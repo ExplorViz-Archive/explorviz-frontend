@@ -1,7 +1,6 @@
-# Explorviz-ui-frontend
+# explorviz-ui-frontend
 
-This README outlines the details of collaborating on this Ember application.
-A short introduction of this app could easily go here.
+This project is a wip replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) and it's (asynchronous) RPC framework with [EmberJS](https://www.emberjs.com/) for using a RESTful API. This is only the frontend, you will need the (to be developed) backend as well.
 
 ## Prerequisites
 
@@ -43,11 +42,9 @@ Make use of the many generators for code, try `ember help generate` for more det
 
 Specify what it takes to deploy your app.
 
-## Further Reading / Useful Links
+### Kanban Status
 
-* [ember.js](http://emberjs.com/)
-* [ember-cli](http://ember-cli.com/)
-* Development Browser Extensions
-  * [ember inspector for chrome](https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi)
-  * [ember inspector for firefox](https://addons.mozilla.org/en-US/firefox/addon/ember-inspector/)
-
+[![Stories in Backlog](https://badge.waffle.io/ExplorViz/explorviz-ui-frontend.png?label=ready&title=Backlog)](http://waffle.io/ExplorViz/explorviz-ui-frontend)
+[![Stories in Ready](https://badge.waffle.io/ExplorViz/explorviz-ui-frontend.png?label=ready&title=Ready)](http://waffle.io/ExplorViz/explorviz-ui-frontend)
+[![Stories in Progress](https://badge.waffle.io/ExplorViz/explorviz-ui-frontend.png?label=ready&title=In%20Progress)](http://waffle.io/ExplorViz/explorviz-ui-frontend)
+[![Stories in Done](https://badge.waffle.io/ExplorViz/explorviz-ui-frontend.png?label=ready&title=Done)](http://waffle.io/ExplorViz/explorviz-ui-frontend)
