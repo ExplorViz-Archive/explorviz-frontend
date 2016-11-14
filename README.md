@@ -12,12 +12,22 @@ You will need the following things properly installed on your computer.
 * [Ember CLI](http://ember-cli.com/)
 * [PhantomJS](http://phantomjs.org/)
 
-## Installation
+## Installation (Generic)
 
 * `git clone <repository-url>` this repository
 * `cd explorviz-ui-frontend`
 * `npm install`
 * `bower install`
+
+## Installation (Windows)
+* install NodeJS
+* npm install -g ember-cli
+* npm install -g phantomjs
+
+## Used IDE
+
+* Webstorm 2016.3
+* EmberJS Plugin
 
 ## Running / Development
 
