@@ -1,6 +1,6 @@
 # explorviz-ui-frontend
 
-This project is a wip replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) and it's (asynchronous) RPC framework with [EmberJS](https://www.emberjs.com/) for using a RESTful API. This is only the frontend, you will need the (to be developed) backend as well.
+This project is a wip replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) client-code with [EmberJS](https://www.emberjs.com/). This is only the frontend, you will need the [backend](https://github.com/ExplorViz/explorviz-ui-backend) as well.
 
 ## Prerequisites
 
