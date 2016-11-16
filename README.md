@@ -23,6 +23,7 @@ You will need the following things properly installed on your computer.
 * install NodeJS
 * npm install -g ember-cli
 * npm install -g phantomjs
+* npm install -g bower
 
 ## Used IDE
 
