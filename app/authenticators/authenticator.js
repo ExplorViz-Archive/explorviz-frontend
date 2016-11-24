@@ -19,14 +19,22 @@ export default Base.extend({
     },
 
     authenticate: function(options) {
-        console.log("hi from authenticate");
-        return this.get('ajax').raw("http://localhost:8080/sessions/create", {
+        return this.get('ajax').request(this.get('tokenEndpoint'), {
             method: 'POST',
-            data: JSON.stringify({ username: options.identification, 
-                password: options.password }),
-            //headers['Content-Type'] = "application/json";
-            //headers['Accept'] = "application/json";
-        });
+            data: "username=admin&password=explorVizPass",
+            //contentType: "application/json",
+            //accept: "application/json"         
+        })
+        .then((response) => this.handleSuccess(response))
+        .catch((response, jqXHR) => this.handleError(response));
+    },
+
+    handleSuccess: function(token) {
+        console.log(token);
+    },
+
+    handleError: function(error) {
+        console.log(error);
     },
 
     invalidate: function() {
@@ -35,6 +43,7 @@ export default Base.extend({
     }
 });
 
-
+       // JSON.stringify({ username: options.identification, 
+       //         password: options.password })
        // .then({ response } => this.handleSuccess(response))
        // .catch(({ response, jqXHR }) => this.handleError(response))
