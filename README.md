@@ -1,4 +1,5 @@
-# explorviz-ui-frontend
+# explorviz-ui-frontend 
+<img src="https://travis-ci.org/ExplorViz/explorviz-ui-frontend.svg?branch=master" alt="Build Status">
 
 This project is a wip replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) client-code with [EmberJS](https://www.emberjs.com/). This is only the frontend, you will need the [backend](https://github.com/ExplorViz/explorviz-ui-backend) as well.
 
