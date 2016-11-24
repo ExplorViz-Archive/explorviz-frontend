@@ -10,6 +10,7 @@ Router.map(function() {
   this.route('visualization');
   this.route('tutorial');
   this.route('administration');
+  this.route('login');
 });
 
 export default Router;
