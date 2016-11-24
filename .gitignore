@@ -1,5 +1,8 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
+# MacOS related files
+.DS_Store
+
 # WebStorm project config
 /.idea/*
 

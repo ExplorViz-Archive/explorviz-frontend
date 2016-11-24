@@ -22,11 +22,11 @@ export default Base.extend({
         console.log("hi from authenticate");
         return this.get('ajax').raw("http://localhost:8080/sessions/create", {
             method: 'POST',
-            data: {
-             username: options.identification,
-             password: options.password
-         }
-     });
+            data: JSON.stringify({ username: options.identification, 
+                password: options.password }),
+            //headers['Content-Type'] = "application/json";
+            //headers['Accept'] = "application/json";
+        });
     },
 
     invalidate: function() {
