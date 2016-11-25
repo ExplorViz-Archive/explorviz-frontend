@@ -4,6 +4,8 @@ import Base from 'ember-simple-auth/authenticators/base';
 
 export default Base.extend({
 
+    session: Ember.inject.service(),
+
     ajax: Ember.inject.service(),
 
     tokenEndpoint: 'http://localhost:8080/sessions/create',
@@ -19,18 +21,20 @@ export default Base.extend({
     },
 
     authenticate: function(options) {
-        return this.get('ajax').request(this.get('tokenEndpoint'), {
+        return this.get('ajax').raw(this.get('tokenEndpoint'), {
             method: 'POST',
             data: "username=admin&password=explorVizPass",
             //contentType: "application/json",
-            //accept: "application/json"         
+            accept: "application/json"         
         })
         .then((response) => this.handleSuccess(response))
         .catch((response, jqXHR) => this.handleError(response));
     },
 
-    handleSuccess: function(token) {
-        console.log(token);
+    handleSuccess: function(responseObj) {
+        console.log(responseObj.response);
+        //this.get('session.content.secure.token') = responseObj.response[token];
+        //console.log(this.get('session.content.secure.token'));
     },
 
     handleError: function(error) {
