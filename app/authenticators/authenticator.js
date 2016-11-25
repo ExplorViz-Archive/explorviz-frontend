@@ -32,9 +32,8 @@ export default Base.extend({
     },
 
     handleSuccess: function(responseObj) {
-        console.log(responseObj.response);
-        //this.get('session.content.secure.token') = responseObj.response[token];
-        //console.log(this.get('session.content.secure.token'));
+        this.set('session.data.authenticated.token', responseObj.response["token"]);
+        console.log(this.get('session.data'));
     },
 
     handleError: function(error) {

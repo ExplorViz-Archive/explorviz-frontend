@@ -10,12 +10,12 @@ export default Ember.Route.extend(ApplicationRouteMixin, {
 
   // transition to login route from main-page
   beforeModel() {
-    this.transitionTo('login');
+    //this.transitionTo('login');
   },
 
   actions: {
     invalidateSession: function() {
-      this.get('session').invalidate();
+      //this.get('session').invalidate();
     }
   }
 });
