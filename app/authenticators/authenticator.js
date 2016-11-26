@@ -12,6 +12,7 @@ export default Base.extend({
 
     restore: function(data) {
         return new Ember.RSVP.Promise(function(resolve, reject) {
+            console.log("data", data);
             if (!Ember.isEmpty(data.token)) {
                 resolve(data);
             } else {
@@ -20,24 +21,29 @@ export default Base.extend({
         });
     },
 
+
     authenticate: function(options) {
-        return this.get('ajax').raw(this.get('tokenEndpoint'), {
-            method: 'POST',
-            data: "username=admin&password=explorVizPass",
-            //contentType: "application/json",
-            accept: "application/json"         
-        })
-        .then((response) => this.handleSuccess(response))
-        .catch((response, jqXHR) => this.handleError(response));
-    },
-
-    handleSuccess: function(responseObj) {
-        this.set('session.data.authenticated.token', responseObj.response["token"]);
-        console.log(this.get('session.data'));
-    },
-
-    handleError: function(error) {
-        console.log(error);
+        return new Ember.RSVP.Promise((resolve, reject) => {
+            Ember.$.ajax({
+                url: this.tokenEndpoint,
+                type: 'POST',
+                data: "username=admin&password=explorVizPass",
+                accept: "application/json"  
+            }).then(function(response) {
+                Ember.run(function() {
+                    console.log("hi from resolve");
+                    console.log("response.id_token", response);
+                    resolve({
+                        token: response.token
+                    });
+                });
+            }, function(xhr, status, error) {
+                var response = xhr.responseText;
+                Ember.run(function() {
+                    reject(response);
+                });
+            });
+        });
     },
 
     invalidate: function() {

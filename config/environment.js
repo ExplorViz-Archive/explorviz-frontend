@@ -23,12 +23,9 @@ module.exports = function(environment) {
     }
   };
 
-  // simple-auth config
-  ENV['simple-auth'] = {
-    store: 'simple-auth-session-store:local-storage',
-    authorizer: 'authorizer:authorizer',
-    crossOriginWhitelist: ['http://localhost:8080/'],
-    routeAfterAuthentication: '/protected'
+  ENV['ember-simple-auth'] = {
+    routeAfterAuthentication: 'visualization',
+    routeIfAlreadyAuthenticated: 'visualization'
   };
 
   if (environment === 'development') {
