@@ -13,7 +13,9 @@
         <span class="icon-bar"></span>
       </button>
       {{#link-to "visualization"}}
-      <span class="navbar-brand" href="#">ExplorViz-Logo</span>
+      <a class="navbar-brand" style="width: 150px" target="_blank"
+          href="http://www.explorviz.net"><img style="width: 100%"
+          src="images/explorviz-transparent.png"/></a>
       {{/link-to}} 
     </div>
 
@@ -33,7 +35,7 @@
       </ul>
       <ul class="nav navbar-nav navbar-right">
        <li><p class="navbar-text"> Signed in as .... </p></li>
-       <li><a {{action 'invalidateSession'}}>Logout</a></li>
+       <li><a {{action 'logout'}} style="cursor:pointer">Logout</a></li>
      </ul>
    </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

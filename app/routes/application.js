@@ -5,10 +5,8 @@ import ApplicationRouteMixin from
 
 export default Ember.Route.extend(ApplicationRouteMixin, {
 
-  session: Ember.inject.service('session'),
-
   actions: {
-    invalidateSession: function() {
+    logout: function() {
       this.get('session').invalidate();
     }
   }
