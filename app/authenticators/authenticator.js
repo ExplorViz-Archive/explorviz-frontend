@@ -22,7 +22,7 @@ export default Base.extend({
     },
 
 
-    authenticate: function(options) {
+    authenticate: function() {
         return new Ember.RSVP.Promise((resolve, reject) => {
             Ember.$.ajax({
                 url: this.tokenEndpoint,
@@ -37,7 +37,7 @@ export default Base.extend({
                         token: response.token
                     });
                 });
-            }, function(xhr, status, error) {
+            }, function(xhr) {
                 var response = xhr.responseText;
                 Ember.run(function() {
                     reject(response);
