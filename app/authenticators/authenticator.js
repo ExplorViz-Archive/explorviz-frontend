@@ -12,8 +12,7 @@ export default Base.extend({
 
     restore: function(data) {
         return new Ember.RSVP.Promise(function(resolve, reject) {
-            console.log("data", data);
-            if (!Ember.isEmpty(data.token)) {
+            if (!Ember.isEmpty(data.access_token)) {
                 resolve(data);
             } else {
                 reject();
@@ -22,19 +21,19 @@ export default Base.extend({
     },
 
 
-    authenticate: function() {
+    authenticate: function(identification, password) {
         return new Ember.RSVP.Promise((resolve, reject) => {
             Ember.$.ajax({
                 url: this.tokenEndpoint,
                 type: 'POST',
-                data: "username=admin&password=explorVizPass",
+                data: "username=" + identification + "&password=" + password,
                 accept: "application/json"  
             }).then(function(response) {
                 Ember.run(function() {
-                    console.log("hi from resolve");
-                    console.log("response.id_token", response);
+                    console.log(response.username);
                     resolve({
-                        token: response.token
+                        access_token: response.token,
+                        username: response.username
                     });
                 });
             }, function(xhr) {
@@ -47,7 +46,6 @@ export default Base.extend({
     },
 
     invalidate: function() {
-        console.log('invalidate...');
         return Ember.RSVP.resolve();
     }
 });
