@@ -1,10 +1,3 @@
 <h2>Visualization</h2>
 
-
-{{#each model as |landscape|}}
-
-  <p>{{landscape.type}}</p>
-  <p>{{landscape.hash}}</p>
-  <p>{{landscape.id}}</p>
-
-{{/each}}
+{{import-landscape landscape=model}}

@@ -4,6 +4,6 @@ import BaseEntity from './baseentity';
 const { attr } = DS;
 
 export default BaseEntity.extend({
-  hash: attr('number'),
-  systems: attr()
+  parent: attr('number'),
+  opened: attr('boolean')
 });
