@@ -1,0 +1,10 @@
+{
+    "name": "ExplorViz Frontend",
+    "description": "API description for ExplorViz's frontend",
+    "version": "0.0.1",
+    "url": "http://explorviz.net",
+    "options": {
+        "outdir": "apidocs",
+        "exclude": "dist,bower_components"
+    }
+}

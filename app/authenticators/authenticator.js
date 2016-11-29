@@ -2,6 +2,13 @@ import Ember from 'ember';
 
 import Base from 'ember-simple-auth/authenticators/base';
 
+/**
+Custom authenticator for token based authentication.
+
+@author akr
+@class Authenticator
+@extends ember-simple-auth/authenticators/base
+*/
 export default Base.extend({
 
     session: Ember.inject.service(),
