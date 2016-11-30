@@ -5,5 +5,6 @@ const { attr } = DS;
 
 export default BaseEntity.extend({
   parent: attr('number'),
-  opened: attr('boolean')
+  opened: attr('boolean'),
+  name: attr('string')
 });

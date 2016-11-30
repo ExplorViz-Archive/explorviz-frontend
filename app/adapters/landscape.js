@@ -1,9 +1,9 @@
 import DS from 'ember-data';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 
-const { JSONAPIAdapter } = DS;
+const { RESTAdapter } = DS;
 
-export default JSONAPIAdapter.extend(DataAdapterMixin, {
+export default RESTAdapter.extend(DataAdapterMixin, {
 
   authorizer: 'authorizers:authorizers',
 

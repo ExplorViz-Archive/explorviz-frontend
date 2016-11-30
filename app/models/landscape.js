@@ -1,9 +1,9 @@
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
 
-const { attr } = DS;
+const { attr, hasMany } = DS;
 
 export default BaseEntity.extend({
   hash: attr('number'),
-  systems: attr()
+  systems: hasMany('system', {async: true})
 });
