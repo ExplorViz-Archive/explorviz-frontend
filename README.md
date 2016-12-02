@@ -1,5 +1,5 @@
 # Explorviz UI Frontend
-<img src="https://travis-ci.org/ExplorViz/explorviz-ui-frontend.svg?branch=master" alt="Build Status"> 
+<a href="https://travis-ci.org/ExplorViz/explorviz-ui-frontend"><img src="https://travis-ci.org/ExplorViz/explorviz-ui-frontend.svg?branch=master" alt="Build Status"></a>
 [![Stories in Backlog](https://badge.waffle.io/ExplorViz/explorviz-ui-frontend.png?label=ready&title=Backlog)](http://waffle.io/ExplorViz/explorviz-ui-frontend) 
 [![Stories in Ready](https://badge.waffle.io/ExplorViz/explorviz-ui-frontend.png?label=ready&title=Ready)](http://waffle.io/ExplorViz/explorviz-ui-frontend)
 [![Stories in Progress](https://badge.waffle.io/ExplorViz/explorviz-ui-frontend.png?label=ready&title=In%20Progress)](http://waffle.io/ExplorViz/explorviz-ui-frontend)
