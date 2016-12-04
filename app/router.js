@@ -11,6 +11,7 @@ Router.map(function() {
   this.route('tutorial');
   this.route('administration');
   this.route('login');
+  this.route('badroute', { path: "/*path" });
 });
 
 export default Router;
