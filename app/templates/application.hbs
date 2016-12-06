@@ -42,10 +42,14 @@
   </nav>
 {{/unless}}
 
-  <div class="container">
+  <div class="container viz">
     {{outlet}}
   </div>
-  
+
+  <div class='timeline' vis='hide'></div>
+
+  <button {{action 'toggleTimeline'}} type="button" class="btn btn-default text-center">Toggle Timeline</button> 
+
   <div id="footer">
     <table style="width: 100%">
       <tr style="width: 100%">

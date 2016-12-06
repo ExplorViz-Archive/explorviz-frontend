@@ -2,6 +2,8 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
 
+  classNames: ['viz'],
+
   jsonLandscape: Ember.computed('landscape', function(){
     this.debug(this.get('landscape').get('systems'));
 
