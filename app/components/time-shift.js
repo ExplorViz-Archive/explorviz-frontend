@@ -4,6 +4,11 @@ const { Component, $ } = Ember;
 
 export default Component.extend({
 
+   didRender() {
+    this._super(...arguments);    
+    console.log(this.$());
+  },
+
 
   actions: {
 
