@@ -1,7 +1,4 @@
-{{#unless session.isAuthenticated}}
-    <!-- Show outlet (at the bottom)-->
-{{else}}
-
+{{#if session.isAuthenticated}}
   <nav class="navbar navbar-default">
     <div class="container-fluid">
      <!-- Brand and toggle get grouped for better mobile display -->
@@ -40,30 +37,27 @@
    </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
   </nav>
-{{/unless}}
+{{/if}}
 
-  <div class="container viz">
-    {{outlet}}
-  </div>
+<div id="vizContainer" class="container viz">
+  {{outlet}}
+</div>
 
-  <div class='timeline' vis='hide'></div>
+{{#if session.isAuthenticated}}
+  {{time-shift}}
+{{/if}}
 
-  <div class="row no-margin">
-    <div class="col-sm-offset-5 col-sm-2 text-center">
-        <button {{action 'toggleTimeline'}} type="button" class="btn btn-default text-center">Toggle Timeline</button>
-    </div>
-  </div>
 
-  <div id="footer" class="footer">
-    <table style="width: 100%">
-      <tr style="width: 100%">
-        <td style="width: 33%">&nbsp;</td>
-        <td style="width: 33%; text-align: center;">Kiel University
-          &#124; <a href="http://www.uni-kiel.de/suchen/impressum.shtml"
-          target="_blank">Legal Notice</a> &#124; <a
-          href="http://www.explorviz.net" target="_blank">Contact</a>
-        </td>
-        <td style="width: 33%; text-align: right;">Version 1.0.0 &nbsp;</td>
-      </tr>
-    </table>
-  </div>
+<div id="footer" class="footer">
+  <table style="width: 100%">
+    <tr style="width: 100%">
+      <td style="width: 33%">&nbsp;</td>
+      <td style="width: 33%; text-align: center;">Kiel University
+        &#124; <a href="http://www.uni-kiel.de/suchen/impressum.shtml"
+        target="_blank">Legal Notice</a> &#124; <a
+        href="http://www.explorviz.net" target="_blank">Contact</a>
+      </td>
+      <td style="width: 33%; text-align: right;">Version 1.0.0 &nbsp;</td>
+    </tr>
+  </table>
+</div>
