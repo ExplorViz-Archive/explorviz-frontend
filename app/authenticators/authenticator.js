@@ -37,7 +37,6 @@ export default Base.extend({
                 accept: "application/json"  
             }).then(function(response) {
                 Ember.run(function() {
-                    console.log(response.username);
                     resolve({
                         access_token: response.token,
                         username: response.username
