@@ -1,8 +1,10 @@
 import DS from 'ember-data';
+import BaseEntity from './baseentity';
 
-const { attr } = DS;
+const { attr, hasMany, belongsTo } = DS;
 
-export default DS.Model.extend({
-  opened: attr(),
-  name: attr()
+export default BaseEntity.extend({
+  opened: attr('boolean'),  
+  nodegroups: hasMany('nodegroup'),
+  parent: belongsTo('landscape')
 });

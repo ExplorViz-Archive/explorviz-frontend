@@ -9,7 +9,8 @@ export default Ember.Component.extend({
     // option 1 to get systems
 
     const systems = this.get('landscape').get('systems'); 
-    console.log(JSON.stringify(systems.objectAt(0)));
+    const system = systems.objectAt(0);
+    console.log("system option 1", JSON.stringify(system));
 
 
     // option 2 to get systems
@@ -20,22 +21,27 @@ export default Ember.Component.extend({
 
     if(systemsRef.value()) {
       systemsRecords = systemsRef.value();
-      console.log(JSON.stringify(systemsRecords.objectAt(0)));
+      console.log("system option 2", JSON.stringify(systemsRecords.objectAt(0)));
     }
 
     // what is the difference in these options above?
 
 
-    // Iteration for future
+    // Iteration for future renderer
 
     console.log("now iterate");
 
     systems.forEach(function(item) {
-      console.log(JSON.stringify(item));
+      console.log("system iterating", JSON.stringify(item));
     });
 
-    //return JSON.stringify(systems.objectAt(0));
-    return JSON.stringify(this.get('landscape'));
+
+    // get nodegroup
+    const nodegroup = system.get('nodegroups').objectAt(0);
+    console.log("nodegroup", JSON.stringify(nodegroup));
+
+    return JSON.stringify(system);
+    //return JSON.stringify(this.get('landscape'));
   })
 
 });

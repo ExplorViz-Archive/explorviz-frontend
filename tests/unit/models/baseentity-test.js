@@ -1,8 +1,8 @@
 import { moduleForModel, test } from 'ember-qunit';
 
-moduleForModel('system', 'Unit | Model | system', {
+moduleForModel('baseentity', 'Unit | Model | baseentity', {
   // Specify the other units that are required for this test.
-  needs: ['model:landscape', 'model:nodegroup']
+  needs: []
 });
 
 test('it exists', function(assert) {
