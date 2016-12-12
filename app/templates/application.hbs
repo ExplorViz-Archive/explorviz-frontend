@@ -20,15 +20,14 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active">
-          {{#link-to "visualization"}}Visualization 
-          <span class="sr-only">(current)</span>
-          {{/link-to}} 
-        </li>
-        <li>
-          {{#link-to "tutorial"}}Tutorial
-          {{/link-to}} 
-        </li>
+        <!-- Outer #link-to is for li-element -->
+        <!-- Inner #link-to is for actual link -->
+        {{#link-to "visualization" tagName="li"}}
+           {{#link-to "visualization"}}Visualization{{/link-to}}
+        {{/link-to}}
+        {{#link-to "tutorial" tagName="li"}}
+          {{#link-to "tutorial"}}Tutorial{{/link-to}}
+        {{/link-to}}
       </ul>
       <ul class="nav navbar-nav navbar-right">
        <li><p class="navbar-text"> Signed in as {{username}}</p></li>
