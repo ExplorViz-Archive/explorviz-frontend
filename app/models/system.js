@@ -1,9 +1,9 @@
 import DS from 'ember-data';
-import BaseEntity from './baseentity';
+import DrawNodeEntity from './drawnodeentity';
 
 const { attr, hasMany, belongsTo } = DS;
 
-export default BaseEntity.extend({
+export default DrawNodeEntity.extend({
   opened: attr('boolean'),  
   nodegroups: hasMany('nodegroup'),
   parent: belongsTo('landscape')

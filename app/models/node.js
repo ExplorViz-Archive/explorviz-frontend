@@ -1,9 +1,10 @@
 import DS from 'ember-data';
 import Draw3DNode from './draw3dnode';
 
-const { attr, belongsTo } = DS;
+const { attr } = DS;
 
 export default Draw3DNode.extend({
-  visible: attr('boolean'),
-  parent: belongsTo('system')
+
+  cpuUtilization: attr('number')
+
 });
