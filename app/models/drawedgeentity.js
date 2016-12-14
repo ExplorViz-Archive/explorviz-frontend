@@ -5,13 +5,12 @@ const { attr } = DS;
 
 export default BaseEntity.extend({
 
-  name: attr('string'),
-
-  width: attr('number'),
-  height: attr('number'),
-  depth: attr('number'),
-  positionX: attr('number'),
-  positionY: attr('number'),
+  lineThickness: attr('number'),
   positionZ: attr('number')
+
+  //List<Point> points = new ArrayList<Point>
+
+  //List<Vector3f> pointsFor3D = new ArrayList<Vector3f>
+
 
 });

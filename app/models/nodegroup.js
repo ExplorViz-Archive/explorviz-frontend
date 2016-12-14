@@ -1,9 +1,10 @@
 import DS from 'ember-data';
-import Draw3DNode from './draw3dnode';
+import DrawNodeEntity from './drawnodeentity';
 
-const { attr, belongsTo } = DS;
+const { attr, belongsTo, hasMany } = DS;
 
-export default Draw3DNode.extend({
+export default DrawNodeEntity.extend({
   visible: attr('boolean'),
-  parent: belongsTo('system')
+  parent: belongsTo('system'),
+  nodes: hasMany('node')
 });

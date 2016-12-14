@@ -1,6 +1,6 @@
 import { moduleForModel, test } from 'ember-qunit';
 
-moduleForModel('draw3dnode', 'Unit | Model | draw3dnode', {
+moduleForModel('clazz', 'Unit | Model | clazz', {
   // Specify the other units that are required for this test.
   needs: []
 });

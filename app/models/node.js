@@ -1,10 +1,18 @@
 import DS from 'ember-data';
-import Draw3DNode from './draw3dnode';
+import DrawNodeEntity from './drawnodeentity';
 
-const { attr } = DS;
+const { attr, hasMany, belongsTo } = DS;
 
-export default Draw3DNode.extend({
+export default DrawNodeEntity.extend({
 
-  cpuUtilization: attr('number')
+  cpuUtilization: attr('number'),
+  freeRAM: attr('number'),
+  usedRAM: attr('number'),
+
+  visible: attr('boolean'),
+
+  applications: hasMany('application'),
+
+  parent: belongsTo('nodegroup')
 
 });
