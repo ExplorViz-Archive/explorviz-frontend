@@ -6,5 +6,7 @@ const { attr, belongsTo, hasMany } = DS;
 export default DrawNodeEntity.extend({
   visible: attr('boolean'),
   parent: belongsTo('system'),
-  nodes: hasMany('node')
+  nodes: hasMany('node'),
+  plusColor: attr(),
+  backgroundColor: attr()
 });

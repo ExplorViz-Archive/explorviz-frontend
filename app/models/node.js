@@ -13,6 +13,8 @@ export default DrawNodeEntity.extend({
 
   applications: hasMany('application'),
 
-  parent: belongsTo('nodegroup')
+  parent: belongsTo('nodegroup'),
+
+  backgroundColor: attr()
 
 });

@@ -13,15 +13,49 @@ export default Ember.Component.extend({
     var height = this.$()[0].clientHeight;
     var width = this.$()[0].clientWidth;
 
-    var cube = new THREE.Mesh(new THREE.CubeGeometry(2, 2, 2), 
-      new THREE.MeshNormalMaterial());
-    scene.add(cube);
+    // explorviz landscape rendering
 
-    scene.background = new THREE.Color(0xf2f2f2);
+    const systems = this.get('landscape').get('systems'); 
+
+    if(systems) {      
+      systems.forEach(function(system) {
+
+        addPlane(0,0,0,system.get('width'), system.get('height'), 0xff0000);
+
+        const nodegroup = system.get('nodegroups');
+
+        nodegroup.forEach(function(nodegroup) {
+
+          const nodes = nodegroup.get('nodes');
+
+          nodes.forEach(function(node) {
+
+            //const color = new THREE.Color();
+
+            addPlane(0, 0, 0.02, node.get('width'), 
+              node.get('height'), node.get('backgroundColor'));          
+          });
+
+          
+        });
+
+      });
+    }
+
+    function addPlane(x, y, z, width, height, color) {
+      const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), 
+      new THREE.MeshBasicMaterial({color: color}));
+      plane.position.set(x, y, z);
+      scene.add(plane);
+    }
+
+    //
+
+    scene.background = new THREE.Color(0xffffff);
 
     var camera = new THREE.PerspectiveCamera(70, width / height, 1, 10);
-    camera.position.set(0, 3.5, 5);
-    camera.lookAt(scene.position);
+    camera.position.set(0, 0, 5);
+    //camera.lookAt(scene.position);
 
     var renderer = new THREE.WebGLRenderer({ 
       antialias: true,  
@@ -30,16 +64,9 @@ export default Ember.Component.extend({
     renderer.setSize(width, height);
 
     function render() {
-      requestAnimationFrame(render);
-      
-      cube.rotation.x -= 0.01 * 2;
-      cube.rotation.y -= 0.01;
-      cube.rotation.z -= 0.01 * 3;
-
+      requestAnimationFrame(render); 
       renderer.render(scene, camera);
     }
-
-    //Ember.$(".viz").append(renderer.domElement);
 
     render();
   },
@@ -48,12 +75,12 @@ export default Ember.Component.extend({
 
     // option 1 to get systems
 
-    const systems = this.get('landscape').get('systems'); 
-    const system = systems.objectAt(0);
+    //const systems = this.get('landscape').get('systems'); 
+    //const system = systems.objectAt(0);
 
-    if(system) {
-      console.log("system option 1", JSON.stringify(system));
-    }
+    //if(system) {
+    //  console.log("system option 1", JSON.stringify(system));
+    //}
 
 
     // option 2 to get systems
@@ -65,27 +92,27 @@ export default Ember.Component.extend({
     if(systemsRef.value()) {
       systemsRecords = systemsRef.value();
 
-      if(systemsRecords.objectAt(0)){
-        console.log("system option 2", JSON.stringify(systemsRecords.objectAt(0)));
-      }
+    // if(systemsRecords.objectAt(0)){
+    //   console.log("system option 2", JSON.stringify(systemsRecords.objectAt(0)));
+    //  }
     }
 
     // what is the difference in these options above?
 
 
     // Iteration for future renderer
-    if(systems) {      
-      systems.forEach(function(item) {
-        console.log("now iterate");
-        console.log("system iterating", JSON.stringify(item));
-      });
-    }
+    //if(systems) {      
+    //  systems.forEach(function(item) {
+    //    console.log("now iterate");
+    //    console.log("system iterating", JSON.stringify(item));
+    //  });
+    //}
 
-    if(system) {
+    //if(system) {
       // get nodegroup
-      const nodegroup = system.get('nodegroups').objectAt(0);
-      console.log("nodegroup", JSON.stringify(nodegroup));
-    }
+    //  const nodegroup = system.get('nodegroups').objectAt(0);
+    //  console.log("nodegroup", JSON.stringify(nodegroup));
+    //}
 
     //return JSON.stringify(system);
     return JSON.stringify(this.get('landscape'));
