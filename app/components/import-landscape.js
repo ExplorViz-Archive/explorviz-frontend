@@ -33,7 +33,7 @@ export default Ember.Component.extend({
 
           nodes.forEach(function(node) {
 
-            const{x, y, z} = node.get('backgroundColor');
+            const{x, y, z} = node.get('color');
 
             addPlane(0, 0, 0, node.get('width'), 
               node.get('height'), new THREE.Color(x,y,z));  
