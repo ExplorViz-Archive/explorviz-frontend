@@ -15,6 +15,6 @@ export default DrawNodeEntity.extend({
 
   parent: belongsTo('nodegroup'),
 
-  backgroundColor: attr()
+  color: attr()
 
 });
