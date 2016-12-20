@@ -20,7 +20,10 @@ export default Ember.Component.extend({
     if(systems) {      
       systems.forEach(function(system) {
 
-        addPlane(0,0,0,system.get('width'), system.get('height'), 0xff0000);
+        const{x, y, z} = system.get('backgroundColor');
+
+        addPlane(0,0,0,system.get('width'), system.get('height'), 
+          new THREE.Color(x,y,z));
 
         const nodegroup = system.get('nodegroups');
 
@@ -30,10 +33,22 @@ export default Ember.Component.extend({
 
           nodes.forEach(function(node) {
 
-            //const color = new THREE.Color();
+            const{x, y, z} = node.get('backgroundColor');
 
-            addPlane(0, 0, 0.02, node.get('width'), 
-              node.get('height'), node.get('backgroundColor'));          
+            addPlane(0, 0, 0, node.get('width'), 
+              node.get('height'), new THREE.Color(x,y,z));  
+
+            const applications = node.get('applications');
+
+            applications.forEach(function(application) {
+
+              const{x, y, z} = application.get('backgroundColor');
+              addPlane(0, 0, 0, application.get('width'), 
+                application.get('height'), new THREE.Color(x,y,z)); 
+
+            });          
+
+
           });
 
           
@@ -69,53 +84,6 @@ export default Ember.Component.extend({
     }
 
     render();
-  },
-
-  jsonLandscape: Ember.computed('landscape', function(){   
-
-    // option 1 to get systems
-
-    //const systems = this.get('landscape').get('systems'); 
-    //const system = systems.objectAt(0);
-
-    //if(system) {
-    //  console.log("system option 1", JSON.stringify(system));
-    //}
-
-
-    // option 2 to get systems
-
-    var systemsRef = this.get('landscape').hasMany('systems');
-
-    var systemsRecords;
-
-    if(systemsRef.value()) {
-      systemsRecords = systemsRef.value();
-
-    // if(systemsRecords.objectAt(0)){
-    //   console.log("system option 2", JSON.stringify(systemsRecords.objectAt(0)));
-    //  }
-    }
-
-    // what is the difference in these options above?
-
-
-    // Iteration for future renderer
-    //if(systems) {      
-    //  systems.forEach(function(item) {
-    //    console.log("now iterate");
-    //    console.log("system iterating", JSON.stringify(item));
-    //  });
-    //}
-
-    //if(system) {
-      // get nodegroup
-    //  const nodegroup = system.get('nodegroups').objectAt(0);
-    //  console.log("nodegroup", JSON.stringify(nodegroup));
-    //}
-
-    //return JSON.stringify(system);
-    return JSON.stringify(this.get('landscape'));
-  })
+  }
 
 });

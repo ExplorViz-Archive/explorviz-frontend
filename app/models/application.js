@@ -15,7 +15,7 @@ export default DrawNodeEntity.extend({
 
   components: hasMany('component'),
 
-  communications: hasMany('communicationclazz')
+  communications: hasMany('communicationclazz'),
 
   //communicationsAccumulated: hasMany('communicationappaccumulator'),
 
@@ -23,5 +23,7 @@ export default DrawNodeEntity.extend({
   //outgoingCommunications: hasMany('communication'),
   
   //databaseQueries: hasMany('databasequery')
+
+  backgroundColor: attr()
 
 });
