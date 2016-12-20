@@ -22,8 +22,8 @@ export default Ember.Component.extend({
 
         const{x, y, z} = system.get('backgroundColor');
 
-        addPlane(0,0,0,system.get('width'), system.get('height'), 
-          new THREE.Color(x,y,z));
+        const systemMesh = addPlane(0,0,0,system.get('width'), system.get('height'), 
+          new THREE.Color(x,y,z), null, scene);
 
         const nodegroup = system.get('nodegroups');
 
@@ -35,16 +35,35 @@ export default Ember.Component.extend({
 
             const{x, y, z} = node.get('color');
 
-            addPlane(0, 0, 0, node.get('width'), 
-              node.get('height'), new THREE.Color(x,y,z));  
+            const nodeMesh = addPlane(0, 0, 0, node.get('width'), 
+              node.get('height'), new THREE.Color(x,y,z), null, systemMesh);  
 
             const applications = node.get('applications');
 
             applications.forEach(function(application) {
 
-              const{x, y, z} = application.get('backgroundColor');
-              addPlane(0, 0, 0, application.get('width'), 
-                application.get('height'), new THREE.Color(x,y,z)); 
+              const{x, y, z} = application.get('backgroundColor'); 
+
+              const applicationMesh = addPlane(0, 0, 0, application.get('width'), 
+                application.get('height'), new THREE.Color(x,y,z), null, nodeMesh);     
+
+              applicationMesh.geometry.computeBoundingBox();
+
+              const logoSize = {width: 0.3, height: 0.3};
+              const appBBox = applicationMesh.geometry.boundingBox;  
+
+              const logoPos = {x : 0, y : 0, z : 0};             
+
+              //logoPos.x = x + application.get('width') - 0.16 / 2.0 - 0.15;
+              logoPos.x = appBBox.max.x - logoSize.width * 0.7;
+              logoPos.y = y + application.get('height') / 2.0 + 0.25 / 8.0;   
+
+
+              console.log(applicationMesh);                 
+
+              addPlane(logoPos.x, 0, logoPos.z, logoSize.width, 
+                logoSize.height, new THREE.Color(1,0,0), "texture", applicationMesh);
+
 
             });          
 
@@ -57,11 +76,32 @@ export default Ember.Component.extend({
       });
     }
 
-    function addPlane(x, y, z, width, height, color) {
-      const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), 
-      new THREE.MeshBasicMaterial({color: color}));
-      plane.position.set(x, y, z);
-      scene.add(plane);
+    function addPlane(x, y, z, width, height, color, texture, parent) {
+
+      if(texture) {
+
+         
+         new THREE.TextureLoader().load('images/logos/database2.png', (texture) => {
+            const material = new THREE.MeshBasicMaterial({map: texture, transparent: true});
+            const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), 
+             material);
+            plane.position.set(x, y, z);
+            parent.add(plane);
+            return plane;
+          });   
+
+        
+      } else {
+
+        const material = new THREE.MeshBasicMaterial({color: color});
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), 
+          material);
+        plane.position.set(x, y, z);
+        parent.add(plane);
+        return plane;
+      }
+
+      
     }
 
     //
