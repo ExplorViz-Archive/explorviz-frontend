@@ -52,11 +52,11 @@ export default Ember.Component.extend({
               const logoSize = {width: 0.4, height: 0.4};
               const appBBox = applicationMesh.geometry.boundingBox;  
 
-              const logoPos = {x : 0, y : 0, z : 0};             
+              const logoPos = {x : 0, y : 0, z : 0};    
 
-              logoPos.x = appBBox.max.x - logoSize.width * 0.7;
+              const logoLeftPadding = logoSize.width * 0.7;
 
-              console.log(application.get('programmingLanguage').toLowerCase());
+              logoPos.x = appBBox.max.x - logoLeftPadding;
 
               const texturePartialPath = application.get('database') ? 
                 'database2' : application.get('programmingLanguage').toLowerCase();
@@ -64,6 +64,53 @@ export default Ember.Component.extend({
               addPlane(logoPos.x, logoPos.y, logoPos.z, 
                 logoSize.width, logoSize.height, new THREE.Color(1,0,0), 
                 texturePartialPath, applicationMesh);
+
+              new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', 
+                (font) => {
+
+                  const labelGeo = new THREE.TextGeometry(
+                    application.get('name'),
+                    {
+                      font: font,
+                      size: 0.1,
+                      height: 0
+                    }
+                  );
+                  
+                  labelGeo.computeBoundingBox();
+                  var bboxText = labelGeo.boundingBox;
+                  var textWidth = bboxText.max.x - bboxText.min.x;
+
+                  var bboxParent = appBBox;
+                  var boxWidth =  Math.abs(bboxParent.max.x) + 
+                    Math.abs(bboxParent.min.x) - logoSize.width - logoLeftPadding;                
+
+                  // upper scaling factor
+                  var i = 1.0;
+                  // until text fits into the parent bounding box
+                  while ((textWidth > boxWidth) && (i > 0.1)) {    
+                     // TODO time complexity: linear -> Do binary search alike approach                         
+                    i -= 0.1;
+                    labelGeo.scale(i, i, i);
+                    // update the BoundingBox
+                    labelGeo.computeBoundingBox();
+                    bboxText = labelGeo.boundingBox;
+                    textWidth = bboxText.max.x - bboxText.min.x;
+                  }
+
+                  // center position
+                  const labelRightPadding = 0.1;
+                  const posX = appBBox.min.x + labelRightPadding;
+
+                  const material = new THREE.MeshBasicMaterial({color: 0xffffff});
+
+                  const labelMesh = new THREE.Mesh(labelGeo, material);
+
+                  labelMesh.position.set(posX, 0, 0);
+
+                  applicationMesh.add(labelMesh);
+
+              });              
 
             }); 
 
