@@ -49,27 +49,25 @@ export default Ember.Component.extend({
 
               applicationMesh.geometry.computeBoundingBox();
 
-              const logoSize = {width: 0.3, height: 0.3};
+              const logoSize = {width: 0.4, height: 0.4};
               const appBBox = applicationMesh.geometry.boundingBox;  
 
               const logoPos = {x : 0, y : 0, z : 0};             
 
-              //logoPos.x = x + application.get('width') - 0.16 / 2.0 - 0.15;
               logoPos.x = appBBox.max.x - logoSize.width * 0.7;
-              logoPos.y = y + application.get('height') / 2.0 + 0.25 / 8.0;   
 
+              console.log(application.get('programmingLanguage').toLowerCase());
 
-              console.log(applicationMesh);                 
+              const texturePartialPath = application.get('database') ? 
+                'database2' : application.get('programmingLanguage').toLowerCase();
 
-              addPlane(logoPos.x, 0, logoPos.z, logoSize.width, 
-                logoSize.height, new THREE.Color(1,0,0), "texture", applicationMesh);
+              addPlane(logoPos.x, logoPos.y, logoPos.z, 
+                logoSize.width, logoSize.height, new THREE.Color(1,0,0), 
+                texturePartialPath, applicationMesh);
 
-
-            });          
-
+            }); 
 
           });
-
           
         });
 
@@ -79,9 +77,8 @@ export default Ember.Component.extend({
     function addPlane(x, y, z, width, height, color, texture, parent) {
 
       if(texture) {
-
          
-         new THREE.TextureLoader().load('images/logos/database2.png', (texture) => {
+         new THREE.TextureLoader().load('images/logos/' + texture + '.png', (texture) => {
             const material = new THREE.MeshBasicMaterial({map: texture, transparent: true});
             const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), 
              material);
