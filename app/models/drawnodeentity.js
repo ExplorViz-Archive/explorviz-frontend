@@ -12,6 +12,7 @@ export default BaseEntity.extend({
   depth: attr('number'),
   positionX: attr('number'),
   positionY: attr('number'),
-  positionZ: attr('number')
+  positionZ: attr('number'),
+  threeJSModel: attr()
 
 });

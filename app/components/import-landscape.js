@@ -28,8 +28,10 @@ export default Ember.Component.extend({
         var extensionY = system.get('height') / 2.0;
         var centerY = system.get('positionY') - extensionY - 0;
 
-        const systemMesh = addPlane(centerX,centerY,0,system.get('width'), system.get('height'), 
-          new THREE.Color(x,y,z), null, scene);
+        const systemMesh = addPlane(centerX, centerY, 0, system.get('width'), 
+          system.get('height'), new THREE.Color(x,y,z), null, scene, system);
+
+        system.set('threeJSModel', systemMesh);
 
         const nodegroup = system.get('nodegroups');
 
@@ -48,7 +50,9 @@ export default Ember.Component.extend({
             var centerY = node.get('positionY') - extensionY - 0;
 
             const nodeMesh = addPlane(centerX, centerY, 0, node.get('width'), 
-              node.get('height'), new THREE.Color(x,y,z), null, scene);  
+              node.get('height'), new THREE.Color(x,y,z), null, scene, node);
+
+            node.set('threeJSModel', nodeMesh);  
 
             const applications = node.get('applications');
 
@@ -62,8 +66,11 @@ export default Ember.Component.extend({
               var centerX = application.get('positionX') + extensionX - 0;          
               var centerY = application.get('positionY') - extensionY - 0;
 
-              const applicationMesh = addPlane(centerX, centerY, 0, application.get('width'), 
-                application.get('height'), new THREE.Color(x,y,z), null, scene);     
+              const applicationMesh = addPlane(centerX, centerY, 0, 
+                application.get('width'), application.get('height'), 
+                new THREE.Color(x,y,z), null, scene, application);
+
+              application.set('threeJSModel', applicationMesh);
 
               applicationMesh.geometry.computeBoundingBox();
 
@@ -81,7 +88,7 @@ export default Ember.Component.extend({
 
               addPlane(logoPos.x, logoPos.y, logoPos.z, 
                 logoSize.width, logoSize.height, new THREE.Color(1,0,0), 
-                texturePartialPath, applicationMesh);
+                texturePartialPath, applicationMesh, "label");
 
               new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', 
                 (font) => {
@@ -237,7 +244,7 @@ export default Ember.Component.extend({
       });
     }
 
-    function addPlane(x, y, z, width, height, color, texture, parent) {
+    function addPlane(x, y, z, width, height, color, texture, parent, model) {
 
       if(texture) {
          
@@ -247,6 +254,7 @@ export default Ember.Component.extend({
              material);
             plane.position.set(x, y, z);
             parent.add(plane);
+            plane.userData['model'] = model;
             return plane;
           });   
 
@@ -258,6 +266,7 @@ export default Ember.Component.extend({
           material);
         plane.position.set(x, y, z);
         parent.add(plane);
+        plane.userData['model'] = model;
         return plane;
       }
 
