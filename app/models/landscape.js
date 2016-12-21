@@ -6,5 +6,6 @@ const { attr, hasMany } = DS;
 export default BaseEntity.extend({
   hash: attr('number'),
   activities: attr('number'),
-  systems: hasMany('system')
+  systems: hasMany('system'),
+  applicationCommunication: hasMany('communication')
 });

@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import DrawEdgeEntity from './drawedgeentity';
 
-const { attr } = DS;
+const { attr, belongsTo } = DS;
 
 export default DrawEdgeEntity.extend({
 
@@ -14,6 +14,8 @@ export default DrawEdgeEntity.extend({
   target: attr("application"),
 
   sourceClazz: attr("clazz"),
-  targetClazz: attr("clazz")
+  targetClazz: attr("clazz"),
+
+  parent: belongsTo('landscape')
 
 });

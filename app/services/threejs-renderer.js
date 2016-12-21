@@ -46,7 +46,7 @@ export default Ember.Service.extend({
 
     const scaleFactor = {width: 0.5, height: 0.5};
 
-    if(systems) {      
+    if(systems) {
       systems.forEach(function(system) {
 
         const{x, y, z} = system.get('backgroundColor');
@@ -148,6 +148,17 @@ export default Ember.Service.extend({
           
         });
 
+      });
+    }
+
+    // Communication
+
+    const appCommunication = landscape.get('applicationCommunication');     
+
+    if(appCommunication) {
+      appCommunication.forEach((communication) => {
+        // TODO Why not working?
+        console.log("communication", communication);
       });
     }
 
