@@ -15,6 +15,8 @@ export default DrawNodeEntity.extend({
 
   parent: belongsTo('nodegroup'),
 
+  ipAddress: attr('string'),
+
   color: attr()
 
 });

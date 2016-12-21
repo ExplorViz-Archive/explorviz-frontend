@@ -19,7 +19,7 @@ export default Ember.Service.extend({
 
     if(!this.get('renderer')) {
       this.set('camera', new THREE.PerspectiveCamera(70, width / height, 1, 10));
-      this.get('camera').position.set(0, 0, 5);
+      this.get('camera').position.set(13, -2, 10);
 
       this.set('renderer', new THREE.WebGLRenderer({
         antialias: true,  
@@ -129,7 +129,7 @@ export default Ember.Service.extend({
                   applicationMesh.add(labelMesh);
 
                   padding = {left: 0.0, right: 0.0, top: 0.0, bottom: 0.2};
-                  labelMesh = createLabel(font, 0.125, null, nodeMesh, 
+                  labelMesh = createLabel(font, 0.125, node.get('ipAddress'), nodeMesh, 
                     padding, 0xffffff, {width: 0.0, height: 0.0}, "min"); 
 
                   nodeMesh.add(labelMesh);
