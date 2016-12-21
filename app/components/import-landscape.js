@@ -22,7 +22,13 @@ export default Ember.Component.extend({
 
         const{x, y, z} = system.get('backgroundColor');
 
-        const systemMesh = addPlane(0,0,0,system.get('width'), system.get('height'), 
+        var extensionX = system.get('width') / 2.0;
+        var centerX = system.get('positionX') + extensionX - 0;
+
+        var extensionY = system.get('height') / 2.0;
+        var centerY = system.get('positionY') - extensionY - 0;
+
+        const systemMesh = addPlane(centerX,centerY,0,system.get('width'), system.get('height'), 
           new THREE.Color(x,y,z), null, scene);
 
         const nodegroup = system.get('nodegroups');
@@ -35,8 +41,14 @@ export default Ember.Component.extend({
 
             const{x, y, z} = node.get('color');
 
-            const nodeMesh = addPlane(0, 0, 0, node.get('width'), 
-              node.get('height'), new THREE.Color(x,y,z), null, systemMesh);  
+            var extensionX = node.get('width') / 2.0;
+            var extensionY = node.get('height') / 2.0;
+
+            var centerX = node.get('positionX') + extensionX - 0;          
+            var centerY = node.get('positionY') - extensionY - 0;
+
+            const nodeMesh = addPlane(centerX, centerY, 0, node.get('width'), 
+              node.get('height'), new THREE.Color(x,y,z), null, scene);  
 
             const applications = node.get('applications');
 
@@ -44,8 +56,14 @@ export default Ember.Component.extend({
 
               const{x, y, z} = application.get('backgroundColor'); 
 
-              const applicationMesh = addPlane(0, 0, 0, application.get('width'), 
-                application.get('height'), new THREE.Color(x,y,z), null, nodeMesh);     
+              var extensionX = application.get('width') / 2.0;
+              var extensionY = application.get('height') / 2.0;
+
+              var centerX = application.get('positionX') + extensionX - 0;          
+              var centerY = application.get('positionY') - extensionY - 0;
+
+              const applicationMesh = addPlane(centerX, centerY, 0, application.get('width'), 
+                application.get('height'), new THREE.Color(x,y,z), null, scene);     
 
               applicationMesh.geometry.computeBoundingBox();
 
@@ -68,7 +86,7 @@ export default Ember.Component.extend({
               new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', 
                 (font) => {
 
-                  const labelGeo = new THREE.TextGeometry(
+                  var labelGeo = new THREE.TextGeometry(
                     application.get('name'),
                     {
                       font: font,
@@ -82,8 +100,10 @@ export default Ember.Component.extend({
                   var textWidth = bboxText.max.x - bboxText.min.x;
 
                   var bboxParent = appBBox;
+                  var labelRightPadding = 0.1;
                   var boxWidth =  Math.abs(bboxParent.max.x) + 
-                    Math.abs(bboxParent.min.x) - logoSize.width - logoLeftPadding;                
+                    Math.abs(bboxParent.min.x) - logoSize.width - 
+                    logoLeftPadding + labelRightPadding;                
 
                   // upper scaling factor
                   var i = 1.0;
@@ -98,17 +118,113 @@ export default Ember.Component.extend({
                     textWidth = bboxText.max.x - bboxText.min.x;
                   }
 
-                  // center position
-                  const labelRightPadding = 0.1;
-                  const posX = appBBox.min.x + labelRightPadding;
+                  // center position                 
+                  var posX = appBBox.min.x + labelRightPadding;
 
-                  const material = new THREE.MeshBasicMaterial({color: 0xffffff});
+                  var material = new THREE.MeshBasicMaterial({color: 0xffffff});
 
-                  const labelMesh = new THREE.Mesh(labelGeo, material);
+                  var labelMesh = new THREE.Mesh(labelGeo, material);
 
                   labelMesh.position.set(posX, 0, 0);
 
                   applicationMesh.add(labelMesh);
+
+                  //
+
+                  labelGeo = new THREE.TextGeometry(
+                    node.get('name'),
+                    {
+                      font: font,
+                      size: 0.1,
+                      height: 0
+                    }
+                  );
+                  
+                  labelGeo.computeBoundingBox();
+                  bboxText = labelGeo.boundingBox;
+                  textWidth = bboxText.max.x - bboxText.min.x;
+
+                  nodeMesh.geometry.computeBoundingBox();
+                  bboxParent = nodeMesh.geometry.boundingBox;
+                  labelRightPadding = 0.1;
+                  boxWidth =  Math.abs(bboxParent.max.x) + 
+                    Math.abs(bboxParent.min.x) - logoSize.width - 
+                    logoLeftPadding + labelRightPadding;                
+
+                  // upper scaling factor
+                  i = 1.0;
+                  // until text fits into the parent bounding box
+                  while ((textWidth > boxWidth) && (i > 0.1)) {    
+                     // TODO time complexity: linear -> Do binary search alike approach                         
+                    i -= 0.1;
+                    labelGeo.scale(i, i, i);
+                    // update the BoundingBox
+                    labelGeo.computeBoundingBox();
+                    bboxText = labelGeo.boundingBox;
+                    textWidth = bboxText.max.x - bboxText.min.x;
+                  }
+
+                  // center position
+                  var labelBottomPadding = 0.1;
+                  posX = -textWidth / 2.0;
+                  var posY = bboxParent.min.y + labelBottomPadding;
+
+                  material = new THREE.MeshBasicMaterial({color: 0xffffff});
+
+                  labelMesh = new THREE.Mesh(labelGeo, material);
+
+                  labelMesh.position.set(posX, posY, 0);
+
+                  nodeMesh.add(labelMesh);
+
+
+                  //
+
+                  labelGeo = new THREE.TextGeometry(
+                    system.get('name'),
+                    {
+                      font: font,
+                      size: 0.1,
+                      height: 0
+                    }
+                  );
+                  
+                  labelGeo.computeBoundingBox();
+                  bboxText = labelGeo.boundingBox;
+                  textWidth = bboxText.max.x - bboxText.min.x;
+
+                  systemMesh.geometry.computeBoundingBox();
+                  bboxParent = systemMesh.geometry.boundingBox;
+                  labelRightPadding = 0.1;
+                  boxWidth =  Math.abs(bboxParent.max.x) + 
+                    Math.abs(bboxParent.min.x) - logoSize.width - 
+                    logoLeftPadding + labelRightPadding;                
+
+                  // upper scaling factor
+                  i = 1.0;
+                  // until text fits into the parent bounding box
+                  while ((textWidth > boxWidth) && (i > 0.1)) {    
+                     // TODO time complexity: linear -> Do binary search alike approach                         
+                    i -= 0.1;
+                    labelGeo.scale(i, i, i);
+                    // update the BoundingBox
+                    labelGeo.computeBoundingBox();
+                    bboxText = labelGeo.boundingBox;
+                    textWidth = bboxText.max.x - bboxText.min.x;
+                  }
+
+                  // center position
+                  labelBottomPadding = 0.3;
+                  posX = -textWidth / 2.0;
+                  posY = bboxParent.max.y - labelBottomPadding;
+
+                  material = new THREE.MeshBasicMaterial({color: 0x00000});
+
+                  labelMesh = new THREE.Mesh(labelGeo, material);
+
+                  labelMesh.position.set(posX, posY, 0);
+
+                  systemMesh.add(labelMesh);
 
               });              
 
