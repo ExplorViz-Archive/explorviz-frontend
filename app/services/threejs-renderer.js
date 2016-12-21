@@ -157,8 +157,7 @@ export default Ember.Service.extend({
 
     if(appCommunication) {
       appCommunication.forEach((communication) => {
-        // TODO Why not working?
-        console.log("communication", communication);
+        console.log(communication);
       });
     }
 

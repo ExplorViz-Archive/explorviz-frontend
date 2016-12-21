@@ -2,7 +2,7 @@ import { moduleForModel, test } from 'ember-qunit';
 
 moduleForModel('communication', 'Unit | Model | communication', {
   // Specify the other units that are required for this test.
-  needs: []
+  needs: ['model:landscape']
 });
 
 test('it exists', function(assert) {
