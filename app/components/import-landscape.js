@@ -17,16 +17,18 @@ export default Ember.Component.extend({
 
     const systems = this.get('landscape').get('systems'); 
 
+    const scaleFactor = {width: 0.5, height: 0.5};
+
     if(systems) {      
       systems.forEach(function(system) {
 
         const{x, y, z} = system.get('backgroundColor');
 
-        var extensionX = system.get('width') / 2.0;
-        var centerX = system.get('positionX') + extensionX - 0;
+        var extensionX = system.get('width') * scaleFactor.width;
+        var centerX = system.get('positionX') + extensionX;
 
-        var extensionY = system.get('height') / 2.0;
-        var centerY = system.get('positionY') - extensionY - 0;
+        var extensionY = system.get('height') * scaleFactor.height;
+        var centerY = system.get('positionY') - extensionY;
 
         const systemMesh = addPlane(centerX, centerY, 0, system.get('width'), 
           system.get('height'), new THREE.Color(x,y,z), null, scene, system);
@@ -43,11 +45,11 @@ export default Ember.Component.extend({
 
             const{x, y, z} = node.get('color');
 
-            var extensionX = node.get('width') / 2.0;
-            var extensionY = node.get('height') / 2.0;
+            extensionX = node.get('width') * scaleFactor.width;
+            extensionY = node.get('height') * scaleFactor.height;
 
-            var centerX = node.get('positionX') + extensionX - 0;          
-            var centerY = node.get('positionY') - extensionY - 0;
+            centerX = node.get('positionX') + extensionX;          
+            centerY = node.get('positionY') - extensionY;
 
             const nodeMesh = addPlane(centerX, centerY, 0, node.get('width'), 
               node.get('height'), new THREE.Color(x,y,z), null, scene, node);
@@ -60,11 +62,11 @@ export default Ember.Component.extend({
 
               const{x, y, z} = application.get('backgroundColor'); 
 
-              var extensionX = application.get('width') / 2.0;
-              var extensionY = application.get('height') / 2.0;
+              extensionX = application.get('width') * scaleFactor.width;
+              extensionY = application.get('height') * scaleFactor.width;
 
-              var centerX = application.get('positionX') + extensionX - 0;          
-              var centerY = application.get('positionY') - extensionY - 0;
+              centerX = application.get('positionX') + extensionX - 0;          
+              centerY = application.get('positionY') - extensionY - 0;
 
               const applicationMesh = addPlane(centerX, centerY, 0, 
                 application.get('width'), application.get('height'), 
