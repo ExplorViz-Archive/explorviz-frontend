@@ -93,143 +93,21 @@ export default Ember.Component.extend({
               new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', 
                 (font) => {
 
-                  var labelGeo = new THREE.TextGeometry(
-                    application.get('name'),
-                    {
-                      font: font,
-                      size: 0.1,
-                      height: 0
-                    }
-                  );
-                  
-                  labelGeo.computeBoundingBox();
-                  var bboxText = labelGeo.boundingBox;
-                  var textWidth = bboxText.max.x - bboxText.min.x;
-
-                  var bboxParent = appBBox;
-                  var labelRightPadding = 0.1;
-                  var boxWidth =  Math.abs(bboxParent.max.x) + 
-                    Math.abs(bboxParent.min.x) - logoSize.width - 
-                    logoLeftPadding + labelRightPadding;                
-
-                  // upper scaling factor
-                  var i = 1.0;
-                  // until text fits into the parent bounding box
-                  while ((textWidth > boxWidth) && (i > 0.1)) {    
-                     // TODO time complexity: linear -> Do binary search alike approach                         
-                    i -= 0.1;
-                    labelGeo.scale(i, i, i);
-                    // update the BoundingBox
-                    labelGeo.computeBoundingBox();
-                    bboxText = labelGeo.boundingBox;
-                    textWidth = bboxText.max.x - bboxText.min.x;
-                  }
-
-                  // center position                 
-                  var posX = appBBox.min.x + labelRightPadding;
-
-                  var material = new THREE.MeshBasicMaterial({color: 0xffffff});
-
-                  var labelMesh = new THREE.Mesh(labelGeo, material);
-
-                  labelMesh.position.set(posX, 0, 0);
+                  var padding = {left: 0.0, right: -logoLeftPadding, top: 0.0, bottom: 0.0};
+                  var labelMesh = createLabel(font, 0.2, null, applicationMesh, 
+                    padding, 0xffffff, logoSize, "center"); 
 
                   applicationMesh.add(labelMesh);
 
-                  //
-
-                  labelGeo = new THREE.TextGeometry(
-                    node.get('name'),
-                    {
-                      font: font,
-                      size: 0.1,
-                      height: 0
-                    }
-                  );
-                  
-                  labelGeo.computeBoundingBox();
-                  bboxText = labelGeo.boundingBox;
-                  textWidth = bboxText.max.x - bboxText.min.x;
-
-                  nodeMesh.geometry.computeBoundingBox();
-                  bboxParent = nodeMesh.geometry.boundingBox;
-                  labelRightPadding = 0.1;
-                  boxWidth =  Math.abs(bboxParent.max.x) + 
-                    Math.abs(bboxParent.min.x) - logoSize.width - 
-                    logoLeftPadding + labelRightPadding;                
-
-                  // upper scaling factor
-                  i = 1.0;
-                  // until text fits into the parent bounding box
-                  while ((textWidth > boxWidth) && (i > 0.1)) {    
-                     // TODO time complexity: linear -> Do binary search alike approach                         
-                    i -= 0.1;
-                    labelGeo.scale(i, i, i);
-                    // update the BoundingBox
-                    labelGeo.computeBoundingBox();
-                    bboxText = labelGeo.boundingBox;
-                    textWidth = bboxText.max.x - bboxText.min.x;
-                  }
-
-                  // center position
-                  var labelBottomPadding = 0.1;
-                  posX = -textWidth / 2.0;
-                  var posY = bboxParent.min.y + labelBottomPadding;
-
-                  material = new THREE.MeshBasicMaterial({color: 0xffffff});
-
-                  labelMesh = new THREE.Mesh(labelGeo, material);
-
-                  labelMesh.position.set(posX, posY, 0);
+                  padding = {left: 0.0, right: 0.0, top: 0.0, bottom: 0.2};
+                  labelMesh = createLabel(font, 0.125, null, nodeMesh, 
+                    padding, 0xffffff, {width: 0.0, height: 0.0}, "min"); 
 
                   nodeMesh.add(labelMesh);
 
-
-                  //
-
-                  labelGeo = new THREE.TextGeometry(
-                    system.get('name'),
-                    {
-                      font: font,
-                      size: 0.1,
-                      height: 0
-                    }
-                  );
-                  
-                  labelGeo.computeBoundingBox();
-                  bboxText = labelGeo.boundingBox;
-                  textWidth = bboxText.max.x - bboxText.min.x;
-
-                  systemMesh.geometry.computeBoundingBox();
-                  bboxParent = systemMesh.geometry.boundingBox;
-                  labelRightPadding = 0.1;
-                  boxWidth =  Math.abs(bboxParent.max.x) + 
-                    Math.abs(bboxParent.min.x) - logoSize.width - 
-                    logoLeftPadding + labelRightPadding;                
-
-                  // upper scaling factor
-                  i = 1.0;
-                  // until text fits into the parent bounding box
-                  while ((textWidth > boxWidth) && (i > 0.1)) {    
-                     // TODO time complexity: linear -> Do binary search alike approach                         
-                    i -= 0.1;
-                    labelGeo.scale(i, i, i);
-                    // update the BoundingBox
-                    labelGeo.computeBoundingBox();
-                    bboxText = labelGeo.boundingBox;
-                    textWidth = bboxText.max.x - bboxText.min.x;
-                  }
-
-                  // center position
-                  labelBottomPadding = 0.3;
-                  posX = -textWidth / 2.0;
-                  posY = bboxParent.max.y - labelBottomPadding;
-
-                  material = new THREE.MeshBasicMaterial({color: 0x00000});
-
-                  labelMesh = new THREE.Mesh(labelGeo, material);
-
-                  labelMesh.position.set(posX, posY, 0);
+                  padding = {left: 0.0, right: 0.0, top: -0.4, bottom: 0.0};
+                  labelMesh = createLabel(font, 0.2, null, systemMesh, 
+                    padding, 0x00000, {width: 0.0, height: 0.0}, "max");                  
 
                   systemMesh.add(labelMesh);
 
@@ -242,6 +120,65 @@ export default Ember.Component.extend({
         });
 
       });
+    }
+
+    function createLabel(font, size, textToShow, parent, padding, color, logoSize, yPosition) {
+
+      const text = textToShow ? textToShow : 
+        parent.userData.model.get('name');
+
+      const labelGeo = new THREE.TextGeometry(
+        text,
+        {
+          font: font,
+          size: size,
+          height: 0
+        }
+      );
+
+      labelGeo.computeBoundingBox();
+      var bboxLabel = labelGeo.boundingBox;
+      var labelWidth = bboxLabel.max.x - bboxLabel.min.x;
+
+      parent.geometry.computeBoundingBox();
+      const bboxParent = parent.geometry.boundingBox;
+
+      var boxWidth =  Math.abs(bboxParent.max.x) + 
+        Math.abs(bboxParent.min.x) - logoSize.width +
+        padding.left + padding.right;   
+
+      // upper scaling factor
+      var i = 1.0;
+
+      // scale until text fits into parent bounding box
+      while ((labelWidth > boxWidth) && (i > 0.1)) {    
+         // TODO time complexity: linear -> Do binary search alike approach                         
+        i -= 0.1;
+        labelGeo.scale(i, i, i);
+        // update the boundingBox
+        labelGeo.computeBoundingBox();
+        bboxLabel = labelGeo.boundingBox;
+        labelWidth = bboxLabel.max.x - bboxLabel.min.x;
+      }
+
+      const posX = (-labelWidth / 2.0) + padding.left + padding.right;
+
+      var posY = padding.bottom + padding.top;
+
+      if(yPosition === "max") {
+        posY += bboxParent.max.y;
+      } 
+      else if(yPosition === "min") {
+        posY += bboxParent.min.y;
+      }
+
+      const material = new THREE.MeshBasicMaterial({color: color});
+
+      const labelMesh = new THREE.Mesh(labelGeo, material);
+
+      labelMesh.position.set(posX, posY, 0);
+
+      return labelMesh;
     }
 
     function addPlane(x, y, z, width, height, color, texture, parent, model) {
