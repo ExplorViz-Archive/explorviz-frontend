@@ -7,7 +7,8 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
   authorizer: 'authorizers:authorizers',
 
-  host: 'http://192.168.247.129:8080',
+  //host: 'http://192.168.247.129:8080',
+  host: 'http://localhost:8080',
 
   headers: {
     "Accept": "application/json"
