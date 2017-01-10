@@ -10,12 +10,14 @@ export default DrawEdgeEntity.extend({
 
   averageResponseTimeInNanoSec: attr("number"),
 
-  source: attr("application"),
-  target: attr("application"),
+  source: belongsTo("application"),
+  target: belongsTo("application"),
 
   sourceClazz: attr("clazz"),
   targetClazz: attr("clazz"),
 
-  parent: belongsTo('landscape')
+  parent: belongsTo("landscape"), 
+
+  pipeColor: attr()
 
 });

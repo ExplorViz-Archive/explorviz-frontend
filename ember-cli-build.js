@@ -29,5 +29,6 @@ module.exports = function(defaults) {
   app.import('bower_components/bootstrap-sass/assets/javascripts/bootstrap.js');
   app.import('vendor/flot/jquery.flot.min.js');
   app.import('vendor/three/three.min.js');
+  app.import('vendor/three/THREE.MeshLine.js');
   return app.toTree();
 };

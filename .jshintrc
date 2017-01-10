@@ -3,7 +3,9 @@
     "document",
     "window",
     "-Promise",
-    "THREE"
+    "THREE",
+    "MeshLineMaterial",
+    "MeshLine"
   ],
   "browser": true,
   "boss": true,

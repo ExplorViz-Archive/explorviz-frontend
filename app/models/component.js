@@ -9,7 +9,7 @@ export default Draw3DNodeEntity.extend({
   foundation: attr('boolean'),
 
   children: hasMany('component', {
-    inverse: 'children'
+    inverse: 'parentComponent'
   }),
 
   clazzes: hasMany('clazz'),

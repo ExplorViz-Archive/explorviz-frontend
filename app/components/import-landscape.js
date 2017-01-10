@@ -15,7 +15,7 @@ export default Ember.Component.extend({
 
     this.get('threeRenderer').updateWindowSize(width, height, canvas);
 
-    this.get('threeRenderer').renderLandscape(this.get('landscape'));
+    this.get('threeRenderer').createLandscape(this.get('landscape'));
   }
 
 });

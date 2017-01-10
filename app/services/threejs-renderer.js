@@ -38,7 +38,9 @@ export default Ember.Service.extend({
     render();
   },
 
-  renderLandscape(landscape) {
+  // Create-function for the entire landscape
+  // Call it on every new received landscape
+  createLandscape(landscape) {
 
     const self = this;
 
@@ -62,9 +64,22 @@ export default Ember.Service.extend({
 
         system.set('threeJSModel', systemMesh);
 
-        const nodegroup = system.get('nodegroups');
+        const nodegroups = system.get('nodegroups');
 
-        nodegroup.forEach(function(nodegroup) {
+        nodegroups.forEach(function(nodegroup) {
+
+          const{x, y, z} = nodegroup.get('backgroundColor');
+
+          extensionX = nodegroup.get('width') * scaleFactor.width;
+          extensionY = nodegroup.get('height') * scaleFactor.height;
+
+          centerX = nodegroup.get('positionX') + extensionX;          
+          centerY = nodegroup.get('positionY') - extensionY;
+
+          const nodegroupMesh = addPlane(centerX, centerY, 0, nodegroup.get('width'), 
+          nodegroup.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), nodegroup);
+
+          nodegroup.set('threeJSModel', nodegroupMesh);  
 
           const nodes = nodegroup.get('nodes');
 
@@ -153,13 +168,148 @@ export default Ember.Service.extend({
 
     // Communication
 
-    const appCommunication = landscape.get('applicationCommunication');     
+    const appCommunication = landscape.get('applicationCommunication');
+
+    const communicationsAccumulated = [];
+
+    var accum;
 
     if(appCommunication) {
       appCommunication.forEach((communication) => {
-        console.log(communication);
+
+        var points = communication.get('points');
+
+        if (points.length !== 0) {
+
+          const{x, y, z} = communication.get('pipeColor');
+
+          accum = {tiles:[], pipeColor: new THREE.Color(x, y, z)};
+          communicationsAccumulated.push(accum);
+
+          for (var i = 1; i < points.length; i++) {
+            
+            var lastPoint = points[i - 1];
+            var thisPoint = points[i];
+
+            var tile = seekOrCreateTile(lastPoint, thisPoint, communicationsAccumulated, 0.02);
+            tile.communications.push(appCommunication);
+            tile.requestsCache = tile.requestsCache + appCommunication.requests;
+
+            accum.tiles.push(tile);
+          }
+          // def static private seekOrCreateTile(Point start, Point end, List<CommunicationAccumulator> communicationAccumulated,
+          //   float z) {
+          //   for (accum : communicationAccumulated) {
+          //     for (tile : accum.tiles) {
+          //       if (tile.startPoint.equals(start) && tile.endPoint.equals(end)) {
+          //         return tile
+          //       }
+          //     }
+          //   }
+
+          //   val tile = new CommunicationTileAccumulator()
+          //   tile.startPoint = start
+          //   tile.endPoint = end
+          //   tile.positionZ = z
+          //   tile
+          // }
+
+          communicationsAccumulated.push(accum);
+
+        }
+
       });
+
+      addCommunicationLineDrawing(communicationsAccumulated, self.get('scene'));
+
     }
+
+
+    function addCommunicationLineDrawing(communicationsAccumulated, parent) {
+
+      communicationsAccumulated.forEach((accum) => {
+
+        accum.tiles.forEach((tile) => { 
+
+          tile.lineThickness = 0.07 * 1.3 + 0.01;
+
+          // TODO createCommunicationLabel
+          // ...
+
+
+          createLine(accum, parent);
+
+        });
+
+      });
+
+    }
+
+    function checkEqualityOfPoints(p1, p2) {
+      var x = p1.x === p2.x;
+      var y = p1.y === p2.y;
+      var z = p1.z === p2.z;
+
+      return x && y && z;
+    }
+
+    function seekOrCreateTile(start, end, 
+      communicationAccumulated, lineZvalue) {
+
+      communicationAccumulated.forEach((accum) => {
+
+        accum.tiles.forEach((tile) => {       
+
+          if (checkEqualityOfPoints(tile.startPoint, start) && 
+            checkEqualityOfPoints(tile.endPoint, end)) {
+            //console.log("old tile");
+            return tile;
+          }
+
+        });
+
+      });
+
+      //console.log("new tile");
+      var tile = {startPoint: start, endPoint: end, positionZ: lineZvalue, 
+        requestsCache: 0, communications: []};
+      return tile;
+    }
+
+    function createLine(accum, parent) {
+
+      if(accum.tiles.length !== 0) {
+
+        var firstTile = accum.tiles[0];
+
+        const material = new MeshLineMaterial({
+          color: accum.pipeColor,
+          lineWidth: firstTile.lineThickness
+        });
+
+        const geometry = new THREE.Geometry();
+
+        geometry.vertices.push(
+          new THREE.Vector3(firstTile.startPoint.x, firstTile.startPoint.y, firstTile.positionZ)
+        );
+
+        accum.tiles.forEach((tile) => {
+          geometry.vertices.push(
+            new THREE.Vector3(tile.endPoint.x, tile.endPoint.y, tile.positionZ)
+          );
+        });
+
+        const line = new MeshLine();
+        line.setGeometry(geometry);
+
+        var lineMesh = new THREE.Mesh( line.geometry, material );
+        
+        parent.add(lineMesh);
+
+      }
+
+    }
+
 
     function createLabel(font, size, textToShow, parent, padding, color, logoSize, yPosition) {
 
