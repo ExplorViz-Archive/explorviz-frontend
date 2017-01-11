@@ -48,6 +48,8 @@ export default Ember.Service.extend({
 
     const scaleFactor = {width: 0.5, height: 0.5};
 
+    getLandscapeRect(landscape);
+
     if(systems) {
       systems.forEach(function(system) {
 
@@ -398,6 +400,99 @@ export default Ember.Service.extend({
 
       
     }
+    
+
+    function getLandscapeRect(landscape) {
+
+      const MIN_X = 0;
+      const MAX_X = 1;
+      const MIN_Y = 2;
+      const MAX_Y = 3;
+
+      let rect = [];
+      rect.push(Number.MAX_VALUE);
+      rect.push(-Number.MAX_VALUE);
+      rect.push(Number.MAX_VALUE);
+      rect.push(-Number.MAX_VALUE);
+
+      const systems = landscape.get('systems');
+
+      if(systems.length === 0) {
+        rect[MIN_X] = 0.0;
+        rect[MAX_X] = 1.0;
+        rect[MIN_Y] = 0.0;
+        rect[MAX_Y] = 1.0;
+      } 
+      else {
+        systems.forEach((system) => {
+          getMinMaxFromQuad(system, rect);
+
+          const nodegroups = system.get('nodegroups');
+          nodegroups.forEach((nodegroup) => {
+
+            const nodes = nodegroup.get('nodes');
+            nodes.forEach((node) => {
+              getMinMaxFromQuad(node, rect);
+            });
+
+          });
+
+        });
+      }
+
+      return rect;
+
+    }
+
+    //
+
+    // def private static void getMinMaxFromQuad(DrawNodeEntity it, ArrayList<Float> rect) {
+    //   val curX = it.positionX
+    //   val curY = it.positionY
+    //   if (curX < rect.get(MIN_X)) {
+    //     rect.set(MIN_X, curX)
+    //   }
+    //   if (rect.get(MAX_X) < curX + (it.width)) {
+    //     rect.set(MAX_X, curX + (it.width))
+    //   }
+    //   if (curY > rect.get(MAX_Y)) {
+    //     rect.set(MAX_Y, curY)
+    //   }
+    //   if (rect.get(MIN_Y) > curY - (it.height)) {
+    //     rect.set(MIN_Y, curY - (it.height))
+    //   }
+    // }
+
+    //
+
+    function getMinMaxFromQuad(drawnodeentity, rect) {
+
+      const MIN_X = 0;
+      const MAX_X = 1;
+      const MIN_Y = 2;
+      const MAX_Y = 3;
+
+
+      const curX = drawnodeentity.get('positionX');
+      const curY = drawnodeentity.get('positionY');
+
+      if (curX < rect[MIN_X]) {
+        rect[MIN_X] = curX;
+      }
+      if (rect[MAX_X]< curX + drawnodeentity.get('width')) {
+        rect[MAX_X] = curX + drawnodeentity.get('width');
+      }
+      if (curY > rect[MAX_Y]) {
+        rect[MAX_Y] = curY;
+      }
+      if (rect[MIN_Y] > curY - drawnodeentity.get('height')) {
+        rect[MIN_Y] = curY - drawnodeentity.get('height');
+      }
+
+    }
+
+
+
   }
 
 });

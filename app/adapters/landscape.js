@@ -12,6 +12,11 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
   headers: {
     "Accept": "application/json"
+  },
+
+  urlForFindRecord(id, modelName) {
+    let baseUrl = this.buildURL();
+    return `${baseUrl}/${modelName}/${id}`;
   }
 
 });
