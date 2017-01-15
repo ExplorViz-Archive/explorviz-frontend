@@ -50,61 +50,80 @@ export default Ember.Service.extend({
 
     getLandscapeRect(landscape);
 
+    let isRequestObject = false;
+
     if(systems) {
       systems.forEach(function(system) {
 
-        const{x, y, z} = system.get('backgroundColor');
+        isRequestObject = false;
 
-        var extensionX = system.get('width') * scaleFactor.width;
-        var centerX = system.get('positionX') + extensionX;
+        if(!isRequestObject && system.get('name') === "Requests") {
+          console.log("test");
+          isRequestObject = true;
+        }
 
-        var extensionY = system.get('height') * scaleFactor.height;
-        var centerY = system.get('positionY') - extensionY;
+        if(!isRequestObject) {
 
-        const systemMesh = addPlane(centerX, centerY, 0, system.get('width'), 
-          system.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), system);
+          const{x, y, z} = system.get('backgroundColor');
 
-        system.set('threeJSModel', systemMesh);
+          var extensionX = system.get('width') * scaleFactor.width;
+          var centerX = system.get('positionX') + extensionX;
+
+          var extensionY = system.get('height') * scaleFactor.height;
+          var centerY = system.get('positionY') - extensionY;
+
+          var systemMesh = addPlane(centerX, centerY, 0, system.get('width'), 
+            system.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), system);
+
+          system.set('threeJSModel', systemMesh);
+
+        }
 
         const nodegroups = system.get('nodegroups');
 
         nodegroups.forEach(function(nodegroup) {
 
-          const{x, y, z} = nodegroup.get('backgroundColor');
+          if(!isRequestObject) {
 
-          extensionX = nodegroup.get('width') * scaleFactor.width;
-          extensionY = nodegroup.get('height') * scaleFactor.height;
+            const{x, y, z} = nodegroup.get('backgroundColor');
 
-          centerX = nodegroup.get('positionX') + extensionX;          
-          centerY = nodegroup.get('positionY') - extensionY;
+            extensionX = nodegroup.get('width') * scaleFactor.width;
+            extensionY = nodegroup.get('height') * scaleFactor.height;
 
-          const nodegroupMesh = addPlane(centerX, centerY, 0, nodegroup.get('width'), 
-          nodegroup.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), nodegroup);
+            centerX = nodegroup.get('positionX') + extensionX;          
+            centerY = nodegroup.get('positionY') - extensionY;
 
-          nodegroup.set('threeJSModel', nodegroupMesh);  
+            var nodegroupMesh = addPlane(centerX, centerY, 0, nodegroup.get('width'), 
+            nodegroup.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), nodegroup);
+
+            nodegroup.set('threeJSModel', nodegroupMesh);              
+
+          }
 
           const nodes = nodegroup.get('nodes');
 
           nodes.forEach(function(node) {
 
-            const{x, y, z} = node.get('color');
+            if(!isRequestObject) {
 
-            extensionX = node.get('width') * scaleFactor.width;
-            extensionY = node.get('height') * scaleFactor.height;
+              const{x, y, z} = node.get('color');
 
-            centerX = node.get('positionX') + extensionX;          
-            centerY = node.get('positionY') - extensionY;
+              extensionX = node.get('width') * scaleFactor.width;
+              extensionY = node.get('height') * scaleFactor.height;
 
-            const nodeMesh = addPlane(centerX, centerY, 0, node.get('width'), 
-              node.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), node);
+              centerX = node.get('positionX') + extensionX;          
+              centerY = node.get('positionY') - extensionY;
 
-            node.set('threeJSModel', nodeMesh);  
+              var nodeMesh = addPlane(centerX, centerY, 0, node.get('width'), 
+                node.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), node);
+
+              node.set('threeJSModel', nodeMesh);
+
+            }
 
             const applications = node.get('applications');
 
-            applications.forEach(function(application) {
-
-              const{x, y, z} = application.get('backgroundColor'); 
+            applications.forEach(function(application) { 
 
               extensionX = application.get('width') * scaleFactor.width;
               extensionY = application.get('height') * scaleFactor.width;
@@ -112,54 +131,65 @@ export default Ember.Service.extend({
               centerX = application.get('positionX') + extensionX - 0;          
               centerY = application.get('positionY') - extensionY - 0;
 
-              const applicationMesh = addPlane(centerX, centerY, 0, 
-                application.get('width'), application.get('height'), 
-                new THREE.Color(x,y,z), null, self.get('scene'), application);
+              if(!isRequestObject) {  
 
-              application.set('threeJSModel', applicationMesh);
+                const{x, y, z} = application.get('backgroundColor'); 
 
-              applicationMesh.geometry.computeBoundingBox();
+                var applicationMesh = addPlane(centerX, centerY, 0, 
+                  application.get('width'), application.get('height'), 
+                  new THREE.Color(x,y,z), null, self.get('scene'), application);
 
-              const logoSize = {width: 0.4, height: 0.4};
-              const appBBox = applicationMesh.geometry.boundingBox;  
+                application.set('threeJSModel', applicationMesh);             
 
-              const logoPos = {x : 0, y : 0, z : 0};    
+                applicationMesh.geometry.computeBoundingBox();
 
-              const logoLeftPadding = logoSize.width * 0.7;
+                const logoSize = {width: 0.4, height: 0.4};
+                const appBBox = applicationMesh.geometry.boundingBox;  
 
-              logoPos.x = appBBox.max.x - logoLeftPadding;
+                const logoPos = {x : 0, y : 0, z : 0};    
 
-              const texturePartialPath = application.get('database') ? 
-                'database2' : application.get('programmingLanguage').toLowerCase();
+                const logoLeftPadding = logoSize.width * 0.7;
 
-              addPlane(logoPos.x, logoPos.y, logoPos.z, 
-                logoSize.width, logoSize.height, new THREE.Color(1,0,0), 
-                texturePartialPath, applicationMesh, "label");
+                logoPos.x = appBBox.max.x - logoLeftPadding;
 
-              new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', 
-                (font) => {
+                const texturePartialPath = application.get('database') ? 
+                  'database2' : application.get('programmingLanguage').toLowerCase();
 
-                  var padding = {left: 0.0, right: -logoLeftPadding, top: 0.0, bottom: 0.0};
-                  var labelMesh = createLabel(font, 0.2, null, applicationMesh, 
-                    padding, 0xffffff, logoSize, "center"); 
+                addPlane(logoPos.x, logoPos.y, logoPos.z, 
+                  logoSize.width, logoSize.height, new THREE.Color(1,0,0), 
+                  texturePartialPath, applicationMesh, "label");                
 
-                  applicationMesh.add(labelMesh);
+                new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', 
+                  (font) => {
 
-                  padding = {left: 0.0, right: 0.0, top: 0.0, bottom: 0.2};
-                  labelMesh = createLabel(font, 0.125, node.get('ipAddress'), nodeMesh, 
-                    padding, 0xffffff, {width: 0.0, height: 0.0}, "min"); 
+                    var padding = {left: 0.0, right: -logoLeftPadding, top: 0.0, bottom: 0.0};
+                    var labelMesh = createLabel(font, 0.2, null, applicationMesh, 
+                      padding, 0xffffff, logoSize, "center"); 
 
-                  nodeMesh.add(labelMesh);
+                    applicationMesh.add(labelMesh);
 
-                  padding = {left: 0.0, right: 0.0, top: -0.4, bottom: 0.0};
-                  labelMesh = createLabel(font, 0.2, null, systemMesh, 
-                    padding, 0x00000, {width: 0.0, height: 0.0}, "max");                  
+                    padding = {left: 0.0, right: 0.0, top: 0.0, bottom: 0.2};
+                    labelMesh = createLabel(font, 0.125, node.get('ipAddress'), nodeMesh, 
+                      padding, 0xffffff, {width: 0.0, height: 0.0}, "min"); 
 
-                  systemMesh.add(labelMesh);
+                    nodeMesh.add(labelMesh);
 
-              });              
+                    padding = {left: 0.0, right: 0.0, top: -0.4, bottom: 0.0};
+                    labelMesh = createLabel(font, 0.2, null, systemMesh, 
+                      padding, 0x00000, {width: 0.0, height: 0.0}, "max");                  
 
-            }); 
+                    systemMesh.add(labelMesh);
+
+                });
+
+              } else {
+                // draw request logo
+                addPlane(centerX, centerY, 0, 
+                  1.6, 1.6, new THREE.Color(1,0,0), 
+                  "requests", self.get('scene'), "label");
+              }
+
+            });
 
           });
           
@@ -199,22 +229,6 @@ export default Ember.Service.extend({
 
             accum.tiles.push(tile);
           }
-          // def static private seekOrCreateTile(Point start, Point end, List<CommunicationAccumulator> communicationAccumulated,
-          //   float z) {
-          //   for (accum : communicationAccumulated) {
-          //     for (tile : accum.tiles) {
-          //       if (tile.startPoint.equals(start) && tile.endPoint.equals(end)) {
-          //         return tile
-          //       }
-          //     }
-          //   }
-
-          //   val tile = new CommunicationTileAccumulator()
-          //   tile.startPoint = start
-          //   tile.endPoint = end
-          //   tile.positionZ = z
-          //   tile
-          // }
 
           communicationsAccumulated.push(accum);
 
@@ -444,26 +458,6 @@ export default Ember.Service.extend({
 
     }
 
-    //
-
-    // def private static void getMinMaxFromQuad(DrawNodeEntity it, ArrayList<Float> rect) {
-    //   val curX = it.positionX
-    //   val curY = it.positionY
-    //   if (curX < rect.get(MIN_X)) {
-    //     rect.set(MIN_X, curX)
-    //   }
-    //   if (rect.get(MAX_X) < curX + (it.width)) {
-    //     rect.set(MAX_X, curX + (it.width))
-    //   }
-    //   if (curY > rect.get(MAX_Y)) {
-    //     rect.set(MAX_Y, curY)
-    //   }
-    //   if (rect.get(MIN_Y) > curY - (it.height)) {
-    //     rect.set(MIN_Y, curY - (it.height))
-    //   }
-    // }
-
-    //
 
     function getMinMaxFromQuad(drawnodeentity, rect) {
 
