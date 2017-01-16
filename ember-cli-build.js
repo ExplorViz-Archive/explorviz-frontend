@@ -30,5 +30,6 @@ module.exports = function(defaults) {
   app.import('vendor/flot/jquery.flot.min.js');
   app.import('vendor/three/three.min.js');
   app.import('vendor/three/THREE.MeshLine.js');
+  app.import('vendor/hammer/hammer.min.js');
   return app.toTree();
 };

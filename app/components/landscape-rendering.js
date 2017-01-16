@@ -8,6 +8,8 @@ export default Ember.Component.extend({
   webglrenderer: null,
   camera: null,
 
+  hammerManager: null,
+
   animationFrameId: null,
 
   // @Override
@@ -15,6 +17,7 @@ export default Ember.Component.extend({
     this._super(...arguments);
 
     this.initRendering();
+    this.initInteraction();
   },
 
   // @Override
@@ -28,6 +31,9 @@ export default Ember.Component.extend({
     this.set('scene', null);
     this.set('webglrenderer', null);
     this.set('camera', null);
+
+    this.get('hammerManager').off();
+    this.set('hammerManager', null);
     
   },
 
@@ -43,7 +49,7 @@ export default Ember.Component.extend({
     this.set('scene', new THREE.Scene());
     this.set('scene.background', new THREE.Color(0xffffff));
 
-    this.set('camera', new THREE.PerspectiveCamera(70, width / height, 1, 10));
+    this.set('camera', new THREE.PerspectiveCamera(70, width / height, 0.1, 200));
     this.get('camera').position.set(13, -2, 10);
 
     this.set('webglrenderer', new THREE.WebGLRenderer({
@@ -57,7 +63,6 @@ export default Ember.Component.extend({
     // Rendering loop //
 
     function render() {
-      console.log("rendering");
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
@@ -87,7 +92,6 @@ export default Ember.Component.extend({
         isRequestObject = false;
 
         if(!isRequestObject && system.get('name') === "Requests") {
-          console.log("test");
           isRequestObject = true;
         }
 
@@ -160,7 +164,7 @@ export default Ember.Component.extend({
               centerX = application.get('positionX') + extensionX - 0;
               centerY = application.get('positionY') - extensionY - 0;
 
-              if(!isRequestObject) {  
+              if(!isRequestObject) {
 
                 const{x, y, z} = application.get('backgroundColor'); 
 
@@ -515,6 +519,153 @@ export default Ember.Component.extend({
 
     }
 
+
+
+
+  },
+
+  initInteraction() {
+
+    const self = this;
+
+    let cameraTranslateX, cameraTranslateY = 0;
+
+    const canvas = this.$('#threeCanvas')[0];
+
+    this.set('hammerManager', new Hammer.Manager(canvas, {}));
+
+    const hammer = this.get('hammerManager');
+
+    const singleTap = new Hammer.Tap({
+        event : 'singletap',
+        interval : 250
+    });
+
+    const doubleTap = new Hammer.Tap({
+        event : 'doubletap',
+        taps : 2,
+        interval : 250
+    });
+
+    const pan = new Hammer.Pan({
+        event : 'pan'
+    });
+
+    hammer.add([ doubleTap, singleTap, pan ]);
+
+    doubleTap.recognizeWith(singleTap);
+    singleTap.requireFailure(doubleTap);
+
+    hammer
+      .on(
+        'doubletap',
+        function(evt) {
+
+          var mouse = {};
+
+          const renderer = self.get('webglrenderer');
+
+          const event = evt.srcEvent;
+
+          mouse.x = ((event.clientX) / renderer.domElement.clientWidth) * 2 - 1;
+          mouse.y = -((event.clientY - 60) / renderer.domElement.clientHeight) * 2 + 1;
+
+          const intersectedViewObj = raycasting(null, mouse, true);
+
+          console.log(intersectedViewObj);
+
+        });
+
+    hammer.on('panstart', function(evt) {
+      const event = evt.srcEvent;
+
+      cameraTranslateX = event.clientX;
+      cameraTranslateY = event.clientY;
+    });
+
+    hammer.on('panmove', function(evt) {
+
+      const event = evt.srcEvent;
+
+      const renderer = self.get('webglrenderer');
+      const camera = self.get('camera');
+
+      var deltaX = event.clientX - cameraTranslateX;
+      var deltaY = event.clientY - cameraTranslateY;
+
+      var distanceXInPercent = (deltaX /
+        parseFloat(renderer.domElement.clientWidth)) * 100.0;
+
+      var distanceYInPercent = (deltaY /
+        parseFloat(renderer.domElement.clientHeight)) * 100.0;
+
+      var xVal = camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(camera.position.z) / 4.0);
+
+      var yVal = camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(camera.position.z) / 4.0);
+
+      camera.position.x = xVal;
+      camera.position.y = yVal;
+
+      cameraTranslateX = event.clientX;
+      cameraTranslateY = event.clientY;
+    });
+
+    // zoom handler
+
+    canvas.addEventListener('mousewheel', onMouseWheelStart, false);
+
+    function onMouseWheelStart(evt) {
+
+      const camera = self.get('camera');
+
+      var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
+
+      // zoom in
+      if (delta > 0) {
+        camera.position.z -= delta * 1.5;
+      }
+      // zoom out
+      else {
+        camera.position.z -= delta * 1.5;
+      }
+    }
+
+
+    // raycasting
+
+    const raycaster = new THREE.Raycaster();
+
+    function raycasting(origin, direction, fromCamera) {
+
+      if (fromCamera) {
+        // direction = mouse
+        raycaster.setFromCamera(direction, self.get('camera'));
+      } else if (origin) {
+        raycaster.set(origin, direction);
+      }
+
+      // calculate objects intersecting the picking ray (true => recursive)
+      const intersections = raycaster.intersectObjects(self.get('scene').children,
+        true);
+
+      if (intersections.length > 0) {
+
+        const result = intersections.filter(function(obj) {
+          const modelName = obj.object.userData.model.constructor.modelName;
+          return (modelName === 'node' ||
+            modelName === 'system' ||
+            modelName === 'nodegroup' ||
+            modelName === 'application');
+        });
+
+        if (result.length <= 0) {
+          return;
+        }
+
+        return result[0];
+
+      }
+    }
 
 
 

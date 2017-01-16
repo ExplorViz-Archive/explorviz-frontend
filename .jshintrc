@@ -5,7 +5,8 @@
     "-Promise",
     "THREE",
     "MeshLineMaterial",
-    "MeshLine"
+    "MeshLine",
+    "Hammer"
   ],
   "browser": true,
   "boss": true,
