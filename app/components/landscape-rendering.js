@@ -1,80 +1,19 @@
-import Ember from 'ember';
+import RenderingCore from './rendering-core';
 
-export default Ember.Component.extend({
-
-  classNames: ['viz'],
-
-  scene : null,
-  webglrenderer: null,
-  camera: null,
+export default RenderingCore.extend({
 
   hammerManager: null,
 
-  animationFrameId: null,
-
   // @Override
-  didRender() {
+  initRendering() {
     this._super(...arguments);
 
-    this.initRendering();
     this.initInteraction();
   },
 
   // @Override
-  didDestroyElement() {
+  populateScene(landscape) {
     this._super(...arguments);
-
-    // cleanup
-
-    cancelAnimationFrame(this.get('animationFrameId'));
-
-    this.set('scene', null);
-    this.set('webglrenderer', null);
-    this.set('camera', null);
-
-    this.get('hammerManager').off();
-    this.set('hammerManager', null);
-    
-  },
-
-
-  initRendering() {
-
-    const self = this;
-
-    const height = this.$()[0].clientHeight;
-    const width = this.$()[0].clientWidth;
-    const canvas = this.$('#threeCanvas')[0];
-
-    this.set('scene', new THREE.Scene());
-    this.set('scene.background', new THREE.Color(0xffffff));
-
-    this.set('camera', new THREE.PerspectiveCamera(70, width / height, 0.1, 200));
-    this.get('camera').position.set(13, -2, 10);
-
-    this.set('webglrenderer', new THREE.WebGLRenderer({
-      antialias: true,  
-      canvas: canvas
-    }));
-    this.get('webglrenderer').setSize(width, height);
-
-    this.createLandscape(this.get('landscape'));
-
-    // Rendering loop //
-
-    function render() {
-      const animationId = requestAnimationFrame(render);
-      self.set('animationFrameId', animationId);
-      self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
-    }
-
-    render();
-
-    ////////////////////
-
-  },
-
-  createLandscape(landscape) {
 
     const self = this;
 
@@ -530,7 +469,7 @@ export default Ember.Component.extend({
 
     let cameraTranslateX, cameraTranslateY = 0;
 
-    const canvas = this.$('#threeCanvas')[0];
+    const canvas = self.get('canvas');
 
     this.set('hammerManager', new Hammer.Manager(canvas, {}));
 

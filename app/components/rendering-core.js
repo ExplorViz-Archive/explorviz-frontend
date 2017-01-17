@@ -8,9 +8,44 @@ export default Ember.Component.extend({
   webglrenderer: null,
   camera: null,
 
+  canvas: null,
+
+  entity: null,
+
   animationFrameId: null,
 
+    // @Override
+  didRender(){
+    this._super(...arguments);
 
+    this.initRendering();
+  },
+
+
+  // @Override
+  didDestroyElement() {
+    this._super(...arguments);
+
+    // cleanup
+
+    cancelAnimationFrame(this.get('animationFrameId'));
+
+    this.set('scene', null);
+    this.set('webglrenderer', null);
+    this.set('camera', null);
+
+    this.get('hammerManager').off();
+    this.set('hammerManager', null);
+    
+  },
+
+  /**
+   * This function is called once on the didRender event. Inherit this function 
+   * to call other important function, e.g. initInteraction as shown in 
+   * {@landscape-rendering}.
+   *
+   * @class Rendering-Core
+   */
   initRendering() {
 
     const self = this;
@@ -18,6 +53,8 @@ export default Ember.Component.extend({
     const height = this.$()[0].clientHeight;
     const width = this.$()[0].clientWidth;
     const canvas = this.$('#threeCanvas')[0];
+
+    this.set('canvas', canvas);
 
     this.set('scene', new THREE.Scene());
     this.set('scene.background', new THREE.Color(0xffffff));
@@ -31,8 +68,6 @@ export default Ember.Component.extend({
     }));
     this.get('webglrenderer').setSize(width, height);
 
-    this.createLandscape(this.get('landscape'));
-
     // Rendering loop //
 
     function render() {
@@ -45,6 +80,21 @@ export default Ember.Component.extend({
 
     ////////////////////
 
+    this.populateScene(this.get('renderingModel'));
+
+  },
+
+
+  /**
+   * This function is called once on initRendering. Inherit this function to 
+   * insert objects in the Three.js scene. Have a look 
+   * at {@landscape-rendering} for an example.
+   *
+   * @class Rendering-Core
+   * @param  {[baseentity]}
+   */
+  populateScene(renderingModel) {
+    this.set('entity', renderingModel);
   }
 
 });
