@@ -12,6 +12,15 @@ export default RenderingCore.extend({
   },
 
   // @Override
+  cleanup() {
+    this._super(...arguments);
+
+    this.get('hammerManager').off();
+    this.set('hammerManager', null);
+    
+  },
+
+  // @Override
   populateScene(landscape) {
     this._super(...arguments);
 

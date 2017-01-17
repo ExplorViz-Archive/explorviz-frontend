@@ -34,8 +34,7 @@ export default Ember.Component.extend({
     this.set('webglrenderer', null);
     this.set('camera', null);
 
-    this.get('hammerManager').off();
-    this.set('hammerManager', null);
+    this.cleanup();
     
   },
 
@@ -95,6 +94,15 @@ export default Ember.Component.extend({
    */
   populateScene(renderingModel) {
     this.set('entity', renderingModel);
-  }
+  },
+
+  /**
+   * This function is called when the destroy event is fired. Inherit this 
+   * function to cleanup custom properties or unbind listener 
+   * as shown in {@landscape-rendering}.
+   *
+   * @class Rendering-Core
+   */
+  cleanup() {}
 
 });
