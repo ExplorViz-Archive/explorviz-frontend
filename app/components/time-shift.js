@@ -49,14 +49,14 @@ export default Component.extend({
      if($(".timeline").attr('vis') ==='show') {
 
        $(".timeline").slideUp();
-       $(".viz").animate({height:'+=200'});
+       $("#vizContainer").animate({height:'+=200'});
        $(".timeline").attr('vis','hide');
 
      } 
      else {
 
        $(".timeline").slideDown();
-       $(".viz").animate({height:'-=200'});
+       $("#vizContainer").animate({height:'-=200'});
        $(".timeline").attr('vis','show');
 
      }
