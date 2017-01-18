@@ -12,6 +12,8 @@ export default Ember.Component.extend({
 
   entity: null,
 
+  font: null,
+
   animationFrameId: null,
 
     // @Override
@@ -79,7 +81,13 @@ export default Ember.Component.extend({
 
     ////////////////////
 
-    this.populateScene(this.get('renderingModel'));
+    // load font for labels and proceed with populating the scene
+    new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', (font) => {
+
+      self.set('font', font);
+      self.populateScene(this.get('renderingModel'));
+
+    });    
 
   },
 

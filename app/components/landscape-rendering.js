@@ -138,30 +138,31 @@ export default RenderingCore.extend({
 
                 addPlane(logoPos.x, logoPos.y, logoPos.z, 
                   logoSize.width, logoSize.height, new THREE.Color(1,0,0), 
-                  texturePartialPath, applicationMesh, "label");                
+                  texturePartialPath, applicationMesh, "label");
 
-                new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', 
-                  (font) => {
+                // create labels
 
-                    var padding = {left: 0.0, right: -logoLeftPadding, top: 0.0, bottom: 0.0};
-                    var labelMesh = createLabel(font, 0.2, null, applicationMesh, 
-                      padding, 0xffffff, logoSize, "center"); 
+                const font = self.get('font');
 
-                    applicationMesh.add(labelMesh);
+                let padding = {left: 0.0, right: -logoLeftPadding, top: 0.0, bottom: 0.0};
+                let labelMesh = createLabel(font, 0.2, null, applicationMesh, 
+                  padding, 0xffffff, logoSize, "center"); 
 
-                    padding = {left: 0.0, right: 0.0, top: 0.0, bottom: 0.2};
-                    labelMesh = createLabel(font, 0.125, node.get('ipAddress'), nodeMesh, 
-                      padding, 0xffffff, {width: 0.0, height: 0.0}, "min"); 
+                applicationMesh.add(labelMesh);
 
-                    nodeMesh.add(labelMesh);
+                padding = {left: 0.0, right: 0.0, top: 0.0, bottom: 0.2};
+                labelMesh = createLabel(font, 0.125, node.get('ipAddress'), nodeMesh, 
+                  padding, 0xffffff, {width: 0.0, height: 0.0}, "min"); 
 
-                    padding = {left: 0.0, right: 0.0, top: -0.4, bottom: 0.0};
-                    labelMesh = createLabel(font, 0.2, null, systemMesh, 
-                      padding, 0x00000, {width: 0.0, height: 0.0}, "max");                  
+                nodeMesh.add(labelMesh);
 
-                    systemMesh.add(labelMesh);
+                padding = {left: 0.0, right: 0.0, top: -0.4, bottom: 0.0};
+                labelMesh = createLabel(font, 0.2, null, systemMesh, 
+                  padding, 0x00000, {width: 0.0, height: 0.0}, "max");                  
 
-                });
+                systemMesh.add(labelMesh);
+
+
 
               } else {
                 // draw request logo
