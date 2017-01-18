@@ -59,8 +59,6 @@ export default RenderingCore.extend({
           var centerX = system.get('positionX') + extensionX - centerPoint.x;          
           var centerY = system.get('positionY') - extensionY  - centerPoint.y;
 
-          console.log(system.get('positionZ'));
-
           var systemMesh = addPlane(centerX, centerY, system.get('positionZ'), system.get('width'), 
             system.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), system);
 
@@ -135,11 +133,11 @@ export default RenderingCore.extend({
                 const logoSize = {width: 0.4, height: 0.4};
                 const appBBox = applicationMesh.geometry.boundingBox;  
 
-                const logoPos = {x : 0, y : 0, z : 0};    
+                const logoPos = {x : 0, y : 0, z : 0};
 
-                const logoLeftPadding = logoSize.width * 0.7;
+                const logoRightPadding = logoSize.width * 0.7;
 
-                logoPos.x = appBBox.max.x - logoLeftPadding;
+                logoPos.x = appBBox.max.x - logoRightPadding;
 
                 const texturePartialPath = application.get('database') ? 
                   'database2' : application.get('programmingLanguage').toLowerCase();
@@ -152,21 +150,21 @@ export default RenderingCore.extend({
 
                 const font = self.get('font');
 
-                let padding = {left: 0.0, right: -logoLeftPadding, top: 0.0, bottom: 0.0};
+                let padding = {left: 0.0, right: -logoRightPadding, top: 0.0, bottom: 0.0};
                 let labelMesh = createLabel(font, 0.2, null, applicationMesh, 
-                  padding, 0xffffff, logoSize, "center"); 
+                  padding, 0xffffff, logoSize, "center");
 
                 applicationMesh.add(labelMesh);
 
                 padding = {left: 0.0, right: 0.0, top: 0.0, bottom: 0.2};
-                labelMesh = createLabel(font, 0.125, node.get('ipAddress'), nodeMesh, 
-                  padding, 0xffffff, {width: 0.0, height: 0.0}, "min"); 
+                labelMesh = createLabel(font, 0.15, node.get('ipAddress'), nodeMesh, 
+                  padding, 0xffffff, {width: 0.0, height: 0.0}, "min");
 
                 nodeMesh.add(labelMesh);
 
                 padding = {left: 0.0, right: 0.0, top: -0.4, bottom: 0.0};
                 labelMesh = createLabel(font, 0.2, null, systemMesh, 
-                  padding, 0x00000, {width: 0.0, height: 0.0}, "max");                  
+                  padding, 0x00000, {width: 0.0, height: 0.0}, "max");
 
                 systemMesh.add(labelMesh);
 
@@ -324,7 +322,7 @@ export default RenderingCore.extend({
       const text = textToShow ? textToShow : 
         parent.userData.model.get('name');
 
-      const labelGeo = new THREE.TextGeometry(
+      let labelGeo = new THREE.TextGeometry(
         text,
         {
           font: font,
@@ -337,36 +335,63 @@ export default RenderingCore.extend({
       var bboxLabel = labelGeo.boundingBox;
       var labelWidth = bboxLabel.max.x - bboxLabel.min.x;
 
+      //console.log("label", text);
+
+      //console.log("labelMax", bboxLabel.max.x);
+      //console.log("labelMin", bboxLabel.min.x);
+      //console.log("labelWidth", labelWidth);
+
       parent.geometry.computeBoundingBox();
       const bboxParent = parent.geometry.boundingBox;
 
-      var boxWidth =  Math.abs(bboxParent.max.x) + 
-        Math.abs(bboxParent.min.x) - logoSize.width +
-        padding.left + padding.right;   
+      var boxWidth = Math.abs(bboxParent.max.x) +
+        Math.abs(bboxParent.min.x);
+
+      //console.log("pre-boxwidth", boxWidth);
+
+      boxWidth = boxWidth - logoSize.width + padding.left + padding.right;
+
+      //console.log("boxwidth", boxWidth);
+
+      // We can't set the size of the labelGeo. Hence we need to scale it.
 
       // upper scaling factor
       var i = 1.0;
 
       // scale until text fits into parent bounding box
       while ((labelWidth > boxWidth) && (i > 0.1)) {    
-         // TODO time complexity: linear -> Do binary search alike approach                         
-        i -= 0.1;
+         // TODO time complexity: linear -> Do binary search alike approach?                        
+        i -= 0.05;
         labelGeo.scale(i, i, i);
         // update the boundingBox
         labelGeo.computeBoundingBox();
         bboxLabel = labelGeo.boundingBox;
         labelWidth = bboxLabel.max.x - bboxLabel.min.x;
+        if(text === "PostgreSQL") {
+          console.log("boxWidth", boxWidth);
+          console.log("labelWidth", labelWidth);
+        }
       }
 
-      const posX = (-labelWidth / 2.0) + padding.left + padding.right;
+      const labelHeight = bboxLabel.max.y - bboxLabel.min.y;
 
-      var posY = padding.bottom + padding.top;
+      if(text === "PostgreSQL") {
+        console.log(labelHeight);
+      }
+      //console.log("labelHeight", labelHeight);
+
+      let posX = (-labelWidth / 2.0) + padding.left + padding.right;
+
+      let posY = padding.bottom + padding.top;
 
       if(yPosition === "max") {
         posY += bboxParent.max.y;
       } 
       else if(yPosition === "min") {
         posY += bboxParent.min.y;
+      } 
+      else if(yPosition === "center") {
+        posY -= (labelHeight / 2.0);
       }
 
       const material = new THREE.MeshBasicMaterial({color: color});
