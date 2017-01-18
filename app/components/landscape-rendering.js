@@ -21,6 +21,11 @@ export default RenderingCore.extend({
   },
 
   // @Override
+  cleanAndUpdateScene(landscape) {
+    this.populateScene(landscape);
+  },
+
+  // @Override
   populateScene(landscape) {
     this._super(...arguments);
 
@@ -30,11 +35,12 @@ export default RenderingCore.extend({
 
     const scaleFactor = {width: 0.5, height: 0.5};
 
-    getLandscapeRect(landscape);
-
     let isRequestObject = false;
 
     if(systems) {
+
+      var centerPoint = calculateLandscapeCenterAndZZoom(landscape);
+
       systems.forEach(function(system) {
 
         isRequestObject = false;
@@ -48,12 +54,14 @@ export default RenderingCore.extend({
           const{x, y, z} = system.get('backgroundColor');
 
           var extensionX = system.get('width') * scaleFactor.width;
-          var centerX = system.get('positionX') + extensionX;
-
           var extensionY = system.get('height') * scaleFactor.height;
-          var centerY = system.get('positionY') - extensionY;
 
-          var systemMesh = addPlane(centerX, centerY, 0, system.get('width'), 
+          var centerX = system.get('positionX') + extensionX - centerPoint.x;          
+          var centerY = system.get('positionY') - extensionY  - centerPoint.y;
+
+          console.log(system.get('positionZ'));
+
+          var systemMesh = addPlane(centerX, centerY, system.get('positionZ'), system.get('width'), 
             system.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), system);
 
           system.set('threeJSModel', systemMesh);
@@ -71,10 +79,10 @@ export default RenderingCore.extend({
             extensionX = nodegroup.get('width') * scaleFactor.width;
             extensionY = nodegroup.get('height') * scaleFactor.height;
 
-            centerX = nodegroup.get('positionX') + extensionX;          
-            centerY = nodegroup.get('positionY') - extensionY;
+            centerX = nodegroup.get('positionX') + extensionX - centerPoint.x;
+            centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
-            var nodegroupMesh = addPlane(centerX, centerY, 0, nodegroup.get('width'), 
+            var nodegroupMesh = addPlane(centerX, centerY, nodegroup.get('positionZ'), nodegroup.get('width'), 
             nodegroup.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), nodegroup);
 
             nodegroup.set('threeJSModel', nodegroupMesh);              
@@ -92,10 +100,10 @@ export default RenderingCore.extend({
               extensionX = node.get('width') * scaleFactor.width;
               extensionY = node.get('height') * scaleFactor.height;
 
-              centerX = node.get('positionX') + extensionX;          
-              centerY = node.get('positionY') - extensionY;
+              centerX = node.get('positionX') + extensionX - centerPoint.x;         
+              centerY = node.get('positionY') - extensionY - centerPoint.y;
 
-              var nodeMesh = addPlane(centerX, centerY, 0, node.get('width'), 
+              var nodeMesh = addPlane(centerX, centerY, node.get('positionZ'), node.get('width'), 
                 node.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), node);
 
               node.set('threeJSModel', nodeMesh);
@@ -109,16 +117,16 @@ export default RenderingCore.extend({
               extensionX = application.get('width') * scaleFactor.width;
               extensionY = application.get('height') * scaleFactor.width;
 
-              centerX = application.get('positionX') + extensionX - 0;
-              centerY = application.get('positionY') - extensionY - 0;
+              centerX = application.get('positionX') + extensionX - centerPoint.x;
+              centerY = application.get('positionY') - extensionY - centerPoint.y;
 
               if(!isRequestObject) {
 
                 const{x, y, z} = application.get('backgroundColor'); 
 
-                var applicationMesh = addPlane(centerX, centerY, 0, 
-                  application.get('width'), application.get('height'), 
-                  new THREE.Color(x,y,z), null, self.get('scene'), application);
+                var applicationMesh = addPlane(centerX, centerY, application.get('positionZ'), 
+                  application.get('width'), application.get('height'), new THREE.Color(x,y,z), null, 
+                  self.get('scene'), application);
 
                 application.set('threeJSModel', applicationMesh);             
 
@@ -288,19 +296,21 @@ export default RenderingCore.extend({
         const geometry = new THREE.Geometry();
 
         geometry.vertices.push(
-          new THREE.Vector3(firstTile.startPoint.x, firstTile.startPoint.y, firstTile.positionZ)
+          new THREE.Vector3(firstTile.startPoint.x - centerPoint.x, 
+            firstTile.startPoint.y - centerPoint.y, firstTile.positionZ)
         );
 
         accum.tiles.forEach((tile) => {
           geometry.vertices.push(
-            new THREE.Vector3(tile.endPoint.x, tile.endPoint.y, tile.positionZ)
+            new THREE.Vector3(tile.endPoint.x - centerPoint.x, 
+              tile.endPoint.y - centerPoint.y, tile.positionZ)
           );
         });
 
         const line = new MeshLine();
         line.setGeometry(geometry);
 
-        var lineMesh = new THREE.Mesh( line.geometry, material );
+        var lineMesh = new THREE.Mesh(line.geometry, material);
         
         parent.add(lineMesh);
 
@@ -396,6 +406,43 @@ export default RenderingCore.extend({
       }
 
       
+    }
+
+    function calculateLandscapeCenterAndZZoom(landscape) {
+
+      const MIN_X = 0;
+      const MAX_X = 1;
+      const MIN_Y = 2;
+      const MAX_Y = 3;
+
+      const rect = getLandscapeRect(landscape);
+      const SPACE_IN_PERCENT = 0.02;
+
+      let requiredWidth = Math.abs(rect.get(MAX_X) - rect.get(MIN_X));
+      requiredWidth += requiredWidth * SPACE_IN_PERCENT;
+
+      let requiredHeight = Math.abs(rect.get(MAX_Y) - rect.get(MIN_Y));
+      requiredHeight += requiredHeight * SPACE_IN_PERCENT;
+
+      const viewPortSize = self.get('webglrenderer').getSize();
+
+      const viewportRatio = viewPortSize.width / viewPortSize.height;
+
+      const newZ_by_width = requiredWidth * -1.0 / viewportRatio;
+      const newZ_by_height = requiredHeight * -1.0;
+
+      const center = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
+        rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0), 0);
+
+      const camera = self.get('camera');
+
+      camera.position.z = Math.max(Math.max(newZ_by_width, newZ_by_height), 10.0);
+      camera.position.x = 0;
+      camera.position.y = 0;
+      camera.updateProjectionMatrix();
+
+      return center;
+
     }
     
 

@@ -27,17 +27,7 @@ export default Ember.Component.extend({
   // @Override
   didDestroyElement() {
     this._super(...arguments);
-
-    // cleanup
-
-    cancelAnimationFrame(this.get('animationFrameId'));
-
-    this.set('scene', null);
-    this.set('webglrenderer', null);
-    this.set('camera', null);
-
-    this.cleanup();
-    
+    this.cleanup();    
   },
 
   /**
@@ -111,6 +101,28 @@ export default Ember.Component.extend({
    *
    * @class Rendering-Core
    */
-  cleanup() {}
+  cleanup() {
+    cancelAnimationFrame(this.get('animationFrameId'));
+
+    this.set('scene', null);
+    this.set('webglrenderer', null);
+    this.set('camera', null);
+  },
+
+  /**
+   * Inherit this function to update the scene with a new renderingModel. It 
+   * automatically removes every mesh from the scene. Add your custom code 
+   * as shown in landscape-rendering.
+   *
+   * @class Rendering-Core
+   */
+  cleanAndUpdateScene(renderingModel) {
+    this.set('entity', renderingModel);
+    const scene = this.get('scene');
+
+    while (scene.children.length) {
+      scene.children.remove(scene.children[0]);
+    }
+  }
 
 });
