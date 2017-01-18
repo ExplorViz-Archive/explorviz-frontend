@@ -22,6 +22,8 @@ export default RenderingCore.extend({
 
   // @Override
   cleanAndUpdateScene(landscape) {
+    this._super(...arguments);
+    
     this.populateScene(landscape);
   },
 
