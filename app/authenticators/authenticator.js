@@ -15,8 +15,8 @@ export default Base.extend({
 
     ajax: Ember.inject.service(),
 
-    //tokenEndpoint: 'http://192.168.247.129:8080/sessions/create',
-    tokenEndpoint: 'http://localhost:8080/sessions/create',
+    tokenEndpoint: 'http://192.168.48.180:8080/sessions/create',
+    //tokenEndpoint: 'http://localhost:8080/sessions/create',
 
     restore: function(data) {
         return new Ember.RSVP.Promise(function(resolve, reject) {
@@ -35,7 +35,7 @@ export default Base.extend({
                 url: this.tokenEndpoint,
                 type: 'POST',
                 data: "username=" + identification + "&password=" + password,
-                accept: "application/json"  
+                accept: "application/json"
             }).then(function(response) {
                 Ember.run(function() {
                     resolve({
@@ -57,7 +57,7 @@ export default Base.extend({
     }
 });
 
-       // JSON.stringify({ username: options.identification, 
+       // JSON.stringify({ username: options.identification,
        //         password: options.password })
        // .then({ response } => this.handleSuccess(response))
        // .catch(({ response, jqXHR }) => this.handleError(response))

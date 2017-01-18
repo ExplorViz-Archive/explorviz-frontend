@@ -6,9 +6,9 @@ const { Route } = Ember;
 export default Route.extend(AuthenticatedRouteMixin, {
 
   model() {
-    return this.get('store').findRecord('landscape', "latest-landscape").then((landscape) => {      
+    return this.store.findRecord('landscape', 'latest-landscape').then((landscape) => {
       return landscape;
-    }); 
+    });
   }
-  
+
 });

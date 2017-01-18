@@ -14,9 +14,16 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
     "Accept": "application/json"
   },
 
-  urlForFindRecord(id, modelName) {
+  /*
+   urlForFindRecord(timestamp, modelName) {
+   let baseUrl = this.buildURL();
+   return `${baseUrl}/${modelName}/${timestamp}`;
+   },
+   */
+
+  urlForFindAll(modelName) {
     let baseUrl = this.buildURL();
-    return `${baseUrl}/${modelName}/${id}`;
+    return `${baseUrl}/timestamp/show-timestamps`;
   }
 
 });
