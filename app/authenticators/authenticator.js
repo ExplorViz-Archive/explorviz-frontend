@@ -15,8 +15,8 @@ export default Base.extend({
 
     ajax: Ember.inject.service(),
 
-    tokenEndpoint: 'http://192.168.48.180:8080/sessions/create',
-    //tokenEndpoint: 'http://localhost:8080/sessions/create',
+    //tokenEndpoint: 'http://192.168.48.180:8080/sessions/create',
+    tokenEndpoint: 'http://localhost:8080/sessions/create',
 
     restore: function(data) {
         return new Ember.RSVP.Promise(function(resolve, reject) {

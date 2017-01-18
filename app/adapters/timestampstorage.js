@@ -7,8 +7,8 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
   authorizer: 'authorizers:authorizers',
 
-  host: 'http://192.168.48.180:8080',
-  //host: 'http://localhost:8080',
+  //host: 'http://192.168.48.180:8080',
+  host: 'http://localhost:8080',
 
   headers: {
     "Accept": "application/json"
@@ -21,7 +21,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
    },
    */
 
-  urlForFindAll(modelName) {
+  urlForFindAll() {
     let baseUrl = this.buildURL();
     return `${baseUrl}/timestamp/show-timestamps`;
   }

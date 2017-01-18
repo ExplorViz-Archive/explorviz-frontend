@@ -2,7 +2,7 @@ import { moduleForModel, test } from 'ember-qunit';
 
 moduleForModel('timestampstorage', 'Unit | Model | timestampstorage', {
   // Specify the other units that are required for this test.
-  needs: []
+  needs: ['model:timestamp']
 });
 
 test('it exists', function(assert) {
