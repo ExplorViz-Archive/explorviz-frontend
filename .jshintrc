@@ -6,7 +6,8 @@
     "THREE",
     "MeshLineMaterial",
     "MeshLine",
-    "Hammer"
+    "Hammer",
+    "Chart"
   ],
   "browser": true,
   "boss": true,
