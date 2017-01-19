@@ -27,8 +27,96 @@ export default RenderingCore.extend({
     this.populateScene(landscape);
   },
 
+  layoutLandscape(landscape) {
+
+    const CONVERT_TO_KIELER_FACTOR = 180.0;
+
+    const layoutOptions = {
+      "direction": "RIGHT", 
+      "spacing": 0.2 * CONVERT_TO_KIELER_FACTOR,
+      "edgeRouting": "POLYLINE",
+      "borderSpacing": 0.2 * CONVERT_TO_KIELER_FACTOR,
+      "nodePlace": "LINEAR_SEGMENTS",
+      "unnecessaryBendpoints": true,
+      "edgeSpacingFactor": 1.0
+    };
+
+    const graph = {
+      "id": "root",
+      "properties": layoutOptions,
+      "children": []
+    };
+
+
+    function calculateRequiredLength(text, quadSize) {
+
+      const SPACE_BETWEEN_LETTERS_IN_PERCENT = 0.09;
+
+      if (text == null || text.empty) {
+        return 0;
+      }
+
+      return ((text.length * quadSize * 0.5) + 
+        ((text.length - 1) * quadSize * SPACE_BETWEEN_LETTERS_IN_PERCENT));
+    }
+
+
+    const systems = landscape.get('systems');
+
+    if (systems) {
+      systems.forEach((system) => {
+
+        const DEFAULT_WIDTH = 1.5;
+        const DEFAULT_HEIGHT = 0.75;
+
+
+        const PADDING = 1.0;
+        const SYSTEM_LABEL_HEIGHT = 0.5;
+
+        const minWidth = Math.max(2.5 * DEFAULT_WIDTH *
+          CONVERT_TO_KIELER_FACTOR,
+          (calculateRequiredLength(system.get('name'), SYSTEM_LABEL_HEIGHT) +
+            PADDING * 6.0) * CONVERT_TO_KIELER_FACTOR);
+
+        const minHeight = 2.5 * DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
+
+        // const minWidth = Math.max(2.5 * DEFAULT_WIDTH * CONVERT_TO_KIELER_FACTOR,
+        //     (calculateRequiredLength(system.name, LandscapeRenderer::SYSTEM_LABEL_HEIGHT) +
+        //       PADDING * 6f) * CONVERT_TO_KIELER_FACTOR)
+
+        const systemLayoutObj = {
+          "id": system.get('id'),
+          "labels": [system.get('name')],
+          "properties": {
+            "de.cau.cs.kieler.minWidth": minWidth,
+            "de.cau.cs.kieler.minHeight": minHeight,
+            "de.cau.cs.kieler.sizeConstraint": "MINIMUM_SIZE",
+            "de.cau.cs.kieler.klay.layered.contentAlignment": "V_CENTER,H_CENTER"
+          }
+        };
+
+        graph.children.push(systemLayoutObj);
+
+      });
+    }
+
+    $klay.layout({
+      graph: graph,
+      options: { spacing: 20 },
+      success: function(layouted) { console.log("success", layouted); },
+      error: function(error) { console.log("error", error); }
+    });
+
+    // update position in landscape for rendering
+
+
+  },
+
   // @Override
   populateScene(landscape) {
+
+    this.layoutLandscape(landscape);
+
     this._super(...arguments);
 
     const self = this;
