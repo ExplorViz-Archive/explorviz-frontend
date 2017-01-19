@@ -41,8 +41,10 @@ export default Ember.Component.extend({
 
     const self = this;
 
+    // get size if outer ember div
     const height = this.$()[0].clientHeight;
     const width = this.$()[0].clientWidth;
+    
     const canvas = this.$('#threeCanvas')[0];
 
     this.set('canvas', canvas);

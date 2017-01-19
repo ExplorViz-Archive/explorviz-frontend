@@ -128,7 +128,9 @@ export default RenderingCore.extend({
                   application.get('width'), application.get('height'), new THREE.Color(x,y,z), null, 
                   self.get('scene'), application);
 
-                application.set('threeJSModel', applicationMesh);             
+                application.set('threeJSModel', applicationMesh);      
+
+                // create logos       
 
                 applicationMesh.geometry.computeBoundingBox();
 
@@ -144,9 +146,14 @@ export default RenderingCore.extend({
                 const texturePartialPath = application.get('database') ? 
                   'database2' : application.get('programmingLanguage').toLowerCase();
 
+
+                if(application.get('name') === "Jira") {               
+
                 addPlane(logoPos.x, logoPos.y, logoPos.z, 
                   logoSize.width, logoSize.height, new THREE.Color(1,0,0), 
                   texturePartialPath, applicationMesh, "label");
+
+                }
 
                 // create labels
 
@@ -159,7 +166,7 @@ export default RenderingCore.extend({
                 applicationMesh.add(labelMesh);
 
                 padding = {left: 0.0, right: 0.0, top: 0.0, bottom: 0.2};
-                labelMesh = createLabel(font, 0.15, node.get('ipAddress'), nodeMesh, 
+                labelMesh = createLabel(font, 0.15, nodegroup.get('name'), nodeMesh, 
                   padding, 0xffffff, {width: 0.0, height: 0.0}, "min");
 
                 nodeMesh.add(labelMesh);
@@ -370,15 +377,15 @@ export default RenderingCore.extend({
         bboxLabel = labelGeo.boundingBox;
         labelWidth = bboxLabel.max.x - bboxLabel.min.x;
         if(text === "PostgreSQL") {
-          console.log("boxWidth", boxWidth);
-          console.log("labelWidth", labelWidth);
+          //console.log("boxWidth", boxWidth);
+          //console.log("labelWidth", labelWidth);
         }
       }
 
       const labelHeight = bboxLabel.max.y - bboxLabel.min.y;
 
       if(text === "PostgreSQL") {
-        console.log(labelHeight);
+        //console.log(labelHeight);
       }
       //console.log("labelHeight", labelHeight);
 
@@ -455,8 +462,8 @@ export default RenderingCore.extend({
 
       const viewportRatio = viewPortSize.width / viewPortSize.height;
 
-      const newZ_by_width = requiredWidth * -1.0 / viewportRatio;
-      const newZ_by_height = requiredHeight * -1.0;
+      const newZ_by_width = requiredWidth / viewportRatio;
+      const newZ_by_height = requiredHeight;
 
       const center = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
         rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0), 0);
@@ -541,8 +548,6 @@ export default RenderingCore.extend({
       }
 
     }
-
-
 
 
   },
