@@ -13,6 +13,8 @@ export default BaseEntity.extend({
   positionX: attr('number'),
   positionY: attr('number'),
   positionZ: attr('number'),
-  threeJSModel: attr()
+  threeJSModel: attr(),
+
+  kielerGraphReference: null
 
 });
