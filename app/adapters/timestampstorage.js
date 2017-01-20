@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 
-const { JSONAPIAdapter } = DS;
+const {JSONAPIAdapter} = DS;
 
 export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
@@ -14,14 +14,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
     "Accept": "application/json"
   },
 
-  /*
-   urlForFindRecord(timestamp, modelName) {
-   let baseUrl = this.buildURL();
-   return `${baseUrl}/${modelName}/${timestamp}`;
-   },
-   */
-
-  urlForFindAll() {
+  urlForFindRecord(id, modelName) {
     let baseUrl = this.buildURL();
     return `${baseUrl}/timestamp/show-timestamps`;
   }

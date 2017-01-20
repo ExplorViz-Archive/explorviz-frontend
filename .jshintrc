@@ -7,7 +7,8 @@
     "MeshLineMaterial",
     "MeshLine",
     "Hammer",
-    "Chart"
+    "Chart",
+    "moment"
   ],
   "browser": true,
   "boss": true,
