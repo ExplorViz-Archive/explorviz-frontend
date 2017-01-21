@@ -12,6 +12,8 @@ export default Ember.Service.extend({
 
     setupKieler(landscape);
 
+    updateGraphWithResults(landscape);
+
 
     // Functions
 
@@ -22,9 +24,7 @@ export default Ember.Service.extend({
 
 
       addNodes(landscape);
-      //addEdges(landscape);
-
-      updateGraphWithResults(landscape);
+      //addEdges(landscape);      
 
 
       // do actual layout
@@ -45,10 +45,11 @@ export default Ember.Service.extend({
       const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
 
       const layoutOptions = {
-        "direction": "RIGHT",
-        "spacing": 0.2 * CONVERT_TO_KIELER_FACTOR,
         "edgeRouting": "POLYLINE",
+        "spacing": 0.2 * CONVERT_TO_KIELER_FACTOR,
         "borderSpacing": 0.2 * CONVERT_TO_KIELER_FACTOR,
+        "direction": "RIGHT",
+        "interactive": true,
         "nodePlace": "LINEAR_SEGMENTS",
         "unnecessaryBendpoints": true,
         "edgeSpacingFactor": 1.0
@@ -95,12 +96,17 @@ export default Ember.Service.extend({
             const systemKielerGraph = createEmptyGraph(system.get('id'));
             system.set('kielerGraphReference', systemKielerGraph);
 
+            systemKielerGraph.properties["de.cau.cs.kieler.sizeConstraint"] = "MINIMUM_SIZE";
             systemKielerGraph.properties["de.cau.cs.kieler.minWidth"] = minWidth;
             systemKielerGraph.properties["de.cau.cs.kieler.minHeight"] = minHeight;
-            systemKielerGraph.properties["de.cau.cs.kieler.sizeConstraint"] = "MINIMUM_SIZE";
             systemKielerGraph.properties["de.cau.cs.kieler.klay.layered.contentAlignment"] = "V_CENTER,H_CENTER";
 
-            //Linset still missing
+            systemKielerGraph.padding = {
+              left: PADDING * CONVERT_TO_KIELER_FACTOR,
+              right: PADDING * CONVERT_TO_KIELER_FACTOR,
+              top: 8 * PADDING * CONVERT_TO_KIELER_FACTOR,
+              bottom: PADDING * CONVERT_TO_KIELER_FACTOR
+            };
 
             topLevelKielerGraph.children.push(systemKielerGraph);
 
@@ -126,12 +132,11 @@ export default Ember.Service.extend({
             const systemKielerGraph = {
               "id": system.get('id'),
               "labels": [system.get('name')],
-              "properties": {
-                "de.cau.cs.kieler.size.x": width,
-                "de.cau.cs.kieler.size.y": height
-              },
+              "width": width,
+              "height": height,
               "children": []
             };
+            system.set('kielerGraphReference', systemKielerGraph);
 
             topLevelKielerGraph.children.push(systemKielerGraph);
 
@@ -146,6 +151,8 @@ export default Ember.Service.extend({
     function createNodeGroup(systemKielerGraph, nodegroup) {
 
       const nodes = nodegroup.get('nodes');
+      const PADDING = 0.1;
+      const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
 
       if (nodes.get('length') > 1) {
 
@@ -153,24 +160,31 @@ export default Ember.Service.extend({
         nodegroup.set('kielerGraphReference', nodeGroupKielerGraph);
 
         nodeGroupKielerGraph.properties["de.cau.cs.kieler.klay.layered.crossMin"] = "LAYER_SWEEP";
-        //Linsets still missing
+
+
+        nodeGroupKielerGraph.padding = {
+          left: PADDING * CONVERT_TO_KIELER_FACTOR,
+          right: PADDING * CONVERT_TO_KIELER_FACTOR,
+          top: PADDING * CONVERT_TO_KIELER_FACTOR,
+          bottom: PADDING * CONVERT_TO_KIELER_FACTOR
+        };
 
         systemKielerGraph.children.push(nodeGroupKielerGraph);
 
         const sortedNodes = nodes.sortBy('ipAddress');
+        nodegroup.set('nodes', sortedNodes);
 
-        // Do we need to set the model to sortedNodes ???
+        let yCoord = 0.0;
 
         sortedNodes.forEach((node) => {
 
           if (node.get('visible')) {
             createNodeAndItsApplications(nodeGroupKielerGraph, node);
 
-            // Set Position ???
-            /* val position = node.kielerNodeReference.position
-            position.x = 0
-            position.y = yCoord
-            yCoord = yCoord + CONVERT_TO_KIELER_FACTOR*/
+            node.get('kielerGraphReference').x = 0;
+            node.get('kielerGraphReference').y = yCoord;
+            yCoord = yCoord + CONVERT_TO_KIELER_FACTOR;
+
           }
 
         });
@@ -192,9 +206,33 @@ export default Ember.Service.extend({
 
     function createNodeAndItsApplications(systemKielerGraph, node) {
 
+      const PADDING = 0.1;
+      const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
+      const NODE_LABEL_HEIGHT = 0.25;
+      const DEFAULT_WIDTH = 1.5;
+      const DEFAULT_HEIGHT = 0.75;
+
       const nodeKielerGraph = createEmptyGraph(node.get('id'));
       node.set('kielerGraphReference', nodeKielerGraph);
-      //Linsets still missing
+
+      nodeKielerGraph.padding = {
+        left: PADDING * CONVERT_TO_KIELER_FACTOR,
+        right: PADDING * CONVERT_TO_KIELER_FACTOR,
+        top: PADDING * CONVERT_TO_KIELER_FACTOR,
+        bottom: 6 * PADDING * CONVERT_TO_KIELER_FACTOR
+      };
+
+      const minWidth = Math.max(DEFAULT_WIDTH *
+        CONVERT_TO_KIELER_FACTOR,
+        (calculateRequiredLabelLength(node.get('name'), NODE_LABEL_HEIGHT) +
+          PADDING * 2.0) * CONVERT_TO_KIELER_FACTOR);
+
+      const minHeight = DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
+
+      nodeKielerGraph.properties["de.cau.cs.kieler.sizeConstraint"] = "MINIMUM_SIZE";
+      nodeKielerGraph.properties["de.cau.cs.kieler.minWidth"] = minWidth;
+      nodeKielerGraph.properties["de.cau.cs.kieler.minHeight"] = minHeight;
+      nodeKielerGraph.properties["de.cau.cs.kieler.klay.layered.contentAlignment"] = "V_CENTER,H_CENTER";
 
       systemKielerGraph.children.push(nodeKielerGraph);
 
@@ -209,29 +247,21 @@ export default Ember.Service.extend({
         const APPLICATION_PIC_PADDING_SIZE = 0.15;
         const APPLICATION_LABEL_HEIGHT = 0.25;
 
-        const PADDING = 0.1;
-
-        const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
-
-        const posX = Math.max(DEFAULT_WIDTH * CONVERT_TO_KIELER_FACTOR,
+        const width = Math.max(DEFAULT_WIDTH * CONVERT_TO_KIELER_FACTOR,
           (calculateRequiredLabelLength(application.get('name'), APPLICATION_LABEL_HEIGHT) +
             APPLICATION_PIC_PADDING_SIZE + APPLICATION_PIC_SIZE +
             PADDING * 3.0) * CONVERT_TO_KIELER_FACTOR);
 
-        const posY = DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
-
+        const height = DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
 
         const applicationKielerNode = {
           "id": application.get('id'),
-          "labels": [application.get('name')],
-          "x": posX,
-          "y": posY,
-          "properties": {
-            //"de.cau.cs.kieler.position.x": posX,
-            //"de.cau.cs.kieler.position.y": posY
-          },
-          "children": []
+          "width": width,
+          "height": height,
+          "children": []                    
         };
+
+        application.set('kielerGraphReference', applicationKielerNode);
 
         nodeKielerGraph.children.push(applicationKielerNode);
 
@@ -248,22 +278,136 @@ export default Ember.Service.extend({
 
         updateNodeValues(system);
 
+        const nodegroups = system.get('nodegroups');
+
+        nodegroups.forEach((nodegroup) => {
+
+          if (nodegroup.get('visible')) {
+
+            const nodes = nodegroup.get('nodes');
+
+            if (nodes.get('length') > 1) {
+              updateNodeValues(nodegroup);
+            }
+
+            setAbsolutePositionForNode(nodegroup, system);
+
+
+            nodes.forEach((node) => {
+
+              if (node.get('visible')) {
+
+                updateNodeValues(node);
+
+                if (nodes.get('length') > 1) {
+                  setAbsolutePositionForNode(node, nodegroup)
+                } else if (nodes.get('length') == 1) {
+                  setAbsolutePositionForNode(node, system)
+                }
+
+                const applications = node.get('applications');
+
+                applications.forEach((application) => {
+
+                  updateNodeValues(application);
+                  setAbsolutePositionForNode(application, node);
+
+                });
+
+              }
+
+
+            });
+
+
+          }
+
+        });
+
       });
 
 
+      //addBendPointsInAbsoluteCoordinates(landscape);
+
+      systems.forEach((system) => {
+
+        const nodegroups = system.get('nodegroups');
+
+        nodegroups.forEach((nodegroup) => {
+
+          if (nodegroup.get('visible')) {
+
+            const nodes = nodegroup.get('nodes');
+
+            nodes.forEach((node) => {
+
+              if (node.get('visible')) {
+
+                const applications = node.get('applications');
+
+                applications.forEach((application) => {
+
+                  convertToExplorVizCoords(application);
+
+                });
+
+                convertToExplorVizCoords(node);
+
+              }
+
+            });
+
+            if (nodes.get('length') > 1) {
+              convertToExplorVizCoords(nodegroup)
+            }
+
+          }
+
+        });
+
+        convertToExplorVizCoords(system);
+
+        //console.log(system.get('positionY'))
+
+      });
 
     } // END updateGraphWithResults
 
 
+    function convertToExplorVizCoords(entity) {
+
+      const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
+
+      entity.set('positionX', entity.get('positionX') / CONVERT_TO_KIELER_FACTOR);
+      entity.set('positionY', entity.get('positionY') / CONVERT_TO_KIELER_FACTOR);
+
+      entity.set('width', entity.get('width') / CONVERT_TO_KIELER_FACTOR);
+      entity.set('height', entity.get('height') / CONVERT_TO_KIELER_FACTOR);
+
+    }
+
+    function setAbsolutePositionForNode(child, parent) {
+
+      const padding = parent.get('kielerGraphReference').padding;
+
+      //val offset = parent.kielerGraphReference.offset
+
+      child.set('positionX', parent.get('positionX') + child.get('positionX') + padding.left);
+      child.set('positionY', parent.get('positionY') + child.get('positionY') + padding.top);
+    }
+
+
     function updateNodeValues(entity) {
 
-     /* entity.set('positionX', entity.get('kielerNodeReference').position.x);
+      //console.log(entity.get('name') + " " + entity.get('kielerGraphReference').x);
+
+      entity.set('positionX', entity.get('kielerGraphReference').x);
 
       // KIELER has inverted Y coords
-      entity.set('positionY', entity.get('kielerNodeReference').position.y * -1);
+      entity.set('positionY', entity.get('kielerGraphReference').y * -1);
 
-      entity.set('width', entity.get('kielerNodeReference').size.x);
-      entity.set('height', entity.get('kielerNodeReference').size.y);*/
+      entity.set('width', entity.get('kielerGraphReference').width);
+      entity.set('height', entity.get('kielerGraphReference').height);
 
     }
 
