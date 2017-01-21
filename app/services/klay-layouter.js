@@ -300,9 +300,9 @@ export default Ember.Service.extend({
                 updateNodeValues(node);
 
                 if (nodes.get('length') > 1) {
-                  setAbsolutePositionForNode(node, nodegroup)
-                } else if (nodes.get('length') == 1) {
-                  setAbsolutePositionForNode(node, system)
+                  setAbsolutePositionForNode(node, nodegroup);
+                } else if (nodes.get('length') === 1) {
+                  setAbsolutePositionForNode(node, system);
                 }
 
                 const applications = node.get('applications');
@@ -358,7 +358,7 @@ export default Ember.Service.extend({
             });
 
             if (nodes.get('length') > 1) {
-              convertToExplorVizCoords(nodegroup)
+              convertToExplorVizCoords(nodegroup);
             }
 
           }
@@ -393,7 +393,7 @@ export default Ember.Service.extend({
       //val offset = parent.kielerGraphReference.offset
 
       child.set('positionX', parent.get('positionX') + child.get('positionX') + padding.left);
-      child.set('positionY', parent.get('positionY') + child.get('positionY') + padding.top);
+      child.set('positionY', parent.get('positionY') + child.get('positionY') - padding.top);
     }
 
 

@@ -20,13 +20,13 @@ export default RenderingCore.extend({
 
     this.get('hammerManager').off();
     this.set('hammerManager', null);
-    
+
   },
 
   // @Override
   cleanAndUpdateScene(landscape) {
     this._super(...arguments);
-    
+
     this.populateScene(landscape);
   },
 
@@ -39,13 +39,16 @@ export default RenderingCore.extend({
 
     const self = this;
 
-    const systems = landscape.get('systems'); 
+    const systems = landscape.get('systems');
 
-    const scaleFactor = {width: 0.5, height: 0.5};
+    const scaleFactor = {
+      width: 0.5,
+      height: 0.5
+    };
 
     let isRequestObject = false;
 
-    if(systems) {
+    if (systems) {
 
       var centerPoint = calculateLandscapeCenterAndZZoom(landscape);
 
@@ -53,22 +56,26 @@ export default RenderingCore.extend({
 
         isRequestObject = false;
 
-        if(!isRequestObject && system.get('name') === "Requests") {
+        if (!isRequestObject && system.get('name') === "Requests") {
           isRequestObject = true;
         }
 
-        if(!isRequestObject) {
+        if (!isRequestObject) {
 
-          const{x, y, z} = system.get('backgroundColor');
+          const {
+            x,
+            y,
+            z
+          } = system.get('backgroundColor');
 
           var extensionX = system.get('width') * scaleFactor.width;
           var extensionY = system.get('height') * scaleFactor.height;
 
-          var centerX = system.get('positionX') + extensionX - centerPoint.x;          
-          var centerY = system.get('positionY') - extensionY  - centerPoint.y;
+          var centerX = system.get('positionX') + extensionX - centerPoint.x;
+          var centerY = system.get('positionY') - extensionY - centerPoint.y;
 
-          var systemMesh = addPlane(centerX, centerY, system.get('positionZ'), system.get('width'), 
-            system.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), system);
+          var systemMesh = addPlane(centerX, centerY, system.get('positionZ'), system.get('width'),
+            system.get('height'), new THREE.Color(x, y, z), null, self.get('scene'), system);
 
           system.set('threeJSModel', systemMesh);
 
@@ -78,9 +85,13 @@ export default RenderingCore.extend({
 
         nodegroups.forEach(function(nodegroup) {
 
-          if(!isRequestObject) {
+          if (!isRequestObject) {
 
-            const{x, y, z} = nodegroup.get('backgroundColor');
+            const {
+              x,
+              y,
+              z
+            } = nodegroup.get('backgroundColor');
 
             extensionX = nodegroup.get('width') * scaleFactor.width;
             extensionY = nodegroup.get('height') * scaleFactor.height;
@@ -88,10 +99,10 @@ export default RenderingCore.extend({
             centerX = nodegroup.get('positionX') + extensionX - centerPoint.x;
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
-            var nodegroupMesh = addPlane(centerX, centerY, nodegroup.get('positionZ'), nodegroup.get('width'), 
-            nodegroup.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), nodegroup);
+            var nodegroupMesh = addPlane(centerX, centerY, nodegroup.get('positionZ'), nodegroup.get('width'),
+              nodegroup.get('height'), new THREE.Color(x, y, z), null, self.get('scene'), nodegroup);
 
-            nodegroup.set('threeJSModel', nodegroupMesh);              
+            nodegroup.set('threeJSModel', nodegroupMesh);
 
           }
 
@@ -99,18 +110,22 @@ export default RenderingCore.extend({
 
           nodes.forEach(function(node) {
 
-            if(!isRequestObject) {
+            if (!isRequestObject) {
 
-              const{x, y, z} = node.get('color');
+              const {
+                x,
+                y,
+                z
+              } = node.get('color');
 
               extensionX = node.get('width') * scaleFactor.width;
               extensionY = node.get('height') * scaleFactor.height;
 
-              centerX = node.get('positionX') + extensionX - centerPoint.x;         
+              centerX = node.get('positionX') + extensionX - centerPoint.x;
               centerY = node.get('positionY') - extensionY - centerPoint.y;
 
-              var nodeMesh = addPlane(centerX, centerY, node.get('positionZ'), node.get('width'), 
-                node.get('height'), new THREE.Color(x,y,z), null, self.get('scene'), node);
+              var nodeMesh = addPlane(centerX, centerY, node.get('positionZ'), node.get('width'),
+                node.get('height'), new THREE.Color(x, y, z), null, self.get('scene'), node);
 
               node.set('threeJSModel', nodeMesh);
 
@@ -126,60 +141,87 @@ export default RenderingCore.extend({
               centerX = application.get('positionX') + extensionX - centerPoint.x;
               centerY = application.get('positionY') - extensionY - centerPoint.y;
 
-              if(!isRequestObject) {
+              if (!isRequestObject) {
 
-                const{x, y, z} = application.get('backgroundColor'); 
+                const {
+                  x,
+                  y,
+                  z
+                } = application.get('backgroundColor');
 
-                var applicationMesh = addPlane(centerX, centerY, application.get('positionZ'), 
-                  application.get('width'), application.get('height'), new THREE.Color(x,y,z), null, 
+                var applicationMesh = addPlane(centerX, centerY, application.get('positionZ'),
+                  application.get('width'), application.get('height'), new THREE.Color(x, y, z), null,
                   self.get('scene'), application);
 
-                application.set('threeJSModel', applicationMesh);      
+                application.set('threeJSModel', applicationMesh);
 
                 // create logos       
 
                 applicationMesh.geometry.computeBoundingBox();
 
-                const logoSize = {width: 0.4, height: 0.4};
-                const appBBox = applicationMesh.geometry.boundingBox;  
+                const logoSize = {
+                  width: 0.4,
+                  height: 0.4
+                };
+                const appBBox = applicationMesh.geometry.boundingBox;
 
-                const logoPos = {x : 0, y : 0, z : 0};
+                const logoPos = {
+                  x: 0,
+                  y: 0,
+                  z: 0
+                };
 
                 const logoRightPadding = logoSize.width * 0.7;
 
                 logoPos.x = appBBox.max.x - logoRightPadding;
 
-                const texturePartialPath = application.get('database') ? 
+                const texturePartialPath = application.get('database') ?
                   'database2' : application.get('programmingLanguage').toLowerCase();
 
-
-                if(application.get('name') === "Jira") {               
-
-                addPlane(logoPos.x, logoPos.y, logoPos.z, 
-                  logoSize.width, logoSize.height, new THREE.Color(1,0,0), 
+                addPlane(logoPos.x, logoPos.y, logoPos.z,
+                  logoSize.width, logoSize.height, new THREE.Color(1, 0, 0),
                   texturePartialPath, applicationMesh, "label");
-
-                }
 
                 // create labels
 
                 const font = self.get('font');
 
-                let padding = {left: 0.0, right: -logoRightPadding, top: 0.0, bottom: 0.0};
-                let labelMesh = createLabel(font, 0.2, null, applicationMesh, 
+                let padding = {
+                  left: 0.0,
+                  right: -logoRightPadding,
+                  top: 0.0,
+                  bottom: 0.0
+                };
+                let labelMesh = createLabel(font, 0.2, null, applicationMesh,
                   padding, 0xffffff, logoSize, "center");
 
                 applicationMesh.add(labelMesh);
 
-                padding = {left: 0.0, right: 0.0, top: 0.0, bottom: 0.2};
-                labelMesh = createLabel(font, 0.15, nodegroup.get('name'), nodeMesh, 
-                  padding, 0xffffff, {width: 0.0, height: 0.0}, "min");
+                padding = {
+                  left: 0.0,
+                  right: 0.0,
+                  top: 0.0,
+                  bottom: 0.2
+                };
+                labelMesh = createLabel(font, 0.15, nodegroup.get('name'), nodeMesh,
+                  padding, 0xffffff, {
+                    width: 0.0,
+                    height: 0.0
+                  }, "min");
 
                 nodeMesh.add(labelMesh);
 
-                padding = {left: 0.0, right: 0.0, top: -0.4, bottom: 0.0};
-                labelMesh = createLabel(font, 0.2, null, systemMesh, 
-                  padding, 0x00000, {width: 0.0, height: 0.0}, "max");
+                padding = {
+                  left: 0.0,
+                  right: 0.0,
+                  top: -0.4,
+                  bottom: 0.0
+                };
+                labelMesh = createLabel(font, 0.2, null, systemMesh,
+                  padding, 0x00000, {
+                    width: 0.0,
+                    height: 0.0
+                  }, "max");
 
                 systemMesh.add(labelMesh);
 
@@ -187,8 +229,8 @@ export default RenderingCore.extend({
 
               } else {
                 // draw request logo
-                addPlane(centerX, centerY, 0, 
-                  1.6, 1.6, new THREE.Color(1,0,0), 
+                addPlane(centerX, centerY, 0,
+                  1.6, 1.6, new THREE.Color(1, 0, 0),
                   "requests", self.get('scene'), "label");
               }
 
@@ -207,20 +249,27 @@ export default RenderingCore.extend({
 
     var accum;
 
-    if(appCommunication) {
+    if (appCommunication) {
       appCommunication.forEach((communication) => {
 
         var points = communication.get('points');
 
         if (points.length !== 0) {
 
-          const{x, y, z} = communication.get('pipeColor');
+          const {
+            x,
+            y,
+            z
+          } = communication.get('pipeColor');
 
-          accum = {tiles:[], pipeColor: new THREE.Color(x, y, z)};
+          accum = {
+            tiles: [],
+            pipeColor: new THREE.Color(x, y, z)
+          };
           communicationsAccumulated.push(accum);
 
           for (var i = 1; i < points.length; i++) {
-            
+
             var lastPoint = points[i - 1];
             var thisPoint = points[i];
 
@@ -247,7 +296,7 @@ export default RenderingCore.extend({
     function addCommunicationLineDrawing(communicationsAccumulated, parent) {
       communicationsAccumulated.forEach((accum) => {
 
-        accum.tiles.forEach((tile) => { 
+        accum.tiles.forEach((tile) => {
 
           tile.lineThickness = 0.07 * 1.3 + 0.01;
 
@@ -271,14 +320,14 @@ export default RenderingCore.extend({
     }
 
 
-    function seekOrCreateTile(start, end, 
+    function seekOrCreateTile(start, end,
       communicationAccumulated, lineZvalue) {
 
       communicationAccumulated.forEach((accum) => {
 
-        accum.tiles.forEach((tile) => {       
+        accum.tiles.forEach((tile) => {
 
-          if (checkEqualityOfPoints(tile.startPoint, start) && 
+          if (checkEqualityOfPoints(tile.startPoint, start) &&
             checkEqualityOfPoints(tile.endPoint, end)) {
             //console.log("old tile");
             return tile;
@@ -289,15 +338,20 @@ export default RenderingCore.extend({
       });
 
       //console.log("new tile");
-      var tile = {startPoint: start, endPoint: end, positionZ: lineZvalue, 
-        requestsCache: 0, communications: []};
+      var tile = {
+        startPoint: start,
+        endPoint: end,
+        positionZ: lineZvalue,
+        requestsCache: 0,
+        communications: []
+      };
       return tile;
     }
 
 
     function createLine(accum, parent) {
 
-      if(accum.tiles.length !== 0) {
+      if (accum.tiles.length !== 0) {
 
         var firstTile = accum.tiles[0];
 
@@ -309,13 +363,13 @@ export default RenderingCore.extend({
         const geometry = new THREE.Geometry();
 
         geometry.vertices.push(
-          new THREE.Vector3(firstTile.startPoint.x - centerPoint.x, 
+          new THREE.Vector3(firstTile.startPoint.x - centerPoint.x,
             firstTile.startPoint.y - centerPoint.y, firstTile.positionZ)
         );
 
         accum.tiles.forEach((tile) => {
           geometry.vertices.push(
-            new THREE.Vector3(tile.endPoint.x - centerPoint.x, 
+            new THREE.Vector3(tile.endPoint.x - centerPoint.x,
               tile.endPoint.y - centerPoint.y, tile.positionZ)
           );
         });
@@ -324,22 +378,21 @@ export default RenderingCore.extend({
         line.setGeometry(geometry);
 
         var lineMesh = new THREE.Mesh(line.geometry, material);
-        
+
         parent.add(lineMesh);
 
       }
     }
 
 
-    function createLabel(font, size, textToShow, parent, padding, color, 
+    function createLabel(font, size, textToShow, parent, padding, color,
       logoSize, yPosition) {
 
-      const text = textToShow ? textToShow : 
+      const text = textToShow ? textToShow :
         parent.userData.model.get('name');
 
       let labelGeo = new THREE.TextGeometry(
-        text,
-        {
+        text, {
           font: font,
           size: size,
           height: 0
@@ -374,15 +427,15 @@ export default RenderingCore.extend({
       var i = 1.0;
 
       // scale until text fits into parent bounding box
-      while ((labelWidth > boxWidth) && (i > 0.1)) {    
-         // TODO time complexity: linear -> Do binary search alike approach?                        
+      while ((labelWidth > boxWidth) && (i > 0.1)) {
+        // TODO time complexity: linear -> Do binary search alike approach?                        
         i -= 0.05;
         labelGeo.scale(i, i, i);
         // update the boundingBox
         labelGeo.computeBoundingBox();
         bboxLabel = labelGeo.boundingBox;
         labelWidth = bboxLabel.max.x - bboxLabel.min.x;
-        if(text === "PostgreSQL") {
+        if (text === "PostgreSQL") {
           //console.log("boxWidth", boxWidth);
           //console.log("labelWidth", labelWidth);
         }
@@ -390,7 +443,7 @@ export default RenderingCore.extend({
 
       const labelHeight = bboxLabel.max.y - bboxLabel.min.y;
 
-      if(text === "PostgreSQL") {
+      if (text === "PostgreSQL") {
         //console.log(labelHeight);
       }
       //console.log("labelHeight", labelHeight);
@@ -399,17 +452,17 @@ export default RenderingCore.extend({
 
       let posY = padding.bottom + padding.top;
 
-      if(yPosition === "max") {
+      if (yPosition === "max") {
         posY += bboxParent.max.y;
-      } 
-      else if(yPosition === "min") {
+      } else if (yPosition === "min") {
         posY += bboxParent.min.y;
-      } 
-      else if(yPosition === "center") {
+      } else if (yPosition === "center") {
         posY -= (labelHeight / 2.0);
       }
 
-      const material = new THREE.MeshBasicMaterial({color: color});
+      const material = new THREE.MeshBasicMaterial({
+        color: color
+      });
 
       const labelMesh = new THREE.Mesh(labelGeo, material);
 
@@ -421,23 +474,28 @@ export default RenderingCore.extend({
 
     function addPlane(x, y, z, width, height, color, texture, parent, model) {
 
-      if(texture) {
-         
-         new THREE.TextureLoader().load('images/logos/' + texture + '.png', (texture) => {
-            const material = new THREE.MeshBasicMaterial({map: texture, transparent: true});
-            const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), 
-             material);
-            plane.position.set(x, y, z);
-            parent.add(plane);
-            plane.userData['model'] = model;
-            return plane;
-          });   
+      if (texture) {
 
-        
+        new THREE.TextureLoader().load('images/logos/' + texture + '.png', (texture) => {
+          const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true
+          });
+          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+            material);
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData['model'] = model;
+          return plane;
+        });
+
+
       } else {
 
-        const material = new THREE.MeshBasicMaterial({color: color});
-        const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), 
+        const material = new THREE.MeshBasicMaterial({
+          color: color
+        });
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
           material);
         plane.position.set(x, y, z);
         parent.add(plane);
@@ -445,7 +503,7 @@ export default RenderingCore.extend({
         return plane;
       }
 
-      
+
     }
 
     function calculateLandscapeCenterAndZZoom(landscape) {
@@ -484,7 +542,7 @@ export default RenderingCore.extend({
       return center;
 
     }
-    
+
 
     function getLandscapeRect(landscape) {
 
@@ -501,13 +559,12 @@ export default RenderingCore.extend({
 
       const systems = landscape.get('systems');
 
-      if(systems.length === 0) {
+      if (systems.length === 0) {
         rect[MIN_X] = 0.0;
         rect[MAX_X] = 1.0;
         rect[MIN_Y] = 0.0;
         rect[MAX_Y] = 1.0;
-      } 
-      else {
+      } else {
         systems.forEach((system) => {
           getMinMaxFromQuad(system, rect);
 
@@ -543,7 +600,7 @@ export default RenderingCore.extend({
       if (curX < rect[MIN_X]) {
         rect[MIN_X] = curX;
       }
-      if (rect[MAX_X]< curX + drawnodeentity.get('width')) {
+      if (rect[MAX_X] < curX + drawnodeentity.get('width')) {
         rect[MAX_X] = curX + drawnodeentity.get('width');
       }
       if (curY > rect[MAX_Y]) {
@@ -571,21 +628,21 @@ export default RenderingCore.extend({
     const hammer = this.get('hammerManager');
 
     const singleTap = new Hammer.Tap({
-        event : 'singletap',
-        interval : 250
+      event: 'singletap',
+      interval: 250
     });
 
     const doubleTap = new Hammer.Tap({
-        event : 'doubletap',
-        taps : 2,
-        interval : 250
+      event: 'doubletap',
+      taps: 2,
+      interval: 250
     });
 
     const pan = new Hammer.Pan({
-        event : 'pan'
+      event: 'pan'
     });
 
-    hammer.add([ doubleTap, singleTap, pan ]);
+    hammer.add([doubleTap, singleTap, pan]);
 
     doubleTap.recognizeWith(singleTap);
     singleTap.requireFailure(doubleTap);
@@ -704,8 +761,6 @@ export default RenderingCore.extend({
 
 
   }
-
-
 
 
 
