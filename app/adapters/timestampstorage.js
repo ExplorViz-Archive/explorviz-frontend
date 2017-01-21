@@ -14,7 +14,8 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
     "Accept": "application/json"
   },
 
-  urlForFindRecord(id, modelName) {
+  //@Override
+  urlForFindRecord() {
     let baseUrl = this.buildURL();
     return `${baseUrl}/timestamp/show-timestamps`;
   }

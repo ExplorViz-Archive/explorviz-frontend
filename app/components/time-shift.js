@@ -193,7 +193,7 @@ export default Component.extend({
 
   // TODO WIP Update function for plot
   updatePlot: function () {
-    var interval = 1000;
+    //var interval = 1000;
     //Ember.run.later(this, function() {
     var updatedPlot = this.plot;
 
