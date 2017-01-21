@@ -30,7 +30,8 @@ module.exports = function(defaults) {
   app.import('vendor/three/three.min.js');
   app.import('vendor/three/THREE.MeshLine.js');
   app.import('vendor/hammer/hammer.min.js');
-  app.import('vendor/chartjs/chart.bundle.min.js');
+  app.import('vendor/momentjs/moment.js');
+  app.import('vendor/chartjs/Chart.min.js');
   app.import('vendor/chartjs/chartjs-plugin-zoom.min.js');
   app.import('vendor/layout/klay.js');
 

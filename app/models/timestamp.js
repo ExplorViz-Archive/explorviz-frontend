@@ -4,5 +4,6 @@ const { attr, belongsTo } = DS;
 
 export default DS.Model.extend({
   parent: belongsTo('timestampstorage'),
-  timestamp: attr('string')
+  timestamp: attr('number'),
+  calls: attr('number')
 });

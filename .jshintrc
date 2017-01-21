@@ -8,7 +8,8 @@
     "MeshLine",
     "Hammer",
     "Chart",
-    "$klay"
+    "$klay",
+    "moment"
   ],
   "browser": true,
   "boss": true,
