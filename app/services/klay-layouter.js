@@ -222,9 +222,11 @@ export default Ember.Service.extend({
         bottom: 6 * PADDING * CONVERT_TO_KIELER_FACTOR
       };
 
+      const parent = node.get('parent');
+
       const minWidth = Math.max(DEFAULT_WIDTH *
         CONVERT_TO_KIELER_FACTOR,
-        (calculateRequiredLabelLength(node.get('name'), NODE_LABEL_HEIGHT) +
+        (calculateRequiredLabelLength(getDisplayName(parent, node), NODE_LABEL_HEIGHT) +
           PADDING * 2.0) * CONVERT_TO_KIELER_FACTOR);
 
       const minHeight = DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
@@ -372,6 +374,19 @@ export default Ember.Service.extend({
       });
 
     } // END updateGraphWithResults
+
+
+    function getDisplayName(system, node) {
+      if (system.get('opened')) {
+        if (node.get('name') && node.get('name').length !== 0 && !node.get('name').startsWith("<")) {
+          return node.get('name');
+        } else {
+          return node.get('ipAddress');
+        }
+      } else {
+        return system.get('name');
+      }
+    }
 
 
     function convertToExplorVizCoords(entity) {
