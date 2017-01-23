@@ -24,7 +24,7 @@ export default Ember.Service.extend({
 
 
       addNodes(landscape);
-      //addEdges(landscape);      
+      addEdges(landscape);
 
 
       // do actual layout
@@ -260,7 +260,7 @@ export default Ember.Service.extend({
           "id": application.get('id'),
           "width": width,
           "height": height,
-          "children": []                    
+          "children": []
         };
 
         application.set('kielerGraphReference', applicationKielerNode);
@@ -270,6 +270,96 @@ export default Ember.Service.extend({
       });
 
     } // END createNodeAndItsApplications
+
+
+
+    function addEdges(landscape) {
+
+      const applicationCommunication = landscape.get('applicationCommunication');
+
+      applicationCommunication.forEach((communication) => {
+        //communication.kielerEdgeReferences.clear()
+        //communication.points.clear()
+
+        const appSource = communication.get('source');
+        const appTarget = communication.get('target');
+
+        if (appSource && appTarget && appSource.get('parent') && appTarget.get('parent')) {
+
+          if (appSource.get('parent').get('visible') && appTarget.get('parent').get('visible')) {
+            communication.get('kielerEdgeReferences').push(createEdgeBetweenSourceTarget(appSource, appTarget));
+          } else if (appSource.get('parent').get('visible') && !appTarget.get('parent').get('visible')) {
+            if (appTarget.get('parent').get('parent').get('parent').get('opened')) {
+              const representativeApplication = seekRepresentativeApplication(appTarget);
+              communication.get('kielerEdgeReferences').push(
+                createEdgeBetweenSourceTarget(
+                  appSource,
+                  representativeApplication
+                ));
+            } else {
+
+              // System is closed
+              communication.get('kielerEdgeReferences').push(
+                createEdgeBetweenSourceTarget(
+                  appSource,
+                  appTarget.get('parent').get('parent').get('parent')
+                ));
+            }
+          } else if (!appSource.get('parent').get('visible') && appTarget.get('parent').get('visible')) {
+            if (appSource.get('parent').get('parent').get('parent').get('opened')) {
+              const representativeApplication = seekRepresentativeApplication(appSource);
+              communication.get('kielerEdgeReferences').push(
+                createEdgeBetweenSourceTarget(
+                  representativeApplication,
+                  appTarget
+                ));
+            } else {
+              // System is closed
+              communication.get('kielerEdgeReferences').push(
+                createEdgeBetweenSourceTarget(
+                  appSource.parent.parent.parent,
+                  appTarget
+                ));
+            }
+          } else {
+
+            if (appSource.get('parent').get('parent').get('parent').get('opened')) {
+
+              const representativeSourceApplication = seekRepresentativeApplication(appSource);
+
+              if (appTarget.get('parent').get('parent').get('parent').get('opened')) {
+                const representativeTargetApplication = seekRepresentativeApplication(appTarget);
+                communication.get('kielerEdgeReferences').push(
+                  createEdgeBetweenSourceTarget(representativeSourceApplication,
+                    representativeTargetApplication));
+              } else {
+                // Target System is closed
+                communication.get('kielerEdgeReferences').push(
+                  createEdgeBetweenSourceTarget(representativeSourceApplication,
+                    appTarget.get('parent').get('parent').get('parent')));
+              }
+            } else {
+
+              // Source System is closed
+              if (appTarget.get('parent').get('parent').get('parent').get('opened')) {
+                const representativeTargetApplication = seekRepresentativeApplication(appTarget);
+                communication.get('kielerEdgeReferences').push(
+                  createEdgeBetweenSourceTarget(appSource.get('parent').get('parent').get('parent'),
+                    representativeTargetApplication));
+              } else {
+
+                // Target System is closed
+                communication.get('kielerEdgeReferences').push(
+                  createEdgeBetweenSourceTarget(
+                    appSource.get('parent').get('parent').get('parent'),
+                    appTarget.get('parent').get('parent').get('parent')
+                  ));
+              }
+            }
+          }
+        }
+      });
+    }
 
 
     function updateGraphWithResults(landscape) {
@@ -318,9 +408,7 @@ export default Ember.Service.extend({
 
               }
 
-
             });
-
 
           }
 
@@ -369,8 +457,6 @@ export default Ember.Service.extend({
 
         convertToExplorVizCoords(system);
 
-        //console.log(system.get('positionY'))
-
       });
 
     } // END updateGraphWithResults
@@ -405,7 +491,9 @@ export default Ember.Service.extend({
 
       const padding = parent.get('kielerGraphReference').padding;
 
-      //val offset = parent.kielerGraphReference.offset
+      //const offset = parent.get('kielerGraphReference').offset;
+
+      //console.log(offset);
 
       child.set('positionX', parent.get('positionX') + child.get('positionX') + padding.left);
       child.set('positionY', parent.get('positionY') + child.get('positionY') - padding.top);
@@ -413,8 +501,6 @@ export default Ember.Service.extend({
 
 
     function updateNodeValues(entity) {
-
-      //console.log(entity.get('name') + " " + entity.get('kielerGraphReference').x);
 
       entity.set('positionX', entity.get('kielerGraphReference').x);
 
@@ -427,7 +513,6 @@ export default Ember.Service.extend({
     }
 
 
-
     function calculateRequiredLabelLength(text, quadSize) {
 
       const SPACE_BETWEEN_LETTERS_IN_PERCENT = 0.09;
@@ -438,6 +523,113 @@ export default Ember.Service.extend({
 
       return ((text.length * quadSize * 0.5) +
         ((text.length - 1) * quadSize * SPACE_BETWEEN_LETTERS_IN_PERCENT));
+    }
+
+
+    function createEdgeBetweenSourceTarget(sourceApplication, targetApplication) {
+      const port1 = createSourcePortIfNotExisting(sourceApplication);
+      const port2 = createTargetPortIfNotExisting(targetApplication);
+
+      createEdgeHelper(sourceApplication, port1, targetApplication, port2);
+    }
+
+
+    function createSourcePortIfNotExisting(sourceDrawnode) {
+      return createPortHelper(sourceDrawnode, sourceDrawnode.get('targetPorts'), "EAST");
+    }
+
+
+    function createTargetPortIfNotExisting(targetDrawnode) {
+      return createPortHelper(targetDrawnode, targetDrawnode.get('targetPorts'), "WEST");
+    }
+
+
+    function createPortHelper(drawnode, ports, portSide) {
+
+      const DEFAULT_PORT_WIDTH = 0.000001;
+      const DEFAULT_PORT_HEIGHT = 0.000001;
+
+      const CONVERT_TO_KIELER_FACTOR = 180;
+
+      const maybePort = ports[drawnode.get('id')];
+
+      if (!maybePort) {
+
+        const length = Object.keys(ports).length;
+
+        const portId = drawnode.get('id') + "_p" + (length + 1);
+
+        const port = {
+          id: portId,
+          width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR,
+          height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
+          properties: {
+            "de.cau.cs.kieler.portSide": portSide
+          }
+        };
+
+        port.node = drawnode.get('kielerGraphReference');
+
+        ports[drawnode.get('id')] = port;
+      }
+
+      return ports[drawnode.get('id')];
+
+    }
+
+
+    function createEdgeHelper(sourceDrawnode, port1, targetDrawnode, port2) {
+
+      const id = sourceDrawnode.get('id') + "_" + targetDrawnode.get('id');
+
+
+      const edge = createNewEdge(id);
+
+      setEdgeLayoutProperties(edge);
+
+      edge.source = port1.id;
+      edge.target = port2.id;
+      edge.sourcePort = port1.id;
+      edge.targetPort = port1.id;
+
+      return edge;
+    }
+
+    function createNewEdge(id) {
+      const kielerEdge = {
+        id: id
+      };
+      return kielerEdge;
+    }
+
+    function setEdgeLayoutProperties(edge) {
+      const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
+      const lineThickness = 0.06 * 4.0 + 0.01;
+      const oldThickness = edge.thickness;
+      edge.thickness = Math.max(lineThickness * CONVERT_TO_KIELER_FACTOR, oldThickness);
+    }
+
+    function seekRepresentativeApplication(application) {
+
+      const nodes = application.get('parent').get('parent').get('nodes');
+
+      let returnValue = null;
+
+      nodes.forEach((node) => {
+        if (node.get('visible')) {
+
+          const applications = node.get('applications');
+
+          applications.forEach((representiveApplication) => {
+
+            if (representiveApplication.get('name') === application.get('name')) {
+              returnValue = representiveApplication;
+            }
+          });
+        }
+      });
+
+      return returnValue ? returnValue : null;
     }
 
 

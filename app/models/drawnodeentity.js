@@ -15,6 +15,9 @@ export default BaseEntity.extend({
   positionZ: attr('number'),
   threeJSModel: attr(),
 
-  kielerGraphReference: null
+  kielerGraphReference: null,
+
+  sourcePorts: {},
+  targetPorts: {}
 
 });

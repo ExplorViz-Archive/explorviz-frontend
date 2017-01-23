@@ -18,6 +18,8 @@ export default DrawEdgeEntity.extend({
 
   parent: belongsTo("landscape"), 
 
-  pipeColor: attr()
+  pipeColor: attr(),
+
+  kielerEdgeReferences: []
 
 });
