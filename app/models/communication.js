@@ -20,6 +20,8 @@ export default DrawEdgeEntity.extend({
 
   pipeColor: attr(),
 
-  kielerEdgeReferences: []
+  kielerEdgeReferences: [],
+
+  points: []
 
 });
