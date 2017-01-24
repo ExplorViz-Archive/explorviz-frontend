@@ -304,7 +304,7 @@ export default Ember.Service.extend({
         const appSource = communication.get('source');
         const appTarget = communication.get('target');
 
-        //if (appSource && appTarget && appSource.get('parent') && appTarget.get('parent')) {
+        if (appSource && appTarget && appSource.get('parent') && appTarget.get('parent')) {
 
           if (appSource.get('parent').get('visible') && appTarget.get('parent').get('visible')) {
             const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
@@ -369,7 +369,7 @@ export default Ember.Service.extend({
               }
             }
           }
-        //}
+        }
       });
     }
 
