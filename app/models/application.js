@@ -19,13 +19,16 @@ export default DrawNodeEntity.extend({
 
   //communicationsAccumulated: hasMany('communicationappaccumulator'),
 
-  incomingCommunications: hasMany('communication', {
-    inverse: 'source'
-  }),
+  // incomingCommunications: hasMany('communication', {
+  //   inverse: 'source'
+  // }),
 
-  outgoingCommunications: hasMany('communication', {
-    inverse: 'target'
-  }),
+  // outgoingCommunications: hasMany('communication', {
+  //   inverse: 'target'
+  // }),
+  // 
+  incomingCommunications: null,
+  outgoingCommunications: null,
   
   //databaseQueries: hasMany('databasequery')
 

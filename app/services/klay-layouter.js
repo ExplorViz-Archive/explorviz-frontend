@@ -299,18 +299,23 @@ export default Ember.Service.extend({
         communication.set('kielerEdgeReferences', []);
         communication.set('points', []);
 
-        console.log(communication);
+        console.log("Communication", communication);
 
         const appSource = communication.get('source');
         const appTarget = communication.get('target');
 
-        if (appSource && appTarget && appSource.get('parent') && appTarget.get('parent')) {
+        //if (appSource && appTarget && appSource.get('parent') && appTarget.get('parent')) {
 
           if (appSource.get('parent').get('visible') && appTarget.get('parent').get('visible')) {
+            
+            //const edge = {"id": "e1", "source": appSource.get('id'), "target": appTarget.get('id')};        
+
             const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
+            //console.log("edge", edge);
             appSource.get('kielerGraphReference').edges.push(edge);
             communication.get('kielerEdgeReferences').push(edge);
-          } else if (appSource.get('parent').get('visible') && !appTarget.get('parent').get('visible')) {
+          } /*
+          else if (appSource.get('parent').get('visible') && !appTarget.get('parent').get('visible')) {
             if (appTarget.get('parent').get('parent').get('parent').get('opened')) {
               const representativeApplication = seekRepresentativeApplication(appTarget);
               const edge = createEdgeBetweenSourceTarget(appSource, representativeApplication);
@@ -323,7 +328,8 @@ export default Ember.Service.extend({
               appSource.get('kielerGraphReference').edges.push(edge);
               communication.get('kielerEdgeReferences').push(edge);
             }
-          } else if (!appSource.get('parent').get('visible') && appTarget.get('parent').get('visible')) {
+          } 
+          else if (!appSource.get('parent').get('visible') && appTarget.get('parent').get('visible')) {
             if (appSource.get('parent').get('parent').get('parent').get('opened')) {
               const representativeApplication = seekRepresentativeApplication(appSource);
               const edge = createEdgeBetweenSourceTarget(representativeApplication, appTarget);
@@ -335,7 +341,8 @@ export default Ember.Service.extend({
               appSource.get('parent').get('parent').get('parent').get('kielerGraphReference').edges.push(edge);
               communication.get('kielerEdgeReferences').push(edge);
             }
-          } else {
+          } 
+          else {
 
             if (appSource.get('parent').get('parent').get('parent').get('opened')) {
 
@@ -368,8 +375,8 @@ export default Ember.Service.extend({
                 communication.get('kielerEdgeReferences').push(edge);
               }
             }
-          }
-        }
+          }*/
+        //}
       });
     }
 
@@ -567,7 +574,7 @@ export default Ember.Service.extend({
 
       const maybePort = ports[drawnode.get('id')];
 
-      if (!maybePort) {
+      if (maybePort == null) {
 
         const length = Object.keys(ports).length;
 
@@ -596,25 +603,32 @@ export default Ember.Service.extend({
 
     function createEdgeHelper(sourceDrawnode, port1, targetDrawnode, port2) {
 
+      console.log(port2);
+
       const id = sourceDrawnode.get('id') + "_" + targetDrawnode.get('id');
 
-      console.log(id);
+      //console.log("port1", port1);
+      //console.log("port2", port2);
+
+      //console.log(id);
+           
+      // TODO create port in related node for reference
 
       const edge = createNewEdge(id);
 
       setEdgeLayoutProperties(edge);
 
-      edge.sourcePort = port1.id;
-      edge.targetPort = port2.id;
+      //edge.sourcePort = port1.id;
+      //edge.targetPort = port2.id;
 
-      edge.sPort = port1;
-      edge.tPort = port2;
+      //edge.sPort = port1;
+      //edge.tPort = port2;
 
       edge.source = sourceDrawnode.get('id');
       edge.target = targetDrawnode.get('id');
 
-      edge.sourceNode = sourceDrawnode;
-      edge.targetNode = targetDrawnode;
+      //edge.sourceNode = sourceDrawnode;
+      //edge.targetNode = targetDrawnode;
 
       return edge;
     }
@@ -633,7 +647,7 @@ export default Ember.Service.extend({
       edge.thickness = Math.max(lineThickness * CONVERT_TO_KIELER_FACTOR, oldThickness);
     }
 
-    function seekRepresentativeApplication(application) {
+   /* function seekRepresentativeApplication(application) {
 
       const nodes = application.get('parent').get('parent').get('nodes');
 
@@ -654,7 +668,7 @@ export default Ember.Service.extend({
       });
 
       return returnValue ? returnValue : null;
-    }
+    }*/
 
 
     /*function addBendPointsInAbsoluteCoordinates(landscape) {
