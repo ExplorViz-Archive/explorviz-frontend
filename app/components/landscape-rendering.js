@@ -54,6 +54,8 @@ export default RenderingCore.extend({
 
       systems.forEach(function(system) {
 
+        console.log(system.get('name') + " und " + system.get('positionX') + ", " + system.get('positionY'));
+
         isRequestObject = false;
 
         if (!isRequestObject && system.get('name') === "Requests") {
@@ -524,7 +526,7 @@ export default RenderingCore.extend({
 
       const viewPortSize = self.get('webglrenderer').getSize();
 
-      const viewportRatio = viewPortSize.width / viewPortSize.height;
+      let viewportRatio = viewPortSize.width / viewPortSize.height;
 
       const newZ_by_width = requiredWidth / viewportRatio;
       const newZ_by_height = requiredHeight;

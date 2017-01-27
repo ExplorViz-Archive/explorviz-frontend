@@ -7,6 +7,7 @@ export default DS.JSONAPISerializer.extend({
     return attr;
   },
 
+  // workaround for camel-cased attributes
   keyForRelationship(key) { 
     return key; 
   }
