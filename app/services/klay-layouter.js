@@ -58,7 +58,8 @@ export default Ember.Service.extend({
       const graph = {
         "id": id,
         "properties": layoutOptions,
-        "children": []
+        "children": [],
+        "edges": []
       };
 
       return graph;
@@ -315,10 +316,11 @@ export default Ember.Service.extend({
           //console.log(appSource.get('name') + " und " + appTarget.get('name'));
 
           const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
-          //console.log("edge", edge);
-          appSource.get('kielerGraphReference').edges.push(edge);
+
           communication.get('kielerEdgeReferences').push(edge);
-        } else if (appSource.get('parent').get('visible') && !appTarget.get('parent').get('visible')) {
+          appSource.get('kielerGraphReference').edges.push(edge); 
+          console.log(appSource.get('kielerGraphReference').edges);
+        } /*else if (appSource.get('parent').get('visible') && !appTarget.get('parent').get('visible')) {
           if (appTarget.get('parent').get('parent').get('parent').get('opened')) {
             //console.log("appSource", appSource.get("name"));
             //console.log("appTarget", appTarget.get("name"));
@@ -379,7 +381,7 @@ export default Ember.Service.extend({
               communication.get('kielerEdgeReferences').push(edge);
             }
           }
-        }
+        }*/
         //}
       });
     }
@@ -439,7 +441,7 @@ export default Ember.Service.extend({
 
       });
 
-      addBendPointsInAbsoluteCoordinates(landscape);
+      //addBendPointsInAbsoluteCoordinates(landscape);
 
       systems.forEach((system) => {
 
@@ -560,7 +562,7 @@ export default Ember.Service.extend({
 
 
     function createSourcePortIfNotExisting(sourceDrawnode) {
-      return createPortHelper(sourceDrawnode, sourceDrawnode.get('targetPorts'), "EAST");
+      return createPortHelper(sourceDrawnode, sourceDrawnode.get('sourcePorts'), "EAST");
     }
 
 
@@ -609,10 +611,13 @@ export default Ember.Service.extend({
 
       //console.log(port2);
 
-      const id = sourceDrawnode.get('id') + "_" + targetDrawnode.get('id');
+      const id = sourceDrawnode.get('id') + "_to_" + targetDrawnode.get('id');
 
-      //console.log("port1", port1);
-      //console.log("port2", port2);
+      console.log("port1", port1);
+      console.log("port2", port2);
+
+      //console.log("drawnode1", sourceDrawnode.get('kielerGraphReference'));
+      //console.log("drawnode2", targetDrawnode.get('kielerGraphReference'));
 
       //console.log(id);
 
@@ -622,16 +627,14 @@ export default Ember.Service.extend({
 
       setEdgeLayoutProperties(edge);
 
+      edge.source = sourceDrawnode.get('id');
+      edge.target = targetDrawnode.get('id');
+
       edge.sourcePort = port1.id;
       //edge.targetPort = port2.id;
 
       edge.sPort = port1;
       edge.tPort = port2;
-
-      edge.source = sourceDrawnode.get('id');
-      edge.target = targetDrawnode.get('id');
-
-      //console.log(sourceDrawnode.get('kielerGraphReference'));
 
       edge.sourceNode = sourceDrawnode;
       edge.targetNode = targetDrawnode;
@@ -653,31 +656,7 @@ export default Ember.Service.extend({
       edge.thickness = Math.max(lineThickness * CONVERT_TO_KIELER_FACTOR, oldThickness);
     }
 
-    function seekRepresentativeApplication(application) {
-
-      const nodes = application.get('parent').get('parent').get('nodes');
-
-      let returnValue = null;
-
-      nodes.forEach((node) => {
-        if (node.get('visible')) {
-
-          const applications = node.get('applications');
-
-          applications.forEach((representiveApplication) => {
-
-            if (representiveApplication.get('name') === application.get('name')) {
-              returnValue = representiveApplication;
-            }
-          });
-        }
-      });
-
-      return returnValue ? returnValue : null;
-    }
-
-
-    function addBendPointsInAbsoluteCoordinates(landscape) {
+    /*function addBendPointsInAbsoluteCoordinates(landscape) {
 
       const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
       const applicationCommunication = landscape.get('applicationCommunication');
@@ -721,7 +700,7 @@ export default Ember.Service.extend({
               //console.log(edge.targetNode.get('kielerGraphReference').children.length);
 
               const filteredChildren = edge.targetNode.get('kielerGraphReference').children.filter((child) => {
-                console.log("hi");
+                console.log("self-edge");
                 return child === edge.sourceNode.get('kielerGraphReference');
               });
 
@@ -821,12 +800,13 @@ export default Ember.Service.extend({
                 }
 
                 if (parentNode.constructor.modelName === "System") {
+                  console.log("ich bin ein system");
                   pOffsetX = insetLeft;
                   pOffsetY = insetTop * -1;
                 } else {
                   pOffsetX = parentNode.get('positionX') + insetLeft;
                   pOffsetY = parentNode.get('positionY') - insetTop;
-
+ 
                 }
               }
 
@@ -840,7 +820,7 @@ export default Ember.Service.extend({
                 resultPoint.y = (point.y * -1 + pOffsetY) / CONVERT_TO_KIELER_FACTOR; // KIELER has inverted Y coords
                 communication.points.push(resultPoint);
               });
-            }
+            } // END if (parentNode != null)
           }
         });
       });
@@ -865,6 +845,31 @@ export default Ember.Service.extend({
       }
       return result;
     }
+
+
+    function seekRepresentativeApplication(application) {
+
+      const nodes = application.get('parent').get('parent').get('nodes');
+
+      let returnValue = null;
+
+      nodes.forEach((node) => {
+        if (node.get('visible')) {
+
+          const applications = node.get('applications');
+
+          applications.forEach((representiveApplication) => {
+
+            if (representiveApplication.get('name') === application.get('name')) {
+              returnValue = representiveApplication;
+            }
+          });
+        }
+      });
+
+      return returnValue ? returnValue : null;
+    }*/
+
 
 
 

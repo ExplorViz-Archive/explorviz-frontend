@@ -12,6 +12,10 @@ export default RenderingCore.extend({
     this._super(...arguments);
 
     this.initInteraction();
+
+    var dirLight = new THREE.DirectionalLight();
+    dirLight.position.set(30, 10, 20);
+    this.get('scene').add(dirLight);
   },
 
   // @Override
@@ -77,7 +81,7 @@ export default RenderingCore.extend({
           var centerY = system.get('positionY') - extensionY - centerPoint.y;
 
           var systemMesh = addPlane(centerX, centerY, system.get('positionZ'), system.get('width'),
-            system.get('height'), new THREE.Color(x, y, z), null, self.get('scene'), system);
+            system.get('height'), new THREE.Color(x, y, z), null, null, self.get('scene'), system);
 
           system.set('threeJSModel', systemMesh);
 
@@ -102,7 +106,7 @@ export default RenderingCore.extend({
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
             var nodegroupMesh = addPlane(centerX, centerY, nodegroup.get('positionZ'), nodegroup.get('width'),
-              nodegroup.get('height'), new THREE.Color(x, y, z), null, self.get('scene'), nodegroup);
+              nodegroup.get('height'), new THREE.Color(x, y, z), null, null, self.get('scene'), nodegroup);
 
             nodegroup.set('threeJSModel', nodegroupMesh);
 
@@ -127,7 +131,7 @@ export default RenderingCore.extend({
               centerY = node.get('positionY') - extensionY - centerPoint.y;
 
               var nodeMesh = addPlane(centerX, centerY, node.get('positionZ'), node.get('width'),
-                node.get('height'), new THREE.Color(x, y, z), null, self.get('scene'), node);
+                node.get('height'), new THREE.Color(x, y, z), null, null, self.get('scene'), node);
 
               node.set('threeJSModel', nodeMesh);
 
@@ -152,7 +156,7 @@ export default RenderingCore.extend({
                 } = application.get('backgroundColor');
 
                 var applicationMesh = addPlane(centerX, centerY, application.get('positionZ'),
-                  application.get('width'), application.get('height'), new THREE.Color(x, y, z), null,
+                  application.get('width'), application.get('height'), new THREE.Color(x, y, z), new THREE.Color(0x6D4FB4), null,
                   self.get('scene'), application);
 
                 application.set('threeJSModel', applicationMesh);
@@ -181,7 +185,7 @@ export default RenderingCore.extend({
                   'database2' : application.get('programmingLanguage').toLowerCase();
 
                 addPlane(logoPos.x, logoPos.y, logoPos.z,
-                  logoSize.width, logoSize.height, new THREE.Color(1, 0, 0),
+                  logoSize.width, logoSize.height, new THREE.Color(1, 0, 0), null,
                   texturePartialPath, applicationMesh, "label");
 
                 // create labels
@@ -232,7 +236,7 @@ export default RenderingCore.extend({
               } else {
                 // draw request logo
                 addPlane(centerX, centerY, 0,
-                  1.6, 1.6, new THREE.Color(1, 0, 0),
+                  1.6, 1.6, new THREE.Color(1, 0, 0), null,
                   "requests", self.get('scene'), "label");
               }
 
@@ -282,8 +286,6 @@ export default RenderingCore.extend({
             accum.tiles.push(tile);
           }
 
-          communicationsAccumulated.push(accum);
-
         }
 
       });
@@ -299,6 +301,8 @@ export default RenderingCore.extend({
       communicationsAccumulated.forEach((accum) => {
 
         accum.tiles.forEach((tile) => {
+
+           //0.07f * categories.get(tile.requestsCache) + 0.01f
 
           tile.lineThickness = 0.07 * 1.3 + 0.01;
 
@@ -468,14 +472,15 @@ export default RenderingCore.extend({
 
       const labelMesh = new THREE.Mesh(labelGeo, material);
 
-      labelMesh.position.set(posX, posY, 0);
+      labelMesh.position.set(posX, posY, 0.005);
 
       return labelMesh;
     }
 
 
-    function addPlane(x, y, z, width, height, color, texture, parent, model) {
+    function addPlane(x, y, z, width, height, color1, color2, texture, parent, model) {
 
+      // Invisible plane with logo texture
       if (texture) {
 
         new THREE.TextureLoader().load('images/logos/' + texture + '.png', (texture) => {
@@ -492,18 +497,60 @@ export default RenderingCore.extend({
         });
 
 
-      } else {
+      } 
+      // regular plane (one color or gradient)
+      else {
 
-        const material = new THREE.MeshBasicMaterial({
-          color: color
-        });
-        const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-          material);
-        plane.position.set(x, y, z);
-        parent.add(plane);
-        plane.userData['model'] = model;
-        return plane;
-      }
+        if(!color2) {
+          const material = new THREE.MeshBasicMaterial({
+            color: color1
+          });
+          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+            material);
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData['model'] = model;
+          return plane;
+        } 
+        else {
+
+          // create gradient texture
+          const canvas = document.createElement( 'canvas' );
+          canvas.width = 16;
+          canvas.height = 16;
+
+          const ctx = canvas.getContext("2d");
+
+          const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
+          grd.addColorStop(0.2, 'rgba(72,26,180,1)');
+          grd.addColorStop(1, 'rgba(101,68,180,1)');
+
+          ctx.fillStyle = grd;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          const gradientTexture = new THREE.Texture(canvas);
+          gradientTexture.needsUpdate = true;
+          gradientTexture.minFilter = THREE.LinearFilter;
+
+          // apply texture too material and create mesh
+          const geometry = new THREE.PlaneGeometry(width, height);
+
+          const material = new THREE.MeshBasicMaterial({      
+            map: gradientTexture
+          });
+
+          const plane = new THREE.Mesh(geometry, material);
+
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData['model'] = model;
+          return plane;
+
+        }
+
+
+
+      }      
 
 
     }
