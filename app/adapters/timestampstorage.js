@@ -15,7 +15,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
   },
 
   //@Override
-  urlForFindRecord() {
+  urlForQueryRecord() {
     let baseUrl = this.buildURL();
     return `${baseUrl}/timestamp/show-timestamps`;
   }

@@ -22,7 +22,7 @@ export default Component.extend({
 
     const store = this.get('store');
     // GET /show-timestamps
-    const timestampstorage = store.findRecord('timestampstorage', '1');
+    const timestampstorage = store.queryRecord('timestampstorage', '1');
 
     return timestampstorage.then((timestampstorage) => {
       const timestamps = timestampstorage.get('timestamps');
