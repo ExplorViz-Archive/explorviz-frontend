@@ -5,9 +5,11 @@ export default Ember.Controller.extend({
   queryParams: ['lid'],
   lid: null,
 
+  showLandscape: true,
+  
   computeLandscapeID: Ember.computed('lid', 'model', function() {
     var lid = this.get('lid');
-    var currentLandscape = this.get('model');
+    //var currentLandscape = this.get('model');
     if(lid) {
       // query for this lid
       return "test1";
@@ -17,20 +19,6 @@ export default Ember.Controller.extend({
     }
     
 
-  }),
-
-  actions: {
-    test(data) {
-      console.log("hello from action", data);
-    }
-  },
-
-  showApplication: Ember.computed('showApplication', function() {
-    if (this.get('visualizationToShow') === 'application') {
-      return true;
-    } else if (this.get('visualizationToShow') === 'landscape') {
-      return true;
-    }
   })
 
 });

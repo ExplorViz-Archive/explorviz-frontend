@@ -28,6 +28,8 @@ export default RenderingCore.extend({
   cleanup() {
     this._super(...arguments);
 
+    this.debug("cleanup landscape rendering");
+
     this.get('hammerManager').off();
     this.set('hammerManager', null);
 
@@ -718,15 +720,11 @@ export default RenderingCore.extend({
 
           const intersectedViewObj = raycasting(null, mouse, true);
 
-          console.log(intersectedViewObj);
-
-          // open application rendering
-          
-          console.log("sending action");
-          self.sendAction("test", 1);
-
-
-        });
+          if(intersectedViewObj) {
+            // open application rendering
+            self.sendAction("showApplication", 1);
+          }
+    });
 
     hammer.on('panstart', function(evt) {
       const event = evt.srcEvent;

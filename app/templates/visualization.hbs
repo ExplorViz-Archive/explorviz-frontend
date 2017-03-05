@@ -1,7 +1,5 @@
-{{landscape-rendering renderingModel=model}}
-
-<!-- {{#if showApplication}}
-  {{landscape-rendering renderingModel=model}}
+{{#if showLandscape}}
+  {{landscape-rendering renderingModel=model showApplication="handleApplication"}}
 {{else}}
   {{application-rendering renderingModel=model}}
-{{/if}} -->
+{{/if}}

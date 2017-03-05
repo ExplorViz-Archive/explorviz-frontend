@@ -6,8 +6,9 @@ const { Route } = Ember;
 export default Route.extend(AuthenticatedRouteMixin, {
 
   actions: {
-    test(data) {
-      console.log("hello from action", data);
+    //handleApplication(application) {
+    handleApplication(){
+      this.controller.set("showLandscape", false);
     }
   },
 
