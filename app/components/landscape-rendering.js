@@ -7,6 +7,12 @@ export default RenderingCore.extend({
 
   klayLayouter: Ember.inject.service("klay-layouter"),
 
+  actions: {
+    test(data) {
+      console.log("hello from action", data);
+    }
+  },
+
   // @Override
   initRendering() {
     this._super(...arguments);
@@ -662,7 +668,7 @@ export default RenderingCore.extend({
     }
 
 
-  },
+  }, // END populateScene
 
   initInteraction() {
 
@@ -713,6 +719,12 @@ export default RenderingCore.extend({
           const intersectedViewObj = raycasting(null, mouse, true);
 
           console.log(intersectedViewObj);
+
+          // open application rendering
+          
+          console.log("sending action");
+          self.sendAction("test", 1);
+
 
         });
 

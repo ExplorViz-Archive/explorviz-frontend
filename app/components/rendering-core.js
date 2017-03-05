@@ -16,6 +16,12 @@ export default Ember.Component.extend({
 
   animationFrameId: null,
 
+    actions: {
+    test: function(data) {
+      console.log("hello from action", data);
+    }
+  },
+
     // @Override
   didRender(){
     this._super(...arguments);
