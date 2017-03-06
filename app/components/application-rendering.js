@@ -1,7 +1,9 @@
 import RenderingCore from './rendering-core';
-//import Ember from 'ember';
+import Ember from 'ember';
 
 export default RenderingCore.extend({
+
+  cityLayouter: Ember.inject.service("city-layouter"),
 
   // @Override
   initRendering() {
@@ -38,8 +40,9 @@ export default RenderingCore.extend({
   // @Override
   populateScene(application) {
     this._super(...arguments);
-
     const self = this;
+
+    this.get('cityLayouter').applyLayout(application);
 
     const viewCenterPoint = calculateAppCenterAndZZoom(application);
     createBox(application.get('components').objectAt(0));
