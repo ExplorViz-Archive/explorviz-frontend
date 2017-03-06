@@ -207,7 +207,7 @@ export default RenderingCore.extend({
                   bottom: 0.0
                 };
                 let labelMesh = createLabel(font, 0.2, null, applicationMesh,
-                  padding, 0xffffff, logoSize, "center");
+                  padding, 0xffffff, logoSize, "center", application);
 
                 applicationMesh.add(labelMesh);
 
@@ -221,7 +221,7 @@ export default RenderingCore.extend({
                   padding, 0xffffff, {
                     width: 0.0,
                     height: 0.0
-                  }, "min");
+                  }, "min", node);
 
                 nodeMesh.add(labelMesh);
 
@@ -235,7 +235,7 @@ export default RenderingCore.extend({
                   padding, 0x00000, {
                     width: 0.0,
                     height: 0.0
-                  }, "max");
+                  }, "max", system);
 
                 systemMesh.add(labelMesh);
 
@@ -400,7 +400,7 @@ export default RenderingCore.extend({
 
 
     function createLabel(font, size, textToShow, parent, padding, color,
-      logoSize, yPosition) {
+      logoSize, yPosition, model) {
 
       const text = textToShow ? textToShow :
         parent.userData.model.get('name');
@@ -481,6 +481,9 @@ export default RenderingCore.extend({
       const labelMesh = new THREE.Mesh(labelGeo, material);
 
       labelMesh.position.set(posX, posY, 0.005);
+
+      labelMesh.userData['type'] = 'label';
+      labelMesh.userData['model'] = model;
 
       return labelMesh;
     }
@@ -721,8 +724,17 @@ export default RenderingCore.extend({
           const intersectedViewObj = raycasting(null, mouse, true);
 
           if(intersectedViewObj) {
-            // open application rendering
-            self.sendAction("showApplication", 1);
+
+            const emberModel = intersectedViewObj.object.userData.model;
+            const emberModelName = emberModel.constructor.modelName;
+
+            self.debug("Name of raycasting goal: ", emberModelName);
+
+            if(emberModelName === "application"){
+              console.log(intersectedViewObj);
+              // open application rendering
+              self.sendAction("showApplication", emberModel);
+            }
           }
     });
 
@@ -797,20 +809,28 @@ export default RenderingCore.extend({
       // calculate objects intersecting the picking ray (true => recursive)
       const intersections = raycaster.intersectObjects(self.get('scene').children,
         true);
-
+      
       if (intersections.length > 0) {
 
         const result = intersections.filter(function(obj) {
-          const modelName = obj.object.userData.model.constructor.modelName;
-          return (modelName === 'node' ||
-            modelName === 'system' ||
-            modelName === 'nodegroup' ||
-            modelName === 'application');
+          if (obj.object.userData.model) {
+            const modelName = obj.object.userData.model.constructor.modelName;
+            return (modelName === 'node' ||
+              modelName === 'system' ||
+              modelName === 'nodegroup' ||
+              modelName === 'application');
+          }
         });
-
         if (result.length <= 0) {
           return;
         }
+
+        // debug //
+
+        self.addPlane(result[0].point.x, result[0].point.y, 0, 0.5,
+          0.5, new THREE.Color(1, 0, 0), null, null, self.get('scene'), null);
+
+        // end debug //
 
         return result[0];
 
@@ -819,7 +839,87 @@ export default RenderingCore.extend({
 
 
 
-  }
+  }, // END initInteraction
+
+
+  addPlane(x, y, z, width, height, color1, color2, texture, parent, model) {
+
+      // Invisible plane with logo texture
+      if (texture) {
+
+        new THREE.TextureLoader().load('images/logos/' + texture + '.png', (texture) => {
+          const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true
+          });
+          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+            material);
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData['model'] = model;
+          return plane;
+        });
+
+
+      } 
+      // regular plane (one color or gradient)
+      else {
+
+        if(!color2) {
+          const material = new THREE.MeshBasicMaterial({
+            color: color1
+          });
+          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+            material);
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData['model'] = model;
+          return plane;
+        } 
+        else {
+
+          // create gradient texture
+          const canvas = document.createElement( 'canvas' );
+          canvas.width = 16;
+          canvas.height = 16;
+
+          const ctx = canvas.getContext("2d");
+
+          const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
+          grd.addColorStop(0.2, 'rgba(72,26,180,1)');
+          grd.addColorStop(1, 'rgba(101,68,180,1)');
+
+          ctx.fillStyle = grd;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          const gradientTexture = new THREE.Texture(canvas);
+          gradientTexture.needsUpdate = true;
+          gradientTexture.minFilter = THREE.LinearFilter;
+
+          // apply texture too material and create mesh
+          const geometry = new THREE.PlaneGeometry(width, height);
+
+          const material = new THREE.MeshBasicMaterial({      
+            map: gradientTexture
+          });
+
+          const plane = new THREE.Mesh(geometry, material);
+
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData['model'] = model;
+          return plane;
+
+        }
+
+
+
+      }      
+
+
+    }
+
+
 
 
 

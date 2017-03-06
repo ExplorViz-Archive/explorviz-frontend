@@ -6,6 +6,8 @@ export default Ember.Controller.extend({
   lid: null,
 
   showLandscape: true,
+
+  lastShownApplication: null,
   
   computeLandscapeID: Ember.computed('lid', 'model', function() {
     var lid = this.get('lid');

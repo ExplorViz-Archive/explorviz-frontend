@@ -123,7 +123,7 @@ export default Ember.Component.extend({
     const scene = this.get('scene');
 
     while (scene.children.length) {
-      scene.children.remove(scene.children[0]);
+      scene.remove(scene.children[0]);
     }
   }
 
