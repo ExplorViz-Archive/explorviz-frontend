@@ -16,7 +16,9 @@ export default Draw3DNodeEntity.extend({
 
   parentComponent: belongsTo('component'),
 
-  belongingApplication: belongsTo('application')
+  belongingApplication: belongsTo('application'),
+
+  opened: attr('boolean')
 
   //color: attr('vector4f')
 
