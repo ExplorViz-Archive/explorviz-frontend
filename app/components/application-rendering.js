@@ -4,6 +4,7 @@ import Ember from 'ember';
 export default RenderingCore.extend({
 
   cityLayouter: Ember.inject.service("city-layouter"),
+  application3D: null,
 
   // @Override
   initRendering() {
@@ -44,9 +45,14 @@ export default RenderingCore.extend({
 
     this.get('cityLayouter').applyLayout(application);
 
+    self.set('application3D', new THREE.Object3D());
+
     const viewCenterPoint = calculateAppCenterAndZZoom(application);
     addComponentToScene(application.get('components').objectAt(0));
 
+    self.scene.add(self.get('application3D'));
+
+    self.resetRotation();
 
     // Helper functions
 
@@ -58,7 +64,7 @@ export default RenderingCore.extend({
 
       clazzes.forEach((clazz) => {
         if (component.get('opened')) {
-          const classCenter = clazz.centerPoint.sub(viewCenterPoint); 
+          //const classCenter = clazz.centerPoint.sub(viewCenterPoint); 
           let color = 0x3E14A0;        
 
           if (clazz.get('highlighted')) {
@@ -89,7 +95,7 @@ export default RenderingCore.extend({
         component.get('positionZ') + component.get('depth') / 2.0);
 
       const material = new THREE.MeshLambertMaterial();
-      material.color = new THREE.Color(0x00BB41);
+      material.color = color;
 
       centerPoint.sub(viewCenterPoint);
 
@@ -103,7 +109,7 @@ export default RenderingCore.extend({
       mesh.position.set(centerPoint.x, centerPoint.y, centerPoint.z);
       mesh.updateMatrix();
 
-      self.scene.add(mesh);
+      self.get('application3D').add(mesh);
 
     } // END createBox
 
@@ -162,8 +168,14 @@ export default RenderingCore.extend({
 
 
 
-  } // END populateScene
+  }, // END populateScene
 
-  
+  resetRotation() {
+    const rotationX = 0.57;
+    const rotationY = 0.76;
+
+    this.set('application3D.rotation.x', rotationX);
+    this.set('application3D.rotation.y', rotationY);
+  }
   
 });

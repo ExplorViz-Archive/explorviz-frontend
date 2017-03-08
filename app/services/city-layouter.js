@@ -14,8 +14,8 @@ export default Ember.Service.extend({
     initNodes(foundationComponent);
 
     doLayout(foundationComponent);
-/*  setAbsoluteLayoutPosition(foundationComponent);
-
+    setAbsoluteLayoutPosition(foundationComponent);
+/*
     layoutEdges(application);
 
     const incomingCommunications = application.get('incomingCommunications');
@@ -32,6 +32,32 @@ export default Ember.Service.extend({
 
 
     // Helper functions
+
+    function setAbsoluteLayoutPosition(component){
+      const children = component.get('children');
+      const clazzes = component.get('clazzes');
+
+      children.forEach((child) => {
+        child.set('positionX', child.get('positionX') + component.get('positionX'));
+        child.set('positionY', child.get('positionY') + component.get('positionY'));
+        if (component.opened) {
+          child.set('positionY', child.get('positionY') + component.get('height'));
+        }
+        child.set('positionZ', child.get('positionZ') + component.get('positionZ'));
+        setAbsoluteLayoutPosition(child);
+      });
+
+
+      clazzes.forEach((clazz) => {
+        clazz.set('positionX', clazz.get('positionX') + component.get('positionX'));
+        clazz.set('positionY', clazz.get('positionY') + component.get('positionY'));
+        if (component.opened) {
+          clazz.set('positionY', clazz.get('positionY') + component.get('height'));
+        }
+        clazz.set('positionZ', clazz.get('positionZ') + component.get('positionZ'));
+      });
+    }
+
 
     function calcClazzHeight(component) {
 
@@ -193,9 +219,17 @@ export default Ember.Service.extend({
       rootSegment.width = maxX;
       rootSegment.height = maxZ;
 
-      //addLabelInsetSpace(rootSegment, children);
+      // add labelInset space
 
-      return rootSegment;
+      const labelInsetSpace = 8.0;
+
+      children.forEach((child) => {
+        child.set('positionX', child.get('positionX') + labelInsetSpace);
+      });
+
+      rootSegment.width = rootSegment.width + labelInsetSpace;
+
+      return rootSegment;     
 
 
       function insertFittingSegment(rootSegment, toFitWidth, toFitHeight){        
