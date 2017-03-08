@@ -45,10 +45,45 @@ export default RenderingCore.extend({
     this.get('cityLayouter').applyLayout(application);
 
     const viewCenterPoint = calculateAppCenterAndZZoom(application);
-    createBox(application.get('components').objectAt(0));
+    addComponentToScene(application.get('components').objectAt(0));
 
 
-    function createBox(component) {
+    // Helper functions
+
+    function addComponentToScene(component) {
+      createBox(component, 0x00BB41);
+
+      const clazzes = component.get('clazzes');
+      const children = component.get('children');
+
+      clazzes.forEach((clazz) => {
+        if (component.get('opened')) {
+          const classCenter = clazz.centerPoint.sub(viewCenterPoint); 
+          let color = 0x3E14A0;        
+
+          if (clazz.get('highlighted')) {
+            color = 0xFF0000;
+          }
+          
+          createBox(component, color);
+        }
+      });
+
+      children.forEach((child) => {
+        if (child.get('opened')) {
+          addComponentToScene(child);
+        } 
+        else {
+          if (component.get('opened')) {
+            addComponentToScene(child);
+          }
+        }
+      });
+    }
+
+
+
+    function createBox(component, color) {
 
       let centerPoint = new THREE.Vector3(component.get('positionX') + component.get('width') / 2.0, component.get('positionY') + component.get('height') / 2.0,
         component.get('positionZ') + component.get('depth') / 2.0);

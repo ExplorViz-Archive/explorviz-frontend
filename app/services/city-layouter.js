@@ -4,6 +4,8 @@ export default Ember.Service.extend({
 
   applyLayout(application) {
 
+    const insetSpace = 4.0;
+
     const components = application.get('components');
     
     const foundationComponent = components.objectAt(0);
@@ -133,37 +135,52 @@ export default Ember.Service.extend({
 
       const children = component.get('children');
       const clazzes = component.get('clazzes');
-      tempList = tempList.concat(children, clazzes);
+      
+      clazzes.forEach((clazz) => {
+        tempList.push(clazz);
+      });
 
-      const segment = layoutGeneric(tempList, component.get('opened'));
+      children.forEach((child) => {
+        tempList.push(child);
+      });
 
-      console.log(segment);
+      const segment = layoutGeneric(tempList);     
 
-      //component.set('width', segment.width);
-      //component.set('depth', segment.height);
+      component.set('width', segment.width);
+      component.set('depth', segment.height);
     }
 
 
-    function layoutGeneric(children, openedComponent) {
-      console.log(children);
-      console.log(openedComponent);
+    function layoutGeneric(children) {
       const rootSegment = createRootSegment(children);
-      console.log(rootSegment);
-/*
+
       let maxX = 0.0;
       let maxZ = 0.0;
 
-      children.sortInplace(comp);
+      children.sort(function(e1, e2) {
+        const result = e1.get('width') - e2.get('width');
 
-      for (child : children) {
-        const childWidth = (child.width + insetSpace * 2);
-        const childHeight = (child.depth + insetSpace * 2);
-        child.positionY = 0.0;
+        if ((-0.00001 < result) && (result < 0.00001)) {
+          return e1.get('name').localeCompare(e2.get('name'));
+        }
 
-        const foundSegment = rootSegment.insertFittingSegment(childWidth, childHeight);
+        if (result < 0) {
+          return 1;
+        } else {
+          return -1;
+        }
+      });
 
-        child.positionX = foundSegment.startX + insetSpace;
-        child.positionZ = foundSegment.startZ + insetSpace;
+      children.forEach((child) => {
+
+        const childWidth = (child.get('width') + insetSpace * 2);
+        const childHeight = (child.get('depth') + insetSpace * 2);
+        child.set('positionY', 0.0);
+
+        const foundSegment = insertFittingSegment(rootSegment, childWidth, childHeight);
+
+        child.set('positionX', foundSegment.startX + insetSpace);
+        child.set('positionZ', foundSegment.startZ + insetSpace);
 
         if (foundSegment.startX + childWidth > maxX) {
           maxX = foundSegment.startX + childWidth;
@@ -171,34 +188,123 @@ export default Ember.Service.extend({
         if (foundSegment.startZ + childHeight > maxZ) {
           maxZ = foundSegment.startZ + childHeight;
         }
-      }
+      });
 
       rootSegment.width = maxX;
       rootSegment.height = maxZ;
 
-      addLabelInsetSpace(rootSegment, children);
+      //addLabelInsetSpace(rootSegment, children);
 
-      return rootSegment;*/
-    }
+      return rootSegment;
 
-    function createRootSegment(children) {
-      console.log(children);
-      /*let worstCaseWidth = 0.0;
-      let worstCaseHeight = 0.0;
 
-      for (child : children) {
-        worstCaseWidth = worstCaseWidth + (child.width + insetSpace * 2)
-        worstCaseHeight = worstCaseHeight + (child.depth + insetSpace * 2)
+      function insertFittingSegment(rootSegment, toFitWidth, toFitHeight){        
+        if(!rootSegment.used && toFitWidth <= rootSegment.width && toFitHeight <= rootSegment.height) {
+          const resultSegment = createLayoutSegment();
+          rootSegment.upperRightChild = createLayoutSegment();
+          rootSegment.lowerChild = createLayoutSegment();
+
+          resultSegment.startX = rootSegment.startX;
+          resultSegment.startZ = rootSegment.startZ;
+          resultSegment.width = toFitWidth;
+          resultSegment.height = toFitHeight;
+          resultSegment.parent = rootSegment;
+
+          rootSegment.upperRightChild.startX = rootSegment.startX + toFitWidth;
+          rootSegment.upperRightChild.startZ = rootSegment.startZ;
+          rootSegment.upperRightChild.width = rootSegment.width - toFitWidth;
+          rootSegment.upperRightChild.height = toFitHeight;
+          rootSegment.upperRightChild.parent = rootSegment;
+
+          if (rootSegment.upperRightChild.width <= 0.0) {
+            rootSegment.upperRightChild = null;
+          }
+          
+          rootSegment.lowerChild.startX = rootSegment.startX;
+          rootSegment.lowerChild.startZ = rootSegment.startZ + toFitHeight;
+          rootSegment.lowerChild.width = rootSegment.width;
+          rootSegment.lowerChild.height = rootSegment.height - toFitHeight;
+          rootSegment.lowerChild.parent = rootSegment;
+          
+          if (rootSegment.lowerChild.height <= 0.0) {
+            rootSegment.lowerChild = null;
+          }
+          
+          rootSegment.used = true;
+          return resultSegment;
+        } 
+        else {
+          let resultFromUpper = null;
+          let resultFromLower = null;
+
+          if (rootSegment.upperRightChild != null) {
+            resultFromUpper = insertFittingSegment(rootSegment.upperRightChild, toFitWidth, toFitHeight);
+          }
+
+          if (rootSegment.lowerChild != null) {
+            resultFromLower = insertFittingSegment(rootSegment.lowerChild, toFitWidth, toFitHeight);
+          }
+
+          if (resultFromUpper == null) {
+            return resultFromLower;
+          } else if (resultFromLower == null) {
+            return resultFromUpper;
+          } else {
+            // choose best fitting square
+            const upperBoundX = resultFromUpper.startX + resultFromUpper.width;
+
+            const lowerBoundZ = resultFromLower.startZ + resultFromLower.height;
+            
+            if (upperBoundX <= lowerBoundZ) {
+              resultFromLower.parent.used = false;
+              return resultFromUpper;
+            } else {
+              resultFromUpper.parent.used = false;
+              return resultFromLower;
+            }
+          }
+        }
       }
 
-      val rootSegment = new LayoutSegment()
-      rootSegment.startX = 0f
-      rootSegment.startZ = 0f
+    } // END layoutGeneric
 
-      rootSegment.width = worstCaseWidth
-      rootSegment.height = worstCaseHeight
 
-      rootSegment*/
+    function createRootSegment(children) {
+      let worstCaseWidth = 0.0;
+      let worstCaseHeight = 0.0;
+
+      children.forEach((child) => {
+        worstCaseWidth = worstCaseWidth + (child.get('width') + insetSpace * 2);
+        worstCaseHeight = worstCaseHeight + (child.get('depth') + insetSpace * 2);
+      });
+
+
+      const rootSegment = createLayoutSegment();
+
+      rootSegment.startX = 0.0;
+      rootSegment.startZ = 0.0;
+
+      rootSegment.width = worstCaseWidth;
+      rootSegment.height = worstCaseHeight;
+
+      return rootSegment;
+    }
+
+
+    function createLayoutSegment() {
+      const layoutSegment = 
+      {
+        parent: null, 
+        lowerChild: null, 
+        upperRightChild: null, 
+        startX: null, 
+        startZ: null, 
+        width: null, 
+        height: null,
+        used: false
+      };
+
+      return layoutSegment;
     }
 
 
