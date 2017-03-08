@@ -5,7 +5,14 @@ const {Component, $, on, observer} = Ember;
 export default Component.extend({
 
   store: Ember.inject.service(),
+  
   plot: null,
+  
+  timeshiftUpdater: Ember.inject.service("timeshift-reload"),
+  
+  timestamps: Ember.computed.oneWay("timeshiftUpdater.object"),
+  
+  observer: Ember.observer("timestamps", function(){this.updatePlot();}),
 
   // @Override
   init() {
@@ -14,6 +21,8 @@ export default Component.extend({
     $(window).resize(() => {
       this.resizePlot();
     });
+	
+	this.get("timestamps")
 
   },
 
@@ -193,20 +202,18 @@ export default Component.extend({
 
   // TODO WIP Update function for plot
   updatePlot: function () {
-    //var interval = 1000;
-    //Ember.run.later(this, function() {
     var updatedPlot = this.plot;
+	if(updatedPlot === null){ return ;}
+	var timestamps = this.get("timestamps");
+	var labels = timestamps.labels;
+	var values = timestamps.values;
+	
+	updatedPlot.data.labels = labels;
+	updatedPlot.data.datasets[0].data = values; 
+	//update the Changes
+	this.set("plot", updatedPlot);
+	this.get("plot").update();
 
-    const chartData = this.getChartData();
-    chartData.then((chartData) => {
-          updatedPlot.labels = chartData.labels;
-          updatedPlot.data = chartData.values;
-          this.set('plot', updatedPlot);
-        }).catch(() => {
-          console.log('Error updating chart!');
-        });
-
-    //}, interval);
   },
 
   resizePlot: function () {
