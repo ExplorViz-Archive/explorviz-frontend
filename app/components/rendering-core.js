@@ -52,8 +52,7 @@ export default Ember.Component.extend({
     this.set('scene', new THREE.Scene());
     this.set('scene.background', new THREE.Color(0xffffff));
 
-    this.set('camera', new THREE.PerspectiveCamera(70, width / height, 0.1, 200));
-    this.get('camera').position.set(13, -2, 10);
+    this.set('camera', new THREE.PerspectiveCamera(75, width / height, 0.1, 1000));
 
     this.set('webglrenderer', new THREE.WebGLRenderer({
       antialias: true,  

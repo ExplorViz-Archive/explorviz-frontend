@@ -113,7 +113,7 @@ export default RenderingCore.extend({
             centerX = nodegroup.get('positionX') + extensionX - centerPoint.x;
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
-            var nodegroupMesh = addPlane(centerX, centerY, nodegroup.get('positionZ'), nodegroup.get('width'),
+            var nodegroupMesh = addPlane(centerX, centerY, nodegroup.get('positionZ') + 0.01, nodegroup.get('width'),
               nodegroup.get('height'), new THREE.Color(x, y, z), null, null, self.get('scene'), nodegroup);
 
             nodegroup.set('threeJSModel', nodegroupMesh);
@@ -138,7 +138,7 @@ export default RenderingCore.extend({
               centerX = node.get('positionX') + extensionX - centerPoint.x;
               centerY = node.get('positionY') - extensionY - centerPoint.y;
 
-              var nodeMesh = addPlane(centerX, centerY, node.get('positionZ'), node.get('width'),
+              var nodeMesh = addPlane(centerX, centerY, node.get('positionZ') + 0.02, node.get('width'),
                 node.get('height'), new THREE.Color(x, y, z), null, null, self.get('scene'), node);
 
               node.set('threeJSModel', nodeMesh);
@@ -163,7 +163,7 @@ export default RenderingCore.extend({
                   z
                 } = application.get('backgroundColor');
 
-                var applicationMesh = addPlane(centerX, centerY, application.get('positionZ'),
+                var applicationMesh = addPlane(centerX, centerY, application.get('positionZ') + 0.03,
                   application.get('width'), application.get('height'), new THREE.Color(x, y, z), new THREE.Color(0x6D4FB4), null,
                   self.get('scene'), application);
 
@@ -718,8 +718,8 @@ export default RenderingCore.extend({
 
           const event = evt.srcEvent;
 
-          mouse.x = ((event.clientX) / renderer.domElement.clientWidth) * 2 - 1;
-          mouse.y = -((event.clientY - 60) / renderer.domElement.clientHeight) * 2 + 1;
+          mouse.x = ((event.clientX - 15) / renderer.domElement.clientWidth) * 2 - 1;
+          mouse.y = -((event.clientY - 75) / renderer.domElement.clientHeight) * 2 + 1;
 
           const intersectedViewObj = raycasting(null, mouse, true);
 
@@ -815,6 +815,7 @@ export default RenderingCore.extend({
         const result = intersections.filter(function(obj) {
           if (obj.object.userData.model) {
             const modelName = obj.object.userData.model.constructor.modelName;
+            console.log(modelName);
             return (modelName === 'node' ||
               modelName === 'system' ||
               modelName === 'nodegroup' ||
