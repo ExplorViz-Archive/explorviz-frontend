@@ -28,7 +28,7 @@ export default RenderingCore.extend({
     var dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
     this.get('scene').add(dirLight);
-	this.get("landscape");
+	this.get("landscape"); //useless, but very important to let the observer work
   },
 
   // @Override

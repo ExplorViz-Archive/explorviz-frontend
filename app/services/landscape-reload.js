@@ -1,6 +1,10 @@
 import Reload from './data-reload';
 
 export default Reload.extend({
+	/*
+		this service starts working with the application. Look "instance-initializer/service-start" for more information
+	*/
+	
 	//@Override
 	updateObject(){
 		const self = this;

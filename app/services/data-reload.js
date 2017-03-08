@@ -6,11 +6,12 @@ export default Ember.Service.extend({
 	session: Ember.inject.service("session"),
 	isAuthenticated: Ember.computed.oneWay("session.isAuthenticated"),
 	
-	//Hier werden die benötigten Teile "erneuert". Später würde hier vielleicht noch Platz für Notifications 
-	//Platz finden
+	/* this service is used like an abstract service
+	it only works with an "authenticated session". It will start immediatly working, when the session is authenticated 
+	*/
 	
 	
-	//Hier ist die Endlosschleife, die alle 10 Sekunden, die Funktion ausführt.
+	//This loop works infinetly, unless the session is authenticated
 	reloadLoop: function(){
 		if(this.get("isAuthenticated") === true){
 			this.updateObject();
@@ -18,9 +19,7 @@ export default Ember.Service.extend({
 		}
 	}.observes("isAuthenticated"),
 	
-	//In dieser Funktion soll genauer identifiziert werden, woher das Modell für unser Objekt genommen wird.
-	//Dies entscheidet auch für den Funktionsaufruf "object.reload()" von welcher URL das Modell bezogen werden
-	//soll
+	//This function is the part, which has to be overwritten by extending services (e.g. landscape-reload) 
 	updateObject(){
 		// z.B. object = this.store.queryRecord('landscape', 'latest-landscape');
 	},

@@ -1,8 +1,10 @@
 import Reload from './data-reload';
 
 export default Reload.extend({
-	object: {'labels':[], "values":[]},
-	//In this function we will update the Datas
+	object: null,
+	/*
+		this service starts working with the application. Look "instance-initializer/service-start" for more information
+	*/
 	//@override
 	updateObject(){
 		const self = this;
