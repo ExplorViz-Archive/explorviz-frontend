@@ -11,7 +11,7 @@ export default RenderingCore.extend({
   
 	landscape: Ember.computed.oneWay("landscapeUpdater.object"),  
 	
-	observer: Ember.observer("landscape", function(){this.cleanAndUpdateScene(this.get("landscape"))}),  //the observer reacts to changes for the computed value landscape
+	observer: Ember.observer("landscape", function(){this.cleanAndUpdateScene(this.get("landscape"));}),  //the observer reacts to changes for the computed value landscape
 
   actions: {
     test(data) {

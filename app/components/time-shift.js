@@ -22,7 +22,7 @@ export default Component.extend({
       this.resizePlot();
     });
 	
-	this.get("timestamps")
+	this.get("timestamps");
 
   },
 
