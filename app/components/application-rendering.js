@@ -49,19 +49,7 @@ export default RenderingCore.extend({
     this._super(...arguments);
     const self = this;
 
-    /*let foundation = this.get('store').createRecord('component', {
-        synthetic: false,
-        foundation: true,
-        children: application.get('components'),
-        clazzes: [],
-        parentComponent: null,
-        belongingApplication: application,
-        opened: true,
-        name: application.get('name'),
-        fullQualifiedName: application.get('name')
-    });
-
-    application.set('components', [foundation]);*/
+    const foundation = createFoundation();
 
     this.get('cityLayouter').applyLayout(application);
 
@@ -69,12 +57,37 @@ export default RenderingCore.extend({
 
     const viewCenterPoint = calculateAppCenterAndZZoom(application);
 
-    addComponentToScene(application.get('components').objectAt(0), 0xCECECE);
+    addComponentToScene(foundation, 0xCECECE);
 
     self.scene.add(self.get('application3D'));
     self.resetRotation();
 
     // Helper functions    
+    
+    function createFoundation() {
+      const foundation = self.get('store').createRecord('component', {
+        id: 0,
+        synthetic: false,
+        foundation: true,
+        children: [application.get('components').objectAt(0)],
+        clazzes: [],
+        belongingApplication: application,
+        opened: true,
+        name: application.get('name'),
+        fullQualifiedName: application.get('name'),
+        positionX: 0,
+        positionY: 0,
+        positionZ: 0,
+        width: 0,
+        height: 0,
+        depth: 0
+      });
+
+      application.get('components').objectAt(0).set('parentComponent', foundation);
+      application.set('components', [foundation]);
+
+      return foundation;
+    }
 
     function addComponentToScene(component, color) {
 
