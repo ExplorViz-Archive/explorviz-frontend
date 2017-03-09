@@ -73,13 +73,144 @@ export default Ember.Service.extend({
         instanceCountList.push(clazz.get('instanceCount'));
       });
 
-      //val categories = MathHelpers::getCategoriesForClazzes(instanceCountList)
+      const categories = getCategoriesForClazzes(instanceCountList, false);
 
-      clazzes.forEach((clazz) => {
-        //clazz.height = (clazzSizeEachStep * categories.get(clazz.instanceCount) + clazzSizeDefault) * 4.0
-        clazz.set('height', (clazzSizeEachStep * 3.0 + clazzSizeDefault) * 4.0);
+      clazzes.forEach((clazz) => {        
+        clazz.set('height', (clazzSizeEachStep * categories[clazz.get('instanceCount')] + clazzSizeDefault) * 4.0);
       });
     }
+
+
+    function getCategoriesForClazzes(list, linear) {
+      const result = [];
+
+      if (list.length === 0) {
+        return result;
+      }
+
+      list.sort();
+
+
+      if (linear) {
+        const listWithout0 = [];
+
+        list.forEach((entry) => {
+          if (entry !== 0){
+            listWithout0.push(entry);
+          }
+        });
+
+        if (listWithout0.length === 0) {
+          result.push({0: 0.0});
+          return result;
+        }        
+        useLinear(listWithout0, list, result);
+      } 
+      else {
+        const listWithout0And1 = [];
+
+        list.forEach((entry) => {
+          if (entry !== 0 && entry !== 1){
+            listWithout0And1.push(entry);
+          }
+        });
+
+        if (listWithout0And1.length === 0) {
+          result.push({0: 0.0});
+          result.push({1: 1.0});
+          return result;
+        }
+
+        useThreshholds(listWithout0And1, list, result);
+      }
+
+      return result;
+
+
+
+      // inner helper functions
+
+      function useThreshholds(listWithout0And1, list, result) {
+        let max = 1;
+
+        listWithout0And1.forEach((value) => {
+          if (value > max) {
+            max = value;
+          }
+        });
+
+        const oneStep = max / 3.0;
+
+        const t1 = oneStep;
+        const t2 = oneStep * 2;
+
+        list.forEach((entry) => {
+          let categoryValue = getCategoryFromValues(entry, t1, t2);
+          result.push(entry, categoryValue);
+        });
+
+      }
+
+
+      function getCategoryFromValues(value, t1, t2) {
+        if (value === 0) {
+          return 0;
+        } else if (value === 1) {
+          return 1;
+        }
+
+        if (value <= t1) {
+          return 2;
+        } else if (value <= t2) {
+          return 3;
+        } else {
+          return 4;
+        }
+      }
+
+
+      function useLinear(listWithout0, list, result) {
+        let max = 1;
+        let secondMax = 1;
+
+        listWithout0.forEach((value) => {
+          if (value > max) {
+            secondMax = max;
+            max = value;
+          }
+        });   
+
+        const oneStep = secondMax / 4.0;
+
+        const t1 = oneStep;
+        const t2 = oneStep * 2;
+        const t3 = oneStep * 3;
+
+        list.forEach((entry) => {
+          const categoryValue = getCategoryFromLinearValues(entry, t1, t2, t3);
+          result.push({entry, categoryValue});
+        }); 
+
+      }
+
+
+      function getCategoryFromLinearValues(value, t1, t2, t3) {
+        if (value <= 0) {
+          return 0;
+        } else if (value <= t1) {
+          return 1.5;
+        } else if (value <= t2) {
+          return 2.5;
+        } else if (value <= t3) {
+          return 4.0;
+        } else {
+          return 6.5;
+        }
+      }
+
+
+
+    } // END getCategoriesForClazzes
 
 
     function getClazzList(component, clazzesArray){

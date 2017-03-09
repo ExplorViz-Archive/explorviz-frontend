@@ -19,7 +19,4 @@ export default Draw3DNodeEntity.extend({
   belongingApplication: belongsTo('application'),
 
   opened: attr('boolean')
-
-  //color: attr('vector4f')
-
 });

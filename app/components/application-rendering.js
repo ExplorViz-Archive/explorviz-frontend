@@ -3,6 +3,7 @@ import Ember from 'ember';
 
 export default RenderingCore.extend({
 
+  store: Ember.inject.service('store'),
   cityLayouter: Ember.inject.service("city-layouter"),
   application3D: null,
 
@@ -14,9 +15,14 @@ export default RenderingCore.extend({
     
     this.get('camera').position.set(0, 0, 100);
 
-    const dirLight = new THREE.DirectionalLight();
-    dirLight.position.set(30, 10, 20);
-    this.get('scene').add(dirLight);
+    const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
+    spotLight.position.set(100, 100, 100);
+    spotLight.castShadow = false;
+    this.get('scene').add(spotLight);
+
+    const light = new THREE.AmbientLight(
+    new THREE.Color(0.65, 0.65, 0.65));
+    this.scene.add(light);
   },
 
   // @Override
@@ -43,21 +49,36 @@ export default RenderingCore.extend({
     this._super(...arguments);
     const self = this;
 
+    /*let foundation = this.get('store').createRecord('component', {
+        synthetic: false,
+        foundation: true,
+        children: application.get('components'),
+        clazzes: [],
+        parentComponent: null,
+        belongingApplication: application,
+        opened: true,
+        name: application.get('name'),
+        fullQualifiedName: application.get('name')
+    });
+
+    application.set('components', [foundation]);*/
+
     this.get('cityLayouter').applyLayout(application);
 
     self.set('application3D', new THREE.Object3D());
 
     const viewCenterPoint = calculateAppCenterAndZZoom(application);
-    addComponentToScene(application.get('components').objectAt(0));
+
+    let colorCounter = 1;
+    addComponentToScene(application.get('components').objectAt(0), 0xCECECE);
 
     self.scene.add(self.get('application3D'));
-
     self.resetRotation();
 
-    // Helper functions
+    // Helper functions    
 
-    function addComponentToScene(component) {
-      createBox(component, 0x00BB41);
+    function addComponentToScene(component, color) {
+      createBox(component, color);
 
       const clazzes = component.get('clazzes');
       const children = component.get('children');
@@ -65,27 +86,39 @@ export default RenderingCore.extend({
       clazzes.forEach((clazz) => {
         if (component.get('opened')) {
           //const classCenter = clazz.centerPoint.sub(viewCenterPoint); 
-          let color = 0x3E14A0;        
+          let clazzColor = 0x3E14A0;        
 
           if (clazz.get('highlighted')) {
-            color = 0xFF0000;
+            clazzColor = 0xFF0000;
           }
           
-          createBox(component, color);
+          createBox(component, clazzColor);
         }
       });
 
       children.forEach((child) => {
         if (child.get('opened')) {
-          addComponentToScene(child);
+          if(colorCounter % 2 === 1) {
+            colorCounter++;
+            addComponentToScene(child, 0x00BB41);
+          } else {
+            colorCounter++;
+            addComponentToScene(child, 0x169E2B);
+          }
         } 
         else {
           if (component.get('opened')) {
-            addComponentToScene(child);
+            if(colorCounter % 2 === 1) {
+              colorCounter++;
+              addComponentToScene(child, 0x00BB41);
+            } else {
+              colorCounter++;
+              addComponentToScene(child, 0x169E2B);
+            }
           }
         }
       });
-    }
+    } // END addComponentToScene
 
 
 
@@ -95,7 +128,7 @@ export default RenderingCore.extend({
         component.get('positionZ') + component.get('depth') / 2.0);
 
       const material = new THREE.MeshLambertMaterial();
-      material.color = color;
+      material.color = new THREE.Color(color);
 
       centerPoint.sub(viewCenterPoint);
 
@@ -171,8 +204,8 @@ export default RenderingCore.extend({
   }, // END populateScene
 
   resetRotation() {
-    const rotationX = 0.57;
-    const rotationY = 0.76;
+    const rotationX = 0.65;
+    const rotationY = 0.80;
 
     this.set('application3D.rotation.x', rotationX);
     this.set('application3D.rotation.y', rotationY);
