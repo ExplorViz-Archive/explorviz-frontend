@@ -90,7 +90,6 @@ export default Ember.Service.extend({
 
       list.sort();
 
-
       if (linear) {
         const listWithout0 = [];
 
@@ -109,9 +108,14 @@ export default Ember.Service.extend({
       else {
         const listWithout0And1 = [];
 
+        let outsideCounter = 0;
+        let insideCounter = 0;
+
         list.forEach((entry) => {
+          outsideCounter++;
           if (entry !== 0 && entry !== 1){
             listWithout0And1.push(entry);
+            insideCounter++;
           }
         });
 
@@ -146,7 +150,7 @@ export default Ember.Service.extend({
 
         list.forEach((entry) => {
           let categoryValue = getCategoryFromValues(entry, t1, t2);
-          result.push(entry, categoryValue);
+          result[entry] = categoryValue;
         });
 
       }
@@ -154,17 +158,17 @@ export default Ember.Service.extend({
 
       function getCategoryFromValues(value, t1, t2) {
         if (value === 0) {
-          return 0;
+          return 0.0;
         } else if (value === 1) {
-          return 1;
+          return 1.0;
         }
 
         if (value <= t1) {
-          return 2;
+          return 2.0;
         } else if (value <= t2) {
-          return 3;
+          return 3.0;
         } else {
-          return 4;
+          return 4.0;
         }
       }
 
@@ -238,7 +242,7 @@ export default Ember.Service.extend({
       });
 
       clazzes.forEach((clazz) => {
-        clazz.set('height', clazzWidth);
+        clazz.set('depth', clazzWidth);
         clazz.set('width', clazzWidth);
       });
 
@@ -251,21 +255,21 @@ export default Ember.Service.extend({
     function getHeightOfComponent(component) {
       const floorHeight = 0.75 * 4.0;
 
-      if (!component.get('opened')) {
+      if (!component.get('opened')) {  
         let childrenHeight = floorHeight;
 
         const children = component.get('children');
         const clazzes = component.get('clazzes');
 
-        children.forEach((child) => {
-          if (child.get('height') > childrenHeight) {
-            childrenHeight = child.get('height');
-          }
-        });
-
         clazzes.forEach((clazz) => {
           if (clazz.get('height') > childrenHeight) {
             childrenHeight = clazz.get('height');
+          }
+        });
+
+        children.forEach((child) => {
+          if (child.get('height') > childrenHeight) {
+            childrenHeight = child.get('height');
           }
         });
 

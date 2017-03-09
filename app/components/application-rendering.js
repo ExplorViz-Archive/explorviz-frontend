@@ -69,7 +69,6 @@ export default RenderingCore.extend({
 
     const viewCenterPoint = calculateAppCenterAndZZoom(application);
 
-    let colorCounter = 1;
     addComponentToScene(application.get('components').objectAt(0), 0xCECECE);
 
     self.scene.add(self.get('application3D'));
@@ -78,42 +77,52 @@ export default RenderingCore.extend({
     // Helper functions    
 
     function addComponentToScene(component, color) {
+
+      const grey = 0xCECECE;
+      const lightGreen = 0x00BB41;
+      const darkGreen = 0x169E2B;
+      const clazzColor = 0x3E14A0;
+      const redHighlighted = 0xFF0000;
+
       createBox(component, color);
+
+      component.set('color', color);
 
       const clazzes = component.get('clazzes');
       const children = component.get('children');
 
       clazzes.forEach((clazz) => {
         if (component.get('opened')) {
-          //const classCenter = clazz.centerPoint.sub(viewCenterPoint); 
-          let clazzColor = 0x3E14A0;        
+          //const classCenter = clazz.centerPoint.sub(viewCenterPoint);      
 
           if (clazz.get('highlighted')) {
-            clazzColor = 0xFF0000;
+             createBox(component, redHighlighted);
+          } else {
+             createBox(component, clazzColor);
           }
-          
-          createBox(component, clazzColor);
         }
       });
 
       children.forEach((child) => {
         if (child.get('opened')) {
-          if(colorCounter % 2 === 1) {
-            colorCounter++;
-            addComponentToScene(child, 0x00BB41);
-          } else {
-            colorCounter++;
-            addComponentToScene(child, 0x169E2B);
+          if(component.get('color') === grey) {
+            addComponentToScene(child, lightGreen);
+          }
+          else if(component.get('color') === darkGreen) {
+            addComponentToScene(child, lightGreen);
+          } else {            
+            addComponentToScene(child, darkGreen);
           }
         } 
         else {
           if (component.get('opened')) {
-            if(colorCounter % 2 === 1) {
-              colorCounter++;
-              addComponentToScene(child, 0x00BB41);
-            } else {
-              colorCounter++;
-              addComponentToScene(child, 0x169E2B);
+            if(component.get('color') === grey) {
+              addComponentToScene(child, lightGreen);
+            }
+            else if(component.get('color') === darkGreen) {            
+              addComponentToScene(child, lightGreen);
+            } else {              
+              addComponentToScene(child, darkGreen);
             }
           }
         }
