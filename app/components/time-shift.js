@@ -12,7 +12,9 @@ export default Component.extend({
   
   timestamps: Ember.computed.oneWay("timeshiftUpdater.object"),
   
-  observer: Ember.observer("timestamps", function(){this.updatePlot();}),
+  observer: Ember.observer("timestamps", function(){
+    this.updatePlot();
+  }),
 
   // @Override
   init() {

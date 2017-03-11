@@ -18,5 +18,15 @@ export default Draw3DNodeEntity.extend({
 
   belongingApplication: belongsTo('application'),
 
-  opened: attr('boolean')
+  opened: attr('boolean'),
+
+  toggleOpenedStatus: function() {
+
+    this.get('children').forEach((child) => {
+      child.set('opened', false);
+    });
+
+    this.set('opened', !this.get('opened'));
+  }
+
 });

@@ -7,17 +7,13 @@ export default RenderingCore.extend({
 
   klayLayouter: Ember.inject.service("klay-layouter"),
   
-    landscapeUpdater: Ember.inject.service("landscape-reload"),
-  
+  landscapeUpdater: Ember.inject.service("landscape-reload"),  
 	landscape: Ember.computed.oneWay("landscapeUpdater.object"),  
 	
-	observer: Ember.observer("landscape", function(){this.cleanAndUpdateScene(this.get("landscape"));}),  //the observer reacts to changes for the computed value landscape
-
-  actions: {
-    test(data) {
-      console.log("hello from action", data);
-    }
-  },
+  //the observer reacts to changes for the computed value landscape
+	observer: Ember.observer("landscape", function(){
+    this.cleanAndUpdateScene(this.get("landscape"));
+  }),  
 
   // @Override
   initRendering() {
@@ -28,7 +24,7 @@ export default RenderingCore.extend({
     var dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
     this.get('scene').add(dirLight);
-	this.get("landscape"); //useless, but very important to let the observer work
+    this.get("landscape"); //useless, but very important for working observer
   },
 
   // @Override
@@ -45,6 +41,8 @@ export default RenderingCore.extend({
   // @Override
   cleanAndUpdateScene(landscape) {
     this._super(...arguments);
+
+    this.debug("populate landscape rendering");
 
     this.populateScene(landscape);
   },

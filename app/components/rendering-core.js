@@ -121,8 +121,12 @@ export default Ember.Component.extend({
     this.set('entity', renderingModel);
     const scene = this.get('scene');
 
-    while (scene.children.length) {
-      scene.remove(scene.children[0]);
+    for (let i = scene.children.length - 1; i >= 0 ; i--) {
+      let child = scene.children[i];
+
+      if ( child.type !== 'AmbientLight' && child.type !== 'SpotLight' ) {
+        scene.remove(child);
+      }
     }
   }
 
