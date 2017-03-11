@@ -20,13 +20,13 @@ export default Draw3DNodeEntity.extend({
 
   opened: attr('boolean'),
 
-  toggleOpenedStatus: function() {
+  setOpenedStatus: function(status) {
 
     this.get('children').forEach((child) => {
-      child.set('opened', false);
+      child.setOpenedStatus(false);
     });
 
-    this.set('opened', !this.get('opened'));
+    this.set('opened', status);
   }
 
 });

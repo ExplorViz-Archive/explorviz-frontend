@@ -45,10 +45,16 @@ export default RenderingCore.extend({
   cleanAndUpdateScene(application) {
     this._super(...arguments);
 
+    this.debug("populate application rendering");
+
     // remove foundation for re-rendering
-    const components = application.get('components');
-    application.set('components', components.objectAt(0).get('children'));
+    
+    const foundation = application.get('components').objectAt(0);
+
+    application.set('components', foundation.get('children'));
     application.get('components').objectAt(0).set('parentComponent', null);
+
+    //this.store.unloadRecord(foundation);
 
     this.populateScene(application);
   },
@@ -339,7 +345,7 @@ export default RenderingCore.extend({
             const emberModelName = emberModel.constructor.modelName;
 
             if(emberModelName === "component"){
-              emberModel.toggleOpenedStatus();
+              emberModel.setOpenedStatus(!emberModel.get('opened'));
               emberModel.set('highlighted', false);
               self.cleanAndUpdateScene(self.application3D.userData.model);
             }
