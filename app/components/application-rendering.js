@@ -54,7 +54,7 @@ export default RenderingCore.extend({
     application.set('components', foundation.get('children'));
     application.get('components').objectAt(0).set('parentComponent', null);
 
-    //this.store.unloadRecord(foundation);
+    this.get('store').unloadRecord(foundation);
 
     this.populateScene(application);
   },
@@ -82,7 +82,7 @@ export default RenderingCore.extend({
     // Helper functions    
     
     function createFoundation() {
-      const idTest = Math.random() * (20000 - 10000) + 10000;
+      const idTest = parseInt(Math.random() * (20000 - 10000) + 10000);
       const foundation = self.get('store').createRecord('component', {
         id: idTest,
         synthetic: false,

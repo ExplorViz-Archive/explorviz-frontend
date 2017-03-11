@@ -5,6 +5,7 @@ export default Ember.Service.extend({
 	object:null,
 	session: Ember.inject.service("session"),
 	isAuthenticated: Ember.computed.oneWay("session.isAuthenticated"),
+	previousRequestDone: true,
 	
 	/* this service is used like an abstract service
 	it only works with an "authenticated session". It will start immediatly working, when the session is authenticated 
