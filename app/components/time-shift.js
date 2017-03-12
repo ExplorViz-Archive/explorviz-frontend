@@ -8,13 +8,13 @@ export default Component.extend({
   
   plot: null,
   
-  timeshiftUpdater: Ember.inject.service("timeshift-reload"),
-  
+  timeshiftUpdater: Ember.inject.service("timeshift-reload"),  
   timestamps: Ember.computed.oneWay("timeshiftUpdater.object"),
   
   observer: Ember.observer("timestamps", function(){
-    this.updatePlot();
+    Ember.run.once(this, 'updatePlot');
   }),
+
 
   // @Override
   init() {

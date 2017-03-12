@@ -2,25 +2,21 @@ import Ember from 'ember';
 
 export default Ember.Controller.extend({
 
-  queryParams: ['lid'],
-  lid: null,
+  queryParams: ['timestamp', 'id', 'appName'],
+
+  type: 'landscape',
+  id: null,
+  appName: null,
 
   showLandscape: true,
-
   lastShownApplication: null,
-  
-  computeLandscapeID: Ember.computed('lid', 'model', function() {
-    var lid = this.get('lid');
-    //var currentLandscape = this.get('model');
-    if(lid) {
-      // query for this lid
-      return "test1";
-    } else {
-      // use lid of currentLandscape
-      return "test2";
-    }
-    
 
+  landscapeUpdater: Ember.inject.service("landscape-reload"),
+  landscape: Ember.computed.oneWay("landscapeUpdater.object"),
+  
+  //the observer reacts to changes for the computed value landscape
+  observer: Ember.observer("landscape", function(){
+    this.debug("hello");
   })
 
 });

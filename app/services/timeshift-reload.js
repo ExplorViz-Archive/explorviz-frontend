@@ -79,7 +79,7 @@ export default Reload.extend({
 	
 		function failure(){
 			self.set('previousRequestDone', true);
-			console.log("timestamp couldn`t be requested");
+			console.log("Timestamps couldn`t be requested");
 		}
 		
 		function error(e){

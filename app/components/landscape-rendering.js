@@ -12,6 +12,8 @@ export default RenderingCore.extend({
 	
   //the observer reacts to changes for the computed value landscape
 	observer: Ember.observer("landscape", function(){
+    this.debug("observed change in landscape-rendering");
+    //Ember.run.once(this, this.cleanAndUpdateScene(this.get("landscape")));
     this.cleanAndUpdateScene(this.get("landscape"));
   }),  
 
