@@ -15,6 +15,39 @@ export default Component.extend({
     Ember.run.once(this, 'updatePlot');
   }),
 
+  chevronCSSClass: 'glyphicon-chevron-up',
+  playPauseCSSClass: 'glyphicon-pause',
+
+
+  actions: {
+    toggleTimeline() {
+
+      if ($(".timeline").attr('vis') === 'show') {
+        // hide timeline        
+        $(".timeline").slideUp();
+        $("#vizContainer").animate({height:'+=200'});
+        $(".timeline").attr('vis', 'hide');
+        this.set('chevronCSSClass', 'glyphicon-chevron-up');
+      }
+      else {
+        // show timeline        
+        $(".timeline").slideDown();
+        $("#vizContainer").animate({height:'-=200'});
+        $(".timeline").attr('vis', 'show');
+        this.set('chevronCSSClass', 'glyphicon-chevron-up');
+      }
+    },
+    playPauseTimeshift() {
+      if(this.get('timeshiftUpdater').active) {
+        this.set('timeshiftUpdater.active', false);
+        this.set('playPauseCSSClass', 'glyphicon-play');
+      } 
+      else {
+        this.set('timeshiftUpdater.active', true);
+        this.set('playPauseCSSClass', 'glyphicon-pause');
+      }
+    }
+  },
 
   // @Override
   init() {
@@ -30,6 +63,8 @@ export default Component.extend({
 
   // query timestamps from backend and call renderPlot with chart-ready data
   getChartData: function () {
+
+    const dataPointPixelRatio = 30;
 
     const store = this.get('store');
     // GET /show-timestamps
@@ -63,7 +98,7 @@ export default Component.extend({
       }
 
       // maximum number of timestamps displayed in chart at one time
-      const maxNumOfChartTimestamps = 30;
+      const maxNumOfChartTimestamps = parseInt(this.$()[0].clientWidth / dataPointPixelRatio);
 
       // TODO: error handling (no data etc)
 
@@ -83,7 +118,7 @@ export default Component.extend({
       }
 
       // get maximum amount of call for scaling the chart
-        const maxCalls = Math.max.apply(null, chartCalls);
+      const maxCalls = Math.max.apply(null, chartCalls);
 
       const chartData = {
         labels: chartTimestamps,
@@ -220,23 +255,6 @@ export default Component.extend({
 
   resizePlot: function () {
     this.renderPlot();
-  },
-
-  actions: {
-    toggleTimeline() {
-
-      if ($(".timeline").attr('vis') === 'show') {
-        $(".timeline").slideUp();
-        $("#vizContainer").animate({height:'+=200'});
-        $(".timeline").attr('vis', 'hide');
-      }
-      else {
-        $(".timeline").slideDown();
-        $("#vizContainer").animate({height:'-=200'});
-        $(".timeline").attr('vis', 'show');
-
-      }
-    }
   }
 
 });

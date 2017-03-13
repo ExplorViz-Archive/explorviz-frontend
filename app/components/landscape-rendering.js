@@ -334,7 +334,7 @@ export default RenderingCore.extend({
           tile.lineThickness = 0.07 * categories[tile.requestsCache] + 0.01;
         }
 
-        createLine(accum, parent);
+        createAccumLine(accum, parent);
 
       });
 
@@ -523,7 +523,7 @@ export default RenderingCore.extend({
     }
 
 
-    function createLine(accum, parent) {
+    function createAccumLine(accum, parent) {
 
       if (accum.tiles.length !== 0) {
 
@@ -531,7 +531,7 @@ export default RenderingCore.extend({
 
         const material = new MeshLineMaterial({
           color: accum.pipeColor,
-          lineWidth: firstTile.lineThickness
+          lineWidth: firstTile.lineThickness * 0.4
         });
 
         const geometry = new THREE.Geometry();

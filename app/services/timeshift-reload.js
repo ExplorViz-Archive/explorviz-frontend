@@ -20,6 +20,7 @@ export default Reload.extend({
 	
 		//----------------------------- Start of inner functions of getData------------------------------------------
 		function success(timestampstorage){
+
 			const timestamps = timestampstorage.get('timestamps');
 			const sortedTimestamps = timestamps.sortBy('timestamp');
 

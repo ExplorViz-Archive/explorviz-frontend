@@ -103,7 +103,7 @@ export default Ember.Service.extend({
             systemKielerGraph.properties["de.cau.cs.kieler.sizeConstraint"] = "MINIMUM_SIZE";
             systemKielerGraph.properties["de.cau.cs.kieler.minWidth"] = minWidth;
             systemKielerGraph.properties["de.cau.cs.kieler.minHeight"] = minHeight;
-            systemKielerGraph.properties["de.cau.cs.kieler.klay.layered.contentAlignment"] = "V_CENTER,H_CENTER";
+            systemKielerGraph.properties["de.cau.cs.kieler.klay.layered.contentAlignment"] = "V_CENTER, H_CENTER";
 
             systemKielerGraph.padding = {
               left: PADDING * CONVERT_TO_KIELER_FACTOR,
@@ -193,8 +193,8 @@ export default Ember.Service.extend({
           if (node.get('visible')) {
             createNodeAndItsApplications(nodeGroupKielerGraph, node);
 
-            node.get('kielerGraphReference').x = 0;
-            node.get('kielerGraphReference').y = yCoord;
+            node.set('kielerGraphReference.x', 0);
+            node.set('kielerGraphReference.y', yCoord);
             yCoord = yCoord + CONVERT_TO_KIELER_FACTOR;
 
           }
@@ -219,7 +219,7 @@ export default Ember.Service.extend({
     } // END createNodeGroup
 
 
-    function createNodeAndItsApplications(systemKielerGraph, node) {
+    function createNodeAndItsApplications(kielerParentGraph, node) {
 
       const PADDING = 0.1;
       const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
@@ -251,7 +251,7 @@ export default Ember.Service.extend({
       nodeKielerGraph.properties["de.cau.cs.kieler.minHeight"] = minHeight;
       nodeKielerGraph.properties["de.cau.cs.kieler.klay.layered.contentAlignment"] = "V_CENTER,H_CENTER";
 
-      systemKielerGraph.children.push(nodeKielerGraph);
+      kielerParentGraph.children.push(nodeKielerGraph);
 
       const applications = node.get('applications');
 
@@ -302,18 +302,10 @@ export default Ember.Service.extend({
         communication.set('kielerEdgeReferences', []);
         communication.set('points', []);
 
-        //console.log("Communication", communication);
-
         const appSource = communication.get('source');
         const appTarget = communication.get('target');
 
-        //if (appSource && appTarget && appSource.get('parent') && appTarget.get('parent')) {
-
         if (appSource.get('parent').get('visible') && appTarget.get('parent').get('visible')) {
-
-          //const edge = {"id": "e1", "source": appSource.get('id'), "target": appTarget.get('id')};    
-          //
-          //console.log(appSource.get('name') + " und " + appTarget.get('name'));
 
           const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
 
@@ -322,10 +314,9 @@ export default Ember.Service.extend({
         } 
         else if (appSource.get('parent').get('visible') && !appTarget.get('parent').get('visible')) {
           if (appTarget.get('parent').get('parent').get('parent').get('opened')) {
-            //console.log("appSource", appSource.get("name"));
-            //console.log("appTarget", appTarget.get("name"));
+
             const representativeApplication = seekRepresentativeApplication(appTarget);
-            //console.log("representativeApplication", representativeApplication.get('name'));
+
             const edge = createEdgeBetweenSourceTarget(appSource, representativeApplication);
             appSource.get('kielerGraphReference').edges.push(edge);
             communication.get('kielerEdgeReferences').push(edge);
@@ -525,8 +516,13 @@ export default Ember.Service.extend({
 
     function updateNodeValues(entity) {
 
+      if(entity.constructor.modelName === "application") {
+        console.log(entity.get('name'), entity.get('kielerGraphReference'));
+      }
+
       entity.set('positionX', entity.get('kielerGraphReference').x);
 
+      // TODO This positionY results in y-offset, e.g. two applcications
       // KIELER has inverted Y coords
       entity.set('positionY', entity.get('kielerGraphReference').y * -1);
 
@@ -611,19 +607,7 @@ export default Ember.Service.extend({
 
     function createEdgeHelper(sourceDrawnode, port1, targetDrawnode, port2) {
 
-      //console.log(port2);
-
       const id = sourceDrawnode.get('id') + "_to_" + targetDrawnode.get('id');
-
-      //console.log("port1", port1);
-     // console.log("port2", port2);
-
-      //console.log("drawnode1", sourceDrawnode.get('kielerGraphReference'));
-      //console.log("drawnode2", targetDrawnode.get('kielerGraphReference'));
-
-      //console.log(id);
-
-      // TODO create port in related node for reference
 
       const edge = createNewEdge(id);
 
@@ -632,10 +616,13 @@ export default Ember.Service.extend({
       edge.source = sourceDrawnode.get('id');
       edge.target = targetDrawnode.get('id');
 
+      console.log("port2", port2);
+
       edge.sourcePort = port1.id;
       //edge.targetPort = port2.id;
 
-      //edge.sourcePoint = {x: port1.x, y: port1.y};
+      edge.sourcePoint = {x: port1.x, y: port1.y};
+      edge.targetPoint = {x: port2.x, y: port2.y};
 
       edge.sPort = port1;
       edge.tPort = port2;
@@ -780,14 +767,9 @@ export default Ember.Service.extend({
                 targetPoint.x += edge.targetNode.get('kielerGraphReference').padding.left;
                 targetPoint.y += edge.targetNode.get('kielerGraphReference').padding.top;
               }
-
-              //points.addLast(targetPoint)
-              //
-              //points[points.length] = targetPoint              
+             
               points.push(targetPoint);
               
-              //console.log("points", points);
-
               points.forEach((point) => {
                 //console.log("edgeOffset", edgeOffset);
                 point.x += edgeOffset.left;
@@ -802,8 +784,8 @@ export default Ember.Service.extend({
                 var insetTop = 0.0;
 
                 if (parentNode.get('kielerGraphReference')) {
-                  insetLeft = parentNode.get('kielerGraphReference').padding.left;
-                  insetTop = parentNode.get('kielerGraphReference').padding.top;
+                  //insetLeft = parentNode.get('kielerGraphReference').padding.left;
+                  //insetTop = parentNode.get('kielerGraphReference').padding.top;
                 }
 
                 // why is parentNode.constructor.modelName undefined?

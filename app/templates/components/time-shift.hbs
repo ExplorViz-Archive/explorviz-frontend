@@ -3,8 +3,15 @@
 </div>
 
 <!-- toggle hiding timeline -->
-<div class="row no-margin">
-  <div class="col-sm-offset-5 col-sm-2 text-center">
-    <button {{action 'toggleTimeline'}} id="toggleTimelineButton" type="button" class="btn btn-default text-center">Toggle Timeline</button>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-offset-5 col-sm-2 text-center">
+      <a {{action 'toggleTimeline'}}>
+        <span id="toggleTimelineButton" class="glyphicon {{chevronCSSClass}}"></span>
+      </a>
+      <a {{action 'playPauseTimeshift'}}>
+        <span id="playPauseTimelineButton" class="glyphicon {{playPauseCSSClass}}"></span>
+      </a>
+    </div>
   </div>
 </div>

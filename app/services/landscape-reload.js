@@ -14,7 +14,7 @@ export default Reload.extend({
 		this.debug("start landscape-request");
 		this.get("store").queryRecord('landscape', 'latest-landscape')
 			.then(success, failure).catch(error);
-	
+
 	//--------------inner functions--------------
 		function success(landscape){
 			self.debug("end landscape-request");
@@ -22,12 +22,12 @@ export default Reload.extend({
 		}
 	
 		function failure(){
-			console.log("Landscape couldn't be requested!");
+			self.debug("Landscape couldn't be requested!");
 		}
 		
 		
 		function error(e){
-			console.log("Error when fetching landscape: " + e);
+			self.debug("Error when fetching landscape: " + e);
 		}
 	//------------End of inner functions------------
 	}

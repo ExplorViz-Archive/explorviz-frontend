@@ -6,6 +6,7 @@ export default Ember.Service.extend({
 	session: Ember.inject.service("session"),
 	isAuthenticated: Ember.computed.oneWay("session.isAuthenticated"),
 	previousRequestDone: true,
+	active: true,
 	
 	/* this service is used like an abstract service
 	it only works with an "authenticated session". It will start immediatly working, when the session is authenticated 
@@ -14,11 +15,11 @@ export default Ember.Service.extend({
 	
 	//This loop works infinetly, unless the session is authenticated
 	reloadLoop: function(){
-		if(this.get("isAuthenticated") === true){
+		if(this.get("isAuthenticated") === true && this.get('active')){
 			this.updateObject();
 			Ember.run.later(this, function(){this.reloadLoop();}, (10*1000));
 		}
-	}.observes("isAuthenticated"),
+	}.observes("isAuthenticated", "active"),
 	
 	//This function is the part, which has to be overwritten by extending services (e.g. landscape-reload) 
 	updateObject(){
