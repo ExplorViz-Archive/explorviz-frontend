@@ -73,15 +73,15 @@ export default Ember.Service.extend({
         instanceCountList.push(clazz.get('instanceCount'));
       });
 
-      const categories = getCategoriesForClazzes(instanceCountList, false);
+      const categories = getCategories(instanceCountList, false);
 
-      clazzes.forEach((clazz) => {        
+      clazzes.forEach((clazz) => {      
         clazz.set('height', (clazzSizeEachStep * categories[clazz.get('instanceCount')] + clazzSizeDefault) * 4.0);
       });
     }
 
 
-    function getCategoriesForClazzes(list, linear) {
+    function getCategories(list, linear) {
       const result = [];
 
       if (list.length === 0) {
@@ -192,7 +192,7 @@ export default Ember.Service.extend({
 
         list.forEach((entry) => {
           const categoryValue = getCategoryFromLinearValues(entry, t1, t2, t3);
-          result.push({entry, categoryValue});
+          result[entry] = categoryValue;
         }); 
 
       }
@@ -214,7 +214,7 @@ export default Ember.Service.extend({
 
 
 
-    } // END getCategoriesForClazzes
+    } // END getCategories
 
 
     function getClazzList(component, clazzesArray){

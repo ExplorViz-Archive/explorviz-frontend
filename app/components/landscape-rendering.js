@@ -296,7 +296,7 @@ export default RenderingCore.extend({
 
             var tile = seekOrCreateTile(lastPoint, thisPoint, communicationsAccumulated, 0.02);
             tile.communications.push(appCommunication);
-            tile.requestsCache = tile.requestsCache + appCommunication.requests;
+            tile.requestsCache = tile.requestsCache + communication.get('requests');
 
             accum.tiles.push(tile);
           }
@@ -313,22 +313,174 @@ export default RenderingCore.extend({
     // Helper functions //
 
     function addCommunicationLineDrawing(communicationsAccumulated, parent) {
+
+      const requestsList = [];    
+
       communicationsAccumulated.forEach((accum) => {
 
         accum.tiles.forEach((tile) => {
+               
+          requestsList.push(tile.requestsCache);
 
-           //0.07f * categories.get(tile.requestsCache) + 0.01f
-
-          tile.lineThickness = 0.07 * 1.3 + 0.01;
-
-          // TODO createCommunicationLabel
-          // ...
-
-
-          createLine(accum, parent);
-
-        });
+          });
       });
+
+      const categories = getCategories(requestsList, true);
+
+      communicationsAccumulated.forEach((accum) => {        
+        for (var i = 0; i < accum.tiles.length; i++) {
+          var tile = accum.tiles[i];
+          tile.lineThickness = 0.07 * categories[tile.requestsCache] + 0.01;
+        }
+
+        createLine(accum, parent);
+
+      });
+
+
+   
+
+
+      ///
+      
+
+      function getCategories(list, linear) {
+        const result = [];
+
+        if (list.length === 0) {
+          return result;
+        }
+
+        list.sort();
+
+        if (linear) {
+          const listWithout0 = [];
+
+          list.forEach((entry) => {
+            if (entry !== 0){
+              listWithout0.push(entry);
+            }
+          });
+
+          if (listWithout0.length === 0) {
+            result.push({0: 0.0});
+            return result;
+          }        
+          useLinear(listWithout0, list, result);
+        } 
+        else {
+          const listWithout0And1 = [];
+
+          let outsideCounter = 0;
+          let insideCounter = 0;
+
+          list.forEach((entry) => {
+            outsideCounter++;
+            if (entry !== 0 && entry !== 1){
+              listWithout0And1.push(entry);
+              insideCounter++;
+            }
+          });
+
+          if (listWithout0And1.length === 0) {
+            result.push({0: 0.0});
+            result.push({1: 1.0});
+            return result;
+          }
+
+          useThreshholds(listWithout0And1, list, result);
+        }
+
+        return result;
+
+
+
+        // inner helper functions
+
+        function useThreshholds(listWithout0And1, list, result) {
+          let max = 1;
+
+          listWithout0And1.forEach((value) => {
+            if (value > max) {
+              max = value;
+            }
+          });
+
+          const oneStep = max / 3.0;
+
+          const t1 = oneStep;
+          const t2 = oneStep * 2;
+
+          list.forEach((entry) => {
+            let categoryValue = getCategoryFromValues(entry, t1, t2);
+            result[entry] = categoryValue;
+          });
+
+        }
+
+
+        function getCategoryFromValues(value, t1, t2) {
+          if (value === 0) {
+            return 0.0;
+          } else if (value === 1) {
+            return 1.0;
+          }
+
+          if (value <= t1) {
+            return 2.0;
+          } else if (value <= t2) {
+            return 3.0;
+          } else {
+            return 4.0;
+          }
+        }
+
+
+        function useLinear(listWithout0, list, result) {
+          let max = 1;
+          let secondMax = 1;
+
+          listWithout0.forEach((value) => {
+            if (value > max) {
+              secondMax = max;
+              max = value;
+            }
+          });   
+
+          const oneStep = secondMax / 4.0;
+
+          const t1 = oneStep;
+          const t2 = oneStep * 2;
+          const t3 = oneStep * 3;
+
+          list.forEach((entry) => {
+            const categoryValue = getCategoryFromLinearValues(entry, t1, t2, t3);
+            result[entry] = categoryValue;
+          }); 
+
+        }
+
+
+        function getCategoryFromLinearValues(value, t1, t2, t3) {
+          if (value <= 0) {
+            return 0;
+          } else if (value <= t1) {
+            return 1.5;
+          } else if (value <= t2) {
+            return 2.5;
+          } else if (value <= t3) {
+            return 4.0;
+          } else {
+            return 6.5;
+          }
+        }
+
+
+
+      } // END getCategories
+
+      ///
+      
     }
 
 
@@ -385,13 +537,13 @@ export default RenderingCore.extend({
 
         geometry.vertices.push(
           new THREE.Vector3(firstTile.startPoint.x - centerPoint.x,
-            firstTile.startPoint.y - centerPoint.y, firstTile.positionZ)
+            firstTile.startPoint.y - centerPoint.y, firstTile.positionZ + 0.001)
         );
 
         accum.tiles.forEach((tile) => {
           geometry.vertices.push(
             new THREE.Vector3(tile.endPoint.x - centerPoint.x,
-              tile.endPoint.y - centerPoint.y, tile.positionZ)
+              tile.endPoint.y - centerPoint.y, tile.positionZ + 0.001)
           );
         });
 

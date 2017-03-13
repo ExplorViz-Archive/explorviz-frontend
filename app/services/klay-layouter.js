@@ -319,8 +319,8 @@ export default Ember.Service.extend({
 
           communication.get('kielerEdgeReferences').push(edge);
           appSource.get('kielerGraphReference').edges.push(edge); 
-          console.log(appSource.get('kielerGraphReference').edges);
-        } /*else if (appSource.get('parent').get('visible') && !appTarget.get('parent').get('visible')) {
+        } 
+        else if (appSource.get('parent').get('visible') && !appTarget.get('parent').get('visible')) {
           if (appTarget.get('parent').get('parent').get('parent').get('opened')) {
             //console.log("appSource", appSource.get("name"));
             //console.log("appTarget", appTarget.get("name"));
@@ -381,8 +381,7 @@ export default Ember.Service.extend({
               communication.get('kielerEdgeReferences').push(edge);
             }
           }
-        }*/
-        //}
+        }
       });
     }
 
@@ -441,7 +440,7 @@ export default Ember.Service.extend({
 
       });
 
-      //addBendPointsInAbsoluteCoordinates(landscape);
+      addBendPointsInAbsoluteCoordinates(landscape);
 
       systems.forEach((system) => {
 
@@ -592,7 +591,9 @@ export default Ember.Service.extend({
           height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
           properties: {
             "de.cau.cs.kieler.portSide": portSide
-          }
+          },
+          x: 0,
+          y: 0
         };
 
         port.node = drawnode.get('kielerGraphReference');
@@ -607,14 +608,15 @@ export default Ember.Service.extend({
     }
 
 
+
     function createEdgeHelper(sourceDrawnode, port1, targetDrawnode, port2) {
 
       //console.log(port2);
 
       const id = sourceDrawnode.get('id') + "_to_" + targetDrawnode.get('id');
 
-      console.log("port1", port1);
-      console.log("port2", port2);
+      //console.log("port1", port1);
+     // console.log("port2", port2);
 
       //console.log("drawnode1", sourceDrawnode.get('kielerGraphReference'));
       //console.log("drawnode2", targetDrawnode.get('kielerGraphReference'));
@@ -632,6 +634,8 @@ export default Ember.Service.extend({
 
       edge.sourcePort = port1.id;
       //edge.targetPort = port2.id;
+
+      //edge.sourcePoint = {x: port1.x, y: port1.y};
 
       edge.sPort = port1;
       edge.tPort = port2;
@@ -656,7 +660,7 @@ export default Ember.Service.extend({
       edge.thickness = Math.max(lineThickness * CONVERT_TO_KIELER_FACTOR, oldThickness);
     }
 
-    /*function addBendPointsInAbsoluteCoordinates(landscape) {
+    function addBendPointsInAbsoluteCoordinates(landscape) {
 
       const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
       const applicationCommunication = landscape.get('applicationCommunication');
@@ -665,49 +669,35 @@ export default Ember.Service.extend({
 
         const kielerEdgeReferences = communication.get('kielerEdgeReferences');
 
-        //console.log(kielerEdgeReferences);
-
         kielerEdgeReferences.forEach((edge) => {
-
-          //console.log(edge);
 
           if (edge != null) {
 
             let parentNode = getRightParent(communication.get('source'), communication.get('target'));
 
             var points = [];
-            var edgeOffset = {x:0.0, y: 0.0};
+
+            var edgeOffset = {bottom:0.0, left: 0.0, right: 0.0, top: 0.0};
 
             if (parentNode != null) {
 
-              console.log("parent not null");
-
               points = edge.bendPoints ? edge.bendPoints : [];
 
-              //console.log("points", points);
+              edgeOffset = {bottom:0.0, left: 0.0, right: 0.0, top: 0.0};
 
-              //edgeOffset = new KVector()
-              edgeOffset = {x:0.0, y: 0.0};
-
-              if (parentNode.get('kielerGraphReference') != null) {
-                //edgeOffset = parentNode.get('kielerGraphReference').offset;
+              if (parentNode.get('kielerGraphReference')) {
+                edgeOffset = parentNode.get('kielerGraphReference').padding;
               }
 
               var sourcePoint = null;
 
-              console.log(edge);
-
-              //console.log(edge.targetNode.get('kielerGraphReference').children.length);
-
-              const filteredChildren = edge.targetNode.get('kielerGraphReference').children.filter((child) => {
-                console.log("self-edge");
-                return child === edge.sourceNode.get('kielerGraphReference');
+              //LGraphUtil::isDescendant(edge.getTarget().getNode(), edge.getSource().getNode())
+              const filteredChildren = edge.tPort.node.children.filter((child) => {               
+                return child === edge.sPort.node;
               });
 
               //if (LGraphUtil::isDescendant(edge.getTarget().getNode(), edge.getSource().getNode())) {
               if (filteredChildren.length === 1) {
-
-                console.log("lol");
 
                 // self edges..
                 let sourcePort = edge.sPort;
@@ -738,13 +728,15 @@ export default Ember.Service.extend({
                 let nestedGraph = edge.sourceNode.get('kielerGraphReference');
 
                 if (nestedGraph != null) {
-                  edgeOffset = nestedGraph.offset;
+                  edgeOffset = nestedGraph.padding;
                 }
                 sourcePoint.x -= edgeOffset.x;
                 sourcePoint.y -= edgeOffset.y;
-              } else {
+              } 
+              else {
 
                 //sourcePoint = edge.getSource().getAbsoluteAnchor();  
+
 
                 if (edge.source) {
                   sourcePoint = {
@@ -758,9 +750,14 @@ export default Ember.Service.extend({
                   };
                 }
 
+                /*sourcePoint = {
+                    x: edge.sPort.x,
+                    y: edge.sPort.y
+                };*/
+
               }
 
-              points.push(sourcePoint);
+              points.unshift(sourcePoint);
 
               //console.log(edge);
 
@@ -772,35 +769,46 @@ export default Ember.Service.extend({
                 y: edge.tPort.y
               };
 
+              /*targetPoint = {
+                x: edge.tPort.x,
+                y: edge.tPort.y
+              };*/
+
               //if (edge.getProperty(InternalProperties.TARGET_OFFSET) != null) {
-              if (edge.targetNode.get('kielerGraphReference').offset != null) {
-                targetPoint.x += edge.targetNode.get('kielerGraphReference').offset.x;
-                targetPoint.y += edge.targetNode.get('kielerGraphReference').offset.y;
+              if (edge.targetNode.get('kielerGraphReference').padding) {
+
+                targetPoint.x += edge.targetNode.get('kielerGraphReference').padding.left;
+                targetPoint.y += edge.targetNode.get('kielerGraphReference').padding.top;
               }
 
               //points.addLast(targetPoint)
+              //
+              //points[points.length] = targetPoint              
               points.push(targetPoint);
+              
+              //console.log("points", points);
 
               points.forEach((point) => {
-                console.log("edgeOffset", edgeOffset);
-                point.x += edgeOffset.x;
-                point.y += edgeOffset.y;
+                //console.log("edgeOffset", edgeOffset);
+                point.x += edgeOffset.left;
+                point.y += edgeOffset.top;
               });
 
               var pOffsetX = 0.0;
               var pOffsetY = 0.0;
 
-              if (parentNode != null) {
+              if (parentNode) {
                 var insetLeft = 0.0;
                 var insetTop = 0.0;
 
-                if (parentNode.get('kielerGraphReference') != null) {
+                if (parentNode.get('kielerGraphReference')) {
                   insetLeft = parentNode.get('kielerGraphReference').padding.left;
                   insetTop = parentNode.get('kielerGraphReference').padding.top;
                 }
 
-                if (parentNode.constructor.modelName === "System") {
-                  console.log("ich bin ein system");
+                // why is parentNode.constructor.modelName undefined?
+                // "alternative": parentNode.content._internalModel.modelName
+                if (parentNode.content._internalModel.modelName === "system") {
                   pOffsetX = insetLeft;
                   pOffsetY = insetTop * -1;
                 } else {
@@ -868,7 +876,7 @@ export default Ember.Service.extend({
       });
 
       return returnValue ? returnValue : null;
-    }*/
+    }
 
 
 
