@@ -8,11 +8,12 @@ export default RenderingCore.extend({
   klayLayouter: Ember.inject.service("klay-layouter"),
   
   landscapeUpdater: Ember.inject.service("landscape-reload"),  
-	landscape: Ember.computed.oneWay("landscapeUpdater.object"),  
+	landscape: Ember.computed("landscapeUpdater.object.timestamp", function() {
+    return this.get('landscapeUpdater.object');
+  }),  
 	
   //the observer reacts to changes for the computed value landscape
 	observer: Ember.observer("landscape", function(){
-    this.debug("observed change in landscape-rendering");
     //Ember.run.once(this, this.cleanAndUpdateScene(this.get("landscape")));
     this.cleanAndUpdateScene(this.get("landscape"));
   }),  
@@ -44,7 +45,7 @@ export default RenderingCore.extend({
   cleanAndUpdateScene(landscape) {
     this._super(...arguments);
 
-    this.debug("populate landscape rendering");
+    this.debug("clean and populate landscape rendering");
 
     this.populateScene(landscape);
   },
