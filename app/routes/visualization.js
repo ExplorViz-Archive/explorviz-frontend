@@ -13,6 +13,7 @@ export default Route.extend(AuthenticatedRouteMixin, {
   },
 
   model() {
+    this.debug("fetch landscape because of route transition");
     return this.store.queryRecord('landscape', 'latest-landscape').then((landscape) => {
       return landscape;
     });

@@ -8,8 +8,8 @@ const { Route } = Ember;
 export default Route.extend(ApplicationRouteMixin, {
 
   actions: {
-    logout: function() {
+    logout() {
       this.get('session').invalidate();
-    }
+    }      
   }
 });
