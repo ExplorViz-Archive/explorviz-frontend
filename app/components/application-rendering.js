@@ -1,5 +1,6 @@
 import RenderingCore from './rendering-core';
 import Ember from 'ember';
+import Hammer from "npm:hammerjs";
 
 export default RenderingCore.extend({
 

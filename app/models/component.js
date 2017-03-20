@@ -14,7 +14,9 @@ export default Draw3DNodeEntity.extend({
 
   clazzes: hasMany('clazz'),
 
-  parentComponent: belongsTo('component'),
+  parentComponent: belongsTo('component', {
+    inverse: 'children'
+  }),
 
   belongingApplication: belongsTo('application'),
 
