@@ -10,6 +10,10 @@
 
 This project is a wip replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) client-code with [EmberJS](https://www.emberjs.com/). This is only the frontend, you will need the [backend](https://github.com/ExplorViz/explorviz-ui-backend) as well.
 
+## Documentation (WIP)
+
+* The API documentation is available at https://explorviz.github.io/explorviz-ui-frontend/
+
 ## Prerequisites
 
 You will need the following things properly installed on your computer.
