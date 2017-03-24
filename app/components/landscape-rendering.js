@@ -75,7 +75,7 @@ export default RenderingCore.extend({
 
       systems.forEach(function(system) {
 
-        console.log(system.get('name') + " und " + system.get('positionX') + ", " + system.get('positionY'));
+        //console.log(system.get('name') + " und " + system.get('positionX') + ", " + system.get('positionY'));
 
         isRequestObject = false;
 
@@ -226,7 +226,8 @@ export default RenderingCore.extend({
                   top: 0.0,
                   bottom: 0.2
                 };
-                labelMesh = createLabel(font, 0.15, nodegroup.get('name'), nodeMesh,
+
+                labelMesh = createLabel(font, 0.15, node.getDisplayName(), nodeMesh,
                   padding, 0xffffff, {
                     width: 0.0,
                     height: 0.0
@@ -895,7 +896,11 @@ export default RenderingCore.extend({
               console.log(intersectedViewObj);
               // open application rendering
               self.sendAction("showApplication", emberModel);
-            }
+            } 
+            else if (emberModelName === "nodegroup" || emberModelName === "system"){
+              emberModel.setOpenedStatus(!emberModel.get('opened'));
+              self.cleanAndUpdateScene(self.get('landscape'));          
+            } 
           }
     });
 

@@ -9,5 +9,14 @@ export default DrawNodeEntity.extend({
   parent: belongsTo('landscape'),
   plusColor : attr(),
   foregroundColor : attr(),
-  backgroundColor : attr()
+  backgroundColor : attr(),
+
+  setOpenedStatus: function(status) {
+
+    this.get('nodegroups').forEach((nodegroup) => {
+        nodegroup.set('visible', !nodegroup.get('visible'));      
+    });
+
+    this.set('opened', status);
+  }
 });
