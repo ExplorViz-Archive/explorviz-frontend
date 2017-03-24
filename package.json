@@ -1,9 +1,9 @@
 {
   "name": "explorviz-ui-frontend",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Explorviz-UI-Frontend",
   "author": "",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "private": true,
   "directories": {
     "doc": "doc",
@@ -38,7 +38,9 @@
     "ember-load-initializers": "^0.6.3",
     "ember-resolver": "^3.0.0",
     "ember-source": "^2.12.0",
-    "loader.js": "^4.2.3"
+    "loader.js": "^4.2.3",
+    "yuidoc-bootstrap-theme": "^1.0.6",
+    "yuidocjs": "^0.10.2"
   },
   "engines": {
     "node": ">= 0.12.0"

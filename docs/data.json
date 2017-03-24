@@ -1,0 +1,119 @@
+{
+    "project": {
+        "name": "ExplorViz: UI Frontend API",
+        "description": "ExplorViz: UI Frontend API: ExplorViz's client component for visualization",
+        "version": "0.0.1",
+        "url": "https://www.explorviz.net/",
+        "logo": "https://www.explorviz.net/img/favicon.png"
+    },
+    "files": {
+        "app\\authenticators\\authenticator.js": {
+            "name": "app\\authenticators\\authenticator.js",
+            "modules": {},
+            "classes": {
+                "Authenticator": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app\\components\\rendering-core.js": {
+            "name": "app\\components\\rendering-core.js",
+            "modules": {},
+            "classes": {
+                "Rendering-Core": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "vendor\\momentjs\\moment.js": {
+            "name": "vendor\\momentjs\\moment.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "vendor\\three\\THREE.MeshLine.js": {
+            "name": "vendor\\three\\THREE.MeshLine.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        }
+    },
+    "modules": {},
+    "classes": {
+        "Authenticator": {
+            "name": "Authenticator",
+            "shortname": "Authenticator",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app\\authenticators\\authenticator.js",
+            "line": 5,
+            "description": "Custom authenticator for token based authentication.",
+            "author": "akr",
+            "extends": "ember-simple-auth/authenticators/base"
+        },
+        "Rendering-Core": {
+            "name": "Rendering-Core",
+            "shortname": "Rendering-Core",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app\\components\\rendering-core.js",
+            "line": 113,
+            "description": "Inherit this function to update the scene with a new renderingModel. It \nautomatically removes every mesh from the scene. Add your custom code \nas shown in landscape-rendering.",
+            "params": [
+                {
+                    "name": "UNKNOWN",
+                    "description": "",
+                    "type": "[baseentity]"
+                }
+            ]
+        }
+    },
+    "elements": {},
+    "classitems": [
+        {
+            "file": "vendor\\momentjs\\moment.js",
+            "line": 3138,
+            "description": "Return a human readable representation of a moment that can\nalso be evaluated to get a new moment which is the same",
+            "link": "https://nodejs.org/dist/latest/docs/api/util.html#util_custom_inspect_function_on_objects",
+            "class": ""
+        },
+        {
+            "file": "vendor\\three\\THREE.MeshLine.js",
+            "line": 206,
+            "description": "Fast method to advance the line by one position.  The oldest position is removed.",
+            "params": [
+                {
+                    "name": "position",
+                    "description": ""
+                }
+            ],
+            "class": ""
+        }
+    ],
+    "warnings": [
+        {
+            "message": "param name missing: {[baseentity]}",
+            "line": " app\\components\\rendering-core.js:86"
+        },
+        {
+            "message": "unknown tag: link",
+            "line": " vendor\\momentjs\\moment.js:3138"
+        },
+        {
+            "message": "Missing item type\nReturn a human readable representation of a moment that can\nalso be evaluated to get a new moment which is the same",
+            "line": " vendor\\momentjs\\moment.js:3138"
+        },
+        {
+            "message": "Missing item type\nFast method to advance the line by one position.  The oldest position is removed.",
+            "line": " vendor\\three\\THREE.MeshLine.js:206"
+        }
+    ]
+}
