@@ -1,0 +1,13 @@
+{
+    "name": "ExplorViz: UI Frontend API",
+    "description": "ExplorViz: UI Frontend API: ExplorViz's client component for visualization",
+    "version": "0.0.1",
+    "url": "https://www.explorviz.net/",
+	"logo": "https://www.explorviz.net/img/favicon.png",
+    "options": {
+        "outdir": "./docs",
+        "exclude": "lib,docs,build",
+        "themedir": "./node_modules/yuidoc-bootstrap-theme",
+        "helpers": ["./node_modules/yuidoc-bootstrap-theme/helpers/helpers.js"]
+    }
+}

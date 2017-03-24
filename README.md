@@ -29,6 +29,7 @@ You will need the following things properly installed on your computer.
 * install NodeJS
 * npm install -g ember-cli
 * npm install -g phantomjs
+* Follow installation (Generic)
 
 ## Used IDE
 
@@ -57,3 +58,6 @@ Make use of the many generators for code, try `ember help generate` for more det
 ### Deploying
 
 Specify what it takes to deploy your app.
+
+### Generating API Documentation
+* `yuidoc .`
