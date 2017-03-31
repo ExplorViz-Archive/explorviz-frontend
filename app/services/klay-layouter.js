@@ -136,13 +136,14 @@ export default Ember.Service.extend({
 
             const height = 2.5 * DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
 
-            const systemKielerGraph = {
-              "id": system.get('id'),
-              "labels": [system.get('name')],
-              "width": width,
-              "height": height,
-              "children": []
-            };
+            const systemKielerGraph = createEmptyGraph(system.get('id'));
+            systemKielerGraph['labels'] = [system.get('name')];
+            systemKielerGraph['width'] = width;
+            systemKielerGraph['height'] = height;
+            systemKielerGraph['height'] = height;
+            systemKielerGraph['edges'] = [];
+            systemKielerGraph['ports'] = [];
+
             system.set('kielerGraphReference', systemKielerGraph);
 
             topLevelKielerGraph.children.push(systemKielerGraph);
@@ -335,6 +336,7 @@ export default Ember.Service.extend({
             communication.get('kielerEdgeReferences').push(edge);
           } else {
             // System is closed
+            console.log("system closed");
             const edge = createEdgeBetweenSourceTarget(appSource.get('parent').get('parent').get('parent'), appTarget);
             appSource.get('parent').get('parent').get('parent').get('kielerGraphReference').edges.push(edge);
             communication.get('kielerEdgeReferences').push(edge);
@@ -505,20 +507,12 @@ export default Ember.Service.extend({
 
       const padding = parent.get('kielerGraphReference').padding;
 
-      //const offset = parent.get('kielerGraphReference').offset;
-
-      //console.log(offset);
-
       child.set('positionX', parent.get('positionX') + child.get('positionX') + padding.left);
       child.set('positionY', parent.get('positionY') + child.get('positionY') - padding.top);
     }
 
 
     function updateNodeValues(entity) {
-
-      if(entity.constructor.modelName === "application") {
-        console.log(entity.get('name'), entity.get('kielerGraphReference'));
-      }
 
       entity.set('positionX', entity.get('kielerGraphReference').x);
 
@@ -616,10 +610,17 @@ export default Ember.Service.extend({
       edge.source = sourceDrawnode.get('id');
       edge.target = targetDrawnode.get('id');
 
-      console.log("port2", port2);
+      //console.log("port2", port2);
 
       edge.sourcePort = port1.id;
       //edge.targetPort = port2.id;
+      
+      if(targetDrawnode.content && targetDrawnode.content._internalModel.modelName === 'system') {
+        console.log("PORT2", port2);
+        edge.targetPort = port2.id;
+      }
+
+      
 
       edge.sourcePoint = {x: port1.x, y: port1.y};
       edge.targetPoint = {x: port2.x, y: port2.y};
@@ -672,7 +673,7 @@ export default Ember.Service.extend({
 
               edgeOffset = {bottom:0.0, left: 0.0, right: 0.0, top: 0.0};
 
-              if (parentNode.get('kielerGraphReference')) {
+              if (parentNode.get('kielerGraphReference') && parentNode.get('kielerGraphReference').padding) {
                 edgeOffset = parentNode.get('kielerGraphReference').padding;
               }
 
@@ -771,7 +772,6 @@ export default Ember.Service.extend({
               points.push(targetPoint);
               
               points.forEach((point) => {
-                //console.log("edgeOffset", edgeOffset);
                 point.x += edgeOffset.left;
                 point.y += edgeOffset.top;
               });

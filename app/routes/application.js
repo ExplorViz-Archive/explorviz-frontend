@@ -15,11 +15,10 @@ init(){
 	this.get('navbarService').navbarLabels.addObject('tutorial');
 	},
 
+actions: {
     logout() {
       this.get('session').invalidate();
-    }
-    
-  
+    }      
+  }
 
-  
 });

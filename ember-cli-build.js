@@ -4,11 +4,7 @@ var EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
 module.exports = function(defaults) {
   var app = new EmberApp(defaults, {
-    sassOptions: {
-      includePaths: [
-        'bower_components/bootstrap-sass/assets/stylesheets'
-      ]
-    }
+    sassOptions: {}
     // Add options here
 
   });
@@ -26,10 +22,8 @@ module.exports = function(defaults) {
   // please specify an object with the list of modules as keys
   // along with the exports of each module as its value.
 
-  app.import('bower_components/bootstrap-sass/assets/javascripts/bootstrap.js');
   app.import('vendor/three/three.min.js');
   app.import('vendor/three/THREE.MeshLine.js');
-  app.import('vendor/hammer/hammer.min.js');
   app.import('vendor/momentjs/moment.js');
   app.import('vendor/chartjs/Chart.min.js');
   app.import('vendor/chartjs/chartjs-plugin-zoom.min.js');

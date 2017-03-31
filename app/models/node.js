@@ -17,6 +17,18 @@ export default DrawNodeEntity.extend({
 
   ipAddress: attr('string'),
 
-  color: attr()
+  color: attr(),
+
+  getDisplayName: function() {
+    if (this.get('parent').get('opened')) {
+      if (this.get('name') && this.get('name').length > 0 && !this.get('name').startsWith("<")) {
+        return this.get('name');
+      } else {
+        return this.get('ipAddress');
+      }
+    } else {
+      return this.get('parent').get('name');
+    }
+  }
 
 });
