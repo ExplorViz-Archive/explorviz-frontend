@@ -1,0 +1,12 @@
+        
+        <!-- Outer #link-to is for li-element -->
+        <!-- Inner #link-to is for actual link -->
+        <!-- #link-to handles active link class on it's own -->
+        <ul class="nav navbar-nav">
+        {{#each navbarService.navbarLabels as |item|}}
+        {{#link-to item tagName="li"}}
+           {{#link-to item}}{{capitalize item}}{{/link-to}}
+        {{/link-to}}
+        {{/each}}
+     </ul>
+     
