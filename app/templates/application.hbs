@@ -19,17 +19,7 @@
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <!-- Outer #link-to is for li-element -->
-        <!-- Inner #link-to is for actual link -->
-        <!-- #link-to handles active link class on it's own -->
-        {{#link-to "visualization" tagName="li"}}
-           {{#link-to "visualization"}}Visualization{{/link-to}}
-        {{/link-to}}
-        {{#link-to "tutorial" tagName="li"}}
-          {{#link-to "tutorial"}}Tutorial{{/link-to}}
-        {{/link-to}}
-      </ul>
+    {{navbar-items}}
       <ul class="nav navbar-nav navbar-right">
        <li><p class="navbar-text"> Signed in as {{username}}</p></li>
        <li><a {{action 'logout'}} style="cursor:pointer">Logout</a></li>
