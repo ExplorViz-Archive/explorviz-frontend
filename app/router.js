@@ -7,6 +7,7 @@ const Router = Ember.Router.extend({
 });
 
 Router.map(function() {
+
   this.route('visualization');
   this.route('tutorial');
   this.route('administration');

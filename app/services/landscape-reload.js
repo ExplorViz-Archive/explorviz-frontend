@@ -30,5 +30,7 @@ export default Reload.extend({
 			self.debug("Error when fetching landscape: " + e);
 		}
 	//------------End of inner functions------------
+
 	}
+
 });
