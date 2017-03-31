@@ -7,7 +7,7 @@ const { Route } = Ember;
 
 export default Route.extend(ApplicationRouteMixin, {
 
-navbarService: Ember.inject.service('navbar'),
+navbarService: Ember.inject.service('navbar-labels'),
 
 init(){
 	this._super();
