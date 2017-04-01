@@ -9,12 +9,6 @@ export default Route.extend(ApplicationRouteMixin, {
 
 navbarService: Ember.inject.service('navbar-labels'),
 
-init(){
-	this._super();
-	this.get('navbarService').navbarLabels.addObject('visualization');
-	this.get('navbarService').navbarLabels.addObject('tutorial');
-	},
-
 actions: {
     logout() {
       this.get('session').invalidate();
