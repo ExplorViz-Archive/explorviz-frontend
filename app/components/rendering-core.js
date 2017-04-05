@@ -16,6 +16,18 @@ export default Ember.Component.extend({
 
   animationFrameId: null,
 
+  landscapeUpdater: Ember.inject.service("landscape-reload"),  
+  landscape: Ember.computed("landscapeUpdater.object.timestamp", function() {
+    return this.get('landscapeUpdater.object');
+  }),  
+  
+  //the observer reacts to changes for the computed value landscape
+  observer: Ember.observer("landscape", function(){
+    //Ember.run.once(this, this.cleanAndUpdateScene(this.get("landscape")));
+    this.mergeModel(this.get("landscape"));
+  }),  
+
+
   // @Override
   didRender(){
     this._super(...arguments);
@@ -70,6 +82,8 @@ export default Ember.Component.extend({
 
     render();
 
+    this.get("landscape"); //useless, but very important for working observer
+
     ////////////////////
 
     // load font for labels and proceed with populating the scene
@@ -108,6 +122,21 @@ export default Ember.Component.extend({
     this.set('scene', null);
     this.set('webglrenderer', null);
     this.set('camera', null);
+  },
+
+  /**
+   * This function is called on every new landscape. Inherit this function
+   * to define the custom merging of the new and old 
+   * interaction state, e.g. component X is open. You need to call 
+   * {{#crossLink "rendering-core/cleanAndUpdateScene:method"}}{{/crossLink}} 
+   * afterwards with the merged model as parameter.
+   *
+   * @class Rendering-Core
+   */
+  mergeModel(renderingModel) {
+    // TODO merging
+    
+    return renderingModel;
   },
 
   /**

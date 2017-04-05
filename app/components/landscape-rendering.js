@@ -7,17 +7,6 @@ export default RenderingCore.extend({
   hammerManager: null,
 
   klayLayouter: Ember.inject.service("klay-layouter"),
-  
-  landscapeUpdater: Ember.inject.service("landscape-reload"),  
-	landscape: Ember.computed("landscapeUpdater.object.timestamp", function() {
-    return this.get('landscapeUpdater.object');
-  }),  
-	
-  //the observer reacts to changes for the computed value landscape
-	observer: Ember.observer("landscape", function(){
-    //Ember.run.once(this, this.cleanAndUpdateScene(this.get("landscape")));
-    this.cleanAndUpdateScene(this.get("landscape"));
-  }),  
 
   // @Override
   initRendering() {
@@ -28,7 +17,6 @@ export default RenderingCore.extend({
     var dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
     this.get('scene').add(dirLight);
-    this.get("landscape"); //useless, but very important for working observer
   },
 
   // @Override
@@ -39,7 +27,6 @@ export default RenderingCore.extend({
 
     this.get('hammerManager').off();
     this.set('hammerManager', null);
-
   },
 
   // @Override
@@ -1004,9 +991,14 @@ export default RenderingCore.extend({
       }
     }
 
-
-
   }, // END initInteraction
+
+  // @Override
+  mergeModel(renderingModel) {
+    // TODO merging
+    
+    this.cleanAndUpdateScene(renderingModel);
+  },
 
 
   addPlane(x, y, z, width, height, color1, color2, texture, parent, model) {

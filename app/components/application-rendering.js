@@ -52,10 +52,11 @@ export default RenderingCore.extend({
     
     const foundation = application.get('components').objectAt(0);
 
-    application.set('components', foundation.get('children'));
-    application.get('components').objectAt(0).set('parentComponent', null);
-
-    this.get('store').unloadRecord(foundation);
+    if(foundation.get('foundation')) {
+      application.set('components', foundation.get('children'));
+      application.get('components').objectAt(0).set('parentComponent', null);
+      this.get('store').unloadRecord(foundation);
+    }
 
     this.populateScene(application);
   },
@@ -125,8 +126,6 @@ export default RenderingCore.extend({
 
       clazzes.forEach((clazz) => {
         if (component.get('opened')) {
-          //const classCenter = clazz.centerPoint.sub(viewCenterPoint);      
-
           if (clazz.get('highlighted')) {
              createBox(clazz, redHighlighted);
           } else {
@@ -136,21 +135,21 @@ export default RenderingCore.extend({
       });
 
       children.forEach((child) => {
-        if (child.get('opened')) {
-          if(child.get('highlighted')) {
-              addComponentToScene(child, redHighlighted);
-          }            
-          else if(component.get('color') === grey) {
-            addComponentToScene(child, lightGreen);
-          }
-          else if(component.get('color') === darkGreen) {
-            addComponentToScene(child, lightGreen);
-          } else {            
-            addComponentToScene(child, darkGreen);
-          }
-        } 
-        else {
-          if (component.get('opened')) {
+        if (component.get('opened')) {
+          if (child.get('opened')) {
+            if(child.get('highlighted')) {
+                addComponentToScene(child, redHighlighted);
+            }            
+            else if(component.get('color') === grey) {
+              addComponentToScene(child, lightGreen);
+            }
+            else if(component.get('color') === darkGreen) {
+              addComponentToScene(child, lightGreen);
+            } else {            
+              addComponentToScene(child, darkGreen);
+            }
+          } 
+          else {
             if(child.get('highlighted')) {
               addComponentToScene(child, redHighlighted);
             }
@@ -251,6 +250,15 @@ export default RenderingCore.extend({
 
 
   }, // END populateScene
+
+  // @Override
+  mergeModel(renderingModel) {
+    // TODO find correct application and merge state
+    // How to save a copy of nested records? Maybe with 
+    // ember-cli-copyable addon?
+    console.log(renderingModel);
+    //this.cleanAndUpdateScene(renderingModel);
+  },
 
 
   resetRotation() {
