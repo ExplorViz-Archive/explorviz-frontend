@@ -4,12 +4,13 @@ export default DS.JSONAPISerializer.extend({
 
   // workaround for camel-cased attributes
   keyForAttribute: function(attr) {
-    return attr;
+    return attr.camelize();
   },
 
   // workaround for camel-cased attributes
+  // every value will now be camelized (camel-cased)
   keyForRelationship(key) { 
-    return key; 
+    return key.camelize(); 
   },
   
   // Now the type of an Ember-Object isn't pluralized anymore, when it's serialized. Instead the Type will always be camel-case
