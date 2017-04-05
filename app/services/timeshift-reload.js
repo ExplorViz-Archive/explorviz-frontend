@@ -18,9 +18,8 @@ export default Reload.extend({
 
 	
 	
-		//----------------------------- Start of inner functions of getData------------------------------------------
+		//----------------------------- Start of inner functions of updateObject------------------------------------------
 		function success(timestampstorage){
-
 			const timestamps = timestampstorage.get('timestamps');
 			const sortedTimestamps = timestamps.sortBy('timestamp');
 

@@ -17,6 +17,7 @@ export default Reload.extend({
 
 	//--------------inner functions--------------
 		function success(landscape){
+			console.log(landscape.serialize());
 			self.debug("end landscape-request");
 			self.set("object", landscape);
 		}
