@@ -754,17 +754,23 @@ export default RenderingCore.extend({
       const MAX_Y = 3;
 
       const rect = getLandscapeRect(emberLandscape);
-      const SPACE_IN_PERCENT = 0.02;
+
+      const EXTRA_SPACE_IN_PERCENT = 0.02;
 
       let requiredWidth = Math.abs(rect.get(MAX_X) - rect.get(MIN_X));
-      requiredWidth += requiredWidth * SPACE_IN_PERCENT;
+      requiredWidth += requiredWidth * EXTRA_SPACE_IN_PERCENT;
 
       let requiredHeight = Math.abs(rect.get(MAX_Y) - rect.get(MIN_Y));
-      requiredHeight += requiredHeight * SPACE_IN_PERCENT;
+      requiredHeight += requiredHeight * EXTRA_SPACE_IN_PERCENT;
 
       const viewPortSize = self.get('webglrenderer').getSize();
 
       let viewportRatio = viewPortSize.width / viewPortSize.height;
+
+      console.log(viewportRatio);
+
+      self.debugPlane(0, 0, 0.1, requiredWidth,
+        requiredHeight, new THREE.Color(1, 0, 0), self.get('scene'));
 
       const newZ_by_width = requiredWidth / viewportRatio;
       const newZ_by_height = requiredHeight;
@@ -1010,8 +1016,8 @@ export default RenderingCore.extend({
 
         // debug //
 
-        self.addPlane(result[0].point.x, result[0].point.y, 0, 0.5,
-          0.5, new THREE.Color(1, 0, 0), null, null, self.get('scene'), null);
+        self.debugPlane(result[0].point.x, result[0].point.y, 0.1, 0.5,
+          0.5, new THREE.Color(1, 0, 0), self.get('scene'));
 
         // end debug //
 
@@ -1023,83 +1029,20 @@ export default RenderingCore.extend({
   }, // END initInteraction
 
 
-  // ONLY FOR DEBUGGIN OF RAYCASTING, REMOVE WHEN RAYCASTING IS FIXED
-  addPlane(x, y, z, width, height, color1, color2, texture, parent, model) {
+  // ONLY FOR DEBUGGIN
+  debugPlane(x, y, z, width, height, color1, parent) {
 
-      // Invisible plane with logo texture
-      if (texture) {
-
-        new THREE.TextureLoader().load('images/logos/' + texture + '.png', (texture) => {
-          const material = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true
-          });
-          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-            material);
-          plane.position.set(x, y, z);
-          parent.add(plane);
-          plane.userData['model'] = model;
-          return plane;
-        });
-
-
-      } 
-      // regular plane (one color or gradient)
-      else {
-
-        if(!color2) {
-          const material = new THREE.MeshBasicMaterial({
-            color: color1
-          });
-          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-            material);
-          plane.position.set(x, y, z);
-          parent.add(plane);
-          plane.userData['model'] = model;
-          return plane;
-        } 
-        else {
-
-          // create gradient texture
-          const canvas = document.createElement( 'canvas' );
-          canvas.width = 16;
-          canvas.height = 16;
-
-          const ctx = canvas.getContext("2d");
-
-          const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
-          grd.addColorStop(0.2, 'rgba(72,26,180,1)');
-          grd.addColorStop(1, 'rgba(101,68,180,1)');
-
-          ctx.fillStyle = grd;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-          const gradientTexture = new THREE.Texture(canvas);
-          gradientTexture.needsUpdate = true;
-          gradientTexture.minFilter = THREE.LinearFilter;
-
-          // apply texture too material and create mesh
-          const geometry = new THREE.PlaneGeometry(width, height);
-
-          const material = new THREE.MeshBasicMaterial({      
-            map: gradientTexture
-          });
-
-          const plane = new THREE.Mesh(geometry, material);
-
-          plane.position.set(x, y, z);
-          parent.add(plane);
-          plane.userData['model'] = model;
-          return plane;
-
-        }
-
-
-
-      }      
-
-
-    }
+    const material = new THREE.MeshBasicMaterial({
+      color: color1,
+      opacity: 0.4,
+      transparent: true
+    });
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+      material);
+    plane.position.set(x, y, z);
+    parent.add(plane);
+ 
+  }
 
 
 
