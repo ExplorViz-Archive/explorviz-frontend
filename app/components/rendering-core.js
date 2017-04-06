@@ -4,6 +4,8 @@ export default Ember.Component.extend({
 
   classNames: ['viz'],
 
+  landscapeUpdater: Ember.inject.service("landscape-reload"),  
+
   scene : null,
   webglrenderer: null,
   camera: null,
@@ -13,19 +15,16 @@ export default Ember.Component.extend({
   entity: null,
 
   font: null,
-
   animationFrameId: null,
 
-  landscapeUpdater: Ember.inject.service("landscape-reload"),  
   landscape: Ember.computed("landscapeUpdater.object.timestamp", function() {
     return this.get('landscapeUpdater.object');
   }),  
-  
-  //the observer reacts to changes for the computed value landscape
+
   observer: Ember.observer("landscape", function(){
-    //Ember.run.once(this, this.cleanAndUpdateScene(this.get("landscape")));
     this.mergeModel(this.get("landscape"));
-  }),  
+    this.cleanAndUpdateScene(this.get("entity"));
+  }),
 
 
   // @Override
@@ -47,7 +46,7 @@ export default Ember.Component.extend({
    * to call other important function, e.g. initInteraction as shown in 
    * {@landscape-rendering}.
    *
-   * @class Rendering-Core
+   * @method initRendering
    */
   initRendering() {
 
@@ -84,13 +83,15 @@ export default Ember.Component.extend({
 
     this.get("landscape"); //useless, but very important for working observer
 
+    this.set('entity', this.get('renderingModel'));
+
     ////////////////////
 
     // load font for labels and proceed with populating the scene
     new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', (font) => {
 
       self.set('font', font);
-      self.populateScene(this.get('renderingModel'));
+      self.populateScene(this.get('entity'));
 
     });    
 
@@ -102,19 +103,20 @@ export default Ember.Component.extend({
    * insert objects in the Three.js scene. Have a look 
    * at {@landscape-rendering} for an example.
    *
-   * @class Rendering-Core
+   * @method populateScene
    * @param  {[baseentity]}
    */
-  populateScene(renderingModel) {
-    this.set('entity', renderingModel);
+  populateScene(entity) {
+    this.set('entity', entity);
   },
+
 
   /**
    * This function is called when the destroy event is fired. Inherit this 
    * function to cleanup custom properties or unbind listener 
    * as shown in {@landscape-rendering}.
    *
-   * @class Rendering-Core
+   * @method cleanup
    */
   cleanup() {
     cancelAnimationFrame(this.get('animationFrameId'));
@@ -124,30 +126,29 @@ export default Ember.Component.extend({
     this.set('camera', null);
   },
 
+
   /**
-   * This function is called on every new landscape. Inherit this function
-   * to define the custom merging of the new and old 
-   * interaction state, e.g. component X is open. You need to call 
-   * {{#crossLink "rendering-core/cleanAndUpdateScene:method"}}{{/crossLink}} 
-   * afterwards with the merged model as parameter.
+   * This function is called with every new incoming landscape. Inherit this 
+   * function to define the custom merging of the new and old 
+   * interaction state, e.g. component X is open. Then set entity to your merged 
+   * model. Afterwards 
+   * {{#crossLink "rendering-core/cleanAndUpdateScene:method"}}{{/crossLink}}
+   * is automatically called with the parameter entitiy.
    *
-   * @class Rendering-Core
+   * @method mergeModel
    */
-  mergeModel(renderingModel) {
-    // TODO merging
-    
-    return renderingModel;
-  },
+  mergeModel(entity) {},
+
 
   /**
    * Inherit this function to update the scene with a new renderingModel. It 
    * automatically removes every mesh from the scene. Add your custom code 
    * as shown in landscape-rendering.
    *
-   * @class Rendering-Core
+   * @method cleanAndUpdateScene
    */
-  cleanAndUpdateScene(renderingModel) {
-    this.set('entity', renderingModel);
+  cleanAndUpdateScene(entity) {
+    this.set('entity', entity);
     const scene = this.get('scene');
 
     for (let i = scene.children.length - 1; i >= 0 ; i--) {

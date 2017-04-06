@@ -30,24 +30,24 @@ export default RenderingCore.extend({
   },
 
   // @Override
-  cleanAndUpdateScene(landscape) {
+  cleanAndUpdateScene(emberLandscape) {
     this._super(...arguments);
 
     this.debug("clean and populate landscape rendering");
 
-    this.populateScene(landscape);
+    this.populateScene(emberLandscape);
   },
 
   // @Override
-  populateScene(landscape) {
+  populateScene(emberLandscape) {
 
-    this.get('klayLayouter').applyLayout(landscape);
+    this.get('klayLayouter').applyLayout(emberLandscape);
 
     this._super(...arguments);
 
     const self = this;
 
-    const systems = landscape.get('systems');
+    const systems = emberLandscape.get('systems');
 
     const scaleFactor = {
       width: 0.5,
@@ -58,7 +58,7 @@ export default RenderingCore.extend({
 
     if (systems) {
 
-      var centerPoint = calculateLandscapeCenterAndZZoom(landscape);
+      var centerPoint = calculateLandscapeCenterAndZZoom(emberLandscape);
 
       systems.forEach(function(system) {
 
@@ -254,7 +254,7 @@ export default RenderingCore.extend({
       });
     } // END if(systems)
 
-    const appCommunication = landscape.get('applicationCommunication');
+    const appCommunication = emberLandscape.get('applicationCommunication');
 
     const communicationsAccumulated = [];
 
@@ -715,14 +715,14 @@ export default RenderingCore.extend({
 
     }
 
-    function calculateLandscapeCenterAndZZoom(landscape) {
+    function calculateLandscapeCenterAndZZoom(emberLandscape) {
 
       const MIN_X = 0;
       const MAX_X = 1;
       const MIN_Y = 2;
       const MAX_Y = 3;
 
-      const rect = getLandscapeRect(landscape);
+      const rect = getLandscapeRect(emberLandscape);
       const SPACE_IN_PERCENT = 0.02;
 
       let requiredWidth = Math.abs(rect.get(MAX_X) - rect.get(MIN_X));
@@ -753,7 +753,7 @@ export default RenderingCore.extend({
     }
 
 
-    function getLandscapeRect(landscape) {
+    function getLandscapeRect(emberLandscape) {
 
       const MIN_X = 0;
       const MAX_X = 1;
@@ -766,7 +766,7 @@ export default RenderingCore.extend({
       rect.push(Number.MAX_VALUE);
       rect.push(-Number.MAX_VALUE);
 
-      const systems = landscape.get('systems');
+      const systems = emberLandscape.get('systems');
 
       if (systems.length === 0) {
         rect[MIN_X] = 0.0;
@@ -886,7 +886,7 @@ export default RenderingCore.extend({
             } 
             else if (emberModelName === "nodegroup" || emberModelName === "system"){
               emberModel.setOpenedStatus(!emberModel.get('opened'));
-              self.cleanAndUpdateScene(self.get('landscape'));          
+              self.cleanAndUpdateScene(self.get('entity'));          
             } 
           }
     });
@@ -994,10 +994,9 @@ export default RenderingCore.extend({
   }, // END initInteraction
 
   // @Override
-  mergeModel(renderingModel) {
+  mergeModel(emberLandscape) {
     // TODO merging
-    
-    this.cleanAndUpdateScene(renderingModel);
+    this.set('entity', emberLandscape);
   },
 
 
