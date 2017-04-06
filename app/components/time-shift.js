@@ -9,6 +9,7 @@ export default Component.extend({
   plot: null,
   
   timeshiftUpdater: Ember.inject.service("timeshift-reload"),  
+  landscapeUpdater: Ember.inject.service("landscape-reload"), 
   timestamps: Ember.computed.oneWay("timeshiftUpdater.object"),
   
   observer: Ember.observer("timestamps", function(){
@@ -38,11 +39,13 @@ export default Component.extend({
       }
     },
     playPauseTimeshift() {
-      if(this.get('timeshiftUpdater').active) {
+      if(this.get('timeshiftUpdater').active) {        
+        this.set('landscapeUpdater.active', false);
         this.set('timeshiftUpdater.active', false);
         this.set('playPauseCSSClass', 'glyphicon-play');
       } 
       else {
+        this.set('landscapeUpdater.active', true);
         this.set('timeshiftUpdater.active', true);
         this.set('playPauseCSSClass', 'glyphicon-pause');
       }

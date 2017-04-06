@@ -41,7 +41,7 @@ export default RenderingCore.extend({
 
   // @Override
   cleanAndUpdateScene(emberLandscape) {
-    this._super(...arguments);
+    this._super(emberLandscape);
 
     this.debug("clean and populate landscape rendering");
 

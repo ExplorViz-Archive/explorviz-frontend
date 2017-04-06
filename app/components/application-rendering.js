@@ -44,6 +44,9 @@ export default RenderingCore.extend({
 
     this.debug("cleanup application rendering");
 
+    this.set('applicationID', null);    
+    this.set('application3D', null);  
+
     this.get('hammerManager').off();
     this.set('hammerManager', null);
 

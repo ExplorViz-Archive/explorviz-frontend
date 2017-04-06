@@ -9,14 +9,6 @@ export default Ember.Controller.extend({
   appName: null,
 
   showLandscape: true,
-  lastShownApplication: null,
-
-  landscapeUpdater: Ember.inject.service("landscape-reload"),
-  landscape: Ember.computed.oneWay("landscapeUpdater.object"),
-  
-  //the observer reacts to changes for the computed value landscape
-  observer: Ember.observer("landscape", function(){
-    this.debug("hello");
-  })
+  lastShownApplication: null
 
 });

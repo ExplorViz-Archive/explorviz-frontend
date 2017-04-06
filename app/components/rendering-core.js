@@ -19,8 +19,7 @@ export default Ember.Component.extend({
 
   classNames: ['viz'],
 
-  landscapeUpdater: Ember.inject.service("landscape-reload"),  
-  store: Ember.inject.service(),  
+  landscapeUpdater: Ember.inject.service("landscape-reload"),
 
   scene : null,
   webglrenderer: null,

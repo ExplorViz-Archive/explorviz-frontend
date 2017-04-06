@@ -9,8 +9,9 @@ export default Ember.Service.extend({
 	active: true,
 	
 	/* this service is used like an abstract service
-	it only works with an "authenticated session". It will start immediatly working, when the session is authenticated 
-	*/
+	 * it only works with an "authenticated session". It will start immediatly 
+ 	 * working, when the session is authenticated 
+	 */
 	
 	
 	//This loop works infinetly, unless the session is authenticated
