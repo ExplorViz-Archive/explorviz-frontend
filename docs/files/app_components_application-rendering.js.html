@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>app/components/application-rendering.js - ExplorViz: UI Frontend API</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="ExplorViz: UI Frontend API" src="https://www.explorviz.net/img/favicon.png" style="max-height: 65%;" title="ExplorViz: UI Frontend API">
+            ExplorViz: UI Frontend API
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>0.0.1</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Application", "classes/Application-Rendering", "classes/Authenticator", "classes/BaseEntity", "classes/Clazz", "classes/Communication", "classes/CommunicationClazz", "classes/Component", "classes/Draw3DNodeEntity", "classes/DrawEdgeEntity", "classes/DrawNodeEntity", "classes/Landscape", "classes/Landscape-Rendering", "classes/Node", "classes/NodeGroup", "classes/Rendering-Core", "classes/System"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+	    <div>
+	        <h3>APIs</h3>
+	        <div id="sidebar">
+	            <ul id="main-nav" class="nav nav-tabs" style="margin-bottom:0;">
+	                <li class="active"><a href="#classes" data-toggle="tab">Classes</a></li>
+	                <li><a href="#modules" data-toggle="tab">Modules</a></li>
+	            </ul>
+	    
+	            <div id="api-tabview-filter">
+	                <input type="search" placeholder="Type to filter APIs">
+	            </div>
+	    
+	            <div class="tab-content" style="border: 1px solid #DDD; border-top:0;">
+	                <div class="tab-pane active" id="classes">
+	                    <ul id="api-classes" class="nav nav-list">
+	                            <li><a href="../classes/Application.html">Application</a></li>
+	                            <li><a href="../classes/Application-Rendering.html">Application-Rendering</a></li>
+	                            <li><a href="../classes/Authenticator.html">Authenticator</a></li>
+	                            <li><a href="../classes/BaseEntity.html">BaseEntity</a></li>
+	                            <li><a href="../classes/Clazz.html">Clazz</a></li>
+	                            <li><a href="../classes/Communication.html">Communication</a></li>
+	                            <li><a href="../classes/CommunicationClazz.html">CommunicationClazz</a></li>
+	                            <li><a href="../classes/Component.html">Component</a></li>
+	                            <li><a href="../classes/Draw3DNodeEntity.html">Draw3DNodeEntity</a></li>
+	                            <li><a href="../classes/DrawEdgeEntity.html">DrawEdgeEntity</a></li>
+	                            <li><a href="../classes/DrawNodeEntity.html">DrawNodeEntity</a></li>
+	                            <li><a href="../classes/Landscape.html">Landscape</a></li>
+	                            <li><a href="../classes/Landscape-Rendering.html">Landscape-Rendering</a></li>
+	                            <li><a href="../classes/Node.html">Node</a></li>
+	                            <li><a href="../classes/NodeGroup.html">NodeGroup</a></li>
+	                            <li><a href="../classes/Rendering-Core.html">Rendering-Core</a></li>
+	                            <li><a href="../classes/System.html">System</a></li>
+	                    </ul>
+	                </div>
+	    
+	                <div class="tab-pane" id="modules">
+	                    <ul id="api-modules" class="nav nav-list">
+	                    </ul>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+        </div>
+        <div class="span9">
+                <form id="options-form" class="form-inline pull-right">
+                    Show:
+                    <label for="api-show-inherited" class="checkbox">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected" class="checkbox">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private" class="checkbox">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated" class="checkbox">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </form>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>app/components/application-rendering.js <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+import RenderingCore from &#x27;./rendering-core&#x27;;
+import Ember from &#x27;ember&#x27;;
+import Hammer from &quot;npm:hammerjs&quot;;
+
+ /**
+ * Renderer for application visualization.
+ *
+ * @class Application-Rendering
+ * @extends Rendering-Core
+ */
+export default RenderingCore.extend({
+
+  store: Ember.inject.service(&#x27;store&#x27;),
+
+  cityLayouter: Ember.inject.service(&quot;city-layouter&quot;),
+  application3D: null,
+
+  applicationID: null,
+
+  hammerManager: null,
+
+  // @Override
+  initRendering() {
+    this._super(...arguments);
+
+    this.initInteraction();
+    
+    this.get(&#x27;camera&#x27;).position.set(0, 0, 100);
+
+    const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
+    spotLight.position.set(100, 100, 100);
+    spotLight.castShadow = false;
+    this.get(&#x27;scene&#x27;).add(spotLight);
+
+    const light = new THREE.AmbientLight(
+    new THREE.Color(0.65, 0.65, 0.65));
+    this.scene.add(light);
+  },
+
+
+  // @Override
+  cleanup() {
+    this._super(...arguments);
+
+    this.debug(&quot;cleanup application rendering&quot;);
+
+    this.get(&#x27;hammerManager&#x27;).off();
+    this.set(&#x27;hammerManager&#x27;, null);
+
+  },
+
+
+  // @Override
+  cleanAndUpdateScene(application) {
+    this._super(...arguments);
+
+    this.debug(&quot;populate application rendering&quot;);
+
+    // remove foundation for re-rendering
+    
+    const foundation = application.get(&#x27;components&#x27;).objectAt(0);
+
+    if(foundation.get(&#x27;foundation&#x27;)) {
+      application.set(&#x27;components&#x27;, foundation.get(&#x27;children&#x27;));
+      application.get(&#x27;components&#x27;).objectAt(0).set(&#x27;parentComponent&#x27;, null);
+      this.get(&#x27;store&#x27;).unloadRecord(foundation);
+    }
+
+    this.populateScene();
+  },
+
+
+  // @Override
+  preProcessEntity() {
+    const application = this.get(&#x27;store&#x27;).peekRecord(&#x27;application&#x27;, 
+      this.get(&#x27;applicationID&#x27;));
+    this.set(&#x27;entity&#x27;, application);
+  },
+
+
+  // @Override
+  populateScene() {
+    this._super(...arguments);
+
+    const emberApplication = this.get(&#x27;entity&#x27;);
+
+    this.set(&#x27;applicationID&#x27;, emberApplication.id);
+
+    const self = this;
+
+    const foundation = createFoundation();
+
+    this.get(&#x27;cityLayouter&#x27;).applyLayout(emberApplication);
+
+    self.set(&#x27;application3D&#x27;, new THREE.Object3D());
+    self.set(&#x27;application3D.userData.model&#x27;, emberApplication);
+
+    const viewCenterPoint = calculateAppCenterAndZZoom(emberApplication);
+
+    addComponentToScene(foundation, 0xCECECE);
+
+    self.scene.add(self.get(&#x27;application3D&#x27;));
+    self.resetRotation();
+
+    // Helper functions    
+    
+    function createFoundation() {
+      const idTest = parseInt(Math.random() * (20000 - 10000) + 10000);
+      const foundation = self.get(&#x27;store&#x27;).createRecord(&#x27;component&#x27;, {
+        id: idTest,
+        synthetic: false,
+        foundation: true,
+        children: [emberApplication.get(&#x27;components&#x27;).objectAt(0)],
+        clazzes: [],
+        belongingApplication: emberApplication,
+        opened: true,
+        name: emberApplication.get(&#x27;name&#x27;),
+        fullQualifiedName: emberApplication.get(&#x27;name&#x27;),
+        positionX: 0,
+        positionY: 0,
+        positionZ: 0,
+        width: 0,
+        height: 0,
+        depth: 0
+      });
+
+      emberApplication.get(&#x27;components&#x27;).objectAt(0).set(&#x27;parentComponent&#x27;, foundation);
+      emberApplication.set(&#x27;components&#x27;, [foundation]);
+
+      return foundation;
+    }
+
+    function addComponentToScene(component, color) {
+
+      const grey = 0xCECECE;
+      const lightGreen = 0x00BB41;
+      const darkGreen = 0x169E2B;
+      const clazzColor = 0x3E14A0;
+      const redHighlighted = 0xFF0000;
+
+      createBox(component, color);
+
+      component.set(&#x27;color&#x27;, color);
+
+      const clazzes = component.get(&#x27;clazzes&#x27;);
+      const children = component.get(&#x27;children&#x27;);
+
+      clazzes.forEach((clazz) =&gt; {
+        if (component.get(&#x27;opened&#x27;)) {
+          if (clazz.get(&#x27;highlighted&#x27;)) {
+             createBox(clazz, redHighlighted);
+          } else {
+             createBox(clazz, clazzColor);
+          }
+        }
+      });
+
+      children.forEach((child) =&gt; {
+        if (component.get(&#x27;opened&#x27;)) {
+          if (child.get(&#x27;opened&#x27;)) {
+            if(child.get(&#x27;highlighted&#x27;)) {
+                addComponentToScene(child, redHighlighted);
+            }            
+            else if(component.get(&#x27;color&#x27;) === grey) {
+              addComponentToScene(child, lightGreen);
+            }
+            else if(component.get(&#x27;color&#x27;) === darkGreen) {
+              addComponentToScene(child, lightGreen);
+            } else {            
+              addComponentToScene(child, darkGreen);
+            }
+          } 
+          else {
+            if(child.get(&#x27;highlighted&#x27;)) {
+              addComponentToScene(child, redHighlighted);
+            }
+            else if(component.get(&#x27;color&#x27;) === grey) {
+              addComponentToScene(child, lightGreen);
+            }
+            else if(component.get(&#x27;color&#x27;) === darkGreen) {            
+              addComponentToScene(child, lightGreen);
+            } else {              
+              addComponentToScene(child, darkGreen);
+            }
+          }
+        }
+      });
+    } // END addComponentToScene
+
+
+
+    function createBox(component, color) {
+
+      let centerPoint = new THREE.Vector3(component.get(&#x27;positionX&#x27;) + component.get(&#x27;width&#x27;) / 2.0, component.get(&#x27;positionY&#x27;) + component.get(&#x27;height&#x27;) / 2.0,
+        component.get(&#x27;positionZ&#x27;) + component.get(&#x27;depth&#x27;) / 2.0);
+
+      const material = new THREE.MeshLambertMaterial();
+      material.color = new THREE.Color(color);
+
+      centerPoint.sub(viewCenterPoint);
+
+      centerPoint.multiplyScalar(0.5);
+
+      const extension = new THREE.Vector3(component.get(&#x27;width&#x27;) / 2.0, component.get(&#x27;height&#x27;) / 2.0, component.get(&#x27;depth&#x27;) / 2.0);
+      const cube = new THREE.BoxGeometry(extension.x, extension.y, extension.z);
+
+      const mesh = new THREE.Mesh(cube, material);
+
+      mesh.position.set(centerPoint.x, centerPoint.y, centerPoint.z);
+      mesh.updateMatrix();
+
+      mesh.userData.model = component;
+
+      self.get(&#x27;application3D&#x27;).add(mesh);
+
+    } // END createBox
+
+
+    function calculateAppCenterAndZZoom(emberApplication) {
+
+      const MIN_X = 0;
+      const MAX_X = 1;
+      const MIN_Y = 2;
+      const MAX_Y = 3;
+      const MIN_Z = 4;
+      const MAX_Z = 5;
+
+      const foundation = emberApplication.get(&#x27;components&#x27;).objectAt(0);
+
+      const rect = [];
+      rect.push(foundation.get(&#x27;positionX&#x27;));
+      rect.push(foundation.get(&#x27;positionY&#x27;) + foundation.get(&#x27;width&#x27;));
+      rect.push(foundation.get(&#x27;positionY&#x27;));
+      rect.push(foundation.get(&#x27;positionY&#x27;) + foundation.get(&#x27;height&#x27;));
+      rect.push(foundation.get(&#x27;positionZ&#x27;));
+      rect.push(foundation.get(&#x27;positionZ&#x27;) + foundation.get(&#x27;depth&#x27;));
+
+      //const SPACE_IN_PERCENT = 0.02;
+
+      const viewCenterPoint = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
+        rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0),
+        rect.get(MIN_Z) + ((rect.get(MAX_Z) - rect.get(MIN_Z)) / 2.0));
+
+      /*let requiredWidth = Math.abs(rect.get(MAX_X) - rect.get(MIN_X));
+      requiredWidth += requiredWidth * SPACE_IN_PERCENT;
+
+      let requiredHeight = Math.abs(rect.get(MAX_Y) - rect.get(MIN_Y));
+      requiredHeight += requiredHeight * SPACE_IN_PERCENT;
+
+      const viewPortSize = self.get(&#x27;webglrenderer&#x27;).getSize();
+
+      let viewportRatio = viewPortSize.width / viewPortSize.height;
+
+      const newZ_by_width = requiredWidth / viewportRatio;
+      const newZ_by_height = requiredHeight;
+
+      const center = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
+        rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0), 0);
+
+      const camera = self.get(&#x27;camera&#x27;);
+
+      camera.position.z = Math.max(Math.max(newZ_by_width, newZ_by_height), 10.0);
+      camera.position.x = 0;
+      camera.position.y = 0;
+      camera.updateProjectionMatrix();*/
+
+      return viewCenterPoint;
+
+    }
+
+
+
+  }, // END populateScene
+
+
+  resetRotation() {
+    const rotationX = 0.65;
+    const rotationY = 0.80;
+
+    this.set(&#x27;application3D.rotation.x&#x27;, rotationX);
+    this.set(&#x27;application3D.rotation.y&#x27;, rotationY);
+  },
+
+
+  initInteraction() {
+
+    const self = this;
+
+    let cameraTranslateX, cameraTranslateY = 0;
+
+    const canvas = self.get(&#x27;canvas&#x27;);
+
+    this.set(&#x27;hammerManager&#x27;, new Hammer.Manager(canvas, {}));
+
+    const hammer = this.get(&#x27;hammerManager&#x27;);
+
+    const singleTap = new Hammer.Tap({
+      event: &#x27;singletap&#x27;,
+      interval: 250
+    });
+
+    const doubleTap = new Hammer.Tap({
+      event: &#x27;doubletap&#x27;,
+      taps: 2,
+      interval: 250
+    });
+
+    const pan = new Hammer.Pan({
+      event: &#x27;pan&#x27;
+    });
+
+    hammer.add([doubleTap, singleTap, pan]);
+
+    doubleTap.recognizeWith(singleTap);
+    singleTap.requireFailure(doubleTap);
+
+    hammer.on(&#x27;singletap&#x27;, function(evt){
+      var mouse = {};
+
+      const renderer = self.get(&#x27;webglrenderer&#x27;);
+
+      const event = evt.srcEvent;
+
+      mouse.x = ((event.clientX - 15) / renderer.domElement.clientWidth) * 2 - 1;
+      mouse.y = -((event.clientY - 75) / renderer.domElement.clientHeight) * 2 + 1;
+
+      const intersectedViewObj = raycasting(null, mouse, true);
+
+      if(intersectedViewObj) {
+
+        const emberModel = intersectedViewObj.object.userData.model;
+        const emberModelName = emberModel.constructor.modelName;
+
+        if(emberModelName === &quot;component&quot; &amp;&amp; !emberModel.get(&#x27;opened&#x27;)){
+          emberModel.set(&#x27;highlighted&#x27;, !emberModel.get(&#x27;highlighted&#x27;));    
+        } 
+        else if(emberModelName === &quot;clazz&quot;) {
+          emberModel.set(&#x27;highlighted&#x27;, !emberModel.get(&#x27;highlighted&#x27;));
+        }
+
+        self.cleanAndUpdateScene(self.application3D.userData.model);
+
+      }
+
+    });
+
+    hammer
+      .on(
+        &#x27;doubletap&#x27;,
+        function(evt) {
+
+          var mouse = {};
+
+          const renderer = self.get(&#x27;webglrenderer&#x27;);
+
+          const event = evt.srcEvent;
+
+          mouse.x = ((event.clientX - 15) / renderer.domElement.clientWidth) * 2 - 1;
+          mouse.y = -((event.clientY - 75) / renderer.domElement.clientHeight) * 2 + 1;
+
+          const intersectedViewObj = raycasting(null, mouse, true);
+
+          if(intersectedViewObj) {
+
+            const emberModel = intersectedViewObj.object.userData.model;
+            const emberModelName = emberModel.constructor.modelName;
+
+            if(emberModelName === &quot;component&quot;){
+              emberModel.setOpenedStatus(!emberModel.get(&#x27;opened&#x27;));
+              emberModel.set(&#x27;highlighted&#x27;, false);
+              self.cleanAndUpdateScene(self.application3D.userData.model);
+            }
+          }
+    });
+
+    hammer.on(&#x27;panstart&#x27;, function(evt) {
+      const event = evt.srcEvent;
+
+      cameraTranslateX = event.clientX;
+      cameraTranslateY = event.clientY;
+    });
+
+    hammer.on(&#x27;panmove&#x27;, function(evt) {
+
+      const event = evt.srcEvent;
+
+      const renderer = self.get(&#x27;webglrenderer&#x27;);
+      const camera = self.get(&#x27;camera&#x27;);
+
+      var deltaX = event.clientX - cameraTranslateX;
+      var deltaY = event.clientY - cameraTranslateY;
+
+      var distanceXInPercent = (deltaX /
+        parseFloat(renderer.domElement.clientWidth)) * 100.0;
+
+      var distanceYInPercent = (deltaY /
+        parseFloat(renderer.domElement.clientHeight)) * 100.0;
+
+      var xVal = camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(camera.position.z) / 4.0);
+
+      var yVal = camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(camera.position.z) / 4.0);
+
+      camera.position.x = xVal;
+      camera.position.y = yVal;
+
+      cameraTranslateX = event.clientX;
+      cameraTranslateY = event.clientY;
+    });
+
+    // zoom handler
+
+    canvas.addEventListener(&#x27;mousewheel&#x27;, onMouseWheelStart, false);
+
+    function onMouseWheelStart(evt) {
+
+      const camera = self.get(&#x27;camera&#x27;);
+
+      var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
+
+      // zoom in
+      if (delta &gt; 0) {
+        camera.position.z -= delta * 1.5;
+      }
+      // zoom out
+      else {
+        camera.position.z -= delta * 1.5;
+      }
+    }
+
+
+    // raycasting
+
+    const raycaster = new THREE.Raycaster();
+
+    function raycasting(origin, direction, fromCamera) {
+
+      if (fromCamera) {
+        // direction = mouse
+        raycaster.setFromCamera(direction, self.get(&#x27;camera&#x27;));
+      } else if (origin) {
+        raycaster.set(origin, direction);
+      }
+
+      // calculate objects intersecting the picking ray (true =&gt; recursive)
+      const intersections = raycaster.intersectObjects(self.get(&#x27;application3D&#x27;).children,
+        true);
+      
+      if (intersections.length &gt; 0) {
+
+        const result = intersections.filter(function(obj) {
+
+          if (obj.object.userData.model) {
+
+            const modelName = obj.object.userData.model.constructor.modelName;
+            return (modelName === &#x27;component&#x27; || modelName === &#x27;clazz&#x27;);
+
+          }
+
+        });
+
+        if (result.length &lt;= 0) {
+          return;
+        }
+
+        return result[0];
+
+      }
+    }
+
+
+  } // END initInteraction
+  
+});
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>

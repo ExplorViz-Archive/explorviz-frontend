@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>app/components/landscape-rendering.js - ExplorViz: UI Frontend API</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="ExplorViz: UI Frontend API" src="https://www.explorviz.net/img/favicon.png" style="max-height: 65%;" title="ExplorViz: UI Frontend API">
+            ExplorViz: UI Frontend API
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>0.0.1</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Application", "classes/Application-Rendering", "classes/Authenticator", "classes/BaseEntity", "classes/Clazz", "classes/Communication", "classes/CommunicationClazz", "classes/Component", "classes/Draw3DNodeEntity", "classes/DrawEdgeEntity", "classes/DrawNodeEntity", "classes/Landscape", "classes/Landscape-Rendering", "classes/Node", "classes/NodeGroup", "classes/Rendering-Core", "classes/System"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+	    <div>
+	        <h3>APIs</h3>
+	        <div id="sidebar">
+	            <ul id="main-nav" class="nav nav-tabs" style="margin-bottom:0;">
+	                <li class="active"><a href="#classes" data-toggle="tab">Classes</a></li>
+	                <li><a href="#modules" data-toggle="tab">Modules</a></li>
+	            </ul>
+	    
+	            <div id="api-tabview-filter">
+	                <input type="search" placeholder="Type to filter APIs">
+	            </div>
+	    
+	            <div class="tab-content" style="border: 1px solid #DDD; border-top:0;">
+	                <div class="tab-pane active" id="classes">
+	                    <ul id="api-classes" class="nav nav-list">
+	                            <li><a href="../classes/Application.html">Application</a></li>
+	                            <li><a href="../classes/Application-Rendering.html">Application-Rendering</a></li>
+	                            <li><a href="../classes/Authenticator.html">Authenticator</a></li>
+	                            <li><a href="../classes/BaseEntity.html">BaseEntity</a></li>
+	                            <li><a href="../classes/Clazz.html">Clazz</a></li>
+	                            <li><a href="../classes/Communication.html">Communication</a></li>
+	                            <li><a href="../classes/CommunicationClazz.html">CommunicationClazz</a></li>
+	                            <li><a href="../classes/Component.html">Component</a></li>
+	                            <li><a href="../classes/Draw3DNodeEntity.html">Draw3DNodeEntity</a></li>
+	                            <li><a href="../classes/DrawEdgeEntity.html">DrawEdgeEntity</a></li>
+	                            <li><a href="../classes/DrawNodeEntity.html">DrawNodeEntity</a></li>
+	                            <li><a href="../classes/Landscape.html">Landscape</a></li>
+	                            <li><a href="../classes/Landscape-Rendering.html">Landscape-Rendering</a></li>
+	                            <li><a href="../classes/Node.html">Node</a></li>
+	                            <li><a href="../classes/NodeGroup.html">NodeGroup</a></li>
+	                            <li><a href="../classes/Rendering-Core.html">Rendering-Core</a></li>
+	                            <li><a href="../classes/System.html">System</a></li>
+	                    </ul>
+	                </div>
+	    
+	                <div class="tab-pane" id="modules">
+	                    <ul id="api-modules" class="nav nav-list">
+	                    </ul>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+        </div>
+        <div class="span9">
+                <form id="options-form" class="form-inline pull-right">
+                    Show:
+                    <label for="api-show-inherited" class="checkbox">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected" class="checkbox">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private" class="checkbox">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated" class="checkbox">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </form>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>app/components/landscape-rendering.js <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+import RenderingCore from &#x27;./rendering-core&#x27;;
+import Ember from &#x27;ember&#x27;;
+import Hammer from &quot;npm:hammerjs&quot;;
+
+ /**
+ * Renderer for landscape visualization.
+ *
+ * @class Landscape-Rendering
+ * @extends Rendering-Core
+ */
+export default RenderingCore.extend({
+
+  hammerManager: null,
+
+  klayLayouter: Ember.inject.service(&quot;klay-layouter&quot;),
+
+  centerPoint : null,
+
+  logos: {},
+
+  // @Override
+  initRendering() {
+    this._super(...arguments);
+
+    this.initInteraction();
+
+    var dirLight = new THREE.DirectionalLight();
+    dirLight.position.set(30, 10, 20);
+    this.get(&#x27;scene&#x27;).add(dirLight);
+  },
+
+  // @Override
+  cleanup() {
+    this._super(...arguments);
+
+    this.debug(&quot;cleanup landscape rendering&quot;);
+
+    this.get(&#x27;hammerManager&#x27;).off();
+    this.set(&#x27;hammerManager&#x27;, null);
+  },
+
+  // @Override
+  cleanAndUpdateScene(emberLandscape) {
+    this._super(...arguments);
+
+    this.debug(&quot;clean and populate landscape rendering&quot;);
+
+    this.populateScene();
+  },
+
+  // @Override
+  populateScene() {
+
+    const emberLandscape = this.get(&#x27;entity&#x27;);
+
+    this.get(&#x27;klayLayouter&#x27;).applyLayout(emberLandscape);
+
+    this._super(...arguments);
+
+    const self = this;
+
+    const systems = emberLandscape.get(&#x27;systems&#x27;);
+
+    const scaleFactor = {
+      width: 0.5,
+      height: 0.5
+    };
+
+    let isRequestObject = false;
+
+    if (systems) {
+
+      if(!this.get(&#x27;centerPoint&#x27;)) {
+        this.set(&#x27;centerPoint&#x27;, calculateLandscapeCenterAndZZoom(emberLandscape));
+      }      
+
+      var centerPoint = this.get(&#x27;centerPoint&#x27;); 
+
+      systems.forEach(function(system) {
+
+        isRequestObject = false;
+
+        if (!isRequestObject &amp;&amp; system.get(&#x27;name&#x27;) === &quot;Requests&quot;) {
+          isRequestObject = true;
+        }
+
+        if (!isRequestObject) {
+
+          const {
+            x,
+            y,
+            z
+          } = system.get(&#x27;backgroundColor&#x27;);
+
+          var extensionX = system.get(&#x27;width&#x27;) * scaleFactor.width;
+          var extensionY = system.get(&#x27;height&#x27;) * scaleFactor.height;
+
+          var centerX = system.get(&#x27;positionX&#x27;) + extensionX - centerPoint.x;
+          var centerY = system.get(&#x27;positionY&#x27;) - extensionY - centerPoint.y;
+
+          var systemMesh = addPlane(centerX, centerY, system.get(&#x27;positionZ&#x27;), system.get(&#x27;width&#x27;),
+            system.get(&#x27;height&#x27;), new THREE.Color(x, y, z), null, null, self.get(&#x27;scene&#x27;), system);
+
+          system.set(&#x27;threeJSModel&#x27;, systemMesh);
+
+        }
+
+        const nodegroups = system.get(&#x27;nodegroups&#x27;);
+
+        nodegroups.forEach(function(nodegroup) {
+
+          if (!isRequestObject) {
+
+            const {
+              x,
+              y,
+              z
+            } = nodegroup.get(&#x27;backgroundColor&#x27;);
+
+            extensionX = nodegroup.get(&#x27;width&#x27;) * scaleFactor.width;
+            extensionY = nodegroup.get(&#x27;height&#x27;) * scaleFactor.height;
+
+            centerX = nodegroup.get(&#x27;positionX&#x27;) + extensionX - centerPoint.x;
+            centerY = nodegroup.get(&#x27;positionY&#x27;) - extensionY - centerPoint.y;
+
+            var nodegroupMesh = addPlane(centerX, centerY, nodegroup.get(&#x27;positionZ&#x27;) + 0.01, nodegroup.get(&#x27;width&#x27;),
+              nodegroup.get(&#x27;height&#x27;), new THREE.Color(x, y, z), null, null, self.get(&#x27;scene&#x27;), nodegroup);
+
+            nodegroup.set(&#x27;threeJSModel&#x27;, nodegroupMesh);
+
+          }
+
+          const nodes = nodegroup.get(&#x27;nodes&#x27;);
+
+          nodes.forEach(function(node) {
+
+            if (!isRequestObject) {
+
+              const {
+                x,
+                y,
+                z
+              } = node.get(&#x27;color&#x27;);
+
+              extensionX = node.get(&#x27;width&#x27;) * scaleFactor.width;
+              extensionY = node.get(&#x27;height&#x27;) * scaleFactor.height;
+
+              centerX = node.get(&#x27;positionX&#x27;) + extensionX - centerPoint.x;
+              centerY = node.get(&#x27;positionY&#x27;) - extensionY - centerPoint.y;
+
+              var nodeMesh = addPlane(centerX, centerY, node.get(&#x27;positionZ&#x27;) + 0.02, node.get(&#x27;width&#x27;),
+                node.get(&#x27;height&#x27;), new THREE.Color(x, y, z), null, null, self.get(&#x27;scene&#x27;), node);
+
+              node.set(&#x27;threeJSModel&#x27;, nodeMesh);
+
+            }
+
+            const applications = node.get(&#x27;applications&#x27;);
+
+            applications.forEach(function(application) {
+
+              extensionX = application.get(&#x27;width&#x27;) * scaleFactor.width;
+              extensionY = application.get(&#x27;height&#x27;) * scaleFactor.width;
+
+              centerX = application.get(&#x27;positionX&#x27;) + extensionX - centerPoint.x;
+              centerY = application.get(&#x27;positionY&#x27;) - extensionY - centerPoint.y;
+
+              if (!isRequestObject) {
+
+                const {
+                  x,
+                  y,
+                  z
+                } = application.get(&#x27;backgroundColor&#x27;);
+
+                var applicationMesh = addPlane(centerX, centerY, application.get(&#x27;positionZ&#x27;) + 0.03,
+                  application.get(&#x27;width&#x27;), application.get(&#x27;height&#x27;), new THREE.Color(x, y, z), new THREE.Color(0x6D4FB4), null,
+                  self.get(&#x27;scene&#x27;), application);
+
+                application.set(&#x27;threeJSModel&#x27;, applicationMesh);
+
+                // create logos       
+
+                applicationMesh.geometry.computeBoundingBox();
+
+                const logoSize = {
+                  width: 0.4,
+                  height: 0.4
+                };
+                const appBBox = applicationMesh.geometry.boundingBox;
+
+                const logoPos = {
+                  x: 0,
+                  y: 0,
+                  z: 0
+                };
+
+                const logoRightPadding = logoSize.width * 0.7;
+
+                logoPos.x = appBBox.max.x - logoRightPadding;
+
+                const texturePartialPath = application.get(&#x27;database&#x27;) ?
+                  &#x27;database2&#x27; : application.get(&#x27;programmingLanguage&#x27;).toLowerCase();
+
+                addPlane(logoPos.x, logoPos.y, logoPos.z,
+                  logoSize.width, logoSize.height, new THREE.Color(1, 0, 0), null,
+                  texturePartialPath, applicationMesh, &quot;label&quot;);
+
+                // create labels
+
+                const font = self.get(&#x27;font&#x27;);
+
+                let padding = {
+                  left: 0.0,
+                  right: -logoRightPadding,
+                  top: 0.0,
+                  bottom: 0.0
+                };
+                let labelMesh = createLabel(font, 0.2, null, applicationMesh,
+                  padding, 0xffffff, logoSize, &quot;center&quot;, application);
+
+                applicationMesh.add(labelMesh);
+
+                padding = {
+                  left: 0.0,
+                  right: 0.0,
+                  top: 0.0,
+                  bottom: 0.2
+                };
+
+                labelMesh = createLabel(font, 0.15, node.getDisplayName(), nodeMesh,
+                  padding, 0xffffff, {
+                    width: 0.0,
+                    height: 0.0
+                  }, &quot;min&quot;, node);
+
+                nodeMesh.add(labelMesh);
+
+                padding = {
+                  left: 0.0,
+                  right: 0.0,
+                  top: -0.4,
+                  bottom: 0.0
+                };
+                labelMesh = createLabel(font, 0.2, null, systemMesh,
+                  padding, 0x00000, {
+                    width: 0.0,
+                    height: 0.0
+                  }, &quot;max&quot;, system);
+
+                systemMesh.add(labelMesh);
+
+
+
+              } else {
+                // draw request logo
+                addPlane(centerX, centerY, 0,
+                  1.6, 1.6, new THREE.Color(1, 0, 0), null,
+                  &quot;requests&quot;, self.get(&#x27;scene&#x27;), &quot;label&quot;);
+              }
+
+            });
+
+          });
+
+        });
+
+      });
+    } // END if(systems)
+
+    const appCommunication = emberLandscape.get(&#x27;applicationCommunication&#x27;);
+
+    const communicationsAccumulated = [];
+
+    var accum;
+
+    if (appCommunication) {
+      appCommunication.forEach((communication) =&gt; {
+
+        var points = communication.get(&#x27;points&#x27;);
+
+        if (points.length !== 0) {
+
+          const {
+            x,
+            y,
+            z
+          } = communication.get(&#x27;pipeColor&#x27;);
+
+          accum = {
+            tiles: [],
+            pipeColor: new THREE.Color(x, y, z)
+          };
+          communicationsAccumulated.push(accum);
+
+          for (var i = 1; i &lt; points.length; i++) {
+
+            var lastPoint = points[i - 1];
+            var thisPoint = points[i];
+
+            var tile = seekOrCreateTile(lastPoint, thisPoint, communicationsAccumulated, 0.02);
+            tile.communications.push(appCommunication);
+            tile.requestsCache = tile.requestsCache + communication.get(&#x27;requests&#x27;);
+
+            accum.tiles.push(tile);
+          }
+
+        }
+
+      });
+
+      addCommunicationLineDrawing(communicationsAccumulated, self.get(&#x27;scene&#x27;));
+
+    }
+
+
+    // Helper functions //
+
+    function addCommunicationLineDrawing(communicationsAccumulated, parent) {
+
+      const requestsList = [];    
+
+      communicationsAccumulated.forEach((accum) =&gt; {
+
+        accum.tiles.forEach((tile) =&gt; {
+               
+          requestsList.push(tile.requestsCache);
+
+          });
+      });
+
+      const categories = getCategories(requestsList, true);
+
+      communicationsAccumulated.forEach((accum) =&gt; {        
+        for (var i = 0; i &lt; accum.tiles.length; i++) {
+          var tile = accum.tiles[i];
+          tile.lineThickness = 0.07 * categories[tile.requestsCache] + 0.01;
+        }
+
+        createAccumLine(accum, parent);
+
+      });
+
+
+   
+
+
+      ///
+      
+
+      function getCategories(list, linear) {
+        const result = [];
+
+        if (list.length === 0) {
+          return result;
+        }
+
+        list.sort();
+
+        if (linear) {
+          const listWithout0 = [];
+
+          list.forEach((entry) =&gt; {
+            if (entry !== 0){
+              listWithout0.push(entry);
+            }
+          });
+
+          if (listWithout0.length === 0) {
+            result.push({0: 0.0});
+            return result;
+          }        
+          useLinear(listWithout0, list, result);
+        } 
+        else {
+          const listWithout0And1 = [];
+
+          let outsideCounter = 0;
+          let insideCounter = 0;
+
+          list.forEach((entry) =&gt; {
+            outsideCounter++;
+            if (entry !== 0 &amp;&amp; entry !== 1){
+              listWithout0And1.push(entry);
+              insideCounter++;
+            }
+          });
+
+          if (listWithout0And1.length === 0) {
+            result.push({0: 0.0});
+            result.push({1: 1.0});
+            return result;
+          }
+
+          useThreshholds(listWithout0And1, list, result);
+        }
+
+        return result;
+
+
+
+        // inner helper functions
+
+        function useThreshholds(listWithout0And1, list, result) {
+          let max = 1;
+
+          listWithout0And1.forEach((value) =&gt; {
+            if (value &gt; max) {
+              max = value;
+            }
+          });
+
+          const oneStep = max / 3.0;
+
+          const t1 = oneStep;
+          const t2 = oneStep * 2;
+
+          list.forEach((entry) =&gt; {
+            let categoryValue = getCategoryFromValues(entry, t1, t2);
+            result[entry] = categoryValue;
+          });
+
+        }
+
+
+        function getCategoryFromValues(value, t1, t2) {
+          if (value === 0) {
+            return 0.0;
+          } else if (value === 1) {
+            return 1.0;
+          }
+
+          if (value &lt;= t1) {
+            return 2.0;
+          } else if (value &lt;= t2) {
+            return 3.0;
+          } else {
+            return 4.0;
+          }
+        }
+
+
+        function useLinear(listWithout0, list, result) {
+          let max = 1;
+          let secondMax = 1;
+
+          listWithout0.forEach((value) =&gt; {
+            if (value &gt; max) {
+              secondMax = max;
+              max = value;
+            }
+          });   
+
+          const oneStep = secondMax / 4.0;
+
+          const t1 = oneStep;
+          const t2 = oneStep * 2;
+          const t3 = oneStep * 3;
+
+          list.forEach((entry) =&gt; {
+            const categoryValue = getCategoryFromLinearValues(entry, t1, t2, t3);
+            result[entry] = categoryValue;
+          }); 
+
+        }
+
+
+        function getCategoryFromLinearValues(value, t1, t2, t3) {
+          if (value &lt;= 0) {
+            return 0;
+          } else if (value &lt;= t1) {
+            return 1.5;
+          } else if (value &lt;= t2) {
+            return 2.5;
+          } else if (value &lt;= t3) {
+            return 4.0;
+          } else {
+            return 6.5;
+          }
+        }
+
+
+
+      } // END getCategories
+
+      ///
+      
+    }
+
+
+    function checkEqualityOfPoints(p1, p2) {
+      var x = p1.x === p2.x;
+      var y = p1.y === p2.y;
+      var z = p1.z === p2.z;
+
+      return x &amp;&amp; y &amp;&amp; z;
+    }
+
+
+    function seekOrCreateTile(start, end,
+      communicationAccumulated, lineZvalue) {
+
+      communicationAccumulated.forEach((accum) =&gt; {
+
+        accum.tiles.forEach((tile) =&gt; {
+
+          if (checkEqualityOfPoints(tile.startPoint, start) &amp;&amp;
+            checkEqualityOfPoints(tile.endPoint, end)) {
+            //console.log(&quot;old tile&quot;);
+            return tile;
+          }
+
+        });
+
+      });
+
+      //console.log(&quot;new tile&quot;);
+      var tile = {
+        startPoint: start,
+        endPoint: end,
+        positionZ: lineZvalue,
+        requestsCache: 0,
+        communications: []
+      };
+      return tile;
+    }
+
+
+    function createAccumLine(accum, parent) {
+
+      if (accum.tiles.length !== 0) {
+
+        var firstTile = accum.tiles[0];
+
+        const material = new MeshLineMaterial({
+          color: accum.pipeColor,
+          lineWidth: firstTile.lineThickness * 0.4
+        });
+
+        const geometry = new THREE.Geometry();
+
+        geometry.vertices.push(
+          new THREE.Vector3(firstTile.startPoint.x - centerPoint.x,
+            firstTile.startPoint.y - centerPoint.y, firstTile.positionZ + 0.001)
+        );
+
+        accum.tiles.forEach((tile) =&gt; {
+          geometry.vertices.push(
+            new THREE.Vector3(tile.endPoint.x - centerPoint.x,
+              tile.endPoint.y - centerPoint.y, tile.positionZ + 0.001)
+          );
+        });
+
+        const line = new MeshLine();
+        line.setGeometry(geometry);
+
+        var lineMesh = new THREE.Mesh(line.geometry, material);
+
+        parent.add(lineMesh);
+
+      }
+    }
+
+
+    function createLabel(font, size, textToShow, parent, padding, color,
+      logoSize, yPosition, model) {
+
+      const text = textToShow ? textToShow :
+        parent.userData.model.get(&#x27;name&#x27;);
+
+      let labelGeo = new THREE.TextGeometry(
+        text, {
+          font: font,
+          size: size,
+          height: 0
+        }
+      );
+
+      labelGeo.computeBoundingBox();
+      var bboxLabel = labelGeo.boundingBox;
+      var labelWidth = bboxLabel.max.x - bboxLabel.min.x;
+
+      //console.log(&quot;label&quot;, text);
+
+      //console.log(&quot;labelMax&quot;, bboxLabel.max.x);
+      //console.log(&quot;labelMin&quot;, bboxLabel.min.x);
+      //console.log(&quot;labelWidth&quot;, labelWidth);
+
+      parent.geometry.computeBoundingBox();
+      const bboxParent = parent.geometry.boundingBox;
+
+      var boxWidth = Math.abs(bboxParent.max.x) +
+        Math.abs(bboxParent.min.x);
+
+      //console.log(&quot;pre-boxwidth&quot;, boxWidth);
+
+      boxWidth = boxWidth - logoSize.width + padding.left + padding.right;
+
+      //console.log(&quot;boxwidth&quot;, boxWidth);
+
+      // We can&#x27;t set the size of the labelGeo. Hence we need to scale it.
+
+      // upper scaling factor
+      var i = 1.0;
+
+      // scale until text fits into parent bounding box
+      while ((labelWidth &gt; boxWidth) &amp;&amp; (i &gt; 0.1)) {
+        // TODO time complexity: linear -&gt; Do binary search alike approach?                        
+        i -= 0.05;
+        labelGeo.scale(i, i, i);
+        // update the boundingBox
+        labelGeo.computeBoundingBox();
+        bboxLabel = labelGeo.boundingBox;
+        labelWidth = bboxLabel.max.x - bboxLabel.min.x;
+        if (text === &quot;PostgreSQL&quot;) {
+          //console.log(&quot;boxWidth&quot;, boxWidth);
+          //console.log(&quot;labelWidth&quot;, labelWidth);
+        }
+      }
+
+      const labelHeight = bboxLabel.max.y - bboxLabel.min.y;
+
+      if (text === &quot;PostgreSQL&quot;) {
+        //console.log(labelHeight);
+      }
+      //console.log(&quot;labelHeight&quot;, labelHeight);
+
+      let posX = (-labelWidth / 2.0) + padding.left + padding.right;
+
+      let posY = padding.bottom + padding.top;
+
+      if (yPosition === &quot;max&quot;) {
+        posY += bboxParent.max.y;
+      } else if (yPosition === &quot;min&quot;) {
+        posY += bboxParent.min.y;
+      } else if (yPosition === &quot;center&quot;) {
+        posY -= (labelHeight / 2.0);
+      }
+
+      const material = new THREE.MeshBasicMaterial({
+        color: color
+      });
+
+      const labelMesh = new THREE.Mesh(labelGeo, material);
+
+      labelMesh.position.set(posX, posY, 0.005);
+
+      labelMesh.userData[&#x27;type&#x27;] = &#x27;label&#x27;;
+      labelMesh.userData[&#x27;model&#x27;] = model;
+
+      return labelMesh;
+    }
+
+
+    function addPlane(x, y, z, width, height, color1, color2, textureName, parent, model) {
+      
+      if (textureName) {
+
+        if(self.get(&#x27;logos&#x27;)[textureName]) {
+
+          const material = new THREE.MeshBasicMaterial({
+            map: self.get(&#x27;logos&#x27;)[textureName],
+            transparent: true
+          });
+
+          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+              material);
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData[&#x27;model&#x27;] = model;
+          return plane;
+
+        } 
+        else {
+
+          new THREE.TextureLoader().load(&#x27;images/logos/&#x27; + textureName + &#x27;.png&#x27;, (texture) =&gt; {
+
+            self.get(&#x27;logos&#x27;)[textureName] = texture;
+
+            const material = new THREE.MeshBasicMaterial({
+              map: texture,
+              transparent: true
+            });
+            const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+              material);
+            plane.position.set(x, y, z);
+            parent.add(plane);
+            plane.userData[&#x27;model&#x27;] = model;
+            return plane;
+          });
+
+        }
+
+      } 
+      // regular plane (one color or color gradient)
+      else {
+
+        if(!color2) {
+          const material = new THREE.MeshBasicMaterial({
+            color: color1
+          });
+          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+            material);
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData[&#x27;model&#x27;] = model;
+          return plane;
+        } 
+        else {
+
+          // create gradient texture
+          const canvas = document.createElement( &#x27;canvas&#x27; );
+          canvas.width = 16;
+          canvas.height = 16;
+
+          const ctx = canvas.getContext(&quot;2d&quot;);
+
+          const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
+          grd.addColorStop(0.2, &#x27;rgba(72,26,180,1)&#x27;);
+          grd.addColorStop(1, &#x27;rgba(101,68,180,1)&#x27;);
+
+          ctx.fillStyle = grd;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          const gradientTexture = new THREE.Texture(canvas);
+          gradientTexture.needsUpdate = true;
+          gradientTexture.minFilter = THREE.LinearFilter;
+
+          // apply texture too material and create mesh
+          const geometry = new THREE.PlaneGeometry(width, height);
+
+          const material = new THREE.MeshBasicMaterial({      
+            map: gradientTexture
+          });
+
+          const plane = new THREE.Mesh(geometry, material);
+
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData[&#x27;model&#x27;] = model;
+          return plane;
+
+        }
+
+      } 
+
+    }
+
+    function calculateLandscapeCenterAndZZoom(emberLandscape) {
+
+      const MIN_X = 0;
+      const MAX_X = 1;
+      const MIN_Y = 2;
+      const MAX_Y = 3;
+
+      const rect = getLandscapeRect(emberLandscape);
+      const SPACE_IN_PERCENT = 0.02;
+
+      let requiredWidth = Math.abs(rect.get(MAX_X) - rect.get(MIN_X));
+      requiredWidth += requiredWidth * SPACE_IN_PERCENT;
+
+      let requiredHeight = Math.abs(rect.get(MAX_Y) - rect.get(MIN_Y));
+      requiredHeight += requiredHeight * SPACE_IN_PERCENT;
+
+      const viewPortSize = self.get(&#x27;webglrenderer&#x27;).getSize();
+
+      let viewportRatio = viewPortSize.width / viewPortSize.height;
+
+      const newZ_by_width = requiredWidth / viewportRatio;
+      const newZ_by_height = requiredHeight;
+
+      const center = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
+        rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0), 0);
+
+      const camera = self.get(&#x27;camera&#x27;);
+
+      camera.position.z = Math.max(Math.max(newZ_by_width, newZ_by_height), 10.0);
+      camera.updateProjectionMatrix();
+
+      return center;
+
+    }
+
+
+    function getLandscapeRect(emberLandscape) {
+
+      const MIN_X = 0;
+      const MAX_X = 1;
+      const MIN_Y = 2;
+      const MAX_Y = 3;
+
+      let rect = [];
+      rect.push(Number.MAX_VALUE);
+      rect.push(-Number.MAX_VALUE);
+      rect.push(Number.MAX_VALUE);
+      rect.push(-Number.MAX_VALUE);
+
+      const systems = emberLandscape.get(&#x27;systems&#x27;);
+
+      if (systems.length === 0) {
+        rect[MIN_X] = 0.0;
+        rect[MAX_X] = 1.0;
+        rect[MIN_Y] = 0.0;
+        rect[MAX_Y] = 1.0;
+      } else {
+        systems.forEach((system) =&gt; {
+          getMinMaxFromQuad(system, rect);
+
+          const nodegroups = system.get(&#x27;nodegroups&#x27;);
+          nodegroups.forEach((nodegroup) =&gt; {
+
+            const nodes = nodegroup.get(&#x27;nodes&#x27;);
+            nodes.forEach((node) =&gt; {
+              getMinMaxFromQuad(node, rect);
+            });
+
+          });
+
+        });
+      }
+
+      return rect;
+
+    }
+
+
+    function getMinMaxFromQuad(drawnodeentity, rect) {
+
+      const MIN_X = 0;
+      const MAX_X = 1;
+      const MIN_Y = 2;
+      const MAX_Y = 3;
+
+
+      const curX = drawnodeentity.get(&#x27;positionX&#x27;);
+      const curY = drawnodeentity.get(&#x27;positionY&#x27;);
+
+      if (curX &lt; rect[MIN_X]) {
+        rect[MIN_X] = curX;
+      }
+      if (rect[MAX_X] &lt; curX + drawnodeentity.get(&#x27;width&#x27;)) {
+        rect[MAX_X] = curX + drawnodeentity.get(&#x27;width&#x27;);
+      }
+      if (curY &gt; rect[MAX_Y]) {
+        rect[MAX_Y] = curY;
+      }
+      if (rect[MIN_Y] &gt; curY - drawnodeentity.get(&#x27;height&#x27;)) {
+        rect[MIN_Y] = curY - drawnodeentity.get(&#x27;height&#x27;);
+      }
+
+    }
+
+
+  }, // END populateScene
+
+  initInteraction() {
+
+    const self = this;
+
+    let cameraTranslateX, cameraTranslateY = 0;
+
+    const canvas = self.get(&#x27;canvas&#x27;);
+
+    this.set(&#x27;hammerManager&#x27;, new Hammer.Manager(canvas, {}));
+
+    const hammer = this.get(&#x27;hammerManager&#x27;);
+
+    const singleTap = new Hammer.Tap({
+      event: &#x27;singletap&#x27;,
+      interval: 250
+    });
+
+    const doubleTap = new Hammer.Tap({
+      event: &#x27;doubletap&#x27;,
+      taps: 2,
+      interval: 250
+    });
+
+    const pan = new Hammer.Pan({
+      event: &#x27;pan&#x27;
+    });
+
+    hammer.add([doubleTap, singleTap, pan]);
+
+    doubleTap.recognizeWith(singleTap);
+    singleTap.requireFailure(doubleTap);
+
+    hammer
+      .on(
+        &#x27;doubletap&#x27;,
+        function(evt) {
+
+          var mouse = {};
+
+          const renderer = self.get(&#x27;webglrenderer&#x27;);
+
+          const event = evt.srcEvent;
+
+          mouse.x = ((event.clientX - 15) / renderer.domElement.clientWidth) * 2 - 1;
+          mouse.y = -((event.clientY - 75) / renderer.domElement.clientHeight) * 2 + 1;
+
+          const intersectedViewObj = raycasting(null, mouse, true);
+
+          if(intersectedViewObj) {
+
+            const emberModel = intersectedViewObj.object.userData.model;
+            const emberModelName = emberModel.constructor.modelName;
+
+            self.debug(&quot;Name of raycasting goal: &quot;, emberModelName);
+
+            if(emberModelName === &quot;application&quot;){
+              console.log(intersectedViewObj);
+              // open application rendering
+              self.sendAction(&quot;showApplication&quot;, emberModel);
+            } 
+            else if (emberModelName === &quot;nodegroup&quot; || emberModelName === &quot;system&quot;){
+              emberModel.setOpenedStatus(!emberModel.get(&#x27;opened&#x27;));
+              self.cleanAndUpdateScene(self.get(&#x27;entity&#x27;));          
+            } 
+          }
+    });
+
+    hammer.on(&#x27;panstart&#x27;, function(evt) {
+      const event = evt.srcEvent;
+
+      cameraTranslateX = event.clientX;
+      cameraTranslateY = event.clientY;
+    });
+
+    hammer.on(&#x27;panmove&#x27;, function(evt) {
+
+      const event = evt.srcEvent;
+
+      const renderer = self.get(&#x27;webglrenderer&#x27;);
+      const camera = self.get(&#x27;camera&#x27;);
+
+      var deltaX = event.clientX - cameraTranslateX;
+      var deltaY = event.clientY - cameraTranslateY;
+
+      var distanceXInPercent = (deltaX /
+        parseFloat(renderer.domElement.clientWidth)) * 100.0;
+
+      var distanceYInPercent = (deltaY /
+        parseFloat(renderer.domElement.clientHeight)) * 100.0;
+
+      var xVal = camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(camera.position.z) / 4.0);
+
+      var yVal = camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(camera.position.z) / 4.0);
+
+      camera.position.x = xVal;
+      camera.position.y = yVal;
+
+      cameraTranslateX = event.clientX;
+      cameraTranslateY = event.clientY;
+    });
+
+    // zoom handler
+
+    canvas.addEventListener(&#x27;mousewheel&#x27;, onMouseWheelStart, false);
+
+    function onMouseWheelStart(evt) {
+
+      const camera = self.get(&#x27;camera&#x27;);
+
+      var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
+
+      // zoom in
+      if (delta &gt; 0) {
+        camera.position.z -= delta * 1.5;
+      }
+      // zoom out
+      else {
+        camera.position.z -= delta * 1.5;
+      }
+    }
+
+
+    // raycasting
+
+    const raycaster = new THREE.Raycaster();
+
+    function raycasting(origin, direction, fromCamera) {
+
+      if (fromCamera) {
+        // direction = mouse
+        raycaster.setFromCamera(direction, self.get(&#x27;camera&#x27;));
+      } else if (origin) {
+        raycaster.set(origin, direction);
+      }
+
+      // calculate objects intersecting the picking ray (true =&gt; recursive)
+      const intersections = raycaster.intersectObjects(self.get(&#x27;scene&#x27;).children,
+        true);
+      
+      if (intersections.length &gt; 0) {
+
+        const result = intersections.filter(function(obj) {
+          if (obj.object.userData.model) {
+            const modelName = obj.object.userData.model.constructor.modelName;
+            console.log(modelName);
+            return (modelName === &#x27;node&#x27; ||
+              modelName === &#x27;system&#x27; ||
+              modelName === &#x27;nodegroup&#x27; ||
+              modelName === &#x27;application&#x27;);
+          }
+        });
+        if (result.length &lt;= 0) {
+          return;
+        }
+
+        // debug //
+
+        self.addPlane(result[0].point.x, result[0].point.y, 0, 0.5,
+          0.5, new THREE.Color(1, 0, 0), null, null, self.get(&#x27;scene&#x27;), null);
+
+        // end debug //
+
+        return result[0];
+
+      }
+    }
+
+  }, // END initInteraction
+
+
+  // ONLY FOR DEBUGGIN OF RAYCASTING, REMOVE WHEN RAYCASTING IS FIXED
+  addPlane(x, y, z, width, height, color1, color2, texture, parent, model) {
+
+      // Invisible plane with logo texture
+      if (texture) {
+
+        new THREE.TextureLoader().load(&#x27;images/logos/&#x27; + texture + &#x27;.png&#x27;, (texture) =&gt; {
+          const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true
+          });
+          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+            material);
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData[&#x27;model&#x27;] = model;
+          return plane;
+        });
+
+
+      } 
+      // regular plane (one color or gradient)
+      else {
+
+        if(!color2) {
+          const material = new THREE.MeshBasicMaterial({
+            color: color1
+          });
+          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+            material);
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData[&#x27;model&#x27;] = model;
+          return plane;
+        } 
+        else {
+
+          // create gradient texture
+          const canvas = document.createElement( &#x27;canvas&#x27; );
+          canvas.width = 16;
+          canvas.height = 16;
+
+          const ctx = canvas.getContext(&quot;2d&quot;);
+
+          const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
+          grd.addColorStop(0.2, &#x27;rgba(72,26,180,1)&#x27;);
+          grd.addColorStop(1, &#x27;rgba(101,68,180,1)&#x27;);
+
+          ctx.fillStyle = grd;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          const gradientTexture = new THREE.Texture(canvas);
+          gradientTexture.needsUpdate = true;
+          gradientTexture.minFilter = THREE.LinearFilter;
+
+          // apply texture too material and create mesh
+          const geometry = new THREE.PlaneGeometry(width, height);
+
+          const material = new THREE.MeshBasicMaterial({      
+            map: gradientTexture
+          });
+
+          const plane = new THREE.Mesh(geometry, material);
+
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData[&#x27;model&#x27;] = model;
+          return plane;
+
+        }
+
+
+
+      }      
+
+
+    }
+
+
+
+
+
+});
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>
