@@ -8,6 +8,8 @@ export default RenderingCore.extend({
 
   klayLayouter: Ember.inject.service("klay-layouter"),
 
+  centerPoint : null,
+
   // @Override
   initRendering() {
     this._super(...arguments);
@@ -58,11 +60,13 @@ export default RenderingCore.extend({
 
     if (systems) {
 
-      var centerPoint = calculateLandscapeCenterAndZZoom(emberLandscape);
+      if(!this.get('centerPoint')) {
+        this.set('centerPoint', calculateLandscapeCenterAndZZoom(emberLandscape));
+      }      
+
+      var centerPoint = this.get('centerPoint'); 
 
       systems.forEach(function(system) {
-
-        //console.log(system.get('name') + " und " + system.get('positionX') + ", " + system.get('positionY'));
 
         isRequestObject = false;
 
@@ -744,8 +748,6 @@ export default RenderingCore.extend({
       const camera = self.get('camera');
 
       camera.position.z = Math.max(Math.max(newZ_by_width, newZ_by_height), 10.0);
-      camera.position.x = 0;
-      camera.position.y = 0;
       camera.updateProjectionMatrix();
 
       return center;
