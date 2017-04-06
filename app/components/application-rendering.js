@@ -251,15 +251,6 @@ export default RenderingCore.extend({
 
   }, // END populateScene
 
-  // @Override
-  mergeModel(renderingModel) {
-    // TODO find correct application and merge state
-    // How to save a copy of nested records? Maybe with 
-    // ember-cli-copyable addon?
-    console.log(renderingModel);
-    //this.cleanAndUpdateScene(renderingModel);
-  },
-
 
   resetRotation() {
     const rotationX = 0.65;

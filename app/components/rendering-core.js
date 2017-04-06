@@ -22,7 +22,7 @@ export default Ember.Component.extend({
   }),  
 
   observer: Ember.observer("landscape", function(){
-    this.mergeModel(this.get("landscape"));
+    this.set("entity", this.get("landscape"));
     this.cleanAndUpdateScene(this.get("entity"));
   }),
 
@@ -126,18 +126,6 @@ export default Ember.Component.extend({
     this.set('camera', null);
   },
 
-
-  /**
-   * This function is called with every new incoming landscape. Inherit this 
-   * function to define the custom merging of the new and old 
-   * interaction state, e.g. component X is open. Then set entity to your merged 
-   * model. Afterwards 
-   * {{#crossLink "rendering-core/cleanAndUpdateScene:method"}}{{/crossLink}}
-   * is automatically called with the parameter entitiy.
-   *
-   * @method mergeModel
-   */
-  mergeModel(entity) {},
 
 
   /**

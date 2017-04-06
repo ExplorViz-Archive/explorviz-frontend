@@ -10,6 +10,8 @@ export default RenderingCore.extend({
 
   centerPoint : null,
 
+  logos: {},
+
   // @Override
   initRendering() {
     this._super(...arguments);
@@ -642,23 +644,45 @@ export default RenderingCore.extend({
     }
 
 
-    function addPlane(x, y, z, width, height, color1, color2, texture, parent, model) {
+    function addPlane(x, y, z, width, height, color1, color2, textureName, parent, model) {
+      
+      if (textureName) {
 
-      // Invisible plane with logo texture
-      if (texture) {
+        if(self.get('logos')[textureName]) {
 
-        new THREE.TextureLoader().load('images/logos/' + texture + '.png', (texture) => {
           const material = new THREE.MeshBasicMaterial({
-            map: texture,
+            map: self.get('logos')[textureName],
             transparent: true
           });
+
           const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-            material);
+              material);
           plane.position.set(x, y, z);
           parent.add(plane);
           plane.userData['model'] = model;
           return plane;
-        });
+
+        } else {
+
+          new THREE.TextureLoader().load('images/logos/' + textureName + '.png', (texture) => {
+
+            self.get('logos')[textureName] = texture;
+
+            const material = new THREE.MeshBasicMaterial({
+              map: texture,
+              transparent: true
+            });
+            const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+              material);
+            plane.position.set(x, y, z);
+            parent.add(plane);
+            plane.userData['model'] = model;
+            return plane;
+          });
+
+        }
+
+
 
 
       } 
@@ -995,13 +1019,8 @@ export default RenderingCore.extend({
 
   }, // END initInteraction
 
-  // @Override
-  mergeModel(emberLandscape) {
-    // TODO merging
-    this.set('entity', emberLandscape);
-  },
 
-
+  // ONLY FOR DEBUGGIN OF RAYCASTING, REMOVE WHEN RAYCASTING IS FIXED
   addPlane(x, y, z, width, height, color1, color2, texture, parent, model) {
 
       // Invisible plane with logo texture
