@@ -3,6 +3,13 @@ import BaseEntity from './baseentity';
 
 const { attr, hasMany } = DS;
 
+
+/**
+* Ember model for a landscape.
+* 
+* @class Landscape
+* @extends BaseEntity
+*/
 export default BaseEntity.extend({
   hash: attr('number'),
   timestamp: attr('number'),

@@ -3,6 +3,12 @@ import DrawNodeEntity from './drawnodeentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
+/**
+* Ember model for an Application.
+* 
+* @class Application
+* @extends DrawNodeEntity
+*/
 export default DrawNodeEntity.extend({
 
   database: attr('boolean'),

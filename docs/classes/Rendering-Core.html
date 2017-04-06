@@ -26,7 +26,7 @@
             </li>
         </div>
         <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
-            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Authenticator", "classes/Rendering-Core"]'>
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Application", "classes/Application-Rendering", "classes/Authenticator", "classes/BaseEntity", "classes/Clazz", "classes/Communication", "classes/CommunicationClazz", "classes/Component", "classes/Draw3DNodeEntity", "classes/DrawEdgeEntity", "classes/DrawNodeEntity", "classes/Landscape", "classes/Landscape-Rendering", "classes/Node", "classes/NodeGroup", "classes/Rendering-Core", "classes/System"]'>
         </form>
     </div>
 </div>
@@ -48,8 +48,23 @@
 	            <div class="tab-content" style="border: 1px solid #DDD; border-top:0;">
 	                <div class="tab-pane active" id="classes">
 	                    <ul id="api-classes" class="nav nav-list">
+	                            <li><a href="../classes/Application.html">Application</a></li>
+	                            <li><a href="../classes/Application-Rendering.html">Application-Rendering</a></li>
 	                            <li><a href="../classes/Authenticator.html">Authenticator</a></li>
+	                            <li><a href="../classes/BaseEntity.html">BaseEntity</a></li>
+	                            <li><a href="../classes/Clazz.html">Clazz</a></li>
+	                            <li><a href="../classes/Communication.html">Communication</a></li>
+	                            <li><a href="../classes/CommunicationClazz.html">CommunicationClazz</a></li>
+	                            <li><a href="../classes/Component.html">Component</a></li>
+	                            <li><a href="../classes/Draw3DNodeEntity.html">Draw3DNodeEntity</a></li>
+	                            <li><a href="../classes/DrawEdgeEntity.html">DrawEdgeEntity</a></li>
+	                            <li><a href="../classes/DrawNodeEntity.html">DrawNodeEntity</a></li>
+	                            <li><a href="../classes/Landscape.html">Landscape</a></li>
+	                            <li><a href="../classes/Landscape-Rendering.html">Landscape-Rendering</a></li>
+	                            <li><a href="../classes/Node.html">Node</a></li>
+	                            <li><a href="../classes/NodeGroup.html">NodeGroup</a></li>
 	                            <li><a href="../classes/Rendering-Core.html">Rendering-Core</a></li>
+	                            <li><a href="../classes/System.html">System</a></li>
 	                    </ul>
 	                </div>
 	    
@@ -94,9 +109,12 @@
 
 <div class="well well-small">
 
+        <div class="extends">
+            Extends Ember.Component
+        </div>
 
         <div class="foundat">
-            Defined in: <a href="../files/app_components_rendering-core.js.html#l113"><code>app\components\rendering-core.js:113</code></a>
+            Defined in: <a href="../files/app_components_rendering-core.js.html#l3"><code>app&#x2F;components&#x2F;rendering-core.js:3</code></a>
         </div>
 
 
@@ -104,9 +122,15 @@
 
 
 <div class="well well-small">
-    <p>Inherit this function to update the scene with a new renderingModel. It
-automatically removes every mesh from the scene. Add your custom code
-as shown in landscape-rendering.</p>
+    <p>This component contains the core mechanics of the different (three.js-based)
+renderer. All functions below are called in a determined order, hence you only
+need to override them in your custom renderer.</p>
+<p>See <a href="../classes/Landscape-Rendering.html" class="crosslink">Landscape-Rendering</a> or
+<a href="../classes/Application-Rendering.html" class="crosslink">Application-Rendering</a> for example usage.</p>
+<p>Call order:</p>
+<ol>
+<li></li>
+</ol>
 
 </div>
 
@@ -115,17 +139,172 @@ as shown in landscape-rendering.</p>
     <ul class="nav nav-tabs">
         <li class="active"><a data-toggle="tab" href="#index">Index</a></li>
 
+            <li><a data-toggle="tab" href="#methods">Methods</a></li>
     </ul>
 
     <div class="tab-content">
         <div id="index" class="tab-pane active">
             <h2 class="off-left">Item Index</h2>
 
+                <div class="index-section methods">
+                    <h3>Methods</h3>
+
+                    <ul class="index-list methods extends">
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_cleanAndUpdateScene" data-tablink="cleanAndUpdateScene">cleanAndUpdateScene</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_cleanup" data-tablink="cleanup">cleanup</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_initRendering" data-tablink="initRendering">initRendering</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_populateScene" data-tablink="populateScene">populateScene</a>
+
+                            </li>
+                    </ul>
+                </div>
 
 
 
         </div>
 
+            <div id="methods" class="tab-pane">
+                <h2 class="off-left">Methods</h2>
+
+                    <div id="method_cleanAndUpdateScene" class="method item">
+                        <h3 class="name"><code>cleanAndUpdateScene</code></h3>
+                    
+                            <span class="paren">()</span>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_rendering-core.js.html#l143"><code>app&#x2F;components&#x2F;rendering-core.js:143</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>Inherit this function to update the scene with a new renderingModel. It
+                    automatically removes every mesh from the scene. Add your custom code
+                    as shown in landscape-rendering.</p>
+                    
+                        </div>
+                    
+                    
+                    
+                    </div>
+                    <div id="method_cleanup" class="method item">
+                        <h3 class="name"><code>cleanup</code></h3>
+                    
+                            <span class="paren">()</span>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_rendering-core.js.html#l126"><code>app&#x2F;components&#x2F;rendering-core.js:126</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>This function is called when the destroy event is fired. Inherit this
+                    function to cleanup custom properties or unbind listener
+                    as shown in <a href="../classes/Landscape-Rendering.html" class="crosslink">Landscape-Rendering</a>.</p>
+                    
+                        </div>
+                    
+                    
+                    
+                    </div>
+                    <div id="method_initRendering" class="method item">
+                        <h3 class="name"><code>initRendering</code></h3>
+                    
+                            <span class="paren">()</span>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_rendering-core.js.html#l59"><code>app&#x2F;components&#x2F;rendering-core.js:59</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>This function is called once on the didRender event. Inherit this function
+                    to call other important function, e.g. initInteraction as shown in
+                    {@landscape-rendering}.</p>
+                    
+                        </div>
+                    
+                    
+                    
+                    </div>
+                    <div id="method_populateScene" class="method item">
+                        <h3 class="name"><code>populateScene</code></h3>
+                    
+                            <span class="paren">()</span>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_rendering-core.js.html#l116"><code>app&#x2F;components&#x2F;rendering-core.js:116</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>This function is called once on initRendering. Inherit this function to
+                    insert objects in the Three.js scene. Have a look
+                    at {@landscape-rendering} for an example.</p>
+                    
+                        </div>
+                    
+                    
+                    
+                    </div>
+            </div>
 
 
 

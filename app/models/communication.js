@@ -3,6 +3,12 @@ import DrawEdgeEntity from './drawedgeentity';
 
 const { attr, belongsTo } = DS;
 
+/**
+* Ember model for a Communication.
+* 
+* @class Communication
+* @extends DrawEdgeEntity
+*/
 export default DrawEdgeEntity.extend({
 
   requests: attr("number"),

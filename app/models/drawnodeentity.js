@@ -3,6 +3,12 @@ import BaseEntity from './baseentity';
 
 const { attr } = DS;
 
+/**
+* Ember model for a DrawNodeEntity.
+* 
+* @class DrawNodeEntity
+* @extends BaseEntity
+*/
 export default BaseEntity.extend({
 
   name: attr('string'),

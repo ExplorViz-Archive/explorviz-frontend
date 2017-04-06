@@ -2,6 +2,12 @@ import RenderingCore from './rendering-core';
 import Ember from 'ember';
 import Hammer from "npm:hammerjs";
 
+ /**
+ * Renderer for application visualization.
+ *
+ * @class Application-Rendering
+ * @extends Rendering-Core
+ */
 export default RenderingCore.extend({
 
   store: Ember.inject.service('store'),

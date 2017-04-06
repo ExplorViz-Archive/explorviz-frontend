@@ -64,4 +64,4 @@ Make use of the many generators for code, try `ember help generate` for more det
 Specify what it takes to deploy your app.
 
 ### Generating API Documentation
-* `yuidoc .`
+* `yuidoc .` (might need to delete content of *tmp* folder)

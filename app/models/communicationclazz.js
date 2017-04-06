@@ -3,6 +3,12 @@ import BaseEntity from './baseentity';
 
 const { attr } = DS;
 
+/**
+* Ember model for a CommunicationClazz.
+* 
+* @class CommunicationClazz
+* @extends BaseEntity
+*/
 export default BaseEntity.extend({
 
   requestsCacheCount: attr('number'),

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>app\components\rendering-core.js - ExplorViz: UI Frontend API</title>
+    <title>app/components/rendering-core.js - ExplorViz: UI Frontend API</title>
     <link rel="stylesheet" href="">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -26,7 +26,7 @@
             </li>
         </div>
         <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
-            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Authenticator", "classes/Rendering-Core"]'>
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Application", "classes/Application-Rendering", "classes/Authenticator", "classes/BaseEntity", "classes/Clazz", "classes/Communication", "classes/CommunicationClazz", "classes/Component", "classes/Draw3DNodeEntity", "classes/DrawEdgeEntity", "classes/DrawNodeEntity", "classes/Landscape", "classes/Landscape-Rendering", "classes/Node", "classes/NodeGroup", "classes/Rendering-Core", "classes/System"]'>
         </form>
     </div>
 </div>
@@ -48,8 +48,23 @@
 	            <div class="tab-content" style="border: 1px solid #DDD; border-top:0;">
 	                <div class="tab-pane active" id="classes">
 	                    <ul id="api-classes" class="nav nav-list">
+	                            <li><a href="../classes/Application.html">Application</a></li>
+	                            <li><a href="../classes/Application-Rendering.html">Application-Rendering</a></li>
 	                            <li><a href="../classes/Authenticator.html">Authenticator</a></li>
+	                            <li><a href="../classes/BaseEntity.html">BaseEntity</a></li>
+	                            <li><a href="../classes/Clazz.html">Clazz</a></li>
+	                            <li><a href="../classes/Communication.html">Communication</a></li>
+	                            <li><a href="../classes/CommunicationClazz.html">CommunicationClazz</a></li>
+	                            <li><a href="../classes/Component.html">Component</a></li>
+	                            <li><a href="../classes/Draw3DNodeEntity.html">Draw3DNodeEntity</a></li>
+	                            <li><a href="../classes/DrawEdgeEntity.html">DrawEdgeEntity</a></li>
+	                            <li><a href="../classes/DrawNodeEntity.html">DrawNodeEntity</a></li>
+	                            <li><a href="../classes/Landscape.html">Landscape</a></li>
+	                            <li><a href="../classes/Landscape-Rendering.html">Landscape-Rendering</a></li>
+	                            <li><a href="../classes/Node.html">Node</a></li>
+	                            <li><a href="../classes/NodeGroup.html">NodeGroup</a></li>
 	                            <li><a href="../classes/Rendering-Core.html">Rendering-Core</a></li>
+	                            <li><a href="../classes/System.html">System</a></li>
 	                    </ul>
 	                </div>
 	    
@@ -89,16 +104,33 @@
                 <div id="docs-main">
                     <div class="content">
 <div class="page-header">
-    <h1>app\components\rendering-core.js <small>File</small></h1>
+    <h1>app/components/rendering-core.js <small>File</small></h1>
 </div>
 
 <div class="file">
     <pre class="prettyprint linenums">
 import Ember from &#x27;ember&#x27;;
 
+/**
+* This component contains the core mechanics of the different (three.js-based) 
+* renderer. All functions below are called in a determined order, hence you only 
+* need to override them in your custom renderer.
+*
+* See {{#crossLink &quot;Landscape-Rendering&quot;}}{{/crossLink}} or 
+* {{#crossLink &quot;Application-Rendering&quot;}}{{/crossLink}} for example usage.
+*
+* Call order:
+*
+* 1. 
+*
+* @class Rendering-Core
+* @extends Ember.Component
+*/
 export default Ember.Component.extend({
 
   classNames: [&#x27;viz&#x27;],
+
+  landscapeUpdater: Ember.inject.service(&quot;landscape-reload&quot;),  
 
   scene : null,
   webglrenderer: null,
@@ -109,8 +141,17 @@ export default Ember.Component.extend({
   entity: null,
 
   font: null,
-
   animationFrameId: null,
+
+  landscape: Ember.computed(&quot;landscapeUpdater.object.timestamp&quot;, function() {
+    return this.get(&#x27;landscapeUpdater.object&#x27;);
+  }),  
+
+  observer: Ember.observer(&quot;landscape&quot;, function(){
+    this.set(&quot;entity&quot;, this.get(&quot;landscape&quot;));
+    this.cleanAndUpdateScene(this.get(&quot;entity&quot;));
+  }),
+
 
   // @Override
   didRender(){
@@ -131,7 +172,7 @@ export default Ember.Component.extend({
    * to call other important function, e.g. initInteraction as shown in 
    * {@landscape-rendering}.
    *
-   * @class Rendering-Core
+   * @method initRendering
    */
   initRendering() {
 
@@ -166,13 +207,17 @@ export default Ember.Component.extend({
 
     render();
 
+    this.get(&quot;landscape&quot;); //useless, but very important for working observer
+
+    this.set(&#x27;entity&#x27;, this.get(&#x27;renderingModel&#x27;));
+
     ////////////////////
 
     // load font for labels and proceed with populating the scene
     new THREE.FontLoader().load(&#x27;three.js/fonts/helvetiker_regular.typeface.json&#x27;, (font) =&gt; {
 
       self.set(&#x27;font&#x27;, font);
-      self.populateScene(this.get(&#x27;renderingModel&#x27;));
+      self.populateScene(this.get(&#x27;entity&#x27;));
 
     });    
 
@@ -184,19 +229,17 @@ export default Ember.Component.extend({
    * insert objects in the Three.js scene. Have a look 
    * at {@landscape-rendering} for an example.
    *
-   * @class Rendering-Core
-   * @param  {[baseentity]}
+   * @method populateScene
    */
-  populateScene(renderingModel) {
-    this.set(&#x27;entity&#x27;, renderingModel);
-  },
+  populateScene() {},
+
 
   /**
    * This function is called when the destroy event is fired. Inherit this 
    * function to cleanup custom properties or unbind listener 
-   * as shown in {@landscape-rendering}.
+   * as shown in {{#crossLink &quot;Landscape-Rendering&quot;}}{{/crossLink}}.
    *
-   * @class Rendering-Core
+   * @method cleanup
    */
   cleanup() {
     cancelAnimationFrame(this.get(&#x27;animationFrameId&#x27;));
@@ -206,15 +249,17 @@ export default Ember.Component.extend({
     this.set(&#x27;camera&#x27;, null);
   },
 
+
+
   /**
    * Inherit this function to update the scene with a new renderingModel. It 
    * automatically removes every mesh from the scene. Add your custom code 
    * as shown in landscape-rendering.
    *
-   * @class Rendering-Core
+   * @method cleanAndUpdateScene
    */
-  cleanAndUpdateScene(renderingModel) {
-    this.set(&#x27;entity&#x27;, renderingModel);
+  cleanAndUpdateScene(entity) {
+    this.set(&#x27;entity&#x27;, entity);
     const scene = this.get(&#x27;scene&#x27;);
 
     for (let i = scene.children.length - 1; i &gt;= 0 ; i--) {

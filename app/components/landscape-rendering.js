@@ -2,6 +2,12 @@ import RenderingCore from './rendering-core';
 import Ember from 'ember';
 import Hammer from "npm:hammerjs";
 
+ /**
+ * Renderer for landscape visualization.
+ *
+ * @class Landscape-Rendering
+ * @extends Rendering-Core
+ */
 export default RenderingCore.extend({
 
   hammerManager: null,
@@ -662,7 +668,8 @@ export default RenderingCore.extend({
           plane.userData['model'] = model;
           return plane;
 
-        } else {
+        } 
+        else {
 
           new THREE.TextureLoader().load('images/logos/' + textureName + '.png', (texture) => {
 
@@ -682,11 +689,8 @@ export default RenderingCore.extend({
 
         }
 
-
-
-
       } 
-      // regular plane (one color or gradient)
+      // regular plane (one color or color gradient)
       else {
 
         if(!color2) {
@@ -736,10 +740,7 @@ export default RenderingCore.extend({
 
         }
 
-
-
-      }      
-
+      } 
 
     }
 

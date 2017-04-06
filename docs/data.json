@@ -7,8 +7,8 @@
         "logo": "https://www.explorviz.net/img/favicon.png"
     },
     "files": {
-        "app\\authenticators\\authenticator.js": {
-            "name": "app\\authenticators\\authenticator.js",
+        "app/authenticators/authenticator.js": {
+            "name": "app/authenticators/authenticator.js",
             "modules": {},
             "classes": {
                 "Authenticator": 1
@@ -16,8 +16,26 @@
             "fors": {},
             "namespaces": {}
         },
-        "app\\components\\rendering-core.js": {
-            "name": "app\\components\\rendering-core.js",
+        "app/components/application-rendering.js": {
+            "name": "app/components/application-rendering.js",
+            "modules": {},
+            "classes": {
+                "Application-Rendering": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/components/landscape-rendering.js": {
+            "name": "app/components/landscape-rendering.js",
+            "modules": {},
+            "classes": {
+                "Landscape-Rendering": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/components/rendering-core.js": {
+            "name": "app/components/rendering-core.js",
             "modules": {},
             "classes": {
                 "Rendering-Core": 1
@@ -25,15 +43,132 @@
             "fors": {},
             "namespaces": {}
         },
-        "vendor\\momentjs\\moment.js": {
-            "name": "vendor\\momentjs\\moment.js",
+        "app/models/application.js": {
+            "name": "app/models/application.js",
+            "modules": {},
+            "classes": {
+                "Application": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/baseentity.js": {
+            "name": "app/models/baseentity.js",
+            "modules": {},
+            "classes": {
+                "BaseEntity": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/clazz.js": {
+            "name": "app/models/clazz.js",
+            "modules": {},
+            "classes": {
+                "Clazz": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/communication.js": {
+            "name": "app/models/communication.js",
+            "modules": {},
+            "classes": {
+                "Communication": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/communicationclazz.js": {
+            "name": "app/models/communicationclazz.js",
+            "modules": {},
+            "classes": {
+                "CommunicationClazz": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/component.js": {
+            "name": "app/models/component.js",
+            "modules": {},
+            "classes": {
+                "Component": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/draw3dnodeentity.js": {
+            "name": "app/models/draw3dnodeentity.js",
+            "modules": {},
+            "classes": {
+                "Draw3DNodeEntity": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/drawedgeentity.js": {
+            "name": "app/models/drawedgeentity.js",
+            "modules": {},
+            "classes": {
+                "DrawEdgeEntity": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/drawnodeentity.js": {
+            "name": "app/models/drawnodeentity.js",
+            "modules": {},
+            "classes": {
+                "DrawNodeEntity": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/landscape.js": {
+            "name": "app/models/landscape.js",
+            "modules": {},
+            "classes": {
+                "Landscape": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/node.js": {
+            "name": "app/models/node.js",
+            "modules": {},
+            "classes": {
+                "Node": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/nodegroup.js": {
+            "name": "app/models/nodegroup.js",
+            "modules": {},
+            "classes": {
+                "NodeGroup": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "app/models/system.js": {
+            "name": "app/models/system.js",
+            "modules": {},
+            "classes": {
+                "System": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
+        "vendor/momentjs/moment.js": {
+            "name": "vendor/momentjs/moment.js",
             "modules": {},
             "classes": {},
             "fors": {},
             "namespaces": {}
         },
-        "vendor\\three\\THREE.MeshLine.js": {
-            "name": "vendor\\three\\THREE.MeshLine.js",
+        "vendor/three/THREE.MeshLine.js": {
+            "name": "vendor/three/THREE.MeshLine.js",
             "modules": {},
             "classes": {},
             "fors": {},
@@ -50,11 +185,37 @@
             "extensions": [],
             "plugin_for": [],
             "extension_for": [],
-            "file": "app\\authenticators\\authenticator.js",
+            "file": "app/authenticators/authenticator.js",
             "line": 5,
             "description": "Custom authenticator for token based authentication.",
             "author": "akr",
             "extends": "ember-simple-auth/authenticators/base"
+        },
+        "Application-Rendering": {
+            "name": "Application-Rendering",
+            "shortname": "Application-Rendering",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/components/application-rendering.js",
+            "line": 5,
+            "description": "Renderer for application visualization.",
+            "extends": "Rendering-Core"
+        },
+        "Landscape-Rendering": {
+            "name": "Landscape-Rendering",
+            "shortname": "Landscape-Rendering",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/components/landscape-rendering.js",
+            "line": 5,
+            "description": "Renderer for landscape visualization.",
+            "extends": "Rendering-Core"
         },
         "Rendering-Core": {
             "name": "Rendering-Core",
@@ -64,29 +225,251 @@
             "extensions": [],
             "plugin_for": [],
             "extension_for": [],
-            "file": "app\\components\\rendering-core.js",
-            "line": 113,
-            "description": "Inherit this function to update the scene with a new renderingModel. It \nautomatically removes every mesh from the scene. Add your custom code \nas shown in landscape-rendering.",
-            "params": [
-                {
-                    "name": "UNKNOWN",
-                    "description": "",
-                    "type": "[baseentity]"
-                }
-            ]
+            "file": "app/components/rendering-core.js",
+            "line": 3,
+            "description": "This component contains the core mechanics of the different (three.js-based) \nrenderer. All functions below are called in a determined order, hence you only \nneed to override them in your custom renderer.\n\nSee {{#crossLink \"Landscape-Rendering\"}}{{/crossLink}} or \n{{#crossLink \"Application-Rendering\"}}{{/crossLink}} for example usage.\n\nCall order:\n\n1.",
+            "extends": "Ember.Component"
+        },
+        "Application": {
+            "name": "Application",
+            "shortname": "Application",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/application.js",
+            "line": 6,
+            "description": "Ember model for an Application.",
+            "extends": "DrawNodeEntity"
+        },
+        "BaseEntity": {
+            "name": "BaseEntity",
+            "shortname": "BaseEntity",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/baseentity.js",
+            "line": 3,
+            "description": "Ember model for a BaseEntity. Every element of ExplorViz's Meta-Model should \ninherit this class, since it might change and contain some useful data at \nsome point.",
+            "extends": "DS.Model"
+        },
+        "Clazz": {
+            "name": "Clazz",
+            "shortname": "Clazz",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/clazz.js",
+            "line": 6,
+            "description": "Ember model for a clazz.",
+            "extends": "Draw3DNodeEntity"
+        },
+        "Communication": {
+            "name": "Communication",
+            "shortname": "Communication",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/communication.js",
+            "line": 6,
+            "description": "Ember model for a Communication.",
+            "extends": "DrawEdgeEntity"
+        },
+        "CommunicationClazz": {
+            "name": "CommunicationClazz",
+            "shortname": "CommunicationClazz",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/communicationclazz.js",
+            "line": 6,
+            "description": "Ember model for a CommunicationClazz.",
+            "extends": "BaseEntity"
+        },
+        "Component": {
+            "name": "Component",
+            "shortname": "Component",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/component.js",
+            "line": 6,
+            "description": "Ember model for a Component, e.g. a Java package.",
+            "extends": "Draw3DNodeEntity"
+        },
+        "Draw3DNodeEntity": {
+            "name": "Draw3DNodeEntity",
+            "shortname": "Draw3DNodeEntity",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/draw3dnodeentity.js",
+            "line": 6,
+            "description": "Ember model for a Draw3DNodeEntity. This model is inherited by all elements \nthat compose an application in the respective visualization.",
+            "extends": "BaseEntity"
+        },
+        "DrawEdgeEntity": {
+            "name": "DrawEdgeEntity",
+            "shortname": "DrawEdgeEntity",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/drawedgeentity.js",
+            "line": 6,
+            "description": "Ember model for a DrawEdgeEntity. This model is mainly used for \ncommunications.",
+            "extends": "BaseEntity"
+        },
+        "DrawNodeEntity": {
+            "name": "DrawNodeEntity",
+            "shortname": "DrawNodeEntity",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/drawnodeentity.js",
+            "line": 6,
+            "description": "Ember model for a DrawNodeEntity.",
+            "extends": "BaseEntity"
+        },
+        "Landscape": {
+            "name": "Landscape",
+            "shortname": "Landscape",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/landscape.js",
+            "line": 7,
+            "description": "Ember model for a landscape.",
+            "extends": "BaseEntity"
+        },
+        "Node": {
+            "name": "Node",
+            "shortname": "Node",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/node.js",
+            "line": 6,
+            "description": "Ember model for a Node.",
+            "extends": "DrawNodeEntity"
+        },
+        "NodeGroup": {
+            "name": "NodeGroup",
+            "shortname": "NodeGroup",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/nodegroup.js",
+            "line": 6,
+            "description": "Ember model for a NodeGroup.",
+            "extends": "DrawNodeEntity"
+        },
+        "System": {
+            "name": "System",
+            "shortname": "System",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "app/models/system.js",
+            "line": 6,
+            "description": "Ember model for a System.",
+            "extends": "DrawNodeEntity"
         }
     },
     "elements": {},
     "classitems": [
         {
-            "file": "vendor\\momentjs\\moment.js",
+            "file": "app/components/rendering-core.js",
+            "line": 59,
+            "description": "This function is called once on the didRender event. Inherit this function \nto call other important function, e.g. initInteraction as shown in \n{@landscape-rendering}.",
+            "itemtype": "method",
+            "name": "initRendering",
+            "class": "Rendering-Core"
+        },
+        {
+            "file": "app/components/rendering-core.js",
+            "line": 116,
+            "description": "This function is called once on initRendering. Inherit this function to \ninsert objects in the Three.js scene. Have a look \nat {@landscape-rendering} for an example.",
+            "itemtype": "method",
+            "name": "populateScene",
+            "class": "Rendering-Core"
+        },
+        {
+            "file": "app/components/rendering-core.js",
+            "line": 126,
+            "description": "This function is called when the destroy event is fired. Inherit this \nfunction to cleanup custom properties or unbind listener \nas shown in {{#crossLink \"Landscape-Rendering\"}}{{/crossLink}}.",
+            "itemtype": "method",
+            "name": "cleanup",
+            "class": "Rendering-Core"
+        },
+        {
+            "file": "app/components/rendering-core.js",
+            "line": 143,
+            "description": "Inherit this function to update the scene with a new renderingModel. It \nautomatically removes every mesh from the scene. Add your custom code \nas shown in landscape-rendering.",
+            "itemtype": "method",
+            "name": "cleanAndUpdateScene",
+            "class": "Rendering-Core"
+        },
+        {
+            "file": "app/models/drawedgeentity.js",
+            "line": 15,
+            "description": "Indicates the line thickness (a.k.a. width) for a edge.",
+            "itemtype": "attribute",
+            "name": "lineThickness",
+            "type": "number",
+            "class": "DrawEdgeEntity"
+        },
+        {
+            "file": "app/models/drawedgeentity.js",
+            "line": 23,
+            "description": "Z-position of this edge.",
+            "itemtype": "attribute",
+            "name": "positionZ",
+            "type": "number",
+            "class": "DrawEdgeEntity"
+        },
+        {
+            "file": "app/models/drawedgeentity.js",
+            "line": 31,
+            "description": "All points of the edge.",
+            "itemtype": "attribute",
+            "name": "points",
+            "type": "objects",
+            "class": "DrawEdgeEntity"
+        },
+        {
+            "file": "vendor/momentjs/moment.js",
             "line": 3138,
             "description": "Return a human readable representation of a moment that can\nalso be evaluated to get a new moment which is the same",
             "link": "https://nodejs.org/dist/latest/docs/api/util.html#util_custom_inspect_function_on_objects",
             "class": ""
         },
         {
-            "file": "vendor\\three\\THREE.MeshLine.js",
+            "file": "vendor/three/THREE.MeshLine.js",
             "line": 206,
             "description": "Fast method to advance the line by one position.  The oldest position is removed.",
             "params": [
@@ -100,20 +483,16 @@
     ],
     "warnings": [
         {
-            "message": "param name missing: {[baseentity]}",
-            "line": " app\\components\\rendering-core.js:86"
-        },
-        {
             "message": "unknown tag: link",
-            "line": " vendor\\momentjs\\moment.js:3138"
+            "line": " vendor/momentjs/moment.js:3138"
         },
         {
             "message": "Missing item type\nReturn a human readable representation of a moment that can\nalso be evaluated to get a new moment which is the same",
-            "line": " vendor\\momentjs\\moment.js:3138"
+            "line": " vendor/momentjs/moment.js:3138"
         },
         {
             "message": "Missing item type\nFast method to advance the line by one position.  The oldest position is removed.",
-            "line": " vendor\\three\\THREE.MeshLine.js:206"
+            "line": " vendor/three/THREE.MeshLine.js:206"
         }
     ]
 }

@@ -3,6 +3,12 @@ import DrawNodeEntity from './drawnodeentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
+/**
+* Ember model for a NodeGroup.
+* 
+* @class NodeGroup
+* @extends DrawNodeEntity
+*/
 export default DrawNodeEntity.extend({
   visible: attr('boolean'),
   parent: belongsTo('system'),

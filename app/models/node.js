@@ -3,6 +3,12 @@ import DrawNodeEntity from './drawnodeentity';
 
 const { attr, hasMany, belongsTo } = DS;
 
+/**
+* Ember model for a Node.
+* 
+* @class Node
+* @extends DrawNodeEntity
+*/
 export default DrawNodeEntity.extend({
 
   cpuUtilization: attr('number'),

@@ -1,5 +1,20 @@
 import Ember from 'ember';
 
+/**
+* This component contains the core mechanics of the different (three.js-based) 
+* renderer. All functions below are called in a determined order, hence you only 
+* need to override them in your custom renderer.
+*
+* See {{#crossLink "Landscape-Rendering"}}{{/crossLink}} or 
+* {{#crossLink "Application-Rendering"}}{{/crossLink}} for example usage.
+*
+* Call order:
+*
+* 1. 
+*
+* @class Rendering-Core
+* @extends Ember.Component
+*/
 export default Ember.Component.extend({
 
   classNames: ['viz'],
@@ -104,17 +119,14 @@ export default Ember.Component.extend({
    * at {@landscape-rendering} for an example.
    *
    * @method populateScene
-   * @param  {[baseentity]}
    */
-  populateScene(entity) {
-    this.set('entity', entity);
-  },
+  populateScene() {},
 
 
   /**
    * This function is called when the destroy event is fired. Inherit this 
    * function to cleanup custom properties or unbind listener 
-   * as shown in {@landscape-rendering}.
+   * as shown in {{#crossLink "Landscape-Rendering"}}{{/crossLink}}.
    *
    * @method cleanup
    */
