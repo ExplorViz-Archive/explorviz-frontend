@@ -15,6 +15,8 @@ export default RenderingCore.extend({
   cityLayouter: Ember.inject.service("city-layouter"),
   application3D: null,
 
+  applicationID: null,
+
   hammerManager: null,
 
   // @Override
@@ -42,8 +44,8 @@ export default RenderingCore.extend({
 
     this.debug("cleanup application rendering");
 
-    //this.get('hammerManager').off();
-    //this.set('hammerManager', null);
+    this.get('hammerManager').off();
+    this.set('hammerManager', null);
 
   },
 
@@ -64,23 +66,36 @@ export default RenderingCore.extend({
       this.get('store').unloadRecord(foundation);
     }
 
-    this.populateScene(application);
+    this.populateScene();
   },
 
 
   // @Override
-  populateScene(application) {
+  preProcessEntity() {
+    const application = this.get('store').peekRecord('application', 
+      this.get('applicationID'));
+    this.set('entity', application);
+  },
+
+
+  // @Override
+  populateScene() {
     this._super(...arguments);
+
+    const emberApplication = this.get('entity');
+
+    this.set('applicationID', emberApplication.id);
+
     const self = this;
 
     const foundation = createFoundation();
 
-    this.get('cityLayouter').applyLayout(application);
+    this.get('cityLayouter').applyLayout(emberApplication);
 
     self.set('application3D', new THREE.Object3D());
-    self.set('application3D.userData.model', application);
+    self.set('application3D.userData.model', emberApplication);
 
-    const viewCenterPoint = calculateAppCenterAndZZoom(application);
+    const viewCenterPoint = calculateAppCenterAndZZoom(emberApplication);
 
     addComponentToScene(foundation, 0xCECECE);
 
@@ -95,12 +110,12 @@ export default RenderingCore.extend({
         id: idTest,
         synthetic: false,
         foundation: true,
-        children: [application.get('components').objectAt(0)],
+        children: [emberApplication.get('components').objectAt(0)],
         clazzes: [],
-        belongingApplication: application,
+        belongingApplication: emberApplication,
         opened: true,
-        name: application.get('name'),
-        fullQualifiedName: application.get('name'),
+        name: emberApplication.get('name'),
+        fullQualifiedName: emberApplication.get('name'),
         positionX: 0,
         positionY: 0,
         positionZ: 0,
@@ -109,8 +124,8 @@ export default RenderingCore.extend({
         depth: 0
       });
 
-      application.get('components').objectAt(0).set('parentComponent', foundation);
-      application.set('components', [foundation]);
+      emberApplication.get('components').objectAt(0).set('parentComponent', foundation);
+      emberApplication.set('components', [foundation]);
 
       return foundation;
     }
@@ -201,7 +216,7 @@ export default RenderingCore.extend({
     } // END createBox
 
 
-    function calculateAppCenterAndZZoom(application) {
+    function calculateAppCenterAndZZoom(emberApplication) {
 
       const MIN_X = 0;
       const MAX_X = 1;
@@ -210,7 +225,7 @@ export default RenderingCore.extend({
       const MIN_Z = 4;
       const MAX_Z = 5;
 
-      const foundation = application.get('components').objectAt(0);
+      const foundation = emberApplication.get('components').objectAt(0);
 
       const rect = [];
       rect.push(foundation.get('positionX'));

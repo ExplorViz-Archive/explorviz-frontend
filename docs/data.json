@@ -404,7 +404,7 @@
     "classitems": [
         {
             "file": "app/components/rendering-core.js",
-            "line": 59,
+            "line": 61,
             "description": "This function is called once on the didRender event. Inherit this function \nto call other important function, e.g. initInteraction as shown in \n{@landscape-rendering}.",
             "itemtype": "method",
             "name": "initRendering",
@@ -412,15 +412,15 @@
         },
         {
             "file": "app/components/rendering-core.js",
-            "line": 116,
-            "description": "This function is called once on initRendering. Inherit this function to \ninsert objects in the Three.js scene. Have a look \nat {@landscape-rendering} for an example.",
+            "line": 118,
+            "description": "This function is called once on initRendering. Inherit this function to \ninsert objects in the Three.js scene. Have a look \nat {{#crossLink \"Landscape-Rendering\"}}{{/crossLink}} for an example.",
             "itemtype": "method",
             "name": "populateScene",
             "class": "Rendering-Core"
         },
         {
             "file": "app/components/rendering-core.js",
-            "line": 126,
+            "line": 128,
             "description": "This function is called when the destroy event is fired. Inherit this \nfunction to cleanup custom properties or unbind listener \nas shown in {{#crossLink \"Landscape-Rendering\"}}{{/crossLink}}.",
             "itemtype": "method",
             "name": "cleanup",
@@ -428,10 +428,18 @@
         },
         {
             "file": "app/components/rendering-core.js",
-            "line": 143,
+            "line": 145,
             "description": "Inherit this function to update the scene with a new renderingModel. It \nautomatically removes every mesh from the scene. Add your custom code \nas shown in landscape-rendering.",
             "itemtype": "method",
             "name": "cleanAndUpdateScene",
+            "class": "Rendering-Core"
+        },
+        {
+            "file": "app/components/rendering-core.js",
+            "line": 166,
+            "description": "This function is called automatically when a new landscape was fetched. It \nis executed before \n{{#crossLink \"Rendering-Core/cleanAndUpdateScene:method\"}}{{/crossLink}}.\nInherit this function to preprocess the \n{{#crossLink \"Landscape\"}}{{/crossLink}} for rendering, e.g. filter some \nvalue.\n\nSee {{#crossLink \"Application-Rendering\"}}{{/crossLink}} for example usage.",
+            "itemtype": "method",
+            "name": "preProcessEntity",
             "class": "Rendering-Core"
         },
         {

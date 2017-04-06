@@ -166,6 +166,10 @@ need to override them in your custom renderer.</p>
                                 <a href="#" data-tabid="#methods" data-anchor="#method_populateScene" data-tablink="populateScene">populateScene</a>
 
                             </li>
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_preProcessEntity" data-tablink="preProcessEntity">preProcessEntity</a>
+
+                            </li>
                     </ul>
                 </div>
 
@@ -191,7 +195,7 @@ need to override them in your custom renderer.</p>
                         <div class="meta">
                                     <p>
                                     Defined in
-                            <a href="../files/app_components_rendering-core.js.html#l143"><code>app&#x2F;components&#x2F;rendering-core.js:143</code></a>
+                            <a href="../files/app_components_rendering-core.js.html#l145"><code>app&#x2F;components&#x2F;rendering-core.js:145</code></a>
                             </p>
                     
                     
@@ -223,7 +227,7 @@ need to override them in your custom renderer.</p>
                         <div class="meta">
                                     <p>
                                     Defined in
-                            <a href="../files/app_components_rendering-core.js.html#l126"><code>app&#x2F;components&#x2F;rendering-core.js:126</code></a>
+                            <a href="../files/app_components_rendering-core.js.html#l128"><code>app&#x2F;components&#x2F;rendering-core.js:128</code></a>
                             </p>
                     
                     
@@ -255,7 +259,7 @@ need to override them in your custom renderer.</p>
                         <div class="meta">
                                     <p>
                                     Defined in
-                            <a href="../files/app_components_rendering-core.js.html#l59"><code>app&#x2F;components&#x2F;rendering-core.js:59</code></a>
+                            <a href="../files/app_components_rendering-core.js.html#l61"><code>app&#x2F;components&#x2F;rendering-core.js:61</code></a>
                             </p>
                     
                     
@@ -287,7 +291,7 @@ need to override them in your custom renderer.</p>
                         <div class="meta">
                                     <p>
                                     Defined in
-                            <a href="../files/app_components_rendering-core.js.html#l116"><code>app&#x2F;components&#x2F;rendering-core.js:116</code></a>
+                            <a href="../files/app_components_rendering-core.js.html#l118"><code>app&#x2F;components&#x2F;rendering-core.js:118</code></a>
                             </p>
                     
                     
@@ -297,7 +301,43 @@ need to override them in your custom renderer.</p>
                         <div class="description">
                             <p>This function is called once on initRendering. Inherit this function to
                     insert objects in the Three.js scene. Have a look
-                    at {@landscape-rendering} for an example.</p>
+                    at <a href="../classes/Landscape-Rendering.html" class="crosslink">Landscape-Rendering</a> for an example.</p>
+                    
+                        </div>
+                    
+                    
+                    
+                    </div>
+                    <div id="method_preProcessEntity" class="method item">
+                        <h3 class="name"><code>preProcessEntity</code></h3>
+                    
+                            <span class="paren">()</span>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_rendering-core.js.html#l166"><code>app&#x2F;components&#x2F;rendering-core.js:166</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>This function is called automatically when a new landscape was fetched. It
+                    is executed before
+                    <a href="../classes/Rendering-Core.html#method_cleanAndUpdateScene" class="crosslink">cleanAndUpdateScene</a>.
+                    Inherit this function to preprocess the
+                    <a href="../classes/Landscape.html" class="crosslink">Landscape</a> for rendering, e.g. filter some
+                    value.</p>
+                    <p>See <a href="../classes/Application-Rendering.html" class="crosslink">Application-Rendering</a> for example usage.</p>
                     
                         </div>
                     

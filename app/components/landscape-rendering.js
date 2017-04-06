@@ -45,11 +45,13 @@ export default RenderingCore.extend({
 
     this.debug("clean and populate landscape rendering");
 
-    this.populateScene(emberLandscape);
+    this.populateScene();
   },
 
   // @Override
-  populateScene(emberLandscape) {
+  populateScene() {
+
+    const emberLandscape = this.get('entity');
 
     this.get('klayLayouter').applyLayout(emberLandscape);
 

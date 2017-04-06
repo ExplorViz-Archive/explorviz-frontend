@@ -131,6 +131,7 @@ export default Ember.Component.extend({
   classNames: [&#x27;viz&#x27;],
 
   landscapeUpdater: Ember.inject.service(&quot;landscape-reload&quot;),  
+  store: Ember.inject.service(),  
 
   scene : null,
   webglrenderer: null,
@@ -149,6 +150,7 @@ export default Ember.Component.extend({
 
   observer: Ember.observer(&quot;landscape&quot;, function(){
     this.set(&quot;entity&quot;, this.get(&quot;landscape&quot;));
+    this.preProcessEntity();
     this.cleanAndUpdateScene(this.get(&quot;entity&quot;));
   }),
 
@@ -217,7 +219,7 @@ export default Ember.Component.extend({
     new THREE.FontLoader().load(&#x27;three.js/fonts/helvetiker_regular.typeface.json&#x27;, (font) =&gt; {
 
       self.set(&#x27;font&#x27;, font);
-      self.populateScene(this.get(&#x27;entity&#x27;));
+      self.populateScene();
 
     });    
 
@@ -227,7 +229,7 @@ export default Ember.Component.extend({
   /**
    * This function is called once on initRendering. Inherit this function to 
    * insert objects in the Three.js scene. Have a look 
-   * at {@landscape-rendering} for an example.
+   * at {{#crossLink &quot;Landscape-Rendering&quot;}}{{/crossLink}} for an example.
    *
    * @method populateScene
    */
@@ -269,7 +271,22 @@ export default Ember.Component.extend({
         scene.remove(child);
       }
     }
-  }
+  },
+
+
+  /**
+   * This function is called automatically when a new landscape was fetched. It 
+   * is executed before 
+   * {{#crossLink &quot;Rendering-Core/cleanAndUpdateScene:method&quot;}}{{/crossLink}}.
+   * Inherit this function to preprocess the 
+   * {{#crossLink &quot;Landscape&quot;}}{{/crossLink}} for rendering, e.g. filter some 
+   * value.
+   *
+   * See {{#crossLink &quot;Application-Rendering&quot;}}{{/crossLink}} for example usage.
+   *
+   * @method preProcessEntity
+   */
+  preProcessEntity() {}
 
 });
 
