@@ -134,6 +134,10 @@ export default RenderingCore.extend({
 
           nodes.forEach(function(node) {
 
+            if(!node.get('visible')) {
+              return;
+            }
+
             if (!isRequestObject) {
 
               const {
@@ -154,6 +158,8 @@ export default RenderingCore.extend({
               node.set('threeJSModel', nodeMesh);
 
             }
+
+            
 
             const applications = node.get('applications');
 
@@ -179,7 +185,7 @@ export default RenderingCore.extend({
 
                 application.set('threeJSModel', applicationMesh);
 
-                // create logos       
+                // create logos 
 
                 applicationMesh.geometry.computeBoundingBox();
 
@@ -228,7 +234,7 @@ export default RenderingCore.extend({
                   bottom: 0.2
                 };
 
-                labelMesh = createLabel(font, 0.15, node.getDisplayName(), nodeMesh,
+               labelMesh = createLabel(font, 0.15, node.getDisplayName(), nodeMesh,
                   padding, 0xffffff, {
                     width: 0.0,
                     height: 0.0
