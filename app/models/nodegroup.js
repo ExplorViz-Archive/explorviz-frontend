@@ -17,28 +17,29 @@ export default DrawNodeEntity.extend({
   backgroundColor: attr(),
   opened: attr('boolean'),
 
-  setOpenedStatus: function(openedStatus) {
 
-    const nodes = this.get('nodes');
-
-    nodes.forEach((node) => {
-
-      if (openedStatus) {
-        node.set('visible', true);
-      } else {
-        node.set('visible', false);
-      }    
-
-    });
-
-    if (!openedStatus && nodes.get('length') > 0) {
-      nodes.objectAt(0).set('visible', true);
+  setOpened: function(openedParam) {
+    console.log("openedParam", openedParam);
+    if (openedParam) {
+      this.setAllChildrenVisibility(true);
+    } else {
+      this.setAllChildrenVisibility(false);
+      if (this.get('nodes').get('length') > 0) {
+        const firstNode = this.get('nodes').objectAt(0);
+        console.log("firstNode", firstNode);
+        firstNode.set('visible', true); 
+      }
     }
 
-    this.set('opened', openedStatus);
-    
-  }
+    this.set('opened', openedParam);
+  },
 
+
+  setAllChildrenVisibility: function(visiblity) {
+    this.get('nodes').forEach((node) => {
+          node.set('visible', visiblity); 
+    });
+  }
 
 
 });

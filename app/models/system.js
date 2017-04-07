@@ -17,12 +17,26 @@ export default DrawNodeEntity.extend({
   foregroundColor : attr(),
   backgroundColor : attr(),
 
-  setOpenedStatus: function(status) {
+  setOpened: function(openedParam) {
 
-    this.get('nodegroups').forEach((nodegroup) => {
-        nodegroup.set('visible', !nodegroup.get('visible'));      
-    });
+    if (openedParam) {
+      this.get('nodegroups').forEach((nodegroup) => {
+          nodegroup.set('visible', true);      
+          if (nodegroup.get('nodes').get('length') === 1) {
+            nodegroup.setOpened(true);
+          } else {
+            nodegroup.setOpened(false);
+          }
+      });
+    }
+    else {
+      this.get('nodegroups').forEach((nodegroup) => {
+          nodegroup.set('visible', false);      
+          nodegroup.setAllChildrenVisibility(false);
+      });
+    }
 
     this.set('opened', status);
+    
   }
 });

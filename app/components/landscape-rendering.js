@@ -773,8 +773,6 @@ export default RenderingCore.extend({
 
       let viewportRatio = viewPortSize.width / viewPortSize.height;
 
-      console.log(viewportRatio);
-
       self.debugPlane(0, 0, 0.1, requiredWidth,
         requiredHeight, new THREE.Color(1, 0, 0), self.get('scene'));
 
@@ -926,7 +924,7 @@ export default RenderingCore.extend({
               self.sendAction("showApplication", emberModel);
             } 
             else if (emberModelName === "nodegroup" || emberModelName === "system"){
-              emberModel.setOpenedStatus(!emberModel.get('opened'));
+              emberModel.setOpened(!emberModel.get('opened'));
               self.cleanAndUpdateScene();          
             } 
           }
