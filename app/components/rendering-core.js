@@ -148,8 +148,7 @@ export default Ember.Component.extend({
    *
    * @method cleanAndUpdateScene
    */
-  cleanAndUpdateScene(entity) {
-    this.set('entity', entity);
+  cleanAndUpdateScene() {
     const scene = this.get('scene');
 
     for (let i = scene.children.length - 1; i >= 0 ; i--) {

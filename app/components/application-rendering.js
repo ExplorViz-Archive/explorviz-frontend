@@ -54,10 +54,12 @@ export default RenderingCore.extend({
 
 
   // @Override
-  cleanAndUpdateScene(application) {
+  cleanAndUpdateScene() {
     this._super(...arguments);
 
     this.debug("populate application rendering");
+
+    const application = this.get('entity');
 
     // remove foundation for re-rendering
     
@@ -341,7 +343,7 @@ export default RenderingCore.extend({
           emberModel.set('highlighted', !emberModel.get('highlighted'));
         }
 
-        self.cleanAndUpdateScene(self.application3D.userData.model);
+        self.cleanAndUpdateScene();
 
       }
 
@@ -371,7 +373,7 @@ export default RenderingCore.extend({
             if(emberModelName === "component"){
               emberModel.setOpenedStatus(!emberModel.get('opened'));
               emberModel.set('highlighted', false);
-              self.cleanAndUpdateScene(self.application3D.userData.model);
+              self.cleanAndUpdateScene();
             }
           }
     });

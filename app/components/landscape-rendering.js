@@ -40,8 +40,8 @@ export default RenderingCore.extend({
   },
 
   // @Override
-  cleanAndUpdateScene(emberLandscape) {
-    this._super(emberLandscape);
+  cleanAndUpdateScene() {
+    this._super(...arguments);
 
     this.debug("clean and populate landscape rendering");
 
@@ -927,7 +927,7 @@ export default RenderingCore.extend({
             } 
             else if (emberModelName === "nodegroup" || emberModelName === "system"){
               emberModel.setOpenedStatus(!emberModel.get('opened'));
-              self.cleanAndUpdateScene(self.get('entity'));          
+              self.cleanAndUpdateScene();          
             } 
           }
     });
