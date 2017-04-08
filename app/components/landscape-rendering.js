@@ -216,7 +216,7 @@ export default RenderingCore.extend({
                   logoSize.width, logoSize.height, new THREE.Color(1, 0, 0), null,
                   texturePartialPath, applicationMesh, "label");
 
-                // create labels
+                // create text labels
 
                 const font = self.get('font');
 
@@ -226,7 +226,7 @@ export default RenderingCore.extend({
                   top: 0.0,
                   bottom: 0.0
                 };
-                let labelMesh = createLabel(font, 0.2, null, applicationMesh,
+                let labelMesh = createTextLabel(font, 0.2, null, applicationMesh,
                   padding, 0xffffff, logoSize, "center", application);
 
                 applicationMesh.add(labelMesh);
@@ -238,7 +238,7 @@ export default RenderingCore.extend({
                   bottom: 0.2
                 };
 
-               labelMesh = createLabel(font, 0.15, node.getDisplayName(), nodeMesh,
+               labelMesh = createTextLabel(font, 0.2, node.getDisplayName(), nodeMesh,
                   padding, 0xffffff, {
                     width: 0.0,
                     height: 0.0
@@ -249,10 +249,10 @@ export default RenderingCore.extend({
                 padding = {
                   left: 0.0,
                   right: 0.0,
-                  top: -0.4,
+                  top: -0.6,
                   bottom: 0.0
                 };
-                labelMesh = createLabel(font, 0.2, null, systemMesh,
+                labelMesh = createTextLabel(font, 0.3, null, systemMesh,
                   padding, 0x00000, {
                     width: 0.0,
                     height: 0.0
@@ -572,7 +572,7 @@ export default RenderingCore.extend({
     }
 
 
-    function createLabel(font, size, textToShow, parent, padding, color,
+    function createTextLabel(font, size, textToShow, parent, padding, color,
       logoSize, yPosition, model) {
 
       const text = textToShow ? textToShow :
@@ -777,8 +777,8 @@ export default RenderingCore.extend({
 
       let viewportRatio = viewPortSize.width / viewPortSize.height;
 
-      self.debugPlane(0, 0, 0.1, requiredWidth,
-        requiredHeight, new THREE.Color(1, 0, 0), self.get('scene'));
+      /*self.debugPlane(0, 0, 0.1, requiredWidth,
+        requiredHeight, new THREE.Color(1, 0, 0), self.get('scene'));*/
 
       const sizeFactor = 0.65;
 
@@ -1026,7 +1026,7 @@ export default RenderingCore.extend({
 
         // debug //
 
-        self.debugPlane(result[0].point.x, result[0].point.y, 0.1, 0.5,
+        self.debugPlane(result[0].point.x, result[0].point.y, 0.2, 0.5,
           0.5, new THREE.Color(1, 0, 0), self.get('scene'));
 
         // end debug //
