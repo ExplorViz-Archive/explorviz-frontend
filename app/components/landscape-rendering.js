@@ -780,15 +780,17 @@ export default RenderingCore.extend({
       self.debugPlane(0, 0, 0.1, requiredWidth,
         requiredHeight, new THREE.Color(1, 0, 0), self.get('scene'));
 
-      const newZ_by_width = requiredWidth / viewportRatio;
-      const newZ_by_height = requiredHeight;
+      const sizeFactor = 0.65;
 
-      const center = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
-        rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0), 0);
+      const newZ_by_width = (requiredWidth / viewportRatio) * sizeFactor;
+      const newZ_by_height = requiredHeight * sizeFactor;
 
       const camera = self.get('camera');
 
-      camera.position.z = Math.max(Math.max(newZ_by_width, newZ_by_height), 10.0);
+      const center = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
+        rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0), 0);      
+
+      camera.position.z = Math.max(Math.max(newZ_by_height, newZ_by_width), 10.0);
       camera.updateProjectionMatrix();
 
       return center;
