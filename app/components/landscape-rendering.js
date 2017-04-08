@@ -109,6 +109,10 @@ export default RenderingCore.extend({
 
         nodegroups.forEach(function(nodegroup) {
 
+          if(!nodegroup.get('visible')) {
+              return;
+            }
+
           if (!isRequestObject) {
 
             const {

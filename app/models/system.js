@@ -30,12 +30,12 @@ export default DrawNodeEntity.extend({
     }
     else {
       this.get('nodegroups').forEach((nodegroup) => {
-        nodegroup.set('visible', false);      
+        nodegroup.set('visible', false);
         nodegroup.setAllChildrenVisibility(false);
       });
     }
 
-    this.set('opened', status);
+    this.set('opened', openedParam);
     
   }
 });

@@ -127,8 +127,6 @@ export default Ember.Service.extend({
 
           } else {
 
-            console.log("closed system");
-
             const width = Math.max(2.5 * DEFAULT_WIDTH *
               CONVERT_TO_KIELER_FACTOR,
               (calculateRequiredLabelLength(system.get('name'), SYSTEM_LABEL_HEIGHT) +
@@ -142,6 +140,13 @@ export default Ember.Service.extend({
               "height": height,
               "edges": [],
               "ports": []
+            };
+
+             systemKielerNode.padding = {
+              left: PADDING * CONVERT_TO_KIELER_FACTOR,
+              right: PADDING * CONVERT_TO_KIELER_FACTOR,
+              top: PADDING * CONVERT_TO_KIELER_FACTOR,
+              bottom: PADDING * CONVERT_TO_KIELER_FACTOR
             };
 
             system.set('kielerGraphReference', systemKielerNode);
@@ -308,7 +313,6 @@ export default Ember.Service.extend({
 
         // Both parent nodes are visible
         if (appSource.get('parent').get('visible') && appTarget.get('parent').get('visible')) {
-          console.log("both parents visible");
           const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
 
           communication.get('kielerEdgeReferences').push(edge);
@@ -317,7 +321,6 @@ export default Ember.Service.extend({
         // Target node not visible 
         else if (appSource.get('parent').get('visible') && !appTarget.get('parent').get('visible')) {
           if (appTarget.get('parent').get('parent').get('parent').get('opened')) {
-            console.log("target system open 5");
             const representativeApplication = seekRepresentativeApplication(appTarget);
 
             const edge = createEdgeBetweenSourceTarget(appSource, representativeApplication);
@@ -325,7 +328,6 @@ export default Ember.Service.extend({
             communication.get('kielerEdgeReferences').push(edge);
           } else {
             // System of target is closed
-            console.log("target system closed");
             const edge = createEdgeBetweenSourceTarget(appSource, appTarget.get('parent').get('parent').get('parent'));
             appSource.get('kielerGraphReference').edges.push(edge);
             communication.get('kielerEdgeReferences').push(edge);
@@ -334,14 +336,12 @@ export default Ember.Service.extend({
         // Source node not visible
         else if (!appSource.get('parent').get('visible') && appTarget.get('parent').get('visible')) {
           if (appSource.get('parent').get('parent').get('parent').get('opened')) {
-            console.log("source system open 4");
             const representativeApplication = seekRepresentativeApplication(appSource);
             const edge = createEdgeBetweenSourceTarget(representativeApplication, appTarget);
             representativeApplication.get('kielerGraphReference').edges.push(edge);
             communication.get('kielerEdgeReferences').push(edge);
           } else {
             // System of source is closed
-            console.log("source system closed");
             const edge = createEdgeBetweenSourceTarget(appSource.get('parent').get('parent').get('parent'), appTarget);
             appSource.get('parent').get('parent').get('parent').get('kielerGraphReference').edges.push(edge);
             communication.get('kielerEdgeReferences').push(edge);
@@ -353,14 +353,12 @@ export default Ember.Service.extend({
             const representativeSourceApplication = seekRepresentativeApplication(appSource);
 
             if (appTarget.get('parent').get('parent').get('parent').get('opened')) {
-              console.log("target system open 3");
               const representativeTargetApplication = seekRepresentativeApplication(appTarget);
               const edge = createEdgeBetweenSourceTarget(representativeSourceApplication, representativeTargetApplication);
               representativeSourceApplication.get('kielerGraphReference').edges.push(edge);
               communication.get('kielerEdgeReferences').push(edge);
             } else {
               // Target System is closed
-              console.log("target system closed 3");
               const edge = createEdgeBetweenSourceTarget(representativeSourceApplication, appTarget.get('parent').get('parent').get('parent'));
               representativeSourceApplication.get('kielerGraphReference').edges.push(edge);
               communication.get('kielerEdgeReferences').push(edge);
@@ -369,7 +367,6 @@ export default Ember.Service.extend({
 
             // Source System is closed
             if (appTarget.get('parent').get('parent').get('parent').get('opened')) {
-              console.log("source system closed 2");
               const representativeTargetApplication = seekRepresentativeApplication(appTarget);
               const edge = createEdgeBetweenSourceTarget(appSource.get('parent').get('parent').get('parent'), representativeTargetApplication);
               appSource.get('parent').get('parent').get('parent').get('kielerGraphReference').edges.push(edge);
@@ -377,7 +374,6 @@ export default Ember.Service.extend({
             } else {
 
               // Target System is closed
-              console.log("target system closed 2");
               const edge = createEdgeBetweenSourceTarget(appSource.get('parent').get('parent').get('parent'), appTarget.get('parent').get('parent').get('parent'));
               appSource.get('parent').get('parent').get('parent').get('kielerGraphReference').edges.push(edge);
               communication.get('kielerEdgeReferences').push(edge);
@@ -385,7 +381,6 @@ export default Ember.Service.extend({
           }
         }
       });
-  console.log("after addEdges");
     } // END addEdges
 
 
@@ -515,8 +510,8 @@ export default Ember.Service.extend({
 
     function setAbsolutePositionForNode(child, parent) {
 
-      console.log("child", child);
-      console.log("parent", parent);
+      //console.log("child", child);
+      //console.log("parent", parent);
 
       let padding = parent.get('kielerGraphReference').padding;
 
@@ -629,7 +624,6 @@ export default Ember.Service.extend({
       //edge.targetPort = port2.id;
       
       if(targetDrawnode.content && targetDrawnode.content._internalModel.modelName === 'system') {
-        console.log("PORT2", port2);
         edge.targetPort = port2.id;
       }
 
