@@ -19,14 +19,12 @@ export default DrawNodeEntity.extend({
 
 
   setOpened: function(openedParam) {
-    console.log("openedParam", openedParam);
     if (openedParam) {
       this.setAllChildrenVisibility(true);
     } else {
       this.setAllChildrenVisibility(false);
       if (this.get('nodes').get('length') > 0) {
-        const firstNode = this.get('nodes').objectAt(0);
-        console.log("firstNode", firstNode);
+        const firstNode = this.get('nodes').objectAt(0);       
         firstNode.set('visible', true); 
       }
     }

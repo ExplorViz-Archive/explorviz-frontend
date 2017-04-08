@@ -136,17 +136,17 @@ export default Ember.Service.extend({
 
             const height = 2.5 * DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
 
-            const systemKielerGraph = createEmptyGraph(system.get('id'));
-            systemKielerGraph['labels'] = [system.get('name')];
-            systemKielerGraph['width'] = width;
-            systemKielerGraph['height'] = height;
-            systemKielerGraph['height'] = height;
-            systemKielerGraph['edges'] = [];
-            systemKielerGraph['ports'] = [];
+            const systemKielerNode = {
+              "id": system.get('id'),
+              "width": width,
+              "height": height,
+              "edges": [],
+              "ports": []
+            };
 
-            system.set('kielerGraphReference', systemKielerGraph);
+            system.set('kielerGraphReference', systemKielerNode);
 
-            topLevelKielerGraph.children.push(systemKielerGraph);
+            topLevelKielerGraph.children.push(systemKielerNode);
 
           }
 
@@ -515,7 +515,10 @@ export default Ember.Service.extend({
 
     function setAbsolutePositionForNode(child, parent) {
 
-      const padding = parent.get('kielerGraphReference').padding;
+      console.log("child", child);
+      console.log("parent", parent);
+
+      let padding = parent.get('kielerGraphReference').padding;
 
       child.set('positionX', parent.get('positionX') + child.get('positionX') + padding.left);
       child.set('positionY', parent.get('positionY') + child.get('positionY') - padding.top);
@@ -689,13 +692,7 @@ export default Ember.Service.extend({
 
               var sourcePoint = null;
 
-              //LGraphUtil::isDescendant(edge.getTarget().getNode(), edge.getSource().getNode())
-              const filteredChildren = edge.tPort.node.children.filter((child) => {               
-                return child === edge.sPort.node;
-              });
-
-              //if (LGraphUtil::isDescendant(edge.getTarget().getNode(), edge.getSource().getNode())) {
-              if (filteredChildren.length === 1) {
+              if(isDescendant(edge.targetNode, edge.sourceNode)) {
 
                 // self edges..
                 let sourcePort = edge.sPort;
@@ -826,6 +823,21 @@ export default Ember.Service.extend({
       });
     } // END addBendPoints 
 
+    function isDescendant(child, parent) {
+
+      let current = child;
+      let next = child.get('parent');
+
+      while(next) {
+        current = next;
+        if(current === parent) {
+          return true;
+        }
+        next = current.get('parent');
+      }
+
+      return false;
+    }
 
     function getRightParent(sourceApplication, targetApplication) {
       let result = sourceApplication.get('parent');

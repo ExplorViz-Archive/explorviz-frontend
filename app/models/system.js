@@ -18,7 +18,6 @@ export default DrawNodeEntity.extend({
   backgroundColor : attr(),
 
   setOpened: function(openedParam) {
-
     if (openedParam) {
       this.get('nodegroups').forEach((nodegroup) => {
           nodegroup.set('visible', true);      
@@ -31,8 +30,8 @@ export default DrawNodeEntity.extend({
     }
     else {
       this.get('nodegroups').forEach((nodegroup) => {
-          nodegroup.set('visible', false);      
-          nodegroup.setAllChildrenVisibility(false);
+        nodegroup.set('visible', false);      
+        nodegroup.setAllChildrenVisibility(false);
       });
     }
 
