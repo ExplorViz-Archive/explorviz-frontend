@@ -17,6 +17,12 @@ export default DrawNodeEntity.extend({
   foregroundColor : attr(),
   backgroundColor : attr(),
 
+  // used for text labeling performance in respective renderers
+  state: Ember.computed('opened', function() {
+    let opened = this.get('visible');   
+    return `${opened}`;
+  }),
+
   setOpened: function(openedParam) {
     if (openedParam) {
       this.get('nodegroups').forEach((nodegroup) => {

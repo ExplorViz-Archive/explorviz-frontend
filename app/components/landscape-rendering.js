@@ -17,6 +17,11 @@ export default RenderingCore.extend({
   centerPoint : null,
 
   logos: {},
+  textLabels: {},
+
+  test: Ember.observer("textLabels", function(){
+    console.log("textLabels", this.get("textLabels"));
+  }),
 
   // @Override
   initRendering() {
@@ -30,13 +35,25 @@ export default RenderingCore.extend({
   },
 
   // @Override
+  willDestroyElement() {
+    this._super(...arguments);
+    this.set('logos', {});
+    this.set('textLabels', {});
+  },
+
+  // @Override
   cleanup() {
     this._super(...arguments);
 
     this.debug("cleanup landscape rendering");
 
+    this.set('logos', {});
+    this.set('textLabels', {});
+
     this.get('hammerManager').off();
     this.set('hammerManager', null);
+
+    this.set = function() { debugger };
   },
 
   // @Override
@@ -575,6 +592,15 @@ export default RenderingCore.extend({
     function createTextLabel(font, size, textToShow, parent, padding, color,
       logoSize, yPosition, model) {
 
+      if(self.get('textLabels')[model.get('id')]) {
+        if(self.get('textLabels')[model.get('id')].state === model.get("state")) {
+          console.log("old label");
+          return self.get('textLabels')[model.get('id')].mesh;
+        }        
+      }      
+
+      console.log("new label");
+
       const text = textToShow ? textToShow :
         parent.userData.model.get('name');
 
@@ -657,6 +683,8 @@ export default RenderingCore.extend({
 
       labelMesh.userData['type'] = 'label';
       labelMesh.userData['model'] = model;
+
+      self.get('textLabels')[model.get('id')] = {"mesh": labelMesh, "state": model.get('state')};
 
       return labelMesh;
     }

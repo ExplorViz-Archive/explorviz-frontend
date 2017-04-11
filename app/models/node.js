@@ -23,6 +23,12 @@ export default DrawNodeEntity.extend({
 
   ipAddress: attr('string'),
 
+  // used for text labeling performance in respective renderers
+  state: Ember.computed('visible', function() {
+    let visible = this.get('visible');
+    return `${visible}`;
+  }),
+
   color: attr(),
 
   getDisplayName: function() {

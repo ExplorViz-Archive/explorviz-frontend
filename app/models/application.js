@@ -38,6 +38,9 @@ export default DrawNodeEntity.extend({
   
   //databaseQueries: hasMany('databasequery')
 
-  backgroundColor: attr()
+  backgroundColor: attr(),
+
+  // used for text labeling performance in respective renderers
+  state: "application"
 
 });

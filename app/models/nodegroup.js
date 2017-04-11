@@ -17,6 +17,13 @@ export default DrawNodeEntity.extend({
   backgroundColor: attr(),
   opened: attr('boolean'),
 
+  // used for text labeling performance in respective renderers
+  state: Ember.computed('visible', 'opened', function() {
+    let opened = this.get('visible');
+    let visible = this.get('visible');    
+    return `${opened}/${visible}`;
+  }),
+
 
   setOpened: function(openedParam) {
     if (openedParam) {
