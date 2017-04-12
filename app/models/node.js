@@ -1,4 +1,5 @@
 import DS from 'ember-data';
+import Ember from 'ember';
 import DrawNodeEntity from './drawnodeentity';
 
 const { attr, hasMany, belongsTo } = DS;

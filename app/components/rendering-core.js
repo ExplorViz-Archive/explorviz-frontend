@@ -52,7 +52,7 @@ export default Ember.Component.extend({
 
 
   // @Override
-  didDestroyElement() {
+  willDestroyElement() {
     this._super(...arguments);
     this.cleanup();    
   },
@@ -125,7 +125,7 @@ export default Ember.Component.extend({
 
 
   /**
-   * This function is called when the destroy event is fired. Inherit this 
+   * This function is called when the willDestroyElement event is fired. Inherit this 
    * function to cleanup custom properties or unbind listener 
    * as shown in {{#crossLink "Landscape-Rendering"}}{{/crossLink}}.
    *

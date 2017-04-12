@@ -23,6 +23,8 @@ export default RenderingCore.extend({
   initRendering() {
     this._super(...arguments);
 
+    this.debug("init application rendering");
+
     this.initInteraction();
     
     this.get('camera').position.set(0, 0, 100);

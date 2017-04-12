@@ -1,4 +1,5 @@
 import DS from 'ember-data';
+import Ember from 'ember';
 import DrawNodeEntity from './drawnodeentity';
 
 const { attr, hasMany, belongsTo } = DS;
@@ -19,7 +20,7 @@ export default DrawNodeEntity.extend({
 
   // used for text labeling performance in respective renderers
   state: Ember.computed('opened', function() {
-    let opened = this.get('visible');   
+    let opened = this.get('opened');   
     return `${opened}`;
   }),
 

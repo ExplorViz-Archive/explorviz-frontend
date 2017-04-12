@@ -19,26 +19,17 @@ export default RenderingCore.extend({
   logos: {},
   textLabels: {},
 
-  test: Ember.observer("textLabels", function(){
-    console.log("textLabels", this.get("textLabels"));
-  }),
-
   // @Override
   initRendering() {
     this._super(...arguments);
+
+    this.debug("init landscape rendering");
 
     this.initInteraction();
 
     var dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
     this.get('scene').add(dirLight);
-  },
-
-  // @Override
-  willDestroyElement() {
-    this._super(...arguments);
-    this.set('logos', {});
-    this.set('textLabels', {});
   },
 
   // @Override
@@ -52,8 +43,6 @@ export default RenderingCore.extend({
 
     this.get('hammerManager').off();
     this.set('hammerManager', null);
-
-    this.set = function() { debugger };
   },
 
   // @Override
@@ -119,6 +108,21 @@ export default RenderingCore.extend({
             system.get('height'), new THREE.Color(x, y, z), null, null, self.get('scene'), system);
 
           system.set('threeJSModel', systemMesh);
+
+          // draw system text label          
+          const padding = {
+            left: 0.0,
+            right: 0.0,
+            top: -0.6,
+            bottom: 0.0
+          };
+          const labelMesh = createTextLabel(self.get('font'), 0.3, null, systemMesh,
+            padding, 0x00000, {
+              width: 0.0,
+              height: 0.0
+            }, "max", system);
+
+          systemMesh.add(labelMesh);
 
         }
 
@@ -262,20 +266,6 @@ export default RenderingCore.extend({
                   }, "min", node);
 
                 nodeMesh.add(labelMesh);
-
-                padding = {
-                  left: 0.0,
-                  right: 0.0,
-                  top: -0.6,
-                  bottom: 0.0
-                };
-                labelMesh = createTextLabel(font, 0.3, null, systemMesh,
-                  padding, 0x00000, {
-                    width: 0.0,
-                    height: 0.0
-                  }, "max", system);
-
-                systemMesh.add(labelMesh);
 
 
 
@@ -594,12 +584,12 @@ export default RenderingCore.extend({
 
       if(self.get('textLabels')[model.get('id')]) {
         if(self.get('textLabels')[model.get('id')].state === model.get("state")) {
-          console.log("old label");
+          //console.log("old label");
           return self.get('textLabels')[model.get('id')].mesh;
         }        
       }      
 
-      console.log("new label");
+      //console.log("new label");
 
       const text = textToShow ? textToShow :
         parent.userData.model.get('name');
@@ -953,7 +943,7 @@ export default RenderingCore.extend({
             self.debug("Name of raycasting goal: ", emberModelName);
 
             if(emberModelName === "application"){
-              console.log(intersectedViewObj);
+              //console.log(intersectedViewObj);
               // open application rendering
               self.sendAction("showApplication", emberModel);
             } 
