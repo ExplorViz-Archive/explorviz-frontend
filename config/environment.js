@@ -4,7 +4,7 @@ module.exports = function(environment) {
   var ENV = {
     modulePrefix: 'explorviz-ui-frontend',
     environment: environment,
-    rootURL: '/',
+    rootURL: '/explorviz-frontend',
     locationType: 'auto',
     EmberENV: {
       FEATURES: {
@@ -29,6 +29,7 @@ module.exports = function(environment) {
   };
 
   if (environment === 'development') {
+  ENV.APP.API_ROOT = 'http://localhost:8081';
     // ENV.APP.LOG_RESOLVER = true;
     // ENV.APP.LOG_ACTIVE_GENERATION = true;
     // ENV.APP.LOG_TRANSITIONS = true;
@@ -48,6 +49,7 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
+ENV.APP.API_ROOT = 'http://localhost:8080/explorviz-ui-backend-1.0-SNAPSHOT';
 
   }
 

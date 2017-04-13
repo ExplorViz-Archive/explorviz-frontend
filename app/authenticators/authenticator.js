@@ -1,6 +1,7 @@
 import Ember from 'ember';
 
 import Base from 'ember-simple-auth/authenticators/base';
+import ENV from 'explorviz-ui-frontend/config/environment';
 
 /**
 Custom authenticator for token based authentication.
@@ -16,7 +17,7 @@ export default Base.extend({
     ajax: Ember.inject.service(),
 
     //tokenEndpoint: 'http://192.168.247.129:8081/sessions/create',
-    tokenEndpoint: 'http://localhost:8081/sessions/create',
+   tokenEndpoint: ENV.APP.API_ROOT,
 
     restore: function(data) {
         return new Ember.RSVP.Promise(function(resolve, reject) {
@@ -32,7 +33,7 @@ export default Base.extend({
     authenticate: function(identification, password) {
         return new Ember.RSVP.Promise((resolve, reject) => {
             Ember.$.ajax({
-                url: this.tokenEndpoint,
+                url: this.tokenEndpoint + '/sessions/create',
                 type: 'POST',
                 data: "username=" + identification + "&password=" + password,
                 accept: "application/json"
