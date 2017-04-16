@@ -3,8 +3,7 @@
 module.exports = function(environment) {
   var ENV = {
     modulePrefix: 'explorviz-ui-frontend',
-    environment: environment,
-    rootURL: '/explorviz-frontend',
+    environment: environment,    
     locationType: 'auto',
     EmberENV: {
       FEATURES: {
@@ -49,7 +48,8 @@ module.exports = function(environment) {
   }
 
   if (environment === 'production') {
-ENV.APP.API_ROOT = 'http://localhost:8080/explorviz-ui-backend-1.0-SNAPSHOT';
+    ENV.baseURL = '/explorviz-frontend';
+    ENV.APP.API_ROOT = 'http://localhost:8080/explorviz-ui-backend-1.0-SNAPSHOT';
 
   }
 
