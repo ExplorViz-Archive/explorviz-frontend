@@ -55,15 +55,13 @@ export default RenderingCore.extend({
   },
 
   // @Override
-  populateScene() {
-
-    const emberLandscape = this.get('entity');
-
-    this.get('klayLayouter').applyLayout(emberLandscape);
-
+  populateScene() {    
     this._super(...arguments);
 
     const self = this;
+
+    const emberLandscape = this.get('entity');
+    this.get('klayLayouter').applyLayout(emberLandscape);
 
     const systems = emberLandscape.get('systems');
 
@@ -189,6 +187,10 @@ export default RenderingCore.extend({
             const applications = node.get('applications');
 
             applications.forEach(function(application) {
+
+              if(application.get('name') === "PostgreSQL") {
+                console.log("app", application);
+              }
 
               extensionX = application.get('width') * scaleFactor.width;
               extensionY = application.get('height') * scaleFactor.width;
@@ -506,11 +508,10 @@ export default RenderingCore.extend({
 
 
     function checkEqualityOfPoints(p1, p2) {
-      var x = p1.x === p2.x;
-      var y = p1.y === p2.y;
-      var z = p1.z === p2.z;
+      var x = Math.abs(p1.x - p2.x) <= 0.01;
+      var y = Math.abs(p1.y - p2.y) <= 0.01;
 
-      return x && y && z;
+      return x && y;
     }
 
 
