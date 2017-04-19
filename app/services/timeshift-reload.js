@@ -22,7 +22,7 @@ export default Reload.extend({
 		function success(timestampstorage){
 			const timestamps = timestampstorage.get('timestamps');
 			const sortedTimestamps = timestamps.sortBy('timestamp');
-
+			console.log();
 			// define outside loop in case of error
 			var timestampList = [];
 			var timestampListFormatted = [];
