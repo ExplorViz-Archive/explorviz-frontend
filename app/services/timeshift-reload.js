@@ -2,6 +2,8 @@ import Reload from './data-reload';
 
 export default Reload.extend({
 	object: null,
+	//@override
+	shallReload: true,
 	/*
 		this service starts working with the application. Look "instance-initializer/service-start" for more information
 	*/
@@ -22,7 +24,6 @@ export default Reload.extend({
 		function success(timestampstorage){
 			const timestamps = timestampstorage.get('timestamps');
 			const sortedTimestamps = timestamps.sortBy('timestamp');
-			console.log();
 			// define outside loop in case of error
 			var timestampList = [];
 			var timestampListFormatted = [];
@@ -90,6 +91,26 @@ export default Reload.extend({
 		
 		//-------------------------------------------------end of inner functions of getData--------------------------------
 	
+	},
+	
+	//@override
+	reloadObject(timestamp){
+		const self = this;
+		var timestampstorage = this.get("store").queryRecord('timestampstorage', timestamp);
+			timestampstorage.then(success, failure).catch(error);
+			
+		function success(timestampStorage){
+			console.log(timestampStorage.serialize());
+			console.log("success");
+		}
+		
+		function failure(){
+			console.log("Timestamps couldn`t be requested");
+		}
+		
+		function error(e){
+			console.log(e);
+		}
 	}
 	
 	

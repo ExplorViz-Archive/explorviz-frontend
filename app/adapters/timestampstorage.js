@@ -17,9 +17,14 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
   },
 
   //@Override
-  urlForQueryRecord() {
+  urlForQueryRecord(query) {
     let baseUrl = this.buildURL();
-    return `${baseUrl}/timestamp/show-timestamps`;
-  }
+	if(query === "1"){
+		return `${baseUrl}/timestamp/from-recent`;
+	}else{
+		return `${baseUrl}/timestamp/before-timestamp/${query}?intervalSize=100`;
+	}
+  },
+  
 
 });
