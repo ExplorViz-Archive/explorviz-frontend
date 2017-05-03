@@ -3,7 +3,7 @@ import Reload from './data-reload';
 export default Reload.extend({
 	object: null,
 	//@override
-	shallReload: true,
+	//shallReload: true,
 	/*
 		this service starts working with the application. Look "instance-initializer/service-start" for more information
 	*/
