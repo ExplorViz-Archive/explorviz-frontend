@@ -50,7 +50,7 @@ module.exports = function(environment) {
 
   if (environment === 'production') {
     ENV.rootURL = '/explorviz-frontend';
-    ENV.APP.API_ROOT = 'http://localhost:8080/explorviz-ui-backend-1.0-SNAPSHOT';
+    ENV.APP.API_ROOT = 'http://0.0.0.0:8080/explorviz-ui-backend-1.0-SNAPSHOT';
 
   }
 

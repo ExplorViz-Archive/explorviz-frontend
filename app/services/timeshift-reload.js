@@ -95,7 +95,6 @@ export default Reload.extend({
 	
 	//@override
 	reloadObject(timestamp){
-		const self = this;
 		var timestampstorage = this.get("store").queryRecord('timestampstorage', timestamp);
 			timestampstorage.then(success, failure).catch(error);
 			
