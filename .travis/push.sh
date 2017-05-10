@@ -11,7 +11,7 @@ commit_and_push() {
   mkdir explorviz-frontend
   cd explorviz-frontend
   cp -R /home/travis/build/ExplorViz/explorviz-ui-frontend/dist/* .
-  git add .
+  git add -A
   git commit --message "Travis build: $TRAVIS_BUILD_NUMBER"
   git push https://$PersonalAccessToken@github.com/Explorviz/explorviz-docker.git > /dev/null 2>&1
 }
