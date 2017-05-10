@@ -20,7 +20,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
   urlForQueryRecord(query) {
     let baseUrl = this.buildURL();
 	if(query === "1"){
-		return `${baseUrl}/timestamp/from-recent`;
+		return `${baseUrl}/timestamp/from-recent?intervalSize=100`;
 	}else{
 		return `${baseUrl}/timestamp/before-timestamp/${query}?intervalSize=100`;
 	}
