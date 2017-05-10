@@ -75,7 +75,7 @@ export default Component.extend({
 
     return timestampstorage.then((timestampstorage) => {
       const timestamps = timestampstorage.get('timestamps');
-      const sortedTimestamps = timestamps.sortBy('timestamp');
+      const sortedTimestamps = timestamps.sortBy('id');
 
       // define outside loop in case of error
       var timestampList = [];
@@ -85,7 +85,7 @@ export default Component.extend({
       // Parse and format timestamps for timeline
       if (sortedTimestamps) {
         sortedTimestamps.forEach(function(timestamp) {
-          const timestampValue = timestamp.get('timestamp');
+          const timestampValue = timestamp.get('id');
           timestampList.push(timestampValue);
 
           const callValue = timestamp.get('calls');
