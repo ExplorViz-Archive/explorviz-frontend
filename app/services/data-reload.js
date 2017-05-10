@@ -8,7 +8,7 @@ export default Ember.Service.extend({
 	previousRequestDone: true,
 	updateThread: null, // This thread shall update the most actual object
 	reloadThread: null, //This thread shall reload other objects
-	shallReload: false, // This attribute defines, if we want to reload data while running
+	shallReload: false, // This attribute defines, if and when we wnat reload data
 	
 	/* this service is used like an abstract service
 	 * it only works with an "authenticated session". It will start immediatly 
@@ -36,11 +36,7 @@ export default Ember.Service.extend({
 				this.updateObject();
 				this.set("updateThread", Ember.run.later(this, this.updateLoop, (10*1000)));
 			}
-			if(this.get("shallReload")){
-				var actualDate = new Date();
-				var actualTimestamp = actualDate.getTime();
-				this.startReload(actualTimestamp);
-			}
+			this.startReload();
 	}.observes("isAuthenticated"),
 	
 	stopUpdate: function(){
@@ -50,34 +46,28 @@ export default Ember.Service.extend({
 		this.set("updateThread", null);
 	},
 	
-	startReload: function(timestamp){
-			var amountOfTimestampsToReload = 1000;
+	
+	startReload: function(){
+		if(this.get("shallReload")){
 			this.stopReload();
-			this.set("reloadThread", Ember.run.later(this, function(){this.reloadInIntervall(timestamp, amountOfTimestampsToReload);}, 1000));
-	},
+			this.set("reloadThread", Ember.run.later(this, this.reloadObjects, 100));
+		}
+	}.observes("shallReload"),
 	
 	stopReload: function(){
-		if(this.get("reloadThread")){
+		this.set("shallReload", false);
+		if(this.get("reloadThread") && this.get("reloadThread").run){
 			this.get("reloadThread").run.cancel();
 		}
 		this.set("reloadThread", null);
 	},
 	
-	reloadInIntervall: function(timestamp, amountOfTimestampsToReload){
-		amountOfTimestampsToReload -= 100;
-		if(amountOfTimestampsToReload <= 0){
-			return;
-		}
-		if(this.get("reloadThread")){
-			this.reloadObject(timestamp);
-			this.set("reloadThread", Ember.run.later(this, function(){this.reloadInIntervall(timestamp, amountOfTimestampsToReload);}, 3000));
-		}
-	},
 	
 	
 	//This function has to be overwritten
-	reloadObject: function(){
+	reloadObjects: function(){
 	},
+	
 	
 	
 	//@override
