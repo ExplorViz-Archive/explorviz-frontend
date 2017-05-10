@@ -24,3 +24,8 @@ install:
 script:
   - npm test
   - ember build -prod
+  
+after_success:
+  - .travis/push.sh
+  
+env:
