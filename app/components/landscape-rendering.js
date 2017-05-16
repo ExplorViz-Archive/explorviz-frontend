@@ -812,6 +812,7 @@ export default RenderingCore.extend({
       camera.position.z = Math.max(Math.max(newZ_by_height, newZ_by_width), 10.0);
       camera.updateProjectionMatrix();
 
+
       return center;
 
     }
@@ -931,8 +932,8 @@ export default RenderingCore.extend({
 
           const event = evt.srcEvent;
 
-          mouse.x = ((event.clientX - 15) / renderer.domElement.clientWidth) * 2 - 1;
-          mouse.y = -((event.clientY - 75) / renderer.domElement.clientHeight) * 2 + 1;
+          mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
+          mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
 
           const intersectedViewObj = raycasting(null, mouse, true);
 
