@@ -328,8 +328,8 @@ export default RenderingCore.extend({
 
       const event = evt.srcEvent;
 
-      mouse.x = ((event.clientX - 15) / renderer.domElement.clientWidth) * 2 - 1;
-      mouse.y = -((event.clientY - 75) / renderer.domElement.clientHeight) * 2 + 1;
+      mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
+      mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
 
       const intersectedViewObj = raycasting(null, mouse, true);
 
