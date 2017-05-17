@@ -2,11 +2,9 @@ import DS from 'ember-data';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 import ENV from 'explorviz-ui-frontend/config/environment';
 
-const {JSONAPIAdapter} = DS;
-
-export default JSONAPIAdapter.extend(DataAdapterMixin, {
-
-  authorizer: 'authorizers:authorizers',
+export default DS.JSONAPIAdapter.extend(DataAdapterMixin,{
+	
+	  authorizer: 'authorizers:authorizers',
 
   //host: 'http://192.168.247.129:8081',
   host: ENV.APP.API_ROOT,
@@ -26,5 +24,13 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
 	}
   },
   
-
+  urlForQuery(query) {
+    let baseUrl = this.buildURL();
+	if(query === "1"){
+		return `${baseUrl}/timestamp/from-recent?intervalSize=100`;
+	}else{
+		return `${baseUrl}/timestamp/before-timestamp/${query}?intervalSize=100`;
+	}
+  },
+  
 });

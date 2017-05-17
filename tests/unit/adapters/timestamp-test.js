@@ -1,8 +1,8 @@
 import { moduleFor, test } from 'ember-qunit';
 
-moduleFor('adapter:timestampstorage', 'Unit | Adapter | timestampstorage', {
+moduleFor('adapter:timestamp', 'Unit | Adapter | timestamp', {
   // Specify the other units that are required for this test.
-  needs: ['service:session']
+  // needs: ['serializer:foo']
 });
 
 // Replace this with your real tests.

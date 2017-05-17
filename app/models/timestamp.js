@@ -1,9 +1,8 @@
 import DS from 'ember-data';
 
-const { attr, belongsTo } = DS;
+const { attr} = DS;
 
 export default DS.Model.extend({
-  parent: belongsTo('timestampstorage'),
   timestamp: attr('number'),
   calls: attr('number')
 });

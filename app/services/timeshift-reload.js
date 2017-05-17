@@ -15,15 +15,14 @@ export default Reload.extend({
 		if(this.get('previousRequestDone')) {
 			this.set('previousRequestDone', false);
 			this.debug("start request");
-			var timestampstorage = this.get("store").queryRecord('timestampstorage', '1');
-			timestampstorage.then(success, failure).catch(error);
+			var timestamps = this.get("store").query('timestamp', '1');
+			timestamps.then(success, failure).catch(error);
 		}
 
 	
 	
 		//----------------------------- Start of inner functions of updateObject------------------------------------------
-		function success(timestampstorage){
-			const timestamps = timestampstorage.get('timestamps');
+		function success(timestamps){
 			const sortedTimestamps = timestamps.sortBy('id');
 			// define outside loop in case of error
 			var timestampList = [];
@@ -81,14 +80,14 @@ export default Reload.extend({
 			self.set('previousRequestDone', true);
 		}
 	
-		function failure(){
+		function failure(e){
 			self.set('previousRequestDone', true);
-			console.log("Timestamps couldn`t be requested");
+			console.error(e.message);
 		}
 		
 		function error(e){
 			self.set('previousRequestDone', true);
-			console.log(e);
+			console.error(e);
 		}
 		
 		
@@ -107,11 +106,10 @@ export default Reload.extend({
 			return;
 		}
 		var id = oldestTimestamp.get("id");
-		var timestampstorage = this.get("store").queryRecord('timestampstorage', id);
-			timestampstorage.then(success, failure).catch(error);
+		var requestedTimestamps = this.get("store").query('timestamp', id);
+			requestedTimestamps.then(success, failure).catch(error);
 			
-		function success(timestampStorage){
-			var timestamps= timestampStorage.get("timestamps");
+		function success(timestamps){
 			var length = timestamps.get("length");
 			if(length !== 0){
 				timestamps.forEach(function(timestamp){
@@ -121,12 +119,12 @@ export default Reload.extend({
 			}
 		}
 		
-		function failure(){
-			console.log("Timestamps couldn`t be requested");
+		function failure(e){
+			console.error(e.message);
 		}
 		
 		function error(e){
-			console.log(e);
+			console.error(e);
 		}
 	},
 	

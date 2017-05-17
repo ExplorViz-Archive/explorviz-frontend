@@ -71,11 +71,10 @@ export default Component.extend({
 
     const store = this.get('store');
     // GET /show-timestamps
-    const timestampstorage = store.queryRecord('timestampstorage', '1');
+    const timestamps = store.query('timestamp', '1');
 
-    return timestampstorage.then((timestampstorage) => {
-      const timestamps = timestampstorage.get('timestamps');
-      const sortedTimestamps = timestamps.sortBy('id');
+    return timestamps.then((timestamps) => {
+		const sortedTimestamps = timestamps.sortBy('id');
 
       // define outside loop in case of error
       var timestampList = [];
@@ -138,8 +137,8 @@ export default Component.extend({
 
       return chartData;
 
-    }).catch(() => {
-      console.log('Error loading timestamps!');
+    }).catch((e) => {
+      console.error(e);
     });
   },
 
