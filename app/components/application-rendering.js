@@ -1,6 +1,7 @@
 import RenderingCore from './rendering-core';
 import Ember from 'ember';
 import Hammer from "npm:hammerjs";
+import Raycaster from '../utils/raycaster';
 
  /**
  * Renderer for application visualization.
@@ -19,6 +20,8 @@ export default RenderingCore.extend({
 
   hammerManager: null,
 
+  raycaster: null,
+
   // @Override
   initRendering() {
     this._super(...arguments);
@@ -28,6 +31,10 @@ export default RenderingCore.extend({
     this.initInteraction();
     
     this.get('camera').position.set(0, 0, 100);
+
+    if (!this.get('raycaster')) {
+      this.set('raycaster', Raycaster.create());
+    }
 
     const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
     spotLight.position.set(100, 100, 100);
@@ -331,7 +338,7 @@ export default RenderingCore.extend({
       mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
       mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
 
-      const intersectedViewObj = raycasting(null, mouse, true);
+      const intersectedViewObj = self.get('raycaster').raycasting(null, mouse, self.get('camera'), self.get('application3D').children, 'applicationObjects');
 
       if(intersectedViewObj) {
 
@@ -365,7 +372,7 @@ export default RenderingCore.extend({
           mouse.x = ((event.clientX - 15) / renderer.domElement.clientWidth) * 2 - 1;
           mouse.y = -((event.clientY - 75) / renderer.domElement.clientHeight) * 2 + 1;
 
-          const intersectedViewObj = raycasting(null, mouse, true);
+          const intersectedViewObj = self.get('raycaster').raycasting(null, mouse, self.get('camera'), self.get('application3D').children, 'applicationObjects');
 
           if(intersectedViewObj) {
 
@@ -431,46 +438,6 @@ export default RenderingCore.extend({
       // zoom out
       else {
         camera.position.z -= delta * 1.5;
-      }
-    }
-
-
-    // raycasting
-
-    const raycaster = new THREE.Raycaster();
-
-    function raycasting(origin, direction, fromCamera) {
-
-      if (fromCamera) {
-        // direction = mouse
-        raycaster.setFromCamera(direction, self.get('camera'));
-      } else if (origin) {
-        raycaster.set(origin, direction);
-      }
-
-      // calculate objects intersecting the picking ray (true => recursive)
-      const intersections = raycaster.intersectObjects(self.get('application3D').children,
-        true);
-      
-      if (intersections.length > 0) {
-
-        const result = intersections.filter(function(obj) {
-
-          if (obj.object.userData.model) {
-
-            const modelName = obj.object.userData.model.constructor.modelName;
-            return (modelName === 'component' || modelName === 'clazz');
-
-          }
-
-        });
-
-        if (result.length <= 0) {
-          return;
-        }
-
-        return result[0];
-
       }
     }
 

@@ -1,6 +1,7 @@
 import RenderingCore from './rendering-core';
 import Ember from 'ember';
 import Hammer from "npm:hammerjs";
+import Raycaster from '../utils/raycaster';
 
  /**
  * Renderer for landscape visualization.
@@ -19,6 +20,8 @@ export default RenderingCore.extend({
   logos: {},
   textLabels: {},
 
+  raycaster: null,
+
   // @Override
   initRendering() {
     this._super(...arguments);
@@ -26,6 +29,10 @@ export default RenderingCore.extend({
     this.debug("init landscape rendering");
 
     this.initInteraction();
+
+    if (!this.get('raycaster')) {
+      this.set('raycaster', Raycaster.create());
+    }
 
     var dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
@@ -935,7 +942,9 @@ export default RenderingCore.extend({
           mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
           mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
 
-          const intersectedViewObj = raycasting(null, mouse, true);
+          console.log(self.get('raycaster'));
+
+          const intersectedViewObj = self.get('raycaster').raycasting(null, mouse, self.get('camera'), self.get('scene').children, 'landscapeObjects');
 
           if(intersectedViewObj) {
 
@@ -1009,52 +1018,7 @@ export default RenderingCore.extend({
         camera.position.z -= delta * 1.5;
       }
     }
-
-
-    // raycasting
-
-    const raycaster = new THREE.Raycaster();
-
-    function raycasting(origin, direction, fromCamera) {
-
-      if (fromCamera) {
-        // direction = mouse
-        raycaster.setFromCamera(direction, self.get('camera'));
-      } else if (origin) {
-        raycaster.set(origin, direction);
-      }
-
-      // calculate objects intersecting the picking ray (true => recursive)
-      const intersections = raycaster.intersectObjects(self.get('scene').children,
-        true);
-      
-      if (intersections.length > 0) {
-
-        const result = intersections.filter(function(obj) {
-          if (obj.object.userData.model) {
-            const modelName = obj.object.userData.model.constructor.modelName;
-            console.log(modelName);
-            return (modelName === 'node' ||
-              modelName === 'system' ||
-              modelName === 'nodegroup' ||
-              modelName === 'application');
-          }
-        });
-        if (result.length <= 0) {
-          return;
-        }
-
-        // debug //
-
-        self.debugPlane(result[0].point.x, result[0].point.y, 0.2, 0.5,
-          0.5, new THREE.Color(1, 0, 0), self.get('scene'));
-
-        // end debug //
-
-        return result[0];
-
-      }
-    }
+ 
 
   }, // END initInteraction
 
