@@ -1,16 +1,15 @@
 import Ember from 'ember';
+import Hammer from "npm:hammerjs";
 
-export default Ember.Component.extend({
+export default Ember.Object.extend(Ember.Evented, {
 
-  // @Override
-  /*init() {
-    this._super(...arguments);
+  setupInteractionHandlers(canvas, raycastObjects, camera, renderer, raycaster) {
 
     const self = this;
 
-    console.log("From nested : " + this.get('camera'));
+    let cameraTranslateX, cameraTranslateY = 0;
 
-    let cameraTranslateX, cameraTranslateY = 0;    
+    console.log(camera);
 
     const hammer = new Hammer.Manager(canvas, {});
 
@@ -41,30 +40,27 @@ export default Ember.Component.extend({
 
           var mouse = {};
 
-          const renderer = webglrenderer;
-
           const event = evt.srcEvent;
 
           mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
           mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
 
-          const intersectedViewObj = raycaster.raycasting(null, mouse, camera, scene.children, 'landscapeObjects');
+          const intersectedViewObj = raycaster.raycasting(null, mouse, camera, raycastObjects, 'landscapeObjects');
 
           if(intersectedViewObj) {
 
             const emberModel = intersectedViewObj.object.userData.model;
             const emberModelName = emberModel.constructor.modelName;
 
-            self.debug("Name of raycasting goal: ", emberModelName);
+            //self.debug("Name of raycasting goal: ", emberModelName);
 
             if(emberModelName === "application"){
-              //console.log(intersectedViewObj);
-              // open application rendering
-              self.sendAction("showApplication", emberModel);
+              // open application-rendering
+              self.trigger('showApplication', emberModel);
             } 
             else if (emberModelName === "nodegroup" || emberModelName === "system"){
               emberModel.setOpened(!emberModel.get('opened'));
-              self.cleanAndUpdateScene();          
+              self.trigger('cleanup');
             } 
           }
     });
@@ -79,9 +75,6 @@ export default Ember.Component.extend({
     hammer.on('panmove', function(evt) {
 
       const event = evt.srcEvent;
-
-      const renderer = webglrenderer;
-      const camera = camera;
 
       var deltaX = event.clientX - cameraTranslateX;
       var deltaY = event.clientY - cameraTranslateY;
@@ -103,13 +96,10 @@ export default Ember.Component.extend({
       cameraTranslateY = event.clientY;
     });
 
-    // zoom handler
-
+    // zoom handler    
     canvas.addEventListener('mousewheel', onMouseWheelStart, false);
 
     function onMouseWheelStart(evt) {
-
-      const camera = camera;
 
       var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
 
@@ -123,6 +113,6 @@ export default Ember.Component.extend({
       }
     }
 
-  }*/
+  }
 
 });

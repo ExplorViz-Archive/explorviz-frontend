@@ -1,7 +1,7 @@
 import RenderingCore from './rendering-core';
-import Hammer from "npm:hammerjs";
 import Raycaster from '../utils/raycaster';
 import applyKlayLayout from '../utils/klay-layouter';
+import HammerInteraction from '../utils/hammer-interaction';
 
  /**
  * Renderer for landscape visualization.
@@ -19,6 +19,7 @@ export default RenderingCore.extend({
   textLabels: {},
 
   raycaster: null,
+  interactionHandler: null,
 
   // @Override
   initRendering() {
@@ -26,11 +27,15 @@ export default RenderingCore.extend({
 
     this.debug("init landscape rendering");
 
-    this.initInteraction();
+    if (!this.get('interactionHandler')) {
+      this.set('interactionHandler', HammerInteraction.create());
+    }
 
     if (!this.get('raycaster')) {
       this.set('raycaster', Raycaster.create());
     }
+
+    this.initInteraction();
 
     var dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
@@ -46,8 +51,8 @@ export default RenderingCore.extend({
     this.set('logos', {});
     this.set('textLabels', {});
 
-    this.get('hammerManager').off();
-    this.set('hammerManager', null);
+    //this.get('hammerManager').off();
+    //this.set('hammerManager', null);
   },
 
   // @Override
@@ -898,125 +903,23 @@ export default RenderingCore.extend({
 
     const self = this;
 
-    let cameraTranslateX, cameraTranslateY = 0;
+    const canvas = this.get('canvas');
+    const raycastObjects = this.get('scene').children;
+    const camera = this.get('camera');
+    const webglrenderer = this.get('webglrenderer');
+    const raycaster = this.get('raycaster');
 
-    const canvas = self.get('canvas');
+    this.get('interactionHandler').setupInteractionHandlers(canvas, 
+      raycastObjects, camera, webglrenderer, raycaster);
 
-    this.set('hammerManager', new Hammer.Manager(canvas, {}));
-
-    const hammer = this.get('hammerManager');
-
-    const singleTap = new Hammer.Tap({
-      event: 'singletap',
-      interval: 250
+    this.get('interactionHandler').on('cleanup', function() {
+      self.cleanAndUpdateScene();
     });
 
-    const doubleTap = new Hammer.Tap({
-      event: 'doubletap',
-      taps: 2,
-      interval: 250
+    this.get('interactionHandler').on('showApplication', function(emberModel) {
+      // bubble up action
+      self.sendAction("showApplication", emberModel);
     });
-
-    const pan = new Hammer.Pan({
-      event: 'pan'
-    });
-
-    hammer.add([doubleTap, singleTap, pan]);
-
-    doubleTap.recognizeWith(singleTap);
-    singleTap.requireFailure(doubleTap);
-
-    hammer
-      .on(
-        'doubletap',
-        function(evt) {
-
-          var mouse = {};
-
-          const renderer = self.get('webglrenderer');
-
-          const event = evt.srcEvent;
-
-          mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
-          mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
-
-          console.log(self.get('raycaster'));
-
-          const intersectedViewObj = self.get('raycaster').raycasting(null, mouse, self.get('camera'), self.get('scene').children, 'landscapeObjects');
-
-          if(intersectedViewObj) {
-
-            const emberModel = intersectedViewObj.object.userData.model;
-            const emberModelName = emberModel.constructor.modelName;
-
-            self.debug("Name of raycasting goal: ", emberModelName);
-
-            if(emberModelName === "application"){
-              //console.log(intersectedViewObj);
-              // open application rendering
-              self.sendAction("showApplication", emberModel);
-            } 
-            else if (emberModelName === "nodegroup" || emberModelName === "system"){
-              emberModel.setOpened(!emberModel.get('opened'));
-              self.cleanAndUpdateScene();          
-            } 
-          }
-    });
-
-    hammer.on('panstart', function(evt) {
-      const event = evt.srcEvent;
-
-      cameraTranslateX = event.clientX;
-      cameraTranslateY = event.clientY;
-    });
-
-    hammer.on('panmove', function(evt) {
-
-      const event = evt.srcEvent;
-
-      const renderer = self.get('webglrenderer');
-      const camera = self.get('camera');
-
-      var deltaX = event.clientX - cameraTranslateX;
-      var deltaY = event.clientY - cameraTranslateY;
-
-      var distanceXInPercent = (deltaX /
-        parseFloat(renderer.domElement.clientWidth)) * 100.0;
-
-      var distanceYInPercent = (deltaY /
-        parseFloat(renderer.domElement.clientHeight)) * 100.0;
-
-      var xVal = camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(camera.position.z) / 4.0);
-
-      var yVal = camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(camera.position.z) / 4.0);
-
-      camera.position.x = xVal;
-      camera.position.y = yVal;
-
-      cameraTranslateX = event.clientX;
-      cameraTranslateY = event.clientY;
-    });
-
-    // zoom handler
-
-    canvas.addEventListener('mousewheel', onMouseWheelStart, false);
-
-    function onMouseWheelStart(evt) {
-
-      const camera = self.get('camera');
-
-      var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
-
-      // zoom in
-      if (delta > 0) {
-        camera.position.z -= delta * 1.5;
-      }
-      // zoom out
-      else {
-        camera.position.z -= delta * 1.5;
-      }
-    }
- 
 
   }, // END initInteraction
 
