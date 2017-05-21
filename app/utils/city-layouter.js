@@ -1,8 +1,4 @@
-import Ember from 'ember';
-
-export default Ember.Service.extend({
-
-  applyLayout(application) {
+export default function applyCityLayout(application) {
 
     const insetSpace = 4.0;
 
@@ -476,8 +472,4 @@ export default Ember.Service.extend({
       return layoutSegment;
     }
 
-
-
-  } // END applyLayout
-
-});
+}

@@ -2,6 +2,7 @@ import RenderingCore from './rendering-core';
 import Ember from 'ember';
 import Hammer from "npm:hammerjs";
 import Raycaster from '../utils/raycaster';
+import applyCityLayout from '../utils/city-layouter';
 
  /**
  * Renderer for application visualization.
@@ -13,7 +14,6 @@ export default RenderingCore.extend({
 
   store: Ember.inject.service('store'),
 
-  cityLayouter: Ember.inject.service("city-layouter"),
   application3D: null,
 
   applicationID: null,
@@ -104,7 +104,7 @@ export default RenderingCore.extend({
 
     const foundation = createFoundation();
 
-    this.get('cityLayouter').applyLayout(emberApplication);
+    applyCityLayout(emberApplication);
 
     self.set('application3D', new THREE.Object3D());
     self.set('application3D.userData.model', emberApplication);

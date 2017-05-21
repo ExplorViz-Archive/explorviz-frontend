@@ -1,14 +1,8 @@
-import Ember from 'ember';
+export default function applyKlayLayout(landscape) {  
 
-export default Ember.Service.extend({
+    let topLevelKielerGraph = null;
 
-  topLevelKielerGraph: null,
-
-  CONVERT_TO_KIELER_FACTOR: 180.0,
-
-  applyLayout(landscape) {
-
-    const self = this;
+    let CONVERT_TO_KIELER_FACTOR = 180.0;
 
     setupKieler(landscape);
 
@@ -20,7 +14,7 @@ export default Ember.Service.extend({
     function setupKieler(landscape) {
 
       const graph = createEmptyGraph("root");
-      self.set('topLevelKielerGraph', graph);
+      topLevelKielerGraph = graph;
 
       addNodes(landscape);
       addEdges(landscape);
@@ -39,8 +33,6 @@ export default Ember.Service.extend({
     }
 
     function createEmptyGraph(id) {
-
-      const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
 
       const layoutOptions = {
         "edgeRouting": "POLYLINE",
@@ -67,10 +59,6 @@ export default Ember.Service.extend({
 
 
     function addNodes(landscape) {
-
-      const topLevelKielerGraph = self.get('topLevelKielerGraph');
-
-      const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
 
       const systems = landscape.get('systems');
 
@@ -165,7 +153,6 @@ export default Ember.Service.extend({
 
       const nodes = nodegroup.get('nodes');
       const PADDING = 0.1;
-      const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
 
       if (nodes.get('length') > 1) {
 
@@ -228,7 +215,6 @@ export default Ember.Service.extend({
     function createNodeAndItsApplications(kielerParentGraph, node) {
 
       const PADDING = 0.1;
-      const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
       const NODE_LABEL_HEIGHT = 0.25;
       const DEFAULT_WIDTH = 1.5;
       const DEFAULT_HEIGHT = 0.75;
@@ -498,8 +484,6 @@ export default Ember.Service.extend({
 
     function convertToExplorVizCoords(entity) {
 
-      const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
-
       entity.set('positionX', entity.get('positionX') / CONVERT_TO_KIELER_FACTOR);
       entity.set('positionY', entity.get('positionY') / CONVERT_TO_KIELER_FACTOR);
 
@@ -649,7 +633,6 @@ export default Ember.Service.extend({
     }
 
     function setEdgeLayoutProperties(edge) {
-      const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
       const lineThickness = 0.06 * 4.0 + 0.01;
       const oldThickness = edge.thickness ? edge.thickness : 0.0;
       edge.thickness = Math.max(lineThickness * CONVERT_TO_KIELER_FACTOR, oldThickness);
@@ -657,7 +640,6 @@ export default Ember.Service.extend({
 
     function addBendPointsInAbsoluteCoordinates(landscape) {
 
-      const CONVERT_TO_KIELER_FACTOR = self.get('CONVERT_TO_KIELER_FACTOR');
       const applicationCommunication = landscape.get('applicationCommunication');
 
       applicationCommunication.forEach((communication) => {
@@ -876,10 +858,4 @@ export default Ember.Service.extend({
       return returnValue ? returnValue : null;
     }
 
-
-
-
-  } // END applayLayout
-
-
-});
+}

@@ -1,7 +1,7 @@
 import RenderingCore from './rendering-core';
-import Ember from 'ember';
 import Hammer from "npm:hammerjs";
 import Raycaster from '../utils/raycaster';
+import applyKlayLayout from '../utils/klay-layouter';
 
  /**
  * Renderer for landscape visualization.
@@ -12,8 +12,6 @@ import Raycaster from '../utils/raycaster';
 export default RenderingCore.extend({
 
   hammerManager: null,
-
-  klayLayouter: Ember.inject.service("klay-layouter"),
 
   centerPoint : null,
 
@@ -68,7 +66,7 @@ export default RenderingCore.extend({
     const self = this;
 
     const emberLandscape = this.get('entity');
-    this.get('klayLayouter').applyLayout(emberLandscape);
+    applyKlayLayout(emberLandscape);
 
     const systems = emberLandscape.get('systems');
 
