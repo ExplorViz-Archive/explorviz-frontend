@@ -51,8 +51,8 @@ export default RenderingCore.extend({
     this.set('logos', {});
     this.set('textLabels', {});
 
-    //this.get('hammerManager').off();
-    //this.set('hammerManager', null);
+    this.get('interactionHandler.hammerManager').off();
+    this.set('interactionHandler', null);
   },
 
   // @Override

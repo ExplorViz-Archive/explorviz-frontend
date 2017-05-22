@@ -64,8 +64,8 @@ export default RenderingCore.extend({
     this.set('applicationID', null);    
     this.set('application3D', null);  
 
-    this.get('hammerManager').off();
-    this.set('hammerManager', null);
+    this.get('interactionHandler.hammerManager').off();
+    this.set('interactionHandler', null);
 
   },
 

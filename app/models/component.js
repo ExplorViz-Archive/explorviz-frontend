@@ -31,6 +31,7 @@ export default Draw3DNodeEntity.extend({
   setOpenedStatus: function(status) {
 
     this.get('children').forEach((child) => {
+      child.set('highlighted', false);
       child.setOpenedStatus(false);
     });
 

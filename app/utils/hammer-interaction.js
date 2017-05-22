@@ -4,6 +4,7 @@ import Hammer from "npm:hammerjs";
 export default Ember.Object.extend(Ember.Evented, {
 
   raycastObjects: null,
+  hammerManager: null,
 
   setupInteractionHandlers(canvas, raycastObjects, camera, renderer, raycaster) {
 
@@ -14,6 +15,8 @@ export default Ember.Object.extend(Ember.Evented, {
     let cameraTranslateX, cameraTranslateY = 0;
 
     const hammer = new Hammer.Manager(canvas, {});
+
+    this.set('hammerManager', hammer);
 
     const singleTap = new Hammer.Tap({
       event: 'singletap',
