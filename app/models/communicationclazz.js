@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
 
-const { attr } = DS;
+const { attr, belongsTo } = DS;
 
 /**
 * Ember model for a CommunicationClazz.
@@ -11,14 +11,14 @@ const { attr } = DS;
 */
 export default BaseEntity.extend({
 
-  requestsCacheCount: attr('number'),
+  requestsCacheCount: attr(),
 
   methodName: attr('string'),
   
-  //traceIdToRuntimeMap = new HashMap<Long, RuntimeInformation>
+  traceIdToRuntimeMap: attr(),
 
-  source: attr('clazz'),
-  target: attr('clazz'),
+  source: belongsTo('clazz', { inverse: null }),
+  target: belongsTo('clazz', { inverse: null }),
   
   hidden: attr('boolean')
 

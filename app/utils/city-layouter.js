@@ -6,14 +6,24 @@ export default function applyCityLayout(application) {
     
     const foundationComponent = components.objectAt(0);
 
+    const EdgeState = {
+      NORMAL: 'NORMAL', 
+      TRANSPARENT: 'TRANSPARENT', 
+      SHOW_DIRECTION_IN: 'SHOW_DIRECTION_IN', 
+      SHOW_DIRECTION_OUT: 'SHOW_DIRECTION_OUT', 
+      SHOW_DIRECTION_IN_AND_OUT: 'SHOW_DIRECTION_IN_AND_OUT', 
+      REPLAY_HIGHLIGHT: 'REPLAY_HIGHLIGHT', 
+      HIDDEN: 'HIDDEN'
+    };
+
     calcClazzHeight(foundationComponent);
     initNodes(foundationComponent);
 
     doLayout(foundationComponent);
     setAbsoluteLayoutPosition(foundationComponent);
-/*
-    layoutEdges(application);
 
+    layoutEdges(application);
+/*
     const incomingCommunications = application.get('incomingCommunications');
     incomingCommunications.forEach((commu) => {
       layoutIncomingCommunication(commu, application.components.get(0));
@@ -471,5 +481,138 @@ export default function applyCityLayout(application) {
 
       return layoutSegment;
     }
+
+    function layoutEdges(application) {
+
+      application.set('communicationsAccumulated', []);
+
+      const communications = application.get('communications');
+
+      communications.forEach((commuFromApp) => {
+        if (!commuFromApp.get('hidden')) {
+
+          let source = null;
+          let target = null;
+
+          if (commuFromApp.get('source').get('parent').get('opened')) {
+            source = commuFromApp.get('source');
+          } else {
+            source = findFirstParentOpenComponent(commuFromApp.get('source').get('parent'));
+          }
+
+          if (commuFromApp.get('target').get('parent').get('opened')) {
+            target = commuFromApp.get('target');
+          }
+          else {
+            target = findFirstParentOpenComponent(commuFromApp.get('target').get('parent'));
+          }
+
+          if (commuFromApp.get('source') != null && commuFromApp.get('target') != null) {
+
+            let found = false;
+
+            const communicationsAccumulated = application.get('communicationsAccumulated');
+
+             communicationsAccumulated.forEach((commuAcc) => {
+
+              if (found === false) {
+                found = ((commuAcc.source === source) && (commuAcc.target === target) ||
+                  (commuAcc.source === target) && (commuAcc.target === source));
+
+                  if (found) {
+                    commuAcc.requests = commuAcc.requests + commuFromApp.get('requests');
+                    commuAcc.aggregatedCommunications.push(commuFromApp);
+                  }
+                }
+
+             });
+
+
+              if (found === false) {
+                const newCommu = {};
+                newCommu.source = source;
+                newCommu.target = target;
+                newCommu.requests = commuFromApp.get('requests');
+                newCommu.aggregatedCommunications = [];
+                newCommu.state = 'NORMAL';
+
+                newCommu.startPoint = new THREE.Vector3(source.get('positionX') + source.get('width') / 2.0, source.get('positionY'),
+                  source.get('positionZ') + source.get('depth') / 2.0);
+               
+                newCommu.endPoint = new THREE.Vector3(target.get('positionX') + target.get('width') / 2.0, target.get('positionY') + 0.05,
+                  target.get('positionZ') + target.get('depth') / 2.0);              
+
+                newCommu.aggregatedCommunications.push(commuFromApp);
+
+                application.get('communicationsAccumulated').push(newCommu);
+              }
+          }          
+
+        }
+
+        calculatePipeSizeFromQuantiles(application);
+
+      });
+
+
+      function calculatePipeSizeFromQuantiles(application) {
+
+        const requestsList = [];
+
+        gatherRequestsIntoList(application, requestsList);
+
+        //const categories = getCategoriesForCommunication(requestsList);
+        
+        /*const communicationsAccumulated = application.get('communicationsAccumulated');
+
+        communicationsAccumulated.forEach((commu) => {
+          if (commu.get('source') != commu.get('target') && commu.get('state') != EdgeState.HIDDEN) {
+            commu.pipeSize = categories.get(commu.requests) * pipeSizeEachStep + pipeSizeDefault
+          }
+        });
+
+
+        const incomingCommunications = application.get('incomingCommunications');
+
+        incomingCommunications.forEach((commu) => {
+          commu.lineThickness = categories.get(commu.requests) * pipeSizeEachStep + pipeSizeDefault;
+        });
+
+
+        const outgoingCommunications = application.get('outgoingCommunications');
+
+        outgoingCommunications.forEach((commu) => {
+          commu.lineThickness = categories.get(commu.requests) * pipeSizeEachStep + pipeSizeDefault;
+        });*/
+
+        function gatherRequestsIntoList(application, requestsList) {
+
+          const communicationsAccumulated = application.get('communicationsAccumulated');
+
+          communicationsAccumulated.forEach((commu) => {
+            if (commu.source !== commu.target && commu.state !== EdgeState.HIDDEN) {
+              requestsList.push(commu.requests);
+            }
+          });
+
+          /*for (commu : application.incomingCommunications)
+              requestsList.add(commu.requests)
+
+          for (commu : application.outgoingCommunications)
+              requestsList.add(commu.requests)*/
+        }
+
+      }// END calculatePipeSizeFromQuantiles 
+
+      function findFirstParentOpenComponent(entity) {
+        if (entity.get('parentComponent') == null || entity.get('parentComponent').opened) {
+          return entity;
+        }
+
+        return findFirstParentOpenComponent(entity.get('parentComponent'));
+      }
+      
+
+    } // END layoutEdges
 
 }

@@ -23,11 +23,11 @@ export default DrawNodeEntity.extend({
 
   communications: hasMany('communicationclazz'),
 
-  //communicationsAccumulated: hasMany('communicationappaccumulator'),
+  communicationsAccumulated: [],
 
-  // incomingCommunications: hasMany('communication', {
-  //   inverse: 'source'
-  // }),
+  //incomingCommunications: hasMany('communication', {
+  //  inverse: 'source'
+  //}),
 
   // outgoingCommunications: hasMany('communication', {
   //   inverse: 'target'
