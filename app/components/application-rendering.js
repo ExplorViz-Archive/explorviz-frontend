@@ -1,8 +1,8 @@
 import RenderingCore from './rendering-core';
 import Ember from 'ember';
-import Hammer from "npm:hammerjs";
 import Raycaster from '../utils/raycaster';
 import applyCityLayout from '../utils/city-layouter';
+import HammerInteraction from '../utils/hammer-interaction';
 
  /**
  * Renderer for application visualization.
@@ -21,20 +21,28 @@ export default RenderingCore.extend({
   hammerManager: null,
 
   raycaster: null,
+  interactionHandler: null,
 
-  // @Override
+  // @Override  
   initRendering() {
     this._super(...arguments);
 
     this.debug("init application rendering");
-
-    this.initInteraction();
     
     this.get('camera').position.set(0, 0, 100);
+
+    // dummy object for raycasting
+    this.set('application3D', new THREE.Object3D());
 
     if (!this.get('raycaster')) {
       this.set('raycaster', Raycaster.create());
     }
+
+    if (!this.get('interactionHandler')) {
+      this.set('interactionHandler', HammerInteraction.create());
+    }
+
+    this.initInteraction();
 
     const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
     spotLight.position.set(100, 100, 100);
@@ -300,146 +308,18 @@ export default RenderingCore.extend({
 
     const self = this;
 
-    let cameraTranslateX, cameraTranslateY = 0;
+    const canvas = this.get('canvas');
+    const raycastObjects = self.get('application3D').children;
+    const camera = this.get('camera');
+    const webglrenderer = this.get('webglrenderer');
+    const raycaster = this.get('raycaster');
 
-    const canvas = self.get('canvas');
+    this.get('interactionHandler').setupInteractionHandlers(canvas, 
+      raycastObjects, camera, webglrenderer, raycaster);
 
-    this.set('hammerManager', new Hammer.Manager(canvas, {}));
-
-    const hammer = this.get('hammerManager');
-
-    const singleTap = new Hammer.Tap({
-      event: 'singletap',
-      interval: 250
+    this.get('interactionHandler').on('cleanup', function() {
+      self.cleanAndUpdateScene();
     });
-
-    const doubleTap = new Hammer.Tap({
-      event: 'doubletap',
-      taps: 2,
-      interval: 250
-    });
-
-    const pan = new Hammer.Pan({
-      event: 'pan'
-    });
-
-    hammer.add([doubleTap, singleTap, pan]);
-
-    doubleTap.recognizeWith(singleTap);
-    singleTap.requireFailure(doubleTap);
-
-    hammer.on('singletap', function(evt){
-      var mouse = {};
-
-      const renderer = self.get('webglrenderer');
-
-      const event = evt.srcEvent;
-
-      mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
-      mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
-
-      const intersectedViewObj = self.get('raycaster').raycasting(null, mouse, self.get('camera'), self.get('application3D').children, 'applicationObjects');
-
-      if(intersectedViewObj) {
-
-        const emberModel = intersectedViewObj.object.userData.model;
-        const emberModelName = emberModel.constructor.modelName;
-
-        if(emberModelName === "component" && !emberModel.get('opened')){
-          emberModel.set('highlighted', !emberModel.get('highlighted'));    
-        } 
-        else if(emberModelName === "clazz") {
-          emberModel.set('highlighted', !emberModel.get('highlighted'));
-        }
-
-        self.cleanAndUpdateScene();
-
-      }
-
-    });
-
-    hammer
-      .on(
-        'doubletap',
-        function(evt) {
-
-          var mouse = {};
-
-          const renderer = self.get('webglrenderer');
-
-          const event = evt.srcEvent;
-
-          mouse.x = ((event.clientX - 15) / renderer.domElement.clientWidth) * 2 - 1;
-          mouse.y = -((event.clientY - 75) / renderer.domElement.clientHeight) * 2 + 1;
-
-          const intersectedViewObj = self.get('raycaster').raycasting(null, mouse, self.get('camera'), self.get('application3D').children, 'applicationObjects');
-
-          if(intersectedViewObj) {
-
-            const emberModel = intersectedViewObj.object.userData.model;
-            const emberModelName = emberModel.constructor.modelName;
-
-            if(emberModelName === "component"){
-              emberModel.setOpenedStatus(!emberModel.get('opened'));
-              emberModel.set('highlighted', false);
-              self.cleanAndUpdateScene();
-            }
-          }
-    });
-
-    hammer.on('panstart', function(evt) {
-      const event = evt.srcEvent;
-
-      cameraTranslateX = event.clientX;
-      cameraTranslateY = event.clientY;
-    });
-
-    hammer.on('panmove', function(evt) {
-
-      const event = evt.srcEvent;
-
-      const renderer = self.get('webglrenderer');
-      const camera = self.get('camera');
-
-      var deltaX = event.clientX - cameraTranslateX;
-      var deltaY = event.clientY - cameraTranslateY;
-
-      var distanceXInPercent = (deltaX /
-        parseFloat(renderer.domElement.clientWidth)) * 100.0;
-
-      var distanceYInPercent = (deltaY /
-        parseFloat(renderer.domElement.clientHeight)) * 100.0;
-
-      var xVal = camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(camera.position.z) / 4.0);
-
-      var yVal = camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(camera.position.z) / 4.0);
-
-      camera.position.x = xVal;
-      camera.position.y = yVal;
-
-      cameraTranslateX = event.clientX;
-      cameraTranslateY = event.clientY;
-    });
-
-    // zoom handler
-
-    canvas.addEventListener('mousewheel', onMouseWheelStart, false);
-
-    function onMouseWheelStart(evt) {
-
-      const camera = self.get('camera');
-
-      var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
-
-      // zoom in
-      if (delta > 0) {
-        camera.position.z -= delta * 1.5;
-      }
-      // zoom out
-      else {
-        camera.position.z -= delta * 1.5;
-      }
-    }
 
 
   } // END initInteraction

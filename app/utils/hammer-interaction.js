@@ -61,7 +61,15 @@ export default Ember.Object.extend(Ember.Evented, {
             else if (emberModelName === "nodegroup" || emberModelName === "system"){
               emberModel.setOpened(!emberModel.get('opened'));
               self.trigger('cleanup');
+            }
+            else if(emberModelName === "component" && !emberModel.get('opened')){
+              emberModel.set('highlighted', !emberModel.get('highlighted'));
+              self.trigger('cleanup');
             } 
+            else if(emberModelName === "clazz") {
+              emberModel.set('highlighted', !emberModel.get('highlighted'));
+              self.trigger('cleanup');
+            }
           }
     });
 
@@ -94,6 +102,35 @@ export default Ember.Object.extend(Ember.Evented, {
 
       cameraTranslateX = event.clientX;
       cameraTranslateY = event.clientY;
+    });
+
+
+    hammer.on('singletap', function(evt){
+      var mouse = {};
+
+      const event = evt.srcEvent;
+
+      mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
+      mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
+
+      const intersectedViewObj = raycaster.raycasting(null, mouse, camera, raycastObjects, 'applicationObjects');
+
+      if(intersectedViewObj) {
+
+        const emberModel = intersectedViewObj.object.userData.model;
+        const emberModelName = emberModel.constructor.modelName;
+
+        if(emberModelName === "component" && !emberModel.get('opened')){
+          emberModel.set('highlighted', !emberModel.get('highlighted'));    
+        } 
+        else if(emberModelName === "clazz") {
+          emberModel.set('highlighted', !emberModel.get('highlighted'));
+        }
+
+        self.trigger('cleanup');
+
+      }
+
     });
 
     // zoom handler    
