@@ -3,13 +3,15 @@ import Hammer from "npm:hammerjs";
 
 export default Ember.Object.extend(Ember.Evented, {
 
+  raycastObjects: null,
+
   setupInteractionHandlers(canvas, raycastObjects, camera, renderer, raycaster) {
 
     const self = this;
 
-    let cameraTranslateX, cameraTranslateY = 0;
+    this.set('raycastObjects', raycastObjects);
 
-    console.log(camera);
+    let cameraTranslateX, cameraTranslateY = 0;
 
     const hammer = new Hammer.Manager(canvas, {});
 
@@ -45,7 +47,7 @@ export default Ember.Object.extend(Ember.Evented, {
           mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
           mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
 
-          const intersectedViewObj = raycaster.raycasting(null, mouse, camera, raycastObjects, 'landscapeObjects');
+          const intersectedViewObj = raycaster.raycasting(null, mouse, camera, self.get('raycastObjects'));
 
           if(intersectedViewObj) {
 
@@ -62,14 +64,12 @@ export default Ember.Object.extend(Ember.Evented, {
               emberModel.setOpened(!emberModel.get('opened'));
               self.trigger('cleanup');
             }
-            else if(emberModelName === "component" && !emberModel.get('opened')){
-              emberModel.set('highlighted', !emberModel.get('highlighted'));
+            else if(emberModelName === "component"){
+              emberModel.setOpenedStatus(!emberModel.get('opened'));
+              emberModel.set('highlighted', false);
               self.trigger('cleanup');
             } 
-            else if(emberModelName === "clazz") {
-              emberModel.set('highlighted', !emberModel.get('highlighted'));
-              self.trigger('cleanup');
-            }
+
           }
     });
 
@@ -113,7 +113,7 @@ export default Ember.Object.extend(Ember.Evented, {
       mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
       mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
 
-      const intersectedViewObj = raycaster.raycasting(null, mouse, camera, raycastObjects, 'applicationObjects');
+      const intersectedViewObj = raycaster.raycasting(null, mouse, camera, self.get('raycastObjects'));
 
       if(intersectedViewObj) {
 
@@ -121,6 +121,7 @@ export default Ember.Object.extend(Ember.Evented, {
         const emberModelName = emberModel.constructor.modelName;
 
         if(emberModelName === "component" && !emberModel.get('opened')){
+
           emberModel.set('highlighted', !emberModel.get('highlighted'));    
         } 
         else if(emberModelName === "clazz") {

@@ -117,6 +117,9 @@ export default RenderingCore.extend({
     self.set('application3D', new THREE.Object3D());
     self.set('application3D.userData.model', emberApplication);
 
+    // update raycasting children, because of new entity
+    this.get('interactionHandler').set('raycastObjects', self.get('application3D').children);
+
     const viewCenterPoint = calculateAppCenterAndZZoom(emberApplication);
 
     addComponentToScene(foundation, 0xCECECE);
@@ -309,10 +312,11 @@ export default RenderingCore.extend({
     const self = this;
 
     const canvas = this.get('canvas');
-    const raycastObjects = self.get('application3D').children;
+    const raycastObjects = this.get('application3D').children;
     const camera = this.get('camera');
     const webglrenderer = this.get('webglrenderer');
     const raycaster = this.get('raycaster');
+    raycaster.set('objectCatalog', 'applicationObjects');
 
     this.get('interactionHandler').setupInteractionHandlers(canvas, 
       raycastObjects, camera, webglrenderer, raycaster);

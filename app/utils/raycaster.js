@@ -6,8 +6,9 @@ export default Ember.Object.extend({
 
   landscapeObjects: ['node', 'system', 'nodegroup', 'application'],
   applicationObjects: ['component', 'clazz'],
+  objectCatalog: 'landscapeObjects',
 
-  raycasting(origin, direction, camera, possibleObjects, objectCatalog) {
+  raycasting(origin, direction, camera, possibleObjects) {
 
     const self = this;
     const raycaster = this.get('raycaster');
@@ -29,7 +30,8 @@ export default Ember.Object.extend({
       const result = intersections.filter(function(obj) {
         if (obj.object.userData.model) {
           const modelName = obj.object.userData.model.constructor.modelName;
-          return self.get(objectCatalog).includes(modelName);
+
+          return self.get(self.get('objectCatalog')).includes(modelName);
         }
       });
       if (result.length <= 0) {
