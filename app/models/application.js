@@ -21,22 +21,21 @@ export default DrawNodeEntity.extend({
     inverse: 'applications'
   }),
 
-  components: hasMany('component'),
+  components: hasMany('component', {
+    inverse: 'belongingApplication'
+  }),
 
   communications: hasMany('communicationclazz'),
 
   communicationsAccumulated: [],
 
   incomingCommunications: hasMany('communication', {
-    inverse: 'source'
+    inverse: 'target'
   }),
 
   outgoingCommunications: hasMany('communication', {
-    inverse: 'target'
+    inverse: 'source'
   }),
-   
-  //incomingCommunications: [],
-  //outgoingCommunications: [],
   
   //databaseQueries: hasMany('databasequery')
 

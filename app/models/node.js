@@ -19,10 +19,12 @@ export default DrawNodeEntity.extend({
   visible: attr('boolean'),
 
   applications: hasMany('application', {
-    //inverse: 'parent'
+    inverse: 'parent'
   }),
 
-  parent: belongsTo('nodegroup'),
+  parent: belongsTo('nodegroup', {
+    inverse: 'nodes'
+  }),
 
   ipAddress: attr('string'),
 

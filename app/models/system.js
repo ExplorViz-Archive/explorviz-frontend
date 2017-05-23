@@ -12,8 +12,15 @@ const { attr, hasMany, belongsTo } = DS;
 */
 export default DrawNodeEntity.extend({
   opened: attr('boolean'),  
-  nodegroups: hasMany('nodegroup'),
-  parent: belongsTo('landscape'),
+
+  nodegroups: hasMany('nodegroup', {
+    inverse: 'parent'
+  }),
+
+  parent: belongsTo('landscape', {
+    inverse: 'systems'
+  }),
+
   plusColor : attr(),
   foregroundColor : attr(),
   backgroundColor : attr(),

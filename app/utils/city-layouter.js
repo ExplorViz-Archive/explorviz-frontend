@@ -27,13 +27,13 @@ export default function applyCityLayout(application) {
     const incomingCommunications = application.get('incomingCommunications');
 
     incomingCommunications.forEach((commu) => {
-      layoutIncomingCommunication(commu, application.components.get(0));
+      layoutIncomingCommunication(commu, application.get('components').objectAt(0));
     });
 
     const outgoingCommunications = application.get('outgoingCommunications');
 
     outgoingCommunications.forEach((commu) => {
-      layoutOutgoingCommunication(commu, application.components.get(0));
+      layoutOutgoingCommunication(commu, application.get('components').objectAt(0));
     });
 
 
@@ -560,6 +560,9 @@ export default function applyCityLayout(application) {
 
         const requestsList = [];
 
+        const pipeSizeEachStep = 0.45;
+        const pipeSizeDefault = 0.1;
+
         gatherRequestsIntoList(application, requestsList);
 
         const categories = getCategories(requestsList, true);
@@ -567,8 +570,8 @@ export default function applyCityLayout(application) {
         const communicationsAccumulated = application.get('communicationsAccumulated');
 
         communicationsAccumulated.forEach((commu) => {
-          if (commu.source != commu.target && commu.state != EdgeState.HIDDEN) {
-            commu.pipeSize = categories[commu.requests] * pipeSizeEachStep + pipeSizeDefault
+          if (commu.source !== commu.target && commu.state !== EdgeState.HIDDEN) {
+            commu.pipeSize = categories[commu.requests] * pipeSizeEachStep + pipeSizeDefault;
           }
         });
 
@@ -762,8 +765,6 @@ export default function applyCityLayout(application) {
 
     function layoutIncomingCommunication(commu, foundation) {
 
-      console.log(foundation);
-
       const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
 
       const centerCommuIcon = 
@@ -772,7 +773,7 @@ export default function applyCityLayout(application) {
         foundation.get('positionZ') + foundation.extension.z * 2.0 - 
         externalPortsExtension.z);
 
-      layoutInAndOutCommunication(commu, commu.targetClazz, centerCommuIcon)
+      layoutInAndOutCommunication(commu, commu.targetClazz, centerCommuIcon);
     }
 
     function layoutOutgoingCommunication(commu, foundation) {
@@ -786,11 +787,14 @@ export default function applyCityLayout(application) {
         foundation.get('positionZ') + foundation.extension.z * 2.0 - 
         externalPortsExtension.z - 12.0);
 
-      layoutInAndOutCommunication(commu, commu.sourceClazz, centerCommuIcon)
+      layoutInAndOutCommunication(commu, commu.sourceClazz, centerCommuIcon);
     }
 
     function layoutInAndOutCommunication(commu, internalClazz, centerCommuIcon) {
-      commu.pointsFor3D.clear
+      console.log(commu);
+      console.log(internalClazz);
+      console.log(centerCommuIcon);
+      /*commu.pointsFor3D.clear
       commu.pointsFor3D.add(centerCommuIcon)
 
       if (internalClazz != null) {
@@ -799,7 +803,7 @@ export default function applyCityLayout(application) {
         end.y = internalClazz.centerPoint.y
         end.z = internalClazz.positionZ + internalClazz.depth / 2.0;
         commu.pointsFor3D.add(end);
-      }
+      }*/
     }
 
 }

@@ -17,17 +17,19 @@ export default DrawEdgeEntity.extend({
   averageResponseTimeInNanoSec: attr("number"),
 
   source: belongsTo("application", {
-    inverse: 'incomingCommunications'
+    inverse: 'outgoingCommunications'
   }),
 
   target: belongsTo("application", {
-    inverse: 'outgoingCommunications'
+    inverse: 'incomingCommunications'
   }),
 
   sourceClazz: attr("clazz"),
   targetClazz: attr("clazz"),
 
-  parent: belongsTo("landscape"), 
+  parent: belongsTo("landscape", {
+    inverse: 'applicationCommunication'
+  }), 
 
   pipeColor: attr(),
 
