@@ -24,7 +24,9 @@ export default Draw3DNodeEntity.extend({
     inverse: 'children'
   }),
 
-  belongingApplication: belongsTo('application'),
+  belongingApplication: belongsTo('application', {
+    inverse: 'components'
+  }),
 
   opened: attr('boolean'),
 

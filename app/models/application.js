@@ -17,24 +17,25 @@ export default DrawNodeEntity.extend({
 
   lastUsage: attr('number'),
 
-  parent: belongsTo('node'),
+  parent: belongsTo('node', {
+    inverse: 'applications'
+  }),
 
-  components: hasMany('component'),
+  components: hasMany('component', {
+    inverse: 'belongingApplication'
+  }),
 
   communications: hasMany('communicationclazz'),
 
   communicationsAccumulated: [],
 
-  //incomingCommunications: hasMany('communication', {
-  //  inverse: 'source'
-  //}),
+  incomingCommunications: hasMany('communication', {
+    inverse: 'target'
+  }),
 
-  // outgoingCommunications: hasMany('communication', {
-  //   inverse: 'target'
-  // }),
-  // 
-  incomingCommunications: null,
-  outgoingCommunications: null,
+  outgoingCommunications: hasMany('communication', {
+    inverse: 'source'
+  }),
   
   //databaseQueries: hasMany('databasequery')
 

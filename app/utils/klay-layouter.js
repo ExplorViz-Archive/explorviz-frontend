@@ -289,6 +289,8 @@ export default function applyKlayLayout(landscape) {
 
       const applicationCommunication = landscape.get('applicationCommunication');
 
+      console.log(applicationCommunication);
+
       applicationCommunication.forEach((communication) => {
 
         communication.set('kielerEdgeReferences', []);

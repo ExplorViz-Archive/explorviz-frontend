@@ -21,6 +21,8 @@ export default BaseEntity.extend({
   positionX: attr('number'),
   positionY: attr('number'),
   positionZ: attr('number'),
+
+  extension: attr(),
   
   highlighted: attr('boolean')
 

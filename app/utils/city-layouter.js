@@ -23,17 +23,18 @@ export default function applyCityLayout(application) {
     setAbsoluteLayoutPosition(foundationComponent);
 
     layoutEdges(application);
-/*
+
     const incomingCommunications = application.get('incomingCommunications');
+
     incomingCommunications.forEach((commu) => {
-      layoutIncomingCommunication(commu, application.components.get(0));
+      layoutIncomingCommunication(commu, application.get('components').objectAt(0));
     });
 
     const outgoingCommunications = application.get('outgoingCommunications');
-    outgoingCommunications.forEach((commu) => {
-      layoutOutgoingCommunication(commu, application.components.get(0));
-    });*/
 
+    outgoingCommunications.forEach((commu) => {
+      layoutOutgoingCommunication(commu, application.get('components').objectAt(0));
+    });
 
 
 
@@ -559,31 +560,170 @@ export default function applyCityLayout(application) {
 
         const requestsList = [];
 
+        const pipeSizeEachStep = 0.45;
+        const pipeSizeDefault = 0.1;
+
         gatherRequestsIntoList(application, requestsList);
 
-        //const categories = getCategoriesForCommunication(requestsList);
+        const categories = getCategories(requestsList, true);
         
-        /*const communicationsAccumulated = application.get('communicationsAccumulated');
+        const communicationsAccumulated = application.get('communicationsAccumulated');
 
         communicationsAccumulated.forEach((commu) => {
-          if (commu.get('source') != commu.get('target') && commu.get('state') != EdgeState.HIDDEN) {
-            commu.pipeSize = categories.get(commu.requests) * pipeSizeEachStep + pipeSizeDefault
+          if (commu.source !== commu.target && commu.state !== EdgeState.HIDDEN) {
+            commu.pipeSize = categories[commu.requests] * pipeSizeEachStep + pipeSizeDefault;
           }
         });
-
 
         const incomingCommunications = application.get('incomingCommunications');
 
         incomingCommunications.forEach((commu) => {
-          commu.lineThickness = categories.get(commu.requests) * pipeSizeEachStep + pipeSizeDefault;
+          commu.lineThickness = categories[commu.requests] * pipeSizeEachStep + pipeSizeDefault;
         });
-
 
         const outgoingCommunications = application.get('outgoingCommunications');
 
         outgoingCommunications.forEach((commu) => {
-          commu.lineThickness = categories.get(commu.requests) * pipeSizeEachStep + pipeSizeDefault;
-        });*/
+          commu.lineThickness = categories[commu.requests] * pipeSizeEachStep + pipeSizeDefault;
+        });
+
+
+
+        function getCategories(list, linear) {
+          const result = [];
+
+          if (list.length === 0) {
+            return result;
+          }
+
+          list.sort();
+
+          if (linear) {
+            const listWithout0 = [];
+
+            list.forEach((entry) => {
+              if (entry !== 0){
+                listWithout0.push(entry);
+              }
+            });
+
+            if (listWithout0.length === 0) {
+              result.push({0: 0.0});
+              return result;
+            }        
+            useLinear(listWithout0, list, result);
+          } 
+          else {
+            const listWithout0And1 = [];
+
+            let outsideCounter = 0;
+            let insideCounter = 0;
+
+            list.forEach((entry) => {
+              outsideCounter++;
+              if (entry !== 0 && entry !== 1){
+                listWithout0And1.push(entry);
+                insideCounter++;
+              }
+            });
+
+            if (listWithout0And1.length === 0) {
+              result.push({0: 0.0});
+              result.push({1: 1.0});
+              return result;
+            }
+
+            useThreshholds(listWithout0And1, list, result);
+          }
+
+          return result;
+
+
+
+          // inner helper functions
+
+          function useThreshholds(listWithout0And1, list, result) {
+            let max = 1;
+
+            listWithout0And1.forEach((value) => {
+              if (value > max) {
+                max = value;
+              }
+            });
+
+            const oneStep = max / 3.0;
+
+            const t1 = oneStep;
+            const t2 = oneStep * 2;
+
+            list.forEach((entry) => {
+              let categoryValue = getCategoryFromValues(entry, t1, t2);
+              result[entry] = categoryValue;
+            });
+
+          }
+
+
+          function getCategoryFromValues(value, t1, t2) {
+            if (value === 0) {
+              return 0.0;
+            } else if (value === 1) {
+              return 1.0;
+            }
+
+            if (value <= t1) {
+              return 2.0;
+            } else if (value <= t2) {
+              return 3.0;
+            } else {
+              return 4.0;
+            }
+          }
+
+
+          function useLinear(listWithout0, list, result) {
+            let max = 1;
+            let secondMax = 1;
+
+            listWithout0.forEach((value) => {
+              if (value > max) {
+                secondMax = max;
+                max = value;
+              }
+            });   
+
+            const oneStep = secondMax / 4.0;
+
+            const t1 = oneStep;
+            const t2 = oneStep * 2;
+            const t3 = oneStep * 3;
+
+            list.forEach((entry) => {
+              const categoryValue = getCategoryFromLinearValues(entry, t1, t2, t3);
+              result[entry] = categoryValue;
+            }); 
+
+          }
+
+
+          function getCategoryFromLinearValues(value, t1, t2, t3) {
+            if (value <= 0) {
+              return 0;
+            } else if (value <= t1) {
+              return 1.5;
+            } else if (value <= t2) {
+              return 2.5;
+            } else if (value <= t3) {
+              return 4.0;
+            } else {
+              return 6.5;
+            }
+          }
+
+
+
+        } // END getCategories
+
 
         function gatherRequestsIntoList(application, requestsList) {
 
@@ -595,11 +735,18 @@ export default function applyCityLayout(application) {
             }
           });
 
-          /*for (commu : application.incomingCommunications)
-              requestsList.add(commu.requests)
+          const incomingCommunications = application.get('incomingCommunications');
 
-          for (commu : application.outgoingCommunications)
-              requestsList.add(commu.requests)*/
+          incomingCommunications.forEach((commu) => {
+            requestsList.push(commu.requests);
+          });
+
+          const outgoingCommunications = application.get('outgoingCommunications');
+
+          outgoingCommunications.forEach((commu) => {
+            requestsList.push(commu.requests);
+          });
+
         }
 
       }// END calculatePipeSizeFromQuantiles 
@@ -614,5 +761,49 @@ export default function applyCityLayout(application) {
       
 
     } // END layoutEdges
+
+
+    function layoutIncomingCommunication(commu, foundation) {
+
+      const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
+
+      const centerCommuIcon = 
+      new THREE.Vector3(foundation.get('positionX') - externalPortsExtension.x * 6.0,
+        foundation.get('positionY') - foundation.extension.y + externalPortsExtension.y,
+        foundation.get('positionZ') + foundation.extension.z * 2.0 - 
+        externalPortsExtension.z);
+
+      layoutInAndOutCommunication(commu, commu.targetClazz, centerCommuIcon);
+    }
+
+    function layoutOutgoingCommunication(commu, foundation) {
+
+      const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
+
+      const centerCommuIcon = 
+      new THREE.Vector3(foundation.get('positionX') + foundation.extension.x * 2.0 + 
+        externalPortsExtension.x * 4.0, foundation.get('positionY') - 
+        foundation.extension.y + externalPortsExtension.y, 
+        foundation.get('positionZ') + foundation.extension.z * 2.0 - 
+        externalPortsExtension.z - 12.0);
+
+      layoutInAndOutCommunication(commu, commu.sourceClazz, centerCommuIcon);
+    }
+
+    function layoutInAndOutCommunication(commu, internalClazz, centerCommuIcon) {
+      console.log(commu);
+      console.log(internalClazz);
+      console.log(centerCommuIcon);
+      /*commu.pointsFor3D.clear
+      commu.pointsFor3D.add(centerCommuIcon)
+
+      if (internalClazz != null) {
+        const end = new THREE.Vector3();
+        end.x = internalClazz.positionX + internalClazz.width / 2.0;
+        end.y = internalClazz.centerPoint.y
+        end.z = internalClazz.positionZ + internalClazz.depth / 2.0;
+        commu.pointsFor3D.add(end);
+      }*/
+    }
 
 }
