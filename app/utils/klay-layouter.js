@@ -297,6 +297,16 @@ export default function applyKlayLayout(landscape) {
         const appSource = communication.get('source');
         const appTarget = communication.get('target');
 
+        if(!appSource.get('parent')) {
+          console.log(appSource);
+          return;
+        }
+
+        if(!appTarget.get('parent')) {
+          console.log(appTarget);
+          return;
+        }
+
         // Both parent nodes are visible
         if (appSource.get('parent').get('visible') && appTarget.get('parent').get('visible')) {
           const edge = createEdgeBetweenSourceTarget(appSource, appTarget);

@@ -18,7 +18,9 @@ export default DrawNodeEntity.extend({
 
   visible: attr('boolean'),
 
-  applications: hasMany('application'),
+  applications: hasMany('application', {
+    //inverse: 'parent'
+  }),
 
   parent: belongsTo('nodegroup'),
 

@@ -16,8 +16,13 @@ export default DrawEdgeEntity.extend({
 
   averageResponseTimeInNanoSec: attr("number"),
 
-  source: belongsTo("application"),
-  target: belongsTo("application"),
+  source: belongsTo("application", {
+    inverse: 'incomingCommunications'
+  }),
+
+  target: belongsTo("application", {
+    inverse: 'outgoingCommunications'
+  }),
 
   sourceClazz: attr("clazz"),
   targetClazz: attr("clazz"),
