@@ -24,8 +24,8 @@ export default DrawEdgeEntity.extend({
     inverse: 'incomingCommunications'
   }),
 
-  sourceClazz: attr("clazz"),
-  targetClazz: attr("clazz"),
+  sourceClazz: belongsTo("clazz"),
+  targetClazz: belongsTo("clazz"),
 
   parent: belongsTo("landscape", {
     inverse: 'applicationCommunication'

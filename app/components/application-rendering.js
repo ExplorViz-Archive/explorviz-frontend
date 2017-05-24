@@ -122,6 +122,55 @@ export default RenderingCore.extend({
 
     const viewCenterPoint = calculateAppCenterAndZZoom(emberApplication);
 
+    const accuCommunications = emberApplication.get('communicationsAccumulated');
+
+    accuCommunications.forEach((commu) => {
+      if (commu.source !== commu.target) {
+        if (commu.startPoint && commu.endPoint) {
+
+          const start = new THREE.Vector3();
+          start.subVectors (commu.startPoint, viewCenterPoint);
+          start.multiplyScalar(0.5);
+          
+          const end = new THREE.Vector3();
+          end.subVectors (commu.endPoint, viewCenterPoint);
+          end.multiplyScalar(0.5);
+
+          const material = new THREE.MeshBasicMaterial({
+            color : new THREE.Color(0xf49100),
+            //opacity : opacityValue,
+            transparent : false
+          });
+
+          const thickness = commu.pipeSize * 0.3;
+
+          const pipe = cylinderMesh(start, end, material, thickness);
+
+          pipe.userData.model = commu;
+
+          self.get('application3D').add(pipe);
+
+        }
+      }
+    });
+
+    function cylinderMesh(pointX, pointY, material, thickness) {
+      const direction = new THREE.Vector3().subVectors(pointY, pointX);
+      const orientation = new THREE.Matrix4();
+      orientation.lookAt(pointX, pointY, new THREE.Object3D().up);
+      orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1,
+          0, 0, -1, 0, 0, 0, 0, 0, 1));
+      const edgeGeometry = new THREE.CylinderGeometry(thickness, thickness,
+          direction.length(), 20, 1);
+      const pipe = new THREE.Mesh(edgeGeometry, material);
+      pipe.applyMatrix(orientation);
+
+      pipe.position.x = (pointY.x + pointX.x) / 2;
+      pipe.position.y = (pointY.y + pointX.y) / 2;
+      pipe.position.z = (pointY.z + pointX.z) / 2;
+      return pipe;
+    }
+
     addComponentToScene(foundation, 0xCECECE);
 
     self.scene.add(self.get('application3D'));

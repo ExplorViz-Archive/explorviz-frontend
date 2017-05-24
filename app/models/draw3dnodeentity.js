@@ -1,5 +1,6 @@
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
+import Ember from 'ember';
 
 const { attr } = DS;
 
@@ -21,9 +22,15 @@ export default BaseEntity.extend({
   positionX: attr('number'),
   positionY: attr('number'),
   positionZ: attr('number'),
-
-  extension: attr(),
   
-  highlighted: attr('boolean')
+  highlighted: attr('boolean'),
+
+  extension: Ember.computed('width', 'height', 'depth', function() {
+    let width = this.get('width') / 2.0;
+    let height = this.get('height') / 2.0;
+    let depth = this.get('depth') / 2.0;
+
+    return new THREE.Vector3(width, height, depth);
+  })
 
 });

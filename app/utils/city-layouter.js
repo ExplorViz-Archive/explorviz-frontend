@@ -508,7 +508,7 @@ export default function applyCityLayout(application) {
             target = findFirstParentOpenComponent(commuFromApp.get('target').get('parent'));
           }
 
-          if (commuFromApp.get('source') != null && commuFromApp.get('target') != null) {
+          if (source !== null && target !== null) {
 
             let found = false;
 
@@ -521,7 +521,7 @@ export default function applyCityLayout(application) {
                   (commuAcc.source === target) && (commuAcc.target === source));
 
                   if (found) {
-                    commuAcc.requests = commuAcc.requests + commuFromApp.get('requests');
+                    commuAcc.requests = commuAcc.requests + commuFromApp.get('requestsCacheCount');
                     commuAcc.aggregatedCommunications.push(commuFromApp);
                   }
                 }
@@ -533,7 +533,7 @@ export default function applyCityLayout(application) {
                 const newCommu = {};
                 newCommu.source = source;
                 newCommu.target = target;
-                newCommu.requests = commuFromApp.get('requests');
+                newCommu.requests = commuFromApp.get('requestsCacheCount');
                 newCommu.aggregatedCommunications = [];
                 newCommu.state = 'NORMAL';
 
@@ -752,7 +752,7 @@ export default function applyCityLayout(application) {
       }// END calculatePipeSizeFromQuantiles 
 
       function findFirstParentOpenComponent(entity) {
-        if (entity.get('parentComponent') == null || entity.get('parentComponent').opened) {
+        if (entity.get('parentComponent') == null || entity.get('parentComponent').get('opened')) {
           return entity;
         }
 
@@ -769,11 +769,11 @@ export default function applyCityLayout(application) {
 
       const centerCommuIcon = 
       new THREE.Vector3(foundation.get('positionX') - externalPortsExtension.x * 6.0,
-        foundation.get('positionY') - foundation.extension.y + externalPortsExtension.y,
-        foundation.get('positionZ') + foundation.extension.z * 2.0 - 
+        foundation.get('positionY') - foundation.get('extension').y + externalPortsExtension.y,
+        foundation.get('positionZ') + foundation.get('extension').z * 2.0 - 
         externalPortsExtension.z);
 
-      layoutInAndOutCommunication(commu, commu.targetClazz, centerCommuIcon);
+      layoutInAndOutCommunication(commu, commu.get('targetClazz'), centerCommuIcon);
     }
 
     function layoutOutgoingCommunication(commu, foundation) {
@@ -781,29 +781,34 @@ export default function applyCityLayout(application) {
       const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
 
       const centerCommuIcon = 
-      new THREE.Vector3(foundation.get('positionX') + foundation.extension.x * 2.0 + 
+      new THREE.Vector3(foundation.get('positionX') + foundation.get('extension').x * 2.0 + 
         externalPortsExtension.x * 4.0, foundation.get('positionY') - 
-        foundation.extension.y + externalPortsExtension.y, 
-        foundation.get('positionZ') + foundation.extension.z * 2.0 - 
+        foundation.get('extension').y + externalPortsExtension.y, 
+        foundation.get('positionZ') + foundation.get('extension').z * 2.0 - 
         externalPortsExtension.z - 12.0);
 
-      layoutInAndOutCommunication(commu, commu.sourceClazz, centerCommuIcon);
+      layoutInAndOutCommunication(commu, commu.get('sourceClazz'), centerCommuIcon);
     }
 
     function layoutInAndOutCommunication(commu, internalClazz, centerCommuIcon) {
-      console.log(commu);
-      console.log(internalClazz);
-      console.log(centerCommuIcon);
-      /*commu.pointsFor3D.clear
-      commu.pointsFor3D.add(centerCommuIcon)
 
-      if (internalClazz != null) {
+      commu.set('pointsFor3D', []);
+      commu.get('pointsFor3D').push(centerCommuIcon);
+
+      if (internalClazz !== null) {
         const end = new THREE.Vector3();
-        end.x = internalClazz.positionX + internalClazz.width / 2.0;
-        end.y = internalClazz.centerPoint.y
-        end.z = internalClazz.positionZ + internalClazz.depth / 2.0;
-        commu.pointsFor3D.add(end);
-      }*/
+
+        const centerPoint = 
+        new THREE.Vector3(internalClazz.get('positionX') + 
+          internalClazz.get('width') / 2.0, 
+          internalClazz.get('positionY') + internalClazz.get('height') / 2.0, 
+          internalClazz.get('positionZ') + internalClazz.get('depth') / 2.0);
+
+        end.x = internalClazz.get('positionX') + internalClazz.get('width') / 2.0;
+        end.y = centerPoint.y;
+        end.z = internalClazz.get('positionZ') + internalClazz.get('depth') / 2.0;
+        commu.get('pointsFor3D').push(end);
+      }
     }
 
 }
