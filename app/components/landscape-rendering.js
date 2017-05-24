@@ -1,4 +1,3 @@
-import Ember from 'ember';
 import RenderingCore from './rendering-core';
 import Raycaster from '../utils/raycaster';
 import applyKlayLayout from '../utils/klay-layouter';
@@ -12,8 +11,12 @@ import HammerInteraction from '../utils/hammer-interaction';
  */
 export default RenderingCore.extend({
 
-  // in den  core
-  urlBuilder: Ember.inject.service("url-builder"),
+  actions: {
+    exportCamera(){
+      this.sendAction("exportCam", 777);
+  },
+
+  },
 
   hammerManager: null,
 
@@ -25,22 +28,9 @@ export default RenderingCore.extend({
   raycaster: null,
   interactionHandler: null,
 
-
-
   // @Override
   initRendering() {
     this._super(...arguments);
-
-    // in den core
-    const self = this;
-
-    // bind url-builder
-    this.get('urlBuilder').on('requestURL', function() {
-      const state = {};
-      state.cameraZ = self.get('camera').position.z; 
-      self.get('urlBuilder').test2(state);
-    });
-
 
     this.debug("init landscape rendering");
 

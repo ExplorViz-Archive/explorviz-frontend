@@ -4,7 +4,7 @@ export default Ember.Controller.extend({
 
   urlBuilder: Ember.inject.service("url-builder"),
 
-  //specify query parameters
+  // Specify query parameters
   queryParams: ['timestamp', 'id', 'appName', 'cameraX', 'cameraY', 'cameraZ'],
 
   type: 'landscape',
@@ -13,32 +13,32 @@ export default Ember.Controller.extend({
   cameraX: null,
   cameraY: null,
   cameraZ: null,
-  camera: null,
   timestamp: null,
 
   showLandscape: true,
   lastShownApplication: null,
+  state: null,
   
   //@override
+  // Initialize service
   init() {
-    this.get('urlBuilder').on('test2', function(state) {
-      console.log(state);
+    const self = this;
+
+    this.get('urlBuilder').on('transmitState', function(state) {
+      self.set('state',state);
     });
   },
 
-
-
   actions: {
   	// triggered by the button implemented in visualization tamplate
-  	exportView: function() {
-  		  /*this.set('timestamp', this.get('model.timestamp')),
-  		  this.set('id', this.get('model.id')),
- 		    this.set('cameraX', 22),
-      	this.set('cameraY', 33);
-      	this.set('cameraZ', 44);
-        */
+  	exportState: function() {
+        // Update query parameters
         this.get('urlBuilder').requestURL();
-
+        this.set('cameraX', this.get('state').cameraX);
+        this.set('cameraY', this.get('state').cameraY);
+        this.set('cameraZ', this.get('state').cameraZ);
+        this.set('timestamp', this.get('model.timestamp'));
+        this.set('id', this.get('model.id'));
     }
   }
 });

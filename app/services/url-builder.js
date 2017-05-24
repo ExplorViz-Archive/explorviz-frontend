@@ -1,13 +1,22 @@
 import Ember from 'ember';
 
+/**
+This service is used to pass data from the component to the controller. 
+*/
 export default Ember.Service.extend(Ember.Evented, {
+	/**
+	This method is implemented in "rendering-core" to create a state out of 
+	the component's data, which is not contained in the model. 
+	This state contains the camera axis (x,y,z).
+	*/
 	requestURL(){
-		console.log("requestURL");
 		this.trigger('requestURL');
 	},
-	test2(state){
-		console.log("test2");
-		this.trigger('test2',state);
+	/**
+	This method is used to pass the state to the controller. 
+	It's triggered in "rendering-core" by the function above.
+	*/
+	transmitState(state){
+		this.trigger('transmitState',state);
 	}
-
 });

@@ -1,6 +1,6 @@
-<button {{action "exportView"}}>Export link</button>
+<button {{action "exportState"}}>Export link</button>
 {{#if showLandscape}}  
-  {{landscape-rendering exportCam="exportCamera" renderingModel=model showApplication="handleApplication"}}
+  {{landscape-rendering renderingModel=model showApplication="handleApplication"}}
 {{else}}
   {{application-rendering renderingModel=lastShownApplication}}
 {{/if}}
