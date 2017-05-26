@@ -47,7 +47,7 @@ export default function applyCityLayout(application) {
       children.forEach((child) => {
         child.set('positionX', child.get('positionX') + component.get('positionX'));
         child.set('positionY', child.get('positionY') + component.get('positionY'));
-        if (component.opened) {
+        if (component.get('opened')) {
           child.set('positionY', child.get('positionY') + component.get('height'));
         }
         child.set('positionZ', child.get('positionZ') + component.get('positionZ'));
@@ -58,7 +58,7 @@ export default function applyCityLayout(application) {
       clazzes.forEach((clazz) => {
         clazz.set('positionX', clazz.get('positionX') + component.get('positionX'));
         clazz.set('positionY', clazz.get('positionY') + component.get('positionY'));
-        if (component.opened) {
+        if (component.get('opened')) {
           clazz.set('positionY', clazz.get('positionY') + component.get('height'));
         }
         clazz.set('positionZ', clazz.get('positionZ') + component.get('positionZ'));

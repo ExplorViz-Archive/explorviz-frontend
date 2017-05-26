@@ -3,6 +3,7 @@ import Ember from 'ember';
 import Raycaster from '../utils/raycaster';
 import applyCityLayout from '../utils/city-layouter';
 import HammerInteraction from '../utils/hammer-interaction';
+import CityLabeler from '../utils/city-labeler';
 
  /**
  * Renderer for application visualization.
@@ -22,6 +23,7 @@ export default RenderingCore.extend({
 
   raycaster: null,
   interactionHandler: null,
+  labeler: null,
 
   // @Override  
   initRendering() {
@@ -33,6 +35,10 @@ export default RenderingCore.extend({
 
     // dummy object for raycasting
     this.set('application3D', new THREE.Object3D());
+
+    if (!this.get('labeler')) {
+      this.set('labeler', CityLabeler.create());
+    }
 
     if (!this.get('raycaster')) {
       this.set('raycaster', Raycaster.create());
@@ -212,7 +218,7 @@ export default RenderingCore.extend({
       const clazzColor = 0x3E14A0;
       const redHighlighted = 0xFF0000;
 
-      createBox(component, color);
+      createBox(component, color, false);
 
       component.set('color', color);
 
@@ -222,9 +228,9 @@ export default RenderingCore.extend({
       clazzes.forEach((clazz) => {
         if (component.get('opened')) {
           if (clazz.get('highlighted')) {
-             createBox(clazz, redHighlighted);
+             createBox(clazz, redHighlighted, true);
           } else {
-             createBox(clazz, clazzColor);
+             createBox(clazz, clazzColor, true);
           }
         }
       });
@@ -263,7 +269,7 @@ export default RenderingCore.extend({
 
 
 
-    function createBox(component, color) {
+    function createBox(component, color, isClass) {
 
       let centerPoint = new THREE.Vector3(component.get('positionX') + component.get('width') / 2.0, component.get('positionY') + component.get('height') / 2.0,
         component.get('positionZ') + component.get('depth') / 2.0);
@@ -284,6 +290,14 @@ export default RenderingCore.extend({
       mesh.updateMatrix();
 
       mesh.userData.model = component;
+      mesh.userData.name = component.get('name');
+      mesh.userData.foundation = component.get('foundation');
+      mesh.userData.type = isClass ? 'clazz' : 'package';
+
+      mesh.userData.opened = component.get('opened');
+
+      self.get('labeler').createLabel(mesh, self.get('application3D'), 
+        self.get('font'));
 
       self.get('application3D').add(mesh);
 
