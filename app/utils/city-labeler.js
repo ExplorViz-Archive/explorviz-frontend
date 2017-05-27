@@ -16,17 +16,14 @@ export default Ember.Object.extend({
 
     const bboxNew = new THREE.Box3().setFromObject(parentMesh);
 
-    const absDistance = (Math.abs(bboxNew.max.z) - Math
-        .abs(bboxNew.min.z)) / 2;
-
     const worldParent = new THREE.Vector3();
     worldParent.setFromMatrixPosition(parentMesh.matrixWorld);
 
     const oldLabel = this.get('labels').filter(function(label) {
       const data = label.userData;
 
-      return data.name == parentMesh.userData.name
-          && label.userData.parentPos.equals(worldParent);
+      return data.name === parentMesh.userData.name && 
+      label.userData.parentPos.equals(worldParent);
     });
 
     // check if TextGeometry already exists
@@ -77,7 +74,7 @@ export default Ember.Object.extend({
       var boxWidth = bboxParent.max.x;
 
       // static size for class text
-      if (parentMesh.userData.type == 'class') {
+      if (parentMesh.userData.type === 'class') {
         // static scaling factor
         var j = 0.2;
         textGeo.scale(j, j, j);
@@ -113,20 +110,17 @@ export default Ember.Object.extend({
         mesh.rotation.z = -(Math.PI / 2);
       } else {
         // TODO fix 'perfect' centering
-        if (parentMesh.userData.type == 'class') {
-          mesh.position.x = worldParent.x - Math.abs(centerX)
-              / 2 - 0.25;
+        if (parentMesh.userData.type === 'class') {
+          mesh.position.x = worldParent.x - Math.abs(centerX) / 2 - 0.25;
           mesh.position.y = bboxNew.max.y;
           mesh.position.z = (worldParent.z - Math
               .abs(centerX) / 2) - 0.25;
           mesh.rotation.x = -(Math.PI / 2);
           mesh.rotation.z = -(Math.PI / 4);
         } else {
-          mesh.position.x = worldParent.x - Math.abs(centerX)
-              / 2;
+          mesh.position.x = worldParent.x - Math.abs(centerX) / 2;
           mesh.position.y = bboxNew.max.y;
-          mesh.position.z = worldParent.z - Math.abs(centerX)
-              / 2;
+          mesh.position.z = worldParent.z - Math.abs(centerX) / 2;
           mesh.rotation.x = -(Math.PI / 2);
           mesh.rotation.z = -(Math.PI / 4);
         }
