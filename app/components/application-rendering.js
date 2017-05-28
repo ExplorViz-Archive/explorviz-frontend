@@ -388,6 +388,11 @@ export default RenderingCore.extend({
       self.cleanAndUpdateScene();
     });
 
+    this.get('interactionHandler').on('rotateApplication', function(deltaX, deltaY) {
+      self.get('application3D').rotation.y += deltaX;
+      self.get('application3D').rotation.x += deltaY;
+    });
+
 
   } // END initInteraction
   

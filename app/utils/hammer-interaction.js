@@ -12,11 +12,11 @@ export default Ember.Object.extend(Ember.Evented, {
 
     this.set('raycastObjects', raycastObjects);
 
-    let cameraTranslateX, cameraTranslateY = 0;
+    let mouseDeltaX, mouseDeltaY = 0;
+
+    registerRightClickWithPan();    
 
     const hammer = new Hammer.Manager(canvas, {});
-
-    console.log(hammer);
 
     this.set('hammerManager', hammer);
 
@@ -44,6 +44,10 @@ export default Ember.Object.extend(Ember.Evented, {
       .on(
         'doubletap',
         function(evt) {
+
+          if(evt.button !== 1) {
+            return;
+          }
 
           var mouse = {};
 
@@ -79,38 +83,59 @@ export default Ember.Object.extend(Ember.Evented, {
     });
 
     hammer.on('panstart', function(evt) {
+
+      if(evt.button !== 1 && evt.button !== 3) {
+        return;
+      }
+
       const event = evt.srcEvent;
 
-      cameraTranslateX = event.clientX;
-      cameraTranslateY = event.clientY;
+      mouseDeltaX = event.clientX;
+      mouseDeltaY = event.clientY;
     });
 
     hammer.on('panmove', function(evt) {
 
+      if(evt.button !== 1 && evt.button !== 3) {
+        return;
+      }
+
       const event = evt.srcEvent;
 
-      var deltaX = event.clientX - cameraTranslateX;
-      var deltaY = event.clientY - cameraTranslateY;
+      var deltaX = event.clientX - mouseDeltaX;
+      var deltaY = event.clientY - mouseDeltaY;
 
-      var distanceXInPercent = (deltaX /
+      if(evt.button === 3) {
+        // rotate object
+        self.trigger('rotateApplication', deltaX / 100, deltaY / 100);
+      } else if(evt.button === 1){
+        // translate camera
+        var distanceXInPercent = (deltaX /
         parseFloat(renderer.domElement.clientWidth)) * 100.0;
 
-      var distanceYInPercent = (deltaY /
-        parseFloat(renderer.domElement.clientHeight)) * 100.0;
+        var distanceYInPercent = (deltaY /
+          parseFloat(renderer.domElement.clientHeight)) * 100.0;
 
-      var xVal = camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(camera.position.z) / 4.0);
+        var xVal = camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(camera.position.z) / 4.0);
 
-      var yVal = camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(camera.position.z) / 4.0);
+        var yVal = camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(camera.position.z) / 4.0);
 
-      camera.position.x = xVal;
-      camera.position.y = yVal;
+        camera.position.x = xVal;
+        camera.position.y = yVal;
+      }     
 
-      cameraTranslateX = event.clientX;
-      cameraTranslateY = event.clientY;
+      mouseDeltaX = event.clientX;
+      mouseDeltaY = event.clientY;
+
     });
 
 
     hammer.on('singletap', function(evt){
+
+      if(evt.button !== 1) {
+        return;
+      }
+
       var mouse = {};
 
       console.log(evt);
@@ -158,6 +183,78 @@ export default Ember.Object.extend(Ember.Evented, {
       }
     }
 
+
+    function registerRightClickWithPan() {
+
+      const POINTER_INPUT_MAP = {
+        pointerdown: Hammer.INPUT_START,
+        pointermove: Hammer.INPUT_MOVE,
+        pointerup: Hammer.INPUT_END,
+        pointercancel: Hammer.INPUT_CANCEL,
+        pointerout: Hammer.INPUT_CANCEL
+      };
+
+      Hammer.inherit(Hammer.PointerEventInput, Hammer.Input, {
+
+        handler: function PEhandler(ev) {
+
+          var store = this.store;
+          var removePointer = false;
+
+          var eventTypeNormalized = ev.type.toLowerCase();
+          var eventType = POINTER_INPUT_MAP[eventTypeNormalized];
+          var pointerType = ev.pointerType;
+
+          //modified to handle all buttons
+          //left=0, middle=1, right=2
+          if (eventType & Hammer.INPUT_START) {
+              //firefox sends button 0 for mousemove, so store it here
+              this.button = ev.button;
+          }
+
+          var isTouch = (pointerType === Hammer.INPUT_TYPE_TOUCH);
+
+          function isCorrectPointerId(element) {
+            return element.pointerId === ev.pointerId;
+          }
+
+          // get index of the event in the store
+          var storeIndex = store.findIndex(isCorrectPointerId);
+
+          // start and mouse must be down
+          if (eventType & Hammer.INPUT_START && (ev.button === 0 || ev.button === 1 || ev.button === 2 || isTouch)) {
+              if (storeIndex < 0) {
+                  store.push(ev);
+                  storeIndex = store.length - 1;
+              }
+          } else if (eventType & (Hammer.INPUT_END | Hammer.INPUT_CANCEL)) {
+              removePointer = true;
+          }
+
+          // it not found, so the pointer hasn't been down (so it's probably a hover)
+          if (storeIndex < 0) {
+              return;
+          }
+
+          // update the event in the store
+          store[storeIndex] = ev;
+
+          this.callback(this.manager, eventType, {
+              button: this.button +1,
+              pointers: store,
+              changedPointers: [ev],
+              pointerType: pointerType,
+              srcEvent: ev
+          });
+
+          if (removePointer) {
+              // remove from the store
+              store.splice(storeIndex, 1);
+          }
+        }
+      });
+
+    }
   }
 
 });
