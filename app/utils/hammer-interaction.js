@@ -16,6 +16,8 @@ export default Ember.Object.extend(Ember.Evented, {
 
     const hammer = new Hammer.Manager(canvas, {});
 
+    console.log(hammer);
+
     this.set('hammerManager', hammer);
 
     const singleTap = new Hammer.Tap({
@@ -110,6 +112,8 @@ export default Ember.Object.extend(Ember.Evented, {
 
     hammer.on('singletap', function(evt){
       var mouse = {};
+
+      console.log(evt);
 
       const event = evt.srcEvent;
 
