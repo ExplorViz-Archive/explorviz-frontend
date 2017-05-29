@@ -2,6 +2,7 @@ import RenderingCore from './rendering-core';
 import Ember from 'ember';
 import Raycaster from '../utils/raycaster';
 import applyCityLayout from '../utils/city-layouter';
+import {createFoundation, removeFoundation} from '../utils/application-rendering/foundation-builder';
 import HammerInteraction from '../utils/hammer-interaction';
 import CityLabeler from '../utils/city-labeler';
 
@@ -71,14 +72,7 @@ export default RenderingCore.extend({
     this.debug("cleanup application rendering");
 
     // remove foundation for re-rendering
-    const application = this.get('entity');    
-    const foundation = application.get('components').objectAt(0);
-
-    if(foundation.get('foundation')) {
-      application.set('components', foundation.get('children'));
-      application.get('components').objectAt(0).set('parentComponent', null);
-      this.get('store').unloadRecord(foundation);
-    }
+    removeFoundation(this.get('entity'), this.get('store'));
 
     this.set('applicationID', null);    
     this.set('application3D', null);  
@@ -95,17 +89,8 @@ export default RenderingCore.extend({
 
     this.debug("populate application rendering");
 
-    const application = this.get('entity');
-
     // remove foundation for re-rendering
-    
-    const foundation = application.get('components').objectAt(0);
-
-    if(foundation.get('foundation')) {
-      application.set('components', foundation.get('children'));
-      application.get('components').objectAt(0).set('parentComponent', null);
-      this.get('store').unloadRecord(foundation);
-    }
+    removeFoundation(this.get('entity'), this.get('store'));
 
     this.populateScene();
   },
@@ -129,7 +114,7 @@ export default RenderingCore.extend({
 
     const self = this;
 
-    const foundation = createFoundation();
+    const foundation = createFoundation(emberApplication, this.get('store'));
 
     applyCityLayout(emberApplication);
 
@@ -206,33 +191,8 @@ export default RenderingCore.extend({
       self.set('initialSetupDone', true);
     }
 
-    // Helper functions    
-    
-    function createFoundation() {
-      const idTest = parseInt(Math.random() * (20000 - 10000) + 10000);
-      const foundation = self.get('store').createRecord('component', {
-        id: idTest,
-        synthetic: false,
-        foundation: true,
-        children: [emberApplication.get('components').objectAt(0)],
-        clazzes: [],
-        belongingApplication: emberApplication,
-        opened: true,
-        name: emberApplication.get('name'),
-        fullQualifiedName: emberApplication.get('name'),
-        positionX: 0,
-        positionY: 0,
-        positionZ: 0,
-        width: 0,
-        height: 0,
-        depth: 0
-      });
+    // Helper functions   
 
-      emberApplication.get('components').objectAt(0).set('parentComponent', foundation);
-      emberApplication.set('components', [foundation]);
-
-      return foundation;
-    }
 
     function addComponentToScene(component, color) {
 

@@ -137,9 +137,7 @@ export default Ember.Object.extend(Ember.Evented, {
       }
 
       var mouse = {};
-
-      console.log(evt);
-
+      
       const event = evt.srcEvent;
 
       mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
