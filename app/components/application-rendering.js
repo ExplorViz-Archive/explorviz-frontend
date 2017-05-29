@@ -25,6 +25,9 @@ export default RenderingCore.extend({
   interactionHandler: null,
   labeler: null,
 
+  oldRotation: {x: 0, y: 0},
+  initialSetupDone: false,
+
   // @Override  
   initRendering() {
     this._super(...arguments);
@@ -66,6 +69,16 @@ export default RenderingCore.extend({
     this._super(...arguments);
 
     this.debug("cleanup application rendering");
+
+    // remove foundation for re-rendering
+    const application = this.get('entity');    
+    const foundation = application.get('components').objectAt(0);
+
+    if(foundation.get('foundation')) {
+      application.set('components', foundation.get('children'));
+      application.get('components').objectAt(0).set('parentComponent', null);
+      this.get('store').unloadRecord(foundation);
+    }
 
     this.set('applicationID', null);    
     this.set('application3D', null);  
@@ -180,7 +193,18 @@ export default RenderingCore.extend({
     addComponentToScene(foundation, 0xCECECE);
 
     self.scene.add(self.get('application3D'));
-    self.resetRotation();
+
+    if(self.get('initialSetupDone')) {
+      // apply old rotation
+      self.set('application3D.rotation.x', self.get('oldRotation.x'));
+      self.set('application3D.rotation.y', self.get('oldRotation.y'));
+    }
+    else {
+      self.resetRotation();
+      self.set('oldRotation.x', self.get('application3D').rotation.x);
+      self.set('oldRotation.y', self.get('application3D').rotation.y);
+      self.set('initialSetupDone', true);
+    }
 
     // Helper functions    
     
@@ -391,6 +415,9 @@ export default RenderingCore.extend({
     this.get('interactionHandler').on('rotateApplication', function(deltaX, deltaY) {
       self.get('application3D').rotation.y += deltaX;
       self.get('application3D').rotation.x += deltaY;
+
+      self.set('oldRotation.x', self.get('application3D').rotation.x);
+      self.set('oldRotation.y', self.get('application3D').rotation.y);
     });
 
 
