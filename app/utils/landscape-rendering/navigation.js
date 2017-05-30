@@ -1,35 +1,71 @@
 import Ember from 'ember';
+import HammerInteraction from '../hammer-interaction';
 
 export default Ember.Object.extend(Ember.Evented, {
 
+  canvas: null,
   camera: null,
   renderer: null,
   raycaster: null,
   raycastObjects: null,
 
+  hammerHandler: null,
+
   setupInteraction(canvas, camera, renderer, raycaster, raycastObjects) {
+    this.set('canvas', canvas);
     this.set('camera', camera);
     this.set('renderer', renderer);
     this.set('raycaster', raycaster);
     this.set('raycastObjects', raycastObjects);
 
     // zoom handler    
-    canvas.addEventListener('mousewheel', onMouseWheelStart, false);
+    canvas.addEventListener('mousewheel', this.onMouseWheelStart, false);
 
-    function onMouseWheelStart(evt) {
+    // init Hammer
+    if (!this.get('hammerHandler')) {
+      this.set('hammerHandler', HammerInteraction.create());
+      this.get('hammerHandler').setupHammer(canvas);
+    }
 
-      var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
+    this.setupHammerListener();
+    
+  },
 
-      // zoom in
-      if (delta > 0) {
-        camera.position.z -= delta * 1.5;
-      }
-      // zoom out
-      else {
-        camera.position.z -= delta * 1.5;
-      }
+  onMouseWheelStart(evt) {
+
+    var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
+
+    // zoom in
+    if (delta > 0) {
+      this.get('camera').position.z -= delta * 1.5;
+    }
+    // zoom out
+    else {
+      this.get('camera').position.z -= delta * 1.5;
     }
   },
+
+
+  setupHammerListener() {
+
+    const self = this;
+
+    this.get('hammerHandler').on('doubleClick', function(mouse) {
+      self.handleDoubleClick(mouse);
+    });
+
+    this.get('hammerHandler').on('panning', function(delta, event) {
+      self.handlePanning(delta, event);
+    });
+
+  },
+
+
+  removeHandlers() {
+    this.get('hammerHandler.hammerManager').off();
+    this.get('canvas').removeEventListener('mousewheel', this.onMouseWheelStart);
+  },
+
 
   handleDoubleClick(mouse) {
 

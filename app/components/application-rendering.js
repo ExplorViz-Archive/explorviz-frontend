@@ -3,7 +3,6 @@ import Ember from 'ember';
 import Raycaster from '../utils/raycaster';
 import applyCityLayout from '../utils/city-layouter';
 import {createFoundation, removeFoundation} from '../utils/application-rendering/foundation-builder';
-import HammerInteraction from '../utils/hammer-interaction';
 import CityLabeler from '../utils/city-labeler';
 import Navigation from '../utils/application-rendering/navigation';
 
@@ -20,8 +19,6 @@ export default RenderingCore.extend({
   application3D: null,
 
   applicationID: null,
-
-  hammerManager: null,
 
   raycaster: null,
   interactionHandler: null,
@@ -56,10 +53,6 @@ export default RenderingCore.extend({
       this.set('raycaster.objectCatalog', 'applicationObjects');
     }
 
-    if (!this.get('interactionHandler')) {
-      this.set('interactionHandler', HammerInteraction.create());
-    }
-
     this.initInteraction();
 
     const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
@@ -85,8 +78,7 @@ export default RenderingCore.extend({
     this.set('applicationID', null);    
     this.set('application3D', null);  
 
-    this.get('interactionHandler.hammerManager').off();
-    this.set('interactionHandler', null);
+    this.get('navigation').removeHandlers();
   },
 
 
@@ -379,28 +371,12 @@ export default RenderingCore.extend({
     const webglrenderer = this.get('webglrenderer');
     const raycaster = this.get('raycaster');
 
-    // init navigation objects
-
-    this.get('interactionHandler').setupHammer(canvas);
-
-    console.log(this.get('navigation'));
+    // init navigation objects    
 
     this.get('navigation').setupInteraction(canvas, camera, webglrenderer, raycaster, 
       this.get('application3D'));
 
     // set listeners
-    
-    this.get('interactionHandler').on('doubleClick', function(mouse) {
-      self.get('navigation').handleDoubleClick(mouse);
-    });
-
-    this.get('interactionHandler').on('panning', function(delta, event) {
-      self.get('navigation').handlePanning(delta, event);
-    });
-
-    this.get('interactionHandler').on('singleClick', function(mouse) {
-      self.get('navigation').handleSingleClick(mouse);
-    });    
 
     this.get('navigation').on('redrawScene', function() {
       self.cleanAndUpdateScene();

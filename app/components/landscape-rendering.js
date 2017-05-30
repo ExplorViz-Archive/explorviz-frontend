@@ -1,7 +1,6 @@
 import RenderingCore from './rendering-core';
 import Raycaster from '../utils/raycaster';
 import applyKlayLayout from '../utils/klay-layouter';
-import HammerInteraction from '../utils/hammer-interaction';
 import Navigation from '../utils/landscape-rendering/navigation';
 
  /**
@@ -20,8 +19,6 @@ export default RenderingCore.extend({
   textLabels: {},
 
   raycaster: null,
-  interactionHandler: null,
-
   navigation: null,
 
   // @Override
@@ -29,10 +26,6 @@ export default RenderingCore.extend({
     this._super(...arguments);
 
     this.debug("init landscape rendering");
-
-    if (!this.get('interactionHandler')) {
-      this.set('interactionHandler', HammerInteraction.create());
-    }
 
     if (!this.get('navigation')) {
       this.set('navigation', Navigation.create());
@@ -58,8 +51,7 @@ export default RenderingCore.extend({
     this.set('logos', {});
     this.set('textLabels', {});
 
-    this.get('interactionHandler.hammerManager').off();
-    this.set('interactionHandler', null);
+    this.get('navigation').removeHandlers();
   },
 
   // @Override
@@ -920,20 +912,10 @@ export default RenderingCore.extend({
 
     // init navigation objects
 
-    this.get('interactionHandler').setupHammer(canvas);
-
     this.get('navigation').setupInteraction(canvas, camera, webglrenderer, raycaster, 
       raycastObjects);
 
     // set listeners
-    
-    this.get('interactionHandler').on('doubleClick', function(mouse) {
-      self.get('navigation').handleDoubleClick(mouse);
-    });
-
-    this.get('interactionHandler').on('panning', function(delta, event) {
-      self.get('navigation').handlePanning(delta, event);
-    });
 
     this.get('navigation').on('redrawScene', function() {
       self.cleanAndUpdateScene();
