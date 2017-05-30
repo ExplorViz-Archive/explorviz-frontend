@@ -133,12 +133,18 @@ export default RenderingCore.extend({
         if (commu.startPoint && commu.endPoint) {
 
           const start = new THREE.Vector3();
-          start.subVectors (commu.startPoint, viewCenterPoint);
+          start.subVectors(commu.startPoint, viewCenterPoint);
           start.multiplyScalar(0.5);
           
           const end = new THREE.Vector3();
-          end.subVectors (commu.endPoint, viewCenterPoint);
+          end.subVectors(commu.endPoint, viewCenterPoint);
           end.multiplyScalar(0.5);
+
+          if(start.y >= end.y) {
+            end.y = start.y;
+          } else {
+            start.y = end.y;
+          }
 
           const material = new THREE.MeshBasicMaterial({
             color : new THREE.Color(0xf49100),
@@ -169,9 +175,9 @@ export default RenderingCore.extend({
       const pipe = new THREE.Mesh(edgeGeometry, material);
       pipe.applyMatrix(orientation);
 
-      pipe.position.x = (pointY.x + pointX.x) / 2;
-      pipe.position.y = (pointY.y + pointX.y) / 2;
-      pipe.position.z = (pointY.z + pointX.z) / 2;
+      pipe.position.x = (pointY.x + pointX.x) / 2.0;
+      pipe.position.y = (pointY.y + pointX.y) / 2.0;
+      pipe.position.z = (pointY.z + pointX.z) / 2.0;
       return pipe;
     }
 
