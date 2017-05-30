@@ -5,6 +5,7 @@ import applyCityLayout from '../utils/city-layouter';
 import {createFoundation, removeFoundation} from '../utils/application-rendering/foundation-builder';
 import HammerInteraction from '../utils/hammer-interaction';
 import CityLabeler from '../utils/city-labeler';
+import Navigation from '../utils/application-rendering/navigation';
 
  /**
  * Renderer for application visualization.
@@ -29,6 +30,8 @@ export default RenderingCore.extend({
   oldRotation: {x: 0, y: 0},
   initialSetupDone: false,
 
+  navigation: null,
+
   // @Override  
   initRendering() {
     this._super(...arguments);
@@ -44,8 +47,13 @@ export default RenderingCore.extend({
       this.set('labeler', CityLabeler.create());
     }
 
+    if (!this.get('navigation')) {
+      this.set('navigation', Navigation.create());
+    }
+
     if (!this.get('raycaster')) {
       this.set('raycaster', Raycaster.create());
+      this.set('raycaster.objectCatalog', 'applicationObjects');
     }
 
     if (!this.get('interactionHandler')) {
@@ -79,7 +87,6 @@ export default RenderingCore.extend({
 
     this.get('interactionHandler.hammerManager').off();
     this.set('interactionHandler', null);
-
   },
 
 
@@ -88,6 +95,9 @@ export default RenderingCore.extend({
     this._super(...arguments);
 
     this.debug("populate application rendering");
+
+    // save old rotation
+    this.set('oldRotation', this.get('application3D').rotation);
 
     // remove foundation for re-rendering
     removeFoundation(this.get('entity'), this.get('store'));
@@ -118,11 +128,11 @@ export default RenderingCore.extend({
 
     applyCityLayout(emberApplication);
 
-    self.set('application3D', new THREE.Object3D());
-    self.set('application3D.userData.model', emberApplication);
+    this.set('application3D', new THREE.Object3D());
+    this.set('application3D.userData.model', emberApplication);
 
-    // update raycasting children, because of new entity
-    this.get('interactionHandler').set('raycastObjects', self.get('application3D').children);
+    // update raycasting children, because of new entity    
+    this.get('navigation').set('rotationObject', this.get('application3D'));
 
     const viewCenterPoint = calculateAppCenterAndZZoom(emberApplication);
 
@@ -365,28 +375,39 @@ export default RenderingCore.extend({
     const self = this;
 
     const canvas = this.get('canvas');
-    const raycastObjects = this.get('application3D').children;
     const camera = this.get('camera');
     const webglrenderer = this.get('webglrenderer');
     const raycaster = this.get('raycaster');
-    raycaster.set('objectCatalog', 'applicationObjects');
 
-    this.get('interactionHandler').setupInteractionHandlers(canvas, 
-      raycastObjects, camera, webglrenderer, raycaster);
+    // init navigation objects
 
-    this.get('interactionHandler').on('cleanup', function() {
+    this.get('interactionHandler').setupHammer(canvas);
+
+    console.log(this.get('navigation'));
+
+    this.get('navigation').setupInteraction(canvas, camera, webglrenderer, raycaster, 
+      this.get('application3D'));
+
+    // set listeners
+    
+    this.get('interactionHandler').on('doubleClick', function(mouse) {
+      self.get('navigation').handleDoubleClick(mouse);
+    });
+
+    this.get('interactionHandler').on('panning', function(delta, event) {
+      self.get('navigation').handlePanning(delta, event);
+    });
+
+    this.get('interactionHandler').on('singleClick', function(mouse) {
+      self.get('navigation').handleSingleClick(mouse);
+    });    
+
+    this.get('navigation').on('redrawScene', function() {
       self.cleanAndUpdateScene();
     });
 
-    this.get('interactionHandler').on('rotateApplication', function(deltaX, deltaY) {
-      self.get('application3D').rotation.y += deltaX;
-      self.get('application3D').rotation.x += deltaY;
-
-      self.set('oldRotation.x', self.get('application3D').rotation.x);
-      self.set('oldRotation.y', self.get('application3D').rotation.y);
-    });
 
 
-  } // END initInteraction
+  }, // END initInteraction
   
 });

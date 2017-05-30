@@ -3,21 +3,17 @@ import Hammer from "npm:hammerjs";
 
 export default Ember.Object.extend(Ember.Evented, {
 
-  raycastObjects: null,
   hammerManager: null,
 
-  setupInteractionHandlers(canvas, raycastObjects, camera, renderer, raycaster) {
+  setupHammer(canvas) {
 
     const self = this;
 
-    this.set('raycastObjects', raycastObjects);
-
     let mouseDeltaX, mouseDeltaY = 0;
 
-    registerRightClickWithPan();    
+    registerRightClickWithPan();
 
     const hammer = new Hammer.Manager(canvas, {});
-
     this.set('hammerManager', hammer);
 
     const singleTap = new Hammer.Tap({
@@ -40,148 +36,66 @@ export default Ember.Object.extend(Ember.Evented, {
     doubleTap.recognizeWith(singleTap);
     singleTap.requireFailure(doubleTap);
 
-    hammer
-      .on(
-        'doubletap',
-        function(evt) {
 
-          if(evt.button !== 1) {
-            return;
-          }
-
-          var mouse = {};
-
-          const event = evt.srcEvent;
-
-          mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
-          mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
-
-          const intersectedViewObj = raycaster.raycasting(null, mouse, camera, self.get('raycastObjects'));
-
-          if(intersectedViewObj) {
-
-            const emberModel = intersectedViewObj.object.userData.model;
-            const emberModelName = emberModel.constructor.modelName;
-
-            //self.debug("Name of raycasting goal: ", emberModelName);
-
-            if(emberModelName === "application"){
-              // open application-rendering
-              self.trigger('showApplication', emberModel);
-            } 
-            else if (emberModelName === "nodegroup" || emberModelName === "system"){
-              emberModel.setOpened(!emberModel.get('opened'));
-              self.trigger('cleanup');
-            }
-            else if(emberModelName === "component"){
-              emberModel.setOpenedStatus(!emberModel.get('opened'));
-              emberModel.set('highlighted', false);
-              self.trigger('cleanup');
-            } 
-
-          }
-    });
-
-    hammer.on('panstart', function(evt) {
-
-      if(evt.button !== 1 && evt.button !== 3) {
-        return;
-      }
-
-      const event = evt.srcEvent;
-
-      mouseDeltaX = event.clientX;
-      mouseDeltaY = event.clientY;
-    });
-
-    hammer.on('panmove', function(evt) {
-
-      if(evt.button !== 1 && evt.button !== 3) {
-        return;
-      }
-
-      const event = evt.srcEvent;
-
-      var deltaX = event.clientX - mouseDeltaX;
-      var deltaY = event.clientY - mouseDeltaY;
-
-      if(evt.button === 3) {
-        // rotate object
-        self.trigger('rotateApplication', deltaX / 100, deltaY / 100);
-      } else if(evt.button === 1){
-        // translate camera
-        var distanceXInPercent = (deltaX /
-        parseFloat(renderer.domElement.clientWidth)) * 100.0;
-
-        var distanceYInPercent = (deltaY /
-          parseFloat(renderer.domElement.clientHeight)) * 100.0;
-
-        var xVal = camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(camera.position.z) / 4.0);
-
-        var yVal = camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(camera.position.z) / 4.0);
-
-        camera.position.x = xVal;
-        camera.position.y = yVal;
-      }     
-
-      mouseDeltaX = event.clientX;
-      mouseDeltaY = event.clientY;
-
-    });
-
-
-    hammer.on('singletap', function(evt){
-
+    hammer.on('doubletap', (evt) => {
       if(evt.button !== 1) {
         return;
       }
 
       var mouse = {};
-      
-      const event = evt.srcEvent;
 
-      mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
-      mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
+      mouse.x = evt.srcEvent.clientX;
+      mouse.y = evt.srcEvent.clientY;
 
-      const intersectedViewObj = raycaster.raycasting(null, mouse, camera, self.get('raycastObjects'));
-
-      if(intersectedViewObj) {
-
-        const emberModel = intersectedViewObj.object.userData.model;
-        const emberModelName = emberModel.constructor.modelName;
-
-        if(emberModelName === "component" && !emberModel.get('opened')){
-
-          emberModel.set('highlighted', !emberModel.get('highlighted'));    
-        } 
-        else if(emberModelName === "clazz") {
-          emberModel.set('highlighted', !emberModel.get('highlighted'));
-        }
-
-        self.trigger('cleanup');
-
-      }
-
+      self.trigger('doubleClick', mouse);
     });
 
-    // zoom handler    
-    canvas.addEventListener('mousewheel', onMouseWheelStart, false);
 
-    function onMouseWheelStart(evt) {
-
-      var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
-
-      // zoom in
-      if (delta > 0) {
-        camera.position.z -= delta * 1.5;
+    hammer.on('panstart', (evt) => {
+      if(evt.button !== 1 && evt.button !== 3) {
+        return;
       }
-      // zoom out
-      else {
-        camera.position.z -= delta * 1.5;
+
+      const event = evt.srcEvent;
+
+      mouseDeltaX = event.clientX;
+      mouseDeltaY = event.clientY;
+    });
+
+
+    hammer.on('panmove', (evt) => {
+      if(evt.button !== 1 && evt.button !== 3) {
+        return;
       }
-    }
+
+      const delta = {};
+
+      delta.x = evt.srcEvent.clientX - mouseDeltaX;
+      delta.y = evt.srcEvent.clientY - mouseDeltaY;
+
+      mouseDeltaX = evt.srcEvent.clientX;
+      mouseDeltaY = evt.srcEvent.clientY;
+
+      self.trigger('panning', delta, evt);
+    });
 
 
+    hammer.on('singletap', function(evt){
+      if(evt.button !== 1) {
+        return;
+      }
+
+      var mouse = {};
+
+      mouse.x = evt.srcEvent.clientX;
+      mouse.y = evt.srcEvent.clientY;
+
+      self.trigger('singleClick', mouse);      
+    });
+
+
+    // Fire Panning-Event with right click as well
+    
     function registerRightClickWithPan() {
 
       const POINTER_INPUT_MAP = {
