@@ -20,8 +20,14 @@ export default Ember.Object.extend(Ember.Evented, {
     this.set('raycaster', raycaster);
     this.set('rotationObject', parentObject);
 
+    const self = this;
+
     // zoom handler    
-    canvas.addEventListener('mousewheel', this.onMouseWheelStart, false);
+    canvas.addEventListener('mousewheel', registerMouseWheel, false);
+
+    function registerMouseWheel(evt) {
+      self.onMouseWheelStart(evt);
+    }
 
     // init Hammer
     if (!this.get('hammerHandler')) {
@@ -39,11 +45,11 @@ export default Ember.Object.extend(Ember.Evented, {
 
     // zoom in
     if (delta > 0) {
-      this.get('camera').position.z -= delta * 1.5;
+      this.camera.position.z -= delta * 3.5;
     }
     // zoom out
     else {
-      this.get('camera').position.z -= delta * 1.5;
+      this.camera.position.z -= delta * 3.5;
     }
   },
 
