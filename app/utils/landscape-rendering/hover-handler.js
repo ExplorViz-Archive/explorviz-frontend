@@ -11,8 +11,8 @@ export default Ember.Object.extend(Ember.Evented, {
 
     Ember.$('#vizContainer').popover(
       {
-        title: '<div style="font-weight:bold;text-align:center;">' 
-          + content.title + '</div>',
+        title: '<div style="font-weight:bold;text-align:center;">' + 
+          content.title + '</div>',
         content : content.html,
         placement:'top',
         trigger:'manual',
