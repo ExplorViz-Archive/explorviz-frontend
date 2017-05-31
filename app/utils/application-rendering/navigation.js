@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import HammerInteraction from '../hammer-interaction';
+import HoverHandler from './hover-handler';
 
 export default Ember.Object.extend(Ember.Evented, {
 
@@ -9,6 +10,8 @@ export default Ember.Object.extend(Ember.Evented, {
   raycaster: null,
   rotationObject: null,
   hammerHandler: null,
+  hoverHandler: null,
+
   raycastObjects: Ember.computed('rotationObject', function() {
     return this.get('rotationObject.children');
   }),
@@ -35,21 +38,32 @@ export default Ember.Object.extend(Ember.Evented, {
       this.get('hammerHandler').setupHammer(canvas);
     }
 
+    // init HoverHandler
+    if (!this.get('hoverHandler')) {
+      this.set('hoverHandler', HoverHandler.create());
+    }
+
+    // hover handler
+    self.registerHoverHandler();
+
     this.setupHammerListener();
 
   },
 
   onMouseWheelStart(evt) {
 
+    // Hide (old) tooltip
+    this.get('hoverHandler').hideTooltip();
+
     var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
 
     // zoom in
     if (delta > 0) {
-      this.camera.position.z -= delta * 3.5;
+      this.get('camera').position.z -= delta * 3.5;
     }
     // zoom out
     else {
-      this.camera.position.z -= delta * 3.5;
+      this.get('camera').position.z -= delta * 3.5;
     }
   },
 
@@ -71,9 +85,46 @@ export default Ember.Object.extend(Ember.Evented, {
 
   },
 
+
+  registerHoverHandler() {
+
+    const self = this;
+
+    // custom event for mousemovement end
+    (function (delay) {
+        var timeout;
+        self.get('canvas').addEventListener('mousemove', function (evt) {
+            clearTimeout(timeout);
+            timeout = setTimeout(function () {
+              var event = new CustomEvent("mousestop", {
+                  detail: {
+                      clientX: evt.clientX,
+                      clientY: evt.clientY
+                  },
+                  bubbles: true,
+                  cancelable: true
+              });
+              evt.target.dispatchEvent(event);
+            }, delay);
+            
+            // When moving, hide (old) tooltip
+            self.get('hoverHandler').hideTooltip();
+        });
+    })(300);
+
+    
+    this.get('canvas').addEventListener('mousestop', registerHoverHandler, false);
+
+    function registerHoverHandler(evt) {
+      self.handleHover(evt);
+    }
+  },
+
+
   removeHandlers() {
     this.get('hammerHandler.hammerManager').off();
     this.get('canvas').removeEventListener('mousewheel', this.onMouseWheelStart);
+    this.get('canvas').removeEventListener('mousestop', this.handleHover);
   },
 
   handleDoubleClick(mouse) {
@@ -90,6 +141,9 @@ export default Ember.Object.extend(Ember.Evented, {
       this.get('camera'), this.get('raycastObjects'));
 
     if(intersectedViewObj) {
+
+      // Hide (old) tooltip
+      this.get('hoverHandler').hideTooltip();
 
       const emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
@@ -118,6 +172,9 @@ export default Ember.Object.extend(Ember.Evented, {
       this.get('camera'), this.get('raycastObjects'));
 
     if(intersectedViewObj) {
+
+      // Hide (old) tooltip
+      this.get('hoverHandler').hideTooltip();
 
       const emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
@@ -158,6 +215,35 @@ export default Ember.Object.extend(Ember.Evented, {
 
       this.get('camera').position.x = xVal;
       this.get('camera').position.y = yVal;
+    }
+
+  },
+
+
+  handleHover(evt) {
+
+    const mouse = {
+      x: evt.detail.clientX,
+      y: evt.detail.clientY
+    };
+
+    const origin = {};
+
+    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
+      this.get('renderer').domElement.clientWidth) * 2 - 1;
+
+    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) / 
+      this.get('renderer').domElement.clientHeight) * 2 + 1;
+
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+      this.get('camera'), this.get('raycastObjects'));
+
+    if(intersectedViewObj) {
+
+      const emberModel = intersectedViewObj.object.userData.model;
+
+      this.get('hoverHandler').showTooltip(mouse, emberModel);
+
     }
 
   }

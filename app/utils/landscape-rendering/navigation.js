@@ -29,9 +29,6 @@ export default Ember.Object.extend(Ember.Evented, {
       self.onMouseWheelStart(evt);
     }
 
-    // hover handler
-    self.registerHoverHandler();
-
     // init Hammer
     if (!this.get('hammerHandler')) {
       this.set('hammerHandler', HammerInteraction.create());
@@ -43,21 +40,27 @@ export default Ember.Object.extend(Ember.Evented, {
       this.set('hoverHandler', HoverHandler.create());
     }
 
+    // hover handler
+    self.registerHoverHandler();
+
     this.setupHammerListener();
     
   },
 
   onMouseWheelStart(evt) {
 
+    // Hide (old) tooltip
+    this.get('hoverHandler').hideTooltip();
+
     var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
 
     // zoom in
     if (delta > 0) {
-      this.camera.position.z -= delta * 1.5;
+      this.get('camera').position.z -= delta * 1.5;
     }
     // zoom out
     else {
-      this.camera.position.z -= delta * 1.5;
+      this.get('camera').position.z -= delta * 1.5;
     }
   },
 
