@@ -79,6 +79,22 @@ export default Ember.Object.extend(Ember.Evented, {
       self.trigger('panning', delta, evt);
     });
 
+    // END of mouse movement
+    hammer.on('mousemove', (evt) => {
+      if(evt.button !== 1 && evt.button !== 3) {
+        return;
+      }
+
+      var mouse = {};
+
+      mouse.x = evt.srcEvent.clientX;
+      mouse.y = evt.srcEvent.clientY;
+
+      console.log("panend");
+
+      self.trigger('panningEnd', mouse);
+    });
+
 
     hammer.on('singletap', function(evt){
       if(evt.button !== 1) {
