@@ -3,19 +3,17 @@ import Hammer from "npm:hammerjs";
 
 export default Ember.Object.extend(Ember.Evented, {
 
-  raycastObjects: null,
   hammerManager: null,
 
-  setupInteractionHandlers(canvas, raycastObjects, camera, renderer, raycaster) {
+  setupHammer(canvas) {
 
     const self = this;
 
-    this.set('raycastObjects', raycastObjects);
+    let mouseDeltaX, mouseDeltaY = 0;
 
-    let cameraTranslateX, cameraTranslateY = 0;
+    registerRightClickWithPan();
 
     const hammer = new Hammer.Manager(canvas, {});
-
     this.set('hammerManager', hammer);
 
     const singleTap = new Hammer.Tap({
@@ -38,122 +36,137 @@ export default Ember.Object.extend(Ember.Evented, {
     doubleTap.recognizeWith(singleTap);
     singleTap.requireFailure(doubleTap);
 
-    hammer
-      .on(
-        'doubletap',
-        function(evt) {
 
-          var mouse = {};
+    hammer.on('doubletap', (evt) => {
+      if(evt.button !== 1) {
+        return;
+      }
 
-          const event = evt.srcEvent;
+      var mouse = {};
 
-          mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
-          mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
+      mouse.x = evt.srcEvent.clientX;
+      mouse.y = evt.srcEvent.clientY;
 
-          const intersectedViewObj = raycaster.raycasting(null, mouse, camera, self.get('raycastObjects'));
-
-          if(intersectedViewObj) {
-
-            const emberModel = intersectedViewObj.object.userData.model;
-            const emberModelName = emberModel.constructor.modelName;
-
-            //self.debug("Name of raycasting goal: ", emberModelName);
-
-            if(emberModelName === "application"){
-              // open application-rendering
-              self.trigger('showApplication', emberModel);
-            } 
-            else if (emberModelName === "nodegroup" || emberModelName === "system"){
-              emberModel.setOpened(!emberModel.get('opened'));
-              self.trigger('cleanup');
-            }
-            else if(emberModelName === "component"){
-              emberModel.setOpenedStatus(!emberModel.get('opened'));
-              emberModel.set('highlighted', false);
-              self.trigger('cleanup');
-            } 
-
-          }
+      self.trigger('doubleClick', mouse);
     });
 
-    hammer.on('panstart', function(evt) {
-      const event = evt.srcEvent;
 
-      cameraTranslateX = event.clientX;
-      cameraTranslateY = event.clientY;
-    });
-
-    hammer.on('panmove', function(evt) {
+    hammer.on('panstart', (evt) => {
+      if(evt.button !== 1 && evt.button !== 3) {
+        return;
+      }
 
       const event = evt.srcEvent;
 
-      var deltaX = event.clientX - cameraTranslateX;
-      var deltaY = event.clientY - cameraTranslateY;
+      mouseDeltaX = event.clientX;
+      mouseDeltaY = event.clientY;
+    });
 
-      var distanceXInPercent = (deltaX /
-        parseFloat(renderer.domElement.clientWidth)) * 100.0;
 
-      var distanceYInPercent = (deltaY /
-        parseFloat(renderer.domElement.clientHeight)) * 100.0;
+    hammer.on('panmove', (evt) => {
+      if(evt.button !== 1 && evt.button !== 3) {
+        return;
+      }
 
-      var xVal = camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(camera.position.z) / 4.0);
+      const delta = {};
 
-      var yVal = camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(camera.position.z) / 4.0);
+      delta.x = evt.srcEvent.clientX - mouseDeltaX;
+      delta.y = evt.srcEvent.clientY - mouseDeltaY;
 
-      camera.position.x = xVal;
-      camera.position.y = yVal;
+      mouseDeltaX = evt.srcEvent.clientX;
+      mouseDeltaY = evt.srcEvent.clientY;
 
-      cameraTranslateX = event.clientX;
-      cameraTranslateY = event.clientY;
+      self.trigger('panning', delta, evt);
     });
 
 
     hammer.on('singletap', function(evt){
+      if(evt.button !== 1) {
+        return;
+      }
+
       var mouse = {};
 
-      const event = evt.srcEvent;
+      mouse.x = evt.srcEvent.clientX;
+      mouse.y = evt.srcEvent.clientY;
 
-      mouse.x = ((event.clientX - (renderer.domElement.offsetLeft+0.66)) / renderer.domElement.clientWidth) * 2 - 1;
-      mouse.y = -((event.clientY - (renderer.domElement.offsetTop+0.665)) / renderer.domElement.clientHeight) * 2 + 1;
-
-      const intersectedViewObj = raycaster.raycasting(null, mouse, camera, self.get('raycastObjects'));
-
-      if(intersectedViewObj) {
-
-        const emberModel = intersectedViewObj.object.userData.model;
-        const emberModelName = emberModel.constructor.modelName;
-
-        if(emberModelName === "component" && !emberModel.get('opened')){
-
-          emberModel.set('highlighted', !emberModel.get('highlighted'));    
-        } 
-        else if(emberModelName === "clazz") {
-          emberModel.set('highlighted', !emberModel.get('highlighted'));
-        }
-
-        self.trigger('cleanup');
-
-      }
-
+      self.trigger('singleClick', mouse);      
     });
 
-    // zoom handler    
-    canvas.addEventListener('mousewheel', onMouseWheelStart, false);
 
-    function onMouseWheelStart(evt) {
+    // Fire Panning-Event with right click as well
+    
+    function registerRightClickWithPan() {
 
-      var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
+      const POINTER_INPUT_MAP = {
+        pointerdown: Hammer.INPUT_START,
+        pointermove: Hammer.INPUT_MOVE,
+        pointerup: Hammer.INPUT_END,
+        pointercancel: Hammer.INPUT_CANCEL,
+        pointerout: Hammer.INPUT_CANCEL
+      };
 
-      // zoom in
-      if (delta > 0) {
-        camera.position.z -= delta * 1.5;
-      }
-      // zoom out
-      else {
-        camera.position.z -= delta * 1.5;
-      }
+      Hammer.inherit(Hammer.PointerEventInput, Hammer.Input, {
+
+        handler: function PEhandler(ev) {
+
+          var store = this.store;
+          var removePointer = false;
+
+          var eventTypeNormalized = ev.type.toLowerCase();
+          var eventType = POINTER_INPUT_MAP[eventTypeNormalized];
+          var pointerType = ev.pointerType;
+
+          //modified to handle all buttons
+          //left=0, middle=1, right=2
+          if (eventType & Hammer.INPUT_START) {
+              //firefox sends button 0 for mousemove, so store it here
+              this.button = ev.button;
+          }
+
+          var isTouch = (pointerType === Hammer.INPUT_TYPE_TOUCH);
+
+          function isCorrectPointerId(element) {
+            return element.pointerId === ev.pointerId;
+          }
+
+          // get index of the event in the store
+          var storeIndex = store.findIndex(isCorrectPointerId);
+
+          // start and mouse must be down
+          if (eventType & Hammer.INPUT_START && (ev.button === 0 || ev.button === 1 || ev.button === 2 || isTouch)) {
+              if (storeIndex < 0) {
+                  store.push(ev);
+                  storeIndex = store.length - 1;
+              }
+          } else if (eventType & (Hammer.INPUT_END | Hammer.INPUT_CANCEL)) {
+              removePointer = true;
+          }
+
+          // it not found, so the pointer hasn't been down (so it's probably a hover)
+          if (storeIndex < 0) {
+              return;
+          }
+
+          // update the event in the store
+          store[storeIndex] = ev;
+
+          this.callback(this.manager, eventType, {
+              button: this.button +1,
+              pointers: store,
+              changedPointers: [ev],
+              pointerType: pointerType,
+              srcEvent: ev
+          });
+
+          if (removePointer) {
+              // remove from the store
+              store.splice(storeIndex, 1);
+          }
+        }
+      });
+
     }
-
   }
 
 });

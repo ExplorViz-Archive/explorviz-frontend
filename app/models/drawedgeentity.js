@@ -34,7 +34,9 @@ export default BaseEntity.extend({
   * @attribute points
   * @type objects
   */
-  points: attr()
+  points: attr(),
+
+  pointsFor3D: attr()
 
   //List<Vector3f> pointsFor3D = new ArrayList<Vector3f>
 

@@ -1,7 +1,7 @@
 import RenderingCore from './rendering-core';
 import Raycaster from '../utils/raycaster';
 import applyKlayLayout from '../utils/klay-layouter';
-import HammerInteraction from '../utils/hammer-interaction';
+import Navigation from '../utils/landscape-rendering/navigation';
 
  /**
  * Renderer for landscape visualization.
@@ -26,7 +26,7 @@ export default RenderingCore.extend({
   textLabels: {},
 
   raycaster: null,
-  interactionHandler: null,
+  navigation: null,
 
   // @Override
   initRendering() {
@@ -34,8 +34,8 @@ export default RenderingCore.extend({
 
     this.debug("init landscape rendering");
 
-    if (!this.get('interactionHandler')) {
-      this.set('interactionHandler', HammerInteraction.create());
+    if (!this.get('navigation')) {
+      this.set('navigation', Navigation.create());
     }
 
     if (!this.get('raycaster')) {
@@ -58,8 +58,7 @@ export default RenderingCore.extend({
     this.set('logos', {});
     this.set('textLabels', {});
 
-    this.get('interactionHandler.hammerManager').off();
-    this.set('interactionHandler', null);
+    this.get('navigation').removeHandlers();
   },
 
   // @Override
@@ -69,10 +68,12 @@ export default RenderingCore.extend({
     this.debug("clean and populate landscape rendering");
 
     this.populateScene();
+
+    this.set('navigation.raycastObjects', this.get('scene').children);
   },
 
   // @Override
-  populateScene() {    
+  populateScene() {
     this._super(...arguments);
 
     const self = this;
@@ -916,17 +917,23 @@ export default RenderingCore.extend({
     const webglrenderer = this.get('webglrenderer');
     const raycaster = this.get('raycaster');
 
-    this.get('interactionHandler').setupInteractionHandlers(canvas, 
-      raycastObjects, camera, webglrenderer, raycaster);
+    // init navigation objects
 
-    this.get('interactionHandler').on('cleanup', function() {
+    this.get('navigation').setupInteraction(canvas, camera, webglrenderer, raycaster, 
+      raycastObjects);
+
+    // set listeners
+
+    this.get('navigation').on('redrawScene', function() {
       self.cleanAndUpdateScene();
     });
 
-    this.get('interactionHandler').on('showApplication', function(emberModel) {
-      // bubble up action
+    this.get('navigation').on('showApplication', function(emberModel) {
+      // bubble up action to visualization route
       self.sendAction("showApplication", emberModel);
     });
+
+
 
   }, // END initInteraction
 

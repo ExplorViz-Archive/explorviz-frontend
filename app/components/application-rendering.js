@@ -2,7 +2,9 @@ import RenderingCore from './rendering-core';
 import Ember from 'ember';
 import Raycaster from '../utils/raycaster';
 import applyCityLayout from '../utils/city-layouter';
-import HammerInteraction from '../utils/hammer-interaction';
+import {createFoundation, removeFoundation} from '../utils/application-rendering/foundation-builder';
+import CityLabeler from '../utils/city-labeler';
+import Navigation from '../utils/application-rendering/navigation';
 
  /**
  * Renderer for application visualization.
@@ -18,10 +20,14 @@ export default RenderingCore.extend({
 
   applicationID: null,
 
-  hammerManager: null,
-
   raycaster: null,
   interactionHandler: null,
+  labeler: null,
+
+  oldRotation: {x: 0, y: 0},
+  initialSetupDone: false,
+
+  navigation: null,
 
   // @Override  
   initRendering() {
@@ -34,12 +40,17 @@ export default RenderingCore.extend({
     // dummy object for raycasting
     this.set('application3D', new THREE.Object3D());
 
-    if (!this.get('raycaster')) {
-      this.set('raycaster', Raycaster.create());
+    if (!this.get('labeler')) {
+      this.set('labeler', CityLabeler.create());
     }
 
-    if (!this.get('interactionHandler')) {
-      this.set('interactionHandler', HammerInteraction.create());
+    if (!this.get('navigation')) {
+      this.set('navigation', Navigation.create());
+    }
+
+    if (!this.get('raycaster')) {
+      this.set('raycaster', Raycaster.create());
+      this.set('raycaster.objectCatalog', 'applicationObjects');
     }
 
     this.initInteraction();
@@ -61,12 +72,13 @@ export default RenderingCore.extend({
 
     this.debug("cleanup application rendering");
 
+    // remove foundation for re-rendering
+    removeFoundation(this.get('entity'), this.get('store'));
+
     this.set('applicationID', null);    
     this.set('application3D', null);  
 
-    this.get('interactionHandler.hammerManager').off();
-    this.set('interactionHandler', null);
-
+    this.get('navigation').removeHandlers();
   },
 
 
@@ -76,17 +88,11 @@ export default RenderingCore.extend({
 
     this.debug("populate application rendering");
 
-    const application = this.get('entity');
+    // save old rotation
+    this.set('oldRotation', this.get('application3D').rotation);
 
     // remove foundation for re-rendering
-    
-    const foundation = application.get('components').objectAt(0);
-
-    if(foundation.get('foundation')) {
-      application.set('components', foundation.get('children'));
-      application.get('components').objectAt(0).set('parentComponent', null);
-      this.get('store').unloadRecord(foundation);
-    }
+    removeFoundation(this.get('entity'), this.get('store'));
 
     this.populateScene();
   },
@@ -110,50 +116,91 @@ export default RenderingCore.extend({
 
     const self = this;
 
-    const foundation = createFoundation();
+    const foundation = createFoundation(emberApplication, this.get('store'));
 
     applyCityLayout(emberApplication);
 
-    self.set('application3D', new THREE.Object3D());
-    self.set('application3D.userData.model', emberApplication);
+    this.set('application3D', new THREE.Object3D());
+    this.set('application3D.userData.model', emberApplication);
 
-    // update raycasting children, because of new entity
-    this.get('interactionHandler').set('raycastObjects', self.get('application3D').children);
+    // update raycasting children, because of new entity    
+    this.get('navigation').set('rotationObject', this.get('application3D'));
 
     const viewCenterPoint = calculateAppCenterAndZZoom(emberApplication);
+
+    const accuCommunications = emberApplication.get('communicationsAccumulated');
+
+    accuCommunications.forEach((commu) => {
+      if (commu.source !== commu.target) {
+        if (commu.startPoint && commu.endPoint) {
+
+          const start = new THREE.Vector3();
+          start.subVectors(commu.startPoint, viewCenterPoint);
+          start.multiplyScalar(0.5);
+          
+          const end = new THREE.Vector3();
+          end.subVectors(commu.endPoint, viewCenterPoint);
+          end.multiplyScalar(0.5);
+
+          if(start.y >= end.y) {
+            end.y = start.y;
+          } else {
+            start.y = end.y;
+          }
+
+          const material = new THREE.MeshBasicMaterial({
+            color : new THREE.Color(0xf49100),
+            //opacity : opacityValue,
+            transparent : false
+          });
+
+          const thickness = commu.pipeSize * 0.3;
+
+          const pipe = cylinderMesh(start, end, material, thickness);
+
+          pipe.userData.model = commu;
+
+          self.get('application3D').add(pipe);
+
+        }
+      }
+    });
+
+    function cylinderMesh(pointX, pointY, material, thickness) {
+      const direction = new THREE.Vector3().subVectors(pointY, pointX);
+      const orientation = new THREE.Matrix4();
+      orientation.lookAt(pointX, pointY, new THREE.Object3D().up);
+      orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1,
+          0, 0, -1, 0, 0, 0, 0, 0, 1));
+      const edgeGeometry = new THREE.CylinderGeometry(thickness, thickness,
+          direction.length(), 20, 1);
+      const pipe = new THREE.Mesh(edgeGeometry, material);
+      pipe.applyMatrix(orientation);
+
+      pipe.position.x = (pointY.x + pointX.x) / 2.0;
+      pipe.position.y = (pointY.y + pointX.y) / 2.0;
+      pipe.position.z = (pointY.z + pointX.z) / 2.0;
+      return pipe;
+    }
 
     addComponentToScene(foundation, 0xCECECE);
 
     self.scene.add(self.get('application3D'));
-    self.resetRotation();
 
-    // Helper functions    
-    
-    function createFoundation() {
-      const idTest = parseInt(Math.random() * (20000 - 10000) + 10000);
-      const foundation = self.get('store').createRecord('component', {
-        id: idTest,
-        synthetic: false,
-        foundation: true,
-        children: [emberApplication.get('components').objectAt(0)],
-        clazzes: [],
-        belongingApplication: emberApplication,
-        opened: true,
-        name: emberApplication.get('name'),
-        fullQualifiedName: emberApplication.get('name'),
-        positionX: 0,
-        positionY: 0,
-        positionZ: 0,
-        width: 0,
-        height: 0,
-        depth: 0
-      });
-
-      emberApplication.get('components').objectAt(0).set('parentComponent', foundation);
-      emberApplication.set('components', [foundation]);
-
-      return foundation;
+    if(self.get('initialSetupDone')) {
+      // apply old rotation
+      self.set('application3D.rotation.x', self.get('oldRotation.x'));
+      self.set('application3D.rotation.y', self.get('oldRotation.y'));
     }
+    else {
+      self.resetRotation();
+      self.set('oldRotation.x', self.get('application3D').rotation.x);
+      self.set('oldRotation.y', self.get('application3D').rotation.y);
+      self.set('initialSetupDone', true);
+    }
+
+    // Helper functions   
+
 
     function addComponentToScene(component, color) {
 
@@ -163,7 +210,7 @@ export default RenderingCore.extend({
       const clazzColor = 0x3E14A0;
       const redHighlighted = 0xFF0000;
 
-      createBox(component, color);
+      createBox(component, color, false);
 
       component.set('color', color);
 
@@ -173,9 +220,9 @@ export default RenderingCore.extend({
       clazzes.forEach((clazz) => {
         if (component.get('opened')) {
           if (clazz.get('highlighted')) {
-             createBox(clazz, redHighlighted);
+             createBox(clazz, redHighlighted, true);
           } else {
-             createBox(clazz, clazzColor);
+             createBox(clazz, clazzColor, true);
           }
         }
       });
@@ -214,7 +261,7 @@ export default RenderingCore.extend({
 
 
 
-    function createBox(component, color) {
+    function createBox(component, color, isClass) {
 
       let centerPoint = new THREE.Vector3(component.get('positionX') + component.get('width') / 2.0, component.get('positionY') + component.get('height') / 2.0,
         component.get('positionZ') + component.get('depth') / 2.0);
@@ -235,6 +282,14 @@ export default RenderingCore.extend({
       mesh.updateMatrix();
 
       mesh.userData.model = component;
+      mesh.userData.name = component.get('name');
+      mesh.userData.foundation = component.get('foundation');
+      mesh.userData.type = isClass ? 'clazz' : 'package';
+
+      mesh.userData.opened = component.get('opened');
+
+      self.get('labeler').createLabel(mesh, self.get('application3D'), 
+        self.get('font'));
 
       self.get('application3D').add(mesh);
 
@@ -312,20 +367,23 @@ export default RenderingCore.extend({
     const self = this;
 
     const canvas = this.get('canvas');
-    const raycastObjects = this.get('application3D').children;
     const camera = this.get('camera');
     const webglrenderer = this.get('webglrenderer');
     const raycaster = this.get('raycaster');
-    raycaster.set('objectCatalog', 'applicationObjects');
 
-    this.get('interactionHandler').setupInteractionHandlers(canvas, 
-      raycastObjects, camera, webglrenderer, raycaster);
+    // init navigation objects    
 
-    this.get('interactionHandler').on('cleanup', function() {
+    this.get('navigation').setupInteraction(canvas, camera, webglrenderer, raycaster, 
+      this.get('application3D'));
+
+    // set listeners
+
+    this.get('navigation').on('redrawScene', function() {
       self.cleanAndUpdateScene();
     });
 
 
-  } // END initInteraction
+
+  }, // END initInteraction
   
 });

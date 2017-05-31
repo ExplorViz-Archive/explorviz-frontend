@@ -107,6 +107,7 @@ export default Ember.Component.extend({
 
     // Bind url-builder
     this.get('urlBuilder').on('requestURL', function() {
+      console.log(self);
       const state = {};
       state.cameraX = self.get('camera').position.x; 
       state.cameraY = self.get('camera').position.y; 
@@ -154,6 +155,7 @@ export default Ember.Component.extend({
     this.set('scene', null);
     this.set('webglrenderer', null);
     this.set('camera', null);
+    //this.get('urlBuilder').off();
   },
 
 
