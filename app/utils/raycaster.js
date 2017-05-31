@@ -4,8 +4,8 @@ export default Ember.Object.extend({
 
   raycaster: new THREE.Raycaster(),
 
-  landscapeObjects: ['node', 'system', 'nodegroup', 'application'],
-  applicationObjects: ['component', 'clazz'],
+  landscapeObjects: ['node', 'system', 'nodegroup', 'application', 'communication'],
+  applicationObjects: ['component', 'clazz', 'communication'],
   objectCatalog: 'landscapeObjects',
 
   raycasting(origin, direction, camera, possibleObjects) {

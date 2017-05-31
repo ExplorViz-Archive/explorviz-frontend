@@ -851,7 +851,7 @@ export default RenderingCore.extend({
 
       const systems = emberLandscape.get('systems');
 
-      if (systems.length === 0) {
+      if (systems.get('length') === 0) {
         rect[MIN_X] = 0.0;
         rect[MAX_X] = 1.0;
         rect[MIN_Y] = 0.0;

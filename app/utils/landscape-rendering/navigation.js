@@ -202,11 +202,9 @@ export default Ember.Object.extend(Ember.Evented, {
     if(intersectedViewObj) {
 
       const emberModel = intersectedViewObj.object.userData.model;
-      const emberModelName = emberModel.constructor.modelName;
 
-      if(emberModelName === "application"){
-        this.get('hoverHandler').showTooltip(mouse, emberModel);
-      }
+      this.get('hoverHandler').showTooltip(mouse, emberModel);
+
     }
 
   }
