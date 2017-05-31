@@ -155,7 +155,7 @@ export default Ember.Component.extend({
     this.set('scene', null);
     this.set('webglrenderer', null);
     this.set('camera', null);
-    //this.get('urlBuilder').off();
+    this.get('urlBuilder').off('requestURL');
   },
 
 
