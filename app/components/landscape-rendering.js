@@ -11,6 +11,13 @@ import Navigation from '../utils/landscape-rendering/navigation';
  */
 export default RenderingCore.extend({
 
+  actions: {
+    exportCamera(){
+      this.sendAction("exportCam", 777);
+  },
+
+  },
+
   hammerManager: null,
 
   centerPoint : null,

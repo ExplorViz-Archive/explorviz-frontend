@@ -1,5 +1,5 @@
-<!-- <button onclick={{action copyURL}}>Copy URL</button> -->
-{{#if showLandscape}}
+<button {{action "exportState"}}>Export link</button>
+{{#if showLandscape}}  
   {{landscape-rendering renderingModel=model showApplication="handleApplication"}}
 {{else}}
   {{application-rendering renderingModel=lastShownApplication}}

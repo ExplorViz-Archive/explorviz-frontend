@@ -17,6 +17,9 @@ import Ember from 'ember';
 */
 export default Ember.Component.extend({
 
+  // Declare url-builder service 
+  urlBuilder: Ember.inject.service("url-builder"),
+
   classNames: ['viz'],
 
   landscapeUpdater: Ember.inject.service("landscape-reload"),
@@ -101,6 +104,21 @@ export default Ember.Component.extend({
 
     this.set('entity', this.get('renderingModel'));
 
+
+    // Bind url-builder
+    this.get('urlBuilder').on('requestURL', function() {
+      console.log(self);
+      const state = {};
+      state.cameraX = self.get('camera').position.x; 
+      state.cameraY = self.get('camera').position.y; 
+      state.cameraZ = self.get('camera').position.z; 
+      state.timestamp = self.get('model.timestamp');
+      state.id = self.get('model.id');
+      // Passes the state from component via service to controller
+      self.get('urlBuilder').transmitState(state);
+    });
+
+
     ////////////////////
 
     // load font for labels and proceed with populating the scene
@@ -137,6 +155,7 @@ export default Ember.Component.extend({
     this.set('scene', null);
     this.set('webglrenderer', null);
     this.set('camera', null);
+    this.get('urlBuilder').off('requestURL');
   },
 
 
