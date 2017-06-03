@@ -2,6 +2,7 @@ import RenderingCore from './rendering-core';
 import Raycaster from '../utils/raycaster';
 import applyKlayLayout from '../utils/klay-layouter';
 import Navigation from '../utils/landscape-rendering/navigation';
+import THREE from "npm:three";
 
  /**
  * Renderer for landscape visualization.

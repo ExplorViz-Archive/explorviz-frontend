@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import THREE from "npm:three";
 
 /**
 * This component contains the core mechanics of the different (three.js-based) 

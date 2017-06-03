@@ -24,8 +24,6 @@ module.exports = function(defaults) {
   // please specify an object with the list of modules as keys
   // along with the exports of each module as its value.
 
-  app.import('vendor/three/three.min.js');
-  app.import('vendor/three/THREE.MeshLine.js');
   app.import('vendor/momentjs/moment.js');
   app.import('vendor/chartjs/Chart.min.js');
   app.import('vendor/chartjs/chartjs-plugin-zoom.min.js');
