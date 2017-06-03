@@ -54,6 +54,9 @@
     "ember-simple-auth": "1.3.0",
     "hammerjs": "^2.0.8",
     "three": "^0.85.2",
-    "three.meshline": "^1.0.3"
+    "three.meshline": "^1.0.3",
+    "moment": "^2.18.1"
+
+
   }
 }

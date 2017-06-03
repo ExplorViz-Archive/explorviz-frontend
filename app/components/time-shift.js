@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import moment from 'npm:moment';
 
 const {Component, $, on, observer} = Ember;
 

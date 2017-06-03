@@ -1,5 +1,6 @@
 import Reload from './data-reload';
 import Ember from "ember";
+import moment from 'npm:moment';
 
 export default Reload.extend({
 	object: null,
