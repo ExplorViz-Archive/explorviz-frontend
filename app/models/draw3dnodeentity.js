@@ -1,6 +1,7 @@
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
 import Ember from 'ember';
+import THREE from "npm:three";
 
 const { attr } = DS;
 

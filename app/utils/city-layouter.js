@@ -1,3 +1,5 @@
+import THREE from "npm:three";
+
 export default function applyCityLayout(application) {
 
     const insetSpace = 4.0;

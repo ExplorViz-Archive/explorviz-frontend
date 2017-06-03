@@ -3,6 +3,7 @@ import Raycaster from '../utils/raycaster';
 import applyKlayLayout from '../utils/klay-layouter';
 import Navigation from '../utils/landscape-rendering/navigation';
 import THREE from "npm:three";
+import Meshline from "npm:three.meshline";
 
  /**
  * Renderer for landscape visualization.
@@ -109,12 +110,6 @@ export default RenderingCore.extend({
 
         if (!isRequestObject) {
 
-          const {
-            x,
-            y,
-            z
-          } = system.get('backgroundColor');
-
           var extensionX = system.get('width') * scaleFactor.width;
           var extensionY = system.get('height') * scaleFactor.height;
 
@@ -122,7 +117,7 @@ export default RenderingCore.extend({
           var centerY = system.get('positionY') - extensionY - centerPoint.y;
 
           var systemMesh = addPlane(centerX, centerY, system.get('positionZ'), system.get('width'),
-            system.get('height'), new THREE.Color(x, y, z), null, null, self.get('scene'), system);
+            system.get('height'), new THREE.Color(0xc7c7c7), null, null, self.get('scene'), system);
 
           system.set('threeJSModel', systemMesh);
 
@@ -153,12 +148,6 @@ export default RenderingCore.extend({
 
           if (!isRequestObject) {
 
-            const {
-              x,
-              y,
-              z
-            } = nodegroup.get('backgroundColor');
-
             extensionX = nodegroup.get('width') * scaleFactor.width;
             extensionY = nodegroup.get('height') * scaleFactor.height;
 
@@ -166,7 +155,7 @@ export default RenderingCore.extend({
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
             var nodegroupMesh = addPlane(centerX, centerY, nodegroup.get('positionZ') + 0.01, nodegroup.get('width'),
-              nodegroup.get('height'), new THREE.Color(x, y, z), null, null, self.get('scene'), nodegroup);
+              nodegroup.get('height'), new THREE.Color(0x019b20), null, null, self.get('scene'), nodegroup);
 
             nodegroup.set('threeJSModel', nodegroupMesh);
 
@@ -182,12 +171,6 @@ export default RenderingCore.extend({
 
             if (!isRequestObject) {
 
-              const {
-                x,
-                y,
-                z
-              } = node.get('color');
-
               extensionX = node.get('width') * scaleFactor.width;
               extensionY = node.get('height') * scaleFactor.height;
 
@@ -195,7 +178,7 @@ export default RenderingCore.extend({
               centerY = node.get('positionY') - extensionY - centerPoint.y;
 
               var nodeMesh = addPlane(centerX, centerY, node.get('positionZ') + 0.02, node.get('width'),
-                node.get('height'), new THREE.Color(x, y, z), null, null, self.get('scene'), node);
+                node.get('height'), new THREE.Color(0x00bd38), null, null, self.get('scene'), node);
 
               node.set('threeJSModel', nodeMesh);
 
@@ -219,14 +202,8 @@ export default RenderingCore.extend({
 
               if (!isRequestObject) {
 
-                const {
-                  x,
-                  y,
-                  z
-                } = application.get('backgroundColor');
-
                 var applicationMesh = addPlane(centerX, centerY, application.get('positionZ') + 0.03,
-                  application.get('width'), application.get('height'), new THREE.Color(x, y, z), new THREE.Color(0x6D4FB4), null,
+                  application.get('width'), application.get('height'), new THREE.Color(0x5122b7), new THREE.Color(0x6D4FB4), null,
                   self.get('scene'), application);
 
                 application.set('threeJSModel', applicationMesh);
@@ -319,15 +296,9 @@ export default RenderingCore.extend({
 
         if (points.length !== 0) {
 
-          const {
-            x,
-            y,
-            z
-          } = communication.get('pipeColor');
-
           accum = {
             tiles: [],
-            pipeColor: new THREE.Color(x, y, z)
+            pipeColor: new THREE.Color(0xf49100)
           };
           communicationsAccumulated.push(accum);
 
@@ -569,7 +540,7 @@ export default RenderingCore.extend({
 
         var firstTile = accum.tiles[0];
 
-        const material = new MeshLineMaterial({
+        const material = new Meshline.MeshLineMaterial({
           color: accum.pipeColor,
           lineWidth: firstTile.lineThickness * 0.4
         });
@@ -588,7 +559,7 @@ export default RenderingCore.extend({
           );
         });
 
-        const line = new MeshLine();
+        const line = new Meshline.MeshLine();
         line.setGeometry(geometry);
 
         var lineMesh = new THREE.Mesh(line.geometry, material);

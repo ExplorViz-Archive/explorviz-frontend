@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import THREE from "npm:three";
 
 export default Ember.Object.extend({
 

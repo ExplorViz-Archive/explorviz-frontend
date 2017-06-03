@@ -5,6 +5,7 @@ import applyCityLayout from '../utils/city-layouter';
 import {createFoundation, removeFoundation} from '../utils/application-rendering/foundation-builder';
 import CityLabeler from '../utils/city-labeler';
 import Navigation from '../utils/application-rendering/navigation';
+import THREE from "npm:three";
 
  /**
  * Renderer for application visualization.
