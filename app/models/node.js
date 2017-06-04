@@ -34,8 +34,6 @@ export default DrawNodeEntity.extend({
     return `${visible}`;
   }),
 
-  color: attr(),
-
   getDisplayName: function() {
     if (this.get('parent').get('opened')) {
       if (this.get('name') && this.get('name').length > 0 && !this.get('name').startsWith("<")) {

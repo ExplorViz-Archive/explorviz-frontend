@@ -13,6 +13,8 @@ export default BaseEntity.extend({
 
   name: attr('string'),
 
+  highlighted: attr('boolean'),
+
   width: attr('number'),
   height: attr('number'),
   depth: attr('number'),

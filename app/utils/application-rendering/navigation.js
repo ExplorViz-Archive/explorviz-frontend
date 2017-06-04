@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import HammerInteraction from '../hammer-interaction';
 import HoverHandler from './hover-handler';
+import Highlighter from './highlighter'
 
 export default Ember.Object.extend(Ember.Evented, {
 
@@ -11,6 +12,7 @@ export default Ember.Object.extend(Ember.Evented, {
   rotationObject: null,
   hammerHandler: null,
   hoverHandler: null,
+  highlighter: null,
 
   raycastObjects: Ember.computed('rotationObject', function() {
     return this.get('rotationObject.children');
@@ -43,12 +45,18 @@ export default Ember.Object.extend(Ember.Evented, {
       this.set('hoverHandler', HoverHandler.create());
     }
 
+    // init Highlighter
+    if (!this.get('highlighter')) {
+      this.set('highlighter', Highlighter.create());
+    }
+
     // hover handler
     self.registerHoverHandler();
 
     this.setupHammerListener();
 
   },
+
 
   onMouseWheelStart(evt) {
 
@@ -66,6 +74,7 @@ export default Ember.Object.extend(Ember.Evented, {
       this.get('camera').position.z -= delta * 3.5;
     }
   },
+
 
   setupHammerListener() {
 
@@ -121,11 +130,18 @@ export default Ember.Object.extend(Ember.Evented, {
   },
 
 
+  updateEntities(app) {
+    this.set('rotationObject', app);
+    this.set('highlighter.application', app.userData.model);
+  },
+
+
   removeHandlers() {
     this.get('hammerHandler.hammerManager').off();
     this.get('canvas').removeEventListener('mousewheel', this.onMouseWheelStart);
     this.get('canvas').removeEventListener('mousestop', this.handleHover);
   },
+
 
   handleDoubleClick(mouse) {
 
@@ -158,6 +174,7 @@ export default Ember.Object.extend(Ember.Evented, {
 
   },
 
+
   handleSingleClick(mouse) {
 
     const origin = {};
@@ -181,7 +198,8 @@ export default Ember.Object.extend(Ember.Evented, {
 
       if(emberModelName === "component" && !emberModel.get('opened')){
 
-        emberModel.set('highlighted', !emberModel.get('highlighted'));    
+        this.get('highlighter').highlight(emberModel)
+        //emberModel.set('highlighted', !emberModel.get('highlighted'));    
       } 
       else if(emberModelName === "clazz") {
         emberModel.set('highlighted', !emberModel.get('highlighted'));

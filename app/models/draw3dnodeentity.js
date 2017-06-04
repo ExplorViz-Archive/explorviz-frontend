@@ -32,6 +32,10 @@ export default BaseEntity.extend({
     let depth = this.get('depth') / 2.0;
 
     return new THREE.Vector3(width, height, depth);
-  })
+  }),
+
+  highlight() {
+    this.set('highlighted', true);
+  }
 
 });

@@ -15,6 +15,10 @@ export default Draw3DNodeEntity.extend({
   objectIds: attr(),
 
   parent: belongsTo('component'),
-  visible: attr('boolean')
+  visible: attr('boolean'),
+
+  unhighlight() {
+    this.set('highlighted', false);
+  }
 
 });

@@ -124,8 +124,8 @@ export default RenderingCore.extend({
     this.set('application3D', new THREE.Object3D());
     this.set('application3D.userData.model', emberApplication);
 
-    // update raycasting children, because of new entity    
-    this.get('navigation').set('rotationObject', this.get('application3D'));
+    // update raycasting children, because of new entity  
+    this.get('navigation').updateEntities(this.get('application3D'));  
 
     const viewCenterPoint = calculateAppCenterAndZZoom(emberApplication);
 

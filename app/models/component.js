@@ -38,6 +38,18 @@ export default Draw3DNodeEntity.extend({
     });
 
     this.set('opened', status);
+  },
+
+  unhighlight() {
+    this.set('highlighted', false);
+
+    this.get('children').forEach((child) => {
+      child.unhighlight();
+    });
+
+    this.get('clazzes').forEach((clazz) => {
+      clazz.unhighlight();
+    });
   }
 
 });
