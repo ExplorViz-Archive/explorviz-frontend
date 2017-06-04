@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import HammerInteraction from '../hammer-interaction';
 import HoverHandler from './hover-handler';
-import Highlighter from './highlighter'
+import Highlighter from './highlighter';
 
 export default Ember.Object.extend(Ember.Evented, {
 
@@ -143,6 +143,14 @@ export default Ember.Object.extend(Ember.Evented, {
   },
 
 
+  applyHighlighting() {
+    this.get('highlighter').applyHighlighting();
+  },
+
+
+  // Handler
+
+
   handleDoubleClick(mouse) {
 
     const origin = {};
@@ -198,7 +206,7 @@ export default Ember.Object.extend(Ember.Evented, {
 
       if(emberModelName === "component" && !emberModel.get('opened')){
 
-        this.get('highlighter').highlight(emberModel)
+        this.get('highlighter').highlight(emberModel);
         //emberModel.set('highlighted', !emberModel.get('highlighted'));    
       } 
       else if(emberModelName === "clazz") {

@@ -31,6 +31,39 @@ export default Ember.Object.extend({
       this.get('application').unhighlight();
       //SceneDrawer::createObjectsFromApplication(app, true)
     }
+  },
+
+
+  applyHighlighting() {
+
+    const highlightedNode = this.get('highlightedNode');
+
+    if (highlightedNode != null) {
+
+      const communicationsAccumulated = 
+        this.get('application').get('communicationsAccumulated');
+
+      communicationsAccumulated.forEach((commu) => {
+      
+        if ((commu.source != null && commu.source.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
+          (commu.target != null && commu.target.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
+
+          //let outgoing = determineOutgoing(commu);
+          //let incoming = determineIncoming(commu);
+
+          //if (incoming && outgoing) {
+            commu.state = "SHOW_DIRECTION_IN_AND_OUT";
+          //} else if (incoming) {
+          //  commu.state = "SHOW_DIRECTION_IN"
+          //} else if (outgoing) {
+         //   commu.state = "SHOW_DIRECTION_OUT";
+         // }
+        } else {
+          commu.state = "TRANSPARENT";
+        }
+      });
+
+    }
   }
 
 });

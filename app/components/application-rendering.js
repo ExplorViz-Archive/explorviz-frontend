@@ -127,6 +127,9 @@ export default RenderingCore.extend({
     // update raycasting children, because of new entity  
     this.get('navigation').updateEntities(this.get('application3D'));  
 
+    // apply (possible) highlighting
+    this.get('navigation').applyHighlighting();
+
     const viewCenterPoint = calculateAppCenterAndZZoom(emberApplication);
 
     const accuCommunications = emberApplication.get('communicationsAccumulated');
@@ -149,10 +152,18 @@ export default RenderingCore.extend({
             start.y = end.y;
           }
 
+          let transparent = false;
+          let opacityValue = 1.0;
+
+          if(commu.state === "TRANSPARENT") {
+            transparent = true;
+            opacityValue = 0.5;
+          }
+
           const material = new THREE.MeshBasicMaterial({
             color : new THREE.Color(0xf49100),
-            //opacity : opacityValue,
-            transparent : false
+            opacity : opacityValue,
+            transparent : transparent
           });
 
           const thickness = commu.pipeSize * 0.3;
