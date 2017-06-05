@@ -12,7 +12,7 @@ export default Ember.Object.extend({
     if (!isHighlighted) {
       this.get('application').unhighlight();
       entity.highlight();
-      this.set('highlightedNode', entity);
+      this.set('highlightedEntity', entity);
       //TraceHighlighter::reset(false);
       //SceneDrawer::createObjectsFromApplication(app, true);
     } 
@@ -24,19 +24,23 @@ export default Ember.Object.extend({
 
 
   unhighlight3DNodes() {
-    this.set('highlightedNode', null);
-    
-    
-    if (this.get('application') !== null) {
-      this.get('application').unhighlight();
-      //SceneDrawer::createObjectsFromApplication(app, true)
+
+    if(this.get('highlightedEntity')) {
+
+      this.set('highlightedEntity', null);
+      
+      
+      if (this.get('application') !== null) {
+        this.get('application').unhighlight();
+        //SceneDrawer::createObjectsFromApplication(app, true)
+      }
     }
   },
 
 
   applyHighlighting() {
 
-    const highlightedNode = this.get('highlightedNode');
+    const highlightedNode = this.get('highlightedEntity');
 
     if (highlightedNode != null) {
 

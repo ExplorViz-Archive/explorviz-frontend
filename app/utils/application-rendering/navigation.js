@@ -174,7 +174,11 @@ export default Ember.Object.extend(Ember.Evented, {
 
       if(emberModelName === "component"){
         emberModel.setOpenedStatus(!emberModel.get('opened'));
-        emberModel.set('highlighted', false);
+        
+        if(emberModel === this.get('highlighter.highlightedEntity')) {
+          this.get('highlighter').unhighlight3DNodes();
+        }
+
         this.trigger('redrawScene');
       } 
 
@@ -207,15 +211,24 @@ export default Ember.Object.extend(Ember.Evented, {
       if(emberModelName === "component" && !emberModel.get('opened')){
 
         this.get('highlighter').highlight(emberModel);
-        //emberModel.set('highlighted', !emberModel.get('highlighted'));    
       } 
       else if(emberModelName === "clazz") {
-        emberModel.set('highlighted', !emberModel.get('highlighted'));
+        this.get('highlighter').highlight(emberModel);
       }
 
-      this.trigger('redrawScene');
+      this.trigger('redrawScene');     
+
+    } 
+    else {
+      if(this.get('highlighter.highlightedEntity')) {
+        // clicked in white space and entity is highlighted
+        this.get('highlighter').unhighlight3DNodes();
+        this.trigger('redrawScene');
+      }
 
     }
+
+    
 
   },
 

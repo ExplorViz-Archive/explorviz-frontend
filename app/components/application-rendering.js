@@ -170,7 +170,7 @@ export default RenderingCore.extend({
 
           if(commu.state === "TRANSPARENT") {
             transparent = true;
-            opacityValue = 0.5;
+            opacityValue = 0.4;
           }
 
           const material = new THREE.MeshBasicMaterial({
