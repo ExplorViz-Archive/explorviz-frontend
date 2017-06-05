@@ -23,8 +23,6 @@ export default Ember.Component.extend({
 
   classNames: ['viz'],
 
-  landscapeUpdater: Ember.inject.service("landscape-reload"),
-
   scene : null,
   webglrenderer: null,
   camera: null,
@@ -35,16 +33,6 @@ export default Ember.Component.extend({
 
   font: null,
   animationFrameId: null,
-
-  landscape: Ember.computed("landscapeUpdater.object.timestamp", function() {
-    return this.get('landscapeUpdater.object');
-  }),  
-
-  observer: Ember.observer("landscape", function(){
-    this.set("entity", this.get("landscape"));
-    this.preProcessEntity();
-    this.cleanAndUpdateScene(this.get("entity"));
-  }),
 
 
   // @Override
@@ -100,8 +88,6 @@ export default Ember.Component.extend({
     }
 
     render();
-
-    this.get("landscape"); //useless, but very important for working observer
 
     this.set('entity', this.get('renderingModel'));
 

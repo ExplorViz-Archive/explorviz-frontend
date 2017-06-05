@@ -1,6 +1,12 @@
+import Ember from 'ember';
 import Reload from './data-reload';
 
 export default Reload.extend({
+
+
+	landscapeRepo: Ember.inject.service("landscape-repository"),
+
+
 	/*
 		This service reloads the latest-landscape every tenth second. 
 		Look "instance-initializer/service-start" for more information.
@@ -18,16 +24,17 @@ export default Reload.extend({
 	//--------------inner functions--------------
 		function success(landscape){
 			self.debug("end landscape-request");
-			self.set("object", landscape);
+			self.set('landscapeRepo.latestLandscape', landscape);
+			//self.set("object", landscape);
 		}
 	
-		function failure(){
-			self.debug("Landscape couldn't be requested!");
+		function failure(e){
+			self.debug("Landscape couldn't be requested!", e);
 		}
 		
 		
 		function error(e){
-			self.debug("Error when fetching landscape: " + e);
+			self.debug("Error when fetching landscape: ", e);
 		}
 	//------------End of inner functions------------
 

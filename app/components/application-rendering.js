@@ -16,6 +16,7 @@ import THREE from "npm:three";
 export default RenderingCore.extend({
 
   store: Ember.inject.service('store'),
+  landscapeRepo: Ember.inject.service("landscape-repository"),
 
   application3D: null,
 
@@ -33,6 +34,8 @@ export default RenderingCore.extend({
   // @Override  
   initRendering() {
     this._super(...arguments);
+
+    const self = this;
 
     this.debug("init application rendering");
     
@@ -53,6 +56,13 @@ export default RenderingCore.extend({
       this.set('raycaster', Raycaster.create());
       this.set('raycaster.objectCatalog', 'applicationObjects');
     }
+
+    // init landscape exchange
+    this.get('landscapeRepo').on("updated", function(landscape) {
+      self.set("entity", landscape);
+      self.preProcessEntity();
+      self.cleanAndUpdateScene(self.get("entity"));
+    });
 
     this.initInteraction();
 
@@ -80,6 +90,8 @@ export default RenderingCore.extend({
     this.set('application3D', null);  
 
     this.get('navigation').removeHandlers();
+
+    this.get('landscapeRepo').off("updated");
   },
 
 
@@ -87,7 +99,7 @@ export default RenderingCore.extend({
   cleanAndUpdateScene() {
     this._super(...arguments);
 
-    this.debug("populate application rendering");
+    this.debug("clean application rendering");
 
     // save old rotation
     this.set('oldRotation', this.get('application3D').rotation);
@@ -110,6 +122,7 @@ export default RenderingCore.extend({
   // @Override
   populateScene() {
     this._super(...arguments);
+    this.debug("populate application rendering");
 
     const emberApplication = this.get('entity');
 

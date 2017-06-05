@@ -3,7 +3,6 @@ import Ember from "ember";
 import moment from 'npm:moment';
 
 export default Reload.extend({
-	object: null,
 	//@override
 	shallReload: true,
 	/*

@@ -1,3 +1,4 @@
+import Ember from 'ember';
 import RenderingCore from './rendering-core';
 import Raycaster from '../utils/raycaster';
 import applyKlayLayout from '../utils/klay-layouter';
@@ -13,11 +14,12 @@ import Meshline from "npm:three.meshline";
  */
 export default RenderingCore.extend({
 
+  landscapeRepo: Ember.inject.service("landscape-repository"),
+
   actions: {
     exportCamera(){
       this.sendAction("exportCam", 777);
-  },
-
+    }
   },
 
   hammerManager: null,
@@ -34,6 +36,8 @@ export default RenderingCore.extend({
   initRendering() {
     this._super(...arguments);
 
+    const self = this;
+
     this.debug("init landscape rendering");
 
     if (!this.get('navigation')) {
@@ -43,6 +47,13 @@ export default RenderingCore.extend({
     if (!this.get('raycaster')) {
       this.set('raycaster', Raycaster.create());
     }
+
+    // init landscape exchange
+    this.get('landscapeRepo').on("updated", function(landscape) {
+      self.set("entity", landscape);
+      self.preProcessEntity();
+      self.cleanAndUpdateScene(self.get("entity"));
+    });
 
     this.initInteraction();
 
@@ -61,6 +72,8 @@ export default RenderingCore.extend({
     this.set('textLabels', {});
 
     this.get('navigation').removeHandlers();
+
+    this.get('landscapeRepo').off("updated");
   },
 
   // @Override
