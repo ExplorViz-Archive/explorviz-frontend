@@ -4,7 +4,7 @@ import Raycaster from '../utils/raycaster';
 import applyCityLayout from '../utils/city-layouter';
 import {createFoundation, removeFoundation} from '../utils/application-rendering/foundation-builder';
 import CityLabeler from '../utils/city-labeler';
-import Navigation from '../utils/application-rendering/navigation';
+import Interaction from '../utils/application-rendering/interaction';
 import THREE from "npm:three";
 
  /**
@@ -29,7 +29,7 @@ export default RenderingCore.extend({
   oldRotation: {x: 0, y: 0},
   initialSetupDone: false,
 
-  navigation: null,
+  interaction: null,
 
   // @Override  
   initRendering() {
@@ -48,8 +48,8 @@ export default RenderingCore.extend({
       this.set('labeler', CityLabeler.create());
     }
 
-    if (!this.get('navigation')) {
-      this.set('navigation', Navigation.create());
+    if (!this.get('interaction')) {
+      this.set('interaction', Interaction.create());
     }
 
     if (!this.get('raycaster')) {
@@ -89,7 +89,7 @@ export default RenderingCore.extend({
     this.set('applicationID', null);    
     this.set('application3D', null);  
 
-    this.get('navigation').removeHandlers();
+    this.get('interaction').removeHandlers();
 
     this.get('landscapeRepo').off("updated");
   },
@@ -138,10 +138,10 @@ export default RenderingCore.extend({
     this.set('application3D.userData.model', emberApplication);
 
     // update raycasting children, because of new entity  
-    this.get('navigation').updateEntities(this.get('application3D'));  
+    this.get('interaction').updateEntities(this.get('application3D'));  
 
     // apply (possible) highlighting
-    this.get('navigation').applyHighlighting();
+    this.get('interaction').applyHighlighting();
 
     const viewCenterPoint = calculateAppCenterAndZZoom(emberApplication);
 
@@ -396,14 +396,14 @@ export default RenderingCore.extend({
     const webglrenderer = this.get('webglrenderer');
     const raycaster = this.get('raycaster');
 
-    // init navigation objects    
+    // init interaction objects    
 
-    this.get('navigation').setupInteraction(canvas, camera, webglrenderer, raycaster, 
+    this.get('interaction').setupInteraction(canvas, camera, webglrenderer, raycaster, 
       this.get('application3D'));
 
     // set listeners
 
-    this.get('navigation').on('redrawScene', function() {
+    this.get('interaction').on('redrawScene', function() {
       self.cleanAndUpdateScene();
     });
 

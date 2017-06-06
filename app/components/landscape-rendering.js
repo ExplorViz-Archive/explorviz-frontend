@@ -2,7 +2,7 @@ import Ember from 'ember';
 import RenderingCore from './rendering-core';
 import Raycaster from '../utils/raycaster';
 import applyKlayLayout from '../utils/klay-layouter';
-import Navigation from '../utils/landscape-rendering/navigation';
+import Interaction from '../utils/landscape-rendering/interaction';
 import THREE from "npm:three";
 import Meshline from "npm:three.meshline";
 
@@ -30,7 +30,7 @@ export default RenderingCore.extend({
   textLabels: {},
 
   raycaster: null,
-  navigation: null,
+  interaction: null,
 
   // @Override
   initRendering() {
@@ -40,8 +40,8 @@ export default RenderingCore.extend({
 
     this.debug("init landscape rendering");
 
-    if (!this.get('navigation')) {
-      this.set('navigation', Navigation.create());
+    if (!this.get('interaction')) {
+      this.set('interaction', Interaction.create());
     }
 
     if (!this.get('raycaster')) {
@@ -71,7 +71,7 @@ export default RenderingCore.extend({
     this.set('logos', {});
     this.set('textLabels', {});
 
-    this.get('navigation').removeHandlers();
+    this.get('interaction').removeHandlers();
 
     this.get('landscapeRepo').off("updated");
   },
@@ -84,7 +84,7 @@ export default RenderingCore.extend({
 
     this.populateScene();
 
-    this.set('navigation.raycastObjects', this.get('scene').children);
+    this.set('interaction.raycastObjects', this.get('scene').children);
   },
 
   // @Override
@@ -902,18 +902,18 @@ export default RenderingCore.extend({
     const webglrenderer = this.get('webglrenderer');
     const raycaster = this.get('raycaster');
 
-    // init navigation objects
+    // init interaction objects
 
-    this.get('navigation').setupInteraction(canvas, camera, webglrenderer, raycaster, 
+    this.get('interaction').setupInteraction(canvas, camera, webglrenderer, raycaster, 
       raycastObjects);
 
     // set listeners
 
-    this.get('navigation').on('redrawScene', function() {
+    this.get('interaction').on('redrawScene', function() {
       self.cleanAndUpdateScene();
     });
 
-    this.get('navigation').on('showApplication', function(emberModel) {
+    this.get('interaction').on('showApplication', function(emberModel) {
       // bubble up action to visualization route
       self.sendAction("showApplication", emberModel);
     });
