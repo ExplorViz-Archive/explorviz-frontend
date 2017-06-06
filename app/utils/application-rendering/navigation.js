@@ -174,9 +174,11 @@ export default Ember.Object.extend(Ember.Evented, {
 
       if(emberModelName === "component"){
         emberModel.setOpenedStatus(!emberModel.get('opened'));
+
+        const highlighted = this.get('highlighter.highlightedEntity');
         
-        if(emberModel === this.get('highlighter.highlightedEntity')) {
-          this.get('highlighter').unhighlight3DNodes();
+        if(emberModel === highlighted || emberModel.contains(highlighted)) {
+          this.get('highlighter').unhighlightAll();
         }
 
         this.trigger('redrawScene');
@@ -222,7 +224,7 @@ export default Ember.Object.extend(Ember.Evented, {
     else {
       if(this.get('highlighter.highlightedEntity')) {
         // clicked in white space and entity is highlighted
-        this.get('highlighter').unhighlight3DNodes();
+        this.get('highlighter').unhighlightAll();
         this.trigger('redrawScene');
       }
 

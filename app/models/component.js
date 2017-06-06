@@ -50,6 +50,33 @@ export default Draw3DNodeEntity.extend({
     this.get('clazzes').forEach((clazz) => {
       clazz.unhighlight();
     });
+  },
+
+  contains(possibleElem) {
+
+    let found = false;
+
+    this.get('clazzes').forEach((clazz) => {
+      if(clazz === possibleElem) {
+        found = true;
+      }
+    });
+
+    if(!found) {
+      this.get('children').forEach((child) => {
+        if(child === possibleElem) {
+          found = true;
+        } else {
+          const tempResult = child.contains(possibleElem);
+          if(tempResult) {
+            found = true;
+          }
+        }
+      });
+    }
+
+    return found;
+
   }
 
 });
