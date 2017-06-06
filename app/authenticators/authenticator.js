@@ -16,7 +16,6 @@ export default Base.extend({
 
     ajax: Ember.inject.service(),
 
-    //tokenEndpoint: 'http://192.168.247.129:8081',
     tokenEndpoint: ENV.APP.API_ROOT,
 
     restore: function(data) {
