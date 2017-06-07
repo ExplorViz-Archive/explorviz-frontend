@@ -9,7 +9,8 @@
     "Hammer",
     "Chart",
     "$klay",
-    "moment"
+    "moment",
+    "THREEx"
   ],
   "browser": true,
   "boss": true,

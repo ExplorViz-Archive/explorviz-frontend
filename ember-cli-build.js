@@ -27,6 +27,7 @@ module.exports = function(defaults) {
   app.import('vendor/chartjs/Chart.min.js');
   app.import('vendor/chartjs/chartjs-plugin-zoom.min.js');
   app.import('vendor/layout/klay.js');
+  app.import('vendor/stats/threex.rendererstats.js');
 
   return app.toTree();
 };
