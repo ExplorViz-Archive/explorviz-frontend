@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import THREE from "npm:three";
 import config from '../config/environment';
-import THREEPerformance from '../mixins/threeperformance';
+import THREEPerformance from '../mixins/threejs-performance';
 
 /**
 * This component contains the core mechanics of the different (three.js-based) 

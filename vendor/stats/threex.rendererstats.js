@@ -51,7 +51,7 @@ THREEx.RendererStats  = function (){
       lastTime  = Date.now()
 
       var i = 0;
-      msTexts[i++].textContent = "== Memory =====";
+      msTexts[i++].textContent = "== Memory ====";
       msTexts[i++].textContent = "Programs: " + webGLRenderer.info.programs.length;
       msTexts[i++].textContent = "Geometries: "+webGLRenderer.info.memory.geometries;
       msTexts[i++].textContent = "Textures: " + webGLRenderer.info.memory.textures;
