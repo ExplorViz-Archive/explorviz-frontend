@@ -35,9 +35,11 @@ export default Ember.Object.extend(Ember.Evented, {
 
     doubleTap.recognizeWith(singleTap);
     singleTap.requireFailure(doubleTap);
+    doubleTap.dropRequireFailure(singleTap);
 
 
     hammer.on('doubletap', (evt) => {
+      console.log("doubletap");
       if(evt.button !== 1) {
         return;
       }
@@ -97,6 +99,7 @@ export default Ember.Object.extend(Ember.Evented, {
 
 
     hammer.on('singletap', function(evt){
+      console.log("singletap");
       if(evt.button !== 1) {
         return;
       }
