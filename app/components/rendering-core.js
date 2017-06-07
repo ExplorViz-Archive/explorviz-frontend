@@ -16,7 +16,7 @@ import THREE from "npm:three";
 * @class Rendering-Core
 * @extends Ember.Component
 */
-export default Ember.Component.extend({
+export default Ember.Component.extend(Ember.Evented, {
 
   // Declare url-builder service 
   urlBuilder: Ember.inject.service("url-builder"),
@@ -79,8 +79,34 @@ export default Ember.Component.extend({
     }));
     this.get('webglrenderer').setSize(width, height);
 
-    // Rendering loop //
 
+
+    // aspect ratio handler for resizing    
+    /*window.addEventListener('resize', registerResizer, false);
+
+    function registerResizer(evt) {
+      self.resizeWindow(evt);
+    }*/
+
+    this.$(window).on('resize.visualization', function(){
+      const outerDiv = this.$('.viz')[0];
+
+      if(outerDiv) {
+
+        const height = Math.round(this.$('.viz').height());
+        const width = Math.round(this.$('.viz').width());
+
+        self.set('camera.aspect', width / height);
+        self.get('camera').updateProjectionMatrix();
+
+        self.get('webglrenderer').setSize(width, height);
+
+        self.trigger("resized");
+      }
+    });
+
+
+    // Rendering loop //
     function render() {
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
@@ -116,7 +142,7 @@ export default Ember.Component.extend({
 
     });    
 
-  },
+  },  
 
 
   /**
@@ -138,6 +164,8 @@ export default Ember.Component.extend({
    */
   cleanup() {
     cancelAnimationFrame(this.get('animationFrameId'));
+
+    this.$(window).off('resize.visualization');
 
     this.set('scene', null);
     this.set('webglrenderer', null);

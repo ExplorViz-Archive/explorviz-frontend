@@ -22,6 +22,8 @@ export default RenderingCore.extend({
 
   applicationID: null,
 
+  viewCenterPoint: null,
+
   raycaster: null,
   interactionHandler: null,
   labeler: null,
@@ -74,6 +76,12 @@ export default RenderingCore.extend({
     const light = new THREE.AmbientLight(
     new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
+
+    // handle window resize
+    this.on('resized', function () {
+      self.set('viewCenterPoint', null);
+      self.cleanAndUpdateScene();
+    });
   },
 
 
@@ -143,7 +151,11 @@ export default RenderingCore.extend({
     // apply (possible) highlighting
     this.get('navigation').applyHighlighting();
 
-    const viewCenterPoint = calculateAppCenterAndZZoom(emberApplication);
+    if(!this.get('viewCenterPoint')) {
+      this.set('viewCenterPoint', calculateAppCenterAndZZoom(emberApplication));
+    }
+
+    const viewCenterPoint = this.get('viewCenterPoint');
 
     const accuCommunications = emberApplication.get('communicationsAccumulated');
 

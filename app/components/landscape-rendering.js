@@ -60,6 +60,12 @@ export default RenderingCore.extend({
     var dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
     this.get('scene').add(dirLight);
+
+    // handle window resize
+    this.on('resized', function () {
+      self.set('centerPoint', null);
+      self.cleanAndUpdateScene();
+    });
   },
 
   // @Override
