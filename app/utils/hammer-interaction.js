@@ -39,7 +39,6 @@ export default Ember.Object.extend(Ember.Evented, {
 
 
     hammer.on('doubletap', (evt) => {
-      console.log("doubletap");
       if(evt.button !== 1) {
         return;
       }
@@ -92,14 +91,11 @@ export default Ember.Object.extend(Ember.Evented, {
       mouse.x = evt.srcEvent.clientX;
       mouse.y = evt.srcEvent.clientY;
 
-      console.log("panend");
-
       self.trigger('panningEnd', mouse);
     });
 
 
     hammer.on('singletap', function(evt){
-      console.log("singletap");
       if(evt.button !== 1) {
         return;
       }

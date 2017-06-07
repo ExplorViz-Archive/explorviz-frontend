@@ -100,7 +100,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
 
     // Init Performance
-    if(config.environment === "development") {
+    if(config.environment === "development" || config.environment === "akr") {
       this.addPerformanceMetrics();
     }
 
@@ -110,14 +110,14 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
 
-      if(config.environment === "development") {
+      if(config.environment === "development" || config.environment === "akr") {
         self.get('threexStats').update(self.get('webglrenderer'));
         self.get('stats').begin();
       }
 
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
 
-      if(config.environment === "development") {
+      if(config.environment === "development" || config.environment === "akr") {
         self.get('stats').end();
       }      
       
