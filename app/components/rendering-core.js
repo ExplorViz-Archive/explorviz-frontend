@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import THREE from "npm:three";
-import Stats from "npm:stats.js";
+import config from '../config/environment';
+import THREEPerformance from '../mixins/threeperformance';
 
 /**
 * This component contains the core mechanics of the different (three.js-based) 
@@ -17,7 +18,7 @@ import Stats from "npm:stats.js";
 * @class Rendering-Core
 * @extends Ember.Component
 */
-export default Ember.Component.extend(Ember.Evented, {
+export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
   // Declare url-builder service 
   urlBuilder: Ember.inject.service("url-builder"),
@@ -98,27 +99,28 @@ export default Ember.Component.extend(Ember.Evented, {
     });
 
 
-    // Three.js monitoring/performance code
-    const stats = new Stats();
-    // 0: fps, 1: ms, 2: mb, 3+: custom or just click the window to toggle
-    stats.showPanel(0); 
-    stats.dom.style.top = "200px";
-    console.log(stats.dom);
-    document.body.appendChild( stats.dom );
+    // Init Performance
+    if(config.environment === "development") {
+      this.addPerformanceMetrics();
+    }
 
-    const rendererStats = new THREEx.RendererStats();
-    rendererStats.domElement.style.position = 'absolute';
-    rendererStats.domElement.style.top = '250px';
-    document.body.appendChild(rendererStats.domElement);
 
     // Rendering loop //
     function render() {
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
-      rendererStats.update(self.get('webglrenderer'));
-      stats.begin();
+
+      if(config.environment === "development") {
+        self.get('threexStats').update(self.get('webglrenderer'));
+        self.get('stats').begin();
+      }
+
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
-      stats.end();
+
+      if(config.environment === "development") {
+        self.get('stats').end();
+      }      
+      
     }
 
     render();
