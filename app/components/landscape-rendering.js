@@ -28,6 +28,7 @@ export default RenderingCore.extend({
 
   logos: {},
   textLabels: {},
+  gradientTextures: {},
 
   raycaster: null,
   navigation: null,
@@ -76,6 +77,7 @@ export default RenderingCore.extend({
 
     this.set('logos', {});
     this.set('textLabels', {});
+    this.set('gradientTextures', {});
 
     this.get('navigation').removeHandlers();
 
@@ -701,8 +703,9 @@ export default RenderingCore.extend({
             transparent: true
           });
 
-          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-              material);
+          const geo = new THREE.PlaneGeometry(width, height);
+
+          const plane = new THREE.Mesh(geo, material);
           plane.position.set(x, y, z);
           parent.add(plane);
           plane.userData['model'] = model;
@@ -711,9 +714,7 @@ export default RenderingCore.extend({
         } 
         else {
 
-          new THREE.TextureLoader().load('images/logos/' + textureName + '.png', (texture) => {
-
-            self.get('logos')[textureName] = texture;
+          new THREE.TextureLoader().load('images/logos/' + textureName + '.png', (texture) => {            
 
             const material = new THREE.MeshBasicMaterial({
               map: texture,
@@ -724,6 +725,9 @@ export default RenderingCore.extend({
             plane.position.set(x, y, z);
             parent.add(plane);
             plane.userData['model'] = model;
+
+            self.get('logos')[textureName] = texture;
+
             return plane;
           });
 
@@ -747,22 +751,38 @@ export default RenderingCore.extend({
         else {
 
           // create gradient texture
-          const canvas = document.createElement( 'canvas' );
-          canvas.width = 16;
-          canvas.height = 16;
+          
+          const name = model.get('name');
 
-          const ctx = canvas.getContext("2d");
+          let gradientTexture = null;
 
-          const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
-          grd.addColorStop(0.2, 'rgba(72,26,180,1)');
-          grd.addColorStop(1, 'rgba(101,68,180,1)');
+          if(self.get('gradientTextures')[name]) {
 
-          ctx.fillStyle = grd;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
+            gradientTexture = self.get('gradientTextures')[name];
 
-          const gradientTexture = new THREE.Texture(canvas);
-          gradientTexture.needsUpdate = true;
-          gradientTexture.minFilter = THREE.LinearFilter;
+          }
+          else {
+
+            const canvas = document.createElement( 'canvas' );
+            canvas.width = 16;
+            canvas.height = 16;
+
+            const ctx = canvas.getContext("2d");
+
+            const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
+            grd.addColorStop(0.2, 'rgba(72,26,180,1)');
+            grd.addColorStop(1, 'rgba(101,68,180,1)');
+
+            ctx.fillStyle = grd;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            gradientTexture = new THREE.Texture(canvas);
+            gradientTexture.needsUpdate = true;
+            gradientTexture.minFilter = THREE.LinearFilter;
+
+            self.get('gradientTextures')[name] = gradientTexture;
+
+          }
 
           // apply texture too material and create mesh
           const geometry = new THREE.PlaneGeometry(width, height);
@@ -777,7 +797,6 @@ export default RenderingCore.extend({
           parent.add(plane);
           plane.userData['model'] = model;
           return plane;
-
         }
 
       } 
@@ -804,9 +823,6 @@ export default RenderingCore.extend({
       const viewPortSize = self.get('webglrenderer').getSize();
 
       let viewportRatio = viewPortSize.width / viewPortSize.height;
-
-      /*self.debugPlane(0, 0, 0.1, requiredWidth,
-        requiredHeight, new THREE.Color(1, 0, 0), self.get('scene'));*/
 
       const sizeFactor = 0.65;
 

@@ -195,11 +195,21 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
   cleanAndUpdateScene() {
     const scene = this.get('scene');
 
-    for (let i = scene.children.length - 1; i >= 0 ; i--) {
-      let child = scene.children[i];
+    removeAllChildren(scene);
 
-      if ( child.type !== 'AmbientLight' && child.type !== 'SpotLight' ) {
-        scene.remove(child);
+    function removeAllChildren(entity) {
+      for (let i = entity.children.length - 1; i >= 0 ; i--) {
+        let child = entity.children[i];
+
+        removeAllChildren(child);
+
+        if (child.type !== 'AmbientLight' && child.type !== 'SpotLight' && child.type !== 'DirectionalLight') {
+          if(child.type !== 'Object3D') {
+            child.geometry.dispose();
+            child.material.dispose();
+          }
+          entity.remove(child);
+        }
       }
     }
   },
