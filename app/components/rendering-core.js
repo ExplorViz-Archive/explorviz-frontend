@@ -98,13 +98,6 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
       }
     });
 
-
-    // Init Performance
-    if(config.environment === "development" || config.environment === "akr") {
-      this.addPerformanceMetrics();
-    }
-
-
     // Rendering loop //
     function render() {
       const animationId = requestAnimationFrame(render);
@@ -175,12 +168,14 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
   cleanup() {
     cancelAnimationFrame(this.get('animationFrameId'));
 
-    this.$(window).off('resize.visualization');
+    this.$(window).off('resize.visualization');    
 
     this.set('scene', null);
     this.set('webglrenderer', null);
     this.set('camera', null);
     this.get('urlBuilder').off('requestURL');
+
+    this.removePerformanceMeasurement();
   },
 
 
