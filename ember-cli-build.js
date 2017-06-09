@@ -29,5 +29,10 @@ module.exports = function(defaults) {
   app.import('vendor/layout/klay.js');
   app.import('vendor/stats/threex.rendererstats.js');
 
+  app.import('vendor/bootstrap/bootstrap-colorpicker.min.js');
+  app.import('vendor/bootstrap/bootstrap-colorpicker.min.css.map');
+  app.import('vendor/bootstrap/bootstrap-colorpicker.min.css');
+
+
   return app.toTree();
 };
