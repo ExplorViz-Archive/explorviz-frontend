@@ -15,6 +15,7 @@ import Meshline from "npm:three.meshline";
 export default RenderingCore.extend({
 
   landscapeRepo: Ember.inject.service("landscape-repository"),
+  configuration: Ember.inject.service("configuration"),
 
   actions: {
     exportCamera(){
@@ -137,8 +138,10 @@ export default RenderingCore.extend({
           var centerX = system.get('positionX') + extensionX - centerPoint.x;
           var centerY = system.get('positionY') - extensionY - centerPoint.y;
 
+          const color = self.get('configuration.landscapeColors.system');
+
           var systemMesh = addPlane(centerX, centerY, system.get('positionZ'), system.get('width'),
-            system.get('height'), new THREE.Color(0xc7c7c7), null, null, self.get('scene'), system);
+            system.get('height'), new THREE.Color(color), null, null, self.get('scene'), system);
 
           system.set('threeJSModel', systemMesh);
 
@@ -175,8 +178,10 @@ export default RenderingCore.extend({
             centerX = nodegroup.get('positionX') + extensionX - centerPoint.x;
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
+            const color = self.get('configuration.landscapeColors.nodegroup');
+
             var nodegroupMesh = addPlane(centerX, centerY, nodegroup.get('positionZ') + 0.01, nodegroup.get('width'),
-              nodegroup.get('height'), new THREE.Color(0x019b20), null, null, self.get('scene'), nodegroup);
+              nodegroup.get('height'), new THREE.Color(color), null, null, self.get('scene'), nodegroup);
 
             nodegroup.set('threeJSModel', nodegroupMesh);
 
@@ -198,8 +203,10 @@ export default RenderingCore.extend({
               centerX = node.get('positionX') + extensionX - centerPoint.x;
               centerY = node.get('positionY') - extensionY - centerPoint.y;
 
+              const color = self.get('configuration.landscapeColors.node');
+
               var nodeMesh = addPlane(centerX, centerY, node.get('positionZ') + 0.02, node.get('width'),
-                node.get('height'), new THREE.Color(0x00bd38), null, null, self.get('scene'), node);
+                node.get('height'), new THREE.Color(color), null, null, self.get('scene'), node);
 
               node.set('threeJSModel', nodeMesh);
 
@@ -223,8 +230,11 @@ export default RenderingCore.extend({
 
               if (!isRequestObject) {
 
+                const color1 = self.get('configuration.landscapeColors.application1');
+                const color2 = self.get('configuration.landscapeColors.application2');
+
                 var applicationMesh = addPlane(centerX, centerY, application.get('positionZ') + 0.03,
-                  application.get('width'), application.get('height'), new THREE.Color(0x5122b7), new THREE.Color(0x6D4FB4), null,
+                  application.get('width'), application.get('height'), new THREE.Color(color1), new THREE.Color(color2), null,
                   self.get('scene'), application);
 
                 application.set('threeJSModel', applicationMesh);
@@ -317,9 +327,11 @@ export default RenderingCore.extend({
 
         if (points.length !== 0) {
 
+          const color = self.get('configuration.landscapeColors.communication');
+
           accum = {
             tiles: [],
-            pipeColor: new THREE.Color(0xf49100)
+            pipeColor: new THREE.Color(color)
           };
           communicationsAccumulated.push(accum);
 
@@ -756,7 +768,10 @@ export default RenderingCore.extend({
 
           let gradientTexture = null;
 
-          if(self.get('gradientTextures')[name]) {
+          const textureChange = 
+            self.get('configuration.landscapeColors.appTextureChanged');
+
+          if(self.get('gradientTextures')[name] && !textureChange) {
 
             gradientTexture = self.get('gradientTextures')[name];
 
@@ -770,8 +785,11 @@ export default RenderingCore.extend({
             const ctx = canvas.getContext("2d");
 
             const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
-            grd.addColorStop(0.2, 'rgba(72,26,180,1)');
-            grd.addColorStop(1, 'rgba(101,68,180,1)');
+
+            console.log("color", color1.getStyle());
+
+            grd.addColorStop(0.2, color1.getStyle());
+            grd.addColorStop(1, color2.getStyle());
 
             ctx.fillStyle = grd;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
