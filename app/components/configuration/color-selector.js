@@ -11,6 +11,19 @@ export default Ember.Component.extend({
   },
 
 
+  // @Override
+  willDestroyElement() {
+    this._super(...arguments);
+  
+    this.$('#cp1').colorpicker().off('changeColor');
+    this.$('#cp2').colorpicker().off('changeColor');
+    this.$('#cp3').colorpicker().off('changeColor');
+    this.$('#cp4').colorpicker().off('changeColor');
+    this.$('#cp5').colorpicker().off('changeColor');
+    this.$('#cp6').colorpicker().off('changeColor');
+  },
+
+
   initColorpicker() {
 
     const self = this;

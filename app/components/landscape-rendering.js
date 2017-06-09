@@ -786,8 +786,6 @@ export default RenderingCore.extend({
 
             const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
 
-            console.log("color", color1.getStyle());
-
             grd.addColorStop(0.2, color1.getStyle());
             grd.addColorStop(1, color2.getStyle());
 
