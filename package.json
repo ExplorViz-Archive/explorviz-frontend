@@ -42,8 +42,7 @@
     "loader.js": "^4.4.0",
     "yuidoc-bootstrap-theme": "^1.0.6",
     "yuidocjs": "^0.10.2",
-    "stats.js": "^0.17.0",
-    "explorviz-frontend-plugin-colorpicker": "0.0.1"
+    "stats.js": "^0.17.0"
   },
   "engines": {
     "node": ">= 0.12.0"
