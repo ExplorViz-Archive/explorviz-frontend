@@ -3,11 +3,14 @@ import Ember from 'ember';
 export default Ember.Controller.extend({
 
   urlBuilder: Ember.inject.service("url-builder"),
+  viewImporter: Ember.inject.service("view-importer"),
 
   // Specify query parameters
   queryParams: ['timestamp', 'id', 'appName', 'cameraX', 'cameraY', 'cameraZ'],
 
   type: 'landscape',
+
+  // query params serialized into strings
   id: null,
   appName: null,
   cameraX: null,
@@ -20,10 +23,24 @@ export default Ember.Controller.extend({
   state: null,
   
   //@override
-  // Initialize service
+  // Initialize services
   init() {
     const self = this;
 
+    // Listen for component request 
+    self.get('viewImporter').on('requestView', function() {
+      let newState = {};
+      // Get and convert query params
+      newState.cameraX = parseFloat(self.get('cameraX'));
+      newState.cameraY = parseFloat(self.get('cameraY'));
+      newState.cameraZ = parseFloat(self.get('cameraZ'));
+      newState.timestamp = self.get('model.timestamp');
+      newState.id = self.get('model.id');
+      // Passes the new state from controller via service to component
+      self.get('viewImporter').transmitView(newState);
+    });
+    
+    // setup url-builder Service
     this.get('urlBuilder').on('transmitState', function(state) {
       self.set('state',state);
     });

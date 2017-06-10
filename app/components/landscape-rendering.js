@@ -16,12 +16,6 @@ export default RenderingCore.extend({
 
   landscapeRepo: Ember.inject.service("landscape-repository"),
 
-  actions: {
-    exportCamera(){
-      this.sendAction("exportCam", 777);
-    }
-  },
-
   hammerManager: null,
 
   centerPoint : null,
@@ -31,6 +25,8 @@ export default RenderingCore.extend({
 
   raycaster: null,
   navigation: null,
+
+  newState: null,
 
   // @Override
   initRendering() {
@@ -55,11 +51,42 @@ export default RenderingCore.extend({
       self.cleanAndUpdateScene(self.get("entity"));
     });
 
+
+    this.get('viewImporter').on('transmitView', function(newState) {
+      self.set('newState',newState);
+    });
+        
     this.initInteraction();
 
     var dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
     this.get('scene').add(dirLight);
+
+    // import view
+    this.importView();
+
+  },
+
+   /**
+    This method is used to update the camera with query parameters
+   */ 
+   importView(){
+    this.get('viewImporter').requestView();
+
+    const camX = this.get('newState').cameraX;
+    const camY = this.get('newState').cameraY;
+    const camZ = this.get('newState').cameraZ;
+
+    if(camX != NaN){
+      this.get('camera').position.x = camX;
+    }
+    if(camY != NaN){
+      this.get('camera').position.y = camY;
+    }
+    if(camZ != NaN){
+      this.get('camera').position.z = camZ;
+    }
+    this.get('camera').updateProjectionMatrix();
   },
 
   // @Override
@@ -74,10 +101,13 @@ export default RenderingCore.extend({
     this.get('navigation').removeHandlers();
 
     this.get('landscapeRepo').off("updated");
+
+    this.get('viewImporter').off('requestView');
   },
 
   // @Override
   cleanAndUpdateScene() {
+
     this._super(...arguments);
 
     this.debug("clean and populate landscape rendering");
@@ -110,7 +140,6 @@ export default RenderingCore.extend({
       if(!this.get('centerPoint')) {
         this.set('centerPoint', calculateLandscapeCenterAndZZoom(emberLandscape));
       }      
-
       var centerPoint = this.get('centerPoint'); 
 
       systems.forEach(function(system) {
@@ -814,8 +843,6 @@ export default RenderingCore.extend({
 
       camera.position.z = Math.max(Math.max(newZ_by_height, newZ_by_width), 10.0);
       camera.updateProjectionMatrix();
-
-
       return center;
 
     }
@@ -917,8 +944,6 @@ export default RenderingCore.extend({
       // bubble up action to visualization route
       self.sendAction("showApplication", emberModel);
     });
-
-
 
   }, // END initInteraction
 

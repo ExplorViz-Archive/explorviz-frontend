@@ -18,6 +18,11 @@ import THREE from "npm:three";
 */
 export default Ember.Component.extend({
 
+  state: null,
+
+  // Declare view-importer service 
+  viewImporter: Ember.inject.service("view-importer"),
+
   // Declare url-builder service 
   urlBuilder: Ember.inject.service("url-builder"),
 
@@ -38,7 +43,6 @@ export default Ember.Component.extend({
   // @Override
   didRender(){
     this._super(...arguments);
-
     this.initRendering();
   },
 
@@ -91,10 +95,8 @@ export default Ember.Component.extend({
 
     this.set('entity', this.get('renderingModel'));
 
-
     // Bind url-builder
     this.get('urlBuilder').on('requestURL', function() {
-      console.log(self);
       const state = {};
       state.cameraX = self.get('camera').position.x; 
       state.cameraY = self.get('camera').position.y; 
@@ -105,7 +107,6 @@ export default Ember.Component.extend({
       self.get('urlBuilder').transmitState(state);
     });
 
-
     ////////////////////
 
     // load font for labels and proceed with populating the scene
@@ -114,10 +115,9 @@ export default Ember.Component.extend({
       self.set('font', font);
       self.populateScene();
 
-    });    
+    });  
 
   },
-
 
   /**
    * This function is called once on initRendering. Inherit this function to 
