@@ -130,8 +130,6 @@ export default Ember.Object.extend(Ember.Evented, {
 
   handleDoubleClick(mouse) {
 
-    const self = this;
-
     const origin = {};
 
     origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
@@ -156,12 +154,17 @@ export default Ember.Object.extend(Ember.Evented, {
         if(emberModel.get('components').get('length') === 0) {
 
           this.set('alertActive', true);
-          
-          alertify.alert("Sorry, no details for " + emberModel.get('name') + 
+
+          const message = "Sorry, no details for " + emberModel.get('name') + 
+            " are available.";
+
+          alertify.delay(3000).log(message);
+
+          /*alertify.alert("Sorry, no details for " + emberModel.get('name') + 
             " are available.", function() {
             // confirmed dialog
             self.set('alertActive', false);
-          });
+          });*/
 
         } else {
           // data available => open application-rendering
