@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import HammerInteraction from '../hammer-interaction';
 import HoverHandler from './hover-handler';
+import alertify from 'npm:alertify.js';
 
 export default Ember.Object.extend(Ember.Evented, {
 
@@ -12,6 +13,8 @@ export default Ember.Object.extend(Ember.Evented, {
 
   hammerHandler: null,
   hoverHandler: null,
+
+  alertActive: false,
 
   setupInteraction(canvas, camera, renderer, raycaster, raycastObjects) {
     this.set('canvas', canvas);
@@ -127,6 +130,8 @@ export default Ember.Object.extend(Ember.Evented, {
 
   handleDoubleClick(mouse) {
 
+    const self = this;
+
     const origin = {};
 
     origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
@@ -140,15 +145,30 @@ export default Ember.Object.extend(Ember.Evented, {
 
     if(intersectedViewObj) {
 
-      const emberModel = intersectedViewObj.object.userData.model;
-      const emberModelName = emberModel.constructor.modelName;
-
       // hide tooltip
       this.get('hoverHandler').hideTooltip();
 
+      const emberModel = intersectedViewObj.object.userData.model;
+      const emberModelName = emberModel.constructor.modelName;
+      
       if(emberModelName === "application"){
-        // open application-rendering
-        this.trigger('showApplication', emberModel);
+
+        if(emberModel.get('components').get('length') === 0) {
+
+          this.set('alertActive', true);
+          
+          alertify.alert("Sorry, no details for " + emberModel.get('name') + 
+            " are available.", function() {
+            // confirmed dialog
+            self.set('alertActive', false);
+          });
+
+        } else {
+          // data available => open application-rendering
+          this.trigger('showApplication', emberModel);
+        }
+
+        
       } 
       else if (emberModelName === "nodegroup" || emberModelName === "system"){
         emberModel.setOpened(!emberModel.get('opened'));
@@ -158,7 +178,7 @@ export default Ember.Object.extend(Ember.Evented, {
         emberModel.setOpenedStatus(!emberModel.get('opened'));
         emberModel.set('highlighted', false);
         this.trigger('redrawScene');
-      } 
+      }
 
     }
 
@@ -185,6 +205,10 @@ export default Ember.Object.extend(Ember.Evented, {
 
 
   handleHover(evt) {
+
+    if(this.get('alertActive')) {
+      return;
+    }
 
     const mouse = {
       x: evt.detail.clientX,
