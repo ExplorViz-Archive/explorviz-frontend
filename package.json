@@ -16,7 +16,6 @@
     "test": "ember test"
   },
   "devDependencies": {
-    "alertify.js": "^1.0.12",
     "broccoli-asset-rev": "^2.5.0",
     "ember-browserify": "^1.1.13",
     "ember-cli": "2.13.2",

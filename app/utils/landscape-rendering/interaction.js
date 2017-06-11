@@ -1,9 +1,9 @@
 import Ember from 'ember';
 import HammerInteraction from '../hammer-interaction';
 import HoverHandler from './hover-handler';
-import alertify from 'npm:alertify.js';
+import AlertifyHandler from 'explorviz-ui-frontend/mixins/alertify-handler';
 
-export default Ember.Object.extend(Ember.Evented, {
+export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
   canvas: null,
   camera: null,
@@ -13,8 +13,6 @@ export default Ember.Object.extend(Ember.Evented, {
 
   hammerHandler: null,
   hoverHandler: null,
-
-  alertActive: false,
 
   setupInteraction(canvas, camera, renderer, raycaster, raycastObjects) {
     this.set('canvas', canvas);
@@ -152,19 +150,12 @@ export default Ember.Object.extend(Ember.Evented, {
       if(emberModelName === "application"){
 
         if(emberModel.get('components').get('length') === 0) {
-
-          this.set('alertActive', true);
+          // no data => show message
 
           const message = "Sorry, no details for " + emberModel.get('name') + 
             " are available.";
 
-          alertify.delay(3000).log(message);
-
-          /*alertify.alert("Sorry, no details for " + emberModel.get('name') + 
-            " are available.", function() {
-            // confirmed dialog
-            self.set('alertActive', false);
-          });*/
+          this.showAlertifyMessage(message);
 
         } else {
           // data available => open application-rendering
@@ -208,10 +199,6 @@ export default Ember.Object.extend(Ember.Evented, {
 
 
   handleHover(evt) {
-
-    if(this.get('alertActive')) {
-      return;
-    }
 
     const mouse = {
       x: evt.detail.clientX,

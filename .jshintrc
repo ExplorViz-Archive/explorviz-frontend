@@ -10,7 +10,8 @@
     "Chart",
     "$klay",
     "moment",
-    "THREEx"
+    "THREEx",
+    "alertify"
   ],
   "browser": true,
   "boss": true,
