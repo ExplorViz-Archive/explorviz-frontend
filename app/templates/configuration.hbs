@@ -1,1 +1,3 @@
-{{color-picker}}
+{{#each configurationService.addonImports as |addon|}}
+  {{component addon}}
+{{/each}}
