@@ -1,20 +1,20 @@
 import Ember from 'ember';
 
 /**
-This service is used to pass data from the component to the controller. 
+This service is used to pass data from the controller to the component. 
 */
 export default Ember.Service.extend(Ember.Evented, {
 	/**
-	This method is implemented in the subcomponents of "rendering-core" to create a state out of 
-	the controllers query paramters. 
+	This method is implemented in the controller to create a state out of 
+	the controllers query parameters. 
 	This state contains the camera axis (x,y,z), id and timestamp.
 	*/
 	requestView(){
 		this.trigger('requestView');
 	},
 	/**
-	This method is used to pass the state to the controller. 
-	It's triggered in "rendering-core" by the function above.
+	This method is used to pass the state to the component. 
+	It's triggered in the controller.
 	*/
 	transmitView(newState){
 		this.trigger('transmitView',newState);
