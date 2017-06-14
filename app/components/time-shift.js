@@ -12,6 +12,7 @@ export default Component.extend({
   timeshiftUpdater: Ember.inject.service("timeshift-reload"),  
   landscapeUpdater: Ember.inject.service("landscape-reload"), 
   timestamps: Ember.computed.oneWay("timeshiftUpdater.object"),
+  timeshiftStopper: Ember.inject.service("timeshift-pause"),
   
   observer: Ember.observer("timestamps", function(){
     Ember.run.once(this, 'updatePlot');
@@ -40,16 +41,16 @@ export default Component.extend({
       }
     },
     playPauseTimeshift() {
-      if(this.get('timeshiftUpdater').active) {        
-        this.set('landscapeUpdater.active', false);
-        this.set('timeshiftUpdater.active', false);
-        this.set('playPauseCSSClass', 'glyphicon-play');
-      } 
-      else {
-        this.set('landscapeUpdater.active', true);
-        this.set('timeshiftUpdater.active', true);
-        this.set('playPauseCSSClass', 'glyphicon-pause');
-      }
+        if(this.get('timeshiftUpdater').active) {        
+          this.set('landscapeUpdater.active', false);
+          this.set('timeshiftUpdater.active', false);
+          this.set('playPauseCSSClass', 'glyphicon-play');
+        } 
+        else {
+          this.set('landscapeUpdater.active', true);
+          this.set('timeshiftUpdater.active', true);
+          this.set('playPauseCSSClass', 'glyphicon-pause');
+        }
     }
   },
 
@@ -65,8 +66,22 @@ export default Component.extend({
 
   },
 
+  /**
+  Stops the timeshift
+  */
+  stopTimeshift() {
+    this.set('landscapeUpdater.active', false);
+    this.set('timeshiftUpdater.active', false);
+    this.set('playPauseCSSClass', 'glyphicon-play');
+  },
+
   // query timestamps from backend and call renderPlot with chart-ready data
   getChartData: function () {
+    const self = this;
+    // listen for pause-event
+    this.get('timeshiftStopper').on('stopTimeshift', function() {
+      self.stopTimeshift();
+    });
 
     const dataPointPixelRatio = 30;
 
