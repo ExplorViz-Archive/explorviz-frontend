@@ -27,9 +27,10 @@ export default Ember.Service.extend({
 	
 	//This loop works infinetly, unless the session is authenticated
 	updateLoop: function(){
-		if(this.get("isAuthenticated") === true){
+		if(this.get("isAuthenticated") === true && this.get("shallUpdate")){
 			this.updateObject();
 			this.set("updateThread", Ember.run.later(this, function(){this.updateLoop();}, (10*1000)));
+			console.log(this.get("updateThread").run);
 		}
 	},
 	
@@ -50,27 +51,22 @@ export default Ember.Service.extend({
 	}.observes("isAuthenticated"),
 	
 	stopUpdate: function(){
-		this.set('shallUpdate', false);
-		if(this.get("updateThread") && this.get("updateThread").run){
-			this.get("updateThread").run.cancel();
-		}
+		this.set("shallUpdate", false);
+		Ember.run.cancel(this.get("updateThread"));
 		this.set("updateThread", null);
 	},
 	
 	
 	startReload: function(){
-		if(this.get("shallReload")){
-			this.stopReload();
-			this.set("reloadThread", Ember.run.later(this, this.reloadObjects, 100));
-		}
-	}.observes("shallReload"),
+		Ember.run.cancel(this.get("reloadThread"));
+		this.set("shallReload", true);
+		this.set("reloadThread", Ember.run.later(this, this.reloadObjects, 100));
+	
+	},
 	
 	stopReload: function(){
 		this.set("shallReload", false);
-		if(this.get("reloadThread") && this.get("reloadThread").run){
-			console.log("cancelling");
-			this.get("reloadThread").run.cancel();
-		}
+		Ember.run.cancel(this.get("reloadThread"));
 		this.set("reloadThread", null);
 	},
 	
