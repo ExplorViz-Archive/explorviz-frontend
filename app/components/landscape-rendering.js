@@ -145,7 +145,7 @@ export default RenderingCore.extend({
             bottom: 0.0
           };
           const labelMesh = createTextLabel(self.get('font'), 0.3, null, systemMesh,
-            padding, 0x00000, {
+            padding, self.get('configuration.landscapeColors.textsystem'), {
               width: 0.0,
               height: 0.0
             }, "max", system);
@@ -261,7 +261,8 @@ export default RenderingCore.extend({
                   bottom: 0.0
                 };
                 let labelMesh = createTextLabel(font, 0.2, null, applicationMesh,
-                  padding, 0xffffff, logoSize, "center", application);
+                  padding, self.get('configuration.landscapeColors.textapp'), 
+                  logoSize, "center", application);
 
                 applicationMesh.add(labelMesh);
 
@@ -272,8 +273,9 @@ export default RenderingCore.extend({
                   bottom: 0.2
                 };
 
-               labelMesh = createTextLabel(font, 0.2, node.getDisplayName(), nodeMesh,
-                  padding, 0xffffff, {
+               labelMesh = createTextLabel(font, 0.2, node.getDisplayName(), 
+                nodeMesh, padding, 
+                self.get('configuration.landscapeColors.textnode'), {
                     width: 0.0,
                     height: 0.0
                   }, "min", node);
@@ -296,6 +298,8 @@ export default RenderingCore.extend({
 
       });
     } // END if(systems)
+
+    self.set('configuration.landscapeColors.textchanged', false);
 
     const appCommunication = emberLandscape.get('applicationCommunication');
 
@@ -589,14 +593,15 @@ export default RenderingCore.extend({
     function createTextLabel(font, size, textToShow, parent, padding, color,
       logoSize, yPosition, model) {
 
-      if(self.get('textLabels')[model.get('id')]) {
+      if(self.get('textLabels')[model.get('id')] && 
+        !self.get('configuration.landscapeColors.textchanged')) {
         if(self.get('textLabels')[model.get('id')].state === model.get("state")) {
-          //console.log("old label");
+          console.log("old label");
           return self.get('textLabels')[model.get('id')].mesh;
         }        
       }      
 
-      //console.log("new label");
+      console.log("new label");
 
       const text = textToShow ? textToShow :
         parent.userData.model.get('name');

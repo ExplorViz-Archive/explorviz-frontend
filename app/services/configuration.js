@@ -10,7 +10,10 @@ export default Ember.Service.extend({
     node: "rgb(0,189,56)",
     application: "rgb(81,34,183)",
     communication: "rgb(244,145,0)",
-    appTextureChanged: false
+    textsystem: "rgb(0,0,0)",
+    textnode: "rgb(255,255,255)",
+    textapp: "rgb(255,255,255)",
+    textchanged: false
   }
 
 });
