@@ -740,77 +740,18 @@ export default RenderingCore.extend({
         }
 
       } 
-      // regular plane (one color or color gradient)
+      // regular plane
       else {
-
-        if(!color2) {
-          const material = new THREE.MeshBasicMaterial({
-            color: color1
-          });
-          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-            material);
-          plane.position.set(x, y, z);
-          parent.add(plane);
-          plane.userData['model'] = model;
-          return plane;
-        } 
-        else {
-
-          // create gradient texture
-          
-          const name = model.get('name');
-
-          let gradientTexture = null;
-
-          const textureChange = 
-            self.get('configuration.landscapeColors.appTextureChanged');
-
-          if(self.get('gradientTextures')[name] && !textureChange) {
-
-            gradientTexture = self.get('gradientTextures')[name];
-
-          }
-          else {
-
-            const canvas = document.createElement( 'canvas' );
-            canvas.width = 16;
-            canvas.height = 16;
-
-            const ctx = canvas.getContext("2d");
-
-            const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
-
-            grd.addColorStop(0.2, color1.getStyle());
-            grd.addColorStop(1, color2.getStyle());
-
-            ctx.fillStyle = grd;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            gradientTexture = new THREE.Texture(canvas);
-            gradientTexture.needsUpdate = true;
-            gradientTexture.minFilter = THREE.LinearFilter;
-
-            self.get('gradientTextures')[name] = gradientTexture;
-
-          }
-
-          // apply texture too material and create mesh
-          const geometry = new THREE.PlaneGeometry(width, height);
-
-          const material = new THREE.MeshBasicMaterial({      
-            map: gradientTexture
-          });
-
-          const plane = new THREE.Mesh(geometry, material);
-
-          plane.position.set(x, y, z);
-          parent.add(plane);
-          plane.userData['model'] = model;
-          return plane;
-        }
-
-      } 
-
+        const material = new THREE.MeshBasicMaterial({
+          color: color1
+        });
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+          material);
+        plane.position.set(x, y, z);
+        parent.add(plane);
+        plane.userData['model'] = model;
+        return plane;
+      }
     }
 
     function calculateLandscapeCenterAndZZoom(emberLandscape) {
