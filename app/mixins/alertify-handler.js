@@ -17,8 +17,8 @@ export default Ember.Mixin.create({
 
     alertify.notify(message, 'message', 3, function(){
 
-      // if last dialog, set flag respective flag
-      // this is not used atm, but may in the future
+      // if last dialog, set respective flag
+      // This flag is not used atm, but may be used in the future
       if(Ember.$('.ajs-message.ajs-message.ajs-visible').length === 0) {
         self.set('alertActive', false);
       }            
