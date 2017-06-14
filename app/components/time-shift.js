@@ -12,11 +12,15 @@ export default Component.extend({
   timeshiftUpdater: Ember.inject.service("timeshift-reload"),  
   landscapeUpdater: Ember.inject.service("landscape-reload"), 
   timestamps: Ember.computed.oneWay("timeshiftUpdater.object"),
-  timeshiftStopper: Ember.inject.service("timeshift-pause"),
+  //timeshiftStopper: Ember.inject.service("timeshift-pause"),
   
   observer: Ember.observer("timestamps", function(){
     Ember.run.once(this, 'updatePlot');
   }),
+
+  /*activeStateChanged: Ember.observer('timeshiftUpdater.', function() {
+    console.log("changed set to " + this.get('isOn'));
+  }),*/
 
   chevronCSSClass: 'glyphicon-chevron-up',
   playPauseCSSClass: 'glyphicon-pause',
@@ -41,16 +45,19 @@ export default Component.extend({
       }
     },
     playPauseTimeshift() {
-        if(this.get('timeshiftUpdater').active) {        
-          this.set('landscapeUpdater.active', false);
-          this.set('timeshiftUpdater.active', false);
-          this.set('playPauseCSSClass', 'glyphicon-play');
-        } 
-        else {
-          this.set('landscapeUpdater.active', true);
-          this.set('timeshiftUpdater.active', true);
-          this.set('playPauseCSSClass', 'glyphicon-pause');
-        }
+      console.log("lol");
+      if(this.get('timeshiftUpdater.shallUpdate')) {
+        console.log("a");
+        this.get('landscapeUpdater').stopUpdate();
+        this.get('timeshiftUpdater').stopUpdate();
+        this.set('playPauseCSSClass', 'glyphicon-play');
+      }
+      else {
+        console.log("b");
+        this.get('landscapeUpdater').startReload();
+        this.get('timeshiftUpdater').startReload();
+        this.set('playPauseCSSClass', 'glyphicon-pause');
+      }
     }
   },
 
@@ -77,11 +84,11 @@ export default Component.extend({
 
   // query timestamps from backend and call renderPlot with chart-ready data
   getChartData: function () {
-    const self = this;
+    //const self = this;
     // listen for pause-event
-    this.get('timeshiftStopper').on('stopTimeshift', function() {
+    /*this.get('timeshiftStopper').on('stopTimeshift', function() {
       self.stopTimeshift();
-    });
+    });*/
 
     const dataPointPixelRatio = 30;
 
@@ -273,6 +280,10 @@ export default Component.extend({
 
   resizePlot: function () {
     this.renderPlot();
-  }
+  }//,
+
+  /*toggleButton: function(){
+    console.log("hi");
+  }.observes("timeshiftUpdater.shallReload")*/
 
 });

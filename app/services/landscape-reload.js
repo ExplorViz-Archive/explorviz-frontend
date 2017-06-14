@@ -7,6 +7,13 @@ export default Reload.extend({
 	landscapeRepo: Ember.inject.service("landscape-repository"),
 
 
+	// @Override	
+	init() {
+		this._super(...arguments);
+		this.set('shallReload', true);
+	},
+
+
 	/*
 		This service reloads the latest-landscape every tenth second. 
 		Look "instance-initializer/service-start" for more information.

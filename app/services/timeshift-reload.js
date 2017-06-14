@@ -3,13 +3,22 @@ import Ember from "ember";
 import moment from 'npm:moment';
 
 export default Reload.extend({
-	//@override
-	shallReload: true,
+
+	// @Override	
+	init() {
+		this._super(...arguments);
+		console.log(this.get('shallReload'));
+		this.set('shallReload', true);
+		console.log(this.get('shallReload'));
+	},
+
 	/*
 		this service starts working with the application. Look "instance-initializer/service-start" for more information
 	*/
+
 	//@override
 	updateObject(){
+		console.log(this.get('shallReload'));
 		const self = this;
 
 		if(this.get('previousRequestDone')) {

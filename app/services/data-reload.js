@@ -9,6 +9,15 @@ export default Ember.Service.extend({
 	updateThread: null, // This thread shall update the most actual object
 	reloadThread: null, //This thread shall reload other objects
 	shallReload: false, // This attribute defines, if and when we wnat reload data
+	shallUpdate: false,
+
+	// @Override
+	init(){
+		this._super(...arguments);
+
+		//starts the observer, because of "get"
+		this.get("isAuthenticated");
+	},
 	
 	/* this service is used like an abstract service
 	 * it only works with an "authenticated session". It will start immediatly 
@@ -24,15 +33,16 @@ export default Ember.Service.extend({
 		}
 	},
 	
-	//This function is the part, which has to be overwritten by extending services (e.g. landscape-reload) 
+	// This function is the part, which has to be overwritten by extending services (e.g. landscape-reload) 
 	updateObject(){
-		// z.B. object = this.store.queryRecord('landscape', 'latest-landscape');
+		// e.g. object = this.store.queryRecord('landscape', 'latest-landscape');
 	},
 	
 	
 	//The update also starts with the reloading if shallBeReloaded is true
 	startUpdate: function(){
 			if(!this.get("updateThread")){
+				this.set('shallUpdate', true);
 				this.updateObject();
 				this.set("updateThread", Ember.run.later(this, this.updateLoop, (10*1000)));
 			}
@@ -40,8 +50,9 @@ export default Ember.Service.extend({
 	}.observes("isAuthenticated"),
 	
 	stopUpdate: function(){
-		if(this.get("updateThread")){
-		this.get("updateThread").run.cancel();
+		this.set('shallUpdate', false);
+		if(this.get("updateThread") && this.get("updateThread").run){
+			this.get("updateThread").run.cancel();
 		}
 		this.set("updateThread", null);
 	},
@@ -57,6 +68,7 @@ export default Ember.Service.extend({
 	stopReload: function(){
 		this.set("shallReload", false);
 		if(this.get("reloadThread") && this.get("reloadThread").run){
+			console.log("cancelling");
 			this.get("reloadThread").run.cancel();
 		}
 		this.set("reloadThread", null);
@@ -65,18 +77,6 @@ export default Ember.Service.extend({
 	
 	
 	//This function has to be overwritten
-	reloadObjects: function(){
-	},
-	
-	
-	
-	//@override
-	init(){
-		//this.get("isAuthenticated") starts the observer too.
-		if(this.get("isAuthenticated") === true){
-			this.reloadLoop();
-		}
-	}
-	
+	reloadObjects(){}
 	
 });
