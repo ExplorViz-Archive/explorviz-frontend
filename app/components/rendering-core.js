@@ -1,5 +1,7 @@
 import Ember from 'ember';
 import THREE from "npm:three";
+import config from '../config/environment';
+import THREEPerformance from '../mixins/threejs-performance';
 
 /**
 * This component contains the core mechanics of the different (three.js-based) 
@@ -16,15 +18,15 @@ import THREE from "npm:three";
 * @class Rendering-Core
 * @extends Ember.Component
 */
-export default Ember.Component.extend({
+export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
   state: null,
 
-  // Declare view-importer service 
-  viewImporter: Ember.inject.service("view-importer"),
-
   // Declare url-builder service 
   urlBuilder: Ember.inject.service("url-builder"),
+
+  // Declare view-importer service 
+  viewImporter: Ember.inject.service("view-importer"),
 
   classNames: ['viz'],
 
@@ -83,12 +85,39 @@ export default Ember.Component.extend({
     }));
     this.get('webglrenderer').setSize(width, height);
 
-    // Rendering loop //
+    this.$(window).on('resize.visualization', function(){
+      const outerDiv = this.$('.viz')[0];
 
+      if(outerDiv) {
+
+        const height = Math.round(this.$('.viz').height());
+        const width = Math.round(this.$('.viz').width());
+
+        self.set('camera.aspect', width / height);
+        self.get('camera').updateProjectionMatrix();
+
+        self.get('webglrenderer').setSize(width, height);
+
+        self.trigger("resized");
+      }
+    });
+
+    // Rendering loop //
     function render() {
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
+
+      if(config.environment === "development" || config.environment === "akr") {
+        self.get('threexStats').update(self.get('webglrenderer'));
+        self.get('stats').begin();
+      }
+
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
+
+      if(config.environment === "development" || config.environment === "akr") {
+        self.get('stats').end();
+      }      
+      
     }
 
     render();
@@ -107,6 +136,15 @@ export default Ember.Component.extend({
       self.get('urlBuilder').transmitState(state);
     });
 
+    
+    // Setup listener in controller 
+    this.sendAction("setupControllerService");
+
+    // setup view-importer Service
+    this.get('viewImporter').on('transmitView', function(newState) { 
+        self.set('newState', newState);  
+    });
+
     ////////////////////
 
     // load font for labels and proceed with populating the scene
@@ -114,10 +152,36 @@ export default Ember.Component.extend({
 
       self.set('font', font);
       self.populateScene();
-
+      // import new view
+      this.importView();
     });  
 
+  },  
+
+  /**
+    This method is used to update the camera with query parameters
+  */ 
+  importView(){
+
+    this.get('viewImporter').requestView();
+
+    let camX = this.get('newState').cameraX;
+    let camY = this.get('newState').cameraY;
+    let camZ = this.get('newState').cameraZ;
+
+    if(!isNaN(camX)){
+      this.get('camera').position.x = camX;
+    }
+    if(!isNaN(camY)){
+      this.get('camera').position.y = camY;
+    }
+    if(!isNaN(camZ)){
+      this.get('camera').position.z = camZ;
+    }
+    this.get('camera').updateProjectionMatrix();
   },
+
+
 
   /**
    * This function is called once on initRendering. Inherit this function to 
@@ -139,10 +203,19 @@ export default Ember.Component.extend({
   cleanup() {
     cancelAnimationFrame(this.get('animationFrameId'));
 
+    this.$(window).off('resize.visualization');    
+
     this.set('scene', null);
     this.set('webglrenderer', null);
     this.set('camera', null);
     this.get('urlBuilder').off('requestURL');
+
+    this.removePerformanceMeasurement();
+
+    this.get('viewImporter').off('transmitView');
+
+    // send action to reset query paramters 
+    this.sendAction("resetQueryParams");
   },
 
 
@@ -157,11 +230,21 @@ export default Ember.Component.extend({
   cleanAndUpdateScene() {
     const scene = this.get('scene');
 
-    for (let i = scene.children.length - 1; i >= 0 ; i--) {
-      let child = scene.children[i];
+    removeAllChildren(scene);
 
-      if ( child.type !== 'AmbientLight' && child.type !== 'SpotLight' ) {
-        scene.remove(child);
+    function removeAllChildren(entity) {
+      for (let i = entity.children.length - 1; i >= 0 ; i--) {
+        let child = entity.children[i];
+
+        removeAllChildren(child);
+
+        if (child.type !== 'AmbientLight' && child.type !== 'SpotLight' && child.type !== 'DirectionalLight') {
+          if(child.type !== 'Object3D') {
+            child.geometry.dispose();
+            child.material.dispose();
+          }
+          entity.remove(child);
+        }
       }
     }
   },

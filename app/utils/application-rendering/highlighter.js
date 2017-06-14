@@ -17,13 +17,13 @@ export default Ember.Object.extend({
       //SceneDrawer::createObjectsFromApplication(app, true);
     } 
     else {
-      this.unhighlight3DNodes();
+      this.unhighlightAll();
     }
 
   },
 
 
-  unhighlight3DNodes() {
+  unhighlightAll() {
 
     if(this.get('highlightedEntity')) {
 

@@ -1,6 +1,7 @@
 import Ember from 'ember';
 import HammerInteraction from '../hammer-interaction';
 import HoverHandler from './hover-handler';
+import Highlighter from './highlighter';
 
 export default Ember.Object.extend(Ember.Evented, {
 
@@ -8,17 +9,21 @@ export default Ember.Object.extend(Ember.Evented, {
   camera: null,
   renderer: null,
   raycaster: null,
-  raycastObjects: null,
-
+  rotationObject: null,
   hammerHandler: null,
   hoverHandler: null,
+  highlighter: null,
 
-  setupInteraction(canvas, camera, renderer, raycaster, raycastObjects) {
+  raycastObjects: Ember.computed('rotationObject', function() {
+    return this.get('rotationObject.children');
+  }),
+
+  setupInteraction(canvas, camera, renderer, raycaster, parentObject) {
     this.set('canvas', canvas);
     this.set('camera', camera);
     this.set('renderer', renderer);
     this.set('raycaster', raycaster);
-    this.set('raycastObjects', raycastObjects);
+    this.set('rotationObject', parentObject);
 
     const self = this;
 
@@ -40,12 +45,18 @@ export default Ember.Object.extend(Ember.Evented, {
       this.set('hoverHandler', HoverHandler.create());
     }
 
+    // init Highlighter
+    if (!this.get('highlighter')) {
+      this.set('highlighter', Highlighter.create());
+    }
+
     // hover handler
     self.registerHoverHandler();
 
     this.setupHammerListener();
-    
+
   },
+
 
   onMouseWheelStart(evt) {
 
@@ -56,11 +67,11 @@ export default Ember.Object.extend(Ember.Evented, {
 
     // zoom in
     if (delta > 0) {
-      this.get('camera').position.z -= delta * 1.5;
+      this.get('camera').position.z -= delta * 3.5;
     }
     // zoom out
     else {
-      this.get('camera').position.z -= delta * 1.5;
+      this.get('camera').position.z -= delta * 3.5;
     }
   },
 
@@ -68,7 +79,7 @@ export default Ember.Object.extend(Ember.Evented, {
   setupHammerListener() {
 
     const self = this;
-
+    
     this.get('hammerHandler').on('doubleClick', function(mouse) {
       self.handleDoubleClick(mouse);
     });
@@ -77,11 +88,12 @@ export default Ember.Object.extend(Ember.Evented, {
       self.handlePanning(delta, event);
     });
 
-    this.get('hammerHandler').on('panningEnd', function(mouse) {
-      self.handleHover(mouse);
-    });
+    this.get('hammerHandler').on('singleClick', function(mouse) {
+      self.handleSingleClick(mouse);
+    });    
 
   },
+
 
   registerHoverHandler() {
 
@@ -118,11 +130,25 @@ export default Ember.Object.extend(Ember.Evented, {
   },
 
 
+  updateEntities(app) {
+    this.set('rotationObject', app);
+    this.set('highlighter.application', app.userData.model);
+  },
+
+
   removeHandlers() {
     this.get('hammerHandler.hammerManager').off();
     this.get('canvas').removeEventListener('mousewheel', this.onMouseWheelStart);
     this.get('canvas').removeEventListener('mousestop', this.handleHover);
   },
+
+
+  applyHighlighting() {
+    this.get('highlighter').applyHighlighting();
+  },
+
+
+  // Handler
 
 
   handleDoubleClick(mouse) {
@@ -140,23 +166,21 @@ export default Ember.Object.extend(Ember.Evented, {
 
     if(intersectedViewObj) {
 
+      // Hide (old) tooltip
+      this.get('hoverHandler').hideTooltip();
+
       const emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
 
-      // hide tooltip
-      this.get('hoverHandler').hideTooltip();
-
-      if(emberModelName === "application"){
-        // open application-rendering
-        this.trigger('showApplication', emberModel);
-      } 
-      else if (emberModelName === "nodegroup" || emberModelName === "system"){
-        emberModel.setOpened(!emberModel.get('opened'));
-        this.trigger('redrawScene');
-      }
-      else if(emberModelName === "component"){
+      if(emberModelName === "component"){
         emberModel.setOpenedStatus(!emberModel.get('opened'));
-        emberModel.set('highlighted', false);
+
+        const highlighted = this.get('highlighter.highlightedEntity');
+        
+        if(emberModel === highlighted || emberModel.contains(highlighted)) {
+          this.get('highlighter').unhighlightAll();
+        }
+
         this.trigger('redrawScene');
       } 
 
@@ -164,10 +188,62 @@ export default Ember.Object.extend(Ember.Evented, {
 
   },
 
-  handlePanning(delta, event) {
-    if(event.button === 1){
-      // translate camera
 
+  handleSingleClick(mouse) {
+
+    const origin = {};
+
+    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
+      this.get('renderer').domElement.clientWidth) * 2 - 1;
+
+    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) / 
+      this.get('renderer').domElement.clientHeight) * 2 + 1;
+
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+      this.get('camera'), this.get('raycastObjects'));
+
+    if(intersectedViewObj) {
+
+      // Hide (old) tooltip
+      this.get('hoverHandler').hideTooltip();
+
+      const emberModel = intersectedViewObj.object.userData.model;
+      const emberModelName = emberModel.constructor.modelName;
+
+      if(emberModelName === "component" && !emberModel.get('opened')){
+
+        this.get('highlighter').highlight(emberModel);
+      } 
+      else if(emberModelName === "clazz") {
+        this.get('highlighter').highlight(emberModel);
+      }
+
+      this.trigger('redrawScene');     
+
+    } 
+    else {
+      if(this.get('highlighter.highlightedEntity')) {
+        // clicked in white space and entity is highlighted
+        this.get('highlighter').unhighlightAll();
+        this.trigger('redrawScene');
+      }
+
+    }
+
+    
+
+  },
+
+  handlePanning(delta, event) {
+
+    if(event.button === 3) {
+      // rotate object
+      this.get('rotationObject').rotation.x += delta.y / 100;
+      this.get('rotationObject').rotation.y += delta.x / 100;
+    } 
+
+    else if(event.button === 1){
+      // translate camera
       var distanceXInPercent = (delta.x /
       parseFloat(this.get('renderer').domElement.clientWidth)) * 100.0;
 
@@ -181,6 +257,7 @@ export default Ember.Object.extend(Ember.Evented, {
       this.get('camera').position.x = xVal;
       this.get('camera').position.y = yVal;
     }
+
   },
 
 

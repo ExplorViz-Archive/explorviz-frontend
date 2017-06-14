@@ -1,0 +1,17 @@
+<div class="panel-group" id="configurationpanelgroup">
+  {{#each configurationService.addonImports as |addon|}}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h4 class="panel-title">
+          <a data-toggle="collapse" data-parent="#accordion" href="#collapse1"> {{addon}}
+          </a>
+        </h4>
+      </div>
+      <div id="collapse1" class="panel-collapse collapse in">
+        <div class="panel-body">
+          {{component addon}}
+        </div>
+      </div>
+    </div>
+  {{/each}}
+</div> 

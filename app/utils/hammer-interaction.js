@@ -35,6 +35,7 @@ export default Ember.Object.extend(Ember.Evented, {
 
     doubleTap.recognizeWith(singleTap);
     singleTap.requireFailure(doubleTap);
+    doubleTap.dropRequireFailure(singleTap);
 
 
     hammer.on('doubletap', (evt) => {
@@ -89,8 +90,6 @@ export default Ember.Object.extend(Ember.Evented, {
 
       mouse.x = evt.srcEvent.clientX;
       mouse.y = evt.srcEvent.clientY;
-
-      console.log("panend");
 
       self.trigger('panningEnd', mouse);
     });

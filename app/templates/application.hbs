@@ -21,8 +21,15 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
     {{navbar-items resetToLandscapeView="resetToLandscapeView"}}
       <ul class="nav navbar-nav navbar-right">
-       <li><p class="navbar-text"> Signed in as {{username}}</p></li>
-       <li><a {{action 'logout'}} style="cursor:pointer">Logout</a></li>
+        <li>
+          {{#link-to "configuration"}}
+            <a style="cursor:pointer; color:#777;">
+              <span id="configurationButton" class="glyphicon glyphicon-cog"></span>
+            </a>
+          {{/link-to}}
+        </li>
+        <li><p class="navbar-text"> Signed in as {{username}}</p></li>
+        <li><a {{action 'logout'}} style="cursor:pointer">Logout</a></li>
      </ul>
    </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

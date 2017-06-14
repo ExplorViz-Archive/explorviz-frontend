@@ -2,7 +2,7 @@ import Ember from 'ember';
 import RenderingCore from './rendering-core';
 import Raycaster from '../utils/raycaster';
 import applyKlayLayout from '../utils/klay-layouter';
-import Navigation from '../utils/landscape-rendering/navigation';
+import Interaction from '../utils/landscape-rendering/interaction';
 import THREE from "npm:three";
 import Meshline from "npm:three.meshline";
 
@@ -15,6 +15,7 @@ import Meshline from "npm:three.meshline";
 export default RenderingCore.extend({
 
   landscapeRepo: Ember.inject.service("landscape-repository"),
+  configuration: Ember.inject.service("configuration"),
 
   hammerManager: null,
 
@@ -22,11 +23,10 @@ export default RenderingCore.extend({
 
   logos: {},
   textLabels: {},
+  gradientTextures: {},
 
   raycaster: null,
-  navigation: null,
-
-  newState: null,
+  interaction: null,
 
   // @Override
   initRendering() {
@@ -36,8 +36,8 @@ export default RenderingCore.extend({
 
     this.debug("init landscape rendering");
 
-    if (!this.get('navigation')) {
-      this.set('navigation', Navigation.create());
+    if (!this.get('interaction')) {
+      this.set('interaction', Interaction.create());
     }
 
     if (!this.get('raycaster')) {
@@ -51,42 +51,17 @@ export default RenderingCore.extend({
       self.cleanAndUpdateScene(self.get("entity"));
     });
 
-
-    this.get('viewImporter').on('transmitView', function(newState) {
-      self.set('newState',newState);
-    });
-        
     this.initInteraction();
 
     var dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
     this.get('scene').add(dirLight);
 
-    // import view
-    this.importView();
-
-  },
-
-   /**
-    This method is used to update the camera with query parameters
-   */ 
-   importView(){
-    this.get('viewImporter').requestView();
-
-    const camX = this.get('newState').cameraX;
-    const camY = this.get('newState').cameraY;
-    const camZ = this.get('newState').cameraZ;
-
-    if(camX != NaN){
-      this.get('camera').position.x = camX;
-    }
-    if(camY != NaN){
-      this.get('camera').position.y = camY;
-    }
-    if(camZ != NaN){
-      this.get('camera').position.z = camZ;
-    }
-    this.get('camera').updateProjectionMatrix();
+    // handle window resize
+    this.on('resized', function () {
+      self.set('centerPoint', null);
+      self.cleanAndUpdateScene();
+    });
   },
 
   // @Override
@@ -97,24 +72,22 @@ export default RenderingCore.extend({
 
     this.set('logos', {});
     this.set('textLabels', {});
+    this.set('gradientTextures', {});
 
-    this.get('navigation').removeHandlers();
+    this.get('interaction').removeHandlers();
 
     this.get('landscapeRepo').off("updated");
-
-    this.get('viewImporter').off('requestView');
   },
 
   // @Override
   cleanAndUpdateScene() {
-
     this._super(...arguments);
 
     this.debug("clean and populate landscape rendering");
 
     this.populateScene();
 
-    this.set('navigation.raycastObjects', this.get('scene').children);
+    this.set('interaction.raycastObjects', this.get('scene').children);
   },
 
   // @Override
@@ -140,6 +113,7 @@ export default RenderingCore.extend({
       if(!this.get('centerPoint')) {
         this.set('centerPoint', calculateLandscapeCenterAndZZoom(emberLandscape));
       }      
+
       var centerPoint = this.get('centerPoint'); 
 
       systems.forEach(function(system) {
@@ -158,8 +132,10 @@ export default RenderingCore.extend({
           var centerX = system.get('positionX') + extensionX - centerPoint.x;
           var centerY = system.get('positionY') - extensionY - centerPoint.y;
 
+          const color = self.get('configuration.landscapeColors.system');
+
           var systemMesh = addPlane(centerX, centerY, system.get('positionZ'), system.get('width'),
-            system.get('height'), new THREE.Color(0xc7c7c7), null, null, self.get('scene'), system);
+            system.get('height'), new THREE.Color(color), null, null, self.get('scene'), system);
 
           system.set('threeJSModel', systemMesh);
 
@@ -196,8 +172,10 @@ export default RenderingCore.extend({
             centerX = nodegroup.get('positionX') + extensionX - centerPoint.x;
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
+            const color = self.get('configuration.landscapeColors.nodegroup');
+
             var nodegroupMesh = addPlane(centerX, centerY, nodegroup.get('positionZ') + 0.01, nodegroup.get('width'),
-              nodegroup.get('height'), new THREE.Color(0x019b20), null, null, self.get('scene'), nodegroup);
+              nodegroup.get('height'), new THREE.Color(color), null, null, self.get('scene'), nodegroup);
 
             nodegroup.set('threeJSModel', nodegroupMesh);
 
@@ -219,8 +197,10 @@ export default RenderingCore.extend({
               centerX = node.get('positionX') + extensionX - centerPoint.x;
               centerY = node.get('positionY') - extensionY - centerPoint.y;
 
+              const color = self.get('configuration.landscapeColors.node');
+
               var nodeMesh = addPlane(centerX, centerY, node.get('positionZ') + 0.02, node.get('width'),
-                node.get('height'), new THREE.Color(0x00bd38), null, null, self.get('scene'), node);
+                node.get('height'), new THREE.Color(color), null, null, self.get('scene'), node);
 
               node.set('threeJSModel', nodeMesh);
 
@@ -244,8 +224,11 @@ export default RenderingCore.extend({
 
               if (!isRequestObject) {
 
+                const color1 = self.get('configuration.landscapeColors.application1');
+                const color2 = self.get('configuration.landscapeColors.application2');
+
                 var applicationMesh = addPlane(centerX, centerY, application.get('positionZ') + 0.03,
-                  application.get('width'), application.get('height'), new THREE.Color(0x5122b7), new THREE.Color(0x6D4FB4), null,
+                  application.get('width'), application.get('height'), new THREE.Color(color1), new THREE.Color(color2), null,
                   self.get('scene'), application);
 
                 application.set('threeJSModel', applicationMesh);
@@ -338,9 +321,11 @@ export default RenderingCore.extend({
 
         if (points.length !== 0) {
 
+          const color = self.get('configuration.landscapeColors.communication');
+
           accum = {
             tiles: [],
-            pipeColor: new THREE.Color(0xf49100)
+            pipeColor: new THREE.Color(color)
           };
           communicationsAccumulated.push(accum);
 
@@ -724,8 +709,9 @@ export default RenderingCore.extend({
             transparent: true
           });
 
-          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-              material);
+          const geo = new THREE.PlaneGeometry(width, height);
+
+          const plane = new THREE.Mesh(geo, material);
           plane.position.set(x, y, z);
           parent.add(plane);
           plane.userData['model'] = model;
@@ -734,9 +720,7 @@ export default RenderingCore.extend({
         } 
         else {
 
-          new THREE.TextureLoader().load('images/logos/' + textureName + '.png', (texture) => {
-
-            self.get('logos')[textureName] = texture;
+          new THREE.TextureLoader().load('images/logos/' + textureName + '.png', (texture) => {            
 
             const material = new THREE.MeshBasicMaterial({
               map: texture,
@@ -747,6 +731,9 @@ export default RenderingCore.extend({
             plane.position.set(x, y, z);
             parent.add(plane);
             plane.userData['model'] = model;
+
+            self.get('logos')[textureName] = texture;
+
             return plane;
           });
 
@@ -770,22 +757,42 @@ export default RenderingCore.extend({
         else {
 
           // create gradient texture
-          const canvas = document.createElement( 'canvas' );
-          canvas.width = 16;
-          canvas.height = 16;
+          
+          const name = model.get('name');
 
-          const ctx = canvas.getContext("2d");
+          let gradientTexture = null;
 
-          const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
-          grd.addColorStop(0.2, 'rgba(72,26,180,1)');
-          grd.addColorStop(1, 'rgba(101,68,180,1)');
+          const textureChange = 
+            self.get('configuration.landscapeColors.appTextureChanged');
 
-          ctx.fillStyle = grd;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          if(self.get('gradientTextures')[name] && !textureChange) {
 
-          const gradientTexture = new THREE.Texture(canvas);
-          gradientTexture.needsUpdate = true;
-          gradientTexture.minFilter = THREE.LinearFilter;
+            gradientTexture = self.get('gradientTextures')[name];
+
+          }
+          else {
+
+            const canvas = document.createElement( 'canvas' );
+            canvas.width = 16;
+            canvas.height = 16;
+
+            const ctx = canvas.getContext("2d");
+
+            const grd = ctx.createLinearGradient(0, 0, canvas.width, 0);
+
+            grd.addColorStop(0.2, color1.getStyle());
+            grd.addColorStop(1, color2.getStyle());
+
+            ctx.fillStyle = grd;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            gradientTexture = new THREE.Texture(canvas);
+            gradientTexture.needsUpdate = true;
+            gradientTexture.minFilter = THREE.LinearFilter;
+
+            self.get('gradientTextures')[name] = gradientTexture;
+
+          }
 
           // apply texture too material and create mesh
           const geometry = new THREE.PlaneGeometry(width, height);
@@ -800,7 +807,6 @@ export default RenderingCore.extend({
           parent.add(plane);
           plane.userData['model'] = model;
           return plane;
-
         }
 
       } 
@@ -828,9 +834,6 @@ export default RenderingCore.extend({
 
       let viewportRatio = viewPortSize.width / viewPortSize.height;
 
-      /*self.debugPlane(0, 0, 0.1, requiredWidth,
-        requiredHeight, new THREE.Color(1, 0, 0), self.get('scene'));*/
-
       const sizeFactor = 0.65;
 
       const newZ_by_width = (requiredWidth / viewportRatio) * sizeFactor;
@@ -843,6 +846,8 @@ export default RenderingCore.extend({
 
       camera.position.z = Math.max(Math.max(newZ_by_height, newZ_by_width), 10.0);
       camera.updateProjectionMatrix();
+
+
       return center;
 
     }
@@ -929,21 +934,23 @@ export default RenderingCore.extend({
     const webglrenderer = this.get('webglrenderer');
     const raycaster = this.get('raycaster');
 
-    // init navigation objects
+    // init interaction objects
 
-    this.get('navigation').setupInteraction(canvas, camera, webglrenderer, raycaster, 
+    this.get('interaction').setupInteraction(canvas, camera, webglrenderer, raycaster, 
       raycastObjects);
 
     // set listeners
 
-    this.get('navigation').on('redrawScene', function() {
+    this.get('interaction').on('redrawScene', function() {
       self.cleanAndUpdateScene();
     });
 
-    this.get('navigation').on('showApplication', function(emberModel) {
+    this.get('interaction').on('showApplication', function(emberModel) {
       // bubble up action to visualization route
       self.sendAction("showApplication", emberModel);
     });
+
+
 
   }, // END initInteraction
 
