@@ -106,6 +106,9 @@ export default Reload.extend({
 	
 	//@override
 	reloadObjects(){
+		if(!this.get("shallReload")){
+			return;
+		}
 		const self = this;
 		var timestamps = this.get("store").peekAll("timestamp").sortBy("id");
 		var oldestTimestamp = timestamps.get("firstObject");
@@ -124,7 +127,7 @@ export default Reload.extend({
 				timestamps.forEach(function(timestamp){
 					self.get("store").push(timestamp.serialize({includeId:true}));
 				});
-				self.set("shallReload", true);
+				self.startReload();
 			}
 		}
 		
