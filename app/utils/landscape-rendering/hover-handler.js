@@ -4,8 +4,14 @@ export default Ember.Object.extend(Ember.Evented, {
 
   alreadyDestroyed: true,
 
+  enableTooltips: true,
+
 
   showTooltip(mouse, emberModel) {
+
+    if(!this.get('enableTooltips')) {
+      return;
+    }
 
     let content = this.buildContent(emberModel);
 

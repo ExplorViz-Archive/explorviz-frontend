@@ -596,12 +596,12 @@ export default RenderingCore.extend({
       if(self.get('textLabels')[model.get('id')] && 
         !self.get('configuration.landscapeColors.textchanged')) {
         if(self.get('textLabels')[model.get('id')].state === model.get("state")) {
-          console.log("old label");
+          //console.log("old label");
           return self.get('textLabels')[model.get('id')].mesh;
         }        
-      }      
+      }
 
-      console.log("new label");
+      //console.log("new label");
 
       const text = textToShow ? textToShow :
         parent.userData.model.get('name');

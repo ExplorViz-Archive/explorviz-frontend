@@ -4,7 +4,7 @@ export default Ember.Controller.extend({
 
   urlBuilder: Ember.inject.service("url-builder"),
   viewImporter: Ember.inject.service("view-importer"),
-  timeshiftStopper: Ember.inject.service("timeshift-pause"),
+  timeshiftUpdater: Ember.inject.service("timeshift-reload"), 
 
   // Specify query parameters
   queryParams: ['timestamp', 'id', 'appName', 'cameraX', 'cameraY', 'cameraZ', 'showApp'],
@@ -24,19 +24,28 @@ export default Ember.Controller.extend({
   lastShownApplication: null,
   state: null,
   
-  //@override
-  // Initialize service
+  // @Override
   init() {
     const self = this;
+
     // setup url-builder Service
     this.get('urlBuilder').on('transmitState', function(state) {
       self.set('state',state);
     });
+
+    Ember.$(window).on('onbeforeunload', function() {
+      window.history.replaceState( {} , 'foo', '/foo' );
+      console.log("lol");
+      self.cleanupQueryParams();
+    });
+
+    Ember.$('body').on('beforeunload',function(){
+     console.log("lol");
+     self.cleanupQueryParams();
+    });
+
   },
 
-  /**
-  This method is used to reset all query parameters
-  */
   cleanupQueryParams(){
     this.set('id',null);
     this.set('appName',null);
@@ -72,7 +81,7 @@ export default Ember.Controller.extend({
     // Triggered by the button implemented in visualization template
     exportState: function() {
         // Pause timeshift
-        this.get('timeshiftStopper').stopTimeshift();
+        this.set('timeshiftUpdater.shallUpdate', false);
         // Update query parameters
         this.get('urlBuilder').requestURL();
         this.set('cameraX', this.get('state').cameraX);

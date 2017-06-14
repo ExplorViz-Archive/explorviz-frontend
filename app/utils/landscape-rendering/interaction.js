@@ -23,6 +23,19 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
     const self = this;
 
+    // mouseout handler for disabling notifications
+    canvas.addEventListener('mouseout', registerMouseOut, false);
+
+    function registerMouseOut(evt) {
+      self.onMouseOut(evt);
+    }
+
+    canvas.addEventListener('mouseenter', registerMouseEnter, false);
+
+    function registerMouseEnter(evt) {
+      self.onMouseEnter(evt);
+    }
+
     // zoom handler    
     canvas.addEventListener('mousewheel', registerMouseWheel, false);
 
@@ -63,6 +76,17 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
     else {
       this.get('camera').position.z -= delta * 1.5;
     }
+  },
+
+
+  onMouseOut() {
+    this.set('hoverHandler.enableTooltips', false);
+    this.get('hoverHandler').hideTooltip();
+  },
+
+
+  onMouseEnter() {
+    this.set('hoverHandler.enableTooltips', true);
   },
 
 
@@ -123,6 +147,8 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
     this.get('hammerHandler.hammerManager').off();
     this.get('canvas').removeEventListener('mousewheel', this.onMouseWheelStart);
     this.get('canvas').removeEventListener('mousestop', this.handleHover);
+    this.get('canvas').removeEventListener('mouseenter', this.onMouseEnter);
+    this.get('canvas').removeEventListener('mouseout', this.onMouseOut);
   },
 
 

@@ -7,9 +7,7 @@ export default Reload.extend({
 	// @Override	
 	init() {
 		this._super(...arguments);
-		console.log(this.get('shallReload'));
 		this.set('shallReload', true);
-		console.log(this.get('shallReload'));
 	},
 
 	/*
@@ -18,7 +16,6 @@ export default Reload.extend({
 
 	//@override
 	updateObject(){
-		console.log(this.get('shallReload'));
 		const self = this;
 
 		if(this.get('previousRequestDone')) {

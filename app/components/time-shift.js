@@ -12,15 +12,10 @@ export default Component.extend({
   timeshiftUpdater: Ember.inject.service("timeshift-reload"),  
   landscapeUpdater: Ember.inject.service("landscape-reload"), 
   timestamps: Ember.computed.oneWay("timeshiftUpdater.object"),
-  //timeshiftStopper: Ember.inject.service("timeshift-pause"),
   
-  observer: Ember.observer("timestamps", function(){
+  observer: observer("timestamps", function(){
     Ember.run.once(this, 'updatePlot');
   }),
-
-  /*activeStateChanged: Ember.observer('timeshiftUpdater.', function() {
-    console.log("changed set to " + this.get('isOn'));
-  }),*/
 
   chevronCSSClass: 'glyphicon-chevron-up',
   playPauseCSSClass: 'glyphicon-pause',
@@ -44,18 +39,15 @@ export default Component.extend({
         this.set('chevronCSSClass', 'glyphicon-chevron-up');
       }
     },
-    playPauseTimeshift() {
-      console.log("lol");
+    playPauseTimeshift: function() {
       if(this.get('timeshiftUpdater.shallUpdate')) {
-        console.log("a");
         this.get('landscapeUpdater').stopUpdate();
         this.get('timeshiftUpdater').stopUpdate();
         this.set('playPauseCSSClass', 'glyphicon-play');
       }
       else {
-        console.log("b");
-        this.get('landscapeUpdater').startReload();
-        this.get('timeshiftUpdater').startReload();
+        this.get('landscapeUpdater').startUpdate();
+        this.get('timeshiftUpdater').startUpdate();
         this.set('playPauseCSSClass', 'glyphicon-pause');
       }
     }
@@ -71,15 +63,6 @@ export default Component.extend({
 	
 	this.get("timestamps");
 
-  },
-
-  /**
-  Stops the timeshift
-  */
-  stopTimeshift() {
-    this.set('landscapeUpdater.active', false);
-    this.set('timeshiftUpdater.active', false);
-    this.set('playPauseCSSClass', 'glyphicon-play');
   },
 
   // query timestamps from backend and call renderPlot with chart-ready data
@@ -280,10 +263,19 @@ export default Component.extend({
 
   resizePlot: function () {
     this.renderPlot();
-  }//,
+  },
 
-  /*toggleButton: function(){
-    console.log("hi");
-  }.observes("timeshiftUpdater.shallReload")*/
+  stopTimeshift: function(){
+    if(!this.get('timeshiftUpdater.shallUpdate')) {
+      this.get('landscapeUpdater').stopUpdate();
+      this.get('timeshiftUpdater').stopUpdate();
+      this.set('playPauseCSSClass', 'glyphicon-play');
+    }
+    else {
+      this.get('landscapeUpdater').startUpdate();
+      this.get('timeshiftUpdater').startUpdate();
+      this.set('playPauseCSSClass', 'glyphicon-pause');
+    }
+  }.observes("timeshiftUpdater.shallUpdate")
 
 });

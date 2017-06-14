@@ -30,7 +30,6 @@ export default Ember.Service.extend({
 		if(this.get("isAuthenticated") === true && this.get("shallUpdate")){
 			this.updateObject();
 			this.set("updateThread", Ember.run.later(this, function(){this.updateLoop();}, (10*1000)));
-			console.log(this.get("updateThread").run);
 		}
 	},
 	
