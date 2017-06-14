@@ -1,6 +1,6 @@
 <button {{action "exportState"}}>Export link</button>
 {{#if showLandscape}}  
-  {{landscape-rendering renderingModel=model showApplication="handleApplication"}}
+  {{landscape-rendering resetQueryParams="resetQueryParams" setupControllerService="setupService" renderingModel=model showApplication="handleApplication"}}
 {{else}}
-  {{application-rendering renderingModel=lastShownApplication}}
+  {{application-rendering resetQueryParams="resetQueryParams" setupControllerService="setupService" renderingModel=lastShownApplication}}
 {{/if}}
