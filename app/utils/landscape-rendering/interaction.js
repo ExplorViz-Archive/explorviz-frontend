@@ -159,6 +159,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
         } else {
           // data available => open application-rendering
+          this.closeAlertifyMessages();
           this.trigger('showApplication', emberModel);
         }
 

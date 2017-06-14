@@ -17,12 +17,18 @@ export default Ember.Mixin.create({
 
     alertify.notify(message, 'message', 3, function(){
 
-      // if last dialog, activate Popups again
+      // if last dialog, set flag respective flag
+      // this is not used atm, but may in the future
       if(Ember.$('.ajs-message.ajs-message.ajs-visible').length === 0) {
         self.set('alertActive', false);
       }            
     });
 
+  },
+
+  closeAlertifyMessages() {
+    alertify.dismissAll();
+    this.set('alertActive', false);
   }
 
 });
