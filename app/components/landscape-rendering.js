@@ -130,13 +130,11 @@ export default RenderingCore.extend({
           var extensionY = system.get('height') * scaleFactor.height;
 
           var centerX = system.get('positionX') + extensionX - centerPoint.x;
-          var centerY = system.get('positionY') - extensionY - centerPoint.y;
+          var centerY = system.get('positionY') - extensionY - centerPoint.y;          
 
-          const color = self.get('configuration.landscapeColors.system');
-
-          var systemMesh = addPlane(centerX, centerY, system.get('positionZ'), system.get('width'),
-            system.get('height'), new THREE.Color(color), null, null, self.get('scene'), system);
-
+          var systemMesh = createPlane(system);
+          systemMesh.position.set(centerX, centerY, system.get('positionZ'));
+          self.get('scene').add(systemMesh);
           system.set('threeJSModel', systemMesh);
 
           // draw system text label          
@@ -172,11 +170,9 @@ export default RenderingCore.extend({
             centerX = nodegroup.get('positionX') + extensionX - centerPoint.x;
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
-            const color = self.get('configuration.landscapeColors.nodegroup');
-
-            var nodegroupMesh = addPlane(centerX, centerY, nodegroup.get('positionZ') + 0.01, nodegroup.get('width'),
-              nodegroup.get('height'), new THREE.Color(color), null, null, self.get('scene'), nodegroup);
-
+            var nodegroupMesh = createPlane(nodegroup);
+            nodegroupMesh.position.set(centerX, centerY, nodegroup.get('positionZ') + 0.01);
+            self.get('scene').add(nodegroupMesh);
             nodegroup.set('threeJSModel', nodegroupMesh);
 
           }
@@ -197,11 +193,9 @@ export default RenderingCore.extend({
               centerX = node.get('positionX') + extensionX - centerPoint.x;
               centerY = node.get('positionY') - extensionY - centerPoint.y;
 
-              const color = self.get('configuration.landscapeColors.node');
-
-              var nodeMesh = addPlane(centerX, centerY, node.get('positionZ') + 0.02, node.get('width'),
-                node.get('height'), new THREE.Color(color), null, null, self.get('scene'), node);
-
+              var nodeMesh = createPlane(node);
+              nodeMesh.position.set(centerX, centerY, node.get('positionZ') + 0.02);
+              self.get('scene').add(nodeMesh);
               node.set('threeJSModel', nodeMesh);
 
             }
@@ -224,13 +218,9 @@ export default RenderingCore.extend({
 
               if (!isRequestObject) {
 
-                const color1 = self.get('configuration.landscapeColors.application1');
-                const color2 = self.get('configuration.landscapeColors.application2');
-
-                var applicationMesh = addPlane(centerX, centerY, application.get('positionZ') + 0.03,
-                  application.get('width'), application.get('height'), new THREE.Color(color1), new THREE.Color(color2), null,
-                  self.get('scene'), application);
-
+                var applicationMesh = createPlane(application);
+                applicationMesh.position.set(centerX, centerY, application.get('positionZ') + 0.03);
+                self.get('scene').add(applicationMesh);
                 application.set('threeJSModel', applicationMesh);
 
                 // create logos 
@@ -256,9 +246,9 @@ export default RenderingCore.extend({
                 const texturePartialPath = application.get('database') ?
                   'database2' : application.get('programmingLanguage').toLowerCase();
 
-                addPlane(logoPos.x, logoPos.y, logoPos.z,
-                  logoSize.width, logoSize.height, new THREE.Color(1, 0, 0), null,
-                  texturePartialPath, applicationMesh, "label");
+                createPicture(logoPos.x, logoPos.y, logoPos.z,
+                  logoSize.width, logoSize.height, texturePartialPath, 
+                  applicationMesh, "label");
 
                 // create text labels
 
@@ -294,9 +284,8 @@ export default RenderingCore.extend({
 
               } else {
                 // draw request logo
-                addPlane(centerX, centerY, 0,
-                  1.6, 1.6, new THREE.Color(1, 0, 0), null,
-                  "requests", self.get('scene'), "label");
+                createPicture(centerX, centerY, 0,
+                  1.6, 1.6, "requests", self.get('scene'), "label");
               }
 
             });
@@ -698,60 +687,58 @@ export default RenderingCore.extend({
     }
 
 
-    function addPlane(x, y, z, width, height, color1, color2, textureName, parent, model) {
+    function createPlane(model) {
+
+      const emberModelName = model.constructor.modelName;
+
+      const material = new THREE.MeshBasicMaterial({
+        color: self.get('configuration.landscapeColors.' + emberModelName)
+      });
+
+      const plane = new THREE.Mesh(new THREE.PlaneGeometry(model.get('width'), model.get('height')),
+        material);      
+      plane.userData['model'] = model;
+      return plane;
       
-      if (textureName) {
+    }
 
-        if(self.get('logos')[textureName]) {
 
-          const material = new THREE.MeshBasicMaterial({
-            map: self.get('logos')[textureName],
-            transparent: true
-          });
+    function createPicture(x, y, z, width, height, textureName, parent, model) {
+      if(self.get('logos')[textureName]) {
 
-          const geo = new THREE.PlaneGeometry(width, height);
-
-          const plane = new THREE.Mesh(geo, material);
-          plane.position.set(x, y, z);
-          parent.add(plane);
-          plane.userData['model'] = model;
-          return plane;
-
-        } 
-        else {
-
-          new THREE.TextureLoader().load('images/logos/' + textureName + '.png', (texture) => {            
-
-            const material = new THREE.MeshBasicMaterial({
-              map: texture,
-              transparent: true
-            });
-            const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-              material);
-            plane.position.set(x, y, z);
-            parent.add(plane);
-            plane.userData['model'] = model;
-
-            self.get('logos')[textureName] = texture;
-
-            return plane;
-          });
-
-        }
-
-      } 
-      // regular plane
-      else {
         const material = new THREE.MeshBasicMaterial({
-          color: color1
+          map: self.get('logos')[textureName],
+          transparent: true
         });
-        const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-          material);
+
+        const geo = new THREE.PlaneGeometry(width, height);
+
+        const plane = new THREE.Mesh(geo, material);
         plane.position.set(x, y, z);
         parent.add(plane);
         plane.userData['model'] = model;
         return plane;
-      }
+
+      } 
+      else {
+
+        new THREE.TextureLoader().load('images/logos/' + textureName + '.png', (texture) => {            
+
+          const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true
+          });
+          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
+            material);
+          plane.position.set(x, y, z);
+          parent.add(plane);
+          plane.userData['model'] = model;
+
+          self.get('logos')[textureName] = texture;
+
+          return plane;
+        });
+      }        
     }
 
     function calculateLandscapeCenterAndZZoom(emberLandscape) {
