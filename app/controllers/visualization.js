@@ -68,7 +68,7 @@ export default Ember.Controller.extend({
       });
     },
 
-    // triggered by the button implemented in visualization tamplate
+    // Triggered by the button implemented in visualization template
     exportState: function() {
         // Update query parameters
         this.get('urlBuilder').requestURL();
