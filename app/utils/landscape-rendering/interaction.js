@@ -178,8 +178,8 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
         if(emberModel.get('components').get('length') === 0) {
           // no data => show message
 
-          const message = "Sorry, no details for " + emberModel.get('name') + 
-            " are available.";
+          const message = "Sorry, no details for <b>" + emberModel.get('name') + 
+            "</b> are available.";
 
           this.showAlertifyMessage(message);
 
