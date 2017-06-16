@@ -2,7 +2,7 @@ import { moduleFor, test } from 'ember-qunit';
 
 moduleFor('service:reload-handler', 'Unit | Service | reload handler', {
   // Specify the other units that are required for this test.
-  // needs: ['service:foo']
+  needs: ['service:timeshift-reload', 'service:landscape-reload']
 });
 
 // Replace this with your real tests.

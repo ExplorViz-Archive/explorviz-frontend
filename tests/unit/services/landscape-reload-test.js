@@ -2,7 +2,7 @@ import { moduleFor, test } from 'ember-qunit';
 
 moduleFor('service:landscape-reload', 'Unit | Service | landscape reload', {
   // Specify the other units that are required for this test.
-  needs: ['service:session', 'service:landscape-repository']
+  needs: ['service:session', 'service:repos/landscape-repository']
 });
 
 // Replace this with your real tests.

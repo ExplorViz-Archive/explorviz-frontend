@@ -2,7 +2,7 @@ import { moduleFor, test } from 'ember-qunit';
 
 moduleFor('service:timeshift-reload', 'Unit | Service | timeshift reload', {
   // Specify the other units that are required for this test.
-  needs: ['service:session']
+  needs: ['service:session', 'service:repos/timestamp-repository']
 });
 
 // Replace this with your real tests.
