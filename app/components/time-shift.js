@@ -10,9 +10,10 @@ export default Component.extend({
   plot: null,
 
   timestampRepo: Ember.inject.service("repos/timestamp-repository"),
+  reloadHandler: Ember.inject.service("reload-handler"),
   
-  timeshiftUpdater: Ember.inject.service("timeshift-reload"),  
-  landscapeUpdater: Ember.inject.service("landscape-reload"), 
+  //timeshiftUpdater: Ember.inject.service("timeshift-reload"),  
+  //landscapeUpdater: Ember.inject.service("landscape-reload"), 
   //timestamps: Ember.computed.oneWay("timeshiftUpdater.object"),
   
   /*observer: observer("timestamps", function(){
@@ -24,6 +25,7 @@ export default Component.extend({
 
 
   actions: {
+
     toggleTimeline() {
 
       if ($(".timeline").attr('vis') === 'show') {
@@ -41,15 +43,14 @@ export default Component.extend({
         this.set('chevronCSSClass', 'glyphicon-chevron-up');
       }
     },
+
     playPauseTimeshift: function() {
-      if(this.get('timeshiftUpdater.shallUpdate')) {
-        this.get('landscapeUpdater').stopUpdate();
-        this.get('timeshiftUpdater').stopUpdate();
+      if(this.get('reloadHandler.isReloading')) {
+        this.get('reloadHandler').stopExchange();
         this.set('playPauseCSSClass', 'glyphicon-play');
       }
       else {
-        this.get('landscapeUpdater').startUpdate();
-        this.get('timeshiftUpdater').startUpdate();
+        this.get('reloadHandler').startExchange();
         this.set('playPauseCSSClass', 'glyphicon-pause');
       }
     }
@@ -57,20 +58,34 @@ export default Component.extend({
 
   // @Override
   init() {
+    this._super(...arguments);
 
     const self = this;
-
-    this._super(...arguments);
 
     $(window).resize(() => {
       this.resizePlot();
     });
 
-    this.get('timestampRepo').on("updated", function(timestamps) {
+    this.get('timestampRepo').on('updated', function(timestamps) {
       self.updatePlot(timestamps);
-      //Ember.run.once(self, 'updatePlot');
     });
 
+    this.get('reloadHandler').on('stopExchange', function() {
+      self.set('playPauseCSSClass', 'glyphicon-play');
+    });
+
+    this.get('reloadHandler').on('startExchange', function() {
+      self.set('playPauseCSSClass', 'glyphicon-pause');
+    });
+  },
+
+
+  // @Override
+  // Cleanup
+  willDestroyElement() {
+    this.get('timestampRepo').off('updated');
+    this.get('reloadHandler').off('stopExchange');
+    this.get('reloadHandler').off('startExchange');
   },
 
   // query timestamps from backend and call renderPlot with chart-ready data
@@ -270,19 +285,6 @@ export default Component.extend({
 
   resizePlot: function () {
     this.renderPlot();
-  },
-
-  stopTimeshift: function(){
-    if(!this.get('timeshiftUpdater.shallUpdate')) {
-      this.get('landscapeUpdater').stopUpdate();
-      this.get('timeshiftUpdater').stopUpdate();
-      this.set('playPauseCSSClass', 'glyphicon-play');
-    }
-    else {
-      this.get('landscapeUpdater').startUpdate();
-      this.get('timeshiftUpdater').startUpdate();
-      this.set('playPauseCSSClass', 'glyphicon-pause');
-    }
-  }.observes("timeshiftUpdater.shallUpdate")
+  }
 
 });

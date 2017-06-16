@@ -4,7 +4,7 @@ export default Ember.Controller.extend({
 
   urlBuilder: Ember.inject.service("url-builder"),
   viewImporter: Ember.inject.service("view-importer"),
-  timeshiftUpdater: Ember.inject.service("timeshift-reload"), 
+  reloadHandler: Ember.inject.service("reload-handler"), 
 
   // Specify query parameters
   queryParams: ['timestamp', 'id', 'appName', 'cameraX', 'cameraY', 'cameraZ', 'showApp'],
@@ -81,7 +81,7 @@ export default Ember.Controller.extend({
     // Triggered by the button implemented in visualization template
     exportState: function() {
         // Pause timeshift
-        this.set('timeshiftUpdater.shallUpdate', false);
+        this.get('reloadHandler').stopExchange();
         // Update query parameters
         this.get('urlBuilder').requestURL();
         this.set('cameraX', this.get('state').cameraX);

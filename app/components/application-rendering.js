@@ -17,7 +17,7 @@ import THREE from "npm:three";
 export default RenderingCore.extend({
 
   store: Ember.inject.service('store'),
-  landscapeRepo: Ember.inject.service("repo/landscape-repository"),
+  landscapeRepo: Ember.inject.service("repos/landscape-repository"),
 
   application3D: null,
 
