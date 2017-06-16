@@ -11,18 +11,6 @@ export default Component.extend({
 
   timestampRepo: Ember.inject.service("repos/timestamp-repository"),
   reloadHandler: Ember.inject.service("reload-handler"),
-  
-  //timeshiftUpdater: Ember.inject.service("timeshift-reload"),  
-  //landscapeUpdater: Ember.inject.service("landscape-reload"), 
-  //timestamps: Ember.computed.oneWay("timeshiftUpdater.object"),
-  
-  /*observer: observer("timestamps", function(){
-    Ember.run.once(this, 'updatePlot');
-  }),*/
-
-  chevronCSSClass: 'glyphicon-chevron-up',
-  playPauseCSSClass: 'glyphicon-pause',
-
 
   actions: {
 
@@ -33,25 +21,25 @@ export default Component.extend({
         $(".timeline").slideUp();
         $("#vizContainer").animate({height:'+=200'});
         $(".timeline").attr('vis', 'hide');
-        this.set('chevronCSSClass', 'glyphicon-chevron-up');
+        $('#toggleTimelineButton').removeClass('glyphicon-chevron-down')
+          .addClass('glyphicon-chevron-up');
       }
       else {
         // show timeline        
         $(".timeline").slideDown();
         $("#vizContainer").animate({height:'-=200'});
         $(".timeline").attr('vis', 'show');
-        this.set('chevronCSSClass', 'glyphicon-chevron-up');
+        $('#toggleTimelineButton').removeClass('glyphicon-chevron-up')
+          .addClass('glyphicon-chevron-down');
       }
     },
 
     playPauseTimeshift: function() {
       if(this.get('reloadHandler.isReloading')) {
         this.get('reloadHandler').stopExchange();
-        this.set('playPauseCSSClass', 'glyphicon-play');
       }
       else {
         this.get('reloadHandler').startExchange();
-        this.set('playPauseCSSClass', 'glyphicon-pause');
       }
     }
   },
@@ -71,11 +59,13 @@ export default Component.extend({
     });
 
     this.get('reloadHandler').on('stopExchange', function() {
-      self.set('playPauseCSSClass', 'glyphicon-play');
+      $('#playPauseTimelineButton').removeClass('glyphicon-pause')
+        .addClass('glyphicon-play');
     });
 
     this.get('reloadHandler').on('startExchange', function() {
-      self.set('playPauseCSSClass', 'glyphicon-pause');
+      $('#playPauseTimelineButton').removeClass('glyphicon-play')
+        .addClass('glyphicon-pause');
     });
   },
 
