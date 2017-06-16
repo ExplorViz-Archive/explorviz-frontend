@@ -6,11 +6,10 @@ const {Component, $, on, observer} = Ember;
 export default Component.extend({
 
   store: Ember.inject.service(),
-  
-  plot: null,
-
   timestampRepo: Ember.inject.service("repos/timestamp-repository"),
   reloadHandler: Ember.inject.service("reload-handler"),
+  
+  plot: null,
 
   actions: {
 
@@ -79,7 +78,7 @@ export default Component.extend({
   },
 
   // query timestamps from backend and call renderPlot with chart-ready data
-  getChartData: function () {
+  getChartData() {
     //const self = this;
     // listen for pause-event
     /*this.get('timeshiftStopper').on('stopTimeshift', function() {
@@ -95,73 +94,73 @@ export default Component.extend({
     return timestamps.then((timestamps) => {
 		const sortedTimestamps = timestamps.sortBy('id');
 
-      // define outside loop in case of error
-      var timestampList = [];
-      var timestampListFormatted = [];
-      var callList = [];
+    // define outside loop in case of error
+    var timestampList = [];
+    var timestampListFormatted = [];
+    var callList = [];
 
-      // Parse and format timestamps for timeline
-      if (sortedTimestamps) {
-        sortedTimestamps.forEach(function(timestamp) {
-          const timestampValue = timestamp.get('id');
-          timestampList.push(timestampValue);
+    // Parse and format timestamps for timeline
+    if (sortedTimestamps) {
+      sortedTimestamps.forEach(function(timestamp) {
+        const timestampValue = timestamp.get('id');
+        timestampList.push(timestampValue);
 
-          const callValue = timestamp.get('calls');
-          callList.push(callValue);
+        const callValue = timestamp.get('calls');
+        callList.push(callValue);
 
-          const parsedTimestampValue = moment(timestampValue,"x");
-          const timestampValueFormatted = parsedTimestampValue.format("HH:mm:ss").toString();
-          timestampListFormatted.push(timestampValueFormatted);
-        });
+        const parsedTimestampValue = moment(timestampValue,"x");
+        const timestampValueFormatted = parsedTimestampValue.format("HH:mm:ss").toString();
+        timestampListFormatted.push(timestampValueFormatted);
+      });
 
-        //console.log("timestampList[0]",timestampList.objectAt(0));
-        //console.log("timestampListFormatted[0]",timestampListFormatted.objectAt(0));
-      }
+      //console.log("timestampList[0]",timestampList.objectAt(0));
+      //console.log("timestampListFormatted[0]",timestampListFormatted.objectAt(0));
+    }
 
-      // maximum number of timestamps displayed in chart at one time
-      const maxNumOfChartTimestamps = parseInt(this.$()[0].clientWidth / dataPointPixelRatio);
+    // maximum number of timestamps displayed in chart at one time
+    const maxNumOfChartTimestamps = parseInt(this.$()[0].clientWidth / dataPointPixelRatio);
 
-      // TODO: error handling (no data etc)
+    // TODO: error handling (no data etc)
 
-      // Container for charts (limited size)
-      var chartTimestamps = [];
-      var chartCalls = [];
-      const timestampListFormattedSize = timestampListFormatted.length;
+    // Container for charts (limited size)
+    var chartTimestamps = [];
+    var chartCalls = [];
+    const timestampListFormattedSize = timestampListFormatted.length;
 
-      // limit size of displayed data points and labels
-      if (timestampListFormattedSize > maxNumOfChartTimestamps) {
-        chartTimestamps = timestampListFormatted.slice(timestampListFormattedSize-maxNumOfChartTimestamps,timestampListFormattedSize);
-        chartCalls = callList.slice(timestampListFormattedSize-maxNumOfChartTimestamps,timestampListFormattedSize);
-      }
-      else {
-        chartTimestamps = timestampListFormatted;
-        chartCalls = callList;
-      }
+    // limit size of displayed data points and labels
+    if (timestampListFormattedSize > maxNumOfChartTimestamps) {
+      chartTimestamps = timestampListFormatted.slice(timestampListFormattedSize-maxNumOfChartTimestamps,timestampListFormattedSize);
+      chartCalls = callList.slice(timestampListFormattedSize-maxNumOfChartTimestamps,timestampListFormattedSize);
+    }
+    else {
+      chartTimestamps = timestampListFormatted;
+      chartCalls = callList;
+    }
 
-      // get maximum amount of call for scaling the chart
-      const maxCalls = Math.max.apply(null, chartCalls);
+    // get maximum amount of call for scaling the chart
+    const maxCalls = Math.max.apply(null, chartCalls);
 
-      const chartData = {
-        labels: chartTimestamps,
-        values: chartCalls,
-        maxValue: maxCalls
-      };
+    const chartData = {
+      labels: chartTimestamps,
+      values: chartCalls,
+      maxValue: maxCalls
+    };
 
-      /*
-      console.log("timestamp", timestampList.objectAt(0));
-      console.log("moment-unix", moment(timestampList.objectAt(0),"x").toString());
-      console.log("chartTimestamps", chartData.labels);
-      console.log("chartCalls", chartData.values);
-      */
+    /*
+    console.log("timestamp", timestampList.objectAt(0));
+    console.log("moment-unix", moment(timestampList.objectAt(0),"x").toString());
+    console.log("chartTimestamps", chartData.labels);
+    console.log("chartCalls", chartData.values);
+    */
 
-      return chartData;
+    return chartData;
 
     }).catch((e) => {
       console.error(e);
     });
   },
 
-  renderPlot: on('didRender', observer('', function () {
+  renderPlot: on('didRender', observer('', function() {
 
     const chartData = this.getChartData();
     chartData.then((chartData) => {
@@ -174,7 +173,6 @@ export default Component.extend({
       Ember.$("#timelinePlot").css('height', $("#timeline").height());
 
       var ctx = $("#timelinePlot");
-
 
       var config = {
         type: 'line',
@@ -253,27 +251,26 @@ export default Component.extend({
       this.set('plot', newPlot);
       //this.updatePlot();
 
-  }).catch(() => {
-    console.log('Error creating chart!');
-  });
+    }).catch(() => {
+      console.log('Error creating chart!');
+    });
   })),
 
   // TODO WIP Update function for plot
-  updatePlot: function (timestamps) {
-    var updatedPlot = this.plot;
-	if(updatedPlot === null){ return ;}
-	var labels = timestamps.labels;
-	var values = timestamps.values;
-	
-	updatedPlot.data.labels = labels;
-	updatedPlot.data.datasets[0].data = values; 
-	//update the Changes
-	this.set("plot", updatedPlot);
-	this.get("plot").update();
-
+  updatePlot(timestamps) {
+    const updatedPlot = this.plot;
+  	if(updatedPlot === null){ return ;}
+  	var labels = timestamps.labels;
+  	var values = timestamps.values;
+  	
+  	updatedPlot.data.labels = labels;
+  	updatedPlot.data.datasets[0].data = values; 
+  	//update the Changes
+  	this.set("plot", updatedPlot);
+  	this.get("plot").update();
   },
 
-  resizePlot: function () {
+  resizePlot() {
     this.renderPlot();
   }
 
