@@ -2,7 +2,8 @@ import RenderingCore from './rendering-core';
 import Ember from 'ember';
 import Raycaster from '../utils/raycaster';
 import applyCityLayout from '../utils/city-layouter';
-import {createFoundation, removeFoundation} from '../utils/application-rendering/foundation-builder';
+import {createFoundation, removeFoundation} from 
+  '../utils/application-rendering/foundation-builder';
 import CityLabeler from '../utils/city-labeler';
 import Interaction from '../utils/application-rendering/interaction';
 import THREE from "npm:three";
@@ -16,7 +17,7 @@ import THREE from "npm:three";
 export default RenderingCore.extend({
 
   store: Ember.inject.service('store'),
-  landscapeRepo: Ember.inject.service("landscape-repository"),
+  landscapeRepo: Ember.inject.service("repo/landscape-repository"),
 
   application3D: null,
 

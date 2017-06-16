@@ -1,6 +1,6 @@
 import { moduleFor, test } from 'ember-qunit';
 
-moduleFor('service:landscape-repository', 'Unit | Service | landscape repository', {
+moduleFor('service:repos/landscape-repository', 'Unit | Service | repos/landscape repository', {
   // Specify the other units that are required for this test.
   // needs: ['service:foo']
 });

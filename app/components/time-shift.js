@@ -8,14 +8,16 @@ export default Component.extend({
   store: Ember.inject.service(),
   
   plot: null,
+
+  timestampRepo: Ember.inject.service("repos/timestamp-repository"),
   
   timeshiftUpdater: Ember.inject.service("timeshift-reload"),  
   landscapeUpdater: Ember.inject.service("landscape-reload"), 
-  timestamps: Ember.computed.oneWay("timeshiftUpdater.object"),
+  //timestamps: Ember.computed.oneWay("timeshiftUpdater.object"),
   
-  observer: observer("timestamps", function(){
+  /*observer: observer("timestamps", function(){
     Ember.run.once(this, 'updatePlot');
-  }),
+  }),*/
 
   chevronCSSClass: 'glyphicon-chevron-up',
   playPauseCSSClass: 'glyphicon-pause',
@@ -55,13 +57,19 @@ export default Component.extend({
 
   // @Override
   init() {
+
+    const self = this;
+
     this._super(...arguments);
 
     $(window).resize(() => {
       this.resizePlot();
     });
-	
-	this.get("timestamps");
+
+    this.get('timestampRepo').on("updated", function(timestamps) {
+      self.updatePlot(timestamps);
+      //Ember.run.once(self, 'updatePlot');
+    });
 
   },
 
@@ -246,10 +254,9 @@ export default Component.extend({
   })),
 
   // TODO WIP Update function for plot
-  updatePlot: function () {
+  updatePlot: function (timestamps) {
     var updatedPlot = this.plot;
 	if(updatedPlot === null){ return ;}
-	var timestamps = this.get("timestamps");
 	var labels = timestamps.labels;
 	var values = timestamps.values;
 	

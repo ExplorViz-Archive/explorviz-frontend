@@ -4,7 +4,7 @@ import Reload from './data-reload';
 export default Reload.extend({
 
 
-	landscapeRepo: Ember.inject.service("landscape-repository"),
+	landscapeRepo: Ember.inject.service("repos/landscape-repository"),
 
 
 	// @Override	

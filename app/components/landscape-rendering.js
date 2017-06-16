@@ -14,7 +14,7 @@ import Meshline from "npm:three.meshline";
  */
 export default RenderingCore.extend({
 
-  landscapeRepo: Ember.inject.service("landscape-repository"),
+  landscapeRepo: Ember.inject.service("repos/landscape-repository"),
   configuration: Ember.inject.service("configuration"),
 
   hammerManager: null,

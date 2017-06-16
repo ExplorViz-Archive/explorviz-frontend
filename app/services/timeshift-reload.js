@@ -4,6 +4,8 @@ import moment from 'npm:moment';
 
 export default Reload.extend({
 
+	timestampRepo: Ember.inject.service("repos/timestamp-repository"),
+
 	// @Override	
 	init() {
 		this._super(...arguments);
@@ -76,18 +78,15 @@ export default Reload.extend({
 			};
 			
 			//This will set the object
-			self.set("object", chartData);
+			self.set('timestampRepo.latestTimestamp', chartData);
 			self.debug("end request");
-			self.set('previousRequestDone', true);
 		}
 	
 		function failure(e){
-			self.set('previousRequestDone', true);
 			console.error(e.message);
 		}
 		
 		function error(e){
-			self.set('previousRequestDone', true);
 			console.error(e);
 		}
 		
