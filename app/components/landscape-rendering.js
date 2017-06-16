@@ -206,9 +206,9 @@ export default RenderingCore.extend({
 
             applications.forEach(function(application) {
 
-              if(application.get('name') === "PostgreSQL") {
+              /*if(application.get('name') === "PostgreSQL") {
                 console.log("app", application);
-              }
+              }*/
 
               extensionX = application.get('width') * scaleFactor.width;
               extensionY = application.get('height') * scaleFactor.width;

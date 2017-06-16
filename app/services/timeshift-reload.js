@@ -18,14 +18,9 @@ export default Reload.extend({
 	updateObject(){
 		const self = this;
 
-		if(this.get('previousRequestDone')) {
-			this.set('previousRequestDone', false);
-			this.debug("start request");
-			var timestamps = this.get("store").query('timestamp', '1');
-			timestamps.then(success, failure).catch(error);
-		}
-
-	
+		this.debug("start timestamp-request");
+		this.get("store").query('timestamp', '1')
+			.then(success, failure).catch(error);
 	
 		//----------------------------- Start of inner functions of updateObject------------------------------------------
 		function success(timestamps){
