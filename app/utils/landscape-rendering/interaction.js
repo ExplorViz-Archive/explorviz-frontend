@@ -30,6 +30,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
       self.onMouseOut(evt);
     }
 
+    // mouseenter handler for disabling notifications
     canvas.addEventListener('mouseenter', registerMouseEnter, false);
 
     function registerMouseEnter(evt) {
