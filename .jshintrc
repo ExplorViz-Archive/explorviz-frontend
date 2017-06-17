@@ -11,7 +11,9 @@
     "$klay",
     "moment",
     "THREEx",
-    "alertify"
+    "alertify",
+    "d3",
+    "c3"
   ],
   "browser": true,
   "boss": true,

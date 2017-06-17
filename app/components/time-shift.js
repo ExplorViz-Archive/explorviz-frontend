@@ -47,10 +47,6 @@ export default Component.extend({
 
     const self = this;
 
-    $(window).resize(() => {
-      this.resizePlot();
-    });
-
     // Listener for updating plot
     this.get('timestampRepo').on('updated', function() {
       self.updatePlot();
@@ -83,103 +79,32 @@ export default Component.extend({
 
     const chartData = this.buildChartData();
 
-    const winWidth = $(window).width();
-    Ember.$("#timeline").css('width', winWidth);
+    const values = chartData.values;
+    values.unshift('Timestamps');
 
-    // Needed to fix the height of the plot
-    Ember.$("#timelinePlot").css('width', $("#timeline").width());
-    Ember.$("#timelinePlot").css('height', $("#timeline").height());
+    const dates = chartData.labels;
+    dates.unshift('xAxis');
 
-    const ctx = $("#timelinePlot");
-
-    const config = {
-      type: 'line',
+    const chart = c3.generate({
       data: {
-        labels: chartData.labels,
-        datasets: [{
-          label: '# of Calls',
-          //data: [0, 2000, 5000, 3000, 1000, 0],
-          data: chartData.values,
-          backgroundColor: 'rgba(0, 80, 255, 0.2)',
-          borderColor: 'rgba(0, 80, 255, 0.8)',
-          borderWidth: 1
-        }]
+        x: 'xAxis',
+        xFormat: '%H:%M:%S',
+        columns: [dates, values]
       },
-      options: {
-        responsive: true,
-        title: {
-          display: false,
-          text: "# of Calls"
-        },
-        legend: {
-          display: false
-        },
-        scales: {
-          xAxes: [{
-            scaleLabel: {
-              display: true,
-              labelString: 'Time',
-              fontStyle: 'bold'
-            }
-          }],
-          yAxes: [{
-            scaleLabel: {
-              display: true,
-              labelString: 'Calls',
-              fontStyle: 'bold'
-            },
-            ticks: {
-              beginAtZero: true
-            }
-          }]
-        },
-        pan: {
-          enabled: true,
-          mode: 'x',
-          rangeMin: {
-            // Format of min pan range depends on scale type
-            x: null,
-            y: null
-          },
-          rangeMax: {
-            // Format of max pan range depends on scale type
-            x: null,
-            y: null
-          }
-        },
-
-        /*
-        TODO
-        Panning & Zooming are not working well atm
-         */
-        /*
-        pan: {
-          enabled: false,
-          // Panning directions. Remove the appropriate direction to disable
-          // Eg. 'y' would only allow panning in the y direction
-          mode: 'x',
-          speed: 10,
-          threshold: 10
-        },
-        */
-        /*
-        zoom: {
-          enabled: true,
-          drag: true,
-          // Zooming directions. Remove the appropriate direction to disable
-          // Eg. 'y' would only allow zooming in the y direction
-          mode: 'y',
-          limits: {
-            max: chartData.maxValue,
-            min: 0
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+              format: '%H:%M:%S'
           }
         }
-        */
+      },
+      zoom: {
+        enabled: true
       }
-    };
+    });
 
-    const newPlot = new Chart(ctx, config);
-    this.set('plot', newPlot);
+    this.set('plot', chart);
   }),
 
 
@@ -253,7 +178,6 @@ export default Component.extend({
 
 
 
-  // TODO WIP Update function for plot
   updatePlot() {
 
     const updatedPlot = this.get('plot');
@@ -265,24 +189,21 @@ export default Component.extend({
 
   	const labels = chartReadyTimestamps.labels;
   	const values = chartReadyTimestamps.values;
-  	
-    // workaround at the moment
-  	//updatedPlot.data.labels.push(labels.pop());
-  	//updatedPlot.data.datasets[0].data.push(values.pop());
-    
-    updatedPlot.data.labels = labels;
-    updatedPlot.data.datasets[0].data = values;
 
-    //console.log("scale", updatedPlot.options.scales.xAxes[0]);
+    // always 25, why?
+    //console.log(values.length);
 
-  	//update the Changes
-  	this.set("plot", updatedPlot);
-  	this.get("plot").update(0);
+    const newLabel = ['xAxis', labels.pop()];
+    const newValue = ['Timestamps', values.pop()];
 
-  },
+    console.log(updatedPlot);
 
-  resizePlot() {
-    this.renderPlot();
+    updatedPlot.flow({
+      columns: [newLabel, newValue],
+      done: function () {
+        updatedPlot.zoom.enable(true);
+      }
+    });
   }
 
 });
