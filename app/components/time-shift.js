@@ -256,7 +256,7 @@ export default Component.extend({
   	updatedPlot.data.datasets[0].data = values; 
   	//update the Changes
   	this.set("plot", updatedPlot);
-  	this.get("plot").update();
+  	this.get("plot").update(0);
 
   },
 
