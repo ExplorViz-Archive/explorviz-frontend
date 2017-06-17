@@ -95,7 +95,6 @@ export default Component.extend({
     const config = {
       type: 'line',
       data: {
-        //labels: ['15:42:00', '15:42:30', '15:43:00', '15:43:30', '15:44:00'],
         labels: chartData.labels,
         datasets: [{
           label: '# of Calls',
@@ -194,16 +193,15 @@ export default Component.extend({
         callList.push(callValue);
 
         const parsedTimestampValue = moment(timestampValue,"x");
-        const timestampValueFormatted = parsedTimestampValue.format("HH:mm:ss").toString();
+        const timestampValueFormatted = 
+          parsedTimestampValue.format("HH:mm:ss").toString();
         timestampListFormatted.push(timestampValueFormatted);
       });
-
-      //console.log("timestampList[0]",timestampList.objectAt(0));
-      //console.log("timestampListFormatted[0]",timestampListFormatted.objectAt(0));
     }
 
     // maximum number of timestamps displayed in chart at one time
-    const maxNumOfChartTimestamps = parseInt(this.$()[0].clientWidth / dataPointPixelRatio);
+    const maxNumOfChartTimestamps = 
+      parseInt(this.$()[0].clientWidth / dataPointPixelRatio);
 
     // TODO: error handling (no data etc)
 
@@ -214,8 +212,13 @@ export default Component.extend({
 
     // limit size of displayed data points and labels
     if (timestampListFormattedSize > maxNumOfChartTimestamps) {
-      chartTimestamps = timestampListFormatted.slice(timestampListFormattedSize-maxNumOfChartTimestamps,timestampListFormattedSize);
-      chartCalls = callList.slice(timestampListFormattedSize-maxNumOfChartTimestamps,timestampListFormattedSize);
+      chartTimestamps = timestampListFormatted.slice(
+        timestampListFormattedSize-maxNumOfChartTimestamps,
+          timestampListFormattedSize);
+
+      chartCalls = callList.slice(
+        timestampListFormattedSize-maxNumOfChartTimestamps,
+          timestampListFormattedSize);
     }
     else {
       chartTimestamps = timestampListFormatted;

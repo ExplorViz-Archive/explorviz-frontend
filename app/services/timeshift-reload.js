@@ -27,7 +27,7 @@ export default Reload.extend({
 		this.get("store").query('timestamp', '1')
 			.then(success, failure).catch(error);
 	
-		//------------- Start of inner functions of updateObject---------------
+		//------------- Start of inner functions of updateObject ---------------
 		function success(timestamps){			
 			self.set('timestampRepo.latestTimestamps', timestamps);
 			self.debug("end timestamp request");
@@ -42,7 +42,7 @@ export default Reload.extend({
 		}
 		
 		
-		//-------------------------------------------------end of inner functions of getData--------------------------------
+		//------------- End of inner functions of getData ---------------
 	
 	},
 	
