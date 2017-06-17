@@ -1,6 +1,5 @@
 import Reload from './data-reload';
 import Ember from "ember";
-import moment from 'npm:moment';
 
 export default Reload.extend({
 
@@ -12,11 +11,15 @@ export default Reload.extend({
 		this.set('shallReload', true);
 	},
 
+
 	/*
-		this service starts working with the application. Look "instance-initializer/service-start" for more information
+		This service fetches the timestamps every tenth second.
+		In addition it reloads timestamps.
+		See "instance-initializer/service-start" for more information.
 	*/
 
-	//@override
+
+	// @Override
 	updateObject(){
 		const self = this;
 
@@ -24,62 +27,10 @@ export default Reload.extend({
 		this.get("store").query('timestamp', '1')
 			.then(success, failure).catch(error);
 	
-		//----------------------------- Start of inner functions of updateObject------------------------------------------
-		function success(timestamps){
-			const sortedTimestamps = timestamps.sortBy('id');
-			// define outside loop in case of error
-			var timestampList = [];
-			var timestampListFormatted = [];
-			var callList = [];
-
-			// Parse and format timestamps for timeline
-			if (sortedTimestamps) {
-				sortedTimestamps.forEach(function(timestamp) {
-					
-					self.get("store").push(timestamp.serialize({includeId: true})); 
-					const timestampValue = timestamp.get('id');
-					timestampList.push(timestampValue);
-
-					const callValue = timestamp.get('calls');
-					callList.push(callValue);
-
-					const parsedTimestampValue = moment(timestampValue,"x");
-					const timestampValueFormatted = parsedTimestampValue.format("HH:mm:ss").toString();
-					timestampListFormatted.push(timestampValueFormatted);
-				});
-			}
-
-			// maximum number of timestamps displayed in chart at one time
-			const maxNumOfChartTimestamps = 30;
-
-			// TODO: error handling (no data etc)
-
-			// Container for charts (limited size)
-			var chartTimestamps = [];
-			var chartCalls = [];
-			const timestampListFormattedSize = timestampListFormatted.length;
-
-			// limit size of displayed data points and labels
-			if (timestampListFormattedSize > maxNumOfChartTimestamps) {
-				chartTimestamps = timestampListFormatted.slice(timestampListFormattedSize-maxNumOfChartTimestamps,timestampListFormattedSize);
-				chartCalls = callList.slice(timestampListFormattedSize-maxNumOfChartTimestamps,timestampListFormattedSize);
-			}
-			else {
-				chartTimestamps = timestampListFormatted;
-				chartCalls = callList;
-			}
-
-			// get maximum amount of call for scaling the chart
-			const maxCalls = Math.max.apply(null, chartCalls);
-			const chartData = {
-				labels: chartTimestamps,
-				values: chartCalls,
-				maxValue: maxCalls
-			};
-			
-			//This will set the object
-			self.set('timestampRepo.latestTimestamp', chartData);
-			self.debug("end request");
+		//------------- Start of inner functions of updateObject---------------
+		function success(timestamps){			
+			self.set('timestampRepo.latestTimestamps', timestamps);
+			self.debug("end timestamp request");
 		}
 	
 		function failure(e){
@@ -105,15 +56,20 @@ export default Reload.extend({
 		var oldestTimestamp = timestamps.get("firstObject");
 		
 		if(!oldestTimestamp){
-			this.set("reloadThread", Ember.run.later(this, function(){this.set("shallReload", true);}, 1000));      //if there is no Object, the service shall wait for a second, then reload
+			//if there is no Object, the service shall wait for a second, then reload
+			this.set("reloadThread", Ember.run.later(this, 
+				function(){
+					this.set("shallReload", true);
+				},1000));     
 			return;
 		}
-		var id = oldestTimestamp.get("id");
+
+		const id = oldestTimestamp.get("id");
 		var requestedTimestamps = this.get("store").query('timestamp', id);
-			requestedTimestamps.then(success, failure).catch(error);
+		requestedTimestamps.then(success, failure).catch(error);
 			
 		function success(timestamps){
-			var length = timestamps.get("length");
+			const length = timestamps.get("length");
 			if(length !== 0){
 				timestamps.forEach(function(timestamp){
 					self.get("store").push(timestamp.serialize({includeId:true}));

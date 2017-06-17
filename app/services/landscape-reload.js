@@ -3,9 +3,7 @@ import Reload from './data-reload';
 
 export default Reload.extend({
 
-
 	landscapeRepo: Ember.inject.service("repos/landscape-repository"),
-
 
 	// @Override	
 	init() {
@@ -16,14 +14,15 @@ export default Reload.extend({
 
 	/*
 		This service reloads the latest-landscape every tenth second. 
-		Look "instance-initializer/service-start" for more information.
-	 */
+		See "instance-initializer/service-start" for more information.
+	*/
 	
 
 	
 	// @Override
 	updateObject(){
 		const self = this;
+
 		this.debug("start landscape-request");
 		this.get("store").queryRecord('landscape', 'latest-landscape')
 			.then(success, failure).catch(error);
@@ -32,7 +31,6 @@ export default Reload.extend({
 		function success(landscape){
 			self.debug("end landscape-request");
 			self.set('landscapeRepo.latestLandscape', landscape);
-			//self.set("object", landscape);
 		}
 	
 		function failure(e){

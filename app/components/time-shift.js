@@ -1,11 +1,10 @@
 import Ember from 'ember';
 import moment from 'npm:moment';
 
-const {Component, $, on, observer} = Ember;
+const {Component, $, on} = Ember;
 
 export default Component.extend({
 
-  store: Ember.inject.service(),
   timestampRepo: Ember.inject.service("repos/timestamp-repository"),
   reloadHandler: Ember.inject.service("reload-handler"),
   
@@ -14,7 +13,6 @@ export default Component.extend({
   actions: {
 
     toggleTimeline() {
-
       if ($(".timeline").attr('vis') === 'show') {
         // hide timeline        
         $(".timeline").slideUp();
@@ -53,10 +51,12 @@ export default Component.extend({
       this.resizePlot();
     });
 
-    this.get('timestampRepo').on('updated', function(timestamps) {
-      self.updatePlot(timestamps);
+    // Listener for updating plot
+    this.get('timestampRepo').on('updated', function() {
+      self.updatePlot();
     });
 
+    // Listeners for changing play / pause css
     this.get('reloadHandler').on('stopExchange', function() {
       $('#playPauseTimelineButton').removeClass('glyphicon-pause')
         .addClass('glyphicon-play');
@@ -77,27 +77,112 @@ export default Component.extend({
     this.get('reloadHandler').off('startExchange');
   },
 
-  // query timestamps from backend and call renderPlot with chart-ready data
-  getChartData() {
-    //const self = this;
-    // listen for pause-event
-    /*this.get('timeshiftStopper').on('stopTimeshift', function() {
-      self.stopTimeshift();
-    });*/
+
+
+  renderPlot: on('didRender', function() {
+
+    const chartData = this.buildChartData();
+
+    const winWidth = $(window).width();
+    Ember.$("#timeline").css('width', winWidth);
+
+    // Needed to fix the height of the plot
+    Ember.$("#timelinePlot").css('width', $("#timeline").width());
+    Ember.$("#timelinePlot").css('height', $("#timeline").height());
+
+    const ctx = $("#timelinePlot");
+
+    const config = {
+      type: 'line',
+      data: {
+        //labels: ['15:42:00', '15:42:30', '15:43:00', '15:43:30', '15:44:00'],
+        labels: chartData.labels,
+        datasets: [{
+          label: '# of Calls',
+          //data: [0, 2000, 5000, 3000, 1000, 0],
+          data: chartData.values,
+          backgroundColor: 'rgba(0, 80, 255, 0.2)',
+          borderColor: 'rgba(0, 80, 255, 0.8)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        title: {
+          display: false,
+          text: "# of Calls"
+        },
+        legend: {
+          display: false
+        },
+        scales: {
+          xAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: 'Time',
+              fontStyle: 'bold'
+            }
+          }],
+          yAxes: [{
+            scaleLabel: {
+              display: true,
+              labelString: 'Calls',
+              fontStyle: 'bold'
+            },
+            ticks: {
+              beginAtZero: true
+            }
+          }]
+        },
+
+        /*
+        TODO
+        Panning & Zooming are not working well atm
+         */
+        /*
+        pan: {
+          enabled: false,
+          // Panning directions. Remove the appropriate direction to disable
+          // Eg. 'y' would only allow panning in the y direction
+          mode: 'x',
+          speed: 10,
+          threshold: 10
+        },
+        */
+        /*
+        zoom: {
+          enabled: true,
+          drag: true,
+          // Zooming directions. Remove the appropriate direction to disable
+          // Eg. 'y' would only allow zooming in the y direction
+          mode: 'y',
+          limits: {
+            max: chartData.maxValue,
+            min: 0
+          }
+        }
+        */
+      }
+    };
+
+    const newPlot = new Chart(ctx, config);
+    this.set('plot', newPlot);
+  }),
+
+
+  // build chart-ready data
+  buildChartData() {
 
     const dataPointPixelRatio = 30;
 
-    const store = this.get('store');
-    // GET /show-timestamps
-    const timestamps = store.query('timestamp', '1');
+    const timestamps = this.get('timestampRepo.latestTimestamps');
 
-    return timestamps.then((timestamps) => {
-		const sortedTimestamps = timestamps.sortBy('id');
+    const sortedTimestamps = timestamps.sortBy('id');
 
     // define outside loop in case of error
-    var timestampList = [];
-    var timestampListFormatted = [];
-    var callList = [];
+    const timestampList = [];
+    const timestampListFormatted = [];
+    const callList = [];
 
     // Parse and format timestamps for timeline
     if (sortedTimestamps) {
@@ -123,8 +208,8 @@ export default Component.extend({
     // TODO: error handling (no data etc)
 
     // Container for charts (limited size)
-    var chartTimestamps = [];
-    var chartCalls = [];
+    let chartTimestamps = [];
+    let chartCalls = [];
     const timestampListFormattedSize = timestampListFormatted.length;
 
     // limit size of displayed data points and labels
@@ -146,128 +231,30 @@ export default Component.extend({
       maxValue: maxCalls
     };
 
-    /*
-    console.log("timestamp", timestampList.objectAt(0));
-    console.log("moment-unix", moment(timestampList.objectAt(0),"x").toString());
-    console.log("chartTimestamps", chartData.labels);
-    console.log("chartCalls", chartData.values);
-    */
-
     return chartData;
-
-    }).catch((e) => {
-      console.error(e);
-    });
   },
 
-  renderPlot: on('didRender', observer('', function() {
 
-    const chartData = this.getChartData();
-    chartData.then((chartData) => {
-
-      var winWidth = $(window).width();
-      Ember.$("#timeline").css('width', winWidth);
-
-      // Needed to fix the height of the plot
-      Ember.$("#timelinePlot").css('width', $("#timeline").width());
-      Ember.$("#timelinePlot").css('height', $("#timeline").height());
-
-      var ctx = $("#timelinePlot");
-
-      var config = {
-        type: 'line',
-        data: {
-          //labels: ['15:42:00', '15:42:30', '15:43:00', '15:43:30', '15:44:00'],
-          labels: chartData.labels,
-          datasets: [{
-            label: '# of Calls',
-            //data: [0, 2000, 5000, 3000, 1000, 0],
-            data: chartData.values,
-            backgroundColor: 'rgba(0, 80, 255, 0.2)',
-            borderColor: 'rgba(0, 80, 255, 0.8)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          title: {
-            display: false,
-            text: "# of Calls"
-          },
-          legend: {
-            display: false
-          },
-          scales: {
-            xAxes: [{
-              scaleLabel: {
-                display: true,
-                labelString: 'Time',
-                fontStyle: 'bold'
-              }
-            }],
-            yAxes: [{
-              scaleLabel: {
-                display: true,
-                labelString: 'Calls',
-                fontStyle: 'bold'
-              },
-              ticks: {
-                beginAtZero: true
-              }
-            }]
-          },
-
-          /*
-          TODO
-          Panning & Zooming are not working well atm
-           */
-          /*
-          pan: {
-            enabled: false,
-            // Panning directions. Remove the appropriate direction to disable
-            // Eg. 'y' would only allow panning in the y direction
-            mode: 'x',
-            speed: 10,
-            threshold: 10
-          },
-          */
-          /*
-          zoom: {
-            enabled: true,
-            drag: true,
-            // Zooming directions. Remove the appropriate direction to disable
-            // Eg. 'y' would only allow zooming in the y direction
-            mode: 'y',
-            limits: {
-              max: chartData.maxValue,
-              min: 0
-            }
-          }
-          */
-        }
-      };
-
-      var newPlot = new Chart(ctx, config);
-      this.set('plot', newPlot);
-      //this.updatePlot();
-
-    }).catch(() => {
-      console.log('Error creating chart!');
-    });
-  })),
 
   // TODO WIP Update function for plot
-  updatePlot(timestamps) {
-    const updatedPlot = this.plot;
-  	if(updatedPlot === null){ return ;}
-  	var labels = timestamps.labels;
-  	var values = timestamps.values;
+  updatePlot() {
+
+    const updatedPlot = this.get('plot');
+
+  	if(updatedPlot === null){
+      return;
+    }
+    const chartReadyTimestamps = this.buildChartData();
+
+  	const labels = chartReadyTimestamps.labels;
+  	const values = chartReadyTimestamps.values;
   	
   	updatedPlot.data.labels = labels;
   	updatedPlot.data.datasets[0].data = values; 
   	//update the Changes
   	this.set("plot", updatedPlot);
   	this.get("plot").update();
+
   },
 
   resizePlot() {

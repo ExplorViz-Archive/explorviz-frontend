@@ -2,10 +2,10 @@ import Ember from 'ember';
 
 export default Ember.Service.extend(Ember.Evented, {
 
-  latestTimestamp: null,
+  latestTimestamps: null,
 
-  observer: Ember.observer("latestTimestamp", function(){
-    this.trigger("updated", this.get("latestTimestamp"));
+  observer: Ember.observer("latestTimestamps", function(){
+    this.trigger("updated");
   }),
 
 });
