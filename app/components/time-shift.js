@@ -133,6 +133,20 @@ export default Component.extend({
             }
           }]
         },
+        pan: {
+          enabled: true,
+          mode: 'x',
+          rangeMin: {
+            // Format of min pan range depends on scale type
+            x: null,
+            y: null
+          },
+          rangeMax: {
+            // Format of max pan range depends on scale type
+            x: null,
+            y: null
+          }
+        },
 
         /*
         TODO
@@ -252,8 +266,15 @@ export default Component.extend({
   	const labels = chartReadyTimestamps.labels;
   	const values = chartReadyTimestamps.values;
   	
-  	updatedPlot.data.labels = labels;
-  	updatedPlot.data.datasets[0].data = values; 
+    // workaround at the moment
+  	//updatedPlot.data.labels.push(labels.pop());
+  	//updatedPlot.data.datasets[0].data.push(values.pop());
+    
+    updatedPlot.data.labels = labels;
+    updatedPlot.data.datasets[0].data = values;
+
+    //console.log("scale", updatedPlot.options.scales.xAxes[0]);
+
   	//update the Changes
   	this.set("plot", updatedPlot);
   	this.get("plot").update(0);
