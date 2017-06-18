@@ -90,6 +90,10 @@ export default Component.extend({
         x: 'xAxis',
         xFormat: '%H:%M:%S',
         columns: [dates, values],
+        types: {
+          Timestamps: 'area-spline'
+            // 'line', 'spline', 'step', 'area', 'area-step' are also available to stack
+        },
         onclick: function(d) {self.loadTimestamp(d);}
       },
       axis: {
@@ -99,6 +103,9 @@ export default Component.extend({
               format: '%H:%M:%S'
           }
         }
+      },
+      legend: {
+        show: false
       },
       zoom: {
         enabled: true
@@ -115,6 +122,10 @@ export default Component.extend({
     const dataPointPixelRatio = 30;
 
     const timestamps = this.get('timestampRepo.latestTimestamps');
+
+    if(!timestamps) {
+      return;
+    }
 
     const sortedTimestamps = timestamps.sortBy('id');
 
