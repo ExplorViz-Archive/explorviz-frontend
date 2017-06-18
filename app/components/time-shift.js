@@ -73,9 +73,9 @@ export default Component.extend({
     this.get('reloadHandler').off('startExchange');
   },
 
-
-
   renderPlot: on('didRender', function() {
+
+    const self = this;
 
     const chartData = this.buildChartData();
 
@@ -89,7 +89,8 @@ export default Component.extend({
       data: {
         x: 'xAxis',
         xFormat: '%H:%M:%S',
-        columns: [dates, values]
+        columns: [dates, values],
+        onclick: function(d) {self.loadTimestamp(d);}
       },
       axis: {
         x: {
@@ -177,7 +178,6 @@ export default Component.extend({
   },
 
 
-
   updatePlot() {
 
     const updatedPlot = this.get('plot');
@@ -190,20 +190,22 @@ export default Component.extend({
   	const labels = chartReadyTimestamps.labels;
   	const values = chartReadyTimestamps.values;
 
-    // always 25, why?
-    //console.log(values.length);
-
     const newLabel = ['xAxis', labels.pop()];
     const newValue = ['Timestamps', values.pop()];
 
-    console.log(updatedPlot);
-
     updatedPlot.flow({
       columns: [newLabel, newValue],
+      length: 0,
       done: function () {
         updatedPlot.zoom.enable(true);
       }
     });
-  }
+  },
+
+
+  loadTimestamp(timestamp) {
+    console.log(timestamp);
+    this.get('reloadHandler').stopExchange();
+  },
 
 });
