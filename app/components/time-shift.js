@@ -61,6 +61,7 @@ export default Component.extend({
     this.get('reloadHandler').on('startExchange', function() {
       $('#playPauseTimelineButton').removeClass('glyphicon-play')
         .addClass('glyphicon-pause');
+      self.get('plot').unselect(['Timestamps']);
     });
   },
 
@@ -92,7 +93,11 @@ export default Component.extend({
         columns: [dates, values],
         types: {
           Timestamps: 'area-spline'
-            // 'line', 'spline', 'step', 'area', 'area-step' are also available to stack
+          // 'line', 'spline', 'step', 'area', 'area-step' ...
+        },        
+        selection: {
+          enabled: true,
+          multiple: false
         },
         onclick: function(d) {self.loadTimestamp(d);}
       },
