@@ -1,9 +1,13 @@
 import Ember from 'ember';
 import RenderingCore from './rendering-core';
+
 import Raycaster from '../utils/raycaster';
-import applyKlayLayout from '../utils/klay-layouter';
-import Interaction from '../utils/landscape-rendering/interaction';
 import THREE from "npm:three";
+
+import applyKlayLayout from '../utils/landscape-rendering/klay-layouter';
+import Interaction from '../utils/landscape-rendering/interaction';
+import Labeler from '../utils/landscape-rendering/labeler';
+
 import Meshline from "npm:three.meshline";
 
  /**
@@ -22,11 +26,11 @@ export default RenderingCore.extend({
   centerPoint : null,
 
   logos: {},
-  textLabels: {},
   gradientTextures: {},
 
   raycaster: null,
   interaction: null,
+  labeler: null,
 
   // @Override
   initRendering() {
@@ -38,6 +42,10 @@ export default RenderingCore.extend({
 
     if (!this.get('interaction')) {
       this.set('interaction', Interaction.create());
+    }
+
+    if (!this.get('labeler')) {
+      this.set('labeler', Labeler.create());
     }
 
     if (!this.get('raycaster')) {
@@ -72,7 +80,7 @@ export default RenderingCore.extend({
     this.debug("cleanup landscape rendering");
 
     this.set('logos', {});
-    this.set('textLabels', {});
+    this.set('labeler.textLabels', {});
     this.set('gradientTextures', {});
 
     this.get('interaction').removeHandlers();
@@ -145,7 +153,7 @@ export default RenderingCore.extend({
             top: -0.6,
             bottom: 0.0
           };
-          const labelMesh = createTextLabel(self.get('font'), 0.3, null, systemMesh,
+          const labelMesh = self.get('labeler').createTextLabel(self.get('font'), 0.3, null, systemMesh,
             padding, self.get('configuration.landscapeColors.textsystem'), {
               width: 0.0,
               height: 0.0
@@ -257,7 +265,7 @@ export default RenderingCore.extend({
                   top: 0.0,
                   bottom: 0.0
                 };
-                let labelMesh = createTextLabel(font, 0.2, null, applicationMesh,
+                let labelMesh = self.get('labeler').createTextLabel(font, 0.2, null, applicationMesh,
                   padding, self.get('configuration.landscapeColors.textapp'), 
                   logoSize, "center", application);
 
@@ -270,7 +278,7 @@ export default RenderingCore.extend({
                   bottom: 0.2
                 };
 
-                labelMesh = createTextLabel(font, 0.2, node.getDisplayName(), 
+                labelMesh = self.get('labeler').createTextLabel(font, 0.2, node.getDisplayName(), 
                   nodeMesh, padding, 
                   self.get('configuration.landscapeColors.textnode'), {
                     width: 0.0,
@@ -583,109 +591,6 @@ export default RenderingCore.extend({
 
       }
     }
-
-
-    function createTextLabel(font, size, textToShow, parent, padding, color,
-      logoSize, yPosition, model) {
-
-      if(self.get('textLabels')[model.get('id')] && 
-        !self.get('configuration.landscapeColors.textchanged')) {
-        if(self.get('textLabels')[model.get('id')].state === model.get("state")) {
-          //console.log("old label");
-          return self.get('textLabels')[model.get('id')].mesh;
-        }        
-      }
-
-      //console.log("new label");
-
-      const text = textToShow ? textToShow :
-        parent.userData.model.get('name');
-
-      let labelGeo = new THREE.TextGeometry(
-        text, {
-          font: font,
-          size: size,
-          height: 0
-        }
-      );
-
-      labelGeo.computeBoundingBox();
-      var bboxLabel = labelGeo.boundingBox;
-      var labelWidth = bboxLabel.max.x - bboxLabel.min.x;
-
-      //console.log("label", text);
-
-      //console.log("labelMax", bboxLabel.max.x);
-      //console.log("labelMin", bboxLabel.min.x);
-      //console.log("labelWidth", labelWidth);
-
-      parent.geometry.computeBoundingBox();
-      const bboxParent = parent.geometry.boundingBox;
-
-      var boxWidth = Math.abs(bboxParent.max.x) +
-        Math.abs(bboxParent.min.x);
-
-      //console.log("pre-boxwidth", boxWidth);
-
-      boxWidth = boxWidth - logoSize.width + padding.left + padding.right;
-
-      //console.log("boxwidth", boxWidth);
-
-      // We can't set the size of the labelGeo. Hence we need to scale it.
-
-      // upper scaling factor
-      var i = 1.0;
-
-      // scale until text fits into parent bounding box
-      while ((labelWidth > boxWidth) && (i > 0.1)) {
-        // TODO time complexity: linear -> Do binary search alike approach?                        
-        i -= 0.05;
-        labelGeo.scale(i, i, i);
-        // update the boundingBox
-        labelGeo.computeBoundingBox();
-        bboxLabel = labelGeo.boundingBox;
-        labelWidth = bboxLabel.max.x - bboxLabel.min.x;
-        if (text === "PostgreSQL") {
-          //console.log("boxWidth", boxWidth);
-          //console.log("labelWidth", labelWidth);
-        }
-      }
-
-      const labelHeight = bboxLabel.max.y - bboxLabel.min.y;
-
-      if (text === "PostgreSQL") {
-        //console.log(labelHeight);
-      }
-      //console.log("labelHeight", labelHeight);
-
-      let posX = (-labelWidth / 2.0) + padding.left + padding.right;
-
-      let posY = padding.bottom + padding.top;
-
-      if (yPosition === "max") {
-        posY += bboxParent.max.y;
-      } else if (yPosition === "min") {
-        posY += bboxParent.min.y;
-      } else if (yPosition === "center") {
-        posY -= (labelHeight / 2.0);
-      }
-
-      const material = new THREE.MeshBasicMaterial({
-        color: color
-      });
-
-      const labelMesh = new THREE.Mesh(labelGeo, material);
-
-      labelMesh.position.set(posX, posY, 0.005);
-
-      labelMesh.userData['type'] = 'label';
-      labelMesh.userData['model'] = model;
-
-      self.get('textLabels')[model.get('id')] = {"mesh": labelMesh, "state": model.get('state')};
-
-      return labelMesh;
-    }
-
 
     function createPlane(model) {
 

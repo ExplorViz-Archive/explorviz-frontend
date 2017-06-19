@@ -1,12 +1,15 @@
-import RenderingCore from './rendering-core';
 import Ember from 'ember';
+import RenderingCore from './rendering-core';
+
 import Raycaster from '../utils/raycaster';
-import applyCityLayout from '../utils/city-layouter';
+import THREE from "npm:three";
+
+import applyCityLayout from '../utils/application-rendering/city-layouter';
+import Interaction from '../utils/application-rendering/interaction';
+import Labeler from '../utils/application-rendering/labeler';
 import {createFoundation, removeFoundation} from 
   '../utils/application-rendering/foundation-builder';
-import CityLabeler from '../utils/city-labeler';
-import Interaction from '../utils/application-rendering/interaction';
-import THREE from "npm:three";
+
 
  /**
  * Renderer for application visualization.
@@ -48,7 +51,7 @@ export default RenderingCore.extend({
     this.set('application3D', new THREE.Object3D());
 
     if (!this.get('labeler')) {
-      this.set('labeler', CityLabeler.create());
+      this.set('labeler', Labeler.create());
     }
 
     if (!this.get('interaction')) {
