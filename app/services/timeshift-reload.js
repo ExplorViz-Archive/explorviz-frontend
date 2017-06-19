@@ -23,14 +23,14 @@ export default Reload.extend({
 	updateObject(){
 		const self = this;
 
-		this.debug("start timestamp-request");
+		this.debug("start timestamp-fetch");
 		this.get("store").query('timestamp', '1')
 			.then(success, failure).catch(error);
 	
 		//------------- Start of inner functions of updateObject ---------------
 		function success(timestamps){			
 			self.set('timestampRepo.latestTimestamps', timestamps);
-			self.debug("end timestamp request");
+			self.debug("end timestamp-fetch");
 		}
 	
 		function failure(e){
@@ -51,6 +51,7 @@ export default Reload.extend({
 		if(!this.get("shallReload")){
 			return;
 		}
+		this.debug("start timestamp-reload");
 		const self = this;
 		var timestamps = this.get("store").peekAll("timestamp").sortBy("id");
 		var oldestTimestamp = timestamps.get("firstObject");
@@ -67,6 +68,7 @@ export default Reload.extend({
 		const id = oldestTimestamp.get("id");
 		var requestedTimestamps = this.get("store").query('timestamp', id);
 		requestedTimestamps.then(success, failure).catch(error);
+		this.debug("end timestamp-fetch");
 			
 		function success(timestamps){
 			const length = timestamps.get("length");
