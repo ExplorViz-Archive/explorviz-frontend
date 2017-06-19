@@ -10,6 +10,8 @@ export default Component.extend({
   
   plot: null,
 
+  zoomDomain: null,
+
   actions: {
 
     toggleTimeline() {
@@ -113,7 +115,10 @@ export default Component.extend({
         show: false
       },
       zoom: {
-        enabled: true
+        enabled: true,
+        onzoom: function (domain) {
+          self.set('zoomDomain', domain);
+        }
       }
     });
 
@@ -209,13 +214,19 @@ export default Component.extend({
     const newLabel = ['xAxis', labels.pop()];
     const newValue = ['Timestamps', values.pop()];
 
+    const zoomDomain = this.get('zoomDomain');
+
     updatedPlot.flow({
       columns: [newLabel, newValue],
       length: 0,
-      done: function () {
+      done: function () {        
         updatedPlot.zoom.enable(true);
       }
     });
+
+    if(zoomDomain) {
+      updatedPlot.zoom(zoomDomain);
+    }
   },
 
 
