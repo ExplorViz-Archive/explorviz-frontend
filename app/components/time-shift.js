@@ -12,11 +12,14 @@ export default Component.extend({
 
   dataPointPixelRatio: 17,
 
+  isUp: false,
+
   actions: {
 
     toggleTimeline() {
       if ($(".timeline").attr('vis') === 'show') {
-        // hide timeline        
+        // hide timeline
+        this.set('isUp', false);
         $(".timeline").slideUp();
         $("#vizContainer").animate({height:'+=200'});
         $(".timeline").attr('vis', 'hide');
@@ -24,7 +27,8 @@ export default Component.extend({
           .addClass('glyphicon-chevron-up');
       }
       else {
-        // show timeline        
+        // show timeline
+        this.set('isUp', true);
         $(".timeline").slideDown();
         $("#vizContainer").animate({height:'-=200'});
         $(".timeline").attr('vis', 'show');
@@ -86,11 +90,11 @@ export default Component.extend({
     values.unshift('Timestamps');
 
     const dates = chartData.labels;
-    dates.unshift('xAxis');
+    dates.unshift('Labels');
 
     const chart = c3.generate({
       data: {
-        x: 'xAxis',
+        x: 'Labels',
         xFormat: '%H:%M:%S',
         columns: [dates, values],
         types: {
@@ -101,7 +105,9 @@ export default Component.extend({
           enabled: true,
           multiple: false
         },
-        onclick: function(d) {self.loadTimestamp(d);}
+        onclick: function(d) {
+          self.loadTimestamp(d);
+        }
       },
       axis: {
         x: {
@@ -116,10 +122,15 @@ export default Component.extend({
       },
       zoom: {
         enabled: true
+      },
+      onresized: function() {
+        self.applyOptimalZoom();
       }
     });
 
     this.set('plot', chart);
+
+    this.applyOptimalZoom();
   }),
 
 
@@ -198,6 +209,8 @@ export default Component.extend({
 
   updatePlot() {
 
+    const self = this;
+
     const updatedPlot = this.get('plot');
 
   	if(updatedPlot === null){
@@ -208,7 +221,7 @@ export default Component.extend({
   	const labels = chartReadyTimestamps.labels;
   	const values = chartReadyTimestamps.values;
 
-    const newLabel = ['xAxis', labels.pop()];
+    const newLabel = ['Labels', labels.pop()];
     const newValue = ['Timestamps', values.pop()];
 
     updatedPlot.flow({
@@ -216,11 +229,22 @@ export default Component.extend({
       length: 0,
       done: function () {        
         updatedPlot.zoom.enable(true);
+        self.applyOptimalZoom();
       }
     });
+  },
+
+
+  applyOptimalZoom() {
+
+    if(!this.get('isUp')) {
+      return;
+    }
+
+    const allData = this.get('plot').data()[0].values;
 
     // calculate and set snippet of timeline
-    const dataSetLength = chartReadyTimestamps.labels.length;
+    const dataSetLength = allData.length;
 
     const divWidth = this.get('plot').element.clientWidth;
     const numberOfPointsToShow = parseInt(divWidth / 
@@ -229,9 +253,10 @@ export default Component.extend({
     const lowerBound = dataSetLength - numberOfPointsToShow <= 0 ? 
         0 : (dataSetLength - numberOfPointsToShow) ;  
 
-    const lowerBoundLabel = labels[lowerBound];
+    const lowerBoundLabel = allData[lowerBound].x;
+    const upperBoundLabel = allData[dataSetLength - 1].x;
 
-    updatedPlot.zoom([lowerBoundLabel, newLabel[1]]);
+    this.get('plot').zoom([lowerBoundLabel, upperBoundLabel]);
   },
 
 
