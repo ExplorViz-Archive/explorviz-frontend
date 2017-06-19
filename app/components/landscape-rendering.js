@@ -150,7 +150,9 @@ export default RenderingCore.extend({
               height: 0.0
             }, "max", system);
 
-          systemMesh.add(labelMesh);
+          if(labelMesh) {
+            systemMesh.add(labelMesh);
+          }
 
         }
 
@@ -264,7 +266,9 @@ export default RenderingCore.extend({
                   padding, self.get('configuration.landscapeColors.textapp'), 
                   logoSize, "center", application);
 
-                applicationMesh.add(labelMesh);
+                if(labelMesh) {
+                  applicationMesh.add(labelMesh);
+                }
 
                 padding = {
                   left: 0.0,
@@ -280,7 +284,9 @@ export default RenderingCore.extend({
                     height: 0.0
                   }, "min", node);
 
-                nodeMesh.add(labelMesh);
+                if(labelMesh) {
+                  nodeMesh.add(labelMesh);
+                }
 
 
 
@@ -602,6 +608,10 @@ export default RenderingCore.extend({
       }
 
       //console.log("new label");
+      
+      if(!font) {
+        return;
+      }
 
       const text = textToShow ? textToShow :
         parent.userData.model.get('name');

@@ -148,12 +148,12 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
     ////////////////////
 
     // load font for labels and proceed with populating the scene
-    new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', (font) => {
+    new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', function(font) {
 
       self.set('font', font);
       self.populateScene();
       // import new view
-      this.importView();
+      self.importView();
     });  
 
   },  
