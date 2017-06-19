@@ -87,7 +87,7 @@ export default Component.extend({
     const chartData = this.buildChartData();
 
     const values = chartData.values;
-    values.unshift('Timestamps');
+    values.unshift('Calls');
 
     const dates = chartData.labels;
     dates.unshift('Labels');
@@ -98,7 +98,7 @@ export default Component.extend({
         xFormat: '%H:%M:%S',
         columns: [dates, values],
         types: {
-          Timestamps: 'area-spline'
+          Calls: 'area-spline'
           // 'line', 'spline', 'step', 'area', 'area-step' ...
         },        
         selection: {
@@ -222,7 +222,7 @@ export default Component.extend({
   	const values = chartReadyTimestamps.values;
 
     const newLabel = ['Labels', labels.pop()];
-    const newValue = ['Timestamps', values.pop()];
+    const newValue = ['Calls', values.pop()];
 
     updatedPlot.flow({
       columns: [newLabel, newValue],
