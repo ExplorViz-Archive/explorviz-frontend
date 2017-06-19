@@ -25,7 +25,8 @@ module.exports = function(defaults) {
   // along with the exports of each module as its value.
 
   app.import('vendor/layout/klay.js');
-  app.import('vendor/stats/threex.rendererstats.js');
+  app.import('vendor/threex/threex.rendererstats.min.js');
+  app.import('vendor/threex/threex.dynamictexture.min.js');
 
   app.import('vendor/alertifyjs/alertify.min.js');
   app.import('vendor/alertifyjs/css/alertify.min.css');

@@ -68,7 +68,7 @@ export default Reload.extend({
 		const id = oldestTimestamp.get("id");
 		var requestedTimestamps = this.get("store").query('timestamp', id);
 		requestedTimestamps.then(success, failure).catch(error);
-		this.debug("end timestamp-fetch");
+		this.debug("end timestamp-reload");
 			
 		function success(timestamps){
 			const length = timestamps.get("length");
