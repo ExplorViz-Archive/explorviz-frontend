@@ -10,7 +10,7 @@ export default Component.extend({
   
   plot: null,
 
-  zoomDomain: null,
+  dataPointPixelRatio: 17,
 
   actions: {
 
@@ -115,10 +115,7 @@ export default Component.extend({
         show: false
       },
       zoom: {
-        enabled: true,
-        onzoom: function (domain) {
-          self.set('zoomDomain', domain);
-        }
+        enabled: true
       }
     });
 
@@ -214,8 +211,6 @@ export default Component.extend({
     const newLabel = ['xAxis', labels.pop()];
     const newValue = ['Timestamps', values.pop()];
 
-    const zoomDomain = this.get('zoomDomain');
-
     updatedPlot.flow({
       columns: [newLabel, newValue],
       length: 0,
@@ -224,9 +219,19 @@ export default Component.extend({
       }
     });
 
-    if(zoomDomain) {
-      updatedPlot.zoom(zoomDomain);
-    }
+    // calculate and set snippet of timeline
+    const dataSetLength = chartReadyTimestamps.labels.length;
+
+    const divWidth = this.get('plot').element.clientWidth;
+    const numberOfPointsToShow = parseInt(divWidth / 
+      this.get('dataPointPixelRatio'));
+
+    const lowerBound = dataSetLength - numberOfPointsToShow <= 0 ? 
+        0 : (dataSetLength - numberOfPointsToShow) ;  
+
+    const lowerBoundLabel = labels[lowerBound];
+
+    updatedPlot.zoom([lowerBoundLabel, newLabel[1]]);
   },
 
 
