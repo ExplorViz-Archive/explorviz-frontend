@@ -46,9 +46,10 @@ export default RenderingCore.extend({
 
     // init landscape exchange
     this.get('landscapeRepo').on("updated", function(landscape) {
-      self.set("entity", landscape);
-      self.preProcessEntity();
-      self.cleanAndUpdateScene(self.get("entity"));
+      if(self.get('initDone')) {
+        self.set("entity", landscape);
+        self.cleanAndUpdateScene(self.get("entity"));
+      }      
     });
 
     this.initInteraction();
@@ -149,10 +150,8 @@ export default RenderingCore.extend({
               width: 0.0,
               height: 0.0
             }, "max", system);
-
-          if(labelMesh) {
-            systemMesh.add(labelMesh);
-          }
+          
+          systemMesh.add(labelMesh);
 
         }
 
@@ -208,10 +207,6 @@ export default RenderingCore.extend({
 
             applications.forEach(function(application) {
 
-              /*if(application.get('name') === "PostgreSQL") {
-                console.log("app", application);
-              }*/
-
               extensionX = application.get('width') * scaleFactor.width;
               extensionY = application.get('height') * scaleFactor.width;
 
@@ -266,9 +261,7 @@ export default RenderingCore.extend({
                   padding, self.get('configuration.landscapeColors.textapp'), 
                   logoSize, "center", application);
 
-                if(labelMesh) {
-                  applicationMesh.add(labelMesh);
-                }
+                applicationMesh.add(labelMesh);
 
                 padding = {
                   left: 0.0,
@@ -277,18 +270,14 @@ export default RenderingCore.extend({
                   bottom: 0.2
                 };
 
-               labelMesh = createTextLabel(font, 0.2, node.getDisplayName(), 
-                nodeMesh, padding, 
-                self.get('configuration.landscapeColors.textnode'), {
+                labelMesh = createTextLabel(font, 0.2, node.getDisplayName(), 
+                  nodeMesh, padding, 
+                  self.get('configuration.landscapeColors.textnode'), {
                     width: 0.0,
                     height: 0.0
                   }, "min", node);
 
-                if(labelMesh) {
-                  nodeMesh.add(labelMesh);
-                }
-
-
+                nodeMesh.add(labelMesh);
 
               } else {
                 // draw request logo
@@ -608,10 +597,6 @@ export default RenderingCore.extend({
       }
 
       //console.log("new label");
-      
-      if(!font) {
-        return;
-      }
 
       const text = textToShow ? textToShow :
         parent.userData.model.get('name');

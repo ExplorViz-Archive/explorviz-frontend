@@ -41,6 +41,8 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
   font: null,
   animationFrameId: null,
 
+  initDone: false,
+
 
   // @Override
   didRender(){
@@ -147,10 +149,12 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
     ////////////////////
 
-    // load font for labels and proceed with populating the scene
-    new THREE.FontLoader().load('three.js/fonts/helvetiker_regular.typeface.json', function(font) {
+    // load font for labels and synchronously proceed with populating the scene
+    new THREE.FontLoader()
+      .load('three.js/fonts/helvetiker_regular.typeface.json', function(font) {
 
       self.set('font', font);
+      self.set('initDone', true);
       self.populateScene();
       // import new view
       self.importView();

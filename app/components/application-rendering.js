@@ -62,9 +62,11 @@ export default RenderingCore.extend({
 
     // init landscape exchange
     this.get('landscapeRepo').on("updated", function(landscape) {
-      self.set("entity", landscape);
-      self.preProcessEntity();
-      self.cleanAndUpdateScene(self.get("entity"));
+      if(self.get('initDone')) {
+        self.set("entity", landscape);
+        self.preProcessEntity();
+        self.cleanAndUpdateScene(self.get("entity"));
+      }
     });
 
     this.initInteraction();
