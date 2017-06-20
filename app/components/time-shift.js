@@ -137,8 +137,6 @@ export default Component.extend({
   // build chart-ready data
   buildChartData() {
 
-    const dataPointPixelRatio = 30;
-
     const timestamps = this.get('timestampRepo.latestTimestamps');
 
     if(!timestamps) {
@@ -168,39 +166,9 @@ export default Component.extend({
       });
     }
 
-    // maximum number of timestamps displayed in chart at one time
-    const maxNumOfChartTimestamps = 
-      parseInt(this.$()[0].clientWidth / dataPointPixelRatio);
-
-    // TODO: error handling (no data etc)
-
-    // Container for charts (limited size)
-    let chartTimestamps = [];
-    let chartCalls = [];
-    const timestampListFormattedSize = timestampListFormatted.length;
-
-    // limit size of displayed data points and labels
-    if (timestampListFormattedSize > maxNumOfChartTimestamps) {
-      chartTimestamps = timestampListFormatted.slice(
-        timestampListFormattedSize-maxNumOfChartTimestamps,
-          timestampListFormattedSize);
-
-      chartCalls = callList.slice(
-        timestampListFormattedSize-maxNumOfChartTimestamps,
-          timestampListFormattedSize);
-    }
-    else {
-      chartTimestamps = timestampListFormatted;
-      chartCalls = callList;
-    }
-
-    // get maximum amount of call for scaling the chart
-    const maxCalls = Math.max.apply(null, chartCalls);
-
     const chartData = {
-      labels: chartTimestamps,
-      values: chartCalls,
-      maxValue: maxCalls
+      labels: timestampListFormatted,
+      values: callList
     };
 
     return chartData;
@@ -221,12 +189,15 @@ export default Component.extend({
   	const labels = chartReadyTimestamps.labels;
   	const values = chartReadyTimestamps.values;
 
+    //labels.unshift('Labels');
+    //values.unshift('Calls');
+
     const newLabel = ['Labels', labels.pop()];
     const newValue = ['Calls', values.pop()];
 
     updatedPlot.flow({
       columns: [newLabel, newValue],
-      length: 0,
+      length:0,
       done: function () {        
         updatedPlot.zoom.enable(true);
         self.applyOptimalZoom();
