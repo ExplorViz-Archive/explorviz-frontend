@@ -7,6 +7,7 @@ import THREE from "npm:three";
 import applyKlayLayout from '../utils/landscape-rendering/klay-layouter';
 import Interaction from '../utils/landscape-rendering/interaction';
 import Labeler from '../utils/landscape-rendering/labeler';
+import ImageLoader from '../utils/three-image-loader';
 
 import Meshline from "npm:three.meshline";
 
@@ -25,12 +26,12 @@ export default RenderingCore.extend({
 
   centerPoint : null,
 
-  logos: {},
   gradientTextures: {},
 
   raycaster: null,
   interaction: null,
   labeler: null,
+  imageLoader: null,
 
   // @Override
   initRendering() {
@@ -42,6 +43,10 @@ export default RenderingCore.extend({
 
     if (!this.get('interaction')) {
       this.set('interaction', Interaction.create());
+    }
+
+    if (!this.get('imageLoader')) {
+      this.set('imageLoader', ImageLoader.create());
     }
 
     if (!this.get('labeler')) {
@@ -79,7 +84,7 @@ export default RenderingCore.extend({
 
     this.debug("cleanup landscape rendering");
 
-    this.set('logos', {});
+    this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
     this.set('gradientTextures', {});
 
@@ -251,7 +256,7 @@ export default RenderingCore.extend({
                 const texturePartialPath = application.get('database') ?
                   'database2' : application.get('programmingLanguage').toLowerCase();
 
-                createPicture(logoPos.x, logoPos.y, logoPos.z,
+                self.get('imageLoader').createPicture(logoPos.x, logoPos.y, logoPos.z,
                   logoSize.width, logoSize.height, texturePartialPath, 
                   applicationMesh, "label");
 
@@ -289,7 +294,7 @@ export default RenderingCore.extend({
 
               } else {
                 // draw request logo
-                createPicture(centerX, centerY, 0,
+                self.get('imageLoader').createPicture(centerX, centerY, 0,
                   1.6, 1.6, "requests", self.get('scene'), "label");
               }
 
@@ -605,45 +610,6 @@ export default RenderingCore.extend({
       plane.userData['model'] = model;
       return plane;
       
-    }
-
-
-    function createPicture(x, y, z, width, height, textureName, parent, model) {
-      if(self.get('logos')[textureName]) {
-
-        const material = new THREE.MeshBasicMaterial({
-          map: self.get('logos')[textureName],
-          transparent: true
-        });
-
-        const geo = new THREE.PlaneGeometry(width, height);
-
-        const plane = new THREE.Mesh(geo, material);
-        plane.position.set(x, y, z);
-        parent.add(plane);
-        plane.userData['model'] = model;
-        return plane;
-
-      } 
-      else {
-
-        new THREE.TextureLoader().load('images/logos/' + textureName + '.png', (texture) => {            
-
-          const material = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true
-          });
-          const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-            material);
-          plane.position.set(x, y, z);
-          parent.add(plane);
-          plane.userData['model'] = model;
-
-          self.get('logos')[textureName] = texture;
-
-          return plane;
-        });
-      }        
     }
 
     function calculateLandscapeCenterAndZZoom(emberLandscape) {
