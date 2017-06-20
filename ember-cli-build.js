@@ -1,7 +1,6 @@
 /*jshint node:true*/
 /* global require, module */
 var EmberApp = require('ember-cli/lib/broccoli/ember-app');
-var browserify = require('browserify');
 
 module.exports = function(defaults) {
 
