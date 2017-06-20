@@ -16,7 +16,8 @@ export default Ember.Object.extend({
   createTextLabel(font, size, textToShow, parent, padding, color,
     logoSize, yPosition, model) {
 
-    //const dynamicTexture  = new THREEx.DynamicTexture(512,512);
+    const dynamicTexture  = new THREEx.DynamicTexture(512,512);
+    console.log(dynamicTexture);
 
     const self = this;
 

@@ -25,6 +25,7 @@
     "ember-cli-htmlbars-inline-precompile": "^0.4.3",
     "ember-cli-inject-live-reload": "^1.6.1",
     "ember-cli-jshint": "^2.0.1",
+    "ember-cli-node-modules-to-vendor": "^0.2.1",
     "ember-cli-qunit": "^4.0.0",
     "ember-cli-release": "^0.2.9",
     "ember-cli-sass": "6.2.0",
@@ -58,4 +59,5 @@
     "three": "^0.85.2",
     "three.meshline": "^1.0.3"
   }
+
 }
