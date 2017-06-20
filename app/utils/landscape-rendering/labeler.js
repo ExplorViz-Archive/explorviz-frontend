@@ -16,6 +16,10 @@ export default Ember.Object.extend({
   createTextLabel(font, size, textToShow, parent, padding, color,
     logoSize, yPosition, model) {
 
+    // TODO: Use DynamicTexture as texture map for plane mesh and add
+    // this plane mesh to the actual model. Resizing should be easier then
+    //var dynamicTexture  = new THREEx.DynamicTexture(512,512);
+
     const self = this;
 
     if(self.get('textLabels')[model.get('id')] && 

@@ -12,11 +12,16 @@ module.exports = function(defaults) {
     nodeModulesToVendor: [
       // add node_modules that you need in vendor modules
       // See: https://www.npmjs.com/package/ember-cli-node-modules-to-vendor
+      'node_modules/three/build'
     ]
   });
 
+  // export for threex.dynamictexture
+  app.import('vendor/three.min.js');
+
   app.import('vendor/layout/klay.js');
   app.import('vendor/threex/threex.rendererstats.min.js');
+  app.import('vendor/threex/threex.dynamictexture.min.js');
 
   app.import('vendor/alertifyjs/alertify.min.js');
   app.import('vendor/alertifyjs/css/alertify.min.css');
