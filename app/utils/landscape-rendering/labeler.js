@@ -16,13 +16,7 @@ export default Ember.Object.extend({
   createTextLabel(font, size, textToShow, parent, padding, color,
     logoSize, yPosition, model) {
 
-    const dynamicTexture  = new THREEx.DynamicTexture(512,512);
-    dynamicTexture.context.font = "bolder 90px Verdana";
-    //dynamicTexture.texture.anisotropy = renderer.getMaxAnisotropy()
-    dynamicTexture.clear('cyan').drawText(textToShow, undefined, 256, 'red');
-
-
-    /*const self = this;
+    const self = this;
 
     if(self.get('textLabels')[model.get('id')] && 
       !self.get('configuration.landscapeColors.textchanged')) {
@@ -37,14 +31,20 @@ export default Ember.Object.extend({
     const text = textToShow ? textToShow :
       parent.userData.model.get('name');
 
-    let labelGeo = new THREE.TextGeometry(
+    let labelGeo = new THREE.TextBufferGeometry( text, {
+          font: font,
+          size: size,
+          height: 0
+        });
+
+    /*let labelGeo = new THREE.TextGeometry(
       text, {
         font: font,
         size: size,
         height: 0
       }
-    );
-
+    );*/
+   
     labelGeo.computeBoundingBox();
     var bboxLabel = labelGeo.boundingBox;
     var labelWidth = bboxLabel.max.x - bboxLabel.min.x;
@@ -107,8 +107,7 @@ export default Ember.Object.extend({
     }
 
     const material = new THREE.MeshBasicMaterial({
-      //color: color
-      map : dynamicTexture.texture
+      color: color
     });
 
     const labelMesh = new THREE.Mesh(labelGeo, material);
@@ -120,7 +119,7 @@ export default Ember.Object.extend({
 
     self.get('textLabels')[model.get('id')] = {"mesh": labelMesh, "state": model.get('state')};
 
-    return labelMesh;*/
+    return labelMesh;
   }
 
 });
