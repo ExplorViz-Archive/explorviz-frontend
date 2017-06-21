@@ -16,11 +16,36 @@ export default Ember.Object.extend({
   createTextLabel(font, size, textToShow, parent, padding, color,
     logoSize, yPosition, model) {
 
-    // TODO: Use DynamicTexture as texture map for plane mesh and add
-    // this plane mesh to the actual model. Resizing should be easier then
-    //var dynamicTexture  = new THREEx.DynamicTexture(512,512);
+    if(this.get('textLabels')[model.get('id')] && 
+      !this.get('configuration.landscapeColors.textchanged')) {
+      if(this.get('textLabels')[model.get('id')].state === model.get("state")) {
+        //console.log("old label");
+        return this.get('textLabels')[model.get('id')].mesh;
+      }        
+    }
 
-    const self = this;
+    //console.log("new label");
+
+    const text = textToShow ? textToShow : parent.userData.model.get('name');
+
+    const dynamicTexture = new THREEx.DynamicTexture(512,512);
+    dynamicTexture.context.font = "bolder 120px Verdana";
+    dynamicTexture.clear().drawText(text, undefined, 256, 'white');
+
+    const textMaterial = new THREE.MeshBasicMaterial({map: dynamicTexture.texture, transparent: true});
+    const textGeo = new THREE.PlaneGeometry(1, 1);
+    const textMesh = new THREE.Mesh(textGeo, textMaterial);
+
+    textMesh.userData['type'] = 'label';
+    textMesh.userData['model'] = model;
+
+    this.get('textLabels')[model.get('id')] = {"mesh": textMesh, 
+      "state": model.get('state')};
+
+    return textMesh;
+
+
+    /*const self = this;
 
     if(self.get('textLabels')[model.get('id')] && 
       !self.get('configuration.landscapeColors.textchanged')) {
@@ -41,13 +66,13 @@ export default Ember.Object.extend({
           height: 0
         });
 
-    /*let labelGeo = new THREE.TextGeometry(
+    let labelGeo = new THREE.TextGeometry(
       text, {
         font: font,
         size: size,
         height: 0
       }
-    );*/
+    );
    
     labelGeo.computeBoundingBox();
     var bboxLabel = labelGeo.boundingBox;
@@ -123,7 +148,7 @@ export default Ember.Object.extend({
 
     self.get('textLabels')[model.get('id')] = {"mesh": labelMesh, "state": model.get('state')};
 
-    return labelMesh;
+    return labelMesh;*/
   }
 
 });
