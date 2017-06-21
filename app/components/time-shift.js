@@ -86,6 +86,10 @@ export default Component.extend({
 
     const chartData = this.buildChartData();
 
+    if(!chartData) {
+      return;
+    }
+
     const values = chartData.values;
     values.unshift('Calls');
 
