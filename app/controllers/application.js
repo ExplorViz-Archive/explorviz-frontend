@@ -8,7 +8,10 @@ export default Ember.Controller.extend({
   actions: {
     resetToLandscapeView() {
       this.set('visualization.showLandscape', true);
-    } 
+    },
+    exportState() {
+      this.get('visualization').send('exportState');
+    }
   },
 
   username: Ember.computed(function(){

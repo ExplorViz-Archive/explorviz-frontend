@@ -20,6 +20,11 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
     {{navbar-items resetToLandscapeView="resetToLandscapeView"}}
       <ul class="nav navbar-nav navbar-right">
+        <li>          
+          <a style="cursor:pointer; color:#777;" {{action "exportState"}}>
+            <span id="exportURLButton" class="glyphicon glyphicon-share"></span>
+          </a>         
+        </li>
         <li>
           {{#link-to "configuration"}}
             <a style="cursor:pointer; color:#777;">
