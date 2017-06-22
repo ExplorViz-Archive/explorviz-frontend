@@ -5,6 +5,8 @@ export default Ember.Object.extend({
 
   textLabels: {},
 
+  textCache: [],
+
   textMaterialWhite: new THREE.MeshBasicMaterial({
     color : 0xffffff
   }),
@@ -13,10 +15,53 @@ export default Ember.Object.extend({
     color : 0x000000
   }),
 
+  saveTextForLabeling(textToShow, parent, color) {
+    const text = textToShow ? textToShow : parent.userData.model.get('name');
+    this.get('textCache').push({text: text, parent: parent, color: color});
+  },
+
+  createTextLabels(font) {
+
+    this.get('textCache').forEach((textObj) => {
+
+      const labelGeo = new THREE.TextGeometry(textObj.text, {
+        font: font,
+        size: 0.2,
+        height: 0
+      });
+
+      const material = new THREE.MeshBasicMaterial({
+        color: textObj.color
+      });
+
+      const labelMesh = new THREE.Mesh(labelGeo, material);   
+
+      textObj.parent.geometry.computeBoundingBox();
+      const bboxParent = textObj.parent.geometry.boundingBox;
+
+      const boxWidth = Math.abs(bboxParent.max.x) +
+        Math.abs(bboxParent.min.x);
+
+      var boxHeigth = Math.abs(bboxParent.max.y) +
+        Math.abs(bboxParent.min.y);
+
+      labelMesh.scale.set(boxWidth / 2, 1, 1);
+
+      labelMesh.position.x = bboxParent.min.x;
+
+      console.log(labelMesh.geometry.vertices);
+
+      textObj.parent.add(labelMesh);
+
+
+    });
+
+  },
+
   createTextLabel(font, size, textToShow, parent, padding, color,
     logoSize, yPosition, model) {
 
-    if(this.get('textLabels')[model.get('id')] && 
+    /*if(this.get('textLabels')[model.get('id')] && 
       !this.get('configuration.landscapeColors.textchanged')) {
       if(this.get('textLabels')[model.get('id')].state === model.get("state")) {
         //console.log("old label");
@@ -28,112 +73,26 @@ export default Ember.Object.extend({
 
     const text = textToShow ? textToShow : parent.userData.model.get('name');
 
-    const dynamicTexture = new THREEx.DynamicTexture(512,512);
-    dynamicTexture.context.font = "bolder 120px Verdana";
-    dynamicTexture.clear().drawText(text, undefined, 256, 'white');
-
-    const textMaterial = new THREE.MeshBasicMaterial({map: dynamicTexture.texture, transparent: true});
-    const textGeo = new THREE.PlaneGeometry(1, 1);
-    const textMesh = new THREE.Mesh(textGeo, textMaterial);
-
-    textMesh.userData['type'] = 'label';
-    textMesh.userData['model'] = model;
-
-    this.get('textLabels')[model.get('id')] = {"mesh": textMesh, 
-      "state": model.get('state')};
-
-    return textMesh;
-
-
-    /*const self = this;
-
-    if(self.get('textLabels')[model.get('id')] && 
-      !self.get('configuration.landscapeColors.textchanged')) {
-      if(self.get('textLabels')[model.get('id')].state === model.get("state")) {
-        //console.log("old label");
-        return self.get('textLabels')[model.get('id')].mesh;
-      }        
-    }
-
-    //console.log("new label");
-
-    const text = textToShow ? textToShow :
-      parent.userData.model.get('name');
-
-    let labelGeo = new THREE.TextBufferGeometry( text, {
-          font: font,
-          size: size,
-          height: 0
-        });
-
-    let labelGeo = new THREE.TextGeometry(
-      text, {
-        font: font,
-        size: size,
-        height: 0
-      }
-    );
-   
-    labelGeo.computeBoundingBox();
-    var bboxLabel = labelGeo.boundingBox;
-    var labelWidth = bboxLabel.max.x - bboxLabel.min.x;
-
-    //console.log("label", text);
-
-    //console.log("labelMax", bboxLabel.max.x);
-    //console.log("labelMin", bboxLabel.min.x);
-    //console.log("labelWidth", labelWidth);
-
     parent.geometry.computeBoundingBox();
     const bboxParent = parent.geometry.boundingBox;
 
     var boxWidth = Math.abs(bboxParent.max.x) +
       Math.abs(bboxParent.min.x);
 
-    //console.log("pre-boxwidth", boxWidth);
+    var boxHeigth = Math.abs(bboxParent.max.y) +
+      Math.abs(bboxParent.min.y);
 
-    boxWidth = boxWidth - logoSize.width + padding.left + padding.right;
+    let labelGeo = new THREE.TextBufferGeometry(text, {
+          font: font,
+          size: size,
+          height: 0
+    });
 
-    //console.log("boxwidth", boxWidth);
-
-    // We can't set the size of the labelGeo. Hence we need to scale it.
-
-    // upper scaling factor
-    var i = 1.0;
-
-    // scale until text fits into parent bounding box
-    while ((labelWidth > boxWidth) && (i > 0.1)) {
-      // TODO time complexity: linear -> Do binary search alike approach?                        
-      i -= 0.05;
-      labelGeo.scale(i, i, i);
-      // update the boundingBox
-      labelGeo.computeBoundingBox();
-      bboxLabel = labelGeo.boundingBox;
-      labelWidth = bboxLabel.max.x - bboxLabel.min.x;
-      if (text === "PostgreSQL") {
-        //console.log("boxWidth", boxWidth);
-        //console.log("labelWidth", labelWidth);
-      }
-    }
-
-    const labelHeight = bboxLabel.max.y - bboxLabel.min.y;
-
-    if (text === "PostgreSQL") {
-      //console.log(labelHeight);
-    }
-    //console.log("labelHeight", labelHeight);
-
-    let posX = (-labelWidth / 2.0) + padding.left + padding.right;
-
-    let posY = padding.bottom + padding.top;
-
-    if (yPosition === "max") {
-      posY += bboxParent.max.y;
-    } else if (yPosition === "min") {
-      posY += bboxParent.min.y;
-    } else if (yPosition === "center") {
-      posY -= (labelHeight / 2.0);
-    }
+    let labelGeo2 = new THREE.TextGeometry(text, {
+          font: font,
+          size: size,
+          height: 0
+    });
 
     const material = new THREE.MeshBasicMaterial({
       color: color
@@ -141,14 +100,15 @@ export default Ember.Object.extend({
 
     const labelMesh = new THREE.Mesh(labelGeo, material);
 
-    labelMesh.position.set(posX, posY, 0.005);
+    labelMesh.position.x = bboxParent.min.x;
+    labelMesh.position.z = 0.005;
 
-    labelMesh.userData['type'] = 'label';
-    labelMesh.userData['model'] = model;
+    //labelMesh.scale.set(boxWidth / 2, boxHeigth, 1);
 
-    self.get('textLabels')[model.get('id')] = {"mesh": labelMesh, "state": model.get('state')};
+    this.get('textLabels')[model.get('id')] = {"mesh": labelMesh, "state": model.get('state')};
 
     return labelMesh;*/
+
   }
 
 });

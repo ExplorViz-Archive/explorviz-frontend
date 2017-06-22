@@ -26,8 +26,6 @@ export default RenderingCore.extend({
 
   centerPoint : null,
 
-  gradientTextures: {},
-
   raycaster: null,
   interaction: null,
   labeler: null,
@@ -76,6 +74,11 @@ export default RenderingCore.extend({
       self.set('centerPoint', null);
       self.cleanAndUpdateScene();
     });
+
+    // set default model
+    this.set('imageLoader.logos', {});
+    this.set('labeler.textLabels', {});
+    this.set('labeler.textCache', []);
   },
 
   // @Override
@@ -86,7 +89,7 @@ export default RenderingCore.extend({
 
     this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
-    this.set('gradientTextures', {});
+    this.set('labeler.textCache', []);
 
     this.get('interaction').removeHandlers();
 
@@ -151,20 +154,9 @@ export default RenderingCore.extend({
           self.get('scene').add(systemMesh);
           system.set('threeJSModel', systemMesh);
 
-          // draw system text label          
-          const padding = {
-            left: 0.0,
-            right: 0.0,
-            top: -0.6,
-            bottom: 0.0
-          };
-          const labelMesh = self.get('labeler').createTextLabel(self.get('font'), 0.3, null, systemMesh,
-            padding, self.get('configuration.landscapeColors.textsystem'), {
-              width: 0.0,
-              height: 0.0
-            }, "max", system);
-          
-          systemMesh.add(labelMesh);
+          const textColor = self.get('configuration.landscapeColors.textsystem');
+          self.get('labeler').saveTextForLabeling(null, systemMesh, textColor);
+
 
         }
 
@@ -264,33 +256,11 @@ export default RenderingCore.extend({
 
                 const font = self.get('font');
 
-                let padding = {
-                  left: 0.0,
-                  right: -logoRightPadding,
-                  top: 0.0,
-                  bottom: 0.0
-                };
-                let labelMesh = self.get('labeler').createTextLabel(font, 0.2, null, applicationMesh,
-                  padding, self.get('configuration.landscapeColors.textapp'), 
-                  logoSize, "center", application);
+                let textColor = self.get('configuration.landscapeColors.textapp');
+                self.get('labeler').saveTextForLabeling(null, applicationMesh, textColor);
 
-                applicationMesh.add(labelMesh);
-
-                padding = {
-                  left: 0.0,
-                  right: 0.0,
-                  top: 0.0,
-                  bottom: 0.2
-                };
-
-                labelMesh = self.get('labeler').createTextLabel(font, 0.2, node.getDisplayName(), 
-                  nodeMesh, padding, 
-                  self.get('configuration.landscapeColors.textnode'), {
-                    width: 0.0,
-                    height: 0.0
-                  }, "min", node);
-
-                nodeMesh.add(labelMesh);
+                textColor = self.get('configuration.landscapeColors.textnode');
+                self.get('labeler').saveTextForLabeling(node.getDisplayName(), nodeMesh, textColor);
 
               } else {
                 // draw request logo
@@ -719,6 +689,12 @@ export default RenderingCore.extend({
       }
 
     }
+
+
+    this.get('labeler').createTextLabels(self.get('font'));
+
+    this.set('labeler.textLabels', {});
+    this.set('labeler.textCache', []);
 
 
   }, // END populateScene
