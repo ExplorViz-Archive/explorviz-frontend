@@ -78,7 +78,9 @@ export default RenderingCore.extend({
     // set default model
     this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
-    this.set('labeler.textCache', []);
+    this.set('labeler.systemTextCache', []);
+    this.set('labeler.nodeTextCache', []);
+    this.set('labeler.appTextCache', []);
   },
 
   // @Override
@@ -254,13 +256,11 @@ export default RenderingCore.extend({
 
                 // create text labels
 
-                const font = self.get('font');
-
                 let textColor = self.get('configuration.landscapeColors.textapp');
-                self.get('labeler').saveTextForLabeling(null, applicationMesh, textColor);
+                //self.get('labeler').saveTextForLabeling(null, applicationMesh, textColor);
 
                 textColor = self.get('configuration.landscapeColors.textnode');
-                self.get('labeler').saveTextForLabeling(node.getDisplayName(), nodeMesh, textColor);
+                //self.get('labeler').saveTextForLabeling(node.getDisplayName(), nodeMesh, textColor);
 
               } else {
                 // draw request logo
@@ -691,10 +691,8 @@ export default RenderingCore.extend({
     }
 
 
-    this.get('labeler').createTextLabels(self.get('font'));
-
-    this.set('labeler.textLabels', {});
-    this.set('labeler.textCache', []);
+    this.get('labeler').drawTextLabels(self.get('font'), 
+      self.get('configuration'));
 
 
   }, // END populateScene
