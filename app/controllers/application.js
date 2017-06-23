@@ -10,7 +10,14 @@ export default Ember.Controller.extend({
       this.set('visualization.showLandscape', true);
     },
     exportState() {
-      this.get('visualization').send('exportState');
+      if(this.get('currentRouteName') === 'visualization') {
+        try {
+          this.get('visualization').send('exportState');
+        }
+        catch(err) {
+          this.debug("Error when exporting URL", err);
+        }
+      }      
     }
   },
 
