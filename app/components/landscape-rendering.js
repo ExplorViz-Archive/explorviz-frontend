@@ -179,7 +179,7 @@ export default RenderingCore.extend({
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
             var nodegroupMesh = createPlane(nodegroup);
-            nodegroupMesh.position.set(centerX, centerY, nodegroup.get('positionZ') + 0.01);
+            nodegroupMesh.position.set(centerX, centerY, nodegroup.get('positionZ') + 0.001);
             self.get('scene').add(nodegroupMesh);
             nodegroup.set('threeJSModel', nodegroupMesh);
 
@@ -202,7 +202,7 @@ export default RenderingCore.extend({
               centerY = node.get('positionY') - extensionY - centerPoint.y;
 
               var nodeMesh = createPlane(node);
-              nodeMesh.position.set(centerX, centerY, node.get('positionZ') + 0.02);
+              nodeMesh.position.set(centerX, centerY, node.get('positionZ') + 0.002);
               self.get('scene').add(nodeMesh);
               node.set('threeJSModel', nodeMesh);
 
@@ -223,7 +223,7 @@ export default RenderingCore.extend({
               if (!isRequestObject) {
 
                 var applicationMesh = createPlane(application);
-                applicationMesh.position.set(centerX, centerY, application.get('positionZ') + 0.03);
+                applicationMesh.position.set(centerX, centerY, application.get('positionZ') + 0.003);
                 self.get('scene').add(applicationMesh);
                 application.set('threeJSModel', applicationMesh);
 
@@ -257,10 +257,10 @@ export default RenderingCore.extend({
                 // create text labels
 
                 let textColor = self.get('configuration.landscapeColors.textapp');
-                //self.get('labeler').saveTextForLabeling(null, applicationMesh, textColor);
+                self.get('labeler').saveTextForLabeling(null, applicationMesh, textColor);
 
                 textColor = self.get('configuration.landscapeColors.textnode');
-                //self.get('labeler').saveTextForLabeling(node.getDisplayName(), nodeMesh, textColor);
+                self.get('labeler').saveTextForLabeling(node.getDisplayName(), nodeMesh, textColor);
 
               } else {
                 // draw request logo
@@ -305,7 +305,7 @@ export default RenderingCore.extend({
             var lastPoint = points[i - 1];
             var thisPoint = points[i];
 
-            var tile = seekOrCreateTile(lastPoint, thisPoint, communicationsAccumulated, 0.02);
+            var tile = seekOrCreateTile(lastPoint, thisPoint, communicationsAccumulated, 0.002);
             tile.communications.push(appCommunication);
             tile.requestsCache = tile.requestsCache + communication.get('requests');
 

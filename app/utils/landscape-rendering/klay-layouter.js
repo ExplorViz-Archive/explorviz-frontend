@@ -69,7 +69,7 @@ export default function applyKlayLayout(landscape) {
           const DEFAULT_HEIGHT = 0.75;
 
           const PADDING = 0.1;
-          const SYSTEM_LABEL_HEIGHT = 0.5;
+          const SYSTEM_LABEL_HEIGHT = 0.4;
 
           system.set('sourcePorts', {});
           system.set('targetPorts', {});

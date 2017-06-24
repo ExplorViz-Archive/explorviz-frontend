@@ -44,6 +44,8 @@ export default Ember.Object.extend({
     this.set('configuration', configuration);
 
     this.drawSystemTextLabels();
+    this.drawNodeTextLabels();
+    this.drawAppTextLabels();
 
     // After drawing, reset all caches for next tick
     this.set('systemTextCache', []);
@@ -62,77 +64,231 @@ export default Ember.Object.extend({
       const threejsModel = textObj.parent;
       const emberModel = threejsModel.userData.model;
 
-      const maybeLabel = this.isLabelAlreadyCreated(emberModel);
+      let labelMesh = this.isLabelAlreadyCreated(emberModel);
 
-      if(maybeLabel) {
-        //console.log("old label");
+      if(labelMesh) {
+
+        console.log("old label");
         // update meta-info for model
-        maybeLabel.userData['model'] = emberModel;  
-        threejsModel.add(maybeLabel);
-        return;
+        labelMesh.userData['model'] = emberModel;
+        threejsModel['label'] = labelMesh;
+        threejsModel.add(labelMesh);        
+
+      }
+      else {
+
+        console.log("new label");
+        const labelGeo = new THREE.TextBufferGeometry(textObj.text, {
+          font: self.get('font'),
+          size: 0.4,
+          height: 0
+        });
+
+        const material = new THREE.MeshBasicMaterial({
+          color: textObj.color
+        });
+
+        labelMesh = new THREE.Mesh(labelGeo, material);
+
+        labelMesh.userData['type'] = 'label';
+        labelMesh.userData['model'] = emberModel;      
+      
+        self.get('textLabels')[emberModel.get('id')] = 
+          {"mesh": labelMesh};
+
+        threejsModel['label'] = labelMesh;
+        threejsModel.add(labelMesh);
+
+
       }
 
-      //console.log("new label");
 
-      const labelGeo = new THREE.TextBufferGeometry(textObj.text, {
-        font: self.get('font'),
-        size: 0.3,
-        height: 0
-      });
+      this.repositionSystemLabel(labelMesh);
 
-      const material = new THREE.MeshBasicMaterial({
-        color: textObj.color
-      });
-
-      const labelMesh = new THREE.Mesh(labelGeo, material);
-
-
-
-      threejsModel.geometry.computeBoundingBox();
-      const bboxParent = threejsModel.geometry.boundingBox;
-
-      /*const boxWidth = Math.abs(bboxParent.max.x) +
-        Math.abs(bboxParent.min.x);
-
-      var boxHeigth = Math.abs(bboxParent.max.y) +
-        Math.abs(bboxParent.min.y);*/
-    
-      
-      // POSITIONING (relative to parent, e.g. 0 = center of parent)
-
-      labelMesh.geometry.computeBoundingBox();
-      const labelBoundingBox = labelMesh.geometry.boundingBox;
-      
-      const labelLength = Math.abs(labelBoundingBox.max.x) - 
-        Math.abs(labelBoundingBox.min.x);
-
-      const yOffset = 0.6;
-
-      labelMesh.position.x = - (labelLength / 2.0);
-      labelMesh.position.y = bboxParent.max.y - yOffset;
-
-      labelMesh.position.z = 0.05;
-
-      labelMesh.userData['type'] = 'label';
-      labelMesh.userData['model'] = emberModel;      
-      
-      self.get('textLabels')[emberModel.get('id')] = 
-        {"mesh": labelMesh, "state": emberModel.get('state')};
-
-      threejsModel.add(labelMesh);
 
     });
   },
 
 
-  createNodeTextLabels() {
+  drawNodeTextLabels() {
+
+    const self = this;
+
+    this.get('nodeTextCache').forEach((textObj) => {
+
+      const threejsModel = textObj.parent;
+      const emberModel = threejsModel.userData.model;
+
+      let labelMesh = this.isLabelAlreadyCreated(emberModel);
+
+      if(labelMesh) {
+
+        console.log("old label");
+        // update meta-info for model
+        labelMesh.userData['model'] = emberModel;  
+        threejsModel['label'] = labelMesh;
+        threejsModel.add(labelMesh);        
+
+      }
+      else {
+
+        console.log("new label");
+
+        const text = emberModel.getDisplayName();
+        textObj.text = text;
+
+        const labelGeo = new THREE.TextBufferGeometry(text, {
+          font: self.get('font'),
+          size: 0.3,
+          height: 0
+        });
+
+        const material = new THREE.MeshBasicMaterial({
+          color: textObj.color
+        });
+
+        labelMesh = new THREE.Mesh(labelGeo, material);
+
+        labelMesh.userData['type'] = 'label';
+        labelMesh.userData['model'] = emberModel;
+        
+        self.get('textLabels')[emberModel.get('id')] = 
+          {"mesh": labelMesh};
+
+        threejsModel['label'] = labelMesh;
+        threejsModel.add(labelMesh);
+
+      }
+
+      
+      this.repositionNodeLabel(labelMesh);
+
+
+    });
+  },
+
+
+
+  drawAppTextLabels() {
+
+    const self = this;
+
+    this.get('appTextCache').forEach((textObj) => {
+
+      const threejsModel = textObj.parent;
+      const emberModel = threejsModel.userData.model;
+
+      let labelMesh = this.isLabelAlreadyCreated(emberModel);
+
+      if(labelMesh) {
+
+        console.log("old label");
+        // update meta-info for model
+        labelMesh.userData['model'] = emberModel;  
+        threejsModel['label'] = labelMesh;
+        threejsModel.add(labelMesh);        
+
+      }
+      else {
+
+        console.log("new label");
+
+        const labelGeo = new THREE.TextBufferGeometry(textObj.text, {
+          font: self.get('font'),
+          size: 0.25,
+          height: 0
+        });
+
+        const material = new THREE.MeshBasicMaterial({
+          color: textObj.color
+        });
+
+        labelMesh = new THREE.Mesh(labelGeo, material);
+
+        labelMesh.userData['type'] = 'label';
+        labelMesh.userData['model'] = emberModel;
+        
+        self.get('textLabels')[emberModel.get('id')] = 
+          {"mesh": labelMesh};
+
+        threejsModel['label'] = labelMesh;
+        threejsModel.add(labelMesh);
+
+      }
+
+      
+      this.repositionAppLabel(labelMesh);
+
+
+    });
+  },
+
+
+  repositionSystemLabel(labelMesh) {
+
+    const parent = labelMesh.parent;
+
+    parent.geometry.computeBoundingBox();
+    const bboxParent = parent.geometry.boundingBox;
+
+    labelMesh.geometry.computeBoundingBox();
+    const labelBoundingBox = labelMesh.geometry.boundingBox;
+    
+    const labelLength = Math.abs(labelBoundingBox.max.x) - 
+      Math.abs(labelBoundingBox.min.x);
+
+    const yOffset = 0.6;
+
+    labelMesh.position.x = - (labelLength / 2.0);
+    labelMesh.position.y = bboxParent.max.y - yOffset;
+    labelMesh.position.z = parent.position.z + 0.001;
 
   },
 
 
-  createApplicationTextLabels() {
+  repositionNodeLabel(labelMesh) {
 
+    const parent = labelMesh.parent;
+
+    parent.geometry.computeBoundingBox();
+    const bboxParent = parent.geometry.boundingBox;
+
+    labelMesh.geometry.computeBoundingBox();
+    const labelBoundingBox = labelMesh.geometry.boundingBox;
+    
+    const labelLength = Math.abs(labelBoundingBox.max.x) - 
+      Math.abs(labelBoundingBox.min.x);
+
+    const yOffset = 0.2;
+
+    labelMesh.position.x = - (labelLength / 2.0);
+    labelMesh.position.y = bboxParent.min.y + yOffset;
+    labelMesh.position.z = parent.position.z + 0.001;
+    
   },
+
+
+  repositionAppLabel(labelMesh) {
+
+    const parent = labelMesh.parent;
+    
+    parent.geometry.computeBoundingBox();
+    const bboxParent = parent.geometry.boundingBox;
+
+    labelMesh.geometry.computeBoundingBox();
+    const labelBoundingBox = labelMesh.geometry.boundingBox;
+
+    const labelHeight = Math.abs(labelBoundingBox.max.y) - 
+      Math.abs(labelBoundingBox.min.y);
+
+    const xOffset = 0.1;
+
+    labelMesh.position.x = bboxParent.min.x + xOffset;
+    labelMesh.position.y = -(labelHeight / 2.0);
+    labelMesh.position.z = parent.position.z + 0.001;
+    
+  },
+
 
 
   isLabelAlreadyCreated(emberModel) {
@@ -141,18 +297,14 @@ export default Ember.Object.extend({
     if(this.get('textLabels')[emberModel.get('id')] && 
       !this.get('configuration.landscapeColors.textchanged')) {
 
-      // model state didn't change?
-      if(this.get('textLabels')[emberModel.get('id')].state === 
-        emberModel.get("state")) {
+      const oldTextLabelMesh = 
+        this.get('textLabels')[emberModel.get('id')].mesh;
 
-        const oldTextLabelMesh = 
-          this.get('textLabels')[emberModel.get('id')].mesh;
-
-        return oldTextLabelMesh;
-      }        
+      return oldTextLabelMesh;
     }
 
     return null;
+
   },
 
 

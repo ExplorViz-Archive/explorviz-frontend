@@ -25,10 +25,9 @@ export default DrawNodeEntity.extend({
   foregroundColor : attr(),
   backgroundColor : attr(),
 
-  // used for text labeling performance in respective renderers
+  // used for text labeling performance in respective labelers
   state: Ember.computed('opened', function() {
-    let opened = this.get('opened');   
-    return `${opened}`;
+    return this.get('opened');
   }),
 
   setOpened: function(openedParam) {

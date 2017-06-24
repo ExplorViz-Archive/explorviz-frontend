@@ -27,7 +27,7 @@ export default DrawNodeEntity.extend({
 
   // used for text labeling performance in respective renderers
   state: Ember.computed('visible', 'opened', function() {
-    let opened = this.get('visible');
+    let opened = this.get('opened');
     let visible = this.get('visible');    
     return `${opened}/${visible}`;
   }),
