@@ -11,15 +11,6 @@ export default Ember.Object.extend({
 
   font: null,
 
-  textMaterialWhite: new THREE.MeshBasicMaterial({
-    color : 0xffffff
-  }),
-
-  textMaterialBlack: new THREE.MeshBasicMaterial({
-    color : 0x000000
-  }),
-
-
   saveTextForLabeling(textToShow, parent, color) {
 
     const emberModelName = parent.userData.model.constructor.modelName;
