@@ -57,13 +57,14 @@ export default Ember.Object.extend({
 
       let labelMesh = this.isLabelAlreadyCreated(emberModel);
 
-      if(labelMesh) {
+      if(labelMesh && labelMesh.mesh) {
 
         console.log("old label");
         // update meta-info for model
-        labelMesh.userData['model'] = emberModel;
-        threejsModel['label'] = labelMesh;
-        threejsModel.add(labelMesh);        
+        labelMesh.mesh.userData['model'] = emberModel;
+        threejsModel['label'] = labelMesh.mesh;
+        threejsModel.add(labelMesh.mesh);
+        labelMesh = labelMesh.mesh;
 
       }
       else {
@@ -112,13 +113,17 @@ export default Ember.Object.extend({
 
       let labelMesh = this.isLabelAlreadyCreated(emberModel);
 
-      if(labelMesh) {
+      const nodegroupstate = emberModel.get('parent.opened');
+
+      if(labelMesh && labelMesh.mesh && 
+        labelMesh.nodegroupopenstate === nodegroupstate) {
 
         console.log("old label");
         // update meta-info for model
-        labelMesh.userData['model'] = emberModel;  
-        threejsModel['label'] = labelMesh;
-        threejsModel.add(labelMesh);        
+        labelMesh.mesh.userData['model'] = emberModel;  
+        threejsModel['label'] = labelMesh.mesh;
+        threejsModel.add(labelMesh.mesh);
+        labelMesh = labelMesh.mesh;  
 
       }
       else {
@@ -144,7 +149,7 @@ export default Ember.Object.extend({
         labelMesh.userData['model'] = emberModel;
         
         self.get('textLabels')[emberModel.get('id')] = 
-          {"mesh": labelMesh};
+          {"mesh": labelMesh, "nodegroupopenstate": emberModel.get('parent.opened')};
 
         threejsModel['label'] = labelMesh;
         threejsModel.add(labelMesh);
@@ -171,13 +176,14 @@ export default Ember.Object.extend({
 
       let labelMesh = this.isLabelAlreadyCreated(emberModel);
 
-      if(labelMesh) {
+      if(labelMesh && labelMesh.mesh) {
 
         console.log("old label");
         // update meta-info for model
-        labelMesh.userData['model'] = emberModel;  
-        threejsModel['label'] = labelMesh;
-        threejsModel.add(labelMesh);        
+        labelMesh.mesh.userData['model'] = emberModel;  
+        threejsModel['label'] = labelMesh.mesh;
+        threejsModel.add(labelMesh.mesh);
+        labelMesh = labelMesh.mesh;
 
       }
       else {
@@ -288,10 +294,10 @@ export default Ember.Object.extend({
     if(this.get('textLabels')[emberModel.get('id')] && 
       !this.get('configuration.landscapeColors.textchanged')) {
 
-      const oldTextLabelMesh = 
-        this.get('textLabels')[emberModel.get('id')].mesh;
+      const oldTextLabelObj = 
+        this.get('textLabels')[emberModel.get('id')];
 
-      return oldTextLabelMesh;
+      return oldTextLabelObj;
     }
 
     return null;
