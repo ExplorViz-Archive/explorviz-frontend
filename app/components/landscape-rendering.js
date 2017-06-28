@@ -211,9 +211,10 @@ export default RenderingCore.extend({
             
 
             const applications = node.get('applications');
+		
 
             applications.forEach(function(application) {
-
+			
               extensionX = application.get('width') * scaleFactor.width;
               extensionY = application.get('height') * scaleFactor.width;
 
@@ -313,7 +314,7 @@ export default RenderingCore.extend({
 				tile = {
 					startPoint: lastPoint,
 					endPoint: thisPoint,
-					positionZ: 0.02,
+					positionZ: 0.0021,
 					requestsCache: 0,
 					communications: [],
 					pipeColor: new THREE.Color(color)
