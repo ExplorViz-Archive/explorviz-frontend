@@ -292,12 +292,13 @@ export default RenderingCore.extend({
 
     if (appCommunication) {
 
+      const color = self.get('configuration.landscapeColors.communication');
+
       appCommunication.forEach((communication) => {
 
         var points = communication.get('points');
 
-        if (points.length !== 0) {
-          const color = self.get('configuration.landscapeColors.communication');
+        if (points.length !== 0) {          
 
           for (var i = 1; i < points.length; i++) {
 
@@ -484,27 +485,28 @@ export default RenderingCore.extend({
 		  const resolution = 
         new THREE.Vector2(window.innerWidth, window.innerHeight);
 		
-        const material = new Meshline.MeshLineMaterial({
-          color: tile.pipeColor,
-          lineWidth: tile.lineThickness * 0.4,
-		      sizeAttenuation : 1,
-		      resolution: resolution
-        });
+      const material = new Meshline.MeshLineMaterial({
+        color: tile.pipeColor,
+        lineWidth: tile.lineThickness * 0.4,
+	      sizeAttenuation : 1,
+	      resolution: resolution
+      });
 
-        let geometry = new THREE.Geometry();
+      let geometry = new THREE.Geometry();
 
-        geometry.vertices.push(
-          new THREE.Vector3(tile.startPoint.x - centerPoint.x,
-            tile.startPoint.y - centerPoint.y, tile.positionZ)
-        );
-		
-		    geometry.vertices.push(
-          new THREE.Vector3(tile.endPoint.x - centerPoint.x,
-            tile.endPoint.y - centerPoint.y, tile.positionZ)
-        );
+      geometry.vertices.push(
+        new THREE.Vector3(tile.startPoint.x - centerPoint.x,
+          tile.startPoint.y - centerPoint.y, tile.positionZ)
+      );
+	
+	    geometry.vertices.push(
+        new THREE.Vector3(tile.endPoint.x - centerPoint.x,
+          tile.endPoint.y - centerPoint.y, tile.positionZ)
+      );
 		  
 		  let followingTiles = tiles.filter(isNextTile, tile);
   		let length = followingTiles.length;
+
   		for(let i = 0; i<length; i++){
   			let followingTile = followingTiles[i];
   			createGoodEdges(tile, followingTile,  parent);
@@ -516,7 +518,7 @@ export default RenderingCore.extend({
       var lineMesh = new THREE.Mesh(line.geometry, material);
 
       parent.add(lineMesh);
-      
+
 		
 		  //----------Helper functions
   		function createGoodEdges(firstTile, secondTile, parent){

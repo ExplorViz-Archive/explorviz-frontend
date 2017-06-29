@@ -151,7 +151,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
     // load font for labels and synchronously proceed with populating the scene
     new THREE.FontLoader()
-      .load('three.js/fonts/helvetiker_bold.typeface.json', function(font) {
+      .load('three.js/fonts/roboto_mono_bold_typeface.json', function(font) {
 
       self.set('font', font);
       self.set('initDone', true);
