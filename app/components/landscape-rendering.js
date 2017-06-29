@@ -56,10 +56,9 @@ export default RenderingCore.extend({
     }
 
     // init landscape exchange
-    this.get('landscapeRepo').on("updated", function(landscape) {
+    this.get('landscapeRepo').on("updated", function() {
       if(self.get('initDone')) {
-        self.set("entity", landscape);
-        self.cleanAndUpdateScene(self.get("entity"));
+        self.cleanAndUpdateScene();
       }      
     });
 
@@ -115,7 +114,12 @@ export default RenderingCore.extend({
 
     const self = this;
 
-    const emberLandscape = this.get('entity');
+    const emberLandscape = this.get('landscapeRepo.latestLandscape');
+
+    if(!emberLandscape) {
+      return;
+    }
+
     applyKlayLayout(emberLandscape);
 
     const systems = emberLandscape.get('systems');
@@ -314,7 +318,7 @@ export default RenderingCore.extend({
 				tile = {
 					startPoint: lastPoint,
 					endPoint: thisPoint,
-					positionZ: 0.0021,
+					positionZ: 0.0025,
 					requestsCache: 0,
 					communications: [],
 					pipeColor: new THREE.Color(color)
@@ -497,12 +501,12 @@ export default RenderingCore.extend({
 
         geometry.vertices.push(
           new THREE.Vector3(tile.startPoint.x - centerPoint.x,
-            tile.startPoint.y - centerPoint.y, tile.positionZ + 0.001)
+            tile.startPoint.y - centerPoint.y, tile.positionZ)
         );
 		
 		geometry.vertices.push(
             new THREE.Vector3(tile.endPoint.x - centerPoint.x,
-              tile.endPoint.y - centerPoint.y, tile.positionZ + 0.001)
+              tile.endPoint.y - centerPoint.y, tile.positionZ)
           );
 		  
 		let followingTiles = tiles.filter(isNextTile, tile);
@@ -536,17 +540,17 @@ export default RenderingCore.extend({
 
 			geometry.vertices.push(
 				new THREE.Vector3(firstTile.startPoint.x - centerPoint.x,
-				firstTile.startPoint.y - centerPoint.y, firstTile.positionZ + 0.001)
+				firstTile.startPoint.y - centerPoint.y, firstTile.positionZ)
 			);
 		
 			geometry.vertices.push(
 				new THREE.Vector3(firstTile.endPoint.x - centerPoint.x,
-				firstTile.endPoint.y - centerPoint.y, firstTile.positionZ + 0.001)
+				firstTile.endPoint.y - centerPoint.y, firstTile.positionZ)
 			);
 			
 			geometry.vertices.push(
 				new THREE.Vector3(secondTile.endPoint.x - centerPoint.x,
-				secondTile.endPoint.y - centerPoint.y, secondTile.positionZ + 0.001)
+				secondTile.endPoint.y - centerPoint.y, secondTile.positionZ)
 			);
 		  
 		
@@ -712,8 +716,9 @@ export default RenderingCore.extend({
     });
 
     this.get('interaction').on('showApplication', function(emberModel) {
+      self.set('landscapeRepo.latestApplication', emberModel);
       // bubble up action to visualization route
-      self.sendAction("showApplication", emberModel);
+      self.sendAction("showApplication");
     });
 
 

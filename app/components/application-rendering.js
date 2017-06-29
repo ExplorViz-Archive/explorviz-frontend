@@ -64,11 +64,10 @@ export default RenderingCore.extend({
     }
 
     // init landscape exchange
-    this.get('landscapeRepo').on("updated", function(landscape) {
+    this.get('landscapeRepo').on("updated", function() {
       if(self.get('initDone')) {
-        self.set("entity", landscape);
         self.preProcessEntity();
-        self.cleanAndUpdateScene(self.get("entity"));
+        self.cleanAndUpdateScene();
       }
     });
 
@@ -98,7 +97,7 @@ export default RenderingCore.extend({
     this.debug("cleanup application rendering");
 
     // remove foundation for re-rendering
-    removeFoundation(this.get('entity'), this.get('store'));
+    removeFoundation(this.get('landscapeRepo.latestApplication'), this.get('store'));
 
     this.set('applicationID', null);    
     this.set('application3D', null);  
@@ -119,7 +118,7 @@ export default RenderingCore.extend({
     this.set('oldRotation', this.get('application3D').rotation);
 
     // remove foundation for re-rendering
-    removeFoundation(this.get('entity'), this.get('store'));
+    removeFoundation(this.get('landscapeRepo.latestApplication'), this.get('store'));
 
     this.populateScene();
   },
@@ -129,7 +128,7 @@ export default RenderingCore.extend({
   preProcessEntity() {
     const application = this.get('store').peekRecord('application', 
       this.get('applicationID'));
-    this.set('entity', application);
+    this.set('landscapeRepo.latestApplication', application);
   },
 
 
@@ -138,7 +137,11 @@ export default RenderingCore.extend({
     this._super(...arguments);
     this.debug("populate application rendering");
 
-    const emberApplication = this.get('entity');
+    const emberApplication = this.get('landscapeRepo.latestApplication');
+
+    if(!emberApplication) {
+      return;
+    }
 
     this.set('applicationID', emberApplication.id);
 
