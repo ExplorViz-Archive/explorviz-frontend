@@ -284,13 +284,14 @@ export default RenderingCore.extend({
 
     self.set('configuration.landscapeColors.textchanged', false);
 
-   const appCommunication = emberLandscape.get('applicationCommunication');
+    const appCommunication = emberLandscape.get('applicationCommunication');
 
     const tiles = [];
 	
-	let tile;
+    let tile;
 
-   if (appCommunication) {
+    if (appCommunication) {
+
       appCommunication.forEach((communication) => {
 
         var points = communication.get('points');
@@ -303,32 +304,33 @@ export default RenderingCore.extend({
             var lastPoint = points[i - 1];
             var thisPoint = points[i];
 			
-			let tileWay = {
-				startPoint: lastPoint,
-				endPoint: thisPoint
-			};
+      			let tileWay = {
+      				startPoint: lastPoint,
+      				endPoint: thisPoint
+      			};
 
-			let id = tiles.findIndex(isSameTile, tileWay);
-			
-			
-			if(id !== -1){
-				tile = tiles[id];
-			}else{
-				id = tiles.length; //Gets a new index
-				tile = {
-					startPoint: lastPoint,
-					endPoint: thisPoint,
-					positionZ: 0.0025,
-					requestsCache: 0,
-					communications: [],
-					pipeColor: new THREE.Color(color)
-				};
-				tiles.push(tile);
-			}
-			
+      			let id = tiles.findIndex(isSameTile, tileWay);
+      			
+      			
+      			if(id !== -1){
+      				tile = tiles[id];
+      			}
+            else{
+      				id = tiles.length; //Gets a new index
+      				tile = {
+      					startPoint: lastPoint,
+      					endPoint: thisPoint,
+      					positionZ: 0.0025,
+      					requestsCache: 0,
+      					communications: [],
+      					pipeColor: new THREE.Color(color)
+      				};
+      				tiles.push(tile);
+      			}
+      			
             tile.communications.push(appCommunication);
             tile.requestsCache = tile.requestsCache + communication.get('requests');
-			tiles[id] = tile;
+      			tiles[id] = tile;
           }
 
         }
@@ -343,64 +345,57 @@ export default RenderingCore.extend({
 
     // Helper functions //
 
-	// This function is only neccessary to find the right index
-	function isSameTile(tile){
-		return checkEqualityOfPoints(this.endPoint, tile.endPoint)&& checkEqualityOfPoints(this.startPoint, tile.startPoint);
-	}
-	
-	function isNextTile(newTile){
-		return checkEqualityOfPoints(newTile.startPoint, this.endPoint);
-	}
+  	// This function is only neccessary to find the right index
+  	function isSameTile(tile){
+  		return checkEqualityOfPoints(this.endPoint, tile.endPoint)&& checkEqualityOfPoints(this.startPoint, tile.startPoint);
+  	}
+  	
+  	function isNextTile(newTile){
+  		return checkEqualityOfPoints(newTile.startPoint, this.endPoint);
+  	}
 
     function addCommunicationLineDrawing(communicationsAccumulated, parent) {
 
       const requestsList = {};    
 
-	  tiles.forEach((tile) => {
-               requestsList[tile.requestsCache] = 0;
-		});
+  	  tiles.forEach((tile) => {
+        requestsList[tile.requestsCache] = 0;
+  		});
 
       const categories = getCategories(requestsList, true);
-	       
-	  for (let i = 0; i < tiles.length; i++) {
-			let tile = tiles[i];
-			tile.lineThickness = 0.07 * categories[tile.requestsCache] + 0.1;
-		}
+  	       
+  	  for (let i = 0; i < tiles.length; i++) {
+  			let tile = tiles[i];
+  			tile.lineThickness = 0.07 * categories[tile.requestsCache] + 0.1;
+  		}
 
-	for (let i = 0; i < tiles.length; i++) {
-        let tile = tiles[i];
-		createLine(tile, tiles, parent);
-	}
+    	for (let i = 0; i < tiles.length; i++) {
+            let tile = tiles[i];
+    		createLine(tile, tiles, parent);
+    	}
 
-
-   
-
-
-      ///
-      
 
       function getCategories(list, linear) {
 
         if (linear) {
           useLinear(list);
-        }else{
-		useThreshholds(list);
-		}
+        }
+        else {          
+		      useThreshholds(list);
+		    }
 
         return list;
-
-
 
         // inner helper functions
 
         function useThreshholds(list) {
           let max = 1;
 
-          for(let request in list){
+          for(let request in list) {
             if (request > max) {
               max = request;
-			}
-		  }
+            }
+          }
 
           const oneStep = max / 3.0;
 
@@ -437,11 +432,11 @@ export default RenderingCore.extend({
           let secondMax = 1;
 
           for(let request in list){
-			if (request > max) {
+      			if (request > max) {
               secondMax = max;
               max = request;
             }
-		  }   
+      		}   
           const oneStep = secondMax / 4.0;
           const t1 = oneStep;
           const t2 = oneStep * 2;
@@ -472,10 +467,8 @@ export default RenderingCore.extend({
 
 
       } // END getCategories
-
-      ///
       
-    }
+    } // END addCommunicationLineDrawing
 
 
     function checkEqualityOfPoints(p1, p2) {
@@ -487,14 +480,15 @@ export default RenderingCore.extend({
 
 
 
-       function createLine(tile, tiles, parent) {
-		const resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
+    function createLine(tile, tiles, parent) {
+		  const resolution = 
+        new THREE.Vector2(window.innerWidth, window.innerHeight);
 		
         const material = new Meshline.MeshLineMaterial({
           color: tile.pipeColor,
           lineWidth: tile.lineThickness * 0.4,
-		  sizeAttenuation : 1,
-		  resolution: resolution
+		      sizeAttenuation : 1,
+		      resolution: resolution
         });
 
         let geometry = new THREE.Geometry();
@@ -504,66 +498,68 @@ export default RenderingCore.extend({
             tile.startPoint.y - centerPoint.y, tile.positionZ)
         );
 		
-		geometry.vertices.push(
-            new THREE.Vector3(tile.endPoint.x - centerPoint.x,
-              tile.endPoint.y - centerPoint.y, tile.positionZ)
-          );
+		    geometry.vertices.push(
+          new THREE.Vector3(tile.endPoint.x - centerPoint.x,
+            tile.endPoint.y - centerPoint.y, tile.positionZ)
+        );
 		  
-		let followingTiles = tiles.filter(isNextTile, tile);
-		let length = followingTiles.length;
-		for(let i = 0; i<length; i++){
-			let followingTile = followingTiles[i];
-			createGoodEdges(tile, followingTile,  parent);
-		}
+		  let followingTiles = tiles.filter(isNextTile, tile);
+  		let length = followingTiles.length;
+  		for(let i = 0; i<length; i++){
+  			let followingTile = followingTiles[i];
+  			createGoodEdges(tile, followingTile,  parent);
+  		}
+  		
+      const line = new Meshline.MeshLine();
+      line.setGeometry(geometry);
+
+      var lineMesh = new THREE.Mesh(line.geometry, material);
+
+      parent.add(lineMesh);
+      
 		
-        const line = new Meshline.MeshLine();
-        line.setGeometry(geometry);
+		  //----------Helper functions
+  		function createGoodEdges(firstTile, secondTile, parent){
+  			
+  			const resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
+  			
+  			const material = new Meshline.MeshLineMaterial({
+  				color: secondTile.pipeColor,
+  				lineWidth: secondTile.lineThickness * 0.4,
+  				sizeAttenuation : 1,
+  				resolution: resolution
+  			});
 
-        var lineMesh = new THREE.Mesh(line.geometry, material);
+  			let geometry = new THREE.Geometry();
 
+  			geometry.vertices.push(
+  				new THREE.Vector3(firstTile.startPoint.x - centerPoint.x,
+  				firstTile.startPoint.y - centerPoint.y, firstTile.positionZ)
+  			);
+  		
+  			geometry.vertices.push(
+  				new THREE.Vector3(firstTile.endPoint.x - centerPoint.x,
+  				firstTile.endPoint.y - centerPoint.y, firstTile.positionZ)
+  			);
+  			
+  			geometry.vertices.push(
+  				new THREE.Vector3(secondTile.endPoint.x - centerPoint.x,
+  				secondTile.endPoint.y - centerPoint.y, secondTile.positionZ)
+  			);
+  		  
+  		
+  			const line = new Meshline.MeshLine();
+  			line.setGeometry(geometry);
 
-       parent.add(lineMesh);
-		
-		//----------Helper functions
-		function createGoodEdges(firstTile, secondTile, parent){
+  			var lineMesh = new THREE.Mesh(line.geometry, material);
+  			
+  			parent.add(lineMesh);
 			
-			const resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
-			
-			const material = new Meshline.MeshLineMaterial({
-				color: secondTile.pipeColor,
-				lineWidth: secondTile.lineThickness * 0.4,
-				sizeAttenuation : 1,
-				resolution: resolution
-			});
+		  }
 
-			let geometry = new THREE.Geometry();
+    } // END createLine
 
-			geometry.vertices.push(
-				new THREE.Vector3(firstTile.startPoint.x - centerPoint.x,
-				firstTile.startPoint.y - centerPoint.y, firstTile.positionZ)
-			);
-		
-			geometry.vertices.push(
-				new THREE.Vector3(firstTile.endPoint.x - centerPoint.x,
-				firstTile.endPoint.y - centerPoint.y, firstTile.positionZ)
-			);
-			
-			geometry.vertices.push(
-				new THREE.Vector3(secondTile.endPoint.x - centerPoint.x,
-				secondTile.endPoint.y - centerPoint.y, secondTile.positionZ)
-			);
-		  
-		
-			const line = new Meshline.MeshLine();
-			line.setGeometry(geometry);
 
-			var lineMesh = new THREE.Mesh(line.geometry, material);
-			
-			parent.add(lineMesh);
-			
-		}
-
-    }
     function createPlane(model) {
 
       const emberModelName = model.constructor.modelName;
@@ -578,6 +574,7 @@ export default RenderingCore.extend({
       return plane;
       
     }
+
 
     function calculateLandscapeCenterAndZZoom(emberLandscape) {
 
