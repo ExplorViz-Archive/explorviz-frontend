@@ -539,7 +539,7 @@ export default function applyKlayLayout(landscape) {
 
   			const CONVERT_TO_KIELER_FACTOR = 180;
   	  
-  			let id= targetDrawnode.get("id");
+  			let id = targetDrawnode.get("id");
 
   			const maybePort = ports[id];
 
@@ -591,13 +591,17 @@ export default function applyKlayLayout(landscape) {
       edge.source = sourceDrawnode.get('id');
       edge.target = targetDrawnode.get('id');
 
-
       edge.sourcePort = port1.id;
       //edge.targetPort = port2.id;
       
-      if(targetDrawnode.content && targetDrawnode.content._internalModel.modelName === 'system') {
+
+      // WHY UNDEFINED?
+      //console.log("targetDrawnode", targetDrawnode.constructor.modelName); 
+      
+      /*if(targetDrawnode.content && targetDrawnode.content._internalModel.modelName === 'application') {
+        console.log(port2.id);
         edge.targetPort = port2.id;
-      }      
+      }*/
 
       edge.sourcePoint = {x: port1.x, y: port1.y};
       edge.targetPoint = {x: port2.x, y: port2.y};
