@@ -506,7 +506,7 @@ export default function applyKlayLayout(landscape) {
 
   				const length = Object.keys(ports).length;
 
-  				const portId = sourceDrawnode.get('id') + "_p" + (length + 1);
+  				const portId = sourceDrawnode.get('id') + "_sp" + (length + 1);
 
   				let port = {
   					id: portId,
@@ -547,7 +547,7 @@ export default function applyKlayLayout(landscape) {
 
   				const length = Object.keys(ports).length;
 
-  				const portId = targetDrawnode.get('id') + "_p" + (length + 1);
+  				const portId = targetDrawnode.get('id') + "_tp" + (length + 1);
 
   				let port = {
   					id: portId,
@@ -592,7 +592,7 @@ export default function applyKlayLayout(landscape) {
       edge.target = targetDrawnode.get('id');
 
       edge.sourcePort = port1.id;
-      //edge.targetPort = port2.id;
+      edge.targetPort = port2.id;
       
 
       // WHY UNDEFINED?
