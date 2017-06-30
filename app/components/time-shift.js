@@ -37,7 +37,7 @@ export default Component.extend({
       }
     },
 
-    playPauseTimeshift: function() {
+    playPauseTimeshift() {
       if(this.get('reloadHandler.isReloading')) {
         this.get('reloadHandler').stopExchange();
       }
@@ -67,7 +67,11 @@ export default Component.extend({
     this.get('reloadHandler').on('startExchange', function() {
       $('#playPauseTimelineButton').removeClass('glyphicon-play')
         .addClass('glyphicon-pause');
-      self.get('plot').unselect(['Timestamps']);
+
+      if(self.get('plot')) {
+        self.get('plot').unselect(['Timestamps']);
+      }
+      
     });
   },
 

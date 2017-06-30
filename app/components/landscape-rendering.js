@@ -7,6 +7,9 @@ import THREE from "npm:three";
 import applyKlayLayout from '../utils/landscape-rendering/klay-layouter';
 import Interaction from '../utils/landscape-rendering/interaction';
 import Labeler from '../utils/landscape-rendering/labeler';
+import CalcCenterAndZoom from 
+  '../utils/landscape-rendering/center-and-zoom-calculator';
+
 import ImageLoader from '../utils/three-image-loader';
 
 import Meshline from "npm:three.meshline";
@@ -24,12 +27,11 @@ export default RenderingCore.extend({
 
   hammerManager: null,
 
-  centerPoint : null,
-
   raycaster: null,
   interaction: null,
   labeler: null,
   imageLoader: null,
+  centerAndZoomCalculator: null,
 
   // @Override
   initRendering() {
@@ -55,6 +57,10 @@ export default RenderingCore.extend({
       this.set('raycaster', Raycaster.create());
     }
 
+    if (!this.get('centerAndZoomCalculator')) {
+      this.set('centerAndZoomCalculator', CalcCenterAndZoom.create());
+    }
+
     // init landscape exchange
     this.get('landscapeRepo').on("updated", function() {
       if(self.get('initDone')) {
@@ -70,7 +76,7 @@ export default RenderingCore.extend({
 
     // handle window resize
     this.on('resized', function () {
-      self.set('centerPoint', null);
+      self.set('centerAndZoomCalculator.centerPoint', null);
       self.cleanAndUpdateScene();
     });
 
@@ -94,7 +100,7 @@ export default RenderingCore.extend({
 
     this.get('interaction').removeHandlers();
 
-    this.get('landscapeRepo').off("updated");
+    this.get('landscapeRepo').off('updated');
   },
 
   // @Override
@@ -133,12 +139,22 @@ export default RenderingCore.extend({
 
     if (systems) {
 
-      if(!this.get('centerPoint')) {
-        this.set('centerPoint', calculateLandscapeCenterAndZZoom(emberLandscape));
-      }      
+      // calculate new center and update zoom
+      //if(!this.get('centerAndZoomCalculator.centerPoint')) {
+        this.get('centerAndZoomCalculator')
+          .calculateLandscapeCenterAndZZoom(emberLandscape, 
+            this.get('webglrenderer'));
 
-      var centerPoint = this.get('centerPoint'); 
+        if(this.get('reloadHandler.isReloading')) {
+          const cameraZ = this.get('centerAndZoomCalculator.cameraZ');
+          this.set('camera.position.z', cameraZ);
+          this.get('camera').updateProjectionMatrix();
+        }
+      //}
 
+      var centerPoint = this.get('centerAndZoomCalculator.centerPoint');
+
+      
       systems.forEach(function(system) {
 
         isRequestObject = false;
@@ -576,116 +592,6 @@ export default RenderingCore.extend({
       return plane;
       
     }
-
-
-    function calculateLandscapeCenterAndZZoom(emberLandscape) {
-
-      const MIN_X = 0;
-      const MAX_X = 1;
-      const MIN_Y = 2;
-      const MAX_Y = 3;
-
-      const rect = getLandscapeRect(emberLandscape);
-
-      const EXTRA_SPACE_IN_PERCENT = 0.02;
-
-      let requiredWidth = Math.abs(rect.get(MAX_X) - rect.get(MIN_X));
-      requiredWidth += requiredWidth * EXTRA_SPACE_IN_PERCENT;
-
-      let requiredHeight = Math.abs(rect.get(MAX_Y) - rect.get(MIN_Y));
-      requiredHeight += requiredHeight * EXTRA_SPACE_IN_PERCENT;
-
-      const viewPortSize = self.get('webglrenderer').getSize();
-
-      let viewportRatio = viewPortSize.width / viewPortSize.height;
-
-      const sizeFactor = 0.65;
-
-      const newZ_by_width = (requiredWidth / viewportRatio) * sizeFactor;
-      const newZ_by_height = requiredHeight * sizeFactor;
-
-      const camera = self.get('camera');
-
-      const center = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
-        rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0), 0);      
-
-      camera.position.z = Math.max(Math.max(newZ_by_height, newZ_by_width), 10.0);
-      camera.updateProjectionMatrix();
-
-
-      return center;
-
-    }
-
-
-    function getLandscapeRect(emberLandscape) {
-
-      const MIN_X = 0;
-      const MAX_X = 1;
-      const MIN_Y = 2;
-      const MAX_Y = 3;
-
-      let rect = [];
-      rect.push(Number.MAX_VALUE);
-      rect.push(-Number.MAX_VALUE);
-      rect.push(Number.MAX_VALUE);
-      rect.push(-Number.MAX_VALUE);
-
-      const systems = emberLandscape.get('systems');
-
-      if (systems.get('length') === 0) {
-        rect[MIN_X] = 0.0;
-        rect[MAX_X] = 1.0;
-        rect[MIN_Y] = 0.0;
-        rect[MAX_Y] = 1.0;
-      } else {
-        systems.forEach((system) => {
-          getMinMaxFromQuad(system, rect);
-
-          const nodegroups = system.get('nodegroups');
-          nodegroups.forEach((nodegroup) => {
-
-            const nodes = nodegroup.get('nodes');
-            nodes.forEach((node) => {
-              getMinMaxFromQuad(node, rect);
-            });
-
-          });
-
-        });
-      }
-
-      return rect;
-
-    }
-
-
-    function getMinMaxFromQuad(drawnodeentity, rect) {
-
-      const MIN_X = 0;
-      const MAX_X = 1;
-      const MIN_Y = 2;
-      const MAX_Y = 3;
-
-
-      const curX = drawnodeentity.get('positionX');
-      const curY = drawnodeentity.get('positionY');
-
-      if (curX < rect[MIN_X]) {
-        rect[MIN_X] = curX;
-      }
-      if (rect[MAX_X] < curX + drawnodeentity.get('width')) {
-        rect[MAX_X] = curX + drawnodeentity.get('width');
-      }
-      if (curY > rect[MAX_Y]) {
-        rect[MAX_Y] = curY;
-      }
-      if (rect[MIN_Y] > curY - drawnodeentity.get('height')) {
-        rect[MIN_Y] = curY - drawnodeentity.get('height');
-      }
-
-    }
-
 
     this.get('labeler').drawTextLabels(self.get('font'), 
       self.get('configuration'));

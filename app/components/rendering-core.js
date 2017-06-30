@@ -28,6 +28,8 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
   // Declare view-importer service 
   viewImporter: Ember.inject.service("view-importer"),
 
+  reloadHandler: Ember.inject.service("reload-handler"),
+
   classNames: ['viz'],
 
   scene : null,
@@ -167,11 +169,14 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
   */ 
   importView(){
 
+    this.get('reloadHandler').stopExchange();
     this.get('viewImporter').requestView();
 
     let camX = this.get('newState').cameraX;
     let camY = this.get('newState').cameraY;
     let camZ = this.get('newState').cameraZ;
+
+    console.log(camZ);
 
     if(!isNaN(camX)){
       this.get('camera').position.x = camX;
@@ -180,6 +185,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
       this.get('camera').position.y = camY;
     }
     if(!isNaN(camZ)){
+      console.log(camZ);
       this.get('camera').position.z = camZ;
     }
     this.get('camera').updateProjectionMatrix();
