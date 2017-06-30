@@ -62,6 +62,11 @@ export default Ember.Controller.extend({
       this.cleanupQueryParams();
     },
 
+    // clean up boolean after leaving application
+    hideApplication: function(){
+      this.set('showLandscape',true);
+    },
+
     setupService: function(){
       const self = this;
       // Listen for component request 

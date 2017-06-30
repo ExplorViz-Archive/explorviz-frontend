@@ -105,6 +105,9 @@ export default RenderingCore.extend({
     this.get('interaction').removeHandlers();
 
     this.get('landscapeRepo').off("updated");
+
+    // bubble up action to clean up controller
+    this.sendAction("hideApplication");
   },
 
 
