@@ -29,6 +29,8 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
   viewImporter: Ember.inject.service("view-importer"),
 
   reloadHandler: Ember.inject.service("reload-handler"),
+  landscapeRepo: Ember.inject.service("repos/landscape-repository"),
+
 
   classNames: ['viz'],
 
@@ -131,11 +133,19 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
     // Bind url-builder
     this.get('urlBuilder').on('requestURL', function() {
       const state = {};
-      state.cameraX = self.get('camera').position.x; 
-      state.cameraY = self.get('camera').position.y; 
-      state.cameraZ = self.get('camera').position.z; 
-      state.timestamp = self.get('model.timestamp');
-      state.id = self.get('model.id');
+
+      // get timestamp
+      state.timestamp = self.get('landscapeRepo.latestLandscape')
+        .get('timestamp');
+
+      // get latestApp, may be null
+      const latestMaybeApp = self.get('landscapeRepo.latestApplication');
+      state.appID = latestMaybeApp ? latestMaybeApp.get('id') : null;
+
+      state.camX = self.get('camera').position.x; 
+      state.camY = self.get('camera').position.y; 
+      state.camZ = self.get('camera').position.z; 
+
       // Passes the state from component via service to controller
       self.get('urlBuilder').transmitState(state);
     });
@@ -168,15 +178,19 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
     This method is used to update the camera with query parameters
   */ 
   importView(){
-
-    this.get('reloadHandler').stopExchange();
+    
     this.get('viewImporter').requestView();
 
-    let camX = this.get('newState').cameraX;
-    let camY = this.get('newState').cameraY;
-    let camZ = this.get('newState').cameraZ;
+    const timestamp = this.get('newState').timestamp;
+    //const application = this.get('newState').appID;
 
-    console.log(camZ);
+    if(timestamp) {
+      this.get('reloadHandler').stopExchange();
+    }
+
+    const camX = this.get('newState').camX;
+    const camY = this.get('newState').camY;
+    const camZ = this.get('newState').camZ;
 
     if(!isNaN(camX)){
       this.get('camera').position.x = camX;

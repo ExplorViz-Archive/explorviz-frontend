@@ -4,21 +4,19 @@ export default Ember.Controller.extend({
 
   urlBuilder: Ember.inject.service("url-builder"),
   viewImporter: Ember.inject.service("view-importer"),
-  reloadHandler: Ember.inject.service("reload-handler"), 
+  reloadHandler: Ember.inject.service("reload-handler"),
 
   // Specify query parameters
-  queryParams: ['timestamp', 'id', 'appName', 'cameraX', 'cameraY', 'cameraZ', 'showApp'],
+  queryParams: ['timestamp', 'appID', 'camX', 'camY', 'camZ'],
 
   type: 'landscape',
 
   // query parameter serialized into strings
-  id: null,
-  appName: null,
-  cameraX: null,
-  cameraY: null,
-  cameraZ: null,
-  showApp: null,
   timestamp: null,
+  appID: null,
+  camX: null,
+  camY: null,
+  camZ: null,
 
   showLandscape: true,
   lastShownApplication: null,
@@ -67,34 +65,39 @@ export default Ember.Controller.extend({
       this.set('showLandscape',true);
     },
 
-    setupService: function(){
+    setupService(){
       const self = this;
       // Listen for component request 
       self.get('viewImporter').on('requestView', function() {
         let newState = {};
         // Get and convert query params
-        newState.cameraX = parseFloat(self.get('cameraX'));
-        newState.cameraY = parseFloat(self.get('cameraY'));
-        newState.cameraZ = parseFloat(self.get('cameraZ'));
-        newState.timestamp = self.get('model.timestamp');
-        newState.id = self.get('model.id');
+        
+        newState.timestamp = self.get('timestamp');
+        newState.appID = self.get('appID'); 
+        
+        newState.camX = parseFloat(self.get('camX'));
+        newState.camY = parseFloat(self.get('camY'));
+        newState.camZ = parseFloat(self.get('camZ'));
+
         // Passes the new state from controller via service to component
         self.get('viewImporter').transmitView(newState);
       });
     },
 
     // Triggered by the button implemented in visualization template
-    exportState: function() {
+    exportState() {
         // Pause timeshift
         this.get('reloadHandler').stopExchange();
         // Update query parameters
         this.get('urlBuilder').requestURL();
-        this.set('cameraX', this.get('state').cameraX);
-        this.set('cameraY', this.get('state').cameraY);
-        this.set('cameraZ', this.get('state').cameraZ);
-        this.set('timestamp', this.get('model.timestamp'));
-        this.set('id', this.get('model.id'));
-        this.set('showApp', !this.get('showLandscape'));
+
+        this.set('timestamp', this.get('state').timestamp);
+        this.set('appID', this.get('state').appID);
+
+        this.set('camX', this.get('state').camX);
+        this.set('camY', this.get('state').camY);
+        this.set('camZ', this.get('state').camZ);
+
     }
   }
 });
