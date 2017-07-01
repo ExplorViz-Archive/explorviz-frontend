@@ -140,17 +140,18 @@ export default RenderingCore.extend({
     if (systems) {
 
       // calculate new center and update zoom
-      //if(!this.get('centerAndZoomCalculator.centerPoint')) {
+      if(!this.get('centerAndZoomCalculator.centerPoint')) {
         this.get('centerAndZoomCalculator')
           .calculateLandscapeCenterAndZZoom(emberLandscape, 
             this.get('webglrenderer'));
 
-        if(this.get('reloadHandler.isReloading')) {
+        if(!this.get('viewImporter.importedURL')) {
           const cameraZ = this.get('centerAndZoomCalculator.cameraZ');
           this.set('camera.position.z', cameraZ);
-          this.get('camera').updateProjectionMatrix();
+          this.get('camera').updateProjectionMatrix();      
         }
-      //}
+        
+      }
 
       var centerPoint = this.get('centerAndZoomCalculator.centerPoint');
 
