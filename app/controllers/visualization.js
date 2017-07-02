@@ -57,7 +57,7 @@ export default Ember.Controller.extend({
       const self = this;
       // Listen for component request 
       self.get('viewImporter').on('requestView', function() {
-        let newState = {};
+        const newState = {};
         // Get and convert query params
         
         newState.timestamp = self.get('timestamp');
