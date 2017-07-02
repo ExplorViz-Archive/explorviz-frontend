@@ -51,7 +51,6 @@ export default Reload.extend({
 		if(!this.get("shallReload")){
 			return;
 		}
-		this.debug("start timestamp-reload");
 		const self = this;
 		var timestamps = this.get("store").peekAll("timestamp").sortBy("id");
 		var oldestTimestamp = timestamps.get("firstObject");
@@ -68,7 +67,6 @@ export default Reload.extend({
 		const id = oldestTimestamp.get("id");
 		var requestedTimestamps = this.get("store").query('timestamp', id);
 		requestedTimestamps.then(success, failure).catch(error);
-		this.debug("end timestamp-reload");
 			
 		function success(timestamps){
 			const length = timestamps.get("length");

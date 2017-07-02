@@ -14,16 +14,17 @@ import ImageLoader from '../utils/three-image-loader';
 
 import Meshline from "npm:three.meshline";
 
- /**
- * Renderer for landscape visualization.
- *
- * @class Landscape-Rendering
- * @extends Rendering-Core
- */
+/**
+* Renderer for landscape visualization.
+*
+* @class Landscape-Rendering
+* @extends Rendering-Core
+*/
 export default RenderingCore.extend({
 
   landscapeRepo: Ember.inject.service("repos/landscape-repository"),
   configuration: Ember.inject.service("configuration"),
+  renderingService: Ember.inject.service(),
 
   hammerManager: null,
 
@@ -80,6 +81,12 @@ export default RenderingCore.extend({
       self.cleanAndUpdateScene();
     });
 
+    // handle redraw events, e.g. when removing query params
+    this.get('renderingService').on('reSetupScene', function () {
+      self.set('centerAndZoomCalculator.centerPoint', null);
+      self.cleanAndUpdateScene();
+    });
+
     // set default model
     this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
@@ -97,6 +104,9 @@ export default RenderingCore.extend({
     this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
     this.set('labeler.textCache', []);
+
+    this.off('resized');
+    this.get('renderingService').off('reSetupScene');
 
     this.get('interaction').removeHandlers();
 

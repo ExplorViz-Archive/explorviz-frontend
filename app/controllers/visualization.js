@@ -5,6 +5,7 @@ export default Ember.Controller.extend({
   urlBuilder: Ember.inject.service("url-builder"),
   viewImporter: Ember.inject.service("view-importer"),
   reloadHandler: Ember.inject.service("reload-handler"),
+  renderingService: Ember.inject.service(),
 
   // Specify query parameters
   queryParams: ['timestamp', 'appID', 'camX', 'camY', 'camZ'],
@@ -30,18 +31,6 @@ export default Ember.Controller.extend({
     this.get('urlBuilder').on('transmitState', function(state) {
       self.set('state',state);
     });
-
-    Ember.$(window).on('onbeforeunload', function() {
-      window.history.replaceState( {} , 'foo', '/foo' );
-      console.log("lol");
-      self.cleanupQueryParams();
-    });
-
-    Ember.$('body').on('beforeunload',function(){
-     console.log("lol");
-     self.cleanupQueryParams();
-    });
-
   },
 
   // reset query parameters
@@ -55,12 +44,12 @@ export default Ember.Controller.extend({
 
   actions: {
 
-    resetQueryParams: function(){
+    resetQueryParams(){
       this.cleanupQueryParams();
     },
 
     // clean up boolean after leaving application
-    hideApplication: function(){
+    hideApplication(){
       this.set('showLandscape',true);
     },
 
@@ -97,6 +86,21 @@ export default Ember.Controller.extend({
         this.set('camY', this.get('state').camY);
         this.set('camZ', this.get('state').camZ);
 
+    },
+
+    removeQueryParams() {
+      this.set('timestamp', null);
+      this.set('appID', null);
+
+      this.set('camX', null);
+      this.set('camY', null);
+      this.set('camZ', null);
+
+      this.set('viewImporter.importedURL', false);
+      this.get('renderingService').reSetupScene();
+      this.get('reloadHandler').startExchange();
     }
+
+
   }
 });

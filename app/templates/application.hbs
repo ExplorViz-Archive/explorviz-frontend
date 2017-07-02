@@ -21,6 +21,11 @@
     {{navbar-items resetToLandscapeView="resetToLandscapeView"}}
       <ul class="nav navbar-nav navbar-right">
         <li>          
+          <a style="cursor:pointer; color:#777;" {{action "removeQueryParams"}}>
+            <span id="removeQueryParams" class="glyphicon glyphicon-remove"></span>
+          </a>         
+        </li>
+        <li>          
           <a style="cursor:pointer; color:#777;" {{action "exportState"}}>
             <span id="exportURLButton" class="glyphicon glyphicon-share"></span>
           </a>         

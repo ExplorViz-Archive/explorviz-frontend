@@ -3,12 +3,14 @@ import Ember from 'ember';
 export default Ember.Controller.extend({
 
   session: Ember.inject.service('session'),
-  visualization: Ember.inject.controller(),
+  visualization: Ember.inject.controller(),  
 
   actions: {
+
     resetToLandscapeView() {
       this.set('visualization.showLandscape', true);
     },
+
     exportState() {
       if(this.get('currentRouteName') === 'visualization') {
         try {
@@ -18,6 +20,11 @@ export default Ember.Controller.extend({
           this.debug("Error when exporting URL", err);
         }
       }      
+    },
+
+
+    removeQueryParams(){
+      this.get('visualization').send('removeQueryParams');
     }
   },
 

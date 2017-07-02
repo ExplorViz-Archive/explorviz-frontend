@@ -3,7 +3,8 @@ import { moduleFor, test } from 'ember-qunit';
 moduleFor('controller:visualization', 'Unit | Controller | visualization', {
   // Specify the other units that are required for this test.
   needs: ['service:session', 'service:landscape-reload', 'service:url-builder', 
-    'service:view-importer', 'service:timeshift-reload', 'service:reload-handler']
+    'service:view-importer', 'service:timeshift-reload', 'service:reload-handler', 
+    'service:rendering-service']
 });
 
 // Replace this with your real tests.
