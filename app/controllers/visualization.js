@@ -44,14 +44,13 @@ export default Ember.Controller.extend({
 
   },
 
+  // reset query parameters
   cleanupQueryParams(){
-    this.set('id',null);
-    this.set('appName',null);
     this.set('timestamp',null);
-    this.set('cameraX',null);
-    this.set('cameraY',null);
-    this.set('cameraZ',null); 
-    this.set('showApp',null);    
+    this.set('appID',null);
+    this.set('camX',null);
+    this.set('camY',null);
+    this.set('camZ',null);  
   },
 
   actions: {
@@ -84,7 +83,7 @@ export default Ember.Controller.extend({
       });
     },
 
-    // Triggered by the button implemented in visualization template
+    // Triggered by the export button 
     exportState() {
         // Pause timeshift
         this.get('reloadHandler').stopExchange();
