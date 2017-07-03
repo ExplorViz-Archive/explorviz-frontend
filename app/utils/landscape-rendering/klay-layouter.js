@@ -254,7 +254,7 @@ export default function applyKlayLayout(landscape) {
 
         const APPLICATION_PIC_SIZE = 0.16;
         const APPLICATION_PIC_PADDING_SIZE = 0.15;
-        const APPLICATION_LABEL_HEIGHT = 0.25;
+        const APPLICATION_LABEL_HEIGHT = 0.21;
 
         application.set('sourcePorts', {});
         application.set('targetPorts', {});
@@ -465,14 +465,11 @@ export default function applyKlayLayout(landscape) {
 
     function calculateRequiredLabelLength(text, quadSize) {
 
-      const SPACE_BETWEEN_LETTERS_IN_PERCENT = 0.09;
-
       if (text == null || text.empty) {
         return 0;
       }
 
-      return ((text.length * quadSize * 0.5) +
-        ((text.length - 1) * quadSize * SPACE_BETWEEN_LETTERS_IN_PERCENT));
+      return text.length * quadSize;
     }
 
 
