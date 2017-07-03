@@ -135,7 +135,7 @@ export default Ember.Object.extend({
 
         const labelGeo = new THREE.TextBufferGeometry(text, {
           font: self.get('font'),
-          size: 0.3,
+          size: 0.22,
           height: 0
         });
 

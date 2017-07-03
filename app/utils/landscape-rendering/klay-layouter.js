@@ -215,7 +215,7 @@ export default function applyKlayLayout(landscape) {
     function createNodeAndItsApplications(kielerParentGraph, node) {
 
       const PADDING = 0.1;
-      const NODE_LABEL_HEIGHT = 0.25;
+      const NODE_LABEL_HEIGHT = 0.2;
       const DEFAULT_WIDTH = 1.5;
       const DEFAULT_HEIGHT = 0.75;
 
