@@ -13,6 +13,7 @@ export default Ember.Service.extend({
     textsystem: "rgb(0,0,0)",
     textnode: "rgb(255,255,255)",
     textapp: "rgb(255,255,255)",
+    collapseSymbol: "rgb(0,0,0)",
     textchanged: false
   }
 

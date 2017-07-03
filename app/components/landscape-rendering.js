@@ -150,6 +150,12 @@ export default RenderingCore.extend({
 
     let isRequestObject = false;
 
+
+    // draw plus or minus symbol
+    if(!(this.get('openSymbol') && this.get('closeSymbol'))) {
+      createCollapseSymbols();
+    }
+
     if (systems) {
 
       // calculate new center and update zoom
@@ -213,7 +219,27 @@ export default RenderingCore.extend({
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
             var nodegroupMesh = createPlane(nodegroup);
-            nodegroupMesh.position.set(centerX, centerY, nodegroup.get('positionZ') + 0.001);
+            nodegroupMesh.position.set(centerX, centerY, nodegroup.get('positionZ') + 0.001);            
+
+            // add respective open / close symbol
+            nodegroupMesh.geometry.computeBoundingBox();
+            const bboxNodegroup = nodegroupMesh.geometry.boundingBox;
+
+            let collapseSymbol = null;
+
+            if(nodegroup.get('opened')) {
+              collapseSymbol = self.get('closeSymbol').clone();
+            } else {
+              collapseSymbol = self.get('openSymbol').clone();              
+            }
+
+            if(collapseSymbol) {
+              collapseSymbol.position.x = bboxNodegroup.max.x - 0.35;
+              collapseSymbol.position.y = bboxNodegroup.max.y - 0.35;
+              collapseSymbol.position.z = nodegroupMesh.position.z + 0.0001;
+              nodegroupMesh.add(collapseSymbol);  
+            }
+            
             self.get('scene').add(nodegroupMesh);
             nodegroup.set('threeJSModel', nodegroupMesh);
 
@@ -375,6 +401,36 @@ export default RenderingCore.extend({
 
 
     // Helper functions //
+
+    function createCollapseSymbols() {
+
+      const material = new THREE.MeshBasicMaterial({
+        color: self.get('configuration.landscapeColors.collapseSymbol')
+      });
+
+
+      // plus symbol
+
+      const labelGeoOpen = new THREE.TextBufferGeometry("+", {
+        font: self.get('font'),
+        size: 0.35,
+        height: 0
+      });
+
+      const labelMeshOpen = new THREE.Mesh(labelGeoOpen, material);
+      self.set('openSymbol', labelMeshOpen);
+
+      // minus symbol
+
+      const labelGeoClose = new THREE.TextBufferGeometry("-", {
+        font: self.get('font'),
+        size: 0.35,
+        height: 0
+      });
+
+      const labelMeshClose = new THREE.Mesh(labelGeoClose, material);
+      self.set('closeSymbol', labelMeshClose);
+    }
 
   	// This function is only neccessary to find the right index
   	function isSameTile(tile){
