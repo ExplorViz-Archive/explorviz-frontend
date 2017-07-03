@@ -89,6 +89,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
       antialias: true,  
       canvas: canvas
     }));
+    this.get('webglrenderer').setPixelRatio(window.devicePixelRatio);
     this.get('webglrenderer').setSize(width, height);
 
     this.$(window).on('resize.visualization', function(){
