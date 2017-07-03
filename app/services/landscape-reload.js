@@ -1,7 +1,8 @@
 import Ember from 'ember';
 import Reload from './data-reload';
+import AlertifyHandler from 'explorviz-ui-frontend/mixins/alertify-handler';
 
-export default Reload.extend({
+export default Reload.extend(AlertifyHandler, {
 
   landscapeRepo: Ember.inject.service("repos/landscape-repository"),
 
@@ -34,6 +35,8 @@ export default Reload.extend({
     }
   
     function failure(e){
+      self.showAlertifyMessage("Landscape couldn't be requested!" +
+        " Backend offline?");
       self.debug("Landscape couldn't be requested!", e);
     }
     

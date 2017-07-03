@@ -1,7 +1,8 @@
 import Reload from './data-reload';
 import Ember from "ember";
+import AlertifyHandler from 'explorviz-ui-frontend/mixins/alertify-handler';
 
-export default Reload.extend({
+export default Reload.extend(AlertifyHandler, {
 
 	timestampRepo: Ember.inject.service("repos/timestamp-repository"),
 
@@ -34,7 +35,9 @@ export default Reload.extend({
 		}
 	
 		function failure(e){
-			console.error(e.message);
+			self.showAlertifyMessage("Timestamps couldn't be requested!" +
+        " Backend offline?");
+      self.debug("Timestamps couldn't be requested!", e);
 		}
 		
 		function error(e){
