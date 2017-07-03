@@ -284,7 +284,6 @@ export default function applyKlayLayout(landscape) {
     } // END createNodeAndItsApplications
 
 
-
       function addEdges(landscape) {
 
         const applicationCommunication = landscape.get('applicationCommunication');
@@ -655,7 +654,6 @@ export default function applyKlayLayout(landscape) {
 
           kielerEdgeReferences.forEach((edge) => {
   			
-          //console.log(edge.tPort.properties, edge.sPort.properties);
 
           if (edge != null) {
     			  if(alreadyCalculatedPoints[edge.id]){

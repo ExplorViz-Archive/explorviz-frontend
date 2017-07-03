@@ -328,7 +328,7 @@ export default RenderingCore.extend({
 
         var points = communication.get('points');
 
-        if (points.length !== 0) {          
+        if (points.length > 1) {          
 
           for (var i = 1; i < points.length; i++) {
 
@@ -385,7 +385,7 @@ export default RenderingCore.extend({
   		return checkEqualityOfPoints(newTile.startPoint, this.endPoint);
   	}
 
-    function addCommunicationLineDrawing(communicationsAccumulated, parent) {
+    function addCommunicationLineDrawing(tiles, parent) {
 
       const requestsList = {};    
 
@@ -534,9 +534,10 @@ export default RenderingCore.extend({
           tile.endPoint.y - centerPoint.y, tile.positionZ)
       );
 		  
-		  let followingTiles = tiles.filter(isNextTile, tile);
+		let followingTiles = tiles.filter(isNextTile, tile);
   		let length = followingTiles.length;
 
+		
   		for(let i = 0; i<length; i++){
   			let followingTile = followingTiles[i];
   			createGoodEdges(tile, followingTile,  parent);
@@ -554,10 +555,11 @@ export default RenderingCore.extend({
   		function createGoodEdges(firstTile, secondTile, parent){
   			
   			const resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
+			let lineThickness = (firstTile.lineThickness < secondTile.lineThickness) ? firstTile.lineThickness : secondTile.lineThickness;
   			
   			const material = new Meshline.MeshLineMaterial({
   				color: secondTile.pipeColor,
-  				lineWidth: secondTile.lineThickness * 0.4,
+  				lineWidth: lineThickness * 0.4,
   				sizeAttenuation : 1,
   				resolution: resolution
   			});
