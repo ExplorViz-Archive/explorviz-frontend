@@ -3,46 +3,46 @@ import Reload from './data-reload';
 
 export default Reload.extend({
 
-	landscapeRepo: Ember.inject.service("repos/landscape-repository"),
+  landscapeRepo: Ember.inject.service("repos/landscape-repository"),
 
-	// @Override	
-	init() {
-		this._super(...arguments);
-		this.set('shallReload', true);
-	},
+  // @Override  
+  init() {
+    this._super(...arguments);
+    this.set('shallReload', true);
+  },
 
 
-	/*
-		This service reloads the latest-landscape every tenth second. 
-		See "instance-initializer/service-start" for more information.
-	*/
-	
+  /*
+    This service reloads the latest-landscape every tenth second. 
+    See "instance-initializer/service-start" for more information.
+  */
+  
 
-	
-	// @Override
-	updateObject(){
-		const self = this;
+  
+  // @Override
+  updateObject(){
+    const self = this;
 
-		this.debug("start landscape-request");
-		this.get("store").queryRecord('landscape', 'latest-landscape')
-			.then(success, failure).catch(error);
+    this.debug("start landscape-request");
+    this.get("store").queryRecord('landscape', 'latest-landscape')
+      .then(success, failure).catch(error);
 
-	//--------------inner functions--------------
-		function success(landscape){
-			self.debug("end landscape-request");
-			self.set('landscapeRepo.latestLandscape', landscape);
-		}
-	
-		function failure(e){
-			self.debug("Landscape couldn't be requested!", e);
-		}
-		
-		
-		function error(e){
-			self.debug("Error when fetching landscape: ", e);
-		}
-	//------------End of inner functions------------
+    //--------------inner functions--------------
+    function success(landscape){
+      self.debug("end landscape-request");
+      self.set('landscapeRepo.latestLandscape', landscape);
+    }
+  
+    function failure(e){
+      self.debug("Landscape couldn't be requested!", e);
+    }
+    
+    
+    function error(e){
+      self.debug("Error when fetching landscape: ", e);
+    }
+    //------------End of inner functions------------
 
-	}
+  }
 
 });

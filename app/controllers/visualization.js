@@ -74,18 +74,17 @@ export default Ember.Controller.extend({
 
     // Triggered by the export button 
     exportState() {
-        // Pause timeshift
-        this.get('reloadHandler').stopExchange();
-        // Update query parameters
-        this.get('urlBuilder').requestURL();
+      // Pause timeshift
+      this.get('reloadHandler').stopExchange();
+      // Update query parameters
+      this.get('urlBuilder').requestURL();
 
-        this.set('timestamp', this.get('state').timestamp);
-        this.set('appID', this.get('state').appID);
+      this.set('timestamp', this.get('state').timestamp);
+      this.set('appID', this.get('state').appID);
 
-        this.set('camX', this.get('state').camX);
-        this.set('camY', this.get('state').camY);
-        this.set('camZ', this.get('state').camZ);
-
+      this.set('camX', this.get('state').camX);
+      this.set('camY', this.get('state').camY);
+      this.set('camZ', this.get('state').camZ);
     },
 
     removeQueryParams() {

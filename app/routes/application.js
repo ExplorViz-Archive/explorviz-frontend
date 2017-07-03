@@ -11,8 +11,8 @@ navbarService: Ember.inject.service('navbar-labels'),
 
 actions: {
     logout() {
-      this.get('session').invalidate();
-    }      
+      this.get('session').invalidate({message: "Logout successful"});
+    }
   }
 
 });

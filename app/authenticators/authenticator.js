@@ -12,52 +12,62 @@ Custom authenticator for token based authentication.
 */
 export default Base.extend({
 
-    session: Ember.inject.service(),
+  session: Ember.inject.service(),
+  ajax: Ember.inject.service(),
 
-    ajax: Ember.inject.service(),
+  tokenEndpoint: ENV.APP.API_ROOT,
 
-    tokenEndpoint: ENV.APP.API_ROOT,
-
-    restore: function(data) {
-        return new Ember.RSVP.Promise(function(resolve, reject) {
-            if (!Ember.isEmpty(data.access_token)) {
-                resolve(data);
-            } else {
-                reject();
-            }
-        });
-    },
+  restore(data) {
+    return new Ember.RSVP.Promise(function(resolve, reject) {
+        if (!Ember.isEmpty(data.access_token)) {
+            resolve(data);
+        } else {
+            reject();
+        }
+    });
+  },
 
 
-    authenticate: function(identification, password) {
-        return new Ember.RSVP.Promise((resolve, reject) => {
-            Ember.$.ajax({
-                url: this.tokenEndpoint + '/sessions/create',
-                type: 'POST',
-                data: "username=" + identification + "&password=" + password,
-                accept: "application/json"
-            }).then(function(response) {
-                Ember.run(function() {
-                    resolve({
-                        access_token: response.token,
-                        username: response.username
-                    });
-                });
-            }, function(xhr) {
-                let response = xhr.responseText;
-                Ember.run(function() {
-                    reject(response);
-                });
+  authenticate(identification, password) {
+    this.set('session.session.messages', {});
+    return new Ember.RSVP.Promise((resolve, reject) => {
+        Ember.$.ajax({
+            url: this.tokenEndpoint + '/sessions/create',
+            type: 'POST',
+            data: "username=" + identification + "&password=" + password,
+            accept: "application/json"
+        }).then(function(response) {
+            Ember.run(function() {              
+              resolve({
+                  access_token: response.token,
+                  username: response.username
+              });
+            });
+        }, function(xhr) {
+            let response = xhr.responseText;           
+            Ember.run(function() {
+                reject(response);
             });
         });
-    },
+    });
+  },
 
-    invalidate: function() {
-        return Ember.RSVP.resolve();
+  invalidate(data, args) {
+    if(args && Object.keys(args)[0]) {
+      const key = Object.keys(args)[0];
+
+      if(!this.get('session.session.messages')) {
+        this.set('session.session.messages', {});
+      }
+
+      this.set('session.session.messages.' + key, args[key]);
     }
+    return Ember.RSVP.resolve();
+  }
+
 });
 
-       // JSON.stringify({ username: options.identification,
-       //         password: options.password })
-       // .then({ response } => this.handleSuccess(response))
-       // .catch(({ response, jqXHR }) => this.handleError(response))
+// JSON.stringify({ username: options.identification,
+//         password: options.password })
+// .then({ response } => this.handleSuccess(response))
+// .catch(({ response, jqXHR }) => this.handleError(response))
