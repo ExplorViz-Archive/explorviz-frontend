@@ -81,7 +81,7 @@ export default RenderingCore.extend({
       self.cleanAndUpdateScene();
     });
 
-    // handle redraw events, e.g. when removing query params
+    // handle redraw events, e.g. when resetting view via button
     this.get('renderingService').on('reSetupScene', function () {
       self.set('centerAndZoomCalculator.centerPoint', null);
       self.set('camera.position.x', 0);

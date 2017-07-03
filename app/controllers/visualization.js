@@ -87,7 +87,7 @@ export default Ember.Controller.extend({
       this.set('camZ', this.get('state').camZ);
     },
 
-    removeQueryParams() {
+    resetView() {
       this.set('timestamp', null);
       this.set('appID', null);
 

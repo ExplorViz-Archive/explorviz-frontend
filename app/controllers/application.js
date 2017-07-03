@@ -23,8 +23,8 @@ export default Ember.Controller.extend({
     },
 
 
-    removeQueryParams(){
-      this.get('visualization').send('removeQueryParams');
+    resetView(){
+      this.get('visualization').send('resetView');
     }
   },
 
