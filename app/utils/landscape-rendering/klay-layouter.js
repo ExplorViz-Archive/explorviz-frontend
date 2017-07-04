@@ -297,21 +297,21 @@ export default function applyKlayLayout(landscape) {
           let appSource = communication.get('source');
           let appTarget = communication.get('target');
 
-      		if(!appTarget.get('parent').get('visible')){
-      			appTarget = (appTarget.get('parent').get('parent').get('parent').get('opened'))? seekRepresentativeApplication(appTarget) : appTarget.get('parent').get('parent').get('parent') ;
-      		}
-      		
-      		if(!appSource.get('parent').get('visible')){
-      			appSource = (appSource.get('parent').get('parent').get('parent').get('opened'))? seekRepresentativeApplication(appSource) : appSource.get('parent').get('parent').get('parent') ;
-      		}
-      		
-      		
-      		if(appSource.get("id") !== appTarget.get("id")){
-      		const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
-              communication.get('kielerEdgeReferences').push(edge);
-      		//console.log(appSource.get("kielerGraphReference").edges);
-      		}
-        });	  
+          if(!appTarget.get('parent').get('visible')){
+            appTarget = (appTarget.get('parent').get('parent').get('parent').get('opened'))? seekRepresentativeApplication(appTarget) : appTarget.get('parent').get('parent').get('parent') ;
+          }
+          
+          if(!appSource.get('parent').get('visible')){
+            appSource = (appSource.get('parent').get('parent').get('parent').get('opened'))? seekRepresentativeApplication(appSource) : appSource.get('parent').get('parent').get('parent') ;
+          }
+          
+          
+          if(appSource.get("id") !== appTarget.get("id")){
+            const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
+            communication.get('kielerEdgeReferences').push(edge);
+            //console.log(appSource.get("kielerGraphReference").edges);
+          }
+        });   
       } // END addEdges
 
 
@@ -336,7 +336,6 @@ export default function applyKlayLayout(landscape) {
             }
 
             setAbsolutePositionForNode(nodegroup, system);
-
 
             nodes.forEach((node) => {
 
@@ -479,106 +478,109 @@ export default function applyKlayLayout(landscape) {
 
       const port1 = createSourcePortIfNotExisting(sourceApplication);
       const port2 = createTargetPortIfNotExisting(targetApplication);
-	  
+    
       let edge = createEdgeHelper(sourceApplication, port1, targetApplication, port2);
       return edge;
-	  
-  	  //---------------------------inner functions
-  		function createSourcePortIfNotExisting(sourceDrawnode) {
-			
-  			let ports = sourceDrawnode.get("sourcePorts");
-  			
-  			const DEFAULT_PORT_WIDTH = 0.000001;
+    
+      //---------------------------inner functions
+      function createSourcePortIfNotExisting(sourceDrawnode) {
+      
+        let ports = sourceDrawnode.get("sourcePorts");
+        
+        const DEFAULT_PORT_WIDTH = 0.000001;
        
-  			const DEFAULT_PORT_HEIGHT = 0.000001;
+        const DEFAULT_PORT_HEIGHT = 0.000001;
 
-  			const CONVERT_TO_KIELER_FACTOR = 180;
-  	  
-  			let id= sourceDrawnode.get("id");
+        const CONVERT_TO_KIELER_FACTOR = 180;
+      
+        let id = sourceDrawnode.get("id");
 
-  			const maybePort = ports[id];
+        const maybePort = ports[id];
 
-  			if (maybePort == null) {
+        if (maybePort == null) {
 
-  				const length = Object.keys(ports).length;
+          const length = Object.keys(ports).length;
 
-  				const portId = sourceDrawnode.get('id') + "_sp" + (length + 1);
+          const portId = sourceDrawnode.get('id') + "_sp" + (length + 1);
 
-  				let port = {
-  					id: portId,
-  					width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR,
-  					height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
-  					properties: {
-  						"de.cau.cs.kieler.portSide": "EAST"
-  					},
-  					x: 0,
-  					y: 0
-  				};
-  		
+          let port = {
+            id: portId,
+            width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR,
+            height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
+            properties: {
+              "de.cau.cs.kieler.portSide": "EAST"
+            },
+            x: 0,
+            y: 0
+          };
+      
 
-  				port.node = sourceDrawnode.get('kielerGraphReference');
+          port.node = sourceDrawnode.get('kielerGraphReference');
 
-  				sourceDrawnode.get('kielerGraphReference').ports.push(port);
+          sourceDrawnode.get('kielerGraphReference').ports.push(port);
 
-  				ports[sourceDrawnode.get('id')] = port;
-  			}
+          ports[sourceDrawnode.get('id')] = port;
+        }
 
-		    return ports[sourceDrawnode.get('id')];				
-		  }
-		
-		  function createTargetPortIfNotExisting(targetDrawnode) {
-		  	let ports = targetDrawnode.get("targetPorts");
-			
-  			const DEFAULT_PORT_WIDTH = 0.000001;
+        return ports[sourceDrawnode.get('id')];       
+      }
+
+    
+      function createTargetPortIfNotExisting(targetDrawnode) {
+
+        let ports = targetDrawnode.get("targetPorts");
+      
+        const DEFAULT_PORT_WIDTH = 0.000001;
        
-  			const DEFAULT_PORT_HEIGHT = 0.000001;
+        const DEFAULT_PORT_HEIGHT = 0.000001;
 
-  			const CONVERT_TO_KIELER_FACTOR = 180;
-  	  
-  			let id = targetDrawnode.get("id");
+        const CONVERT_TO_KIELER_FACTOR = 180;
+      
+        let id = targetDrawnode.get("id");
 
-  			const maybePort = ports[id];
+        const maybePort = ports[id];
 
-  			if (maybePort == null) {
+        if (maybePort == null) {
 
-  				const length = Object.keys(ports).length;
+          const length = Object.keys(ports).length;
 
-  				const portId = targetDrawnode.get('id') + "_tp" + (length + 1);
+          const portId = targetDrawnode.get('id') + "_tp" + (length + 1);
 
-  				let port = {
-  					id: portId,
-  					width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR,
-  					height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
-  					properties: {
-  						"de.cau.cs.kieler.portSide": "WEST"
-  					},
-  					x: 0,
-  					y: 0
-  				};
-  		
+          let port = {
+            id: portId,
+            width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR,
+            height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
+            properties: {
+              "de.cau.cs.kieler.portSide": "WEST"
+            },
+            x: 0,
+            y: 0
+          };
+      
 
-  				port.node = targetDrawnode.get('kielerGraphReference');
+          port.node = targetDrawnode.get('kielerGraphReference');
 
-  				targetDrawnode.get('kielerGraphReference').ports.push(port);
+          targetDrawnode.get('kielerGraphReference').ports.push(port);
 
-  				ports[targetDrawnode.get('id')] = port;
-  			}
+          ports[targetDrawnode.get('id')] = port;
+        }
 
-		    return ports[targetDrawnode.get('id')];
-		  }
-	  
+        return ports[targetDrawnode.get('id')];
+      }
+    
       //---------------------------- end inner functions
+
     } // END createEdgeBetweenSourceTarget
 
     function createEdgeHelper(sourceDrawnode, port1, targetDrawnode, port2) {
-	
+  
       const id = sourceDrawnode.get('id') + "_to_" + targetDrawnode.get('id');
-	  
+    
       let edge = lookForExistingEdge(sourceDrawnode, id);
-	  
-  	  if(edge){
-  		  return edge;
-  	  }
+    
+      if(edge){
+        return edge;
+      }
 
       edge = createNewEdge(id);
 
@@ -589,15 +591,6 @@ export default function applyKlayLayout(landscape) {
 
       edge.sourcePort = port1.id;
       edge.targetPort = port2.id;
-      
-
-      // WHY UNDEFINED?
-      //console.log("targetDrawnode", targetDrawnode.constructor.modelName); 
-      
-      /*if(targetDrawnode.content && targetDrawnode.content._internalModel.modelName === 'application') {
-        console.log(port2.id);
-        edge.targetPort = port2.id;
-      }*/
 
       edge.sourcePoint = {x: port1.x, y: port1.y};
       edge.targetPoint = {x: port2.x, y: port2.y};
@@ -607,24 +600,24 @@ export default function applyKlayLayout(landscape) {
 
       edge.sourceNode = sourceDrawnode;
       edge.targetNode = targetDrawnode;
-	  
+    
       sourceDrawnode.get('kielerGraphReference').edges.push(edge);
 
       return edge;  
-	  
-	  
-  	  //inner function
-  	  // looks for already existing edges
-  	  function lookForExistingEdge(sourceDrawnode, id){
-  		  let edges = sourceDrawnode.get('kielerGraphReference').edges;
-  		  let length = edges.length;
-  		  for(let i=0; i<length; i++){
-  			  if(edges[i].id === id){
-  				  return edges[i];
-  			  }
-  		  }
-  	  }
-	  
+    
+    
+      //inner function
+      // looks for already existing edges
+      function lookForExistingEdge(sourceDrawnode, id){
+        let edges = sourceDrawnode.get('kielerGraphReference').edges;
+        let length = edges.length;
+        for(let i=0; i<length; i++){
+          if(edges[i].id === id){
+            return edges[i];
+          }
+        }
+      }
+    
     } // END createEdgeHelper
 
     function createNewEdge(id) {
@@ -643,20 +636,21 @@ export default function applyKlayLayout(landscape) {
     function addBendPointsInAbsoluteCoordinates(landscape) {
 
       const applicationCommunication = landscape.get('applicationCommunication');
-	    const alreadyCalculatedPoints = {};
+      const alreadyCalculatedPoints = {};
 
       applicationCommunication.forEach((communication) => {
 
         const kielerEdgeReferences = communication.get('kielerEdgeReferences');
 
           kielerEdgeReferences.forEach((edge) => {
-  			
+        
 
           if (edge != null) {
-			if(alreadyCalculatedPoints[edge.id]){
-				communication.set("points", alreadyCalculatedPoints[edge.id]);
-    			return;
-    		}
+
+            if(alreadyCalculatedPoints[edge.id]){
+              communication.set("points", alreadyCalculatedPoints[edge.id]);
+              return;
+            }
 
             let parentNode = getRightParent(communication.get('source'), 
               communication.get('target'));
@@ -682,29 +676,16 @@ export default function applyKlayLayout(landscape) {
                 // self edges..
                 let sourcePort = edge.sPort;
 
-                // public static KVector sum(final KVector...vs) {
-                //   final KVector sum = new KVector();
-                //   for (final KVector v: vs) {
-                //     sum.x += v.x;
-                //     sum.y += v.y;
-                //   }
-                //   return sum;
-                // }
-
-                //sourcePoint = KVector.sum(sourcePort.getPosition(), sourcePort.getAnchor());
                 sourcePoint = {
                   x: sourcePort.x,
                   y: sourcePort.y
                 };
 
-
-                //var sourceInsets = sourcePort.getNode().getInsets();
                 let sourceInsets = edge.sourceNode.get('kielerGraphReference').padding;
 
                 sourcePoint.x -= sourceInsets.left;
                 sourcePoint.y -= sourceInsets.top;
 
-                //var nestedGraph = sourcePort.getNode().getProperty(InternalProperties.NESTED_LGRAPH);
                 let nestedGraph = edge.sourceNode.get('kielerGraphReference');
 
                 if (nestedGraph != null) {
@@ -712,9 +693,6 @@ export default function applyKlayLayout(landscape) {
                 }
               } 
               else {
-
-                //sourcePoint = edge.getSource().getAbsoluteAnchor();  
-
 
                 if (edge.source) {
                   sourcePoint = {
@@ -728,16 +706,9 @@ export default function applyKlayLayout(landscape) {
                   };
                 }
 
-                /*sourcePoint = {
-                    x: edge.sPort.x,
-                    y: edge.sPort.y
-                };*/
-
               }
 
               points.unshift(sourcePoint);
-
-              //console.log(edge);
 
               var targetPoint = edge.targetPoint ? {
                 x: edge.targetPoint.x,
@@ -745,17 +716,9 @@ export default function applyKlayLayout(landscape) {
               } : {
                 x: edge.tPort.x,
                 y: edge.tPort.y
-              };
+              };        
 
-              /*targetPoint = {
-                x: edge.tPort.x,
-                y: edge.tPort.y
-              };*/
-  		  
-
-              //if (edge.getProperty(InternalProperties.TARGET_OFFSET) != null) {
               if (edge.targetNode.get('kielerGraphReference').padding) {
-
                 targetPoint.x += edge.targetNode.get('kielerGraphReference').padding.left;
                 targetPoint.y += edge.targetNode.get('kielerGraphReference').padding.top;
               }
@@ -766,14 +729,14 @@ export default function applyKlayLayout(landscape) {
                 point.x += edgeOffset.left;
                 point.y += edgeOffset.top;
               });
-  		  
+        
 
-              var pOffsetX = 0.0;
-              var pOffsetY = 0.0;
+              let pOffsetX = 0.0;
+              let pOffsetY = 0.0;
 
               if (parentNode) {
-                var insetLeft = 0.0;
-                var insetTop = 0.0;
+                let insetLeft = 0.0;
+                let insetTop = 0.0;
 
                 if (parentNode.get('kielerGraphReference')) {
                   //insetLeft = parentNode.get('kielerGraphReference').padding.left;
@@ -803,7 +766,9 @@ export default function applyKlayLayout(landscape) {
                 communication.points.push(resultPoint);
 
               });
-			alreadyCalculatedPoints[edge.id] = points;
+
+              alreadyCalculatedPoints[edge.id] = points;
+
             } // END if (parentNode != null)
           }
         });
