@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import THREE from "npm:three";
 import HammerInteraction from '../hammer-interaction';
 import HoverHandler from './hover-handler';
 import AlertifyHandler from 'explorviz-ui-frontend/mixins/alertify-handler';
@@ -67,16 +68,27 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
     // Hide (old) tooltip
     this.get('hoverHandler').hideTooltip();
 
-    var delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
+    const delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
+
+    const mX = (evt.clientX / window.innerWidth ) * 2 - 1;
+    const mY = - (evt.clientY / window.innerHeight ) * 2 + 1;
+
+    const vector = new THREE.Vector3(mX, mY, 1 );
+    vector.unproject(this.get('camera'));
+    vector.sub(this.get('camera').position);
+    
+    this.get('camera').position.addVectors(this.get('camera').position,
+      vector.setLength(delta * 1.5));
+
 
     // zoom in
-    if (delta > 0) {
+    /*if (delta > 0) {
       this.get('camera').position.z -= delta * 1.5;
     }
     // zoom out
     else {
       this.get('camera').position.z -= delta * 1.5;
-    }
+    }*/
   },
 
 
