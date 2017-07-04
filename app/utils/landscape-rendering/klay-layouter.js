@@ -653,10 +653,10 @@ export default function applyKlayLayout(landscape) {
   			
 
           if (edge != null) {
-    			  if(alreadyCalculatedPoints[edge.id]){
-    				  communication.points.push(alreadyCalculatedPoints[edge.id]);
-    				  return;
-    			  }
+			if(alreadyCalculatedPoints[edge.id]){
+				communication.set("points", alreadyCalculatedPoints[edge.id]);
+    			return;
+    		}
 
             let parentNode = getRightParent(communication.get('source'), 
               communication.get('target'));
@@ -800,11 +800,10 @@ export default function applyKlayLayout(landscape) {
 
                 resultPoint.x = (point.x + pOffsetX) / CONVERT_TO_KIELER_FACTOR;
                 resultPoint.y = (point.y * -1 + pOffsetY) / CONVERT_TO_KIELER_FACTOR; // KIELER has inverted Y coords
-  			        alreadyCalculatedPoints[edge.id] = resultPoint;
                 communication.points.push(resultPoint);
 
               });
-
+			alreadyCalculatedPoints[edge.id] = points;
             } // END if (parentNode != null)
           }
         });

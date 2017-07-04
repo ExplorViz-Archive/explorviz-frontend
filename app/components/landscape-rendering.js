@@ -354,7 +354,7 @@ export default RenderingCore.extend({
 
         var points = communication.get('points');
 
-        if (points.length > 1) {          
+        if (points.length > 0) {          
 
           for (var i = 1; i < points.length; i++) {
 
@@ -479,9 +479,8 @@ export default RenderingCore.extend({
           let max = 1;
 
           for(let request in list) {
-            if (request > max) {
-              max = request;
-            }
+            request = parseInt(request);
+			max = (request > max) ? request : max;
           }
 
           const oneStep = max / 3.0;
@@ -498,6 +497,7 @@ export default RenderingCore.extend({
 
 
         function getCategoryFromValues(value, t1, t2) {
+		  value = parseInt(value);
           if (value === 0) {
             return 0.0;
           } else if (value === 1) {
@@ -519,10 +519,9 @@ export default RenderingCore.extend({
           let secondMax = 1;
 
           for(let request in list){
-      			if (request > max) {
-              secondMax = max;
-              max = request;
-            }
+      		  request = parseInt(request);
+              secondMax = (request > max) ? max : secondMax;
+              max = (request > max) ? request: max;
       		}   
           const oneStep = secondMax / 4.0;
           const t1 = oneStep;
@@ -538,6 +537,7 @@ export default RenderingCore.extend({
 
 
         function getCategoryFromLinearValues(value, t1, t2, t3) {
+			value = parseInt(value);
           if (value <= 0) {
             return 0;
           } else if (value <= t1) {
