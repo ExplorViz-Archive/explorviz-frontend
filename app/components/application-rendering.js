@@ -10,8 +10,7 @@ import Labeler from '../utils/application-rendering/labeler';
 import {createFoundation, removeFoundation} from 
   '../utils/application-rendering/foundation-builder';
 
-
- /**
+/**
  * Renderer for application visualization.
  *
  * @class Application-Rendering
@@ -21,7 +20,6 @@ export default RenderingCore.extend({
 
   store: Ember.inject.service('store'),
   landscapeRepo: Ember.inject.service("repos/landscape-repository"),
-  renderingService: Ember.inject.service(),
 
   application3D: null,
 
@@ -41,6 +39,13 @@ export default RenderingCore.extend({
   // @Override  
   initRendering() {
     this._super(...arguments);
+
+    this.reSetupScene = function() {
+      this.resetRotation();
+      this.set('viewCenterPoint', null);
+      this.get('camera.position').set(0, 0, 100);
+      this.cleanAndUpdateScene();       
+    };
 
     const self = this;
 
@@ -88,14 +93,6 @@ export default RenderingCore.extend({
       self.set('viewCenterPoint', null);
       self.cleanAndUpdateScene();
     });
-
-    // handle redraw events, e.g. when resetting view via button
-    this.get('renderingService').on('reSetupScene', function () {
-      self.set('viewCenterPoint', null);
-      self.get('camera').position.set(0, 0, 100);
-      self.resetRotation();
-      self.cleanAndUpdateScene();
-    });
   },
 
 
@@ -115,7 +112,7 @@ export default RenderingCore.extend({
     this.get('interaction').removeHandlers();
 
     this.get('landscapeRepo').off('updated');
-    this.get('renderingService').off('reSetupScene');
+
   },
 
 

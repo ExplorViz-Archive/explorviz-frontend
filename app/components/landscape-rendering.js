@@ -14,6 +14,7 @@ import ImageLoader from '../utils/three-image-loader';
 
 import Meshline from "npm:three.meshline";
 
+
 /**
 * Renderer for landscape visualization.
 *
@@ -24,7 +25,6 @@ export default RenderingCore.extend({
 
   landscapeRepo: Ember.inject.service("repos/landscape-repository"),
   configuration: Ember.inject.service("configuration"),
-  renderingService: Ember.inject.service(),
 
   hammerManager: null,
 
@@ -37,6 +37,12 @@ export default RenderingCore.extend({
   // @Override
   initRendering() {
     this._super(...arguments);
+
+    this.reSetupScene = function() {
+      this.set('centerAndZoomCalculator.centerPoint', null);
+      this.get('camera.position').set(0, 0, 0);
+      this.cleanAndUpdateScene();  
+    };
 
     const self = this;
 
@@ -81,21 +87,15 @@ export default RenderingCore.extend({
       self.cleanAndUpdateScene();
     });
 
-    // handle redraw events, e.g. when resetting view via button
-    this.get('renderingService').on('reSetupScene', function () {
-      self.set('centerAndZoomCalculator.centerPoint', null);
-      self.set('camera.position.x', 0);
-      self.set('camera.position.y', 0);
-      self.set('camera.position.z', 0);
-      self.cleanAndUpdateScene();
-    });
-
     // set default model
     this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
     this.set('labeler.systemTextCache', []);
     this.set('labeler.nodeTextCache', []);
     this.set('labeler.appTextCache', []);
+
+    this.set('centerAndZoomCalculator.centerPoint', null);
+
   },
 
   // @Override
@@ -109,7 +109,6 @@ export default RenderingCore.extend({
     this.set('labeler.textCache', []);
 
     this.off('resized');
-    this.get('renderingService').off('reSetupScene');
 
     this.get('interaction').removeHandlers();
 
@@ -124,7 +123,7 @@ export default RenderingCore.extend({
 
     this.populateScene();
 
-    this.set('interaction.raycastObjects', this.get('scene').children);
+    this.set('interaction.raycastObjects', this.get('scene.children'));
   },
 
   // @Override
@@ -151,7 +150,7 @@ export default RenderingCore.extend({
     let isRequestObject = false;
 
 
-    // draw plus or minus symbol
+    // create plus or minus, if not already done
     if(!(this.get('openSymbol') && this.get('closeSymbol'))) {
       createCollapseSymbols();
     }

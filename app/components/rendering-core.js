@@ -30,7 +30,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
   reloadHandler: Ember.inject.service("reload-handler"),
   landscapeRepo: Ember.inject.service("repos/landscape-repository"),
-
+  renderingService: Ember.inject.service(),
 
   classNames: ['viz'],
 
@@ -69,6 +69,8 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
    * @method initRendering
    */
   initRendering() {
+
+    this.debug('init rendering-core');
 
     const self = this;
 
@@ -157,6 +159,11 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
         self.set('newState', newState);  
     });
 
+    // handle redraw events, e.g. when resetting view via button
+    this.get('renderingService').on('reSetupScene', function() {
+      self.reSetupScene();
+    });
+
     ////////////////////
 
     // load font for labels and synchronously proceed with populating the scene
@@ -230,10 +237,10 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
    *
    * @method cleanup
    */
-  cleanup() {
+  cleanup() {    
     cancelAnimationFrame(this.get('animationFrameId'));
 
-    this.$(window).off('resize.visualization');    
+    this.$(window).off('resize.visualization');
 
     this.set('scene', null);
     this.set('webglrenderer', null);
@@ -243,9 +250,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
     this.removePerformanceMeasurement();
 
     this.get('viewImporter').off('transmitView');
-
-    // send action to reset query paramters 
-    this.sendAction("resetQueryParams");
+    this.get('renderingService').off('reSetupScene');
   },
 
 
@@ -292,6 +297,13 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
    *
    * @method preProcessEntity
    */
-  preProcessEntity() {}
+  preProcessEntity() {},
+
+  // Listener-Callbacks. Use RenderingCore.reopen to override
+
+  reSetupScene() {
+    //this.get('camera.position').set(0, 0, 0);
+    //this.cleanAndUpdateScene();
+  }
 
 });
