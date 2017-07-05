@@ -150,10 +150,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
       // Passes the state from component via service to controller
       self.get('urlBuilder').transmitState(state);
     });
-
     
-    // Setup listener in controller 
-    this.sendAction("setupControllerService");
 
     // setup view-importer Service
     this.get('viewImporter').on('transmitView', function(newState) { 

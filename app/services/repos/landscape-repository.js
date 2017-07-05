@@ -1,16 +1,19 @@
 import Ember from 'ember';
+const {Service, inject, observer, Evented} = Ember;
 
-export default Ember.Service.extend(Ember.Evented, {
+export default Service.extend(Evented, {
 
-  store: Ember.inject.service(),
+  store: inject.service(),
 
   latestLandscape: null,
 
   latestApplication: null,
 
-  observer: Ember.observer("latestLandscape.timestamp", function(){
+
+  observer: observer("latestLandscape.timestamp", function(){
     this.trigger("updated", this.get("latestLandscape"));
   }),
+
 
   loadLandscapeById(timestamp, appID) {
 
@@ -27,7 +30,6 @@ export default Ember.Service.extend(Ember.Evented, {
       if(appID) {
         const app = self.get('store').peekRecord('application', appID);
         self.set('latestApplication', app);
-        self.debug('updated latest', self.get('latestApplication'));
       }
 
       self.debug("end import landscape-request");

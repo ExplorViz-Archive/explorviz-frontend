@@ -36,6 +36,29 @@ export default Controller.extend({
     this.get('urlBuilder').on('transmitState', function(state) {
       self.set('state',state);
     });
+
+    // Listen for component request 
+    this.get('viewImporter').on('requestView', function() {
+      const newState = {};
+      // Get and convert query params
+      
+      newState.timestamp = self.get('timestamp');
+      newState.appID = self.get('appID'); 
+      
+      newState.camX = parseFloat(self.get('camX'));
+      newState.camY = parseFloat(self.get('camY'));
+      newState.camZ = parseFloat(self.get('camZ'));
+
+      // Passes the new state from controller via service to component
+      self.get('viewImporter').transmitView(newState);
+    });
+  },
+
+  // @Override
+  cleanup() {
+    this._super(...arguments);
+    this.get('urlBuilder').off('transmitState');
+    this.get('viewImporter').off('requestView');
   },
 
   // reset query parameters
@@ -44,33 +67,11 @@ export default Controller.extend({
     this.set('appID',null);
     this.set('camX',null);
     this.set('camY',null);
-    this.set('camZ',null);  
+    this.set('camZ',null);
+    this.set('viewImporter.importedURL', false);
   },
 
   actions: {
-
-    resetQueryParams(){
-      this.cleanupQueryParams();
-    },
-
-    setupService(){
-      const self = this;
-      // Listen for component request 
-      self.get('viewImporter').on('requestView', function() {
-        const newState = {};
-        // Get and convert query params
-        
-        newState.timestamp = self.get('timestamp');
-        newState.appID = self.get('appID'); 
-        
-        newState.camX = parseFloat(self.get('camX'));
-        newState.camY = parseFloat(self.get('camY'));
-        newState.camZ = parseFloat(self.get('camZ'));
-
-        // Passes the new state from controller via service to component
-        self.get('viewImporter').transmitView(newState);
-      });
-    },
 
     // Triggered by the export button 
     exportState() {
@@ -88,14 +89,7 @@ export default Controller.extend({
     },
 
     resetView() {
-      this.set('timestamp', null);
-      this.set('appID', null);
-
-      this.set('camX', null);
-      this.set('camY', null);
-      this.set('camZ', null);
-
-      this.set('viewImporter.importedURL', false);
+      this.cleanupQueryParams();
       this.get('renderingService').reSetupScene();
       this.get('reloadHandler').startExchange();
     }
