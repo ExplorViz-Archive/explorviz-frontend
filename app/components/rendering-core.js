@@ -182,13 +182,6 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
     
     this.get('viewImporter').requestView();
 
-    const timestamp = this.get('newState').timestamp;
-    //const application = this.get('newState').appID;
-
-    if(timestamp) {
-      this.get('reloadHandler').stopExchange();
-    }
-
     const camX = this.get('newState').camX;
     const camY = this.get('newState').camY;
     const camZ = this.get('newState').camZ;
@@ -204,6 +197,21 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
       this.get('camera').position.z = camZ;
     }
     this.get('camera').updateProjectionMatrix();
+
+
+    // load actual landscape
+    
+    const timestamp = this.get('newState').timestamp;
+    const appID = this.get('newState').appID;
+
+    if(timestamp) {
+      this.get('reloadHandler').stopExchange();
+      this.get('landscapeRepo').loadLandscapeById(timestamp, appID);
+
+      if(appID) {
+        //this.sendAction('showApplication');
+      }
+    }
   },
 
 

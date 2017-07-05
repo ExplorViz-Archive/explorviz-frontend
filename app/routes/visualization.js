@@ -3,12 +3,4 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 
 const { Route } = Ember;
 
-export default Route.extend(AuthenticatedRouteMixin, {
-
-  actions: {
-    handleApplication(){
-      this.controller.set("showLandscape", false);
-    }
-  }
-
-});
+export default Route.extend(AuthenticatedRouteMixin, {});

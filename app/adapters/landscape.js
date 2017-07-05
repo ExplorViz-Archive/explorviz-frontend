@@ -9,15 +9,16 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
   authorizer: 'authorizers:authorizers',
 
   host: ENV.APP.API_ROOT,
+  namespace: 'landscape',
 
   headers: {
     "Accept": "application/json"
   },
 
   //@Override
-  urlForQueryRecord(id, modelName) {
+  urlForQueryRecord(query) {
     let baseUrl = this.buildURL();
-    return `${baseUrl}/${modelName}/${id}`;
+    return `${baseUrl}/${query}`;
   }
 
 });

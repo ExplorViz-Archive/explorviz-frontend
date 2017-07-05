@@ -1,11 +1,13 @@
 import Ember from 'ember';
+const { computed, Controller, inject } = Ember;
 
-export default Ember.Controller.extend({
+export default Controller.extend({
 
-  urlBuilder: Ember.inject.service("url-builder"),
-  viewImporter: Ember.inject.service("view-importer"),
-  reloadHandler: Ember.inject.service("reload-handler"),
-  renderingService: Ember.inject.service(),
+  urlBuilder: inject.service("url-builder"),
+  viewImporter: inject.service("view-importer"),
+  reloadHandler: inject.service("reload-handler"),
+  renderingService: inject.service(),
+  landscapeRepo: inject.service("repos/landscape-repository"),
 
   // Specify query parameters
   queryParams: ['timestamp', 'appID', 'camX', 'camY', 'camZ'],
@@ -19,8 +21,11 @@ export default Ember.Controller.extend({
   camY: null,
   camZ: null,
 
-  showLandscape: true,
-  lastShownApplication: null,
+  showLandscape: computed('landscapeRepo.latestApplication', function() {
+    return !this.get('landscapeRepo.latestApplication');
+  }),
+
+  //showLandscape: true,
   state: null,
   
   // @Override
@@ -46,11 +51,6 @@ export default Ember.Controller.extend({
 
     resetQueryParams(){
       this.cleanupQueryParams();
-    },
-
-    // clean up boolean after leaving application
-    hideApplication(){
-      this.set('showLandscape',true);
     },
 
     setupService(){

@@ -1,14 +1,17 @@
 import Ember from 'ember';
+const { Controller, inject, computed } = Ember;
 
-export default Ember.Controller.extend({
+export default Controller.extend({
 
-  session: Ember.inject.service('session'),
-  visualization: Ember.inject.controller(),  
+  session: inject.service('session'),
+  visualization: inject.controller(),
+  landscapeRepo: inject.service("repos/landscape-repository"),
 
   actions: {
 
     resetToLandscapeView() {
-      this.set('visualization.showLandscape', true);
+      this.debug("reset landscape view");
+      this.set('landscapeRepo.latestApplication', null);
     },
 
     exportState() {
@@ -28,7 +31,7 @@ export default Ember.Controller.extend({
     }
   },
 
-  username: Ember.computed(function(){
+  username: computed(function(){
     return this.get('session').session.content.authenticated.username;
   })
 

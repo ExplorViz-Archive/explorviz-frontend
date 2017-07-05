@@ -106,18 +106,16 @@ export default RenderingCore.extend({
     this.debug("cleanup application rendering");
 
     // remove foundation for re-rendering
-    removeFoundation(this.get('landscapeRepo.latestApplication'), this.get('store'));
+    const emberApplication = this.get('application3D.userData.model');
+    removeFoundation(emberApplication, this.get('store'));
 
     this.set('applicationID', null);    
     this.set('application3D', null);  
 
     this.get('interaction').removeHandlers();
 
-    this.get('landscapeRepo').off("updated");
+    this.get('landscapeRepo').off('updated');
     this.get('renderingService').off('reSetupScene');
-
-    // bubble up action to clean up controller
-    this.sendAction("hideApplication");
   },
 
 
