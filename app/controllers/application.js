@@ -10,7 +10,7 @@ export default Controller.extend({
   actions: {
 
     resetToLandscapeView() {
-      this.get('visualization').cleanupQueryParams();
+      this.get('visualization').send('resetView');
       this.set('landscapeRepo.latestApplication', null);
     },
 

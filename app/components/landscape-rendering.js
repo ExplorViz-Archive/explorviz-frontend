@@ -693,6 +693,7 @@ export default RenderingCore.extend({
     });
 
     this.get('interaction').on('showApplication', function(emberModel) {
+      self.set('viewImporter.importedURL', null);
       self.set('landscapeRepo.latestApplication', emberModel);
       // bubble up action to visualization route
       self.sendAction("showApplication");

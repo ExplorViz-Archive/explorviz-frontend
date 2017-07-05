@@ -1,5 +1,5 @@
 import Ember from 'ember';
-const { computed, Controller, inject } = Ember;
+const { computed, Controller, inject, observer } = Ember;
 
 export default Controller.extend({
 
@@ -20,6 +20,16 @@ export default Controller.extend({
   camX: null,
   camY: null,
   camZ: null,
+
+  observer: observer('viewImporter.importedURL', function() {
+    if(!this.get('viewImporter.importedURL')) {
+      this.set('timestamp',null);
+      this.set('appID',null);
+      this.set('camX',null);
+      this.set('camY',null);
+      this.set('camZ',null);
+    }
+  }),
 
   showLandscape: computed('landscapeRepo.latestApplication', function() {
     return !this.get('landscapeRepo.latestApplication');
@@ -61,16 +71,6 @@ export default Controller.extend({
     this.get('viewImporter').off('requestView');
   },
 
-  // reset query parameters
-  cleanupQueryParams(){
-    this.set('timestamp',null);
-    this.set('appID',null);
-    this.set('camX',null);
-    this.set('camY',null);
-    this.set('camZ',null);
-    this.set('viewImporter.importedURL', false);
-  },
-
   actions: {
 
     // Triggered by the export button 
@@ -89,7 +89,7 @@ export default Controller.extend({
     },
 
     resetView() {
-      this.cleanupQueryParams();
+      this.set('viewImporter.importedURL', false);
       this.get('renderingService').reSetupScene();
       this.get('reloadHandler').startExchange();
     }
