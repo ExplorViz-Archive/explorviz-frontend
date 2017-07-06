@@ -40,8 +40,6 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
   canvas: null,
 
-  entity: null,
-
   font: null,
   animationFrameId: null,
 
@@ -52,6 +50,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
   didRender(){
     this._super(...arguments);
     this.initRendering();
+    this.initListener();
   },
 
 
@@ -94,23 +93,6 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
     this.get('webglrenderer').setPixelRatio(window.devicePixelRatio);
     this.get('webglrenderer').setSize(width, height);
 
-    this.$(window).on('resize.visualization', function(){
-      const outerDiv = this.$('.viz')[0];
-
-      if(outerDiv) {
-
-        const height = Math.round(this.$('.viz').height());
-        const width = Math.round(this.$('.viz').width());
-
-        self.set('camera.aspect', width / height);
-        self.get('camera').updateProjectionMatrix();
-
-        self.get('webglrenderer').setSize(width, height);
-
-        self.trigger("resized");
-      }
-    });
-
     // Rendering loop //
     function render() {
       const animationId = requestAnimationFrame(render);
@@ -130,10 +112,56 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
     }
 
     render();
+    
+    ////////////////////
 
-    this.set('entity', this.get('renderingModel'));
+    // load font for labels and synchronously proceed with populating the scene
+    new THREE.FontLoader()
+      .load('three.js/fonts/roboto_mono_bold_typeface.json', function(font) {
 
-    // Bind url-builder
+      self.set('font', font);
+      self.set('initDone', true);
+      self.populateScene();
+      // import new view
+      self.importView();
+    });  
+
+  },
+
+
+  initListener() {
+
+    const self = this;
+
+    this.$(window).on('resize.visualization', function(){
+      const outerDiv = this.$('.viz')[0];
+
+      if(outerDiv) {
+
+        const height = Math.round(this.$('.viz').height());
+        const width = Math.round(this.$('.viz').width());
+
+        self.set('camera.aspect', width / height);
+        self.get('camera').updateProjectionMatrix();
+
+        self.get('webglrenderer').setSize(width, height);
+
+        self.trigger("resized");
+      }
+    });
+
+
+    this.get('viewImporter').on('transmitView', function(newState) { 
+        self.set('newState', newState);  
+    });
+
+
+    
+    this.get('renderingService').on('reSetupScene', function() {
+      self.onReSetupScene();
+    });
+
+
     this.get('urlBuilder').on('requestURL', function() {
       const state = {};
 
@@ -152,32 +180,15 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
       // Passes the state from component via service to controller
       self.get('urlBuilder').transmitState(state);
     });
-    
 
-    // setup view-importer Service
-    this.get('viewImporter').on('transmitView', function(newState) { 
-        self.set('newState', newState);  
+
+    this.get('landscapeRepo').on("updated", function() {
+      self.onUpdated();
     });
 
-    // handle redraw events, e.g. when resetting view via button
-    this.get('renderingService').on('reSetupScene', function() {
-      self.reSetupScene();
-    });
 
-    ////////////////////
+  },
 
-    // load font for labels and synchronously proceed with populating the scene
-    new THREE.FontLoader()
-      .load('three.js/fonts/roboto_mono_bold_typeface.json', function(font) {
-
-      self.set('font', font);
-      self.set('initDone', true);
-      self.populateScene();
-      // import new view
-      self.importView();
-    });  
-
-  },  
 
   /**
     This method is used to update the camera with query parameters
@@ -211,10 +222,6 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
     if(timestamp) {
       this.get('reloadHandler').stopExchange();
       this.get('landscapeRepo').loadLandscapeById(timestamp, appID);
-
-      if(appID) {
-        //this.sendAction('showApplication');
-      }
     }
   },
 
@@ -240,7 +247,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
   cleanup() {    
     cancelAnimationFrame(this.get('animationFrameId'));
 
-    this.$(window).off('resize.visualization');
+    
 
     this.set('scene', null);
     this.set('webglrenderer', null);
@@ -249,8 +256,10 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
     this.removePerformanceMeasurement();
 
+    this.$(window).off('resize.visualization');
     this.get('viewImporter').off('transmitView');
-    this.get('renderingService').off('reSetupScene');
+    this.get('renderingService').off('onReSetupScene');
+    this.get('landscapeRepo').off('updated');
   },
 
 
@@ -299,11 +308,14 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
    */
   preProcessEntity() {},
 
-  // Listener-Callbacks. Use RenderingCore.reopen to override
 
-  reSetupScene() {
-    //this.get('camera.position').set(0, 0, 0);
-    //this.cleanAndUpdateScene();
-  }
+
+
+
+  // Listener-Callbacks. Override in extending components
+
+  onReSetupScene() {},
+
+  onUpdated() {}
 
 });

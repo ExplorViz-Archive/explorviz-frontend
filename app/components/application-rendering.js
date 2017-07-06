@@ -19,7 +19,6 @@ import {createFoundation, removeFoundation} from
 export default RenderingCore.extend({
 
   store: Ember.inject.service('store'),
-  landscapeRepo: Ember.inject.service("repos/landscape-repository"),
 
   application3D: null,
 
@@ -40,11 +39,18 @@ export default RenderingCore.extend({
   initRendering() {
     this._super(...arguments);
 
-    this.reSetupScene = function() {
+    this.onReSetupScene = function() {
       this.resetRotation();
       this.set('viewCenterPoint', null);
       this.get('camera.position').set(0, 0, 100);
       this.cleanAndUpdateScene();       
+    };
+
+    this.onUpdated = function() {
+      if(this.get('initDone')) {
+        this.preProcessEntity();
+        this.cleanAndUpdateScene();
+      }
     };
 
     const self = this;
@@ -68,14 +74,6 @@ export default RenderingCore.extend({
       this.set('raycaster', Raycaster.create());
       this.set('raycaster.objectCatalog', 'applicationObjects');
     }
-
-    // init landscape exchange
-    this.get('landscapeRepo').on("updated", function() {
-      if(self.get('initDone')) {
-        self.preProcessEntity();
-        self.cleanAndUpdateScene();
-      }
-    });
 
     this.initInteraction();
 
@@ -110,9 +108,6 @@ export default RenderingCore.extend({
     this.set('application3D', null);  
 
     this.get('interaction').removeHandlers();
-
-    this.get('landscapeRepo').off('updated');
-
   },
 
 

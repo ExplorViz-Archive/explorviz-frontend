@@ -23,7 +23,6 @@ import Meshline from "npm:three.meshline";
 */
 export default RenderingCore.extend({
 
-  landscapeRepo: Ember.inject.service("repos/landscape-repository"),
   configuration: Ember.inject.service("configuration"),
 
   hammerManager: null,
@@ -38,10 +37,16 @@ export default RenderingCore.extend({
   initRendering() {
     this._super(...arguments);
 
-    this.reSetupScene = function() {
+    this.onReSetupScene = function() {
       this.set('centerAndZoomCalculator.centerPoint', null);
       this.get('camera.position').set(0, 0, 0);
       this.cleanAndUpdateScene();  
+    };
+
+    this.onUpdated = function() {
+      if(this.get('initDone')) {
+        this.cleanAndUpdateScene();
+      }
     };
 
     const self = this;
@@ -67,13 +72,6 @@ export default RenderingCore.extend({
     if (!this.get('centerAndZoomCalculator')) {
       this.set('centerAndZoomCalculator', CalcCenterAndZoom.create());
     }
-
-    // init landscape exchange
-    this.get('landscapeRepo').on("updated", function() {
-      if(self.get('initDone')) {
-        self.cleanAndUpdateScene();
-      }      
-    });
 
     this.initInteraction();
 
@@ -111,8 +109,6 @@ export default RenderingCore.extend({
     this.off('resized');
 
     this.get('interaction').removeHandlers();
-
-    this.get('landscapeRepo').off('updated');
   },
 
   // @Override
