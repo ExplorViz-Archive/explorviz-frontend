@@ -244,9 +244,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
    * @method cleanup
    */
   cleanup() {    
-    cancelAnimationFrame(this.get('animationFrameId'));
-
-    
+    cancelAnimationFrame(this.get('animationFrameId'));    
 
     this.set('scene', null);
     this.set('webglrenderer', null);

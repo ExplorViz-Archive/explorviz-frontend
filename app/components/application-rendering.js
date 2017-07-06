@@ -120,7 +120,8 @@ export default RenderingCore.extend({
     this.set('oldRotation', this.get('application3D').rotation);
 
     // remove foundation for re-rendering
-    removeFoundation(this.get('landscapeRepo.latestApplication'), this.get('store'));
+    removeFoundation(this.get('landscapeRepo.latestApplication'), 
+      this.get('store'));
 
     this.populateScene();
   },
@@ -168,7 +169,8 @@ export default RenderingCore.extend({
 
     const viewCenterPoint = this.get('viewCenterPoint');
 
-    const accuCommunications = emberApplication.get('communicationsAccumulated');
+    const accuCommunications = 
+      emberApplication.get('communicationsAccumulated');
 
     accuCommunications.forEach((commu) => {
       if (commu.source !== commu.target) {
@@ -311,7 +313,9 @@ export default RenderingCore.extend({
 
     function createBox(component, color, isClass) {
 
-      let centerPoint = new THREE.Vector3(component.get('positionX') + component.get('width') / 2.0, component.get('positionY') + component.get('height') / 2.0,
+      let centerPoint = new THREE.Vector3(component.get('positionX') + 
+        component.get('width') / 2.0, component.get('positionY') + 
+        component.get('height') / 2.0,
         component.get('positionZ') + component.get('depth') / 2.0);
 
       const material = new THREE.MeshLambertMaterial();
@@ -321,7 +325,9 @@ export default RenderingCore.extend({
 
       centerPoint.multiplyScalar(0.5);
 
-      const extension = new THREE.Vector3(component.get('width') / 2.0, component.get('height') / 2.0, component.get('depth') / 2.0);
+      const extension = new THREE.Vector3(component.get('width') / 2.0, 
+        component.get('height') / 2.0, component.get('depth') / 2.0);
+
       const cube = new THREE.BoxGeometry(extension.x, extension.y, extension.z);
 
       const mesh = new THREE.Mesh(cube, material);
@@ -365,7 +371,8 @@ export default RenderingCore.extend({
 
       //const SPACE_IN_PERCENT = 0.02;
 
-      const viewCenterPoint = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
+      const viewCenterPoint = new THREE.Vector3(rect.get(MIN_X) + 
+        ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
         rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0),
         rect.get(MIN_Z) + ((rect.get(MAX_Z) - rect.get(MIN_Z)) / 2.0));
 
@@ -382,12 +389,14 @@ export default RenderingCore.extend({
       const newZ_by_width = requiredWidth / viewportRatio;
       const newZ_by_height = requiredHeight;
 
-      const center = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
+      const center = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) 
+      - rect.get(MIN_X)) / 2.0),
         rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0), 0);
 
       const camera = self.get('camera');
 
-      camera.position.z = Math.max(Math.max(newZ_by_width, newZ_by_height), 10.0);
+      camera.position.z = Math.max(Math.max(newZ_by_width, newZ_by_height), 
+      10.0);
       camera.position.x = 0;
       camera.position.y = 0;
       camera.updateProjectionMatrix();*/
@@ -421,8 +430,8 @@ export default RenderingCore.extend({
 
     // init interaction objects    
 
-    this.get('interaction').setupInteraction(canvas, camera, webglrenderer, raycaster, 
-      this.get('application3D'));
+    this.get('interaction').setupInteraction(canvas, camera, webglrenderer, 
+      raycaster, this.get('application3D'));
 
     // set listeners
 
