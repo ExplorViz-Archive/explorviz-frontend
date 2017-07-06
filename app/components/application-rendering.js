@@ -39,6 +39,8 @@ export default RenderingCore.extend({
   initRendering() {
     this._super(...arguments);
 
+    this.debug("init application rendering");
+
     this.onReSetupScene = function() {
       this.resetRotation();
       this.set('viewCenterPoint', null);
@@ -53,9 +55,10 @@ export default RenderingCore.extend({
       }
     };
 
-    const self = this;
-
-    this.debug("init application rendering");
+    this.onResized = function() {
+      this.set('viewCenterPoint', null);
+      this.cleanAndUpdateScene();
+    };
     
     this.get('camera').position.set(0, 0, 100);
 
@@ -85,12 +88,6 @@ export default RenderingCore.extend({
     const light = new THREE.AmbientLight(
     new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
-
-    // handle window resize
-    this.on('resized', function () {
-      self.set('viewCenterPoint', null);
-      self.cleanAndUpdateScene();
-    });
   },
 
 

@@ -37,6 +37,8 @@ export default RenderingCore.extend({
   initRendering() {
     this._super(...arguments);
 
+    this.debug("init landscape-rendering");
+
     this.onReSetupScene = function() {
       this.set('centerAndZoomCalculator.centerPoint', null);
       this.get('camera.position').set(0, 0, 0);
@@ -49,9 +51,10 @@ export default RenderingCore.extend({
       }
     };
 
-    const self = this;
-
-    this.debug("init landscape rendering");
+    this.onResized = function() {
+      this.set('centerAndZoomCalculator.centerPoint', null);
+      this.cleanAndUpdateScene();
+    };
 
     if (!this.get('interaction')) {
       this.set('interaction', Interaction.create());
@@ -75,15 +78,9 @@ export default RenderingCore.extend({
 
     this.initInteraction();
 
-    var dirLight = new THREE.DirectionalLight();
+    const dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
     this.get('scene').add(dirLight);
-
-    // handle window resize
-    this.on('resized', function () {
-      self.set('centerAndZoomCalculator.centerPoint', null);
-      self.cleanAndUpdateScene();
-    });
 
     // set default model
     this.set('imageLoader.logos', {});
@@ -105,8 +102,6 @@ export default RenderingCore.extend({
     this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
     this.set('labeler.textCache', []);
-
-    this.off('resized');
 
     this.get('interaction').removeHandlers();
   },

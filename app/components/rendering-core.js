@@ -146,7 +146,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
         self.get('webglrenderer').setSize(width, height);
 
-        self.trigger("resized");
+        self.onResized();
       }
     });
 
@@ -316,6 +316,8 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
   onReSetupScene() {},
 
-  onUpdated() {}
+  onUpdated() {},
+
+  onResized() {}
 
 });
