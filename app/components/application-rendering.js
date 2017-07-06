@@ -102,7 +102,9 @@ export default RenderingCore.extend({
     removeFoundation(emberApplication, this.get('store'));
 
     this.set('applicationID', null);    
-    this.set('application3D', null);  
+    this.set('application3D', null);
+
+    this.get('interaction').off('redrawScene');
 
     this.get('interaction').removeHandlers();
   },

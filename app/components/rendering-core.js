@@ -155,7 +155,6 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
         self.set('newState', newState);  
     });
 
-
     
     this.get('renderingService').on('reSetupScene', function() {
       self.onReSetupScene();
@@ -258,7 +257,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
     this.$(window).off('resize.visualization');
     this.get('viewImporter').off('transmitView');
-    this.get('renderingService').off('onReSetupScene');
+    this.get('renderingService').off('reSetupScene');
     this.get('landscapeRepo').off('updated');
   },
 

@@ -103,6 +103,9 @@ export default RenderingCore.extend({
     this.set('labeler.textLabels', {});
     this.set('labeler.textCache', []);
 
+    this.get('interaction').off('redrawScene');
+    this.get('interaction').off('showApplication');
+    
     this.get('interaction').removeHandlers();
   },
 
