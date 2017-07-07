@@ -113,10 +113,11 @@ export default Component.extend({
           enabled: true,
           multiple: false
         },
-        onclick: function(d) {
+        onclick: ((d) => {
           self.loadTimestamp(d);
-        }
+        })
       },
+      transition: {duration: 0},
       axis: {
         x: {
           type: 'timeseries',
@@ -187,11 +188,14 @@ export default Component.extend({
 
     const self = this;
 
-    const updatedPlot = this.get('plot');
+    let updatedPlot = this.get('plot');
 
-  	if(updatedPlot === null){
-      return;
+  	if(!updatedPlot){
+      this.renderPlot();
+      updatedPlot = this.get('plot');
+      //return;
     }
+
     const chartReadyTimestamps = this.buildChartData();
 
   	const labels = chartReadyTimestamps.labels;
@@ -241,7 +245,11 @@ export default Component.extend({
 
   loadTimestamp(timestamp) {
     console.log(timestamp);
-    this.get('reloadHandler').stopExchange();
+
+    var date = new Date(timestamp.x); // some mock date
+    var milliseconds = date.getTime();
+    console.log(milliseconds);
+    //this.get('reloadHandler').stopExchange();
   },
 
 });

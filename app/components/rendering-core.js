@@ -220,7 +220,7 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
     if(timestamp) {
       this.get('reloadHandler').stopExchange();
-      this.get('landscapeRepo').loadLandscapeById(timestamp, appID);
+      this.get('reloadHandler').loadLandscapeById(timestamp, appID);
     }
   },
 
