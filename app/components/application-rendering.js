@@ -106,6 +106,9 @@ export default RenderingCore.extend({
 
     this.get('interaction').off('redrawScene');
 
+    // clean up landscapeRepo for visualization template
+    this.set('landscapeRepo.latestApplication', null);
+
     this.get('interaction').removeHandlers();
   },
 
