@@ -19,3 +19,38 @@ body > .ember-view {
 .no-margin{
   margin: 0px;
 }
+
+//Additional classes
+
+.nav.navbar-nav > li > a{
+  cursor: pointer;
+  color: #777;
+  border-radius: 10px;
+}
+
+.nav.navbar-nav > li > a:hover{
+  background-color: #f1f1f1;
+  box-shadow: 0px 0px 0px 1px #e6e6e6;
+}
+
+.navbar-fixed-left {
+  width: 140px;
+  position: fixed;
+  overflow: hidden;
+}
+
+.navbar-fixed-left > .nav.navbar-nav > li {
+  float: none;  /* Cancel default li float: left */
+  width: 139px;
+  border-color:white;
+  border-top-style: solid;
+  border-bottom-style: solid;
+  border-width: 0.5px;
+  margin-left: 0px;
+}
+
+.navbar-fixed-left > .nav.navbar-nav > li > a{
+  padding-left: 0pt;
+  padding-right:0pt;
+  text-align: center;
+}

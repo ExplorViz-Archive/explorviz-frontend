@@ -21,20 +21,18 @@
     {{navbar-items resetToLandscapeView="resetToLandscapeView"}}
       <ul class="nav navbar-nav navbar-right">
         <li>
-          <a style="cursor:pointer; color:#777;" {{action "resetView"}}>
+          <a {{action "resetView"}} title="Landschaft zurücksetzen">
             <span id="resetView" class="glyphicon glyphicon-remove"></span>
           </a>
         </li>
         <li>
-          <a style="cursor:pointer; color:#777;" {{action "exportState"}}>
+          <a {{action "exportState"}} title="URL exportieren">
             <span id="exportURLButton" class="glyphicon glyphicon-share"></span>
           </a>
         </li>
         <li>
-          {{#link-to "configuration"}}
-            <a style="cursor:pointer; color:#777;">
+          {{#link-to "configuration" title="Konfigurationen"}}
               <span id="configurationButton" class="glyphicon glyphicon-cog"></span>
-            </a>
           {{/link-to}}
         </li>
         <li><p class="navbar-text"> Signed in as {{username}}</p></li>

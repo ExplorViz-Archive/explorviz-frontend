@@ -3,6 +3,7 @@ import Ember from 'ember';
 export default Ember.Service.extend({
 
   addonImports: [],
+  addonNavbarRight:[],
 
   landscapeColors: {
     system: "rgb(199,199,199)",
