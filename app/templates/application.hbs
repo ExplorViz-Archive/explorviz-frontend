@@ -20,15 +20,15 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
     {{navbar-items resetToLandscapeView="resetToLandscapeView"}}
       <ul class="nav navbar-nav navbar-right">
-        <li>          
+        <li>
           <a style="cursor:pointer; color:#777;" {{action "resetView"}}>
             <span id="resetView" class="glyphicon glyphicon-remove"></span>
-          </a>         
+          </a>
         </li>
-        <li>          
+        <li>
           <a style="cursor:pointer; color:#777;" {{action "exportState"}}>
             <span id="exportURLButton" class="glyphicon glyphicon-share"></span>
-          </a>         
+          </a>
         </li>
         <li>
           {{#link-to "configuration"}}
@@ -40,6 +40,7 @@
         <li><p class="navbar-text"> Signed in as {{username}}</p></li>
         <li><a {{action 'logout'}} style="cursor:pointer">Logout</a></li>
      </ul>
+     {{addon-navbar-right}}
    </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
   </nav>
