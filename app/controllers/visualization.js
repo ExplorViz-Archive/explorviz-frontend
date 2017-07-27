@@ -80,6 +80,8 @@ export default Controller.extend({
       // Update query parameters
       this.get('urlBuilder').requestURL();
 
+      this.set('viewImporter.importedURL', true);
+
       this.set('timestamp', this.get('state').timestamp);
       this.set('appID', this.get('state').appID);
 
