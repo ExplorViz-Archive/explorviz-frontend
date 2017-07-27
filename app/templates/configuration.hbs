@@ -1,3 +1,36 @@
+<ul class="nav nav-tabs">
+  <li class="active"><a data-toggle="tab" href="#settings">Settings</a></li>
+  <li><a data-toggle="tab" href="#addons">Addons</a></li>
+</ul>
+
+<div class="tab-content">
+  <div id="settings" class="tab-pane fade in active">
+    <h3>General Settings</h3>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+  </div>
+  <div id="addons" class="tab-pane fade" style="height: 100%;">
+    <h3>Addon Settings</h3>
+    <div class="panel-group pre-scrollable" id="configurationpanelgroup">
+      {{#each configurationService.addonImports as |addon|}}
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" href='#{{addon}}'> {{addon}} </a>
+            </h4>
+          </div>
+          <div id={{addon}} class="panel-collapse collapse">
+            <div class="panel-body">
+              {{component addon}}
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+</div>
+
+
+<!-- 
 <div class="navbar navbar-default navbar-fixed-side navbar-fixed-left">
   <ul class="nav navbar-nav">
     <li>
@@ -33,3 +66,4 @@
     </div>
   {{/each}}
 </div>
+-->
