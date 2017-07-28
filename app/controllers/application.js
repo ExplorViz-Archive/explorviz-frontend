@@ -6,6 +6,7 @@ export default Controller.extend({
   session: inject.service('session'),
   visualization: inject.controller(),
   landscapeRepo: inject.service("repos/landscape-repository"),
+  renderingService: inject.service("rendering-service"),
 
   actions: {
 

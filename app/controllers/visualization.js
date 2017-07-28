@@ -6,8 +6,10 @@ export default Controller.extend({
   urlBuilder: inject.service("url-builder"),
   viewImporter: inject.service("view-importer"),
   reloadHandler: inject.service("reload-handler"),
-  renderingService: inject.service(),
+  renderingService: inject.service("rendering-service"),
   landscapeRepo: inject.service("repos/landscape-repository"),
+
+  state: null,
 
   // Specify query parameters
   queryParams: ['timestamp', 'appID', 'camX', 'camY', 'camZ'],
@@ -35,11 +37,14 @@ export default Controller.extend({
     return !this.get('landscapeRepo.latestApplication');
   }),
 
-  //showLandscape: true,
-  state: null,
+  showTimeline() {
+    this.set('renderingService.showTimeline', true);
+  },
   
   // @Override
   init() {
+    this._super(...arguments);
+
     const self = this;
 
     // setup url-builder Service

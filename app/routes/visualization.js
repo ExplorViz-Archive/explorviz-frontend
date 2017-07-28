@@ -3,4 +3,12 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 
 const { Route } = Ember;
 
-export default Route.extend(AuthenticatedRouteMixin, {});
+export default Route.extend(AuthenticatedRouteMixin, {
+
+  actions: {
+    didTransition() {
+      this.controller.showTimeline();
+    }
+  }
+  
+});
