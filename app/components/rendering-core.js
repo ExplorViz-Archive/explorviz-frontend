@@ -248,6 +248,11 @@ export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
 
     this.set('scene', null);
     this.set('webglrenderer', null);
+
+    // clean up WebGL rendering context by forcing context loss
+    var gl = this.get('canvas').getContext('webgl');
+    gl.getExtension('WEBGL_lose_context').loseContext();
+
     this.set('camera', null);
     this.get('urlBuilder').off('requestURL');
 
