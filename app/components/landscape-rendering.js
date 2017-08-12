@@ -173,7 +173,7 @@ export default RenderingCore.extend({
 
       var centerPoint = this.get('centerAndZoomCalculator.centerPoint');
 
-
+      // Draw boxes for systems
       systems.forEach(function(system) {
 
         isRequestObject = false;
@@ -205,6 +205,9 @@ export default RenderingCore.extend({
 
         const nodegroups = system.get('nodegroups');
 
+        var nodegroupMesh;
+
+        // Draw boxes for nodegroups
         nodegroups.forEach(function(nodegroup) {
 
           if(!nodegroup.get('visible')) {
@@ -219,7 +222,7 @@ export default RenderingCore.extend({
             centerX = nodegroup.get('positionX') + extensionX - centerPoint.x;
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
-            var nodegroupMesh = createPlane(nodegroup);
+            nodegroupMesh = createPlane(nodegroup);
             nodegroupMesh.position.set(centerX, centerY,
               nodegroup.get('positionZ') + 0.001);
 
@@ -245,14 +248,17 @@ export default RenderingCore.extend({
               collapseSymbol.position.z = nodegroupMesh.position.z + 0.0001;
               nodegroupMesh.add(collapseSymbol);
             }
-
-            self.get('scene').add(nodegroupMesh);
-            nodegroup.set('threeJSModel', nodegroupMesh);
-
           }
 
           const nodes = nodegroup.get('nodes');
 
+          // Add box for nodegroup if it contains more than one node
+          if(nodes.content.length > 1){
+            self.get('scene').add(nodegroupMesh);
+            nodegroup.set('threeJSModel', nodegroupMesh);
+          }
+
+          // Draw boxes for nodes
           nodes.forEach(function(node) {
 
             if(!node.get('visible')) {
@@ -277,10 +283,9 @@ export default RenderingCore.extend({
             }
 
 
-
             const applications = node.get('applications');
 
-
+            // Draw boxes for applications
             applications.forEach(function(application) {
 
               extensionX = application.get('width') * scaleFactor.width;
