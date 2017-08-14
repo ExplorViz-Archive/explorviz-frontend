@@ -1,7 +1,6 @@
 import Ember from 'ember';
 import RenderingCore from './rendering-core';
 
-import Raycaster from '../utils/raycaster';
 import THREE from "npm:three";
 
 import applyKlayLayout from '../utils/landscape-rendering/klay-layouter';
@@ -27,7 +26,6 @@ export default RenderingCore.extend({
 
   hammerManager: null,
 
-  raycaster: null,
   interaction: null,
   labeler: null,
   imageLoader: null,
@@ -69,10 +67,6 @@ export default RenderingCore.extend({
 
     if (!this.get('labeler')) {
       this.set('labeler', Labeler.create());
-    }
-
-    if (!this.get('raycaster')) {
-      this.set('raycaster', Raycaster.create());
     }
 
     if (!this.get('centerAndZoomCalculator')) {
@@ -729,12 +723,11 @@ export default RenderingCore.extend({
     const raycastObjects = this.get('scene').children;
     const camera = this.get('camera');
     const webglrenderer = this.get('webglrenderer');
-    const raycaster = this.get('raycaster');
 
     // init interaction objects
 
-    this.get('interaction').setupInteraction(canvas, camera, webglrenderer,
-      raycaster, raycastObjects);
+    this.get('interaction').setupInteraction(canvas, camera, webglrenderer, 
+      raycastObjects);
 
     // set listeners
 

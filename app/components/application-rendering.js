@@ -1,7 +1,6 @@
 import Ember from 'ember';
 import RenderingCore from './rendering-core';
 
-import Raycaster from '../utils/raycaster';
 import THREE from "npm:three";
 
 import applyCityLayout from '../utils/application-rendering/city-layouter';
@@ -26,7 +25,6 @@ export default RenderingCore.extend({
 
   viewCenterPoint: null,
 
-  raycaster: null,
   interactionHandler: null,
   labeler: null,
 
@@ -71,11 +69,6 @@ export default RenderingCore.extend({
 
     if (!this.get('interaction')) {
       this.set('interaction', Interaction.create());
-    }
-
-    if (!this.get('raycaster')) {
-      this.set('raycaster', Raycaster.create());
-      this.set('raycaster.objectCatalog', 'applicationObjects');
     }
 
     this.initInteraction();
@@ -429,12 +422,11 @@ export default RenderingCore.extend({
     const canvas = this.get('canvas');
     const camera = this.get('camera');
     const webglrenderer = this.get('webglrenderer');
-    const raycaster = this.get('raycaster');
 
     // init interaction objects    
 
     this.get('interaction').setupInteraction(canvas, camera, webglrenderer, 
-      raycaster, this.get('application3D'));
+      this.get('application3D'));
 
     // set listeners
 

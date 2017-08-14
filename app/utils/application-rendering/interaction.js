@@ -2,6 +2,7 @@ import Ember from 'ember';
 import HammerInteraction from '../hammer-interaction';
 import HoverHandler from './hover-handler';
 import Highlighter from './highlighter';
+import Raycaster from '../raycaster';
 
 export default Ember.Object.extend(Ember.Evented, {
 
@@ -18,11 +19,10 @@ export default Ember.Object.extend(Ember.Evented, {
     return this.get('rotationObject.children');
   }),
 
-  setupInteraction(canvas, camera, renderer, raycaster, parentObject) {
+  setupInteraction(canvas, camera, renderer, parentObject) {
     this.set('canvas', canvas);
     this.set('camera', camera);
     this.set('renderer', renderer);
-    this.set('raycaster', raycaster);
     this.set('rotationObject', parentObject);
 
     const self = this;
@@ -52,6 +52,11 @@ export default Ember.Object.extend(Ember.Evented, {
     if (!this.get('hammerHandler')) {
       this.set('hammerHandler', HammerInteraction.create());
       this.get('hammerHandler').setupHammer(canvas);
+    }
+
+    if (!this.get('raycaster')) {
+      this.set('raycaster', Raycaster.create());
+      this.set('raycaster.objectCatalog', 'applicationObjects');
     }
 
     // init HoverHandler

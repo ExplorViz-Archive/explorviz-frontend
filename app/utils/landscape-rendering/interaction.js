@@ -3,6 +3,7 @@ import THREE from "npm:three";
 import HammerInteraction from '../hammer-interaction';
 import HoverHandler from './hover-handler';
 import AlertifyHandler from 'explorviz-ui-frontend/mixins/alertify-handler';
+import Raycaster from '../raycaster';
 
 export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
@@ -15,11 +16,10 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
   hammerHandler: null,
   hoverHandler: null,
 
-  setupInteraction(canvas, camera, renderer, raycaster, raycastObjects) {
+  setupInteraction(canvas, camera, renderer, raycastObjects) {
     this.set('canvas', canvas);
     this.set('camera', camera);
     this.set('renderer', renderer);
-    this.set('raycaster', raycaster);
     this.set('raycastObjects', raycastObjects);
 
     const self = this;
@@ -49,6 +49,10 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
     if (!this.get('hammerHandler')) {
       this.set('hammerHandler', HammerInteraction.create());
       this.get('hammerHandler').setupHammer(canvas);
+    }
+
+    if (!this.get('raycaster')) {
+      this.set('raycaster', Raycaster.create());
     }
 
     // init HoverHandler
