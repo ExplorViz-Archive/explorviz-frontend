@@ -6,6 +6,8 @@ import THREE from "npm:three";
 import applyCityLayout from '../utils/application-rendering/city-layouter';
 import Interaction from '../utils/application-rendering/interaction';
 import Labeler from '../utils/application-rendering/labeler';
+import CalcCenterAndZoom from
+  '../utils/application-rendering/center-and-zoom-calculator';
 import {createFoundation, removeFoundation} from 
   '../utils/application-rendering/foundation-builder';
 
@@ -23,8 +25,6 @@ export default RenderingCore.extend({
 
   applicationID: null,
 
-  viewCenterPoint: null,
-
   interactionHandler: null,
   labeler: null,
 
@@ -32,6 +32,7 @@ export default RenderingCore.extend({
   initialSetupDone: false,
 
   interaction: null,
+  centerAndZoomCalculator: null,
 
   // @Override  
   initRendering() {
@@ -41,7 +42,7 @@ export default RenderingCore.extend({
 
     this.onReSetupScene = function() {
       this.resetRotation();
-      this.set('viewCenterPoint', null);
+      this.set('centerAndZoomCalculator.centerPoint', null);
       this.get('camera.position').set(0, 0, 100);
       this.cleanAndUpdateScene();       
     };
@@ -54,7 +55,7 @@ export default RenderingCore.extend({
     };
 
     this.onResized = function() {
-      this.set('viewCenterPoint', null);
+      this.set('centerAndZoomCalculator.centerPoint', null);
       this.cleanAndUpdateScene();
     };
     
@@ -71,6 +72,10 @@ export default RenderingCore.extend({
       this.set('interaction', Interaction.create());
     }
 
+    if (!this.get('centerAndZoomCalculator')) {
+      this.set('centerAndZoomCalculator', CalcCenterAndZoom.create());
+    }
+
     this.initInteraction();
 
     const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
@@ -81,6 +86,8 @@ export default RenderingCore.extend({
     const light = new THREE.AmbientLight(
     new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
+
+    this.set('centerAndZoomCalculator.centerPoint', null);
   },
 
 
@@ -159,11 +166,12 @@ export default RenderingCore.extend({
     // apply (possible) highlighting
     this.get('interaction').applyHighlighting();
 
-    if(!this.get('viewCenterPoint')) {
-      this.set('viewCenterPoint', calculateAppCenterAndZZoom(emberApplication));
+    if(!this.get('centerAndZoomCalculator.centerPoint')) {
+      this.get('centerAndZoomCalculator')
+        .calculateAppCenterAndZZoom(emberApplication);
     }
 
-    const viewCenterPoint = this.get('viewCenterPoint');
+    const viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
 
     const accuCommunications = 
       emberApplication.get('communicationsAccumulated');
@@ -344,63 +352,6 @@ export default RenderingCore.extend({
       self.get('application3D').add(mesh);
 
     } // END createBox
-
-
-    function calculateAppCenterAndZZoom(emberApplication) {
-
-      const MIN_X = 0;
-      const MAX_X = 1;
-      const MIN_Y = 2;
-      const MAX_Y = 3;
-      const MIN_Z = 4;
-      const MAX_Z = 5;
-
-      const foundation = emberApplication.get('components').objectAt(0);
-
-      const rect = [];
-      rect.push(foundation.get('positionX'));
-      rect.push(foundation.get('positionY') + foundation.get('width'));
-      rect.push(foundation.get('positionY'));
-      rect.push(foundation.get('positionY') + foundation.get('height'));
-      rect.push(foundation.get('positionZ'));
-      rect.push(foundation.get('positionZ') + foundation.get('depth'));
-
-      //const SPACE_IN_PERCENT = 0.02;
-
-      const viewCenterPoint = new THREE.Vector3(rect.get(MIN_X) + 
-        ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
-        rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0),
-        rect.get(MIN_Z) + ((rect.get(MAX_Z) - rect.get(MIN_Z)) / 2.0));
-
-      /*let requiredWidth = Math.abs(rect.get(MAX_X) - rect.get(MIN_X));
-      requiredWidth += requiredWidth * SPACE_IN_PERCENT;
-
-      let requiredHeight = Math.abs(rect.get(MAX_Y) - rect.get(MIN_Y));
-      requiredHeight += requiredHeight * SPACE_IN_PERCENT;
-
-      const viewPortSize = self.get('webglrenderer').getSize();
-
-      let viewportRatio = viewPortSize.width / viewPortSize.height;
-
-      const newZ_by_width = requiredWidth / viewportRatio;
-      const newZ_by_height = requiredHeight;
-
-      const center = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) 
-      - rect.get(MIN_X)) / 2.0),
-        rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0), 0);
-
-      const camera = self.get('camera');
-
-      camera.position.z = Math.max(Math.max(newZ_by_width, newZ_by_height), 
-      10.0);
-      camera.position.x = 0;
-      camera.position.y = 0;
-      camera.updateProjectionMatrix();*/
-
-      return viewCenterPoint;
-
-    }
-
 
 
   }, // END populateScene
