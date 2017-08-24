@@ -17,7 +17,9 @@ module.exports = function(defaults) {
   });
 
   // export for threex.dynamictexture
-  app.import('vendor/three.min.js');
+  app.import('vendor/three.min.js',{
+    prepend: true
+  });
 
   app.import('vendor/layout/klay.js');
   app.import('vendor/threex/threex.rendererstats.min.js');
