@@ -477,12 +477,8 @@ export default RenderingCore.extend({
   	  for (let i = 0; i < tiles.length; i++) {
   			let tile = tiles[i];
   			tile.lineThickness = 0.7 * categories[tile.requestsCache] + 0.1;
+        createLine(tile, tiles, parent);
   		}
-
-    	for (let i = 0; i < tiles.length; i++) {
-            let tile = tiles[i];
-    		createLine(tile, tiles, parent);
-    	}
 
 
       function getCategories(list, linear) {
@@ -618,30 +614,52 @@ export default RenderingCore.extend({
       });
 
       const geometry = new THREE.Geometry();
-
-      geometry.vertices.push(
-        new THREE.Vector3(tile.startPoint.x - centerPoint.x,
-          tile.startPoint.y - centerPoint.y, tile.positionZ)
-      );
-
-	    geometry.vertices.push(
-        new THREE.Vector3(tile.endPoint.x - centerPoint.x,
+      let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x, 
+        tile.startPoint.y - centerPoint.y, tile.positionZ);
+      let secondVector = new THREE.Vector3(tile.endPoint.x - centerPoint.x,
           tile.endPoint.y - centerPoint.y, tile.positionZ)
-      );
 
+
+      let helpVector = new THREE.Vector3();
+      helpVector.subVectors(secondVector, firstVector);
+      if(helpVector.y > 0){
+        helpVector.cross(new THREE.Vector3(0,0,1));
+      }else{
+        helpVector.cross(new THREE.Vector3(0,0,-1));
+      }
+      helpVector.normalize();
+      helpVector.multiplyScalar(tile.lineThickness * 0.4);
+
+      geometry.vertices.push(firstVector);
+
+      geometry.vertices.push(secondVector);
+
+      geometry.vertices.unshift(new THREE.Vector3(firstVector.x - helpVector.x, firstVector.y, firstVector.z));
+
+      geometry.vertices.push(new THREE.Vector3(secondVector.x + helpVector.x, secondVector.y, secondVector.z));
+
+      //saves the angle between vector and x-axis
+
+      /*
 		  const followingTiles = tiles.filter(isNextTile, tile);
   		const length = followingTiles.length;
 
 
   		for(let i = 0; i < length; i++){
   			let followingTile = followingTiles[i];
-  			createGoodEdges(tile, followingTile,  parent);
+  		//	createGoodEdges(tile, followingTile,  parent);
   		}
+      */
 
       const line = new Meshline.MeshLine();
       line.setGeometry(geometry);
 
       var lineMesh = new THREE.Mesh(line.geometry, material);
+
+      lineMesh.geometry.computeBoundingBox();
+      let boundingBox = lineMesh.geometry.boundingBox;
+      let minX = boundingBox.min.x;
+      let maxX = boundingBox.min.y;
 
       parent.add(lineMesh);
 
