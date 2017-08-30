@@ -460,9 +460,11 @@ export default RenderingCore.extend({
         checkEqualityOfPoints(this.startPoint, tile.startPoint);
   	}
 
+    /*
   	function isNextTile(newTile){
   		return checkEqualityOfPoints(newTile.startPoint, this.endPoint);
   	}
+    */
 
     function addCommunicationLineDrawing(tiles, parent) {
 
@@ -617,7 +619,7 @@ export default RenderingCore.extend({
       let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x, 
         tile.startPoint.y - centerPoint.y, tile.positionZ);
       let secondVector = new THREE.Vector3(tile.endPoint.x - centerPoint.x,
-          tile.endPoint.y - centerPoint.y, tile.positionZ)
+          tile.endPoint.y - centerPoint.y, tile.positionZ);
 
 
       let helpVector = new THREE.Vector3();
@@ -656,15 +658,11 @@ export default RenderingCore.extend({
 
       var lineMesh = new THREE.Mesh(line.geometry, material);
 
-      lineMesh.geometry.computeBoundingBox();
-      let boundingBox = lineMesh.geometry.boundingBox;
-      let minX = boundingBox.min.x;
-      let maxX = boundingBox.min.y;
-
       parent.add(lineMesh);
 
 
 		  //----------Helper functions
+      /*
   		function createGoodEdges(firstTile, secondTile, parent){
 
   			const resolution = new THREE.Vector2(window.innerWidth,
@@ -706,7 +704,7 @@ export default RenderingCore.extend({
 
   			parent.add(lineMesh);
 
-		  }
+		  }*/
 
     } // END createLine
 
