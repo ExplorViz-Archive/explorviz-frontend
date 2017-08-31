@@ -44,9 +44,9 @@ export default Base.extend({
               });
             });
         }, function(xhr) {
-            let response = xhr.responseText;           
+            let httpResponse = xhr;
             Ember.run(function() {
-                reject(response);
+                reject(httpResponse);
             });
         });
     });

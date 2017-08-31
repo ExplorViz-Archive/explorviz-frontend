@@ -7,19 +7,47 @@ export default Ember.Component.extend({
 
   actions: {
     authenticate() {
+
       const { identification, password } = 
         this.getProperties('identification', 'password');
 
+      // reset (possible) old lables
+      this.set('session.session.messages.message',"");
+      this.set('session.session.messages.errorMessage',"");
+
+      if(!this.checkForValidInput(identification, password)) {
+        const errorMessage = "Enter valid credentials.";
+        this.set('session.session.messages.errorMessage', errorMessage);
+        return;
+      }
+
+      // try to authenticate (see authenticator.js)
       this.get('session')
         .authenticate('authenticator:authenticator', identification, password)
         .catch((reason) => {
 
-          const errorMessage = (reason && reason.error) ? reason.error : 
-           "No connection to Backend";
+          // Fallback message
+          let errorMessage = "No connection to Backend";
+
+          // Message from backend
+          if (reason && reason.status) {
+            errorMessage = `${reason.status}: ${reason.statusText} / 
+              ${reason.responseText}`;
+          }
 
           this.set('session.session.messages.errorMessage', errorMessage);
         });
     }
+  },
+
+  checkForValidInput(username, password) {
+    const usernameValid = username !== "" && username !== null && 
+      username !== undefined;
+
+    const passwordValid = password !== "" && password !== null && 
+      password !== undefined;
+
+    return usernameValid && passwordValid;
   }
 
 });
