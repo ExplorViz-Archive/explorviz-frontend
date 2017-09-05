@@ -6,7 +6,6 @@ import ENV from 'explorviz-ui-frontend/config/environment';
 /**
 Custom authenticator for token based authentication.
 
-@author akr
 @class Authenticator
 @extends ember-simple-auth/authenticators/base
 */

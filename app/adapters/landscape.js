@@ -4,6 +4,13 @@ import ENV from 'explorviz-ui-frontend/config/environment';
 
 const { JSONAPIAdapter } = DS;
 
+/**
+TODO
+
+@class Landscape-Adapter
+@extends DS.JSONAPIAdapter
+*/
+
 export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
   authorizer: 'authorizers:authorizers',

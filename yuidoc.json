@@ -6,8 +6,20 @@
 	"logo": "https://www.explorviz.net/img/favicon.png",
     "options": {
         "outdir": "./docs",
-        "exclude": "lib,docs,build",
+        "exclude": "dist,lib,docs,build",
         "themedir": "./node_modules/yuidoc-bootstrap-theme",
-        "helpers": ["./node_modules/yuidoc-bootstrap-theme/helpers/helpers.js"]
+        "helpers": ["./node_modules/yuidoc-bootstrap-theme/helpers/helpers.js"],
+        "external": {
+          "data": [
+            {
+              "base": "https://emberjs.com/api/",
+              "json": "http://builds.emberjs.com/tags/v2.14.1/ember-docs.json"
+            },
+            {
+              "base": "https://emberjs.com/api/data/",
+              "json": "http://builds.emberjs.com/tags/v2.13.1/ember-data-docs.json"
+            }
+          ]
+        }
     }
 }
