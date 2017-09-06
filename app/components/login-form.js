@@ -27,8 +27,10 @@ export default Component.extend({
         this.getProperties('identification', 'password');
 
       // reset (possible) old lables
-      this.set('session.session.messages.message',"");
-      this.set('session.session.messages.errorMessage',"");
+      if(this.get('session.session') && this.get('session.session.messages')) {
+        this.set('session.session.messages.message',"");
+        this.set('session.session.messages.errorMessage',"");
+      }
 
       if(!this.checkForValidInput(identification, password)) {
         const errorMessage = "Enter valid credentials.";

@@ -3,6 +3,8 @@ import Ember from 'ember';
 import Base from 'ember-simple-auth/authenticators/base';
 import ENV from 'explorviz-ui-frontend/config/environment';
 
+const {inject, RSVP, $, isEmpty, run} = Ember;
+
 /**
 * This Authenticator sends a single AJAX request with data fields "username" 
 * and "password" to the backend. The backend checks the authentication data 
@@ -14,12 +16,11 @@ import ENV from 'explorviz-ui-frontend/config/environment';
 * {{#crossLink "Login-Form/authenticate:method"}}{{/crossLink}}.
 * 
 * @class Authenticator
-* @extends Base
+* @extends Ember-Simple-Auth.Authenticators.BaseAuthenticator
 */
 export default Base.extend({
 
-  session: Ember.inject.service(),
-  ajax: Ember.inject.service(),
+  session: inject.service(),
 
   tokenEndpoint: ENV.APP.API_ROOT,
 
@@ -30,8 +31,8 @@ export default Base.extend({
    * @method restore
    */
   restore(data) {
-    return new Ember.RSVP.Promise(function(resolve, reject) {
-        if (!Ember.isEmpty(data.access_token)) {
+    return new RSVP.Promise(function(resolve, reject) {
+        if (!isEmpty(data.access_token)) {
             resolve(data);
         } else {
             reject();
@@ -48,14 +49,14 @@ export default Base.extend({
    */
   authenticate(identification, password) {
     this.set('session.session.messages', {});
-    return new Ember.RSVP.Promise((resolve, reject) => {
-        Ember.$.ajax({
+    return new RSVP.Promise((resolve, reject) => {
+        $.ajax({
             url: this.tokenEndpoint + '/sessions/create',
             type: 'POST',
             data: "username=" + identification + "&password=" + password,
             accept: "application/json"
         }).then(function(response) {
-            Ember.run(function() {              
+            run(function() {              
               resolve({
                   access_token: response.token,
                   username: response.username
@@ -63,7 +64,7 @@ export default Base.extend({
             });
         }, function(xhr) {
             let httpResponse = xhr;
-            Ember.run(function() {
+            run(function() {
                 reject(httpResponse);
             });
         });
@@ -87,7 +88,7 @@ export default Base.extend({
 
       this.set('session.session.messages.' + key, args[key]);
     }
-    return Ember.RSVP.resolve();
+    return RSVP.resolve();
   }
 
 });
