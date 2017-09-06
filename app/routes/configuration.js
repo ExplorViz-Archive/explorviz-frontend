@@ -2,7 +2,15 @@ import Ember from 'ember';
 import ApplicationRouteMixin from 
 'ember-simple-auth/mixins/application-route-mixin';
 
-export default Ember.Route.extend(ApplicationRouteMixin, {
+const {Route} = Ember;
+
+/**
+* TODO
+* 
+* @class Configuration-Route
+* @extends Ember.Route
+*/
+export default Route.extend(ApplicationRouteMixin, {
 
   actions: {
     didTransition() {

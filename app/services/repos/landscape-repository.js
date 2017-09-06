@@ -1,6 +1,13 @@
 import Ember from 'ember';
+
 const {Service, observer, Evented} = Ember;
 
+/**
+* TODO
+* 
+* @class Landscape-Repository-Service
+* @extends Ember.Service
+*/
 export default Service.extend(Evented, {
 
   latestLandscape: null,

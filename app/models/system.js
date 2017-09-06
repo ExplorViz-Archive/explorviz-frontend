@@ -7,8 +7,8 @@ const { attr, hasMany, belongsTo } = DS;
 /**
 * Ember model for a System.
 * 
-* @class System
-* @extends DrawNodeEntity
+* @class System-Model
+* @extends DrawNodeEntity-Model
 */
 export default DrawNodeEntity.extend({
   opened: attr('boolean'),  

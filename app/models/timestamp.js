@@ -1,8 +1,14 @@
 import DS from 'ember-data';
 
-const { attr} = DS;
+const {Model, attr} = DS;
 
-export default DS.Model.extend({
+/**
+* Ember model for a Timestamp.
+* 
+* @class Timestamp-Model
+* @extends DS.Model
+*/
+export default Model.extend({
   timestamp: attr('number'),
   calls: attr('number')
 });

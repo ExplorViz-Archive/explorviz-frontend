@@ -15,7 +15,6 @@ const { JSONAPIAdapter } = DS;
 * @class Landscape-Adapter
 * @extends DS.JSONAPIAdapter
 */
-
 export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
   authorizer: 'authorizers:authorizers',

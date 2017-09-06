@@ -11,15 +11,18 @@ import CalcCenterAndZoom from
 import {createFoundation, removeFoundation} from 
   '../utils/application-rendering/foundation-builder';
 
+const {inject} = Ember;
+
+
 /**
  * Renderer for application visualization.
  *
- * @class Application-Rendering
- * @extends Rendering-Core
+ * @class Application-Rendering-Component
+ * @extends Rendering-Core-Component
  */
 export default RenderingCore.extend({
 
-  store: Ember.inject.service('store'),
+  store: inject.service('store'),
 
   application3D: null,
 

@@ -7,7 +7,7 @@ const {Service, inject, computed, run} = Ember;
  * "authenticated session". It will start immediatly working, when the session 
  * is authenticated.
  *
- * @class Data-Reload
+ * @class Data-Reload-Service
  * @extends Ember.Service
  */
 

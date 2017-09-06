@@ -1,10 +1,18 @@
 import Ember from 'ember';
 
-export default Ember.Service.extend(Ember.Evented, {
+const {Service, observer, Evented} = Ember;
+
+/**
+* TODO
+* 
+* @class Timestamp-Repository-Service
+* @extends Ember.Service
+*/
+export default Service.extend(Evented, {
 
   latestTimestamps: null,
 
-  observer: Ember.observer("latestTimestamps", function(){
+  observer: observer("latestTimestamps", function(){
     this.trigger("updated");
   }),
 

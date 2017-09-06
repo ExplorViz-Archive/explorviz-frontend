@@ -1,12 +1,27 @@
 import Ember from 'ember';
 import moment from 'npm:moment';
 
-const {Component, $, on} = Ember;
+const {Component, $, on, inject} = Ember;
 
+/**
+* This component contains the core mechanics of the different (three.js-based) 
+* renderer. All functions below are called in a determined order, hence you only 
+* need to override them in your custom renderer.
+*
+* See {{#crossLink "Landscape-Rendering"}}{{/crossLink}} or 
+* {{#crossLink "Application-Rendering"}}{{/crossLink}} for example usage.
+*
+* Call order:
+*
+* 1. 
+*
+* @class Time-Shift-Component
+* @extends Ember.Component
+*/
 export default Component.extend({
 
-  timestampRepo: Ember.inject.service("repos/timestamp-repository"),
-  reloadHandler: Ember.inject.service("reload-handler"),
+  timestampRepo: inject.service("repos/timestamp-repository"),
+  reloadHandler: inject.service("reload-handler"),
   
   plot: null,
 

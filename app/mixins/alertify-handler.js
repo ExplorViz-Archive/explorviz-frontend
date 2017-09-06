@@ -1,6 +1,14 @@
 import Ember from 'ember';
 
-export default Ember.Mixin.create({
+const {Mixin, $} = Ember;
+
+/**
+* TODO
+*
+* @class Alertify-Handler
+* @extends Ember.Mixin
+*/
+export default Mixin.create({
 
   // @Override
   init() {
@@ -19,7 +27,7 @@ export default Ember.Mixin.create({
 
       // if last dialog, set respective flag
       // This flag is not used atm, but may be used in the future
-      if(Ember.$('.ajs-message.ajs-message.ajs-visible').length === 0) {
+      if($('.ajs-message.ajs-message.ajs-visible').length === 0) {
         self.set('alertActive', false);
       }            
     });

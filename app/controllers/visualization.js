@@ -1,6 +1,13 @@
 import Ember from 'ember';
+
 const { computed, Controller, inject, observer } = Ember;
 
+/**
+* TODO
+*
+* @class Visualization-Controller
+* @extends Ember.Controller
+*/
 export default Controller.extend({
 
   urlBuilder: inject.service("url-builder"),

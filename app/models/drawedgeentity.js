@@ -7,8 +7,8 @@ const { attr } = DS;
 * Ember model for a DrawEdgeEntity. This model is mainly used for 
 * communications. 
 * 
-* @class DrawEdgeEntity
-* @extends BaseEntity
+* @class DrawEdgeEntity-Model
+* @extends BaseEntity-Model
 */
 export default BaseEntity.extend({
 

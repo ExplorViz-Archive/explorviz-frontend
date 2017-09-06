@@ -7,8 +7,8 @@ const { attr, hasMany } = DS;
 /**
 * Ember model for a landscape.
 * 
-* @class Landscape
-* @extends BaseEntity
+* @class Landscape-Model
+* @extends BaseEntity-Model
 */
 export default BaseEntity.extend({
   hash: attr('number'),

@@ -12,10 +12,9 @@ const { JSONAPIAdapter } = DS;
 * {{#crossLink "Timeshift-Reload/updateObject:method"}}{{/crossLink}} shows an 
 * exemplary requests.
 * 
-* @class Landscape-Adapter
+* @class Timestamp-Adapter
 * @extends DS.JSONAPIAdapter
 */
-
 export default JSONAPIAdapter.extend(DataAdapterMixin,{
 	
 	authorizer: 'authorizers:authorizers',

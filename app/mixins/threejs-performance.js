@@ -1,7 +1,16 @@
 import Ember from 'ember';
 import Stats from "npm:stats.js";
 
-export default Ember.Mixin.create({
+const {Mixin} = Ember;
+
+
+/**
+* TODO
+*
+* @class ThreeJS-Performance-Mixin
+* @extends Ember.Mixin
+*/
+export default Mixin.create({
 
   // @Override
   init() {

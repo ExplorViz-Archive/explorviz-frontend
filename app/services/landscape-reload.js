@@ -6,8 +6,8 @@ import AlertifyHandler from 'explorviz-ui-frontend/mixins/alertify-handler';
 * This service reloads the latest-landscape every tenth second. See 
 * {{#crossLink "Service-Start"}}{{/crossLink}} for more information.
 * 
-* @class Landscape-Reload
-* @extends Reload
+* @class Landscape-Reload-Service
+* @extends Data-Reload-Service
 */
 
 export default Reload.extend(AlertifyHandler, {

@@ -13,16 +13,18 @@ import ImageLoader from '../utils/three-image-loader';
 
 import Meshline from "npm:three.meshline";
 
+const {inject} = Ember;
+
 
 /**
 * Renderer for landscape visualization.
 *
-* @class Landscape-Rendering
-* @extends Rendering-Core
+* @class Landscape-Rendering-Component
+* @extends Rendering-Core-Component
 */
 export default RenderingCore.extend({
 
-  configuration: Ember.inject.service("configuration"),
+  configuration: inject.service("configuration"),
 
   hammerManager: null,
 

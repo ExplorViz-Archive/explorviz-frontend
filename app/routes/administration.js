@@ -3,5 +3,10 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 
 const { Route } = Ember;
 
-export default Route.extend(AuthenticatedRouteMixin, {
-});
+/**
+* TODO
+* 
+* @class Administration-Route
+* @extends Ember.Route
+*/
+export default Route.extend(AuthenticatedRouteMixin, {});

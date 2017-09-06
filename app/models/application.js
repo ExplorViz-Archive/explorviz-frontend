@@ -6,8 +6,8 @@ const { attr, belongsTo, hasMany } = DS;
 /**
 * Ember model for an Application.
 * 
-* @class Application
-* @extends DrawNodeEntity
+* @class Application-Model
+* @extends DrawNodeEntity-Model
 */
 export default DrawNodeEntity.extend({
 

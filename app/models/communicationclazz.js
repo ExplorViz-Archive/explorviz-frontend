@@ -6,8 +6,8 @@ const { attr, belongsTo } = DS;
 /**
 * Ember model for a CommunicationClazz.
 * 
-* @class CommunicationClazz
-* @extends BaseEntity
+* @class CommunicationClazz-Model
+* @extends BaseEntity-Model
 */
 export default BaseEntity.extend({
 

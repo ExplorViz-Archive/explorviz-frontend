@@ -6,8 +6,8 @@ const { attr, belongsTo, hasMany } = DS;
 /**
 * Ember model for a Component, e.g. a Java package.
 * 
-* @class Component
-* @extends Draw3DNodeEntity
+* @class Component-Model
+* @extends Draw3DNodeEntity-Model
 */
 export default Draw3DNodeEntity.extend({
 

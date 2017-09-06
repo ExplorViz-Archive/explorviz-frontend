@@ -7,8 +7,8 @@ const { attr, belongsTo, hasMany } = DS;
 /**
 * Ember model for a NodeGroup.
 * 
-* @class NodeGroup
-* @extends DrawNodeEntity
+* @class NodeGroup-Model
+* @extends DrawNodeEntity-Model
 */
 export default DrawNodeEntity.extend({
   visible: attr('boolean'),

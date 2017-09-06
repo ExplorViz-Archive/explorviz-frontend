@@ -3,6 +3,8 @@ import THREE from "npm:three";
 import config from '../config/environment';
 import THREEPerformance from '../mixins/threejs-performance';
 
+const {Component, inject, Evented} = Ember;
+
 /**
 * This component contains the core mechanics of the different (three.js-based) 
 * renderer. All functions below are called in a determined order, hence you only 
@@ -15,22 +17,22 @@ import THREEPerformance from '../mixins/threejs-performance';
 *
 * 1. 
 *
-* @class Rendering-Core
+* @class Rendering-Core-Component
 * @extends Ember.Component
 */
-export default Ember.Component.extend(Ember.Evented, THREEPerformance, {
+export default Component.extend(Evented, THREEPerformance, {
 
   state: null,
 
   // Declare url-builder service 
-  urlBuilder: Ember.inject.service("url-builder"),
+  urlBuilder: inject.service("url-builder"),
 
   // Declare view-importer service 
-  viewImporter: Ember.inject.service("view-importer"),
+  viewImporter: inject.service("view-importer"),
 
-  reloadHandler: Ember.inject.service("reload-handler"),
-  landscapeRepo: Ember.inject.service("repos/landscape-repository"),
-  renderingService: Ember.inject.service(),
+  reloadHandler: inject.service("reload-handler"),
+  landscapeRepo: inject.service("repos/landscape-repository"),
+  renderingService: inject.service(),
 
   classNames: ['viz'],
 

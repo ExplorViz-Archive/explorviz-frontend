@@ -6,8 +6,8 @@ const { attr, belongsTo } = DS;
 /**
 * Ember model for a Communication.
 * 
-* @class Communication
-* @extends DrawEdgeEntity
+* @class Communication-Model
+* @extends DrawEdgeEntity-Model
 */
 export default DrawEdgeEntity.extend({
 

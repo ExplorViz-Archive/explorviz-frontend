@@ -1,6 +1,14 @@
 import DS from 'ember-data';
 
-export default DS.JSONAPISerializer.extend({
+const {JSONAPISerializer} = DS;
+
+/**
+* TODO
+* 
+* @class Application-Serializer
+* @extends DS.JSONAPISerializer
+*/
+export default JSONAPISerializer.extend({
 
   // workaround for camel-cased attributes
   keyForAttribute: function(attr) {

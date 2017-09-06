@@ -1,6 +1,14 @@
 import Ember from 'ember';
 
-export default Ember.Service.extend({
+const {Service} = Ember;
+
+/**
+* TODO
+* 
+* @class Configuration-Service
+* @extends Ember.Service
+*/
+export default Service.extend({
 
   addonImports: [],
   addonNavbarRight:[],

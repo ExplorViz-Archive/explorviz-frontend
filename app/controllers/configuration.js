@@ -1,9 +1,17 @@
 import Ember from 'ember';
 
-export default Ember.Controller.extend({
+const {Controller, inject} = Ember;
 
-  configurationService: Ember.inject.service("configuration"),
-  renderingService: Ember.inject.service("rendering-service"),
+/**
+* TODO
+*
+* @class Configuration-Controller
+* @extends Ember.Controller
+*/
+export default Controller.extend({
+
+  configurationService: inject.service("configuration"),
+  renderingService: inject.service("rendering-service"),
 
   hideTimeline() {
     this.set('renderingService.showTimeline', false);

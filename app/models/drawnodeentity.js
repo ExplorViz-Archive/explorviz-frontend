@@ -6,8 +6,8 @@ const { attr } = DS;
 /**
 * Ember model for a DrawNodeEntity.
 * 
-* @class DrawNodeEntity
-* @extends BaseEntity
+* @class DrawNodeEntity-Model
+* @extends BaseEntity-Model
 */
 export default BaseEntity.extend({
 

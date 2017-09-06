@@ -7,8 +7,8 @@ import AlertifyHandler from 'explorviz-ui-frontend/mixins/alertify-handler';
 * reloads timestamps. {{#crossLink "Service-Start"}}{{/crossLink}} for more 
 * information.
 * 
-* @class Timeshift-Reload
-* @extends Reload
+* @class Timeshift-Reload-Service
+* @extends Data-Reload-Service
 */
 
 export default Reload.extend(AlertifyHandler, {

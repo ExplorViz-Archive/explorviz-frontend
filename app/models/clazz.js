@@ -6,8 +6,8 @@ const { attr, belongsTo } = DS;
 /**
 * Ember model for a clazz.
 * 
-* @class Clazz
-* @extends Draw3DNodeEntity
+* @class Clazz-Model
+* @extends Draw3DNodeEntity-Model
 */
 export default Draw3DNodeEntity.extend({
 

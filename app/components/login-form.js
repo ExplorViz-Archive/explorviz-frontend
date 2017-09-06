@@ -5,10 +5,9 @@ const {Component, inject} = Ember;
 /**
 * TODO
 * 
-* @class Login-Form
+* @class Login-Form-Component
 * @extends Ember.Component
 */
-
 export default Component.extend({
 
   session: inject.service('session'),
