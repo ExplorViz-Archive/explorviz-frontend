@@ -15,7 +15,7 @@ export default BaseEntity.extend({
   /**
   * Indicates the line thickness (a.k.a. width) for a edge.
   *
-  * @attribute lineThickness
+  * @property lineThickness
   * @type number
   */
   lineThickness: attr('number'),
@@ -23,7 +23,7 @@ export default BaseEntity.extend({
   /**
   * Z-position of this edge.
   *
-  * @attribute positionZ
+  * @property positionZ
   * @type number
   */ 
   positionZ: attr('number'),
@@ -31,7 +31,7 @@ export default BaseEntity.extend({
   /**
   * All points of the edge.
   *
-  * @attribute points
+  * @property points
   * @type objects
   */
   points: attr(),
