@@ -2,7 +2,21 @@ import DS from 'ember-data';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 import ENV from 'explorviz-ui-frontend/config/environment';
 
-export default DS.JSONAPIAdapter.extend(DataAdapterMixin,{
+const { JSONAPIAdapter } = DS;
+
+/**
+* This Adapter operates as communication abstraction for all network requests, 
+* that refer to Timestamp objects. It provides functions for fetching, 
+* updating and uploading. However, at the time of writing this documentation 
+* only fetching is implemented by the backend. 
+* {{#crossLink "Timeshift-Reload/updateObject:method"}}{{/crossLink}} shows an 
+* exemplary requests.
+* 
+* @class Landscape-Adapter
+* @extends DS.JSONAPIAdapter
+*/
+
+export default JSONAPIAdapter.extend(DataAdapterMixin,{
 	
 	authorizer: 'authorizers:authorizers',
 

@@ -2,25 +2,37 @@ import Ember from 'ember';
 import Reload from './data-reload';
 import AlertifyHandler from 'explorviz-ui-frontend/mixins/alertify-handler';
 
+/**
+* This service reloads the latest-landscape every tenth second. See 
+* {{#crossLink "Service-Start"}}{{/crossLink}} for more information.
+* 
+* @class Landscape-Reload
+* @extends Reload
+*/
+
 export default Reload.extend(AlertifyHandler, {
 
   landscapeRepo: Ember.inject.service("repos/landscape-repository"),
 
-  // @Override  
+  // @Override
+  /**
+   * TODO
+   *
+   * @method init
+   */
   init() {
     this._super(...arguments);
     this.set('shallReload', true);
   },
-
-
-  /*
-    This service reloads the latest-landscape every tenth second. 
-    See "instance-initializer/service-start" for more information.
-  */
   
 
   
   // @Override
+  /**
+   * TODO
+   *
+   * @method updateObject
+   */
   updateObject(){
     const self = this;
 

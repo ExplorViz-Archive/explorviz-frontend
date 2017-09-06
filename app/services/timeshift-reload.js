@@ -2,25 +2,38 @@ import Reload from './data-reload';
 import Ember from "ember";
 import AlertifyHandler from 'explorviz-ui-frontend/mixins/alertify-handler';
 
+/**
+* This service fetches the timestamps every tenth second. In addition it 
+* reloads timestamps. {{#crossLink "Service-Start"}}{{/crossLink}} for more 
+* information.
+* 
+* @class Timeshift-Reload
+* @extends Reload
+*/
+
 export default Reload.extend(AlertifyHandler, {
 
 	timestampRepo: Ember.inject.service("repos/timestamp-repository"),
 
-	// @Override	
+  // @Override
+  /**
+   * TODO
+   *
+   * @method init
+   */
 	init() {
 		this._super(...arguments);
 		this.set('shallReload', true);
 	},
 
 
-	/*
-		This service fetches the timestamps every tenth second.
-		In addition it reloads timestamps.
-		See "instance-initializer/service-start" for more information.
-	*/
 
-
-	// @Override
+  // @Override
+  /**
+   * TODO
+   *
+   * @method updateObject
+   */
 	updateObject(){
 		const self = this;
 

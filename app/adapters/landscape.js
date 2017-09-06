@@ -5,10 +5,15 @@ import ENV from 'explorviz-ui-frontend/config/environment';
 const { JSONAPIAdapter } = DS;
 
 /**
-TODO
-
-@class Landscape-Adapter
-@extends DS.JSONAPIAdapter
+* This Adapter operates as communication abstraction for all network requests, 
+* that refer to Landscape objects. It provides functions for fetching, 
+* updating and uploading. However, at the time of writing this documentation 
+* only fetching is implemented by the backend. 
+* {{#crossLink "Landscape-Reload/updateObject:method"}}{{/crossLink}} shows an 
+* exemplary requests.
+* 
+* @class Landscape-Adapter
+* @extends DS.JSONAPIAdapter
 */
 
 export default JSONAPIAdapter.extend(DataAdapterMixin, {

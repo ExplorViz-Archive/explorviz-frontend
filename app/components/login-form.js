@@ -1,11 +1,26 @@
 import Ember from 'ember';
 
-export default Ember.Component.extend({
+const {Component, inject} = Ember;
 
-  session: Ember.inject.service('session'),
-  router: Ember.inject.service('-routing'),
+/**
+* TODO
+* 
+* @class Login-Form
+* @extends Ember.Component
+*/
+
+export default Component.extend({
+
+  session: inject.service('session'),
+  router: inject.service('-routing'),
 
   actions: {
+
+    /**
+     * TODO
+     *
+     * @method authenticate
+     */
     authenticate() {
 
       const { identification, password } = 
@@ -38,6 +53,7 @@ export default Ember.Component.extend({
           this.set('session.session.messages.errorMessage', errorMessage);
         });
     }
+
   },
 
   checkForValidInput(username, password) {

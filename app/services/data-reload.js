@@ -1,5 +1,12 @@
 import Ember from 'ember';
 
+/**
+TODO
+
+@class Data-Reload
+@extends Ember.Service
+*/
+
 export default Ember.Service.extend({
 
   store: Ember.inject.service('store'),
