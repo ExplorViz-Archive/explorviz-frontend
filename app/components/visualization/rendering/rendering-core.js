@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import THREE from "npm:three";
-import config from '../config/environment';
-import THREEPerformance from '../mixins/threejs-performance';
+import config from 'explorviz-ui-frontend/config/environment';
+import THREEPerformance from 'explorviz-ui-frontend/mixins/threejs-performance';
 
 const {Component, inject, Evented} = Ember;
 

@@ -3,13 +3,16 @@ import RenderingCore from './rendering-core';
 
 import THREE from "npm:three";
 
-import applyCityLayout from '../utils/application-rendering/city-layouter';
-import Interaction from '../utils/application-rendering/interaction';
-import Labeler from '../utils/application-rendering/labeler';
+import applyCityLayout from
+ 'explorviz-ui-frontend/utils/application-rendering/city-layouter';
+import Interaction from
+ 'explorviz-ui-frontend/utils/application-rendering/interaction';
+import Labeler from
+ 'explorviz-ui-frontend/utils/application-rendering/labeler';
 import CalcCenterAndZoom from
-  '../utils/application-rendering/center-and-zoom-calculator';
+ 'explorviz-ui-frontend/utils/application-rendering/center-and-zoom-calculator';
 import {createFoundation, removeFoundation} from 
-  '../utils/application-rendering/foundation-builder';
+ 'explorviz-ui-frontend/utils/application-rendering/foundation-builder';
 
 const {inject} = Ember;
 

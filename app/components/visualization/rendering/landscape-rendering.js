@@ -3,13 +3,16 @@ import RenderingCore from './rendering-core';
 
 import THREE from "npm:three";
 
-import applyKlayLayout from '../utils/landscape-rendering/klay-layouter';
-import Interaction from '../utils/landscape-rendering/interaction';
-import Labeler from '../utils/landscape-rendering/labeler';
+import applyKlayLayout from
+ 'explorviz-ui-frontend/utils/landscape-rendering/klay-layouter';
+import Interaction from
+ 'explorviz-ui-frontend/utils/landscape-rendering/interaction';
+import Labeler from
+ 'explorviz-ui-frontend/utils/landscape-rendering/labeler';
 import CalcCenterAndZoom from
-  '../utils/landscape-rendering/center-and-zoom-calculator';
+ 'explorviz-ui-frontend/utils/landscape-rendering/center-and-zoom-calculator';
 
-import ImageLoader from '../utils/three-image-loader';
+import ImageLoader from 'explorviz-ui-frontend/utils/three-image-loader';
 
 import Meshline from "npm:three.meshline";
 
