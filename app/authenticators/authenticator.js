@@ -4,6 +4,7 @@ import Base from 'ember-simple-auth/authenticators/base';
 import ENV from 'explorviz-ui-frontend/config/environment';
 
 const {inject, RSVP, $, isEmpty, run} = Ember;
+const {APP} = ENV;
 
 /**
 * This Authenticator sends a single AJAX request with data fields "username" 
@@ -25,7 +26,7 @@ export default Base.extend({
 
   session: inject.service(),
 
-  tokenEndpoint: ENV.APP.API_ROOT,
+  tokenEndpoint: APP.API_ROOT,
 
   // @Override
   /**
