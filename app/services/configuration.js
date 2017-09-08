@@ -10,8 +10,23 @@ const {Service} = Ember;
 */
 export default Service.extend({
 
-  addonImports: [],
+  /**
+  * Array for component-based settings dialogs. Any plugin may push a String 
+  * with the name of it's settings-component in this array. See 
+  * "color-picker-plugin" for exemplary usage.
+  *
+  * @property pluginSettings
+  * @type Array
+  */
+  pluginSettings: [],
 
+
+  /**
+  * Default colors for landscape visualization
+  *
+  * @property landscapeColors
+  * @type Object
+  */
   landscapeColors: {
     system: "rgb(199,199,199)",
     nodegroup: "rgb(1,155,32)",
