@@ -5,8 +5,8 @@
     "url": "https://www.explorviz.net/",
 	"logo": "https://www.explorviz.net/img/favicon.png",
     "options": {
+        "paths": "app/*.js",
         "outdir": "./docs",
-        "exclude": "dist,lib,docs,build",
         "themedir": "./node_modules/yuidoc-bootstrap-theme",
         "helpers": ["./node_modules/yuidoc-bootstrap-theme/helpers/helpers.js"],
         "external": {
