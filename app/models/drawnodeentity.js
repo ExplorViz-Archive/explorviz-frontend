@@ -8,6 +8,9 @@ const { attr } = DS;
 * 
 * @class DrawNodeEntity-Model
 * @extends BaseEntity-Model
+*
+* @module explorviz
+* @submodule model.util
 */
 export default BaseEntity.extend({
 

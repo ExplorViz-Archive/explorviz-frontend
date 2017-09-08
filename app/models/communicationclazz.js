@@ -8,6 +8,9 @@ const { attr, belongsTo } = DS;
 * 
 * @class CommunicationClazz-Model
 * @extends BaseEntity-Model
+*
+* @module explorviz
+* @submodule model.meta
 */
 export default BaseEntity.extend({
 

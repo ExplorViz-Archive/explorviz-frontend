@@ -15,11 +15,14 @@ const {inject} = Ember;
 
 
 /**
- * Renderer for application visualization.
- *
- * @class Application-Rendering-Component
- * @extends Rendering-Core-Component
- */
+* Renderer for application visualization.
+*
+* @class Application-Rendering-Component
+* @extends Rendering-Core-Component
+*
+* @module explorviz
+* @submodule visualization.rendering
+*/
 export default RenderingCore.extend({
 
   store: inject.service('store'),

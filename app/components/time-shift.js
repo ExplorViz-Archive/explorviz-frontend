@@ -17,6 +17,9 @@ const {Component, $, on, inject} = Ember;
 *
 * @class Time-Shift-Component
 * @extends Ember.Component
+*
+* @module explorviz
+* @submodule visualization.timeshift
 */
 export default Component.extend({
 

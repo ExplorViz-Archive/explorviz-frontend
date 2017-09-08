@@ -7,6 +7,9 @@ const {Controller, inject} = Ember;
 *
 * @class Configuration-Controller
 * @extends Ember.Controller
+*
+* @module explorviz
+* @submodule settings
 */
 export default Controller.extend({
 

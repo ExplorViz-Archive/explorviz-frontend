@@ -7,6 +7,9 @@ const {Mixin, $} = Ember;
 *
 * @class Alertify-Handler
 * @extends Ember.Mixin
+*
+* @module explorviz
+* @submodule page
 */
 export default Mixin.create({
 

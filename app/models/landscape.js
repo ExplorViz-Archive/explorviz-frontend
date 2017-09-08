@@ -9,6 +9,9 @@ const { attr, hasMany } = DS;
 * 
 * @class Landscape-Model
 * @extends BaseEntity-Model
+*
+* @module explorviz
+* @submodule model.meta
 */
 export default BaseEntity.extend({
   hash: attr('number'),

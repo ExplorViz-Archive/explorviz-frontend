@@ -9,5 +9,8 @@ import OAuth2Bearer from 'ember-simple-auth/authorizers/oauth2-bearer';
 * 
 * @class Authorizer
 * @extends OAuth2Bearer
+*
+* @module explorviz
+* @submodule security
 */
 export default OAuth2Bearer.extend();

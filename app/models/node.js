@@ -9,6 +9,9 @@ const { attr, hasMany, belongsTo } = DS;
 * 
 * @class Node-Model
 * @extends DrawNodeEntity-Model
+*
+* @module explorviz
+* @submodule model.meta
 */
 export default DrawNodeEntity.extend({
 

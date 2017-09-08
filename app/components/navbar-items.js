@@ -7,6 +7,9 @@ const {Component, inject} = Ember;
 * 
 * @class Navbar-Item-Component
 * @extends Ember.Component
+*
+* @module explorviz
+* @submodule page
 */
 export default Component.extend({
 	tagName: "ul",

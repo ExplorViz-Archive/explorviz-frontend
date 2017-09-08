@@ -9,5 +9,8 @@ const {Model} = DS;
 * 
 * @class BaseEntity-Model
 * @extends DS.Model
+*
+* @module explorviz
+* @submodule model.util
 */
 export default Model.extend({});

@@ -6,6 +6,9 @@ const { Controller, inject, computed } = Ember;
 *
 * @class Application-Controller
 * @extends Ember.Controller
+*
+* @module explorviz
+* @submodule page
 */
 export default Controller.extend({
 

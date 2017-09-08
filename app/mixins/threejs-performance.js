@@ -9,6 +9,9 @@ const {Mixin} = Ember;
 *
 * @class ThreeJS-Performance-Mixin
 * @extends Ember.Mixin
+*
+* @module explorviz
+* @submodule visualization.rendering
 */
 export default Mixin.create({
 

@@ -7,6 +7,9 @@ const {Component, inject} = Ember;
 * 
 * @class Login-Form-Component
 * @extends Ember.Component
+*
+* @module explorviz
+* @submodule page
 */
 export default Component.extend({
 

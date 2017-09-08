@@ -7,6 +7,9 @@ const { computed, Controller, inject, observer } = Ember;
 *
 * @class Visualization-Controller
 * @extends Ember.Controller
+*
+* @module explorviz
+* @submodule visualization
 */
 export default Controller.extend({
 

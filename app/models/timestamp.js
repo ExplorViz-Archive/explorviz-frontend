@@ -7,6 +7,9 @@ const {Model, attr} = DS;
 * 
 * @class Timestamp-Model
 * @extends DS.Model
+*
+* @module explorviz
+* @submodule model.timeshift
 */
 export default Model.extend({
   timestamp: attr('number'),

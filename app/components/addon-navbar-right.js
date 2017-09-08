@@ -11,6 +11,9 @@ const {Component, inject} = Ember;
 * 
 * @class Addon-Navbar-Right-Component
 * @extends Ember.Component
+*
+* @module explorviz
+* @submodule page
 */
 export default Component.extend({
   configuration: inject.service("configuration"),

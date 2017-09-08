@@ -19,6 +19,9 @@ const {Component, inject, Evented} = Ember;
 *
 * @class Rendering-Core-Component
 * @extends Ember.Component
+*
+* @module explorviz
+* @submodule visualization.rendering
 */
 export default Component.extend(Evented, THREEPerformance, {
 

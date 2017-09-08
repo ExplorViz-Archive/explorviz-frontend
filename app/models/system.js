@@ -9,6 +9,9 @@ const { attr, hasMany, belongsTo } = DS;
 * 
 * @class System-Model
 * @extends DrawNodeEntity-Model
+*
+* @module explorviz
+* @submodule model.meta
 */
 export default DrawNodeEntity.extend({
   opened: attr('boolean'),  

@@ -8,6 +8,9 @@ const { attr, belongsTo } = DS;
 * 
 * @class Communication-Model
 * @extends DrawEdgeEntity-Model
+*
+* @module explorviz
+* @submodule model.meta
 */
 export default DrawEdgeEntity.extend({
 

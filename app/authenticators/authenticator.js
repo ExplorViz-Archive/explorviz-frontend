@@ -17,6 +17,9 @@ const {inject, RSVP, $, isEmpty, run} = Ember;
 * 
 * @class Authenticator
 * @extends Ember-Simple-Auth.Authenticators.BaseAuthenticator
+*
+* @module explorviz
+* @submodule security
 */
 export default Base.extend({
 

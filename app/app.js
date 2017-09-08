@@ -3,9 +3,17 @@ import Resolver from './resolver';
 import loadInitializers from 'ember-load-initializers';
 import config from './config/environment';
 
-let App;
+const {Application} = Ember;
 
-App = Ember.Application.extend({
+/**
+* Ember application is the starting point for every Ember application.
+* 
+* @class Application
+* @extends Ember.Application
+*
+* @module ember
+*/
+let App = Application.extend({
   modulePrefix: config.modulePrefix,
   podModulePrefix: config.podModulePrefix,
   Resolver

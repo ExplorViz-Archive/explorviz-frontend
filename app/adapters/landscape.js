@@ -14,6 +14,9 @@ const { JSONAPIAdapter } = DS;
 * 
 * @class Landscape-Adapter
 * @extends DS.JSONAPIAdapter
+*
+* @module explorviz
+* @submodule network
 */
 export default JSONAPIAdapter.extend(DataAdapterMixin, {
 

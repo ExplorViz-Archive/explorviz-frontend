@@ -21,6 +21,9 @@ const {inject} = Ember;
 *
 * @class Landscape-Rendering-Component
 * @extends Rendering-Core-Component
+*
+* @module explorviz
+* @submodule visualization.rendering
 */
 export default RenderingCore.extend({
 
