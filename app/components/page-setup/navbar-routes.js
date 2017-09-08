@@ -3,20 +3,22 @@ import Ember from 'ember';
 const {Component, inject} = Ember;
 
 /**
-* TODO
+* This component renders all routes (!), that are registered in 
+* {{#crossLink "Page-Setup-Service"}}{{/crossLink}}, as nav-links.
 * 
-* @class Navbar-Item-Component
+* 
+* @class Navbar-Routes
 * @extends Ember.Component
 *
 * @module explorviz
 * @submodule page
 */
 export default Component.extend({
-	tagName: "ul",
+  tagName: "ul",
 
-	classNames:["nav", "navbar-nav"],
+  classNames:["nav", "navbar-nav"],
 
-	navbarService: inject.service('navbar-labels'),
+  pageSetupService: inject.service('page-setup'),
 
   actions: {
     resetToLandscapeView() {

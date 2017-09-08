@@ -1,6 +1,6 @@
 import { moduleFor, test } from 'ember-qunit';
 
-moduleFor('service:navbar-labels', 'Unit | Service | navbar labels', {
+moduleFor('service:page-setup', 'Unit | Service | page setup', {
   // Specify the other units that are required for this test.
   // needs: ['service:foo']
 });

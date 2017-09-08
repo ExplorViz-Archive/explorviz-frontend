@@ -12,12 +12,12 @@ const {Route, inject} = Ember;
 */
 export default Route.extend(ApplicationRouteMixin, {
 
-navbarService: inject.service('navbar-labels'),
+  session: inject.service("session"),
 
-actions: {
-    logout() {
-      this.get('session').invalidate({message: "Logout successful"});
+  actions: {
+      logout() {
+        this.get('session').invalidate({message: "Logout successful"});
+      }
     }
-  }
 
 });

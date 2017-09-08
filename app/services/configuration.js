@@ -11,7 +11,6 @@ const {Service} = Ember;
 export default Service.extend({
 
   addonImports: [],
-  addonNavbarRight:[],
 
   landscapeColors: {
     system: "rgb(199,199,199)",

@@ -18,7 +18,7 @@
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-    {{navbar-items resetToLandscapeView="resetToLandscapeView"}}
+    {{page-setup/navbar-routes resetToLandscapeView="resetToLandscapeView"}}
       <ul class="nav navbar-nav navbar-right">
         <li>
           <a {{action "resetView"}} title="Landschaft zurücksetzen">
@@ -38,7 +38,7 @@
         <li><p class="navbar-text"> Signed in as {{username}}</p></li>
         <li><a {{action 'logout'}} style="cursor:pointer">Logout</a></li>
      </ul>
-     {{addon-navbar-right}}
+     {{page-setup/navbar-glyphicons}}
    </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
   </nav>
