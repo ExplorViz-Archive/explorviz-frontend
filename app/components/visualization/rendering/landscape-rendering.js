@@ -14,7 +14,7 @@ import CalcCenterAndZoom from
 
 import ImageLoader from 'explorviz-ui-frontend/utils/three-image-loader';
 
-import Meshline from "npm:three.meshline";
+//import Meshline from "npm:three.meshline";
 
 const {inject} = Ember;
 
@@ -613,7 +613,8 @@ export default RenderingCore.extend({
 
 
     function createLine(tile, tiles, parent) {
-		  const resolution =
+
+		  /*const resolution =
         new THREE.Vector2(window.innerWidth, window.innerHeight);
 
       const material = new Meshline.MeshLineMaterial({
@@ -623,14 +624,14 @@ export default RenderingCore.extend({
 	      resolution: resolution
       });
 
-      const geometry = new THREE.Geometry();
+      const geometry = new THREE.Geometry(); */
       let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x, 
         tile.startPoint.y - centerPoint.y, tile.positionZ);
       let secondVector = new THREE.Vector3(tile.endPoint.x - centerPoint.x,
           tile.endPoint.y - centerPoint.y, tile.positionZ);
+     
 
-
-      let helpVector = new THREE.Vector3();
+      /*let helpVector = new THREE.Vector3();
       helpVector.subVectors(secondVector, firstVector);
       if(helpVector.y > 0){
         helpVector.cross(new THREE.Vector3(0,0,1));
@@ -638,15 +639,15 @@ export default RenderingCore.extend({
         helpVector.cross(new THREE.Vector3(0,0,-1));
       }
       helpVector.normalize();
-      helpVector.multiplyScalar(tile.lineThickness * 0.4);
+      helpVector.multiplyScalar(tile.lineThickness * 0.4);*/
 
-      geometry.vertices.push(firstVector);
+      //geometry.vertices.push(firstVector);
 
-      geometry.vertices.push(secondVector);
+      //geometry.vertices.push(secondVector);
 
-      geometry.vertices.unshift(new THREE.Vector3(firstVector.x - helpVector.x, firstVector.y, firstVector.z));
+      //geometry.vertices.unshift(new THREE.Vector3(firstVector.x - helpVector.x, firstVector.y, firstVector.z));
 
-      geometry.vertices.push(new THREE.Vector3(secondVector.x + helpVector.x, secondVector.y, secondVector.z));
+      //geometry.vertices.push(new THREE.Vector3(secondVector.x + helpVector.x, secondVector.y, secondVector.z));
 
       //saves the angle between vector and x-axis
 
@@ -661,12 +662,57 @@ export default RenderingCore.extend({
   		}
       */
 
-      const line = new Meshline.MeshLine();
-      line.setGeometry(geometry);
+      //const line = new Meshline.MeshLine();
+      //line.setGeometry(geometry);
 
-      var lineMesh = new THREE.Mesh(line.geometry, material);
+      //var lineMesh = new THREE.Mesh(line.geometry, material);
 
-      parent.add(lineMesh);
+      //parent.add(lineMesh);
+
+
+
+
+      // New line approach (draw planes)
+      
+      // Euclidean distance
+      const lengthPlane = Math.sqrt(
+        Math.pow((firstVector.x - secondVector.x),2) + 
+        Math.pow((firstVector.y - secondVector.y),2));      
+
+      const geometryPlane = new THREE.PlaneGeometry(lengthPlane, 
+        tile.lineThickness * 0.4);
+
+      const materialPlane = new THREE.MeshBasicMaterial({color: tile.pipeColor});
+      const plane = new THREE.Mesh(geometryPlane, materialPlane);
+
+      let isDiagonalPlane = false;
+      const diagonalPos = new THREE.Vector3();
+
+      // Rotate plane => diagonal plane (diagonal commu line)
+      if(Math.abs(firstVector.y - secondVector.y) > 0.1) {
+        isDiagonalPlane = true;
+
+        const distanceVector = new THREE.Vector3()
+          .subVectors(secondVector, firstVector);
+
+        plane.rotateZ(Math.atan2(distanceVector.y, distanceVector.x));
+
+        diagonalPos.copy(distanceVector).multiplyScalar(0.5).add(firstVector);
+      }
+
+      // Set plane position
+      if (!isDiagonalPlane) {
+        const posX = firstVector.x + (lengthPlane / 2);
+        const posY = firstVector.y;
+        const posZ = firstVector.z;
+
+        plane.position.set(posX, posY, posZ);
+      } 
+      else {
+        plane.position.copy(diagonalPos);
+      }
+
+      parent.add(plane);
 
 
 		  //----------Helper functions
