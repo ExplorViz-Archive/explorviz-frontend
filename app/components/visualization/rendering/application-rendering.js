@@ -53,7 +53,7 @@ export default RenderingCore.extend({
       this.resetRotation();
       this.set('centerAndZoomCalculator.centerPoint', null);
       this.get('camera.position').set(0, 0, 100);
-      this.cleanAndUpdateScene();       
+      this.cleanAndUpdateScene();
     };
 
     this.onUpdated = function() {

@@ -342,10 +342,16 @@ export default Component.extend(Evented, THREEPerformance, {
 
   // Listener-Callbacks. Override in extending components
 
-  onReSetupScene() {},
+  onReSetupScene() {
+    this.cleanAndUpdateScene();
+  },
 
-  onUpdated() {},
+  onUpdated() {
+    this.cleanAndUpdateScene();
+  },
 
-  onResized() {}
+  onResized() {
+    this.cleanAndUpdateScene();
+  }
 
 });
