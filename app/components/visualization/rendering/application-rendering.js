@@ -124,8 +124,6 @@ export default RenderingCore.extend({
 
   // @Override
   cleanAndUpdateScene() {
-    this._super(...arguments);
-
     this.debug("clean application rendering");
 
     // save old rotation
@@ -134,8 +132,8 @@ export default RenderingCore.extend({
     // remove foundation for re-rendering
     removeFoundation(this.get('landscapeRepo.latestApplication'), 
       this.get('store'));
-
-    this.populateScene();
+    
+    this._super(...arguments);
   },
 
 

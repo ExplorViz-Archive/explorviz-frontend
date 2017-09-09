@@ -42,7 +42,13 @@ export default RenderingCore.extend({
   openSymbol: null,
   closeSymbol: null,
 
+
   // @Override
+  /**
+   * TODO
+   *
+   * @method initRendering
+   */
   initRendering() {
     this._super(...arguments);
 
@@ -118,9 +124,7 @@ export default RenderingCore.extend({
   cleanAndUpdateScene() {
     this._super(...arguments);
 
-    this.debug("clean and populate landscape rendering");
-
-    this.populateScene();
+    this.debug("clean and populate landscape-rendering");
 
     this.set('interaction.raycastObjects', this.get('scene.children'));
   },

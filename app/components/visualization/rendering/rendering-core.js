@@ -52,6 +52,12 @@ export default Component.extend(Evented, THREEPerformance, {
 
 
   // @Override
+  /**
+   * This overridden Ember Component lifecycle hook enables calling 
+   * ExplorViz's setup code for actual rendering and custom listeners.
+   *
+   * @method didRender
+   */
   didRender(){
     this._super(...arguments);
     this.initRendering();
@@ -60,15 +66,22 @@ export default Component.extend(Evented, THREEPerformance, {
 
 
   // @Override
+  /**
+   * This overridden Ember Component lifecycle hook enables calling 
+   * ExplorViz's custom cleanup code.
+   *
+   * @method willDestroyElement
+   */
   willDestroyElement() {
     this._super(...arguments);
     this.cleanup();    
   },
 
+
   /**
    * This function is called once on the didRender event. Inherit this function 
-   * to call other important function, e.g. initInteraction as shown in 
-   * {@landscape-rendering}.
+   * to call other important function, e.g. "initInteraction" as shown in 
+   * {{#crossLink "Landscape-Rendering/initInteraction:method"}}{{/crossLink}}.
    *
    * @method initRendering
    */
@@ -298,6 +311,7 @@ export default Component.extend(Evented, THREEPerformance, {
         }
       }
     }
+    this.populateScene();
   },
 
 
