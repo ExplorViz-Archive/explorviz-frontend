@@ -245,9 +245,15 @@ export default Component.extend(Evented, THREEPerformance, {
 
 
   /**
-   * This function is called once on initRendering. Inherit this function to 
-   * insert objects in the Three.js scene. Have a look 
-   * at {{#crossLink "Landscape-Rendering"}}{{/crossLink}} for an example.
+   * This function is called once on initRendering and everytime at the end of 
+   * "cleanAndUpdateScene". Inherit this function to insert objects in the 
+   * Three.js scene. Have a look at 
+   * {{#crossLink "Landscape-Rendering/cleanAndUpdateScene:method"}}
+   * {{/crossLink}} 
+   * or 
+   * {{#crossLink "Application-Rendering/cleanAndUpdateScene:method"}}
+   * {{/crossLink}} 
+   * for examplary usage.
    *
    * @method populateScene
    */
@@ -286,7 +292,8 @@ export default Component.extend(Evented, THREEPerformance, {
 
   /**
    * Inherit this function to update the scene with a new renderingModel. It 
-   * automatically removes every mesh from the scene. Add your custom code 
+   * automatically removes every mesh from the scene and finally calls 
+   * the (overridden) "populateScene" function. Add your custom code 
    * as shown in landscape-rendering.
    *
    * @method cleanAndUpdateScene

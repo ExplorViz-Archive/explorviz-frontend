@@ -123,6 +123,11 @@ export default RenderingCore.extend({
 
 
   // @Override
+  /**
+   * TODO
+   *
+   * @method cleanAndUpdateScene
+   */
   cleanAndUpdateScene() {
     this.debug("clean application rendering");
 
@@ -132,12 +137,17 @@ export default RenderingCore.extend({
     // remove foundation for re-rendering
     removeFoundation(this.get('landscapeRepo.latestApplication'), 
       this.get('store'));
-    
+
     this._super(...arguments);
   },
 
 
   // @Override
+  /**
+   * TODO
+   *
+   * @method preProcessEntity
+   */
   preProcessEntity() {
     const application = this.get('store').peekRecord('application', 
       this.get('applicationID'));
@@ -146,6 +156,11 @@ export default RenderingCore.extend({
 
 
   // @Override
+  /**
+   * TODO
+   *
+   * @method populateScene
+   */
   populateScene() {
     this._super(...arguments);
     this.debug("populate application rendering");

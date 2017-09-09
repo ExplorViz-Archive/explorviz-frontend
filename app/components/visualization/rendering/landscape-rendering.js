@@ -120,7 +120,13 @@ export default RenderingCore.extend({
     this.get('interaction').removeHandlers();
   },
 
+
   // @Override
+  /**
+   * TODO
+   *
+   * @method cleanAndUpdateScene
+   */
   cleanAndUpdateScene() {
     this._super(...arguments);
 
@@ -129,7 +135,13 @@ export default RenderingCore.extend({
     this.set('interaction.raycastObjects', this.get('scene.children'));
   },
 
+
   // @Override
+  /**
+   * TODO
+   *
+   * @method populateScene
+   */
   populateScene() {
     this._super(...arguments);
 
