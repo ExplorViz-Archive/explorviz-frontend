@@ -14,7 +14,14 @@ This project is a wip replica of ExplorViz's visualization component. It substit
 
 * The API documentation is available at https://explorviz.github.io/explorviz-ui-frontend/
 
-## Prerequisites
+## Deployment
+There are two options for you at the moment. Browse to our [docker repository](https://github.com/ExplorViz/explorviz-docker). 
+* Clone the repository and deploy the built artifacts "explorviz-backend.war" and "explorviz-frontend" in a Tomcat
+* **OR** Use Docker as shown in the respective README.md
+
+## Development
+
+### Prerequisites
 
 You will need the following things properly installed on your computer.
 
@@ -23,45 +30,32 @@ You will need the following things properly installed on your computer.
 * [Ember CLI](http://ember-cli.com/)
 * [PhantomJS](http://phantomjs.org/)
 
-## Installation (Generic)
+### Installation (Generic)
 
 * `git clone <repository-url>` this repository
 * `cd explorviz-ui-frontend`
 * `npm install`
 
-## Installation (Windows)
+### Installation (Windows)
 * install NodeJS
 * npm install -g ember-cli
 * npm install -g phantomjs
 * Follow installation (Generic)
 
-## Used IDE
-
-* Webstorm 2016.3
-* EmberJS Plugin
-
-## Running / Development
+### Running / Development
 
 * `ember serve`
 * Visit your app at [http://localhost:4200](http://localhost:4200).
 
-### Code Generators
-
-Make use of the many generators for code, try `ember help generate` for more details
-
-### Running Tests
+#### Running Tests
 
 * `ember test`
 * `ember test --server`
 
-### Building
+#### Building
 
 * `ember build` (development)
 * `ember build --environment production` (production)
 
-### Deploying
-
-Specify what it takes to deploy your app.
-
-### Generating API Documentation
-* `yuidoc .` (might need to delete content of *tmp* folder)
+#### Generating API Documentation
+* `yuidoc .` (Might need to delete content of *tmp* folder. Be aware! The result of this command should be commited at the end of your development, since it generates a lot of LoC.)
