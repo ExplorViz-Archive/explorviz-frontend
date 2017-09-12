@@ -68,7 +68,10 @@ export default Ember.Object.extend(Ember.Evented, {
     }
     else if(modelType === 'nodegroup') {
       content = buildNodegroupContent(emberModel);
-    }    
+    }
+    else if(modelType === 'communication') {
+      content = buildCommunicationContent(emberModel);
+    } 
 
     return content;
 
@@ -220,6 +223,40 @@ export default Ember.Object.extend(Ember.Evented, {
             '<td>Avg. CPU Utilization:</td>' + 
             '<td style="text-align:right;padding-left:10px;">' +
               avgNodeCPUUtil + 
+            '</td>' +
+          '</tr>' + 
+        '</table>';
+
+      return content;
+    }
+
+
+
+    function buildCommunicationContent(communication) {
+
+      let content = {title: '', html: ''};
+
+      content.title = communication.get('source').get('name') + 
+        "&nbsp;<span class='glyphicon glyphicon-transfer'></span>&nbsp;";
+
+      content.html = 
+        '<table style="width:100%">' + 
+          '<tr>' + 
+            '<td>Requests:</td>' + 
+            '<td style="text-align:right;padding-left:10px;">' +
+              communication.get('requests') + 
+            '</td>' + 
+          '</tr>' + 
+          '<tr>' + 
+            '<td>Technology:</td>' + 
+            '<td style="text-align:right;padding-left:10px;">' +
+              communication.get('technology') + 
+            '</td>' + 
+          '</tr>' + 
+          '<tr>' + 
+            '<td>Avg. Duration:</td>' + 
+            '<td style="text-align:right;padding-left:10px;">' +
+              communication.get('averageResponseTimeInNanoSec') + ' ms' +
             '</td>' +
           '</tr>' + 
         '</table>';

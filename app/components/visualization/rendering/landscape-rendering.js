@@ -423,7 +423,8 @@ export default RenderingCore.extend({
       					positionZ: 0.0025,
       					requestsCache: 0,
       					communications: [],
-      					pipeColor: new THREE.Color(color)
+      					pipeColor: new THREE.Color(color),
+                emberModel: communication
       				};
 
       				tiles.push(tile);
@@ -728,6 +729,7 @@ export default RenderingCore.extend({
         plane.position.copy(diagonalPos);
       }
 
+      plane.userData['model'] = tile.emberModel;
       parent.add(plane);
 
 
