@@ -38,6 +38,14 @@ export default Service.extend({
     textapp: "rgb(255,255,255)",
     collapseSymbol: "rgb(0,0,0)",
     textchanged: false
+  },
+  
+     applicationColors: {
+    0xCECECE: "rgb(199,199,199)",
+    0x00BB41: "rgb(0,187,65)",
+    0x169E2B: "rgb(22,158,43)",
+       clazz: "rgb(62,20,160)",
+    0xFF0000: "rgb(255,0,0)",
   }
 
 });
