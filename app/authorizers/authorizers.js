@@ -1,7 +1,8 @@
-import OAuth2Bearer from 'ember-simple-auth/authorizers/oauth2-bearer';
+import { isEmpty } from '@ember/utils';
+import Base from 'ember-simple-auth/authorizers/base';
 
 /**
-* This predefined (by Simple-Auth) authorizer injects the token, that is given 
+* Custom authoriziers that injects the token, that is given 
 * by the backend and acquired by the authenticator after successful 
 * authentication, in every future request. This token is necessary, since all 
 * backend-resources (except the AuthenticationEndpoint) are secured by a 
@@ -13,4 +14,15 @@ import OAuth2Bearer from 'ember-simple-auth/authorizers/oauth2-bearer';
 * @module explorviz
 * @submodule security
 */
-export default OAuth2Bearer.extend();
+export default Base.extend({
+
+  authorize(data, block) {
+    const accessToken = data['access_token'];
+
+    if (!isEmpty(accessToken)) {
+     
+      block('Authorization', `Basic ${accessToken}`);
+    }
+  }
+
+});
