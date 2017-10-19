@@ -3,14 +3,20 @@ import Ember from 'ember';
 export function initialize(appInstance) {
   const config = appInstance.resolveRegistration("config:environment");
 
-  if(config.environment !== 'production') {
+  if(config.environment !== 'production' && 
+    config.environment !== 'development') {
     return;
   }
 
   Ember.$.getJSON('configuration.json')
     .done(function(jsonConfig) {
 
-      config.APP.API_ROOT = jsonConfig.API_ROOT;
+      if(config.environment === 'production') {
+        updateProductionEnv(jsonConfig, config);
+      } 
+      else if(config.environment === 'development') {
+        updateDevelopmentEnv(jsonConfig, config);
+      }
 
     })
     .fail(function( jqxhr, textStatus, error ) {
@@ -18,6 +24,29 @@ export function initialize(appInstance) {
       console.log("Couldn't load configuration.json: " + err );
     });
 }
+
+
+function updateDevelopmentEnv(jsonConfig, emberConfig) {
+  
+  if(jsonConfig.DEV_BACKEND_ROOT) {
+    emberConfig.APP.API_ROOT = jsonConfig.DEV_BACKEND_ROOT;
+  }
+  
+}
+
+
+function updateProductionEnv(jsonConfig, emberConfig) {
+
+   if(jsonConfig.PROD_BACKEND_ROOT) {
+    emberConfig.APP.API_ROOT = jsonConfig.PROD_BACKEND_ROOT;
+  }
+
+   if(jsonConfig.PROD_FRONTEND_ROOT) {
+    emberConfig.rootURL = jsonConfig.PROD_FRONTEND_ROOT;
+  }
+
+}
+
 
 export default {
   name: 'environment-updater',
