@@ -255,18 +255,22 @@ export default Component.extend(Evented, THREEPerformance, {
 
   /*
    * This method is used to collect data about the application.
-   * Ids of opened packages are stored in an array. 
+   * Names of opened packages are stored in an array. 
    */
   computeAppCondition(){
     const self = this;
     const components = this.get('landscapeRepo.latestApplication').get('components');
     const condition = [];
-
+    console.log("compute appcondition");
     components.forEach(function(component) {
-      // Handle closed systems and add id to array
+      // Handle opened packages and add name to array
       if(component.get('opened')){
         condition.push(component.get('name'));
         self.computeAppChildrenCondition(component,condition);
+      }
+      // Handle closed and highlighted packages
+      else if(component.get('highlighted')){
+        condition.push(component.get('name').concat("highlighted"));
       }
     });
     return condition;
@@ -283,6 +287,9 @@ export default Component.extend(Evented, THREEPerformance, {
       if(entity.get('opened')){
         condition.push(entity.get('name'));
         self.computeAppChildrenCondition(entity,condition);
+      }
+      else if(entity.get('highlighted')){
+        condition.push(entity.get('name').concat("highlighted"));
       }
     });
   },
@@ -353,6 +360,10 @@ export default Component.extend(Evented, THREEPerformance, {
               component.setOpenedStatus(true);  
               self.applyAppConditionChildren(component);
             }
+            // case not opened => maybe highlighted
+            else if(component.get('name').concat("highlighted") === self.get('condition')[i]) {
+              component.set('highlighted',true);
+            }
           }  
         });
       self.cleanAndUpdateScene();
@@ -374,12 +385,15 @@ export default Component.extend(Evented, THREEPerformance, {
               component.setOpenedStatus(true);    
               self.applyAppConditionChildren(component);
             }
+            // case not opened => maybe highlighted
+            else if(component.get('name').concat("highlighted") === self.get('condition')[i]) {
+              component.set('highlighted',true);
+            }
           }  
         });
       }
     }
   },
-
 
   /**
     This method is used to update the camera with query parameters
@@ -437,8 +451,6 @@ export default Component.extend(Evented, THREEPerformance, {
       });    
     }
   },
-
-
 
   /**
    * This function is called once on initRendering and everytime at the end of 
