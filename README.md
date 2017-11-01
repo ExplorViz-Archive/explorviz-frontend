@@ -2,7 +2,7 @@
 <a href="https://travis-ci.org/ExplorViz/explorviz-ui-frontend"><img src="https://travis-ci.org/ExplorViz/explorviz-ui-frontend.svg?branch=master" alt="Build Status"></a>
 <a href="https://david-dm.org/ExplorViz/explorviz-ui-frontend"><img src="https://david-dm.org/ExplorViz/explorviz-ui-frontend.svg?branch=master" alt="Dependency Status"></a>
 <a href="https://david-dm.org/ExplorViz/explorviz-ui-frontend?type=dev"><img src="https://david-dm.org/ExplorViz/explorviz-ui-frontend/dev-status.svg" alt="devDependencies status"></a>
-
+[![](https://img.shields.io/docker/pulls/explorviz/explorviz-docker.svg)](https://hub.docker.com/r/explorviz/explorviz-docker "Click to view the image on Docker Hub")
 
 This project is a wip replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) client-code with [EmberJS](https://www.emberjs.com/). This is only the frontend, you will need the [backend](https://github.com/ExplorViz/explorviz-ui-backend) as well.
 
