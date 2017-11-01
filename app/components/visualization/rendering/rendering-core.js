@@ -50,6 +50,8 @@ export default Component.extend(Evented, THREEPerformance, {
 
   initDone: false,
 
+  appCondition: [],
+
 
   // @Override
   /**
@@ -197,7 +199,11 @@ export default Component.extend(Evented, THREEPerformance, {
       state.camZ = self.get('camera').position.z; 
 
       if(state.appID){
-        state.appCondition = self.computeAppCondition();
+        self.set('appCondition',[]);
+        self.computeAppCondition(
+          self.get('landscapeRepo.latestApplication').get('components'), 
+          self.get('landscapeRepo.latestApplication').get('clazzes'));
+        state.appCondition = self.get('appCondition');
       }
       else{
         state.landscapeCondition = self.computeLandscapeCondition();
@@ -207,17 +213,15 @@ export default Component.extend(Evented, THREEPerformance, {
       self.get('urlBuilder').transmitState(state);
     });
 
-
     this.get('landscapeRepo').on("updated", function() {
       self.onUpdated();
     });
 
-
   },
 
   /*
-   * This method is used to collect data about the landscape.
-   * Ids of closed systems and nodegroups are stored in an array 
+   *  This method is used to collect data about the landscape.
+   *  Ids of closed systems and nodegroups are stored in an array 
    */
   computeLandscapeCondition(){
   
@@ -228,16 +232,16 @@ export default Component.extend(Evented, THREEPerformance, {
 
       let isRequestObject = false;
 
+      // Find requests
       if (!isRequestObject && system.get('name') === "Requests") {
         isRequestObject = true;
       }
+      // Exclude requests
       if(!isRequestObject){
-        
         // Handle closed systems and add id to array
         if(!system.get('opened')){
           condition.push(system.get('id'));
         }
-
         // Handle opened systems
         else{
           // Handle closed nodegroups and add id to array
@@ -254,45 +258,37 @@ export default Component.extend(Evented, THREEPerformance, {
   },
 
   /*
-   * This method is used to collect data about the application.
-   * Names of opened packages are stored in an array. 
+   *  This method is used to collect data about the application.
+   *  Names of opened packages are stored in an array. 
+   *  Furthermore the name+highlighted of the 
+   *  highlighted package is stored
    */
-  computeAppCondition(){
+  computeAppCondition(components, clazzes){
     const self = this;
-    const components = this.get('landscapeRepo.latestApplication').get('components');
-    const condition = [];
-    console.log("compute appcondition");
+
+    
+
+    if(clazzes){
+      clazzes.forEach(function(clazz) {
+        if(clazz.get('highlighted')){
+          self.get('appCondition').push(clazz.get('name').concat("highlighted"));
+        }
+      });
+    }
+    
     components.forEach(function(component) {
       // Handle opened packages and add name to array
       if(component.get('opened')){
-        condition.push(component.get('name'));
-        self.computeAppChildrenCondition(component,condition);
+        self.get('appCondition').push(component.get('name'));
+        self.computeAppCondition(component.get('children'), component.get('clazzes'));
       }
       // Handle closed and highlighted packages
       else if(component.get('highlighted')){
-        condition.push(component.get('name').concat("highlighted"));
-      }
-    });
-    return condition;
-  },
-
-  /*
-   *  This method is used to calculate the state of the subpackages
-   */
-  computeAppChildrenCondition(parent,condition){
-    const self = this;
-    let enties = parent.get('children');
-
-    enties.forEach(function(entity) {
-      if(entity.get('opened')){
-        condition.push(entity.get('name'));
-        self.computeAppChildrenCondition(entity,condition);
-      }
-      else if(entity.get('highlighted')){
-        condition.push(entity.get('name').concat("highlighted"));
+        self.get('appCondition').push(component.get('name').concat("highlighted"));
       }
     });
   },
+
 
   /*
    *  This method is used to open and close specified systems 
@@ -350,6 +346,19 @@ export default Component.extend(Evented, THREEPerformance, {
     if(application){
 
       const components = application.get('components');
+      const clazzes = application.get('clazzes');
+
+      if(clazzes){
+        clazzes.forEach(function(clazz) { 
+          for (var i = 0; i < self.get('condition').length; i++) { 
+            // case not opened => maybe highlighted
+            if(clazz.get('name').concat("highlighted") === self.get('condition')[i]) {
+              clazz.set('highlighted',true);
+            }
+          }  
+        });
+      }
+
       if(components){
         components.forEach(function(component) {
           // Close component  
@@ -375,6 +384,20 @@ export default Component.extend(Evented, THREEPerformance, {
     const self = this;
     if(entity){
       const components = entity.get('children');
+
+      const clazzes = entity.get('clazzes');
+
+      if(clazzes){
+        clazzes.forEach(function(clazz) { 
+          for (var i = 0; i < self.get('condition').length; i++) { 
+            // case not opened => maybe highlighted
+            if(clazz.get('name').concat("highlighted") === self.get('condition')[i]) {
+              clazz.set('highlighted',true);
+            }
+          }  
+        });
+      }
+
       if(components){
         components.forEach(function(component) {
 
@@ -394,6 +417,7 @@ export default Component.extend(Evented, THREEPerformance, {
       }
     }
   },
+
 
   /**
     This method is used to update the camera with query parameters
