@@ -142,6 +142,8 @@ export default Component.extend(Evented, THREEPerformance, {
       self.populateScene();
       // import new view
       self.importView();
+
+
     });  
 
   },
@@ -194,6 +196,13 @@ export default Component.extend(Evented, THREEPerformance, {
       state.camY = self.get('camera').position.y; 
       state.camZ = self.get('camera').position.z; 
 
+      if(state.appID){
+        state.appCondition = self.computeAppCondition();
+      }
+      else{
+        state.landscapeCondition = self.computeLandscapeCondition();
+      }
+     
       // Passes the state from component via service to controller
       self.get('urlBuilder').transmitState(state);
     });
@@ -206,17 +215,186 @@ export default Component.extend(Evented, THREEPerformance, {
 
   },
 
+  /*
+   * This method is used to collect data about the landscape.
+   * Ids of closed systems and nodegroups are stored in an array 
+   */
+  computeLandscapeCondition(){
+  
+    const systems = this.get('landscapeRepo.latestLandscape').get('systems');
+    const condition = [];
+
+    systems.forEach(function(system) {
+
+      let isRequestObject = false;
+
+      if (!isRequestObject && system.get('name') === "Requests") {
+        isRequestObject = true;
+      }
+      if(!isRequestObject){
+        
+        // Handle closed systems and add id to array
+        if(!system.get('opened')){
+          condition.push(system.get('id'));
+        }
+
+        // Handle opened systems
+        else{
+          // Handle closed nodegroups and add id to array
+          const nodegroups = system.get('nodegroups');
+          nodegroups.forEach(function(nodegroup){
+            if(!nodegroup.get('opened')){
+              condition.push(nodegroup.get('id'));
+            }
+          });
+        }
+      }
+    });
+    return condition;
+  },
+
+  /*
+   * This method is used to collect data about the application.
+   * Ids of opened packages are stored in an array. 
+   */
+  computeAppCondition(){
+    const self = this;
+    const components = this.get('landscapeRepo.latestApplication').get('components');
+    const condition = [];
+
+    components.forEach(function(component) {
+      // Handle closed systems and add id to array
+      if(component.get('opened')){
+        condition.push(component.get('name'));
+        self.computeAppChildrenCondition(component,condition);
+      }
+    });
+    return condition;
+  },
+
+  /*
+   *  This method is used to calculate the state of the subpackages
+   */
+  computeAppChildrenCondition(parent,condition){
+    const self = this;
+    let enties = parent.get('children');
+
+    enties.forEach(function(entity) {
+      if(entity.get('opened')){
+        condition.push(entity.get('name'));
+        self.computeAppChildrenCondition(entity,condition);
+      }
+    });
+  },
+
+  /*
+   *  This method is used to open and close specified systems 
+   *  and nodegroups. The array 'condition' contains the ids of 
+   *  of all closed systems and nodegroups  
+   */ 
+  applyLandscapeCondition(landscape){
+
+    const self = this;
+    const systems = landscape.get('systems');
+
+    systems.forEach(function(system) {
+      let isRequestObject = false;
+
+      if (!isRequestObject && system.get('name') === "Requests") {
+        isRequestObject = true;
+      }
+
+      if(!isRequestObject){
+
+        // Open system  
+        system.setOpened(true);  
+        for (var i = 0; i < self.get('condition').length; i++) { 
+
+          // Close system if id is in condition
+          if(parseFloat(system.get('id')) === parseFloat(self.get('condition')[i])){
+            system.setOpened(false);
+          }
+        }
+
+        // Check condition of nodegroups if system is opened
+        if(system.get('opened')){
+          const nodegroups = system.get('nodegroups');
+
+          nodegroups.forEach(function(nodegroup) {
+
+            // Open nodegroup  
+            nodegroup.setOpened(true);  
+            for (var i = 0; i < self.get('condition').length; i++) { 
+
+              // Close nodegroup if id is in condition
+              if(parseFloat(nodegroup.get('id')) === parseFloat(self.get('condition')[i])){
+                nodegroup.setOpened(false);
+              }
+            }
+          });
+        }
+      }
+    }); 
+  },
+
+  applyAppCondition(application){
+
+    const self = this;
+    if(application){
+
+      const components = application.get('components');
+      if(components){
+        components.forEach(function(component) {
+          // Close component  
+          component.setOpenedStatus(false);  
+          for (var i = 0; i < self.get('condition').length; i++) { 
+            // Open component if name is in condition
+            if(component.get('name') === self.get('condition')[i]){
+              component.setOpenedStatus(true);  
+              self.applyAppConditionChildren(component);
+            }
+          }  
+        });
+      self.cleanAndUpdateScene();
+      }
+    }
+  },
+
+  applyAppConditionChildren(entity){
+    const self = this;
+    if(entity){
+      const components = entity.get('children');
+      if(components){
+        components.forEach(function(component) {
+
+          component.setOpenedStatus(false);  
+          for (var i = 0; i < self.get('condition').length; i++) { 
+            // Close system if id is in condition
+            if(component.get('name') === self.get('condition')[i]){
+              component.setOpenedStatus(true);    
+              self.applyAppConditionChildren(component);
+            }
+          }  
+        });
+      }
+    }
+  },
+
 
   /**
     This method is used to update the camera with query parameters
   */ 
   importView(){
+
+    const self = this;
     
     this.get('viewImporter').requestView();
 
     const camX = this.get('newState').camX;
     const camY = this.get('newState').camY;
     const camZ = this.get('newState').camZ;
+
+    this.set('condition', this.get('newState').condition);
 
     if(!isNaN(camX)){
       this.get('camera').position.x = camX;
@@ -225,20 +403,38 @@ export default Component.extend(Evented, THREEPerformance, {
       this.get('camera').position.y = camY;
     }
     if(!isNaN(camZ)){
-      console.log(camZ);
       this.get('camera').position.z = camZ;
     }
     this.get('camera').updateProjectionMatrix();
 
-
     // load actual landscape
-    
     const timestamp = this.get('newState').timestamp;
     const appID = this.get('newState').appID;
-
+  
+    // Stop timeline  
+    self.get('reloadHandler').stopExchange();
+  
     if(timestamp) {
-      this.get('reloadHandler').stopExchange();
-      this.get('reloadHandler').loadLandscapeById(timestamp, appID);
+      loadLandscape();
+    }
+
+    // Callback to wait until landscape is loaded
+    function caller(callbackFunction){
+      self.get('reloadHandler').loadLandscapeById(timestamp, appID);
+      // Do callback stuff after landscape is loaded
+      callbackFunction();    
+    }
+
+    // Pass callback function
+    function loadLandscape(){
+      caller(function() {
+        if(appID){
+          self.applyAppCondition(self.get('landscapeRepo.latestApplication'));
+        } 
+        else{
+          self.applyLandscapeCondition(self.get('landscapeRepo.latestLandscape'));
+        }
+      });    
     }
   },
 

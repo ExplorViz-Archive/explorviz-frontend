@@ -22,7 +22,7 @@ export default Controller.extend({
   state: null,
 
   // Specify query parameters
-  queryParams: ['timestamp', 'appID', 'camX', 'camY', 'camZ'],
+  queryParams: ['timestamp', 'appID', 'camX', 'camY', 'camZ', 'condition'],
 
   type: 'landscape',
 
@@ -32,6 +32,7 @@ export default Controller.extend({
   camX: null,
   camY: null,
   camZ: null,
+  condition: [],
 
   observer: observer('viewImporter.importedURL', function() {
     if(!this.get('viewImporter.importedURL')) {
@@ -40,6 +41,7 @@ export default Controller.extend({
       this.set('camX',null);
       this.set('camY',null);
       this.set('camZ',null);
+      this.set('condition',[]);
     }
   }),
 
@@ -73,6 +75,7 @@ export default Controller.extend({
       newState.camX = parseFloat(self.get('camX'));
       newState.camY = parseFloat(self.get('camY'));
       newState.camZ = parseFloat(self.get('camZ'));
+      newState.condition = self.get('condition');
 
       // Passes the new state from controller via service to component
       self.get('viewImporter').transmitView(newState);
@@ -103,6 +106,14 @@ export default Controller.extend({
       this.set('camX', this.get('state').camX);
       this.set('camY', this.get('state').camY);
       this.set('camZ', this.get('state').camZ);
+
+      // handle landscape or application
+      if(this.get('showLandscape')){
+        this.set('condition', this.get('state').landscapeCondition);
+      }
+      else{
+        this.set('condition', this.get('state').appCondition);
+      }
     },
 
     resetView() {
