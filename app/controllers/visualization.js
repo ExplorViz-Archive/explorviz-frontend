@@ -121,7 +121,5 @@ export default Controller.extend({
       this.get('renderingService').reSetupScene();
       this.get('reloadHandler').startExchange();
     }
-
-
   }
 });

@@ -51,6 +51,7 @@ export default Component.extend(Evented, THREEPerformance, {
   initDone: false,
 
   appCondition: [],
+  initImport: true,
 
 
   // @Override
@@ -266,8 +267,6 @@ export default Component.extend(Evented, THREEPerformance, {
   computeAppCondition(components, clazzes){
     const self = this;
 
-    
-
     if(clazzes){
       clazzes.forEach(function(clazz) {
         if(clazz.get('highlighted')){
@@ -344,14 +343,21 @@ export default Component.extend(Evented, THREEPerformance, {
 
     const self = this;
     if(application){
+      let components = null;
+      if(self.get('initImport')){
+        components = application.get('components');
+        self.set('initImport', false);
+      }
+      else{
+        components = application.get('children');
+      }
 
-      const components = application.get('components');
       const clazzes = application.get('clazzes');
 
       if(clazzes){
         clazzes.forEach(function(clazz) { 
+          // Look for highlighted clazzes
           for (var i = 0; i < self.get('condition').length; i++) { 
-            // case not opened => maybe highlighted
             if(clazz.get('name').concat("highlighted") === self.get('condition')[i]) {
               clazz.set('highlighted',true);
             }
@@ -367,7 +373,7 @@ export default Component.extend(Evented, THREEPerformance, {
             // Open component if name is in condition
             if(component.get('name') === self.get('condition')[i]){
               component.setOpenedStatus(true);  
-              self.applyAppConditionChildren(component);
+              self.applyAppCondition(component);
             }
             // case not opened => maybe highlighted
             else if(component.get('name').concat("highlighted") === self.get('condition')[i]) {
@@ -379,45 +385,6 @@ export default Component.extend(Evented, THREEPerformance, {
       }
     }
   },
-
-  applyAppConditionChildren(entity){
-    const self = this;
-    if(entity){
-      const components = entity.get('children');
-
-      const clazzes = entity.get('clazzes');
-
-      if(clazzes){
-        clazzes.forEach(function(clazz) { 
-          for (var i = 0; i < self.get('condition').length; i++) { 
-            // case not opened => maybe highlighted
-            if(clazz.get('name').concat("highlighted") === self.get('condition')[i]) {
-              clazz.set('highlighted',true);
-            }
-          }  
-        });
-      }
-
-      if(components){
-        components.forEach(function(component) {
-
-          component.setOpenedStatus(false);  
-          for (var i = 0; i < self.get('condition').length; i++) { 
-            // Close system if id is in condition
-            if(component.get('name') === self.get('condition')[i]){
-              component.setOpenedStatus(true);    
-              self.applyAppConditionChildren(component);
-            }
-            // case not opened => maybe highlighted
-            else if(component.get('name').concat("highlighted") === self.get('condition')[i]) {
-              component.set('highlighted',true);
-            }
-          }  
-        });
-      }
-    }
-  },
-
 
   /**
     This method is used to update the camera with query parameters
@@ -455,6 +422,7 @@ export default Component.extend(Evented, THREEPerformance, {
     if(timestamp) {
       loadLandscape();
     }
+    self.set('initImport',true);
 
     // Callback to wait until landscape is loaded
     function caller(callbackFunction){
