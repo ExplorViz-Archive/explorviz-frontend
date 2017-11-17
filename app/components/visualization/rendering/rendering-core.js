@@ -416,9 +416,6 @@ export default Component.extend(Evented, THREEPerformance, {
     const timestamp = this.get('newState').timestamp;
     const appID = this.get('newState').appID;
   
-    // Stop timeline  
-    self.get('reloadHandler').stopExchange();
-  
     if(timestamp) {
       loadLandscape();
     }
