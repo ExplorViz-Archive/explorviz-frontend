@@ -6,6 +6,10 @@ export default Ember.Service.extend(Ember.Evented, {
 
   reSetupScene() {
     this.trigger('reSetupScene');
+  },
+
+  focusEntity(emberEntitiy) {
+    this.trigger('focusEntity', emberEntitiy);
   }
 
 });
