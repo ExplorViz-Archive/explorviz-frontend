@@ -6,6 +6,7 @@ export default Component.extend({
   store: service(),
   renderingService: service(),
   landscapeRepo: service('repos/landscape-repository'),
+  highlighter: service('visualization/application/highlighter'),
 
   actions: {
     focusEntity() {
@@ -19,7 +20,23 @@ export default Component.extend({
   },
 
   findElementByString(searchString) {
-    console.log(this.get('store').peekRecord('component', {name: searchString}));
+
+    const possiblGlobalCandidates = this.get('store')
+      .peekAll('component')
+      .filterBy('name', searchString);
+
+
+    const latestApp = this.get('landscapeRepo.latestApplication');
+
+    const firstMatch = possiblGlobalCandidates.find((candidate) => {
+      return latestApp.contains(candidate);
+    });
+
+    if(firstMatch) {
+      this.get('highlighter').highlight(firstMatch);
+      this.get('renderingService').redrawScene();
+    }
+
   }
 
 });

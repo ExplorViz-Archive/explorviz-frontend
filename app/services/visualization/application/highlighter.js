@@ -1,19 +1,21 @@
-import Ember from 'ember';
+import Service from '@ember/service';
+import { inject as service } from "@ember/service";
 
-export default Ember.Object.extend({
 
+export default Service.extend({
+
+  landscapeRepo: service('repos/landscape-repository'),
   highlightedEntity: null,
-  application: null,
 
   highlight(entity) {
 
     const isHighlighted = entity.get('highlighted');   
 
     if (!isHighlighted) {
-      this.get('application').unhighlight();
+      this.get('landscapeRepo.latestApplication').unhighlight();
       entity.highlight();
       this.set('highlightedEntity', entity);
-    } 
+    }
     else {
       this.unhighlightAll();
     }
@@ -25,10 +27,10 @@ export default Ember.Object.extend({
 
     if(this.get('highlightedEntity')) {
 
-      this.set('highlightedEntity', null);      
+      this.set('highlightedEntity', null);
       
-      if (this.get('application') !== null) {
-        this.get('application').unhighlight();
+      if (this.get('landscapeRepo.latestApplication') !== null) {
+        this.get('landscapeRepo.latestApplication').unhighlight();
       }
     }
   },
@@ -41,12 +43,15 @@ export default Ember.Object.extend({
     if (highlightedNode != null) {
 
       const communicationsAccumulated = 
-        this.get('application').get('communicationsAccumulated');
+        this.get('landscapeRepo.latestApplication')
+          .get('communicationsAccumulated');
 
       communicationsAccumulated.forEach((commu) => {
       
-        if ((commu.source != null && commu.source.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
-          (commu.target != null && commu.target.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
+        if ((commu.source != null && commu.source.get('fullQualifiedName') === 
+          highlightedNode.get('fullQualifiedName')) ||
+          (commu.target != null && commu.target.get('fullQualifiedName') === 
+            highlightedNode.get('fullQualifiedName'))) {
 
           //let outgoing = determineOutgoing(commu);
           //let incoming = determineIncoming(commu);

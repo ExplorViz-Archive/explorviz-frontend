@@ -1,10 +1,12 @@
-import Ember from 'ember';
+import EmberObject, { computed } from '@ember/object';
+import Evented from '@ember/object/evented';
+import { inject as service } from "@ember/service";
+
 import HammerInteraction from '../hammer-interaction';
 import HoverHandler from './hover-handler';
-import Highlighter from './highlighter';
 import Raycaster from '../raycaster';
 
-export default Ember.Object.extend(Ember.Evented, {
+export default EmberObject.extend(Evented, {
 
   canvas: null,
   camera: null,
@@ -13,9 +15,12 @@ export default Ember.Object.extend(Ember.Evented, {
   rotationObject: null,
   hammerHandler: null,
   hoverHandler: null,
-  highlighter: null,
 
-  raycastObjects: Ember.computed('rotationObject', function() {
+  highlighter: service('visualization/application/highlighter'),
+  renderingService: service(),
+
+
+  raycastObjects: computed('rotationObject', function() {
     return this.get('rotationObject.children');
   }),
 
@@ -62,11 +67,6 @@ export default Ember.Object.extend(Ember.Evented, {
     // init HoverHandler
     if (!this.get('hoverHandler')) {
       this.set('hoverHandler', HoverHandler.create());
-    }
-
-    // init Highlighter
-    if (!this.get('highlighter')) {
-      this.set('highlighter', Highlighter.create());
     }
 
     // hover handler
@@ -162,7 +162,7 @@ export default Ember.Object.extend(Ember.Evented, {
 
   updateEntities(app) {
     this.set('rotationObject', app);
-    this.set('highlighter.application', app.userData.model);
+    //this.set('highlighter.application', app.userData.model);
   },
 
 
@@ -211,7 +211,8 @@ export default Ember.Object.extend(Ember.Evented, {
           this.get('highlighter').unhighlightAll();
         }
 
-        this.trigger('redrawScene');
+
+        this.get('renderingService').redrawScene();
       } 
 
     }
@@ -248,14 +249,14 @@ export default Ember.Object.extend(Ember.Evented, {
         this.get('highlighter').highlight(emberModel);
       }
 
-      this.trigger('redrawScene');     
+      this.get('renderingService').redrawScene();     
 
     } 
     else {
       if(this.get('highlighter.highlightedEntity')) {
         // clicked in white space and entity is highlighted
         this.get('highlighter').unhighlightAll();
-        this.trigger('redrawScene');
+        this.get('renderingService').redrawScene();
       }
 
     }

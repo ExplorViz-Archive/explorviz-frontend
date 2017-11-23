@@ -78,7 +78,8 @@ export default RenderingCore.extend({
     }
 
     if (!this.get('interaction')) {
-      this.set('interaction', Interaction.create());
+      // owner necessary to inject service into util
+      this.set('interaction', Interaction.create(Ember.getOwner(this).ownerInjection()));
     }
 
     if (!this.get('centerAndZoomCalculator')) {
@@ -113,7 +114,7 @@ export default RenderingCore.extend({
     this.set('applicationID', null);    
     this.set('application3D', null);
 
-    this.get('interaction').off('redrawScene');
+    this.get('renderingService').off('redrawScene');
 
     // clean up landscapeRepo for visualization template
     this.set('landscapeRepo.latestApplication', null);
@@ -403,7 +404,7 @@ export default RenderingCore.extend({
 
     // set listeners
 
-    this.get('interaction').on('redrawScene', function() {
+    this.get('renderingService').on('redrawScene', function() {
       self.cleanAndUpdateScene();
     });
 

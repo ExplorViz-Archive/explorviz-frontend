@@ -49,6 +49,16 @@ export default DrawNodeEntity.extend({
     this.get('components').forEach((component) => {
       component.unhighlight();
     });
+  },
+
+  contains(emberEntity) {
+    let found = false;
+
+    this.get('components').forEach((component) => {
+      found = component.contains(emberEntity);
+    });
+
+    return found;
   }
 
 });
