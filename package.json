@@ -35,7 +35,9 @@
     "loader.js": "^4.6.0",
     "stats.js": "^0.17.0",
     "yuidoc-bootstrap-theme": "^1.0.6",
-    "yuidocjs": "^0.10.2"
+    "yuidocjs": "^0.10.2",
+    "explorviz-frontend-extension-discovery": "latest",
+    "explorviz-frontend-plugin-vr": "latest"
   },
   "engines": {
     "node": ">= 6.11.2"

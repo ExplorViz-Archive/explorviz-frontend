@@ -21,22 +21,37 @@ export default Component.extend({
 
   findElementByString(searchString) {
 
-    const possiblGlobalCandidates = this.get('store')
+    const possibleGlobalComponentCandidates = this.get('store')
       .peekAll('component')
       .filterBy('name', searchString);
 
+    const possibleGlobalClazzCandidates = this.get('store')
+      .peekAll('clazz')
+      .filterBy('name', searchString);
 
+    const possibleGlobalCandidates = possibleGlobalComponentCandidates
+      .concat(possibleGlobalClazzCandidates);
+
+    // Retrieve the specific element of the currently visible latestApp
     const latestApp = this.get('landscapeRepo.latestApplication');
 
-    const firstMatch = possiblGlobalCandidates.find((candidate) => {
+    const firstMatch = possibleGlobalCandidates.find((candidate) => {
       return latestApp.contains(candidate);
     });
 
-    if(firstMatch) {
-      this.get('highlighter').highlight(firstMatch);
-      this.get('renderingService').redrawScene();
+    if(!firstMatch) {
+      return;
     }
 
+    if(firstMatch.get('opened')) {
+      // close and highlight
+      firstMatch.setOpenedStatus(false);
+    } else {
+      // open all parents
+      firstMatch.openParents();
+    }
+    this.get('highlighter').highlight(firstMatch);
+    this.get('renderingService').redrawScene();
   }
 
 });

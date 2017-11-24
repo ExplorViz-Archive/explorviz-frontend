@@ -59,6 +59,18 @@ export default DrawNodeEntity.extend({
     });
 
     return found;
+  },
+
+  filterComponents(attributeString, predicateValue) {
+    const filteredComponents = [];
+
+    this.get('components').forEach((component) => {
+      if(component.get(attributeString) === predicateValue) {
+        filteredComponents.push(component);
+      }
+    });
+
+    return filteredComponents;
   }
 
 });

@@ -22,6 +22,15 @@ export default Draw3DNodeEntity.extend({
 
   unhighlight() {
     this.set('highlighted', false);
+  },
+
+  openParents() {
+    let parentModel = this.belongsTo('parent').value();
+
+    if(parentModel !== null) {
+      parentModel.set('opened', true);
+      parentModel.openParents();
+    }
   }
 
 });

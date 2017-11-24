@@ -33,7 +33,7 @@ export default Draw3DNodeEntity.extend({
 
   opened: attr('boolean'),
 
-  setOpenedStatus: function(status) {
+  setOpenedStatus(status) {
 
     this.get('children').forEach((child) => {
       child.set('highlighted', false);
@@ -80,6 +80,27 @@ export default Draw3DNodeEntity.extend({
 
     return found;
 
+  },
+
+  openParents: function() {
+    let parentModel = this.belongsTo('parentComponent').value();
+
+    if(parentModel !== null) {
+      parentModel.set('opened', true);
+      parentModel.openParents();
+    }
+  },
+
+  filterChildComponents(attributeString, predicateValue) {
+    const filteredComponents = [];
+
+    this.get('children').forEach((component) => {
+      if(component.get(attributeString) === predicateValue) {
+        filteredComponents.push(component);
+      }
+    });
+
+    return filteredComponents;
   }
 
 });
