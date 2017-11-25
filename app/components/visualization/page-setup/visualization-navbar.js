@@ -39,9 +39,12 @@ export default Component.extend({
       return latestApp.contains(candidate);
     });
 
-    if(!firstMatch) {
+    if(!firstMatch || 
+      this.get('highlighter.highlightedEntity') === firstMatch) {
       return;
     }
+
+
 
     if(firstMatch.get('opened')) {
       // close and highlight
