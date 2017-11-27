@@ -42,7 +42,6 @@ export default Service.extend(Evented, {
       if(appID) {
         const app = self.get('store').peekRecord('application', appID);
         self.set('landscapeRepo.latestApplication', app);
-        console.log("application", app);
       }
 
       self.debug("end import landscape-request");
