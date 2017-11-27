@@ -297,6 +297,7 @@ export default Component.extend(Evented, THREEPerformance, {
   applyLandscapeCondition(landscape){
 
     const self = this;
+
     const systems = landscape.get('systems');
 
     systems.forEach(function(system) {
@@ -342,6 +343,7 @@ export default Component.extend(Evented, THREEPerformance, {
   applyAppCondition(application){
 
     const self = this;
+
     if(application){
       let components = null;
       if(self.get('initImport')){
@@ -415,29 +417,42 @@ export default Component.extend(Evented, THREEPerformance, {
     // load actual landscape
     const timestamp = this.get('newState').timestamp;
     const appID = this.get('newState').appID;
-  
+      
+    this.get('reloadHandler').stopExchange();
+
     if(timestamp) {
-      loadLandscape();
+      self.get('reloadHandler').loadLandscapeById(timestamp, appID);
+      waitForLandscape();
     }
+
     self.set('initImport',true);
 
-    // Callback to wait until landscape is loaded
-    function caller(callbackFunction){
-      self.get('reloadHandler').loadLandscapeById(timestamp, appID);
-      // Do callback stuff after landscape is loaded
-      callbackFunction();    
-    }
-
-    // Pass callback function
-    function loadLandscape(){
-      caller(function() {
-        if(appID){
-          self.applyAppCondition(self.get('landscapeRepo.latestApplication'));
-        } 
-        else{
-          self.applyLandscapeCondition(self.get('landscapeRepo.latestLandscape'));
-        }
-      });    
+    function waitForLandscape() {
+      // New Promise
+      var promise = new Ember.RSVP.Promise(
+        function(resolve) {       
+          window.setTimeout(
+            function() {
+              // Wait until landscape is loaded
+              if(self.get('landscapeRepo.latestLandscape') === null){
+                waitForLandscape();
+              }
+              // Fulfill promise
+              else if(self.get('landscapeRepo.latestLandscape')){
+                resolve();
+              }
+            }, 500);
+        });
+      // Promise fulfilled => apply condition
+      promise.then(
+        function() {
+          if(appID){
+            self.applyAppCondition(self.get('landscapeRepo.latestApplication'));
+          } 
+          else{
+            self.applyLandscapeCondition(self.get('landscapeRepo.latestLandscape'));
+          }
+        });
     }
   },
 

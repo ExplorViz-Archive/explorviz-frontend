@@ -42,18 +42,21 @@ export default Service.extend(Evented, {
       if(appID) {
         const app = self.get('store').peekRecord('application', appID);
         self.set('landscapeRepo.latestApplication', app);
+        console.log("application", app);
       }
 
       self.debug("end import landscape-request");
     }
   
     function failure(e){
+      self.set('landscapeRepo.latestLandscape', undefined);
       self.showAlertifyMessage("Landscape couldn't be requested!" +
         " Backend offline?");
       self.debug("Landscape couldn't be requested!", e);
     }    
     
     function error(e){
+      self.set('landscapeRepo.latestLandscape', undefined);
       self.debug("Error when fetching landscape: ", e);
     }
 
