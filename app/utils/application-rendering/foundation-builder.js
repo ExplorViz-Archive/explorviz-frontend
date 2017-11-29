@@ -32,11 +32,7 @@ export function removeFoundation(emberApplication, store) {
 
   if(foundation.get('foundation')) {
     emberApplication.set('components', foundation.get('children'));
-
-    emberApplication.get('components').forEach((component) => {
-      component.set('parentComponent', null);
-    });
-
+    emberApplication.get('components').objectAt(0).set('parentComponent', null);
     store.unloadRecord(foundation);
   }
   return true;

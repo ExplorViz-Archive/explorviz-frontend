@@ -27,9 +27,11 @@ export default Draw3DNodeEntity.extend({
     inverse: 'children'
   }),
 
-  belongingApplication: belongsTo('application', {
+  // breaks Ember, maybe because of circle ?
+  
+  /*belongingApplication: belongsTo('application', {
     inverse: 'components'
-  }),
+  }),*/
 
   opened: attr('boolean'),
 

@@ -25,7 +25,9 @@ export default DrawNodeEntity.extend({
   }),
 
   components: hasMany('component', {
-    inverse: 'belongingApplication'
+    // breaks Ember, maybe because of circle ?
+    
+    //inverse: 'belongingApplication'
   }),
 
   communications: hasMany('communicationclazz'),
