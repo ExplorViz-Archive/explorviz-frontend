@@ -4,7 +4,7 @@ export function createFoundation(emberApplication, store) {
     id: idTest,
     synthetic: false,
     foundation: true,
-    children: [emberApplication.get('components').objectAt(0)],
+    children: emberApplication.get('components'),
     clazzes: [],
     belongingApplication: emberApplication,
     opened: true,
@@ -18,7 +18,10 @@ export function createFoundation(emberApplication, store) {
     depth: 0
   });
 
-  emberApplication.get('components').objectAt(0).set('parentComponent', foundation);
+  emberApplication.get('components').forEach((component) => {
+    component.set('parentComponent', foundation);
+  });
+
   emberApplication.set('components', [foundation]);
 
   return foundation;
@@ -29,7 +32,11 @@ export function removeFoundation(emberApplication, store) {
 
   if(foundation.get('foundation')) {
     emberApplication.set('components', foundation.get('children'));
-    emberApplication.get('components').objectAt(0).set('parentComponent', null);
+
+    emberApplication.get('components').forEach((component) => {
+      component.set('parentComponent', null);
+    });
+
     store.unloadRecord(foundation);
   }
   return true;
