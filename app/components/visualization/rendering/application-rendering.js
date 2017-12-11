@@ -200,7 +200,7 @@ export default RenderingCore.extend({
       emberApplication.get('communicationsAccumulated');
 
     accuCommunications.forEach((commu) => {
-      if (commu.source !== commu.target) {
+      if (commu.source.content !== commu.target.content) {
         if (commu.startPoint && commu.endPoint) {
 
           const start = new THREE.Vector3();
