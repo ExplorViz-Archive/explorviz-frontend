@@ -1,6 +1,6 @@
 import DS from 'ember-data';
 
-const {Model} = DS;
+const {Model, attr} = DS;
 
 /**
 * Ember model for a BaseEntity. Every element of ExplorViz's Meta-Model should 
@@ -13,4 +13,8 @@ const {Model} = DS;
 * @module explorviz
 * @submodule model.util
 */
-export default Model.extend({});
+export default Model.extend({
+
+  timestamp: attr("number")
+
+});
