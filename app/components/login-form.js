@@ -1,6 +1,5 @@
-import Ember from 'ember';
-
-const {Component, inject} = Ember;
+import { inject as service } from "@ember/service";
+import Component from '@ember/component';
 
 /**
 * TODO
@@ -13,8 +12,9 @@ const {Component, inject} = Ember;
 */
 export default Component.extend({
 
-  session: inject.service('session'),
-  router: inject.service('-routing'),
+  session: service('session'),
+  router: service('-routing'),
+  store: service(),
 
   actions: {
 
@@ -24,6 +24,8 @@ export default Component.extend({
      * @method authenticate
      */
     authenticate() {
+
+      const self = this;
 
       const { identification, password } = 
         this.getProperties('identification', 'password');
@@ -40,22 +42,37 @@ export default Component.extend({
         return;
       }
 
-      // try to authenticate (see authenticator.js)
-      this.get('session')
-        .authenticate('authenticator:authenticator', identification, password)
-        .catch((reason) => {
+      // retrieve empty user record from backend with valid id
+      this.get('store').queryRecord('user', {
+        username: identification
+      }).then(success, failure);
 
-          // Fallback message
-          let errorMessage = "No connection to Backend";
+      function success(userRecord) {
+        userRecord.set('username', identification);
+        userRecord.set('password', password);
+        self.get('session').authenticate('authenticator:authenticator', userRecord).then(undefined, failure);
+      }
 
-          // Message from backend
-          if (reason && reason.status) {
-            errorMessage = `${reason.status}: ${reason.statusText} / 
-              ${reason.responseText}`;
-          }
+      function failure(reason) {
 
-          this.set('session.session.messages.errorMessage', errorMessage);
-        });
+        self.debug(reason);
+
+        const backendResponse = reason.errors[0];        
+
+        let errorMessage = "No connection to backend";
+
+        if (backendResponse && backendResponse.status && backendResponse.title &&
+          backendResponse.detail) {
+
+          errorMessage = `${backendResponse.status}: ${backendResponse.title} / 
+            ${backendResponse.detail}`;
+
+        }
+
+        self.set('session.session.messages.errorMessage', errorMessage);
+
+      }
+
     }
 
   },

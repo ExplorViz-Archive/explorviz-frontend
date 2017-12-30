@@ -1,10 +1,7 @@
-import Ember from 'ember';
-
+import { inject as service } from "@ember/service";
+import { isEmpty } from 'ember-utils';
+import RSVP, { resolve, reject } from 'rsvp';
 import Base from 'ember-simple-auth/authenticators/base';
-import ENV from 'explorviz-ui-frontend/config/environment';
-
-const {inject, RSVP, $, isEmpty, run} = Ember;
-const {APP} = ENV;
 
 /**
 * This Authenticator sends a single AJAX request with data fields "username" 
@@ -24,9 +21,8 @@ const {APP} = ENV;
 */
 export default Base.extend({
 
-  session: inject.service(),
-
-  tokenEndpoint: APP.API_ROOT,
+  session: service(),
+  store: service(),
 
   // @Override
   /**
@@ -51,28 +47,26 @@ export default Base.extend({
    *
    * @method authenticate
    */
-  authenticate(identification, password) {
+  authenticate(user) {
     this.set('session.session.messages', {});
-    return new RSVP.Promise((resolve, reject) => {
-        $.ajax({
-            url: this.tokenEndpoint + '/sessions/create',
-            type: 'POST',
-            data: "username=" + identification + "&password=" + password,
-            accept: "application/json"
-        }).then(function(response) {
-            run(function() {              
-              resolve({
-                  access_token: response.token,
-                  username: response.username
-              });
-            });
-        }, function(xhr) {
-            let httpResponse = xhr;
-            run(function() {
-                reject(httpResponse);
-            });
-        });
-    });
+
+    return user.save({
+      adapterOptions: {
+        pathExtension: 'authenticate'
+      }
+    }).then(fulfill, failure);
+
+    function fulfill(userRecord) {
+      return resolve({
+        access_token: userRecord.get('token'),
+        username: userRecord.get('username')
+      });
+    }
+
+    function failure(reason) {
+      return reject(reason);
+    }
+
   },
 
 

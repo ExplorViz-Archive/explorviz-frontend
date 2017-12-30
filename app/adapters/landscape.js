@@ -26,7 +26,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
   namespace: "landscape",
 
   headers: {
-    "Accept": "application/json"
+    "Accept": "application/vnd.api+json"
   },
 
   //@Override
