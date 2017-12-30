@@ -108,7 +108,7 @@ export default RenderingCore.extend({
     this.debug("cleanup application rendering");
 
     // remove foundation for re-rendering
-    const emberApplication = this.get('application3D.userData.model');
+    const emberApplication = this.get('landscapeRepo.latestApplication');
     removeFoundation(emberApplication, this.get('store'));
 
     this.set('applicationID', null);    
@@ -344,7 +344,7 @@ export default RenderingCore.extend({
         component.get('width') / 2.0, component.get('positionY') + 
         component.get('height') / 2.0,
         component.get('positionZ') + component.get('depth') / 2.0);
-
+      
       const material = new THREE.MeshLambertMaterial();
       material.color = new THREE.Color(color);
 

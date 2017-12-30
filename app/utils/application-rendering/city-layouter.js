@@ -84,7 +84,7 @@ export default function applyCityLayout(application) {
 
       const categories = getCategories(instanceCountList, false);
 
-      clazzes.forEach((clazz) => {      
+      clazzes.forEach((clazz) => {
         clazz.set('height', (clazzSizeEachStep * categories[clazz.get('instanceCount')] + clazzSizeDefault) * 4.0);
       });
     }
@@ -109,7 +109,7 @@ export default function applyCityLayout(application) {
         });
 
         if (listWithout0.length === 0) {
-          result.push({0: 0.0});
+          result.push(0.0);
           return result;
         }        
         useLinear(listWithout0, list, result);
@@ -129,8 +129,8 @@ export default function applyCityLayout(application) {
         });
 
         if (listWithout0And1.length === 0) {
-          result.push({0: 0.0});
-          result.push({1: 1.0});
+          result.push(0.0);
+          result.push(1.0);
           return result;
         }
 

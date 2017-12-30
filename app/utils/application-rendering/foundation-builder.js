@@ -1,4 +1,5 @@
 export function createFoundation(emberApplication, store) {
+
   const idTest = parseInt(Math.random() * (20000 - 10000) + 10000);
   const foundation = store.createRecord('component', {
     id: idTest,
@@ -28,12 +29,24 @@ export function createFoundation(emberApplication, store) {
 }
 
 export function removeFoundation(emberApplication, store) {
-  const foundation = emberApplication.get('components').objectAt(0);
 
-  if(foundation.get('foundation')) {
+  const foundation = emberApplication.get('components').toArray().find((component) => {
+    return component.get('foundation');
+  });
+
+  if(foundation) {
+
     emberApplication.set('components', foundation.get('children'));
-    emberApplication.get('components').objectAt(0).set('parentComponent', null);
+    emberApplication.get('components').forEach((component) => {
+      component.set('parentComponent', null);
+    });
+    
     store.unloadRecord(foundation);
+    return true;
   }
-  return true;
+
+  return false;
+  
+ 
+
 }
