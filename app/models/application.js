@@ -42,7 +42,7 @@ export default DrawNodeEntity.extend({
     inverse: 'source'
   }),
   
-  //databaseQueries: hasMany('databasequery')
+  databaseQueries: hasMany('databasequery'),
 
   // used for text labeling performance in respective renderers
   state: "application",

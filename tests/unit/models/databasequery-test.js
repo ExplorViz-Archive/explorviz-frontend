@@ -1,8 +1,8 @@
 import { moduleForModel, test } from 'ember-qunit';
 
-moduleForModel('application', 'Unit | Model | application', {
+moduleForModel('databasequery', 'Unit | Model | databasequery', {
   // Specify the other units that are required for this test.
-  needs: ['model:node', 'model:component', 'model:communicationclazz', 'model:communication', 'model:databasequery']
+  needs: []
 });
 
 test('it exists', function(assert) {

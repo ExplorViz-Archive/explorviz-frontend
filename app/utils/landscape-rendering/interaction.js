@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import THREE from "npm:three";
 import HammerInteraction from '../hammer-interaction';
-import HoverHandler from './hover-handler';
+import PopUpHandler from './popup-handler';
 import AlertifyHandler from 'explorviz-ui-frontend/mixins/alertify-handler';
 import Raycaster from '../raycaster';
 
@@ -14,7 +14,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
   raycastObjects: null,
 
   hammerHandler: null,
-  hoverHandler: null,
+  popUpHandler: null,
 
   setupInteraction(canvas, camera, renderer, raycastObjects) {
     this.set('canvas', canvas);
@@ -55,13 +55,13 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
       this.set('raycaster', Raycaster.create());
     }
 
-    // init HoverHandler
-    if (!this.get('hoverHandler')) {
-      this.set('hoverHandler', HoverHandler.create());
+    // init PopUpHandler
+    if (!this.get('popUpHandler')) {
+      this.set('popUpHandler', PopUpHandler.create());
     }
 
-    // hover handler
-    self.registerHoverHandler();
+    // PopUpHandler
+    self.registerPopUpHandler();
 
     this.setupHammerListener();
     
@@ -70,7 +70,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
   onMouseWheelStart(evt) {
 
     // Hide (old) tooltip
-    this.get('hoverHandler').hideTooltip();
+    this.get('popUpHandler').hideTooltip();
 
     const delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
 
@@ -97,13 +97,13 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
 
   onMouseOut() {
-    this.set('hoverHandler.enableTooltips', false);
-    this.get('hoverHandler').hideTooltip();
+    this.set('popUpHandler.enableTooltips', false);
+    this.get('popUpHandler').hideTooltip();
   },
 
 
   onMouseEnter() {
-    this.set('hoverHandler.enableTooltips', true);
+    this.set('popUpHandler.enableTooltips', true);
   },
 
 
@@ -120,12 +120,12 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
     });
 
     this.get('hammerHandler').on('panningEnd', function(mouse) {
-      self.handleHover(mouse);
+      self.handlePopUp(mouse);
     });
 
   },
 
-  registerHoverHandler() {
+  registerPopUpHandler() {
 
     const self = this;
 
@@ -147,15 +147,15 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
             }, delay);
             
             // When moving, hide (old) tooltip
-            self.get('hoverHandler').hideTooltip();
+            self.get('popUpHandler').hideTooltip();
         });
     })(300);
 
     
-    this.get('canvas').addEventListener('mousestop', registerHoverHandler, false);
+    this.get('canvas').addEventListener('mousestop', registerPopUpHandler, false);
 
-    function registerHoverHandler(evt) {
-      self.handleHover(evt);
+    function registerPopUpHandler(evt) {
+      self.handlePopUp(evt);
     }
   },
 
@@ -163,7 +163,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
   removeHandlers() {
     this.get('hammerHandler.hammerManager').off();
     this.get('canvas').removeEventListener('mousewheel', this.onMouseWheelStart);
-    this.get('canvas').removeEventListener('mousestop', this.handleHover);
+    this.get('canvas').removeEventListener('mousestop', this.handlePopUp);
     this.get('canvas').removeEventListener('mouseenter', this.onMouseEnter);
     this.get('canvas').removeEventListener('mouseout', this.onMouseOut);
   },
@@ -185,7 +185,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
     if(intersectedViewObj) {
 
       // hide tooltip
-      this.get('hoverHandler').hideTooltip();
+      this.get('popUpHandler').hideTooltip();
 
       const emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
@@ -242,7 +242,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
   },
 
 
-  handleHover(evt) {
+  handlePopUp(evt) {
 
     const mouse = {
       x: evt.detail.clientX,
@@ -264,7 +264,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
       const emberModel = intersectedViewObj.object.userData.model;
 
-      this.get('hoverHandler').showTooltip(mouse, emberModel);
+      this.get('popUpHandler').showTooltip(mouse, emberModel);
 
     }
 

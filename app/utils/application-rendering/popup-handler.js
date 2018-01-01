@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import { encodeStringForPopUp } from '../helpers/string-helpers';
 
 export default Ember.Object.extend(Ember.Evented, {
 
@@ -69,7 +70,7 @@ export default Ember.Object.extend(Ember.Evented, {
 
       let content = {title: '', html: ''};
 
-      content.title = component.get('name');
+      content.title = encodeStringForPopUp(component.get('name'));
 
       const clazzesCount = getClazzesCount(component);
       const packageCount = getPackagesCount(component);

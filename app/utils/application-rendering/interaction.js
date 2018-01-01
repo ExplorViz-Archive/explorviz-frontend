@@ -3,7 +3,7 @@ import Evented from '@ember/object/evented';
 import { inject as service } from "@ember/service";
 
 import HammerInteraction from '../hammer-interaction';
-import PopUpHandler from './hover-handler';
+import PopUpHandler from './popup-handler';
 import Raycaster from '../raycaster';
 import Highlighter from './highlighter';
 

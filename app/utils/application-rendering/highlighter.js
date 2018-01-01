@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import { calculateColorBrightness } from '../helpers/threejs-helpers';
 
 export default Ember.Object.extend({
 
@@ -59,7 +60,7 @@ export default Ember.Object.extend({
       color: new THREE.Color().copy(oldColor)
     });
 
-    newHoverEntity.material.color = this.calculateLighterColor(oldColor);
+    newHoverEntity.material.color = calculateColorBrightness(oldColor, 1.1);
     
   },
 
@@ -107,20 +108,7 @@ export default Ember.Object.extend({
       });
 
     }
-  },
-
-
-  /*
-   *  The method is used to calculate a 35 percent 
-   *  lighter threeJS color
-   */
-  calculateLighterColor(threeColor){
-
-    const r = Math.floor(threeColor.r * 1.12 * 255);
-    const g = Math.floor(threeColor.g * 1.12 * 255);
-    const b = Math.floor(threeColor.b * 1.12 * 255);
-
-    return new THREE.Color("rgb("+r+", "+g+", "+b+")");
   }
+  
 
 });

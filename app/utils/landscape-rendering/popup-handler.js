@@ -1,4 +1,5 @@
 import Ember from 'ember';
+import { encodeStringForPopUp } from '../helpers/string-helpers';
 
 export default Ember.Object.extend(Ember.Evented, {
 
@@ -83,7 +84,7 @@ export default Ember.Object.extend(Ember.Evented, {
 
       let content = {title: '', html: ''};
 
-      content.title = application.get('name');
+      content.title = encodeStringForPopUp(application.get('name'));
 
       const year = new Date(application.get('lastUsage')).toLocaleString();
 
@@ -111,7 +112,7 @@ export default Ember.Object.extend(Ember.Evented, {
 
       let content = {title: '', html: ''};
 
-      content.title = system.get('name');
+      content.title = encodeStringForPopUp(system.get('name'));
 
       var nodesCount = 0;
       var applicationCount = 0;
@@ -188,7 +189,7 @@ export default Ember.Object.extend(Ember.Evented, {
 
       let content = {title: '', html: ''};
 
-      content.title = nodeGroup.get('name');
+      content.title = encodeStringForPopUp(nodeGroup.get('name'));
 
       var avgNodeCPUUtil = 0.0;
       var applicationCount = 0;
@@ -236,7 +237,7 @@ export default Ember.Object.extend(Ember.Evented, {
 
       let content = {title: '', html: ''};
 
-      content.title = communication.get('source').get('name') + 
+      content.title = encodeStringForPopUp(communication.get('source').get('name')) + 
         "&nbsp;<span class='glyphicon glyphicon-transfer'></span>&nbsp;";
 
       content.html = 
