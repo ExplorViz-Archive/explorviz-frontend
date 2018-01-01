@@ -5,6 +5,7 @@ import { inject as service } from "@ember/service";
 import HammerInteraction from '../hammer-interaction';
 import PopUpHandler from './hover-handler';
 import Raycaster from '../raycaster';
+import Highlighter from './highlighter';
 
 export default EmberObject.extend(Evented, {
 
@@ -16,7 +17,8 @@ export default EmberObject.extend(Evented, {
   hammerHandler: null,
   popUpHandler: null,
 
-  highlighter: service('visualization/application/highlighter'),
+  //highlighter: service('visualization/application/highlighter'),
+  highlighter: null,
   renderingService: service(),
 
 
@@ -53,6 +55,13 @@ export default EmberObject.extend(Evented, {
       self.onMouseWheelStart(evt);
     }
 
+    // hover handler    
+    canvas.addEventListener('mousemove', registerMouseMove, false);
+
+    function registerMouseMove(evt) {
+      self.onMouseMove(evt);
+    }
+
     // init Hammer
     if (!this.get('hammerHandler')) {
       this.set('hammerHandler', HammerInteraction.create());
@@ -69,9 +78,37 @@ export default EmberObject.extend(Evented, {
       this.set('popUpHandler', PopUpHandler.create());
     }
 
+    // init Highlighter
+    if (!this.get('highlighter')) {
+      this.set('highlighter', Highlighter.create());
+    }
+
     self.registerPopUpHandler();
 
     this.setupHammerListener();
+
+  },
+
+
+  onMouseMove(evt) {
+
+    const rect = this.get('canvas').getBoundingClientRect();
+
+    const mouse = {
+      x: evt.clientX - rect.left, 
+      y: evt.clientY - rect.top
+    };
+
+    const origin = {};
+
+    origin.x = (mouse.x / this.get('renderer').domElement.clientWidth) * 2 - 1;
+
+    origin.y = -(mouse.y / this.get('renderer').domElement.clientHeight) * 2 + 1;
+
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+      this.get('camera'), this.get('raycastObjects'));
+
+    this.get('highlighter').handleHoverEffect(intersectedViewObj);    
 
   },
 
@@ -161,7 +198,7 @@ export default EmberObject.extend(Evented, {
 
   updateEntities(app) {
     this.set('rotationObject', app);
-    //this.set('highlighter.application', app.userData.model);
+    this.set('highlighter.application', app.userData.model);
   },
 
 
@@ -248,7 +285,7 @@ export default EmberObject.extend(Evented, {
         this.get('highlighter').highlight(emberModel);
       }
 
-      this.get('renderingService').redrawScene();     
+      this.get('renderingService').redrawScene();
 
     } 
     else {

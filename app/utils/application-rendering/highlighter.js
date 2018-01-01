@@ -4,6 +4,7 @@ export default Ember.Object.extend({
 
   highlightedEntity: null,
   application: null,
+  hoveredEntityColorObj: null,
 
   highlight(entity) {
 
@@ -18,6 +19,48 @@ export default Ember.Object.extend({
       this.unhighlightAll();
     }
 
+  },
+
+
+  resetHoverEffect() {
+    if(this.get('hoveredEntityColorObj')) {
+
+      this.get('hoveredEntityColorObj').entity.material.color = 
+        this.get('hoveredEntityColorObj').color;
+
+      this.set('hoveredEntityColorObj', null);
+
+    }
+  },
+
+
+  handleHoverEffect(raycastTarget) {
+
+    // no raycastTarget, do nothing and return
+    if(!raycastTarget) {
+      this.resetHoverEffect();
+        return;
+    }
+
+    const newHoverEntity = raycastTarget.object;
+
+    // same object, do nothing and return
+    if(this.get('hoveredEntityColorObj') && 
+      this.get('hoveredEntityColorObj').entity === newHoverEntity) {
+        return;
+    }
+
+    this.resetHoverEffect();
+
+    const oldColor = newHoverEntity.material.color;
+
+    this.set('hoveredEntityColorObj', {
+      entity: newHoverEntity,
+      color: new THREE.Color().copy(oldColor)
+    });
+
+    newHoverEntity.material.color = this.calculateLighterColor(oldColor);
+    
   },
 
 
@@ -64,6 +107,20 @@ export default Ember.Object.extend({
       });
 
     }
+  },
+
+
+  /*
+   *  The method is used to calculate a 35 percent 
+   *  lighter threeJS color
+   */
+  calculateLighterColor(threeColor){
+
+    const r = Math.floor(threeColor.r * 1.12 * 255);
+    const g = Math.floor(threeColor.g * 1.12 * 255);
+    const b = Math.floor(threeColor.b * 1.12 * 255);
+
+    return new THREE.Color("rgb("+r+", "+g+", "+b+")");
   }
 
 });

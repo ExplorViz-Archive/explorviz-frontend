@@ -13,6 +13,7 @@ export default Ember.Object.extend(Ember.Evented, {
       return;
     }
 
+    // Bootstrap Popover
     Ember.$('#vizContainer').popover(
       {
         title: '<div style="font-weight:bold;text-align:center;">' + 

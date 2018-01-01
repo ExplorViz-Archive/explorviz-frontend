@@ -40,12 +40,19 @@ export default Service.extend({
     textchanged: false
   },
   
-     applicationColors: {
-    0xCECECE: "rgb(199,199,199)",
-    0x00BB41: "rgb(0,187,65)",
-    0x169E2B: "rgb(22,158,43)",
-       clazz: "rgb(62,20,160)",
-    0xFF0000: "rgb(255,0,0)",
+
+  /**
+  * Default colors for application visualization
+  *
+  * @property applicationColors
+  * @type Object
+  */
+  applicationColors: {
+    foundation: "rgb(199,199,199)",
+    componentOdd: "rgb(0,187,65)",
+    componentEven: "rgb(22,158,43)",
+    clazz: "rgb(62,20,160)",
+    highlightedEntity: "rgb(255,0,0)",
   }
 
 });
