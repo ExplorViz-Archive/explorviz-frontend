@@ -38,11 +38,21 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
       self.onMouseEnter(evt);
     }
 
-    // zoom handler    
+    // zoom handler (chrome)
     canvas.addEventListener('mousewheel', registerMouseWheel, false);
+
+    // zoom handler (firefox)
+    canvas.addEventListener('DOMMouseScroll', registerMouseWheel, false);    
 
     function registerMouseWheel(evt) {
       self.onMouseWheelStart(evt);
+    }
+
+    // register PopUpHandler
+    this.get('canvas').addEventListener('mousestop', registerPopUpHandler, false);
+
+    function registerPopUpHandler(evt) {
+      self.handlePopUp(evt);
     }
 
     // init Hammer
@@ -72,7 +82,9 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
     // Hide (old) tooltip
     this.get('popUpHandler').hideTooltip();
 
-    const delta = Math.max(-1, Math.min(1, (evt.wheelDelta || -evt.detail)));
+    const wheelDelta = evt.wheelDelta ? evt.wheelDelta : -evt.detail;
+
+    const delta = Math.max(-1, Math.min(1, wheelDelta));
 
     const mX = (evt.clientX / window.innerWidth ) * 2 - 1;
     const mY = - (evt.clientY / window.innerHeight ) * 2 + 1;
@@ -149,20 +161,15 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
             // When moving, hide (old) tooltip
             self.get('popUpHandler').hideTooltip();
         });
-    })(300);
-
+    })(300);   
     
-    this.get('canvas').addEventListener('mousestop', registerPopUpHandler, false);
-
-    function registerPopUpHandler(evt) {
-      self.handlePopUp(evt);
-    }
   },
 
 
   removeHandlers() {
     this.get('hammerHandler.hammerManager').off();
     this.get('canvas').removeEventListener('mousewheel', this.onMouseWheelStart);
+    this.get('canvas').removeEventListener('DOMMouseScroll', this.onMouseWheelStart);
     this.get('canvas').removeEventListener('mousestop', this.handlePopUp);
     this.get('canvas').removeEventListener('mouseenter', this.onMouseEnter);
     this.get('canvas').removeEventListener('mouseout', this.onMouseOut);

@@ -139,7 +139,7 @@ export default Ember.Object.extend(Ember.Evented, {
               this.button = ev.button;
           }
 
-          var isTouch = (pointerType === Hammer.INPUT_TYPE_TOUCH);
+          //var isTouch = (pointerType === Hammer.INPUT_TYPE_TOUCH);
 
           function isCorrectPointerId(element) {
             return element.pointerId === ev.pointerId;
@@ -149,7 +149,7 @@ export default Ember.Object.extend(Ember.Evented, {
           var storeIndex = store.findIndex(isCorrectPointerId);
 
           // start and mouse must be down
-          if (eventType & Hammer.INPUT_START && (ev.button === 0 || ev.button === 1 || ev.button === 2 || isTouch)) {
+          if (eventType & Hammer.INPUT_START && (ev.button === 0 || ev.button === 1 || ev.button === 2)) {
               if (storeIndex < 0) {
                   store.push(ev);
                   storeIndex = store.length - 1;
