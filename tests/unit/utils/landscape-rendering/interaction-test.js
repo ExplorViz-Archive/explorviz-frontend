@@ -1,4 +1,4 @@
-//import landscapeRenderingInteraction from 'explorviz-ui-frontend/utils/landscape-rendering/interaction';
+//import landscapeRenderingInteraction from 'explorviz-frontend/utils/landscape-rendering/interaction';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | landscape rendering/interaction');

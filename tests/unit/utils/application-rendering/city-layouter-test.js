@@ -1,4 +1,4 @@
-//import applicationRenderingCityLayouter from 'explorviz-ui-frontend/utils/application-rendering/city-layouter';
+//import applicationRenderingCityLayouter from 'explorviz-frontend/utils/application-rendering/city-layouter';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | application rendering/city layouter');

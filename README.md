@@ -1,14 +1,14 @@
-# Explorviz UI Frontend
-<a href="https://travis-ci.org/ExplorViz/explorviz-ui-frontend"><img src="https://travis-ci.org/ExplorViz/explorviz-ui-frontend.svg?branch=master" alt="Build Status"></a>
-<a href="https://david-dm.org/ExplorViz/explorviz-ui-frontend"><img src="https://david-dm.org/ExplorViz/explorviz-ui-frontend.svg?branch=master" alt="Dependency Status"></a>
-<a href="https://david-dm.org/ExplorViz/explorviz-ui-frontend?type=dev"><img src="https://david-dm.org/ExplorViz/explorviz-ui-frontend/dev-status.svg" alt="devDependencies status"></a>
+# Explorviz Frontend
+<a href="https://travis-ci.org/ExplorViz/explorviz-frontend"><img src="https://travis-ci.org/ExplorViz/explorviz-frontend.svg?branch=master" alt="Build Status"></a>
+<a href="https://david-dm.org/ExplorViz/explorviz-frontend"><img src="https://david-dm.org/ExplorViz/explorviz-frontend.svg?branch=master" alt="Dependency Status"></a>
+<a href="https://david-dm.org/ExplorViz/explorviz-frontend?type=dev"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/dev-status.svg" alt="devDependencies status"></a>
 [![](https://img.shields.io/docker/pulls/explorviz/explorviz-docker.svg)](https://hub.docker.com/r/explorviz/explorviz-docker "Click to view the image on Docker Hub")
 
-This project is a WIP replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) client-code with [EmberJS](https://www.emberjs.com/). This is only the frontend, you will need the [backend](https://github.com/ExplorViz/explorviz-ui-backend) as well.
+This project is a WIP replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) client-code with [EmberJS](https://www.emberjs.com/). This is only the frontend, you will need the [backend](https://github.com/ExplorViz/explorviz-backend) as well.
 
 ## Documentation (WIP)
 
-* The API documentation is available at https://explorviz.github.io/explorviz-ui-frontend/
+* The API documentation is available at https://explorviz.github.io/explorviz-frontend/
 
 ## Deployment
 There are two options for you at the moment. Browse to our [docker repository](https://github.com/ExplorViz/explorviz-docker). 
@@ -27,7 +27,7 @@ You will need the following things properly installed on your computer.
 ### Installation (Generic)
 
 * `git clone <repository-url>` this repository
-* `cd explorviz-ui-frontend`
+* `cd explorviz-frontend`
 * `npm install -g ember-cli`
 * `npm install`
 

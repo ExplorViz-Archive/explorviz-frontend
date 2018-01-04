@@ -1,5 +1,5 @@
 /*import Ember from 'ember';
-import { initialize } from 'explorviz-ui-frontend/instance-initializers/environment-updater';
+import { initialize } from 'explorviz-frontend/instance-initializers/environment-updater';
 import { module, test } from 'qunit';
 import destroyApp from '../../helpers/destroy-app';
 
