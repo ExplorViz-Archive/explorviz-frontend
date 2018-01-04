@@ -11,7 +11,7 @@ import Labeler from
  'explorviz-ui-frontend/utils/application-rendering/labeler';
 import CalcCenterAndZoom from
  'explorviz-ui-frontend/utils/application-rendering/center-and-zoom-calculator';
-import {createFoundation, removeFoundation} from 
+import FoundationBuilder from 
  'explorviz-ui-frontend/utils/application-rendering/foundation-builder';
 
 const {inject} = Ember;
@@ -42,6 +42,7 @@ export default RenderingCore.extend({
 
   interaction: null,
   centerAndZoomCalculator: null,
+  foundationBuilder: null,
 
   // @Override  
   initRendering() {
@@ -77,6 +78,10 @@ export default RenderingCore.extend({
       this.set('labeler', Labeler.create());
     }
 
+    if (!this.get('foundationBuilder')) {
+      this.set('foundationBuilder', FoundationBuilder.create());
+    }       
+
     if (!this.get('interaction')) {
       // owner necessary to inject service into util
       this.set('interaction', Interaction.create(Ember.getOwner(this).ownerInjection()));
@@ -108,8 +113,7 @@ export default RenderingCore.extend({
     this.debug("cleanup application rendering");
 
     // remove foundation for re-rendering
-    const emberApplication = this.get('landscapeRepo.latestApplication');
-    removeFoundation(emberApplication, this.get('store'));
+    this.get('foundationBuilder').removeFoundation(this.get('store'));
 
     this.set('applicationID', null);    
     this.set('application3D', null);
@@ -136,8 +140,7 @@ export default RenderingCore.extend({
     this.set('oldRotation', this.get('application3D').rotation);
 
     // remove foundation for re-rendering
-    removeFoundation(this.get('landscapeRepo.latestApplication'), 
-      this.get('store'));
+    this.get('foundationBuilder').removeFoundation(this.get('store'));
 
     this._super(...arguments);
   },
@@ -176,7 +179,7 @@ export default RenderingCore.extend({
 
     const self = this;
 
-    const foundation = createFoundation(emberApplication, this.get('store'));
+    const foundation = this.get('foundationBuilder').createFoundation(emberApplication, this.get('store'));
 
     applyCityLayout(emberApplication);
 
