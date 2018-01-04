@@ -146,7 +146,8 @@ export default Service.extend({
   startReload: function(){
     run.cancel(this.get("reloadThread"));
     this.set("shallReload", true);
-    this.set("reloadThread", run.later(this, this.reloadObjects, 100));
+    // disabled at the moment, since it introduces backend bugs
+    //this.set("reloadThread", run.later(this, this.reloadObjects, 100));
   
   },
 

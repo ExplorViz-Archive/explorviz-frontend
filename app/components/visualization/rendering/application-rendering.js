@@ -10,9 +10,9 @@ import Interaction from
 import Labeler from
  'explorviz-frontend/utils/application-rendering/labeler';
 import CalcCenterAndZoom from
- 'explorviz-ui-frontend/utils/application-rendering/center-and-zoom-calculator';
+ 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
 import FoundationBuilder from 
- 'explorviz-ui-frontend/utils/application-rendering/foundation-builder';
+ 'explorviz-frontend/utils/application-rendering/foundation-builder';
 
 
 const {inject} = Ember;
