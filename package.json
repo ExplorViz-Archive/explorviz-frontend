@@ -1,7 +1,7 @@
 {
-  "name": "explorviz-ui-frontend",
+  "name": "explorviz-frontend",
   "version": "0.0.1",
-  "description": "Explorviz-UI-Frontend",
+  "description": "Explorviz-Frontend",
   "author": "",
   "license": "Apache-2.0",
   "private": true,

@@ -1,7 +1,7 @@
 {
-    "name": "ExplorViz: UI Frontend API",
-    "description": "ExplorViz: UI Frontend API: ExplorViz's client component for visualization",
-    "version": "0.0.1",
+    "name": "ExplorViz: Frontend API",
+    "description": "ExplorViz: Frontend API: ExplorViz's client component for visualization",
+    "version": "0.0.2",
     "url": "https://www.explorviz.net/",
 	"logo": "https://www.explorviz.net/img/favicon.png",
     "options": {
