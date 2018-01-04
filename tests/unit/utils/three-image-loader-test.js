@@ -1,4 +1,4 @@
-//import threeImageLoader from 'explorviz-ui-frontend/utils/three-image-loader';
+//import threeImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | three image loader');

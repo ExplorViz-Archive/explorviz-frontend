@@ -1,9 +1,9 @@
 import JSONAPIAdapter from 'ember-data/adapters/json-api';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
-import ENV from 'explorviz-ui-frontend/config/environment';
+import ENV from 'explorviz-frontend/config/environment';
 
 export default JSONAPIAdapter.extend(DataAdapterMixin,{
-	
+
 	authorizer: 'authorizers:authorizers',
 	host: ENV.APP.API_ROOT,
 	namespace: 'users',

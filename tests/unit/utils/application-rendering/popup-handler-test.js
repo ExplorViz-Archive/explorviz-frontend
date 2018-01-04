@@ -1,4 +1,4 @@
-//import applicationRenderingPopupHandler from 'explorviz-ui-frontend/utils/application-rendering/popup-handler';
+//import applicationRenderingPopupHandler from 'explorviz-frontend/utils/application-rendering/popup-handler';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | application rendering/popup handler');

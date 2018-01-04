@@ -1,4 +1,4 @@
-//import hammerInteraction from 'explorviz-ui-frontend/utils/hammer-interaction';
+//import hammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | hammer interaction');

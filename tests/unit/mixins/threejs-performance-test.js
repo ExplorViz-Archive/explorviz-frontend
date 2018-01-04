@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import ThreejsPerformanceMixin from 'explorviz-ui-frontend/mixins/threejs-performance';
+import ThreejsPerformanceMixin from 'explorviz-frontend/mixins/threejs-performance';
 import { module, test } from 'qunit';
 
 module('Unit | Mixin | threejs performance');

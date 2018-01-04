@@ -1,18 +1,18 @@
 import DS from 'ember-data';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
-import ENV from 'explorviz-ui-frontend/config/environment';
+import ENV from 'explorviz-frontend/config/environment';
 
 const {JSONAPIAdapter} = DS;
 const {APP} = ENV;
 
 /**
-* This Adapter operates as communication abstraction for all network requests, 
-* that refer to Timestamp objects. It provides functions for fetching, 
-* updating and uploading. However, at the time of writing this documentation 
-* only fetching is implemented by the backend. 
-* {{#crossLink "Timeshift-Reload/updateObject:method"}}{{/crossLink}} shows an 
+* This Adapter operates as communication abstraction for all network requests,
+* that refer to Timestamp objects. It provides functions for fetching,
+* updating and uploading. However, at the time of writing this documentation
+* only fetching is implemented by the backend.
+* {{#crossLink "Timeshift-Reload/updateObject:method"}}{{/crossLink}} shows an
 * exemplary requests.
-* 
+*
 * @class Timestamp-Adapter
 * @extends DS.JSONAPIAdapter
 *
@@ -20,12 +20,12 @@ const {APP} = ENV;
 * @submodule network
 */
 export default JSONAPIAdapter.extend(DataAdapterMixin,{
-	
+
 	authorizer: 'authorizers:authorizers',
 
   host: APP.API_ROOT,
   namespace: "timestamp",
-  
+
 
   headers: {
     "Accept": "application/vnd.api+json"
@@ -53,5 +53,5 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   		return `${baseUrl}/before-timestamp/${query}?intervalSize=100`;
   	}
   },
-  
+
 });

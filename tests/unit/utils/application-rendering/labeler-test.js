@@ -1,4 +1,4 @@
-//import applicationRenderingLabeler from 'explorviz-ui-frontend/utils/application-rendering/labeler';
+//import applicationRenderingLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | application rendering/labeler');

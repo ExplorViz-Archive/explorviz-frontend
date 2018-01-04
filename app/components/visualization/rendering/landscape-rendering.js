@@ -4,15 +4,15 @@ import RenderingCore from './rendering-core';
 import THREE from "npm:three";
 
 import applyKlayLayout from
- 'explorviz-ui-frontend/utils/landscape-rendering/klay-layouter';
+ 'explorviz-frontend/utils/landscape-rendering/klay-layouter';
 import Interaction from
- 'explorviz-ui-frontend/utils/landscape-rendering/interaction';
+ 'explorviz-frontend/utils/landscape-rendering/interaction';
 import Labeler from
- 'explorviz-ui-frontend/utils/landscape-rendering/labeler';
+ 'explorviz-frontend/utils/landscape-rendering/labeler';
 import CalcCenterAndZoom from
- 'explorviz-ui-frontend/utils/landscape-rendering/center-and-zoom-calculator';
+ 'explorviz-frontend/utils/landscape-rendering/center-and-zoom-calculator';
 
-import ImageLoader from 'explorviz-ui-frontend/utils/three-image-loader';
+import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 
 //import Meshline from "npm:three.meshline";
 
@@ -642,11 +642,11 @@ export default RenderingCore.extend({
       });
 
       const geometry = new THREE.Geometry(); */
-      let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x, 
+      let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x,
         tile.startPoint.y - centerPoint.y, tile.positionZ);
       let secondVector = new THREE.Vector3(tile.endPoint.x - centerPoint.x,
           tile.endPoint.y - centerPoint.y, tile.positionZ);
-     
+
 
       /*let helpVector = new THREE.Vector3();
       helpVector.subVectors(secondVector, firstVector);
@@ -690,13 +690,13 @@ export default RenderingCore.extend({
 
 
       // New line approach (draw planes)
-      
+
       // Euclidean distance
       const lengthPlane = Math.sqrt(
-        Math.pow((firstVector.x - secondVector.x),2) + 
-        Math.pow((firstVector.y - secondVector.y),2));      
+        Math.pow((firstVector.x - secondVector.x),2) +
+        Math.pow((firstVector.y - secondVector.y),2));
 
-      const geometryPlane = new THREE.PlaneGeometry(lengthPlane, 
+      const geometryPlane = new THREE.PlaneGeometry(lengthPlane,
         tile.lineThickness * 0.4);
 
       const materialPlane = new THREE.MeshBasicMaterial({color: tile.pipeColor});
@@ -724,7 +724,7 @@ export default RenderingCore.extend({
         const posZ = firstVector.z;
 
         plane.position.set(posX, posY, posZ);
-      } 
+      }
       else {
         plane.position.copy(diagonalPos);
       }
@@ -814,7 +814,7 @@ export default RenderingCore.extend({
 
     // init interaction objects
 
-    this.get('interaction').setupInteraction(canvas, camera, webglrenderer, 
+    this.get('interaction').setupInteraction(canvas, camera, webglrenderer,
       raycastObjects);
 
     // set listeners

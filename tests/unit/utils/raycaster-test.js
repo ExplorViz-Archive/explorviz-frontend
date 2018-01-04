@@ -1,4 +1,4 @@
-//import raycaster from 'explorviz-ui-frontend/utils/raycaster';
+//import raycaster from 'explorviz-frontend/utils/raycaster';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | raycaster');

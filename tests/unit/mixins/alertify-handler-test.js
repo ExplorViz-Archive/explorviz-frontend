@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import AlertifyHandlerMixin from 'explorviz-ui-frontend/mixins/alertify-handler';
+import AlertifyHandlerMixin from 'explorviz-frontend/mixins/alertify-handler';
 import { module, test } from 'qunit';
 
 module('Unit | Mixin | alertify handler');
