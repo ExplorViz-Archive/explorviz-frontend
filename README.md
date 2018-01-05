@@ -22,7 +22,7 @@ There are two options for you at the moment. Browse to our [docker repository](h
 You will need the following things properly installed on your computer.
 
 * [Git](http://git-scm.com/)
-* [Node.js](http://nodejs.org/) (with NPM)
+* [Node.js](http://nodejs.org/) with NPM (currently 8.9.4 LTS)
 
 ### Installation (Generic)
 
