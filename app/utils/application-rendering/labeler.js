@@ -1,5 +1,6 @@
 import Ember from 'ember';
 import THREE from "npm:three";
+import { shortenString } from '../helpers/string-helpers';
 
 export default Ember.Object.extend({
 
@@ -23,7 +24,7 @@ export default Ember.Object.extend({
     const oldLabel = this.get('labels').filter(function(label) {
       const data = label.userData;
 
-      return data.name === parentMesh.userData.name && 
+      return data.name === parentMesh.userData.name &&
       label.userData.parentPos.equals(worldParent);
     });
 
@@ -36,9 +37,13 @@ export default Ember.Object.extend({
     // new TextGeometry necessary
     else {
 
-      var fontSize = 2;
+      let fontSize = 2;
 
-      var labelString = parentMesh.userData.name;
+      let labelString = parentMesh.userData.name;
+
+      if(parentMesh.userData.type === 'clazz' && labelString.length > 10){
+        labelString = shortenString(labelString);
+      }
 
       var textGeo = new THREE.TextGeometry(labelString, {
         font : font,
@@ -51,7 +56,7 @@ export default Ember.Object.extend({
       let material;
       if (parentMesh.userData.foundation) {
         material = this.get('textMaterialBlack');
-      } 
+      }
       else if (parentMesh.userData.type === 'package') {
         material = this.get('textMaterialWhite');
       }
@@ -75,9 +80,9 @@ export default Ember.Object.extend({
       var boxWidth = bboxParent.max.x;
 
       // static size for class text
-      if (parentMesh.userData.type === 'class') {
+      if (parentMesh.userData.type === 'clazz') {
         // static scaling factor
-        var j = 0.2;
+        var j = 0.3;
         textGeo.scale(j, j, j);
       }
       // shrink the text if necessary to fit into the box
@@ -111,13 +116,13 @@ export default Ember.Object.extend({
         mesh.rotation.z = -(Math.PI / 2);
       } else {
         // TODO fix 'perfect' centering
-        if (parentMesh.userData.type === 'class') {
+        if (parentMesh.userData.type === 'clazz') {
           mesh.position.x = worldParent.x - Math.abs(centerX) / 2 - 0.25;
           mesh.position.y = bboxNew.max.y;
           mesh.position.z = (worldParent.z - Math
               .abs(centerX) / 2) - 0.25;
           mesh.rotation.x = -(Math.PI / 2);
-          mesh.rotation.z = -(Math.PI / 4);
+          mesh.rotation.z = -(Math.PI / 3);
         } else {
           mesh.position.x = worldParent.x - Math.abs(centerX) / 2;
           mesh.position.y = bboxNew.max.y;
