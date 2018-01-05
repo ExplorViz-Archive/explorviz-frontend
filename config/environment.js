@@ -2,8 +2,8 @@
 
 module.exports = function(environment) {
   var ENV = {
-    modulePrefix: 'explorviz-ui-frontend',
-    environment: environment,    
+    modulePrefix: 'explorviz-frontend',
+    environment: environment,
     rootURL: '/',
     locationType: 'auto',
     EmberENV: {

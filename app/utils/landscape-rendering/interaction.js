@@ -2,7 +2,7 @@ import Ember from 'ember';
 import THREE from "npm:three";
 import HammerInteraction from '../hammer-interaction';
 import PopUpHandler from './popup-handler';
-import AlertifyHandler from 'explorviz-ui-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import Raycaster from '../raycaster';
 
 export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
@@ -42,7 +42,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
     canvas.addEventListener('mousewheel', registerMouseWheel, false);
 
     // zoom handler (firefox)
-    canvas.addEventListener('DOMMouseScroll', registerMouseWheel, false);    
+    canvas.addEventListener('DOMMouseScroll', registerMouseWheel, false);
 
     function registerMouseWheel(evt) {
       self.onMouseWheelStart(evt);
@@ -74,7 +74,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
     self.registerPopUpHandler();
 
     this.setupHammerListener();
-    
+
   },
 
   onMouseWheelStart(evt) {
@@ -92,7 +92,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
     const vector = new THREE.Vector3(mX, mY, 1 );
     vector.unproject(this.get('camera'));
     vector.sub(this.get('camera').position);
-    
+
     this.get('camera').position.addVectors(this.get('camera').position,
       vector.setLength(delta * 1.5));
 
@@ -157,12 +157,12 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
               });
               evt.target.dispatchEvent(event);
             }, delay);
-            
+
             // When moving, hide (old) tooltip
             self.get('popUpHandler').hideTooltip();
         });
-    })(300);   
-    
+    })(300);
+
   },
 
 
@@ -180,13 +180,13 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
     const origin = {};
 
-    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
+    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) /
       this.get('renderer').domElement.clientWidth) * 2 - 1;
 
-    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) / 
+    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) /
       this.get('renderer').domElement.clientHeight) * 2 + 1;
 
-    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
 
     if(intersectedViewObj) {
@@ -196,13 +196,13 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
       const emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
-      
+
       if(emberModelName === "application"){
 
         if(emberModel.get('components').get('length') === 0) {
           // no data => show message
 
-          const message = "Sorry, no details for <b>" + emberModel.get('name') + 
+          const message = "Sorry, no details for <b>" + emberModel.get('name') +
             "</b> are available.";
 
           this.showAlertifyMessage(message);
@@ -213,8 +213,8 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
           this.trigger('showApplication', emberModel);
         }
 
-        
-      } 
+
+      }
       else if (emberModelName === "nodegroup" || emberModelName === "system"){
         emberModel.setOpened(!emberModel.get('opened'));
         this.trigger('redrawScene');
@@ -258,13 +258,13 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
     const origin = {};
 
-    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
+    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) /
       this.get('renderer').domElement.clientWidth) * 2 - 1;
 
-    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) / 
+    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) /
       this.get('renderer').domElement.clientHeight) * 2 + 1;
 
-    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
 
     if(intersectedViewObj) {

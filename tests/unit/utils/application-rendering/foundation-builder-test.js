@@ -1,4 +1,4 @@
-//import applicationRenderingFoundationBuilder from 'explorviz-ui-frontend/utils/application-rendering/foundation-builder';
+//import applicationRenderingFoundationBuilder from 'explorviz-frontend/utils/application-rendering/foundation-builder';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | application rendering/foundation builder');

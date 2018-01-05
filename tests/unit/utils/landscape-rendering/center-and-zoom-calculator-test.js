@@ -1,4 +1,4 @@
-//import landscapeRenderingCenterAndZoomCalculator from 'explorviz-ui-frontend/utils/landscape-rendering/center-and-zoom-calculator';
+//import landscapeRenderingCenterAndZoomCalculator from 'explorviz-frontend/utils/landscape-rendering/center-and-zoom-calculator';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | landscape rendering/center and zoom calculator');

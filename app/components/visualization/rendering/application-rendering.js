@@ -4,15 +4,16 @@ import RenderingCore from './rendering-core';
 import THREE from "npm:three";
 
 import applyCityLayout from
- 'explorviz-ui-frontend/utils/application-rendering/city-layouter';
+ 'explorviz-frontend/utils/application-rendering/city-layouter';
 import Interaction from
- 'explorviz-ui-frontend/utils/application-rendering/interaction';
+ 'explorviz-frontend/utils/application-rendering/interaction';
 import Labeler from
- 'explorviz-ui-frontend/utils/application-rendering/labeler';
+ 'explorviz-frontend/utils/application-rendering/labeler';
 import CalcCenterAndZoom from
- 'explorviz-ui-frontend/utils/application-rendering/center-and-zoom-calculator';
-import {createFoundation, removeFoundation} from 
- 'explorviz-ui-frontend/utils/application-rendering/foundation-builder';
+ 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
+import FoundationBuilder from 
+ 'explorviz-frontend/utils/application-rendering/foundation-builder';
+
 
 const {inject} = Ember;
 
@@ -42,8 +43,9 @@ export default RenderingCore.extend({
 
   interaction: null,
   centerAndZoomCalculator: null,
+  foundationBuilder: null,
 
-  // @Override  
+  // @Override
   initRendering() {
     this._super(...arguments);
 
@@ -67,7 +69,7 @@ export default RenderingCore.extend({
       this.set('centerAndZoomCalculator.centerPoint', null);
       this.cleanAndUpdateScene();
     };
-    
+
     this.get('camera').position.set(0, 0, 100);
 
     // dummy object for raycasting
@@ -76,6 +78,10 @@ export default RenderingCore.extend({
     if (!this.get('labeler')) {
       this.set('labeler', Labeler.create());
     }
+
+    if (!this.get('foundationBuilder')) {
+      this.set('foundationBuilder', FoundationBuilder.create());
+    }       
 
     if (!this.get('interaction')) {
       // owner necessary to inject service into util
@@ -108,10 +114,9 @@ export default RenderingCore.extend({
     this.debug("cleanup application rendering");
 
     // remove foundation for re-rendering
-    const emberApplication = this.get('landscapeRepo.latestApplication');
-    removeFoundation(emberApplication, this.get('store'));
+    this.get('foundationBuilder').removeFoundation(this.get('store'));
 
-    this.set('applicationID', null);    
+    this.set('applicationID', null);
     this.set('application3D', null);
 
     this.get('renderingService').off('redrawScene');
@@ -136,8 +141,7 @@ export default RenderingCore.extend({
     this.set('oldRotation', this.get('application3D').rotation);
 
     // remove foundation for re-rendering
-    removeFoundation(this.get('landscapeRepo.latestApplication'), 
-      this.get('store'));
+    this.get('foundationBuilder').removeFoundation(this.get('store'));
 
     this._super(...arguments);
   },
@@ -150,7 +154,7 @@ export default RenderingCore.extend({
    * @method preProcessEntity
    */
   preProcessEntity() {
-    const application = this.get('store').peekRecord('application', 
+    const application = this.get('store').peekRecord('application',
       this.get('applicationID'));
     this.set('landscapeRepo.latestApplication', application);
   },
@@ -176,15 +180,15 @@ export default RenderingCore.extend({
 
     const self = this;
 
-    const foundation = createFoundation(emberApplication, this.get('store'));
+    const foundation = this.get('foundationBuilder').createFoundation(emberApplication, this.get('store'));
 
     applyCityLayout(emberApplication);
 
     this.set('application3D', new THREE.Object3D());
     this.set('application3D.userData.model', emberApplication);
 
-    // update raycasting children, because of new entity  
-    this.get('interaction').updateEntities(this.get('application3D'));  
+    // update raycasting children, because of new entity
+    this.get('interaction').updateEntities(this.get('application3D'));
 
     // apply (possible) highlighting
     this.get('interaction').applyHighlighting();
@@ -196,7 +200,7 @@ export default RenderingCore.extend({
 
     const viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
 
-    const accuCommunications = 
+    const accuCommunications =
       emberApplication.get('communicationsAccumulated');
 
     accuCommunications.forEach((commu) => {
@@ -206,7 +210,7 @@ export default RenderingCore.extend({
           const start = new THREE.Vector3();
           start.subVectors(commu.startPoint, viewCenterPoint);
           start.multiplyScalar(0.5);
-          
+
           const end = new THREE.Vector3();
           end.subVectors(commu.endPoint, viewCenterPoint);
           end.multiplyScalar(0.5);
@@ -276,7 +280,7 @@ export default RenderingCore.extend({
       self.set('initialSetupDone', true);
     }
 
-    // Helper functions   
+    // Helper functions
 
 
     function addComponentToScene(component, color) {
@@ -309,16 +313,16 @@ export default RenderingCore.extend({
           if (child.get('opened')) {
             if(child.get('highlighted')) {
                 addComponentToScene(child, redHighlighted);
-            }            
+            }
             else if(component.get('color') === grey) {
               addComponentToScene(child, lightGreen);
             }
             else if(component.get('color') === darkGreen) {
               addComponentToScene(child, lightGreen);
-            } else {            
+            } else {
               addComponentToScene(child, darkGreen);
             }
-          } 
+          }
           else {
             if(child.get('highlighted')) {
               addComponentToScene(child, redHighlighted);
@@ -326,9 +330,9 @@ export default RenderingCore.extend({
             else if(component.get('color') === grey) {
               addComponentToScene(child, lightGreen);
             }
-            else if(component.get('color') === darkGreen) {            
+            else if(component.get('color') === darkGreen) {
               addComponentToScene(child, lightGreen);
-            } else {              
+            } else {
               addComponentToScene(child, darkGreen);
             }
           }
@@ -340,11 +344,11 @@ export default RenderingCore.extend({
 
     function createBox(component, color, isClass) {
 
-      let centerPoint = new THREE.Vector3(component.get('positionX') + 
-        component.get('width') / 2.0, component.get('positionY') + 
+      let centerPoint = new THREE.Vector3(component.get('positionX') +
+        component.get('width') / 2.0, component.get('positionY') +
         component.get('height') / 2.0,
         component.get('positionZ') + component.get('depth') / 2.0);
-      
+
       const material = new THREE.MeshLambertMaterial();
       material.color = new THREE.Color(color);
 
@@ -352,7 +356,7 @@ export default RenderingCore.extend({
 
       centerPoint.multiplyScalar(0.5);
 
-      const extension = new THREE.Vector3(component.get('width') / 2.0, 
+      const extension = new THREE.Vector3(component.get('width') / 2.0,
         component.get('height') / 2.0, component.get('depth') / 2.0);
 
       const cube = new THREE.BoxGeometry(extension.x, extension.y, extension.z);
@@ -369,7 +373,7 @@ export default RenderingCore.extend({
 
       mesh.userData.opened = component.get('opened');
 
-      self.get('labeler').createLabel(mesh, self.get('application3D'), 
+      self.get('labeler').createLabel(mesh, self.get('application3D'),
         self.get('font'));
 
       self.get('application3D').add(mesh);
@@ -397,9 +401,9 @@ export default RenderingCore.extend({
     const camera = this.get('camera');
     const webglrenderer = this.get('webglrenderer');
 
-    // init interaction objects    
+    // init interaction objects
 
-    this.get('interaction').setupInteraction(canvas, camera, webglrenderer, 
+    this.get('interaction').setupInteraction(canvas, camera, webglrenderer,
       this.get('application3D'));
 
     // set listeners
@@ -411,5 +415,5 @@ export default RenderingCore.extend({
 
 
   }, // END initInteraction
-  
+
 });

@@ -1,5 +1,5 @@
 
-import { stringComparison } from 'explorviz-ui-frontend/helpers/string-comparison';
+import { stringComparison } from 'explorviz-frontend/helpers/string-comparison';
 import { module, test } from 'qunit';
 
 module('Unit | Helper | string comparison');

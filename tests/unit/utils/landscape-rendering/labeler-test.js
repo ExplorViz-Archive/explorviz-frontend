@@ -1,4 +1,4 @@
-//import landscapeRenderingLabeler from 'explorviz-ui-frontend/utils/landscape-rendering/labeler';
+//import landscapeRenderingLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | landscape rendering/labeler');

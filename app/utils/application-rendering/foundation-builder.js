@@ -1,40 +1,56 @@
-export function createFoundation(emberApplication, store) {
+import EmberObject from '@ember/object';
 
-  const idTest = parseInt(Math.random() * (20000 - 10000) + 10000);
-  const foundation = store.createRecord('component', {
-    id: idTest,
-    synthetic: false,
-    foundation: true,
-    children: emberApplication.get('components'),
-    clazzes: [],
-    belongingApplication: emberApplication,
-    opened: true,
-    name: emberApplication.get('name'),
-    fullQualifiedName: emberApplication.get('name'),
-    positionX: 0,
-    positionY: 0,
-    positionZ: 0,
-    width: 0,
-    height: 0,
-    depth: 0
-  });
+/**
+ * The foundation is the grey all-encompassing tile. It shows 
+ * the name of the previously clicked application and presents 
+ * data on mouse hovering. It simply is a container for actual 
+ * application data.
+ */
+export default EmberObject.extend({
 
-  emberApplication.get('components').forEach((component) => {
-    component.set('parentComponent', foundation);
-  });
+  foundationObj: null,
 
-  emberApplication.set('components', [foundation]);
+  createFoundation(emberApplication, store) {
 
-  return foundation;
-}
+    const idTest = parseInt(Math.random() * (20000 - 10000) + 10000);
+    const foundation = store.createRecord('component', {
+      id: idTest,
+      synthetic: false,
+      foundation: true,
+      children: emberApplication.get('components'),
+      clazzes: [],
+      belongingApplication: emberApplication,
+      opened: true,
+      name: emberApplication.get('name'),
+      fullQualifiedName: emberApplication.get('name'),
+      positionX: 0,
+      positionY: 0,
+      positionZ: 0,
+      width: 0,
+      height: 0,
+      depth: 0
+    });
 
-export function removeFoundation(emberApplication, store) {
+    emberApplication.get('components').forEach((component) => {
+      component.set('parentComponent', foundation);
+    });
 
-  const foundation = emberApplication.get('components').toArray().find((component) => {
-    return component.get('foundation');
-  });
+    emberApplication.set('components', [foundation]);
 
-  if(foundation) {
+    this.set('foundationObj', foundation);
+
+    return foundation;
+  },
+
+  removeFoundation(store) {
+
+    const foundation = this.get('foundationObj');
+
+    if(!foundation) {
+      return false;
+    }
+
+    const emberApplication = foundation.get('belongingApplication');
 
     emberApplication.set('components', foundation.get('children'));
     emberApplication.get('components').forEach((component) => {
@@ -42,11 +58,10 @@ export function removeFoundation(emberApplication, store) {
     });
     
     store.unloadRecord(foundation);
-    return true;
-  }
 
-  return false;
-  
- 
+    this.set('foundationObj', null);
 
-}
+    return true;    
+   }
+
+});

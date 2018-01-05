@@ -1,4 +1,4 @@
-import { encodeStringForPopUp } from 'explorviz-ui-frontend/utils/helpers/string-helpers';
+import { encodeStringForPopUp } from 'explorviz-frontend/utils/helpers/string-helpers';
 import { module, test } from 'qunit';
 
 module('Unit | Utility | helpers/string helpers');

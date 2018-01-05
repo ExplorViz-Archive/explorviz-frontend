@@ -16,8 +16,6 @@ export default EmberObject.extend(Evented, {
   rotationObject: null,
   hammerHandler: null,
   popUpHandler: null,
-
-  //highlighter: service('visualization/application/highlighter'),
   highlighter: null,
   renderingService: service(),
 

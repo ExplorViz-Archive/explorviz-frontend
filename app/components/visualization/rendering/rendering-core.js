@@ -1,21 +1,21 @@
 import Ember from 'ember';
 import THREE from "npm:three";
-import config from 'explorviz-ui-frontend/config/environment';
-import THREEPerformance from 'explorviz-ui-frontend/mixins/threejs-performance';
+import config from 'explorviz-frontend/config/environment';
+import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
 
 const {Component, inject, Evented} = Ember;
 
 /**
-* This component contains the core mechanics of the different (three.js-based) 
-* renderer. All functions below are called in a determined order, hence you only 
+* This component contains the core mechanics of the different (three.js-based)
+* renderer. All functions below are called in a determined order, hence you only
 * need to override them in your custom renderer.
 *
-* See {{#crossLink "Landscape-Rendering"}}{{/crossLink}} or 
+* See {{#crossLink "Landscape-Rendering"}}{{/crossLink}} or
 * {{#crossLink "Application-Rendering"}}{{/crossLink}} for example usage.
 *
 * Call order:
 *
-* 1. 
+* 1.
 *
 * @class Rendering-Core-Component
 * @extends Ember.Component
@@ -27,10 +27,10 @@ export default Component.extend(Evented, THREEPerformance, {
 
   state: null,
 
-  // Declare url-builder service 
+  // Declare url-builder service
   urlBuilder: inject.service("url-builder"),
 
-  // Declare view-importer service 
+  // Declare view-importer service
   viewImporter: inject.service("view-importer"),
 
   reloadHandler: inject.service("reload-handler"),
@@ -56,7 +56,7 @@ export default Component.extend(Evented, THREEPerformance, {
 
   // @Override
   /**
-   * This overridden Ember Component lifecycle hook enables calling 
+   * This overridden Ember Component lifecycle hook enables calling
    * ExplorViz's setup code for actual rendering and custom listeners.
    *
    * @method didRender
@@ -70,20 +70,20 @@ export default Component.extend(Evented, THREEPerformance, {
 
   // @Override
   /**
-   * This overridden Ember Component lifecycle hook enables calling 
+   * This overridden Ember Component lifecycle hook enables calling
    * ExplorViz's custom cleanup code.
    *
    * @method willDestroyElement
    */
   willDestroyElement() {
     this._super(...arguments);
-    this.cleanup();    
+    this.cleanup();
   },
 
 
   /**
-   * This function is called once on the didRender event. Inherit this function 
-   * to call other important function, e.g. "initInteraction" as shown in 
+   * This function is called once on the didRender event. Inherit this function
+   * to call other important function, e.g. "initInteraction" as shown in
    * {{#crossLink "Landscape-Rendering/initInteraction:method"}}{{/crossLink}}.
    *
    * @method initRendering
@@ -97,7 +97,7 @@ export default Component.extend(Evented, THREEPerformance, {
     // get size if outer ember div
     const height = this.$()[0].clientHeight;
     const width = this.$()[0].clientWidth;
-    
+
     const canvas = this.$('#threeCanvas')[0];
 
     this.set('canvas', canvas);
@@ -108,7 +108,7 @@ export default Component.extend(Evented, THREEPerformance, {
     this.set('camera', new THREE.PerspectiveCamera(75, width / height, 0.1, 1000));
 
     this.set('webglrenderer', new THREE.WebGLRenderer({
-      antialias: true,  
+      antialias: true,
       canvas: canvas
     }));
     this.get('webglrenderer').setPixelRatio(window.devicePixelRatio);
@@ -128,12 +128,12 @@ export default Component.extend(Evented, THREEPerformance, {
 
       if(config.environment === "development" || config.environment === "akr") {
         self.get('stats').end();
-      }      
-      
+      }
+
     }
 
     render();
-    
+
     ////////////////////
 
     // load font for labels and synchronously proceed with populating the scene
@@ -147,7 +147,7 @@ export default Component.extend(Evented, THREEPerformance, {
       self.importView();
 
 
-    });  
+    });
 
   },
 
@@ -174,11 +174,11 @@ export default Component.extend(Evented, THREEPerformance, {
     });
 
 
-    this.get('viewImporter').on('transmitView', function(newState) { 
-        self.set('newState', newState);  
+    this.get('viewImporter').on('transmitView', function(newState) {
+        self.set('newState', newState);
     });
 
-    
+
     this.get('renderingService').on('reSetupScene', function() {
       self.onReSetupScene();
     });
@@ -195,21 +195,21 @@ export default Component.extend(Evented, THREEPerformance, {
       const latestMaybeApp = self.get('landscapeRepo.latestApplication');
       state.appID = latestMaybeApp ? latestMaybeApp.get('id') : null;
 
-      state.camX = self.get('camera').position.x; 
-      state.camY = self.get('camera').position.y; 
-      state.camZ = self.get('camera').position.z; 
+      state.camX = self.get('camera').position.x;
+      state.camY = self.get('camera').position.y;
+      state.camZ = self.get('camera').position.z;
 
       if(state.appID){
         self.set('appCondition',[]);
         self.computeAppCondition(
-          self.get('landscapeRepo.latestApplication').get('components'), 
+          self.get('landscapeRepo.latestApplication').get('components'),
           self.get('landscapeRepo.latestApplication').get('clazzes'));
         state.appCondition = self.get('appCondition');
       }
       else{
         state.landscapeCondition = self.computeLandscapeCondition();
       }
-     
+
       // Passes the state from component via service to controller
       self.get('urlBuilder').transmitState(state);
     });
@@ -222,10 +222,10 @@ export default Component.extend(Evented, THREEPerformance, {
 
   /*
    *  This method is used to collect data about the landscape.
-   *  Ids of closed systems and nodegroups are stored in an array 
+   *  Ids of closed systems and nodegroups are stored in an array
    */
   computeLandscapeCondition(){
-  
+
     const systems = this.get('landscapeRepo.latestLandscape').get('systems');
     const condition = [];
 
@@ -260,8 +260,8 @@ export default Component.extend(Evented, THREEPerformance, {
 
   /*
    *  This method is used to collect data about the application.
-   *  Names of opened packages are stored in an array. 
-   *  Furthermore the name+highlighted of the 
+   *  Names of opened packages are stored in an array.
+   *  Furthermore the name+highlighted of the
    *  highlighted package is stored
    */
   computeAppCondition(components, clazzes){
@@ -274,7 +274,7 @@ export default Component.extend(Evented, THREEPerformance, {
         }
       });
     }
-    
+
     components.forEach(function(component) {
       // Handle opened packages and add name to array
       if(component.get('opened')){
@@ -290,10 +290,10 @@ export default Component.extend(Evented, THREEPerformance, {
 
 
   /*
-   *  This method is used to open and close specified systems 
-   *  and nodegroups. The array 'condition' contains the ids of 
-   *  of all closed systems and nodegroups  
-   */ 
+   *  This method is used to open and close specified systems
+   *  and nodegroups. The array 'condition' contains the ids of
+   *  of all closed systems and nodegroups
+   */
   applyLandscapeCondition(landscape){
 
     const self = this;
@@ -309,9 +309,9 @@ export default Component.extend(Evented, THREEPerformance, {
 
       if(!isRequestObject){
 
-        // Open system  
-        system.setOpened(true);  
-        for (var i = 0; i < self.get('condition').length; i++) { 
+        // Open system
+        system.setOpened(true);
+        for (var i = 0; i < self.get('condition').length; i++) {
 
           // Close system if id is in condition
           if(parseFloat(system.get('id')) === parseFloat(self.get('condition')[i])){
@@ -325,9 +325,9 @@ export default Component.extend(Evented, THREEPerformance, {
 
           nodegroups.forEach(function(nodegroup) {
 
-            // Open nodegroup  
-            nodegroup.setOpened(true);  
-            for (var i = 0; i < self.get('condition').length; i++) { 
+            // Open nodegroup
+            nodegroup.setOpened(true);
+            for (var i = 0; i < self.get('condition').length; i++) {
 
               // Close nodegroup if id is in condition
               if(parseFloat(nodegroup.get('id')) === parseFloat(self.get('condition')[i])){
@@ -337,7 +337,7 @@ export default Component.extend(Evented, THREEPerformance, {
           });
         }
       }
-    }); 
+    });
   },
 
   applyAppCondition(application){
@@ -357,31 +357,31 @@ export default Component.extend(Evented, THREEPerformance, {
       const clazzes = application.get('clazzes');
 
       if(clazzes){
-        clazzes.forEach(function(clazz) { 
+        clazzes.forEach(function(clazz) {
           // Look for highlighted clazzes
-          for (var i = 0; i < self.get('condition').length; i++) { 
+          for (var i = 0; i < self.get('condition').length; i++) {
             if(clazz.get('name').concat("highlighted") === self.get('condition')[i]) {
               clazz.set('highlighted',true);
             }
-          }  
+          }
         });
       }
 
       if(components){
         components.forEach(function(component) {
-          // Close component  
-          component.setOpenedStatus(false);  
-          for (var i = 0; i < self.get('condition').length; i++) { 
+          // Close component
+          component.setOpenedStatus(false);
+          for (var i = 0; i < self.get('condition').length; i++) {
             // Open component if name is in condition
             if(component.get('name') === self.get('condition')[i]){
-              component.setOpenedStatus(true);  
+              component.setOpenedStatus(true);
               self.applyAppCondition(component);
             }
             // case not opened => maybe highlighted
             else if(component.get('name').concat("highlighted") === self.get('condition')[i]) {
               component.set('highlighted',true);
             }
-          }  
+          }
         });
       self.cleanAndUpdateScene();
       }
@@ -390,11 +390,11 @@ export default Component.extend(Evented, THREEPerformance, {
 
   /**
     This method is used to update the camera with query parameters
-  */ 
+  */
   importView(){
 
     const self = this;
-    
+
     this.get('viewImporter').requestView();
 
     const camX = this.get('newState').camX;
@@ -417,7 +417,7 @@ export default Component.extend(Evented, THREEPerformance, {
     // load actual landscape
     const timestamp = this.get('newState').timestamp;
     const appID = this.get('newState').appID;
-      
+
     this.get('reloadHandler').stopExchange();
 
     if(timestamp) {
@@ -430,7 +430,7 @@ export default Component.extend(Evented, THREEPerformance, {
     function waitForLandscape() {
       // New Promise
       var promise = new Ember.RSVP.Promise(
-        function(resolve) {       
+        function(resolve) {
           window.setTimeout(
             function() {
               // Wait until landscape is loaded
@@ -448,7 +448,7 @@ export default Component.extend(Evented, THREEPerformance, {
         function() {
           if(appID){
             self.applyAppCondition(self.get('landscapeRepo.latestApplication'));
-          } 
+          }
           else{
             self.applyLandscapeCondition(self.get('landscapeRepo.latestLandscape'));
           }
@@ -457,14 +457,14 @@ export default Component.extend(Evented, THREEPerformance, {
   },
 
   /**
-   * This function is called once on initRendering and everytime at the end of 
-   * "cleanAndUpdateScene". Inherit this function to insert objects in the 
-   * Three.js scene. Have a look at 
+   * This function is called once on initRendering and everytime at the end of
+   * "cleanAndUpdateScene". Inherit this function to insert objects in the
+   * Three.js scene. Have a look at
    * {{#crossLink "Landscape-Rendering/cleanAndUpdateScene:method"}}
-   * {{/crossLink}} 
-   * or 
+   * {{/crossLink}}
+   * or
    * {{#crossLink "Application-Rendering/cleanAndUpdateScene:method"}}
-   * {{/crossLink}} 
+   * {{/crossLink}}
    * for examplary usage.
    *
    * @method populateScene
@@ -473,14 +473,14 @@ export default Component.extend(Evented, THREEPerformance, {
 
 
   /**
-   * This function is called when the willDestroyElement event is fired. Inherit this 
-   * function to cleanup custom properties or unbind listener 
+   * This function is called when the willDestroyElement event is fired. Inherit this
+   * function to cleanup custom properties or unbind listener
    * as shown in {{#crossLink "Landscape-Rendering"}}{{/crossLink}}.
    *
    * @method cleanup
    */
-  cleanup() {    
-    cancelAnimationFrame(this.get('animationFrameId'));    
+  cleanup() {
+    cancelAnimationFrame(this.get('animationFrameId'));
 
     this.set('scene', null);
     this.set('webglrenderer', null);
@@ -503,9 +503,9 @@ export default Component.extend(Evented, THREEPerformance, {
 
 
   /**
-   * Inherit this function to update the scene with a new renderingModel. It 
-   * automatically removes every mesh from the scene and finally calls 
-   * the (overridden) "populateScene" function. Add your custom code 
+   * Inherit this function to update the scene with a new renderingModel. It
+   * automatically removes every mesh from the scene and finally calls
+   * the (overridden) "populateScene" function. Add your custom code
    * as shown in landscape-rendering.
    *
    * @method cleanAndUpdateScene
@@ -535,11 +535,11 @@ export default Component.extend(Evented, THREEPerformance, {
 
 
   /**
-   * This function is called automatically when a new landscape was fetched. It 
-   * is executed before 
+   * This function is called automatically when a new landscape was fetched. It
+   * is executed before
    * {{#crossLink "Rendering-Core/cleanAndUpdateScene:method"}}{{/crossLink}}.
-   * Inherit this function to preprocess the 
-   * {{#crossLink "Landscape"}}{{/crossLink}} for rendering, e.g. filter some 
+   * Inherit this function to preprocess the
+   * {{#crossLink "Landscape"}}{{/crossLink}} for rendering, e.g. filter some
    * value.
    *
    * See {{#crossLink "Application-Rendering"}}{{/crossLink}} for example usage.
