@@ -1,7 +1,7 @@
 {
   "name": "explorviz-frontend",
-  "version": "0.0.2",
-  "description": "Explorviz-Frontend",
+  "version": "1.2.0",
+  "description": "Explorviz Frontend",
   "author": "",
   "license": "Apache-2.0",
   "private": true,
@@ -39,7 +39,7 @@
     "yuidocjs": "^0.10.2"
   },
   "engines": {
-    "node": ">= 6.11.2"
+    "node": ">= 8.9.4"
   },
   "dependencies": {
     "ember-ajax": "^3.0.0",
