@@ -8,7 +8,7 @@ This project is a WIP replica of ExplorViz's visualization component. It substit
 
 ## Documentation (WIP)
 
-* The API documentation is available at https://explorviz.github.io/explorviz-frontend/
+* The API documentation is available [here](https://explorviz.github.io/explorviz-frontend/).
 
 ## Deployment
 There are two options for you at the moment. Browse to our [docker repository](https://github.com/ExplorViz/explorviz-docker). 
@@ -33,18 +33,16 @@ You will need the following things properly installed on your computer.
 
 ### Running / Development
 
-* `ember serve`
-* Visit your app at [http://localhost:4200](http://localhost:4200).
+* `npm start` or `ember serve`
+* Visit the frontend at [http://localhost:4200](http://localhost:4200).
 
-#### Running Tests
+#### Testing
 
-* `ember test`
-* `ember test --server`
+* `npm test` or `ember test` / `ember test --server`
 
 #### Building
 
-* `ember build` (development)
-* `ember build --environment production` (production)
+* `npm build` or `ember build` (development) / `ember build --environment production` (production)
 
 #### Generating API Documentation
 * `yuidoc .` (Might need to delete content of *tmp* folder. Be aware! The result of this command should be commited at the end of your development, since it generates a lot of LoC.)
