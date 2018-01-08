@@ -15,7 +15,11 @@ export default Component.extend({
       if(searchResult !== null) {
         this.get('renderingService').focusEntity();
       }
-      
+
+    },
+
+    openAllComponents(){
+      this.openAllComponents();
     }
   },
 
@@ -39,7 +43,7 @@ export default Component.extend({
       return latestApp.contains(candidate);
     });
 
-    if(!firstMatch || 
+    if(!firstMatch ||
       this.get('highlighter.highlightedEntity') === firstMatch) {
       return;
     }
@@ -55,6 +59,15 @@ export default Component.extend({
     }
     this.get('highlighter').highlight(firstMatch);
     this.get('renderingService').redrawScene();
+  },
+
+  openAllComponents(){
+    const allClazzes = this.get('store').peekAll('clazz');
+
+    allClazzes.forEach(function(clazz){
+    clazz.openParents();
+        });
+     this.get('renderingService').redrawScene();
   }
 
 });
