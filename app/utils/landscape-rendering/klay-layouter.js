@@ -1,4 +1,4 @@
-export default function applyKlayLayout(landscape) {  
+export default function applyKlayLayout(landscape) {
 
     let topLevelKielerGraph = null;
 
@@ -23,10 +23,10 @@ export default function applyKlayLayout(landscape) {
       $klay.layout({
         graph: graph,
         success: function(layouted) {
-          console.log("success", layouted);
+          //console.log("success", layouted);
         },
         error: function(error) {
-          console.log("error", error);
+          //console.log("error", error);
         }
       });
 
@@ -300,18 +300,18 @@ export default function applyKlayLayout(landscape) {
           if(!appTarget.get('parent').get('visible')){
             appTarget = (appTarget.get('parent').get('parent').get('parent').get('opened'))? seekRepresentativeApplication(appTarget) : appTarget.get('parent').get('parent').get('parent') ;
           }
-          
+
           if(!appSource.get('parent').get('visible')){
             appSource = (appSource.get('parent').get('parent').get('parent').get('opened'))? seekRepresentativeApplication(appSource) : appSource.get('parent').get('parent').get('parent') ;
           }
-          
-          
+
+
           if(appSource.get("id") !== appTarget.get("id")){
             const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
             communication.get('kielerEdgeReferences').push(edge);
             //console.log(appSource.get("kielerGraphReference").edges);
           }
-        });   
+        });
       } // END addEdges
 
 
@@ -478,21 +478,21 @@ export default function applyKlayLayout(landscape) {
 
       const port1 = createSourcePortIfNotExisting(sourceApplication);
       const port2 = createTargetPortIfNotExisting(targetApplication);
-    
+
       let edge = createEdgeHelper(sourceApplication, port1, targetApplication, port2);
       return edge;
-    
+
       //---------------------------inner functions
       function createSourcePortIfNotExisting(sourceDrawnode) {
-      
+
         let ports = sourceDrawnode.get("sourcePorts");
-        
+
         const DEFAULT_PORT_WIDTH = 0.000001;
-       
+
         const DEFAULT_PORT_HEIGHT = 0.000001;
 
         const CONVERT_TO_KIELER_FACTOR = 180;
-      
+
         let id = sourceDrawnode.get("id");
 
         const maybePort = ports[id];
@@ -513,7 +513,7 @@ export default function applyKlayLayout(landscape) {
             x: 0,
             y: 0
           };
-      
+
 
           port.node = sourceDrawnode.get('kielerGraphReference');
 
@@ -522,20 +522,20 @@ export default function applyKlayLayout(landscape) {
           ports[sourceDrawnode.get('id')] = port;
         }
 
-        return ports[sourceDrawnode.get('id')];       
+        return ports[sourceDrawnode.get('id')];
       }
 
-    
+
       function createTargetPortIfNotExisting(targetDrawnode) {
 
         let ports = targetDrawnode.get("targetPorts");
-      
+
         const DEFAULT_PORT_WIDTH = 0.000001;
-       
+
         const DEFAULT_PORT_HEIGHT = 0.000001;
 
         const CONVERT_TO_KIELER_FACTOR = 180;
-      
+
         let id = targetDrawnode.get("id");
 
         const maybePort = ports[id];
@@ -556,7 +556,7 @@ export default function applyKlayLayout(landscape) {
             x: 0,
             y: 0
           };
-      
+
 
           port.node = targetDrawnode.get('kielerGraphReference');
 
@@ -567,17 +567,17 @@ export default function applyKlayLayout(landscape) {
 
         return ports[targetDrawnode.get('id')];
       }
-    
+
       //---------------------------- end inner functions
 
     } // END createEdgeBetweenSourceTarget
 
     function createEdgeHelper(sourceDrawnode, port1, targetDrawnode, port2) {
-  
+
       const id = sourceDrawnode.get('id') + "_to_" + targetDrawnode.get('id');
-    
+
       let edge = lookForExistingEdge(sourceDrawnode, id);
-    
+
       if(edge){
         return edge;
       }
@@ -600,12 +600,12 @@ export default function applyKlayLayout(landscape) {
 
       edge.sourceNode = sourceDrawnode;
       edge.targetNode = targetDrawnode;
-    
+
       sourceDrawnode.get('kielerGraphReference').edges.push(edge);
 
-      return edge;  
-    
-    
+      return edge;
+
+
       //inner function
       // looks for already existing edges
       function lookForExistingEdge(sourceDrawnode, id){
@@ -617,7 +617,7 @@ export default function applyKlayLayout(landscape) {
           }
         }
       }
-    
+
     } // END createEdgeHelper
 
     function createNewEdge(id) {
@@ -643,7 +643,7 @@ export default function applyKlayLayout(landscape) {
         const kielerEdgeReferences = communication.get('kielerEdgeReferences');
 
           kielerEdgeReferences.forEach((edge) => {
-        
+
 
           if (edge != null) {
 
@@ -652,7 +652,7 @@ export default function applyKlayLayout(landscape) {
               return;
             }
 
-            let parentNode = getRightParent(communication.get('source'), 
+            let parentNode = getRightParent(communication.get('source'),
               communication.get('target'));
 
             var points = [];
@@ -691,7 +691,7 @@ export default function applyKlayLayout(landscape) {
                 if (nestedGraph != null) {
                   edgeOffset = nestedGraph.padding;
                 }
-              } 
+              }
               else {
 
                 if (edge.source) {
@@ -716,20 +716,20 @@ export default function applyKlayLayout(landscape) {
               } : {
                 x: edge.tPort.x,
                 y: edge.tPort.y
-              };        
+              };
 
               if (edge.targetNode.get('kielerGraphReference').padding) {
                 targetPoint.x += edge.targetNode.get('kielerGraphReference').padding.left;
                 targetPoint.y += edge.targetNode.get('kielerGraphReference').padding.top;
               }
-             
+
               points.push(targetPoint);
-              
+
               points.forEach((point) => {
                 point.x += edgeOffset.left;
                 point.y += edgeOffset.top;
               });
-        
+
 
               let pOffsetX = 0.0;
               let pOffsetY = 0.0;
@@ -775,7 +775,7 @@ export default function applyKlayLayout(landscape) {
           }
         });
       });
-    } // END addBendPoints 
+    } // END addBendPoints
 
     function isDescendant(child, parent) {
 

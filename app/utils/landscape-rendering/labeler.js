@@ -58,8 +58,6 @@ export default Ember.Object.extend({
       let labelMesh = this.isLabelAlreadyCreated(emberModel);
 
       if(labelMesh && labelMesh.mesh) {
-
-        console.log("old label");
         // update meta-info for model
         labelMesh.mesh.userData['model'] = emberModel;
         threejsModel['label'] = labelMesh.mesh;
@@ -68,8 +66,6 @@ export default Ember.Object.extend({
 
       }
       else {
-
-        console.log("new label");
         const labelGeo = new THREE.TextBufferGeometry(textObj.text, {
           font: self.get('font'),
           size: 0.4,
@@ -83,21 +79,16 @@ export default Ember.Object.extend({
         labelMesh = new THREE.Mesh(labelGeo, material);
 
         labelMesh.userData['type'] = 'label';
-        labelMesh.userData['model'] = emberModel;      
-      
-        self.get('textLabels')[emberModel.get('id')] = 
+        labelMesh.userData['model'] = emberModel;
+
+        self.get('textLabels')[emberModel.get('id')] =
           {"mesh": labelMesh};
 
         threejsModel['label'] = labelMesh;
         threejsModel.add(labelMesh);
-
-
       }
 
-
       this.repositionSystemLabel(labelMesh);
-
-
     });
   },
 
@@ -115,21 +106,16 @@ export default Ember.Object.extend({
 
       const nodegroupstate = emberModel.get('parent.opened');
 
-      if(labelMesh && labelMesh.mesh && 
+      if(labelMesh && labelMesh.mesh &&
         labelMesh.nodegroupopenstate === nodegroupstate) {
-
-        console.log("old label");
         // update meta-info for model
-        labelMesh.mesh.userData['model'] = emberModel;  
+        labelMesh.mesh.userData['model'] = emberModel;
         threejsModel['label'] = labelMesh.mesh;
         threejsModel.add(labelMesh.mesh);
-        labelMesh = labelMesh.mesh;  
+        labelMesh = labelMesh.mesh;
 
       }
       else {
-
-        console.log("new label");
-
         const text = emberModel.getDisplayName();
         textObj.text = text;
 
@@ -147,19 +133,15 @@ export default Ember.Object.extend({
 
         labelMesh.userData['type'] = 'label';
         labelMesh.userData['model'] = emberModel;
-        
-        self.get('textLabels')[emberModel.get('id')] = 
+
+        self.get('textLabels')[emberModel.get('id')] =
           {"mesh": labelMesh, "nodegroupopenstate": emberModel.get('parent.opened')};
 
         threejsModel['label'] = labelMesh;
         threejsModel.add(labelMesh);
-
       }
 
-      
       this.repositionNodeLabel(labelMesh);
-
-
     });
   },
 
@@ -177,19 +159,14 @@ export default Ember.Object.extend({
       let labelMesh = this.isLabelAlreadyCreated(emberModel);
 
       if(labelMesh && labelMesh.mesh) {
-
-        console.log("old label");
         // update meta-info for model
-        labelMesh.mesh.userData['model'] = emberModel;  
+        labelMesh.mesh.userData['model'] = emberModel;
         threejsModel['label'] = labelMesh.mesh;
         threejsModel.add(labelMesh.mesh);
         labelMesh = labelMesh.mesh;
 
       }
       else {
-
-        console.log("new label");
-
         const labelGeo = new THREE.TextBufferGeometry(textObj.text, {
           font: self.get('font'),
           size: 0.25,
@@ -204,8 +181,8 @@ export default Ember.Object.extend({
 
         labelMesh.userData['type'] = 'label';
         labelMesh.userData['model'] = emberModel;
-        
-        self.get('textLabels')[emberModel.get('id')] = 
+
+        self.get('textLabels')[emberModel.get('id')] =
           {"mesh": labelMesh};
 
         threejsModel['label'] = labelMesh;
@@ -213,10 +190,7 @@ export default Ember.Object.extend({
 
       }
 
-      
       this.repositionAppLabel(labelMesh);
-
-
     });
   },
 
@@ -230,8 +204,8 @@ export default Ember.Object.extend({
 
     labelMesh.geometry.computeBoundingBox();
     const labelBoundingBox = labelMesh.geometry.boundingBox;
-    
-    const labelLength = Math.abs(labelBoundingBox.max.x) - 
+
+    const labelLength = Math.abs(labelBoundingBox.max.x) -
       Math.abs(labelBoundingBox.min.x);
 
     const yOffset = 0.6;
@@ -252,8 +226,8 @@ export default Ember.Object.extend({
 
     labelMesh.geometry.computeBoundingBox();
     const labelBoundingBox = labelMesh.geometry.boundingBox;
-    
-    const labelLength = Math.abs(labelBoundingBox.max.x) - 
+
+    const labelLength = Math.abs(labelBoundingBox.max.x) -
       Math.abs(labelBoundingBox.min.x);
 
     const yOffset = 0.2;
@@ -261,21 +235,21 @@ export default Ember.Object.extend({
     labelMesh.position.x = - (labelLength / 2.0);
     labelMesh.position.y = bboxParent.min.y + yOffset;
     labelMesh.position.z = parent.position.z + 0.001;
-    
+
   },
 
 
   repositionAppLabel(labelMesh) {
 
     const parent = labelMesh.parent;
-    
+
     parent.geometry.computeBoundingBox();
     const bboxParent = parent.geometry.boundingBox;
 
     labelMesh.geometry.computeBoundingBox();
     const labelBoundingBox = labelMesh.geometry.boundingBox;
 
-    const labelHeight = Math.abs(labelBoundingBox.max.y) - 
+    const labelHeight = Math.abs(labelBoundingBox.max.y) -
       Math.abs(labelBoundingBox.min.y);
 
     const xOffset = 0.1;
@@ -283,7 +257,7 @@ export default Ember.Object.extend({
     labelMesh.position.x = bboxParent.min.x + xOffset;
     labelMesh.position.y = -(labelHeight / 2.0);
     labelMesh.position.z = parent.position.z + 0.001;
-    
+
   },
 
 
@@ -291,10 +265,10 @@ export default Ember.Object.extend({
   isLabelAlreadyCreated(emberModel) {
 
     // label already created and color didn't change?
-    if(this.get('textLabels')[emberModel.get('id')] && 
+    if(this.get('textLabels')[emberModel.get('id')] &&
       !this.get('configuration.landscapeColors.textchanged')) {
 
-      const oldTextLabelObj = 
+      const oldTextLabelObj =
         this.get('textLabels')[emberModel.get('id')];
 
       return oldTextLabelObj;
