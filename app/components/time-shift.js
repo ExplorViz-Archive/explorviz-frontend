@@ -1,5 +1,4 @@
 import Ember from 'ember';
-import moment from 'npm:moment';
 
 const {Component, $, on, inject} = Ember;
 
@@ -170,7 +169,7 @@ export default Component.extend({
       return;
     }
 
-    const sortedTimestamps = timestamps.sortBy('id');
+    const sortedTimestamps = timestamps.sortBy('timestamp');
 
     // define outside loop in case of error
     const timestampList = [];
@@ -180,16 +179,18 @@ export default Component.extend({
     // Parse and format timestamps for timeline
     if (sortedTimestamps) {
       sortedTimestamps.forEach(function(timestamp) {
-        const timestampValue = timestamp.get('id');
+        const timestampValue = timestamp.get('timestamp');
         timestampList.push(timestampValue);
 
         const callValue = timestamp.get('calls');
         callList.push(callValue);
 
-        const parsedTimestampValue = moment(timestampValue,"x");
-        const timestampValueFormatted = 
-          parsedTimestampValue.format("HH:mm:ss").toString();
-        timestampListFormatted.push(timestampValueFormatted);
+        //const parsedTimestampValue = moment(timestampValue,"x");
+        
+        //const timestampValueFormatted = 
+        //  parsedTimestampValue.format("HH:mm:ss").toString();
+
+        timestampListFormatted.push(timestampValue);
       });
     }
 
@@ -262,12 +263,8 @@ export default Component.extend({
 
 
   loadTimestamp(timestamp) {
-    console.log(timestamp);
-
-    var date = new Date(timestamp.x); // some mock date
-    var milliseconds = date.getTime();
-    console.log(milliseconds);
-    //this.get('reloadHandler').stopExchange();
-  },
+    const milliseconds = new Date(timestamp.x).getTime();
+    this.get('reloadHandler').loadLandscapeById(milliseconds);
+  }
 
 });

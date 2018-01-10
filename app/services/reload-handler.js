@@ -1,7 +1,9 @@
 import Ember from 'ember';
+import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+
 const {Service, inject, computed, Evented} = Ember;
 
-export default Service.extend(Evented, {
+export default Service.extend(AlertifyHandler, Evented, {
 
   isReloading: computed('timeshiftReload.shallUpdate', function() {
     return this.get('timeshiftReload.shallUpdate');
