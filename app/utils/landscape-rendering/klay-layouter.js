@@ -22,10 +22,10 @@ export default function applyKlayLayout(landscape) {
       // do actual layout
       $klay.layout({
         graph: graph,
-        success: function(layouted) {
-          //console.log("success", layouted);
+        success: function(layouted) { // jshint ignore:line
+			//console.log("success", layouted);
         },
-        error: function(error) {
+        error: function(error) { // jshint ignore:line
           //console.log("error", error);
         }
       });
