@@ -15,6 +15,16 @@ const {Model, attr} = DS;
 */
 export default Model.extend({
 
-  timestamp: attr("number")
+  timestamp: attr("number"),
+
+  /**
+  * This attribute can be used by extensions to insert custom properties to any
+  * meta-model object.
+  *
+  * @property extensionAttributes
+  * @type Array
+  * 
+  */
+  extensionAttributes: attr()
 
 });
