@@ -418,8 +418,6 @@ export default Component.extend(Evented, THREEPerformance, {
     const timestamp = this.get('newState').timestamp;
     const appID = this.get('newState').appID;
 
-    this.get('reloadHandler').stopExchange();
-
     if(timestamp) {
       self.get('reloadHandler').loadLandscapeById(timestamp, appID);
       waitForLandscape();
@@ -446,6 +444,7 @@ export default Component.extend(Evented, THREEPerformance, {
       // Promise fulfilled => apply condition
       promise.then(
         function() {
+          self.get('reloadHandler').stopExchange();
           if(appID){
             self.applyAppCondition(self.get('landscapeRepo.latestApplication'));
           }
