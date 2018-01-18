@@ -3,16 +3,16 @@ import Ember from 'ember';
 const {Component, $, on, inject} = Ember;
 
 /**
-* This component contains the core mechanics of the different (three.js-based) 
-* renderer. All functions below are called in a determined order, hence you only 
+* This component contains the core mechanics of the different (three.js-based)
+* renderer. All functions below are called in a determined order, hence you only
 * need to override them in your custom renderer.
 *
-* See {{#crossLink "Landscape-Rendering"}}{{/crossLink}} or 
+* See {{#crossLink "Landscape-Rendering"}}{{/crossLink}} or
 * {{#crossLink "Application-Rendering"}}{{/crossLink}} for example usage.
 *
 * Call order:
 *
-* 1. 
+* 1.
 *
 * @class Time-Shift-Component
 * @extends Ember.Component
@@ -24,7 +24,7 @@ export default Component.extend({
 
   timestampRepo: inject.service("repos/timestamp-repository"),
   reloadHandler: inject.service("reload-handler"),
-  
+
   plot: null,
 
   dataPointPixelRatio: 17,
@@ -40,7 +40,7 @@ export default Component.extend({
         $(".timeline").slideUp();
         $("#vizContainer").animate({height:'+=200'});
         $(".timeline").attr('vis', 'hide');
-        $('#toggleTimelineButton').removeClass('glyphicon-chevron-down')
+        $('#toggleTimelineButton').removeClass('glyphicon-collapse-down')
           .addClass('glyphicon-chevron-up');
       }
       else {
@@ -49,7 +49,7 @@ export default Component.extend({
         $(".timeline").slideDown();
         $("#vizContainer").animate({height:'-=200'});
         $(".timeline").attr('vis', 'show');
-        $('#toggleTimelineButton').removeClass('glyphicon-chevron-up')
+        $('#toggleTimelineButton').removeClass('glyphicon-collapse-up')
           .addClass('glyphicon-chevron-down');
       }
     },
@@ -88,7 +88,7 @@ export default Component.extend({
       if(self.get('plot')) {
         self.get('plot').unselect(['Timestamps']);
       }
-      
+
     });
   },
 
@@ -125,7 +125,7 @@ export default Component.extend({
         types: {
           Calls: 'area-spline'
           // 'line', 'spline', 'step', 'area', 'area-step' ...
-        },        
+        },
         selection: {
           enabled: true,
           multiple: false
@@ -186,8 +186,8 @@ export default Component.extend({
         callList.push(callValue);
 
         //const parsedTimestampValue = moment(timestampValue,"x");
-        
-        //const timestampValueFormatted = 
+
+        //const timestampValueFormatted =
         //  parsedTimestampValue.format("HH:mm:ss").toString();
 
         timestampListFormatted.push(timestampValue);
@@ -229,7 +229,7 @@ export default Component.extend({
     updatedPlot.flow({
       columns: [newLabel, newValue],
       length:0,
-      done: function () {        
+      done: function () {
         updatedPlot.zoom.enable(true);
         self.applyOptimalZoom();
       }
@@ -249,11 +249,11 @@ export default Component.extend({
     const dataSetLength = allData.length;
 
     const divWidth = this.get('plot').element.clientWidth;
-    const numberOfPointsToShow = parseInt(divWidth / 
+    const numberOfPointsToShow = parseInt(divWidth /
       this.get('dataPointPixelRatio'));
 
-    const lowerBound = dataSetLength - numberOfPointsToShow <= 0 ? 
-        0 : (dataSetLength - numberOfPointsToShow) ;  
+    const lowerBound = dataSetLength - numberOfPointsToShow <= 0 ?
+        0 : (dataSetLength - numberOfPointsToShow) ;
 
     const lowerBoundLabel = allData[lowerBound].x;
     const upperBoundLabel = allData[dataSetLength - 1].x;
