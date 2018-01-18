@@ -1,7 +1,7 @@
-//import applicationRenderingHighlighter from 'explorviz-frontend/utils/landscape-rendering/interaction';
+//import applicationRenderingHighlighter from 'explorviz-frontend/utils/landscape-rendering/highlighter';
 import { module, test } from 'qunit';
 
-module('Unit | Utility | landscape rendering/interaction');
+module('Unit | Utility | landscape rendering/highlighter');
 
 // Replace this with your real tests.
 test('it works', function(assert) {

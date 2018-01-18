@@ -4,6 +4,7 @@ import HammerInteraction from '../hammer-interaction';
 import PopUpHandler from './popup-handler';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import Raycaster from '../raycaster';
+import Highlighter from './highlighter';
 
 export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
@@ -15,6 +16,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
   hammerHandler: null,
   popUpHandler: null,
+  highlighter: null,
 
   setupInteraction(canvas, camera, renderer, raycastObjects) {
     this.set('canvas', canvas);
@@ -48,8 +50,15 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
       self.onMouseWheelStart(evt);
     }
 
+    // hover handler    
+    canvas.addEventListener('mousemove', registerMouseMove, false);
+
+    function registerMouseMove(evt) {
+      self.onMouseMove(evt);
+    }
+
     // register PopUpHandler
-    this.get('canvas').addEventListener('mousestop', registerPopUpHandler, false);
+    canvas.addEventListener('mousestop', registerPopUpHandler, false);
 
     function registerPopUpHandler(evt) {
       self.handlePopUp(evt);
@@ -70,12 +79,41 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
       this.set('popUpHandler', PopUpHandler.create());
     }
 
+    // init Highlighter
+    if (!this.get('highlighter')) {
+      this.set('highlighter', Highlighter.create());
+    }
+
     // PopUpHandler
     self.registerPopUpHandler();
 
     this.setupHammerListener();
 
   },
+
+
+  onMouseMove(evt) {
+
+    const rect = this.get('canvas').getBoundingClientRect();
+
+    const mouse = {
+      x: evt.clientX - rect.left, 
+      y: evt.clientY - rect.top
+    };
+
+    const origin = {};
+
+    origin.x = (mouse.x / this.get('renderer').domElement.clientWidth) * 2 - 1;
+
+    origin.y = -(mouse.y / this.get('renderer').domElement.clientHeight) * 2 + 1;
+
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+      this.get('camera'), this.get('raycastObjects'));
+
+    this.get('highlighter').handleHoverEffect(intersectedViewObj);    
+
+  },
+
 
   onMouseWheelStart(evt) {
 
