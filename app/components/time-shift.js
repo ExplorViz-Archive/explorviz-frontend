@@ -41,7 +41,7 @@ export default Component.extend({
         $("#vizContainer").animate({height:'+=200'});
         $(".timeline").attr('vis', 'hide');
         $('#toggleTimelineButton').removeClass('glyphicon-collapse-down')
-          .addClass('glyphicon-chevron-up');
+          .addClass('glyphicon-collapse-up');
       }
       else {
         // show timeline
@@ -50,7 +50,7 @@ export default Component.extend({
         $("#vizContainer").animate({height:'-=200'});
         $(".timeline").attr('vis', 'show');
         $('#toggleTimelineButton').removeClass('glyphicon-collapse-up')
-          .addClass('glyphicon-chevron-down');
+          .addClass('glyphicon-collapse-down');
       }
     },
 
