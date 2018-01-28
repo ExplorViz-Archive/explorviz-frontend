@@ -144,7 +144,7 @@ export default EmberObject.extend(Evented, {
 
     const self = this;
     
-    this.get('hammerHandler').on('doubleClick', function(mouse) {
+    this.get('hammerHandler').on('tap', function(mouse) {
       self.handleDoubleClick(mouse);
     });
 
@@ -152,7 +152,7 @@ export default EmberObject.extend(Evented, {
       self.handlePanning(delta, event);
     });
 
-    this.get('hammerHandler').on('singleClick', function(mouse) {
+    this.get('hammerHandler').on('press', function(mouse) {
       self.handleSingleClick(mouse);
     });    
 
