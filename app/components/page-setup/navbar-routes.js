@@ -21,8 +21,8 @@ export default Component.extend({
   pageSetupService: inject.service('page-setup'),
 
   actions: {
-    resetToLandscapeView() {
-      this.sendAction("resetToLandscapeView");
+    resetRoute() {
+      this.sendAction("resetRoute");
     }
   }
 });

@@ -22,6 +22,7 @@ Router.map(function() {
   this.route('login');
   this.route('badroute', { path: "/*path" });
   this.route('configuration');
+  this.route('base-route');
 });
 
 export default Router;

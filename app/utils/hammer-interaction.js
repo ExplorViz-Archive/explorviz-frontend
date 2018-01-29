@@ -61,7 +61,6 @@ export default Ember.Object.extend(Ember.Evented, {
 
 
     hammer.on('tap', function(evt){
-      console.log("tap");
       if(evt.button !== 1) {
         return;
       }

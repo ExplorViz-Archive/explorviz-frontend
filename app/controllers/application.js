@@ -17,12 +17,7 @@ export default Controller.extend({
   landscapeRepo: inject.service("repos/landscape-repository"),
   renderingService: inject.service("rendering-service"),
 
-  actions: {
-
-    resetToLandscapeView() {
-      this.get('visualization').send('resetView');
-      this.set('landscapeRepo.latestApplication', null);
-    },
+  actions: {    
 
     exportState() {
       if(this.get('currentRouteName') === 'visualization') {

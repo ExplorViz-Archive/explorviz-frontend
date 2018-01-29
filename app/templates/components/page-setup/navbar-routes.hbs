@@ -1,20 +1,11 @@
 <!-- Outer #link-to is for li-element -->
 <!-- Inner #link-to is for actual link -->
 <!-- #link-to handles active link class on it's own -->
+
 {{#each pageSetupService.navbarRoutes as |item|}}
 
-  <!-- invoke landscape rendering when visualization is clicked -->
-  {{#if (string-comparison item "visualization") }}
+  {{#link-to item tagName="li" invokeAction=(action 'resetRoute')}}
+    {{#link-to item}}{{capitalize item}}{{/link-to}}
+  {{/link-to}}
 
-    {{#link-to item tagName="li" invokeAction=(action 'resetToLandscapeView')}}
-      {{#link-to item}}{{capitalize item}}{{/link-to}}
-    {{/link-to}}
-
-  {{else}}
-
-    {{#link-to item tagName="li"}}
-      {{#link-to item}}{{capitalize item}}{{/link-to}}
-    {{/link-to}}
-
-  {{/if}}
 {{/each}}

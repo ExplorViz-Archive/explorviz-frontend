@@ -15,6 +15,7 @@ export default Route.extend(ApplicationRouteMixin, {
   session: inject.service("session"),
 
   actions: {
+  	
       logout() {
         this.get('session').invalidate({message: "Logout successful"});
       }

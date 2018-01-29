@@ -1,8 +1,6 @@
-import Ember from 'ember';
+import BaseRoute from './base-route';
 import AuthenticatedRouteMixin from
  'ember-simple-auth/mixins/authenticated-route-mixin';
-
-const { Route } = Ember;
 
 /**
 * TODO
@@ -10,7 +8,7 @@ const { Route } = Ember;
 * @class Tutorial-Route
 * @extends Ember.Route
 */
-export default Route.extend(AuthenticatedRouteMixin, {
+export default BaseRoute.extend(AuthenticatedRouteMixin, {
 
   // BUG
   // not 100% working unloading ember store, related to https://github.com/emberjs/data/issues/4938

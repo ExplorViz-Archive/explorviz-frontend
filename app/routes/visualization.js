@@ -1,8 +1,6 @@
-import Ember from 'ember';
+import BaseRoute from './base-route';
 import AuthenticatedRouteMixin from
  'ember-simple-auth/mixins/authenticated-route-mixin';
-
-const { Route } = Ember;
 
 /**
 * TODO
@@ -10,9 +8,16 @@ const { Route } = Ember;
 * @class Visualization-Route
 * @extends Ember.Route
 */
-export default Route.extend(AuthenticatedRouteMixin, {
+export default BaseRoute.extend(AuthenticatedRouteMixin, {
 
   actions: {
+
+    // @Override BaseRoute
+  	resetRoute() {
+      this.controller.send('resetView');
+      this.controller.set('landscapeRepo.latestApplication', null);
+  	},
+
     didTransition() {
       this.controller.showTimeline();
     }

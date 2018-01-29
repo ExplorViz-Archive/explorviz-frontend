@@ -51,6 +51,7 @@
     "ember-cli-htmlbars": "^2.0.3",
     "ember-cli-node-modules-to-vendor": "^0.3.0",
     "ember-data": "^2.18.0",
+    "ember-link-action": "0.0.38",
     "ember-resolver": "^4.4.0",
     "ember-simple-auth": "^1.4.2",
     "ember-source": "^2.14.1",
