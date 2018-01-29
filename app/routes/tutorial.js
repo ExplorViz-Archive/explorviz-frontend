@@ -17,6 +17,7 @@ export default Route.extend(AuthenticatedRouteMixin, {
   beforeModel() {
     this.store.unloadAll();
     this.store.unloadAll('databasequery');
+    this.store.unloadAll('timestamp');
   }
 
 });

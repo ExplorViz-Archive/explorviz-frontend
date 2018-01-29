@@ -1,15 +1,16 @@
 <div id='chart' class='timeline' vis='hide'/>
 
-<!-- toggle hiding timeline -->
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-sm-offset-5 col-sm-2 text-center">
-      <a {{action 'toggleTimeline'}}>
-        <span id="toggleTimelineButton" class="glyphicon glyphicon-collapse-up"></span>
-      </a>
-      <a {{action 'playPauseTimeshift'}}>
-        <span id="playPauseTimelineButton" class="glyphicon glyphicon-pause"></span>
-      </a>
+  <!-- toggle hiding timeline -->
+  <div class="container-fluid" style="position: fixed; width: 100%; bottom: 80px; background:white;">
+    <div class="row">
+      <div class="col-sm-offset-5 col-sm-2 text-center">
+        <a {{action 'toggleTimeline'}}>
+          <span id="toggleTimelineButton" class="glyphicon glyphicon-collapse-up"></span>
+        </a>
+        <a {{action 'playPauseTimeshift'}}>
+          <span id="playPauseTimelineButton" class="glyphicon glyphicon-pause"></span>
+        </a>
+      </div>
     </div>
   </div>
-</div>
+

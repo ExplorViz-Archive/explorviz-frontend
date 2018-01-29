@@ -37,19 +37,20 @@ export default Component.extend({
       if ($(".timeline").attr('vis') === 'show') {
         // hide timeline
         this.set('isUp', false);
-        $(".timeline").slideUp();
-        $("#vizContainer").animate({height:'+=200'});
+        $(".timeline").slideUp(400);
+        $("#vizContainer").animate({height:'+=120'});
         $(".timeline").attr('vis', 'hide');
-        $('#toggleTimelineButton').removeClass('glyphicon-collapse-down')
+        $("#toggleTimelineButton").removeClass('glyphicon-collapse-down')
           .addClass('glyphicon-collapse-up');
       }
       else {
         // show timeline
         this.set('isUp', true);
-        $(".timeline").slideDown();
-        $("#vizContainer").animate({height:'-=200'});
+        $(".timeline").slideDown('fast');
+        $("#vizContainer").animate({height:'-=120'});
+
         $(".timeline").attr('vis', 'show');
-        $('#toggleTimelineButton').removeClass('glyphicon-collapse-up')
+        $("#toggleTimelineButton").removeClass('glyphicon-collapse-up')
           .addClass('glyphicon-collapse-down');
       }
     },
@@ -138,8 +139,19 @@ export default Component.extend({
       axis: {
         x: {
           type: 'timeseries',
+          localTime: false,
           tick: {
               format: '%H:%M:%S'
+          },
+          label: {
+            text: 'Date',
+            position: 'outer-center'
+          }
+        },
+        y: {
+          label: {
+            text: 'Calls',
+            position: 'outer-middle'
           }
         }
       },
@@ -149,13 +161,23 @@ export default Component.extend({
       zoom: {
         enabled: true
       },
+      grid: {
+        x: {
+          show: true
+        },
+        y: {
+          show: false
+        }
+      },
+      padding: {
+        right: 30,
+      },
       onresized: function() {
         self.applyOptimalZoom();
       }
     });
 
     this.set('plot', chart);
-
     this.applyOptimalZoom();
   }),
 
