@@ -13,7 +13,7 @@
     <div class="panel-group pre-scrollable" id="configurationpanelgroup">
       {{#each configurationService.pluginSettings as |addon|}}
         <div class="panel panel-default">
-          <div class="panel-heading">
+          <div data-toggle="collapse" data-target='#{{addon}}' class="panel-heading container-shadow" style="cursor:pointer;">
             <h4 class="panel-title">
               <a data-toggle="collapse" href='#{{addon}}'> {{addon}} </a>
             </h4>
