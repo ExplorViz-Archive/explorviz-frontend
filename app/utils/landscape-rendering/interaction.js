@@ -161,7 +161,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
     const self = this;
 
-    this.get('hammerHandler').on('tap', function(mouse) {
+    this.get('hammerHandler').on('doubletap', function(mouse) {
       self.handleDoubleClick(mouse);
     });
 

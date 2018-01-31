@@ -13,9 +13,29 @@ export default Ember.Object.extend(Ember.Evented, {
 
     registerRightClickWithPan();
 
-    const hammer = new Hammer(canvas, {});
-    hammer.get('pan').set({ direction: Hammer.DIRECTION_ALL });
-    this.set('hammerManager', hammer);    
+    const hammer = new Hammer.Manager(canvas, {});
+    this.set('hammerManager', hammer);
+
+    const singleTap = new Hammer.Tap({
+      event: 'singletap',
+      interval: 250
+    });
+
+    const doubleTap = new Hammer.Tap({
+      event: 'doubletap',
+      taps: 2,
+      interval: 250
+    });
+
+    const pan = new Hammer.Pan({
+      event: 'pan'
+    });
+
+    hammer.add([doubleTap, singleTap, pan]);
+
+    doubleTap.recognizeWith(singleTap);
+    singleTap.requireFailure(doubleTap);
+    doubleTap.dropRequireFailure(singleTap);
 
     hammer.on('panstart', (evt) => {
       if(evt.button !== 1 && evt.button !== 3) {
@@ -59,8 +79,7 @@ export default Ember.Object.extend(Ember.Evented, {
       self.trigger('panningEnd', mouse);
     });
 
-
-    hammer.on('tap', function(evt){
+    hammer.on('doubletap', (evt) => {
       if(evt.button !== 1) {
         return;
       }
@@ -70,10 +89,11 @@ export default Ember.Object.extend(Ember.Evented, {
       mouse.x = evt.srcEvent.clientX;
       mouse.y = evt.srcEvent.clientY;
 
-      self.trigger('tap', mouse);      
+      self.trigger('doubletap', mouse);
     });
 
-    hammer.on('press', function(evt){
+
+    hammer.on('singletap', function(evt){
       if(evt.button !== 1) {
         return;
       }
@@ -83,9 +103,8 @@ export default Ember.Object.extend(Ember.Evented, {
       mouse.x = evt.srcEvent.clientX;
       mouse.y = evt.srcEvent.clientY;
 
-      self.trigger('press', mouse);      
+      self.trigger('singletap', mouse);      
     });
-
 
     // Fire Panning-Event with right click as well
     
