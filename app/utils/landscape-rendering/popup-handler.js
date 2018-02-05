@@ -152,6 +152,10 @@ export default Ember.Object.extend(Ember.Evented, {
       return content;
     }
 
+    function round(value, precision) {
+      var multiplier = Math.pow(10, precision || 0);
+      return Math.round(value * multiplier) / multiplier;
+    }
 
     function buildNodeContent(node) {
 
@@ -161,9 +165,9 @@ export default Ember.Object.extend(Ember.Evented, {
 
       // Formatted values for the node popup
       const formatFactor = (1024 * 1024 * 1024);
-      var cpuUtilization = Math.round(node.get('cpuUtilization') * 100);
-      var freeRAM =  Math.round(node.get('freeRAM') / formatFactor);
-      var totalRAM =  Math.round((node.get('usedRAM') + node.get('freeRAM')) / formatFactor);
+      var cpuUtilization = round(node.get('cpuUtilization') * 100, 0);
+      var freeRAM =  round(node.get('freeRAM') / formatFactor, 2).toFixed(2);
+      var totalRAM =  round((node.get('usedRAM') + node.get('freeRAM')) / formatFactor, 2).toFixed(2);
 
       content.html =
         '<table style="width:100%">' +
