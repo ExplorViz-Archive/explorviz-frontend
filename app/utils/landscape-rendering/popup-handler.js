@@ -22,7 +22,7 @@ export default Ember.Object.extend(Ember.Evented, {
 
     Ember.$('#vizContainer').popover(
       {
-        title: '<div style="font-weight:bold;text-align:center;">' + 
+        title: '<div style="font-weight:bold;text-align:center;">' +
           content.title + '</div>',
         content : content.html,
         placement:'top',
@@ -72,14 +72,14 @@ export default Ember.Object.extend(Ember.Evented, {
     }
     else if(modelType === 'communication') {
       content = buildCommunicationContent(emberModel);
-    } 
+    }
 
     return content;
 
 
 
     // Helper functions
-    
+
     function buildApplicationContent(application) {
 
       let content = {title: '', html: ''};
@@ -88,20 +88,20 @@ export default Ember.Object.extend(Ember.Evented, {
 
       const year = new Date(application.get('lastUsage')).toLocaleString();
 
-      content.html = 
-        '<table style="width:100%">' + 
-          '<tr>' + 
-            '<td>Last Usage:</td>' + 
+      content.html =
+        '<table style="width:100%">' +
+          '<tr>' +
+            '<td>Last Usage:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              year + 
-            '</td>' + 
-          '</tr>' + 
-          '<tr>' + 
-            '<td>Language:</td>' + 
-            '<td style="text-align:right;padding-left:10px;">' +
-              application.get('programmingLanguage') + 
+              year +
             '</td>' +
-          '</tr>' + 
+          '</tr>' +
+          '<tr>' +
+            '<td>Language:</td>' +
+            '<td style="text-align:right;padding-left:10px;">' +
+              application.get('programmingLanguage') +
+            '</td>' +
+          '</tr>' +
         '</table>';
 
       return content;
@@ -133,20 +133,20 @@ export default Ember.Object.extend(Ember.Evented, {
       });
 
 
-      content.html = 
-        '<table style="width:100%">' + 
-          '<tr>' + 
-            '<td>Nodes:</td>' + 
+      content.html =
+        '<table style="width:100%">' +
+          '<tr>' +
+            '<td>Nodes:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              nodesCount + 
-            '</td>' + 
-          '</tr>' + 
-          '<tr>' + 
-            '<td>Applications:</td>' + 
-            '<td style="text-align:right;padding-left:10px;">' +
-              applicationCount + 
+              nodesCount +
             '</td>' +
-          '</tr>' + 
+          '</tr>' +
+          '<tr>' +
+            '<td>Applications:</td>' +
+            '<td style="text-align:right;padding-left:10px;">' +
+              applicationCount +
+            '</td>' +
+          '</tr>' +
         '</table>';
 
       return content;
@@ -159,26 +159,32 @@ export default Ember.Object.extend(Ember.Evented, {
 
       content.title = node.getDisplayName();
 
-      content.html = 
-        '<table style="width:100%">' + 
-          '<tr>' + 
-            '<td>CPU Utilization:</td>' + 
+      // Formatted values for the node popup
+      const formatFactor = (1024 * 1024 * 1024);
+      var cpuUtilization = Math.round(node.get('cpuUtilization') * 100);
+      var freeRAM =  Math.round(node.get('freeRAM') / formatFactor);
+      var totalRAM =  Math.round((node.get('usedRAM') + node.get('freeRAM')) / formatFactor);
+
+      content.html =
+        '<table style="width:100%">' +
+          '<tr>' +
+            '<td>CPU Utilization:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              node.get('cpuUtilization') + ' %' +
-            '</td>' + 
-          '</tr>' + 
-          '<tr>' + 
-            '<td>Total RAM:</td>' + 
-            '<td style="text-align:right;padding-left:10px;">' +
-              node.get('freeRAM') + ' GB' +
-            '</td>' + 
-          '</tr>' + 
-          '<tr>' + 
-            '<td>Free RAM:</td>' + 
-            '<td style="text-align:right;padding-left:10px;">' +
-              node.get('usedRAM') + ' %' +
+              cpuUtilization + ' %' +
             '</td>' +
-          '</tr>' + 
+          '</tr>' +
+          '<tr>' +
+            '<td>Free RAM:</td>' +
+            '<td style="text-align:right;padding-left:10px;">' +
+            freeRAM + ' GB' +
+            '</td>' +
+          '</tr>' +
+          '<tr>' +
+            '<td>Total RAM:</td>' +
+              '<td style="text-align:right;padding-left:10px;">' +
+              totalRAM + ' GB' +
+            '</td>' +
+          '</tr>' +
         '</table>';
 
       return content;
@@ -206,26 +212,26 @@ export default Ember.Object.extend(Ember.Evented, {
       });
 
 
-      content.html = 
-        '<table style="width:100%">' + 
-          '<tr>' + 
-            '<td>Nodes:</td>' + 
+      content.html =
+        '<table style="width:100%">' +
+          '<tr>' +
+            '<td>Nodes:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              nodes.get('length') + 
-            '</td>' + 
-          '</tr>' + 
-          '<tr>' + 
-            '<td>Applications:</td>' + 
-            '<td style="text-align:right;padding-left:10px;">' +
-              applicationCount + 
+              nodes.get('length') +
             '</td>' +
           '</tr>' +
-          '<tr>' + 
-            '<td>Avg. CPU Utilization:</td>' + 
+          '<tr>' +
+            '<td>Applications:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              avgNodeCPUUtil + 
+              applicationCount +
             '</td>' +
-          '</tr>' + 
+          '</tr>' +
+          '<tr>' +
+            '<td>Avg. CPU Utilization:</td>' +
+            '<td style="text-align:right;padding-left:10px;">' +
+              avgNodeCPUUtil +
+            '</td>' +
+          '</tr>' +
         '</table>';
 
       return content;
@@ -237,35 +243,35 @@ export default Ember.Object.extend(Ember.Evented, {
 
       let content = {title: '', html: ''};
 
-      content.title = encodeStringForPopUp(communication.get('source').get('name')) + 
+      content.title = encodeStringForPopUp(communication.get('source').get('name')) +
         "&nbsp;<span class='glyphicon glyphicon-transfer'></span>&nbsp;";
 
-      content.html = 
-        '<table style="width:100%">' + 
-          '<tr>' + 
-            '<td>Requests:</td>' + 
+      content.html =
+        '<table style="width:100%">' +
+          '<tr>' +
+            '<td>Requests:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              communication.get('requests') + 
-            '</td>' + 
-          '</tr>' + 
-          '<tr>' + 
-            '<td>Technology:</td>' + 
+              communication.get('requests') +
+            '</td>' +
+          '</tr>' +
+          '<tr>' +
+            '<td>Technology:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              communication.get('technology') + 
-            '</td>' + 
-          '</tr>' + 
-          '<tr>' + 
-            '<td>Avg. Duration:</td>' + 
+              communication.get('technology') +
+            '</td>' +
+          '</tr>' +
+          '<tr>' +
+            '<td>Avg. Duration:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
               communication.get('averageResponseTimeInNanoSec') + ' ms' +
             '</td>' +
-          '</tr>' + 
+          '</tr>' +
         '</table>';
 
       return content;
     }
 
-    
+
 
 
   } // END buildApplicationContent
