@@ -21,10 +21,10 @@ export default Mixin.create({
   },
 
   showAlertifyMessage(message) {
-    this.showAlertifyMessage(message, 3);
+    this.showAlertifyMessageWithDuration(message, 3);
   },
 
-  showAlertifyMessage(message, duration) {
+  showAlertifyMessageWithDuration(message, duration) {
 
     const self = this;
 
