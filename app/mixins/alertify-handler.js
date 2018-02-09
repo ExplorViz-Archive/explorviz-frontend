@@ -21,17 +21,26 @@ export default Mixin.create({
   },
 
   showAlertifyMessage(message) {
+    this.showAlertifyMessage(message, 3);
+  },
+
+  showAlertifyMessage(message, duration) {
 
     const self = this;
 
     this.set('alertActive', true);
 
-    alertify.notify(message, 'message', 3, function(){
+    alertify.notify(message, 'message', duration, function(){
 
       // if last dialog, set respective flag
       // This flag is not used atm, but may be used in the future
       if($('.ajs-message.ajs-message.ajs-visible').length === 0) {
-        self.set('alertActive', false);
+
+        // reference might be destroyed 
+        // since outer container (e.g. component) might be destroyed
+        if(self && !self.isDestroyed) {
+          self.set('alertActive', false);
+        }  
       }            
     });
 
@@ -39,7 +48,12 @@ export default Mixin.create({
 
   closeAlertifyMessages() {
     alertify.dismissAll();
-    this.set('alertActive', false);
+
+    // reference might be destroyed 
+    // since outer container (e.g. component) might be destroyed
+    if(this && !this.isDestroyed) {
+      this.set('alertActive', false);
+    }  
   }
 
 });
