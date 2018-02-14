@@ -5,7 +5,7 @@ const { attr, belongsTo } = DS;
 
 /**
 * Ember model for a CommunicationClazz.
-* 
+*
 * @class CommunicationClazz-Model
 * @extends BaseEntity-Model
 *
@@ -15,14 +15,14 @@ const { attr, belongsTo } = DS;
 export default BaseEntity.extend({
 
   requestsCacheCount: attr(),
-
   methodName: attr('string'),
-  
   traceIdToRuntimeMap: attr(),
 
-  source: belongsTo('clazz', { inverse: null }),
-  target: belongsTo('clazz', { inverse: null }),
-  
-  hidden: attr('boolean')
+  sourceApplication: belongsTo('application', {inverse: 'outgoingApplicationCommunications'}),
+  targetApplication: belongsTo('application', { inverse: null }),
 
+  sourceClazz: belongsTo('clazz', { inverse: null }),
+  targetClazz: belongsTo('clazz', { inverse: null }),
+
+  hidden: attr('boolean')
 });
