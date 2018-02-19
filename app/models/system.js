@@ -6,7 +6,7 @@ const { attr, hasMany, belongsTo } = DS;
 
 /**
 * Ember model for a System.
-* 
+*
 * @class System-Model
 * @extends DrawNodeEntity-Model
 *
@@ -14,9 +14,9 @@ const { attr, hasMany, belongsTo } = DS;
 * @submodule model.meta
 */
 export default DrawNodeEntity.extend({
-  opened: attr('boolean'),  
+  opened: attr('boolean'),
 
-  nodegroups: hasMany('nodegroup', {
+  nodeGroups: hasMany('nodegroup', {
     inverse: 'parent'
   }),
 
@@ -36,7 +36,7 @@ export default DrawNodeEntity.extend({
   setOpened: function(openedParam) {
     if (openedParam) {
       this.get('nodegroups').forEach((nodegroup) => {
-          nodegroup.set('visible', true);      
+          nodegroup.set('visible', true);
           if (nodegroup.get('nodes').get('length') === 1) {
             nodegroup.setOpened(true);
           } else {
@@ -52,6 +52,6 @@ export default DrawNodeEntity.extend({
     }
 
     this.set('opened', openedParam);
-    
+
   }
 });

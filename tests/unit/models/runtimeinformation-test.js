@@ -1,8 +1,8 @@
 import { moduleForModel, test } from 'ember-qunit';
 
-moduleForModel('communication', 'Unit | Model | communication', {
+moduleForModel('runtimeinformation', 'Unit | Model | runtimeinformation', {
   // Specify the other units that are required for this test.
-  needs: ['model:landscape', 'model:application', 'model:clazz']
+  needs: []
 });
 
 test('it exists', function(assert) {

@@ -16,28 +16,26 @@ export default DrawEdgeEntity.extend({
 
   requests: attr('number'),
   technology: attr('string'),
-
   averageResponseTime: attr('number'),
 
   sourceApplication: belongsTo('application', {
-    inverse: 'outgoingCommunications'
+    inverse: 'outgoingApplicationCommunication'
   }),
 
   targetApplication: belongsTo('application', {
-    inverse: 'incomingCommunications'
+    inverse: null
   }),
 
-  sourceClazz: belongsTo('clazz'),
-  targetClazz: belongsTo('clazz'),
+  sourceClazz: belongsTo('clazz', {
+    inverse: null
+  }),
+
+  targetClazz: belongsTo('clazz', {
+    inverse: null
+  }),
 
   parent: belongsTo('landscape', {
     inverse: 'applicationCommunication'
   }),
-
-  pipeColor: attr(),
-
-  kielerEdgeReferences: [],
-
-  points: []
 
 });

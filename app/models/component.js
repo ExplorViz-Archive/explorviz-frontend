@@ -5,7 +5,7 @@ const { attr, belongsTo, hasMany } = DS;
 
 /**
 * Ember model for a Component, e.g. a Java package.
-* 
+*
 * @class Component-Model
 * @extends Draw3DNodeEntity-Model
 *
@@ -14,6 +14,9 @@ const { attr, belongsTo, hasMany } = DS;
 */
 export default Draw3DNodeEntity.extend({
 
+  name: attr('string'),
+  fullQualifiedName: attr('string'),
+
   synthetic: attr('boolean'),
   foundation: attr('boolean'),
 
@@ -21,19 +24,19 @@ export default Draw3DNodeEntity.extend({
     inverse: 'parentComponent'
   }),
 
-  clazzes: hasMany('clazz'),
+  clazzes: hasMany('clazz', {
+    inverse: 'parent'
+  }),
 
   parentComponent: belongsTo('component', {
     inverse: 'children'
   }),
 
   // breaks Ember, maybe because of circle ?
-  
+
   /*belongingApplication: belongsTo('application', {
     inverse: 'components'
   }),*/
-
-  opened: attr('boolean'),
 
   setOpenedStatus(status) {
 

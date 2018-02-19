@@ -4,7 +4,7 @@ const {Model, attr} = DS;
 
 /**
 * Ember model for a Timestamp.
-* 
+*
 * @class Timestamp-Model
 * @extends DS.Model
 *
@@ -12,6 +12,7 @@ const {Model, attr} = DS;
 * @submodule model
 */
 export default Model.extend({
+
   timestamp: attr('number'),
-  calls: attr('number')
+  overallCalls: attr('number')
 });

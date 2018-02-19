@@ -6,9 +6,9 @@ import THREE from "npm:three";
 const { attr } = DS;
 
 /**
-* Ember model for a Draw3DNodeEntity. This model is inherited by all elements 
+* Ember model for a Draw3DNodeEntity. This model is inherited by all elements
 * that compose an application in the respective visualization.
-* 
+*
 * @class Draw3DNodeEntity-Model
 * @extends BaseEntity-Model
 *
@@ -17,17 +17,16 @@ const { attr } = DS;
 */
 export default BaseEntity.extend({
 
-  name: attr('string'),
-  fullQualifiedName: attr('string'),
-
   width: attr('number'),
   height: attr('number'),
   depth: attr('number'),
   positionX: attr('number'),
   positionY: attr('number'),
   positionZ: attr('number'),
-  
+
   highlighted: attr('boolean'),
+  opened: attr('boolean'),
+  visible: attr('boolean'),
 
   extension: Ember.computed('width', 'height', 'depth', function() {
     let width = this.get('width') / 2.0;

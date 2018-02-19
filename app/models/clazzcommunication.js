@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
 
-const { attr, belongsTo } = DS;
+const { attr, belongsTo, hasMany } = DS;
 
 /**
  * Ember model for a ClazzCommunication.
@@ -12,15 +12,21 @@ const { attr, belongsTo } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default BaseEntity.extend({
+export default DrawEdgeEntity.extend({
 
+  operationName: attr('string'),
   requestsCacheCount: attr(),
-  methodName: attr('string'),
-  traceIdToRuntimeMap: attr(),
 
-  sourceClazz: belongsTo('clazz', { inverse: 'outgoingCommunications' }),
-  targetClazz: belongsTo('clazz', { inverse: null }),
+  runtimeInformations:  hasMany('runtimeInformation', {
+    inverse: null
+}),
 
-  hidden: attr('boolean')
+  sourceClazz: belongsTo('clazz', {
+    inverse: 'outgoingClazzCommunications'
+  }),
+
+  targetClazz: belongsTo('clazz', {
+    inverse: null
+  }),
 
 });

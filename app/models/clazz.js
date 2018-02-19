@@ -1,11 +1,11 @@
 import DS from 'ember-data';
 import Draw3DNodeEntity from './draw3dnodeentity';
 
-const { attr, belongsTo } = DS;
+const { attr, belongsTo, hasMany } = DS;
 
 /**
 * Ember model for a clazz.
-* 
+*
 * @class Clazz-Model
 * @extends Draw3DNodeEntity-Model
 *
@@ -14,11 +14,18 @@ const { attr, belongsTo } = DS;
 */
 export default Draw3DNodeEntity.extend({
 
+  name: attr('string'),
+  fullQualifiedName: attr('string'),
   instanceCount: attr("number"),
   objectIds: attr(),
 
-  parent: belongsTo('component'),
-  visible: attr('boolean'),
+  outgoingClazzCommunications: hasMany('clazzCommunication', {
+    inverse: 'sourceClazz'
+  }),
+
+  parent: belongsTo('component', {
+    inverse: 'clazzes'
+  }),
 
   unhighlight() {
     this.set('highlighted', false);

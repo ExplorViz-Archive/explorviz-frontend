@@ -4,9 +4,9 @@ import BaseEntity from './baseentity';
 const { attr } = DS;
 
 /**
-* Ember model for a DrawEdgeEntity. This model is mainly used for 
-* communications. 
-* 
+* Ember model for a DrawEdgeEntity. This model is mainly used for
+* communications.
+*
 * @class DrawEdgeEntity-Model
 * @extends BaseEntity-Model
 *
@@ -28,7 +28,7 @@ export default BaseEntity.extend({
   *
   * @property positionZ
   * @type number
-  */ 
+  */
   positionZ: attr('number'),
 
   /**
@@ -39,9 +39,12 @@ export default BaseEntity.extend({
   */
   points: attr(),
 
-  pointsFor3D: attr()
+  pointsFor3D: attr(),
 
   //List<Vector3f> pointsFor3D = new ArrayList<Vector3f>
 
+  pipeColor: attr(),
+  kielerEdgeReferences: [],
+  hidden: attr('boolean')
 
 });

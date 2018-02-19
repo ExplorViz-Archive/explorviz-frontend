@@ -5,7 +5,7 @@ const { attr } = DS;
 
 /**
 * Ember model for a DrawNodeEntity.
-* 
+*
 * @class DrawNodeEntity-Model
 * @extends BaseEntity-Model
 *
@@ -14,8 +14,11 @@ const { attr } = DS;
 */
 export default BaseEntity.extend({
 
-  name: attr('string'),
+  visible: attr('boolean'),
+  opened: attr('boolean'),
 
+  plusColor: attr(),
+  backgroundColor: attr(),
   highlighted: attr('boolean'),
 
   width: attr('number'),

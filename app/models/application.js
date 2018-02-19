@@ -5,7 +5,7 @@ const { attr, belongsTo, hasMany } = DS;
 
 /**
 * Ember model for an Application.
-* 
+*
 * @class Application-Model
 * @extends DrawNodeEntity-Model
 *
@@ -14,11 +14,9 @@ const { attr, belongsTo, hasMany } = DS;
 */
 export default DrawNodeEntity.extend({
 
-  database: attr('boolean'),
-
-  programmingLanguage: attr('string'),
-
+  name: attr('string'),
   lastUsage: attr('number'),
+  programmingLanguage: attr('string'),
 
   parent: belongsTo('node', {
     inverse: 'applications'
@@ -26,22 +24,16 @@ export default DrawNodeEntity.extend({
 
   components: hasMany('component', {
     // breaks Ember, maybe because of circle ?
-    
     //inverse: 'belongingApplication'
   }),
 
-  communications: hasMany('communicationclazz'),
-
-  communicationsAccumulated: [],
-
-  incomingCommunications: hasMany('communication', {
-    inverse: 'target'
+  outgoingApplicationCommunication: hasMany('applicationCommunication', {
+    inverse: 'sourceApplication'
   }),
 
-  outgoingCommunications: hasMany('communication', {
-    inverse: 'source'
-  }),
-  
+  // generated list of clazzCommunication for rendering purposes
+  outgoingClazzCommunication: attr(),
+
   databaseQueries: hasMany('databasequery'),
 
   // used for text labeling performance in respective renderers
