@@ -1,5 +1,5 @@
 import DS from 'ember-data';
-import BaseEntity from './baseentity';
+import DrawEdgeEntity from './drawedgeentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -17,7 +17,7 @@ export default DrawEdgeEntity.extend({
   operationName: attr('string'),
   requestsCacheCount: attr(),
 
-  runtimeInformations:  hasMany('runtimeInformation', {
+  runtimeInformations:  hasMany('runtimeinformation', {
     inverse: null
 }),
 

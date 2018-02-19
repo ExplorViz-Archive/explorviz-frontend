@@ -18,6 +18,7 @@ export default BaseEntity.extend({
   opened: attr('boolean'),
 
   plusColor: attr(),
+  foregroundColor: attr(),
   backgroundColor: attr(),
   highlighted: attr('boolean'),
 

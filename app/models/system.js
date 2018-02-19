@@ -2,7 +2,7 @@ import DS from 'ember-data';
 import Ember from 'ember';
 import DrawNodeEntity from './drawnodeentity';
 
-const { attr, hasMany, belongsTo } = DS;
+const { hasMany, belongsTo } = DS;
 
 /**
 * Ember model for a System.
@@ -14,19 +14,14 @@ const { attr, hasMany, belongsTo } = DS;
 * @submodule model.meta
 */
 export default DrawNodeEntity.extend({
-  opened: attr('boolean'),
 
-  nodeGroups: hasMany('nodegroup', {
+  nodegroups: hasMany('nodegroup', {
     inverse: 'parent'
   }),
 
   parent: belongsTo('landscape', {
     inverse: 'systems'
   }),
-
-  plusColor : attr(),
-  foregroundColor : attr(),
-  backgroundColor : attr(),
 
   // used for text labeling performance in respective labelers
   state: Ember.computed('opened', function() {

@@ -52,7 +52,7 @@ export default Controller.extend({
   showTimeline() {
     this.set('renderingService.showTimeline', true);
   },
-  
+
   // @Override
   init() {
     this._super(...arguments);
@@ -64,14 +64,14 @@ export default Controller.extend({
       self.set('state',state);
     });
 
-    // Listen for component request 
+    // Listen for component request
     this.get('viewImporter').on('requestView', function() {
       const newState = {};
       // Get and convert query params
-      
+
       newState.timestamp = self.get('timestamp');
-      newState.appID = self.get('appID'); 
-      
+      newState.appID = self.get('appID');
+
       newState.camX = parseFloat(self.get('camX'));
       newState.camY = parseFloat(self.get('camY'));
       newState.camZ = parseFloat(self.get('camZ'));
@@ -91,7 +91,7 @@ export default Controller.extend({
 
   actions: {
 
-    // Triggered by the export button 
+    // Triggered by the export button
     exportState() {
       // Pause timeshift
       this.get('reloadHandler').stopExchange();

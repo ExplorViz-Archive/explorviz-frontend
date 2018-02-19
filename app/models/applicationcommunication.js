@@ -19,7 +19,7 @@ export default DrawEdgeEntity.extend({
   averageResponseTime: attr('number'),
 
   sourceApplication: belongsTo('application', {
-    inverse: 'outgoingApplicationCommunication'
+    inverse: 'outgoingApplicationCommunications'
   }),
 
   targetApplication: belongsTo('application', {
@@ -32,10 +32,6 @@ export default DrawEdgeEntity.extend({
 
   targetClazz: belongsTo('clazz', {
     inverse: null
-  }),
-
-  parent: belongsTo('landscape', {
-    inverse: 'applicationCommunication'
   }),
 
 });

@@ -15,6 +15,6 @@ export default BaseEntity.extend({
   timestamp: attr('number'),
 	sqlStatement: attr('string'),
 	returnValue: attr('string'),
-	timeInNanos: attr('number')
+	responseTime: attr('number')
 
 });

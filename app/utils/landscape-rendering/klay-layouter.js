@@ -1,5 +1,8 @@
 export default function applyKlayLayout(landscape) {
 
+    const tmp = landscape.get('systems').objectAt(0).get('nodegroups');
+    debugger;
+
     let topLevelKielerGraph = null;
 
     let CONVERT_TO_KIELER_FACTOR = 180.0;
@@ -286,7 +289,7 @@ export default function applyKlayLayout(landscape) {
 
       function addEdges(landscape) {
 
-        const applicationCommunication = landscape.get('applicationCommunication');
+        const applicationCommunication = landscape.get('outgoingApplicationCommunications');
 
 
         applicationCommunication.forEach((communication) => {
@@ -294,8 +297,8 @@ export default function applyKlayLayout(landscape) {
           communication.set('kielerEdgeReferences', []);
           communication.set('points', []);
 
-          let appSource = communication.get('source');
-          let appTarget = communication.get('target');
+          let appSource = communication.get('sourceApplication');
+          let appTarget = communication.get('targetApplication');
 
           if(!appTarget.get('parent').get('visible')){
             appTarget = (appTarget.get('parent').get('parent').get('parent').get('opened'))? seekRepresentativeApplication(appTarget) : appTarget.get('parent').get('parent').get('parent') ;
@@ -635,10 +638,10 @@ export default function applyKlayLayout(landscape) {
 
     function addBendPointsInAbsoluteCoordinates(landscape) {
 
-      const applicationCommunication = landscape.get('applicationCommunication');
+      const applicationCommunications = landscape.get('outgoingApplicationCommunications');
       const alreadyCalculatedPoints = {};
 
-      applicationCommunication.forEach((communication) => {
+      applicationCommunications.forEach((communication) => {
 
         const kielerEdgeReferences = communication.get('kielerEdgeReferences');
 
@@ -652,8 +655,8 @@ export default function applyKlayLayout(landscape) {
               return;
             }
 
-            let parentNode = getRightParent(communication.get('source'),
-              communication.get('target'));
+            let parentNode = getRightParent(communication.get('sourceApplication'),
+              communication.get('targetApplication'));
 
             var points = [];
 

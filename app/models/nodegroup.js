@@ -18,7 +18,7 @@ export default DrawNodeEntity.extend({
   name: attr('string'),
 
   parent: belongsTo('system', {
-    inverse: 'nodeGroups'
+    inverse: 'nodegroups'
   }),
 
   nodes: hasMany('node', {

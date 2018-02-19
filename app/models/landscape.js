@@ -3,7 +3,6 @@ import BaseEntity from './baseentity';
 
 const { attr, hasMany } = DS;
 
-
 /**
 * Ember model for a landscape.
 *
@@ -24,7 +23,9 @@ export default BaseEntity.extend({
     inverse: 'parent'
   }),
 
-  // generated list of applicationCommunication for rendering purposes
-  applicationCommunication: attr(),
+  // list of applicationCommunication for rendering purposes
+  outgoingApplicationCommunications: hasMany('applicationcommunication', {
+    inverse: null
+  }),
 
 });
