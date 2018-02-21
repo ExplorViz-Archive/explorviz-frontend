@@ -2,7 +2,7 @@ import DS from 'ember-data';
 import Ember from 'ember';
 import DrawNodeEntity from './drawnodeentity';
 
-const { hasMany, belongsTo } = DS;
+const { attr, hasMany, belongsTo } = DS;
 
 /**
 * Ember model for a System.
@@ -14,6 +14,8 @@ const { hasMany, belongsTo } = DS;
 * @submodule model.meta
 */
 export default DrawNodeEntity.extend({
+
+  name: attr('string'),
 
   nodegroups: hasMany('nodegroup', {
     inverse: 'parent'

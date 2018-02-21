@@ -17,16 +17,16 @@ const { attr } = DS;
 */
 export default BaseEntity.extend({
 
-  width: attr('number'),
-  height: attr('number'),
-  depth: attr('number'),
-  positionX: attr('number'),
-  positionY: attr('number'),
-  positionZ: attr('number'),
+  width: attr('number', { defaultValue: 0}),
+  height: attr('number', { defaultValue: 0}),
+  depth: attr('number', { defaultValue: 0}),
+  positionX: attr('number', { defaultValue: 0}),
+  positionY: attr('number', { defaultValue: 0}),
+  positionZ: attr('number', { defaultValue: 0}),
 
-  highlighted: attr('boolean'),
-  opened: attr('boolean'),
-  visible: attr('boolean'),
+  highlighted: attr('boolean', { defaultValue: false}),
+  opened: attr('boolean', { defaultValue: true}),
+  visible: attr('boolean', { defaultValue: true}),
 
   extension: Ember.computed('width', 'height', 'depth', function() {
     let width = this.get('width') / 2.0;

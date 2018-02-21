@@ -1,8 +1,5 @@
 export default function applyKlayLayout(landscape) {
 
-    const tmp = landscape.get('systems').objectAt(0).get('nodegroups');
-    debugger;
-
     let topLevelKielerGraph = null;
 
     let CONVERT_TO_KIELER_FACTOR = 180.0;
@@ -26,10 +23,10 @@ export default function applyKlayLayout(landscape) {
       $klay.layout({
         graph: graph,
         success: function(layouted) { // jshint ignore:line
-			//console.log("success", layouted);
+          console.log("success", layouted);
         },
         error: function(error) { // jshint ignore:line
-          //console.log("error", error);
+          console.log("error", error);
         }
       });
 
@@ -289,16 +286,15 @@ export default function applyKlayLayout(landscape) {
 
       function addEdges(landscape) {
 
-        const applicationCommunication = landscape.get('outgoingApplicationCommunications');
+        const applicationCommunications = landscape.get('outgoingApplicationCommunications');
 
+        applicationCommunications.forEach((applicationcommunication) => {
 
-        applicationCommunication.forEach((communication) => {
+          applicationcommunication.set('kielerEdgeReferences', []);
+          applicationcommunication.set('points', []);
 
-          communication.set('kielerEdgeReferences', []);
-          communication.set('points', []);
-
-          let appSource = communication.get('sourceApplication');
-          let appTarget = communication.get('targetApplication');
+          let appSource = applicationcommunication.get('sourceApplication');
+          let appTarget = applicationcommunication.get('targetApplication');
 
           if(!appTarget.get('parent').get('visible')){
             appTarget = (appTarget.get('parent').get('parent').get('parent').get('opened'))? seekRepresentativeApplication(appTarget) : appTarget.get('parent').get('parent').get('parent') ;
@@ -308,10 +304,9 @@ export default function applyKlayLayout(landscape) {
             appSource = (appSource.get('parent').get('parent').get('parent').get('opened'))? seekRepresentativeApplication(appSource) : appSource.get('parent').get('parent').get('parent') ;
           }
 
-
           if(appSource.get("id") !== appTarget.get("id")){
             const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
-            communication.get('kielerEdgeReferences').push(edge);
+            applicationcommunication.get('kielerEdgeReferences').push(edge);
             //console.log(appSource.get("kielerGraphReference").edges);
           }
         });
@@ -477,8 +472,6 @@ export default function applyKlayLayout(landscape) {
 
    function createEdgeBetweenSourceTarget(sourceApplication, targetApplication) {
 
-      //console.log(sourceApplication.get('name') + " und " + targetApplication.get('name'));
-
       const port1 = createSourcePortIfNotExisting(sourceApplication);
       const port2 = createTargetPortIfNotExisting(targetApplication);
 
@@ -641,9 +634,9 @@ export default function applyKlayLayout(landscape) {
       const applicationCommunications = landscape.get('outgoingApplicationCommunications');
       const alreadyCalculatedPoints = {};
 
-      applicationCommunications.forEach((communication) => {
+      applicationCommunications.forEach((applicationcommunication) => {
 
-        const kielerEdgeReferences = communication.get('kielerEdgeReferences');
+        const kielerEdgeReferences = applicationcommunication.get('kielerEdgeReferences');
 
           kielerEdgeReferences.forEach((edge) => {
 
@@ -651,12 +644,12 @@ export default function applyKlayLayout(landscape) {
           if (edge != null) {
 
             if(alreadyCalculatedPoints[edge.id]){
-              communication.set("points", alreadyCalculatedPoints[edge.id]);
+              applicationcommunication.set("points", alreadyCalculatedPoints[edge.id]);
               return;
             }
 
-            let parentNode = getRightParent(communication.get('sourceApplication'),
-              communication.get('targetApplication'));
+            let parentNode = getRightParent(applicationcommunication.get('sourceApplication'),
+              applicationcommunication.get('targetApplication'));
 
             var points = [];
 
@@ -767,7 +760,7 @@ export default function applyKlayLayout(landscape) {
 
                 resultPoint.x = (point.x + pOffsetX) / CONVERT_TO_KIELER_FACTOR;
                 resultPoint.y = (point.y * -1 + pOffsetY) / CONVERT_TO_KIELER_FACTOR; // KIELER has inverted Y coords
-                communication.points.push(resultPoint);
+                applicationcommunication.get('points').push(resultPoint);
                 updatedPoints.push(resultPoint);
 
               });
@@ -817,7 +810,6 @@ export default function applyKlayLayout(landscape) {
 
 
     function seekRepresentativeApplication(application) {
-
       const nodes = application.get('parent').get('parent').get('nodes');
 
       let returnValue = null;

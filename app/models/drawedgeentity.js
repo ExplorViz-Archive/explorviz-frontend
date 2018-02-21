@@ -21,7 +21,7 @@ export default BaseEntity.extend({
   * @property lineThickness
   * @type number
   */
-  lineThickness: attr('number'),
+  lineThickness: attr('number', { defaultValue: 0}),
 
   /**
   * Z-position of this edge.
@@ -29,7 +29,7 @@ export default BaseEntity.extend({
   * @property positionZ
   * @type number
   */
-  positionZ: attr('number'),
+  positionZ: attr('number', { defaultValue: 0}),
 
   /**
   * All points of the edge.
@@ -41,10 +41,8 @@ export default BaseEntity.extend({
 
   pointsFor3D: attr(),
 
-  //List<Vector3f> pointsFor3D = new ArrayList<Vector3f>
-
   pipeColor: attr(),
   kielerEdgeReferences: [],
-  hidden: attr('boolean')
+  hidden: attr('boolean', { defaultValue: false}),
 
 });
