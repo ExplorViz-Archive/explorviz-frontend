@@ -9,13 +9,13 @@ export default Ember.Object.extend({
 
   highlight(entity) {
 
-    const isHighlighted = entity.get('highlighted');   
+    const isHighlighted = entity.get('highlighted');
 
     if (!isHighlighted) {
       this.get('application').unhighlight();
       entity.highlight();
       this.set('highlightedEntity', entity);
-    } 
+    }
     else {
       this.unhighlightAll();
     }
@@ -26,7 +26,7 @@ export default Ember.Object.extend({
   resetHoverEffect() {
     if(this.get('hoveredEntityColorObj')) {
 
-      this.get('hoveredEntityColorObj').entity.material.color = 
+      this.get('hoveredEntityColorObj').entity.material.color =
         this.get('hoveredEntityColorObj').color;
 
       this.set('hoveredEntityColorObj', null);
@@ -46,7 +46,7 @@ export default Ember.Object.extend({
     const newHoverEntity = raycastTarget.object;
 
     // same object, do nothing and return
-    if(this.get('hoveredEntityColorObj') && 
+    if(this.get('hoveredEntityColorObj') &&
       this.get('hoveredEntityColorObj').entity === newHoverEntity) {
         return;
     }
@@ -61,7 +61,7 @@ export default Ember.Object.extend({
     });
 
     newHoverEntity.material.color = calculateColorBrightness(oldColor, 1.1);
-    
+
   },
 
 
@@ -69,8 +69,8 @@ export default Ember.Object.extend({
 
     if(this.get('highlightedEntity')) {
 
-      this.set('highlightedEntity', null);      
-      
+      this.set('highlightedEntity', null);
+
       if (this.get('application') !== null) {
         this.get('application').unhighlight();
       }
@@ -84,13 +84,13 @@ export default Ember.Object.extend({
 
     if (highlightedNode != null) {
 
-      const communicationsAccumulated = 
-        this.get('application').get('communicationsAccumulated');
+      const communicationsAccumulated =
+        this.get('application').get('outgoingClazzCommunicationsAccumulated');
 
       communicationsAccumulated.forEach((commu) => {
-      
-        if ((commu.source != null && commu.source.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
-          (commu.target != null && commu.target.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
+
+        if ((commu.sourceClazz != null && commu.sourceClazz.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
+          (commu.targetClazz != null && commu.targetClazz.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
 
           //let outgoing = determineOutgoing(commu);
           //let incoming = determineIncoming(commu);
@@ -109,6 +109,6 @@ export default Ember.Object.extend({
 
     }
   }
-  
+
 
 });

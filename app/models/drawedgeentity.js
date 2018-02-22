@@ -38,8 +38,10 @@ export default BaseEntity.extend({
   * @type objects
   */
   points: attr(),
-
   pointsFor3D: attr(),
+
+  startPoint: attr(),
+  endPoint: attr(),
 
   pipeColor: attr(),
   kielerEdgeReferences: [],

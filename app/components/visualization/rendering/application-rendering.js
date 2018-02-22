@@ -11,7 +11,7 @@ import Labeler from
  'explorviz-frontend/utils/application-rendering/labeler';
 import CalcCenterAndZoom from
  'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
-import FoundationBuilder from 
+import FoundationBuilder from
  'explorviz-frontend/utils/application-rendering/foundation-builder';
 
 
@@ -81,7 +81,7 @@ export default RenderingCore.extend({
 
     if (!this.get('foundationBuilder')) {
       this.set('foundationBuilder', FoundationBuilder.create());
-    }       
+    }
 
     if (!this.get('interaction')) {
       // owner necessary to inject service into util
@@ -200,11 +200,11 @@ export default RenderingCore.extend({
 
     const viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
 
-    const accuCommunications =
-      emberApplication.get('communicationsAccumulated');
+    const accuCommunications = emberApplication.get('outgoingClazzCommunicationsAccumulated');
 
     accuCommunications.forEach((commu) => {
-      if (commu.source.content !== commu.target.content) {
+
+      if (commu.sourceClazz.content !== commu.targetClazz.content) {
         if (commu.startPoint && commu.endPoint) {
 
           const start = new THREE.Vector3();
@@ -240,7 +240,6 @@ export default RenderingCore.extend({
           const pipe = cylinderMesh(start, end, material, thickness);
 
           pipe.userData.model = commu;
-
           self.get('application3D').add(pipe);
 
         }

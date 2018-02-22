@@ -36,6 +36,11 @@ export default DrawNodeEntity.extend({
     inverse: null
   }),
 
+  // list of clazzCommunication for rendering purposes
+  aggregatedOutgoingClazzCommunications: hasMany('clazzcommunication', {
+    inverse: null
+  }),
+
   databaseQueries: hasMany('databasequery'),
 
   // used for text labeling performance in respective renderers

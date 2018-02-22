@@ -7,7 +7,7 @@ const { attr, belongsTo, hasMany } = DS;
  * Ember model for a ClazzCommunication.
  *
  * @class ClazzCommunication-Model
- * @extends BaseEntity-Model
+ * @extends DrawEdgeEntity-Model
  *
  * @module explorviz
  * @submodule model.meta

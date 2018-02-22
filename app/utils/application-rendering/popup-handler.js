@@ -17,7 +17,7 @@ export default Ember.Object.extend(Ember.Evented, {
     // Bootstrap Popover
     Ember.$('#vizContainer').popover(
       {
-        title: '<div style="font-weight:bold;text-align:center;">' + 
+        title: '<div style="font-weight:bold;text-align:center;">' +
           content.title + '</div>',
         content : content.html,
         placement:'top',
@@ -58,14 +58,18 @@ export default Ember.Object.extend(Ember.Evented, {
     }
     else if(modelType === 'clazz') {
       content = buildClazzContent(emberModel);
-    }    
+    }
+    else if(modelType === 'clazzcommunication') {
+      //content = buildClazzContent(emberModel);
+    }
+
+    console.log(modelType);
 
     return content;
 
 
-
     // Helper functions
-    
+
     function buildComponentContent(component) {
 
       let content = {title: '', html: ''};
@@ -75,20 +79,20 @@ export default Ember.Object.extend(Ember.Evented, {
       const clazzesCount = getClazzesCount(component);
       const packageCount = getPackagesCount(component);
 
-      content.html = 
-        '<table style="width:100%">' + 
-          '<tr>' + 
-            '<td>Contained Classes:</td>' + 
+      content.html =
+        '<table style="width:100%">' +
+          '<tr>' +
+            '<td>Contained Classes:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              clazzesCount + 
-            '</td>' + 
-          '</tr>' + 
-          '<tr>' + 
-            '<td>Contained Packages:</td>' + 
-            '<td style="text-align:right;padding-left:10px;">' +
-              packageCount + 
+              clazzesCount +
             '</td>' +
-          '</tr>' + 
+          '</tr>' +
+          '<tr>' +
+            '<td>Contained Packages:</td>' +
+            '<td style="text-align:right;padding-left:10px;">' +
+              packageCount +
+            '</td>' +
+          '</tr>' +
         '</table>';
 
       function getClazzesCount(component) {
@@ -100,7 +104,7 @@ export default Ember.Object.extend(Ember.Evented, {
           result += getClazzesCount(child);
         });
 
-        return result;   
+        return result;
       }
 
       function getPackagesCount(component) {
@@ -112,7 +116,7 @@ export default Ember.Object.extend(Ember.Evented, {
           result += getPackagesCount(child);
         });
 
-        return result;   
+        return result;
       }
 
       return content;
@@ -125,51 +129,32 @@ export default Ember.Object.extend(Ember.Evented, {
 
       content.title = clazz.get('name');
 
-      const calledMethods = getCalledMethods(clazz);
-      
-      content.html = 
-        '<table style="width:100%">' + 
-          '<tr>' + 
-            '<td>Active Instances:</td>' + 
+      const calledOperations = getCalledOperations(clazz);
+
+      content.html =
+        '<table style="width:100%">' +
+          '<tr>' +
+            '<td>Active Instances:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              clazz.get('instanceCount') + 
-            '</td>' + 
-          '</tr>' + 
-          '<tr>' + 
-            '<td>Called Methods:</td>' + 
-            '<td style="text-align:right;padding-left:10px;">' +
-              calledMethods + 
+              clazz.get('instanceCount') +
             '</td>' +
-          '</tr>' + 
+          '</tr>' +
+          '<tr>' +
+            '<td>Called Operations:</td>' +
+            '<td style="text-align:right;padding-left:10px;">' +
+              calledOperations +
+            '</td>' +
+          '</tr>' +
         '</table>';
 
       return content;
 
 
-      function getCalledMethods(clazz) {
-        console.log(clazz);
-        //let methods = [];
-
-        //console.log(clazz.get('parent.belongingApplication'));
-
-        /*const communications = clazz.get('parent').get('belongingApplication').get('communications');
-
-        communications.forEach((commu) => {
-          if (commu.get('target') === clazz && commu.get('target') !== commu.get('source')) {
-            console.log("asd");
-            methods.push(commu.get('methodName'));
-          }
-        });
-
-        return methods.length;*/
-
-        return 0;
-
+      function getCalledOperations(clazz) {
+        const clazzCommunications = clazz.get('outgoingClazzCommunications');
+        return clazzCommunications.get('length');
       }
-
-
     }
-
 
   } // END buildApplicationContent
 
