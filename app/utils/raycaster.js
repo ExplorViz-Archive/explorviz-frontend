@@ -5,8 +5,8 @@ export default Ember.Object.extend({
 
   raycaster: new THREE.Raycaster(),
 
-  landscapeObjects: ['node', 'system', 'nodegroup', 'application', 'communication'],
-  applicationObjects: ['component', 'clazz', 'communication'],
+  landscapeObjects: ['system', 'nodegroup', 'node', 'application', 'applicationcommunication'],
+  applicationObjects: ['component', 'clazz', 'clazzcommunication'],
   objectCatalog: 'landscapeObjects',
 
   raycasting(origin, direction, camera, possibleObjects) {
@@ -31,7 +31,6 @@ export default Ember.Object.extend({
       const result = intersections.filter(function(obj) {
         if (obj.object.userData.model) {
           const modelName = obj.object.userData.model.constructor.modelName;
-
           return self.get(self.get('objectCatalog')).includes(modelName);
         }
       });
@@ -43,5 +42,5 @@ export default Ember.Object.extend({
 
     }
   }
-  
+
 });
