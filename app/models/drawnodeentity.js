@@ -14,9 +14,6 @@ const { attr } = DS;
 */
 export default BaseEntity.extend({
 
-  visible: attr('boolean', { defaultValue: true}),
-  opened: attr('boolean', { defaultValue: true}),
-
   plusColor: attr(),
   foregroundColor: attr(),
   backgroundColor: attr(),

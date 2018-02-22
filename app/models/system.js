@@ -25,6 +25,8 @@ export default DrawNodeEntity.extend({
     inverse: 'systems'
   }),
 
+  opened: attr('boolean', {defaultValue: true}),
+
   // used for text labeling performance in respective labelers
   state: Ember.computed('opened', function() {
     return this.get('opened');

@@ -21,6 +21,8 @@ export default DrawNodeEntity.extend({
   freeRAM: attr('number'),
   usedRAM: attr('number'),
 
+  visible: attr('boolean', {defaultValue: true}),
+
   applications: hasMany('application', {
     inverse: 'parent'
   }),

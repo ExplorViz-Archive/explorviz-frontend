@@ -218,6 +218,29 @@ export default RenderingCore.extend({
 
           self.get('labeler').saveTextForLabeling(null, systemMesh, textColor);
 
+          // add respective open / close symbol
+          systemMesh.geometry.computeBoundingBox();
+          const bboxSystem = systemMesh.geometry.boundingBox;
+
+          let collapseSymbol = null;
+
+          if(system.get('opened')) {
+            if(self.get('closeSymbol')) {
+              collapseSymbol = self.get('closeSymbol').clone();
+            }
+          } else {
+            if(self.get('openSymbol')) {
+              collapseSymbol = self.get('openSymbol').clone();
+            }
+          }
+
+          if(collapseSymbol) {
+            collapseSymbol.position.x = bboxSystem.max.x - 0.35;
+            collapseSymbol.position.y = bboxSystem.max.y - 0.35;
+            collapseSymbol.position.z = systemMesh.position.z + 0.0001;
+            systemMesh.add(collapseSymbol);
+          }
+
 
         }
 
@@ -367,7 +390,7 @@ export default RenderingCore.extend({
 
               } else {
                 // draw request logo
-                self.get('imageLoader').createPicture(centerX, centerY, 0,
+                self.get('imageLoader').createPicture((centerX + 0.47), centerY, 0,
                   1.6, 1.6, "requests", self.get('scene'), "label");
               }
 
@@ -382,19 +405,19 @@ export default RenderingCore.extend({
 
     self.set('configuration.landscapeColors.textchanged', false);
 
-    const appCommunication = emberLandscape.get('applicationCommunication');
+    const appCommunications = emberLandscape.get('outgoingApplicationCommunications');
 
     const tiles = [];
 
     let tile;
 
-    if (appCommunication) {
+    if (appCommunications) {
 
       const color = self.get('configuration.landscapeColors.communication');
 
-      appCommunication.forEach((communication) => {
+      appCommunications.forEach((appcommunication) => {
 
-        const points = communication.get('points');
+        const points = appcommunication.get('points');
 
         if (points.length > 0) {
 
@@ -424,15 +447,15 @@ export default RenderingCore.extend({
       					requestsCache: 0,
       					communications: [],
       					pipeColor: new THREE.Color(color),
-                emberModel: communication
+                emberModel: appcommunication
       				};
 
       				tiles.push(tile);
       			}
 
-            tile.communications.push(appCommunication);
+            tile.communications.push(appCommunications);
             tile.requestsCache = tile.requestsCache +
-              communication.get('requests');
+              appcommunication.get('requests');
 
       			tiles[id] = tile;
           }

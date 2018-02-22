@@ -25,6 +25,9 @@ export default DrawNodeEntity.extend({
     inverse: 'parent'
   }),
 
+  visible: attr('boolean', {defaultValue: true}),
+  opened: attr('boolean', {defaultValue: true}),
+
   // used for text labeling performance in respective renderers
   state: Ember.computed('visible', 'opened', function() {
     let opened = this.get('opened');

@@ -5,7 +5,6 @@ export default function applyKlayLayout(landscape) {
     let CONVERT_TO_KIELER_FACTOR = 180.0;
 
     setupKieler(landscape);
-
     updateGraphWithResults(landscape);
 
 
@@ -23,10 +22,10 @@ export default function applyKlayLayout(landscape) {
       $klay.layout({
         graph: graph,
         success: function(layouted) { // jshint ignore:line
-          console.log("success", layouted);
+          //console.log("success", layouted);
         },
         error: function(error) { // jshint ignore:line
-          console.log("error", error);
+          //console.log("error", error);
         }
       });
 
@@ -55,7 +54,6 @@ export default function applyKlayLayout(landscape) {
       return graph;
 
     }
-
 
 
     function addNodes(landscape) {
@@ -211,7 +209,6 @@ export default function applyKlayLayout(landscape) {
 
     } // END createNodeGroup
 
-
     function createNodeAndItsApplications(kielerParentGraph, node) {
 
       const PADDING = 0.1;
@@ -276,7 +273,6 @@ export default function applyKlayLayout(landscape) {
         };
 
         application.set('kielerGraphReference', applicationKielerNode);
-
         nodeKielerGraph.children.push(applicationKielerNode);
 
       });
@@ -295,6 +291,7 @@ export default function applyKlayLayout(landscape) {
 
           let appSource = applicationcommunication.get('sourceApplication');
           let appTarget = applicationcommunication.get('targetApplication');
+          //console.log("edge: " + appSource.get('name') + " -> " + appTarget.get('name'));
 
           if(!appTarget.get('parent').get('visible')){
             appTarget = (appTarget.get('parent').get('parent').get('parent').get('opened'))? seekRepresentativeApplication(appTarget) : appTarget.get('parent').get('parent').get('parent') ;
@@ -639,12 +636,10 @@ export default function applyKlayLayout(landscape) {
         const kielerEdgeReferences = applicationcommunication.get('kielerEdgeReferences');
 
           kielerEdgeReferences.forEach((edge) => {
-
-
           if (edge != null) {
 
             if(alreadyCalculatedPoints[edge.id]){
-              applicationcommunication.set("points", alreadyCalculatedPoints[edge.id]);
+              applicationcommunication.set('points', alreadyCalculatedPoints[edge.id]);
               return;
             }
 
