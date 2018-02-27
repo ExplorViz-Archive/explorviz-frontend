@@ -200,19 +200,16 @@ export default RenderingCore.extend({
 
     const viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
 
-    const accuCommunications = emberApplication.get('outgoingClazzCommunicationsAccumulated');
+    const outgoingClazzCommunications = emberApplication.get('outgoingClazzCommunications');
 
-    accuCommunications.forEach((commu) => {
-
-      if (commu.sourceClazz.content !== commu.targetClazz.content) {
-        if (commu.startPoint && commu.endPoint) {
-
+    outgoingClazzCommunications.forEach((clazzCommunication) => {
+      if (clazzCommunication.get('startPoint') && clazzCommunication.get('endPoint')) {
           const start = new THREE.Vector3();
-          start.subVectors(commu.startPoint, viewCenterPoint);
+          start.subVectors(clazzCommunication.get('startPoint'), viewCenterPoint);
           start.multiplyScalar(0.5);
 
           const end = new THREE.Vector3();
-          end.subVectors(commu.endPoint, viewCenterPoint);
+          end.subVectors(clazzCommunication.get('endPoint'), viewCenterPoint);
           end.multiplyScalar(0.5);
 
           if(start.y >= end.y) {
@@ -224,7 +221,7 @@ export default RenderingCore.extend({
           let transparent = false;
           let opacityValue = 1.0;
 
-          if(commu.state === "TRANSPARENT") {
+          if(clazzCommunication.get('state') === "TRANSPARENT") {
             transparent = true;
             opacityValue = 0.4;
           }
@@ -235,15 +232,13 @@ export default RenderingCore.extend({
             transparent : transparent
           });
 
-          const thickness = commu.pipeSize * 0.3;
+          const thickness = clazzCommunication.get('lineThickness') * 0.3;
 
           const pipe = cylinderMesh(start, end, material, thickness);
 
-          pipe.userData.model = commu;
+          pipe.userData.model = clazzCommunication;
           self.get('application3D').add(pipe);
-
         }
-      }
     });
 
     function cylinderMesh(pointX, pointY, material, thickness) {

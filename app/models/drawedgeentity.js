@@ -43,6 +43,10 @@ export default BaseEntity.extend({
   startPoint: attr(),
   endPoint: attr(),
 
+  state: attr(),
+
+  pipeSize: attr(),
+
   pipeColor: attr(),
   kielerEdgeReferences: [],
   hidden: attr('boolean', { defaultValue: false}),

@@ -83,27 +83,15 @@ export default Ember.Object.extend({
     const highlightedNode = this.get('highlightedEntity');
 
     if (highlightedNode != null) {
+      const outgoingClazzCommunications =
+        this.get('application').get('outgoingClazzCommunications');
 
-      const communicationsAccumulated =
-        this.get('application').get('outgoingClazzCommunicationsAccumulated');
-
-      communicationsAccumulated.forEach((commu) => {
-
-        if ((commu.sourceClazz != null && commu.sourceClazz.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
-          (commu.targetClazz != null && commu.targetClazz.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
-
-          //let outgoing = determineOutgoing(commu);
-          //let incoming = determineIncoming(commu);
-
-          //if (incoming && outgoing) {
-            commu.state = "SHOW_DIRECTION_IN_AND_OUT";
-          //} else if (incoming) {
-          //  commu.state = "SHOW_DIRECTION_IN"
-          //} else if (outgoing) {
-         //   commu.state = "SHOW_DIRECTION_OUT";
-         // }
+      outgoingClazzCommunications.forEach((clazzCommunication) => {
+        if ((clazzCommunication.sourceClazz != null && clazzCommunication.get('sourceClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
+          (clazzCommunication.targetClazz != null && clazzCommunication.get('targetClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
+            clazzCommunication.state = "SHOW_DIRECTION_OUT";
         } else {
-          commu.state = "TRANSPARENT";
+          clazzCommunication.state = "TRANSPARENT";
         }
       });
 

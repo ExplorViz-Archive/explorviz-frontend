@@ -250,7 +250,7 @@ export default Ember.Object.extend(Ember.Evented, {
       const targetApplicationName = applicationCommunication.get('targetApplication').get('name');
 
       content.title = encodeStringForPopUp(sourceApplicationName) +
-        "&nbsp;<span class='glyphicon glyphicon-transfer'></span>&nbsp;" + encodeStringForPopUp(targetApplicationName);
+        "&nbsp;<span class='glyphicon glyphicon-arrow-right'></span>&nbsp;" + encodeStringForPopUp(targetApplicationName);
 
       content.html =
         '<table style="width:100%">' +

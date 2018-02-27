@@ -481,8 +481,6 @@ export default function applyCityLayout(application) {
 
     function layoutEdges(application) {
 
-      application.set('outgoingClazzCommunicationsAccumulated', []);
-
       const outgoingClazzCommunications = application.get('outgoingClazzCommunications');
 
       outgoingClazzCommunications.forEach((clazzCommunication) => {
@@ -504,254 +502,79 @@ export default function applyCityLayout(application) {
             targetClazz = findFirstParentOpenComponent(clazzCommunication.get('targetClazz').get('parent'));
           }
 
-
           if (sourceClazz !== null && targetClazz !== null) {
-
-            let found = false;
-
-            const communicationsAccumulated = application.get('outgoingClazzCommunicationsAccumulated');
-
-             communicationsAccumulated.forEach((commuAcc) => {
-
-              if (found === false) {
-                found = ((commuAcc.sourceClazz === sourceClazz) && (commuAcc.targetClazz === targetClazz) ||
-                  (commuAcc.sourceClazz === targetClazz) && (commuAcc.targetClazz === sourceClazz));
-
-                  if (found) {
-                    commuAcc.requests = commuAcc.requests + clazzCommunication.get('requestsCacheCount');
-                    commuAcc.aggregatedCommunications.push(clazzCommunication);
-                  }
-                }
-
-             });
-
-              if (found === false) {
-
-                // create new communication line
-                let newClazzCommunication;
-                newClazzCommunication.sourceClazz = sourceClazz;
-                newClazzCommunication.targetClazz = targetClazz;
-                newClazzCommunication.requests = clazzCommunication.get('requestsCacheCount');
-                newClazzCommunication.aggregatedCommunications = [];
-                newClazzCommunication.state = 'NORMAL';
-
-                newClazzCommunication.startPoint = new THREE.Vector3(sourceClazz.get('positionX') + sourceClazz.get('width') / 2.0, sourceClazz.get('positionY'),
-                  sourceClazz.get('positionZ') + sourceClazz.get('depth') / 2.0);
-
-                newClazzCommunication.endPoint = new THREE.Vector3(targetClazz.get('positionX') + targetClazz.get('width') / 2.0, targetClazz.get('positionY') + 0.05,
-                  targetClazz.get('positionZ') + targetClazz.get('depth') / 2.0);
-
-                newClazzCommunication.aggregatedCommunications.push(clazzCommunication);
-                application.get('outgoingClazzCommunicationsAccumulated').push(newClazzCommunication);
-
-              }
+            clazzCommunication.set('state', 'NORMAL');
+            clazzCommunication.set('startPoint', new THREE.Vector3(sourceClazz.get('positionX') + sourceClazz.get('width') / 2.0, sourceClazz.get('positionY'), sourceClazz.get('positionZ') + sourceClazz.get('depth') / 2.0));
+            clazzCommunication.set('endPoint', new THREE.Vector3(targetClazz.get('positionX') + targetClazz.get('width') / 2.0, targetClazz.get('positionY') + 0.05, targetClazz.get('positionZ') + targetClazz.get('depth') / 2.0));
           }
-
         }
-
         calculatePipeSizeFromQuantiles(application);
-
       });
 
-
+      // Calculates the size of the pipes regarding the number of requests
       function calculatePipeSizeFromQuantiles(application) {
 
-        const requestsList = [];
-
+        // constant factors for rendering communication lines (pipes)
         const pipeSizeEachStep = 0.45;
         const pipeSizeDefault = 0.1;
 
-        gatherRequestsIntoList(application, requestsList);
+        const requestsList = gatherRequestsIntoList(application);
+        const categories = calculateCategories(requestsList);
+        const outgoingClazzCommunications = application.get('outgoingClazzCommunications');
 
-        const categories = getCategories(requestsList, true);
-
-        const communicationsAccumulated = application.get('outgoingClazzCommunicationsAccumulated');
-
-        communicationsAccumulated.forEach((commu) => {
-          if (commu.sourceClazz !== commu.targetClazz && commu.state !== EdgeState.HIDDEN) {
-            commu.pipeSize = categories[commu.requests] * pipeSizeEachStep + pipeSizeDefault;
-          }
+        outgoingClazzCommunications.forEach((clazzCommunication) => {
+          const calculatedCategory = getMatchingCategory(clazzCommunication.get('requestsCacheCount'), categories);
+          clazzCommunication.set('lineThickness', (calculatedCategory  * pipeSizeEachStep) + pipeSizeDefault);
         });
 
-        /*
-        const incomingCommunications = application.get('incomingCommunications');
+        // generates four default categories for rendering (thickness of communication lines)
+        function calculateCategories(requestsList) {
+          const minNumber = Math.min.apply(Math, requestsList);
+          const avgNumber = requestsList.reduce(addUpRequests) / requestsList.length;
+          const maxNumber = Math.max.apply(Math,requestsList);
+          const categories = [0, minNumber, avgNumber, maxNumber];
 
-        incomingCommunications.forEach((commu) => {
-          commu.lineThickness = categories[commu.requests] * pipeSizeEachStep + pipeSizeDefault;
-        });
-        */
+          return categories;
+        } // END calculateCategories
 
-        const outgoingCommunications = application.get('outgoingClazzCommunications');
+        // retrieves a matching category for a specific clazzCommunication
+        function getMatchingCategory(numOfRequests, categories) {
 
-        outgoingCommunications.forEach((commu) => {
-          commu.lineThickness = categories[commu.requests] * pipeSizeEachStep + pipeSizeDefault;
-        });
+          // default category = lowest category
+          let calculatedCategory = 0;
 
-
-
-        function getCategories(list, linear) {
-          const result = [];
-
-          if (list.length === 0) {
-            return result;
-          }
-
-          list.sort();
-
-          if (linear) {
-            const listWithout0 = [];
-
-            list.forEach((entry) => {
-              if (entry !== 0){
-                listWithout0.push(entry);
-              }
-            });
-
-            if (listWithout0.length === 0) {
-              result.push({0: 0.0});
-              return result;
+          for (var i = 1; i < categories.length; i++) {
+            if (numOfRequests >= categories[i]) {
+              calculatedCategory = i;
             }
-            useLinear(listWithout0, list, result);
-          }
-          else {
-            const listWithout0And1 = [];
-
-            let outsideCounter = 0;
-            let insideCounter = 0;
-
-            list.forEach((entry) => {
-              outsideCounter++;
-              if (entry !== 0 && entry !== 1){
-                listWithout0And1.push(entry);
-                insideCounter++;
-              }
-            });
-
-            if (listWithout0And1.length === 0) {
-              result.push({0: 0.0});
-              result.push({1: 1.0});
-              return result;
-            }
-
-            useThreshholds(listWithout0And1, list, result);
-          }
-
-          return result;
-
-
-
-          // inner helper functions
-
-          function useThreshholds(listWithout0And1, list, result) {
-            let max = 1;
-
-            listWithout0And1.forEach((value) => {
-              if (value > max) {
-                max = value;
-              }
-            });
-
-            const oneStep = max / 3.0;
-
-            const t1 = oneStep;
-            const t2 = oneStep * 2;
-
-            list.forEach((entry) => {
-              let categoryValue = getCategoryFromValues(entry, t1, t2);
-              result[entry] = categoryValue;
-            });
-
-          }
-
-
-          function getCategoryFromValues(value, t1, t2) {
-            if (value === 0) {
-              return 0.0;
-            } else if (value === 1) {
-              return 1.0;
-            }
-
-            if (value <= t1) {
-              return 2.0;
-            } else if (value <= t2) {
-              return 3.0;
-            } else {
-              return 4.0;
+            else {
+              return calculatedCategory;
             }
           }
+          return calculatedCategory;
+        } // END getMatchingCategory
 
+        // Retrieves all requests and pushes them to a list for further processing
+        function gatherRequestsIntoList(application) {
 
-          function useLinear(listWithout0, list, result) {
-            let max = 1;
-            let secondMax = 1;
+          let requestsList = [];
+          const outgoingClazzCommunications = application.get('outgoingClazzCommunications');
 
-            listWithout0.forEach((value) => {
-              if (value > max) {
-                secondMax = max;
-                max = value;
-              }
-            });
-
-            const oneStep = secondMax / 4.0;
-
-            const t1 = oneStep;
-            const t2 = oneStep * 2;
-            const t3 = oneStep * 3;
-
-            list.forEach((entry) => {
-              const categoryValue = getCategoryFromLinearValues(entry, t1, t2, t3);
-              result[entry] = categoryValue;
-            });
-
-          }
-
-
-          function getCategoryFromLinearValues(value, t1, t2, t3) {
-            if (value <= 0) {
-              return 0;
-            } else if (value <= t1) {
-              return 1.5;
-            } else if (value <= t2) {
-              return 2.5;
-            } else if (value <= t3) {
-              return 4.0;
-            } else {
-              return 6.5;
-            }
-          }
-
-
-
-        } // END getCategories
-
-
-        function gatherRequestsIntoList(application, requestsList) {
-
-          const communicationsAccumulated = application.get('aggregatedOutgoingClazzCommunications');
-
-          communicationsAccumulated.forEach((commu) => {
-            if (commu.sourceClazz !== commu.targetClazz && commu.state !== EdgeState.HIDDEN) {
-              requestsList.push(commu.requests);
+          outgoingClazzCommunications.forEach((clazzCommunication) => {
+            if ((clazzCommunication.get('sourceClazz') !== clazzCommunication.get('targetClazz'))) {
+              requestsList.push(clazzCommunication.get('requestsCacheCount'));
             }
           });
 
-          /*
-          const incomingCommunications = application.get('incomingCommunications');
+          return requestsList;
+        } // END gatherRequestsIntoList
 
-          incomingCommunications.forEach((commu) => {
-            requestsList.push(commu.requests);
-          });
-          */
+        // adds up a number to an existing number
+        function addUpRequests(requestSum, requestCount) {
+          return requestSum + requestCount;
+        } // END addUpRequests
 
-          const outgoingCommunications = application.get('aggregatedOutgoingClazzCommunications');
-
-          outgoingCommunications.forEach((commu) => {
-            requestsList.push(commu.requests);
-          });
-
-        }
-
-      }// END calculatePipeSizeFromQuantiles
+      } // END calculatePipeSizeFromQuantiles
 
       function findFirstParentOpenComponent(entity) {
         if (entity.get('parentComponent') == null || entity.get('parentComponent').get('opened')) {

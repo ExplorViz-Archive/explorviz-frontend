@@ -27,6 +27,8 @@ export default DrawNodeEntity.extend({
     //inverse: 'belongingApplication'
   }),
 
+  databaseQueries: hasMany('databasequery'),
+
   outgoingApplicationCommunications: hasMany('applicationcommunication', {
     inverse: 'sourceApplication'
   }),
@@ -35,13 +37,6 @@ export default DrawNodeEntity.extend({
   outgoingClazzCommunications: hasMany('clazzcommunication', {
     inverse: null
   }),
-
-  // list of clazzCommunication for rendering purposes
-  aggregatedOutgoingClazzCommunications: hasMany('clazzcommunication', {
-    inverse: null
-  }),
-
-  databaseQueries: hasMany('databasequery'),
 
   // used for text labeling performance in respective renderers
   state: "application",

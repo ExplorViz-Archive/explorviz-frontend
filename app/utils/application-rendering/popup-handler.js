@@ -60,10 +60,8 @@ export default Ember.Object.extend(Ember.Evented, {
       content = buildClazzContent(emberModel);
     }
     else if(modelType === 'clazzcommunication') {
-      //content = buildClazzContent(emberModel);
+      content = buildClazzCommunicationContent(emberModel);
     }
-
-    console.log(modelType);
 
     return content;
 
@@ -120,7 +118,7 @@ export default Ember.Object.extend(Ember.Evented, {
       }
 
       return content;
-    }
+    } // END buildComponentContent
 
 
     function buildClazzContent(clazz) {
@@ -154,7 +152,86 @@ export default Ember.Object.extend(Ember.Evented, {
         const clazzCommunications = clazz.get('outgoingClazzCommunications');
         return clazzCommunications.get('length');
       }
-    }
+    } // END buildClazzContent
+
+    function buildClazzCommunicationContent(clazzcommunication) {
+
+      let content = {title: '', html: ''};
+
+      const sourceClazzName = clazzcommunication.get('sourceClazz').get('name');
+      const targetClazzName = clazzcommunication.get('targetClazz').get('name');
+
+      const aggregatedRuntimeInformation = getRuntimeInformations(clazzcommunication);
+
+      content.title = encodeStringForPopUp(sourceClazzName) +
+        "&nbsp;<span class='glyphicon glyphicon-arrow-right'></span>&nbsp;" + encodeStringForPopUp(targetClazzName);
+
+      content.html =
+        '<table style="width:100%">' +
+        '<tr>' +
+        '<td>&nbsp;<span class=\'glyphicon glyphicon-tasks\'></span>&nbsp;  Requests:</td>' +
+        '<td style="text-align:right;padding-left:10px;">' +
+        aggregatedRuntimeInformation.totalRequests +
+        '</td>' +
+        '</tr>' +
+        //'<tr>' +
+        //'<td>Called Times:</td>' +
+        //'<td style="text-align:right;padding-left:10px;">' +
+        //aggregatedRuntimeInformation.totalCalledTimes +
+        //'</td>' +
+        //'</tr>' +
+        '<tr>' +
+        '<td>&nbsp;<span class=\'glyphicon glyphicon-time\'></span>&nbsp; Avg. Response Time:</td>' +
+        '<td style="text-align:right;padding-left:10px;">' +
+        aggregatedRuntimeInformation.avgAverageResponseTime + ' ns' +
+        '</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td>&nbsp;<span class=\'glyphicon glyphicon-time\'></span>&nbsp; Avg. Duration:</td>' +
+        '<td style="text-align:right;padding-left:10px;">' +
+        aggregatedRuntimeInformation.avgOverallTraceDuration + ' ns' +
+        '</td>' +
+        '</tr>' +
+        '</table>';
+
+      return content;
+
+      // retrieves all runtimeinformations for a specific clazzCommunication
+      function getRuntimeInformations(clazzcommunication) {
+        const runtimeInformations = clazzcommunication.get('runtimeInformations');
+
+        let aggregatedRuntimeInformation = {
+          // sum up
+          totalOverallTraceDuration: 0,
+          totalAverageResponseTime: 0,
+
+          // interessting for popups
+          totalRequests: 0,
+          totalCalledTimes: 0,
+          avgOverallTraceDuration: 0,
+          avgAverageResponseTime: 0
+        };
+
+        var runtimeInformationCounter = 0;
+
+        runtimeInformations.forEach((runtimeInformation) => {
+          aggregatedRuntimeInformation.totalRequests += runtimeInformation.get('requests');
+          aggregatedRuntimeInformation.totalCalledTimes += runtimeInformation.get('calledTimes');
+          aggregatedRuntimeInformation.totalOverallTraceDuration += runtimeInformation.get('overallTraceDuration');
+          aggregatedRuntimeInformation.totalAverageResponseTime += runtimeInformation.get('averageResponseTime');
+          runtimeInformationCounter++;
+        });
+
+        if (runtimeInformationCounter > 0) {
+          aggregatedRuntimeInformation.avgAverageResponseTime = aggregatedRuntimeInformation.totalAverageResponseTime / runtimeInformationCounter;
+          aggregatedRuntimeInformation.avgOverallTraceDuration = aggregatedRuntimeInformation.totalOverallTraceDuration / runtimeInformationCounter;
+        }
+
+        return aggregatedRuntimeInformation;
+
+      } // END getRuntimeInformations
+
+    } // END buildClazzCommunicationContent
 
   } // END buildApplicationContent
 
