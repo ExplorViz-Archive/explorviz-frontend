@@ -1,5 +1,17 @@
-{{#if showLandscape}}
-  {{visualization/rendering/landscape-rendering}}
+{{#if showLandscape}}  
+  {{#if landscapeRepo.latestLandscape.systems}}    
+    {{visualization/rendering/landscape-rendering}}
+  {{else}}
+    <div class="container-fluid">
+      <div class="jumbotron">
+        <h2>No landscape found!</h2>
+        <p>A new landscape will be fetched every 10 seconds.</p>
+      </div>
+      <div id="spinnerDiv" class="container" style="position:relative; height:20%;">
+        {{ember-spinner}}
+      </div>
+    </div>
+  {{/if}}
 {{else}}
   {{visualization/page-setup/visualization-navbar}}
   {{visualization/rendering/application-rendering}}
