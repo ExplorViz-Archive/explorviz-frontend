@@ -20,9 +20,9 @@ export default Ember.Object.extend(Ember.Evented, {
         title: '<div style="font-weight:bold;text-align:center;">' +
           content.title + '</div>',
         content : content.html,
-        placement:'top',
-        trigger:'manual',
-        html:true
+        placement: 'top',
+        trigger: 'manual',
+        html: true
       }
     );
 
@@ -48,20 +48,25 @@ export default Ember.Object.extend(Ember.Evented, {
   },
 
 
-  buildContent(emberModel) {
+  buildContent: function (emberModel) {
     let content = {title: '', html: ''};
 
     const modelType = emberModel.constructor.modelName;
 
-    if(modelType === 'component') {
+    if (modelType === 'component') {
       content = buildComponentContent(emberModel);
     }
-    else if(modelType === 'clazz') {
+    else if (modelType === 'clazz') {
       content = buildClazzContent(emberModel);
     }
-    else if(modelType === 'clazzcommunication') {
-      content = buildClazzCommunicationContent(emberModel);
+    else if (modelType === 'aggregatedclazzcommunication') {
+      content = buildClazzAggregatedCommunicationContent(emberModel);
     }
+    /*
+    else if(modelType === 'clazzcommunication') {
+      ...
+    }
+    */
 
     return content;
 
@@ -79,18 +84,18 @@ export default Ember.Object.extend(Ember.Evented, {
 
       content.html =
         '<table style="width:100%">' +
-          '<tr>' +
-            '<td>Contained Classes:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              clazzesCount +
-            '</td>' +
-          '</tr>' +
-          '<tr>' +
-            '<td>Contained Packages:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              packageCount +
-            '</td>' +
-          '</tr>' +
+        '<tr>' +
+        '<td>Contained Classes:</td>' +
+        '<td style="text-align:right;padding-left:10px;">' +
+        clazzesCount +
+        '</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td>Contained Packages:</td>' +
+        '<td style="text-align:right;padding-left:10px;">' +
+        packageCount +
+        '</td>' +
+        '</tr>' +
         '</table>';
 
       function getClazzesCount(component) {
@@ -131,22 +136,21 @@ export default Ember.Object.extend(Ember.Evented, {
 
       content.html =
         '<table style="width:100%">' +
-          '<tr>' +
-            '<td>Active Instances:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              clazz.get('instanceCount') +
-            '</td>' +
-          '</tr>' +
-          '<tr>' +
-            '<td>Called Operations:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              calledOperations +
-            '</td>' +
-          '</tr>' +
+        '<tr>' +
+        '<td>Active Instances:</td>' +
+        '<td style="text-align:right;padding-left:10px;">' +
+        clazz.get('instanceCount') +
+        '</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td>Called Operations:</td>' +
+        '<td style="text-align:right;padding-left:10px;">' +
+        calledOperations +
+        '</td>' +
+        '</tr>' +
         '</table>';
 
       return content;
-
 
       function getCalledOperations(clazz) {
         const clazzCommunications = clazz.get('outgoingClazzCommunications');
@@ -154,14 +158,19 @@ export default Ember.Object.extend(Ember.Evented, {
       }
     } // END buildClazzContent
 
-    function buildClazzCommunicationContent(clazzcommunication) {
+    function buildClazzAggregatedCommunicationContent(clazzcommunication) {
 
       let content = {title: '', html: ''};
 
       const sourceClazzName = clazzcommunication.get('sourceClazz').get('name');
       const targetClazzName = clazzcommunication.get('targetClazz').get('name');
 
-      const aggregatedRuntimeInformation = getRuntimeInformations(clazzcommunication);
+      const runtimeStats = getRuntimeInformations(clazzcommunication);
+
+      // Formatted values for the clazzCommunication popup
+      const formatFactor = 1000; // convert from ns to ms
+      const avgAverageResponseTime =  round(runtimeStats.avgAverageResponseTime / formatFactor, 2).toFixed(2);
+      const avgOverallTraceDuration =  round(runtimeStats.avgOverallTraceDuration / formatFactor, 2).toFixed(2);
 
       content.title = encodeStringForPopUp(sourceClazzName) +
         "&nbsp;<span class='glyphicon glyphicon-arrow-right'></span>&nbsp;" + encodeStringForPopUp(targetClazzName);
@@ -169,67 +178,78 @@ export default Ember.Object.extend(Ember.Evented, {
       content.html =
         '<table style="width:100%">' +
         '<tr>' +
-        '<td>&nbsp;<span class=\'glyphicon glyphicon-tasks\'></span>&nbsp;  Requests:</td>' +
+        '<td>&nbsp;<span class=\'glyphicon glyphicon-tasks\'></span>&nbsp; Requests:</td>' +
         '<td style="text-align:right;padding-left:10px;">' +
-        aggregatedRuntimeInformation.totalRequests +
+        clazzcommunication.get('requests') +
         '</td>' +
         '</tr>' +
-        //'<tr>' +
-        //'<td>Called Times:</td>' +
-        //'<td style="text-align:right;padding-left:10px;">' +
-        //aggregatedRuntimeInformation.totalCalledTimes +
-        //'</td>' +
-        //'</tr>' +
+        '<tr>' +
+        '<td>&nbsp;<span class=\'glyphicon glyphicon-triangle-right\'></span>&nbsp; Involved Traces :</td>' +
+        '<td style="text-align:right;padding-left:10px;">' +
+        runtimeStats.involvedTraces.length +
+        '</td>' +
+        '</tr>' +
         '<tr>' +
         '<td>&nbsp;<span class=\'glyphicon glyphicon-time\'></span>&nbsp; Avg. Response Time:</td>' +
         '<td style="text-align:right;padding-left:10px;">' +
-        aggregatedRuntimeInformation.avgAverageResponseTime + ' ns' +
+        avgAverageResponseTime + ' ms' +
         '</td>' +
         '</tr>' +
         '<tr>' +
         '<td>&nbsp;<span class=\'glyphicon glyphicon-time\'></span>&nbsp; Avg. Duration:</td>' +
         '<td style="text-align:right;padding-left:10px;">' +
-        aggregatedRuntimeInformation.avgOverallTraceDuration + ' ns' +
+        avgOverallTraceDuration + ' ms' +
         '</td>' +
         '</tr>' +
         '</table>';
 
       return content;
 
-      // retrieves all runtimeinformations for a specific clazzCommunication
-      function getRuntimeInformations(clazzcommunication) {
-        const runtimeInformations = clazzcommunication.get('runtimeInformations');
+      // retrieves runtime information for a specific aggregatedClazzCommunication (same sourceClazz and tagetClazz)
+      function getRuntimeInformations(aggregatedClazzCommunication) {
 
-        let aggregatedRuntimeInformation = {
+        const clazzCommunications = aggregatedClazzCommunication.get('clazzCommunications');
+
+        let runtimeStats = {
           // sum up
           totalOverallTraceDuration: 0,
           totalAverageResponseTime: 0,
 
-          // interessting for popups
-          totalRequests: 0,
-          totalCalledTimes: 0,
+          // interesting for popups
+          involvedTraces: [],
           avgOverallTraceDuration: 0,
           avgAverageResponseTime: 0
         };
 
         var runtimeInformationCounter = 0;
 
-        runtimeInformations.forEach((runtimeInformation) => {
-          aggregatedRuntimeInformation.totalRequests += runtimeInformation.get('requests');
-          aggregatedRuntimeInformation.totalCalledTimes += runtimeInformation.get('calledTimes');
-          aggregatedRuntimeInformation.totalOverallTraceDuration += runtimeInformation.get('overallTraceDuration');
-          aggregatedRuntimeInformation.totalAverageResponseTime += runtimeInformation.get('averageResponseTime');
-          runtimeInformationCounter++;
+        // retrieves runtime information for every clazzCommunication (same sourceClazz, targetClazz, and operationName)
+        clazzCommunications.forEach((clazzCommunication) => {
+          const runtimeInformations = clazzCommunication.get('runtimeInformations');
+
+          runtimeInformations.forEach((runtimeInformation) => {
+            runtimeStats.involvedTraces.push(runtimeInformation.get('traceId'));
+            runtimeStats.totalOverallTraceDuration += runtimeInformation.get('overallTraceDuration');
+            runtimeStats.totalAverageResponseTime += runtimeInformation.get('averageResponseTime');
+
+            runtimeInformationCounter++;
+          });
+
         });
 
         if (runtimeInformationCounter > 0) {
-          aggregatedRuntimeInformation.avgAverageResponseTime = aggregatedRuntimeInformation.totalAverageResponseTime / runtimeInformationCounter;
-          aggregatedRuntimeInformation.avgOverallTraceDuration = aggregatedRuntimeInformation.totalOverallTraceDuration / runtimeInformationCounter;
+          runtimeStats.avgAverageResponseTime = runtimeStats.totalAverageResponseTime / runtimeInformationCounter;
+          runtimeStats.avgOverallTraceDuration = runtimeStats.totalOverallTraceDuration / runtimeInformationCounter;
         }
 
-        return aggregatedRuntimeInformation;
+        return runtimeStats;
 
       } // END getRuntimeInformations
+
+      function round(value, precision) {
+        var multiplier = Math.pow(10, precision || 0);
+        return Math.round(value * multiplier) / multiplier;
+      } // END round
 
     } // END buildClazzCommunicationContent
 

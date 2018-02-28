@@ -200,16 +200,16 @@ export default RenderingCore.extend({
 
     const viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
 
-    const outgoingClazzCommunications = emberApplication.get('outgoingClazzCommunications');
+    const aggregatedOutgoingClazzCommunications = emberApplication.get('aggregatedOutgoingClazzCommunications');
 
-    outgoingClazzCommunications.forEach((clazzCommunication) => {
-      if (clazzCommunication.get('startPoint') && clazzCommunication.get('endPoint')) {
+    aggregatedOutgoingClazzCommunications.forEach((aggClazzCommunication) => {
+      if (aggClazzCommunication.get('startPoint') && aggClazzCommunication.get('endPoint')) {
           const start = new THREE.Vector3();
-          start.subVectors(clazzCommunication.get('startPoint'), viewCenterPoint);
+          start.subVectors(aggClazzCommunication.get('startPoint'), viewCenterPoint);
           start.multiplyScalar(0.5);
 
           const end = new THREE.Vector3();
-          end.subVectors(clazzCommunication.get('endPoint'), viewCenterPoint);
+          end.subVectors(aggClazzCommunication.get('endPoint'), viewCenterPoint);
           end.multiplyScalar(0.5);
 
           if(start.y >= end.y) {
@@ -221,7 +221,7 @@ export default RenderingCore.extend({
           let transparent = false;
           let opacityValue = 1.0;
 
-          if(clazzCommunication.get('state') === "TRANSPARENT") {
+          if(aggClazzCommunication.get('state') === "TRANSPARENT") {
             transparent = true;
             opacityValue = 0.4;
           }
@@ -232,11 +232,11 @@ export default RenderingCore.extend({
             transparent : transparent
           });
 
-          const thickness = clazzCommunication.get('lineThickness') * 0.3;
+          const thickness = aggClazzCommunication.get('lineThickness') * 0.3;
 
           const pipe = cylinderMesh(start, end, material, thickness);
 
-          pipe.userData.model = clazzCommunication;
+          pipe.userData.model = aggClazzCommunication;
           self.get('application3D').add(pipe);
         }
     });

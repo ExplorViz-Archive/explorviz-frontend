@@ -8,6 +8,7 @@ export default function applyCityLayout(application) {
 
     const foundationComponent = components.objectAt(0);
 
+    /*
     const EdgeState = {
       NORMAL: 'NORMAL',
       TRANSPARENT: 'TRANSPARENT',
@@ -17,6 +18,7 @@ export default function applyCityLayout(application) {
       REPLAY_HIGHLIGHT: 'REPLAY_HIGHLIGHT',
       HIDDEN: 'HIDDEN'
     };
+    */
 
     calcClazzHeight(foundationComponent);
     initNodes(foundationComponent);
@@ -31,7 +33,6 @@ export default function applyCityLayout(application) {
     outgoingClazzCommunications.forEach((clazzcommunication) => {
       layoutOutgoingCommunication(clazzcommunication, application.get('components').objectAt(0));
     });
-
 
 
     // Helper functions
@@ -477,13 +478,13 @@ export default function applyCityLayout(application) {
       };
 
       return layoutSegment;
-    }
+    } // END createLayoutSegment
 
     function layoutEdges(application) {
 
-      const outgoingClazzCommunications = application.get('outgoingClazzCommunications');
+      const aggregatedOutgoingClazzCommunications = application.get('aggregatedOutgoingClazzCommunications');
 
-      outgoingClazzCommunications.forEach((clazzCommunication) => {
+      aggregatedOutgoingClazzCommunications.forEach((clazzCommunication) => {
         if (!clazzCommunication.get('hidden')) {
 
           let sourceClazz = null;
@@ -520,10 +521,10 @@ export default function applyCityLayout(application) {
 
         const requestsList = gatherRequestsIntoList(application);
         const categories = calculateCategories(requestsList);
-        const outgoingClazzCommunications = application.get('outgoingClazzCommunications');
+        const aggregatedOutgoingClazzCommunications = application.get('aggregatedOutgoingClazzCommunications');
 
-        outgoingClazzCommunications.forEach((clazzCommunication) => {
-          const calculatedCategory = getMatchingCategory(clazzCommunication.get('requestsCacheCount'), categories);
+        aggregatedOutgoingClazzCommunications.forEach((clazzCommunication) => {
+          const calculatedCategory = getMatchingCategory(clazzCommunication.get('requests'), categories);
           clazzCommunication.set('lineThickness', (calculatedCategory  * pipeSizeEachStep) + pipeSizeDefault);
         });
 
@@ -558,11 +559,11 @@ export default function applyCityLayout(application) {
         function gatherRequestsIntoList(application) {
 
           let requestsList = [];
-          const outgoingClazzCommunications = application.get('outgoingClazzCommunications');
+          const aggregatedOutgoingClazzCommunications = application.get('aggregatedOutgoingClazzCommunications');
 
-          outgoingClazzCommunications.forEach((clazzCommunication) => {
+          aggregatedOutgoingClazzCommunications.forEach((clazzCommunication) => {
             if ((clazzCommunication.get('sourceClazz') !== clazzCommunication.get('targetClazz'))) {
-              requestsList.push(clazzCommunication.get('requestsCacheCount'));
+              requestsList.push(clazzCommunication.get('requests'));
             }
           });
 
@@ -588,6 +589,7 @@ export default function applyCityLayout(application) {
     } // END layoutEdges
 
 
+    /*
     function layoutIncomingCommunication(commu, foundation) {
 
       const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
@@ -599,8 +601,9 @@ export default function applyCityLayout(application) {
         externalPortsExtension.z);
 
       layoutInAndOutCommunication(commu, commu.get('targetClazz'), centerCommuIcon);
-    }
 
+    }
+    */
     function layoutOutgoingCommunication(commu, foundation) {
 
       const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);

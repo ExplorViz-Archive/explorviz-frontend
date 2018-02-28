@@ -6,7 +6,7 @@ export default Ember.Object.extend({
   raycaster: new THREE.Raycaster(),
 
   landscapeObjects: ['system', 'nodegroup', 'node', 'application', 'applicationcommunication'],
-  applicationObjects: ['component', 'clazz', 'clazzcommunication'],
+  applicationObjects: ['component', 'clazz', 'aggregatedclazzcommunication', 'clazzcommunication'],
   objectCatalog: 'landscapeObjects',
 
   raycasting(origin, direction, camera, possibleObjects) {
@@ -37,7 +37,6 @@ export default Ember.Object.extend({
       if (result.length <= 0) {
         return;
       }
-
       return result[0];
 
     }

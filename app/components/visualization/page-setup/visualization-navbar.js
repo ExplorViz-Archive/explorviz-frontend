@@ -48,8 +48,6 @@ export default Component.extend({
       return;
     }
 
-
-
     if(firstMatch.get('opened')) {
       // close and highlight
       firstMatch.setOpenedStatus(false);

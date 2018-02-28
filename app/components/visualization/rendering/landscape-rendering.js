@@ -189,8 +189,6 @@ export default RenderingCore.extend({
       }
 
       var centerPoint = this.get('centerAndZoomCalculator.centerPoint');
-      var systemMesh;
-
 
       // Draw boxes for systems
       systems.forEach(function(system) {

@@ -84,7 +84,7 @@ export default Ember.Object.extend({
 
     if (highlightedNode != null) {
       const outgoingClazzCommunications =
-        this.get('application').get('outgoingClazzCommunications');
+        this.get('application').get('aggregatedOutgoingClazzCommunications');
 
       outgoingClazzCommunications.forEach((clazzCommunication) => {
         if ((clazzCommunication.sourceClazz != null && clazzCommunication.get('sourceClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||

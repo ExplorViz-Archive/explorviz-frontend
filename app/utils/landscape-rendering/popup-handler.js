@@ -255,19 +255,19 @@ export default Ember.Object.extend(Ember.Evented, {
       content.html =
         '<table style="width:100%">' +
           '<tr>' +
-            '<td>Requests:</td>' +
+            '<td>&nbsp;<span class=\'glyphicon glyphicon-tasks\'></span>&nbsp; Requests:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
               applicationCommunication.get('requests') +
             '</td>' +
           '</tr>' +
           '<tr>' +
-            '<td>Technology:</td>' +
+            '<td>&nbsp;<span class=\'glyphicon glyphicon-oil\'></span>&nbsp;Technology:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
               applicationCommunication.get('technology') +
             '</td>' +
           '</tr>' +
           '<tr>' +
-            '<td>Avg. Duration:</td>' +
+            '<td>&nbsp;<span class=\'glyphicon glyphicon-time\'></span>&nbsp; Avg. Duration:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
               applicationCommunication.get('averageResponseTime') + ' ns' +
             '</td>' +
