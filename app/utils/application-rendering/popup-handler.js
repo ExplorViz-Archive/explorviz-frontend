@@ -169,8 +169,8 @@ export default Ember.Object.extend(Ember.Evented, {
 
       // Formatted values for the clazzCommunication popup
       const formatFactor = 1000; // convert from ns to ms
-      const avgAverageResponseTime =  round(runtimeStats.avgAverageResponseTime / formatFactor, 2).toFixed(2);
-      const avgOverallTraceDuration =  round(runtimeStats.avgOverallTraceDuration / formatFactor, 2).toFixed(2);
+      const avgAverageResponseTime =  round(runtimeStats.avgAverageResponseTime / formatFactor, 0);
+      const avgOverallTraceDuration =  round(runtimeStats.avgOverallTraceDuration / formatFactor, 0);
 
       content.title = encodeStringForPopUp(sourceClazzName) +
         "&nbsp;<span class='glyphicon glyphicon-arrow-right'></span>&nbsp;" + encodeStringForPopUp(targetClazzName);
