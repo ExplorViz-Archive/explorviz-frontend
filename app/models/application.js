@@ -33,11 +33,6 @@ export default DrawNodeEntity.extend({
     inverse: 'sourceApplication'
   }),
 
-  // list of clazzCommunication for all whole application
-  outgoingClazzCommunications: hasMany('clazzcommunication', {
-    inverse: null
-  }),
-
   // list of aggregated clazzCommunication for rendering purposes
   aggregatedOutgoingClazzCommunications: hasMany('aggregatedclazzcommunication', {
     inverse: null

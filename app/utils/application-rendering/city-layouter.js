@@ -28,7 +28,7 @@ export default function applyCityLayout(application) {
 
     layoutEdges(application);
 
-    const outgoingClazzCommunications = application.get('outgoingClazzCommunications');
+    const outgoingClazzCommunications = application.get('aggregatedOutgoingClazzCommunications');
 
     outgoingClazzCommunications.forEach((clazzcommunication) => {
       layoutOutgoingCommunication(clazzcommunication, application.get('components').objectAt(0));
