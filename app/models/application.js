@@ -38,6 +38,11 @@ export default DrawNodeEntity.extend({
     inverse: null
   }),
 
+  // list of aggregated clazzCommunication for rendering purposes
+  cumulatedClazzCommunications: hasMany('cumulatedclazzcommunication', {
+    inverse: null
+  }),
+
   // used for text labeling performance in respective renderers
   state: "application",
 

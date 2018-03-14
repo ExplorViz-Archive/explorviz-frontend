@@ -59,14 +59,9 @@ export default Ember.Object.extend(Ember.Evented, {
     else if (modelType === 'clazz') {
       content = buildClazzContent(emberModel);
     }
-    else if (modelType === 'aggregatedclazzcommunication') {
-      content = buildClazzAggregatedCommunicationContent(emberModel);
+    else if (modelType === 'cumulatedclazzcommunication') {
+      content = buildCumulatedClazzCommunicationContent(emberModel);
     }
-    /*
-    else if(modelType === 'clazzcommunication') {
-      ...
-    }
-    */
 
     return content;
 
@@ -158,29 +153,40 @@ export default Ember.Object.extend(Ember.Evented, {
       }
     } // END buildClazzContent
 
-    function buildClazzAggregatedCommunicationContent(clazzcommunication) {
+    // Information about a clazzCommunication between two classes
+    function buildCumulatedClazzCommunicationContent(cumulatedClazzCommunication) {
 
       let content = {title: '', html: ''};
 
-      const sourceClazzName = clazzcommunication.get('sourceClazz').get('name');
-      const targetClazzName = clazzcommunication.get('targetClazz').get('name');
+      const sourceClazzName = cumulatedClazzCommunication.get('sourceClazz').get('name');
+      const targetClazzName = cumulatedClazzCommunication.get('targetClazz').get('name');
 
-      const runtimeStats = getRuntimeInformations(clazzcommunication);
+      const numOfAggregatedClazzCommunications = cumulatedClazzCommunication.get('aggregatedClazzCommunications').get('length');
+
+      const runtimeStats = getRuntimeInformations(cumulatedClazzCommunication);
 
       // Formatted values for the clazzCommunication popup
       const formatFactor = 1000; // convert from ns to ms
       const avgAverageResponseTime =  round(runtimeStats.avgAverageResponseTime / formatFactor, 0);
       const avgOverallTraceDuration =  round(runtimeStats.avgOverallTraceDuration / formatFactor, 0);
 
-      content.title = encodeStringForPopUp(sourceClazzName) +
-        "&nbsp;<span class='glyphicon glyphicon-arrow-right'></span>&nbsp;" + encodeStringForPopUp(targetClazzName);
+
+      /// determine the direction of communication symbol
+      // default uni-directional
+      let commDirectionString = "&nbsp;<span class='\glyphicon glyphicon-arrow-right\'></span>&nbsp;";
+      // bi-directional communication
+      if (numOfAggregatedClazzCommunications > 1) {
+        commDirectionString = "&nbsp;<span class='\glyphicon glyphicon-transfer\'></span>&nbsp;";
+      }
+
+      content.title = encodeStringForPopUp(sourceClazzName) + commDirectionString + encodeStringForPopUp(targetClazzName);
 
       content.html =
         '<table style="width:100%">' +
         '<tr>' +
         '<td>&nbsp;<span class=\'glyphicon glyphicon-tasks\'></span>&nbsp; Requests:</td>' +
         '<td style="text-align:right;padding-left:10px;">' +
-        clazzcommunication.get('requests') +
+        cumulatedClazzCommunication.get('requests') +
         '</td>' +
         '</tr>' +
         '<tr>' +
@@ -206,9 +212,9 @@ export default Ember.Object.extend(Ember.Evented, {
       return content;
 
       // retrieves runtime information for a specific aggregatedClazzCommunication (same sourceClazz and tagetClazz)
-      function getRuntimeInformations(aggregatedClazzCommunication) {
+      function getRuntimeInformations(cumulatedClazzCommunication) {
 
-        const clazzCommunications = aggregatedClazzCommunication.get('clazzCommunications');
+        const aggregatedClazzCommunications = cumulatedClazzCommunication.get('aggregatedClazzCommunications');
 
         let runtimeStats = {
           // sum up
@@ -223,18 +229,23 @@ export default Ember.Object.extend(Ember.Evented, {
 
         var runtimeInformationCounter = 0;
 
-        // retrieves runtime information for every clazzCommunication (same sourceClazz, targetClazz, and operationName)
-        clazzCommunications.forEach((clazzCommunication) => {
-          const runtimeInformations = clazzCommunication.get('runtimeInformations');
+        aggregatedClazzCommunications.forEach((aggregatedClazzCommunication) => {
 
-          runtimeInformations.forEach((runtimeInformation) => {
-            runtimeStats.involvedTraces.push(runtimeInformation.get('traceId'));
-            runtimeStats.totalOverallTraceDuration += runtimeInformation.get('overallTraceDuration');
-            runtimeStats.totalAverageResponseTime += runtimeInformation.get('averageResponseTime');
+          const clazzCommunications = aggregatedClazzCommunication.get('outgoingClazzCommunications');
 
-            runtimeInformationCounter++;
+          // retrieves runtime information for every clazzCommunication (same sourceClazz, targetClazz, and operationName)
+          clazzCommunications.forEach((clazzCommunication) => {
+              const runtimeInformations = clazzCommunication.get('runtimeInformations');
+              runtimeInformations.forEach((runtimeInformation) => {
+
+                runtimeStats.involvedTraces.push(runtimeInformation.get('traceId'));
+                runtimeStats.totalOverallTraceDuration += runtimeInformation.get('overallTraceDuration');
+                runtimeStats.totalAverageResponseTime += runtimeInformation.get('averageResponseTime');
+
+                runtimeInformationCounter++;
+              });
+
           });
-
         });
 
         if (runtimeInformationCounter > 0) {

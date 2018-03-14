@@ -200,16 +200,16 @@ export default RenderingCore.extend({
 
     const viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
 
-    const aggregatedOutgoingClazzCommunications = emberApplication.get('aggregatedOutgoingClazzCommunications');
+    const cumulatedClazzCommunications = emberApplication.get('cumulatedClazzCommunications');
 
-    aggregatedOutgoingClazzCommunications.forEach((aggClazzCommunication) => {
-      if (aggClazzCommunication.get('startPoint') && aggClazzCommunication.get('endPoint')) {
+    cumulatedClazzCommunications.forEach((cumuClazzCommu) => {
+      if (cumuClazzCommu.get('startPoint') && cumuClazzCommu.get('endPoint')) {
           const start = new THREE.Vector3();
-          start.subVectors(aggClazzCommunication.get('startPoint'), viewCenterPoint);
+          start.subVectors(cumuClazzCommu.get('startPoint'), viewCenterPoint);
           start.multiplyScalar(0.5);
 
           const end = new THREE.Vector3();
-          end.subVectors(aggClazzCommunication.get('endPoint'), viewCenterPoint);
+          end.subVectors(cumuClazzCommu.get('endPoint'), viewCenterPoint);
           end.multiplyScalar(0.5);
 
           if(start.y >= end.y) {
@@ -221,7 +221,7 @@ export default RenderingCore.extend({
           let transparent = false;
           let opacityValue = 1.0;
 
-          if(aggClazzCommunication.get('state') === "TRANSPARENT") {
+          if(cumuClazzCommu.get('state') === "TRANSPARENT") {
             transparent = true;
             opacityValue = 0.4;
           }
@@ -232,11 +232,11 @@ export default RenderingCore.extend({
             transparent : transparent
           });
 
-          const thickness = aggClazzCommunication.get('lineThickness') * 0.3;
+          const thickness = cumuClazzCommu.get('lineThickness') * 0.3;
 
           const pipe = cylinderMesh(start, end, material, thickness);
 
-          pipe.userData.model = aggClazzCommunication;
+          pipe.userData.model = cumuClazzCommu;
           self.get('application3D').add(pipe);
         }
     });

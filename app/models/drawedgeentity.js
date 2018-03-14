@@ -49,6 +49,6 @@ export default BaseEntity.extend({
 
   pipeColor: attr(),
   kielerEdgeReferences: [],
-  hidden: attr('boolean', { defaultValue: false}),
+  hidden: attr('boolean', { defaultValue: false }),
 
 });

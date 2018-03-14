@@ -4,9 +4,10 @@ import DrawEdgeEntity from './drawedgeentity';
 const { attr, belongsTo, hasMany } = DS;
 
 /**
- * Ember model for an AggregatedClazzCommunication.
- * Uni-directional between two clazzes
- * @class AggregatedClazzCommunication-Model
+ * Ember model for an CumulatedClazzCommunication
+ * Bi-directional between two clazzes
+ *
+ * @class CumulatedClazzCommunication-Model
  * @extends DrawEdgeEntity-Model
  *
  * @module explorviz
@@ -24,9 +25,8 @@ export default DrawEdgeEntity.extend({
     inverse: null
   }),
 
-  outgoingClazzCommunications: hasMany('clazzcommunication', {
+  aggregatedClazzCommunications: hasMany('aggregatedclazzcommunication', {
     inverse: null
   }),
 
 });
-

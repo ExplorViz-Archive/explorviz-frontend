@@ -28,10 +28,10 @@ export default function applyCityLayout(application) {
 
     layoutEdges(application);
 
-    const outgoingClazzCommunications = application.get('aggregatedOutgoingClazzCommunications');
+    const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
 
-    outgoingClazzCommunications.forEach((clazzcommunication) => {
-      layoutOutgoingCommunication(clazzcommunication, application.get('components').objectAt(0));
+    cumulatedClazzCommunications.forEach((clazzcommunication) => {
+      layoutCumulatedCommunication(clazzcommunication, application.get('components').objectAt(0));
     });
 
 
@@ -482,9 +482,9 @@ export default function applyCityLayout(application) {
 
     function layoutEdges(application) {
 
-      const aggregatedOutgoingClazzCommunications = application.get('aggregatedOutgoingClazzCommunications');
+      const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
 
-      aggregatedOutgoingClazzCommunications.forEach((clazzCommunication) => {
+      cumulatedClazzCommunications.forEach((clazzCommunication) => {
         if (!clazzCommunication.get('hidden')) {
 
           let sourceClazz = null;
@@ -504,11 +504,12 @@ export default function applyCityLayout(application) {
           }
 
           if (sourceClazz !== null && targetClazz !== null) {
-            clazzCommunication.set('state', 'NORMAL');
-            clazzCommunication.set('startPoint', new THREE.Vector3(sourceClazz.get('positionX') + sourceClazz.get('width') / 2.0, sourceClazz.get('positionY'), sourceClazz.get('positionZ') + sourceClazz.get('depth') / 2.0));
-            clazzCommunication.set('endPoint', new THREE.Vector3(targetClazz.get('positionX') + targetClazz.get('width') / 2.0, targetClazz.get('positionY') + 0.05, targetClazz.get('positionZ') + targetClazz.get('depth') / 2.0));
+              clazzCommunication.set('state', 'NORMAL');
+              clazzCommunication.set('startPoint', new THREE.Vector3(sourceClazz.get('positionX') + sourceClazz.get('width') / 2.0, sourceClazz.get('positionY'), sourceClazz.get('positionZ') + sourceClazz.get('depth') / 2.0));
+              clazzCommunication.set('endPoint', new THREE.Vector3(targetClazz.get('positionX') + targetClazz.get('width') / 2.0, targetClazz.get('positionY') + 0.05, targetClazz.get('positionZ') + targetClazz.get('depth') / 2.0));
           }
         }
+
         calculatePipeSizeFromQuantiles(application);
       });
 
@@ -521,9 +522,9 @@ export default function applyCityLayout(application) {
 
         const requestsList = gatherRequestsIntoList(application);
         const categories = calculateCategories(requestsList);
-        const aggregatedOutgoingClazzCommunications = application.get('aggregatedOutgoingClazzCommunications');
+        const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
 
-        aggregatedOutgoingClazzCommunications.forEach((clazzCommunication) => {
+        cumulatedClazzCommunications.forEach((clazzCommunication) => {
           const calculatedCategory = getMatchingCategory(clazzCommunication.get('requests'), categories);
           clazzCommunication.set('lineThickness', (calculatedCategory  * pipeSizeEachStep) + pipeSizeDefault);
         });
@@ -559,9 +560,9 @@ export default function applyCityLayout(application) {
         function gatherRequestsIntoList(application) {
 
           let requestsList = [];
-          const aggregatedOutgoingClazzCommunications = application.get('aggregatedOutgoingClazzCommunications');
+          const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
 
-          aggregatedOutgoingClazzCommunications.forEach((clazzCommunication) => {
+          cumulatedClazzCommunications.forEach((clazzCommunication) => {
             if ((clazzCommunication.get('sourceClazz') !== clazzCommunication.get('targetClazz'))) {
               requestsList.push(clazzCommunication.get('requests'));
             }
@@ -585,26 +586,9 @@ export default function applyCityLayout(application) {
         return findFirstParentOpenComponent(entity.get('parentComponent'));
       }
 
-
     } // END layoutEdges
 
-
-    /*
-    function layoutIncomingCommunication(commu, foundation) {
-
-      const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
-
-      const centerCommuIcon =
-      new THREE.Vector3(foundation.get('positionX') - externalPortsExtension.x * 6.0,
-        foundation.get('positionY') - foundation.get('extension').y + externalPortsExtension.y,
-        foundation.get('positionZ') + foundation.get('extension').z * 2.0 -
-        externalPortsExtension.z);
-
-      layoutInAndOutCommunication(commu, commu.get('targetClazz'), centerCommuIcon);
-
-    }
-    */
-    function layoutOutgoingCommunication(commu, foundation) {
+    function layoutCumulatedCommunication(commu, foundation) {
 
       const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
 
