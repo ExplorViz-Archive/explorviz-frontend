@@ -42,7 +42,6 @@ export default RenderingCore.extend({
   openSymbol: null,
   closeSymbol: null,
 
-
   // @Override
   /**
    * TODO
@@ -218,6 +217,29 @@ export default RenderingCore.extend({
 
           self.get('labeler').saveTextForLabeling(null, systemMesh, textColor);
 
+          // add respective open / close symbol
+          systemMesh.geometry.computeBoundingBox();
+          const bboxSystem = systemMesh.geometry.boundingBox;
+
+          let collapseSymbol = null;
+
+          if(system.get('opened')) {
+            if(self.get('closeSymbol')) {
+              collapseSymbol = self.get('closeSymbol').clone();
+            }
+          } else {
+            if(self.get('openSymbol')) {
+              collapseSymbol = self.get('openSymbol').clone();
+            }
+          }
+
+          if(collapseSymbol) {
+            collapseSymbol.position.x = bboxSystem.max.x - 0.35;
+            collapseSymbol.position.y = bboxSystem.max.y - 0.35;
+            collapseSymbol.position.z = systemMesh.position.z + 0.0001;
+            systemMesh.add(collapseSymbol);
+          }
+
 
         }
 
@@ -230,7 +252,7 @@ export default RenderingCore.extend({
 
           if(!nodegroup.get('visible')) {
               return;
-            }
+          }
 
           if (!isRequestObject) {
 
@@ -300,7 +322,6 @@ export default RenderingCore.extend({
 
             }
 
-
             const applications = node.get('applications');
 
             // Draw boxes for applications
@@ -367,7 +388,7 @@ export default RenderingCore.extend({
 
               } else {
                 // draw request logo
-                self.get('imageLoader').createPicture(centerX, centerY, 0,
+                self.get('imageLoader').createPicture((centerX + 0.47), centerY, 0,
                   1.6, 1.6, "requests", self.get('scene'), "label");
               }
 
@@ -382,19 +403,19 @@ export default RenderingCore.extend({
 
     self.set('configuration.landscapeColors.textchanged', false);
 
-    const appCommunication = emberLandscape.get('applicationCommunication');
+    const appCommunications = emberLandscape.get('outgoingApplicationCommunications');
 
     const tiles = [];
 
     let tile;
 
-    if (appCommunication) {
+    if (appCommunications) {
 
       const color = self.get('configuration.landscapeColors.communication');
 
-      appCommunication.forEach((communication) => {
+      appCommunications.forEach((applicationCommunication) => {
 
-        const points = communication.get('points');
+        const points = applicationCommunication.get('points');
 
         if (points.length > 0) {
 
@@ -424,15 +445,14 @@ export default RenderingCore.extend({
       					requestsCache: 0,
       					communications: [],
       					pipeColor: new THREE.Color(color),
-                emberModel: communication
+                emberModel: applicationCommunication
       				};
-
       				tiles.push(tile);
       			}
 
-            tile.communications.push(appCommunication);
+            tile.communications.push(appCommunications);
             tile.requestsCache = tile.requestsCache +
-              communication.get('requests');
+              applicationCommunication.get('requests');
 
       			tiles[id] = tile;
           }
@@ -631,63 +651,10 @@ export default RenderingCore.extend({
 
     function createLine(tile, tiles, parent) {
 
-		  /*const resolution =
-        new THREE.Vector2(window.innerWidth, window.innerHeight);
-
-      const material = new Meshline.MeshLineMaterial({
-        color: tile.pipeColor,
-        lineWidth: tile.lineThickness * 0.4,
-	      sizeAttenuation : 1,
-	      resolution: resolution
-      });
-
-      const geometry = new THREE.Geometry(); */
       let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x,
         tile.startPoint.y - centerPoint.y, tile.positionZ);
       let secondVector = new THREE.Vector3(tile.endPoint.x - centerPoint.x,
           tile.endPoint.y - centerPoint.y, tile.positionZ);
-
-
-      /*let helpVector = new THREE.Vector3();
-      helpVector.subVectors(secondVector, firstVector);
-      if(helpVector.y > 0){
-        helpVector.cross(new THREE.Vector3(0,0,1));
-      }else{
-        helpVector.cross(new THREE.Vector3(0,0,-1));
-      }
-      helpVector.normalize();
-      helpVector.multiplyScalar(tile.lineThickness * 0.4);*/
-
-      //geometry.vertices.push(firstVector);
-
-      //geometry.vertices.push(secondVector);
-
-      //geometry.vertices.unshift(new THREE.Vector3(firstVector.x - helpVector.x, firstVector.y, firstVector.z));
-
-      //geometry.vertices.push(new THREE.Vector3(secondVector.x + helpVector.x, secondVector.y, secondVector.z));
-
-      //saves the angle between vector and x-axis
-
-      /*
-		  const followingTiles = tiles.filter(isNextTile, tile);
-  		const length = followingTiles.length;
-
-
-  		for(let i = 0; i < length; i++){
-  			let followingTile = followingTiles[i];
-  		//	createGoodEdges(tile, followingTile,  parent);
-  		}
-      */
-
-      //const line = new Meshline.MeshLine();
-      //line.setGeometry(geometry);
-
-      //var lineMesh = new THREE.Mesh(line.geometry, material);
-
-      //parent.add(lineMesh);
-
-
-
 
       // New line approach (draw planes)
 
@@ -706,7 +673,7 @@ export default RenderingCore.extend({
       const diagonalPos = new THREE.Vector3();
 
       // Rotate plane => diagonal plane (diagonal commu line)
-      if(Math.abs(firstVector.y - secondVector.y) > 0.1) {
+      if (Math.abs(firstVector.y - secondVector.y) > 0.1) {
         isDiagonalPlane = true;
 
         const distanceVector = new THREE.Vector3()
@@ -730,6 +697,7 @@ export default RenderingCore.extend({
       }
 
       plane.userData['model'] = tile.emberModel;
+
       parent.add(plane);
 
 

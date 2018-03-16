@@ -9,13 +9,13 @@ export default Ember.Object.extend({
 
   highlight(entity) {
 
-    const isHighlighted = entity.get('highlighted');   
+    const isHighlighted = entity.get('highlighted');
 
     if (!isHighlighted) {
       this.get('application').unhighlight();
       entity.highlight();
       this.set('highlightedEntity', entity);
-    } 
+    }
     else {
       this.unhighlightAll();
     }
@@ -26,7 +26,7 @@ export default Ember.Object.extend({
   resetHoverEffect() {
     if(this.get('hoveredEntityColorObj')) {
 
-      this.get('hoveredEntityColorObj').entity.material.color = 
+      this.get('hoveredEntityColorObj').entity.material.color =
         this.get('hoveredEntityColorObj').color;
 
       this.set('hoveredEntityColorObj', null);
@@ -46,7 +46,7 @@ export default Ember.Object.extend({
     const newHoverEntity = raycastTarget.object;
 
     // same object, do nothing and return
-    if(this.get('hoveredEntityColorObj') && 
+    if(this.get('hoveredEntityColorObj') &&
       this.get('hoveredEntityColorObj').entity === newHoverEntity) {
         return;
     }
@@ -61,7 +61,7 @@ export default Ember.Object.extend({
     });
 
     newHoverEntity.material.color = calculateColorBrightness(oldColor, 1.1);
-    
+
   },
 
 
@@ -69,8 +69,8 @@ export default Ember.Object.extend({
 
     if(this.get('highlightedEntity')) {
 
-      this.set('highlightedEntity', null);      
-      
+      this.set('highlightedEntity', null);
+
       if (this.get('application') !== null) {
         this.get('application').unhighlight();
       }
@@ -83,32 +83,20 @@ export default Ember.Object.extend({
     const highlightedNode = this.get('highlightedEntity');
 
     if (highlightedNode != null) {
+      const outgoingClazzCommunications =
+        this.get('application').get('cumulatedClazzCommunications');
 
-      const communicationsAccumulated = 
-        this.get('application').get('communicationsAccumulated');
-
-      communicationsAccumulated.forEach((commu) => {
-      
-        if ((commu.source != null && commu.source.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
-          (commu.target != null && commu.target.get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
-
-          //let outgoing = determineOutgoing(commu);
-          //let incoming = determineIncoming(commu);
-
-          //if (incoming && outgoing) {
-            commu.state = "SHOW_DIRECTION_IN_AND_OUT";
-          //} else if (incoming) {
-          //  commu.state = "SHOW_DIRECTION_IN"
-          //} else if (outgoing) {
-         //   commu.state = "SHOW_DIRECTION_OUT";
-         // }
+      outgoingClazzCommunications.forEach((clazzCommunication) => {
+        if ((clazzCommunication.sourceClazz != null && clazzCommunication.get('sourceClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
+          (clazzCommunication.targetClazz != null && clazzCommunication.get('targetClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
+            clazzCommunication.state = "NORMAL";
         } else {
-          commu.state = "TRANSPARENT";
+          clazzCommunication.state = "TRANSPARENT";
         }
       });
 
     }
   }
-  
+
 
 });

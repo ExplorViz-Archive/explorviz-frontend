@@ -6,7 +6,7 @@ const { attr, hasMany, belongsTo } = DS;
 
 /**
 * Ember model for a System.
-* 
+*
 * @class System-Model
 * @extends DrawNodeEntity-Model
 *
@@ -14,7 +14,8 @@ const { attr, hasMany, belongsTo } = DS;
 * @submodule model.meta
 */
 export default DrawNodeEntity.extend({
-  opened: attr('boolean'),  
+
+  name: attr('string'),
 
   nodegroups: hasMany('nodegroup', {
     inverse: 'parent'
@@ -24,9 +25,7 @@ export default DrawNodeEntity.extend({
     inverse: 'systems'
   }),
 
-  plusColor : attr(),
-  foregroundColor : attr(),
-  backgroundColor : attr(),
+  opened: attr('boolean', {defaultValue: true}),
 
   // used for text labeling performance in respective labelers
   state: Ember.computed('opened', function() {
@@ -36,7 +35,7 @@ export default DrawNodeEntity.extend({
   setOpened: function(openedParam) {
     if (openedParam) {
       this.get('nodegroups').forEach((nodegroup) => {
-          nodegroup.set('visible', true);      
+          nodegroup.set('visible', true);
           if (nodegroup.get('nodes').get('length') === 1) {
             nodegroup.setOpened(true);
           } else {
@@ -52,6 +51,6 @@ export default DrawNodeEntity.extend({
     }
 
     this.set('opened', openedParam);
-    
+
   }
 });

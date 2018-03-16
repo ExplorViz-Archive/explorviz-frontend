@@ -6,7 +6,7 @@ const { attr, belongsTo, hasMany } = DS;
 
 /**
 * Ember model for a NodeGroup.
-* 
+*
 * @class NodeGroup-Model
 * @extends DrawNodeEntity-Model
 *
@@ -14,8 +14,9 @@ const { attr, belongsTo, hasMany } = DS;
 * @submodule model.meta
 */
 export default DrawNodeEntity.extend({
-  visible: attr('boolean'),
-  
+
+  name: attr('string'),
+
   parent: belongsTo('system', {
     inverse: 'nodegroups'
   }),
@@ -24,14 +25,13 @@ export default DrawNodeEntity.extend({
     inverse: 'parent'
   }),
 
-  plusColor: attr(),
-  backgroundColor: attr(),
-  opened: attr('boolean'),
+  visible: attr('boolean', {defaultValue: true}),
+  opened: attr('boolean', {defaultValue: true}),
 
   // used for text labeling performance in respective renderers
   state: Ember.computed('visible', 'opened', function() {
     let opened = this.get('opened');
-    let visible = this.get('visible');    
+    let visible = this.get('visible');
     return `${opened}/${visible}`;
   }),
 
@@ -42,8 +42,8 @@ export default DrawNodeEntity.extend({
     } else {
       this.setAllChildrenVisibility(false);
       if (this.get('nodes').get('length') > 0) {
-        const firstNode = this.get('nodes').objectAt(0);       
-        firstNode.set('visible', true); 
+        const firstNode = this.get('nodes').objectAt(0);
+        firstNode.set('visible', true);
       }
     }
 
@@ -53,7 +53,7 @@ export default DrawNodeEntity.extend({
 
   setAllChildrenVisibility: function(visiblity) {
     this.get('nodes').forEach((node) => {
-          node.set('visible', visiblity); 
+          node.set('visible', visiblity);
     });
   }
 

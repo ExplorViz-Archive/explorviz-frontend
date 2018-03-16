@@ -4,7 +4,6 @@ import { encodeStringForPopUp } from '../helpers/string-helpers';
 export default Ember.Object.extend(Ember.Evented, {
 
   alreadyDestroyed: true,
-
   enableTooltips: true,
 
 
@@ -58,20 +57,20 @@ export default Ember.Object.extend(Ember.Evented, {
 
     const modelType = emberModel.constructor.modelName;
 
-    if(modelType === 'application') {
-      content = buildApplicationContent(emberModel);
-    }
-    else if(modelType === 'system') {
+    if (modelType === 'system') {
       content = buildSystemContent(emberModel);
     }
-    else if(modelType === 'node') {
+    else if (modelType === 'node') {
       content = buildNodeContent(emberModel);
     }
-    else if(modelType === 'nodegroup') {
+    else if (modelType === 'nodegroup') {
       content = buildNodegroupContent(emberModel);
     }
-    else if(modelType === 'communication') {
-      content = buildCommunicationContent(emberModel);
+    else if (modelType === 'application') {
+      content = buildApplicationContent(emberModel);
+    }
+    else if (modelType === 'applicationcommunication') {
+      content = buildApplicationCommunicationContent(emberModel);
     }
 
     return content;
@@ -210,11 +209,11 @@ export default Ember.Object.extend(Ember.Evented, {
       nodes.forEach((node) => {
 
         avgNodeCPUUtil += node.get('cpuUtilization');
-
         applicationCount += node.get('applications').get('length');
 
       });
 
+      var avgCpuUtilization = round((avgNodeCPUUtil * 100) / nodes.get('length'), 0);
 
       content.html =
         '<table style="width:100%">' +
@@ -233,7 +232,7 @@ export default Ember.Object.extend(Ember.Evented, {
           '<tr>' +
             '<td>Avg. CPU Utilization:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              avgNodeCPUUtil +
+              avgCpuUtilization + ' %' +
             '</td>' +
           '</tr>' +
         '</table>';
@@ -243,31 +242,34 @@ export default Ember.Object.extend(Ember.Evented, {
 
 
 
-    function buildCommunicationContent(communication) {
+    function buildApplicationCommunicationContent(applicationCommunication) {
 
       let content = {title: '', html: ''};
 
-      content.title = encodeStringForPopUp(communication.get('source').get('name')) +
-        "&nbsp;<span class='glyphicon glyphicon-transfer'></span>&nbsp;";
+      const sourceApplicationName = applicationCommunication.get('sourceApplication').get('name');
+      const targetApplicationName = applicationCommunication.get('targetApplication').get('name');
+
+      content.title = encodeStringForPopUp(sourceApplicationName) +
+        "&nbsp;<span class='glyphicon glyphicon-arrow-right'></span>&nbsp;" + encodeStringForPopUp(targetApplicationName);
 
       content.html =
         '<table style="width:100%">' +
           '<tr>' +
-            '<td>Requests:</td>' +
+            '<td>&nbsp;<span class=\'glyphicon glyphicon-tasks\'></span>&nbsp; Requests:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              communication.get('requests') +
+              applicationCommunication.get('requests') +
             '</td>' +
           '</tr>' +
           '<tr>' +
-            '<td>Technology:</td>' +
+            '<td>&nbsp;<span class=\'glyphicon glyphicon-oil\'></span>&nbsp;Technology:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              communication.get('technology') +
+              applicationCommunication.get('technology') +
             '</td>' +
           '</tr>' +
           '<tr>' +
-            '<td>Avg. Duration:</td>' +
+            '<td>&nbsp;<span class=\'glyphicon glyphicon-time\'></span>&nbsp; Avg. Duration:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
-              communication.get('averageResponseTimeInNanoSec') + ' ms' +
+              applicationCommunication.get('averageResponseTime') + ' ns' +
             '</td>' +
           '</tr>' +
         '</table>';

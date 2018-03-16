@@ -5,7 +5,7 @@ const { attr } = DS;
 
 /**
 * Ember model for a DrawNodeEntity.
-* 
+*
 * @class DrawNodeEntity-Model
 * @extends BaseEntity-Model
 *
@@ -14,16 +14,17 @@ const { attr } = DS;
 */
 export default BaseEntity.extend({
 
-  name: attr('string'),
+  plusColor: attr(),
+  foregroundColor: attr(),
+  backgroundColor: attr(),
+  highlighted: attr('boolean', { defaultValue: false }),
 
-  highlighted: attr('boolean'),
-
-  width: attr('number'),
-  height: attr('number'),
-  depth: attr('number'),
-  positionX: attr('number'),
-  positionY: attr('number'),
-  positionZ: attr('number'),
+  width: attr('number', { defaultValue: 0}),
+  height: attr('number', { defaultValue: 0}),
+  depth: attr('number', { defaultValue: 0}),
+  positionX: attr('number', { defaultValue: 0}),
+  positionY: attr('number', { defaultValue: 0}),
+  positionZ: attr('number', { defaultValue: 0}),
   threeJSModel: attr(),
 
   kielerGraphReference: null,

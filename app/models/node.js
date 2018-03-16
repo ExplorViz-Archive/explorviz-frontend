@@ -6,7 +6,7 @@ const { attr, hasMany, belongsTo } = DS;
 
 /**
 * Ember model for a Node.
-* 
+*
 * @class Node-Model
 * @extends DrawNodeEntity-Model
 *
@@ -15,11 +15,13 @@ const { attr, hasMany, belongsTo } = DS;
 */
 export default DrawNodeEntity.extend({
 
+  name: attr('string'),
+  ipAddress: attr('string'),
   cpuUtilization: attr('number'),
   freeRAM: attr('number'),
   usedRAM: attr('number'),
 
-  visible: attr('boolean'),
+  visible: attr('boolean', {defaultValue: true}),
 
   applications: hasMany('application', {
     inverse: 'parent'
@@ -28,8 +30,6 @@ export default DrawNodeEntity.extend({
   parent: belongsTo('nodegroup', {
     inverse: 'nodes'
   }),
-
-  ipAddress: attr('string'),
 
   // used for text labeling performance in respective labelers
   state: Ember.computed('visible', function() {

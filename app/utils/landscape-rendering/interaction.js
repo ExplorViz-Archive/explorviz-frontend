@@ -50,7 +50,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
       self.onMouseWheelStart(evt);
     }
 
-    // hover handler    
+    // hover handler
     canvas.addEventListener('mousemove', registerMouseMove, false);
 
     function registerMouseMove(evt) {
@@ -97,7 +97,7 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
     const rect = this.get('canvas').getBoundingClientRect();
 
     const mouse = {
-      x: evt.clientX - rect.left, 
+      x: evt.clientX - rect.left,
       y: evt.clientY - rect.top
     };
 
@@ -107,10 +107,10 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
 
     origin.y = -(mouse.y / this.get('renderer').domElement.clientHeight) * 2 + 1;
 
-    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
 
-    this.get('highlighter').handleHoverEffect(intersectedViewObj);    
+    this.get('highlighter').handleHoverEffect(intersectedViewObj);
 
   },
 
@@ -240,8 +240,8 @@ export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
         if(emberModel.get('components').get('length') === 0) {
           // no data => show message
 
-          const message = "Sorry, no details for <b>" + emberModel.get('name') +
-            "</b> are available.";
+          const message = "Sorry, there is no information for application <b>" + emberModel.get('name') +
+            "</b> available.";
 
           this.showAlertifyMessage(message);
 

@@ -5,18 +5,20 @@ export default function applyCityLayout(application) {
     const insetSpace = 4.0;
 
     const components = application.get('components');
-    
+
     const foundationComponent = components.objectAt(0);
 
+    /*
     const EdgeState = {
-      NORMAL: 'NORMAL', 
-      TRANSPARENT: 'TRANSPARENT', 
-      SHOW_DIRECTION_IN: 'SHOW_DIRECTION_IN', 
-      SHOW_DIRECTION_OUT: 'SHOW_DIRECTION_OUT', 
-      SHOW_DIRECTION_IN_AND_OUT: 'SHOW_DIRECTION_IN_AND_OUT', 
-      REPLAY_HIGHLIGHT: 'REPLAY_HIGHLIGHT', 
+      NORMAL: 'NORMAL',
+      TRANSPARENT: 'TRANSPARENT',
+      SHOW_DIRECTION_IN: 'SHOW_DIRECTION_IN',
+      SHOW_DIRECTION_OUT: 'SHOW_DIRECTION_OUT',
+      SHOW_DIRECTION_IN_AND_OUT: 'SHOW_DIRECTION_IN_AND_OUT',
+      REPLAY_HIGHLIGHT: 'REPLAY_HIGHLIGHT',
       HIDDEN: 'HIDDEN'
     };
+    */
 
     calcClazzHeight(foundationComponent);
     initNodes(foundationComponent);
@@ -26,18 +28,11 @@ export default function applyCityLayout(application) {
 
     layoutEdges(application);
 
-    const incomingCommunications = application.get('incomingCommunications');
+    const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
 
-    incomingCommunications.forEach((commu) => {
-      layoutIncomingCommunication(commu, application.get('components').objectAt(0));
+    cumulatedClazzCommunications.forEach((clazzcommunication) => {
+      layoutCumulatedCommunication(clazzcommunication, application.get('components').objectAt(0));
     });
-
-    const outgoingCommunications = application.get('outgoingCommunications');
-
-    outgoingCommunications.forEach((commu) => {
-      layoutOutgoingCommunication(commu, application.get('components').objectAt(0));
-    });
-
 
 
     // Helper functions
@@ -111,9 +106,9 @@ export default function applyCityLayout(application) {
         if (listWithout0.length === 0) {
           result.push(0.0);
           return result;
-        }        
+        }
         useLinear(listWithout0, list, result);
-      } 
+      }
       else {
         const listWithout0And1 = [];
 
@@ -191,7 +186,7 @@ export default function applyCityLayout(application) {
             secondMax = max;
             max = value;
           }
-        });   
+        });
 
         const oneStep = secondMax / 4.0;
 
@@ -202,7 +197,7 @@ export default function applyCityLayout(application) {
         list.forEach((entry) => {
           const categoryValue = getCategoryFromLinearValues(entry, t1, t2, t3);
           result[entry] = categoryValue;
-        }); 
+        });
 
       }
 
@@ -264,7 +259,7 @@ export default function applyCityLayout(application) {
     function getHeightOfComponent(component) {
       const floorHeight = 0.75 * 4.0;
 
-      if (!component.get('opened')) {  
+      if (!component.get('opened')) {
         let childrenHeight = floorHeight;
 
         const children = component.get('children');
@@ -305,7 +300,7 @@ export default function applyCityLayout(application) {
 
       const children = component.get('children');
       const clazzes = component.get('clazzes');
-      
+
       clazzes.forEach((clazz) => {
         tempList.push(clazz);
       });
@@ -314,7 +309,7 @@ export default function applyCityLayout(application) {
         tempList.push(child);
       });
 
-      const segment = layoutGeneric(tempList);     
+      const segment = layoutGeneric(tempList);
 
       component.set('width', segment.width);
       component.set('depth', segment.height);
@@ -373,10 +368,10 @@ export default function applyCityLayout(application) {
 
       rootSegment.width = rootSegment.width + labelInsetSpace;
 
-      return rootSegment;     
+      return rootSegment;
 
 
-      function insertFittingSegment(rootSegment, toFitWidth, toFitHeight){        
+      function insertFittingSegment(rootSegment, toFitWidth, toFitHeight){
         if(!rootSegment.used && toFitWidth <= rootSegment.width && toFitHeight <= rootSegment.height) {
           const resultSegment = createLayoutSegment();
           rootSegment.upperRightChild = createLayoutSegment();
@@ -397,20 +392,20 @@ export default function applyCityLayout(application) {
           if (rootSegment.upperRightChild.width <= 0.0) {
             rootSegment.upperRightChild = null;
           }
-          
+
           rootSegment.lowerChild.startX = rootSegment.startX;
           rootSegment.lowerChild.startZ = rootSegment.startZ + toFitHeight;
           rootSegment.lowerChild.width = rootSegment.width;
           rootSegment.lowerChild.height = rootSegment.height - toFitHeight;
           rootSegment.lowerChild.parent = rootSegment;
-          
+
           if (rootSegment.lowerChild.height <= 0.0) {
             rootSegment.lowerChild = null;
           }
-          
+
           rootSegment.used = true;
           return resultSegment;
-        } 
+        }
         else {
           let resultFromUpper = null;
           let resultFromLower = null;
@@ -432,7 +427,7 @@ export default function applyCityLayout(application) {
             const upperBoundX = resultFromUpper.startX + resultFromUpper.width;
 
             const lowerBoundZ = resultFromLower.startZ + resultFromLower.height;
-            
+
             if (upperBoundX <= lowerBoundZ) {
               resultFromLower.parent.used = false;
               return resultFromUpper;
@@ -470,288 +465,118 @@ export default function applyCityLayout(application) {
 
 
     function createLayoutSegment() {
-      const layoutSegment = 
+      const layoutSegment =
       {
-        parent: null, 
-        lowerChild: null, 
-        upperRightChild: null, 
-        startX: null, 
-        startZ: null, 
-        width: null, 
+        parent: null,
+        lowerChild: null,
+        upperRightChild: null,
+        startX: null,
+        startZ: null,
+        width: null,
         height: null,
         used: false
       };
 
       return layoutSegment;
-    }
+    } // END createLayoutSegment
 
     function layoutEdges(application) {
 
-      application.set('communicationsAccumulated', []);
+      const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
 
-      const communications = application.get('communications');
+      cumulatedClazzCommunications.forEach((clazzCommunication) => {
+        if (!clazzCommunication.get('hidden')) {
 
-      communications.forEach((commuFromApp) => {
-        if (!commuFromApp.get('hidden')) {
+          let sourceClazz = null;
+          let targetClazz = null;
 
-          let source = null;
-          let target = null;
-
-          if (commuFromApp.get('source').get('parent').get('opened')) {
-            source = commuFromApp.get('source');
+          if (clazzCommunication.get('sourceClazz').get('parent').get('opened')) {
+            sourceClazz = clazzCommunication.get('sourceClazz');
           } else {
-            source = findFirstParentOpenComponent(commuFromApp.get('source').get('parent'));
+            sourceClazz = findFirstParentOpenComponent(clazzCommunication.get('sourceClazz').get('parent'));
           }
 
-          if (commuFromApp.get('target').get('parent').get('opened')) {
-            target = commuFromApp.get('target');
+          if (clazzCommunication.get('targetClazz').get('parent').get('opened')) {
+            targetClazz = clazzCommunication.get('targetClazz');
           }
           else {
-            target = findFirstParentOpenComponent(commuFromApp.get('target').get('parent'));
+            targetClazz = findFirstParentOpenComponent(clazzCommunication.get('targetClazz').get('parent'));
           }
 
-          if (source !== null && target !== null) {
-
-            let found = false;
-
-            const communicationsAccumulated = application.get('communicationsAccumulated');
-
-             communicationsAccumulated.forEach((commuAcc) => {
-
-              if (found === false) {
-                found = ((commuAcc.source === source) && (commuAcc.target === target) ||
-                  (commuAcc.source === target) && (commuAcc.target === source));
-
-                  if (found) {
-                    commuAcc.requests = commuAcc.requests + commuFromApp.get('requestsCacheCount');
-                    commuAcc.aggregatedCommunications.push(commuFromApp);
-                  }
-                }
-
-             });
-
-
-              if (found === false) {
-                const newCommu = {};
-                newCommu.source = source;
-                newCommu.target = target;
-                newCommu.requests = commuFromApp.get('requestsCacheCount');
-                newCommu.aggregatedCommunications = [];
-                newCommu.state = 'NORMAL';
-
-                newCommu.startPoint = new THREE.Vector3(source.get('positionX') + source.get('width') / 2.0, source.get('positionY'),
-                  source.get('positionZ') + source.get('depth') / 2.0);
-               
-                newCommu.endPoint = new THREE.Vector3(target.get('positionX') + target.get('width') / 2.0, target.get('positionY') + 0.05,
-                  target.get('positionZ') + target.get('depth') / 2.0);              
-
-                newCommu.aggregatedCommunications.push(commuFromApp);
-
-                application.get('communicationsAccumulated').push(newCommu);
-              }
-          }          
-
+          if (sourceClazz !== null && targetClazz !== null) {
+              clazzCommunication.set('state', 'NORMAL');
+              clazzCommunication.set('startPoint', new THREE.Vector3(sourceClazz.get('positionX') + sourceClazz.get('width') / 2.0, sourceClazz.get('positionY'), sourceClazz.get('positionZ') + sourceClazz.get('depth') / 2.0));
+              clazzCommunication.set('endPoint', new THREE.Vector3(targetClazz.get('positionX') + targetClazz.get('width') / 2.0, targetClazz.get('positionY') + 0.05, targetClazz.get('positionZ') + targetClazz.get('depth') / 2.0));
+          }
         }
 
         calculatePipeSizeFromQuantiles(application);
-
       });
 
-
+      // Calculates the size of the pipes regarding the number of requests
       function calculatePipeSizeFromQuantiles(application) {
 
-        const requestsList = [];
-
+        // constant factors for rendering communication lines (pipes)
         const pipeSizeEachStep = 0.45;
         const pipeSizeDefault = 0.1;
 
-        gatherRequestsIntoList(application, requestsList);
+        const requestsList = gatherRequestsIntoList(application);
+        const categories = calculateCategories(requestsList);
+        const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
 
-        const categories = getCategories(requestsList, true);
-        
-        const communicationsAccumulated = application.get('communicationsAccumulated');
-
-        communicationsAccumulated.forEach((commu) => {
-          if (commu.source !== commu.target && commu.state !== EdgeState.HIDDEN) {
-            commu.pipeSize = categories[commu.requests] * pipeSizeEachStep + pipeSizeDefault;
-          }
+        cumulatedClazzCommunications.forEach((clazzCommunication) => {
+          const calculatedCategory = getMatchingCategory(clazzCommunication.get('requests'), categories);
+          clazzCommunication.set('lineThickness', (calculatedCategory  * pipeSizeEachStep) + pipeSizeDefault);
         });
 
-        const incomingCommunications = application.get('incomingCommunications');
+        // generates four default categories for rendering (thickness of communication lines)
+        function calculateCategories(requestsList) {
+          const minNumber = Math.min.apply(Math, requestsList);
+          const avgNumber = requestsList.reduce(addUpRequests) / requestsList.length;
+          const maxNumber = Math.max.apply(Math,requestsList);
+          const categories = [0, minNumber, avgNumber, maxNumber];
 
-        incomingCommunications.forEach((commu) => {
-          commu.lineThickness = categories[commu.requests] * pipeSizeEachStep + pipeSizeDefault;
-        });
+          return categories;
+        } // END calculateCategories
 
-        const outgoingCommunications = application.get('outgoingCommunications');
+        // retrieves a matching category for a specific clazzCommunication
+        function getMatchingCategory(numOfRequests, categories) {
 
-        outgoingCommunications.forEach((commu) => {
-          commu.lineThickness = categories[commu.requests] * pipeSizeEachStep + pipeSizeDefault;
-        });
+          // default category = lowest category
+          let calculatedCategory = 0;
 
-
-
-        function getCategories(list, linear) {
-          const result = [];
-
-          if (list.length === 0) {
-            return result;
-          }
-
-          list.sort();
-
-          if (linear) {
-            const listWithout0 = [];
-
-            list.forEach((entry) => {
-              if (entry !== 0){
-                listWithout0.push(entry);
-              }
-            });
-
-            if (listWithout0.length === 0) {
-              result.push({0: 0.0});
-              return result;
-            }        
-            useLinear(listWithout0, list, result);
-          } 
-          else {
-            const listWithout0And1 = [];
-
-            let outsideCounter = 0;
-            let insideCounter = 0;
-
-            list.forEach((entry) => {
-              outsideCounter++;
-              if (entry !== 0 && entry !== 1){
-                listWithout0And1.push(entry);
-                insideCounter++;
-              }
-            });
-
-            if (listWithout0And1.length === 0) {
-              result.push({0: 0.0});
-              result.push({1: 1.0});
-              return result;
+          for (var i = 1; i < categories.length; i++) {
+            if (numOfRequests >= categories[i]) {
+              calculatedCategory = i;
             }
-
-            useThreshholds(listWithout0And1, list, result);
-          }
-
-          return result;
-
-
-
-          // inner helper functions
-
-          function useThreshholds(listWithout0And1, list, result) {
-            let max = 1;
-
-            listWithout0And1.forEach((value) => {
-              if (value > max) {
-                max = value;
-              }
-            });
-
-            const oneStep = max / 3.0;
-
-            const t1 = oneStep;
-            const t2 = oneStep * 2;
-
-            list.forEach((entry) => {
-              let categoryValue = getCategoryFromValues(entry, t1, t2);
-              result[entry] = categoryValue;
-            });
-
-          }
-
-
-          function getCategoryFromValues(value, t1, t2) {
-            if (value === 0) {
-              return 0.0;
-            } else if (value === 1) {
-              return 1.0;
-            }
-
-            if (value <= t1) {
-              return 2.0;
-            } else if (value <= t2) {
-              return 3.0;
-            } else {
-              return 4.0;
+            else {
+              return calculatedCategory;
             }
           }
+          return calculatedCategory;
+        } // END getMatchingCategory
 
+        // Retrieves all requests and pushes them to a list for further processing
+        function gatherRequestsIntoList(application) {
 
-          function useLinear(listWithout0, list, result) {
-            let max = 1;
-            let secondMax = 1;
+          let requestsList = [];
+          const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
 
-            listWithout0.forEach((value) => {
-              if (value > max) {
-                secondMax = max;
-                max = value;
-              }
-            });   
-
-            const oneStep = secondMax / 4.0;
-
-            const t1 = oneStep;
-            const t2 = oneStep * 2;
-            const t3 = oneStep * 3;
-
-            list.forEach((entry) => {
-              const categoryValue = getCategoryFromLinearValues(entry, t1, t2, t3);
-              result[entry] = categoryValue;
-            }); 
-
-          }
-
-
-          function getCategoryFromLinearValues(value, t1, t2, t3) {
-            if (value <= 0) {
-              return 0;
-            } else if (value <= t1) {
-              return 1.5;
-            } else if (value <= t2) {
-              return 2.5;
-            } else if (value <= t3) {
-              return 4.0;
-            } else {
-              return 6.5;
-            }
-          }
-
-
-
-        } // END getCategories
-
-
-        function gatherRequestsIntoList(application, requestsList) {
-
-          const communicationsAccumulated = application.get('communicationsAccumulated');
-
-          communicationsAccumulated.forEach((commu) => {
-            if (commu.source !== commu.target && commu.state !== EdgeState.HIDDEN) {
-              requestsList.push(commu.requests);
+          cumulatedClazzCommunications.forEach((clazzCommunication) => {
+            if ((clazzCommunication.get('sourceClazz') !== clazzCommunication.get('targetClazz'))) {
+              requestsList.push(clazzCommunication.get('requests'));
             }
           });
 
-          const incomingCommunications = application.get('incomingCommunications');
+          return requestsList;
+        } // END gatherRequestsIntoList
 
-          incomingCommunications.forEach((commu) => {
-            requestsList.push(commu.requests);
-          });
+        // adds up a number to an existing number
+        function addUpRequests(requestSum, requestCount) {
+          return requestSum + requestCount;
+        } // END addUpRequests
 
-          const outgoingCommunications = application.get('outgoingCommunications');
-
-          outgoingCommunications.forEach((commu) => {
-            requestsList.push(commu.requests);
-          });
-
-        }
-
-      }// END calculatePipeSizeFromQuantiles 
+      } // END calculatePipeSizeFromQuantiles
 
       function findFirstParentOpenComponent(entity) {
         if (entity.get('parentComponent') == null || entity.get('parentComponent').get('opened')) {
@@ -760,33 +585,18 @@ export default function applyCityLayout(application) {
 
         return findFirstParentOpenComponent(entity.get('parentComponent'));
       }
-      
 
     } // END layoutEdges
 
-
-    function layoutIncomingCommunication(commu, foundation) {
-
-      const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
-
-      const centerCommuIcon = 
-      new THREE.Vector3(foundation.get('positionX') - externalPortsExtension.x * 6.0,
-        foundation.get('positionY') - foundation.get('extension').y + externalPortsExtension.y,
-        foundation.get('positionZ') + foundation.get('extension').z * 2.0 - 
-        externalPortsExtension.z);
-
-      layoutInAndOutCommunication(commu, commu.get('targetClazz'), centerCommuIcon);
-    }
-
-    function layoutOutgoingCommunication(commu, foundation) {
+    function layoutCumulatedCommunication(commu, foundation) {
 
       const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
 
-      const centerCommuIcon = 
-      new THREE.Vector3(foundation.get('positionX') + foundation.get('extension').x * 2.0 + 
-        externalPortsExtension.x * 4.0, foundation.get('positionY') - 
-        foundation.get('extension').y + externalPortsExtension.y, 
-        foundation.get('positionZ') + foundation.get('extension').z * 2.0 - 
+      const centerCommuIcon =
+      new THREE.Vector3(foundation.get('positionX') + foundation.get('extension').x * 2.0 +
+        externalPortsExtension.x * 4.0, foundation.get('positionY') -
+        foundation.get('extension').y + externalPortsExtension.y,
+        foundation.get('positionZ') + foundation.get('extension').z * 2.0 -
         externalPortsExtension.z - 12.0);
 
       layoutInAndOutCommunication(commu, commu.get('sourceClazz'), centerCommuIcon);
@@ -800,10 +610,10 @@ export default function applyCityLayout(application) {
       if (internalClazz !== null) {
         const end = new THREE.Vector3();
 
-        const centerPoint = 
-        new THREE.Vector3(internalClazz.get('positionX') + 
-          internalClazz.get('width') / 2.0, 
-          internalClazz.get('positionY') + internalClazz.get('height') / 2.0, 
+        const centerPoint =
+        new THREE.Vector3(internalClazz.get('positionX') +
+          internalClazz.get('width') / 2.0,
+          internalClazz.get('positionY') + internalClazz.get('height') / 2.0,
           internalClazz.get('positionZ') + internalClazz.get('depth') / 2.0);
 
         end.x = internalClazz.get('positionX') + internalClazz.get('width') / 2.0;

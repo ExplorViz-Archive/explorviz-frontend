@@ -1,11 +1,12 @@
 import DS from 'ember-data';
 import Draw3DNodeEntity from './draw3dnodeentity';
+import Ember from 'ember';
 
 const { attr, belongsTo, hasMany } = DS;
 
 /**
 * Ember model for a Component, e.g. a Java package.
-* 
+*
 * @class Component-Model
 * @extends Draw3DNodeEntity-Model
 *
@@ -14,26 +15,31 @@ const { attr, belongsTo, hasMany } = DS;
 */
 export default Draw3DNodeEntity.extend({
 
-  synthetic: attr('boolean'),
-  foundation: attr('boolean'),
+  name: attr('string'),
+  fullQualifiedName: attr('string'),
+
+  synthetic: attr('boolean', {defaultValue: false}),
+  foundation: attr('boolean', {defaultValue: false}),
 
   children: hasMany('component', {
     inverse: 'parentComponent'
   }),
 
-  clazzes: hasMany('clazz'),
+  clazzes: hasMany('clazz', {
+    inverse: 'parent'
+  }),
 
   parentComponent: belongsTo('component', {
     inverse: 'children'
   }),
 
+  opened: false,
+
   // breaks Ember, maybe because of circle ?
-  
+
   /*belongingApplication: belongsTo('application', {
     inverse: 'components'
   }),*/
-
-  opened: attr('boolean'),
 
   setOpenedStatus(status) {
 
@@ -103,6 +109,10 @@ export default Draw3DNodeEntity.extend({
     });
 
     return filteredComponents;
-  }
+  },
+
+  hasOnlyOneChildComponent: Ember.computed('children', function() {
+    return this.hasMany('children').ids().length < 2;
+  }),
 
 });

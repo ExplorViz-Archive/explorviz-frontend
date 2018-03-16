@@ -1,17 +1,20 @@
 import DS from 'ember-data';
+import BaseEntity from './baseentity';
 
-const {Model, attr} = DS;
+const { attr } = DS;
 
 /**
 * Ember model for a Timestamp.
-* 
+*
 * @class Timestamp-Model
-* @extends DS.Model
+* @extends @extends BaseEntity-Model
 *
 * @module explorviz
 * @submodule model
 */
-export default Model.extend({
+export default BaseEntity.extend({
+
   timestamp: attr('number'),
   calls: attr('number')
+
 });
