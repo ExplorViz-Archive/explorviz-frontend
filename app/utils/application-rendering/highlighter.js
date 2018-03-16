@@ -84,12 +84,12 @@ export default Ember.Object.extend({
 
     if (highlightedNode != null) {
       const outgoingClazzCommunications =
-        this.get('application').get('aggregatedOutgoingClazzCommunications');
+        this.get('application').get('cumulatedClazzCommunications');
 
       outgoingClazzCommunications.forEach((clazzCommunication) => {
         if ((clazzCommunication.sourceClazz != null && clazzCommunication.get('sourceClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
           (clazzCommunication.targetClazz != null && clazzCommunication.get('targetClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
-            clazzCommunication.state = "SHOW_DIRECTION_OUT";
+            clazzCommunication.state = "NORMAL";
         } else {
           clazzCommunication.state = "TRANSPARENT";
         }
