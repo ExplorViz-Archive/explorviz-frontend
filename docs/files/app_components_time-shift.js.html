@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>app\components\time-shift.js - ExplorViz: Frontend API</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="ExplorViz: Frontend API" src="https://www.explorviz.net/img/favicon.png" style="max-height: 65%;" title="ExplorViz: Frontend API">
+            ExplorViz: Frontend API
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>0.0.2</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Administration-Route", "classes/AggregatedClazzCommunication-Model", "classes/Alertify-Handler", "classes/Application", "classes/Application-Controller", "classes/Application-Model", "classes/Application-Rendering-Component", "classes/Application-Route", "classes/Application-Serializer", "classes/ApplicationCommunication-Model", "classes/Authenticator", "classes/Authorizer", "classes/Badroute-Route", "classes/BaseEntity-Model", "classes/Clazz-Model", "classes/ClazzCommunication-Model", "classes/Component-Model", "classes/Configuration-Controller", "classes/Configuration-Route", "classes/Configuration-Service", "classes/CumulatedClazzCommunication-Model", "classes/Data-Reload-Service", "classes/DatabaseQuery-Model", "classes/Draw3DNodeEntity-Model", "classes/DrawEdgeEntity-Model", "classes/DrawNodeEntity-Model", "classes/Index-Route", "classes/Landscape-Adapter", "classes/Landscape-Model", "classes/Landscape-Reload-Service", "classes/Landscape-Rendering-Component", "classes/Landscape-Repository-Service", "classes/Landscape-Serializer", "classes/Login-Form-Component", "classes/Login-Route", "classes/Navbar-Glyphicons", "classes/Navbar-Routes", "classes/Node-Model", "classes/NodeGroup-Model", "classes/Page-Setup-Service", "classes/Rendering-Core-Component", "classes/Router", "classes/RuntimeInformation-Model", "classes/System-Model", "classes/System-Serializer", "classes/ThreeJS-Performance-Mixin", "classes/Time-Shift-Component", "classes/Timeshift-Reload-Service", "classes/Timestamp-Adapter", "classes/Timestamp-Model", "classes/Timestamp-Repository-Service", "classes/Tutorial-Route", "classes/user-Model", "classes/Visualization-Controller", "classes/Visualization-Route", "modules/explorviz", "modules/model", "modules/model.meta", "modules/model.util", "modules/network", "modules/page", "modules/security", "modules/settings", "modules/util", "modules/visualization", "modules/visualization.rendering", "modules/visualization.timeshift"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+	    <div>
+	        <h3>APIs</h3>
+	        <div id="sidebar">
+	            <ul id="main-nav" class="nav nav-tabs" style="margin-bottom:0;">
+	                <li class="active"><a href="#classes" data-toggle="tab">Classes</a></li>
+	                <li><a href="#modules" data-toggle="tab">Modules</a></li>
+	            </ul>
+	    
+	            <div id="api-tabview-filter">
+	                <input type="search" placeholder="Type to filter APIs">
+	            </div>
+	    
+	            <div class="tab-content" style="border: 1px solid #DDD; border-top:0;">
+	                <div class="tab-pane active" id="classes">
+	                    <ul id="api-classes" class="nav nav-list">
+	                            <li><a href="../classes/Administration-Route.html">Administration-Route</a></li>
+	                            <li><a href="../classes/AggregatedClazzCommunication-Model.html">AggregatedClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/Alertify-Handler.html">Alertify-Handler</a></li>
+	                            <li><a href="../classes/Application.html">Application</a></li>
+	                            <li><a href="../classes/Application-Controller.html">Application-Controller</a></li>
+	                            <li><a href="../classes/Application-Model.html">Application-Model</a></li>
+	                            <li><a href="../classes/Application-Rendering-Component.html">Application-Rendering-Component</a></li>
+	                            <li><a href="../classes/Application-Route.html">Application-Route</a></li>
+	                            <li><a href="../classes/Application-Serializer.html">Application-Serializer</a></li>
+	                            <li><a href="../classes/ApplicationCommunication-Model.html">ApplicationCommunication-Model</a></li>
+	                            <li><a href="../classes/Authenticator.html">Authenticator</a></li>
+	                            <li><a href="../classes/Authorizer.html">Authorizer</a></li>
+	                            <li><a href="../classes/Badroute-Route.html">Badroute-Route</a></li>
+	                            <li><a href="../classes/BaseEntity-Model.html">BaseEntity-Model</a></li>
+	                            <li><a href="../classes/Clazz-Model.html">Clazz-Model</a></li>
+	                            <li><a href="../classes/ClazzCommunication-Model.html">ClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/Component-Model.html">Component-Model</a></li>
+	                            <li><a href="../classes/Configuration-Controller.html">Configuration-Controller</a></li>
+	                            <li><a href="../classes/Configuration-Route.html">Configuration-Route</a></li>
+	                            <li><a href="../classes/Configuration-Service.html">Configuration-Service</a></li>
+	                            <li><a href="../classes/CumulatedClazzCommunication-Model.html">CumulatedClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/Data-Reload-Service.html">Data-Reload-Service</a></li>
+	                            <li><a href="../classes/DatabaseQuery-Model.html">DatabaseQuery-Model</a></li>
+	                            <li><a href="../classes/Draw3DNodeEntity-Model.html">Draw3DNodeEntity-Model</a></li>
+	                            <li><a href="../classes/DrawEdgeEntity-Model.html">DrawEdgeEntity-Model</a></li>
+	                            <li><a href="../classes/DrawNodeEntity-Model.html">DrawNodeEntity-Model</a></li>
+	                            <li><a href="../classes/Index-Route.html">Index-Route</a></li>
+	                            <li><a href="../classes/Landscape-Adapter.html">Landscape-Adapter</a></li>
+	                            <li><a href="../classes/Landscape-Model.html">Landscape-Model</a></li>
+	                            <li><a href="../classes/Landscape-Reload-Service.html">Landscape-Reload-Service</a></li>
+	                            <li><a href="../classes/Landscape-Rendering-Component.html">Landscape-Rendering-Component</a></li>
+	                            <li><a href="../classes/Landscape-Repository-Service.html">Landscape-Repository-Service</a></li>
+	                            <li><a href="../classes/Landscape-Serializer.html">Landscape-Serializer</a></li>
+	                            <li><a href="../classes/Login-Form-Component.html">Login-Form-Component</a></li>
+	                            <li><a href="../classes/Login-Route.html">Login-Route</a></li>
+	                            <li><a href="../classes/Navbar-Glyphicons.html">Navbar-Glyphicons</a></li>
+	                            <li><a href="../classes/Navbar-Routes.html">Navbar-Routes</a></li>
+	                            <li><a href="../classes/Node-Model.html">Node-Model</a></li>
+	                            <li><a href="../classes/NodeGroup-Model.html">NodeGroup-Model</a></li>
+	                            <li><a href="../classes/Page-Setup-Service.html">Page-Setup-Service</a></li>
+	                            <li><a href="../classes/Rendering-Core-Component.html">Rendering-Core-Component</a></li>
+	                            <li><a href="../classes/Router.html">Router</a></li>
+	                            <li><a href="../classes/RuntimeInformation-Model.html">RuntimeInformation-Model</a></li>
+	                            <li><a href="../classes/System-Model.html">System-Model</a></li>
+	                            <li><a href="../classes/System-Serializer.html">System-Serializer</a></li>
+	                            <li><a href="../classes/ThreeJS-Performance-Mixin.html">ThreeJS-Performance-Mixin</a></li>
+	                            <li><a href="../classes/Time-Shift-Component.html">Time-Shift-Component</a></li>
+	                            <li><a href="../classes/Timeshift-Reload-Service.html">Timeshift-Reload-Service</a></li>
+	                            <li><a href="../classes/Timestamp-Adapter.html">Timestamp-Adapter</a></li>
+	                            <li><a href="../classes/Timestamp-Model.html">Timestamp-Model</a></li>
+	                            <li><a href="../classes/Timestamp-Repository-Service.html">Timestamp-Repository-Service</a></li>
+	                            <li><a href="../classes/Tutorial-Route.html">Tutorial-Route</a></li>
+	                            <li><a href="../classes/user-Model.html">user-Model</a></li>
+	                            <li><a href="../classes/Visualization-Controller.html">Visualization-Controller</a></li>
+	                            <li><a href="../classes/Visualization-Route.html">Visualization-Route</a></li>
+	                    </ul>
+	                </div>
+	    
+	                <div class="tab-pane" id="modules">
+	                    <ul id="api-modules" class="nav nav-list">
+	                            <li><a href="../modules/explorviz.html">explorviz</a></li>
+	                            <li><a href="../modules/model.html">model</a></li>
+	                            <li><a href="../modules/model.meta.html">model.meta</a></li>
+	                            <li><a href="../modules/model.util.html">model.util</a></li>
+	                            <li><a href="../modules/network.html">network</a></li>
+	                            <li><a href="../modules/page.html">page</a></li>
+	                            <li><a href="../modules/security.html">security</a></li>
+	                            <li><a href="../modules/settings.html">settings</a></li>
+	                            <li><a href="../modules/util.html">util</a></li>
+	                            <li><a href="../modules/visualization.html">visualization</a></li>
+	                            <li><a href="../modules/visualization.rendering.html">visualization.rendering</a></li>
+	                            <li><a href="../modules/visualization.timeshift.html">visualization.timeshift</a></li>
+	                    </ul>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+        </div>
+        <div class="span9">
+                <form id="options-form" class="form-inline pull-right">
+                    Show:
+                    <label for="api-show-inherited" class="checkbox">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected" class="checkbox">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private" class="checkbox">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated" class="checkbox">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </form>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>app\components\time-shift.js <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+import Ember from &#x27;ember&#x27;;
+
+const {Component, $, on, inject} = Ember;
+
+/**
+* This component contains the core mechanics of the different (three.js-based)
+* renderer. All functions below are called in a determined order, hence you only
+* need to override them in your custom renderer.
+*
+* See {{#crossLink &quot;Landscape-Rendering&quot;}}{{/crossLink}} or
+* {{#crossLink &quot;Application-Rendering&quot;}}{{/crossLink}} for example usage.
+*
+* Call order:
+*
+* 1.
+*
+* @class Time-Shift-Component
+* @extends Ember.Component
+*
+* @module explorviz
+* @submodule visualization.timeshift
+*/
+export default Component.extend({
+
+  timestampRepo: inject.service(&quot;repos/timestamp-repository&quot;),
+  reloadHandler: inject.service(&quot;reload-handler&quot;),
+
+  plot: null,
+
+  dataPointPixelRatio: 17,
+
+  isUp: false,
+
+  actions: {
+
+    toggleTimeline() {
+      if ($(&quot;.timeline&quot;).attr(&#x27;vis&#x27;) === &#x27;show&#x27;) {
+        // hide timeline
+        this.set(&#x27;isUp&#x27;, false);
+        $(&quot;.timeline&quot;).slideUp(400);
+        $(&quot;#vizContainer&quot;).animate({height:&#x27;+=120&#x27;});
+        $(&quot;.timeline&quot;).attr(&#x27;vis&#x27;, &#x27;hide&#x27;);
+        $(&quot;#toggleTimelineButton&quot;).removeClass(&#x27;glyphicon-collapse-down&#x27;)
+          .addClass(&#x27;glyphicon-collapse-up&#x27;);
+      }
+      else {
+        // show timeline
+        this.set(&#x27;isUp&#x27;, true);
+        $(&quot;.timeline&quot;).slideDown(&#x27;fast&#x27;);
+        $(&quot;#vizContainer&quot;).animate({height:&#x27;-=120&#x27;});
+
+        $(&quot;.timeline&quot;).attr(&#x27;vis&#x27;, &#x27;show&#x27;);
+        $(&quot;#toggleTimelineButton&quot;).removeClass(&#x27;glyphicon-collapse-up&#x27;)
+          .addClass(&#x27;glyphicon-collapse-down&#x27;);
+      }
+    },
+
+    playPauseTimeshift() {
+      if(this.get(&#x27;reloadHandler.isReloading&#x27;)) {
+        this.get(&#x27;reloadHandler&#x27;).stopExchange();
+      }
+      else {
+        this.get(&#x27;reloadHandler&#x27;).startExchange();
+      }
+    }
+  },
+
+  // @Override
+  init() {
+    this._super(...arguments);
+
+    const self = this;
+
+    // Listener for updating plot
+    this.get(&#x27;timestampRepo&#x27;).on(&#x27;updated&#x27;, function() {
+      self.updatePlot();
+    });
+
+    // Listeners for changing play / pause css
+    this.get(&#x27;reloadHandler&#x27;).on(&#x27;stopExchange&#x27;, function() {
+      $(&#x27;#playPauseTimelineButton&#x27;).removeClass(&#x27;glyphicon-pause&#x27;)
+        .addClass(&#x27;glyphicon-play&#x27;);
+    });
+
+    this.get(&#x27;reloadHandler&#x27;).on(&#x27;startExchange&#x27;, function() {
+      $(&#x27;#playPauseTimelineButton&#x27;).removeClass(&#x27;glyphicon-play&#x27;)
+        .addClass(&#x27;glyphicon-pause&#x27;);
+
+      if(self.get(&#x27;plot&#x27;)) {
+        self.get(&#x27;plot&#x27;).unselect([&#x27;Timestamps&#x27;]);
+      }
+
+    });
+  },
+
+
+  // @Override
+  // Cleanup
+  willDestroyElement() {
+    this.get(&#x27;timestampRepo&#x27;).off(&#x27;updated&#x27;);
+    this.get(&#x27;reloadHandler&#x27;).off(&#x27;stopExchange&#x27;);
+    this.get(&#x27;reloadHandler&#x27;).off(&#x27;startExchange&#x27;);
+  },
+
+  renderPlot: on(&#x27;didRender&#x27;, function() {
+
+    const self = this;
+
+    const chartData = this.buildChartData();
+
+    if(!chartData) {
+      return;
+    }
+
+    const values = chartData.values;
+    values.unshift(&#x27;Calls&#x27;);
+
+    const dates = chartData.labels;
+    dates.unshift(&#x27;Labels&#x27;);
+
+    const chart = c3.generate({
+      data: {
+        x: &#x27;Labels&#x27;,
+        xFormat: &#x27;%H:%M:%S&#x27;,
+        columns: [dates, values],
+        types: {
+          Calls: &#x27;area-spline&#x27;
+          // &#x27;line&#x27;, &#x27;spline&#x27;, &#x27;step&#x27;, &#x27;area&#x27;, &#x27;area-step&#x27; ...
+        },
+        selection: {
+          enabled: true,
+          multiple: false
+        },
+        onclick: ((d) =&gt; {
+          self.loadTimestamp(d);
+        })
+      },
+      transition: {duration: 0},
+      axis: {
+        x: {
+          type: &#x27;timeseries&#x27;,
+          localTime: false,
+          tick: {
+              format: &#x27;%H:%M:%S&#x27;
+          },
+          label: {
+            text: &#x27;Date&#x27;,
+            position: &#x27;outer-center&#x27;
+          }
+        },
+        y: {
+          label: {
+            text: &#x27;Calls&#x27;,
+            position: &#x27;outer-middle&#x27;
+          }
+        }
+      },
+      legend: {
+        show: false
+      },
+      zoom: {
+        enabled: true
+      },
+      grid: {
+        x: {
+          show: true
+        },
+        y: {
+          show: false
+        }
+      },
+      padding: {
+        right: 30,
+      },
+      onresized: function() {
+        self.applyOptimalZoom();
+      }
+    });
+
+    this.set(&#x27;plot&#x27;, chart);
+    this.applyOptimalZoom();
+  }),
+
+
+  // build chart-ready data
+  buildChartData() {
+
+    const timestamps = this.get(&#x27;timestampRepo.latestTimestamps&#x27;);
+
+    if(!timestamps) {
+      return;
+    }
+
+    const sortedTimestamps = timestamps.sortBy(&#x27;timestamp&#x27;);
+
+    // define outside loop in case of error
+    const timestampList = [];
+    const timestampListFormatted = [];
+    const callList = [];
+
+    // Parse and format timestamps for timeline
+    if (sortedTimestamps) {
+      sortedTimestamps.forEach(function(timestamp) {
+        const timestampValue = timestamp.get(&#x27;timestamp&#x27;);
+        timestampList.push(timestampValue);
+
+        const callValue = timestamp.get(&#x27;calls&#x27;);
+        callList.push(callValue);
+
+        //const parsedTimestampValue = moment(timestampValue,&quot;x&quot;);
+
+        //const timestampValueFormatted =
+        //  parsedTimestampValue.format(&quot;HH:mm:ss&quot;).toString();
+
+        timestampListFormatted.push(timestampValue);
+      });
+    }
+
+    const chartData = {
+      labels: timestampListFormatted,
+      values: callList
+    };
+
+    return chartData;
+  },
+
+
+  updatePlot() {
+
+    const self = this;
+
+    let updatedPlot = this.get(&#x27;plot&#x27;);
+
+  	if(!updatedPlot){
+      this.renderPlot();
+      updatedPlot = this.get(&#x27;plot&#x27;);
+      //return;
+    }
+
+    const chartReadyTimestamps = this.buildChartData();
+
+  	const labels = chartReadyTimestamps.labels;
+  	const values = chartReadyTimestamps.values;
+
+    //labels.unshift(&#x27;Labels&#x27;);
+    //values.unshift(&#x27;Calls&#x27;);
+
+    const newLabel = [&#x27;Labels&#x27;, labels.pop()];
+    const newValue = [&#x27;Calls&#x27;, values.pop()];
+
+    updatedPlot.flow({
+      columns: [newLabel, newValue],
+      length:0,
+      done: function () {
+        updatedPlot.zoom.enable(true);
+        self.applyOptimalZoom();
+      }
+    });
+  },
+
+
+  applyOptimalZoom() {
+
+    if(!this.get(&#x27;isUp&#x27;)) {
+      return;
+    }
+
+    const allData = this.get(&#x27;plot&#x27;).data()[0].values;
+
+    // calculate and set snippet of timeline
+    const dataSetLength = allData.length;
+
+    const divWidth = this.get(&#x27;plot&#x27;).element.clientWidth;
+    const numberOfPointsToShow = parseInt(divWidth /
+      this.get(&#x27;dataPointPixelRatio&#x27;));
+
+    const lowerBound = dataSetLength - numberOfPointsToShow &lt;= 0 ?
+        0 : (dataSetLength - numberOfPointsToShow) ;
+
+    const lowerBoundLabel = allData[lowerBound].x;
+    const upperBoundLabel = allData[dataSetLength - 1].x;
+
+    this.get(&#x27;plot&#x27;).zoom([lowerBoundLabel, upperBoundLabel]);
+  },
+
+
+  loadTimestamp(timestamp) {
+    const milliseconds = new Date(timestamp.x).getTime();
+    this.get(&#x27;reloadHandler&#x27;).loadLandscapeById(milliseconds);
+  }
+
+});
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>

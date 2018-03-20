@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>app\components\visualization\rendering\application-rendering.js - ExplorViz: Frontend API</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="ExplorViz: Frontend API" src="https://www.explorviz.net/img/favicon.png" style="max-height: 65%;" title="ExplorViz: Frontend API">
+            ExplorViz: Frontend API
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>0.0.2</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Administration-Route", "classes/AggregatedClazzCommunication-Model", "classes/Alertify-Handler", "classes/Application", "classes/Application-Controller", "classes/Application-Model", "classes/Application-Rendering-Component", "classes/Application-Route", "classes/Application-Serializer", "classes/ApplicationCommunication-Model", "classes/Authenticator", "classes/Authorizer", "classes/Badroute-Route", "classes/BaseEntity-Model", "classes/Clazz-Model", "classes/ClazzCommunication-Model", "classes/Component-Model", "classes/Configuration-Controller", "classes/Configuration-Route", "classes/Configuration-Service", "classes/CumulatedClazzCommunication-Model", "classes/Data-Reload-Service", "classes/DatabaseQuery-Model", "classes/Draw3DNodeEntity-Model", "classes/DrawEdgeEntity-Model", "classes/DrawNodeEntity-Model", "classes/Index-Route", "classes/Landscape-Adapter", "classes/Landscape-Model", "classes/Landscape-Reload-Service", "classes/Landscape-Rendering-Component", "classes/Landscape-Repository-Service", "classes/Landscape-Serializer", "classes/Login-Form-Component", "classes/Login-Route", "classes/Navbar-Glyphicons", "classes/Navbar-Routes", "classes/Node-Model", "classes/NodeGroup-Model", "classes/Page-Setup-Service", "classes/Rendering-Core-Component", "classes/Router", "classes/RuntimeInformation-Model", "classes/System-Model", "classes/System-Serializer", "classes/ThreeJS-Performance-Mixin", "classes/Time-Shift-Component", "classes/Timeshift-Reload-Service", "classes/Timestamp-Adapter", "classes/Timestamp-Model", "classes/Timestamp-Repository-Service", "classes/Tutorial-Route", "classes/user-Model", "classes/Visualization-Controller", "classes/Visualization-Route", "modules/explorviz", "modules/model", "modules/model.meta", "modules/model.util", "modules/network", "modules/page", "modules/security", "modules/settings", "modules/util", "modules/visualization", "modules/visualization.rendering", "modules/visualization.timeshift"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+	    <div>
+	        <h3>APIs</h3>
+	        <div id="sidebar">
+	            <ul id="main-nav" class="nav nav-tabs" style="margin-bottom:0;">
+	                <li class="active"><a href="#classes" data-toggle="tab">Classes</a></li>
+	                <li><a href="#modules" data-toggle="tab">Modules</a></li>
+	            </ul>
+	    
+	            <div id="api-tabview-filter">
+	                <input type="search" placeholder="Type to filter APIs">
+	            </div>
+	    
+	            <div class="tab-content" style="border: 1px solid #DDD; border-top:0;">
+	                <div class="tab-pane active" id="classes">
+	                    <ul id="api-classes" class="nav nav-list">
+	                            <li><a href="../classes/Administration-Route.html">Administration-Route</a></li>
+	                            <li><a href="../classes/AggregatedClazzCommunication-Model.html">AggregatedClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/Alertify-Handler.html">Alertify-Handler</a></li>
+	                            <li><a href="../classes/Application.html">Application</a></li>
+	                            <li><a href="../classes/Application-Controller.html">Application-Controller</a></li>
+	                            <li><a href="../classes/Application-Model.html">Application-Model</a></li>
+	                            <li><a href="../classes/Application-Rendering-Component.html">Application-Rendering-Component</a></li>
+	                            <li><a href="../classes/Application-Route.html">Application-Route</a></li>
+	                            <li><a href="../classes/Application-Serializer.html">Application-Serializer</a></li>
+	                            <li><a href="../classes/ApplicationCommunication-Model.html">ApplicationCommunication-Model</a></li>
+	                            <li><a href="../classes/Authenticator.html">Authenticator</a></li>
+	                            <li><a href="../classes/Authorizer.html">Authorizer</a></li>
+	                            <li><a href="../classes/Badroute-Route.html">Badroute-Route</a></li>
+	                            <li><a href="../classes/BaseEntity-Model.html">BaseEntity-Model</a></li>
+	                            <li><a href="../classes/Clazz-Model.html">Clazz-Model</a></li>
+	                            <li><a href="../classes/ClazzCommunication-Model.html">ClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/Component-Model.html">Component-Model</a></li>
+	                            <li><a href="../classes/Configuration-Controller.html">Configuration-Controller</a></li>
+	                            <li><a href="../classes/Configuration-Route.html">Configuration-Route</a></li>
+	                            <li><a href="../classes/Configuration-Service.html">Configuration-Service</a></li>
+	                            <li><a href="../classes/CumulatedClazzCommunication-Model.html">CumulatedClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/Data-Reload-Service.html">Data-Reload-Service</a></li>
+	                            <li><a href="../classes/DatabaseQuery-Model.html">DatabaseQuery-Model</a></li>
+	                            <li><a href="../classes/Draw3DNodeEntity-Model.html">Draw3DNodeEntity-Model</a></li>
+	                            <li><a href="../classes/DrawEdgeEntity-Model.html">DrawEdgeEntity-Model</a></li>
+	                            <li><a href="../classes/DrawNodeEntity-Model.html">DrawNodeEntity-Model</a></li>
+	                            <li><a href="../classes/Index-Route.html">Index-Route</a></li>
+	                            <li><a href="../classes/Landscape-Adapter.html">Landscape-Adapter</a></li>
+	                            <li><a href="../classes/Landscape-Model.html">Landscape-Model</a></li>
+	                            <li><a href="../classes/Landscape-Reload-Service.html">Landscape-Reload-Service</a></li>
+	                            <li><a href="../classes/Landscape-Rendering-Component.html">Landscape-Rendering-Component</a></li>
+	                            <li><a href="../classes/Landscape-Repository-Service.html">Landscape-Repository-Service</a></li>
+	                            <li><a href="../classes/Landscape-Serializer.html">Landscape-Serializer</a></li>
+	                            <li><a href="../classes/Login-Form-Component.html">Login-Form-Component</a></li>
+	                            <li><a href="../classes/Login-Route.html">Login-Route</a></li>
+	                            <li><a href="../classes/Navbar-Glyphicons.html">Navbar-Glyphicons</a></li>
+	                            <li><a href="../classes/Navbar-Routes.html">Navbar-Routes</a></li>
+	                            <li><a href="../classes/Node-Model.html">Node-Model</a></li>
+	                            <li><a href="../classes/NodeGroup-Model.html">NodeGroup-Model</a></li>
+	                            <li><a href="../classes/Page-Setup-Service.html">Page-Setup-Service</a></li>
+	                            <li><a href="../classes/Rendering-Core-Component.html">Rendering-Core-Component</a></li>
+	                            <li><a href="../classes/Router.html">Router</a></li>
+	                            <li><a href="../classes/RuntimeInformation-Model.html">RuntimeInformation-Model</a></li>
+	                            <li><a href="../classes/System-Model.html">System-Model</a></li>
+	                            <li><a href="../classes/System-Serializer.html">System-Serializer</a></li>
+	                            <li><a href="../classes/ThreeJS-Performance-Mixin.html">ThreeJS-Performance-Mixin</a></li>
+	                            <li><a href="../classes/Time-Shift-Component.html">Time-Shift-Component</a></li>
+	                            <li><a href="../classes/Timeshift-Reload-Service.html">Timeshift-Reload-Service</a></li>
+	                            <li><a href="../classes/Timestamp-Adapter.html">Timestamp-Adapter</a></li>
+	                            <li><a href="../classes/Timestamp-Model.html">Timestamp-Model</a></li>
+	                            <li><a href="../classes/Timestamp-Repository-Service.html">Timestamp-Repository-Service</a></li>
+	                            <li><a href="../classes/Tutorial-Route.html">Tutorial-Route</a></li>
+	                            <li><a href="../classes/user-Model.html">user-Model</a></li>
+	                            <li><a href="../classes/Visualization-Controller.html">Visualization-Controller</a></li>
+	                            <li><a href="../classes/Visualization-Route.html">Visualization-Route</a></li>
+	                    </ul>
+	                </div>
+	    
+	                <div class="tab-pane" id="modules">
+	                    <ul id="api-modules" class="nav nav-list">
+	                            <li><a href="../modules/explorviz.html">explorviz</a></li>
+	                            <li><a href="../modules/model.html">model</a></li>
+	                            <li><a href="../modules/model.meta.html">model.meta</a></li>
+	                            <li><a href="../modules/model.util.html">model.util</a></li>
+	                            <li><a href="../modules/network.html">network</a></li>
+	                            <li><a href="../modules/page.html">page</a></li>
+	                            <li><a href="../modules/security.html">security</a></li>
+	                            <li><a href="../modules/settings.html">settings</a></li>
+	                            <li><a href="../modules/util.html">util</a></li>
+	                            <li><a href="../modules/visualization.html">visualization</a></li>
+	                            <li><a href="../modules/visualization.rendering.html">visualization.rendering</a></li>
+	                            <li><a href="../modules/visualization.timeshift.html">visualization.timeshift</a></li>
+	                    </ul>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+        </div>
+        <div class="span9">
+                <form id="options-form" class="form-inline pull-right">
+                    Show:
+                    <label for="api-show-inherited" class="checkbox">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected" class="checkbox">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private" class="checkbox">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated" class="checkbox">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </form>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>app\components\visualization\rendering\application-rendering.js <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+import Ember from &#x27;ember&#x27;;
+import RenderingCore from &#x27;./rendering-core&#x27;;
+
+import THREE from &quot;npm:three&quot;;
+
+import applyCityLayout from
+    &#x27;explorviz-frontend/utils/application-rendering/city-layouter&#x27;;
+import Interaction from
+    &#x27;explorviz-frontend/utils/application-rendering/interaction&#x27;;
+import Labeler from
+    &#x27;explorviz-frontend/utils/application-rendering/labeler&#x27;;
+import CalcCenterAndZoom from
+    &#x27;explorviz-frontend/utils/application-rendering/center-and-zoom-calculator&#x27;;
+import FoundationBuilder from
+    &#x27;explorviz-frontend/utils/application-rendering/foundation-builder&#x27;;
+
+
+const {inject} = Ember;
+
+
+/**
+ * Renderer for application visualization.
+ *
+ * @class Application-Rendering-Component
+ * @extends Rendering-Core-Component
+ *
+ * @module explorviz
+ * @submodule visualization.rendering
+ */
+export default RenderingCore.extend({
+
+  store: inject.service(&#x27;store&#x27;),
+
+  application3D: null,
+
+  applicationID: null,
+
+  interactionHandler: null,
+  labeler: null,
+
+  oldRotation: {x: 0, y: 0},
+  initialSetupDone: false,
+
+  interaction: null,
+  centerAndZoomCalculator: null,
+  foundationBuilder: null,
+
+  // @Override
+  initRendering() {
+    this._super(...arguments);
+
+    this.debug(&quot;init application rendering&quot;);
+
+    this.onReSetupScene = function() {
+      this.resetRotation();
+      this.set(&#x27;centerAndZoomCalculator.centerPoint&#x27;, null);
+      this.get(&#x27;camera.position&#x27;).set(0, 0, 100);
+      this.cleanAndUpdateScene();
+    };
+
+    this.onUpdated = function() {
+      if(this.get(&#x27;initDone&#x27;)) {
+        this.preProcessEntity();
+        this.cleanAndUpdateScene();
+      }
+    };
+
+    this.onResized = function() {
+      this.set(&#x27;centerAndZoomCalculator.centerPoint&#x27;, null);
+      this.cleanAndUpdateScene();
+    };
+
+    this.get(&#x27;camera&#x27;).position.set(0, 0, 100);
+
+    // dummy object for raycasting
+    this.set(&#x27;application3D&#x27;, new THREE.Object3D());
+
+    if (!this.get(&#x27;labeler&#x27;)) {
+      this.set(&#x27;labeler&#x27;, Labeler.create());
+    }
+
+    if (!this.get(&#x27;foundationBuilder&#x27;)) {
+      this.set(&#x27;foundationBuilder&#x27;, FoundationBuilder.create());
+    }
+
+    if (!this.get(&#x27;interaction&#x27;)) {
+      // owner necessary to inject service into util
+      this.set(&#x27;interaction&#x27;, Interaction.create(Ember.getOwner(this).ownerInjection()));
+    }
+
+    if (!this.get(&#x27;centerAndZoomCalculator&#x27;)) {
+      this.set(&#x27;centerAndZoomCalculator&#x27;, CalcCenterAndZoom.create());
+    }
+
+    this.initInteraction();
+
+    const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
+    spotLight.position.set(100, 100, 100);
+    spotLight.castShadow = false;
+    this.get(&#x27;scene&#x27;).add(spotLight);
+
+    const light = new THREE.AmbientLight(
+      new THREE.Color(0.65, 0.65, 0.65));
+    this.scene.add(light);
+
+    this.set(&#x27;centerAndZoomCalculator.centerPoint&#x27;, null);
+  },
+
+  // @Override
+  cleanup() {
+    this._super(...arguments);
+
+    this.debug(&quot;cleanup application rendering&quot;);
+
+    // remove foundation for re-rendering
+    this.get(&#x27;foundationBuilder&#x27;).removeFoundation(this.get(&#x27;store&#x27;));
+
+    this.set(&#x27;applicationID&#x27;, null);
+    this.set(&#x27;application3D&#x27;, null);
+
+    this.get(&#x27;renderingService&#x27;).off(&#x27;redrawScene&#x27;);
+
+    // clean up landscapeRepo for visualization template
+    this.set(&#x27;landscapeRepo.latestApplication&#x27;, null);
+
+    this.get(&#x27;interaction&#x27;).removeHandlers();
+  },
+
+
+  // @Override
+  /**
+   * TODO
+   *
+   * @method cleanAndUpdateScene
+   */
+  cleanAndUpdateScene() {
+    this.debug(&quot;clean application rendering&quot;);
+
+    // save old rotation
+    this.set(&#x27;oldRotation&#x27;, this.get(&#x27;application3D&#x27;).rotation);
+
+    // remove foundation for re-rendering
+    this.get(&#x27;foundationBuilder&#x27;).removeFoundation(this.get(&#x27;store&#x27;));
+
+    this._super(...arguments);
+  },
+
+
+  // @Override
+  /**
+   * TODO
+   *
+   * @method preProcessEntity
+   */
+  preProcessEntity() {
+    const application = this.get(&#x27;store&#x27;).peekRecord(&#x27;application&#x27;,
+      this.get(&#x27;applicationID&#x27;));
+    this.set(&#x27;landscapeRepo.latestApplication&#x27;, application);
+  },
+
+
+  // @Override
+  /**
+   * TODO
+   *
+   * @method populateScene
+   */
+  populateScene() {
+    this._super(...arguments);
+    this.debug(&quot;populate application rendering&quot;);
+
+    const emberApplication = this.get(&#x27;landscapeRepo.latestApplication&#x27;);
+
+    if(!emberApplication) {
+      return;
+    }
+
+    this.set(&#x27;applicationID&#x27;, emberApplication.id);
+
+    const self = this;
+
+    const foundation = this.get(&#x27;foundationBuilder&#x27;).createFoundation(emberApplication, this.get(&#x27;store&#x27;));
+
+    applyCityLayout(emberApplication);
+
+    this.set(&#x27;application3D&#x27;, new THREE.Object3D());
+    this.set(&#x27;application3D.userData.model&#x27;, emberApplication);
+
+    // update raycasting children, because of new entity
+    this.get(&#x27;interaction&#x27;).updateEntities(this.get(&#x27;application3D&#x27;));
+
+    // apply (possible) highlighting
+    this.get(&#x27;interaction&#x27;).applyHighlighting();
+
+    if(!this.get(&#x27;centerAndZoomCalculator.centerPoint&#x27;)) {
+      this.get(&#x27;centerAndZoomCalculator&#x27;)
+        .calculateAppCenterAndZZoom(emberApplication);
+    }
+
+    const viewCenterPoint = this.get(&#x27;centerAndZoomCalculator.centerPoint&#x27;);
+
+    const cumulatedClazzCommunications = emberApplication.get(&#x27;cumulatedClazzCommunications&#x27;);
+
+    cumulatedClazzCommunications.forEach((cumuClazzCommu) =&gt; {
+      if (cumuClazzCommu.get(&#x27;startPoint&#x27;) &amp;&amp; cumuClazzCommu.get(&#x27;endPoint&#x27;)) {
+        const start = new THREE.Vector3();
+        start.subVectors(cumuClazzCommu.get(&#x27;startPoint&#x27;), viewCenterPoint);
+        start.multiplyScalar(0.5);
+
+        const end = new THREE.Vector3();
+        end.subVectors(cumuClazzCommu.get(&#x27;endPoint&#x27;), viewCenterPoint);
+        end.multiplyScalar(0.5);
+
+        if(start.y &gt;= end.y) {
+          end.y = start.y;
+        } else {
+          start.y = end.y;
+        }
+
+        let transparent = false;
+        let opacityValue = 1.0;
+
+        if(cumuClazzCommu.get(&#x27;state&#x27;) === &quot;TRANSPARENT&quot;) {
+          transparent = true;
+          opacityValue = 0.4;
+        }
+
+        const material = new THREE.MeshBasicMaterial({
+          color : new THREE.Color(0xf49100),
+          opacity : opacityValue,
+          transparent : transparent
+        });
+
+        const thickness = cumuClazzCommu.get(&#x27;lineThickness&#x27;) * 0.3;
+
+        const pipe = this.cylinderMesh(start, end, material, thickness);
+
+        pipe.userData.model = cumuClazzCommu;
+        self.get(&#x27;application3D&#x27;).add(pipe);
+      }
+    });
+
+    this.addComponentToScene(foundation, 0xCECECE);
+
+    self.scene.add(self.get(&#x27;application3D&#x27;));
+
+    if(self.get(&#x27;initialSetupDone&#x27;)) {
+      // apply old rotation
+      self.set(&#x27;application3D.rotation.x&#x27;, self.get(&#x27;oldRotation.x&#x27;));
+      self.set(&#x27;application3D.rotation.y&#x27;, self.get(&#x27;oldRotation.y&#x27;));
+    }
+    else {
+      self.resetRotation();
+      self.set(&#x27;oldRotation.x&#x27;, self.get(&#x27;application3D&#x27;).rotation.x);
+      self.set(&#x27;oldRotation.y&#x27;, self.get(&#x27;application3D&#x27;).rotation.y);
+      self.set(&#x27;initialSetupDone&#x27;, true);
+    }
+  },
+
+  // Helper functions
+  cylinderMesh(pointX, pointY, material, thickness) {
+    const direction = new THREE.Vector3().subVectors(pointY, pointX);
+    const orientation = new THREE.Matrix4();
+    orientation.lookAt(pointX, pointY, new THREE.Object3D().up);
+    orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1,
+      0, 0, -1, 0, 0, 0, 0, 0, 1));
+    const edgeGeometry = new THREE.CylinderGeometry(thickness, thickness,
+      direction.length(), 20, 1);
+    const pipe = new THREE.Mesh(edgeGeometry, material);
+    pipe.applyMatrix(orientation);
+
+    pipe.position.x = (pointY.x + pointX.x) / 2.0;
+    pipe.position.y = (pointY.y + pointX.y) / 2.0;
+    pipe.position.z = (pointY.z + pointX.z) / 2.0;
+    return pipe;
+  },
+
+  addComponentToScene(component, color) {
+
+    const grey = 0xCECECE;
+    const lightGreen = 0x00BB41;
+    const darkGreen = 0x169E2B;
+    const clazzColor = 0x3E14A0;
+    const redHighlighted = 0xFF0000;
+
+    this.createBox(component, color, false);
+
+    component.set(&#x27;color&#x27;, color);
+
+    const clazzes = component.get(&#x27;clazzes&#x27;);
+    const children = component.get(&#x27;children&#x27;);
+
+    clazzes.forEach((clazz) =&gt; {
+      if (component.get(&#x27;opened&#x27;)) {
+        if (clazz.get(&#x27;highlighted&#x27;)) {
+          this.createBox(clazz, redHighlighted, true);
+        } else {
+          this.createBox(clazz, clazzColor, true);
+        }
+      }
+    });
+
+    children.forEach((child) =&gt; {
+      if (component.get(&#x27;opened&#x27;)) {
+        if (child.get(&#x27;opened&#x27;)) {
+          if(child.get(&#x27;highlighted&#x27;)) {
+            this.addComponentToScene(child, redHighlighted);
+          }
+          else if(component.get(&#x27;color&#x27;) === grey) {
+            this.addComponentToScene(child, lightGreen);
+          }
+          else if(component.get(&#x27;color&#x27;) === darkGreen) {
+            this.addComponentToScene(child, lightGreen);
+          } else {
+            this.addComponentToScene(child, darkGreen);
+          }
+        }
+        else {
+          if(child.get(&#x27;highlighted&#x27;)) {
+            this.addComponentToScene(child, redHighlighted);
+          }
+          else if(component.get(&#x27;color&#x27;) === grey) {
+            this.addComponentToScene(child, lightGreen);
+          }
+          else if(component.get(&#x27;color&#x27;) === darkGreen) {
+            this.addComponentToScene(child, lightGreen);
+          } else {
+            this.addComponentToScene(child, darkGreen);
+          }
+        }
+      }
+    });
+  }, // END addComponentToScene
+
+
+
+  createBox(component, color, isClass) {
+    const self = this;
+    let centerPoint = new THREE.Vector3(component.get(&#x27;positionX&#x27;) +
+      component.get(&#x27;width&#x27;) / 2.0, component.get(&#x27;positionY&#x27;) +
+      component.get(&#x27;height&#x27;) / 2.0,
+      component.get(&#x27;positionZ&#x27;) + component.get(&#x27;depth&#x27;) / 2.0);
+
+    const material = new THREE.MeshLambertMaterial();
+    material.color = new THREE.Color(color);
+
+    centerPoint.sub(this.get(&#x27;centerAndZoomCalculator.centerPoint&#x27;));
+
+    centerPoint.multiplyScalar(0.5);
+
+    const extension = new THREE.Vector3(component.get(&#x27;width&#x27;) / 2.0,
+      component.get(&#x27;height&#x27;) / 2.0, component.get(&#x27;depth&#x27;) / 2.0);
+
+    const cube = new THREE.BoxGeometry(extension.x, extension.y, extension.z);
+
+    const mesh = new THREE.Mesh(cube, material);
+
+    mesh.position.set(centerPoint.x, centerPoint.y, centerPoint.z);
+    mesh.updateMatrix();
+
+    mesh.userData.model = component;
+    mesh.userData.name = component.get(&#x27;name&#x27;);
+    mesh.userData.foundation = component.get(&#x27;foundation&#x27;);
+    mesh.userData.type = isClass ? &#x27;clazz&#x27; : &#x27;package&#x27;;
+
+    mesh.userData.opened = component.get(&#x27;opened&#x27;);
+
+    self.get(&#x27;labeler&#x27;).createLabel(mesh, self.get(&#x27;application3D&#x27;),
+      self.get(&#x27;font&#x27;));
+
+    self.get(&#x27;application3D&#x27;).add(mesh);
+
+  } ,// END createBox
+
+
+  resetRotation() {
+    const rotationX = 0.65;
+    const rotationY = 0.80;
+
+    this.set(&#x27;application3D.rotation.x&#x27;, rotationX);
+    this.set(&#x27;application3D.rotation.y&#x27;, rotationY);
+  },
+
+
+  initInteraction() {
+    const self = this;
+
+    const canvas = this.get(&#x27;canvas&#x27;);
+    const camera = this.get(&#x27;camera&#x27;);
+    const webglrenderer = this.get(&#x27;webglrenderer&#x27;);
+
+    // init interaction objects
+
+    this.get(&#x27;interaction&#x27;).setupInteraction(canvas, camera, webglrenderer,
+      this.get(&#x27;application3D&#x27;));
+
+    // set listeners
+
+    this.get(&#x27;renderingService&#x27;).on(&#x27;redrawScene&#x27;, function() {
+      self.cleanAndUpdateScene();
+    });
+
+
+
+  }, // END initInteraction
+
+});
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>
