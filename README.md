@@ -30,6 +30,7 @@ You will need the following things properly installed on your computer.
 * `cd explorviz-frontend`
 * `npm install -g ember-cli`
 * `npm install -g phantomjs`
+* `npm install -g yuidocjs`
 * `npm install`
 
 ### Running / Development
