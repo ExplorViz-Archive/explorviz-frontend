@@ -2,7 +2,7 @@ import { moduleForModel, test } from 'ember-qunit';
 
 moduleForModel('aggregatedclazzcommunication', 'Unit | Model | aggregatedclazzcommunication', {
   // Specify the other units that are required for this test.
-  needs: []
+  needs: ['model:cumulatedclazzcommunication', 'model:clazzcommunication']
 });
 
 test('it exists', function(assert) {
