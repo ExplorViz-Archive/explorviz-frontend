@@ -1,8 +1,9 @@
 import Ember from 'ember';
-const { Controller, inject, computed } = Ember;
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import FileSaverMixin from 'ember-cli-file-saver/mixins/file-saver';
+import ENV from 'explorviz-frontend/config/environment';
 
+const { Controller, inject, computed } = Ember;
 /**
 * TODO
 *
@@ -14,7 +15,7 @@ import FileSaverMixin from 'ember-cli-file-saver/mixins/file-saver';
 */
 export default Controller.extend(AlertifyHandler, FileSaverMixin, {
 
-ajax: inject.service(),
+  ajax: inject.service(),
   session: inject.service('session'),
   visualization: inject.controller(),
   landscapeRepo: inject.service("repos/landscape-repository"),
@@ -40,22 +41,21 @@ ajax: inject.service(),
 
     exportLandscape(){
       const currentLandscape = this.get('landscapeRepo.latestLandscape');
-
       const currentTimestamp = currentLandscape.get('timestamp');
 
-this.get('ajax').raw('http://localhost:8083/landscape/export/' + currentTimestamp, {
-dataType: 'text',
-  options: {
-    arraybuffer: true
+      this.get('ajax').raw(ENV.APP.API_ROOT + '/landscape/export/' + currentTimestamp, {
+        dataType: 'text',
+        options: {
+          arraybuffer: true
+        }
+      }
+    ).then((content) => {
+      console.log('content: ', content);
+      this.saveFileAs(currentTimestamp + '-' + currentLandscape.get('overallCalls') +'.expl', content.payload, 'text/plain');
+    }).catch((error) => {
+      console.log(error);
+    });
   }
-  }
-).then((content) => {
-  console.log('content: ', content);
-  this.saveFileAs(currentTimestamp + '-' + currentLandscape.get('overallCalls') +'.expl', content.payload, 'text/plain');
-}).catch((error) => {
-  console.log(error);
-});
-}
   },
 
   username: computed(function(){
