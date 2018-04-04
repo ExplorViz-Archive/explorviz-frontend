@@ -1,5 +1,5 @@
 {
   "PROD_BACKEND_ROOT": "/explorviz-backend",
   "PROD_FRONTEND_ROOT": "/explorviz-frontend",
-  "DEV_BACKEND_ROOT": "http://localhost:8081"
+  "DEV_BACKEND_ROOT": "http://localhost:8083"
 }

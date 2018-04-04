@@ -36,7 +36,10 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     const baseUrl = this.buildURL();
   	if(query === "1"){
   		return `${baseUrl}/from-recent?intervalSize=100`;
-  	}
+  	} else if(query === "2"){
+			//query all uploaded timestamps
+			return `${baseUrl}/all-uploaded`;
+		}
     else{
   		return `${baseUrl}/before-timestamp/${query}?intervalSize=100`;
   	}
@@ -48,7 +51,10 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     const baseUrl = this.buildURL();
   	if(query === "1"){
   		return `${baseUrl}/from-recent?intervalSize=100`;
-  	}
+  	}else	if(query === "2"){
+			//query all uploaded timestamps
+			return `${baseUrl}/all-uploaded`;
+		}
     else{
   		return `${baseUrl}/before-timestamp/${query}?intervalSize=100`;
   	}
