@@ -71,11 +71,14 @@ export default Component.extend({
     values.unshift('Calls');
 
     const dates = chartData.labels;
-    //dates.unshift('Labels');
+    dates.unshift('Labels');
 this.debug('dates: ', dates);
+
     const chart = c3.generate({
       data: {
-        columns: [chartData.values],
+        x: 'Labels',
+        xFormat: '%H:%M:%S',
+        columns: [dates, values],
         types: {
           Calls: 'area-spline'
           // 'line', 'spline', 'step', 'area', 'area-step' ...
@@ -85,15 +88,18 @@ this.debug('dates: ', dates);
           multiple: false
         },
         onclick: ((d) => {
-          self.debug('onClick(d): ', d);
-          //self.loadTimestamp(d);
+          console.log('onClick', dates[d.x + 1]);
+          self.loadTimestamp(dates[d.x + 1]);
         })
       },
       transition: {duration: 0},
       axis: {
         x: {
           type: 'category',
-          categories: dates,
+           tick: {
+              format: '%H:%M:%S',
+              centered: true
+          },
           label: {
             text: 'Version',
             position: 'outer-center'
@@ -126,11 +132,11 @@ this.debug('dates: ', dates);
       onresized: function() {
         self.applyOptimalZoom();
       }
-    });
+     });
 
     this.set('plot', chart);
     this.debug('set plot = chart: ', chart);
-  //  this.applyOptimalZoom();
+   this.applyOptimalZoom();
   }),
 
 
@@ -149,23 +155,15 @@ this.debug('dates: ', dates);
     const timestampList = [];
     const timestampListFormatted = [];
     const callList = [];
-    // const chartDataEntry = {};
-    // const chartDataJson={};
 
     // Parse and format timestamps for versionbar
     if (sortedTimestamps) {
       sortedTimestamps.forEach(function(timestamp) {
         const timestampValue = timestamp.get('timestamp');
         timestampList.push(timestampValue);
-//chartDataEntry[x]= timestampValue;
+
         const callValue = timestamp.get('calls');
         callList.push(callValue);
-//chartDataEntry[y] = callValue;
-        //const parsedTimestampValue = moment(timestampValue,"x");
-
-        //const timestampValueFormatted =
-        //  parsedTimestampValue.format("HH:mm:ss").toString();
-//chartDataJson.push(chartDataEntry);
         timestampListFormatted.push(timestampValue);
       });
     }
@@ -174,7 +172,6 @@ this.debug('dates: ', dates);
       labels: timestampListFormatted,
       values: callList
     };
-    //this.debug('chartDataJson: ', chartDataJson);
 
     return chartData;
   },
@@ -192,19 +189,17 @@ this.debug('updatedPlot', updatedPlot);
       //return;
     }
 
-    const chartReadyTimestamps = this.buildChartData();
+     const chartReadyTimestamps = this.buildChartData();
+  const labels = chartReadyTimestamps.labels;
+  const values = chartReadyTimestamps.values;
 
-  //  const labels = chartReadyTimestamps.labels;
-    const values = chartReadyTimestamps.values;
-    //labels.unshift('Labels');
-    //values.unshift('Calls');
+    labels.unshift('Labels');
+    values.unshift('Calls');
 
-  //  const newLabel = ['Labels', labels.pop()];
-    const newValue = ['Calls', values.pop()];
-
-    updatedPlot.flow({
-      columns: [newValue],
-      length:0,
+//flow() with category-labels on the X-axis doesn't work: https://github.com/c3js/c3/issues/865
+    updatedPlot.load({
+      columns: [labels, values],
+      unload:true,
       done: function () {
         updatedPlot.zoom.enable(true);
         self.applyOptimalZoom();
@@ -239,7 +234,7 @@ this.debug('updatedPlot', updatedPlot);
 
 
   loadTimestamp(timestamp) {
-    const milliseconds = new Date(timestamp.x).getTime();
+    const milliseconds = new Date(timestamp).getTime();
         this.debug('milliseconds: ', milliseconds);
     this.get('reloadHandler').loadOldLandscapeById(milliseconds);
   }
