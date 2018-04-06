@@ -45,6 +45,7 @@ export default Component.extend({
     const self = this;
     //workaround stop reload of timestamps in time-shift
     this.get('reloadHandler').stopExchange();
+
     this.get('versionbarLoad').receiveUploadedObjects();
     // Listener for updating plot
     this.get('timestampRepo').on('uploaded', function() {
@@ -89,7 +90,6 @@ this.debug('dates: ', dates);
           multiple: false
         },
         onclick: ((d) => {
-          console.log('onClick', dates[d.x + 1]);
           self.loadTimestamp(dates[d.x + 1]);
         })
       },
@@ -136,7 +136,6 @@ this.debug('dates: ', dates);
      });
 
     this.set('plot', chart);
-    this.debug('set plot = chart: ', chart);
    this.applyOptimalZoom();
   }),
 
@@ -183,7 +182,7 @@ this.debug('dates: ', dates);
     const self = this;
 
     let updatedPlot = this.get('plot');
-this.debug('updatedPlot', updatedPlot);
+
     if(!updatedPlot){
       this.renderPlot();
       updatedPlot = this.get('plot');
@@ -236,7 +235,6 @@ this.debug('updatedPlot', updatedPlot);
 
   loadTimestamp(timestamp) {
     const milliseconds = new Date(timestamp).getTime();
-        this.debug('milliseconds: ', milliseconds);
     this.get('reloadHandler').loadOldLandscapeById(milliseconds);
   }
 });
