@@ -23,6 +23,7 @@ Router.map(function() {
   this.route('badroute', { path: "/*path" });
   this.route('configuration');
   this.route('base-route');
+  this.route('discovery');
 });
 
 export default Router;

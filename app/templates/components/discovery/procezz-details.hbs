@@ -1,0 +1,62 @@
+{{#if showSpinner}}
+  <div class="explorVizModal">
+    {{ember-spinner lines=11 length=16 radius=30 width=8 rotate=10 speed='1.1' color="#ffffff"}}
+  </div>
+{{/if}}
+
+<div class="panel-group" id="accordion">
+
+  <!-- BEGIN collapse1 -->
+  <div class="panel panel-default">
+    <div data-toggle="collapse" data-parent="#accordion" data-target="#collapse1" class="panel-heading darker-accordion-header container-shadow" style="cursor:pointer">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
+          {{name-selector procezz.pid procezz.name}} - <b>General Information</b>
+        </a>
+      </h4>
+    </div>
+    <div id="collapse1" class="panel-collapse collapse in">
+      <div class="panel-body">
+        {{discovery/procezz-details-tables/general-information procezz=procezz}}
+      </div>
+    </div>
+  </div>
+
+  <!-- BEGIN collapse2 -->
+  <div class="panel panel-default">
+    <div data-toggle="collapse" data-parent="#accordion" data-target="#collapse2" class="panel-heading darker-accordion-header container-shadow" style="cursor:pointer">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">
+          {{name-selector procezz.pid procezz.name}} - <b>Execution Information</b>
+        </a>
+      </h4>
+    </div>
+    <div id="collapse2" class="panel-collapse collapse">
+      <div class="panel-body">
+        {{discovery/procezz-details-tables/execution-information procezz=procezz}}
+      </div>
+    </div>
+  </div>
+
+  <!-- BEGIN collapse3 -->
+  <div class="panel panel-default">
+    <div data-toggle="collapse" data-parent="#accordion" data-target="#collapse3" class="panel-heading darker-accordion-header container-shadow" style="cursor:pointer">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">
+          {{name-selector procezz.pid procezz.name}} - <b>Monitoring Information</b>
+        </a>
+      </h4>
+    </div>
+    <div id="collapse3" class="panel-collapse collapse">
+      <div class="panel-body">
+        {{discovery/procezz-details-tables/monitoring-information procezz=procezz}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-bottom: 5px;" class="button-box text-center">
+  <a class="btn btn-info" {{action "saveProcezz"}} role="button">Save</a>
+  <a class="btn btn-warning" {{action "restartProcezz"}} role="button">Restart</a>
+  <a class="btn btn-primary" {{action "stopProcezz"}} role="button">Stop</a>
+</div>

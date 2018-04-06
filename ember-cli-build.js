@@ -34,5 +34,7 @@ module.exports = function(defaults) {
   app.import('vendor/c3/c3.min.js');
   app.import('vendor/c3/c3.min.css');
 
+  app.import('vendor/cytoscape/cytoscape.min.js');
+
   return app.toTree();
 };
