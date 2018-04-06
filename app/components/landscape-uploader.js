@@ -6,38 +6,29 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import ENV from 'explorviz-frontend/config/environment';
 
 
-const { get, set, inject } = Ember;
+const { get, inject } = Ember;
 
 export default Component.extend(AlertifyHandler, {
   store: service(),
   versionbarLoad: inject.service("versionbar-load"),
 
   uploadOldLandscape: task(function * (file) {
-
-
-    let landscape = this.get('store').createRecord('landscape', {
-        filename: get(file, 'name'),
-        filesize: get(file, 'size')
-      });
-
+const self = this;
 
     file.readAsDataURL().then(function (url) {
-          if (get(landscape, 'url') == null) {
-        set(landscape, 'url', url);
-      }
-    });
+    self.debug('url: ', url);
+      });
 
 try {
-  this.debug('before file.upload');
     let response = yield file.upload(ENV.APP.API_ROOT + '/landscape/upload-landscape');
-    this.debug('response in landscape-uploader: ', response);
+
     if(response){
       this.get('versionbarLoad').receiveUploadedObjects();
     }
   } catch (e) {
     this.debug('error in file.upload ', e);
   }
-}).maxConcurrency(3).enqueue(),
+}).maxConcurrency(100).enqueue(),
 
 actions: {
   uploadLandscape(file) {
