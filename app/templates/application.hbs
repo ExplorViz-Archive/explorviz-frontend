@@ -59,7 +59,12 @@
 </div>
 
 {{#if session.isAuthenticated}}
-  {{timestamp-versionbar}}
+{{#if renderingService.showTimeline}}
+ {{time-shift}}
+{{/if}}
+{{#if renderingService.showVersionbar}}
+{{timestamp-versionbar}}
+{{/if}}
 {{/if}}
 
 <div id="footer" class="footer">

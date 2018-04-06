@@ -18,6 +18,7 @@ export default Controller.extend({
 
   hideTimeline() {
     this.set('renderingService.showTimeline', false);
+    this.set('renderingService.showVersionbar', false);
   }
 
 });
