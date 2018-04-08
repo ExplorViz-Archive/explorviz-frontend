@@ -74,12 +74,10 @@ export default Component.extend({
 
     const dates = chartData.labels;
     dates.unshift('Labels');
-this.debug('dates: ', dates);
 
     const chart = c3.generate({
       data: {
         x: 'Labels',
-        xFormat: '%H:%M:%S',
         columns: [dates, values],
         types: {
           Calls: 'area-spline'
@@ -98,7 +96,6 @@ this.debug('dates: ', dates);
         x: {
           type: 'category',
            tick: {
-              format: '%H:%M:%S',
               centered: true
           },
           label: {
@@ -234,7 +231,6 @@ this.debug('dates: ', dates);
 
 
   loadTimestamp(timestamp) {
-    const milliseconds = new Date(timestamp).getTime();
-    this.get('reloadHandler').loadOldLandscapeById(milliseconds);
+    this.get('reloadHandler').loadOldLandscapeById(timestamp);
   }
 });
