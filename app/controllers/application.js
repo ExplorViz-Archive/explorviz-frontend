@@ -42,6 +42,7 @@ export default Controller.extend(AlertifyHandler, FileSaverMixin, {
     exportLandscape(){
       const currentLandscape = this.get('landscapeRepo.latestLandscape');
       const currentTimestamp = currentLandscape.get('timestamp');
+      const currentCalls = currentLandscape.get('overallCalls');
 
       this.get('ajax').raw(ENV.APP.API_ROOT + '/landscape/export/' + currentTimestamp, {
         dataType: 'text',
@@ -50,10 +51,9 @@ export default Controller.extend(AlertifyHandler, FileSaverMixin, {
         }
       }
     ).then((content) => {
-      console.log('content: ', content);
-      this.saveFileAs(currentTimestamp + '-' + currentLandscape.get('overallCalls') +'.expl', content.payload, 'text/plain');
+      this.saveFileAs(currentTimestamp + '-' + currentCalls +'.expl', content.payload, 'text/plain');
     }).catch((error) => {
-      console.log(error);
+      this.debug('error in exportLandscape', error);
     });
   }
   },
