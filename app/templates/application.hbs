@@ -20,6 +20,11 @@
     {{page-setup/navbar-routes resetRoute="resetRoute"}}
       <ul class="nav navbar-nav navbar-right">
         <li>
+          <a {{action "exportLandscape"}} title="Export landscape">
+            <span id="exportLandscape" class="glyphicon glyphicon-save"></span>
+          </a>
+        </li>
+        <li>
           <a {{action "resetView"}} title="Reset landscape">
             <span id="resetView" class="glyphicon glyphicon-remove"></span>
           </a>
@@ -54,9 +59,12 @@
 </div>
 
 {{#if session.isAuthenticated}}
-  {{#if renderingService.showTimeline}}
-    {{time-shift}}
-  {{/if}}
+{{#if renderingService.showTimeline}}
+ {{time-shift}}
+{{/if}}
+{{#if renderingService.showVersionbar}}
+{{timestamp-versionbar}}
+{{/if}}
 {{/if}}
 
 <div id="footer" class="footer">

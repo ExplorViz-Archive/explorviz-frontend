@@ -4,7 +4,7 @@ import config from './config/environment';
 
 /**
 * Ember router for mapping "route" and respective "template".
-* 
+*
 * @class Router
 * @extends Ember.Router
 *
@@ -24,6 +24,7 @@ Router.map(function() {
   this.route('configuration');
   this.route('base-route');
   this.route('discovery');
+  this.route('replay');
 });
 
 export default Router;

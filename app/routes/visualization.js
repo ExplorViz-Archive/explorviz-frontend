@@ -4,7 +4,7 @@ import AuthenticatedRouteMixin from
 
 /**
 * TODO
-* 
+*
 * @class Visualization-Route
 * @extends Ember.Route
 */
@@ -19,8 +19,9 @@ export default BaseRoute.extend(AuthenticatedRouteMixin, {
   	},
 
     didTransition() {
+      this.controller.hideVersionbar();
       this.controller.showTimeline();
     }
   }
-  
+
 });

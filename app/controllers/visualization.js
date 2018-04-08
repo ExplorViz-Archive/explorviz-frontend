@@ -53,6 +53,10 @@ export default Controller.extend({
     this.set('renderingService.showTimeline', true);
   },
 
+  hideVersionbar(){
+    this.set('renderingService.showVersionbar', false);
+  },
+
   // @Override
   init() {
     this._super(...arguments);

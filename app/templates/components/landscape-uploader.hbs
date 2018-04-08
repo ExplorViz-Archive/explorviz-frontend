@@ -1,0 +1,14 @@
+      {{#file-upload name="upload-landscape"
+                     accepts=""
+                     multiple=true
+                     onfileadd=(action "uploadLandscape") as |queue|}}
+                     <!-- <a id="toggleVersionbarButton" class="glyphicon glyphicon-upload">
+                     </a> -->
+                     <a class="button">
+                       {{#if queue.files.length}}
+                       Uploading...
+                       {{else}}
+                       Upload file
+                       {{/if}}
+                     </a>
+      {{/file-upload}}
