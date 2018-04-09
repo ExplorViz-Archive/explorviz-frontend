@@ -15,7 +15,7 @@ const { Controller, inject, computed } = Ember;
 */
 export default Controller.extend(AlertifyHandler, FileSaverMixin, {
 
-  ajax: inject.service(),
+  ajax: inject.service('ajax'),
   session: inject.service('session'),
   visualization: inject.controller(),
   landscapeRepo: inject.service("repos/landscape-repository"),

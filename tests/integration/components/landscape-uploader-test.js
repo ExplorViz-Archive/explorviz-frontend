@@ -11,14 +11,14 @@ test('it renders', function(assert) {
 
   this.render(hbs`{{landscape-uploader}}`);
 
-  assert.equal(this.$().text().trim(), '');
+  assert.equal(this.$().text().trim(), 'Upload file');
 
   // Template block usage:
   this.render(hbs`
     {{#landscape-uploader}}
-      template block text
+    template block text
     {{/landscape-uploader}}
   `);
 
-  assert.equal(this.$().text().trim(), 'template block text');
+  assert.equal(this.$().text().trim(), 'Upload file');
 });
