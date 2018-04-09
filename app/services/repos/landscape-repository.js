@@ -4,7 +4,7 @@ const {Service, observer, Evented} = Ember;
 
 /**
 * TODO
-* 
+*
 * @class Landscape-Repository-Service
 * @extends Ember.Service
 */
@@ -14,8 +14,12 @@ export default Service.extend(Evented, {
 
   latestApplication: null,
 
+  replayLandscape: null,
+
+  replayApplication:null,
+
   observer: observer("latestLandscape.timestamp", function(){
     this.trigger("updated", this.get("latestLandscape"));
-  })  
+  })
 
 });

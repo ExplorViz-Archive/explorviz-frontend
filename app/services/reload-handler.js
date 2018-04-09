@@ -73,25 +73,25 @@ export default Service.extend(AlertifyHandler, Evented, {
       'by-uploaded-timestamp/' + timestamp).then(success, failure).catch(error);
 
     function success(landscape){
-      self.set('landscapeRepo.latestLandscape', landscape);
+      self.set('landscapeRepo.replayLandscape', landscape);
 
       if(appID) {
         const app = self.get('store').peekRecord('application', appID);
-        self.set('landscapeRepo.latestApplication', app);
+        self.set('landscapeRepo.replayApplication', app);
       }
 
       self.debug("end import uploaded-landscape-request");
     }
 
     function failure(e){
-      self.set('landscapeRepo.latestLandscape', undefined);
+      self.set('landscapeRepo.replayLandscape', undefined);
       self.showAlertifyMessage("Uploaded landscape couldn't be requested!" +
         " Backend offline?");
       self.debug("Uploaded landscape couldn't be requested!", e);
     }
 
     function error(e){
-      self.set('landscapeRepo.latestLandscape', undefined);
+      self.set('landscapeRepo.replayLandscape', undefined);
       self.debug("Error when fetching uploaded landscape: ", e);
     }
 
