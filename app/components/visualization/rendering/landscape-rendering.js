@@ -794,6 +794,7 @@ export default RenderingCore.extend({
     this.get('interaction').on('showApplication', function(emberModel) {
       self.set('viewImporter.importedURL', null);
       self.set('landscapeRepo.latestApplication', emberModel);
+      self.set('landscapeRepo.replayApplication', emberModel);
     });
 
 

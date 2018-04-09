@@ -44,8 +44,7 @@ export default Component.extend({
 
     const self = this;
     //workaround stop reload of timestamps in time-shift
-    this.get('reloadHandler').stopExchange();
-
+   this.get('reloadHandler').stopExchange();
     this.get('versionbarLoad').receiveUploadedObjects();
     // Listener for updating plot
     this.get('timestampRepo').on('uploaded', function() {
