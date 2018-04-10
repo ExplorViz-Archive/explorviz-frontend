@@ -45,6 +45,7 @@ export default Controller.extend(AlertifyHandler, FileSaverMixin, {
       const currentCalls = currentLandscape.get('overallCalls');
 
       this.get('ajax').raw(ENV.APP.API_ROOT + '/landscape/export/' + currentTimestamp, {
+        'id':this,
         dataType: 'text',
         options: {
           arraybuffer: true
