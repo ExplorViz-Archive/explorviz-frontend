@@ -211,11 +211,12 @@ export default RenderingCore.extend({
         end.subVectors(cumuClazzCommu.get('endPoint'), viewCenterPoint);
         end.multiplyScalar(0.5);
 
-        if(start.y >= end.y) {
+        // horizontal communication lines
+        /*if(start.y >= end.y) {
           end.y = start.y;
         } else {
           start.y = end.y;
-        }
+        }*/
 
         let transparent = false;
         let opacityValue = 1.0;
