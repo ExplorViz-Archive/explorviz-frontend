@@ -21,8 +21,6 @@ const {APP} = ENV;
 */
 export default JSONAPIAdapter.extend(DataAdapterMixin,{
 
-	authorizer: 'authorizers:authorizers',
-
   host: APP.API_ROOT,
   namespace: "timestamp",
 
@@ -59,5 +57,10 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   		return `${baseUrl}/before-timestamp/${query}?intervalSize=100`;
   	}
   },
+
+  authorize(xhr) {
+    let { access_token } = this.get('session.data.authenticated');
+    xhr.setRequestHeader('Authorization', `Basic ${access_token}`);
+  }
 
 });

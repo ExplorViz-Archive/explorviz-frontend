@@ -21,8 +21,6 @@ const {APP} = ENV;
 */
 export default JSONAPIAdapter.extend(DataAdapterMixin,{
 
-  authorizer: 'authorizers:authorizers',
-
   host: APP.API_ROOT, 
   namespace: "discovery",
 
@@ -43,6 +41,11 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     }
 
     return path;
+  },
+
+  authorize(xhr) {
+    let { access_token } = this.get('session.data.authenticated');
+    xhr.setRequestHeader('Authorization', `Basic ${access_token}`);
   }
 
 });
