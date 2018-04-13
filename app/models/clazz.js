@@ -16,7 +16,7 @@ export default Draw3DNodeEntity.extend({
 
   name: attr('string'),
   fullQualifiedName: attr('string'),
-  instanceCount: attr("number"),
+  instanceCount: attr('number', {defaultValue: 0}),
   objectIds: attr(),
 
   outgoingClazzCommunications: hasMany('clazzcommunication', {

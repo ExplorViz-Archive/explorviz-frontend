@@ -40,11 +40,14 @@ export default Service.extend(AlertifyHandler, Evented, {
 
     function success(landscape){
       self.set('landscapeRepo.latestLandscape', landscape);
+      self.get('landscapeRepo').triggerUpdate();
 
       if(appID) {
         const app = self.get('store').peekRecord('application', appID);
         self.set('landscapeRepo.latestApplication', app);
       }
+
+
 
       self.debug("end import landscape-request");
     }

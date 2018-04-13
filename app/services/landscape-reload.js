@@ -44,6 +44,7 @@ export default Reload.extend(AlertifyHandler, {
     function success(landscape){
       self.debug("end landscape-request");
       self.set('landscapeRepo.latestLandscape', landscape);
+      self.get('landscapeRepo').triggerUpdate();
     }
 
     function failure(e){

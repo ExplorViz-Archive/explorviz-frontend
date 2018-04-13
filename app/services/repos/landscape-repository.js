@@ -1,6 +1,6 @@
 import Ember from 'ember';
 
-const {Service, observer, Evented} = Ember;
+const {Service, Evented} = Ember;
 
 /**
 * TODO
@@ -18,8 +18,8 @@ export default Service.extend(Evented, {
 
   replayApplication:null,
 
-  observer: observer("latestLandscape.timestamp", function(){
+  triggerUpdate(){
     this.trigger("updated", this.get("latestLandscape"));
-  })
+  }
 
 });
