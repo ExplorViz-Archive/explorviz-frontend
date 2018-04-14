@@ -23,7 +23,7 @@ export default Component.extend({
         $("#vizContainer").animate({height:'+=120'});
         $(".versionbar").attr('vis', 'hide');
         $("#toggleVersionbarButton").removeClass('glyphicon-collapse-down')
-          .addClass('glyphicon-collapse-up');
+        .addClass('glyphicon-collapse-up');
       }
       else {
         // show versionbar
@@ -33,7 +33,7 @@ export default Component.extend({
 
         $(".versionbar").attr('vis', 'show');
         $("#toggleVersionbarButton").removeClass('glyphicon-collapse-up')
-          .addClass('glyphicon-collapse-down');
+        .addClass('glyphicon-collapse-down');
       }
     },
   },
@@ -44,8 +44,8 @@ export default Component.extend({
 
     const self = this;
     //workaround stop reload of timestamps in time-shift
-   this.get('reloadHandler').stopExchange();
-   //init versionbar
+    this.get('reloadHandler').stopExchange();
+    //init versionbar
     this.get('versionbarLoad').receiveUploadedObjects();
 
     // Listener for updating plot
@@ -91,7 +91,7 @@ export default Component.extend({
           multiple: false
         },
         onclick: ((d) => {
-//+1, because String 'Labels' is at index 0 and dates start at index 1
+          //+1, because String 'Labels' is at index 0 and dates start at index 1
           self.loadTimestamp(dates[d.x + 1]);
         })
       },
@@ -99,8 +99,8 @@ export default Component.extend({
       axis: {
         x: {
           type: 'category',
-           tick: {
-              centered: true
+          tick: {
+            centered: true
           },
           label: {
             text: 'Version',
@@ -134,24 +134,24 @@ export default Component.extend({
       onresized: function() {
         self.applyOptimalZoom();
       }
-     });
+    });
 
     this.set('plot', chart);
-   this.applyOptimalZoom();
+    this.applyOptimalZoom();
   }),
 
-//hides versionbar
-hideVersionbar(){
-  if ($(".versionbar").attr('vis') === 'show') {
-    // hide versionbar
-    this.set('isUp', false);
-    $(".versionbar").slideUp(400);
-    $("#vizContainer").animate({height:'+=120'});
-    $(".versionbar").attr('vis', 'hide');
-    $("#toggleVersionbarButton").removeClass('glyphicon-collapse-down')
+  //hides versionbar
+  hideVersionbar(){
+    if ($(".versionbar").attr('vis') === 'show') {
+      // hide versionbar
+      this.set('isUp', false);
+      $(".versionbar").slideUp(400);
+      $("#vizContainer").animate({height:'+=120'});
+      $(".versionbar").attr('vis', 'hide');
+      $("#toggleVersionbarButton").removeClass('glyphicon-collapse-down')
       .addClass('glyphicon-collapse-up');
-  }
-},
+    }
+  },
   // build chart-ready data
   buildChartData() {
 
@@ -201,14 +201,15 @@ hideVersionbar(){
       //return;
     }
 
-     const chartReadyTimestamps = this.buildChartData();
-  const labels = chartReadyTimestamps.labels;
-  const values = chartReadyTimestamps.values;
+    const chartReadyTimestamps = this.buildChartData();
+
+    const labels = chartReadyTimestamps.labels;
+    const values = chartReadyTimestamps.values;
 
     labels.unshift('Labels');
     values.unshift('Calls');
 
-//flow() with category-labels on the X-axis doesn't work: https://github.com/c3js/c3/issues/865
+    //flow() with category-labels on the X-axis doesn't work: https://github.com/c3js/c3/issues/865
     updatedPlot.load({
       columns: [labels, values],
       done: function () {
@@ -227,6 +228,11 @@ hideVersionbar(){
       return;
     }
 
+    if(!this.get('plot').data()[0]){
+      //situation: no timestamps uploaded, no data available
+      return;
+    }
+
     const allData = this.get('plot').data()[0].values;
 
     // calculate and set snippet of timeline
@@ -236,17 +242,17 @@ hideVersionbar(){
     const numberOfPointsToShow = parseInt(divWidth /
       this.get('dataPointPixelRatio'));
 
-    const lowerBound = dataSetLength - numberOfPointsToShow <= 0 ?
-        0 : (dataSetLength - numberOfPointsToShow) ;
+      const lowerBound = dataSetLength - numberOfPointsToShow <= 0 ?
+      0 : (dataSetLength - numberOfPointsToShow) ;
 
-    const lowerBoundLabel = allData[lowerBound].x;
-    const upperBoundLabel = allData[dataSetLength - 1].x;
+      const lowerBoundLabel = allData[lowerBound].x;
+      const upperBoundLabel = allData[dataSetLength - 1].x;
 
-    this.get('plot').zoom([lowerBoundLabel, upperBoundLabel]);
-  },
+      this.get('plot').zoom([lowerBoundLabel, upperBoundLabel]);
+    },
 
 
-  loadTimestamp(timestamp) {
-    this.get('reloadHandler').loadOldLandscapeById(timestamp);
-  }
-});
+    loadTimestamp(timestamp) {
+      this.get('reloadHandler').loadOldLandscapeById(timestamp);
+    }
+  });
