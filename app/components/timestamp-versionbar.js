@@ -45,7 +45,9 @@ export default Component.extend({
     const self = this;
     //workaround stop reload of timestamps in time-shift
    this.get('reloadHandler').stopExchange();
+   //init versionbar
     this.get('versionbarLoad').receiveUploadedObjects();
+
     // Listener for updating plot
     this.get('timestampRepo').on('uploaded', function() {
       self.updatePlot();
@@ -55,7 +57,9 @@ export default Component.extend({
   // @Override
   // Cleanup
   willDestroyElement() {
-    this.get('timestampRepo').off('updated');
+    //workaround: hide versionbar, otherwise timeline gets broken
+    this.hideVersionbar();
+    this.get('timestampRepo').off('uploaded');
   },
 
   renderPlot: on('didRender', function() {
@@ -135,7 +139,19 @@ export default Component.extend({
    this.applyOptimalZoom();
   }),
 
-
+//hides versionbar
+hideVersionbar(){
+  this.debug('in hideVersionbar');
+  if ($(".versionbar").attr('vis') === 'show') {
+    // hide versionbar
+    this.set('isUp', false);
+    $(".versionbar").slideUp(400);
+    $("#vizContainer").animate({height:'+=120'});
+    $(".versionbar").attr('vis', 'hide');
+    $("#toggleVersionbarButton").removeClass('glyphicon-collapse-down')
+      .addClass('glyphicon-collapse-up');
+  }
+},
   // build chart-ready data
   buildChartData() {
 

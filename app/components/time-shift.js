@@ -97,6 +97,8 @@ export default Component.extend({
   // @Override
   // Cleanup
   willDestroyElement() {
+      //workaround: hide timeline, otherwise the component timestamp-versionbar gets broken
+    this.hideTimeline();
     this.get('timestampRepo').off('updated');
     this.get('reloadHandler').off('stopExchange');
     this.get('reloadHandler').off('startExchange');
@@ -181,6 +183,18 @@ export default Component.extend({
     this.applyOptimalZoom();
   }),
 
+  //hides the timeline
+      hideTimeline(){
+        this.debug('in hideTimeline()');
+        if ($(".timeline").attr('vis') === 'show') {
+          this.set('isUp', false);
+          $(".timeline").slideUp(400);
+          $("#vizContainer").animate({height:'+=120'});
+          $(".timeline").attr('vis', 'hide');
+          $("#toggleTimelineButton").removeClass('glyphicon-collapse-down')
+            .addClass('glyphicon-collapse-up');
+        }
+      },
 
   // build chart-ready data
   buildChartData() {
