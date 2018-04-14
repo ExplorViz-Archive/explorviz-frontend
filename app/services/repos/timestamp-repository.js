@@ -17,8 +17,8 @@ export default Service.extend(Evented, {
     this.trigger("updated");
   }),
 
-  uploadedTimestampsChanged: observer("uploadedTimestamps", function(){
-    this.trigger("uploaded");
-  }),
+  triggerUploaded(){
+    this.trigger("uploaded", this.get("uploadedTimestamps"));
+  }
 
 });

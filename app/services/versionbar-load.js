@@ -30,6 +30,7 @@ export default Service.extend(AlertifyHandler, {
     //------------- Start of inner functions of updateObject ---------------
     function success(timestamps){
       self.set('timestampRepo.uploadedTimestamps', timestamps);
+      self.get('timestampRepo').triggerUploaded();
       self.debug("end uploaded-timestamp-fetch");
     }
 

@@ -77,6 +77,7 @@ export default Service.extend(AlertifyHandler, Evented, {
 
     function success(landscape){
       self.set('landscapeRepo.replayLandscape', landscape);
+      self.get('landscapeRepo').triggerUpdate();
 
       if(appID) {
         const app = self.get('store').peekRecord('application', appID);
