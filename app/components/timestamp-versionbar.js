@@ -91,6 +91,7 @@ export default Component.extend({
           multiple: false
         },
         onclick: ((d) => {
+//+1, because String 'Labels' is at index 0 and dates start at index 1
           self.loadTimestamp(dates[d.x + 1]);
         })
       },
@@ -141,7 +142,6 @@ export default Component.extend({
 
 //hides versionbar
 hideVersionbar(){
-  this.debug('in hideVersionbar');
   if ($(".versionbar").attr('vis') === 'show') {
     // hide versionbar
     this.set('isUp', false);
@@ -211,8 +211,9 @@ hideVersionbar(){
 //flow() with category-labels on the X-axis doesn't work: https://github.com/c3js/c3/issues/865
     updatedPlot.load({
       columns: [labels, values],
-      unload:true,
       done: function () {
+        //render plot, so that data and rendered chart are consistent
+        self.renderPlot();
         updatedPlot.zoom.enable(true);
         self.applyOptimalZoom();
       }
