@@ -185,7 +185,6 @@ export default Component.extend({
 
   //hides the timeline
       hideTimeline(){
-        this.debug('in hideTimeline()');
         if ($(".timeline").attr('vis') === 'show') {
           this.set('isUp', false);
           $(".timeline").slideUp(400);
