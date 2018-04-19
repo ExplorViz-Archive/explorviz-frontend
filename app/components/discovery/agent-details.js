@@ -2,9 +2,6 @@ import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
-// Declare globals
-/*global $*/
-
 export default Component.extend(AlertifyHandler, {
 
   store: service(),
