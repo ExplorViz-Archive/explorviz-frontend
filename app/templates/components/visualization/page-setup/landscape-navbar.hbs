@@ -1,0 +1,25 @@
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="collapse navbar-collapse">
+
+      <ul class="nav navbar-nav navbar-left">
+        <li>
+          <a {{action "exportLandscape"}} title="Export landscape">
+            <span id="exportLandscape" class="glyphicon glyphicon-save"></span>
+          </a>
+        </li>
+        <li>
+          <a {{action "resetView"}} title="Reset landscape">
+            <span id="resetView" class="glyphicon glyphicon-remove"></span>
+          </a>
+        </li>
+        <li>
+          <a {{action "exportState"}} title="Export URL">
+            <span id="exportURLButton" class="glyphicon glyphicon-share"></span>
+          </a>
+        </li>        
+     </ul>
+
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
