@@ -18,6 +18,8 @@ export default BaseRoute.extend(AuthenticatedRouteMixin, {
   	},
 
     didTransition() {
+      this.controller.set('landscapeRepo.replayApplication', null);
+      this.controller.set('landscapeRepo.replayLandscape', null);
       this.set('renderingService.showTimeline', false);
       this.set('renderingService.showVersionbar', true);
     }
