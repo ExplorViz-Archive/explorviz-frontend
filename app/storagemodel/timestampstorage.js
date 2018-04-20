@@ -13,5 +13,5 @@ export default JSONAPI.extend({
 
     this.set('relationshipsToBeSaved', {timestamps: timestampType.create()});
     this.set('relationshipsToInclude', {timestamps: timestampType.create()});
-  },
+  }
 });

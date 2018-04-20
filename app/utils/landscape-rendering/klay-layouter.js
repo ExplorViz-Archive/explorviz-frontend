@@ -1,3 +1,5 @@
+/* global $klay */
+
 export default function applyKlayLayout(landscape) {
 
     let topLevelKielerGraph = null;
@@ -21,10 +23,10 @@ export default function applyKlayLayout(landscape) {
       // do actual layout
       $klay.layout({
         graph: graph,
-        success: function(layouted) { // jshint ignore:line
+        success: function(layouted) { // // eslint-disable-line
           //console.log("success", layouted);
         },
-        error: function(error) { // jshint ignore:line
+        error: function(error) { // eslint-disable-line
           //console.log("error", error);
         }
       });

@@ -1,18 +1,33 @@
-import Ember from 'ember';
+import Object from '@ember/object';
 import THREE from "npm:three";
 import { shortenString } from '../helpers/string-helpers';
 
-export default Ember.Object.extend({
+export default Object.extend({
 
-  labels: [],
+  labels: null,
 
-  textMaterialWhite: new THREE.MeshBasicMaterial({
-    color : 0xffffff
-  }),
+  textMaterialWhite: null,
 
-  textMaterialBlack: new THREE.MeshBasicMaterial({
-    color : 0x000000
-  }),
+  textMaterialBlack: null,
+
+  init() {
+    this._super(...arguments);
+
+    this.set('labels', []);
+
+    this.set('textMaterialWhite', 
+      new THREE.MeshBasicMaterial({
+        color : 0xffffff
+      })
+    );
+
+    this.set('textMaterialBlack', 
+      new THREE.MeshBasicMaterial({
+        color : 0x000000
+      })
+    );
+
+  },
 
   createLabel(parentMesh, parentObject, font) {
 

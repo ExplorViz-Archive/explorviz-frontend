@@ -1,4 +1,4 @@
-import EmberObject, { computed } from '@ember/object';
+import Object, { computed } from '@ember/object';
 import Evented from '@ember/object/evented';
 import { inject as service } from "@ember/service";
 
@@ -7,7 +7,7 @@ import PopUpHandler from './popup-handler';
 import Raycaster from '../raycaster';
 import Highlighter from './highlighter';
 
-export default EmberObject.extend(Evented, {
+export default Object.extend(Evented, {
 
   canvas: null,
   camera: null,

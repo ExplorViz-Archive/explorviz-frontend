@@ -1,7 +1,8 @@
-import Ember from 'ember';
+import Object from '@ember/object';
+import THREE from "npm:three";
 import { calculateColorBrightness } from '../helpers/threejs-helpers';
 
-export default Ember.Object.extend({
+export default Object.extend({
 
   highlightedEntity: null,
   application: null,

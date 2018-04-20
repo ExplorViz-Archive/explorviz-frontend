@@ -1,6 +1,8 @@
-import Ember from 'ember';
+import Object from '@ember/object';
+import Evented from '@ember/object/evented';
+import THREE from "npm:three";
 
-export default Ember.Object.extend(Ember.Evented, {
+export default Object.extend(Evented, {
 
   centerPoint : null,
   cameraZ: null,

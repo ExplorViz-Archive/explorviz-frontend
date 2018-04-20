@@ -1,12 +1,13 @@
-import Ember from 'ember';
+import Object from '@ember/object';
 import { calculateColorBrightness } from '../helpers/threejs-helpers';
+import THREE from "npm:three";
 
-export default Ember.Object.extend({
+export default Object.extend({
 
   hoveredEntityColorObj: null,
 
-  highlight(entity) {// jshint ignore:line
-  	
+  highlight(entity) { // eslint-disable-line
+    
   },
 
 

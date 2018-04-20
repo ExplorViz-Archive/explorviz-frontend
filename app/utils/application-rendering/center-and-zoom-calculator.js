@@ -1,6 +1,7 @@
-import Ember from 'ember';
+import Object from '@ember/object';
+import THREE from "npm:three";
 
-export default Ember.Object.extend({
+export default Object.extend({
 
   centerPoint : null,
 
