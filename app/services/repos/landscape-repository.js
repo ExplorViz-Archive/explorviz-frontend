@@ -20,6 +20,7 @@ export default Service.extend(Evented, {
 
   triggerUpdate(){
     this.trigger("updated", this.get("latestLandscape"));
+    this.trigger("updated", this.get("replayLandscape"));
   }
 
 });
