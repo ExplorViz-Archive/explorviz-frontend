@@ -8,10 +8,10 @@ import ApplicationSerializer from './application';
 */
 export default ApplicationSerializer.extend({
 
-	//This attribute will declare to serialize hasMany-relationships
-	attrs:{
-	  systems:{serialize:true},
+  //This attribute will declare to serialize hasMany-relationships
+  attrs:{
+    systems:{serialize:true},
     outgoingApplicationCommunications:{serialize:true}
-	}
+  }
 
 });

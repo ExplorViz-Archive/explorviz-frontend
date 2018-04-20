@@ -1,6 +1,7 @@
 import Reload from './data-reload';
-import Ember from "ember";
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import { inject as service } from '@ember/service';
+import { later } from '@ember/runloop';
 
 /**
 * This service fetches the timestamps every tenth second. In addition it
@@ -13,7 +14,7 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 export default Reload.extend(AlertifyHandler, {
 
-	timestampRepo: Ember.inject.service("repos/timestamp-repository"),
+	timestampRepo: service("repos/timestamp-repository"),
 
   // @Override
   /**
@@ -54,7 +55,7 @@ export default Reload.extend(AlertifyHandler, {
 		}
 
 		function error(e){
-			console.error(e);
+			this.debug(e);
 		}
 
 
@@ -73,7 +74,7 @@ export default Reload.extend(AlertifyHandler, {
 
 		if(!oldestTimestamp){
 			//if there is no Object, the service shall wait for a second, then reload
-			this.set("reloadThread", Ember.run.later(this,
+			this.set("reloadThread", later(this,
 				function(){
 					this.set("shallReload", true);
 				},1000));
@@ -95,11 +96,11 @@ export default Reload.extend(AlertifyHandler, {
 		}
 
 		function failure(e){
-			console.error(e.message);
+			this.debug(e);
 		}
 
 		function error(e){
-			console.error(e);
+			this.debug(e);
 		}
 	},
 

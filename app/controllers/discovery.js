@@ -4,7 +4,6 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 export default Controller.extend(AlertifyHandler, {
 
-  procezzList: [],
   procezzForDetailView: null,
   agentForDetailView: null,
 

@@ -1,6 +1,7 @@
-import Ember from 'ember';
-
-const {Service, inject, computed, run} = Ember;
+import Service from '@ember/service';
+import { inject as service } from '@ember/service';
+import { computed, observer } from '@ember/object';
+import { run } from '@ember/runloop'; 
 
 /**
  * This service is used like an abstract service. It only works with an 
@@ -13,8 +14,8 @@ const {Service, inject, computed, run} = Ember;
 
 export default Service.extend({
 
-  store: inject.service('store'),
-  session: inject.service("session"),
+  store: service(),
+  session: service(),
 
 
   /**
@@ -115,7 +116,7 @@ export default Service.extend({
    *
    * @method startUpdate
    */ 
-  startUpdate: function(){
+  startUpdate: observer("isAuthenticated", function() {
       if(!this.get("fetchThread")){
         this.set('shallUpdate', true);
         this.updateObject();
@@ -123,7 +124,7 @@ export default Service.extend({
           run.later(this, this.updateLoop, (10*1000)));
       }
       this.startReload();
-  }.observes("isAuthenticated"),
+  }),
 
   
   /**

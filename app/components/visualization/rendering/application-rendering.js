@@ -1,5 +1,6 @@
-import Ember from 'ember';
 import RenderingCore from './rendering-core';
+import {inject as service} from '@ember/service';
+import { getOwner } from '@ember/application';
 
 import THREE from "npm:three";
 
@@ -15,9 +16,6 @@ import FoundationBuilder from
     'explorviz-frontend/utils/application-rendering/foundation-builder';
 
 
-const {inject} = Ember;
-
-
 /**
  * Renderer for application visualization.
  *
@@ -29,7 +27,7 @@ const {inject} = Ember;
  */
 export default RenderingCore.extend({
 
-  store: inject.service('store'),
+  store: service('store'),
 
   application3D: null,
 
@@ -38,7 +36,7 @@ export default RenderingCore.extend({
   interactionHandler: null,
   labeler: null,
 
-  oldRotation: {x: 0, y: 0},
+  oldRotation: null,
   initialSetupDone: false,
 
   interaction: null,
@@ -50,6 +48,8 @@ export default RenderingCore.extend({
     this._super(...arguments);
 
     this.debug("init application rendering");
+
+    this.set('oldRotation', {x: 0, y: 0});
 
     this.onReSetupScene = function() {
       this.resetRotation();
@@ -85,7 +85,7 @@ export default RenderingCore.extend({
 
     if (!this.get('interaction')) {
       // owner necessary to inject service into util
-      this.set('interaction', Interaction.create(Ember.getOwner(this).ownerInjection()));
+      this.set('interaction', Interaction.create(getOwner(this).ownerInjection()));
     }
 
     if (!this.get('centerAndZoomCalculator')) {

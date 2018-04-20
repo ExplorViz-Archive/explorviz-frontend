@@ -1,6 +1,6 @@
-import Ember from 'ember';
-
-const {Service, observer, Evented} = Ember;
+import Service from '@ember/service';
+import Evented from '@ember/object/evented';
+import { observer } from '@ember/object';
 
 /**
 * TODO

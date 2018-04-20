@@ -1,9 +1,10 @@
-import Ember from 'ember';
+import Service from '@ember/service';
+import Evented from '@ember/object/evented';
 
 /**
 This service is used to pass data from the controller to the component. 
 */
-export default Ember.Service.extend(Ember.Evented, {
+export default Service.extend(Evented, {
 
 	importedURL: false,
 

@@ -1,6 +1,7 @@
-import Ember from 'ember';
-
-const { computed, Controller, inject, observer } = Ember;
+import Controller from '@ember/controller';
+import { inject as service } from '@ember/service'; 
+import { computed } from '@ember/object';
+import { observer } from '@ember/object';
 
 /**
 * TODO
@@ -13,11 +14,11 @@ const { computed, Controller, inject, observer } = Ember;
 */
 export default Controller.extend({
 
-  urlBuilder: inject.service("url-builder"),
-  viewImporter: inject.service("view-importer"),
-  reloadHandler: inject.service("reload-handler"),
-  renderingService: inject.service("rendering-service"),
-  landscapeRepo: inject.service("repos/landscape-repository"),
+  urlBuilder: service("url-builder"),
+  viewImporter: service("view-importer"),
+  reloadHandler: service("reload-handler"),
+  renderingService: service("rendering-service"),
+  landscapeRepo: service("repos/landscape-repository"),
 
   state: null,
 
@@ -32,7 +33,7 @@ export default Controller.extend({
   camX: null,
   camY: null,
   camZ: null,
-  condition: [],
+  condition: null,
 
   observer: observer('viewImporter.importedURL', function() {
     if(!this.get('viewImporter.importedURL')) {
@@ -62,6 +63,8 @@ export default Controller.extend({
     this._super(...arguments);
 
     const self = this;
+
+    this.set('condition', []);
 
     // setup url-builder Service
     this.get('urlBuilder').on('transmitState', function(state) {

@@ -1,6 +1,7 @@
-import Ember from 'ember';
+import Mixin from '@ember/object/mixin';
+import $ from 'jquery';
 
-const {Mixin, $} = Ember;
+/* global alertify */
 
 /**
 * TODO

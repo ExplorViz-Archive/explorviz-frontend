@@ -1,4 +1,4 @@
-import Ember from 'ember';
+ import { helper } from '@ember/component/helper';
 
 // TODO use this as generic comparison helper
 // not only for string equality
@@ -7,4 +7,4 @@ export function stringComparison(params) {
   return params[0] === params[1];
 }
 
-export default Ember.Helper.helper(stringComparison);
+export default helper(stringComparison);

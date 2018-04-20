@@ -1,9 +1,9 @@
-import DS from 'ember-data';
 import BaseEntity from './baseentity';
-import Ember from 'ember';
 import THREE from "npm:three";
+import attr from 'ember-data/attr';
+import { computed } from '@ember/object';
 
-const { attr } = DS;
+
 
 /**
 * Ember model for a Draw3DNodeEntity. This model is inherited by all elements
@@ -28,7 +28,7 @@ export default BaseEntity.extend({
   opened: attr('boolean', { defaultValue: true}),
   visible: attr('boolean', { defaultValue: true}),
 
-  extension: Ember.computed('width', 'height', 'depth', function() {
+  extension: computed('width', 'height', 'depth', function() {
     let width = this.get('width') / 2.0;
     let height = this.get('height') / 2.0;
     let depth = this.get('depth') / 2.0;

@@ -1,4 +1,4 @@
-import Ember from 'ember';
+import { inject as service } from '@ember/service';
 import Reload from './data-reload';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
@@ -12,7 +12,7 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 export default Reload.extend(AlertifyHandler, {
 
-  landscapeRepo: Ember.inject.service("repos/landscape-repository"),
+  landscapeRepo: service("repos/landscape-repository"),
 
   // @Override
   /**

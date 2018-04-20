@@ -1,12 +1,14 @@
-import Ember from 'ember';
+import Component from '@ember/component';
+import {inject as service} from '@ember/service';
+import $ from 'jquery';
 
-const {Component, $, on, inject} = Ember;
+/* global c3 */
 
 export default Component.extend({
 
-  timestampRepo: inject.service("repos/timestamp-repository"),
-  versionbarLoad: inject.service("versionbar-load"),
-  reloadHandler: inject.service("reload-handler"),
+  timestampRepo: service("repos/timestamp-repository"),
+  versionbarLoad: service("versionbar-load"),
+  reloadHandler: service("reload-handler"),
 
   plot: null,
 

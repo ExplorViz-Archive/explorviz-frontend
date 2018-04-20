@@ -2,7 +2,16 @@ import JSONAPI from "./jsonapi";
 import timestampType from "./timestamp";
 
 export default JSONAPI.extend({
+
 	modelName : "timestampstorage",
-	relationshipsToBeSaved: {timestamps: timestampType.create()},
-	relationshipsToInclude: {timestamps: timestampType.create()},
-	});
+
+	relationshipsToBeSaved: null,
+	relationshipsToInclude: null,
+
+  init() {
+    this._super(...arguments);
+
+    this.set('relationshipsToBeSaved', {timestamps: timestampType.create()});
+    this.set('relationshipsToInclude', {timestamps: timestampType.create()});
+  },
+});

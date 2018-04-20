@@ -1,7 +1,5 @@
-import DS from 'ember-data';
 import BaseEntity from './baseentity';
-
-const { attr } = DS;
+import attr from 'ember-data/attr';
 
 /**
 * Ember model for a DrawNodeEntity.
@@ -29,7 +27,14 @@ export default BaseEntity.extend({
 
   kielerGraphReference: null,
 
-  sourcePorts: {},
-  targetPorts: {}
+  sourcePorts: null,
+  targetPorts: null,
+
+  init() {
+    this._super(...arguments);
+    this.set('sourcePorts', {});
+    this.set('targetPorts', {});
+  }
+
 
 });

@@ -13,10 +13,10 @@ export default BaseRoute.extend(AuthenticatedRouteMixin, {
   actions: {
 
     // @Override BaseRoute
-  	resetRoute() {
+    resetRoute() {
       this.controller.send('resetView');
       this.controller.set('landscapeRepo.latestApplication', null);
-  	},
+    },
 
     didTransition() {
       this.controller.hideVersionbar();

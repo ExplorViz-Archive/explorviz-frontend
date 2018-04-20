@@ -1,8 +1,7 @@
-import Ember from 'ember';
+import Mixin from '@ember/object/mixin';
 import Stats from "npm:stats.js";
 
-const {Mixin} = Ember;
-
+/* global THREEx */
 
 /**
 * TODO

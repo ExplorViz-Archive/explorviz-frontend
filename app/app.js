@@ -1,9 +1,7 @@
-import Ember from 'ember';
 import Resolver from './resolver';
 import loadInitializers from 'ember-load-initializers';
 import config from './config/environment';
-
-const {Application} = Ember;
+import Application from '@ember/application';
 
 /**
 * Ember application is the starting point for every Ember application.

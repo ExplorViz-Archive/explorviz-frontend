@@ -1,9 +1,11 @@
-import Ember from 'ember';
+import Component from '@ember/component';
+import {inject as service} from '@ember/service';
+import Evented from '@ember/object/evented';
+import { Promise } from 'rsvp';
+
 import THREE from "npm:three";
 import config from 'explorviz-frontend/config/environment';
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
-
-const {Component, inject, Evented} = Ember;
 
 /**
 * This component contains the core mechanics of the different (three.js-based)
@@ -28,14 +30,14 @@ export default Component.extend(Evented, THREEPerformance, {
   state: null,
 
   // Declare url-builder service
-  urlBuilder: inject.service("url-builder"),
+  urlBuilder: service("url-builder"),
 
   // Declare view-importer service
-  viewImporter: inject.service("view-importer"),
+  viewImporter: service("view-importer"),
 
-  reloadHandler: inject.service("reload-handler"),
-  landscapeRepo: inject.service("repos/landscape-repository"),
-  renderingService: inject.service(),
+  reloadHandler: service("reload-handler"),
+  landscapeRepo: service("repos/landscape-repository"),
+  renderingService: service(),
 
   classNames: ['viz'],
 
@@ -50,8 +52,13 @@ export default Component.extend(Evented, THREEPerformance, {
 
   initDone: false,
 
-  appCondition: [],
+  appCondition: null,
   initImport: true,
+
+  init()  {
+    this._super(...arguments);
+    this.set('appCondition', []);
+  },
 
 
   // @Override
@@ -427,7 +434,7 @@ export default Component.extend(Evented, THREEPerformance, {
 
     function waitForLandscape() {
       // New Promise
-      var promise = new Ember.RSVP.Promise(
+      var promise = new Promise(
         function(resolve) {
           window.setTimeout(
             function() {

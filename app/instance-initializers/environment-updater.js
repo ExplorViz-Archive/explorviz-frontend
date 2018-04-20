@@ -1,4 +1,4 @@
-import Ember from 'ember';
+import $ from 'jquery';
 
 export function initialize(appInstance) {
   const config = appInstance.resolveRegistration("config:environment");
@@ -8,7 +8,7 @@ export function initialize(appInstance) {
     return;
   }
 
-  Ember.$.getJSON('configuration.json')
+  $.getJSON('configuration.json')
     .done(function(jsonConfig) {
 
       if(config.environment === 'production') {
@@ -21,7 +21,7 @@ export function initialize(appInstance) {
     })
     .fail(function( jqxhr, textStatus, error ) {
       var err = textStatus + ", " + error;
-      console.log("Couldn't load configuration.json: " + err );
+      this.error("Couldn't load configuration.json: " + err );
     });
 }
 
