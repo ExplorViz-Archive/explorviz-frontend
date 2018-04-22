@@ -90,9 +90,9 @@ export default Object.extend({
       outgoingClazzCommunications.forEach((clazzCommunication) => {
         if ((clazzCommunication.sourceClazz != null && clazzCommunication.get('sourceClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
           (clazzCommunication.targetClazz != null && clazzCommunication.get('targetClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
-            clazzCommunication.state = "NORMAL";
+            clazzCommunication.set("state", "NORMAL");
         } else {
-          clazzCommunication.state = "TRANSPARENT";
+          clazzCommunication.set("state", "TRANSPARENT");
         }
       });
 

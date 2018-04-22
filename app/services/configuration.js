@@ -41,7 +41,7 @@ export default Service.extend({
 
     this.set('pluginSettings', []);
 
-    this.set('applicationColors', {
+    this.set('landscapeColors', {
       system: "rgb(199,199,199)",
       nodegroup: "rgb(1,155,32)",
       node: "rgb(0,189,56)",
