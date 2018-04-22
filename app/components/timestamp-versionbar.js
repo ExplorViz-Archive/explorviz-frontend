@@ -64,7 +64,9 @@ export default Component.extend({
     this.get('timestampRepo').off('uploaded');
   },
 
-  renderPlot: on('didRender', function() {
+  didRender() {
+
+    this._super(...arguments);
 
     const self = this;
 
@@ -140,7 +142,7 @@ export default Component.extend({
 
     this.set('plot', chart);
     this.applyOptimalZoom();
-  }),
+  },
 
   //hides versionbar
   hideVersionbar(){

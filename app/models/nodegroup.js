@@ -1,8 +1,8 @@
 import DrawNodeEntity from './drawnodeentity';
 import { computed } from '@ember/object'; 
-import attr from 'ember-data/attr';
-import belongsTo from 'ember-data/belongsTo';
-import { hasMany } from 'ember-data/relationships';
+import DS from 'ember-data';
+
+const { attr, belongsTo, hasMany } = DS;
 
 /**
 * Ember model for a NodeGroup.

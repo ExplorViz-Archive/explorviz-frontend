@@ -12,15 +12,38 @@ module('Integration | Component | visualization/page-setup/landscape-navbar', fu
 
     await render(hbs`{{visualization/page-setup/landscape-navbar}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    const listOfAElements = this.element.querySelectorAll('a');
 
-    // Template block usage:
-    await render(hbs`
-      {{#visualization/page-setup/landscape-navbar}}
-        template block text
-      {{/visualization/page-setup/landscape-navbar}}
-    `);
+    const aTitleList = ["Export landscape", "Reset landscape", "Export URL"];
 
-    assert.equal(this.element.textContent.trim(), 'template block text');
+    listOfAElements.forEach((el) => {
+
+      const title = el.getAttribute('title');
+
+      if(aTitleList.includes(title)) {
+        assert.ok(true, 'Title rendered: ' + title);
+
+        const index = aTitleList.findIndex((aTitle) => {
+          return aTitle === title;
+        });
+
+        // remove from array
+        aTitleList.splice(index, 1);
+      } 
+      else {
+        assert.notOk(true, 'Title rendered, but not considered in test: ' + title);
+      }
+      
+    });
+
+    // if something is still remaining, fail test
+    aTitleList.forEach((remainingTitle) => {
+      assert.notOk(true, 'Title NOT rendered: ' + remainingTitle + 
+        '. Maybe it is gone and the test needs to be updated.');      
+    });
+
+
   });
+
+
 });

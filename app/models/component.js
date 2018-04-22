@@ -1,8 +1,8 @@
 import Draw3DNodeEntity from './draw3dnodeentity';
-import attr from 'ember-data/attr';
-import belongsTo from 'ember-data/belongsTo';
-import { hasMany } from 'ember-data/relationships';
+import DS from 'ember-data';
 import { computed } from '@ember/object';
+
+const { attr, belongsTo, hasMany } = DS;
 
 /**
 * Ember model for a Component, e.g. a Java package.

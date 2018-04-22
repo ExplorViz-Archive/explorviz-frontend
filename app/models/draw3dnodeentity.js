@@ -1,9 +1,9 @@
 import BaseEntity from './baseentity';
 import THREE from "npm:three";
-import attr from 'ember-data/attr';
 import { computed } from '@ember/object';
+import DS from 'ember-data';
 
-
+const { attr } = DS;
 
 /**
 * Ember model for a Draw3DNodeEntity. This model is inherited by all elements

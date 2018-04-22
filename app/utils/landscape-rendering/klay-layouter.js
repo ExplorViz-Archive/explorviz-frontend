@@ -23,7 +23,7 @@ export default function applyKlayLayout(landscape) {
       // do actual layout
       $klay.layout({
         graph: graph,
-        success: function(layouted) { // // eslint-disable-line
+        success: function(layouted) { // eslint-disable-line
           //console.log("success", layouted);
         },
         error: function(error) { // eslint-disable-line

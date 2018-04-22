@@ -20,7 +20,7 @@ export default Component.extend({
 
   actions: {
     resetRoute() {
-      this.sendAction("resetRoute");
+      this.sendAction("resetRoute"); // eslint-disable-line
     }
   }
 });
