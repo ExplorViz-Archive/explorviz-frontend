@@ -18,6 +18,7 @@ export default BaseRoute.extend(AuthenticatedRouteMixin, {
       this.controller.set('landscapeRepo.latestApplication', null);
     },
 
+    // @Override
     didTransition() {
       this.controller.hideVersionbar();
       this.controller.showTimeline();
