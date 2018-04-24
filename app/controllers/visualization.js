@@ -50,6 +50,16 @@ export default Controller.extend({
     return !this.get('landscapeRepo.latestApplication');
   }),
 
+  actions: {
+
+    resetView() {
+      this.set('viewImporter.importedURL', false);
+      this.get('renderingService').reSetupScene();
+      this.get('reloadHandler').startExchange();
+    }
+    
+  },
+
   showTimeline() {
     this.set('renderingService.showTimeline', true);
   },
@@ -94,6 +104,6 @@ export default Controller.extend({
     this._super(...arguments);
     this.get('urlBuilder').off('transmitState');
     this.get('viewImporter').off('requestView');
-  }
+  }  
   
 });
