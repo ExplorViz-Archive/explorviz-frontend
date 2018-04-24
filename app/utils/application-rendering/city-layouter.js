@@ -112,14 +112,9 @@ export default function applyCityLayout(application) {
       else {
         const listWithout0And1 = [];
 
-        let outsideCounter = 0;
-        let insideCounter = 0;
-
         list.forEach((entry) => {
-          outsideCounter++;
           if (entry !== 0 && entry !== 1){
             listWithout0And1.push(entry);
-            insideCounter++;
           }
         });
 

@@ -1,33 +1,41 @@
-import Ember from 'ember';
+import Object from '@ember/object';
+import { computed } from '@ember/object';
 
 //This Object is to define the different functions neccesary for the Object to work
-export default Ember.Object.extend({
+export default Object.extend({
 
 	// This value is important to identify the type and to save the Object in the right position
 	modelName: null,
 
 	//This attribute is important to show, which attribute has which type
 	//To identify you have to look in the models
-	attributes: {},
+	attributes: null,
 
 
 	// this attribute will decide, which attributes shall be saved into the Object
 	// It has the following structure {[attributeNameOfModel]:[ModelType]}
-	relationshipsToBeSaved: {},
+	relationshipsToBeSaved: null,
 
 
 	//This param is used to decide, which relationships of which type shall be included in getItemWithInclude
-	relationshipsToInclude:{},
+	relationshipsToInclude: null,
 
 
 
 	//The modelStorage will be the part in the localStorage for saving Objects of this model
-	modelStorage: Ember.computed("modelName",
-		function(){
-			var modelStorage = localStorage.getItem(this.modelName);
-			modelStorage = JSON.parse(modelStorage);
-			return (modelStorage ? modelStorage : {});
-		}),
+	modelStorage: computed("modelName", function(){
+		var modelStorage = localStorage.getItem(this.modelName);
+		modelStorage = JSON.parse(modelStorage);
+		return (modelStorage ? modelStorage : {});
+	}),
+
+	init() {
+		this._super(...arguments);
+
+		this.set('attributes', {});
+		this.set('relationshipsToBeSaved', {});
+		this.set('relationshipsToInclude', {});
+	},
 
 
 	//This important to see if a Json has the right format

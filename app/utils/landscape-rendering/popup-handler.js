@@ -1,7 +1,9 @@
-import Ember from 'ember';
+import Object from '@ember/object';
+import Evented from '@ember/object/evented';
 import { encodeStringForPopUp } from '../helpers/string-helpers';
+import $ from 'jquery';
 
-export default Ember.Object.extend(Ember.Evented, {
+export default Object.extend(Evented, {
 
   alreadyDestroyed: true,
   enableTooltips: true,
@@ -19,7 +21,7 @@ export default Ember.Object.extend(Ember.Evented, {
       return;
     }
 
-    Ember.$('#vizContainer').popover(
+    $('#vizContainer').popover(
       {
         title: '<div style="font-weight:bold;text-align:center;">' +
           content.title + '</div>',
@@ -30,13 +32,13 @@ export default Ember.Object.extend(Ember.Evented, {
       }
     );
 
-    Ember.$('#vizContainer').popover('show');
+    $('#vizContainer').popover('show');
 
-    const topOffset = Ember.$('.popover').height() + 7;
-    const leftOffset = Ember.$('.popover').width() / 2;
+    const topOffset = $('.popover').height() + 7;
+    const leftOffset = $('.popover').width() / 2;
 
-    Ember.$('.popover').css('top', mouse.y - topOffset + 'px');
-    Ember.$('.popover').css('left', mouse.x - leftOffset + 'px');
+    $('.popover').css('top', mouse.y - topOffset + 'px');
+    $('.popover').css('left', mouse.x - leftOffset + 'px');
 
     this.set('alreadyDestroyed', false);
 
@@ -46,7 +48,7 @@ export default Ember.Object.extend(Ember.Evented, {
   hideTooltip() {
 
     if(!this.get('alreadyDestroyed')) {
-      Ember.$('#vizContainer').popover('destroy');
+      $('#vizContainer').popover('destroy');
       this.set('alreadyDestroyed', true);
     }
   },

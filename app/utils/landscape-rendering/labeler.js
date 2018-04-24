@@ -1,15 +1,24 @@
-import Ember from 'ember';
+import Object from '@ember/object';
 import THREE from "npm:three";
 
-export default Ember.Object.extend({
+export default Object.extend({
 
-  textLabels: {},
+  textLabels: null,
 
-  systemTextCache: [],
-  nodeTextCache: [],
-  appTextCache: [],
+  systemTextCache: null,
+  nodeTextCache: null,
+  appTextCache: null,
 
   font: null,
+
+  init() {
+    this._super(...arguments);
+
+    this.set('textLabels', {});
+    this.set('systemTextCache', []);
+    this.set('nodeTextCache', []);
+    this.set('appTextCache', []);
+  },
 
   saveTextForLabeling(textToShow, parent, color) {
 

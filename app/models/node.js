@@ -1,8 +1,8 @@
-import DS from 'ember-data';
-import Ember from 'ember';
 import DrawNodeEntity from './drawnodeentity';
+import { computed } from '@ember/object'; 
+import DS from 'ember-data';
 
-const { attr, hasMany, belongsTo } = DS;
+const { attr, belongsTo, hasMany } = DS;
 
 /**
 * Ember model for a Node.
@@ -32,7 +32,7 @@ export default DrawNodeEntity.extend({
   }),
 
   // used for text labeling performance in respective labelers
-  state: Ember.computed('visible', function() {
+  state: computed('visible', function() {
     let visible = this.get('visible');
     return `${visible}`;
   }),

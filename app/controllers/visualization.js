@@ -1,6 +1,7 @@
-import Ember from 'ember';
-
-const { computed, Controller, inject, observer } = Ember;
+import Controller from '@ember/controller';
+import { inject as service } from '@ember/service'; 
+import { computed } from '@ember/object';
+import { observer } from '@ember/object';
 
 /**
 * TODO
@@ -13,11 +14,11 @@ const { computed, Controller, inject, observer } = Ember;
 */
 export default Controller.extend({
 
-  urlBuilder: inject.service("url-builder"),
-  viewImporter: inject.service("view-importer"),
-  reloadHandler: inject.service("reload-handler"),
-  renderingService: inject.service("rendering-service"),
-  landscapeRepo: inject.service("repos/landscape-repository"),
+  urlBuilder: service("url-builder"),
+  viewImporter: service("view-importer"),
+  reloadHandler: service("reload-handler"),
+  renderingService: service("rendering-service"),
+  landscapeRepo: service("repos/landscape-repository"),
 
   state: null,
 
@@ -32,7 +33,7 @@ export default Controller.extend({
   camX: null,
   camY: null,
   camZ: null,
-  condition: [],
+  condition: null,
 
   observer: observer('viewImporter.importedURL', function() {
     if(!this.get('viewImporter.importedURL')) {
@@ -63,6 +64,8 @@ export default Controller.extend({
 
     const self = this;
 
+    this.set('condition', []);
+
     // setup url-builder Service
     this.get('urlBuilder').on('transmitState', function(state) {
       self.set('state',state);
@@ -91,39 +94,6 @@ export default Controller.extend({
     this._super(...arguments);
     this.get('urlBuilder').off('transmitState');
     this.get('viewImporter').off('requestView');
-  },
-
-  actions: {
-
-    // Triggered by the export button
-    exportState() {
-      // Pause timeshift
-      this.get('reloadHandler').stopExchange();
-      // Update query parameters
-      this.get('urlBuilder').requestURL();
-
-      this.set('viewImporter.importedURL', true);
-
-      this.set('timestamp', this.get('state').timestamp);
-      this.set('appID', this.get('state').appID);
-
-      this.set('camX', this.get('state').camX);
-      this.set('camY', this.get('state').camY);
-      this.set('camZ', this.get('state').camZ);
-
-      // handle landscape or application
-      if(this.get('showLandscape')){
-        this.set('condition', this.get('state').landscapeCondition);
-      }
-      else{
-        this.set('condition', this.get('state').appCondition);
-      }
-    },
-
-    resetView() {
-      this.set('viewImporter.importedURL', false);
-      this.get('renderingService').reSetupScene();
-      this.get('reloadHandler').startExchange();
-    }
   }
+  
 });

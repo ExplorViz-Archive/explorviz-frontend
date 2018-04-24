@@ -1,19 +1,20 @@
 import VizController from './visualization';
-import Ember from 'ember';
+import { inject as service } from '@ember/service'; 
+import { computed } from '@ember/object';
 
 export default VizController.extend({
 
-renderingService: Ember.inject.service("rendering-service"),
+  renderingService: service("rendering-service"),
 
-init(){
-  this._super(...arguments);
-},
+  init(){
+    this._super(...arguments);
+  },
 
   showVersionbar() {
     this.set('renderingService.showVersionbar', true);
   },
 
-  showReplayLandscape: Ember.computed('landscapeRepo.replayApplication', function() {
+  showReplayLandscape: computed('landscapeRepo.replayApplication', function() {
     return !this.get('landscapeRepo.replayApplication');
   }),
 });

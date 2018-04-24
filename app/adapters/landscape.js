@@ -23,8 +23,12 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
   host: ENV.APP.API_ROOT,
   namespace: "landscape",
 
-  headers: {
-    "Accept": "application/vnd.api+json"
+  init() {
+
+    this.set('headers', {
+      "Accept": "application/vnd.api+json"
+    });
+ 
   },
 
   //@Override

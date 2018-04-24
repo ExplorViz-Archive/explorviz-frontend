@@ -1,8 +1,8 @@
-import DS from 'ember-data';
-import Ember from 'ember';
 import DrawNodeEntity from './drawnodeentity';
+import { computed } from '@ember/object'; 
+import DS from 'ember-data';
 
-const { attr, hasMany, belongsTo } = DS;
+const { attr, belongsTo, hasMany } = DS;
 
 /**
 * Ember model for a System.
@@ -28,7 +28,7 @@ export default DrawNodeEntity.extend({
   opened: attr('boolean', {defaultValue: true}),
 
   // used for text labeling performance in respective labelers
-  state: Ember.computed('opened', function() {
+  state: computed('opened', function() {
     return this.get('opened');
   }),
 

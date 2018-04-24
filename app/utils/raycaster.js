@@ -1,13 +1,23 @@
-import Ember from 'ember';
+import Object from '@ember/object';
 import THREE from "npm:three";
 
-export default Ember.Object.extend({
+export default Object.extend({
 
-  raycaster: new THREE.Raycaster(),
+  raycaster: null,
 
-  landscapeObjects: ['system', 'nodegroup', 'node', 'application', 'applicationcommunication'],
-  applicationObjects: ['component', 'clazz', 'cumulatedclazzcommunication'],
-  objectCatalog: 'landscapeObjects',
+  landscapeObjects: null,
+  applicationObjects: null,
+  objectCatalog: null,
+
+  init() {
+    this._super(...arguments);
+
+    this.set('landscapeObjects', ['system', 'nodegroup', 'node', 'application', 'applicationcommunication']);
+    this.set('applicationObjects', ['component', 'clazz', 'cumulatedclazzcommunication']);
+    this.set('objectCatalog', 'landscapeObjects');
+    this.set('raycaster', new THREE.Raycaster());
+  },
+
 
   raycasting(origin, direction, camera, possibleObjects) {
 

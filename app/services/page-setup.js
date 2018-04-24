@@ -1,6 +1,4 @@
-import Ember from 'ember';
-
-const {Service} = Ember;
+import Service from '@ember/service';
 
 /**
 * This service is used to
@@ -20,7 +18,7 @@ export default Service.extend({
   * @property navbarRoutes
   * @type Array
   */
-  navbarRoutes:["visualization", "tutorial", "replay", "discovery"],
+  navbarRoutes: null,
 
 
   /**
@@ -29,5 +27,13 @@ export default Service.extend({
   * @property navbarGlyphicons
   * @type Array
   */
-  navbarGlyphicons:[]
+  navbarGlyphicons: null,
+
+  init() {
+    this._super(...arguments);
+
+    this.set('navbarRoutes', ["visualization", "tutorial", "replay", "discovery"]);
+    this.set('navbarGlyphicons', []);
+
+  }
 });

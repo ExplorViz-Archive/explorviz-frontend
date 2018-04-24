@@ -24,9 +24,14 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   host: APP.API_ROOT, 
   namespace: "discovery",
 
-  headers: {
-    "Accept": "application/vnd.api+json"
+  init() {
+
+    this.set('headers', {
+      "Accept": "application/vnd.api+json"
+    });
+ 
   },
+
 
   // @Override
   // Overrides URL for model.save()

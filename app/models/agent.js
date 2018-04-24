@@ -1,6 +1,7 @@
-import attr from 'ember-data/attr';
-import { hasMany } from 'ember-data/relationships';
 import BaseModel from './base-model';
+import DS from 'ember-data';
+
+const { attr, hasMany } = DS;
 
 
 /**

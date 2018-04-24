@@ -1,4 +1,4 @@
-import EmberObject from '@ember/object';
+import Object from '@ember/object';
 
 /**
  * The foundation is the grey all-encompassing tile. It shows 
@@ -6,7 +6,7 @@ import EmberObject from '@ember/object';
  * data on mouse hovering. It simply is a container for actual 
  * application data.
  */
-export default EmberObject.extend({
+export default Object.extend({
 
   foundationObj: null,
 

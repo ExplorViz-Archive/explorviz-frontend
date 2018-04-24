@@ -1,6 +1,6 @@
-import DS from 'ember-data';
 import Draw3DNodeEntity from './draw3dnodeentity';
-import Ember from 'ember';
+import DS from 'ember-data';
+import { computed } from '@ember/object';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -111,7 +111,7 @@ export default Draw3DNodeEntity.extend({
     return filteredComponents;
   },
 
-  hasOnlyOneChildComponent: Ember.computed('children', function() {
+  hasOnlyOneChildComponent: computed('children', function() {
     return this.hasMany('children').ids().length < 2;
   }),
 

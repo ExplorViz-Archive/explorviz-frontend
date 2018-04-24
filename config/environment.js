@@ -50,7 +50,7 @@ module.exports = function(environment) {
   }
 
   if (environment === 'akr') {
-    ENV.APP.API_ROOT = 'http://192.168.247.129:8081';
+    ENV.APP.API_ROOT = 'http://192.168.91.128:8081';
   }
 
   if (environment === 'mac') {

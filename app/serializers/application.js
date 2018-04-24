@@ -24,14 +24,14 @@ export default JSONAPISerializer.extend({
   // Now the type of an Ember-Object isn't pluralized anymore, when it's serialized. Instead the Type will always be camel-case
   //@override
   payloadKeyFromModelName(key){
-	  return key.camelize();
+    return key.camelize();
   },
 
   //this function will be used to bring the format of the server into the JSONAPI convention
   //@override
   normalizeQueryRecordResponse (store, primaryModelClass, payload, id, requestType){
-	  //Here you'll change payload to your needs
-	  return this._super(store, primaryModelClass, payload, id, requestType);
+    //Here you'll change payload to your needs
+    return this._super(store, primaryModelClass, payload, id, requestType);
   }
 
 });

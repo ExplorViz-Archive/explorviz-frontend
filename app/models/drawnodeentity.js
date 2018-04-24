@@ -1,5 +1,5 @@
-import DS from 'ember-data';
 import BaseEntity from './baseentity';
+import DS from 'ember-data';
 
 const { attr } = DS;
 
@@ -29,7 +29,14 @@ export default BaseEntity.extend({
 
   kielerGraphReference: null,
 
-  sourcePorts: {},
-  targetPorts: {}
+  sourcePorts: null,
+  targetPorts: null,
+
+  init() {
+    this._super(...arguments);
+    this.set('sourcePorts', {});
+    this.set('targetPorts', {});
+  }
+
 
 });

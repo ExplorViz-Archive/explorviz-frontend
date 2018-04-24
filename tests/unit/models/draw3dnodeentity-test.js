@@ -1,12 +1,14 @@
-import { moduleForModel, test } from 'ember-qunit';
+import { module, test } from 'qunit';
+import { setupTest } from 'ember-qunit';
+import { run } from '@ember/runloop';
 
-moduleForModel('draw3dnodeentity', 'Unit | Model | draw3dnodeentity', {
-  // Specify the other units that are required for this test.
-  needs: []
-});
+module('Unit | Model | draw3dnodeentity', function(hooks) {
+  setupTest(hooks);
 
-test('it exists', function(assert) {
-  let model = this.subject();
-  // let store = this.store();
-  assert.ok(!!model);
+  // Replace this with your real tests.
+  test('it exists', function(assert) {
+    let store = this.owner.lookup('service:store');
+    let model = run(() => store.createRecord('draw3dnodeentity', {}));
+    assert.ok(model);
+  });
 });

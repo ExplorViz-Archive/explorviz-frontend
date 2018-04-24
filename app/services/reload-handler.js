@@ -1,7 +1,9 @@
-import Ember from 'ember';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import Service from '@ember/service';
+import Evented from '@ember/object/evented';
+import { computed } from '@ember/object';
+import { inject as service } from '@ember/service';
 
-const {Service, inject, computed, Evented} = Ember;
+import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 export default Service.extend(AlertifyHandler, Evented, {
 
@@ -9,10 +11,10 @@ export default Service.extend(AlertifyHandler, Evented, {
     return this.get('timeshiftReload.shallUpdate');
   }),
 
-  timeshiftReload: inject.service("timeshift-reload"),
-  landscapeReload: inject.service("landscape-reload"),
-  landscapeRepo: inject.service("repos/landscape-repository"),
-  store: inject.service(),
+  timeshiftReload: service("timeshift-reload"),
+  landscapeReload: service("landscape-reload"),
+  landscapeRepo: service("repos/landscape-repository"),
+  store: service(),
 
 
   stopExchange() {

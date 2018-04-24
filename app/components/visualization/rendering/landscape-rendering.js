@@ -1,5 +1,5 @@
-import Ember from 'ember';
 import RenderingCore from './rendering-core';
+import {inject as service} from '@ember/service';
 
 import THREE from "npm:three";
 
@@ -14,9 +14,6 @@ import CalcCenterAndZoom from
 
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 
-//import Meshline from "npm:three.meshline";
-
-const {inject} = Ember;
 
 
 /**
@@ -30,7 +27,7 @@ const {inject} = Ember;
 */
 export default RenderingCore.extend({
 
-  configuration: inject.service("configuration"),
+  configuration: service("configuration"),
 
   hammerManager: null,
 
@@ -424,37 +421,37 @@ export default RenderingCore.extend({
             const lastPoint = points[i - 1];
             const thisPoint = points[i];
 
-      			let tileWay = {
-      				startPoint: lastPoint,
-      				endPoint: thisPoint
-      			};
+            let tileWay = {
+              startPoint: lastPoint,
+              endPoint: thisPoint
+            };
 
-      			let id = tiles.findIndex(isSameTile, tileWay);
+            let id = tiles.findIndex(isSameTile, tileWay);
 
 
-      			if(id !== -1){
-      				tile = tiles[id];
-      			}
+            if(id !== -1){
+              tile = tiles[id];
+            }
             else{
-      				id = tiles.length; // Gets a new index
+              id = tiles.length; // Gets a new index
 
-      				tile = {
-      					startPoint: lastPoint,
-      					endPoint: thisPoint,
-      					positionZ: 0.0025,
-      					requestsCache: 0,
-      					communications: [],
-      					pipeColor: new THREE.Color(color),
+              tile = {
+                startPoint: lastPoint,
+                endPoint: thisPoint,
+                positionZ: 0.0025,
+                requestsCache: 0,
+                communications: [],
+                pipeColor: new THREE.Color(color),
                 emberModel: applicationCommunication
-      				};
-      				tiles.push(tile);
-      			}
+              };
+              tiles.push(tile);
+            }
 
             tile.communications.push(appCommunications);
             tile.requestsCache = tile.requestsCache +
               applicationCommunication.get('requests');
 
-      			tiles[id] = tile;
+            tiles[id] = tile;
           }
 
         }
@@ -499,33 +496,33 @@ export default RenderingCore.extend({
       self.set('closeSymbol', labelMeshClose);
     }
 
-  	// This function is only neccessary to find the right index
-  	function isSameTile(tile){
-  		return checkEqualityOfPoints(this.endPoint, tile.endPoint) &&
+    // This function is only neccessary to find the right index
+    function isSameTile(tile){
+      return checkEqualityOfPoints(this.endPoint, tile.endPoint) &&
         checkEqualityOfPoints(this.startPoint, tile.startPoint);
-  	}
+    }
 
     /*
-  	function isNextTile(newTile){
-  		return checkEqualityOfPoints(newTile.startPoint, this.endPoint);
-  	}
+    function isNextTile(newTile){
+      return checkEqualityOfPoints(newTile.startPoint, this.endPoint);
+    }
     */
 
     function addCommunicationLineDrawing(tiles, parent) {
 
       const requestsList = {};
 
-  	  tiles.forEach((tile) => {
+      tiles.forEach((tile) => {
         requestsList[tile.requestsCache] = 0;
-  		});
+      });
 
       const categories = getCategories(requestsList, true);
 
-  	  for (let i = 0; i < tiles.length; i++) {
-  			let tile = tiles[i];
-  			tile.lineThickness = 0.7 * categories[tile.requestsCache] + 0.1;
+      for (let i = 0; i < tiles.length; i++) {
+        let tile = tiles[i];
+        tile.lineThickness = 0.7 * categories[tile.requestsCache] + 0.1;
         createLine(tile, tiles, parent);
-  		}
+      }
 
 
       function getCategories(list, linear) {
@@ -534,8 +531,8 @@ export default RenderingCore.extend({
           useLinear(list);
         }
         else {
-		      useThreshholds(list);
-		    }
+          useThreshholds(list);
+        }
 
         return list;
 
@@ -546,7 +543,7 @@ export default RenderingCore.extend({
 
           for(let request in list) {
             request = parseInt(request);
-			max = (request > max) ? request : max;
+      max = (request > max) ? request : max;
           }
 
           const oneStep = max / 3.0;
@@ -563,7 +560,7 @@ export default RenderingCore.extend({
 
 
         function getCategoryFromValues(value, t1, t2) {
-		  value = parseInt(value);
+      value = parseInt(value);
           if (value === 0) {
             return 0.0;
           } else if (value === 1) {
@@ -585,10 +582,10 @@ export default RenderingCore.extend({
           let secondMax = 1;
 
           for(let request in list){
-      		  request = parseInt(request);
+            request = parseInt(request);
               secondMax = (request > max) ? max : secondMax;
               max = (request > max) ? request: max;
-      		}
+          }
           const oneStep = secondMax / 4.0;
           const t1 = oneStep;
           const t2 = oneStep * 2;
@@ -605,7 +602,7 @@ export default RenderingCore.extend({
 
 
         function getCategoryFromLinearValues(value, t1, t2, t3) {
-			value = parseInt(value);
+      value = parseInt(value);
           if (value <= 0) {
             return 0;
           } else if (value <= t1) {
@@ -701,50 +698,50 @@ export default RenderingCore.extend({
       parent.add(plane);
 
 
-		  //----------Helper functions
+      //----------Helper functions
       /*
-  		function createGoodEdges(firstTile, secondTile, parent){
+      function createGoodEdges(firstTile, secondTile, parent){
 
-  			const resolution = new THREE.Vector2(window.innerWidth,
+        const resolution = new THREE.Vector2(window.innerWidth,
           window.innerHeight);
 
         let lineThickness =
         (firstTile.lineThickness < secondTile.lineThickness) ?
           firstTile.lineThickness : secondTile.lineThickness;
 
-  			const material = new Meshline.MeshLineMaterial({
-  				color: secondTile.pipeColor,
-  				lineWidth: lineThickness * 0.4,
-  				sizeAttenuation : 1,
-  				resolution: resolution
-  			});
+        const material = new Meshline.MeshLineMaterial({
+          color: secondTile.pipeColor,
+          lineWidth: lineThickness * 0.4,
+          sizeAttenuation : 1,
+          resolution: resolution
+        });
 
-  			let geometry = new THREE.Geometry();
+        let geometry = new THREE.Geometry();
 
-  			geometry.vertices.push(
-  				new THREE.Vector3(firstTile.startPoint.x - centerPoint.x,
-  				firstTile.startPoint.y - centerPoint.y, firstTile.positionZ)
-  			);
+        geometry.vertices.push(
+          new THREE.Vector3(firstTile.startPoint.x - centerPoint.x,
+          firstTile.startPoint.y - centerPoint.y, firstTile.positionZ)
+        );
 
-  			geometry.vertices.push(
-  				new THREE.Vector3(firstTile.endPoint.x - centerPoint.x,
-  				firstTile.endPoint.y - centerPoint.y, firstTile.positionZ)
-  			);
+        geometry.vertices.push(
+          new THREE.Vector3(firstTile.endPoint.x - centerPoint.x,
+          firstTile.endPoint.y - centerPoint.y, firstTile.positionZ)
+        );
 
-  			geometry.vertices.push(
-  				new THREE.Vector3(secondTile.endPoint.x - centerPoint.x,
-  				secondTile.endPoint.y - centerPoint.y, secondTile.positionZ)
-  			);
+        geometry.vertices.push(
+          new THREE.Vector3(secondTile.endPoint.x - centerPoint.x,
+          secondTile.endPoint.y - centerPoint.y, secondTile.positionZ)
+        );
 
 
-  			const line = new Meshline.MeshLine();
-  			line.setGeometry(geometry);
+        const line = new Meshline.MeshLine();
+        line.setGeometry(geometry);
 
-  			var lineMesh = new THREE.Mesh(line.geometry, material);
+        var lineMesh = new THREE.Mesh(line.geometry, material);
 
-  			parent.add(lineMesh);
+        parent.add(lineMesh);
 
-		  }*/
+      }*/
 
     } // END createLine
 

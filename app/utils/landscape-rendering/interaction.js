@@ -1,4 +1,5 @@
-import Ember from 'ember';
+import Object from '@ember/object';
+import Evented from '@ember/object/evented';
 import THREE from "npm:three";
 import HammerInteraction from '../hammer-interaction';
 import PopUpHandler from './popup-handler';
@@ -6,7 +7,7 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import Raycaster from '../raycaster';
 import Highlighter from './highlighter';
 
-export default Ember.Object.extend(Ember.Evented, AlertifyHandler, {
+export default Object.extend(Evented, AlertifyHandler, {
 
   canvas: null,
   camera: null,

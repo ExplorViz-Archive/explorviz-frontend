@@ -1,6 +1,8 @@
-import Ember from 'ember';
+import Component from '@ember/component';
+import {inject as service} from '@ember/service';
+import $ from 'jquery';
 
-const {Component, $, on, inject} = Ember;
+/* global c3 */
 
 /**
 * This component contains the core mechanics of the different (three.js-based)
@@ -22,8 +24,8 @@ const {Component, $, on, inject} = Ember;
 */
 export default Component.extend({
 
-  timestampRepo: inject.service("repos/timestamp-repository"),
-  reloadHandler: inject.service("reload-handler"),
+  timestampRepo: service("repos/timestamp-repository"),
+  reloadHandler: service("reload-handler"),
 
   plot: null,
 
@@ -104,7 +106,9 @@ export default Component.extend({
     this.get('reloadHandler').off('startExchange');
   },
 
-  renderPlot: on('didRender', function() {
+  didRender() {
+
+    this._super(...arguments);
 
     const self = this;
 
@@ -181,7 +185,7 @@ export default Component.extend({
 
     this.set('plot', chart);
     this.applyOptimalZoom();
-  }),
+  },
 
   //hides the timeline
       hideTimeline(){
@@ -244,7 +248,7 @@ export default Component.extend({
 
     let updatedPlot = this.get('plot');
 
-  	if(!updatedPlot){
+    if(!updatedPlot){
       this.renderPlot();
       updatedPlot = this.get('plot');
       //return;
@@ -252,8 +256,8 @@ export default Component.extend({
 
     const chartReadyTimestamps = this.buildChartData();
 
-  	const labels = chartReadyTimestamps.labels;
-  	const values = chartReadyTimestamps.values;
+    const labels = chartReadyTimestamps.labels;
+    const values = chartReadyTimestamps.values;
 
     //labels.unshift('Labels');
     //values.unshift('Calls');

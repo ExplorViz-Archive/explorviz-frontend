@@ -1,8 +1,7 @@
-import Ember from 'ember';
+import Route from '@ember/routing/route';
+import {inject as service} from '@ember/service';
 import ApplicationRouteMixin from 
 'ember-simple-auth/mixins/application-route-mixin';
-
-const {Route, inject} = Ember;
 
 /**
 * TODO
@@ -12,10 +11,10 @@ const {Route, inject} = Ember;
 */
 export default Route.extend(ApplicationRouteMixin, {
 
-  session: inject.service("session"),
+  session: service(),
 
   actions: {
-  	
+    
       logout() {
         this.get('session').invalidate({message: "Logout successful"});
       }

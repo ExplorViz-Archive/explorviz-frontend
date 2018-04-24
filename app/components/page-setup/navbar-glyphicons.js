@@ -1,6 +1,5 @@
-import Ember from 'ember';
-
-const {Component, inject} = Ember;
+import Component from '@ember/component';
+import {inject as service} from '@ember/service';
 
 /**
 * This component renders all components (!), that are registered in 
@@ -14,7 +13,7 @@ const {Component, inject} = Ember;
 */
 export default Component.extend({
 
-  pageSetupService: inject.service("page-setup"),
+  pageSetupService: service("page-setup"),
 
   tagName: "ul",
   classNames:["nav navbar-nav navbar-right"],

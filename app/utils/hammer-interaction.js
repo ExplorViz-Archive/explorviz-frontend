@@ -1,7 +1,8 @@
-import Ember from 'ember';
+import Object from '@ember/object';
+import Evented from '@ember/object/evented';
 import Hammer from "npm:hammerjs";
 
-export default Ember.Object.extend(Ember.Evented, {
+export default Object.extend(Evented, {
 
   hammerManager: null,
 

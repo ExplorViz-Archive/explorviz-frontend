@@ -1,7 +1,8 @@
-import Ember from 'ember';
+import Object from '@ember/object';
+import THREE from "npm:three";
 import { calculateColorBrightness } from '../helpers/threejs-helpers';
 
-export default Ember.Object.extend({
+export default Object.extend({
 
   highlightedEntity: null,
   application: null,
@@ -89,9 +90,9 @@ export default Ember.Object.extend({
       outgoingClazzCommunications.forEach((clazzCommunication) => {
         if ((clazzCommunication.sourceClazz != null && clazzCommunication.get('sourceClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
           (clazzCommunication.targetClazz != null && clazzCommunication.get('targetClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
-            clazzCommunication.state = "NORMAL";
+            clazzCommunication.set("state", "NORMAL");
         } else {
-          clazzCommunication.state = "TRANSPARENT";
+          clazzCommunication.set("state", "TRANSPARENT");
         }
       });
 

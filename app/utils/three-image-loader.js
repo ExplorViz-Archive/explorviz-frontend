@@ -1,9 +1,15 @@
-import Ember from 'ember';
+import Object from '@ember/object';
 import THREE from "npm:three";
 
-export default Ember.Object.extend({
+export default Object.extend({
 
-  logos: {},
+  logos: null,
+
+  init() {
+    this._super(...arguments);
+
+    this.set('logos', {});
+  },
 
   createPicture(x, y, z, width, height, textureName, parent, type) {
       if(this.get('logos')[textureName]) {

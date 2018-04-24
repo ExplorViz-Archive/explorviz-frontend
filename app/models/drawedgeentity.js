@@ -1,7 +1,8 @@
-import DS from 'ember-data';
 import BaseEntity from './baseentity';
+import DS from 'ember-data';
 
 const { attr } = DS;
+
 
 /**
 * Ember model for a DrawEdgeEntity. This model is mainly used for
@@ -48,7 +49,12 @@ export default BaseEntity.extend({
   pipeSize: attr(),
 
   pipeColor: attr(),
-  kielerEdgeReferences: [],
+  kielerEdgeReferences: null,
   hidden: attr('boolean', { defaultValue: false }),
+
+  init() {
+    this._super(...arguments);
+    this.set('kielerEdgeReferences', []);
+  }
 
 });

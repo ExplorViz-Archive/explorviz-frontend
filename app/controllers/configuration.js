@@ -1,6 +1,5 @@
-import Ember from 'ember';
-
-const {Controller, inject} = Ember;
+ import Controller from '@ember/controller';
+ import {inject as service} from '@ember/service';
 
 /**
 * TODO
@@ -13,8 +12,8 @@ const {Controller, inject} = Ember;
 */
 export default Controller.extend({
 
-  configurationService: inject.service("configuration"),
-  renderingService: inject.service("rendering-service"),
+  configurationService: service("configuration"),
+  renderingService: service("rendering-service"),
 
   hideTimeline() {
     this.set('renderingService.showTimeline', false);

@@ -1,12 +1,14 @@
-import { moduleForModel, test } from 'ember-qunit';
+import { module, test } from 'qunit';
+import { setupTest } from 'ember-qunit';
+import { run } from '@ember/runloop';
 
-moduleForModel('applicationcommunication', 'Unit | Model | applicationcommunication', {
-  // Specify the other units that are required for this test.
-  needs: ['model:landscape', 'model:application']
-});
+module('Unit | Model | applicationcommunication', function(hooks) {
+  setupTest(hooks);
 
-test('it exists', function(assert) {
-  let model = this.subject();
-  // let store = this.store();
-  assert.ok(!!model);
+  // Replace this with your real tests.
+  test('it exists', function(assert) {
+    let store = this.owner.lookup('service:store');
+    let model = run(() => store.createRecord('applicationcommunication', {}));
+    assert.ok(model);
+  });
 });

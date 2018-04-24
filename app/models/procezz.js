@@ -1,7 +1,7 @@
-import attr from 'ember-data/attr';
-import { belongsTo } from 'ember-data/relationships';
 import BaseModel from './base-model';
+import DS from 'ember-data';
 
+const { attr, belongsTo } = DS;
 
 /**
 * Ember model for a Process. This model is used as an abstraction for 

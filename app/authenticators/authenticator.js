@@ -1,5 +1,5 @@
 import { inject as service } from "@ember/service";
-import { isEmpty } from 'ember-utils';
+import { isEmpty } from '@ember/utils';
 import RSVP, { resolve, reject } from 'rsvp';
 import Base from 'ember-simple-auth/authenticators/base';
 

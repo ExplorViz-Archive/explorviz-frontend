@@ -3,8 +3,7 @@ import { inject as service } from '@ember/service';
 import nameSelector from 'explorviz-frontend/utils/helpers/name-selector';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
-// Declare globals
-/*global cytoscape*/
+/* global cytoscape */
 
 export default Component.extend(AlertifyHandler, {
 
