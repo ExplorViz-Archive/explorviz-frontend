@@ -41,8 +41,7 @@
     "loader.js": "^4.7.0",
     "stats.js": "^0.17.0",
     "yuidoc-bootstrap-theme": "^1.0.6",
-    "yuidocjs": "^0.10.2",
-    "explorviz-frontend-extension-vr": "latest"
+    "yuidocjs": "^0.10.2"
   },
   "engines": {
     "node": ">= 8.9.4"
