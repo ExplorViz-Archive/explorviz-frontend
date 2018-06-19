@@ -32,6 +32,10 @@ module.exports = function(environment) {
     ENV.APP.API_ROOT = 'http://localhost:8081';
   }
 
+  if (environment === 'mocked') {
+    ENV.APP.API_ROOT = 'http://localhost:4200/api';
+  }
+
   if (environment === 'test') {
     // Testem prefers this...
     ENV.locationType = 'none';

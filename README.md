@@ -4,7 +4,7 @@
 <a href="https://david-dm.org/ExplorViz/explorviz-frontend?type=dev"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/dev-status.svg" alt="devDependencies status"></a>
 [![](https://img.shields.io/docker/pulls/explorviz/explorviz-docker.svg)](https://hub.docker.com/r/explorviz/explorviz-docker "Click to view the image on Docker Hub")
 
-This project is a WIP replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) client-code with [EmberJS](https://www.emberjs.com/). This is only the frontend, you will need the [backend](https://github.com/ExplorViz/explorviz-backend) as well.
+This project is a WIP replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) client-code with [EmberJS](https://www.emberjs.com/). This is only the frontend, you will need the [backend](https://github.com/ExplorViz/explorviz-backend) as well for production. However, you can mock the backend as shown in the development section below.
 
 ## Documentation (Work in progress)
 The API documentation is available [here](https://explorviz.github.io/explorviz-frontend/).
@@ -34,8 +34,14 @@ You will need the following things properly installed on your computer.
 
 ### Running / Development
 
-* `npm start` or `ember serve`
+* `ember serve` or `ember s`
 * Visit the frontend at [http://localhost:4200](http://localhost:4200).
+
+### Mocking the Backend
+
+You can mock the backend, for example if you don't need live data for your development (or as showcase).
+Therefore, you are not required to download and run the ExplorViz Backen Java project.
+To achieve this, run the frontend with `ENABLE_MOCK=true ember s --environment=mocked`.
 
 #### Testing
 
