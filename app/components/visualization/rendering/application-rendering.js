@@ -169,7 +169,8 @@ export default RenderingCore.extend({
     this._super(...arguments);
     this.debug("populate application rendering");
 
-    const emberApplication = this.get('landscapeRepo.latestApplication');
+    //const emberApplication = this.get('landscapeRepo.latestApplication');
+    const emberApplication = this.get('latestApplication');
 
     if(!emberApplication) {
       return;

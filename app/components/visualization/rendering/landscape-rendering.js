@@ -143,7 +143,8 @@ export default RenderingCore.extend({
 
     const self = this;
 
-    const emberLandscape = this.get('landscapeRepo.latestLandscape');
+    //const emberLandscape = this.get('landscapeRepo.latestLandscape');
+    const emberLandscape = this.get('latestLandscape');
 
     if(!emberLandscape || !this.get('font')) {
       return;
