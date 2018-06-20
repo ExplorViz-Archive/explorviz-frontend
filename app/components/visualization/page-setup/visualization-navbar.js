@@ -48,13 +48,21 @@ export default Component.extend({
       return;
     }
 
-    if(firstMatch.get('opened')) {
-      // close and highlight
-      firstMatch.setOpenedStatus(false);
-    } else {
-      // open all parents
+    const modelType = firstMatch.constructor.modelName;
+
+    if(modelType === "clazz") {
       firstMatch.openParents();
+    } 
+    else if(modelType === "component") {
+      if(firstMatch.get('opened')) {
+        // close and highlight, since it is already open
+        firstMatch.setOpenedStatus(false);
+      } else {
+        // open all parents, since component is hidden
+        firstMatch.openParents();
+      }
     }
+    
     this.get('highlighter').highlight(firstMatch);
     this.get('renderingService').redrawScene();
   },
