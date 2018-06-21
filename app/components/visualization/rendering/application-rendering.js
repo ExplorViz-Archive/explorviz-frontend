@@ -182,6 +182,8 @@ export default RenderingCore.extend({
 
     const foundation = this.get('foundationBuilder').createFoundation(emberApplication, this.get('store'));
 
+    emberApplication.applyDefaultOpenLayout(self.get('initialSetupDone'));
+
     applyCityLayout(emberApplication);
 
     this.set('application3D', new THREE.Object3D());

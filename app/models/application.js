@@ -72,6 +72,24 @@ export default DrawNodeEntity.extend({
     });
 
     return filteredComponents;
+  },
+
+  applyDefaultOpenLayout(userAlreadyActed) {
+    // opens all components until at least two entities are on the same level
+
+    if(userAlreadyActed) {
+      return;
+    }
+    
+    const components = this.get('components');
+
+    if(components.length > 1) {
+      // there are two components on the first level
+      // therefore, here is nothing to do
+      return;
+    }
+
+    components.objectAt(0).applyDefaultOpenLayout();
   }
 
 });

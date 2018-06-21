@@ -33,7 +33,8 @@ export default Draw3DNodeEntity.extend({
     inverse: 'children'
   }),
 
-  opened: false,
+  // why is this overriden here?
+  //opened: false,
 
   // breaks Ember, maybe because of circle ?
 
@@ -114,5 +115,29 @@ export default Draw3DNodeEntity.extend({
   hasOnlyOneChildComponent: computed('children', function() {
     return this.hasMany('children').ids().length < 2;
   }),
+
+  applyDefaultOpenLayout() {
+    // opens all nested components until at least two entities are on the same level
+
+    if(this.get('opened') && !this.get('foundation')) {
+      // package already open,
+      // therefore users must have opened it
+      // Do not change the user's state
+      return;
+    }
+
+    this.set('opened', true);
+    
+    const components = this.get('children');
+    const clazzes = this.get('clazzes');
+
+    if(components.length + clazzes.length > 1) {
+      // there are two entities on this level
+      // therefore, here is nothing to do
+      return;
+    }
+
+    components.objectAt(0).applyDefaultOpenLayout();
+  }
 
 });

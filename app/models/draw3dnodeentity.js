@@ -25,7 +25,7 @@ export default BaseEntity.extend({
   positionZ: attr('number', { defaultValue: 0}),
 
   highlighted: attr('boolean', { defaultValue: false}),
-  opened: attr('boolean', { defaultValue: true}),
+  opened: attr('boolean', { defaultValue: false}),
   visible: attr('boolean', { defaultValue: true}),
 
   extension: computed('width', 'height', 'depth', function() {
