@@ -36,6 +36,8 @@ export default RenderingCore.extend({
   imageLoader: null,
   centerAndZoomCalculator: null,
 
+  renderingService: service("rendering-service"),
+
   openSymbol: null,
   closeSymbol: null,
 
@@ -140,6 +142,8 @@ export default RenderingCore.extend({
    */
   populateScene() {
     this._super(...arguments);
+
+    this.debug(this.get('renderingService'));
 
     const self = this;
 

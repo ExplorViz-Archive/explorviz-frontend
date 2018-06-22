@@ -55,7 +55,7 @@ export default Reload.extend(AlertifyHandler, {
 		}
 
 		function error(e){
-			this.debug(e);
+			self.debug(e);
 		}
 
 
@@ -96,11 +96,11 @@ export default Reload.extend(AlertifyHandler, {
 		}
 
 		function failure(e){
-			this.debug(e);
+			self.debug(e);
 		}
 
 		function error(e){
-			this.debug(e);
+			self.debug(e);
 		}
 	},
 

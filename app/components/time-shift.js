@@ -188,16 +188,16 @@ export default Component.extend({
   },
 
   //hides the timeline
-      hideTimeline(){
-        if ($(".timeline").attr('vis') === 'show') {
-          this.set('isUp', false);
-          $(".timeline").slideUp(400);
-          $("#vizContainer").animate({height:'+=120'});
-          $(".timeline").attr('vis', 'hide');
-          $("#toggleTimelineButton").removeClass('glyphicon-collapse-down')
-            .addClass('glyphicon-collapse-up');
-        }
-      },
+  hideTimeline(){
+    if ($(".timeline").attr('vis') === 'show') {
+      this.set('isUp', false);
+      $(".timeline").slideUp(400);
+      $("#vizContainer").animate({height:'+=120'});
+      $(".timeline").attr('vis', 'hide');
+      $("#toggleTimelineButton").removeClass('glyphicon-collapse-down')
+        .addClass('glyphicon-collapse-up');
+    }
+  },
 
   // build chart-ready data
   buildChartData() {
@@ -249,7 +249,7 @@ export default Component.extend({
     let updatedPlot = this.get('plot');
 
     if(!updatedPlot){
-      this.renderPlot();
+      this.didRender();
       updatedPlot = this.get('plot');
       //return;
     }
