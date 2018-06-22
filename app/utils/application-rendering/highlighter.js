@@ -1,5 +1,5 @@
 import Object from '@ember/object';
-import THREE from "npm:three";
+import THREE from "three";
 import { calculateColorBrightness } from '../helpers/threejs-helpers';
 
 export default Object.extend({

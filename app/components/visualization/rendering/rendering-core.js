@@ -3,7 +3,7 @@ import {inject as service} from '@ember/service';
 import Evented from '@ember/object/evented';
 import { Promise } from 'rsvp';
 
-import THREE from "npm:three";
+import THREE from "three";
 import config from 'explorviz-frontend/config/environment';
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
 

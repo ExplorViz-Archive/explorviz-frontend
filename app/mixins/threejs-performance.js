@@ -1,5 +1,5 @@
 import Mixin from '@ember/object/mixin';
-import Stats from "npm:stats.js";
+import Stats from "stats.js";
 
 /* global THREEx */
 

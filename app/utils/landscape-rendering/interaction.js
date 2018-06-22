@@ -1,6 +1,6 @@
 import Object from '@ember/object';
 import Evented from '@ember/object/evented';
-import THREE from "npm:three";
+import THREE from "three";
 import HammerInteraction from '../hammer-interaction';
 import PopUpHandler from './popup-handler';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';

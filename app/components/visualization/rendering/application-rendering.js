@@ -2,7 +2,7 @@ import RenderingCore from './rendering-core';
 import {inject as service} from '@ember/service';
 import { getOwner } from '@ember/application';
 
-import THREE from "npm:three";
+import THREE from "three";
 
 import applyCityLayout from
     'explorviz-frontend/utils/application-rendering/city-layouter';

@@ -1,7 +1,7 @@
 import RenderingCore from './rendering-core';
 import {inject as service} from '@ember/service';
 
-import THREE from "npm:three";
+import THREE from "three";
 
 import applyKlayLayout from
  'explorviz-frontend/utils/landscape-rendering/klay-layouter';

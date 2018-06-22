@@ -1,6 +1,6 @@
 import Object from '@ember/object';
 import Evented from '@ember/object/evented';
-import Hammer from "npm:hammerjs";
+import Hammer from "hammerjs";
 
 export default Object.extend(Evented, {
 

@@ -1,6 +1,6 @@
 import Object from '@ember/object';
 import Evented from '@ember/object/evented';
-import THREE from "npm:three";
+import THREE from "three";
 
 export default Object.extend(Evented, {
 

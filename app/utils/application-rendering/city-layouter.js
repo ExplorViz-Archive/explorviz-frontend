@@ -1,4 +1,4 @@
-import THREE from "npm:three";
+import THREE from "three";
 
 export default function applyCityLayout(application) {
 

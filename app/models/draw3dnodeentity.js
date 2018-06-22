@@ -1,5 +1,5 @@
 import BaseEntity from './baseentity';
-import THREE from "npm:three";
+import THREE from "three";
 import { computed } from '@ember/object';
 import DS from 'ember-data';
 
