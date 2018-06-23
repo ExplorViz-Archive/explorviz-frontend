@@ -2,7 +2,7 @@
   {{#if landscapeRepo.replayLandscape.systems}}
     {{visualization/rendering/landscape-rendering}}
   {{else}}
-    <div class="container-fluid">
+    <div class="main-content-majority container-fluid">
       <div class="jumbotron">
         <h2>No uploaded landscape found!</h2>
         <p>You can upload a landscape by using the button "Upload Landscape" at the bottom of the page.</p>
@@ -15,4 +15,8 @@
 {{else}}
   {{visualization/page-setup/visualization-navbar}}
   {{visualization/rendering/application-rendering}}
+{{/if}}
+
+{{#if renderingService.showVersionbar}}
+  {{timestamp-versionbar}}
 {{/if}}

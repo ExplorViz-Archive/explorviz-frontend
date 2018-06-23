@@ -39,18 +39,9 @@
   </nav>
 {{/if}}
 
-<div id="vizContainer" style="height: 80%; width: 100%; overflow:hidden;">
+<div id="vizContainer" class="main-content">
   {{outlet}}
 </div>
-
-{{#if session.isAuthenticated}}
-  {{#if renderingService.showTimeline}}
-    {{time-shift}}
-  {{/if}}
-  {{#if renderingService.showVersionbar}}
-    {{timestamp-versionbar}}
-  {{/if}}
-{{/if}}
 
 <div id="footer" class="footer">
   <table style="width: 100%;">

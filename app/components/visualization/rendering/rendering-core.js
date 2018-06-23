@@ -39,7 +39,7 @@ export default Component.extend(Evented, THREEPerformance, {
   landscapeRepo: service("repos/landscape-repository"),
   renderingService: service(),
 
-  classNames: ['viz'],
+  classNames: ['main-content-majority'],
 
   scene : null,
   webglrenderer: null,
@@ -164,12 +164,12 @@ export default Component.extend(Evented, THREEPerformance, {
     const self = this;
 
     this.$(window).on('resize.visualization', function(){
-      const outerDiv = this.$('.viz')[0];
+      const outerDiv = this.$('.main-content-majority')[0];
 
       if(outerDiv) {
 
-        const height = Math.round(this.$('.viz').height());
-        const width = Math.round(this.$('.viz').width());
+        const height = Math.round(this.$('.main-content-majority').height());
+        const width = Math.round(this.$('.main-content-majority').width());
 
         self.set('camera.aspect', width / height);
         self.get('camera').updateProjectionMatrix();

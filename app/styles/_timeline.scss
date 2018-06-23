@@ -1,5 +1,7 @@
 .timeline, .versionbar{
-  height: 200px;
-  display: none;
-  width: 100%;
+  height: 100px;
+  width: calc(100% - 10px);
+  border-style: solid;
+  bottom: 40px;
+  position: fixed !important;
 }

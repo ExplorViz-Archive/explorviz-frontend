@@ -1,13 +1,21 @@
-html, body{
+html, body {
   height: 100%;
+  overflow: hidden;
 }
 
 body > .ember-view {
   height: 100%;
 }
 
-.viz {
+.main-content {
   height: 100%;
+  overflow: hidden;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+.main-content-majority {
+  max-height: 65%;
   width: 100%;
 }
 

@@ -17,3 +17,7 @@
   {{visualization/page-setup/visualization-navbar}}
   {{visualization/rendering/application-rendering latestApplication=landscapeRepo.latestApplication}}
 {{/if}}
+
+{{#if renderingService.showTimeline}}
+  {{time-shift}}
+{{/if}}

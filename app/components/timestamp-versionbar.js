@@ -16,30 +16,6 @@ export default Component.extend({
 
   isUp: false,
 
-  actions: {
-    toggleVersionbar() {
-      if ($(".versionbar").attr('vis') === 'show') {
-        // hide versionbar
-        this.set('isUp', false);
-        $(".versionbar").slideUp(400);
-        $("#vizContainer").animate({height:'+=120'});
-        $(".versionbar").attr('vis', 'hide');
-        $("#toggleVersionbarButton").removeClass('glyphicon-collapse-down')
-        .addClass('glyphicon-collapse-up');
-      }
-      else {
-        // show versionbar
-        this.set('isUp', true);
-        $(".versionbar").slideDown('fast');
-        $("#vizContainer").animate({height:'-=120'});
-
-        $(".versionbar").attr('vis', 'show');
-        $("#toggleVersionbarButton").removeClass('glyphicon-collapse-up')
-        .addClass('glyphicon-collapse-down');
-      }
-    },
-  },
-
   // @Override
   init() {
     this._super(...arguments);
@@ -60,7 +36,6 @@ export default Component.extend({
   // Cleanup
   willDestroyElement() {
     //workaround: hide versionbar, otherwise timeline gets broken
-    this.hideVersionbar();
     this.get('timestampRepo').off('uploaded');
   },
 
