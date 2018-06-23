@@ -107,9 +107,11 @@ export default Component.extend({
   },
 
   didRender() {
-
     this._super(...arguments);
+    this.renderPlot();
+  },
 
+  renderPlot() {
     const self = this;
 
     const chartData = this.buildChartData();
@@ -204,7 +206,7 @@ export default Component.extend({
 
     const timestamps = this.get('timestampRepo.latestTimestamps');
 
-    if(!timestamps) {
+    if(!timestamps || timestamps.length == 0) {
       return;
     }
 
@@ -249,12 +251,16 @@ export default Component.extend({
     let updatedPlot = this.get('plot');
 
     if(!updatedPlot){
-      this.didRender();
+      this.renderPlot();
       updatedPlot = this.get('plot');
       //return;
     }
 
     const chartReadyTimestamps = this.buildChartData();
+
+    if(!chartReadyTimestamps) {
+      return;
+    }
 
     const labels = chartReadyTimestamps.labels;
     const values = chartReadyTimestamps.values;
@@ -269,6 +275,8 @@ export default Component.extend({
       columns: [newLabel, newValue],
       length:0,
       done: function () {
+        //render plot, so that data and rendered chart are consistent
+        self.renderPlot();
         updatedPlot.zoom.enable(true);
         self.applyOptimalZoom();
       }

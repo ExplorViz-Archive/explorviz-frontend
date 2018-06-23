@@ -9,6 +9,10 @@ module.exports = function(app) {
     res.send({data: []});
   });
 
+  timestampRouter.get('/all-uploaded', function(req, res) {
+    res.send({data: []});
+  });  
+
   timestampRouter.post('/', function(req, res) {
     res.status(201).end();
   });

@@ -24,6 +24,7 @@ export default Controller.extend(AlertifyHandler, {
 
   setup() {
     this.set('renderingService.showTimeline', false);
+    this.set('renderingService.showVersionbar', false);
     this.resetState();    
   },
 

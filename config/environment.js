@@ -32,6 +32,11 @@ module.exports = function(environment) {
     ENV.APP.API_ROOT = 'http://localhost:8081';
   }
 
+  if (environment === 'production') {
+    ENV.rootURL = '/explorviz-frontend';
+    ENV.APP.API_ROOT = '/explorviz-backend';
+  }
+
   if (environment === 'mocked') {
     ENV.APP.API_ROOT = 'http://localhost:4200/api';
   }
@@ -47,14 +52,16 @@ module.exports = function(environment) {
     ENV.APP.rootElement = '#ember-testing';
   }
 
-  if (environment === 'production') {
-    ENV.rootURL = '/explorviz-frontend';
-    ENV.APP.API_ROOT = '/explorviz-backend';
 
-  }
+  // User specific environment, e.g. for usage in a virtual machine
+
 
   if (environment === 'akr') {
-    ENV.APP.API_ROOT = 'http://192.168.91.128:8081';
+    ENV.APP.API_ROOT = 'http://192.168.91.129:8081';
+  }
+
+  if (environment === 'akr-mocked') {
+    ENV.APP.API_ROOT = 'http://192.168.91.129:4200/api';
   }
 
   if (environment === 'mac') {
