@@ -65,6 +65,10 @@ export default Component.extend(AlertifyHandler, FileSaverMixin, {
       }).catch((error) => {
         this.debug('error in exportLandscape', error);
       });
+    },
+
+    toggleTimeline() {
+      this.set('renderingService.showTimeline', !this.get('renderingService.showTimeline'));
     }
 
   }

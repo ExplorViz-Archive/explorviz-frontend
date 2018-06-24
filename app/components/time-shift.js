@@ -31,42 +31,6 @@ export default Component.extend({
 
   dataPointPixelRatio: 17,
 
-  isUp: false,
-
-  actions: {
-
-    toggleTimeline() {
-      if ($(".timeline").attr('vis') === 'show') {
-        // hide timeline
-        this.set('isUp', false);
-        $(".timeline").slideUp(400);
-        $("#vizContainer").animate({height:'+=120'});
-        $(".timeline").attr('vis', 'hide');
-        $("#toggleTimelineButton").removeClass('glyphicon-collapse-down')
-          .addClass('glyphicon-collapse-up');
-      }
-      else {
-        // show timeline
-        this.set('isUp', true);
-        $(".timeline").slideDown('fast');
-        $("#vizContainer").animate({height:'-=120'});
-
-        $(".timeline").attr('vis', 'show');
-        $("#toggleTimelineButton").removeClass('glyphicon-collapse-up')
-          .addClass('glyphicon-collapse-down');
-      }
-    },
-
-    playPauseTimeshift() {
-      if(this.get('reloadHandler.isReloading')) {
-        this.get('reloadHandler').stopExchange();
-      }
-      else {
-        this.get('reloadHandler').startExchange();
-      }
-    }
-  },
-
   // @Override
   init() {
     this._super(...arguments);
@@ -76,22 +40,6 @@ export default Component.extend({
     // Listener for updating plot
     this.get('timestampRepo').on('updated', function() {
       self.updatePlot();
-    });
-
-    // Listeners for changing play / pause css
-    this.get('reloadHandler').on('stopExchange', function() {
-      $('#playPauseTimelineButton').removeClass('glyphicon-pause')
-        .addClass('glyphicon-play');
-    });
-
-    this.get('reloadHandler').on('startExchange', function() {
-      $('#playPauseTimelineButton').removeClass('glyphicon-play')
-        .addClass('glyphicon-pause');
-
-      if(self.get('plot')) {
-        self.get('plot').unselect(['Timestamps']);
-      }
-
     });
   },
 
@@ -192,7 +140,6 @@ export default Component.extend({
   //hides the timeline
   hideTimeline(){
     if ($(".timeline").attr('vis') === 'show') {
-      this.set('isUp', false);
       $(".timeline").slideUp(400);
       $("#vizContainer").animate({height:'+=120'});
       $(".timeline").attr('vis', 'hide');
@@ -285,10 +232,6 @@ export default Component.extend({
 
 
   applyOptimalZoom() {
-
-    if(!this.get('isUp')) {
-      return;
-    }
 
     const allData = this.get('plot').data()[0].values;
 

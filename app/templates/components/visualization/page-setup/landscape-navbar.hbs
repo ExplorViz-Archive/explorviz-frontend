@@ -4,6 +4,12 @@
 
       <ul class="nav navbar-nav navbar-left">
         <li>
+          <a {{action "toggleTimeline"}} title="Toggle timeline">
+            <span id="toggleTimelineButton" 
+            class="glyphicon glyphicon-resize-vertical"></span>
+          </a>
+        </li>
+        <li>
           <a {{action "exportLandscape"}} title="Export landscape">
             <span id="exportLandscape" class="glyphicon glyphicon-save"></span>
           </a>

@@ -20,6 +20,10 @@ export default Component.extend({
 
     openAllComponents(){
       this.openAllComponents();
+    },
+
+    toggleTimeline() {
+      this.set('renderingService.showTimeline', !this.get('renderingService.showTimeline'));
     }
   },
 

@@ -14,7 +14,7 @@ module('Integration | Component | visualization/page-setup/landscape-navbar', fu
 
     const listOfAElements = this.element.querySelectorAll('a');
 
-    const aTitleList = ["Export landscape", "Reset landscape", "Export URL"];
+    const aTitleList = ["Toggle timeline", "Export landscape", "Reset landscape", "Export URL"];
 
     listOfAElements.forEach((el) => {
 
