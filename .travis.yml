@@ -1,7 +1,12 @@
 ---
 language: node_js
+
 node_js:
   - "8"
+  - "7"
+  - "6"
+  - "5"
+  - "4"
 
 sudo: false
 
@@ -22,15 +27,12 @@ install:
   - npm install
 
 script:
+  - echo "Running tests against $(node -v) ..."
   - npm test
   - ember build -prod
-  
-after_success:
-  - .travis/push.sh
-  
-env:
 
 branches:
   only:
   - master
+  - travis-version-test
   - /^greenkeeper/.*$/
