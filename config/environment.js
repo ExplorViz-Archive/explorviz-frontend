@@ -23,6 +23,7 @@ module.exports = function(environment) {
     }
   };
 
+  // specify default route definitions
   ENV['ember-simple-auth'] = {
     routeAfterAuthentication: 'visualization',
     routeIfAlreadyAuthenticated: 'visualization'
@@ -62,10 +63,6 @@ module.exports = function(environment) {
 
   if (environment === 'akr-mocked') {
     ENV.APP.API_ROOT = 'http://192.168.91.129:4200/api';
-  }
-
-  if (environment === 'mac') {
-    ENV.APP.API_ROOT = 'http://192.168.48.205:8081';
   }
 
   return ENV;

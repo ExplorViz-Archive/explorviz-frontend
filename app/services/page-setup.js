@@ -31,8 +31,8 @@ export default Service.extend({
 
   init() {
     this._super(...arguments);
-
-    this.set('navbarRoutes', ["visualization", "tutorial", "replay", "discovery"]);
+    // TODO tutorial button not shown until implemented
+    this.set('navbarRoutes', ["visualization", "replay", "discovery"]);
     this.set('navbarGlyphicons', []);
 
   }

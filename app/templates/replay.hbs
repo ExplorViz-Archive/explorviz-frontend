@@ -1,11 +1,13 @@
 {{#if showReplayLandscape}}
   {{#if landscapeRepo.replayLandscape.systems}}
-    {{visualization/rendering/landscape-rendering}}
+    {{visualization/page-setup/replay-navbar}}
+    {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.replayLandscape}}
   {{else}}
+    {{visualization/page-setup/replay-navbar}}
     <div class="main-content-majority container-fluid">
       <div class="jumbotron">
         <h2>No uploaded landscape found!</h2>
-        <p>You can upload a landscape by using the button "Upload Landscape" at the bottom of the page.</p>
+        <p>You can upload a landscape by using the button <span class="glyphicon glyphicon-upload"></span>.</p>
       </div>
       <div id="spinnerDiv" class="container" style="position:relative; height:20%;">
         {{ember-spinner}}
