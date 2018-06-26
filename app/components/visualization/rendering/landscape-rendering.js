@@ -112,8 +112,9 @@ export default RenderingCore.extend({
     this.set('labeler.textLabels', {});
     this.set('labeler.textCache', []);
 
-    this.get('interaction').off('redrawScene');
-    this.get('interaction').off('showApplication');
+    this.get('renderingService').off('redrawScene');
+    this.get('interaction').off('clickedEntity');
+    this.get('interaction').off('doubleClickedEntity');
 
     this.get('interaction').removeHandlers();
   },
@@ -793,17 +794,13 @@ export default RenderingCore.extend({
       self.clickedEntity(emberRecord);
     });
 
-    this.get('interaction').on('redrawScene', function() {
+    this.get('interaction').on('doubleClickedEntity', function(emberModel) {
+      self.doubleClickedEntity(emberModel);
+    });
+
+    this.get('renderingService').on('redrawScene', function() {
       self.cleanAndUpdateScene();
     });
-
-    this.get('interaction').on('showApplication', function(emberModel) {
-      self.set('viewImporter.importedURL', null);
-      self.set('landscapeRepo.latestApplication', emberModel);
-      self.set('landscapeRepo.replayApplication', emberModel);
-    });
-
-
 
   }, // END initInteraction
 

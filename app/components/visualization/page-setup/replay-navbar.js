@@ -27,7 +27,7 @@ export default Component.extend(AlertifyHandler, FileSaverMixin, {
 
       if(this.get("isAuthenticated") === true) {
 
-        let { access_token } = this.get('session.data.authenticated');
+        // let { access_token } = this.get('session.data.authenticated');
 
         let response = yield file.upload(
           ENV.APP.API_ROOT + '/landscape/upload-landscape',

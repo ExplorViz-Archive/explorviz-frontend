@@ -2,6 +2,7 @@ import Controller from '@ember/controller';
 import { inject as service } from '@ember/service'; 
 import { computed } from '@ember/object';
 import { observer } from '@ember/object';
+import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 /**
 * TODO
@@ -12,7 +13,7 @@ import { observer } from '@ember/object';
 * @module explorviz
 * @submodule visualization
 */
-export default Controller.extend({
+export default Controller.extend(AlertifyHandler, {
 
   urlBuilder: service("url-builder"),
   viewImporter: service("view-importer"),
@@ -110,6 +111,44 @@ export default Controller.extend({
   // Passed via template
   clickedEntity(emberRecord) {
     this.debug("clicked", emberRecord);
+  },
+
+  // Closure action for components
+  // Passed via template
+  doubleClickedEntity(emberModel) {
+
+    const emberModelName = emberModel.constructor.modelName;
+
+    if(emberModelName === "application"){
+
+      if(emberModel.get('components').get('length') === 0) {
+        // no data => show message
+
+        const message = "Sorry, there is no information for application <b>" + emberModel.get('name') +
+          "</b> available.";
+
+        this.showAlertifyMessage(message);
+
+      } else {
+        // data available => open application-rendering
+        this.closeAlertifyMessages();
+        
+        
+        // show application
+        this.set('viewImporter.importedURL', null);
+        this.set('landscapeRepo.latestApplication', emberModel);
+        this.set('landscapeRepo.replayApplication', emberModel);
+      }
+    }
+    else if (emberModelName === "nodegroup" || emberModelName === "system"){
+      emberModel.setOpened(!emberModel.get('opened'));
+      this.get('renderingService').redrawScene();
+    }
+    else if(emberModelName === "component"){
+      emberModel.setOpenedStatus(!emberModel.get('opened'));
+      emberModel.set('highlighted', false);
+      this.get('renderingService').redrawScene();
+    }
   }
   
 });

@@ -238,36 +238,7 @@ export default Object.extend(Evented, AlertifyHandler, {
       this.get('popUpHandler').hideTooltip();
 
       const emberModel = intersectedViewObj.object.userData.model;
-      const emberModelName = emberModel.constructor.modelName;
-
-      if(emberModelName === "application"){
-
-        if(emberModel.get('components').get('length') === 0) {
-          // no data => show message
-
-          const message = "Sorry, there is no information for application <b>" + emberModel.get('name') +
-            "</b> available.";
-
-          this.showAlertifyMessage(message);
-
-        } else {
-          // data available => open application-rendering
-          this.closeAlertifyMessages();
-          this.trigger('showApplication', emberModel);
-        }
-
-
-      }
-      else if (emberModelName === "nodegroup" || emberModelName === "system"){
-        emberModel.setOpened(!emberModel.get('opened'));
-        this.trigger('redrawScene');
-      }
-      else if(emberModelName === "component"){
-        emberModel.setOpenedStatus(!emberModel.get('opened'));
-        emberModel.set('highlighted', false);
-        this.trigger('redrawScene');
-      }
-
+      this.trigger('doubleClickedEntity', emberModel);
     }
 
   },
