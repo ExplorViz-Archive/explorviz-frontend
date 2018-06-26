@@ -1,0 +1,31 @@
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="collapse navbar-collapse">
+
+      <ul class="nav navbar-nav navbar-left">
+        <li>
+          <a {{action "toggleVersionBar"}} title="Toggle version bar">
+            <span id="toggleVersionBarButton" class="glyphicon glyphicon-resize-vertical"></span>
+          </a>
+        </li>
+        <li>
+        {{#file-upload name="upload-landscape"
+                       accepts=""
+                       multiple=true
+                       onfileadd=(action "uploadLandscape") as |queue|}}
+            <a class="button" id="selectLandscape" class="btn btn-link" title="Upload landscape">
+              {{#if queue.files.length}}
+                <div id="spinnerDiv" class="container" style="position:relative; height:20%;">
+                  {{ember-spinner}}
+                </div>
+              {{else}}
+                <span class="glyphicon glyphicon-upload"></span>
+              {{/if}}
+            </a>
+        {{/file-upload}}
+        </li>
+      </ul>
+
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>

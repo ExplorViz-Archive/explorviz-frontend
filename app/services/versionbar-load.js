@@ -1,19 +1,31 @@
 import Service from '@ember/service';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import { inject as service } from '@ember/service';
-import { later } from '@ember/runloop'; 
+import { later } from '@ember/runloop';
+import { computed} from '@ember/object';
 
+/**
+ * This service loads the data for the {{#crossLink "timestamp-versionbar"}}{{/crossLink}}.
+ *
+ * @class Versionbar-Load-Service
+ * @extends Ember.Service
+ */
 export default Service.extend(AlertifyHandler, {
 
   store: service(),
+  session: service(),
   timestampRepo: service('repos/timestamp-repository'),
+
+  isAuthenticated: computed.oneWay("session.isAuthenticated"),
 
   init() {
     this._super(...arguments);
     this.receiveUploadedObjects();
+
+    if(this.get("isAuthenticated") === true){
+            this.receiveUploadedObjects();
+    }
   },
-
-
 
     /**
    * TODO
@@ -41,7 +53,7 @@ export default Service.extend(AlertifyHandler, {
     }
 
     function error(e){
-      self.debug(e);
+      self.debug("Error when fetching uploaded timestamps: ", e);
     }
 
 
@@ -49,43 +61,4 @@ export default Service.extend(AlertifyHandler, {
 
   },
 
-  reloadObjects(){
-    if(!this.get("shallReload")){
-      return;
-    }
-    const self = this;
-    var timestamps = this.get("store").peekAll("timestamp").sortBy("id");
-    var oldestTimestamp = timestamps.get("firstObject");
-
-    if(!oldestTimestamp){
-      //if there is no Object, the service shall wait for a second, then reload
-      this.set("reloadThread", later(this,
-        function(){
-          this.set("shallReload", true);
-        },1000));
-      return;
-    }
-
-    const id = oldestTimestamp.get("id");
-    var requestedTimestamps = this.get("store").query('timestamp', id);
-    requestedTimestamps.then(success, failure).catch(error);
-
-    function success(timestamps){
-      const length = timestamps.get("length");
-      if(length !== 0){
-        timestamps.forEach(function(timestamp){
-          self.get("store").push(timestamp.serialize({includeId:true}));
-        });
-        self.startReload();
-      }
-    }
-
-    function failure(e){
-      self.debug(e);
-    }
-
-    function error(e){
-      self.debug(e);
-    }
-  },
 });
