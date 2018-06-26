@@ -789,6 +789,10 @@ export default RenderingCore.extend({
 
     // set listeners
 
+    this.get('interaction').on('clickedEntity', function(emberRecord) {
+      self.clickedEntity(emberRecord);
+    });
+
     this.get('interaction').on('redrawScene', function() {
       self.cleanAndUpdateScene();
     });

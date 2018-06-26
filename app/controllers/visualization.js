@@ -104,6 +104,12 @@ export default Controller.extend({
     this._super(...arguments);
     this.get('urlBuilder').off('transmitState');
     this.get('viewImporter').off('requestView');
-  }  
+  },
+
+  // Closure action for components
+  // Passed via template
+  clickedEntity(emberRecord) {
+    this.debug("clicked", emberRecord);
+  }
   
 });

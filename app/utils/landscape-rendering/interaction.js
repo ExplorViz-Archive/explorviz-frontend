@@ -174,6 +174,10 @@ export default Object.extend(Evented, AlertifyHandler, {
       self.handlePopUp(mouse);
     });
 
+    this.get('hammerHandler').on('singletap', function(mouse) {
+      self.handleSingleClick(mouse);
+    });
+
   },
 
   registerPopUpHandler() {
@@ -266,6 +270,25 @@ export default Object.extend(Evented, AlertifyHandler, {
 
     }
 
+  },
+
+  handleSingleClick(mouse) {
+
+    const origin = {};
+
+    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
+      this.get('renderer').domElement.clientWidth) * 2 - 1;
+
+    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) / 
+      this.get('renderer').domElement.clientHeight) * 2 + 1;
+
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+      this.get('camera'), this.get('raycastObjects'));
+
+    if(intersectedViewObj) {
+      const emberModel = intersectedViewObj.object.userData.model;
+      this.trigger('clickedEntity', emberModel);
+    }
   },
 
   handlePanning(delta, event) {
