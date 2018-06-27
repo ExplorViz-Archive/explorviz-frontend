@@ -66,10 +66,9 @@ export default Object.extend(Evented, AlertifyHandler, {
     }
 
     // init Hammer
-    if (!this.get('hammerHandler')) {
-      this.set('hammerHandler', HammerInteraction.create());
-      this.get('hammerHandler').setupHammer(canvas);
-    }
+    this.set('hammerHandler', HammerInteraction.create());
+    this.get('hammerHandler').setupHammer(canvas);
+ 
 
     if (!this.get('raycaster')) {
       this.set('raycaster', Raycaster.create());
@@ -232,14 +231,46 @@ export default Object.extend(Evented, AlertifyHandler, {
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
 
+    let emberModel;
+
     if(intersectedViewObj) {
 
       // hide tooltip
       this.get('popUpHandler').hideTooltip();
 
-      const emberModel = intersectedViewObj.object.userData.model;
-      this.trigger('doubleClickedEntity', emberModel);
+      emberModel = intersectedViewObj.object.userData.model;
+      const emberModelName = emberModel.constructor.modelName;
+
+      if(emberModelName === "application"){
+
+        if(emberModel.get('components').get('length') === 0) {
+          // no data => show message
+
+          const message = "Sorry, there is no information for application <b>" + emberModel.get('name') +
+            "</b> available.";
+
+          this.showAlertifyMessage(message);
+
+        } else {
+          // data available => open application-rendering
+          this.closeAlertifyMessages();
+          this.trigger('showApplication', emberModel);
+        }
+
+      }
+      else if (emberModelName === "nodegroup" || emberModelName === "system"){
+        emberModel.setOpened(!emberModel.get('opened'));
+        this.trigger('redrawScene');
+      }
+      else if(emberModelName === "component"){
+        emberModel.setOpenedStatus(!emberModel.get('opened'));
+        emberModel.set('highlighted', false);
+        this.trigger('redrawScene');
+      }
+
     }
+
+    this.trigger('doubleClick', emberModel);
 
   },
 
@@ -256,10 +287,14 @@ export default Object.extend(Evented, AlertifyHandler, {
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
       this.get('camera'), this.get('raycastObjects'));
 
+    let emberModel;
+
     if(intersectedViewObj) {
-      const emberModel = intersectedViewObj.object.userData.model;
-      this.trigger('clickedEntity', emberModel);
+      emberModel = intersectedViewObj.object.userData.model;
+      //this.trigger('clickedEntity', emberModel);
     }
+
+    this.trigger('singleClick', emberModel);
   },
 
   handlePanning(delta, event) {

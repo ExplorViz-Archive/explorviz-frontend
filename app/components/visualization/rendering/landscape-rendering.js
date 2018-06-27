@@ -790,12 +790,14 @@ export default RenderingCore.extend({
 
     // set listeners
 
-    this.get('interaction').on('clickedEntity', function(emberRecord) {
-      self.clickedEntity(emberRecord);
+    this.get('interaction').on('redrawScene', function() {
+      self.cleanAndUpdateScene();
     });
 
-    this.get('interaction').on('doubleClickedEntity', function(emberModel) {
-      self.doubleClickedEntity(emberModel);
+    this.get('interaction').on('showApplication', function(emberModel) {
+      self.set('viewImporter.importedURL', null);
+      self.set('landscapeRepo.latestApplication', emberModel);
+      self.set('landscapeRepo.replayApplication', emberModel);
     });
 
     this.get('renderingService').on('redrawScene', function() {

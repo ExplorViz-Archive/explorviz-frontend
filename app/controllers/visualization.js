@@ -75,7 +75,7 @@ export default Controller.extend(AlertifyHandler, {
 
     const self = this;
 
-    this.set('condition', []);
+    this.set('condition', []);    
 
     // setup url-builder Service
     this.get('urlBuilder').on('transmitState', function(state) {
@@ -105,50 +105,6 @@ export default Controller.extend(AlertifyHandler, {
     this._super(...arguments);
     this.get('urlBuilder').off('transmitState');
     this.get('viewImporter').off('requestView');
-  },
-
-  // Closure action for components
-  // Passed via template
-  clickedEntity(emberRecord) {
-    this.debug("clicked", emberRecord);
-  },
-
-  // Closure action for components
-  // Passed via template
-  doubleClickedEntity(emberModel) {
-
-    const emberModelName = emberModel.constructor.modelName;
-
-    if(emberModelName === "application"){
-
-      if(emberModel.get('components').get('length') === 0) {
-        // no data => show message
-
-        const message = "Sorry, there is no information for application <b>" + emberModel.get('name') +
-          "</b> available.";
-
-        this.showAlertifyMessage(message);
-
-      } else {
-        // data available => open application-rendering
-        this.closeAlertifyMessages();
-        
-        
-        // show application
-        this.set('viewImporter.importedURL', null);
-        this.set('landscapeRepo.latestApplication', emberModel);
-        this.set('landscapeRepo.replayApplication', emberModel);
-      }
-    }
-    else if (emberModelName === "nodegroup" || emberModelName === "system"){
-      emberModel.setOpened(!emberModel.get('opened'));
-      this.get('renderingService').redrawScene();
-    }
-    else if(emberModelName === "component"){
-      emberModel.setOpenedStatus(!emberModel.get('opened'));
-      emberModel.set('highlighted', false);
-      this.get('renderingService').redrawScene();
-    }
   }
   
 });

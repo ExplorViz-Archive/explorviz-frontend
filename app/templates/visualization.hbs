@@ -1,8 +1,7 @@
 {{#if showLandscape}}
   {{#if landscapeRepo.latestLandscape.systems}}
     {{visualization/page-setup/landscape-navbar}}
-    {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.latestLandscape 
-    clickedEntity=(action clickedEntity) doubleClickedEntity=(action doubleClickedEntity)}}
+    {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.latestLandscape}}
   {{else}}
     <div class="container-fluid">
       <div class="jumbotron">

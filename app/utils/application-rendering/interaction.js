@@ -19,7 +19,6 @@ export default Object.extend(Evented, {
   highlighter: null,
   renderingService: service(),
 
-
   raycastObjects: computed('rotationObject', function() {
     return this.get('rotationObject.children');
   }),
@@ -60,11 +59,9 @@ export default Object.extend(Evented, {
       self.onMouseMove(evt);
     }
 
-    // init Hammer
-    if (!this.get('hammerHandler')) {
-      this.set('hammerHandler', HammerInteraction.create());
-      this.get('hammerHandler').setupHammer(canvas);
-    }
+    // init Hammer    
+    this.set('hammerHandler', HammerInteraction.create());
+    this.get('hammerHandler').setupHammer(canvas);   
 
     if (!this.get('raycaster')) {
       this.set('raycaster', Raycaster.create());
@@ -81,8 +78,7 @@ export default Object.extend(Evented, {
       this.set('highlighter', Highlighter.create());
     }
 
-    self.registerPopUpHandler();
-
+    this.registerPopUpHandler();
     this.setupHammerListener();
 
   },
@@ -228,12 +224,14 @@ export default Object.extend(Evented, {
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
       this.get('camera'), this.get('raycastObjects'));
 
+    let emberModel;
+
     if(intersectedViewObj) {
 
       // Hide (old) tooltip
       this.get('popUpHandler').hideTooltip();
 
-      const emberModel = intersectedViewObj.object.userData.model;
+      emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
 
       if(emberModelName === "component"){
@@ -251,6 +249,8 @@ export default Object.extend(Evented, {
 
     }
 
+    this.trigger('doubleClick', emberModel);
+    
   },
 
 
@@ -267,12 +267,14 @@ export default Object.extend(Evented, {
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
       this.get('camera'), this.get('raycastObjects'));
 
+    let emberModel;
+
     if(intersectedViewObj) {
 
       // Hide (old) tooltip
       this.get('popUpHandler').hideTooltip();
 
-      const emberModel = intersectedViewObj.object.userData.model;
+      emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
 
       if(emberModelName === "component" && !emberModel.get('opened')){
@@ -292,10 +294,9 @@ export default Object.extend(Evented, {
         this.get('highlighter').unhighlightAll();
         this.get('renderingService').redrawScene();
       }
-
     }
 
-    
+    this.trigger('singleClick', emberModel);
 
   },
 
