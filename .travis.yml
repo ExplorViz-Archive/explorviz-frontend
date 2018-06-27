@@ -2,23 +2,19 @@
 language: node_js
 
 node_js:
-  - "10"
-  - "9"
   - "8"
-  - "7"
-  - "6"
 
 sudo: false
-dist: trusty
 
 cache:
   directories:
     - node_modules
 
 before_script:
-  - chmod +x .travis/push.sh    
+  - chmod +x .travis/push.sh
     
 before_install:
+  - dpkg --compare-versions `npm -v` ge 5.6.0 || npm i -g npm@^5.6.0
   - npm config set spin false
   - npm install -g ember-cli
   - npm install phantomjs-prebuilt
