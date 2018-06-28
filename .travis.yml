@@ -41,7 +41,7 @@ before_install:
 #  - if [[ `npm -v` != 5.6.0 ]]; then npm i -g npm@5.6.0; fi
 
 install:
-  - travis_wait npm install --no-package-lock
+  - npm install --no-package-lock
 
 script:
   - ember try:one $EMBER_TRY_SCENARIO
