@@ -2,35 +2,46 @@
 language: node_js
 
 node_js:
-  - "10"
-  - "8"
+  - "6"
 
-sudo: required
+sudo: false
 
-cache:
-  directories:
-    - node_modules
+# For testing environment
+addons:
+  chrome: stable
 
-before_script:
-  - chmod +x .travis/push.sh
-    
-before_install:
-  - if [[ `npm -v` != 5.6.0 ]]; then npm i -g npm@5.6.0; fi
-  - npm config set spin false
-  - npm install -g ember-cli
-  - npm install phantomjs-prebuilt
-  - node_modules/phantomjs-prebuilt/bin/phantomjs --version
-
-install:
-  - npm install
-
-script:
-  - echo "Running tests against $(node -v) ..."
-  - npm test
-  - ember build -prod
+#cache:
+#  directories:
+#    - node_modules
 
 branches:
   only:
   - master
   - travis-version-test
   - /^greenkeeper/.*$/
+
+env:
+  global:
+    # See https://git.io/vdao3 for details.
+    - JOBS=1
+  matrix:
+    - EMBER_TRY_SCENARIO=ember-lts-2.12
+    - EMBER_TRY_SCENARIO=ember-lts-2.16
+    - EMBER_TRY_SCENARIO=ember-lts-2.18
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: EMBER_TRY_SCENARIO=ember-lts-2.12
+
+before_script:
+  - chmod +x .travis/push.sh
+    
+before_install:
+#  - if [[ `npm -v` != 5.6.0 ]]; then npm i -g npm@5.6.0; fi
+
+install:
+  - npm install --no-package-lock
+
+script:
+  - ember try:one $EMBER_TRY_SCENARIO
