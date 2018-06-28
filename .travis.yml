@@ -10,10 +10,10 @@ sudo: false
 addons:
   chrome: stable
 
-#cache:
-#  directories:
-#    - node_modules
-
+cache:
+  directories:
+    - $HOME/.npm
+    
 branches:
   only:
   - master
@@ -23,7 +23,7 @@ branches:
 env:
   global:
     # See https://git.io/vdao3 for details.
-#    - JOBS=1
+    #- JOBS=1
   matrix:
     - EMBER_TRY_SCENARIO=ember-lts-2.12
     - EMBER_TRY_SCENARIO=ember-lts-2.16
@@ -41,7 +41,7 @@ before_install:
 #  - if [[ `npm -v` != 5.6.0 ]]; then npm i -g npm@5.6.0; fi
 
 install:
-  - npm install --no-package-lock
+  - travis_wait npm install --no-package-lock
 
 script:
   - ember try:one $EMBER_TRY_SCENARIO
