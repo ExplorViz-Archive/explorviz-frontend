@@ -1,6 +1,14 @@
 {{#if showLandscape}}
   {{#if landscapeRepo.latestLandscape.systems}}
-    {{visualization/page-setup/landscape-navbar}}
+
+    {{visualization/page-setup/landscape-navbar 
+      content=(array 
+        "visualization/page-setup/navbar/reset-visualization" 
+        "visualization/page-setup/navbar/toggle-timeline" 
+        "visualization/page-setup/navbar/export-landscape"
+      )
+    }}
+
     {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.latestLandscape}}
   {{else}}
     <div class="container-fluid">

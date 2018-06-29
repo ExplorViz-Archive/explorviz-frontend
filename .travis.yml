@@ -19,6 +19,7 @@ branches:
   - master
   - travis-version-test
   - /^greenkeeper/.*$/
+  - navbar-refactoring
 
 env:
   global:

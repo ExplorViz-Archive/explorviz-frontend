@@ -9,12 +9,21 @@ module('Integration | Component | visualization/page-setup/landscape-navbar', fu
   test('it renders', async function(assert) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
+    
+    await render(hbs`{{visualization/page-setup/landscape-navbar 
+      content=(array 
+        "visualization/page-setup/navbar/reset-visualization" 
+        "visualization/page-setup/navbar/toggle-timeline" 
+        "visualization/page-setup/navbar/export-landscape"
+      )
+    }}`);
 
-    await render(hbs`{{visualization/page-setup/landscape-navbar}}`);
+    assert.equal(this.element.querySelector('ul').getAttribute('class'), 
+      'nav navbar-nav navbar-left');
 
     const listOfAElements = this.element.querySelectorAll('a');
 
-    const aTitleList = ["Toggle timeline", "Export landscape", "Reset landscape", "Export URL"];
+    const aTitleList = ["Toggle timeline", "Export landscape", "Reset view"];
 
     listOfAElements.forEach((el) => {
 
