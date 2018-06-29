@@ -45,6 +45,7 @@ export default Component.extend(AlertifyHandler, FileSaverMixin, {
       this.get('reloadHandler').startExchange();
     },
 
+    //download currentLandscape from backend server, the returned file is base64 encoded
     exportLandscape(){
       const currentLandscape = this.get('landscapeRepo.latestLandscape');
       const currentTimestamp = currentLandscape.get('timestamp');

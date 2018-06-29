@@ -66,10 +66,9 @@ export default Object.extend(Evented, AlertifyHandler, {
     }
 
     // init Hammer
-    if (!this.get('hammerHandler')) {
-      this.set('hammerHandler', HammerInteraction.create());
-      this.get('hammerHandler').setupHammer(canvas);
-    }
+    this.set('hammerHandler', HammerInteraction.create());
+    this.get('hammerHandler').setupHammer(canvas);
+ 
 
     if (!this.get('raycaster')) {
       this.set('raycaster', Raycaster.create());
@@ -174,6 +173,10 @@ export default Object.extend(Evented, AlertifyHandler, {
       self.handlePopUp(mouse);
     });
 
+    this.get('hammerHandler').on('singletap', function(mouse) {
+      self.handleSingleClick(mouse);
+    });
+
   },
 
   registerPopUpHandler() {
@@ -228,12 +231,14 @@ export default Object.extend(Evented, AlertifyHandler, {
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
 
+    let emberModel;
+
     if(intersectedViewObj) {
 
       // hide tooltip
       this.get('popUpHandler').hideTooltip();
 
-      const emberModel = intersectedViewObj.object.userData.model;
+      emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
 
       if(emberModelName === "application"){
@@ -252,7 +257,6 @@ export default Object.extend(Evented, AlertifyHandler, {
           this.trigger('showApplication', emberModel);
         }
 
-
       }
       else if (emberModelName === "nodegroup" || emberModelName === "system"){
         emberModel.setOpened(!emberModel.get('opened'));
@@ -266,6 +270,31 @@ export default Object.extend(Evented, AlertifyHandler, {
 
     }
 
+    this.trigger('doubleClick', emberModel);
+
+  },
+
+  handleSingleClick(mouse) {
+
+    const origin = {};
+
+    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
+      this.get('renderer').domElement.clientWidth) * 2 - 1;
+
+    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) / 
+      this.get('renderer').domElement.clientHeight) * 2 + 1;
+
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+      this.get('camera'), this.get('raycastObjects'));
+
+    let emberModel;
+
+    if(intersectedViewObj) {
+      emberModel = intersectedViewObj.object.userData.model;
+      //this.trigger('clickedEntity', emberModel);
+    }
+
+    this.trigger('singleClick', emberModel);
   },
 
   handlePanning(delta, event) {

@@ -4,6 +4,13 @@ import $ from 'jquery';
 
 /* global c3 */
 
+/**
+ *  Similar to the {{#crossLink "time-shift"}}{{/crossLink}}, displays uploaded landscapes
+ *{{#crossLink "landscape-uploader"}}{{/crossLink}}.
+ *
+ * @class Timestamp-Versionbar-Component
+ * @extends Ember.Component
+ */
 export default Component.extend({
 
   timestampRepo: service("repos/timestamp-repository"),
@@ -173,7 +180,6 @@ export default Component.extend({
 
 
   updatePlot() {
-
     const self = this;
 
     let updatedPlot = this.get('plot');
@@ -206,7 +212,6 @@ export default Component.extend({
 
 
   applyOptimalZoom() {
-
     if(!this.get('isUp')) {
       return;
     }

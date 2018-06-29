@@ -112,8 +112,9 @@ export default RenderingCore.extend({
     this.set('labeler.textLabels', {});
     this.set('labeler.textCache', []);
 
-    this.get('interaction').off('redrawScene');
-    this.get('interaction').off('showApplication');
+    this.get('renderingService').off('redrawScene');
+    this.get('interaction').off('clickedEntity');
+    this.get('interaction').off('doubleClickedEntity');
 
     this.get('interaction').removeHandlers();
   },
@@ -799,7 +800,9 @@ export default RenderingCore.extend({
       self.set('landscapeRepo.replayApplication', emberModel);
     });
 
-
+    this.get('renderingService').on('redrawScene', function() {
+      self.cleanAndUpdateScene();
+    });
 
   }, // END initInteraction
 

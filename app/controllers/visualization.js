@@ -2,6 +2,7 @@ import Controller from '@ember/controller';
 import { inject as service } from '@ember/service'; 
 import { computed } from '@ember/object';
 import { observer } from '@ember/object';
+import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 /**
 * TODO
@@ -12,7 +13,7 @@ import { observer } from '@ember/object';
 * @module explorviz
 * @submodule visualization
 */
-export default Controller.extend({
+export default Controller.extend(AlertifyHandler, {
 
   urlBuilder: service("url-builder"),
   viewImporter: service("view-importer"),
@@ -74,7 +75,7 @@ export default Controller.extend({
 
     const self = this;
 
-    this.set('condition', []);
+    this.set('condition', []);    
 
     // setup url-builder Service
     this.get('urlBuilder').on('transmitState', function(state) {
@@ -104,6 +105,6 @@ export default Controller.extend({
     this._super(...arguments);
     this.get('urlBuilder').off('transmitState');
     this.get('viewImporter').off('requestView');
-  }  
+  }
   
 });
