@@ -1,7 +1,6 @@
 import Service from '@ember/service';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import { inject as service } from '@ember/service';
-import { later } from '@ember/runloop';
 import { computed} from '@ember/object';
 
 /**
