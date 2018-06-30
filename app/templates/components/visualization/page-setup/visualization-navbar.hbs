@@ -2,6 +2,21 @@
   <div class="container-fluid">
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav navbar-left">
+        {{#each content as |compName|}}
+          <li>
+            {{component compName}}
+          </li>
+        {{/each}}
+     </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+
+<!-- <nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="collapse navbar-collapse">
+      <ul class="nav navbar-nav navbar-left">
         <li>
           <a {{action "toggleTimeline"}} title="Toggle timeline">
             <span id="toggleTimelineButton" 
@@ -19,6 +34,6 @@
           <button class="btn btn-default" {{action "openAllComponents"}}> Open All Components
           </button>
       </form>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
-</nav>
+    </div>< /.navbar-collapse 
+  </div> /.container-fluid 
+</nav>-->
