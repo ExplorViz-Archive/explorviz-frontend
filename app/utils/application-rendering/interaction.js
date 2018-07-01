@@ -3,10 +3,10 @@ import Evented from '@ember/object/evented';
 import { inject as service } from "@ember/service";
 
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
-import PopUpHandler from 'explorviz-frontend/utils/application-rendering/popup-handler';
+import PopUpHandler from 
+  'explorviz-frontend/utils/application-rendering/popup-handler';
 import Raycaster from 'explorviz-frontend/utils/raycaster';
-import HoverHandler from 'explorviz-frontend/utils/application-rendering/hover-handler';
-
+import HoverHandler from 'explorviz-frontend/utils/hover-effect-handler';
 export default Object.extend(Evented, {
 
   canvas: null,

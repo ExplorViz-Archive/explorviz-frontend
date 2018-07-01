@@ -9,7 +9,8 @@
       content=(array 
         (component "visualization/page-setup/navbar/reset-visualization") 
         (component "visualization/page-setup/navbar/toggle-timeline") 
-        (component "visualization/page-setup/navbar/export-landscape")
+        (component "visualization/page-setup/navbar/file-downloader" 
+          urlPath=exportLandscapeUrl fileName=exportLandscapeFileName)
       )
     }}
 
@@ -31,7 +32,8 @@
     content=(array 
       (component "visualization/page-setup/navbar/reset-visualization") 
       (component "visualization/page-setup/navbar/toggle-timeline") 
-      (component "visualization/page-setup/navbar/export-landscape") 
+      (component "visualization/page-setup/navbar/file-downloader" 
+        urlPath=exportLandscapeUrl fileName=exportLandscapeFileName) 
       (component "visualization/page-setup/navbar/application-opener") 
       (component "visualization/page-setup/navbar/application-search")
     )

@@ -1,11 +1,15 @@
 import Object from '@ember/object';
 import Evented from '@ember/object/evented';
+import { inject as service } from "@ember/service";
+
 import THREE from "three";
-import HammerInteraction from '../hammer-interaction';
-import PopUpHandler from './popup-handler';
+import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
+import PopUpHandler from 
+  'explorviz-frontend/utils/landscape-rendering/popup-handler';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
-import Raycaster from '../raycaster';
-import Highlighter from './highlighter';
+import Raycaster from 'explorviz-frontend/utils/raycaster';
+import HoverHandler from 'explorviz-frontend/utils/hover-effect-handler';
+
 
 export default Object.extend(Evented, AlertifyHandler, {
 
@@ -14,10 +18,10 @@ export default Object.extend(Evented, AlertifyHandler, {
   renderer: null,
   raycaster: null,
   raycastObjects: null,
+  highlighter: service('visualization/application/highlighter'),
 
   hammerHandler: null,
   popUpHandler: null,
-  highlighter: null,
 
   setupInteraction(canvas, camera, renderer, raycastObjects) {
     this.set('canvas', canvas);
@@ -79,9 +83,9 @@ export default Object.extend(Evented, AlertifyHandler, {
       this.set('popUpHandler', PopUpHandler.create());
     }
 
-    // init Highlighter
-    if (!this.get('highlighter')) {
-      this.set('highlighter', Highlighter.create());
+    // init HoverHandler
+    if (!this.get('hoverHandler')) {
+      this.set('hoverHandler', HoverHandler.create());
     }
 
     // PopUpHandler
@@ -110,7 +114,7 @@ export default Object.extend(Evented, AlertifyHandler, {
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
 
-    this.get('highlighter').handleHoverEffect(intersectedViewObj);
+    this.get('hoverHandler').handleHoverEffect(intersectedViewObj);
 
   },
 
