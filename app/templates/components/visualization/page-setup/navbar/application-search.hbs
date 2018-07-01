@@ -1,1 +1,8 @@
-{{yield}}
+<form {{action 'focusEntity' on="submit" }} class="navbar-form navbar-left" role="search">
+  <div class="form-group">
+    {{input value=searchString placeholder="Search Entity" class="form-control navbar-button-height-fix"}}
+  </div>
+  <button type="submit" class="btn btn-default navbar-button-height-fix">
+    <span class="glyphicon glyphicon-search"></span>
+  </button>
+</form>

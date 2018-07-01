@@ -53,6 +53,13 @@ body > .ember-view {
   box-shadow: none !important;
 }
 
+.navbar-button-height-fix {
+  height: 30px !important;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  vertical-align: middle !important;
+}
+
 .scrollable-extension {
   max-height: 40%;
 }

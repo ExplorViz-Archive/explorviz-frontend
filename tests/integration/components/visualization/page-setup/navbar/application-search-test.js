@@ -13,14 +13,5 @@ module('Integration | Component | visualization/page-setup/navbar/application-se
     await render(hbs`{{visualization/page-setup/navbar/application-search}}`);
 
     assert.equal(this.element.textContent.trim(), '');
-
-    // Template block usage:
-    await render(hbs`
-      {{#visualization/page-setup/navbar/application-search}}
-        template block text
-      {{/visualization/page-setup/navbar/application-search}}
-    `);
-
-    assert.equal(this.element.textContent.trim(), 'template block text');
   });
 });
