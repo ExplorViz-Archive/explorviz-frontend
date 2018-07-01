@@ -3,6 +3,7 @@ import { inject as service } from '@ember/service';
 import { computed } from '@ember/object';
 import { observer } from '@ember/object';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import ENV from 'explorviz-frontend/config/environment';
 
 /**
 * TODO
@@ -63,6 +64,10 @@ export default Controller.extend(AlertifyHandler, {
     const currentCalls = currentLandscape.get('overallCalls');
 
     return`${currentTimestamp}-${currentCalls}.expl`
+  }),
+
+  uploadLandscapeUrl: computed(function() {    
+    return `${ENV.APP.API_ROOT}/landscape/upload-landscape`;
   }),
 
   actions: {

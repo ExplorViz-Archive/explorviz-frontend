@@ -13,7 +13,7 @@ export default Component.extend({
   fileName: null,
 
   actions: {
-    //download currentLandscape from backend server, the returned file is base64 encoded
+    //download file from backend server
     downloadFile(){
       this.get('fileDownloader').downloadFile(this.get('urlPath'), this.get('fileName'));
     }

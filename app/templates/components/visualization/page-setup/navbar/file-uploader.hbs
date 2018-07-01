@@ -1,0 +1,9 @@
+<!--
+    Hidden HTML input is programatically clicked, when the user clicks 
+    the HTML a element
+-->
+
+<input id="selectBox" onchange={{action "uploadFile"}} type="file" style="display:none;" />
+<a {{action "triggerSelectBox"}} title="Upload file">
+  <span class="glyphicon glyphicon-upload"></span>
+</a>
