@@ -47,6 +47,12 @@ body > .ember-view {
   border-right-width: 1px;
 }
 
+.navbar-no-hover-effect {
+  background-color:transparent !important;
+  cursor: default !important;
+  box-shadow: none !important;
+}
+
 .scrollable-extension {
   max-height: 40%;
 }

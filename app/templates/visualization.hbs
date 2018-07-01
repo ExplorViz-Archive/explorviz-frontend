@@ -1,11 +1,15 @@
 {{#if showLandscape}}
   {{#if landscapeRepo.latestLandscape.systems}}
 
-    {{visualization/page-setup/landscape-navbar 
+    <!-- "ember-composable-helpers addon" array-helper used -->
+    <!-- ember component helper allows binding declarations, totally equal to -->
+    <!-- compinent that are initiated with braces -->
+
+    {{visualization/page-setup/visualization-navbar
       content=(array 
-        "visualization/page-setup/navbar/reset-visualization" 
-        "visualization/page-setup/navbar/toggle-timeline" 
-        "visualization/page-setup/navbar/export-landscape"
+        (component "visualization/page-setup/navbar/reset-visualization") 
+        (component "visualization/page-setup/navbar/toggle-timeline") 
+        (component "visualization/page-setup/navbar/export-landscape")
       )
     }}
 
@@ -21,12 +25,14 @@
       </div>
     </div>
   {{/if}}
-{{else}}
 
+{{else}}
   {{visualization/page-setup/visualization-navbar
     content=(array 
-      "visualization/page-setup/navbar/reset-visualization" 
-      "visualization/page-setup/navbar/application-opener"
+      (component "visualization/page-setup/navbar/reset-visualization") 
+      (component "visualization/page-setup/navbar/toggle-timeline") 
+      (component "visualization/page-setup/navbar/export-landscape") 
+      (component "visualization/page-setup/navbar/application-opener")
     )
   }}
 

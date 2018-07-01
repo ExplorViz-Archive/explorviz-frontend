@@ -1,17 +1,19 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
-export default Component.extend(AlertifyHandler, {
+export default Component.extend({
 
+  renderingService: service("rendering-service"),
   reloadHandler: service("reload-handler"),
   viewImporter: service("view-importer"),
-
-  content: null,
+  urlBuilder: service("url-builder"),
 
   actions: {
 
     exportState() {
+
+      // ATTENTION: needs heavy refactoring, won't work atm
+
       // Pause timeshift
       this.get('reloadHandler').stopExchange();
       // Update query parameters
@@ -27,10 +29,10 @@ export default Component.extend(AlertifyHandler, {
       this.set('camZ', this.get('state').camZ);
 
       // handle landscape or application
-      if(this.get('showLandscape')){
+      if (this.get('renderingService.showLandscape')) {
         this.set('condition', this.get('state').landscapeCondition);
       }
-      else{
+      else {
         this.set('condition', this.get('state').appCondition);
       }
     }
