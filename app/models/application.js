@@ -89,7 +89,9 @@ export default DrawNodeEntity.extend({
       return;
     }
 
-    components.objectAt(0).applyDefaultOpenLayout();
+    if(components.objectAt(0)) {
+      components.objectAt(0).applyDefaultOpenLayout();
+    }    
   }
 
 });
