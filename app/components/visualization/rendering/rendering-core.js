@@ -123,6 +123,11 @@ export default Component.extend(Evented, THREEPerformance, {
 
     // Rendering loop //
     function render() {
+      
+      if(self.get('isDestroyed')) {
+        return;
+      }
+      
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
 
