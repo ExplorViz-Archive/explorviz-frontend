@@ -49,8 +49,6 @@ export default Service.extend(AlertifyHandler, Evented, {
         self.set('landscapeRepo.latestApplication', app);
       }
 
-
-
       self.debug("end import landscape-request");
     }
 
