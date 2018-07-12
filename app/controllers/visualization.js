@@ -55,7 +55,9 @@ export default Controller.extend(AlertifyHandler, {
   exportLandscapeUrl: computed(function() {
     const currentLandscape = this.get('landscapeRepo.latestLandscape');
     const currentTimestamp = currentLandscape.get('timestamp');
-    return `/landscape/export/${currentTimestamp}`;
+    const overallCalls = currentLandscape.get('overallCalls');
+
+    return `/landscape/export/${currentTimestamp}-${overallCalls}`;
   }),
 
   exportLandscapeFileName: computed(function() {
