@@ -315,7 +315,7 @@ export default Component.extend(AlertifyHandler, {
 
         const edgeID = procezzID + "To" + agentName;
 
-        const monitoredEnabled = procezzRecord.get('monitoredFlag');
+        const monitoredEnabled = procezzRecord.get('wasFoundByBackend') && procezzRecord.get('monitoredFlag');
         const faultyProcezz = procezzRecord.get('errorOccured');
         const stoppedProcezz = procezzRecord.get('stopped');
 

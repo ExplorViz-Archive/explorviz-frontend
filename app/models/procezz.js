@@ -25,6 +25,8 @@ export default BaseModel.extend({
   workingDirectory: attr("string"),
   programmingLanguage: attr("string"),
 
+  wasFoundByBackend: attr("boolean"),
+
   agent: belongsTo("agent"),
 
   // the following attribute can be changed by users
