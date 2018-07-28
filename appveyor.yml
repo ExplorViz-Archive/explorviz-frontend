@@ -1,0 +1,29 @@
+# https://www.appveyor.com/docs/appveyor-yml/
+
+# Test against these versions of Node.js.
+skip_branch_with_pr: true
+environment:
+  MOCHA_REPORTER: "mocha-appveyor-reporter"
+  matrix:
+    - nodejs_version: "6"
+    - EMBER_TRY_SCENARIO=ember-lts-2.12
+    - EMBER_TRY_SCENARIO=ember-lts-2.16
+    - EMBER_TRY_SCENARIO=ember-lts-2.18
+    - EMBER_TRY_SCENARIO=ember-3.2.0
+
+# Install scripts. (runs after repo cloning)
+install:
+  - ps: Install-Product node $env:nodejs_version
+  - appveyor-retry npm i -g npm@^4
+  - appveyor-retry npm install mocha-appveyor-reporter # must be installed locally.
+
+# Post-install test scripts.
+test_script:
+  - cmd: npm install
+  - cmd: node_modules/.bin/ember try:one $EMBER_TRY_SCENARIO
+
+# Don't actually build.
+build: off
+
+# Set build version format here instead of in the admin panel.
+version: "{build}"
