@@ -6,10 +6,10 @@ environment:
   MOCHA_REPORTER: "mocha-appveyor-reporter"
   matrix:
     - nodejs_version: "6"
-    - EMBER_TRY_SCENARIO=ember-lts-2.12
-    - EMBER_TRY_SCENARIO=ember-lts-2.16
-    - EMBER_TRY_SCENARIO=ember-lts-2.18
-    - EMBER_TRY_SCENARIO=ember-3.2.0
+    - EMBER_TRY_SCENARIO: "ember-lts-2.12"
+    - EMBER_TRY_SCENARIO: "ember-lts-2.16"
+    - EMBER_TRY_SCENARIO: "ember-lts-2.18"
+    - EMBER_TRY_SCENARIO: "ember-3.2.0"
 
 # Install scripts. (runs after repo cloning)
 install:
