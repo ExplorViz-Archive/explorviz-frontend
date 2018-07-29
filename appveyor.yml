@@ -5,21 +5,21 @@ skip_branch_with_pr: true
 environment:
   MOCHA_REPORTER: "mocha-appveyor-reporter"
   matrix:
-    - EMBER_TRY_SCENARIO: "ember-lts-2.12"
-    - EMBER_TRY_SCENARIO: "ember-lts-2.16"
-    - EMBER_TRY_SCENARIO: "ember-lts-2.18"
-    - EMBER_TRY_SCENARIO: "ember-3.2.0"
+    - EMBER_TRYSCENARIO: "ember-lts-2.12"
+    - EMBER_TRYSCENARIO: "ember-lts-2.16"
+    - EMBER_TRYSCENARIO: "ember-lts-2.18"
+    - EMBER_TRYSCENARIO: "ember-3.2.0"
 
 # Install scripts. (runs after repo cloning)
 install:
-  - ps: Install-Product node $env:EMBER_TRY_SCENARIO
+  - ps: Install-Product node $env:EMBER_TRYSCENARIO
   - appveyor-retry npm i -g npm@^4
   - appveyor-retry npm install mocha-appveyor-reporter # must be installed locally.
 
 # Post-install test scripts.
 test_script:
   - cmd: npm install --no-package-lock
-  - cmd: node_modules/.bin/ember try:one $env:EMBER_TRY_SCENARIO
+  - cmd: node_modules/.bin/ember try:one $env:EMBER_TRYSCENARIO
 
 # Don't actually build.
 build: off
