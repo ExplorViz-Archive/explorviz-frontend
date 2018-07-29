@@ -13,14 +13,13 @@ environment:
 
 # Install scripts. (runs after repo cloning)
 install:
-  - echo %EMBER_TRY_SCENARIO%
   - appveyor-retry npm i -g npm@^4
   - appveyor-retry npm install mocha-appveyor-reporter # must be installed locally.
 
 # Post-install test scripts.
 test_script:
   - cmd: npm install --no-package-lock
-  - cmd: node_modules/.bin/ember try:one $env:EMBER_TRY_SCENARIO
+  - cmd: node_modules/.bin/ember try:one %EMBER_TRY_SCENARIO%
 
 # Don't actually build.
 build: off
