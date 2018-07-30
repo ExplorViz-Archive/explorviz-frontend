@@ -3,6 +3,11 @@
 # Test against these versions of Node.js.
 skip_branch_with_pr: true
 
+branches:
+  only:
+    - appveyor
+    - /^greenkeeper/.*$/
+
 environment:
   MOCHA_REPORTER: "mocha-appveyor-reporter"
   matrix:
