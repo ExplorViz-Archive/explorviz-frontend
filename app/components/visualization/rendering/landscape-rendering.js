@@ -210,7 +210,7 @@ export default RenderingCore.extend({
           var centerX = system.get('positionX') + extensionX - centerPoint.x;
           var centerY = system.get('positionY') - extensionY - centerPoint.y;
 
-          var systemMesh = createPlane(system);
+          var systemMesh = self.createPlane(system);
           systemMesh.position.set(centerX, centerY, system.get('positionZ'));
           self.get('scene').add(systemMesh);
           system.set('threeJSModel', systemMesh);
@@ -265,7 +265,7 @@ export default RenderingCore.extend({
             centerX = nodegroup.get('positionX') + extensionX - centerPoint.x;
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
-            nodegroupMesh = createPlane(nodegroup);
+            nodegroupMesh = self.createPlane(nodegroup);
             nodegroupMesh.position.set(centerX, centerY,
               nodegroup.get('positionZ') + 0.001);
 
@@ -316,7 +316,7 @@ export default RenderingCore.extend({
               centerX = node.get('positionX') + extensionX - centerPoint.x;
               centerY = node.get('positionY') - extensionY - centerPoint.y;
 
-              var nodeMesh = createPlane(node);
+              var nodeMesh = self.createPlane(node);
               nodeMesh.position.set(centerX, centerY, node.get('positionZ') +
                 0.002);
 
@@ -341,7 +341,7 @@ export default RenderingCore.extend({
 
               if (!isRequestObject) {
 
-                var applicationMesh = createPlane(application);
+                var applicationMesh = self.createPlane(application);
 
                 applicationMesh.position.set(centerX, centerY,
                   application.get('positionZ') + 0.003);
@@ -751,29 +751,28 @@ export default RenderingCore.extend({
 
     } // END createLine
 
-
-    function createPlane(model) {
-
-      const emberModelName = model.constructor.modelName;
-
-      const material = new THREE.MeshBasicMaterial({
-        color: self.get('configuration.landscapeColors.' + emberModelName)
-      });
-
-      const plane = new THREE.Mesh(new THREE.PlaneGeometry(model.get('width'),
-        model.get('height')), material);
-
-      plane.userData['model'] = model;
-      return plane;
-
-    }
-
     this.get('labeler').drawTextLabels(self.get('font'),
       self.get('configuration'));
 
 
   }, // END populateScene
 
+  createPlane(model) {
+
+    const emberModelName = model.constructor.modelName;
+
+    const material = new THREE.MeshBasicMaterial({
+      color: this.get('configuration.landscapeColors.' + emberModelName)
+    });
+
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(model.get('width'),
+      model.get('height')), material);
+
+    plane.userData['model'] = model;
+    return plane;
+
+  },
+  
   initInteraction() {
 
     const self = this;
