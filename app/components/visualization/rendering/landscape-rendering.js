@@ -527,7 +527,7 @@ export default RenderingCore.extend({
       for (let i = 0; i < tiles.length; i++) {
         let tile = tiles[i];
         tile.lineThickness = 0.7 * categories[tile.requestsCache] + 0.1;
-        createLine(tile, tiles, parent);
+        self.createLine(tile, tiles, parent, centerPoint);
       }
 
 
@@ -650,9 +650,13 @@ export default RenderingCore.extend({
       return (x && y);
     }
 
+    this.get('labeler').drawTextLabels(self.get('font'),
+      self.get('configuration'));
 
 
-    function createLine(tile, tiles, parent) {
+  }, // END populateScene
+
+  createLine(tile, tiles, parent, centerPoint) {
 
       let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x,
         tile.startPoint.y - centerPoint.y, tile.positionZ);
@@ -749,13 +753,7 @@ export default RenderingCore.extend({
 
       }*/
 
-    } // END createLine
-
-    this.get('labeler').drawTextLabels(self.get('font'),
-      self.get('configuration'));
-
-
-  }, // END populateScene
+  }, // END createLine
 
   createPlane(model) {
 
