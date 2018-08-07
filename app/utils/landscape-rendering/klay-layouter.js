@@ -293,6 +293,14 @@ export default function applyKlayLayout(landscape) {
 
           let appSource = applicationcommunication.get('sourceApplication');
           let appTarget = applicationcommunication.get('targetApplication');
+          
+          if(appSource == null || appTarget == null) {
+            return;
+          }
+
+          if(appSource.get('parent') == null || appTarget.get('parent') == null) {
+            return;
+          }
           //console.log("edge: " + appSource.get('name') + " -> " + appTarget.get('name'));
 
           if(!appTarget.get('parent').get('visible')){
@@ -552,7 +560,8 @@ export default function applyKlayLayout(landscape) {
             y: 0
           };
 
-
+          if(targetDrawnode.get('kielerGraphReference') == null)return;
+          
           port.node = targetDrawnode.get('kielerGraphReference');
 
           targetDrawnode.get('kielerGraphReference').ports.push(port);
