@@ -560,7 +560,9 @@ export default function applyKlayLayout(landscape) {
             y: 0
           };
 
-          if(targetDrawnode.get('kielerGraphReference') == null)return;
+          if(targetDrawnode.get('kielerGraphReference') == null) {
+            return;
+          }
           
           port.node = targetDrawnode.get('kielerGraphReference');
 
