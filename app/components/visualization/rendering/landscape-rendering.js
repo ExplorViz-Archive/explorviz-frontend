@@ -1,5 +1,7 @@
 import RenderingCore from './rendering-core';
-import {inject as service} from '@ember/service';
+import { inject as service } from '@ember/service';
+import { observer } from '@ember/object';
+
 
 import THREE from "three";
 
@@ -40,6 +42,13 @@ export default RenderingCore.extend({
 
   openSymbol: null,
   closeSymbol: null,
+
+
+  messages: service('landscape-listener'),
+
+  onNewMessage: observer('messages.content.[]', function(){
+    this.debug("SSE received", this.get('messages.content.firstObject'));
+  }),
 
   // @Override
   /**
@@ -99,7 +108,6 @@ export default RenderingCore.extend({
     this.set('labeler.appTextCache', []);
 
     this.set('centerAndZoomCalculator.centerPoint', null);
-
   },
 
   // @Override

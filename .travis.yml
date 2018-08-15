@@ -20,6 +20,7 @@ branches:
   - travis-version-test
   - /^greenkeeper/.*$/
   - navbar-refactoring
+  - reverse-proxy-adjustments
 
 env:
   global:
