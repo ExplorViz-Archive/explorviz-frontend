@@ -210,7 +210,7 @@ export default RenderingCore.extend({
           var centerX = system.get('positionX') + extensionX - centerPoint.x;
           var centerY = system.get('positionY') - extensionY - centerPoint.y;
 
-          var systemMesh = createPlane(system);
+          var systemMesh = self.createPlane(system);
           systemMesh.position.set(centerX, centerY, system.get('positionZ'));
           self.get('scene').add(systemMesh);
           system.set('threeJSModel', systemMesh);
@@ -265,7 +265,7 @@ export default RenderingCore.extend({
             centerX = nodegroup.get('positionX') + extensionX - centerPoint.x;
             centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
 
-            nodegroupMesh = createPlane(nodegroup);
+            nodegroupMesh = self.createPlane(nodegroup);
             nodegroupMesh.position.set(centerX, centerY,
               nodegroup.get('positionZ') + 0.001);
 
@@ -316,7 +316,7 @@ export default RenderingCore.extend({
               centerX = node.get('positionX') + extensionX - centerPoint.x;
               centerY = node.get('positionY') - extensionY - centerPoint.y;
 
-              var nodeMesh = createPlane(node);
+              var nodeMesh = self.createPlane(node);
               nodeMesh.position.set(centerX, centerY, node.get('positionZ') +
                 0.002);
 
@@ -341,7 +341,7 @@ export default RenderingCore.extend({
 
               if (!isRequestObject) {
 
-                var applicationMesh = createPlane(application);
+                var applicationMesh = self.createPlane(application);
 
                 applicationMesh.position.set(centerX, centerY,
                   application.get('positionZ') + 0.003);
@@ -368,6 +368,11 @@ export default RenderingCore.extend({
                 const logoRightPadding = logoSize.width * 0.7;
 
                 logoPos.x = appBBox.max.x - logoRightPadding;
+
+                if(application.get('programmingLanguage') == null){
+                  console.log("ich musste hier raus!");
+                  return;
+                }
 
                 const texturePartialPath = application.get('database') ?
                   'database2' : application.get('programmingLanguage')
@@ -433,7 +438,7 @@ export default RenderingCore.extend({
             };
 
             let id = tiles.findIndex(isSameTile, tileWay);
-
+            //hier wird geschaut, welche tiles zusammengefasst werden?!?
 
             if(id !== -1){
               tile = tiles[id];
@@ -448,6 +453,7 @@ export default RenderingCore.extend({
                 requestsCache: 0,
                 communications: [],
                 pipeColor: new THREE.Color(color),
+                status: [],
                 emberModel: applicationCommunication
               };
               tiles.push(tile);
@@ -457,12 +463,16 @@ export default RenderingCore.extend({
             tile.requestsCache = tile.requestsCache +
               applicationCommunication.get('requests');
 
+            tile.status.push(applicationCommunication.get('extensionAttributes.status'))
+
             tiles[id] = tile;
           }
 
         }
 
       });
+
+      this.statusConfirmationOfTiles(tiles);
 
 
       addCommunicationLineDrawing(tiles, self.get('scene'));
@@ -527,7 +537,10 @@ export default RenderingCore.extend({
       for (let i = 0; i < tiles.length; i++) {
         let tile = tiles[i];
         tile.lineThickness = 0.7 * categories[tile.requestsCache] + 0.1;
-        createLine(tile, tiles, parent);
+        if(tile.lineThickness > 0.5){          
+        }
+
+        self.createLine(tile, tiles, parent, centerPoint);
       }
 
 
@@ -650,9 +663,13 @@ export default RenderingCore.extend({
       return (x && y);
     }
 
+    this.get('labeler').drawTextLabels(self.get('font'),
+      self.get('configuration'));
 
 
-    function createLine(tile, tiles, parent) {
+  }, // END populateScene
+
+  createLine(tile, tiles, parent, centerPoint) {
 
       let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x,
         tile.startPoint.y - centerPoint.y, tile.positionZ);
@@ -749,30 +766,36 @@ export default RenderingCore.extend({
 
       }*/
 
-    } // END createLine
+    }, // END createLine
 
+    statusConfirmationOfTiles(tiles){
+      for(let i = 0; i < tiles.length; i++){
+        for(let j = 0; j < tiles[i].status.length; j++){
+          if(tiles[i].status[j] === "WARNING"){
+            tiles[i].drawStatus = "WARNING";
+          } else if (tiles[i].status[j] === "GHOST" && tiles[i].drawStatus != "WARNING"){
+            tiles[i].drawStatus = "GHOST";
+          }else if(tiles[i].status[j] === "ASMODELLED" && tiles[i].drawStatus != "WARNING" && tiles[i].drawStatus != "GHOST"){
+            tiles[i].drawStatus = "ASMODELLED";
+          }
+        }
+      }
+    },
 
-    function createPlane(model) {
+  createPlane(model) {
 
-      const emberModelName = model.constructor.modelName;
+    const emberModelName = model.constructor.modelName;
 
-      const material = new THREE.MeshBasicMaterial({
-        color: self.get('configuration.landscapeColors.' + emberModelName)
-      });
+    const material = new THREE.MeshBasicMaterial({
+      color: this.get('configuration.landscapeColors.' + emberModelName)
+    });
 
-      const plane = new THREE.Mesh(new THREE.PlaneGeometry(model.get('width'),
-        model.get('height')), material);
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(model.get('width'),
+      model.get('height')), material);
 
-      plane.userData['model'] = model;
-      return plane;
-
-    }
-
-    this.get('labeler').drawTextLabels(self.get('font'),
-      self.get('configuration'));
-
-
-  }, // END populateScene
+    plane.userData['model'] = model;
+    return plane;
+  },
 
   initInteraction() {
 

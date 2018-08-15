@@ -19,6 +19,7 @@ export default Object.extend({
       foundation: true,
       children: emberApplication.get('components'),
       clazzes: [],
+      extensionAttributes: emberApplication.get('extensionAttributes'),
       belongingApplication: emberApplication,
       opened: true,
       name: emberApplication.get('name'),
