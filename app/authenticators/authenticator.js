@@ -23,6 +23,7 @@ export default Base.extend({
 
   session: service(),
   store: service(),
+  ajax: service(),
 
   // @Override
   /**
@@ -50,13 +51,25 @@ export default Base.extend({
   authenticate(user) {
     this.set('session.session.messages', {});
 
-    return user.save({
+    console.log("hi", user);
+
+    /*return user.save({
       adapterOptions: {
         pathExtension: 'authenticate'
       }
+    }).then(fulfill, failure);*/
+
+    this.get('ajax').request('http://192.168.91.129:8082/v1/tokens/', {
+      method: 'POST',
+      contentType: 'application/json; charset=utf-8',
+      data: {
+        username: user.identification,
+        password: user.password
+      }
     }).then(fulfill, failure);
 
-    function fulfill(userRecord) {
+    function fulfill(token) {
+      console.log(token);
       return resolve({
         access_token: userRecord.get('token'),
         username: userRecord.get('username')

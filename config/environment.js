@@ -30,7 +30,7 @@ module.exports = function(environment) {
   };
 
   if (environment === 'development') {
-    ENV.APP.API_ROOT = 'http://localhost:8081';
+    ENV.APP.API_ROOT = 'http://localhost:8080';
   }
 
   if (environment === 'production') {
@@ -58,7 +58,7 @@ module.exports = function(environment) {
 
 
   if (environment === 'akr') {
-    ENV.APP.API_ROOT = 'http://192.168.91.129:8081';
+    ENV.APP.API_ROOT = 'http://192.168.91.129:8080';
   }
 
   if (environment === 'akr-mocked') {

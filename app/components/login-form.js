@@ -27,8 +27,7 @@ export default Component.extend({
 
       const self = this;
 
-      const { identification, password } = 
-        this.getProperties('identification', 'password');
+      const user = this.getProperties('identification', 'password');
 
       // reset (possible) old lables
       if(this.get('session.session') && this.get('session.session.messages')) {
@@ -36,22 +35,13 @@ export default Component.extend({
         this.set('session.session.messages.errorMessage',"");
       }
 
-      if(!this.checkForValidInput(identification, password)) {
+      if(!this.checkForValidInput(user)) {
         const errorMessage = "Enter valid credentials.";
         this.set('session.session.messages.errorMessage', errorMessage);
         return;
       }
 
-      // retrieve empty user record from backend with valid id
-      this.get('store').queryRecord('user', {
-        username: identification
-      }).then(success, failure);
-
-      function success(userRecord) {
-        userRecord.set('username', identification);
-        userRecord.set('password', password);
-        self.get('session').authenticate('authenticator:authenticator', userRecord).then(undefined, failure);
-      }
+      this.get('session').authenticate('authenticator:authenticator', user).then(undefined, failure);
 
       function failure(reason) {
 
@@ -77,7 +67,11 @@ export default Component.extend({
 
   },
 
-  checkForValidInput(username, password) {
+  checkForValidInput(user) {
+
+    const username = user.identification;
+    const password = user.password;
+
     const usernameValid = username !== "" && username !== null && 
       username !== undefined;
 
