@@ -2,6 +2,7 @@ import { inject as service } from "@ember/service";
 import { isEmpty } from '@ember/utils';
 import RSVP, { resolve, reject } from 'rsvp';
 import Base from 'ember-simple-auth/authenticators/base';
+import config from 'explorviz-frontend/config/environment';
 
 /**
 * This Authenticator sends a single AJAX request with data fields "username" 
@@ -51,15 +52,9 @@ export default Base.extend({
   authenticate(user) {
     this.set('session.session.messages', {});
 
-    console.log("hi", user);
+    const url = config.APP.API_ROOT;
 
-    /*return user.save({
-      adapterOptions: {
-        pathExtension: 'authenticate'
-      }
-    }).then(fulfill, failure);*/
-
-    this.get('ajax').request('http://192.168.91.129:8082/v1/tokens/', {
+    return this.get('ajax').request(`${url}/v1/tokens/`, {
       method: 'POST',
       contentType: 'application/json; charset=utf-8',
       data: {
@@ -69,10 +64,9 @@ export default Base.extend({
     }).then(fulfill, failure);
 
     function fulfill(token) {
-      console.log(token);
       return resolve({
-        access_token: userRecord.get('token'),
-        username: userRecord.get('username')
+        access_token: token,
+        username: user.identification
       });
     }
 
