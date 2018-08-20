@@ -21,6 +21,7 @@ export default Controller.extend(AlertifyHandler, {
   reloadHandler: service("reload-handler"),
   renderingService: service("rendering-service"),
   landscapeRepo: service("repos/landscape-repository"),
+  landscapeListener: service("landscape-listener"),
 
   state: null,
 
@@ -119,6 +120,8 @@ export default Controller.extend(AlertifyHandler, {
       // Passes the new state from controller via service to component
       self.get('viewImporter').transmitView(newState);
     });
+
+    this.get('landscapeListener').initSSE();
   },
 
   // @Override

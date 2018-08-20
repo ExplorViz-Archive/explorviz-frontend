@@ -51,7 +51,7 @@ export default Base.extend({
    */
   authenticate(user) {
     this.set('session.session.messages', {});
-
+    
     const url = config.APP.API_ROOT;
 
     return this.get('ajax').request(`${url}/v1/tokens/`, {

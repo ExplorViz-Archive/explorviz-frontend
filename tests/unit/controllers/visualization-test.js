@@ -1,14 +1,12 @@
-import { moduleFor, test } from 'ember-qunit';
+import { module, test } from 'qunit';
+import { setupTest } from 'ember-qunit';
 
-moduleFor('controller:visualization', 'Unit | Controller | visualization', {
-  // Specify the other units that are required for this test.
-  needs: ['service:session', 'service:landscape-reload', 'service:url-builder', 
-    'service:view-importer', 'service:timeshift-reload', 'service:reload-handler', 
-    'service:rendering-service', 'service:repos/landscape-repository']
-});
+module('Unit | Controller | visualization', function(hooks) {
+  setupTest(hooks);
 
-// Replace this with your real tests.
-test('it exists', function(assert) {
-  let controller = this.subject();
-  assert.ok(controller);
+  // Replace this with your real tests.
+  test('it exists', function(assert) {
+    let controller = this.owner.lookup('controller:tutorial');
+    assert.ok(controller);
+  });
 });

@@ -1,24 +1,35 @@
 import Service from '@ember/service';
+import config from 'explorviz-frontend/config/environment';
+import { inject as service } from "@ember/service";
 
+/* global EventSourcePolyfill */
 export default Service.extend({
 
   // https://github.com/segmentio/sse/blob/master/index.js
 
   content: null,
+  session: service(),
 
-  init() {
+  initSSE() {
 
-    this._super(...arguments);
     this.set('content', []);
 
-    const self = this;   
+    const self = this;
 
-    let unbind = self.subscribe('/updates', (data)=>{
-      if (data == 'quit') {
-        unbind();
+    const url = config.APP.API_ROOT;
+    const { access_token } = this.get('session.data.authenticated');
+
+    // ATTENTION: This is a polyfill (see vendor folder)
+    // Replace if original EventSource API allows HTTP-Headers
+    const es = new EventSourcePolyfill(`${url}/v1/landscapes/broadcast/`, {
+      headers: {
+        Authorization: `Bearer ${access_token.token}`
       }
-      self.get('content').unshiftObject(data);
     });
+
+    es.onmessage = function(e) {
+      self.debug(e);
+    }
   },
 
   subscribe(url, fn){

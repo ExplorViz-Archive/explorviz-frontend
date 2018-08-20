@@ -39,5 +39,7 @@ module.exports = function(defaults) {
 
   app.import('vendor/cytoscape/cytoscape.min.js');
 
+  app.import('vendor/eventsource-polyfill/eventsource.min.js');
+
   return app.toTree();
 };
