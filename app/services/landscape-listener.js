@@ -9,6 +9,8 @@ export default Service.extend({
 
   content: null,
   session: service(),
+  store: service(),
+  landscapeRepo: service("repos/landscape-repository"),
 
   initSSE() {
 
@@ -28,7 +30,11 @@ export default Service.extend({
     });
 
     es.onmessage = function(e) {
-      self.debug(e);
+      const jsonLandscape = JSON.parse(e.data);
+      const landscapeRecord = self.get('store').push(jsonLandscape);
+
+      self.set('landscapeRepo.latestLandscape', landscapeRecord);
+      self.get('landscapeRepo').triggerUpdate();
     }
   },
 
