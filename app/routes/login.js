@@ -8,4 +8,6 @@ import UnauthenticatedRouteMixin from
 * @class Login-Route
 * @extends Ember.Route
 */
-export default Route.extend(UnauthenticatedRouteMixin);
+export default Route.extend(UnauthenticatedRouteMixin, {
+    routeIfAlreadyAuthenticated: 'visualization'
+});

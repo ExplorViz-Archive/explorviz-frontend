@@ -23,12 +23,6 @@ module.exports = function(environment) {
     }
   };
 
-  // specify default route definitions
-  ENV['ember-simple-auth'] = {
-    routeAfterAuthentication: 'visualization',
-    routeIfAlreadyAuthenticated: 'visualization'
-  };
-
   if (environment === 'development') {
     ENV.APP.API_ROOT = 'http://localhost:8080';
   }

@@ -91,9 +91,7 @@ export default Controller.extend(AlertifyHandler, {
     this.set('renderingService.showVersionbar', false);
   },
 
-  // @Override
-  init() {
-    this._super(...arguments);
+  initRendering() {
 
     const self = this;
 
