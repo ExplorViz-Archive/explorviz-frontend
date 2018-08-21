@@ -39,6 +39,7 @@ export default Component.extend({
 
     // Listener for updating plot
     this.get('timestampRepo').on('updated', function() {
+      debugger;
       self.updatePlot();
     });
   },

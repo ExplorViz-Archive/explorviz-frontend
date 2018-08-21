@@ -10,6 +10,7 @@ export default Service.extend({
   content: null,
   session: service(),
   store: service(),
+  timestampRepo: service("repos/timestamp-repository"),
   landscapeRepo: service("repos/landscape-repository"),
 
   initSSE() {
@@ -34,7 +35,10 @@ export default Service.extend({
       const landscapeRecord = self.get('store').push(jsonLandscape);
 
       self.set('landscapeRepo.latestLandscape', landscapeRecord);
-      self.get('landscapeRepo').triggerUpdate();
+      self.get('timestampRepo').addTimestampToList(landscapeRecord.get('timestamp'));
+      self.get('timestampRepo').triggerUpdated();
+
+      self.get('landscapeRepo').triggerLatestLandscapeUpdate();
     }
   },
 
