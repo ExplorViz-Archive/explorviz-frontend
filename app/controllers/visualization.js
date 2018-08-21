@@ -18,7 +18,6 @@ export default Controller.extend(AlertifyHandler, {
 
   urlBuilder: service("url-builder"),
   viewImporter: service("view-importer"),
-  reloadHandler: service("reload-handler"),
   renderingService: service("rendering-service"),
   landscapeRepo: service("repos/landscape-repository"),
   landscapeListener: service("landscape-listener"),
@@ -78,7 +77,6 @@ export default Controller.extend(AlertifyHandler, {
     resetView() {
       this.set('viewImporter.importedURL', false);
       this.get('renderingService').reSetupScene();
-      this.get('reloadHandler').startExchange();
     }
     
   },
