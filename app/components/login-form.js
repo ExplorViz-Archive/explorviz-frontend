@@ -12,7 +12,7 @@ import Component from '@ember/component';
 */
 export default Component.extend({
 
-  session: service('session'),
+  session: service(),
   router: service('-routing'),
   store: service(),
 
@@ -30,14 +30,17 @@ export default Component.extend({
       const user = this.getProperties('identification', 'password');
 
       // reset (possible) old lables
-      if(this.get('session.session') && this.get('session.session.messages')) {
-        this.set('session.session.messages.message',"");
-        this.set('session.session.messages.errorMessage',"");
+      try {
+        this.set('session.session.content.message', "");
+        this.set('session.session.content.errorMessage', "");
+      } catch(exception) {
+        this.debug("Error when resetting login page labels", exception);
       }
+
 
       if(!this.checkForValidInput(user)) {
         const errorMessage = "Enter valid credentials.";
-        this.set('session.session.messages.errorMessage', errorMessage);
+        this.set('session.session.content.errorMessage', errorMessage);
         return;
       }
 
@@ -59,7 +62,7 @@ export default Component.extend({
 
         }
 
-        self.set('session.session.messages.errorMessage', errorMessage);
+        self.set('session.session.content.errorMessage', errorMessage);
 
       }
 

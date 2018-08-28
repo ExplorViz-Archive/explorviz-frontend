@@ -8,13 +8,13 @@
           </div>
           <div class="modal-body">
             <div id="failure" style="color: #FF0000; text-align: center; font-weight: bold; font-size: 150%; padding-bottom: 1em">
-              {{#if session.session.messages.errorMessage}}              
-                {{session.session.messages.errorMessage}}
+              {{#if session.session.content.errorMessage}}              
+                {{session.session.content.errorMessage}}
               {{/if}}
             </div>
             <div id="succeededLogout" style="color: #00FF00; text-align: center; font-weight: bold; font-size: 150%; padding-bottom: 1em">
-              {{#if session.session.messages.message}}              
-                {{session.session.messages.message}}
+              {{#if session.session.content.message}}
+                {{session.session.content.message}}
               {{/if}}
             </div>
             <form {{action 'authenticate' on='submit'}} class="form center-block">
