@@ -49,6 +49,9 @@ export default Object.extend(Evented, {
     // zoom handler    
     canvas.addEventListener('mousewheel', registerMouseWheel, false);
 
+    // zoom handler (firefox)
+    canvas.addEventListener('DOMMouseScroll', registerMouseWheel, false);
+
     function registerMouseWheel(evt) {
       self.onMouseWheelStart(evt);
     }
