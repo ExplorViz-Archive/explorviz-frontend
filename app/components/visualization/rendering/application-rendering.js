@@ -306,31 +306,16 @@ export default RenderingCore.extend({
 
     children.forEach((child) => {
       if (component.get('opened')) {
-        if (child.get('opened')) {
-          if(child.get('highlighted')) {
-            this.addComponentToScene(child, redHighlighted);
-          }
-          else if(component.get('color') === grey) {
-            this.addComponentToScene(child, lightGreen);
-          }
-          else if(component.get('color') === darkGreen) {
-            this.addComponentToScene(child, lightGreen);
-          } else {
-            this.addComponentToScene(child, darkGreen);
-          }
+        if(child.get('highlighted')) {
+          this.addComponentToScene(child, redHighlighted);
         }
-        else {
-          if(child.get('highlighted')) {
-            this.addComponentToScene(child, redHighlighted);
-          }
-          else if(component.get('color') === grey) {
-            this.addComponentToScene(child, lightGreen);
-          }
-          else if(component.get('color') === darkGreen) {
-            this.addComponentToScene(child, lightGreen);
-          } else {
-            this.addComponentToScene(child, darkGreen);
-          }
+        else if(component.get('color') === grey) {
+          this.addComponentToScene(child, lightGreen);
+        }
+        else if(component.get('color') === darkGreen) {
+          this.addComponentToScene(child, lightGreen);
+        } else {
+          this.addComponentToScene(child, darkGreen);
         }
       }
     });
