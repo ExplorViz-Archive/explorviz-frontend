@@ -4,8 +4,8 @@
 
 {{#each pageSetupService.navbarRoutes as |item|}}
 
-  {{#link-to item tagName="li" invokeAction=(action 'resetRoute')}}
-    {{#link-to item}}{{capitalize item}}{{/link-to}}
+  {{#link-to item tagName="li" class="nav-item" invokeAction=(action 'resetRoute')}}
+    {{#link-to item tagName="a" class="nav-link"}}{{capitalize item}}{{/link-to}}
   {{/link-to}}
 
 {{/each}}

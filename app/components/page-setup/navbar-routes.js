@@ -14,7 +14,7 @@ import {inject as service} from '@ember/service';
 export default Component.extend({
 
   tagName: "ul",
-  classNames:["nav", "navbar-nav"],
+  classNames:["navbar-nav mr-auto"],
 
   pageSetupService: service('page-setup'),
 

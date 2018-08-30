@@ -5,7 +5,15 @@ var EmberApp = require('ember-cli/lib/broccoli/ember-app');
 module.exports = function(defaults) {
 
   var app = new EmberApp(defaults, {
-    sassOptions: {},
+    octicons: {
+      icons: null // don't import any SVG files at build time
+    },
+    svgJar: {
+      sourceDirs: [
+        'public', // default SVGJar lookup directory
+        'node_modules/octicons/build/svg'
+      ]
+    },
     'ember-cli-babel': {
       includePolyfill: true
     },
