@@ -6,21 +6,15 @@ import hbs from 'htmlbars-inline-precompile';
 module('Integration | Component | page-setup/footer', function(hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', async function(assert) {
+  test('contains footer information', async function(assert) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
     await render(hbs`{{page-setup/footer}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
-
-    // Template block usage:
-    await render(hbs`
-      {{#page-setup/footer}}
-        template block text
-      {{/page-setup/footer}}
-    `);
-
-    assert.equal(this.element.textContent.trim(), 'template block text');
+    assert.ok(this.element.textContent.trim().includes('Kiel University'));
+    assert.ok(this.element.textContent.trim().includes('Legal Notice'));
+    assert.ok(this.element.textContent.trim().includes('Contact'));
+    
   });
 });

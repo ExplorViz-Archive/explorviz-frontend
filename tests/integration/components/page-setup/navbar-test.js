@@ -2,25 +2,38 @@ import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
+import Service from '@ember/service';
+
+/* eslint-disable */
+const sessionStub = Service.extend({
+  session: {
+    content: {
+      authenticated: {
+        username: 'testUsernameExplorViz'
+      }
+    }
+  }
+});
+/* eslint-enable */
 
 module('Integration | Component | page-setup/navbar', function(hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', async function(assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
+  hooks.beforeEach(function() {
+    this.owner.register('service:session', sessionStub);
+  });
 
+  test('visualization template contains main routes', async function(assert) {
     await render(hbs`{{page-setup/navbar}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    assert.ok(this.element.textContent.trim().includes('Visualization'));
+    assert.ok(this.element.textContent.trim().includes('Replay'));
+    assert.ok(this.element.textContent.trim().includes('Discovery'));
+  });
 
-    // Template block usage:
-    await render(hbs`
-      {{#page-setup/navbar}}
-        template block text
-      {{/page-setup/navbar}}
-    `);
+  test('username is rendered', async function(assert) {
+    await render(hbs`{{page-setup/navbar}}`);
 
-    assert.equal(this.element.textContent.trim(), 'template block text');
+    assert.ok(this.element.textContent.trim().includes('Signed in as testUsernameExplorViz'));
   });
 });

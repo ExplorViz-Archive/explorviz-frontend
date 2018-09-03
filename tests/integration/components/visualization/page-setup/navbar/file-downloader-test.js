@@ -12,7 +12,10 @@ module('Integration | Component | visualization/page-setup/navbar/file-downloade
 
     await render(hbs`{{visualization/page-setup/navbar/file-downloader}}`);
 
-    assert.equal(this.element.querySelector('span').getAttribute('class'), 
-      'glyphicon glyphicon-download');
+    assert.equal(this.element.querySelector('svg').getAttribute('class'), 
+      'octicon align-middle');
+
+    assert.equal(this.element.querySelector('a').getAttribute('title'), 
+      'Download file');
   });
 });

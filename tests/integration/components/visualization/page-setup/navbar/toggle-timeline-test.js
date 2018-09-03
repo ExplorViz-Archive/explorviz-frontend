@@ -12,8 +12,8 @@ module('Integration | Component | visualization/page-setup/navbar/toggle-timelin
 
     await render(hbs`{{visualization/page-setup/navbar/toggle-timeline}}`);
 
-    assert.equal(this.element.querySelector('span').getAttribute('class'), 
-      'glyphicon glyphicon-resize-vertical');
+    assert.equal(this.element.querySelector('svg').getAttribute('class'), 
+      'octicon align-middle');
 
     assert.equal(this.element.querySelector('a').getAttribute('title'), 
       'Toggle timeline');
