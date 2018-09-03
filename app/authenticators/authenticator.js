@@ -50,7 +50,7 @@ export default BaseAuthenticator.extend({
         try {
           reason = answer.payload.errors[0].detail;
         } catch(exception) {
-          self.debug("During authentication refreshment, the following error was reported", exception);
+          //self.debug("During authentication refreshment, the following error was reported", exception);
         }
         self.set('session.errorMessage', reason);
         reject(reason);
