@@ -1,0 +1,19 @@
+.nav-link-with-cursor {
+  @extend .nav-link;
+  cursor: pointer;
+}
+
+.explorviz-top-navbar {
+  @extend .navbar;
+  @extend .navbar-expand-lg;
+  @extend .navbar-light;
+  @extend .mb-2;
+  background-color: #eff0f1;
+}
+
+.explorviz-visualization-navbar {
+  @extend .navbar;
+  @extend .navbar-expand-lg;
+  @extend .navbar-light;
+  @extend .bg-light;
+}
