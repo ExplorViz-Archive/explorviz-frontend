@@ -21,7 +21,7 @@ export default Object.extend(Evented, {
       return;
     }
 
-    $('#vizContainer').popover(
+    const popoverJQueryObj = $('#vizContainer').popover(
       {
         title: '<div style="font-weight:bold;text-align:center;">' +
           content.title + '</div>',
@@ -32,23 +32,26 @@ export default Object.extend(Evented, {
       }
     );
 
-    $('#vizContainer').popover('show');
+    console.log(popoverJQueryObj);
 
-    const topOffset = $('.popover').height() + 7;
-    const leftOffset = $('.popover').width() / 2;
+    popoverJQueryObj.popover('show');
 
-    $('.popover').css('top', mouse.y - topOffset + 'px');
-    $('.popover').css('left', mouse.x - leftOffset + 'px');
+    const topOffset = popoverJQueryObj.height() + 7;
+    const leftOffset = popoverJQueryObj.width() / 2;
+
+    popoverJQueryObj.css('top', 100 + 'px');
+    popoverJQueryObj.css('left', 100 + 'px');
+
+    console.log(popoverJQueryObj.css('top'));
 
     this.set('alreadyDestroyed', false);
-
   },
 
 
   hideTooltip() {
 
     if(!this.get('alreadyDestroyed')) {
-      $('#vizContainer').popover('destroy');
+      $('#vizContainer').popover('dispose');
       this.set('alreadyDestroyed', true);
     }
   },

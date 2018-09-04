@@ -8,18 +8,22 @@ module.exports = function(defaults) {
     octicons: {
       icons: null // don't import any SVG files at build time
     },
+
     svgJar: {
       sourceDirs: [
         'public', // default SVGJar lookup directory
         'node_modules/octicons/build/svg'
       ]
     },
+
     'ember-cli-babel': {
       includePolyfill: true
     },
+
     fingerprint: {
       exclude: ['images']
     },
+
     nodeModulesToVendor: [
       // add node_modules that you need in vendor modules
       // See: https://www.npmjs.com/package/ember-cli-node-modules-to-vendor

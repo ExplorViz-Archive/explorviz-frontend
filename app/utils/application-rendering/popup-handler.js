@@ -15,6 +15,8 @@ export default Object.extend(Evented, {
       return;
     }
 
+    console.log("tooltip");
+
     // Bootstrap Popover
     $('#vizContainer').popover(
       {

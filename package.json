@@ -64,7 +64,6 @@
     "ember-cli": "^3.1.4",
     "ember-cli-app-version": "^3.2.0",
     "ember-cli-babel": "^6.14.1",
-    "ember-cli-bootstrap-sassy": "^0.5.8",
     "ember-cli-htmlbars": "^3.0.0",
     "ember-cli-node-modules-to-vendor": "^0.3.0",
     "ember-data": "^3.1.1",
