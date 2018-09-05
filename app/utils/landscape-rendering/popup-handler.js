@@ -32,17 +32,13 @@ export default Object.extend(Evented, {
       }
     );
 
-    console.log(popoverJQueryObj);
-
     popoverJQueryObj.popover('show');
 
-    const topOffset = popoverJQueryObj.height() + 7;
-    const leftOffset = popoverJQueryObj.width() / 2;
+    //const topOffset = popoverJQueryObj.height() + 7;
+    //const leftOffset = popoverJQueryObj.width() / 2;
 
     popoverJQueryObj.css('top', 100 + 'px');
     popoverJQueryObj.css('left', 100 + 'px');
-
-    console.log(popoverJQueryObj.css('top'));
 
     this.set('alreadyDestroyed', false);
   },
