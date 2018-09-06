@@ -1,14 +1,15 @@
-<ul class="nav nav-tabs">
-  <li class="active"><a data-toggle="tab" href="#settings">Settings</a></li>
-  <li><a data-toggle="tab" href="#addons">Addons</a></li>
-</ul>
-
-<div class="tab-content">
-  <div id="settings" class="tab-pane fade in active">
+<nav>
+  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+    <a class="nav-item nav-link active" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab" aria-controls="nav-settings" aria-selected="true">Settings</a>
+    <a class="nav-item nav-link" id="nav-addons-tab" data-toggle="tab" href="#nav-addons" role="tab" aria-controls="nav-addons" aria-selected="false">Addons</a>
+  </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+  <div class="tab-pane fade show active" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
     <h3>General Settings</h3>
     <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
   </div>
-  <div id="addons" class="tab-pane fade" style="height: 100%;">
+  <div class="tab-pane fade" id="nav-addons" role="tabpanel" aria-labelledby="nav-addons-tab">
     <h3>Addon Settings</h3>
     <div class="panel-group pre-scrollable" id="configurationpanelgroup">
       {{#each configurationService.pluginSettings as |addon|}}
@@ -28,42 +29,3 @@
     </div>
   </div>
 </div>
-
-
-<!-- 
-<div class="navbar navbar-default navbar-fixed-side navbar-fixed-left">
-  <ul class="nav navbar-nav">
-    <li>
-      <a>
-        <span>
-          Einstellungen
-        </span>
-      </a>
-    </li>
-    <li>
-      <a>
-        <span>
-          Addons
-        </span>
-      </a>
-    </li>
-  </ul>
-</div>
-<div class="panel-group" id="configurationpanelgroup">
-  {{#each configurationService.addonImports as |addon|}}
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h4 class="panel-title">
-          <a data-toggle="collapse" data-parent="#accordion" href="#collapse1"> {{addon}}
-          </a>
-        </h4>
-      </div>
-      <div id="collapse1" class="panel-collapse collapse in">
-        <div class="panel-body">
-          {{component addon}}
-        </div>
-      </div>
-    </div>
-  {{/each}}
-</div>
--->

@@ -9,7 +9,7 @@
   </button>
   <div class="collapse navbar-collapse">
       <!-- Left content -->
-      {{page-setup/navbar-routes resetRoute="resetRoute"}}
+      {{page-setup/navbar-routes}}
 
       <!-- Right content -->
       <ul class="navbar-nav ml-auto">
@@ -25,7 +25,7 @@
           <span class="navbar-text">Signed in as <b>{{username}}</b></span>
         </li>
         <li class="nav-item pl-3">
-          <a class="nav-link" {{action 'logout'}} style="cursor:pointer;" title="Logout">
+          <a class="nav-link" {{action (route-action 'logout')}} style="cursor:pointer;" title="Logout">
             {{svg-jar "sign-out" class="octicon align-middle" id="configurationButton"}}
           </a>
         </li>

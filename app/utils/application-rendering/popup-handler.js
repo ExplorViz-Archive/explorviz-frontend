@@ -43,7 +43,7 @@ export default Object.extend(Evented, {
   hideTooltip() {
 
     if(!this.get('alreadyDestroyed')) {
-      $('#vizContainer').popover('destroy');
+      $('#vizContainer').popover('dispose');
       this.set('alreadyDestroyed', true);
     }
   },

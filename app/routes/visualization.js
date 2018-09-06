@@ -18,6 +18,11 @@ export default BaseRoute.extend(AuthenticatedRouteMixin, {
     controller.initRendering();
   },
 
+  resetRoute() {
+    this.controller.send('resetView');
+    this.controller.set('landscapeRepo.latestApplication', null);
+  },
+
   actions: {
 
     // @Override BaseRoute
