@@ -32,13 +32,15 @@ export default Service.extend({
 
     es.onmessage = function(e) {
       const jsonLandscape = JSON.parse(e.data);
-      const landscapeRecord = self.get('store').push(jsonLandscape);
 
-      self.set('landscapeRepo.latestLandscape', landscapeRecord);
-      self.get('timestampRepo').addTimestampToList(landscapeRecord.get('timestamp'));
-      self.get('timestampRepo').triggerUpdated();
-
-      self.get('landscapeRepo').triggerLatestLandscapeUpdate();
+      if(jsonLandscape && jsonLandscape.hasOwnProperty("data")) {
+        const landscapeRecord = self.get('store').push(jsonLandscape);
+        self.set('landscapeRepo.latestLandscape', landscapeRecord);
+        self.get('timestampRepo').addTimestampToList(landscapeRecord.get('timestamp'));
+        self.get('timestampRepo').triggerUpdated();
+  
+        self.get('landscapeRepo').triggerLatestLandscapeUpdate();
+      }     
     }
   },
 

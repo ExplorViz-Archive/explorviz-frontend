@@ -56,7 +56,7 @@ module.exports = function(environment) {
   }
 
   if (environment === 'akr-mocked') {
-    ENV.APP.API_ROOT = 'http://192.168.91.129:4200/api';
+    ENV.APP.API_ROOT = 'http://192.168.91.132:4200/api';
   }
 
   return ENV;
