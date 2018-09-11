@@ -8,7 +8,6 @@ export default Object.extend(Evented, {
   alreadyDestroyed: true,
   enableTooltips: true,
 
-
   showTooltip(mouse, emberModel) {
 
     if(!this.get('enableTooltips')) {
@@ -21,33 +20,30 @@ export default Object.extend(Evented, {
       return;
     }
 
-    const popoverJQueryObj = $('#vizContainer').popover(
-      {
-        title: '<div style="font-weight:bold;text-align:center;">' +
-          content.title + '</div>',
-        content : content.html,
-        placement:'top',
-        trigger:'manual',
-        html:true
-      }
-    );
+    const popoverDiv = $('<div class="popover bs-popover-top"></div>');
 
-    popoverJQueryObj.popover('show');
+    //popoverDiv.append('<div class="arrow"></div>');
+    popoverDiv.append(`<h3 class="popover-header"><div style="font-weight:bold;text-align:center;">${content.title}</div></h3>`);
+    popoverDiv.append(`<div class="popover-body" style="white-space: nowrap;">${content.html}</div>`);
 
-    //const topOffset = popoverJQueryObj.height() + 7;
-    //const leftOffset = popoverJQueryObj.width() / 2;
+    $('#vizContainer').append(popoverDiv);
 
-    popoverJQueryObj.css('top', 100 + 'px');
-    popoverJQueryObj.css('left', 100 + 'px');
+    const topOffset = popoverDiv.height() + 10;
+    const leftOffset = popoverDiv.width() / 2;
+
+    popoverDiv.css('top', mouse.y - topOffset + 'px');
+    popoverDiv.css('left', mouse.x - leftOffset + 'px');
+
+    // center arrow
+    //$('.arrow').css('left', 20 + 'px');
 
     this.set('alreadyDestroyed', false);
   },
 
 
   hideTooltip() {
-
     if(!this.get('alreadyDestroyed')) {
-      $('#vizContainer').popover('dispose');
+      $('.popover').remove();
       this.set('alreadyDestroyed', true);
     }
   },

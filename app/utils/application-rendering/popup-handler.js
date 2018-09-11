@@ -15,35 +15,31 @@ export default Object.extend(Evented, {
       return;
     }
 
-    // Bootstrap Popover
-    $('#vizContainer').popover(
-      {
-        title: '<div style="font-weight:bold;text-align:center;">' +
-          content.title + '</div>',
-        content : content.html,
-        placement: 'top',
-        trigger: 'manual',
-        html: true
-      }
-    );
+    const popoverDiv = $('<div class="popover bs-popover-top"></div>');
 
-    $('#vizContainer').popover('show');
+    //popoverDiv.append('<div class="arrow"></div>');
+    popoverDiv.append(`<h3 class="popover-header"><div style="font-weight:bold;text-align:center;">${content.title}</div></h3>`);
+    popoverDiv.append(`<div class="popover-body" style="white-space: nowrap;">${content.html}</div>`);
 
-    const topOffset = $('.popover').height() + 7;
-    const leftOffset = $('.popover').width() / 2;
+    $('#vizContainer').append(popoverDiv);
 
-    $('.popover').css('top', mouse.y - topOffset + 'px');
-    $('.popover').css('left', mouse.x - leftOffset + 'px');
+    const topOffset = popoverDiv.height() + 10;
+    const leftOffset = popoverDiv.width() / 2;
+
+    popoverDiv.css('top', mouse.y - topOffset + 'px');
+    popoverDiv.css('left', mouse.x - leftOffset + 'px');
+
+    // center arrow
+    //$('.arrow').css('left', 20 + 'px');
 
     this.set('alreadyDestroyed', false);
-
   },
 
 
   hideTooltip() {
 
     if(!this.get('alreadyDestroyed')) {
-      $('#vizContainer').popover('dispose');
+      $('.popover').remove();
       this.set('alreadyDestroyed', true);
     }
   },
