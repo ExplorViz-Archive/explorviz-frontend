@@ -9,10 +9,6 @@ sudo: false
 # For testing environment
 addons:
   chrome: stable
-
-cache:
-  directories:
-    - $HOME/.npm
     
 branches:
   only:
