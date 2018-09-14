@@ -1,4 +1,9 @@
-# ExplorViz Frontend
+<p align="center">
+  <img width="60%" src="https://raw.githubusercontent.com/ExplorViz/Docs/master/images/explorviz-logo.png">
+</p>
+
+___
+
 <a href="https://travis-ci.org/ExplorViz/explorviz-frontend"><img src="https://travis-ci.org/ExplorViz/explorviz-frontend.svg?branch=master" alt="Build Status"></a>
 [![Build status](https://ci.appveyor.com/api/projects/status/am0ea9r6sp2h74x7/branch/master?svg=true)](https://ci.appveyor.com/project/Alexander-Krause/explorviz-frontend/branch/master)
 <a href="https://david-dm.org/ExplorViz/explorviz-frontend"><img src="https://david-dm.org/ExplorViz/explorviz-frontend.svg?branch=master" alt="Dependency Status"></a>
