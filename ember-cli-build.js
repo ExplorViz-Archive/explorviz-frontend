@@ -1,5 +1,6 @@
 /*jshint node:true*/
 /* global require, module */
+var sass = require('sass');
 var EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
 module.exports = function(defaults) {
@@ -7,6 +8,11 @@ module.exports = function(defaults) {
   var app = new EmberApp(defaults, {
     octicons: {
       icons: null // don't import any SVG files at build time
+    },
+
+    // Default implementation for ember-cli-sass
+    sassOptions: {
+      implementation: sass
     },
 
     svgJar: {
