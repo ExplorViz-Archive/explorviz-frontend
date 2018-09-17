@@ -70,7 +70,7 @@
     "ember-cli-node-modules-to-vendor": "^0.3.0",
     "ember-cli-spinjs": "1.4.2",
     "ember-data": "^3.1.1",
-    "ember-link-action": "0.1.1",
+    "ember-link-action": "0.1.2",
     "ember-resolver": "^5.0.1",
     "ember-simple-auth": "^1.6.0",
     "ember-toggle": "^5.2.4",
