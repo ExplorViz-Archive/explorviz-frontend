@@ -70,6 +70,6 @@
     "three": "^0.95.0",
     "three.meshline": "^1.1.0",
     "ember-toggle": "^5.2.4",
-    "ember-cli-spinjs": "1.4.2"
+    "ember-cli-spinjs": "2.0.0"
   }
 }
