@@ -9,14 +9,12 @@ sudo: false
 # For testing environment
 addons:
   chrome: stable
-    
+
 branches:
   only:
   - master
-  - travis-version-test
   - /^greenkeeper/.*$/
-  - navbar-refactoring
-  - reverse-proxy-adjustments
+  - dev-1
 
 env:
   global:
@@ -35,7 +33,7 @@ matrix:
 
 before_script:
   - chmod +x .travis/push.sh
-    
+
 before_install:
 #  - if [[ `npm -v` != 5.6.0 ]]; then npm i -g npm@5.6.0; fi
 
