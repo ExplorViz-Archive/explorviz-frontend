@@ -33,7 +33,7 @@
     "ember-cli-uglify": "^2.1.0",
     "ember-composable-helpers": "^2.1.0",
     "ember-concurrency": "^0.8.19",
-    "ember-debug-logger": "1.1.0",
+    "ember-debug-logger": "1.1.1",
     "ember-export-application-global": "^2.0.0",
     "ember-file-upload": "^2.5.0",
     "ember-load-initializers": "^1.1.0",
