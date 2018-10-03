@@ -1,9 +1,9 @@
 import Object from '@ember/object';
 
 /**
- * The foundation is the grey all-encompassing tile. It shows 
- * the name of the previously clicked application and presents 
- * data on mouse hovering. It simply is a container for actual 
+ * The foundation is the grey all-encompassing tile. It shows
+ * the name of the previously clicked application and presents
+ * data on mouse hovering. It simply is a container for actual
  * application data.
  */
 export default Object.extend({
@@ -12,9 +12,10 @@ export default Object.extend({
 
   createFoundation(emberApplication, store) {
 
-    const idTest = parseInt(Math.random() * (20000 - 10000) + 10000);
+    // use big random ID to avoid conflicts with IDs of regular components
+    const idRandom = parseInt(Math.random() * 10000 + 10000);
     const foundation = store.createRecord('component', {
-      id: idTest,
+      id: idRandom,
       synthetic: false,
       foundation: true,
       children: emberApplication.get('components'),
@@ -56,12 +57,12 @@ export default Object.extend({
     emberApplication.get('components').forEach((component) => {
       component.set('parentComponent', null);
     });
-    
+
     store.unloadRecord(foundation);
 
     this.set('foundationObj', null);
 
-    return true;    
+    return true;
    }
 
 });
