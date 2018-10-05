@@ -3,7 +3,7 @@ import Evented from '@ember/object/evented';
 import { inject as service } from "@ember/service";
 
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
-import PopUpHandler from 
+import PopUpHandler from
   'explorviz-frontend/utils/application-rendering/popup-handler';
 import Raycaster from 'explorviz-frontend/utils/raycaster';
 import HoverHandler from 'explorviz-frontend/utils/hover-effect-handler';
@@ -46,7 +46,7 @@ export default Object.extend(Evented, {
       self.onMouseEnter(evt);
     }
 
-    // zoom handler    
+    // zoom handler
     canvas.addEventListener('mousewheel', registerMouseWheel, false);
 
     // zoom handler (firefox)
@@ -56,16 +56,16 @@ export default Object.extend(Evented, {
       self.onMouseWheelStart(evt);
     }
 
-    // hover handler    
+    // hover handler
     canvas.addEventListener('mousemove', registerMouseMove, false);
 
     function registerMouseMove(evt) {
       self.onMouseMove(evt);
     }
 
-    // init Hammer    
+    // init Hammer
     this.set('hammerHandler', HammerInteraction.create());
-    this.get('hammerHandler').setupHammer(canvas);   
+    this.get('hammerHandler').setupHammer(canvas);
 
     if (!this.get('raycaster')) {
       this.set('raycaster', Raycaster.create());
@@ -80,7 +80,7 @@ export default Object.extend(Evented, {
     // init HoverHandler
     if (!this.get('hoverHandler')) {
       this.set('hoverHandler', HoverHandler.create());
-    }    
+    }
 
     this.registerPopUpHandler();
     this.setupHammerListener();
@@ -93,7 +93,7 @@ export default Object.extend(Evented, {
     const rect = this.get('canvas').getBoundingClientRect();
 
     const mouse = {
-      x: evt.clientX - rect.left, 
+      x: evt.clientX - rect.left,
       y: evt.clientY - rect.top
     };
 
@@ -103,10 +103,10 @@ export default Object.extend(Evented, {
 
     origin.y = -(mouse.y / this.get('renderer').domElement.clientHeight) * 2 + 1;
 
-    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
 
-    this.get('hoverHandler').handleHoverEffect(intersectedViewObj);    
+    this.get('hoverHandler').handleHoverEffect(intersectedViewObj);
 
   },
 
@@ -143,7 +143,7 @@ export default Object.extend(Evented, {
   setupHammerListener() {
 
     const self = this;
-    
+
     this.get('hammerHandler').on('doubletap', function(mouse) {
       self.handleDoubleClick(mouse);
     });
@@ -154,7 +154,7 @@ export default Object.extend(Evented, {
 
     this.get('hammerHandler').on('singletap', function(mouse) {
       self.handleSingleClick(mouse);
-    });    
+    });
 
   },
 
@@ -179,13 +179,13 @@ export default Object.extend(Evented, {
               });
               evt.target.dispatchEvent(event);
             }, delay);
-            
+
             // When moving, hide (old) tooltip
             self.get('popUpHandler').hideTooltip();
         });
     })(300);
 
-    
+
     this.get('canvas').addEventListener('mousestop', registerPopUpHandler, false);
 
     function registerPopUpHandler(evt) {
@@ -219,13 +219,13 @@ export default Object.extend(Evented, {
 
     const origin = {};
 
-    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
+    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) /
       this.get('renderer').domElement.clientWidth) * 2 - 1;
 
-    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) / 
+    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) /
       this.get('renderer').domElement.clientHeight) * 2 + 1;
 
-    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
 
     let emberModel;
@@ -242,19 +242,19 @@ export default Object.extend(Evented, {
         emberModel.setOpenedStatus(!emberModel.get('opened'));
 
         const highlighted = this.get('highlighter.highlightedEntity');
-        
+
         if(emberModel === highlighted || emberModel.contains(highlighted)) {
           this.get('highlighter').unhighlightAll();
         }
 
 
         this.get('renderingService').redrawScene();
-      } 
+      }
 
     }
 
     this.trigger('doubleClick', emberModel);
-    
+
   },
 
 
@@ -262,13 +262,13 @@ export default Object.extend(Evented, {
 
     const origin = {};
 
-    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
+    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) /
       this.get('renderer').domElement.clientWidth) * 2 - 1;
 
-    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) / 
+    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) /
       this.get('renderer').domElement.clientHeight) * 2 + 1;
 
-    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
 
     let emberModel;
@@ -281,17 +281,17 @@ export default Object.extend(Evented, {
       emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
 
-      if(emberModelName === "component" && !emberModel.get('opened')){
+      if(emberModelName === "component"){
 
         this.get('highlighter').highlight(emberModel);
-      } 
+      }
       else if(emberModelName === "clazz") {
         this.get('highlighter').highlight(emberModel);
       }
 
       this.get('renderingService').redrawScene();
 
-    } 
+    }
     else {
       if(this.get('highlighter.highlightedEntity')) {
         // clicked in white space and entity is highlighted
@@ -310,7 +310,7 @@ export default Object.extend(Evented, {
       // rotate object
       this.get('rotationObject').rotation.x += delta.y / 100;
       this.get('rotationObject').rotation.y += delta.x / 100;
-    } 
+    }
 
     else if(event.button === 1){
       // translate camera
@@ -340,13 +340,13 @@ export default Object.extend(Evented, {
 
     const origin = {};
 
-    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
+    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) /
       this.get('renderer').domElement.clientWidth) * 2 - 1;
 
-    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) / 
+    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) /
       this.get('renderer').domElement.clientHeight) * 2 + 1;
 
-    const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
+    const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
 
     if(intersectedViewObj) {
