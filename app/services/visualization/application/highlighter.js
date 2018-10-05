@@ -40,15 +40,32 @@ export default Service.extend({
       const outgoingClazzCommunications =
         this.get('application').get('cumulatedClazzCommunications');
 
+      const emberModelName = highlightedNode.constructor.modelName;
+
+      let selectedClazzes = new Set();
+
+      if (emberModelName === "clazz"){
+        selectedClazzes.add(highlightedNode);
+      } else if (emberModelName === "component"){
+        highlightedNode.getContainedClazzes(selectedClazzes); //add all clazzes of component
+      }
+
+
       outgoingClazzCommunications.forEach((clazzCommunication) => {
-        if ((clazzCommunication.sourceClazz != null && clazzCommunication.get('sourceClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName')) ||
-          (clazzCommunication.targetClazz != null && clazzCommunication.get('targetClazz').get('fullQualifiedName') === highlightedNode.get('fullQualifiedName'))) {
-            clazzCommunication.set("state", "NORMAL");
+        let toBeHighlighted = false;
+        // highlight all communication lines which have a selected clazz as an endpoint
+        selectedClazzes.forEach((clazz) => {
+          if ((clazzCommunication.sourceClazz != null && clazzCommunication.get('sourceClazz').get('fullQualifiedName') === clazz.get('fullQualifiedName')) ||
+            (clazzCommunication.targetClazz != null && clazzCommunication.get('targetClazz').get('fullQualifiedName') === clazz.get('fullQualifiedName'))) {
+              toBeHighlighted = true;
+          }
+        });
+        if (toBeHighlighted){
+          clazzCommunication.set("state", "NORMAL");
         } else {
           clazzCommunication.set("state", "TRANSPARENT");
         }
       });
-
     }
   }
 
