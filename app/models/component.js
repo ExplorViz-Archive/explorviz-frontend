@@ -100,6 +100,21 @@ export default Draw3DNodeEntity.extend({
     }
   },
 
+  // adds all clazzes of the component or underlying components to a Set
+  getContainedClazzes(containedClazzes){
+    const clazzes = this.get('clazzes');
+
+    clazzes.forEach((clazz) => {
+      containedClazzes.add(clazz);
+    });
+
+    const children = this.get('children');
+
+    children.forEach((child) => {
+      child.getContainedClazzes(containedClazzes);
+    });
+  },
+
   filterChildComponents(attributeString, predicateValue) {
     const filteredComponents = [];
 
@@ -127,7 +142,7 @@ export default Draw3DNodeEntity.extend({
     }
 
     this.set('opened', true);
-    
+
     const components = this.get('children');
     const clazzes = this.get('clazzes');
 
