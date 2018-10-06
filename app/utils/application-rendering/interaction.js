@@ -281,7 +281,7 @@ export default Object.extend(Evented, {
       emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
 
-      if(emberModelName === "component"){
+      if(emberModelName === "component" && emberModel.get('foundation') === false){
 
         this.get('highlighter').highlight(emberModel);
       }
