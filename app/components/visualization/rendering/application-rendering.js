@@ -291,6 +291,8 @@ export default RenderingCore.extend({
 
     component.set('color', color);
 
+
+
     const clazzes = component.get('clazzes');
     const children = component.get('children');
 
@@ -308,11 +310,9 @@ export default RenderingCore.extend({
       if (component.get('opened')) {
         if(child.get('highlighted')) {
           this.addComponentToScene(child, redHighlighted);
-        }
-        else if(component.get('color') === grey) {
+        } else if(component.get('color') === grey) {
           this.addComponentToScene(child, lightGreen);
-        }
-        else if(component.get('color') === darkGreen) {
+        } else if(component.get('color') === darkGreen) {
           this.addComponentToScene(child, lightGreen);
         } else {
           this.addComponentToScene(child, darkGreen);
@@ -330,7 +330,19 @@ export default RenderingCore.extend({
       component.get('height') / 2.0,
       component.get('positionZ') + component.get('depth') / 2.0);
 
-    const material = new THREE.MeshLambertMaterial();
+    let transparent = false;
+    let opacityValue = 1.0;
+
+    if(component.get('state') === "TRANSPARENT") {
+      transparent = true;
+      opacityValue = 0.4;
+    }
+
+    const material = new THREE.MeshLambertMaterial({
+      opacity : opacityValue,
+      transparent : transparent
+    });
+
     material.color = new THREE.Color(color);
 
     centerPoint.sub(this.get('centerAndZoomCalculator.centerPoint'));
