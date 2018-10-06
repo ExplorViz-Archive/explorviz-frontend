@@ -36,6 +36,9 @@ export default BaseEntity.extend({
     return new THREE.Vector3(width, height, depth);
   }),
 
+  // used to mark entities as transparent or normal for highlighting
+  state: attr('string', { defaultValue: 'NORMAL'}),
+
   highlight() {
     this.set('highlighted', true);
   }

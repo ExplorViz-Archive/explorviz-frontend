@@ -54,6 +54,7 @@ export default Draw3DNodeEntity.extend({
 
   unhighlight() {
     this.set('highlighted', false);
+    this.set('state', "NORMAL");
 
     this.get('children').forEach((child) => {
       child.unhighlight();

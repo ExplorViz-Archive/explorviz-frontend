@@ -29,6 +29,7 @@ export default Draw3DNodeEntity.extend({
 
   unhighlight() {
     this.set('highlighted', false);
+    this.set('state', 'NORMAL');
   },
 
   openParents() {
