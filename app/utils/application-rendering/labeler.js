@@ -29,7 +29,7 @@ export default Object.extend({
 
   },
 
-  createLabel(parentMesh, parentObject, font) {
+  createLabel(parentMesh, parentObject, font, transparent) {
 
     const bboxNew = new THREE.Box3().setFromObject(parentMesh);
 
@@ -45,6 +45,21 @@ export default Object.extend({
 
     // check if TextGeometry already exists
     if (oldLabel && oldLabel[0]) {
+
+      // check if transparency changed, therefore requires an update
+      if(transparent && !oldLabel[0].material.transparent) {
+        const newMaterial = oldLabel[0].material.clone();
+        newMaterial.transparent = true;
+        newMaterial.opacity = 0.4;
+        oldLabel[0].material = newMaterial;
+      } 
+      else if(!transparent && oldLabel[0].material.transparent){
+        const newMaterial = oldLabel[0].material.clone();
+        newMaterial.transparent = false;
+        newMaterial.opacity = 1;
+        oldLabel[0].material = newMaterial;
+      }
+
       parentObject.add(oldLabel[0]);
       return;
     }
@@ -78,7 +93,7 @@ export default Object.extend({
       // class
       else {
         material = this.get('textMaterialWhite');
-      }
+      }      
 
       var mesh = new THREE.Mesh(textGeo, material);
 

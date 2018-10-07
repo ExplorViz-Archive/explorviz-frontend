@@ -367,7 +367,7 @@ export default RenderingCore.extend({
     mesh.userData.opened = component.get('opened');
 
     self.get('labeler').createLabel(mesh, self.get('application3D'),
-      self.get('font'));
+      self.get('font'), transparent);
 
     self.get('application3D').add(mesh);
 
