@@ -243,9 +243,10 @@ export default Object.extend(Evented, {
 
         const highlighted = this.get('highlighter.highlightedEntity');
 
-        if(emberModel === highlighted || emberModel.contains(highlighted)) {
-          this.get('highlighter').unhighlightAll();
-        }
+        // TODO Allow users to change this behavior via configuration route
+        //if(emberModel === highlighted || emberModel.contains(highlighted)) {
+          //this.get('highlighter').unhighlightAll();
+        //}
 
 
         this.get('renderingService').redrawScene();
