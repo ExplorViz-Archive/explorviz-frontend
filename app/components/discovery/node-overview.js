@@ -36,10 +36,13 @@ export default Component.extend(AlertifyHandler, {
   didRender(){    
     this._super(...arguments);
 
+    console.log(this.get('agentRepo.agentList'));
+
     if(!this.get('initDone') && this.get('agentRepo.agentList.length') > 0) {
       this.initCytoscape();
       this.setupListener();
       this.set('initDone', true);
+      console.log("init");
     }
     this.updateCytoscapeGraph(this.get('agentRepo.agentList'));
   },

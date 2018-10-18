@@ -7,8 +7,6 @@ import AuthenticatedRouteMixin from
 
 export default BaseRoute.extend(AuthenticatedRouteMixin, {
 
-  agentReload: service("agent-reload"),
-
   actions: {
     // @Override BaseRoute
     resetRoute() {
@@ -28,8 +26,8 @@ export default BaseRoute.extend(AuthenticatedRouteMixin, {
     this.controller.set('agentForDetailView', null);
 
     // stop first, there might be an old service instance running
-    this.get("agentReload").stopUpdate();
-    this.get("agentReload").startUpdate();
+    //this.get("agentReload").stopUpdate();
+    //this.get("agentReload").startUpdate();
   },
 
 

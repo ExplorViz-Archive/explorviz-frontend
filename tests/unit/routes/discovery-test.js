@@ -2,7 +2,7 @@ import { moduleFor, test } from 'ember-qunit';
 
 moduleFor('route:discovery', 'Unit | Route | discovery', {
   // Specify the other units that are required for this test.
-  needs: ['service:session', 'service:agent-reload']
+  needs: ['service:session', 'service:agents-listener']
 });
 
 test('it exists', function(assert) {

@@ -22,10 +22,8 @@ const {APP} = ENV;
 export default JSONAPIAdapter.extend(DataAdapterMixin,{
 
   host: APP.API_ROOT,
-  namespace: "discovery",
 
   init() {
-
     this.set('headers', {
       "Accept": "application/vnd.api+json"
     });
@@ -36,6 +34,10 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   urlForQueryRecord(query) {
     const baseUrl = this.buildURL();
     return `${baseUrl}/${query}`;
+  },
+
+  createRecord(store, type, snapshot) {
+    console.log("test");
   },
 
 
