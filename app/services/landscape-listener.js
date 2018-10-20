@@ -34,6 +34,10 @@ export default Service.extend({
       const jsonLandscape = JSON.parse(e.data);
 
       if(jsonLandscape && jsonLandscape.hasOwnProperty("data")) {
+
+        // ATTENTION: Mind the push operation, push != pushPayload in terms of 
+        // serializer usage
+        // https://github.com/emberjs/data/issues/3455
         const landscapeRecord = self.get('store').push(jsonLandscape);
         self.set('landscapeRepo.latestLandscape', landscapeRecord);
         self.get('timestampRepo').addTimestampToList(landscapeRecord.get('timestamp'));

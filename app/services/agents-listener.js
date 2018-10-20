@@ -32,34 +32,6 @@ export default Service.extend({
     es.onmessage = function(e) {
       const agentListJson = JSON.parse(e.data);
 
-      const landscapeObject = {
-        "data": {
-          "type": "landscape",
-          "id": "3",
-          "attributes": {
-            "extensionAttributes": {},
-            "events": {},
-            "exceptions": {}
-          }
-        }
-      };
-
-      const stringTestAgent = {
-        "data": 
-          {
-            "type": "agent",
-            "id": "1",
-            "attributes": {
-              "ip": "127.0.0.1",
-              "port": "8084",
-              "last-discovery-time": 1539784755989,
-              "is-hidden": false,
-              "error-occured": false,
-              "error-message": ""
-            }
-          }
-        };
-
       const stringTest = {
         "data": 
           { 
@@ -68,7 +40,7 @@ export default Service.extend({
             "attributes": {
               "ip": "127.0.0.1",
               "port": "8084",
-              "lastDiscoveryTime": 1539784755989,
+              "last-discovery-time": 1539784755989,
               "is-hidden": false,
               "error-occured": false,
               "error-message": ""
@@ -131,10 +103,15 @@ export default Service.extend({
         ]
       };
 
-      // Data loss (attribute values = undefined) due to parsing?
-      const agentRecordList = self.get('store').push(landscapeObject);
+      // ATTENTION: Mind the push operation, push != pushPayload in terms of 
+      // serializer usage
+      // https://github.com/emberjs/data/issues/3455
+      self.get('store').pushPayload(stringTest);
 
-      self.set('agentRepo.agentList', agentRecordList);
+      // TODO How to update rendering? Frontend store could contain agents, 
+      // which are not contained in the payload
+
+      //self.set('agentRepo.agentList', agentRecordList);
 
       // TODO update similar to ... ?
       //self.get('agentRepo').triggerUpdated();

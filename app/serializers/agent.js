@@ -5,7 +5,6 @@ export default DS.JSONAPISerializer.extend({
   payloadKeyFromModelName: function(modelName) {
     // singularize modelName (default plural)
     // since backend works singularized types
-    console.log(modelName);
     return modelName;
   }
 });
