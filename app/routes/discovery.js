@@ -1,6 +1,5 @@
 import BaseRoute from 'explorviz-frontend/routes/base-route';
 import { on } from "@ember/object/evented";
-import { inject as service } from "@ember/service";
 import AuthenticatedRouteMixin from 
   'ember-simple-auth/mixins/authenticated-route-mixin';
 

@@ -241,7 +241,7 @@ export default Object.extend(Evented, {
       if(emberModelName === "component"){
         emberModel.setOpenedStatus(!emberModel.get('opened'));
 
-        const highlighted = this.get('highlighter.highlightedEntity');
+        //const highlighted = this.get('highlighter.highlightedEntity');
 
         // TODO Allow users to change this behavior via configuration route
         //if(emberModel === highlighted || emberModel.contains(highlighted)) {

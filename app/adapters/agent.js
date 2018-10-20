@@ -36,11 +36,6 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     return `${baseUrl}/${query}`;
   },
 
-  createRecord(store, type, snapshot) {
-    console.log("test");
-  },
-
-
   // @Override
   // Overrides URL for model.save()
   urlForUpdateRecord(id, modelName, snapshot) {

@@ -30,7 +30,7 @@ export default Service.extend({
     });
 
     es.onmessage = function(e) {
-      const agentListJson = JSON.parse(e.data);
+      //const agentListJson = JSON.parse(e.data);
 
       const stringTest = {
         "data": 
