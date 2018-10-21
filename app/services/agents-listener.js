@@ -30,9 +30,9 @@ export default Service.extend({
     });
 
     es.onmessage = function(e) {
-      //const agentListJson = JSON.parse(e.data);
+      const agentListJson = JSON.parse(e.data);
 
-      const stringTest = {
+      /*const stringTest = {
         "data": 
           { 
             "type": "agent",
@@ -101,17 +101,25 @@ export default Service.extend({
             }
           }
         ]
-      };
+      };*/
 
       // ATTENTION: Mind the push operation, push != pushPayload in terms of 
       // serializer usage
       // https://github.com/emberjs/data/issues/3455
-      self.get('store').pushPayload(stringTest);
+      self.get('store').pushPayload(agentListJson);
 
-      // TODO How to update rendering? Frontend store could contain agents, 
-      // which are not contained in the payload
+      const idArray = [];
+      const agentRecordList = [];
 
-      //self.set('agentRepo.agentList', agentRecordList);
+      agentListJson["data"].forEach(function(agentJson) {
+        idArray.push(agentJson["id"]);
+      });
+
+      idArray.forEach(function(id) {
+        agentRecordList.push(self.get('store').peekRecord("agent", id));
+      });
+
+      self.set('agentRepo.agentList', agentRecordList);
 
       // TODO update similar to ... ?
       //self.get('agentRepo').triggerUpdated();
