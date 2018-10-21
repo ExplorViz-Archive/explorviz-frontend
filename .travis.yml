@@ -49,4 +49,4 @@ script:
   - ember try:one $EMBER_TRY_SCENARIO
 
 after_success:
-  - .travis/push.sh
+  - test $TRAVIS_BRANCH = "master" && .travis/push.sh
