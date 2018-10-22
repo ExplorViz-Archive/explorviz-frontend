@@ -3,11 +3,11 @@
     <img style="width: 100%;" src="images/explorviz-transparent.png"/>
   </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse"
-    data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
+    data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
     aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <div class="collapse navbar-collapse">
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
       <!-- Left content -->
       {{page-setup/navbar-routes}}
 
@@ -24,7 +24,7 @@
         <li class="nav-item">
           <span class="navbar-text">Signed in as <b>{{username}}</b></span>
         </li>
-        <li class="nav-item pl-3">
+        <li class="nav-item pl-lg-3">
           <a class="nav-link" {{action (route-action 'logout')}} style="cursor:pointer;" title="Logout">
             {{svg-jar "sign-out" class="octicon align-middle" id="configurationButton"}}
           </a>
