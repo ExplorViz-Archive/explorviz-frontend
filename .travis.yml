@@ -42,3 +42,6 @@ install:
 
 script:
   - ember try:one $EMBER_TRY_SCENARIO
+
+after_success:
+  - test $TRAVIS_BRANCH = "master" && .travis/push.sh
