@@ -1,6 +1,11 @@
 <div class="container">
-  <nav class="explorviz-visualization-navbar">    
-    <div class="collapse navbar-collapse">
+  <nav class="explorviz-visualization-navbar">
+    <a class="navbar-brand" href="#">Controls</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" 
+      data-target="#navbarVisualization" aria-controls="navbarVisualization" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarVisualization">
         <!-- Right content -->
         <ul class="navbar-nav mr-auto">
           {{#each content as |componentName|}}
