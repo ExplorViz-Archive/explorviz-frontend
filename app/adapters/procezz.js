@@ -21,8 +21,7 @@ const {APP} = ENV;
 */
 export default JSONAPIAdapter.extend(DataAdapterMixin,{
 
-  host: APP.API_ROOT, 
-  namespace: "discovery",
+  host: APP.API_ROOT,
 
   init() {
 
@@ -32,20 +31,13 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
  
   },
 
-
   // @Override
   // Overrides URL for model.save()
   urlForUpdateRecord(id, modelName, snapshot) {
     const baseUrl = this.buildURL();
 
-    let path = `${baseUrl}/${modelName}`;
-
-    if(snapshot.adapterOptions && snapshot.adapterOptions.pathExtension) {
-      const pathExtension = snapshot.adapterOptions.pathExtension;
-      path = `${baseUrl}/${modelName}/${pathExtension}`;
-    }
-
-    return path;
+    const agentId = snapshot.belongsTo('agent', { id: true });
+    return `${baseUrl}/v1/agents/${agentId}/procezzes/${id}`;
   },
 
   authorize(xhr) {

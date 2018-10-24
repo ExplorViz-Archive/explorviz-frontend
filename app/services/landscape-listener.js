@@ -40,10 +40,9 @@ export default Service.extend({
         // https://github.com/emberjs/data/issues/3455
         const landscapeRecord = self.get('store').push(jsonLandscape);
         self.set('landscapeRepo.latestLandscape', landscapeRecord);
+        self.get('landscapeRepo').triggerLatestLandscapeUpdate();
         self.get('timestampRepo').addTimestampToList(landscapeRecord.get('timestamp'));
         self.get('timestampRepo').triggerUpdated();
-  
-        self.get('landscapeRepo').triggerLatestLandscapeUpdate();
       }     
     }
   },

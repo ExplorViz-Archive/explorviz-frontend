@@ -41,14 +41,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   urlForUpdateRecord(id, modelName, snapshot) {
     const baseUrl = this.buildURL();
 
-    let path = `${baseUrl}/${modelName}`;
-
-    if(snapshot.adapterOptions && snapshot.adapterOptions.pathExtension) {
-      const pathExtension = snapshot.adapterOptions.pathExtension;
-      path = `${baseUrl}/${modelName}/${pathExtension}`;
-    }
-
-    return path;
+    return `${baseUrl}/v1/agents/${id}`;
   },
 
   authorize(xhr) {
