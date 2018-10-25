@@ -34,7 +34,13 @@ module.exports = function(defaults) {
       // add node_modules that you need in vendor modules
       // See: https://www.npmjs.com/package/ember-cli-node-modules-to-vendor
       'node_modules/three/build'
-    ]
+    ],
+
+    'ember-bootstrap': {
+      'bootstrapVersion': 4,
+      'importBootstrapFont': false,
+      'importBootstrapCSS': false
+    }
   });
 
   // export for threex.dynamictexture
