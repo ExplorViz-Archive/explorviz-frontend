@@ -38,7 +38,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
 
   // @Override
   // Overrides URL for model.save()
-  urlForUpdateRecord(id, modelName, snapshot) {
+  urlForUpdateRecord(id) {
     const baseUrl = this.buildURL();
 
     return `${baseUrl}/v1/agents/${id}`;

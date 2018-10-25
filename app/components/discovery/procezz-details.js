@@ -15,17 +15,6 @@ export default Component.extend(AlertifyHandler, {
   monitoredFlag: null,
 
   // @Override
-  init() {
-    this._super(...arguments);
-    
-    // enable bootstrap tooltip effect
-    $(document).ready(function(){
-      $('[data-toggle="tooltip"]').tooltip(); 
-    });
-  },
-
-
-  // @Override
   willInsertElement: function(){
     this._super(...arguments);
     // Save the monitoring flag on component setup
