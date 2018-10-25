@@ -4,6 +4,8 @@ import { htmlSafe } from '@ember/string';
 
 export default Component.extend({
 
+  classNames: ["relative scroll-container"],
+
   workingDirectory: computed('procezz.workingDirectory', function() {
       const workingDirectory = this.get('procezz.workingDirectory');
 

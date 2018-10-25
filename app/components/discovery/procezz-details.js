@@ -8,8 +8,6 @@ export default Component.extend(AlertifyHandler, {
 
   store: service(),
 
-  classNames: ["relative scroll-container"],
-
   showSpinner: false,
 
   monitoredFlag: null,
