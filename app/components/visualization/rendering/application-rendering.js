@@ -226,7 +226,7 @@ export default RenderingCore.extend({
 
         if(cumuClazzCommu.get('state') === "TRANSPARENT") {
           transparent = true;
-          opacityValue = 0.4;
+          opacityValue = 0.3;
         }
 
         const material = new THREE.MeshBasicMaterial({
@@ -335,7 +335,7 @@ export default RenderingCore.extend({
 
     if(component.get('state') === "TRANSPARENT") {
       transparent = true;
-      opacityValue = 0.4;
+      opacityValue = 0.2;
     }
 
     const material = new THREE.MeshLambertMaterial({
