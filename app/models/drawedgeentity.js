@@ -51,10 +51,21 @@ export default BaseEntity.extend({
   pipeColor: attr(),
   kielerEdgeReferences: null,
   hidden: attr('boolean', { defaultValue: false }),
+  highlighted: attr('boolean', { defaultValue: false}),
 
   init() {
     this._super(...arguments);
     this.set('kielerEdgeReferences', []);
-  }
+  },
+
+  highlight() {
+    this.set('highlighted', true);
+    this.set('state', 'NORMAL');
+  },
+
+  unhighlight() {
+    this.set('highlighted', false);
+    this.set('state', 'TRANSPARENT');
+  },
 
 });
