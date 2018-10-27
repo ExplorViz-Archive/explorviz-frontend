@@ -54,7 +54,7 @@ To achieve this, run the frontend with `ENABLE_MOCK=true ember s --environment=m
 
 #### Building
 
-* `npm build` or `ember build` (development) / `ember build --environment production` (production)
+* `npm build` or `ember build` (development) / `ember build --environment=production` (production)
 
 #### Generating API Documentation
 * `yuidoc .` (Might need to delete content of *tmp* folder. Be aware! The result of this command should be commited at the end of your development, since it generates a lot of LoC.)
