@@ -230,7 +230,7 @@ export default RenderingCore.extend({
         }
 
         const material = new THREE.MeshBasicMaterial({
-          color : new THREE.Color(0xf49100),
+          color : cumuClazzCommu.get('highlighted') ? new THREE.Color(0xFF0000) : new THREE.Color(0xf49100), // either red or orange, depending on highlighting status
           opacity : opacityValue,
           transparent : transparent
         });

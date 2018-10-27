@@ -33,56 +33,55 @@ export default Service.extend({
 
 
   applyHighlighting() {
+    const highlightedEntity = this.get('highlightedEntity');
 
-    const highlightedNode = this.get('highlightedEntity');
+    if (highlightedEntity === null) {
+      return;
+    }
 
-    if (highlightedNode != null) {
-      const outgoingClazzCommunications =
-        this.get('application').get('cumulatedClazzCommunications');
+    const emberModelName = highlightedEntity.constructor.modelName; // e.g. "clazz" or "component"
 
-      const emberModelName = highlightedNode.constructor.modelName;
+    // contains all clazzes which the user directly or indirectly highlighted
+    let selectedClazzes = new Set();
 
-      // contains all clazzes which the user directly or indirectly highlighted
-      let selectedClazzes = new Set();
+    // determine selectedClazzes(Set), depends on type of highlightedEntity
+    if (emberModelName === "clazz"){ // add only clazz itself if clazz is highlighted
+      selectedClazzes.add(highlightedEntity); 
+    } else if (emberModelName === "component"){ // add all clazzes of component if component is highlighted
+      highlightedEntity.getContainedClazzes(selectedClazzes); 
+    } else if (emberModelName === "cumulatedclazzcommunication"){ // add adjacent clazzes if communication is highlighted
+      selectedClazzes.add(highlightedEntity.get('sourceClazz'));
+      selectedClazzes.add(highlightedEntity.get('targetClazz'));
+    }
 
-      if (emberModelName === "clazz"){
-        selectedClazzes.add(highlightedNode);
-      } else if (emberModelName === "component"){
-        highlightedNode.getContainedClazzes(selectedClazzes); //add all clazzes of component
-      }
+    let communicatingClazzes = new Set(selectedClazzes); // contains all clazzes which the user highlighted or which communicate with a highlighted clazz
 
-      // contains all clazzes which the user highlighted or which communicate with a highlighted clazz
-      let communicatingClazzes = new Set(selectedClazzes);
-
-      outgoingClazzCommunications.forEach((clazzCommunication) => {
-        let toBeHighlighted = false;
-
-        // highlight all communication lines which have a selected clazz as an endpoint
-        selectedClazzes.forEach((clazz) => {
-          if (clazzCommunication.sourceClazz != null && clazzCommunication.get('sourceClazz').get('fullQualifiedName') === clazz.get('fullQualifiedName')){
-            communicatingClazzes.add(clazzCommunication.get('targetClazz'));
-            toBeHighlighted = true;
-          } else if(clazzCommunication.targetClazz != null && clazzCommunication.get('targetClazz').get('fullQualifiedName') === clazz.get('fullQualifiedName')){
-            communicatingClazzes.add(clazzCommunication.get('sourceClazz'));
-            toBeHighlighted = true;
-          }
-        });
-
-        // mark clazzes as transparent which do not communicate with a highlighted entity
-        if (toBeHighlighted){
-          clazzCommunication.set("state", "NORMAL");
+    // set states (either "NORMAL" or "TRANSPARENT") of communcation for highlighting
+    if (emberModelName === "component" || emberModelName === "clazz"){
+      this.applyCommunicationHighlighting(selectedClazzes, communicatingClazzes);
+    } else if (emberModelName === "cumulatedclazzcommunication"){ 
+      this.get('application.cumulatedClazzCommunications').forEach((communication) => {
+        if (communication === highlightedEntity){
+          communication.set('state', "NORMAL");
         } else {
-          clazzCommunication.set("state", "TRANSPARENT");
+          communication.set('state', "TRANSPARENT");
         }
       });
-
-      // iterate over all application entities and mark those as transparent which are not part of the highlighting
-      this.get('application.components').forEach((component) => {
-        this.updateEntityStates(component, communicatingClazzes);
-      });
     }
+
+
+    // iterate over all application entities and mark those as transparent which are not part of the highlighting
+    this.get('application.components').forEach((component) => {
+      this.updateEntityStates(component, communicatingClazzes);
+    });
   },
 
+  /**
+   * Sets all (nested) entities (components & clazzes) of a component either to TRANSPARENT or NORMAL for highlighting
+   * @param {component} component             Component which entities shall be updated
+   * @param {Set}       communicatingClazzes  Contains all clazzes which are involved in communication with highlighted entity
+   * 
+   */
   updateEntityStates(component, communicatingClazzes){
     let isPartOfHighlighting = false;
     let componentClazzes = new Set();
@@ -124,6 +123,39 @@ export default Service.extend({
     component.get('children').forEach((child) => {
       this.updateEntityStates(child, communicatingClazzes);
     });
+  },
+
+  /**
+   * Marks communication between clazzes as NORMAL or TRANSPARENT for highlighting, only used if a component or clazz is highlighted
+   * @param {*} selectedClazzes      Clazzes which are (indirectly) highlighted
+   * @param {*} communicatingClazzes Clazzes which communicate with selectedClazzes (including selectedClazzes itself)
+   */
+  applyCommunicationHighlighting(selectedClazzes, communicatingClazzes){
+    const outgoingClazzCommunications =
+    this.get('application').get('cumulatedClazzCommunications');
+
+    outgoingClazzCommunications.forEach((clazzCommunication) => {
+      let toBeHighlighted = false;
+
+      // highlight all communication lines which have a selected clazz as an endpoint
+      selectedClazzes.forEach((clazz) => {
+        if (clazzCommunication.sourceClazz != null && clazzCommunication.get('sourceClazz').get('fullQualifiedName') === clazz.get('fullQualifiedName')){
+          communicatingClazzes.add(clazzCommunication.get('targetClazz'));
+          toBeHighlighted = true;
+        } else if(clazzCommunication.targetClazz != null && clazzCommunication.get('targetClazz').get('fullQualifiedName') === clazz.get('fullQualifiedName')){
+          communicatingClazzes.add(clazzCommunication.get('sourceClazz'));
+          toBeHighlighted = true;
+        }
+      });
+
+      // mark clazzes as transparent which do not communicate with a highlighted entity
+      if (toBeHighlighted){
+        clazzCommunication.set("state", "NORMAL");
+      } else {
+        clazzCommunication.set("state", "TRANSPARENT");
+      }
+    });
+    
   }
 
 });

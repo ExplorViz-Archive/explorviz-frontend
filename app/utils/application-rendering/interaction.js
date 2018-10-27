@@ -289,6 +289,9 @@ export default Object.extend(Evented, {
       else if(emberModelName === "clazz") {
         this.get('highlighter').highlight(emberModel);
       }
+      else if(emberModelName === "cumulatedclazzcommunication"){
+        this.get('highlighter').highlight(emberModel);
+      }
 
       this.get('renderingService').redrawScene();
 
