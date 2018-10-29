@@ -36,7 +36,7 @@
     "ember-debug-logger": "1.1.0",
     "ember-export-application-global": "^2.0.0",
     "ember-file-upload": "^2.5.0",
-    "ember-load-initializers": "^1.1.0",
+    "ember-load-initializers": "^2.0.0",
     "ember-modal-dialog": "^3.0.0-beta.0",
     "ember-source": "^3.2.0",
     "ember-source-channel-url": "^1.1.0",
