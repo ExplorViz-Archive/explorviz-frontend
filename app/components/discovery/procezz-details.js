@@ -1,8 +1,6 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
-import $ from "jquery";
-
 
 export default Component.extend(AlertifyHandler, {
 
