@@ -17,6 +17,7 @@ export default Object.extend(Evented, {
   hammerHandler: null,
   popUpHandler: null,
   highlighter: service('visualization/application/highlighter'),
+  additionalData: service("additional-data"),
   hoverHandler: null,
   renderingService: service(),
 
@@ -250,6 +251,29 @@ export default Object.extend(Evented, {
 
 
         this.get('renderingService').redrawScene();
+      } else if(emberModelName === "cumulatedclazzcommunication"){
+
+        // retrive runtime informtions
+        let traces = [];
+        const aggregatedClazzCommunications = emberModel.get('aggregatedClazzCommunications');
+        aggregatedClazzCommunications.forEach((aggregatedClazzCommunication) => {
+          const clazzCommunications = aggregatedClazzCommunication.get('outgoingClazzCommunications');
+          clazzCommunications.forEach((clazzCommunication) => {
+              const runtimeInformations = clazzCommunication.get('runtimeInformations');
+              runtimeInformations.forEach((runtimeInformation) => {
+                let trace = {
+                  traceID: runtimeInformation.get('traceId'),
+                  requests: runtimeInformation.get('requests'),
+                  duration: runtimeInformation.get('overallTraceDuration')};
+                traces.push(trace);
+              });
+  
+          });
+        });
+
+        // store data and show window with additional information
+        this.set('additionalData.data', traces);
+        this.set('additionalData.showWindow', true);
       }
 
     }

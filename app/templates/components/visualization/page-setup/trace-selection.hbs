@@ -1,0 +1,14 @@
+  <table style="width:100%">
+  <tr>
+    <th>TraceID</th>
+    <th>Requests</th> 
+    <th>Trace Duration</th>
+  </tr>
+  {{#each traces as |trace|}}
+    <tr>
+    <td>{{trace.traceID}}</td>
+    <td>{{trace.requests}}</td>
+    <td>{{trace.duration}}</td>
+    </tr>
+  {{/each}}
+</table>

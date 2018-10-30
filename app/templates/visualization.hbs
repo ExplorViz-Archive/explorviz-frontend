@@ -44,6 +44,15 @@
   {{visualization/rendering/application-rendering latestApplication=landscapeRepo.latestApplication}}
 {{/if}}
 
+{{#if additionalData.showWindow}}
+  {{visualization/page-setup/data-selection
+    content=(array 
+      (component "visualization/page-setup/trace-selection"
+        traces=additionalData.data) 
+    )
+    }}
+{{/if}}
+
 {{#if renderingService.showTimeline}}
   {{time-shift}}
 {{/if}}
