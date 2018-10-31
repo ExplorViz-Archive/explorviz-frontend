@@ -252,6 +252,13 @@ export default Object.extend(Evented, {
 
         this.get('renderingService').redrawScene();
       } else if(emberModelName === "cumulatedclazzcommunication"){
+        this.get('highlighter').highlight(emberModel);
+        this.get('renderingService').redrawScene();
+
+        // only proceed if communication was not originally highlighted
+        if (!emberModel.get('highlighted')){
+          return;
+        }
 
         // retrive runtime informtions
         let traces = [];
@@ -271,7 +278,7 @@ export default Object.extend(Evented, {
           });
         });
 
-        // store data and show window with additional information
+        // store data in service and show window with additional information / selection options
         this.set('additionalData.data', traces);
         this.set('additionalData.showWindow', true);
       }

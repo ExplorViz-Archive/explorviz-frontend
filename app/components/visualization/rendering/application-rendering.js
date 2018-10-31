@@ -229,6 +229,8 @@ export default RenderingCore.extend({
           opacityValue = 0.3;
         }
 
+        console.log("Status: " + cumuClazzCommu.get('state'));
+
         const material = new THREE.MeshBasicMaterial({
           color : cumuClazzCommu.get('highlighted') ? new THREE.Color(0xFF0000) : new THREE.Color(0xf49100), // either red or orange, depending on highlighting status
           opacity : opacityValue,

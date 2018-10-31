@@ -1,9 +1,11 @@
 import Service from '@ember/service';
+import { inject as service } from "@ember/service";
 
 export default Service.extend({
 
   highlightedEntity: null,
   application: null,
+  store: service(),
 
   highlight(entity) {
 
@@ -29,6 +31,26 @@ export default Service.extend({
         this.get('application').unhighlight();
       }
     }
+  },
+
+  highlightTrace(traceID){
+    // mark all communications of a trace as highlighted
+    this.get('application.cumulatedClazzCommunications').forEach((cumulatedclazzcommunication) => {
+      const aggregatedClazzCommunications = cumulatedclazzcommunication.get('aggregatedClazzCommunications');
+      aggregatedClazzCommunications.forEach((aggregatedClazzCommunication) => {
+        const clazzCommunications = aggregatedClazzCommunication.get('outgoingClazzCommunications');
+        clazzCommunications.forEach((clazzCommunication) => {
+            const runtimeInformations = clazzCommunication.get('runtimeInformations');
+            runtimeInformations.forEach((runtimeInformation) => {
+              if (runtimeInformation.get('traceId') === traceID){
+                cumulatedclazzcommunication.set('highlighted', true);
+                cumulatedclazzcommunication.set('state', "NORMAL");
+              }
+            });
+
+        });
+      });
+    });
   },
 
 
