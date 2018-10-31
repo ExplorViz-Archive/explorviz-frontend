@@ -306,14 +306,10 @@ export default Object.extend(Evented, {
       emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
 
-      if(emberModelName === "component" && emberModel.get('foundation') === false){
+      if(emberModelName === "component" && emberModel.get('foundation') === false ||
+         emberModelName === "clazz" || 
+         emberModelName === "cumulatedclazzcommunication"){
 
-        this.get('highlighter').highlight(emberModel);
-      }
-      else if(emberModelName === "clazz") {
-        this.get('highlighter').highlight(emberModel);
-      }
-      else if(emberModelName === "cumulatedclazzcommunication"){
         this.get('highlighter').highlight(emberModel);
       }
 
