@@ -1,17 +1,14 @@
 <div class="container">
-  <nav class="explorviz-visualization-navbar">
+  {{#bs-navbar class="explorviz-visualization-navbar" type=type backgroundColor=bg onCollapse=(action (mut collapsed) true) onExpand=(action (mut collapsed) false) as |navbar|}}
     <a class="navbar-brand" href="#">Controls</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" 
-      data-target="#navbarVisualization" aria-controls="navbarVisualization" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarVisualization">
+    {{navbar.toggle}}
+    {{#navbar.content}}
         <!-- Right content -->
         <ul class="navbar-nav mr-auto">
           {{#each content as |componentName|}}
             {{componentName}}
           {{/each}}
         </ul>
-		</div>
-  </nav>
+		{{/navbar.content}}
+  {{/bs-navbar}}
 </div>

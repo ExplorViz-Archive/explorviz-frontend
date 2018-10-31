@@ -1,18 +1,14 @@
-<nav class="explorviz-top-navbar">
+{{#bs-navbar class="explorviz-top-navbar" type=type backgroundColor=bg onCollapse=(action (mut collapsed) true) onExpand=(action (mut collapsed) false) as |navbar|}}
   <a class="navbar-brand" style="width: 150px;" target="_blank" href="http://www.explorviz.net">
     <img style="width: 100%;" src="images/explorviz-transparent.png"/>
   </a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse"
-    data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
-    aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+  {{navbar.toggle}}
+  {{#navbar.content}}
       <!-- Left content -->
       {{page-setup/navbar-routes}}
 
       <!-- Right content -->
-      <ul class="navbar-nav ml-auto">
+      {{#navbar.nav as |nav|}}
         {{page-setup/navbar-glyphicons}}
 
         {{#link-to "configuration" tagName="li" class="nav-item"}}
@@ -21,14 +17,14 @@
           {{/link-to}}
         {{/link-to}}
         
-        <li class="nav-item">
+        {{#nav.item class="nav-item-with-def-cursor"}}
           <span class="navbar-text">Signed in as <b>{{username}}</b></span>
-        </li>
-        <li class="nav-item pl-lg-3">
-          <a class="nav-link" {{action (route-action 'logout')}} style="cursor:pointer;" title="Logout">
+        {{/nav.item}}
+        {{#nav.item class="pl-lg-2"}}
+          <a class="nav-link-with-cursor" {{action (route-action 'logout')}} title="Logout">
             {{svg-jar "sign-out" class="octicon align-middle" id="configurationButton"}}
           </a>
-        </li>
-      </ul>
-  </div>
-</nav>
+        {{/nav.item}}
+      {{/navbar.nav}}
+  {{/navbar.content}}
+{{/bs-navbar}}
