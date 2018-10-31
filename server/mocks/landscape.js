@@ -338,7 +338,7 @@ module.exports = function(app) {
         "id": "132",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 0,
+          "traceId": 2,
           "overallTraceDuration": 8228,
           "requests": 800,
           "averageResponseTime": 282,
@@ -2485,7 +2485,7 @@ module.exports = function(app) {
         "id": "152",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 0,
+          "traceId": 3,
           "overallTraceDuration": 8673,
           "requests": 1000,
           "averageResponseTime": 299,
@@ -4701,7 +4701,7 @@ module.exports = function(app) {
         "id": "166",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 0,
+          "traceId": 3,
           "overallTraceDuration": 2705,
           "requests": 500,
           "averageResponseTime": 418,
@@ -4716,7 +4716,7 @@ module.exports = function(app) {
         "id": "136",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 0,
+          "traceId": 1,
           "overallTraceDuration": 6835,
           "requests": 60,
           "averageResponseTime": 49,
@@ -4742,7 +4742,7 @@ module.exports = function(app) {
         "id": "156",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 0,
+          "traceId": 1,
           "overallTraceDuration": 1903,
           "requests": 150,
           "averageResponseTime": 895,
@@ -5190,7 +5190,7 @@ module.exports = function(app) {
         "id": "144",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 0,
+          "traceId": 1,
           "overallTraceDuration": 5087,
           "requests": 1000,
           "averageResponseTime": 16,
@@ -6987,7 +6987,7 @@ module.exports = function(app) {
         "id": "164",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 0,
+          "traceId": 2,
           "overallTraceDuration": 1047,
           "requests": 3500,
           "averageResponseTime": 596,
@@ -7426,7 +7426,7 @@ module.exports = function(app) {
         "id": "128",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 0,
+          "traceId": 1,
           "overallTraceDuration": 4531,
           "requests": 40,
           "averageResponseTime": 721,
