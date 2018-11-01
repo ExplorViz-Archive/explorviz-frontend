@@ -1,11 +1,14 @@
 {{#bs-tab as |tab|}}
+
   {{#tab.pane title="General"}}
     TODO: see issue https://github.com/ExplorViz/explorviz-frontend/issues/80
   {{/tab.pane}}
+
   <!-- Tab pane for each addon that is registered at configurationService -->
   {{#each configurationService.pluginSettings as |addon|}}
-    {{#tab.pane title=(addon)}}
+    {{#tab.pane title=addon}}
       {{component addon}}
     {{/tab.pane}}
   {{/each}}
+
 {{/bs-tab}}
