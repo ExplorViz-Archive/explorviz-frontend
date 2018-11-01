@@ -44,7 +44,6 @@ export default Service.extend({
             runtimeInformations.forEach((runtimeInformation) => {
               if (runtimeInformation.get('traceId') === traceID){
                 cumulatedclazzcommunication.set('highlighted', true);
-                cumulatedclazzcommunication.set('state', "NORMAL");
               }
             });
 
