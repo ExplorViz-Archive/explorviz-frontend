@@ -261,24 +261,8 @@ export default Object.extend(Evented, {
         }
 
         // retrive runtime informtions
-        let traces = [];
-        const aggregatedClazzCommunications = emberModel.get('aggregatedClazzCommunications');
-        aggregatedClazzCommunications.forEach((aggregatedClazzCommunication) => {
-          const clazzCommunications = aggregatedClazzCommunication.get('outgoingClazzCommunications');
-          clazzCommunications.forEach((clazzCommunication) => {
-              const runtimeInformations = clazzCommunication.get('runtimeInformations');
-              runtimeInformations.forEach((runtimeInformation) => {
-                let trace = {
-                  traceID: runtimeInformation.get('traceId'),
-                  requests: runtimeInformation.get('requests'),
-                  duration: runtimeInformation.get('overallTraceDuration')};
-                traces.push(trace);
-              });
-  
-          });
-        });
-
-        // store data in service and show window with additional information / selection options
+        let traces = emberModel.getRuntimeInformations();
+        
         this.set('additionalData.data', traces);
         this.set('additionalData.showWindow', true);
       }
