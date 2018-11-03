@@ -8,9 +8,9 @@ export default Component.extend({
     renderingService: service(),
 
     actions: {
-        traceSelected(traceID) {
+        traceSelected(traceId) {
             this.set('additionalData.showWindow', false);
-            this.get('highlighter').highlightTrace(traceID);
+            this.get('highlighter').highlightTrace(traceId);
             this.get('renderingService').redrawScene();
         }
       },
