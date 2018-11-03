@@ -5,11 +5,10 @@
     <th>Trace Duration</th>
   </tr>
   {{#each traces as |trace|}}
-    <tr {{action "traceSelected" trace.traceID}}>
-    <td>{{trace.traceID}}
-    </td>
+    <tr {{action "traceSelected" trace.traceId}}>
+    <td>{{trace.traceId}} </td>
     <td>{{trace.requests}}</td>
-    <td>{{trace.duration}}</td>
+    <td>{{trace.overallTraceDuration}}</td>
     </tr>
   {{/each}}
 </table>

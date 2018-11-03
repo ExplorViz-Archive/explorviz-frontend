@@ -211,8 +211,6 @@ export default Object.extend(Evented, {
       // retrieves runtime information for a specific aggregatedClazzCommunication (same sourceClazz and tagetClazz)
       function getRuntimeInformations(cumulatedClazzCommunication) {
 
-        const aggregatedClazzCommunications = cumulatedClazzCommunication.get('aggregatedClazzCommunications');
-
         let runtimeStats = {
           // sum up
           totalOverallTraceDuration: 0,
@@ -226,25 +224,18 @@ export default Object.extend(Evented, {
 
         var runtimeInformationCounter = 0;
 
-        aggregatedClazzCommunications.forEach((aggregatedClazzCommunication) => {
+        let runtimeInformations = cumulatedClazzCommunication.getRuntimeInformations();
 
-          const clazzCommunications = aggregatedClazzCommunication.get('outgoingClazzCommunications');
+        // accumulate runtime information
+        runtimeInformations.forEach( (runtimeInformation) => {
+          runtimeStats.involvedTraces.push(runtimeInformation.get('traceId'));
+          runtimeStats.totalOverallTraceDuration += runtimeInformation.get('overallTraceDuration');
+          runtimeStats.totalAverageResponseTime += runtimeInformation.get('averageResponseTime');
 
-          // retrieves runtime information for every clazzCommunication (same sourceClazz, targetClazz, and operationName)
-          clazzCommunications.forEach((clazzCommunication) => {
-              const runtimeInformations = clazzCommunication.get('runtimeInformations');
-              runtimeInformations.forEach((runtimeInformation) => {
-
-                runtimeStats.involvedTraces.push(runtimeInformation.get('traceId'));
-                runtimeStats.totalOverallTraceDuration += runtimeInformation.get('overallTraceDuration');
-                runtimeStats.totalAverageResponseTime += runtimeInformation.get('averageResponseTime');
-
-                runtimeInformationCounter++;
-              });
-
-          });
+          runtimeInformationCounter++;
         });
 
+        // calculate averages
         if (runtimeInformationCounter > 0) {
           runtimeStats.avgAverageResponseTime = runtimeStats.totalAverageResponseTime / runtimeInformationCounter;
           runtimeStats.avgOverallTraceDuration = runtimeStats.totalOverallTraceDuration / runtimeInformationCounter;

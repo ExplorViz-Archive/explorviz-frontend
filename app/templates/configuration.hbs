@@ -1,29 +1,18 @@
 {{#bs-tab as |tab|}}
-  {{#tab.pane title="Settings"}}
-    <h3>General Settings</h3>
-    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+
+  {{#tab.pane title="General"}}
+    TODO: see issue https://github.com/ExplorViz/explorviz-frontend/issues/80
   {{/tab.pane}}
-  {{#tab.pane title="Addons"}}
-    <h3>Addon Settings</h3>
-    <div class="panel-group pre-scrollable" id="configurationpanelgroup">
-      {{#each configurationService.pluginSettings as |addon|}}
-        <div class="panel panel-default">
-          <div data-toggle="collapse" data-target='#{{addon}}' class="panel-heading container-shadow" style="cursor:pointer;">
-            <h4 class="panel-title">
-              <a data-toggle="collapse" href='#{{addon}}'> {{addon}} </a>
-            </h4>
-          </div>
-          <div id={{addon}} class="panel-collapse collapse">
-            <div class="panel-body">
-              {{component addon}}
-            </div>
-          </div>
-        </div>
-      {{/each}}
-    </div>
-  {{/tab.pane}}
+
+  <!-- Tab pane for each addon that is registered at configurationService -->
+  {{#each configurationService.pluginSettings as |addon|}}
+    {{#tab.pane title=addon}}
+      {{component addon}}
+    {{/tab.pane}}
+  {{/each}}
   {{#tab.pane title="User Management"}}
     <h3>User Management</h3>
     {{user-management}}
   {{/tab.pane}}
+
 {{/bs-tab}}

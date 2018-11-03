@@ -5,7 +5,7 @@ html {
   min-height: 100%;
 }
 
-#footer {
+.footer {
   position: fixed;
   left: 0;
   bottom: 0;
@@ -15,7 +15,7 @@ html {
   background-color: #f5f5f5;
 }
 
-#footer ul > li:nth-child(n+2) {
+.footer ul > li:nth-child(n+2) {
   @extend .ml-2;
   @extend .pl-2;
   @extend .ml-md-3;
@@ -23,7 +23,7 @@ html {
   border-left: 1px solid;
 }
 
-#footer ul {
+.footer ul {
   list-style: none;
   display: flex;
   flex-direction: row;
