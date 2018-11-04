@@ -15,8 +15,6 @@ import CalcCenterAndZoom from
 import FoundationBuilder from
     'explorviz-frontend/utils/application-rendering/foundation-builder';
 
-import debug from 'debug';
-
 
 /**
  * Renderer for application visualization.
@@ -49,7 +47,7 @@ export default RenderingCore.extend({
   initRendering() {
     this._super(...arguments);
 
-    debug("init application rendering");
+    this.debug("init application rendering");
 
     this.set('oldRotation', {x: 0, y: 0});
 
@@ -112,7 +110,7 @@ export default RenderingCore.extend({
   cleanup() {
     this._super(...arguments);
 
-    debug("cleanup application rendering");
+    this.debug("cleanup application rendering");
 
     // remove foundation for re-rendering
     this.get('foundationBuilder').removeFoundation(this.get('store'));
@@ -136,7 +134,7 @@ export default RenderingCore.extend({
    * @method cleanAndUpdateScene
    */
   cleanAndUpdateScene() {
-    debug("clean application rendering");
+    this.debug("clean application rendering");
 
     // save old rotation
     this.set('oldRotation', this.get('application3D').rotation);
@@ -169,7 +167,7 @@ export default RenderingCore.extend({
    */
   populateScene() {
     this._super(...arguments);
-    debug("populate application rendering");
+    this.debug("populate application rendering");
 
     //const emberApplication = this.get('landscapeRepo.latestApplication');
     const emberApplication = this.get('latestApplication');

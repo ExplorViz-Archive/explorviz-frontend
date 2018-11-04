@@ -6,7 +6,7 @@ import { Promise } from 'rsvp';
 import THREE from "three";
 import config from 'explorviz-frontend/config/environment';
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
-import debug from 'debug';
+import debugLogger from 'ember-debug-logger';
 
 /**
 * This component contains the core mechanics of the different (three.js-based)
@@ -27,6 +27,8 @@ import debug from 'debug';
 * @submodule visualization.rendering
 */
 export default Component.extend(Evented, THREEPerformance, {
+
+  debug: debugLogger(),
 
   state: null,
 
@@ -98,7 +100,7 @@ export default Component.extend(Evented, THREEPerformance, {
    */
   initRendering() {
 
-    debug('init rendering-core');
+    this.debug('init rendering-core');
 
     const self = this;
 
