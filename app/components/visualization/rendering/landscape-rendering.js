@@ -1,6 +1,7 @@
 import RenderingCore from './rendering-core';
 import { inject as service } from '@ember/service';
 import { observer } from '@ember/object';
+import debug from 'debug';
 
 
 import THREE from "three";
@@ -43,13 +44,6 @@ export default RenderingCore.extend({
   openSymbol: null,
   closeSymbol: null,
 
-
-  messages: service('landscape-listener'),
-
-  onNewMessage: observer('messages.content.[]', function(){
-    this.debug("SSE received", this.get('messages.content.firstObject'));
-  }),
-
   // @Override
   /**
    * TODO
@@ -59,7 +53,7 @@ export default RenderingCore.extend({
   initRendering() {
     this._super(...arguments);
 
-    this.debug("init landscape-rendering");
+    debug("init landscape-rendering");
 
     this.onReSetupScene = function() {
       this.set('centerAndZoomCalculator.centerPoint', null);
@@ -114,7 +108,7 @@ export default RenderingCore.extend({
   cleanup() {
     this._super(...arguments);
 
-    this.debug("cleanup landscape rendering");
+    debug("cleanup landscape rendering");
 
     this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
@@ -137,7 +131,7 @@ export default RenderingCore.extend({
   cleanAndUpdateScene() {
     this._super(...arguments);
 
-    this.debug("clean and populate landscape-rendering");
+    debug("clean and populate landscape-rendering");
 
     this.set('interaction.raycastObjects', this.get('scene.children'));
   },
@@ -151,8 +145,7 @@ export default RenderingCore.extend({
    */
   populateScene() {
     this._super(...arguments);
-
-    this.debug(this.get('renderingService'));
+    debug("populate landscape rendering");
 
     const self = this;
 
