@@ -239,7 +239,30 @@ export default RenderingCore.extend({
 
         const pipe = this.cylinderMesh(start, end, material, thickness);
 
+
+
         pipe.userData.model = cumuClazzCommu;
+
+        // indicate communication for direction for (indirectly) highlighted communication
+        if (cumuClazzCommu.get('highlighted') ||
+            cumuClazzCommu.get('sourceClazz.highlighted') || 
+            cumuClazzCommu.get('targetClazz.highlighted')){
+
+              // keep track of drawn arrow to prevent duplicates
+              let drewSecondArrow = false;
+
+              // add arrow from in direction of source to target clazz
+              self.addCommunicationArrow(start, end);
+
+              // check for bidirectional communication
+              cumuClazzCommu.get('aggregatedClazzCommunications').forEach( (aggrComm) => {
+                if ((cumuClazzCommu.get('sourceClazz.fullQualifiedName') === aggrComm.get('targetClazz.fullQualifiedName') && !drewSecondArrow)){
+                  self.addCommunicationArrow(end, start);
+                  drewSecondArrow = true;
+                }
+              });
+        }
+
         self.get('application3D').add(pipe);
       }
     });
@@ -372,6 +395,34 @@ export default RenderingCore.extend({
     self.get('application3D').add(mesh);
 
   } ,// END createBox
+
+  /**
+   * Draws an small black arrow
+   * @param {*} start start vector of the associated communication
+   * @param {*} end   end vector of the associated communication
+   */
+  addCommunicationArrow(start, end){
+
+    // determine (almost the) middle
+    let dir = end.clone().sub(start);
+    let len = dir.length();
+    // do not draw precisely in the middle to leave a small gap in case of bidirectional communication
+    let halfVector = dir.normalize().multiplyScalar(len*0.51);
+    let middle = start.clone().add(halfVector);
+
+    // normalize the direction vector (convert to vector of length 1)
+    dir.normalize();
+
+    // arrow properties
+    let origin = new THREE.Vector3(middle.x, middle.y + 0.8, middle.z);
+    let headLength = 1;
+    let length = headLength + 0.00001; // body of arrow not visible
+    let color = 0x000000; // black
+
+    let arrow = new THREE.ArrowHelper(dir, origin, length, color , 1, 0.5);
+
+    this.get('application3D').add(arrow);
+  }, // END addCommunicationArrow
 
 
   resetRotation() {
