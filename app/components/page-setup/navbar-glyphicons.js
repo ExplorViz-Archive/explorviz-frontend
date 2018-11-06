@@ -13,5 +13,8 @@ import {inject as service} from '@ember/service';
 */
 export default Component.extend({
 
+  // No Ember generated container
+  tagName: '',
+
   pageSetupService: service("page-setup")
 });

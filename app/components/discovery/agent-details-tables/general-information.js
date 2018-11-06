@@ -4,6 +4,9 @@ import { alias } from '@ember/object/computed';
 
 export default Component.extend({
 
+  // No Ember generated container
+  tagName: '',
+
   toggleIsHidden: alias('agent.isHidden'),  
 
   lastDiscoveryTimeAsDate: computed('agent.lastDiscoveryTime', function() {

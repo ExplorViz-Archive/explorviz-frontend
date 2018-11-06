@@ -5,9 +5,10 @@ import { computed } from '@ember/object';
 
 export default Component.extend(AlertifyHandler, {
 
-  store: service(),
+  // No Ember generated container
+  tagName: '',
 
-  classNames: ["relative scroll-container"],
+  store: service(),
 
   showSpinner: false,
 

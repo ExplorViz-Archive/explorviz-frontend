@@ -13,6 +13,9 @@ import debugLogger from 'ember-debug-logger';
 */
 export default Component.extend({
 
+  // No Ember generated container
+  tagName: '',
+
   debug: debugLogger(),
 
   session: service(),

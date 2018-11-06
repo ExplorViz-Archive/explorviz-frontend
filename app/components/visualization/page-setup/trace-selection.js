@@ -3,6 +3,9 @@ import { inject as service } from "@ember/service";
 
 export default Component.extend({
 
+    // No Ember generated container
+    tagName: '',
+
     additionalData: service('additional-data'),
     highlighter: service('visualization/application/highlighter'),
     renderingService: service(),

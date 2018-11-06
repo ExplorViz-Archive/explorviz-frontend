@@ -13,6 +13,9 @@ import $ from 'jquery';
  */
 export default Component.extend({
 
+  // No Ember generated container
+  tagName: '',
+
   timestampRepo: service("repos/timestamp-repository"),
   versionbarLoad: service("versionbar-load"),
   reloadHandler: service("reload-handler"),

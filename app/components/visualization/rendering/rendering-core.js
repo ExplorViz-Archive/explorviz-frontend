@@ -28,6 +28,9 @@ import debugLogger from 'ember-debug-logger';
 */
 export default Component.extend(Evented, THREEPerformance, {
 
+  // No Ember generated container
+  tagName: '',
+
   debug: debugLogger(),
 
   state: null,
@@ -41,8 +44,6 @@ export default Component.extend(Evented, THREEPerformance, {
   reloadHandler: service("reload-handler"),
   landscapeRepo: service("repos/landscape-repository"),
   renderingService: service(),
-
-  classNames: ['main-content-majority'],
 
   scene : null,
   webglrenderer: null,

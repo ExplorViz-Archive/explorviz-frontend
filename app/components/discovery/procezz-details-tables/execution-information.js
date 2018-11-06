@@ -4,7 +4,8 @@ import { htmlSafe } from '@ember/string';
 
 export default Component.extend({
 
-  classNames: ["relative scroll-container"],
+  // No Ember generated container
+  tagName: '',
 
   workingDirectory: computed('procezz.workingDirectory', function() {
       const workingDirectory = this.get('procezz.workingDirectory');

@@ -3,12 +3,13 @@ import { inject as service } from "@ember/service";
 
 export default Component.extend({
 
+  // No Ember generated container
+  tagName: '',
+
   store: service(),
   renderingService: service(),
   landscapeRepo: service('repos/landscape-repository'),
   highlighter: service('visualization/application/highlighter'),
-
-  tagName: '',
 
   actions: {
     focusEntity() {

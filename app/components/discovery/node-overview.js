@@ -8,6 +8,9 @@ import debugLogger from 'ember-debug-logger';
 
 export default Component.extend(AlertifyHandler, {
 
+  // No Ember generated container
+  tagName: '',
+
   debug: debugLogger(),
 
   agentRepo: service("repos/agent-repository"),

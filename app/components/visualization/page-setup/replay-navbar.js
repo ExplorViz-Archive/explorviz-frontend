@@ -10,6 +10,9 @@ import debugLogger from 'ember-debug-logger';
 
 export default Component.extend(AlertifyHandler, FileSaverMixin, {
 
+  // No Ember generated container
+  tagName: '',
+
   debug: debugLogger(),
 
   renderingService: service(),

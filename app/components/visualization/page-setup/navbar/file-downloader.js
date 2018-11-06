@@ -3,6 +3,7 @@ import { inject as service } from "@ember/service";
 
 export default Component.extend({
 
+  // No Ember generated container
   tagName: '',
 
   fileDownloader: service('file-downloader'),

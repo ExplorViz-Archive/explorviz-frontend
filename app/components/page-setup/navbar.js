@@ -4,6 +4,9 @@ import { computed } from "@ember/object";
 
 export default Component.extend({
 
+  // No Ember generated container
+  tagName: '',
+
   session: service('session'),
 
   username: computed(function(){
