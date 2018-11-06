@@ -6,6 +6,7 @@ import { Promise } from 'rsvp';
 import THREE from "three";
 import config from 'explorviz-frontend/config/environment';
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
+import debugLogger from 'ember-debug-logger';
 
 /**
 * This component contains the core mechanics of the different (three.js-based)
@@ -26,6 +27,8 @@ import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
 * @submodule visualization.rendering
 */
 export default Component.extend(Evented, THREEPerformance, {
+
+  debug: debugLogger(),
 
   state: null,
 
@@ -93,7 +96,7 @@ export default Component.extend(Evented, THREEPerformance, {
    * to call other important function, e.g. "initInteraction" as shown in
    * {{#crossLink "Landscape-Rendering/initInteraction:method"}}{{/crossLink}}.
    *
-   * @method initRendering
+   * @method initRenderings
    */
   initRendering() {
 

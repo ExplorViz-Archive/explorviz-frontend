@@ -1,7 +1,5 @@
 import RenderingCore from './rendering-core';
 import { inject as service } from '@ember/service';
-import { observer } from '@ember/object';
-
 
 import THREE from "three";
 
@@ -42,13 +40,6 @@ export default RenderingCore.extend({
 
   openSymbol: null,
   closeSymbol: null,
-
-
-  messages: service('landscape-listener'),
-
-  onNewMessage: observer('messages.content.[]', function(){
-    this.debug("SSE received", this.get('messages.content.firstObject'));
-  }),
 
   // @Override
   /**
@@ -151,8 +142,7 @@ export default RenderingCore.extend({
    */
   populateScene() {
     this._super(...arguments);
-
-    this.debug(this.get('renderingService'));
+    this.debug("populate application rendering");
 
     const self = this;
 

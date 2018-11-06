@@ -4,6 +4,12 @@
     TODO: see issue https://github.com/ExplorViz/explorviz-frontend/issues/80
   {{/tab.pane}}
 
+  {{#tab.pane title="User Management"}}
+    <br>
+    <h3>User Management</h3>
+    {{user-management}}
+  {{/tab.pane}}
+
   <!-- Tab pane for each addon that is registered at configurationService -->
   {{#each configurationService.pluginSettings as |addon|}}
     {{#tab.pane title=addon}}

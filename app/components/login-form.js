@@ -1,5 +1,6 @@
 import { inject as service } from "@ember/service";
 import Component from '@ember/component';
+import debugLogger from 'ember-debug-logger';
 
 /**
 * TODO
@@ -11,6 +12,8 @@ import Component from '@ember/component';
 * @submodule page
 */
 export default Component.extend({
+
+  debug: debugLogger(),
 
   session: service(),
   router: service('-routing'),

@@ -2,10 +2,13 @@ import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import nameSelector from 'explorviz-frontend/utils/helpers/name-selector';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import debugLogger from 'ember-debug-logger';
 
 /* global cytoscape */
 
 export default Component.extend(AlertifyHandler, {
+
+  debug: debugLogger(),
 
   agentRepo: service("repos/agent-repository"),
   configuration: service("configuration"),
