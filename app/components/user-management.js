@@ -13,7 +13,6 @@ export default Component.extend({
       const userData = this.getProperties('username', 'password');
 
       const userRecord = this.get('store').createRecord('user', {
-        id: "-1",
         username: userData.username,
         password: userData.password,
         roles: ["admin"]
