@@ -26,8 +26,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   init() {
     this.set('headers', {
       "Accept": "application/vnd.api+json"
-    });
- 
+    }); 
   },
 
   //@Override
