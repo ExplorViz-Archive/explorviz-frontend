@@ -18,7 +18,7 @@
   "devDependencies": {
     "ember-auto-import": "^1.2.5",
     "ember-cli-dependency-checker": "^3.0.0",
-    "ember-cli-eslint": "^4.2.3",
+    "ember-cli-eslint": "^5.0.0",
     "ember-cli-favicon": "^1.0.0",
     "ember-cli-file-saver": "^1.2.2",
     "ember-cli-htmlbars-inline-precompile": "^1.0.3",
