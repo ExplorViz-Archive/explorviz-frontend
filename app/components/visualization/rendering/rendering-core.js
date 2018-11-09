@@ -8,6 +8,8 @@ import config from 'explorviz-frontend/config/environment';
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
 import debugLogger from 'ember-debug-logger';
 
+import $ from 'jquery';
+
 /**
 * This component contains the core mechanics of the different (three.js-based)
 * renderer. All functions below are called in a determined order, hence you only
@@ -106,10 +108,10 @@ export default Component.extend(Evented, THREEPerformance, {
     const self = this;
 
     // get size if outer ember div
-    const height = this.$()[0].clientHeight;
-    const width = this.$()[0].clientWidth;
+    const height = $('#vizContainer')[0].clientHeight * 0.6;  // 0.6 since canvas height is 60%
+    const width = $('#vizContainer')[0].clientWidth;
 
-    const canvas = this.$('#threeCanvas')[0];
+    const canvas = $('#threeCanvas')[0];
 
     this.set('canvas', canvas);
 
@@ -172,13 +174,13 @@ export default Component.extend(Evented, THREEPerformance, {
 
     const self = this;
 
-    this.$(window).on('resize.visualization', function(){
-      const outerDiv = this.$('.main-content-majority')[0];
+    $(window).on('resize.visualization', function(){
+      const outerDiv = $('.main-content-majority')[0];
 
       if(outerDiv) {
 
-        const height = Math.round(this.$('.main-content-majority').height());
-        const width = Math.round(this.$('.main-content-majority').width());
+        const height = Math.round($('.main-content-majority').height());
+        const width = Math.round($('.main-content-majority').width());
 
         self.set('camera.aspect', width / height);
         self.get('camera').updateProjectionMatrix();
@@ -509,7 +511,7 @@ export default Component.extend(Evented, THREEPerformance, {
 
     this.removePerformanceMeasurement();
 
-    this.$(window).off('resize.visualization');
+    $(window).off('resize.visualization');
     this.get('viewImporter').off('transmitView');
     this.get('renderingService').off('reSetupScene');
     this.get('landscapeRepo').off('updated');

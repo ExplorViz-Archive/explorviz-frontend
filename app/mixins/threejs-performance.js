@@ -1,6 +1,8 @@
 import Mixin from '@ember/object/mixin';
 import Stats from "stats.js";
 
+import $ from 'jquery';
+
 /* global THREEx */
 
 /**
@@ -38,8 +40,8 @@ export default Mixin.create({
 
   removePerformanceMeasurement() {
 
-    this.$(this.get('stats').dom).remove();
-    this.$(this.get('threexStats').domElement).remove();
+    $(this.get('stats').dom).remove();
+    $(this.get('threexStats').domElement).remove();
 
   }
 
