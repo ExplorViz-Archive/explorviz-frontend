@@ -7,6 +7,7 @@ import THREE from "three";
 import config from 'explorviz-frontend/config/environment';
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
 import debugLogger from 'ember-debug-logger';
+import $ from 'jquery'
 
 /**
 * This component contains the core mechanics of the different (three.js-based)
@@ -106,10 +107,10 @@ export default Component.extend(Evented, THREEPerformance, {
     const self = this;
 
     // get size if outer ember div
-    const height = this.$()[0].clientHeight;
-    const width = this.$()[0].clientWidth;
+    const height = $('#rendering').innerHeight();
+    const width = $('#rendering').innerWidth() - 2*15;
 
-    const canvas = this.$('#threeCanvas')[0];
+    const canvas = $('#threeCanvas')[0];
 
     this.set('canvas', canvas);
 
@@ -168,27 +169,35 @@ export default Component.extend(Evented, THREEPerformance, {
   },
 
 
+  updateCanvasSize() {
+    const outerDiv = $('#vizspace')[0];
+
+    if(outerDiv) {
+      if(!this.get('camera') || !this.get('webglrenderer'))
+        return;
+
+      $('#threeCanvas').hide();
+
+      const height = Math.round($('#rendering').innerHeight());
+      const width = Math.round($('#rendering').innerWidth());
+
+      this.set('camera.aspect', width / height);
+      this.get('camera').updateProjectionMatrix();
+
+      this.get('webglrenderer').setSize(width, height);
+
+      this.onResized();
+
+      $('#threeCanvas').show();
+    }
+  },
+
+
   initListener() {
 
     const self = this;
 
-    this.$(window).on('resize.visualization', function(){
-      const outerDiv = this.$('.main-content-majority')[0];
-
-      if(outerDiv) {
-
-        const height = Math.round(this.$('.main-content-majority').height());
-        const width = Math.round(this.$('.main-content-majority').width());
-
-        self.set('camera.aspect', width / height);
-        self.get('camera').updateProjectionMatrix();
-
-        self.get('webglrenderer').setSize(width, height);
-
-        self.onResized();
-      }
-    });
-
+    $(window).on('resize.visualization', this.updateCanvasSize.bind(this));
 
     this.get('viewImporter').on('transmitView', function(newState) {
         self.set('newState', newState);
@@ -197,6 +206,10 @@ export default Component.extend(Evented, THREEPerformance, {
 
     this.get('renderingService').on('reSetupScene', function() {
       self.onReSetupScene();
+    });
+
+    this.get('renderingService').on('resizeCanvas', function() {
+      self.updateCanvasSize();
     });
 
 
@@ -509,7 +522,7 @@ export default Component.extend(Evented, THREEPerformance, {
 
     this.removePerformanceMeasurement();
 
-    this.$(window).off('resize.visualization');
+    $(window).off('resize.visualization');
     this.get('viewImporter').off('transmitView');
     this.get('renderingService').off('reSetupScene');
     this.get('landscapeRepo').off('updated');

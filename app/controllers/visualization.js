@@ -4,6 +4,7 @@ import { computed } from '@ember/object';
 import { observer } from '@ember/object';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import ENV from 'explorviz-frontend/config/environment';
+import $ from 'jquery'
 
 /**
 * TODO
@@ -24,6 +25,10 @@ export default Controller.extend(AlertifyHandler, {
   additionalData: service("additional-data"),
 
   state: null,
+
+  sidebarcollapsed: true,
+  sidebarmoving: false,
+  showsidebar: false,
 
   // Specify query parameters
   queryParams: ['timestamp', 'appID', 'camX', 'camY', 'camZ', 'condition'],
@@ -78,6 +83,40 @@ export default Controller.extend(AlertifyHandler, {
     resetView() {
       this.set('viewImporter.importedURL', false);
       this.get('renderingService').reSetupScene();
+    },
+
+    toggle() {
+      if(this.get('sidebarmoving'))
+        return;
+
+      this.set('sidebarmoving', true);
+
+      if(this.get('sidebarcollapsed')) {
+        this.set('showsidebar', true);
+        $('#dataselection').addClass('slideInRight col-12 col-xl-4');
+        $('#dataselection').removeClass('slideOutRight col-0');
+        $('#vizspace').addClass('col-xl-8');
+        $('#vizspace').removeClass('col-xl-12');
+        $('#threeCanvas').hide();
+      } else {
+        $('#dataselection').addClass('slideOutRight');
+        $('#dataselection').removeClass('slideInRight');
+      }
+
+
+      setTimeout(() => {
+        this.set('sidebarmoving', false);
+        this.set('sidebarcollapsed', !this.get('sidebarcollapsed'));
+        this.set('showsidebar', !this.get('sidebarcollapsed'));
+        if(this.get('sidebarcollapsed')) {
+          $('#vizspace').removeClass('col-xl-8');
+          $('#dataselection').addClass('col-0');
+          $('#dataselection').removeClass('col-xl-4 col-12');
+        }
+        this.get('renderingService').resizeCanvas();
+        $('#threeCanvas').show();
+      }, 1000);
+
     }
     
   },

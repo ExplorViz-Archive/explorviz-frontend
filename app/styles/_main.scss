@@ -1,22 +1,39 @@
 html, body {
-  height: 100%;
   overflow: hidden;
+  height: 100vh;
 }
 
 body > .ember-view {
   height: 100%;
+  display: flex;
+  flex-flow: column;
 }
 
 .main-content {
-  height: 100%;
   overflow: hidden;
-  margin-right: 5px;
-  margin-left: 5px;
+  @extend .ml-3;
+  @extend .mr-3;
+  flex-grow: 1;
+  display: flex;
+  flex-flow: column;
 }
 
-.main-content-majority {
-  max-height: 60%;
-  width: 100%;
+.main-content > .row {
+  flex-grow: 1;
+}
+
+#vizspace {
+  display: flex;
+  flex-flow: column;
+}
+
+#rendering {
+  flex-grow: 1;
+}
+
+#dataselection {
+  display: flex;
+  flex-flow: row;
 }
 
 .canvasViz {
