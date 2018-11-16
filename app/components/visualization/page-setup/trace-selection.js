@@ -12,7 +12,6 @@ export default Component.extend({
 
     actions: {
         traceSelected(traceId) {
-            this.set('additionalData.showWindow', false);
             this.get('highlighter').highlightTrace(traceId);
             this.get('renderingService').redrawScene();
         }
