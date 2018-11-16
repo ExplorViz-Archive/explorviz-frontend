@@ -813,13 +813,13 @@ module.exports = function(app) {
           "sourceClazz": {
             "data": {
               "type": "clazz",
-              "id": "109"
+              "id": "80"
             }
           },
           "targetClazz": {
             "data": {
               "type": "clazz",
-              "id": "80"
+              "id": "109"
             }
           },
           "outgoingClazzCommunications": {
@@ -1623,13 +1623,13 @@ module.exports = function(app) {
           "sourceClazz": {
             "data": {
               "type": "clazz",
-              "id": "106"
+              "id": "93"
             }
           },
           "targetClazz": {
             "data": {
               "type": "clazz",
-              "id": "93"
+              "id": "106"
             }
           },
           "aggregatedClazzCommunications": {
@@ -2485,7 +2485,7 @@ module.exports = function(app) {
         "id": "152",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 3,
+          "traceId": 4,
           "overallTraceDuration": 8673,
           "requests": 1000,
           "averageResponseTime": 299,
@@ -5339,13 +5339,13 @@ module.exports = function(app) {
           "sourceClazz": {
             "data": {
               "type": "clazz",
-              "id": "106"
+              "id": "93"
             }
           },
           "targetClazz": {
             "data": {
               "type": "clazz",
-              "id": "93"
+              "id": "106"
             }
           },
           "outgoingClazzCommunications": {
@@ -6938,13 +6938,13 @@ module.exports = function(app) {
           "sourceClazz": {
             "data": {
               "type": "clazz",
-              "id": "109"
+              "id": "80"
             }
           },
           "targetClazz": {
             "data": {
               "type": "clazz",
-              "id": "80"
+              "id": "109"
             }
           }
         }
