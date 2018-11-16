@@ -1,8 +1,8 @@
-import VizController from './visualization';
+import Controller from '@ember/controller';
 import { inject as service } from '@ember/service';
 import { computed } from '@ember/object';
 
-export default VizController.extend({
+export default Controller.extend({
 
   renderingService: service("rendering-service"),
   landscapeRepo: service("repos/landscape-repository"),

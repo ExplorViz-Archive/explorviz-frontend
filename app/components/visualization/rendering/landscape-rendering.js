@@ -1,5 +1,5 @@
 import RenderingCore from './rendering-core';
-import {inject as service} from '@ember/service';
+import { inject as service } from '@ember/service';
 
 import THREE from "three";
 
@@ -99,7 +99,6 @@ export default RenderingCore.extend({
     this.set('labeler.appTextCache', []);
 
     this.set('centerAndZoomCalculator.centerPoint', null);
-
   },
 
   // @Override
@@ -143,8 +142,7 @@ export default RenderingCore.extend({
    */
   populateScene() {
     this._super(...arguments);
-
-    this.debug(this.get('renderingService'));
+    this.debug("populate application rendering");
 
     const self = this;
 

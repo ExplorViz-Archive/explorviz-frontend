@@ -1,4 +1,9 @@
-# ExplorViz Frontend
+<p align="center">
+  <img width="60%" src="https://raw.githubusercontent.com/ExplorViz/Docs/master/images/explorviz-logo.png">
+</p>
+
+___
+
 <a href="https://travis-ci.org/ExplorViz/explorviz-frontend"><img src="https://travis-ci.org/ExplorViz/explorviz-frontend.svg?branch=master" alt="Build Status"></a>
 [![Build status](https://ci.appveyor.com/api/projects/status/am0ea9r6sp2h74x7/branch/master?svg=true)](https://ci.appveyor.com/project/Alexander-Krause/explorviz-frontend/branch/master)
 <a href="https://david-dm.org/ExplorViz/explorviz-frontend"><img src="https://david-dm.org/ExplorViz/explorviz-frontend.svg?branch=master" alt="Dependency Status"></a>
@@ -56,7 +61,7 @@ To achieve this, run the frontend with `ENABLE_MOCK=true ember s --environment=m
 
 #### Building
 
-* `npm build` or `ember build` (development) / `ember build --environment production` (production)
+* `npm build` or `ember build` (development) / `ember build --environment=production` (production)
 
 #### Generating API Documentation
 * `yuidoc .` (Might need to delete content of *tmp* folder. Be aware! The result of this command should be commited at the end of your development, since it generates a lot of LoC.)

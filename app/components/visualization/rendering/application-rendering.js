@@ -226,11 +226,11 @@ export default RenderingCore.extend({
 
         if(cumuClazzCommu.get('state') === "TRANSPARENT") {
           transparent = true;
-          opacityValue = 0.4;
+          opacityValue = 0.3;
         }
 
         const material = new THREE.MeshBasicMaterial({
-          color : new THREE.Color(0xf49100),
+          color : cumuClazzCommu.get('highlighted') ? new THREE.Color(0xFF0000) : new THREE.Color(0xf49100), // either red or orange, depending on highlighting status
           opacity : opacityValue,
           transparent : transparent
         });
@@ -239,7 +239,30 @@ export default RenderingCore.extend({
 
         const pipe = this.cylinderMesh(start, end, material, thickness);
 
+
+
         pipe.userData.model = cumuClazzCommu;
+
+        // indicate communication for direction for (indirectly) highlighted communication
+        if (cumuClazzCommu.get('highlighted') ||
+            cumuClazzCommu.get('sourceClazz.highlighted') || 
+            cumuClazzCommu.get('targetClazz.highlighted')){
+
+              // keep track of drawn arrow to prevent duplicates
+              let drewSecondArrow = false;
+
+              // add arrow from in direction of source to target clazz
+              self.addCommunicationArrow(start, end);
+
+              // check for bidirectional communication
+              cumuClazzCommu.get('aggregatedClazzCommunications').forEach( (aggrComm) => {
+                if ((cumuClazzCommu.get('sourceClazz.fullQualifiedName') === aggrComm.get('targetClazz.fullQualifiedName') && !drewSecondArrow)){
+                  self.addCommunicationArrow(end, start);
+                  drewSecondArrow = true;
+                }
+              });
+        }
+
         self.get('application3D').add(pipe);
       }
     });
@@ -291,6 +314,8 @@ export default RenderingCore.extend({
 
     component.set('color', color);
 
+
+
     const clazzes = component.get('clazzes');
     const children = component.get('children');
 
@@ -306,31 +331,14 @@ export default RenderingCore.extend({
 
     children.forEach((child) => {
       if (component.get('opened')) {
-        if (child.get('opened')) {
-          if(child.get('highlighted')) {
-            this.addComponentToScene(child, redHighlighted);
-          }
-          else if(component.get('color') === grey) {
-            this.addComponentToScene(child, lightGreen);
-          }
-          else if(component.get('color') === darkGreen) {
-            this.addComponentToScene(child, lightGreen);
-          } else {
-            this.addComponentToScene(child, darkGreen);
-          }
-        }
-        else {
-          if(child.get('highlighted')) {
-            this.addComponentToScene(child, redHighlighted);
-          }
-          else if(component.get('color') === grey) {
-            this.addComponentToScene(child, lightGreen);
-          }
-          else if(component.get('color') === darkGreen) {
-            this.addComponentToScene(child, lightGreen);
-          } else {
-            this.addComponentToScene(child, darkGreen);
-          }
+        if(child.get('highlighted')) {
+          this.addComponentToScene(child, redHighlighted);
+        } else if(component.get('color') === grey) {
+          this.addComponentToScene(child, lightGreen);
+        } else if(component.get('color') === darkGreen) {
+          this.addComponentToScene(child, lightGreen);
+        } else {
+          this.addComponentToScene(child, darkGreen);
         }
       }
     });
@@ -345,7 +353,19 @@ export default RenderingCore.extend({
       component.get('height') / 2.0,
       component.get('positionZ') + component.get('depth') / 2.0);
 
-    const material = new THREE.MeshLambertMaterial();
+    let transparent = false;
+    let opacityValue = 1.0;
+
+    if(component.get('state') === "TRANSPARENT") {
+      transparent = true;
+      opacityValue = 0.2;
+    }
+
+    const material = new THREE.MeshLambertMaterial({
+      opacity : opacityValue,
+      transparent : transparent
+    });
+
     material.color = new THREE.Color(color);
 
     centerPoint.sub(this.get('centerAndZoomCalculator.centerPoint'));
@@ -370,11 +390,39 @@ export default RenderingCore.extend({
     mesh.userData.opened = component.get('opened');
 
     self.get('labeler').createLabel(mesh, self.get('application3D'),
-      self.get('font'));
+      self.get('font'), transparent);
 
     self.get('application3D').add(mesh);
 
   } ,// END createBox
+
+  /**
+   * Draws an small black arrow
+   * @param {*} start start vector of the associated communication
+   * @param {*} end   end vector of the associated communication
+   */
+  addCommunicationArrow(start, end){
+
+    // determine (almost the) middle
+    let dir = end.clone().sub(start);
+    let len = dir.length();
+    // do not draw precisely in the middle to leave a small gap in case of bidirectional communication
+    let halfVector = dir.normalize().multiplyScalar(len*0.51);
+    let middle = start.clone().add(halfVector);
+
+    // normalize the direction vector (convert to vector of length 1)
+    dir.normalize();
+
+    // arrow properties
+    let origin = new THREE.Vector3(middle.x, middle.y + 0.8, middle.z);
+    let headLength = 1;
+    let length = headLength + 0.00001; // body of arrow not visible
+    let color = 0x000000; // black
+
+    let arrow = new THREE.ArrowHelper(dir, origin, length, color , 1, 0.5);
+
+    this.get('application3D').add(arrow);
+  }, // END addCommunicationArrow
 
 
   resetRotation() {

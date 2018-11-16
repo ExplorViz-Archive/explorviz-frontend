@@ -4,6 +4,7 @@ import { computed } from '@ember/object';
 import { observer } from '@ember/object';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import ENV from 'explorviz-frontend/config/environment';
+import $ from 'jquery'
 
 /**
 * TODO
@@ -18,11 +19,16 @@ export default Controller.extend(AlertifyHandler, {
 
   urlBuilder: service("url-builder"),
   viewImporter: service("view-importer"),
-  reloadHandler: service("reload-handler"),
   renderingService: service("rendering-service"),
   landscapeRepo: service("repos/landscape-repository"),
+  landscapeListener: service("landscape-listener"),
+  additionalData: service("additional-data"),
 
   state: null,
+
+  sidebarcollapsed: true,
+  sidebarmoving: false,
+  showsidebar: false,
 
   // Specify query parameters
   queryParams: ['timestamp', 'appID', 'camX', 'camY', 'camZ', 'condition'],
@@ -77,7 +83,40 @@ export default Controller.extend(AlertifyHandler, {
     resetView() {
       this.set('viewImporter.importedURL', false);
       this.get('renderingService').reSetupScene();
-      this.get('reloadHandler').startExchange();
+    },
+
+    toggle() {
+      if(this.get('sidebarmoving'))
+        return;
+
+      this.set('sidebarmoving', true);
+
+      if(this.get('sidebarcollapsed')) {
+        this.set('showsidebar', true);
+        $('#dataselection').addClass('slideInRight col-12 col-xl-4');
+        $('#dataselection').removeClass('slideOutRight col-0');
+        $('#vizspace').addClass('col-xl-8');
+        $('#vizspace').removeClass('col-xl-12');
+        $('#threeCanvas').hide();
+      } else {
+        $('#dataselection').addClass('slideOutRight');
+        $('#dataselection').removeClass('slideInRight');
+      }
+
+
+      setTimeout(() => {
+        this.set('sidebarmoving', false);
+        this.set('sidebarcollapsed', !this.get('sidebarcollapsed'));
+        this.set('showsidebar', !this.get('sidebarcollapsed'));
+        if(this.get('sidebarcollapsed')) {
+          $('#vizspace').removeClass('col-xl-8');
+          $('#dataselection').addClass('col-0');
+          $('#dataselection').removeClass('col-xl-4 col-12');
+        }
+        this.get('renderingService').resizeCanvas();
+        $('#threeCanvas').show();
+      }, 1000);
+
     }
     
   },
@@ -90,9 +129,7 @@ export default Controller.extend(AlertifyHandler, {
     this.set('renderingService.showVersionbar', false);
   },
 
-  // @Override
-  init() {
-    this._super(...arguments);
+  initRendering() {
 
     const self = this;
 
@@ -119,6 +156,8 @@ export default Controller.extend(AlertifyHandler, {
       // Passes the new state from controller via service to component
       self.get('viewImporter').transmitView(newState);
     });
+
+    this.get('landscapeListener').initSSE();
   },
 
   // @Override

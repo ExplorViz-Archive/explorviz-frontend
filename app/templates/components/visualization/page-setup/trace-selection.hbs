@@ -1,0 +1,18 @@
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">TraceID</th>
+      <th scope="col">Requests</th> 
+      <th scope="col">Trace Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each traces as |trace|}}
+      <tr {{action "traceSelected" trace.traceId}}>
+        <th scope="row">{{trace.traceId}}</th>
+        <td>{{trace.requests}}</td>
+        <td>{{trace.overallTraceDuration}}</td>
+      </tr>
+    {{/each}}
+  </tbody>
+</table>

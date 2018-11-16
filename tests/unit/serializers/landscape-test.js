@@ -2,7 +2,7 @@ import { moduleForModel, test } from 'ember-qunit';
 
 moduleForModel('landscape', 'Unit | Serializer | landscape', {
   // Specify the other units that are required for this test.
-  needs: ['serializer:landscape', 'model:system', 'model:applicationcommunication']
+  needs: ['serializer:landscape', 'model:system', 'model:timestamp', 'model:applicationcommunication']
 });
 
 // Replace this with your real tests.

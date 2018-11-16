@@ -1,8 +1,6 @@
-<form {{action 'focusEntity' on="submit" }} class="navbar-form navbar-left" role="search">
-  <div class="form-group">
-    {{input value=searchString placeholder="Search Entity" class="form-control navbar-button-height-fix"}}
-  </div>
-  <button type="submit" class="btn btn-default navbar-button-height-fix">
-    <span class="glyphicon glyphicon-search"></span>
+<form {{action 'focusEntity' on="submit" }} class="form-inline my-2 my-lg-0 px-2">
+  {{input value=searchString placeholder="Search Entity" class="form-control mr-sm-2" aria-label="Search"}}
+  <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+    {{svg-jar "search" class="octicon align-middle"}}
   </button>
 </form>

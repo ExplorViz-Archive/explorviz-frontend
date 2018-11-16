@@ -1,3 +1,6 @@
-<a href="#" data-toggle="tooltip" data-placement="right" title={{title}} style="text-decoration: none;">
-  <span class="glyphicon glyphicon-info-sign"></span>
-</a>
+<div class='inline tooltip-component'>
+  <a>
+    {{svg-jar "info" class="octicon align-middle"}}
+    {{#bs-tooltip placement="left"}}{{title}}{{/bs-tooltip}}
+  </a>
+</div>

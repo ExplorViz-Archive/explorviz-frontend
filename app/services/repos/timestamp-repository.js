@@ -1,6 +1,5 @@
 import Service from '@ember/service';
 import Evented from '@ember/object/evented';
-import { observer } from '@ember/object';
 
 /**
 * TODO
@@ -13,9 +12,19 @@ export default Service.extend(Evented, {
   latestTimestamps: null,
   uploadedTimestamps:null,
 
-  observer: observer("latestTimestamps", function(){
+  // @Override
+  init() {
+    this._super(...arguments);
+    this.set('latestTimestamps', []);
+  },
+
+  addTimestampToList(timestampRecord) {
+    this.get('latestTimestamps').push(timestampRecord);
+  },
+
+  triggerUpdated(){
     this.trigger("updated");
-  }),
+  },
 
   triggerUploaded(){
     this.trigger("uploaded", this.get("uploadedTimestamps"));

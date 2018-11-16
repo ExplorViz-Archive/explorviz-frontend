@@ -9,7 +9,7 @@
 export default Route.extend({
 
   redirect : function(){
-        this.replaceWith("index");
+        this.replaceWith('index');
     }
 
 });

@@ -4,6 +4,9 @@ import { computed } from '@ember/object';
 
 export default Component.extend({
 
+  // No Ember generated container
+  tagName: '',
+
   toggleStateWebServer: alias('procezz.webserverFlag'),
   toggleIsHidden: alias('procezz.isHidden'),  
 

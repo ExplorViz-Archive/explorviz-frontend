@@ -1,6 +1,6 @@
 import BaseRoute from './base-route';
-import AuthenticatedRouteMixin from
- 'ember-simple-auth/mixins/authenticated-route-mixin';
+import AuthenticatedRouteMixin from 
+  'ember-simple-auth/mixins/authenticated-route-mixin';
 
 /**
 * TODO
@@ -9,6 +9,19 @@ import AuthenticatedRouteMixin from
 * @extends Ember.Route
 */
 export default BaseRoute.extend(AuthenticatedRouteMixin, {
+
+  // @Override
+  setupController(controller, model) {
+    // Call _super for default behavior
+    this._super(controller, model);
+
+    controller.initRendering();
+  },
+
+  resetRoute() {
+    this.controller.send('resetView');
+    this.controller.set('landscapeRepo.latestApplication', null);
+  },
 
   actions: {
 

@@ -1,7 +1,8 @@
 import { inject as service } from "@ember/service";
 import { isEmpty } from '@ember/utils';
 import RSVP, { resolve, reject } from 'rsvp';
-import Base from 'ember-simple-auth/authenticators/base';
+import BaseAuthenticator from 'ember-simple-auth/authenticators/base';
+import config from 'explorviz-frontend/config/environment';
 
 /**
 * This Authenticator sends a single AJAX request with data fields "username" 
@@ -19,10 +20,11 @@ import Base from 'ember-simple-auth/authenticators/base';
 * @module explorviz
 * @submodule security
 */
-export default Base.extend({
+export default BaseAuthenticator.extend({
 
   session: service(),
   store: service(),
+  ajax: service(),
 
   // @Override
   /**
@@ -31,12 +33,43 @@ export default Base.extend({
    * @method restore
    */
   restore(data) {
+
+    const self = this;
+    const url = config.APP.API_ROOT;
+
     return new RSVP.Promise(function(resolve, reject) {
-        if (!isEmpty(data.access_token)) {
-            resolve(data);
-        } else {
-            reject();
+      function fulfill(token) {
+        resolve({
+          access_token: token
+        });
+      }
+  
+      function failure(answer) {
+        let reason = "Please login again.";
+
+        try {
+          reason = answer.payload.errors[0].detail;
+        } catch(exception) {
+          //self.debug("During authentication refreshment, the following error was reported", exception);
         }
+        self.set('session.errorMessage', reason);
+        reject(reason);
+      }
+
+      if (!isEmpty(data.access_token)) {
+
+        // check if token is still valid
+        self.get('ajax').request(`${url}/v1/tokens/refresh/`, {
+          method: 'POST',
+          contentType: 'application/json; charset=utf-8',
+          headers: {
+            'Authorization': `Bearer ${data.access_token.token}`
+          }
+        }).then(fulfill, failure);
+
+      } else {
+          reject();
+      }
     });
   },
 
@@ -47,19 +80,22 @@ export default Base.extend({
    *
    * @method authenticate
    */
-  authenticate(user) {
-    this.set('session.session.messages', {});
+  authenticate(user) {    
+    const url = config.APP.API_ROOT;
 
-    return user.save({
-      adapterOptions: {
-        pathExtension: 'authenticate'
+    return this.get('ajax').request(`${url}/v1/tokens/`, {
+      method: 'POST',
+      contentType: 'application/json; charset=utf-8',
+      data: {
+        username: user.identification,
+        password: user.password
       }
     }).then(fulfill, failure);
 
-    function fulfill(userRecord) {
+    function fulfill(token) {
       return resolve({
-        access_token: userRecord.get('token'),
-        username: userRecord.get('username')
+        access_token: token,
+        username: user.identification
       });
     }
 
@@ -77,15 +113,7 @@ export default Base.extend({
    * @method invalidate
    */
   invalidate(data, args) {
-    if(args && Object.keys(args)[0]) {
-      const key = Object.keys(args)[0];
-
-      if(!this.get('session.session.messages')) {
-        this.set('session.session.messages', {});
-      }
-
-      this.set('session.session.messages.' + key, args[key]);
-    }
+    this.set('session.session.content.message', args.message);
     return RSVP.resolve();
   }
 

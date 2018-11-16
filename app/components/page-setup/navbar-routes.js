@@ -13,14 +13,8 @@ import {inject as service} from '@ember/service';
 */
 export default Component.extend({
 
-  tagName: "ul",
-  classNames:["nav", "navbar-nav"],
+  // No Ember generated container
+  tagName: '',
 
-  pageSetupService: service('page-setup'),
-
-  actions: {
-    resetRoute() {
-      this.sendAction("resetRoute"); // eslint-disable-line
-    }
-  }
+  pageSetupService: service('page-setup')
 });

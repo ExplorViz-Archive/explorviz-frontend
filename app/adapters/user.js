@@ -5,7 +5,6 @@ import ENV from 'explorviz-frontend/config/environment';
 export default JSONAPIAdapter.extend(DataAdapterMixin,{
 
   host: ENV.APP.API_ROOT,
-  namespace: 'users',
 
   init() {
 
@@ -19,25 +18,20 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   // @Override
   urlForQueryRecord() {
     const baseUrl = this.buildURL();
-      return `${baseUrl}`;
+    return `${baseUrl}/v1/users`;
   },
 
-  //@Override
-  urlForUpdateRecord(id, modelName, snapshot) {
+  // @Override
+  // Overrides URL for model.save()
+  urlForCreateRecord() {
     const baseUrl = this.buildURL();
-    let path = `${baseUrl}`;
-
-    if(snapshot.adapterOptions && snapshot.adapterOptions.pathExtension) {
-      const pathExtension = snapshot.adapterOptions.pathExtension;
-      path = `${baseUrl}/${pathExtension}`;
-    }
-
-    return path;
+    return `${baseUrl}/v1/users/`;
   },
+
 
   authorize(xhr) {
     let { access_token } = this.get('session.data.authenticated');
-    xhr.setRequestHeader('Authorization', `Basic ${access_token}`);
+    xhr.setRequestHeader('Authorization', `Bearer ${access_token.token}`);
   }
 
 });

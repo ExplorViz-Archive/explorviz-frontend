@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
 
-const { attr, hasMany } = DS;
+const { attr, belongsTo, hasMany } = DS;
 
 /**
 * Ember model for a landscape.
@@ -14,8 +14,7 @@ const { attr, hasMany } = DS;
 */
 export default BaseEntity.extend({
 
-  timestamp: attr('number'),
-  overallCalls: attr('number', { defaultValue: 0 }),
+  timestamp: belongsTo('timestamp'),
   events: attr(),
   exceptions: attr(),
 

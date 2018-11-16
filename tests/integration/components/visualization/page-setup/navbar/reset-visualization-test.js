@@ -12,8 +12,8 @@ module('Integration | Component | visualization/page-setup/navbar/reset-visualiz
 
     await render(hbs`{{visualization/page-setup/navbar/reset-visualization}}`);
 
-    assert.equal(this.element.querySelector('span').getAttribute('class'), 
-      'glyphicon glyphicon-remove');
+    assert.equal(this.element.querySelector('svg').getAttribute('class'), 
+      'octicon align-middle');
 
     assert.equal(this.element.querySelector('a').getAttribute('title'), 
       'Reset view');

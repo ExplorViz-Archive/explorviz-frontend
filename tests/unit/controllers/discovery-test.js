@@ -2,7 +2,7 @@ import { moduleFor, test } from 'ember-qunit';
 
 moduleFor('controller:discovery', 'Unit | Controller | discovery', {
   // Specify the other units that are required for this test.
-  needs: ['service:rendering-service', 'service:agent-reload']
+  needs: ['service:rendering-service', 'service:agents-listener']
 });
 
 // Replace this with your real tests.

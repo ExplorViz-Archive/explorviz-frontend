@@ -6,8 +6,14 @@ import { task } from 'ember-concurrency';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import FileSaverMixin from 'ember-cli-file-saver/mixins/file-saver';
 import ENV from 'explorviz-frontend/config/environment';
+import debugLogger from 'ember-debug-logger';
 
 export default Component.extend(AlertifyHandler, FileSaverMixin, {
+
+  // No Ember generated container
+  tagName: '',
+
+  debug: debugLogger(),
 
   renderingService: service(),
   store: service(),

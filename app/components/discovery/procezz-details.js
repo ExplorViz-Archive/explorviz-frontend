@@ -1,29 +1,17 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
-import $ from "jquery";
-
 
 export default Component.extend(AlertifyHandler, {
 
-  store: service(),
+  // No Ember generated container
+  tagName: '',
 
-  classNames: ["relative scroll-container"],
+  store: service(),
 
   showSpinner: false,
 
   monitoredFlag: null,
-
-  // @Override
-  init() {
-    this._super(...arguments);
-    
-    // enable bootstrap tooltip effect
-    $(document).ready(function(){
-      $('[data-toggle="tooltip"]').tooltip(); 
-    });
-  },
-
 
   // @Override
   willInsertElement: function(){

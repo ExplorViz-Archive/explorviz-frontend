@@ -11,6 +11,7 @@ import ApplicationRouteMixin from
 */
 export default Route.extend(ApplicationRouteMixin, {
 
+  routeAfterAuthentication: 'visualization',
   session: service(),
 
   actions: {

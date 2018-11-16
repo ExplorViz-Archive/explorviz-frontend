@@ -2,10 +2,16 @@ import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import nameSelector from 'explorviz-frontend/utils/helpers/name-selector';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import debugLogger from 'ember-debug-logger';
 
 /* global cytoscape */
 
 export default Component.extend(AlertifyHandler, {
+
+  // No Ember generated container
+  tagName: '',
+
+  debug: debugLogger(),
 
   agentRepo: service("repos/agent-repository"),
   configuration: service("configuration"),
@@ -35,7 +41,7 @@ export default Component.extend(AlertifyHandler, {
    */
   didRender(){    
     this._super(...arguments);
-
+    
     if(!this.get('initDone') && this.get('agentRepo.agentList.length') > 0) {
       this.initCytoscape();
       this.setupListener();

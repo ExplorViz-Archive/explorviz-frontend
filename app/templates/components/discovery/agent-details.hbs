@@ -4,26 +4,14 @@
   </div>
 {{/if}}
 
-<div class="panel-group" id="accordion">
-
-  <!-- BEGIN collapse1 -->
-  <div class="panel panel-default">
-    <div data-toggle="collapse" data-parent="#accordion" data-target="#collapse1" class="panel-heading darker-accordion-header container-shadow" style="cursor:pointer">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">
-          {{name-selector agent.ip agent.name}} - <b>General Information</b>
-        </a>
-      </h4>
-    </div>
-    <div id="collapse1" class="panel-collapse collapse in">
-      <div class="panel-body">
-        {{discovery/agent-details-tables/general-information agent=agent}}
-      </div>
-    </div>
-  </div>
-
-</div>
-
 <div class="text-center" style="margin-bottom: 5px;">
   <button type="button" class="btn btn-success" {{action "saveAgent"}}>Save</button>
 </div>
+
+{{#bs-tab as |tab|}}
+  {{#tab.pane title=(name-selector agent.ip agent.name)}}
+    {{discovery/agent-details-tables/general-information agent=agent}}
+  {{/tab.pane}}
+{{/bs-tab}}
+
+<!-- {{name-selector agent.ip agent.name}} - <b>General Information</b> -->

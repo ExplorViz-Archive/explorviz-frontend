@@ -1,3 +1,11 @@
+{{#bs-button active=notCollapsed click=(action "toggle")}}
+  {{#if sidebarcollapsed}}
+    Show
+  {{else}}
+    Hide
+  {{/if}}
+{{/bs-button}}
+
 {{#if showLandscape}}
   {{#if landscapeRepo.latestLandscape.systems}}
 
@@ -5,18 +13,6 @@
     <!-- ember component helper allows binding declarations, totally equal to -->
     <!-- compinent that are initiated with braces -->
 
-    {{visualization/page-setup/visualization-navbar
-      content=(array 
-        (component "visualization/page-setup/navbar/reset-visualization") 
-        (component "visualization/page-setup/navbar/toggle-timeline") 
-        (component "visualization/page-setup/navbar/file-downloader" 
-          urlPath=exportLandscapeUrl fileName=exportLandscapeFileName) 
-        (component "visualization/page-setup/navbar/file-uploader" 
-          backendURL=uploadLandscapeUrl) 
-      )
-    }}
-
-    {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.latestLandscape}}
   {{else}}
     <div class="container-fluid">
       <div class="jumbotron">
@@ -30,20 +26,52 @@
   {{/if}}
 
 {{else}}
-  {{visualization/page-setup/visualization-navbar
-    content=(array 
-      (component "visualization/page-setup/navbar/reset-visualization") 
-      (component "visualization/page-setup/navbar/toggle-timeline") 
-      (component "visualization/page-setup/navbar/file-downloader" 
-        urlPath=exportLandscapeUrl fileName=exportLandscapeFileName) 
-      (component "visualization/page-setup/navbar/application-opener") 
-      (component "visualization/page-setup/navbar/application-search")
-    )
-  }}
 
-  {{visualization/rendering/application-rendering latestApplication=landscapeRepo.latestApplication}}
 {{/if}}
 
-{{#if renderingService.showTimeline}}
-  {{time-shift}}
-{{/if}}
+<div class="row pt-3 pb-3">
+  <div class="col-12" id="vizspace">
+    {{#if showLandscape}}
+      {{#if landscapeRepo.latestLandscape.systems}}
+        {{visualization/page-setup/visualization-navbar
+          content=(array 
+            (component "visualization/page-setup/navbar/reset-visualization") 
+            (component "visualization/page-setup/navbar/toggle-timeline") 
+            (component "visualization/page-setup/navbar/file-downloader" 
+              urlPath=exportLandscapeUrl fileName=exportLandscapeFileName)
+            (component "visualization/page-setup/navbar/file-uploader" 
+              backendURL=uploadLandscapeUrl)
+          )
+        }}
+        <div id="rendering">
+          {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.latestLandscape}}
+        </div>
+      {{/if}}
+    {{else}}
+      {{visualization/page-setup/visualization-navbar
+        content=(array 
+          (component "visualization/page-setup/navbar/reset-visualization") 
+          (component "visualization/page-setup/navbar/toggle-timeline") 
+          (component "visualization/page-setup/navbar/file-downloader" 
+            urlPath=exportLandscapeUrl fileName=exportLandscapeFileName)
+          (component "visualization/page-setup/navbar/application-opener")
+          (component "visualization/page-setup/navbar/application-search")
+        )
+      }}
+      <div id="rendering">
+        {{visualization/rendering/application-rendering latestApplication=landscapeRepo.latestApplication}}
+      </div>
+    {{/if}}
+    {{#if renderingService.showTimeline}}
+      {{time-shift}}
+    {{/if}}
+  </div>
+  <div class="col-0 animated" id="dataselection">
+    {{visualization/page-setup/data-selection
+      content=(array 
+        (component "visualization/page-setup/trace-selection"
+          traces=additionalData.data) 
+      )
+    }}
+  </div>
+</div>

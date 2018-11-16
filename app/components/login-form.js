@@ -1,5 +1,6 @@
 import { inject as service } from "@ember/service";
 import Component from '@ember/component';
+import debugLogger from 'ember-debug-logger';
 
 /**
 * TODO
@@ -12,7 +13,12 @@ import Component from '@ember/component';
 */
 export default Component.extend({
 
-  session: service('session'),
+  // No Ember generated container
+  tagName: '',
+
+  debug: debugLogger(),
+
+  session: service(),
   router: service('-routing'),
   store: service(),
 
@@ -27,31 +33,24 @@ export default Component.extend({
 
       const self = this;
 
-      const { identification, password } = 
-        this.getProperties('identification', 'password');
+      const user = this.getProperties('identification', 'password');
 
       // reset (possible) old lables
-      if(this.get('session.session') && this.get('session.session.messages')) {
-        this.set('session.session.messages.message',"");
-        this.set('session.session.messages.errorMessage',"");
+      try {
+        this.set('session.session.content.message', "");
+        this.set('session.session.content.errorMessage', "");
+      } catch(exception) {
+        this.debug("Error when resetting login page labels", exception);
       }
 
-      if(!this.checkForValidInput(identification, password)) {
+
+      if(!this.checkForValidInput(user)) {
         const errorMessage = "Enter valid credentials.";
-        this.set('session.session.messages.errorMessage', errorMessage);
+        this.set('session.session.content.errorMessage', errorMessage);
         return;
       }
 
-      // retrieve empty user record from backend with valid id
-      this.get('store').queryRecord('user', {
-        username: identification
-      }).then(success, failure);
-
-      function success(userRecord) {
-        userRecord.set('username', identification);
-        userRecord.set('password', password);
-        self.get('session').authenticate('authenticator:authenticator', userRecord).then(undefined, failure);
-      }
+      this.get('session').authenticate('authenticator:authenticator', user).then(undefined, failure);
 
       function failure(reason) {
 
@@ -69,7 +68,7 @@ export default Component.extend({
 
         }
 
-        self.set('session.session.messages.errorMessage', errorMessage);
+        self.set('session.session.content.errorMessage', errorMessage);
 
       }
 
@@ -77,7 +76,11 @@ export default Component.extend({
 
   },
 
-  checkForValidInput(username, password) {
+  checkForValidInput(user) {
+
+    const username = user.identification;
+    const password = user.password;
+
     const usernameValid = username !== "" && username !== null && 
       username !== undefined;
 

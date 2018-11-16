@@ -8,7 +8,7 @@ export default Controller.extend(AlertifyHandler, {
   agentForDetailView: null,
 
   renderingService: service("rendering-service"),
-  agentReload: service("agent-reload"),
+  agentListener: service("agents-listener"),
 
   // closure action for node-overview component
   showDetailsComponent(emberRecord) {
@@ -17,7 +17,6 @@ export default Controller.extend(AlertifyHandler, {
     const possibleModels = ["procezz", "agent"];
 
     if(possibleModels.includes(modelName)) {
-      this.set("agentReload.shallUpdate", false);
       this.set(modelName + 'ForDetailView', emberRecord);
     }    
   },
@@ -25,7 +24,10 @@ export default Controller.extend(AlertifyHandler, {
   setup() {
     this.set('renderingService.showTimeline', false);
     this.set('renderingService.showVersionbar', false);
-    this.resetState();    
+    this.resetState();
+    
+    // start SSE transmission from backend
+    this.get('agentListener').initSSE();
   },
 
 
@@ -56,10 +58,6 @@ export default Controller.extend(AlertifyHandler, {
       this.showAlertifyMessageWithDuration(alertifyMessage, 8);
     }
     this.resetState();
-
-    // stop first, there might be an old service instance running
-    this.get("agentReload").stopUpdate();
-    this.get("agentReload").startUpdate();
   }
 
 });

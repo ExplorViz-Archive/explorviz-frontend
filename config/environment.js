@@ -23,14 +23,8 @@ module.exports = function(environment) {
     }
   };
 
-  // specify default route definitions
-  ENV['ember-simple-auth'] = {
-    routeAfterAuthentication: 'visualization',
-    routeIfAlreadyAuthenticated: 'visualization'
-  };
-
   if (environment === 'development') {
-    ENV.APP.API_ROOT = 'http://localhost:8081';
+    ENV.APP.API_ROOT = 'http://localhost:8080';
   }
 
   if (environment === 'production') {
@@ -58,11 +52,11 @@ module.exports = function(environment) {
 
 
   if (environment === 'akr') {
-    ENV.APP.API_ROOT = 'http://192.168.91.129:8081';
+    ENV.APP.API_ROOT = 'http://192.168.91.132:8080';
   }
 
   if (environment === 'akr-mocked') {
-    ENV.APP.API_ROOT = 'http://192.168.91.129:4200/api';
+    ENV.APP.API_ROOT = 'http://192.168.91.132:4200/api';
   }
 
   return ENV;

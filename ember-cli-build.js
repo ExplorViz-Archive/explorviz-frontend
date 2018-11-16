@@ -1,22 +1,46 @@
 /*jshint node:true*/
 /* global require, module */
+var sass = require('sass');
 var EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
 module.exports = function(defaults) {
 
   var app = new EmberApp(defaults, {
-    sassOptions: {},
+    octicons: {
+      icons: null // don't import any SVG files at build time
+    },
+
+    // Default implementation for ember-cli-sass
+    sassOptions: {
+      implementation: sass
+    },
+
+    svgJar: {
+      sourceDirs: [
+        'public', // default SVGJar lookup directory
+        'node_modules/octicons/build/svg'
+      ]
+    },
+
     'ember-cli-babel': {
       includePolyfill: true
     },
+
     fingerprint: {
       exclude: ['images']
     },
+
     nodeModulesToVendor: [
       // add node_modules that you need in vendor modules
       // See: https://www.npmjs.com/package/ember-cli-node-modules-to-vendor
       'node_modules/three/build'
-    ]
+    ],
+
+    'ember-bootstrap': {
+      'bootstrapVersion': 4,
+      'importBootstrapFont': false,
+      'importBootstrapCSS': false
+    }
   });
 
   // export for threex.dynamictexture
@@ -38,6 +62,8 @@ module.exports = function(defaults) {
   app.import('vendor/c3/c3.min.css');
 
   app.import('vendor/cytoscape/cytoscape.min.js');
+
+  app.import('vendor/eventsource-polyfill/eventsource.min.js');
 
   return app.toTree();
 };

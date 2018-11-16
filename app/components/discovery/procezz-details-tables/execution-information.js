@@ -4,6 +4,9 @@ import { htmlSafe } from '@ember/string';
 
 export default Component.extend({
 
+  // No Ember generated container
+  tagName: '',
+
   workingDirectory: computed('procezz.workingDirectory', function() {
       const workingDirectory = this.get('procezz.workingDirectory');
 

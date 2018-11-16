@@ -50,6 +50,9 @@ export default DrawNodeEntity.extend({
     this.get('components').forEach((component) => {
       component.unhighlight();
     });
+    this.get('cumulatedClazzCommunications').forEach((communication) => {
+      communication.unhighlight();
+    });
   },
 
   contains(emberEntity) {

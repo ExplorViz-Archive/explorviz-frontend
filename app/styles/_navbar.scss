@@ -1,0 +1,29 @@
+.nav-link-with-cursor {
+  @extend .nav-link;
+  cursor: pointer;
+}
+
+.nav-item-with-def-cursor {
+  @extend .nav-item;
+  cursor: default!important;
+}
+
+.explorviz-top-navbar {
+  @extend .navbar;
+  @extend .navbar-expand-lg;
+  @extend .navbar-light;
+  @extend .mb-2;
+  background-color: #eff0f1;
+}
+
+.explorviz-visualization-navbar {
+  @extend .navbar;
+  @extend .navbar-expand-lg;
+  @extend .navbar-light;
+  @extend .bg-light;
+  @extend .mb-2;
+}
+
+.nav.navbar-nav > li > a:hover {
+  box-shadow: none;
+}

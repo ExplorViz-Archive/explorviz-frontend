@@ -13,9 +13,8 @@ import {inject as service} from '@ember/service';
 */
 export default Component.extend({
 
-  pageSetupService: service("page-setup"),
+  // No Ember generated container
+  tagName: '',
 
-  tagName: "ul",
-  classNames:["nav navbar-nav navbar-right"],
-  elementId: "navbar-glyphicons"
+  pageSetupService: service("page-setup")
 });

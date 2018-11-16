@@ -5,14 +5,21 @@ html {
   min-height: 100%;
 }
 
-#footer {
-  position: fixed;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  /* Set the fixed height of the footer here */
-  height: 20px;
+.footer {
   background-color: #f5f5f5;
 }
+
+.footer ul > li:nth-child(n+2) {
+  @extend .ml-2;
+  @extend .pl-2;
+  @extend .ml-md-3;
+  @extend .pl-md-3;
+  border-left: 1px solid;
+}
+
+.footer ul {
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+}
+
