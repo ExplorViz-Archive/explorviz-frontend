@@ -1,10 +1,4 @@
-{{#bs-button active=notCollapsed click=(action "toggle")}}
-  {{#if sidebarcollapsed}}
-    Show
-  {{else}}
-    Hide
-  {{/if}}
-{{/bs-button}}
+
 
 {{#if showLandscape}}
   {{#if landscapeRepo.latestLandscape.systems}}
@@ -31,6 +25,13 @@
 
 <div class="row pt-3 pb-3">
   <div class="col-12" id="vizspace">
+    {{#bs-button active=notCollapsed click=(action "toggle")}}
+      {{#if sidebarcollapsed}}
+        Show
+      {{else}}
+        Hide
+      {{/if}}
+    {{/bs-button}}
     {{#if showLandscape}}
       {{#if landscapeRepo.latestLandscape.systems}}
         {{visualization/page-setup/visualization-navbar

@@ -5,35 +5,38 @@ html, body {
 
 body > .ember-view {
   height: 100%;
-  display: flex;
-  flex-flow: column;
+  @extend .d-flex;
+  @extend .flex-column;
 }
 
 .main-content {
   overflow: hidden;
   @extend .ml-3;
   @extend .mr-3;
-  flex-grow: 1;
-  display: flex;
-  flex-flow: column;
+  @extend .flex-grow-1;
+  @extend .d-flex;
+  @extend .flex-column;
 }
 
 .main-content > .row {
-  flex-grow: 1;
+  @extend .flex-grow-1;
 }
 
 #vizspace {
-  display: flex;
-  flex-flow: column;
+  @extend .d-flex;
+  @extend .flex-column;
+  border-left-style: solid;
+  border-color: lightgray;
+  border-width: 1px;
 }
 
 #rendering {
-  flex-grow: 1;
+  @extend .flex-grow-1;
 }
 
 #dataselection {
-  display: flex;
-  flex-flow: row;
+  @extend .d-flex;
+  @extend .flex-row;
 }
 
 .canvasViz {

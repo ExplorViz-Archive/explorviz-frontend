@@ -8,7 +8,7 @@
   </thead>
   <tbody>
     {{#each traces as |trace|}}
-      <tr {{action "traceSelected" trace.traceId}}>
+      <tr {{action "traceSelected" trace.traceId}} style="cursor: pointer">
         <th scope="row">{{trace.traceId}}</th>
         <td>{{trace.requests}}</td>
         <td>{{trace.overallTraceDuration}}</td>

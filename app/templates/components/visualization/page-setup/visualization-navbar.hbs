@@ -1,14 +1,8 @@
-<div class="container">
-  {{#bs-navbar class="explorviz-visualization-navbar" type=type backgroundColor=bg onCollapse=(action (mut collapsed) true) onExpand=(action (mut collapsed) false) as |navbar|}}
-    <a class="navbar-brand" href="#">Controls</a>
-    {{navbar.toggle}}
-    {{#navbar.content}}
-        <!-- Right content -->
-        <ul class="navbar-nav mr-auto">
-          {{#each content as |componentName|}}
-            {{componentName}}
-          {{/each}}
-        </ul>
-		{{/navbar.content}}
-  {{/bs-navbar}}
+<div class="explorviz-visualization-navbar">
+  <!-- Right content -->
+  <ul class="nav justify-content-center">
+    {{#each content as |componentName|}}
+      {{componentName}}
+    {{/each}}
+  </ul>
 </div>
