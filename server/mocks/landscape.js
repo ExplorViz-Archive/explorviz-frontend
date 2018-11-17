@@ -1380,13 +1380,13 @@ module.exports = function(app) {
           "sourceClazz": {
             "data": {
               "type": "clazz",
-              "id": "109"
+              "id": "80"
             }
           },
           "targetClazz": {
             "data": {
               "type": "clazz",
-              "id": "80"
+              "id": "109"
             }
           },
           "aggregatedClazzCommunications": {
@@ -4742,7 +4742,7 @@ module.exports = function(app) {
         "id": "156",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 1,
+          "traceId": 3,
           "overallTraceDuration": 1903,
           "requests": 150,
           "averageResponseTime": 895,
