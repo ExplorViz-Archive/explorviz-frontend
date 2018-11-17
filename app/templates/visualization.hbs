@@ -45,12 +45,7 @@
 {{/if}}
 
 {{#if additionalData.showWindow}}
-  {{visualization/page-setup/data-selection
-    content=(array 
-      (component "visualization/page-setup/trace-selection"
-        traces=additionalData.data) 
-    )
-    }}
+  {{visualization/page-setup/data-selection}}
 {{/if}}
 
 {{#if renderingService.showTimeline}}

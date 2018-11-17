@@ -4,7 +4,7 @@
     <th>Requests</th> 
     <th>Trace Duration</th>
   </tr>
-  {{#each traces as |trace|}}
+  {{#each additionalData.data as |trace|}}
     <tr {{action "traceSelected" trace.traceId}}>
     <td>{{trace.traceId}} </td>
     <td>{{trace.requests}}</td>

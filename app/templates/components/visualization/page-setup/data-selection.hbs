@@ -1,5 +1,5 @@
 <button {{action "closeWindow"}}>X</button>
 
-{{#each content as |componentName|}}
-{{componentName}}
+{{#each additionalData.shownComponents as |componentName|}}
+{{component componentName}}
 {{/each}}

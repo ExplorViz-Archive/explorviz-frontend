@@ -9,7 +9,7 @@ export default Component.extend({
 
   actions: {
       closeWindow() {
-          this.set('additionalData.showWindow', false);
+          this.get('additionalData').emptyAdditionalData();
       }
     },
 
