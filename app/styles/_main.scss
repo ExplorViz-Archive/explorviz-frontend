@@ -25,9 +25,6 @@ body > .ember-view {
 #vizspace {
   @extend .d-flex;
   @extend .flex-column;
-  border-left-style: solid;
-  border-color: lightgray;
-  border-width: 1px;
 }
 
 #rendering {

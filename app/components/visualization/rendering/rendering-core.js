@@ -108,7 +108,7 @@ export default Component.extend(Evented, THREEPerformance, {
 
     // get size if outer ember div
     const height = $('#rendering').innerHeight();
-    const width = $('#rendering').innerWidth() - 2*15;
+    const width = $('#rendering').innerWidth();
 
     const canvas = $('#threeCanvas')[0];
 
