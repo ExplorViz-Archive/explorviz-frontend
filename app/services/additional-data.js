@@ -3,17 +3,23 @@ import Service from '@ember/service';
 export default Service.extend({
 
     showWindow: false,
-    shownComponents: [],
+    shownComponents: null,
     data: null,
 
     addComponent(path){
+        if (this.get('shownComponents') == null){
+            this.set('shownComponents', []);
+        }
         if (!this.get('shownComponents').includes(path)){
             this.get('shownComponents').push(path);
         }
     },
 
     removeComponent(path){
-        var index = this.get('shownComponents').indexOf(path);
+        if (this.get('shownComponents') == null){
+            return;
+        }
+        let index = this.get('shownComponents').indexOf(path);
         if (index !== -1) 
             this.get('shownComponents').splice(index, 1);
 
