@@ -21,13 +21,6 @@
 
 <div class="row pt-3 pb-3">
   <div class="col-12" id="vizspace">
-    {{#bs-button active=notCollapsed click=(action "toggle")}}
-      {{#if sidebarcollapsed}}
-        Show
-      {{else}}
-        Hide
-      {{/if}}
-    {{/bs-button}}
     {{#if showLandscape}}
       {{#if landscapeRepo.latestLandscape.systems}}
         {{visualization/page-setup/visualization-navbar
@@ -63,9 +56,7 @@
       {{time-shift}}
     {{/if}}
   </div>
-  <div class="col-0 animated" id="dataselection">
-    {{#if additionalData.showWindow}}
-      {{visualization/page-setup/data-selection}}
-    {{/if}}
+  <div class="col-4 hide" id="dataselection" >
+    {{visualization/page-setup/data-selection}}
   </div>
 </div>

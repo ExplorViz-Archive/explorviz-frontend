@@ -265,7 +265,7 @@ export default Object.extend(Evented, {
         
         this.set('additionalData.data', traces);
         this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
-        this.set('additionalData.showWindow', true);
+        this.get('additionalData').openAdditionalData();
       }
 
     }

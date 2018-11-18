@@ -1,37 +1,47 @@
 import Service from '@ember/service';
+import Evented from '@ember/object/evented';
 
-export default Service.extend({
+export default Service.extend(Evented, {
 
-    showWindow: false,
-    shownComponents: null,
-    data: null,
+  shownComponents: null,
+  data: null,
+  showWindow: false,
 
-    addComponent(path){
-        if(!this.get('shownComponents'))
-            this.shownComponents = [];
+  addComponent(path) {
+    if(!this.get('shownComponents'))
+      this.set('shownComponents', []);
 
-        if (!this.get('shownComponents').includes(path)){
-            this.get('shownComponents').push(path);
-        }
-    },
-
-    removeComponent(path){
-        if(!this.get('shownComponents'))
-            return;
-
-        var index = this.get('shownComponents').indexOf(path);
-        if (index !== -1) 
-            this.get('shownComponents').splice(index, 1);
-
-        // close everything when no components are left
-        if (this.get('shownComponents.length') == 0)
-            this.emptyAdditionalData()
-    },
-
-    emptyAdditionalData(){
-        this.set('showWindow', false);
-        this.set('shownComponents', []);
-        this.set('data', null);
+    if (!this.get('shownComponents').includes(path)) {
+      this.get('shownComponents').push(path);
     }
+  },
+
+  removeComponent(path) {
+    if(!this.get('shownComponents'))
+      return;
+
+    var index = this.get('shownComponents').indexOf(path);
+    if (index !== -1) 
+      this.get('shownComponents').splice(index, 1);
+
+    // close everything when no components are left
+    if (this.get('shownComponents.length') == 0)
+      this.emptyAdditionalData()
+  },
+
+  emptyAdditionalData() {
+    this.set('shownComponents', []);
+    this.set('data', null);
+  },
+
+  closeAdditionalData() {
+    this.set('showWindow', false);
+    this.trigger('showWindow');
+  },
+
+  openAdditionalData() {
+    this.set('showWindow', true);
+    this.trigger('showWindow');
+  }
 
 });

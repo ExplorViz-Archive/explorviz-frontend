@@ -35,7 +35,7 @@ body > .ember-view {
 }
 
 #dataselection {
-  @extend .d-flex;
+  display: flex;
   @extend .flex-row;
 }
 
@@ -46,6 +46,10 @@ body > .ember-view {
 
 .no-margin{
   margin: 0px;
+}
+
+.hide {
+  display: none !important;
 }
 
 //Additional classes
