@@ -170,10 +170,11 @@ export default Object.extend(Evented, {
 
       /// determine the direction of communication symbol
       // default uni-directional
-      let commDirectionString = "&nbsp;<span class='glyphicon glyphicon-arrow-right'></span>&nbsp;";
+      const iconSize = 20;
+      let commDirectionString = '&nbsp;<img src="images/svg/octicons/arrow-right.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp;';
       // bi-directional communication
       if (numOfAggregatedClazzCommunications > 1) {
-        commDirectionString = "&nbsp;<span class='glyphicon glyphicon-transfer'></span>&nbsp;";
+        commDirectionString = '&nbsp;<img src="images/svg/octicons/arrow-both.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp;';
       }
 
       content.title = encodeStringForPopUp(sourceClazzName) + commDirectionString + encodeStringForPopUp(targetClazzName);
@@ -181,25 +182,25 @@ export default Object.extend(Evented, {
       content.html =
         '<table style="width:100%">' +
         '<tr>' +
-        '<td>&nbsp;<span class=\'glyphicon glyphicon-tasks\'></span>&nbsp; Requests:</td>' +
+        '<td>&nbsp;<img src="images/svg/octicons/code.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Requests:</td>' +
         '<td style="text-align:right;padding-left:10px;">' +
         cumulatedClazzCommunication.get('requests') +
         '</td>' +
         '</tr>' +
         '<tr>' +
-        '<td>&nbsp;<span class=\'glyphicon glyphicon-triangle-right\'></span>&nbsp; Involved Traces :</td>' +
+        '<td>&nbsp;<img src="images/svg/octicons/list-ordered.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Involved Traces :</td>' +
         '<td style="text-align:right;padding-left:10px;">' +
         runtimeStats.involvedTraces.length +
         '</td>' +
         '</tr>' +
         '<tr>' +
-        '<td>&nbsp;<span class=\'glyphicon glyphicon-time\'></span>&nbsp; Avg. Response Time:</td>' +
+        '<td>&nbsp;<img src="images/svg/octicons/clock.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Avg. Response Time:</td>' +
         '<td style="text-align:right;padding-left:10px;">' +
         avgAverageResponseTime + ' ms' +
         '</td>' +
         '</tr>' +
         '<tr>' +
-        '<td>&nbsp;<span class=\'glyphicon glyphicon-time\'></span>&nbsp; Avg. Duration:</td>' +
+        '<td>&nbsp;<img src="images/svg/octicons/clock.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Avg. Duration:</td>' +
         '<td style="text-align:right;padding-left:10px;">' +
         avgOverallTraceDuration + ' ms' +
         '</td>' +

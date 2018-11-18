@@ -246,25 +246,26 @@ export default Object.extend(Evented, {
       const sourceApplicationName = applicationCommunication.get('sourceApplication').get('name');
       const targetApplicationName = applicationCommunication.get('targetApplication').get('name');
 
+      const iconSize = 20;
       content.title = encodeStringForPopUp(sourceApplicationName) +
-        "&nbsp;<span class='glyphicon glyphicon-arrow-right'></span>&nbsp;" + encodeStringForPopUp(targetApplicationName);
+        '&nbsp;<img src="images/svg/octicons/arrow-right.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp;' + encodeStringForPopUp(targetApplicationName);
 
       content.html =
         '<table style="width:100%">' +
           '<tr>' +
-            '<td>&nbsp;<span class=\'glyphicon glyphicon-tasks\'></span>&nbsp; Requests:</td>' +
+            '<td>&nbsp;<img src="images/svg/octicons/code.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Requests:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
               applicationCommunication.get('requests') +
             '</td>' +
           '</tr>' +
           '<tr>' +
-            '<td>&nbsp;<span class=\'glyphicon glyphicon-oil\'></span>&nbsp;Technology:</td>' +
+            '<td>&nbsp;<img src="images/svg/octicons/tools.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp;Technology:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
               applicationCommunication.get('technology') +
             '</td>' +
           '</tr>' +
           '<tr>' +
-            '<td>&nbsp;<span class=\'glyphicon glyphicon-time\'></span>&nbsp; Avg. Duration:</td>' +
+            '<td>&nbsp;<img src="images/svg/octicons/clock.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Avg. Duration:</td>' +
             '<td style="text-align:right;padding-left:10px;">' +
               applicationCommunication.get('averageResponseTime') + ' ns' +
             '</td>' +

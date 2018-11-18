@@ -7,7 +7,8 @@ module.exports = function(defaults) {
 
   var app = new EmberApp(defaults, {
     octicons: {
-      icons: null // don't import any SVG files at build time
+      // load selected icons for popup-handler since it does not (yet) use components / templates
+      icons: ['arrow-right', 'arrow-both', 'code', 'list-ordered', 'clock', 'tools']
     },
 
     // Default implementation for ember-cli-sass
