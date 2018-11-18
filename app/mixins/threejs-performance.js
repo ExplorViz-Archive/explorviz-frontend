@@ -1,6 +1,6 @@
 import Mixin from '@ember/object/mixin';
 import Stats from 'stats.js';
-import $ from 'jquery'
+import $ from 'jquery';
 
 /* global THREEx */
 

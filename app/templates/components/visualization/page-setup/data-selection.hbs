@@ -1,56 +1,56 @@
 <div class="">
-  <button type="button" class="btn btn-outline-dark" aria-label="Close">
+  <button {{action "closeWindow"}} type="button" class="btn btn-outline-dark" aria-label="Close">
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
 {{#ember-scrollable}}
   <div class="pr-3 ml-2">
-    {{#each content as |componentName|}}
+    {{#each additionalData.shownComponents as |componentName|}}
       <div class="card mb-3">
         <div class="card-body">
-          {{componentName}}
+          {{component componentName}}
         </div>
       </div>
     {{/each}}
-    {{#each content as |componentName|}}
+    {{#each additionalData.shownComponents as |componentName|}}
       <div class="card mb-3">
         <div class="card-body">
-          {{componentName}}
+          {{component componentName}}
         </div>
       </div>
     {{/each}}
-    {{#each content as |componentName|}}
+    {{#each additionalData.shownComponents as |componentName|}}
       <div class="card mb-3">
         <div class="card-body">
-          {{componentName}}
+          {{component componentName}}
         </div>
       </div>
     {{/each}}
-    {{#each content as |componentName|}}
+    {{#each additionalData.shownComponents as |componentName|}}
       <div class="card mb-3">
         <div class="card-body">
-          {{componentName}}
+          {{component componentName}}
         </div>
       </div>
     {{/each}}
-    {{#each content as |componentName|}}
+    {{#each additionalData.shownComponents as |componentName|}}
       <div class="card mb-3">
         <div class="card-body">
-          {{componentName}}
+          {{component componentName}}
         </div>
       </div>
     {{/each}}
-    {{#each content as |componentName|}}
+    {{#each additionalData.shownComponents as |componentName|}}
       <div class="card mb-3">
         <div class="card-body">
-          {{componentName}}
+          {{component componentName}}
         </div>
       </div>
     {{/each}}
-    {{#each content as |componentName|}}
+    {{#each additionalData.shownComponents as |componentName|}}
       <div class="card">
         <div class="card-body">
-          {{componentName}}
+          {{component componentName}}
         </div>
       </div>
     {{/each}}

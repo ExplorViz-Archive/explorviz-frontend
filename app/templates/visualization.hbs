@@ -1,5 +1,3 @@
-
-
 {{#if showLandscape}}
   {{#if landscapeRepo.latestLandscape.systems}}
 
@@ -18,9 +16,7 @@
       </div>
     </div>
   {{/if}}
-
 {{else}}
-
 {{/if}}
 
 <div class="row pt-3 pb-3">
@@ -68,11 +64,8 @@
     {{/if}}
   </div>
   <div class="col-0 animated" id="dataselection">
-    {{visualization/page-setup/data-selection
-      content=(array 
-        (component "visualization/page-setup/trace-selection"
-          traces=additionalData.data) 
-      )
-    }}
+    {{#if additionalData.showWindow}}
+      {{visualization/page-setup/data-selection}}
+    {{/if}}
   </div>
 </div>

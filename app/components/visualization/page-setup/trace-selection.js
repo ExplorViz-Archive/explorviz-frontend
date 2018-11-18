@@ -3,19 +3,19 @@ import { inject as service } from "@ember/service";
 
 export default Component.extend({
 
-    // No Ember generated container
-    tagName: '',
+  // No Ember generated container
+  tagName: '',
 
-    additionalData: service('additional-data'),
-    highlighter: service('visualization/application/highlighter'),
-    renderingService: service(),
+  additionalData: service('additional-data'),
+  highlighter: service('visualization/application/highlighter'),
+  renderingService: service(),
 
-    actions: {
-        traceSelected(traceId) {
-            this.set('additionalData.showWindow', false);
-            this.get('highlighter').highlightTrace(traceId);
-            this.get('renderingService').redrawScene();
-        }
-      },
+  actions: {
+    traceSelected(traceId) {
+      this.get('highlighter').highlightTrace(traceId);
+      this.get('renderingService').redrawScene();
+      this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
+    }
+  },
 
 });

@@ -7,7 +7,7 @@ import THREE from "three";
 import config from 'explorviz-frontend/config/environment';
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
 import debugLogger from 'ember-debug-logger';
-import $ from 'jquery'
+import $ from 'jquery';
 
 /**
 * This component contains the core mechanics of the different (three.js-based)
