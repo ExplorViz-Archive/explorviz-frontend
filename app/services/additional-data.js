@@ -30,7 +30,8 @@ export default Service.extend(Evented, {
   },
 
   emptyAdditionalData() {
-    this.set('shownComponents', []);
+    this.closeAdditionalData();
+    this.set('shownComponents.length', 0);
     this.set('data', null);
   },
 
