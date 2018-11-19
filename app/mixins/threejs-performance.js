@@ -28,6 +28,7 @@ export default Mixin.create({
     // 0: fps, 1: ms, 2: mb, 3+: custom or just click the window to toggle
     this.get('stats').showPanel(0); 
     this.get('stats').dom.style.top = "200px";
+    this.get('stats').dom.style.zIndex = "1000";
     document.body.appendChild(this.get('stats').dom);
 
     this.set('threexStats', new THREEx.RendererStats());

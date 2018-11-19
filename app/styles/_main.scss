@@ -13,9 +13,12 @@ body > .ember-view {
   overflow: hidden;
   @extend .ml-3;
   @extend .mr-3;
+  @extend .pt-3;
+  @extend .pb-3;
   @extend .flex-grow-1;
   @extend .d-flex;
   @extend .flex-column;
+  margin-top: 64px;
 }
 
 .main-content > .row {
@@ -29,6 +32,7 @@ body > .ember-view {
 
 #rendering {
   @extend .flex-grow-1;
+  @extend .mt-3;
 }
 
 #dataselection {
