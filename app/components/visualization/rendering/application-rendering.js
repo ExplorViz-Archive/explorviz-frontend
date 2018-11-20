@@ -415,11 +415,13 @@ export default RenderingCore.extend({
 
     // arrow properties
     let origin = new THREE.Vector3(middle.x, middle.y + 0.8, middle.z);
-    let headLength = 1;
+    let headLength = 2.6;
     let length = headLength + 0.00001; // body of arrow not visible
     let color = 0x000000; // black
 
-    let arrow = new THREE.ArrowHelper(dir, origin, length, color , 1, 0.5);
+    const headWidth = 1.6;
+
+    let arrow = new THREE.ArrowHelper(dir, origin, length, color , headLength, headWidth);
 
     this.get('application3D').add(arrow);
   }, // END addCommunicationArrow
