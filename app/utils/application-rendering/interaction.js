@@ -252,13 +252,13 @@ export default Object.extend(Evented, {
 
         this.get('renderingService').redrawScene();
       } else if(emberModelName === "cumulatedclazzcommunication"){
-        this.get('highlighter').highlight(emberModel);
-        this.get('renderingService').redrawScene();
-
-        // only proceed if communication was not originally highlighted
-        if (!emberModel.get('highlighted')){
+        
+        if (emberModel.get('highlighted')){
           return;
         }
+
+        this.get('highlighter').highlight(emberModel);
+        this.get('renderingService').redrawScene();
 
         // retrive runtime informtions
         let traces = emberModel.getRuntimeInformations();
@@ -317,6 +317,9 @@ export default Object.extend(Evented, {
     }
 
     this.trigger('singleClick', emberModel);
+
+    // close trace information (possibly opened before)
+    this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
 
   },
 
