@@ -40,7 +40,8 @@ export default BaseAuthenticator.extend({
     return new RSVP.Promise(function(resolve, reject) {
       function fulfill(token) {
         resolve({
-          access_token: token
+          access_token: token,
+          username: data.username
         });
       }
   
