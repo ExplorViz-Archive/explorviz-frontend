@@ -54,17 +54,22 @@ export default Component.extend({
 
       function failure(reason) {
 
-        self.debug(reason);
-
-        const backendResponse = reason.errors[0];        
+        if(reason.message) {
+          self.debug(reason.message);
+        }
 
         let errorMessage = "No connection to backend";
 
-        if (backendResponse && backendResponse.status && backendResponse.title &&
-          backendResponse.detail) {
+        if(reason.errors && reason.errors[0]) {
+
+        const backendResponse = reason.errors[0];        
+
+          if (backendResponse && backendResponse.status && backendResponse.title && backendResponse.detail) {
 
           errorMessage = `${backendResponse.status}: ${backendResponse.title} / 
             ${backendResponse.detail}`;
+
+          }
 
         }
 
