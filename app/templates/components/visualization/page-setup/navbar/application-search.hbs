@@ -1,7 +1,7 @@
 <form {{action 'focusEntity' on="submit" }} class="form-inline my-2 my-lg-0 px-2">
-  {{input list="entities" value=searchString placeholder="Search Entity" class="form-control mr-sm-2" aria-label="Search"}}
+  {{input list="entities" value=searchString autocomplete="off" placeholder="Search Entity" class="form-control mr-sm-2" aria-label="Search"}}
   <datalist id="entities">
-    {{#each entityNames as |entityName|}}
+    {{#each shownSuggestions as |entityName|}}
       <option value={{entityName}} />
     {{/each}}
   </datalist>

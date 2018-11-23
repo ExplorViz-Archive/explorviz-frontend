@@ -11,11 +11,13 @@ export default Component.extend({
   landscapeRepo: service('repos/landscape-repository'),
   highlighter: service('visualization/application/highlighter'),
   entityNames: null,
+  shownSuggestions: null,
 
   // @Override
   init()  {
     this._super(...arguments);
     this.set('entityNames', []);
+    this.set('shownSuggestions', []);
   },
 
   actions: {
@@ -24,6 +26,27 @@ export default Component.extend({
 
       if (searchResult !== null) {
         this.get('renderingService').focusEntity();
+      }
+    }
+  },
+
+  // find entries which match user's entry (amount limited by maxSuggestions value)
+  keyUp(event){
+    this.set('shownSuggestions', []);
+    let searchString = this.get('searchString');
+    let shownSuggestions = this.get('shownSuggestions');
+    let entityNames = this.get('entityNames');
+    let foundSuggestions = 0;
+
+    const maxSuggestions = 5;
+
+    // do not show results for empty input
+    if (searchString != ""){
+      for (let i = 0; i < entityNames.length && foundSuggestions < maxSuggestions; i++) {
+        if (entityNames[i].toLowerCase().includes(searchString.toLowerCase())){
+          shownSuggestions.push(entityNames[i]);
+          foundSuggestions++;
+        }
       }
     }
   },
@@ -42,6 +65,12 @@ export default Component.extend({
     })
 
     this.set('entityNames', entityNames);
+  },
+
+  // do not unnecessarily keep potentially large array in memory
+  focusOut() {
+    this.set('entityNames', []);
+    this.set('shownSuggestions', []);
   },
 
   findElementByString(searchString) {
@@ -87,6 +116,11 @@ export default Component.extend({
     this.get('highlighter').highlight(firstMatch);
     this.get('renderingService').redrawScene();
   },
+
+  destroyElement(){
+    this.set('entityNames', null);
+    this.set('shownSuggestions', null);
+  }
 
 
 });
