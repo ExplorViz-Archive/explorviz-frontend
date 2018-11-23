@@ -36,7 +36,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "Landscape-Serializer",
         "Login-Form-Component",
         "Login-Route",
-        "Navbar-Glyphicons",
+        "Navbar-Octicons",
         "Navbar-Routes",
         "Node-Model",
         "NodeGroup-Model",

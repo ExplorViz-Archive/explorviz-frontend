@@ -146,8 +146,6 @@ export default Component.extend({
       $(".timeline").slideUp(400);
       $("#vizContainer").animate({height:'+=120'});
       $(".timeline").attr('vis', 'hide');
-      $("#toggleTimelineButton").removeClass('glyphicon-collapse-down')
-        .addClass('glyphicon-collapse-up');
     }
   },
 
