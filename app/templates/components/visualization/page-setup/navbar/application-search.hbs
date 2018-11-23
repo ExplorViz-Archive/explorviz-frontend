@@ -1,5 +1,10 @@
 <form {{action 'focusEntity' on="submit" }} class="form-inline my-2 my-lg-0 px-2">
-  {{input value=searchString placeholder="Search Entity" class="form-control mr-sm-2" aria-label="Search"}}
+  {{input list="entities" value=searchString placeholder="Search Entity" class="form-control mr-sm-2" aria-label="Search"}}
+  <datalist id="entities">
+    {{#each entityNames as |entityName|}}
+      <option value={{entityName}} />
+    {{/each}}
+  </datalist>
   <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
     {{svg-jar "search" class="octicon align-middle"}}
   </button>

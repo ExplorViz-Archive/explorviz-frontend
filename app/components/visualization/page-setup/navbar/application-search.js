@@ -3,13 +3,14 @@ import { inject as service } from "@ember/service";
 
 export default Component.extend({
 
-  // No Ember generated container
-  tagName: '',
+  // tagName needed at the moment to handle focus event
+  tagName: 'application-search',
 
   store: service(),
   renderingService: service(),
   landscapeRepo: service('repos/landscape-repository'),
   highlighter: service('visualization/application/highlighter'),
+  entityNames: [],
 
   actions: {
     focusEntity() {
@@ -19,6 +20,22 @@ export default Component.extend({
         this.get('renderingService').focusEntity();
       }
     }
+  },
+
+  // extract all (searchable) entity names of application when input form is in focus
+  focusIn(event) {
+    let components = this.get('store').peekAll('component');
+    let clazzes = this.get('store').peekAll('clazz');
+    let entityNames = [];
+    components.forEach( (component) => {
+      entityNames.push(component.get('name'));
+    })
+
+    clazzes.forEach( (clazz) => {
+      entityNames.push(clazz.get('name'));
+    })
+
+    this.set('entityNames', entityNames);
   },
 
   findElementByString(searchString) {
