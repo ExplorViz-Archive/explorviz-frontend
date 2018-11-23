@@ -13,6 +13,7 @@ export default Component.extend({
     actions: {
         traceSelected(traceId) {
             this.get('highlighter').highlightTrace(traceId);
+            this.get('highlighter').applyHighlighting();
             this.get('renderingService').redrawScene();
             this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
         }
