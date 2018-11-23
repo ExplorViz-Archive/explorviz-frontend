@@ -10,7 +10,13 @@ export default Component.extend({
   renderingService: service(),
   landscapeRepo: service('repos/landscape-repository'),
   highlighter: service('visualization/application/highlighter'),
-  entityNames: [],
+  entityNames: null,
+
+  // @Override
+  init()  {
+    this._super(...arguments);
+    this.set('entityNames', []);
+  },
 
   actions: {
     focusEntity() {
@@ -23,7 +29,7 @@ export default Component.extend({
   },
 
   // extract all (searchable) entity names of application when input form is in focus
-  focusIn(event) {
+  focusIn() {
     let components = this.get('store').peekAll('component');
     let clazzes = this.get('store').peekAll('clazz');
     let entityNames = [];
