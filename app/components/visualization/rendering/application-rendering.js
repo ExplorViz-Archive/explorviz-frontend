@@ -263,7 +263,7 @@ export default RenderingCore.extend({
               // check for bidirectional communication
               cumuClazzCommu.get('aggregatedClazzCommunications').forEach( (aggrComm) => {
                 if ((cumuClazzCommu.get('sourceClazz.fullQualifiedName') === aggrComm.get('targetClazz.fullQualifiedName') && !drewSecondArrow)){
-                  self.addCommunicationArrow(end, start, thickness);
+                  self.addCommunicationArrow(end, start, arrowThickness);
                   drewSecondArrow = true;
                 }
               });
@@ -408,7 +408,7 @@ export default RenderingCore.extend({
    * @param {*} start start vector of the associated communication
    * @param {*} end   end vector of the associated communication
    */
-  addCommunicationArrow(start, end, headWidth){
+  addCommunicationArrow(start, end, width){
 
     // determine (almost the) middle
     let dir = end.clone().sub(start);
@@ -422,6 +422,7 @@ export default RenderingCore.extend({
 
     // arrow properties
     let origin = new THREE.Vector3(middle.x, middle.y + 0.8, middle.z);
+    let headWidth = Math.max(1.2, width);
     let headLength = Math.min(2 * headWidth, 0.3 * len);
     let length = headLength + 0.00001; // body of arrow not visible
     let color = 0x000000; // black
