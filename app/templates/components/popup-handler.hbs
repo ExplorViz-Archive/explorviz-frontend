@@ -1,0 +1,39 @@
+<div class="popover bs-popover-top">
+    <h3 class="popover-header">
+        <div style="font-weight:bold;text-align:center;">{{communication.sourceClazz}} 
+            
+            {{#if communication.isBidirectional}}
+                {{svg-jar "arrow-both" class="octicon align-middle"}}
+            {{else}}
+                {{svg-jar "arrow-right" class="octicon align-middle"}}
+            {{/if}}
+
+            {{communication.targetClazz}}</div>
+    </h3>
+    <div class="popover-body" style="white-space: nowrap;">
+
+        <table style="width:100%">
+            <tr>
+                <td>&nbsp;{{svg-jar "code" class="octicon align-middle"}}&nbsp; Requests:</td>
+                <td style="text-align:right;padding-left:10px;"> {{communication.requests}}
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;{{svg-jar "list-ordered" class="octicon align-middle"}}&nbsp; Involved Traces
+                    :</td>
+                <td style="text-align:right;padding-left:10px;"> {{communication.traces}}
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;{{svg-jar "clock" class="octicon align-middle"}}&nbsp; Avg. Response Time:</td>
+                <td style="text-align:right;padding-left:10px;"> {{communication.responseTime}}
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;{{svg-jar "clock" class="octicon align-middle"}}&nbsp; Avg. Duration:</td>
+                <td style="text-align:right;padding-left:10px;"> {{communication.duration}}
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
