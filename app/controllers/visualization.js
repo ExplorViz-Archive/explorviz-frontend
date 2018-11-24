@@ -22,6 +22,7 @@ export default Controller.extend(AlertifyHandler, {
   landscapeRepo: service("repos/landscape-repository"),
   landscapeListener: service("landscape-listener"),
   additionalData: service("additional-data"),
+  timestampRepo: service("repos/timestamp-repository"),
 
   state: null,
 
@@ -78,7 +79,7 @@ export default Controller.extend(AlertifyHandler, {
     resetView() {
       this.set('viewImporter.importedURL', false);
       this.get('renderingService').reSetupScene();
-    }
+    },
     
   },
 
@@ -119,6 +120,13 @@ export default Controller.extend(AlertifyHandler, {
     });
 
     this.get('landscapeListener').initSSE();
+
+    this.get('additionalData').on('showWindow', this, this.onShowWindow);
+  },
+
+  onShowWindow() {
+    this.get('renderingService').resizeCanvas();
+    this.get('timestampRepo').triggerUpdated();
   },
 
   // @Override
@@ -126,6 +134,7 @@ export default Controller.extend(AlertifyHandler, {
     this._super(...arguments);
     this.get('urlBuilder').off('transmitState');
     this.get('viewImporter').off('requestView');
+    this.get('additionalData').off('showWindow', this, this.onShowWindow);
   }
   
 });

@@ -220,11 +220,16 @@ export default Object.extend(Evented, {
 
     const origin = {};
 
-    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) /
-      this.get('renderer').domElement.clientWidth) * 2 - 1;
+    const rect = this.get('canvas').getBoundingClientRect();
 
-    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) /
-      this.get('renderer').domElement.clientHeight) * 2 + 1;
+    const mouseOnCanvas = {
+      x: mouse.x - rect.left,
+      y: mouse.y - rect.top
+    };
+
+    origin.x = (mouseOnCanvas.x / this.get('renderer').domElement.clientWidth) * 2 - 1;
+
+    origin.y = -(mouseOnCanvas.y / this.get('renderer').domElement.clientHeight) * 2 + 1;
 
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
@@ -270,7 +275,7 @@ export default Object.extend(Evented, {
         // display trace selection component for communication
         this.set('additionalData.data', traces);
         this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
-        this.set('additionalData.showWindow', true);
+        this.get('additionalData').openAdditionalData();
       }
 
     }
@@ -284,11 +289,16 @@ export default Object.extend(Evented, {
 
     const origin = {};
 
-    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) /
-      this.get('renderer').domElement.clientWidth) * 2 - 1;
+    const rect = this.get('canvas').getBoundingClientRect();
 
-    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) /
-      this.get('renderer').domElement.clientHeight) * 2 + 1;
+    const mouseOnCanvas = {
+      x: mouse.x - rect.left,
+      y: mouse.y - rect.top
+    };
+
+    origin.x = (mouseOnCanvas.x / this.get('renderer').domElement.clientWidth) * 2 - 1;
+
+    origin.y = -(mouseOnCanvas.y / this.get('renderer').domElement.clientHeight) * 2 + 1;
 
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
@@ -357,18 +367,18 @@ export default Object.extend(Evented, {
 
   handlePopUp(evt) {
 
+    const rect = this.get('canvas').getBoundingClientRect();
+
     const mouse = {
-      x: evt.detail.clientX,
-      y: evt.detail.clientY
+      x: evt.detail.clientX - rect.left,
+      y: evt.detail.clientY - rect.top
     };
 
     const origin = {};
 
-    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) /
-      this.get('renderer').domElement.clientWidth) * 2 - 1;
+    origin.x = (mouse.x / this.get('renderer').domElement.clientWidth) * 2 - 1;
 
-    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) /
-      this.get('renderer').domElement.clientHeight) * 2 + 1;
+    origin.y = -(mouse.y / this.get('renderer').domElement.clientHeight) * 2 + 1;
 
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
@@ -377,7 +387,13 @@ export default Object.extend(Evented, {
 
       const emberModel = intersectedViewObj.object.userData.model;
 
-      this.get('popUpHandler').showTooltip(mouse, emberModel);
+      this.get('popUpHandler').showTooltip(
+        {
+          x: evt.detail.clientX,
+          y: evt.detail.clientY
+        },
+        emberModel
+      );
 
     }
 

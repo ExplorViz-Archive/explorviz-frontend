@@ -408,7 +408,7 @@ export default RenderingCore.extend({
    * @param {*} start start vector of the associated communication
    * @param {*} end   end vector of the associated communication
    */
-  addCommunicationArrow(start, end, headWidth, maxLength){
+  addCommunicationArrow(start, end, headWidth){
 
     // determine (almost the) middle
     let dir = end.clone().sub(start);

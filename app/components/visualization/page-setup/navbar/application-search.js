@@ -6,6 +6,8 @@ import { isBlank } from '@ember/utils';
 /* eslint-disable require-yield */
 export default Component.extend({
 
+  tagName: "",
+
   store: service(),
   renderingService: service(),
   landscapeRepo: service('repos/landscape-repository'),

@@ -1,22 +1,43 @@
 html, body {
-  height: 100%;
   overflow: hidden;
+  height: 100vh;
 }
 
 body > .ember-view {
   height: 100%;
+  @extend .d-flex;
+  @extend .flex-column;
 }
 
 .main-content {
-  height: 100%;
   overflow: hidden;
-  margin-right: 5px;
-  margin-left: 5px;
+  @extend .ml-3;
+  @extend .mr-3;
+  @extend .pt-3;
+  @extend .pb-3;
+  @extend .flex-grow-1;
+  @extend .d-flex;
+  @extend .flex-column;
+  margin-top: 64px;
 }
 
-.main-content-majority {
-  max-height: 60%;
-  width: 100%;
+.main-content > .row {
+  @extend .flex-grow-1;
+}
+
+#vizspace {
+  @extend .d-flex;
+  @extend .flex-column;
+}
+
+#rendering {
+  @extend .flex-grow-1;
+  @extend .mt-3;
+}
+
+#dataselection {
+  display: flex;
+  @extend .flex-row;
 }
 
 .canvasViz {
@@ -26,6 +47,37 @@ body > .ember-view {
 
 .no-margin{
   margin: 0px;
+}
+
+.hide {
+  display: none !important;
+}
+
+#discovery-details-tab {
+  @extend .d-flex;
+  @extend .flex-column;
+  @extend .flex-grow-1;
+  min-height: 0;
+}
+
+#discovery-details-tab > .tab-content {
+  @extend .d-flex;
+  flex: 1 1 100%;
+  min-height: 0;
+}
+
+#discovery-details-tab > nav {
+  flex-direction: column;
+}
+
+#discovery-details-tab > .tab-content > .tab-pane {
+  flex: 0 0 100%;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+#discovery-details-tab table {
+  @extend .mb-0;
 }
 
 //Additional classes
@@ -74,9 +126,8 @@ body > .ember-view {
 }
 
 .cytoscape-container {
-  height: 80%;
-  width: 100%;
-  position: absolute;
+  @extend .d-flex;
+  @extend .flex-grow-1;
 }
 
 .scroll-container {
@@ -117,4 +168,19 @@ body > .ember-view {
 
 .tooltip-component > a {
   color: #777;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background-color: #d2d2d2;
+}
+
+::-webkit-scrollbar-thumb {
+  background:#989898; 
+  border-radius: 5px;
 }

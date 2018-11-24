@@ -11,6 +11,10 @@ export default Service.extend(Evented, {
     this.trigger('reSetupScene');
   },
 
+  resizeCanvas() {
+    this.trigger('resizeCanvas');
+  },
+
   redrawScene() {
     // only redraws
     this.trigger('redrawScene');
