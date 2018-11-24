@@ -1,11 +1,23 @@
-<form {{action 'focusEntity' on="submit" }} class="form-inline my-2 my-lg-0 px-2">
-  {{input list="entities" value=searchString autocomplete="off" placeholder="Search Entity" class="form-control mr-sm-2" aria-label="Search"}}
+<form {{action 'focusEntity' on="submit" }} 
+  class="form-inline my-2 my-lg-0 px-2">
+
+  {{input type="text" input=(perform searchEntity value="target.value") 
+    list="entities" value=searchString autocomplete="off" 
+    placeholder="Search Entity" class="form-control mr-sm-2" 
+    aria-label="Search"}}
+
+  {{#if searchRepo.isRunning}}
+    {{ember-spinner}}
+  {{/if}}
+
   <datalist id="entities">
-    {{#each shownSuggestions as |entityName|}}
-      <option value={{entityName}} />
+    {{#each searchEntity.lastSuccessful.value as |name|}}
+      <option value={{name}}/>
     {{/each}}
   </datalist>
+
   <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
     {{svg-jar "search" class="octicon align-middle"}}
   </button>
+
 </form>
