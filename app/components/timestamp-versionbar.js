@@ -141,8 +141,6 @@ export default Component.extend({
       $(".versionbar").slideUp(400);
       $("#vizContainer").animate({height:'+=120'});
       $(".versionbar").attr('vis', 'hide');
-      $("#toggleVersionbarButton").removeClass('glyphicon-collapse-down')
-      .addClass('glyphicon-collapse-up');
     }
   },
   // build chart-ready data

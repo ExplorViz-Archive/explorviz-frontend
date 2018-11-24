@@ -24,16 +24,16 @@ export default Service.extend({
   /**
   * Latest fetched entity
   *
-  * @property navbarGlyphicons
+  * @property navbarOcticons
   * @type Array
   */
-  navbarGlyphicons: null,
+ navbarOcticons: null,
 
   init() {
     this._super(...arguments);
     // TODO tutorial button not shown until implemented
     this.set('navbarRoutes', ["visualization", "replay", "discovery"]);
-    this.set('navbarGlyphicons', []);
+    this.set('navbarOcticons', []);
 
   }
 });

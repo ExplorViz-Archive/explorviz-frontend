@@ -26,6 +26,7 @@ export default Component.extend({
             this.set('additionalData.data', traces);
 
             this.get('highlighter').highlightTrace(traceId);
+            this.get('highlighter').applyHighlighting();
             this.get('renderingService').redrawScene();
         }
     },
