@@ -66,5 +66,7 @@ module.exports = function(defaults) {
 
   app.import('vendor/eventsource-polyfill/eventsource.min.js');
 
+  app.import('node_modules/bootstrap/dist/js/bootstrap.min.js');
+
   return app.toTree();
 };
