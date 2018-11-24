@@ -261,6 +261,11 @@ export default Object.extend(Evented, {
 
         // retrive runtime informtions
         let traces = emberModel.getRuntimeInformations();
+
+        // initialize every trace as unselected
+        traces.forEach( (trace) => {
+          trace.set('isSelected', false);
+        });
         
         // display trace selection component for communication
         this.set('additionalData.data', traces);

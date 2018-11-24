@@ -1,14 +1,22 @@
-  <table style="width:100%">
+<table style="width:100%">
   <tr>
     <th>TraceID</th>
-    <th>Requests</th> 
+    <th>Requests</th>
     <th>Trace Duration</th>
   </tr>
   {{#each additionalData.data as |trace|}}
-    <tr {{action "traceSelected" trace.traceId}}>
+  {{#if trace.isSelected}}
+  <tr {{action "traceSelected" trace.traceId}} bgcolor="#cc8a8a">
     <td>{{trace.traceId}} </td>
     <td>{{trace.requests}}</td>
     <td>{{trace.overallTraceDuration}}</td>
-    </tr>
+  </tr>
+  {{else}}
+  <tr {{action "traceSelected" trace.traceId}}>
+    <td>{{trace.traceId}} </td>
+    <td>{{trace.requests}}</td>
+    <td>{{trace.overallTraceDuration}}</td>
+  </tr>
+  {{/if}}
   {{/each}}
 </table>
