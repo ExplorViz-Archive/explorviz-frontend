@@ -252,17 +252,17 @@ export default Object.extend(Evented, {
 
         this.get('renderingService').redrawScene();
       } else if(emberModelName === "cumulatedclazzcommunication"){
-        
-        if (emberModel.get('highlighted')){
-          return;
-        }
+        // remove old highlighting
+        this.get('highlighter').unhighlightAll();
 
+        // highlight communication
         this.get('highlighter').highlight(emberModel);
         this.get('renderingService').redrawScene();
 
         // retrive runtime informtions
         let traces = emberModel.getRuntimeInformations();
         
+        // display trace selection component for communication
         this.set('additionalData.data', traces);
         this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
         this.set('additionalData.showWindow', true);
