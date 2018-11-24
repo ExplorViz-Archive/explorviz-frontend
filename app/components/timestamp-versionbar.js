@@ -45,6 +45,7 @@ export default Component.extend({
   // @Override
   // Cleanup
   willDestroyElement() {
+    this._super(...arguments);
     //workaround: hide versionbar, otherwise timeline gets broken
     this.get('timestampRepo').off('uploaded');
   },

@@ -44,6 +44,7 @@ export default Component.extend(Evented, THREEPerformance, {
 
   reloadHandler: service("reload-handler"),
   landscapeRepo: service("repos/landscape-repository"),
+  highlighter: service('visualization/application/highlighter'),
   renderingService: service(),
 
   scene : null,
@@ -526,6 +527,9 @@ export default Component.extend(Evented, THREEPerformance, {
     this.get('viewImporter').off('transmitView');
     this.get('renderingService').off('reSetupScene');
     this.get('landscapeRepo').off('updated');
+
+    let highlighter = this.get('highlighter');
+    highlighter.unhighlightAll();
   },
 
 

@@ -50,6 +50,7 @@ export default Component.extend({
   // @Override
   // Cleanup
   willDestroyElement() {
+    this._super(...arguments);
       //workaround: hide timeline, otherwise the component timestamp-versionbar gets broken
     this.hideTimeline();
     this.get('timestampRepo').off('updated');

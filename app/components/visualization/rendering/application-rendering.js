@@ -459,9 +459,6 @@ export default RenderingCore.extend({
     this.get('renderingService').on('redrawScene', function() {
       self.cleanAndUpdateScene();
     });
-
-
-
   }, // END initInteraction
 
 });
