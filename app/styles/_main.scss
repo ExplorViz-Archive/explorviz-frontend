@@ -67,6 +67,7 @@ body > .ember-view {
 #discovery-details-tab > .tab-content {
   @extend .d-flex;
   flex: 1 1 100%;
+  overflow-y: auto;
 }
 
 #discovery-details-tab > .tab-content > .tab-pane {
