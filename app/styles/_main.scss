@@ -167,3 +167,18 @@ body > .ember-view {
 .tooltip-component > a {
   color: #777;
 }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background-color: #d2d2d2;
+}
+
+::-webkit-scrollbar-thumb {
+  background:#989898; 
+  border-radius: 5px;
+}
