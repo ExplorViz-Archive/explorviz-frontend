@@ -53,6 +53,30 @@ body > .ember-view {
   display: none !important;
 }
 
+#discoveryspace {
+  @extend .d-flex;
+  @extend .flex-column;
+}
+
+#discovery-details-tab {
+  @extend .d-flex;
+  @extend .flex-column;
+  @extend .flex-grow-1;
+}
+
+#discovery-details-tab > .tab-content {
+  @extend .d-flex;
+  flex: 1 1 100%;
+}
+
+#discovery-details-tab > .tab-content > .tab-pane {
+  flex: 0 0 100%;
+}
+
+#discovery-details-tab table {
+  @extend .mb-0;
+}
+
 //Additional classes
 
 .nav.navbar-nav > li > a{
@@ -99,9 +123,8 @@ body > .ember-view {
 }
 
 .cytoscape-container {
-  height: 80%;
-  width: 100%;
-  position: absolute;
+  @extend .d-flex;
+  @extend .flex-grow-1;
 }
 
 .scroll-container {

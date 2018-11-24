@@ -1,24 +1,18 @@
 {{#if showHiddenMessage}}
-  
   <div class="container-fluid">
     <div class="jumbotron">
       <h2>All agents are hidden!</h2>
       <p>Go to Settings an enable 'Show hidden entities' or click <a {{action "enableShowHidden" preventDefault=false}}>here</a>
-</p>
+      </p>
     </div>
     <div id="spinnerDiv" class="container" style="position:relative; height:20%;">
       {{ember-spinner}}
     </div>
   </div>
-
 {{else}}
-
   {{#if agentRepo.agentList}}
-    
-    <div id="cy" class="container-fluid cytoscape-container"></div>
-
+    <div id="cy" class="cytoscape-container"></div>
   {{else}}
-
     <div class="container-fluid">
       <div class="jumbotron">
         <h2>No agents found!</h2>
@@ -28,7 +22,5 @@
         {{ember-spinner}}
       </div>
     </div>
-
   {{/if}}
-  
 {{/if}}
