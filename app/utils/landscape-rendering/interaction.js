@@ -131,22 +131,17 @@ export default Object.extend(Evented, AlertifyHandler, {
     const mX = (evt.clientX / window.innerWidth ) * 2 - 1;
     const mY = - (evt.clientY / window.innerHeight ) * 2 + 1;
 
-    const vector = new THREE.Vector3(mX, mY, 1 );
-    vector.unproject(this.get('camera'));
-    vector.sub(this.get('camera').position);
+    const scrollVector = new THREE.Vector3(mX, mY, 1 );
+    scrollVector.unproject(this.get('camera'));
+    scrollVector.sub(this.get('camera.position'));
+    scrollVector.setLength(delta * 1.5)
 
-    this.get('camera').position.addVectors(this.get('camera').position,
-      vector.setLength(delta * 1.5));
-
-
-    // zoom in
-    /*if (delta > 0) {
-      this.get('camera').position.z -= delta * 1.5;
+    let landscapeVisible = this.get('camera.position.z') + scrollVector.z > 0.2;
+    
+    // apply zoom, prevent to zoom behind 2D-Landscape (z-direction)
+    if (landscapeVisible){
+      this.get('camera.position').addVectors(this.get('camera.position'), scrollVector);
     }
-    // zoom out
-    else {
-      this.get('camera').position.z -= delta * 1.5;
-    }*/
   },
 
 
