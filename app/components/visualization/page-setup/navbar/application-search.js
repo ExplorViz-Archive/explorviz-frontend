@@ -73,6 +73,10 @@ export default Component.extend({
 
   getPossibleEntityNames: task(function * (name) {
 
+    // TODO search only in current app, not overall store
+    // save entities (not names) in list and after selection, use the entitiy 
+    // for highlighting
+
     const searchString = name.toLowerCase();
 
     let components = this.get('store').peekAll('component');
