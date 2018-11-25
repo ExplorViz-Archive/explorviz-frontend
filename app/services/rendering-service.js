@@ -22,6 +22,10 @@ export default Service.extend(Evented, {
 
   focusEntity(emberEntitiy) {
     this.trigger('focusEntity', emberEntitiy);
+  },
+
+  toggleTimeline(){
+    this.set('showTimeline', !this.get('showTimeline'));
   }
 
 });
