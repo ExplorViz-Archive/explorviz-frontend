@@ -10,7 +10,7 @@ export default Component.extend({
   
   actions: {
     toggleTimeline() {
-      this.set('renderingService.showTimeline', !this.get('renderingService.showTimeline'));
+      this.get('renderingService').toggleTimeline();
     }
   }
 

@@ -29,6 +29,7 @@ export default Component.extend({
 
   timestampRepo: service("repos/timestamp-repository"),
   reloadHandler: service("reload-handler"),
+  renderingService: service("rendering-service"),
 
   plot: null,
 
@@ -58,9 +59,15 @@ export default Component.extend({
     this.get('reloadHandler').off('startExchange');
   },
 
+  didDestroyElement(){
+    this._super(...arguments);
+    this.get('renderingService').resizeCanvas();
+  },
+
   didRender() {
     this._super(...arguments);
     this.renderPlot();
+    this.get('renderingService').resizeCanvas();
   },
 
   renderPlot() {
