@@ -65,6 +65,33 @@ export default DrawNodeEntity.extend({
     return found;
   },
 
+  getAllComponents() {
+    let components = [];
+
+    this.get('components').forEach((component) => {      
+      components.push(component);
+
+      const children = component.get('children');
+      children.forEach((child) => {
+        components.push(child);
+        components = components.concat(child.getAllComponents());
+      });
+    });
+
+    return components;
+  },
+
+  getAllClazzes() {
+    let clazzes = [];
+
+    this.get('components').forEach((component) => {
+      console.log("hi");
+      clazzes = clazzes.concat(component.getAllClazzes());
+    });
+
+    return clazzes;
+  },
+
   filterComponents(attributeString, predicateValue) {
     const filteredComponents = [];
 
@@ -72,9 +99,20 @@ export default DrawNodeEntity.extend({
       if(component.get(attributeString) === predicateValue) {
         filteredComponents.push(component);
       }
+      component.filterChildComponents(attributeString, predicateValue);
     });
 
     return filteredComponents;
+  },
+
+  filterClazzes(attributeString, predicateValue) {
+    const filteredClazzes = [];
+
+    this.get('components').forEach((component) => {
+      filteredClazzes.push(component.filterClazzes(attributeString, predicateValue));
+    });
+
+    return filteredClazzes;
   },
 
   applyDefaultOpenLayout(userAlreadyActed) {

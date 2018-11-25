@@ -101,6 +101,31 @@ export default Draw3DNodeEntity.extend({
     }
   },
 
+  getAllComponents() {
+    let components = [];
+
+    this.get('children').forEach((child) => {      
+      components.push(child);
+      components = components.concat(child.getAllComponents());
+    });
+
+    return components;
+  },
+
+  getAllClazzes() {
+    let clazzes = [];
+
+    this.get('clazzes').forEach((clazz) => {
+      clazzes.push(clazz);
+    });
+
+    this.get('children').forEach((child) => {      
+      clazzes = clazzes.concat(child.getAllClazzes());
+    });
+
+    return clazzes;
+  },
+
   // adds all clazzes of the component or underlying components to a Set
   getContainedClazzes(containedClazzes){
     const clazzes = this.get('clazzes');
@@ -116,6 +141,21 @@ export default Draw3DNodeEntity.extend({
     });
   },
 
+  filterClazzes(attributeString, predicateValue) {
+    const filteredClazzes = [];
+
+    const allClazzes = new Set();
+    this.getContainedClazzes(allClazzes);
+
+    allClazzes.forEach((clazz) => {
+      if(clazz.get(attributeString) === predicateValue) {
+        filteredClazzes.push(clazz);
+      }
+    });
+
+    return filteredClazzes;
+  },
+
   filterChildComponents(attributeString, predicateValue) {
     const filteredComponents = [];
 
@@ -123,6 +163,7 @@ export default Draw3DNodeEntity.extend({
       if(component.get(attributeString) === predicateValue) {
         filteredComponents.push(component);
       }
+      component.filterChildComponents(attributeString, predicateValue);
     });
 
     return filteredComponents;

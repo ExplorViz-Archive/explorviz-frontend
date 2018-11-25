@@ -13,6 +13,9 @@ export default Component.extend({
   landscapeRepo: service('repos/landscape-repository'),
   highlighter: service('visualization/application/highlighter'),
 
+  appComponents: null,
+  appClazzes: null,
+
   actions: {
     focusEntity() {
       const searchResult = this.findElementByString(this.get('searchString'));
@@ -73,18 +76,17 @@ export default Component.extend({
 
   getPossibleEntityNames: task(function * (name) {
 
-    // TODO search only in current app, not overall store
-    // save entities (not names) in list and after selection, use the entitiy 
-    // for highlighting
-
     const searchString = name.toLowerCase();
 
-    let components = this.get('store').peekAll('component');
-    let clazzes = this.get('store').peekAll('clazz');
-    let entityNames = [];
+    const latestApp = this.get('landscapeRepo.latestApplication');
+
+    // re-calculate since there might be an update to the app (e.g. new class)
+    const components = latestApp.getAllComponents();
+    const clazzes = latestApp.getAllClazzes();
+    const entityNames = [];
 
     const maxNumberOfCompNames = 20;
-    let currentNumberOfCompNames = 0;
+    let currentNumberOfCompNames = 0; 
 
     for (let i = 0; i < components.length; i++) {      
       if(currentNumberOfCompNames === maxNumberOfCompNames) {
