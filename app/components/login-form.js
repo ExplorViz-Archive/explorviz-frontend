@@ -23,7 +23,7 @@ export default Component.extend({
   router: service('-routing'),
   store: service(),
 
-  didRender(){
+  didInsertElement(){
     this._super(...arguments);
     // also support autofocus for firefox
     $('#username').focus();
