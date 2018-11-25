@@ -11,8 +11,8 @@
     {{/if}}
 
     <datalist id="entities">
-      {{#each searchEntity.lastSuccessful.value as |name|}}
-        <option value={{name}}/>
+      {{#each searchEntity.lastSuccessful.value as |entity|}}
+        <option value={{entity.name}}/>
       {{/each}}
     </datalist>
 

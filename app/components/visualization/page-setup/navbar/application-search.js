@@ -26,24 +26,19 @@ export default Component.extend({
   },
 
   findElementByString(searchString) {
+    const searchResults = this.get('searchEntity.lastSuccessful.value');
 
-    const possibleGlobalComponentCandidates = this.get('store')
-      .peekAll('component')
-      .filterBy('name', searchString);
-
-    const possibleGlobalClazzCandidates = this.get('store')
-      .peekAll('clazz')
-      .filterBy('name', searchString);
-
-    const possibleGlobalCandidates = possibleGlobalComponentCandidates
-      .concat(possibleGlobalClazzCandidates);
-
-    // Retrieve the specific element of the currently visible latestApp
-    const latestApp = this.get('landscapeRepo.latestApplication');
-
-    const firstMatch = possibleGlobalCandidates.find((candidate) => {
-      return latestApp.contains(candidate);
-    });
+    // TODO Do not pass string but entity. As a result, the following loop
+    // won't be necessary and entities with the same name are distinguishable
+    // (e.g. ConfigurationHandler in dummy mode)
+    
+    let firstMatch = null;
+    for (let i = 0; i < searchResults.length; i++) {
+      if(searchString === searchResults[i].get('name')) {
+        firstMatch = searchResults[i];
+        break;
+      }
+    }
 
     if (!firstMatch ||
       this.get('highlighter.highlightedEntity') === firstMatch) {
@@ -83,7 +78,7 @@ export default Component.extend({
     // re-calculate since there might be an update to the app (e.g. new class)
     const components = latestApp.getAllComponents();
     const clazzes = latestApp.getAllClazzes();
-    const entityNames = [];
+    const entities = [];
 
     const maxNumberOfCompNames = 20;
     let currentNumberOfCompNames = 0; 
@@ -96,7 +91,7 @@ export default Component.extend({
       const component = components.objectAt(i);
       const componentName = component.get('name').toLowerCase();
       if(componentName.startsWith(searchString)) {
-        entityNames.push(component.get('name'));
+        entities.push(component);
         currentNumberOfCompNames++;
       }
     }
@@ -112,11 +107,11 @@ export default Component.extend({
       const clazz = clazzes.objectAt(i);
       const clazzName = clazz.get('name').toLowerCase();
       if(clazzName.startsWith(searchString)) {
-        entityNames.push(clazz.get('name'));
+        entities.push(clazz);
         currentNumberOfClazzNames++;
       }  
     }
-    return entityNames;
+    return entities;
   })
 
 

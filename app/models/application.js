@@ -85,7 +85,6 @@ export default DrawNodeEntity.extend({
     let clazzes = [];
 
     this.get('components').forEach((component) => {
-      console.log("hi");
       clazzes = clazzes.concat(component.getAllClazzes());
     });
 
