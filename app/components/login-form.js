@@ -1,6 +1,7 @@
 import { inject as service } from "@ember/service";
 import Component from '@ember/component';
 import debugLogger from 'ember-debug-logger';
+import $ from 'jquery';
 
 /**
 * TODO
@@ -21,6 +22,12 @@ export default Component.extend({
   session: service(),
   router: service('-routing'),
   store: service(),
+
+  didInsertElement(){
+    this._super(...arguments);
+    // also support autofocus for firefox
+    $('#username').focus();
+  },
 
   actions: {
 
