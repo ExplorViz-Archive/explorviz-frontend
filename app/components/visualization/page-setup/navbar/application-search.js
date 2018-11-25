@@ -73,25 +73,47 @@ export default Component.extend({
 
   getPossibleEntityNames: task(function * (name) {
 
+    // TODO search only in current app, not overall store
+    // save entities (not names) in list and after selection, use the entitiy 
+    // for highlighting
+
     const searchString = name.toLowerCase();
 
     let components = this.get('store').peekAll('component');
     let clazzes = this.get('store').peekAll('clazz');
     let entityNames = [];
 
-    components.forEach((component) => {
+    const maxNumberOfCompNames = 20;
+    let currentNumberOfCompNames = 0;
+
+    for (let i = 0; i < components.length; i++) {      
+      if(currentNumberOfCompNames === maxNumberOfCompNames) {
+        break;
+      }
+
+      const component = components.objectAt(i);
       const componentName = component.get('name').toLowerCase();
       if(componentName.startsWith(searchString)) {
         entityNames.push(component.get('name'));
-      }      
-    });
+        currentNumberOfCompNames++;
+      }
+    }
 
-    clazzes.forEach((clazz) => {
+    const maxNumberOfClazzNames = 20;
+    let currentNumberOfClazzNames = 0;
+
+    for (let i = 0; i < clazzes.length; i++) {      
+      if(currentNumberOfClazzNames === maxNumberOfClazzNames) {
+        break;
+      }
+
+      const clazz = clazzes.objectAt(i);
       const clazzName = clazz.get('name').toLowerCase();
       if(clazzName.startsWith(searchString)) {
         entityNames.push(clazz.get('name'));
-      }   
-    });
+        currentNumberOfClazzNames++;
+      }  
+    }
     return entityNames;
   })
 
