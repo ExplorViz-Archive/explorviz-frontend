@@ -40,9 +40,14 @@ export default Component.extend({
       }
     }
 
+    console.log("test");
+
     if (!firstMatch ||
       this.get('highlighter.highlightedEntity') === firstMatch) {
-      return;
+        // empty box, unhighlight all
+        this.get('highlighter').unhighlightAll();
+        this.get('renderingService').redrawScene();
+        return;
     }
 
     const modelType = firstMatch.constructor.modelName;
