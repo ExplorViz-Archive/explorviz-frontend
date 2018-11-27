@@ -1,24 +1,15 @@
 <li class="nav-item ml-2">
-  <form {{action 'focusEntity' on="submit" }} class="form-inline" style="flex-flow: row;">
 
-    {{input type="text" input=(perform searchEntity value="target.value") 
-      list="entities" value=searchString autocomplete="off" 
-      placeholder="Search Entity" class="form-control" 
-      aria-label="Search"}}
+    <!-- CSS styling https://ember-power-select.com/cookbook/css-animations -->
 
-    {{#if searchRepo.isRunning}}
-      {{ember-spinner}}
-    {{/if}}
-
-    <datalist id="entities">
-      {{#each searchEntity.lastSuccessful.value as |entity|}}
-        <option value={{entity.name}}/>
-      {{/each}}
-    </datalist>
-
-    <button class="btn btn-outline-success ml-2" type="submit">
-      {{svg-jar "search" class="octicon align-middle"}}
-    </button>
-
-  </form>
+    {{#power-select
+      triggerClass="bootstrap-theme-trigger form-control"
+      search=(perform searchEntity)
+      placeholder="Search Entity..." 
+      onchange=(action "focusEntity")
+      calculatePosition=reCalculateDropdown
+      as |entity|
+    }}
+      {{entity.name}}
+    {{/power-select}}
 </li>

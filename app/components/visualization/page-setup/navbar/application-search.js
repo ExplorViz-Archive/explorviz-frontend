@@ -2,6 +2,7 @@ import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import { task } from 'ember-concurrency';
 import { isBlank } from '@ember/utils';
+import { calculatePosition } from 'ember-basic-dropdown/utils/calculate-position'
 
 /* eslint-disable require-yield */
 export default Component.extend({
@@ -17,56 +18,47 @@ export default Component.extend({
   appClazzes: null,
 
   actions: {
-    focusEntity() {
-      const searchResult = this.findElementByString(this.get('searchString'));
-      if (searchResult !== null) {
-        this.get('renderingService').focusEntity();
+    focusEntity(entity) {
+
+      /*if (!firstMatch ||
+        this.get('highlighter.highlightedEntity') === firstMatch) {
+          // empty box, unhighlight all
+          this.get('highlighter').unhighlightAll();
+          this.get('renderingService').redrawScene();
+          return;
+      }*/
+  
+      const modelType = entity.constructor.modelName;
+  
+      if (modelType === "clazz") {
+        entity.openParents();
       }
+      else if (modelType === "component") {
+        if (entity.get('opened')) {
+          // close and highlight, since it is already open
+          entity.setOpenedStatus(false);
+        } else {
+          // open all parents, since component is hidden
+          entity.openParents();
+        }
+      }
+  
+      this.get('highlighter').highlight(entity);
+      this.get('renderingService').redrawScene();
+      this.get('renderingService').focusEntity();    
     }
   },
 
-  findElementByString(searchString) {
-    const searchResults = this.get('searchEntity.lastSuccessful.value');
+  reCalculateDropdown(trigger) {
 
-    // TODO Do not pass string but entity. As a result, the following loop
-    // won't be necessary and entities with the same name are distinguishable
-    // (e.g. ConfigurationHandler in dummy mode)
-    
-    let firstMatch = null;
-    for (let i = 0; i < searchResults.length; i++) {
-      if(searchString === searchResults[i].get('name')) {
-        firstMatch = searchResults[i];
-        break;
-      }
-    }
+    // https://ember-basic-dropdown.com/docs/custom-position/
 
-    console.log("test");
-
-    if (!firstMatch ||
-      this.get('highlighter.highlightedEntity') === firstMatch) {
-        // empty box, unhighlight all
-        this.get('highlighter').unhighlightAll();
-        this.get('renderingService').redrawScene();
-        return;
-    }
-
-    const modelType = firstMatch.constructor.modelName;
-
-    if (modelType === "clazz") {
-      firstMatch.openParents();
-    }
-    else if (modelType === "component") {
-      if (firstMatch.get('opened')) {
-        // close and highlight, since it is already open
-        firstMatch.setOpenedStatus(false);
-      } else {
-        // open all parents, since component is hidden
-        firstMatch.openParents();
-      }
-    }
-
-    this.get('highlighter').highlight(firstMatch);
-    this.get('renderingService').redrawScene();
+    let { top, left, height } = trigger.getBoundingClientRect();
+    let style = {
+      left: left,
+      top: top +  height
+    };
+    return { style };
   },
 
   searchEntity: task(function * (term) {
