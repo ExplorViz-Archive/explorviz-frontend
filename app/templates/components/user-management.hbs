@@ -1,37 +1,31 @@
-<div class="row">
-  <div class="col-4">
-    <h4 class="mt-3">Create Single User</h4>
-    <form {{action 'saveUser' on='submit'}}>
-      <div class="form-group">
-        <label for="inputUsername">Username</label>
-        {{input value=username placeholder='Enter Username' class="form-control" id="inputUsername" autofocus="true"}}
-      </div>
-      <div class="form-group">
-        <label for="inputPassword">Password</label>
-        {{input value=password placeholder='Password' class="form-control" id="inputPassword" type="password"}}
-      </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-    <h4 class="mt-3">Create Multiple Users</h4>
-    <form {{action 'saveMultipleUsers' on='submit'}}>
-      <div class="form-group">
-        <label for="inputUsernamePrefix">Username Prefix</label>
-        {{input value=usernameprefix placeholder='Enter Prefix' class="form-control" id="inputUsernamePrefix" autofocus="true"}}
-      </div>
-      <div class="form-group">
-        <label for="inputNumberOfUsers">Number of Users</label>
-        {{input value=numberofusers placeholder='# of users' class="form-control" id="inputNumberOfUsers" type="number" min="1"}}
-      </div>
-      <div class="form-group">
-        {{#each roles as |role index|}}
-          <div class="form-check form-check-inline">
-            <label class="form-check-label">
-              {{input checked=(get roleChecked index) class="form-check-input" id=(concat "input_role_" index) type="checkbox"}}{{role}}
-            </label>
-          </div>
-        {{/each}}
-      </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+      {{#bs-button-group
+        value=page
+        type="radio"
+        class="mt-3"
+        onChange=(action (mut page)) as |bg|}}
+        {{#bg.button value="createSingleUser"}}Single User{{/bg.button}}
+        {{#bg.button value="createMultipleUsers"}}Multiple Users{{/bg.button}}
+      {{/bs-button-group}}
+      {{#if (eq page "createSingleUser")}}
+        <h4 class="mt-5">Create Single User</h4>
+        {{#bs-form formLayout=formLayout model=this onSubmit=(action "saveUser") as |form|}}
+          {{form.element controlType="text" label="Username" placeholder="Username" property="username" required=true}}
+          {{form.element controlType="password" label="Password" placeholder="Password" property="password" required=true}}
+          {{form.element controlType="power-select-multiple" property="roles_selected_single" label="Choose Roles" searchEnabled=false options=roles required=required}}
+          {{bs-button defaultText="Submit" type="primary" buttonType="submit"}}
+        {{/bs-form}}
+      {{else if (eq page "createMultipleUsers")}}
+        <h4 class="mt-5">Create Multiple Users</h4>
+        {{#bs-form formLayout=formLayout model=this onSubmit=(action "saveMultipleUsers") as |form|}}
+          {{form.element controlType="text" label="Username Prefix" placeholder="Username Prefix" property="usernameprefix" required=true}}
+          {{form.element controlType="number" label="Number of Users" placeholder="# of users" property="numberofusers" min="1" required=true}}
+          {{form.element controlType="power-select-multiple" property="roles_selected_multiple" label="Choose Roles" searchEnabled=false options=roles required=required}}
+          {{bs-button defaultText="Submit" type="primary" buttonType="submit"}}
+        {{/bs-form}}
+      {{/if}}
+    </div>
   </div>
 </div>

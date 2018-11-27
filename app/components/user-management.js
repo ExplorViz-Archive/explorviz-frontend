@@ -10,45 +10,40 @@ export default Component.extend({
 
   // rather request a list of roles from backend?
   roles: null,
-  roleChecked: null,
+  users: null,
+  page: null,
 
   init(){
     this._super(...arguments);
     this.set('roles', ["admin", "user"]);
-    this.set('roleChecked', [false, false]);
+    this.set('page', 'createSingleUser');
   },
 
   actions: {
     saveUser() {
-      const userData = this.getProperties('username', 'password');
+      const userData = this.getProperties('username', 'password', 'roles_selected_single');
 
       const userRecord = this.get('store').createRecord('user', {
         username: userData.username,
         password: userData.password,
-        roles: ["admin"]
+        roles: userData.roles_selected_single
       });
 
       userRecord.save();
     },
 
     saveMultipleUsers() {
-      const userData = this.getProperties('usernameprefix', 'numberofusers');
+      const {'usernameprefix': userNamePrefix, 'numberofusers': numberOfUsers, 'roles_selected_multiple': roles} = 
+        this.getProperties('usernameprefix', 'numberofusers', 'roles_selected_multiple');
 
-      let userRoles = [];
-
-      for(let i = 0; i < this.roles.length; i++) {
-        if(this.roleChecked[i])
-          userRoles.push(this.roles[i]);
-      }
-
-      for(let i = 1; i <= userData.numberofusers; i++) {
-        const username = `${userData.usernameprefix}_${i}`;
+      for(let i = 1; i <= numberOfUsers; i++) {
+        const username = `${userNamePrefix}_${i}`;
         const password = "test123";
 
         const userRecord = this.get('store').createRecord('user', {
           username,
           password,
-          roles: userRoles
+          roles
         });
 
         userRecord.save();
