@@ -26,12 +26,14 @@ export default Service.extend(Evented, {
 
     // close everything when no components are left
     if (this.get('shownComponents.length') == 0)
-      this.emptyAdditionalData()
+      this.emptyAndClose()
   },
 
-  emptyAdditionalData() {
+  emptyAndClose() {
     this.closeAdditionalData();
-    this.set('shownComponents.length', 0);
+    if (this.get('shownComponents')){
+      this.set('shownComponents.length', 0);
+    }
     this.set('data', null);
   },
 
