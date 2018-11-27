@@ -3,10 +3,13 @@
     <!-- CSS styling https://ember-power-select.com/cookbook/css-animations -->
 
     {{#power-select
-      triggerClass="bootstrap-theme-trigger form-control"
+      triggerClass="bootstrap-theme-trigger form-control text-center"
       search=(perform searchEntity)
       placeholder="Search Entity..." 
-      onchange=(action "focusEntity")
+      onchange=(action "emptyAction")
+      onclose=(action "onSelectClose")
+      selected=selectedEntity
+      loadingMessage="loading..."
       calculatePosition=reCalculateDropdown
       as |entity|
     }}

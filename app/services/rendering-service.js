@@ -20,10 +20,6 @@ export default Service.extend(Evented, {
     this.trigger('redrawScene');
   },
 
-  focusEntity(emberEntitiy) {
-    this.trigger('focusEntity', emberEntitiy);
-  },
-
   toggleTimeline(){
     this.set('showTimeline', !this.get('showTimeline'));
   }

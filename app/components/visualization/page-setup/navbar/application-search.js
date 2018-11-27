@@ -12,20 +12,33 @@ export default Component.extend({
   renderingService: service(),
   landscapeRepo: service('repos/landscape-repository'),
   highlighter: service('visualization/application/highlighter'),
+  addionalData: service("additional-data"),
+
+  selectedEntity: null,
 
   appComponents: null,
   appClazzes: null,
 
-  actions: {
-    focusEntity(entity) {
+  actions: {   
 
-      /*if (!firstMatch ||
-        this.get('highlighter.highlightedEntity') === firstMatch) {
-          // empty box, unhighlight all
-          this.get('highlighter').unhighlightAll();
-          this.get('renderingService').redrawScene();
-          return;
-      }*/
+    emptyAction() {
+      // the onchange event of ember-power-select behaves badly
+      // we only use the onclose event, but a onchange callback function 
+      // is required
+    },
+
+    onSelectClose(emberPowerSelectObject) {
+
+      if(!emberPowerSelectObject.highlighted || !emberPowerSelectObject.searchText) {
+        this.set('selectedEntity', null);
+        this.get('highlighter').unhighlightAll();
+        this.get('renderingService').redrawScene();
+        return;
+      }
+
+      const entity = emberPowerSelectObject.highlighted;
+
+      this.set('selectedEntity', entity);
   
       const modelType = entity.constructor.modelName;
   
@@ -41,10 +54,12 @@ export default Component.extend({
           entity.openParents();
         }
       }
+
+      // close potential side-bar
+      this.get('addionalData').emptyAndClose();
   
       this.get('highlighter').highlight(entity);
       this.get('renderingService').redrawScene();
-      this.get('renderingService').focusEntity();    
     }
   },
 
