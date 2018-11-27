@@ -1,8 +1,6 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 
-import $ from 'jquery';
-
 export default Component.extend({
 
   // No Ember generated container
@@ -11,8 +9,14 @@ export default Component.extend({
   store: service(),
 
   // rather request a list of roles from backend?
-  roles: ["admin", "user"],
-  roleChecked: [false, false],
+  roles: null,
+  roleChecked: null,
+
+  init(){
+    this._super(...arguments);
+    this.set('roles', ["admin", "user"]);
+    this.set('roleChecked', [false, false]);
+  },
 
   actions: {
     saveUser() {

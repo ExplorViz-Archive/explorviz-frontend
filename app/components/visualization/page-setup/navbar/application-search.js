@@ -2,7 +2,6 @@ import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import { task } from 'ember-concurrency';
 import { isBlank } from '@ember/utils';
-import { calculatePosition } from 'ember-basic-dropdown/utils/calculate-position'
 
 /* eslint-disable require-yield */
 export default Component.extend({
