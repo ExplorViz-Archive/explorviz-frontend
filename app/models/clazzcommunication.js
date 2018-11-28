@@ -17,12 +17,12 @@ export default DrawEdgeEntity.extend({
   operationName: attr('string'),
   requests: attr(),
 
-  runtimeInformations:  hasMany('runtimeinformation', {
+  traces: hasMany('trace', {
     inverse: null
-}),
+  }),
 
   sourceClazz: belongsTo('clazz', {
-    inverse: 'outgoingClazzCommunications'
+    inverse: 'clazzcommunication'
   }),
 
   targetClazz: belongsTo('clazz', {

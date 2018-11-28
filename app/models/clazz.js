@@ -19,7 +19,7 @@ export default Draw3DNodeEntity.extend({
   instanceCount: attr('number', {defaultValue: 0}),
   objectIds: attr(),
 
-  outgoingClazzCommunications: hasMany('clazzcommunication', {
+  clazzCommunications: hasMany('clazzcommunication', {
     inverse: 'sourceClazz'
   }),
 

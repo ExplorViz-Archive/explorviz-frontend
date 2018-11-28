@@ -4,9 +4,9 @@ import BaseEntity from './baseentity';
 const { attr } = DS;
 
 /**
- * Ember model for a RuntimeInformation.
+ * Ember model for a step in a trace.
  *
- * @class RuntimeInformation-Model
+ * @class TraceStep-Model
  * @extends BaseEntity-Model
  *
  * @module explorviz
@@ -14,10 +14,13 @@ const { attr } = DS;
  */
 export default BaseEntity.extend({
 
-  traceId: attr ('number'),
-  orderIndexes: attr(),
+  tracePosition: attr ('number'),
   requests: attr('number'),
-  overallTraceDuration: attr('number'),
+  currentTraceDuration: attr('number'),
   averageResponseTime: attr('number'),
+
+  parentTrace: belongsTo('trace', {
+    inverse: 'tracestep'
+  }),
 
 });
