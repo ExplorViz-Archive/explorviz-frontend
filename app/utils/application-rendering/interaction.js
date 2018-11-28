@@ -1,6 +1,7 @@
 import Object, { computed } from '@ember/object';
 import Evented from '@ember/object/evented';
 import { inject as service } from "@ember/service";
+import { getOwner } from '@ember/application';
 
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import PopUpHandler from
@@ -75,7 +76,7 @@ export default Object.extend(Evented, {
 
     // init PopUpHandler
     if (!this.get('popUpHandler')) {
-      this.set('popUpHandler', PopUpHandler.create());
+      this.set('popUpHandler', PopUpHandler.create(getOwner(this).ownerInjection()));
     }
 
     // init HoverHandler

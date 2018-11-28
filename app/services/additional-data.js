@@ -4,6 +4,7 @@ export default Service.extend({
 
     showWindow: false,
     shownComponents: null,
+    popupContent: null,
     data: null,
 
     addComponent(path){
@@ -32,6 +33,14 @@ export default Service.extend({
         this.set('showWindow', false);
         this.set('shownComponents', []);
         this.set('data', null);
+    },
+
+    setPopupContent(content){
+        this.set('popupContent', content);
+    },
+
+    removePopup(){
+        this.set('popupContent', null);
     }
 
 });

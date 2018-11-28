@@ -1,11 +1,12 @@
-<div class="popover bs-popover-top">
+{{#if communication.isShown}}
+<div class="popover">
     <h3 class="popover-header">
-        <div style="font-weight:bold;text-align:center;">{{communication.sourceClazz}} 
-            
+        <div style="font-weight:bold;text-align:center;">{{communication.sourceClazz}}
+
             {{#if communication.isBidirectional}}
-                {{svg-jar "arrow-both" class="octicon align-middle"}}
+            {{svg-jar "arrow-both" class="octicon align-middle"}}
             {{else}}
-                {{svg-jar "arrow-right" class="octicon align-middle"}}
+            {{svg-jar "arrow-right" class="octicon align-middle"}}
             {{/if}}
 
             {{communication.targetClazz}}</div>
@@ -37,3 +38,12 @@
         </table>
     </div>
 </div>
+
+<style>
+    div.popover {
+        position: absolute;
+        top: {{communication.top}}px;
+        left: {{communication.left}}px;
+    }
+</style>
+{{/if}}
