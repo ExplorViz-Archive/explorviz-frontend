@@ -1,4 +1,4 @@
-{{#if communication.isShown}}
+{{#if (string-comparison communication.popupType "communication")}}
 <div class="popover">
     <h3 class="popover-header">
         <div style="font-weight:bold;text-align:center;">{{communication.sourceClazz}}

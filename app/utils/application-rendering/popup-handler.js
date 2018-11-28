@@ -32,6 +32,7 @@ export default Object.extend(Evented, {
 
     let popupData = {
       isShown: true,
+      popupType: "communication",
       top: mouse.y - 175, // incorporate popup height
       left: mouse.x - 138, // incorporate popup width / 2
       sourceClazz: cumulatedClazzCommunication.get("sourceClazz").get("name"),
