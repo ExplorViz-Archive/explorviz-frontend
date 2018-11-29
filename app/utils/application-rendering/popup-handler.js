@@ -17,6 +17,7 @@ export default Object.extend(Evented, {
             popupData = this.buildComponentData(mouse, emberModel);
             break;
         case "clazz":
+            popupData = this.buildClazzData(mouse, emberModel);
             break;
         case "cumulatedclazzcommunication":
             popupData = this.buildCommunicationData(mouse, emberModel);
@@ -43,7 +44,7 @@ export default Object.extend(Evented, {
         isShown: true,
         popupType: "component",
         componentName: name,
-        containedClasses: clazzCount,
+        containedClazzes: clazzCount,
         containedPackages: packageCount,
         top: mouse.y - 105, // incorporate popup height
         left: mouse.x - 90, // incorporate popup width / 2
@@ -67,6 +68,27 @@ export default Object.extend(Evented, {
         });
         return result;
       }
+  },
+
+  buildClazzData(mouse, clazz){
+    let clazzName = clazz.get('name');
+    let instanceCount = clazz.get('instanceCount');
+
+    const clazzCommunications = clazz.get('outgoingClazzCommunications');
+    let operationCount = clazzCommunications.get('length');
+
+    let popupData = {
+        isShown: true,
+        popupType: "clazz",
+        clazzName: clazzName,
+        activeInstances: instanceCount,
+        calledOps: operationCount,
+        top: mouse.y - 105, // incorporate popup height
+        left: mouse.x - 90, // incorporate popup width / 2
+      }
+  
+      return popupData;
+
   },
 
   buildCommunicationData(mouse, cumulatedClazzCommunication) {
