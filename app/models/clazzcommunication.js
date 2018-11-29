@@ -22,7 +22,7 @@ export default DrawEdgeEntity.extend({
   }),
 
   sourceClazz: belongsTo('clazz', {
-    inverse: 'clazzcommunication'
+    inverse: 'clazzCommunications'
   }),
 
   targetClazz: belongsTo('clazz', {

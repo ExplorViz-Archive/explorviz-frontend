@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
 
-const { attr } = DS;
+const { attr, hasMany } = DS;
 
 /**
  * Ember model for a RuntimeInformation.
