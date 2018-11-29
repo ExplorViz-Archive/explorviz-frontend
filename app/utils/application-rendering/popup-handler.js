@@ -12,11 +12,61 @@ export default Object.extend(Evented, {
     let popupData;
     let modelType = emberModel.constructor.modelName;
 
-    if (modelType == "cumulatedclazzcommunication") {
-      popupData = this.buildCommunicationData(mouse, emberModel);
+    switch (modelType) {
+        case "component":
+            popupData = this.buildComponentData(mouse, emberModel);
+            break;
+        case "clazz":
+            break;
+        case "cumulatedclazzcommunication":
+            popupData = this.buildCommunicationData(mouse, emberModel);
+            break;
+        default:
+            popupData = null;
+            break;
     }
 
     this.get("additionalData").setPopupContent(popupData);
+  },
+
+  hideTooltip() {
+    this.get("additionalData").removePopup();
+  },
+
+
+  buildComponentData(mouse, component){
+    let name = component.get("name");
+    let clazzCount = getClazzesCount(component);
+    let packageCount = getPackagesCount(component);
+
+    let popupData = {
+        isShown: true,
+        popupType: "component",
+        componentName: name,
+        containedClasses: clazzCount,
+        containedPackages: packageCount,
+        top: mouse.y - 105, // incorporate popup height
+        left: mouse.x - 90, // incorporate popup width / 2
+      }
+  
+      return popupData;
+
+      function getClazzesCount(component) {
+        let result = component.get('clazzes').get('length');
+        const children = component.get('children');
+        children.forEach((child) => {
+          result += getClazzesCount(child);
+        });
+        return result;
+      }
+      function getPackagesCount(component) {
+        let result = component.get('children').get('length');
+        const children = component.get('children');
+        children.forEach((child) => {
+          result += getPackagesCount(child);
+        });
+        return result;
+      }
   },
 
   buildCommunicationData(mouse, cumulatedClazzCommunication) {
@@ -87,11 +137,6 @@ export default Object.extend(Evented, {
       var multiplier = Math.pow(10, precision || 0);
       return Math.round(value * multiplier) / multiplier;
     } // END round
-  },
-
-
-  hideTooltip() {
-    this.get("additionalData").removePopup();
   },
 
 });
