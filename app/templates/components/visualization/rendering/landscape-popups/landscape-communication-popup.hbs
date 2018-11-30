@@ -1,15 +1,11 @@
-{{#if (string-comparison data.popupType "clazzCommunication")}}
+{{#if (string-comparison data.popupType "applicationCommunication")}}
 <div class="popover">
     <h3 class="popover-header">
-        <div style="font-weight:bold;text-align:center;">{{data.sourceClazz}}
-
-            {{#if data.isBidirectional}}
-            {{svg-jar "arrow-both" class="octicon align-middle"}}
-            {{else}}
+        <div style="font-weight:bold;text-align:center;">
+            {{data.sourceApplication}}
             {{svg-jar "arrow-right" class="octicon align-middle"}}
-            {{/if}}
-
-            {{data.targetClazz}}</div>
+            {{data.targetApplication}}
+        </div>
     </h3>
     <div class="popover-body" style="white-space: nowrap;">
 
@@ -20,14 +16,8 @@
                 </td>
             </tr>
             <tr>
-                <td>&nbsp;{{svg-jar "list-ordered" class="octicon align-middle"}}&nbsp; Involved Traces
-                    :</td>
-                <td style="text-align:right;padding-left:10px;"> {{data.traces}}
-                </td>
-            </tr>
-            <tr>
-                <td>&nbsp;{{svg-jar "clock" class="octicon align-middle"}}&nbsp; Avg. Response Time:</td>
-                <td style="text-align:right;padding-left:10px;"> {{data.responseTime}}
+                <td>&nbsp;{{svg-jar "tools" class="octicon align-middle"}}&nbsp; Technology:</td>
+                <td style="text-align:right;padding-left:10px;"> {{data.technology}}
                 </td>
             </tr>
             <tr>

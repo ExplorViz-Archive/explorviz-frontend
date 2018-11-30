@@ -1,14 +1,18 @@
 import Object from '@ember/object';
-import Evented from '@ember/object/evented';
 import { inject as service } from '@ember/service';
 
-export default Object.extend(Evented, {
+export default Object.extend({
 
   additionalData: service("additional-data"),
 
-  alreadyDestroyed: true,
+  enableTooltips: true,
 
   showTooltip(mouse, emberModel) {
+
+    if (!this.get('enableTooltips')){
+      return;
+    }
+
     let popupData;
     let modelType = emberModel.constructor.modelName;
 
@@ -104,7 +108,7 @@ export default Object.extend(Evented, {
 
     let popupData = {
       isShown: true,
-      popupType: "communication",
+      popupType: "clazzCommunication",
       top: mouse.y - 175, // incorporate popup height
       left: mouse.x - 138, // incorporate popup width / 2
       sourceClazz: cumulatedClazzCommunication.get("sourceClazz").get("name"),
