@@ -1,7 +1,7 @@
 import Model from 'ember-data/model';
 import DS from 'ember-data';
 
-const { attr } = DS;
+const { attr, hasMany } = DS;
 
 /**
  * Ember model for a User.
@@ -18,6 +18,6 @@ export default Model.extend({
 	username: attr('string'),
 	password: attr('string'),
 
-	roles: attr()
+	roles: hasMany('role')
 
 });

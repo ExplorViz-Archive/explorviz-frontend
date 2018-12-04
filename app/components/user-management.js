@@ -1,5 +1,6 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
+import { task } from 'ember-concurrency';
 
 export default Component.extend({
 
@@ -51,5 +52,13 @@ export default Component.extend({
       
     }  
   },
+
+  getRoles: task(function * () {    
+    /*this.store.findAll('role') // => GET /blog-posts
+      .then(function(roles) {
+        console.log("sucess", roles);
+      });*/
+    return this.get('store').findAll('role');
+  })
 
 });
