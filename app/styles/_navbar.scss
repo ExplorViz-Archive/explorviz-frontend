@@ -38,6 +38,30 @@
   @extend .my-2;
 }
 
-.nav.navbar-nav > li > a:hover {
-  box-shadow: none;
+.explorviz-visualization-navbar > ul.nav > li.nav-item {
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.explorviz-visualization-navbar > ul.nav > li.nav-item:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+#navbar-octicons:last-child{
+  border-right-style: solid;
+  border-right-color: #e6e6e6;
+  border-right-width: 1px;
+}
+
+.navbar-no-hover-effect {
+  background-color:transparent !important;
+  cursor: default !important;
+  box-shadow: none !important;
+}
+
+.navbar-button-height-fix {
+  height: 30px !important;
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+  vertical-align: middle !important;
 }
