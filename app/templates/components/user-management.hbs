@@ -14,7 +14,9 @@
         {{#bs-form formLayout=formLayout model=this onSubmit=(action "saveUser") as |form|}}
           {{form.element controlType="text" label="Username" placeholder="Username" property="username" required=true}}
           {{form.element controlType="password" label="Password" placeholder="Password" property="password" required=true}}
-          {{form.element controlType="power-select-multiple" property="roles_selected_single" label="Choose Roles" searchEnabled=false options=roles required=required}}
+          {{#form.element controlType="power-select-multiple" property="roles_selected_single" label="Choose Roles" searchEnabled=false as |el|}}
+            {{el.control onopen=(perform getRoles)}}
+           {{/form.element}}
           {{bs-button defaultText="Submit" type="primary" buttonType="submit"}}
         {{/bs-form}}
       {{else if (eq page "createMultipleUsers")}}
