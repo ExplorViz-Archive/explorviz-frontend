@@ -11,20 +11,22 @@
       {{#navbar.nav as |nav|}}
         {{page-setup/navbar-octicons}}
 
-        {{#link-to "configuration" tagName="li" class="nav-item"}}
-          {{#link-to "configuration" tagName="a" class="nav-link"}}
-            {{svg-jar "gear" class="octicon align-middle"}}
-          {{/link-to}}
-        {{/link-to}}
-        
-        {{#nav.item class="nav-item-with-def-cursor"}}
-          <span class="navbar-text">Signed in as <b>{{username}}</b></span>
-        {{/nav.item}}
-        {{#nav.item class="pl-lg-2"}}
-          <a class="nav-link-with-cursor" {{action (route-action 'logout')}} title="Logout">
-            {{svg-jar "sign-out" class="octicon align-middle" id="configurationButton"}}
-          </a>
-        {{/nav.item}}
+        {{#nav.dropdown as |dd|}}
+          {{#dd.toggle}}
+            {{svg-jar "person" class="octicon align-middle"}} <b>{{username}}</b> <span class="caret"></span>
+          {{/dd.toggle}}
+          
+          {{#dd.menu as |ddm|}}
+            {{#ddm.item}}
+              {{#ddm.link-to "configuration"}}{{svg-jar "gear" class="octicon align-middle"}} Configuration{{/ddm.link-to}}
+            {{/ddm.item}}
+            {{#ddm.item}}
+              <a class="dropdown-item" style="cursor: pointer" {{action (route-action 'logout')}} title="Logout">
+                {{svg-jar "sign-out" class="octicon align-middle" id="configurationButton"}} Logout
+              </a>
+            {{/ddm.item}}
+          {{/dd.menu}}
+        {{/nav.dropdown}}
       {{/navbar.nav}}
   {{/navbar.content}}
 {{/bs-navbar}}
