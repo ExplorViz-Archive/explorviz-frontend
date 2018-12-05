@@ -1,6 +1,6 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
-import { task, timeout } from 'ember-concurrency';
+import { task } from 'ember-concurrency';
 
 export default Component.extend({
 
@@ -52,7 +52,7 @@ export default Component.extend({
   },
 
   getRoles: task(function * () {
-    this.set('roles', this.store.findAll('role'));
+    yield this.set('roles', this.store.findAll('role'));
   })
 
 });

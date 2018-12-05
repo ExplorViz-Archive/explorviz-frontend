@@ -17,7 +17,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
  
   },
 
-  urlForFindAll(modelName, snapshot) {
+  urlForFindAll() {
     const baseUrl = this.buildURL();
     // the final "/" is important for Ember-Data ...
     return `${baseUrl}/roles/`;
