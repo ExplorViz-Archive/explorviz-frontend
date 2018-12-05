@@ -37,18 +37,14 @@ export default Component.extend({
       const {'usernameprefix': userNamePrefix, 'numberofusers': numberOfUsers, 'roles_selected_multiple': roles} = 
         this.getProperties('usernameprefix', 'numberofusers', 'roles_selected_multiple');
 
-      console.log("alex", numberOfUsers);
-
       for(let i = 1; i <= numberOfUsers; i++) {
         const username = `${userNamePrefix}_${i}`;
         const password = "test123";
-        console.log("eee", username, roles);
         const userRecord = this.get('store').createRecord('user', {
           username,
           password,
           roles
         });
-        console.log("test", userRecord);
         userRecord.save();
       }
       
