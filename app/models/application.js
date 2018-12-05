@@ -29,12 +29,14 @@ export default DrawNodeEntity.extend({
 
   databaseQueries: hasMany('databasequery'),
 
-  outgoingApplicationCommunications: hasMany('applicationcommunication', {
+  traces: hasMany('trace'),
+
+  applicationCommunications: hasMany('applicationcommunication', {
     inverse: 'sourceApplication'
   }),
 
   // list of aggregated clazzCommunication for rendering purposes
-  aggregatedOutgoingClazzCommunications: hasMany('aggregatedclazzcommunication', {
+  aggregatedClazzCommunications: hasMany('aggregatedclazzcommunication', {
     inverse: null
   }),
 

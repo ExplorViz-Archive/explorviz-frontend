@@ -4,7 +4,7 @@ import BaseEntity from './baseentity';
 const { attr, hasMany } = DS;
 
 /**
- * Ember model for a RuntimeInformation.
+ * Ember model for a Trace.
  *
  * @class Trace-Model
  * @extends Trace-Model
@@ -20,7 +20,7 @@ export default BaseEntity.extend({
   averageResponseTime: attr('number'),
 
   traceSteps: hasMany('tracestep', {
-    inverse: 'trace'
+    inverse: 'parentTrace'
   }),
 
 });

@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
 
-const { attr } = DS;
+const { attr, belongsTo } = DS;
 
 /**
  * Ember model for a step in a trace.
@@ -20,7 +20,11 @@ export default BaseEntity.extend({
   averageResponseTime: attr('number'),
 
   parentTrace: belongsTo('trace', {
-    inverse: 'tracestep'
+    inverse: 'traceSteps'
+  }),
+
+  clazzCommunication: belongsTo('clazzcommunication', {
+    inverse: null
   }),
 
 });

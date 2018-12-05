@@ -19,7 +19,7 @@ export default DrawEdgeEntity.extend({
   averageResponseTime: attr('number'),
 
   sourceApplication: belongsTo('application', {
-    inverse: 'outgoingApplicationCommunications'
+    inverse: 'applicationCommunications'
   }),
 
   targetApplication: belongsTo('application', {

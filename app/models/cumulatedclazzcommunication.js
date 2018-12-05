@@ -15,7 +15,8 @@ const { attr, belongsTo, hasMany } = DS;
  */
 export default DrawEdgeEntity.extend({
 
-  requests: attr(),
+  isBidirectional: attr('boolean', { defaultValue: false}),
+  requests: attr('number'),
 
   sourceClazz: belongsTo('clazz', {
     inverse: null
@@ -49,7 +50,7 @@ export default DrawEdgeEntity.extend({
 
     this.get('aggregatedClazzCommunications').forEach((aggregatedClazzCommunication) => {
 
-      const clazzCommunications = aggregatedClazzCommunication.get('outgoingClazzCommunications');
+      const clazzCommunications = aggregatedClazzCommunication.get('clazzCommunications');
 
       clazzCommunications.forEach((clazzCommunication) => {
           const runtimeInformations = clazzCommunication.get('runtimeInformations');

@@ -56,7 +56,7 @@ module.exports = function(app) {
             }
           ]
         },
-        "outgoingApplicationCommunications": {
+        "totalApplicationCommunications": {
           "data": [
             {
               "type": "applicationcommunication",
@@ -495,7 +495,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -781,7 +781,7 @@ module.exports = function(app) {
               "id": "102"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -822,7 +822,7 @@ module.exports = function(app) {
               "id": "109"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -946,7 +946,7 @@ module.exports = function(app) {
               "id": "85"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -1099,7 +1099,7 @@ module.exports = function(app) {
               "id": "73"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -1583,7 +1583,7 @@ module.exports = function(app) {
               "id": "79"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -1664,7 +1664,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -1700,7 +1700,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -1790,7 +1790,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -1802,7 +1802,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -1866,7 +1866,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -1886,7 +1886,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -2308,10 +2308,10 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": []
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -2383,7 +2383,7 @@ module.exports = function(app) {
               "id": "109"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -2433,7 +2433,7 @@ module.exports = function(app) {
               "id": "92"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -2460,7 +2460,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -2472,7 +2472,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -3202,10 +3202,10 @@ module.exports = function(app) {
               }
             ]
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": []
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -3235,7 +3235,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -3247,7 +3247,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -3277,7 +3277,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -3289,7 +3289,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -3472,7 +3472,7 @@ module.exports = function(app) {
               "id": "108"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -3534,7 +3534,7 @@ module.exports = function(app) {
               "id": "85"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -3612,7 +3612,7 @@ module.exports = function(app) {
               "id": "113"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -3661,7 +3661,7 @@ module.exports = function(app) {
               "id": "73"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -3770,7 +3770,7 @@ module.exports = function(app) {
               "id": "85"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -3826,7 +3826,7 @@ module.exports = function(app) {
               "id": "85"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -3848,7 +3848,7 @@ module.exports = function(app) {
               "id": "79"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -3892,7 +3892,7 @@ module.exports = function(app) {
               "id": "118"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -3914,7 +3914,7 @@ module.exports = function(app) {
               "id": "121"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -3951,10 +3951,10 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": []
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": [
               {
                 "type": "aggregatedclazzcommunication",
@@ -4149,7 +4149,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -4169,7 +4169,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -4221,7 +4221,7 @@ module.exports = function(app) {
               "id": "121"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -4259,10 +4259,10 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": []
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -4309,7 +4309,7 @@ module.exports = function(app) {
               "id": "96"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -4369,7 +4369,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -4389,7 +4389,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -4478,7 +4478,7 @@ module.exports = function(app) {
               "id": "112"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -4505,7 +4505,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -4517,7 +4517,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -4665,7 +4665,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -4677,7 +4677,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -4864,7 +4864,7 @@ module.exports = function(app) {
               "id": "116"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -4889,7 +4889,7 @@ module.exports = function(app) {
               "id": "100"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -5013,7 +5013,7 @@ module.exports = function(app) {
               "id": "102"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -5046,7 +5046,7 @@ module.exports = function(app) {
               "id": "118"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -5147,7 +5147,7 @@ module.exports = function(app) {
               "id": "99"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -5169,7 +5169,7 @@ module.exports = function(app) {
               "id": "114"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -5233,10 +5233,10 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": []
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -5348,7 +5348,7 @@ module.exports = function(app) {
               "id": "106"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -5375,7 +5375,7 @@ module.exports = function(app) {
               "id": "79"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -5402,7 +5402,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -5414,7 +5414,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -5439,7 +5439,7 @@ module.exports = function(app) {
               "id": "96"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -5622,7 +5622,7 @@ module.exports = function(app) {
               "id": "80"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -5680,7 +5680,7 @@ module.exports = function(app) {
               "id": "174"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -5707,7 +5707,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -5727,7 +5727,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -5909,7 +5909,7 @@ module.exports = function(app) {
               "id": "79"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -5995,7 +5995,7 @@ module.exports = function(app) {
               "id": "85"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -6148,7 +6148,7 @@ module.exports = function(app) {
               "id": "85"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -6304,7 +6304,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -6348,7 +6348,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -6412,7 +6412,7 @@ module.exports = function(app) {
               "id": "124"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -6499,10 +6499,10 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": []
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -6532,7 +6532,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -6544,7 +6544,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -6580,7 +6580,7 @@ module.exports = function(app) {
               "id": "110"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -6613,7 +6613,7 @@ module.exports = function(app) {
               "id": "79"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -6657,7 +6657,7 @@ module.exports = function(app) {
               "id": "73"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -6684,7 +6684,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -6696,7 +6696,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -6794,7 +6794,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -6806,7 +6806,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -6831,7 +6831,7 @@ module.exports = function(app) {
               "id": "73"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -6902,7 +6902,7 @@ module.exports = function(app) {
               "id": "124"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -6966,7 +6966,7 @@ module.exports = function(app) {
               "id": "105"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -7116,7 +7116,7 @@ module.exports = function(app) {
               "id": "109"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -7176,7 +7176,7 @@ module.exports = function(app) {
               "id": "73"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -7256,7 +7256,7 @@ module.exports = function(app) {
               "id": "92"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -7347,7 +7347,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -7367,7 +7367,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -7395,7 +7395,7 @@ module.exports = function(app) {
               "id": "125"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -7605,7 +7605,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -7617,7 +7617,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -7721,7 +7721,7 @@ module.exports = function(app) {
               "id": "105"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -7779,10 +7779,10 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": []
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -7807,7 +7807,7 @@ module.exports = function(app) {
               "id": "99"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -7940,7 +7940,7 @@ module.exports = function(app) {
               "id": "109"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -8065,7 +8065,7 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
@@ -8085,7 +8085,7 @@ module.exports = function(app) {
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -8309,10 +8309,10 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": []
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedclazzCommunications": {
             "data": []
           },
           "cumulatedClazzCommunications": {
@@ -8340,7 +8340,7 @@ module.exports = function(app) {
               "id": "125"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",

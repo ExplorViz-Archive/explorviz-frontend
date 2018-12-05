@@ -34,17 +34,76 @@ export default Service.extend({
       const jsonLandscape = JSON.parse(e.data);
 
       if(jsonLandscape && jsonLandscape.hasOwnProperty("data")) {
+        // console.log("JSON: " + JSON.stringify(jsonLandscape));
 
         // ATTENTION: Mind the push operation, push != pushPayload in terms of 
         // serializer usage
         // https://github.com/emberjs/data/issues/3455
         const landscapeRecord = self.get('store').push(jsonLandscape);
+        self.addCumulatedCommunication();
         self.set('landscapeRepo.latestLandscape', landscapeRecord);
         self.get('landscapeRepo').triggerLatestLandscapeUpdate();
         self.get('timestampRepo').addTimestampToList(landscapeRecord.get('timestamp'));
         self.get('timestampRepo').triggerUpdated();
       }     
     }
+  },
+
+  // Computes the (possibly) bidirectional communication and saves 
+  // it as a model. Later used to draw communication between clazzes
+  addCumulatedCommunication() {
+    let store = this.get('store');
+
+    // Remove outdated communication
+    store.unloadAll('cumulatedclazzcommunication');
+
+    let applications = store.peekAll('application');
+    applications.forEach((application) => {
+      // Reset relationship in application
+      application.set('cumulatedClazzCommunications', []);
+
+
+      let aggregatedComms = application.get('aggregatedClazzCommunications');
+      aggregatedComms.forEach((aggregatedComm) => {
+
+        let possibleExistingComm = checkBidirectionality(application, aggregatedComm);
+
+        if (possibleExistingComm.isBidirectional){
+          let existingCommunication = possibleExistingComm.communication;
+          let existingRequests = existingCommunication.get('requests');
+          existingCommunication.set('requests', existingRequests + aggregatedComm.get('totalRequests'));
+          existingCommunication.set('isBidirectional', true);
+
+          // Set relationship which does not yet exist
+          existingCommunication.get('aggregatedClazzCommunications').addObject(aggregatedComm);
+        } else {
+          let cumulatedComm = store.createRecord('cumulatedclazzcommunication', {});
+          cumulatedComm.set('requests', aggregatedComm.get('totalRequests'));
+          cumulatedComm.set('isBidirectional', false);
+
+          // Set relationships
+          cumulatedComm.set('sourceClazz', aggregatedComm.get('sourceClazz'));
+          cumulatedComm.set('targetClazz', aggregatedComm.get('targetClazz'));
+          cumulatedComm.get('aggregatedClazzCommunications').addObject(aggregatedComm);
+          application.get('cumulatedClazzCommunications').addObject(cumulatedComm);
+        }
+      });
+    });
+
+    // Check for a given aggregated communication is there already exists a corresponding
+    // cumulated communication which would imply bidirectionality
+    function checkBidirectionality(application, aggregatedComm){
+      let cumulatedComms = application.get('cumulatedClazzCommunications');
+      let possibleCommunication = {isBidirectional: false, communication: null};
+      cumulatedComms.forEach( (cumulatedComm) => {
+        // check if cumulatedCommunication with reversed communication is already created
+        if (aggregatedComm.get('sourceClazz.id') == cumulatedComm.get('targetClazz.id') &&
+            aggregatedComm.get('targetClazz.id') == cumulatedComm.get('sourceClazz.id')){
+              possibleCommunication = {isBidirectional: true, communication: cumulatedComm};
+        }
+      });
+      return possibleCommunication;
+     }
   },
 
   subscribe(url, fn){

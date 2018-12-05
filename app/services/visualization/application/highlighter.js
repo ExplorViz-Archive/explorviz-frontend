@@ -167,10 +167,10 @@ export default Service.extend({
    */
   applyCommunicationHighlighting(selectedClazzes, communicatingClazzes){
 
-    const outgoingClazzCommunications =
+    const clazzCommunications =
     this.get('application').get('cumulatedClazzCommunications');
 
-    outgoingClazzCommunications.forEach((clazzCommunication) => {
+    clazzCommunications.forEach((clazzCommunication) => {
       let toBeHighlighted = false;
 
       // highlight all communication lines which have a selected clazz as an endpoint

@@ -145,7 +145,7 @@ export default Object.extend(Evented, {
       return content;
 
       function getCalledOperations(clazz) {
-        const clazzCommunications = clazz.get('outgoingClazzCommunications');
+        const clazzCommunications = clazz.get('clazzCommunications');
         return clazzCommunications.get('length');
       }
     } // END buildClazzContent
