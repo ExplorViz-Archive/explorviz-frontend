@@ -2,17 +2,19 @@
 
     <!-- CSS styling https://ember-power-select.com/cookbook/css-animations -->
 
-    {{#power-select
-      triggerClass="bootstrap-theme-trigger form-control text-center"
+    {{!-- Maybe not the nicest option to use multiple select for single select
+          However, the search inside the trigger seems more intuitive
+     --}}
+    {{#power-select-multiple
+      triggerClass="bootstrap-theme-trigger form-control"
       search=(perform searchEntity)
       placeholder="Search Entity..." 
-      onchange=(action "emptyAction")
-      onclose=(action "onSelectClose")
+      onchange=(action "onSelect")
       selected=selectedEntity
       loadingMessage="loading..."
-      calculatePosition=reCalculateDropdown
+      matchTriggerWidth=false
       as |entity|
     }}
       {{entity.name}}
-    {{/power-select}}
+    {{/power-select-multiple}}
 </li>

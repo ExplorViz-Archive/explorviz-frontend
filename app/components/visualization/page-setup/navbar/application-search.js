@@ -19,26 +19,17 @@ export default Component.extend({
   appComponents: null,
   appClazzes: null,
 
-  actions: {   
+  actions: {
 
-    emptyAction() {
-      // the onchange event of ember-power-select behaves badly
-      // we only use the onclose event, but a onchange callback function 
-      // is required
-    },
+    onSelect(emberPowerSelectObject) {
 
-    onSelectClose(emberPowerSelectObject) {
-
-      if(!emberPowerSelectObject.highlighted || !emberPowerSelectObject.searchText) {
-        this.set('selectedEntity', null);
-        this.get('highlighter').unhighlightAll();
-        this.get('renderingService').redrawScene();
+      if(!emberPowerSelectObject || emberPowerSelectObject.length < 1)
         return;
-      }
 
-      const entity = emberPowerSelectObject.highlighted;
+      this.get('highlighter').unhighlightAll();
+      this.get('renderingService').redrawScene();
 
-      this.set('selectedEntity', entity);
+      const entity = emberPowerSelectObject[0];
   
       const modelType = entity.constructor.modelName;
   
@@ -100,6 +91,11 @@ export default Component.extend({
       }
 
       const component = components.objectAt(i);
+
+      // skip foundation, since it can't be highlighted anyways
+      if(component.get('foundation'))
+        continue;
+
       const componentName = component.get('name').toLowerCase();
       if(componentName.startsWith(searchString)) {
         entities.push(component);
