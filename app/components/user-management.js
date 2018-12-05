@@ -42,8 +42,7 @@ export default Component.extend({
       for(let i = 1; i <= numberOfUsers; i++) {
         const username = `${userNamePrefix}_${i}`;
         const password = "test123";
-        console.log("eee");
-        console.log(this.get('store'));
+        console.log("eee", username, roles);
         const userRecord = this.get('store').createRecord('user', {
           username,
           password,
