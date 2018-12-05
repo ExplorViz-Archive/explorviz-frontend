@@ -29,7 +29,7 @@
         {{#bs-form formLayout=formLayout model=this onSubmit=(action "saveMultipleUsers") as |form|}}
           {{form.element controlType="text" label="Username Prefix" placeholder="Username Prefix" property="usernameprefix" required=true}}
           {{form.element controlType="number" label="Number of Users" placeholder="# of users" property="numberofusers" min="1" required=true}}
-          {{#form.element controlType="power-select-multiple" property="roles_selected_single" label="Choose Roles" searchEnabled=false loadingMessage="Loading..." options=roles 
+          {{#form.element controlType="power-select-multiple" property="roles_selected_multiple" label="Choose Roles" searchEnabled=false loadingMessage="Loading..." options=roles 
           as |el|}}
             {{#el.control 
               onopen=(perform getRoles)  
