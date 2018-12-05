@@ -1,6 +1,6 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
-import { task } from 'ember-concurrency';
+import { task, timeout } from 'ember-concurrency';
 
 export default Component.extend({
 
@@ -16,7 +16,7 @@ export default Component.extend({
 
   init(){
     this._super(...arguments);
-    this.set('roles', ["admin", "user"]);
+    this.set('roles', []);
     this.set('page', 'createSingleUser');
   },
 
@@ -37,28 +37,27 @@ export default Component.extend({
       const {'usernameprefix': userNamePrefix, 'numberofusers': numberOfUsers, 'roles_selected_multiple': roles} = 
         this.getProperties('usernameprefix', 'numberofusers', 'roles_selected_multiple');
 
+      console.log("alex", numberOfUsers);
+
       for(let i = 1; i <= numberOfUsers; i++) {
         const username = `${userNamePrefix}_${i}`;
         const password = "test123";
-
+        console.log("eee");
+        console.log(this.get('store'));
         const userRecord = this.get('store').createRecord('user', {
           username,
           password,
           roles
         });
-
+        console.log("test", userRecord);
         userRecord.save();
       }
       
     }  
   },
 
-  getRoles: task(function * () {    
-    /*this.store.findAll('role') // => GET /blog-posts
-      .then(function(roles) {
-        console.log("sucess", roles);
-      });*/
-    return this.get('store').findAll('role');
+  getRoles: task(function * () {
+    this.set('roles', this.store.findAll('role'));
   })
 
 });
