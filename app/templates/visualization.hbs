@@ -41,9 +41,11 @@
         {{visualization/rendering/application-rendering latestApplication=landscapeRepo.latestApplication}}
       </div>
     {{/if}}
+    {{!-- only output author name if an author exists 
     {{#if renderingService.showTimeline}}
-      {{time-shift}}
+       {{time-shift}}
     {{/if}}
+    --}}
   </div>
   <div class="col-4 hide" id="dataselection" >
     {{visualization/page-setup/data-selection}}
