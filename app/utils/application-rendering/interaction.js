@@ -254,7 +254,7 @@ export default Object.extend(Evented, {
           //this.get('highlighter').unhighlightAll();
         //}
 
-
+        this.get('highlighter').applyHighlighting();
         this.get('renderingService').redrawScene();
       } else if(emberModelName === "cumulatedclazzcommunication"){
         // remove old highlighting

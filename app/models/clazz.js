@@ -39,6 +39,10 @@ export default Draw3DNodeEntity.extend({
       parentModel.set('opened', true);
       parentModel.openParents();
     }
+  },
+
+  isVisible() {
+    return this.get('parent.opened');
   }
 
 });

@@ -93,31 +93,31 @@ export default Controller.extend(AlertifyHandler, {
 
   initRendering() {
 
-    const self = this;
+    //const self = this;
 
-    this.set('condition', []);    
+    //this.set('condition', []);    
 
     // setup url-builder Service
-    this.get('urlBuilder').on('transmitState', function(state) {
-      self.set('state',state);
-    });
+    // this.get('urlBuilder').on('transmitState', function(state) {
+    //   self.set('state',state);
+    // });
 
-    // Listen for component request
-    this.get('viewImporter').on('requestView', function() {
-      const newState = {};
-      // Get and convert query params
+    // // Listen for component request
+    // this.get('viewImporter').on('requestView', function() {
+    //   const newState = {};
+    //   // Get and convert query params
 
-      newState.timestamp = self.get('timestamp');
-      newState.appID = self.get('appID');
+    //   newState.timestamp = self.get('timestamp');
+    //   newState.appID = self.get('appID');
 
-      newState.camX = parseFloat(self.get('camX'));
-      newState.camY = parseFloat(self.get('camY'));
-      newState.camZ = parseFloat(self.get('camZ'));
-      newState.condition = self.get('condition');
+    //   newState.camX = parseFloat(self.get('camX'));
+    //   newState.camY = parseFloat(self.get('camY'));
+    //   newState.camZ = parseFloat(self.get('camZ'));
+    //   newState.condition = self.get('condition');
 
       // Passes the new state from controller via service to component
-      self.get('viewImporter').transmitView(newState);
-    });
+    //  self.get('viewImporter').transmitView(newState);
+    //});
 
     this.get('landscapeListener').initSSE();
 
