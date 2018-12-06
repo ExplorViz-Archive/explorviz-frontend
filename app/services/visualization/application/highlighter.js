@@ -8,6 +8,7 @@ export default Service.extend({
   traceId: null,
   application: null,
   store: service(),
+  renderingService: service(),
 
   highlight(entity) {
 
@@ -59,6 +60,13 @@ export default Service.extend({
     }
 
     const emberModelName = highlightedEntity.constructor.modelName; // e.g. "clazz" or "component"
+
+    if((emberModelName === "clazz" || emberModelName === "component") && 
+      !highlightedEntity.isVisible()) {
+        this.unhighlightAll();
+        this.get('renderingService').redrawScene();
+        return;
+    }
 
     // contains all clazzes which the user directly or indirectly highlighted
     let selectedClazzes = new Set();
@@ -191,7 +199,6 @@ export default Service.extend({
         clazzCommunication.set("state", "TRANSPARENT");
       }
     });
-    
   }
 
 });
