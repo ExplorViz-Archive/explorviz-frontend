@@ -163,7 +163,7 @@ export default Component.extend(Evented, THREEPerformance, {
       self.set('initDone', true);
       self.populateScene();
       // import new view
-      self.importView();
+      // self.importView();
 
 
     });

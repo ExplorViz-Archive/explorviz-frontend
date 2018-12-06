@@ -2,6 +2,7 @@ import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import { task } from 'ember-concurrency';
 import { isBlank } from '@ember/utils';
+import $ from 'jquery';
 
 /* eslint-disable require-yield */
 export default Component.extend({
@@ -18,6 +19,15 @@ export default Component.extend({
 
   appComponents: null,
   appClazzes: null,
+
+  // @Override
+  didRender() {
+    this._super(...arguments);
+
+    // remove arrow from ember-power-select
+    $('.ember-power-select-status-icon').remove();
+  },
+
 
   actions: {
 
@@ -97,7 +107,7 @@ export default Component.extend({
         continue;
 
       const componentName = component.get('name').toLowerCase();
-      if(componentName.startsWith(searchString)) {
+      if(searchEngineFindsHit(componentName, searchString)) {
         entities.push(component);
         currentNumberOfCompNames++;
       }
@@ -113,12 +123,21 @@ export default Component.extend({
 
       const clazz = clazzes.objectAt(i);
       const clazzName = clazz.get('name').toLowerCase();
-      if(clazzName.startsWith(searchString)) {
+      if(searchEngineFindsHit(clazzName, searchString)) {
         entities.push(clazz);
         currentNumberOfClazzNames++;
       }  
     }
     return entities;
+
+    function searchEngineFindsHit(name, searchString) {
+      if(searchString.startsWith('*')) {
+        const searchName = searchString.substring(1);
+        return name.includes(searchName);
+      } else {
+        return name.startsWith(searchString);
+      }
+    }
   })
 
 
