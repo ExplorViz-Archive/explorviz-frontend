@@ -10,6 +10,30 @@
         {{#bg.button value="createMultipleUsers"}}Multiple Users{{/bg.button}}
       {{/bs-button-group}}
       {{#if (eq page "createSingleUser")}}
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Name</th> 
+              <th scope="col">Roles</th>
+              <th scope="col">Roles</th>
+              <th scope="col">Roles</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each users as |user|}}
+              <tr style="cursor: pointer">
+                <th scope="row">{{user.id}}</th>
+                <td>{{user.username}}</td>
+                  {{#each user.roles as |role|}}
+                <td>
+                    {{role.descriptor}}
+                </td>
+                  {{/each}}
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
         <h4 class="mt-5">Create Single User</h4>
         {{#bs-form formLayout=formLayout model=this onSubmit=(action "saveUser") as |form|}}
           {{form.element controlType="text" label="Username" placeholder="Username" property="username" required=true}}
