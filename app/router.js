@@ -18,7 +18,6 @@ const Router = EmberRouter.extend({
 Router.map(function() {
   this.route('visualization');
   this.route('tutorial');
-  this.route('administration');
   this.route('login');
   this.route('badroute', { path: "/*path" });
   this.route('configuration');
