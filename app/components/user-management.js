@@ -19,7 +19,7 @@ export default Component.extend(AlertifyHandler, {
   init(){
     this._super(...arguments);
     this.set('roles', []);
-    this.set('page', 'createSingleUser');
+    this.set('page', 'main');
     this.updateUserList();
   },
 
@@ -36,6 +36,14 @@ export default Component.extend(AlertifyHandler, {
   },
 
   actions: {
+    openCreateSingleUserPage() {
+      this.set('page', 'createSingleUser');
+    },
+
+    openMainPage() {
+      this.set('page', 'main');
+    },
+
     saveUser() {
       const userData = this.getProperties('username', 'password', 'roles_selected_single');
 
@@ -52,6 +60,8 @@ export default Component.extend(AlertifyHandler, {
       }, () => {
         const message = "User " + userData.username + " could <b>not</b> be created.";
         this.showAlertifyMessage(message);
+        userRecord.deleteRecord();
+        this.updateUserList();
       });
     },
 
@@ -84,6 +94,7 @@ export default Component.extend(AlertifyHandler, {
           }
         }, () => { // failure
           usersNoSuccess.push(i);
+          userRecord.deleteRecord();
           if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
             const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
             this.showAlertifyMessage(message);

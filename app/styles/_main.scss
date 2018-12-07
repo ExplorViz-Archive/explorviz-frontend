@@ -53,14 +53,16 @@ body > .ember-view {
   display: none !important;
 }
 
-#discovery-details-tab {
+#discovery-details-tab,
+#configuration-tab {
   @extend .d-flex;
   @extend .flex-column;
   @extend .flex-grow-1;
   min-height: 0;
 }
 
-#discovery-details-tab > .tab-content {
+#discovery-details-tab > .tab-content,
+#configuration-tab > .tab-content {
   @extend .d-flex;
   flex: 1 1 100%;
   min-height: 0;
@@ -74,6 +76,12 @@ body > .ember-view {
   flex: 0 0 100%;
   overflow-y: auto;
   min-height: 0;
+}
+
+#configuration-tab > .tab-content > .tab-pane.active {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 #discovery-details-tab table {
