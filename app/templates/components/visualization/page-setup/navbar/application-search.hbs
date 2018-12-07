@@ -8,6 +8,7 @@
     {{#power-select-multiple
       triggerClass="bootstrap-theme-trigger form-control"
       search=(perform searchEntity)
+      searchMessage="Insert name or start with '*'"
       placeholder="Search Entity..." 
       onchange=(action "onSelect")
       selected=selectedEntity
