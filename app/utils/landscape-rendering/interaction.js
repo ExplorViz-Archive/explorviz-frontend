@@ -351,10 +351,7 @@ export default Object.extend(Evented, AlertifyHandler, {
       const emberModel = intersectedViewObj.object.userData.model;
 
       this.get('popUpHandler').showTooltip(
-        {
-          x: evt.detail.clientX,
-          y: evt.detail.clientY
-        },
+        mouse,
         emberModel
       );
 

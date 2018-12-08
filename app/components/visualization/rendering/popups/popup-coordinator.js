@@ -10,15 +10,26 @@ export default Component.extend({
         this._super(...arguments);
 
         if (this.get('additionalData.popupContent')){
-            let popupData = this.get('additionalData.popupContent');
-
-            const popoverDiv = $('.popover');
-        
-            const topOffset = popoverDiv.height() + 10;
-            const leftOffset = popoverDiv.width() / 2;
-            
-            $('.popover').css('top', popupData.mouseY - topOffset + 'px');
-            $('.popover').css('left', popupData.mouseX - leftOffset + 'px');
+            this.setPopupPosition();
         }
+    },
+
+    setPopupPosition(){
+        let popupData = this.get('additionalData.popupContent');
+
+        const popoverDiv = $('.popover');
+        const containerDiv = $('.main-content');
+
+        const containerTopOffset = containerDiv.offset().top;
+        const containerLeftOffset = containerDiv.offset().left;
+    
+        const popupTopOffset = popoverDiv.height();
+        const popupLeftOffset = popoverDiv.width() / 2;
+
+        const popupTopPosition = containerTopOffset + popupData.mouseY - popupTopOffset;
+        const popupLeftPosition = containerLeftOffset + popupData.mouseX - popupLeftOffset;
+
+        $('.popover').css('top', popupTopPosition + 'px');
+        $('.popover').css('left', popupLeftPosition + 'px');
     }
 })
