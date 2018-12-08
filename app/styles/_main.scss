@@ -168,3 +168,23 @@ li.ember-power-select-option {
   padding-left: 8px;
   padding-right: 22px;
 }
+
+.removecaret.dropdown-toggle::after {
+  display: none!important;
+}
+
+.explorviz-top-navbar .dropdown-item.active,
+.explorviz-top-navbar .dropdown-item:active {
+  color: #212529;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#userManagementPane table .dropdown-menu > .dropdown-item.active,
+#userManagementPane table .dropdown-menu > .dropdown-item:active {
+  color: #212529;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#userManagementPane table .dropdown-menu {
+  @extend .dropdown-menu-right;
+}

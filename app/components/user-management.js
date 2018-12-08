@@ -31,8 +31,10 @@ export default Component.extend(AlertifyHandler, {
         users.forEach(user => {
           this.get('users').push(user);
         });
+        // sort by id
+        this.get('users').sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1);
         this.propertyDidChange('users');
-      })
+      });
   },
 
   actions: {
@@ -53,13 +55,13 @@ export default Component.extend(AlertifyHandler, {
         roles: userData.roles_selected_single
       });
 
-      userRecord.save().then(() => {
+      userRecord.save().then(() => { // success
         const message = "User <b>" + userData.username + "</b> was created.";
         this.showAlertifyMessage(message);
         this.updateUserList();
-      }, () => {
-        const message = "User " + userData.username + " could <b>not</b> be created.";
-        this.showAlertifyMessage(message);
+      }, (reason) => { // failure
+        const {title, detail} = reason.errors[0];
+        this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
         userRecord.deleteRecord();
         this.updateUserList();
       });
@@ -102,7 +104,26 @@ export default Component.extend(AlertifyHandler, {
           }
         });
       }
-    }  
+    },
+
+    editUser(user) {
+
+    },
+
+    deleteUser(user) {
+      user.destroyRecord()
+        .then(() => { // success
+          const message = `User <b>${user.username}</b> deleted.`;
+          this.showAlertifyMessage(message);
+          this.updateUserList();
+        }, (reason) => { // failure
+          const {title, detail} = reason.errors[0];
+          this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+          this.showAlertifyMessage(message);
+          this.updateUserList();
+        }
+        );
+    }
   },
 
   getRoles: task(function * () {
