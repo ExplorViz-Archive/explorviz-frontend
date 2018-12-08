@@ -52,22 +52,5 @@
   {{time-shift}}
 {{/if}}
 
-<!-- landscape popups -->
-  {{visualization/rendering/landscape-popups/system-popup
-     data=additionalData.popupContent}}
-  {{visualization/rendering/landscape-popups/nodegroup-popup
-      data=additionalData.popupContent}}
-  {{visualization/rendering/landscape-popups/node-popup
-      data=additionalData.popupContent}}
-  {{visualization/rendering/landscape-popups/application-popup
-     data=additionalData.popupContent}}
-    {{visualization/rendering/landscape-popups/landscape-communication-popup
-     data=additionalData.popupContent}}
-
-<!-- application popups -->
-  {{visualization/rendering/application-popups/component-popup
-     data=additionalData.popupContent}}
-  {{visualization/rendering/application-popups/clazz-popup
-      data=additionalData.popupContent}}
-  {{visualization/rendering/application-popups/communication-popup
-      data=additionalData.popupContent}}
+{{visualization/rendering/popups/popup-coordinator
+    popupData=additionalData.popupContent}}
