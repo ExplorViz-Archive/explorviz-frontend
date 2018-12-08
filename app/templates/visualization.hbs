@@ -38,6 +38,11 @@
         )
       }}
       <div id="rendering">
+        <div style="position: absolute!important" class="pl-1">
+          {{#bs-button onClick=(action "openLandscapeView") type="secondary" outline=true title="Back to Landscape"}}
+            {{svg-jar "reply" class="octicon align-middle"}}
+          {{/bs-button}}
+        </div>
         {{visualization/rendering/application-rendering latestApplication=landscapeRepo.latestApplication}}
       </div>
     {{/if}}

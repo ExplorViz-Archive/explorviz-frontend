@@ -80,6 +80,11 @@ export default Controller.extend(AlertifyHandler, {
       this.set('viewImporter.importedURL', false);
       this.get('renderingService').reSetupScene();
     },
+
+    openLandscapeView() {
+      this.set('landscapeRepo.latestApplication', null);
+      this.set('landscapeRepo.replayApplication', null);
+    }
     
   },
 
