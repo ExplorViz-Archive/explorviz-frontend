@@ -18,17 +18,24 @@ export default Object.extend({
 
     switch (modelType) {
         case "component":
-            popupData = this.buildComponentData(mouse, emberModel);
+            popupData = this.buildComponentData(emberModel);
             break;
         case "clazz":
-            popupData = this.buildClazzData(mouse, emberModel);
+            popupData = this.buildClazzData(emberModel);
             break;
         case "cumulatedclazzcommunication":
-            popupData = this.buildCommunicationData(mouse, emberModel);
+            popupData = this.buildCommunicationData(emberModel);
             break;
         default:
             popupData = null;
             break;
+    }
+
+
+    // add mouse position for calculating div position
+    if (popupData){
+      popupData.mouseX = mouse.x;
+      popupData.mouseY = mouse.y;
     }
 
     this.get("additionalData").setPopupContent(popupData);
@@ -39,7 +46,7 @@ export default Object.extend({
   },
 
 
-  buildComponentData(mouse, component){
+  buildComponentData(component){
     let name = component.get("name");
     let clazzCount = getClazzesCount(component);
     let packageCount = getPackagesCount(component);
@@ -50,8 +57,6 @@ export default Object.extend({
         componentName: name,
         containedClazzes: clazzCount,
         containedPackages: packageCount,
-        top: mouse.y - 105, // incorporate popup height
-        left: mouse.x - 90, // incorporate popup width / 2
       }
   
       return popupData;
@@ -74,7 +79,7 @@ export default Object.extend({
       }
   },
 
-  buildClazzData(mouse, clazz){
+  buildClazzData(clazz){
     let clazzName = clazz.get('name');
     let instanceCount = clazz.get('instanceCount');
 
@@ -87,15 +92,13 @@ export default Object.extend({
         clazzName: clazzName,
         activeInstances: instanceCount,
         calledOps: operationCount,
-        top: mouse.y - 105, // incorporate popup height
-        left: mouse.x - 90, // incorporate popup width / 2
       }
   
       return popupData;
 
   },
 
-  buildCommunicationData(mouse, cumulatedClazzCommunication) {
+  buildCommunicationData(cumulatedClazzCommunication) {
     let runtimeStats = getRuntimeInformations(cumulatedClazzCommunication);
 
     // TODO: check if this is correct way to check for bidirectionality
@@ -109,8 +112,6 @@ export default Object.extend({
     let popupData = {
       isShown: true,
       popupType: "clazzCommunication",
-      top: mouse.y - 175, // incorporate popup height
-      left: mouse.x - 138, // incorporate popup width / 2
       sourceClazz: cumulatedClazzCommunication.get("sourceClazz").get("name"),
       targetClazz: cumulatedClazzCommunication.get("targetClazz").get("name"),
       isBidirectional: isBidirectional,

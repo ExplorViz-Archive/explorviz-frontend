@@ -19,23 +19,29 @@ export default Object.extend({
 
     switch (modelType) {
       case "system":
-        popupData = this.buildSystemData(mouse, emberModel);
+        popupData = this.buildSystemData(emberModel);
         break;
       case "nodegroup":
-        popupData = this.buildNodeGroupData(mouse, emberModel);
+        popupData = this.buildNodeGroupData(emberModel);
         break;
       case "node":
-        popupData = this.buildNodeData(mouse, emberModel);
+        popupData = this.buildNodeData(emberModel);
         break;
       case "application":
-        popupData = this.buildApplicationData(mouse, emberModel);
+        popupData = this.buildApplicationData(emberModel);
         break;
       case "applicationcommunication":
-        popupData = this.buildCommunicationData(mouse, emberModel);
+        popupData = this.buildCommunicationData(emberModel);
         break;
       default:
         popupData = null;
         break;
+    }
+
+    // add mouse position for calculating div position
+    if (popupData){
+      popupData.mouseX = mouse.x;
+      popupData.mouseY = mouse.y;
     }
 
     this.get("additionalData").setPopupContent(popupData);
@@ -47,7 +53,7 @@ export default Object.extend({
     this.get("additionalData").removePopup();
   },
 
-  buildSystemData(mouse, system) {
+  buildSystemData(system) {
 
     let systemName = encodeStringForPopUp(system.get('name'));
 
@@ -73,14 +79,12 @@ export default Object.extend({
       systemName: systemName,
       numOfNodes: nodeCount,
       numOfApps: applicationCount,
-      top: mouse.y - 105, // incorporate popup height
-      left: mouse.x - 62, // incorporate popup width / 2
     }
 
     return popupData;
   },
 
-  buildNodeGroupData(mouse, nodeGroup){
+  buildNodeGroupData(nodeGroup){
 
     let avgNodeCPUUtil = 0.0;
     let applicationCount = 0;
@@ -102,14 +106,12 @@ export default Object.extend({
       numOfNodes: nodeCount,
       numOfApps: applicationCount,
       avgCPUtil: avgCpuUtilization + '%',
-      top: mouse.y - 128, // incorporate popup height
-      left: mouse.x - 96, // incorporate popup width / 2
     }
 
     return popupData;
   },
 
-  buildNodeData(mouse, node){
+  buildNodeData(node){
     const formatFactor = (1024 * 1024 * 1024);
     let cpuUtilization = round(node.get('cpuUtilization') * 100, 0);
     let freeRAM =  round(node.get('freeRAM') / formatFactor, 2).toFixed(2);
@@ -123,14 +125,12 @@ export default Object.extend({
       cpuUtil: cpuUtilization + '%',
       freeRAM: freeRAM,
       totalRAM: totalRAM,
-      top: mouse.y - 130, // incorporate popup height
-      left: mouse.x - 80, // incorporate popup width / 2
     }
 
     return popupData;
   },
 
-  buildApplicationData(mouse, application){
+  buildApplicationData(application){
 
     const lastUsage = new Date(application.get('lastUsage')).toLocaleString();
 
@@ -140,14 +140,12 @@ export default Object.extend({
       applicatioName: application.get('name'),
       lastUsage: lastUsage,
       language: application.get('programmingLanguage'),
-      top: mouse.y - 107, // incorporate popup height
-      left: mouse.x - 105, // incorporate popup width / 2
     }
 
     return popupData;
   },
 
-  buildCommunicationData(mouse, communication){
+  buildCommunicationData(communication){
 
     const sourceApplicationName = communication.get('sourceApplication').get('name');
     const targetApplicationName = communication.get('targetApplication').get('name');
@@ -162,8 +160,6 @@ export default Object.extend({
       requests: communication.get('requests'),
       technology: technology,
       duration: communication.get('averageResponseTime') + 'ns',
-      top: mouse.y - 130, // incorporate popup height
-      left: mouse.x - 107, // incorporate popup width / 2
     }
 
     return popupData;

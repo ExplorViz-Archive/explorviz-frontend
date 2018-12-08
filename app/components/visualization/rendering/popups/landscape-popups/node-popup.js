@@ -1,4 +1,4 @@
-import Component from '@ember/component';
+import PopupCoordinator from '../popup-coordinator';
 
-export default Component.extend({
+export default PopupCoordinator.extend({
 });
