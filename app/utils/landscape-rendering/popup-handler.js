@@ -1,283 +1,168 @@
 import Object from '@ember/object';
-import Evented from '@ember/object/evented';
 import { encodeStringForPopUp } from '../helpers/string-helpers';
-import $ from 'jquery';
+import { round } from '../helpers/number-helpers';
+import { inject as service } from '@ember/service';
 
-export default Object.extend(Evented, {
+export default Object.extend({
 
-  alreadyDestroyed: true,
+  additionalData: service("additional-data"),
   enableTooltips: true,
 
   showTooltip(mouse, emberModel) {
 
-    if(!this.get('enableTooltips')) {
+    if (!this.get('enableTooltips')) {
       return;
     }
 
-    let content = this.buildContent(emberModel);
+    let popupData;
+    const modelType = emberModel.constructor.modelName;
 
-    if(content.title === '' && content.html === '') {
-      return;
+    switch (modelType) {
+      case "system":
+        popupData = this.buildSystemData(emberModel);
+        break;
+      case "nodegroup":
+        popupData = this.buildNodeGroupData(emberModel);
+        break;
+      case "node":
+        popupData = this.buildNodeData(emberModel);
+        break;
+      case "application":
+        popupData = this.buildApplicationData(emberModel);
+        break;
+      case "applicationcommunication":
+        popupData = this.buildCommunicationData(emberModel);
+        break;
+      default:
+        popupData = null;
+        break;
     }
 
-    const popoverDiv = $('<div class="popover bs-popover-top"></div>');
+    // add mouse position for calculating div position
+    if (popupData){
+      popupData.mouseX = mouse.x;
+      popupData.mouseY = mouse.y;
+    }
 
-    //popoverDiv.append('<div class="arrow"></div>');
-    popoverDiv.append(`<h3 class="popover-header"><div style="font-weight:bold;text-align:center;">${content.title}</div></h3>`);
-    popoverDiv.append(`<div class="popover-body" style="white-space: nowrap;">${content.html}</div>`);
+    this.get("additionalData").setPopupContent(popupData);
 
-    $('#vizContainer').append(popoverDiv);
-
-    const topOffset = popoverDiv.height() + 10;
-    const leftOffset = popoverDiv.width() / 2;
-
-    popoverDiv.css('top', mouse.y - topOffset + 'px');
-    popoverDiv.css('left', mouse.x - leftOffset + 'px');
-
-    // center arrow
-    //$('.arrow').css('left', 20 + 'px');
-
-    this.set('alreadyDestroyed', false);
   },
 
 
   hideTooltip() {
-    if(!this.get('alreadyDestroyed')) {
-      $('.popover').remove();
-      this.set('alreadyDestroyed', true);
-    }
+    this.get("additionalData").removePopup();
   },
 
+  buildSystemData(system) {
 
-  buildContent(emberModel) {
-    let content = {title: '', html: ''};
+    let systemName = encodeStringForPopUp(system.get('name'));
 
-    const modelType = emberModel.constructor.modelName;
+    let nodeCount = 0;
+    let applicationCount = 0;
 
-    if (modelType === 'system') {
-      content = buildSystemContent(emberModel);
-    }
-    else if (modelType === 'node') {
-      content = buildNodeContent(emberModel);
-    }
-    else if (modelType === 'nodegroup') {
-      content = buildNodegroupContent(emberModel);
-    }
-    else if (modelType === 'application') {
-      content = buildApplicationContent(emberModel);
-    }
-    else if (modelType === 'applicationcommunication') {
-      content = buildApplicationCommunicationContent(emberModel);
-    }
+    // Calculate node and application count
+    const nodeGroups = system.get('nodegroups');
 
-    return content;
+    nodeGroups.forEach((nodeGroup) => {
 
-
-
-    // Helper functions
-
-    function buildApplicationContent(application) {
-
-      let content = {title: '', html: ''};
-
-      content.title = encodeStringForPopUp(application.get('name'));
-
-      const year = new Date(application.get('lastUsage')).toLocaleString();
-
-      content.html =
-        '<table style="width:100%">' +
-          '<tr>' +
-            '<td>Last Usage:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              year +
-            '</td>' +
-          '</tr>' +
-          '<tr>' +
-            '<td>Language:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              application.get('programmingLanguage') +
-            '</td>' +
-          '</tr>' +
-        '</table>';
-
-      return content;
-    }
-
-
-    function buildSystemContent(system) {
-
-      let content = {title: '', html: ''};
-
-      content.title = encodeStringForPopUp(system.get('name'));
-
-      var nodesCount = 0;
-      var applicationCount = 0;
-
-      // Calculate node and application count
-      const nodeGroups = system.get('nodegroups');
-
-      nodeGroups.forEach((nodeGroup) => {
-
-        nodesCount += nodeGroup.get('nodes').get('length');
-
-        const nodes = nodeGroup.get('nodes');
-
-        nodes.forEach((node) => {
-          applicationCount += node.get('applications').get('length');
-        });
-
-      });
-
-
-      content.html =
-        '<table style="width:100%">' +
-          '<tr>' +
-            '<td>Nodes:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              nodesCount +
-            '</td>' +
-          '</tr>' +
-          '<tr>' +
-            '<td>Applications:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              applicationCount +
-            '</td>' +
-          '</tr>' +
-        '</table>';
-
-      return content;
-    }
-
-    function round(value, precision) {
-      var multiplier = Math.pow(10, precision || 0);
-      return Math.round(value * multiplier) / multiplier;
-    }
-
-    function buildNodeContent(node) {
-
-      let content = {title: '', html: ''};
-
-      content.title = node.getDisplayName();
-
-      // Formatted values for the node popup
-      const formatFactor = (1024 * 1024 * 1024);
-      var cpuUtilization = round(node.get('cpuUtilization') * 100, 0);
-      var freeRAM =  round(node.get('freeRAM') / formatFactor, 2).toFixed(2);
-      var totalRAM =  round((node.get('usedRAM') + node.get('freeRAM')) / formatFactor, 2).toFixed(2);
-
-      content.html =
-        '<table style="width:100%">' +
-          '<tr>' +
-            '<td>CPU Utilization:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              cpuUtilization + ' %' +
-            '</td>' +
-          '</tr>' +
-          '<tr>' +
-            '<td>Free RAM:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-            freeRAM + ' GB' +
-            '</td>' +
-          '</tr>' +
-          '<tr>' +
-            '<td>Total RAM:</td>' +
-              '<td style="text-align:right;padding-left:10px;">' +
-              totalRAM + ' GB' +
-            '</td>' +
-          '</tr>' +
-        '</table>';
-
-      return content;
-    }
-
-
-    function buildNodegroupContent(nodeGroup) {
-
-      let content = {title: '', html: ''};
-
-      content.title = encodeStringForPopUp(nodeGroup.get('name'));
-
-      var avgNodeCPUUtil = 0.0;
-      var applicationCount = 0;
-
-      // Calculate node and application count
+      nodeCount += nodeGroup.get('nodes').get('length');
       const nodes = nodeGroup.get('nodes');
 
       nodes.forEach((node) => {
-
-        avgNodeCPUUtil += node.get('cpuUtilization');
         applicationCount += node.get('applications').get('length');
-
       });
+    });
 
-      var avgCpuUtilization = round((avgNodeCPUUtil * 100) / nodes.get('length'), 0);
-
-      content.html =
-        '<table style="width:100%">' +
-          '<tr>' +
-            '<td>Nodes:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              nodes.get('length') +
-            '</td>' +
-          '</tr>' +
-          '<tr>' +
-            '<td>Applications:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              applicationCount +
-            '</td>' +
-          '</tr>' +
-          '<tr>' +
-            '<td>Avg. CPU Utilization:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              avgCpuUtilization + ' %' +
-            '</td>' +
-          '</tr>' +
-        '</table>';
-
-      return content;
+    let popupData = {
+      isShown: true,
+      popupType: "system",
+      systemName: systemName,
+      numOfNodes: nodeCount,
+      numOfApps: applicationCount,
     }
 
+    return popupData;
+  },
 
+  buildNodeGroupData(nodeGroup){
 
-    function buildApplicationCommunicationContent(applicationCommunication) {
+    let avgNodeCPUUtil = 0.0;
+    let applicationCount = 0;
 
-      let content = {title: '', html: ''};
+    const nodes = nodeGroup.get('nodes');
+    const nodeCount = nodes.get('length');
 
-      const sourceApplicationName = applicationCommunication.get('sourceApplication').get('name');
-      const targetApplicationName = applicationCommunication.get('targetApplication').get('name');
+    nodes.forEach((node) => {
+      avgNodeCPUUtil += node.get('cpuUtilization');
+      applicationCount += node.get('applications').get('length');
+    });
 
-      const iconSize = 20;
-      content.title = encodeStringForPopUp(sourceApplicationName) +
-        '&nbsp;<img src="images/svg/octicons/arrow-right.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp;' + encodeStringForPopUp(targetApplicationName);
+    let avgCpuUtilization = round((avgNodeCPUUtil * 100) / nodeCount, 0);
 
-      content.html =
-        '<table style="width:100%">' +
-          '<tr>' +
-            '<td>&nbsp;<img src="images/svg/octicons/code.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Requests:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              applicationCommunication.get('requests') +
-            '</td>' +
-          '</tr>' +
-          '<tr>' +
-            '<td>&nbsp;<img src="images/svg/octicons/tools.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp;Technology:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              applicationCommunication.get('technology') +
-            '</td>' +
-          '</tr>' +
-          '<tr>' +
-            '<td>&nbsp;<img src="images/svg/octicons/clock.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Avg. Duration:</td>' +
-            '<td style="text-align:right;padding-left:10px;">' +
-              applicationCommunication.get('averageResponseTime') + ' ns' +
-            '</td>' +
-          '</tr>' +
-        '</table>';
-
-      return content;
+    let popupData = {
+      isShown: true,
+      popupType: "nodeGroup",
+      nodeGroupName: nodeGroup.get('name'),
+      numOfNodes: nodeCount,
+      numOfApps: applicationCount,
+      avgCPUtil: avgCpuUtilization + '%',
     }
 
+    return popupData;
+  },
+
+  buildNodeData(node){
+    const formatFactor = (1024 * 1024 * 1024);
+    let cpuUtilization = round(node.get('cpuUtilization') * 100, 0);
+    let freeRAM =  round(node.get('freeRAM') / formatFactor, 2).toFixed(2);
+    let totalRAM = round((node.get('usedRAM') + node.get('freeRAM')) / formatFactor, 2).toFixed(2);
 
 
+    let popupData = {
+      isShown: true,
+      popupType: "node",
+      nodeName: node.getDisplayName(),
+      cpuUtil: cpuUtilization + '%',
+      freeRAM: freeRAM,
+      totalRAM: totalRAM,
+    }
 
-  } // END buildApplicationContent
+    return popupData;
+  },
+
+  buildApplicationData(application){
+
+    const lastUsage = new Date(application.get('lastUsage')).toLocaleString();
+
+    let popupData = {
+      isShown: true,
+      popupType: "application",
+      applicatioName: application.get('name'),
+      lastUsage: lastUsage,
+      language: application.get('programmingLanguage'),
+    }
+
+    return popupData;
+  },
+
+  buildCommunicationData(communication){
+
+    const sourceApplicationName = communication.get('sourceApplication').get('name');
+    const targetApplicationName = communication.get('targetApplication').get('name');
+
+    let technology = communication.get('technology') === undefined ? "undefined" : communication.get('technology');
+
+    let popupData = {
+      isShown: true,
+      popupType: "applicationCommunication",
+      sourceApplication: sourceApplicationName,
+      targetApplication: targetApplicationName,
+      requests: communication.get('requests'),
+      technology: technology,
+      duration: communication.get('averageResponseTime') + 'ns',
+    }
+
+    return popupData;
+  },
 
 });
