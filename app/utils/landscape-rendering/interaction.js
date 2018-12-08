@@ -133,22 +133,17 @@ export default Object.extend(Evented, AlertifyHandler, {
     const mX = (evt.clientX / window.innerWidth ) * 2 - 1;
     const mY = - (evt.clientY / window.innerHeight ) * 2 + 1;
 
-    const vector = new THREE.Vector3(mX, mY, 1 );
-    vector.unproject(this.get('camera'));
-    vector.sub(this.get('camera').position);
+    const scrollVector = new THREE.Vector3(mX, mY, 1 );
+    scrollVector.unproject(this.get('camera'));
+    scrollVector.sub(this.get('camera.position'));
+    scrollVector.setLength(delta * 1.5)
 
-    this.get('camera').position.addVectors(this.get('camera').position,
-      vector.setLength(delta * 1.5));
-
-
-    // zoom in
-    /*if (delta > 0) {
-      this.get('camera').position.z -= delta * 1.5;
+    let landscapeVisible = this.get('camera.position.z') + scrollVector.z > 0.2;
+    
+    // apply zoom, prevent to zoom behind 2D-Landscape (z-direction)
+    if (landscapeVisible){
+      this.get('camera.position').addVectors(this.get('camera.position'), scrollVector);
     }
-    // zoom out
-    else {
-      this.get('camera').position.z -= delta * 1.5;
-    }*/
   },
 
 
@@ -228,11 +223,16 @@ export default Object.extend(Evented, AlertifyHandler, {
 
     const origin = {};
 
-    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) /
-      this.get('renderer').domElement.clientWidth) * 2 - 1;
+    const rect = this.get('canvas').getBoundingClientRect();
 
-    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) /
-      this.get('renderer').domElement.clientHeight) * 2 + 1;
+    const mouseOnCanvas = {
+      x: mouse.x - rect.left,
+      y: mouse.y - rect.top
+    };
+
+    origin.x = (mouseOnCanvas.x / this.get('renderer').domElement.clientWidth) * 2 - 1;
+
+    origin.y = -(mouseOnCanvas.y / this.get('renderer').domElement.clientHeight) * 2 + 1;
 
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
@@ -281,14 +281,19 @@ export default Object.extend(Evented, AlertifyHandler, {
   },
 
   handleSingleClick(mouse) {
-
+    
     const origin = {};
 
-    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) / 
-      this.get('renderer').domElement.clientWidth) * 2 - 1;
+    const rect = this.get('canvas').getBoundingClientRect();
 
-    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) / 
-      this.get('renderer').domElement.clientHeight) * 2 + 1;
+    const mouseOnCanvas = {
+      x: mouse.x - rect.left,
+      y: mouse.y - rect.top
+    };
+
+    origin.x = (mouseOnCanvas.x / this.get('renderer').domElement.clientWidth) * 2 - 1;
+
+    origin.y = -(mouseOnCanvas.y / this.get('renderer').domElement.clientHeight) * 2 + 1;
 
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin, 
       this.get('camera'), this.get('raycastObjects'));
@@ -325,18 +330,18 @@ export default Object.extend(Evented, AlertifyHandler, {
 
   handlePopUp(evt) {
 
+    const rect = this.get('canvas').getBoundingClientRect();
+
     const mouse = {
-      x: evt.detail.clientX,
-      y: evt.detail.clientY
+      x: evt.detail.clientX - rect.left,
+      y: evt.detail.clientY - rect.top
     };
 
     const origin = {};
 
-    origin.x = ((mouse.x - (this.get('renderer').domElement.offsetLeft+0.66)) /
-      this.get('renderer').domElement.clientWidth) * 2 - 1;
+    origin.x = (mouse.x / this.get('renderer').domElement.clientWidth) * 2 - 1;
 
-    origin.y = -((mouse.y - (this.get('renderer').domElement.offsetTop+0.665)) /
-      this.get('renderer').domElement.clientHeight) * 2 + 1;
+    origin.y = -(mouse.y / this.get('renderer').domElement.clientHeight) * 2 + 1;
 
     const intersectedViewObj = this.get('raycaster').raycasting(null, origin,
       this.get('camera'), this.get('raycastObjects'));
@@ -345,7 +350,13 @@ export default Object.extend(Evented, AlertifyHandler, {
 
       const emberModel = intersectedViewObj.object.userData.model;
 
-      this.get('popUpHandler').showTooltip(mouse, emberModel);
+      this.get('popUpHandler').showTooltip(
+        {
+          x: evt.detail.clientX,
+          y: evt.detail.clientY
+        },
+        emberModel
+      );
 
     }
 

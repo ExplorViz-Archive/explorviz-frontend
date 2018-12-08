@@ -89,8 +89,15 @@ export default Service.extend({
       this.get('application.cumulatedClazzCommunications').forEach((communication) => {
         if (communicatingClazzes.has( communication.get('sourceClazz')) && 
             communicatingClazzes.has( communication.get('targetClazz'))){
-          communication.highlight()
-        } else {
+              communication.highlight()
+
+              if(this.get('isTrace')) {
+                // if trace, open all parents such that user can see trace
+                communication.get('sourceClazz').content.openParents();
+                communication.get('targetClazz').content.openParents();
+              }
+        }        
+        else {
           communication.unhighlight();
         }
       });

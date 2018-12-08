@@ -248,19 +248,26 @@ export default RenderingCore.extend({
             cumuClazzCommu.get('sourceClazz.highlighted') || 
             cumuClazzCommu.get('targetClazz.highlighted')){
 
+              // check for recursion
+              if ( cumuClazzCommu.get('sourceClazz.fullQualifiedName') == 
+                   cumuClazzCommu.get('targetClazz.fullQualifiedName') ){
+                // TODO: draw a circular arrow or something alike
+              } else {
               // keep track of drawn arrow to prevent duplicates
               let drewSecondArrow = false;
 
               // add arrow from in direction of source to target clazz
-              self.addCommunicationArrow(start, end);
+              let arrowThickness = 4 * thickness;
+              self.addCommunicationArrow(start, end, arrowThickness);
 
               // check for bidirectional communication
               cumuClazzCommu.get('aggregatedClazzCommunications').forEach( (aggrComm) => {
                 if ((cumuClazzCommu.get('sourceClazz.fullQualifiedName') === aggrComm.get('targetClazz.fullQualifiedName') && !drewSecondArrow)){
-                  self.addCommunicationArrow(end, start);
+                  self.addCommunicationArrow(end, start, arrowThickness);
                   drewSecondArrow = true;
                 }
               });
+              }
         }
 
         self.get('application3D').add(pipe);
@@ -401,7 +408,7 @@ export default RenderingCore.extend({
    * @param {*} start start vector of the associated communication
    * @param {*} end   end vector of the associated communication
    */
-  addCommunicationArrow(start, end){
+  addCommunicationArrow(start, end, width){
 
     // determine (almost the) middle
     let dir = end.clone().sub(start);
@@ -415,11 +422,10 @@ export default RenderingCore.extend({
 
     // arrow properties
     let origin = new THREE.Vector3(middle.x, middle.y + 0.8, middle.z);
-    let headLength = 2.6;
+    let headWidth = Math.max(1.2, width);
+    let headLength = Math.min(2 * headWidth, 0.3 * len);
     let length = headLength + 0.00001; // body of arrow not visible
     let color = 0x000000; // black
-
-    const headWidth = 1.6;
 
     let arrow = new THREE.ArrowHelper(dir, origin, length, color , headLength, headWidth);
 
@@ -453,9 +459,6 @@ export default RenderingCore.extend({
     this.get('renderingService').on('redrawScene', function() {
       self.cleanAndUpdateScene();
     });
-
-
-
   }, // END initInteraction
 
 });

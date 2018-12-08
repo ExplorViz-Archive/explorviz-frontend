@@ -3,9 +3,9 @@ import {inject as service} from '@ember/service';
 
 /**
 * This component renders all components (!), that are registered in 
-* {{#crossLink "Page-Setup-Service"}}{{/crossLink}}, as nav-glyphicons.
+* {{#crossLink "Page-Setup-Service"}}{{/crossLink}}, as nav-octicons.
 * 
-* @class Navbar-Glyphicons
+* @class Navbar-Octicons
 * @extends Ember.Component
 *
 * @module explorviz

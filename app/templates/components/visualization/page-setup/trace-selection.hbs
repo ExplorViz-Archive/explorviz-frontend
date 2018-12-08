@@ -1,14 +1,27 @@
-  <table style="width:100%">
-  <tr>
-    <th>TraceID</th>
-    <th>Requests</th> 
-    <th>Trace Duration</th>
-  </tr>
-  {{#each additionalData.data as |trace|}}
-    <tr {{action "traceSelected" trace.traceId}}>
-    <td>{{trace.traceId}} </td>
-    <td>{{trace.requests}}</td>
-    <td>{{trace.overallTraceDuration}}</td>
+
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">TraceID</th>
+      <th scope="col">Requests</th> 
+      <th scope="col">Trace Duration</th>
     </tr>
-  {{/each}}
+  </thead>
+  <tbody>
+    {{#each additionalData.data as |trace|}}
+      {{#if trace.isSelected}}
+        <tr {{action "traceSelected" trace.traceId}} style="cursor: pointer" bgcolor="#cc8a8a">
+          <th scope="row">{{trace.traceId}}</th>
+          <td>{{trace.requests}}</td>
+          <td>{{trace.overallTraceDuration}}</td>
+        </tr>
+      {{else}}
+        <tr {{action "traceSelected" trace.traceId}} style="cursor: pointer">
+          <th scope="row">{{trace.traceId}}</th>
+          <td>{{trace.requests}}</td>
+          <td>{{trace.overallTraceDuration}}</td>
+        </tr>
+      {{/if}}
+    {{/each}}
+  </tbody>
 </table>

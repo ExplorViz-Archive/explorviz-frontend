@@ -1,22 +1,43 @@
 html, body {
-  height: 100%;
   overflow: hidden;
+  height: 100vh;
 }
 
 body > .ember-view {
   height: 100%;
+  @extend .d-flex;
+  @extend .flex-column;
 }
 
 .main-content {
-  height: 100%;
   overflow: hidden;
-  margin-right: 5px;
-  margin-left: 5px;
+  @extend .ml-3;
+  @extend .mr-3;
+  @extend .pt-3;
+  @extend .pb-3;
+  @extend .flex-grow-1;
+  @extend .d-flex;
+  @extend .flex-column;
+  margin-top: 64px;
 }
 
-.main-content-majority {
-  max-height: 60%;
-  width: 100%;
+.main-content > .row {
+  @extend .flex-grow-1;
+}
+
+#vizspace {
+  @extend .d-flex;
+  @extend .flex-column;
+}
+
+#rendering {
+  @extend .flex-grow-1;
+  @extend .mt-3;
+}
+
+#dataselection {
+  display: flex;
+  @extend .flex-row;
 }
 
 .canvasViz {
@@ -28,37 +49,38 @@ body > .ember-view {
   margin: 0px;
 }
 
+.hide {
+  display: none !important;
+}
+
+#discovery-details-tab {
+  @extend .d-flex;
+  @extend .flex-column;
+  @extend .flex-grow-1;
+  min-height: 0;
+}
+
+#discovery-details-tab > .tab-content {
+  @extend .d-flex;
+  flex: 1 1 100%;
+  min-height: 0;
+}
+
+#discovery-details-tab > nav {
+  flex-direction: column;
+}
+
+#discovery-details-tab > .tab-content > .tab-pane {
+  flex: 0 0 100%;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+#discovery-details-tab table {
+  @extend .mb-0;
+}
+
 //Additional classes
-
-.nav.navbar-nav > li > a{
-  cursor: pointer;
-  color: #777;
-  border-radius: 10px;
-}
-
-.nav.navbar-nav > li > a:hover{
-  background-color: #f1f1f1;
-  box-shadow: 0px 0px 0px 1px #e6e6e6;
-}
-
-#navbar-glyphicons:last-child{
-  border-right-style: solid;
-  border-right-color: #e6e6e6;
-  border-right-width: 1px;
-}
-
-.navbar-no-hover-effect {
-  background-color:transparent !important;
-  cursor: default !important;
-  box-shadow: none !important;
-}
-
-.navbar-button-height-fix {
-  height: 30px !important;
-  padding-top: 0px !important;
-  padding-bottom: 0px !important;
-  vertical-align: middle !important;
-}
 
 .scrollable-extension {
   max-height: 40%;
@@ -68,15 +90,13 @@ body > .ember-view {
   box-shadow: 0 2px 4px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
 }
 
-
 .container-word-wrap {
   word-break: break-word;
 }
 
 .cytoscape-container {
-  height: 80%;
-  width: 100%;
-  position: absolute;
+  @extend .d-flex;
+  @extend .flex-grow-1;
 }
 
 .scroll-container {
@@ -117,4 +137,26 @@ body > .ember-view {
 
 .tooltip-component > a {
   color: #777;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 5px;
+  background-color: #d2d2d2;
+}
+
+::-webkit-scrollbar-thumb {
+  background:#989898; 
+  border-radius: 5px;
+}
+
+
+// Needed for firefox, since the scrollbar might else overlap the options
+li.ember-power-select-option {
+  padding-left: 8px;
+  padding-right: 22px;
 }

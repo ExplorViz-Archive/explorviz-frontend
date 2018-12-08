@@ -1,17 +1,6 @@
-@include media-breakpoint-up(xs) {
-  .timeline, .versionbar{
-    height: 100px;
-    width: calc(100% - 10px);
-    bottom: 72px;
-    position: fixed !important;
-  }
-}
-
-@include media-breakpoint-up(md) {
-  .timeline, .versionbar{
-    height: 100px;
-    width: calc(100% - 10px);
-    bottom: 40px;
-    position: fixed !important;
-  }
+.timeline, .versionbar {
+  height: 100px;
+  max-height: 100px!important;
+  width: calc(100% - 10px);
+  position: relative;
 }

@@ -7,7 +7,6 @@ import THREE from "three";
 import config from 'explorviz-frontend/config/environment';
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
 import debugLogger from 'ember-debug-logger';
-
 import $ from 'jquery';
 
 /**
@@ -45,6 +44,8 @@ export default Component.extend(Evented, THREEPerformance, {
 
   reloadHandler: service("reload-handler"),
   landscapeRepo: service("repos/landscape-repository"),
+  highlighter: service("visualization/application/highlighter"),
+  addionalData: service("additional-data"),
   renderingService: service(),
 
   scene : null,
@@ -108,8 +109,8 @@ export default Component.extend(Evented, THREEPerformance, {
     const self = this;
 
     // get size if outer ember div
-    const height = $('#vizContainer')[0].clientHeight * 0.6;  // 0.6 since canvas height is 60%
-    const width = $('#vizContainer')[0].clientWidth;
+    const height = $('#rendering').innerHeight();
+    const width = $('#rendering').innerWidth();
 
     const canvas = $('#threeCanvas')[0];
 
@@ -170,27 +171,35 @@ export default Component.extend(Evented, THREEPerformance, {
   },
 
 
+  updateCanvasSize() {
+    const outerDiv = $('#vizspace')[0];
+
+    if(outerDiv) {
+      if(!this.get('camera') || !this.get('webglrenderer'))
+        return;
+
+      $('#threeCanvas').hide();
+
+      const height = Math.round($('#rendering').innerHeight());
+      const width = Math.round($('#rendering').innerWidth());
+
+      this.set('camera.aspect', width / height);
+      this.get('camera').updateProjectionMatrix();
+
+      this.get('webglrenderer').setSize(width, height);
+
+      this.onResized();
+
+      $('#threeCanvas').show();
+    }
+  },
+
+
   initListener() {
 
     const self = this;
 
-    $(window).on('resize.visualization', function(){
-      const outerDiv = $('.main-content-majority')[0];
-
-      if(outerDiv) {
-
-        const height = Math.round($('.main-content-majority').height());
-        const width = Math.round($('.main-content-majority').width());
-
-        self.set('camera.aspect', width / height);
-        self.get('camera').updateProjectionMatrix();
-
-        self.get('webglrenderer').setSize(width, height);
-
-        self.onResized();
-      }
-    });
-
+    $(window).on('resize.visualization', this.updateCanvasSize.bind(this));
 
     this.get('viewImporter').on('transmitView', function(newState) {
         self.set('newState', newState);
@@ -199,6 +208,10 @@ export default Component.extend(Evented, THREEPerformance, {
 
     this.get('renderingService').on('reSetupScene', function() {
       self.onReSetupScene();
+    });
+
+    this.get('renderingService').on('resizeCanvas', function() {
+      self.updateCanvasSize();
     });
 
 
@@ -515,6 +528,9 @@ export default Component.extend(Evented, THREEPerformance, {
     this.get('viewImporter').off('transmitView');
     this.get('renderingService').off('reSetupScene');
     this.get('landscapeRepo').off('updated');
+
+    this.get('highlighter').unhighlightAll();
+    this.get('addionalData').emptyAndClose();
   },
 
 

@@ -1,56 +1,57 @@
-{{#if showLandscape}}
-  {{#if landscapeRepo.latestLandscape.systems}}
-
-    <!-- "ember-composable-helpers addon" array-helper used -->
-    <!-- ember component helper allows binding declarations, totally equal to -->
-    <!-- compinent that are initiated with braces -->
-
-    {{visualization/page-setup/visualization-navbar
-      content=(array 
-        (component "visualization/page-setup/navbar/reset-visualization") 
-        (component "visualization/page-setup/navbar/toggle-timeline") 
-        (component "visualization/page-setup/navbar/file-downloader" 
-          urlPath=exportLandscapeUrl fileName=exportLandscapeFileName) 
-        (component "visualization/page-setup/navbar/file-uploader" 
-          backendURL=uploadLandscapeUrl) 
-      )
-    }}
-
-    {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.latestLandscape}}
-  {{else}}
-    <div class="container-fluid">
-      <div class="jumbotron">
-        <h2>No landscape found!</h2>
-        <p>A new landscape will be fetched every 10 seconds.</p>
+<div class="row">
+  <div class="col-12" id="vizspace">
+    {{#if showLandscape}}
+      {{#if landscapeRepo.latestLandscape.systems}}
+        {{visualization/page-setup/visualization-navbar
+          content=(array 
+            (component "visualization/page-setup/navbar/reset-visualization") 
+            (component "visualization/page-setup/navbar/toggle-timeline") 
+            (component "visualization/page-setup/navbar/file-downloader" 
+              urlPath=exportLandscapeUrl fileName=exportLandscapeFileName)
+            (component "visualization/page-setup/navbar/file-uploader" 
+              backendURL=uploadLandscapeUrl)
+          )
+        }}
+        <div id="rendering">
+          {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.latestLandscape}}
+        </div>
+      {{else}}
+        <div class="container-fluid">
+          <div class="jumbotron">
+            <h2>No landscape found!</h2>
+            <p>A new landscape will be fetched every 10 seconds.</p>
+          </div>
+          <div id="spinnerDiv" class="container" style="position:relative; height:20%;">
+            {{ember-spinner}}
+          </div>
+        </div>
+      {{/if}}
+    {{else}}
+      {{visualization/page-setup/visualization-navbar
+        content=(array 
+          (component "visualization/page-setup/navbar/reset-visualization") 
+          (component "visualization/page-setup/navbar/toggle-timeline") 
+          (component "visualization/page-setup/navbar/file-downloader" 
+            urlPath=exportLandscapeUrl fileName=exportLandscapeFileName)
+          (component "visualization/page-setup/navbar/application-opener")
+          (component "visualization/page-setup/navbar/application-search")
+        )
+      }}
+      <div id="rendering">
+        {{visualization/rendering/application-rendering latestApplication=landscapeRepo.latestApplication}}
       </div>
-      <div id="spinnerDiv" class="container" style="position:relative; height:20%;">
-        {{ember-spinner}}
-      </div>
-    </div>
-  {{/if}}
+    {{/if}}
+    {{!-- only output author name if an author exists 
+    {{#if renderingService.showTimeline}}
+       {{time-shift}}
+    {{/if}}
+    --}}
+  </div>
+  <div class="col-4 hide" id="dataselection" >
+    {{visualization/page-setup/data-selection}}
+  </div>
+</div>
 
-{{else}}
-  {{visualization/page-setup/visualization-navbar
-    content=(array 
-      (component "visualization/page-setup/navbar/reset-visualization") 
-      (component "visualization/page-setup/navbar/toggle-timeline") 
-      (component "visualization/page-setup/navbar/file-downloader" 
-        urlPath=exportLandscapeUrl fileName=exportLandscapeFileName) 
-      (component "visualization/page-setup/navbar/application-opener") 
-      (component "visualization/page-setup/navbar/application-search")
-    )
-  }}
-
-  {{visualization/rendering/application-rendering latestApplication=landscapeRepo.latestApplication}}
-{{/if}}
-
-{{#if additionalData.showWindow}}
-  {{visualization/page-setup/data-selection}}
-{{/if}}
-
-{{#if renderingService.showTimeline}}
-  {{time-shift}}
-{{/if}}
-
+<!-- popup(s) -->
 {{visualization/rendering/popups/popup-coordinator
-    popupData=additionalData.popupContent}}
+popupData=additionalData.popupContent}}

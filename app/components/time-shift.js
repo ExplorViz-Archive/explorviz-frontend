@@ -29,6 +29,7 @@ export default Component.extend({
 
   timestampRepo: service("repos/timestamp-repository"),
   reloadHandler: service("reload-handler"),
+  renderingService: service("rendering-service"),
 
   plot: null,
 
@@ -50,6 +51,7 @@ export default Component.extend({
   // @Override
   // Cleanup
   willDestroyElement() {
+    this._super(...arguments);
       //workaround: hide timeline, otherwise the component timestamp-versionbar gets broken
     this.hideTimeline();
     this.get('timestampRepo').off('updated');
@@ -57,9 +59,15 @@ export default Component.extend({
     this.get('reloadHandler').off('startExchange');
   },
 
+  didDestroyElement(){
+    this._super(...arguments);
+    this.get('renderingService').resizeCanvas();
+  },
+
   didRender() {
     this._super(...arguments);
     this.renderPlot();
+    this.get('renderingService').resizeCanvas();
   },
 
   renderPlot() {
@@ -146,8 +154,6 @@ export default Component.extend({
       $(".timeline").slideUp(400);
       $("#vizContainer").animate({height:'+=120'});
       $(".timeline").attr('vis', 'hide');
-      $("#toggleTimelineButton").removeClass('glyphicon-collapse-down')
-        .addClass('glyphicon-collapse-up');
     }
   },
 
