@@ -1,258 +1,169 @@
 import Object from '@ember/object';
-import Evented from '@ember/object/evented';
-import { encodeStringForPopUp } from '../helpers/string-helpers';
-import $ from 'jquery';
+import { inject as service } from '@ember/service';
 
-export default Object.extend(Evented, {
+export default Object.extend({
 
-  alreadyDestroyed: true,
+  additionalData: service("additional-data"),
+
+  enableTooltips: true,
 
   showTooltip(mouse, emberModel) {
 
-    let content = this.buildContent(emberModel);
-
-    if(content.title === '' && content.html === '') {
+    if (!this.get('enableTooltips')){
       return;
     }
 
-    const popoverDiv = $('<div class="popover bs-popover-top"></div>');
+    let popupData;
+    let modelType = emberModel.constructor.modelName;
 
-    //popoverDiv.append('<div class="arrow"></div>');
-    popoverDiv.append(`<h3 class="popover-header"><div style="font-weight:bold;text-align:center;">${content.title}</div></h3>`);
-    popoverDiv.append(`<div class="popover-body" style="white-space: nowrap;">${content.html}</div>`);
+    switch (modelType) {
+        case "component":
+            popupData = this.buildComponentData(emberModel);
+            break;
+        case "clazz":
+            popupData = this.buildClazzData(emberModel);
+            break;
+        case "cumulatedclazzcommunication":
+            popupData = this.buildCommunicationData(emberModel);
+            break;
+        default:
+            popupData = null;
+            break;
+    }
 
-    $('#vizContainer').append(popoverDiv);
 
-    const topOffset = popoverDiv.height() + 10;
-    const leftOffset = popoverDiv.width() / 2;
+    // add mouse position for calculating div position
+    if (popupData){
+      popupData.mouseX = mouse.x;
+      popupData.mouseY = mouse.y;
+    }
 
-    popoverDiv.css('top', mouse.y - topOffset + 'px');
-    popoverDiv.css('left', mouse.x - leftOffset + 'px');
-
-    // center arrow
-    //$('.arrow').css('left', 20 + 'px');
-
-    this.set('alreadyDestroyed', false);
+    this.get("additionalData").setPopupContent(popupData);
   },
-
 
   hideTooltip() {
-
-    if(!this.get('alreadyDestroyed')) {
-      $('.popover').remove();
-      this.set('alreadyDestroyed', true);
-    }
+    this.get("additionalData").removePopup();
   },
 
 
-  buildContent: function (emberModel) {
-    let content = {title: '', html: ''};
+  buildComponentData(component){
+    let name = component.get("name");
+    let clazzCount = getClazzesCount(component);
+    let packageCount = getPackagesCount(component);
 
-    const modelType = emberModel.constructor.modelName;
-
-    if (modelType === 'component') {
-      content = buildComponentContent(emberModel);
-    }
-    else if (modelType === 'clazz') {
-      content = buildClazzContent(emberModel);
-    }
-    else if (modelType === 'cumulatedclazzcommunication') {
-      content = buildCumulatedClazzCommunicationContent(emberModel);
-    }
-
-    return content;
-
-
-    // Helper functions
-
-    function buildComponentContent(component) {
-
-      let content = {title: '', html: ''};
-
-      content.title = encodeStringForPopUp(component.get('name'));
-
-      const clazzesCount = getClazzesCount(component);
-      const packageCount = getPackagesCount(component);
-
-      content.html =
-        '<table style="width:100%">' +
-        '<tr>' +
-        '<td>Contained Classes:</td>' +
-        '<td style="text-align:right;padding-left:10px;">' +
-        clazzesCount +
-        '</td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td>Contained Packages:</td>' +
-        '<td style="text-align:right;padding-left:10px;">' +
-        packageCount +
-        '</td>' +
-        '</tr>' +
-        '</table>';
+    let popupData = {
+        isShown: true,
+        popupType: "component",
+        componentName: name,
+        containedClazzes: clazzCount,
+        containedPackages: packageCount,
+      }
+  
+      return popupData;
 
       function getClazzesCount(component) {
         let result = component.get('clazzes').get('length');
-
         const children = component.get('children');
-
         children.forEach((child) => {
           result += getClazzesCount(child);
         });
-
         return result;
       }
-
       function getPackagesCount(component) {
         let result = component.get('children').get('length');
-
         const children = component.get('children');
-
         children.forEach((child) => {
           result += getPackagesCount(child);
         });
-
         return result;
       }
+  },
 
-      return content;
-    } // END buildComponentContent
+  buildClazzData(clazz){
+    let clazzName = clazz.get('name');
+    let instanceCount = clazz.get('instanceCount');
 
+    const clazzCommunications = clazz.get('outgoingClazzCommunications');
+    let operationCount = clazzCommunications.get('length');
 
-    function buildClazzContent(clazz) {
-
-      let content = {title: '', html: ''};
-
-      content.title = clazz.get('name');
-
-      const calledOperations = getCalledOperations(clazz);
-
-      content.html =
-        '<table style="width:100%">' +
-        '<tr>' +
-        '<td>Active Instances:</td>' +
-        '<td style="text-align:right;padding-left:10px;">' +
-        clazz.get('instanceCount') +
-        '</td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td>Called Operations:</td>' +
-        '<td style="text-align:right;padding-left:10px;">' +
-        calledOperations +
-        '</td>' +
-        '</tr>' +
-        '</table>';
-
-      return content;
-
-      function getCalledOperations(clazz) {
-        const clazzCommunications = clazz.get('outgoingClazzCommunications');
-        return clazzCommunications.get('length');
+    let popupData = {
+        isShown: true,
+        popupType: "clazz",
+        clazzName: clazzName,
+        activeInstances: instanceCount,
+        calledOps: operationCount,
       }
-    } // END buildClazzContent
+  
+      return popupData;
 
-    // Information about a clazzCommunication between two classes
-    function buildCumulatedClazzCommunicationContent(cumulatedClazzCommunication) {
+  },
 
-      let content = {title: '', html: ''};
+  buildCommunicationData(cumulatedClazzCommunication) {
+    let runtimeStats = getRuntimeInformations(cumulatedClazzCommunication);
 
-      const sourceClazzName = cumulatedClazzCommunication.get('sourceClazz').get('name');
-      const targetClazzName = cumulatedClazzCommunication.get('targetClazz').get('name');
+    // TODO: check if this is correct way to check for bidirectionality
+    const isBidirectional = cumulatedClazzCommunication.get("aggregatedClazzCommunications").get("length") > 1;
 
-      const numOfAggregatedClazzCommunications = cumulatedClazzCommunication.get('aggregatedClazzCommunications').get('length');
+    // Formatted values for the clazzCommunication popup
+    const formatFactor = 1000; // convert from ns to ms
+    const avgAverageResponseTime = round(runtimeStats.avgAverageResponseTime / formatFactor, 0);
+    const avgOverallTraceDuration = round(runtimeStats.avgOverallTraceDuration / formatFactor, 0);
 
-      const runtimeStats = getRuntimeInformations(cumulatedClazzCommunication);
+    let popupData = {
+      isShown: true,
+      popupType: "clazzCommunication",
+      sourceClazz: cumulatedClazzCommunication.get("sourceClazz").get("name"),
+      targetClazz: cumulatedClazzCommunication.get("targetClazz").get("name"),
+      isBidirectional: isBidirectional,
+      requests: cumulatedClazzCommunication.get("requests"),
+      traces: runtimeStats.involvedTraces.length,
+      responseTime: avgAverageResponseTime,
+      duration: avgOverallTraceDuration,
+    }
 
-      // Formatted values for the clazzCommunication popup
-      const formatFactor = 1000; // convert from ns to ms
-      const avgAverageResponseTime =  round(runtimeStats.avgAverageResponseTime / formatFactor, 0);
-      const avgOverallTraceDuration =  round(runtimeStats.avgOverallTraceDuration / formatFactor, 0);
+    return popupData;
 
+    // retrieves runtime information for a specific aggregatedClazzCommunication (same sourceClazz and tagetClazz)
+    function getRuntimeInformations(cumulatedClazzCommunication) {
 
-      /// determine the direction of communication symbol
-      // default uni-directional
-      const iconSize = 20;
-      let commDirectionString = '&nbsp;<img src="images/svg/octicons/arrow-right.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp;';
-      // bi-directional communication
-      if (numOfAggregatedClazzCommunications > 1) {
-        commDirectionString = '&nbsp;<img src="images/svg/octicons/arrow-both.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp;';
+      let runtimeStats = {
+        // sum up
+        totalOverallTraceDuration: 0,
+        totalAverageResponseTime: 0,
+
+        // interesting for popups
+        involvedTraces: [],
+        avgOverallTraceDuration: 0,
+        avgAverageResponseTime: 0
+      };
+
+      let runtimeInformationCounter = 0;
+
+      let runtimeInformations = cumulatedClazzCommunication.getRuntimeInformations();
+
+      // accumulate runtime information
+      runtimeInformations.forEach((runtimeInformation) => {
+        runtimeStats.involvedTraces.push(runtimeInformation.get("traceId"));
+        runtimeStats.totalOverallTraceDuration += runtimeInformation.get("overallTraceDuration");
+        runtimeStats.totalAverageResponseTime += runtimeInformation.get("averageResponseTime");
+
+        runtimeInformationCounter++;
+      });
+
+      // calculate averages
+      if (runtimeInformationCounter > 0) {
+        runtimeStats.avgAverageResponseTime = runtimeStats.totalAverageResponseTime / runtimeInformationCounter;
+        runtimeStats.avgOverallTraceDuration = runtimeStats.totalOverallTraceDuration / runtimeInformationCounter;
       }
 
-      content.title = encodeStringForPopUp(sourceClazzName) + commDirectionString + encodeStringForPopUp(targetClazzName);
+      return runtimeStats;
 
-      content.html =
-        '<table style="width:100%">' +
-        '<tr>' +
-        '<td>&nbsp;<img src="images/svg/octicons/code.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Requests:</td>' +
-        '<td style="text-align:right;padding-left:10px;">' +
-        cumulatedClazzCommunication.get('requests') +
-        '</td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td>&nbsp;<img src="images/svg/octicons/list-ordered.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Involved Traces :</td>' +
-        '<td style="text-align:right;padding-left:10px;">' +
-        runtimeStats.involvedTraces.length +
-        '</td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td>&nbsp;<img src="images/svg/octicons/clock.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Avg. Response Time:</td>' +
-        '<td style="text-align:right;padding-left:10px;">' +
-        avgAverageResponseTime + ' ms' +
-        '</td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td>&nbsp;<img src="images/svg/octicons/clock.svg" width="' + iconSize + '" height="' + iconSize + '">&nbsp; Avg. Duration:</td>' +
-        '<td style="text-align:right;padding-left:10px;">' +
-        avgOverallTraceDuration + ' ms' +
-        '</td>' +
-        '</tr>' +
-        '</table>';
+    } // END getRuntimeInformations
 
-      return content;
-
-      // retrieves runtime information for a specific aggregatedClazzCommunication (same sourceClazz and tagetClazz)
-      function getRuntimeInformations(cumulatedClazzCommunication) {
-
-        let runtimeStats = {
-          // sum up
-          totalOverallTraceDuration: 0,
-          totalAverageResponseTime: 0,
-
-          // interesting for popups
-          involvedTraces: [],
-          avgOverallTraceDuration: 0,
-          avgAverageResponseTime: 0
-        };
-
-        var runtimeInformationCounter = 0;
-
-        let runtimeInformations = cumulatedClazzCommunication.getRuntimeInformations();
-
-        // accumulate runtime information
-        runtimeInformations.forEach( (runtimeInformation) => {
-          runtimeStats.involvedTraces.push(runtimeInformation.get('traceId'));
-          runtimeStats.totalOverallTraceDuration += runtimeInformation.get('overallTraceDuration');
-          runtimeStats.totalAverageResponseTime += runtimeInformation.get('averageResponseTime');
-
-          runtimeInformationCounter++;
-        });
-
-        // calculate averages
-        if (runtimeInformationCounter > 0) {
-          runtimeStats.avgAverageResponseTime = runtimeStats.totalAverageResponseTime / runtimeInformationCounter;
-          runtimeStats.avgOverallTraceDuration = runtimeStats.totalOverallTraceDuration / runtimeInformationCounter;
-        }
-
-        return runtimeStats;
-
-      } // END getRuntimeInformations
-
-      function round(value, precision) {
-        var multiplier = Math.pow(10, precision || 0);
-        return Math.round(value * multiplier) / multiplier;
-      } // END round
-
-    } // END buildClazzCommunicationContent
-
-  } // END buildApplicationContent
+    function round(value, precision) {
+      var multiplier = Math.pow(10, precision || 0);
+      return Math.round(value * multiplier) / multiplier;
+    } // END round
+  },
 
 });

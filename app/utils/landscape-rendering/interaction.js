@@ -1,6 +1,8 @@
 import Object from '@ember/object';
 import Evented from '@ember/object/evented';
 import { inject as service } from "@ember/service";
+import { getOwner } from '@ember/application';
+
 
 import THREE from "three";
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
@@ -80,7 +82,7 @@ export default Object.extend(Evented, AlertifyHandler, {
 
     // init PopUpHandler
     if (!this.get('popUpHandler')) {
-      this.set('popUpHandler', PopUpHandler.create());
+      this.set('popUpHandler', PopUpHandler.create(getOwner(this).ownerInjection()));
     }
 
     // init HoverHandler
@@ -349,10 +351,7 @@ export default Object.extend(Evented, AlertifyHandler, {
       const emberModel = intersectedViewObj.object.userData.model;
 
       this.get('popUpHandler').showTooltip(
-        {
-          x: evt.detail.clientX,
-          y: evt.detail.clientY
-        },
+        mouse,
         emberModel
       );
 

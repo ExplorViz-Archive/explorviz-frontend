@@ -38,6 +38,7 @@ export default Controller.extend(AlertifyHandler, {
   camY: null,
   camZ: null,
   condition: null,
+  communication: null,
 
   observer: observer('viewImporter.importedURL', function() {
     if(!this.get('viewImporter.importedURL')) {
@@ -123,6 +124,16 @@ export default Controller.extend(AlertifyHandler, {
       // Passes the new state from controller via service to component
     //  self.get('viewImporter').transmitView(newState);
     //});
+
+    // mocked data
+    this.set('communication', 
+    { sourceClazz: 'SourceClazz', 
+      targetClazz: 'TargetClazz', 
+      isBidirectional: false,
+      requests: 30000,
+      traces: 3,
+      responseTime: 1,
+      duration: 30000});
 
     this.get('landscapeListener').initSSE();
 

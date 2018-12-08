@@ -14,6 +14,9 @@
         }}
         <div id="rendering">
           {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.latestLandscape}}
+            <!-- popup(s) -->
+          {{visualization/rendering/popups/popup-coordinator
+          popupData=additionalData.popupContent}}
         </div>
       {{else}}
         <div class="container-fluid">
@@ -44,6 +47,9 @@
           {{/bs-button}}
         </div>
         {{visualization/rendering/application-rendering latestApplication=landscapeRepo.latestApplication}}
+          <!-- popup(s) -->
+        {{visualization/rendering/popups/popup-coordinator
+        popupData=additionalData.popupContent}}
       </div>
     {{/if}}
     {{!-- only output author name if an author exists 
@@ -56,3 +62,4 @@
     {{visualization/page-setup/data-selection}}
   </div>
 </div>
+
