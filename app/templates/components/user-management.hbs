@@ -65,7 +65,7 @@
     </div>
   {{else if (eq page "main")}}
     <div class="col-12 mt-3 d-flex flex-column">
-      <h3>User List</h3>
+      <h3>Users</h3>
       <div class="mb-3">
         <div class="float-right">
           {{#bs-button onClick=(action "openCreateSingleUserPage") type="success" outline=true}}
@@ -100,7 +100,7 @@
                     {{/dd.button}}
                     {{#dd.menu as |ddm|}}
                       {{#ddm.item}}
-                        <a class="dropdown-item" style="cursor: pointer" title="Edit" {{action "editUser" user}}>
+                        <a class="dropdown-item" style="cursor: pointer" title="Edit" {{action "openEditUserPage" user}}>
                           {{svg-jar "pencil" class="octicon align-middle" id="edit-button"}} Edit
                         </a>
                       {{/ddm.item}}
@@ -117,6 +117,29 @@
           </tbody>
         </table>
       </div>
+    </div>
+  {{else if (eq page "editUser")}}
+    <div class="col-12 mt-3 d-flex flex-column">
+      <div>
+        {{#bs-button onClick=(action "openMainPage") type="secondary" outline=true title="Back to User List"}}
+          {{svg-jar "reply" class="octicon align-middle"}}
+        {{/bs-button}}
+      </div>
+      <h3 class="mt-4">Edit User</h3>
+      {{#bs-form formLayout=formLayout model=this onSubmit=(action "saveUserChanges") as |form|}}
+        {{form.element controlType="number" label="ID" property="id_change" disabled=true required=true}}
+        {{form.element controlType="text" label="Username" placeholder="Enter New Username" property="username_change" required=true}}
+        {{form.element controlType="password" label="Password" placeholder="Enter New Password" property="password_change" required=false}}
+        {{#form.element controlType="power-select-multiple" property="roles_change" label="Change Roles" searchEnabled=false loadingMessage="Loading..." options=roles 
+        as |el|}}
+          {{#el.control 
+            onopen=(perform getRoles)  
+            as |item|}}
+              {{item.descriptor}}
+          {{/el.control}}
+        {{/form.element}}
+        {{bs-button defaultText="Submit" type="primary" buttonType="submit"}}
+      {{/bs-form}}
     </div>
   {{/if}}
 </div>

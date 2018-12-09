@@ -27,13 +27,12 @@ export default Component.extend(AlertifyHandler, {
     this.set('users', []);
     this.get('store').findAll('user')
       .then(users => {
-        this.propertyWillChange('users');
         users.forEach(user => {
           this.get('users').push(user);
         });
         // sort by id
         this.get('users').sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1);
-        this.propertyDidChange('users');
+        this.notifyPropertyChange('users');
       });
   },
 
@@ -44,6 +43,16 @@ export default Component.extend(AlertifyHandler, {
 
     openMainPage() {
       this.set('page', 'main');
+    },
+
+    openEditUserPage(user) {
+      this.set('page', 'editUser');
+
+      this.setProperties({
+        id_change: user.id,
+        username_change: user.username,
+        roles_change: user.roles,
+      });
     },
 
     saveUser() {
@@ -68,21 +77,21 @@ export default Component.extend(AlertifyHandler, {
     },
 
     saveMultipleUsers() {
-      const {'usernameprefix': userNamePrefix, numberofusers, 'roles_selected_multiple': roles} = 
-        this.getProperties('usernameprefix', 'numberofusers', 'roles_selected_multiple');
+      const userData = this.getProperties('usernameprefix', 'numberofusers', 'roles_selected_multiple');
 
-      const numberOfUsers = parseInt(numberofusers);
+      const numberOfUsers = parseInt(userData.numberofusers);
 
       let usersSuccess = [];
       let usersNoSuccess = [];
       for(let i = 1; i <= numberOfUsers; i++) {
-        const username = `${userNamePrefix}_${i}`;
+        const username = `${userData.usernameprefix}_${i}`;
         const password = "test123";
         const userRecord = this.get('store').createRecord('user', {
           username,
           password,
-          roles
+          roles: userData.roles_selected_multiple
         });
+
         userRecord.save().then(() => { // success
           usersSuccess.push(i);
           if(usersSuccess.length === numberOfUsers) {
@@ -106,8 +115,32 @@ export default Component.extend(AlertifyHandler, {
       }
     },
 
-    editUser(user) {
+    saveUserChanges() {
+      const userData = this.getProperties('id_change', 'username_change', 'password_change', 'roles_change');
 
+      const user = this.get('users').find( user => user.get('id') == userData.id_change);
+
+      if(user) {
+        if(user.get('username') !== userData.username_change)
+          user.set('username', userData.username_change);
+        
+        if(userData.password_change !== null && userData.password_change !== '')
+          user.set('password', userData.password_change);
+  
+        user.set('roles', userData.roles_change);
+  
+        user.save()
+          .then(()=> {
+            const message = `User updated.`;
+            this.showAlertifyMessage(message);
+            this.actions.openMainPage.bind(this)();
+          }, (reason) => {
+            const {title, detail} = reason.errors[0];
+            this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+          });
+      } else {
+        this.showAlertifyMessage(`User not found.`);
+      }
     },
 
     deleteUser(user) {
@@ -119,7 +152,6 @@ export default Component.extend(AlertifyHandler, {
         }, (reason) => { // failure
           const {title, detail} = reason.errors[0];
           this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
-          this.showAlertifyMessage(message);
           this.updateUserList();
         }
         );
