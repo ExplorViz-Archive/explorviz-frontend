@@ -13,16 +13,16 @@
 
         {{#nav.dropdown as |dd|}}
           {{#dd.toggle}}
-            {{svg-jar "person" class="octicon align-middle"}} <b>{{username}}</b> <span class="caret"></span>
+            {{svg-jar "person" class="octicon"}} <b>{{username}}</b> <span class="caret"></span>
           {{/dd.toggle}}
           
           {{#dd.menu as |ddm|}}
             {{#ddm.item}}
-              {{#ddm.link-to "configuration"}}{{svg-jar "gear" class="octicon align-middle"}} Configuration{{/ddm.link-to}}
+              {{#ddm.link-to "configuration"}}{{svg-jar "gear" class="octicon"}} Configuration{{/ddm.link-to}}
             {{/ddm.item}}
             {{#ddm.item}}
               <a class="dropdown-item" style="cursor: pointer" {{action (route-action 'logout')}} title="Logout">
-                {{svg-jar "sign-out" class="octicon align-middle" id="configurationButton"}} Logout
+                {{svg-jar "sign-out" class="octicon" id="configurationButton"}} Logout
               </a>
             {{/ddm.item}}
           {{/dd.menu}}

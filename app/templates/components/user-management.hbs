@@ -2,7 +2,7 @@
   {{#if (eq page "createSingleUser")}}
     <div class="col-12 mt-3 d-flex flex-column">
       <div>
-        {{#bs-button onClick=(action "openMainPage") type="secondary" outline=true}}
+        {{#bs-button onClick=(action "openMainPage") type="secondary" outline=true title="Back to User List"}}
           {{svg-jar "reply" class="octicon align-middle"}}
         {{/bs-button}}
       </div>
@@ -69,7 +69,7 @@
       <div class="mb-3">
         <div class="float-right">
           {{#bs-button onClick=(action "openCreateSingleUserPage") type="success" outline=true}}
-            {{svg-jar "person" class="octicon align-middle"}}{{svg-jar "plus-small" class="octicon align-middle"}} Add Users
+            {{svg-jar "person" class="octicon"}}{{svg-jar "plus-small" class="octicon"}} Add Users
           {{/bs-button}}
         </div>
       </div>
@@ -96,17 +96,17 @@
                 <td class="text-right">
                   {{#bs-dropdown as |dd|}}
                     {{#dd.button class="removecaret" size="sm" title="Options"}}
-                      {{svg-jar "kebab-vertical" class="octicon align-middle"}}
+                      {{svg-jar "kebab-vertical" class="octicon"}}
                     {{/dd.button}}
                     {{#dd.menu as |ddm|}}
                       {{#ddm.item}}
                         <a class="dropdown-item" style="cursor: pointer" title="Edit" {{action "openEditUserPage" user}}>
-                          {{svg-jar "pencil" class="octicon align-middle" id="edit-button"}} Edit
+                          {{svg-jar "pencil" class="octicon" id="edit-button"}} Edit
                         </a>
                       {{/ddm.item}}
                       {{#ddm.item}}
                         <a class="dropdown-item" style="cursor: pointer" title="Delete" {{action "deleteUser" user}}>
-                          {{svg-jar "x" class="octicon align-middle" id="delete-button"}} Delete
+                          {{svg-jar "x" class="octicon" id="delete-button"}} Delete
                         </a>
                       {{/ddm.item}}
                     {{/dd.menu}}
