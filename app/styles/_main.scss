@@ -188,3 +188,12 @@ li.ember-power-select-option {
 #userManagementPane table .dropdown-menu {
   @extend .dropdown-menu-right;
 }
+
+svg.octicon + span {
+  margin-left: 5px;
+}
+
+.d-flex-center {
+  align-items: center;
+  display: flex;
+}

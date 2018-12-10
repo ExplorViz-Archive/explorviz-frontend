@@ -12,17 +12,19 @@
         {{page-setup/navbar-octicons}}
 
         {{#nav.dropdown as |dd|}}
-          {{#dd.toggle}}
-            {{svg-jar "person" class="octicon"}} <b>{{username}}</b> <span class="caret"></span>
+          {{#dd.toggle class="d-flex-center"}}
+            {{svg-jar "person" class="octicon"}}<span><b>{{username}}</b></span><span class="caret"></span>
           {{/dd.toggle}}
           
           {{#dd.menu as |ddm|}}
             {{#ddm.item}}
-              {{#ddm.link-to "configuration"}}{{svg-jar "gear" class="octicon"}} Configuration{{/ddm.link-to}}
+              {{#ddm.link-to "configuration" class="d-flex-center" title="Configuration"}}
+                {{svg-jar "gear" class="octicon"}}<span>Configuration</span>
+              {{/ddm.link-to}}
             {{/ddm.item}}
             {{#ddm.item}}
-              <a class="dropdown-item" style="cursor: pointer" {{action (route-action 'logout')}} title="Logout">
-                {{svg-jar "sign-out" class="octicon" id="configurationButton"}} Logout
+              <a class="dropdown-item d-flex-center" style="cursor: pointer" {{action (route-action 'logout')}} title="Logout">
+                {{svg-jar "sign-out" class="octicon"}}<span>Logout</span>
               </a>
             {{/ddm.item}}
           {{/dd.menu}}

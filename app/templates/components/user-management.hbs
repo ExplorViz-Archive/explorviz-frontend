@@ -28,7 +28,7 @@
               {{item.descriptor}}
           {{/el.control}}
         {{/form.element}}
-        {{bs-button defaultText="Submit" type="primary" buttonType="submit"}}
+        {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
       {{/bs-form}}
     </div>
   {{else if (eq page "createMultipleUsers")}}
@@ -60,7 +60,7 @@
               {{item.descriptor}}
           {{/el.control}}
         {{/form.element}}
-        {{bs-button defaultText="Submit" type="primary" buttonType="submit"}}
+        {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
       {{/bs-form}}
     </div>
   {{else if (eq page "main")}}
@@ -68,8 +68,8 @@
       <h3>Users</h3>
       <div class="mb-3">
         <div class="float-right">
-          {{#bs-button onClick=(action "openCreateSingleUserPage") type="success" outline=true}}
-            {{svg-jar "person" class="octicon"}}{{svg-jar "plus-small" class="octicon"}} Add Users
+          {{#bs-button class="d-flex-center"onClick=(action "openCreateSingleUserPage") type="success" outline=true title="Add Users"}}
+            {{svg-jar "person" class="octicon"}}{{svg-jar "plus-small" class="octicon"}}<span>Add Users</span>
           {{/bs-button}}
         </div>
       </div>
@@ -95,18 +95,18 @@
                 </td>
                 <td class="text-right">
                   {{#bs-dropdown as |dd|}}
-                    {{#dd.button class="removecaret" size="sm" title="Options"}}
+                    {{#dd.button class="removecaret d-flex-center" size="sm" title="Options"}}
                       {{svg-jar "kebab-vertical" class="octicon"}}
                     {{/dd.button}}
                     {{#dd.menu as |ddm|}}
-                      {{#ddm.item}}
-                        <a class="dropdown-item" style="cursor: pointer" title="Edit" {{action "openEditUserPage" user}}>
-                          {{svg-jar "pencil" class="octicon" id="edit-button"}} Edit
+                      {{#ddm.item title="Edit"}}
+                        <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Edit" {{action "openEditUserPage" user}}>
+                          {{svg-jar "pencil" class="octicon" id="edit-button"}}<span>Edit</span>
                         </a>
                       {{/ddm.item}}
-                      {{#ddm.item}}
-                        <a class="dropdown-item" style="cursor: pointer" title="Delete" {{action "deleteUser" user}}>
-                          {{svg-jar "x" class="octicon" id="delete-button"}} Delete
+                      {{#ddm.item title="Delete"}}
+                        <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Delete" {{action "deleteUser" user}}>
+                          {{svg-jar "x" class="octicon" id="delete-button"}}<span>Delete</span>
                         </a>
                       {{/ddm.item}}
                     {{/dd.menu}}
@@ -138,7 +138,7 @@
               {{item.descriptor}}
           {{/el.control}}
         {{/form.element}}
-        {{bs-button defaultText="Submit" type="primary" buttonType="submit"}}
+        {{bs-button defaultText="Apply Changes" type="primary" buttonType="submit"}}
       {{/bs-form}}
     </div>
   {{/if}}
