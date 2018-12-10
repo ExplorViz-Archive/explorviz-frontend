@@ -68,6 +68,7 @@ export default Component.extend(AlertifyHandler, {
         const message = "User <b>" + userData.username + "</b> was created.";
         this.showAlertifyMessage(message);
         this.updateUserList();
+        this.actions.openMainPage.bind(this)();
       }, (reason) => { // failure
         const {title, detail} = reason.errors[0];
         this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
@@ -98,6 +99,7 @@ export default Component.extend(AlertifyHandler, {
             const message = `All <b>${numberOfUsers}</b> users were successfully created.`;
             this.showAlertifyMessage(message);
             this.updateUserList();
+            this.actions.openMainPage.bind(this)();
           } else if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
             const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
             this.showAlertifyMessage(message);
