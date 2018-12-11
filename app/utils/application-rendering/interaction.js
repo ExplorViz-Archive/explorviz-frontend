@@ -265,6 +265,7 @@ export default Object.extend(Evented, {
         this.get('highlighter').highlight(emberModel);
         this.get('renderingService').redrawScene();
 
+        /* 
         // retrive runtime informtions
         let traces = emberModel.getRuntimeInformations();
 
@@ -277,6 +278,7 @@ export default Object.extend(Evented, {
         this.set('additionalData.data.traces', traces);
         this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
         this.get('additionalData').openAdditionalData();
+        */
       }
 
     }
