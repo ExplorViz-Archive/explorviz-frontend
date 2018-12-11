@@ -15,11 +15,13 @@ export default Component.extend(AlertifyHandler, {
   roles: null,
   users: null,
   page: null,
+  showNewUsers: null,
 
   init(){
     this._super(...arguments);
     this.set('roles', []);
     this.set('page', 'main');
+    this.set('showNewUsers', false);
     this.updateUserList();
   },
 
@@ -37,6 +39,16 @@ export default Component.extend(AlertifyHandler, {
   },
 
   actions: {
+
+    printNewUsers() {
+
+    },
+
+    hideNewUsersCreatedModal() {
+      this.set('createdUsers', []);
+      this.set('showNewUsers', false);
+    },
+
     openCreateSingleUserPage() {
       this.set('page', 'createSingleUser');
     },
@@ -58,6 +70,18 @@ export default Component.extend(AlertifyHandler, {
     saveUser() {
       const userData = this.getProperties('username', 'password', 'roles_selected_single');
 
+      // check for valid input
+      if(!userData.username || userData.username.length === 0) {
+        this.showAlertifyMessage('Username cannot be empty.');
+        return;
+      } else if(!userData.password || userData.password.length === 0) {
+        this.showAlertifyMessage('Password cannot be empty.');
+        return;
+      } else if(!userData.roles_selected_single || userData.roles_selected_single.length === 0) {
+        this.showAlertifyMessage('User needs at least 1 role.');
+        return;
+      }
+
       const userRecord = this.get('store').createRecord('user', {
         username: userData.username,
         password: userData.password,
@@ -78,15 +102,28 @@ export default Component.extend(AlertifyHandler, {
     },
 
     saveMultipleUsers() {
-      const userData = this.getProperties('usernameprefix', 'numberofusers', 'roles_selected_multiple');
+      const PASSWORD_LENGTH = 8;
 
+      const userData = this.getProperties('usernameprefix', 'numberofusers', 'roles_selected_multiple');
       const numberOfUsers = parseInt(userData.numberofusers);
+
+      // check for valid input
+      if(!userData.usernameprefix || userData.usernameprefix.length === 0) {
+        this.showAlertifyMessage('Username prexif cannot be empty.');
+        return;
+      } else if(!userData.numberofusers || numberOfUsers <= 1) {
+        this.showAlertifyMessage('# of users must be at least 2.');
+        return;
+      } else if(!userData.roles_selected_multiple || userData.roles_selected_multiple.length === 0) {
+        this.showAlertifyMessage('Users need at least 1 role.');
+        return;
+      }
 
       let usersSuccess = [];
       let usersNoSuccess = [];
       for(let i = 1; i <= numberOfUsers; i++) {
         const username = `${userData.usernameprefix}_${i}`;
-        const password = "test123";
+        const password = this.generatePassword(PASSWORD_LENGTH);
         const userRecord = this.get('store').createRecord('user', {
           username,
           password,
@@ -94,16 +131,25 @@ export default Component.extend(AlertifyHandler, {
         });
 
         userRecord.save().then(() => { // success
-          usersSuccess.push(i);
+          usersSuccess.push(userRecord);
           if(usersSuccess.length === numberOfUsers) {
             const message = `All <b>${numberOfUsers}</b> users were successfully created.`;
             this.showAlertifyMessage(message);
             this.updateUserList();
             this.actions.openMainPage.bind(this)();
+
+            this.set('createdUsers', usersSuccess);
+            this.set('showNewUsers', true);
+
           } else if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
             const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
             this.showAlertifyMessage(message);
             this.updateUserList();
+            
+            if(usersSuccess.length > 0) {
+              this.set('createdUsers', usersSuccess);
+              this.set('showNewUsers', true);
+            }
           }
         }, () => { // failure
           usersNoSuccess.push(i);
@@ -112,6 +158,11 @@ export default Component.extend(AlertifyHandler, {
             const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
             this.showAlertifyMessage(message);
             this.updateUserList();
+
+            if(usersSuccess.length > 0) {
+              this.set('createdUsers', usersSuccess);
+              this.set('showNewUsers', true);
+            }
           }
         });
       }
@@ -123,6 +174,19 @@ export default Component.extend(AlertifyHandler, {
       const user = this.get('users').find( user => user.get('id') == userData.id_change);
 
       if(user) {
+
+        // check for valid input
+        if(!userData.username_change || userData.username_change.length === 0) {
+          this.showAlertifyMessage('Username cannot be empty.');
+          return;
+        } else if(userData.password_change && userData.password_change.length === 0) {
+          this.showAlertifyMessage('New password cannot be empty.');
+          return;
+        } else if(!userData.roles_change || userData.roles_change.length === 0) {
+          this.showAlertifyMessage('User needs at least 1 role.');
+          return;
+        }
+        
         if(user.get('username') !== userData.username_change)
           user.set('username', userData.username_change);
         
@@ -158,6 +222,15 @@ export default Component.extend(AlertifyHandler, {
         }
         );
     }
+  },
+
+  generatePassword(length) {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let retVal = "";
+    for(let i = 0, n = charset.length; i < length; ++i) {
+        retVal += charset.charAt(Math.floor(Math.random() * n));
+    }
+    return retVal;
   },
 
   getRoles: task(function * () {

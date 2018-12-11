@@ -1,4 +1,19 @@
 <div class="d-flex justify-content-center flex-grow-1 container" style="min-height: 0">
+  {{#bs-modal open=showNewUsers backdropClose=false keyboard=false onHidden=(action "hideNewUsersCreatedModal") as |modal|}}
+    {{#modal.header}}
+      <h4 class="modal-title">New Users</h4>
+    {{/modal.header}}
+    {{#modal.body}}
+      {{#each createdUsers as |user|}}
+        <p>ID: {{user.id}}</p>
+        <p>Username: {{user.username}}</p>
+        <p>Password: {{user.password}}</p>
+      {{/each}}
+    {{/modal.body}}
+    {{#modal.footer as |footer|}}
+      {{#bs-button onClick=(action "printNewUsers") type="primary"}}Print{{/bs-button}}
+    {{/modal.footer}}
+  {{/bs-modal}}
   {{#if (eq page "createSingleUser")}}
     <div class="col-12 mt-5 d-flex flex-column">
       <div>
@@ -18,8 +33,8 @@
         {{/bs-button-group}}
       </div>
       {{#bs-form formLayout=formLayout model=this onSubmit=(action "saveUser") as |form|}}
-        {{form.element controlType="text" label="Username" placeholder="Username" property="username" required=true}}
-        {{form.element controlType="password" label="Password" placeholder="Password" property="password" required=true}}
+        {{form.element controlType="text" label="Username" placeholder="Username" property="username"}}
+        {{form.element controlType="password" label="Password" placeholder="Password" property="password"}}
         {{#form.element controlType="power-select-multiple" property="roles_selected_single" label="Choose Roles" searchEnabled=false loadingMessage="Loading..." options=roles 
         as |el|}}
           {{#el.control 
@@ -50,8 +65,8 @@
         {{/bs-button-group}}
       </div>
       {{#bs-form formLayout=formLayout model=this onSubmit=(action "saveMultipleUsers") as |form|}}
-        {{form.element controlType="text" label="Username Prefix" placeholder="Username Prefix" property="usernameprefix" required=true}}
-        {{form.element controlType="number" label="Number of Users" placeholder="# of users" property="numberofusers" min="1" required=true}}
+        {{form.element controlType="text" label="Username Prefix" placeholder="Username Prefix" property="usernameprefix"}}
+        {{form.element controlType="number" label="Number of Users" placeholder="# of users" property="numberofusers"}}
         {{#form.element controlType="power-select-multiple" property="roles_selected_multiple" label="Choose Roles" searchEnabled=false loadingMessage="Loading..." options=roles 
         as |el|}}
           {{#el.control 
@@ -127,9 +142,9 @@
       </div>
       <h3 class="mt-4">Edit User</h3>
       {{#bs-form formLayout=formLayout model=this onSubmit=(action "saveUserChanges") as |form|}}
-        {{form.element controlType="number" label="ID" property="id_change" disabled=true required=true}}
-        {{form.element controlType="text" label="Username" placeholder="Enter New Username" property="username_change" required=true}}
-        {{form.element controlType="password" label="Password" placeholder="Enter New Password" property="password_change" required=false}}
+        {{form.element controlType="number" label="ID" property="id_change" disabled=true}}
+        {{form.element controlType="text" label="Username" placeholder="Enter New Username" property="username_change"}}
+        {{form.element controlType="password" label="Password" placeholder="Enter New Password" property="password_change"}}
         {{#form.element controlType="power-select-multiple" property="roles_change" label="Change Roles" searchEnabled=false loadingMessage="Loading..." options=roles 
         as |el|}}
           {{#el.control 
