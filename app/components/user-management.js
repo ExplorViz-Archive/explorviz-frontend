@@ -98,7 +98,7 @@ export default Component.extend(AlertifyHandler, {
         this.updateUserList();
         this.actions.openMainPage.bind(this)();
       }, (reason) => { // failure
-        showReasonErrorAlert(reason);
+        this.showReasonErrorAlert(reason);
         userRecord.deleteRecord();
         this.updateUserList();
       });
@@ -211,7 +211,7 @@ export default Component.extend(AlertifyHandler, {
           this.showAlertifyMessage(message);
           this.updateUserList();
         }, (reason) => { // failure
-          showReasonErrorAlert(reason);
+          this.showReasonErrorAlert(reason);
           this.updateUserList();
         }
         );
