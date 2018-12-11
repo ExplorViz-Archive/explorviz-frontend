@@ -10,6 +10,7 @@ export default Component.extend(AlertifyHandler, {
   tagName: '',
 
   store: service(),
+  printThis: service(),
 
   // rather request a list of roles from backend?
   roles: null,
@@ -41,7 +42,12 @@ export default Component.extend(AlertifyHandler, {
   actions: {
 
     printNewUsers() {
-
+      const selector = '#new-user-list';
+      const options = {
+        printDelay: 500
+      }
+ 
+      this.get('printThis').print(selector, options);
     },
 
     hideNewUsersCreatedModal() {
@@ -138,7 +144,7 @@ export default Component.extend(AlertifyHandler, {
             this.updateUserList();
             this.actions.openMainPage.bind(this)();
 
-            this.set('createdUsers', usersSuccess);
+            this.set('createdUsers', usersSuccess.sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1));
             this.set('showNewUsers', true);
 
           } else if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
