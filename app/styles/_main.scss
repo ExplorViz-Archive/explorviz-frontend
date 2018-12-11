@@ -53,14 +53,16 @@ body > .ember-view {
   display: none !important;
 }
 
-#discovery-details-tab {
+#discovery-details-tab,
+#configuration-tab {
   @extend .d-flex;
   @extend .flex-column;
   @extend .flex-grow-1;
   min-height: 0;
 }
 
-#discovery-details-tab > .tab-content {
+#discovery-details-tab > .tab-content,
+#configuration-tab > .tab-content {
   @extend .d-flex;
   flex: 1 1 100%;
   min-height: 0;
@@ -76,41 +78,17 @@ body > .ember-view {
   min-height: 0;
 }
 
+#configuration-tab > .tab-content > .tab-pane.active {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
 #discovery-details-tab table {
   @extend .mb-0;
 }
 
 //Additional classes
-
-.nav.navbar-nav > li > a{
-  cursor: pointer;
-  color: #777;
-  border-radius: 10px;
-}
-
-.nav.navbar-nav > li > a:hover{
-  background-color: #f1f1f1;
-  box-shadow: 0px 0px 0px 1px #e6e6e6;
-}
-
-#navbar-octicons:last-child{
-  border-right-style: solid;
-  border-right-color: #e6e6e6;
-  border-right-width: 1px;
-}
-
-.navbar-no-hover-effect {
-  background-color:transparent !important;
-  cursor: default !important;
-  box-shadow: none !important;
-}
-
-.navbar-button-height-fix {
-  height: 30px !important;
-  padding-top: 0px !important;
-  padding-bottom: 0px !important;
-  vertical-align: middle !important;
-}
 
 .scrollable-extension {
   max-height: 40%;
@@ -119,7 +97,6 @@ body > .ember-view {
 .container-shadow:hover {
   box-shadow: 0 2px 4px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
 }
-
 
 .container-word-wrap {
   word-break: break-word;
@@ -183,4 +160,40 @@ body > .ember-view {
 ::-webkit-scrollbar-thumb {
   background:#989898; 
   border-radius: 5px;
+}
+
+
+// Needed for firefox, since the scrollbar might else overlap the options
+li.ember-power-select-option {
+  padding-left: 8px;
+  padding-right: 22px;
+}
+
+.removecaret.dropdown-toggle::after {
+  display: none!important;
+}
+
+.explorviz-top-navbar .dropdown-item.active,
+.explorviz-top-navbar .dropdown-item:active {
+  color: #212529;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#userManagementPane table .dropdown-menu > .dropdown-item.active,
+#userManagementPane table .dropdown-menu > .dropdown-item:active {
+  color: #212529;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#userManagementPane table .dropdown-menu {
+  @extend .dropdown-menu-right;
+}
+
+svg.octicon + span {
+  margin-left: 5px;
+}
+
+.d-flex-center {
+  align-items: center;
+  display: flex;
 }

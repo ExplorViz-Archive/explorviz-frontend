@@ -14,7 +14,20 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
  
   },
 
+  urlForUpdateRecord(id) {
+    const baseUrl = this.buildURL();
+    return `${baseUrl}/v1/users/${id}`;
+  },
 
+  urlForDeleteRecord(id) {
+    const baseUrl = this.buildURL();
+    return `${baseUrl}/v1/users/${id}`;
+  },
+
+  urlForFindAll() {
+    const baseUrl = this.buildURL();
+    return `${baseUrl}/v1/users/`;
+  },
   // @Override
   urlForQueryRecord() {
     const baseUrl = this.buildURL();

@@ -14,6 +14,9 @@
         }}
         <div id="rendering">
           {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.latestLandscape}}
+            <!-- popup(s) -->
+          {{visualization/rendering/popups/popup-coordinator
+          popupData=additionalData.popupContent}}
         </div>
       {{else}}
         <div class="container-fluid">
@@ -38,18 +41,25 @@
         )
       }}
       <div id="rendering">
+        <div style="position: absolute!important" class="pl-1">
+          {{#bs-button onClick=(action "openLandscapeView") type="secondary" outline=true title="Back to Landscape"}}
+            {{svg-jar "reply" class="octicon align-middle"}}
+          {{/bs-button}}
+        </div>
         {{visualization/rendering/application-rendering latestApplication=landscapeRepo.latestApplication}}
+          <!-- popup(s) -->
+        {{visualization/rendering/popups/popup-coordinator
+        popupData=additionalData.popupContent}}
       </div>
     {{/if}}
-
-{{!-- 
+    {{!-- only output author name if an author exists 
     {{#if renderingService.showTimeline}}
-      {{time-shift}}
+       {{time-shift}}
     {{/if}}
---}}
-
+    --}}
   </div>
   <div class="col-4 hide" id="dataselection" >
     {{visualization/page-setup/data-selection}}
   </div>
 </div>
+

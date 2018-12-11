@@ -1,6 +1,7 @@
 import Object, { computed } from '@ember/object';
 import Evented from '@ember/object/evented';
 import { inject as service } from "@ember/service";
+import { getOwner } from '@ember/application';
 
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import PopUpHandler from
@@ -75,7 +76,7 @@ export default Object.extend(Evented, {
 
     // init PopUpHandler
     if (!this.get('popUpHandler')) {
-      this.set('popUpHandler', PopUpHandler.create());
+      this.set('popUpHandler', PopUpHandler.create(getOwner(this).ownerInjection()));
     }
 
     // init HoverHandler
@@ -254,7 +255,7 @@ export default Object.extend(Evented, {
           //this.get('highlighter').unhighlightAll();
         //}
 
-
+        this.get('highlighter').applyHighlighting();
         this.get('renderingService').redrawScene();
       } else if(emberModelName === "cumulatedclazzcommunication"){
         // remove old highlighting
@@ -273,7 +274,7 @@ export default Object.extend(Evented, {
         });
         
         // display trace selection component for communication
-        this.set('additionalData.data', traces);
+        this.set('additionalData.data.traces', traces);
         this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
         this.get('additionalData').openAdditionalData();
       }
@@ -388,10 +389,7 @@ export default Object.extend(Evented, {
       const emberModel = intersectedViewObj.object.userData.model;
 
       this.get('popUpHandler').showTooltip(
-        {
-          x: evt.detail.clientX,
-          y: evt.detail.clientY
-        },
+        mouse,
         emberModel
       );
 

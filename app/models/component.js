@@ -197,6 +197,10 @@ export default Draw3DNodeEntity.extend({
     if(components.objectAt(0)) {
       components.objectAt(0).applyDefaultOpenLayout();
     }
+  },
+
+  isVisible() {
+    return this.get('parentComponent.opened');
   }
 
 });

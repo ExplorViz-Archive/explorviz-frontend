@@ -74,7 +74,7 @@ export default Object.extend({
       if(parentMesh.userData.type === 'clazz' && labelString.length > 10){
         labelString = shortenString(labelString);
       }
-
+      
       var textGeo = new THREE.TextGeometry(labelString, {
         font : font,
         size : fontSize,

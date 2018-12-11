@@ -1,5 +1,6 @@
 import RenderingCore from './rendering-core';
 import { inject as service } from '@ember/service';
+import { getOwner } from '@ember/application';
 
 import THREE from "three";
 
@@ -70,7 +71,8 @@ export default RenderingCore.extend({
     };
 
     if (!this.get('interaction')) {
-      this.set('interaction', Interaction.create());
+      // owner necessary to inject service into util
+      this.set('interaction', Interaction.create(getOwner(this).ownerInjection()));
     }
 
     if (!this.get('imageLoader')) {

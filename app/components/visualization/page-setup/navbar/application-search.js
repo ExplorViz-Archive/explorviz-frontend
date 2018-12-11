@@ -2,6 +2,7 @@ import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import { task } from 'ember-concurrency';
 import { isBlank } from '@ember/utils';
+import $ from 'jquery';
 
 /* eslint-disable require-yield */
 export default Component.extend({
@@ -19,26 +20,26 @@ export default Component.extend({
   appComponents: null,
   appClazzes: null,
 
-  actions: {   
+  // @Override
+  didRender() {
+    this._super(...arguments);
 
-    emptyAction() {
-      // the onchange event of ember-power-select behaves badly
-      // we only use the onclose event, but a onchange callback function 
-      // is required
-    },
+    // remove arrow from ember-power-select
+    $('.ember-power-select-status-icon').remove();
+  },
 
-    onSelectClose(emberPowerSelectObject) {
 
-      if(!emberPowerSelectObject.highlighted || !emberPowerSelectObject.searchText) {
-        this.set('selectedEntity', null);
-        this.get('highlighter').unhighlightAll();
-        this.get('renderingService').redrawScene();
+  actions: {
+
+    onSelect(emberPowerSelectObject) {
+
+      if(!emberPowerSelectObject || emberPowerSelectObject.length < 1)
         return;
-      }
 
-      const entity = emberPowerSelectObject.highlighted;
+      this.get('highlighter').unhighlightAll();
+      this.get('renderingService').redrawScene();
 
-      this.set('selectedEntity', entity);
+      const entity = emberPowerSelectObject[0];
   
       const modelType = entity.constructor.modelName;
   
@@ -100,8 +101,13 @@ export default Component.extend({
       }
 
       const component = components.objectAt(i);
+
+      // skip foundation, since it can't be highlighted anyways
+      if(component.get('foundation'))
+        continue;
+
       const componentName = component.get('name').toLowerCase();
-      if(componentName.startsWith(searchString)) {
+      if(searchEngineFindsHit(componentName, searchString)) {
         entities.push(component);
         currentNumberOfCompNames++;
       }
@@ -117,12 +123,21 @@ export default Component.extend({
 
       const clazz = clazzes.objectAt(i);
       const clazzName = clazz.get('name').toLowerCase();
-      if(clazzName.startsWith(searchString)) {
+      if(searchEngineFindsHit(clazzName, searchString)) {
         entities.push(clazz);
         currentNumberOfClazzNames++;
       }  
     }
     return entities;
+
+    function searchEngineFindsHit(name, searchString) {
+      if(searchString.startsWith('*')) {
+        const searchName = searchString.substring(1);
+        return name.includes(searchName);
+      } else {
+        return name.startsWith(searchString);
+      }
+    }
   })
 
 
