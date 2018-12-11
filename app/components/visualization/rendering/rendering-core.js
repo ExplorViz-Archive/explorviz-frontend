@@ -48,6 +48,8 @@ export default Component.extend(Evented, THREEPerformance, {
   addionalData: service("additional-data"),
   renderingService: service(),
 
+  session: service(),
+
   scene : null,
   webglrenderer: null,
   camera: null,
@@ -128,6 +130,13 @@ export default Component.extend(Evented, THREEPerformance, {
     this.get('webglrenderer').setPixelRatio(window.devicePixelRatio);
     this.get('webglrenderer').setSize(width, height);
 
+    const { user } = this.get('session.data.authenticated');
+    const userSettings = user.get('settings');
+
+    if(userSettings["show-fps-counter"] === "false") {
+      this.removePerformanceMeasurement();
+    }
+
     // Rendering loop //
     function render() {
       
@@ -138,14 +147,14 @@ export default Component.extend(Evented, THREEPerformance, {
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
 
-      if(config.environment === "development" || config.environment === "akr") {
+      if(userSettings["show-fps-counter"] === "true") {
         self.get('threexStats').update(self.get('webglrenderer'));
         self.get('stats').begin();
       }
 
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
 
-      if(config.environment === "development" || config.environment === "akr") {
+      if(userSettings["show-fps-counter"] === "true") {
         self.get('stats').end();
       }
 
