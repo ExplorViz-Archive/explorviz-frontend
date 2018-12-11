@@ -68,10 +68,13 @@ export default Service.extend({
 
         let possibleExistingComm = checkBidirectionality(application, aggregatedComm);
 
-        if (possibleExistingComm.isBidirectional){
+        if (possibleExistingComm.isBidirectional) {
           let existingCommunication = possibleExistingComm.communication;
           let existingRequests = existingCommunication.get('requests');
+          let averageResponseTime =
+            (existingCommunication.get('averageResponseTime') + aggregatedComm.get('averageResponseTime')) / 2;
           existingCommunication.set('requests', existingRequests + aggregatedComm.get('totalRequests'));
+          existingCommunication.set('averageResponseTime', averageResponseTime);
           existingCommunication.set('isBidirectional', true);
 
           // Set relationship which does not yet exist
@@ -79,6 +82,7 @@ export default Service.extend({
         } else {
           let cumulatedComm = store.createRecord('cumulatedclazzcommunication', {});
           cumulatedComm.set('requests', aggregatedComm.get('totalRequests'));
+          cumulatedComm.set('averageResponseTime', aggregatedComm.get('averageResponseTime'));
           cumulatedComm.set('isBidirectional', false);
 
           // Set relationships

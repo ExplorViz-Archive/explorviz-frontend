@@ -4,7 +4,8 @@
     <tr>
       <th scope="col">TraceID</th>
       <th scope="col">Requests</th> 
-      <th scope="col">Trace Duration</th>
+      <th scope="col">Duration</th>
+      <th scope="col">Avg. Response Time</th>
     </tr>
   </thead>
   <tbody>
@@ -12,14 +13,16 @@
       {{#if trace.isSelected}}
         <tr {{action "traceSelected" trace.traceId}} style="cursor: pointer" bgcolor="#cc8a8a">
           <th scope="row">{{trace.traceId}}</th>
-          <td>{{trace.requests}}</td>
-          <td>{{trace.overallTraceDuration}}</td>
+          <td>{{trace.totalRequests}}</td>
+          <td>{{trace.totalTraceDuration}}</td>
+          <td>{{trace.averageResponseTime}}</td>
         </tr>
       {{else}}
         <tr {{action "traceSelected" trace.traceId}} style="cursor: pointer">
           <th scope="row">{{trace.traceId}}</th>
-          <td>{{trace.requests}}</td>
-          <td>{{trace.overallTraceDuration}}</td>
+          <td>{{trace.totalRequests}}</td>
+          <td>{{trace.totalTraceDuration}}</td>
+          <td>{{trace.averageResponseTime}}</td>
         </tr>
       {{/if}}
     {{/each}}

@@ -14,7 +14,8 @@ const { attr, belongsTo, hasMany } = DS;
  */
 export default DrawEdgeEntity.extend({
 
-  totalRequests: attr(),
+  totalRequests: attr('number'),
+  averageResponseTime: attr('number'),
 
   sourceClazz: belongsTo('clazz', {
     inverse: null

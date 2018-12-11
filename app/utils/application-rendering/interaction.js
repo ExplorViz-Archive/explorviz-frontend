@@ -265,20 +265,14 @@ export default Object.extend(Evented, {
         this.get('highlighter').highlight(emberModel);
         this.get('renderingService').redrawScene();
 
-        /* 
-        // retrive runtime informtions
-        let traces = emberModel.getRuntimeInformations();
 
-        // initialize every trace as unselected
-        traces.forEach( (trace) => {
-          trace.set('isSelected', false);
-        });
+        let traces = emberModel.getContainedTraces();
         
         // display trace selection component for communication
         this.set('additionalData.data.traces', traces);
         this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
         this.get('additionalData').openAdditionalData();
-        */
+        
       }
 
     }

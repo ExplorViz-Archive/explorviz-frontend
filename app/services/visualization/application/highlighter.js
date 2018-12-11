@@ -81,7 +81,12 @@ export default Service.extend({
       selectedClazzes.add(highlightedEntity.get('targetClazz'));
     } else if (emberModelName === "cumulatedclazzcommunication" && this.get('isTrace')){ // add all adjacent clazzes of trace
       this.get('application.cumulatedClazzCommunications').forEach((communication) => {
-        if (communication.containsTrace(this.get('traceId'))){
+        let traces = communication.getContainedTraces();
+        let traceIds = new Set();
+        traces.forEach( (trace) => {
+          traceIds.add(trace.get('traceId'));
+        });
+        if (traceIds.has(this.get('traceId'))){
           selectedClazzes.add(communication.get('sourceClazz'));
           selectedClazzes.add(communication.get('targetClazz'));
         }

@@ -83,7 +83,7 @@ export default Object.extend({
     let clazzName = clazz.get('name');
     let instanceCount = clazz.get('instanceCount');
 
-    const clazzCommunications = clazz.get('outgoingClazzCommunications');
+    const clazzCommunications = clazz.get('clazzCommunications');
     let operationCount = clazzCommunications.get('length');
 
     let popupData = {
@@ -95,7 +95,6 @@ export default Object.extend({
       }
   
       return popupData;
-
   },
 
   buildCommunicationData(cumulatedClazzCommunication) {
@@ -104,10 +103,7 @@ export default Object.extend({
     // TODO: check if this is correct way to check for bidirectionality
     const isBidirectional = cumulatedClazzCommunication.get("isBidirectional");
 
-    // Formatted values for the clazzCommunication popup
-    // const formatFactor = 1000; // convert from ns to ms
-    // const avgAverageResponseTime = round(runtimeStats.avgAverageResponseTime / formatFactor, 0);
-    // const avgOverallTraceDuration = round(runtimeStats.avgOverallTraceDuration / formatFactor, 0);
+    const traces = cumulatedClazzCommunication.getContainedTraces();
 
     let popupData = {
       isShown: true,
@@ -116,9 +112,8 @@ export default Object.extend({
       targetClazz: cumulatedClazzCommunication.get("targetClazz").get("name"),
       isBidirectional: isBidirectional,
       requests: cumulatedClazzCommunication.get("requests"),
-      //traces: runtimeStats.involvedTraces.length,
-      //responseTime: avgAverageResponseTime,
-      //duration: avgOverallTraceDuration,
+      traces: traces.size,
+      responseTime: cumulatedClazzCommunication.get("averageResponseTime"),
     }
 
     return popupData;

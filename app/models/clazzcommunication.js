@@ -17,7 +17,7 @@ export default DrawEdgeEntity.extend({
   operationName: attr('string'),
   requests: attr(),
 
-  traces: hasMany('trace', {
+  tracesteps: hasMany('tracestep', {
     inverse: null
   }),
 
