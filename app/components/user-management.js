@@ -109,7 +109,7 @@ export default Component.extend(AlertifyHandler, {
 
       // check for valid input
       if(!userData.usernameprefix || userData.usernameprefix.length === 0) {
-        this.showAlertifyMessage('Username prexif cannot be empty.');
+        this.showAlertifyMessage('Username prefix cannot be empty.');
         return;
       } else if(!userData.numberofusers || numberOfUsers <= 1) {
         this.showAlertifyMessage('# of users must be at least 2.');
@@ -174,7 +174,6 @@ export default Component.extend(AlertifyHandler, {
       const user = this.get('users').find( user => user.get('id') == userData.id_change);
 
       if(user) {
-
         // check for valid input
         if(!userData.username_change || userData.username_change.length === 0) {
           this.showAlertifyMessage('Username cannot be empty.');
