@@ -12,7 +12,6 @@ export default Component.extend(AlertifyHandler, {
   store: service(),
   printThis: service(),
 
-  // rather request a list of roles from backend?
   roles: null,
   users: null,
   page: null,
@@ -40,7 +39,6 @@ export default Component.extend(AlertifyHandler, {
   },
 
   actions: {
-
     printNewUsers() {
       const selector = '#new-user-list';
       const options = {
@@ -100,8 +98,7 @@ export default Component.extend(AlertifyHandler, {
         this.updateUserList();
         this.actions.openMainPage.bind(this)();
       }, (reason) => { // failure
-        const {title, detail} = reason.errors[0];
-        this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+        showReasonErrorAlert(reason);
         userRecord.deleteRecord();
         this.updateUserList();
       });
@@ -144,8 +141,7 @@ export default Component.extend(AlertifyHandler, {
             this.updateUserList();
             this.actions.openMainPage.bind(this)();
 
-            this.set('createdUsers', usersSuccess.sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1));
-            this.set('showNewUsers', true);
+            this.showCreatedUsers(usersSuccess);
 
           } else if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
             const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
@@ -153,8 +149,7 @@ export default Component.extend(AlertifyHandler, {
             this.updateUserList();
             
             if(usersSuccess.length > 0) {
-              this.set('createdUsers', usersSuccess);
-              this.set('showNewUsers', true);
+              this.showCreatedUsers(usersSuccess);
             }
           }
         }, () => { // failure
@@ -166,8 +161,7 @@ export default Component.extend(AlertifyHandler, {
             this.updateUserList();
 
             if(usersSuccess.length > 0) {
-              this.set('createdUsers', usersSuccess);
-              this.set('showNewUsers', true);
+              this.showCreatedUsers(usersSuccess);
             }
           }
         });
@@ -184,9 +178,6 @@ export default Component.extend(AlertifyHandler, {
         if(!userData.username_change || userData.username_change.length === 0) {
           this.showAlertifyMessage('Username cannot be empty.');
           return;
-        } else if(userData.password_change && userData.password_change.length === 0) {
-          this.showAlertifyMessage('New password cannot be empty.');
-          return;
         } else if(!userData.roles_change || userData.roles_change.length === 0) {
           this.showAlertifyMessage('User needs at least 1 role.');
           return;
@@ -195,7 +186,7 @@ export default Component.extend(AlertifyHandler, {
         if(user.get('username') !== userData.username_change)
           user.set('username', userData.username_change);
         
-        if(userData.password_change !== null && userData.password_change !== '')
+        if(userData.password_change && userData.password_change !== '')
           user.set('password', userData.password_change);
   
         user.set('roles', userData.roles_change);
@@ -206,8 +197,7 @@ export default Component.extend(AlertifyHandler, {
             this.showAlertifyMessage(message);
             this.actions.openMainPage.bind(this)();
           }, (reason) => {
-            const {title, detail} = reason.errors[0];
-            this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+            this.showReasonErrorAlert(reason);
           });
       } else {
         this.showAlertifyMessage(`User not found.`);
@@ -221,12 +211,21 @@ export default Component.extend(AlertifyHandler, {
           this.showAlertifyMessage(message);
           this.updateUserList();
         }, (reason) => { // failure
-          const {title, detail} = reason.errors[0];
-          this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+          showReasonErrorAlert(reason);
           this.updateUserList();
         }
         );
     }
+  },
+
+  showReasonErrorAlert(reason) {
+    const {title, detail} = reason.errors[0];
+    this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+  },
+
+  showCreatedUsers(userList) {
+    this.set('createdUsers', userList.sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1));
+    this.set('showNewUsers', true);
   },
 
   generatePassword(length) {
