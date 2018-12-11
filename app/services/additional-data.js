@@ -8,6 +8,11 @@ export default Service.extend(Evented, {
   popupContent: null,
   data: null,
 
+  init(){
+    this._super(...arguments);
+    this.set('data', {});
+  },
+
   addComponent(path) {
     if (this.get('shownComponents') == null) {
       this.set('shownComponents', []);
@@ -35,7 +40,7 @@ export default Service.extend(Evented, {
     if (this.get('shownComponents')) {
       this.set('shownComponents.length', 0);
     }
-    this.set('data', null);
+    this.set('data', {});
   },
 
   closeAdditionalData() {
