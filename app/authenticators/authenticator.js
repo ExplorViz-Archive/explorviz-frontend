@@ -37,11 +37,17 @@ export default BaseAuthenticator.extend({
     const self = this;
     const url = config.APP.API_ROOT;
 
+    // TODO refactor with Ember-Data
+
     return new RSVP.Promise(function(resolve, reject) {
+
       function fulfill(token) {
+        const { rawUserData } = data;
+        const userRecord = self.get('store').push(rawUserData);
         resolve({
-          access_token: token,
-          username: data.username
+          access_token: token.token,
+          user: userRecord,
+          rawUserData: rawUserData
         });
       }
   
@@ -64,7 +70,7 @@ export default BaseAuthenticator.extend({
           method: 'POST',
           contentType: 'application/json; charset=utf-8',
           headers: {
-            'Authorization': `Bearer ${data.access_token.token}`
+            'Authorization': `Bearer ${data.access_token}`
           }
         }).then(fulfill, failure);
 
@@ -84,6 +90,10 @@ export default BaseAuthenticator.extend({
   authenticate(user) {    
     const url = config.APP.API_ROOT;
 
+    const self = this;
+
+    // TODO refactor with Ember-Data
+
     return this.get('ajax').request(`${url}/v1/tokens/`, {
       method: 'POST',
       contentType: 'application/json; charset=utf-8',
@@ -93,10 +103,14 @@ export default BaseAuthenticator.extend({
       }
     }).then(fulfill, failure);
 
-    function fulfill(token) {
+    function fulfill(userPayload) {
+      const userRecord = self.get('store').push(userPayload);
       return resolve({
-        access_token: token,
-        username: user.identification
+        // rawUserData is necessary, because the userRecord is transformed 
+        // to typical JSON on page refresh (see "restore" above)
+        access_token: userRecord.get('token'),
+        user: userRecord,
+        rawUserData: userPayload
       });
     }
 

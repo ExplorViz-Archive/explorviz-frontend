@@ -26,7 +26,7 @@ export default Service.extend({
     // Replace if original EventSource API allows HTTP-Headers
     const es = new EventSourcePolyfill(`${url}/v1/landscapes/broadcast/`, {
       headers: {
-        Authorization: `Bearer ${access_token.token}`
+        Authorization: `Bearer ${access_token}`
       }
     });
 

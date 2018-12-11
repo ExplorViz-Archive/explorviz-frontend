@@ -10,7 +10,7 @@ export default Component.extend({
   session: service('session'),
 
   username: computed(function(){
-    return this.get('session.session.content.authenticated.username');
+    return this.get('session.session.content.authenticated.user.username');
   })
 
 });
