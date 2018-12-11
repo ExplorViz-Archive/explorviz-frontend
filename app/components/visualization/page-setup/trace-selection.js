@@ -17,7 +17,7 @@ export default Component.extend({
 
     actions: {
         traceSelected(traceId) {
-            let traces = this.get('additionalData.data');
+            let traces = this.get('additionalData.data.traces');
 
             // mark selected trace
             traces.forEach((trace) => {
@@ -28,7 +28,7 @@ export default Component.extend({
                 }
             });
 
-            this.set('additionalData.data', traces);
+            this.set('additionalData.data.traces', traces);
 
             this.get('highlighter').highlightTrace(traceId);
             this.get('highlighter').applyHighlighting();

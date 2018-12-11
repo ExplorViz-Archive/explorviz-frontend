@@ -274,7 +274,7 @@ export default Object.extend(Evented, {
         });
         
         // display trace selection component for communication
-        this.set('additionalData.data', traces);
+        this.set('additionalData.data.traces', traces);
         this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
         this.get('additionalData').openAdditionalData();
       }
