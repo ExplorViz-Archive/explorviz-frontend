@@ -58,11 +58,18 @@ export default Component.extend(AlertifyHandler, {
     saveUser() {
       const userData = this.getProperties('username', 'password', 'roles_selected_single');
 
+      if(!userData.username || !userData.password || !userData.roles_selected_single) {
+        this.showAlertifyMessage("Fill out all data before submitting.");
+        return;
+      }
+
       const userRecord = this.get('store').createRecord('user', {
         username: userData.username,
         password: userData.password,
         roles: userData.roles_selected_single
       });
+
+      
 
       userRecord.save().then(() => { // success
         const message = "User <b>" + userData.username + "</b> was created.";
@@ -81,6 +88,11 @@ export default Component.extend(AlertifyHandler, {
       const userData = this.getProperties('usernameprefix', 'numberofusers', 'roles_selected_multiple');
 
       const numberOfUsers = parseInt(userData.numberofusers);
+
+      if(!userData.usernameprefix || !numberOfUsers || !userData.roles_selected_multiple) {
+        this.showAlertifyMessage("Fill out all data before submitting.");
+        return;
+      }
 
       let usersSuccess = [];
       let usersNoSuccess = [];
