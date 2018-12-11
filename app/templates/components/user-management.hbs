@@ -20,10 +20,14 @@
       {{#bs-form formLayout=formLayout model=this onSubmit=(action "saveUser") as |form|}}
         {{form.element controlType="text" label="Username" placeholder="Username" property="username" required=true}}
         {{form.element controlType="password" label="Password" placeholder="Password" property="password" required=true}}
-        {{#form.element controlType="power-select-multiple" property="roles_selected_single" label="Choose Roles" searchEnabled=false loadingMessage="Loading..." options=roles 
+        {{#form.element controlType="power-select-multiple" property="roles_selected_single" label="Choose Roles" options=roles 
         as |el|}}
           {{#el.control 
+            placeholder="Choose roles"
+            loadingMessage="loading..."
             onopen=(perform getRoles)
+            searchEnabled=false
+            searchField="default"
             as |item|}}
               {{item.descriptor}}
           {{/el.control}}
@@ -52,10 +56,14 @@
       {{#bs-form formLayout=formLayout model=this onSubmit=(action "saveMultipleUsers") as |form|}}
         {{form.element controlType="text" label="Username Prefix" placeholder="Username Prefix" property="usernameprefix" required=true}}
         {{form.element controlType="number" label="Number of Users" placeholder="# of users" property="numberofusers" min="1" required=true}}
-        {{#form.element controlType="power-select-multiple" property="roles_selected_multiple" label="Choose Roles" searchEnabled=false loadingMessage="Loading..." options=roles 
+        {{#form.element controlType="power-select-multiple" property="roles_selected_multiple" label="Choose Roles" options=roles 
         as |el|}}
           {{#el.control 
-            onopen=(perform getRoles)  
+            placeholder="Choose roles"
+            loadingMessage="loading..."
+            onopen=(perform getRoles)
+            searchEnabled=false
+            searchField="default" 
             as |item|}}
               {{item.descriptor}}
           {{/el.control}}
