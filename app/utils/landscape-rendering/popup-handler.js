@@ -159,7 +159,7 @@ export default Object.extend({
       targetApplication: targetApplicationName,
       requests: communication.get('requests'),
       technology: technology,
-      duration: communication.get('averageResponseTime') + 'ns',
+      duration: communication.get('averageResponseTime'),
     }
 
     return popupData;
