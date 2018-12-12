@@ -21,6 +21,7 @@ export default Model.extend({
 
 	roles: hasMany('role'),
 
+	// simple object, no Ember record
 	settings: attr()
 
 });

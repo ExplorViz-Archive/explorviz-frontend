@@ -23,6 +23,9 @@ export default Component.extend(AlertifyHandler, {
     this.set('page', 'main');
     this.set('showNewUsers', false);
     this.updateUserList();
+
+    // for testing
+    this.get('store').findRecord('usersetting', 1);
   },
 
   updateUserList() {

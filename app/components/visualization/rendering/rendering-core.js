@@ -4,7 +4,6 @@ import Evented from '@ember/object/evented';
 import { Promise } from 'rsvp';
 
 import THREE from "three";
-import config from 'explorviz-frontend/config/environment';
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
 import debugLogger from 'ember-debug-logger';
 import $ from 'jquery';
@@ -133,7 +132,7 @@ export default Component.extend(Evented, THREEPerformance, {
     const { user } = this.get('session.data.authenticated');
     const userSettings = user.get('settings');
 
-    if(userSettings["show-fps-counter"] === "false") {
+    if(!userSettings["show-fps-counter"]) {
       this.removePerformanceMeasurement();
     }
 
@@ -147,14 +146,14 @@ export default Component.extend(Evented, THREEPerformance, {
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
 
-      if(userSettings["show-fps-counter"] === "true") {
+      if(userSettings["show-fps-counter"]) {
         self.get('threexStats').update(self.get('webglrenderer'));
         self.get('stats').begin();
       }
 
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
 
-      if(userSettings["show-fps-counter"] === "true") {
+      if(userSettings["show-fps-counter"]) {
         self.get('stats').end();
       }
 
