@@ -113,10 +113,16 @@ export default Object.extend({
       isBidirectional: isBidirectional,
       requests: drawableClazzCommunication.get("requests"),
       traces: traces.size,
-      responseTime: drawableClazzCommunication.get("averageResponseTime"),
+      responseTime: round(drawableClazzCommunication.get("averageResponseTime"), 2),
     }
 
     return popupData;
+
+    
+    function round(value, precision) {
+      let multiplier = Math.pow(10, precision || 0);
+      return Math.round(value * multiplier) / multiplier;
+    } 
   },
 
 });
