@@ -55,6 +55,9 @@ export default DrawNodeEntity.extend({
     this.get('drawableClazzCommunications').forEach((communication) => {
       communication.unhighlight();
     });
+    this.get('traces').forEach((trace) => {
+      trace.unhighlight();
+    });
   },
 
   contains(emberEntity) {

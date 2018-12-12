@@ -18,9 +18,14 @@ export default BaseEntity.extend({
   totalRequests: attr('number'),
   totalTraceDuration: attr('number'),
   averageResponseTime: attr('number'),
+  isSelected: attr('boolean', { defaultValue: false}),
 
   traceSteps: hasMany('tracestep', {
     inverse: 'parentTrace'
   }),
+
+  unhighlight() {
+    this.set('isSelected', false);
+  },
 
 });

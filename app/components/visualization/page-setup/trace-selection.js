@@ -28,11 +28,7 @@ export default Component.extend({
                 }
             });
 
-            // Necessary?
-            // this.set('additionalData.data.traces', traces);
-
             this.get('highlighter').highlightTrace(traceId);
-            // this.get('highlighter').applyHighlighting();
             this.get('renderingService').redrawScene();
         }
     },
