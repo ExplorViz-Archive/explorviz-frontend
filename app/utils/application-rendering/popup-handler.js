@@ -23,7 +23,7 @@ export default Object.extend({
         case "clazz":
             popupData = this.buildClazzData(emberModel);
             break;
-        case "cumulatedclazzcommunication":
+        case "drawableclazzcommunication":
             popupData = this.buildCommunicationData(emberModel);
             break;
         default:
@@ -97,23 +97,23 @@ export default Object.extend({
       return popupData;
   },
 
-  buildCommunicationData(cumulatedClazzCommunication) {
-    // let runtimeStats = getRuntimeInformations(cumulatedClazzCommunication);
+  buildCommunicationData(drawableClazzCommunication) {
+    // let runtimeStats = getRuntimeInformations(drawableClazzCommunication);
 
     // TODO: check if this is correct way to check for bidirectionality
-    const isBidirectional = cumulatedClazzCommunication.get("isBidirectional");
+    const isBidirectional = drawableClazzCommunication.get("isBidirectional");
 
-    const traces = cumulatedClazzCommunication.getContainedTraces();
+    const traces = drawableClazzCommunication.getContainedTraces();
 
     let popupData = {
       isShown: true,
       popupType: "clazzCommunication",
-      sourceClazz: cumulatedClazzCommunication.get("sourceClazz").get("name"),
-      targetClazz: cumulatedClazzCommunication.get("targetClazz").get("name"),
+      sourceClazz: drawableClazzCommunication.get("sourceClazz").get("name"),
+      targetClazz: drawableClazzCommunication.get("targetClazz").get("name"),
       isBidirectional: isBidirectional,
-      requests: cumulatedClazzCommunication.get("requests"),
+      requests: drawableClazzCommunication.get("requests"),
       traces: traces.size,
-      responseTime: cumulatedClazzCommunication.get("averageResponseTime"),
+      responseTime: drawableClazzCommunication.get("averageResponseTime"),
     }
 
     return popupData;

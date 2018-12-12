@@ -257,7 +257,7 @@ export default Object.extend(Evented, {
 
         this.get('highlighter').applyHighlighting();
         this.get('renderingService').redrawScene();
-      } else if(emberModelName === "cumulatedclazzcommunication"){
+      } else if(emberModelName === "drawableclazzcommunication"){
         // remove old highlighting
         this.get('highlighter').unhighlightAll();
 
@@ -312,7 +312,7 @@ export default Object.extend(Evented, {
 
       if(emberModelName === "component" && emberModel.get('foundation') === false ||
          emberModelName === "clazz" || 
-         emberModelName === "cumulatedclazzcommunication"){
+         emberModelName === "drawableclazzcommunication"){
 
         this.get('highlighter').highlight(emberModel);
       }

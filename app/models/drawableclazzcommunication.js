@@ -4,10 +4,10 @@ import DrawEdgeEntity from './drawedgeentity';
 const { attr, belongsTo, hasMany } = DS;
 
 /**
- * Ember model for an CumulatedClazzCommunication
+ * Ember model for a DrawableClazzCommunication
  * Bi-directional between two clazzes
  *
- * @class CumulatedClazzCommunication-Model
+ * @class DrawableClazzCommunication-Model
  * @extends DrawEdgeEntity-Model
  *
  * @module explorviz

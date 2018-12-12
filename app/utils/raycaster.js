@@ -13,7 +13,7 @@ export default Object.extend({
     this._super(...arguments);
 
     this.set('landscapeObjects', ['system', 'nodegroup', 'node', 'application', 'applicationcommunication']);
-    this.set('applicationObjects', ['component', 'clazz', 'cumulatedclazzcommunication']);
+    this.set('applicationObjects', ['component', 'clazz', 'drawableclazzcommunication']);
     this.set('objectCatalog', 'landscapeObjects');
     this.set('raycaster', new THREE.Raycaster());
   },

@@ -202,16 +202,16 @@ export default RenderingCore.extend({
 
     const viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
 
-    const cumulatedClazzCommunications = emberApplication.get('cumulatedClazzCommunications');
+    const drawableClazzCommunications = emberApplication.get('drawableClazzCommunications');
 
-    cumulatedClazzCommunications.forEach((cumuClazzCommu) => {
-      if (cumuClazzCommu.get('startPoint') && cumuClazzCommu.get('endPoint')) {
+    drawableClazzCommunications.forEach((drawableClazzComm) => {
+      if (drawableClazzComm.get('startPoint') && drawableClazzComm.get('endPoint')) {
         const start = new THREE.Vector3();
-        start.subVectors(cumuClazzCommu.get('startPoint'), viewCenterPoint);
+        start.subVectors(drawableClazzComm.get('startPoint'), viewCenterPoint);
         start.multiplyScalar(0.5);
 
         const end = new THREE.Vector3();
-        end.subVectors(cumuClazzCommu.get('endPoint'), viewCenterPoint);
+        end.subVectors(drawableClazzComm.get('endPoint'), viewCenterPoint);
         end.multiplyScalar(0.5);
 
         // horizontal communication lines
@@ -224,33 +224,33 @@ export default RenderingCore.extend({
         let transparent = false;
         let opacityValue = 1.0;
 
-        if(cumuClazzCommu.get('state') === "TRANSPARENT") {
+        if(drawableClazzComm.get('state') === "TRANSPARENT") {
           transparent = true;
           opacityValue = 0.3;
         }
 
         const material = new THREE.MeshBasicMaterial({
-          color : cumuClazzCommu.get('highlighted') ? new THREE.Color(0xFF0000) : new THREE.Color(0xf49100), // either red or orange, depending on highlighting status
+          color : drawableClazzComm.get('highlighted') ? new THREE.Color(0xFF0000) : new THREE.Color(0xf49100), // either red or orange, depending on highlighting status
           opacity : opacityValue,
           transparent : transparent
         });
 
-        const thickness = cumuClazzCommu.get('lineThickness') * 0.3;
+        const thickness = drawableClazzComm.get('lineThickness') * 0.3;
 
         const pipe = this.cylinderMesh(start, end, material, thickness);
 
 
 
-        pipe.userData.model = cumuClazzCommu;
+        pipe.userData.model = drawableClazzComm;
 
         // indicate communication for direction for (indirectly) highlighted communication
-        if (cumuClazzCommu.get('highlighted') ||
-            cumuClazzCommu.get('sourceClazz.highlighted') || 
-            cumuClazzCommu.get('targetClazz.highlighted')){
+        if (drawableClazzComm.get('highlighted') ||
+            drawableClazzComm.get('sourceClazz.highlighted') || 
+            drawableClazzComm.get('targetClazz.highlighted')){
 
               // check for recursion
-              if ( cumuClazzCommu.get('sourceClazz.fullQualifiedName') == 
-                   cumuClazzCommu.get('targetClazz.fullQualifiedName') ){
+              if ( drawableClazzComm.get('sourceClazz.fullQualifiedName') == 
+                   drawableClazzComm.get('targetClazz.fullQualifiedName') ){
                 // TODO: draw a circular arrow or something alike
               } else {
               // keep track of drawn arrow to prevent duplicates
@@ -261,8 +261,8 @@ export default RenderingCore.extend({
               self.addCommunicationArrow(start, end, arrowThickness);
 
               // check for bidirectional communication
-              cumuClazzCommu.get('aggregatedClazzCommunications').forEach( (aggrComm) => {
-                if ((cumuClazzCommu.get('sourceClazz.fullQualifiedName') === aggrComm.get('targetClazz.fullQualifiedName') && !drewSecondArrow)){
+              drawableClazzComm.get('aggregatedClazzCommunications').forEach( (aggrComm) => {
+                if ((drawableClazzComm.get('sourceClazz.fullQualifiedName') === aggrComm.get('targetClazz.fullQualifiedName') && !drewSecondArrow)){
                   self.addCommunicationArrow(end, start, arrowThickness);
                   drewSecondArrow = true;
                 }

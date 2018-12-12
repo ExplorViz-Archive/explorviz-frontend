@@ -43,7 +43,7 @@ export default Service.extend({
         // https://github.com/emberjs/data/issues/3455
         self.set('latestJsonLandscape', jsonLandscape);
         const landscapeRecord = self.get('store').push(jsonLandscape);
-        self.addCumulatedCommunication();
+        self.addDrawableCommunication();
         self.set('landscapeRepo.latestLandscape', landscapeRecord);
         self.get('landscapeRepo').triggerLatestLandscapeUpdate();
         self.get('timestampRepo').addTimestampToList(landscapeRecord.get('timestamp'));
@@ -54,17 +54,17 @@ export default Service.extend({
 
   // Computes the (possibly) bidirectional communication and saves 
   // it as a model. Later used to draw communication between clazzes
-  addCumulatedCommunication() {
+  addDrawableCommunication() {
     let store = this.get('store');
 
     // Remove outdated communication
     // TODO: Reuse old data to persist models for drawing
-    store.unloadAll('cumulatedclazzcommunication');
+    store.unloadAll('drawableclazzcommunication');
 
     let applications = store.peekAll('application');
     applications.forEach((application) => {
       // Reset relationship in application
-      application.set('cumulatedClazzCommunications', []);
+      application.set('drawableClazzCommunications', []);
 
 
       let aggregatedComms = application.get('aggregatedClazzCommunications');
@@ -84,30 +84,30 @@ export default Service.extend({
           // Set relationship which does not yet exist
           existingCommunication.get('aggregatedClazzCommunications').addObject(aggregatedComm);
         } else {
-          let cumulatedComm = store.createRecord('cumulatedclazzcommunication', {});
-          cumulatedComm.set('requests', aggregatedComm.get('totalRequests'));
-          cumulatedComm.set('averageResponseTime', aggregatedComm.get('averageResponseTime'));
-          cumulatedComm.set('isBidirectional', false);
+          let drawableComm = store.createRecord('drawableclazzcommunication', {});
+          drawableComm.set('requests', aggregatedComm.get('totalRequests'));
+          drawableComm.set('averageResponseTime', aggregatedComm.get('averageResponseTime'));
+          drawableComm.set('isBidirectional', false);
 
           // Set relationships
-          cumulatedComm.set('sourceClazz', aggregatedComm.get('sourceClazz'));
-          cumulatedComm.set('targetClazz', aggregatedComm.get('targetClazz'));
-          cumulatedComm.get('aggregatedClazzCommunications').addObject(aggregatedComm);
-          application.get('cumulatedClazzCommunications').addObject(cumulatedComm);
+          drawableComm.set('sourceClazz', aggregatedComm.get('sourceClazz'));
+          drawableComm.set('targetClazz', aggregatedComm.get('targetClazz'));
+          drawableComm.get('aggregatedClazzCommunications').addObject(aggregatedComm);
+          application.get('drawableClazzCommunications').addObject(drawableComm);
         }
       });
     });
 
     // Check for a given aggregated communication is there already exists a corresponding
-    // cumulated communication which would imply bidirectionality
+    // drawable communication which would imply bidirectionality
     function checkBidirectionality(application, aggregatedComm){
-      let cumulatedComms = application.get('cumulatedClazzCommunications');
+      let drawableComms = application.get('drawableClazzCommunications');
       let possibleCommunication = {isBidirectional: false, communication: null};
-      cumulatedComms.forEach( (cumulatedComm) => {
-        // check if cumulatedCommunication with reversed communication is already created
-        if (aggregatedComm.get('sourceClazz.id') == cumulatedComm.get('targetClazz.id') &&
-            aggregatedComm.get('targetClazz.id') == cumulatedComm.get('sourceClazz.id')){
-              possibleCommunication = {isBidirectional: true, communication: cumulatedComm};
+      drawableComms.forEach( (drawableComm) => {
+        // check if drawableCommunication with reversed communication is already created
+        if (aggregatedComm.get('sourceClazz.id') == drawableComm.get('targetClazz.id') &&
+            aggregatedComm.get('targetClazz.id') == drawableComm.get('sourceClazz.id')){
+              possibleCommunication = {isBidirectional: true, communication: drawableComm};
         }
       });
       return possibleCommunication;

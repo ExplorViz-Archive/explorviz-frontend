@@ -41,7 +41,7 @@ export default DrawNodeEntity.extend({
   }),
 
   // list of aggregated clazzCommunication for rendering purposes
-  cumulatedClazzCommunications: hasMany('cumulatedclazzcommunication', {
+  drawableClazzCommunications: hasMany('drawableclazzcommunication', {
     inverse: null
   }),
 
@@ -52,7 +52,7 @@ export default DrawNodeEntity.extend({
     this.get('components').forEach((component) => {
       component.unhighlight();
     });
-    this.get('cumulatedClazzCommunications').forEach((communication) => {
+    this.get('drawableClazzCommunications').forEach((communication) => {
       communication.unhighlight();
     });
   },
