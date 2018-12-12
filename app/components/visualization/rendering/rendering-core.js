@@ -4,7 +4,6 @@ import Evented from '@ember/object/evented';
 import { Promise } from 'rsvp';
 
 import THREE from "three";
-import config from 'explorviz-frontend/config/environment';
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
 import debugLogger from 'ember-debug-logger';
 import $ from 'jquery';
@@ -47,6 +46,8 @@ export default Component.extend(Evented, THREEPerformance, {
   highlighter: service("visualization/application/highlighter"),
   addionalData: service("additional-data"),
   renderingService: service(),
+
+  session: service(),
 
   scene : null,
   webglrenderer: null,
@@ -128,6 +129,13 @@ export default Component.extend(Evented, THREEPerformance, {
     this.get('webglrenderer').setPixelRatio(window.devicePixelRatio);
     this.get('webglrenderer').setSize(width, height);
 
+    const { user } = this.get('session.data.authenticated');
+    const userSettings = user.get('settings');
+
+    if(!userSettings["show-fps-counter"]) {
+      this.removePerformanceMeasurement();
+    }
+
     // Rendering loop //
     function render() {
       
@@ -138,14 +146,14 @@ export default Component.extend(Evented, THREEPerformance, {
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
 
-      if(config.environment === "development" || config.environment === "akr") {
+      if(userSettings["show-fps-counter"]) {
         self.get('threexStats').update(self.get('webglrenderer'));
         self.get('stats').begin();
       }
 
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
 
-      if(config.environment === "development" || config.environment === "akr") {
+      if(userSettings["show-fps-counter"]) {
         self.get('stats').end();
       }
 

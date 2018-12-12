@@ -4,11 +4,28 @@
       <h4 class="modal-title">New Users</h4>
     {{/modal.header}}
     {{#modal.body}}
-      {{#each createdUsers as |user|}}
-        <p>ID: {{user.id}}</p>
-        <p>Username: {{user.username}}</p>
-        <p>Password: {{user.password}}</p>
-      {{/each}}
+      <div class="alert alert-danger" role="alert">
+        <p>Print now using the button below.</p>
+        <p>You cannot access the passwords again after closing this window!</p>
+      </div>
+      <table class="table" id="new-user-list">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Username</th>
+            <th scope="col">Password</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each createdUsers as |user|}}
+            <tr>
+              <th scope="row">{{user.id}}</th>
+              <td>{{user.username}}</td>
+              <td>{{user.password}}</td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
     {{/modal.body}}
     {{#modal.footer as |footer|}}
       {{#bs-button onClick=(action "printNewUsers") type="primary"}}Print{{/bs-button}}

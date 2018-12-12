@@ -10,38 +10,43 @@ export default Component.extend(AlertifyHandler, {
   tagName: '',
 
   store: service(),
+  printThis: service(),
 
-  // rather request a list of roles from backend?
   roles: null,
   users: null,
   page: null,
   showNewUsers: null,
 
-  init(){
+  didInsertElement() {
     this._super(...arguments);
     this.set('roles', []);
     this.set('page', 'main');
     this.set('showNewUsers', false);
-    this.updateUserList();
+    this.updateUserList(true);
+
+    // for testing
+    this.get('store').findRecord('usersetting', 1);
   },
 
-  updateUserList() {
+  updateUserList(reload) {
     this.set('users', []);
-    this.get('store').findAll('user')
+    this.get('store').findAll('user', { reload })
       .then(users => {
-        users.forEach(user => {
-          this.get('users').push(user);
-        });
+        let userList = users.toArray();
         // sort by id
-        this.get('users').sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1);
-        this.notifyPropertyChange('users');
+        userList.sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1);
+        this.set('users', userList);
       });
   },
 
   actions: {
-
     printNewUsers() {
-
+      const selector = '#new-user-list';
+      const options = {
+        printDelay: 200
+      }
+ 
+      this.get('printThis').print(selector, options);
     },
 
     hideNewUsersCreatedModal() {
@@ -91,14 +96,22 @@ export default Component.extend(AlertifyHandler, {
       userRecord.save().then(() => { // success
         const message = "User <b>" + userData.username + "</b> was created.";
         this.showAlertifyMessage(message);
-        this.updateUserList();
+        this.updateUserList(false);
+        clearInputFields.bind(this)();
         this.actions.openMainPage.bind(this)();
       }, (reason) => { // failure
-        const {title, detail} = reason.errors[0];
-        this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+        this.showReasonErrorAlert(reason);
         userRecord.deleteRecord();
-        this.updateUserList();
+        this.updateUserList(false);
       });
+
+      function clearInputFields() {
+        this.setProperties({
+          username: "",
+          password: "",
+          roles_selected_single: []
+        });
+      }
     },
 
     saveMultipleUsers() {
@@ -135,20 +148,19 @@ export default Component.extend(AlertifyHandler, {
           if(usersSuccess.length === numberOfUsers) {
             const message = `All <b>${numberOfUsers}</b> users were successfully created.`;
             this.showAlertifyMessage(message);
-            this.updateUserList();
+            this.updateUserList(false);
+            clearInputFields.bind(this)();
             this.actions.openMainPage.bind(this)();
-
-            this.set('createdUsers', usersSuccess);
-            this.set('showNewUsers', true);
+            this.showCreatedUsers(usersSuccess);
 
           } else if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
             const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
             this.showAlertifyMessage(message);
-            this.updateUserList();
+            this.updateUserList(false);
             
             if(usersSuccess.length > 0) {
-              this.set('createdUsers', usersSuccess);
-              this.set('showNewUsers', true);
+              this.showCreatedUsers(usersSuccess);
+              clearInputFields.bind(this)();
             }
           }
         }, () => { // failure
@@ -157,13 +169,21 @@ export default Component.extend(AlertifyHandler, {
           if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
             const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
             this.showAlertifyMessage(message);
-            this.updateUserList();
+            this.updateUserList(false);
 
             if(usersSuccess.length > 0) {
-              this.set('createdUsers', usersSuccess);
-              this.set('showNewUsers', true);
+              this.showCreatedUsers(usersSuccess);
+              clearInputFields.bind(this)();
             }
           }
+        });
+      }
+
+      function clearInputFields() {
+        this.setProperties({
+          usernameprefix: "",
+          numberofusers: "",
+          roles_selected_multiple: []
         });
       }
     },
@@ -178,9 +198,6 @@ export default Component.extend(AlertifyHandler, {
         if(!userData.username_change || userData.username_change.length === 0) {
           this.showAlertifyMessage('Username cannot be empty.');
           return;
-        } else if(userData.password_change && userData.password_change.length === 0) {
-          this.showAlertifyMessage('New password cannot be empty.');
-          return;
         } else if(!userData.roles_change || userData.roles_change.length === 0) {
           this.showAlertifyMessage('User needs at least 1 role.');
           return;
@@ -189,7 +206,7 @@ export default Component.extend(AlertifyHandler, {
         if(user.get('username') !== userData.username_change)
           user.set('username', userData.username_change);
         
-        if(userData.password_change !== null && userData.password_change !== '')
+        if(userData.password_change && userData.password_change !== '')
           user.set('password', userData.password_change);
   
         user.set('roles', userData.roles_change);
@@ -198,13 +215,22 @@ export default Component.extend(AlertifyHandler, {
           .then(()=> {
             const message = `User updated.`;
             this.showAlertifyMessage(message);
+            clearInputFields.bind(this)();
             this.actions.openMainPage.bind(this)();
           }, (reason) => {
-            const {title, detail} = reason.errors[0];
-            this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+            this.showReasonErrorAlert(reason);
           });
       } else {
         this.showAlertifyMessage(`User not found.`);
+      }
+
+      function clearInputFields() {
+        this.setProperties({
+          id_change: "",
+          username_change: "",
+          password_change: "",
+          roles_change: []
+        });
       }
     },
 
@@ -213,14 +239,23 @@ export default Component.extend(AlertifyHandler, {
         .then(() => { // success
           const message = `User <b>${user.username}</b> deleted.`;
           this.showAlertifyMessage(message);
-          this.updateUserList();
+          this.updateUserList(false);
         }, (reason) => { // failure
-          const {title, detail} = reason.errors[0];
-          this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
-          this.updateUserList();
+          this.showReasonErrorAlert(reason);
+          this.updateUserList(true);
         }
         );
     }
+  },
+
+  showReasonErrorAlert(reason) {
+    const {title, detail} = reason.errors[0];
+    this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+  },
+
+  showCreatedUsers(userList) {
+    this.set('createdUsers', userList.sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1));
+    this.set('showNewUsers', true);
   },
 
   generatePassword(length) {

@@ -31,7 +31,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
   authorize(xhr) {    
     let { access_token } = this.get('session.data.authenticated');
-    xhr.setRequestHeader('Authorization', `Bearer ${access_token.token}`);
+    xhr.setRequestHeader('Authorization', `Bearer ${access_token}`);
   }
 
 });

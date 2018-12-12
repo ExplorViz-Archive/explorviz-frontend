@@ -17,7 +17,11 @@ export default Model.extend({
 
 	username: attr('string'),
 	password: attr('string'),
+	token: attr('string'),
 
-	roles: hasMany('role')
+	roles: hasMany('role'),
+
+	// simple object, no Ember record
+	settings: attr()
 
 });
