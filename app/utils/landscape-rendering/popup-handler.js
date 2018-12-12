@@ -159,10 +159,15 @@ export default Object.extend({
       targetApplication: targetApplicationName,
       requests: communication.get('requests'),
       technology: technology,
-      duration: communication.get('averageResponseTime') + 'ns',
+      duration: round(communication.get('averageResponseTime'), 2),
     }
 
     return popupData;
+
+    function round(value, precision) {
+      let multiplier = Math.pow(10, precision || 0);
+      return Math.round(value * multiplier) / multiplier;
+    } 
   },
 
 });

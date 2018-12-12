@@ -28,10 +28,10 @@ export default function applyCityLayout(application) {
 
     layoutEdges(application);
 
-    const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
+    const drawableClazzCommunications = application.get('drawableClazzCommunications');
 
-    cumulatedClazzCommunications.forEach((clazzcommunication) => {
-      layoutCumulatedCommunication(clazzcommunication, application.get('components').objectAt(0));
+    drawableClazzCommunications.forEach((clazzcommunication) => {
+      layoutDrawableCommunication(clazzcommunication, application.get('components').objectAt(0));
     });
 
 
@@ -477,9 +477,9 @@ export default function applyCityLayout(application) {
 
     function layoutEdges(application) {
 
-      const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
+      const drawableClazzCommunications = application.get('drawableClazzCommunications');
 
-      cumulatedClazzCommunications.forEach((clazzCommunication) => {
+      drawableClazzCommunications.forEach((clazzCommunication) => {
         if (!clazzCommunication.get('hidden')) {
 
           let sourceClazz = null;
@@ -517,9 +517,9 @@ export default function applyCityLayout(application) {
 
         const requestsList = gatherRequestsIntoList(application);
         const categories = calculateCategories(requestsList);
-        const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
+        const drawableClazzCommunications = application.get('drawableClazzCommunications');
 
-        cumulatedClazzCommunications.forEach((clazzCommunication) => {
+        drawableClazzCommunications.forEach((clazzCommunication) => {
           const calculatedCategory = getMatchingCategory(clazzCommunication.get('requests'), categories);
           clazzCommunication.set('lineThickness', (calculatedCategory  * pipeSizeEachStep) + pipeSizeDefault);
         });
@@ -555,9 +555,9 @@ export default function applyCityLayout(application) {
         function gatherRequestsIntoList(application) {
 
           let requestsList = [];
-          const cumulatedClazzCommunications = application.get('cumulatedClazzCommunications');
+          const drawableClazzCommunications = application.get('drawableClazzCommunications');
 
-          cumulatedClazzCommunications.forEach((clazzCommunication) => {
+          drawableClazzCommunications.forEach((clazzCommunication) => {
             if ((clazzCommunication.get('sourceClazz') !== clazzCommunication.get('targetClazz'))) {
               requestsList.push(clazzCommunication.get('requests'));
             }
@@ -583,7 +583,7 @@ export default function applyCityLayout(application) {
 
     } // END layoutEdges
 
-    function layoutCumulatedCommunication(commu, foundation) {
+    function layoutDrawableCommunication(commu, foundation) {
 
       const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
 

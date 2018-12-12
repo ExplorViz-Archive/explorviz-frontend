@@ -406,7 +406,7 @@ export default RenderingCore.extend({
 
     self.set('configuration.landscapeColors.textchanged', false);
 
-    const appCommunications = emberLandscape.get('outgoingApplicationCommunications');
+    const appCommunications = emberLandscape.get('totalApplicationCommunications');
 
     const tiles = [];
 

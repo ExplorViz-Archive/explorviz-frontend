@@ -257,7 +257,7 @@ export default Object.extend(Evented, {
 
         this.get('highlighter').applyHighlighting();
         this.get('renderingService').redrawScene();
-      } else if(emberModelName === "cumulatedclazzcommunication"){
+      } else if(emberModelName === "drawableclazzcommunication"){
         // remove old highlighting
         this.get('highlighter').unhighlightAll();
 
@@ -265,18 +265,14 @@ export default Object.extend(Evented, {
         this.get('highlighter').highlight(emberModel);
         this.get('renderingService').redrawScene();
 
-        // retrive runtime informtions
-        let traces = emberModel.getRuntimeInformations();
 
-        // initialize every trace as unselected
-        traces.forEach( (trace) => {
-          trace.set('isSelected', false);
-        });
+        let traces = emberModel.getContainedTraces();
         
         // display trace selection component for communication
         this.set('additionalData.data.traces', traces);
         this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
         this.get('additionalData').openAdditionalData();
+        
       }
 
     }
@@ -316,7 +312,7 @@ export default Object.extend(Evented, {
 
       if(emberModelName === "component" && emberModel.get('foundation') === false ||
          emberModelName === "clazz" || 
-         emberModelName === "cumulatedclazzcommunication"){
+         emberModelName === "drawableclazzcommunication"){
 
         this.get('highlighter').highlight(emberModel);
       }

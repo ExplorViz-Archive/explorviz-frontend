@@ -284,9 +284,9 @@ export default function applyKlayLayout(landscape) {
 
       function addEdges(landscape) {
 
-        const applicationCommunications = landscape.get('outgoingApplicationCommunications');
+        const totalApplicationCommunications = landscape.get('totalApplicationCommunications');
 
-        applicationCommunications.forEach((applicationcommunication) => {
+        totalApplicationCommunications.forEach((applicationcommunication) => {
 
           applicationcommunication.set('kielerEdgeReferences', []);
           applicationcommunication.set('points', []);
@@ -641,10 +641,10 @@ export default function applyKlayLayout(landscape) {
 
     function addBendPointsInAbsoluteCoordinates(landscape) {
 
-      const applicationCommunications = landscape.get('outgoingApplicationCommunications');
+      const totalApplicationCommunications = landscape.get('totalApplicationCommunications');
       const alreadyCalculatedPoints = {};
 
-      applicationCommunications.forEach((applicationcommunication) => {
+      totalApplicationCommunications.forEach((applicationcommunication) => {
 
         const kielerEdgeReferences = applicationcommunication.get('kielerEdgeReferences');
 

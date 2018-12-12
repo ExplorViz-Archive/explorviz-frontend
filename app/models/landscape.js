@@ -23,7 +23,7 @@ export default BaseEntity.extend({
   }),
 
   // list of applicationCommunication for rendering purposes
-  outgoingApplicationCommunications: hasMany('applicationcommunication', {
+  totalApplicationCommunications: hasMany('applicationcommunication', {
     inverse: null
   }),
 

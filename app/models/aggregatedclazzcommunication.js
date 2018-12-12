@@ -14,7 +14,8 @@ const { attr, belongsTo, hasMany } = DS;
  */
 export default DrawEdgeEntity.extend({
 
-  requests: attr(),
+  totalRequests: attr('number'),
+  averageResponseTime: attr('number'),
 
   sourceClazz: belongsTo('clazz', {
     inverse: null
@@ -24,7 +25,7 @@ export default DrawEdgeEntity.extend({
     inverse: null
   }),
 
-  outgoingClazzCommunications: hasMany('clazzcommunication', {
+  clazzCommunications: hasMany('clazzcommunication', {
     inverse: null
   }),
 

@@ -1,11 +1,11 @@
 /* eslint-env node */
 'use strict';
 
-module.exports = function(app) {
+module.exports = function (app) {
   const express = require('express');
   const SSE = require('express-sse');
   const sse = new SSE(["array", "containing", "initial", "content", "(optional)"]);
-  
+
   let landscapeRouter = express.Router();
 
   const landscapeObject = {
@@ -21,7 +21,7 @@ module.exports = function(app) {
         "timestamp": {
           "data": {
             "type": "timestamp",
-            "id": "444"
+            "id": "441"
           }
         },
         "systems": {
@@ -56,56 +56,8 @@ module.exports = function(app) {
             }
           ]
         },
-        "outgoingApplicationCommunications": {
+        "totalApplicationCommunications": {
           "data": [
-            {
-              "type": "applicationcommunication",
-              "id": "326"
-            },
-            {
-              "type": "applicationcommunication",
-              "id": "327"
-            },
-            {
-              "type": "applicationcommunication",
-              "id": "328"
-            },
-            {
-              "type": "applicationcommunication",
-              "id": "329"
-            },
-            {
-              "type": "applicationcommunication",
-              "id": "330"
-            },
-            {
-              "type": "applicationcommunication",
-              "id": "331"
-            },
-            {
-              "type": "applicationcommunication",
-              "id": "332"
-            },
-            {
-              "type": "applicationcommunication",
-              "id": "333"
-            },
-            {
-              "type": "applicationcommunication",
-              "id": "334"
-            },
-            {
-              "type": "applicationcommunication",
-              "id": "335"
-            },
-            {
-              "type": "applicationcommunication",
-              "id": "336"
-            },
-            {
-              "type": "applicationcommunication",
-              "id": "337"
-            },
             {
               "type": "applicationcommunication",
               "id": "338"
@@ -185,6 +137,54 @@ module.exports = function(app) {
             {
               "type": "applicationcommunication",
               "id": "357"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "358"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "359"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "360"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "361"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "362"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "363"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "364"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "365"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "366"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "367"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "368"
+            },
+            {
+              "type": "applicationcommunication",
+              "id": "369"
             }
           ]
         }
@@ -193,39 +193,52 @@ module.exports = function(app) {
     "included": [
       {
         "type": "databasequery",
-        "id": "187",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355448816,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "17",
-          "responseTime": 305
-        }
-      },
-      {
-        "type": "databasequery",
         "id": "265",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355717926,
+          "timestamp": 360505056789400,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "71",
-          "responseTime": 549
+          "returnValue": "33",
+          "responseTime": 352
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
-        "type": "runtimeinformation",
-        "id": "160",
+        "type": "aggregatedclazzcommunication",
+        "id": "148",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 0,
-          "overallTraceDuration": 2510,
-          "requests": 12000,
-          "averageResponseTime": 329,
-          "orderIndexes": [
-            1
-          ],
-          "averageResponseTimeInNanoSec": 329
+          "totalRequests": 2000,
+          "averageResponseTime": 832
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "97"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "100"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "146"
+              }
+            ]
+          }
         }
       },
       {
@@ -233,10 +246,18 @@ module.exports = function(app) {
         "id": "215",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355550536,
+          "timestamp": 360505056711500,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
           "returnValue": "null",
-          "responseTime": 439
+          "responseTime": 187
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -245,7 +266,7 @@ module.exports = function(app) {
         "attributes": {
           "extensionAttributes": {},
           "ipAddress": "10.0.0.7",
-          "cpuUtilization": 0.67,
+          "cpuUtilization": 0.34,
           "freeRAM": 1073741824,
           "usedRAM": 2147483648
         },
@@ -275,18 +296,11 @@ module.exports = function(app) {
         "id": "131",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 800,
-          "operationName": "getMethod10()"
+          "operationName": "getMethod37()",
+          "totalRequests": 800,
+          "averageResponseTime": 329
         },
         "relationships": {
-          "runtimeInformations": {
-            "data": [
-              {
-                "type": "runtimeinformation",
-                "id": "132"
-              }
-            ]
-          },
           "sourceClazz": {
             "data": {
               "type": "clazz",
@@ -298,6 +312,14 @@ module.exports = function(app) {
               "type": "clazz",
               "id": "109"
             }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "132"
+              }
+            ]
           }
         }
       },
@@ -334,29 +356,22 @@ module.exports = function(app) {
         }
       },
       {
-        "type": "runtimeinformation",
-        "id": "132",
-        "attributes": {
-          "extensionAttributes": {},
-          "traceId": 2,
-          "overallTraceDuration": 8228,
-          "requests": 800,
-          "averageResponseTime": 282,
-          "orderIndexes": [
-            1
-          ],
-          "averageResponseTimeInNanoSec": 282
-        }
-      },
-      {
         "type": "databasequery",
         "id": "230",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355599855,
+          "timestamp": 360505056730300,
           "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
           "returnValue": "null",
-          "responseTime": 343
+          "responseTime": 380
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -365,9 +380,9 @@ module.exports = function(app) {
         "attributes": {
           "extensionAttributes": {},
           "ipAddress": "10.0.1.2",
-          "cpuUtilization": 0.43,
-          "freeRAM": 2147483648,
-          "usedRAM": 4294967296
+          "cpuUtilization": 1,
+          "freeRAM": 3221225472,
+          "usedRAM": 3221225472
         },
         "relationships": {
           "applications": {
@@ -414,13 +429,13 @@ module.exports = function(app) {
           "sourceApplication": {
             "data": {
               "type": "application",
-              "id": "60"
+              "id": "34"
             }
           },
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "170"
+              "id": "37"
             }
           }
         }
@@ -443,7 +458,26 @@ module.exports = function(app) {
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "170"
+              "id": "34"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "328",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056876300,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 218
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
             }
           }
         }
@@ -460,7 +494,7 @@ module.exports = function(app) {
           "timestamp": {
             "data": {
               "type": "timestamp",
-              "id": "444"
+              "id": "441"
             }
           },
           "systems": {
@@ -495,56 +529,8 @@ module.exports = function(app) {
               }
             ]
           },
-          "outgoingApplicationCommunications": {
+          "totalApplicationCommunications": {
             "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "326"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "327"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "328"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "329"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "330"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "331"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "332"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "333"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "334"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "335"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "336"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "337"
-              },
               {
                 "type": "applicationcommunication",
                 "id": "338"
@@ -624,6 +610,54 @@ module.exports = function(app) {
               {
                 "type": "applicationcommunication",
                 "id": "357"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "358"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "359"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "360"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "361"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "362"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "363"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "364"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "365"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "366"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "367"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "368"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "369"
               }
             ]
           }
@@ -634,10 +668,18 @@ module.exports = function(app) {
         "id": "238",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355624998,
+          "timestamp": 360505056740300,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 369
+          "responseTime": 50
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -645,20 +687,20 @@ module.exports = function(app) {
         "id": "355",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 200,
+          "requests": 100,
           "averageResponseTime": 0
         },
         "relationships": {
           "sourceApplication": {
             "data": {
               "type": "application",
-              "id": "61"
+              "id": "49"
             }
           },
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "70"
+              "id": "63"
             }
           }
         }
@@ -668,21 +710,18 @@ module.exports = function(app) {
         "id": "292",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355806713,
+          "timestamp": 360505056825700,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 832
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "288",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355794573,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "51",
-          "responseTime": 663
+          "responseTime": 593
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -690,10 +729,136 @@ module.exports = function(app) {
         "id": "316",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355902384,
+          "timestamp": 360505056861300,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 304
+          "responseTime": 206
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "288",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056821000,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "47",
+          "responseTime": 398
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "361",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 100,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "57"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "182"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "331",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056880400,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "23",
+          "responseTime": 928
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "176",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 4,
+          "requests": 11200,
+          "currentTraceDuration": 8583,
+          "averageResponseTime": 465
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "169"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "175"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "157",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod20()",
+          "totalRequests": 500,
+          "averageResponseTime": 681
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "125"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "158"
+              }
+            ]
+          }
         }
       },
       {
@@ -701,10 +866,43 @@ module.exports = function(app) {
         "id": "253",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355676225,
+          "timestamp": 360505056759100,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "38",
-          "responseTime": 849
+          "returnValue": "39",
+          "responseTime": 504
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "138",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 4,
+          "requests": 600,
+          "currentTraceDuration": 1140,
+          "averageResponseTime": 674
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "137"
+            }
+          }
         }
       },
       {
@@ -712,39 +910,17 @@ module.exports = function(app) {
         "id": "191",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355460958,
+          "timestamp": 360505056667900,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
           "returnValue": "null",
-          "responseTime": 721
-        }
-      },
-      {
-        "type": "cumulatedclazzcommunication",
-        "id": "154",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 4000
+          "responseTime": 92
         },
         "relationships": {
-          "sourceClazz": {
+          "parentApplication": {
             "data": {
-              "type": "clazz",
-              "id": "97"
+              "type": "application",
+              "id": "183"
             }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "100"
-            }
-          },
-          "aggregatedClazzCommunications": {
-            "data": [
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "153"
-              }
-            ]
           }
         }
       },
@@ -771,8 +947,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "MultipleExtensionHandler",
           "fullQualifiedName": "org.webshop.kernel.extension.MultipleExtensionHandler",
-          "instanceCount": 5,
-          "objectIds": []
+          "instanceCount": 5
         },
         "relationships": {
           "parent": {
@@ -781,7 +956,7 @@ module.exports = function(app) {
               "id": "102"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -803,30 +978,36 @@ module.exports = function(app) {
         }
       },
       {
-        "type": "aggregatedclazzcommunication",
-        "id": "137",
+        "type": "clazzcommunication",
+        "id": "160",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 120
+          "operationName": "getMethod45()",
+          "totalRequests": 6300,
+          "averageResponseTime": 576.5
         },
         "relationships": {
           "sourceClazz": {
             "data": {
               "type": "clazz",
-              "id": "80"
+              "id": "109"
             }
           },
           "targetClazz": {
             "data": {
               "type": "clazz",
-              "id": "109"
+              "id": "80"
             }
           },
-          "outgoingClazzCommunications": {
+          "tracesteps": {
             "data": [
               {
-                "type": "clazzcommunication",
-                "id": "135"
+                "type": "tracestep",
+                "id": "161"
+              },
+              {
+                "type": "tracestep",
+                "id": "165"
               }
             ]
           }
@@ -837,26 +1018,23 @@ module.exports = function(app) {
         "id": "276",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355755291,
+          "timestamp": 360505056803000,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "83",
-          "responseTime": 235
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "190",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355457850,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 631
+          "returnValue": "23",
+          "responseTime": 424
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
         "type": "applicationcommunication",
-        "id": "333",
+        "id": "366",
         "attributes": {
           "extensionAttributes": {},
           "requests": 100,
@@ -866,13 +1044,57 @@ module.exports = function(app) {
           "sourceApplication": {
             "data": {
               "type": "application",
-              "id": "57"
+              "id": "58"
             }
           },
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "41"
+              "id": "70"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "190",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056665100,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 375
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "156",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 10,
+          "requests": 3500,
+          "currentTraceDuration": 9974,
+          "averageResponseTime": 160
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "155"
             }
           }
         }
@@ -882,10 +1104,18 @@ module.exports = function(app) {
         "id": "277",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355759194,
+          "timestamp": 360505056804400,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "55",
-          "responseTime": 651
+          "returnValue": "71",
+          "responseTime": 194
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -893,39 +1123,39 @@ module.exports = function(app) {
         "id": "320",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355916636,
+          "timestamp": 360505056866400,
           "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
           "returnValue": "null",
-          "responseTime": 737
+          "responseTime": 22
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
-        "type": "cumulatedclazzcommunication",
-        "id": "162",
+        "type": "component",
+        "id": "184",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 48000
+          "name": "org",
+          "fullQualifiedName": "org"
         },
         "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "106"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
-            }
-          },
-          "aggregatedClazzCommunications": {
+          "children": {
             "data": [
               {
-                "type": "aggregatedclazzcommunication",
-                "id": "161"
+                "type": "component",
+                "id": "185"
               }
             ]
+          },
+          "clazzes": {
+            "data": []
           }
         }
       },
@@ -936,8 +1166,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "AccountSqlMapDao",
           "fullQualifiedName": "org.webshop.tooling.AccountSqlMapDao",
-          "instanceCount": 5,
-          "objectIds": []
+          "instanceCount": 5
         },
         "relationships": {
           "parent": {
@@ -946,7 +1175,7 @@ module.exports = function(app) {
               "id": "85"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -968,13 +1197,13 @@ module.exports = function(app) {
           "sourceApplication": {
             "data": {
               "type": "application",
-              "id": "34"
+              "id": "8"
             }
           },
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "37"
+              "id": "12"
             }
           }
         }
@@ -985,8 +1214,8 @@ module.exports = function(app) {
         "attributes": {
           "extensionAttributes": {},
           "ipAddress": "10.0.0.9",
-          "cpuUtilization": 0.37,
-          "freeRAM": 2147483648,
+          "cpuUtilization": 0.75,
+          "freeRAM": 1073741824,
           "usedRAM": 1073741824
         },
         "relationships": {
@@ -1011,22 +1240,15 @@ module.exports = function(app) {
         "id": "155",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 150,
-          "operationName": "getMethod49()"
+          "operationName": "getMethod21()",
+          "totalRequests": 3500,
+          "averageResponseTime": 160
         },
         "relationships": {
-          "runtimeInformations": {
-            "data": [
-              {
-                "type": "runtimeinformation",
-                "id": "156"
-              }
-            ]
-          },
           "sourceClazz": {
             "data": {
               "type": "clazz",
-              "id": "122"
+              "id": "109"
             }
           },
           "targetClazz": {
@@ -1034,6 +1256,14 @@ module.exports = function(app) {
               "type": "clazz",
               "id": "125"
             }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "156"
+              }
+            ]
           }
         }
       },
@@ -1042,10 +1272,18 @@ module.exports = function(app) {
         "id": "226",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355586781,
+          "timestamp": 360505056725300,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 137
+          "responseTime": 698
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -1053,31 +1291,16 @@ module.exports = function(app) {
         "id": "227",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355589958,
+          "timestamp": 360505056726500,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
           "returnValue": "null",
-          "responseTime": 643
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "331",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
+          "responseTime": 999
         },
         "relationships": {
-          "sourceApplication": {
+          "parentApplication": {
             "data": {
               "type": "application",
-              "id": "12"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "15"
+              "id": "183"
             }
           }
         }
@@ -1089,8 +1312,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "BaseLabeler",
           "fullQualifiedName": "org.webshop.labeling.BaseLabeler",
-          "instanceCount": 20,
-          "objectIds": []
+          "instanceCount": 20
         },
         "relationships": {
           "parent": {
@@ -1099,7 +1321,7 @@ module.exports = function(app) {
               "id": "73"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -1114,10 +1336,56 @@ module.exports = function(app) {
         "id": "216",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355554491,
+          "timestamp": 360505056713000,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "100",
-          "responseTime": 757
+          "returnValue": "87",
+          "responseTime": 928
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "327",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056875100,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 555
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "329",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056877500,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 759
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -1125,39 +1393,35 @@ module.exports = function(app) {
         "id": "249",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355661989,
+          "timestamp": 360505056753800,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 959
+          "responseTime": 676
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
-        "type": "clazzcommunication",
-        "id": "159",
+        "type": "databasequery",
+        "id": "231",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 12000,
-          "operationName": "getMethod46()"
+          "timestamp": 360505056731500,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 759
         },
         "relationships": {
-          "runtimeInformations": {
-            "data": [
-              {
-                "type": "runtimeinformation",
-                "id": "160"
-              }
-            ]
-          },
-          "sourceClazz": {
+          "parentApplication": {
             "data": {
-              "type": "clazz",
-              "id": "106"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
+              "type": "application",
+              "id": "183"
             }
           }
         }
@@ -1167,21 +1431,41 @@ module.exports = function(app) {
         "id": "214",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355547444,
+          "timestamp": 360505056710300,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 954
+          "responseTime": 72
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
-        "type": "databasequery",
-        "id": "231",
+        "type": "applicationcommunication",
+        "id": "368",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355602790,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 843
+          "requests": 300,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "64"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "70"
+            }
+          }
         }
       },
       {
@@ -1190,9 +1474,9 @@ module.exports = function(app) {
         "attributes": {
           "extensionAttributes": {},
           "ipAddress": "10.0.2.1",
-          "cpuUtilization": 0.87,
-          "freeRAM": 1073741824,
-          "usedRAM": 4294967296
+          "cpuUtilization": 0.51,
+          "freeRAM": 2147483648,
+          "usedRAM": 1073741824
         },
         "relationships": {
           "applications": {
@@ -1260,18 +1544,11 @@ module.exports = function(app) {
         "id": "127",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 40,
-          "operationName": "getMethod28()"
+          "operationName": "getMethod16()",
+          "totalRequests": 40,
+          "averageResponseTime": 880
         },
         "relationships": {
-          "runtimeInformations": {
-            "data": [
-              {
-                "type": "runtimeinformation",
-                "id": "128"
-              }
-            ]
-          },
           "sourceClazz": {
             "data": {
               "type": "clazz",
@@ -1283,6 +1560,14 @@ module.exports = function(app) {
               "type": "clazz",
               "id": "80"
             }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "129"
+              }
+            ]
           }
         }
       },
@@ -1291,10 +1576,18 @@ module.exports = function(app) {
         "id": "315",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355899399,
+          "timestamp": 360505056858400,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 825
+          "responseTime": 745
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -1302,31 +1595,16 @@ module.exports = function(app) {
         "id": "237",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355621957,
+          "timestamp": 360505056739100,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 72
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "336",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
+          "responseTime": 169
         },
         "relationships": {
-          "sourceApplication": {
+          "parentApplication": {
             "data": {
               "type": "application",
-              "id": "27"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "30"
+              "id": "183"
             }
           }
         }
@@ -1336,10 +1614,18 @@ module.exports = function(app) {
         "id": "317",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355905497,
+          "timestamp": 360505056862500,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
           "returnValue": "null",
-          "responseTime": 820
+          "responseTime": 788
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -1348,9 +1634,9 @@ module.exports = function(app) {
         "attributes": {
           "extensionAttributes": {},
           "ipAddress": "10.0.0.2",
-          "cpuUtilization": 0.75,
+          "cpuUtilization": 0.6,
           "freeRAM": 3221225472,
-          "usedRAM": 4294967296
+          "usedRAM": 3221225472
         },
         "relationships": {
           "applications": {
@@ -1370,30 +1656,109 @@ module.exports = function(app) {
         }
       },
       {
-        "type": "cumulatedclazzcommunication",
-        "id": "138",
+        "type": "trace",
+        "id": "128",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 240
+          "traceId": 1,
+          "totalRequests": 32350,
+          "totalTraceDuration": 1513,
+          "averageResponseTime": 163
+        },
+        "relationships": {
+          "traceSteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "129"
+              },
+              {
+                "type": "tracestep",
+                "id": "132"
+              },
+              {
+                "type": "tracestep",
+                "id": "135"
+              },
+              {
+                "type": "tracestep",
+                "id": "138"
+              },
+              {
+                "type": "tracestep",
+                "id": "141"
+              },
+              {
+                "type": "tracestep",
+                "id": "144"
+              },
+              {
+                "type": "tracestep",
+                "id": "147"
+              },
+              {
+                "type": "tracestep",
+                "id": "150"
+              },
+              {
+                "type": "tracestep",
+                "id": "153"
+              },
+              {
+                "type": "tracestep",
+                "id": "156"
+              },
+              {
+                "type": "tracestep",
+                "id": "158"
+              },
+              {
+                "type": "tracestep",
+                "id": "161"
+              },
+              {
+                "type": "tracestep",
+                "id": "163"
+              },
+              {
+                "type": "tracestep",
+                "id": "165"
+              },
+              {
+                "type": "tracestep",
+                "id": "167"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "134",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod20()",
+          "totalRequests": 60,
+          "averageResponseTime": 544
         },
         "relationships": {
           "sourceClazz": {
             "data": {
               "type": "clazz",
-              "id": "80"
+              "id": "109"
             }
           },
           "targetClazz": {
             "data": {
               "type": "clazz",
-              "id": "109"
+              "id": "80"
             }
           },
-          "aggregatedClazzCommunications": {
+          "tracesteps": {
             "data": [
               {
-                "type": "aggregatedclazzcommunication",
-                "id": "137"
+                "type": "tracestep",
+                "id": "135"
               }
             ]
           }
@@ -1404,10 +1769,18 @@ module.exports = function(app) {
         "id": "239",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355628215,
+          "timestamp": 360505056741500,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
           "returnValue": "null",
-          "responseTime": 952
+          "responseTime": 855
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -1415,20 +1788,58 @@ module.exports = function(app) {
         "id": "342",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 500,
+          "requests": 100,
           "averageResponseTime": 0
         },
         "relationships": {
           "sourceApplication": {
             "data": {
               "type": "application",
-              "id": "49"
+              "id": "19"
             }
           },
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "60"
+              "id": "22"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "332",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056881300,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 176
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "330",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056879000,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "88",
+          "responseTime": 20
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
             }
           }
         }
@@ -1461,7 +1872,7 @@ module.exports = function(app) {
               },
               {
                 "type": "nodegroup",
-                "id": "168"
+                "id": "180"
               }
             ]
           },
@@ -1474,14 +1885,64 @@ module.exports = function(app) {
         }
       },
       {
+        "type": "tracestep",
+        "id": "141",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 5,
+          "requests": 1000,
+          "currentTraceDuration": 2714,
+          "averageResponseTime": 493
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "140"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "135",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 3,
+          "requests": 60,
+          "currentTraceDuration": 4599,
+          "averageResponseTime": 544
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "134"
+            }
+          }
+        }
+      },
+      {
         "type": "node",
         "id": "29",
         "attributes": {
           "extensionAttributes": {},
           "ipAddress": "10.0.3.2",
-          "cpuUtilization": 0.52,
-          "freeRAM": 1073741824,
-          "usedRAM": 3221225472
+          "cpuUtilization": 0.64,
+          "freeRAM": 3221225472,
+          "usedRAM": 1073741824
         },
         "relationships": {
           "applications": {
@@ -1505,31 +1966,16 @@ module.exports = function(app) {
         "id": "270",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355734335,
+          "timestamp": 360505056795400,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "42",
-          "responseTime": 220
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "327",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
+          "returnValue": "27",
+          "responseTime": 528
         },
         "relationships": {
-          "sourceApplication": {
+          "parentApplication": {
             "data": {
               "type": "application",
-              "id": "41"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "44"
+              "id": "183"
             }
           }
         }
@@ -1573,8 +2019,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "SequenceHelper",
           "fullQualifiedName": "org.webshop.helpers.SequenceHelper",
-          "instanceCount": 35,
-          "objectIds": []
+          "instanceCount": 35
         },
         "relationships": {
           "parent": {
@@ -1583,7 +2028,7 @@ module.exports = function(app) {
               "id": "79"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -1613,43 +2058,13 @@ module.exports = function(app) {
         }
       },
       {
-        "type": "cumulatedclazzcommunication",
-        "id": "150",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 400
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "93"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "106"
-            }
-          },
-          "aggregatedClazzCommunications": {
-            "data": [
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "149"
-              }
-            ]
-          }
-        }
-      },
-      {
         "type": "application",
         "id": "49",
         "attributes": {
           "extensionAttributes": {},
           "name": "Jira",
           "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
+          "lastUsage": 1544623821772
         },
         "relationships": {
           "parent": {
@@ -1664,46 +2079,46 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "applicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
-                "id": "339"
+                "id": "351"
               },
               {
                 "type": "applicationcommunication",
-                "id": "341"
+                "id": "353"
               },
               {
                 "type": "applicationcommunication",
-                "id": "342"
+                "id": "354"
               },
               {
                 "type": "applicationcommunication",
-                "id": "343"
+                "id": "355"
               },
               {
                 "type": "applicationcommunication",
-                "id": "339"
+                "id": "351"
               },
               {
                 "type": "applicationcommunication",
-                "id": "341"
+                "id": "353"
               },
               {
                 "type": "applicationcommunication",
-                "id": "342"
+                "id": "354"
               },
               {
                 "type": "applicationcommunication",
-                "id": "343"
+                "id": "355"
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedClazzCommunications": {
             "data": []
           },
-          "cumulatedClazzCommunications": {
+          "traces": {
             "data": []
           }
         }
@@ -1713,10 +2128,18 @@ module.exports = function(app) {
         "id": "202",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355507679,
+          "timestamp": 360505056695000,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 50
+          "responseTime": 930
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -1724,10 +2147,18 @@ module.exports = function(app) {
         "id": "197",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355480214,
+          "timestamp": 360505056688400,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
           "returnValue": "null",
-          "responseTime": 165
+          "responseTime": 939
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -1735,10 +2166,18 @@ module.exports = function(app) {
         "id": "199",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355489436,
+          "timestamp": 360505056691500,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "74",
-          "responseTime": 774
+          "returnValue": "17",
+          "responseTime": 435
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -1747,9 +2186,9 @@ module.exports = function(app) {
         "attributes": {
           "extensionAttributes": {},
           "ipAddress": "10.0.4.1",
-          "cpuUtilization": 0.85,
-          "freeRAM": 4294967296,
-          "usedRAM": 4294967296
+          "cpuUtilization": 0.52,
+          "freeRAM": 2147483648,
+          "usedRAM": 1073741824
         },
         "relationships": {
           "applications": {
@@ -1775,7 +2214,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "Provenance",
           "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
+          "lastUsage": 1544623821772
         },
         "relationships": {
           "parent": {
@@ -1790,22 +2229,22 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "applicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
-                "id": "354"
+                "id": "366"
               },
               {
                 "type": "applicationcommunication",
-                "id": "354"
+                "id": "366"
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedClazzCommunications": {
             "data": []
           },
-          "cumulatedClazzCommunications": {
+          "traces": {
             "data": []
           }
         }
@@ -1815,10 +2254,18 @@ module.exports = function(app) {
         "id": "204",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355514994,
+          "timestamp": 360505056697700,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "49",
-          "responseTime": 356
+          "returnValue": "15",
+          "responseTime": 366
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -1826,20 +2273,20 @@ module.exports = function(app) {
         "id": "347",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 500,
+          "requests": 100,
           "averageResponseTime": 0
         },
         "relationships": {
           "sourceApplication": {
             "data": {
               "type": "application",
-              "id": "63"
+              "id": "26"
             }
           },
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "64"
+              "id": "27"
             }
           }
         }
@@ -1851,7 +2298,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "Interface",
           "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
+          "lastUsage": 1544623821768
         },
         "relationships": {
           "parent": {
@@ -1866,31 +2313,66 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "applicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
-                "id": "330"
+                "id": "342"
               },
               {
                 "type": "applicationcommunication",
-                "id": "332"
+                "id": "344"
               },
               {
                 "type": "applicationcommunication",
-                "id": "330"
+                "id": "342"
               },
               {
                 "type": "applicationcommunication",
-                "id": "332"
+                "id": "344"
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedClazzCommunications": {
             "data": []
           },
-          "cumulatedClazzCommunications": {
+          "traces": {
             "data": []
+          }
+        }
+      },
+      {
+        "type": "aggregatedclazzcommunication",
+        "id": "159",
+        "attributes": {
+          "extensionAttributes": {},
+          "totalRequests": 2800,
+          "averageResponseTime": 700.5
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "125"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "157"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "171"
+              }
+            ]
           }
         }
       },
@@ -1899,20 +2381,20 @@ module.exports = function(app) {
         "id": "352",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 100,
+          "requests": 200,
           "averageResponseTime": 0
         },
         "relationships": {
           "sourceApplication": {
             "data": {
               "type": "application",
-              "id": "66"
+              "id": "51"
             }
           },
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "170"
+              "id": "54"
             }
           }
         }
@@ -1922,20 +2404,20 @@ module.exports = function(app) {
         "id": "357",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 100,
+          "requests": 400,
           "averageResponseTime": 0
         },
         "relationships": {
           "sourceApplication": {
             "data": {
               "type": "application",
-              "id": "67"
+              "id": "57"
             }
           },
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "70"
+              "id": "58"
             }
           }
         }
@@ -1945,36 +2427,16 @@ module.exports = function(app) {
         "id": "241",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355636100,
+          "timestamp": 360505056744300,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "87",
-          "responseTime": 620
-        }
-      },
-      {
-        "type": "component",
-        "id": "174",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "connector",
-          "fullQualifiedName": "org.database.connector"
+          "returnValue": "52",
+          "responseTime": 269
         },
         "relationships": {
-          "children": {
-            "data": []
-          },
-          "clazzes": {
-            "data": [
-              {
-                "type": "clazz",
-                "id": "175"
-              }
-            ]
-          },
-          "parentComponent": {
+          "parentApplication": {
             "data": {
-              "type": "component",
-              "id": "173"
+              "type": "application",
+              "id": "183"
             }
           }
         }
@@ -1996,14 +2458,85 @@ module.exports = function(app) {
         }
       },
       {
+        "type": "clazzcommunication",
+        "id": "162",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod31()",
+          "totalRequests": 4200,
+          "averageResponseTime": 909
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "80"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "163"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "aggregatedclazzcommunication",
+        "id": "154",
+        "attributes": {
+          "extensionAttributes": {},
+          "totalRequests": 24000,
+          "averageResponseTime": 307
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "106"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "152"
+              }
+            ]
+          }
+        }
+      },
+      {
         "type": "databasequery",
         "id": "298",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355831289,
+          "timestamp": 360505056833800,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 254
+          "responseTime": 396
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -2011,10 +2544,18 @@ module.exports = function(app) {
         "id": "243",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355641983,
+          "timestamp": 360505056746400,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 100
+          "responseTime": 460
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -2054,10 +2595,50 @@ module.exports = function(app) {
         "id": "303",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355855707,
+          "timestamp": 360505056840000,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 227
+          "responseTime": 365
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "152",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod13()",
+          "totalRequests": 12000,
+          "averageResponseTime": 307
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "106"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "153"
+              }
+            ]
+          }
         }
       },
       {
@@ -2065,10 +2646,18 @@ module.exports = function(app) {
         "id": "282",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355774811,
+          "timestamp": 360505056811200,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "86",
-          "responseTime": 631
+          "returnValue": "44",
+          "responseTime": 485
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -2076,21 +2665,18 @@ module.exports = function(app) {
         "id": "280",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355767961,
+          "timestamp": 360505056807800,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 945
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "185",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355441059,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 59
+          "responseTime": 219
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -2098,10 +2684,18 @@ module.exports = function(app) {
         "id": "305",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355865324,
+          "timestamp": 360505056842400,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
           "returnValue": "null",
-          "responseTime": 404
+          "responseTime": 878
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -2109,10 +2703,18 @@ module.exports = function(app) {
         "id": "213",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355544451,
+          "timestamp": 360505056709000,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 611
+          "responseTime": 560
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -2120,10 +2722,18 @@ module.exports = function(app) {
         "id": "189",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355454593,
+          "timestamp": 360505056661500,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 35
+          "responseTime": 250
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -2132,9 +2742,9 @@ module.exports = function(app) {
         "attributes": {
           "extensionAttributes": {},
           "ipAddress": "10.0.0.1",
-          "cpuUtilization": 0.73,
-          "freeRAM": 4294967296,
-          "usedRAM": 2147483648
+          "cpuUtilization": 0.56,
+          "freeRAM": 1073741824,
+          "usedRAM": 1073741824
         },
         "relationships": {
           "applications": {
@@ -2218,6 +2828,29 @@ module.exports = function(app) {
         }
       },
       {
+        "type": "applicationcommunication",
+        "id": "364",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 100,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "66"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "182"
+            }
+          }
+        }
+      },
+      {
         "type": "component",
         "id": "112",
         "attributes": {
@@ -2246,32 +2879,25 @@ module.exports = function(app) {
         }
       },
       {
-        "type": "cumulatedclazzcommunication",
-        "id": "134",
+        "type": "applicationcommunication",
+        "id": "358",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 3200
+          "requests": 300,
+          "averageResponseTime": 0
         },
         "relationships": {
-          "sourceClazz": {
+          "sourceApplication": {
             "data": {
-              "type": "clazz",
-              "id": "86"
+              "type": "application",
+              "id": "60"
             }
           },
-          "targetClazz": {
+          "targetApplication": {
             "data": {
-              "type": "clazz",
-              "id": "109"
+              "type": "application",
+              "id": "61"
             }
-          },
-          "aggregatedClazzCommunications": {
-            "data": [
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "133"
-              }
-            ]
           }
         }
       },
@@ -2280,10 +2906,18 @@ module.exports = function(app) {
         "id": "248",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355658722,
+          "timestamp": 360505056752600,
           "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
           "returnValue": "null",
-          "responseTime": 75
+          "responseTime": 21
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -2293,7 +2927,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "PostgreSQL",
           "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
+          "lastUsage": 1544623821772
         },
         "relationships": {
           "parent": {
@@ -2308,14 +2942,65 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "applicationCommunications": {
             "data": []
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedClazzCommunications": {
             "data": []
           },
-          "cumulatedClazzCommunications": {
+          "traces": {
             "data": []
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "149",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod13()",
+          "totalRequests": 150,
+          "averageResponseTime": 718
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "122"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "125"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "150"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "326",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056873800,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 979
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
           }
         }
       },
@@ -2364,67 +3049,13 @@ module.exports = function(app) {
         }
       },
       {
-        "type": "aggregatedclazzcommunication",
-        "id": "161",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 24000
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "106"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "clazzcommunication",
-                "id": "159"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "335",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "26"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "27"
-            }
-          }
-        }
-      },
-      {
         "type": "clazz",
         "id": "93",
         "attributes": {
           "extensionAttributes": {},
           "name": "AbstractBean",
           "fullQualifiedName": "org.webshop.unsafe.AbstractBean",
-          "instanceCount": 20,
-          "objectIds": []
+          "instanceCount": 20
         },
         "relationships": {
           "parent": {
@@ -2433,7 +3064,7 @@ module.exports = function(app) {
               "id": "92"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
           }
         }
@@ -2445,7 +3076,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "Eprints",
           "programmingLanguage": "PERL",
-          "lastUsage": 1536152927556
+          "lastUsage": 1544623821768
         },
         "relationships": {
           "parent": {
@@ -2460,39 +3091,56 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "applicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
-                "id": "336"
+                "id": "348"
               },
               {
                 "type": "applicationcommunication",
-                "id": "336"
+                "id": "348"
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedClazzCommunications": {
             "data": []
           },
-          "cumulatedClazzCommunications": {
+          "traces": {
             "data": []
           }
         }
       },
       {
-        "type": "runtimeinformation",
-        "id": "152",
+        "type": "clazzcommunication",
+        "id": "137",
         "attributes": {
           "extensionAttributes": {},
-          "traceId": 4,
-          "overallTraceDuration": 8673,
-          "requests": 1000,
-          "averageResponseTime": 299,
-          "orderIndexes": [
-            1
-          ],
-          "averageResponseTimeInNanoSec": 299
+          "operationName": "getMethod42()",
+          "totalRequests": 600,
+          "averageResponseTime": 674
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "113"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "138"
+              }
+            ]
+          }
         }
       },
       {
@@ -2500,15 +3148,730 @@ module.exports = function(app) {
         "id": "251",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355668173,
+          "timestamp": 360505056756200,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
           "returnValue": "null",
-          "responseTime": 60
+          "responseTime": 446
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "369",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 100,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "67"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "70"
+            }
+          }
         }
       },
       {
         "type": "applicationcommunication",
         "id": "341",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 100,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "12"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "19"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "255",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056761200,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 721
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "217",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056714400,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "82",
+          "responseTime": 450
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "346",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 100,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "57"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "26"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "333",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056882500,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 288
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "34",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Wiki",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821768
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "33"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "350"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "350"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "67",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Provenance",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821772
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "65"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "369"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "369"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "aggregatedclazzcommunication",
+        "id": "130",
+        "attributes": {
+          "extensionAttributes": {},
+          "totalRequests": 80,
+          "averageResponseTime": 880
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "74"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "80"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "127"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "187",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Connection",
+          "fullQualifiedName": "org.database.connector.Connection",
+          "instanceCount": 80
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "186"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "193",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056683100,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "27",
+          "responseTime": 612
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "node",
+        "id": "11",
+        "attributes": {
+          "extensionAttributes": {},
+          "ipAddress": "10.0.1.1",
+          "cpuUtilization": 0.19,
+          "freeRAM": 3221225472,
+          "usedRAM": 1073741824
+        },
+        "relationships": {
+          "applications": {
+            "data": [
+              {
+                "type": "application",
+                "id": "12"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "nodegroup",
+              "id": "10"
+            }
+          }
+        }
+      },
+      {
+        "type": "component",
+        "id": "71",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "org",
+          "fullQualifiedName": "org"
+        },
+        "relationships": {
+          "children": {
+            "data": [
+              {
+                "type": "component",
+                "id": "72"
+              }
+            ]
+          },
+          "clazzes": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "component",
+        "id": "102",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "extension",
+          "fullQualifiedName": "org.webshop.kernel.extension"
+        },
+        "relationships": {
+          "children": {
+            "data": []
+          },
+          "clazzes": {
+            "data": [
+              {
+                "type": "clazz",
+                "id": "103"
+              },
+              {
+                "type": "clazz",
+                "id": "104"
+              }
+            ]
+          },
+          "parentComponent": {
+            "data": {
+              "type": "component",
+              "id": "95"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "274",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056800300,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 416
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "275",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056801500,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 523
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "220",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056717700,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 863
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "192",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056680100,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "98",
+          "responseTime": 270
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "278",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056805400,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 80
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "224",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056722800,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 432
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "166",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod37()",
+          "totalRequests": 2100,
+          "averageResponseTime": 163
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "80"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "167"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "337",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056892300,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "77",
+          "responseTime": 593
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "109",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "ImplementationHandler",
+          "fullQualifiedName": "org.webshop.kernel.impl.ImplementationHandler",
+          "instanceCount": 45
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "108"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "134"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "137"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "140"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "155"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "160"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "168"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "173"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "89",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "ItemSqlMapDao",
+          "fullQualifiedName": "org.webshop.tooling.ItemSqlMapDao",
+          "instanceCount": 45
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "85"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "322",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056868800,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 565
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "node",
+        "id": "25",
+        "attributes": {
+          "extensionAttributes": {},
+          "ipAddress": "10.0.3.1",
+          "cpuUtilization": 0.61,
+          "freeRAM": 3221225472,
+          "usedRAM": 1073741824
+        },
+        "relationships": {
+          "applications": {
+            "data": [
+              {
+                "type": "application",
+                "id": "26"
+              },
+              {
+                "type": "application",
+                "id": "27"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "nodegroup",
+              "id": "24"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "279",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056806600,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 604
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "78",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "DescriptionLabeler",
+          "fullQualifiedName": "org.webshop.labeling.DescriptionLabeler",
+          "instanceCount": 5
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "73"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "228",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056728000,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "54",
+          "responseTime": 338
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "353",
         "attributes": {
           "extensionAttributes": {},
           "requests": 100,
@@ -2530,33 +3893,2728 @@ module.exports = function(app) {
         }
       },
       {
-        "type": "databasequery",
-        "id": "217",
+        "type": "node",
+        "id": "43",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355558284,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "90",
-          "responseTime": 706
+          "ipAddress": "10.0.5.2",
+          "cpuUtilization": 0.63,
+          "freeRAM": 2147483648,
+          "usedRAM": 1073741824
+        },
+        "relationships": {
+          "applications": {
+            "data": [
+              {
+                "type": "application",
+                "id": "44"
+              },
+              {
+                "type": "application",
+                "id": "45"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "nodegroup",
+              "id": "42"
+            }
+          }
         }
       },
       {
         "type": "databasequery",
-        "id": "255",
+        "id": "264",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355681758,
+          "timestamp": 360505056787900,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "35",
+          "responseTime": 416
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "177",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 5,
+          "requests": 1200,
+          "currentTraceDuration": 7524,
+          "averageResponseTime": 429
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "169"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "173"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "174",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 3,
+          "requests": 8200,
+          "currentTraceDuration": 1920,
+          "averageResponseTime": 33
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "169"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "173"
+            }
+          }
+        }
+      },
+      {
+        "type": "aggregatedclazzcommunication",
+        "id": "139",
+        "attributes": {
+          "extensionAttributes": {},
+          "totalRequests": 1200,
+          "averageResponseTime": 674
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "113"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "137"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "91",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "SequenceSqlMapDao",
+          "fullQualifiedName": "org.webshop.tooling.SequenceSqlMapDao",
+          "instanceCount": 15
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "85"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "88",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "CategorySqlMapDao",
+          "fullQualifiedName": "org.webshop.tooling.CategorySqlMapDao",
+          "instanceCount": 30
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "85"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "82",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "CategoryHelper",
+          "fullQualifiedName": "org.webshop.helpers.CategoryHelper",
+          "instanceCount": 35
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "79"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "285",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056815200,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 380
+          "responseTime": 680
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "119",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "AccountSqlMapDao",
+          "fullQualifiedName": "org.webshop.kernel.info.AccountSqlMapDao",
+          "instanceCount": 5
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "118"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "146",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod34()",
+          "totalRequests": 1000,
+          "averageResponseTime": 832
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "97"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "100"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "147"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "122",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "AccountSqlMapDao",
+          "fullQualifiedName": "org.webshop.kernel.lifecycle.AccountSqlMapDao",
+          "instanceCount": 25
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "121"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "149"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "70",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Webshop",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821772
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "69"
+            }
+          },
+          "components": {
+            "data": [
+              {
+                "type": "component",
+                "id": "71"
+              }
+            ]
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": []
+          },
+          "aggregatedClazzCommunications": {
+            "data": [
+              {
+                "type": "aggregatedclazzcommunication",
+                "id": "130"
+              },
+              {
+                "type": "aggregatedclazzcommunication",
+                "id": "133"
+              },
+              {
+                "type": "aggregatedclazzcommunication",
+                "id": "136"
+              },
+              {
+                "type": "aggregatedclazzcommunication",
+                "id": "139"
+              },
+              {
+                "type": "aggregatedclazzcommunication",
+                "id": "142"
+              },
+              {
+                "type": "aggregatedclazzcommunication",
+                "id": "145"
+              },
+              {
+                "type": "aggregatedclazzcommunication",
+                "id": "148"
+              },
+              {
+                "type": "aggregatedclazzcommunication",
+                "id": "151"
+              },
+              {
+                "type": "aggregatedclazzcommunication",
+                "id": "154"
+              },
+              {
+                "type": "aggregatedclazzcommunication",
+                "id": "159"
+              },
+              {
+                "type": "aggregatedclazzcommunication",
+                "id": "164"
+              }
+            ]
+          },
+          "traces": {
+            "data": [
+              {
+                "type": "trace",
+                "id": "128"
+              },
+              {
+                "type": "trace",
+                "id": "169"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "268",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056792700,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 663
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "289",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056822400,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "52",
+          "responseTime": 219
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "node",
+        "id": "53",
+        "attributes": {
+          "extensionAttributes": {},
+          "ipAddress": "10.0.0.3",
+          "cpuUtilization": 0.12,
+          "freeRAM": 4294967296,
+          "usedRAM": 2147483648
+        },
+        "relationships": {
+          "applications": {
+            "data": [
+              {
+                "type": "application",
+                "id": "54"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "nodegroup",
+              "id": "52"
+            }
+          }
+        }
+      },
+      {
+        "type": "node",
+        "id": "36",
+        "attributes": {
+          "extensionAttributes": {},
+          "ipAddress": "10.0.4.2",
+          "cpuUtilization": 0.41,
+          "freeRAM": 2147483648,
+          "usedRAM": 4294967296
+        },
+        "relationships": {
+          "applications": {
+            "data": [
+              {
+                "type": "application",
+                "id": "37"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "nodegroup",
+              "id": "35"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "254",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056760000,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 421
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "63",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Workflow",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821772
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "62"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "359"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "363"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "359"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "363"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "nodegroup",
+        "id": "28",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "10.0.3.2"
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "system",
+              "id": "23"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "158",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 11,
+          "requests": 500,
+          "currentTraceDuration": 5615,
+          "averageResponseTime": 681
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "157"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "123",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "AccountSqlMapDao",
+          "fullQualifiedName": "org.webshop.kernel.lifecycle.AccountSqlMapDao",
+          "instanceCount": 15
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "121"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "291",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056824600,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 40
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "30",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Database",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821768
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "29"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": []
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "271",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056796800,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "57",
+          "responseTime": 265
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "207",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056701500,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 445
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "98",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "APIHandler",
+          "fullQualifiedName": "org.webshop.kernel.api.APIHandler",
+          "instanceCount": 25
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "96"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "161",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 12,
+          "requests": 4200,
+          "currentTraceDuration": 6334,
+          "averageResponseTime": 583
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "160"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "258",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056773200,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "65",
+          "responseTime": 471
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "196",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056687100,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 34
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "203",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056696200,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 68
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "12",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Frontend",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821768
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "11"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "341"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "343"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "341"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "343"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "aggregatedclazzcommunication",
+        "id": "151",
+        "attributes": {
+          "extensionAttributes": {},
+          "totalRequests": 300,
+          "averageResponseTime": 718
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "122"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "125"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "149"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "302",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056838800,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 324
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "240",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056742900,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "75",
+          "responseTime": 41
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "173",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod36()",
+          "totalRequests": 9400,
+          "averageResponseTime": 231
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "80"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "174"
+              },
+              {
+                "type": "tracestep",
+                "id": "177"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "295",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056829700,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "94",
+          "responseTime": 91
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "113",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "APIImpl",
+          "fullQualifiedName": "org.webshop.kernel.impl.api.APIImpl",
+          "instanceCount": 25
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "112"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "41",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "4D",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821772
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "40"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "339"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "339"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "244",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056747700,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 660
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "nodegroup",
+        "id": "47",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "10.0.0.1 - 10.0.0.2"
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "system",
+              "id": "46"
+            }
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "182",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Cache",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821773
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "181"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "365"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "365"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
         }
       },
       {
         "type": "applicationcommunication",
-        "id": "346",
+        "id": "344",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 300,
+          "requests": 100,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "19"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "57"
+            }
+          }
+        }
+      },
+      {
+        "type": "node",
+        "id": "21",
+        "attributes": {
+          "extensionAttributes": {},
+          "ipAddress": "10.0.2.2",
+          "cpuUtilization": 0.39,
+          "freeRAM": 2147483648,
+          "usedRAM": 3221225472
+        },
+        "relationships": {
+          "applications": {
+            "data": [
+              {
+                "type": "application",
+                "id": "22"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "nodegroup",
+              "id": "20"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "306",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056843900,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "22",
+          "responseTime": 294
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "61",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Provenance",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821772
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "59"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "367"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "367"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "299",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056835000,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 218
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "281",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056809800,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 509
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "component",
+        "id": "185",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "database",
+          "fullQualifiedName": "org.database"
+        },
+        "relationships": {
+          "children": {
+            "data": [
+              {
+                "type": "component",
+                "id": "186"
+              }
+            ]
+          },
+          "clazzes": {
+            "data": []
+          },
+          "parentComponent": {
+            "data": {
+              "type": "component",
+              "id": "184"
+            }
+          }
+        }
+      },
+      {
+        "type": "system",
+        "id": "31",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "OSIS-Kiel"
+        },
+        "relationships": {
+          "nodegroups": {
+            "data": [
+              {
+                "type": "nodegroup",
+                "id": "32"
+              },
+              {
+                "type": "nodegroup",
+                "id": "35"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "landscape",
+              "id": "3"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "171",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod7()",
+          "totalRequests": 900,
+          "averageResponseTime": 720
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "125"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "172"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "261",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056783800,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 950
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "211",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056706800,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "10",
+          "responseTime": 614
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "284",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056813500,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 744
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "117",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "AccountSqlMapDao",
+          "fullQualifiedName": "org.webshop.kernel.impl.persistence.AccountSqlMapDao",
+          "instanceCount": 45
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "116"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "269",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056793900,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 591
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "component",
+        "id": "124",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "logging",
+          "fullQualifiedName": "org.webshop.kernel.logging"
+        },
+        "relationships": {
+          "children": {
+            "data": []
+          },
+          "clazzes": {
+            "data": [
+              {
+                "type": "clazz",
+                "id": "125"
+              },
+              {
+                "type": "clazz",
+                "id": "126"
+              }
+            ]
+          },
+          "parentComponent": {
+            "data": {
+              "type": "component",
+              "id": "95"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "143",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod44()",
+          "totalRequests": 100,
+          "averageResponseTime": 948
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "106"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "93"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "144"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "103",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "SingleExtensionHandler",
+          "fullQualifiedName": "org.webshop.kernel.extension.SingleExtensionHandler",
+          "instanceCount": 25
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "102"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "312",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056851300,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "100",
+          "responseTime": 675
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "120",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "AccountSqlMapDao",
+          "fullQualifiedName": "org.webshop.kernel.info.AccountSqlMapDao",
+          "instanceCount": 25
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "118"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "234",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056735500,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "87",
+          "responseTime": 800
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "219",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056716500,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 756
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "195",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056685800,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 265
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "167",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 15,
+          "requests": 2100,
+          "currentTraceDuration": 1513,
+          "averageResponseTime": 163
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "166"
+            }
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "356",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 200,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "51"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "66"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "101",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "ConfigurationHandler",
+          "fullQualifiedName": "org.webshop.kernel.configuration.ConfigurationHandler",
+          "instanceCount": 5
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "99"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "115",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "CacheImpl",
+          "fullQualifiedName": "org.webshop.kernel.impl.cache.CacheImpl",
+          "instanceCount": 45
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "114"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "273",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056799100,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 66
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "335",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056889300,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 93
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "170",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 1,
+          "requests": 2500,
+          "currentTraceDuration": 9806,
+          "averageResponseTime": 469
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "169"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "168"
+            }
+          }
+        }
+      },
+      {
+        "type": "aggregatedclazzcommunication",
+        "id": "164",
+        "attributes": {
+          "extensionAttributes": {},
+          "totalRequests": 35780,
+          "averageResponseTime": 622.25
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "80"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "162"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "166"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "175"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "178"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "45",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "PostgreSQL",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821772
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "43"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": []
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "343",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 100,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "12"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "15"
+            }
+          }
+        }
+      },
+      {
+        "type": "component",
+        "id": "114",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "cache",
+          "fullQualifiedName": "org.webshop.kernel.impl.cache"
+        },
+        "relationships": {
+          "children": {
+            "data": []
+          },
+          "clazzes": {
+            "data": [
+              {
+                "type": "clazz",
+                "id": "115"
+              }
+            ]
+          },
+          "parentComponent": {
+            "data": {
+              "type": "component",
+              "id": "108"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "223",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056721900,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "96",
+          "responseTime": 383
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "250",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056755000,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 405
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "336",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056890800,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "35",
+          "responseTime": 126
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "222",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056720500,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "12",
+          "responseTime": 178
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "83",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "ItemHelper",
+          "fullQualifiedName": "org.webshop.helpers.ItemHelper",
+          "instanceCount": 35
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "79"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "26",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Webinterface",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821768
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "25"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "347"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "347"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "97",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "APIHandler",
+          "fullQualifiedName": "org.webshop.kernel.api.APIHandler",
+          "instanceCount": 25
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "96"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "146"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "324",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056871400,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "9",
+          "responseTime": 892
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "323",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056870000,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 936
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "348",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 100,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "27"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "30"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "212",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056707800,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 276
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "nodegroup",
+        "id": "13",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "10.0.1.2"
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "system",
+              "id": "9"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "210",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056705400,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "47",
+          "responseTime": 643
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "system",
+        "id": "23",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "OceanRep"
+        },
+        "relationships": {
+          "nodegroups": {
+            "data": [
+              {
+                "type": "nodegroup",
+                "id": "24"
+              },
+              {
+                "type": "nodegroup",
+                "id": "28"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "landscape",
+              "id": "3"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "260",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056775600,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 767
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "165",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 14,
+          "requests": 2100,
+          "currentTraceDuration": 9301,
+          "averageResponseTime": 570
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "160"
+            }
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "66",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Workflow",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821772
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "65"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "360"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "364"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "360"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "364"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "313",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056852700,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "87",
+          "responseTime": 848
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "system",
+        "id": "16",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "OCN Database"
+        },
+        "relationships": {
+          "nodegroups": {
+            "data": [
+              {
+                "type": "nodegroup",
+                "id": "17"
+              },
+              {
+                "type": "nodegroup",
+                "id": "20"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "landscape",
+              "id": "3"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "235",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056736900,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "13",
+          "responseTime": 983
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "140",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod32()",
+          "totalRequests": 1000,
+          "averageResponseTime": 493
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "125"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "141"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "311",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056849700,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 572
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "233",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056734000,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 810
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "200",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056692400,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 161
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "218",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056715300,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 262
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "351",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 100,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "49"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "54"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "81",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "ProductHelper",
+          "fullQualifiedName": "org.webshop.helpers.ProductHelper",
+          "instanceCount": 40
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "79"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "272",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056797700,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 192
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "node",
+        "id": "59",
+        "attributes": {
+          "extensionAttributes": {},
+          "ipAddress": "10.0.0.5",
+          "cpuUtilization": 0.11,
+          "freeRAM": 4294967296,
+          "usedRAM": 1073741824
+        },
+        "relationships": {
+          "applications": {
+            "data": [
+              {
+                "type": "application",
+                "id": "60"
+              },
+              {
+                "type": "application",
+                "id": "61"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "nodegroup",
+              "id": "55"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "208",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056702700,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 823
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "132",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 2,
+          "requests": 800,
+          "currentTraceDuration": 4974,
+          "averageResponseTime": 329
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "131"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "206",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056700300,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 39
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "timestamp",
+        "id": "441",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 1544624261766,
+          "totalRequests": 120704
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "87",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "BaseSqlMapDao",
+          "fullQualifiedName": "org.webshop.tooling.BaseSqlMapDao",
+          "instanceCount": 20
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "85"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "257",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056771600,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 107
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "129",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 1,
+          "requests": 40,
+          "currentTraceDuration": 5063,
+          "averageResponseTime": 880
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "127"
+            }
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "362",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 100,
           "averageResponseTime": 0
         },
         "relationships": {
@@ -2569,85 +6627,1561 @@ module.exports = function(app) {
           "targetApplication": {
             "data": {
               "type": "application",
+              "id": "182"
+            }
+          }
+        }
+      },
+      {
+        "type": "aggregatedclazzcommunication",
+        "id": "142",
+        "attributes": {
+          "extensionAttributes": {},
+          "totalRequests": 14000,
+          "averageResponseTime": 397.75
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "125"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "140"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "155"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "168"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "component",
+        "id": "85",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "tooling",
+          "fullQualifiedName": "org.webshop.tooling"
+        },
+        "relationships": {
+          "children": {
+            "data": []
+          },
+          "clazzes": {
+            "data": [
+              {
+                "type": "clazz",
+                "id": "86"
+              },
+              {
+                "type": "clazz",
+                "id": "87"
+              },
+              {
+                "type": "clazz",
+                "id": "88"
+              },
+              {
+                "type": "clazz",
+                "id": "89"
+              },
+              {
+                "type": "clazz",
+                "id": "90"
+              },
+              {
+                "type": "clazz",
+                "id": "91"
+              }
+            ]
+          },
+          "parentComponent": {
+            "data": {
+              "type": "component",
+              "id": "72"
+            }
+          }
+        }
+      },
+      {
+        "type": "node",
+        "id": "181",
+        "attributes": {
+          "extensionAttributes": {},
+          "ipAddress": "10.0.0.8",
+          "cpuUtilization": 0.74,
+          "freeRAM": 3221225472,
+          "usedRAM": 3221225472
+        },
+        "relationships": {
+          "applications": {
+            "data": [
+              {
+                "type": "application",
+                "id": "182"
+              },
+              {
+                "type": "application",
+                "id": "183"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "nodegroup",
+              "id": "180"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "301",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056837800,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "40",
+          "responseTime": 97
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "nodegroup",
+        "id": "35",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "10.0.4.2"
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "system",
+              "id": "31"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "319",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056865500,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "88",
+          "responseTime": 520
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "259",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056774600,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "57",
+          "responseTime": 165
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "90",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "ProductSqlMapDao",
+          "fullQualifiedName": "org.webshop.tooling.ProductSqlMapDao",
+          "instanceCount": 20
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "85"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "309",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056847400,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 142
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "296",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056830600,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 72
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "component",
+        "id": "116",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "persistence",
+          "fullQualifiedName": "org.webshop.kernel.impl.persistence"
+        },
+        "relationships": {
+          "children": {
+            "data": []
+          },
+          "clazzes": {
+            "data": [
+              {
+                "type": "clazz",
+                "id": "117"
+              }
+            ]
+          },
+          "parentComponent": {
+            "data": {
+              "type": "component",
+              "id": "108"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "307",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056845200,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "53",
+          "responseTime": 633
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "aggregatedclazzcommunication",
+        "id": "136",
+        "attributes": {
+          "extensionAttributes": {},
+          "totalRequests": 24920,
+          "averageResponseTime": 298.25
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "80"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "134"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "160"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "173"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "247",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056751700,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "76",
+          "responseTime": 302
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "245",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056748800,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 552
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "367",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 200,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
               "id": "61"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "70"
             }
           }
         }
       },
       {
         "type": "application",
-        "id": "171",
+        "id": "57",
         "attributes": {
           "extensionAttributes": {},
-          "name": "Database Connector",
+          "name": "Workflow",
           "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927558
+          "lastUsage": 1544623821772
         },
         "relationships": {
           "parent": {
             "data": {
               "type": "node",
+              "id": "56"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "345"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "346"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "349"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "357"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "361"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "345"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "346"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "349"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "357"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "361"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "system",
+        "id": "38",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "WDC-Mare"
+        },
+        "relationships": {
+          "nodegroups": {
+            "data": [
+              {
+                "type": "nodegroup",
+                "id": "39"
+              },
+              {
+                "type": "nodegroup",
+                "id": "42"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "landscape",
+              "id": "3"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "267",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056791500,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 234
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "125",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "AccountSqlMapDao",
+          "fullQualifiedName": "org.webshop.kernel.logging.AccountSqlMapDao",
+          "instanceCount": 25
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "124"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "157"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "171"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "node",
+        "id": "7",
+        "attributes": {
+          "extensionAttributes": {},
+          "ipAddress": "10.0.99.1",
+          "cpuUtilization": 0.35,
+          "freeRAM": 3221225472,
+          "usedRAM": 4294967296
+        },
+        "relationships": {
+          "applications": {
+            "data": [
+              {
+                "type": "application",
+                "id": "8"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "nodegroup",
+              "id": "6"
+            }
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "37",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Artifacts",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821772
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "36"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": []
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "44",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Jira",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821772
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "43"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "340"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "340"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "111",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "AnnotationHandler",
+          "fullQualifiedName": "org.webshop.kernel.impl.annotations.AnnotationHandler",
+          "instanceCount": 35
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "110"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "310",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056848600,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 534
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "80",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "BaseHelper",
+          "fullQualifiedName": "org.webshop.helpers.BaseHelper",
+          "instanceCount": 30
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "79"
+            }
+          },
+          "clazzCommunications": {
+            "data": [
+              {
+                "type": "clazzcommunication",
+                "id": "162"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "166"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "175"
+              },
+              {
+                "type": "clazzcommunication",
+                "id": "178"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "286",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056816700,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 949
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "232",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056732800,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 335
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "77",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "ItemLabeler",
+          "fullQualifiedName": "org.webshop.labeling.ItemLabeler",
+          "instanceCount": 55
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "73"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "64",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Provenance",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821772
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "62"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "368"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "368"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "236",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056737900,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 554
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "294",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056828300,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
+          "returnValue": "79",
+          "responseTime": 994
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "nodegroup",
+        "id": "17",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "10.0.2.1"
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "system",
+              "id": "16"
+            }
+          }
+        }
+      },
+      {
+        "type": "trace",
+        "id": "169",
+        "attributes": {
+          "extensionAttributes": {},
+          "traceId": 2,
+          "totalRequests": 24390,
+          "totalTraceDuration": 5033,
+          "averageResponseTime": 744
+        },
+        "relationships": {
+          "traceSteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "170"
+              },
+              {
+                "type": "tracestep",
+                "id": "172"
+              },
+              {
+                "type": "tracestep",
+                "id": "174"
+              },
+              {
+                "type": "tracestep",
+                "id": "176"
+              },
+              {
+                "type": "tracestep",
+                "id": "177"
+              },
+              {
+                "type": "tracestep",
+                "id": "179"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "8",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Requests",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821768
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "7"
+            }
+          },
+          "components": {
+            "data": []
+          },
+          "databaseQueries": {
+            "data": []
+          },
+          "applicationCommunications": {
+            "data": [
+              {
+                "type": "applicationcommunication",
+                "id": "338"
+              },
+              {
+                "type": "applicationcommunication",
+                "id": "338"
+              }
+            ]
+          },
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "76",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "CategoryLabeler",
+          "fullQualifiedName": "org.webshop.labeling.CategoryLabeler",
+          "instanceCount": 10
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "73"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "201",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056693800,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 418
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "nodegroup",
+        "id": "20",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "10.0.2.2"
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "system",
+              "id": "16"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "290",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056823300,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 762
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "126",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "AccountSqlMapDao2",
+          "fullQualifiedName": "org.webshop.kernel.logging.AccountSqlMapDao2",
+          "instanceCount": 5
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "124"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "314",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056855200,
+          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
+          "returnValue": "null",
+          "responseTime": 479
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "107",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "GuardHandler",
+          "fullQualifiedName": "org.webshop.kernel.guard.GuardHandler",
+          "instanceCount": 25
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "105"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "221",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056719000,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 427
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "component",
+        "id": "108",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "impl",
+          "fullQualifiedName": "org.webshop.kernel.impl"
+        },
+        "relationships": {
+          "children": {
+            "data": [
+              {
+                "type": "component",
+                "id": "110"
+              },
+              {
+                "type": "component",
+                "id": "112"
+              },
+              {
+                "type": "component",
+                "id": "114"
+              },
+              {
+                "type": "component",
+                "id": "116"
+              }
+            ]
+          },
+          "clazzes": {
+            "data": [
+              {
+                "type": "clazz",
+                "id": "109"
+              }
+            ]
+          },
+          "parentComponent": {
+            "data": {
+              "type": "component",
+              "id": "95"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "334",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056888000,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 229
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "node",
+        "id": "62",
+        "attributes": {
+          "extensionAttributes": {},
+          "ipAddress": "10.0.0.6",
+          "cpuUtilization": 0.92,
+          "freeRAM": 4294967296,
+          "usedRAM": 1073741824
+        },
+        "relationships": {
+          "applications": {
+            "data": [
+              {
+                "type": "application",
+                "id": "63"
+              },
+              {
+                "type": "application",
+                "id": "64"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "nodegroup",
+              "id": "55"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "179",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 6,
+          "requests": 390,
+          "currentTraceDuration": 5033,
+          "averageResponseTime": 744
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
               "id": "169"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "178"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "321",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056867600,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 492
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "229",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056729400,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "38",
+          "responseTime": 632
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "175",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod8()",
+          "totalRequests": 11200,
+          "averageResponseTime": 465
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "80"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "176"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "363",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 300,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "63"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "182"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "325",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056872800,
+          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
+          "returnValue": "67",
+          "responseTime": 771
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "75",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "ProcuctLabeler",
+          "fullQualifiedName": "org.webshop.labeling.ProcuctLabeler",
+          "instanceCount": 30
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "73"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "225",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056724000,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 642
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "nodegroup",
+        "id": "68",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "10.0.0.9"
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "system",
+              "id": "46"
+            }
+          }
+        }
+      },
+      {
+        "type": "clazz",
+        "id": "94",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "CartBean",
+          "fullQualifiedName": "org.webshop.unsafe.CartBean",
+          "instanceCount": 40
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "component",
+              "id": "92"
+            }
+          },
+          "clazzCommunications": {
+            "data": []
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "163",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 13,
+          "requests": 4200,
+          "currentTraceDuration": 5116,
+          "averageResponseTime": 909
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "162"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "262",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056785200,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
+          "returnValue": "null",
+          "responseTime": 952
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "node",
+        "id": "56",
+        "attributes": {
+          "extensionAttributes": {},
+          "ipAddress": "10.0.0.4",
+          "cpuUtilization": 0.37,
+          "freeRAM": 4294967296,
+          "usedRAM": 1073741824
+        },
+        "relationships": {
+          "applications": {
+            "data": [
+              {
+                "type": "application",
+                "id": "57"
+              },
+              {
+                "type": "application",
+                "id": "58"
+              }
+            ]
+          },
+          "parent": {
+            "data": {
+              "type": "nodegroup",
+              "id": "55"
+            }
+          }
+        }
+      },
+      {
+        "type": "databasequery",
+        "id": "263",
+        "attributes": {
+          "extensionAttributes": {},
+          "timestamp": 360505056786400,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 47
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "application",
+        "id": "183",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "Database Connector",
+          "programmingLanguage": "JAVA",
+          "lastUsage": 1544623821773
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "node",
+              "id": "181"
             }
           },
           "components": {
             "data": [
               {
                 "type": "component",
-                "id": "172"
+                "id": "184"
               }
             ]
           },
           "databaseQueries": {
             "data": [
-              {
-                "type": "databasequery",
-                "id": "176"
-              },
-              {
-                "type": "databasequery",
-                "id": "177"
-              },
-              {
-                "type": "databasequery",
-                "id": "178"
-              },
-              {
-                "type": "databasequery",
-                "id": "179"
-              },
-              {
-                "type": "databasequery",
-                "id": "180"
-              },
-              {
-                "type": "databasequery",
-                "id": "181"
-              },
-              {
-                "type": "databasequery",
-                "id": "182"
-              },
-              {
-                "type": "databasequery",
-                "id": "183"
-              },
-              {
-                "type": "databasequery",
-                "id": "184"
-              },
-              {
-                "type": "databasequery",
-                "id": "185"
-              },
-              {
-                "type": "databasequery",
-                "id": "186"
-              },
-              {
-                "type": "databasequery",
-                "id": "187"
-              },
               {
                 "type": "databasequery",
                 "id": "188"
@@ -3199,1458 +8733,95 @@ module.exports = function(app) {
               {
                 "type": "databasequery",
                 "id": "325"
-              }
-            ]
-          },
-          "outgoingApplicationCommunications": {
-            "data": []
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "application",
-        "id": "34",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Wiki",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "33"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "338"
               },
               {
-                "type": "applicationcommunication",
-                "id": "338"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "application",
-        "id": "67",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Provenance",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "65"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "357"
+                "type": "databasequery",
+                "id": "326"
               },
               {
-                "type": "applicationcommunication",
-                "id": "357"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "193",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355468562,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "10",
-          "responseTime": 43
-        }
-      },
-      {
-        "type": "node",
-        "id": "11",
-        "attributes": {
-          "extensionAttributes": {},
-          "ipAddress": "10.0.1.1",
-          "cpuUtilization": 0.22,
-          "freeRAM": 4294967296,
-          "usedRAM": 4294967296
-        },
-        "relationships": {
-          "applications": {
-            "data": [
-              {
-                "type": "application",
-                "id": "12"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "nodegroup",
-              "id": "10"
-            }
-          }
-        }
-      },
-      {
-        "type": "component",
-        "id": "71",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "org",
-          "fullQualifiedName": "org"
-        },
-        "relationships": {
-          "children": {
-            "data": [
-              {
-                "type": "component",
-                "id": "72"
-              }
-            ]
-          },
-          "clazzes": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "component",
-        "id": "102",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "extension",
-          "fullQualifiedName": "org.webshop.kernel.extension"
-        },
-        "relationships": {
-          "children": {
-            "data": []
-          },
-          "clazzes": {
-            "data": [
-              {
-                "type": "clazz",
-                "id": "103"
+                "type": "databasequery",
+                "id": "327"
               },
               {
-                "type": "clazz",
-                "id": "104"
+                "type": "databasequery",
+                "id": "328"
+              },
+              {
+                "type": "databasequery",
+                "id": "329"
+              },
+              {
+                "type": "databasequery",
+                "id": "330"
+              },
+              {
+                "type": "databasequery",
+                "id": "331"
+              },
+              {
+                "type": "databasequery",
+                "id": "332"
+              },
+              {
+                "type": "databasequery",
+                "id": "333"
+              },
+              {
+                "type": "databasequery",
+                "id": "334"
+              },
+              {
+                "type": "databasequery",
+                "id": "335"
+              },
+              {
+                "type": "databasequery",
+                "id": "336"
+              },
+              {
+                "type": "databasequery",
+                "id": "337"
               }
             ]
           },
-          "parentComponent": {
-            "data": {
-              "type": "component",
-              "id": "95"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "274",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355747957,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 998
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "275",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355751162,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 866
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "192",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355464730,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "66",
-          "responseTime": 480
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "220",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355567460,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 743
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "224",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355580528,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 759
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "278",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355761599,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 34
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "109",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "ImplementationHandler",
-          "fullQualifiedName": "org.webshop.kernel.impl.ImplementationHandler",
-          "instanceCount": 45,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "108"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "clazzcommunication",
-                "id": "135"
-              },
-              {
-                "type": "clazzcommunication",
-                "id": "139"
-              },
-              {
-                "type": "clazzcommunication",
-                "id": "143"
-              },
-              {
-                "type": "clazzcommunication",
-                "id": "163"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "330",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "19"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "22"
-            }
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "89",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "ItemSqlMapDao",
-          "fullQualifiedName": "org.webshop.tooling.ItemSqlMapDao",
-          "instanceCount": 45,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "85"
-            }
-          },
-          "outgoingClazzCommunications": {
+          "applicationCommunications": {
             "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "322",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355923149,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 554
-        }
-      },
-      {
-        "type": "node",
-        "id": "25",
-        "attributes": {
-          "extensionAttributes": {},
-          "ipAddress": "10.0.3.1",
-          "cpuUtilization": 0.71,
-          "freeRAM": 3221225472,
-          "usedRAM": 3221225472
-        },
-        "relationships": {
-          "applications": {
-            "data": [
-              {
-                "type": "application",
-                "id": "26"
-              },
-              {
-                "type": "application",
-                "id": "27"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "nodegroup",
-              "id": "24"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "279",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355764761,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 229
-        }
-      },
-      {
-        "type": "aggregatedclazzcommunication",
-        "id": "141",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 1200
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "113"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "clazzcommunication",
-                "id": "139"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "component",
-        "id": "172",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "org",
-          "fullQualifiedName": "org"
-        },
-        "relationships": {
-          "children": {
-            "data": [
-              {
-                "type": "component",
-                "id": "173"
-              }
-            ]
-          },
-          "clazzes": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "78",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "DescriptionLabeler",
-          "fullQualifiedName": "org.webshop.labeling.DescriptionLabeler",
-          "instanceCount": 5,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "73"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "228",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355593860,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "93",
-          "responseTime": 768
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "353",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 600,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "170"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "171"
-            }
-          }
-        }
-      },
-      {
-        "type": "node",
-        "id": "43",
-        "attributes": {
-          "extensionAttributes": {},
-          "ipAddress": "10.0.5.2",
-          "cpuUtilization": 0.7,
-          "freeRAM": 1073741824,
-          "usedRAM": 2147483648
-        },
-        "relationships": {
-          "applications": {
-            "data": [
-              {
-                "type": "application",
-                "id": "44"
-              },
-              {
-                "type": "application",
-                "id": "45"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "nodegroup",
-              "id": "42"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "186",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355444978,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "95",
-          "responseTime": 985
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "264",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355714300,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "60",
-          "responseTime": 769
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "91",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "SequenceSqlMapDao",
-          "fullQualifiedName": "org.webshop.tooling.SequenceSqlMapDao",
-          "instanceCount": 15,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "85"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "cumulatedclazzcommunication",
-        "id": "146",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 5000
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "125"
-            }
           },
           "aggregatedClazzCommunications": {
-            "data": [
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "145"
-              },
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "167"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "88",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "CategorySqlMapDao",
-          "fullQualifiedName": "org.webshop.tooling.CategorySqlMapDao",
-          "instanceCount": 30,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "85"
-            }
-          },
-          "outgoingClazzCommunications": {
             "data": []
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "82",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "CategoryHelper",
-          "fullQualifiedName": "org.webshop.helpers.CategoryHelper",
-          "instanceCount": 35,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "79"
-            }
           },
-          "outgoingClazzCommunications": {
+          "traces": {
             "data": []
           }
         }
       },
       {
         "type": "databasequery",
-        "id": "182",
+        "id": "266",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355431286,
+          "timestamp": 360505056790300,
           "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
           "returnValue": "null",
-          "responseTime": 314
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "285",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355784489,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 76
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "119",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "AccountSqlMapDao",
-          "fullQualifiedName": "org.webshop.kernel.info.AccountSqlMapDao",
-          "instanceCount": 5,
-          "objectIds": []
+          "responseTime": 842
         },
         "relationships": {
-          "parent": {
+          "parentApplication": {
             "data": {
-              "type": "component",
-              "id": "118"
+              "type": "application",
+              "id": "183"
             }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "122",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "AccountSqlMapDao",
-          "fullQualifiedName": "org.webshop.kernel.lifecycle.AccountSqlMapDao",
-          "instanceCount": 25,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "121"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "clazzcommunication",
-                "id": "155"
-              }
-            ]
           }
         }
       },
       {
         "type": "application",
-        "id": "70",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Webshop",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "69"
-            }
-          },
-          "components": {
-            "data": [
-              {
-                "type": "component",
-                "id": "71"
-              }
-            ]
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": []
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "129"
-              },
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "133"
-              },
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "137"
-              },
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "141"
-              },
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "145"
-              },
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "149"
-              },
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "153"
-              },
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "157"
-              },
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "161"
-              },
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "167"
-              }
-            ]
-          },
-          "cumulatedClazzCommunications": {
-            "data": [
-              {
-                "type": "cumulatedclazzcommunication",
-                "id": "130"
-              },
-              {
-                "type": "cumulatedclazzcommunication",
-                "id": "134"
-              },
-              {
-                "type": "cumulatedclazzcommunication",
-                "id": "138"
-              },
-              {
-                "type": "cumulatedclazzcommunication",
-                "id": "142"
-              },
-              {
-                "type": "cumulatedclazzcommunication",
-                "id": "146"
-              },
-              {
-                "type": "cumulatedclazzcommunication",
-                "id": "150"
-              },
-              {
-                "type": "cumulatedclazzcommunication",
-                "id": "154"
-              },
-              {
-                "type": "cumulatedclazzcommunication",
-                "id": "158"
-              },
-              {
-                "type": "cumulatedclazzcommunication",
-                "id": "162"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "268",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355727098,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 883
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "289",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355798230,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "81",
-          "responseTime": 172
-        }
-      },
-      {
-        "type": "node",
-        "id": "53",
-        "attributes": {
-          "extensionAttributes": {},
-          "ipAddress": "10.0.0.3",
-          "cpuUtilization": 0.51,
-          "freeRAM": 4294967296,
-          "usedRAM": 1073741824
-        },
-        "relationships": {
-          "applications": {
-            "data": [
-              {
-                "type": "application",
-                "id": "54"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "nodegroup",
-              "id": "52"
-            }
-          }
-        }
-      },
-      {
-        "type": "node",
-        "id": "36",
-        "attributes": {
-          "extensionAttributes": {},
-          "ipAddress": "10.0.4.2",
-          "cpuUtilization": 0.39,
-          "freeRAM": 3221225472,
-          "usedRAM": 4294967296
-        },
-        "relationships": {
-          "applications": {
-            "data": [
-              {
-                "type": "application",
-                "id": "37"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "nodegroup",
-              "id": "35"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "254",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355678736,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 450
-        }
-      },
-      {
-        "type": "application",
-        "id": "63",
+        "id": "60",
         "attributes": {
           "extensionAttributes": {},
           "name": "Workflow",
           "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "62"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "347"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "351"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "347"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "351"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "nodegroup",
-        "id": "28",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "10.0.3.2"
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "system",
-              "id": "23"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "176",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355353846,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 807
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "123",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "AccountSqlMapDao",
-          "fullQualifiedName": "org.webshop.kernel.lifecycle.AccountSqlMapDao",
-          "instanceCount": 15,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "121"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "291",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355803675,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 312
-        }
-      },
-      {
-        "type": "application",
-        "id": "30",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Database",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "29"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": []
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "207",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355524493,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 94
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "271",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355738018,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "79",
-          "responseTime": 679
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "98",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "APIHandler",
-          "fullQualifiedName": "org.webshop.kernel.api.APIHandler",
-          "instanceCount": 25,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "96"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "258",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355694269,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "86",
-          "responseTime": 932
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "196",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355477189,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 793
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "203",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355510964,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 571
-        }
-      },
-      {
-        "type": "application",
-        "id": "12",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Frontend",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "11"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "329"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "331"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "329"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "331"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "302",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355848526,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 924
-        }
-      },
-      {
-        "type": "clazzcommunication",
-        "id": "163",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 3500,
-          "operationName": "getMethod1()"
-        },
-        "relationships": {
-          "runtimeInformations": {
-            "data": [
-              {
-                "type": "runtimeinformation",
-                "id": "164"
-              }
-            ]
-          },
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "125"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "240",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355632160,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "74",
-          "responseTime": 673
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "295",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355818607,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "39",
-          "responseTime": 634
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "113",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "APIImpl",
-          "fullQualifiedName": "org.webshop.kernel.impl.api.APIImpl",
-          "instanceCount": 25,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "112"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "application",
-        "id": "41",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "4D",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "40"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "327"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "327"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "244",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355645099,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 752
-        }
-      },
-      {
-        "type": "cumulatedclazzcommunication",
-        "id": "158",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 600
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "122"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "125"
-            }
-          },
-          "aggregatedClazzCommunications": {
-            "data": [
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "157"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "nodegroup",
-        "id": "47",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "10.0.0.1 - 10.0.0.2"
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "system",
-              "id": "46"
-            }
-          }
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "344",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 200,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "51"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "66"
-            }
-          }
-        }
-      },
-      {
-        "type": "node",
-        "id": "21",
-        "attributes": {
-          "extensionAttributes": {},
-          "ipAddress": "10.0.2.2",
-          "cpuUtilization": 0.86,
-          "freeRAM": 1073741824,
-          "usedRAM": 4294967296
-        },
-        "relationships": {
-          "applications": {
-            "data": [
-              {
-                "type": "application",
-                "id": "22"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "nodegroup",
-              "id": "20"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "306",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355869344,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "44",
-          "responseTime": 800
-        }
-      },
-      {
-        "type": "application",
-        "id": "61",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Provenance",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
+          "lastUsage": 1544623821772
         },
         "relationships": {
           "parent": {
@@ -4665,846 +8836,37 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "applicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
-                "id": "355"
+                "id": "358"
               },
               {
                 "type": "applicationcommunication",
-                "id": "355"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "299",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355834681,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 24
-        }
-      },
-      {
-        "type": "runtimeinformation",
-        "id": "166",
-        "attributes": {
-          "extensionAttributes": {},
-          "traceId": 3,
-          "overallTraceDuration": 2705,
-          "requests": 500,
-          "averageResponseTime": 418,
-          "orderIndexes": [
-            1
-          ],
-          "averageResponseTimeInNanoSec": 418
-        }
-      },
-      {
-        "type": "runtimeinformation",
-        "id": "136",
-        "attributes": {
-          "extensionAttributes": {},
-          "traceId": 1,
-          "overallTraceDuration": 6835,
-          "requests": 60,
-          "averageResponseTime": 49,
-          "orderIndexes": [
-            1
-          ],
-          "averageResponseTimeInNanoSec": 49
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "281",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355770807,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 472
-        }
-      },
-      {
-        "type": "runtimeinformation",
-        "id": "156",
-        "attributes": {
-          "extensionAttributes": {},
-          "traceId": 3,
-          "overallTraceDuration": 1903,
-          "requests": 150,
-          "averageResponseTime": 895,
-          "orderIndexes": [
-            1
-          ],
-          "averageResponseTimeInNanoSec": 895
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "329",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "12"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "19"
-            }
-          }
-        }
-      },
-      {
-        "type": "system",
-        "id": "31",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "OSIS-Kiel"
-        },
-        "relationships": {
-          "nodegroups": {
-            "data": [
-              {
-                "type": "nodegroup",
-                "id": "32"
-              },
-              {
-                "type": "nodegroup",
-                "id": "35"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "landscape",
-              "id": "3"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "261",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355704367,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 789
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "183",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355434681,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 894
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "211",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355538836,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "94",
-          "responseTime": 717
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "284",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355781353,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 501
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "117",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "AccountSqlMapDao",
-          "fullQualifiedName": "org.webshop.kernel.impl.persistence.AccountSqlMapDao",
-          "instanceCount": 45,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "116"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "aggregatedclazzcommunication",
-        "id": "153",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 2000
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "97"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "100"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "clazzcommunication",
-                "id": "151"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "269",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355730263,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 868
-        }
-      },
-      {
-        "type": "component",
-        "id": "124",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "logging",
-          "fullQualifiedName": "org.webshop.kernel.logging"
-        },
-        "relationships": {
-          "children": {
-            "data": []
-          },
-          "clazzes": {
-            "data": [
-              {
-                "type": "clazz",
-                "id": "125"
-              },
-              {
-                "type": "clazz",
-                "id": "126"
-              }
-            ]
-          },
-          "parentComponent": {
-            "data": {
-              "type": "component",
-              "id": "95"
-            }
-          }
-        }
-      },
-      {
-        "type": "clazzcommunication",
-        "id": "143",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 1000,
-          "operationName": "getMethod18()"
-        },
-        "relationships": {
-          "runtimeInformations": {
-            "data": [
-              {
-                "type": "runtimeinformation",
-                "id": "144"
-              }
-            ]
-          },
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "125"
-            }
-          }
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "326",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "8"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "12"
-            }
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "103",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "SingleExtensionHandler",
-          "fullQualifiedName": "org.webshop.kernel.extension.SingleExtensionHandler",
-          "instanceCount": 25,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "102"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "312",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355889696,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "60",
-          "responseTime": 167
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "120",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "AccountSqlMapDao",
-          "fullQualifiedName": "org.webshop.kernel.info.AccountSqlMapDao",
-          "instanceCount": 25,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "118"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "234",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355612506,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "11",
-          "responseTime": 137
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "219",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355564129,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 810
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "195",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355474162,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 734
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "332",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "19"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "57"
-            }
-          }
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "356",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 300,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "64"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "70"
-            }
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "101",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "ConfigurationHandler",
-          "fullQualifiedName": "org.webshop.kernel.configuration.ConfigurationHandler",
-          "instanceCount": 5,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "99"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "115",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "CacheImpl",
-          "fullQualifiedName": "org.webshop.kernel.impl.cache.CacheImpl",
-          "instanceCount": 45,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "114"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "273",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355743484,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 961
-        }
-      },
-      {
-        "type": "runtimeinformation",
-        "id": "144",
-        "attributes": {
-          "extensionAttributes": {},
-          "traceId": 1,
-          "overallTraceDuration": 5087,
-          "requests": 1000,
-          "averageResponseTime": 16,
-          "orderIndexes": [
-            1
-          ],
-          "averageResponseTimeInNanoSec": 16
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "179",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355411148,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 163
-        }
-      },
-      {
-        "type": "application",
-        "id": "45",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "PostgreSQL",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "43"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": []
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "343",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "49"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "63"
-            }
-          }
-        }
-      },
-      {
-        "type": "component",
-        "id": "114",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "cache",
-          "fullQualifiedName": "org.webshop.kernel.impl.cache"
-        },
-        "relationships": {
-          "children": {
-            "data": []
-          },
-          "clazzes": {
-            "data": [
-              {
-                "type": "clazz",
-                "id": "115"
-              }
-            ]
-          },
-          "parentComponent": {
-            "data": {
-              "type": "component",
-              "id": "108"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "223",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355578005,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "16",
-          "responseTime": 798
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "250",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355665034,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 65
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "222",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355574283,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "9",
-          "responseTime": 77
-        }
-      },
-      {
-        "type": "aggregatedclazzcommunication",
-        "id": "149",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 200
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "93"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "106"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "clazzcommunication",
-                "id": "147"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "83",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "ItemHelper",
-          "fullQualifiedName": "org.webshop.helpers.ItemHelper",
-          "instanceCount": 35,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "79"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "application",
-        "id": "26",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Webinterface",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "25"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "335"
+                "id": "362"
               },
               {
                 "type": "applicationcommunication",
-                "id": "335"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "97",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "APIHandler",
-          "fullQualifiedName": "org.webshop.kernel.api.APIHandler",
-          "instanceCount": 25,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "96"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "clazzcommunication",
-                "id": "151"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "node",
-        "id": "169",
-        "attributes": {
-          "extensionAttributes": {},
-          "ipAddress": "10.0.0.8",
-          "cpuUtilization": 0.57,
-          "freeRAM": 3221225472,
-          "usedRAM": 1073741824
-        },
-        "relationships": {
-          "applications": {
-            "data": [
-              {
-                "type": "application",
-                "id": "170"
+                "id": "358"
               },
               {
-                "type": "application",
-                "id": "171"
+                "type": "applicationcommunication",
+                "id": "362"
               }
             ]
           },
-          "parent": {
-            "data": {
-              "type": "nodegroup",
-              "id": "168"
-            }
+          "aggregatedClazzCommunications": {
+            "data": []
+          },
+          "traces": {
+            "data": []
           }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "324",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355930246,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "13",
-          "responseTime": 362
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "323",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355926284,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 133
         }
       },
       {
         "type": "applicationcommunication",
-        "id": "348",
+        "id": "360",
         "attributes": {
           "extensionAttributes": {},
           "requests": 200,
@@ -5526,22 +8888,11 @@ module.exports = function(app) {
         }
       },
       {
-        "type": "databasequery",
-        "id": "212",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355541339,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 11
-        }
-      },
-      {
         "type": "nodegroup",
-        "id": "13",
+        "id": "10",
         "attributes": {
           "extensionAttributes": {},
-          "name": "10.0.1.2"
+          "name": "10.0.1.1"
         },
         "relationships": {
           "parent": {
@@ -5553,467 +8904,50 @@ module.exports = function(app) {
         }
       },
       {
-        "type": "databasequery",
-        "id": "210",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355534975,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "9",
-          "responseTime": 247
-        }
-      },
-      {
-        "type": "system",
-        "id": "23",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "OceanRep"
-        },
-        "relationships": {
-          "nodegroups": {
-            "data": [
-              {
-                "type": "nodegroup",
-                "id": "24"
-              },
-              {
-                "type": "nodegroup",
-                "id": "28"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "landscape",
-              "id": "3"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "260",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355700568,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 231
-        }
-      },
-      {
-        "type": "aggregatedclazzcommunication",
-        "id": "129",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 80
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "74"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "80"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "clazzcommunication",
-                "id": "127"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "clazzcommunication",
-        "id": "139",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 600,
-          "operationName": "getMethod7()"
-        },
-        "relationships": {
-          "runtimeInformations": {
-            "data": [
-              {
-                "type": "runtimeinformation",
-                "id": "140"
-              }
-            ]
-          },
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "113"
-            }
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "175",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Connection",
-          "fullQualifiedName": "org.database.connector.Connection",
-          "instanceCount": 80,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "174"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "application",
-        "id": "66",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Workflow",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "65"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "348"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "352"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "348"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "352"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "313",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355893631,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "17",
-          "responseTime": 965
-        }
-      },
-      {
-        "type": "system",
-        "id": "16",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "OCN Database"
-        },
-        "relationships": {
-          "nodegroups": {
-            "data": [
-              {
-                "type": "nodegroup",
-                "id": "17"
-              },
-              {
-                "type": "nodegroup",
-                "id": "20"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "landscape",
-              "id": "3"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "235",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355616394,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "88",
-          "responseTime": 785
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "233",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355608681,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 376
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "311",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355885458,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 512
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "200",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355492945,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 387
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "218",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355560840,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 814
-        }
-      },
-      {
-        "type": "clazzcommunication",
-        "id": "147",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "operationName": "getMethod32()"
-        },
-        "relationships": {
-          "runtimeInformations": {
-            "data": [
-              {
-                "type": "runtimeinformation",
-                "id": "148"
-              }
-            ]
-          },
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "106"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "93"
-            }
-          }
-        }
-      },
-      {
-        "type": "timestamp",
-        "id": "444",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 1536153517554,
-          "calls": 168059
-        }
-      },
-      {
         "type": "applicationcommunication",
-        "id": "351",
+        "id": "354",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 300,
+          "requests": 500,
           "averageResponseTime": 0
         },
         "relationships": {
           "sourceApplication": {
             "data": {
               "type": "application",
-              "id": "63"
+              "id": "49"
             }
           },
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "170"
+              "id": "60"
             }
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "81",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "ProductHelper",
-          "fullQualifiedName": "org.webshop.helpers.ProductHelper",
-          "instanceCount": 40,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "79"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
           }
         }
       },
       {
         "type": "databasequery",
-        "id": "272",
+        "id": "188",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355740463,
+          "timestamp": 360505056631900,
           "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
           "returnValue": "null",
-          "responseTime": 206
-        }
-      },
-      {
-        "type": "node",
-        "id": "59",
-        "attributes": {
-          "extensionAttributes": {},
-          "ipAddress": "10.0.0.5",
-          "cpuUtilization": 0.83,
-          "freeRAM": 3221225472,
-          "usedRAM": 1073741824
+          "responseTime": 951
         },
         "relationships": {
-          "applications": {
-            "data": [
-              {
-                "type": "application",
-                "id": "60"
-              },
-              {
-                "type": "application",
-                "id": "61"
-              }
-            ]
-          },
-          "parent": {
+          "parentApplication": {
             "data": {
-              "type": "nodegroup",
-              "id": "55"
+              "type": "application",
+              "id": "183"
             }
           }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "208",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355527727,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 511
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "206",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355521298,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 131
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "87",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "BaseSqlMapDao",
-          "fullQualifiedName": "org.webshop.tooling.BaseSqlMapDao",
-          "instanceCount": 20,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "85"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "257",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355689611,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 441
         }
       },
       {
         "type": "applicationcommunication",
-        "id": "337",
+        "id": "339",
         "attributes": {
           "extensionAttributes": {},
           "requests": 100,
@@ -6023,1059 +8957,20 @@ module.exports = function(app) {
           "sourceApplication": {
             "data": {
               "type": "application",
-              "id": "57"
+              "id": "41"
             }
           },
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "34"
-            }
-          }
-        }
-      },
-      {
-        "type": "component",
-        "id": "85",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "tooling",
-          "fullQualifiedName": "org.webshop.tooling"
-        },
-        "relationships": {
-          "children": {
-            "data": []
-          },
-          "clazzes": {
-            "data": [
-              {
-                "type": "clazz",
-                "id": "86"
-              },
-              {
-                "type": "clazz",
-                "id": "87"
-              },
-              {
-                "type": "clazz",
-                "id": "88"
-              },
-              {
-                "type": "clazz",
-                "id": "89"
-              },
-              {
-                "type": "clazz",
-                "id": "90"
-              },
-              {
-                "type": "clazz",
-                "id": "91"
-              }
-            ]
-          },
-          "parentComponent": {
-            "data": {
-              "type": "component",
-              "id": "72"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "301",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355842331,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "92",
-          "responseTime": 198
-        }
-      },
-      {
-        "type": "nodegroup",
-        "id": "35",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "10.0.4.2"
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "system",
-              "id": "31"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "259",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355698048,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "42",
-          "responseTime": 30
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "319",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355913820,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "92",
-          "responseTime": 68
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "90",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "ProductSqlMapDao",
-          "fullQualifiedName": "org.webshop.tooling.ProductSqlMapDao",
-          "instanceCount": 20,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "85"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "309",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355879090,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 121
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "296",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355821945,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 379
-        }
-      },
-      {
-        "type": "component",
-        "id": "116",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "persistence",
-          "fullQualifiedName": "org.webshop.kernel.impl.persistence"
-        },
-        "relationships": {
-          "children": {
-            "data": []
-          },
-          "clazzes": {
-            "data": [
-              {
-                "type": "clazz",
-                "id": "117"
-              }
-            ]
-          },
-          "parentComponent": {
-            "data": {
-              "type": "component",
-              "id": "108"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "307",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355873240,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "49",
-          "responseTime": 127
-        }
-      },
-      {
-        "type": "runtimeinformation",
-        "id": "140",
-        "attributes": {
-          "extensionAttributes": {},
-          "traceId": 0,
-          "overallTraceDuration": 1064,
-          "requests": 600,
-          "averageResponseTime": 761,
-          "orderIndexes": [
-            1
-          ],
-          "averageResponseTimeInNanoSec": 761
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "247",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355656195,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "70",
-          "responseTime": 206
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "245",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355648239,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 612
-        }
-      },
-      {
-        "type": "clazzcommunication",
-        "id": "151",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 1000,
-          "operationName": "getMethod1()"
-        },
-        "relationships": {
-          "runtimeInformations": {
-            "data": [
-              {
-                "type": "runtimeinformation",
-                "id": "152"
-              }
-            ]
-          },
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "97"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "100"
-            }
-          }
-        }
-      },
-      {
-        "type": "application",
-        "id": "57",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Workflow",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "56"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "333"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "334"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "337"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "345"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "349"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "333"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "334"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "337"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "345"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "349"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "system",
-        "id": "38",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "WDC-Mare"
-        },
-        "relationships": {
-          "nodegroups": {
-            "data": [
-              {
-                "type": "nodegroup",
-                "id": "39"
-              },
-              {
-                "type": "nodegroup",
-                "id": "42"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "landscape",
-              "id": "3"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "267",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355724010,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 742
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "125",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "AccountSqlMapDao",
-          "fullQualifiedName": "org.webshop.kernel.logging.AccountSqlMapDao",
-          "instanceCount": 25,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "124"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "clazzcommunication",
-                "id": "165"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "component",
-        "id": "173",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "database",
-          "fullQualifiedName": "org.database"
-        },
-        "relationships": {
-          "children": {
-            "data": [
-              {
-                "type": "component",
-                "id": "174"
-              }
-            ]
-          },
-          "clazzes": {
-            "data": []
-          },
-          "parentComponent": {
-            "data": {
-              "type": "component",
-              "id": "172"
-            }
-          }
-        }
-      },
-      {
-        "type": "node",
-        "id": "7",
-        "attributes": {
-          "extensionAttributes": {},
-          "ipAddress": "10.0.99.1",
-          "cpuUtilization": 0.21,
-          "freeRAM": 1073741824,
-          "usedRAM": 2147483648
-        },
-        "relationships": {
-          "applications": {
-            "data": [
-              {
-                "type": "application",
-                "id": "8"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "nodegroup",
-              "id": "6"
-            }
-          }
-        }
-      },
-      {
-        "type": "application",
-        "id": "37",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Artifacts",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "36"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": []
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "application",
-        "id": "44",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Jira",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "43"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "328"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "328"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "181",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355428397,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "8",
-          "responseTime": 510
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "111",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "AnnotationHandler",
-          "fullQualifiedName": "org.webshop.kernel.impl.annotations.AnnotationHandler",
-          "instanceCount": 35,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "110"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "310",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355882215,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 498
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "80",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "BaseHelper",
-          "fullQualifiedName": "org.webshop.helpers.BaseHelper",
-          "instanceCount": 30,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "79"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "286",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355787531,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 845
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "232",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355605695,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 891
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "77",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "ItemLabeler",
-          "fullQualifiedName": "org.webshop.labeling.ItemLabeler",
-          "instanceCount": 55,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "73"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "application",
-        "id": "64",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Provenance",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "62"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "356"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "356"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "236",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355618846,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 108
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "294",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355813730,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "38",
-          "responseTime": 644
-        }
-      },
-      {
-        "type": "nodegroup",
-        "id": "17",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "10.0.2.1"
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "system",
-              "id": "16"
-            }
-          }
-        }
-      },
-      {
-        "type": "cumulatedclazzcommunication",
-        "id": "142",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 2400
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "113"
-            }
-          },
-          "aggregatedClazzCommunications": {
-            "data": [
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "141"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "application",
-        "id": "8",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Requests",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "7"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "326"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "326"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "76",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "CategoryLabeler",
-          "fullQualifiedName": "org.webshop.labeling.CategoryLabeler",
-          "instanceCount": 10,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "73"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "201",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355496519,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 938
-        }
-      },
-      {
-        "type": "nodegroup",
-        "id": "20",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "10.0.2.2"
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "system",
-              "id": "16"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "177",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355398303,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 598
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "290",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355800630,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 907
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "126",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "AccountSqlMapDao2",
-          "fullQualifiedName": "org.webshop.kernel.logging.AccountSqlMapDao2",
-          "instanceCount": 5,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "124"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "314",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355896256,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 235
-        }
-      },
-      {
-        "type": "clazzcommunication",
-        "id": "135",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 60,
-          "operationName": "getMethod26()"
-        },
-        "relationships": {
-          "runtimeInformations": {
-            "data": [
-              {
-                "type": "runtimeinformation",
-                "id": "136"
-              }
-            ]
-          },
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "80"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
-            }
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "107",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "GuardHandler",
-          "fullQualifiedName": "org.webshop.kernel.guard.GuardHandler",
-          "instanceCount": 25,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "105"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "221",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355570459,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 763
-        }
-      },
-      {
-        "type": "runtimeinformation",
-        "id": "164",
-        "attributes": {
-          "extensionAttributes": {},
-          "traceId": 2,
-          "overallTraceDuration": 1047,
-          "requests": 3500,
-          "averageResponseTime": 596,
-          "orderIndexes": [
-            1
-          ],
-          "averageResponseTimeInNanoSec": 596
-        }
-      },
-      {
-        "type": "component",
-        "id": "108",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "impl",
-          "fullQualifiedName": "org.webshop.kernel.impl"
-        },
-        "relationships": {
-          "children": {
-            "data": [
-              {
-                "type": "component",
-                "id": "110"
-              },
-              {
-                "type": "component",
-                "id": "112"
-              },
-              {
-                "type": "component",
-                "id": "114"
-              },
-              {
-                "type": "component",
-                "id": "116"
-              }
-            ]
-          },
-          "clazzes": {
-            "data": [
-              {
-                "type": "clazz",
-                "id": "109"
-              }
-            ]
-          },
-          "parentComponent": {
-            "data": {
-              "type": "component",
-              "id": "95"
-            }
-          }
-        }
-      },
-      {
-        "type": "node",
-        "id": "62",
-        "attributes": {
-          "extensionAttributes": {},
-          "ipAddress": "10.0.0.6",
-          "cpuUtilization": 0.51,
-          "freeRAM": 4294967296,
-          "usedRAM": 1073741824
-        },
-        "relationships": {
-          "applications": {
-            "data": [
-              {
-                "type": "application",
-                "id": "63"
-              },
-              {
-                "type": "application",
-                "id": "64"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "nodegroup",
-              "id": "55"
+              "id": "44"
             }
           }
         }
       },
       {
         "type": "applicationcommunication",
-        "id": "328",
+        "id": "340",
         "attributes": {
           "extensionAttributes": {},
           "requests": 100,
@@ -7097,540 +8992,11 @@ module.exports = function(app) {
         }
       },
       {
-        "type": "aggregatedclazzcommunication",
-        "id": "167",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 1000
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "125"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "clazzcommunication",
-                "id": "165"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "321",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355919872,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 850
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "229",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355597581,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "20",
-          "responseTime": 894
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "325",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355934054,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "65",
-          "responseTime": 479
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "75",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "ProcuctLabeler",
-          "fullQualifiedName": "org.webshop.labeling.ProcuctLabeler",
-          "instanceCount": 30,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "73"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "225",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355583576,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 41
-        }
-      },
-      {
-        "type": "nodegroup",
-        "id": "68",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "10.0.0.9"
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "system",
-              "id": "46"
-            }
-          }
-        }
-      },
-      {
-        "type": "clazzcommunication",
-        "id": "165",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 500,
-          "operationName": "getMethod6()"
-        },
-        "relationships": {
-          "runtimeInformations": {
-            "data": [
-              {
-                "type": "runtimeinformation",
-                "id": "166"
-              }
-            ]
-          },
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "125"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "109"
-            }
-          }
-        }
-      },
-      {
-        "type": "clazz",
-        "id": "94",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "CartBean",
-          "fullQualifiedName": "org.webshop.unsafe.CartBean",
-          "instanceCount": 40,
-          "objectIds": []
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "component",
-              "id": "92"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "262",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355707403,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 286
-        }
-      },
-      {
-        "type": "node",
-        "id": "56",
-        "attributes": {
-          "extensionAttributes": {},
-          "ipAddress": "10.0.0.4",
-          "cpuUtilization": 0.4,
-          "freeRAM": 1073741824,
-          "usedRAM": 3221225472
-        },
-        "relationships": {
-          "applications": {
-            "data": [
-              {
-                "type": "application",
-                "id": "57"
-              },
-              {
-                "type": "application",
-                "id": "58"
-              }
-            ]
-          },
-          "parent": {
-            "data": {
-              "type": "nodegroup",
-              "id": "55"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "263",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355710436,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 315
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "266",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355720409,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 831
-        }
-      },
-      {
-        "type": "application",
-        "id": "60",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Workflow",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "59"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "346"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "350"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "346"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "350"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
-        "type": "aggregatedclazzcommunication",
-        "id": "157",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 300
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "122"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "125"
-            }
-          },
-          "outgoingClazzCommunications": {
-            "data": [
-              {
-                "type": "clazzcommunication",
-                "id": "155"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "nodegroup",
-        "id": "10",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "10.0.1.1"
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "system",
-              "id": "9"
-            }
-          }
-        }
-      },
-      {
-        "type": "runtimeinformation",
-        "id": "128",
-        "attributes": {
-          "extensionAttributes": {},
-          "traceId": 1,
-          "overallTraceDuration": 4531,
-          "requests": 40,
-          "averageResponseTime": 721,
-          "orderIndexes": [
-            1
-          ],
-          "averageResponseTimeInNanoSec": 721
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "354",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "58"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "70"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "184",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355437728,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 967
-        }
-      },
-      {
-        "type": "runtimeinformation",
-        "id": "148",
-        "attributes": {
-          "extensionAttributes": {},
-          "traceId": 0,
-          "overallTraceDuration": 9400,
-          "requests": 100,
-          "averageResponseTime": 72,
-          "orderIndexes": [
-            1
-          ],
-          "averageResponseTimeInNanoSec": 72
-        }
-      },
-      {
-        "type": "cumulatedclazzcommunication",
-        "id": "130",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 160
-        },
-        "relationships": {
-          "sourceClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "74"
-            }
-          },
-          "targetClazz": {
-            "data": {
-              "type": "clazz",
-              "id": "80"
-            }
-          },
-          "aggregatedClazzCommunications": {
-            "data": [
-              {
-                "type": "aggregatedclazzcommunication",
-                "id": "129"
-              }
-            ]
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "188",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355451249,
-          "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
-          "returnValue": "null",
-          "responseTime": 435
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "339",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "49"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "54"
-            }
-          }
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "180",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355422668,
-          "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "79",
-          "responseTime": 513
-        }
-      },
-      {
-        "type": "applicationcommunication",
-        "id": "340",
-        "attributes": {
-          "extensionAttributes": {},
-          "requests": 200,
-          "averageResponseTime": 0
-        },
-        "relationships": {
-          "sourceApplication": {
-            "data": {
-              "type": "application",
-              "id": "51"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "54"
-            }
-          }
-        }
-      },
-      {
-        "type": "application",
-        "id": "170",
-        "attributes": {
-          "extensionAttributes": {},
-          "name": "Cache",
-          "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927558
-        },
-        "relationships": {
-          "parent": {
-            "data": {
-              "type": "node",
-              "id": "169"
-            }
-          },
-          "components": {
-            "data": []
-          },
-          "databaseQueries": {
-            "data": []
-          },
-          "outgoingApplicationCommunications": {
-            "data": [
-              {
-                "type": "applicationcommunication",
-                "id": "353"
-              },
-              {
-                "type": "applicationcommunication",
-                "id": "353"
-              }
-            ]
-          },
-          "aggregatedOutgoingClazzCommunications": {
-            "data": []
-          },
-          "cumulatedClazzCommunications": {
-            "data": []
-          }
-        }
-      },
-      {
         "type": "applicationcommunication",
         "id": "345",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 400,
+          "requests": 100,
           "averageResponseTime": 0
         },
         "relationships": {
@@ -7643,7 +9009,7 @@ module.exports = function(app) {
           "targetApplication": {
             "data": {
               "type": "application",
-              "id": "58"
+              "id": "41"
             }
           }
         }
@@ -7711,8 +9077,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "GuardHandler",
           "fullQualifiedName": "org.webshop.kernel.guard.GuardHandler",
-          "instanceCount": 35,
-          "objectIds": []
+          "instanceCount": 35
         },
         "relationships": {
           "parent": {
@@ -7721,15 +9086,15 @@ module.exports = function(app) {
               "id": "105"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
-                "id": "147"
+                "id": "143"
               },
               {
                 "type": "clazzcommunication",
-                "id": "159"
+                "id": "152"
               }
             ]
           }
@@ -7740,10 +9105,18 @@ module.exports = function(app) {
         "id": "293",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355809899,
+          "timestamp": 360505056826900,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
           "returnValue": "null",
-          "responseTime": 161
+          "responseTime": 390
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -7751,10 +9124,18 @@ module.exports = function(app) {
         "id": "287",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355790719,
+          "timestamp": 360505056818000,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
           "returnValue": "null",
-          "responseTime": 530
+          "responseTime": 69
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -7764,7 +9145,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "Database",
           "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
+          "lastUsage": 1544623821768
         },
         "relationships": {
           "parent": {
@@ -7779,13 +9160,13 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "applicationCommunications": {
             "data": []
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedClazzCommunications": {
             "data": []
           },
-          "cumulatedClazzCommunications": {
+          "traces": {
             "data": []
           }
         }
@@ -7797,8 +9178,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "ConfigurationHandler",
           "fullQualifiedName": "org.webshop.kernel.configuration.ConfigurationHandler",
-          "instanceCount": 35,
-          "objectIds": []
+          "instanceCount": 35
         },
         "relationships": {
           "parent": {
@@ -7807,8 +9187,33 @@ module.exports = function(app) {
               "id": "99"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": []
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "153",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 9,
+          "requests": 12000,
+          "currentTraceDuration": 3899,
+          "averageResponseTime": 307
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "152"
+            }
           }
         }
       },
@@ -7817,10 +9222,41 @@ module.exports = function(app) {
         "id": "252",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355672098,
+          "timestamp": 360505056757600,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "15",
-          "responseTime": 424
+          "returnValue": "27",
+          "responseTime": 138
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "359",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 500,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "63"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "64"
+            }
+          }
         }
       },
       {
@@ -7856,14 +9292,51 @@ module.exports = function(app) {
         }
       },
       {
-        "type": "databasequery",
-        "id": "178",
+        "type": "tracestep",
+        "id": "144",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355405320,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
-          "returnValue": "null",
-          "responseTime": 419
+          "tracePosition": 6,
+          "requests": 100,
+          "currentTraceDuration": 9008,
+          "averageResponseTime": 948
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "143"
+            }
+          }
+        }
+      },
+      {
+        "type": "applicationcommunication",
+        "id": "365",
+        "attributes": {
+          "extensionAttributes": {},
+          "requests": 600,
+          "averageResponseTime": 0
+        },
+        "relationships": {
+          "sourceApplication": {
+            "data": {
+              "type": "application",
+              "id": "182"
+            }
+          },
+          "targetApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -7883,14 +9356,47 @@ module.exports = function(app) {
         }
       },
       {
+        "type": "tracestep",
+        "id": "150",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 8,
+          "requests": 150,
+          "currentTraceDuration": 5079,
+          "averageResponseTime": 718
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "149"
+            }
+          }
+        }
+      },
+      {
         "type": "databasequery",
         "id": "194",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355471017,
+          "timestamp": 360505056684200,
           "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
           "returnValue": "null",
-          "responseTime": 480
+          "responseTime": 579
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -7898,25 +9404,81 @@ module.exports = function(app) {
         "id": "256",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355686595,
+          "timestamp": 360505056770200,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 434
+          "responseTime": 738
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
-        "type": "nodegroup",
+        "type": "clazzcommunication",
         "id": "168",
         "attributes": {
           "extensionAttributes": {},
-          "name": "10.0.0.8"
+          "operationName": "getMethod45()",
+          "totalRequests": 2500,
+          "averageResponseTime": 469
         },
         "relationships": {
-          "parent": {
+          "sourceClazz": {
             "data": {
-              "type": "system",
-              "id": "46"
+              "type": "clazz",
+              "id": "109"
             }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "125"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "170"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "clazzcommunication",
+        "id": "178",
+        "attributes": {
+          "extensionAttributes": {},
+          "operationName": "getMethod11()",
+          "totalRequests": 390,
+          "averageResponseTime": 744
+        },
+        "relationships": {
+          "sourceClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "80"
+            }
+          },
+          "targetClazz": {
+            "data": {
+              "type": "clazz",
+              "id": "109"
+            }
+          },
+          "tracesteps": {
+            "data": [
+              {
+                "type": "tracestep",
+                "id": "179"
+              }
+            ]
           }
         }
       },
@@ -7925,7 +9487,8 @@ module.exports = function(app) {
         "id": "133",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 1600
+          "totalRequests": 1600,
+          "averageResponseTime": 329
         },
         "relationships": {
           "sourceClazz": {
@@ -7940,7 +9503,7 @@ module.exports = function(app) {
               "id": "109"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
@@ -7956,9 +9519,9 @@ module.exports = function(app) {
         "attributes": {
           "extensionAttributes": {},
           "ipAddress": "10.0.5.1",
-          "cpuUtilization": 0.91,
+          "cpuUtilization": 0.97,
           "freeRAM": 4294967296,
-          "usedRAM": 4294967296
+          "usedRAM": 3221225472
         },
         "relationships": {
           "applications": {
@@ -7978,14 +9541,47 @@ module.exports = function(app) {
         }
       },
       {
+        "type": "tracestep",
+        "id": "147",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 7,
+          "requests": 1000,
+          "currentTraceDuration": 4927,
+          "averageResponseTime": 832
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "128"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "146"
+            }
+          }
+        }
+      },
+      {
         "type": "databasequery",
         "id": "198",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355484096,
+          "timestamp": 360505056690000,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "6",
-          "responseTime": 784
+          "returnValue": "11",
+          "responseTime": 186
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -7993,10 +9589,18 @@ module.exports = function(app) {
         "id": "318",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355909646,
+          "timestamp": 360505056864100,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "77",
-          "responseTime": 909
+          "returnValue": "9",
+          "responseTime": 970
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -8004,10 +9608,18 @@ module.exports = function(app) {
         "id": "205",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355518903,
+          "timestamp": 360505056699300,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "29",
-          "responseTime": 562
+          "returnValue": "8",
+          "responseTime": 660
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -8015,10 +9627,18 @@ module.exports = function(app) {
         "id": "300",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355838558,
+          "timestamp": 360505056836400,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "71",
-          "responseTime": 693
+          "returnValue": "69",
+          "responseTime": 99
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -8026,10 +9646,43 @@ module.exports = function(app) {
         "id": "242",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355638747,
+          "timestamp": 360505056745200,
           "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
           "returnValue": "null",
-          "responseTime": 709
+          "responseTime": 109
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "tracestep",
+        "id": "172",
+        "attributes": {
+          "extensionAttributes": {},
+          "tracePosition": 2,
+          "requests": 900,
+          "currentTraceDuration": 6712,
+          "averageResponseTime": 720
+        },
+        "relationships": {
+          "parentTrace": {
+            "data": {
+              "type": "trace",
+              "id": "169"
+            }
+          },
+          "clazzCommunication": {
+            "data": {
+              "type": "clazzcommunication",
+              "id": "171"
+            }
+          }
         }
       },
       {
@@ -8037,10 +9690,18 @@ module.exports = function(app) {
         "id": "308",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355875856,
+          "timestamp": 360505056846200,
           "sqlStatement": "CREATE TABLE IF NOT EXISTS `order` (oid integer PRIMARY KEY, name text NOT NULL, email text NOT NULL, odate text NOT NULL, itemid integer NOT NULL);",
           "returnValue": "null",
-          "responseTime": 424
+          "responseTime": 40
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -8050,7 +9711,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "Jira",
           "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
+          "lastUsage": 1544623821772
         },
         "relationships": {
           "parent": {
@@ -8065,30 +9726,30 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "applicationCommunications": {
             "data": [
               {
                 "type": "applicationcommunication",
-                "id": "340"
+                "id": "352"
               },
               {
                 "type": "applicationcommunication",
-                "id": "344"
+                "id": "356"
               },
               {
                 "type": "applicationcommunication",
-                "id": "340"
+                "id": "352"
               },
               {
                 "type": "applicationcommunication",
-                "id": "344"
+                "id": "356"
               }
             ]
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedClazzCommunications": {
             "data": []
           },
-          "cumulatedClazzCommunications": {
+          "traces": {
             "data": []
           }
         }
@@ -8138,6 +9799,22 @@ module.exports = function(app) {
         }
       },
       {
+        "type": "nodegroup",
+        "id": "180",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "10.0.0.8"
+        },
+        "relationships": {
+          "parent": {
+            "data": {
+              "type": "system",
+              "id": "46"
+            }
+          }
+        }
+      },
+      {
         "type": "component",
         "id": "110",
         "attributes": {
@@ -8170,10 +9847,18 @@ module.exports = function(app) {
         "id": "297",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355825114,
+          "timestamp": 360505056832600,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 944
+          "responseTime": 994
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -8225,10 +9910,46 @@ module.exports = function(app) {
         "id": "283",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355778699,
+          "timestamp": 360505056812600,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Tom B. Erichsen",
-          "returnValue": "75",
-          "responseTime": 349
+          "returnValue": "50",
+          "responseTime": 829
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
+        }
+      },
+      {
+        "type": "component",
+        "id": "186",
+        "attributes": {
+          "extensionAttributes": {},
+          "name": "connector",
+          "fullQualifiedName": "org.database.connector"
+        },
+        "relationships": {
+          "children": {
+            "data": []
+          },
+          "clazzes": {
+            "data": [
+              {
+                "type": "clazz",
+                "id": "187"
+              }
+            ]
+          },
+          "parentComponent": {
+            "data": {
+              "type": "component",
+              "id": "185"
+            }
+          }
         }
       },
       {
@@ -8236,21 +9957,18 @@ module.exports = function(app) {
         "id": "304",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355862226,
+          "timestamp": 360505056841200,
           "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0'Tom B. Erichsen', 'erichsen@uni-kiel.de', '2017-11-16', '1');",
           "returnValue": "null",
-          "responseTime": 534
-        }
-      },
-      {
-        "type": "databasequery",
-        "id": "209",
-        "attributes": {
-          "extensionAttributes": {},
-          "timestamp": 19118355530990,
-          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
-          "returnValue": "null",
-          "responseTime": 113
+          "responseTime": 819
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
@@ -8258,31 +9976,35 @@ module.exports = function(app) {
         "id": "246",
         "attributes": {
           "extensionAttributes": {},
-          "timestamp": 19118355652233,
+          "timestamp": 360505056750300,
           "sqlStatement": "SELECT * FROM `order` WHERE name = Carol K. Durham",
-          "returnValue": "7",
-          "responseTime": 17
+          "returnValue": "13",
+          "responseTime": 176
+        },
+        "relationships": {
+          "parentApplication": {
+            "data": {
+              "type": "application",
+              "id": "183"
+            }
+          }
         }
       },
       {
-        "type": "applicationcommunication",
-        "id": "334",
+        "type": "databasequery",
+        "id": "209",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 100,
-          "averageResponseTime": 0
+          "timestamp": 360505056703900,
+          "sqlStatement": "INSERT INTO `order` (oid, name, email, odate, itemid) VALUES('0', 'Carol K. Durham', 'durham@uni-kiel.de', '2017-10-08', '1');",
+          "returnValue": "null",
+          "responseTime": 98
         },
         "relationships": {
-          "sourceApplication": {
+          "parentApplication": {
             "data": {
               "type": "application",
-              "id": "57"
-            }
-          },
-          "targetApplication": {
-            "data": {
-              "type": "application",
-              "id": "26"
+              "id": "183"
             }
           }
         }
@@ -8294,7 +10016,7 @@ module.exports = function(app) {
           "extensionAttributes": {},
           "name": "Database",
           "programmingLanguage": "JAVA",
-          "lastUsage": 1536152927556
+          "lastUsage": 1544623821768
         },
         "relationships": {
           "parent": {
@@ -8309,13 +10031,13 @@ module.exports = function(app) {
           "databaseQueries": {
             "data": []
           },
-          "outgoingApplicationCommunications": {
+          "applicationCommunications": {
             "data": []
           },
-          "aggregatedOutgoingClazzCommunications": {
+          "aggregatedClazzCommunications": {
             "data": []
           },
-          "cumulatedClazzCommunications": {
+          "traces": {
             "data": []
           }
         }
@@ -8325,30 +10047,27 @@ module.exports = function(app) {
         "id": "145",
         "attributes": {
           "extensionAttributes": {},
-          "requests": 5500
+          "totalRequests": 200,
+          "averageResponseTime": 948
         },
         "relationships": {
           "sourceClazz": {
             "data": {
               "type": "clazz",
-              "id": "109"
+              "id": "106"
             }
           },
           "targetClazz": {
             "data": {
               "type": "clazz",
-              "id": "125"
+              "id": "93"
             }
           },
-          "outgoingClazzCommunications": {
+          "clazzCommunications": {
             "data": [
               {
                 "type": "clazzcommunication",
                 "id": "143"
-              },
-              {
-                "type": "clazzcommunication",
-                "id": "163"
               }
             ]
           }
@@ -8371,19 +10090,19 @@ module.exports = function(app) {
         }
       }
     ]
-  };
+  }
 
   landscapeRouter.get('/broadcast', sse.init);
 
-  landscapeRouter.get('/latest-landscape', function(req, res) {
+  landscapeRouter.get('/latest-landscape', function (req, res) {
     res.send(landscapeObject);
   });
 
-  landscapeRouter.post('/', function(req, res) {
+  landscapeRouter.post('/', function (req, res) {
     res.status(201).end();
   });
 
-  landscapeRouter.get('/:id', function(req, res) {
+  landscapeRouter.get('/:id', function (req, res) {
     res.send({
       'landscape': {
         id: req.params.id
@@ -8391,7 +10110,7 @@ module.exports = function(app) {
     });
   });
 
-  landscapeRouter.put('/:id', function(req, res) {
+  landscapeRouter.put('/:id', function (req, res) {
     res.send({
       'landscape': {
         id: req.params.id
@@ -8399,7 +10118,7 @@ module.exports = function(app) {
     });
   });
 
-  landscapeRouter.delete('/:id', function(req, res) {
+  landscapeRouter.delete('/:id', function (req, res) {
     res.status(204).end();
   });
 
@@ -8417,8 +10136,8 @@ module.exports = function(app) {
 
   function sendSSE() {
     setTimeout(function () {
-        sse.send(landscapeObject, "message");
-        sendSSE();
+      sse.send(landscapeObject, "message");
+      sendSSE();
     }, 10000);
   }
 

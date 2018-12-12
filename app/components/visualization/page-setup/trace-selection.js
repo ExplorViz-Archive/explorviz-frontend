@@ -21,17 +21,14 @@ export default Component.extend({
 
             // mark selected trace
             traces.forEach((trace) => {
-                if (trace.traceId == traceId) {
+                if (trace.get('traceId') == traceId) {
                     trace.set('isSelected', true);
                 } else {
                     trace.set('isSelected', false);
                 }
             });
 
-            this.set('additionalData.data.traces', traces);
-
             this.get('highlighter').highlightTrace(traceId);
-            this.get('highlighter').applyHighlighting();
             this.get('renderingService').redrawScene();
         }
     },
