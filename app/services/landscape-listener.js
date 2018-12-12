@@ -12,6 +12,7 @@ export default Service.extend({
   store: service(),
   timestampRepo: service("repos/timestamp-repository"),
   landscapeRepo: service("repos/landscape-repository"),
+  latestJsonLandscape: null,
 
   initSSE() {
 
@@ -33,12 +34,14 @@ export default Service.extend({
     es.onmessage = function(e) {
       const jsonLandscape = JSON.parse(e.data);
 
-      if(jsonLandscape && jsonLandscape.hasOwnProperty("data")) {
+      if (jsonLandscape && jsonLandscape.hasOwnProperty("data") &&
+        JSON.stringify(jsonLandscape) !== JSON.stringify(self.get('latestJsonLandscape'))) {
         // console.log("JSON: " + JSON.stringify(jsonLandscape));
 
         // ATTENTION: Mind the push operation, push != pushPayload in terms of 
         // serializer usage
         // https://github.com/emberjs/data/issues/3455
+        self.set('latestJsonLandscape', jsonLandscape);
         const landscapeRecord = self.get('store').push(jsonLandscape);
         self.addCumulatedCommunication();
         self.set('landscapeRepo.latestLandscape', landscapeRecord);
@@ -55,6 +58,7 @@ export default Service.extend({
     let store = this.get('store');
 
     // Remove outdated communication
+    // TODO: Reuse old data to persist models for drawing
     store.unloadAll('cumulatedclazzcommunication');
 
     let applications = store.peekAll('application');
