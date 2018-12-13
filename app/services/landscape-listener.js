@@ -12,6 +12,8 @@ export default Service.extend({
   store: service(),
   timestampRepo: service("repos/timestamp-repository"),
   landscapeRepo: service("repos/landscape-repository"),
+  highlighter: service('visualization/application/highlighter'),
+  additionalData: service('additional-data'),
   latestJsonLandscape: null,
 
   initSSE() {
@@ -57,57 +59,67 @@ export default Service.extend({
   addDrawableCommunication() {
     let store = this.get('store');
 
-    // Remove outdated communication
-    // TODO: Reuse old data to persist models for drawing
-    store.unloadAll('drawableclazzcommunication');
+    let highlightedEntity = this.get('highlighter.highlightedEntity');
+
+    // Reset communication highlighting due to new communication
+    if (highlightedEntity && highlightedEntity.constructor.modelName === "drawableclazzcommunication"){
+      this.get('highlighter').unhighlightAll();
+       this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
+    }
 
     let applications = store.peekAll('application');
     applications.forEach((application) => {
       // Reset relationship in application
       application.set('drawableClazzCommunications', []);
 
-
       let aggregatedComms = application.get('aggregatedClazzCommunications');
       aggregatedComms.forEach((aggregatedComm) => {
 
-        let possibleExistingComm = checkBidirectionality(application, aggregatedComm);
+        let possibleExistingComm = checkForExistingComm(application, aggregatedComm);
 
-        if (possibleExistingComm.isBidirectional) {
-          let existingCommunication = possibleExistingComm.communication;
-          let existingRequests = existingCommunication.get('requests');
-          let averageResponseTime =
-            (existingCommunication.get('averageResponseTime') + aggregatedComm.get('averageResponseTime')) / 2;
-          existingCommunication.set('requests', existingRequests + aggregatedComm.get('totalRequests'));
-          existingCommunication.set('averageResponseTime', averageResponseTime);
-          existingCommunication.set('isBidirectional', true);
-
-          // Set relationship which does not yet exist
-          existingCommunication.get('aggregatedClazzCommunications').addObject(aggregatedComm);
+        if (possibleExistingComm.isExisting) {
+          updateExistingDrawableComm(possibleExistingComm.communication, aggregatedComm);
         } else {
-          let drawableComm = store.createRecord('drawableclazzcommunication', {});
-          drawableComm.set('requests', aggregatedComm.get('totalRequests'));
-          drawableComm.set('averageResponseTime', aggregatedComm.get('averageResponseTime'));
-          drawableComm.set('isBidirectional', false);
-
-          // Set relationships
-          drawableComm.set('sourceClazz', aggregatedComm.get('sourceClazz'));
-          drawableComm.set('targetClazz', aggregatedComm.get('targetClazz'));
-          drawableComm.get('aggregatedClazzCommunications').addObject(aggregatedComm);
-          application.get('drawableClazzCommunications').addObject(drawableComm);
+          addNewDrawableCommunication(application, aggregatedComm);
         }
       });
     });
 
+    function addNewDrawableCommunication(application, aggregatedComm){
+      let drawableComm = store.createRecord('drawableclazzcommunication', {});
+      drawableComm.set('requests', aggregatedComm.get('totalRequests'));
+      drawableComm.set('averageResponseTime', aggregatedComm.get('averageResponseTime'));
+      drawableComm.set('isBidirectional', false);
+
+      // Set relationships
+      drawableComm.set('sourceClazz', aggregatedComm.get('sourceClazz'));
+      drawableComm.set('targetClazz', aggregatedComm.get('targetClazz'));
+      drawableComm.get('aggregatedClazzCommunications').addObject(aggregatedComm);
+      application.get('drawableClazzCommunications').addObject(drawableComm);
+    }
+
+    function updateExistingDrawableComm(existingCommunication, aggregatedComm){
+      let existingRequests = existingCommunication.get('requests');
+      let averageResponseTime =
+        (existingCommunication.get('averageResponseTime') + aggregatedComm.get('averageResponseTime')) / 2;
+      existingCommunication.set('requests', existingRequests + aggregatedComm.get('totalRequests'));
+      existingCommunication.set('averageResponseTime', averageResponseTime);
+      existingCommunication.set('isBidirectional', true);
+
+      // Set relationship which does not yet exist
+      existingCommunication.get('aggregatedClazzCommunications').addObject(aggregatedComm);
+    }
+
     // Check for a given aggregated communication is there already exists a corresponding
     // drawable communication which would imply bidirectionality
-    function checkBidirectionality(application, aggregatedComm){
+    function checkForExistingComm(application, aggregatedComm){
       let drawableComms = application.get('drawableClazzCommunications');
-      let possibleCommunication = {isBidirectional: false, communication: null};
+      let possibleCommunication = {isExisting: false, communication: null};
       drawableComms.forEach( (drawableComm) => {
         // check if drawableCommunication with reversed communication is already created
         if (aggregatedComm.get('sourceClazz.id') == drawableComm.get('targetClazz.id') &&
             aggregatedComm.get('targetClazz.id') == drawableComm.get('sourceClazz.id')){
-              possibleCommunication = {isBidirectional: true, communication: drawableComm};
+              possibleCommunication = {isExisting: true, communication: drawableComm};
         }
       });
       return possibleCommunication;
