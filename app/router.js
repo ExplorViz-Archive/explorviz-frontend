@@ -23,7 +23,7 @@ Router.map(function() {
   this.route('configuration');
   this.route('base-route');
   this.route('discovery');
-  this.route('replay');
+  //this.route('replay');
 });
 
 export default Router;
