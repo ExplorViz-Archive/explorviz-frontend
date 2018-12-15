@@ -23,7 +23,7 @@ export default Object.extend({
         case "clazz":
             popupData = this.buildClazzData(emberModel);
             break;
-        case "cumulatedclazzcommunication":
+        case "drawableclazzcommunication":
             popupData = this.buildCommunicationData(emberModel);
             break;
         default:
@@ -83,7 +83,7 @@ export default Object.extend({
     let clazzName = clazz.get('name');
     let instanceCount = clazz.get('instanceCount');
 
-    const clazzCommunications = clazz.get('outgoingClazzCommunications');
+    const clazzCommunications = clazz.get('clazzCommunications');
     let operationCount = clazzCommunications.get('length');
 
     let popupData = {
@@ -95,75 +95,34 @@ export default Object.extend({
       }
   
       return popupData;
-
   },
 
-  buildCommunicationData(cumulatedClazzCommunication) {
-    let runtimeStats = getRuntimeInformations(cumulatedClazzCommunication);
+  buildCommunicationData(drawableClazzCommunication) {
+    // let runtimeStats = getRuntimeInformations(drawableClazzCommunication);
 
     // TODO: check if this is correct way to check for bidirectionality
-    const isBidirectional = cumulatedClazzCommunication.get("aggregatedClazzCommunications").get("length") > 1;
+    const isBidirectional = drawableClazzCommunication.get("isBidirectional");
 
-    // Formatted values for the clazzCommunication popup
-    const formatFactor = 1000; // convert from ns to ms
-    const avgAverageResponseTime = round(runtimeStats.avgAverageResponseTime / formatFactor, 0);
-    const avgOverallTraceDuration = round(runtimeStats.avgOverallTraceDuration / formatFactor, 0);
+    const traces = drawableClazzCommunication.getContainedTraces();
 
     let popupData = {
       isShown: true,
       popupType: "clazzCommunication",
-      sourceClazz: cumulatedClazzCommunication.get("sourceClazz").get("name"),
-      targetClazz: cumulatedClazzCommunication.get("targetClazz").get("name"),
+      sourceClazz: drawableClazzCommunication.get("sourceClazz").get("name"),
+      targetClazz: drawableClazzCommunication.get("targetClazz").get("name"),
       isBidirectional: isBidirectional,
-      requests: cumulatedClazzCommunication.get("requests"),
-      traces: runtimeStats.involvedTraces.length,
-      responseTime: avgAverageResponseTime,
-      duration: avgOverallTraceDuration,
+      requests: drawableClazzCommunication.get("requests"),
+      traces: traces.size,
+      responseTime: round(drawableClazzCommunication.get("averageResponseTime"), 2),
     }
 
     return popupData;
 
-    // retrieves runtime information for a specific aggregatedClazzCommunication (same sourceClazz and tagetClazz)
-    function getRuntimeInformations(cumulatedClazzCommunication) {
-
-      let runtimeStats = {
-        // sum up
-        totalOverallTraceDuration: 0,
-        totalAverageResponseTime: 0,
-
-        // interesting for popups
-        involvedTraces: [],
-        avgOverallTraceDuration: 0,
-        avgAverageResponseTime: 0
-      };
-
-      let runtimeInformationCounter = 0;
-
-      let runtimeInformations = cumulatedClazzCommunication.getRuntimeInformations();
-
-      // accumulate runtime information
-      runtimeInformations.forEach((runtimeInformation) => {
-        runtimeStats.involvedTraces.push(runtimeInformation.get("traceId"));
-        runtimeStats.totalOverallTraceDuration += runtimeInformation.get("overallTraceDuration");
-        runtimeStats.totalAverageResponseTime += runtimeInformation.get("averageResponseTime");
-
-        runtimeInformationCounter++;
-      });
-
-      // calculate averages
-      if (runtimeInformationCounter > 0) {
-        runtimeStats.avgAverageResponseTime = runtimeStats.totalAverageResponseTime / runtimeInformationCounter;
-        runtimeStats.avgOverallTraceDuration = runtimeStats.totalOverallTraceDuration / runtimeInformationCounter;
-      }
-
-      return runtimeStats;
-
-    } // END getRuntimeInformations
-
+    
     function round(value, precision) {
-      var multiplier = Math.pow(10, precision || 0);
+      let multiplier = Math.pow(10, precision || 0);
       return Math.round(value * multiplier) / multiplier;
-    } // END round
+    } 
   },
 
 });

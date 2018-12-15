@@ -8,10 +8,14 @@
 
   <div class="tab-content">
     {{#tab.pane elementId="generalPane" title="General"}}
-      TODO: see issue https://github.com/ExplorViz/explorviz-frontend/issues/80
+      {{#if (eq tab.activeId "generalPane")}}
+        TODO: see issue https://github.com/ExplorViz/explorviz-frontend/issues/80
+      {{/if}}
     {{/tab.pane}}
     {{#tab.pane elementId="userManagementPane" title="User Management"}}
-      {{user-management}}
+      {{#if (eq tab.activeId "userManagementPane")}}
+        {{user-management}}
+      {{/if}}
     {{/tab.pane}}
 
     <!-- Tab pane for each addon that is registered at configurationService -->

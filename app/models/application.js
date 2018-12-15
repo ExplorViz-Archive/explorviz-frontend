@@ -29,17 +29,19 @@ export default DrawNodeEntity.extend({
 
   databaseQueries: hasMany('databasequery'),
 
-  outgoingApplicationCommunications: hasMany('applicationcommunication', {
+  traces: hasMany('trace'),
+
+  applicationCommunications: hasMany('applicationcommunication', {
     inverse: 'sourceApplication'
   }),
 
   // list of aggregated clazzCommunication for rendering purposes
-  aggregatedOutgoingClazzCommunications: hasMany('aggregatedclazzcommunication', {
+  aggregatedClazzCommunications: hasMany('aggregatedclazzcommunication', {
     inverse: null
   }),
 
   // list of aggregated clazzCommunication for rendering purposes
-  cumulatedClazzCommunications: hasMany('cumulatedclazzcommunication', {
+  drawableClazzCommunications: hasMany('drawableclazzcommunication', {
     inverse: null
   }),
 
@@ -50,8 +52,11 @@ export default DrawNodeEntity.extend({
     this.get('components').forEach((component) => {
       component.unhighlight();
     });
-    this.get('cumulatedClazzCommunications').forEach((communication) => {
+    this.get('drawableClazzCommunications').forEach((communication) => {
       communication.unhighlight();
+    });
+    this.get('traces').forEach((trace) => {
+      trace.unhighlight();
     });
   },
 

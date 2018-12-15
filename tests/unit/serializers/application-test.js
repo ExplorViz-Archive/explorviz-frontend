@@ -2,7 +2,7 @@ import { moduleForModel, test } from 'ember-qunit';
 
 moduleForModel('application', 'Unit | Serializer | application', {
   // Specify the other units that are required for this test.
-  needs: ['model:node', 'model:component', 'model:applicationcommunication', 'model:cumulatedclazzcommunication', 'model:aggregatedclazzcommunication', 'model:databasequery']
+  needs: ['model:node', 'model:component', 'model:applicationcommunication', 'model:drawableclazzcommunication', 'model:aggregatedclazzcommunication', 'model:databasequery']
 });
 
 // Replace this with your real tests.
