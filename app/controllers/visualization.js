@@ -1,7 +1,6 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service'; 
 import { computed } from '@ember/object';
-import { observer } from '@ember/object';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import ENV from 'explorviz-frontend/config/environment';
 
@@ -40,7 +39,7 @@ export default Controller.extend(AlertifyHandler, {
   condition: null,
   communication: null,
 
-  observer: observer('viewImporter.importedURL', function() {
+  /*observer: observer('viewImporter.importedURL', function() {
     if(!this.get('viewImporter.importedURL')) {
       this.set('timestamp',null);
       this.set('appID',null);
@@ -49,7 +48,7 @@ export default Controller.extend(AlertifyHandler, {
       this.set('camZ',null);
       this.set('condition',[]);
     }
-  }),
+  }),*/
 
   showLandscape: computed('landscapeRepo.latestApplication', function() {
     return !this.get('landscapeRepo.latestApplication');

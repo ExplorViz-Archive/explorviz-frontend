@@ -1,12 +1,12 @@
-import { moduleFor, test } from 'ember-qunit';
+import { module, test } from 'qunit';
+import { setupTest } from 'ember-qunit';
 
-moduleFor('service:visualization/application/highlighter', 'Unit | Service | visualization/application/highlighter', {
-  // Specify the other units that are required for this test.
-  needs: ['service:repos/landscape-repository']
-});
+module('Unit | Service | visualization/application/highlighter', function(hooks) {
+  setupTest(hooks);
 
-// Replace this with your real tests.
-test('it exists', function(assert) {
-  let service = this.subject();
-  assert.ok(service);
+  // Replace this with your real tests.
+  test('it exists', function(assert) {
+    let service = this.owner.lookup('service:visualization/application/highlighter');
+    assert.ok(service);
+  });
 });

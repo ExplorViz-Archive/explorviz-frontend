@@ -1,15 +1,23 @@
-import { moduleForModel, test } from 'ember-qunit';
+import { module, test } from 'qunit';
+import { setupTest } from 'ember-qunit';
 
-moduleForModel('landscape', 'Unit | Serializer | landscape', {
-  // Specify the other units that are required for this test.
-  needs: ['serializer:landscape', 'model:system', 'model:timestamp', 'model:applicationcommunication']
-});
+module('Unit | Serializer | landscape', function(hooks) {
+  setupTest(hooks);
 
-// Replace this with your real tests.
-test('it serializes records', function(assert) {
-  let record = this.subject();
+  // Replace this with your real tests.
+  test('it exists', function(assert) {
+    let store = this.owner.lookup('service:store');
+    let serializer = store.serializerFor('landscape');
 
-  let serializedRecord = record.serialize();
+    assert.ok(serializer);
+  });
 
-  assert.ok(serializedRecord);
+  test('it serializes records', function(assert) {
+    let store = this.owner.lookup('service:store');
+    let record = store.createRecord('landscape', {});
+
+    let serializedRecord = record.serialize();
+
+    assert.ok(serializedRecord);
+  });
 });
