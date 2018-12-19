@@ -87,7 +87,7 @@ export default BaseAuthenticator.extend({
    *
    * @method authenticate
    */
-  authenticate(user) {    
+  authenticate(user) {
     const url = config.APP.API_ROOT;
 
     const self = this;

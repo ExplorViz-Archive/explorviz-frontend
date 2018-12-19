@@ -35,25 +35,14 @@ module.exports = function(environment) {
 
   if (environment === 'production') {
 
-    var rootURL = '/explorviz-frontend';
-    var API_ROOT = '/explorviz-backend';
-
-    if(process.env.ROOT_URL) {
-      rootURL = process.env.ROOT_URL;
-      console.log(`Production mode: Using ${rootURL} as rootURL`.yellow);
-    } else {
-      console.log(`ATTENTION: Production mode, but using default value ${rootURL} as rootURL`.yellow);
-    }
-
-    if(process.env.API_ROOT) {
-      API_ROOT = process.env.API_ROOT;
-      console.log(`Production mode: Using ${API_ROOT} as API_ROOT`.yellow);
-    } else {
-      console.log(`ATTENTION: Production mode, but using default value ${rootURL} as rootURL`.yellow);
-    }
-
+    var rootURL = 'change-rootURL';
+    var API_ROOT = 'change-API_ROOT';    
     ENV.rootURL = rootURL;
     ENV.APP.API_ROOT = API_ROOT;
+
+    console.log(`Production mode: Using ${rootURL} as rootURL`.yellow);
+    console.log(`Production mode: Using ${API_ROOT} as API_ROOT`.yellow);
+    console.log(`If you are using Docker, then override these values with environment variables`.yellow);
   }
 
   if (environment === 'mocked') {
