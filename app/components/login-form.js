@@ -66,14 +66,18 @@ export default Component.extend({
         // NULL if no connection to backend
         if(reason.payload) {
 
-          const errorPayload = reason.payload.errors[0];
+          if(reason.payload.errors && reason.payload.errors[0]) {
 
-          if (errorPayload && errorPayload.status && errorPayload.title && errorPayload.detail) {
+            const errorPayload = reason.payload.errors[0];
 
-            self.debug(errorPayload.detail);
+            if (errorPayload && errorPayload.status && errorPayload.title && errorPayload.detail) {
 
-            errorMessage = `${errorPayload.status}: ${errorPayload.title} / ${errorPayload.detail}`;
-          }
+              self.debug(errorPayload.detail);
+
+              errorMessage = `${errorPayload.status}: ${errorPayload.title} / ${errorPayload.detail}`;
+            }
+
+          }          
         }
         self.set('session.session.content.errorMessage', errorMessage);
       }
