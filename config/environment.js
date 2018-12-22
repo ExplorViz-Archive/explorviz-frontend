@@ -30,7 +30,8 @@ module.exports = function(environment) {
     var API_ROOT = 'http://localhost:8080';
     ENV.APP.API_ROOT = API_ROOT;
 
-    console.log(`Development mode: Using ${API_ROOT} as API_ROOT`.yellow);
+    console.log("");
+    console.log(`EXPL-INFO: Development mode: Using ${API_ROOT} as API_ROOT`.blue);
   }
 
   if (environment === 'production') {
@@ -40,15 +41,16 @@ module.exports = function(environment) {
     ENV.rootURL = rootURL;
     ENV.APP.API_ROOT = API_ROOT;
 
-    console.log(`Production mode: Using ${rootURL} as rootURL`.yellow);
-    console.log(`Production mode: Using ${API_ROOT} as API_ROOT`.yellow);
-    console.log(`If you are using Docker, then override these values with environment variables`.yellow);
+    console.log("");
+    console.log(`EXPL-INFO: Production mode: Using ${rootURL} as rootURL`.blue);
+    console.log(`EXPL-INFO: Production mode: Using ${API_ROOT} as API_ROOT`.blue);
+    console.log(`EXPL-INFO: If you are using Docker, then override these values with environment variables`.blue);
   }
 
   if (environment === 'mocked') {
     var API_ROOT = 'http://localhost:4200/api';
     ENV.APP.API_ROOT = 'http://localhost:4200/api';
-    console.log(`Mocked API mode: Using ${API_ROOT} as API_ROOT`.yellow);
+    console.log(`EXPL-INFO: Mocked API mode: Using ${API_ROOT} as API_ROOT`.blue);
   }
 
   if (environment === 'test') {
