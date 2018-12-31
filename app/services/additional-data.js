@@ -19,6 +19,7 @@ export default Service.extend(Evented, {
     }
     if (!this.get('shownComponents').includes(path)) {
       this.get('shownComponents').push(path);
+      this.notifyPropertyChange('shownComponents');
     }
   },
 
