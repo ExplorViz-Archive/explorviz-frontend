@@ -12,9 +12,7 @@ module('Integration | Component | page-setup/footer', function(hooks) {
 
     await render(hbs`{{page-setup/footer}}`);
 
-    assert.ok(this.element.textContent.trim().includes('Kiel University'));
-    assert.ok(this.element.textContent.trim().includes('Legal Notice'));
-    assert.ok(this.element.textContent.trim().includes('Contact'));
+    assert.ok(this.element.textContent.trim().includes('ExplorViz'));
     
   });
 });

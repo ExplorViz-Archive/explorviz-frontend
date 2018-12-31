@@ -1,17 +1,18 @@
 import Service from '@ember/service';
 import Evented from '@ember/object/evented';
-import { computed } from '@ember/object';
+//import { computed } from '@ember/object';
 import { inject as service } from '@ember/service';
 
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 export default Service.extend(AlertifyHandler, Evented, {
 
+  /*
   isReloading: computed('timeshiftReload.shallUpdate', function() {
     return this.get('timeshiftReload.shallUpdate');
-  }),
+  }),*/
 
-  timeshiftReload: service("timeshift-reload"),
+  //timeshiftReload: service("timeshift-reload"),
   landscapeReload: service("landscape-reload"),
   landscapeRepo: service("repos/landscape-repository"),
   store: service(),
@@ -19,14 +20,14 @@ export default Service.extend(AlertifyHandler, Evented, {
 
   stopExchange() {
     this.get('landscapeReload').stopUpdate();
-    this.get('timeshiftReload').stopUpdate();
+    //this.get('timeshiftReload').stopUpdate();
     this.trigger('stopExchange');
   },
 
 
   startExchange() {
     this.get('landscapeReload').startUpdate();
-    this.get('timeshiftReload').startUpdate();
+    //this.get('timeshiftReload').startUpdate();
     this.trigger('startExchange');
   },
 
