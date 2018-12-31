@@ -13,20 +13,20 @@ export default Service.extend(AlertifyHandler, Evented, {
   }),*/
 
   //timeshiftReload: service("timeshift-reload"),
-  landscapeReload: service("landscape-reload"),
+  //landscapeReload: service("landscape-reload"),
   landscapeRepo: service("repos/landscape-repository"),
   store: service(),
 
 
   stopExchange() {
-    this.get('landscapeReload').stopUpdate();
+    //this.get('landscapeReload').stopUpdate();
     //this.get('timeshiftReload').stopUpdate();
     this.trigger('stopExchange');
   },
 
 
   startExchange() {
-    this.get('landscapeReload').startUpdate();
+    //this.get('landscapeReload').startUpdate();
     //this.get('timeshiftReload').startUpdate();
     this.trigger('startExchange');
   },
