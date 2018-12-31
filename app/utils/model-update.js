@@ -23,7 +23,7 @@ export default Object.extend({
     // TODO: persist highlighting if drawableCommunication is still present in new landscape
     if (highlightedEntity && highlightedEntity.constructor.modelName === "drawableclazzcommunication") {
       this.get('highlighter').unhighlightAll();
-      this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
+      this.get('additionalData').removeComponent("visualization/page-setup/sidebar/trace-selection");
     }
 
     let applications = store.peekAll('application');

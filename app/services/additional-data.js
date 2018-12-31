@@ -19,6 +19,7 @@ export default Service.extend(Evented, {
     }
     if (!this.get('shownComponents').includes(path)) {
       this.get('shownComponents').push(path);
+      this.notifyPropertyChange('shownComponents');
     }
   },
 
@@ -36,14 +37,14 @@ export default Service.extend(Evented, {
   },
 
   emptyAndClose() {
-    this.closeAdditionalData();
+    this.close();
     if (this.get('shownComponents')) {
       this.set('shownComponents.length', 0);
     }
     this.set('data', {});
   },
 
-  closeAdditionalData() {
+  close() {
     this.set('showWindow', false);
     this.trigger('showWindow');
   },

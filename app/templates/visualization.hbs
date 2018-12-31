@@ -34,6 +34,7 @@
         content=(array 
           (component "visualization/page-setup/navbar/reset-visualization") 
           (component "visualization/page-setup/navbar/toggle-timeline") 
+          (component "visualization/page-setup/navbar/sql-opener")
           (component "visualization/page-setup/navbar/file-downloader" 
             urlPath=exportLandscapeUrl fileName=exportLandscapeFileName)
           (component "visualization/page-setup/navbar/application-opener")
@@ -59,7 +60,7 @@
     --}}
   </div>
   <div class="col-4 hide" id="dataselection" >
-    {{visualization/page-setup/data-selection}}
+    {{visualization/page-setup/sidebar/data-selection}}
   </div>
 </div>
 

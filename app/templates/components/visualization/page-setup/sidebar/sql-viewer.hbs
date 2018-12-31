@@ -1,1 +1,18 @@
-{{yield}}
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">Timestamp</th>
+      <th scope="col">Statement</th>
+      <th scope="col">Return Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each landscapeRepo.latestApplication.databaseQueries as |query|}}
+    <tr style="cursor: pointer">
+      <th scope="row">{{query.timestamp}}</th>
+      <td>{{query.sqlStatement}}</td>
+      <td>{{query.returnValue}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>

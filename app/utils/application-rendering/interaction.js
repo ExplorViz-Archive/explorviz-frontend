@@ -267,10 +267,10 @@ export default Object.extend(Evented, {
 
 
         let traces = emberModel.getContainedTraces();
-        
+
         // display trace selection component for communication
         this.set('additionalData.data.traces', traces);
-        this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
+        this.get('additionalData').addComponent("visualization/page-setup/sidebar/trace-selection");
         this.get('additionalData').openAdditionalData();
         
       }
@@ -331,7 +331,7 @@ export default Object.extend(Evented, {
     this.trigger('singleClick', emberModel);
 
     // close trace information (possibly opened before)
-    this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
+    this.get('additionalData').removeComponent("visualization/page-setup/sidebar/trace-selection");
 
   },
 
