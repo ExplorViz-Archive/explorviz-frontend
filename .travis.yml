@@ -55,7 +55,7 @@ deploy:
       branch: master
       condition: $EMBER_TRY_SCENARIO = ember-3.2.0
   - provider: script
-    script: echo $EMBER_TRY_SCENARIO && chmod +x .travis/docker_push_dev.sh && .travis/docker_push_dev.sh
+    script: chmod +x .travis/docker_push_dev.sh && .travis/docker_push_dev.sh
     on:
       branch: dev-1
       condition: $EMBER_TRY_SCENARIO = ember-3.2.0
