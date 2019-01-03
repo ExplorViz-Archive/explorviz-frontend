@@ -49,13 +49,15 @@ script:
 
 after_success:
   - test $TRAVIS_BRANCH = "master" && .travis/push.sh
-deploy:
+deploy:  
   - provider: script
+    skip_cleanup: true
     script: chmod +x .travis/docker_push_latest.sh && .travis/docker_push_latest.sh
     on:
       branch: master
       condition: $EMBER_TRY_SCENARIO = ember-lts-3.4.7
   - provider: script
+    skip_cleanup: true
     script: echo $EMBER_TRY_SCENARIO && chmod +x .travis/docker_push_dev.sh && .travis/docker_push_dev.sh
     on:
       branch: dev-1
