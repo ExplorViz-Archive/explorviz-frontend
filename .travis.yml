@@ -45,3 +45,9 @@ script:
 
 after_success:
   - test $TRAVIS_BRANCH = "master" && .travis/push.sh
+deploy:
+  provider: script
+  script: .travis/docker_push.sh
+  on:
+    branch: master
+    condition: $EMBER_TRY_SCENARIO=ember-3.2.0
