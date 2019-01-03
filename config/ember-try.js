@@ -48,6 +48,15 @@ module.exports = function() {
               'ember-source': '~3.5.0',
             }
           }
+        },
+        {
+          name: 'build with ember-lts-3.4.7',
+          command: 'ember build --prod',
+          npm: {
+            devDependencies: {
+              'ember-source': '~3.4.7',
+            }
+          }
         }
       ]
     };
