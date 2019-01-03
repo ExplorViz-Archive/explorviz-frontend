@@ -42,7 +42,7 @@ module.exports = function() {
           }
         },
         {
-          name: 'ember-3.5.0 current DEV version',
+          name: 'ember-3.5.0',
           npm: {
             devDependencies: {
               'ember-source': '~3.5.0',
