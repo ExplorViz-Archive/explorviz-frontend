@@ -20,9 +20,6 @@ branches:
   - dev-1
 
 env:
-  global:
-    # See https://git.io/vdao3 for details.
-    #- JOBS=1
   matrix:
     - EMBER_TRY_SCENARIO=ember-lts-2.12
     - EMBER_TRY_SCENARIO=ember-lts-2.16
@@ -30,35 +27,25 @@ env:
     - EMBER_TRY_SCENARIO=ember-lts-3.4.7
     - EMBER_TRY_SCENARIO=ember-3.5.0
 
-matrix:
+jobs:
   fast_finish: true
   allow_failures:
     - env: EMBER_TRY_SCENARIO=ember-lts-2.12
-
-before_script:
-  - chmod +x .travis/push.sh
-
-before_install:
-#  - if [[ `npm -v` != 5.6.0 ]]; then npm i -g npm@5.6.0; fi
+  include:
+    - stage: test
+      script: ember try:one $EMBER_TRY_SCENARIO
+    - stage: deploy
+      if: (branch = dev-1) OR (branch = master)
+      skip_cleanup: true
+      env:
+        - $EMBER_TRY_SCENARIO = ember-lts-3.4.7
+      script: chmod +x .travis/docker_push.sh && .travis/docker_push.sh
 
 install:
   - npm install --no-package-lock
 
-script:
-  - ember try:one $EMBER_TRY_SCENARIO
+#before_script:
+#  - chmod +x .travis/push.sh
 
-after_success:
-  - test $TRAVIS_BRANCH = "master" && .travis/push.sh
-deploy:  
-  - provider: script
-    skip_cleanup: true
-    script: chmod +x .travis/docker_push_latest.sh && .travis/docker_push_latest.sh
-    on:
-      branch: master
-      condition: $EMBER_TRY_SCENARIO = ember-lts-3.4.7
-  - provider: script
-    skip_cleanup: true
-    script: chmod +x .travis/docker_push_dev.sh && .travis/docker_push_dev.sh
-    on:
-      branch: dev-1
-      condition: $EMBER_TRY_SCENARIO = ember-lts-3.4.7
+#after_success:
+#  - test $TRAVIS_BRANCH = "master" && .travis/push.sh
