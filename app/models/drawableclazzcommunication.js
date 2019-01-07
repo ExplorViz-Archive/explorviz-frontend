@@ -32,18 +32,15 @@ export default DrawEdgeEntity.extend({
   }),
 
   getContainedTraces(){
-    let traceIds = new Set();
     let traces = new Set();
 
     // Find all belonging traces
-    this.get('aggregatedClazzCommunications').forEach( (aggClazzComm) => {
-      aggClazzComm.get('clazzCommunications').forEach( (clazzComm) => {
-        clazzComm.get('tracesteps').forEach( (traceStep) => {
-          let trace = traceStep.get('parentTrace');
-          // Avoid adding trace twice (not ensured by Set in this case)
-          if (! traceIds.has(trace.get('traceId'))){
-            traces.add(trace);
-            traceIds.add(trace.get('traceId'));
+    this.get('aggregatedClazzCommunications').forEach((aggClazzComm) => {
+      aggClazzComm.get('clazzCommunications').forEach((clazzComm) => {
+        clazzComm.get('tracesteps').forEach((traceStep) => {
+          let containedTrace = traceStep.belongsTo('parentTrace').value();
+          if (containedTrace){
+            traces.add(containedTrace);
           }
         });
       });
