@@ -102,7 +102,7 @@ export default Service.extend({
 
     // iterate recursively over all application entities and update states
     this.get('application.components').forEach((component) => {
-      this.updateEntityStates(component, communicatingClazzes);
+      this.applyNodeHighlighting(component, communicatingClazzes);
     });
 
     function computeSelectedClazzes(highlightedEntity, selectedClazzes) {
@@ -137,18 +137,17 @@ export default Service.extend({
    */
   applyCommunicationHighlighting(selectedClazzes, communicatingClazzes){
 
-    const clazzCommunications =
-    this.get('application').get('drawableClazzCommunications');
+    const clazzCommunications = this.get('application').get('drawableClazzCommunications');
 
     clazzCommunications.forEach((clazzCommunication) => {
       let toBeHighlighted = false;
 
       // highlight all communication lines which have a selected clazz as an endpoint
       selectedClazzes.forEach((clazz) => {
-        if (clazzCommunication.sourceClazz != null && clazzCommunication.get('sourceClazz').get('fullQualifiedName') === clazz.get('fullQualifiedName')){
+        if (clazzCommunication.get('sourceClazz').get('id') === clazz.get('id')){
           communicatingClazzes.add(clazzCommunication.get('targetClazz'));
           toBeHighlighted = true;
-        } else if(clazzCommunication.targetClazz != null && clazzCommunication.get('targetClazz').get('fullQualifiedName') === clazz.get('fullQualifiedName')){
+        } else if(clazzCommunication.get('targetClazz').get('id') === clazz.get('id')){
           communicatingClazzes.add(clazzCommunication.get('sourceClazz'));
           toBeHighlighted = true;
         }
@@ -169,7 +168,7 @@ export default Service.extend({
    * @param {Set}       communicatingClazzes  Contains all clazzes which are involved in communication with highlighted entity
    * 
    */
-  updateEntityStates(component, communicatingClazzes){
+  applyNodeHighlighting(component, communicatingClazzes){
 
     let isPartOfHighlighting = false;
     let componentClazzes = new Set();
@@ -179,7 +178,7 @@ export default Service.extend({
     // check if component contains a class which is part of highlighting
     communicatingClazzes.forEach((clazz) => {
       componentClazzes.forEach((componentClazz) => {
-        if (clazz.get('fullQualifiedName') === componentClazz.get('fullQualifiedName')){
+        if (clazz.get('id') === componentClazz.get('id')){
           isPartOfHighlighting = true;
         }
       });
@@ -196,7 +195,7 @@ export default Service.extend({
     component.get('clazzes').forEach((clazz) => {
       let isCommunicatingClazz = false;
       communicatingClazzes.forEach((componentClazz) => {
-        if (clazz.get('fullQualifiedName') === componentClazz.get('fullQualifiedName')){
+        if (clazz.get('id') === componentClazz.get('id')){
           isCommunicatingClazz = true;
         }
       });
@@ -209,7 +208,7 @@ export default Service.extend({
 
     // check state also for underlying components (and clazzes)
     component.get('children').forEach((child) => {
-      this.updateEntityStates(child, communicatingClazzes);
+      this.applyNodeHighlighting(child, communicatingClazzes);
     });
   },
 
