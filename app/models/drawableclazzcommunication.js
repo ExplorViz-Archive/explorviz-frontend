@@ -52,4 +52,16 @@ export default DrawEdgeEntity.extend({
     return traces;
   },
 
+  isVisible() {
+    let sourceClazzModel = this.belongsTo('sourceClazz').value();
+    let targetClazzModel = this.belongsTo('targetClazz').value();
+
+    if (!sourceClazzModel || !targetClazzModel) {
+      return false;
+    } else {
+      // consider also as visible if only a part of communication line is visible
+      return sourceClazzModel.isVisible() || targetClazzModel.isVisible();
+    }
+  },
+
 });

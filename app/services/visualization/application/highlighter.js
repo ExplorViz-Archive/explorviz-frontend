@@ -61,7 +61,8 @@ export default Service.extend({
 
     const emberModelName = highlightedEntity.constructor.modelName; // e.g. "clazz" or "component"
 
-    if((emberModelName === "clazz" || emberModelName === "component") && 
+    // unhighlight entity if it is not visible
+    if ((emberModelName === "clazz" || emberModelName === "component" || emberModelName === "drawableclazzcommunication") &&
       !highlightedEntity.isVisible()) {
         this.unhighlightAll();
         this.get('renderingService').redrawScene();
