@@ -49,16 +49,45 @@ export default DrawEdgeEntity.extend({
     return traces;
   },
 
-  isVisible() {
-    let sourceClazzModel = this.belongsTo('sourceClazz').value();
-    let targetClazzModel = this.belongsTo('targetClazz').value();
-
-    if (!sourceClazzModel || !targetClazzModel) {
-      return false;
-    } else {
-      // consider also as visible if only a part of communication line is visible
-      return sourceClazzModel.isVisible() || targetClazzModel.isVisible();
+  // return most inner component which common to both source and target clazz of communication
+  getParentComponent(){
+    // contains all parent components of source clazz incl. foundation in hierarchical order
+    let sourceClazzComponents = [];
+    let parentComponent = this.belongsTo('sourceClazz').value().belongsTo('parent').value();
+    sourceClazzComponents.push(parentComponent);
+    while (!parentComponent.get('foundation')){
+      parentComponent = parentComponent.belongsTo('parentComponent').value();
+      sourceClazzComponents.push(parentComponent);
     }
+
+    // contains all parent components of target clazz incl. foundation in hierarchical order
+    let targetClazzComponents = [];
+    parentComponent = this.belongsTo('targetClazz').value().belongsTo('parent').value();
+    targetClazzComponents.push(parentComponent);
+    while (!parentComponent.get('foundation')){
+      parentComponent = parentComponent.belongsTo('parentComponent').value();
+      targetClazzComponents.push(parentComponent);
+    }
+
+    // let component arrays start with foundation (reversed hierarchical order)
+    sourceClazzComponents.reverse();
+    targetClazzComponents.reverse();
+
+    // find the most inner common component
+    let commonComponent = sourceClazzComponents[0];
+    for (let i = 0; i < sourceClazzComponents.length && i < targetClazzComponents.length ; i++){
+      if (sourceClazzComponents[i] === targetClazzComponents[i]){
+        commonComponent = sourceClazzComponents[i];
+      } else {
+        break;
+      }
+    }
+
+    return commonComponent;
+  },
+
+  isVisible() {
+    return this.getParentComponent().get('opened');
   },
 
 });
