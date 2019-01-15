@@ -36,6 +36,7 @@ export default Component.extend({
       traces.forEach((trace) => {
         if (trace.get('traceId') == traceId) {
           trace.set('isSelected', true);
+          trace.openParents();
         } else {
           trace.set('isSelected', false);
         }

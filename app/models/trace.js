@@ -28,4 +28,14 @@ export default BaseEntity.extend({
     this.set('isSelected', false);
   },
 
+  openParents() {
+    let traceSteps = this.hasMany('traceSteps').value();
+
+    traceSteps.forEach((traceStep) => {
+      if (traceStep !== null) {
+        traceStep.openParents();
+      }
+    });
+  },
+
 });

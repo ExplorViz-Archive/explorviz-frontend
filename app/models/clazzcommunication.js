@@ -29,4 +29,16 @@ export default DrawEdgeEntity.extend({
     inverse: null
   }),
 
+  openParents() {
+    let sourceClazz = this.belongsTo('sourceClazz').value();
+    if (sourceClazz !== null) {
+      sourceClazz.openParents();
+    }
+    
+    let targetClazz = this.belongsTo('targetClazz').value();
+    if (targetClazz !== null) {
+      targetClazz.openParents();
+    }
+  },
+
 });

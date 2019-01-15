@@ -62,6 +62,7 @@ export default Service.extend({
 
     const emberModelName = highlightedEntity.constructor.modelName; // e.g. "clazz" or "component"
 
+    
     // unhighlight entity if it is not visible
     if ((emberModelName === "clazz" || emberModelName === "component" || emberModelName === "drawableclazzcommunication") &&
       !highlightedEntity.isVisible() && !this.get('isTrace')) {
@@ -86,12 +87,6 @@ export default Service.extend({
         if (communicatingClazzes.has(communication.get('sourceClazz')) && 
             communicatingClazzes.has(communication.get('targetClazz'))){
               communication.highlight()
-
-              // every clazz which is part of trace should be visible
-              if(this.get('isTrace')) {
-                communication.belongsTo('sourceClazz').value().openParents();
-                communication.belongsTo('targetClazz').value().openParents();
-              }
         }        
         else {
           communication.unhighlight();
