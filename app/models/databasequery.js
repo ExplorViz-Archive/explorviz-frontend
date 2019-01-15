@@ -15,6 +15,7 @@ const { attr } = DS;
 export default BaseEntity.extend({
 
   timestamp: attr('number'),
+  statementType: attr('string'),
   sqlStatement: attr('string'),
   returnValue: attr('string'),
   responseTime: attr('number')
