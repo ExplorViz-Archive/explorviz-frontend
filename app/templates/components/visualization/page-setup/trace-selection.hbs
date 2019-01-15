@@ -9,7 +9,7 @@
     </tr>
   </thead>
   <tbody>
-    {{#each additionalData.data.traces as |trace|}}
+    {{#each traces as |trace|}}
       {{#if trace.isSelected}}
         <tr {{action "traceSelected" trace.traceId}} style="cursor: pointer" bgcolor="#cc8a8a">
           <th scope="row">{{trace.traceId}}</th>

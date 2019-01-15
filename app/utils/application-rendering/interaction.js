@@ -265,14 +265,8 @@ export default Object.extend(Evented, {
         this.get('highlighter').highlight(emberModel);
         this.get('renderingService').redrawScene();
 
-
-        let traces = emberModel.getContainedTraces();
-        
-        // display trace selection component for communication
-        this.set('additionalData.data.traces', traces);
         this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
         this.get('additionalData').openAdditionalData();
-        
       }
 
     }

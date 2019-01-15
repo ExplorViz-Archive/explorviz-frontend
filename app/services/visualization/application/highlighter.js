@@ -64,7 +64,7 @@ export default Service.extend({
 
     // unhighlight entity if it is not visible
     if ((emberModelName === "clazz" || emberModelName === "component" || emberModelName === "drawableclazzcommunication") &&
-      !highlightedEntity.isVisible()) {
+      !highlightedEntity.isVisible() && !this.get('isTrace')) {
         this.unhighlightAll();
         this.get('renderingService').redrawScene();
         return;
