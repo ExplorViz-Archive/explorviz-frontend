@@ -1,9 +1,9 @@
 {{#bs-tab id="configuration-tab"customTabs=true as |tab|}}
   <nav>
     {{#bs-nav type="tabs" as |nav|}}
-      {{#nav.item class="nav-link" onClick=(action tab.select "generalPane") active=(bs-eq tab.activeId "generalPane")}}General{{/nav.item}}
-      {{#nav.item class="nav-link" onClick=(action tab.select "userManagementPane") active=(bs-eq tab.activeId "userManagementPane")}}User Management{{/nav.item}}
-      {{#nav.item class="nav-link" onClick=(action tab.select "userSettingsPane") active=(bs-eq tab.activeId "userSettingsPane")}}Settings{{/nav.item}}
+      {{#nav.item class="nav-link-with-cursor" onClick=(action tab.select "generalPane") active=(bs-eq tab.activeId "generalPane")}}General{{/nav.item}}
+      {{#nav.item class="nav-link-with-cursor" onClick=(action tab.select "userManagementPane") active=(bs-eq tab.activeId "userManagementPane")}}User Management{{/nav.item}}
+      {{#nav.item class="nav-link-with-cursor" onClick=(action tab.select "userSettingsPane") active=(bs-eq tab.activeId "userSettingsPane")}}Settings{{/nav.item}}
     {{/bs-nav}}
   </nav>
 

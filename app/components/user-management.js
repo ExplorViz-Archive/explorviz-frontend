@@ -65,6 +65,7 @@ export default Component.extend(AlertifyHandler, {
 
     openEditUserPage(user) {
       this.set('page', 'editUser');
+      this.set('currentUser', user);
 
       this.setProperties({
         id_change: user.id,

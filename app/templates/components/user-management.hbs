@@ -41,34 +41,36 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
           {{svg-jar "reply" class="octicon align-middle"}}
         {{/bs-button}}
       </div>
-      <h3 class="mt-4">Create Users</h3>
-      <div>
-        {{#bs-button-group
-          value=page
-          type="radio"
-          class="mt-2 mb-2 float-right"
-          onChange=(action (mut page)) as |bg|}}
-          {{#bg.button value="createSingleUser"}}Single User{{/bg.button}}
-          {{#bg.button value="createMultipleUsers"}}Multiple Users{{/bg.button}}
-        {{/bs-button-group}}
+      <div class="mt-4" style="overflow-y: auto">
+        <h3>Create Users</h3>
+        <div class="d-flex justify-content-end">
+          {{#bs-button-group
+            value=page
+            type="radio"
+            class="mt-2 mb-2 float-right"
+            onChange=(action (mut page)) as |bg|}}
+            {{#bg.button value="createSingleUser"}}Single User{{/bg.button}}
+            {{#bg.button value="createMultipleUsers"}}Multiple Users{{/bg.button}}
+          {{/bs-button-group}}
+        </div>
+        {{#bs-form model=this onSubmit=(action "saveUser") as |form|}}
+          {{form.element controlType="text" label="Username" placeholder="Username" property="username"}}
+          {{form.element controlType="password" label="Password" placeholder="Password" property="password"}}
+          {{#form.element controlType="power-select-multiple" property="roles_selected_single" label="Choose Roles" options=roles
+          as |el|}}
+            {{#el.control 
+              placeholder="Choose roles"
+              loadingMessage="loading..."
+              onopen=(perform getRoles)
+              searchEnabled=false
+              searchField="default"
+              as |item|}}
+                {{item.descriptor}}
+            {{/el.control}}
+          {{/form.element}}
+          {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+        {{/bs-form}}
       </div>
-      {{#bs-form model=this onSubmit=(action "saveUser") as |form|}}
-        {{form.element controlType="text" label="Username" placeholder="Username" property="username"}}
-        {{form.element controlType="password" label="Password" placeholder="Password" property="password"}}
-        {{#form.element controlType="power-select-multiple" property="roles_selected_single" label="Choose Roles" options=roles
-        as |el|}}
-          {{#el.control 
-            placeholder="Choose roles"
-            loadingMessage="loading..."
-            onopen=(perform getRoles)
-            searchEnabled=false
-            searchField="default"
-            as |item|}}
-              {{item.descriptor}}
-          {{/el.control}}
-        {{/form.element}}
-        {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
-      {{/bs-form}}
     </div>
   {{else if (eq page "createMultipleUsers")}}
     <div class="col-12 mt-5 d-flex flex-column">
@@ -77,34 +79,36 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
           {{svg-jar "reply" class="octicon align-middle"}}
         {{/bs-button}}
       </div>
-      <h3 class="mt-4">Create Users</h3>
-      <div>
-        {{#bs-button-group
-          value=page
-          type="radio"
-          class="mt-2 mb-2 float-right"
-          onChange=(action (mut page)) as |bg|}}
-          {{#bg.button value="createSingleUser"}}Single User{{/bg.button}}
-          {{#bg.button value="createMultipleUsers"}}Multiple Users{{/bg.button}}
-        {{/bs-button-group}}
+      <div class="mt-4" style="overflow-y: auto">
+        <h3>Create Users</h3>
+        <div class="d-flex justify-content-end">
+          {{#bs-button-group
+            value=page
+            type="radio"
+            class="mt-2 mb-2 float-right"
+            onChange=(action (mut page)) as |bg|}}
+            {{#bg.button value="createSingleUser"}}Single User{{/bg.button}}
+            {{#bg.button value="createMultipleUsers"}}Multiple Users{{/bg.button}}
+          {{/bs-button-group}}
+        </div>
+        {{#bs-form model=this onSubmit=(action "saveMultipleUsers") as |form|}}
+          {{form.element controlType="text" label="Username Prefix" placeholder="Username Prefix" property="usernameprefix"}}
+          {{form.element controlType="number" label="Number of Users" placeholder="# of users" property="numberofusers"}}
+          {{#form.element controlType="power-select-multiple" property="roles_selected_multiple" label="Choose Roles" options=roles
+          as |el|}}
+            {{#el.control 
+              placeholder="Choose roles"
+              loadingMessage="loading..."
+              onopen=(perform getRoles)
+              searchEnabled=false
+              searchField="default" 
+              as |item|}}
+                {{item.descriptor}}
+            {{/el.control}}
+          {{/form.element}}
+          {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+        {{/bs-form}}
       </div>
-      {{#bs-form model=this onSubmit=(action "saveMultipleUsers") as |form|}}
-        {{form.element controlType="text" label="Username Prefix" placeholder="Username Prefix" property="usernameprefix"}}
-        {{form.element controlType="number" label="Number of Users" placeholder="# of users" property="numberofusers"}}
-        {{#form.element controlType="power-select-multiple" property="roles_selected_multiple" label="Choose Roles" options=roles
-        as |el|}}
-          {{#el.control 
-            placeholder="Choose roles"
-            loadingMessage="loading..."
-            onopen=(perform getRoles)
-            searchEnabled=false
-            searchField="default" 
-            as |item|}}
-              {{item.descriptor}}
-          {{/el.control}}
-        {{/form.element}}
-        {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
-      {{/bs-form}}
     </div>
   {{else if (eq page "main")}}
     <div class="col-12 mt-5 d-flex flex-column">
@@ -168,21 +172,24 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
           {{svg-jar "reply" class="octicon align-middle"}}
         {{/bs-button}}
       </div>
-      <h3 class="mt-4">Edit User</h3>
-      {{#bs-form model=this onSubmit=(action "saveUserChanges") as |form|}}
-        {{form.element controlType="number" label="ID" property="id_change" disabled=true}}
-        {{form.element controlType="text" label="Username" placeholder="Enter New Username" property="username_change"}}
-        {{form.element controlType="password" label="Password" placeholder="Enter New Password" property="password_change"}}
-        {{#form.element controlType="power-select-multiple" property="roles_change" label="Change Roles" searchEnabled=false loadingMessage="Loading..." options=roles 
-        as |el|}}
-          {{#el.control 
-            onopen=(perform getRoles)  
-            as |item|}}
-              {{item.descriptor}}
-          {{/el.control}}
-        {{/form.element}}
-        {{bs-button defaultText="Apply Changes" type="primary" buttonType="submit"}}
-      {{/bs-form}}
+      <div class="mt-4" style="overflow-y: auto">
+        <h3>Edit User</h3>
+        {{#bs-form model=this onSubmit=(action "saveUserChanges") as |form|}}
+          {{form.element controlType="number" label="ID" property="id_change" disabled=true}}
+          {{form.element controlType="text" label="Username" placeholder="Enter New Username" property="username_change"}}
+          {{form.element controlType="password" label="Password" placeholder="Enter New Password" property="password_change"}}
+          {{#form.element controlType="power-select-multiple" property="roles_change" label="Change Roles" searchEnabled=false loadingMessage="Loading..." options=roles 
+          as |el|}}
+            {{#el.control 
+              onopen=(perform getRoles)  
+              as |item|}}
+                {{item.descriptor}}
+            {{/el.control}}
+          {{/form.element}}
+          {{bs-button defaultText="Apply Changes" type="primary" buttonType="submit"}}
+          {{user-settings user=currentUser}}
+        {{/bs-form}}
+      </div>
     </div>
   {{/if}}
 </div>

@@ -1,1 +1,28 @@
-{{yield}}
+<div>
+  <h3 class="mt-4">Settings</h3>
+  <div class="mt-2">
+    {{#each settings as |setting|}}
+      {{#if (eq setting.type "boolean")}}
+        {{setting.key}}
+        {{setting.value}}
+        {{x-toggle
+          theme='material'
+          value=setting.value
+          onToggle=(action (mut setting.value))
+        }}
+      {{else if (eq setting.type "string")}}
+        {{#bs-form model=this as |form|}}
+          {{form.element controlType="text" label=setting.key property=(concat setting.key "_" user.id)}}
+        {{/bs-form}}
+      {{else if (eq setting.type "number")}}
+        {{#bs-form model=this as |form|}}
+          {{form.element controlType="number" label=setting.key property=(concat setting.key "_" user.id)}}
+        {{/bs-form}}
+      {{/if}}
+    {{/each}}
+
+    {{#bs-button onClick=(action "saveSettings") type="secondary" outline=true}}
+      Save
+    {{/bs-button}}
+  </div>
+</div>
