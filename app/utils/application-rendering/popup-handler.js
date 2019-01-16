@@ -103,7 +103,7 @@ export default Object.extend({
     // TODO: check if this is correct way to check for bidirectionality
     const isBidirectional = drawableClazzCommunication.get("isBidirectional");
 
-    const traces = drawableClazzCommunication.getContainedTraces();
+    const traces = drawableClazzCommunication.get('containedTraces');
 
     let popupData = {
       isShown: true,

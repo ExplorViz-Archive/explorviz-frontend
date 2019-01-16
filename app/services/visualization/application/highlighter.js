@@ -114,7 +114,7 @@ export default Service.extend({
         // add all adjacent clazzes if trace is highlighted
       } else if (emberModelName === "drawableclazzcommunication" && self.get('isTrace')) {
         self.get('application.drawableClazzCommunications').forEach((communication) => {
-          let communicationTraces = communication.getContainedTraces();
+          let communicationTraces = communication.get('containedTraces');
           let communicationTraceIds = Array.from(communicationTraces).map(trace => trace.get('traceId'));
           if (communicationTraceIds.includes(self.get('traceId'))) {
             selectedClazzes.add(communication.get('sourceClazz'));

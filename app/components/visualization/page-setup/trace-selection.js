@@ -16,7 +16,7 @@ export default Component.extend({
     let highlightedEntity = this.get('highlighter.highlightedEntity');
     if (highlightedEntity &&
       highlightedEntity.constructor.modelName === "drawableclazzcommunication") {
-        let traces = highlightedEntity.getContainedTraces();
+        let traces = highlightedEntity.get('containedTraces');
         return traces;
     } else {
       return null;
