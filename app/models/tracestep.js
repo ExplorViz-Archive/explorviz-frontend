@@ -27,4 +27,12 @@ export default BaseEntity.extend({
     inverse: null
   }),
 
+  openParents() {
+    let clazzCommunication = this.belongsTo('clazzCommunication').value();
+
+    if (clazzCommunication !== null) {
+      clazzCommunication.openParents();
+    }
+  },
+
 });

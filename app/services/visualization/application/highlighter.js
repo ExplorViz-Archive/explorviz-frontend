@@ -62,9 +62,10 @@ export default Service.extend({
 
     const emberModelName = highlightedEntity.constructor.modelName; // e.g. "clazz" or "component"
 
+    
     // unhighlight entity if it is not visible
     if ((emberModelName === "clazz" || emberModelName === "component" || emberModelName === "drawableclazzcommunication") &&
-      !highlightedEntity.isVisible()) {
+      !highlightedEntity.isVisible() && !this.get('isTrace')) {
         this.unhighlightAll();
         this.get('renderingService').redrawScene();
         return;
@@ -86,12 +87,6 @@ export default Service.extend({
         if (communicatingClazzes.has(communication.get('sourceClazz')) && 
             communicatingClazzes.has(communication.get('targetClazz'))){
               communication.highlight()
-
-              // every clazz which is part of trace should be visible
-              if(this.get('isTrace')) {
-                communication.belongsTo('sourceClazz').value().openParents();
-                communication.belongsTo('targetClazz').value().openParents();
-              }
         }        
         else {
           communication.unhighlight();
@@ -119,7 +114,7 @@ export default Service.extend({
         // add all adjacent clazzes if trace is highlighted
       } else if (emberModelName === "drawableclazzcommunication" && self.get('isTrace')) {
         self.get('application.drawableClazzCommunications').forEach((communication) => {
-          let communicationTraces = communication.getContainedTraces();
+          let communicationTraces = communication.get('containedTraces');
           let communicationTraceIds = Array.from(communicationTraces).map(trace => trace.get('traceId'));
           if (communicationTraceIds.includes(self.get('traceId'))) {
             selectedClazzes.add(communication.get('sourceClazz'));

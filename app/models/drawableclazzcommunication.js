@@ -1,5 +1,6 @@
 import DS from 'ember-data';
 import DrawEdgeEntity from './drawedgeentity';
+import { computed } from '@ember/object';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -31,7 +32,7 @@ export default DrawEdgeEntity.extend({
     inverse: null
   }),
 
-  getContainedTraces(){
+  containedTraces: computed('aggregatedClazzCommunications', function(){
     let traces = new Set();
 
     // Find all belonging traces
@@ -47,10 +48,10 @@ export default DrawEdgeEntity.extend({
     });
 
     return traces;
-  },
+  }),
 
-  // return most inner component which common to both source and target clazz of communication
-  getParentComponent(){
+  // most inner component which common to both source and target clazz of communication
+  parentComponent: computed('sourceClazz', 'targetClazz', function(){
     // contains all parent components of source clazz incl. foundation in hierarchical order
     let sourceClazzComponents = [];
     let parentComponent = this.belongsTo('sourceClazz').value().belongsTo('parent').value();
@@ -84,10 +85,10 @@ export default DrawEdgeEntity.extend({
     }
 
     return commonComponent;
-  },
+  }),
 
   isVisible() {
-    return this.getParentComponent().get('opened');
+    return this.get('parentComponent').get('opened');
   },
 
 });
