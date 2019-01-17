@@ -2,7 +2,9 @@ import Component from '@ember/component';
 import { typeOf } from '@ember/utils';
 import { inject as service } from "@ember/service";
 
-export default Component.extend({
+import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+
+export default Component.extend(AlertifyHandler, {
   // No Ember generated container
   tagName: '',
 
@@ -65,11 +67,12 @@ export default Component.extend({
         }
       });
 
-/*      this.get('user').save().then(function() {
-        console.log('Success')
-      }, function() {
-        console.log('Error')
-      }); */
+      this.get('user').save().then(() => {
+        this.showAlertifyMessage('Settings saved.');
+      }, reason => {
+        const {title, detail} = reason.errors[0];
+        this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+      });
     }
   },
 

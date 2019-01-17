@@ -1,15 +1,17 @@
 <div>
-  <h3 class="mt-4">Settings</h3>
+  <h3>User Settings</h3>
+  <hr>
   <div class="mt-2">
     {{#each settings as |setting|}}
       {{#if (eq setting.type "boolean")}}
-        {{setting.key}}
-        {{setting.value}}
-        {{x-toggle
-          theme='material'
-          value=setting.value
-          onToggle=(action (mut setting.value))
-        }}
+        <div class="d-flex justify-content-between pr-2">
+          {{setting.key}}
+          {{x-toggle
+            theme='flat'
+            value=setting.value
+            onToggle=(action (mut setting.value))
+          }}
+        </div>
       {{else if (eq setting.type "string")}}
         {{#bs-form model=this as |form|}}
           {{form.element controlType="text" label=setting.key property=(concat setting.key "_" user.id)}}
@@ -21,7 +23,7 @@
       {{/if}}
     {{/each}}
 
-    {{#bs-button onClick=(action "saveSettings") type="secondary" outline=true}}
+    {{#bs-button onClick=(action "saveSettings") type="primary"}}
       Save
     {{/bs-button}}
   </div>

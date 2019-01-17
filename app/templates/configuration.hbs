@@ -7,7 +7,7 @@
     {{/bs-nav}}
   </nav>
 
-  <div class="tab-content">
+  <div class="tab-content mt-5">
     {{#tab.pane elementId="generalPane" title="General"}}
       {{#if (eq tab.activeId "generalPane")}}
         TODO: see issue https://github.com/ExplorViz/explorviz-frontend/issues/80
@@ -20,7 +20,11 @@
     {{/tab.pane}}
     {{#tab.pane elementId="userSettingsPane" title="Settings"}}
       {{#if (eq tab.activeId "userSettingsPane")}}
-        {{user-settings}}
+        <div class="container">
+          <div class="col-12">
+            {{user-settings}}
+          </div>
+        </div>
       {{/if}}
     {{/tab.pane}}
 
