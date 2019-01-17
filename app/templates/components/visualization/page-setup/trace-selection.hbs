@@ -13,15 +13,15 @@
       {{#if trace.isSelected}}
         <tr {{action "traceSelected" trace.traceId}} style="cursor: pointer" bgcolor="#cc8a8a">
           <th scope="row">{{trace.traceId}}</th>
-          <td>{{trace.sourceClazz.name}}</td>
-          <td>{{trace.targetClazz.name}}</td>
+          <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
+          <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
           <td>{{trace.totalTraceDuration}}</td>
         </tr>
       {{else}}
         <tr {{action "traceSelected" trace.traceId}} style="cursor: pointer">
           <th scope="row">{{trace.traceId}}</th>
-          <td>{{trace.sourceClazz.name}}</td>
-          <td>{{trace.targetClazz.name}}</td>
+          <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
+          <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
           <td>{{trace.totalTraceDuration}}</td>
         </tr>
       {{/if}}
