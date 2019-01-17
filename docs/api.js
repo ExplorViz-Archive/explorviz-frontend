@@ -1,7 +1,7 @@
 YUI.add("yuidoc-meta", function(Y) {
    Y.YUIDoc = { meta: {
     "classes": [
-        "Administration-Route",
+        "Agent-Adapter",
         "AggregatedClazzCommunication-Model",
         "Alertify-Handler",
         "Application",
@@ -12,7 +12,6 @@ YUI.add("yuidoc-meta", function(Y) {
         "Application-Serializer",
         "ApplicationCommunication-Model",
         "Authenticator",
-        "Authorizer",
         "Badroute-Route",
         "BaseEntity-Model",
         "Clazz-Model",
@@ -21,16 +20,14 @@ YUI.add("yuidoc-meta", function(Y) {
         "Configuration-Controller",
         "Configuration-Route",
         "Configuration-Service",
-        "CumulatedClazzCommunication-Model",
-        "Data-Reload-Service",
         "DatabaseQuery-Model",
         "Draw3DNodeEntity-Model",
         "DrawEdgeEntity-Model",
         "DrawNodeEntity-Model",
+        "DrawableClazzCommunication-Model",
         "Index-Route",
         "Landscape-Adapter",
         "Landscape-Model",
-        "Landscape-Reload-Service",
         "Landscape-Rendering-Component",
         "Landscape-Repository-Service",
         "Landscape-Serializer",
@@ -41,24 +38,30 @@ YUI.add("yuidoc-meta", function(Y) {
         "Node-Model",
         "NodeGroup-Model",
         "Page-Setup-Service",
+        "Process-Model",
+        "Procezz-Adapter",
         "Rendering-Core-Component",
         "Router",
-        "RuntimeInformation-Model",
         "System-Model",
         "System-Serializer",
         "ThreeJS-Performance-Mixin",
         "Time-Shift-Component",
-        "Timeshift-Reload-Service",
         "Timestamp-Adapter",
         "Timestamp-Model",
         "Timestamp-Repository-Service",
-        "Tutorial-Route",
+        "Timestamp-Versionbar-Component",
+        "Trace-Model",
+        "TraceStep-Model",
+        "Versionbar-Load-Service",
         "Visualization-Controller",
         "Visualization-Route",
         "user-Model"
     ],
     "modules": [
         "explorviz",
+        "explorviz.discovery",
+        "explorviz.extension.discovery",
+        "model",
         "model",
         "model.meta",
         "model.util",
@@ -76,6 +79,14 @@ YUI.add("yuidoc-meta", function(Y) {
             "displayName": "explorviz",
             "name": "explorviz",
             "description": "Main module"
+        },
+        {
+            "displayName": "explorviz.discovery",
+            "name": "explorviz.discovery"
+        },
+        {
+            "displayName": "explorviz.extension.discovery",
+            "name": "explorviz.extension.discovery"
         },
         {
             "displayName": "model",
