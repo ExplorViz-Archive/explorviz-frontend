@@ -13,15 +13,21 @@ export default Component.extend({
 
   // Compute current traces when highlighting changes
   traces: computed('highlighter.highlightedEntity', function () {
-    let highlightedEntity = this.get('highlighter.highlightedEntity');
+    let highlighter = this.get('highlighter');
+    if (highlighter.get('isTrace')) {
+      return [highlighter.get('highlightedEntity')];
+    }
+    let highlightedEntity = highlighter.get('highlightedEntity');
     if (highlightedEntity &&
       highlightedEntity.constructor.modelName === "drawableclazzcommunication") {
-        let traces = highlightedEntity.get('containedTraces');
-        return traces;
+      let traces = highlightedEntity.get('containedTraces');
+      return traces;
     } else {
       return null;
     }
   }),
+
+  selectedTrace: null,
 
   init() {
     this.get('additionalData').on('showWindow', this, this.onWindowChange);
@@ -35,15 +41,18 @@ export default Component.extend({
       // mark selected trace
       traces.forEach((trace) => {
         if (trace.get('traceId') == traceId) {
-          trace.set('isSelected', true);
-          trace.openParents();
-        } else {
-          trace.set('isSelected', false);
+          this.get('highlighter').highlightTrace(trace);
         }
       });
-
-      this.get('highlighter').highlightTrace(traceId);
       this.get('renderingService').redrawScene();
+    },
+
+    selectNextTraceStep() {
+      this.get('highlighter').highlightNextTraceStep();
+    },
+
+    selectPreviousTraceStep() {
+      this.get('highlighter').highlightPreviousTraceStep();
     }
   },
 
