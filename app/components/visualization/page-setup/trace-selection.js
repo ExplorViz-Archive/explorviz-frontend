@@ -9,6 +9,7 @@ export default Component.extend({
 
   additionalData: service('additional-data'),
   highlighter: service('visualization/application/highlighter'),
+  landscapeRepo: service('repos/landscape-repository'),
   renderingService: service(),
 
   // Compute current traces when highlighting changes
@@ -35,15 +36,8 @@ export default Component.extend({
   },
 
   actions: {
-    traceSelected(traceId) {
-      let traces = this.get('traces');
-
-      // mark selected trace
-      traces.forEach((trace) => {
-        if (trace.get('traceId') == traceId) {
-          this.get('highlighter').highlightTrace(trace);
-        }
-      });
+    traceSelected(trace) {
+      this.get('highlighter').highlightTrace(trace);
       this.get('renderingService').redrawScene();
     },
 

@@ -9,16 +9,16 @@
     </tr>
   </thead>
   <tbody>
-    {{#each traces as |trace|}}
+    {{#each landscapeRepo.latestApplication.traces as |trace|}}
     {{#if trace.highlighted}}
-    <tr {{action "traceSelected" trace.traceId}} style="cursor: pointer" bgcolor="#cc8a8a">
+    <tr {{action "traceSelected" trace}} style="cursor: pointer" bgcolor="#cc8a8a">
       <th scope="row">{{trace.traceId}}</th>
       <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
       <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
       <td>{{trace.totalTraceDuration}}</td>
     </tr>
     {{else}}
-    <tr {{action "traceSelected" trace.traceId}} style="cursor: pointer">
+    <tr {{action "traceSelected" trace}} style="cursor: pointer">
       <th scope="row">{{trace.traceId}}</th>
       <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
       <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>

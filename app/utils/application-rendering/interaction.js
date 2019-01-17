@@ -264,9 +264,6 @@ export default Object.extend(Evented, {
         // highlight communication
         this.get('highlighter').highlight(emberModel);
         this.get('renderingService').redrawScene();
-
-        this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
-        this.get('additionalData').openAdditionalData();
       }
 
     }
