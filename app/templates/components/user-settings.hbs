@@ -4,10 +4,10 @@
   <div class="mt-2">
     {{#each settings as |setting|}}
       {{#if (eq setting.type "boolean")}}
-        <div class="d-flex justify-content-between pr-2">
+        <div class="d-flex justify-content-between pr-3">
           {{setting.key}}
           {{x-toggle
-            theme='flat'
+            theme='skewed'
             value=setting.value
             onToggle=(action (mut setting.value))
           }}

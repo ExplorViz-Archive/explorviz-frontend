@@ -175,14 +175,14 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
     </div>
   {{else if (eq page "editUser")}}
     <div class="col-12 d-flex flex-column">
-      <div>
+      <div class="mb-4">
         {{#bs-button onClick=(action "openMainPage") type="secondary" outline=true title="Back to User List"}}
           {{svg-jar "reply" class="octicon align-middle"}}
         {{/bs-button}}
       </div>
       <div style="overflow-y: auto">
         <div class="row" style="margin-right: 0">
-          <div class="col-12 col-xl-6 mt-4">
+          <div class="col-12 col-xl-6 mb-4">
             <div class="card">
               <div class="card-body">
                 <h3>User Data</h3>
@@ -204,7 +204,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
               </div>
             </div>
           </div>
-          <div class="col-12 col-xl-6 mt-4">
+          <div class="col-12 col-xl-6">
             <div class="card">
               <div class="card-body">
                 {{user-settings user=currentUser}}

@@ -20,7 +20,7 @@
     {{/tab.pane}}
     {{#tab.pane elementId="userSettingsPane" title="Settings"}}
       {{#if (eq tab.activeId "userSettingsPane")}}
-        <div class="container">
+        <div class="container" style="overflow-y: auto">
           <div class="col-12">
             {{user-settings}}
           </div>
