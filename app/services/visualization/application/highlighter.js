@@ -129,13 +129,26 @@ export default Service.extend({
         }
       });
     } else if (emberModelName === "trace") {
-      // highlight communication lines
-      this.get('application.drawableClazzCommunications').forEach((communication) => {
-        if (communication.get('containedTraces').has(highlightedEntity)) {
-          communication.highlight();
-        } else {
-          communication.unhighlight();
+      // unhighlight communication
+      this.get('application.drawableClazzCommunications').forEach((drawableCommunication) => {
+        drawableCommunication.unhighlight();
+      });
+
+      // highlight communication which contains current trace step
+      this.get('application.drawableClazzCommunications').forEach((drawableCommunication) => {
+        if (drawableCommunication.get('containedTraces').has(highlightedEntity)){
+          drawableCommunication.set('state', 'NORMAL');
         }
+        drawableCommunication.get('aggregatedClazzCommunications').forEach((aggregatedComm) => {
+          aggregatedComm.get('clazzCommunications').forEach((comm) => {
+            comm.get('tracesteps').forEach((traceStep) => {
+              if(traceStep.get('parentTrace.traceId') === highlightedEntity.get('traceId') && 
+              traceStep.get('tracePosition') === this.get('currentTracePosition')){
+                drawableCommunication.highlight();
+              }
+            });
+          });
+        });
       });
     }
 

@@ -38,7 +38,7 @@
   {{svg-jar "chevron-left" class="octicon align-middle"}}
   {{/bs-button}}
   <div>
-    {{highlighter.currentTracePosition}} of {{highlighter.highlightedEntity.length}}
+    Step {{highlighter.currentTracePosition}} of {{highlighter.highlightedEntity.length}}
   </div>
   {{#bs-button onClick=(action "selectNextTraceStep") type="secondary" outline=true title="One step forth"}}
   {{svg-jar "chevron-right" class="octicon align-middle"}}

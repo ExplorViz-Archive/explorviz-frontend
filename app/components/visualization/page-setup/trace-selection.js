@@ -43,10 +43,12 @@ export default Component.extend({
 
     selectNextTraceStep() {
       this.get('highlighter').highlightNextTraceStep();
+      this.get('renderingService').redrawScene();
     },
 
     selectPreviousTraceStep() {
       this.get('highlighter').highlightPreviousTraceStep();
+      this.get('renderingService').redrawScene();
     }
   },
 

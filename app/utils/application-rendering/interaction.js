@@ -18,7 +18,6 @@ export default Object.extend(Evented, {
   hammerHandler: null,
   popUpHandler: null,
   highlighter: service('visualization/application/highlighter'),
-  additionalData: service("additional-data"),
   hoverHandler: null,
   renderingService: service(),
 
@@ -320,10 +319,6 @@ export default Object.extend(Evented, {
     }
 
     this.trigger('singleClick', emberModel);
-
-    // close trace information (possibly opened before)
-    this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
-
   },
 
   handlePanning(delta, event) {
