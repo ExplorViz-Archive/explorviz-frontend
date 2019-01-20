@@ -1,33 +1,35 @@
 <h5 align="center">Trace Selection</h5>
-<table class="table table-hover">
-  <thead>
-    <tr>
-      <th scope="col">Trace ID</th>
-      <th scope="col">Soure Clazz</th>
-      <th scope="col">Target Clazz</th>
-      <th scope="col">Duration(ns)</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{#each landscapeRepo.latestApplication.traces as |trace|}}
-    {{#if trace.highlighted}}
-    <tr {{action "traceSelected" trace}} style="cursor: pointer" bgcolor="#cc8a8a">
-      <th title={{trace.traceId}}>{{string-shortener trace.traceId 8}}</th>
-      <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
-      <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
-      <td>{{trace.totalTraceDuration}}</td>
-    </tr>
-    {{else}}
-    <tr {{action "traceSelected" trace}} style="cursor: pointer">
-      <th title={{trace.traceId}}>{{string-shortener trace.traceId 7}}</th>
-      <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
-      <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
-      <td>{{trace.totalTraceDuration}}</td>
-    </tr>
-    {{/if}}
-    {{/each}}
-  </tbody>
-</table>
+<div style="height:500px; overflow:auto;">
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col">Trace ID</th>
+        <th scope="col">Soure Clazz</th>
+        <th scope="col">Target Clazz</th>
+        <th scope="col">Duration(ns)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each landscapeRepo.latestApplication.traces as |trace|}}
+      {{#if trace.highlighted}}
+      <tr {{action "traceSelected" trace}} style="cursor: pointer" bgcolor="#cc8a8a">
+        <th title={{trace.traceId}}>{{string-shortener trace.traceId 8}}</th>
+        <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
+        <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
+        <td>{{trace.totalTraceDuration}}</td>
+      </tr>
+      {{else}}
+      <tr {{action "traceSelected" trace}} style="cursor: pointer">
+        <th title={{trace.traceId}}>{{string-shortener trace.traceId 7}}</th>
+        <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
+        <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
+        <td>{{trace.totalTraceDuration}}</td>
+      </tr>
+      {{/if}}
+      {{/each}}
+    </tbody>
+  </table>
+</div>
 
 <hr>
 

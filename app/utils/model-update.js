@@ -6,6 +6,7 @@ export default Object.extend({
   store: service(),
   highlighter: service('visualization/application/highlighter'),
   additionalData: service('additional-data'),
+  renderingService: service(),
 
   init() {
   },
@@ -21,8 +22,10 @@ export default Object.extend({
 
     // Reset communication highlighting due to new communication
     // TODO: persist highlighting if drawableCommunication is still present in new landscape
-    if (highlightedEntity && highlightedEntity.constructor.modelName === "drawableclazzcommunication") {
+    if (highlightedEntity &&
+      (highlightedEntity.constructor.modelName === "drawableclazzcommunication" || this.get('highlighter.isTrace'))) {
       this.get('highlighter').unhighlightAll();
+      this.get('renderingService').redrawScene();
       this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
     }
 
