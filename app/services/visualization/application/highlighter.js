@@ -32,18 +32,22 @@ export default Service.extend({
     this.set('currentTracePosition', 1);
   },
 
-  highlightPreviousTraceStep() {
+  highlightTraceStep(position){
     let trace = this.get('highlightedEntity');
+    // make sure a trace is highlighted
     if (!this.get('isTrace') || !trace || !this.get('currentTracePosition')) {
       return;
     }
-    let currentTracePosition = this.get('currentTracePosition');
-    if (currentTracePosition <= 1) {
+
+    // check if position is valid
+    if (position < 1|| position > trace.get('length')) {
       return;
     }
-    this.set('currentTracePosition', currentTracePosition -= 1);
+
+    this.set('currentTracePosition', position);
+
     this.get('highlightedEntity.traceSteps').forEach((traceStep) => {
-      if (traceStep.get('tracePosition') === currentTracePosition) {
+      if (traceStep.get('tracePosition') === position) {
         traceStep.highlight();
       } else {
         traceStep.unhighlight();
@@ -51,23 +55,12 @@ export default Service.extend({
     });
   },
 
+  highlightPreviousTraceStep() {
+    this.highlightTraceStep(this.get('currentTracePosition') - 1);
+  },
+
   highlightNextTraceStep() {
-    let trace = this.get('highlightedEntity');
-    if (!this.get('isTrace') || !trace || !this.get('currentTracePosition')) {
-      return;
-    }
-    let currentTracePosition = this.get('currentTracePosition');
-    if (currentTracePosition >= trace.get('length')) {
-      return;
-    }
-    this.set('currentTracePosition', currentTracePosition += 1);
-    this.get('highlightedEntity.traceSteps').forEach((traceStep) => {
-      if (traceStep.get('tracePosition') === currentTracePosition) {
-        traceStep.highlight();
-      } else {
-        traceStep.unhighlight();
-      }
-    });
+    this.highlightTraceStep(this.get('currentTracePosition') + 1);
   },
 
   unhighlightAll() {
