@@ -132,7 +132,7 @@ export default Component.extend(Evented, THREEPerformance, {
     const { user } = this.get('session.data.authenticated');
     const userSettings = user.get('settings');
 
-    if(!userSettings["show-fps-counter"]) {
+    if(!userSettings.showFpsCounter) {
       this.removePerformanceMeasurement();
     }
 
@@ -146,14 +146,14 @@ export default Component.extend(Evented, THREEPerformance, {
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
 
-      if(userSettings["show-fps-counter"]) {
+      if(userSettings.showFpsCounter) {
         self.get('threexStats').update(self.get('webglrenderer'));
         self.get('stats').begin();
       }
 
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
 
-      if(userSettings["show-fps-counter"]) {
+      if(userSettings.showFpsCounter) {
         self.get('stats').end();
       }
 

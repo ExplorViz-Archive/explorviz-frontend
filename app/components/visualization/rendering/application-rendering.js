@@ -29,6 +29,8 @@ export default RenderingCore.extend({
 
   store: service('store'),
 
+  session: service(),
+
   application3D: null,
 
   applicationID: null,
@@ -42,6 +44,8 @@ export default RenderingCore.extend({
   interaction: null,
   centerAndZoomCalculator: null,
   foundationBuilder: null,
+
+  currentUser: null,
 
   // @Override
   initRendering() {
@@ -104,6 +108,8 @@ export default RenderingCore.extend({
     this.scene.add(light);
 
     this.set('centerAndZoomCalculator.centerPoint', null);
+
+    this.set('currentUser', this.get('session.session.content.authenticated.user'));
   },
 
   // @Override
@@ -225,8 +231,8 @@ export default RenderingCore.extend({
         let opacityValue = 1.0;
 
         if(drawableClazzComm.get('state') === "TRANSPARENT") {
-          transparent = true;
-          opacityValue = 0.3;
+          transparent = this.get('currentUser.settings.appVizTransparency');
+          opacityValue = this.get('currentUser.settings.appVizTransparencyIntensity');
         }
 
         const material = new THREE.MeshBasicMaterial({
@@ -238,8 +244,6 @@ export default RenderingCore.extend({
         const thickness = drawableClazzComm.get('lineThickness') * 0.3;
 
         const pipe = this.cylinderMesh(start, end, material, thickness);
-
-
 
         pipe.userData.model = drawableClazzComm;
 
@@ -257,7 +261,7 @@ export default RenderingCore.extend({
               let drewSecondArrow = false;
 
               // add arrow from in direction of source to target clazz
-              let arrowThickness = 4 * thickness;
+              let arrowThickness = this.get('currentUser.settings.appVizCommArrowSize') * 4 * thickness;
               self.addCommunicationArrow(start, end, arrowThickness);
 
               // check for bidirectional communication
@@ -364,8 +368,8 @@ export default RenderingCore.extend({
     let opacityValue = 1.0;
 
     if(component.get('state') === "TRANSPARENT") {
-      transparent = true;
-      opacityValue = 0.2;
+      transparent = this.get('currentUser.settings.appVizTransparency');
+      opacityValue = this.get('currentUser.settings.appVizTransparencyIntensity');
     }
 
     const material = new THREE.MeshLambertMaterial({

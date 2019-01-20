@@ -4,6 +4,8 @@ const { attr } = DS;
 export default DS.Model.extend({
 
   showFpsCounter: attr('boolean'),
-	appVizClassColor: attr('string')
+  appVizCommArrowSize: attr('number'),
+  appVizTransparency: attr('boolean'),
+  appVizTransparencyIntensity: attr('number')
 
 });

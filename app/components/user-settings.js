@@ -35,32 +35,33 @@ export default Component.extend(AlertifyHandler, {
 
         const type = typeOf(value);
 
-        this.get('settings').push({
-          key,
-          value,
-          type
-        });
+        this.get('settings').push({key, value, type});
 
-        this.set(`${key}_${this.get('user').id}`, value);
+        if(type === 'number' || type === 'string') {
+          this.set(`${key}_${this.get('user').id}`, value);
+        }
       }
     );
   },
 
   actions: {
     // saves the changes made to the actual model and backend
-    // TODO: handle boolean values through properties as well
     saveSettings() {
       this.get('settings').forEach(setting => {
-        // get new setting value
-        const settingProperty = this.get(`${setting.key}_${this.get('user').id}`);
 
         if(setting.type === 'number') {
+          // get new setting value
+          const settingProperty = this.get(`${setting.key}_${this.get('user').id}`);
           const newVal = Number(settingProperty);
+
           // newVal might be NaN
           if(newVal) {
             this.set(`user.settings.${setting.key}`, newVal);
           }
         } else if(setting.type === 'string') {
+          // get new setting value
+          const settingProperty = this.get(`${setting.key}_${this.get('user').id}`);
+
           this.set(`user.settings.${setting.key}`, settingProperty);
         } else if(setting.type === 'boolean') {
           this.set(`user.settings.${setting.key}`, setting.value);
