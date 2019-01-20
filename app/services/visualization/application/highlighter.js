@@ -40,7 +40,7 @@ export default Service.extend({
     }
 
     // check if position is valid
-    if (position < 1|| position > trace.get('length')) {
+    if (typeof position !== 'number' || position < 1|| position > trace.get('length')) {
       return;
     }
 

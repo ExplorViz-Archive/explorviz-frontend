@@ -1,5 +1,5 @@
 <h5 align="center">Trace Selection</h5>
-<div style="height:500px; overflow:auto;">
+<div style="max-height:500px; overflow:auto;">
   <table class="table table-hover">
     <thead>
       <tr>
@@ -40,10 +40,10 @@
   {{svg-jar "chevron-left" class="octicon align-middle"}}
   {{/bs-button}}
   <div>
-    Step {{highlighter.currentTracePosition}} of {{highlighter.highlightedEntity.length}}
+    <div align="center">Step <b>{{highlighter.currentTracePosition}}</b>  of {{highlighter.highlightedEntity.length}}</div> <br>
   </div>
   {{#bs-button onClick=(action "selectNextTraceStep") type="secondary" outline=true title="One step forth"}}
   {{svg-jar "chevron-right" class="octicon align-middle"}}
-  {{/bs-button}}
+  {{/bs-button}} 
 </div>
 {{/if}}
