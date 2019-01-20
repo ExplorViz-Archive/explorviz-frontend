@@ -1,8 +1,12 @@
 import { helper } from '@ember/component/helper';
 
-export function shortenString(params) {
+export function stringshortener(params) {
   const [value, desiredLength] = params;
-  return String(value).substring(0, desiredLength) + "...";
+  if (String(value).length <= desiredLength) {
+    return String(value);
+  } else {
+    return String(value).substring(0, desiredLength) + "...";
+  }
 }
 
-export default helper(shortenString);
+export default helper(stringshortener);
