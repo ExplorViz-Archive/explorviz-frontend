@@ -73,6 +73,8 @@ export default Component.extend(AlertifyHandler, {
       }, reason => {
         const {title, detail} = reason.errors[0];
         this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+        // reload model rollback the properties
+        this.get('user').reload();
       });
     }
   },

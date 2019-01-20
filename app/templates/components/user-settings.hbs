@@ -2,29 +2,27 @@
   <h3>User Settings</h3>
   <hr>
   <div class="mt-2">
-    {{#each settings as |setting|}}
-      {{#if (eq setting.type "boolean")}}
-        <div class="d-flex justify-content-between pr-3">
-          {{setting.key}}
-          {{x-toggle
-            theme='skewed'
-            value=setting.value
-            onToggle=(action (mut setting.value))
-          }}
-        </div>
-      {{else if (eq setting.type "string")}}
-        {{#bs-form model=this as |form|}}
+    {{#bs-form model=this onSubmit=(action "saveSettings") as |form|}}
+      {{#each settings as |setting|}}
+        {{#if (eq setting.type "boolean")}}
+          <div class="d-flex justify-content-between pr-3">
+            {{setting.key}}
+            {{x-toggle
+              theme='skewed'
+              value=setting.value
+              onToggle=(action (mut setting.value))
+            }}
+          </div>
+        {{else if (eq setting.type "string")}}
           {{form.element controlType="text" label=setting.key property=(concat setting.key "_" user.id)}}
-        {{/bs-form}}
-      {{else if (eq setting.type "number")}}
-        {{#bs-form model=this as |form|}}
+        {{else if (eq setting.type "number")}}
           {{form.element controlType="number" label=setting.key property=(concat setting.key "_" user.id)}}
-        {{/bs-form}}
-      {{/if}}
-    {{/each}}
+        {{/if}}
+      {{/each}}
 
-    {{#bs-button onClick=(action "saveSettings") type="primary"}}
-      Save
-    {{/bs-button}}
+      {{#bs-button onClick=(action "saveSettings") type="primary" buttonType="submit"}}
+        Save
+      {{/bs-button}}
+    {{/bs-form}}
   </div>
 </div>
