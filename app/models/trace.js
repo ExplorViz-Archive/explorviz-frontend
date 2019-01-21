@@ -15,7 +15,7 @@ const { attr, hasMany } = DS;
  */
 export default BaseEntity.extend({
 
-  traceId: attr('number'),
+  traceId: attr('string'),
   totalRequests: attr('number'),
   totalTraceDuration: attr('number'),
   averageResponseTime: attr('number'),
