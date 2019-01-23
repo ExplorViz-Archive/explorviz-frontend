@@ -256,15 +256,7 @@ export default Object.extend(Evented, {
 
         this.get('highlighter').applyHighlighting();
         this.get('renderingService').redrawScene();
-      } else if(emberModelName === "drawableclazzcommunication"){
-        // remove old highlighting
-        this.get('highlighter').unhighlightAll();
-
-        // highlight communication
-        this.get('highlighter').highlight(emberModel);
-        this.get('renderingService').redrawScene();
-      }
-
+      } 
     }
 
     this.trigger('doubleClick', emberModel);
