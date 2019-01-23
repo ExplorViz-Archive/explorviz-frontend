@@ -134,7 +134,7 @@ export default Service.extend({
         }
         drawableCommunication.get('aggregatedClazzCommunications').forEach((aggregatedComm) => {
           aggregatedComm.get('clazzCommunications').forEach((comm) => {
-            comm.get('tracesteps').forEach((traceStep) => {
+            comm.get('traceSteps').forEach((traceStep) => {
               // based upon id until traceId is unique
               if(traceStep.get('parentTrace.id') === highlightedEntity.get('id') && 
               traceStep.get('tracePosition') === this.get('currentTracePosition')){
