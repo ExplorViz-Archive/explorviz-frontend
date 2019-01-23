@@ -13,11 +13,11 @@
           }}
         </div>
       {{/each-in}}
-      {{#each-in numbers as |key|}}
-        {{form.element controlType="text" label=key property=(concat "numbers." key)}}
+      {{#each-in numerics as |key|}}
+        {{form.element controlType="number" label=key property=(concat "numerics." key)}}
       {{/each-in}}
       {{#each-in strings as |key v|}}
-        {{form.element controlType="number" label=key property=(concat "strings." key)}}
+        {{form.element controlType="text" label=key property=(concat "strings." key)}}
       {{/each-in}}
 
       {{#bs-button onClick=(action "saveSettings") type="primary" buttonType="submit"}}

@@ -231,8 +231,8 @@ export default RenderingCore.extend({
         let opacityValue = 1.0;
 
         if(drawableClazzComm.get('state') === "TRANSPARENT") {
-          transparent = this.get('currentUser.settings.appVizTransparency');
-          opacityValue = this.get('currentUser.settings.appVizTransparencyIntensity');
+          transparent = this.get('currentUser.settings.booleanAttributes.appVizTransparency');
+          opacityValue = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
         }
 
         const material = new THREE.MeshBasicMaterial({
@@ -261,7 +261,7 @@ export default RenderingCore.extend({
               let drewSecondArrow = false;
 
               // add arrow from in direction of source to target clazz
-              let arrowThickness = this.get('currentUser.settings.appVizCommArrowSize') * 4 * thickness;
+              let arrowThickness = this.get('currentUser.settings.numericAttributes.appVizCommArrowSize') * 4 * thickness;
               self.addCommunicationArrow(start, end, arrowThickness);
 
               // check for bidirectional communication
@@ -368,8 +368,8 @@ export default RenderingCore.extend({
     let opacityValue = 1.0;
 
     if(component.get('state') === "TRANSPARENT") {
-      transparent = this.get('currentUser.settings.appVizTransparency');
-      opacityValue = this.get('currentUser.settings.appVizTransparencyIntensity');
+      transparent = this.get('currentUser.settings.booleanAttributes.appVizTransparency');
+      opacityValue = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
     }
 
     const material = new THREE.MeshLambertMaterial({

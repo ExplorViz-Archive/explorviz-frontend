@@ -1,5 +1,4 @@
 import Component from '@ember/component';
-import { typeOf } from '@ember/utils';
 import { inject as service } from "@ember/service";
 
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
@@ -12,42 +11,42 @@ export default Component.extend(AlertifyHandler, {
   session: service(),
 
   booleans: null,
-  numbers: null,
+  numerics: null,
   strings: null,
   // set through hb template, else is set to logged-in user
   user: null,
 
   didInsertElement() {
-    this.initializeSettingsArray();
+    this.initUser();
+    this.initAttributeProperties();
   },
 
-  initializeSettingsArray() {
-    let user = this.get('user');
-    if(!user) {
+  initUser() {
+    if(!this.get('user')) {
       this.set('user', this.get('session.session.content.authenticated.user'));
-      user = this.get('user');
     }
+  },
 
-    const usersettings = user.settings;
+  initAttributeProperties() {
+    const usersettings = this.get('user').settings;
 
     this.set('booleans', {});
-    this.set('numbers', {});
+    this.set('numerics', {});
     this.set('strings', {});
 
-    Object.entries(usersettings).forEach(
+    Object.entries(usersettings.booleanAttributes).forEach(
       ([key, value]) => {
-        if(key === 'id')
-          return;
-
-        const type = typeOf(value);
-
-        if(type === 'boolean') {
-          this.get('booleans')[key] = value;
-        } else if(type === 'number') {
-          this.get('numbers')[key] = value;
-        } else {
-          this.get('strings')[key] = value;
-        }
+        this.set(`booleans.${key}`, value);
+      }
+    );
+    Object.entries(usersettings.numericAttributes).forEach(
+      ([key, value]) => {
+        this.set(`numerics.${key}`, value);
+      }
+    );
+    Object.entries(usersettings.stringAttributes).forEach(
+      ([key, value]) => {
+        this.set(`strings.${key}`, value);
       }
     );
   },
@@ -55,22 +54,25 @@ export default Component.extend(AlertifyHandler, {
   actions: {
     // saves the changes made to the actual model and backend
     saveSettings() {
+      //Update booleans
       Object.entries(this.get('booleans')).forEach(([key, value]) => {
-        this.set(`user.settings.${key}`, value);
+        this.set(`user.settings.booleanAttributes.${key}`, value);
       });
 
-      Object.entries(this.get('numbers')).forEach(([key, value]) => {
+      //Update numerics
+      Object.entries(this.get('numerics')).forEach(([key, value]) => {
         // get new setting value
         const newVal = Number(value);
 
         // newVal might be NaN
         if(newVal) {
-          this.set(`user.settings.${key}`, newVal);
+          this.set(`user.settings.numericAttributes.${key}`, newVal);
         }
       });
 
+      //Update strings
       Object.entries(this.get('strings')).forEach(([key, value]) => {
-        this.set(`user.settings.${key}`, value);
+        this.set(`user.settings.stringAttributes.${key}`, value);
       });
 
       this.get('user').save().then(() => {
@@ -78,7 +80,7 @@ export default Component.extend(AlertifyHandler, {
       }, reason => {
         const {title, detail} = reason.errors[0];
         this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
-        // reload model rollback the properties
+        // reload model and rollback the properties
         this.get('user').reload();
       });
     }
