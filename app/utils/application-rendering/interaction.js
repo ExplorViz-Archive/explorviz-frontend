@@ -18,7 +18,6 @@ export default Object.extend(Evented, {
   hammerHandler: null,
   popUpHandler: null,
   highlighter: service('visualization/application/highlighter'),
-  additionalData: service("additional-data"),
   hoverHandler: null,
   renderingService: service(),
 
@@ -257,18 +256,7 @@ export default Object.extend(Evented, {
 
         this.get('highlighter').applyHighlighting();
         this.get('renderingService').redrawScene();
-      } else if(emberModelName === "drawableclazzcommunication"){
-        // remove old highlighting
-        this.get('highlighter').unhighlightAll();
-
-        // highlight communication
-        this.get('highlighter').highlight(emberModel);
-        this.get('renderingService').redrawScene();
-
-        this.get('additionalData').addComponent("visualization/page-setup/trace-selection");
-        this.get('additionalData').openAdditionalData();
-      }
-
+      } 
     }
 
     this.trigger('doubleClick', emberModel);
@@ -323,10 +311,6 @@ export default Object.extend(Evented, {
     }
 
     this.trigger('singleClick', emberModel);
-
-    // close trace information (possibly opened before)
-    this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
-
   },
 
   handlePanning(delta, event) {
