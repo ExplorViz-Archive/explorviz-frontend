@@ -38,7 +38,7 @@ export default DrawEdgeEntity.extend({
     // Find all belonging traces
     this.get('aggregatedClazzCommunications').forEach((aggClazzComm) => {
       aggClazzComm.get('clazzCommunications').forEach((clazzComm) => {
-        clazzComm.get('tracesteps').forEach((traceStep) => {
+        clazzComm.get('traceSteps').forEach((traceStep) => {
           let containedTrace = traceStep.belongsTo('parentTrace').value();
           if (containedTrace){
             traces.add(containedTrace);

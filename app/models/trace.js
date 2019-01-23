@@ -15,21 +15,20 @@ const { attr, hasMany } = DS;
  */
 export default BaseEntity.extend({
 
-  traceId: attr ('number'),
+  traceId: attr('string'),
   totalRequests: attr('number'),
   totalTraceDuration: attr('number'),
   averageResponseTime: attr('number'),
-  isSelected: attr('boolean', { defaultValue: false}),
-
+  highlighted: attr('boolean', { defaultValue: false }),
   traceSteps: hasMany('tracestep', {
     inverse: 'parentTrace'
   }),
 
-  length: computed('traceSteps', function(){
+  length: computed('traceSteps', function () {
     return this.get('traceSteps').length;
   }),
 
-  sourceClazz: computed('traceSteps', function(){
+  sourceClazz: computed('traceSteps', function () {
     let traceSteps = this.get('traceSteps');
     // assumption: Tracesteps non-empty and in order
     let firstTraceStep = traceSteps.objectAt(0);
@@ -37,7 +36,7 @@ export default BaseEntity.extend({
     return sourceClazz;
   }),
 
-  targetClazz: computed('traceSteps', function(){
+  targetClazz: computed('traceSteps', function () {
     let traceSteps = this.get('traceSteps');
     // assumption: Tracesteps non-empty and in order
     let lastTraceStep = traceSteps.objectAt(this.get('length') - 1);
@@ -45,8 +44,22 @@ export default BaseEntity.extend({
     return targetClazz;
   }),
 
+  highlight() {
+    this.set('highlighted', true);
+    this.get('traceSteps').forEach((traceStep) => {
+      if (traceStep.get('tracePosition') === 1) {
+        traceStep.highlight();
+      } else {
+        traceStep.unhighlight();
+      }
+    });
+  },
+
   unhighlight() {
-    this.set('isSelected', false);
+    this.set('highlighted', false);
+    this.get('traceSteps').forEach((traceStep) => {
+      traceStep.unhighlight();
+    });
   },
 
   openParents() {

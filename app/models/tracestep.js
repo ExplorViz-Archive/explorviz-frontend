@@ -14,10 +14,11 @@ const { attr, belongsTo } = DS;
  */
 export default BaseEntity.extend({
 
-  tracePosition: attr ('number'),
+  tracePosition: attr('number'),
   requests: attr('number'),
   currentTraceDuration: attr('number'),
   averageResponseTime: attr('number'),
+  highlighted: attr('boolean', { defaultValue: false }),
 
   parentTrace: belongsTo('trace', {
     inverse: 'traceSteps'
@@ -33,6 +34,14 @@ export default BaseEntity.extend({
     if (clazzCommunication !== null) {
       clazzCommunication.openParents();
     }
+  },
+
+  highlight() {
+    this.set('highlighted', true);
+  },
+
+  unhighlight() {
+    this.set('highlighted', false);
   },
 
 });
