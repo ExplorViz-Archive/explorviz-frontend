@@ -6,6 +6,7 @@ export default DS.Model.extend({
   showFpsCounter: attr('boolean'),
   appVizCommArrowSize: attr('number'),
   appVizTransparency: attr('boolean'),
-  appVizTransparencyIntensity: attr('number')
+  appVizTransparencyIntensity: attr('number'),
+  booleanAttributes: hasMany('boolean')
 
 });

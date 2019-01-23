@@ -3,22 +3,22 @@
   <hr>
   <div class="mt-2">
     {{#bs-form model=this onSubmit=(action "saveSettings") as |form|}}
-      {{#each settings as |setting|}}
-        {{#if (eq setting.type "boolean")}}
-          <div class="d-flex justify-content-between pr-3">
-            {{setting.key}}
-            {{x-toggle
-              theme='skewed'
-              value=setting.value
-              onToggle=(action (mut setting.value))
-            }}
-          </div>
-        {{else if (eq setting.type "string")}}
-          {{form.element controlType="text" label=setting.key property=(concat setting.key "_" user.id)}}
-        {{else if (eq setting.type "number")}}
-          {{form.element controlType="number" label=setting.key property=(concat setting.key "_" user.id)}}
-        {{/if}}
-      {{/each}}
+      {{#each-in booleans as |key v|}}
+        <div class="d-flex justify-content-between pr-3">
+          {{key}}
+          {{x-toggle
+            theme='skewed'
+            value=(get this.booleans key)
+            onToggle=(action (mut (get this.booleans key)))
+          }}
+        </div>
+      {{/each-in}}
+      {{#each-in numbers as |key|}}
+        {{form.element controlType="text" label=key property=(concat "numbers." key)}}
+      {{/each-in}}
+      {{#each-in strings as |key v|}}
+        {{form.element controlType="number" label=key property=(concat "strings." key)}}
+      {{/each-in}}
 
       {{#bs-button onClick=(action "saveSettings") type="primary" buttonType="submit"}}
         Save

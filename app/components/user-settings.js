@@ -11,7 +11,9 @@ export default Component.extend(AlertifyHandler, {
   store: service(),
   session: service(),
 
-  settings: null,
+  booleans: null,
+  numbers: null,
+  strings: null,
   // set through hb template, else is set to logged-in user
   user: null,
 
@@ -27,7 +29,11 @@ export default Component.extend(AlertifyHandler, {
     }
 
     const usersettings = user.settings;
-    this.set('settings', []);
+
+    this.set('booleans', {});
+    this.set('numbers', {});
+    this.set('strings', {});
+
     Object.entries(usersettings).forEach(
       ([key, value]) => {
         if(key === 'id')
@@ -35,10 +41,12 @@ export default Component.extend(AlertifyHandler, {
 
         const type = typeOf(value);
 
-        this.get('settings').push({key, value, type});
-
-        if(type === 'number' || type === 'string') {
-          this.set(`${key}_${this.get('user').id}`, value);
+        if(type === 'boolean') {
+          this.get('booleans')[key] = value;
+        } else if(type === 'number') {
+          this.get('numbers')[key] = value;
+        } else {
+          this.get('strings')[key] = value;
         }
       }
     );
@@ -47,25 +55,22 @@ export default Component.extend(AlertifyHandler, {
   actions: {
     // saves the changes made to the actual model and backend
     saveSettings() {
-      this.get('settings').forEach(setting => {
+      Object.entries(this.get('booleans')).forEach(([key, value]) => {
+        this.set(`user.settings.${key}`, value);
+      });
 
-        if(setting.type === 'number') {
-          // get new setting value
-          const settingProperty = this.get(`${setting.key}_${this.get('user').id}`);
-          const newVal = Number(settingProperty);
+      Object.entries(this.get('numbers')).forEach(([key, value]) => {
+        // get new setting value
+        const newVal = Number(value);
 
-          // newVal might be NaN
-          if(newVal) {
-            this.set(`user.settings.${setting.key}`, newVal);
-          }
-        } else if(setting.type === 'string') {
-          // get new setting value
-          const settingProperty = this.get(`${setting.key}_${this.get('user').id}`);
-
-          this.set(`user.settings.${setting.key}`, settingProperty);
-        } else if(setting.type === 'boolean') {
-          this.set(`user.settings.${setting.key}`, setting.value);
+        // newVal might be NaN
+        if(newVal) {
+          this.set(`user.settings.${key}`, newVal);
         }
+      });
+
+      Object.entries(this.get('strings')).forEach(([key, value]) => {
+        this.set(`user.settings.${key}`, value);
       });
 
       this.get('user').save().then(() => {
