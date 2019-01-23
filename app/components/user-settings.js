@@ -28,18 +28,24 @@ export default Component.extend(AlertifyHandler, {
 
     const usersettings = user.settings;
     this.set('settings', []);
-    Object.entries(usersettings).forEach(
+    Object.entries(usersettings.booleanAttributes).forEach(
       ([key, value]) => {
-        if(key === 'id')
-          return;
-
         const type = typeOf(value);
-
         this.get('settings').push({key, value, type});
-
-        if(type === 'number' || type === 'string') {
-          this.set(`${key}_${this.get('user').id}`, value);
-        }
+      }
+    );
+    Object.entries(usersettings.numericAttributes).forEach(
+      ([key, value]) => {
+        const type = typeOf(value);
+        this.get('settings').push({key, value, type});
+        this.set(`${key}_${this.get('user').id}`, value);
+      }
+    );
+    Object.entries(usersettings.stringAttributes).forEach(
+      ([key, value]) => {
+        const type = typeOf(value);
+        this.get('settings').push({key, value, type});
+        this.set(`${key}_${this.get('user').id}`, value);
       }
     );
   },
@@ -56,15 +62,15 @@ export default Component.extend(AlertifyHandler, {
 
           // newVal might be NaN
           if(newVal) {
-            this.set(`user.settings.${setting.key}`, newVal);
+            this.set(`user.settings.numericAttributes.${setting.key}`, newVal);
           }
         } else if(setting.type === 'string') {
           // get new setting value
           const settingProperty = this.get(`${setting.key}_${this.get('user').id}`);
 
-          this.set(`user.settings.${setting.key}`, settingProperty);
+          this.set(`user.settings.stringAttributes.${setting.key}`, settingProperty);
         } else if(setting.type === 'boolean') {
-          this.set(`user.settings.${setting.key}`, setting.value);
+          this.set(`user.settings.booleanAttributes.${setting.key}`, setting.value);
         }
       });
 
