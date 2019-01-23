@@ -129,15 +129,14 @@ export default Service.extend({
 
       // highlight communication which contains current trace step
       this.get('application.drawableClazzCommunications').forEach((drawableCommunication) => {
-        if (drawableCommunication.get('containedTraces').has(highlightedEntity)){
+        if (drawableCommunication.get('containedTraces').has(highlightedEntity)) {
           drawableCommunication.set('state', 'NORMAL');
         }
         drawableCommunication.get('aggregatedClazzCommunications').forEach((aggregatedComm) => {
           aggregatedComm.get('clazzCommunications').forEach((comm) => {
             comm.get('traceSteps').forEach((traceStep) => {
-              // based upon id until traceId is unique
-              if(traceStep.get('parentTrace.id') === highlightedEntity.get('id') && 
-              traceStep.get('tracePosition') === this.get('currentTracePosition')){
+              if (traceStep.get('parentTrace.traceId') === highlightedEntity.get('traceId') &&
+                traceStep.get('tracePosition') === this.get('currentTracePosition')) {
                 drawableCommunication.highlight();
               }
             });
