@@ -13,8 +13,17 @@ module.exports = function(app) {
         "username":"admin",
         "settings":{
           "id":1,
-          "showFpsCounter":false,
-          "appVizClassColor":"0xFF0000"
+          "booleanAttributes": {
+            "showFpsCounter": false,
+            "appVizTransparency": true,
+            "enableHoverEffects": true,
+            "keepHighlightingOnOpenOrClose": true
+          },
+          "numericAttributes": {
+            "appVizCommArrowSize": 1.0,
+            "appVizTransparencyIntensity": 0.3
+          },
+          "stringAttributes": {}
         },"token":"eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJmNTVhMWMzNS0yYTJhLTQxMTMtOTY0ZS01MGRmNWI2MTkwNTQiLCJpc3MiOiJFeHBsb3JWaXoiLCJhdWQiOiJFeHBsb3JWaXoiLCJzdWIiOiJhZG1pbiIsImlhdCI6MTU0NDk1MTk5NywiZXhwIjoxNTQ0OTU1NTk3LCJyb2xlcyI6W3siaWQiOjIsImRlc2NyaXB0b3IiOiJhZG1pbiJ9XSwicmVmcmVzaENvdW50IjowLCJyZWZyZXNoTGltaXQiOjF9.OwcVptvB-6-cP6Jt244gtsLkCX7qSya_nx7VQ8Z_A-k"
       },
       "relationships":{
