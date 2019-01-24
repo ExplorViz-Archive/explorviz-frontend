@@ -20,6 +20,7 @@ export default Object.extend(Evented, {
   highlighter: service('visualization/application/highlighter'),
   hoverHandler: null,
   renderingService: service(),
+  session: service(),
 
   raycastObjects: computed('rotationObject', function() {
     return this.get('rotationObject.children');
@@ -80,7 +81,7 @@ export default Object.extend(Evented, {
 
     // init HoverHandler
     if (!this.get('hoverHandler')) {
-      this.set('hoverHandler', HoverHandler.create());
+      this.set('hoverHandler', HoverHandler.create(getOwner(this).ownerInjection()));
     }
 
     this.registerPopUpHandler();
@@ -247,12 +248,16 @@ export default Object.extend(Evented, {
       if(emberModelName === "component"){
         emberModel.setOpenedStatus(!emberModel.get('opened'));
 
-        //const highlighted = this.get('highlighter.highlightedEntity');
+        const user = this.get('session.session.content.authenticated.user');
 
-        // TODO Allow users to change this behavior via configuration route
-        //if(emberModel === highlighted || emberModel.contains(highlighted)) {
-          //this.get('highlighter').unhighlightAll();
-        //}
+        if(!user.settings.booleanAttributes.keepHighlightingOnOpenOrClose) {
+          const highlighted = this.get('highlighter.highlightedEntity');
+  
+          // TODO Allow users to change this behavior via configuration route
+          if(emberModel === highlighted || emberModel.contains(highlighted)) {
+            this.get('highlighter').unhighlightAll();
+          }
+        }
 
         this.get('highlighter').applyHighlighting();
         this.get('renderingService').redrawScene();
