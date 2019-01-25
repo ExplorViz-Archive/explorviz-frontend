@@ -14,6 +14,8 @@ export default Object.extend({
   /**
    *  Computes (possibly) bidirectional communication and saves 
    *  it as a model. Later used to draw communication between clazzes
+   * 
+   * @method addDrawableCommunication
    */
   addDrawableCommunication() {
     let store = this.get('store');

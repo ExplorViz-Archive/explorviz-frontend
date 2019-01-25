@@ -179,6 +179,7 @@ export default Service.extend({
    * Marks communication between clazzes as NORMAL or TRANSPARENT for highlighting, only used if a component or clazz is highlighted
    * @param {*} selectedClazzes      Clazzes which are (indirectly) highlighted
    * @param {*} communicatingClazzes Clazzes which communicate with selectedClazzes (including selectedClazzes itself)
+   * @method applyCommunicationHighlighting
    */
   applyCommunicationHighlighting(selectedClazzes, communicatingClazzes) {
 
@@ -207,10 +208,11 @@ export default Service.extend({
     });
   },
 
-  /**
+/**
  * Sets all (nested) entities (components & clazzes) of a component either to TRANSPARENT or NORMAL for highlighting
  * @param {component} component             Component which entities shall be updated
  * @param {Set}       communicatingClazzes  Contains all clazzes which are involved in communication with highlighted entity
+ * @method applyNodeHighlighting
  * 
  */
   applyNodeHighlighting(component, communicatingClazzes) {

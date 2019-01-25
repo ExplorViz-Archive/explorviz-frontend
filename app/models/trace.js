@@ -8,7 +8,7 @@ const { attr, hasMany } = DS;
  * Ember model for a Trace.
  *
  * @class Trace-Model
- * @extends Trace-Model
+ * @extends BaseEntity-Model
  *
  * @module explorviz
  * @submodule model.meta

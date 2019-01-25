@@ -5,6 +5,8 @@ import Object from '@ember/object';
  * the name of the previously clicked application and presents
  * data on mouse hovering. It simply is a container for actual
  * application data.
+ * 
+ * @class foundation-builder
  */
 export default Object.extend({
 

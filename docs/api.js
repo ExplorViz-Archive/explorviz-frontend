@@ -45,16 +45,14 @@ YUI.add("yuidoc-meta", function(Y) {
         "System-Model",
         "System-Serializer",
         "ThreeJS-Performance-Mixin",
-        "Time-Shift-Component",
         "Timestamp-Adapter",
         "Timestamp-Model",
         "Timestamp-Repository-Service",
-        "Timestamp-Versionbar-Component",
         "Trace-Model",
         "TraceStep-Model",
-        "Versionbar-Load-Service",
         "Visualization-Controller",
         "Visualization-Route",
+        "foundation-builder",
         "user-Model"
     ],
     "modules": [

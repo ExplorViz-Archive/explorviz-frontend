@@ -113,24 +113,6 @@
             "fors": {},
             "namespaces": {}
         },
-        "app\\components\\time-shift.js": {
-            "name": "app\\components\\time-shift.js",
-            "modules": {},
-            "classes": {
-                "Time-Shift-Component": 1
-            },
-            "fors": {},
-            "namespaces": {}
-        },
-        "app\\components\\timestamp-versionbar.js": {
-            "name": "app\\components\\timestamp-versionbar.js",
-            "modules": {},
-            "classes": {
-                "Timestamp-Versionbar-Component": 1
-            },
-            "fors": {},
-            "namespaces": {}
-        },
         "app\\controllers\\application.js": {
             "name": "app\\controllers\\application.js",
             "modules": {},
@@ -503,33 +485,12 @@
             "fors": {},
             "namespaces": {}
         },
-        "app\\services\\url-builder.js": {
-            "name": "app\\services\\url-builder.js",
-            "modules": {},
-            "classes": {},
-            "fors": {},
-            "namespaces": {}
-        },
-        "app\\services\\versionbar-load.js": {
-            "name": "app\\services\\versionbar-load.js",
-            "modules": {},
-            "classes": {
-                "Versionbar-Load-Service": 1
-            },
-            "fors": {},
-            "namespaces": {}
-        },
-        "app\\services\\view-importer.js": {
-            "name": "app\\services\\view-importer.js",
-            "modules": {},
-            "classes": {},
-            "fors": {},
-            "namespaces": {}
-        },
         "app\\utils\\application-rendering\\foundation-builder.js": {
             "name": "app\\utils\\application-rendering\\foundation-builder.js",
             "modules": {},
-            "classes": {},
+            "classes": {
+                "foundation-builder": 1
+            },
             "fors": {},
             "namespaces": {}
         },
@@ -575,13 +536,13 @@
                 "security": 1,
                 "page": 1,
                 "visualization.rendering": 1,
-                "visualization.timeshift": 1,
                 "settings": 1,
                 "visualization": 1,
                 "model": 1,
                 "model.meta": 1,
                 "model.util": 1,
-                "ember": 1
+                "ember": 1,
+                "visualization.timeshift": 1
             },
             "classes": {},
             "fors": {},
@@ -630,13 +591,13 @@
                 "security": 1,
                 "page": 1,
                 "visualization.rendering": 1,
-                "visualization.timeshift": 1,
                 "settings": 1,
                 "visualization": 1,
                 "model": 1,
                 "model.meta": 1,
                 "model.util": 1,
-                "util": 1
+                "util": 1,
+                "visualization.timeshift": 1
             },
             "elements": {},
             "classes": {
@@ -651,8 +612,6 @@
                 "Landscape-Rendering-Component": 1,
                 "Rendering-Core-Component": 1,
                 "Login-Form-Component": 1,
-                "Time-Shift-Component": 1,
-                "Timestamp-Versionbar-Component": 1,
                 "Application-Controller": 1,
                 "Configuration-Controller": 1,
                 "Visualization-Controller": 1,
@@ -689,13 +648,13 @@
                 "Timestamp-Repository-Service": 1,
                 "Configuration-Service": 1,
                 "Page-Setup-Service": 1,
-                "Versionbar-Load-Service": 1
+                "foundation-builder": 1
             },
             "fors": {},
             "namespaces": {},
             "tag": "main",
-            "file": "app\\services\\versionbar-load.js",
-            "line": 6,
+            "file": "app\\utils\\application-rendering\\foundation-builder.js",
+            "line": 3,
             "description": "Main module",
             "itemtype": "main"
         },
@@ -761,24 +720,6 @@
             "tag": "main",
             "itemtype": "main"
         },
-        "visualization.timeshift": {
-            "name": "visualization.timeshift",
-            "submodules": {},
-            "elements": {},
-            "classes": {
-                "Time-Shift-Component": 1
-            },
-            "fors": {},
-            "is_submodule": 1,
-            "namespaces": {},
-            "module": "explorviz",
-            "namespace": "",
-            "file": "app\\components\\time-shift.js",
-            "line": 7,
-            "description": "Viz.Time TODO",
-            "tag": "main",
-            "itemtype": "main"
-        },
         "settings": {
             "name": "settings",
             "submodules": {},
@@ -810,7 +751,7 @@
             "module": "explorviz",
             "namespace": "",
             "file": "app\\controllers\\visualization.js",
-            "line": 7,
+            "line": 6,
             "description": "Viz TODO",
             "tag": "main",
             "itemtype": "main"
@@ -943,6 +884,22 @@
             "line": 5,
             "description": "This module holds JS-files that are necessary for every Ember application.",
             "itemtype": "main"
+        },
+        "visualization.timeshift": {
+            "name": "visualization.timeshift",
+            "submodules": {},
+            "elements": {},
+            "classes": {},
+            "fors": {},
+            "is_submodule": 1,
+            "namespaces": {},
+            "module": "explorviz",
+            "namespace": "",
+            "file": "yuidoc-packages.js",
+            "line": 39,
+            "description": "Viz.Time TODO",
+            "tag": "main",
+            "itemtype": "main"
         }
     },
     "classes": {
@@ -1005,7 +962,7 @@
             "namespace": "",
             "file": "app\\adapters\\timestamp.js",
             "line": 8,
-            "description": "This Adapter operates as communication abstraction for all network requests,\nthat refer to Timestamp objects. It provides functions for fetching,\nupdating and uploading. However, at the time of writing this documentation\nonly fetching is implemented by the backend.\n{{#crossLink \"Timeshift-Reload/updateObject:method\"}}{{/crossLink}} shows an\nexemplary requests.",
+            "description": "This Adapter operates as communication abstraction for all network requests,\nthat refer to Timestamp objects. It provides functions for fetching,\nupdating and uploading. However, at the time of writing this documentation\nonly fetching is implemented by the backend.",
             "submodule": "network",
             "extends": "DS.JSONAPIAdapter"
         },
@@ -1100,7 +1057,7 @@
             "module": "explorviz",
             "namespace": "",
             "file": "app\\components\\visualization\\rendering\\rendering-core.js",
-            "line": 11,
+            "line": 9,
             "description": "This component contains the core mechanics of the different (three.js-based)\nrenderer. All functions below are called in a determined order, hence you only\nneed to override them in your custom renderer.\n\nSee {{#crossLink \"Landscape-Rendering\"}}{{/crossLink}} or\n{{#crossLink \"Application-Rendering\"}}{{/crossLink}} for example usage.\n\nCall order:\n\n1.",
             "submodule": "visualization.rendering",
             "extends": "Ember.Component"
@@ -1119,37 +1076,6 @@
             "line": 6,
             "description": "TODO",
             "submodule": "page",
-            "extends": "Ember.Component"
-        },
-        "Time-Shift-Component": {
-            "name": "Time-Shift-Component",
-            "shortname": "Time-Shift-Component",
-            "classitems": [],
-            "plugins": [],
-            "extensions": [],
-            "plugin_for": [],
-            "extension_for": [],
-            "module": "explorviz",
-            "namespace": "",
-            "file": "app\\components\\time-shift.js",
-            "line": 7,
-            "description": "This component contains the core mechanics of the different (three.js-based)\nrenderer. All functions below are called in a determined order, hence you only\nneed to override them in your custom renderer.\n\nSee {{#crossLink \"Landscape-Rendering\"}}{{/crossLink}} or\n{{#crossLink \"Application-Rendering\"}}{{/crossLink}} for example usage.\n\nCall order:\n\n1.",
-            "submodule": "visualization.timeshift",
-            "extends": "Ember.Component"
-        },
-        "Timestamp-Versionbar-Component": {
-            "name": "Timestamp-Versionbar-Component",
-            "shortname": "Timestamp-Versionbar-Component",
-            "classitems": [],
-            "plugins": [],
-            "extensions": [],
-            "plugin_for": [],
-            "extension_for": [],
-            "module": "explorviz",
-            "namespace": "",
-            "file": "app\\components\\timestamp-versionbar.js",
-            "line": 7,
-            "description": "Similar to the {{#crossLink \"time-shift\"}}{{/crossLink}}, displays uploaded landscapes\n{{#crossLink \"landscape-uploader\"}}{{/crossLink}}.",
             "extends": "Ember.Component"
         },
         "Application-Controller": {
@@ -1195,7 +1121,7 @@
             "module": "explorviz",
             "namespace": "",
             "file": "app\\controllers\\visualization.js",
-            "line": 7,
+            "line": 6,
             "description": "TODO",
             "submodule": "visualization",
             "extends": "Ember.Controller"
@@ -1534,7 +1460,7 @@
             "line": 7,
             "description": "Ember model for a Trace.",
             "submodule": "model.meta",
-            "extends": "Trace-Model"
+            "extends": "BaseEntity-Model"
         },
         "TraceStep-Model": {
             "name": "TraceStep-Model",
@@ -1764,9 +1690,9 @@
             "submodule": "page",
             "extends": "Ember.Service"
         },
-        "Versionbar-Load-Service": {
-            "name": "Versionbar-Load-Service",
-            "shortname": "Versionbar-Load-Service",
+        "foundation-builder": {
+            "name": "foundation-builder",
+            "shortname": "foundation-builder",
             "classitems": [],
             "plugins": [],
             "extensions": [],
@@ -1774,10 +1700,9 @@
             "extension_for": [],
             "module": "explorviz",
             "namespace": "",
-            "file": "app\\services\\versionbar-load.js",
-            "line": 6,
-            "description": "This service loads the data for the {{#crossLink \"timestamp-versionbar\"}}{{/crossLink}}.",
-            "extends": "Ember.Service"
+            "file": "app\\utils\\application-rendering\\foundation-builder.js",
+            "line": 3,
+            "description": "The foundation is the grey all-encompassing tile. It shows\nthe name of the previously clicked application and presents\ndata on mouse hovering. It simply is a container for actual\napplication data."
         },
         "Application": {
             "name": "Application",
@@ -1871,7 +1796,7 @@
         },
         {
             "file": "app\\components\\visualization\\rendering\\application-rendering.js",
-            "line": 131,
+            "line": 137,
             "description": "TODO",
             "itemtype": "method",
             "name": "cleanAndUpdateScene",
@@ -1881,7 +1806,7 @@
         },
         {
             "file": "app\\components\\visualization\\rendering\\application-rendering.js",
-            "line": 150,
+            "line": 156,
             "description": "TODO",
             "itemtype": "method",
             "name": "preProcessEntity",
@@ -1891,7 +1816,7 @@
         },
         {
             "file": "app\\components\\visualization\\rendering\\application-rendering.js",
-            "line": 163,
+            "line": 169,
             "description": "TODO",
             "itemtype": "method",
             "name": "populateScene",
@@ -1901,20 +1826,27 @@
         },
         {
             "file": "app\\components\\visualization\\rendering\\application-rendering.js",
-            "line": 406,
+            "line": 410,
             "description": "Draws an small black arrow",
             "params": [
                 {
                     "name": "start",
                     "description": "start vector of the associated communication",
-                    "type": "*"
+                    "type": "Number"
                 },
                 {
                     "name": "end",
                     "description": "end vector of the associated communication",
-                    "type": "*"
+                    "type": "Number"
+                },
+                {
+                    "name": "width",
+                    "description": "thickness of the arrow",
+                    "type": "Number"
                 }
             ],
+            "itemtype": "method",
+            "name": "addCommunicationArrow",
             "class": "Application-Rendering-Component",
             "module": "explorviz",
             "submodule": "visualization.rendering"
@@ -1951,7 +1883,7 @@
         },
         {
             "file": "app\\components\\visualization\\rendering\\rendering-core.js",
-            "line": 73,
+            "line": 65,
             "description": "This overridden Ember Component lifecycle hook enables calling\nExplorViz's setup code for actual rendering and custom listeners.",
             "itemtype": "method",
             "name": "didRender",
@@ -1961,7 +1893,7 @@
         },
         {
             "file": "app\\components\\visualization\\rendering\\rendering-core.js",
-            "line": 87,
+            "line": 79,
             "description": "This overridden Ember Component lifecycle hook enables calling\nExplorViz's custom cleanup code.",
             "itemtype": "method",
             "name": "willDestroyElement",
@@ -1971,7 +1903,7 @@
         },
         {
             "file": "app\\components\\visualization\\rendering\\rendering-core.js",
-            "line": 99,
+            "line": 91,
             "description": "This function is called once on the didRender event. Inherit this function\nto call other important function, e.g. \"initInteraction\" as shown in\n{{#crossLink \"Landscape-Rendering/initInteraction:method\"}}{{/crossLink}}.",
             "itemtype": "method",
             "name": "initRenderings",
@@ -1981,15 +1913,7 @@
         },
         {
             "file": "app\\components\\visualization\\rendering\\rendering-core.js",
-            "line": 430,
-            "description": "This method is used to update the camera with query parameters",
-            "class": "Rendering-Core-Component",
-            "module": "explorviz",
-            "submodule": "visualization.rendering"
-        },
-        {
-            "file": "app\\components\\visualization\\rendering\\rendering-core.js",
-            "line": 497,
+            "line": 388,
             "description": "This function is called once on initRendering and everytime at the end of\n\"cleanAndUpdateScene\". Inherit this function to insert objects in the\nThree.js scene. Have a look at\n{{#crossLink \"Landscape-Rendering/cleanAndUpdateScene:method\"}}\n{{/crossLink}}\nor\n{{#crossLink \"Application-Rendering/cleanAndUpdateScene:method\"}}\n{{/crossLink}}\nfor examplary usage.",
             "itemtype": "method",
             "name": "populateScene",
@@ -1999,7 +1923,7 @@
         },
         {
             "file": "app\\components\\visualization\\rendering\\rendering-core.js",
-            "line": 513,
+            "line": 404,
             "description": "This function is called when the willDestroyElement event is fired. Inherit this\nfunction to cleanup custom properties or unbind listener\nas shown in {{#crossLink \"Landscape-Rendering\"}}{{/crossLink}}.",
             "itemtype": "method",
             "name": "cleanup",
@@ -2009,7 +1933,7 @@
         },
         {
             "file": "app\\components\\visualization\\rendering\\rendering-core.js",
-            "line": 546,
+            "line": 435,
             "description": "Inherit this function to update the scene with a new renderingModel. It\nautomatically removes every mesh from the scene and finally calls\nthe (overridden) \"populateScene\" function. Add your custom code\nas shown in landscape-rendering.",
             "itemtype": "method",
             "name": "cleanAndUpdateScene",
@@ -2019,7 +1943,7 @@
         },
         {
             "file": "app\\components\\visualization\\rendering\\rendering-core.js",
-            "line": 578,
+            "line": 467,
             "description": "This function is called automatically when a new landscape was fetched. It\nis executed before\n{{#crossLink \"Rendering-Core/cleanAndUpdateScene:method\"}}{{/crossLink}}.\nInherit this function to preprocess the\n{{#crossLink \"Landscape\"}}{{/crossLink}} for rendering, e.g. filter some\nvalue.\n\nSee {{#crossLink \"Application-Rendering\"}}{{/crossLink}} for example usage.",
             "itemtype": "method",
             "name": "preProcessEntity",
@@ -2083,7 +2007,7 @@
         },
         {
             "file": "app\\services\\visualization\\application\\highlighter.js",
-            "line": 128,
+            "line": 178,
             "description": "Marks communication between clazzes as NORMAL or TRANSPARENT for highlighting, only used if a component or clazz is highlighted",
             "params": [
                 {
@@ -2097,12 +2021,14 @@
                     "type": "*"
                 }
             ],
+            "itemtype": "method",
+            "name": "applyCommunicationHighlighting",
             "class": "Configuration-Service",
             "module": "explorviz"
         },
         {
             "file": "app\\services\\visualization\\application\\highlighter.js",
-            "line": 160,
+            "line": 211,
             "description": "Sets all (nested) entities (components & clazzes) of a component either to TRANSPARENT or NORMAL for highlighting",
             "params": [
                 {
@@ -2116,6 +2042,8 @@
                     "type": "Set"
                 }
             ],
+            "itemtype": "method",
+            "name": "applyNodeHighlighting",
             "class": "Configuration-Service",
             "module": "explorviz"
         },
@@ -2172,119 +2100,14 @@
             "submodule": "page"
         },
         {
-            "file": "app\\services\\url-builder.js",
-            "line": 4,
-            "description": "This service is used to pass data from the component to the controller.",
-            "class": "Versionbar-Load-Service",
-            "module": "explorviz"
-        },
-        {
-            "file": "app\\services\\url-builder.js",
-            "line": 8,
-            "description": "This method is implemented in \"rendering-core\" to create a state out of \nthe component's data, which is not contained in the model. \nThis state contains the camera axis (x,y,z).",
-            "class": "Versionbar-Load-Service",
-            "module": "explorviz"
-        },
-        {
-            "file": "app\\services\\url-builder.js",
-            "line": 16,
-            "description": "This method is used to pass the state to the controller. \nIt's triggered in \"rendering-core\" by the function above.",
-            "class": "Versionbar-Load-Service",
-            "module": "explorviz"
-        },
-        {
-            "file": "app\\services\\versionbar-load.js",
-            "line": 29,
-            "description": "TODO",
-            "itemtype": "method",
-            "name": "updateObject",
-            "class": "Versionbar-Load-Service",
-            "module": "explorviz"
-        },
-        {
-            "file": "app\\services\\view-importer.js",
-            "line": 4,
-            "description": "This service is used to pass data from the controller to the component.",
-            "class": "Application",
-            "module": "explorviz"
-        },
-        {
-            "file": "app\\services\\view-importer.js",
-            "line": 11,
-            "description": "This method is implemented in the controller to create a state out of \nthe controllers query parameters. \nThis state contains the camera axis (x,y,z), id and timestamp.",
-            "class": "Application",
-            "module": "explorviz"
-        },
-        {
-            "file": "app\\services\\view-importer.js",
-            "line": 19,
-            "description": "This method is used to pass the state to the component. \nIt's triggered in the controller.",
-            "class": "Application",
-            "module": "explorviz"
-        },
-        {
-            "file": "app\\utils\\application-rendering\\foundation-builder.js",
-            "line": 3,
-            "description": "The foundation is the grey all-encompassing tile. It shows\nthe name of the previously clicked application and presents\ndata on mouse hovering. It simply is a container for actual\napplication data.",
-            "class": "Application",
-            "module": "explorviz"
-        },
-        {
             "file": "app\\utils\\model-update.js",
-            "line": 13,
+            "line": 14,
             "description": "Computes (possibly) bidirectional communication and saves \nit as a model. Later used to draw communication between clazzes",
+            "itemtype": "method",
+            "name": "addDrawableCommunication",
             "class": "Application",
             "module": "explorviz"
         }
     ],
-    "warnings": [
-        {
-            "message": "Missing item type\nDraws an small black arrow",
-            "line": " app\\components\\visualization\\rendering\\application-rendering.js:406"
-        },
-        {
-            "message": "Missing item type\nThis method is used to update the camera with query parameters",
-            "line": " app\\components\\visualization\\rendering\\rendering-core.js:430"
-        },
-        {
-            "message": "Missing item type\nMarks communication between clazzes as NORMAL or TRANSPARENT for highlighting, only used if a component or clazz is highlighted",
-            "line": " app\\services\\visualization\\application\\highlighter.js:128"
-        },
-        {
-            "message": "Missing item type\nSets all (nested) entities (components & clazzes) of a component either to TRANSPARENT or NORMAL for highlighting",
-            "line": " app\\services\\visualization\\application\\highlighter.js:160"
-        },
-        {
-            "message": "Missing item type\nThis service is used to pass data from the component to the controller.",
-            "line": " app\\services\\url-builder.js:4"
-        },
-        {
-            "message": "Missing item type\nThis method is implemented in \"rendering-core\" to create a state out of \nthe component's data, which is not contained in the model. \nThis state contains the camera axis (x,y,z).",
-            "line": " app\\services\\url-builder.js:8"
-        },
-        {
-            "message": "Missing item type\nThis method is used to pass the state to the controller. \nIt's triggered in \"rendering-core\" by the function above.",
-            "line": " app\\services\\url-builder.js:16"
-        },
-        {
-            "message": "Missing item type\nThis service is used to pass data from the controller to the component.",
-            "line": " app\\services\\view-importer.js:4"
-        },
-        {
-            "message": "Missing item type\nThis method is implemented in the controller to create a state out of \nthe controllers query parameters. \nThis state contains the camera axis (x,y,z), id and timestamp.",
-            "line": " app\\services\\view-importer.js:11"
-        },
-        {
-            "message": "Missing item type\nThis method is used to pass the state to the component. \nIt's triggered in the controller.",
-            "line": " app\\services\\view-importer.js:19"
-        },
-        {
-            "message": "Missing item type\nThe foundation is the grey all-encompassing tile. It shows\nthe name of the previously clicked application and presents\ndata on mouse hovering. It simply is a container for actual\napplication data.",
-            "line": " app\\utils\\application-rendering\\foundation-builder.js:3"
-        },
-        {
-            "message": "Missing item type\nComputes (possibly) bidirectional communication and saves \nit as a model. Later used to draw communication between clazzes",
-            "line": " app\\utils\\model-update.js:13"
-        }
-    ]
+    "warnings": []
 }

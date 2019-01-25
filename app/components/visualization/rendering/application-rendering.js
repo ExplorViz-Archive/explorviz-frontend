@@ -409,8 +409,10 @@ export default RenderingCore.extend({
 
   /**
    * Draws an small black arrow
-   * @param {*} start start vector of the associated communication
-   * @param {*} end   end vector of the associated communication
+   * @param {Number} start start vector of the associated communication
+   * @param {Number} end end vector of the associated communication
+   * @param {Number} width thickness of the arrow
+   * @method addCommunicationArrow
    */
   addCommunicationArrow(start, end, width){
 
