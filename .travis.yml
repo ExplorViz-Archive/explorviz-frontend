@@ -22,16 +22,14 @@ branches:
 # Version Matrix
 # Testing needs to pass: test-release
 # Deployment needs to pass: build-release
-env:
-  - EMBER_TRY_SCENARIO=test-release
-  - EMBER_TRY_SCENARIO=build-release
-
 jobs:
   fast_finish: true
   #allow_failures:
   #  - env: EMBER_TRY_SCENARIO=ember-3.8.0-beta.1
   include:
     - stage: test
+      env:
+        - EMBER_TRY_SCENARIO=test-release
       script: ember try:one $EMBER_TRY_SCENARIO
     - stage: deploy
       if: (branch = dev-1) OR (branch = master)
