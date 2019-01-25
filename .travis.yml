@@ -19,25 +19,25 @@ branches:
   - /^greenkeeper/.*$/
   - dev-1
 
-# Default scenario: Passing latest Ember release (currently 3.7)
-# Optional scenario: Passing latest Ember beta
+# Version Matrix
+# Testing and deployment needs to pass (current release): ember-3.7
+# Allowing to fail: ember-beta
 env:
-  - EMBER_TRY_SCENARIO=ember-release
-  - EMBER_TRY_SCENARIO=ember-beta
-  
+  - EMBER_TRY_SCENARIO=test-release
+  - EMBER_TRY_SCENARIO=build-release
 
 jobs:
   fast_finish: true
-  allow_failures:
-    - env: EMBER_TRY_SCENARIO=ember-beta
+  #allow_failures:
+  #  - env: EMBER_TRY_SCENARIO=ember-3.8.0-beta.1
   include:
     - stage: test
-      script: ember try:one $EMBER_TRY_SCENARIO
+      script: ember try:one EMBER_TRY_SCENARIO=test-release
     - stage: deploy
       if: (branch = dev-1) OR (branch = master)
       skip_cleanup: true
       env:
-        - $EMBER_TRY_SCENARIO = ember-release
+        - $EMBER_TRY_SCENARIO=build-release
       script: chmod +x .travis/docker_push.sh && .travis/docker_push.sh
 
 install:
