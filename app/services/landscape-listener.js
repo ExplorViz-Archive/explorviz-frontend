@@ -3,6 +3,7 @@ import config from 'explorviz-frontend/config/environment';
 import { inject as service } from "@ember/service";
 import { getOwner } from '@ember/application';
 import ModelUpdater from 'explorviz-frontend/utils/model-update';
+import debugLogger from 'ember-debug-logger';
 
 /* global EventSourcePolyfill */
 export default Service.extend({
@@ -16,6 +17,10 @@ export default Service.extend({
   landscapeRepo: service("repos/landscape-repository"),
   latestJsonLandscape: null,
   modelUpdater: null,
+
+  pauseVisualizationReload: false,
+
+  debug: debugLogger(),
 
   init(){
     this._super(...arguments);
@@ -54,6 +59,12 @@ export default Service.extend({
         self.set('latestJsonLandscape', jsonLandscape);
         const landscapeRecord = self.get('store').push(jsonLandscape);
 
+         // pause active -> no landscape visualization update
+        if (self.pauseVisualizationReload) {
+          self.debug("SSE: Updating visualization paused")
+          return;
+        }
+
         self.get('modelUpdater').addDrawableCommunication();
 
         self.set('landscapeRepo.latestLandscape', landscapeRecord);
@@ -77,6 +88,11 @@ export default Service.extend({
       self.error(e);
     };
     return source.close.bind(source);
+  },
+
+  toggleVisualizationReload(){
+    self.debug("Toggle Visualization Reload");
+    this.set('pauseVisualizationReload', !this.get('pauseVisualizationReload'));
   }
 
 });

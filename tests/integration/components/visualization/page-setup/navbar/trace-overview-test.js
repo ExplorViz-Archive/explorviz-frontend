@@ -10,17 +10,8 @@ module('Integration | Component | trace-overview', function(hooks) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{trace-overview}}`);
+    await render(hbs`{{visualization/page-setup/navbar/trace-overview}}`);
 
     assert.equal(this.element.textContent.trim(), '');
-
-    // Template block usage:
-    await render(hbs`
-      {{#trace-overview}}
-        template block text
-      {{/trace-overview}}
-    `);
-
-    assert.equal(this.element.textContent.trim(), 'template block text');
   });
 });

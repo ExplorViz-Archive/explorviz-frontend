@@ -183,12 +183,9 @@ export default RenderingCore.extend({
           .calculateLandscapeCenterAndZZoom(emberLandscape,
             this.get('webglrenderer'));
 
-        if(!this.get('viewImporter.importedURL')) {
           const cameraZ = this.get('centerAndZoomCalculator.cameraZ');
           this.set('camera.position.z', cameraZ);
           this.get('camera').updateProjectionMatrix();
-        }
-
       }
 
       var centerPoint = this.get('centerAndZoomCalculator.centerPoint');
@@ -792,7 +789,6 @@ export default RenderingCore.extend({
     });
 
     this.get('interaction').on('showApplication', function(emberModel) {
-      self.set('viewImporter.importedURL', null);
       self.set('landscapeRepo.latestApplication', emberModel);
       self.set('landscapeRepo.replayApplication', emberModel);
     });

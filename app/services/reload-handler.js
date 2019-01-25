@@ -17,7 +17,6 @@ export default Service.extend(AlertifyHandler, Evented, {
   landscapeRepo: service("repos/landscape-repository"),
   store: service(),
 
-
   stopExchange() {
     //this.get('landscapeReload').stopUpdate();
     //this.get('timeshiftReload').stopUpdate();
