@@ -37,7 +37,7 @@ jobs:
       if: (branch = dev-1) OR (branch = master)
       skip_cleanup: true
       env:
-        - $EMBER_TRY_SCENARIO=build-release
+        - EMBER_TRY_SCENARIO=build-release
       script: chmod +x .travis/docker_push.sh && .travis/docker_push.sh
 
 install:
