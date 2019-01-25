@@ -19,17 +19,17 @@ branches:
   - /^greenkeeper/.*$/
   - dev-1
 
-env:  
-  - EMBER_TRY_SCENARIO=ember-lts-2.12
-  - EMBER_TRY_SCENARIO=ember-lts-2.16
-  - EMBER_TRY_SCENARIO=ember-lts-2.18
-  - EMBER_TRY_SCENARIO=ember-lts-3.4.7
-  - EMBER_TRY_SCENARIO=ember-3.7.0
+# Default scenario: Passing latest Ember release (currently 3.7)
+# Optional scenario: Passing latest Ember beta
+env:
+  - EMBER_TRY_SCENARIO=ember-release
+  - EMBER_TRY_SCENARIO=ember-beta
+  
 
 jobs:
   fast_finish: true
   allow_failures:
-    - env: EMBER_TRY_SCENARIO=ember-lts-2.12
+    - env: EMBER_TRY_SCENARIO=ember-beta
   include:
     - stage: test
       script: ember try:one $EMBER_TRY_SCENARIO
@@ -37,7 +37,7 @@ jobs:
       if: (branch = dev-1) OR (branch = master)
       skip_cleanup: true
       env:
-        - $EMBER_TRY_SCENARIO = ember-lts-3.4.7
+        - $EMBER_TRY_SCENARIO = ember-release
       script: chmod +x .travis/docker_push.sh && .travis/docker_push.sh
 
 install:
