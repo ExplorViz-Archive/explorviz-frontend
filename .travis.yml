@@ -20,8 +20,8 @@ branches:
   - dev-1
 
 # Version Matrix
-# Testing and deployment needs to pass (current release): ember-3.7
-# Allowing to fail: ember-beta
+# Testing needs to pass: test-release
+# Deployment needs to pass: build-release
 env:
   - EMBER_TRY_SCENARIO=test-release
   - EMBER_TRY_SCENARIO=build-release
@@ -32,7 +32,7 @@ jobs:
   #  - env: EMBER_TRY_SCENARIO=ember-3.8.0-beta.1
   include:
     - stage: test
-      script: ember try:one EMBER_TRY_SCENARIO=test-release
+      script: ember try:one $EMBER_TRY_SCENARIO
     - stage: deploy
       if: (branch = dev-1) OR (branch = master)
       skip_cleanup: true
@@ -42,9 +42,3 @@ jobs:
 
 install:
   - npm install --no-package-lock
-
-#before_script:
-#  - chmod +x .travis/push.sh
-
-#after_success:
-#  - test $TRAVIS_BRANCH = "master" && .travis/push.sh
