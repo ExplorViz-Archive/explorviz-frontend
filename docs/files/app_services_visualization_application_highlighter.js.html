@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>app\services\visualization\application\highlighter.js - ExplorViz Frontend</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="ExplorViz Frontend" src="https://www.explorviz.net/img/favicon.png" style="max-height: 65%;" title="ExplorViz Frontend">
+            ExplorViz Frontend
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>1.2.0</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Agent-Adapter", "classes/AggregatedClazzCommunication-Model", "classes/Alertify-Handler", "classes/Application", "classes/Application-Controller", "classes/Application-Model", "classes/Application-Rendering-Component", "classes/Application-Route", "classes/Application-Serializer", "classes/ApplicationCommunication-Model", "classes/Authenticator", "classes/Badroute-Route", "classes/BaseEntity-Model", "classes/Clazz-Model", "classes/ClazzCommunication-Model", "classes/Component-Model", "classes/Configuration-Controller", "classes/Configuration-Route", "classes/Configuration-Service", "classes/DatabaseQuery-Model", "classes/Draw3DNodeEntity-Model", "classes/DrawableClazzCommunication-Model", "classes/DrawEdgeEntity-Model", "classes/DrawNodeEntity-Model", "classes/foundation-builder", "classes/Index-Route", "classes/Landscape-Adapter", "classes/Landscape-Model", "classes/Landscape-Rendering-Component", "classes/Landscape-Repository-Service", "classes/Landscape-Serializer", "classes/Login-Form-Component", "classes/Login-Route", "classes/Navbar-Octicons", "classes/Navbar-Routes", "classes/Node-Model", "classes/NodeGroup-Model", "classes/Page-Setup-Service", "classes/Process-Model", "classes/Procezz-Adapter", "classes/Rendering-Core-Component", "classes/Router", "classes/System-Model", "classes/System-Serializer", "classes/ThreeJS-Performance-Mixin", "classes/Timestamp-Adapter", "classes/Timestamp-Model", "classes/Timestamp-Repository-Service", "classes/Trace-Model", "classes/TraceStep-Model", "classes/user-Model", "classes/Visualization-Controller", "classes/Visualization-Route", "modules/explorviz", "modules/explorviz.discovery", "modules/explorviz.extension.discovery", "modules/model", "modules/model.meta", "modules/model.util", "modules/network", "modules/page", "modules/security", "modules/settings", "modules/util", "modules/visualization", "modules/visualization.rendering", "modules/visualization.timeshift"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+	    <div>
+	        <h3>APIs</h3>
+	        <div id="sidebar">
+	            <ul id="main-nav" class="nav nav-tabs" style="margin-bottom:0;">
+	                <li class="active"><a href="#classes" data-toggle="tab">Classes</a></li>
+	                <li><a href="#modules" data-toggle="tab">Modules</a></li>
+	            </ul>
+	    
+	            <div id="api-tabview-filter">
+	                <input type="search" placeholder="Type to filter APIs">
+	            </div>
+	    
+	            <div class="tab-content" style="border: 1px solid #DDD; border-top:0;">
+	                <div class="tab-pane active" id="classes">
+	                    <ul id="api-classes" class="nav nav-list">
+	                            <li><a href="../classes/Agent-Adapter.html">Agent-Adapter</a></li>
+	                            <li><a href="../classes/AggregatedClazzCommunication-Model.html">AggregatedClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/Alertify-Handler.html">Alertify-Handler</a></li>
+	                            <li><a href="../classes/Application.html">Application</a></li>
+	                            <li><a href="../classes/Application-Controller.html">Application-Controller</a></li>
+	                            <li><a href="../classes/Application-Model.html">Application-Model</a></li>
+	                            <li><a href="../classes/Application-Rendering-Component.html">Application-Rendering-Component</a></li>
+	                            <li><a href="../classes/Application-Route.html">Application-Route</a></li>
+	                            <li><a href="../classes/Application-Serializer.html">Application-Serializer</a></li>
+	                            <li><a href="../classes/ApplicationCommunication-Model.html">ApplicationCommunication-Model</a></li>
+	                            <li><a href="../classes/Authenticator.html">Authenticator</a></li>
+	                            <li><a href="../classes/Badroute-Route.html">Badroute-Route</a></li>
+	                            <li><a href="../classes/BaseEntity-Model.html">BaseEntity-Model</a></li>
+	                            <li><a href="../classes/Clazz-Model.html">Clazz-Model</a></li>
+	                            <li><a href="../classes/ClazzCommunication-Model.html">ClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/Component-Model.html">Component-Model</a></li>
+	                            <li><a href="../classes/Configuration-Controller.html">Configuration-Controller</a></li>
+	                            <li><a href="../classes/Configuration-Route.html">Configuration-Route</a></li>
+	                            <li><a href="../classes/Configuration-Service.html">Configuration-Service</a></li>
+	                            <li><a href="../classes/DatabaseQuery-Model.html">DatabaseQuery-Model</a></li>
+	                            <li><a href="../classes/Draw3DNodeEntity-Model.html">Draw3DNodeEntity-Model</a></li>
+	                            <li><a href="../classes/DrawableClazzCommunication-Model.html">DrawableClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/DrawEdgeEntity-Model.html">DrawEdgeEntity-Model</a></li>
+	                            <li><a href="../classes/DrawNodeEntity-Model.html">DrawNodeEntity-Model</a></li>
+	                            <li><a href="../classes/foundation-builder.html">foundation-builder</a></li>
+	                            <li><a href="../classes/Index-Route.html">Index-Route</a></li>
+	                            <li><a href="../classes/Landscape-Adapter.html">Landscape-Adapter</a></li>
+	                            <li><a href="../classes/Landscape-Model.html">Landscape-Model</a></li>
+	                            <li><a href="../classes/Landscape-Rendering-Component.html">Landscape-Rendering-Component</a></li>
+	                            <li><a href="../classes/Landscape-Repository-Service.html">Landscape-Repository-Service</a></li>
+	                            <li><a href="../classes/Landscape-Serializer.html">Landscape-Serializer</a></li>
+	                            <li><a href="../classes/Login-Form-Component.html">Login-Form-Component</a></li>
+	                            <li><a href="../classes/Login-Route.html">Login-Route</a></li>
+	                            <li><a href="../classes/Navbar-Octicons.html">Navbar-Octicons</a></li>
+	                            <li><a href="../classes/Navbar-Routes.html">Navbar-Routes</a></li>
+	                            <li><a href="../classes/Node-Model.html">Node-Model</a></li>
+	                            <li><a href="../classes/NodeGroup-Model.html">NodeGroup-Model</a></li>
+	                            <li><a href="../classes/Page-Setup-Service.html">Page-Setup-Service</a></li>
+	                            <li><a href="../classes/Process-Model.html">Process-Model</a></li>
+	                            <li><a href="../classes/Procezz-Adapter.html">Procezz-Adapter</a></li>
+	                            <li><a href="../classes/Rendering-Core-Component.html">Rendering-Core-Component</a></li>
+	                            <li><a href="../classes/Router.html">Router</a></li>
+	                            <li><a href="../classes/System-Model.html">System-Model</a></li>
+	                            <li><a href="../classes/System-Serializer.html">System-Serializer</a></li>
+	                            <li><a href="../classes/ThreeJS-Performance-Mixin.html">ThreeJS-Performance-Mixin</a></li>
+	                            <li><a href="../classes/Timestamp-Adapter.html">Timestamp-Adapter</a></li>
+	                            <li><a href="../classes/Timestamp-Model.html">Timestamp-Model</a></li>
+	                            <li><a href="../classes/Timestamp-Repository-Service.html">Timestamp-Repository-Service</a></li>
+	                            <li><a href="../classes/Trace-Model.html">Trace-Model</a></li>
+	                            <li><a href="../classes/TraceStep-Model.html">TraceStep-Model</a></li>
+	                            <li><a href="../classes/user-Model.html">user-Model</a></li>
+	                            <li><a href="../classes/Visualization-Controller.html">Visualization-Controller</a></li>
+	                            <li><a href="../classes/Visualization-Route.html">Visualization-Route</a></li>
+	                    </ul>
+	                </div>
+	    
+	                <div class="tab-pane" id="modules">
+	                    <ul id="api-modules" class="nav nav-list">
+	                            <li><a href="../modules/explorviz.html">explorviz</a></li>
+	                            <li><a href="../modules/explorviz.discovery.html">explorviz.discovery</a></li>
+	                            <li><a href="../modules/explorviz.extension.discovery.html">explorviz.extension.discovery</a></li>
+	                            <li><a href="../modules/model.html">model</a></li>
+	                            <li><a href="../modules/model.meta.html">model.meta</a></li>
+	                            <li><a href="../modules/model.util.html">model.util</a></li>
+	                            <li><a href="../modules/network.html">network</a></li>
+	                            <li><a href="../modules/page.html">page</a></li>
+	                            <li><a href="../modules/security.html">security</a></li>
+	                            <li><a href="../modules/settings.html">settings</a></li>
+	                            <li><a href="../modules/util.html">util</a></li>
+	                            <li><a href="../modules/visualization.html">visualization</a></li>
+	                            <li><a href="../modules/visualization.rendering.html">visualization.rendering</a></li>
+	                            <li><a href="../modules/visualization.timeshift.html">visualization.timeshift</a></li>
+	                    </ul>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+        </div>
+        <div class="span9">
+                <form id="options-form" class="form-inline pull-right">
+                    Show:
+                    <label for="api-show-inherited" class="checkbox">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected" class="checkbox">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private" class="checkbox">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated" class="checkbox">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </form>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>app\services\visualization\application\highlighter.js <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+import Service from &#x27;@ember/service&#x27;;
+import { inject as service } from &quot;@ember/service&quot;;
+
+export default Service.extend({
+
+  highlightedEntity: null,
+  isTrace: false,
+  traceId: null,
+  currentTracePosition: null,
+  application: null,
+  store: service(),
+  renderingService: service(),
+
+  highlight(entity) {
+    const isHighlighted = entity.get(&#x27;highlighted&#x27;);
+
+    if (!isHighlighted) {
+      this.unhighlightAll();
+      entity.highlight();
+      this.set(&#x27;highlightedEntity&#x27;, entity);
+    }
+    else {
+      this.unhighlightAll();
+    }
+  },
+
+  highlightTrace(trace) {
+    this.unhighlightAll();
+    trace.highlight();
+    this.set(&#x27;highlightedEntity&#x27;, trace);
+    this.set(&#x27;isTrace&#x27;, true);
+    this.set(&#x27;currentTracePosition&#x27;, 1);
+  },
+
+  highlightTraceStep(position){
+    let trace = this.get(&#x27;highlightedEntity&#x27;);
+    // make sure a trace is highlighted
+    if (!this.get(&#x27;isTrace&#x27;) || !trace || !this.get(&#x27;currentTracePosition&#x27;)) {
+      return;
+    }
+
+    // check if position is valid
+    if (typeof position !== &#x27;number&#x27; || position &lt; 1|| position &gt; trace.get(&#x27;length&#x27;)) {
+      return;
+    }
+
+    this.set(&#x27;currentTracePosition&#x27;, position);
+
+    this.get(&#x27;highlightedEntity.traceSteps&#x27;).forEach((traceStep) =&gt; {
+      if (traceStep.get(&#x27;tracePosition&#x27;) === position) {
+        traceStep.highlight();
+      } else {
+        traceStep.unhighlight();
+      }
+    });
+  },
+
+  highlightPreviousTraceStep() {
+    this.highlightTraceStep(this.get(&#x27;currentTracePosition&#x27;) - 1);
+  },
+
+  highlightNextTraceStep() {
+    this.highlightTraceStep(this.get(&#x27;currentTracePosition&#x27;) + 1);
+  },
+
+  unhighlightAll() {
+    if (this.get(&#x27;highlightedEntity&#x27;)) {
+
+      this.set(&#x27;highlightedEntity&#x27;, null);
+      this.set(&#x27;isTrace&#x27;, false);
+      this.set(&#x27;traceId&#x27;, null);
+
+      if (this.get(&#x27;application&#x27;) !== null) {
+        this.get(&#x27;application&#x27;).unhighlight();
+      }
+    }
+  },
+
+  applyHighlighting() {
+    const self = this;
+
+    const highlightedEntity = this.get(&#x27;highlightedEntity&#x27;);
+
+    if (highlightedEntity === null) {
+      return;
+    }
+
+    let emberModelName;
+    if (this.get(&#x27;isTrace&#x27;)) {
+      emberModelName = &quot;trace&quot;;
+    } else {
+      emberModelName = highlightedEntity.constructor.modelName;
+    }
+
+    // unhighlight entity if it is not visible
+    if ((emberModelName === &quot;clazz&quot; || emberModelName === &quot;component&quot; || emberModelName === &quot;drawableclazzcommunication&quot;)
+      &amp;&amp; !highlightedEntity.isVisible()) {
+      this.unhighlightAll();
+      this.get(&#x27;renderingService&#x27;).redrawScene();
+      return;
+    }
+
+    // shall contain all clazzes which the user directly or indirectly highlighted
+    let selectedClazzes = new Set();
+    computeSelectedClazzes(highlightedEntity, selectedClazzes);
+
+    // shall contain all clazzes which the user highlighted or which communicate with a highlighted clazz
+    let communicatingClazzes = new Set(selectedClazzes);
+
+    // set states (either &quot;NORMAL&quot; or &quot;TRANSPARENT&quot;) of communcation for highlighting
+    if (emberModelName === &quot;component&quot; || emberModelName === &quot;clazz&quot;) {
+      this.applyCommunicationHighlighting(selectedClazzes, communicatingClazzes);
+    } else if (emberModelName === &quot;drawableclazzcommunication&quot;) {
+      // highlight communication lines
+      this.get(&#x27;application.drawableClazzCommunications&#x27;).forEach((communication) =&gt; {
+        if (communicatingClazzes.has(communication.get(&#x27;sourceClazz&#x27;)) &amp;&amp;
+          communicatingClazzes.has(communication.get(&#x27;targetClazz&#x27;))) {
+          communication.highlight()
+        }
+        else {
+          communication.unhighlight();
+        }
+      });
+    } else if (emberModelName === &quot;trace&quot;) {
+      // unhighlight communication
+      this.get(&#x27;application.drawableClazzCommunications&#x27;).forEach((drawableCommunication) =&gt; {
+        drawableCommunication.unhighlight();
+      });
+
+      // highlight communication which contains current trace step
+      this.get(&#x27;application.drawableClazzCommunications&#x27;).forEach((drawableCommunication) =&gt; {
+        if (drawableCommunication.get(&#x27;containedTraces&#x27;).has(highlightedEntity)) {
+          drawableCommunication.set(&#x27;state&#x27;, &#x27;NORMAL&#x27;);
+        }
+        drawableCommunication.get(&#x27;aggregatedClazzCommunications&#x27;).forEach((aggregatedComm) =&gt; {
+          aggregatedComm.get(&#x27;clazzCommunications&#x27;).forEach((comm) =&gt; {
+            comm.get(&#x27;traceSteps&#x27;).forEach((traceStep) =&gt; {
+              if (traceStep.get(&#x27;parentTrace.traceId&#x27;) === highlightedEntity.get(&#x27;traceId&#x27;) &amp;&amp;
+                traceStep.get(&#x27;tracePosition&#x27;) === this.get(&#x27;currentTracePosition&#x27;)) {
+                drawableCommunication.highlight();
+              }
+            });
+          });
+        });
+      });
+    }
+
+
+    // iterate recursively over all application entities and update states
+    this.get(&#x27;application.components&#x27;).forEach((component) =&gt; {
+      this.applyNodeHighlighting(component, communicatingClazzes);
+    });
+
+    function computeSelectedClazzes(highlightedEntity, selectedClazzes) {
+      // add only clazz itself if clazz is highlighted
+      if (emberModelName === &quot;clazz&quot;) {
+        selectedClazzes.add(highlightedEntity);
+        // add all clazzes of component if component is highlighted
+      } else if (emberModelName === &quot;component&quot;) {
+        highlightedEntity.getContainedClazzes(selectedClazzes);
+        // add the two adjacent clazzes if drawable communication is highlighted
+      } else if (emberModelName === &quot;drawableclazzcommunication&quot;) {
+        selectedClazzes.add(highlightedEntity.get(&#x27;sourceClazz&#x27;));
+        selectedClazzes.add(highlightedEntity.get(&#x27;targetClazz&#x27;));
+        // add all adjacent clazzes if trace is highlighted
+      } else if (emberModelName === &quot;trace&quot;) {
+        self.get(&#x27;application.drawableClazzCommunications&#x27;).forEach((communication) =&gt; {
+          let communicationTraces = communication.get(&#x27;containedTraces&#x27;);
+          if (communicationTraces.has(highlightedEntity)) {
+            selectedClazzes.add(communication.get(&#x27;sourceClazz&#x27;));
+            selectedClazzes.add(communication.get(&#x27;targetClazz&#x27;));
+          }
+        });
+      }
+    }
+  },
+
+  /**
+   * Marks communication between clazzes as NORMAL or TRANSPARENT for highlighting, only used if a component or clazz is highlighted
+   * @param {*} selectedClazzes      Clazzes which are (indirectly) highlighted
+   * @param {*} communicatingClazzes Clazzes which communicate with selectedClazzes (including selectedClazzes itself)
+   * @method applyCommunicationHighlighting
+   */
+  applyCommunicationHighlighting(selectedClazzes, communicatingClazzes) {
+
+    const clazzCommunications = this.get(&#x27;application&#x27;).get(&#x27;drawableClazzCommunications&#x27;);
+
+    clazzCommunications.forEach((clazzCommunication) =&gt; {
+      let toBeHighlighted = false;
+
+      // highlight all communication lines which have a selected clazz as an endpoint
+      selectedClazzes.forEach((clazz) =&gt; {
+        if (clazzCommunication.get(&#x27;sourceClazz&#x27;).get(&#x27;id&#x27;) === clazz.get(&#x27;id&#x27;)) {
+          communicatingClazzes.add(clazzCommunication.get(&#x27;targetClazz&#x27;));
+          toBeHighlighted = true;
+        } else if (clazzCommunication.get(&#x27;targetClazz&#x27;).get(&#x27;id&#x27;) === clazz.get(&#x27;id&#x27;)) {
+          communicatingClazzes.add(clazzCommunication.get(&#x27;sourceClazz&#x27;));
+          toBeHighlighted = true;
+        }
+      });
+
+      // mark clazzes as transparent which do not communicate with a highlighted entity
+      if (toBeHighlighted) {
+        clazzCommunication.set(&quot;state&quot;, &quot;NORMAL&quot;);
+      } else {
+        clazzCommunication.set(&quot;state&quot;, &quot;TRANSPARENT&quot;);
+      }
+    });
+  },
+
+/**
+ * Sets all (nested) entities (components &amp; clazzes) of a component either to TRANSPARENT or NORMAL for highlighting
+ * @param {component} component             Component which entities shall be updated
+ * @param {Set}       communicatingClazzes  Contains all clazzes which are involved in communication with highlighted entity
+ * @method applyNodeHighlighting
+ * 
+ */
+  applyNodeHighlighting(component, communicatingClazzes) {
+
+    let isPartOfHighlighting = false;
+    let componentClazzes = new Set();
+
+    component.getContainedClazzes(componentClazzes);
+
+    // check if component contains a class which is part of highlighting
+    communicatingClazzes.forEach((clazz) =&gt; {
+      componentClazzes.forEach((componentClazz) =&gt; {
+        if (clazz.get(&#x27;id&#x27;) === componentClazz.get(&#x27;id&#x27;)) {
+          isPartOfHighlighting = true;
+        }
+      });
+    });
+
+    // mark component as transparent if no contained clazz communicates with a highlighted clazz
+    if (isPartOfHighlighting) {
+      component.set(&#x27;state&#x27;, &#x27;NORMAL&#x27;);
+    } else {
+      component.set(&#x27;state&#x27;, &#x27;TRANSPARENT&#x27;);
+    }
+
+    // mark clazzes as transparent if they are not involved in communication with highlighted clazzes
+    component.get(&#x27;clazzes&#x27;).forEach((clazz) =&gt; {
+      let isCommunicatingClazz = false;
+      communicatingClazzes.forEach((componentClazz) =&gt; {
+        if (clazz.get(&#x27;id&#x27;) === componentClazz.get(&#x27;id&#x27;)) {
+          isCommunicatingClazz = true;
+        }
+      });
+      if (isCommunicatingClazz) {
+        clazz.set(&#x27;state&#x27;, &quot;NORMAL&quot;);
+      } else {
+        clazz.set(&#x27;state&#x27;, &quot;TRANSPARENT&quot;);
+      }
+    });
+
+    // check state also for underlying components (and clazzes)
+    component.get(&#x27;children&#x27;).forEach((child) =&gt; {
+      this.applyNodeHighlighting(child, communicatingClazzes);
+    });
+  },
+
+});
+
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>
