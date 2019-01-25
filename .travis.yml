@@ -35,7 +35,7 @@ jobs:
       script: ember try:one $EMBER_TRY_SCENARIO
     - stage: deploy
       if: (branch = dev-1) OR (branch = master)
-      skip_cleanup: false
+      skip_cleanup: true
       env:
         - EMBER_TRY_SCENARIO=build-release
       script: chmod +x .travis/docker_push.sh && .travis/docker_push.sh
