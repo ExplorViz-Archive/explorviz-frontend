@@ -2,9 +2,9 @@
     "project": {
         "name": "ExplorViz Frontend",
         "description": "ExplorViz Frontend : ExplorViz's client component for visualization",
-        "version": "1.2.0",
-        "url": "https://www.explorviz.net/",
-        "logo": "https://www.explorviz.net/img/favicon.png"
+        "version": "1.3.0",
+        "url": "https://www.explorviz.net",
+        "logo": "https://www.explorviz.net/img/slideshow/explorviz-logo.png"
     },
     "files": {
         "app\\adapters\\agent.js": {

@@ -4,7 +4,6 @@ YUI.add("yuidoc-meta", function(Y) {
         "Agent-Adapter",
         "AggregatedClazzCommunication-Model",
         "Alertify-Handler",
-        "Application",
         "Application-Controller",
         "Application-Model",
         "Application-Rendering-Component",
