@@ -22,8 +22,11 @@ export default Service.extend(Evented, {
       return;
 
     var index = this.get('shownComponents').indexOf(path);
-    if (index !== -1)
+    if (index !== -1){
       this.get('shownComponents').splice(index, 1);
+      this.notifyPropertyChange('shownComponents');
+    }
+
 
     // close everything when no components are left
     if (this.get('shownComponents.length') == 0)
