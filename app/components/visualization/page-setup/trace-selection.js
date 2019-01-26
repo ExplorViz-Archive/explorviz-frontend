@@ -49,7 +49,11 @@ export default Component.extend({
     selectPreviousTraceStep() {
       this.get('highlighter').highlightPreviousTraceStep();
       this.get('renderingService').redrawScene();
-    }
+    },
+
+    close() {
+      this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
+    },
   },
 
   onWindowChange() {
