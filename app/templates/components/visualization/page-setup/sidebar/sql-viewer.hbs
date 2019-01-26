@@ -7,8 +7,9 @@
 <table class="table table-hover">
   <thead>
     <tr>
-      <th scope="col">Timestamp</th>
+      <th scope="col">Time</th>
       <th scope="col">Statement</th>
+      <th scope="col">Statement Type</th>
       <th scope="col">Return Value</th>
     </tr>
   </thead>
@@ -16,8 +17,9 @@
     {{#each landscapeRepo.latestApplication.databaseQueries as |query|}}
     <tr style="cursor: pointer">
       <th scope="row">{{query.timestamp}}</th>
-      <td>{{query.sqlStatement}}</td>
-      <td>{{query.returnValue}}</td>
+      <td title={{query.sqlStatement}}>{{query.sqlStatement}}</td>
+      <td title={{query.statementType}}>{{string-shortener query.statementType 9}}</td>
+      <td title={{query.returnValue}}>{{query.returnValue}}</td>
     </tr>
     {{/each}}
   </tbody>
