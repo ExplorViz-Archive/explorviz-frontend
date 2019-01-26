@@ -10,8 +10,6 @@ const {APP} = ENV;
 * that refer to Timestamp objects. It provides functions for fetching,
 * updating and uploading. However, at the time of writing this documentation
 * only fetching is implemented by the backend.
-* {{#crossLink "Timeshift-Reload/updateObject:method"}}{{/crossLink}} shows an
-* exemplary requests.
 *
 * @class Timestamp-Adapter
 * @extends DS.JSONAPIAdapter

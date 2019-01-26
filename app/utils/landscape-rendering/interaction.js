@@ -87,7 +87,7 @@ export default Object.extend(Evented, AlertifyHandler, {
 
     // init HoverHandler
     if (!this.get('hoverHandler')) {
-      this.set('hoverHandler', HoverHandler.create());
+      this.set('hoverHandler', HoverHandler.create(getOwner(this).ownerInjection()));
     }
 
     // PopUpHandler

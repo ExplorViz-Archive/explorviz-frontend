@@ -10,38 +10,25 @@ module.exports = function() {
       useYarn: false,
       scenarios: [
         {
-          name: 'ember-lts-2.12',
+          name: 'test-release',
+          description: 'test with current release (ember-3.7.0)',
           npm: {
             devDependencies: {
-              'ember-source': '~2.12.0',
-            },
-          },
+              'ember-source': '~3.7.0',
+            }
+          }
         },
         {
-          name: 'ember-lts-2.16',
+          name: 'build-release',
+          description: 'build with current release (ember-3.7.0)',
+          command: 'ember build --prod',
           npm: {
             devDependencies: {
-              'ember-source': '~2.16.0',
-            },
-          },
-        },
-        {
-          name: 'ember-lts-2.18',
-          npm: {
-            devDependencies: {
-              'ember-source': '~2.18.0',
-            },
-          },
-        },
-        {
-          name: 'ember-3.2.0',
-          npm: {
-            devDependencies: {
-              'ember-source': '~3.2.0',
-            },
-          },
+              'ember-source': '~3.7.0',
+            }
+          }
         }
-      ],
+      ]
     };
   });
 };

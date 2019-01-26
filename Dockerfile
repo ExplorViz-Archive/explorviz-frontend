@@ -3,9 +3,12 @@ FROM nginx:alpine
 ENV ROOT_URL=
 ENV API_ROOT=change-API_ROOT
 
-ADD prod-env-updater.sh .
+COPY prod-env-updater.sh .
 RUN chmod +x ./prod-env-updater.sh
 
 COPY dist /usr/share/nginx/html
+COPY explorviz-nginx.conf /etc/nginx/conf.d
+
+RUN rm /etc/nginx/conf.d/default.conf
 
 CMD ./prod-env-updater.sh && nginx -g "daemon off;"

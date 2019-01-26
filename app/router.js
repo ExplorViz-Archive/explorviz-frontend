@@ -16,13 +16,12 @@ const Router = EmberRouter.extend({
 });
 
 Router.map(function() {
-  this.route('visualization');
-  this.route('tutorial');
   this.route('login');
-  this.route('badroute', { path: "/*path" });
-  this.route('configuration');
-  this.route('base-route');
+  this.route('visualization');
   this.route('discovery');
+  this.route('configuration');
+  this.route('base-route');  
+  this.route('badroute', { path: "/*path" });
 });
 
 export default Router;

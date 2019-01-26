@@ -1,20 +1,24 @@
 {{#bs-tab id="configuration-tab"customTabs=true as |tab|}}
   <nav>
     {{#bs-nav type="tabs" as |nav|}}
-      {{#nav.item class="nav-link" onClick=(action tab.select "generalPane") active=(bs-eq tab.activeId "generalPane")}}General{{/nav.item}}
-      {{#nav.item class="nav-link" onClick=(action tab.select "userManagementPane") active=(bs-eq tab.activeId "userManagementPane")}}User Management{{/nav.item}}
+      {{#nav.item class="nav-link-with-cursor" onClick=(action tab.select "userManagementPane") active=(bs-eq tab.activeId "userManagementPane")}}User Management{{/nav.item}}
+      {{#nav.item class="nav-link-with-cursor" onClick=(action tab.select "userSettingsPane") active=(bs-eq tab.activeId "userSettingsPane")}}Settings{{/nav.item}}
     {{/bs-nav}}
   </nav>
-
-  <div class="tab-content">
-    {{#tab.pane elementId="generalPane" title="General"}}
-      {{#if (eq tab.activeId "generalPane")}}
-        TODO: see issue https://github.com/ExplorViz/explorviz-frontend/issues/80
-      {{/if}}
-    {{/tab.pane}}
+  
+  <div class="tab-content mt-5">
     {{#tab.pane elementId="userManagementPane" title="User Management"}}
       {{#if (eq tab.activeId "userManagementPane")}}
         {{user-management}}
+      {{/if}}
+    {{/tab.pane}}
+    {{#tab.pane elementId="userSettingsPane" title="Settings"}}
+      {{#if (eq tab.activeId "userSettingsPane")}}
+        <div class="container" style="overflow-y: auto">
+          <div class="col-12">
+            {{user-settings}}
+          </div>
+        </div>
       {{/if}}
     {{/tab.pane}}
 

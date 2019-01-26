@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>app\components\discovery\node-overview.js - ExplorViz Frontend</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="ExplorViz Frontend" src="https://www.explorviz.net/img/slideshow/explorviz-logo.png" style="max-height: 65%;" title="ExplorViz Frontend">
+            ExplorViz Frontend
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>1.3.0</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Agent-Adapter", "classes/AggregatedClazzCommunication-Model", "classes/Alertify-Handler", "classes/Application-Controller", "classes/Application-Model", "classes/Application-Rendering-Component", "classes/Application-Route", "classes/Application-Serializer", "classes/ApplicationCommunication-Model", "classes/Authenticator", "classes/Badroute-Route", "classes/BaseEntity-Model", "classes/Clazz-Model", "classes/ClazzCommunication-Model", "classes/Component-Model", "classes/Configuration-Controller", "classes/Configuration-Route", "classes/Configuration-Service", "classes/DatabaseQuery-Model", "classes/Draw3DNodeEntity-Model", "classes/DrawableClazzCommunication-Model", "classes/DrawEdgeEntity-Model", "classes/DrawNodeEntity-Model", "classes/foundation-builder", "classes/Index-Route", "classes/Landscape-Adapter", "classes/Landscape-Model", "classes/Landscape-Rendering-Component", "classes/Landscape-Repository-Service", "classes/Landscape-Serializer", "classes/Login-Form-Component", "classes/Login-Route", "classes/Navbar-Octicons", "classes/Navbar-Routes", "classes/Node-Model", "classes/NodeGroup-Model", "classes/Page-Setup-Service", "classes/Process-Model", "classes/Procezz-Adapter", "classes/Rendering-Core-Component", "classes/Router", "classes/System-Model", "classes/System-Serializer", "classes/ThreeJS-Performance-Mixin", "classes/Timestamp-Adapter", "classes/Timestamp-Model", "classes/Timestamp-Repository-Service", "classes/Trace-Model", "classes/TraceStep-Model", "classes/user-Model", "classes/Visualization-Controller", "classes/Visualization-Route", "modules/explorviz", "modules/explorviz.discovery", "modules/explorviz.extension.discovery", "modules/model", "modules/model.meta", "modules/model.util", "modules/network", "modules/page", "modules/security", "modules/settings", "modules/util", "modules/visualization", "modules/visualization.rendering", "modules/visualization.timeshift"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+	    <div>
+	        <h3>APIs</h3>
+	        <div id="sidebar">
+	            <ul id="main-nav" class="nav nav-tabs" style="margin-bottom:0;">
+	                <li class="active"><a href="#classes" data-toggle="tab">Classes</a></li>
+	                <li><a href="#modules" data-toggle="tab">Modules</a></li>
+	            </ul>
+	    
+	            <div id="api-tabview-filter">
+	                <input type="search" placeholder="Type to filter APIs">
+	            </div>
+	    
+	            <div class="tab-content" style="border: 1px solid #DDD; border-top:0;">
+	                <div class="tab-pane active" id="classes">
+	                    <ul id="api-classes" class="nav nav-list">
+	                            <li><a href="../classes/Agent-Adapter.html">Agent-Adapter</a></li>
+	                            <li><a href="../classes/AggregatedClazzCommunication-Model.html">AggregatedClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/Alertify-Handler.html">Alertify-Handler</a></li>
+	                            <li><a href="../classes/Application-Controller.html">Application-Controller</a></li>
+	                            <li><a href="../classes/Application-Model.html">Application-Model</a></li>
+	                            <li><a href="../classes/Application-Rendering-Component.html">Application-Rendering-Component</a></li>
+	                            <li><a href="../classes/Application-Route.html">Application-Route</a></li>
+	                            <li><a href="../classes/Application-Serializer.html">Application-Serializer</a></li>
+	                            <li><a href="../classes/ApplicationCommunication-Model.html">ApplicationCommunication-Model</a></li>
+	                            <li><a href="../classes/Authenticator.html">Authenticator</a></li>
+	                            <li><a href="../classes/Badroute-Route.html">Badroute-Route</a></li>
+	                            <li><a href="../classes/BaseEntity-Model.html">BaseEntity-Model</a></li>
+	                            <li><a href="../classes/Clazz-Model.html">Clazz-Model</a></li>
+	                            <li><a href="../classes/ClazzCommunication-Model.html">ClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/Component-Model.html">Component-Model</a></li>
+	                            <li><a href="../classes/Configuration-Controller.html">Configuration-Controller</a></li>
+	                            <li><a href="../classes/Configuration-Route.html">Configuration-Route</a></li>
+	                            <li><a href="../classes/Configuration-Service.html">Configuration-Service</a></li>
+	                            <li><a href="../classes/DatabaseQuery-Model.html">DatabaseQuery-Model</a></li>
+	                            <li><a href="../classes/Draw3DNodeEntity-Model.html">Draw3DNodeEntity-Model</a></li>
+	                            <li><a href="../classes/DrawableClazzCommunication-Model.html">DrawableClazzCommunication-Model</a></li>
+	                            <li><a href="../classes/DrawEdgeEntity-Model.html">DrawEdgeEntity-Model</a></li>
+	                            <li><a href="../classes/DrawNodeEntity-Model.html">DrawNodeEntity-Model</a></li>
+	                            <li><a href="../classes/foundation-builder.html">foundation-builder</a></li>
+	                            <li><a href="../classes/Index-Route.html">Index-Route</a></li>
+	                            <li><a href="../classes/Landscape-Adapter.html">Landscape-Adapter</a></li>
+	                            <li><a href="../classes/Landscape-Model.html">Landscape-Model</a></li>
+	                            <li><a href="../classes/Landscape-Rendering-Component.html">Landscape-Rendering-Component</a></li>
+	                            <li><a href="../classes/Landscape-Repository-Service.html">Landscape-Repository-Service</a></li>
+	                            <li><a href="../classes/Landscape-Serializer.html">Landscape-Serializer</a></li>
+	                            <li><a href="../classes/Login-Form-Component.html">Login-Form-Component</a></li>
+	                            <li><a href="../classes/Login-Route.html">Login-Route</a></li>
+	                            <li><a href="../classes/Navbar-Octicons.html">Navbar-Octicons</a></li>
+	                            <li><a href="../classes/Navbar-Routes.html">Navbar-Routes</a></li>
+	                            <li><a href="../classes/Node-Model.html">Node-Model</a></li>
+	                            <li><a href="../classes/NodeGroup-Model.html">NodeGroup-Model</a></li>
+	                            <li><a href="../classes/Page-Setup-Service.html">Page-Setup-Service</a></li>
+	                            <li><a href="../classes/Process-Model.html">Process-Model</a></li>
+	                            <li><a href="../classes/Procezz-Adapter.html">Procezz-Adapter</a></li>
+	                            <li><a href="../classes/Rendering-Core-Component.html">Rendering-Core-Component</a></li>
+	                            <li><a href="../classes/Router.html">Router</a></li>
+	                            <li><a href="../classes/System-Model.html">System-Model</a></li>
+	                            <li><a href="../classes/System-Serializer.html">System-Serializer</a></li>
+	                            <li><a href="../classes/ThreeJS-Performance-Mixin.html">ThreeJS-Performance-Mixin</a></li>
+	                            <li><a href="../classes/Timestamp-Adapter.html">Timestamp-Adapter</a></li>
+	                            <li><a href="../classes/Timestamp-Model.html">Timestamp-Model</a></li>
+	                            <li><a href="../classes/Timestamp-Repository-Service.html">Timestamp-Repository-Service</a></li>
+	                            <li><a href="../classes/Trace-Model.html">Trace-Model</a></li>
+	                            <li><a href="../classes/TraceStep-Model.html">TraceStep-Model</a></li>
+	                            <li><a href="../classes/user-Model.html">user-Model</a></li>
+	                            <li><a href="../classes/Visualization-Controller.html">Visualization-Controller</a></li>
+	                            <li><a href="../classes/Visualization-Route.html">Visualization-Route</a></li>
+	                    </ul>
+	                </div>
+	    
+	                <div class="tab-pane" id="modules">
+	                    <ul id="api-modules" class="nav nav-list">
+	                            <li><a href="../modules/explorviz.html">explorviz</a></li>
+	                            <li><a href="../modules/explorviz.discovery.html">explorviz.discovery</a></li>
+	                            <li><a href="../modules/explorviz.extension.discovery.html">explorviz.extension.discovery</a></li>
+	                            <li><a href="../modules/model.html">model</a></li>
+	                            <li><a href="../modules/model.meta.html">model.meta</a></li>
+	                            <li><a href="../modules/model.util.html">model.util</a></li>
+	                            <li><a href="../modules/network.html">network</a></li>
+	                            <li><a href="../modules/page.html">page</a></li>
+	                            <li><a href="../modules/security.html">security</a></li>
+	                            <li><a href="../modules/settings.html">settings</a></li>
+	                            <li><a href="../modules/util.html">util</a></li>
+	                            <li><a href="../modules/visualization.html">visualization</a></li>
+	                            <li><a href="../modules/visualization.rendering.html">visualization.rendering</a></li>
+	                            <li><a href="../modules/visualization.timeshift.html">visualization.timeshift</a></li>
+	                    </ul>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+        </div>
+        <div class="span9">
+                <form id="options-form" class="form-inline pull-right">
+                    Show:
+                    <label for="api-show-inherited" class="checkbox">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected" class="checkbox">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private" class="checkbox">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated" class="checkbox">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </form>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<div class="page-header">
+    <h1>app\components\discovery\node-overview.js <small>File</small></h1>
+</div>
+
+<div class="file">
+    <pre class="prettyprint linenums">
+import Component from &#x27;@ember/component&#x27;;
+import { inject as service } from &#x27;@ember/service&#x27;;
+import nameSelector from &#x27;explorviz-frontend/utils/helpers/name-selector&#x27;;
+import AlertifyHandler from &#x27;explorviz-frontend/mixins/alertify-handler&#x27;;
+import debugLogger from &#x27;ember-debug-logger&#x27;;
+
+/* global cytoscape */
+
+export default Component.extend(AlertifyHandler, {
+
+  // No Ember generated container
+  tagName: &#x27;&#x27;,
+
+  debug: debugLogger(),
+
+  agentRepo: service(&quot;repos/agent-repository&quot;),
+  configuration: service(&quot;configuration&quot;),
+
+  cytoscapeGraph: null,
+  cytoscapeLayout: null,
+
+  showCytoscape: false,
+
+  initDone: false,
+  showHiddenMessage: false,
+
+  actions: {
+    enableShowHidden() {
+      this.set(&#x27;initDone&#x27;, false);
+      this.set(&#x27;configuration.discoverySettings.showHiddenEntities&#x27;, true);
+      this.set(&#x27;showHiddenMessage&#x27;, false);
+    }
+  },
+
+  // @Override
+  /**
+   * This overridden Ember Component lifecycle hook is used
+   * to render the actual cytoscapeGraph
+   *
+   * @method didRender
+   */
+  didRender(){    
+    this._super(...arguments);
+    
+    if(!this.get(&#x27;initDone&#x27;) &amp;&amp; this.get(&#x27;agentRepo.agentList.length&#x27;) &gt; 0) {
+      this.initCytoscape();
+      this.setupListener();
+      this.set(&#x27;initDone&#x27;, true);
+    }
+    this.updateCytoscapeGraph(this.get(&#x27;agentRepo.agentList&#x27;));
+  },
+
+
+  // @Override
+  /**
+   * This overridden Ember Component lifecycle hook enables calling
+   * custom cleanup code.
+   *
+   * @method willDestroyElement
+   */
+  willDestroyElement() {
+    this._super(...arguments);
+    this.removeListener();
+  },
+
+
+  setupListener() {
+    const self = this;
+
+    if(this.get(&#x27;cytoscapeGraph&#x27;)) {
+      this.get(&#x27;cytoscapeGraph&#x27;).on(&#x27;tap&#x27;, &#x27;node&#x27;, function (evt) {
+
+        const emberModel = evt.target.data().emberModel;
+
+        if(emberModel) {
+          // closure action of discovery controller        
+          self.showDetails(emberModel);
+        }
+
+      });
+    }
+  },
+
+
+  removeListener() {
+    if(this.get(&#x27;initDone&#x27;)) {
+
+      if(this.get(&#x27;agentRepo&#x27;)) {
+        this.get(&#x27;agentRepo&#x27;).off(&#x27;updated&#x27;);
+      }
+
+      if(this.get(&#x27;cytoscapeGraph&#x27;)) {
+        this.get(&#x27;cytoscapeGraph&#x27;).off(&#x27;tap&#x27;);
+      }     
+      
+    }
+  },
+
+
+  //possible TODO https://github.com/cytoscape/cytoscape.js-cola/issues/14
+
+
+  /**
+   * This function is called once on the didRender event.
+   * It initializes cytoscape 
+   *
+   * @method initCytoscape
+   */
+  initCytoscape() {
+
+    const cy = cytoscape({
+      container: document.getElementById(&#x27;cy&#x27;),
+
+      boxSelectionEnabled: false,
+      autounselectify: true,
+
+      style: cytoscape.stylesheet()
+        .selector(&#x27;#expLogo&#x27;)
+          .css({
+            &#x27;content&#x27;: &#x27;&#x27;,
+            &#x27;background-fit&#x27;: &#x27;cover&#x27;,
+            &#x27;background-image&#x27;: &#x27;images/explorviz-logo.png&#x27;
+          })    
+        .selector(&#x27;.edge&#x27;)
+          .css({
+            &#x27;curve-style&#x27;: &#x27;bezier&#x27;,
+            &#x27;target-arrow-shape&#x27;: &#x27;triangle&#x27;,
+            &#x27;width&#x27;: 10,
+            &#x27;line-color&#x27;: &#x27;#ddd&#x27;,
+            &#x27;target-arrow-color&#x27;: &#x27;#ddd&#x27;
+          })      
+        .selector(&#x27;.edge-monitoring-enabled&#x27;)
+          .css({
+            &#x27;curve-style&#x27;: &#x27;bezier&#x27;,
+            &#x27;target-arrow-shape&#x27;: &#x27;triangle&#x27;,
+            &#x27;width&#x27;: 10,
+            &#x27;line-color&#x27;: &#x27;#94f2a2&#x27;,
+            &#x27;target-arrow-color&#x27;: &#x27;#94f2a2&#x27;
+          })
+        .selector(&#x27;.edge-stopped&#x27;)
+          .css({
+            &#x27;curve-style&#x27;: &#x27;bezier&#x27;,
+            &#x27;target-arrow-shape&#x27;: &#x27;triangle&#x27;,
+            &#x27;width&#x27;: 10,
+            &#x27;line-color&#x27;: &#x27;#f4ffa8&#x27;,
+            &#x27;target-arrow-color&#x27;: &#x27;#f4ffa8&#x27;
+          })
+        .selector(&#x27;.edge-error&#x27;)
+          .css({
+            &#x27;curve-style&#x27;: &#x27;bezier&#x27;,
+            &#x27;target-arrow-shape&#x27;: &#x27;triangle&#x27;,
+            &#x27;width&#x27;: 10,
+            &#x27;line-color&#x27;: &#x27;#ff0000&#x27;,
+            &#x27;target-arrow-color&#x27;: &#x27;#ff0000&#x27;
+          })
+        .selector(&#x27;.procezz&#x27;)
+          .css({
+            &#x27;content&#x27;: &#x27;data(name)&#x27;
+          })
+        .selector(&#x27;.procezz-monitoring-enabled&#x27;)
+          .css({
+            &#x27;background-color&#x27;: &#x27;#37ca4d&#x27;,
+          })
+        .selector(&#x27;.procezz-stopped&#x27;)
+          .css({
+            &#x27;background-color&#x27;: &#x27;#e4ff19&#x27;,
+          })
+        .selector(&#x27;.procezz-error&#x27;)
+          .css({
+            &#x27;background-color&#x27;: &#x27;#ff0000&#x27;,
+          })
+        .selector(&#x27;.agent&#x27;)
+          .css({
+            &#x27;content&#x27;: &#x27;data(id)&#x27;,
+            &#x27;background-color&#x27;: &#x27;#90EE90&#x27;
+          })
+        .selector(&#x27;.agent-error&#x27;)
+          .css({
+            &#x27;content&#x27;: &#x27;data(id)&#x27;,
+            &#x27;background-color&#x27;: &#x27;#ff0000&#x27;
+          })
+        .selector(&#x27;.hidden&#x27;)
+          .css({
+            &#x27;opacity&#x27;: 0.5
+          })
+        .selector(&#x27;.highlighted&#x27;)
+          .css({
+            &#x27;background-color&#x27;: &#x27;#61bffc&#x27;,
+            &#x27;line-color&#x27;: &#x27;#61bffc&#x27;,
+            &#x27;target-arrow-color&#x27;: &#x27;#61bffc&#x27;,
+            &#x27;transition-property&#x27;: &#x27;background-color, line-color, target-arrow-color&#x27;,
+            &#x27;transition-duration&#x27;: &#x27;0.5s&#x27;
+          }),
+
+      elements: {
+          nodes: [
+            { data: { id: &#x27;expLogo&#x27; } }
+          ],
+          edges: []
+        }
+    });
+
+    const layout = cy.layout({
+      name: &#x27;breadthfirst&#x27;,
+      directed: true,
+      padding: 10
+    });
+
+    this.set(&#x27;cytoscapeGraph&#x27;, cy);
+    this.set(&#x27;cytoscapeLayout&#x27;, layout);
+
+    layout.run();
+  },
+
+
+  updateCytoscapeGraph(newAgentList) {
+
+    const cy = this.get(&#x27;cytoscapeGraph&#x27;);
+    const layout = this.get(&#x27;cytoscapeLayout&#x27;);
+
+    if(!(cy &amp;&amp; layout) || !newAgentList) {
+      return;
+    }
+
+    this.debug(&#x27;updating cytoscapeGraph&#x27;);
+
+    //cy.startBatch();
+
+    let cyOldPanPosition = null;
+    let cyOldZoomValue = null;
+    let cyOldProcezzCount = null;
+
+    if(cy.collection(&#x27;.procezz&#x27;).length &gt; 0) {
+      cyOldPanPosition = cy.pan();
+      cyOldZoomValue = cy.zoom();
+      cyOldProcezzCount = cy.collection(&#x27;.procezz&#x27;).length;
+    }
+
+    // remove all old elements
+    cy.elements().remove();
+
+    const explorVizNode = {
+      nodes: [
+        { 
+          data: { id: &#x27;expLogo&#x27; }
+        }
+      ],
+      edges: []
+    };
+
+    cy.add(explorVizNode);
+
+    const showHiddenEntities = this.get(&#x27;configuration.discoverySettings.showHiddenEntities&#x27;);
+
+    let isAtLeastOneSet = false;
+
+    newAgentList.forEach((agentRecord) =&gt; {
+
+      const agentHidden = agentRecord.get(&#x27;isHidden&#x27;);
+
+      if(agentHidden &amp;&amp; !showHiddenEntities) {
+        // skip this agent
+        // proceed with next one
+        return;
+      }
+      
+      const ip = agentRecord.get(&#x27;ip&#x27;);
+      const port = agentRecord.get(&#x27;port&#x27;);
+      const agentName = nameSelector(ip + &quot;:&quot; + port, agentRecord.get(&#x27;name&#x27;));
+      const edgeIDAgent = agentName + &quot;_ToexpLogo&quot;;
+
+      const faultyAgent = agentRecord.get(&#x27;errorOccured&#x27;);
+
+      let cssClassAgent = faultyAgent ? 
+        &quot;agent-error&quot; : &quot;agent&quot;;
+
+      cssClassAgent = agentHidden ? 
+         &quot;hidden &quot; + cssClassAgent : cssClassAgent;
+
+      let cssClassAgentEdge = faultyAgent ? 
+        &quot;edge-error&quot; : &quot;edge&quot;;
+
+      cssClassAgentEdge = agentHidden ? 
+        &quot;hidden &quot; + cssClassAgentEdge : cssClassAgentEdge;
+
+      const agentAndEdge = {
+        nodes: [
+          { 
+            data: { id: agentName, emberModel: agentRecord}, 
+            classes: cssClassAgent
+          }
+        ],
+        edges: [
+          { 
+            data: { id: edgeIDAgent, source: agentName, target: &#x27;expLogo&#x27; },
+            classes: cssClassAgentEdge
+          }
+        ]
+      };
+
+      cy.add(agentAndEdge);
+
+      isAtLeastOneSet = true;
+
+      // look for procezzes and add to graph
+      const procezzes = agentRecord.get(&#x27;procezzes&#x27;);
+      procezzes.forEach((procezzRecord) =&gt; {
+
+        const procezzHidden = procezzRecord.get(&#x27;isHidden&#x27;);
+
+        if(procezzHidden &amp;&amp; !showHiddenEntities) {
+          // skip this procezz if user
+          // does not want to show hidden procezzes
+          // -&gt; proceed with next one
+          return;
+        }
+
+        const procezzName = nameSelector(procezzRecord.get(&#x27;pid&#x27;), procezzRecord.get(&#x27;name&#x27;));
+
+        const procezzID = procezzRecord.get(&#x27;id&#x27;);
+
+        const edgeID = procezzID + &quot;To&quot; + agentName;
+
+        const monitoredEnabled = procezzRecord.get(&#x27;wasFoundByBackend&#x27;) &amp;&amp; procezzRecord.get(&#x27;monitoredFlag&#x27;);
+        const faultyProcezz = procezzRecord.get(&#x27;errorOccured&#x27;);
+        const stoppedProcezz = procezzRecord.get(&#x27;stopped&#x27;);
+
+        let cssClassProcezz = &quot;procezz&quot;;
+        let cssClassEdge = &quot;edge&quot;;
+
+        if(monitoredEnabled) {
+          cssClassProcezz +=  &quot; procezz-monitoring-enabled&quot;;
+          cssClassEdge +=  &quot; edge-monitoring-enabled&quot;;
+        }
+        if(faultyProcezz) {
+          cssClassProcezz +=  &quot; procezz-error&quot;;
+          cssClassEdge +=  &quot; edge-error&quot;;
+        }
+        if(procezzHidden) {
+          cssClassProcezz +=  &quot; hidden&quot;;
+          cssClassEdge +=  &quot; hidden&quot;;
+        }
+        if(stoppedProcezz) {
+          cssClassProcezz +=  &quot; procezz-stopped&quot;;
+          cssClassEdge +=  &quot; edge-stopped&quot;;
+        }
+
+        const procezzAndEdge = {
+          nodes: [
+            { 
+              data: { id: procezzID, emberModel: procezzRecord, name: procezzName}, 
+              classes: cssClassProcezz
+            }
+          ],
+          edges: [
+            { 
+              data: { id: edgeID, source: procezzID, target: agentName },
+              classes: cssClassEdge
+            }
+          ]
+        };
+
+        cy.add(procezzAndEdge);
+          
+      });
+
+    });
+    // END agentList loop
+
+    this.set(&#x27;showCytoscape&#x27;, isAtLeastOneSet);
+    this.set(&#x27;showHiddenMessage&#x27;, !isAtLeastOneSet);
+
+    //cy.endBatch();
+    layout.options.eles = cy.elements();
+    layout.run();
+
+    // Apply old manipulation
+    if(cyOldPanPosition) {
+      cy.pan(cyOldPanPosition);
+      cy.zoom(cyOldZoomValue);
+
+      const cyNewProcezzCount = cy.collection(&#x27;.procezz&#x27;).length;
+
+      // if there is a new procezz, reset manipulation.
+      // otherwise zoom acts weird (bugged) in cytoscape.js
+      if(cyOldProcezzCount !== cyNewProcezzCount) {
+        cy.fit();
+        let alertifyMessage = &quot;New Procezz(es) found.&quot;;
+
+        if(cyOldProcezzCount &gt; cyNewProcezzCount) {
+          alertifyMessage = &quot;Procezzes gone, potential agent failure&quot;;
+        }
+
+        this.showAlertifyMessageWithDuration(alertifyMessage, 4);
+      }
+    }
+  }
+
+});
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<div>
+  <h3>User Settings</h3>
+  <hr>
+  <div class="mt-2">
+    {{#bs-form model=this onSubmit=(action "saveSettings") as |form|}}
+      {{#each-in booleans as |key v|}}
+        <div class="d-flex justify-content-between pr-3">
+          {{key}}
+          {{x-toggle
+            theme='skewed'
+            value=(get this.booleans key)
+            onToggle=(action (mut (get this.booleans key)))
+          }}
+        </div>
+      {{/each-in}}
+      {{#each-in numerics as |key|}}
+        {{form.element controlType="number" label=key property=(concat "numerics." key)}}
+      {{/each-in}}
+      {{#each-in strings as |key v|}}
+        {{form.element controlType="text" label=key property=(concat "strings." key)}}
+      {{/each-in}}
+
+      {{#bs-button onClick=(action "saveSettings") type="primary" buttonType="submit"}}
+        Save
+      {{/bs-button}}
+    {{/bs-form}}
+  </div>
+</div>

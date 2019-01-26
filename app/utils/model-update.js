@@ -6,6 +6,7 @@ export default Object.extend({
   store: service(),
   highlighter: service('visualization/application/highlighter'),
   additionalData: service('additional-data'),
+  renderingService: service(),
 
   init() {
   },
@@ -13,6 +14,8 @@ export default Object.extend({
   /**
    *  Computes (possibly) bidirectional communication and saves 
    *  it as a model. Later used to draw communication between clazzes
+   * 
+   * @method addDrawableCommunication
    */
   addDrawableCommunication() {
     let store = this.get('store');
@@ -21,8 +24,10 @@ export default Object.extend({
 
     // Reset communication highlighting due to new communication
     // TODO: persist highlighting if drawableCommunication is still present in new landscape
-    if (highlightedEntity && highlightedEntity.constructor.modelName === "drawableclazzcommunication") {
+    if (highlightedEntity &&
+      (highlightedEntity.constructor.modelName === "drawableclazzcommunication" || this.get('highlighter.isTrace'))) {
       this.get('highlighter').unhighlightAll();
+      this.get('renderingService').redrawScene();
       this.get('additionalData').removeComponent("visualization/page-setup/sidebar/trace-selection");
     }
 

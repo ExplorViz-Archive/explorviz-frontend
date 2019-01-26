@@ -1,8 +1,6 @@
 import Component from '@ember/component';
 import {inject as service} from '@ember/service';
 import Evented from '@ember/object/evented';
-import { Promise } from 'rsvp';
-
 import THREE from "three";
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
 import debugLogger from 'ember-debug-logger';
@@ -34,12 +32,6 @@ export default Component.extend(Evented, THREEPerformance, {
   debug: debugLogger(),
 
   state: null,
-
-  // Declare url-builder service
-  urlBuilder: service("url-builder"),
-
-  // Declare view-importer service
-  viewImporter: service("view-importer"),
 
   reloadHandler: service("reload-handler"),
   landscapeRepo: service("repos/landscape-repository"),
@@ -132,7 +124,7 @@ export default Component.extend(Evented, THREEPerformance, {
     const { user } = this.get('session.data.authenticated');
     const userSettings = user.get('settings');
 
-    if(!userSettings["show-fps-counter"]) {
+    if(!userSettings.booleanAttributes.showFpsCounter) {
       this.removePerformanceMeasurement();
     }
 
@@ -146,14 +138,14 @@ export default Component.extend(Evented, THREEPerformance, {
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
 
-      if(userSettings["show-fps-counter"]) {
+      if(userSettings.booleanAttributes.showFpsCounter) {
         self.get('threexStats').update(self.get('webglrenderer'));
         self.get('stats').begin();
       }
 
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
 
-      if(userSettings["show-fps-counter"]) {
+      if(userSettings.booleanAttributes.showFpsCounter) {
         self.get('stats').end();
       }
 
@@ -209,9 +201,6 @@ export default Component.extend(Evented, THREEPerformance, {
 
     $(window).on('resize.visualization', this.updateCanvasSize.bind(this));
 
-    this.get('viewImporter').on('transmitView', function(newState) {
-        self.set('newState', newState);
-    });
 
 
     this.get('renderingService').on('reSetupScene', function() {
@@ -220,37 +209,6 @@ export default Component.extend(Evented, THREEPerformance, {
 
     this.get('renderingService').on('resizeCanvas', function() {
       self.updateCanvasSize();
-    });
-
-
-    this.get('urlBuilder').on('requestURL', function() {
-      const state = {};
-
-      // get timestamp
-      state.timestamp = self.get('landscapeRepo.latestLandscape')
-        .get('timestamp');
-
-      // get latestApp, may be null
-      const latestMaybeApp = self.get('landscapeRepo.latestApplication');
-      state.appID = latestMaybeApp ? latestMaybeApp.get('id') : null;
-
-      state.camX = self.get('camera').position.x;
-      state.camY = self.get('camera').position.y;
-      state.camZ = self.get('camera').position.z;
-
-      if(state.appID){
-        self.set('appCondition',[]);
-        self.computeAppCondition(
-          self.get('landscapeRepo.latestApplication').get('components'),
-          self.get('landscapeRepo.latestApplication').get('clazzes'));
-        state.appCondition = self.get('appCondition');
-      }
-      else{
-        state.landscapeCondition = self.computeLandscapeCondition();
-      }
-
-      // Passes the state from component via service to controller
-      self.get('urlBuilder').transmitState(state);
     });
 
     this.get('landscapeRepo').on("updated", function() {
@@ -428,73 +386,6 @@ export default Component.extend(Evented, THREEPerformance, {
   },
 
   /**
-    This method is used to update the camera with query parameters
-  */
-  importView(){
-
-    const self = this;
-
-    this.get('viewImporter').requestView();
-
-    const camX = this.get('newState').camX;
-    const camY = this.get('newState').camY;
-    const camZ = this.get('newState').camZ;
-
-    this.set('condition', this.get('newState').condition);
-
-    if(!isNaN(camX)){
-      this.get('camera').position.x = camX;
-    }
-    if(!isNaN(camY)){
-      this.get('camera').position.y = camY;
-    }
-    if(!isNaN(camZ)){
-      this.get('camera').position.z = camZ;
-    }
-    this.get('camera').updateProjectionMatrix();
-
-    // load actual landscape
-    const timestamp = this.get('newState').timestamp;
-    const appID = this.get('newState').appID;
-
-    if(timestamp) {
-      self.get('reloadHandler').loadLandscapeById(timestamp, appID);
-      waitForLandscape();
-    }
-
-    self.set('initImport',true);
-
-    function waitForLandscape() {
-      // New Promise
-      var promise = new Promise(
-        function(resolve) {
-          window.setTimeout(
-            function() {
-              // Wait until landscape is loaded
-              if(self.get('landscapeRepo.latestLandscape') === null){
-                waitForLandscape();
-              }
-              // Fulfill promise
-              else if(self.get('landscapeRepo.latestLandscape')){
-                resolve();
-              }
-            }, 500);
-        });
-      // Promise fulfilled => apply condition
-      promise.then(
-        function() {
-          self.get('reloadHandler').stopExchange();
-          if(appID){
-            self.applyAppCondition(self.get('landscapeRepo.latestApplication'));
-          }
-          else{
-            self.applyLandscapeCondition(self.get('landscapeRepo.latestLandscape'));
-          }
-        });
-    }
-  },
-
-  /**
    * This function is called once on initRendering and everytime at the end of
    * "cleanAndUpdateScene". Inherit this function to insert objects in the
    * Three.js scene. Have a look at
@@ -528,12 +419,10 @@ export default Component.extend(Evented, THREEPerformance, {
     gl.getExtension('WEBGL_lose_context').loseContext();
 
     this.set('camera', null);
-    this.get('urlBuilder').off('requestURL');
 
     this.removePerformanceMeasurement();
 
     $(window).off('resize.visualization');
-    this.get('viewImporter').off('transmitView');
     this.get('renderingService').off('reSetupScene');
     this.get('landscapeRepo').off('updated');
 

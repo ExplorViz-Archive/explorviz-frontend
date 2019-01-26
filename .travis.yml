@@ -2,7 +2,10 @@
 language: node_js
 
 node_js:
-  - "6"
+  - "10"
+
+services:
+  - docker
 
 sudo: false
 
@@ -16,32 +19,24 @@ branches:
   - /^greenkeeper/.*$/
   - dev-1
 
-env:
-  global:
-    # See https://git.io/vdao3 for details.
-    #- JOBS=1
-  matrix:
-    - EMBER_TRY_SCENARIO=ember-lts-2.12
-    - EMBER_TRY_SCENARIO=ember-lts-2.16
-    - EMBER_TRY_SCENARIO=ember-lts-2.18
-    - EMBER_TRY_SCENARIO=ember-3.2.0
-
-matrix:
+# Version Matrix
+# Testing needs to pass: test-release
+# Deployment needs to pass: build-release
+jobs:
   fast_finish: true
-  allow_failures:
-    - env: EMBER_TRY_SCENARIO=ember-lts-2.12
-
-before_script:
-  - chmod +x .travis/push.sh
-
-before_install:
-#  - if [[ `npm -v` != 5.6.0 ]]; then npm i -g npm@5.6.0; fi
+  #allow_failures:
+  #  - env: EMBER_TRY_SCENARIO=ember-3.8.0-beta.1
+  include:
+    - stage: test
+      env:
+        - EMBER_TRY_SCENARIO=test-release
+      script: ember try:one $EMBER_TRY_SCENARIO
+    - stage: deploy
+      if: (branch = dev-1) OR (branch = master)
+      skip_cleanup: true
+      env:
+        - EMBER_TRY_SCENARIO=build-release
+      script: chmod +x .travis/docker_push.sh && .travis/docker_push.sh
 
 install:
   - npm install --no-package-lock
-
-script:
-  - ember try:one $EMBER_TRY_SCENARIO
-
-after_success:
-  - test $TRAVIS_BRANCH = "master" && .travis/push.sh

@@ -18,9 +18,9 @@ export default Object.extend(Evented, {
   hammerHandler: null,
   popUpHandler: null,
   highlighter: service('visualization/application/highlighter'),
-  additionalData: service("additional-data"),
   hoverHandler: null,
   renderingService: service(),
+  session: service(),
 
   raycastObjects: computed('rotationObject', function() {
     return this.get('rotationObject.children');
@@ -81,7 +81,7 @@ export default Object.extend(Evented, {
 
     // init HoverHandler
     if (!this.get('hoverHandler')) {
-      this.set('hoverHandler', HoverHandler.create());
+      this.set('hoverHandler', HoverHandler.create(getOwner(this).ownerInjection()));
     }
 
     this.registerPopUpHandler();
@@ -248,33 +248,20 @@ export default Object.extend(Evented, {
       if(emberModelName === "component"){
         emberModel.setOpenedStatus(!emberModel.get('opened'));
 
-        //const highlighted = this.get('highlighter.highlightedEntity');
+        const user = this.get('session.session.content.authenticated.user');
 
-        // TODO Allow users to change this behavior via configuration route
-        //if(emberModel === highlighted || emberModel.contains(highlighted)) {
-          //this.get('highlighter').unhighlightAll();
-        //}
+        if(!user.settings.booleanAttributes.keepHighlightingOnOpenOrClose) {
+          const highlighted = this.get('highlighter.highlightedEntity');
+  
+          // TODO Allow users to change this behavior via configuration route
+          if(emberModel === highlighted || emberModel.contains(highlighted)) {
+            this.get('highlighter').unhighlightAll();
+          }
+        }
 
         this.get('highlighter').applyHighlighting();
         this.get('renderingService').redrawScene();
-      } else if(emberModelName === "drawableclazzcommunication"){
-        // remove old highlighting
-        this.get('highlighter').unhighlightAll();
-
-        // highlight communication
-        this.get('highlighter').highlight(emberModel);
-        this.get('renderingService').redrawScene();
-
-
-        let traces = emberModel.getContainedTraces();
-
-        // display trace selection component for communication
-        this.set('additionalData.data.traces', traces);
-        this.get('additionalData').addComponent("visualization/page-setup/sidebar/trace-selection");
-        this.get('additionalData').openAdditionalData();
-        
-      }
-
+      } 
     }
 
     this.trigger('doubleClick', emberModel);
@@ -329,10 +316,6 @@ export default Object.extend(Evented, {
     }
 
     this.trigger('singleClick', emberModel);
-
-    // close trace information (possibly opened before)
-    this.get('additionalData').removeComponent("visualization/page-setup/sidebar/trace-selection");
-
   },
 
   handlePanning(delta, event) {
@@ -392,9 +375,4 @@ export default Object.extend(Evented, {
     }
 
   }
-
-
-
-
-
 });

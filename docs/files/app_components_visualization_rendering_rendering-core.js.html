@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>app\components\visualization\rendering\rendering-core.js - ExplorViz: Frontend API</title>
+    <title>app\components\visualization\rendering\rendering-core.js - ExplorViz Frontend</title>
     <link rel="stylesheet" href="">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -14,19 +14,19 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
-	    <img alt="ExplorViz: Frontend API" src="https://www.explorviz.net/img/favicon.png" style="max-height: 65%;" title="ExplorViz: Frontend API">
-            ExplorViz: Frontend API
+	    <img alt="ExplorViz Frontend" src="https://www.explorviz.net/img/slideshow/explorviz-logo.png" style="max-height: 65%;" title="ExplorViz Frontend">
+            ExplorViz Frontend
         </h1>
 	<div class="nav">
             <li class="divider-vertical"></li>
             <li>
                 <p class="navbar-text">
-                    API Docs for Version: <b>0.0.2</b>
+                    API Docs for Version: <b>1.3.0</b>
                 </p>
             </li>
         </div>
         <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
-            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Administration-Route", "classes/AggregatedClazzCommunication-Model", "classes/Alertify-Handler", "classes/Application", "classes/Application-Controller", "classes/Application-Model", "classes/Application-Rendering-Component", "classes/Application-Route", "classes/Application-Serializer", "classes/ApplicationCommunication-Model", "classes/Authenticator", "classes/Authorizer", "classes/Badroute-Route", "classes/BaseEntity-Model", "classes/Clazz-Model", "classes/ClazzCommunication-Model", "classes/Component-Model", "classes/Configuration-Controller", "classes/Configuration-Route", "classes/Configuration-Service", "classes/CumulatedClazzCommunication-Model", "classes/Data-Reload-Service", "classes/DatabaseQuery-Model", "classes/Draw3DNodeEntity-Model", "classes/DrawEdgeEntity-Model", "classes/DrawNodeEntity-Model", "classes/Index-Route", "classes/Landscape-Adapter", "classes/Landscape-Model", "classes/Landscape-Reload-Service", "classes/Landscape-Rendering-Component", "classes/Landscape-Repository-Service", "classes/Landscape-Serializer", "classes/Login-Form-Component", "classes/Login-Route", "classes/Navbar-Glyphicons", "classes/Navbar-Routes", "classes/Node-Model", "classes/NodeGroup-Model", "classes/Page-Setup-Service", "classes/Rendering-Core-Component", "classes/Router", "classes/RuntimeInformation-Model", "classes/System-Model", "classes/System-Serializer", "classes/ThreeJS-Performance-Mixin", "classes/Time-Shift-Component", "classes/Timeshift-Reload-Service", "classes/Timestamp-Adapter", "classes/Timestamp-Model", "classes/Timestamp-Repository-Service", "classes/Tutorial-Route", "classes/user-Model", "classes/Visualization-Controller", "classes/Visualization-Route", "modules/explorviz", "modules/model", "modules/model.meta", "modules/model.util", "modules/network", "modules/page", "modules/security", "modules/settings", "modules/util", "modules/visualization", "modules/visualization.rendering", "modules/visualization.timeshift"]'>
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Agent-Adapter", "classes/AggregatedClazzCommunication-Model", "classes/Alertify-Handler", "classes/Application-Controller", "classes/Application-Model", "classes/Application-Rendering-Component", "classes/Application-Route", "classes/Application-Serializer", "classes/ApplicationCommunication-Model", "classes/Authenticator", "classes/Badroute-Route", "classes/BaseEntity-Model", "classes/Clazz-Model", "classes/ClazzCommunication-Model", "classes/Component-Model", "classes/Configuration-Controller", "classes/Configuration-Route", "classes/Configuration-Service", "classes/DatabaseQuery-Model", "classes/Draw3DNodeEntity-Model", "classes/DrawableClazzCommunication-Model", "classes/DrawEdgeEntity-Model", "classes/DrawNodeEntity-Model", "classes/foundation-builder", "classes/Index-Route", "classes/Landscape-Adapter", "classes/Landscape-Model", "classes/Landscape-Rendering-Component", "classes/Landscape-Repository-Service", "classes/Landscape-Serializer", "classes/Login-Form-Component", "classes/Login-Route", "classes/Navbar-Octicons", "classes/Navbar-Routes", "classes/Node-Model", "classes/NodeGroup-Model", "classes/Page-Setup-Service", "classes/Process-Model", "classes/Procezz-Adapter", "classes/Rendering-Core-Component", "classes/Router", "classes/System-Model", "classes/System-Serializer", "classes/ThreeJS-Performance-Mixin", "classes/Timestamp-Adapter", "classes/Timestamp-Model", "classes/Timestamp-Repository-Service", "classes/Trace-Model", "classes/TraceStep-Model", "classes/user-Model", "classes/Visualization-Controller", "classes/Visualization-Route", "modules/explorviz", "modules/explorviz.discovery", "modules/explorviz.extension.discovery", "modules/model", "modules/model.meta", "modules/model.util", "modules/network", "modules/page", "modules/security", "modules/settings", "modules/util", "modules/visualization", "modules/visualization.rendering", "modules/visualization.timeshift"]'>
         </form>
     </div>
 </div>
@@ -48,10 +48,9 @@
 	            <div class="tab-content" style="border: 1px solid #DDD; border-top:0;">
 	                <div class="tab-pane active" id="classes">
 	                    <ul id="api-classes" class="nav nav-list">
-	                            <li><a href="../classes/Administration-Route.html">Administration-Route</a></li>
+	                            <li><a href="../classes/Agent-Adapter.html">Agent-Adapter</a></li>
 	                            <li><a href="../classes/AggregatedClazzCommunication-Model.html">AggregatedClazzCommunication-Model</a></li>
 	                            <li><a href="../classes/Alertify-Handler.html">Alertify-Handler</a></li>
-	                            <li><a href="../classes/Application.html">Application</a></li>
 	                            <li><a href="../classes/Application-Controller.html">Application-Controller</a></li>
 	                            <li><a href="../classes/Application-Model.html">Application-Model</a></li>
 	                            <li><a href="../classes/Application-Rendering-Component.html">Application-Rendering-Component</a></li>
@@ -59,7 +58,6 @@
 	                            <li><a href="../classes/Application-Serializer.html">Application-Serializer</a></li>
 	                            <li><a href="../classes/ApplicationCommunication-Model.html">ApplicationCommunication-Model</a></li>
 	                            <li><a href="../classes/Authenticator.html">Authenticator</a></li>
-	                            <li><a href="../classes/Authorizer.html">Authorizer</a></li>
 	                            <li><a href="../classes/Badroute-Route.html">Badroute-Route</a></li>
 	                            <li><a href="../classes/BaseEntity-Model.html">BaseEntity-Model</a></li>
 	                            <li><a href="../classes/Clazz-Model.html">Clazz-Model</a></li>
@@ -68,38 +66,37 @@
 	                            <li><a href="../classes/Configuration-Controller.html">Configuration-Controller</a></li>
 	                            <li><a href="../classes/Configuration-Route.html">Configuration-Route</a></li>
 	                            <li><a href="../classes/Configuration-Service.html">Configuration-Service</a></li>
-	                            <li><a href="../classes/CumulatedClazzCommunication-Model.html">CumulatedClazzCommunication-Model</a></li>
-	                            <li><a href="../classes/Data-Reload-Service.html">Data-Reload-Service</a></li>
 	                            <li><a href="../classes/DatabaseQuery-Model.html">DatabaseQuery-Model</a></li>
 	                            <li><a href="../classes/Draw3DNodeEntity-Model.html">Draw3DNodeEntity-Model</a></li>
+	                            <li><a href="../classes/DrawableClazzCommunication-Model.html">DrawableClazzCommunication-Model</a></li>
 	                            <li><a href="../classes/DrawEdgeEntity-Model.html">DrawEdgeEntity-Model</a></li>
 	                            <li><a href="../classes/DrawNodeEntity-Model.html">DrawNodeEntity-Model</a></li>
+	                            <li><a href="../classes/foundation-builder.html">foundation-builder</a></li>
 	                            <li><a href="../classes/Index-Route.html">Index-Route</a></li>
 	                            <li><a href="../classes/Landscape-Adapter.html">Landscape-Adapter</a></li>
 	                            <li><a href="../classes/Landscape-Model.html">Landscape-Model</a></li>
-	                            <li><a href="../classes/Landscape-Reload-Service.html">Landscape-Reload-Service</a></li>
 	                            <li><a href="../classes/Landscape-Rendering-Component.html">Landscape-Rendering-Component</a></li>
 	                            <li><a href="../classes/Landscape-Repository-Service.html">Landscape-Repository-Service</a></li>
 	                            <li><a href="../classes/Landscape-Serializer.html">Landscape-Serializer</a></li>
 	                            <li><a href="../classes/Login-Form-Component.html">Login-Form-Component</a></li>
 	                            <li><a href="../classes/Login-Route.html">Login-Route</a></li>
-	                            <li><a href="../classes/Navbar-Glyphicons.html">Navbar-Glyphicons</a></li>
+	                            <li><a href="../classes/Navbar-Octicons.html">Navbar-Octicons</a></li>
 	                            <li><a href="../classes/Navbar-Routes.html">Navbar-Routes</a></li>
 	                            <li><a href="../classes/Node-Model.html">Node-Model</a></li>
 	                            <li><a href="../classes/NodeGroup-Model.html">NodeGroup-Model</a></li>
 	                            <li><a href="../classes/Page-Setup-Service.html">Page-Setup-Service</a></li>
+	                            <li><a href="../classes/Process-Model.html">Process-Model</a></li>
+	                            <li><a href="../classes/Procezz-Adapter.html">Procezz-Adapter</a></li>
 	                            <li><a href="../classes/Rendering-Core-Component.html">Rendering-Core-Component</a></li>
 	                            <li><a href="../classes/Router.html">Router</a></li>
-	                            <li><a href="../classes/RuntimeInformation-Model.html">RuntimeInformation-Model</a></li>
 	                            <li><a href="../classes/System-Model.html">System-Model</a></li>
 	                            <li><a href="../classes/System-Serializer.html">System-Serializer</a></li>
 	                            <li><a href="../classes/ThreeJS-Performance-Mixin.html">ThreeJS-Performance-Mixin</a></li>
-	                            <li><a href="../classes/Time-Shift-Component.html">Time-Shift-Component</a></li>
-	                            <li><a href="../classes/Timeshift-Reload-Service.html">Timeshift-Reload-Service</a></li>
 	                            <li><a href="../classes/Timestamp-Adapter.html">Timestamp-Adapter</a></li>
 	                            <li><a href="../classes/Timestamp-Model.html">Timestamp-Model</a></li>
 	                            <li><a href="../classes/Timestamp-Repository-Service.html">Timestamp-Repository-Service</a></li>
-	                            <li><a href="../classes/Tutorial-Route.html">Tutorial-Route</a></li>
+	                            <li><a href="../classes/Trace-Model.html">Trace-Model</a></li>
+	                            <li><a href="../classes/TraceStep-Model.html">TraceStep-Model</a></li>
 	                            <li><a href="../classes/user-Model.html">user-Model</a></li>
 	                            <li><a href="../classes/Visualization-Controller.html">Visualization-Controller</a></li>
 	                            <li><a href="../classes/Visualization-Route.html">Visualization-Route</a></li>
@@ -109,6 +106,8 @@
 	                <div class="tab-pane" id="modules">
 	                    <ul id="api-modules" class="nav nav-list">
 	                            <li><a href="../modules/explorviz.html">explorviz</a></li>
+	                            <li><a href="../modules/explorviz.discovery.html">explorviz.discovery</a></li>
+	                            <li><a href="../modules/explorviz.extension.discovery.html">explorviz.extension.discovery</a></li>
 	                            <li><a href="../modules/model.html">model</a></li>
 	                            <li><a href="../modules/model.meta.html">model.meta</a></li>
 	                            <li><a href="../modules/model.util.html">model.util</a></li>
@@ -159,12 +158,13 @@
 
 <div class="file">
     <pre class="prettyprint linenums">
-import Ember from &#x27;ember&#x27;;
-import THREE from &quot;npm:three&quot;;
-import config from &#x27;explorviz-frontend/config/environment&#x27;;
+import Component from &#x27;@ember/component&#x27;;
+import {inject as service} from &#x27;@ember/service&#x27;;
+import Evented from &#x27;@ember/object/evented&#x27;;
+import THREE from &quot;three&quot;;
 import THREEPerformance from &#x27;explorviz-frontend/mixins/threejs-performance&#x27;;
-
-const {Component, inject, Evented} = Ember;
+import debugLogger from &#x27;ember-debug-logger&#x27;;
+import $ from &#x27;jquery&#x27;;
 
 /**
 * This component contains the core mechanics of the different (three.js-based)
@@ -186,19 +186,20 @@ const {Component, inject, Evented} = Ember;
 */
 export default Component.extend(Evented, THREEPerformance, {
 
+  // No Ember generated container
+  tagName: &#x27;&#x27;,
+
+  debug: debugLogger(),
+
   state: null,
 
-  // Declare url-builder service
-  urlBuilder: inject.service(&quot;url-builder&quot;),
+  reloadHandler: service(&quot;reload-handler&quot;),
+  landscapeRepo: service(&quot;repos/landscape-repository&quot;),
+  highlighter: service(&quot;visualization/application/highlighter&quot;),
+  addionalData: service(&quot;additional-data&quot;),
+  renderingService: service(),
 
-  // Declare view-importer service
-  viewImporter: inject.service(&quot;view-importer&quot;),
-
-  reloadHandler: inject.service(&quot;reload-handler&quot;),
-  landscapeRepo: inject.service(&quot;repos/landscape-repository&quot;),
-  renderingService: inject.service(),
-
-  classNames: [&#x27;viz&#x27;],
+  session: service(),
 
   scene : null,
   webglrenderer: null,
@@ -211,8 +212,13 @@ export default Component.extend(Evented, THREEPerformance, {
 
   initDone: false,
 
-  appCondition: [],
+  appCondition: null,
   initImport: true,
+
+  init()  {
+    this._super(...arguments);
+    this.set(&#x27;appCondition&#x27;, []);
+  },
 
 
   // @Override
@@ -247,7 +253,7 @@ export default Component.extend(Evented, THREEPerformance, {
    * to call other important function, e.g. &quot;initInteraction&quot; as shown in
    * {{#crossLink &quot;Landscape-Rendering/initInteraction:method&quot;}}{{/crossLink}}.
    *
-   * @method initRendering
+   * @method initRenderings
    */
   initRendering() {
 
@@ -256,10 +262,10 @@ export default Component.extend(Evented, THREEPerformance, {
     const self = this;
 
     // get size if outer ember div
-    const height = this.$()[0].clientHeight;
-    const width = this.$()[0].clientWidth;
+    const height = $(&#x27;#rendering&#x27;).innerHeight();
+    const width = $(&#x27;#rendering&#x27;).innerWidth();
 
-    const canvas = this.$(&#x27;#threeCanvas&#x27;)[0];
+    const canvas = $(&#x27;#threeCanvas&#x27;)[0];
 
     this.set(&#x27;canvas&#x27;, canvas);
 
@@ -275,19 +281,31 @@ export default Component.extend(Evented, THREEPerformance, {
     this.get(&#x27;webglrenderer&#x27;).setPixelRatio(window.devicePixelRatio);
     this.get(&#x27;webglrenderer&#x27;).setSize(width, height);
 
+    const { user } = this.get(&#x27;session.data.authenticated&#x27;);
+    const userSettings = user.get(&#x27;settings&#x27;);
+
+    if(!userSettings.booleanAttributes.showFpsCounter) {
+      this.removePerformanceMeasurement();
+    }
+
     // Rendering loop //
     function render() {
+      
+      if(self.get(&#x27;isDestroyed&#x27;)) {
+        return;
+      }
+      
       const animationId = requestAnimationFrame(render);
       self.set(&#x27;animationFrameId&#x27;, animationId);
 
-      if(config.environment === &quot;development&quot; || config.environment === &quot;akr&quot;) {
+      if(userSettings.booleanAttributes.showFpsCounter) {
         self.get(&#x27;threexStats&#x27;).update(self.get(&#x27;webglrenderer&#x27;));
         self.get(&#x27;stats&#x27;).begin();
       }
 
       self.get(&#x27;webglrenderer&#x27;).render(self.get(&#x27;scene&#x27;), self.get(&#x27;camera&#x27;));
 
-      if(config.environment === &quot;development&quot; || config.environment === &quot;akr&quot;) {
+      if(userSettings.booleanAttributes.showFpsCounter) {
         self.get(&#x27;stats&#x27;).end();
       }
 
@@ -305,7 +323,7 @@ export default Component.extend(Evented, THREEPerformance, {
       self.set(&#x27;initDone&#x27;, true);
       self.populateScene();
       // import new view
-      self.importView();
+      // self.importView();
 
 
     });
@@ -313,66 +331,44 @@ export default Component.extend(Evented, THREEPerformance, {
   },
 
 
+  updateCanvasSize() {
+    const outerDiv = $(&#x27;#vizspace&#x27;)[0];
+
+    if(outerDiv) {
+      if(!this.get(&#x27;camera&#x27;) || !this.get(&#x27;webglrenderer&#x27;))
+        return;
+
+      $(&#x27;#threeCanvas&#x27;).hide();
+
+      const height = Math.round($(&#x27;#rendering&#x27;).innerHeight());
+      const width = Math.round($(&#x27;#rendering&#x27;).innerWidth());
+
+      this.set(&#x27;camera.aspect&#x27;, width / height);
+      this.get(&#x27;camera&#x27;).updateProjectionMatrix();
+
+      this.get(&#x27;webglrenderer&#x27;).setSize(width, height);
+
+      this.onResized();
+
+      $(&#x27;#threeCanvas&#x27;).show();
+    }
+  },
+
+
   initListener() {
 
     const self = this;
 
-    this.$(window).on(&#x27;resize.visualization&#x27;, function(){
-      const outerDiv = this.$(&#x27;.viz&#x27;)[0];
+    $(window).on(&#x27;resize.visualization&#x27;, this.updateCanvasSize.bind(this));
 
-      if(outerDiv) {
-
-        const height = Math.round(this.$(&#x27;.viz&#x27;).height());
-        const width = Math.round(this.$(&#x27;.viz&#x27;).width());
-
-        self.set(&#x27;camera.aspect&#x27;, width / height);
-        self.get(&#x27;camera&#x27;).updateProjectionMatrix();
-
-        self.get(&#x27;webglrenderer&#x27;).setSize(width, height);
-
-        self.onResized();
-      }
-    });
-
-
-    this.get(&#x27;viewImporter&#x27;).on(&#x27;transmitView&#x27;, function(newState) {
-        self.set(&#x27;newState&#x27;, newState);
-    });
 
 
     this.get(&#x27;renderingService&#x27;).on(&#x27;reSetupScene&#x27;, function() {
       self.onReSetupScene();
     });
 
-
-    this.get(&#x27;urlBuilder&#x27;).on(&#x27;requestURL&#x27;, function() {
-      const state = {};
-
-      // get timestamp
-      state.timestamp = self.get(&#x27;landscapeRepo.latestLandscape&#x27;)
-        .get(&#x27;timestamp&#x27;);
-
-      // get latestApp, may be null
-      const latestMaybeApp = self.get(&#x27;landscapeRepo.latestApplication&#x27;);
-      state.appID = latestMaybeApp ? latestMaybeApp.get(&#x27;id&#x27;) : null;
-
-      state.camX = self.get(&#x27;camera&#x27;).position.x;
-      state.camY = self.get(&#x27;camera&#x27;).position.y;
-      state.camZ = self.get(&#x27;camera&#x27;).position.z;
-
-      if(state.appID){
-        self.set(&#x27;appCondition&#x27;,[]);
-        self.computeAppCondition(
-          self.get(&#x27;landscapeRepo.latestApplication&#x27;).get(&#x27;components&#x27;),
-          self.get(&#x27;landscapeRepo.latestApplication&#x27;).get(&#x27;clazzes&#x27;));
-        state.appCondition = self.get(&#x27;appCondition&#x27;);
-      }
-      else{
-        state.landscapeCondition = self.computeLandscapeCondition();
-      }
-
-      // Passes the state from component via service to controller
-      self.get(&#x27;urlBuilder&#x27;).transmitState(state);
+    this.get(&#x27;renderingService&#x27;).on(&#x27;resizeCanvas&#x27;, function() {
+      self.updateCanvasSize();
     });
 
     this.get(&#x27;landscapeRepo&#x27;).on(&quot;updated&quot;, function() {
@@ -550,73 +546,6 @@ export default Component.extend(Evented, THREEPerformance, {
   },
 
   /**
-    This method is used to update the camera with query parameters
-  */
-  importView(){
-
-    const self = this;
-
-    this.get(&#x27;viewImporter&#x27;).requestView();
-
-    const camX = this.get(&#x27;newState&#x27;).camX;
-    const camY = this.get(&#x27;newState&#x27;).camY;
-    const camZ = this.get(&#x27;newState&#x27;).camZ;
-
-    this.set(&#x27;condition&#x27;, this.get(&#x27;newState&#x27;).condition);
-
-    if(!isNaN(camX)){
-      this.get(&#x27;camera&#x27;).position.x = camX;
-    }
-    if(!isNaN(camY)){
-      this.get(&#x27;camera&#x27;).position.y = camY;
-    }
-    if(!isNaN(camZ)){
-      this.get(&#x27;camera&#x27;).position.z = camZ;
-    }
-    this.get(&#x27;camera&#x27;).updateProjectionMatrix();
-
-    // load actual landscape
-    const timestamp = this.get(&#x27;newState&#x27;).timestamp;
-    const appID = this.get(&#x27;newState&#x27;).appID;
-
-    if(timestamp) {
-      self.get(&#x27;reloadHandler&#x27;).loadLandscapeById(timestamp, appID);
-      waitForLandscape();
-    }
-
-    self.set(&#x27;initImport&#x27;,true);
-
-    function waitForLandscape() {
-      // New Promise
-      var promise = new Ember.RSVP.Promise(
-        function(resolve) {
-          window.setTimeout(
-            function() {
-              // Wait until landscape is loaded
-              if(self.get(&#x27;landscapeRepo.latestLandscape&#x27;) === null){
-                waitForLandscape();
-              }
-              // Fulfill promise
-              else if(self.get(&#x27;landscapeRepo.latestLandscape&#x27;)){
-                resolve();
-              }
-            }, 500);
-        });
-      // Promise fulfilled =&gt; apply condition
-      promise.then(
-        function() {
-          self.get(&#x27;reloadHandler&#x27;).stopExchange();
-          if(appID){
-            self.applyAppCondition(self.get(&#x27;landscapeRepo.latestApplication&#x27;));
-          }
-          else{
-            self.applyLandscapeCondition(self.get(&#x27;landscapeRepo.latestLandscape&#x27;));
-          }
-        });
-    }
-  },
-
-  /**
    * This function is called once on initRendering and everytime at the end of
    * &quot;cleanAndUpdateScene&quot;. Inherit this function to insert objects in the
    * Three.js scene. Have a look at
@@ -650,14 +579,15 @@ export default Component.extend(Evented, THREEPerformance, {
     gl.getExtension(&#x27;WEBGL_lose_context&#x27;).loseContext();
 
     this.set(&#x27;camera&#x27;, null);
-    this.get(&#x27;urlBuilder&#x27;).off(&#x27;requestURL&#x27;);
 
     this.removePerformanceMeasurement();
 
-    this.$(window).off(&#x27;resize.visualization&#x27;);
-    this.get(&#x27;viewImporter&#x27;).off(&#x27;transmitView&#x27;);
+    $(window).off(&#x27;resize.visualization&#x27;);
     this.get(&#x27;renderingService&#x27;).off(&#x27;reSetupScene&#x27;);
     this.get(&#x27;landscapeRepo&#x27;).off(&#x27;updated&#x27;);
+
+    this.get(&#x27;highlighter&#x27;).unhighlightAll();
+    this.get(&#x27;addionalData&#x27;).emptyAndClose();
   },
 
 

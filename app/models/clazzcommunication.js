@@ -17,7 +17,7 @@ export default DrawEdgeEntity.extend({
   operationName: attr('string'),
   requests: attr(),
 
-  tracesteps: hasMany('tracestep', {
+  traceSteps: hasMany('tracestep', {
     inverse: null
   }),
 
@@ -28,5 +28,17 @@ export default DrawEdgeEntity.extend({
   targetClazz: belongsTo('clazz', {
     inverse: null
   }),
+
+  openParents() {
+    let sourceClazz = this.belongsTo('sourceClazz').value();
+    if (sourceClazz !== null) {
+      sourceClazz.openParents();
+    }
+    
+    let targetClazz = this.belongsTo('targetClazz').value();
+    if (targetClazz !== null) {
+      targetClazz.openParents();
+    }
+  },
 
 });

@@ -2,6 +2,7 @@ import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import { task } from 'ember-concurrency';
 
+
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 export default Component.extend(AlertifyHandler, {
@@ -23,9 +24,6 @@ export default Component.extend(AlertifyHandler, {
     this.set('page', 'main');
     this.set('showNewUsers', false);
     this.updateUserList(true);
-
-    // for testing
-    this.get('store').findRecord('usersetting', 1);
   },
 
   updateUserList(reload) {
@@ -64,6 +62,7 @@ export default Component.extend(AlertifyHandler, {
 
     openEditUserPage(user) {
       this.set('page', 'editUser');
+      this.set('currentUser', user);
 
       this.setProperties({
         id_change: user.id,

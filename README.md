@@ -4,10 +4,10 @@
 
 ___
 
-<a href="https://travis-ci.org/ExplorViz/explorviz-frontend"><img src="https://travis-ci.org/ExplorViz/explorviz-frontend.svg?branch=master" alt="Build Status"></a>
+<a href="https://travis-ci.org/ExplorViz/explorviz-frontend"><img src="https://travis-ci.org/ExplorViz/explorviz-frontend.svg?branch=dev-1" alt="Build Status"></a>
 [![Build status](https://ci.appveyor.com/api/projects/status/am0ea9r6sp2h74x7/branch/master?svg=true)](https://ci.appveyor.com/project/Alexander-Krause/explorviz-frontend/branch/master)
-<a href="https://david-dm.org/ExplorViz/explorviz-frontend"><img src="https://david-dm.org/ExplorViz/explorviz-frontend.svg?branch=master" alt="Dependency Status"></a>
-<a href="https://david-dm.org/ExplorViz/explorviz-frontend?type=dev"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/dev-status.svg" alt="devDependencies status"></a>
+<a href="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1/status.svg" alt="Dependency Status"></a>
+<a href="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1?type=dev"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1/dev-status.svg" alt="devDependencies status"></a>
 [![](https://img.shields.io/docker/pulls/explorviz/explorviz-docker.svg)](https://hub.docker.com/r/explorviz/explorviz-docker "Click to view the image on Docker Hub") [![Greenkeeper badge](https://badges.greenkeeper.io/ExplorViz/explorviz-frontend.svg)](https://greenkeeper.io/)
 
 ## Project Description
@@ -34,7 +34,7 @@ There are two options for you at the moment. Browse to our [docker repository](h
 You will need the following things properly installed on your computer.
 
 * [Git](http://git-scm.com/)
-* [Node.js](http://nodejs.org/) with NPM (currently 8.9.4 LTS)
+* [Node.js](http://nodejs.org/) with NPM (currently 10.15.0 LTS)
 
 ### Installation (Generic)
 

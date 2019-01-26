@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>app\components\visualization\rendering\landscape-rendering.js - ExplorViz: Frontend API</title>
+    <title>app\components\visualization\rendering\landscape-rendering.js - ExplorViz Frontend</title>
     <link rel="stylesheet" href="">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -14,19 +14,19 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
-	    <img alt="ExplorViz: Frontend API" src="https://www.explorviz.net/img/favicon.png" style="max-height: 65%;" title="ExplorViz: Frontend API">
-            ExplorViz: Frontend API
+	    <img alt="ExplorViz Frontend" src="https://www.explorviz.net/img/slideshow/explorviz-logo.png" style="max-height: 65%;" title="ExplorViz Frontend">
+            ExplorViz Frontend
         </h1>
 	<div class="nav">
             <li class="divider-vertical"></li>
             <li>
                 <p class="navbar-text">
-                    API Docs for Version: <b>0.0.2</b>
+                    API Docs for Version: <b>1.3.0</b>
                 </p>
             </li>
         </div>
         <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
-            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Administration-Route", "classes/AggregatedClazzCommunication-Model", "classes/Alertify-Handler", "classes/Application", "classes/Application-Controller", "classes/Application-Model", "classes/Application-Rendering-Component", "classes/Application-Route", "classes/Application-Serializer", "classes/ApplicationCommunication-Model", "classes/Authenticator", "classes/Authorizer", "classes/Badroute-Route", "classes/BaseEntity-Model", "classes/Clazz-Model", "classes/ClazzCommunication-Model", "classes/Component-Model", "classes/Configuration-Controller", "classes/Configuration-Route", "classes/Configuration-Service", "classes/CumulatedClazzCommunication-Model", "classes/Data-Reload-Service", "classes/DatabaseQuery-Model", "classes/Draw3DNodeEntity-Model", "classes/DrawEdgeEntity-Model", "classes/DrawNodeEntity-Model", "classes/Index-Route", "classes/Landscape-Adapter", "classes/Landscape-Model", "classes/Landscape-Reload-Service", "classes/Landscape-Rendering-Component", "classes/Landscape-Repository-Service", "classes/Landscape-Serializer", "classes/Login-Form-Component", "classes/Login-Route", "classes/Navbar-Glyphicons", "classes/Navbar-Routes", "classes/Node-Model", "classes/NodeGroup-Model", "classes/Page-Setup-Service", "classes/Rendering-Core-Component", "classes/Router", "classes/RuntimeInformation-Model", "classes/System-Model", "classes/System-Serializer", "classes/ThreeJS-Performance-Mixin", "classes/Time-Shift-Component", "classes/Timeshift-Reload-Service", "classes/Timestamp-Adapter", "classes/Timestamp-Model", "classes/Timestamp-Repository-Service", "classes/Tutorial-Route", "classes/user-Model", "classes/Visualization-Controller", "classes/Visualization-Route", "modules/explorviz", "modules/model", "modules/model.meta", "modules/model.util", "modules/network", "modules/page", "modules/security", "modules/settings", "modules/util", "modules/visualization", "modules/visualization.rendering", "modules/visualization.timeshift"]'>
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Agent-Adapter", "classes/AggregatedClazzCommunication-Model", "classes/Alertify-Handler", "classes/Application-Controller", "classes/Application-Model", "classes/Application-Rendering-Component", "classes/Application-Route", "classes/Application-Serializer", "classes/ApplicationCommunication-Model", "classes/Authenticator", "classes/Badroute-Route", "classes/BaseEntity-Model", "classes/Clazz-Model", "classes/ClazzCommunication-Model", "classes/Component-Model", "classes/Configuration-Controller", "classes/Configuration-Route", "classes/Configuration-Service", "classes/DatabaseQuery-Model", "classes/Draw3DNodeEntity-Model", "classes/DrawableClazzCommunication-Model", "classes/DrawEdgeEntity-Model", "classes/DrawNodeEntity-Model", "classes/foundation-builder", "classes/Index-Route", "classes/Landscape-Adapter", "classes/Landscape-Model", "classes/Landscape-Rendering-Component", "classes/Landscape-Repository-Service", "classes/Landscape-Serializer", "classes/Login-Form-Component", "classes/Login-Route", "classes/Navbar-Octicons", "classes/Navbar-Routes", "classes/Node-Model", "classes/NodeGroup-Model", "classes/Page-Setup-Service", "classes/Process-Model", "classes/Procezz-Adapter", "classes/Rendering-Core-Component", "classes/Router", "classes/System-Model", "classes/System-Serializer", "classes/ThreeJS-Performance-Mixin", "classes/Timestamp-Adapter", "classes/Timestamp-Model", "classes/Timestamp-Repository-Service", "classes/Trace-Model", "classes/TraceStep-Model", "classes/user-Model", "classes/Visualization-Controller", "classes/Visualization-Route", "modules/explorviz", "modules/explorviz.discovery", "modules/explorviz.extension.discovery", "modules/model", "modules/model.meta", "modules/model.util", "modules/network", "modules/page", "modules/security", "modules/settings", "modules/util", "modules/visualization", "modules/visualization.rendering", "modules/visualization.timeshift"]'>
         </form>
     </div>
 </div>
@@ -48,10 +48,9 @@
 	            <div class="tab-content" style="border: 1px solid #DDD; border-top:0;">
 	                <div class="tab-pane active" id="classes">
 	                    <ul id="api-classes" class="nav nav-list">
-	                            <li><a href="../classes/Administration-Route.html">Administration-Route</a></li>
+	                            <li><a href="../classes/Agent-Adapter.html">Agent-Adapter</a></li>
 	                            <li><a href="../classes/AggregatedClazzCommunication-Model.html">AggregatedClazzCommunication-Model</a></li>
 	                            <li><a href="../classes/Alertify-Handler.html">Alertify-Handler</a></li>
-	                            <li><a href="../classes/Application.html">Application</a></li>
 	                            <li><a href="../classes/Application-Controller.html">Application-Controller</a></li>
 	                            <li><a href="../classes/Application-Model.html">Application-Model</a></li>
 	                            <li><a href="../classes/Application-Rendering-Component.html">Application-Rendering-Component</a></li>
@@ -59,7 +58,6 @@
 	                            <li><a href="../classes/Application-Serializer.html">Application-Serializer</a></li>
 	                            <li><a href="../classes/ApplicationCommunication-Model.html">ApplicationCommunication-Model</a></li>
 	                            <li><a href="../classes/Authenticator.html">Authenticator</a></li>
-	                            <li><a href="../classes/Authorizer.html">Authorizer</a></li>
 	                            <li><a href="../classes/Badroute-Route.html">Badroute-Route</a></li>
 	                            <li><a href="../classes/BaseEntity-Model.html">BaseEntity-Model</a></li>
 	                            <li><a href="../classes/Clazz-Model.html">Clazz-Model</a></li>
@@ -68,38 +66,37 @@
 	                            <li><a href="../classes/Configuration-Controller.html">Configuration-Controller</a></li>
 	                            <li><a href="../classes/Configuration-Route.html">Configuration-Route</a></li>
 	                            <li><a href="../classes/Configuration-Service.html">Configuration-Service</a></li>
-	                            <li><a href="../classes/CumulatedClazzCommunication-Model.html">CumulatedClazzCommunication-Model</a></li>
-	                            <li><a href="../classes/Data-Reload-Service.html">Data-Reload-Service</a></li>
 	                            <li><a href="../classes/DatabaseQuery-Model.html">DatabaseQuery-Model</a></li>
 	                            <li><a href="../classes/Draw3DNodeEntity-Model.html">Draw3DNodeEntity-Model</a></li>
+	                            <li><a href="../classes/DrawableClazzCommunication-Model.html">DrawableClazzCommunication-Model</a></li>
 	                            <li><a href="../classes/DrawEdgeEntity-Model.html">DrawEdgeEntity-Model</a></li>
 	                            <li><a href="../classes/DrawNodeEntity-Model.html">DrawNodeEntity-Model</a></li>
+	                            <li><a href="../classes/foundation-builder.html">foundation-builder</a></li>
 	                            <li><a href="../classes/Index-Route.html">Index-Route</a></li>
 	                            <li><a href="../classes/Landscape-Adapter.html">Landscape-Adapter</a></li>
 	                            <li><a href="../classes/Landscape-Model.html">Landscape-Model</a></li>
-	                            <li><a href="../classes/Landscape-Reload-Service.html">Landscape-Reload-Service</a></li>
 	                            <li><a href="../classes/Landscape-Rendering-Component.html">Landscape-Rendering-Component</a></li>
 	                            <li><a href="../classes/Landscape-Repository-Service.html">Landscape-Repository-Service</a></li>
 	                            <li><a href="../classes/Landscape-Serializer.html">Landscape-Serializer</a></li>
 	                            <li><a href="../classes/Login-Form-Component.html">Login-Form-Component</a></li>
 	                            <li><a href="../classes/Login-Route.html">Login-Route</a></li>
-	                            <li><a href="../classes/Navbar-Glyphicons.html">Navbar-Glyphicons</a></li>
+	                            <li><a href="../classes/Navbar-Octicons.html">Navbar-Octicons</a></li>
 	                            <li><a href="../classes/Navbar-Routes.html">Navbar-Routes</a></li>
 	                            <li><a href="../classes/Node-Model.html">Node-Model</a></li>
 	                            <li><a href="../classes/NodeGroup-Model.html">NodeGroup-Model</a></li>
 	                            <li><a href="../classes/Page-Setup-Service.html">Page-Setup-Service</a></li>
+	                            <li><a href="../classes/Process-Model.html">Process-Model</a></li>
+	                            <li><a href="../classes/Procezz-Adapter.html">Procezz-Adapter</a></li>
 	                            <li><a href="../classes/Rendering-Core-Component.html">Rendering-Core-Component</a></li>
 	                            <li><a href="../classes/Router.html">Router</a></li>
-	                            <li><a href="../classes/RuntimeInformation-Model.html">RuntimeInformation-Model</a></li>
 	                            <li><a href="../classes/System-Model.html">System-Model</a></li>
 	                            <li><a href="../classes/System-Serializer.html">System-Serializer</a></li>
 	                            <li><a href="../classes/ThreeJS-Performance-Mixin.html">ThreeJS-Performance-Mixin</a></li>
-	                            <li><a href="../classes/Time-Shift-Component.html">Time-Shift-Component</a></li>
-	                            <li><a href="../classes/Timeshift-Reload-Service.html">Timeshift-Reload-Service</a></li>
 	                            <li><a href="../classes/Timestamp-Adapter.html">Timestamp-Adapter</a></li>
 	                            <li><a href="../classes/Timestamp-Model.html">Timestamp-Model</a></li>
 	                            <li><a href="../classes/Timestamp-Repository-Service.html">Timestamp-Repository-Service</a></li>
-	                            <li><a href="../classes/Tutorial-Route.html">Tutorial-Route</a></li>
+	                            <li><a href="../classes/Trace-Model.html">Trace-Model</a></li>
+	                            <li><a href="../classes/TraceStep-Model.html">TraceStep-Model</a></li>
 	                            <li><a href="../classes/user-Model.html">user-Model</a></li>
 	                            <li><a href="../classes/Visualization-Controller.html">Visualization-Controller</a></li>
 	                            <li><a href="../classes/Visualization-Route.html">Visualization-Route</a></li>
@@ -109,6 +106,8 @@
 	                <div class="tab-pane" id="modules">
 	                    <ul id="api-modules" class="nav nav-list">
 	                            <li><a href="../modules/explorviz.html">explorviz</a></li>
+	                            <li><a href="../modules/explorviz.discovery.html">explorviz.discovery</a></li>
+	                            <li><a href="../modules/explorviz.extension.discovery.html">explorviz.extension.discovery</a></li>
 	                            <li><a href="../modules/model.html">model</a></li>
 	                            <li><a href="../modules/model.meta.html">model.meta</a></li>
 	                            <li><a href="../modules/model.util.html">model.util</a></li>
@@ -159,10 +158,11 @@
 
 <div class="file">
     <pre class="prettyprint linenums">
-import Ember from &#x27;ember&#x27;;
 import RenderingCore from &#x27;./rendering-core&#x27;;
+import { inject as service } from &#x27;@ember/service&#x27;;
+import { getOwner } from &#x27;@ember/application&#x27;;
 
-import THREE from &quot;npm:three&quot;;
+import THREE from &quot;three&quot;;
 
 import applyKlayLayout from
  &#x27;explorviz-frontend/utils/landscape-rendering/klay-layouter&#x27;;
@@ -175,9 +175,6 @@ import CalcCenterAndZoom from
 
 import ImageLoader from &#x27;explorviz-frontend/utils/three-image-loader&#x27;;
 
-//import Meshline from &quot;npm:three.meshline&quot;;
-
-const {inject} = Ember;
 
 
 /**
@@ -191,7 +188,7 @@ const {inject} = Ember;
 */
 export default RenderingCore.extend({
 
-  configuration: inject.service(&quot;configuration&quot;),
+  configuration: service(&quot;configuration&quot;),
 
   hammerManager: null,
 
@@ -199,6 +196,8 @@ export default RenderingCore.extend({
   labeler: null,
   imageLoader: null,
   centerAndZoomCalculator: null,
+
+  renderingService: service(&quot;rendering-service&quot;),
 
   openSymbol: null,
   closeSymbol: null,
@@ -232,7 +231,8 @@ export default RenderingCore.extend({
     };
 
     if (!this.get(&#x27;interaction&#x27;)) {
-      this.set(&#x27;interaction&#x27;, Interaction.create());
+      // owner necessary to inject service into util
+      this.set(&#x27;interaction&#x27;, Interaction.create(getOwner(this).ownerInjection()));
     }
 
     if (!this.get(&#x27;imageLoader&#x27;)) {
@@ -261,7 +261,6 @@ export default RenderingCore.extend({
     this.set(&#x27;labeler.appTextCache&#x27;, []);
 
     this.set(&#x27;centerAndZoomCalculator.centerPoint&#x27;, null);
-
   },
 
   // @Override
@@ -274,8 +273,9 @@ export default RenderingCore.extend({
     this.set(&#x27;labeler.textLabels&#x27;, {});
     this.set(&#x27;labeler.textCache&#x27;, []);
 
-    this.get(&#x27;interaction&#x27;).off(&#x27;redrawScene&#x27;);
-    this.get(&#x27;interaction&#x27;).off(&#x27;showApplication&#x27;);
+    this.get(&#x27;renderingService&#x27;).off(&#x27;redrawScene&#x27;);
+    this.get(&#x27;interaction&#x27;).off(&#x27;clickedEntity&#x27;);
+    this.get(&#x27;interaction&#x27;).off(&#x27;doubleClickedEntity&#x27;);
 
     this.get(&#x27;interaction&#x27;).removeHandlers();
   },
@@ -304,10 +304,12 @@ export default RenderingCore.extend({
    */
   populateScene() {
     this._super(...arguments);
+    this.debug(&quot;populate application rendering&quot;);
 
     const self = this;
 
-    const emberLandscape = this.get(&#x27;landscapeRepo.latestLandscape&#x27;);
+    //const emberLandscape = this.get(&#x27;landscapeRepo.latestLandscape&#x27;);
+    const emberLandscape = this.get(&#x27;latestLandscape&#x27;);
 
     if(!emberLandscape || !this.get(&#x27;font&#x27;)) {
       return;
@@ -341,12 +343,9 @@ export default RenderingCore.extend({
           .calculateLandscapeCenterAndZZoom(emberLandscape,
             this.get(&#x27;webglrenderer&#x27;));
 
-        if(!this.get(&#x27;viewImporter.importedURL&#x27;)) {
           const cameraZ = this.get(&#x27;centerAndZoomCalculator.cameraZ&#x27;);
           this.set(&#x27;camera.position.z&#x27;, cameraZ);
           this.get(&#x27;camera&#x27;).updateProjectionMatrix();
-        }
-
       }
 
       var centerPoint = this.get(&#x27;centerAndZoomCalculator.centerPoint&#x27;);
@@ -368,7 +367,7 @@ export default RenderingCore.extend({
           var centerX = system.get(&#x27;positionX&#x27;) + extensionX - centerPoint.x;
           var centerY = system.get(&#x27;positionY&#x27;) - extensionY - centerPoint.y;
 
-          var systemMesh = createPlane(system);
+          var systemMesh = self.createPlane(system);
           systemMesh.position.set(centerX, centerY, system.get(&#x27;positionZ&#x27;));
           self.get(&#x27;scene&#x27;).add(systemMesh);
           system.set(&#x27;threeJSModel&#x27;, systemMesh);
@@ -423,7 +422,7 @@ export default RenderingCore.extend({
             centerX = nodegroup.get(&#x27;positionX&#x27;) + extensionX - centerPoint.x;
             centerY = nodegroup.get(&#x27;positionY&#x27;) - extensionY - centerPoint.y;
 
-            nodegroupMesh = createPlane(nodegroup);
+            nodegroupMesh = self.createPlane(nodegroup);
             nodegroupMesh.position.set(centerX, centerY,
               nodegroup.get(&#x27;positionZ&#x27;) + 0.001);
 
@@ -474,7 +473,7 @@ export default RenderingCore.extend({
               centerX = node.get(&#x27;positionX&#x27;) + extensionX - centerPoint.x;
               centerY = node.get(&#x27;positionY&#x27;) - extensionY - centerPoint.y;
 
-              var nodeMesh = createPlane(node);
+              var nodeMesh = self.createPlane(node);
               nodeMesh.position.set(centerX, centerY, node.get(&#x27;positionZ&#x27;) +
                 0.002);
 
@@ -499,7 +498,7 @@ export default RenderingCore.extend({
 
               if (!isRequestObject) {
 
-                var applicationMesh = createPlane(application);
+                var applicationMesh = self.createPlane(application);
 
                 applicationMesh.position.set(centerX, centerY,
                   application.get(&#x27;positionZ&#x27;) + 0.003);
@@ -564,7 +563,7 @@ export default RenderingCore.extend({
 
     self.set(&#x27;configuration.landscapeColors.textchanged&#x27;, false);
 
-    const appCommunications = emberLandscape.get(&#x27;outgoingApplicationCommunications&#x27;);
+    const appCommunications = emberLandscape.get(&#x27;totalApplicationCommunications&#x27;);
 
     const tiles = [];
 
@@ -585,37 +584,37 @@ export default RenderingCore.extend({
             const lastPoint = points[i - 1];
             const thisPoint = points[i];
 
-      			let tileWay = {
-      				startPoint: lastPoint,
-      				endPoint: thisPoint
-      			};
+            let tileWay = {
+              startPoint: lastPoint,
+              endPoint: thisPoint
+            };
 
-      			let id = tiles.findIndex(isSameTile, tileWay);
+            let id = tiles.findIndex(isSameTile, tileWay);
 
 
-      			if(id !== -1){
-      				tile = tiles[id];
-      			}
+            if(id !== -1){
+              tile = tiles[id];
+            }
             else{
-      				id = tiles.length; // Gets a new index
+              id = tiles.length; // Gets a new index
 
-      				tile = {
-      					startPoint: lastPoint,
-      					endPoint: thisPoint,
-      					positionZ: 0.0025,
-      					requestsCache: 0,
-      					communications: [],
-      					pipeColor: new THREE.Color(color),
+              tile = {
+                startPoint: lastPoint,
+                endPoint: thisPoint,
+                positionZ: 0.0025,
+                requestsCache: 0,
+                communications: [],
+                pipeColor: new THREE.Color(color),
                 emberModel: applicationCommunication
-      				};
-      				tiles.push(tile);
-      			}
+              };
+              tiles.push(tile);
+            }
 
             tile.communications.push(appCommunications);
             tile.requestsCache = tile.requestsCache +
               applicationCommunication.get(&#x27;requests&#x27;);
 
-      			tiles[id] = tile;
+            tiles[id] = tile;
           }
 
         }
@@ -660,33 +659,33 @@ export default RenderingCore.extend({
       self.set(&#x27;closeSymbol&#x27;, labelMeshClose);
     }
 
-  	// This function is only neccessary to find the right index
-  	function isSameTile(tile){
-  		return checkEqualityOfPoints(this.endPoint, tile.endPoint) &amp;&amp;
+    // This function is only neccessary to find the right index
+    function isSameTile(tile){
+      return checkEqualityOfPoints(this.endPoint, tile.endPoint) &amp;&amp;
         checkEqualityOfPoints(this.startPoint, tile.startPoint);
-  	}
+    }
 
     /*
-  	function isNextTile(newTile){
-  		return checkEqualityOfPoints(newTile.startPoint, this.endPoint);
-  	}
+    function isNextTile(newTile){
+      return checkEqualityOfPoints(newTile.startPoint, this.endPoint);
+    }
     */
 
     function addCommunicationLineDrawing(tiles, parent) {
 
       const requestsList = {};
 
-  	  tiles.forEach((tile) =&gt; {
+      tiles.forEach((tile) =&gt; {
         requestsList[tile.requestsCache] = 0;
-  		});
+      });
 
       const categories = getCategories(requestsList, true);
 
-  	  for (let i = 0; i &lt; tiles.length; i++) {
-  			let tile = tiles[i];
-  			tile.lineThickness = 0.7 * categories[tile.requestsCache] + 0.1;
-        createLine(tile, tiles, parent);
-  		}
+      for (let i = 0; i &lt; tiles.length; i++) {
+        let tile = tiles[i];
+        tile.lineThickness = 0.7 * categories[tile.requestsCache] + 0.1;
+        self.createLine(tile, tiles, parent, centerPoint);
+      }
 
 
       function getCategories(list, linear) {
@@ -695,8 +694,8 @@ export default RenderingCore.extend({
           useLinear(list);
         }
         else {
-		      useThreshholds(list);
-		    }
+          useThreshholds(list);
+        }
 
         return list;
 
@@ -707,7 +706,7 @@ export default RenderingCore.extend({
 
           for(let request in list) {
             request = parseInt(request);
-			max = (request &gt; max) ? request : max;
+      max = (request &gt; max) ? request : max;
           }
 
           const oneStep = max / 3.0;
@@ -724,7 +723,7 @@ export default RenderingCore.extend({
 
 
         function getCategoryFromValues(value, t1, t2) {
-		  value = parseInt(value);
+      value = parseInt(value);
           if (value === 0) {
             return 0.0;
           } else if (value === 1) {
@@ -746,10 +745,10 @@ export default RenderingCore.extend({
           let secondMax = 1;
 
           for(let request in list){
-      		  request = parseInt(request);
+            request = parseInt(request);
               secondMax = (request &gt; max) ? max : secondMax;
               max = (request &gt; max) ? request: max;
-      		}
+          }
           const oneStep = secondMax / 4.0;
           const t1 = oneStep;
           const t2 = oneStep * 2;
@@ -766,7 +765,7 @@ export default RenderingCore.extend({
 
 
         function getCategoryFromLinearValues(value, t1, t2, t3) {
-			value = parseInt(value);
+      value = parseInt(value);
           if (value &lt;= 0) {
             return 0;
           } else if (value &lt;= t1) {
@@ -808,9 +807,13 @@ export default RenderingCore.extend({
       return (x &amp;&amp; y);
     }
 
+    this.get(&#x27;labeler&#x27;).drawTextLabels(self.get(&#x27;font&#x27;),
+      self.get(&#x27;configuration&#x27;));
 
 
-    function createLine(tile, tiles, parent) {
+  }, // END populateScene
+
+  createLine(tile, tiles, parent, centerPoint) {
 
       let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x,
         tile.startPoint.y - centerPoint.y, tile.positionZ);
@@ -862,76 +865,69 @@ export default RenderingCore.extend({
       parent.add(plane);
 
 
-		  //----------Helper functions
+      //----------Helper functions
       /*
-  		function createGoodEdges(firstTile, secondTile, parent){
+      function createGoodEdges(firstTile, secondTile, parent){
 
-  			const resolution = new THREE.Vector2(window.innerWidth,
+        const resolution = new THREE.Vector2(window.innerWidth,
           window.innerHeight);
 
         let lineThickness =
         (firstTile.lineThickness &lt; secondTile.lineThickness) ?
           firstTile.lineThickness : secondTile.lineThickness;
 
-  			const material = new Meshline.MeshLineMaterial({
-  				color: secondTile.pipeColor,
-  				lineWidth: lineThickness * 0.4,
-  				sizeAttenuation : 1,
-  				resolution: resolution
-  			});
+        const material = new Meshline.MeshLineMaterial({
+          color: secondTile.pipeColor,
+          lineWidth: lineThickness * 0.4,
+          sizeAttenuation : 1,
+          resolution: resolution
+        });
 
-  			let geometry = new THREE.Geometry();
+        let geometry = new THREE.Geometry();
 
-  			geometry.vertices.push(
-  				new THREE.Vector3(firstTile.startPoint.x - centerPoint.x,
-  				firstTile.startPoint.y - centerPoint.y, firstTile.positionZ)
-  			);
+        geometry.vertices.push(
+          new THREE.Vector3(firstTile.startPoint.x - centerPoint.x,
+          firstTile.startPoint.y - centerPoint.y, firstTile.positionZ)
+        );
 
-  			geometry.vertices.push(
-  				new THREE.Vector3(firstTile.endPoint.x - centerPoint.x,
-  				firstTile.endPoint.y - centerPoint.y, firstTile.positionZ)
-  			);
+        geometry.vertices.push(
+          new THREE.Vector3(firstTile.endPoint.x - centerPoint.x,
+          firstTile.endPoint.y - centerPoint.y, firstTile.positionZ)
+        );
 
-  			geometry.vertices.push(
-  				new THREE.Vector3(secondTile.endPoint.x - centerPoint.x,
-  				secondTile.endPoint.y - centerPoint.y, secondTile.positionZ)
-  			);
-
-
-  			const line = new Meshline.MeshLine();
-  			line.setGeometry(geometry);
-
-  			var lineMesh = new THREE.Mesh(line.geometry, material);
-
-  			parent.add(lineMesh);
-
-		  }*/
-
-    } // END createLine
+        geometry.vertices.push(
+          new THREE.Vector3(secondTile.endPoint.x - centerPoint.x,
+          secondTile.endPoint.y - centerPoint.y, secondTile.positionZ)
+        );
 
 
-    function createPlane(model) {
+        const line = new Meshline.MeshLine();
+        line.setGeometry(geometry);
 
-      const emberModelName = model.constructor.modelName;
+        var lineMesh = new THREE.Mesh(line.geometry, material);
 
-      const material = new THREE.MeshBasicMaterial({
-        color: self.get(&#x27;configuration.landscapeColors.&#x27; + emberModelName)
-      });
+        parent.add(lineMesh);
 
-      const plane = new THREE.Mesh(new THREE.PlaneGeometry(model.get(&#x27;width&#x27;),
-        model.get(&#x27;height&#x27;)), material);
+      }*/
 
-      plane.userData[&#x27;model&#x27;] = model;
-      return plane;
+  }, // END createLine
 
-    }
+  createPlane(model) {
 
-    this.get(&#x27;labeler&#x27;).drawTextLabels(self.get(&#x27;font&#x27;),
-      self.get(&#x27;configuration&#x27;));
+    const emberModelName = model.constructor.modelName;
 
+    const material = new THREE.MeshBasicMaterial({
+      color: this.get(&#x27;configuration.landscapeColors.&#x27; + emberModelName)
+    });
 
-  }, // END populateScene
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(model.get(&#x27;width&#x27;),
+      model.get(&#x27;height&#x27;)), material);
 
+    plane.userData[&#x27;model&#x27;] = model;
+    return plane;
+
+  },
+  
   initInteraction() {
 
     const self = this;
@@ -953,11 +949,13 @@ export default RenderingCore.extend({
     });
 
     this.get(&#x27;interaction&#x27;).on(&#x27;showApplication&#x27;, function(emberModel) {
-      self.set(&#x27;viewImporter.importedURL&#x27;, null);
       self.set(&#x27;landscapeRepo.latestApplication&#x27;, emberModel);
+      self.set(&#x27;landscapeRepo.replayApplication&#x27;, emberModel);
     });
 
-
+    this.get(&#x27;renderingService&#x27;).on(&#x27;redrawScene&#x27;, function() {
+      self.cleanAndUpdateScene();
+    });
 
   }, // END initInteraction
 
