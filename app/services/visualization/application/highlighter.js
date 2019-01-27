@@ -27,6 +27,7 @@ export default Service.extend({
   highlightTrace(trace) {
     this.unhighlightAll();
     trace.highlight();
+    trace.openParents();
     this.set('highlightedEntity', trace);
     this.set('isTrace', true);
     this.set('currentTracePosition', 1);
