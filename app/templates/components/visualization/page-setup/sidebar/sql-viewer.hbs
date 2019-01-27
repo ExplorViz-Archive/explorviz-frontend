@@ -2,7 +2,7 @@
   <label {{action "close"}} title="Close SQL Overview" aria-label="Close">
     <font size="5">&times;</font>
   </label>
-  <h5 align="center">SQL Statements</h5>
+  <h5 align="center">Database Queries</h5>
 </div>
 <div style="max-height:500px; overflow:auto;">
   <table class="table table-hover">
@@ -16,13 +16,53 @@
     </thead>
     <tbody>
       {{#each landscapeRepo.latestApplication.databaseQueries as |query|}}
-      <tr style="cursor: pointer">
+      {{#if query.isSelected}}
+      <tr {{action "queryClicked" query}} style="cursor: pointer" bgcolor="#cc8a8a">
         <th scope="row" title={{query.timestamp}}>{{query.timestamp}}</th>
         <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
         <td title={{query.statementType}}>{{string-shortener query.statementType 9}}</td>
         <td title={{query.returnValue}}>{{query.returnValue}}</td>
       </tr>
+      {{else}}
+      <tr {{action "queryClicked" query}} style="cursor: pointer">
+        <th scope="row" title={{query.timestamp}}>{{query.timestamp}}</th>
+        <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
+        <td title={{query.statementType}}>{{string-shortener query.statementType 9}}</td>
+        <td title={{query.returnValue}}>{{query.returnValue}}</td>
+      </tr>
+      {{/if}}
       {{/each}}
     </tbody>
   </table>
 </div>
+
+{{#each landscapeRepo.latestApplication.databaseQueries as |query|}}
+{{#if query.isSelected}}
+<hr>
+<h5 align="center">Query Details</h5>
+<table class="table table-striped">
+  <tbody>
+    <tr>
+      <th>Timestamp</th>
+      <td>{{query.timestamp}}</td>
+    </tr>
+    <tr>
+      <th>Statement</th>
+      <td>{{query.sqlStatement}}</td>
+    </tr>
+    <tr>
+      <th>Type</th>
+      <td>{{query.statementType}}</td>
+    </tr>
+    <tr>
+      <th>Return Value</th>
+      <td>{{query.returnValue}}</td>
+    </tr>
+    <tr>
+      <th>Response Time</th>
+      <td>{{query.responseTime}} ns</td>
+    </tr>
+  </tbody>
+</table>
+{{/if}}
+{{/each}}

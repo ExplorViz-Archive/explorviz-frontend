@@ -36,19 +36,20 @@
   </table>
 </div>
 
+{{#if highlighter.isTrace}}
 <hr>
 
-{{#if highlighter.isTrace}}
 <h5 align="center">Trace Replayer</h5>
 <div class="mt-3 d-flex justify-content-between">
   {{#bs-button onClick=(action "selectPreviousTraceStep") type="secondary" outline=true title="One step back"}}
   {{svg-jar "chevron-left" class="octicon align-middle"}}
   {{/bs-button}}
   <div>
-    <div align="center">Step <b>{{highlighter.currentTracePosition}}</b>  of {{highlighter.highlightedEntity.length}}</div> <br>
+    <div align="center">Step <b>{{highlighter.currentTracePosition}}</b> of {{highlighter.highlightedEntity.length}}</div>
+    <br>
   </div>
   {{#bs-button onClick=(action "selectNextTraceStep") type="secondary" outline=true title="One step forth"}}
   {{svg-jar "chevron-right" class="octicon align-middle"}}
-  {{/bs-button}} 
+  {{/bs-button}}
 </div>
 {{/if}}
