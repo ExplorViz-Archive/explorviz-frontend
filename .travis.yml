@@ -21,21 +21,20 @@ branches:
   - dev-1
 
 # Version Matrix
-env:
-    - EMBER_VERSION=release
-    - EMBER_VERSION=beta
-
-matrix:
-  fast_finish: true
-  allow_failures:
-    - env: EMBER_VERSION=beta
-
 jobs:
   fast_finish: true
   include:
-    - stage: test
+    - stage: release test
       env:
         - EMBER_VERSION=release
+      allow_failure: true
+      script: ember test
+
+    - stage: beta test
+      allow_failure: true
+      env:
+        - EMBER_VERSION=beta
+      allow_failures:
         - EMBER_VERSION=beta
       script: ember test
 
