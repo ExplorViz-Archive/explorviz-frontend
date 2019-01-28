@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "Building Docker image"
 
-ember test
+#ember test
 
 echo "$DOCKER_PW" | docker login -u "$DOCKER_LOGIN" --password-stdin
 

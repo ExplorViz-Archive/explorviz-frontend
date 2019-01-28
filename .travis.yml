@@ -24,27 +24,23 @@ branches:
 jobs:
   fast_finish: true
   include:
-    - stage: release test
+    - stage: Test (Ember release version)
       env:
         - EMBER_VERSION=release
-      allow_failure: true
       script: ember test
 
-    - stage: beta test
-      allow_failure: true
-      env:
-        - EMBER_VERSION=beta
-      allow_failures:
-        - EMBER_VERSION=beta
-      script: ember test
+    #- stage: Test (Ember beta version)
+    #  allow_failure: true
+    #  env:
+    #    - EMBER_VERSION=beta
+    #  script: ember test
 
     - stage: deploy
       if: (branch = dev-1) OR (branch = master)
       skip_cleanup: true
       env:
         - EMBER_VERSION=release
-      script: ember build --prod
-      script: chmod +x .travis/docker_push.sh && .travis/docker_push.sh
+      script: ember build --prod && chmod +x .travis/docker_push.sh && .travis/docker_push.sh
 
 install:
   - npm install --no-package-lock
