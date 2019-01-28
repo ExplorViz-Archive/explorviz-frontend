@@ -8,7 +8,7 @@
   <table class="table table-hover">
     <thead>
       <tr>
-        <th scope="col">Timestamp</th>
+        <th scope="col">Time</th>
         <th scope="col">Statement</th>
         <th scope="col">Statement Type</th>
         <th scope="col">Return Value</th>
@@ -18,14 +18,16 @@
       {{#each landscapeRepo.latestApplication.databaseQueries as |query|}}
       {{#if query.isSelected}}
       <tr {{action "queryClicked" query}} style="cursor: pointer" bgcolor="#cc8a8a">
-        <th scope="row" title={{query.timestamp}}>{{query.timestamp}}</th>
+        <th scope="row" title={{timestamp-to-date query.timestamp "localString"}}>{{timestamp-to-date query.timestamp
+          "time"}}</th>
         <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
         <td title={{query.statementType}}>{{string-shortener query.statementType 9}}</td>
         <td title={{query.returnValue}}>{{query.returnValue}}</td>
       </tr>
       {{else}}
       <tr {{action "queryClicked" query}} style="cursor: pointer">
-        <th scope="row" title={{query.timestamp}}>{{query.timestamp}}</th>
+        <th scope="row" title={{timestamp-to-date query.timestamp "localString"}}>{{timestamp-to-date query.timestamp
+          "time"}}</th>
         <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
         <td title={{query.statementType}}>{{string-shortener query.statementType 9}}</td>
         <td title={{query.returnValue}}>{{query.returnValue}}</td>
@@ -42,6 +44,10 @@
 <h5 align="center">Query Details</h5>
 <table class="table table-striped">
   <tbody>
+    <tr>
+      <th>Time</th>
+      <td>{{timestamp-to-date query.timestamp "localString"}}</td>
+    </tr>
     <tr>
       <th>Timestamp</th>
       <td>{{query.timestamp}}</td>
