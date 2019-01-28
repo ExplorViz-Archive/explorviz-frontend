@@ -12,7 +12,7 @@ export default Service.extend(Evented, {
       this.set('shownComponents', []);
     }
     if (!this.get('shownComponents').includes(path)) {
-      this.get('shownComponents').push(path);
+      this.get('shownComponents').unshift(path);
       this.notifyPropertyChange('shownComponents');
     }
   },
