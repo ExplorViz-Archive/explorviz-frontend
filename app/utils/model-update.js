@@ -28,7 +28,7 @@ export default Object.extend({
       (highlightedEntity.constructor.modelName === "drawableclazzcommunication" || this.get('highlighter.isTrace'))) {
       this.get('highlighter').unhighlightAll();
       this.get('renderingService').redrawScene();
-      this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
+      this.get('additionalData').removeComponent("visualization/page-setup/sidebar/trace-selection");
     }
 
     let applications = store.peekAll('application');

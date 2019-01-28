@@ -18,6 +18,7 @@ export default BaseEntity.extend({
   statementType: attr('string'),
   sqlStatement: attr('string'),
   returnValue: attr('string'),
-  responseTime: attr('number')
+  responseTime: attr('number'),
+  isSelected: attr('boolean', {defaultValue: false}),
 
 });

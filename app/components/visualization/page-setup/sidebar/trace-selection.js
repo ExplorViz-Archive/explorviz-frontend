@@ -57,7 +57,7 @@ export default Component.extend({
     },
 
     close() {
-      this.get('additionalData').removeComponent("visualization/page-setup/trace-selection");
+      this.get('additionalData').removeComponent("visualization/page-setup/sidebar/trace-selection");
     },
   },
 

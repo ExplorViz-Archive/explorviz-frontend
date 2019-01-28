@@ -11,7 +11,7 @@ export default Component.extend({
 
   actions: {
     closeWindow() {
-      this.get('additionalData').closeAdditionalData();
+      this.get('additionalData').emptyAndClose();
     },
 
     openWindow() {
