@@ -7,6 +7,7 @@ export default Service.extend({
   isTrace: false,
   traceId: null,
   currentTracePosition: null,
+  currentTraceStep: null,
   application: null,
   store: service(),
   renderingService: service(),
@@ -31,6 +32,7 @@ export default Service.extend({
     this.set('highlightedEntity', trace);
     this.set('isTrace', true);
     this.set('currentTracePosition', 1);
+    this.set('currentTraceStep', trace.get('traceSteps').get('firstObject'));
   },
 
   highlightTraceStep(position){
@@ -46,6 +48,7 @@ export default Service.extend({
     }
 
     this.set('currentTracePosition', position);
+    this.set('currentTraceStep', trace.get('traceSteps').objectAt(position-1));
 
     this.get('highlightedEntity.traceSteps').forEach((traceStep) => {
       if (traceStep.get('tracePosition') === position) {
