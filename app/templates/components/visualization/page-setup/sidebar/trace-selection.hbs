@@ -22,7 +22,7 @@
       {{#each landscapeRepo.latestApplication.traces as |trace|}}
       {{#if trace.highlighted}}
       <tr {{action "clickedTrace" trace}} style="cursor: pointer" bgcolor="#cc8a8a">
-        <th title={{trace.traceId}}>{{string-shortener trace.traceId 8}}</th>
+        <th title={{trace.traceId}}>{{string-shortener trace.traceId 7}}</th>
         <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
         <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
         <td>{{trace.totalTraceDuration}}</td>
