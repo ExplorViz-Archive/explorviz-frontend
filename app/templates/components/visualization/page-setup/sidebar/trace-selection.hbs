@@ -59,26 +59,30 @@
 <hr>
 
 <h5 align="center">Trace Step Details</h5>
-<div class="mt-3 d-flex justify-content-between" style="overflow-x:auto;" >
- <table class="table table-hover">
-    <thead>
-      <tr>
-        <th scope="col">Soure Clazz</th>
-        <th scope="col">Target Clazz</th>
-        <th scope="col">Method</th>
-        <th scope="col">Requests</th>
-        <th title="Avg. Response Time (ms)" scope="col">Avg. (ms)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td title={{highlighter.currentTraceStep.clazzCommunication.sourceClazz.name}}>{{string-shortener highlighter.currentTraceStep.clazzCommunication.sourceClazz.name 11}}</td>
-        <td title={{highlighter.currentTraceStep.clazzCommunication.targetClazz.name}}>{{string-shortener highlighter.currentTraceStep.clazzCommunication.targetClazz.name 13}}</td>
-        <td title={{highlighter.currentTraceStep.clazzCommunication.operationName}}>{{string-shortener highlighter.currentTraceStep.clazzCommunication.operationName 8}}</td>
-        <td>{{highlighter.currentTraceStep.requests}}</td>
-        <td>{{highlighter.currentTraceStep.averageResponseTime}}</td>
-      </tr>
-    </tbody>
-  </table>
+<div class="mt-3 d-flex justify-content-between">
+  <table class="table table-striped">
+  <tbody>
+    <tr class="d-flex">
+      <th class="col-3">Soure Clazz</th>
+      <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.clazzCommunication.sourceClazz.name}}</td>
+    </tr>
+    <tr class="d-flex">
+      <th class="col-3">Target Clazz</th>
+      <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.clazzCommunication.targetClazz.name}}</td>
+    </tr>
+    <tr class="d-flex">
+      <th class="col-3">Method</th>
+      <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.clazzCommunication.operationName}}</td>
+    </tr>
+    <tr class="d-flex">
+      <th class="col-3">Requests</th>
+      <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.requests}}</td>
+    </tr>
+    <tr class="d-flex">
+      <th class="col-3">Avg. Resp. Time</th>
+      <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.averageResponseTime}} ms</td>
+    </tr>
+  </tbody>
+</table>
 </div>
 {{/if}}

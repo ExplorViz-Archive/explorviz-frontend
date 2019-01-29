@@ -49,29 +49,29 @@
 <h5 align="center">Query Details</h5>
 <table class="table table-striped">
   <tbody>
-    <tr>
-      <th>Time</th>
-      <td>{{timestamp-to-date query.timestamp "localString"}}</td>
+    <tr class="d-flex">
+      <th class="col-3">Time</th>
+      <td class="col-9 container-word-wrap">{{timestamp-to-date query.timestamp "localString"}}</td>
     </tr>
-    <tr>
-      <th>Timestamp</th>
-      <td>{{query.timestamp}}</td>
+    <tr class="d-flex">
+      <th class="col-3">Timestamp</th>
+      <td class="col-9 container-word-wrap">{{query.timestamp}}</td>
     </tr>
-    <tr>
-      <th>Statement</th>
-      <td>{{query.sqlStatement}}</td>
+    <tr class="d-flex">
+      <th class="col-3">Statement</th>
+      <td class="col-9 container-word-wrap">{{query.sqlStatement}}</td>
     </tr>
-    <tr>
-      <th>Type</th>
-      <td>{{query.statementType}}</td>
+    <tr class="d-flex">
+      <th class="col-3">Type</th>
+      <td class="col-9 container-word-wrap">{{query.statementType}}</td>
     </tr>
-    <tr>
-      <th>Return Value</th>
-      <td>{{query.returnValue}}</td>
+    <tr class="d-flex">
+      <th class="col-3">Return Value</th>
+      <td class="col-9 container-word-wrap">{{query.returnValue}}</td>
     </tr>
-    <tr>
-      <th>Response Time</th>
-      <td>{{query.responseTime}} ns</td>
+    <tr class="d-flex">
+      <th class="col-3">Response Time</th>
+      <td class="col-9 container-word-wrap">{{query.responseTime}} ns</td>
     </tr>
   </tbody>
 </table>
