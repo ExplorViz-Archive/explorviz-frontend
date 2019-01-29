@@ -71,7 +71,7 @@
       <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.clazzCommunication.targetClazz.name}}</td>
     </tr>
     <tr class="d-flex">
-      <th class="col-3">Method</th>
+      <th class="col-3">Operation Name</th>
       <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.clazzCommunication.operationName}}</td>
     </tr>
     <tr class="d-flex">
@@ -79,8 +79,8 @@
       <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.requests}}</td>
     </tr>
     <tr class="d-flex">
-      <th class="col-3">Avg. Resp. Time</th>
-      <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.averageResponseTime}} ms</td>
+      <th class="col-3" title="Average Response Time">Avg. Resp. Time (ms)</th>
+      <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.averageResponseTime}}</td>
     </tr>
   </tbody>
 </table>
