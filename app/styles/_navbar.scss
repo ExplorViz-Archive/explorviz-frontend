@@ -8,6 +8,12 @@
   cursor: default!important;
 }
 
+.explorviz-top-navbar .dropdown-item.active,
+.explorviz-top-navbar .dropdown-item:active {
+  color: #212529;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
 .explorviz-top-navbar {
   @extend .navbar;
   @extend .navbar-expand-lg;
