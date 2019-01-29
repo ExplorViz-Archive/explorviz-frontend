@@ -73,6 +73,8 @@ export default Service.extend({
       this.set('highlightedEntity', null);
       this.set('isTrace', false);
       this.set('traceId', null);
+      this.set('currentTracePosition', null);
+      this.set('currentTraceStep', null);
 
       if (this.get('application') !== null) {
         this.get('application').unhighlight();
