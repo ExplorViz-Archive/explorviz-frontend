@@ -375,9 +375,4 @@ export default Object.extend(Evented, {
     }
 
   }
-
-
-
-
-
 });

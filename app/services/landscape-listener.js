@@ -57,6 +57,14 @@ export default Service.extend({
 
       if (jsonLandscape && jsonLandscape.hasOwnProperty("data") &&
         JSON.stringify(jsonLandscape) !== JSON.stringify(self.get('latestJsonLandscape'))) {
+
+        // pause active -> no landscape visualization update
+        // do avoid update of store to prevent inconsistencies between visualization and e.g. trace data
+        if (self.pauseVisualizationReload) {
+          self.debug("SSE: Updating visualization paused")
+          return;
+        }
+
         // console.log("JSON: " + JSON.stringify(jsonLandscape));
 
         // ATTENTION: Mind the push operation, push != pushPayload in terms of 
@@ -64,12 +72,6 @@ export default Service.extend({
         // https://github.com/emberjs/data/issues/3455
         self.set('latestJsonLandscape', jsonLandscape);
         const landscapeRecord = self.get('store').push(jsonLandscape);
-
-         // pause active -> no landscape visualization update
-        if (self.pauseVisualizationReload) {
-          self.debug("SSE: Updating visualization paused")
-          return;
-        }
 
         self.get('modelUpdater').addDrawableCommunication();
 

@@ -12,7 +12,7 @@ export default Service.extend(Evented, {
       this.set('shownComponents', []);
     }
     if (!this.get('shownComponents').includes(path)) {
-      this.get('shownComponents').push(path);
+      this.get('shownComponents').unshift(path);
       this.notifyPropertyChange('shownComponents');
     }
   },
@@ -22,8 +22,11 @@ export default Service.extend(Evented, {
       return;
 
     var index = this.get('shownComponents').indexOf(path);
-    if (index !== -1)
+    if (index !== -1){
       this.get('shownComponents').splice(index, 1);
+      this.notifyPropertyChange('shownComponents');
+    }
+
 
     // close everything when no components are left
     if (this.get('shownComponents.length') == 0)
@@ -31,13 +34,13 @@ export default Service.extend(Evented, {
   },
 
   emptyAndClose() {
-    this.closeAdditionalData();
+    this.close();
     if (this.get('shownComponents')) {
       this.set('shownComponents.length', 0);
     }
   },
 
-  closeAdditionalData() {
+  close() {
     this.set('showWindow', false);
     this.trigger('showWindow');
   },

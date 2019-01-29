@@ -9,15 +9,16 @@ export default Component.extend(AlertifyHandler, {
 
   additionalData: service(),
   landscapeRepo: service('repos/landscape-repository'),
-  
+
   actions: {
-    showTraces() {
-      if (this.get("landscapeRepo.latestApplication.traces.length") === 0){
-        this.showAlertifyMessage("No Traces found!");
+    showSql() {
+      if (this.get("landscapeRepo.latestApplication.databaseQueries.length") === 0){
+        this.showAlertifyMessage("No SQL statements found!");
         return;
       }
-      this.get('additionalData').addComponent("visualization/page-setup/sidebar/trace-selection");
+      this.get('additionalData').addComponent("visualization/page-setup/sidebar/sql-viewer");
       this.get('additionalData').openAdditionalData();
-    }
-  }
+    },
+  },
+
 });

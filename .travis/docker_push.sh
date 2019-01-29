@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "Building Docker image"
 
-ember try:one "build with ember-lts-3.4.7"
+#ember test
 
 echo "$DOCKER_PW" | docker login -u "$DOCKER_LOGIN" --password-stdin
 

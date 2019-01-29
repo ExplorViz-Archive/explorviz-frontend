@@ -36,8 +36,13 @@ export default Component.extend({
   },
 
   actions: {
-    traceSelected(trace) {
-      this.get('highlighter').highlightTrace(trace);
+    clickedTrace(trace) {
+      if (trace.get('highlighted')){
+        this.get('highlighter').unhighlightAll();
+      } else {
+        this.get('highlighter').highlightTrace(trace);
+      }
+
       this.get('renderingService').redrawScene();
     },
 
@@ -49,7 +54,11 @@ export default Component.extend({
     selectPreviousTraceStep() {
       this.get('highlighter').highlightPreviousTraceStep();
       this.get('renderingService').redrawScene();
-    }
+    },
+
+    close() {
+      this.get('additionalData').removeComponent("visualization/page-setup/sidebar/trace-selection");
+    },
   },
 
   onWindowChange() {

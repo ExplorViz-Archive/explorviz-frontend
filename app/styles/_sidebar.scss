@@ -1,0 +1,16 @@
+#dataselection {
+  display: flex;
+  @extend .flex-row;
+}
+
+.sidebar-component-title {
+  position: relative;
+  margin-top: 20px;
+  left: 50%;
+  transform: translateX(-50%); 
+  display:inline-block;
+}
+
+.sidebar-component-close {
+  float: right;
+}

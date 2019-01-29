@@ -1,4 +1,5 @@
----
+dist: xenial
+
 language: node_js
 
 node_js:
@@ -20,23 +21,26 @@ branches:
   - dev-1
 
 # Version Matrix
-# Testing needs to pass: test-release
-# Deployment needs to pass: build-release
 jobs:
   fast_finish: true
-  #allow_failures:
-  #  - env: EMBER_TRY_SCENARIO=ember-3.8.0-beta.1
   include:
-    - stage: test
+    - stage: Test (Ember release version)
       env:
-        - EMBER_TRY_SCENARIO=test-release
-      script: ember try:one $EMBER_TRY_SCENARIO
+        - EMBER_VERSION=release
+      script: ember test
+
+    #- stage: Test (Ember beta version)
+    #  allow_failure: true
+    #  env:
+    #    - EMBER_VERSION=beta
+    #  script: ember test
+
     - stage: deploy
       if: (branch = dev-1) OR (branch = master)
       skip_cleanup: true
       env:
-        - EMBER_TRY_SCENARIO=build-release
-      script: chmod +x .travis/docker_push.sh && .travis/docker_push.sh
+        - EMBER_VERSION=release
+      script: ember build --prod && chmod +x .travis/docker_push.sh && .travis/docker_push.sh
 
 install:
   - npm install --no-package-lock

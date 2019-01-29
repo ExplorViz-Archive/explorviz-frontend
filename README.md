@@ -34,7 +34,7 @@ There are two options for you at the moment. Browse to our [docker repository](h
 You will need the following things properly installed on your computer.
 
 * [Git](http://git-scm.com/)
-* [Node.js](http://nodejs.org/) with NPM (currently 10.15.0 LTS)
+* [Node.js](http://nodejs.org/) with NPM (currently 11.8.0 / npm 6.5.0)
 
 ### Installation (Generic)
 
