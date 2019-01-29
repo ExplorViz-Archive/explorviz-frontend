@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@ember/jquery": "^0.5.2",
+    "body-parser": "^1.18.3",
     "bootstrap": "^4.2.1",
     "ember-auto-import": "^1.2.19",
     "ember-bootstrap": "^2.4.0",
