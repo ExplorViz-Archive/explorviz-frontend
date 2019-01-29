@@ -25,14 +25,14 @@
         <th title={{trace.traceId}}>{{string-shortener trace.traceId 7}}</th>
         <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
         <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
-        <td>{{trace.totalTraceDuration}}</td>
+        <td>{{format-number trace.totalTraceDuration}}</td>
       </tr>
       {{else}}
       <tr {{action "clickedTrace" trace}} style="cursor: pointer">
         <th title={{trace.traceId}}>{{string-shortener trace.traceId 7}}</th>
         <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
         <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
-        <td>{{trace.totalTraceDuration}}</td>
+        <td>{{format-number trace.totalTraceDuration}}</td>
       </tr>
       {{/if}}
       {{/each}}
@@ -76,11 +76,11 @@
     </tr>
     <tr class="d-flex">
       <th class="col-3">Requests</th>
-      <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.requests}}</td>
+      <td class="col-9 container-word-wrap">{{format-number highlighter.currentTraceStep.requests}}</td>
     </tr>
     <tr class="d-flex">
       <th class="col-3">Avg. Resp. Time</th>
-      <td class="col-9 container-word-wrap">{{highlighter.currentTraceStep.averageResponseTime}} ms</td>
+      <td class="col-9 container-word-wrap">{{format-number highlighter.currentTraceStep.averageResponseTime}} ms</td>
     </tr>
   </tbody>
 </table>
