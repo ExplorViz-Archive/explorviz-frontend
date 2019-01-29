@@ -158,14 +158,14 @@ export default Component.extend(Evented, THREEPerformance, {
     // load font for labels and synchronously proceed with populating the scene
     new THREE.FontLoader()
       .load('three.js/fonts/roboto_mono_bold_typeface.json', function(font) {
-
-      self.set('font', font);
-      self.set('initDone', true);
-      self.populateScene();
-      // import new view
-      // self.importView();
-
-
+        if(self.isDestroyed)
+          return;
+          
+        self.set('font', font);
+        self.set('initDone', true);
+        self.populateScene();
+        // import new view
+        // self.importView();
     });
 
   },
