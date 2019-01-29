@@ -11,6 +11,7 @@ export default Service.extend({
   session: service(),
   store: service(),
   agentRepo: service("repos/agent-repository"),
+  es: null,
 
   initSSE() {
 
@@ -21,15 +22,20 @@ export default Service.extend({
     const url = config.APP.API_ROOT;
     const { access_token } = this.get('session.data.authenticated');
 
+    // close former event source. Multiple (>= 6) instances cause the ember store to no longer work
+    if(this.get('es')) {
+      this.get('es').close();
+    }
+
     // ATTENTION: This is a polyfill (see vendor folder)
     // Replace if original EventSource API allows HTTP-Headers
-    const es = new EventSourcePolyfill(`${url}/v1/agents/broadcast/`, {
+    this.set('es', new EventSourcePolyfill(`${url}/v1/agents/broadcast/`, {
       headers: {
         Authorization: `Bearer ${access_token.token}`
       }
-    });
+    }));
 
-    es.onmessage = function(e) {
+    this.set('es.onmessage', function(e) {
       const agentListJson = JSON.parse(e.data);
 
       /*const stringTest = {
@@ -123,7 +129,7 @@ export default Service.extend({
 
       // TODO update similar to ... ?
       //self.get('agentRepo').triggerUpdated();
-    }
+    });
   },
 
   subscribe(url, fn){

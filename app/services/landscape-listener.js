@@ -17,6 +17,7 @@ export default Service.extend({
   landscapeRepo: service("repos/landscape-repository"),
   latestJsonLandscape: null,
   modelUpdater: null,
+  es: null,
 
   pauseVisualizationReload: false,
 
@@ -38,15 +39,20 @@ export default Service.extend({
     const url = config.APP.API_ROOT;
     const { access_token } = this.get('session.data.authenticated');
 
+    // close former event source. Multiple (>= 6) instances cause the ember store to no longer work
+    if(this.get('es')) {
+      this.get('es').close();
+    }
+
     // ATTENTION: This is a polyfill (see vendor folder)
     // Replace if original EventSource API allows HTTP-Headers
-    const es = new EventSourcePolyfill(`${url}/v1/landscapes/broadcast/`, {
+    this.set('es', new EventSourcePolyfill(`${url}/v1/landscapes/broadcast/`, {
       headers: {
         Authorization: `Bearer ${access_token}`
       }
-    });
+    }));
 
-    es.onmessage = function(e) {
+    this.set('es.onmessage', function(e) {
       const jsonLandscape = JSON.parse(e.data);
 
       if (jsonLandscape && jsonLandscape.hasOwnProperty("data") &&
@@ -72,7 +78,7 @@ export default Service.extend({
         self.get('timestampRepo').addTimestampToList(landscapeRecord.get('timestamp'));
         self.get('timestampRepo').triggerUpdated();
       }     
-    }
+    });
   },
 
   subscribe(url, fn){
