@@ -3,7 +3,6 @@ import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 import ENV from 'explorviz-frontend/config/environment';
 
 const {JSONAPIAdapter} = DS;
-const {APP} = ENV;
 
 /**
 * This Adapter operates as communication abstraction for all network requests,
@@ -19,12 +18,12 @@ const {APP} = ENV;
 */
 export default JSONAPIAdapter.extend(DataAdapterMixin,{
 
-  host: APP.API_ROOT,
-  namespace: "timestamp",
+  // API ROOT for timestamps is currently on port 8081
+  host: ENV.APP.API_ROOT,
+  namespace: "v1/timestamps",
 
 
   init() {
-
     this.set('headers', {
       "Accept": "application/vnd.api+json"
     });
@@ -32,32 +31,9 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   },
 
   // @Override
-  urlForQueryRecord(query) {
+  urlForQuery() {
     const baseUrl = this.buildURL();
-    if(query === "1"){
-      return `${baseUrl}/from-recent?intervalSize=100`;
-    } else if(query === "2"){
-      //query all uploaded timestamps
-      return `${baseUrl}/all-uploaded`;
-    }
-    else{
-      return `${baseUrl}/before-timestamp/${query}?intervalSize=100`;
-    }
-  },
-
-
-  // @Override
-  urlForQuery(query) {
-    const baseUrl = this.buildURL();
-    if(query === "1"){
-      return `${baseUrl}/from-recent?intervalSize=100`;
-    }else if(query === "2"){
-      //query all uploaded timestamps
-      return `${baseUrl}/all-uploaded`;
-    }
-    else{
-      return `${baseUrl}/before-timestamp/${query}?intervalSize=100`;
-    }
+    return `${baseUrl}/subsequent-interval`;
   },
 
   authorize(xhr) {

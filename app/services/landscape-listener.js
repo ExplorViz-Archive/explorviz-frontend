@@ -77,8 +77,9 @@ export default Service.extend({
 
         self.set('landscapeRepo.latestLandscape', landscapeRecord);
         self.get('landscapeRepo').triggerLatestLandscapeUpdate();
-        self.get('timestampRepo').addTimestampToList(landscapeRecord.get('timestamp'));
-        self.get('timestampRepo').triggerUpdated();
+
+        self.set('timestampRepo.latestTimestamp', landscapeRecord.get('timestamp'));
+        self.get('timestampRepo').triggerTimelineUpdate();
       }     
     });
   },

@@ -57,11 +57,6 @@ module.exports = function(defaults) {
   app.import('vendor/alertifyjs/css/alertify.min.css');
   app.import('vendor/alertifyjs/css/themes/default.min.css');
 
-  app.import('vendor/d3/d3.min.js');
-
-  app.import('vendor/c3/c3.min.js');
-  app.import('vendor/c3/c3.min.css');
-
   app.import('vendor/cytoscape/cytoscape.min.js');
 
   app.import('vendor/eventsource-polyfill/eventsource.min.js');

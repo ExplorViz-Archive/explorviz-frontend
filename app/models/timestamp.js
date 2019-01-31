@@ -15,6 +15,6 @@ const { attr } = DS;
 export default BaseEntity.extend({
 
   timestamp: attr('number'),
-  calls: attr('number')
+  totalRequests: attr('number')
 
 });
