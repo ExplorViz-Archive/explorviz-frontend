@@ -56,7 +56,6 @@ export default Controller.extend(AlertifyHandler, {
 
   onShowWindow() {
     this.get('renderingService').resizeCanvas();
-    this.get('timestampRepo').triggerUpdated();
   },
 
   // @Override

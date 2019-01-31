@@ -84,8 +84,7 @@ export default Service.extend({
     });
   },
 
-  subscribe(url, fn){
-
+  subscribe(url, fn) {
     const self = this;   
 
     let source = new EventSource(url);
@@ -100,7 +99,6 @@ export default Service.extend({
   },
 
   toggleVisualizationReload(){
-    self.debug("Toggle Visualization Reload");
     this.set('pauseVisualizationReload', !this.get('pauseVisualizationReload'));
   }
 

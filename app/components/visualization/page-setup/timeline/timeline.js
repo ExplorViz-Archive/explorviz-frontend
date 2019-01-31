@@ -132,6 +132,10 @@ export default Component.extend(Evented, {
                         enabled: true,
                         mode: 'point',
                     },
+                    hover: {
+                        enabled: true,
+                        mode: 'point',
+                    },
                     legend: {
                         display: false
                     },
@@ -226,22 +230,40 @@ export default Component.extend(Evented, {
 
         const updatedTimelineChart = this.get('timelineChart');
 
+        const numOfDataPoints = updatedTimelineChart.data.datasets[0].data.length;
         
         const timestamp = newTimestamp.get('timestamp');
         const totalRequests = newTimestamp.get('totalRequests');
         
         const newTimelineData = { x: timestamp, y: totalRequests };
         
+        // remove oldest timestamp in timeline to keep a fixed number of data points
+        if (numOfDataPoints >= 10) {
+            updatedTimelineChart.data.datasets[0].data.shift();
+            updatedTimelineChart.data.labels.shift();
+        }
+
         updatedTimelineChart.data.datasets[0].data.push(newTimelineData);
         updatedTimelineChart.data.labels.push(timestamp);
-        //updatedTimelineChart.data.datasets[0].data.push(newTimestamp.get('totalRequests'));
-        //updatedTimelineChart.data.labels.push(newTimestamp.get('timestamp'));
         
         updatedTimelineChart.update();
 
         self.debug("end timeline update");
   },
 
+
+  /**
+   * @method shiftChartValues
+   */
+  shiftChartValues(){
+
+  },
+
+  /**
+   * Called when a new timestamp is passed and the chart needs to be updated
+   * @method onUpdated
+   * @param {*} newTimestamp 
+   */
   onUpdated(newTimestamp) {
     this.updateChart(newTimestamp);
   },
