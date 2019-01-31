@@ -88,7 +88,7 @@ module.exports = function (app) {
   }
 
   userRouter.patch('/:id', (req, res) => {
-    const { username, password } = req.body.data.attributes;
+    const { username, settings, password } = req.body.data.attributes;
     const { roles } = req.body.data.relationships;
 
     if(!username || username === '') {
@@ -111,6 +111,7 @@ module.exports = function (app) {
       if(users.data[i].id == req.params.id) {
         users.data[i].attributes.username = username;
         users.data[i].attributes.password = password;
+        users.data[i].attributes.settings = settings;
         users.data[i].relationships.roles = roles;
         res.status(204).send();
         return;
