@@ -11,6 +11,9 @@ export default Component.extend(AlertifyHandler, {
 
   store: service(),
   printThis: service(),
+
+  showSpinner: null,
+
   createdUsers: null,
   showNewUsers: null,
   page: null,
@@ -37,16 +40,20 @@ export default Component.extend(AlertifyHandler, {
     },
 
     saveUser() {
+      this.set('showSpinner', true);
       const userData = this.getProperties('username', 'password', 'roles_selected_single');
 
       // check for valid input
       if(!userData.username || userData.username.length === 0) {
+        this.set('showSpinner', false);
         this.showAlertifyMessage('Username cannot be empty.');
         return;
       } else if(!userData.password || userData.password.length === 0) {
+        this.set('showSpinner', false);
         this.showAlertifyMessage('Password cannot be empty.');
         return;
       } else if(!userData.roles_selected_single || userData.roles_selected_single.length === 0) {
+        this.set('showSpinner', false);
         this.showAlertifyMessage('User needs at least 1 role.');
         return;
       }
@@ -58,10 +65,12 @@ export default Component.extend(AlertifyHandler, {
       });
 
       userRecord.save().then(() => { // success
+        this.set('showSpinner', false);
         const message = "User <b>" + userData.username + "</b> was created.";
         this.showAlertifyMessage(message);
         clearInputFields.bind(this)();
       }, (reason) => { // failure
+        this.set('showSpinner', false);
         this.showReasonErrorAlert(reason);
         userRecord.deleteRecord();
       });
@@ -76,6 +85,7 @@ export default Component.extend(AlertifyHandler, {
     },
 
     saveMultipleUsers() {
+      this.set('showSpinner', true);
       const PASSWORD_LENGTH = 8;
 
       const userData = this.getProperties('usernameprefix', 'numberofusers', 'roles_selected_multiple');
@@ -83,12 +93,15 @@ export default Component.extend(AlertifyHandler, {
 
       // check for valid input
       if(!userData.usernameprefix || userData.usernameprefix.length === 0) {
+        this.set('showSpinner', false);
         this.showAlertifyMessage('Username prefix cannot be empty.');
         return;
       } else if(!userData.numberofusers || numberOfUsers <= 1) {
+        this.set('showSpinner', false);
         this.showAlertifyMessage('# of users must be at least 2.');
         return;
       } else if(!userData.roles_selected_multiple || userData.roles_selected_multiple.length === 0) {
+        this.set('showSpinner', false);
         this.showAlertifyMessage('Users need at least 1 role.');
         return;
       }
@@ -107,12 +120,14 @@ export default Component.extend(AlertifyHandler, {
         userRecord.save().then(() => { // success
           usersSuccess.push(userRecord);
           if(usersSuccess.length === numberOfUsers) {
+            this.set('showSpinner', false);
             const message = `All <b>${numberOfUsers}</b> users were successfully created.`;
             this.showAlertifyMessage(message);
             clearInputFields.bind(this)();
             this.showCreatedUsers(usersSuccess);
 
           } else if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
+            this.set('showSpinner', false);
             const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
             this.showAlertifyMessage(message);
             
@@ -125,6 +140,7 @@ export default Component.extend(AlertifyHandler, {
           usersNoSuccess.push(i);
           userRecord.deleteRecord();
           if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
+            this.set('showSpinner', false);
             const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
             this.showAlertifyMessage(message);
 

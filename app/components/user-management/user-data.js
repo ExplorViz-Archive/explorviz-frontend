@@ -10,6 +10,9 @@ export default Component.extend(AlertifyHandler, {
   tagName: '',
 
   store: service(),
+
+  showSpinner: null,
+
   user: null,
   roles: null,
 
@@ -28,6 +31,7 @@ export default Component.extend(AlertifyHandler, {
 
   actions: {
     saveUserChanges() {
+      this.set('showSpinner', true);
       const userData = this.getProperties('username_change', 'password_change', 'roles_change');
 
       const user = this.get('user');
@@ -35,9 +39,11 @@ export default Component.extend(AlertifyHandler, {
       if(user) {
         // check for valid input
         if(!userData.username_change || userData.username_change.length === 0) {
+          this.set('showSpinner', false);
           this.showAlertifyMessage('Username cannot be empty.');
           return;
         } else if(!userData.roles_change || userData.roles_change.length === 0) {
+          this.set('showSpinner', false);
           this.showAlertifyMessage('User needs at least 1 role.');
           return;
         }
@@ -52,12 +58,15 @@ export default Component.extend(AlertifyHandler, {
   
         user.save()
           .then(() => {
+            this.set('showSpinner', false);
             this.showAlertifyMessage(`User updated.`);
             clearInputFields.bind(this)();
           }, (reason) => {
+            this.set('showSpinner', false);
             this.showReasonErrorAlert(reason);
           });
       } else {
+        this.set('showSpinner', false);
         this.showAlertifyMessage(`User not found.`);
       }
 

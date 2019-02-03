@@ -11,6 +11,8 @@ export default Component.extend(AlertifyHandler, {
   store: service(),
   router: service(),
 
+  showSpinner: null,
+
   users: null,
 
   didInsertElement() {
@@ -28,7 +30,14 @@ export default Component.extend(AlertifyHandler, {
         let userList = users.toArray();
         // sort by id
         userList.sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1);
+        if(!this.isDestroyed) {
           this.set('users', userList);
+          this.set('showSpinner', false);
+        }
+      }, reason => {
+        if(!this.isDestroyed) {
+          this.set('showSpinner', false);
+        }
       });
   },
 
@@ -42,14 +51,17 @@ export default Component.extend(AlertifyHandler, {
     },
 
     deleteUser(user) {
+      this.set('showSpinner', true);
       user.destroyRecord()
         .then(() => { // success
           const message = `User <b>${user.username}</b> deleted.`;
           this.showAlertifyMessage(message);
           this.updateUserList(false);
+          this.set('showSpinner', false);
         }, (reason) => { // failure
           this.showReasonErrorAlert(reason);
           this.updateUserList(true);
+          this.set('showSpinner', false);
         });
     }
   }
