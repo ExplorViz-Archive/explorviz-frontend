@@ -3,7 +3,6 @@ import AuthenticatedRouteMixin from
   'ember-simple-auth/mixins/authenticated-route-mixin';
 
 import {inject as service} from '@ember/service';
-import { computed } from '@ember/object';
 
 /**
 * TODO
@@ -14,9 +13,9 @@ import { computed } from '@ember/object';
 export default BaseRoute.extend(AuthenticatedRouteMixin, {
   session: service(),
 
-  currentUser: computed(function() {
+  model() {
     return this.get('session.session.content.authenticated.user');
-  }),
+  },
 
   actions: {
     didTransition() {

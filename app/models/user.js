@@ -1,5 +1,6 @@
 import Model from 'ember-data/model';
 import DS from 'ember-data';
+import { computed } from '@ember/object';
 
 const { attr, hasMany } = DS;
 
@@ -31,6 +32,10 @@ export default Model.extend({
 				return true;
 		}
 		return false;
-	},
+  },
+  
+  isAdmin: computed('roles', function() {
+    return this.hasRole('admin');
+  })
 
 });
