@@ -39,6 +39,7 @@
     "ember-cli-uglify": "^2.1.0",
     "ember-composable-helpers": "^2.1.0",
     "ember-concurrency": "^0.8.26",
+    "ember-data": "3.7.2",
     "ember-debug-logger": "^2.0.0",
     "ember-export-application-global": "^2.0.0",
     "ember-file-upload": "^2.5.3",
@@ -49,6 +50,7 @@
     "ember-power-select-blockless": "^0.5.0",
     "ember-print-this": "^1.0.0",
     "ember-route-action-helper": "^2.0.6",
+    "ember-route-constraints": "0.0.7",
     "ember-scrollable": "^0.5.2",
     "ember-source": "3.7.2",
     "ember-source-channel-url": "^1.1.0",
@@ -64,8 +66,7 @@
     "sass": "^1.15.2",
     "stats.js": "^0.17.0",
     "yuidoc-bootstrap-theme": "^1.0.6",
-    "yuidocjs": "^0.10.2",
-    "ember-data": "3.7.2"
+    "yuidocjs": "^0.10.2"
   },
   "engines": {
     "node": ">= 10.15.0"

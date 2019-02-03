@@ -4,6 +4,7 @@ import { inject as service } from "@ember/service";
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 export default Component.extend(AlertifyHandler, {
+  
   // No Ember generated container
   tagName: '',
 

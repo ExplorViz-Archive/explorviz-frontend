@@ -1,0 +1,106 @@
+{{#bs-modal open=showNewUsers backdropClose=false keyboard=false onHidden=(action "hideNewUsersCreatedModal") as |modal|}}
+  {{#modal.header}}
+    <h4 class="modal-title">New Users</h4>
+  {{/modal.header}}
+  {{#modal.body}}
+    <div class="alert alert-danger" role="alert">
+      <p>Print now using the button below.</p>
+      <p>You cannot access the passwords again after closing this window!</p>
+    </div>
+    <table class="table" id="new-user-list">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Username</th>
+          <th scope="col">Password</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each createdUsers as |user|}}
+          <tr>
+            <th scope="row">{{user.id}}</th>
+            <td>{{user.username}}</td>
+            <td>{{user.password}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  {{/modal.body}}
+  {{#modal.footer as |footer|}}
+    {{#bs-button onClick=(action "printNewUsers") type="primary"}}Print{{/bs-button}}
+  {{/modal.footer}}
+{{/bs-modal}}
+
+{{#if (eq page "createSingleUser")}}
+  <div class="mt-4" style="overflow-y: auto">
+    <div class="card">
+      <div class="card-body">
+        <h3>Create Users</h3>
+        <hr>
+        <div class="d-flex justify-content-center">
+          {{#bs-button-group
+            value=page
+            type="radio"
+            class="mt-2 mb-2 float-right"
+            onChange=(action (mut page)) as |bg|}}
+            {{#bg.button value="createSingleUser"}}Single User{{/bg.button}}
+            {{#bg.button value="createMultipleUsers"}}Multiple Users{{/bg.button}}
+          {{/bs-button-group}}
+        </div>
+        {{#bs-form model=this onSubmit=(action "saveUser") as |form|}}
+          {{form.element controlType="text" label="Username" placeholder="Username" property="username"}}
+          {{form.element controlType="password" label="Password" placeholder="Password" property="password"}}
+          {{#form.element controlType="power-select-multiple" property="roles_selected_single" label="Choose Roles" options=roles
+          as |el|}}
+            {{#el.control 
+              placeholder="Choose roles"
+              loadingMessage="loading..."
+              onopen=(perform getRoles)
+              searchEnabled=false
+              searchField="default"
+              as |item|}}
+                {{item.descriptor}}
+            {{/el.control}}
+          {{/form.element}}
+          {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+        {{/bs-form}}
+      </div>
+    </div>
+  </div>
+{{else if (eq page "createMultipleUsers")}}
+  <div class="mt-4" style="overflow-y: auto">
+    <div class="card">
+      <div class="card-body">
+        <h3>Create Users</h3>
+        <hr>
+        <div class="d-flex justify-content-center">
+          {{#bs-button-group
+            value=page
+            type="radio"
+            class="mt-2 mb-2 float-right"
+            onChange=(action (mut page)) as |bg|}}
+            {{#bg.button value="createSingleUser"}}Single User{{/bg.button}}
+            {{#bg.button value="createMultipleUsers"}}Multiple Users{{/bg.button}}
+          {{/bs-button-group}}
+        </div>
+        {{#bs-form model=this onSubmit=(action "saveMultipleUsers") as |form|}}
+          {{form.element controlType="text" label="Username Prefix" placeholder="Username Prefix" property="usernameprefix"}}
+          {{form.element controlType="number" label="Number of Users" placeholder="# of users" property="numberofusers"}}
+          {{#form.element controlType="power-select-multiple" property="roles_selected_multiple" label="Choose Roles" options=roles
+          as |el|}}
+            {{#el.control 
+              placeholder="Choose roles"
+              loadingMessage="loading..."
+              onopen=(perform getRoles)
+              searchEnabled=false
+              searchField="default" 
+              as |item|}}
+                {{item.descriptor}}
+            {{/el.control}}
+          {{/form.element}}
+          {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+        {{/bs-form}}
+      </div>
+    </div>
+  </div>
+{{/if}}

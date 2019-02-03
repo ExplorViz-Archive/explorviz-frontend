@@ -1,8 +1,7 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
+
 import { task } from 'ember-concurrency';
-
-
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 export default Component.extend(AlertifyHandler, {
@@ -12,29 +11,14 @@ export default Component.extend(AlertifyHandler, {
 
   store: service(),
   printThis: service(),
-
-  roles: null,
-  users: null,
-  page: null,
+  createdUsers: null,
   showNewUsers: null,
+  page: null,
 
   didInsertElement() {
     this._super(...arguments);
-    this.set('roles', []);
-    this.set('page', 'main');
     this.set('showNewUsers', false);
-    this.updateUserList(true);
-  },
-
-  updateUserList(reload) {
-    this.set('users', []);
-    this.get('store').findAll('user', { reload })
-      .then(users => {
-        let userList = users.toArray();
-        // sort by id
-        userList.sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1);
-        this.set('users', userList);
-      });
+    this.set('page', 'createSingleUser')
   },
 
   actions: {
@@ -42,7 +26,7 @@ export default Component.extend(AlertifyHandler, {
       const selector = '#new-user-list';
       const options = {
         printDelay: 200
-      }
+      };
  
       this.get('printThis').print(selector, options);
     },
@@ -50,25 +34,6 @@ export default Component.extend(AlertifyHandler, {
     hideNewUsersCreatedModal() {
       this.set('createdUsers', []);
       this.set('showNewUsers', false);
-    },
-
-    openCreateSingleUserPage() {
-      this.set('page', 'createSingleUser');
-    },
-
-    openMainPage() {
-      this.set('page', 'main');
-    },
-
-    openEditUserPage(user) {
-      this.set('page', 'editUser');
-      this.set('currentUser', user);
-
-      this.setProperties({
-        id_change: user.id,
-        username_change: user.username,
-        roles_change: user.roles,
-      });
     },
 
     saveUser() {
@@ -95,13 +60,10 @@ export default Component.extend(AlertifyHandler, {
       userRecord.save().then(() => { // success
         const message = "User <b>" + userData.username + "</b> was created.";
         this.showAlertifyMessage(message);
-        this.updateUserList(false);
         clearInputFields.bind(this)();
-        this.actions.openMainPage.bind(this)();
       }, (reason) => { // failure
         this.showReasonErrorAlert(reason);
         userRecord.deleteRecord();
-        this.updateUserList(false);
       });
 
       function clearInputFields() {
@@ -147,15 +109,12 @@ export default Component.extend(AlertifyHandler, {
           if(usersSuccess.length === numberOfUsers) {
             const message = `All <b>${numberOfUsers}</b> users were successfully created.`;
             this.showAlertifyMessage(message);
-            this.updateUserList(false);
             clearInputFields.bind(this)();
-            this.actions.openMainPage.bind(this)();
             this.showCreatedUsers(usersSuccess);
 
           } else if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
             const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
             this.showAlertifyMessage(message);
-            this.updateUserList(false);
             
             if(usersSuccess.length > 0) {
               this.showCreatedUsers(usersSuccess);
@@ -168,7 +127,6 @@ export default Component.extend(AlertifyHandler, {
           if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
             const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
             this.showAlertifyMessage(message);
-            this.updateUserList(false);
 
             if(usersSuccess.length > 0) {
               this.showCreatedUsers(usersSuccess);
@@ -186,65 +144,15 @@ export default Component.extend(AlertifyHandler, {
         });
       }
     },
+  },
 
-    saveUserChanges() {
-      const userData = this.getProperties('id_change', 'username_change', 'password_change', 'roles_change');
-
-      const user = this.get('users').find( user => user.get('id') == userData.id_change);
-
-      if(user) {
-        // check for valid input
-        if(!userData.username_change || userData.username_change.length === 0) {
-          this.showAlertifyMessage('Username cannot be empty.');
-          return;
-        } else if(!userData.roles_change || userData.roles_change.length === 0) {
-          this.showAlertifyMessage('User needs at least 1 role.');
-          return;
-        }
-        
-        if(user.get('username') !== userData.username_change)
-          user.set('username', userData.username_change);
-        
-        if(userData.password_change && userData.password_change !== '')
-          user.set('password', userData.password_change);
-  
-        user.set('roles', userData.roles_change);
-  
-        user.save()
-          .then(()=> {
-            const message = `User updated.`;
-            this.showAlertifyMessage(message);
-            clearInputFields.bind(this)();
-            this.actions.openMainPage.bind(this)();
-          }, (reason) => {
-            this.showReasonErrorAlert(reason);
-          });
-      } else {
-        this.showAlertifyMessage(`User not found.`);
-      }
-
-      function clearInputFields() {
-        this.setProperties({
-          id_change: "",
-          username_change: "",
-          password_change: "",
-          roles_change: []
-        });
-      }
-    },
-
-    deleteUser(user) {
-      user.destroyRecord()
-        .then(() => { // success
-          const message = `User <b>${user.username}</b> deleted.`;
-          this.showAlertifyMessage(message);
-          this.updateUserList(false);
-        }, (reason) => { // failure
-          this.showReasonErrorAlert(reason);
-          this.updateUserList(true);
-        }
-        );
+  generatePassword(length) {
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let retVal = "";
+    for(let i = 0, n = charset.length; i < length; ++i) {
+        retVal += charset.charAt(Math.floor(Math.random() * n));
     }
+    return retVal;
   },
 
   showReasonErrorAlert(reason) {
@@ -257,17 +165,7 @@ export default Component.extend(AlertifyHandler, {
     this.set('showNewUsers', true);
   },
 
-  generatePassword(length) {
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let retVal = "";
-    for(let i = 0, n = charset.length; i < length; ++i) {
-        retVal += charset.charAt(Math.floor(Math.random() * n));
-    }
-    return retVal;
-  },
-
   getRoles: task(function * () {
     yield this.set('roles', this.store.findAll('role'));
   })
-
 });

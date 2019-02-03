@@ -22,6 +22,15 @@ export default Model.extend({
 	roles: hasMany('role'),
 
 	// simple object, no Ember record
-	settings: attr()
+	settings: attr(),
+
+	hasRole(rolename) {
+		const roles = this.get('roles').toArray();
+		for (const role of roles) {
+			if(rolename === role.get('descriptor'))
+				return true;
+		}
+		return false;
+	},
 
 });
