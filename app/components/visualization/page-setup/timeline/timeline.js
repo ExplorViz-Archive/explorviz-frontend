@@ -3,6 +3,7 @@ import { inject as service } from "@ember/service";
 import Evented from '@ember/object/evented';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import debugLogger from 'ember-debug-logger';
+import { timestampToDate } from 'explorviz-frontend/helpers/timestamp-to-date';
 
 import Chart from "chart.js";
 import $ from 'jquery';
@@ -22,8 +23,11 @@ export default Component.extend(AlertifyHandler, Evented, {
     timelineChart: null,
     lastHighlightedElementIndex: null,
     canvas: null,
-
     backgroundColor: null,
+
+    // The maximum number of data points shown in the timeline
+    maxNumOfDataPoints: 10,
+
 
     // @Override
     /**
@@ -35,7 +39,7 @@ export default Component.extend(AlertifyHandler, Evented, {
     didRender() {
         this._super(...arguments);
         this.renderChart();
-        this.initListener();
+        this.initTimeline();
     },
 
     // @Override
@@ -61,7 +65,11 @@ export default Component.extend(AlertifyHandler, Evented, {
         this.get('timestampRepo').off('updated');
     },
 
-    initListener() {
+    /**
+     * Inititializes the canvas and the "updated" listener
+     * @method initTimeline
+     */
+    initTimeline() {
         const self = this;
 
         self.set('canvas', $('#timelineCanvas').get(0));
@@ -81,6 +89,7 @@ export default Component.extend(AlertifyHandler, Evented, {
 
         self.debug("start timeline init");
 
+        // setting the default background color for resetting purposes
         const color = Chart.helpers.color;
         self.set('backgroundColor', color('rgb(0, 123, 255)').alpha(0.5).rgbString());
         const backgroundColor = self.get('backgroundColor');
@@ -90,6 +99,7 @@ export default Component.extend(AlertifyHandler, Evented, {
 
         var ctx = $('#timelineCanvas').get(0).getContext('2d');
 
+        // Chart configuration
         var chartConfig = {
             type: 'line',
             data: {
@@ -114,10 +124,6 @@ export default Component.extend(AlertifyHandler, Evented, {
                 },
                 tooltips: {
                     enabled: true,
-                    mode: 'point',
-                },
-                hover: {
-                    enabled: false,
                     mode: 'point',
                 },
                 legend: {
@@ -206,10 +212,12 @@ export default Component.extend(AlertifyHandler, Evented, {
                     radius: '4'
                 };
 
-                // reset the color of the previous data point
+                // reset the style of the previous data point
                 if (lastHighlightedElementIndex) {
                     timelineChart.getDatasetMeta(datasetIndex).data[lastHighlightedElementIndex].custom = {
-                        backgroundColor: backgroundColor
+                        backgroundColor: backgroundColor,
+                        borderColor: 'rgba(0,0,0,0.1)',
+                        radius: '3'
                     };
                 }
 
@@ -220,11 +228,16 @@ export default Component.extend(AlertifyHandler, Evented, {
                 timelineChart.update();
 
                 // load specific landscape and pause visulization
-                self.showVisualizationReloadMessageForUser(true);
+
+                // convert timestamp to readable date for notification
+                const formattedTimestamp = timestampToDate([retrievedTimestamp]);
+
+                self.showAlertifyMessage("Loading landscape [" + formattedTimestamp + "]");
+                self.showAlertifyMessage("Visualization paused!");
                 self.get('reloadHandler').loadLandscapeById(retrievedTimestamp, null)
             }
         } else {
-            // reset the color of the previous data point and unpause visualization
+            // reset the style of the previous data point and unpause the visualization
             if (lastHighlightedElementIndex) {
                 
                 timelineChart.getDatasetMeta(0).data[lastHighlightedElementIndex].custom = {
@@ -238,7 +251,7 @@ export default Component.extend(AlertifyHandler, Evented, {
                 self.set('timelineChart', timelineChart);
                 timelineChart.update();
 
-                self.showVisualizationReloadMessageForUser(false);
+                this.showAlertifyMessage("Visualization resumed!");
                 this.get('landscapeListener').startVisualizationReload();
                 
             }
@@ -246,7 +259,7 @@ export default Component.extend(AlertifyHandler, Evented, {
     },
 
     /**
-     * Updates the timeline chart
+     * Updates the timeline chart when "updated" is triggered
      * @method updateChart
      */
     updateChart(newTimestamp) {
@@ -267,7 +280,7 @@ export default Component.extend(AlertifyHandler, Evented, {
         };
 
         // remove oldest timestamp in timeline to keep a fixed number of data points
-        if (numOfDataPoints >= 10) {
+        if (numOfDataPoints >= this.get('maxNumOfDataPoints')) {
             updatedTimelineChart.data.datasets[0].data.shift();
             updatedTimelineChart.data.labels.shift();
         }
@@ -280,8 +293,11 @@ export default Component.extend(AlertifyHandler, Evented, {
 
         if (lastHighlightedElementIndex) {
             updatedTimelineChart.getDatasetMeta(0).data[lastHighlightedElementIndex].custom = {
-                backgroundColor: self.get('backgroundColor')
+                backgroundColor: self.get('backgroundColor'),
+                borderColor: 'rgba(0,0,0,0.1)',
+                radius: '3'
             };
+
             self.set('lastHighlightedElementIndex', null);
         }
 
@@ -306,19 +322,5 @@ export default Component.extend(AlertifyHandler, Evented, {
     onUpdated(newTimestamp) {
         this.updateChart(newTimestamp);
     },
-
-    /**
-     * Shows a message for the User that the visualization is paused or resumed
-     * @method showVisualizationReloadMessageForUser
-     * @param {*} pauseReload 
-     */
-    showVisualizationReloadMessageForUser(pause) {
-        if(pause) {
-          this.showAlertifyMessage("Visualization paused!");
-        }
-        else {
-          this.showAlertifyMessage("Visualization resumed!");
-        }
-    }
 
 });
