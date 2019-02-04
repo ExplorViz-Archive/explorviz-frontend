@@ -73,6 +73,7 @@
   },
   "dependencies": {
     "chart.js": "^2.7.3",
+    "chartjs-plugin-zoom": "^0.6.6",
     "ember-ajax": "^4.0.2",
     "ember-cli-app-version": "^3.2.0",
     "ember-cli-babel": "^7.4.0",

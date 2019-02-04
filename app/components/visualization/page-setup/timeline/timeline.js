@@ -17,13 +17,14 @@ export default Component.extend(AlertifyHandler, Evented, {
 
     store: service(),
     timestampRepo: service("repos/timestamp-repository"),
-    landscapeListener: service ("landscape-listener"),
+    landscapeListener: service("landscape-listener"),
     reloadHandler: service("reload-handler"),
 
     timelineChart: null,
     lastHighlightedElementIndex: null,
     canvas: null,
-    backgroundColor: null,
+
+    chartColors: null,
 
     // The maximum number of data points shown in the timeline
     maxNumOfDataPoints: 10,
@@ -38,8 +39,9 @@ export default Component.extend(AlertifyHandler, Evented, {
      */
     didRender() {
         this._super(...arguments);
+        this.initChart();
         this.renderChart();
-        this.initTimeline();
+        this.initListener();
     },
 
     // @Override
@@ -66,22 +68,47 @@ export default Component.extend(AlertifyHandler, Evented, {
     },
 
     /**
-     * Inititializes the canvas and the "updated" listener
+     * Inititializes "updated" listener
      * @method initTimeline
      */
-    initTimeline() {
+    initListener() {
         const self = this;
 
-        self.set('canvas', $('#timelineCanvas').get(0));
-
-        self.get('timestampRepo').on("updated", function(newTimestamp) {
+        self.get('timestampRepo').on("updated", function (newTimestamp) {
             self.onUpdated(newTimestamp);
         });
 
     },
 
     /**
-     * Retrieves timestamps from the store and renders the timeline chart
+     * Initializes default settings for the chart
+     * @method initChart
+     */
+    initChart() {
+        const self = this;
+
+        // referencing the canvas
+        self.set('canvas', $('#timelineCanvas').get(0));
+
+        // setting the default colors for highlighting and resetting purposes
+        const color = Chart.helpers.color;
+
+        self.set('chartColors', {
+            default: {
+                backgroundColor: color('rgb(0, 123, 255)').alpha(0.5).rgbString(),
+                borderColor: 'rgba(0,0,0,0.1)',
+                radius: '3'
+            },
+            highlighted: {
+                backgroundColor: 'red',
+                borderColor: 'black',
+                radius: '4'
+            }
+        });
+    },
+
+    /**
+     * Renders the timeline chart
      * @method renderChart
      */
     renderChart() {
@@ -89,14 +116,14 @@ export default Component.extend(AlertifyHandler, Evented, {
 
         self.debug("start timeline init");
 
-        // setting the default background color for resetting purposes
-        const color = Chart.helpers.color;
-        self.set('backgroundColor', color('rgb(0, 123, 255)').alpha(0.5).rgbString());
-        const backgroundColor = self.get('backgroundColor');
+        const backgroundColor = self.get('chartColors.default.backgroundColor');
+        const borderColor = self.get('chartColors.default.borderColor');
 
+        // chart data
         var chartValues = [];
         var chartLabels = [];
 
+        // setting the context for the chart
         var ctx = $('#timelineCanvas').get(0).getContext('2d');
 
         // Chart configuration
@@ -107,7 +134,7 @@ export default Component.extend(AlertifyHandler, Evented, {
                 datasets: [{
                     label: 'Requests',
                     backgroundColor: backgroundColor,
-                    borderColor: color('rgb(0, 123, 255)'),
+                    borderColor: borderColor,
                     data: chartValues,
                 }]
             },
@@ -170,9 +197,28 @@ export default Component.extend(AlertifyHandler, Evented, {
                 },
                 'onClick': function (evt) {
                     self.chartClickHandler(evt);
+                },
+
+                // Container for zoom options
+                zoom: {
+                    // Boolean to enable zooming
+                    enabled: true,
+
+                    // Enable drag-to-zoom behavior
+                    drag: true,
+
+                    // Zooming directions. Remove the appropriate direction to disable 
+                    // Eg. 'y' would only allow zooming in the y direction
+                    mode: 'y',
+ 
+                    // Function called once zooming is completed
+                    // Useful for dynamic data loading
+                    onZoom: function () { self.debug('I was zoomed!!!'); }
                 }
             }
-        }
+        };
+
+        self.debug(chartConfig.options.zoom);
 
         var timelineChart = new Chart(ctx, chartConfig);
         self.set('timelineChart', timelineChart);
@@ -189,7 +235,9 @@ export default Component.extend(AlertifyHandler, Evented, {
         const self = this;
 
         const timelineChart = self.get('timelineChart');
-        const backgroundColor = self.get('backgroundColor');
+
+        const colorsDefault = self.get('chartColors.default');
+        const colorsHighlighted = self.get('chartColors.highlighted');
 
         var activePoint = timelineChart.getElementAtEvent(evt)[0];
         const lastHighlightedElementIndex = self.get('lastHighlightedElementIndex');
@@ -206,19 +254,11 @@ export default Component.extend(AlertifyHandler, Evented, {
                 // do nothing
             } else {
                 // highlight clicked data point
-                timelineChart.getDatasetMeta(datasetIndex).data[elementIndex].custom = {
-                    backgroundColor: 'red',
-                    borderColor: 'black',
-                    radius: '4'
-                };
+                timelineChart.getDatasetMeta(datasetIndex).data[elementIndex].custom = colorsHighlighted;
 
                 // reset the style of the previous data point
                 if (lastHighlightedElementIndex) {
-                    timelineChart.getDatasetMeta(datasetIndex).data[lastHighlightedElementIndex].custom = {
-                        backgroundColor: backgroundColor,
-                        borderColor: 'rgba(0,0,0,0.1)',
-                        radius: '3'
-                    };
+                    timelineChart.getDatasetMeta(datasetIndex).data[lastHighlightedElementIndex].custom = colorsDefault;
                 }
 
                 // save the index of the clicked data point
@@ -233,28 +273,51 @@ export default Component.extend(AlertifyHandler, Evented, {
                 const formattedTimestamp = timestampToDate([retrievedTimestamp]);
 
                 self.showAlertifyMessage("Loading landscape [" + formattedTimestamp + "]");
-                self.showAlertifyMessage("Visualization paused!");
+                self.handleNotificationMessage(false);
+
                 self.get('reloadHandler').loadLandscapeById(retrievedTimestamp, null)
             }
         } else {
             // reset the style of the previous data point and unpause the visualization
             if (lastHighlightedElementIndex) {
-                
-                timelineChart.getDatasetMeta(0).data[lastHighlightedElementIndex].custom = {
-                    backgroundColor: backgroundColor,
-                    borderColor: 'rgba(0,0,0,0.1)',
-                    radius: '3'
-                };
-      
+
+                timelineChart.getDatasetMeta(0).data[lastHighlightedElementIndex].custom = colorsDefault;
+
                 self.set('lastHighlightedElementIndex', null);
 
                 self.set('timelineChart', timelineChart);
                 timelineChart.update();
 
-                this.showAlertifyMessage("Visualization resumed!");
-                this.get('landscapeListener').startVisualizationReload();
-                
+                self.handleNotificationMessage(true);
+
             }
+            // TODO 
+            // maybe Bug within ChartJS? The first data point can't be unhighlighted like the others
+            else {
+                self.unhighlightFirstDataPoint();
+            }
+        }
+    },
+
+    /**
+     * Resets the style of first data point in the chart
+     * @method unhighlightFirstDataPoint
+     */
+    unhighlightFirstDataPoint() {
+        const self = this;
+
+        const timelineChart = self.get('timelineChart');
+
+        const colorsDefault = self.get('chartColors.default');
+
+        timelineChart.getDatasetMeta(0).data[0].custom = colorsDefault;
+
+        self.set('lastHighlightedElementIndex', null);
+        self.set('timelineChart', timelineChart);
+        timelineChart.update();
+
+        if (self.get('landscapeListener').pauseVisualizationReload) {
+            self.handleNotificationMessage(true);
         }
     },
 
@@ -269,7 +332,10 @@ export default Component.extend(AlertifyHandler, Evented, {
 
         const updatedTimelineChart = self.get('timelineChart');
 
+        const colorsDefault = self.get('chartColors.default');
+
         const numOfDataPoints = updatedTimelineChart.data.datasets[0].data.length;
+        const maxNumOfDataPoints = this.get('maxNumOfDataPoints');
 
         const timestamp = newTimestamp.get('timestamp');
         const totalRequests = newTimestamp.get('totalRequests');
@@ -280,7 +346,7 @@ export default Component.extend(AlertifyHandler, Evented, {
         };
 
         // remove oldest timestamp in timeline to keep a fixed number of data points
-        if (numOfDataPoints >= this.get('maxNumOfDataPoints')) {
+        if (numOfDataPoints >= maxNumOfDataPoints) {
             updatedTimelineChart.data.datasets[0].data.shift();
             updatedTimelineChart.data.labels.shift();
         }
@@ -292,11 +358,7 @@ export default Component.extend(AlertifyHandler, Evented, {
         const lastHighlightedElementIndex = self.get('lastHighlightedElementIndex');
 
         if (lastHighlightedElementIndex) {
-            updatedTimelineChart.getDatasetMeta(0).data[lastHighlightedElementIndex].custom = {
-                backgroundColor: self.get('backgroundColor'),
-                borderColor: 'rgba(0,0,0,0.1)',
-                radius: '3'
-            };
+            updatedTimelineChart.getDatasetMeta(0).data[lastHighlightedElementIndex].custom = colorsDefault;
 
             self.set('lastHighlightedElementIndex', null);
         }
@@ -304,14 +366,6 @@ export default Component.extend(AlertifyHandler, Evented, {
         updatedTimelineChart.update();
 
         self.debug("end timeline update");
-    },
-
-
-    /**
-     * @method shiftChartValues
-     */
-    shiftChartValues() {
-
     },
 
     /**
@@ -322,5 +376,22 @@ export default Component.extend(AlertifyHandler, Evented, {
     onUpdated(newTimestamp) {
         this.updateChart(newTimestamp);
     },
+
+
+    /**
+     * Displays a notifaction message  and resumes/pauses the visualization
+     * @method handleNotificationMessage
+     * @param {true, false} pause (true: pause -> resume, false: resume -> pause )
+     */
+    handleNotificationMessage(pause) {
+        if (pause) {
+            this.showAlertifyMessage("Visualization resumed!");
+            this.get('landscapeListener').startVisualizationReload();
+        }
+        else {
+            this.showAlertifyMessage("Visualization paused!");
+            this.get('landscapeListener').stopVisualizationReload();
+        }
+    }
 
 });
