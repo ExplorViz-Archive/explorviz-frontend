@@ -99,7 +99,22 @@ export default Service.extend({
   },
 
   toggleVisualizationReload(){
-    this.set('pauseVisualizationReload', !this.get('pauseVisualizationReload'));
+    const self = this;
+
+    if (self.pauseVisualizationReload) {
+      this.startVisualizationReload();
+    }
+    else {
+      this.stopVisualizationReload();
+    }
+  },
+
+  startVisualizationReload(){
+    this.set('pauseVisualizationReload', false);
+  },
+
+  stopVisualizationReload(){
+    this.set('pauseVisualizationReload', true);
   }
 
 });

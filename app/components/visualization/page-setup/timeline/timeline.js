@@ -1,23 +1,29 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import Evented from '@ember/object/evented';
+import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import debugLogger from 'ember-debug-logger';
 
 import Chart from "chart.js";
 import $ from 'jquery';
 
-export default Component.extend(Evented, {
+export default Component.extend(AlertifyHandler, Evented, {
 
-  // No Ember generated container
-  tagName: '',
+    // No Ember generated container
+    tagName: '',
 
-  debug: debugLogger(),
+    debug: debugLogger(),
 
-  store: service(),
-  timestampRepo: service("repos/timestamp-repository"),
+    store: service(),
+    timestampRepo: service("repos/timestamp-repository"),
+    landscapeListener: service ("landscape-listener"),
+    reloadHandler: service("reload-handler"),
 
-  timelineChart: null,
-  canvas: null,
+    timelineChart: null,
+    lastHighlightedElementIndex: null,
+    canvas: null,
+
+    backgroundColor: null,
 
     // @Override
     /**
@@ -26,7 +32,7 @@ export default Component.extend(Evented, {
      *
      * @method didRender
      */
-    didRender(){
+    didRender() {
         this._super(...arguments);
         this.renderChart();
         this.initListener();
@@ -58,9 +64,9 @@ export default Component.extend(Evented, {
     initListener() {
         const self = this;
 
-        this.set('canvas', $('#timelineCanvas').get(0));
+        self.set('canvas', $('#timelineCanvas').get(0));
 
-        this.get('timestampRepo').on("updated", function(newTimestamp) {
+        self.get('timestampRepo').on("updated", function(newTimestamp) {
             self.onUpdated(newTimestamp);
         });
 
@@ -73,170 +79,193 @@ export default Component.extend(Evented, {
     renderChart() {
         const self = this;
 
-        const afterTimestamp = 1547644343153;
-        const intervalSize = 5;
+        self.debug("start timeline init");
 
-        self.debug("start import timestamp-request");
-        
-        // TODO querying needs to be refactored in placed in service
-        self.get('store').query('timestamp', {after: afterTimestamp, intervalSize: intervalSize}).then(success, failure).catch(error);
-            
-        function success(timestamps){
-            //self.set('timestampRepo.timelineTimestamps', timestamps);
+        const color = Chart.helpers.color;
+        self.set('backgroundColor', color('rgb(0, 123, 255)').alpha(0.5).rgbString());
+        const backgroundColor = self.get('backgroundColor');
 
-            self.debug("end import timestamp-request");
-            
-            self.debug("start timeline init");
-    
-            var chartValues = [];
-            var chartLabels = []; 
-        
-            const loadedTimestamps = self.get('timestampRepo.timelineTimestamps');
+        var chartValues = [];
+        var chartLabels = [];
 
+        var ctx = $('#timelineCanvas').get(0).getContext('2d');
 
-            // fill chartData with timestamps
-            if (loadedTimestamps) {
-                loadedTimestamps.forEach(function(timestamp) {           
-                    chartValues.push({x: timestamp.get('timestamp'), y: timestamp.get('totalRequests')});             
-                    chartLabels.push(timestamp.get('timestamp'));
-
-                });
-            }
-
-            var color = Chart.helpers.color;
-            var ctx = $('#timelineCanvas').get(0).getContext('2d');
-
-            var chartConfig = {
-                type: 'line',
-                data: {
-                    labels: chartLabels,
-                    datasets: [{
-                        label: 'Requests',
-                        backgroundColor: color('rgb(0, 123, 255)').alpha(0.5).rgbString(),
-                        borderColor: color('rgb(0, 123, 255)'), 
-                        data: chartValues, 
+        var chartConfig = {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Requests',
+                    backgroundColor: backgroundColor,
+                    borderColor: color('rgb(0, 123, 255)'),
+                    data: chartValues,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 0,
+                        right: 35,
+                        top: 25,
+                        bottom: 0
+                    }
+                },
+                tooltips: {
+                    enabled: true,
+                    mode: 'point',
+                },
+                hover: {
+                    enabled: false,
+                    mode: 'point',
+                },
+                legend: {
+                    display: false
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Time',
+                            fontStyle: 'bold'
+                        },
+                        type: 'time',
+                        distribution: 'series',
+                        time: {
+                            unit: 'second',
+                            displayFormats: {
+                                second: 'HH:mm:ss'
+                            },
+                            tooltipFormat: 'DD.MM.YYYY - kk:mm:ss'
+                        },
+                        ticks: {
+                            source: 'labels'
+                        }
+                    }],
+                    yAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Total Requests',
+                            fontStyle: 'bold'
+                        },
+                        ticks: {
+                            beginAtZero: true
+                        }
                     }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: {
-                            left: 0,
-                            right: 35,
-                            top: 25,
-                            bottom: 0
-                        }
-                    },
-                    tooltips: {
-                        enabled: true,
-                        mode: 'point',
-                    },
-                    hover: {
-                        enabled: false,
-                        mode: 'point',
-                    },
-                    legend: {
-                        display: false
-                    },
-                    scales: {
-                        xAxes: [{
-                            display: true,
-                            scaleLabel: {
-                                display: true,
-                                labelString: 'Time',
-                                fontStyle: 'bold'
-                            },
-                            type: 'time',
-                            distribution: 'series',
-                            time: {
-                                unit: 'second',
-                                displayFormats: {
-                                    second: 'HH:mm:ss'
-                                },
-                                tooltipFormat: 'DD.MM.YYYY - kk:mm:ss'
-                            },
-                            ticks: {
-                                source: 'labels'
-                            }
-                        }],
-                        yAxes: [{
-                            display: true,
-                            scaleLabel: {
-                                display: true,
-                                labelString: 'Total Requests',
-                                fontStyle: 'bold'
-                            },
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }]
-                    },
-                    // performance optimizations
-                    elements: {
-                        line: {
-                            tension: 0, // disables bezier curves
-                        }
+                // performance optimizations
+                elements: {
+                    line: {
+                        tension: 0, // disables bezier curves
                     }
+                },
+                'onClick': function (evt) {
+                    self.chartClickHandler(evt);
                 }
-            };
-
-            var timelineChart = new Chart(ctx, chartConfig);
-            self.set('timelineChart', timelineChart);
-
-            // single click listener in order to load a specific landscape in the timeline
-            self.get('canvas').onclick = function(evt) {
-                var activePoint = timelineChart.getElementAtEvent(evt)[0];
-                
-                if (activePoint) {
-                    var data = activePoint._chart.data;
-                    var datasetIndex = activePoint._datasetIndex;
-                    var index = activePoint._index;
-                    var retrievedTimestamp = data.datasets[datasetIndex].data[index].x;
-                    self.debug(retrievedTimestamp);
-                    // TODO load specific landscape in visulization and pause
-                }
-                else {
-                    // self.debug("no data point clicked")
-                }
-             };
-
-            self.debug("end timeline init");
+            }
         }
 
-        function failure(e){
-            self.set('timestampRepo.timelineTimestamps', []);
-            self.showAlertifyMessage("Timestamps couldn't be requested!" +
-            " Backend offline?");
-            self.debug("Timestamps couldn't be requested!", e);
-        }
-    
-        function error(e){
-            self.set('timestampRepo.timelineTimestamps', []);
-            self.debug("Error when fetching timestamps: ", e);
-        }
+        var timelineChart = new Chart(ctx, chartConfig);
+        self.set('timelineChart', timelineChart);
 
+        self.debug("end timeline init");
     },
 
+    /**
+     * Clickhandler for the chart
+     * @method chartClickhandler
+     * @param {*} evt 
+     */
+    chartClickHandler(evt) {
+        const self = this;
 
-  /**
-   * Updates the timeline chart
-   * @method updateChart
-   */
-  updateChart(newTimestamp) { 
-        const self = this;    
-    
+        const timelineChart = self.get('timelineChart');
+        const backgroundColor = self.get('backgroundColor');
+
+        var activePoint = timelineChart.getElementAtEvent(evt)[0];
+        const lastHighlightedElementIndex = self.get('lastHighlightedElementIndex');
+
+        // data point clicked - only one data point is highlighted at a time
+        if (activePoint) {
+            var data = activePoint._chart.data;
+            var datasetIndex = activePoint._datasetIndex;
+            var elementIndex = activePoint._index;
+            var retrievedTimestamp = data.datasets[datasetIndex].data[elementIndex].x;
+
+            // data point was already highlighted
+            if (lastHighlightedElementIndex === elementIndex) {
+                // do nothing
+            } else {
+                // highlight clicked data point
+                timelineChart.getDatasetMeta(datasetIndex).data[elementIndex].custom = {
+                    backgroundColor: 'red',
+                    borderColor: 'black',
+                    radius: '4'
+                };
+
+                // reset the color of the previous data point
+                if (lastHighlightedElementIndex) {
+                    timelineChart.getDatasetMeta(datasetIndex).data[lastHighlightedElementIndex].custom = {
+                        backgroundColor: backgroundColor
+                    };
+                }
+
+                // save the index of the clicked data point
+                self.set('lastHighlightedElementIndex', elementIndex);
+
+                self.set('timelineChart', timelineChart);
+                timelineChart.update();
+
+                // load specific landscape and pause visulization
+                self.showVisualizationReloadMessageForUser(true);
+                self.get('reloadHandler').loadLandscapeById(retrievedTimestamp, null)
+            }
+        } else {
+            // reset the color of the previous data point and unpause visualization
+            if (lastHighlightedElementIndex) {
+                
+                timelineChart.getDatasetMeta(0).data[lastHighlightedElementIndex].custom = {
+                    backgroundColor: backgroundColor,
+                    borderColor: 'rgba(0,0,0,0.1)',
+                    radius: '3'
+                };
+      
+                self.set('lastHighlightedElementIndex', null);
+
+                self.set('timelineChart', timelineChart);
+                timelineChart.update();
+
+                self.showVisualizationReloadMessageForUser(false);
+                this.get('landscapeListener').startVisualizationReload();
+                
+            }
+        }
+    },
+
+    /**
+     * Updates the timeline chart
+     * @method updateChart
+     */
+    updateChart(newTimestamp) {
+        const self = this;
+
         self.debug("start timeline update");
 
-        const updatedTimelineChart = this.get('timelineChart');
+        const updatedTimelineChart = self.get('timelineChart');
 
         const numOfDataPoints = updatedTimelineChart.data.datasets[0].data.length;
-        
+
         const timestamp = newTimestamp.get('timestamp');
         const totalRequests = newTimestamp.get('totalRequests');
-        
-        const newTimelineData = { x: timestamp, y: totalRequests };
-        
+
+        const newTimelineData = {
+            x: timestamp,
+            y: totalRequests
+        };
+
         // remove oldest timestamp in timeline to keep a fixed number of data points
         if (numOfDataPoints >= 10) {
             updatedTimelineChart.data.datasets[0].data.shift();
@@ -245,28 +274,51 @@ export default Component.extend(Evented, {
 
         updatedTimelineChart.data.datasets[0].data.push(newTimelineData);
         updatedTimelineChart.data.labels.push(timestamp);
-        
+
+        // reset the color of the previous data point
+        const lastHighlightedElementIndex = self.get('lastHighlightedElementIndex');
+
+        if (lastHighlightedElementIndex) {
+            updatedTimelineChart.getDatasetMeta(0).data[lastHighlightedElementIndex].custom = {
+                backgroundColor: self.get('backgroundColor')
+            };
+            self.set('lastHighlightedElementIndex', null);
+        }
+
         updatedTimelineChart.update();
 
         self.debug("end timeline update");
-  },
+    },
 
 
-  /**
-   * @method shiftChartValues
-   */
-  shiftChartValues(){
+    /**
+     * @method shiftChartValues
+     */
+    shiftChartValues() {
 
-  },
+    },
 
-  /**
-   * Called when a new timestamp is passed and the chart needs to be updated
-   * @method onUpdated
-   * @param {*} newTimestamp 
-   */
-  onUpdated(newTimestamp) {
-    this.updateChart(newTimestamp);
-  },
+    /**
+     * Called when a new timestamp is passed and the chart needs to be updated
+     * @method onUpdated
+     * @param {*} newTimestamp 
+     */
+    onUpdated(newTimestamp) {
+        this.updateChart(newTimestamp);
+    },
+
+    /**
+     * Shows a message for the User that the visualization is paused or resumed
+     * @method showVisualizationReloadMessageForUser
+     * @param {*} pauseReload 
+     */
+    showVisualizationReloadMessageForUser(pause) {
+        if(pause) {
+          this.showAlertifyMessage("Visualization paused!");
+        }
+        else {
+          this.showAlertifyMessage("Visualization resumed!");
+        }
+    }
 
 });
-

@@ -2,7 +2,7 @@ import DS from 'ember-data';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 import ENV from 'explorviz-frontend/config/environment';
 
-const {JSONAPIAdapter} = DS;
+const { JSONAPIAdapter } = DS;
 
 /**
 * This Adapter operates as communication abstraction for all network requests,
