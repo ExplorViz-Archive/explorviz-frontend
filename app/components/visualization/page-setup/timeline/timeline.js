@@ -133,7 +133,7 @@ export default Component.extend(Evented, {
                         mode: 'point',
                     },
                     hover: {
-                        enabled: true,
+                        enabled: false,
                         mode: 'point',
                     },
                     legend: {
