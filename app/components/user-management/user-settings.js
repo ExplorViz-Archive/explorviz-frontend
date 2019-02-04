@@ -4,11 +4,14 @@ import { inject as service } from "@ember/service";
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 export default Component.extend(AlertifyHandler, {
+  
   // No Ember generated container
   tagName: '',
 
   store: service(),
   session: service(),
+
+  showSpinner: null,
 
   booleans: null,
   numerics: null,
@@ -17,8 +20,10 @@ export default Component.extend(AlertifyHandler, {
   user: null,
 
   didInsertElement() {
+    this.set('showSpinner', true);
     this.initUser();
     this.initAttributeProperties();
+    this.set('showSpinner', false);
   },
 
   initUser() {
@@ -54,6 +59,7 @@ export default Component.extend(AlertifyHandler, {
   actions: {
     // saves the changes made to the actual model and backend
     saveSettings() {
+      this.set('showSpinner', true);
       //Update booleans
       Object.entries(this.get('booleans')).forEach(([key, value]) => {
         this.set(`user.settings.booleanAttributes.${key}`, value);
@@ -76,19 +82,16 @@ export default Component.extend(AlertifyHandler, {
       });
 
       this.get('user').save().then(() => {
+        this.set('showSpinner', false);
         this.showAlertifyMessage('Settings saved.');
       }, reason => {
         const {title, detail} = reason.errors[0];
+        this.set('showSpinner', false);
         this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
         // reload model and rollback the properties
         this.get('user').reload();
       });
     }
-  },
-
-  willDestroyElement() {
-    this.set('user', null);
-    this.set('settings', null);
   }
 
 });

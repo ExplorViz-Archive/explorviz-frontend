@@ -1,0 +1,21 @@
+
+<h3>User Data</h3>
+<hr>
+{{#bs-form model=this onSubmit=(action "saveUserChanges") as |form|}}
+  {{form.element controlType="number" label="ID" property="id_change" disabled=true}}
+  {{form.element controlType="text" label="Username" placeholder="Enter New Username" property="username_change"}}
+  {{form.element controlType="password" label="Password" placeholder="Enter New Password" property="password_change"}}
+  {{#form.element controlType="power-select-multiple" property="roles_change" label="Change Roles" searchEnabled=false loadingMessage="Loading..." options=roles 
+  as |el|}}
+    {{#el.control
+    onopen=(perform getRoles)
+    as |item|}}
+      {{item.descriptor}}
+    {{/el.control}}
+  {{/form.element}}
+  {{bs-button defaultText="Apply Changes" type="primary" buttonType="submit"}}
+{{/bs-form}}
+
+{{#if this.showSpinner}}
+  {{ember-spinner}}
+{{/if}}

@@ -1,0 +1,25 @@
+<div class="col-12 d-flex flex-column">
+  <div class="mb-4">
+    {{#bs-button onClick=(route-action "goBack") type="secondary" outline=true title="Back to User List"}}
+      {{svg-jar "reply" class="octicon align-middle"}}
+    {{/bs-button}}
+  </div>
+  <div style="overflow-y: auto">
+    <div class="row" style="margin-right: 0">
+      <div class="col-12 col-xl-6 mb-4">
+        <div class="card">
+          <div class="card-body">
+            {{user-management/user-data user=this.model}}
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-xl-6">
+        <div class="card">
+          <div class="card-body">
+            {{user-management/user-settings user=this.model}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
