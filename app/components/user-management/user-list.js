@@ -34,7 +34,7 @@ export default Component.extend(AlertifyHandler, {
           this.set('users', userList);
           this.set('showSpinner', false);
         }
-      }, reason => {
+      }, () => {
         if(!this.isDestroyed) {
           this.set('showSpinner', false);
         }
