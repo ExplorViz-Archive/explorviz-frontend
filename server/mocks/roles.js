@@ -13,6 +13,13 @@ module.exports = function (app) {
         "attributes": {
           "descriptor": "admin"
         }
+      },
+      {
+        "type": "role",
+        "id": "3",
+        "attributes": {
+          "descriptor": "user"
+        }
       }
     ]
   };

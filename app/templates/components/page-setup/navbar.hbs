@@ -1,6 +1,6 @@
 {{#bs-navbar class="explorviz-top-navbar fixed-top navbar-light" type=type backgroundColor=bg onCollapse=(action (mut collapsed) true) onExpand=(action (mut collapsed) false) as |navbar|}}
   <a class="navbar-brand" style="width: 150px;" target="_blank" href="http://www.explorviz.net">
-    <img style="width: 100%;" src="images/explorviz-transparent.png"/>
+    <img style="width: 100%;" src="/images/explorviz-transparent.png"/>
   </a>
   {{navbar.toggle}}
   {{#navbar.content}}
@@ -18,7 +18,7 @@
           
           {{#dd.menu as |ddm|}}
             {{#ddm.item}}
-              {{#ddm.link-to "configuration" class="d-flex-center" title="Configuration"}}
+              {{#ddm.link-to "configuration.settings" class="d-flex-center" title="Configuration"}}
                 {{svg-jar "gear" class="octicon"}}<span>Configuration</span>
               {{/ddm.link-to}}
             {{/ddm.item}}

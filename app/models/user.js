@@ -1,5 +1,6 @@
 import Model from 'ember-data/model';
 import DS from 'ember-data';
+import { computed } from '@ember/object';
 
 const { attr, hasMany } = DS;
 
@@ -22,6 +23,19 @@ export default Model.extend({
 	roles: hasMany('role'),
 
 	// simple object, no Ember record
-	settings: attr()
+	settings: attr(),
+
+	hasRole(rolename) {
+		const roles = this.get('roles').toArray();
+		for (const role of roles) {
+			if(rolename === role.get('descriptor'))
+				return true;
+		}
+		return false;
+  },
+  
+  isAdmin: computed('roles', function() {
+    return this.hasRole('admin');
+  })
 
 });

@@ -29,7 +29,7 @@ module.exports = function (app) {
         "type": "user",
         "id": "4",
         "attributes": {
-          "username": "admin2",
+          "username": "user",
           "settings": createSettingsObject()
         },
         "relationships": {
@@ -37,7 +37,7 @@ module.exports = function (app) {
             "data": [
               {
                 "type": "role",
-                "id": "2"
+                "id": "3"
               }
             ]
           }
@@ -50,6 +50,13 @@ module.exports = function (app) {
         "id": "2",
         "attributes": {
           "descriptor": "admin"
+        }
+      },
+      {
+        "type": "role",
+        "id": "3",
+        "attributes": {
+          "descriptor": "user"
         }
       }
     ]
@@ -114,6 +121,20 @@ module.exports = function (app) {
         users.data[i].attributes.settings = settings;
         users.data[i].relationships.roles = roles;
         res.status(204).send();
+        return;
+      }
+    }
+
+    res.send(400, {"errors": [ { "status": "400", "title": "Error", "detail": "User does not exists" } ]});
+  });
+
+  userRouter.get('/:id', (req, res) => {
+    const userCount = users.data.length;
+    for (let i = 0; i < userCount; i++) {
+      if(users.data[i].id == req.params.id) {
+        res.send({
+          "data": users.data[i]
+        });
         return;
       }
     }

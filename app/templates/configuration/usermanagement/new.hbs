@@ -1,0 +1,8 @@
+<div class="col-12 d-flex flex-column">
+  <div>
+    {{#bs-button onClick=(route-action "goBack") type="secondary" outline=true title="Back to User List"}}
+      {{svg-jar "reply" class="octicon align-middle"}}
+    {{/bs-button}}
+  </div>
+  {{user-management/user-creation}}
+</div>
