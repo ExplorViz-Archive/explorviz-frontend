@@ -25,9 +25,7 @@ export default Component.extend(AlertifyHandler, Evented, {
     canvas: null,
 
     chartColors: null,
-
-    // The maximum number of data points shown in the timeline
-    maxNumOfDataPoints: 10,
+    maxNumOfDataPoints: null,
 
 
     // @Override
@@ -105,6 +103,9 @@ export default Component.extend(AlertifyHandler, Evented, {
                 radius: '4'
             }
         });
+
+        // setting the maximum number of data points shown in the timeline
+        self.set('maxNumOfDataPoints', 10);
     },
 
     /**
@@ -174,7 +175,7 @@ export default Component.extend(AlertifyHandler, Evented, {
                             tooltipFormat: 'DD.MM.YYYY - kk:mm:ss'
                         },
                         ticks: {
-                            source: 'labels'
+                            source: 'labels',
                         }
                     }],
                     yAxes: [{
@@ -198,27 +199,8 @@ export default Component.extend(AlertifyHandler, Evented, {
                 'onClick': function (evt) {
                     self.chartClickHandler(evt);
                 },
-
-                // Container for zoom options
-                zoom: {
-                    // Boolean to enable zooming
-                    enabled: true,
-
-                    // Enable drag-to-zoom behavior
-                    drag: true,
-
-                    // Zooming directions. Remove the appropriate direction to disable 
-                    // Eg. 'y' would only allow zooming in the y direction
-                    mode: 'y',
- 
-                    // Function called once zooming is completed
-                    // Useful for dynamic data loading
-                    onZoom: function () { self.debug('I was zoomed!!!'); }
-                }
             }
         };
-
-        self.debug(chartConfig.options.zoom);
 
         var timelineChart = new Chart(ctx, chartConfig);
         self.set('timelineChart', timelineChart);
@@ -363,6 +345,7 @@ export default Component.extend(AlertifyHandler, Evented, {
             self.set('lastHighlightedElementIndex', null);
         }
 
+        self.set('timelineChart', updatedTimelineChart);
         updatedTimelineChart.update();
 
         self.debug("end timeline update");
