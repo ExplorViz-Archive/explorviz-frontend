@@ -8,6 +8,14 @@ import { timestampToDate } from 'explorviz-frontend/helpers/timestamp-to-date';
 import Chart from "chart.js";
 import $ from 'jquery';
 
+/**
+ * Renderer for athe timeline.
+ *
+ * @class Timeline-Component
+ *
+ * @module explorviz
+ * @submodule visualization.page-setup.timeline
+ */
 export default Component.extend(AlertifyHandler, Evented, {
 
     // No Ember generated container
