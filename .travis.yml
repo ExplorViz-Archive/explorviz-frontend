@@ -42,5 +42,8 @@ jobs:
         - EMBER_VERSION=release
       script: ember build --prod && chmod +x .travis/docker_push.sh && .travis/docker_push.sh
 
+before_install:
+- export TZ=Europe/Berlin
+
 install:
   - npm install --no-package-lock
