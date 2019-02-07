@@ -2,11 +2,12 @@ import Service from '@ember/service';
 import config from 'explorviz-frontend/config/environment';
 import { inject as service } from "@ember/service";
 import { getOwner } from '@ember/application';
+import Evented from '@ember/object/evented';
 import ModelUpdater from 'explorviz-frontend/utils/model-update';
 import debugLogger from 'ember-debug-logger';
 
 /* global EventSourcePolyfill */
-export default Service.extend({
+export default Service.extend(Evented, {
 
   // https://github.com/segmentio/sse/blob/master/index.js
 
@@ -101,6 +102,7 @@ export default Service.extend({
   toggleVisualizationReload(){
     const self = this;
 
+    // TODO need to notify the timeline
     if (self.pauseVisualizationReload) {
       this.startVisualizationReload();
     }
@@ -111,6 +113,7 @@ export default Service.extend({
 
   startVisualizationReload(){
     this.set('pauseVisualizationReload', false);
+    this.trigger("visualizationResumed");
   },
 
   stopVisualizationReload(){

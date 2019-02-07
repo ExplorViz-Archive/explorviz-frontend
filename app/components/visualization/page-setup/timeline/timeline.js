@@ -71,19 +71,25 @@ export default Component.extend(AlertifyHandler, Evented, {
     cleanup() {
         this.set('timelineChart', null);
         this.get('timestampRepo').off('updated');
+        this.get('landscapeListener').off('visualizationResumed');
     },
 
     /**
      * Inititializes "updated" listener
-     * @method initTimeline
+     * @method initListener
      */
     initListener() {
         const self = this;
 
+        // a new timestamp (data point) arrives
         self.get('timestampRepo').on("updated", function (newTimestamp) {
             self.onUpdated(newTimestamp);
         });
-
+        
+        // the visualization is resumed from the navbar
+        self.get('landscapeListener').on("visualizationResumed", function () {
+            self.onLandscapeListenerVisualizationResumed();
+        });
     },
 
     /**
@@ -312,6 +318,23 @@ export default Component.extend(AlertifyHandler, Evented, {
     },
 
     /**
+     * Unhighlights all previosly selected data points in the chart
+     * @method unhighlightAllDataPoints
+     */
+    unhighlightAllDataPoints() {
+        const self = this;
+
+        const timelineChart = self.get('timelineChart');
+        const colorsDefault = self.get('chartColors.default');
+        const lastHighlightedElementIndex = self.get('lastHighlightedElementIndex');
+
+        if (lastHighlightedElementIndex) {
+            timelineChart.getDatasetMeta(0).data[lastHighlightedElementIndex].custom = colorsDefault;
+            self.unhighlightFirstDataPoint();
+        }
+    },
+
+    /**
      * Updates the timeline chart when "updated" is triggered
      * @method updateChart
      */
@@ -368,6 +391,13 @@ export default Component.extend(AlertifyHandler, Evented, {
         this.updateChart(newTimestamp);
     },
 
+    /**
+     * Called when the landscapeListener.startVisualizationReload is executed
+     * @method onLandscapeListenerVisualizationResumed
+     */
+    onLandscapeListenerVisualizationResumed(){
+        this.unhighlightAllDataPoints();
+    },
 
     /**
      * Displays a notifaction message  and resumes/pauses the visualization
