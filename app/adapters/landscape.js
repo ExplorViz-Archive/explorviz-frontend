@@ -21,7 +21,7 @@ const { JSONAPIAdapter } = DS;
 export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
   host: ENV.APP.API_ROOT,
-  namespace: "landscape",
+  namespace: "v1/landscapes",
 
   init() {
 
@@ -31,10 +31,10 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
  
   },
 
-  //@Override
-  urlForQueryRecord(query) {
+  // @Override
+  urlForQueryRecord() {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/${query}`;
+    return `${baseUrl}/by-timestamp`;
   },
 
   authorize(xhr) {

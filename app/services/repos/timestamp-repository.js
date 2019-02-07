@@ -1,6 +1,8 @@
 import Service from '@ember/service';
 import Evented from '@ember/object/evented';
 
+import debugLogger from 'ember-debug-logger';
+
 /**
 * TODO
 *
@@ -9,25 +11,23 @@ import Evented from '@ember/object/evented';
 */
 export default Service.extend(Evented, {
 
-  latestTimestamps: null,
-  uploadedTimestamps:null,
+  debug: debugLogger(),
+
+  latestTimestamp: null,
+  timelineTimestamps: null,
 
   // @Override
   init() {
     this._super(...arguments);
-    this.set('latestTimestamps', []);
+    this.set('timelineTimestamps', []);
   },
 
-  addTimestampToList(timestampRecord) {
-    this.get('latestTimestamps').push(timestampRecord);
-  },
-
-  triggerUpdated(){
-    this.trigger("updated");
-  },
-
-  triggerUploaded(){
-    this.trigger("uploaded", this.get("uploadedTimestamps"));
+  /**
+   * Triggers the 'updated' event in the timeline for updating the chart
+   * @method triggerTimelineUpdate
+   */
+  triggerTimelineUpdate() {
+    this.trigger("updated", this.get('latestTimestamp'));
   }
 
 });

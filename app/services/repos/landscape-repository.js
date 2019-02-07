@@ -19,6 +19,6 @@ export default Service.extend(Evented, {
 
   triggerLatestLandscapeUpdate(){
     this.trigger("updated", this.get("latestLandscape"));
-  }
+  },
 
 });

@@ -77,14 +77,14 @@ export default Service.extend({
 
         self.set('landscapeRepo.latestLandscape', landscapeRecord);
         self.get('landscapeRepo').triggerLatestLandscapeUpdate();
-        self.get('timestampRepo').addTimestampToList(landscapeRecord.get('timestamp'));
-        self.get('timestampRepo').triggerUpdated();
+
+        self.set('timestampRepo.latestTimestamp', landscapeRecord.get('timestamp'));
+        self.get('timestampRepo').triggerTimelineUpdate();
       }     
     });
   },
 
-  subscribe(url, fn){
-
+  subscribe(url, fn) {
     const self = this;   
 
     let source = new EventSource(url);
@@ -99,8 +99,22 @@ export default Service.extend({
   },
 
   toggleVisualizationReload(){
-    self.debug("Toggle Visualization Reload");
-    this.set('pauseVisualizationReload', !this.get('pauseVisualizationReload'));
+    const self = this;
+
+    if (self.pauseVisualizationReload) {
+      this.startVisualizationReload();
+    }
+    else {
+      this.stopVisualizationReload();
+    }
+  },
+
+  startVisualizationReload(){
+    this.set('pauseVisualizationReload', false);
+  },
+
+  stopVisualizationReload(){
+    this.set('pauseVisualizationReload', true);
   }
 
 });

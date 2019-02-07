@@ -10,6 +10,6 @@ export default JSONAPI.extend({
   init() {
     this._super(...arguments);
 
-    this.set('attributes', {timestamp: "number", calls: "number"});
+    this.set('attributes', {timestamp: "number", totalRequests: "number"});
   }
 });
