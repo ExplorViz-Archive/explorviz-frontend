@@ -8,12 +8,6 @@ node_js:
 services:
   - docker
 
-addons:
-  sonarcloud:
-    organization: "ExplorViz_explorviz-frontend"
-    token:
-      secure: ${Sonarcloud_Token}
-
 sudo: false
 
 # For testing environment
@@ -34,9 +28,6 @@ jobs:
       env:
         - EMBER_VERSION=release
       script: ember test
-
-    - stage: Sonarcloud (Quality Gate)
-      script: sonar-scanner
 
     #- stage: Test (Ember beta version)
     #  allow_failure: true
