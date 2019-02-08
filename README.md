@@ -25,43 +25,32 @@ The API documentation is available [here](https://explorviz.github.io/explorviz-
 ## Deployment
 There are two options for you at the moment. Browse to our [docker repository](https://github.com/ExplorViz/explorviz-docker). 
 * Clone the repository and deploy the built artifacts "explorviz-backend.war" and "explorviz-frontend" in a Tomcat
-* **OR** Use Docker as shown in the respective README.md
+* **OR** Use Docker as shown in the respective README.md.
 
 ## Development
-
 ### Prerequisites
-
 You will need the following things properly installed on your computer.
 
 * [Git](http://git-scm.com/)
 * [Node.js](http://nodejs.org/) with NPM (currently 11.8.0 / npm 6.5.0)
 
 ### Installation (Generic)
-
 * `git clone <repository-url>` this repository
 * `cd explorviz-frontend`
 * `npm install -g ember-cli`
-* `npm install -g yuidocjs`
 * `npm install`
 
 ### Running / Development
-
 * `ember serve` or `ember s`
 * Visit the frontend at [http://localhost:4200](http://localhost:4200).
 
 ### Mocking the Backend
-
 You can mock the backend, for example if you don't need live data for your development (or as showcase).
 Therefore, you are not required to download and run the ExplorViz Backen Java project.
 To achieve this, run the frontend with `ENABLE_MOCK=true ember s --environment=mocked`.
 
 #### Testing
-
 * `npm test` or `ember test` / `ember test --server`
 
 #### Building
-
 * `npm build` or `ember build` (development) / `ember build --environment=production` (production)
-
-#### Generating API Documentation
-* `yuidoc .` (Might need to delete content of *tmp* folder. Be aware! The result of this command should be commited at the end of your development, since it generates a lot of LoC.)
