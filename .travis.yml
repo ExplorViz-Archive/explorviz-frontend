@@ -42,6 +42,13 @@ jobs:
         - EMBER_VERSION=release
       script: ember build --prod && chmod +x .travis/docker_push.sh && .travis/docker_push.sh
 
+    - stage: documentation
+      if: (branch = master)
+      skip_cleanup: true
+      env:
+        - EMBER_VERSION=release
+      script: chmod +x .travis/yuidoc_push.sh && .travis/yuidoc_push.sh
+
 before_install:
 - export TZ=Europe/Berlin
 
