@@ -245,8 +245,6 @@ export default Component.extend(AlertifyHandler, Evented, {
             var elementIndex = activePoint._index;
             var retrievedTimestamp = data.datasets[datasetIndex].data[elementIndex].x;
 
-            self.debug(retrievedTimestamp);
-
             // data point was already highlighted
             if (lastHighlightedElementIndex === elementIndex) {
                 // do nothing
@@ -332,8 +330,9 @@ export default Component.extend(AlertifyHandler, Evented, {
 
         if (lastHighlightedElementIndex) {
             timelineChart.getDatasetMeta(0).data[lastHighlightedElementIndex].custom = colorsDefault;
-            self.unhighlightFirstDataPoint();
         }
+
+        self.unhighlightFirstDataPoint();
     },
 
     /**
