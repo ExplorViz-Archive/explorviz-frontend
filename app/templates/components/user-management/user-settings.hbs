@@ -5,7 +5,10 @@
     {{#bs-form model=this onSubmit=(action "saveSettings") as |form|}}
       {{#each-in booleans as |key v|}}
         <div class="d-flex justify-content-between pr-3">
-          {{key}}
+          <div>
+            {{help-tooltip title=(get this.descriptions key)}}
+            {{key}}
+          </div>
           {{x-toggle
             theme='skewed'
             value=(get this.booleans key)
@@ -14,9 +17,11 @@
         </div>
       {{/each-in}}
       {{#each-in numerics as |key|}}
+        {{help-tooltip title=(get this.descriptions key)}}
         {{form.element controlType="number" label=key property=(concat "numerics." key)}}
       {{/each-in}}
       {{#each-in strings as |key v|}}
+        {{help-tooltip title=(get this.descriptions key)}}
         {{form.element controlType="text" label=key property=(concat "strings." key)}}
       {{/each-in}}
 

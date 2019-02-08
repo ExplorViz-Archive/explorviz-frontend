@@ -19,11 +19,23 @@ export default Component.extend(AlertifyHandler, {
   // set through hb template, else is set to logged-in user
   user: null,
 
+  // workaround for release 1.3
+  // remove when usersettings descriptions are implemented
+  descriptions: null,
+
   didInsertElement() {
     this.set('showSpinner', true);
     this.initUser();
     this.initAttributeProperties();
     this.set('showSpinner', false);
+
+    this.set('descriptions', {});
+    this.get('descriptions')["showFpsCounter"] = "'Frames Per Second' metrics in visualizations";
+    this.get('descriptions')["appVizTransparency"] = "Transparency effect for selection (left click) in application visualization";
+    this.get('descriptions')["enableHoverEffects"] = "Hover effect (flashing entities) for mouse cursor";
+    this.get('descriptions')["keepHighlightingOnOpenOrClose"] = "Transparency effect for selection (left click) in application visualization";
+    this.get('descriptions')["appVizCommArrowSize"] = "Arrow Size for selected communications in application visualization";
+    this.get('descriptions')["appVizTransparencyIntensity"] = "Transparency effect intensity ('appVizTransparency' must be enabled)";
   },
 
   initUser() {
