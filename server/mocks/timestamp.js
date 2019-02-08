@@ -5,7 +5,7 @@ module.exports = function(app) {
   const express = require('express');
   let timestampRouter = express.Router();
 
-  const timestampObjects = require('./timestamp.json');
+  const timestampObjects = require('./timestamps.json');
 
   timestampRouter.get('/subsequent-interval', function(req, res) {
     res.send(timestampObjects);

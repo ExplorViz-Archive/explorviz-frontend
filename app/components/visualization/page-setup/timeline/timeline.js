@@ -245,6 +245,8 @@ export default Component.extend(AlertifyHandler, Evented, {
             var elementIndex = activePoint._index;
             var retrievedTimestamp = data.datasets[datasetIndex].data[elementIndex].x;
 
+            self.debug(retrievedTimestamp);
+
             // data point was already highlighted
             if (lastHighlightedElementIndex === elementIndex) {
                 // do nothing

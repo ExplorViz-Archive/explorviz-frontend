@@ -16,6 +16,10 @@ module.exports = function (app) {
     res.send(landscapeObject);
   });
 
+  landscapeRouter.get('/by-timestamp', function (req, res) {
+    res.send(landscapeObject);
+  });
+
   landscapeRouter.post('/', function (req, res) {
     res.status(201).end();
   });
