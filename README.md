@@ -8,7 +8,7 @@ ___
 [![Build status](https://ci.appveyor.com/api/projects/status/am0ea9r6sp2h74x7/branch/master?svg=true)](https://ci.appveyor.com/project/Alexander-Krause/explorviz-frontend/branch/master)
 <a href="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1/status.svg" alt="Dependency Status"></a>
 <a href="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1?type=dev"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1/dev-status.svg" alt="devDependencies status"></a>
-[![](https://img.shields.io/docker/pulls/explorviz/explorviz-docker.svg)](https://hub.docker.com/r/explorviz/explorviz-docker "Click to view the image on Docker Hub") [![Greenkeeper badge](https://badges.greenkeeper.io/ExplorViz/explorviz-frontend.svg)](https://greenkeeper.io/)
+[![Greenkeeper badge](https://badges.greenkeeper.io/ExplorViz/explorviz-frontend.svg)](https://greenkeeper.io/)
 
 ## Project Description
 ExplorViz uses dynamic analysis techniques to provide live trace visualization of the communication in large software landscape. It targets system and program comprehension in those landscapes while still providing details on the communication within an application. A landscape perspective enriches current system visualizations with additional abstraction levels for efficient comprehension of communication between hundreds of applications which is often encountered in, for instance, Cloud environments. On the application level perspective, ExplorViz utilizes the 3D city metaphor combined with an interactive concept of showing only details that are in focus of the analysis. For best accessibility, ExplorViz is a web-based tool featuring cutting-edge technologies like WebGL and HTML 5.
