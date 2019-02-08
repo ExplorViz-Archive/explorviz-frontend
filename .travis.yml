@@ -53,4 +53,5 @@ before_install:
 - export TZ=Europe/Berlin
 
 install:
+  - npm install -g yuidocjs
   - npm install --no-package-lock
