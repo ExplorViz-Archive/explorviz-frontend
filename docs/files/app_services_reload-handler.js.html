@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>app\mixins\threejs-performance.js - ExplorViz Frontend</title>
+    <title>app\services\reload-handler.js - ExplorViz Frontend</title>
     <link rel="stylesheet" href="">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -155,55 +155,68 @@
                 <div id="docs-main">
                     <div class="content">
 <div class="page-header">
-    <h1>app\mixins\threejs-performance.js <small>File</small></h1>
+    <h1>app\services\reload-handler.js <small>File</small></h1>
 </div>
 
 <div class="file">
     <pre class="prettyprint linenums">
-import Mixin from &#x27;@ember/object/mixin&#x27;;
-import Stats from &#x27;stats.js&#x27;;
-import $ from &#x27;jquery&#x27;;
+import Service from &#x27;@ember/service&#x27;;
+import Evented from &#x27;@ember/object/evented&#x27;;
+import { inject as service } from &#x27;@ember/service&#x27;;
+import debugLogger from &#x27;ember-debug-logger&#x27;;
+import AlertifyHandler from &#x27;explorviz-frontend/mixins/alertify-handler&#x27;;
 
-/* global THREEx */
+export default Service.extend(AlertifyHandler, Evented, {
 
-/**
-* TODO
-*
-* @class ThreeJS-Performance-Mixin
-* @extends Ember.Mixin
-*
-* @module explorviz
-* @submodule visualization.rendering
-*/
-export default Mixin.create({
+  debug: debugLogger(),
 
-  // @Override
-  init() {
-    
-    // Very important for mixins: Use this structure for object literals etc.
-    // if you WANT to avoid shared states
-    // https://www.emberjs.com/api/classes/Ember.Mixin.html
-    
-    this._super(...arguments);
+  landscapeRepo: service(&quot;repos/landscape-repository&quot;),
+  timestampRepo: service(&quot;repos/timestamp-repository&quot;),
+  store: service(),
 
-    this.set(&#x27;stats&#x27;, new Stats());
-    // 0: fps, 1: ms, 2: mb, 3+: custom or just click the window to toggle
-    this.get(&#x27;stats&#x27;).showPanel(0); 
-    this.get(&#x27;stats&#x27;).dom.style.top = &quot;200px&quot;;
-    this.get(&#x27;stats&#x27;).dom.style.zIndex = &quot;1000&quot;;
-    document.body.appendChild(this.get(&#x27;stats&#x27;).dom);
+  landscapeListener: service(&quot;landscape-listener&quot;),
 
-    this.set(&#x27;threexStats&#x27;, new THREEx.RendererStats());
-    this.get(&#x27;threexStats&#x27;).domElement.style.position = &#x27;absolute&#x27;;
-    this.get(&#x27;threexStats&#x27;).domElement.style.top = &#x27;250px&#x27;;
-    document.body.appendChild(this.get(&#x27;threexStats&#x27;).domElement);
+  /**
+   * Loads a landscape from the backend and triggers a visualization update
+   * @method loadLandscapeById
+   * @param {*} timestamp 
+   * @param {*} appID 
+   */
+  loadLandscapeById(timestamp, appID) {
 
-  },
+    const self = this;
 
-  removePerformanceMeasurement() {
+    self.debug(&quot;start import landscape-request&quot;);
 
-    $(this.get(&#x27;stats&#x27;).dom).remove();
-    $(this.get(&#x27;threexStats&#x27;).domElement).remove();
+    self.get(&#x27;store&#x27;).queryRecord(&#x27;landscape&#x27;, {timestamp: timestamp}).then(success, failure).catch(error);
+
+    function success(landscape){
+      
+      self.set(&#x27;landscapeRepo.latestLandscape&#x27;, landscape);
+      self.get(&#x27;landscapeRepo&#x27;).triggerLatestLandscapeUpdate();
+
+      if (appID) {
+        const app = self.get(&#x27;store&#x27;).peekRecord(&#x27;application&#x27;, appID);
+        self.set(&#x27;landscapeRepo.latestApplication&#x27;, app);
+      }
+
+      // pause the visulization
+      self.get(&#x27;landscapeListener&#x27;).stopVisualizationReload();
+
+      self.debug(&quot;end import landscape-request&quot;);
+    }
+
+    function failure(e){
+      self.set(&#x27;landscapeRepo.latestLandscape&#x27;, undefined);
+      self.showAlertifyMessage(&quot;Landscape couldn&#x27;t be requested!&quot; +
+        &quot; Backend offline?&quot;);
+      self.debug(&quot;Landscape couldn&#x27;t be requested!&quot;, e);
+    }
+
+    function error(e){
+      self.set(&#x27;landscapeRepo.latestLandscape&#x27;, undefined);
+      self.debug(&quot;Error when fetching landscape: &quot;, e);
+    }
 
   }
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>app\mixins\threejs-performance.js - ExplorViz Frontend</title>
+    <title>visualization.page-setup.timeline - ExplorViz Frontend</title>
     <link rel="stylesheet" href="">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -155,61 +155,40 @@
                 <div id="docs-main">
                     <div class="content">
 <div class="page-header">
-    <h1>app\mixins\threejs-performance.js <small>File</small></h1>
+    <h1>visualization.page-setup.timeline <small>Module</small></h1>
 </div>
 
-<div class="file">
-    <pre class="prettyprint linenums">
-import Mixin from &#x27;@ember/object/mixin&#x27;;
-import Stats from &#x27;stats.js&#x27;;
-import $ from &#x27;jquery&#x27;;
+<div class="clearfix well well-small">
 
-/* global THREEx */
 
-/**
-* TODO
-*
-* @class ThreeJS-Performance-Mixin
-* @extends Ember.Mixin
-*
-* @module explorviz
-* @submodule visualization.rendering
-*/
-export default Mixin.create({
+        <div class="foundat">
+            Defined in: <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l11"><code>app\components\visualization\page-setup\timeline\timeline.js:11</code></a>
+        </div>
 
-  // @Override
-  init() {
-    
-    // Very important for mixins: Use this structure for object literals etc.
-    // if you WANT to avoid shared states
-    // https://www.emberjs.com/api/classes/Ember.Mixin.html
-    
-    this._super(...arguments);
+</div>
 
-    this.set(&#x27;stats&#x27;, new Stats());
-    // 0: fps, 1: ms, 2: mb, 3+: custom or just click the window to toggle
-    this.get(&#x27;stats&#x27;).showPanel(0); 
-    this.get(&#x27;stats&#x27;).dom.style.top = &quot;200px&quot;;
-    this.get(&#x27;stats&#x27;).dom.style.zIndex = &quot;1000&quot;;
-    document.body.appendChild(this.get(&#x27;stats&#x27;).dom);
 
-    this.set(&#x27;threexStats&#x27;, new THREEx.RendererStats());
-    this.get(&#x27;threexStats&#x27;).domElement.style.position = &#x27;absolute&#x27;;
-    this.get(&#x27;threexStats&#x27;).domElement.style.top = &#x27;250px&#x27;;
-    document.body.appendChild(this.get(&#x27;threexStats&#x27;).domElement);
+<div class="moduledesc well well-small">
+    <p>Renderer for athe timeline.</p>
 
-  },
+</div>
 
-  removePerformanceMeasurement() {
 
-    $(this.get(&#x27;stats&#x27;).dom).remove();
-    $(this.get(&#x27;threexStats&#x27;).domElement).remove();
+<div class="yui3-g">
+    <div class="yui3-u-1-2">
+            <p>This module provides the following classes:</p>
 
-  }
+            <ul class="module-classes">
+                <li class="module-class">
+                    <a href="../classes/Timeline-Component.html">
+                        Timeline-Component
+                    </a>
+                </li>
+            </ul>
+    </div>
 
-});
-
-    </pre>
+    <div class="yui3-u-1-2">
+    </div>
 </div>
                     </div>
                 </div>

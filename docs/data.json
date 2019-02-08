@@ -77,6 +77,15 @@
             "fors": {},
             "namespaces": {}
         },
+        "app\\components\\visualization\\page-setup\\timeline\\timeline.js": {
+            "name": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "modules": {},
+            "classes": {
+                "Timeline-Component": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        },
         "app\\components\\visualization\\rendering\\application-rendering.js": {
             "name": "app\\components\\visualization\\rendering\\application-rendering.js",
             "modules": {},
@@ -485,6 +494,13 @@
             "fors": {},
             "namespaces": {}
         },
+        "app\\services\\reload-handler.js": {
+            "name": "app\\services\\reload-handler.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
         "app\\utils\\application-rendering\\foundation-builder.js": {
             "name": "app\\utils\\application-rendering\\foundation-builder.js",
             "modules": {},
@@ -579,7 +595,7 @@
             "module": "explorviz",
             "namespace": "",
             "file": "app\\adapters\\timestamp.js",
-            "line": 8,
+            "line": 7,
             "description": "Network TODO",
             "tag": "main",
             "itemtype": "main"
@@ -590,6 +606,7 @@
                 "network": 1,
                 "security": 1,
                 "page": 1,
+                "visualization.page-setup.timeline": 1,
                 "visualization.rendering": 1,
                 "settings": 1,
                 "visualization": 1,
@@ -608,6 +625,7 @@
                 "Authenticator": 1,
                 "Navbar-Octicons": 1,
                 "Navbar-Routes": 1,
+                "Timeline-Component": 1,
                 "Application-Rendering-Component": 1,
                 "Landscape-Rendering-Component": 1,
                 "Rendering-Core-Component": 1,
@@ -699,6 +717,22 @@
             "tag": "main",
             "itemtype": "main"
         },
+        "visualization.page-setup.timeline": {
+            "name": "visualization.page-setup.timeline",
+            "submodules": {},
+            "elements": {},
+            "classes": {
+                "Timeline-Component": 1
+            },
+            "fors": {},
+            "is_submodule": 1,
+            "namespaces": {},
+            "module": "explorviz",
+            "namespace": "",
+            "description": "Renderer for athe timeline.",
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 11
+        },
         "visualization.rendering": {
             "name": "visualization.rendering",
             "submodules": {},
@@ -785,7 +819,7 @@
             "module": "explorviz",
             "namespace": "",
             "file": "app\\models\\user.js",
-            "line": 6,
+            "line": 7,
             "description": "Model TODO",
             "tag": "main",
             "itemtype": "main"
@@ -961,7 +995,7 @@
             "module": "explorviz",
             "namespace": "",
             "file": "app\\adapters\\timestamp.js",
-            "line": 8,
+            "line": 7,
             "description": "This Adapter operates as communication abstraction for all network requests,\nthat refer to Timestamp objects. It provides functions for fetching,\nupdating and uploading. However, at the time of writing this documentation\nonly fetching is implemented by the backend.",
             "submodule": "network",
             "extends": "DS.JSONAPIAdapter"
@@ -1013,6 +1047,21 @@
             "description": "This component renders all routes (!), that are registered in \n{{#crossLink \"Page-Setup-Service\"}}{{/crossLink}}, as nav-links.",
             "submodule": "page",
             "extends": "Ember.Component"
+        },
+        "Timeline-Component": {
+            "name": "Timeline-Component",
+            "shortname": "Timeline-Component",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "explorviz",
+            "namespace": "",
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 11,
+            "description": "Renderer for athe timeline.",
+            "submodule": "visualization.page-setup.timeline"
         },
         "Application-Rendering-Component": {
             "name": "Application-Rendering-Component",
@@ -1489,7 +1538,7 @@
             "module": "explorviz",
             "namespace": "",
             "file": "app\\models\\user.js",
-            "line": 6,
+            "line": 7,
             "description": "Ember model for a User.",
             "submodule": "model",
             "extends": "@extends BaseEntity-Model"
@@ -1535,7 +1584,7 @@
             "module": "explorviz",
             "namespace": "",
             "file": "app\\routes\\configuration.js",
-            "line": 6,
+            "line": 7,
             "description": "TODO",
             "extends": "Ember.Route"
         },
@@ -1655,7 +1704,7 @@
             "module": "explorviz",
             "namespace": "",
             "file": "app\\services\\repos\\timestamp-repository.js",
-            "line": 4,
+            "line": 6,
             "description": "TODO",
             "extends": "Ember.Service"
         },
@@ -1793,6 +1842,157 @@
             "name": "initCytoscape",
             "class": "Navbar-Octicons",
             "module": "explorviz"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 40,
+            "description": "This overridden Ember Component lifecycle hook enables calling\nExplorViz's setup code for actual rendering and custom listeners.",
+            "itemtype": "method",
+            "name": "didRender",
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 54,
+            "description": "This overridden Ember Component lifecycle hook enables calling\nExplorViz's custom cleanup code.",
+            "itemtype": "method",
+            "name": "willDestroyElement",
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 65,
+            "description": "This function is called when the willDestroyElement event is fired. Inherit this\nfunction to cleanup custom properties or unbind listener",
+            "itemtype": "method",
+            "name": "cleanup",
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 77,
+            "description": "Inititializes \"updated\" listener",
+            "itemtype": "method",
+            "name": "initListener",
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 95,
+            "description": "Initializes default settings for the chart",
+            "itemtype": "method",
+            "name": "initChart",
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 125,
+            "description": "Renders the timeline chart",
+            "itemtype": "method",
+            "name": "renderChart",
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 225,
+            "description": "Clickhandler for the chart",
+            "itemtype": "method",
+            "name": "chartClickhandler",
+            "params": [
+                {
+                    "name": "evt",
+                    "description": "",
+                    "type": "*"
+                }
+            ],
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 298,
+            "description": "Resets the style of first data point in the chart",
+            "itemtype": "method",
+            "name": "unhighlightFirstDataPoint",
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 320,
+            "description": "Unhighlights all previosly selected data points in the chart",
+            "itemtype": "method",
+            "name": "unhighlightAllDataPoints",
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 338,
+            "description": "Updates the timeline chart when \"updated\" is triggered",
+            "itemtype": "method",
+            "name": "updateChart",
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 386,
+            "description": "Called when a new timestamp is passed and the chart needs to be updated",
+            "itemtype": "method",
+            "name": "onUpdated",
+            "params": [
+                {
+                    "name": "newTimestamp",
+                    "description": "",
+                    "type": "*"
+                }
+            ],
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 395,
+            "description": "Called when the landscapeListener.startVisualizationReload is executed",
+            "itemtype": "method",
+            "name": "onLandscapeListenerVisualizationResumed",
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
+        },
+        {
+            "file": "app\\components\\visualization\\page-setup\\timeline\\timeline.js",
+            "line": 403,
+            "description": "Displays a notifaction message  and resumes/pauses the visualization",
+            "itemtype": "method",
+            "name": "handleNotificationMessage",
+            "params": [
+                {
+                    "name": "pause",
+                    "description": "(true: pause -> resume, false: resume -> pause )",
+                    "type": "True, false"
+                }
+            ],
+            "class": "Timeline-Component",
+            "module": "explorviz",
+            "submodule": "visualization.page-setup.timeline"
         },
         {
             "file": "app\\components\\visualization\\rendering\\application-rendering.js",
@@ -2006,8 +2206,17 @@
             "submodule": "model.util"
         },
         {
+            "file": "app\\services\\repos\\timestamp-repository.js",
+            "line": 25,
+            "description": "Triggers the 'updated' event in the timeline for updating the chart",
+            "itemtype": "method",
+            "name": "triggerTimelineUpdate",
+            "class": "Timestamp-Repository-Service",
+            "module": "explorviz"
+        },
+        {
             "file": "app\\services\\visualization\\application\\highlighter.js",
-            "line": 178,
+            "line": 184,
             "description": "Marks communication between clazzes as NORMAL or TRANSPARENT for highlighting, only used if a component or clazz is highlighted",
             "params": [
                 {
@@ -2028,7 +2237,7 @@
         },
         {
             "file": "app\\services\\visualization\\application\\highlighter.js",
-            "line": 211,
+            "line": 217,
             "description": "Sets all (nested) entities (components & clazzes) of a component either to TRANSPARENT or NORMAL for highlighting",
             "params": [
                 {
@@ -2098,6 +2307,27 @@
             "class": "Page-Setup-Service",
             "module": "explorviz",
             "submodule": "page"
+        },
+        {
+            "file": "app\\services\\reload-handler.js",
+            "line": 17,
+            "description": "Loads a landscape from the backend and triggers a visualization update",
+            "itemtype": "method",
+            "name": "loadLandscapeById",
+            "params": [
+                {
+                    "name": "timestamp",
+                    "description": "",
+                    "type": "*"
+                },
+                {
+                    "name": "appID",
+                    "description": "",
+                    "type": "*"
+                }
+            ],
+            "class": "foundation-builder",
+            "module": "explorviz"
         },
         {
             "file": "app\\utils\\model-update.js",

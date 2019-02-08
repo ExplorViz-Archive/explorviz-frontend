@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Landscape-Rendering-Component - ExplorViz Frontend</title>
+    <title>Timeline-Component - ExplorViz Frontend</title>
     <link rel="stylesheet" href="">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -155,27 +155,24 @@
                 <div id="docs-main">
                     <div class="content">
 <div class="page-header">
-    <h1>Landscape-Rendering-Component <small>Class</small></h1>
+    <h1>Timeline-Component <small>Class</small></h1>
 </div>
 
 <div class="well well-small">
 
-        <div class="extends">
-            Extends <a href="../classes/Rendering-Core-Component.html" class="crosslink">Rendering-Core-Component</a>
-        </div>
 
         <div class="foundat">
-            Defined in: <a href="../files/app_components_visualization_rendering_landscape-rendering.js.html#l20"><code>app\components\visualization\rendering\landscape-rendering.js:20</code></a>
+            Defined in: <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l11"><code>app\components\visualization\page-setup\timeline\timeline.js:11</code></a>
         </div>
 
-            Module: <a href="../modules/visualization.rendering.html">visualization.rendering</a><br>
+            Module: <a href="../modules/visualization.page-setup.timeline.html">visualization.page-setup.timeline</a><br>
             Parent Module: <a href="../modules/explorviz.html">explorviz</a>
 
 </div>
 
 
 <div class="well well-small">
-    <p>Renderer for landscape visualization.</p>
+    <p>Renderer for athe timeline.</p>
 
 </div>
 
@@ -194,36 +191,56 @@
                 <div class="index-section methods">
                     <h3>Methods</h3>
 
-                    <ul class="index-list methods extends">
-                            <li class="index-item method inherited">
-                                <a href="#" data-tabid="#methods" data-anchor="#method_cleanAndUpdateScene" data-tablink="cleanAndUpdateScene">cleanAndUpdateScene</a>
+                    <ul class="index-list methods">
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_chartClickhandler" data-tablink="chartClickhandler">chartClickhandler</a>
 
                             </li>
-                            <li class="index-item method inherited">
+                            <li class="index-item method">
                                 <a href="#" data-tabid="#methods" data-anchor="#method_cleanup" data-tablink="cleanup">cleanup</a>
 
                             </li>
-                            <li class="index-item method inherited">
+                            <li class="index-item method">
                                 <a href="#" data-tabid="#methods" data-anchor="#method_didRender" data-tablink="didRender">didRender</a>
 
                             </li>
                             <li class="index-item method">
-                                <a href="#" data-tabid="#methods" data-anchor="#method_initRendering" data-tablink="initRendering">initRendering</a>
+                                <a href="#" data-tabid="#methods" data-anchor="#method_handleNotificationMessage" data-tablink="handleNotificationMessage">handleNotificationMessage</a>
 
                             </li>
-                            <li class="index-item method inherited">
-                                <a href="#" data-tabid="#methods" data-anchor="#method_initRenderings" data-tablink="initRenderings">initRenderings</a>
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_initChart" data-tablink="initChart">initChart</a>
 
                             </li>
-                            <li class="index-item method inherited">
-                                <a href="#" data-tabid="#methods" data-anchor="#method_populateScene" data-tablink="populateScene">populateScene</a>
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_initListener" data-tablink="initListener">initListener</a>
 
                             </li>
-                            <li class="index-item method inherited">
-                                <a href="#" data-tabid="#methods" data-anchor="#method_preProcessEntity" data-tablink="preProcessEntity">preProcessEntity</a>
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_onLandscapeListenerVisualizationResumed" data-tablink="onLandscapeListenerVisualizationResumed">onLandscapeListenerVisualizationResumed</a>
 
                             </li>
-                            <li class="index-item method inherited">
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_onUpdated" data-tablink="onUpdated">onUpdated</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_renderChart" data-tablink="renderChart">renderChart</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_unhighlightAllDataPoints" data-tablink="unhighlightAllDataPoints">unhighlightAllDataPoints</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_unhighlightFirstDataPoint" data-tablink="unhighlightFirstDataPoint">unhighlightFirstDataPoint</a>
+
+                            </li>
+                            <li class="index-item method">
+                                <a href="#" data-tabid="#methods" data-anchor="#method_updateChart" data-tablink="updateChart">updateChart</a>
+
+                            </li>
+                            <li class="index-item method">
                                 <a href="#" data-tabid="#methods" data-anchor="#method_willDestroyElement" data-tablink="willDestroyElement">willDestroyElement</a>
 
                             </li>
@@ -237,10 +254,16 @@
             <div id="methods" class="tab-pane">
                 <h2 class="off-left">Methods</h2>
 
-                    <div id="method_cleanAndUpdateScene" class="method item">
-                        <h3 class="name"><code>cleanAndUpdateScene</code></h3>
+                    <div id="method_chartClickhandler" class="method item">
+                        <h3 class="name"><code>chartClickhandler</code></h3>
                     
-                            <span class="paren">()</span>
+                            <div class="args">
+                                <span class="paren">(</span><ul class="args-list inline commas">
+                                    <li class="arg">
+                                            <code>evt</code>
+                                    </li>
+                                </ul><span class="paren">)</span>
+                            </div>
                     
                     
                     
@@ -250,12 +273,9 @@
                     
                     
                         <div class="meta">
-                                <p>Inherited from
-                                <a href="../classes/Rendering-Core-Component.html#method_cleanAndUpdateScene">
-                                    Rendering-Core-Component
-                                </a>
-                                but overwritten in
-                            <a href="../files/app_components_visualization_rendering_landscape-rendering.js.html#l125"><code>app\components\visualization\rendering\landscape-rendering.js:125</code></a>
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l225"><code>app\components\visualization\page-setup\timeline\timeline.js:225</code></a>
                             </p>
                     
                     
@@ -263,76 +283,31 @@
                         </div>
                     
                         <div class="description">
-                            <p>TODO</p>
+                            <p>Clickhandler for the chart</p>
                     
                         </div>
                     
+                            <div class="params">
+                                <h4>Parameters:</h4>
+                    
+                                <ul class="params-list">
+                                    <li class="param">
+                                            <code class="param-name">evt</code>
+                                            <span class="type"></span>
+                    
+                    
+                                        <div class="param-description">
+                                             
+                                        </div>
+                    
+                                    </li>
+                                </ul>
+                            </div>
                     
                     
                     </div>
-                    <div id="method_cleanup" class="method item inherited">
+                    <div id="method_cleanup" class="method item">
                         <h3 class="name"><code>cleanup</code></h3>
-                    
-                            <span class="paren">()</span>
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                        <div class="meta">
-                                    <p>Inherited from
-                                    <a href="../classes/Rendering-Core-Component.html#method_cleanup">Rendering-Core-Component</a>:
-                            <a href="../files/app_components_visualization_rendering_rendering-core.js.html#l404"><code>app\components\visualization\rendering\rendering-core.js:404</code></a>
-                            </p>
-                    
-                    
-                    
-                        </div>
-                    
-                        <div class="description">
-                            This function is called when the willDestroyElement event is fired. Inherit this
-                    function to cleanup custom properties or unbind listener
-                    as shown in {{#crossLink "Landscape-Rendering"}}{{/crossLink}}.
-                        </div>
-                    
-                    
-                    
-                    </div>
-                    <div id="method_didRender" class="method item inherited">
-                        <h3 class="name"><code>didRender</code></h3>
-                    
-                            <span class="paren">()</span>
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                        <div class="meta">
-                                    <p>Inherited from
-                                    <a href="../classes/Rendering-Core-Component.html#method_didRender">Rendering-Core-Component</a>:
-                            <a href="../files/app_components_visualization_rendering_rendering-core.js.html#l65"><code>app\components\visualization\rendering\rendering-core.js:65</code></a>
-                            </p>
-                    
-                    
-                    
-                        </div>
-                    
-                        <div class="description">
-                            This overridden Ember Component lifecycle hook enables calling
-                    ExplorViz's setup code for actual rendering and custom listeners.
-                        </div>
-                    
-                    
-                    
-                    </div>
-                    <div id="method_initRendering" class="method item">
-                        <h3 class="name"><code>initRendering</code></h3>
                     
                             <span class="paren">()</span>
                     
@@ -346,7 +321,7 @@
                         <div class="meta">
                                     <p>
                                     Defined in
-                            <a href="../files/app_components_visualization_rendering_landscape-rendering.js.html#l46"><code>app\components\visualization\rendering\landscape-rendering.js:46</code></a>
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l65"><code>app\components\visualization\page-setup\timeline\timeline.js:65</code></a>
                             </p>
                     
                     
@@ -354,15 +329,16 @@
                         </div>
                     
                         <div class="description">
-                            <p>TODO</p>
+                            <p>This function is called when the willDestroyElement event is fired. Inherit this
+                    function to cleanup custom properties or unbind listener</p>
                     
                         </div>
                     
                     
                     
                     </div>
-                    <div id="method_initRenderings" class="method item inherited">
-                        <h3 class="name"><code>initRenderings</code></h3>
+                    <div id="method_didRender" class="method item">
+                        <h3 class="name"><code>didRender</code></h3>
                     
                             <span class="paren">()</span>
                     
@@ -374,9 +350,9 @@
                     
                     
                         <div class="meta">
-                                    <p>Inherited from
-                                    <a href="../classes/Rendering-Core-Component.html#method_initRenderings">Rendering-Core-Component</a>:
-                            <a href="../files/app_components_visualization_rendering_rendering-core.js.html#l91"><code>app\components\visualization\rendering\rendering-core.js:91</code></a>
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l40"><code>app\components\visualization\page-setup\timeline\timeline.js:40</code></a>
                             </p>
                     
                     
@@ -384,16 +360,69 @@
                         </div>
                     
                         <div class="description">
-                            This function is called once on the didRender event. Inherit this function
-                    to call other important function, e.g. "initInteraction" as shown in
-                    {{#crossLink "Landscape-Rendering/initInteraction:method"}}{{/crossLink}}.
+                            <p>This overridden Ember Component lifecycle hook enables calling
+                    ExplorViz's setup code for actual rendering and custom listeners.</p>
+                    
                         </div>
                     
                     
                     
                     </div>
-                    <div id="method_populateScene" class="method item">
-                        <h3 class="name"><code>populateScene</code></h3>
+                    <div id="method_handleNotificationMessage" class="method item">
+                        <h3 class="name"><code>handleNotificationMessage</code></h3>
+                    
+                            <div class="args">
+                                <span class="paren">(</span><ul class="args-list inline commas">
+                                    <li class="arg">
+                                            <code>pause</code>
+                                    </li>
+                                </ul><span class="paren">)</span>
+                            </div>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l403"><code>app\components\visualization\page-setup\timeline\timeline.js:403</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>Displays a notifaction message  and resumes/pauses the visualization</p>
+                    
+                        </div>
+                    
+                            <div class="params">
+                                <h4>Parameters:</h4>
+                    
+                                <ul class="params-list">
+                                    <li class="param">
+                                            <code class="param-name">pause</code>
+                                            <span class="type">True, false</span>
+                    
+                    
+                                        <div class="param-description">
+                                            <p>(true: pause -&gt; resume, false: resume -&gt; pause )</p>
+                    
+                                        </div>
+                    
+                                    </li>
+                                </ul>
+                            </div>
+                    
+                    
+                    </div>
+                    <div id="method_initChart" class="method item">
+                        <h3 class="name"><code>initChart</code></h3>
                     
                             <span class="paren">()</span>
                     
@@ -405,12 +434,9 @@
                     
                     
                         <div class="meta">
-                                <p>Inherited from
-                                <a href="../classes/Rendering-Core-Component.html#method_populateScene">
-                                    Rendering-Core-Component
-                                </a>
-                                but overwritten in
-                            <a href="../files/app_components_visualization_rendering_landscape-rendering.js.html#l140"><code>app\components\visualization\rendering\landscape-rendering.js:140</code></a>
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l95"><code>app\components\visualization\page-setup\timeline\timeline.js:95</code></a>
                             </p>
                     
                     
@@ -418,15 +444,15 @@
                         </div>
                     
                         <div class="description">
-                            <p>TODO</p>
+                            <p>Initializes default settings for the chart</p>
                     
                         </div>
                     
                     
                     
                     </div>
-                    <div id="method_preProcessEntity" class="method item inherited">
-                        <h3 class="name"><code>preProcessEntity</code></h3>
+                    <div id="method_initListener" class="method item">
+                        <h3 class="name"><code>initListener</code></h3>
                     
                             <span class="paren">()</span>
                     
@@ -438,9 +464,9 @@
                     
                     
                         <div class="meta">
-                                    <p>Inherited from
-                                    <a href="../classes/Rendering-Core-Component.html#method_preProcessEntity">Rendering-Core-Component</a>:
-                            <a href="../files/app_components_visualization_rendering_rendering-core.js.html#l467"><code>app\components\visualization\rendering\rendering-core.js:467</code></a>
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l77"><code>app\components\visualization\page-setup\timeline\timeline.js:77</code></a>
                             </p>
                     
                     
@@ -448,20 +474,216 @@
                         </div>
                     
                         <div class="description">
-                            This function is called automatically when a new landscape was fetched. It
-                    is executed before
-                    {{#crossLink "Rendering-Core/cleanAndUpdateScene:method"}}{{/crossLink}}.
-                    Inherit this function to preprocess the
-                    {{#crossLink "Landscape"}}{{/crossLink}} for rendering, e.g. filter some
-                    value.
+                            <p>Inititializes "updated" listener</p>
                     
-                    See {{#crossLink "Application-Rendering"}}{{/crossLink}} for example usage.
                         </div>
                     
                     
                     
                     </div>
-                    <div id="method_willDestroyElement" class="method item inherited">
+                    <div id="method_onLandscapeListenerVisualizationResumed" class="method item">
+                        <h3 class="name"><code>onLandscapeListenerVisualizationResumed</code></h3>
+                    
+                            <span class="paren">()</span>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l395"><code>app\components\visualization\page-setup\timeline\timeline.js:395</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>Called when the landscapeListener.startVisualizationReload is executed</p>
+                    
+                        </div>
+                    
+                    
+                    
+                    </div>
+                    <div id="method_onUpdated" class="method item">
+                        <h3 class="name"><code>onUpdated</code></h3>
+                    
+                            <div class="args">
+                                <span class="paren">(</span><ul class="args-list inline commas">
+                                    <li class="arg">
+                                            <code>newTimestamp</code>
+                                    </li>
+                                </ul><span class="paren">)</span>
+                            </div>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l386"><code>app\components\visualization\page-setup\timeline\timeline.js:386</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>Called when a new timestamp is passed and the chart needs to be updated</p>
+                    
+                        </div>
+                    
+                            <div class="params">
+                                <h4>Parameters:</h4>
+                    
+                                <ul class="params-list">
+                                    <li class="param">
+                                            <code class="param-name">newTimestamp</code>
+                                            <span class="type"></span>
+                    
+                    
+                                        <div class="param-description">
+                                             
+                                        </div>
+                    
+                                    </li>
+                                </ul>
+                            </div>
+                    
+                    
+                    </div>
+                    <div id="method_renderChart" class="method item">
+                        <h3 class="name"><code>renderChart</code></h3>
+                    
+                            <span class="paren">()</span>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l125"><code>app\components\visualization\page-setup\timeline\timeline.js:125</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>Renders the timeline chart</p>
+                    
+                        </div>
+                    
+                    
+                    
+                    </div>
+                    <div id="method_unhighlightAllDataPoints" class="method item">
+                        <h3 class="name"><code>unhighlightAllDataPoints</code></h3>
+                    
+                            <span class="paren">()</span>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l320"><code>app\components\visualization\page-setup\timeline\timeline.js:320</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>Unhighlights all previosly selected data points in the chart</p>
+                    
+                        </div>
+                    
+                    
+                    
+                    </div>
+                    <div id="method_unhighlightFirstDataPoint" class="method item">
+                        <h3 class="name"><code>unhighlightFirstDataPoint</code></h3>
+                    
+                            <span class="paren">()</span>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l298"><code>app\components\visualization\page-setup\timeline\timeline.js:298</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>Resets the style of first data point in the chart</p>
+                    
+                        </div>
+                    
+                    
+                    
+                    </div>
+                    <div id="method_updateChart" class="method item">
+                        <h3 class="name"><code>updateChart</code></h3>
+                    
+                            <span class="paren">()</span>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        <div class="meta">
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l338"><code>app\components\visualization\page-setup\timeline\timeline.js:338</code></a>
+                            </p>
+                    
+                    
+                    
+                        </div>
+                    
+                        <div class="description">
+                            <p>Updates the timeline chart when "updated" is triggered</p>
+                    
+                        </div>
+                    
+                    
+                    
+                    </div>
+                    <div id="method_willDestroyElement" class="method item">
                         <h3 class="name"><code>willDestroyElement</code></h3>
                     
                             <span class="paren">()</span>
@@ -474,9 +696,9 @@
                     
                     
                         <div class="meta">
-                                    <p>Inherited from
-                                    <a href="../classes/Rendering-Core-Component.html#method_willDestroyElement">Rendering-Core-Component</a>:
-                            <a href="../files/app_components_visualization_rendering_rendering-core.js.html#l79"><code>app\components\visualization\rendering\rendering-core.js:79</code></a>
+                                    <p>
+                                    Defined in
+                            <a href="../files/app_components_visualization_page-setup_timeline_timeline.js.html#l54"><code>app\components\visualization\page-setup\timeline\timeline.js:54</code></a>
                             </p>
                     
                     
@@ -484,8 +706,9 @@
                         </div>
                     
                         <div class="description">
-                            This overridden Ember Component lifecycle hook enables calling
-                    ExplorViz's custom cleanup code.
+                            <p>This overridden Ember Component lifecycle hook enables calling
+                    ExplorViz's custom cleanup code.</p>
+                    
                         </div>
                     
                     

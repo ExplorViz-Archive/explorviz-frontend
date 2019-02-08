@@ -44,6 +44,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "System-Model",
         "System-Serializer",
         "ThreeJS-Performance-Mixin",
+        "Timeline-Component",
         "Timestamp-Adapter",
         "Timestamp-Model",
         "Timestamp-Repository-Service",
@@ -68,6 +69,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "settings",
         "util",
         "visualization",
+        "visualization.page-setup.timeline",
         "visualization.rendering",
         "visualization.timeshift"
     ],
@@ -129,6 +131,11 @@ YUI.add("yuidoc-meta", function(Y) {
             "displayName": "visualization",
             "name": "visualization",
             "description": "Viz TODO"
+        },
+        {
+            "displayName": "visualization.page-setup.timeline",
+            "name": "visualization.page-setup.timeline",
+            "description": "Renderer for athe timeline."
         },
         {
             "displayName": "visualization.rendering",
