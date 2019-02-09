@@ -17,12 +17,16 @@
         </div>
       {{/each-in}}
       {{#each-in numerics as |key|}}
-        {{help-tooltip title=(get this.descriptions key)}}
-        {{form.element controlType="number" label=key property=(concat "numerics." key)}}
+        <div class="mb-3">
+          {{help-tooltip title=(get this.descriptions key)}}
+          {{form.element class="d-contents" controlType="number" step=".01" label=key property=(concat "numerics." key)}}
+        </div>
       {{/each-in}}
-      {{#each-in strings as |key v|}}
-        {{help-tooltip title=(get this.descriptions key)}}
-        {{form.element controlType="text" label=key property=(concat "strings." key)}}
+      {{#each-in strings as |key|}}
+        <div class="mb-3">
+          {{help-tooltip title=(get this.descriptions key)}}
+          {{form.element class="d-contents" controlType="text" label=key property=(concat "strings." key)}}
+        </div>
       {{/each-in}}
 
       {{#bs-button onClick=(action "saveSettings") type="primary" buttonType="submit"}}
