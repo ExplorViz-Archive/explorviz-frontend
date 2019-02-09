@@ -80,9 +80,3 @@
 .explorviz-top-navbar .nav.navbar-nav > li.dropdown > .dropdown-menu {
   @extend .dropdown-menu-right;
 }
-
-.explorviz-top-navbar .dropdown-item.active,
-.explorviz-top-navbar .dropdown-item:active {
-  color: #212529;
-  background-color: rgba(0, 0, 0, 0.05);
-}
