@@ -18,5 +18,3 @@ git commit -m "Latest Yuidoc on successful Travis build $TRAVIS_BUILD_NUMBER aut
 git push -fq origin gh-pages > /dev/null
 
 echo -e "Published Yuidoc to gh-pages.\n"
-
-fi
