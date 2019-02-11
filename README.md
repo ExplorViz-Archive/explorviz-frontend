@@ -24,7 +24,7 @@ The API documentation is available [here](https://explorviz.github.io/explorviz-
 ## Deployment
 There are two options for you at the moment. Browse to our [docker repository](https://github.com/ExplorViz/explorviz-docker). 
 * Clone the repository and deploy the built artifacts "explorviz-backend.war" and "explorviz-frontend" in a Tomcat
-* **OR** Use Docker as shown in the respective README.md.
+* **OR** use our Docker images as described in our [Wiki](https://github.com/ExplorViz/docs/wiki).
 
 ## Development
 ### Prerequisites
