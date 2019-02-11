@@ -4,10 +4,10 @@
 
 ___
 
-<a href="https://travis-ci.org/ExplorViz/explorviz-frontend"><img src="https://travis-ci.org/ExplorViz/explorviz-frontend.svg?branch=dev-1" alt="Build Status"></a>
+<a href="https://travis-ci.org/ExplorViz/explorviz-frontend"><img src="https://travis-ci.org/ExplorViz/explorviz-frontend.svg?branch=master" alt="Build Status"></a>
 [![Build status](https://ci.appveyor.com/api/projects/status/am0ea9r6sp2h74x7/branch/master?svg=true)](https://ci.appveyor.com/project/Alexander-Krause/explorviz-frontend/branch/master)
-<a href="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1/status.svg" alt="Dependency Status"></a>
-<a href="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1?type=dev"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/dev-1/dev-status.svg" alt="devDependencies status"></a>
+<a href="https://david-dm.org/ExplorViz/explorviz-frontend/master"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/master/status.svg" alt="Dependency Status"></a>
+<a href="https://david-dm.org/ExplorViz/explorviz-frontend/master?type=dev"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/master/dev-status.svg" alt="devDependencies status"></a>
 [![Greenkeeper badge](https://badges.greenkeeper.io/ExplorViz/explorviz-frontend.svg)](https://greenkeeper.io/)
 
 ## Project Description
