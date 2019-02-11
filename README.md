@@ -5,7 +5,7 @@
 ___
 
 <a href="https://travis-ci.org/ExplorViz/explorviz-frontend"><img src="https://travis-ci.org/ExplorViz/explorviz-frontend.svg?branch=master" alt="Build Status"></a>
-[![Build status](https://ci.appveyor.com/api/projects/status/am0ea9r6sp2h74x7/branch/master?svg=true)](https://ci.appveyor.com/project/Alexander-Krause/explorviz-frontend/branch/master)
+<!-- [![Build status](https://ci.appveyor.com/api/projects/status/am0ea9r6sp2h74x7/branch/master?svg=true)](https://ci.appveyor.com/project/Alexander-Krause/explorviz-frontend/branch/master) -->
 <a href="https://david-dm.org/ExplorViz/explorviz-frontend/master"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/master/status.svg" alt="Dependency Status"></a>
 <a href="https://david-dm.org/ExplorViz/explorviz-frontend/master?type=dev"><img src="https://david-dm.org/ExplorViz/explorviz-frontend/master/dev-status.svg" alt="devDependencies status"></a>
 [![Greenkeeper badge](https://badges.greenkeeper.io/ExplorViz/explorviz-frontend.svg)](https://greenkeeper.io/)
@@ -19,7 +19,7 @@ The usability and effectiveness of ExplorViz has been investigated in controlled
 
 This project is a WIP replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) client-code with [EmberJS](https://www.emberjs.com/). This is only the frontend, you will need the [backend](https://github.com/ExplorViz/explorviz-backend) as well for production. However, you can mock the backend as shown in the development section below.
 
-## Documentation (Work in progress)
+## Documentation
 The API documentation is available [here](https://explorviz.github.io/explorviz-frontend/).
 
 ## Deployment
