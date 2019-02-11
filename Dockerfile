@@ -11,7 +11,7 @@ COPY prod-env-updater.sh .
 RUN chmod +x ./prod-env-updater.sh
 
 COPY dist /usr/share/nginx/html
-COPY explorviz-nginx.conf /etc/nginx/nginx.conf
+COPY explorviz-nginx.conf /etc/nginx/conf.d
 
 RUN rm /etc/nginx/conf.d/default.conf
 
