@@ -22,9 +22,7 @@ This project is a WIP replica of ExplorViz's visualization component. It substit
 The API documentation is available [here](https://explorviz.github.io/explorviz-frontend/).
 
 ## Deployment
-There are two options for you at the moment. Browse to our [docker repository](https://github.com/ExplorViz/explorviz-docker). 
-* Clone the repository and deploy the built artifacts "explorviz-backend.war" and "explorviz-frontend" in a Tomcat
-* **OR** use our Docker images as described in our [Wiki](https://github.com/ExplorViz/docs/wiki).
+Use our Docker images as described in our [Wiki](https://github.com/ExplorViz/docs/wiki).
 
 ## Development
 ### Prerequisites
