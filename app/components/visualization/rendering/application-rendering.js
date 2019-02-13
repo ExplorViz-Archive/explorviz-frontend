@@ -1,6 +1,8 @@
 import RenderingCore from './rendering-core';
 import {inject as service} from '@ember/service';
 import { getOwner } from '@ember/application';
+import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+
 
 import THREE from "three";
 
@@ -25,7 +27,7 @@ import FoundationBuilder from
  * @module explorviz
  * @submodule visualization.rendering
  */
-export default RenderingCore.extend({
+export default RenderingCore.extend(AlertifyHandler, {
 
   store: service('store'),
 
@@ -293,6 +295,9 @@ export default RenderingCore.extend({
       self.set('oldRotation.y', self.get('application3D').rotation.y);
       self.set('initialSetupDone', true);
     }
+
+    this.showAlertifyMessage("Application loaded");
+
   },
 
   // Helper functions

@@ -1,6 +1,7 @@
 import RenderingCore from './rendering-core';
 import { inject as service } from '@ember/service';
 import { getOwner } from '@ember/application';
+import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 import THREE from "three";
 
@@ -26,7 +27,7 @@ import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 * @module explorviz
 * @submodule visualization.rendering
 */
-export default RenderingCore.extend({
+export default RenderingCore.extend(AlertifyHandler, {
 
   configuration: service("configuration"),
 
@@ -650,6 +651,7 @@ export default RenderingCore.extend({
     this.get('labeler').drawTextLabels(self.get('font'),
       self.get('configuration'));
 
+    this.showAlertifyMessage("Landscape loaded");
 
   }, // END populateScene
 
