@@ -28,6 +28,11 @@ module.exports = function(environment) {
   if (environment === 'development') {
 
     var API_ROOT = 'http://localhost:8080';
+
+    if(process.env.API_ROOT) {
+      API_ROOT = process.env.API_ROOT;
+    }
+
     ENV.APP.API_ROOT = API_ROOT;
 
     console.log("");
