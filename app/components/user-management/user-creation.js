@@ -23,7 +23,7 @@ export default Component.extend(AlertifyHandler, {
   didInsertElement() {
     this._super(...arguments);
     this.get('store').queryRecord('usersetting', {}).then(defaultSettings => {
-      this.set('settings', defaultSettings)
+      this.set('settings', defaultSettings);
     });
     this.set('showNewUsers', false);
     this.set('page', 'createSingleUser')
