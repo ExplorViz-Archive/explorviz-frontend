@@ -13,21 +13,16 @@ export default Component.extend(AlertifyHandler, {
 
   showSpinner: null,
 
-  booleans: null,
-  numerics: null,
-  strings: null,
   // set through hb template, else is set to logged-in user
   user: null,
 
-  // workaround for release 1.3
-  // remove when usersettings descriptions are implemented
+  // remove later, load descriptors in user-settings-base
   descriptions: null,
 
-  didInsertElement() {
+  init() {
     this.set('showSpinner', true);
+    this._super(...arguments);
     this.initUser();
-    this.initAttributeProperties();
-    this.set('showSpinner', false);
 
     this.set('descriptions', {});
     this.get('descriptions')["showFpsCounter"] = "'Frames Per Second' metrics in visualizations";
@@ -38,60 +33,20 @@ export default Component.extend(AlertifyHandler, {
     this.get('descriptions')["appVizTransparencyIntensity"] = "Transparency effect intensity ('appVizTransparency' must be enabled)";
   },
 
+  didInsertElement() {
+    this.set('showSpinner', false);
+  },
+
   initUser() {
     if(!this.get('user')) {
       this.set('user', this.get('session.session.content.authenticated.user'));
     }
   },
 
-  initAttributeProperties() {
-    const usersettings = this.get('user').settings;
-
-    this.set('booleans', {});
-    this.set('numerics', {});
-    this.set('strings', {});
-
-    Object.entries(usersettings.booleanAttributes).forEach(
-      ([key, value]) => {
-        this.set(`booleans.${key}`, value);
-      }
-    );
-    Object.entries(usersettings.numericAttributes).forEach(
-      ([key, value]) => {
-        this.set(`numerics.${key}`, value);
-      }
-    );
-    Object.entries(usersettings.stringAttributes).forEach(
-      ([key, value]) => {
-        this.set(`strings.${key}`, value);
-      }
-    );
-  },
-
   actions: {
     // saves the changes made to the actual model and backend
     saveSettings() {
       this.set('showSpinner', true);
-      //Update booleans
-      Object.entries(this.get('booleans')).forEach(([key, value]) => {
-        this.set(`user.settings.booleanAttributes.${key}`, value);
-      });
-
-      //Update numerics
-      Object.entries(this.get('numerics')).forEach(([key, value]) => {
-        // get new setting value
-        const newVal = Number(value);
-
-        // newVal might be NaN
-        if(newVal) {
-          this.set(`user.settings.numericAttributes.${key}`, newVal);
-        }
-      });
-
-      //Update strings
-      Object.entries(this.get('strings')).forEach(([key, value]) => {
-        this.set(`user.settings.stringAttributes.${key}`, value);
-      });
 
       this.get('user').save().then(() => {
         this.set('showSpinner', false);
@@ -104,6 +59,11 @@ export default Component.extend(AlertifyHandler, {
         this.get('user').reload();
       });
     }
+  },
+
+  willDestroyElement() {
+    this.get('user').reload();
+    this._super(...arguments);
   }
 
 });

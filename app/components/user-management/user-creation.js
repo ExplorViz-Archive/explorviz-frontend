@@ -18,8 +18,13 @@ export default Component.extend(AlertifyHandler, {
   showNewUsers: null,
   page: null,
 
+  settings: null,
+
   didInsertElement() {
     this._super(...arguments);
+    this.get('store').queryRecord('usersetting', {}).then(defaultSettings => {
+      this.set('settings', defaultSettings)
+    });
     this.set('showNewUsers', false);
     this.set('page', 'createSingleUser')
   },
@@ -61,7 +66,8 @@ export default Component.extend(AlertifyHandler, {
       const userRecord = this.get('store').createRecord('user', {
         username: userData.username,
         password: userData.password,
-        roles: userData.roles_selected_single
+        roles: userData.roles_selected_single,
+        settings: this.get('settings')
       });
 
       userRecord.save().then(() => { // success
@@ -114,7 +120,8 @@ export default Component.extend(AlertifyHandler, {
         const userRecord = this.get('store').createRecord('user', {
           username,
           password,
-          roles: userData.roles_selected_multiple
+          roles: userData.roles_selected_multiple,
+          settings: this.get('settings')
         });
 
         userRecord.save().then(() => { // success
