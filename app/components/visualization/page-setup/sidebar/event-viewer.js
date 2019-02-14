@@ -22,7 +22,7 @@ export default Component.extend({
         event.set('isSelected', false);
       });
       // mark new event as selected
-      events.set('isSelected', true);
+      event.set('isSelected', true);
     },
 
     close() {

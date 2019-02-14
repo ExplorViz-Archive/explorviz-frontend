@@ -6,7 +6,7 @@ import hbs from 'htmlbars-inline-precompile';
 module('Integration | Component | visualization/page-setup/navbar/event-opener', function(hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', async function(assert) {
+  test('it renders', async function (assert) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
@@ -17,10 +17,9 @@ module('Integration | Component | visualization/page-setup/navbar/event-opener',
     // Template block usage:
     await render(hbs`
       {{#visualization/page-setup/navbar/event-opener}}
-        template block text
       {{/visualization/page-setup/navbar/event-opener}}
     `);
 
-    assert.equal(this.element.textContent.trim(), 'template block text');
+    assert.equal(this.element.textContent.trim(), '');
   });
 });

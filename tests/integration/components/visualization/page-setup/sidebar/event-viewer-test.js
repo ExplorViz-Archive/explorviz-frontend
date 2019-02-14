@@ -12,15 +12,6 @@ module('Integration | Component | visualization/page-setup/sidebar/event-viewer'
 
     await render(hbs`{{visualization/page-setup/sidebar/event-viewer}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
-
-    // Template block usage:
-    await render(hbs`
-      {{#visualization/page-setup/sidebar/event-viewer}}
-        template block text
-      {{/visualization/page-setup/sidebar/event-viewer}}
-    `);
-
-    assert.equal(this.element.textContent.trim(), 'template block text');
+    assert.notEqual(this.element.textContent.trim(), '');
   });
 });
