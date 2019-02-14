@@ -18,4 +18,5 @@ export default BaseEntity.extend({
     eventType: attr('string'),
     eventMessage: attr('string'),
 
+    isSelected: attr('boolean', {defaultValue: false}),
 });
