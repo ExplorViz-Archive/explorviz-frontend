@@ -1,0 +1,28 @@
+
+{{#bs-form model=this as |form|}}
+  {{#each-in this.booleans as |key|}}
+    <div class="d-flex justify-content-between pr-3">
+      <div>
+        {{help-tooltip title=(get this.descriptions key)}}
+        {{key}}
+      </div>
+      {{x-toggle
+        theme='skewed'
+        value=(get this.booleans key)
+        onToggle=(action (mut (get this.booleans key)))
+      }}
+    </div>
+  {{/each-in}}
+  {{#each-in this.numerics as |key|}}
+    <div class="mb-3">
+      {{help-tooltip title=(get this.descriptions key)}}
+      {{form.element class="d-contents" controlType="number" step=".01" label=key property=(concat "numerics." key)}}
+    </div>
+  {{/each-in}}
+  {{#each-in this.strings as |key|}}
+    <div class="mb-3">
+      {{help-tooltip title=(get this.descriptions key)}}
+      {{form.element class="d-contents" controlType="text" label=key property=(concat "strings." key)}}
+    </div>
+  {{/each-in}}
+{{/bs-form}}

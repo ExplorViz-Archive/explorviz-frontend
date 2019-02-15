@@ -1,9 +1,9 @@
 import BaseEntity from './baseentity';
 import DS from 'ember-data';
-
 const { attr } = DS;
 
 /**
+<<<<<<< HEAD
  * Ember model for an event occurring in the landscape.
  *
  * @class Event-Model
@@ -19,4 +19,5 @@ export default BaseEntity.extend({
     eventMessage: attr('string'),
 
     isSelected: attr('boolean', {defaultValue: false}),
+
 });

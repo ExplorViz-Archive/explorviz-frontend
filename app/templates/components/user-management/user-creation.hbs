@@ -62,6 +62,18 @@
                 {{item.descriptor}}
             {{/el.control}}
           {{/form.element}}
+          {{#form.element label="Settings"}}
+            <div class="card mb-3">
+              <div class="card-body">
+                {{user-management/user-settings-base
+                  booleans=this.settings.booleanAttributes
+                  numerics=this.settings.numericAttributes
+                  strings=this.settings.stringAttributes
+                  descriptions=this.descriptions
+                }}
+              </div>
+            </div>
+          {{/form.element}}
           {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
         {{/bs-form}}
       </div>
@@ -97,6 +109,18 @@
               as |item|}}
                 {{item.descriptor}}
             {{/el.control}}
+          {{/form.element}}
+          {{#form.element label="Settings"}}
+            <div class="card mb-3">
+              <div class="card-body">
+                {{user-management/user-settings-base
+                  booleans=this.settings.booleanAttributes
+                  numerics=this.settings.numericAttributes
+                  strings=this.settings.stringAttributes
+                  descriptions=this.descriptions
+                }}
+              </div>
+            </div>
           {{/form.element}}
           {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
         {{/bs-form}}
