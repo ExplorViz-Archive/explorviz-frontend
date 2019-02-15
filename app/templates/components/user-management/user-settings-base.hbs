@@ -1,28 +1,39 @@
 
 {{#bs-form model=this as |form|}}
-  {{#each-in this.booleans as |key|}}
+  {{#each-in this.settings.booleanAttributes as |key|}}
     <div class="d-flex justify-content-between pr-3">
       <div>
-        {{help-tooltip title=(get this.descriptions key)}}
-        {{key}}
+        {{help-tooltip title=(get this.descriptions (concat key ".description"))}}
+        {{get this.descriptions (concat key ".name")}}
       </div>
       {{x-toggle
         theme='skewed'
-        value=(get this.booleans key)
-        onToggle=(action (mut (get this.booleans key)))
+        value=(get this.settings.booleanAttributes key)
+        onToggle=(action (mut (get this.settings.booleanAttributes key)))
       }}
     </div>
   {{/each-in}}
-  {{#each-in this.numerics as |key|}}
+  {{#each-in this.settings.numericAttributes as |key|}}
     <div class="mb-3">
-      {{help-tooltip title=(get this.descriptions key)}}
-      {{form.element class="d-contents" controlType="number" step=".01" label=key property=(concat "numerics." key)}}
+      {{help-tooltip title=(get this.descriptions (concat key ".description"))}}
+      {{form.element
+        class="d-contents"
+        controlType="number"
+        step=".01"
+        label=(get this.descriptions (concat key ".name"))
+        property=(concat "settings.numericAttributes." key)
+      }}
     </div>
   {{/each-in}}
-  {{#each-in this.strings as |key|}}
+  {{#each-in this.settings.stringAttributes as |key|}}
     <div class="mb-3">
-      {{help-tooltip title=(get this.descriptions key)}}
-      {{form.element class="d-contents" controlType="text" label=key property=(concat "strings." key)}}
+      {{help-tooltip title=(get this.descriptions (concat key ".description"))}}
+      {{form.element
+        class="d-contents"
+        controlType="text"
+        label=(get this.descriptions (concat key ".name"))
+        property=(concat "settings.stringAttributes." key)
+      }}
     </div>
   {{/each-in}}
 {{/bs-form}}

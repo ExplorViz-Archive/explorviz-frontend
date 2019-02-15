@@ -2,12 +2,7 @@
   <h3>User Settings</h3>
   <hr>
   <div class="mt-2">
-    {{user-management/user-settings-base
-      booleans=this.user.settings.booleanAttributes
-      numerics=this.user.settings.numericAttributes
-      strings=this.user.settings.stringAttributes
-      descriptions=this.descriptions
-    }}
+    {{user-management/user-settings-base settings=this.user.settings}}
 
     {{#bs-button onClick=(action "saveSettings") type="primary" buttonType="submit"}}
       Save

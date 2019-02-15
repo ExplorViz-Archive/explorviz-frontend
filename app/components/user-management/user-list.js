@@ -43,7 +43,12 @@ export default Component.extend(AlertifyHandler, {
 
   actions: {
     openUserCreation() {
-      this.get('router').transitionTo('configuration.usermanagement.new');
+      this.set('showSpinner', true);
+      this.get('router').transitionTo('configuration.usermanagement.new').then(() => {
+        this.set('showSpinner', false);
+      }, () => {
+        this.set('showSpinner', false);
+      });
     },
 
     openUserEdit(userId) {

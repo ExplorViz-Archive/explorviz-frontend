@@ -18,13 +18,8 @@ export default Component.extend(AlertifyHandler, {
   showNewUsers: null,
   page: null,
 
-  settings: null,
-
   didInsertElement() {
     this._super(...arguments);
-    this.get('store').queryRecord('usersetting', {}).then(defaultSettings => {
-      this.set('settings', defaultSettings);
-    });
     this.set('showNewUsers', false);
     this.set('page', 'createSingleUser')
   },
