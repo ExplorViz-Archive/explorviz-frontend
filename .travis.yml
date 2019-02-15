@@ -36,14 +36,14 @@ jobs:
     #  script: ember test
 
     - stage: deploy
-      if: (type = push) && ((branch = dev-1) OR (branch = master))
+      if: (type = push) AND ((branch = dev-1) OR (branch = master))
       skip_cleanup: true
       env:
         - EMBER_VERSION=release
       script: ember build --prod && chmod +x .travis/docker_push.sh && .travis/docker_push.sh
 
     - stage: documentation
-      if: (type = push) && (branch = master)
+      if: (type = push) AND (branch = master)
       skip_cleanup: true
       env:
         - EMBER_VERSION=release
