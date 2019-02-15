@@ -1,20 +1,23 @@
-import DS from 'ember-data';
 import BaseEntity from './baseentity';
-
+import DS from 'ember-data';
 const { attr } = DS;
 
 /**
-* Ember model for a clazz.
-*
-* @class Clazz-Model
-* @extends Draw3DNodeEntity-Model
-*
-* @module explorviz
-* @submodule model.meta
-*/
+<<<<<<< HEAD
+ * Ember model for an event occurring in the landscape.
+ *
+ * @class Event-Model
+ * @extends BaseEntity-Model
+ *
+ * @module explorviz
+ * @submodule model.meta
+ */
 export default BaseEntity.extend({
 
-  eventMessage: attr('string'),
-  timestamp: attr('number'),
+    timestamp: attr('number'),
+    eventType: attr('string'),
+    eventMessage: attr('string'),
+
+    isSelected: attr('boolean', {defaultValue: false}),
 
 });
