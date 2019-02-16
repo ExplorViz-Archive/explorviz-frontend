@@ -37,6 +37,7 @@ export default Component.extend(AlertifyHandler, {
       }, () => {
         if(!this.isDestroyed) {
           this.set('showSpinner', false);
+          this.showAlertifyMessage('Could not load users!');
         }
       });
   },
@@ -52,7 +53,12 @@ export default Component.extend(AlertifyHandler, {
     },
 
     openUserEdit(userId) {
-      this.get('router').transitionTo('configuration.usermanagement.edit', userId);
+      this.set('showSpinner', true);
+      this.get('router').transitionTo('configuration.usermanagement.edit', userId).then(() => {
+        this.set('showSpinner', false);
+      }, () => {
+        this.set('showSpinner', false);
+      });
     },
 
     deleteUser(user) {

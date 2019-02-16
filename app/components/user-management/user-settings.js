@@ -19,14 +19,7 @@ export default Component.extend(AlertifyHandler, {
   init() {
     this.set('showSpinner', true);
     this._super(...arguments);
-    this.initUser();
     this.set('showSpinner', false);
-  },
-
-  initUser() {
-    if(!this.get('user')) {
-      this.set('user', this.get('session.session.content.authenticated.user'));
-    }
   },
 
   actions: {
