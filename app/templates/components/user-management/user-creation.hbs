@@ -71,7 +71,14 @@
               </div>
             </div>
           {{/form.element}}
-          {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+          {{#if this.showSpinner}}
+            {{#bs-button type="primary" buttonType="submit" disabled=true}}
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Creating User...
+            {{/bs-button}}
+          {{else}}
+            {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+          {{/if}}
         {{/bs-form}}
       {{else if (eq page "createMultipleUsers")}}
         {{#bs-form model=this onSubmit=(action "saveMultipleUsers") as |form|}}
@@ -98,13 +105,16 @@
               </div>
             </div>
           {{/form.element}}
-          {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+          {{#if this.showSpinner}}
+            {{#bs-button type="primary" buttonType="submit" disabled=true}}
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Creating Users...
+            {{/bs-button}}
+          {{else}}
+            {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+          {{/if}}
         {{/bs-form}}
       {{/if}}
     </div>
   </div>
 </div>
-
-{{#if this.showSpinner}}
-  {{ember-spinner}}
-{{/if}}
