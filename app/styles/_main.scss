@@ -14,7 +14,7 @@ body > .ember-view {
   @extend .ml-3;
   @extend .mr-3;
   @extend .pt-3;
-  @extend .pb-3;
+  @extend .mb-3;
   @extend .flex-grow-1;
   @extend .d-flex;
   @extend .flex-column;
@@ -32,7 +32,6 @@ body > .ember-view {
 
 #rendering {
   @extend .flex-grow-1;
-  @extend .mt-3;
 }
 
 .canvasViz {
@@ -52,6 +51,10 @@ body > .ember-view {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+}
+
+.explorviz-visualization-navbar {
+  @extend .mb-3;
 }
 
 //Additional classes
