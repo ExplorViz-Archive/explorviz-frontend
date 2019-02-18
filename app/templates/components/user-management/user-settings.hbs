@@ -4,13 +4,13 @@
   <div class="mt-2">
     {{user-management/user-settings-base settings=this.user.settings}}
 
-    {{#if this.showSpinner}}
+    {{#if saveSettings.isRunning}}
       {{#bs-button type="primary" buttonType="submit" disabled=true}}
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         Saving...
       {{/bs-button}}
     {{else}}
-      {{bs-button defaultText="Save Changes" onClick=(action "saveSettings") type="primary" buttonType="submit"}}
+      {{bs-button defaultText="Save Changes" onClick=(perform saveSettings) type="primary" buttonType="submit"}}
     {{/if}}
   </div>
 </div>

@@ -29,57 +29,49 @@ export default Component.extend(AlertifyHandler, {
     }
   },
 
-  actions: {
-    saveUserChanges() {
-      this.set('showSpinner', true);
-      const userData = this.getProperties('username_change', 'password_change', 'roles_change');
+  saveUserChanges: task(function * () {
+    const userData = this.getProperties('username_change', 'password_change', 'roles_change');
 
-      const user = this.get('user');
+    const user = this.get('user');
 
-      if(user) {
-        // check for valid input
-        if(!userData.username_change || userData.username_change.length === 0) {
-          this.set('showSpinner', false);
-          this.showAlertifyMessage('Username cannot be empty.');
-          return;
-        } else if(!userData.roles_change || userData.roles_change.length === 0) {
-          this.set('showSpinner', false);
-          this.showAlertifyMessage('User needs at least 1 role.');
-          return;
-        }
-  
-        if(user.get('username') !== userData.username_change)
-          user.set('username', userData.username_change);
-  
-        if(userData.password_change && userData.password_change !== '')
-          user.set('password', userData.password_change);
-  
-        user.set('roles', userData.roles_change);
-  
-        user.save()
-          .then(() => {
-            this.set('showSpinner', false);
-            this.showAlertifyMessage(`User updated.`);
-            clearInputFields.bind(this)();
-          }, (reason) => {
-            this.set('showSpinner', false);
-            this.showReasonErrorAlert(reason);
-          });
-      } else {
-        this.set('showSpinner', false);
-        this.showAlertifyMessage(`User not found.`);
+    if(user) {
+      // check for valid input
+      if(!userData.username_change || userData.username_change.length === 0) {
+        this.showAlertifyMessage('Username cannot be empty.');
+        return;
+      } else if(!userData.roles_change || userData.roles_change.length === 0) {
+        this.showAlertifyMessage('User needs at least 1 role.');
+        return;
       }
 
-      function clearInputFields() {
-        this.setProperties({
-          // id_change: "",
-          // username_change: "",
-          password_change: "",
-          // roles_change: []
-        });
+      if(user.get('username') !== userData.username_change)
+        user.set('username', userData.username_change);
+
+      if(userData.password_change && userData.password_change !== '')
+        user.set('password', userData.password_change);
+
+      user.set('roles', userData.roles_change);
+
+      try {
+        yield user.save();
+        this.showAlertifyMessage(`User updated.`);
+        clearInputFields.bind(this)();
+      } catch(reason) {
+        this.showReasonErrorAlert(reason);
       }
+    } else {
+      this.showAlertifyMessage(`User not found.`);
     }
-  },
+
+    function clearInputFields() {
+      this.setProperties({
+        // id_change: "",
+        // username_change: "",
+        password_change: "",
+        // roles_change: []
+      });
+    }
+  }).drop(),
 
   showReasonErrorAlert(reason) {
     const {title, detail} = reason.errors[0];
