@@ -1,5 +1,6 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
+import { task } from 'ember-concurrency';
 
 export default Component.extend({
   
@@ -15,25 +16,24 @@ export default Component.extend({
   init() {
     this._super(...arguments);
 
-    this.initDescriptions();
+    this.set('descriptions', {});
+    
+    this.get('loadDescriptions').perform('booleanAttributes');
+    this.get('loadDescriptions').perform('numericAttributes');
+    this.get('loadDescriptions').perform('stringAttributes');
   },
 
-  initDescriptions() {
-    this.set('descriptions', {});
+  loadDescriptions: task(function * (type) {
+    yield Object.entries(this.get(`settings.${type}`)).forEach(
+      ([key]) => {
+        this.get('loadDescription').perform(key);
+      }
+    );
+  }),
 
-    loadDescriptions.bind(this)('booleanAttributes');
-    loadDescriptions.bind(this)('numericAttributes');
-    loadDescriptions.bind(this)('stringAttributes');
-
-    function loadDescriptions(type) {
-      Object.entries(this.get(`settings.${type}`)).forEach(
-        ([key]) => {
-          this.get('store').findRecord('usersetting', key).then(descriptor => {
-            this.set(`descriptions.${key}`, descriptor);
-          });
-        }
-      );
-    }
-  }
+  loadDescription: task(function *(key){
+    const descriptor = yield this.get('store').findRecord('usersetting', key);
+    this.set(`descriptions.${key}`, descriptor);
+  })
 
 });

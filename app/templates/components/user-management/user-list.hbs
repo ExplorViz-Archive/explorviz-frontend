@@ -5,8 +5,20 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
   <h3>Users</h3>
   <div class="mb-3">
     <div class="float-right">
-      {{#bs-button class="d-flex-center" onClick=(action "openUserCreation") type="success" outline=true title="Add Users"}}
-        {{svg-jar "person" class="octicon"}}{{svg-jar "plus-small" class="octicon"}}<span>Add Users</span>
+      {{#bs-button
+        class="d-flex-center"
+        onClick=(perform openUserCreation)
+        type="success"
+        outline=true
+        title="Add Users"
+        disabled=this.openUserCreation.isRunning
+      }}
+        {{#if this.openUserCreation.isRunning}}
+          <span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
+        {{else}}
+          {{svg-jar "person" class="octicon"}}{{svg-jar "plus-small" class="octicon"}}
+        {{/if}}
+        <span>Create Users</span>
       {{/bs-button}}
     </div>
   </div>
@@ -24,34 +36,54 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         </tr>
       </thead>
       <tbody>
-        {{#each users as |user|}}
+        {{#if this.updateUserList.isRunning}}
           <tr>
-            <th scope="row">{{user.id}}</th>
-            <td>{{user.username}}</td>
-            <td>
-              {{user-roles-list user.roles}}
-            </td>
-            <td class="text-right">
-              {{#bs-dropdown as |dd|}}
-                {{#dd.button class="removecaret d-flex-center" size="sm" title="Options"}}
-                  {{svg-jar "kebab-vertical" class="octicon"}}
-                {{/dd.button}}
-                {{#dd.menu as |ddm|}}
-                  {{#ddm.item title="Edit"}}
-                    <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Edit" {{action "openUserEdit" user.id}}>
-                      {{svg-jar "pencil" class="octicon" id="edit-button"}}<span>Edit</span>
-                    </a>
-                  {{/ddm.item}}
-                  {{#ddm.item title="Delete"}}
-                    <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Delete" {{action "deleteUser" user}}>
-                      {{svg-jar "x" class="octicon" id="delete-button"}}<span>Delete</span>
-                    </a>
-                  {{/ddm.item}}
-                {{/dd.menu}}
-              {{/bs-dropdown}}
-            </td>
+            <th scope="row">
+              Loading User List
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            </th>
+            <td></td>
+            <td></td>
+            <td></td>
           </tr>
-        {{/each}}
+        {{else}}
+          {{#each users as |user|}}
+            <tr>
+              <th scope="row">{{user.id}}</th>
+              <td>{{user.username}}</td>
+              <td>
+                {{user-roles-list user.roles}}
+              </td>
+              <td class="text-right">
+                {{#bs-dropdown as |dd|}}
+                  {{!-- Show spinner instead of edit button, if user edit or deletion was called --}}
+                  {{#if (or
+                    (and this.deleteUser.isRunning (eq (get this.deleteUser.last.args 0) user))
+                    (and this.openUserEdit.isRunning (eq (get this.openUserEdit.last.args 0) user.id)))
+                  }}
+                    <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+                  {{else}}
+                    {{#dd.button class="removecaret d-flex-center" size="sm" title="Options"}}
+                      {{svg-jar "kebab-vertical" class="octicon"}}
+                    {{/dd.button}}
+                  {{/if}}
+                  {{#dd.menu as |ddm|}}
+                    {{#ddm.item title="Edit"}}
+                      <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Edit" onclick={{perform openUserEdit user.id}}>
+                        {{svg-jar "pencil" class="octicon" id="edit-button"}}<span>Edit</span>
+                      </a>
+                    {{/ddm.item}}
+                    {{#ddm.item title="Delete"}}
+                      <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Delete" onclick={{perform deleteUser user}}>
+                        {{svg-jar "x" class="octicon" id="delete-button"}}<span>Delete</span>
+                      </a>
+                    {{/ddm.item}}
+                  {{/dd.menu}}
+                {{/bs-dropdown}}
+              </td>
+            </tr>
+          {{/each}}
+        {{/if}}
       </tbody>
     </table>
   </div>

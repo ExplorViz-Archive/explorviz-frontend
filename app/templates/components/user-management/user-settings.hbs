@@ -2,15 +2,19 @@
   <h3>User Settings</h3>
   <hr>
   <div class="mt-2">
-    {{user-management/user-settings-base settings=this.user.settings}}
-
-    {{#if saveSettings.isRunning}}
-      {{#bs-button type="primary" buttonType="submit" disabled=true}}
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        Saving...
-      {{/bs-button}}
+    {{#if this.copySettings.isRunning}}
+      {{ember-spinner}}
     {{else}}
-      {{bs-button defaultText="Save Changes" onClick=(perform saveSettings) type="primary" buttonType="submit"}}
+      {{user-management/user-settings-base settings=this.settings}}
+
+      {{#if this.saveSettings.isRunning}}
+        {{#bs-button type="primary" buttonType="submit" disabled=true}}
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Saving...
+        {{/bs-button}}
+      {{else}}
+        {{bs-button defaultText="Save Changes" onClick=(perform saveSettings) type="primary" buttonType="submit"}}
+      {{/if}}
     {{/if}}
   </div>
 </div>

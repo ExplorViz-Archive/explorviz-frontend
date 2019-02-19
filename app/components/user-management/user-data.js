@@ -24,7 +24,7 @@ export default Component.extend(AlertifyHandler, {
       this.setProperties({
         id_change: user.id,
         username_change: user.username,
-        roles_change: user.roles,
+        roles_change: user.roles
       });
     }
   },

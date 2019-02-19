@@ -9,7 +9,7 @@ export default BaseRoute.extend(AuthenticatedRouteMixin, AlertifyHandler, {
 
   store: service(),
 
-  model({ user_id }) {
+  model: function ({ user_id }) {
     return this.get('store').findRecord('user', user_id, {reload: true});
   },
 

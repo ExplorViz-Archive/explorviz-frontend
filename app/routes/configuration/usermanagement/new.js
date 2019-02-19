@@ -8,7 +8,7 @@ export default BaseRoute.extend(AuthenticatedRouteMixin, {
 
   store: service(),
 
-  model() {
+  model: function () {
     return this.get('store').queryRecord('usersetting', {});
   },
 
