@@ -17,6 +17,7 @@
         <th scope="col">Statement</th>
         <th scope="col">Statement Type</th>
         <th scope="col">Return Value</th>
+        <th scope="col">Response Time (ms)</th>
       </tr>
     </thead>
     <tbody>
@@ -28,6 +29,7 @@
         <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
         <td title={{query.statementType}}>{{string-shortener query.statementType 9}}</td>
         <td title={{query.returnValue}}>{{query.returnValue}}</td>
+        <td title={{query.responseTime}}>{{query.responseTime}}</td>
       </tr>
       {{else}}
       <tr {{action "queryClicked" query}} style="cursor: pointer">
@@ -36,6 +38,7 @@
         <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
         <td title={{query.statementType}}>{{string-shortener query.statementType 9}}</td>
         <td title={{query.returnValue}}>{{query.returnValue}}</td>
+        <td title={{query.responseTime}}>{{format-number query.responseTime}}</td>
       </tr>
       {{/if}}
       {{/each}}
@@ -52,10 +55,6 @@
     <tr class="d-flex">
       <th class="col-3">Time</th>
       <td class="col-9 container-word-wrap">{{timestamp-to-date query.timestamp "localString"}}</td>
-    </tr>
-    <tr class="d-flex">
-      <th class="col-3">Timestamp</th>
-      <td class="col-9 container-word-wrap">{{query.timestamp}}</td>
     </tr>
     <tr class="d-flex">
       <th class="col-3">Statement</th>
