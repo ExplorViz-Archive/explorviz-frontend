@@ -37,6 +37,10 @@ export default Controller.extend(AlertifyHandler, {
     openLandscapeView() {
       this.set('landscapeRepo.latestApplication', null);
       this.set('landscapeRepo.replayApplication', null);
+    },
+
+    toggleTimeline() {
+      this.get('renderingService').toggleTimeline();
     }
     
   },
