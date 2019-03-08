@@ -7,28 +7,31 @@ export default Component.extend({
   // No Ember generated container
   tagName: '',
 
+  traceTimeUnit: 'ms',
+  traceStepTimeUnit: 'ms',
+
   additionalData: service('additional-data'),
   highlighter: service('visualization/application/highlighter'),
   landscapeRepo: service('repos/landscape-repository'),
   renderingService: service(),
 
   // Compute current traces when highlighting changes
-  traces: computed('highlighter.highlightedEntity', function () {
+  traces: computed('highlighter.highlightedEntity', 'landscapeRepo.latestApplication', function () {
     let highlighter = this.get('highlighter');
     if (highlighter.get('isTrace')) {
       return [highlighter.get('highlightedEntity')];
-    }
-    let highlightedEntity = highlighter.get('highlightedEntity');
-    if (highlightedEntity &&
-      highlightedEntity.constructor.modelName === "drawableclazzcommunication") {
-      let traces = highlightedEntity.get('containedTraces');
-      return traces;
     } else {
-      return null;
+      return this.filterAndSortTraces(this.get('landscapeRepo.latestApplication.traces'));
     }
   }),
 
-  selectedTrace: null,
+  filterAndSortTraces(traces){
+    let filteredTraces = [];
+    traces.forEach( (trace) => {
+      filteredTraces.push(trace);
+    });
+    return filteredTraces;
+  },
 
   init() {
     this.get('additionalData').on('showWindow', this, this.onWindowChange);
@@ -54,6 +57,24 @@ export default Component.extend({
     selectPreviousTraceStep() {
       this.get('highlighter').highlightPreviousTraceStep();
       this.get('renderingService').redrawScene();
+    },
+
+    toggleTraceTimeUnit() {
+      let timeUnit = this.get('traceTimeUnit');
+      if (timeUnit === 'ms'){
+        this.set('traceTimeUnit', 's');
+      } else if (timeUnit === 's'){
+        this.set('traceTimeUnit', 'ms');
+      }
+    },
+
+    toggleTraceStepTimeUnit() {
+      let timeUnit = this.get('traceStepTimeUnit');
+      if (timeUnit === 'ms'){
+        this.set('traceStepTimeUnit', 's');
+      } else if (timeUnit === 's'){
+        this.set('traceStepTimeUnit', 'ms');
+      }
     },
 
     close() {

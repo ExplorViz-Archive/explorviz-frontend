@@ -15,24 +15,24 @@
         <th scope="col">Trace ID</th>
         <th scope="col">Soure Clazz</th>
         <th scope="col">Target Clazz</th>
-        <th scope="col">Duration (ms)</th>
+        <th scope="col">Duration in {{#bs-button onClick=(action "toggleTraceTimeUnit") class="th-btn" outline=true}}{{traceTimeUnit}}{{/bs-button}}</th>
       </tr>
     </thead>
     <tbody>
-      {{#each landscapeRepo.latestApplication.traces as |trace|}}
+      {{#each traces as |trace|}}
       {{#if trace.highlighted}}
       <tr {{action "clickedTrace" trace}} style="cursor: pointer" bgcolor="#cc8a8a">
         <th title={{trace.traceId}}>{{string-shortener trace.traceId 7}}</th>
         <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
         <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
-        <td>{{format-number trace.totalTraceDuration}}</td>
+        <td>{{format-number trace.totalTraceDuration traceTimeUnit }}</td>
       </tr>
       {{else}}
       <tr {{action "clickedTrace" trace}} style="cursor: pointer">
         <th title={{trace.traceId}}>{{string-shortener trace.traceId 7}}</th>
         <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
         <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
-        <td>{{format-number trace.totalTraceDuration}}</td>
+        <td>{{format-number trace.totalTraceDuration traceTimeUnit }}</td>
       </tr>
       {{/if}}
       {{/each}}
@@ -79,8 +79,8 @@
       <td class="col-9 container-word-wrap">{{format-number highlighter.currentTraceStep.requests}}</td>
     </tr>
     <tr class="d-flex">
-      <th class="col-3" title="Average Response Time">Avg. Resp. Time (ms)</th>
-      <td class="col-9 container-word-wrap">{{format-number highlighter.currentTraceStep.averageResponseTime}}</td>
+      <th class="col-3" title="Average Response Time">Avg. Resp. Time in {{#bs-button onClick=(action "toggleTraceStepTimeUnit") class="th-btn" outline=true}}{{traceStepTimeUnit}}{{/bs-button}}</th>
+      <td class="col-9 container-word-wrap">{{format-number highlighter.currentTraceStep.averageResponseTime traceDetailTimeUnit}}</td>
     </tr>
   </tbody>
 </table>
