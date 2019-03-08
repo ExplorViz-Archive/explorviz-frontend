@@ -55,9 +55,6 @@ export default Component.extend({
           entity.openParents();
         }
       }
-
-      // close potential side-bar
-      this.get('addionalData').emptyAndClose();
   
       this.get('highlighter').highlight(entity);
       this.get('renderingService').redrawScene();
