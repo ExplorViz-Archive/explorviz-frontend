@@ -9,6 +9,9 @@ export default Component.extend({
 
   traceTimeUnit: 'ms',
   traceStepTimeUnit: 'ms',
+  sortBy: 'traceId',
+  sortOrder: 'asc',
+  filterTerm: '',
 
   additionalData: service('additional-data'),
   highlighter: service('visualization/application/highlighter'),
@@ -16,7 +19,7 @@ export default Component.extend({
   renderingService: service(),
 
   // Compute current traces when highlighting changes
-  traces: computed('highlighter.highlightedEntity', 'landscapeRepo.latestApplication', function () {
+  traces: computed('highlighter.highlightedEntity', 'landscapeRepo.latestApplication', 'sortBy', 'sortOrder', 'filterTerm' , function () {
     let highlighter = this.get('highlighter');
     if (highlighter.get('isTrace')) {
       return [highlighter.get('highlightedEntity')];
@@ -27,9 +30,22 @@ export default Component.extend({
 
   filterAndSortTraces(traces){
     let filteredTraces = [];
+    let filter = this.get('filterTerm');
     traces.forEach( (trace) => {
-      filteredTraces.push(trace);
+      if (filter === '' 
+      || trace.get('traceId').includes(filter) 
+      || trace.get('sourceClazz.name').includes(filter) 
+      || trace.get('targetClazz.name').includes(filter)){
+        filteredTraces.push(trace);
+      }
     });
+
+    if (this.get('sortOrder') === 'asc'){
+      filteredTraces.sort((a,b) => (a.get(this.get('sortBy')) > b.get(this.get('sortBy'))) ? 1 : ((b.get(this.get('sortBy')) > a.get(this.get('sortBy'))) ? -1 : 0)); 
+    } else {
+      filteredTraces.sort((a,b) => (a.get(this.get('sortBy')) < b.get(this.get('sortBy'))) ? 1 : ((b.get(this.get('sortBy')) < a.get(this.get('sortBy'))) ? -1 : 0)); 
+    }
+
     return filteredTraces;
   },
 
@@ -47,6 +63,10 @@ export default Component.extend({
       }
 
       this.get('renderingService').redrawScene();
+    },
+
+    filter(){
+      this.set('filterTerm', this.get('filterInput'));
     },
 
     selectNextTraceStep() {
@@ -75,6 +95,24 @@ export default Component.extend({
       } else if (timeUnit === 's'){
         this.set('traceStepTimeUnit', 'ms');
       }
+    },
+
+    sortBy(property){
+      // Determine order for sorting
+      if (this.get('sortBy') === property){
+        // Toggle sorting order
+        if (this.get('sortOrder') === 'asc'){
+          this.set('sortOrder', 'desc');
+        } else {
+          this.set('sortOrder', 'asc');
+        }
+      } else {
+        // Sort in ascending order by default
+        this.set('sortOrder', 'asc');
+      }
+
+      // Set property by which shall be sorted
+      this.set('sortBy', property);
     },
 
     close() {

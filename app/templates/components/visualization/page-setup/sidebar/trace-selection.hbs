@@ -8,14 +8,20 @@
   </label>
 </div>
 
+<div class="mt-2 mb-1 d-flex justify-content-end">
+  <div>{{input id="filterInput" value=filterInput placeholder='Filter traces' class="form-control input-lg" autofocus="autofocus" enter=(action "filter")}}</div>
+  <div>{{#bs-button onClick=(action "filter") type="button" class="btn btn-light"}}{{svg-jar "search" class="octicon align-middle"}}{{/bs-button}}</div>
+</div>
+
+
 <div style="max-height:500px; overflow:auto; width:100%;">
   <table class="table table-hover">
     <thead>
       <tr>
-        <th scope="col">Trace ID</th>
-        <th scope="col">Soure Clazz</th>
-        <th scope="col">Target Clazz</th>
-        <th scope="col">Duration in {{#bs-button onClick=(action "toggleTraceTimeUnit") class="th-btn" outline=true}}{{traceTimeUnit}}{{/bs-button}}</th>
+        <th {{action "sortBy" "traceId"}} scope="col">Trace ID</th>
+        <th {{action "sortBy" "sourceClazz.name"}} scope="col">Soure Clazz</th>
+        <th {{action "sortBy" "targetClazz.name"}} scope="col">Target Clazz</th>
+        <th {{action "sortBy" "totalTraceDuration"}} scope="col">Duration in {{#bs-button onClick=(action "toggleTraceTimeUnit") class="th-btn" outline=true}}{{traceTimeUnit}}{{/bs-button}}</th>
       </tr>
     </thead>
     <tbody>
@@ -80,7 +86,7 @@
     </tr>
     <tr class="d-flex">
       <th class="col-3" title="Average Response Time">Avg. Resp. Time in {{#bs-button onClick=(action "toggleTraceStepTimeUnit") class="th-btn" outline=true}}{{traceStepTimeUnit}}{{/bs-button}}</th>
-      <td class="col-9 container-word-wrap">{{format-number highlighter.currentTraceStep.averageResponseTime traceDetailTimeUnit}}</td>
+      <td class="col-9 container-word-wrap">{{format-number highlighter.currentTraceStep.averageResponseTime traceStepTimeUnit}}</td>
     </tr>
   </tbody>
 </table>
