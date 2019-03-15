@@ -9,9 +9,9 @@ import Service from '@ember/service';
 export default Service.extend({
 
   /**
-  * Array for component-based settings dialogs. Any plugin may push a String 
-  * with the name of it's settings-component in this array. See 
-  * "color-picker-plugin" for exemplary usage.
+  * Array for component-based settings dialogs. Any plugin may push an object  
+  * with the name of it's settings-component and it's title in this array. See 
+  * "color-picker-extension" for exemplary usage.
   *
   * @property pluginSettings
   * @type Array
