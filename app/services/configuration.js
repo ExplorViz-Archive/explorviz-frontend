@@ -9,14 +9,14 @@ import Service from '@ember/service';
 export default Service.extend({
 
   /**
-  * Array for component-based settings dialogs. Any plugin may push an object  
+  * Array for component-based settings dialogs. Any extension may push an object  
   * with the name of it's settings-component and it's title in this array. See 
   * "color-picker-extension" for exemplary usage.
   *
-  * @property pluginSettings
+  * @property configurationExtensions
   * @type Array
   */
-  pluginSettings: null,
+  configurationExtensions: null,
 
 
   /**
@@ -26,7 +26,7 @@ export default Service.extend({
   * @type Object
   */
   landscapeColors: null,
-  
+
 
   /**
   * Default colors for application visualization
@@ -39,7 +39,7 @@ export default Service.extend({
   init() {
     this._super(...arguments);
 
-    this.set('pluginSettings', []);
+    this.set('configurationExtensions', []);
 
     this.set('landscapeColors', {
       system: "rgb(199,199,199)",
