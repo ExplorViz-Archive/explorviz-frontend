@@ -25,17 +25,18 @@ Router.map(function () {
 
   this.route('configuration', function () {
 
-    const configurationRouteContext = this;
-
     this.route('usermanagement', function () {
       this.route('users');
       this.route('edit', { path: '/edit/:user_id' });
       this.route('new');
     });
 
-    // this.route('settings');
+    this.route('settings');
 
-    // add nested configuration routes towards the added by extensions
+
+    // add nested configuration routes which are added by extensions
+    const configurationRouteContext = this;
+
     Router.configurationRouteExtensions.forEach(function (extensionRoute) {
       if (extensionRoute !== 'undefined') {
         configurationRouteContext.route(extensionRoute);
