@@ -31,22 +31,22 @@
   {{/modal.footer}}
 {{/bs-modal}}
 
-{{#if (eq page "createSingleUser")}}
-  <div class="mt-4" style="overflow-y: auto">
-    <div class="card">
-      <div class="card-body">
-        <h3>Create Users</h3>
-        <hr>
-        <div class="d-flex justify-content-center">
-          {{#bs-button-group
-            value=page
-            type="radio"
-            class="mt-2 mb-2 float-right"
-            onChange=(action (mut page)) as |bg|}}
-            {{#bg.button value="createSingleUser"}}Single User{{/bg.button}}
-            {{#bg.button value="createMultipleUsers"}}Multiple Users{{/bg.button}}
-          {{/bs-button-group}}
-        </div>
+<div class="mt-4" style="overflow-y: auto">
+  <div class="card">
+    <div class="card-body">
+      <h3>Create Users</h3>
+      <hr>
+      <div class="d-flex justify-content-center">
+        {{#bs-button-group
+          value=page
+          type="radio"
+          class="mt-2 mb-2 float-right"
+          onChange=(action (mut page)) as |bg|}}
+          {{#bg.button value="createSingleUser"}}Single User{{/bg.button}}
+          {{#bg.button value="createMultipleUsers"}}Multiple Users{{/bg.button}}
+        {{/bs-button-group}}
+      </div>
+      {{#if (eq page "createSingleUser")}}
         {{#bs-form model=this onSubmit=(action "saveUser") as |form|}}
           {{form.element controlType="text" label="Username" placeholder="Username" property="username"}}
           {{form.element controlType="password" label="Password" placeholder="Password" property="password"}}
@@ -62,27 +62,25 @@
                 {{item.descriptor}}
             {{/el.control}}
           {{/form.element}}
-          {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+          {{#form.element label="Settings"}}
+            <div class="card mb-3">
+              <div class="card-body">
+                {{user-management/user-settings-base
+                  settings=this.settings
+                }}
+              </div>
+            </div>
+          {{/form.element}}
+          {{#if this.showSpinner}}
+            {{#bs-button type="primary" buttonType="submit" disabled=true}}
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Creating User...
+            {{/bs-button}}
+          {{else}}
+            {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+          {{/if}}
         {{/bs-form}}
-      </div>
-    </div>
-  </div>
-{{else if (eq page "createMultipleUsers")}}
-  <div class="mt-4" style="overflow-y: auto">
-    <div class="card">
-      <div class="card-body">
-        <h3>Create Users</h3>
-        <hr>
-        <div class="d-flex justify-content-center">
-          {{#bs-button-group
-            value=page
-            type="radio"
-            class="mt-2 mb-2 float-right"
-            onChange=(action (mut page)) as |bg|}}
-            {{#bg.button value="createSingleUser"}}Single User{{/bg.button}}
-            {{#bg.button value="createMultipleUsers"}}Multiple Users{{/bg.button}}
-          {{/bs-button-group}}
-        </div>
+      {{else if (eq page "createMultipleUsers")}}
         {{#bs-form model=this onSubmit=(action "saveMultipleUsers") as |form|}}
           {{form.element controlType="text" label="Username Prefix" placeholder="Username Prefix" property="usernameprefix"}}
           {{form.element controlType="number" label="Number of Users" placeholder="# of users" property="numberofusers"}}
@@ -98,13 +96,25 @@
                 {{item.descriptor}}
             {{/el.control}}
           {{/form.element}}
-          {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+          {{#form.element label="Settings"}}
+            <div class="card mb-3">
+              <div class="card-body">
+                {{user-management/user-settings-base
+                  settings=this.settings
+                }}
+              </div>
+            </div>
+          {{/form.element}}
+          {{#if this.showSpinner}}
+            {{#bs-button type="primary" buttonType="submit" disabled=true}}
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              Creating Users...
+            {{/bs-button}}
+          {{else}}
+            {{bs-button defaultText="Create" type="primary" buttonType="submit"}}
+          {{/if}}
         {{/bs-form}}
-      </div>
+      {{/if}}
     </div>
   </div>
-{{/if}}
-
-{{#if this.showSpinner}}
-  {{ember-spinner}}
-{{/if}}
+</div>

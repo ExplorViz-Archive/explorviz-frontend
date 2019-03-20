@@ -41,13 +41,12 @@ export default BaseAuthenticator.extend({
 
     return new RSVP.Promise(function(resolve, reject) {
 
-      function fulfill(token) {
-        const { rawUserData } = data;
-        const userRecord = self.get('store').push(rawUserData);
+      function fulfill() {
+        const userRecord = self.get('store').push(data.rawUserData);
         resolve({
-          access_token: token.token,
+          access_token: data.access_token,
           user: userRecord,
-          rawUserData: rawUserData
+          rawUserData: data.rawUserData
         });
       }
   

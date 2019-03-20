@@ -61,7 +61,8 @@ export default Component.extend(AlertifyHandler, {
       const userRecord = this.get('store').createRecord('user', {
         username: userData.username,
         password: userData.password,
-        roles: userData.roles_selected_single
+        roles: userData.roles_selected_single,
+        settings: this.get('settings')
       });
 
       userRecord.save().then(() => { // success
@@ -114,7 +115,8 @@ export default Component.extend(AlertifyHandler, {
         const userRecord = this.get('store').createRecord('user', {
           username,
           password,
-          roles: userData.roles_selected_multiple
+          roles: userData.roles_selected_multiple,
+          settings: this.get('settings')
         });
 
         userRecord.save().then(() => { // success

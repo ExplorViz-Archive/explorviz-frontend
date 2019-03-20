@@ -1,5 +1,6 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
+import { task } from 'ember-concurrency';
 
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
@@ -11,99 +12,71 @@ export default Component.extend(AlertifyHandler, {
   store: service(),
   session: service(),
 
-  showSpinner: null,
-
-  booleans: null,
-  numerics: null,
-  strings: null,
   // set through hb template, else is set to logged-in user
   user: null,
 
-  // workaround for release 1.3
-  // remove when usersettings descriptions are implemented
-  descriptions: null,
+  settings: null,
 
-  didInsertElement() {
-    this.set('showSpinner', true);
-    this.initUser();
-    this.initAttributeProperties();
-    this.set('showSpinner', false);
+  init() {
+    this._super(...arguments);
 
-    this.set('descriptions', {});
-    this.get('descriptions')["showFpsCounter"] = "'Frames Per Second' metrics in visualizations";
-    this.get('descriptions')["appVizTransparency"] = "Transparency effect for selection (left click) in application visualization";
-    this.get('descriptions')["enableHoverEffects"] = "Hover effect (flashing entities) for mouse cursor";
-    this.get('descriptions')["keepHighlightingOnOpenOrClose"] = "Transparency effect for selection (left click) in application visualization";
-    this.get('descriptions')["appVizCommArrowSize"] = "Arrow Size for selected communications in application visualization";
-    this.get('descriptions')["appVizTransparencyIntensity"] = "Transparency effect intensity ('appVizTransparency' must be enabled)";
+    this.initSettings();
   },
 
-  initUser() {
-    if(!this.get('user')) {
-      this.set('user', this.get('session.session.content.authenticated.user'));
+  initSettings() {
+    this.set('settings', {
+      booleanAttributes: {},
+      numericAttributes: {},
+      stringAttributes: {},
+    });
+
+    this.get('copySettings').perform('booleanAttributes');
+    this.get('copySettings').perform('numericAttributes');
+    this.get('copySettings').perform('stringAttributes');
+  },
+
+  copySettings: task( function * (type) {
+    yield Object.entries(this.get(`user.settings.${type}`)).forEach(
+      ([key, value]) => {
+        this.get(`settings.${type}`)[key] = value;
+      }
+    );
+  }),
+
+  saveSettings: task(function * () {
+    let success = false;
+
+    try {
+      this.get('copySettingsToUser').perform('booleanAttributes');
+      this.get('copySettingsToUser').perform('numericAttributes');
+      this.get('copySettingsToUser').perform('stringAttributes');
+      yield this.get('user').save();
+      this.showAlertifyMessage('Settings saved.');
+      success = true;
+    } catch(reason) {
+      const {title, detail} = reason.errors[0];
+      this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+    } finally {
+      if(!success)
+        this.get('reloadUser').perform();
     }
-  },
+  }).drop(),
 
-  initAttributeProperties() {
-    const usersettings = this.get('user').settings;
-
-    this.set('booleans', {});
-    this.set('numerics', {});
-    this.set('strings', {});
-
-    Object.entries(usersettings.booleanAttributes).forEach(
+  copySettingsToUser: task(function *(type) {
+    yield Object.entries(this.get(`settings.${type}`)).forEach(
       ([key, value]) => {
-        this.set(`booleans.${key}`, value);
+        this.set(`user.settings.${type}.${key}`, value);
       }
     );
-    Object.entries(usersettings.numericAttributes).forEach(
-      ([key, value]) => {
-        this.set(`numerics.${key}`, value);
-      }
-    );
-    Object.entries(usersettings.stringAttributes).forEach(
-      ([key, value]) => {
-        this.set(`strings.${key}`, value);
-      }
-    );
-  },
+  }),
 
-  actions: {
-    // saves the changes made to the actual model and backend
-    saveSettings() {
-      this.set('showSpinner', true);
-      //Update booleans
-      Object.entries(this.get('booleans')).forEach(([key, value]) => {
-        this.set(`user.settings.booleanAttributes.${key}`, value);
-      });
+  reloadUser: task(function * () {
+    const user = this.get('user');
+    yield user.reload();
+  }),
 
-      //Update numerics
-      Object.entries(this.get('numerics')).forEach(([key, value]) => {
-        // get new setting value
-        const newVal = Number(value);
-
-        // newVal might be NaN
-        if(newVal) {
-          this.set(`user.settings.numericAttributes.${key}`, newVal);
-        }
-      });
-
-      //Update strings
-      Object.entries(this.get('strings')).forEach(([key, value]) => {
-        this.set(`user.settings.stringAttributes.${key}`, value);
-      });
-
-      this.get('user').save().then(() => {
-        this.set('showSpinner', false);
-        this.showAlertifyMessage('Settings saved.');
-      }, reason => {
-        const {title, detail} = reason.errors[0];
-        this.set('showSpinner', false);
-        this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
-        // reload model and rollback the properties
-        this.get('user').reload();
-      });
-    }
+  willDestroyElement() {
+    this.get('reloadUser').perform();
+    this._super(...arguments);
   }
-
 });

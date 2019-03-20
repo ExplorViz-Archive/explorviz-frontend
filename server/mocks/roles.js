@@ -28,6 +28,18 @@ module.exports = function (app) {
     res.send(roles);
   });
 
+  roleRouter.get('/:id', function (req, res) {
+    const roleCount = roles.data.length;
+    for (let i = 0; i < roleCount; i++) {
+      if(roles.data[i].id == req.params.id) {
+        res.send({
+          "data": roles.data[i]
+        });
+        return;
+      }
+    }
+  });
+
   // The POST and PUT call will not contain a request body
   // because the body-parser is not included by default.
   // To use req.body, run:

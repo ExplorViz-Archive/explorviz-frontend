@@ -9,8 +9,8 @@ export default BaseRoute.extend(AuthenticatedRouteMixin, AlertifyHandler, {
 
   store: service(),
 
-  model(params) {
-    return this.get('store').findRecord('user', params.user_id);
+  model: function ({ user_id }) {
+    return this.get('store').findRecord('user', user_id, {reload: true});
   },
 
   actions: {

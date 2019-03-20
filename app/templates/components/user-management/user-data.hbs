@@ -1,7 +1,7 @@
 
 <h3>User Data</h3>
 <hr>
-{{#bs-form model=this onSubmit=(action "saveUserChanges") as |form|}}
+{{#bs-form model=this onSubmit=(perform saveUserChanges) as |form|}}
   {{form.element controlType="number" label="ID" property="id_change" disabled=true}}
   {{form.element controlType="text" label="Username" placeholder="Enter New Username" property="username_change"}}
   {{form.element controlType="password" label="Password" placeholder="Enter New Password" property="password_change"}}
@@ -13,9 +13,12 @@
       {{item.descriptor}}
     {{/el.control}}
   {{/form.element}}
-  {{bs-button defaultText="Apply Changes" type="primary" buttonType="submit"}}
+  {{#if saveUserChanges.isRunning}}
+    {{#bs-button type="primary" buttonType="submit" disabled=true}}
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Saving...
+    {{/bs-button}}
+  {{else}}
+    {{bs-button defaultText="Save Changes" type="primary" buttonType="submit"}}
+  {{/if}}
 {{/bs-form}}
-
-{{#if this.showSpinner}}
-  {{ember-spinner}}
-{{/if}}

@@ -2,40 +2,19 @@
   <h3>User Settings</h3>
   <hr>
   <div class="mt-2">
-    {{#bs-form model=this onSubmit=(action "saveSettings") as |form|}}
-      {{#each-in booleans as |key v|}}
-        <div class="d-flex justify-content-between pr-3">
-          <div>
-            {{help-tooltip title=(get this.descriptions key)}}
-            {{key}}
-          </div>
-          {{x-toggle
-            theme='skewed'
-            value=(get this.booleans key)
-            onToggle=(action (mut (get this.booleans key)))
-          }}
-        </div>
-      {{/each-in}}
-      {{#each-in numerics as |key|}}
-        <div class="mb-3">
-          {{help-tooltip title=(get this.descriptions key)}}
-          {{form.element class="d-contents" controlType="number" step=".01" label=key property=(concat "numerics." key)}}
-        </div>
-      {{/each-in}}
-      {{#each-in strings as |key|}}
-        <div class="mb-3">
-          {{help-tooltip title=(get this.descriptions key)}}
-          {{form.element class="d-contents" controlType="text" label=key property=(concat "strings." key)}}
-        </div>
-      {{/each-in}}
+    {{#if this.copySettings.isRunning}}
+      {{ember-spinner}}
+    {{else}}
+      {{user-management/user-settings-base settings=this.settings}}
 
-      {{#bs-button onClick=(action "saveSettings") type="primary" buttonType="submit"}}
-        Save
-      {{/bs-button}}
-    {{/bs-form}}
+      {{#if this.saveSettings.isRunning}}
+        {{#bs-button type="primary" buttonType="submit" disabled=true}}
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Saving...
+        {{/bs-button}}
+      {{else}}
+        {{bs-button defaultText="Save Changes" onClick=(perform saveSettings) type="primary" buttonType="submit"}}
+      {{/if}}
+    {{/if}}
   </div>
 </div>
-
-{{#if this.showSpinner}}
-  {{ember-spinner}}
-{{/if}}

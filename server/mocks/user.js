@@ -181,8 +181,6 @@ module.exports = function (app) {
 
     req.body.data.id = getNextUserId().toString();
 
-    req.body.data.attributes.settings = createSettingsObject();
-
     users.data.push(req.body.data);
     res.send(req.body);
   });

@@ -1,6 +1,7 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 
+import { task } from 'ember-concurrency';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 export default Component.extend(AlertifyHandler, {
@@ -11,59 +12,46 @@ export default Component.extend(AlertifyHandler, {
   store: service(),
   router: service(),
 
-  showSpinner: null,
-
   users: null,
 
   didInsertElement() {
     this._super(...arguments);
     this.set('roles', []);
     this.set('showNewUsers', false);
-    this.updateUserList(true);
+    this.get('updateUserList').perform(true);
   },
 
-  updateUserList(reload) {
+  updateUserList: task(function * (reload) {
     this.set('users', []);
-    this.set('showSpinner', true);
-    this.get('store').findAll('user', { reload })
-      .then(users => {
-        let userList = users.toArray();
-        // sort by id
-        userList.sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1);
-        if(!this.isDestroyed) {
-          this.set('users', userList);
-          this.set('showSpinner', false);
-        }
-      }, () => {
-        if(!this.isDestroyed) {
-          this.set('showSpinner', false);
-        }
-      });
-  },
-
-  actions: {
-    openUserCreation() {
-      this.get('router').transitionTo('configuration.usermanagement.new');
-    },
-
-    openUserEdit(userId) {
-      this.get('router').transitionTo('configuration.usermanagement.edit', userId);
-    },
-
-    deleteUser(user) {
-      this.set('showSpinner', true);
-      user.destroyRecord()
-        .then(() => { // success
-          const message = `User <b>${user.username}</b> deleted.`;
-          this.showAlertifyMessage(message);
-          this.updateUserList(false);
-          this.set('showSpinner', false);
-        }, (reason) => { // failure
-          this.showReasonErrorAlert(reason);
-          this.updateUserList(true);
-          this.set('showSpinner', false);
-        });
+    try {
+      const users = yield this.get('store').findAll('user', { reload });
+      let userList = users.toArray();
+      // sort by id
+      userList.sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1);
+      this.set('users', userList);
+    } catch(reason) {
+      this.showAlertifyMessage('Could not load users!');
     }
-  }
+  }).restartable(),
+
+  openUserCreation: task(function * () {
+    yield this.get('router').transitionTo('configuration.usermanagement.new');
+  }).drop(),
+
+  openUserEdit: task(function * (userId) {
+    yield this.get('router').transitionTo('configuration.usermanagement.edit', userId);
+  }).drop(),
+
+  deleteUser: task(function * (user) {
+    try {
+      yield user.destroyRecord();
+      const message = `User <b>${user.username}</b> deleted.`;
+      this.showAlertifyMessage(message);
+      this.get('updateUserList').perform(false);
+    } catch(reason) {
+      this.showReasonErrorAlert(reason);
+      this.get('updateUserList').perform(true);
+    }
+  }).enqueue()
 
 });
