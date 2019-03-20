@@ -1,6 +1,8 @@
 /* jshint node: true */
 
-var colors = require('colors');
+/* eslint no-console: 0 */
+
+var colors = require('colors'); // eslint-disable-line
 
 module.exports = function(environment) {
   var ENV = {
@@ -25,9 +27,11 @@ module.exports = function(environment) {
     }
   };
 
+  var API_ROOT;
+
   if (environment === 'development') {
 
-    var API_ROOT = 'http://localhost:8080';
+    API_ROOT = 'http://localhost:8080';
 
     if(process.env.API_ROOT) {
       API_ROOT = process.env.API_ROOT;
@@ -36,48 +40,36 @@ module.exports = function(environment) {
     ENV.APP.API_ROOT = API_ROOT;
 
     console.log("");
-    console.log(`EXPL-INFO: Development mode: Using ${API_ROOT} as API_ROOT`.blue);
+    console.log(`EXPL-INFO: Development mode: Using ${API_ROOT} as API_ROOT`.blue); 
   }
 
   if (environment === 'production') {
 
-    console.log("");
+    console.log(""); 
 
-    var rootURL = 'change-rootURL';
-    var API_ROOT = 'change-API_ROOT';
+    //var rootURL = 'change-rootURL';
+    API_ROOT = 'change-API_ROOT'; 
 
     if(process.env.API_ROOT) {
-      console.log(`EXPL-INFO: Using environment variable as API_ROOT`.blue);
+      console.log(`EXPL-INFO: Using environment variable as API_ROOT`.blue); 
       API_ROOT = process.env.API_ROOT;
     }
 
-    if(process.env.ROOT_URL) {
-      console.log(`EXPL-INFO: Using environment variable as rootURL`.blue);
-      rootURL = process.env.ROOT_URL;
-    }
-
-    ENV.rootURL = rootURL;
     ENV.APP.API_ROOT = API_ROOT;
 
-    console.log("");
-    console.log(`EXPL-INFO: Production mode: Using ${rootURL} as rootURL`.blue);
-    console.log(`EXPL-INFO: Production mode: Using ${API_ROOT} as API_ROOT`.blue);
-
-    if(rootURL == 'change-rootURL' || API_ROOT == 'change-API_ROOT') {
-      console.log(`EXPL-WARNING: This is prodution mode. You must override the 'rootURL' variable with its current value: ${rootURL}`.yellow);
-      console.log(`EXPL-WARNING: Set the environment variable ROOT_URL=XXX`.yellow);
-    }
+    console.log(""); 
+    console.log(`EXPL-INFO: Production mode: Using ${API_ROOT} as API_ROOT`.blue); 
 
     if(API_ROOT == 'change-API_ROOT') {
-      console.log(`EXPL-WARNING: This is prodution mode. You must override the 'API_ROOT' variable with its current value: ${API_ROOT}`.yellow);
-      console.log(`EXPL-WARNING: Set the environment variable API_ROOT=XXX`.yellow);
+      console.log(`EXPL-WARNING: This is prodution mode. You must override the 'API_ROOT' variable with its current value: ${API_ROOT}`.yellow); 
+      console.log(`EXPL-WARNING: Set the environment variable API_ROOT=XXX`.yellow); 
     }
   }
 
   if (environment === 'mocked') {
-    var API_ROOT = 'http://localhost:4200/api';
+    API_ROOT = 'http://localhost:4200/api'; 
     ENV.APP.API_ROOT = 'http://localhost:4200/api';
-    console.log(`EXPL-INFO: Mocked API mode: Using ${API_ROOT} as API_ROOT`.blue);    
+    console.log(`EXPL-INFO: Mocked API mode: Using ${API_ROOT} as API_ROOT`.blue); 
   }
 
   if (environment === 'test') {
