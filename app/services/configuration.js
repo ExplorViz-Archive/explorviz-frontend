@@ -64,9 +64,9 @@ export default Service.extend({
 
     this.set('landscapeColorsDefault', {
       system: "rgb(199, 199, 199)",
-      nodegroup: "rgb(1, 155, 32)",
-      node: "rgb(0, 189, 56)",
-      application: "rgb(81, 34, 183)",
+      nodegroup: "rgb(22, 158, 43)",
+      node: "rgb(0, 187, 65)",
+      application: "rgb(62, 20, 160)",
       communication: "rgb(244, 145, 0)",
       textsystem: "rgb(0, 0, 0)",
       textnode: "rgb(255, 255, 255)",
@@ -77,8 +77,8 @@ export default Service.extend({
 
     this.set('applicationColorsDefault', {
       foundation: "rgb(199, 199, 199)",
-      componentOdd: "rgb(0, 187, 65)",
-      componentEven: "rgb(22, 158, 43)",
+      componentOdd: "rgb(22, 158, 43)",
+      componentEven: "rgb(0, 187, 65)",
       clazz: "rgb(62, 20, 160)",
       highlightedEntity: "rgb(255, 0, 0)",
       communication: "rgb(244, 145, 0)",
