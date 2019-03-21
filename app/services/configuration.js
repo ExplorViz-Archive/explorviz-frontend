@@ -79,7 +79,9 @@ export default Service.extend({
       componentOdd: "rgb(0, 187, 65)",
       componentEven: "rgb(22, 158, 43)",
       clazz: "rgb(62, 20, 160)",
-      highlightedEntity: "rgb(255, 0, 0)"
+      highlightedEntity: "rgb(255, 0, 0)",
+      communication: "rgb(244, 145, 0)",
+      communicationArrow: "rgb(0, 0, 0)"
     });
   },
 
