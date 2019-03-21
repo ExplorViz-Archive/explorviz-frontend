@@ -9,8 +9,6 @@ import Router from "explorviz-frontend/router";
 * @module ember
 */
 export function initialize(/* appInstance */) {
-
-  console.log('initializer router.js');
   Router.configurationRouteExtensions = [];
 }
 
