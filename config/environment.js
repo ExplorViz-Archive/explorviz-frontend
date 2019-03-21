@@ -4,7 +4,7 @@
 
 var colors = require('colors'); // eslint-disable-line
 
-module.exports = function(environment) {
+module.exports = function (environment) {
   var ENV = {
     modulePrefix: 'explorviz-frontend',
     environment: environment,
@@ -33,43 +33,43 @@ module.exports = function(environment) {
 
     API_ROOT = 'http://localhost:8080';
 
-    if(process.env.API_ROOT) {
+    if (process.env.API_ROOT) {
       API_ROOT = process.env.API_ROOT;
     }
 
     ENV.APP.API_ROOT = API_ROOT;
 
     console.log("");
-    console.log(`EXPL-INFO: Development mode: Using ${API_ROOT} as API_ROOT`.blue); 
+    console.log(`EXPL-INFO: Development mode: Using ${API_ROOT} as API_ROOT`.blue);
   }
 
   if (environment === 'production') {
 
-    console.log(""); 
+    console.log("");
 
     //var rootURL = 'change-rootURL';
-    API_ROOT = 'change-API_ROOT'; 
+    API_ROOT = 'change-API_ROOT';
 
-    if(process.env.API_ROOT) {
-      console.log(`EXPL-INFO: Using environment variable as API_ROOT`.blue); 
+    if (process.env.API_ROOT) {
+      console.log(`EXPL-INFO: Using environment variable as API_ROOT`.blue);
       API_ROOT = process.env.API_ROOT;
     }
 
     ENV.APP.API_ROOT = API_ROOT;
 
-    console.log(""); 
-    console.log(`EXPL-INFO: Production mode: Using ${API_ROOT} as API_ROOT`.blue); 
+    console.log("");
+    console.log(`EXPL-INFO: Production mode: Using ${API_ROOT} as API_ROOT`.blue);
 
-    if(API_ROOT == 'change-API_ROOT') {
-      console.log(`EXPL-WARNING: This is prodution mode. You must override the 'API_ROOT' variable with its current value: ${API_ROOT}`.yellow); 
-      console.log(`EXPL-WARNING: Set the environment variable API_ROOT=XXX`.yellow); 
+    if (API_ROOT == 'change-API_ROOT') {
+      console.log(`EXPL-WARNING: This is prodution mode. You must override the 'API_ROOT' variable with its current value: ${API_ROOT}`.yellow);
+      console.log(`EXPL-WARNING: Set the environment variable API_ROOT=XXX`.yellow);
     }
   }
 
   if (environment === 'mocked') {
-    API_ROOT = 'http://localhost:4200/api'; 
+    API_ROOT = 'http://localhost:4200/api';
     ENV.APP.API_ROOT = 'http://localhost:4200/api';
-    console.log(`EXPL-INFO: Mocked API mode: Using ${API_ROOT} as API_ROOT`.blue); 
+    console.log(`EXPL-INFO: Mocked API mode: Using ${API_ROOT} as API_ROOT`.blue);
   }
 
   if (environment === 'test') {
