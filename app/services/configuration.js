@@ -57,6 +57,9 @@ export default Service.extend({
     this.resetColors();
   },
 
+  /**
+   * Sets the default visualization colors
+   */
   initDefaultColors() {
     this.set('landscapeColorsDefault', {
       system: "rgb(199, 199, 199)",
@@ -82,10 +85,11 @@ export default Service.extend({
 
   /**
    * Resets all visualization colors to default values
+   * Needs to be a deep copy of the object, otherwise the default colors got overridden when the colors are in the extension
    */
   resetColors() {
-    this.set('landscapeColors', this.get('landscapeColorsDefault'));
-    this.set('applicationColors', this.get('applicationColorsDefault'));
+    this.set('landscapeColors', Object.assign({}, this.get('landscapeColorsDefault')));
+    this.set('applicationColors', Object.assign({}, this.get('applicationColorsDefault')));
   }
 
 });
