@@ -213,6 +213,8 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     const drawableClazzCommunications = emberApplication.get('drawableClazzCommunications');
 
+    // TODO why is drawableClazzCommunications.length = 0 on timeline selection= 
+
     drawableClazzCommunications.forEach((drawableClazzComm) => {
       if (drawableClazzComm.get('startPoint') && drawableClazzComm.get('endPoint')) {
         const start = new THREE.Vector3();

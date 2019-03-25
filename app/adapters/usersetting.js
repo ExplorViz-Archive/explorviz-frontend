@@ -16,7 +16,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
 
   urlForFindRecord(id) {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/settings/${id}`;
+    return `${baseUrl}/v1/settings/${id}/info`;
   },
 
   urlForUpdateRecord(id) {
@@ -33,6 +33,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     const baseUrl = this.buildURL();
     return `${baseUrl}/v1/settings/`;
   },
+  
   // @Override
   urlForQueryRecord() {
     const baseUrl = this.buildURL();
