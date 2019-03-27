@@ -106,7 +106,7 @@ module.exports = function(app) {
     res.send(defaultSettings);
   });
 
-  tokensRouter.get('/:id', function(req, res) {
+  tokensRouter.get('/:id/info', function(req, res) {
     if(descriptors[req.params.id]) {
       res.send(descriptors[req.params.id]);
     } else {
