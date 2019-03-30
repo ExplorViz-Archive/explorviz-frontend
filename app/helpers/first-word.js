@@ -2,8 +2,16 @@ import { helper } from '@ember/component/helper';
 
 export function firstWord(params) {
   const [string] = params;
-  var words = string.split(" ");
-  return words[0]
+
+  let firstWord;
+  if (string.includes(' ')) {
+    let words = string.split(' ');
+    firstWord = words[0];
+  } else {
+    firstWord = string;
+  }
+
+  return firstWord;
 }
 
 export default helper(firstWord);
