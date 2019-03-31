@@ -144,6 +144,13 @@ export default Service.extend({
               if (traceStep.get('parentTrace.traceId') === highlightedEntity.get('traceId') &&
                 traceStep.get('tracePosition') === this.get('currentTracePosition')) {
                 drawableCommunication.highlight();
+                // set source and target clazz according to highlighted traceStep
+                if (traceStep.get('clazzCommunication.sourceClazz.id') !== drawableCommunication.get('sourceClazz.id')){
+                  let oldSourceClazz = drawableCommunication.get('sourceClazz');
+                  let oldTargetClazz = drawableCommunication.get('targetClazz');
+                  drawableCommunication.set('sourceClazz', oldTargetClazz);
+                  drawableCommunication.set('targetClazz', oldSourceClazz);
+                }
               }
             });
           });

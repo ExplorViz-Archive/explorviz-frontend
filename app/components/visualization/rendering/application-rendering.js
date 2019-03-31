@@ -29,6 +29,7 @@ import FoundationBuilder from
 export default RenderingCore.extend(AlertifyHandler, {
 
   store: service('store'),
+  highlighter: service('visualization/application/highlighter'),
 
   session: service(),
 
@@ -270,8 +271,8 @@ export default RenderingCore.extend(AlertifyHandler, {
             let arrowThickness = this.get('currentUser.settings.numericAttributes.appVizCommArrowSize') * 4 * thickness;
             self.addCommunicationArrow(start, end, arrowThickness);
 
-            // draw second arrow for bidirectional communication
-            if (drawableClazzComm.get('isBidirectional')){
+            // draw second arrow for bidirectional communication, but not if only trace communication direction shall be displayed
+            if (drawableClazzComm.get('isBidirectional') && !this.get('highlighter.isTrace')){
               self.addCommunicationArrow(end, start, arrowThickness);
             }
           }
