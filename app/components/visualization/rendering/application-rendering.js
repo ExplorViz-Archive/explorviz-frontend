@@ -265,20 +265,15 @@ export default RenderingCore.extend(AlertifyHandler, {
             drawableClazzComm.get('targetClazz.fullQualifiedName')) {
             // TODO: draw a circular arrow or something alike
           } else {
-            // keep track of drawn arrow to prevent duplicates
-            let drewSecondArrow = false;
 
             // add arrow from in direction of source to target clazz
             let arrowThickness = this.get('currentUser.settings.numericAttributes.appVizCommArrowSize') * 4 * thickness;
             self.addCommunicationArrow(start, end, arrowThickness);
 
-            // check for bidirectional communication
-            drawableClazzComm.get('aggregatedClazzCommunications').forEach((aggrComm) => {
-              if ((drawableClazzComm.get('sourceClazz.fullQualifiedName') === aggrComm.get('targetClazz.fullQualifiedName') && !drewSecondArrow)) {
-                self.addCommunicationArrow(end, start, arrowThickness);
-                drewSecondArrow = true;
-              }
-            });
+            // draw second arrow for bidirectional communication
+            if (drawableClazzComm.get('isBidirectional')){
+              self.addCommunicationArrow(end, start, arrowThickness);
+            }
           }
         }
 

@@ -9,7 +9,7 @@
 </div>
 
 <div class="mt-2 mb-1 d-flex justify-content-end">
-  <div>{{input id="filterInput" value=filterInput placeholder='Filter traces' class="form-control input-lg" autofocus="autofocus" enter=(action "filter")}}</div>
+  <div>{{input id="filterInput" value=filterInput placeholder='Filter traces' class="form-control input-lg" autofocus="autofocus" focus-out=(action "filter") enter=(action "filter")}}</div>
   <div>{{#bs-button onClick=(action "filter") type="button" class="btn btn-light"}}{{svg-jar "search" class="octicon align-middle"}}{{/bs-button}}</div>
 </div>
 
