@@ -9,12 +9,12 @@
         </div>
       </div>
       <div class="modal-body">
-        <div id="failure" style="color: #FF0000; text-align: center; font-weight: bold; font-size: 150%; padding-bottom: 1em">
+        <div id="failure" style="color: #ef5350; text-align: center; font-weight: bold; font-size: 150%; padding-bottom: 1em">
           {{#if session.session.content.errorMessage}}              
             {{session.session.content.errorMessage}}
           {{/if}}
         </div>
-        <div id="succeededLogout" style="color: #00FF00; text-align: center; font-weight: bold; font-size: 150%; padding-bottom: 1em">
+        <div id="succeededLogout" style="color: #a5d6a7; text-align: center; font-weight: bold; font-size: 150%; padding-bottom: 1em">
           {{#if session.session.content.message}}
             {{session.session.content.message}}
           {{/if}}
@@ -27,7 +27,7 @@
             {{input value=password placeholder='password' class='form-control input-lg' type='password'}}
           </div>
           <div class="form-group">
-            <button class="btn btn-primary btn-lg btn-block">Sign In</button>
+            <button class="btn btn-outline-primary btn-lg btn-block btn-exp-login">Sign In</button>
           </div>
         </form>
       </div>

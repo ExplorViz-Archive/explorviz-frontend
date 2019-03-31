@@ -1,5 +1,5 @@
 import RenderingCore from './rendering-core';
-import {inject as service} from '@ember/service';
+import { inject as service } from '@ember/service';
 import { getOwner } from '@ember/application';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
@@ -7,16 +7,15 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import THREE from "three";
 
 import applyCityLayout from
-    'explorviz-frontend/utils/application-rendering/city-layouter';
+  'explorviz-frontend/utils/application-rendering/city-layouter';
 import Interaction from
-    'explorviz-frontend/utils/application-rendering/interaction';
+  'explorviz-frontend/utils/application-rendering/interaction';
 import Labeler from
-    'explorviz-frontend/utils/application-rendering/labeler';
+  'explorviz-frontend/utils/application-rendering/labeler';
 import CalcCenterAndZoom from
-    'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
+  'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
 import FoundationBuilder from
-    'explorviz-frontend/utils/application-rendering/foundation-builder';
-
+  'explorviz-frontend/utils/application-rendering/foundation-builder';
 
 /**
  * Renderer for application visualization.
@@ -32,6 +31,8 @@ export default RenderingCore.extend(AlertifyHandler, {
   store: service('store'),
 
   session: service(),
+
+  configuration: service("configuration"),
 
   application3D: null,
 
@@ -55,23 +56,23 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     this.debug("init application rendering");
 
-    this.set('oldRotation', {x: 0, y: 0});
+    this.set('oldRotation', { x: 0, y: 0 });
 
-    this.onReSetupScene = function() {
+    this.onReSetupScene = function () {
       this.resetRotation();
       this.set('centerAndZoomCalculator.centerPoint', null);
       this.get('camera.position').set(0, 0, 100);
       this.cleanAndUpdateScene();
     };
 
-    this.onUpdated = function() {
-      if(this.get('initDone')) {
+    this.onUpdated = function () {
+      if (this.get('initDone')) {
         this.preProcessEntity();
         this.cleanAndUpdateScene();
       }
     };
 
-    this.onResized = function() {
+    this.onResized = function () {
       this.set('centerAndZoomCalculator.centerPoint', null);
       this.cleanAndUpdateScene();
     };
@@ -180,7 +181,7 @@ export default RenderingCore.extend(AlertifyHandler, {
     //const emberApplication = this.get('landscapeRepo.latestApplication');
     const emberApplication = this.get('latestApplication');
 
-    if(!emberApplication) {
+    if (!emberApplication) {
       return;
     }
 
@@ -203,7 +204,7 @@ export default RenderingCore.extend(AlertifyHandler, {
     // apply (possible) highlighting
     this.get('interaction').applyHighlighting();
 
-    if(!this.get('centerAndZoomCalculator.centerPoint')) {
+    if (!this.get('centerAndZoomCalculator.centerPoint')) {
       this.get('centerAndZoomCalculator')
         .calculateAppCenterAndZZoom(emberApplication);
     }
@@ -211,6 +212,8 @@ export default RenderingCore.extend(AlertifyHandler, {
     const viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
 
     const drawableClazzCommunications = emberApplication.get('drawableClazzCommunications');
+
+    // TODO why is drawableClazzCommunications.length = 0 on timeline selection= 
 
     drawableClazzCommunications.forEach((drawableClazzComm) => {
       if (drawableClazzComm.get('startPoint') && drawableClazzComm.get('endPoint')) {
@@ -232,15 +235,18 @@ export default RenderingCore.extend(AlertifyHandler, {
         let transparent = false;
         let opacityValue = 1.0;
 
-        if(drawableClazzComm.get('state') === "TRANSPARENT") {
+        if (drawableClazzComm.get('state') === "TRANSPARENT") {
           transparent = this.get('currentUser.settings.booleanAttributes.appVizTransparency');
           opacityValue = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
         }
 
+        const communicationColor = this.get('configuration.applicationColors.communication');
+        const communicationHighlightedColor = this.get('configuration.applicationColors.highlightedEntity');
+
         const material = new THREE.MeshBasicMaterial({
-          color : drawableClazzComm.get('highlighted') ? new THREE.Color(0xFF0000) : new THREE.Color(0xf49100), // either red or orange, depending on highlighting status
-          opacity : opacityValue,
-          transparent : transparent
+          color: drawableClazzComm.get('highlighted') ? new THREE.Color(communicationHighlightedColor) : new THREE.Color(communicationColor), // either red if 'highlighted', otherwise orange
+          opacity: opacityValue,
+          transparent: transparent
         });
 
         const thickness = drawableClazzComm.get('lineThickness') * 0.3;
@@ -251,40 +257,41 @@ export default RenderingCore.extend(AlertifyHandler, {
 
         // indicate communication for direction for (indirectly) highlighted communication
         if (drawableClazzComm.get('highlighted') ||
-            drawableClazzComm.get('sourceClazz.highlighted') || 
-            drawableClazzComm.get('targetClazz.highlighted')){
+          drawableClazzComm.get('sourceClazz.highlighted') ||
+          drawableClazzComm.get('targetClazz.highlighted')) {
 
-              // check for recursion
-              if ( drawableClazzComm.get('sourceClazz.fullQualifiedName') == 
-                   drawableClazzComm.get('targetClazz.fullQualifiedName') ){
-                // TODO: draw a circular arrow or something alike
-              } else {
-              // keep track of drawn arrow to prevent duplicates
-              let drewSecondArrow = false;
+          // check for recursion
+          if (drawableClazzComm.get('sourceClazz.fullQualifiedName') ==
+            drawableClazzComm.get('targetClazz.fullQualifiedName')) {
+            // TODO: draw a circular arrow or something alike
+          } else {
+            // keep track of drawn arrow to prevent duplicates
+            let drewSecondArrow = false;
 
-              // add arrow from in direction of source to target clazz
-              let arrowThickness = this.get('currentUser.settings.numericAttributes.appVizCommArrowSize') * 4 * thickness;
-              self.addCommunicationArrow(start, end, arrowThickness);
+            // add arrow from in direction of source to target clazz
+            let arrowThickness = this.get('currentUser.settings.numericAttributes.appVizCommArrowSize') * 4 * thickness;
+            self.addCommunicationArrow(start, end, arrowThickness);
 
-              // check for bidirectional communication
-              drawableClazzComm.get('aggregatedClazzCommunications').forEach( (aggrComm) => {
-                if ((drawableClazzComm.get('sourceClazz.fullQualifiedName') === aggrComm.get('targetClazz.fullQualifiedName') && !drewSecondArrow)){
-                  self.addCommunicationArrow(end, start, arrowThickness);
-                  drewSecondArrow = true;
-                }
-              });
+            // check for bidirectional communication
+            drawableClazzComm.get('aggregatedClazzCommunications').forEach((aggrComm) => {
+              if ((drawableClazzComm.get('sourceClazz.fullQualifiedName') === aggrComm.get('targetClazz.fullQualifiedName') && !drewSecondArrow)) {
+                self.addCommunicationArrow(end, start, arrowThickness);
+                drewSecondArrow = true;
               }
+            });
+          }
         }
 
         self.get('application3D').add(pipe);
       }
     });
 
-    this.addComponentToScene(foundation, 0xCECECE);
+    const foundationColor = this.get('configuration.applicationColors.foundation');
+    this.addComponentToScene(foundation, foundationColor);
 
     self.scene.add(self.get('application3D'));
 
-    if(self.get('initialSetupDone')) {
+    if (self.get('initialSetupDone')) {
       // apply old rotation
       self.set('application3D.rotation.x', self.get('oldRotation.x'));
       self.set('application3D.rotation.y', self.get('oldRotation.y'));
@@ -320,17 +327,15 @@ export default RenderingCore.extend(AlertifyHandler, {
 
   addComponentToScene(component, color) {
 
-    const grey = 0xCECECE;
-    const lightGreen = 0x00BB41;
-    const darkGreen = 0x169E2B;
-    const clazzColor = 0x3E14A0;
-    const redHighlighted = 0xFF0000;
+    const foundationColor = this.get('configuration.applicationColors.foundation');
+    const componentOddColor = this.get('configuration.applicationColors.componentOdd');
+    const componentEvenColor = this.get('configuration.applicationColors.componentEven');
+    const clazzColor = this.get('configuration.applicationColors.clazz');
+    const highlightedEntityColor = this.get('configuration.applicationColors.highlightedEntity');
 
     this.createBox(component, color, false);
 
     component.set('color', color);
-
-
 
     const clazzes = component.get('clazzes');
     const children = component.get('children');
@@ -338,7 +343,7 @@ export default RenderingCore.extend(AlertifyHandler, {
     clazzes.forEach((clazz) => {
       if (component.get('opened')) {
         if (clazz.get('highlighted')) {
-          this.createBox(clazz, redHighlighted, true);
+          this.createBox(clazz, highlightedEntityColor, true);
         } else {
           this.createBox(clazz, clazzColor, true);
         }
@@ -347,14 +352,14 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     children.forEach((child) => {
       if (component.get('opened')) {
-        if(child.get('highlighted')) {
-          this.addComponentToScene(child, redHighlighted);
-        } else if(component.get('color') === grey) {
-          this.addComponentToScene(child, lightGreen);
-        } else if(component.get('color') === darkGreen) {
-          this.addComponentToScene(child, lightGreen);
+        if (child.get('highlighted')) {
+          this.addComponentToScene(child, highlightedEntityColor);
+        } else if (component.get('color') === foundationColor) {
+          this.addComponentToScene(child, componentOddColor);
+        } else if (component.get('color') === componentEvenColor) {
+          this.addComponentToScene(child, componentOddColor);
         } else {
-          this.addComponentToScene(child, darkGreen);
+          this.addComponentToScene(child, componentEvenColor);
         }
       }
     });
@@ -372,14 +377,14 @@ export default RenderingCore.extend(AlertifyHandler, {
     let transparent = false;
     let opacityValue = 1.0;
 
-    if(component.get('state') === "TRANSPARENT") {
+    if (component.get('state') === "TRANSPARENT") {
       transparent = this.get('currentUser.settings.booleanAttributes.appVizTransparency');
       opacityValue = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
     }
 
     const material = new THREE.MeshLambertMaterial({
-      opacity : opacityValue,
-      transparent : transparent
+      opacity: opacityValue,
+      transparent: transparent
     });
 
     material.color = new THREE.Color(color);
@@ -410,7 +415,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     self.get('application3D').add(mesh);
 
-  } ,// END createBox
+  },// END createBox
 
   /**
    * Draws an small black arrow
@@ -419,13 +424,13 @@ export default RenderingCore.extend(AlertifyHandler, {
    * @param {Number} width thickness of the arrow
    * @method addCommunicationArrow
    */
-  addCommunicationArrow(start, end, width){
+  addCommunicationArrow(start, end, width) {
 
     // determine (almost the) middle
     let dir = end.clone().sub(start);
     let len = dir.length();
     // do not draw precisely in the middle to leave a small gap in case of bidirectional communication
-    let halfVector = dir.normalize().multiplyScalar(len*0.51);
+    let halfVector = dir.normalize().multiplyScalar(len * 0.51);
     let middle = start.clone().add(halfVector);
 
     // normalize the direction vector (convert to vector of length 1)
@@ -436,9 +441,9 @@ export default RenderingCore.extend(AlertifyHandler, {
     let headWidth = Math.max(1.2, width);
     let headLength = Math.min(2 * headWidth, 0.3 * len);
     let length = headLength + 0.00001; // body of arrow not visible
-    let color = 0x000000; // black
+    const communicationArrowColor = this.get('configuration.applicationColors.communicationArrow');
 
-    let arrow = new THREE.ArrowHelper(dir, origin, length, color , headLength, headWidth);
+    let arrow = new THREE.ArrowHelper(dir, origin, length, communicationArrowColor, headLength, headWidth);
 
     this.get('application3D').add(arrow);
   }, // END addCommunicationArrow
@@ -467,7 +472,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     // set listeners
 
-    this.get('renderingService').on('redrawScene', function() {
+    this.get('renderingService').on('redrawScene', function () {
       self.cleanAndUpdateScene();
     });
   }, // END initInteraction

@@ -20,6 +20,9 @@ export default Component.extend({
   appComponents: null,
   appClazzes: null,
 
+  componentLabel: "-- Components --",
+  clazzLabel: "-- Classes --",
+
   // @Override
   didRender() {
     this._super(...arguments);
@@ -33,16 +36,20 @@ export default Component.extend({
 
     onSelect(emberPowerSelectObject) {
 
-      if(!emberPowerSelectObject || emberPowerSelectObject.length < 1)
+      if(!emberPowerSelectObject || emberPowerSelectObject.length < 1) {
         return;
+      }
+
+      const entity = emberPowerSelectObject[0];
+      const modelType = entity.constructor.modelName;
+
+      if(!modelType || modelType === "") {
+        return;
+      }
 
       this.get('highlighter').unhighlightAll();
       this.get('renderingService').redrawScene();
-
-      const entity = emberPowerSelectObject[0];
-  
-      const modelType = entity.constructor.modelName;
-  
+    
       if (modelType === "clazz") {
         entity.openParents();
       }
@@ -90,7 +97,9 @@ export default Component.extend({
     const entities = [];
 
     const maxNumberOfCompNames = 20;
-    let currentNumberOfCompNames = 0; 
+    let currentNumberOfCompNames = 0;
+
+    let isComponentLabelSet = false;
 
     for (let i = 0; i < components.length; i++) {      
       if(currentNumberOfCompNames === maxNumberOfCompNames) {
@@ -105,6 +114,12 @@ export default Component.extend({
 
       const componentName = component.get('name').toLowerCase();
       if(searchEngineFindsHit(componentName, searchString)) {
+
+        if(!isComponentLabelSet) {
+          isComponentLabelSet = true;
+          entities.push({name: this.get('componentLabel')});
+        }
+
         entities.push(component);
         currentNumberOfCompNames++;
       }
@@ -113,7 +128,9 @@ export default Component.extend({
     const maxNumberOfClazzNames = 20;
     let currentNumberOfClazzNames = 0;
 
-    for (let i = 0; i < clazzes.length; i++) {      
+    let isClazzLabelSet = false;
+
+    for (let i = 0; i < clazzes.length; i++) {
       if(currentNumberOfClazzNames === maxNumberOfClazzNames) {
         break;
       }
@@ -121,6 +138,12 @@ export default Component.extend({
       const clazz = clazzes.objectAt(i);
       const clazzName = clazz.get('name').toLowerCase();
       if(searchEngineFindsHit(clazzName, searchString)) {
+
+        if(!isClazzLabelSet) {
+          isClazzLabelSet = true;
+          entities.push({name: this.get('clazzLabel')});
+        }
+
         entities.push(clazz);
         currentNumberOfClazzNames++;
       }  
