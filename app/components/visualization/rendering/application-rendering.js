@@ -80,7 +80,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     this.get('camera').position.set(0, 0, 100);
 
-    // dummy object for raycasting
+    // Dummy object for raycasting
     this.set('application3D', new THREE.Object3D());
 
     if (!this.get('labeler')) {
@@ -92,7 +92,7 @@ export default RenderingCore.extend(AlertifyHandler, {
     }
 
     if (!this.get('interaction')) {
-      // owner necessary to inject service into util
+      // Owner necessary to inject service into util
       this.set('interaction', Interaction.create(getOwner(this).ownerInjection()));
     }
 
@@ -122,7 +122,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     this.debug("cleanup application rendering");
 
-    // remove foundation for re-rendering
+    // Remove foundation for re-rendering
     this.get('foundationBuilder').removeFoundation(this.get('store'));
 
     this.set('applicationID', null);
@@ -130,7 +130,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     this.get('renderingService').off('redrawScene');
 
-    // clean up landscapeRepo for visualization template
+    // Clean up landscapeRepo for visualization template
     this.set('landscapeRepo.latestApplication', null);
 
     this.get('interaction').removeHandlers();
@@ -139,17 +139,17 @@ export default RenderingCore.extend(AlertifyHandler, {
 
   // @Override
   /**
-   * TODO
+   * Persists rotation and removes foundation
    *
    * @method cleanAndUpdateScene
    */
   cleanAndUpdateScene() {
     this.debug("clean application rendering");
 
-    // save old rotation
+    // Save old rotation
     this.set('oldRotation', this.get('application3D').rotation);
 
-    // remove foundation for re-rendering
+    // Remove foundation for re-rendering
     this.get('foundationBuilder').removeFoundation(this.get('store'));
 
     this._super(...arguments);
@@ -158,7 +158,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
   // @Override
   /**
-   * TODO
+   * Update latest application in landscape repo
    *
    * @method preProcessEntity
    */
@@ -171,7 +171,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
   // @Override
   /**
-   * TODO
+   * Main method for adding THREE.js objects to application
    *
    * @method populateScene
    */
@@ -179,7 +179,6 @@ export default RenderingCore.extend(AlertifyHandler, {
     this._super(...arguments);
     this.debug("populate application rendering");
 
-    //const emberApplication = this.get('landscapeRepo.latestApplication');
     const emberApplication = this.get('latestApplication');
 
     if (!emberApplication) {
@@ -199,11 +198,11 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.set('application3D', new THREE.Object3D());
     this.set('application3D.userData.model', emberApplication);
 
-    // update raycasting children, because of new entity
+    // Update raycasting children, because of new entity
     this.get('interaction').updateEntities(this.get('application3D'));
 
-    // apply (possible) highlighting
-    this.get('interaction').applyHighlighting();
+    // Apply (possible) highlighting
+    this.get('highlighter').applyHighlighting();
 
     if (!this.get('centerAndZoomCalculator.centerPoint')) {
       this.get('centerAndZoomCalculator')
@@ -214,8 +213,6 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     const drawableClazzCommunications = emberApplication.get('drawableClazzCommunications');
 
-    // TODO why is drawableClazzCommunications.length = 0 on timeline selection= 
-
     drawableClazzCommunications.forEach((drawableClazzComm) => {
       if (drawableClazzComm.get('startPoint') && drawableClazzComm.get('endPoint')) {
         const start = new THREE.Vector3();
@@ -225,13 +222,6 @@ export default RenderingCore.extend(AlertifyHandler, {
         const end = new THREE.Vector3();
         end.subVectors(drawableClazzComm.get('endPoint'), viewCenterPoint);
         end.multiplyScalar(0.5);
-
-        // horizontal communication lines
-        /*if(start.y >= end.y) {
-          end.y = start.y;
-        } else {
-          start.y = end.y;
-        }*/
 
         let transparent = false;
         let opacityValue = 1.0;
@@ -256,23 +246,23 @@ export default RenderingCore.extend(AlertifyHandler, {
 
         pipe.userData.model = drawableClazzComm;
 
-        // indicate communication for direction for (indirectly) highlighted communication
+        // Indicate communication for direction for (indirectly) highlighted communication
         if (drawableClazzComm.get('highlighted') ||
           drawableClazzComm.get('sourceClazz.highlighted') ||
           drawableClazzComm.get('targetClazz.highlighted')) {
 
-          // check for recursion
+          // Check for recursion
           if (drawableClazzComm.get('sourceClazz.fullQualifiedName') ==
             drawableClazzComm.get('targetClazz.fullQualifiedName')) {
             // TODO: draw a circular arrow or something alike
           } else {
 
-            // add arrow from in direction of source to target clazz
+            // Add arrow from in direction of source to target clazz
             let arrowThickness = this.get('currentUser.settings.numericAttributes.appVizCommArrowSize') * 4 * thickness;
             self.addCommunicationArrow(start, end, arrowThickness);
 
-            // draw second arrow for bidirectional communication, but not if only trace communication direction shall be displayed
-            if (drawableClazzComm.get('isBidirectional') && !this.get('highlighter.isTrace')){
+            // Draw second arrow for bidirectional communication, but not if only trace communication direction shall be displayed
+            if (drawableClazzComm.get('isBidirectional') && !this.get('highlighter.isTrace')) {
               self.addCommunicationArrow(end, start, arrowThickness);
             }
           }
@@ -288,7 +278,7 @@ export default RenderingCore.extend(AlertifyHandler, {
     self.scene.add(self.get('application3D'));
 
     if (self.get('initialSetupDone')) {
-      // apply old rotation
+      // Apply old rotation
       self.set('application3D.rotation.x', self.get('oldRotation.x'));
       self.set('application3D.rotation.y', self.get('oldRotation.y'));
     }
@@ -422,17 +412,17 @@ export default RenderingCore.extend(AlertifyHandler, {
    */
   addCommunicationArrow(start, end, width) {
 
-    // determine (almost the) middle
+    // Determine (almost the) middle
     let dir = end.clone().sub(start);
     let len = dir.length();
-    // do not draw precisely in the middle to leave a small gap in case of bidirectional communication
+    // Do not draw precisely in the middle to leave a small gap in case of bidirectional communication
     let halfVector = dir.normalize().multiplyScalar(len * 0.51);
     let middle = start.clone().add(halfVector);
 
-    // normalize the direction vector (convert to vector of length 1)
+    // Normalize the direction vector (convert to vector of length 1)
     dir.normalize();
 
-    // arrow properties
+    // Arrow properties
     let origin = new THREE.Vector3(middle.x, middle.y + 0.8, middle.z);
     let headWidth = Math.max(1.2, width);
     let headLength = Math.min(2 * headWidth, 0.3 * len);
@@ -461,12 +451,12 @@ export default RenderingCore.extend(AlertifyHandler, {
     const camera = this.get('camera');
     const webglrenderer = this.get('webglrenderer');
 
-    // init interaction objects
+    // Init interaction objects
 
     this.get('interaction').setupInteraction(canvas, camera, webglrenderer,
       this.get('application3D'));
 
-    // set listeners
+    // Set listeners
 
     this.get('renderingService').on('redrawScene', function () {
       self.cleanAndUpdateScene();
