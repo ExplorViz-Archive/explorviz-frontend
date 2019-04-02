@@ -34,8 +34,8 @@ export default Component.extend({
     traces.forEach( (trace) => {
       if (filter === '' 
       || trace.get('traceId').includes(filter) 
-      || trace.get('sourceClazz.name').includes(filter) 
-      || trace.get('targetClazz.name').includes(filter)){
+      || trace.get('sourceClazz.name').toLowerCase().includes(filter) 
+      || trace.get('targetClazz.name').toLowerCase().includes(filter)){
         filteredTraces.push(trace);
       }
     });
@@ -66,7 +66,8 @@ export default Component.extend({
     },
 
     filter(){
-      this.set('filterTerm', this.get('filterInput'));
+      // Case insensitive string filter
+      this.set('filterTerm', this.get('filterInput').toLowerCase());
     },
 
     selectNextTraceStep() {
