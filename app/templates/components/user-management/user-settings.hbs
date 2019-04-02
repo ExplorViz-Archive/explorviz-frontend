@@ -3,7 +3,7 @@
   <hr>
   <div class="mt-2">
     {{#if this.copySettings.isRunning}}
-      {{ember-spinner}}
+      <div class="spinner-center" role="status"></div>
     {{else}}
       {{user-management/user-settings-base settings=this.settings}}
 
