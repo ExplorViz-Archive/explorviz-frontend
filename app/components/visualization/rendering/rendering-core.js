@@ -101,7 +101,7 @@ export default Component.extend(Evented, THREEPerformance, {
 
     const self = this;
 
-    // get size if outer ember div
+    // Get size if outer ember div
     const height = $('#rendering').innerHeight();
     const width = $('#rendering').innerWidth();
 
@@ -155,7 +155,7 @@ export default Component.extend(Evented, THREEPerformance, {
 
     ////////////////////
 
-    // load font for labels and synchronously proceed with populating the scene
+    // Load font for labels and synchronously proceed with populating the scene
     new THREE.FontLoader()
       .load('three.js/fonts/roboto_mono_bold_typeface.json', function(font) {
         if(self.isDestroyed)
@@ -164,8 +164,6 @@ export default Component.extend(Evented, THREEPerformance, {
         self.set('font', font);
         self.set('initDone', true);
         self.populateScene();
-        // import new view
-        // self.importView();
     });
 
   },
@@ -262,25 +260,23 @@ export default Component.extend(Evented, THREEPerformance, {
    *  highlighted package is stored
    */
   computeAppCondition(components, clazzes){
-    const self = this;
-
     if(clazzes){
-      clazzes.forEach(function(clazz) {
+      clazzes.forEach( (clazz) => {
         if(clazz.get('highlighted')){
-          self.get('appCondition').push(clazz.get('name').concat("highlighted"));
+          this.get('appCondition').push(clazz.get('name').concat("highlighted"));
         }
       });
     }
 
-    components.forEach(function(component) {
+    components.forEach( (component) =>{
       // Handle opened packages and add name to array
       if(component.get('opened')){
-        self.get('appCondition').push(component.get('name'));
-        self.computeAppCondition(component.get('children'), component.get('clazzes'));
+        this.get('appCondition').push(component.get('name'));
+        this.computeAppCondition(component.get('children'), component.get('clazzes'));
       }
       // Handle closed and highlighted packages
       else if(component.get('highlighted')){
-        self.get('appCondition').push(component.get('name').concat("highlighted"));
+        this.get('appCondition').push(component.get('name').concat("highlighted"));
       }
     });
   },
@@ -293,11 +289,9 @@ export default Component.extend(Evented, THREEPerformance, {
    */
   applyLandscapeCondition(landscape){
 
-    const self = this;
-
     const systems = landscape.get('systems');
 
-    systems.forEach(function(system) {
+    systems.forEach( (system) => {
       let isRequestObject = false;
 
       if (!isRequestObject && system.get('name') === "Requests") {
@@ -308,10 +302,10 @@ export default Component.extend(Evented, THREEPerformance, {
 
         // Open system
         system.setOpened(true);
-        for (var i = 0; i < self.get('condition').length; i++) {
+        for (var i = 0; i < this.get('condition').length; i++) {
 
           // Close system if id is in condition
-          if(parseFloat(system.get('id')) === parseFloat(self.get('condition')[i])){
+          if(parseFloat(system.get('id')) === parseFloat(this.get('condition')[i])){
             system.setOpened(false);
           }
         }
@@ -324,10 +318,10 @@ export default Component.extend(Evented, THREEPerformance, {
 
             // Open nodegroup
             nodegroup.setOpened(true);
-            for (var i = 0; i < self.get('condition').length; i++) {
+            for (var i = 0; i < this.get('condition').length; i++) {
 
               // Close nodegroup if id is in condition
-              if(parseFloat(nodegroup.get('id')) === parseFloat(self.get('condition')[i])){
+              if(parseFloat(nodegroup.get('id')) === parseFloat(this.get('condition')[i])){
                 nodegroup.setOpened(false);
               }
             }
@@ -339,50 +333,54 @@ export default Component.extend(Evented, THREEPerformance, {
 
   applyAppCondition(application){
 
-    const self = this;
+    if (!application) {
+      return;
+    } 
 
-    if(application){
-      let components = null;
-      if(self.get('initImport')){
-        components = application.get('components');
-        self.set('initImport', false);
-      }
-      else{
-        components = application.get('children');
-      }
-
-      const clazzes = application.get('clazzes');
-
-      if(clazzes){
-        clazzes.forEach(function(clazz) {
-          // Look for highlighted clazzes
-          for (var i = 0; i < self.get('condition').length; i++) {
-            if(clazz.get('name').concat("highlighted") === self.get('condition')[i]) {
-              clazz.set('highlighted',true);
-            }
-          }
-        });
-      }
-
-      if(components){
-        components.forEach(function(component) {
-          // Close component
-          component.setOpenedStatus(false);
-          for (var i = 0; i < self.get('condition').length; i++) {
-            // Open component if name is in condition
-            if(component.get('name') === self.get('condition')[i]){
-              component.setOpenedStatus(true);
-              self.applyAppCondition(component);
-            }
-            // case not opened => maybe highlighted
-            else if(component.get('name').concat("highlighted") === self.get('condition')[i]) {
-              component.set('highlighted',true);
-            }
-          }
-        });
-      self.cleanAndUpdateScene();
-      }
+    // Get clazzes of application
+    let components = null;
+    if(this.get('initImport')){
+      components = application.get('components');
+      this.set('initImport', false);
     }
+    else{
+      components = application.get('children');
+    }
+
+    const clazzes = application.get('clazzes');
+
+    // Set states of clazzes
+    if(clazzes){
+      clazzes.forEach(function(clazz) {
+        // Look for highlighted clazzes
+        for (var i = 0; i < this.get('condition').length; i++) {
+          if(clazz.get('name').concat("highlighted") === this.get('condition')[i]) {
+            clazz.set('highlighted',true);
+          }
+        }
+      });
+    }
+
+    // Set states if components
+    if(components){
+      components.forEach(function(component) {
+        // Close component
+        component.setOpenedStatus(false);
+        for (var i = 0; i < this.get('condition').length; i++) {
+          // Open component if name is in condition
+          if(component.get('name') === this.get('condition')[i]){
+            component.setOpenedStatus(true);
+            this.applyAppCondition(component);
+          }
+          // Case not opened => maybe highlighted
+          else if(component.get('name').concat("highlighted") === this.get('condition')[i]) {
+            component.set('highlighted',true);
+          }
+        }
+      });
+      this.cleanAndUpdateScene();
+    }
+    
   },
 
   /**
@@ -414,7 +412,7 @@ export default Component.extend(Evented, THREEPerformance, {
     this.set('scene', null);
     this.set('webglrenderer', null);
 
-    // clean up WebGL rendering context by forcing context loss
+    // Clean up WebGL rendering context by forcing context loss
     var gl = this.get('canvas').getContext('webgl');
     gl.getExtension('WEBGL_lose_context').loseContext();
 
