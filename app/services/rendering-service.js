@@ -7,7 +7,7 @@ export default Service.extend(Evented, {
   showVersionbar: true,
 
   reSetupScene() {
-    // redraws and repositions scene to default
+    // Redraws and repositions scene to default
     this.trigger('reSetupScene');
   },
 
@@ -16,11 +16,15 @@ export default Service.extend(Evented, {
   },
 
   redrawScene() {
-    // only redraws
+    // Only redraws
     this.trigger('redrawScene');
   },
 
-  toggleTimeline(){
+  moveCamera(position) {
+    this.trigger('moveCamera', position);
+  },
+
+  toggleTimeline() {
     this.set('showTimeline', !this.get('showTimeline'));
   }
 

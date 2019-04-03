@@ -73,11 +73,19 @@ export default Component.extend({
     selectNextTraceStep() {
       this.get('highlighter').highlightNextTraceStep();
       this.get('renderingService').redrawScene();
+      let currentTraceStep = this.get('highlighter.currentTraceStep');
+      let originClazz = currentTraceStep.get('clazzCommunication.sourceClazz');
+      let position = new THREE.Vector3(originClazz.get('positionX'), originClazz.get('positionY'), originClazz.get('positionZ'));
+      this.get('renderingService').moveCamera(position);
     },
 
     selectPreviousTraceStep() {
       this.get('highlighter').highlightPreviousTraceStep();
       this.get('renderingService').redrawScene();
+      let currentTraceStep = this.get('highlighter.currentTraceStep');
+      let originClazz = currentTraceStep.get('clazzCommunication.sourceClazz');
+      let position = new THREE.Vector3(originClazz.get('positionX'), originClazz.get('positionY'), originClazz.get('positionZ'));
+      this.get('renderingService').moveCamera(position);
     },
 
     toggleTraceTimeUnit() {

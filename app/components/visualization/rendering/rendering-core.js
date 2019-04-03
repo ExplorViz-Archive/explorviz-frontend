@@ -1,5 +1,5 @@
 import Component from '@ember/component';
-import {inject as service} from '@ember/service';
+import { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
 import THREE from "three";
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
@@ -41,7 +41,7 @@ export default Component.extend(Evented, THREEPerformance, {
 
   session: service(),
 
-  scene : null,
+  scene: null,
   webglrenderer: null,
   camera: null,
 
@@ -55,7 +55,7 @@ export default Component.extend(Evented, THREEPerformance, {
   appCondition: null,
   initImport: true,
 
-  init()  {
+  init() {
     this._super(...arguments);
     this.set('appCondition', []);
   },
@@ -68,7 +68,7 @@ export default Component.extend(Evented, THREEPerformance, {
    *
    * @method didRender
    */
-  didRender(){
+  didRender() {
     this._super(...arguments);
     this.initRendering();
     this.initListener();
@@ -124,28 +124,28 @@ export default Component.extend(Evented, THREEPerformance, {
     const { user } = this.get('session.data.authenticated');
     const userSettings = user.get('settings');
 
-    if(!userSettings.booleanAttributes.showFpsCounter) {
+    if (!userSettings.booleanAttributes.showFpsCounter) {
       this.removePerformanceMeasurement();
     }
 
     // Rendering loop //
     function render() {
-      
-      if(self.get('isDestroyed')) {
+
+      if (self.get('isDestroyed')) {
         return;
       }
-      
+
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
 
-      if(userSettings.booleanAttributes.showFpsCounter) {
+      if (userSettings.booleanAttributes.showFpsCounter) {
         self.get('threexStats').update(self.get('webglrenderer'));
         self.get('stats').begin();
       }
 
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
 
-      if(userSettings.booleanAttributes.showFpsCounter) {
+      if (userSettings.booleanAttributes.showFpsCounter) {
         self.get('stats').end();
       }
 
@@ -157,14 +157,14 @@ export default Component.extend(Evented, THREEPerformance, {
 
     // Load font for labels and synchronously proceed with populating the scene
     new THREE.FontLoader()
-      .load('three.js/fonts/roboto_mono_bold_typeface.json', function(font) {
-        if(self.isDestroyed)
+      .load('three.js/fonts/roboto_mono_bold_typeface.json', function (font) {
+        if (self.isDestroyed)
           return;
-          
+
         self.set('font', font);
         self.set('initDone', true);
         self.populateScene();
-    });
+      });
 
   },
 
@@ -172,8 +172,8 @@ export default Component.extend(Evented, THREEPerformance, {
   updateCanvasSize() {
     const outerDiv = $('#vizspace')[0];
 
-    if(outerDiv) {
-      if(!this.get('camera') || !this.get('webglrenderer'))
+    if (outerDiv) {
+      if (!this.get('camera') || !this.get('webglrenderer'))
         return;
 
       $('#threeCanvas').hide();
@@ -195,22 +195,22 @@ export default Component.extend(Evented, THREEPerformance, {
 
   initListener() {
 
-    const self = this;
-
     $(window).on('resize.visualization', this.updateCanvasSize.bind(this));
 
-
-
-    this.get('renderingService').on('reSetupScene', function() {
-      self.onReSetupScene();
+    this.get('renderingService').on('reSetupScene', () => {
+      this.onReSetupScene();
     });
 
-    this.get('renderingService').on('resizeCanvas', function() {
-      self.updateCanvasSize();
+    this.get('renderingService').on('resizeCanvas', () => {
+      this.updateCanvasSize();
     });
 
-    this.get('landscapeRepo').on("updated", function() {
-      self.onUpdated();
+    this.get('renderingService').on('moveCamera', (position) => {
+      this.onCameraMovement(position);
+    });
+
+    this.get('landscapeRepo').on("updated", () => {
+      this.onUpdated();
     });
 
   },
@@ -219,12 +219,12 @@ export default Component.extend(Evented, THREEPerformance, {
    *  This method is used to collect data about the landscape.
    *  Ids of closed systems and nodegroups are stored in an array
    */
-  computeLandscapeCondition(){
+  computeLandscapeCondition() {
 
     const systems = this.get('landscapeRepo.latestLandscape').get('systems');
     const condition = [];
 
-    systems.forEach(function(system) {
+    systems.forEach(function (system) {
 
       let isRequestObject = false;
 
@@ -233,17 +233,17 @@ export default Component.extend(Evented, THREEPerformance, {
         isRequestObject = true;
       }
       // Exclude requests
-      if(!isRequestObject){
+      if (!isRequestObject) {
         // Handle closed systems and add id to array
-        if(!system.get('opened')){
+        if (!system.get('opened')) {
           condition.push(system.get('id'));
         }
         // Handle opened systems
-        else{
+        else {
           // Handle closed nodegroups and add id to array
           const nodegroups = system.get('nodegroups');
-          nodegroups.forEach(function(nodegroup){
-            if(!nodegroup.get('opened')){
+          nodegroups.forEach(function (nodegroup) {
+            if (!nodegroup.get('opened')) {
               condition.push(nodegroup.get('id'));
             }
           });
@@ -259,23 +259,23 @@ export default Component.extend(Evented, THREEPerformance, {
    *  Furthermore the name+highlighted of the
    *  highlighted package is stored
    */
-  computeAppCondition(components, clazzes){
-    if(clazzes){
-      clazzes.forEach( (clazz) => {
-        if(clazz.get('highlighted')){
+  computeAppCondition(components, clazzes) {
+    if (clazzes) {
+      clazzes.forEach((clazz) => {
+        if (clazz.get('highlighted')) {
           this.get('appCondition').push(clazz.get('name').concat("highlighted"));
         }
       });
     }
 
-    components.forEach( (component) =>{
+    components.forEach((component) => {
       // Handle opened packages and add name to array
-      if(component.get('opened')){
+      if (component.get('opened')) {
         this.get('appCondition').push(component.get('name'));
         this.computeAppCondition(component.get('children'), component.get('clazzes'));
       }
       // Handle closed and highlighted packages
-      else if(component.get('highlighted')){
+      else if (component.get('highlighted')) {
         this.get('appCondition').push(component.get('name').concat("highlighted"));
       }
     });
@@ -287,41 +287,41 @@ export default Component.extend(Evented, THREEPerformance, {
    *  and nodegroups. The array 'condition' contains the ids of
    *  of all closed systems and nodegroups
    */
-  applyLandscapeCondition(landscape){
+  applyLandscapeCondition(landscape) {
 
     const systems = landscape.get('systems');
 
-    systems.forEach( (system) => {
+    systems.forEach((system) => {
       let isRequestObject = false;
 
       if (!isRequestObject && system.get('name') === "Requests") {
         isRequestObject = true;
       }
 
-      if(!isRequestObject){
+      if (!isRequestObject) {
 
         // Open system
         system.setOpened(true);
         for (var i = 0; i < this.get('condition').length; i++) {
 
           // Close system if id is in condition
-          if(parseFloat(system.get('id')) === parseFloat(this.get('condition')[i])){
+          if (parseFloat(system.get('id')) === parseFloat(this.get('condition')[i])) {
             system.setOpened(false);
           }
         }
 
         // Check condition of nodegroups if system is opened
-        if(system.get('opened')){
+        if (system.get('opened')) {
           const nodegroups = system.get('nodegroups');
 
-          nodegroups.forEach(function(nodegroup) {
+          nodegroups.forEach(function (nodegroup) {
 
             // Open nodegroup
             nodegroup.setOpened(true);
             for (var i = 0; i < this.get('condition').length; i++) {
 
               // Close nodegroup if id is in condition
-              if(parseFloat(nodegroup.get('id')) === parseFloat(this.get('condition')[i])){
+              if (parseFloat(nodegroup.get('id')) === parseFloat(this.get('condition')[i])) {
                 nodegroup.setOpened(false);
               }
             }
@@ -331,56 +331,56 @@ export default Component.extend(Evented, THREEPerformance, {
     });
   },
 
-  applyAppCondition(application){
+  applyAppCondition(application) {
 
     if (!application) {
       return;
-    } 
+    }
 
     // Get clazzes of application
     let components = null;
-    if(this.get('initImport')){
+    if (this.get('initImport')) {
       components = application.get('components');
       this.set('initImport', false);
     }
-    else{
+    else {
       components = application.get('children');
     }
 
     const clazzes = application.get('clazzes');
 
     // Set states of clazzes
-    if(clazzes){
-      clazzes.forEach(function(clazz) {
+    if (clazzes) {
+      clazzes.forEach(function (clazz) {
         // Look for highlighted clazzes
         for (var i = 0; i < this.get('condition').length; i++) {
-          if(clazz.get('name').concat("highlighted") === this.get('condition')[i]) {
-            clazz.set('highlighted',true);
+          if (clazz.get('name').concat("highlighted") === this.get('condition')[i]) {
+            clazz.set('highlighted', true);
           }
         }
       });
     }
 
     // Set states if components
-    if(components){
-      components.forEach(function(component) {
+    if (components) {
+      components.forEach(function (component) {
         // Close component
         component.setOpenedStatus(false);
         for (var i = 0; i < this.get('condition').length; i++) {
           // Open component if name is in condition
-          if(component.get('name') === this.get('condition')[i]){
+          if (component.get('name') === this.get('condition')[i]) {
             component.setOpenedStatus(true);
             this.applyAppCondition(component);
           }
           // Case not opened => maybe highlighted
-          else if(component.get('name').concat("highlighted") === this.get('condition')[i]) {
-            component.set('highlighted',true);
+          else if (component.get('name').concat("highlighted") === this.get('condition')[i]) {
+            component.set('highlighted', true);
           }
         }
       });
       this.cleanAndUpdateScene();
     }
-    
+
   },
 
   /**
@@ -396,7 +396,7 @@ export default Component.extend(Evented, THREEPerformance, {
    *
    * @method populateScene
    */
-  populateScene() {},
+  populateScene() { },
 
 
   /**
@@ -444,13 +444,13 @@ export default Component.extend(Evented, THREEPerformance, {
     removeAllChildren(scene);
 
     function removeAllChildren(entity) {
-      for (let i = entity.children.length - 1; i >= 0 ; i--) {
+      for (let i = entity.children.length - 1; i >= 0; i--) {
         let child = entity.children[i];
 
         removeAllChildren(child);
 
         if (child.type !== 'AmbientLight' && child.type !== 'SpotLight' && child.type !== 'DirectionalLight') {
-          if(child.type !== 'Object3D') {
+          if (child.type !== 'Object3D') {
             child.geometry.dispose();
             child.material.dispose();
           }
@@ -474,7 +474,7 @@ export default Component.extend(Evented, THREEPerformance, {
    *
    * @method preProcessEntity
    */
-  preProcessEntity() {},
+  preProcessEntity() { },
 
 
 
@@ -492,6 +492,8 @@ export default Component.extend(Evented, THREEPerformance, {
 
   onResized() {
     this.cleanAndUpdateScene();
-  }
+  },
+
+  onCameraMovement() {},
 
 });

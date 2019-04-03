@@ -78,6 +78,38 @@ export default RenderingCore.extend(AlertifyHandler, {
       this.cleanAndUpdateScene();
     };
 
+    // Move camera to specified position
+    this.onCameraMovement = function (position) {
+
+      // Calculate center point of application
+      if (!this.get('centerAndZoomCalculator.centerPoint')) {
+        this.get('centerAndZoomCalculator')
+          .calculateAppCenterAndZZoom(emberApplication);
+      }
+  
+      const viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
+
+      position.sub(viewCenterPoint);
+      position.multiplyScalar(0.5);
+
+      let application = this.get('application3D');
+
+      let appQuaternion = new THREE.Quaternion();
+
+      application.getWorldQuaternion(appQuaternion);
+      position.applyQuaternion(appQuaternion);
+
+      let appPosition = new THREE.Vector3();
+      application.getWorldPosition(appPosition);
+
+      position.sub(appPosition);
+
+      // Move camera on to given position
+      this.get('camera').position.set(position.x, position.y, position.z);
+      // Zoom out 
+      this.get('camera').position.z += 50;
+    };
+
     this.get('camera').position.set(0, 0, 100);
 
     // Dummy object for raycasting
