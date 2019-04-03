@@ -13,12 +13,11 @@ body > .ember-view {
   overflow: hidden;
   @extend .ml-3;
   @extend .mr-3;
-  @extend .pt-3;
+  @extend .mt-5;
   @extend .mb-3;
   @extend .flex-grow-1;
   @extend .d-flex;
   @extend .flex-column;
-  margin-top: 64px;
 }
 
 .main-content > .row {

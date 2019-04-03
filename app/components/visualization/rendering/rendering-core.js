@@ -199,10 +199,6 @@ export default Component.extend(Evented, THREEPerformance, {
 
     const self = this;
 
-    $(window).on('resize.visualization', this.updateCanvasSize.bind(this));
-
-
-
     this.get('renderingService').on('reSetupScene', function() {
       self.onReSetupScene();
     });

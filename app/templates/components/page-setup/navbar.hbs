@@ -1,34 +1,24 @@
-{{#bs-navbar class="explorviz-top-navbar fixed-top navbar-light" type=type backgroundColor=bg onCollapse=(action (mut collapsed) true) onExpand=(action (mut collapsed) false) as |navbar|}}
-  <a class="navbar-brand" style="width: 150px;" target="_blank" href="http://www.explorviz.net">
-    <img style="width: 100%;" src="/images/explorviz-transparent.png"/>
-  </a>
-  {{navbar.toggle}}
-  {{#navbar.content}}
-      <!-- Left content -->
-      {{page-setup/navbar-routes}}
-
-      <!-- Right content -->
-      {{#navbar.nav as |nav|}}
-        {{page-setup/navbar-octicons}}
-
-        {{#nav.dropdown as |dd|}}
-          {{#dd.toggle class="d-flex-center"}}
-            {{svg-jar "person" class="octicon"}}<span><b>{{username}}</b></span><span class="caret"></span>
-          {{/dd.toggle}}
-          
-          {{#dd.menu as |ddm|}}
-            {{#ddm.item}}
-              {{#ddm.link-to "configuration.settings" class="d-flex-center" title="Configuration"}}
-                {{svg-jar "gear" class="octicon"}}<span>Configuration</span>
-              {{/ddm.link-to}}
-            {{/ddm.item}}
-            {{#ddm.item}}
-              <a class="dropdown-item d-flex-center" style="cursor: pointer" {{action (route-action 'logout')}} title="Logout">
-                {{svg-jar "sign-out" class="octicon"}}<span>Logout</span>
-              </a>
-            {{/ddm.item}}
-          {{/dd.menu}}
-        {{/nav.dropdown}}
-      {{/navbar.nav}}
-  {{/navbar.content}}
-{{/bs-navbar}}
+<div id="exp-navbar" class="{{unless navbarActive "active"}}">
+  {{!-- Button to toggle navbar with (closed/open) --}}
+  <div id="exp-navbar-btn">
+    <button type="button" onclick={{action "toggleNavbar"}} class="btn btn-primary">
+      {{svg-jar "three-bars" class="octicon"}}
+    </button>
+  </div>
+  <div id="exp-navbar-main">
+    <div class="d-flex flex-column flex-grow-1">
+      <div id="exp-navbar-logo" class="d-flex justify-content-center">
+        <a target="_blank" href="http://www.explorviz.net">
+          <img style="width: 100%" src="/images/explorviz-transparent.png"/>
+        </a>
+      </div>
+      <div class="d-flex flex-column flex-grow-1 justify-content-between pt-3">
+        {{page-setup/navbar-routes}}
+        {{page-setup/navbar-adv}}
+      </div>
+    </div>
+    <div id="exp-navbar-footer">
+      {{page-setup/footer}}
+    </div>
+  </div>
+</div>

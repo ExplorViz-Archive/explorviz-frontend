@@ -41,6 +41,10 @@ export default Controller.extend(AlertifyHandler, {
 
     toggleTimeline() {
       this.get('renderingService').toggleTimeline();
+    },
+
+    resize() {
+      this.get('renderingService').resizeCanvas();
     }
     
   },
@@ -55,17 +59,11 @@ export default Controller.extend(AlertifyHandler, {
 
   initRendering() {
     this.get('landscapeListener').initSSE();
-    this.get('additionalData').on('showWindow', this, this.onShowWindow);
-  },
-
-  onShowWindow() {
-    this.get('renderingService').resizeCanvas();
   },
 
   // @Override
   cleanup() {
     this._super(...arguments);
-    this.get('additionalData').off('showWindow', this, this.onShowWindow);
   }
   
 });
