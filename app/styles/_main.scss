@@ -174,3 +174,12 @@ svg.octicon {
   background-color: #9be7ff;
   border-color: #9be7ff;
 }
+
+.spinner-center {
+  @extend .spinner-border;
+  position: absolute;
+  top: 50%;
+  left: calc(50% - 1.5rem);
+  width: 3rem;
+  height: 3rem;
+}

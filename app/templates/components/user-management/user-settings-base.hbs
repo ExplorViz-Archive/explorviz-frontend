@@ -1,6 +1,6 @@
 
 {{#if this.loadDescription.isRunning}}
-  {{ember-spinner}}
+  <div class="spinner-center" role="status"></div>
 {{else}}
   {{#bs-form model=this as |form|}}
     {{#each-in this.settings.booleanAttributes as |key|}}
