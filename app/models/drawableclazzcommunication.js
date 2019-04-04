@@ -87,6 +87,26 @@ export default DrawEdgeEntity.extend({
     return commonComponent;
   }),
 
+  toggleCommunicationDirection() {
+
+    // Toggle of communication direction only sensible for bidirectional communication
+    if (!this.get('isBidirectional')){
+      return;
+    }
+
+    // Swap source and target clazz
+    let oldSourceClazz = this.get('sourceClazz');
+    let oldTargetClazz = this.get('targetClazz');
+    this.set('sourceClazz', oldTargetClazz);
+    this.set('targetClazz', oldSourceClazz);
+
+    // Swap start and end point for rendering (e.g. drawing of arrows)
+    let oldStartPoint = this.get('startPoint');
+    let oldEndPoint = this.get('endPoint');
+    this.set('startPoint', oldEndPoint);
+    this.set('endPoint', oldStartPoint);
+  },
+
   isVisible() {
     return this.get('parentComponent').get('opened');
   },

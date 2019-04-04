@@ -209,11 +209,6 @@ export default Object.extend(Evented, {
   },
 
 
-  applyHighlighting() {
-    this.get('highlighter').applyHighlighting();
-  },
-
-
   // Handler
 
 

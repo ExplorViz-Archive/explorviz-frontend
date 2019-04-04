@@ -2,6 +2,8 @@ import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import { computed } from '@ember/object';
 
+import THREE from "three";
+
 export default Component.extend({
 
   // No Ember generated container
@@ -29,6 +31,11 @@ export default Component.extend({
   }),
 
   filterAndSortTraces(traces){
+
+    if (!traces){
+      return [];
+    }
+
     let filteredTraces = [];
     let filter = this.get('filterTerm');
     traces.forEach( (trace) => {

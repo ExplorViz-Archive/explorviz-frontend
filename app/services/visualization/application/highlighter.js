@@ -37,12 +37,12 @@ export default Service.extend({
 
   highlightTraceStep(position){
     let trace = this.get('highlightedEntity');
-    // make sure a trace is highlighted
+    // Make sure a trace is highlighted
     if (!this.get('isTrace') || !trace || !this.get('currentTracePosition')) {
       return;
     }
 
-    // check if position is valid
+    // Check if position is valid
     if (typeof position !== 'number' || position < 1|| position > trace.get('length')) {
       return;
     }
@@ -98,7 +98,7 @@ export default Service.extend({
       emberModelName = highlightedEntity.constructor.modelName;
     }
 
-    // unhighlight entity if it is not visible
+    // Unhighlight entity if it is not visible
     if ((emberModelName === "clazz" || emberModelName === "component" || emberModelName === "drawableclazzcommunication")
       && !highlightedEntity.isVisible()) {
       this.unhighlightAll();
@@ -106,18 +106,18 @@ export default Service.extend({
       return;
     }
 
-    // shall contain all clazzes which the user directly or indirectly highlighted
+    // Shall contain all clazzes which the user directly or indirectly highlighted
     let selectedClazzes = new Set();
     computeSelectedClazzes(highlightedEntity, selectedClazzes);
 
-    // shall contain all clazzes which the user highlighted or which communicate with a highlighted clazz
+    // Shall contain all clazzes which the user highlighted or which communicate with a highlighted clazz
     let communicatingClazzes = new Set(selectedClazzes);
 
-    // set states (either "NORMAL" or "TRANSPARENT") of communcation for highlighting
+    // Set states (either "NORMAL" or "TRANSPARENT") of communcation for highlighting
     if (emberModelName === "component" || emberModelName === "clazz") {
       this.applyCommunicationHighlighting(selectedClazzes, communicatingClazzes);
     } else if (emberModelName === "drawableclazzcommunication") {
-      // highlight communication lines
+      // Highlight communication lines
       this.get('application.drawableClazzCommunications').forEach((communication) => {
         if (communicatingClazzes.has(communication.get('sourceClazz')) &&
           communicatingClazzes.has(communication.get('targetClazz'))) {
@@ -128,12 +128,12 @@ export default Service.extend({
         }
       });
     } else if (emberModelName === "trace") {
-      // unhighlight communication
+      // Unhighlight communication
       this.get('application.drawableClazzCommunications').forEach((drawableCommunication) => {
         drawableCommunication.unhighlight();
       });
 
-      // highlight communication which contains current trace step
+      // Highlight communication which contains current trace step
       this.get('application.drawableClazzCommunications').forEach((drawableCommunication) => {
         if (drawableCommunication.get('containedTraces').has(highlightedEntity)) {
           drawableCommunication.set('state', 'NORMAL');
@@ -144,12 +144,9 @@ export default Service.extend({
               if (traceStep.get('parentTrace.traceId') === highlightedEntity.get('traceId') &&
                 traceStep.get('tracePosition') === this.get('currentTracePosition')) {
                 drawableCommunication.highlight();
-                // set source and target clazz according to highlighted traceStep
+                // Set source and target clazz according to highlighted traceStep
                 if (traceStep.get('clazzCommunication.sourceClazz.id') !== drawableCommunication.get('sourceClazz.id')){
-                  let oldSourceClazz = drawableCommunication.get('sourceClazz');
-                  let oldTargetClazz = drawableCommunication.get('targetClazz');
-                  drawableCommunication.set('sourceClazz', oldTargetClazz);
-                  drawableCommunication.set('targetClazz', oldSourceClazz);
+                  drawableCommunication.toggleCommunicationDirection();
                 }
               }
             });
@@ -159,23 +156,23 @@ export default Service.extend({
     }
 
 
-    // iterate recursively over all application entities and update states
+    // Iterate recursively over all application entities and update states
     this.get('application.components').forEach((component) => {
       this.applyNodeHighlighting(component, communicatingClazzes);
     });
 
     function computeSelectedClazzes(highlightedEntity, selectedClazzes) {
-      // add only clazz itself if clazz is highlighted
+      // Add only clazz itself if clazz is highlighted
       if (emberModelName === "clazz") {
         selectedClazzes.add(highlightedEntity);
-        // add all clazzes of component if component is highlighted
+        // Add all clazzes of component if component is highlighted
       } else if (emberModelName === "component") {
         highlightedEntity.getContainedClazzes(selectedClazzes);
-        // add the two adjacent clazzes if drawable communication is highlighted
+        // Add the two adjacent clazzes if drawable communication is highlighted
       } else if (emberModelName === "drawableclazzcommunication") {
         selectedClazzes.add(highlightedEntity.get('sourceClazz'));
         selectedClazzes.add(highlightedEntity.get('targetClazz'));
-        // add all adjacent clazzes if trace is highlighted
+        // Add all adjacent clazzes if trace is highlighted
       } else if (emberModelName === "trace") {
         self.get('application.drawableClazzCommunications').forEach((communication) => {
           let communicationTraces = communication.get('containedTraces');
@@ -201,7 +198,7 @@ export default Service.extend({
     clazzCommunications.forEach((clazzCommunication) => {
       let toBeHighlighted = false;
 
-      // highlight all communication lines which have a selected clazz as an endpoint
+      // Highlight all communication lines which have a selected clazz as an endpoint
       selectedClazzes.forEach((clazz) => {
         if (clazzCommunication.get('sourceClazz').get('id') === clazz.get('id')) {
           communicatingClazzes.add(clazzCommunication.get('targetClazz'));
@@ -212,7 +209,7 @@ export default Service.extend({
         }
       });
 
-      // mark clazzes as transparent which do not communicate with a highlighted entity
+      // Mark clazzes as transparent which do not communicate with a highlighted entity
       if (toBeHighlighted) {
         clazzCommunication.set("state", "NORMAL");
       } else {
@@ -235,7 +232,7 @@ export default Service.extend({
 
     component.getContainedClazzes(componentClazzes);
 
-    // check if component contains a class which is part of highlighting
+    // Check if component contains a class which is part of highlighting
     communicatingClazzes.forEach((clazz) => {
       componentClazzes.forEach((componentClazz) => {
         if (clazz.get('id') === componentClazz.get('id')) {
@@ -244,14 +241,14 @@ export default Service.extend({
       });
     });
 
-    // mark component as transparent if no contained clazz communicates with a highlighted clazz
+    // Mark component as transparent if no contained clazz communicates with a highlighted clazz
     if (isPartOfHighlighting) {
       component.set('state', 'NORMAL');
     } else {
       component.set('state', 'TRANSPARENT');
     }
 
-    // mark clazzes as transparent if they are not involved in communication with highlighted clazzes
+    // Mark clazzes as transparent if they are not involved in communication with highlighted clazzes
     component.get('clazzes').forEach((clazz) => {
       let isCommunicatingClazz = false;
       communicatingClazzes.forEach((componentClazz) => {
@@ -266,7 +263,7 @@ export default Service.extend({
       }
     });
 
-    // check state also for underlying components (and clazzes)
+    // Check state also for underlying components (and clazzes)
     component.get('children').forEach((child) => {
       this.applyNodeHighlighting(child, communicatingClazzes);
     });

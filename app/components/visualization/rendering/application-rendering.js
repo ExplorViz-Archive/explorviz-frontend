@@ -84,7 +84,7 @@ export default RenderingCore.extend(AlertifyHandler, {
       // Calculate center point of application
       if (!this.get('centerAndZoomCalculator.centerPoint')) {
         this.get('centerAndZoomCalculator')
-          .calculateAppCenterAndZZoom(emberApplication);
+          .calculateAppCenterAndZZoom(this.get('latestApplication'));
       }
   
       const viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
