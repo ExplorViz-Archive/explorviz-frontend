@@ -20,33 +20,30 @@ export default Component.extend({
     const popoverDiv = $('.popover');
 
     // Sorrounding div for position calculations
-    const containerDiv = $('.main-content');
-
-    const containerTopOffset = containerDiv.offset().top;
-    const containerLeftOffset = containerDiv.offset().left;
+    const containerDiv = $('#rendering');
 
     const popupTopOffset = popoverDiv.height() + 10;
     const popupLeftOffset = popoverDiv.width() / 2;
 
-    let popupTopPosition = containerTopOffset + popupData.mouseY - popupTopOffset;
-    let popupLeftPosition = containerLeftOffset + popupData.mouseX - popupLeftOffset;
+    let popupTopPosition = popupData.mouseY - popupTopOffset;
+    let popupLeftPosition = popupData.mouseX - popupLeftOffset;
 
     // Prevent popup positioning on top of rendering canvas => 
     // position under mouse cursor
-    if (popupTopPosition < containerTopOffset) {
-      popupTopPosition = containerTopOffset + popupData.mouseY + 35;
+     if (popupTopPosition < 0) {
+      popupTopPosition = popupData.mouseY + 35;
     }
 
     // Prevent popup positioning right(outside) of rendering canvas => 
     // position at right edge of canvas
-    if (popupLeftPosition + popoverDiv.width() > containerLeftOffset + containerDiv.width()) {
-      popupLeftPosition = containerLeftOffset + containerDiv.width() - popoverDiv.width() - 5;
+    if (popupLeftPosition + popoverDiv.width() > containerDiv.width()) {
+      popupLeftPosition = containerDiv.width() - popoverDiv.width() - 5;
     }
 
     // Prevent popup positioning left(outside) of rendering canvas => 
     // position at left edge of canvas
-    if (popupLeftPosition < containerLeftOffset) {
-      popupLeftPosition = containerLeftOffset;
+    if (popupLeftPosition < 0) {
+      popupLeftPosition = 0;
     }
 
     // Set popup position

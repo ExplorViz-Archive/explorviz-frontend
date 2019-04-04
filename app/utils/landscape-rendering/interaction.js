@@ -337,6 +337,8 @@ export default Object.extend(Evented, AlertifyHandler, {
       y: evt.detail.clientY - rect.top
     };
 
+    console.log(rect)
+
     const origin = {};
 
     origin.x = (mouse.x / this.get('renderer').domElement.clientWidth) * 2 - 1;
