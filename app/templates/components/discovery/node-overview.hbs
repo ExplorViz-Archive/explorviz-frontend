@@ -5,9 +5,7 @@
       <p>Go to Settings an enable 'Show hidden entities' or click <a {{action "enableShowHidden" preventDefault=false}}>here</a>
       </p>
     </div>
-    <div id="spinnerDiv" class="container" style="position:relative; height:20%;">
-      {{ember-spinner}}
-    </div>
+    <div class="spinner-center" role="status"></div>
   </div>
 {{else}}
   {{#if agentRepo.agentList}}
@@ -23,8 +21,9 @@
         </p>        
         <p>No agent registered with the backend at the moment. A new list will be fetched every 10 seconds.</p>
       </div>
-      <div id="spinnerDiv" class="container" style="position:relative; height:20%;">
-        {{ember-spinner}}
+      <div class="d-flex justify-content-center">
+        <div class="spinner-center-relative" role="status">
+        </div>
       </div>
     </div>
   {{/if}}
