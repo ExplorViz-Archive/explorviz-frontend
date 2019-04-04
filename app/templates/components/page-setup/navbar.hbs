@@ -2,23 +2,25 @@
   {{!-- Button to toggle navbar with (closed/open) --}}
   <div id="exp-navbar-btn">
     <button type="button" onclick={{action "toggleNavbar"}} class="btn btn-primary">
-      {{svg-jar "three-bars" class="octicon"}}
+      {{svg-jar (if navbarActive "chevron-left" "three-bars") class="octicon"}}
     </button>
   </div>
   <div id="exp-navbar-main">
+    {{#ember-scrollable class="d-flex flex-column flex-grow-1"}}
     <div class="d-flex flex-column flex-grow-1">
       <div id="exp-navbar-logo" class="d-flex justify-content-center">
         <a target="_blank" href="http://www.explorviz.net">
           <img style="width: 100%" src="/images/explorviz-transparent.png"/>
         </a>
       </div>
-      <div class="d-flex flex-column flex-grow-1 justify-content-between pt-3">
+        <div class="d-flex flex-column flex-grow-1 justify-content-between pt-3">
         {{page-setup/navbar-routes}}
-        {{page-setup/navbar-adv}}
-      </div>
+          {{page-setup/navbar-adv}}
+        </div>
     </div>
     <div id="exp-navbar-footer">
       {{page-setup/footer}}
     </div>
+  {{/ember-scrollable}}
   </div>
 </div>
