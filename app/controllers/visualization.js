@@ -2,6 +2,7 @@ import Controller from '@ember/controller';
 import { inject as service } from '@ember/service'; 
 import { computed } from '@ember/object';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import { task, timeout } from 'ember-concurrency';
 
 /**
 * TODO
@@ -42,12 +43,13 @@ export default Controller.extend(AlertifyHandler, {
     toggleTimeline() {
       this.get('renderingService').toggleTimeline();
     },
-
-    resize() {
-      this.get('renderingService').resizeCanvas();
-    }
     
   },
+
+  resize: task(function * () {
+    yield timeout(100);
+    this.get('renderingService').resizeCanvas();
+  }).restartable(),
 
   showTimeline() {
     this.set('renderingService.showTimeline', true);
