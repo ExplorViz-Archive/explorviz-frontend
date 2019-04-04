@@ -20,6 +20,11 @@ export default Component.extend({
   }),
 
   filterAndSortQueries(queries) {
+
+    if (!queries) {
+      return [];
+    }
+
     let filteredQueries = [];
     let filter = this.get('filterTerm');
     queries.forEach((query) => {
