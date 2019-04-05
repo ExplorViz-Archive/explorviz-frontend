@@ -199,6 +199,10 @@ export default Component.extend(Evented, THREEPerformance, {
       this.onReSetupScene();
     });
 
+    this.get('renderingService').on('resizeCanvas', () => {
+      this.updateCanvasSize();
+    });
+
     this.get('renderingService').on('moveCamera', (position) => {
       this.onCameraMovement(position);
     });
