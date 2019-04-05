@@ -30,7 +30,7 @@ export default BaseEntity.extend({
 
   sourceClazz: computed('traceSteps', function () {
     let traceSteps = this.get('traceSteps');
-    // assumption: Tracesteps non-empty and in order
+    // Assumption: Tracesteps non-empty and in order
     let firstTraceStep = traceSteps.objectAt(0);
     let sourceClazz = firstTraceStep.get('clazzCommunication').get('sourceClazz');
     return sourceClazz;
@@ -38,7 +38,7 @@ export default BaseEntity.extend({
 
   targetClazz: computed('traceSteps', function () {
     let traceSteps = this.get('traceSteps');
-    // assumption: Tracesteps non-empty and in order
+    // Assumption: Tracesteps non-empty and in order
     let lastTraceStep = traceSteps.objectAt(this.get('length') - 1);
     let targetClazz = lastTraceStep.get('clazzCommunication').get('targetClazz');
     return targetClazz;

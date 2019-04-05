@@ -32,7 +32,7 @@ export default Service.extend({
     this.set('highlightedEntity', trace);
     this.set('isTrace', true);
     this.set('currentTracePosition', 1);
-    this.set('currentTraceStep', trace.get('traceSteps').get('firstObject'));
+    this.highlightTraceStep(1);
   },
 
   highlightTraceStep(position){
