@@ -149,7 +149,6 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     const self = this;
 
-    //const emberLandscape = this.get('landscapeRepo.latestLandscape');
     const emberLandscape = this.get('latestLandscape');
 
     if (!emberLandscape || !this.get('font')) {
@@ -165,10 +164,7 @@ export default RenderingCore.extend(AlertifyHandler, {
       height: 0.5
     };
 
-    let isRequestObject = false;
-
-
-    // create plus or minus, if not already done
+    // Create plus or minus, if not already done
     if (!(this.get('openSymbol') && this.get('closeSymbol')) &&
       this.get('font')) {
 
@@ -178,7 +174,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     if (systems) {
 
-      // calculate new center and update zoom
+      // Calculate new center and update zoom
       if (!this.get('centerAndZoomCalculator.centerPoint')) {
         this.get('centerAndZoomCalculator')
           .calculateLandscapeCenterAndZZoom(emberLandscape,
@@ -194,11 +190,7 @@ export default RenderingCore.extend(AlertifyHandler, {
       // Draw boxes for systems
       systems.forEach(function (system) {
 
-        isRequestObject = false;
-
-        if (!isRequestObject && system.get('name') === "Requests") {
-          isRequestObject = true;
-        }
+        let isRequestObject = system.get('name') === "Requests";
 
         if (!isRequestObject) {
 

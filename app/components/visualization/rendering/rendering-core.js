@@ -226,14 +226,8 @@ export default Component.extend(Evented, THREEPerformance, {
 
     systems.forEach(function (system) {
 
-      let isRequestObject = false;
-
-      // Find requests
-      if (!isRequestObject && system.get('name') === "Requests") {
-        isRequestObject = true;
-      }
       // Exclude requests
-      if (!isRequestObject) {
+      if (system.get('name') !== "Requests") {
         // Handle closed systems and add id to array
         if (!system.get('opened')) {
           condition.push(system.get('id'));
@@ -292,13 +286,8 @@ export default Component.extend(Evented, THREEPerformance, {
     const systems = landscape.get('systems');
 
     systems.forEach((system) => {
-      let isRequestObject = false;
-
-      if (!isRequestObject && system.get('name') === "Requests") {
-        isRequestObject = true;
-      }
-
-      if (!isRequestObject) {
+      
+      if (system.get('name') !== "Requests") {
 
         // Open system
         system.setOpened(true);
