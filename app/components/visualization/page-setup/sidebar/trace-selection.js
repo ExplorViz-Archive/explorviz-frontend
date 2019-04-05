@@ -14,6 +14,7 @@ export default Component.extend({
   sortBy: 'traceId',
   sortOrder: 'asc',
   filterTerm: '',
+  isReplayAnimated: true,
 
   additionalData: service('additional-data'),
   highlighter: service('visualization/application/highlighter'),
@@ -81,13 +82,17 @@ export default Component.extend({
     selectNextTraceStep() {
       this.get('highlighter').highlightNextTraceStep();
       this.get('renderingService').redrawScene();
-      this.moveCameraToTraceStep();
+      if (this.get('isReplayAnimated')){
+        this.moveCameraToTraceStep();
+      }
     },
 
     selectPreviousTraceStep() {
       this.get('highlighter').highlightPreviousTraceStep();
       this.get('renderingService').redrawScene();
-      this.moveCameraToTraceStep();
+      if (this.get('isReplayAnimated')){
+        this.moveCameraToTraceStep();
+      }
     },
 
     toggleTraceTimeUnit() {
@@ -106,6 +111,15 @@ export default Component.extend({
       } else if (timeUnit === 's') {
         this.set('traceStepTimeUnit', 'ms');
       }
+    },
+
+    toggleAnimation() {
+      this.set('isReplayAnimated', !this.get('isReplayAnimated'));
+    },
+
+    lookAtClazz(clazz){
+      let position = new THREE.Vector3(clazz.get('positionX'), clazz.get('positionY'), clazz.get('positionZ'));
+      this.get('renderingService').moveCamera(position);
     },
 
     sortBy(property) {
