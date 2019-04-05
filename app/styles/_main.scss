@@ -13,12 +13,11 @@ body > .ember-view {
   overflow: hidden;
   @extend .ml-3;
   @extend .mr-3;
-  @extend .pt-3;
+  @extend .mt-5;
   @extend .mb-3;
   @extend .flex-grow-1;
   @extend .d-flex;
   @extend .flex-column;
-  margin-top: 64px;
 }
 
 .main-content > .row {
@@ -180,6 +179,12 @@ svg.octicon {
   position: absolute;
   top: 50%;
   left: calc(50% - 1.5rem);
+  width: 3rem;
+  height: 3rem;
+}
+
+.spinner-center-relative {
+  @extend .spinner-border;
   width: 3rem;
   height: 3rem;
 }

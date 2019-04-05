@@ -51,11 +51,11 @@ export default Component.extend(AlertifyHandler, {
       this.get('copySettingsToUser').perform('numericAttributes');
       this.get('copySettingsToUser').perform('stringAttributes');
       yield this.get('user').save();
-      this.showAlertifyMessage('Settings saved.');
+      this.showAlertifySuccess('Settings saved.');
       success = true;
     } catch(reason) {
       const {title, detail} = reason.errors[0];
-      this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+      this.showAlertifyError(`<b>${title}:</b> ${detail}`);
     } finally {
       if(!success)
         this.get('reloadUser').perform();

@@ -2,6 +2,7 @@ import Controller from '@ember/controller';
 import { inject as service } from '@ember/service'; 
 import { computed } from '@ember/object';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import { task, timeout } from 'ember-concurrency';
 
 /**
 * TODO
@@ -41,9 +42,14 @@ export default Controller.extend(AlertifyHandler, {
 
     toggleTimeline() {
       this.get('renderingService').toggleTimeline();
-    }
+    },
     
   },
+
+  resize: task(function * () {
+    yield timeout(100);
+    this.get('renderingService').resizeCanvas();
+  }).restartable(),
 
   showTimeline() {
     this.set('renderingService.showTimeline', true);
@@ -55,17 +61,11 @@ export default Controller.extend(AlertifyHandler, {
 
   initRendering() {
     this.get('landscapeListener').initSSE();
-    this.get('additionalData').on('showWindow', this, this.onShowWindow);
-  },
-
-  onShowWindow() {
-    this.get('renderingService').resizeCanvas();
   },
 
   // @Override
   cleanup() {
     this._super(...arguments);
-    this.get('additionalData').off('showWindow', this, this.onShowWindow);
   }
   
 });

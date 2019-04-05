@@ -195,14 +195,8 @@ export default Component.extend(Evented, THREEPerformance, {
 
   initListener() {
 
-    $(window).on('resize.visualization', this.updateCanvasSize.bind(this));
-
     this.get('renderingService').on('reSetupScene', () => {
       this.onReSetupScene();
-    });
-
-    this.get('renderingService').on('resizeCanvas', () => {
-      this.updateCanvasSize();
     });
 
     this.get('renderingService').on('moveCamera', (position) => {

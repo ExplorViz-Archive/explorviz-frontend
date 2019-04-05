@@ -21,17 +21,33 @@ export default Mixin.create({
     alertify.set('notifier','position', 'bottom-left');
   },
 
+  showAlertifyError(message) {
+    this.showAlertifyMessageWithDuration(message, 3, "error");
+  },
+
+  showAlertifyWarning(message) {
+    this.showAlertifyMessageWithDuration(message, 3, "warning");
+  },
+
+  showAlertifySuccess(message) {
+    this.showAlertifyMessageWithDuration(message, 3, "success");
+  },
+
   showAlertifyMessage(message) {
     this.showAlertifyMessageWithDuration(message, 3);
   },
 
-  showAlertifyMessageWithDuration(message, duration) {
+  showAlertifyMessageWithDuration(message, duration, cssClass) {
+
+    if(!cssClass) {
+      cssClass = "message";
+    }
 
     const self = this;
 
     this.set('alertActive', true);
 
-    alertify.notify(message, 'message', duration, function(){
+    alertify.notify(message, cssClass, duration, function(){
 
       // if last dialog, set respective flag
       // This flag is not used atm, but may be used in the future
