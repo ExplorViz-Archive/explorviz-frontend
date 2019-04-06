@@ -11,7 +11,6 @@ import Service from '@ember/service';
 */
 export default Service.extend({
 
-
   /**
   * Latest fetched entity
   *
@@ -19,7 +18,6 @@ export default Service.extend({
   * @type Array
   */
   navbarRoutes: null,
-
 
   /**
   * Latest fetched entity
@@ -31,7 +29,7 @@ export default Service.extend({
 
   init() {
     this._super(...arguments);
-    // TODO replay button not shown until implemented
+    // TODO: replay button not shown until implemented
     this.set('navbarRoutes', ["visualization", "discovery"]);
     this.set('navbarOcticons', []);
   }

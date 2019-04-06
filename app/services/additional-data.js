@@ -8,7 +8,7 @@ export default Service.extend(Evented, {
   popupContent: null,
 
   addComponent(path) {
-    if (this.get('shownComponents') == null) {
+    if (this.get('shownComponents') === null) {
       this.set('shownComponents', []);
     }
     if (!this.get('shownComponents').includes(path)) {
@@ -21,14 +21,14 @@ export default Service.extend(Evented, {
     if (!this.get('shownComponents'))
       return;
 
-    var index = this.get('shownComponents').indexOf(path);
-    if (index !== -1){
+    let index = this.get('shownComponents').indexOf(path);
+    // Remove existing sidebar component
+    if (index !== -1) {
       this.get('shownComponents').splice(index, 1);
       this.notifyPropertyChange('shownComponents');
     }
 
-
-    // close everything when no components are left
+    // Close sidebar if it would be empty otherwise
     if (this.get('shownComponents.length') == 0)
       this.emptyAndClose()
   },

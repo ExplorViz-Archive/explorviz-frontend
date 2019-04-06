@@ -11,13 +11,12 @@ export default Service.extend(AlertifyHandler, Evented, {
 
   debug: debugLogger(),
 
+  store: service(),
+  landscapeListener: service("landscape-listener"),
   landscapeRepo: service("repos/landscape-repository"),
   timestampRepo: service("repos/timestamp-repository"),
-  store: service(),
 
   modelUpdater: null,
-
-  landscapeListener: service("landscape-listener"),
 
   init(){
     this._super(...arguments);
@@ -33,16 +32,15 @@ export default Service.extend(AlertifyHandler, Evented, {
    * @param {*} appID 
    */
   loadLandscapeById(timestamp, appID) { // eslint-disable-line
-
     const self = this;
 
-    self.debug("start import landscape-request");
+    self.debug("Start import landscape-request");
 
     self.get('store').queryRecord('landscape', {timestamp: timestamp}).then(success, failure).catch(error);
 
     function success(landscape){
 
-      // pause the visulization
+      // Pause the visulization
       self.get('landscapeListener').stopVisualizationReload();
 
       self.get('modelUpdater').addDrawableCommunication();

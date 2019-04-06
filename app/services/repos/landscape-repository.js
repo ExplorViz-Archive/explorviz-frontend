@@ -15,9 +15,9 @@ export default Service.extend(Evented, {
 
   replayLandscape: null,
 
-  replayApplication:null,
+  replayApplication: null,
 
-  triggerLatestLandscapeUpdate(){
+  triggerLatestLandscapeUpdate() {
     this.trigger("updated", this.get("latestLandscape"));
   },
 

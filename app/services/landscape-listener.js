@@ -24,7 +24,7 @@ export default Service.extend(Evented, {
 
   debug: debugLogger(),
 
-  init(){
+  init() {
     this._super(...arguments);
     if (!this.get('modelUpdater')) {
       this.set('modelUpdater', ModelUpdater.create(getOwner(this).ownerInjection()));
@@ -32,16 +32,13 @@ export default Service.extend(Evented, {
   },
 
   initSSE() {
-
     this.set('content', []);
-
-    const self = this;
 
     const url = config.APP.API_ROOT;
     const { access_token } = this.get('session.data.authenticated');
 
-    // close former event source. Multiple (>= 6) instances cause the ember store to no longer work
-    if(this.get('es')) {
+    // Close former event source. Multiple (>= 6) instances cause the ember store to no longer work
+    if (this.get('es')) {
       this.get('es').close();
     }
 
@@ -53,16 +50,16 @@ export default Service.extend(Evented, {
       }
     }));
 
-    this.set('es.onmessage', function(e) {
-      const jsonLandscape = JSON.parse(e.data);
+    this.set('es.onmessage', (event) => {
+      const jsonLandscape = JSON.parse(event.data);
 
       if (jsonLandscape && jsonLandscape.hasOwnProperty("data") &&
-        JSON.stringify(jsonLandscape) !== JSON.stringify(self.get('latestJsonLandscape'))) {
+        JSON.stringify(jsonLandscape) !== JSON.stringify(this.get('latestJsonLandscape'))) {
 
-        // pause active -> no landscape visualization update
-        // do avoid update of store to prevent inconsistencies between visualization and e.g. trace data
-        if (self.pauseVisualizationReload) {
-          self.debug("SSE: Updating visualization paused")
+        // Pause active -> no landscape visualization update
+        // Do avoid update of store to prevent inconsistencies between visualization and e.g. trace data
+        if (this.pauseVisualizationReload) {
+          this.debug("SSE: Updating visualization paused")
           return;
         }
 
@@ -71,52 +68,50 @@ export default Service.extend(Evented, {
         // ATTENTION: Mind the push operation, push != pushPayload in terms of 
         // serializer usage
         // https://github.com/emberjs/data/issues/3455
-        self.set('latestJsonLandscape', jsonLandscape);
-        const landscapeRecord = self.get('store').push(jsonLandscape);
+        this.set('latestJsonLandscape', jsonLandscape);
+        const landscapeRecord = this.get('store').push(jsonLandscape);
 
-        self.get('modelUpdater').addDrawableCommunication();
+        this.get('modelUpdater').addDrawableCommunication();
 
-        self.set('landscapeRepo.latestLandscape', landscapeRecord);
-        self.get('landscapeRepo').triggerLatestLandscapeUpdate();
+        this.set('landscapeRepo.latestLandscape', landscapeRecord);
+        this.get('landscapeRepo').triggerLatestLandscapeUpdate();
 
-        self.set('timestampRepo.latestTimestamp', landscapeRecord.get('timestamp'));
-        self.get('timestampRepo').triggerTimelineUpdate();
-      }     
+        this.set('timestampRepo.latestTimestamp', landscapeRecord.get('timestamp'));
+        this.get('timestampRepo').triggerTimelineUpdate();
+      }
     });
   },
 
   subscribe(url, fn) {
-    const self = this;   
-
     let source = new EventSource(url);
-    source.onmessage = function(e){
-      fn(e.data);
+
+    source.onmessage = (event) => {
+      fn(event.data);
     };
-    source.onerror = function(e){
-      if (source.readyState == EventSource.CLOSED) return;
-      self.error(e);
+
+    source.onerror = (event) => {
+      if (source.readyState !== EventSource.CLOSED)
+        this.error(event);
     };
+
     return source.close.bind(source);
   },
 
-  toggleVisualizationReload(){
-    const self = this;
-
-    // TODO need to notify the timeline
-    if (self.pauseVisualizationReload) {
+  toggleVisualizationReload() {
+    // TODO: need to notify the timeline
+    if (this.pauseVisualizationReload) {
       this.startVisualizationReload();
-    }
-    else {
+    } else {
       this.stopVisualizationReload();
     }
   },
 
-  startVisualizationReload(){
+  startVisualizationReload() {
     this.set('pauseVisualizationReload', false);
     this.trigger("visualizationResumed");
   },
 
-  stopVisualizationReload(){
+  stopVisualizationReload() {
     this.set('pauseVisualizationReload', true);
   }
 

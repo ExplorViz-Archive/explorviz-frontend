@@ -20,6 +20,10 @@ export default Service.extend(Evented, {
     this.trigger('redrawScene');
   },
 
+  /**
+   * Triggers camera to move to a specified position
+   * @param {*} position Array, representing local application coordinates
+   */
   moveCamera(position) {
     this.trigger('moveCamera', position);
   },
