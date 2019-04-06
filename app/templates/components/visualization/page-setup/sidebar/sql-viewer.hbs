@@ -10,7 +10,7 @@
 
 <div class="mt-2 mb-1 d-flex justify-content-end">
   <div>
-    {{input id="filterInput" value=filterInput placeholder='Filter queries' class="form-control input-lg" autofocus="autofocus" focus-out=(action "filter") enter=(action "filter")}}
+    {{input id="filterInput" value=filterInput placeholder='Filter statements' class="form-control input-lg" autofocus="autofocus" focus-out=(action "filter") enter=(action "filter")}}
   </div>
   <div>
     {{#bs-button onClick=(action "filter") type="button" class="btn btn-light"}}{{svg-jar "search" class="octicon align-middle"}}{{/bs-button}}
@@ -20,7 +20,7 @@
 <div style="max-height:500px; overflow:auto; width:100%;">
   <table class="table table-hover">
     <thead>
-      <tr style="cursor: pointer" >
+      <tr style="cursor: pointer">
         <th {{action "sortBy" "timestamp"}} scope="col">Time</th>
         <th {{action "sortBy" "sqlStatement"}} scope="col">Statement</th>
         <th {{action "sortBy" "statementType"}} scope="col">Statement Type</th>

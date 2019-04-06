@@ -10,12 +10,12 @@ export default Component.extend({
   additionalData: service('additional-data'),
   store: service(),
 
-  sortOrder: 'asc',
+  isSortedAsc: true,
   sortBy: 'timestamp',
   filterTerm: '',
 
   // Compute current traces when highlighting changes
-  databaseQueries: computed('landscapeRepo.latestApplication.databaseQueries', 'sortOrder', 'filterTerm', function () {
+  databaseQueries: computed('landscapeRepo.latestApplication.databaseQueries', 'isSortedAsc', 'filterTerm', function () {
     return this.filterAndSortQueries(this.get('landscapeRepo.latestApplication.databaseQueries'));
   }),
 
@@ -34,7 +34,7 @@ export default Component.extend({
       }
     });
 
-    if (this.get('sortOrder') === 'asc') {
+    if (this.get('isSortedAsc')) {
       filteredQueries.sort((a, b) => (a.get(this.get('sortBy')) > b.get(this.get('sortBy'))) ? 1 : ((b.get(this.get('sortBy')) > a.get(this.get('sortBy'))) ? -1 : 0));
     } else {
       filteredQueries.sort((a, b) => (a.get(this.get('sortBy')) < b.get(this.get('sortBy'))) ? 1 : ((b.get(this.get('sortBy')) < a.get(this.get('sortBy'))) ? -1 : 0));
@@ -68,14 +68,10 @@ export default Component.extend({
       // Determine order for sorting
       if (this.get('sortBy') === property) {
         // Toggle sorting order
-        if (this.get('sortOrder') === 'asc') {
-          this.set('sortOrder', 'desc');
-        } else {
-          this.set('sortOrder', 'asc');
-        }
+        this.set('isSortedAsc', !this.get('isSortedAsc'));
       } else {
         // Sort in ascending order by default
-        this.set('sortOrder', 'asc');
+        this.set('isSortedAsc', true);
       }
 
       // Set property by which shall be sorted
