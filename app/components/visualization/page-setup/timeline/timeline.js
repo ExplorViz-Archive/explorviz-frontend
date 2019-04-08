@@ -271,7 +271,7 @@ export default Component.extend(AlertifyHandler, Evented, {
                 self.showAlertifyMessage("Loading landscape [" + formattedTimestamp + "]");
                 self.handleNotificationMessage(false);
 
-                self.get('reloadHandler').loadLandscapeById(retrievedTimestamp, null)
+                self.get('reloadHandler').loadLandscapeById(retrievedTimestamp);
             }
         } else {
             // reset the style of the previous data point and unpause the visualization
