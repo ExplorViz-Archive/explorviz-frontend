@@ -21,11 +21,11 @@ export default Service.extend(Evented, {
   },
 
   /**
-   * Triggers camera to move to a specified position
-   * @param {*} position Array, representing local application coordinates
+   * Triggers camera to move to a specified ember model
+   * @param {*} emberModel Model which the camera should focus on
    */
-  moveCamera(position) {
-    this.trigger('moveCamera', position);
+  moveCameraTo(emberModel) {
+    this.trigger('moveCameraTo', emberModel);
   },
 
   toggleTimeline() {

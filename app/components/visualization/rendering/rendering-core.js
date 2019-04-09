@@ -96,7 +96,6 @@ export default Component.extend(Evented, THREEPerformance, {
    * @method initRenderings
    */
   initRendering() {
-
     this.debug('init rendering-core');
 
     const self = this;
@@ -130,7 +129,6 @@ export default Component.extend(Evented, THREEPerformance, {
 
     // Rendering loop //
     function render() {
-
       if (self.get('isDestroyed')) {
         return;
       }
@@ -148,7 +146,6 @@ export default Component.extend(Evented, THREEPerformance, {
       if (userSettings.booleanAttributes.showFpsCounter) {
         self.get('stats').end();
       }
-
     }
 
     render();
@@ -194,7 +191,6 @@ export default Component.extend(Evented, THREEPerformance, {
 
 
   initListener() {
-
     this.get('renderingService').on('reSetupScene', () => {
       this.onReSetupScene();
     });
@@ -203,14 +199,13 @@ export default Component.extend(Evented, THREEPerformance, {
       this.updateCanvasSize();
     });
 
-    this.get('renderingService').on('moveCamera', (position) => {
-      this.onCameraMovement(position);
+    this.get('renderingService').on('moveCameraTo', (emberModel) => {
+      this.onMoveCameraTo(emberModel);
     });
 
     this.get('landscapeRepo').on("updated", () => {
       this.onUpdated();
     });
-
   },
 
   /*
@@ -218,7 +213,6 @@ export default Component.extend(Evented, THREEPerformance, {
    *  Ids of closed systems and nodegroups are stored in an array
    */
   computeLandscapeCondition() {
-
     const systems = this.get('landscapeRepo.latestLandscape').get('systems');
     const condition = [];
 
@@ -280,7 +274,6 @@ export default Component.extend(Evented, THREEPerformance, {
    *  of all closed systems and nodegroups
    */
   applyLandscapeCondition(landscape) {
-
     const systems = landscape.get('systems');
 
     systems.forEach((system) => {
@@ -319,7 +312,6 @@ export default Component.extend(Evented, THREEPerformance, {
   },
 
   applyAppCondition(application) {
-
     if (!application) {
       return;
     }
@@ -367,7 +359,6 @@ export default Component.extend(Evented, THREEPerformance, {
       });
       this.cleanAndUpdateScene();
     }
-
   },
 
   /**
@@ -384,7 +375,6 @@ export default Component.extend(Evented, THREEPerformance, {
    * @method populateScene
    */
   populateScene() { },
-
 
   /**
    * This function is called when the willDestroyElement event is fired. Inherit this
@@ -414,8 +404,6 @@ export default Component.extend(Evented, THREEPerformance, {
     this.get('highlighter').unhighlightAll();
     this.get('addionalData').emptyAndClose();
   },
-
-
 
   /**
    * Inherit this function to update the scene with a new renderingModel. It
@@ -462,10 +450,7 @@ export default Component.extend(Evented, THREEPerformance, {
    * @method preProcessEntity
    */
   preProcessEntity() { },
-
-
-
-
+  
 
   // Listener-Callbacks. Override in extending components
 
@@ -481,6 +466,6 @@ export default Component.extend(Evented, THREEPerformance, {
     this.cleanAndUpdateScene();
   },
 
-  onCameraMovement() {},
+  onMoveCameraTo() {},
 
 });

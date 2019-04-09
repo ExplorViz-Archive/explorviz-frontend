@@ -79,21 +79,35 @@ export default RenderingCore.extend(AlertifyHandler, {
     };
 
     // Move camera to specified position
-    this.onCameraMovement = function (position) {
+    this.onMoveCameraTo = function (emberModel) {
+      if (!emberModel){
+        return;
+      }
+
+      let emberModelName = emberModel.get('constructor.modelName');
+      // Position of object in local coordinates
+      let position, zoom;
+
+      if (emberModelName === "clazz"){
+        position = new THREE.Vector3(emberModel.get('positionX'), emberModel.get('positionY'), emberModel.get('positionZ'));
+        zoom = 50;
+      } else {
+        // Position and zoom of model not (yet) defined
+        return;
+      }
 
       // Calculate center point of application
       if (!this.get('centerAndZoomCalculator.centerPoint')) {
         this.get('centerAndZoomCalculator')
-          .calculateAppCenterAndZZoom(this.get('latestApplication'));
+          .calculateAppCenterAndZZoom(emberApplication);
       }
-  
-      const viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
+
+      let viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
 
       position.sub(viewCenterPoint);
       position.multiplyScalar(0.5);
 
       let application = this.get('application3D');
-
       let appQuaternion = new THREE.Quaternion();
 
       application.getWorldQuaternion(appQuaternion);
@@ -101,13 +115,12 @@ export default RenderingCore.extend(AlertifyHandler, {
 
       let appPosition = new THREE.Vector3();
       application.getWorldPosition(appPosition);
-
       position.sub(appPosition);
 
       // Move camera on to given position
       this.get('camera').position.set(position.x, position.y, position.z);
-      // Zoom out 
-      this.get('camera').position.z += 50;
+      // Zoom out to allow for better overview
+      this.get('camera').position.z += zoom;
     };
 
     this.get('camera').position.set(0, 0, 100);
@@ -213,7 +226,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     const emberApplication = this.get('latestApplication');
 
-    if (!emberApplication || !this.get('font')) {
+    if (!emberApplication) {
       return;
     }
 

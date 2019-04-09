@@ -16,6 +16,7 @@ export default Component.extend({
   filterTerm: '',
   isReplayAnimated: true,
 
+  store: service(),
   additionalData: service('additional-data'),
   highlighter: service('visualization/application/highlighter'),
   landscapeRepo: service('repos/landscape-repository'),
@@ -117,9 +118,10 @@ export default Component.extend({
       this.set('isReplayAnimated', !this.get('isReplayAnimated'));
     },
 
-    lookAtClazz(clazz) {
-      let position = new THREE.Vector3(clazz.get('positionX'), clazz.get('positionY'), clazz.get('positionZ'));
-      this.get('renderingService').moveCamera(position);
+    lookAtClazz(proxyClazz) {
+      let clazzId = proxyClazz.get('id');
+      let clazz = this.get('store').peekRecord('clazz', clazzId);
+      this.get('renderingService').moveCameraTo(clazz);
     },
 
     sortBy(property) {
@@ -145,9 +147,10 @@ export default Component.extend({
     let currentTraceStep = this.get('highlighter.currentTraceStep');
 
     if (currentTraceStep) {
-      let originClazz = currentTraceStep.get('clazzCommunication.sourceClazz');
-      let position = new THREE.Vector3(originClazz.get('positionX'), originClazz.get('positionY'), originClazz.get('positionZ'));
-      this.get('renderingService').moveCamera(position);
+      let storeId = currentTraceStep.get('clazzCommunication.sourceClazz.id');
+      // Avoid proxy object by requesting clazz from store
+      let originClazz = this.get('store').peekRecord('clazz', storeId);
+      this.get('renderingService').moveCameraTo(originClazz);
     }
   },
 
