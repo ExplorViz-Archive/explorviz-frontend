@@ -226,7 +226,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     const emberApplication = this.get('latestApplication');
 
-    if (!emberApplication) {
+    if (!emberApplication || !this.get('font')) {
       return;
     }
 
