@@ -58,10 +58,15 @@ export default Service.extend(Evented, {
 
         // Pause active -> no landscape visualization update
         // Do avoid update of store to prevent inconsistencies between visualization and e.g. trace data
-        if (this.pauseVisualizationReload) {
+        if (this.get('pauseVisualizationReload')) {
           this.debug("SSE: Updating visualization paused")
           return;
         }
+
+        this.get('store').unloadAll('tracestep');
+        this.get('store').unloadAll('trace');
+        this.get('store').unloadAll('clazzcommunication');
+        this.get('store').unloadAll('event');
 
         // console.log("JSON: " + JSON.stringify(jsonLandscape));
 
