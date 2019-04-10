@@ -29,7 +29,7 @@ export default Service.extend({
     // Replace if original EventSource API allows HTTP-Headers
     this.set('es', new EventSourcePolyfill(`${url}/v1/agents/broadcast/`, {
       headers: {
-        Authorization: `Bearer ${access_token.token}`
+        Authorization: `Bearer ${access_token}`
       }
     }));
 
