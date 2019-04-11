@@ -104,7 +104,7 @@ export default Service.extend({
       textchanged: false
     });
 
-    this.set('applicationColorsDefault', {
+    this.set('applicationColors', {
       foundation: "rgb(199, 199, 199)",
       componentOdd: "rgb(1, 90, 110)",
       componentEven: "rgb(0, 150, 190)",
