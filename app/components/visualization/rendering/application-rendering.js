@@ -80,7 +80,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     // Move camera to specified position
     this.onMoveCameraTo = function (emberModel) {
-      if (!emberModel){
+      if (!emberModel) {
         return;
       }
 
@@ -88,11 +88,20 @@ export default RenderingCore.extend(AlertifyHandler, {
       // Position of object in local coordinates
       let position, zoom;
 
-      if (emberModelName === "clazz"){
+      if (emberModelName === "clazz") {
         position = new THREE.Vector3(emberModel.get('positionX'), emberModel.get('positionY'), emberModel.get('positionZ'));
         zoom = 50;
+      } else if (emberModelName === "clazzcommunication") {
+        let sourceClazz = emberModel.get('sourceClazz');
+        let targetClazz = emberModel.get('targetClazz');
+        // Set middle point of communication as position
+        position = new THREE.Vector3(
+          sourceClazz.get('positionX') + 0.5 * (targetClazz.get('positionX') - sourceClazz.get('positionX')),
+          sourceClazz.get('positionY') + 0.5 * (targetClazz.get('positionY') - sourceClazz.get('positionY')),
+          sourceClazz.get('positionZ') + 0.5 * (targetClazz.get('positionZ') - sourceClazz.get('positionZ')));
+        zoom = 50;
       } else {
-        // Position and zoom of model not (yet) defined
+        // Given model not yet supported for moving camera
         return;
       }
 
