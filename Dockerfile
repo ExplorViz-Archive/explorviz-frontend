@@ -8,6 +8,7 @@ ENV API_ROOT=change-API_ROOT
 # docker-configuration repository
 
 ENV API_ROOT_LANDSCAPE=http://landscape-service:8081
+ENV API_ROOT_HISTORY=http://history-service:8086
 ENV API_ROOT_USER=http://user-service:8082
 ENV API_ROOT_DISCOVERY=http://discovery-service:8083
 
