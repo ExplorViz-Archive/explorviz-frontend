@@ -27,7 +27,7 @@ export default Object.extend({
 
   createLabel(parentMesh, parentObject, font, transparent) {
     const bboxNew = new THREE.Box3().setFromObject(parentMesh);
-    
+
     const worldParent = new THREE.Vector3();
     worldParent.setFromMatrixPosition(parentMesh.matrixWorld);
 
@@ -75,14 +75,20 @@ export default Object.extend({
       // Font color depending on parent object
       let material;
       if (parentMesh.userData.foundation) {
-        material = this.get('textMaterialBlack');
+        material = this.get('textMaterialBlack').clone();
       }
       else if (parentMesh.userData.type === 'package') {
-        material = this.get('textMaterialWhite');
+        material = this.get('textMaterialWhite').clone();
       }
       // Clazz
       else {
-        material = this.get('textMaterialWhite');
+        material = this.get('textMaterialWhite').clone();
+      }
+
+      // Apply transparency / opacity
+      if (transparent) {
+        material.transparent = true;
+        material.opacity = 0.4;
       }
 
       let mesh = new THREE.Mesh(textGeo, material);
