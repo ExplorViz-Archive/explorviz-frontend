@@ -1,12 +1,15 @@
 import Object from '@ember/object';
 import THREE from "three";
 import { shortenString } from '../helpers/string-helpers';
+import { inject as service } from "@ember/service";
 
 export default Object.extend({
 
   labels: null,
   textMaterialWhite: null,
   textMaterialBlack: null,
+
+  session: service(),
 
   init() {
     this._super(...arguments);
@@ -23,6 +26,8 @@ export default Object.extend({
         color: 0x000000
       })
     );
+
+    this.set('currentUser', this.get('session.session.content.authenticated.user'));
   },
 
   createLabel(parentMesh, parentObject, font, transparent) {
@@ -44,13 +49,13 @@ export default Object.extend({
       if (transparent && !oldLabel[0].material.transparent) {
         const newMaterial = oldLabel[0].material.clone();
         newMaterial.transparent = true;
-        newMaterial.opacity = 0.4;
+        newMaterial.opacity = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
         oldLabel[0].material = newMaterial;
       }
       else if (!transparent && oldLabel[0].material.transparent) {
         const newMaterial = oldLabel[0].material.clone();
         newMaterial.transparent = false;
-        newMaterial.opacity = 1;
+        newMaterial.opacity = 1.0;
         oldLabel[0].material = newMaterial;
       }
 
@@ -88,16 +93,16 @@ export default Object.extend({
       // Apply transparency / opacity
       if (transparent) {
         material.transparent = true;
-        material.opacity = 0.4;
+        material.opacity = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
       }
 
       let textMesh = new THREE.Mesh(textGeo, material);
 
       // Calculate textWidth
       textGeo.computeBoundingBox();
-      let bboxText = textGeo.boundingBox;
+      let bBoxText = textGeo.boundingBox;
       let textBoxDimensions = new THREE.Vector3();
-      bboxText.getSize(textBoxDimensions);
+      bBoxText.getSize(textBoxDimensions);
       let textWidth = textBoxDimensions.x;
 
       // Calculate boundingbox of parent mesh
@@ -120,8 +125,8 @@ export default Object.extend({
 
         // Update text width data
         textGeo.computeBoundingBox();
-        bboxText.getSize(textBoxDimensions);
-        textWidth = textGeo.boundingBox.max.x - textGeo.boundingBox.min.x; //textBoxDimensions.x;
+        bBoxText.getSize(textBoxDimensions);
+        textWidth = textBoxDimensions.x;
       }
 
       // Calculate center for positioning
