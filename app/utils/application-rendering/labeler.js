@@ -96,12 +96,16 @@ export default Object.extend({
       // Calculate textWidth
       textGeo.computeBoundingBox();
       let bboxText = textGeo.boundingBox;
-      let textWidth = bboxText.max.x - bboxText.min.x;
+      let textBoxDimensions = new THREE.Vector3();
+      bboxText.getSize(textBoxDimensions);
+      let textWidth = textBoxDimensions.x;
 
       // Calculate boundingbox for (centered) positioning
       parentMesh.geometry.computeBoundingBox();
       let bboxParent = parentMesh.geometry.boundingBox;
-      let boxWidth = bboxParent.max.x;
+      let bBoxDimension = new THREE.Vector3();
+      bboxParent.getSize(bBoxDimension);
+      let boxWidth = bBoxDimension.z;
 
       // Static size for class text
       if (parentMesh.userData.type === 'clazz') {
@@ -109,22 +113,10 @@ export default Object.extend({
         let j = 0.3;
         textGeo.scale(j, j, j);
       }
-      // Shrink the text if necessary to fit into the box
-      else {
-        // Upper scaling factor
-        let i = 1.0;
-        // Until text fits into the parent bounding box
-        while ((textWidth > boxWidth) && (i > 0.1)) {
-          textGeo.scale(i, i, i);
-          i -= 0.1;
-          // Update the BoundingBoxes
-          textGeo.computeBoundingBox();
-          bboxText = textGeo.boundingBox;
-          textWidth = bboxText.max.x - bboxText.min.x;
-          parentMesh.geometry.computeBoundingBox();
-          bboxParent = parentMesh.geometry.boundingBox;
-          boxWidth = bboxParent.max.x;
-        }
+      // Shrink text to size of parentBox if necessary
+      else if (textWidth > boxWidth) {
+        let scaleFactor = boxWidth / textWidth;
+        textGeo.scale(scaleFactor, scaleFactor, scaleFactor);
       }
 
       // Calculate center for postioning

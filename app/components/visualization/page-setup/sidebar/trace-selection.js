@@ -31,7 +31,6 @@ export default Component.extend({
   }),
 
   filterAndSortTraces(traces) {
-
     if (!traces) {
       return [];
     }

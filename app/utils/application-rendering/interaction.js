@@ -248,7 +248,6 @@ export default Object.extend(Evented, {
         if(!user.settings.booleanAttributes.keepHighlightingOnOpenOrClose) {
           const highlighted = this.get('highlighter.highlightedEntity');
   
-          // TODO Allow users to change this behavior via configuration route
           if(emberModel === highlighted || emberModel.contains(highlighted)) {
             this.get('highlighter').unhighlightAll();
           }
