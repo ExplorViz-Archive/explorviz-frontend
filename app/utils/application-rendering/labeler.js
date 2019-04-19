@@ -63,26 +63,25 @@ export default Object.extend({
     }
     // New TextGeometry necessary
     else {
-      let fontSize = 2;
-      let labelString = parentMesh.userData.name;
+      let { name: labelString, foundation, type, opened } = parentMesh.userData;
 
-      if (parentMesh.userData.type === 'clazz' && labelString.length > 10) {
+      if (type === 'clazz' && labelString.length > 10) {
         labelString = shortenString(labelString);
       }
 
-      let textGeo = new THREE.TextGeometry(labelString, {
-        font: font,
-        size: fontSize,
+      let textGeometry = new THREE.TextGeometry(labelString, {
+        font,
+        size: 2,
         height: 0.1,
         curveSegments: 1
       });
 
       // Font color depending on parent object
       let material;
-      if (parentMesh.userData.foundation) {
+      if (foundation) {
         material = this.get('textMaterialBlack').clone();
       }
-      else if (parentMesh.userData.type === 'package') {
+      else if (type === 'package') {
         material = this.get('textMaterialWhite').clone();
       }
       // Clazz
@@ -96,11 +95,11 @@ export default Object.extend({
         material.opacity = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
       }
 
-      let textMesh = new THREE.Mesh(textGeo, material);
+      let textMesh = new THREE.Mesh(textGeometry, material);
 
       // Calculate textWidth
-      textGeo.computeBoundingBox();
-      let bBoxText = textGeo.boundingBox;
+      textGeometry.computeBoundingBox();
+      let bBoxText = textGeometry.boundingBox;
       let textBoxDimensions = new THREE.Vector3();
       bBoxText.getSize(textBoxDimensions);
       let textWidth = textBoxDimensions.x;
@@ -108,35 +107,34 @@ export default Object.extend({
       // Calculate boundingbox of parent mesh
       let bBoxDimension = new THREE.Vector3();
       bBoxParent.getSize(bBoxDimension);
-      let boxWidth = bBoxDimension.z;
+      let parentBoxWidth = bBoxDimension.z;
 
       // Static size for class text
       let margin = 0.5;
-      if (parentMesh.userData.type === 'clazz') {
+      if (type === 'clazz') {
         // Static scaling factor
         let scaleFactor = 0.3;
-        textGeo.scale(scaleFactor, scaleFactor, scaleFactor);
+        textGeometry.scale(scaleFactor, scaleFactor, scaleFactor);
       }
       // Handle text which is too big for a component
-      else if (textWidth > (boxWidth - margin)) {
+      else if (textWidth > (parentBoxWidth - margin)) {
         // Compute factor to fit text to parent (including small margin)
-        let scaleFactor = (boxWidth - margin) / textWidth;
-        textGeo.scale(scaleFactor, scaleFactor, scaleFactor);
+        let scaleFactor = (parentBoxWidth - margin) / textWidth;
+        textGeometry.scale(scaleFactor, scaleFactor, scaleFactor);
 
         // Update text width data
-        textGeo.computeBoundingBox();
+        textGeometry.computeBoundingBox();
         bBoxText.getSize(textBoxDimensions);
         textWidth = textBoxDimensions.x;
       }
 
-      // Calculate center for positioning
-      textGeo.center();
+      textGeometry.center();
 
       const centerParentBox = new THREE.Vector3();
       bBoxParent.getCenter(centerParentBox);
 
       // Set position and rotation
-      if (parentMesh.userData.opened) {
+      if (opened) {
         textMesh.position.x = bBoxParent.min.x + 2;
         textMesh.position.y = bBoxParent.max.y;
         // Center mesh
@@ -149,7 +147,7 @@ export default Object.extend({
         textMesh.position.z = centerParentBox.z;
         textMesh.rotation.x = -(Math.PI / 2);
 
-        if (parentMesh.userData.type === 'clazz') {
+        if (type === 'clazz') {
           textMesh.rotation.z = -(Math.PI / 3);
         } else {
           textMesh.rotation.z = -(Math.PI / 4);
@@ -159,7 +157,7 @@ export default Object.extend({
       // Internal user-defined type
       textMesh.userData = {
         type: 'label',
-        name: parentMesh.userData.name,
+        name: labelString,
         parentPos: worldParent
       };
 
