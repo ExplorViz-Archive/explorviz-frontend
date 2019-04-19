@@ -26,7 +26,7 @@ export default Object.extend({
   },
 
   createLabel(parentMesh, parentObject, font, transparent) {
-    const bboxNew = new THREE.Box3().setFromObject(parentMesh);
+    const bBoxParent = new THREE.Box3().setFromObject(parentMesh);
 
     const worldParent = new THREE.Vector3();
     worldParent.setFromMatrixPosition(parentMesh.matrixWorld);
@@ -91,7 +91,7 @@ export default Object.extend({
         material.opacity = 0.4;
       }
 
-      let mesh = new THREE.Mesh(textGeo, material);
+      let textMesh = new THREE.Mesh(textGeo, material);
 
       // Calculate textWidth
       textGeo.computeBoundingBox();
@@ -100,23 +100,28 @@ export default Object.extend({
       bboxText.getSize(textBoxDimensions);
       let textWidth = textBoxDimensions.x;
 
-      // Calculate boundingbox for (centered) positioning
-      parentMesh.geometry.computeBoundingBox();
-      let bboxParent = parentMesh.geometry.boundingBox;
+      // Calculate boundingbox of parent mesh
       let bBoxDimension = new THREE.Vector3();
-      bboxParent.getSize(bBoxDimension);
+      bBoxParent.getSize(bBoxDimension);
       let boxWidth = bBoxDimension.z;
 
       // Static size for class text
+      let margin = 0.5;
       if (parentMesh.userData.type === 'clazz') {
         // Static scaling factor
-        let j = 0.3;
-        textGeo.scale(j, j, j);
-      }
-      // Shrink text to size of parentBox if necessary
-      else if (textWidth > boxWidth) {
-        let scaleFactor = boxWidth / textWidth;
+        let scaleFactor = 0.3;
         textGeo.scale(scaleFactor, scaleFactor, scaleFactor);
+      }
+      // Handle text which is too big for a component
+      else if (textWidth > (boxWidth - margin)) {
+        // Compute factor to fit text to parent (including small margin)
+        let scaleFactor = (boxWidth - margin) / textWidth;
+        textGeo.scale(scaleFactor, scaleFactor, scaleFactor);
+
+        // Update text width data
+        textGeo.computeBoundingBox();
+        bboxText.getSize(textBoxDimensions);
+        textWidth = textGeo.boundingBox.max.x - textGeo.boundingBox.min.x; //textBoxDimensions.x;
       }
 
       // Calculate center for postioning
@@ -125,38 +130,40 @@ export default Object.extend({
 
       // Set position and rotation
       if (parentMesh.userData.opened) {
-        mesh.position.x = bboxNew.min.x + 2;
-        mesh.position.y = bboxNew.max.y;
-        mesh.position.z = (worldParent.z - Math.abs(centerX) / 2) - 2;
-        mesh.rotation.x = -(Math.PI / 2);
-        mesh.rotation.z = -(Math.PI / 2);
-      } else {
+        textMesh.position.x = bBoxParent.min.x + 2;
+        textMesh.position.y = bBoxParent.max.y;
+        // Center mesh
+        textMesh.position.z = (bBoxParent.min.z + 0.5 * (boxWidth)) - 0.5 * textWidth;
+        textMesh.rotation.x = -(Math.PI / 2);
+        textMesh.rotation.z = -(Math.PI / 2);
+      }
+      else {
         if (parentMesh.userData.type === 'clazz') {
-          mesh.position.x = worldParent.x - Math.abs(centerX) / 2 - 0.25;
-          mesh.position.y = bboxNew.max.y;
-          mesh.position.z = (worldParent.z - Math
+          textMesh.position.x = worldParent.x - Math.abs(centerX) / 2 - 0.25;
+          textMesh.position.y = bBoxParent.max.y;
+          textMesh.position.z = (worldParent.z - Math
             .abs(centerX) / 2) - 0.25;
-          mesh.rotation.x = -(Math.PI / 2);
-          mesh.rotation.z = -(Math.PI / 3);
+          textMesh.rotation.x = -(Math.PI / 2);
+          textMesh.rotation.z = -(Math.PI / 3);
         } else {
-          mesh.position.x = worldParent.x - Math.abs(centerX) / 2;
-          mesh.position.y = bboxNew.max.y;
-          mesh.position.z = worldParent.z - Math.abs(centerX) / 2;
-          mesh.rotation.x = -(Math.PI / 2);
-          mesh.rotation.z = -(Math.PI / 4);
+          textMesh.position.x = worldParent.x - Math.abs(centerX) / 2;
+          textMesh.position.y = bBoxParent.max.y;
+          textMesh.position.z = worldParent.z - Math.abs(centerX) / 2;
+          textMesh.rotation.x = -(Math.PI / 2);
+          textMesh.rotation.z = -(Math.PI / 4);
         }
       }
 
       // Internal user-defined type
-      mesh.userData = {
+      textMesh.userData = {
         type: 'label',
         name: parentMesh.userData.name,
         parentPos: worldParent
       };
 
       // Add labels
-      this.get('labels').push(mesh);
-      parentObject.add(mesh);
+      this.get('labels').push(textMesh);
+      parentObject.add(textMesh);
     }
   }
 
