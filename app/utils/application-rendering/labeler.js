@@ -130,34 +130,28 @@ export default Object.extend({
       }
 
       // Calculate center for positioning
-      textGeo.computeBoundingSphere();
       textGeo.center();
-      let centerX = textGeo.boundingSphere.center.x;
+
+      const centerParentBox = new THREE.Vector3();
+      bBoxParent.getCenter(centerParentBox);
 
       // Set position and rotation
       if (parentMesh.userData.opened) {
         textMesh.position.x = bBoxParent.min.x + 2;
         textMesh.position.y = bBoxParent.max.y;
         // Center mesh
-        const centerTextBox = new THREE.Vector3();
-        bBoxParent.getCenter(centerTextBox);
-        textMesh.position.z = centerTextBox.z;
+        textMesh.position.z = centerParentBox.z;
         textMesh.rotation.x = -(Math.PI / 2);
         textMesh.rotation.z = -(Math.PI / 2);
-      }
-      else {
+      } else {
+        textMesh.position.x = centerParentBox.x;
+        textMesh.position.y = bBoxParent.max.y;
+        textMesh.position.z = centerParentBox.z;
+        textMesh.rotation.x = -(Math.PI / 2);
+
         if (parentMesh.userData.type === 'clazz') {
-          textMesh.position.x = worldParent.x - Math.abs(centerX) / 2 - 0.25;
-          textMesh.position.y = bBoxParent.max.y;
-          textMesh.position.z = (worldParent.z - Math
-            .abs(centerX) / 2) - 0.25;
-          textMesh.rotation.x = -(Math.PI / 2);
           textMesh.rotation.z = -(Math.PI / 3);
         } else {
-          textMesh.position.x = worldParent.x - Math.abs(centerX) / 2;
-          textMesh.position.y = bBoxParent.max.y;
-          textMesh.position.z = worldParent.z - Math.abs(centerX) / 2;
-          textMesh.rotation.x = -(Math.PI / 2);
           textMesh.rotation.z = -(Math.PI / 4);
         }
       }
