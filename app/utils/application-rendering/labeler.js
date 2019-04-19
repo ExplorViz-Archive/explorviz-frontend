@@ -124,8 +124,9 @@ export default Object.extend({
         textWidth = textGeo.boundingBox.max.x - textGeo.boundingBox.min.x; //textBoxDimensions.x;
       }
 
-      // Calculate center for postioning
+      // Calculate center for positioning
       textGeo.computeBoundingSphere();
+      textGeo.center();
       let centerX = textGeo.boundingSphere.center.x;
 
       // Set position and rotation
@@ -133,7 +134,9 @@ export default Object.extend({
         textMesh.position.x = bBoxParent.min.x + 2;
         textMesh.position.y = bBoxParent.max.y;
         // Center mesh
-        textMesh.position.z = (bBoxParent.min.z + 0.5 * (boxWidth)) - 0.5 * textWidth;
+        const centerTextBox = new THREE.Vector3();
+        bBoxParent.getCenter(centerTextBox);
+        textMesh.position.z = centerTextBox.z;
         textMesh.rotation.x = -(Math.PI / 2);
         textMesh.rotation.z = -(Math.PI / 2);
       }
