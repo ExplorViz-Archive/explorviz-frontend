@@ -415,18 +415,23 @@ export default RenderingCore.extend(AlertifyHandler, {
   }, // END addComponentToScene
 
 
-
-  createBox(component, color, isClass) {
-    const self = this;
-    let centerPoint = new THREE.Vector3(component.get('positionX') +
-      component.get('width') / 2.0, component.get('positionY') +
-      component.get('height') / 2.0,
-      component.get('positionZ') + component.get('depth') / 2.0);
+  /**
+   * Adds a Box to an application, therefore also computes color, size etc.
+   * @method createBox
+   * @param {emberModel} boxEntity Component or clazz
+   * @param {string}     color     Color for box
+   * @param {boolean}    isClazz   Distinguishes between component and clazz
+   */
+  createBox(boxEntity, color, isClazz) {
+    let centerPoint = new THREE.Vector3(boxEntity.get('positionX') +
+      boxEntity.get('width') / 2.0, boxEntity.get('positionY') +
+      boxEntity.get('height') / 2.0,
+      boxEntity.get('positionZ') + boxEntity.get('depth') / 2.0);
 
     let transparent = false;
     let opacityValue = 1.0;
 
-    if (component.get('state') === "TRANSPARENT") {
+    if (boxEntity.get('state') === "TRANSPARENT") {
       transparent = this.get('currentUser.settings.booleanAttributes.appVizTransparency');
       opacityValue = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
     }
@@ -439,31 +444,27 @@ export default RenderingCore.extend(AlertifyHandler, {
     material.color = new THREE.Color(color);
 
     centerPoint.sub(this.get('centerAndZoomCalculator.centerPoint'));
-
     centerPoint.multiplyScalar(0.5);
 
-    const extension = new THREE.Vector3(component.get('width') / 2.0,
-      component.get('height') / 2.0, component.get('depth') / 2.0);
+    const extension = new THREE.Vector3(boxEntity.get('width') / 2.0,
+      boxEntity.get('height') / 2.0, boxEntity.get('depth') / 2.0);
 
     const cube = new THREE.BoxGeometry(extension.x, extension.y, extension.z);
-
     const mesh = new THREE.Mesh(cube, material);
 
     mesh.position.set(centerPoint.x, centerPoint.y, centerPoint.z);
     mesh.updateMatrix();
 
-    mesh.userData.model = component;
-    mesh.userData.name = component.get('name');
-    mesh.userData.foundation = component.get('foundation');
-    mesh.userData.type = isClass ? 'clazz' : 'package';
+    mesh.userData.model = boxEntity;
+    mesh.userData.name = boxEntity.get('name');
+    mesh.userData.foundation = boxEntity.get('foundation');
+    mesh.userData.type = isClazz ? 'clazz' : 'package';
+    mesh.userData.opened = boxEntity.get('opened');
 
-    mesh.userData.opened = component.get('opened');
+    this.get('labeler').createLabel(mesh, this.get('application3D'),
+      this.get('font'), transparent);
 
-    self.get('labeler').createLabel(mesh, self.get('application3D'),
-      self.get('font'), transparent);
-
-    self.get('application3D').add(mesh);
-
+    this.get('application3D').add(mesh);
   },// END createBox
 
   /**

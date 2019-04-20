@@ -48,7 +48,6 @@ export default Component.extend({
       }
 
       this.get('highlighter').unhighlightAll();
-      this.get('renderingService').redrawScene();
     
       if (modelType === "clazz") {
         entity.openParents();
