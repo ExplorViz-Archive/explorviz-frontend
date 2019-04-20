@@ -98,23 +98,17 @@ export default RenderingCore.extend(AlertifyHandler, {
       if (emberModelName === "clazz") {
         position = new THREE.Vector3(emberModel.get('positionX'), emberModel.get('positionY'), emberModel.get('positionZ'));
         applyCameraPosition(this.get('application3D'), viewCenterPoint, this.get('camera'), position);
-        this.get('application3D').localToWorld(position);
         // Apply zoom
         this.get('camera').position.z += 25;
       } else if (emberModelName === "clazzcommunication") {
         let sourceClazz = emberModel.get('sourceClazz');
         let targetClazz = emberModel.get('targetClazz');
-        // Set middle point of communication as position
-        let startPosition = new THREE.Vector3(sourceClazz.get('positionX'), sourceClazz.get('positionY'), sourceClazz.get('positionZ'));
-        let endPosition = new THREE.Vector3(targetClazz.get('positionX'), targetClazz.get('positionY'), targetClazz.get('positionZ'));
-
-        this.get('application3D').localToWorld(startPosition);
-        this.get('application3D').localToWorld(endPosition);
 
         position = new THREE.Vector3(
           sourceClazz.get('positionX') + 0.5 * (targetClazz.get('positionX') - sourceClazz.get('positionX')),
           sourceClazz.get('positionY') + 0.5 * (targetClazz.get('positionY') - sourceClazz.get('positionY')),
           sourceClazz.get('positionZ') + 0.5 * (targetClazz.get('positionZ') - sourceClazz.get('positionZ')));
+
         applyCameraPosition(this.get('application3D'), viewCenterPoint, this.get('camera'), position);
         // Apply zoom
         this.get('camera').position.z += 50;
