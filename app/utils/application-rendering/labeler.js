@@ -65,27 +65,28 @@ export default Object.extend({
     else {
       let { name: labelString, foundation, type, opened } = parentMesh.userData;
 
+      // Text properties for TextGeometry
+      const textSize = 2;
+      const textHeight = 0.1;
+      const curveSegments = 1;
+      
+      // Fixed text length for clazz labels
       if (type === 'clazz' && labelString.length > 10) {
-        labelString = shortenString(labelString);
+        labelString = shortenString(labelString, 8);
       }
 
       let textGeometry = new THREE.TextGeometry(labelString, {
         font,
-        size: 2,
-        height: 0.1,
-        curveSegments: 1
+        size: textSize,
+        height: textHeight,
+        curveSegments
       });
 
-      // Font color depending on parent object
+      // Font color(material) depending on parent object
       let material;
       if (foundation) {
         material = this.get('textMaterialBlack').clone();
-      }
-      else if (type === 'package') {
-        material = this.get('textMaterialWhite').clone();
-      }
-      // Clazz
-      else {
+      } else {
         material = this.get('textMaterialWhite').clone();
       }
 
@@ -96,41 +97,55 @@ export default Object.extend({
       }
 
       let textMesh = new THREE.Mesh(textGeometry, material);
+      let textWidth = computeBoxSize(textGeometry).x;
+      let parentBoxWidth = computeBoxSize(parentMesh.geometry).z;
 
-      // Calculate textWidth
-      textGeometry.computeBoundingBox();
-      let bBoxText = textGeometry.boundingBox;
-      let textBoxDimensions = new THREE.Vector3();
-      bBoxText.getSize(textBoxDimensions);
-      let textWidth = textBoxDimensions.x;
+      // Properties for label positioning, scaling and length
+      const margin = 0.5;
+      const staticScaleFactor = 0.3;
+      const minTextHeight = 1;
+      const minTextLength = 3;
 
-      // Calculate boundingbox of parent mesh
-      let bBoxDimension = new THREE.Vector3();
-      bBoxParent.getSize(bBoxDimension);
-      let parentBoxWidth = bBoxDimension.z;
-
-      // Static size for class text
-      let margin = 0.5;
+      // Static size for clazz text
       if (type === 'clazz') {
-        // Static scaling factor
-        let scaleFactor = 0.3;
-        textGeometry.scale(scaleFactor, scaleFactor, scaleFactor);
+        textGeometry.scale(staticScaleFactor, staticScaleFactor, staticScaleFactor);
       }
-      // Handle text which is too big for a component
+      // Handle label which is too big for parent component
       else if (textWidth > (parentBoxWidth - margin)) {
         // Compute factor to fit text to parent (including small margin)
         let scaleFactor = (parentBoxWidth - margin) / textWidth;
         textGeometry.scale(scaleFactor, scaleFactor, scaleFactor);
 
-        // Update text width data
-        textGeometry.computeBoundingBox();
-        bBoxText.getSize(textBoxDimensions);
-        textWidth = textBoxDimensions.x;
+        // Update size data
+        textWidth = computeBoxSize(textGeometry).x;
+        let textHeight = computeBoxSize(textGeometry).y;
+
+        // Handle label which is too small due to scaling
+        if (textHeight < minTextHeight) {
+          // Shorten label to reach minimal text height, 
+          // Accounting for later added "..." to label by substracting '3'
+          let labelLength = Math.max(Math.round(labelString.length * (textHeight / minTextHeight) - 3), minTextLength);
+          labelString = shortenString(labelString, labelLength);
+
+          // Update geometry and mesh based upon new label text
+          textGeometry = new THREE.TextGeometry(labelString, {
+            font,
+            size: textSize,
+            height: textHeight,
+            curveSegments
+          });
+          textMesh.geometry = textGeometry;
+
+          // Scale shortened label according to parent component size
+          textWidth = computeBoxSize(textGeometry).x;
+          scaleFactor = (parentBoxWidth - margin) / textWidth;
+          textGeometry.scale(scaleFactor, scaleFactor, scaleFactor);
+        }
       }
 
-      textGeometry.center();
-
+      // Compute center coordinates of parent box
       const centerParentBox = new THREE.Vector3();
+      textGeometry.center();
       bBoxParent.getCenter(centerParentBox);
 
       // Set position and rotation
@@ -164,6 +179,16 @@ export default Object.extend({
       // Add labels
       this.get('labels').push(textMesh);
       parentObject.add(textMesh);
+    }
+
+    /**
+     * Updates bounding box of geometry and returns respective dimensions
+     */
+    function computeBoxSize(geometry) {
+      geometry.computeBoundingBox();
+      let boxDimensions = new THREE.Vector3();
+      geometry.boundingBox.getSize(boxDimensions);
+      return { x: boxDimensions.x, y: boxDimensions.y, z: boxDimensions.z };
     }
   }
 
