@@ -174,16 +174,22 @@ svg.octicon {
   border-color: #9be7ff;
 }
 
-.spinner-center {
-  @extend .spinner-border;
-  position: absolute;
-  top: 50%;
-  left: calc(50% - 1.5rem);
-  width: 3rem;
-  height: 3rem;
+@mixin centerSpinners() {
+  @for $i from 1 through 5 {
+    .spinner-center-#{$i} {
+      @extend .spinner-border;
+      position: absolute;
+      top: calc(50% - #{$i/2}rem);
+      left: calc(50% - #{$i/2}rem);
+      width: #{$i}rem;
+      height: #{$i}rem;
+    }
+  }
 }
 
-.spinner-center-relative {
+* { @include centerSpinners(); }
+
+.spinner-center-3-relative {
   @extend .spinner-border;
   width: 3rem;
   height: 3rem;
