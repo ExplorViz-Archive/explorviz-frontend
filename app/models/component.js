@@ -32,10 +32,7 @@ export default Draw3DNodeEntity.extend({
   parentComponent: belongsTo('component', {
     inverse: 'children'
   }),
-
-  // why is this overriden here?
-  //opened: false,
-
+  
   // breaks Ember, maybe because of circle ?
 
   /*belongingApplication: belongsTo('application', {

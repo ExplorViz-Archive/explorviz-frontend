@@ -130,8 +130,7 @@ export default Component.extend({
         // Sort in ascending order by default
         this.set('isSortedAsc', true);
       }
-
-      // Set property by which shall be sorted
+      
       this.set('sortBy', property);
     },
 
@@ -144,10 +143,10 @@ export default Component.extend({
     let currentTraceStep = this.get('highlighter.currentTraceStep');
 
     if (currentTraceStep) {
-      let storeId = currentTraceStep.get('clazzCommunication.sourceClazz.id');
+      let storeId = currentTraceStep.get('clazzCommunication.id');
       // Avoid proxy object by requesting clazz from store
-      let originClazz = this.get('store').peekRecord('clazz', storeId);
-      this.get('renderingService').moveCameraTo(originClazz);
+      let clazzCommunication = this.get('store').peekRecord('clazzcommunication', storeId);
+      this.get('renderingService').moveCameraTo(clazzCommunication);
     }
   },
 

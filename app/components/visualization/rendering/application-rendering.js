@@ -80,47 +80,59 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     // Move camera to specified position
     this.onMoveCameraTo = function (emberModel) {
-      if (!emberModel){
+      if (!emberModel) {
         return;
       }
 
       let emberModelName = emberModel.get('constructor.modelName');
-      // Position of object in local coordinates
-      let position, zoom;
-
-      if (emberModelName === "clazz"){
-        position = new THREE.Vector3(emberModel.get('positionX'), emberModel.get('positionY'), emberModel.get('positionZ'));
-        zoom = 50;
-      } else {
-        // Position and zoom of model not (yet) defined
-        return;
-      }
+      // Position of target object in local coordinates
+      let position;
 
       // Calculate center point of application
       if (!this.get('centerAndZoomCalculator.centerPoint')) {
         this.get('centerAndZoomCalculator')
           .calculateAppCenterAndZZoom(this.get('latestApplication'));
       }
-
       let viewCenterPoint = this.get('centerAndZoomCalculator.centerPoint');
 
-      position.sub(viewCenterPoint);
-      position.multiplyScalar(0.5);
+      if (emberModelName === "clazz") {
+        position = new THREE.Vector3(emberModel.get('positionX'), emberModel.get('positionY'), emberModel.get('positionZ'));
+        applyCameraPosition(this.get('application3D'), viewCenterPoint, this.get('camera'), position);
+        // Apply zoom
+        this.get('camera').position.z += 25;
+      } else if (emberModelName === "clazzcommunication") {
+        let sourceClazz = emberModel.get('sourceClazz');
+        let targetClazz = emberModel.get('targetClazz');
 
-      let application = this.get('application3D');
-      let appQuaternion = new THREE.Quaternion();
+        position = new THREE.Vector3(
+          sourceClazz.get('positionX') + 0.5 * (targetClazz.get('positionX') - sourceClazz.get('positionX')),
+          sourceClazz.get('positionY') + 0.5 * (targetClazz.get('positionY') - sourceClazz.get('positionY')),
+          sourceClazz.get('positionZ') + 0.5 * (targetClazz.get('positionZ') - sourceClazz.get('positionZ')));
 
-      application.getWorldQuaternion(appQuaternion);
-      position.applyQuaternion(appQuaternion);
+        applyCameraPosition(this.get('application3D'), viewCenterPoint, this.get('camera'), position);
+        // Apply zoom
+        this.get('camera').position.z += 50;
+      } else {
+        // Given model not yet supported for moving camera
+        return;
+      }
 
-      let appPosition = new THREE.Vector3();
-      application.getWorldPosition(appPosition);
-      position.sub(appPosition);
+      function applyCameraPosition(application, centerPoint, camera, position) {
+        position.sub(centerPoint);
+        position.multiplyScalar(0.5);
 
-      // Move camera on to given position
-      this.get('camera').position.set(position.x, position.y, position.z);
-      // Zoom out to allow for better overview
-      this.get('camera').position.z += zoom;
+        let appQuaternion = new THREE.Quaternion();
+
+        application.getWorldQuaternion(appQuaternion);
+        position.applyQuaternion(appQuaternion);
+
+        let appPosition = new THREE.Vector3();
+        application.getWorldPosition(appPosition);
+        position.sub(appPosition);
+
+        // Move camera on to given position
+        camera.position.set(position.x, position.y, position.z);
+      }
     };
 
     this.get('camera').position.set(0, 0, 100);
