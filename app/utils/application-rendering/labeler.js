@@ -1,12 +1,15 @@
 import Object from '@ember/object';
 import THREE from "three";
 import { shortenString } from '../helpers/string-helpers';
+import { inject as service } from "@ember/service";
 
 export default Object.extend({
 
   labels: null,
   textMaterialWhite: null,
   textMaterialBlack: null,
+
+  session: service(),
 
   init() {
     this._super(...arguments);
@@ -23,10 +26,12 @@ export default Object.extend({
         color: 0x000000
       })
     );
+
+    this.set('currentUser', this.get('session.session.content.authenticated.user'));
   },
 
   createLabel(parentMesh, parentObject, font, transparent) {
-    const bboxNew = new THREE.Box3().setFromObject(parentMesh);
+    const bBoxParent = new THREE.Box3().setFromObject(parentMesh);
 
     const worldParent = new THREE.Vector3();
     worldParent.setFromMatrixPosition(parentMesh.matrixWorld);
@@ -44,13 +49,13 @@ export default Object.extend({
       if (transparent && !oldLabel[0].material.transparent) {
         const newMaterial = oldLabel[0].material.clone();
         newMaterial.transparent = true;
-        newMaterial.opacity = 0.4;
+        newMaterial.opacity = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
         oldLabel[0].material = newMaterial;
       }
       else if (!transparent && oldLabel[0].material.transparent) {
         const newMaterial = oldLabel[0].material.clone();
         newMaterial.transparent = false;
-        newMaterial.opacity = 1;
+        newMaterial.opacity = 1.0;
         oldLabel[0].material = newMaterial;
       }
 
@@ -58,113 +63,132 @@ export default Object.extend({
     }
     // New TextGeometry necessary
     else {
-      let fontSize = 2;
-      let labelString = parentMesh.userData.name;
+      let { name: labelString, foundation, type, opened } = parentMesh.userData;
 
-      if (parentMesh.userData.type === 'clazz' && labelString.length > 10) {
-        labelString = shortenString(labelString);
+      // Text properties for TextGeometry
+      const textSize = 2;
+      const textHeight = 0.1;
+      const curveSegments = 1;
+      
+      // Fixed text length for clazz labels
+      if (type === 'clazz' && labelString.length > 10) {
+        labelString = shortenString(labelString, 8);
       }
 
-      let textGeo = new THREE.TextGeometry(labelString, {
-        font: font,
-        size: fontSize,
-        height: 0.1,
-        curveSegments: 1
+      let textGeometry = new THREE.TextGeometry(labelString, {
+        font,
+        size: textSize,
+        height: textHeight,
+        curveSegments
       });
 
-      // Font color depending on parent object
+      // Font color(material) depending on parent object
       let material;
-      if (parentMesh.userData.foundation) {
+      if (foundation) {
         material = this.get('textMaterialBlack').clone();
-      }
-      else if (parentMesh.userData.type === 'package') {
-        material = this.get('textMaterialWhite').clone();
-      }
-      // Clazz
-      else {
+      } else {
         material = this.get('textMaterialWhite').clone();
       }
 
       // Apply transparency / opacity
       if (transparent) {
         material.transparent = true;
-        material.opacity = 0.4;
+        material.opacity = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
       }
 
-      let mesh = new THREE.Mesh(textGeo, material);
+      let textMesh = new THREE.Mesh(textGeometry, material);
+      let textWidth = computeBoxSize(textGeometry).x;
+      let parentBoxWidth = computeBoxSize(parentMesh.geometry).z;
 
-      // Calculate textWidth
-      textGeo.computeBoundingBox();
-      let bboxText = textGeo.boundingBox;
-      let textWidth = bboxText.max.x - bboxText.min.x;
+      // Properties for label positioning, scaling and length
+      const margin = 0.5;
+      const staticScaleFactor = 0.3;
+      const minTextHeight = 1;
+      const minTextLength = 3;
 
-      // Calculate boundingbox for (centered) positioning
-      parentMesh.geometry.computeBoundingBox();
-      let bboxParent = parentMesh.geometry.boundingBox;
-      let boxWidth = bboxParent.max.x;
-
-      // Static size for class text
-      if (parentMesh.userData.type === 'clazz') {
-        // Static scaling factor
-        let j = 0.3;
-        textGeo.scale(j, j, j);
+      // Static size for clazz text
+      if (type === 'clazz') {
+        textGeometry.scale(staticScaleFactor, staticScaleFactor, staticScaleFactor);
       }
-      // Shrink the text if necessary to fit into the box
-      else {
-        // Upper scaling factor
-        let i = 1.0;
-        // Until text fits into the parent bounding box
-        while ((textWidth > boxWidth) && (i > 0.1)) {
-          textGeo.scale(i, i, i);
-          i -= 0.1;
-          // Update the BoundingBoxes
-          textGeo.computeBoundingBox();
-          bboxText = textGeo.boundingBox;
-          textWidth = bboxText.max.x - bboxText.min.x;
-          parentMesh.geometry.computeBoundingBox();
-          bboxParent = parentMesh.geometry.boundingBox;
-          boxWidth = bboxParent.max.x;
+      // Handle label which is too big for parent component
+      else if (textWidth > (parentBoxWidth - margin)) {
+        // Compute factor to fit text to parent (including small margin)
+        let scaleFactor = (parentBoxWidth - margin) / textWidth;
+        textGeometry.scale(scaleFactor, scaleFactor, scaleFactor);
+
+        // Update size data
+        textWidth = computeBoxSize(textGeometry).x;
+        let textHeight = computeBoxSize(textGeometry).y;
+
+        // Handle label which is too small due to scaling
+        if (textHeight < minTextHeight) {
+          // Shorten label to reach minimal text height, 
+          // Accounting for later added "..." to label by substracting '3'
+          let labelLength = Math.max(Math.round(labelString.length * (textHeight / minTextHeight) - 3), minTextLength);
+          labelString = shortenString(labelString, labelLength);
+
+          // Update geometry and mesh based upon new label text
+          textGeometry = new THREE.TextGeometry(labelString, {
+            font,
+            size: textSize,
+            height: textHeight,
+            curveSegments
+          });
+          textMesh.geometry = textGeometry;
+
+          // Scale shortened label according to parent component size
+          textWidth = computeBoxSize(textGeometry).x;
+          scaleFactor = (parentBoxWidth - margin) / textWidth;
+          textGeometry.scale(scaleFactor, scaleFactor, scaleFactor);
         }
       }
 
-      // Calculate center for postioning
-      textGeo.computeBoundingSphere();
-      let centerX = textGeo.boundingSphere.center.x;
+      // Compute center coordinates of parent box
+      const centerParentBox = new THREE.Vector3();
+      textGeometry.center();
+      bBoxParent.getCenter(centerParentBox);
 
       // Set position and rotation
-      if (parentMesh.userData.opened) {
-        mesh.position.x = bboxNew.min.x + 2;
-        mesh.position.y = bboxNew.max.y;
-        mesh.position.z = (worldParent.z - Math.abs(centerX) / 2) - 2;
-        mesh.rotation.x = -(Math.PI / 2);
-        mesh.rotation.z = -(Math.PI / 2);
+      if (opened) {
+        textMesh.position.x = bBoxParent.min.x + 2;
+        textMesh.position.y = bBoxParent.max.y;
+        // Center mesh
+        textMesh.position.z = centerParentBox.z;
+        textMesh.rotation.x = -(Math.PI / 2);
+        textMesh.rotation.z = -(Math.PI / 2);
       } else {
-        if (parentMesh.userData.type === 'clazz') {
-          mesh.position.x = worldParent.x - Math.abs(centerX) / 2 - 0.25;
-          mesh.position.y = bboxNew.max.y;
-          mesh.position.z = (worldParent.z - Math
-            .abs(centerX) / 2) - 0.25;
-          mesh.rotation.x = -(Math.PI / 2);
-          mesh.rotation.z = -(Math.PI / 3);
+        textMesh.position.x = centerParentBox.x;
+        textMesh.position.y = bBoxParent.max.y;
+        textMesh.position.z = centerParentBox.z;
+        textMesh.rotation.x = -(Math.PI / 2);
+
+        if (type === 'clazz') {
+          textMesh.rotation.z = -(Math.PI / 3);
         } else {
-          mesh.position.x = worldParent.x - Math.abs(centerX) / 2;
-          mesh.position.y = bboxNew.max.y;
-          mesh.position.z = worldParent.z - Math.abs(centerX) / 2;
-          mesh.rotation.x = -(Math.PI / 2);
-          mesh.rotation.z = -(Math.PI / 4);
+          textMesh.rotation.z = -(Math.PI / 4);
         }
       }
 
       // Internal user-defined type
-      mesh.userData = {
+      textMesh.userData = {
         type: 'label',
-        name: parentMesh.userData.name,
+        name: labelString,
         parentPos: worldParent
       };
 
       // Add labels
-      this.get('labels').push(mesh);
-      parentObject.add(mesh);
+      this.get('labels').push(textMesh);
+      parentObject.add(textMesh);
+    }
+
+    /**
+     * Updates bounding box of geometry and returns respective dimensions
+     */
+    function computeBoxSize(geometry) {
+      geometry.computeBoundingBox();
+      let boxDimensions = new THREE.Vector3();
+      geometry.boundingBox.getSize(boxDimensions);
+      return { x: boxDimensions.x, y: boxDimensions.y, z: boxDimensions.z };
     }
   }
 

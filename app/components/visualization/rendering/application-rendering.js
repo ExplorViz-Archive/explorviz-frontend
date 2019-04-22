@@ -141,7 +141,8 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.set('application3D', new THREE.Object3D());
 
     if (!this.get('labeler')) {
-      this.set('labeler', Labeler.create());
+      // Owner necessary to inject service into util
+      this.set('labeler', Labeler.create(getOwner(this).ownerInjection()));
     }
 
     if (!this.get('foundationBuilder')) {
