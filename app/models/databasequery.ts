@@ -12,7 +12,7 @@ const { attr } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default BaseEntity.extend({
+export default class DatabaseQuery extends BaseEntity.extend({
 
   timestamp: attr('number'),
   statementType: attr('string'),
@@ -21,4 +21,10 @@ export default BaseEntity.extend({
   responseTime: attr('number'),
   isSelected: attr('boolean', {defaultValue: false}),
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+	export default interface ModelRegistry {
+	  'databasequery': DatabaseQuery;
+	}
+}
