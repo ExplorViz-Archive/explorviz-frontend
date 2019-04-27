@@ -24,7 +24,8 @@ export default Object.extend(Evented, {
     let requiredHeight = Math.abs(rect.get(MAX_Y) - rect.get(MIN_Y));
     requiredHeight += requiredHeight * EXTRA_SPACE_IN_PERCENT;
 
-    const viewPortSize = renderer.getSize();
+    let viewPortSize = new THREE.Vector2();
+    renderer.getSize(viewPortSize);
 
     let viewportRatio = viewPortSize.width / viewPortSize.height;
 
