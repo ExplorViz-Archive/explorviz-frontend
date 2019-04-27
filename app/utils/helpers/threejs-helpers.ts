@@ -11,10 +11,10 @@ import THREE from "three";
 * @module explorviz
 * @submodule util
 */
-export function calculateColorBrightness(threeColor, brightnessDegree) {
-    const r = Math.floor(threeColor.r * brightnessDegree * 255);
-    const g = Math.floor(threeColor.g * brightnessDegree * 255);
-    const b = Math.floor(threeColor.b * brightnessDegree * 255);
+export function calculateColorBrightness(threeColor: THREE.Color, brightnessDegree: number) : THREE.Color {
+	const r = Math.floor(threeColor.r * brightnessDegree * 255);
+	const g = Math.floor(threeColor.g * brightnessDegree * 255);
+	const b = Math.floor(threeColor.b * brightnessDegree * 255);
 
-    return new THREE.Color("rgb("+r+", "+g+", "+b+")");
+	return new THREE.Color("rgb(" + r + ", " + g + ", " + b + ")");
 }
