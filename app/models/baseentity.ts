@@ -13,7 +13,7 @@ const {Model, attr} = DS;
 * @module explorviz
 * @submodule model.util
 */
-export default Model.extend({
+export default class BaseEntitity extends Model.extend({
   /**
   * This attribute can be used by extensions to insert custom properties to any
   * meta-model object.
@@ -24,4 +24,10 @@ export default Model.extend({
   */
   extensionAttributes: attr(),
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+	export default interface ModelRegistry {
+	  'baseentity': BaseEntitity;
+	}
+}

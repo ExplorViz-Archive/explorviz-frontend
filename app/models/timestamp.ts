@@ -12,9 +12,15 @@ const { attr } = DS;
 * @module explorviz
 * @submodule model
 */
-export default BaseEntity.extend({
+export default class Timestamp extends BaseEntity.extend({
 
   timestamp: attr('number'),
   totalRequests: attr('number')
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+	export default interface ModelRegistry {
+	  'timestamp': Timestamp;
+	}
+}

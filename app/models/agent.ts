@@ -16,11 +16,17 @@ const { attr, hasMany } = DS;
 * @module explorviz.extension.discovery
 * @submodule model
 */
-export default BaseModel.extend({
+export default class Agent extends BaseModel.extend({
 
   ip: attr("string"),
   port: attr("string"),
 
   procezzes: hasMany("procezz")
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+	export default interface ModelRegistry {
+	  'agent': Agent;
+	}
+}
