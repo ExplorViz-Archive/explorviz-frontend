@@ -14,7 +14,7 @@ const { attr, hasMany } = DS;
  * @submodule model
  *
  */
-export default Model.extend({
+export default class User extends Model.extend({
 
 	username: attr('string'),
 	password: attr('string'),
@@ -25,7 +25,7 @@ export default Model.extend({
 	// simple object, no Ember record
 	settings: attr(),
 
-	hasRole(rolename) {
+	hasRole(this: User, rolename:string): boolean {
 		const roles = this.get('roles').toArray();
 		for (const role of roles) {
 			if(rolename === role.get('descriptor'))
@@ -34,8 +34,14 @@ export default Model.extend({
 		return false;
   },
   
-  isAdmin: computed('roles', function() {
+  isAdmin: computed('roles', function(this: User): boolean {
     return this.hasRole('admin');
   })
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+	export default interface ModelRegistry {
+	  'user': User;
+	}
+}
