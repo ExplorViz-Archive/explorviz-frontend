@@ -1,7 +1,6 @@
 import { helper } from '@ember/component/helper';
 
-export function stringShortener(params) {
-  const [value, desiredLength] = params;
+export function stringShortener([value, desiredLength]:[string, number]) {
   if (desiredLength <= 0){
     return '';
   } else if (String(value).length <= desiredLength) {

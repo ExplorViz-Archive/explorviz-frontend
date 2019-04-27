@@ -1,7 +1,6 @@
 import { helper } from '@ember/component/helper';
 
-export function firstWord(params) {
-  const [string] = params;
+export function firstWord([string]:[string]) {
 
   let firstWord;
   if (string.includes(' ')) {

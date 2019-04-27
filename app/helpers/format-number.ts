@@ -1,7 +1,6 @@
 import { helper } from '@ember/component/helper';
 
-export function formatNumber(params) {
-  const [number, unit] = params;
+export function formatNumber([number, unit]:[number, string]) {
   if (unit === 's'){
     return (number / 1000).toString();
   } else {

@@ -2,8 +2,8 @@ import DS from 'ember-data';
 const { attr } = DS;
 
 
-export default DS.Model.extend({
+export default class Role extends DS.Model.extend({
 
   descriptor: attr('string')
 
-});
+}) {}

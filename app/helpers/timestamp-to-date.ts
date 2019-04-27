@@ -1,7 +1,6 @@
 import { helper } from '@ember/component/helper';
 
-export function timestampToDate(params) {
-  const [timestamp, format] = params;
+export function timestampToDate([timestamp, format]:[number, string]) {
   let date = new Date(timestamp);
   let hours = date.getHours();
   let minutes = "0" + date.getMinutes();

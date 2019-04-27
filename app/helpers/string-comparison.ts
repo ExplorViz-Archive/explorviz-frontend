@@ -3,8 +3,8 @@
 // TODO use this as generic comparison helper
 // not only for string equality
 
-export function stringComparison(params) {
-  return params[0] === params[1];
+export function stringComparison([string1, string2]:[string, string]) {
+  return string1 === string2;
 }
 
 export default helper(stringComparison);
