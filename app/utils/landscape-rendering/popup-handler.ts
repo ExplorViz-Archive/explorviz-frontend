@@ -5,16 +5,16 @@ import { inject as service } from '@ember/service';
 
 export default Object.extend({
 
-  additionalData: service("additional-data"),
+  additionalData: service(),
   enableTooltips: true,
 
-  showTooltip(mouse, emberModel) {
+  showTooltip(mouse : {x : number, y : number}, emberModel : any) {
 
     if (!this.get('enableTooltips')) {
       return;
     }
 
-    let popupData;
+    let popupData : any;
     const modelType = emberModel.constructor.modelName;
 
     switch (modelType) {
@@ -38,23 +38,23 @@ export default Object.extend({
         break;
     }
 
-    // add mouse position for calculating div position
+    // Add mouse position for calculating div position
     if (popupData){
       popupData.mouseX = mouse.x;
       popupData.mouseY = mouse.y;
     }
 
-    this.get("additionalData").setPopupContent(popupData);
-
+    const additionalData : any = this.get("additionalData");
+    additionalData.setPopupContent(popupData);
   },
 
 
   hideTooltip() {
-    this.get("additionalData").removePopup();
+    const additionalData : any = this.get("additionalData");
+    additionalData.removePopup();
   },
 
-  buildSystemData(system) {
-
+  buildSystemData(system : any) {
     let systemName = encodeStringForPopUp(system.get('name'));
 
     let nodeCount = 0;
@@ -63,12 +63,12 @@ export default Object.extend({
     // Calculate node and application count
     const nodeGroups = system.get('nodegroups');
 
-    nodeGroups.forEach((nodeGroup) => {
+    nodeGroups.forEach((nodeGroup : any) => {
 
       nodeCount += nodeGroup.get('nodes').get('length');
       const nodes = nodeGroup.get('nodes');
 
-      nodes.forEach((node) => {
+      nodes.forEach((node : any) => {
         applicationCount += node.get('applications').get('length');
       });
     });
@@ -84,7 +84,7 @@ export default Object.extend({
     return popupData;
   },
 
-  buildNodeGroupData(nodeGroup){
+  buildNodeGroupData(nodeGroup : any){
 
     let avgNodeCPUUtil = 0.0;
     let applicationCount = 0;
@@ -92,7 +92,7 @@ export default Object.extend({
     const nodes = nodeGroup.get('nodes');
     const nodeCount = nodes.get('length');
 
-    nodes.forEach((node) => {
+    nodes.forEach((node : any) => {
       avgNodeCPUUtil += node.get('cpuUtilization');
       applicationCount += node.get('applications').get('length');
     });
@@ -111,7 +111,7 @@ export default Object.extend({
     return popupData;
   },
 
-  buildNodeData(node){
+  buildNodeData(node : any){
     const formatFactor = (1024 * 1024 * 1024);
     let cpuUtilization = round(node.get('cpuUtilization') * 100, 0);
     let freeRAM =  round(node.get('freeRAM') / formatFactor, 2).toFixed(2);
@@ -130,8 +130,7 @@ export default Object.extend({
     return popupData;
   },
 
-  buildApplicationData(application){
-
+  buildApplicationData(application : any){
     const lastUsage = new Date(application.get('lastUsage')).toLocaleString();
 
     let popupData = {
@@ -145,8 +144,7 @@ export default Object.extend({
     return popupData;
   },
 
-  buildCommunicationData(communication){
-
+  buildCommunicationData(communication : any){
     const sourceApplicationName = communication.get('sourceApplication').get('name');
     const targetApplicationName = communication.get('targetApplication').get('name');
 
@@ -164,7 +162,7 @@ export default Object.extend({
 
     return popupData;
 
-    function round(value, precision) {
+    function round(value : number, precision : number) {
       let multiplier = Math.pow(10, precision || 0);
       return Math.round(value * multiplier) / multiplier;
     } 
