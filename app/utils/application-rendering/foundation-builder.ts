@@ -12,10 +12,9 @@ export default Object.extend({
 
   foundationObj: null,
 
-  createFoundation(emberApplication, store) {
-
-    // use big random ID to avoid conflicts with IDs of regular components
-    const idRandom = parseInt(Math.random() * 10000 + 10000);
+  createFoundation(emberApplication : any, store : any) {
+    // Use big random ID to avoid conflicts with IDs of regular components
+    const idRandom = Math.round(Math.random() * 10000 + 10000);
     const foundation = store.createRecord('component', {
       id: idRandom,
       synthetic: false,
@@ -34,7 +33,7 @@ export default Object.extend({
       depth: 0
     });
 
-    emberApplication.get('components').forEach((component) => {
+    emberApplication.get('components').forEach((component : any) => {
       component.set('parentComponent', foundation);
     });
 
@@ -45,10 +44,8 @@ export default Object.extend({
     return foundation;
   },
 
-  removeFoundation(store) {
-
-    const foundation = this.get('foundationObj');
-
+  removeFoundation(store : any) : boolean{
+    const foundation : any = this.get('foundationObj');
     if(!foundation) {
       return false;
     }
@@ -56,7 +53,7 @@ export default Object.extend({
     const emberApplication = foundation.get('belongingApplication');
 
     emberApplication.set('components', foundation.get('children'));
-    emberApplication.get('components').forEach((component) => {
+    emberApplication.get('components').forEach((component : any) => {
       component.set('parentComponent', null);
     });
 

@@ -8,6 +8,7 @@ export default Object.extend({
   labels: null,
   textMaterialWhite: null,
   textMaterialBlack: null,
+  currentUser: null,
 
   session: service(),
 
@@ -27,16 +28,21 @@ export default Object.extend({
       })
     );
 
-    this.set('currentUser', this.get('session.session.content.authenticated.user'));
+    const session: any = this.get('session');
+    const user: any = session.session.content.authenticated.user;
+    this.set('currentUser', user);
   },
 
-  createLabel(parentMesh, parentObject, font, transparent) {
+  createLabel(parentMesh: THREE.Mesh, parentObject: THREE.Object3D, font: THREE.Font, transparent: boolean) {
+    const currentUser: any = this.get('currentUser');
     const bBoxParent = new THREE.Box3().setFromObject(parentMesh);
 
     const worldParent = new THREE.Vector3();
     worldParent.setFromMatrixPosition(parentMesh.matrixWorld);
 
-    const oldLabel = this.get('labels').filter(function (label) {
+    const labels: any = this.get('labels');
+
+    const oldLabel = labels.filter(function (label: THREE.Object3D) {
       const data = label.userData;
 
       return data.name === parentMesh.userData.name &&
@@ -49,7 +55,7 @@ export default Object.extend({
       if (transparent && !oldLabel[0].material.transparent) {
         const newMaterial = oldLabel[0].material.clone();
         newMaterial.transparent = true;
-        newMaterial.opacity = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
+        newMaterial.opacity = currentUser.settings.numericAttributes.appVizTransparencyIntensity;
         oldLabel[0].material = newMaterial;
       }
       else if (!transparent && oldLabel[0].material.transparent) {
@@ -69,7 +75,7 @@ export default Object.extend({
       const textSize = 2;
       const textHeight = 0.1;
       const curveSegments = 1;
-      
+
       // Fixed text length for clazz labels
       if (type === 'clazz' && labelString.length > 10) {
         labelString = shortenString(labelString, 8);
@@ -83,17 +89,22 @@ export default Object.extend({
       });
 
       // Font color(material) depending on parent object
+      const blackMaterial: any = this.get('textMaterialBlack');
+      const whiteMaterial: any = this.get('textMaterialWhite');
+      if (!blackMaterial || !whiteMaterial) {
+        return;
+      }
       let material;
       if (foundation) {
-        material = this.get('textMaterialBlack').clone();
+        material = blackMaterial.clone();
       } else {
-        material = this.get('textMaterialWhite').clone();
+        material = whiteMaterial.clone();
       }
 
       // Apply transparency / opacity
       if (transparent) {
         material.transparent = true;
-        material.opacity = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
+        material.opacity = currentUser.settings.numericAttributes.appVizTransparencyIntensity;
       }
 
       let textMesh = new THREE.Mesh(textGeometry, material);
@@ -177,14 +188,17 @@ export default Object.extend({
       };
 
       // Add labels
-      this.get('labels').push(textMesh);
-      parentObject.add(textMesh);
+      let labels: any = this.get('labels');
+      if (labels) {
+        labels.push(textMesh);
+        parentObject.add(textMesh);
+      }
     }
 
     /**
      * Updates bounding box of geometry and returns respective dimensions
      */
-    function computeBoxSize(geometry) {
+    function computeBoxSize(geometry: THREE.Geometry | THREE.BufferGeometry) {
       geometry.computeBoundingBox();
       let boxDimensions = new THREE.Vector3();
       geometry.boundingBox.getSize(boxDimensions);
