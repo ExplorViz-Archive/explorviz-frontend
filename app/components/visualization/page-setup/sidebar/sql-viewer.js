@@ -13,11 +13,20 @@ export default Component.extend({
   isSortedAsc: true,
   sortBy: 'timestamp',
   filterTerm: '',
+  selectedQuery: null,
 
   // Compute current traces when highlighting changes
-  databaseQueries: computed('landscapeRepo.latestApplication.databaseQueries', 'isSortedAsc', 'filterTerm', function () {
-    return this.filterAndSortQueries(this.get('landscapeRepo.latestApplication.databaseQueries'));
-  }),
+  databaseQueries: computed('landscapeRepo.latestApplication.databaseQueries', 'isSortedAsc',
+    'filterTerm', 'selectedQuery', function () {
+
+      let queries;
+      if (this.get('selectedQuery')) {
+        queries = [this.get('selectedQuery')];
+      } else {
+        queries = this.filterAndSortQueries(this.get('landscapeRepo.latestApplication.databaseQueries'));
+      }
+      return queries;
+    }),
 
   filterAndSortQueries(queries) {
 
@@ -48,15 +57,18 @@ export default Component.extend({
       // Allow deselection of query
       if (query.get('isSelected')) {
         query.set('isSelected', false);
-        return;
+        this.set('selectedQuery', null);
       }
-      // Deselect potentially selected query
-      let queries = this.get('store').peekAll('databasequery');
-      queries.forEach((query) => {
-        query.set('isSelected', false);
-      });
-      // Mark new query as selected
-      query.set('isSelected', true);
+      else {
+        // Deselect potentially selected query
+        let queries = this.get('store').peekAll('databasequery');
+        queries.forEach((query) => {
+          query.set('isSelected', false);
+        });
+        // Mark new query as selected
+        query.set('isSelected', true);
+        this.set('selectedQuery', query);
+      }
     },
 
     filter() {
