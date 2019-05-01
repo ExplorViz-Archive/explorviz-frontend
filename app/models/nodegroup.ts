@@ -13,7 +13,7 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default DrawNodeEntity.extend({
+export default class NodeGroup extends DrawNodeEntity.extend({
 
   name: attr('string'),
 
@@ -36,14 +36,16 @@ export default DrawNodeEntity.extend({
   }),
 
 
-  setOpened: function(openedParam) {
+  setOpened: function(openedParam: boolean) {
     if (openedParam) {
       this.setAllChildrenVisibility(true);
     } else {
       this.setAllChildrenVisibility(false);
       if (this.get('nodes').get('length') > 0) {
         const firstNode = this.get('nodes').objectAt(0);
-        firstNode.set('visible', true);
+        if(firstNode !== undefined) {
+          firstNode.set('visible', true);
+        }
       }
     }
 
@@ -51,11 +53,10 @@ export default DrawNodeEntity.extend({
   },
 
 
-  setAllChildrenVisibility: function(visiblity) {
+  setAllChildrenVisibility: function(visiblity: boolean) {
     this.get('nodes').forEach((node) => {
-          node.set('visible', visiblity);
+      node.set('visible', visiblity);
     });
   }
 
-
-});
+}) {}

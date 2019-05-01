@@ -15,7 +15,7 @@ const { attr, belongsTo } = DS;
 * @module explorviz.extension.discovery
 * @submodule model
 */
-export default BaseModel.extend({
+export default class Procezz extends BaseModel.extend({
 
   pid: attr("number"),
 
@@ -43,6 +43,10 @@ export default BaseModel.extend({
   aopContent: attr("string"),
   kiekerConfigContent: attr("string")
 
-  
+}) {}
 
-});
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'procezz': Procezz;
+  }
+}

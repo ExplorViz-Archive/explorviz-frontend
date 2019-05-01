@@ -1,5 +1,6 @@
 import DS from 'ember-data';
 import Draw3DNodeEntity from './draw3dnodeentity';
+import Component from './component';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -12,7 +13,7 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default Draw3DNodeEntity.extend({
+export default class Clazz extends Draw3DNodeEntity.extend({
 
   name: attr('string'),
   fullQualifiedName: attr('string'),
@@ -33,7 +34,7 @@ export default Draw3DNodeEntity.extend({
   },
 
   openParents() {
-    let parentModel = this.belongsTo('parent').value();
+    let parentModel = this.belongsTo('parent').value() as Component;
 
     if(parentModel !== null) {
       parentModel.set('opened', true);
@@ -42,7 +43,7 @@ export default Draw3DNodeEntity.extend({
   },
 
   isVisible() {
-    return this.get('parent.opened');
+    return this.get('parent').get('opened');
   }
 
-});
+}) {}

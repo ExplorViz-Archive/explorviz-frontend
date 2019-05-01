@@ -1,6 +1,7 @@
 import Draw3DNodeEntity from './draw3dnodeentity';
 import DS from 'ember-data';
 import { computed } from '@ember/object';
+import Clazz from './clazz';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -13,7 +14,7 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default Draw3DNodeEntity.extend({
+export default class Component extends Draw3DNodeEntity.extend({
 
   name: attr('string'),
   fullQualifiedName: attr('string'),
@@ -39,9 +40,9 @@ export default Draw3DNodeEntity.extend({
     inverse: 'components'
   }),*/
 
-  setOpenedStatus(status) {
+  setOpenedStatus(status: boolean) {
 
-    this.get('children').forEach((child) => {
+    this.get('children').forEach((child:Component) => {
       child.set('highlighted', false);
       child.setOpenedStatus(false);
     });
@@ -62,7 +63,7 @@ export default Draw3DNodeEntity.extend({
     });
   },
 
-  contains(possibleElem) {
+  contains(possibleElem: Clazz|Component) {
 
     let found = false;
 
@@ -90,7 +91,7 @@ export default Draw3DNodeEntity.extend({
   },
 
   openParents: function() {
-    let parentModel = this.belongsTo('parentComponent').value();
+    let parentModel = this.belongsTo('parentComponent').value() as Component;
 
     if(parentModel !== null) {
       parentModel.set('opened', true);
@@ -99,7 +100,7 @@ export default Draw3DNodeEntity.extend({
   },
 
   getAllComponents() {
-    let components = [];
+    let components:Component[] = [];
 
     this.get('children').forEach((child) => {      
       components.push(child);
@@ -110,7 +111,7 @@ export default Draw3DNodeEntity.extend({
   },
 
   getAllClazzes() {
-    let clazzes = [];
+    let clazzes:Clazz[] = [];
 
     this.get('clazzes').forEach((clazz) => {
       clazzes.push(clazz);
@@ -124,7 +125,7 @@ export default Draw3DNodeEntity.extend({
   },
 
   // adds all clazzes of the component or underlying components to a Set
-  getContainedClazzes(containedClazzes){
+  getContainedClazzes(containedClazzes: Set<Clazz>){
     const clazzes = this.get('clazzes');
 
     clazzes.forEach((clazz) => {
@@ -138,8 +139,8 @@ export default Draw3DNodeEntity.extend({
     });
   },
 
-  filterClazzes(attributeString, predicateValue) {
-    const filteredClazzes = [];
+  filterClazzes(attributeString: string, predicateValue: any) {
+    const filteredClazzes:Clazz[] = [];
 
     const allClazzes = new Set();
     this.getContainedClazzes(allClazzes);
@@ -153,8 +154,8 @@ export default Draw3DNodeEntity.extend({
     return filteredClazzes;
   },
 
-  filterChildComponents(attributeString, predicateValue) {
-    const filteredComponents = [];
+  filterChildComponents(attributeString: string, predicateValue: any) {
+    const filteredComponents:Component[] = [];
 
     this.get('children').forEach((component) => {
       if(component.get(attributeString) === predicateValue) {
@@ -185,7 +186,7 @@ export default Draw3DNodeEntity.extend({
     const components = this.get('children');
     const clazzes = this.get('clazzes');
 
-    if(components.length + clazzes.length > 1) {
+    if(components.get('length') + clazzes.get('length') > 1) {
       // there are two entities on this level
       // therefore, here is nothing to do
       return;
@@ -197,7 +198,7 @@ export default Draw3DNodeEntity.extend({
   },
 
   isVisible() {
-    return this.get('parentComponent.opened');
+    return this.get('parentComponent').get('opened');
   }
 
-});
+}) {}

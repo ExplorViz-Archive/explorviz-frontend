@@ -13,7 +13,7 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default DrawNodeEntity.extend({
+export default class Node extends DrawNodeEntity.extend({
 
   name: attr('string'),
   ipAddress: attr('string'),
@@ -49,4 +49,10 @@ export default DrawNodeEntity.extend({
     }
   }
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'node': Node;
+  }
+}

@@ -14,7 +14,7 @@ const { attr } = DS;
 * @module explorviz
 * @submodule model.util
 */
-export default BaseEntity.extend({
+export default class DrawEdgeEntity extends BaseEntity.extend({
 
   /**
   * Indicates the line thickness (a.k.a. width) for a edge.
@@ -66,6 +66,12 @@ export default BaseEntity.extend({
   unhighlight() {
     this.set('highlighted', false);
     this.set('state', 'TRANSPARENT');
-  },
+  }
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'drawedgeentity': DrawEdgeEntity;
+  }
+}

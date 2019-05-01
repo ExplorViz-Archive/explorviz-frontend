@@ -13,7 +13,7 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default DrawNodeEntity.extend({
+export default class System extends DrawNodeEntity.extend({
 
   name: attr('string'),
 
@@ -32,15 +32,15 @@ export default DrawNodeEntity.extend({
     return this.get('opened');
   }),
 
-  setOpened: function(openedParam) {
+  setOpened: function(openedParam: boolean) {
     if (openedParam) {
       this.get('nodegroups').forEach((nodegroup) => {
-          nodegroup.set('visible', true);
-          if (nodegroup.get('nodes').get('length') === 1) {
-            nodegroup.setOpened(true);
-          } else {
-            nodegroup.setOpened(false);
-          }
+        nodegroup.set('visible', true);
+        if (nodegroup.get('nodes').get('length') === 1) {
+          nodegroup.setOpened(true);
+        } else {
+          nodegroup.setOpened(false);
+        }
       });
     }
     else {
@@ -51,6 +51,12 @@ export default DrawNodeEntity.extend({
     }
 
     this.set('opened', openedParam);
-
   }
-});
+
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'system': System;
+  }
+}

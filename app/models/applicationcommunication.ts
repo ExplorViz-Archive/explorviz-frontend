@@ -12,7 +12,7 @@ const { attr, belongsTo } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default DrawEdgeEntity.extend({
+export default class ApplicationCommunication extends DrawEdgeEntity.extend({
 
   requests: attr('number'),
   technology: attr('string'),
@@ -32,6 +32,12 @@ export default DrawEdgeEntity.extend({
 
   targetClazz: belongsTo('clazz', {
     inverse: null
-  }),
+  })
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'applicationcommunication': ApplicationCommunication;
+  }
+}

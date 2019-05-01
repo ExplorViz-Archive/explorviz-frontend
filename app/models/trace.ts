@@ -13,7 +13,7 @@ const { attr, hasMany } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default BaseEntity.extend({
+export default class Trace extends BaseEntity.extend({
 
   traceId: attr('string'),
   totalRequests: attr('number'),
@@ -65,11 +65,13 @@ export default BaseEntity.extend({
   openParents() {
     let traceSteps = this.hasMany('traceSteps').value();
 
-    traceSteps.forEach((traceStep) => {
-      if (traceStep !== null) {
-        traceStep.openParents();
-      }
-    });
-  },
+    if(traceSteps !== null) {
+      traceSteps.forEach((traceStep) => {
+        if (traceStep !== null) {
+          traceStep.openParents();
+        }
+      });
+    }
+  }
 
-});
+}) {}

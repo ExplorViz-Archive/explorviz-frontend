@@ -1,5 +1,7 @@
 import DS from 'ember-data';
 import DrawNodeEntity from './drawnodeentity';
+import Component from './component';
+import Clazz from './clazz';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -12,7 +14,7 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default DrawNodeEntity.extend({
+export default class Application extends DrawNodeEntity.extend({
 
   name: attr('string'),
   lastUsage: attr('number'),
@@ -60,7 +62,7 @@ export default DrawNodeEntity.extend({
     });
   },
 
-  contains(emberEntity) {
+  contains(emberEntity: any) {
     let found = false;
 
     this.get('components').forEach((component) => {
@@ -71,13 +73,13 @@ export default DrawNodeEntity.extend({
   },
 
   getAllComponents() {
-    let components = [];
+    let components:Component[] = [];
 
     this.get('components').forEach((component) => {      
       components.push(component);
 
       const children = component.get('children');
-      children.forEach((child) => {
+      children.forEach((child: Component) => {
         components.push(child);
         components = components.concat(child.getAllComponents());
       });
@@ -87,7 +89,7 @@ export default DrawNodeEntity.extend({
   },
 
   getAllClazzes() {
-    let clazzes = [];
+    let clazzes:Clazz[] = [];
 
     this.get('components').forEach((component) => {
       clazzes = clazzes.concat(component.getAllClazzes());
@@ -96,8 +98,8 @@ export default DrawNodeEntity.extend({
     return clazzes;
   },
 
-  filterComponents(attributeString, predicateValue) {
-    const filteredComponents = [];
+  filterComponents(attributeString: string, predicateValue: any) {
+    const filteredComponents:Component[] = [];
 
     this.get('components').forEach((component) => {
       if(component.get(attributeString) === predicateValue) {
@@ -109,8 +111,8 @@ export default DrawNodeEntity.extend({
     return filteredComponents;
   },
 
-  filterClazzes(attributeString, predicateValue) {
-    const filteredClazzes = [];
+  filterClazzes(attributeString: string, predicateValue: any) {
+    const filteredClazzes:Clazz[] = [];
 
     this.get('components').forEach((component) => {
       filteredClazzes.push(component.filterClazzes(attributeString, predicateValue));
@@ -119,7 +121,7 @@ export default DrawNodeEntity.extend({
     return filteredClazzes;
   },
 
-  applyDefaultOpenLayout(userAlreadyActed) {
+  applyDefaultOpenLayout(userAlreadyActed: boolean) {
     // opens all components until at least two entities are on the same level
 
     if(userAlreadyActed) {
@@ -139,4 +141,4 @@ export default DrawNodeEntity.extend({
     }    
   }
 
-});
+}) {}

@@ -1,5 +1,6 @@
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
+import ClazzCommunication from './clazzcommunication';
 
 const { attr, belongsTo } = DS;
 
@@ -12,7 +13,7 @@ const { attr, belongsTo } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default BaseEntity.extend({
+export default class TraceStep extends BaseEntity.extend({
 
   tracePosition: attr('number'),
   requests: attr('number'),
@@ -29,7 +30,7 @@ export default BaseEntity.extend({
   }),
 
   openParents() {
-    let clazzCommunication = this.belongsTo('clazzCommunication').value();
+    let clazzCommunication = this.belongsTo('clazzCommunication').value() as ClazzCommunication;
 
     if (clazzCommunication !== null) {
       clazzCommunication.openParents();
@@ -42,6 +43,12 @@ export default BaseEntity.extend({
 
   unhighlight() {
     this.set('highlighted', false);
-  },
+  }
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'tracestep': TraceStep;
+  }
+}

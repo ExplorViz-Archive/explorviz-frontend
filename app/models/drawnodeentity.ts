@@ -12,7 +12,7 @@ const { attr } = DS;
 * @module explorviz
 * @submodule model.util
 */
-export default BaseEntity.extend({
+export default class DrawNodeEntity extends BaseEntity.extend({
 
   plusColor: attr(),
   foregroundColor: attr(),
@@ -39,4 +39,10 @@ export default BaseEntity.extend({
   }
 
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'drawnodeentity': DrawNodeEntity;
+  }
+}

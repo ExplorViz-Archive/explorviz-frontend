@@ -12,7 +12,7 @@ const { belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default BaseEntity.extend({
+export default class Landscape extends BaseEntity.extend({
 
   timestamp: belongsTo('timestamp'),
   
@@ -27,6 +27,6 @@ export default BaseEntity.extend({
   // list of applicationCommunication for rendering purposes
   totalApplicationCommunications: hasMany('applicationcommunication', {
     inverse: null
-  }),
+  })
 
-});
+}) {}

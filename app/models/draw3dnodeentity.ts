@@ -15,7 +15,7 @@ const { attr } = DS;
 * @module explorviz
 * @submodule model.util
 */
-export default BaseEntity.extend({
+export default class Draw3DNodeEntity extends BaseEntity.extend({
 
   width: attr('number', { defaultValue: 0}),
   height: attr('number', { defaultValue: 0}),
@@ -43,4 +43,10 @@ export default BaseEntity.extend({
     this.set('highlighted', true);
   }
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'draw3dnodeentity': Draw3DNodeEntity;
+  }
+}

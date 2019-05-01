@@ -1,6 +1,9 @@
 import DS from 'ember-data';
 import DrawEdgeEntity from './drawedgeentity';
 import { computed } from '@ember/object';
+import AggregatedClazzCommunication from './aggregatedclazzcommunication';
+import ClazzCommunication from './clazzcommunication';
+import TraceStep from './tracestep';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -14,7 +17,7 @@ const { attr, belongsTo, hasMany } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default DrawEdgeEntity.extend({
+export default class DrawableClazzCommunication extends DrawEdgeEntity.extend({
 
   isBidirectional: attr('boolean', { defaultValue: false}),
   requests: attr('number'),
@@ -36,9 +39,9 @@ export default DrawEdgeEntity.extend({
     let traces = new Set();
 
     // Find all belonging traces
-    this.get('aggregatedClazzCommunications').forEach((aggClazzComm) => {
-      aggClazzComm.get('clazzCommunications').forEach((clazzComm) => {
-        clazzComm.get('traceSteps').forEach((traceStep) => {
+    this.get('aggregatedClazzCommunications').forEach((aggClazzComm: AggregatedClazzCommunication) => {
+      aggClazzComm.get('clazzCommunications').forEach((clazzComm: ClazzCommunication) => {
+        clazzComm.get('traceSteps').forEach((traceStep: TraceStep) => {
           let containedTrace = traceStep.belongsTo('parentTrace').value();
           if (containedTrace){
             traces.add(containedTrace);
@@ -109,6 +112,12 @@ export default DrawEdgeEntity.extend({
 
   isVisible() {
     return this.get('parentComponent').get('opened');
-  },
+  }
 
-});
+}) {}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'drawableclazzcommunication': DrawableClazzCommunication;
+  }
+}
