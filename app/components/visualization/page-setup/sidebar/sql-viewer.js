@@ -1,6 +1,7 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import { computed } from '@ember/object';
+import $ from 'jquery';
 
 export default Component.extend({
 
@@ -14,9 +15,10 @@ export default Component.extend({
   sortBy: 'timestamp',
   filterTerm: '',
   selectedQuery: null,
+  scrollPosition: null,
 
   // Compute current traces when highlighting changes
-  databaseQueries: computed('landscapeRepo.latestApplication.databaseQueries', 'isSortedAsc',
+  databaseQueries: computed('landscapeRepo.latestApplication.databaseQueries', 'isSortedAsc', 'sortBy',
     'filterTerm', 'selectedQuery', function () {
 
       let queries;
@@ -29,7 +31,6 @@ export default Component.extend({
     }),
 
   filterAndSortQueries(queries) {
-
     if (!queries) {
       return [];
     }
@@ -58,7 +59,11 @@ export default Component.extend({
       if (query.get('isSelected')) {
         query.set('isSelected', false);
         this.set('selectedQuery', null);
+        if (this.get('scrollPosition')) {
+          $('#sqlScrollDiv').animate({ scrollTop: this.get('scrollPosition') }, 'slow');
+        }
       }
+      // Select query
       else {
         // Deselect potentially selected query
         let queries = this.get('store').peekAll('databasequery');
@@ -68,6 +73,9 @@ export default Component.extend({
         // Mark new query as selected
         query.set('isSelected', true);
         this.set('selectedQuery', query);
+        // Remember scroll position
+        let scrollPos = $('#sqlScrollDiv').scrollTop();
+        this.set('scrollPosition', scrollPos);
       }
     },
 
