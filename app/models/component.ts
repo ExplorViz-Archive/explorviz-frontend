@@ -14,25 +14,31 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default class Component extends Draw3DNodeEntity.extend({
+export default class Component extends Draw3DNodeEntity {
 
-  name: attr('string'),
-  fullQualifiedName: attr('string'),
+  // @ts-ignore
+  @attr('string') name!: string;
 
-  synthetic: attr('boolean', {defaultValue: false}),
-  foundation: attr('boolean', {defaultValue: false}),
+  // @ts-ignore
+  @attr('string') fullQualifiedName!: string;
 
-  children: hasMany('component', {
-    inverse: 'parentComponent'
-  }),
+  // @ts-ignore
+  @attr('boolean', {defaultValue: false}) synthetic!: boolean;
 
-  clazzes: hasMany('clazz', {
-    inverse: 'parent'
-  }),
+  // @ts-ignore
+  @attr('boolean', {defaultValue: false}) foundation!: boolean;
 
-  parentComponent: belongsTo('component', {
-    inverse: 'children'
-  }),
+  // @ts-ignore
+  @hasMany('component', { inverse: 'parentComponent' })
+  children!: DS.PromiseManyArray<Component>;
+
+  // @ts-ignore
+  @hasMany('clazz', { inverse: 'parent' })
+  clazzes!: DS.PromiseManyArray<Clazz>;
+
+  // @ts-ignore
+  @belongsTo('component', { inverse: 'children' })
+  parentComponent!: DS.PromiseObject<Component> & Component;
   
   // breaks Ember, maybe because of circle ?
 
@@ -41,14 +47,13 @@ export default class Component extends Draw3DNodeEntity.extend({
   }),*/
 
   setOpenedStatus(status: boolean) {
-
     this.get('children').forEach((child:Component) => {
       child.set('highlighted', false);
       child.setOpenedStatus(false);
     });
 
     this.set('opened', status);
-  },
+  }
 
   unhighlight() {
     this.set('highlighted', false);
@@ -61,7 +66,7 @@ export default class Component extends Draw3DNodeEntity.extend({
     this.get('clazzes').forEach((clazz) => {
       clazz.unhighlight();
     });
-  },
+  }
 
   contains(possibleElem: Clazz|Component) {
 
@@ -87,17 +92,7 @@ export default class Component extends Draw3DNodeEntity.extend({
     }
 
     return found;
-
-  },
-
-  openParents: function() {
-    let parentModel = this.belongsTo('parentComponent').value() as Component;
-
-    if(parentModel !== null) {
-      parentModel.set('opened', true);
-      parentModel.openParents();
-    }
-  },
+  }
 
   getAllComponents() {
     let components:Component[] = [];
@@ -108,7 +103,7 @@ export default class Component extends Draw3DNodeEntity.extend({
     });
 
     return components;
-  },
+  }
 
   getAllClazzes() {
     let clazzes:Clazz[] = [];
@@ -122,7 +117,7 @@ export default class Component extends Draw3DNodeEntity.extend({
     });
 
     return clazzes;
-  },
+  }
 
   // adds all clazzes of the component or underlying components to a Set
   getContainedClazzes(containedClazzes: Set<Clazz>){
@@ -137,9 +132,9 @@ export default class Component extends Draw3DNodeEntity.extend({
     children.forEach((child) => {
       child.getContainedClazzes(containedClazzes);
     });
-  },
+  }
 
-  filterClazzes(attributeString: string, predicateValue: any) {
+/*   filterClazzes(attributeString: string, predicateValue: any) {
     const filteredClazzes:Clazz[] = [];
 
     const allClazzes = new Set();
@@ -152,7 +147,7 @@ export default class Component extends Draw3DNodeEntity.extend({
     });
 
     return filteredClazzes;
-  },
+  }
 
   filterChildComponents(attributeString: string, predicateValue: any) {
     const filteredComponents:Component[] = [];
@@ -165,11 +160,12 @@ export default class Component extends Draw3DNodeEntity.extend({
     });
 
     return filteredComponents;
-  },
+  } */
 
-  hasOnlyOneChildComponent: computed('children', function() {
+  @computed('children')
+  get hasOnlyOneChildComponent(this: Component) {
     return this.hasMany('children').ids().length < 2;
-  }),
+  }
 
   applyDefaultOpenLayout() {
     // opens all nested components until at least two entities are on the same level
@@ -192,13 +188,27 @@ export default class Component extends Draw3DNodeEntity.extend({
       return;
     }
 
-    if(components.objectAt(0)) {
-      components.objectAt(0).applyDefaultOpenLayout();
+    let component = components.objectAt(0);
+    if(component) {
+      component.applyDefaultOpenLayout();
     }
-  },
+  }
 
   isVisible() {
     return this.get('parentComponent').get('opened');
   }
 
-}) {}
+  openParents(this:Component) {
+    let parentComponent = this.belongsTo('parentComponent').value() as Component;
+    if(parentComponent !== null) {
+      parentComponent.set('opened', true);
+      parentComponent.openParents();
+    }
+  }
+}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'component': Component;
+  }
+}

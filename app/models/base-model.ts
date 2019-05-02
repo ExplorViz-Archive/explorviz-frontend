@@ -1,17 +1,25 @@
 import DS from 'ember-data';
-const { attr, Model } = DS;
 
-export default class BaseModel extends Model.extend({
+const { Model, attr } = DS;
 
-  name: attr("string"),
-  lastDiscoveryTime: attr("number"),
+export default class BaseModel extends Model {
 
-  errorMessage: attr("string"),
-  errorOccured: attr("boolean"),
+  // @ts-ignore
+  @attr("string") name!: string;
 
-  isHidden: attr("boolean")
+  // @ts-ignore
+  @attr("number") lastDiscoveryTime!: string;
 
-}) {}
+  // @ts-ignore
+  @attr("number") errorMessage!: string;
+
+  // @ts-ignore
+  @attr("boolean") errorOccured!: boolean;
+
+  // @ts-ignore
+  @attr("boolean") isHidden!: boolean;
+
+}
 
 declare module 'ember-data/types/registries/model' {
 	export default interface ModelRegistry {

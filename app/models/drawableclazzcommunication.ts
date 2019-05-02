@@ -4,6 +4,8 @@ import { computed } from '@ember/object';
 import AggregatedClazzCommunication from './aggregatedclazzcommunication';
 import ClazzCommunication from './clazzcommunication';
 import TraceStep from './tracestep';
+import Clazz from './clazz';
+import Component from './component';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -17,25 +19,31 @@ const { attr, belongsTo, hasMany } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default class DrawableClazzCommunication extends DrawEdgeEntity.extend({
+export default class DrawableClazzCommunication extends DrawEdgeEntity {
 
-  isBidirectional: attr('boolean', { defaultValue: false}),
-  requests: attr('number'),
-  averageResponseTime: attr('number'),
+  // @ts-ignore
+  @attr('boolean', { defaultValue: false}) isBidirectional!: boolean;
 
-  sourceClazz: belongsTo('clazz', {
-    inverse: null
-  }),
+  // @ts-ignore
+  @attr('number') requests!: number;
 
-  targetClazz: belongsTo('clazz', {
-    inverse: null
-  }),
+  // @ts-ignore
+  @attr('number') averageResponseTime!: number;
 
-  aggregatedClazzCommunications: hasMany('aggregatedclazzcommunication', {
-    inverse: null
-  }),
+  // @ts-ignore
+  @belongsTo('clazz', { inverse: null })
+  sourceClazz!: DS.PromiseObject<Clazz> & Clazz;
 
-  containedTraces: computed('aggregatedClazzCommunications', function(){
+  // @ts-ignore
+  @belongsTo('clazz', { inverse: null })
+  targetClazz!: DS.PromiseObject<Clazz> & Clazz;
+
+  // @ts-ignore
+  @hasMany('aggregatedclazzcommunication', { inverse: null })
+  aggregatedClazzCommunications!: DS.PromiseManyArray<AggregatedClazzCommunication>;
+
+  @computed('aggregatedClazzCommunications')
+  get containedTraces(){
     let traces = new Set();
 
     // Find all belonging traces
@@ -51,26 +59,37 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity.extend({
     });
 
     return traces;
-  }),
+  }
 
   // most inner component which common to both source and target clazz of communication
-  parentComponent: computed('sourceClazz', 'targetClazz', function(){
+  @computed('sourceClazz', 'targetClazz')
+  get parentComponent(this: DrawableClazzCommunication){
     // contains all parent components of source clazz incl. foundation in hierarchical order
     let sourceClazzComponents = [];
-    let parentComponent = this.belongsTo('sourceClazz').value().belongsTo('parent').value();
-    sourceClazzComponents.push(parentComponent);
-    while (!parentComponent.get('foundation')){
-      parentComponent = parentComponent.belongsTo('parentComponent').value();
-      sourceClazzComponents.push(parentComponent);
+    let sourceClazz = this.belongsTo('sourceClazz').value() as Clazz;
+    if(sourceClazz !== null) {
+      let parentComponent = sourceClazz.belongsTo('parent').value() as Component;
+      if(parentComponent !== null) {
+        sourceClazzComponents.push(parentComponent);
+        while (parentComponent !== null && !parentComponent.get('foundation')){
+          parentComponent = parentComponent.belongsTo('parentComponent').value() as Component;
+          sourceClazzComponents.push(parentComponent);
+        }
+      }
     }
 
     // contains all parent components of target clazz incl. foundation in hierarchical order
     let targetClazzComponents = [];
-    parentComponent = this.belongsTo('targetClazz').value().belongsTo('parent').value();
-    targetClazzComponents.push(parentComponent);
-    while (!parentComponent.get('foundation')){
-      parentComponent = parentComponent.belongsTo('parentComponent').value();
-      targetClazzComponents.push(parentComponent);
+    let targetClazz = this.belongsTo('targetClazz').value() as Clazz;
+    if(targetClazz !== null) {
+      let parentComponent = targetClazz.belongsTo('parent').value() as Component;
+      if(parentComponent !== null) {
+        targetClazzComponents.push(parentComponent);
+        while (parentComponent !== null && !parentComponent.get('foundation')){
+          parentComponent = parentComponent.belongsTo('parentComponent').value() as Component;
+          targetClazzComponents.push(parentComponent);
+        }
+      }
     }
 
     // let component arrays start with foundation (reversed hierarchical order)
@@ -88,7 +107,7 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity.extend({
     }
 
     return commonComponent;
-  }),
+  }
 
   toggleCommunicationDirection() {
 
@@ -108,13 +127,13 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity.extend({
     let oldEndPoint = this.get('endPoint');
     this.set('startPoint', oldEndPoint);
     this.set('endPoint', oldStartPoint);
-  },
+  }
 
   isVisible() {
     return this.get('parentComponent').get('opened');
   }
 
-}) {}
+}
 
 declare module 'ember-data/types/registries/model' {
   export default interface ModelRegistry {

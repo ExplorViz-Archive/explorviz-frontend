@@ -1,6 +1,7 @@
 import DS from 'ember-data';
 import Draw3DNodeEntity from './draw3dnodeentity';
 import Component from './component';
+import ClazzCommunication from './clazzcommunication';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -13,37 +14,48 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default class Clazz extends Draw3DNodeEntity.extend({
+export default class Clazz extends Draw3DNodeEntity {
 
-  name: attr('string'),
-  fullQualifiedName: attr('string'),
-  instanceCount: attr('number', {defaultValue: 0}),
-  objectIds: attr(),
+  // @ts-ignore
+  @attr('string') name!: string;
+  // @ts-ignore
+  @attr('string') fullQualifiedName!: string;
 
-  clazzCommunications: hasMany('clazzcommunication', {
-    inverse: 'sourceClazz'
-  }),
+  // @ts-ignore
+  @attr('number', {defaultValue: 0}) instanceCount!: number;
 
-  parent: belongsTo('component', {
-    inverse: 'clazzes'
-  }),
+  // @ts-ignore
+  @attr() objectIds: any;
+
+  // @ts-ignore
+  @hasMany('clazzcommunication', { inverse: 'sourceClazz' })
+  clazzCommunications!: DS.PromiseManyArray<ClazzCommunication>;
+
+  // @ts-ignore
+  @belongsTo('component', { inverse: 'clazzes' })
+  parent!: DS.PromiseObject<Component> & Component;
 
   unhighlight() {
     this.set('highlighted', false);
     this.set('state', 'NORMAL');
-  },
+  }
 
-  openParents() {
-    let parentModel = this.belongsTo('parent').value() as Component;
-
-    if(parentModel !== null) {
-      parentModel.set('opened', true);
-      parentModel.openParents();
+  openParents(this: Clazz) {
+    let parent = this.belongsTo('parent').value() as Component;
+    if(parent !== null) {
+      parent.set('opened', true);
+      parent.openParents();
     }
-  },
+  }
 
   isVisible() {
     return this.get('parent').get('opened');
   }
 
-}) {}
+}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'clazz': Clazz;
+  }
+}

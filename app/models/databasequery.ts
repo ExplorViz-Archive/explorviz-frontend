@@ -12,16 +12,27 @@ const { attr } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default class DatabaseQuery extends BaseEntity.extend({
+export default class DatabaseQuery extends BaseEntity {
 
-  timestamp: attr('number'),
-  statementType: attr('string'),
-  sqlStatement: attr('string'),
-  returnValue: attr('string'),
-  responseTime: attr('number'),
-  isSelected: attr('boolean', {defaultValue: false}),
+  // @ts-ignore
+  @attr('number') timestamp!: number;
 
-}) {}
+  // @ts-ignore
+  @attr('string') statementType!: string;
+
+  // @ts-ignore
+  @attr('string') sqlStatement!: string;
+
+  // @ts-ignore
+  @attr('string') returnValue!: string;
+
+  // @ts-ignore
+  @attr('number') responseTime!: number;
+
+  // @ts-ignore
+  @attr('boolean', {defaultValue: false}) isSelected!: boolean;
+
+}
 
 declare module 'ember-data/types/registries/model' {
 	export default interface ModelRegistry {

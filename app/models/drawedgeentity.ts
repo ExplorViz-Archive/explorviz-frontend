@@ -14,7 +14,7 @@ const { attr } = DS;
 * @module explorviz
 * @submodule model.util
 */
-export default class DrawEdgeEntity extends BaseEntity.extend({
+export default class DrawEdgeEntity extends BaseEntity {
 
   /**
   * Indicates the line thickness (a.k.a. width) for a edge.
@@ -22,7 +22,8 @@ export default class DrawEdgeEntity extends BaseEntity.extend({
   * @property lineThickness
   * @type number
   */
-  lineThickness: attr('number', { defaultValue: 0.0}),
+  // @ts-ignore
+  @attr('number', { defaultValue: 0.0}) lineThickness!: number;
 
   /**
   * Z-position of this edge.
@@ -30,7 +31,8 @@ export default class DrawEdgeEntity extends BaseEntity.extend({
   * @property positionZ
   * @type number
   */
-  positionZ: attr('number', { defaultValue: 0.0}),
+  // @ts-ignore
+  @attr('number', { defaultValue: 0.0}) positionZ!: number;
 
   /**
   * All points of the edge.
@@ -38,37 +40,48 @@ export default class DrawEdgeEntity extends BaseEntity.extend({
   * @property points
   * @type objects
   */
-  points: attr(),
-  pointsFor3D: attr(),
+  // @ts-ignore
+  @attr() points: any;
+  // @ts-ignore
+  @attr() pointsFor3D: any;
 
-  startPoint: attr(),
-  endPoint: attr(),
+  // @ts-ignore
+  @attr() startPoint: any;
+  // @ts-ignore
+  @attr() endPoint: any;
 
-  state: attr(),
+  // @ts-ignore
+  @attr() state: any;
 
-  pipeSize: attr(),
+  // @ts-ignore
+  @attr() pipeSize: any;
+  // @ts-ignore
+  @attr() pipeColor: any;
 
-  pipeColor: attr(),
-  kielerEdgeReferences: null,
-  hidden: attr('boolean', { defaultValue: false }),
-  highlighted: attr('boolean', { defaultValue: false}),
+  kielerEdgeReferences = null;
+
+  // @ts-ignore
+  @attr('boolean', { defaultValue: false }) hidden!: boolean;
+
+  // @ts-ignore
+  @attr('boolean', { defaultValue: false }) highlighted!: boolean;
 
   init() {
-    this._super(...arguments);
+    super.init();
     this.set('kielerEdgeReferences', []);
-  },
+  }
 
   highlight() {
     this.set('highlighted', true);
     this.set('state', 'NORMAL');
-  },
+  }
 
   unhighlight() {
     this.set('highlighted', false);
     this.set('state', 'TRANSPARENT');
   }
 
-}) {}
+}
 
 declare module 'ember-data/types/registries/model' {
   export default interface ModelRegistry {

@@ -2,6 +2,11 @@ import DS from 'ember-data';
 import DrawNodeEntity from './drawnodeentity';
 import Component from './component';
 import Clazz from './clazz';
+import DatabaseQuery from './databasequery';
+import Trace from './trace';
+import ApplicationCommunication from './applicationcommunication';
+import AggregatedClazzCommunication from './aggregatedclazzcommunication';
+import DrawableClazzCommunication from './drawableclazzcommunication';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -14,41 +19,51 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default class Application extends DrawNodeEntity.extend({
+export default class Application extends DrawNodeEntity {
 
-  name: attr('string'),
-  lastUsage: attr('number'),
-  programmingLanguage: attr('string'),
+  // @ts-ignore
+  @attr('string') name!: string;
 
-  parent: belongsTo('node', {
-    inverse: 'applications'
-  }),
+  // @ts-ignore
+  @attr('number') lastUsage!: number;
 
-  components: hasMany('component', {
+  // @ts-ignore
+  @attr('string') programmingLanguage!: string;
+
+  // @ts-ignore
+  @belongsTo('node', { inverse: 'applications' })
+  parent!: DS.PromiseObject<Node> & Node;
+
+  // @ts-ignore
+  @hasMany('component', {
     // breaks Ember, maybe because of circle ?
     //inverse: 'belongingApplication'
-  }),
+  })
+  components!: DS.PromiseManyArray<Component>;
 
-  databaseQueries: hasMany('databasequery'),
+  // @ts-ignore
+  @hasMany('databasequery')
+  databaseQueries!: DS.PromiseManyArray<DatabaseQuery>;
 
-  traces: hasMany('trace'),
+  // @ts-ignore
+  @hasMany('trace') traces!: DS.PromiseManyArray<Trace>;
 
-  applicationCommunications: hasMany('applicationcommunication', {
-    inverse: 'sourceApplication'
-  }),
+  // @ts-ignore
+  @hasMany('applicationcommunication', { inverse: 'sourceApplication' })
+  applicationCommunications!: DS.PromiseManyArray<ApplicationCommunication>;
 
+  // @ts-ignore
   // list of aggregated clazzCommunication for rendering purposes
-  aggregatedClazzCommunications: hasMany('aggregatedclazzcommunication', {
-    inverse: null
-  }),
+  @hasMany('aggregatedclazzcommunication', { inverse: null })
+  aggregatedClazzCommunications!: DS.PromiseManyArray<AggregatedClazzCommunication>;
 
+  // @ts-ignore
   // list of aggregated clazzCommunication for rendering purposes
-  drawableClazzCommunications: hasMany('drawableclazzcommunication', {
-    inverse: null
-  }),
+  @hasMany('drawableclazzcommunication', { inverse: null })
+  drawableClazzCommunications!: DS.PromiseManyArray<DrawableClazzCommunication>;
 
   // used for text labeling performance in respective renderers
-  state: "application",
+  state = "application";
 
   unhighlight() {
     this.get('components').forEach((component) => {
@@ -60,7 +75,7 @@ export default class Application extends DrawNodeEntity.extend({
     this.get('traces').forEach((trace) => {
       trace.unhighlight();
     });
-  },
+  }
 
   contains(emberEntity: any) {
     let found = false;
@@ -70,7 +85,7 @@ export default class Application extends DrawNodeEntity.extend({
     });
 
     return found;
-  },
+  }
 
   getAllComponents() {
     let components:Component[] = [];
@@ -86,7 +101,7 @@ export default class Application extends DrawNodeEntity.extend({
     });
 
     return components;
-  },
+  }
 
   getAllClazzes() {
     let clazzes:Clazz[] = [];
@@ -96,9 +111,9 @@ export default class Application extends DrawNodeEntity.extend({
     });
 
     return clazzes;
-  },
+  }
 
-  filterComponents(attributeString: string, predicateValue: any) {
+/*   filterComponents(attributeString: string, predicateValue: any) {
     const filteredComponents:Component[] = [];
 
     this.get('components').forEach((component) => {
@@ -119,7 +134,7 @@ export default class Application extends DrawNodeEntity.extend({
     });
 
     return filteredClazzes;
-  },
+  }, */
 
   applyDefaultOpenLayout(userAlreadyActed: boolean) {
     // opens all components until at least two entities are on the same level
@@ -136,9 +151,16 @@ export default class Application extends DrawNodeEntity.extend({
       return;
     }
 
-    if(components.objectAt(0)) {
-      components.objectAt(0).applyDefaultOpenLayout();
+    let component = components.objectAt(0);
+    if(component !== undefined) {
+      component.applyDefaultOpenLayout();
     }    
   }
 
-}) {}
+}
+
+declare module 'ember-data/types/registries/model' {
+  export default interface ModelRegistry {
+    'application': Application;
+  }
+}

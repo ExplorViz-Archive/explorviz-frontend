@@ -1,6 +1,6 @@
 import DS from 'ember-data';
 
-const {Model, attr} = DS;
+const { Model, attr } = DS;
 
 /**
 * Ember model for a BaseEntity. Every element of ExplorViz's Meta-Model should
@@ -13,7 +13,7 @@ const {Model, attr} = DS;
 * @module explorviz
 * @submodule model.util
 */
-export default class BaseEntitity extends Model.extend({
+export default class BaseEntitity extends Model {
   /**
   * This attribute can be used by extensions to insert custom properties to any
   * meta-model object.
@@ -22,9 +22,10 @@ export default class BaseEntitity extends Model.extend({
   * @type Array
   *
   */
-  extensionAttributes: attr(),
+  // @ts-ignore
+  @attr() extensionAttributes!: any;
 
-}) {}
+}
 
 declare module 'ember-data/types/registries/model' {
 	export default interface ModelRegistry {

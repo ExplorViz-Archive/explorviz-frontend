@@ -12,34 +12,48 @@ const { attr } = DS;
 * @module explorviz
 * @submodule model.util
 */
-export default class DrawNodeEntity extends BaseEntity.extend({
+export default class DrawNodeEntity extends BaseEntity {
 
-  plusColor: attr(),
-  foregroundColor: attr(),
-  backgroundColor: attr(),
-  highlighted: attr('boolean', { defaultValue: false }),
+  // @ts-ignore
+  @attr() plusColor: any;
+  // @ts-ignore
+  @attr() foregroundColor: any;
+  // @ts-ignore
+  @attr() backgroundColor: any;
 
-  width: attr('number', { defaultValue: 0}),
-  height: attr('number', { defaultValue: 0}),
-  depth: attr('number', { defaultValue: 0}),
-  positionX: attr('number', { defaultValue: 0}),
-  positionY: attr('number', { defaultValue: 0}),
-  positionZ: attr('number', { defaultValue: 0}),
-  threeJSModel: attr(),
+  // @ts-ignore
+  @attr('boolean', { defaultValue: false }) highlighted!: boolean;
 
-  kielerGraphReference: null,
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) width!: number;
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) height!: number;
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) depth!: number;
 
-  sourcePorts: null,
-  targetPorts: null,
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) positionX!: number;
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) positionY!: number;
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) positionZ!: number;
+
+  // @ts-ignore
+  @attr()
+  threeJSModel: any;
+
+  kielerGraphReference = null;
+
+  sourcePorts = null;
+  targetPorts = null;
 
   init() {
-    this._super(...arguments);
+    super.init();
     this.set('sourcePorts', {});
     this.set('targetPorts', {});
   }
 
-
-}) {}
+}
 
 declare module 'ember-data/types/registries/model' {
   export default interface ModelRegistry {

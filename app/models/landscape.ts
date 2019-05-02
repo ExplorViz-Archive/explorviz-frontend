@@ -1,5 +1,8 @@
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
+import Timestamp from './timestamp';
+import Event from './event';
+import ApplicationCommunication from './applicationcommunication';
 
 const { belongsTo, hasMany } = DS;
 
@@ -12,21 +15,29 @@ const { belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default class Landscape extends BaseEntity.extend({
+export default class Landscape extends BaseEntity {
 
-  timestamp: belongsTo('timestamp'),
+  // @ts-ignore
+  @belongsTo('timestamp')
+  timestamp!: DS.PromiseObject<Timestamp> & Timestamp;
   
-  events: hasMany('event', {
-    inverse: null
-  }),
+  // @ts-ignore
+  @hasMany('event', { inverse: null })
+  events!: DS.PromiseManyArray<Event>;
 
-  systems: hasMany('system', {
-    inverse: 'parent'
-  }),
+  // @ts-ignore
+  @hasMany('system', { inverse: 'parent' })
+  systems!: DS.PromiseManyArray<Event>;
 
+  // @ts-ignore
   // list of applicationCommunication for rendering purposes
-  totalApplicationCommunications: hasMany('applicationcommunication', {
-    inverse: null
-  })
+  @hasMany('applicationcommunication', { inverse: null })
+  totalApplicationCommunications!: DS.PromiseManyArray<ApplicationCommunication>;
 
-}) {}
+}
+
+declare module 'ember-data/types/registries/model' {
+	export default interface ModelRegistry {
+	  'landscape': Landscape;
+	}
+}

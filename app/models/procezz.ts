@@ -1,5 +1,6 @@
 import BaseModel from './base-model';
 import DS from 'ember-data';
+import Agent from './agent';
 
 const { attr, belongsTo } = DS;
 
@@ -15,35 +16,59 @@ const { attr, belongsTo } = DS;
 * @module explorviz.extension.discovery
 * @submodule model
 */
-export default class Procezz extends BaseModel.extend({
+export default class Procezz extends BaseModel {
 
-  pid: attr("number"),
+  // @ts-ignore
+  @attr("number") pid!: number;
 
-  osExecutionCommand: attr("string"),  
-  agentExecutionCommand: attr("string"),
-  proposedExecutionCommand: attr("string"),
-  workingDirectory: attr("string"),
-  programmingLanguage: attr("string"),
+  // @ts-ignore
+  @attr("string") osExecutionCommand!: string;
 
-  wasFoundByBackend: attr("boolean"),
+  // @ts-ignore
+  @attr("string") agentExecutionCommand!: string;
 
-  agent: belongsTo("agent"),
+  // @ts-ignore
+  @attr("string") proposedExecutionCommand!: string;
+
+  // @ts-ignore
+  @attr("string") workingDirectory!: string;
+
+  // @ts-ignore
+  @attr("string") programmingLanguage!: string;
+
+  // @ts-ignore
+  @attr("boolean") wasFoundByBackend!: boolean;
+
+  // @ts-ignore
+  @belongsTo("agent") agent!: DS.PromiseObject<Agent> & Agent;
 
   // the following attribute can be changed by users
 
-  userExecutionCommand: attr("string"),
-  shutdownCommand: attr("string"),
+  // @ts-ignore
+  @attr("string") userExecutionCommand!: string;
 
-  monitoredFlag: attr("boolean"),
-  webserverFlag: attr("boolean"),  
+  // @ts-ignore
+  @attr("string") shutdownCommand!: string;
 
-  stopped: attr("boolean"),
-  restart: attr("boolean"),
+  // @ts-ignore
+  @attr("boolean") monitoredFlag!: boolean;
 
-  aopContent: attr("string"),
-  kiekerConfigContent: attr("string")
+  // @ts-ignore
+  @attr("boolean") webserverFlag!: boolean;
 
-}) {}
+  // @ts-ignore
+  @attr("boolean") stopped!: boolean;
+
+  // @ts-ignore
+  @attr("boolean") restart!: boolean;
+
+  // @ts-ignore
+  @attr("string") aopContent!: string;
+
+  // @ts-ignore
+  @attr("string") kiekerConfigContent!: string;
+
+}
 
 declare module 'ember-data/types/registries/model' {
   export default interface ModelRegistry {

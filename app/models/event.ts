@@ -1,5 +1,6 @@
 import BaseEntity from './baseentity';
 import DS from 'ember-data';
+
 const { attr } = DS;
 
 /**
@@ -11,15 +12,21 @@ const { attr } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default class Event extends BaseEntity.extend({
+export default class Event extends BaseEntity {
 
-  timestamp: attr('number'),
-  eventType: attr('string'),
-  eventMessage: attr('string'),
+  // @ts-ignore
+  @attr('number') timestamp!: number;
 
-  isSelected: attr('boolean', { defaultValue: false }),
+  // @ts-ignore
+  @attr('string') eventType!: string;
 
-}) {}
+  // @ts-ignore
+  @attr('string') eventMessage!: string;
+
+  // @ts-ignore
+  @attr('boolean', { defaultValue: false }) isSelected!: boolean;
+
+}
 
 declare module 'ember-data/types/registries/model' {
 	export default interface ModelRegistry {

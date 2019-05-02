@@ -1,5 +1,5 @@
-import DS from 'ember-data';
 import BaseEntity from './baseentity';
+import DS from 'ember-data';
 
 const { attr } = DS;
 
@@ -12,15 +12,18 @@ const { attr } = DS;
 * @module explorviz
 * @submodule model
 */
-export default class Timestamp extends BaseEntity.extend({
+export default class Timestamp extends BaseEntity {
 
-  timestamp: attr('number'),
-  totalRequests: attr('number')
+  // @ts-ignore
+  @attr('number') timestamp!: number;
 
-}) {}
+  // @ts-ignore
+  @attr('number') totalRequests!: number;
+
+}
 
 declare module 'ember-data/types/registries/model' {
-	export default interface ModelRegistry {
-	  'timestamp': Timestamp;
-	}
+  export default interface ModelRegistry {
+    'timestamp': Timestamp;
+  }
 }

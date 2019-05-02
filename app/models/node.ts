@@ -1,8 +1,10 @@
 import DrawNodeEntity from './drawnodeentity';
 import { computed } from '@ember/object'; 
 import DS from 'ember-data';
+import Application from './application';
+import NodeGroup from './nodegroup';
 
-const { attr, belongsTo, hasMany } = DS;
+const { attr, hasMany, belongsTo } = DS;
 
 /**
 * Ember model for a Node.
@@ -13,31 +15,42 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default class Node extends DrawNodeEntity.extend({
+export default class Node extends DrawNodeEntity {
 
-  name: attr('string'),
-  ipAddress: attr('string'),
-  cpuUtilization: attr('number'),
-  freeRAM: attr('number'),
-  usedRAM: attr('number'),
+  // @ts-ignore
+  @attr('string') name!: string;
 
-  visible: attr('boolean', {defaultValue: true}),
+  // @ts-ignore
+  @attr('string') ipAddress!: string;
 
-  applications: hasMany('application', {
-    inverse: 'parent'
-  }),
+  // @ts-ignore
+  @attr('number') cpuUtilization!: number;
 
-  parent: belongsTo('nodegroup', {
-    inverse: 'nodes'
-  }),
+  // @ts-ignore
+  @attr('number') freeRAM!: number;
+
+  // @ts-ignore
+  @attr('number') usedRAM!: number;
+
+  // @ts-ignore
+  @attr('boolean', {defaultValue: true}) visible!: boolean;
+
+  // @ts-ignore
+  @hasMany('application', { inverse: 'parent' })
+  applications!: DS.PromiseManyArray<Application>;
+
+  // @ts-ignore
+  @belongsTo('nodegroup', { inverse: 'nodes' })
+  parent!: DS.PromiseObject<NodeGroup> & NodeGroup;
 
   // used for text labeling performance in respective labelers
-  state: computed('visible', function() {
+  @computed('visible')
+  get state() {
     let visible = this.get('visible');
     return `${visible}`;
-  }),
+  }
 
-  getDisplayName: function() {
+  getDisplayName() {
     if (this.get('parent').get('opened')) {
       if (this.get('name') && this.get('name').length > 0 && !this.get('name').startsWith("<")) {
         return this.get('name');
@@ -49,7 +62,7 @@ export default class Node extends DrawNodeEntity.extend({
     }
   }
 
-}) {}
+}
 
 declare module 'ember-data/types/registries/model' {
   export default interface ModelRegistry {

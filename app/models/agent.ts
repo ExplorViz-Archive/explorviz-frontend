@@ -1,5 +1,6 @@
 import BaseModel from './base-model';
 import DS from 'ember-data';
+import Procezz from './procezz';
 
 const { attr, hasMany } = DS;
 
@@ -16,14 +17,18 @@ const { attr, hasMany } = DS;
 * @module explorviz.extension.discovery
 * @submodule model
 */
-export default class Agent extends BaseModel.extend({
+export default class Agent extends BaseModel {
 
-  ip: attr("string"),
-  port: attr("string"),
+  // @ts-ignore
+  @attr("string") ip!: string;
 
-  procezzes: hasMany("procezz")
+  // @ts-ignore
+  @attr("string") port!: string;
 
-}) {}
+  // @ts-ignore
+  @hasMany("procezz") procezzes!: DS.PromiseManyArray<Procezz>;
+
+}
 
 declare module 'ember-data/types/registries/model' {
 	export default interface ModelRegistry {

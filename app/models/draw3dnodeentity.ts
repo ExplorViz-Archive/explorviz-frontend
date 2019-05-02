@@ -15,35 +15,49 @@ const { attr } = DS;
 * @module explorviz
 * @submodule model.util
 */
-export default class Draw3DNodeEntity extends BaseEntity.extend({
+export default class Draw3DNodeEntity extends BaseEntity {
 
-  width: attr('number', { defaultValue: 0}),
-  height: attr('number', { defaultValue: 0}),
-  depth: attr('number', { defaultValue: 0}),
-  positionX: attr('number', { defaultValue: 0}),
-  positionY: attr('number', { defaultValue: 0}),
-  positionZ: attr('number', { defaultValue: 0}),
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) width!: number;
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) height!: number;
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) depth!: number;
 
-  highlighted: attr('boolean', { defaultValue: false}),
-  opened: attr('boolean', { defaultValue: false}),
-  visible: attr('boolean', { defaultValue: true}),
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) positionX!: number;
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) positionY!: number;
+  // @ts-ignore
+  @attr('number', { defaultValue: 0}) positionZ!: number;
+  // @ts-ignore
 
-  extension: computed('width', 'height', 'depth', function() {
+  // @ts-ignore
+  @attr('boolean', { defaultValue: false}) highlighted!: boolean;
+  // @ts-ignore
+  @attr('boolean', { defaultValue: false}) opened!: boolean;
+  // @ts-ignore
+  @attr('boolean', { defaultValue: true}) visible!: boolean;
+
+  @computed('width', 'height', 'depth')
+  get extension() {
     let width = this.get('width') / 2.0;
     let height = this.get('height') / 2.0;
     let depth = this.get('depth') / 2.0;
 
     return new THREE.Vector3(width, height, depth);
-  }),
+  }
 
   // used to mark entities as transparent or normal for highlighting
-  state: attr('string', { defaultValue: 'NORMAL'}),
+  // @ts-ignore
+  @attr('string', { defaultValue: 'NORMAL'})
+  state!: string;
 
   highlight() {
     this.set('highlighted', true);
   }
 
-}) {}
+}
 
 declare module 'ember-data/types/registries/model' {
   export default interface ModelRegistry {

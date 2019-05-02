@@ -1,6 +1,7 @@
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
 import ClazzCommunication from './clazzcommunication';
+import Trace from './trace';
 
 const { attr, belongsTo } = DS;
 
@@ -13,39 +14,45 @@ const { attr, belongsTo } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default class TraceStep extends BaseEntity.extend({
+export default class TraceStep extends BaseEntity {
 
-  tracePosition: attr('number'),
-  requests: attr('number'),
-  currentTraceDuration: attr('number'),
-  averageResponseTime: attr('number'),
-  highlighted: attr('boolean', { defaultValue: false }),
+  // @ts-ignore
+  @attr('number') tracePosition!: number;
 
-  parentTrace: belongsTo('trace', {
-    inverse: 'traceSteps'
-  }),
+  // @ts-ignore
+  @attr('number') requests!: number;
 
-  clazzCommunication: belongsTo('clazzcommunication', {
-    inverse: null
-  }),
+  // @ts-ignore
+  @attr('number') currentTraceDuration!: number;
 
-  openParents() {
+  // @ts-ignore
+  @attr('number') averageResponseTime!: number;
+
+  // @ts-ignore
+  @attr('boolean', { defaultValue: false }) highlighted!: boolean;
+
+  // @ts-ignore
+  @belongsTo('trace', { inverse: 'traceSteps' })
+  parentTrace!: DS.PromiseObject<Trace> & Trace;
+
+  // @ts-ignore
+  @belongsTo('clazzcommunication', { inverse: null })
+  clazzCommunication!: DS.PromiseObject<ClazzCommunication> & ClazzCommunication;
+
+  openParents(this: TraceStep) {
     let clazzCommunication = this.belongsTo('clazzCommunication').value() as ClazzCommunication;
-
-    if (clazzCommunication !== null) {
-      clazzCommunication.openParents();
-    }
-  },
+    clazzCommunication.openParents();
+  }
 
   highlight() {
     this.set('highlighted', true);
-  },
+  }
 
   unhighlight() {
     this.set('highlighted', false);
   }
 
-}) {}
+}
 
 declare module 'ember-data/types/registries/model' {
   export default interface ModelRegistry {

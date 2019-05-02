@@ -1,5 +1,7 @@
 import DS from 'ember-data';
 import DrawEdgeEntity from './drawedgeentity';
+import Clazz from './clazz';
+import ClazzCommunication from './clazzcommunication';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -12,24 +14,27 @@ const { attr, belongsTo, hasMany } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default class AggregatedClazzCommunication extends DrawEdgeEntity.extend({
+export default class AggregatedClazzCommunication extends DrawEdgeEntity {
 
-  totalRequests: attr('number'),
-  averageResponseTime: attr('number'),
+  // @ts-ignore
+  @attr('number') totalRequests!: number;
 
-  sourceClazz: belongsTo('clazz', {
-    inverse: null
-  }),
+  // @ts-ignore
+  @attr('number') averageResponseTime!: number;
 
-  targetClazz: belongsTo('clazz', {
-    inverse: null
-  }),
+  // @ts-ignore
+  @belongsTo('clazz', { inverse: null })
+  sourceClazz!: DS.PromiseObject<Clazz> & Clazz;
 
-  clazzCommunications: hasMany('clazzcommunication', {
-    inverse: null
-  })
+  // @ts-ignore
+  @belongsTo('clazz', { inverse: null })
+  targetClazz!: DS.PromiseObject<Clazz> & Clazz;
 
-}) {}
+  // @ts-ignore
+  @hasMany('clazzcommunication', { inverse: null })
+  clazzCommunications!: DS.PromiseManyArray<ClazzCommunication>;
+
+}
 
 declare module 'ember-data/types/registries/model' {
   export default interface ModelRegistry {
