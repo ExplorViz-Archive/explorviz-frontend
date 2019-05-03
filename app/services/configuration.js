@@ -61,26 +61,30 @@ export default Service.extend({
    * Sets the default visualization colors
    */
   initDefaultColors() {
-
     this.set('landscapeColorsDefault', {
+      background: "rgb(255, 255, 255)",
       system: "rgb(199, 199, 199)",
       nodegroup: "rgb(22, 158, 43)",
       node: "rgb(0, 187, 65)",
       application: "rgb(62, 20, 160)",
       communication: "rgb(244, 145, 0)",
-      textsystem: "rgb(0, 0, 0)",
-      textnode: "rgb(255, 255, 255)",
-      textapp: "rgb(255, 255, 255)",
+      textSystem: "rgb(0, 0, 0)",
+      textNode: "rgb(255, 255, 255)",
+      textApp: "rgb(255, 255, 255)",
       collapseSymbol: "rgb(0, 0, 0)",
-      textchanged: false
+      textChanged: false
     });
 
     this.set('applicationColorsDefault', {
+      background: "rgb(255, 255, 255)",
       foundation: "rgb(199, 199, 199)",
       componentOdd: "rgb(22, 158, 43)",
       componentEven: "rgb(0, 187, 65)",
       clazz: "rgb(62, 20, 160)",
       highlightedEntity: "rgb(255, 0, 0)",
+      textComponent: "rgb(255, 255, 255)",
+      textClazz: "rgb(255, 255, 255)",
+      textFoundation: "rgb(0, 0, 0)",
       communication: "rgb(244, 145, 0)",
       communicationArrow: "rgb(0, 0, 0)"
     });
@@ -90,26 +94,30 @@ export default Service.extend({
    * Sets the current colors towards more visually impaired ones
    */
   applyVisuallyImpairedColors() {
-
     this.set('landscapeColors', {
+      background: "rgb(255, 255, 255)",
       system: "rgb(199, 199, 199)",
       nodegroup: "rgb(1, 90, 110)",
       node: "rgb(0, 150, 190)",
       application: "rgb(95, 95, 95)",
       communication: "rgb(244, 145, 0)",
-      textsystem: "rgb(0, 0, 0)",
-      textnode: "rgb(255, 255, 255)",
-      textapp: "rgb(255, 255, 255)",
+      textSystem: "rgb(0, 0, 0)",
+      textNode: "rgb(255, 255, 255)",
+      textApp: "rgb(255, 255, 255)",
       collapseSymbol: "rgb(0, 0, 0)",
-      textchanged: false
+      textChanged: false
     });
 
     this.set('applicationColors', {
+      background: "rgb(255, 255, 255)",
       foundation: "rgb(199, 199, 199)",
       componentOdd: "rgb(1, 90, 110)",
       componentEven: "rgb(0, 150, 190)",
       clazz: "rgb(95, 95, 95)",
       highlightedEntity: "rgb(255, 0, 0)",
+      textComponent: "rgb(255, 255, 255)",
+      textClazz: "rgb(255, 255, 255)",
+      textFoundation: "rgb(0, 0, 0)",
       communication: "rgb(244, 145, 0)",
       communicationArrow: "rgb(0, 0, 0)"
     });

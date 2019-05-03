@@ -6,26 +6,34 @@ import { inject as service } from "@ember/service";
 export default Object.extend({
 
   labels: null,
-  textMaterialWhite: null,
-  textMaterialBlack: null,
+  textMaterialFoundation: null,
+  textMaterialComponent: null,
+  textMaterialClazz: null,
 
   session: service(),
+  configuration: service(),
 
   init() {
     this._super(...arguments);
 
     this.set('labels', []);
-    this.set('textMaterialWhite',
+    this.set('textMaterialFoundation',
       new THREE.MeshBasicMaterial({
-        color: 0xffffff
+        color: this.get('configuration.applicationColors.textFoundation')
       })
     );
 
-    this.set('textMaterialBlack',
+    this.set('textMaterialComponent',
       new THREE.MeshBasicMaterial({
-        color: 0x000000
+        color: this.get('configuration.applicationColors.textComponent')
       })
     );
+
+    this.set('textMaterialClazz',
+    new THREE.MeshBasicMaterial({
+      color: this.get('configuration.applicationColors.textClazz')
+    })
+  );
 
     this.set('currentUser', this.get('session.session.content.authenticated.user'));
   },
@@ -85,9 +93,11 @@ export default Object.extend({
       // Font color(material) depending on parent object
       let material;
       if (foundation) {
-        material = this.get('textMaterialBlack').clone();
+        material = this.get('textMaterialFoundation').clone();
+      } else if (type === 'clazz') {
+        material = this.get('textMaterialComponent').clone();
       } else {
-        material = this.get('textMaterialWhite').clone();
+        material = this.get('textMaterialClazz').clone();
       }
 
       // Apply transparency / opacity

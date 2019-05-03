@@ -10,6 +10,7 @@ export default Object.extend({
   appTextCache: null,
 
   font: null,
+  configuration: null,
 
   init() {
     this._super(...arguments);
@@ -49,7 +50,6 @@ export default Object.extend({
     this.set('systemTextCache', []);
     this.set('nodeTextCache', []);
     this.set('appTextCache', []);
-
   },
 
 
@@ -253,7 +253,7 @@ export default Object.extend({
   isLabelAlreadyCreated(emberModel) {
     // Label already created and color didn't change?
     if (this.get('textLabels')[emberModel.get('id')] &&
-      !this.get('configuration.landscapeColors.textchanged')) {
+      !this.get('configuration.landscapeColors.textChanged')) {
 
       const oldTextLabelObj =
         this.get('textLabels')[emberModel.get('id')];

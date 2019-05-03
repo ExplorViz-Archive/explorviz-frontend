@@ -158,6 +158,9 @@ export default RenderingCore.extend(AlertifyHandler, {
       this.set('centerAndZoomCalculator', CalcCenterAndZoom.create());
     }
 
+    const backgroundColor = this.get('configuration.applicationColors.background');
+    this.set('scene.background', new THREE.Color(backgroundColor));
+
     this.initInteraction();
 
     const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);

@@ -33,10 +33,11 @@ export default Component.extend(Evented, THREEPerformance, {
 
   state: null,
 
-  reloadHandler: service("reload-handler"),
-  landscapeRepo: service("repos/landscape-repository"),
   highlighter: service("visualization/application/highlighter"),
-  addionalData: service("additional-data"),
+  landscapeRepo: service("repos/landscape-repository"),
+  additionalData: service(),
+  configuration: service(),
+  reloadHandler: service(),
   renderingService: service(),
 
   session: service(),
@@ -109,7 +110,8 @@ export default Component.extend(Evented, THREEPerformance, {
     this.set('canvas', canvas);
 
     this.set('scene', new THREE.Scene());
-    this.set('scene.background', new THREE.Color(0xffffff));
+    const backgroundColor = this.get('configuration.landscapeColors.background');
+    this.set('scene.background', new THREE.Color(backgroundColor));
 
     this.set('camera', new THREE.PerspectiveCamera(75, width / height, 0.1, 1000));
 
@@ -402,7 +404,7 @@ export default Component.extend(Evented, THREEPerformance, {
     this.get('landscapeRepo').off('updated');
 
     this.get('highlighter').unhighlightAll();
-    this.get('addionalData').emptyAndClose();
+    this.get('additionalData').emptyAndClose();
   },
 
   /**
