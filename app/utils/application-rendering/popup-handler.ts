@@ -1,20 +1,25 @@
 import Object from '@ember/object';
 import { inject as service } from '@ember/service';
+import AdditionalData from 'explorviz-frontend/services/additional-data';
+import Component from 'explorviz-frontend/models/component';
+import Clazz from 'explorviz-frontend/models/clazz';
+import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 
-export default Object.extend({
+export default class PopupHandler extends Object {
 
-  additionalData: service("additional-data"),
+  @service("additional-data")
+  additionalData!: AdditionalData;
 
-  enableTooltips: true,
+  enableTooltips:boolean = true;
 
-  showTooltip(mouse, emberModel) {
+  showTooltip(mouse:{x:number, y:number}, emberModel:any) : void {
 
     if (!this.get('enableTooltips')){
       return;
     }
 
-    let popupData;
-    let modelType = emberModel.constructor.modelName;
+    let popupData: any = {};
+    let modelType:string = emberModel.constructor.modelName;
 
     switch (modelType) {
       case "component":
@@ -39,14 +44,14 @@ export default Object.extend({
     }
 
     this.get("additionalData").setPopupContent(popupData);
-  },
+  }
 
-  hideTooltip() {
+  hideTooltip() : void {
     this.get("additionalData").removePopup();
-  },
+  }
 
 
-  buildComponentData(component){
+  buildComponentData(component:Component){
     let name = component.get("name");
     let clazzCount = getClazzesCount(component);
     let packageCount = getPackagesCount(component);
@@ -61,7 +66,7 @@ export default Object.extend({
   
     return popupData;
 
-    function getClazzesCount(component) {
+    function getClazzesCount(component:Component) : number {
       let result = component.get('clazzes').get('length');
       const children = component.get('children');
       children.forEach((child) => {
@@ -69,7 +74,7 @@ export default Object.extend({
       });
       return result;
     }
-    function getPackagesCount(component) {
+    function getPackagesCount(component:Component) : number {
       let result = component.get('children').get('length');
       const children = component.get('children');
       children.forEach((child) => {
@@ -77,9 +82,9 @@ export default Object.extend({
       });
       return result;
     }
-  },
+  }
 
-  buildClazzData(clazz){
+  buildClazzData(clazz:Clazz){
     let clazzName = clazz.get('name');
     let instanceCount = clazz.get('instanceCount');
 
@@ -94,10 +99,10 @@ export default Object.extend({
       calledOps: operationCount,
     }
   
-      return popupData;
-  },
+    return popupData;
+  }
 
-  buildCommunicationData(drawableClazzCommunication) {
+  buildCommunicationData(drawableClazzCommunication:DrawableClazzCommunication) {
     // let runtimeStats = getRuntimeInformations(drawableClazzCommunication);
 
     // TODO: check if this is correct way to check for bidirectionality
@@ -119,10 +124,10 @@ export default Object.extend({
     return popupData;
 
     
-    function round(value, precision) {
+    function round(value:number, precision:number) : number {
       let multiplier = Math.pow(10, precision || 0);
       return Math.round(value * multiplier) / multiplier;
     } 
-  },
+  }
 
-});
+}
