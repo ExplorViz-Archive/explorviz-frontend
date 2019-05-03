@@ -1,20 +1,20 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
+import DS from 'ember-data';
+import RenderingService from 'explorviz-frontend/services/rendering-service';
+import { action } from '@ember/object';
 
-export default Component.extend({
+
+export default class ApplicationOpener extends Component {
 
   // No Ember generated container
-  tagName: '',
+  tagName = '';
 
-  store: service(),
-  renderingService: service(),
+  @service('store') store!: DS.Store;
 
-  actions: {
-    openAllComponents() {
-      this.openAllComponents();
-    }
-  },
+  @service('rendering-service') renderingService!: RenderingService;
 
+  @action
   openAllComponents() {
     const allClazzes = this.get('store').peekAll('clazz');
 
@@ -24,4 +24,4 @@ export default Component.extend({
     this.get('renderingService').redrawScene();
   }
 
-});
+}
