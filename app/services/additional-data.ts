@@ -1,23 +1,20 @@
 import Service from '@ember/service';
 import Evented from '@ember/object/evented';
 
-export default Service.extend(Evented, {
+export default class AdditionalData extends Service.extend(Evented) {
 
-  showWindow: false,
-  shownComponents: null,
-  popupContent: null,
+  showWindow:boolean = false;
+  shownComponents:string[] = [];
+  popupContent:any = null;
 
-  addComponent(path) {
-    if (this.get('shownComponents') === null) {
-      this.set('shownComponents', []);
-    }
+  addComponent(path:string) {
     if (!this.get('shownComponents').includes(path)) {
       this.get('shownComponents').unshift(path);
       this.notifyPropertyChange('shownComponents');
     }
-  },
+  }
 
-  removeComponent(path) {
+  removeComponent(path: string) {
     if (!this.get('shownComponents'))
       return;
 
@@ -29,33 +26,39 @@ export default Service.extend(Evented, {
     }
 
     // Close sidebar if it would be empty otherwise
-    if (this.get('shownComponents.length') == 0)
+    if (this.get('shownComponents').length === 0)
       this.emptyAndClose()
-  },
+  }
 
   emptyAndClose() {
     this.close();
     if (this.get('shownComponents')) {
-      this.set('shownComponents.length', 0);
+      this.get('shownComponents').length = 0;
     }
-  },
+  }
 
   close() {
     this.set('showWindow', false);
     this.trigger('showWindow');
-  },
+  }
 
   openAdditionalData() {
     this.set('showWindow', true);
     this.trigger('showWindow');
-  },
+  }
 
-  setPopupContent(content) {
+  setPopupContent(content: any) {
     this.set('popupContent', content);
-  },
+  }
 
   removePopup() {
     this.set('popupContent', null);
   }
 
-});
+}
+
+declare module "@ember/service" {
+  interface Registry {
+    "additional-data": AdditionalData;
+  }
+}

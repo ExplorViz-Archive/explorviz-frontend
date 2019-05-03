@@ -9,18 +9,12 @@ import debugLogger from 'ember-debug-logger';
 * @class Timestamp-Repository-Service
 * @extends Ember.Service
 */
-export default Service.extend(Evented, {
+export default class TimestampRepository extends Service.extend(Evented) {
 
-  debug: debugLogger(),
+  debug = debugLogger();
 
-  latestTimestamp: null,
-  timelineTimestamps: null,
-
-  // @Override
-  init() {
-    this._super(...arguments);
-    this.set('timelineTimestamps', []);
-  },
+  latestTimestamp:any = null;
+  timelineTimestamps = [];
 
   /**
    * Triggers the 'updated' event in the timeline for updating the chart
@@ -30,4 +24,10 @@ export default Service.extend(Evented, {
     this.trigger("updated", this.get('latestTimestamp'));
   }
 
-});
+}
+
+declare module "@ember/service" {
+  interface Registry {
+    "timestamp-repository": TimestampRepository;
+  }
+}

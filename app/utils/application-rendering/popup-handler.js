@@ -17,18 +17,18 @@ export default Object.extend({
     let modelType = emberModel.constructor.modelName;
 
     switch (modelType) {
-        case "component":
-            popupData = this.buildComponentData(emberModel);
-            break;
-        case "clazz":
-            popupData = this.buildClazzData(emberModel);
-            break;
-        case "drawableclazzcommunication":
-            popupData = this.buildCommunicationData(emberModel);
-            break;
-        default:
-            popupData = null;
-            break;
+      case "component":
+        popupData = this.buildComponentData(emberModel);
+        break;
+      case "clazz":
+        popupData = this.buildClazzData(emberModel);
+        break;
+      case "drawableclazzcommunication":
+        popupData = this.buildCommunicationData(emberModel);
+        break;
+      default:
+        popupData = null;
+        break;
     }
 
 
@@ -52,31 +52,31 @@ export default Object.extend({
     let packageCount = getPackagesCount(component);
 
     let popupData = {
-        isShown: true,
-        popupType: "component",
-        componentName: name,
-        containedClazzes: clazzCount,
-        containedPackages: packageCount,
-      }
+      isShown: true,
+      popupType: "component",
+      componentName: name,
+      containedClazzes: clazzCount,
+      containedPackages: packageCount,
+    }
   
-      return popupData;
+    return popupData;
 
-      function getClazzesCount(component) {
-        let result = component.get('clazzes').get('length');
-        const children = component.get('children');
-        children.forEach((child) => {
-          result += getClazzesCount(child);
-        });
-        return result;
-      }
-      function getPackagesCount(component) {
-        let result = component.get('children').get('length');
-        const children = component.get('children');
-        children.forEach((child) => {
-          result += getPackagesCount(child);
-        });
-        return result;
-      }
+    function getClazzesCount(component) {
+      let result = component.get('clazzes').get('length');
+      const children = component.get('children');
+      children.forEach((child) => {
+        result += getClazzesCount(child);
+      });
+      return result;
+    }
+    function getPackagesCount(component) {
+      let result = component.get('children').get('length');
+      const children = component.get('children');
+      children.forEach((child) => {
+        result += getPackagesCount(child);
+      });
+      return result;
+    }
   },
 
   buildClazzData(clazz){
@@ -87,12 +87,12 @@ export default Object.extend({
     let operationCount = clazzCommunications.get('length');
 
     let popupData = {
-        isShown: true,
-        popupType: "clazz",
-        clazzName: clazzName,
-        activeInstances: instanceCount,
-        calledOps: operationCount,
-      }
+      isShown: true,
+      popupType: "clazz",
+      clazzName: clazzName,
+      activeInstances: instanceCount,
+      calledOps: operationCount,
+    }
   
       return popupData;
   },

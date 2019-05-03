@@ -82,6 +82,7 @@ export default Service.extend(Evented, {
         this.get('landscapeRepo').triggerLatestLandscapeUpdate();
 
         this.set('timestampRepo.latestTimestamp', landscapeRecord.get('timestamp'));
+        console.log(landscapeRecord.get('timestamp'))
         this.get('timestampRepo').triggerTimelineUpdate();
       }
     });

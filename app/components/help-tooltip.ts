@@ -1,6 +1,6 @@
 import Component from '@ember/component';
 
-export default Component.extend({
+export default class HelpTooltip extends Component {
   // No Ember generated container
-  tagName: ''
-});
+  tagName = '';
+}

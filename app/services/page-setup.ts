@@ -9,7 +9,7 @@ import Service from '@ember/service';
 * @module explorviz
 * @submodule page
 */
-export default Service.extend({
+export default class PageSetup extends Service {
 
   /**
   * Latest fetched entity
@@ -17,7 +17,7 @@ export default Service.extend({
   * @property navbarRoutes
   * @type Array
   */
-  navbarRoutes: null,
+  navbarRoutes:string[] = [];
 
   /**
   * Latest fetched entity
@@ -25,12 +25,18 @@ export default Service.extend({
   * @property navbarOcticons
   * @type Array
   */
- navbarOcticons: null,
+ navbarOcticons = null;
 
   init() {
-    this._super(...arguments);
+    super.init();
     // TODO: replay button not shown until implemented
     this.set('navbarRoutes', ["visualization", "discovery"]);
     this.set('navbarOcticons', []);
   }
-});
+}
+
+declare module "@ember/service" {
+  interface Registry {
+    "page-setup": PageSetup;
+  }
+}

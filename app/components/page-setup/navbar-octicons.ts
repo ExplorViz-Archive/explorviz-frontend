@@ -1,5 +1,6 @@
 import Component from '@ember/component';
 import {inject as service} from '@ember/service';
+import PageSetup from 'explorviz-frontend/services/page-setup';
 
 /**
 * This component renders all components (!), that are registered in 
@@ -11,10 +12,11 @@ import {inject as service} from '@ember/service';
 * @module explorviz
 * @submodule page
 */
-export default Component.extend({
+export default class NavbarOcticons extends Component {
 
   // No Ember generated container
-  tagName: '',
+  tagName = '';
 
-  pageSetupService: service("page-setup")
-});
+  @service("page-setup")
+  pageSetupService!: PageSetup;
+}
