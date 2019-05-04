@@ -71,8 +71,7 @@ export default Service.extend({
       textSystem: "rgb(0, 0, 0)",
       textNode: "rgb(255, 255, 255)",
       textApp: "rgb(255, 255, 255)",
-      collapseSymbol: "rgb(0, 0, 0)",
-      textChanged: false
+      collapseSymbol: "rgb(0, 0, 0)"
     });
 
     this.set('applicationColorsDefault', {
@@ -104,8 +103,7 @@ export default Service.extend({
       textSystem: "rgb(0, 0, 0)",
       textNode: "rgb(255, 255, 255)",
       textApp: "rgb(255, 255, 255)",
-      collapseSymbol: "rgb(0, 0, 0)",
-      textChanged: false
+      collapseSymbol: "rgb(0, 0, 0)"
     });
 
     this.set('applicationColors', {

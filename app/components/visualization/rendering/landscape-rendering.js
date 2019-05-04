@@ -397,8 +397,6 @@ export default RenderingCore.extend(AlertifyHandler, {
       });
     } // END if(systems)
 
-    self.set('configuration.landscapeColors.textChanged', false);
-
     const appCommunications = emberLandscape.get('totalApplicationCommunications');
 
     const tiles = [];

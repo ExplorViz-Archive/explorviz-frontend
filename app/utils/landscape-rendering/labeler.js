@@ -251,9 +251,8 @@ export default Object.extend({
 
 
   isLabelAlreadyCreated(emberModel) {
-    // Label already created and color didn't change?
-    if (this.get('textLabels')[emberModel.get('id')] &&
-      !this.get('configuration.landscapeColors.textChanged')) {
+    // Label already created?
+    if (this.get('textLabels')[emberModel.get('id')]) {
 
       const oldTextLabelObj =
         this.get('textLabels')[emberModel.get('id')];
