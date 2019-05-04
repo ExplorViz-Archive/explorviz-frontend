@@ -80,6 +80,8 @@ export default Object.extend({
         });
 
         labelMesh = new THREE.Mesh(labelGeo, material);
+
+        labelMesh.name = emberModel.get('name');
         labelMesh.userData['type'] = 'label';
         labelMesh.userData['model'] = emberModel;
 
@@ -128,6 +130,7 @@ export default Object.extend({
 
         labelMesh = new THREE.Mesh(labelGeo, material);
 
+        labelMesh.name = emberModel.get('name');
         labelMesh.userData['type'] = 'label';
         labelMesh.userData['model'] = emberModel;
 
@@ -172,7 +175,8 @@ export default Object.extend({
         });
 
         labelMesh = new THREE.Mesh(labelGeo, material);
-
+        
+        labelMesh.name = emberModel.get('name');
         labelMesh.userData['type'] = 'label';
         labelMesh.userData['model'] = emberModel;
 
@@ -251,10 +255,10 @@ export default Object.extend({
 
 
   isLabelAlreadyCreated(emberModel) {
-    // Label already created and color didn't change?
-    if (this.get('textLabels')[emberModel.get('id')] &&
+    let potentialLabel = this.get('textLabels')[emberModel.get('id')];
+    // Label exists and text + text color did not change?
+    if (potentialLabel && potentialLabel.mesh.name === emberModel.get('name') &&
       !this.get('configuration.landscapeColors.textchanged')) {
-
       const oldTextLabelObj =
         this.get('textLabels')[emberModel.get('id')];
 
