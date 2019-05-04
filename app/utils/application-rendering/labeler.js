@@ -19,19 +19,19 @@ export default Object.extend({
     this.set('labels', []);
     this.set('textMaterialFoundation',
       new THREE.MeshBasicMaterial({
-        color: this.get('configuration.applicationColors.textFoundation')
+        color: this.get('configuration.applicationColors.foundationText')
       })
     );
 
     this.set('textMaterialComponent',
       new THREE.MeshBasicMaterial({
-        color: this.get('configuration.applicationColors.textComponent')
+        color: this.get('configuration.applicationColors.componentText')
       })
     );
 
     this.set('textMaterialClazz',
     new THREE.MeshBasicMaterial({
-      color: this.get('configuration.applicationColors.textClazz')
+      color: this.get('configuration.applicationColors.clazzText')
     })
   );
 

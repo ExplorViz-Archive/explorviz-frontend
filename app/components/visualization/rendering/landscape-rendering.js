@@ -209,7 +209,7 @@ export default RenderingCore.extend(AlertifyHandler, {
           system.set('threeJSModel', systemMesh);
 
           const textColor =
-            self.get('configuration.landscapeColors.textSystem');
+            self.get('configuration.landscapeColors.systemText');
 
           self.get('labeler').saveTextForLabeling(null, systemMesh, textColor);
 
@@ -373,12 +373,12 @@ export default RenderingCore.extend(AlertifyHandler, {
                 // Create text labels
 
                 let textColor =
-                  self.get('configuration.landscapeColors.textApp');
+                  self.get('configuration.landscapeColors.applicationText');
 
                 self.get('labeler').saveTextForLabeling(null, applicationMesh,
                   textColor);
 
-                textColor = self.get('configuration.landscapeColors.textNode');
+                textColor = self.get('configuration.landscapeColors.nodeText');
                 self.get('labeler').saveTextForLabeling(node.getDisplayName(),
                   nodeMesh, textColor);
 
