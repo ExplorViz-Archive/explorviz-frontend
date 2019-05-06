@@ -80,6 +80,8 @@ export default Object.extend({
         });
 
         labelMesh = new THREE.Mesh(labelGeo, material);
+
+        labelMesh.name = emberModel.get('name');
         labelMesh.userData['type'] = 'label';
         labelMesh.userData['model'] = emberModel;
 
@@ -128,6 +130,7 @@ export default Object.extend({
 
         labelMesh = new THREE.Mesh(labelGeo, material);
 
+        labelMesh.name = emberModel.get('name');
         labelMesh.userData['type'] = 'label';
         labelMesh.userData['model'] = emberModel;
 
@@ -172,7 +175,8 @@ export default Object.extend({
         });
 
         labelMesh = new THREE.Mesh(labelGeo, material);
-
+        
+        labelMesh.name = emberModel.get('name');
         labelMesh.userData['type'] = 'label';
         labelMesh.userData['model'] = emberModel;
 
@@ -249,17 +253,14 @@ export default Object.extend({
   },
 
 
-
   isLabelAlreadyCreated(emberModel) {
-    // Label already created?
-    if (this.get('textLabels')[emberModel.get('id')]) {
-
-      const oldTextLabelObj =
-        this.get('textLabels')[emberModel.get('id')];
-
-      return oldTextLabelObj;
+    let potentialLabel = this.get('textLabels')[emberModel.get('id')];
+    // Label exists and text did not change?
+    if (potentialLabel && potentialLabel.mesh.name === emberModel.get('name')) {
+      return potentialLabel;
+    } else {
+      return null;
     }
-    return null;
   },
 
 
