@@ -12,10 +12,20 @@ module('Integration | Component | visualization/page-setup/navbar/reset-visualiz
 
     await render(hbs`{{visualization/page-setup/navbar/reset-visualization}}`);
 
-    assert.equal(this.element.querySelector('svg').getAttribute('class'),
-      'octicon align-middle');
+    let firstSVGElement = this.element.querySelector('svg');
 
-    assert.equal(this.element.querySelector('a').getAttribute('title'),
-      'Reset View');
+    if(firstSVGElement === null) {
+      assert.ok(null, 'no <svg> tag found');
+    } else {
+      assert.equal(firstSVGElement.getAttribute('class'), 'octicon align-middle');
+    }
+
+    let firstAElement = this.element.querySelector('a');
+
+    if(firstAElement === null) {
+      assert.ok(null, 'no <a> tag found');
+    } else {
+      assert.equal(firstAElement.getAttribute('title'), 'Reset View');
+    }
   });
 });

@@ -12,7 +12,13 @@ module('Integration | Component | visualization/page-setup/timeline/timeline', f
 
     await render(hbs`{{visualization/page-setup/timeline/timeline}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    let textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'no text content');
+    } else {
+      assert.equal(textContent.trim(), '');
+    }
 
     // Template block usage:
     await render(hbs`
@@ -20,6 +26,12 @@ module('Integration | Component | visualization/page-setup/timeline/timeline', f
       {{/visualization/page-setup/timeline/timeline}}
     `);
 
-    assert.equal(this.element.textContent.trim(), '');
+    textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'no text content');
+    } else {
+      assert.equal(textContent.trim(), '');
+    }
   });
 });

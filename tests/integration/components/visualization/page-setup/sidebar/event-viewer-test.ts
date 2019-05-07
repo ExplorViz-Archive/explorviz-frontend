@@ -3,15 +3,21 @@ import { setupRenderingTest } from 'ember-qunit';
 import { render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 
-module('Integration | Component | visualization/page-setup/navbar/application-search', function(hooks) {
+module('Integration | Component | visualization/page-setup/sidebar/event-viewer', function(hooks) {
   setupRenderingTest(hooks);
 
   test('it renders', async function(assert) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{visualization/page-setup/navbar/application-search}}`);
+    await render(hbs`{{visualization/page-setup/sidebar/event-viewer}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    let textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'no text content');
+    } else {
+      assert.notEqual(textContent.trim(), '');
+    }
   });
 });

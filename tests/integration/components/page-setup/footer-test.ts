@@ -12,7 +12,13 @@ module('Integration | Component | page-setup/footer', function(hooks) {
 
     await render(hbs`{{page-setup/footer}}`);
 
-    assert.ok(this.element.textContent.trim().includes('ExplorViz'));
+    let textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'textContent is null');
+    } else {
+      assert.ok(textContent.trim().includes('ExplorViz'));
+    }
     
   });
 });

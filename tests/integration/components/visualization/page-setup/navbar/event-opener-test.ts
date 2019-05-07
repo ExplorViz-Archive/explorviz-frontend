@@ -12,7 +12,13 @@ module('Integration | Component | visualization/page-setup/navbar/event-opener',
 
     await render(hbs`{{visualization/page-setup/navbar/event-opener}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    let textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'textContent is null');
+    } else {
+      assert.equal(textContent.trim(), '');
+    }
 
     // Template block usage:
     await render(hbs`
@@ -20,6 +26,13 @@ module('Integration | Component | visualization/page-setup/navbar/event-opener',
       {{/visualization/page-setup/navbar/event-opener}}
     `);
 
-    assert.equal(this.element.textContent.trim(), '');
+
+    textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'textContent is null');
+    } else {
+      assert.equal(textContent.trim(), '');
+    }
   });
 });

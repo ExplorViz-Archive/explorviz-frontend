@@ -12,7 +12,13 @@ module('Integration | Component | visualization/page-setup/navbar/sql-opener', f
 
     await render(hbs`{{visualization/page-setup/navbar/sql-opener}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    let textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'no text content');
+    } else {
+      assert.equal(textContent.trim(), '');
+    }
 
     // Template block usage:
     await render(hbs`
@@ -20,6 +26,12 @@ module('Integration | Component | visualization/page-setup/navbar/sql-opener', f
       {{/visualization/page-setup/navbar/sql-opener}}
     `);
 
-    assert.equal(this.element.textContent.trim(), '');
+    textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'no text content');
+    } else {
+      assert.equal(textContent.trim(), '');
+    }
   });
 });

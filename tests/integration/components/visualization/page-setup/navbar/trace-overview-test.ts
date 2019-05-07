@@ -12,6 +12,12 @@ module('Integration | Component | trace-overview', function (hooks) {
 
     await render(hbs`{{visualization/page-setup/navbar/trace-overview}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    let textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'no text content');
+    } else {
+      assert.equal(textContent.trim(), '');
+    }
   });
 });

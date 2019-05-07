@@ -12,6 +12,12 @@ module('Integration | Component | visualization/page-setup/navbar/application-op
 
     await render(hbs`{{visualization/page-setup/navbar/application-opener}}`);
 
-    assert.equal(this.element.textContent.trim(), 'Open All Components');
+    let textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'textContent is null');
+    } else {
+      assert.equal(textContent.trim(), 'Open All Components');
+    }
   });
 });
