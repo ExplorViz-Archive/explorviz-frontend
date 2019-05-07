@@ -90,38 +90,6 @@ export default Service.extend({
   },
 
   /**
-   * Sets the current colors towards more visually impaired ones
-   */
-  applyVisuallyImpairedColors() {
-    this.set('landscapeColors', {
-      system: "rgb(199, 199, 199)",
-      nodegroup: "rgb(1, 90, 110)",
-      node: "rgb(0, 150, 190)",
-      application: "rgb(95, 95, 95)",
-      communication: "rgb(244, 145, 0)",
-      systemText: "rgb(0, 0, 0)",
-      nodeText: "rgb(255, 255, 255)",
-      applicationText: "rgb(255, 255, 255)",
-      collapseSymbol: "rgb(0, 0, 0)",
-      background: "rgb(255, 255, 255)"
-    });
-
-    this.set('applicationColors', {
-      foundation: "rgb(199, 199, 199)",
-      componentOdd: "rgb(1, 90, 110)",
-      componentEven: "rgb(0, 150, 190)",
-      clazz: "rgb(95, 95, 95)",
-      highlightedEntity: "rgb(255, 0, 0)",
-      componentText: "rgb(255, 255, 255)",
-      clazzText: "rgb(255, 255, 255)",
-      foundationText: "rgb(0, 0, 0)",
-      communication: "rgb(244, 145, 0)",
-      communicationArrow: "rgb(0, 0, 0)",
-      background: "rgb(255, 255, 255)"
-    });
-  },
-
-  /**
    * Resets all visualization colors to default values
    * Needs to be a deep copy of the object, otherwise the default colors got overridden when the colors are in the extension
    */
