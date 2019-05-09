@@ -1,5 +1,7 @@
 import Service from '@ember/service';
 import Evented from '@ember/object/evented';
+import Landscape from 'explorviz-frontend/models/landscape';
+import Application from 'explorviz-frontend/models/application';
 
 /**
 * TODO
@@ -9,8 +11,8 @@ import Evented from '@ember/object/evented';
 */
 export default class LandscapeRepository extends Service.extend(Evented) {
 
-  latestLandscape = null;
-  latestApplication = null;
+  latestLandscape:Landscape|null = null;
+  latestApplication:Application|null = null;
 
   replayLandscape = null;
   replayApplication = null;
@@ -23,6 +25,6 @@ export default class LandscapeRepository extends Service.extend(Evented) {
 
 declare module "@ember/service" {
   interface Registry {
-    "landscape-repository": LandscapeRepository;
+    "repos/landscape-repository": LandscapeRepository;
   }
 }

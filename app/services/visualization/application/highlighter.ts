@@ -181,7 +181,7 @@ export default class Highlighter extends Service {
 
     function prepareTraceHighlighting() {
       // Unhighlight communication
-      if(application === null || highlightedEntity === null)
+      if(application === null || highlightedEntity === null || !(highlightedEntity instanceof Trace))
         return;
 
       application.get('drawableClazzCommunications').forEach((drawableCommunication) => {
@@ -302,6 +302,6 @@ export default class Highlighter extends Service {
 
 declare module "@ember/service" {
   interface Registry {
-    "highlighter": Highlighter;
+    "visualization/application/highlighter": Highlighter;
   }
 }

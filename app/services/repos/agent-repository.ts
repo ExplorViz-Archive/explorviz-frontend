@@ -15,6 +15,6 @@ export default class AgentRepository extends Service.extend(Evented) {
 
 declare module "@ember/service" {
   interface Registry {
-    "agent-repository": AgentRepository;
+    "repos/agent-repository": AgentRepository;
   }
 }

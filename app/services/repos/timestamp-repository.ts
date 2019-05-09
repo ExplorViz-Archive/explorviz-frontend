@@ -28,6 +28,6 @@ export default class TimestampRepository extends Service.extend(Evented) {
 
 declare module "@ember/service" {
   interface Registry {
-    "timestamp-repository": TimestampRepository;
+    "repos/timestamp-repository": TimestampRepository;
   }
 }
