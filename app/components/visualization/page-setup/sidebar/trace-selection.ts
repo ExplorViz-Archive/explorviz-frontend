@@ -1,47 +1,76 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import { computed } from '@ember/object';
+import DS from 'ember-data';
+import AdditionalData from 'explorviz-frontend/services/additional-data';
+import Highlighter from 'explorviz-frontend/services/visualization/application/highlighter';
+import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
+import RenderingService from 'explorviz-frontend/services/rendering-service';
+import Trace from 'explorviz-frontend/models/trace';
+import Clazz from 'explorviz-frontend/models/clazz';
 
-export default Component.extend({
+export type TimeUnit = 'ms'|'s';
+
+export default class TraceSelection extends Component {
 
   // No Ember generated container
-  tagName: '',
+  tagName = '';
 
-  traceTimeUnit: 'ms',
-  traceStepTimeUnit: 'ms',
-  sortBy: 'traceId',
-  isSortedAsc: true,
-  filterTerm: '',
-  isReplayAnimated: true,
+  traceTimeUnit:TimeUnit = 'ms';
+  traceStepTimeUnit:TimeUnit = 'ms';
+  
+  sortBy:any = 'traceId';
+  isSortedAsc:boolean = true;
+  filterTerm:string = '';
+  filterInput:string = '';
 
-  store: service(),
-  additionalData: service('additional-data'),
-  highlighter: service('visualization/application/highlighter'),
-  landscapeRepo: service('repos/landscape-repository'),
-  renderingService: service(),
+  isReplayAnimated:boolean = true;
+
+  @service('store')
+  store!: DS.Store;
+
+  @service('additional-data')
+  additionalData!: AdditionalData;
+
+  @service('visualization/application/highlighter')
+  highlighter!: Highlighter;
+  
+  @service('repos/landscape-repository')
+  landscapeRepo!: LandscapeRepository;
+
+  @service('rendering-service')
+  renderingService!: RenderingService;
 
   // Compute current traces when highlighting changes
-  traces: computed('highlighter.highlightedEntity', 'landscapeRepo.latestApplication', 'sortBy', 'isSortedAsc', 'filterTerm', function () {
+  @computed('highlighter.highlightedEntity', 'landscapeRepo.latestApplication', 'sortBy', 'isSortedAsc', 'filterTerm')
+  get traces() {
     let highlighter = this.get('highlighter');
     if (highlighter.get('isTrace')) {
       return [highlighter.get('highlightedEntity')];
     } else {
-      return this.filterAndSortTraces(this.get('landscapeRepo.latestApplication.traces'));
+      const latestApplication = this.get('landscapeRepo').get('latestApplication');
+      if(latestApplication === null) {
+        return [];
+      } else {
+        return this.filterAndSortTraces(latestApplication.get('traces'));
+      }
     }
-  }),
+  }
 
-  filterAndSortTraces(traces) {
+  filterAndSortTraces(this: TraceSelection, traces: DS.PromiseManyArray<Trace>) {
     if (!traces) {
       return [];
     }
 
-    let filteredTraces = [];
+    let filteredTraces:Trace[] = [];
     let filter = this.get('filterTerm');
     traces.forEach((trace) => {
+      let sourceClazz = trace.get('sourceClazz');
+      let targetClazz = trace.get('targetClazz');
       if (filter === ''
         || trace.get('traceId').includes(filter)
-        || trace.get('sourceClazz.name').toLowerCase().includes(filter)
-        || trace.get('targetClazz.name').toLowerCase().includes(filter)) {
+        || (sourceClazz !== undefined && sourceClazz.get('name').toLowerCase().includes(filter))
+        || (targetClazz !== undefined && targetClazz.get('name').toLowerCase().includes(filter))) {
         filteredTraces.push(trace);
       }
     });
@@ -53,15 +82,15 @@ export default Component.extend({
     }
 
     return filteredTraces;
-  },
+  }
 
   init() {
     this.get('additionalData').on('showWindow', this, this.onWindowChange);
-    this._super(...arguments);
-  },
+    super.init();
+  }
 
-  actions: {
-    clickedTrace(trace) {
+  actions = {
+    clickedTrace(this: TraceSelection, trace: Trace) {
       if (trace.get('highlighted')) {
         this.get('highlighter').unhighlightAll();
       } else {
@@ -72,12 +101,12 @@ export default Component.extend({
       this.get('renderingService').redrawScene();
     },
 
-    filter() {
+    filter(this: TraceSelection) {
       // Case insensitive string filter
       this.set('filterTerm', this.get('filterInput').toLowerCase());
     },
 
-    selectNextTraceStep() {
+    selectNextTraceStep(this: TraceSelection) {
       this.get('highlighter').highlightNextTraceStep();
       this.get('renderingService').redrawScene();
       if (this.get('isReplayAnimated')) {
@@ -85,7 +114,7 @@ export default Component.extend({
       }
     },
 
-    selectPreviousTraceStep() {
+    selectPreviousTraceStep(this: TraceSelection) {
       this.get('highlighter').highlightPreviousTraceStep();
       this.get('renderingService').redrawScene();
       if (this.get('isReplayAnimated')) {
@@ -93,7 +122,7 @@ export default Component.extend({
       }
     },
 
-    toggleTraceTimeUnit() {
+    toggleTraceTimeUnit(this: TraceSelection) {
       let timeUnit = this.get('traceTimeUnit');
       if (timeUnit === 'ms') {
         this.set('traceTimeUnit', 's');
@@ -102,7 +131,7 @@ export default Component.extend({
       }
     },
 
-    toggleTraceStepTimeUnit() {
+    toggleTraceStepTimeUnit(this: TraceSelection) {
       let timeUnit = this.get('traceStepTimeUnit');
       if (timeUnit === 'ms') {
         this.set('traceStepTimeUnit', 's');
@@ -111,17 +140,19 @@ export default Component.extend({
       }
     },
 
-    toggleAnimation() {
+    toggleAnimation(this: TraceSelection) {
       this.set('isReplayAnimated', !this.get('isReplayAnimated'));
     },
 
-    lookAtClazz(proxyClazz) {
+    lookAtClazz(this: TraceSelection, proxyClazz: Clazz) {
       let clazzId = proxyClazz.get('id');
       let clazz = this.get('store').peekRecord('clazz', clazzId);
-      this.get('renderingService').moveCameraTo(clazz);
+      if(clazz !== null) {
+        this.get('renderingService').moveCameraTo(clazz);
+      }
     },
 
-    sortBy(property) {
+    sortBy(this: TraceSelection, property:any) {
       // Determine order for sorting
       if (this.get('sortBy') === property) {
         // Toggle sorting order
@@ -134,28 +165,30 @@ export default Component.extend({
       this.set('sortBy', property);
     },
 
-    close() {
+    close(this: TraceSelection) {
       this.get('additionalData').removeComponent("visualization/page-setup/sidebar/trace-selection");
     },
-  },
+  }
 
-  moveCameraToTraceStep() {
-    let currentTraceStep = this.get('highlighter.currentTraceStep');
+  moveCameraToTraceStep(this: TraceSelection) {
+    let currentTraceStep = this.get('highlighter').get('currentTraceStep');
 
     if (currentTraceStep) {
-      let storeId = currentTraceStep.get('clazzCommunication.id');
+      let storeId = currentTraceStep.get('clazzCommunication').get('id');
       // Avoid proxy object by requesting clazz from store
       let clazzCommunication = this.get('store').peekRecord('clazzcommunication', storeId);
-      this.get('renderingService').moveCameraTo(clazzCommunication);
+      if(clazzCommunication !== null) {
+        this.get('renderingService').moveCameraTo(clazzCommunication);
+      }
     }
-  },
+  }
 
-  onWindowChange() {
-    if (!this.get('additionalData.showWindow') && this.get('highlighter.isTrace')) {
+  onWindowChange(this: TraceSelection) {
+    if (!this.get('additionalData').get('showWindow') && this.get('highlighter').get('isTrace')) {
       let highlighter = this.get('highlighter');
       highlighter.unhighlightAll();
       this.get('renderingService').redrawScene();
     }
-  },
+  }
 
-});
+}

@@ -1,50 +1,53 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
+import { action } from '@ember/object';
 
 import $ from 'jquery';
+import AdditionalData from 'explorviz-frontend/services/additional-data';
 
-export default Component.extend({
+export default class DataSelection extends Component {
   // No Ember generated container
-  tagName: '',
+  tagName = '';
 
-  additionalData: service('additional-data'),
+  @service('additional-data')
+  additionalData!: AdditionalData;
 
-  actions: {
-    closeWindow() {
-      this.get('additionalData').emptyAndClose();
-    },
+  @action
+  closeWindow() {
+    this.get('additionalData').emptyAndClose();
+  }
 
-    openWindow() {
-      this.get('additionalData').openAdditionalData();
-    },
-  },
+  @action
+  openWindow() {
+    this.get('additionalData').openAdditionalData();
+  }
 
   closeDataSelection() {
     $('#dataselection').addClass('hide');
     $('#vizspace').addClass('col-12');
     $('#vizspace').removeClass('col-8');
-  },
+  }
 
   openDataSelection() {
     $('#dataselection').removeClass('hide');
     $('#vizspace').addClass('col-8');
     $('#vizspace').removeClass('col-12');
-  },
+  }
 
   onShowWindow() {
-    if(this.get('additionalData.showWindow'))
+    if(this.get('additionalData').get('showWindow'))
       this.openDataSelection();
     else
       this.closeDataSelection();
-  },
+  }
 
   init() {
-    this._super(...arguments);
+    super.init();
     this.get('additionalData').on('showWindow', this, this.onShowWindow);
-  },
+  }
 
   willDestroyElement() {
-    this._super(...arguments);
+    super.willDestroyElement();
     this.get('additionalData').off('showWindow', this, this.onShowWindow);
   }
-});
+}
