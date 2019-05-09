@@ -21,7 +21,7 @@ export default class Highlighter extends Service {
   application:Application|null = null;
   traceId:number|null = null;
   currentTracePosition:number|null = null;
-  currentTraceStep:number|null = null;
+  currentTraceStep:TraceStep|null = null;
 
   @computed('highlightedEntity')
   get isTrace(this: Highlighter) {
