@@ -21,24 +21,18 @@ const { attr, belongsTo, hasMany } = DS;
  */
 export default class DrawableClazzCommunication extends DrawEdgeEntity {
 
-  // @ts-ignore
   @attr('boolean', { defaultValue: false}) isBidirectional!: boolean;
 
-  // @ts-ignore
   @attr('number') requests!: number;
 
-  // @ts-ignore
   @attr('number') averageResponseTime!: number;
 
-  // @ts-ignore
   @belongsTo('clazz', { inverse: null })
   sourceClazz!: DS.PromiseObject<Clazz> & Clazz;
 
-  // @ts-ignore
   @belongsTo('clazz', { inverse: null })
   targetClazz!: DS.PromiseObject<Clazz> & Clazz;
 
-  // @ts-ignore
   @hasMany('aggregatedclazzcommunication', { inverse: null })
   aggregatedClazzCommunications!: DS.PromiseManyArray<AggregatedClazzCommunication>;
 

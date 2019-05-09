@@ -17,19 +17,15 @@ const { belongsTo, hasMany } = DS;
 */
 export default class Landscape extends BaseEntity {
 
-  // @ts-ignore
   @belongsTo('timestamp')
   timestamp!: DS.PromiseObject<Timestamp> & Timestamp;
-  
-  // @ts-ignore
+
   @hasMany('event', { inverse: null })
   events!: DS.PromiseManyArray<Event>;
 
-  // @ts-ignore
   @hasMany('system', { inverse: 'parent' })
   systems!: DS.PromiseManyArray<Event>;
 
-  // @ts-ignore
   // list of applicationCommunication for rendering purposes
   @hasMany('applicationcommunication', { inverse: null })
   totalApplicationCommunications!: DS.PromiseManyArray<ApplicationCommunication>;

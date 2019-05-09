@@ -14,16 +14,12 @@ const { attr } = DS;
  */
 export default class Event extends BaseEntity {
 
-  // @ts-ignore
   @attr('number') timestamp!: number;
 
-  // @ts-ignore
   @attr('string') eventType!: string;
 
-  // @ts-ignore
   @attr('string') eventMessage!: string;
 
-  // @ts-ignore
   @attr('boolean', { defaultValue: false }) isSelected!: boolean;
 
 }

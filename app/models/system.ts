@@ -17,18 +17,14 @@ const { attr, hasMany, belongsTo } = DS;
 */
 export default class System extends DrawNodeEntity {
 
-  // @ts-ignore
   @attr('string') name!: string;
 
-  // @ts-ignore
   @hasMany('nodegroup', { inverse: 'parent' })
   nodegroups!: DS.PromiseManyArray<NodeGroup>;
 
-  // @ts-ignore
   @belongsTo('landscape', { inverse: 'systems' })
   parent!: DS.PromiseObject<Landscape> & Landscape;
 
-  // @ts-ignore
   @attr('boolean', {defaultValue: true}) opened!: boolean;
 
   // used for text labeling performance in respective labelers

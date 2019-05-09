@@ -18,54 +18,38 @@ const { attr, belongsTo } = DS;
 */
 export default class Procezz extends BaseModel {
 
-  // @ts-ignore
   @attr("number") pid!: number;
 
-  // @ts-ignore
   @attr("string") osExecutionCommand!: string;
 
-  // @ts-ignore
   @attr("string") agentExecutionCommand!: string;
 
-  // @ts-ignore
   @attr("string") proposedExecutionCommand!: string;
 
-  // @ts-ignore
   @attr("string") workingDirectory!: string;
 
-  // @ts-ignore
   @attr("string") programmingLanguage!: string;
 
-  // @ts-ignore
   @attr("boolean") wasFoundByBackend!: boolean;
 
-  // @ts-ignore
   @belongsTo("agent") agent!: DS.PromiseObject<Agent> & Agent;
 
   // the following attribute can be changed by users
 
-  // @ts-ignore
   @attr("string") userExecutionCommand!: string;
 
-  // @ts-ignore
   @attr("string") shutdownCommand!: string;
 
-  // @ts-ignore
   @attr("boolean") monitoredFlag!: boolean;
 
-  // @ts-ignore
   @attr("boolean") webserverFlag!: boolean;
 
-  // @ts-ignore
   @attr("boolean") stopped!: boolean;
 
-  // @ts-ignore
   @attr("boolean") restart!: boolean;
 
-  // @ts-ignore
   @attr("string") aopContent!: string;
 
-  // @ts-ignore
   @attr("string") kiekerConfigContent!: string;
 
 }

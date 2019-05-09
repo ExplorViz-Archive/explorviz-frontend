@@ -22,7 +22,6 @@ export default class DrawEdgeEntity extends BaseEntity {
   * @property lineThickness
   * @type number
   */
-  // @ts-ignore
   @attr('number', { defaultValue: 0.0}) lineThickness!: number;
 
   /**
@@ -31,7 +30,6 @@ export default class DrawEdgeEntity extends BaseEntity {
   * @property positionZ
   * @type number
   */
-  // @ts-ignore
   @attr('number', { defaultValue: 0.0}) positionZ!: number;
 
   /**
@@ -40,30 +38,21 @@ export default class DrawEdgeEntity extends BaseEntity {
   * @property points
   * @type objects
   */
-  // @ts-ignore
   @attr() points: any;
-  // @ts-ignore
   @attr() pointsFor3D: any;
 
-  // @ts-ignore
   @attr() startPoint: any;
-  // @ts-ignore
   @attr() endPoint: any;
 
-  // @ts-ignore
   @attr() state: any;
 
-  // @ts-ignore
   @attr() pipeSize: any;
-  // @ts-ignore
   @attr() pipeColor: any;
 
   kielerEdgeReferences = null;
 
-  // @ts-ignore
   @attr('boolean', { defaultValue: false }) hidden!: boolean;
 
-  // @ts-ignore
   @attr('boolean', { defaultValue: false }) highlighted!: boolean;
 
   init() {

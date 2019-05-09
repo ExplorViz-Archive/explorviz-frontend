@@ -16,27 +16,20 @@ const { attr, belongsTo, hasMany } = DS;
 */
 export default class Component extends Draw3DNodeEntity {
 
-  // @ts-ignore
   @attr('string') name!: string;
 
-  // @ts-ignore
   @attr('string') fullQualifiedName!: string;
 
-  // @ts-ignore
   @attr('boolean', {defaultValue: false}) synthetic!: boolean;
 
-  // @ts-ignore
   @attr('boolean', {defaultValue: false}) foundation!: boolean;
 
-  // @ts-ignore
   @hasMany('component', { inverse: 'parentComponent' })
   children!: DS.PromiseManyArray<Component>;
 
-  // @ts-ignore
   @hasMany('clazz', { inverse: 'parent' })
   clazzes!: DS.PromiseManyArray<Clazz>;
 
-  // @ts-ignore
   @belongsTo('component', { inverse: 'children' })
   parentComponent!: DS.PromiseObject<Component> & Component;
   

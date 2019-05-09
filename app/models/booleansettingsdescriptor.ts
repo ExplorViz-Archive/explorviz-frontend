@@ -4,13 +4,10 @@ const { attr } = DS;
 
 export default class BooleanSettingsDescriptor extends DS.Model {
 
-  // @ts-ignore
   @attr('string') description!: string;
   
-  // @ts-ignore
   @attr('string') name!: string;
 
-  // @ts-ignore
   @attr('boolean') defaultValue!: boolean;
 }
 

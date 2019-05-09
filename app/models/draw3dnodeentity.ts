@@ -17,26 +17,16 @@ const { attr } = DS;
 */
 export default class Draw3DNodeEntity extends BaseEntity {
 
-  // @ts-ignore
   @attr('number', { defaultValue: 0}) width!: number;
-  // @ts-ignore
   @attr('number', { defaultValue: 0}) height!: number;
-  // @ts-ignore
   @attr('number', { defaultValue: 0}) depth!: number;
 
-  // @ts-ignore
   @attr('number', { defaultValue: 0}) positionX!: number;
-  // @ts-ignore
   @attr('number', { defaultValue: 0}) positionY!: number;
-  // @ts-ignore
   @attr('number', { defaultValue: 0}) positionZ!: number;
-  // @ts-ignore
 
-  // @ts-ignore
   @attr('boolean', { defaultValue: false}) highlighted!: boolean;
-  // @ts-ignore
   @attr('boolean', { defaultValue: false}) opened!: boolean;
-  // @ts-ignore
   @attr('boolean', { defaultValue: true}) visible!: boolean;
 
   @computed('width', 'height', 'depth')
@@ -49,7 +39,6 @@ export default class Draw3DNodeEntity extends BaseEntity {
   }
 
   // used to mark entities as transparent or normal for highlighting
-  // @ts-ignore
   @attr('string', { defaultValue: 'NORMAL'})
   state!: string;
 

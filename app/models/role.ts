@@ -5,7 +5,6 @@ const { attr } = DS;
 
 export default class Role extends DS.Model {
 
-  // @ts-ignore
   @attr('string') descriptor!: string;
 
 }

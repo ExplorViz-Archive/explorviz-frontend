@@ -17,29 +17,21 @@ const { attr, hasMany, belongsTo } = DS;
 */
 export default class Node extends DrawNodeEntity {
 
-  // @ts-ignore
   @attr('string') name!: string;
 
-  // @ts-ignore
   @attr('string') ipAddress!: string;
 
-  // @ts-ignore
   @attr('number') cpuUtilization!: number;
 
-  // @ts-ignore
   @attr('number') freeRAM!: number;
 
-  // @ts-ignore
   @attr('number') usedRAM!: number;
 
-  // @ts-ignore
   @attr('boolean', {defaultValue: true}) visible!: boolean;
 
-  // @ts-ignore
   @hasMany('application', { inverse: 'parent' })
   applications!: DS.PromiseManyArray<Application>;
 
-  // @ts-ignore
   @belongsTo('nodegroup', { inverse: 'nodes' })
   parent!: DS.PromiseObject<NodeGroup> & NodeGroup;
 

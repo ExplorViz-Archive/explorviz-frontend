@@ -16,26 +16,19 @@ const { attr, belongsTo } = DS;
  */
 export default class TraceStep extends BaseEntity {
 
-  // @ts-ignore
   @attr('number') tracePosition!: number;
 
-  // @ts-ignore
   @attr('number') requests!: number;
 
-  // @ts-ignore
   @attr('number') currentTraceDuration!: number;
 
-  // @ts-ignore
   @attr('number') averageResponseTime!: number;
 
-  // @ts-ignore
   @attr('boolean', { defaultValue: false }) highlighted!: boolean;
 
-  // @ts-ignore
   @belongsTo('trace', { inverse: 'traceSteps' })
   parentTrace!: DS.PromiseObject<Trace> & Trace;
 
-  // @ts-ignore
   @belongsTo('clazzcommunication', { inverse: null })
   clazzCommunication!: DS.PromiseObject<ClazzCommunication> & ClazzCommunication;
 

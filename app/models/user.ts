@@ -17,19 +17,14 @@ const { attr, hasMany } = DS;
  */
 export default class User extends Model {
 
-  // @ts-ignore
 	@attr('string') username!: string;
 
-  // @ts-ignore
 	@attr('string') password!: string;
 
-  // @ts-ignore
 	@attr('string') token!: string;
 
-  // @ts-ignore
 	@hasMany('role') roles!: DS.PromiseManyArray<Role>;
 
-  // @ts-ignore
 	// simple object, no Ember record
 	@attr() settings!: any;
 

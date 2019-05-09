@@ -16,28 +16,21 @@ const { attr, belongsTo } = DS;
  */
 export default class ApplicationCommunication extends DrawEdgeEntity {
 
-  // @ts-ignore
   @attr('number') requests!: number;
 
-  // @ts-ignore
   @attr('string') technology!: string;
 
-  // @ts-ignore
   @attr('number') averageResponseTime!: number;
 
-  // @ts-ignore
   @belongsTo('application', { inverse: 'applicationCommunications' })
   sourceApplication!: DS.PromiseObject<Application> & Application;
 
-  // @ts-ignore
   @belongsTo('application', { inverse: null })
   targetApplication!: DS.PromiseObject<Application> & Application;
 
-  // @ts-ignore
   @belongsTo('clazz', { inverse: null })
   sourceClazz!: DS.PromiseObject<Clazz> & Clazz;
 
-  // @ts-ignore
   @belongsTo('clazz', { inverse: null })
   targetClazz!: DS.PromiseObject<Clazz> & Clazz;
 

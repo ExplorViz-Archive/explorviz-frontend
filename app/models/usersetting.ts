@@ -4,11 +4,8 @@ const { attr } = DS;
 
 export default class UserSetting extends DS.Model {
 
-  // @ts-ignore
   @attr() booleanAttributes: any;
-  // @ts-ignore
   @attr() numericAttributes: any;
-  // @ts-ignore
   @attr() stringAttributes: any;
   
 }

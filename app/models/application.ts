@@ -21,43 +21,33 @@ const { attr, belongsTo, hasMany } = DS;
 */
 export default class Application extends DrawNodeEntity {
 
-  // @ts-ignore
   @attr('string') name!: string;
 
-  // @ts-ignore
   @attr('number') lastUsage!: number;
 
-  // @ts-ignore
   @attr('string') programmingLanguage!: string;
 
-  // @ts-ignore
   @belongsTo('node', { inverse: 'applications' })
   parent!: DS.PromiseObject<Node> & Node;
 
-  // @ts-ignore
   @hasMany('component', {
     // breaks Ember, maybe because of circle ?
     //inverse: 'belongingApplication'
   })
   components!: DS.PromiseManyArray<Component>;
 
-  // @ts-ignore
   @hasMany('databasequery')
   databaseQueries!: DS.PromiseManyArray<DatabaseQuery>;
 
-  // @ts-ignore
   @hasMany('trace') traces!: DS.PromiseManyArray<Trace>;
 
-  // @ts-ignore
   @hasMany('applicationcommunication', { inverse: 'sourceApplication' })
   applicationCommunications!: DS.PromiseManyArray<ApplicationCommunication>;
 
-  // @ts-ignore
   // list of aggregated clazzCommunication for rendering purposes
   @hasMany('aggregatedclazzcommunication', { inverse: null })
   aggregatedClazzCommunications!: DS.PromiseManyArray<AggregatedClazzCommunication>;
 
-  // @ts-ignore
   // list of aggregated clazzCommunication for rendering purposes
   @hasMany('drawableclazzcommunication', { inverse: null })
   drawableClazzCommunications!: DS.PromiseManyArray<DrawableClazzCommunication>;

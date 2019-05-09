@@ -16,22 +16,16 @@ const { attr, hasMany } = DS;
  */
 export default class Trace extends BaseEntity {
 
-  // @ts-ignore
   @attr('string') traceId!: string;
 
-  // @ts-ignore
   @attr('number') totalRequests!: number;
 
-  // @ts-ignore
   @attr('number') totalTraceDuration!: number;
 
-  // @ts-ignore
   @attr('number') averageResponseTime!: number;
 
-  // @ts-ignore
   @attr('boolean', { defaultValue: false }) highlighted!: boolean;
 
-  // @ts-ignore
   @hasMany('tracestep', { inverse: 'parentTrace' })
   traceSteps!: DS.PromiseManyArray<TraceStep>;
 

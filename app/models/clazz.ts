@@ -16,22 +16,17 @@ const { attr, belongsTo, hasMany } = DS;
 */
 export default class Clazz extends Draw3DNodeEntity {
 
-  // @ts-ignore
   @attr('string') name!: string;
-  // @ts-ignore
+
   @attr('string') fullQualifiedName!: string;
 
-  // @ts-ignore
   @attr('number', {defaultValue: 0}) instanceCount!: number;
 
-  // @ts-ignore
   @attr() objectIds: any;
 
-  // @ts-ignore
   @hasMany('clazzcommunication', { inverse: 'sourceClazz' })
   clazzCommunications!: DS.PromiseManyArray<ClazzCommunication>;
 
-  // @ts-ignore
   @belongsTo('component', { inverse: 'clazzes' })
   parent!: DS.PromiseObject<Component> & Component;
 

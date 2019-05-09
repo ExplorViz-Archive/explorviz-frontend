@@ -16,21 +16,16 @@ const { attr, hasMany, belongsTo } = DS;
 */
 export default class NodeGroup extends DrawNodeEntity {
 
-  // @ts-ignore
   @attr('string') name!: string;
 
-  // @ts-ignore
   @belongsTo('system', { inverse: 'nodegroups' })
   parent!: DS.PromiseObject<System> & System;
 
-  // @ts-ignore
   @hasMany('node', { inverse: 'parent' })
   nodes!: DS.PromiseObject<Node> & Node;
 
-  // @ts-ignore
   @attr('boolean', {defaultValue: true}) visible!: boolean;
 
-  // @ts-ignore
   @attr('boolean', {defaultValue: true}) opened!: boolean;
 
   // used for text labeling performance in respective renderers

@@ -22,7 +22,6 @@ export default class BaseEntitity extends Model {
   * @type Array
   *
   */
-  // @ts-ignore
   @attr() extensionAttributes!: any;
 
 }

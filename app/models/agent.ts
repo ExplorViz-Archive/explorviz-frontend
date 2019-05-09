@@ -19,13 +19,10 @@ const { attr, hasMany } = DS;
 */
 export default class Agent extends BaseModel {
 
-  // @ts-ignore
   @attr("string") ip!: string;
 
-  // @ts-ignore
   @attr("string") port!: string;
 
-  // @ts-ignore
   @hasMany("procezz") procezzes!: DS.PromiseManyArray<Procezz>;
 
 }

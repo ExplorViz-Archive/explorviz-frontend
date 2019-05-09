@@ -14,10 +14,8 @@ const { attr } = DS;
 */
 export default class Timestamp extends BaseEntity {
 
-  // @ts-ignore
   @attr('number') timestamp!: number;
 
-  // @ts-ignore
   @attr('number') totalRequests!: number;
 
 }

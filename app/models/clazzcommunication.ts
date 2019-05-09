@@ -16,21 +16,16 @@ const { attr, belongsTo, hasMany } = DS;
  */
 export default class ClazzCommunication extends DrawEdgeEntity {
 
-  // @ts-ignore
   @attr('string') operationName!: string;
 
-  // @ts-ignore
   @attr() requests: any;
 
-  // @ts-ignore
   @hasMany('tracestep', { inverse: null })
   traceSteps!: DS.PromiseManyArray<TraceStep>;
 
-  // @ts-ignore
   @belongsTo('clazz', { inverse: 'clazzCommunications' })
   sourceClazz!: DS.PromiseObject<Clazz> & Clazz;
 
-  // @ts-ignore
   @belongsTo('clazz', { inverse: null })
   targetClazz!: DS.PromiseObject<Clazz> & Clazz;
 

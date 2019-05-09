@@ -4,13 +4,10 @@ const { attr } = DS;
 
 export default class StringSettingsDescriptor extends DS.Model {
 
-  // @ts-ignore
   @attr('string') description!: string;
-  
-  // @ts-ignore
+
   @attr('string') name!: string;
 
-  // @ts-ignore
   @attr('string') defaultValue!: string;
 }
 
