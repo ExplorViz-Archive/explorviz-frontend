@@ -65,14 +65,15 @@ export default Object.extend({
     }
 
     systemTextCache.forEach((textObj: { text: string, parent: THREE.Mesh, color: string }) => {
-      const threejsModel = textObj.parent;
+      const threejsModel:any = textObj.parent;
       const emberModel = threejsModel.userData.model;
 
-      let labelMesh = this.isLabelAlreadyCreated(emberModel);
+      let labelMesh:any = this.isLabelAlreadyCreated(emberModel);
 
       if (labelMesh && labelMesh.mesh) {
         // Update meta-info for model
         labelMesh.mesh.userData['model'] = emberModel;
+        threejsModel['label'] = labelMesh.mesh;
         threejsModel.add(labelMesh.mesh);
         labelMesh = labelMesh.mesh;
       }
@@ -90,6 +91,8 @@ export default Object.extend({
         });
 
         labelMesh = new THREE.Mesh(labelGeo, material);
+
+        labelMesh.name = emberModel.get('name');
         labelMesh.userData['type'] = 'label';
         labelMesh.userData['model'] = emberModel;
 
@@ -97,6 +100,7 @@ export default Object.extend({
         textLabels[emberModel.get('id')] =
           { "mesh": labelMesh };
 
+        threejsModel['label'] = labelMesh;
         threejsModel.add(labelMesh);
       }
 
@@ -108,16 +112,17 @@ export default Object.extend({
   drawNodeTextLabels() {
     let nodeTextCache: any = this.get('nodeTextCache');
     nodeTextCache.forEach((textObj : { text: string, parent: THREE.Mesh, color: string }) => {
-      const threejsModel = textObj.parent;
+      const threejsModel:any = textObj.parent;
       const emberModel = threejsModel.userData.model;
       const nodegroupstate = emberModel.get('parent.opened');
 
-      let labelMesh = this.isLabelAlreadyCreated(emberModel);
+      let labelMesh:any = this.isLabelAlreadyCreated(emberModel);
 
       if (labelMesh && labelMesh.mesh &&
         labelMesh.nodegroupopenstate === nodegroupstate) {
         // Update meta-info for model
         labelMesh.mesh.userData['model'] = emberModel;
+        threejsModel['label'] = labelMesh.mesh;
         threejsModel.add(labelMesh.mesh);
         labelMesh = labelMesh.mesh;
       }
@@ -138,6 +143,7 @@ export default Object.extend({
 
         labelMesh = new THREE.Mesh(labelGeo, material);
 
+        labelMesh.name = emberModel.get('name');
         labelMesh.userData['type'] = 'label';
         labelMesh.userData['model'] = emberModel;
 
@@ -145,6 +151,7 @@ export default Object.extend({
         textLabels[emberModel.get('id')] =
           { "mesh": labelMesh, "nodegroupopenstate": emberModel.get('parent.opened') };
 
+        threejsModel['label'] = labelMesh;
         threejsModel.add(labelMesh);
       }
 
@@ -158,14 +165,15 @@ export default Object.extend({
     let appTextCache : any = this.get('appTextCache');
     appTextCache.forEach((textObj : { text: string, parent: THREE.Object3D, color: string }) => {
 
-      const threejsModel = textObj.parent;
+      const threejsModel:any = textObj.parent;
       const emberModel = threejsModel.userData.model;
 
-      let labelMesh = this.isLabelAlreadyCreated(emberModel);
+      let labelMesh:any = this.isLabelAlreadyCreated(emberModel);
 
       if (labelMesh && labelMesh.mesh) {
         // Update meta-info for model
         labelMesh.mesh.userData['model'] = emberModel;
+        threejsModel['label'] = labelMesh.mesh;
         threejsModel.add(labelMesh.mesh);
         labelMesh = labelMesh.mesh;
       }
@@ -182,7 +190,8 @@ export default Object.extend({
         });
 
         labelMesh = new THREE.Mesh(labelGeo, material);
-
+        
+        labelMesh.name = emberModel.get('name');
         labelMesh.userData['type'] = 'label';
         labelMesh.userData['model'] = emberModel;
 
@@ -190,6 +199,7 @@ export default Object.extend({
         textLabels[emberModel.get('id')] =
           { "mesh": labelMesh };
 
+        threejsModel['label'] = labelMesh;
         threejsModel.add(labelMesh);
       }
 
@@ -262,15 +272,18 @@ export default Object.extend({
 
 
 
-  isLabelAlreadyCreated(emberModel : any) {
-    // Label already created and color didn't change?
-    let textLabels : any = this.get('textLabels');
-    let configuration : any = this.get('configuration');
-    let textChanged : any = configuration.landscapeColors.textchanged;
+  isLabelAlreadyCreated(emberModel:any) {
+    let textLabels = this.get('textLabels');
 
-    if (textLabels[emberModel.get('id')] &&
-      !textChanged) {
+    if(textLabels === null)
+      return null;
 
+    let potentialLabel:any = textLabels[emberModel.get('id')];
+
+    let configuration:any = this.get('configuration');
+    // Label exists and text + text color did not change?
+    if (potentialLabel && potentialLabel.mesh.name === emberModel.get('name') &&
+      (!configuration || !configuration.get('landscapeColors.textchanged'))) {
       const oldTextLabelObj =
       textLabels[emberModel.get('id')];
 
