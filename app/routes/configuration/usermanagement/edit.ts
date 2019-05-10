@@ -1,29 +1,31 @@
 import BaseRoute from 'explorviz-frontend/routes/base-route';
-import AuthenticatedRouteMixin from 
-  'ember-simple-auth/mixins/authenticated-route-mixin';
+// @ts-ignore
+import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 import { inject as service } from "@ember/service";
+import DS from 'ember-data';
 
-export default BaseRoute.extend(AuthenticatedRouteMixin, AlertifyHandler, {
+export default class UserManagementEditRoute extends BaseRoute.extend(AuthenticatedRouteMixin, AlertifyHandler) {
 
-  store: service(),
+  @service('store')
+  store!: DS.Store;
 
-  model: function ({ user_id }) {
+  model(this:UserManagementEditRoute, { user_id }:{ user_id:string }) {
     return this.get('store').findRecord('user', user_id, {reload: true});
-  },
+  }
 
-  actions: {
+  actions = {
     // @Override BaseRoute
-    resetRoute() {
+    resetRoute(this: UserManagementEditRoute) {
       this.transitionTo('configuration.usermanagement');
     },
 
-    goBack() {
+    goBack(this: UserManagementEditRoute) {
       this.transitionTo('configuration.usermanagement');
     },
 
-    error(error) {
+    error(this: UserManagementEditRoute, error:any) {
       let notFound = error === 'not-found' ||
         (error &&
           error.errors &&
@@ -34,9 +36,10 @@ export default BaseRoute.extend(AuthenticatedRouteMixin, AlertifyHandler, {
       if (notFound) {
         this.showAlertifyMessage('Error: User was not found.');
         this.transitionTo('configuration.usermanagement');
+        return;
       } else {
         return true;
       }
     }
   }
-});
+}

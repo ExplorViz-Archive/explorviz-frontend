@@ -1,8 +1,8 @@
 import Route from '@ember/routing/route';
 
-export default Route.extend({
+export default class ConfigurationIndexRoute extends Route {
 
-  beforeModel: function() {
+  beforeModel() {
     this.transitionTo('configuration.settings');
   }
-});
+}
