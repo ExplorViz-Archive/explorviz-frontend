@@ -18,22 +18,14 @@ const { JSONAPIAdapter } = DS;
 */
 export default JSONAPIAdapter.extend(DataAdapterMixin,{
 
-  // API ROOT for timestamps is currently on port 8081
   host: ENV.APP.API_ROOT,
-  namespace: "v1/timestamps",
-
+  namespace: "v1",
 
   init() {
     this.set('headers', {
       "Accept": "application/vnd.api+json"
     });
  
-  },
-
-  // @Override
-  urlForQuery() {
-    const baseUrl = this.buildURL();
-    return `${baseUrl}/subsequent-interval`;
   },
 
   authorize(xhr) {
