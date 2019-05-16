@@ -1,24 +1,27 @@
-import { moduleForComponent, test } from 'ember-qunit';
+import { module, test } from 'qunit';
+import { setupRenderingTest } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
+import $ from 'jquery';
 
-moduleForComponent('login-form', 'Integration | Component | login form', {
-  integration: true
-});
 
-test('it renders', function(assert) {
-  // Set any properties with this.set('myProperty', 'value');
-  // Handle any actions with this.on('myAction', function(val) { ... });
+module('Integration | Component | login form', function(hooks) {
+  setupRenderingTest(hooks);
 
-  this.render(hbs`{{login-form}}`);
+  test('it renders', async function(assert) {
+    // Set any properties with this.set('myProperty', 'value');
+    // Handle any actions with this.on('myAction', function(val) { ... });
 
-  assert.equal(this.$().text().trim(), 'Sign In');
+    await this.render(hbs`{{login-form}}`);
 
-  // Template block usage:
-  this.render(hbs`
-    {{#login-form}}
-      template block text
-    {{/login-form}}
-  `);
+    assert.equal($('#loginModal').text().trim(), 'Sign In');
 
-  assert.equal(this.$().text().trim(), 'Sign In');
+    // Template block usage:
+    await this.render(hbs`
+      {{#login-form}}
+        template block text
+      {{/login-form}}
+    `);
+
+    assert.equal($('#loginModal').text().trim(), 'Sign In');
+  });
 });

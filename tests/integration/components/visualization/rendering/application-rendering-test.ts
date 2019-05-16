@@ -1,27 +1,29 @@
-import { moduleForComponent, test } from 'ember-qunit';
+import { module, test } from 'qunit';
+import { setupRenderingTest } from 'ember-qunit';
 //import hbs from 'htmlbars-inline-precompile';
 
-moduleForComponent('application-rendering', 'Integration | Component | application rendering', {
-  integration: true
-});
 
-test('it renders', function(assert) {
+module('Integration | Component | application rendering', function(hooks) {
+  setupRenderingTest(hooks);
 
-  // Set any properties with this.set('myProperty', 'value');
-  // Handle any actions with this.on('myAction', function(val) { ... });
+  test('it renders', function(assert) {
 
-  //this.render(hbs`{{application-rendering}}`);
+    // Set any properties with this.set('myProperty', 'value');
+    // Handle any actions with this.on('myAction', function(val) { ... });
 
-  //assert.equal(this.$().text().trim(), "''");
+    //this.render(hbs`{{application-rendering}}`);
 
-  // Template block usage:
- // this.render(hbs`
-  //  {{#application-rendering}}
- //     template block text
-  //  {{/application-rendering}}
- // `);
+    //assert.equal(this.$().text().trim(), "''");
 
-  //assert.equal(this.$().text().trim(), 'template block text');
-  
-  assert.equal(true, true);
+    // Template block usage:
+    // this.render(hbs`
+    //  {{#application-rendering}}
+    //     template block text
+    //  {{/application-rendering}}
+    // `);
+
+    //assert.equal(this.$().text().trim(), 'template block text');
+    
+    assert.equal(true, true);
+  });
 });

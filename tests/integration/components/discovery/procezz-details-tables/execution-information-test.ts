@@ -1,25 +1,27 @@
-import { moduleForComponent, test } from 'ember-qunit';
+import { module, test } from 'qunit';
+import { setupRenderingTest } from 'ember-qunit';
 //import hbs from 'htmlbars-inline-precompile';
 
-moduleForComponent('discovery/procezz-details-tables/execution-information', 'Integration | Component | discovery/procezz details tables/execution information', {
-  integration: true
-});
 
-test('it renders', function(assert) {
-  // Set any properties with this.set('myProperty', 'value');
-  // Handle any actions with this.on('myAction', function(val) { ... });
+module('Integration | Component | discovery/procezz details tables/execution information', function(hooks) {
+  setupRenderingTest(hooks);
 
-  /*this.render(hbs`{{discovery/procezz-details-tables/execution-information}}`);
+  test('it renders', function(assert) {
+    // Set any properties with this.set('myProperty', 'value');
+    // Handle any actions with this.on('myAction', function(val) { ... });
 
-  assert.equal(this.$().text().trim(), '');
+    /*this.render(hbs`{{discovery/procezz-details-tables/execution-information}}`);
 
-  // Template block usage:
-  this.render(hbs`
-    {{#discovery/procezz-details-tables/execution-information}}
-      template block text
-    {{/discovery/procezz-details-tables/execution-information}}
-  `);
+    assert.equal(this.$().text().trim(), '');
 
-  assert.equal(this.$().text().trim(), 'template block text');*/
-  assert.equal(true, true, 'TODO');
+    // Template block usage:
+    this.render(hbs`
+      {{#discovery/procezz-details-tables/execution-information}}
+        template block text
+      {{/discovery/procezz-details-tables/execution-information}}
+    `);
+
+    assert.equal(this.$().text().trim(), 'template block text');*/
+    assert.equal(true, true, 'TODO');
+  });
 });
