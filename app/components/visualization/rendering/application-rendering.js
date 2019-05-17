@@ -300,9 +300,24 @@ export default RenderingCore.extend(AlertifyHandler, {
 
         const thickness = drawableClazzComm.get('lineThickness') * 0.3;
 
-        const pipe = this.cylinderMesh(start, end, material, thickness);
+        // TODO: Set the following properties according to user settings
+        const isCurvedCommunication = false;
+        // Determines how smooth/round the curve looks, impacts performance
+        const curveSegments = 20;
+        const curveHeight = 5;
 
-        pipe.userData.model = drawableClazzComm;
+        if (isCurvedCommunication) {
+          let curveMeshes = this.curvedCylinderMeshes(start, end, material, thickness, curveSegments, curveHeight);
+          for (let i = 0; i < curveMeshes.length; i++) {
+            let curveSegment = curveMeshes[i];
+            curveSegment.userData.model = drawableClazzComm;
+            self.get('application3D').add(curveSegment);
+          }
+        } else {
+          const pipe = this.cylinderMesh(start, end, material, thickness);
+          pipe.userData.model = drawableClazzComm;
+          self.get('application3D').add(pipe);
+        }
 
         // Indicate communication for direction for (indirectly) highlighted communication
         if (drawableClazzComm.get('highlighted') ||
@@ -314,19 +329,18 @@ export default RenderingCore.extend(AlertifyHandler, {
             drawableClazzComm.get('targetClazz.fullQualifiedName')) {
             // TODO: draw a circular arrow or something alike
           } else {
-
             // Add arrow from in direction of source to target clazz
             let arrowThickness = this.get('currentUser.settings.numericAttributes.appVizCommArrowSize') * 4 * thickness;
-            self.addCommunicationArrow(start, end, arrowThickness);
+            let yOffset = isCurvedCommunication ? curveHeight / 2 + 1 : 0.8;
+
+            self.addCommunicationArrow(start, end, arrowThickness, yOffset);
 
             // Draw second arrow for bidirectional communication, but not if only trace communication direction shall be displayed
             if (drawableClazzComm.get('isBidirectional') && !this.get('highlighter.isTrace')) {
-              self.addCommunicationArrow(end, start, arrowThickness);
+              self.addCommunicationArrow(end, start, arrowThickness, yOffset);
             }
           }
         }
-
-        self.get('application3D').add(pipe);
       }
     });
 
@@ -367,6 +381,31 @@ export default RenderingCore.extend(AlertifyHandler, {
     pipe.position.y = (pointY.y + pointX.y) / 2.0;
     pipe.position.z = (pointY.z + pointX.z) / 2.0;
     return pipe;
+  },
+
+  curvedCylinderMeshes(start, end, material, thickness, points, curveHeight) {
+    // Determine middle
+    let dir = end.clone().sub(start);
+    let len = dir.length();
+    let halfVector = dir.normalize().multiplyScalar(len * 0.5);
+    let middle = start.clone().add(halfVector);
+    middle.y += curveHeight;
+
+    let curve = new THREE.QuadraticBezierCurve3(
+      start,
+      middle,
+      end
+    );
+
+    let curvePoints = curve.getPoints(points);
+    let curveMeshes = [];
+
+    // Compute meshes for curve
+    for (let i = 0; i < curvePoints.length - 1; i++) {
+      let curveSegment = this.cylinderMesh(curvePoints[i], curvePoints[i + 1], material, thickness);
+      curveMeshes.push(curveSegment);
+    }
+    return curveMeshes;
   },
 
   addComponentToScene(component, color) {
@@ -469,8 +508,7 @@ export default RenderingCore.extend(AlertifyHandler, {
    * @param {Number} width thickness of the arrow
    * @method addCommunicationArrow
    */
-  addCommunicationArrow(start, end, width) {
-
+  addCommunicationArrow(start, end, width, yOffset) {
     // Determine (almost the) middle
     let dir = end.clone().sub(start);
     let len = dir.length();
@@ -482,7 +520,7 @@ export default RenderingCore.extend(AlertifyHandler, {
     dir.normalize();
 
     // Arrow properties
-    let origin = new THREE.Vector3(middle.x, middle.y + 0.8, middle.z);
+    let origin = new THREE.Vector3(middle.x, middle.y + yOffset, middle.z);
     let headWidth = Math.max(1.2, width);
     let headLength = Math.min(2 * headWidth, 0.3 * len);
     let length = headLength + 0.00001; // body of arrow not visible
