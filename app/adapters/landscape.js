@@ -21,20 +21,12 @@ const { JSONAPIAdapter } = DS;
 export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
   host: ENV.APP.API_ROOT,
-  namespace: "v1/landscapes",
+  namespace: "v1",
 
   init() {
-
     this.set('headers', {
       "Accept": "application/vnd.api+json"
-    });
- 
-  },
-
-  // @Override
-  urlForQueryRecord() {
-    const baseUrl = this.buildURL();
-    return `${baseUrl}/by-timestamp`;
+    }); 
   },
 
   authorize(xhr) {
