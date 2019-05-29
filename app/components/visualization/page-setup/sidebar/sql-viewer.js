@@ -1,6 +1,7 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import { computed } from '@ember/object';
+import $ from 'jquery';
 
 export default Component.extend({
 
@@ -13,14 +14,23 @@ export default Component.extend({
   isSortedAsc: true,
   sortBy: 'timestamp',
   filterTerm: '',
+  selectedQuery: null,
+  scrollPosition: null,
 
   // Compute current traces when highlighting changes
-  databaseQueries: computed('landscapeRepo.latestApplication.databaseQueries', 'isSortedAsc', 'filterTerm', function () {
-    return this.filterAndSortQueries(this.get('landscapeRepo.latestApplication.databaseQueries'));
-  }),
+  databaseQueries: computed('landscapeRepo.latestApplication.databaseQueries', 'isSortedAsc', 'sortBy',
+    'filterTerm', 'selectedQuery', function () {
+
+      let queries;
+      if (this.get('selectedQuery')) {
+        queries = [this.get('selectedQuery')];
+      } else {
+        queries = this.filterAndSortQueries(this.get('landscapeRepo.latestApplication.databaseQueries'));
+      }
+      return queries;
+    }),
 
   filterAndSortQueries(queries) {
-
     if (!queries) {
       return [];
     }
@@ -48,15 +58,25 @@ export default Component.extend({
       // Allow deselection of query
       if (query.get('isSelected')) {
         query.set('isSelected', false);
-        return;
+        this.set('selectedQuery', null);
+        if (this.get('scrollPosition')) {
+          $('#sqlScrollDiv').animate({ scrollTop: this.get('scrollPosition') }, 'slow');
+        }
       }
-      // Deselect potentially selected query
-      let queries = this.get('store').peekAll('databasequery');
-      queries.forEach((query) => {
-        query.set('isSelected', false);
-      });
-      // Mark new query as selected
-      query.set('isSelected', true);
+      // Select query
+      else {
+        // Deselect potentially selected query
+        let queries = this.get('store').peekAll('databasequery');
+        queries.forEach((query) => {
+          query.set('isSelected', false);
+        });
+        // Mark new query as selected
+        query.set('isSelected', true);
+        this.set('selectedQuery', query);
+        // Remember scroll position
+        let scrollPos = $('#sqlScrollDiv').scrollTop();
+        this.set('scrollPosition', scrollPos);
+      }
     },
 
     filter() {
