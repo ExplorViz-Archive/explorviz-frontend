@@ -1,13 +1,6 @@
 import DS from 'ember-data';
 
-const { attr } = DS;
-
-
-export default class Role extends DS.Model {
-
-  @attr('string') descriptor!: string;
-
-}
+export default class Role extends DS.Model {}
 
 declare module 'ember-data/types/registries/model' {
   export default interface ModelRegistry {
