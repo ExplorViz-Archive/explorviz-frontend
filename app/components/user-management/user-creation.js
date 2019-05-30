@@ -3,6 +3,7 @@ import { inject as service } from "@ember/service";
 
 import { task } from 'ember-concurrency';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import { all, allSettled } from 'rsvp';
 
 export default Component.extend(AlertifyHandler, {
 
@@ -18,11 +19,42 @@ export default Component.extend(AlertifyHandler, {
   showNewUsers: null,
   page: null,
 
+  // object of setting arrays of form
+  // [[settingId0,settingValue0],...,[settingIdN,settingValueN]]
+  settings: null,
+
   didInsertElement() {
     this._super(...arguments);
     this.set('showNewUsers', false);
-    this.set('page', 'createSingleUser')
+    this.set('page', 'createSingleUser');
+
+    this.get('initSettings').perform();
   },
+
+  initSettings: task(function * () {
+    yield this.get('store').findAll('settingsinfo', {reload: true});
+
+    let rangeSettings = this.get('store').peekAll('rangesetting');
+    let flagSettings = this.get('store').peekAll('flagsetting');
+
+    let rangeSettingsMap = new Map();
+    let flagSettingsMap = new Map();
+
+    // copy all settings with their according default values into the maps
+    for(let i = 0; i < rangeSettings.get('length'); i++) {
+      let setting = rangeSettings.objectAt(i);
+      rangeSettingsMap.set(setting.get('id'), setting.get('defaultValue'));
+    }
+    for(let i = 0; i < flagSettings.get('length'); i++) {
+      let setting = flagSettings.objectAt(i);
+      flagSettingsMap.set(setting.get('id'), setting.get('defaultValue'));
+    }
+
+    this.set('settings', {
+      rangeSettings: [...rangeSettingsMap],
+      flagSettings: [...flagSettingsMap]
+    });
+  }),
 
   actions: {
     printNewUsers() {
@@ -61,15 +93,11 @@ export default Component.extend(AlertifyHandler, {
       const userRecord = this.get('store').createRecord('user', {
         username: userData.username,
         password: userData.password,
-        roles: userData.roles_selected_single,
-        settings: this.get('settings')
+        roles: userData.roles_selected_single
       });
 
       userRecord.save().then(() => { // success
-        this.set('showSpinner', false);
-        const message = "User <b>" + userData.username + "</b> was created.";
-        this.showAlertifySuccess(message);
-        clearInputFields.bind(this)();
+        createPreferences.bind(this)(userRecord.get('id'));
       }, (reason) => { // failure
         this.set('showSpinner', false);
         this.showReasonErrorAlert(reason);
@@ -82,6 +110,37 @@ export default Component.extend(AlertifyHandler, {
           password: "",
           roles_selected_single: []
         });
+      }
+
+      function createPreferences(uid) {
+        let settingsPromiseArray = [];
+        // group all settings
+        let flagSettings = this.get('settings').flagSettings;
+        let rangeSettings = this.get('settings').rangeSettings;
+        let allSettings = [].concat(flagSettings, rangeSettings);
+
+        // create records for the preferences and save them
+        for(let i = 0; i < allSettings.length; i++) {
+          const preferenceRecord = this.get('store').createRecord('userpreference', {
+            userId: uid,
+            settingId: allSettings[i][0],
+            value: allSettings[i][1]
+          });
+          settingsPromiseArray.push(preferenceRecord.save());
+        }
+
+        // if all settings are created successfully, notify user
+        // else delete the user and notify user about failure
+        return new all(settingsPromiseArray).then(()=>{
+          this.set('showSpinner', false);
+          const message = "User <b>" + userData.username + "</b> was created.";
+          this.showAlertifySuccess(message);
+          clearInputFields.bind(this)();
+        }).catch((reason)=>{
+          this.set('showSpinner', false);
+          this.showReasonErrorAlert(reason);
+          userRecord.destroyRecord();
+        })
       }
     },
 
@@ -107,58 +166,99 @@ export default Component.extend(AlertifyHandler, {
         return;
       }
 
-      let usersSuccess = [];
-      let usersNoSuccess = [];
+      let userRecordArray = [];
+      let userPromiseArray = [];
+
       for(let i = 1; i <= numberOfUsers; i++) {
         const username = `${userData.usernameprefix}_${i}`;
         const password = this.generatePassword(PASSWORD_LENGTH);
         const userRecord = this.get('store').createRecord('user', {
           username,
           password,
-          roles: userData.roles_selected_multiple,
-          settings: this.get('settings')
+          roles: userData.roles_selected_multiple
         });
-
-        userRecord.save().then(() => { // success
-          usersSuccess.push(userRecord);
-          if(usersSuccess.length === numberOfUsers) {
-            this.set('showSpinner', false);
-            const message = `All <b>${numberOfUsers}</b> users were successfully created.`;
-            this.showAlertifySuccess(message);
-            clearInputFields.bind(this)();
-            this.showCreatedUsers(usersSuccess);
-
-          } else if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
-            this.set('showSpinner', false);
-            const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
-            this.showAlertifyWarning(message);
-            
-            if(usersSuccess.length > 0) {
-              this.showCreatedUsers(usersSuccess);
-              clearInputFields.bind(this)();
-            }
-          }
-        }, () => { // failure
-          usersNoSuccess.push(i);
-          userRecord.deleteRecord();
-          if(usersSuccess.length + usersNoSuccess.length === numberOfUsers) {
-            this.set('showSpinner', false);
-            const message = `<b>${usersSuccess.length}</b> users were created.<br><b>${usersNoSuccess.length}</b> failed.`;
-            this.showAlertifyWarning(message);
-
-            if(usersSuccess.length > 0) {
-              this.showCreatedUsers(usersSuccess);
-              clearInputFields.bind(this)();
-            }
-          }
-        });
+        userRecordArray.push(userRecord);
+        userPromiseArray.push(userRecord.save());
       }
+
+      new allSettled(userPromiseArray).then((array)=>{
+        let failed;
+        for(let i = 0; i < array.length; i++) {
+          let { state } = array[i];
+          if(state === 'rejected') {
+            failed = array[i];
+          }
+        }
+
+        if(failed !== undefined) {
+          let { reason } = failed;
+          this.set('showSpinner', false);
+          this.showReasonErrorAlert(reason);
+          for(let i = 0; i < numberOfUsers; i++) {
+            let user = userRecordArray[i];
+            user.destroyRecord();
+          }
+        } else {
+          createPreferences.bind(this)();
+        }
+      });
 
       function clearInputFields() {
         this.setProperties({
           usernameprefix: "",
           numberofusers: "",
           roles_selected_multiple: []
+        });
+      }
+
+      function createPreferences() {
+        let settingsPromiseArray = [];
+        // group all settings
+        let flagSettings = this.get('settings').flagSettings;
+        let rangeSettings = this.get('settings').rangeSettings;
+        let allSettings = [].concat(flagSettings, rangeSettings);
+
+        // create preference records for each user and save them
+        for(let i = 0; i < numberOfUsers; i++) {
+          let user = userRecordArray[i];
+          let uid = user.get('id');
+
+          for(let j = 0; j < allSettings.length; j++) {
+            const preferenceRecord = this.get('store').createRecord('userpreference', {
+              userId: uid,
+              settingId: allSettings[j][0],
+              value: allSettings[j][1]
+            });
+            settingsPromiseArray.push(preferenceRecord.save());
+          }
+        }
+
+        // if all settings are created successfully, notify user
+        // else delete the user and notify user about failure
+        return new allSettled(settingsPromiseArray).then((array)=>{
+          let failed;
+          for(let i = 0; i < array.length; i++) {
+            let { state } = array[i];
+            if(state === 'rejected') {
+              failed = array[i];
+            }
+          }
+  
+          if(failed !== undefined) {
+            let { reason } = failed;
+            this.set('showSpinner', false);
+            this.showReasonErrorAlert(reason);
+            for(let i = 0; i < numberOfUsers; i++) {
+              let user = userRecordArray[i];
+              user.destroyRecord();
+            }
+          } else {
+            this.set('showSpinner', false);
+            const message = `All users were successfully created.`;
+            this.showAlertifySuccess(message);
+            clearInputFields.bind(this)();
+            this.showCreatedUsers(userRecordArray);
+          }
         });
       }
     },

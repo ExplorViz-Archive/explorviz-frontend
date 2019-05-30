@@ -10,6 +10,9 @@ export default class ConfigurationSettingsRoute extends BaseRoute.extend(Authent
   session: any;
 
   model(this:ConfigurationSettingsRoute) {
-    return this.get('session.session.content.authenticated.user');
+    let user = this.get('session.session.content.authenticated.user');
+    return {
+      user
+    }
   }
 }
