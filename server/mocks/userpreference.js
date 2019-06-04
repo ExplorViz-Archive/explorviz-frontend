@@ -5,58 +5,80 @@ module.exports = function (app) {
   const express = require('express');
   let userpreferenceRouter = express.Router();
 
-  // userId -> [setting1,...,settingN]
+  // settingId -> setting
   let userPreferences = new Map();
 
-  userpreferenceRouter.get('/', function (_req, res) {
-    let settings = [...userPreferences.values()]
-    res.send(settings);
+  userpreferenceRouter.get('/', function (req, res) {
+    // /userpreferences?uid=x
+    let { uid } = req.query;
+
+    if(uid) {
+      let preferences = [];
+
+      for (const [,preferenceObject] of userPreferences.entries()) {
+        if(preferenceObject.attributes.userId === uid) {
+          preferences.push(preferenceObject);
+        }
+      }
+
+      res.send({
+        "data":preferences
+      });
+    } else {
+      res.status(404).send('User id is mandatory');
+    }
   });
 
-  userpreferenceRouter.get('/:id', function (req, res) {
-    let userId = req.params.id;
+  userpreferenceRouter.delete('/:id', function (req, res) {
+    let preferenceId = req.params.id;
 
-    if(!userPreferences.has(userId))
-      userPreferences.set(userId, []);
-      
-    res.send({
-      "data":userPreferences.get(userId)
-    });
+    if(userPreferences.has(preferenceId)) {
+      userPreferences.delete(preferenceId);
+      res.status(204).send();
+    } else {
+      res.send(404).send('Preference not found');
+    }
+  });
+
+  userpreferenceRouter.patch('/:prefId', function (req, res) {
+    let preferenceId = req.params.prefId;
+    const { value } = req.body.data.attributes;
+
+    if(userPreferences.has(preferenceId)) {
+      let preference = userPreferences.get(preferenceId);
+      preference.attributes.value = value;
+      res.send({
+        "data": preference
+      });
+    } else {
+      res.send(404).send('Preference not found');
+    }
   });
 
   userpreferenceRouter.post('/', function (req, res) {
     let { userId, settingId, value } = req.body.data.attributes;
 
-    if(!userPreferences.has(userId))
-      userPreferences.set(userId, []);
-
-    let currentSettings = userPreferences.get(userId);
-    for(let i = 0; i < currentSettings.length; i++) {
-      if(currentSettings[i].attributes.settingId === settingId) {
-        currentSettings[i].attributes.value = value;
-        res.send({
-          "data":currentSettings
-        });
-        return;
-      }
-    }
     let preferenceNew = createUserPreference(userId, settingId, value);
-    currentSettings.push(preferenceNew);
+    userPreferences.set(preferenceNew.id, preferenceNew);
     res.send({
-      "data":currentSettings
+      "data": preferenceNew
     });
   });
 
   function createUserPreference(userId, settingId, value) {
     return {
       "type":"userpreference",
-      "id":`[userId=${userId},settingId=${settingId}]`,
+      "id": ID(),
       "attributes":{  
          "userId":userId,
          "settingId":settingId,
          "value":value
       }
     }
+  }
+
+  function ID() {
+    return Math.random().toString(36).substr(2, 9);
   }
 
   // The POST and PUT call will not contain a request body
@@ -69,6 +91,6 @@ module.exports = function (app) {
   // this mock uncommenting the following line:
   //
   //app.use('/api/tokens', require('body-parser').json());
-  app.use('/api/v1/settings/custom', require('body-parser').json({ type: 'application/vnd.api+json' }));
-  app.use('/api/v1/settings/custom', userpreferenceRouter);
+  app.use('/api/v1/settings/preferences', require('body-parser').json({ type: 'application/vnd.api+json' }));
+  app.use('/api/v1/settings/preferences', userpreferenceRouter);
 };
