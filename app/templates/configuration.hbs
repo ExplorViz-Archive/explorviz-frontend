@@ -3,7 +3,7 @@
     {{#bs-nav type="tabs" as |nav|}}
       {{#nav.item onClick=(action tab.select "userSettingsPane") active=(bs-eq tab.activeId "userSettingsPane")}}{{#nav.link-to "configuration.settings"}}Settings{{/nav.link-to}}{{/nav.item}}
 
-      {{#if this.model.isAdmin}}
+      {{#if this.currentUser.user.isAdmin}}
         {{#nav.item onClick=(action tab.select "userManagementPane") active=(bs-eq tab.activeId "userManagementPane")}}{{#nav.link-to "configuration.usermanagement"}}User Management{{/nav.link-to}}{{/nav.item}}
       {{/if}}
 
