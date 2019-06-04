@@ -10,8 +10,8 @@ export default Component.extend({
   store: service(),
 
   // {
-  //   rangeSettings: [[settingId0,value0],...,[settingIdN,valueN]],
-  //   flagSettings: [[settingId0,value0],...,[settingIdN,valueN]]
+  //   rangesettings: [[settingId0,value0],...,[settingIdN,valueN]],
+  //   flagsettings: [[settingId0,value0],...,[settingIdN,valueN]]
   // }
   settings: null,
 
@@ -23,20 +23,20 @@ export default Component.extend({
 
     this.set('descriptions', {});
     
-    this.get('loadDescriptions').perform('rangeSettings');
-    this.get('loadDescriptions').perform('flagSettings');
+    this.get('loadDescriptions').perform('rangesetting');
+    this.get('loadDescriptions').perform('flagsetting');
   },
 
   loadDescriptions: task(function * (type) {
-    for (const [id] of this.get(`settings.${type}`)) {
-      const { description, displayName } = yield this.get('store').findRecord('settingsinfo', id);
+    for (const [id] of this.get(`settings.${type}s`)) {
+      const { description, displayName } = yield this.get('store').peekRecord(type, id);
       this.set(`descriptions.${id}`, { description, displayName });
     }
   }),
 
   actions: {
     onRangeSettingChange(index, valueNew) {
-      this.get('settings').rangeSettings[index].set(1, Number(valueNew));
+      this.get('settings').rangesettings[index].set(1, Number(valueNew));
     }
   }
 

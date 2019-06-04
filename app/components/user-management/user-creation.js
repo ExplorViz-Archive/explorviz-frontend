@@ -32,10 +32,8 @@ export default Component.extend(AlertifyHandler, {
   },
 
   initSettings: task(function * () {
-    yield this.get('store').findAll('settingsinfo', {reload: true});
-
-    let rangeSettings = this.get('store').peekAll('rangesetting');
-    let flagSettings = this.get('store').peekAll('flagsetting');
+    let rangeSettings = yield this.get('store').peekAll('rangesetting');
+    let flagSettings = yield this.get('store').peekAll('flagsetting');
 
     let rangeSettingsMap = new Map();
     let flagSettingsMap = new Map();
@@ -51,8 +49,8 @@ export default Component.extend(AlertifyHandler, {
     }
 
     this.set('settings', {
-      rangeSettings: [...rangeSettingsMap],
-      flagSettings: [...flagSettingsMap]
+      rangesettings: [...rangeSettingsMap],
+      flagsettings: [...flagSettingsMap]
     });
   }),
 
@@ -115,8 +113,8 @@ export default Component.extend(AlertifyHandler, {
       function createPreferences(uid) {
         let settingsPromiseArray = [];
         // group all settings
-        let flagSettings = this.get('settings').flagSettings;
-        let rangeSettings = this.get('settings').rangeSettings;
+        let flagSettings = this.get('settings').flagsettings;
+        let rangeSettings = this.get('settings').rangesettings;
         let allSettings = [].concat(flagSettings, rangeSettings);
 
         // create records for the preferences and save them
@@ -214,8 +212,8 @@ export default Component.extend(AlertifyHandler, {
       function createPreferences() {
         let settingsPromiseArray = [];
         // group all settings
-        let flagSettings = this.get('settings').flagSettings;
-        let rangeSettings = this.get('settings').rangeSettings;
+        let flagSettings = this.get('settings').flagsettings;
+        let rangeSettings = this.get('settings').rangesettings;
         let allSettings = [].concat(flagSettings, rangeSettings);
 
         // create preference records for each user and save them

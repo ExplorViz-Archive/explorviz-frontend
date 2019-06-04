@@ -12,6 +12,7 @@ export default Component.extend(AlertifyHandler, {
 
   store: service(),
   session: service(),
+  userSettings: service(),
 
   // set through hb template
   user: null,
@@ -25,15 +26,14 @@ export default Component.extend(AlertifyHandler, {
   },
 
   initSettings: task(function * () {
-    yield this.get('store').findAll('settingsinfo');
-
     let rangeSettings = this.get('store').peekAll('rangesetting');
     let flagSettings = this.get('store').peekAll('flagsetting');
 
     let rangeSettingsMap = new Map();
     let flagSettingsMap = new Map();
 
-    let preferences = yield this.get('store').query('userpreference', this.get('user').get('id'));
+    let preferences = yield this.get('store').query('userpreference', { uid: this.get('user').get('id') });
+
     for(let i = 0; i < rangeSettings.get('length'); i++) {
       let setting = rangeSettings.objectAt(i);
       rangeSettingsMap.set(setting.get('id'), setting.get('defaultValue'));
@@ -54,34 +54,40 @@ export default Component.extend(AlertifyHandler, {
     }
 
     this.set('settings', {
-      rangeSettings: [...rangeSettingsMap],
-      flagSettings: [...flagSettingsMap]
+      rangesettings: [...rangeSettingsMap],
+      flagsettings: [...flagSettingsMap]
     });
   }),
 
   saveSettings: task(function * () {
-    let uid = this.get('user').get('id');
+    let userId = this.get('user').get('id');
     
     // group all settings
-    let flagSettings = this.get('settings').flagSettings;
-    let rangeSettings = this.get('settings').rangeSettings;
+    let flagSettings = this.get('settings').flagsettings;
+    let rangeSettings = this.get('settings').rangesettings;
     let allSettings = [].concat(flagSettings, rangeSettings);
     
     let settingsPromiseArray = [];
 
-    // Update user's preferences by removing old records
-    // and saving new ones.
+    // Update user's preferences by updating old records
+    // or by creating and saving new ones.
     for(let i = 0; i < allSettings.length; i++) {
-      let oldRecord = this.getUserPreference(uid, allSettings[i][0]);
-      if(oldRecord)
-        oldRecord.unloadRecord();
+      let settingId = allSettings[i][0];
+      let preferenceValueNew = allSettings[i][1];
 
-      const preferenceRecord = this.get('store').createRecord('userpreference', {
-        userId: uid,
-        settingId: allSettings[i][0],
-        value: allSettings[i][1]
-      });
-      settingsPromiseArray.push(preferenceRecord.save());
+      let oldRecord = this.get('userSettings').getUserPreference(userId, settingId);
+
+      if(oldRecord) {
+        oldRecord.set('value', preferenceValueNew);
+        oldRecord.save();
+      } else {
+        const preferenceRecord = this.get('store').createRecord('userpreference', {
+          userId,
+          settingId,
+          value: preferenceValueNew
+        });
+        settingsPromiseArray.push(preferenceRecord.save());
+      }
     }
 
     // wait for all recorsd to be saved. Give out error if one fails
@@ -91,20 +97,5 @@ export default Component.extend(AlertifyHandler, {
       const {title, detail} = reason.errors[0];
       this.showAlertifyError(`<b>${title}:</b> ${detail}`);
     });
-  }).drop(),
-
-  /**
-   * Returns the matching user preference
-   * 
-   * @param {string} userId 
-   * @param {string} settingId 
-   */
-  getUserPreference(userId, settingId) {
-    // prefer a version that's already in the store
-    let allPreferences = this.get('store').peekAll('userpreference');
-    let userPreference = allPreferences.filterBy('userId', userId).filterBy('settingId', settingId).objectAt(0);
-
-    if(userPreference !== undefined)
-      return userPreference;
-  }
+  }).drop()
 });
