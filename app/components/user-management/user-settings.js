@@ -79,7 +79,7 @@ export default Component.extend(AlertifyHandler, {
 
       if(oldRecord) {
         oldRecord.set('value', preferenceValueNew);
-        oldRecord.save();
+        settingsPromiseArray.push(oldRecord.save());
       } else {
         const preferenceRecord = this.get('store').createRecord('userpreference', {
           userId,
