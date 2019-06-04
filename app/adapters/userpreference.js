@@ -15,22 +15,21 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   },
   
   // @Override
-  urlForFindAll() {
+  urlForQuery() {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/settings/custom`;
-  },
-  
-  // @Override
-  urlForQuery(id) {
-    const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/settings/custom/${id}`;
+    return `${baseUrl}/v1/settings/preferences`;
   },
 
   // @Override
   // Overrides URL for model.save()
   urlForCreateRecord() {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/settings/custom`;
+    return `${baseUrl}/v1/settings/preferences`;
+  },
+
+  urlForUpdateRecord(id) {
+    const baseUrl = this.buildURL();
+    return `${baseUrl}/v1/settings/preferences/${id}`;
   },
 
 
