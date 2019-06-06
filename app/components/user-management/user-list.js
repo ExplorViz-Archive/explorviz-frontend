@@ -12,6 +12,8 @@ export default Component.extend(AlertifyHandler, {
   store: service(),
   router: service(),
 
+  currentUser: service(),
+
   users: null,
 
   didInsertElement() {
