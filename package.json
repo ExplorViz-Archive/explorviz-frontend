@@ -50,7 +50,7 @@
     "ember-composable-helpers": "^2.1.0",
     "ember-concurrency": "^0.10.0",
     "ember-debug-logger": "^2.0.0",
-    "ember-element-resize-detector": "^0.4.0",
+    "ember-did-resize-modifier": "^0.2.0",
     "ember-export-application-global": "^2.0.0",
     "ember-file-upload": "^2.5.3",
     "ember-load-initializers": "^2.0.0",
