@@ -64,12 +64,7 @@ export default Component.extend(AlertifyHandler, {
     }
 
     function clearInputFields() {
-      this.setProperties({
-        // id_change: "",
-        // username_change: "",
-        password_change: "",
-        // roles_change: []
-      });
+      this.set('password_change', '');
     }
   }).drop(),
 

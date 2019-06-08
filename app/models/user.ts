@@ -25,13 +25,10 @@ export default class User extends Model {
 
 	@hasMany('role') roles!: DS.PromiseManyArray<Role>;
 
-	// simple object, no Ember record
-	@attr() settings!: any;
-
 	hasRole(this: User, rolename:string): boolean {
 		const roles = this.get('roles').toArray();
 		for (const role of roles) {
-			if(rolename === role.get('descriptor'))
+			if(rolename === role.get('id'))
 				return true;
 		}
 		return false;
