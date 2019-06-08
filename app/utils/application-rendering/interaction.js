@@ -20,7 +20,8 @@ export default Object.extend(Evented, {
   highlighter: service('visualization/application/highlighter'),
   hoverHandler: null,
   renderingService: service(),
-  session: service(),
+
+  currentUser: service(),
 
   raycastObjects: computed('rotationObject', function() {
     return this.get('rotationObject.children');
@@ -243,9 +244,9 @@ export default Object.extend(Evented, {
       if(emberModelName === "component"){
         emberModel.setOpenedStatus(!emberModel.get('opened'));
 
-        const user = this.get('session.session.content.authenticated.user');
+        let keepHighlightingOnOpenOrClose = this.get('currentUser').getPreferenceOrDefaultValue('flagsetting', 'keepHighlightingOnOpenOrClose');
 
-        if(!user.settings.booleanAttributes.keepHighlightingOnOpenOrClose) {
+        if(!keepHighlightingOnOpenOrClose) {
           const highlighted = this.get('highlighter.highlightedEntity');
   
           if(emberModel === highlighted || emberModel.contains(highlighted)) {

@@ -12,14 +12,13 @@ module.exports = function (app) {
         "id": "3",
         "attributes": {
           "username": "admin",
-          "settings": createSettingsObject()
         },
         "relationships": {
           "roles": {
             "data": [
               {
                 "type": "role",
-                "id": "2"
+                "id": "admin"
               }
             ]
           }
@@ -30,14 +29,13 @@ module.exports = function (app) {
         "id": "4",
         "attributes": {
           "username": "user",
-          "settings": createSettingsObject()
         },
         "relationships": {
           "roles": {
             "data": [
               {
                 "type": "role",
-                "id": "3"
+                "id": "user"
               }
             ]
           }
@@ -47,16 +45,16 @@ module.exports = function (app) {
     "included": [
       {
         "type": "role",
-        "id": "2",
+        "id": "admin",
         "attributes": {
-          "descriptor": "admin"
+
         }
       },
       {
         "type": "role",
-        "id": "3",
+        "id": "user",
         "attributes": {
-          "descriptor": "user"
+
         }
       }
     ]
@@ -77,25 +75,8 @@ module.exports = function (app) {
     return ++userIdCounter;
   }
 
-  function createSettingsObject() {
-    return {
-      "id": 1,
-      "booleanAttributes": {
-        "keepHighlightingOnOpenOrClose": true,
-        "enableHoverEffects": true,
-        "showFpsCounter": false,
-        "appVizTransparency": true
-      },
-      "numericAttributes": {
-        "appVizTransparencyIntensity": 0.3,
-        "appVizCommArrowSize": 1.0
-      },
-      "stringAttributes": {}
-    };
-  }
-
   userRouter.patch('/:id', (req, res) => {
-    const { username, settings, password } = req.body.data.attributes;
+    const { username, password } = req.body.data.attributes;
     const { roles } = req.body.data.relationships;
 
     if(!username || username === '') {
@@ -118,7 +99,6 @@ module.exports = function (app) {
       if(users.data[i].id == req.params.id) {
         users.data[i].attributes.username = username;
         users.data[i].attributes.password = password;
-        users.data[i].attributes.settings = settings;
         users.data[i].relationships.roles = roles;
         res.status(204).send();
         return;
@@ -154,7 +134,7 @@ module.exports = function (app) {
     res.send(400, {"errors": [ { "status": "400", "title": "Error", "detail": "User does not exists" } ]});
   });
 
-  userRouter.get('/', function (req, res) {
+  userRouter.get('/', function (_req, res) {
     res.send(users);
   });
 

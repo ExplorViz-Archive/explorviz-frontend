@@ -3,11 +3,12 @@ import { inject as service } from "@ember/service";
 import { calculateColorBrightness } from
   'explorviz-frontend/utils/helpers/threejs-helpers';
 import THREE from "three";
+import CurrentUser from 'explorviz-frontend/services/current-user';
 
 export default Object.extend({
 
   hoveredEntityColorObj: null,
-  session: service(),
+  currentUser: service(),
 
   resetHoverEffect() : void {
     let hoveredEntityColorObj: any = this.get('hoveredEntityColorObj');
@@ -23,12 +24,11 @@ export default Object.extend({
     distance: number, point: THREE.Vector3,
     face: THREE.Face3, faceIndex: number, object: THREE.Mesh, uv: THREE.Vector2
   }): void {
-    const session : any = this.get('session');
-    const user = session.session.content.authenticated.user;
+    let currentUser: CurrentUser = this.get('currentUser') as CurrentUser;
+    let enableHoverEffects = currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects');
 
     // No raycastTarget, do nothing and return
-    if (!raycastTarget ||
-      !user.settings.booleanAttributes.enableHoverEffects) {
+    if (!raycastTarget || !enableHoverEffects) {
       this.resetHoverEffect();
       return;
     }

@@ -55,31 +55,34 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
                 {{user-roles-list user.roles}}
               </td>
               <td class="text-right">
-                {{#bs-dropdown as |dd|}}
-                  {{!-- Show spinner instead of edit button, if user edit or deletion was called --}}
-                  {{#if (or
-                    (and this.deleteUser.isRunning (eq (get this.deleteUser.last.args 0) user))
-                    (and this.openUserEdit.isRunning (eq (get this.openUserEdit.last.args 0) user.id)))
-                  }}
-                    <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
-                  {{else}}
-                    {{#dd.button class="removecaret d-flex-center" size="sm" title="Options"}}
-                      {{svg-jar "kebab-vertical" class="octicon"}}
-                    {{/dd.button}}
-                  {{/if}}
-                  {{#dd.menu as |ddm|}}
-                    {{#ddm.item title="Edit"}}
-                      <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Edit" onclick={{perform openUserEdit user.id}}>
-                        {{svg-jar "pencil" class="octicon" id="edit-button"}}<span>Edit</span>
-                      </a>
-                    {{/ddm.item}}
-                    {{#ddm.item title="Delete"}}
-                      <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Delete" onclick={{perform deleteUser user}}>
-                        {{svg-jar "x" class="octicon" id="delete-button"}}<span>Delete</span>
-                      </a>
-                    {{/ddm.item}}
-                  {{/dd.menu}}
-                {{/bs-dropdown}}
+                {{!-- Hide Edit/Delete for the admin user themself --}}
+                {{#unless (eq this.currentUser.user.id user.id)}}
+                  {{#bs-dropdown as |dd|}}
+                    {{!-- Show spinner instead of edit button, if user edit or deletion was called --}}
+                    {{#if (or
+                      (and this.deleteUser.isRunning (eq (get this.deleteUser.last.args 0) user))
+                      (and this.openUserEdit.isRunning (eq (get this.openUserEdit.last.args 0) user.id)))
+                    }}
+                      <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+                    {{else}}
+                      {{#dd.button class="removecaret d-flex-center" size="sm" title="Options"}}
+                        {{svg-jar "kebab-vertical" class="octicon"}}
+                      {{/dd.button}}
+                    {{/if}}
+                    {{#dd.menu as |ddm|}}
+                      {{#ddm.item title="Edit"}}
+                        <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Edit" onclick={{perform openUserEdit user.id}}>
+                          {{svg-jar "pencil" class="octicon" id="edit-button"}}<span>Edit</span>
+                        </a>
+                      {{/ddm.item}}
+                      {{#ddm.item title="Delete"}}
+                        <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Delete" onclick={{perform deleteUser user}}>
+                          {{svg-jar "x" class="octicon" id="delete-button"}}<span>Delete</span>
+                        </a>
+                      {{/ddm.item}}
+                    {{/dd.menu}}
+                  {{/bs-dropdown}}
+                {{/unless}}
               </td>
             </tr>
           {{/each}}
