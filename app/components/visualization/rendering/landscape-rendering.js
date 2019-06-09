@@ -88,6 +88,9 @@ export default RenderingCore.extend(AlertifyHandler, {
       this.set('centerAndZoomCalculator', CalcCenterAndZoom.create());
     }
 
+    const backgroundColor = this.get('configuration.landscapeColors.background');
+    this.set('scene.background', new THREE.Color(backgroundColor));
+
     this.initInteraction();
 
     const dirLight = new THREE.DirectionalLight();
@@ -206,7 +209,7 @@ export default RenderingCore.extend(AlertifyHandler, {
           system.set('threeJSModel', systemMesh);
 
           const textColor =
-            self.get('configuration.landscapeColors.textsystem');
+            self.get('configuration.landscapeColors.systemText');
 
           self.get('labeler').saveTextForLabeling(null, systemMesh, textColor);
 
@@ -370,12 +373,12 @@ export default RenderingCore.extend(AlertifyHandler, {
                 // Create text labels
 
                 let textColor =
-                  self.get('configuration.landscapeColors.textapp');
+                  self.get('configuration.landscapeColors.applicationText');
 
                 self.get('labeler').saveTextForLabeling(null, applicationMesh,
                   textColor);
 
-                textColor = self.get('configuration.landscapeColors.textnode');
+                textColor = self.get('configuration.landscapeColors.nodeText');
                 self.get('labeler').saveTextForLabeling(node.getDisplayName(),
                   nodeMesh, textColor);
 
@@ -393,8 +396,6 @@ export default RenderingCore.extend(AlertifyHandler, {
 
       });
     } // END if(systems)
-
-    self.set('configuration.landscapeColors.textchanged', false);
 
     const appCommunications = emberLandscape.get('totalApplicationCommunications');
 
