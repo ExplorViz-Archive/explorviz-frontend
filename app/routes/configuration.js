@@ -2,8 +2,6 @@ import BaseRoute from 'explorviz-frontend/routes/base-route';
 import AuthenticatedRouteMixin from 
   'ember-simple-auth/mixins/authenticated-route-mixin';
 
-import {inject as service} from '@ember/service';
-
 /**
 * TODO
 * 
@@ -11,11 +9,6 @@ import {inject as service} from '@ember/service';
 * @extends Ember.Route
 */
 export default BaseRoute.extend(AuthenticatedRouteMixin, {
-  session: service(),
-
-  model() {
-    return this.get('session.session.content.authenticated.user');
-  },
 
   actions: {
     didTransition() {

@@ -2,15 +2,14 @@ import Object from '@ember/object';
 import THREE from "three";
 import { shortenString } from '../helpers/string-helpers';
 import { inject as service } from "@ember/service";
+import CurrentUser from 'explorviz-frontend/services/current-user';
 
 export default Object.extend({
 
   labels: null,
   textMaterialWhite: null,
   textMaterialBlack: null,
-  currentUser: null,
-
-  session: service(),
+  currentUser: service(),
 
   init() {
     this._super(...arguments);
@@ -27,14 +26,10 @@ export default Object.extend({
         color: 0x000000
       })
     );
-
-    const session: any = this.get('session');
-    const user: any = session.session.content.authenticated.user;
-    this.set('currentUser', user);
   },
 
   createLabel(parentMesh: THREE.Mesh, parentObject: THREE.Object3D, font: THREE.Font, transparent: boolean) {
-    const currentUser: any = this.get('currentUser');
+    let currentUser: CurrentUser = this.get('currentUser') as CurrentUser;
     const bBoxParent = new THREE.Box3().setFromObject(parentMesh);
 
     const worldParent = new THREE.Vector3();
@@ -55,7 +50,7 @@ export default Object.extend({
       if (transparent && !oldLabel[0].material.transparent) {
         const newMaterial = oldLabel[0].material.clone();
         newMaterial.transparent = true;
-        newMaterial.opacity = currentUser.settings.numericAttributes.appVizTransparencyIntensity;
+        newMaterial.opacity = currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizTransparencyIntensity');
         oldLabel[0].material = newMaterial;
       }
       else if (!transparent && oldLabel[0].material.transparent) {
@@ -104,7 +99,7 @@ export default Object.extend({
       // Apply transparency / opacity
       if (transparent) {
         material.transparent = true;
-        material.opacity = currentUser.settings.numericAttributes.appVizTransparencyIntensity;
+        material.opacity = currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizTransparencyIntensity');
       }
 
       let textMesh = new THREE.Mesh(textGeometry, material);
