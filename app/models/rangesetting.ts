@@ -2,11 +2,11 @@ import DS from 'ember-data';
 
 const { attr } = DS;
 
-export default class NumericSettingsDescriptor extends DS.Model {
+export default class RangeSetting extends DS.Model {
 
   @attr('string') description!: string;
 
-  @attr('string') name!: string;
+  @attr('string') displayName!: string;
 
   @attr('number') min!: number;
 
@@ -17,6 +17,6 @@ export default class NumericSettingsDescriptor extends DS.Model {
 
 declare module 'ember-data/types/registries/model' {
 	export default interface ModelRegistry {
-	  'numericsettingsdescriptor': NumericSettingsDescriptor;
+	  'rangesetting': RangeSetting;
 	}
 }

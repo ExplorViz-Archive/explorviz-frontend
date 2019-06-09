@@ -12,6 +12,8 @@ export default Component.extend(AlertifyHandler, {
   store: service(),
   router: service(),
 
+  currentUser: service(),
+
   users: null,
 
   didInsertElement() {
@@ -24,7 +26,12 @@ export default Component.extend(AlertifyHandler, {
   updateUserList: task(function * (reload) {
     this.set('users', []);
     try {
-      const users = yield this.get('store').findAll('user', { reload });
+      let users;
+      if(reload) {
+        users = yield this.get('store').findAll('user', { reload: true });
+      } else {
+        users = yield this.get('store').peekAll('user');
+      }
       let userList = users.toArray();
       // sort by id
       userList.sort((user1, user2) => parseInt(user1.id) < parseInt(user2.id) ? -1 : 1);
@@ -32,7 +39,7 @@ export default Component.extend(AlertifyHandler, {
     } catch(reason) {
       this.showAlertifyMessage('Could not load users!');
     }
-  }).restartable(),
+  }).enqueue(),
 
   openUserCreation: task(function * () {
     yield this.get('router').transitionTo('configuration.usermanagement.new');
@@ -44,13 +51,14 @@ export default Component.extend(AlertifyHandler, {
 
   deleteUser: task(function * (user) {
     try {
+      let username = user.get('username');
       yield user.destroyRecord();
-      const message = `User <b>${user.username}</b> deleted.`;
+      const message = `User <b>${username}</b> deleted.`;
       this.showAlertifyMessage(message);
-      this.get('updateUserList').perform(false);
+      yield this.get('updateUserList').perform(false);
     } catch(reason) {
       this.showReasonErrorAlert(reason);
-      this.get('updateUserList').perform(true);
+      yield this.get('updateUserList').perform(true);
     }
   }).enqueue()
 

@@ -123,7 +123,7 @@ export default class Highlighter extends Service {
     }
 
     // Shall contain all clazzes which the user directly or indirectly highlighted
-    let selectedClazzes = new Set();
+    let selectedClazzes: Set<Clazz> = new Set();
     computeSelectedClazzes();
 
     // Shall contain all clazzes which the user highlighted or which communicate with a highlighted clazz
@@ -257,7 +257,7 @@ export default class Highlighter extends Service {
    */
   applyNodeHighlighting(component:Component, communicatingClazzes:Set<Clazz>) {
     let isPartOfHighlighting = false;
-    let componentClazzes = new Set();
+    let componentClazzes: Set<Clazz> = new Set();
 
     component.getContainedClazzes(componentClazzes);
 

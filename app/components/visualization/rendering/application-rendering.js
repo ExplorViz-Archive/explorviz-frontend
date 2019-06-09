@@ -31,7 +31,7 @@ export default RenderingCore.extend(AlertifyHandler, {
   store: service('store'),
   highlighter: service('visualization/application/highlighter'),
 
-  session: service(),
+  currentUser: service(),
 
   configuration: service("configuration"),
 
@@ -48,8 +48,6 @@ export default RenderingCore.extend(AlertifyHandler, {
   interaction: null,
   centerAndZoomCalculator: null,
   foundationBuilder: null,
-
-  currentUser: null,
 
   // @Override
   initRendering() {
@@ -173,8 +171,6 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.scene.add(light);
 
     this.set('centerAndZoomCalculator.centerPoint', null);
-
-    this.set('currentUser', this.get('session.session.content.authenticated.user'));
   },
 
   // @Override
@@ -288,8 +284,8 @@ export default RenderingCore.extend(AlertifyHandler, {
         let opacityValue = 1.0;
 
         if (drawableClazzComm.get('state') === "TRANSPARENT") {
-          transparent = this.get('currentUser.settings.booleanAttributes.appVizTransparency');
-          opacityValue = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
+          transparent = this.get('currentUser').getPreferenceOrDefaultValue('flagsetting', 'appVizTransparency');
+          opacityValue = this.get('currentUser').getPreferenceOrDefaultValue('rangesetting', 'appVizTransparencyIntensity');
         }
 
         const communicationColor = this.get('configuration.applicationColors.communication');
@@ -319,7 +315,7 @@ export default RenderingCore.extend(AlertifyHandler, {
           } else {
 
             // Add arrow from in direction of source to target clazz
-            let arrowThickness = this.get('currentUser.settings.numericAttributes.appVizCommArrowSize') * 4 * thickness;
+            let arrowThickness = this.get('currentUser').getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize') * 4 * thickness;
             self.addCommunicationArrow(start, end, arrowThickness);
 
             // Draw second arrow for bidirectional communication, but not if only trace communication direction shall be displayed
@@ -430,8 +426,8 @@ export default RenderingCore.extend(AlertifyHandler, {
     let opacityValue = 1.0;
 
     if (boxEntity.get('state') === "TRANSPARENT") {
-      transparent = this.get('currentUser.settings.booleanAttributes.appVizTransparency');
-      opacityValue = this.get('currentUser.settings.numericAttributes.appVizTransparencyIntensity');
+      transparent = this.get('currentUser').getPreferenceOrDefaultValue('flagsetting', 'appVizTransparency');
+      opacityValue = this.get('currentUser').getPreferenceOrDefaultValue('rangesetting', 'appVizTransparencyIntensity');
     }
 
     const material = new THREE.MeshLambertMaterial({
