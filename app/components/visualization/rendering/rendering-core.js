@@ -396,7 +396,6 @@ export default Component.extend(Evented, THREEPerformance, {
 
     this.removePerformanceMeasurement();
 
-    $(window).off('resize.visualization');
     this.get('renderingService').off('reSetupScene');
     this.get('landscapeRepo').off('updated');
 
