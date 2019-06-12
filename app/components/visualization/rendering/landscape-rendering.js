@@ -592,7 +592,8 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.get('labeler').drawTextLabels(self.get('font'),
       self.get('configuration'));
 
-    this.showAlertifyMessage("Landscape loaded");
+
+    this.debug("Landscape loaded");
 
   }, // END populateScene
 

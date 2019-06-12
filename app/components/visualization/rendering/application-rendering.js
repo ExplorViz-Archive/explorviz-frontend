@@ -346,7 +346,7 @@ export default RenderingCore.extend(AlertifyHandler, {
       self.set('initialSetupDone', true);
     }
 
-    this.showAlertifyMessage("Application loaded");
+    this.debug("Application loaded");
 
   },
 
