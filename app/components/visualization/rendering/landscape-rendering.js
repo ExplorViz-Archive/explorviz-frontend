@@ -139,6 +139,11 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.set('interaction.raycastObjects', this.get('scene.children'));
   },
 
+  
+  getLandscape() {
+    return this.get('landscapeRepo.latestLandscape');
+  },
+
 
   // @Override
   /**
@@ -152,7 +157,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     const self = this;
 
-    const emberLandscape = this.get('landscapeRepo.latestLandscape');
+    const emberLandscape = this.getLandscape();
 
     if (!emberLandscape || !this.get('font')) {
       return;
