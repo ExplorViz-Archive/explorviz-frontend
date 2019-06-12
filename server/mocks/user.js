@@ -80,7 +80,7 @@ module.exports = function (app) {
     const { roles } = req.body.data.relationships;
 
     if(!username || username === '') {
-      res.send(400, {"errors": [ { "status": "400", "title": "Error", "detail": "Invalid username" } ]});
+      res.status(400).send("Invalid username");
       return;
     }
 
@@ -89,7 +89,7 @@ module.exports = function (app) {
     // Does user with entered username already exist?
     for (let i = 0; i < userCount; i++) {
       if(users.data[i].id != req.params.id && users.data[i].attributes.username === username) {
-        res.send(400, {"errors": [ { "status": "400", "title": "Error", "detail": "User already exists" } ]});
+        res.status(400).send("User already exists");
         return;
       }
     }
@@ -105,7 +105,7 @@ module.exports = function (app) {
       }
     }
 
-    res.send(400, {"errors": [ { "status": "400", "title": "Error", "detail": "User does not exists" } ]});
+    res.status(400).send("User does not exist");
   });
 
   userRouter.get('/:id', (req, res) => {
@@ -119,7 +119,7 @@ module.exports = function (app) {
       }
     }
 
-    res.send(400, {"errors": [ { "status": "400", "title": "Error", "detail": "User does not exists" } ]});
+    res.status(400).send("User does not exist");
   });
 
   userRouter.delete('/:id', (req, res) => {
@@ -131,22 +131,86 @@ module.exports = function (app) {
         return;
       }
     }
-    res.send(400, {"errors": [ { "status": "400", "title": "Error", "detail": "User does not exists" } ]});
+    res.status(400).send("User does not exist");
   });
 
   userRouter.get('/', function (_req, res) {
     res.send(users);
   });
 
+  userRouter.post('/batch', (req, res) => {
+    const { count, prefix, passwords, roles } = req.body.data.attributes;
+
+    if(!count || count <= 1) {
+      res.status(400).send("Invalid user count");
+      return;
+    }
+    if(!prefix || prefix === '') {
+      res.status(400).send("Invalid prefix");
+      return;
+    }
+    if(!passwords || passwords.length !== count) {
+      res.status(400).send("Passwords missing or do not match user count");
+      return;
+    }
+    // Could also check for validity of roles here
+    
+    // check if a user with given prefix already exists
+    var usernameFormatRegEx = new RegExp(`${prefix}-[0-9]+`);
+    for (let i = 0; i < count; i++) {
+      let match = users.data[i].attributes.username.match(usernameFormatRegEx) !== null;
+      if(match) {
+        res.status(400).send("User(s) with passed prefix already exist");
+        return;
+      }
+    }
+
+    let createdUsers = [];
+
+    let relationshipRolesData = roles.map(role => new Object({  
+      "type":"role",
+      "id":role.descriptor
+    }));
+
+    for(let i = 0; i < count; i++) {
+      let userNew = {
+        "type": "user",
+        "id": getNextUserId().toString(),
+        "attributes": {
+          "username": `${prefix}-${i}`
+        },
+        "relationships":{
+          "roles": {
+            "data": relationshipRolesData
+          }
+        }
+      };
+      users.data.push(userNew);
+      createdUsers.push(userNew);
+    }
+
+    req.body.included = createdUsers;
+
+    let relationshipUserData = createdUsers.map(user => new Object({type: "user", id: user.id}));
+
+    req.body.data.relationships = {
+      "users":{
+        "data": relationshipUserData
+      }
+    };
+
+    res.send(req.body);
+  });
+
   userRouter.post('/', (req, res) => {
     const { username, password } = req.body.data.attributes;
 
     if(!username || username === '') {
-      res.send(400, {"errors": [ { "status": "400", "title": "Error", "detail": "Invalid username" } ]});
+      res.status(400).send("Invalid username");
       return;
     }
     if(!password || password === '') {
-      res.send(400, {"errors": [ { "status": "400", "title": "Error", "detail": "Invalid password" } ]});
+      res.status(400).send("Invalid password");
       return;
     }
     // Could also check for validity of roles here
@@ -154,7 +218,7 @@ module.exports = function (app) {
     const userCount = users.data.length;
     for (let i = 0; i < userCount; i++) {
       if(users.data[i].attributes.username === username) {
-        res.send(400, {"errors": [ { "status": "400", "title": "Error", "detail": "User already exists" } ]});
+        res.status(400).send("User already exists");
         return;
       }
     }
