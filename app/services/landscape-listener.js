@@ -63,10 +63,10 @@ export default Service.extend(Evented, {
           return;
         }
 
-        //this.get('store').unloadAll('tracestep');
-        //this.get('store').unloadAll('trace');
-        //this.get('store').unloadAll('clazzcommunication');
-        //this.get('store').unloadAll('event');
+        this.get('store').unloadAll('tracestep');
+        this.get('store').unloadAll('trace');
+        this.get('store').unloadAll('clazzcommunication');
+        this.get('store').unloadAll('event');
 
         // console.log("JSON: " + JSON.stringify(jsonLandscape));
 
