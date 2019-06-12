@@ -164,6 +164,10 @@ export default Component.extend(AlertifyHandler, {
         return;
       }
 
+      if(numberOfUsers >= 65) {
+        this.showAlertifyWarning("User creation might take some time. You will be notified when it's done.");
+      }
+
       let userRecordArray = [];
       let userPromiseArray = [];
 
