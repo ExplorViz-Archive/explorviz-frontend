@@ -148,11 +148,11 @@ export default RenderingCore.extend(AlertifyHandler, {
    */
   populateScene() {
     this._super(...arguments);
-    this.debug("populate application rendering");
+    this.debug("populate landscape-rendering");
 
     const self = this;
 
-    const emberLandscape = this.get('latestLandscape');
+    const emberLandscape = this.get('landscapeRepo.latestLandscape');
 
     if (!emberLandscape || !this.get('font')) {
       return;
