@@ -50,7 +50,7 @@
         <div class="spinner-center-3 mb-5 mt-5" style="position:relative" role="status"></div>
       {{else}}
         {{#if (eq page "createSingleUser")}}
-          {{#bs-form model=this onSubmit=(action "saveUser") as |form|}}
+          {{#bs-form model=this onSubmit=(perform saveUser) as |form|}}
             {{form.element controlType="text" label="Username" placeholder="Username" property="username"}}
             {{form.element controlType="password" label="Password" placeholder="Password" property="password"}}
             {{#form.element controlType="power-select-multiple" property="roles_selected_single" label="Choose Roles" options=roles
@@ -74,7 +74,7 @@
                 </div>
               </div>
             {{/form.element}}
-            {{#if this.showSpinner}}
+            {{#if saveUser.isRunning}}
               {{#bs-button type="primary" buttonType="submit" disabled=true}}
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 Creating User...
@@ -84,7 +84,7 @@
             {{/if}}
           {{/bs-form}}
         {{else if (eq page "createMultipleUsers")}}
-          {{#bs-form model=this onSubmit=(action "saveMultipleUsers") as |form|}}
+          {{#bs-form model=this onSubmit=(perform saveMultipleUsers) as |form|}}
             {{form.element controlType="text" label="Username Prefix" placeholder="Username Prefix" property="usernameprefix"}}
             {{form.element controlType="number" label="Number of Users" placeholder="# of users" property="numberofusers"}}
             {{#form.element controlType="power-select-multiple" property="roles_selected_multiple" label="Choose Roles" options=roles
@@ -108,7 +108,7 @@
                 </div>
               </div>
             {{/form.element}}
-            {{#if this.showSpinner}}
+            {{#if saveMultipleUsers.isRunning}}
               {{#bs-button type="primary" buttonType="submit" disabled=true}}
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 Creating Users...
