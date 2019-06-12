@@ -148,11 +148,11 @@ export default RenderingCore.extend(AlertifyHandler, {
    */
   populateScene() {
     this._super(...arguments);
-    this.debug("populate application rendering");
+    this.debug("populate landscape-rendering");
 
     const self = this;
 
-    const emberLandscape = this.get('latestLandscape');
+    const emberLandscape = this.get('landscapeRepo.latestLandscape');
 
     if (!emberLandscape || !this.get('font')) {
       return;
@@ -592,7 +592,8 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.get('labeler').drawTextLabels(self.get('font'),
       self.get('configuration'));
 
-    this.showAlertifyMessage("Landscape loaded");
+
+    this.debug("Landscape loaded");
 
   }, // END populateScene
 
