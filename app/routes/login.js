@@ -1,4 +1,4 @@
-import Route from '@ember/routing/route';
+import BaseRoute from 'explorviz-frontend/routes/base-route';
 import UnauthenticatedRouteMixin from
  'ember-simple-auth/mixins/unauthenticated-route-mixin';
 
@@ -8,6 +8,12 @@ import UnauthenticatedRouteMixin from
 * @class Login-Route
 * @extends Ember.Route
 */
-export default Route.extend(UnauthenticatedRouteMixin, {
-    routeIfAlreadyAuthenticated: 'visualization'
+export default BaseRoute.extend(UnauthenticatedRouteMixin, {
+  routeIfAlreadyAuthenticated: 'visualization',
+
+  // @Override BaseRoute
+  actions: {
+    resetRoute() {
+    }
+  }
 });

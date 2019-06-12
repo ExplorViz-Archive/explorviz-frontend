@@ -9,8 +9,8 @@ export default Object.extend({
   textMaterialFoundation: null,
   textMaterialComponent: null,
   textMaterialClazz: null,
-  currentUser: null,
 
+  currentUser: service(),
   session: service(),
   configuration: service(),
 
