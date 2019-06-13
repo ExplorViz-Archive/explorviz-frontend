@@ -2,34 +2,46 @@ import Object from '@ember/object';
 import THREE from "three";
 import { shortenString } from '../helpers/string-helpers';
 import { inject as service } from "@ember/service";
-import CurrentUser from 'explorviz-frontend/services/current-user';
 
 export default Object.extend({
 
   labels: null,
-  textMaterialWhite: null,
-  textMaterialBlack: null,
+  textMaterialFoundation: null,
+  textMaterialComponent: null,
+  textMaterialClazz: null,
+
   currentUser: service(),
+  session: service(),
+  configuration: service(),
 
   init() {
     this._super(...arguments);
-
     this.set('labels', []);
-    this.set('textMaterialWhite',
+
+    const configuration : any = this.get('configuration');
+    const applicationColors : any = configuration.get('applicationColors');
+
+    this.set('textMaterialFoundation',
       new THREE.MeshBasicMaterial({
-        color: 0xffffff
+        color: applicationColors.foundationText
       })
     );
 
-    this.set('textMaterialBlack',
+    this.set('textMaterialComponent',
       new THREE.MeshBasicMaterial({
-        color: 0x000000
+        color: applicationColors.componentText
+      })
+    );
+
+    this.set('textMaterialClazz',
+      new THREE.MeshBasicMaterial({
+        color: applicationColors.clazzText
       })
     );
   },
 
   createLabel(parentMesh: THREE.Mesh, parentObject: THREE.Object3D, font: THREE.Font, transparent: boolean) {
-    let currentUser: CurrentUser = this.get('currentUser') as CurrentUser;
+    let currentUser: any = this.get('currentUser');
     const bBoxParent = new THREE.Box3().setFromObject(parentMesh);
 
     const worldParent = new THREE.Vector3();
@@ -83,17 +95,23 @@ export default Object.extend({
         curveSegments
       });
 
-      // Font color(material) depending on parent object
-      const blackMaterial: any = this.get('textMaterialBlack');
-      const whiteMaterial: any = this.get('textMaterialWhite');
-      if (!blackMaterial || !whiteMaterial) {
+      let material;
+      let foundationTextMaterial : any = this.get('textMaterialFoundation');
+      let componentTextMaterial : any = this.get('textMaterialComponent');
+      let clazzTextMaterial : any = this.get('textMaterialClazz');
+
+      if (foundation && foundationTextMaterial) {
+        material = foundationTextMaterial.clone();
+      } else if (type === 'clazz' && clazzTextMaterial) {
+        material = clazzTextMaterial.clone();
+      } else if (type === 'package' && componentTextMaterial) {
+        material = componentTextMaterial.clone();
+      } else {
         return;
       }
-      let material;
-      if (foundation) {
-        material = blackMaterial.clone();
-      } else {
-        material = whiteMaterial.clone();
+
+      if (!material) {
+        return;
       }
 
       // Apply transparency / opacity

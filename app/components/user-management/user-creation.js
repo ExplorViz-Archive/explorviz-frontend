@@ -145,6 +145,10 @@ export default Component.extend(AlertifyHandler, {
       this.showAlertifyWarning('Users need at least 1 role.');
       return;
     }
+    
+    if(numberOfUsers >= 65) {
+      this.showAlertifyWarning("User creation might take some time. You will be notified when it's done.");
+    }
 
     let passwords = this.generatePasswords(numberOfUsers, PASSWORD_LENGTH);
 

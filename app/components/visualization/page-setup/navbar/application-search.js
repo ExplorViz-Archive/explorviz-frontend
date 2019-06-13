@@ -9,11 +9,9 @@ export default Component.extend({
 
   tagName: "",
 
-  store: service(),
   renderingService: service(),
   landscapeRepo: service('repos/landscape-repository'),
   highlighter: service('visualization/application/highlighter'),
-  addionalData: service("additional-data"),
 
   selectedEntity: null,
 
