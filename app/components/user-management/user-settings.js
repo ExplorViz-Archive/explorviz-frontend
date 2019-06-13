@@ -19,6 +19,8 @@ export default Component.extend(AlertifyHandler, {
 
   settings: null,
 
+  useDefaultSettings: null,
+
   init() {
     this._super(...arguments);
 
@@ -53,6 +55,8 @@ export default Component.extend(AlertifyHandler, {
       }
     }
 
+    this.set('useDefaultSettings', preferences.length <= 0);
+
     this.set('settings', {
       rangesettings: [...rangeSettingsMap],
       flagsettings: [...flagSettingsMap]
@@ -77,16 +81,21 @@ export default Component.extend(AlertifyHandler, {
 
       let oldRecord = this.get('userSettings').getUserPreference(userId, settingId);
 
-      if(oldRecord) {
-        oldRecord.set('value', preferenceValueNew);
-        settingsPromiseArray.push(oldRecord.save());
-      } else {
-        const preferenceRecord = this.get('store').createRecord('userpreference', {
-          userId,
-          settingId,
-          value: preferenceValueNew
-        });
-        settingsPromiseArray.push(preferenceRecord.save());
+      // delete preference records if user selected default settings
+      if(oldRecord && this.get('useDefaultSettings')) {
+        settingsPromiseArray.push(oldRecord.destroyRecord());
+      } else { // else change or create settings
+        if(oldRecord) {
+          oldRecord.set('value', preferenceValueNew);
+          settingsPromiseArray.push(oldRecord.save());
+        } else {
+          const preferenceRecord = this.get('store').createRecord('userpreference', {
+            userId,
+            settingId,
+            value: preferenceValueNew
+          });
+          settingsPromiseArray.push(preferenceRecord.save());
+        }
       }
     }
 
