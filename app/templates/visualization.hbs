@@ -1,5 +1,5 @@
-<div class="row">
-  <div class="col-12" id="vizspace">
+<div class="row" style="max-height:100%">
+  <div class="col-12" id="vizspace" {{did-resize this.resize debounce=100}}>
     {{#if showLandscape}}
       {{#if landscapeRepo.latestLandscape.systems}}
         {{visualization/page-setup/visualization-navbar
@@ -9,9 +9,8 @@
             (component "visualization/page-setup/navbar/event-opener")
           )
         }}
-        {{resize-detector '#rendering' on-resize=(perform resize)}}
         <div id="rendering">
-          {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.latestLandscape}}
+          {{visualization/rendering/landscape-rendering}}
           <!-- popup(s) -->
           {{visualization/rendering/popups/popup-coordinator
           popupData=additionalData.popupContent}}
@@ -36,7 +35,6 @@
           (component "visualization/page-setup/navbar/application-search")
         )
       }}
-      {{resize-detector '#rendering' on-resize=(perform resize)}}
       <div id="rendering">
         <div style="position: absolute!important" class="pl-1">
           {{#bs-button onClick=(action "openLandscapeView") type="secondary" outline=true title="Back to Landscape"}}

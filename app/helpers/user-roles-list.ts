@@ -9,7 +9,7 @@ export function userRolesList([roles]:[DS.PromiseManyArray<Role>]) {
   for(let i = 0; i < roles.get('length'); i++) {
     let role:Role|undefined = roles.objectAt(i);
     if(role !== undefined) {
-      rawRoleList.push(role.get('descriptor'));
+      rawRoleList.push(role.get('id'));
     }
   }
 

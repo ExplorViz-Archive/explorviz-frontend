@@ -5,6 +5,7 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 import { inject as service } from "@ember/service";
 import DS from 'ember-data';
+import User from 'explorviz-frontend/models/user';
 
 export default class UserManagementEditRoute extends BaseRoute.extend(AuthenticatedRouteMixin, AlertifyHandler) {
 
@@ -12,7 +13,14 @@ export default class UserManagementEditRoute extends BaseRoute.extend(Authentica
   store!: DS.Store;
 
   model(this:UserManagementEditRoute, { user_id }:{ user_id:string }) {
-    return this.get('store').findRecord('user', user_id, {reload: true});
+    return this.get('store').findRecord('user', user_id, {reload: true}).then((user:User) => {
+      return {
+        user
+      };
+    }, () => {
+      this.showAlertifyWarning('User was not found.');
+      this.transitionTo('configuration.usermanagement');
+    });
   }
 
   actions = {
@@ -23,23 +31,6 @@ export default class UserManagementEditRoute extends BaseRoute.extend(Authentica
 
     goBack(this: UserManagementEditRoute) {
       this.transitionTo('configuration.usermanagement');
-    },
-
-    error(this: UserManagementEditRoute, error:any) {
-      let notFound = error === 'not-found' ||
-        (error &&
-          error.errors &&
-          error.errors[0] &&
-          error.errors[0].status == 404);
-
-      // routes that can't find models
-      if (notFound) {
-        this.showAlertifyMessage('Error: User was not found.');
-        this.transitionTo('configuration.usermanagement');
-        return;
-      } else {
-        return true;
-      }
     }
   }
 }
