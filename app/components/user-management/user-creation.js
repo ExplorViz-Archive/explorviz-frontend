@@ -155,7 +155,7 @@ export default Component.extend(AlertifyHandler, {
     }
     
     if(numberOfUsers >= 65) {
-      this.showAlertifyWarning("User creation might take some time. You will be notified when it's done.");
+      this.showAlertifyMessageWithDuration("User creation might take some time. You will be notified when it's done.", 5, "warning");
     }
 
     let passwords = this.generatePasswords(numberOfUsers, PASSWORD_LENGTH);
