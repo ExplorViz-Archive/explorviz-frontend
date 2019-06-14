@@ -5,7 +5,21 @@
     {{#if this.initSettings.isRunning}}
       <div class="spinner-center-3" role="status"></div>
     {{else}}
-      {{user-management/user-settings-base settings=this.settings}}
+      <div class="d-flex justify-content-between pr-3 pb-2">
+        <div>
+          Use Default Settings
+        </div>
+        {{x-toggle
+          theme='skewed'
+          onLabel='Yes'
+          offLabel='No'
+          value=useDefaultSettings
+          onToggle=(action (mut useDefaultSettings))
+        }}
+      </div>
+      {{#unless this.useDefaultSettings}}
+        {{user-management/user-settings-base settings=this.settings}}
+      {{/unless}}
 
       {{#if this.saveSettings.isRunning}}
         {{#bs-button type="primary" buttonType="submit" disabled=true}}

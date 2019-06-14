@@ -270,8 +270,6 @@ export default Object.extend({
     labelMesh.position.z = parent.position.z + 0.001;
   },
 
-
-
   isLabelAlreadyCreated(emberModel:any) {
     let textLabels = this.get('textLabels');
 
@@ -288,8 +286,9 @@ export default Object.extend({
       textLabels[emberModel.get('id')];
 
       return oldTextLabelObj;
+    } else {
+      return null;
     }
-    return null;
   },
 
 });

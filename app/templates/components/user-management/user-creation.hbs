@@ -66,9 +66,25 @@
             {{#form.element label="Settings"}}
               <div class="card mb-3">
                 <div class="card-body">
-                  {{user-management/user-settings-base
-                    settings=this.settings
-                  }}
+                  <div class="d-flex justify-content-between pr-3">
+                    <div>
+                      Use Default Settings
+                    </div>
+                    {{x-toggle
+                      theme='skewed'
+                      onLabel='Yes'
+                      offLabel='No'
+                      value=useDefaultSettingsSingle
+                      onToggle=(action (mut useDefaultSettingsSingle))
+                    }}
+                  </div>
+                  {{#unless this.useDefaultSettingsSingle}}
+                    <div class="pt-2">
+                      {{user-management/user-settings-base
+                        settings=this.settings
+                      }}
+                    </div>
+                  {{/unless}}
                 </div>
               </div>
             {{/form.element}}
@@ -100,9 +116,25 @@
             {{#form.element label="Settings"}}
               <div class="card mb-3">
                 <div class="card-body">
-                  {{user-management/user-settings-base
-                    settings=this.settings
-                  }}
+                  <div class="d-flex justify-content-between pr-3">
+                    <div>
+                      Use Default Settings
+                    </div>
+                    {{x-toggle
+                      theme='skewed'
+                      onLabel='Yes'
+                      offLabel='No'
+                      value=useDefaultSettingsMultiple
+                      onToggle=(action (mut useDefaultSettingsMultiple))
+                    }}
+                  </div>
+                  {{#unless this.useDefaultSettingsMultiple}}
+                    <div class="pt-2">
+                      {{user-management/user-settings-base
+                        settings=this.settings
+                      }}
+                    </div>
+                  {{/unless}}
                 </div>
               </div>
             {{/form.element}}

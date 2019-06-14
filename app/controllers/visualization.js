@@ -1,8 +1,7 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service'; 
-import { computed } from '@ember/object';
+import { computed, action } from '@ember/object';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
-import { task, timeout } from 'ember-concurrency';
 
 /**
 * TODO
@@ -13,7 +12,7 @@ import { task, timeout } from 'ember-concurrency';
 * @module explorviz
 * @submodule visualization
 */
-export default Controller.extend(AlertifyHandler, {
+export default class VisualizationController extends Controller.extend(AlertifyHandler, {
 
   renderingService: service("rendering-service"),
   landscapeRepo: service("repos/landscape-repository"),
@@ -42,14 +41,9 @@ export default Controller.extend(AlertifyHandler, {
 
     toggleTimeline() {
       this.get('renderingService').toggleTimeline();
-    },
+    }
     
   },
-
-  resize: task(function * () {
-    yield timeout(100);
-    this.get('renderingService').resizeCanvas();
-  }).restartable(),
 
   showTimeline() {
     this.set('renderingService.showTimeline', true);
@@ -68,4 +62,9 @@ export default Controller.extend(AlertifyHandler, {
     this._super(...arguments);
   }
   
-});
+}) {
+  @action
+  resize() {
+    this.get('renderingService').resizeCanvas();
+  }
+}

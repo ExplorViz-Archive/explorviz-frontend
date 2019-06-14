@@ -17,6 +17,9 @@ export default Component.extend(AlertifyHandler, {
   showNewUsers: null,
   page: null,
 
+  useDefaultSettingsSingle: null,
+  useDefaultSettingsMultiple: null,
+
   // object of setting arrays of form
   // [[settingId0,settingValue0],...,[settingIdN,settingValueN]]
   settings: null,
@@ -25,6 +28,9 @@ export default Component.extend(AlertifyHandler, {
     this._super(...arguments);
     this.set('showNewUsers', false);
     this.set('page', 'createSingleUser');
+
+    this.set('useDefaultSettingsSingle', true);
+    this.set('useDefaultSettingsMultiple', true);
 
     this.get('initSettings').perform();
   },
@@ -91,7 +97,9 @@ export default Component.extend(AlertifyHandler, {
 
     try {
       yield userRecord.save();
-      yield createPreferences.bind(this)(userRecord.get('id'));
+      if(!this.get('useDefaultSettingsSingle')) {
+        yield createPreferences.bind(this)(userRecord.get('id'));
+      }
       this.showAlertifySuccess(`User <b>${userData.username}</b> was created.`);
       clearInputFields.bind(this)();
     } catch(reason) {
@@ -145,6 +153,10 @@ export default Component.extend(AlertifyHandler, {
       this.showAlertifyWarning('Users need at least 1 role.');
       return;
     }
+    
+    if(numberOfUsers >= 65) {
+      this.showAlertifyWarning("User creation might take some time. You will be notified when it's done.");
+    }
 
     let passwords = this.generatePasswords(numberOfUsers, PASSWORD_LENGTH);
 
@@ -158,10 +170,12 @@ export default Component.extend(AlertifyHandler, {
 
     let preferences = {};
 
-    for(let j = 0; j < allSettings.length; j++) {
-      let settingId = allSettings[j][0];
-      let value = allSettings[j][1];
-      preferences[settingId] = value;
+    if(!this.get('useDefaultSettingsMultiple')) {
+      for(let j = 0; j < allSettings.length; j++) {
+        let settingId = allSettings[j][0];
+        let value = allSettings[j][1];
+        preferences[settingId] = value;
+      }
     }
 
     const userBatchRecord = this.get('store').createRecord('userbatchrequest', {

@@ -17,6 +17,9 @@ export default class UserManagementEditRoute extends BaseRoute.extend(Authentica
       return {
         user
       };
+    }, () => {
+      this.showAlertifyWarning('User was not found.');
+      this.transitionTo('configuration.usermanagement');
     });
   }
 
@@ -28,23 +31,6 @@ export default class UserManagementEditRoute extends BaseRoute.extend(Authentica
 
     goBack(this: UserManagementEditRoute) {
       this.transitionTo('configuration.usermanagement');
-    },
-
-    error(this: UserManagementEditRoute, error:any) {
-      let notFound = error === 'not-found' ||
-        (error &&
-          error.errors &&
-          error.errors[0] &&
-          error.errors[0].status == 404);
-
-      // routes that can't find models
-      if (notFound) {
-        this.showAlertifyMessage('Error: User was not found.');
-        this.transitionTo('configuration.usermanagement');
-        return;
-      } else {
-        return true;
-      }
     }
   }
 }

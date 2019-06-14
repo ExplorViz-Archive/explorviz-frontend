@@ -139,7 +139,7 @@ module.exports = function (app) {
   });
 
   userRouter.post('/batch', (req, res) => {
-    const { count, prefix, passwords, roles } = req.body.data.attributes;
+    const { count, prefix, passwords, roles, preferences } = req.body.data.attributes;
 
     if(!count || count <= 1) {
       res.status(400).send("Invalid user count");
@@ -157,7 +157,7 @@ module.exports = function (app) {
     
     // check if a user with given prefix already exists
     var usernameFormatRegEx = new RegExp(`${prefix}-[0-9]+`);
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < users.data.length; i++) {
       let match = users.data[i].attributes.username.match(usernameFormatRegEx) !== null;
       if(match) {
         res.status(400).send("User(s) with passed prefix already exist");
@@ -187,6 +187,13 @@ module.exports = function (app) {
       };
       users.data.push(userNew);
       createdUsers.push(userNew);
+    }
+
+    for(let i = 0; i < createdUsers.length; i++) {
+      for (const [settingId, value] of Object.entries(preferences)) {
+        let preferenceNew = global.createUserPreference(createdUsers[i].id, settingId, value);
+        global.userPreferences.set(preferenceNew.id, preferenceNew);
+      }
     }
 
     req.body.included = createdUsers;

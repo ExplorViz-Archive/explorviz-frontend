@@ -1,12 +1,28 @@
 /* eslint-env node */
 'use strict';
 
+// settingId -> setting
+global.userPreferences = new Map();
+
+global.createUserPreference = function(userId, settingId, value) {
+  return {
+    "type":"userpreference",
+    "id": ID(),
+    "attributes":{  
+       "userId":userId,
+       "settingId":settingId,
+       "value":value
+    }
+  }
+}
+
+function ID() {
+  return Math.random().toString(36).substr(2, 9);
+}
+
 module.exports = function (app) {
   const express = require('express');
   let userpreferenceRouter = express.Router();
-
-  // settingId -> setting
-  let userPreferences = new Map();
 
   userpreferenceRouter.get('/', function (req, res) {
     // /userpreferences?uid=x
@@ -15,7 +31,7 @@ module.exports = function (app) {
     if(uid) {
       let preferences = [];
 
-      for (const [,preferenceObject] of userPreferences.entries()) {
+      for (const [,preferenceObject] of global.userPreferences.entries()) {
         if(preferenceObject.attributes.userId === uid) {
           preferences.push(preferenceObject);
         }
@@ -32,8 +48,8 @@ module.exports = function (app) {
   userpreferenceRouter.delete('/:id', function (req, res) {
     let preferenceId = req.params.id;
 
-    if(userPreferences.has(preferenceId)) {
-      userPreferences.delete(preferenceId);
+    if(global.userPreferences.has(preferenceId)) {
+      global.userPreferences.delete(preferenceId);
       res.status(204).send();
     } else {
       res.send(404).send('Preference not found');
@@ -44,8 +60,8 @@ module.exports = function (app) {
     let preferenceId = req.params.prefId;
     const { value } = req.body.data.attributes;
 
-    if(userPreferences.has(preferenceId)) {
-      let preference = userPreferences.get(preferenceId);
+    if(global.userPreferences.has(preferenceId)) {
+      let preference = global.userPreferences.get(preferenceId);
       preference.attributes.value = value;
       res.send({
         "data": preference
@@ -58,28 +74,12 @@ module.exports = function (app) {
   userpreferenceRouter.post('/', function (req, res) {
     let { userId, settingId, value } = req.body.data.attributes;
 
-    let preferenceNew = createUserPreference(userId, settingId, value);
-    userPreferences.set(preferenceNew.id, preferenceNew);
+    let preferenceNew = global.createUserPreference(userId, settingId, value);
+    global.userPreferences.set(preferenceNew.id, preferenceNew);
     res.send({
       "data": preferenceNew
     });
   });
-
-  function createUserPreference(userId, settingId, value) {
-    return {
-      "type":"userpreference",
-      "id": ID(),
-      "attributes":{  
-         "userId":userId,
-         "settingId":settingId,
-         "value":value
-      }
-    }
-  }
-
-  function ID() {
-    return Math.random().toString(36).substr(2, 9);
-  }
 
   // The POST and PUT call will not contain a request body
   // because the body-parser is not included by default.

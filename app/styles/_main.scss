@@ -27,10 +27,12 @@ body > .ember-view {
 #vizspace {
   @extend .d-flex;
   @extend .flex-column;
+  max-height: 100%;
 }
 
 #rendering {
   @extend .flex-grow-1;
+  max-height: 100%;
 }
 
 .canvasViz {
