@@ -6,6 +6,7 @@
     <div class="alert alert-danger" role="alert">
       <p>Print now using the button below.</p>
       <p>You cannot access the passwords again after closing this window!</p>
+      {{#bs-button onClick=(action "printNewUsers") type="primary"}}Print{{/bs-button}}
     </div>
     <table class="table" id="new-user-list">
       <thead>
@@ -26,9 +27,6 @@
       </tbody>
     </table>
   {{/modal.body}}
-  {{#modal.footer as |footer|}}
-    {{#bs-button onClick=(action "printNewUsers") type="primary"}}Print{{/bs-button}}
-  {{/modal.footer}}
 {{/bs-modal}}
 
 <div class="mt-4" style="overflow-y: auto">
