@@ -299,11 +299,12 @@ export default RenderingCore.extend(AlertifyHandler, {
 
         const thickness = drawableClazzComm.get('lineThickness') * 0.3;
 
-        // TODO: Set the following properties according to user settings
-        const isCurvedCommunication = false;
         // Determines how smooth/round the curve looks, impacts performance
-        const curveSegments = 20;
-        const curveHeight = 5;
+        const curveSegments = 40;
+        const curveHeight = this.get('currentUser').getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
+
+        // TODO: Set the following properties according to user settings
+        const isCurvedCommunication = curveHeight > 0.0;
 
         if (isCurvedCommunication) {
           let curveMeshes = this.curvedCylinderMeshes(start, end, material, thickness, curveSegments, curveHeight);

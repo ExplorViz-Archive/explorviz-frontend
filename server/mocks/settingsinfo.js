@@ -32,6 +32,18 @@ module.exports = function(app) {
           }
        },
        {
+          "type":"rangesetting",
+          "id":"appVizCurvyCommHeight",
+          "attributes":{  
+             "max":50.0,
+             "displayName":"Curviness of the Communication Lines",
+             "description":"If greater 0.0, communication lines are rendered arc-shaped with set height (Straight lines: 0.0)",
+             "origin":"backend",
+             "defaultValue":0.0,
+             "min":0.0
+          }
+       },
+       {
           "type":"flagsetting",
           "id":"showFpsCounter",
           "attributes":{  
@@ -45,7 +57,7 @@ module.exports = function(app) {
           "type":"flagsetting",
           "id":"appVizTransparency",
           "attributes":{  
-             "displayName":"App Viz Transparency",
+             "displayName":"Enable Transparent Components",
              "description":"Transparency effect for selection (left click) in application visualization",
              "origin":"backend",
              "defaultValue":true
