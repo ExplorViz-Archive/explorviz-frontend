@@ -13,6 +13,8 @@ export default class RangeSetting extends DS.Model {
   @attr('number') max!: number;
 
   @attr('number') defaultValue!: number;
+
+  @attr('string') origin!: string;
 }
 
 declare module 'ember-data/types/registries/model' {

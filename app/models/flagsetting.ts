@@ -9,6 +9,8 @@ export default class FlagSetting extends DS.Model {
   @attr('string') displayName!: string;
 
   @attr('boolean') defaultValue!: boolean;
+
+  @attr('string') origin!: string;
 }
 
 declare module 'ember-data/types/registries/model' {
