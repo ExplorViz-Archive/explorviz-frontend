@@ -57,7 +57,7 @@ export default Component.extend(AlertifyHandler, {
         this.showAlertifySuccess(`User updated.`);
         clearInputFields.bind(this)();
       } catch(reason) {
-        this.showAlertifyError(reason);
+        this.showReasonErrorAlert(reason);
       }
     } else {
       this.showAlertifyError(`User not found.`);
