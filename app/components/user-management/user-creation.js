@@ -17,11 +17,23 @@ export default Component.extend(AlertifyHandler, {
   showNewUsers: null,
   page: null,
 
-  useDefaultSettingsSingle: null,
-  useDefaultSettingsMultiple: null,
+  // {
+  //   origin1: boolean1,
+  //   origin2: boolean2
+  //   ...
+  // }
+  useDefaultSettings: null,
 
-  // object of setting arrays of form
-  // [[settingId0,settingValue0],...,[settingIdN,settingValueN]]
+
+  /*
+    {
+      origin1: {
+        settingstype1: [[settingId1, value1], ...]
+        settingstype2: [[settingId'1, value'1], ...]
+      }
+      origin2: {...}
+    }
+  */
   settings: null,
 
   init() {
@@ -29,33 +41,39 @@ export default Component.extend(AlertifyHandler, {
     this.set('showNewUsers', false);
     this.set('page', 'createSingleUser');
 
-    this.set('useDefaultSettingsSingle', true);
-    this.set('useDefaultSettingsMultiple', true);
+    this.set('useDefaultSettings', {});
 
-    this.get('initSettings').perform();
+    this.get('initSettings').perform(['rangesetting', 'flagsetting']);
   },
 
-  initSettings: task(function * () {
-    let rangeSettings = yield this.get('store').peekAll('rangesetting');
-    let flagSettings = yield this.get('store').peekAll('flagsetting');
-
-    let rangeSettingsMap = new Map();
-    let flagSettingsMap = new Map();
-
-    // copy all settings with their according default values into the maps
-    for(let i = 0; i < rangeSettings.get('length'); i++) {
-      let setting = rangeSettings.objectAt(i);
-      rangeSettingsMap.set(setting.get('id'), setting.get('defaultValue'));
-    }
-    for(let i = 0; i < flagSettings.get('length'); i++) {
-      let setting = flagSettings.objectAt(i);
-      flagSettingsMap.set(setting.get('id'), setting.get('defaultValue'));
+  initSettings: task(function * (settingTypes) {
+    let allSettings = [];
+    for(let i = 0; i < settingTypes.length; i++) {
+      let settings = yield this.get('store').peekAll(settingTypes[i]);
+      allSettings.pushObjects(settings.toArray());
     }
 
-    this.set('settings', {
-      rangesettings: [...rangeSettingsMap],
-      flagsettings: [...flagSettingsMap]
-    });
+    let origins = [...new Set(allSettings.mapBy('origin'))];
+
+    let settingsByOrigin = {};
+
+    for(let i = 0; i < origins.length; i++) {
+      this.get('useDefaultSettings')[origins[i]] = true;
+      // initialize settings object for origin containing arrays for every type
+      settingsByOrigin[origins[i]] = {};
+      for(let j = 0; j < settingTypes.length; j++) {
+        settingsByOrigin[origins[i]][`${settingTypes[j]}s`] = [];
+      }
+    }
+
+    // copy all settings to settingsByOrigin
+    // use default if no perefenrece exists for user, else use preference value
+    for(let i = 0; i < allSettings.length; i++) {
+      let setting = allSettings[i];
+      settingsByOrigin[setting.origin][`${setting.constructor.modelName}s`].push([setting.get('id'), setting.get('defaultValue')]);
+    }
+
+    this.set('settings', settingsByOrigin);
   }),
 
   actions: {
@@ -97,9 +115,7 @@ export default Component.extend(AlertifyHandler, {
 
     try {
       yield userRecord.save();
-      if(!this.get('useDefaultSettingsSingle')) {
-        yield createPreferences.bind(this)(userRecord.get('id'));
-      }
+      yield createPreferences.bind(this)(userRecord.get('id'));
       this.showAlertifySuccess(`User <b>${userData.username}</b> was created.`);
       clearInputFields.bind(this)();
     } catch(reason) {
@@ -117,19 +133,24 @@ export default Component.extend(AlertifyHandler, {
 
     function createPreferences(uid) {
       let settingsPromiseArray = [];
-      // group all settings
-      let flagSettings = this.get('settings').flagsettings;
-      let rangeSettings = this.get('settings').rangesettings;
-      let allSettings = [].concat(flagSettings, rangeSettings);
 
-      // create records for the preferences and save them
-      for(let i = 0; i < allSettings.length; i++) {
-        const preferenceRecord = this.get('store').createRecord('userpreference', {
-          userId: uid,
-          settingId: allSettings[i][0],
-          value: allSettings[i][1]
-        });
-        settingsPromiseArray.push(preferenceRecord.save());
+      const settings = Object.entries(this.get('settings'))
+
+      // go through all settings and create a preference for the user if default settings was not chosen.
+      for (const [origin, {flagsettings, rangesettings}] of settings) {
+        if(this.get('useDefaultSettings')[origin])
+          continue;
+
+        let allSettings = [].concat(flagsettings, rangesettings);
+        // create records for the preferences and save them
+        for(let i = 0; i < allSettings.length; i++) {
+          const preferenceRecord = this.get('store').createRecord('userpreference', {
+            userId: uid,
+            settingId: allSettings[i][0],
+            value: allSettings[i][1]
+          });
+          settingsPromiseArray.push(preferenceRecord.save());
+        }
       }
 
       return new all(settingsPromiseArray);
@@ -163,17 +184,19 @@ export default Component.extend(AlertifyHandler, {
     // property in backend is called descriptor and not id
     const roles = userData.roles_selected_multiple.map(role => new Object({descriptor: role.id}));
 
-    // group all settings
-    let flagSettings = this.get('settings').flagsettings;
-    let rangeSettings = this.get('settings').rangesettings;
-    let allSettings = [].concat(flagSettings, rangeSettings);
-
     let preferences = {};
 
-    if(!this.get('useDefaultSettingsMultiple')) {
-      for(let j = 0; j < allSettings.length; j++) {
-        let settingId = allSettings[j][0];
-        let value = allSettings[j][1];
+    // for all settings, add a preference for the new users if default settings was not chosen.
+    const settings = Object.entries(this.get('settings'))
+    for (const [origin, {flagsettings, rangesettings}] of settings) {
+      if(this.get('useDefaultSettings')[origin])
+        continue;
+
+      let allSettings = [].concat(flagsettings, rangesettings);
+      // create records for the preferences and save them
+      for(let i = 0; i < allSettings.length; i++) {
+        let settingId = allSettings[i][0];
+        let value = allSettings[i][1];
         preferences[settingId] = value;
       }
     }
@@ -195,6 +218,8 @@ export default Component.extend(AlertifyHandler, {
     } catch(reason) {
       this.showReasonErrorAlert(reason);
     } finally {
+      // always remove the userBatchRecord, since the backend always assigns id "const" and
+      // else we can't create a second one and save it
       userBatchRecord.unloadRecord();
       this.get('store')._removeFromIdMap(userBatchRecord._internalModel);
     }

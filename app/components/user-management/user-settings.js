@@ -17,78 +17,112 @@ export default Component.extend(AlertifyHandler, {
   // set through hb template
   user: null,
 
+  /*
+    {
+      origin1: {
+        settingstype1: [[settingId1, value1], ...]
+        settingstype2: [[settingId'1, value'1], ...]
+      }
+      origin2: {...}
+    }
+  */
   settings: null,
 
+  /*
+    {
+      origin1: boolean1,
+      origin2: boolean2
+      ...
+    }
+  */
   useDefaultSettings: null,
 
   init() {
     this._super(...arguments);
 
-    this.get('initSettings').perform();
+    this.set('useDefaultSettings', {});
+
+    this.get('initSettings').perform(['rangesetting', 'flagsetting']);
   },
 
-  initSettings: task(function * () {
-    let rangeSettings = this.get('store').peekAll('rangesetting');
-    let flagSettings = this.get('store').peekAll('flagsetting');
+  initSettings: task(function * (settingTypes) {
+    // load all settings from store
+    let allSettings = [];
+    for(let i = 0; i < settingTypes.length; i++) {
+      let settings = yield this.get('store').peekAll(settingTypes[i]);
+      allSettings.pushObjects(settings.toArray());
+    }
 
-    let rangeSettingsMap = new Map();
-    let flagSettingsMap = new Map();
-
+    let origins = [...new Set(allSettings.mapBy('origin'))];
     let preferences = yield this.get('store').query('userpreference', { uid: this.get('user').get('id') });
 
-    for(let i = 0; i < rangeSettings.get('length'); i++) {
-      let setting = rangeSettings.objectAt(i);
-      rangeSettingsMap.set(setting.get('id'), setting.get('defaultValue'));
-    }
-    for(let i = 0; i < flagSettings.get('length'); i++) {
-      let setting = flagSettings.objectAt(i);
-      flagSettingsMap.set(setting.get('id'), setting.get('defaultValue'));
-    }
+    // stores settings by origin and type
+    // see settings property above for structure
+    let settingsByOrigin = {};
 
-    for(let i = 0; i < preferences.length; i++) {
-      let setting = preferences.objectAt(i);
-      if(setting !== undefined) {
-        if(typeof setting.get('value') === 'number')
-        rangeSettingsMap.set(setting.get('settingId'), setting.get('value'));
-        else
-        flagSettingsMap.set(setting.get('settingId'), setting.get('value'));
+    for(let i = 0; i < origins.length; i++) {
+      this.get('useDefaultSettings')[origins[i]] = true;
+      let settingsWithOrigin = allSettings.filterBy('origin', origins[i]);
+
+      // use default settings for settings of origin if there are no user preferences for it
+      for(let j = 0; j < preferences.get('length'); j++) {
+        if(settingsWithOrigin.filterBy('id', preferences.objectAt(j).get('settingId')).length > 0) {
+          this.get('useDefaultSettings')[origins[i]] = false;
+          break;
+        }
+      }
+
+      // initialize settings object for origin containing arrays for every type
+      settingsByOrigin[origins[i]] = {};
+      for(let j = 0; j < settingTypes.length; j++) {
+        settingsByOrigin[origins[i]][`${settingTypes[j]}s`] = [];
       }
     }
 
-    this.set('useDefaultSettings', preferences.length <= 0);
+    // copy all settings to settingsByOrigin
+    // use default if no perefenrece exists for user, else use preference value
+    for(let i = 0; i < allSettings.length; i++) {
+      let setting = allSettings[i];
+      let preference = preferences.findBy('settingId', setting.get('id'));
+      let value;
+      if(preference !== undefined)
+        value = preference.get('value');
+      else
+        value = setting.get('defaultValue');
 
-    this.set('settings', {
-      rangesettings: [...rangeSettingsMap],
-      flagsettings: [...flagSettingsMap]
-    });
+      settingsByOrigin[setting.origin][`${setting.constructor.modelName}s`].push([setting.get('id'), value]);
+    }
+
+    this.set('settings', settingsByOrigin);
   }),
 
   saveSettings: task(function * () {
     let userId = this.get('user').get('id');
-    
-    // group all settings
-    let flagSettings = this.get('settings').flagsettings;
-    let rangeSettings = this.get('settings').rangesettings;
-    let allSettings = [].concat(flagSettings, rangeSettings);
+
+    const settings = Object.entries(this.get('settings'));
     
     let settingsPromiseArray = [];
 
-    // Update user's preferences by updating old records
-    // or by creating and saving new ones.
-    for(let i = 0; i < allSettings.length; i++) {
-      let settingId = allSettings[i][0];
-      let preferenceValueNew = allSettings[i][1];
+    for (const [origin, settingsGroupedByType] of settings) {
+      let allSettings = [].concat(...Object.values(settingsGroupedByType))
 
-      let oldRecord = this.get('userSettings').getUserPreference(userId, settingId);
+      // patch, create or delete preference based on whether the default button for
+      // the corresponding origin is enabled or not and whether or not a prefenrece already exists
+      for(let i = 0; i < allSettings.length; i++) {
+        let settingId = allSettings[i][0];
+        let preferenceValueNew = allSettings[i][1];
 
-      // delete preference records if user selected default settings
-      if(oldRecord && this.get('useDefaultSettings')) {
-        settingsPromiseArray.push(oldRecord.destroyRecord());
-      } else { // else change or create settings
+        let oldRecord = this.get('userSettings').getUserPreference(userId, settingId);
+
         if(oldRecord) {
-          oldRecord.set('value', preferenceValueNew);
-          settingsPromiseArray.push(oldRecord.save());
-        } else {
+          // delete preference if user wants default settings
+          if(this.get('useDefaultSettings')[origin]) {
+            settingsPromiseArray.push(oldRecord.destroyRecord());
+          } else { // edit preference if user does not want default settings
+            oldRecord.set('value', preferenceValueNew);
+            settingsPromiseArray.push(oldRecord.save());
+          }
+        } else if(!this.get('useDefaultSettings')[origin]) { // create preference if user used default settings before
           const preferenceRecord = this.get('store').createRecord('userpreference', {
             userId,
             settingId,
@@ -99,7 +133,7 @@ export default Component.extend(AlertifyHandler, {
       }
     }
 
-    // wait for all recorsd to be saved. Give out error if one fails
+    // wait for all records to be saved. Give out error if one fails
     yield new all(settingsPromiseArray).then(()=>{
       this.showAlertifySuccess('Settings saved.');
     }).catch((reason)=>{
