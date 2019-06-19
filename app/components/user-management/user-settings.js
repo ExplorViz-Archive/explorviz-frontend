@@ -42,14 +42,15 @@ export default Component.extend(AlertifyHandler, {
 
     this.set('useDefaultSettings', {});
 
-    this.get('initSettings').perform(['rangesetting', 'flagsetting']);
+    this.get('initSettings').perform();
   },
 
-  initSettings: task(function * (settingTypes) {
+  initSettings: task(function * () {
     // load all settings from store
+    let settingTypes = [...this.get('userSettings').get('types')];
     let allSettings = [];
-    for(let i = 0; i < settingTypes.length; i++) {
-      let settings = yield this.get('store').peekAll(settingTypes[i]);
+    for (const type of settingTypes) {
+      let settings = yield this.get('store').peekAll(type);
       allSettings.pushObjects(settings.toArray());
     }
 
@@ -74,8 +75,8 @@ export default Component.extend(AlertifyHandler, {
 
       // initialize settings object for origin containing arrays for every type
       settingsByOrigin[origins[i]] = {};
-      for(let j = 0; j < settingTypes.length; j++) {
-        settingsByOrigin[origins[i]][`${settingTypes[j]}s`] = [];
+      for (const type of settingTypes) {
+        settingsByOrigin[origins[i]][type] = [];
       }
     }
 
@@ -90,7 +91,7 @@ export default Component.extend(AlertifyHandler, {
       else
         value = setting.get('defaultValue');
 
-      settingsByOrigin[setting.origin][`${setting.constructor.modelName}s`].push([setting.get('id'), value]);
+      settingsByOrigin[setting.origin][setting.constructor.modelName].push([setting.get('id'), value]);
     }
 
     this.set('settings', settingsByOrigin);

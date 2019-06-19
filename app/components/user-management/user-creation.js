@@ -12,6 +12,7 @@ export default Component.extend(AlertifyHandler, {
 
   store: service(),
   printThis: service(),
+  userSettings: service(),
 
   createdUsers: null,
   showNewUsers: null,
@@ -43,13 +44,15 @@ export default Component.extend(AlertifyHandler, {
 
     this.set('useDefaultSettings', {});
 
-    this.get('initSettings').perform(['rangesetting', 'flagsetting']);
+    this.get('initSettings').perform();
   },
 
-  initSettings: task(function * (settingTypes) {
+  initSettings: task(function * () {
+    let settingTypes = [...this.get('userSettings').get('types')];
     let allSettings = [];
-    for(let i = 0; i < settingTypes.length; i++) {
-      let settings = yield this.get('store').peekAll(settingTypes[i]);
+    // get all settings
+    for (const type of settingTypes) {
+      let settings = yield this.get('store').peekAll(type);
       allSettings.pushObjects(settings.toArray());
     }
 
@@ -61,8 +64,8 @@ export default Component.extend(AlertifyHandler, {
       this.get('useDefaultSettings')[origins[i]] = true;
       // initialize settings object for origin containing arrays for every type
       settingsByOrigin[origins[i]] = {};
-      for(let j = 0; j < settingTypes.length; j++) {
-        settingsByOrigin[origins[i]][`${settingTypes[j]}s`] = [];
+      for (const type of settingTypes) {
+        settingsByOrigin[origins[i]][type] = [];
       }
     }
 
@@ -70,7 +73,7 @@ export default Component.extend(AlertifyHandler, {
     // use default if no perefenrece exists for user, else use preference value
     for(let i = 0; i < allSettings.length; i++) {
       let setting = allSettings[i];
-      settingsByOrigin[setting.origin][`${setting.constructor.modelName}s`].push([setting.get('id'), setting.get('defaultValue')]);
+      settingsByOrigin[setting.origin][setting.constructor.modelName].push([setting.get('id'), setting.get('defaultValue')]);
     }
 
     this.set('settings', settingsByOrigin);
@@ -134,14 +137,13 @@ export default Component.extend(AlertifyHandler, {
     function createPreferences(uid) {
       let settingsPromiseArray = [];
 
-      const settings = Object.entries(this.get('settings'))
+      const settings = Object.entries(this.get('settings'));
 
-      // go through all settings and create a preference for the user if default settings was not chosen.
-      for (const [origin, {flagsettings, rangesettings}] of settings) {
+      for (const [origin, settingsObject] of settings) {
         if(this.get('useDefaultSettings')[origin])
           continue;
 
-        let allSettings = [].concat(flagsettings, rangesettings);
+        let allSettings = [].concat(...Object.values(settingsObject));
         // create records for the preferences and save them
         for(let i = 0; i < allSettings.length; i++) {
           const preferenceRecord = this.get('store').createRecord('userpreference', {
@@ -188,11 +190,11 @@ export default Component.extend(AlertifyHandler, {
 
     // for all settings, add a preference for the new users if default settings was not chosen.
     const settings = Object.entries(this.get('settings'))
-    for (const [origin, {flagsettings, rangesettings}] of settings) {
+    for (const [origin, settingsObject] of settings) {
       if(this.get('useDefaultSettings')[origin])
         continue;
 
-      let allSettings = [].concat(flagsettings, rangesettings);
+      let allSettings = [].concat(...Object.values(settingsObject));
       // create records for the preferences and save them
       for(let i = 0; i < allSettings.length; i++) {
         let settingId = allSettings[i][0];

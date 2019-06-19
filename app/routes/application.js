@@ -17,12 +17,13 @@ export default Route.extend(ApplicationRouteMixin, {
   routeAfterAuthentication: 'visualization',
   session: service(),
   currentUser: service(),
+  userSettings: service(),
 
   beforeModel() {
     return new all([
       this._loadCurrentUser(),
       this._loadCurrentUserPreferences(),
-      this._loadSettings()
+      this._loadSettingsAndTypes()
     ]);
   },
 
@@ -30,7 +31,7 @@ export default Route.extend(ApplicationRouteMixin, {
     this._super(...arguments);
     this._loadCurrentUser();
     this._loadCurrentUserPreferences();
-    this._loadSettings();
+    this._loadSettingsAndTypes();
   },
 
   _loadCurrentUser() {
@@ -47,8 +48,23 @@ export default Route.extend(ApplicationRouteMixin, {
     }
   },
 
-  _loadSettings() {
-    return this.get('store').findAll('settingsinfo').catch(() => this.get('session').invalidate({message: 'Settings could not be loaded'}));
+  _loadSettingsAndTypes() {
+    let settings;
+    try {
+      // request all settings and load into store
+      settings = this.get('store').query('settingsinfo', 1);
+      // get all setting types and save them for future access
+      settings.then(() => {
+        let types = new Set();
+        for(let i = 0; i < settings.get('length'); i++) {
+          types.add(settings.objectAt(i).constructor.modelName);
+        }
+        this.get('userSettings').set('types', types);
+      });
+      return settings;
+    } catch(reason) {
+      this.get('session').invalidate({message: 'Settings could not be loaded'});
+    }
   },
 
   actions: {

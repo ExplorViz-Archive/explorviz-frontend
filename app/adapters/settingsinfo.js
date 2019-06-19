@@ -25,6 +25,12 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     const baseUrl = this.buildURL();
     return `${baseUrl}/v1/settings/info`;
   },
+  
+  // @Override
+  urlForQuery() {
+    const baseUrl = this.buildURL();
+    return `${baseUrl}/v1/settings/info`;
+  },
 
   // @Override
   // Overrides URL for model.save()
