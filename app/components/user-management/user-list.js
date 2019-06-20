@@ -20,6 +20,9 @@ export default Component.extend(AlertifyHandler, {
   allSelected: null,
   selected: null,
 
+  showDeleteUsersButton: null,
+  showDeleteUsersDialog: null,
+
   didInsertElement() {
     this._super(...arguments);
     this.set('roles', []);
@@ -27,6 +30,8 @@ export default Component.extend(AlertifyHandler, {
 
     this.set('allSelected', false);
     this.set('selected', {});
+    this.set('showDeleteUsersButton', false);
+    this.set('showDeleteUsersDialog', false);
 
     this.get('updateUserList').perform(true);
   },
@@ -48,8 +53,10 @@ export default Component.extend(AlertifyHandler, {
       this.set('allSelected', false);
       this.set('selected', {});
       for(const user of userList) {
-        this.set(`selected.${user.get('id')}`, false);
+        if(this.get('currentUser.user') !== user)
+          this.set(`selected.${user.get('id')}`, false);
       }
+      this.set('showDeleteUsersButton', false);
     } catch(reason) {
       this.showAlertifyMessage('Could not load users!');
     }
@@ -74,6 +81,7 @@ export default Component.extend(AlertifyHandler, {
       this.showAlertifyError(`<b>${title}:</b> ${detail}`);
     }).finally(() => {
       this.get('updateUserList').perform();
+      this.set('showDeleteUsersDialog', false);
     });
 
   }).enqueue(),
@@ -83,6 +91,7 @@ export default Component.extend(AlertifyHandler, {
       this.toggleProperty(`selected.${userId}`);
       let allTrue = Object.values(this.get('selected')).every(Boolean);
       this.set('allSelected', allTrue);
+      this.set('showDeleteUsersButton', Object.values(this.get('selected')).some(Boolean));
     },
     selectAllCheckboxes() {
       this.toggleProperty('allSelected');
@@ -90,6 +99,7 @@ export default Component.extend(AlertifyHandler, {
       for(const [id] of Object.entries(this.get('selected'))) {
         this.set(`selected.${id}`, value);
       }
+      this.set('showDeleteUsersButton', Object.values(this.get('selected')).some(Boolean));
     }
   },
 
