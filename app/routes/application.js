@@ -3,8 +3,10 @@ import {inject as service} from '@ember/service';
 import { isEmpty } from '@ember/utils';
 import ApplicationRouteMixin from 
 'ember-simple-auth/mixins/application-route-mixin';
-
 import { resolve, all } from 'rsvp';
+import ENV from 'explorviz-frontend/config/environment';
+ 
+const { environment } = ENV;
 
 /**
 * TODO
@@ -20,6 +22,9 @@ export default Route.extend(ApplicationRouteMixin, {
   userSettings: service(),
 
   beforeModel() {
+    if(environment === 'test')
+      return resolve();
+
     return new all([
       this._loadCurrentUser(),
       this._loadCurrentUserPreferences(),
@@ -29,6 +34,10 @@ export default Route.extend(ApplicationRouteMixin, {
 
   sessionAuthenticated() {
     this._super(...arguments);
+
+    if(environment === 'test')
+      return;
+
     this._loadCurrentUser();
     this._loadCurrentUserPreferences();
     this._loadSettingsAndTypes();
