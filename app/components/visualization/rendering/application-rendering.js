@@ -306,7 +306,7 @@ export default RenderingCore.extend(AlertifyHandler, {
         // TODO: Set the following properties according to user settings
         const isCurvedCommunication = curveHeight > 0.0;
 
-        if (isCurvedCommunication) {
+        if (isCurvedCommunication && drawableClazzComm.get('sourceClazz') !== drawableClazzComm.get('targetClazz')) {
           let curveMeshes = this.curvedCylinderMeshes(start, end, material, thickness, curveSegments, curveHeight);
           for (let i = 0; i < curveMeshes.length; i++) {
             let curveSegment = curveMeshes[i];
