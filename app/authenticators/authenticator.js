@@ -65,9 +65,9 @@ export default BaseAuthenticator.extend({
       if (!isEmpty(data.access_token)) {
 
         // check if token is still valid
-        self.get('ajax').request(`${url}/v1/tokens/refresh/`, {
+        self.get('ajax').request(`${url}/v1/tokens/refresh`, {
           method: 'POST',
-          contentType: 'application/json; charset=utf-8',
+          contentType: 'application/json;',
           headers: {
             'Authorization': `Bearer ${data.access_token}`
           }
@@ -93,9 +93,9 @@ export default BaseAuthenticator.extend({
 
     // TODO refactor with Ember-Data
 
-    return this.get('ajax').request(`${url}/v1/tokens/`, {
+    return this.get('ajax').request(`${url}/v1/tokens`, {
       method: 'POST',
-      contentType: 'application/json; charset=utf-8',
+      contentType: 'application/json;',
       data: {
         username: user.identification,
         password: user.password
