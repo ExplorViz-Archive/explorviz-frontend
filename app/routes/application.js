@@ -59,21 +59,19 @@ export default Route.extend(ApplicationRouteMixin, {
 
   _loadSettingsAndTypes() {
     let settings;
-    try {
-      // request all settings and load into store
-      settings = this.get('store').query('settingsinfo', 1);
-      // get all setting types and save them for future access
-      settings.then(() => {
-        let types = new Set();
-        for(let i = 0; i < settings.get('length'); i++) {
-          types.add(settings.objectAt(i).constructor.modelName);
-        }
-        this.get('userSettings').set('types', types);
-      });
-      return settings;
-    } catch(reason) {
+    // request all settings and load into store
+    settings = this.get('store').query('settingsinfo', 1);
+    // get all setting types and save them for future access
+    settings.then(() => {
+      let types = new Set();
+      for(let i = 0; i < settings.get('length'); i++) {
+        types.add(settings.objectAt(i).constructor.modelName);
+      }
+      this.get('userSettings').set('types', types);
+    }, () => {
       this.get('session').invalidate({message: 'Settings could not be loaded'});
-    }
+    });
+    return resolve();
   },
 
   actions: {
