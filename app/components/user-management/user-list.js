@@ -59,6 +59,10 @@ export default Component.extend(AlertifyHandler, {
       this.set('showDeleteUsersButton', false);
     } catch(reason) {
       this.showAlertifyMessage('Could not load users!');
+      this.set('allSelected', false);
+      this.set('users', []);
+      this.set('selected', {});
+      this.set('showDeleteUsersButton', false);
     }
   }).enqueue(),
 
