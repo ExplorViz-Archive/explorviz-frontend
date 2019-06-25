@@ -120,6 +120,8 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.set('labeler.textLabels', {});
     this.set('labeler.textCache', []);
 
+    this.removeListeners();
+
     this.get('interaction').removeHandlers();
   },
 
