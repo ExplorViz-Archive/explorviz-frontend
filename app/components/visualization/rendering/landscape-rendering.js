@@ -125,7 +125,7 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.get('interaction').removeHandlers();
   },
 
-  removeListerns() {
+  removeListeners() {
     // unsubscribe from all services
     this.get('listeners2').forEach(([service, event, listenerFunction]) => {
       this.get(service).off(event, listenerFunction);
