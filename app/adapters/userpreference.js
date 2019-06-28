@@ -37,6 +37,10 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     return `${baseUrl}/v1/settings/preferences/${id}`;
   },
 
+  urlForFindAll(modelName, snapshot) {
+    const baseUrl = this.buildURL();
+    return `${baseUrl}/v1/users/${snapshot.adapterOptions.userId}/settings/preferences`;
+  },
 
   authorize(xhr) {
     let { access_token } = this.get('session.data.authenticated');

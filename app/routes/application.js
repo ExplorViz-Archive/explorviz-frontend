@@ -50,7 +50,7 @@ export default Route.extend(ApplicationRouteMixin, {
   _loadCurrentUserPreferences() {
     let userId = this.get('session').get('session.content.authenticated.rawUserData.data.id');
     if (!isEmpty(userId)) {
-      return this.store.query('userpreference', { uid: userId }).catch(() => this.get('session').invalidate({message: 'User preferences could not be loaded'}));
+      return this.store.findAll('userpreference', { adapterOptions: {userId: userId} }).catch(() => this.get('session').invalidate({message: 'User preferences could not be loaded'}));
     } else {
       this.get('session').invalidate({message: 'Session invalid'});
       return resolve();
