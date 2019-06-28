@@ -50,7 +50,7 @@ export default Route.extend(ApplicationRouteMixin, {
   _loadCurrentUserPreferences() {
     let userId = this.get('session').get('session.content.authenticated.rawUserData.data.id');
     if (!isEmpty(userId)) {
-      return this.store.query('userpreference', { uid: userId }).catch(() => this.get('session').invalidate({message: 'User preferences could not be loaded'}));
+      return this.store.findAll('userpreference', { adapterOptions: {userId: userId} }).catch(() => this.get('session').invalidate({message: 'User preferences could not be loaded'}));
     } else {
       this.get('session').invalidate({message: 'Session invalid'});
       return resolve();
@@ -59,21 +59,19 @@ export default Route.extend(ApplicationRouteMixin, {
 
   _loadSettingsAndTypes() {
     let settings;
-    try {
-      // request all settings and load into store
-      settings = this.get('store').query('settingsinfo', 1);
-      // get all setting types and save them for future access
-      settings.then(() => {
-        let types = new Set();
-        for(let i = 0; i < settings.get('length'); i++) {
-          types.add(settings.objectAt(i).constructor.modelName);
-        }
-        this.get('userSettings').set('types', types);
-      });
-      return settings;
-    } catch(reason) {
+    // request all settings and load into store
+    settings = this.get('store').query('settingsinfo', 1);
+    // get all setting types and save them for future access
+    settings.then(() => {
+      let types = new Set();
+      for(let i = 0; i < settings.get('length'); i++) {
+        types.add(settings.objectAt(i).constructor.modelName);
+      }
+      this.get('userSettings').set('types', types);
+    }, () => {
       this.get('session').invalidate({message: 'Settings could not be loaded'});
-    }
+    });
+    return resolve();
   },
 
   actions: {
