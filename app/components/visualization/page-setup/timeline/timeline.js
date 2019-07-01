@@ -35,6 +35,8 @@ export default Component.extend(AlertifyHandler, Evented, {
     chartColors: null,
     maxNumOfDataPoints: null,
 
+    listeners: null,
+
 
     // @Override
     /**
@@ -70,8 +72,12 @@ export default Component.extend(AlertifyHandler, Evented, {
      */
     cleanup() {
         this.set('timelineChart', null);
-        this.get('timestampRepo').off('updated');
-        this.get('landscapeListener').off('visualizationResumed');
+
+        // unsubscribe from all services
+        this.get('listeners').forEach(([service, event, listenerFunction]) => {
+            this.get(service).off(event, listenerFunction);
+        });
+        this.set('listeners', null);
     },
 
     /**
@@ -79,16 +85,29 @@ export default Component.extend(AlertifyHandler, Evented, {
      * @method initListener
      */
     initListener() {
-        const self = this;
+        this.set('listeners', new Set());
 
-        // a new timestamp (data point) arrives
-        self.get('timestampRepo').on("updated", function (newTimestamp) {
-            self.onUpdated(newTimestamp);
-        });
-        
-        // the visualization is resumed from the navbar
-        self.get('landscapeListener').on("visualizationResumed", function () {
-            self.onLandscapeListenerVisualizationResumed();
+        // listener for when a new timestamp (data point) arrives
+        this.get('listeners').add([
+            'timestampRepo',
+            'updated',
+            (newTimestamp) => {
+                this.onUpdated(newTimestamp);
+            }
+        ]);
+
+        // listener for when the visualization is resumed from the navbar
+        this.get('listeners').add([
+            'landscapeListener',
+            'visualizationResumed',
+            () => {
+                this.onLandscapeListenerVisualizationResumed();
+            }
+        ]);
+
+        // start subscriptions
+        this.get('listeners').forEach(([service, event, listenerFunction]) => {
+            this.get(service).on(event, listenerFunction);
         });
     },
 

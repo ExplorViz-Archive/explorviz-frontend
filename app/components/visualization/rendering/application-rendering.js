@@ -49,6 +49,9 @@ export default RenderingCore.extend(AlertifyHandler, {
   centerAndZoomCalculator: null,
   foundationBuilder: null,
 
+  // there's already a property 'listener' in superclass RenderingCore
+  listeners2: null,
+
   // @Override
   initRendering() {
     this._super(...arguments);
@@ -185,12 +188,20 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.set('applicationID', null);
     this.set('application3D', null);
 
-    this.get('renderingService').off('redrawScene');
+    this.removeListeners();
 
     // Clean up landscapeRepo for visualization template
     this.set('landscapeRepo.latestApplication', null);
 
     this.get('interaction').removeHandlers();
+  },
+
+  removeListeners() {
+    // unsubscribe from all services
+    this.get('listeners2').forEach(([service, event, listenerFunction]) => {
+        this.get(service).off(event, listenerFunction);
+    });
+    this.set('listeners2', null);
   },
 
 
@@ -542,8 +553,6 @@ export default RenderingCore.extend(AlertifyHandler, {
 
 
   initInteraction() {
-    const self = this;
-
     const canvas = this.get('canvas');
     const camera = this.get('camera');
     const webglrenderer = this.get('webglrenderer');
@@ -554,9 +563,19 @@ export default RenderingCore.extend(AlertifyHandler, {
       this.get('application3D'));
 
     // Set listeners
+    this.set('listeners2', new Set());
 
-    this.get('renderingService').on('redrawScene', function () {
-      self.cleanAndUpdateScene();
+    this.get('listeners2').add([
+      'renderingService',
+      'redrawScene',
+      () => {
+        this.cleanAndUpdateScene();
+      }
+    ]);
+
+    // start subscriptions
+    this.get('listeners2').forEach(([service, event, listenerFunction]) => {
+        this.get(service).on(event, listenerFunction);
     });
   }, // END initInteraction
 

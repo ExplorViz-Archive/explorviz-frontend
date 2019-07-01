@@ -24,17 +24,17 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   // Overrides URL for model.save()
   urlForCreateRecord() {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/settings/preferences`;
+    return `${baseUrl}/v1/users/settings/preferences`;
   },
 
   urlForUpdateRecord(id) {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/settings/preferences/${id}`;
+    return `${baseUrl}/v1/users/settings/preferences/${id}`;
   },
 
   urlForDeleteRecord(id) {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/settings/preferences/${id}`;
+    return `${baseUrl}/v1/users/settings/preferences/${id}`;
   },
 
   urlForFindAll(modelName, snapshot) {
