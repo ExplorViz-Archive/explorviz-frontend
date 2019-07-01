@@ -1,25 +1,73 @@
 {{! regarding formLayout: 
 https://github.com/kaliber5/ember-bootstrap/issues/441}}
 
+{{#bs-modal
+  open=this.showDeleteUsersDialog
+  onSubmit=(perform deleteUsers)
+  onHide=(action (mut this.showDeleteUsersDialog) false)
+  as |modal|}}
+  {{#modal.header}}
+    <h4 class="modal-title">Please confirm</h4>
+  {{/modal.header}}
+  {{#modal.body}}Are you sure you want to delete the selected users?{{/modal.body}}
+  {{#modal.footer as |footer|}}
+    {{#bs-button onClick=(action modal.close) type="danger"}}Cancel{{/bs-button}}
+    {{#bs-button onClick=(action modal.submit) type="success" disabled=this.deleteUsers.isRunning}}
+      {{#if this.deleteUsers.isRunning}}
+        Deleting <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      {{else}}
+        Confirm
+      {{/if}}
+    {{/bs-button}}
+  {{/modal.footer}}
+{{/bs-modal}}
+
 <div class="col-12 d-flex flex-column">
   <h3>Users</h3>
   <div class="mb-3">
-    <div class="float-right">
-      {{#bs-button
-        class="d-flex-center"
-        onClick=(perform openUserCreation)
-        type="success"
-        outline=true
-        title="Add Users"
-        disabled=this.openUserCreation.isRunning
-      }}
-        {{#if this.openUserCreation.isRunning}}
-          <span class="spinner-border spinner-border-sm mr-1" role="status" aria-hidden="true"></span>
-        {{else}}
-          {{svg-jar "person" class="octicon"}}{{svg-jar "plus-small" class="octicon"}}
+    <div class="d-flex justify-content-between">
+      <div class="d-flex">
+        {{#if showDeleteUsersButton}}
+          {{#bs-button
+            class="d-flex-center mr-2"
+            onClick=(action (mut showDeleteUsersDialog) true)
+            type="danger"
+            outline=true
+            title="Delete Selected Users"
+          }}
+            {{svg-jar "trashcan" class="octicon"}}
+          {{/bs-button}}
         {{/if}}
-        <span>Create Users</span>
-      {{/bs-button}}
+      </div>
+      <div class="d-flex">
+        {{#bs-button
+          class="d-flex-center mr-2"
+          onClick=(perform openUserCreation)
+          type="success"
+          outline=true
+          title="Add Users"
+          disabled=this.openUserCreation.isRunning
+        }}
+          {{#if this.openUserCreation.isRunning}}
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          {{else}}
+            {{svg-jar "organization" class="octicon"}}{{svg-jar "plus-small" class="octicon"}}
+          {{/if}}
+          <span>Create Users</span>
+        {{/bs-button}}
+        {{#bs-button
+          class="d-flex-center"
+          onClick=(perform updateUserList true)
+          outline=true
+          title="Reload Users"
+        }}
+          {{#if this.updateUserList.isRunning}}
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          {{else}}
+            {{svg-jar "sync" class="octicon"}}
+          {{/if}}
+        {{/bs-button}}
+      </div>
     </div>
   </div>
   <div class="d-flex flex-grow-1" style="overflow-y: auto">
@@ -29,6 +77,12 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
     <table class="table table-striped">
       <thead class="thead-light">
         <tr>
+          <th style="width: 20px">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="checkAll" checked={{allSelected}} onchange={{action "selectAllCheckboxes"}}>
+              <label class="custom-control-label" for="checkAll"></label>
+            </div>
+          </th>
           <th scope="col">ID</th>
           <th scope="col">Name</th> 
           <th scope="col">Roles</th>
@@ -38,10 +92,11 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
       <tbody>
         {{#if this.updateUserList.isRunning}}
           <tr>
-            <th scope="row">
+            <th scope="row"></th>
+            <td>
               Loading User List
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            </th>
+            </td>
             <td></td>
             <td></td>
             <td></td>
@@ -49,6 +104,14 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         {{else}}
           {{#each users as |user|}}
             <tr>
+              <td scope="col">
+                {{#unless (eq this.currentUser.user.id user.id)}}
+                  <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" id="check-{{user.id}}" checked={{get selected user.id}} onchange={{action "selectCheckbox" user.id}}>
+                    <label class="custom-control-label" for="check-{{user.id}}"></label>
+                  </div>
+                {{/unless}}
+              </td>
               <th scope="row">{{user.id}}</th>
               <td>{{user.username}}</td>
               <td>

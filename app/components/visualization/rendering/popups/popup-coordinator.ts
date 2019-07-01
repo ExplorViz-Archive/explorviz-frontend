@@ -5,6 +5,8 @@ import AdditionalData from 'explorviz-frontend/services/additional-data';
 
 export default class PopupCoordinator extends Component {
 
+  tagName = '';
+  
   @service('additional-data')
   additionalData!: AdditionalData;
 
