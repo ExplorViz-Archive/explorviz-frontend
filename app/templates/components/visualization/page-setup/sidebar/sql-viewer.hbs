@@ -8,20 +8,28 @@
   </label>
 </div>
 
+<div class="mt-2 mb-1 d-flex justify-content-end">
+  <div>
+    {{input id="filterInput" value=filterInput placeholder='Filter statements' class="form-control input-lg" autofocus="autofocus" focus-out=(action "filter") enter=(action "filter")}}
+  </div>
+  <div>
+    {{#bs-button onClick=(action "filter") type="button" class="btn btn-light"}}{{svg-jar "search" class="octicon align-middle"}}{{/bs-button}}
+  </div>
+</div>
 
-<div style="max-height:500px; overflow:auto; width:100%;">
+<div id="sqlScrollDiv" style="max-height:500px; overflow:auto; width:100%;">
   <table class="table table-hover">
     <thead>
-      <tr>
-        <th scope="col">Time</th>
-        <th scope="col">Statement</th>
-        <th scope="col">Statement Type</th>
-        <th scope="col">Return Value</th>
-        <th scope="col">Response Time (ms)</th>
+      <tr style="cursor: pointer">
+        <th {{action "sortBy" "timestamp"}} scope="col">Time</th>
+        <th {{action "sortBy" "sqlStatement"}} scope="col">Statement</th>
+        <th {{action "sortBy" "statementType"}} scope="col">Statement Type</th>
+        <th {{action "sortBy" "returnValue"}} scope="col">Return Value</th>
+        <th {{action "sortBy" "responseTime"}} scope="col">Response Time (ms)</th>
       </tr>
     </thead>
     <tbody>
-      {{#each landscapeRepo.latestApplication.databaseQueries as |query|}}
+      {{#each databaseQueries as |query|}}
       {{#if query.isSelected}}
       <tr {{action "queryClicked" query}} style="cursor: pointer" bgcolor="#cc8a8a">
         <th scope="row" title={{timestamp-to-date query.timestamp "localString"}}>{{timestamp-to-date query.timestamp

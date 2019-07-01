@@ -1,5 +1,5 @@
-<div class="row">
-  <div class="col-12" id="vizspace">
+<div class="row" style="max-height:100%">
+  <div class="col-12" id="vizspace" {{did-resize this.resize debounce=100}}>
     {{#if showLandscape}}
       {{#if landscapeRepo.latestLandscape.systems}}
         {{visualization/page-setup/visualization-navbar
@@ -10,7 +10,7 @@
           )
         }}
         <div id="rendering">
-          {{visualization/rendering/landscape-rendering latestLandscape=landscapeRepo.latestLandscape}}
+          {{visualization/rendering/landscape-rendering}}
           <!-- popup(s) -->
           {{visualization/rendering/popups/popup-coordinator
           popupData=additionalData.popupContent}}
@@ -21,9 +21,7 @@
           <h2>No Landscape Found!</h2>
           <p>A new landscape will be fetched every 10 seconds.</p>
         </div>
-        <div id="spinnerDiv" class="container" style="position:relative; height:20%;">
-          {{ember-spinner}}
-        </div>
+        <div class="spinner-center-3" role="status"></div>
       </div>
     {{/if}}
     {{else}}

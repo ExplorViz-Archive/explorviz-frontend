@@ -2,14 +2,12 @@
 <!-- Inner #link-to is for actual link -->
 <!-- #link-to handles active link class on it's own -->
 
-<ul class="navbar-nav mr-auto">
-
-  {{#each pageSetupService.navbarRoutes as |item|}}
-
-    {{#link-to item tagName="li" class="nav-item" invokeAction=(action (route-action 'resetRoute'))}}
-      {{#link-to item tagName="a" class="nav-link"}}{{capitalize item}}{{/link-to}}
-    {{/link-to}}
-
-  {{/each}}
-
-</ul>
+<div id="exp-navbar-routes">
+  <ul class="navbar-nav mr-auto">
+    {{#each pageSetupService.navbarRoutes as |item|}}
+      {{#link-to item tagName="li" class="nav-item" invokeAction=(action (route-action 'resetRoute'))}}
+        {{#link-to item tagName="a" class="nav-link"}}{{capitalize item}}{{/link-to}}
+      {{/link-to}}
+    {{/each}}
+  </ul>
+</div>

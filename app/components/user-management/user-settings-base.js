@@ -8,9 +8,15 @@ export default Component.extend({
   tagName: '',
 
   store: service(),
+  userSettings: service(),
 
+  // {
+  //   rangesetting: [[settingId0,value0],...,[settingIdN,valueN]],
+  //   flagsetting: [[settingId0,value0],...,[settingIdN,valueN]]
+  // }
   settings: null,
 
+  // { settingId: { description, displayName } }
   descriptions: null,
 
   init() {
@@ -18,22 +24,24 @@ export default Component.extend({
 
     this.set('descriptions', {});
     
-    this.get('loadDescriptions').perform('booleanAttributes');
-    this.get('loadDescriptions').perform('numericAttributes');
-    this.get('loadDescriptions').perform('stringAttributes');
+    let typesArray = [].concat(...Object.keys(this.get('settings')));
+
+    for(let i = 0; i < typesArray.length; i++) {
+      this.get('loadDescriptions').perform(typesArray[i]);
+    }
   },
 
   loadDescriptions: task(function * (type) {
-    yield Object.entries(this.get(`settings.${type}`)).forEach(
-      ([key]) => {
-        this.get('loadDescription').perform(key);
-      }
-    );
+    for (const [id] of this.get(`settings.${type}`)) {
+      const { description, displayName } = yield this.get('store').peekRecord(type, id);
+      this.set(`descriptions.${id}`, { description, displayName });
+    }
   }),
 
-  loadDescription: task(function *(key){
-    const descriptor = yield this.get('store').findRecord('usersetting', key);
-    this.set(`descriptions.${key}`, descriptor);
-  })
+  actions: {
+    onRangeSettingChange(index, valueNew) {
+      this.get('settings').rangesetting[index].set(1, Number(valueNew));
+    }
+  }
 
 });

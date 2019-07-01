@@ -13,12 +13,11 @@ body > .ember-view {
   overflow: hidden;
   @extend .ml-3;
   @extend .mr-3;
-  @extend .pt-3;
+  @extend .mt-5;
   @extend .mb-3;
   @extend .flex-grow-1;
   @extend .d-flex;
   @extend .flex-column;
-  margin-top: 64px;
 }
 
 .main-content > .row {
@@ -28,10 +27,13 @@ body > .ember-view {
 #vizspace {
   @extend .d-flex;
   @extend .flex-column;
+  max-height: 100%;
 }
 
 #rendering {
   @extend .flex-grow-1;
+  max-height: 100%;
+  position: relative;
 }
 
 .canvasViz {
@@ -163,4 +165,35 @@ svg.octicon {
 
 .d-contents {
   display: contents!important;
+}
+
+.btn-exp-login {
+  color: #64b5f6;
+  border-color: #64b5f6;
+}
+
+.btn-exp-login:hover {
+  background-color: #9be7ff;
+  border-color: #9be7ff;
+}
+
+@mixin centerSpinners() {
+  @for $i from 1 through 5 {
+    .spinner-center-#{$i} {
+      @extend .spinner-border;
+      position: absolute;
+      top: calc(50% - #{$i/2}rem);
+      left: calc(50% - #{$i/2}rem);
+      width: #{$i}rem;
+      height: #{$i}rem;
+    }
+  }
+}
+
+* { @include centerSpinners(); }
+
+.spinner-center-3-relative {
+  @extend .spinner-border;
+  width: 3rem;
+  height: 3rem;
 }

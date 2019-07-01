@@ -1,43 +1,36 @@
 
-{{#if this.loadDescription.isRunning}}
-  {{ember-spinner}}
-{{else}}
-  {{#bs-form model=this as |form|}}
-    {{#each-in this.settings.booleanAttributes as |key|}}
-      <div class="d-flex justify-content-between pr-3">
-        <div>
-          {{help-tooltip title=(get this.descriptions (concat key ".description"))}}
-          {{get this.descriptions (concat key ".name")}}
+<div>
+  {{#if this.loadDescriptions.isRunning}}
+    <div class="spinner-center-3 mb-5 mt-5" style="position:relative" role="status"></div>
+  {{else}}
+    {{#bs-form model=this as |form|}}
+      {{#each this.settings.flagsetting as |setting|}}
+        {{!-- setting.[0] = settingId, setting.[1] = settingValue --}}
+        <div class="d-flex justify-content-between pr-3">
+          <div>
+            {{help-tooltip title=(get this.descriptions (concat setting.[0] ".description"))}}
+            {{get this.descriptions (concat setting.[0] ".displayName")}}
+          </div>
+          {{x-toggle
+            theme='skewed'
+            value=setting.[1]
+            onToggle=(action (mut setting.[1]))
+          }}
         </div>
-        {{x-toggle
-          theme='skewed'
-          value=(get this.settings.booleanAttributes key)
-          onToggle=(action (mut (get this.settings.booleanAttributes key)))
-        }}
-      </div>
-    {{/each-in}}
-    {{#each-in this.settings.numericAttributes as |key|}}
-      <div class="mb-3">
-        {{help-tooltip title=(get this.descriptions (concat key ".description"))}}
-        {{form.element
-          class="d-contents"
-          controlType="number"
-          step=".01"
-          label=(get this.descriptions (concat key ".name"))
-          property=(concat "settings.numericAttributes." key)
-        }}
-      </div>
-    {{/each-in}}
-    {{#each-in this.settings.stringAttributes as |key|}}
-      <div class="mb-3">
-        {{help-tooltip title=(get this.descriptions (concat key ".description"))}}
-        {{form.element
-          class="d-contents"
-          controlType="text"
-          label=(get this.descriptions (concat key ".name"))
-          property=(concat "settings.stringAttributes." key)
-        }}
-      </div>
-    {{/each-in}}
-  {{/bs-form}}
-{{/if}}
+      {{/each}}
+      {{#each this.settings.rangesetting as |setting index|}}
+        <div class="mb-3">
+          {{help-tooltip title=(get this.descriptions (concat setting.[0] ".description"))}}
+          {{form.element
+            class="d-contents"
+            controlType="number"
+            step=".01"
+            label=(get this.descriptions (concat setting.[0] ".displayName"))
+            value=setting.[1]
+            onChange=(action "onRangeSettingChange" index)
+          }}
+        </div>
+      {{/each}}
+    {{/bs-form}}
+  {{/if}}
+</div>

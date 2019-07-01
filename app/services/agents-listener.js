@@ -7,23 +7,21 @@ export default Service.extend({
 
   // https://github.com/segmentio/sse/blob/master/index.js
 
-  content: null,
   session: service(),
   store: service(),
   agentRepo: service("repos/agent-repository"),
+
+  content: null,
   es: null,
 
   initSSE() {
-
     this.set('content', []);
-
-    const self = this;
 
     const url = config.APP.API_ROOT;
     const { access_token } = this.get('session.data.authenticated');
 
-    // close former event source. Multiple (>= 6) instances cause the ember store to no longer work
-    if(this.get('es')) {
+    // Close former event source. Multiple (>= 6) instances cause the ember store to break
+    if (this.get('es')) {
       this.get('es').close();
     }
 
@@ -31,119 +29,48 @@ export default Service.extend({
     // Replace if original EventSource API allows HTTP-Headers
     this.set('es', new EventSourcePolyfill(`${url}/v1/agents/broadcast/`, {
       headers: {
-        Authorization: `Bearer ${access_token.token}`
+        Authorization: `Bearer ${access_token}`
       }
     }));
 
-    this.set('es.onmessage', function(e) {
-      const agentListJson = JSON.parse(e.data);
-
-      /*const stringTest = {
-        "data": 
-          { 
-            "type": "agent",
-            "id": "1",
-            "attributes": {
-              "ip": "127.0.0.1",
-              "port": "8084",
-              "last-discovery-time": 1539784755989,
-              "is-hidden": false,
-              "error-occured": false,
-              "error-message": ""
-            },
-            "relationships": {
-              "procezzes": {
-                "data": [
-                  {
-                    "type": "procezz",
-                    "id": "1-1"
-                  }
-                ]
-              }
-            }
-          }
-        ,
-        "included": [
-          {
-            "type": "agent",
-            "id": "1",
-            "attributes": {
-              "ip": "127.0.0.1",
-              "port": "8084",
-              "last-discovery-time": 1539784755989,
-              "is-hidden": false,
-              "error-occured": false,
-              "error-message": ""
-            },
-            "relationships": {
-              "procezzes": {
-                "data": [
-                  {
-                    "type": "procezz",
-                    "id": "1-1"
-                  }
-                ]
-              }
-            }
-          },
-          {
-            "type": "procezz",
-            "id": "1-1",
-            "attributes": {
-              "pid": 6649,
-              "last-discovery-time": 1539784756164,
-              "is-hidden": false,
-              "error-occured": false,
-              "error-message": "",
-              "os-execution-command": "a"
-            },
-            "relationships": {
-              "agent": {
-                "data": {
-                  "type": "agent",
-                  "id": "1"
-                }
-              }
-            }
-          }
-        ]
-      };*/
+    this.set('es.onmessage', (event) => {
+      const agentListJson = JSON.parse(event.data);
 
       // ATTENTION: Mind the push operation, push != pushPayload in terms of 
       // serializer usage
       // https://github.com/emberjs/data/issues/3455
-      self.get('store').pushPayload(agentListJson);
+      this.get('store').pushPayload(agentListJson);
 
       const idArray = [];
       const agentRecordList = [];
 
-      agentListJson["data"].forEach(function(agentJson) {
+      agentListJson["data"].forEach((agentJson) => {
         idArray.push(agentJson["id"]);
       });
 
-      idArray.forEach(function(id) {
-        agentRecordList.push(self.get('store').peekRecord("agent", id));
+      idArray.forEach((id) => {
+        agentRecordList.push(this.get('store').peekRecord("agent", id));
       });
 
-      self.set('agentRepo.agentList', agentRecordList);
+      this.set('agentRepo.agentList', agentRecordList);
 
       // TODO update similar to ... ?
-      //self.get('agentRepo').triggerUpdated();
+      // this.get('agentRepo').triggerUpdated();
     });
   },
 
-  subscribe(url, fn){
-
-    const self = this;   
-
+  subscribe(url, fn) {
     let source = new EventSource(url);
-    source.onmessage = function(e){
-      fn(e.data);
+
+    source.onmessage = (event) => {
+      fn(event.data);
     };
-    source.onerror = function(e){
+
+    source.onerror = (event) => {
       if (source.readyState == EventSource.CLOSED) return;
-      self.error(e);
+      this.error(event);
     };
+
     return source.close.bind(source);
   }
 

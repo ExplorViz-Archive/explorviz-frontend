@@ -14,6 +14,8 @@ export default Controller.extend({
 
   configurationService: service("configuration"),
   renderingService: service("rendering-service"),
+  
+  currentUser: service(),
 
   hideTimeline() {
     this.set('renderingService.showTimeline', false);

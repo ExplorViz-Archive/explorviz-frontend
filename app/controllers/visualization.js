@@ -1,6 +1,6 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service'; 
-import { computed } from '@ember/object';
+import { computed, action } from '@ember/object';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 /**
@@ -12,7 +12,7 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 * @module explorviz
 * @submodule visualization
 */
-export default Controller.extend(AlertifyHandler, {
+export default class VisualizationController extends Controller.extend(AlertifyHandler, {
 
   renderingService: service("rendering-service"),
   landscapeRepo: service("repos/landscape-repository"),
@@ -55,17 +55,16 @@ export default Controller.extend(AlertifyHandler, {
 
   initRendering() {
     this.get('landscapeListener').initSSE();
-    this.get('additionalData').on('showWindow', this, this.onShowWindow);
-  },
-
-  onShowWindow() {
-    this.get('renderingService').resizeCanvas();
   },
 
   // @Override
   cleanup() {
     this._super(...arguments);
-    this.get('additionalData').off('showWindow', this, this.onShowWindow);
   }
   
-});
+}) {
+  @action
+  resize() {
+    this.get('renderingService').resizeCanvas();
+  }
+}

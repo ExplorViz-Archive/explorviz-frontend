@@ -1,5 +1,5 @@
 import Component from '@ember/component';
-import {inject as service} from '@ember/service';
+import { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
 import THREE from "three";
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
@@ -33,15 +33,16 @@ export default Component.extend(Evented, THREEPerformance, {
 
   state: null,
 
-  reloadHandler: service("reload-handler"),
-  landscapeRepo: service("repos/landscape-repository"),
   highlighter: service("visualization/application/highlighter"),
-  addionalData: service("additional-data"),
+  landscapeRepo: service("repos/landscape-repository"),
+  additionalData: service(),
+  configuration: service(),
+  reloadHandler: service(),
   renderingService: service(),
 
-  session: service(),
+  currentUser: service(),
 
-  scene : null,
+  scene: null,
   webglrenderer: null,
   camera: null,
 
@@ -55,7 +56,9 @@ export default Component.extend(Evented, THREEPerformance, {
   appCondition: null,
   initImport: true,
 
-  init()  {
+  listeners: null,
+
+  init() {
     this._super(...arguments);
     this.set('appCondition', []);
   },
@@ -68,7 +71,7 @@ export default Component.extend(Evented, THREEPerformance, {
    *
    * @method didRender
    */
-  didRender(){
+  didRender() {
     this._super(...arguments);
     this.initRendering();
     this.initListener();
@@ -96,12 +99,11 @@ export default Component.extend(Evented, THREEPerformance, {
    * @method initRenderings
    */
   initRendering() {
-
     this.debug('init rendering-core');
 
     const self = this;
 
-    // get size if outer ember div
+    // Get size if outer ember div
     const height = $('#rendering').innerHeight();
     const width = $('#rendering').innerWidth();
 
@@ -110,7 +112,8 @@ export default Component.extend(Evented, THREEPerformance, {
     this.set('canvas', canvas);
 
     this.set('scene', new THREE.Scene());
-    this.set('scene.background', new THREE.Color(0xffffff));
+    const backgroundColor = this.get('configuration.landscapeColors.background');
+    this.set('scene.background', new THREE.Color(backgroundColor));
 
     this.set('camera', new THREE.PerspectiveCamera(75, width / height, 0.1, 1000));
 
@@ -121,52 +124,47 @@ export default Component.extend(Evented, THREEPerformance, {
     this.get('webglrenderer').setPixelRatio(window.devicePixelRatio);
     this.get('webglrenderer').setSize(width, height);
 
-    const { user } = this.get('session.data.authenticated');
-    const userSettings = user.get('settings');
+    let showFpsCounter = this.get('currentUser').getPreferenceOrDefaultValue('flagsetting', 'showFpsCounter');
 
-    if(!userSettings.booleanAttributes.showFpsCounter) {
+    if (!showFpsCounter) {
       this.removePerformanceMeasurement();
     }
 
     // Rendering loop //
     function render() {
-      
-      if(self.get('isDestroyed')) {
+      if (self.get('isDestroyed')) {
         return;
       }
-      
+
       const animationId = requestAnimationFrame(render);
       self.set('animationFrameId', animationId);
 
-      if(userSettings.booleanAttributes.showFpsCounter) {
+      if (showFpsCounter) {
         self.get('threexStats').update(self.get('webglrenderer'));
         self.get('stats').begin();
       }
 
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
 
-      if(userSettings.booleanAttributes.showFpsCounter) {
+      if (showFpsCounter) {
         self.get('stats').end();
       }
-
     }
 
     render();
 
     ////////////////////
 
-    // load font for labels and synchronously proceed with populating the scene
+    // Load font for labels and synchronously proceed with populating the scene
     new THREE.FontLoader()
-      .load('three.js/fonts/roboto_mono_bold_typeface.json', function(font) {
-        if(self.isDestroyed)
+      .load('three.js/fonts/roboto_mono_bold_typeface.json', function (font) {
+        if (self.isDestroyed)
           return;
-          
+
         self.set('font', font);
         self.set('initDone', true);
         self.populateScene();
-        // import new view
-        // self.importView();
-    });
+      });
 
   },
 
@@ -174,8 +172,8 @@ export default Component.extend(Evented, THREEPerformance, {
   updateCanvasSize() {
     const outerDiv = $('#vizspace')[0];
 
-    if(outerDiv) {
-      if(!this.get('camera') || !this.get('webglrenderer'))
+    if (outerDiv) {
+      if (!this.get('camera') || !this.get('webglrenderer'))
         return;
 
       $('#threeCanvas').hide();
@@ -196,56 +194,68 @@ export default Component.extend(Evented, THREEPerformance, {
 
 
   initListener() {
+    this.set('listeners', new Set());
 
-    const self = this;
+    this.get('listeners').add([
+      'renderingService',
+      'reSetupScene',
+      () => {
+        this.onReSetupScene();
+      }
+    ]);
 
-    $(window).on('resize.visualization', this.updateCanvasSize.bind(this));
+    this.get('listeners').add([
+      'renderingService',
+      'resizeCanvas',
+      () => {
+        this.updateCanvasSize();
+      }
+    ]);
 
+    this.get('listeners').add([
+      'renderingService',
+      'moveCameraTo',
+      (emberModel) => {
+        this.onMoveCameraTo(emberModel);
+      }
+    ]);
 
+    this.get('listeners').add([
+      'landscapeRepo',
+      'updated',
+      () => {
+        this.onUpdated();
+      }
+    ]);
 
-    this.get('renderingService').on('reSetupScene', function() {
-      self.onReSetupScene();
+    // start subscriptions
+    this.get('listeners').forEach(([service, event, listenerFunction]) => {
+        this.get(service).on(event, listenerFunction);
     });
-
-    this.get('renderingService').on('resizeCanvas', function() {
-      self.updateCanvasSize();
-    });
-
-    this.get('landscapeRepo').on("updated", function() {
-      self.onUpdated();
-    });
-
   },
 
   /*
    *  This method is used to collect data about the landscape.
    *  Ids of closed systems and nodegroups are stored in an array
    */
-  computeLandscapeCondition(){
-
+  computeLandscapeCondition() {
     const systems = this.get('landscapeRepo.latestLandscape').get('systems');
     const condition = [];
 
-    systems.forEach(function(system) {
+    systems.forEach(function (system) {
 
-      let isRequestObject = false;
-
-      // Find requests
-      if (!isRequestObject && system.get('name') === "Requests") {
-        isRequestObject = true;
-      }
       // Exclude requests
-      if(!isRequestObject){
+      if (system.get('name') !== "Requests") {
         // Handle closed systems and add id to array
-        if(!system.get('opened')){
+        if (!system.get('opened')) {
           condition.push(system.get('id'));
         }
         // Handle opened systems
-        else{
+        else {
           // Handle closed nodegroups and add id to array
           const nodegroups = system.get('nodegroups');
-          nodegroups.forEach(function(nodegroup){
-            if(!nodegroup.get('opened')){
+          nodegroups.forEach(function (nodegroup) {
+            if (!nodegroup.get('opened')) {
               condition.push(nodegroup.get('id'));
             }
           });
@@ -261,26 +271,24 @@ export default Component.extend(Evented, THREEPerformance, {
    *  Furthermore the name+highlighted of the
    *  highlighted package is stored
    */
-  computeAppCondition(components, clazzes){
-    const self = this;
-
-    if(clazzes){
-      clazzes.forEach(function(clazz) {
-        if(clazz.get('highlighted')){
-          self.get('appCondition').push(clazz.get('name').concat("highlighted"));
+  computeAppCondition(components, clazzes) {
+    if (clazzes) {
+      clazzes.forEach((clazz) => {
+        if (clazz.get('highlighted')) {
+          this.get('appCondition').push(clazz.get('name').concat("highlighted"));
         }
       });
     }
 
-    components.forEach(function(component) {
+    components.forEach((component) => {
       // Handle opened packages and add name to array
-      if(component.get('opened')){
-        self.get('appCondition').push(component.get('name'));
-        self.computeAppCondition(component.get('children'), component.get('clazzes'));
+      if (component.get('opened')) {
+        this.get('appCondition').push(component.get('name'));
+        this.computeAppCondition(component.get('children'), component.get('clazzes'));
       }
       // Handle closed and highlighted packages
-      else if(component.get('highlighted')){
-        self.get('appCondition').push(component.get('name').concat("highlighted"));
+      else if (component.get('highlighted')) {
+        this.get('appCondition').push(component.get('name').concat("highlighted"));
       }
     });
   },
@@ -291,43 +299,35 @@ export default Component.extend(Evented, THREEPerformance, {
    *  and nodegroups. The array 'condition' contains the ids of
    *  of all closed systems and nodegroups
    */
-  applyLandscapeCondition(landscape){
-
-    const self = this;
-
+  applyLandscapeCondition(landscape) {
     const systems = landscape.get('systems');
 
-    systems.forEach(function(system) {
-      let isRequestObject = false;
-
-      if (!isRequestObject && system.get('name') === "Requests") {
-        isRequestObject = true;
-      }
-
-      if(!isRequestObject){
+    systems.forEach((system) => {
+      
+      if (system.get('name') !== "Requests") {
 
         // Open system
         system.setOpened(true);
-        for (var i = 0; i < self.get('condition').length; i++) {
+        for (var i = 0; i < this.get('condition').length; i++) {
 
           // Close system if id is in condition
-          if(parseFloat(system.get('id')) === parseFloat(self.get('condition')[i])){
+          if (parseFloat(system.get('id')) === parseFloat(this.get('condition')[i])) {
             system.setOpened(false);
           }
         }
 
         // Check condition of nodegroups if system is opened
-        if(system.get('opened')){
+        if (system.get('opened')) {
           const nodegroups = system.get('nodegroups');
 
-          nodegroups.forEach(function(nodegroup) {
+          nodegroups.forEach(function (nodegroup) {
 
             // Open nodegroup
             nodegroup.setOpened(true);
-            for (var i = 0; i < self.get('condition').length; i++) {
+            for (var i = 0; i < this.get('condition').length; i++) {
 
               // Close nodegroup if id is in condition
-              if(parseFloat(nodegroup.get('id')) === parseFloat(self.get('condition')[i])){
+              if (parseFloat(nodegroup.get('id')) === parseFloat(this.get('condition')[i])) {
                 nodegroup.setOpened(false);
               }
             }
@@ -337,51 +337,53 @@ export default Component.extend(Evented, THREEPerformance, {
     });
   },
 
-  applyAppCondition(application){
+  applyAppCondition(application) {
+    if (!application) {
+      return;
+    }
 
-    const self = this;
+    // Get clazzes of application
+    let components = null;
+    if (this.get('initImport')) {
+      components = application.get('components');
+      this.set('initImport', false);
+    }
+    else {
+      components = application.get('children');
+    }
 
-    if(application){
-      let components = null;
-      if(self.get('initImport')){
-        components = application.get('components');
-        self.set('initImport', false);
-      }
-      else{
-        components = application.get('children');
-      }
+    const clazzes = application.get('clazzes');
 
-      const clazzes = application.get('clazzes');
-
-      if(clazzes){
-        clazzes.forEach(function(clazz) {
-          // Look for highlighted clazzes
-          for (var i = 0; i < self.get('condition').length; i++) {
-            if(clazz.get('name').concat("highlighted") === self.get('condition')[i]) {
-              clazz.set('highlighted',true);
-            }
+    // Set states of clazzes
+    if (clazzes) {
+      clazzes.forEach(function (clazz) {
+        // Look for highlighted clazzes
+        for (var i = 0; i < this.get('condition').length; i++) {
+          if (clazz.get('name').concat("highlighted") === this.get('condition')[i]) {
+            clazz.set('highlighted', true);
           }
-        });
-      }
+        }
+      });
+    }
 
-      if(components){
-        components.forEach(function(component) {
-          // Close component
-          component.setOpenedStatus(false);
-          for (var i = 0; i < self.get('condition').length; i++) {
-            // Open component if name is in condition
-            if(component.get('name') === self.get('condition')[i]){
-              component.setOpenedStatus(true);
-              self.applyAppCondition(component);
-            }
-            // case not opened => maybe highlighted
-            else if(component.get('name').concat("highlighted") === self.get('condition')[i]) {
-              component.set('highlighted',true);
-            }
+    // Set states if components
+    if (components) {
+      components.forEach(function (component) {
+        // Close component
+        component.setOpenedStatus(false);
+        for (var i = 0; i < this.get('condition').length; i++) {
+          // Open component if name is in condition
+          if (component.get('name') === this.get('condition')[i]) {
+            component.setOpenedStatus(true);
+            this.applyAppCondition(component);
           }
-        });
-      self.cleanAndUpdateScene();
-      }
+          // Case not opened => maybe highlighted
+          else if (component.get('name').concat("highlighted") === this.get('condition')[i]) {
+            component.set('highlighted', true);
+          }
+        }
+      });
+      this.cleanAndUpdateScene();
     }
   },
 
@@ -398,8 +400,7 @@ export default Component.extend(Evented, THREEPerformance, {
    *
    * @method populateScene
    */
-  populateScene() {},
-
+  populateScene() { },
 
   /**
    * This function is called when the willDestroyElement event is fired. Inherit this
@@ -414,7 +415,7 @@ export default Component.extend(Evented, THREEPerformance, {
     this.set('scene', null);
     this.set('webglrenderer', null);
 
-    // clean up WebGL rendering context by forcing context loss
+    // Clean up WebGL rendering context by forcing context loss
     var gl = this.get('canvas').getContext('webgl');
     gl.getExtension('WEBGL_lose_context').loseContext();
 
@@ -422,15 +423,15 @@ export default Component.extend(Evented, THREEPerformance, {
 
     this.removePerformanceMeasurement();
 
-    $(window).off('resize.visualization');
-    this.get('renderingService').off('reSetupScene');
-    this.get('landscapeRepo').off('updated');
+    // unsubscribe from all services
+    this.get('listeners').forEach(([service, event, listenerFunction]) => {
+      this.get(service).off(event, listenerFunction);
+    });
+    this.set('listeners', null);
 
     this.get('highlighter').unhighlightAll();
-    this.get('addionalData').emptyAndClose();
+    this.get('additionalData').emptyAndClose();
   },
-
-
 
   /**
    * Inherit this function to update the scene with a new renderingModel. It
@@ -446,13 +447,13 @@ export default Component.extend(Evented, THREEPerformance, {
     removeAllChildren(scene);
 
     function removeAllChildren(entity) {
-      for (let i = entity.children.length - 1; i >= 0 ; i--) {
+      for (let i = entity.children.length - 1; i >= 0; i--) {
         let child = entity.children[i];
 
         removeAllChildren(child);
 
         if (child.type !== 'AmbientLight' && child.type !== 'SpotLight' && child.type !== 'DirectionalLight') {
-          if(child.type !== 'Object3D') {
+          if (child.type !== 'Object3D') {
             child.geometry.dispose();
             child.material.dispose();
           }
@@ -476,11 +477,8 @@ export default Component.extend(Evented, THREEPerformance, {
    *
    * @method preProcessEntity
    */
-  preProcessEntity() {},
-
-
-
-
+  preProcessEntity() { },
+  
 
   // Listener-Callbacks. Override in extending components
 
@@ -494,6 +492,8 @@ export default Component.extend(Evented, THREEPerformance, {
 
   onResized() {
     this.cleanAndUpdateScene();
-  }
+  },
+
+  onMoveCameraTo() {},
 
 });

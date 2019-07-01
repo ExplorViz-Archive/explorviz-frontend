@@ -37,10 +37,10 @@ export default Component.extend(AlertifyHandler, {
     if(user) {
       // check for valid input
       if(!userData.username_change || userData.username_change.length === 0) {
-        this.showAlertifyMessage('Username cannot be empty.');
+        this.showAlertifyWarning('Username cannot be empty.');
         return;
       } else if(!userData.roles_change || userData.roles_change.length === 0) {
-        this.showAlertifyMessage('User needs at least 1 role.');
+        this.showAlertifyWarning('User needs at least 1 role.');
         return;
       }
 
@@ -54,28 +54,23 @@ export default Component.extend(AlertifyHandler, {
 
       try {
         yield user.save();
-        this.showAlertifyMessage(`User updated.`);
+        this.showAlertifySuccess(`User updated.`);
         clearInputFields.bind(this)();
       } catch(reason) {
         this.showReasonErrorAlert(reason);
       }
     } else {
-      this.showAlertifyMessage(`User not found.`);
+      this.showAlertifyError(`User not found.`);
     }
 
     function clearInputFields() {
-      this.setProperties({
-        // id_change: "",
-        // username_change: "",
-        password_change: "",
-        // roles_change: []
-      });
+      this.set('password_change', '');
     }
   }).drop(),
 
   showReasonErrorAlert(reason) {
     const {title, detail} = reason.errors[0];
-    this.showAlertifyMessage(`<b>${title}:</b> ${detail}`);
+    this.showAlertifyError(`<b>${title}:</b> ${detail}`);
   },
 
   getRoles: task(function * () {

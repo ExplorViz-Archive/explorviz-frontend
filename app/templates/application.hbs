@@ -1,9 +1,9 @@
-{{#if session.isAuthenticated}}
-  {{page-setup/navbar}}
-{{/if}}
+<div class="d-flex flex-row vh-100">
+  {{#if session.isAuthenticated}}
+    {{page-setup/navbar}}
+  {{/if}}
 
-<div id="vizContainer" class="main-content">
-  {{outlet}}
+  <div id="vizContainer" class="main-content">
+    {{outlet}}
+  </div>
 </div>
-
-{{page-setup/footer}}

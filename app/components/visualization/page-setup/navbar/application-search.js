@@ -9,11 +9,9 @@ export default Component.extend({
 
   tagName: "",
 
-  store: service(),
   renderingService: service(),
   landscapeRepo: service('repos/landscape-repository'),
   highlighter: service('visualization/application/highlighter'),
-  addionalData: service("additional-data"),
 
   selectedEntity: null,
 
@@ -48,7 +46,6 @@ export default Component.extend({
       }
 
       this.get('highlighter').unhighlightAll();
-      this.get('renderingService').redrawScene();
     
       if (modelType === "clazz") {
         entity.openParents();
@@ -62,9 +59,6 @@ export default Component.extend({
           entity.openParents();
         }
       }
-
-      // close potential side-bar
-      this.get('addionalData').emptyAndClose();
   
       this.get('highlighter').highlight(entity);
       this.get('renderingService').redrawScene();

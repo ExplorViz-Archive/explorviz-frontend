@@ -27,14 +27,17 @@ export default Mixin.create({
     this.set('stats', new Stats());
     // 0: fps, 1: ms, 2: mb, 3+: custom or just click the window to toggle
     this.get('stats').showPanel(0); 
-    this.get('stats').dom.style.top = "200px";
-    this.get('stats').dom.style.zIndex = "1000";
-    document.body.appendChild(this.get('stats').dom);
+    this.get('stats').dom.style.position = "absolute";
+    this.get('stats').dom.style.bottom = "368px";
+    this.get('stats').dom.style.top = null;
+    this.get('stats').dom.style.zIndex = "100";
+    this.get('stats').dom.style.left = '15px';
+    $('#rendering').append(this.get('stats').dom);
 
     this.set('threexStats', new THREEx.RendererStats());
     this.get('threexStats').domElement.style.position = 'absolute';
-    this.get('threexStats').domElement.style.top = '250px';
-    document.body.appendChild(this.get('threexStats').domElement);
+    this.get('threexStats').domElement.style.bottom = '200px';
+    $('#rendering').append(this.get('threexStats').domElement);
 
   },
 

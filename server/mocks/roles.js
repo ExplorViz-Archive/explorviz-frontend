@@ -9,16 +9,16 @@ module.exports = function (app) {
     "data": [
       {
         "type": "role",
-        "id": "2",
+        "id": "admin",
         "attributes": {
-          "descriptor": "admin"
+          
         }
       },
       {
         "type": "role",
-        "id": "3",
+        "id": "user",
         "attributes": {
-          "descriptor": "user"
+
         }
       }
     ]

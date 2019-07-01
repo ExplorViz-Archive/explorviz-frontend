@@ -18,6 +18,15 @@
     {{content-for "test-head-footer"}}
   </head>
   <body>
+
+    <!-- 
+      Fix for scrollable page, since our 
+      CSS interferes with this index.html file
+    -->
+    <style type="text/css">
+      body { overflow-y: scroll; }
+    </style>
+
     {{content-for "body"}}
     {{content-for "test-body"}}
 

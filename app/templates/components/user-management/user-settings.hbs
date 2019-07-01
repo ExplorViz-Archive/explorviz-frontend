@@ -2,10 +2,10 @@
   <h3>User Settings</h3>
   <hr>
   <div class="mt-2">
-    {{#if this.copySettings.isRunning}}
-      {{ember-spinner}}
+    {{#if this.initSettings.isRunning}}
+      <div class="spinner-center-3" role="status"></div>
     {{else}}
-      {{user-management/user-settings-base settings=this.settings}}
+      {{user-management/user-settings-default settings=this.settings useDefaultSettings=this.useDefaultSettings}}
 
       {{#if this.saveSettings.isRunning}}
         {{#bs-button type="primary" buttonType="submit" disabled=true}}
