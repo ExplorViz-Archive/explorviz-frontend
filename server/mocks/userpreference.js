@@ -44,7 +44,7 @@ module.exports = function (app) {
     }
   });
 
-  userpreferenceRouter.delete('/settings/preferences/:id', function (req, res) {
+  userpreferenceRouter.delete('/users/settings/preferences/:id', function (req, res) {
     let preferenceId = req.params.id;
 
     if(global.userPreferences.has(preferenceId)) {
@@ -55,7 +55,7 @@ module.exports = function (app) {
     }
   });
 
-  userpreferenceRouter.patch('/settings/preferences/:prefId', function (req, res) {
+  userpreferenceRouter.patch('/users/settings/preferences/:prefId', function (req, res) {
     let preferenceId = req.params.prefId;
     const { value } = req.body.data.attributes;
 
@@ -70,7 +70,7 @@ module.exports = function (app) {
     }
   });
 
-  userpreferenceRouter.post('/settings/preferences', function (req, res) {
+  userpreferenceRouter.post('/users/settings/preferences', function (req, res) {
     let { userId, settingId, value } = req.body.data.attributes;
 
     let preferenceNew = global.createUserPreference(userId, settingId, value);
