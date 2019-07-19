@@ -7,13 +7,9 @@ import $ from 'jquery';
 export default class LogstashLogger extends Service {
 
   private _logstashEndpoint: string = "http://localhost:4563/"
-  private _logstashEnabled: boolean = false
-
-
-  init() {
-    this._logstashEndpoint = ""
-    this._logstashEnabled = true
-  }
+  private _logstashEnabled: boolean = true
+  private debug = debugLogger();
+  
 
   set logstashEnabled(enabled: boolean) {
     this._logstashEnabled = enabled;
@@ -39,19 +35,21 @@ export default class LogstashLogger extends Service {
       'message': message
     }
 
-    $.ajax("http://localhost:4563", { 
+    $.ajax(this._logstashEndpoint, { 
       type: "POST",
       data: JSON.stringify(logObj),
       mimeType: "json",
-      error: function (ajaxContext) {
-        let debug = debugLogger("LogstashLogger");
-        let statuscode = ajaxContext.status;
-        let statustext = ajaxContext.statusText;
-        debug(`Failed to forward logs to Logstash: ${statuscode} - ${statustext}`)
-      }
+      error: this.logstashError.bind(this)
     })
   }
-  
+
+  private logstashError(ajaxContext: any) {
+    let statuscode = ajaxContext.status;
+    let statustext = ajaxContext.statusText;
+    // logger is disabled by default thus failing silently
+    this.debug(`Failed to forward logs to Logstash: ${statuscode} - ${statustext}`)
+  }
+
 }
 
 // DO NOT DELETE: this is how TypeScript knows how to look up your services.
