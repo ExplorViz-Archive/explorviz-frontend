@@ -48,6 +48,7 @@
       </div>
     {{/if}}
     <!-- timeline -->
+    {{visualization/page-setup/timeline/plotly-timeline}}
     <div id="timeline-content">
       {{#bs-button
         onClick=(action "toggleTimeline")
@@ -60,7 +61,7 @@
         {{svg-jar "chevron-up" id="hidetimeline-icon" class=(if renderingService.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")}}
       {{/bs-button}}
       <div id="timeline" class="timeline {{unless renderingService.showTimeline "timelinehide"}}">
-        {{plotly-timeline}}
+        {{visualization/page-setup/timeline/plotly-timeline}}
       </div>
     </div>
   </div>
