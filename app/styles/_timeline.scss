@@ -8,11 +8,16 @@
   //border: 1px solid black;
 }
 
+#plotlyDiv {
+  height: 150px;
+}
+
 .timeline {
   background-color: white;
-  height: 150px;
+  border-top: darkgray 1px solid;
   transition: 0.7s ease-in-out;
   opacity: 1;
+  height: 150px;
 }
 
 .timelinehide {

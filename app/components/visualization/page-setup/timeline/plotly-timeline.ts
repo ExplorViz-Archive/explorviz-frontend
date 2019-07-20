@@ -36,8 +36,13 @@ export default class PlotlyTimeline extends Component.extend({
       { 
         dragmode: 'pan', 
         yaxis: { 
-          fixedrange: true 
-        }
+          fixedrange: true
+        },
+        margin: {
+          b: 20,
+          t: 20,
+          pad: 4
+        },
       },
       {
         displayModeBar: false,
