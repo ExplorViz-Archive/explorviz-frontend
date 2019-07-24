@@ -1,6 +1,6 @@
 import Controller from '@ember/controller';
 import { inject as service } from "@ember/service";
-
+import logger from 'explorviz-frontend/utils/logging'
 
 /**
 * TODO
@@ -14,13 +14,12 @@ import { inject as service } from "@ember/service";
 export default Controller.extend({
   
   session: service('session'),
-  logger: service('LogstashLogger'),
 
   init(){
     this._super();
     localStorage.setItem('debug', '*');
-    this.logger.logstashEnabled = true;
-    this.logger.log("key", 'value');
+    let l = logger(this._debugContainerKey)
+    l.warn("A warning message")
   }
 
 });
