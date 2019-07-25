@@ -71,8 +71,15 @@ module.exports = function (app) {
 
     for(var elem of includedArray) {
       if(elem["id"] == timestampId) {
-        elem["attributes"]["timestamp"] = Date.now();
+
+        const currentDate = Date.now();
+
+        elem["attributes"]["timestamp"] = currentDate;
         elem["attributes"]["totalRequests"] = getRandomInt(1000000);
+        elem["attributes"]["totalRequests"] = 1000000;
+
+        // update id of timestamp
+        findAndReplace(jsonLandscape, "id", timestampId, currentDate);
         break;
       }
     }
@@ -82,6 +89,19 @@ module.exports = function (app) {
 
   function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
+  }
+
+  function findAndReplace(object, key, oldValue, replacevalue) {
+    for (var x in object) {
+      if (object.hasOwnProperty(x)) {
+        if (typeof object[x] == 'object') {
+          findAndReplace(object[x], key, oldValue, replacevalue);
+        }
+        if (x == key && object[x] == oldValue) { 
+          object[key] = replacevalue;
+        }
+      }
+    }
   }
 
   sendSSE();
