@@ -58,9 +58,30 @@ module.exports = function (app) {
 
   function sendSSE() {
     setTimeout(function () {
-      sse.send(landscapeObject, "message");
+      const updatedLandscape = updateTimestampInLandscape(landscapeObject);
+      sse.send(updatedLandscape, "message");
       sendSSE();
     }, 10000);
+  }
+
+  function updateTimestampInLandscape(jsonLandscape) {
+    const timestampId = jsonLandscape["data"]["relationships"]["timestamp"]["data"]["id"];
+    
+    const includedArray = jsonLandscape["included"];
+
+    for(var elem of includedArray) {
+      if(elem["id"] == timestampId) {
+        elem["attributes"]["timestamp"] = Date.now();
+        elem["attributes"]["totalRequests"] = getRandomInt(1000000);
+        break;
+      }
+    }
+
+    return jsonLandscape;
+  }
+
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
   }
 
   sendSSE();
