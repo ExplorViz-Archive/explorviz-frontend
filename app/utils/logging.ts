@@ -3,82 +3,66 @@ import $ from 'jquery';
 
 abstract class Logger {
 
-    protected _name: string;
+    protected name: string;
 
     constructor(name: string) {
-        this._name = name;
+        this.name = name;
     }
 
-    log(level: LogLevel, message: String): void {
-        switch(level) {
-            case LogLevel.DEBUG:
-                this.debug(message); 
-                break;
-            case LogLevel.INFO:
-                this.info(message);
-                break;
-            case LogLevel.WARN:
-                this.warn(message);
-                break;
-            case LogLevel.ERROR:
-                this.error(message);
-                break;
-        }
-    }
+    abstract log(level: LogLevel, message: String): void;
 
-    abstract debug(message: String): void;
-    abstract info(message: String): void;
-    abstract warn(message: String): void;
-    abstract error(message: String): void;
+    abstract debug(message: string): void;
+    abstract info(message: string): void;
+    abstract warn(message: string): void;
+    abstract error(message: string): void;
 }
 
-class LogstashPayload {
-    constructor(public name: string, public levelName: string, public levelCode: number, public message: string, public time: number){}
+class LogstashEvent {
+    constructor(public name: string, 
+        public levelName: string, 
+        public levelCode: number, 
+        public message: string, 
+        public time: number){}
 }
 
 class LogstashLogger extends Logger {
 
-    private _logstashEndpoint: string = "http://localhost:4563/"
+    log(level: LogLevel, message: string): void {
+        let lvlName = LogLevel[level]
+        let now = new Date().getDate();
+        let event = new LogstashEvent(this.name, lvlName, level, message, now);
+        this.dispatch(event);
+    }
+
+    private logstashURL: string = "http://localhost:4563/"
 
 
     constructor(name: string) {
         super(name);
     }
 
-    private dispatch(msg: LogstashPayload): void {
-        $.ajax(this._logstashEndpoint, { 
+    private dispatch(event: LogstashEvent): void {
+        $.ajax(this.logstashURL, { 
             type: "POST",
-            data: JSON.stringify(msg),
+            data: JSON.stringify(event),
             mimeType: "json"
           })
     }
 
     debug(message: string): void {
-        let lvlName = LogLevel[LogLevel.DEBUG]
-        let now = new Date().getDate();
-        let msg = new LogstashPayload(this._name, lvlName, LogLevel.DEBUG, message, now);
-        this.dispatch(msg)
+        this.log(LogLevel.DEBUG, message);
     }
 
     info(message: string): void {
-        let lvlName = LogLevel[LogLevel.INFO]
-        let now = new Date().getDate();
-        let msg = new LogstashPayload(this._name, lvlName, LogLevel.INFO, message, now);
-        this.dispatch(msg)
+        this.log(LogLevel.INFO, message);
     }
 
     warn(message: string): void {
-        let lvlName = LogLevel[LogLevel.WARN]
-        let now = new Date().getDate();
-        let msg = new LogstashPayload(this._name, lvlName, LogLevel.WARN, message, now);
-        this.dispatch(msg)
+        this.log(LogLevel.WARN, message);
     }
 
     error(message: string): void {
-        let lvlName = LogLevel[LogLevel.ERROR]
-        let now = new Date().getDate();
-        let msg = new LogstashPayload(this._name, lvlName, LogLevel.ERROR, message, now);
-        this.dispatch(msg)
+        this.log(LogLevel.ERROR, message);
     }     
 }
 
@@ -157,6 +141,7 @@ enum LogLevel {
     ERROR = 3
 }
 
+// Configuration
 const logstashEnabled = true;
 
 export default function logger(name: string): Logger{
