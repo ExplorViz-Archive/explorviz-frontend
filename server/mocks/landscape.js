@@ -76,7 +76,6 @@ module.exports = function (app) {
 
         elem["attributes"]["timestamp"] = currentDate;
         elem["attributes"]["totalRequests"] = getRandomInt(1000000);
-        elem["attributes"]["totalRequests"] = 1000000;
 
         // update id of timestamp
         findAndReplace(jsonLandscape, "id", timestampId, currentDate);
