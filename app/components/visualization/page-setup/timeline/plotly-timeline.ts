@@ -16,25 +16,25 @@ export default class PlotlyTimeline extends Component.extend({
     this._super(...arguments);
 
     if(this.initDone) {
-      this.extendPlotlyTimelineChart(this.get("timestamp"));
+      this.extendPlotlyTimelineChart(this.get("timestamps"));
     } else {
-      this.setupPlotlyTimelineChart(this.get("timestamp"));
+      this.setupPlotlyTimelineChart(this.get("timestamps"));
     }
   };
   
-  setupPlotlyTimelineChart(timestamp : Timestamp) {
+  setupPlotlyTimelineChart(timestamps : Array<Timestamp>) {
 
-    if(!timestamp) {
+    if(!timestamps || timestamps.length == 0) {
       return;
     }
 
     var x : Array<Date> = [];
     var y : Array<number> = [];
 
-    const currentTimestamp = new Date(timestamp.get("timestamp"));
-
-    x.push(currentTimestamp);
-    y.push(timestamp.get("totalRequests"));
+    for(const timestamp of timestamps) {
+      x.push(new Date(timestamp.get('timestamp')));
+      y.push(timestamp.get('totalRequests'));
+    }
 
     const data = [
       {
@@ -44,10 +44,14 @@ export default class PlotlyTimeline extends Component.extend({
       }
     ];
 
-    const minTimestamp = currentTimestamp.setMinutes(currentTimestamp.getMinutes() - 1);
-    const maxTimestamp = currentTimestamp.setMinutes(currentTimestamp.getMinutes() + 1);
+    const latestTimestamp = timestamps.lastObject;
+    const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
+    console.log(latestTimestamp.get('timestamp'));
 
-    const layout = { 
+    const minTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() - 1);
+    const maxTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() + 1);
+
+    const layout = {
       dragmode: 'pan', 
       yaxis: { 
         fixedrange: true
@@ -81,23 +85,28 @@ export default class PlotlyTimeline extends Component.extend({
   };
 
 
-  extendPlotlyTimelineChart(timestamp : Timestamp) {
+  extendPlotlyTimelineChart(timestamps : Array<Timestamp>) {
 
-    if(!timestamp) {
+    if(!timestamps || timestamps.length == 0) {
       return;
     }
 
     var x : Array<Date> = [];
     var y : Array<number> = [];
 
-    const newTimestamp = new Date(timestamp.get("timestamp"));
-    const newRequestValue : number = timestamp.get("totalRequests");
+    // TODO might need to filter already painted timestamps.
+    // Otherwise, all timestamps are connected with the first one (buggy) 
 
-    x.push(newTimestamp);
-    y.push(newRequestValue);
+    for(const timestamp of timestamps) {
+      x.push(new Date(timestamp.get('timestamp')));
+      y.push(timestamp.get('totalRequests'));
+    }
 
-    const minTimestamp = newTimestamp.setMinutes(newTimestamp.getMinutes() - 1);
-    const maxTimestamp = newTimestamp.setMinutes(newTimestamp.getMinutes() + 1);
+    const latestTimestamp = timestamps.lastObject;
+    const latestTimestampValue = new Date(latestTimestamp.get("timestamp"));
+
+    const minTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() - 1);
+    const maxTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() + 1);
 
     const minuteView = {
       xaxis: {
@@ -109,8 +118,8 @@ export default class PlotlyTimeline extends Component.extend({
     Plotly.relayout('plotlyDiv', minuteView);
 
     const data = {      
-      x: [[newTimestamp]],
-      y: [[newRequestValue]]
+      x: [x],
+      y: [y]
     };
 
     Plotly.extendTraces(
