@@ -5,7 +5,6 @@ import { getOwner } from '@ember/application';
 import Evented from '@ember/object/evented';
 import ModelUpdater from 'explorviz-frontend/utils/model-update';
 import debugLogger from 'ember-debug-logger';
-import { typeOf } from '@ember/utils';
 
 /* global EventSourcePolyfill */
 export default Service.extend(Evented, {

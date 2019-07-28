@@ -10,7 +10,6 @@ export default class PlotlyTimeline extends Component.extend({
   debug = debugLogger();
 
   tagName = '';
-
   initDone = false;
 
   didRender() {
