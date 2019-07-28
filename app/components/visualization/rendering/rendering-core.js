@@ -4,6 +4,7 @@ import Evented from '@ember/object/evented';
 import THREE from "three";
 import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
 import debugLogger from 'ember-debug-logger';
+import logger from 'explorviz-frontend/utils/logging'
 import $ from 'jquery';
 
 /**
@@ -29,7 +30,11 @@ export default Component.extend(Evented, THREEPerformance, {
   // No Ember generated container
   tagName: '',
 
-  debug: debugLogger(),
+
+
+  logger: logger(this._debugContainerKey),
+
+
 
   state: null,
 
@@ -97,7 +102,7 @@ export default Component.extend(Evented, THREEPerformance, {
    * @method initRenderings
    */
   initRendering() {
-    this.debug('init rendering-core');
+    this.logger.info('init rendering-core');
 
     const self = this;
 

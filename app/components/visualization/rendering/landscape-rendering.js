@@ -52,7 +52,7 @@ export default RenderingCore.extend(AlertifyHandler, {
   initRendering() {
     this._super(...arguments);
 
-    this.debug("init landscape-rendering");
+    this.logger.info("init landscape-rendering");
 
     this.onReSetupScene = function () {
       this.set('centerAndZoomCalculator.centerPoint', null);
@@ -111,7 +111,7 @@ export default RenderingCore.extend(AlertifyHandler, {
   cleanup() {
     this._super(...arguments);
 
-    this.debug("cleanup landscape rendering");
+    this.logger.debug("cleanup landscape rendering");
 
     this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
@@ -134,7 +134,7 @@ export default RenderingCore.extend(AlertifyHandler, {
   cleanAndUpdateScene() {
     this._super(...arguments);
 
-    this.debug("clean and populate landscape-rendering");
+    this.logger.debug("clean and populate landscape-rendering");
 
     this.set('interaction.raycastObjects', this.get('scene.children'));
   },
@@ -598,7 +598,7 @@ export default RenderingCore.extend(AlertifyHandler, {
       self.get('configuration'));
 
 
-    this.debug("Landscape loaded");
+    this.logger.info("Landscape loaded");
 
   }, // END populateScene
 

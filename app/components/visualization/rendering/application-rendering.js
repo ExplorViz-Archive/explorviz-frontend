@@ -53,7 +53,7 @@ export default RenderingCore.extend(AlertifyHandler, {
   initRendering() {
     this._super(...arguments);
 
-    this.debug("init application rendering");
+    this.logger.info("init application rendering");
 
     this.set('oldRotation', { x: 0, y: 0 });
 
@@ -177,7 +177,7 @@ export default RenderingCore.extend(AlertifyHandler, {
   cleanup() {
     this._super(...arguments);
 
-    this.debug("cleanup application rendering");
+    this.logger.debug("cleanup application rendering");
 
     // Remove foundation for re-rendering
     this.get('foundationBuilder').removeFoundation(this.get('store'));
@@ -201,7 +201,7 @@ export default RenderingCore.extend(AlertifyHandler, {
    * @method cleanAndUpdateScene
    */
   cleanAndUpdateScene() {
-    this.debug("clean application rendering");
+    this.logger.debug("clean application rendering");
 
     // Save old rotation
     this.set('oldRotation', this.get('application3D').rotation);
@@ -234,7 +234,7 @@ export default RenderingCore.extend(AlertifyHandler, {
    */
   populateScene() {
     this._super(...arguments);
-    this.debug("populate application rendering");
+    this.logger.info("populate application rendering");
 
     const emberApplication = this.get('latestApplication');
 
@@ -361,7 +361,7 @@ export default RenderingCore.extend(AlertifyHandler, {
       self.set('initialSetupDone', true);
     }
 
-    this.debug("Application loaded");
+    this.logger.info("Application loaded");
 
   },
 

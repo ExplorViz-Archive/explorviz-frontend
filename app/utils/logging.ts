@@ -11,10 +11,18 @@ abstract class Logger {
 
     abstract log(level: LogLevel, message: String): void;
 
-    abstract debug(message: string): void;
-    abstract info(message: string): void;
-    abstract warn(message: string): void;
-    abstract error(message: string): void;
+    debug(message: String): void {
+        this.log(LogLevel.DEBUG, message);
+    }    
+    info(message: String): void {
+        this.log(LogLevel.INFO, message);
+    }
+    warn(message: String): void {
+        this.log(LogLevel.WARN, message);
+    }
+    error(message: String): void {
+        this.log(LogLevel.ERROR, message);
+    }
 }
 
 class LogstashEvent {
@@ -48,22 +56,7 @@ class LogstashLogger extends Logger {
             mimeType: "json"
           })
     }
-
-    debug(message: string): void {
-        this.log(LogLevel.DEBUG, message);
-    }
-
-    info(message: string): void {
-        this.log(LogLevel.INFO, message);
-    }
-
-    warn(message: string): void {
-        this.log(LogLevel.WARN, message);
-    }
-
-    error(message: string): void {
-        this.log(LogLevel.ERROR, message);
-    }     
+    
 }
 
 class DebugLogger extends Logger {
@@ -75,18 +68,7 @@ class DebugLogger extends Logger {
         this._debug = debugLogger(name);
     }
 
-    debug(message: String): void {
-        this.log(LogLevel.DEBUG, message);
-    }    
-    info(message: String): void {
-        this.log(LogLevel.INFO, message);
-    }
-    warn(message: String): void {
-        this.log(LogLevel.WARN, message);
-    }
-    error(message: String): void {
-        this.log(LogLevel.ERROR, message);
-    }
+   
 
     
     log(level: LogLevel, message: String): void {
@@ -101,37 +83,22 @@ interface ConstructorOf<T> {
 }
 
 class CompositLogger extends Logger {
+
+    log(level: LogLevel, message: String): void {
+        this.loggers.forEach((l) => l.log(level, message))
+    }
     private loggers: Logger[];
 
     constructor(name: string) {
         super(name)
         this.loggers = [];
     }
+
     addLogger<T extends Logger>(loggerCls : ConstructorOf<T>): void {
-        let logger = new loggerCls(this._name);
+        let logger = new loggerCls(this.name);
         this.loggers.push(logger);
     }
 
-    debug(message: String): void {
-        this.loggers.forEach(l => {
-            l.debug(message);
-        });
-    }    
-    info(message: String): void {
-        this.loggers.forEach(l => {
-            l.info(message);
-        });
-    }
-    warn(message: String): void {
-        this.loggers.forEach(l => {
-            l.warn(message);
-        });
-    }
-    error(message: String): void {
-        this.loggers.forEach(l => {
-            l.error(message);
-        });
-    }    
 }
 
 enum LogLevel {

@@ -1,6 +1,6 @@
 import Controller from '@ember/controller';
 import { inject as service } from "@ember/service";
-import logger from 'explorviz-frontend/utils/logging'
+
 
 /**
 * TODO
@@ -17,9 +17,6 @@ export default Controller.extend({
 
   init(){
     this._super();
-    localStorage.setItem('debug', '*');
-    let l = logger(this._debugContainerKey)
-    l.warn("A warning message")
   }
 
 });
