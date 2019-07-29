@@ -21,7 +21,11 @@ export default class PlotlyTimeline extends Component.extend({
       this.setupPlotlyTimelineChart(this.get("timestamps"));
     }
   };
-  
+
+  hoverText(x : Array<Date> ,y : Array<number>) {
+    return x.map((xi, i) => `<b>Time</b>: ${xi}<br><b>Total Requests</b>: ${y[i]}<br>`);
+  };
+
   setupPlotlyTimelineChart(timestamps : Array<Timestamp>) {
 
     if(!timestamps || timestamps.length == 0) {
@@ -36,11 +40,27 @@ export default class PlotlyTimeline extends Component.extend({
       y.push(timestamp.get('totalRequests'));
     }
 
+    //const hoverText = x.map(xi => y.map(yi => `ts: 1<br>hz: 1<br>`));
+    //const hoverText = `ts: 1<br>hz: 1<br>`;
+    //const hoverText = x.map((xi, i) => `Total Requests: ${xi}<br>Time: ${y[i]}<br>`);
+    //const hoverText = x.forEach((xi, i) =>
+    //  `Total Requests: ${xi}<br>Time: ${y[i]}<br>`
+    //);
+    //var hoverText = x.map((xi, i) => y.map((yi, j) => `ts: ${xi}<br>hz: ${yi}<br>`));
+
     const data = [
       {
+        hoverinfo: 'text',
+        type: 'scattergl',
         x: x,
         y: y,
-        type: 'scattergl'
+        //hovertemplate: 
+        // '<b>Total Requests</b>: %{y:.2f}' +
+        //  '<br><b>Time</b>: %{x}<br>',
+        hoverlabel: {
+          align: "left"
+        },
+        text: this.hoverText(x,y)
       }
     ];
 
@@ -113,9 +133,14 @@ export default class PlotlyTimeline extends Component.extend({
 
     Plotly.relayout('plotlyDiv', minuteView);
 
-    const data = {      
+    const data = {
+      type: 'scattergl',
       x: [x],
-      y: [y]
+      y: [y],
+      hoverlabel: {
+        align: "left"
+      },
+      text: this.hoverText(x,y)
     };
 
     Plotly.update(
