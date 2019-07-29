@@ -15,7 +15,7 @@ module('Integration | Component | visualization/page-setup/timeline/plotly-timel
       const el:any = this.element;
 
       if(el) {
-        assert.equal(el.textContent.trim(), '010020030040050060070080090000.511.52');
+        assert.equal(el.textContent.trim(), 'No timestamps available.');
       } else {
         assert.notOk( "empty element", "There was no element to test." );
       }

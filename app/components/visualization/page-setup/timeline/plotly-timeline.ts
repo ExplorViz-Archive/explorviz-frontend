@@ -46,7 +46,6 @@ export default class PlotlyTimeline extends Component.extend({
 
     const latestTimestamp = timestamps.lastObject;
     const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
-    console.log(latestTimestamp.get('timestamp'));
 
     const minTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() - 1);
     const maxTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() + 1);
@@ -94,9 +93,6 @@ export default class PlotlyTimeline extends Component.extend({
     var x : Array<Date> = [];
     var y : Array<number> = [];
 
-    // TODO might need to filter already painted timestamps.
-    // Otherwise, all timestamps are connected with the first one (buggy) 
-
     for(const timestamp of timestamps) {
       x.push(new Date(timestamp.get('timestamp')));
       y.push(timestamp.get('totalRequests'));
@@ -122,10 +118,9 @@ export default class PlotlyTimeline extends Component.extend({
       y: [y]
     };
 
-    Plotly.extendTraces(
+    Plotly.update(
       'plotlyDiv',
-      data, 
-      [0]
+      data
     );
 
 
