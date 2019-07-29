@@ -13,33 +13,12 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     });
  
   },
-  
-  // @Override
-  urlForQuery() {
-    const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/settings/preferences`;
-  },
 
   // @Override
   // Overrides URL for model.save()
   urlForCreateRecord() {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/settings/preferences`;
-  },
-
-  urlForUpdateRecord(id) {
-    const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/settings/preferences/${id}`;
-  },
-
-  urlForDeleteRecord(id) {
-    const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/settings/preferences/${id}`;
-  },
-
-  urlForFindAll(modelName, snapshot) {
-    const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/${snapshot.adapterOptions.userId}/settings/preferences`;
+    return `${baseUrl}/v1/users/batch`;
   },
 
   authorize(xhr) {

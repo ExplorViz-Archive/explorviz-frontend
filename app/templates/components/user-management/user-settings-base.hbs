@@ -4,7 +4,7 @@
     <div class="spinner-center-3 mb-5 mt-5" style="position:relative" role="status"></div>
   {{else}}
     {{#bs-form model=this as |form|}}
-      {{#each this.settings.flagsettings as |setting|}}
+      {{#each this.settings.flagsetting as |setting|}}
         {{!-- setting.[0] = settingId, setting.[1] = settingValue --}}
         <div class="d-flex justify-content-between pr-3">
           <div>
@@ -18,7 +18,7 @@
           }}
         </div>
       {{/each}}
-      {{#each this.settings.rangesettings as |setting index|}}
+      {{#each this.settings.rangesetting as |setting index|}}
         <div class="mb-3">
           {{help-tooltip title=(get this.descriptions (concat setting.[0] ".description"))}}
           {{form.element

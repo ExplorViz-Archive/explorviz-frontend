@@ -2,7 +2,7 @@
   {{!-- Button to toggle navbar with (closed/open) --}}
   <div id="exp-navbar-btn">
     <button type="button" onclick={{action "toggleNavbar"}} class="btn btn-primary" title={{if navbarActive "Close Navbar" "Open Navbar"}}>
-      {{svg-jar (if navbarActive "chevron-left" "three-bars") class="octicon"}}
+      {{svg-jar "three-bars" class="octicon"}}
     </button>
   </div>
   <div id="exp-navbar-main">

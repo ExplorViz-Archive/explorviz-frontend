@@ -14,7 +14,7 @@ module.exports = function(app) {
              "max":5.0,
              "displayName":"Arrow Size in Application Visualization",
              "description":"Arrow Size for selected communications in application visualization",
-             "origin":"backend",
+             "origin":"core",
              "defaultValue":1.0,
              "min":0.0
           }
@@ -26,9 +26,21 @@ module.exports = function(app) {
              "max":0.5,
              "displayName":"Transparency Intensity in Application Visualization",
              "description":"Transparency effect intensity ('App Viz Transparency' must be enabled)",
-             "origin":"backend",
+             "origin":"core",
              "defaultValue":0.1,
              "min":0.1
+          }
+       },
+       {
+          "type":"rangesetting",
+          "id":"appVizCurvyCommHeight",
+          "attributes":{  
+             "max":50.0,
+             "displayName":"Curviness of the Communication Lines",
+             "description":"If greater 0.0, communication lines are rendered arc-shaped with set height (Straight lines: 0.0)",
+             "origin":"core",
+             "defaultValue":0.0,
+             "min":0.0
           }
        },
        {
@@ -37,7 +49,7 @@ module.exports = function(app) {
           "attributes":{  
              "displayName":"Show FPS Counter",
              "description":"'Frames Per Second' metrics in visualizations",
-             "origin":"backend",
+             "origin":"core",
              "defaultValue":false
           }
        },
@@ -45,9 +57,9 @@ module.exports = function(app) {
           "type":"flagsetting",
           "id":"appVizTransparency",
           "attributes":{  
-             "displayName":"App Viz Transparency",
+             "displayName":"Enable Transparent Components",
              "description":"Transparency effect for selection (left click) in application visualization",
-             "origin":"backend",
+             "origin":"core",
              "defaultValue":true
           }
        },
@@ -57,7 +69,7 @@ module.exports = function(app) {
           "attributes":{  
              "displayName":"Keep Highlighting On Open Or Close",
              "description":"Toggle if highlighting should be resetted on double click in application visualization",
-             "origin":"backend",
+             "origin":"core",
              "defaultValue":true
           }
        },
@@ -67,10 +79,32 @@ module.exports = function(app) {
           "attributes":{  
              "displayName":"Enable Hover Effects",
              "description":"Hover effect (flashing entities) for mouse cursor",
-             "origin":"backend",
+             "origin":"core",
              "defaultValue":true
           }
        }
+/*        ,{
+          "type":"flagsetting",
+          "id":"dummy1",
+          "attributes":{  
+             "displayName":"I'm just a dummy flagsetting",
+             "description":"I'm just a dummy flagsetting",
+             "origin":"dummy",
+             "defaultValue":true
+          }
+       },
+       {
+          "type":"rangesetting",
+          "id":"dummy2",
+          "attributes":{  
+            "max":10.0,
+            "displayName":"I'm just a dummy rangesetting",
+            "description":"I'm just a dummy rangesetting",
+            "origin":"dummy",
+            "defaultValue":5.0,
+            "min":1.0
+          }
+       } */
     ]
   };
 

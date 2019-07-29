@@ -22,7 +22,7 @@ export default Mixin.create({
   },
 
   showAlertifyError(message) {
-    this.showAlertifyMessageWithDuration(message, 3, "error");
+    this.showAlertifyMessageWithDuration(message, 5, "error");
   },
 
   showAlertifyWarning(message) {

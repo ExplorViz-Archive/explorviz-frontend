@@ -7,6 +7,8 @@ export default class UserSettings extends Service {
 
   @service('store') store!: DS.Store;
 
+  types = new Set<string>();
+
   /**
    * Returns the matching user preference, if existent.
    * 

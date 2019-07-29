@@ -8,10 +8,11 @@ export default Component.extend({
   tagName: '',
 
   store: service(),
+  userSettings: service(),
 
   // {
-  //   rangesettings: [[settingId0,value0],...,[settingIdN,valueN]],
-  //   flagsettings: [[settingId0,value0],...,[settingIdN,valueN]]
+  //   rangesetting: [[settingId0,value0],...,[settingIdN,valueN]],
+  //   flagsetting: [[settingId0,value0],...,[settingIdN,valueN]]
   // }
   settings: null,
 
@@ -23,12 +24,15 @@ export default Component.extend({
 
     this.set('descriptions', {});
     
-    this.get('loadDescriptions').perform('rangesetting');
-    this.get('loadDescriptions').perform('flagsetting');
+    let typesArray = [].concat(...Object.keys(this.get('settings')));
+
+    for(let i = 0; i < typesArray.length; i++) {
+      this.get('loadDescriptions').perform(typesArray[i]);
+    }
   },
 
   loadDescriptions: task(function * (type) {
-    for (const [id] of this.get(`settings.${type}s`)) {
+    for (const [id] of this.get(`settings.${type}`)) {
       const { description, displayName } = yield this.get('store').peekRecord(type, id);
       this.set(`descriptions.${id}`, { description, displayName });
     }
@@ -36,7 +40,7 @@ export default Component.extend({
 
   actions: {
     onRangeSettingChange(index, valueNew) {
-      this.get('settings').rangesettings[index].set(1, Number(valueNew));
+      this.get('settings').rangesetting[index].set(1, Number(valueNew));
     }
   }
 

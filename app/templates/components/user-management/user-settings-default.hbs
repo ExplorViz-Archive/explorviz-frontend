@@ -1,0 +1,25 @@
+{{#each-in this.settings as |key value|}}
+  <h6>{{capitalize key}}</h6>
+  <div class="pl-3">
+    <div class="d-flex justify-content-between pr-3">
+      <div>
+        Use Default Settings
+      </div>
+      {{x-toggle
+        theme='skewed'
+        onLabel='Yes'
+        offLabel='No'
+        value=(get useDefaultSettings key)
+        onToggle=(action (mut (get useDefaultSettings key)))
+      }}
+    </div>
+    {{#unless (get useDefaultSettings key)}}
+      <div class="pt-2">
+        {{user-management/user-settings-base
+          settings=value
+        }}
+      </div>
+    {{/unless}}
+  </div>
+  <hr>
+{{/each-in}}

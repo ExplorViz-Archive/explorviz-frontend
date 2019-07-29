@@ -5,7 +5,7 @@
     {{#if this.initSettings.isRunning}}
       <div class="spinner-center-3" role="status"></div>
     {{else}}
-      {{user-management/user-settings-base settings=this.settings}}
+      {{user-management/user-settings-default settings=this.settings useDefaultSettings=this.useDefaultSettings}}
 
       {{#if this.saveSettings.isRunning}}
         {{#bs-button type="primary" buttonType="submit" disabled=true}}
