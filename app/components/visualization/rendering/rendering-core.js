@@ -155,7 +155,7 @@ export default Component.extend(Evented, THREEPerformance, {
 
     // Load font for labels and synchronously proceed with populating the scene
     new THREE.FontLoader()
-      .load('three.js/fonts/roboto_mono_bold_typeface.json', function (font) {
+      .load('/three.js/fonts/roboto_mono_bold_typeface.json', function (font) {
         if (self.isDestroyed)
           return;
 

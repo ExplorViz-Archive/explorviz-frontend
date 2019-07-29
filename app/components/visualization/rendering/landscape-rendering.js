@@ -110,14 +110,12 @@ export default RenderingCore.extend(AlertifyHandler, {
   // @Override
   cleanup() {
     this._super(...arguments);
-
     this.debug("cleanup landscape rendering");
-
     this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
     this.set('labeler.textCache', []);
-
     this.get('renderingService').off('redrawScene');
+    this.get('interaction').off('redrawScene');
     this.get('interaction').off('clickedEntity');
     this.get('interaction').off('doubleClickedEntity');
 
@@ -672,7 +670,6 @@ export default RenderingCore.extend(AlertifyHandler, {
   },
 
   initInteraction() {
-
     const self = this;
 
     const canvas = this.get('canvas');
@@ -686,7 +683,6 @@ export default RenderingCore.extend(AlertifyHandler, {
       raycastObjects);
 
     // Set listeners
-
     this.get('interaction').on('redrawScene', function () {
       self.cleanAndUpdateScene();
     });

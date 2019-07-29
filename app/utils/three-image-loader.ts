@@ -31,7 +31,7 @@ export default Object.extend({
       return plane;
     }
     else {
-      new THREE.TextureLoader().load('images/logos/' + textureName + '.png', (texture) => {
+      new THREE.TextureLoader().load('/images/logos/' + textureName + '.png', (texture) => {
         let logos: any = this.get('logos');
         if (!logos) {
           return null;
