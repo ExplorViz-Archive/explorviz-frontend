@@ -178,7 +178,6 @@ export default Component.extend(Evented, THREEPerformance, {
       // },
 
       // onError callback
-      // eslint-disable-next-line no-unused-vars
       // function ( error ) {
       //   self.debug("(THREE.js) Error when loading font!");
       // }  
