@@ -156,15 +156,33 @@ export default Component.extend(Evented, THREEPerformance, {
     ////////////////////
 
     // Load font for labels and synchronously proceed with populating the scene
-    new THREE.FontLoader()
-      .load('/three.js/fonts/roboto_mono_bold_typeface.json', function (font) {
+    new THREE.FontLoader().load(
+      // resource URL
+      '/three.js/fonts/roboto_mono_bold_typeface.json',
+
+      // onLoad callback
+      function ( font ) {
+
         if (self.isDestroyed)
           return;
 
         self.set('font', font);
+        self.debug("(THREE.js) font sucessfully loaded.");
         self.set('initDone', true);
         self.populateScene();
-      });
+      },
+
+      // onProgress callback
+      // function ( xhr ) {
+      //   self.debug("(THREE.js) font " + (xhr.loaded / xhr.total * 100) + "% loaded.");
+      // },
+
+      // onError callback
+      // eslint-disable-next-line no-unused-vars
+      // function ( error ) {
+      //   self.debug("(THREE.js) Error when loading font!");
+      // }  
+    );
 
   },
 
