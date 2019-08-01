@@ -9,10 +9,10 @@ export default class PlotlyTimeline extends Component.extend({
 
   debug = debugLogger();
 
-  tagName = '';
   initDone = false;
 
   oldMinuteView = null;
+  stopUpdatingSlidingWindow = false;
 
   // BEGIN Plotly parameter (must be updated at runtime)
 
@@ -53,6 +53,18 @@ export default class PlotlyTimeline extends Component.extend({
 
   // END Plotly Parameter
 
+  // BEGIN Ember Div Events
+  mouseEnter() {
+    console.log("set");
+    this.set("stopUpdatingSlidingWindow", true);
+  }
+
+  mouseLeave() {
+    this.set("stopUpdatingSlidingWindow", false);
+  }
+  // END Ember Div Events
+
+
   didRender() {
     this._super(...arguments);
 
@@ -82,7 +94,6 @@ export default class PlotlyTimeline extends Component.extend({
     }
 
     const data = this.get("plotlyData");
-    console.log(data.get(0));
     data.get(0).x = x;
     data.get(0).y = y;
     data.get(0).text = this.hoverText(x,y);
@@ -125,7 +136,6 @@ export default class PlotlyTimeline extends Component.extend({
     }    
 
     const data = this.get("plotlyData");
-    console.log(data.get(0));
     data.get(0).x = x;
     data.get(0).y = y;
     data.get(0).text = this.hoverText(x,y);
@@ -136,10 +146,26 @@ export default class PlotlyTimeline extends Component.extend({
     const minTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() - 1);
     const maxTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() + 1);
 
+    const minuteView = {
+      xaxis: {
+        type: 'date',
+        range: [minTimestamp,maxTimestamp]
+      }        
+    };
+    if(!this.get("oldMinuteView")) {
+      this.set("oldMinuteView", minuteView);
+    }
+
     const layout = this.get("plotlyLayout");
     layout.xaxis.range = [minTimestamp,maxTimestamp];
 
     const options = this.get("plotlyOptions");
+
+    // If mouse is on timeline, do not update the sliding window
+    // Data is still extended
+    if(this.get("stopUpdatingSlidingWindow")) {      
+      console.log("relayout");
+    }
 
     Plotly.react(
       'plotlyDiv',
@@ -148,18 +174,7 @@ export default class PlotlyTimeline extends Component.extend({
       options
     );
 
-    if(!this.get("oldMinuteView")) {
-      console.log("test");
-      const minuteView = {
-        xaxis: {
-          type: 'date',
-          range: [minTimestamp,maxTimestamp]
-        }        
-      };
-      this.set("oldMinuteView", minuteView);
-    }   
-
-    //Plotly.relayout('plotlyDiv', this.get("oldMinuteView"));
+    Plotly.relayout('plotlyDiv', this.get("oldMinuteView")); 
   };
   
 };
