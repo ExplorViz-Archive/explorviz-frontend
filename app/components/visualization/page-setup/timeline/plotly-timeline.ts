@@ -12,6 +12,47 @@ export default class PlotlyTimeline extends Component.extend({
   tagName = '';
   initDone = false;
 
+  oldMinuteView = null;
+
+  // BEGIN Plotly parameter (must be updated at runtime)
+
+  plotlyData = [
+    {
+      hoverinfo: 'text',
+      type: 'scattergl',
+      x: 1, // must be updated
+      y: 1, // must be updated
+      hoverlabel: {
+        align: "left"
+      },
+      text: this.hoverText([new Date()],[1]) // must be updated
+    }
+  ];
+
+  plotlyLayout = {
+    dragmode: 'pan', 
+    yaxis: { 
+      fixedrange: true
+    },
+    xaxis: {
+      type: 'date',
+      range: [1,2] // must be updated
+    },
+    margin: {
+      b: 20,
+      t: 20,
+      pad: 4
+    }
+  };
+
+  plotlyOptions = {
+    displayModeBar: false,
+    scrollZoom: true,
+    responsive: true 
+  };
+
+  // END Plotly Parameter
+
   didRender() {
     this._super(...arguments);
 
@@ -40,29 +81,11 @@ export default class PlotlyTimeline extends Component.extend({
       y.push(timestamp.get('totalRequests'));
     }
 
-    //const hoverText = x.map(xi => y.map(yi => `ts: 1<br>hz: 1<br>`));
-    //const hoverText = `ts: 1<br>hz: 1<br>`;
-    //const hoverText = x.map((xi, i) => `Total Requests: ${xi}<br>Time: ${y[i]}<br>`);
-    //const hoverText = x.forEach((xi, i) =>
-    //  `Total Requests: ${xi}<br>Time: ${y[i]}<br>`
-    //);
-    //var hoverText = x.map((xi, i) => y.map((yi, j) => `ts: ${xi}<br>hz: ${yi}<br>`));
-
-    const data = [
-      {
-        hoverinfo: 'text',
-        type: 'scattergl',
-        x: x,
-        y: y,
-        //hovertemplate: 
-        // '<b>Total Requests</b>: %{y:.2f}' +
-        //  '<br><b>Time</b>: %{x}<br>',
-        hoverlabel: {
-          align: "left"
-        },
-        text: this.hoverText(x,y)
-      }
-    ];
+    const data = this.get("plotlyData");
+    console.log(data.get(0));
+    data.get(0).x = x;
+    data.get(0).y = y;
+    data.get(0).text = this.hoverText(x,y);
 
     const latestTimestamp = timestamps.lastObject;
     const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
@@ -70,27 +93,10 @@ export default class PlotlyTimeline extends Component.extend({
     const minTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() - 1);
     const maxTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() + 1);
 
-    const layout = {
-      dragmode: 'pan', 
-      yaxis: { 
-        fixedrange: true
-      },
-      xaxis: {
-        type: 'date',
-        range: [minTimestamp,maxTimestamp]
-      },
-      margin: {
-        b: 20,
-        t: 20,
-        pad: 4
-      }
-    };
+    const layout = this.get("plotlyLayout");
+    layout.xaxis.range = [minTimestamp,maxTimestamp];
 
-    const options = {
-      displayModeBar: false,
-      scrollZoom: true,
-      responsive: true 
-    };
+    const options = this.get("plotlyOptions");
 
     Plotly.newPlot(
       'plotlyDiv',
@@ -116,39 +122,44 @@ export default class PlotlyTimeline extends Component.extend({
     for(const timestamp of timestamps) {
       x.push(new Date(timestamp.get('timestamp')));
       y.push(timestamp.get('totalRequests'));
-    }
+    }    
+
+    const data = this.get("plotlyData");
+    console.log(data.get(0));
+    data.get(0).x = x;
+    data.get(0).y = y;
+    data.get(0).text = this.hoverText(x,y);
 
     const latestTimestamp = timestamps.lastObject;
-    const latestTimestampValue = new Date(latestTimestamp.get("timestamp"));
+    const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
 
     const minTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() - 1);
     const maxTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() + 1);
 
-    const minuteView = {
-      xaxis: {
-        type: 'date',
-        range: [minTimestamp,maxTimestamp]
-      }
-    };    
+    const layout = this.get("plotlyLayout");
+    layout.xaxis.range = [minTimestamp,maxTimestamp];
 
-    Plotly.relayout('plotlyDiv', minuteView);
+    const options = this.get("plotlyOptions");
 
-    const data = {
-      type: 'scattergl',
-      x: [x],
-      y: [y],
-      hoverlabel: {
-        align: "left"
-      },
-      text: this.hoverText(x,y)
-    };
-
-    Plotly.update(
+    Plotly.react(
       'plotlyDiv',
-      data
+      data, 
+      layout,
+      options
     );
 
+    if(!this.get("oldMinuteView")) {
+      console.log("test");
+      const minuteView = {
+        xaxis: {
+          type: 'date',
+          range: [minTimestamp,maxTimestamp]
+        }        
+      };
+      this.set("oldMinuteView", minuteView);
+    }   
 
+    //Plotly.relayout('plotlyDiv', this.get("oldMinuteView"));
   };
   
 };
