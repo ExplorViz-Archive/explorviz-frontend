@@ -19,6 +19,7 @@ export default class VisualizationController extends Controller.extend(AlertifyH
   landscapeListener: service("landscape-listener"),
   additionalData: service("additional-data"),
   timestampRepo: service("repos/timestamp-repository"),
+  reloadHandler: service("reload-handler"),
 
   state: null,
 
@@ -41,6 +42,10 @@ export default class VisualizationController extends Controller.extend(AlertifyH
 
     toggleTimeline() {
       this.get('renderingService').toggleTimeline();
+    },
+
+    timelineClicked(timestampInMilliseconds) {
+      this.get('reloadHandler').loadLandscapeById(timestampInMilliseconds);
     }
     
   },

@@ -19,6 +19,10 @@ export default class PlotlyTimeline extends Component.extend({
   // BEGIN Ember Div Events
   mouseEnter() {
     const plotlyDiv = document.getElementById("plotlyDiv");
+
+    // if user hovers over plotly, save his 
+    // sliding window, so that updating the 
+    // plot won't modify his current viewport
     if(plotlyDiv && plotlyDiv.layout) {
       this.set("userSlidingWindow", plotlyDiv.layout);
     }
@@ -37,27 +41,35 @@ export default class PlotlyTimeline extends Component.extend({
       this.extendPlotlyTimelineChart(this.get("timestamps"));
     } else {
       this.setupPlotlyTimelineChart(this.get("timestamps"));
-      this.setupPlotlyCustomCSS();
+      this.setupPlotlyListenerCSS();
     }
   };
 
-  setupPlotlyCustomCSS() {
+  setupPlotlyListenerCSS() {
     const plotlyDiv = document.getElementById("plotlyDiv");
     const dragLayer = document.getElementsByClassName('nsewdrag')[0];
 
-    // BEGIN show cursor when hovering data point
-    if(plotlyDiv && plotlyDiv.layout && dragLayer) {
+    if(plotlyDiv && plotlyDiv.layout) {
 
-      plotlyDiv.on('plotly_hover', function(){
-        dragLayer.style.cursor = 'pointer'
-      });
-      
-      plotlyDiv.on('plotly_unhover', function(){
-        dragLayer.style.cursor = ''
+      const self = this;
+
+      plotlyDiv.on('plotly_click', function(event){
+        const clickedTimestamp = new Date(event.points[0].x);
+        // closure action
+        self.clicked(clickedTimestamp.getTime());
       });
 
+      // Show cursor when hovering data point
+      if(dragLayer) {
+        plotlyDiv.on('plotly_hover', function(){
+          dragLayer.style.cursor = 'pointer'
+        });
+        
+        plotlyDiv.on('plotly_unhover', function(){
+          dragLayer.style.cursor = ''
+        });
+      }
     }
-    // END show cursor when hovering data point
 
   };
 
@@ -148,11 +160,25 @@ export default class PlotlyTimeline extends Component.extend({
     return {
       dragmode: 'pan', 
       yaxis: { 
-        fixedrange: true
+        fixedrange: true,
+        title: {
+          text: 'Requests',
+          font: {
+            size: 16,
+            color: '#7f7f7f'
+          }
+        }
       },
       xaxis: {
         type: 'date',
         range: [minRange,maxRange],
+        title: {
+          text: 'Time',
+          font: {
+            size: 16,
+            color: '#7f7f7f'
+          }
+        }
       },
       margin: {
         b: 20,
@@ -181,7 +207,7 @@ export default class PlotlyTimeline extends Component.extend({
     return {
       displayModeBar: false,
       scrollZoom: true,
-      responsive: true 
+      responsive: true
     };
   };
 
