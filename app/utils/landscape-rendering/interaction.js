@@ -246,6 +246,7 @@ export default Object.extend(Evented, AlertifyHandler, {
 
       emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
+      this.trigger('doubleClick', emberModel);
 
       if(emberModelName === "application"){
 
@@ -275,8 +276,6 @@ export default Object.extend(Evented, AlertifyHandler, {
       }
 
     }
-
-    this.trigger('doubleClick', emberModel);
 
   },
 

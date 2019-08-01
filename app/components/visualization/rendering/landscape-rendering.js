@@ -115,7 +115,7 @@ export default RenderingCore.extend(AlertifyHandler, {
     this._super(...arguments);
 
     this.debug("cleanup landscape rendering");
-
+    
     this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
     this.set('labeler.textCache', []);
