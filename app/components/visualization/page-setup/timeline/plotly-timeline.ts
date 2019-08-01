@@ -37,11 +37,25 @@ export default class PlotlyTimeline extends Component.extend({
       this.extendPlotlyTimelineChart(this.get("timestamps"));
     } else {
       this.setupPlotlyTimelineChart(this.get("timestamps"));
+      this.setupPlotlyCustomCSS();
     }
   };
 
-  hoverText(x : Array<Date> ,y : Array<number>) {
-    return x.map((xi, i) => `<b>Time</b>: ${xi}<br><b>Total Requests</b>: ${y[i]}<br>`);
+  setupPlotlyCustomCSS() {
+    const plotlyDiv = document.getElementById("plotlyDiv");
+
+    const dragLayer = document.getElementsByClassName('nsewdrag')[0];
+
+    if(plotlyDiv && plotlyDiv.layout) {
+      plotlyDiv.on('plotly_hover', function(){
+        dragLayer.style.cursor = 'pointer'
+      });
+      
+      plotlyDiv.on('plotly_unhover', function(){
+        dragLayer.style.cursor = ''
+      });
+    }
+
   };
 
   setupPlotlyTimelineChart(timestamps : Array<Timestamp>) {
@@ -106,6 +120,10 @@ export default class PlotlyTimeline extends Component.extend({
   };
 
   // BEGIN Helper functions
+
+  hoverText(x : Array<Date> ,y : Array<number>) {
+    return x.map((xi, i) => `<b>Time</b>: ${xi}<br><b>Total Requests</b>: ${y[i]}<br>`);
+  };
 
   getSlidingWindowInterval(t : Date, lowerBound : number, upperBound : number) : {"min" : number, "max" : number} {
     const minTimestamp = t.setMinutes(t.getMinutes() - lowerBound);
