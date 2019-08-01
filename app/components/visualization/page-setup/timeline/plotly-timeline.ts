@@ -50,8 +50,8 @@ export default class PlotlyTimeline extends Component.extend({
       return;
     }
 
-    var x : Array<Date> = [];
-    var y : Array<number> = [];
+    const x : Array<Date> = [];
+    const y : Array<number> = [];
 
     for(const timestamp of timestamps) {
       x.push(new Date(timestamp.get('timestamp')));
@@ -82,8 +82,8 @@ export default class PlotlyTimeline extends Component.extend({
       return;
     }
 
-    var x : Array<Date> = [];
-    var y : Array<number> = [];
+    const x : Array<Date> = [];
+    const y : Array<number> = [];
 
     for(const timestamp of timestamps) {
       x.push(new Date(timestamp.get('timestamp')));
