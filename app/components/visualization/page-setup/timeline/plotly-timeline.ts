@@ -11,16 +11,21 @@ export default class PlotlyTimeline extends Component.extend({
 
   initDone = false;
 
-  oldSlidingWindowObject = null;
-  stopUpdatingSlidingWindow = false;
+  slidingWindowLowerBound = 2;
+  slidingWindowUpperBound = 2;
+
+  userSlidingWindow = null;
 
   // BEGIN Ember Div Events
   mouseEnter() {
-    this.set("stopUpdatingSlidingWindow", true);
+    const plotlyDiv = document.getElementById("plotlyDiv");
+    if(plotlyDiv && plotlyDiv.layout) {
+      this.set("userSlidingWindow", plotlyDiv.layout);
+    }
   }
 
   mouseLeave() {
-    this.set("stopUpdatingSlidingWindow", false);
+    this.set("userSlidingWindow", null);
   }
   // END Ember Div Events
 
@@ -56,7 +61,7 @@ export default class PlotlyTimeline extends Component.extend({
     const latestTimestamp = timestamps.lastObject;
     const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
 
-    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, 1, 1);
+    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, this.get("slidingWindowLowerBound"), this.get("slidingWindowUpperBound"));
     const layout = this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
 
     Plotly.newPlot(
@@ -88,13 +93,9 @@ export default class PlotlyTimeline extends Component.extend({
     const latestTimestamp = timestamps.lastObject;
     const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
 
-    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, 1, 1);
+    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, this.get("slidingWindowLowerBound"), this.get("slidingWindowUpperBound"));
 
-    if(!this.get("stopUpdatingSlidingWindow")) {
-      this.set("oldSlidingWindowObject", this.getPlotlySlidingWindowUpdateObject(windowInterval.min, windowInterval.max));
-    }
-
-    const layout = this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);    
+    const layout = this.get("userSlidingWindow") ? this.get("userSlidingWindow") : this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);   
 
     Plotly.react(
       'plotlyDiv',
@@ -102,13 +103,6 @@ export default class PlotlyTimeline extends Component.extend({
       layout,
       this.getPlotlyOptionsObject()
     );
-
-    // If mouse is on timeline, do not update the sliding window
-    // Data is still extended
-    if(this.get("stopUpdatingSlidingWindow")) {
-      Plotly.relayout('plotlyDiv', this.get("oldSlidingWindowObject")); 
-    }
-
   };
 
   // BEGIN Helper functions
@@ -137,7 +131,7 @@ export default class PlotlyTimeline extends Component.extend({
       },
       xaxis: {
         type: 'date',
-        range: [minRange,maxRange]
+        range: [minRange,maxRange],
       },
       margin: {
         b: 20,
