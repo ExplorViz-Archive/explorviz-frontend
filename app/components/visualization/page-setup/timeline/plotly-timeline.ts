@@ -11,51 +11,11 @@ export default class PlotlyTimeline extends Component.extend({
 
   initDone = false;
 
-  oldMinuteView = null;
+  oldSlidingWindowObject = null;
   stopUpdatingSlidingWindow = false;
-
-  // BEGIN Plotly parameter (must be updated at runtime)
-
-  plotlyData = [
-    {
-      hoverinfo: 'text',
-      type: 'scattergl',
-      x: 1, // must be updated
-      y: 1, // must be updated
-      hoverlabel: {
-        align: "left"
-      },
-      text: this.hoverText([new Date()],[1]) // must be updated
-    }
-  ];
-
-  plotlyLayout = {
-    dragmode: 'pan', 
-    yaxis: { 
-      fixedrange: true
-    },
-    xaxis: {
-      type: 'date',
-      range: [1,2] // must be updated
-    },
-    margin: {
-      b: 20,
-      t: 20,
-      pad: 4
-    }
-  };
-
-  plotlyOptions = {
-    displayModeBar: false,
-    scrollZoom: true,
-    responsive: true 
-  };
-
-  // END Plotly Parameter
 
   // BEGIN Ember Div Events
   mouseEnter() {
-    console.log("set");
     this.set("stopUpdatingSlidingWindow", true);
   }
 
@@ -93,27 +53,17 @@ export default class PlotlyTimeline extends Component.extend({
       y.push(timestamp.get('totalRequests'));
     }
 
-    const data = this.get("plotlyData");
-    data.get(0).x = x;
-    data.get(0).y = y;
-    data.get(0).text = this.hoverText(x,y);
-
     const latestTimestamp = timestamps.lastObject;
     const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
 
-    const minTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() - 1);
-    const maxTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() + 1);
-
-    const layout = this.get("plotlyLayout");
-    layout.xaxis.range = [minTimestamp,maxTimestamp];
-
-    const options = this.get("plotlyOptions");
+    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, 1, 1);
+    const layout = this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
 
     Plotly.newPlot(
       'plotlyDiv',
-      data, 
+      this.getPlotlyDataObject(x,y), 
       layout,
-      options
+      this.getPlotlyOptionsObject()
     );
 
     this.initDone = true;
@@ -135,46 +85,91 @@ export default class PlotlyTimeline extends Component.extend({
       y.push(timestamp.get('totalRequests'));
     }    
 
-    const data = this.get("plotlyData");
-    data.get(0).x = x;
-    data.get(0).y = y;
-    data.get(0).text = this.hoverText(x,y);
-
     const latestTimestamp = timestamps.lastObject;
     const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
 
-    const minTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() - 1);
-    const maxTimestamp = latestTimestampValue.setMinutes(latestTimestampValue.getMinutes() + 1);
+    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, 1, 1);
 
-    const minuteView = {
+    if(!this.get("stopUpdatingSlidingWindow")) {
+      this.set("oldSlidingWindowObject", this.getPlotlySlidingWindowUpdateObject(windowInterval.min, windowInterval.max));
+    }
+
+    const layout = this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);    
+
+    Plotly.react(
+      'plotlyDiv',
+      this.getPlotlyDataObject(x,y),
+      layout,
+      this.getPlotlyOptionsObject()
+    );
+
+    // If mouse is on timeline, do not update the sliding window
+    // Data is still extended
+    if(this.get("stopUpdatingSlidingWindow")) {
+      Plotly.relayout('plotlyDiv', this.get("oldSlidingWindowObject")); 
+    }
+
+  };
+
+  // BEGIN Helper functions
+
+  getSlidingWindowInterval(t : Date, lowerBound : number, upperBound : number) : {"min" : number, "max" : number} {
+    const minTimestamp = t.setMinutes(t.getMinutes() - lowerBound);
+    const maxTimestamp = t.setMinutes(t.getMinutes() + upperBound);
+
+    return {"min" : minTimestamp, "max": maxTimestamp};
+  };
+
+  getPlotlySlidingWindowUpdateObject(minTimestamp : number, maxTimestamp : number) : {xaxis : {type: 'date', range: number[]} } {
+    return {
       xaxis: {
         type: 'date',
         range: [minTimestamp,maxTimestamp]
       }        
     };
-    if(!this.get("oldMinuteView")) {
-      this.set("oldMinuteView", minuteView);
-    }
-
-    const layout = this.get("plotlyLayout");
-    layout.xaxis.range = [minTimestamp,maxTimestamp];
-
-    const options = this.get("plotlyOptions");
-
-    // If mouse is on timeline, do not update the sliding window
-    // Data is still extended
-    if(this.get("stopUpdatingSlidingWindow")) {      
-      console.log("relayout");
-    }
-
-    Plotly.react(
-      'plotlyDiv',
-      data, 
-      layout,
-      options
-    );
-
-    Plotly.relayout('plotlyDiv', this.get("oldMinuteView")); 
   };
-  
+
+  getPlotlyLayoutObject(minRange:number, maxRange:number) : {} {
+    return {
+      dragmode: 'pan', 
+      yaxis: { 
+        fixedrange: true
+      },
+      xaxis: {
+        type: 'date',
+        range: [minRange,maxRange]
+      },
+      margin: {
+        b: 20,
+        t: 20,
+        pad: 4
+      }
+    };
+  };
+
+  getPlotlyDataObject(dates : Date[], requests : number[]) : [{}] {
+    return [
+      {
+        hoverinfo: 'text',
+        type: 'scattergl',
+        x: dates,
+        y: requests, 
+        hoverlabel: {
+          align: "left"
+        },
+        text: this.hoverText(dates, requests) 
+      }
+    ];
+  };
+
+  getPlotlyOptionsObject() : {} {
+    return {
+      displayModeBar: false,
+      scrollZoom: true,
+      responsive: true 
+    };
+  };
+
+  // END Helper functions
+
 };
