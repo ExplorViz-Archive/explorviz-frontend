@@ -46,7 +46,7 @@ export default class PlotlyTimeline extends Component.extend({
     const dragLayer = document.getElementsByClassName('nsewdrag')[0];
 
     // BEGIN show cursor when hovering data point
-    if(plotlyDiv && plotlyDiv.layout) {
+    if(plotlyDiv && plotlyDiv.layout && dragLayer) {
 
       plotlyDiv.on('plotly_hover', function(){
         dragLayer.style.cursor = 'pointer'
@@ -55,7 +55,7 @@ export default class PlotlyTimeline extends Component.extend({
       plotlyDiv.on('plotly_unhover', function(){
         dragLayer.style.cursor = ''
       });
-      
+
     }
     // END show cursor when hovering data point
 
