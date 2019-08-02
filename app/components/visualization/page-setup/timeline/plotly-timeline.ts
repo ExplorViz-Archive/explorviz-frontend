@@ -63,6 +63,7 @@ export default class PlotlyTimeline extends Component.extend({
       // singe click
       plotlyDiv.on('plotly_click', function(event : any){
         const clickedTimestamp = new Date(event.points[0].x);
+
         // closure action
         self.clicked(clickedTimestamp.getTime());
       });
@@ -77,16 +78,24 @@ export default class PlotlyTimeline extends Component.extend({
 
       // Show cursor when hovering data point
       if(dragLayer) {
-        plotlyDiv.on('plotly_hover', function(){
+        plotlyDiv.on('plotly_hover', function(event : any){
           dragLayer.style.cursor = 'pointer'
+
+          const pointIndex = event.points[0].pointIndex;
+          const update = self.getColorUpdateObjectForPointIndex(pointIndex);
+
+          Plotly.restyle('plotlyDiv', update, [0]);
         });
         
         plotlyDiv.on('plotly_unhover', function(){
           dragLayer.style.cursor = ''
+
+          const update = self.getColorResetObject();
+          //Plotly.restyle('plotlyDiv', update);
+          Plotly.restyle('plotlyDiv', 'marker.color', ['red'], [0]);
         });
       }
-    }
-
+    }    
   };
 
   // BEGIN Plot Logic
@@ -245,6 +254,18 @@ export default class PlotlyTimeline extends Component.extend({
       doubleClick: false
     };
   };
+
+  getColorUpdateObjectForPointIndex(pointIndex : number) {
+    const markerIndex = `marker.color[${pointIndex}]`;
+    const update : any = {};
+    update[markerIndex] = "red";
+
+    return update;
+  }
+
+  getColorResetObject() {
+    return { "marker.color" : "black" };
+  }
 
   // END Helper functions
 
