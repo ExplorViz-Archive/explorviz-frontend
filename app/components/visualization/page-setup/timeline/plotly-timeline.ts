@@ -2,6 +2,7 @@ import Component from '@ember/component';
 import Plotly from 'plotly.js-dist';
 import debugLogger from 'ember-debug-logger';
 import Timestamp from 'explorviz-frontend/models/timestamp';
+import { get, set } from '@ember/object';
 
 export default class PlotlyTimeline extends Component.extend({
   // anything which *must* be merged to prototype here
@@ -18,18 +19,18 @@ export default class PlotlyTimeline extends Component.extend({
 
   // BEGIN Ember Div Events
   mouseEnter() {
-    const plotlyDiv = document.getElementById("plotlyDiv");
+    const plotlyDiv : any = document.getElementById("plotlyDiv");
 
     // if user hovers over plotly, save his 
     // sliding window, so that updating the 
     // plot won't modify his current viewport
     if(plotlyDiv && plotlyDiv.layout) {
-      this.set("userSlidingWindow", plotlyDiv.layout);
+      set(this, "userSlidingWindow", plotlyDiv.layout);
     }
   }
 
   mouseLeave() {
-    this.set("userSlidingWindow", null);
+    set(this, "userSlidingWindow", null);
   }
   // END Ember Div Events
 
@@ -38,22 +39,22 @@ export default class PlotlyTimeline extends Component.extend({
     this._super(...arguments);
 
     if(this.initDone) {
-      this.extendPlotlyTimelineChart(this.get("timestamps"));
+      this.extendPlotlyTimelineChart(get(this, "timestamps"));
     } else {
-      this.setupPlotlyTimelineChart(this.get("timestamps"));
+      this.setupPlotlyTimelineChart(get(this, "timestamps"));
       this.setupPlotlyListenerCSS();
     }
   };
 
   setupPlotlyListenerCSS() {
-    const plotlyDiv = document.getElementById("plotlyDiv");
-    const dragLayer = document.getElementsByClassName('nsewdrag')[0];
+    const plotlyDiv : any = document.getElementById("plotlyDiv");
+    const dragLayer : any = document.getElementsByClassName('nsewdrag')[0];
 
     if(plotlyDiv && plotlyDiv.layout) {
 
-      const self = this;
+      const self : any = this;
 
-      plotlyDiv.on('plotly_click', function(event){
+      plotlyDiv.on('plotly_click', function(event : any){
         const clickedTimestamp = new Date(event.points[0].x);
         // closure action
         self.clicked(clickedTimestamp.getTime());
@@ -87,10 +88,10 @@ export default class PlotlyTimeline extends Component.extend({
       y.push(timestamp.get('totalRequests'));
     }
 
-    const latestTimestamp = timestamps.lastObject;
-    const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
+    const latestTimestamp : any = timestamps.lastObject;
+    const latestTimestampValue = new Date(get(latestTimestamp, 'timestamp'));
 
-    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, this.get("slidingWindowLowerBoundInMinutes"), this.get("slidingWindowUpperBoundInMinutes"));
+    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, get(this, "slidingWindowLowerBoundInMinutes"), get(this, "slidingWindowUpperBoundInMinutes"));
     const layout = this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
 
     Plotly.newPlot(
@@ -115,16 +116,16 @@ export default class PlotlyTimeline extends Component.extend({
     const y : Array<number> = [];
 
     for(const timestamp of timestamps) {
-      x.push(new Date(timestamp.get('timestamp')));
-      y.push(timestamp.get('totalRequests'));
+      x.push(new Date(get(timestamp, 'timestamp')));
+      y.push(get(timestamp, 'totalRequests'));
     }    
 
-    const latestTimestamp = timestamps.lastObject;
-    const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
+    const latestTimestamp : any = timestamps.lastObject;
+    const latestTimestampValue = new Date(get(latestTimestamp, 'timestamp'));
 
-    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, this.get("slidingWindowLowerBoundInMinutes"), this.get("slidingWindowUpperBoundInMinutes"));
+    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, get(this, "slidingWindowLowerBoundInMinutes"), get(this, "slidingWindowUpperBoundInMinutes"));
 
-    const layout = this.get("userSlidingWindow") ? this.get("userSlidingWindow") : this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);   
+    const layout = get(this, "userSlidingWindow") ? get(this, "userSlidingWindow") : this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);   
 
     Plotly.react(
       'plotlyDiv',
