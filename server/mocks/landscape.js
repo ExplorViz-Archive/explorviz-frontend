@@ -20,6 +20,10 @@ module.exports = function (app) {
     res.send(landscapeObject);
   });
 
+  landscapeRouter.get('/', function (req, res) {
+    res.send(landscapeObject);
+  });
+
   landscapeRouter.post('/', function (req, res) {
     res.status(201).end();
   });
