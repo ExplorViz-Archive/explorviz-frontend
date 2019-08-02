@@ -15,6 +15,7 @@ export default class PlotlyTimeline extends Component.extend({
   slidingWindowLowerBoundInMinutes = 4;
   slidingWindowUpperBoundInMinutes = 4;
 
+  oldPlotlySlidingWindow = {};
   userSlidingWindow = null;
 
   timestamps : Timestamp[] = [];
@@ -37,6 +38,7 @@ export default class PlotlyTimeline extends Component.extend({
   // END Ember Div Events
 
 
+  // @Override
   didRender() {
     this._super(...arguments);
 
@@ -44,11 +46,13 @@ export default class PlotlyTimeline extends Component.extend({
       this.extendPlotlyTimelineChart(get(this, "timestamps"));
     } else {
       this.setupPlotlyTimelineChart(get(this, "timestamps"));
-      this.setupPlotlyListenerCSS();
+      if(get(this, "initDone")) {
+        this.setupPlotlyListener();
+      }      
     }
   };
 
-  setupPlotlyListenerCSS() {
+  setupPlotlyListener() {
     const plotlyDiv : any = document.getElementById("plotlyDiv");
     const dragLayer : any = document.getElementsByClassName('nsewdrag')[0];
 
@@ -56,10 +60,19 @@ export default class PlotlyTimeline extends Component.extend({
 
       const self : any = this;
 
+      // singe click
       plotlyDiv.on('plotly_click', function(event : any){
         const clickedTimestamp = new Date(event.points[0].x);
         // closure action
         self.clicked(clickedTimestamp.getTime());
+      });
+
+      // double click
+      plotlyDiv.on('plotly_doubleclick', function() {
+        const min = get(self, "oldPlotlySlidingWindow.min");
+        const max = get(self, "oldPlotlySlidingWindow.max");
+        const update = self.getPlotlySlidingWindowUpdateObject(min, max);
+        Plotly.relayout('plotlyDiv', update);
       });
 
       // Show cursor when hovering data point
@@ -75,6 +88,8 @@ export default class PlotlyTimeline extends Component.extend({
     }
 
   };
+
+  // BEGIN Plot Logic
 
   setupPlotlyTimelineChart(timestamps : Timestamp[]) {
 
@@ -94,8 +109,10 @@ export default class PlotlyTimeline extends Component.extend({
     const latestTimestampValue = new Date(get(latestTimestamp, 'timestamp'));
 
     const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, get(this, "slidingWindowLowerBoundInMinutes"), get(this, "slidingWindowUpperBoundInMinutes"));
-    
+
     const layout = this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
+
+    set(this, "oldPlotlySlidingWindow", windowInterval)
 
     Plotly.newPlot(
       'plotlyDiv',
@@ -126,9 +143,11 @@ export default class PlotlyTimeline extends Component.extend({
     const latestTimestamp : any = timestamps.lastObject;
     const latestTimestampValue = new Date(get(latestTimestamp, 'timestamp'));
 
-    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, get(this, "slidingWindowLowerBoundInMinutes"), get(this, "slidingWindowUpperBoundInMinutes"));
+    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, get(this, "slidingWindowLowerBoundInMinutes"), get(this, "slidingWindowUpperBoundInMinutes"));    
 
     const layout = get(this, "userSlidingWindow") ? get(this, "userSlidingWindow") : this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
+
+    set(this, "oldPlotlySlidingWindow", windowInterval);
 
     Plotly.react(
       'plotlyDiv',
@@ -138,7 +157,25 @@ export default class PlotlyTimeline extends Component.extend({
     );
   };
 
+  // END Plot Logic
+
   // BEGIN Helper functions
+
+  getPlotlySlidingWindowUpdateObject(minTimestamp : number, maxTimestamp : number) : {xaxis : {type: 'date', range: number[], title: {}} } {
+    return {
+      xaxis: {
+        type: 'date',
+        range: [minTimestamp,maxTimestamp],
+        title: {
+          text: 'Time',
+          font: {
+            size: 16,
+            color: '#7f7f7f'
+          }
+        }
+      }        
+    };
+  };
 
   hoverText(x : Date[] ,y : number[]) {
     return x.map((xi, i) => `<b>Time</b>: ${xi}<br><b>Total Requests</b>: ${y[i]}<br>`);
@@ -153,7 +190,9 @@ export default class PlotlyTimeline extends Component.extend({
 
   getPlotlyLayoutObject(minRange:number, maxRange:number) : {} {
     return {
-      dragmode: 'pan', 
+      dragmode: 'pan',
+      hovermode: 'closest',
+      hoverdistance: 10,
       yaxis: { 
         fixedrange: true,
         title: {
@@ -202,7 +241,8 @@ export default class PlotlyTimeline extends Component.extend({
     return {
       displayModeBar: false,
       scrollZoom: true,
-      responsive: true
+      responsive: true,
+      doubleClick: false
     };
   };
 
