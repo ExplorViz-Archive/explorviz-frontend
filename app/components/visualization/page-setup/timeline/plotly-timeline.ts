@@ -74,7 +74,7 @@ export default class PlotlyTimeline extends Component.extend({
         };
         colors[pn] = '#C54C82';
 
-        var update = {'marker':{color: colors, size:16}};
+        var update = {'marker':{color: colors, size:8}};
         Plotly.restyle('plotlyDiv', update, [tn]);
 
         // closure action
@@ -91,21 +91,12 @@ export default class PlotlyTimeline extends Component.extend({
 
       // Show cursor when hovering data point
       if(dragLayer) {
-        plotlyDiv.on('plotly_hover', function(event : any){
-          dragLayer.style.cursor = 'pointer'
-
-          const pointIndex = event.points[0].pointIndex;
-          const update = self.getColorUpdateObjectForPointIndex(pointIndex);
-
-          //Plotly.restyle('plotlyDiv', update, [0]);
+        plotlyDiv.on('plotly_hover', function(){
+          dragLayer.style.cursor = 'pointer';
         });
         
         plotlyDiv.on('plotly_unhover', function(){
-          dragLayer.style.cursor = ''
-
-          const update = self.getColorResetObject();
-          //Plotly.restyle('plotlyDiv', update);
-          //Plotly.restyle('plotlyDiv', 'marker.color', ['red'], [0]);
+          dragLayer.style.cursor = '';
         });
       }
     }    
@@ -246,14 +237,14 @@ export default class PlotlyTimeline extends Component.extend({
 
   getPlotlyDataObject(dates : Date[], requests : number[]) : [{}] {
 
-    const colors = Array(dates.length).fill("blue");
+    const colors = Array(dates.length).fill("lightblue");
 
     return [
       {
         hoverinfo: 'text',
         type: 'scattergl',
         mode:'lines+markers',
-        marker: {size:16, color: colors},
+        marker: {color: colors, size:8},
         x: dates,
         y: requests, 
         hoverlabel: {
