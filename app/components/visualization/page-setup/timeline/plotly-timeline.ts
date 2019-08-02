@@ -11,8 +11,8 @@ export default class PlotlyTimeline extends Component.extend({
 
   initDone = false;
 
-  slidingWindowLowerBound = 2;
-  slidingWindowUpperBound = 2;
+  slidingWindowLowerBoundInMinutes = 4;
+  slidingWindowUpperBoundInMinutes = 4;
 
   userSlidingWindow = null;
 
@@ -90,7 +90,7 @@ export default class PlotlyTimeline extends Component.extend({
     const latestTimestamp = timestamps.lastObject;
     const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
 
-    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, this.get("slidingWindowLowerBound"), this.get("slidingWindowUpperBound"));
+    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, this.get("slidingWindowLowerBoundInMinutes"), this.get("slidingWindowUpperBoundInMinutes"));
     const layout = this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
 
     Plotly.newPlot(
@@ -122,7 +122,7 @@ export default class PlotlyTimeline extends Component.extend({
     const latestTimestamp = timestamps.lastObject;
     const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
 
-    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, this.get("slidingWindowLowerBound"), this.get("slidingWindowUpperBound"));
+    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, this.get("slidingWindowLowerBoundInMinutes"), this.get("slidingWindowUpperBoundInMinutes"));
 
     const layout = this.get("userSlidingWindow") ? this.get("userSlidingWindow") : this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);   
 
