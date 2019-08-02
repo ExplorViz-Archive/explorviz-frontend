@@ -148,15 +148,6 @@ export default class PlotlyTimeline extends Component.extend({
     return {"min" : minTimestamp, "max": maxTimestamp};
   };
 
-  getPlotlySlidingWindowUpdateObject(minTimestamp : number, maxTimestamp : number) : {xaxis : {type: 'date', range: number[]} } {
-    return {
-      xaxis: {
-        type: 'date',
-        range: [minTimestamp,maxTimestamp]
-      }        
-    };
-  };
-
   getPlotlyLayoutObject(minRange:number, maxRange:number) : {} {
     return {
       dragmode: 'pan', 
