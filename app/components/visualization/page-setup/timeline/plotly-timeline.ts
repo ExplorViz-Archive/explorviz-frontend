@@ -17,6 +17,8 @@ export default class PlotlyTimeline extends Component.extend({
 
   userSlidingWindow = null;
 
+  timestamps : Timestamp[] = [];
+
   // BEGIN Ember Div Events
   mouseEnter() {
     const plotlyDiv : any = document.getElementById("plotlyDiv");
@@ -74,14 +76,14 @@ export default class PlotlyTimeline extends Component.extend({
 
   };
 
-  setupPlotlyTimelineChart(timestamps : Array<Timestamp>) {
+  setupPlotlyTimelineChart(timestamps : Timestamp[]) {
 
     if(!timestamps || timestamps.length == 0) {
       return;
     }
 
-    const x : Array<Date> = [];
-    const y : Array<number> = [];
+    const x : Date[] = [];
+    const y : number[] = [];
 
     for(const timestamp of timestamps) {
       x.push(new Date(timestamp.get('timestamp')));
@@ -92,6 +94,7 @@ export default class PlotlyTimeline extends Component.extend({
     const latestTimestampValue = new Date(get(latestTimestamp, 'timestamp'));
 
     const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, get(this, "slidingWindowLowerBoundInMinutes"), get(this, "slidingWindowUpperBoundInMinutes"));
+    
     const layout = this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
 
     Plotly.newPlot(
@@ -106,14 +109,14 @@ export default class PlotlyTimeline extends Component.extend({
   };
 
 
-  extendPlotlyTimelineChart(timestamps : Array<Timestamp>) {
+  extendPlotlyTimelineChart(timestamps : Timestamp[]) {
 
     if(!timestamps || timestamps.length == 0) {
       return;
     }
 
-    const x : Array<Date> = [];
-    const y : Array<number> = [];
+    const x : Date[] = [];
+    const y : number[] = [];
 
     for(const timestamp of timestamps) {
       x.push(new Date(get(timestamp, 'timestamp')));
@@ -125,7 +128,7 @@ export default class PlotlyTimeline extends Component.extend({
 
     const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, get(this, "slidingWindowLowerBoundInMinutes"), get(this, "slidingWindowUpperBoundInMinutes"));
 
-    const layout = get(this, "userSlidingWindow") ? get(this, "userSlidingWindow") : this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);   
+    const layout = get(this, "userSlidingWindow") ? get(this, "userSlidingWindow") : this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
 
     Plotly.react(
       'plotlyDiv',
@@ -137,7 +140,7 @@ export default class PlotlyTimeline extends Component.extend({
 
   // BEGIN Helper functions
 
-  hoverText(x : Array<Date> ,y : Array<number>) {
+  hoverText(x : Date[] ,y : number[]) {
     return x.map((xi, i) => `<b>Time</b>: ${xi}<br><b>Total Requests</b>: ${y[i]}<br>`);
   };
 
@@ -173,7 +176,7 @@ export default class PlotlyTimeline extends Component.extend({
         }
       },
       margin: {
-        b: 20,
+        b: 40,
         t: 20,
         pad: 4
       }
