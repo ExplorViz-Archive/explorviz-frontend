@@ -61,8 +61,21 @@ export default class PlotlyTimeline extends Component.extend({
       const self : any = this;
 
       // singe click
-      plotlyDiv.on('plotly_click', function(event : any){
-        const clickedTimestamp = new Date(event.points[0].x);
+      plotlyDiv.on('plotly_click', function(data : any){
+        const clickedTimestamp = new Date(data.points[0].x);
+
+        var pn='',
+            tn='',
+            colors=[];
+        for(var i=0; i < data.points.length; i++){
+          pn = data.points[i].pointNumber;
+          tn = data.points[i].curveNumber;
+          colors = data.points[i].data.marker.color;
+        };
+        colors[pn] = '#C54C82';
+
+        var update = {'marker':{color: colors, size:16}};
+        Plotly.restyle('plotlyDiv', update, [tn]);
 
         // closure action
         self.clicked(clickedTimestamp.getTime());
@@ -84,7 +97,7 @@ export default class PlotlyTimeline extends Component.extend({
           const pointIndex = event.points[0].pointIndex;
           const update = self.getColorUpdateObjectForPointIndex(pointIndex);
 
-          Plotly.restyle('plotlyDiv', update, [0]);
+          //Plotly.restyle('plotlyDiv', update, [0]);
         });
         
         plotlyDiv.on('plotly_unhover', function(){
@@ -92,7 +105,7 @@ export default class PlotlyTimeline extends Component.extend({
 
           const update = self.getColorResetObject();
           //Plotly.restyle('plotlyDiv', update);
-          Plotly.restyle('plotlyDiv', 'marker.color', ['red'], [0]);
+          //Plotly.restyle('plotlyDiv', 'marker.color', ['red'], [0]);
         });
       }
     }    
@@ -232,10 +245,15 @@ export default class PlotlyTimeline extends Component.extend({
   };
 
   getPlotlyDataObject(dates : Date[], requests : number[]) : [{}] {
+
+    const colors = Array(dates.length).fill("blue");
+
     return [
       {
         hoverinfo: 'text',
         type: 'scattergl',
+        mode:'lines+markers',
+        marker: {size:16, color: colors},
         x: dates,
         y: requests, 
         hoverlabel: {
