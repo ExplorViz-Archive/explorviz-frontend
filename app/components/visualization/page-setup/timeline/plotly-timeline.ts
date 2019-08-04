@@ -20,6 +20,8 @@ export default class PlotlyTimeline extends Component.extend({
 
   timestamps : Timestamp[] = [];
 
+  defaultMarkerColor = "#1f77b4";
+
   // BEGIN Ember Div Events
   mouseEnter() {
     const plotlyDiv : any = document.getElementById("plotlyDiv");
@@ -64,17 +66,23 @@ export default class PlotlyTimeline extends Component.extend({
       plotlyDiv.on('plotly_click', function(data : any){
         const clickedTimestamp = new Date(data.points[0].x);
 
-        var pn='',
-            tn='',
-            colors=[];
-        for(var i=0; i < data.points.length; i++){
-          pn = data.points[i].pointNumber;
-          tn = data.points[i].curveNumber;
-          colors = data.points[i].data.marker.color;
-        };
-        colors[pn] = '#C54C82';
+        // https://plot.ly/javascript/reference/#scatter-marker
 
-        var update = {'marker':{color: colors, size:8}};
+        const pn = data.points[0].pointNumber;
+        const tn = data.points[0].curveNumber;
+
+        const numberOfPoints = data.points[0].fullData.x.length;       
+
+        const colors = Array(numberOfPoints).fill(get(self, "defaultMarkerColor"));
+        colors[pn] = 'red';
+       
+        const sizes = Array(numberOfPoints).fill(8);
+        sizes[pn] = 12;
+
+        //const symbols = Array(numberOfPoints).fill("circle");
+        //symbols[pn] = "circle-open";
+
+        var update = {'marker':{color: colors, size: sizes}};
         Plotly.restyle('plotlyDiv', update, [tn]);
 
         // closure action
@@ -237,14 +245,15 @@ export default class PlotlyTimeline extends Component.extend({
 
   getPlotlyDataObject(dates : Date[], requests : number[]) : [{}] {
 
-    const colors = Array(dates.length).fill("lightblue");
+    const colors = Array(dates.length).fill(get(this, "defaultMarkerColor"));
 
     return [
       {
         hoverinfo: 'text',
         type: 'scattergl',
         mode:'lines+markers',
-        marker: {color: colors, size:8},
+        //fill: 'tozeroy',
+        marker: {color: colors, size: 8},
         x: dates,
         y: requests, 
         hoverlabel: {
