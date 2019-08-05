@@ -79,8 +79,7 @@
     "typescript": "^3.4.5",
     "yuidoc-bootstrap-theme": "^1.0.6",
     "yuidocjs": "^0.10.2"
-	},
-	
+  },
   "engines": {
     "node": ">= 10.15.0"
   },
