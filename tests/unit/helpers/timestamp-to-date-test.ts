@@ -5,22 +5,43 @@ import { module, test } from 'qunit';
 module('Unit | Helper | timestamp to date');
 
 test('timestamp to time', function (assert) {
-  let assertedResult = "15:32:18";
-  let result = timestampToDate([1549204338000, "time"]);
+  const timestamp = 1549204338000;
 
-  assert.equal(result, assertedResult);
+  const result = timestampToDate([timestamp, "time"]);
+  let expected : any = new Date(timestamp);
+
+  let hours = expected.getHours();
+  let minutes = "0" + expected.getMinutes();
+  let seconds = "0" + expected.getSeconds();   
+     
+  expected = hours + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
+
+  assert.equal(result, expected);
 });
 
-test('timestamp to toLocalString', function (assert) {
-  let assertedResult= "2/3/2019, 3:32:18 PM";
-  let result = timestampToDate([1549204338000, "localString"]);
-  
-  assert.equal(result, assertedResult);
+test('timestamp to localString', function (assert) {
+  const timestamp = 1549204338000;
+
+  const result = timestampToDate([timestamp, "localString"]);
+  const expected = new Date(timestamp).toLocaleString();
+
+  assert.equal(result, expected);
 });
 
 test('timestamp to String', function (assert) {
-  let assertedResult= "Sun Feb 03 2019 15:32:18 GMT+0100 (Central European Standard Time)";
-  let result = timestampToDate([1549204338000, ""]);
+  const timestamp = 1549204338000;
   
-  assert.equal(result, assertedResult);
+  const result = timestampToDate([timestamp, ""]);
+  const expected = new Date(timestamp).toString();
+
+  assert.equal(result, expected);
+});
+
+test('timestamp to default Date', function (assert) {
+  const timestamp = 1549204338000;
+  
+  const result = timestampToDate([timestamp, ""]);
+  const expected = new Date(timestamp);
+
+  assert.equal(result, expected);
 });
