@@ -24,9 +24,8 @@ module.exports = function (app) {
   const express = require('express');
   let userpreferenceRouter = express.Router();
 
-  userpreferenceRouter.get('/', function (req, res) {
-    // /userpreferences?uid=x
-    let { uid } = req.query;
+  userpreferenceRouter.get('/users/:id/settings/preferences', function (req, res) {
+    let uid = req.params.id;
 
     if(uid) {
       let preferences = [];
@@ -45,7 +44,7 @@ module.exports = function (app) {
     }
   });
 
-  userpreferenceRouter.delete('/:id', function (req, res) {
+  userpreferenceRouter.delete('/users/settings/preferences/:id', function (req, res) {
     let preferenceId = req.params.id;
 
     if(global.userPreferences.has(preferenceId)) {
@@ -56,7 +55,7 @@ module.exports = function (app) {
     }
   });
 
-  userpreferenceRouter.patch('/:prefId', function (req, res) {
+  userpreferenceRouter.patch('/users/settings/preferences/:prefId', function (req, res) {
     let preferenceId = req.params.prefId;
     const { value } = req.body.data.attributes;
 
@@ -71,7 +70,7 @@ module.exports = function (app) {
     }
   });
 
-  userpreferenceRouter.post('/', function (req, res) {
+  userpreferenceRouter.post('/users/settings/preferences', function (req, res) {
     let { userId, settingId, value } = req.body.data.attributes;
 
     let preferenceNew = global.createUserPreference(userId, settingId, value);
@@ -91,6 +90,6 @@ module.exports = function (app) {
   // this mock uncommenting the following line:
   //
   //app.use('/api/tokens', require('body-parser').json());
-  app.use('/api/v1/settings/preferences', require('body-parser').json({ type: 'application/vnd.api+json' }));
-  app.use('/api/v1/settings/preferences', userpreferenceRouter);
+  app.use('/api/v1', require('body-parser').json({ type: 'application/vnd.api+json' }));
+  app.use('/api/v1', userpreferenceRouter);
 };

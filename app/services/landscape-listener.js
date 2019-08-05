@@ -53,15 +53,16 @@ export default Service.extend(Evented, {
     this.set('es.onmessage', (event) => {
       const jsonLandscape = JSON.parse(event.data);
 
-      if (jsonLandscape && jsonLandscape.hasOwnProperty("data") &&
-        JSON.stringify(jsonLandscape) !== JSON.stringify(this.get('latestJsonLandscape'))) {
+      if (jsonLandscape && jsonLandscape.hasOwnProperty("data")) {
 
         // Pause active -> no landscape visualization update
         // Do avoid update of store to prevent inconsistencies between visualization and e.g. trace data
         if (this.get('pauseVisualizationReload')) {
-          this.debug("SSE: Updating visualization paused")
+          this.debug("SSE: Updating paused");
           return;
         }
+
+        this.debug("SSE: Updating.");
 
         this.get('store').unloadAll('tracestep');
         this.get('store').unloadAll('trace');
@@ -81,7 +82,14 @@ export default Service.extend(Evented, {
         this.set('landscapeRepo.latestLandscape', landscapeRecord);
         this.get('landscapeRepo').triggerLatestLandscapeUpdate();
 
-        this.set('timestampRepo.latestTimestamp', landscapeRecord.get('timestamp'));
+        const timestamp = landscapeRecord.get('timestamp');
+
+        this.set('timestampRepo.latestTimestamp', timestamp);
+
+        // this syntax will notify the template engine to redraw all components
+        // with a binding to this attribute
+        this.set('timestampRepo.timelineTimestamps', [...this.timestampRepo.timelineTimestamps, timestamp]);
+
         this.get('timestampRepo').triggerTimelineUpdate();
       }
     });

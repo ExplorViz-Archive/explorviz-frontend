@@ -1,6 +1,6 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service'; 
-import { computed, action } from '@ember/object';
+import { computed, action, get, set } from '@ember/object';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 /**
@@ -12,59 +12,64 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 * @module explorviz
 * @submodule visualization
 */
-export default class VisualizationController extends Controller.extend(AlertifyHandler, {
+export default class VisualizationController extends Controller.extend(AlertifyHandler) {
 
-  renderingService: service("rendering-service"),
-  landscapeRepo: service("repos/landscape-repository"),
-  landscapeListener: service("landscape-listener"),
-  additionalData: service("additional-data"),
-  timestampRepo: service("repos/timestamp-repository"),
+  @service("rendering-service") renderingService;
+  @service("repos/landscape-repository") landscapeRepo;
+  @service("landscape-listener") landscapeListener;
+  @service("additional-data") additionalData;
+  @service("repos/timestamp-repository") timestampRepo;
+  @service("reload-handler") reloadHandler;
 
-  state: null,
+  state = null;
 
-  type: 'landscape',
+  type = 'landscape';
 
-  showLandscape: computed('landscapeRepo.latestApplication', function() {
-    return !this.get('landscapeRepo.latestApplication');
-  }),
+  @computed('landscapeRepo.latestApplication')
+  get showLandscape() {
+    return !get(this, 'landscapeRepo.latestApplication');
+  }
 
+  @action
+  resize() {
+    get(this, 'renderingService').resizeCanvas();
+  }
 
-  actions: {
-    resetView() {
-      this.get('renderingService').reSetupScene();
-    },
+  @action
+  resetView() {
+    get(this, 'renderingService').reSetupScene();
+  }
 
-    openLandscapeView() {
-      this.set('landscapeRepo.latestApplication', null);
-      this.set('landscapeRepo.replayApplication', null);
-    },
+  @action
+  openLandscapeView() {
+    set(this, 'landscapeRepo.latestApplication', null);
+    set(this, 'landscapeRepo.replayApplication', null);
+  }
 
-    toggleTimeline() {
-      this.get('renderingService').toggleTimeline();
-    }
-    
-  },
+  @action
+  toggleTimeline() {
+    get(this, 'renderingService').toggleTimeline();
+  }
+
+  @action
+  timelineClicked(timestampInMillisecondsArray) {
+    get(this, 'reloadHandler').loadLandscapeById(timestampInMillisecondsArray[0]);
+  }
 
   showTimeline() {
-    this.set('renderingService.showTimeline', true);
-  },
+    set(this, 'renderingService.showTimeline', true);
+  }
 
   hideVersionbar(){
-    this.set('renderingService.showVersionbar', false);
-  },
+    set(this, 'renderingService.showVersionbar', false);
+  }
 
   initRendering() {
-    this.get('landscapeListener').initSSE();
-  },
+    get(this, 'landscapeListener').initSSE();
+  }
 
   // @Override
   cleanup() {
     this._super(...arguments);
-  }
-  
-}) {
-  @action
-  resize() {
-    this.get('renderingService').resizeCanvas();
   }
 }

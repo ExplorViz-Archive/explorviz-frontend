@@ -86,11 +86,11 @@ module.exports = function (environment) {
   // User specific environment, e.g. for usage in a virtual machine
 
   if (environment === 'akr') {
-    ENV.APP.API_ROOT = 'http://192.168.91.132:8080';
+    ENV.APP.API_ROOT = 'http://192.168.91.128:8080';
   }
 
   if (environment === 'akr-mocked') {
-    ENV.APP.API_ROOT = 'http://192.168.91.132:4200/api';
+    ENV.APP.API_ROOT = 'http://192.168.91.128:4200/api';
   }
 
   if (environment === 'czi') {

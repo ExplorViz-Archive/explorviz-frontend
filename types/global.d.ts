@@ -4,3 +4,5 @@ declare module 'explorviz-frontend/templates/*' {
   const tmpl: TemplateFactory;
   export default tmpl;
 }
+
+declare module 'plotly.js-dist';

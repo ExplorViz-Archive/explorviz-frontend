@@ -61,6 +61,8 @@ export default Component.extend(Evented, THREEPerformance, {
   appCondition: null,
   initImport: true,
 
+  listeners: null,
+
   init() {
     this._super(...arguments);
     this.set('appCondition', []);
@@ -159,15 +161,32 @@ export default Component.extend(Evented, THREEPerformance, {
     ////////////////////
 
     // Load font for labels and synchronously proceed with populating the scene
-    new THREE.FontLoader()
-      .load('three.js/fonts/roboto_mono_bold_typeface.json', function (font) {
+    new THREE.FontLoader().load(
+      // resource URL
+      '/three.js/fonts/roboto_mono_bold_typeface.json',
+
+      // onLoad callback
+      function ( font ) {
+
         if (self.isDestroyed)
           return;
 
         self.set('font', font);
+        self.debug("(THREE.js) font sucessfully loaded.");
         self.set('initDone', true);
         self.populateScene();
-      });
+      },
+
+      // onProgress callback
+      // function ( xhr ) {
+      //   self.debug("(THREE.js) font " + (xhr.loaded / xhr.total * 100) + "% loaded.");
+      // },
+
+      // onError callback
+      // function ( error ) {
+      //   self.debug("(THREE.js) Error when loading font!");
+      // }  
+    );
 
   },
 
@@ -197,20 +216,43 @@ export default Component.extend(Evented, THREEPerformance, {
 
 
   initListener() {
-    this.get('renderingService').on('reSetupScene', () => {
-      this.onReSetupScene();
-    });
+    this.set('listeners', new Set());
 
-    this.get('renderingService').on('resizeCanvas', () => {
-      this.updateCanvasSize();
-    });
+    this.get('listeners').add([
+      'renderingService',
+      'reSetupScene',
+      () => {
+        this.onReSetupScene();
+      }
+    ]);
 
-    this.get('renderingService').on('moveCameraTo', (emberModel) => {
-      this.onMoveCameraTo(emberModel);
-    });
+    this.get('listeners').add([
+      'renderingService',
+      'resizeCanvas',
+      () => {
+        this.updateCanvasSize();
+      }
+    ]);
 
-    this.get('landscapeRepo').on("updated", () => {
-      this.onUpdated();
+    this.get('listeners').add([
+      'renderingService',
+      'moveCameraTo',
+      (emberModel) => {
+        this.onMoveCameraTo(emberModel);
+      }
+    ]);
+
+    this.get('listeners').add([
+      'landscapeRepo',
+      'updated',
+      () => {
+        this.onUpdated();
+      }
+    ]);
+
+    // start subscriptions
+    this.get('listeners').forEach(([service, event, listenerFunction]) => {
+        this.get(service).on(event, listenerFunction);
     });
   },
 
@@ -403,8 +445,11 @@ export default Component.extend(Evented, THREEPerformance, {
 
     this.removePerformanceMeasurement();
 
-    this.get('renderingService').off('reSetupScene');
-    this.get('landscapeRepo').off('updated');
+    // unsubscribe from all services
+    this.get('listeners').forEach(([service, event, listenerFunction]) => {
+      this.get(service).off(event, listenerFunction);
+    });
+    this.set('listeners', null);
 
     this.get('highlighter').unhighlightAll();
     this.get('additionalData').emptyAndClose();

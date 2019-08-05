@@ -20,6 +20,10 @@ module.exports = function (app) {
     res.send(landscapeObject);
   });
 
+  landscapeRouter.get('/', function (req, res) {
+    res.send(landscapeObject);
+  });
+
   landscapeRouter.post('/', function (req, res) {
     res.status(201).end();
   });
@@ -58,9 +62,49 @@ module.exports = function (app) {
 
   function sendSSE() {
     setTimeout(function () {
-      sse.send(landscapeObject, "message");
+      const updatedLandscape = updateTimestampInLandscape(landscapeObject);
+      sse.send(updatedLandscape, "message");
       sendSSE();
     }, 10000);
+  }
+
+  function updateTimestampInLandscape(jsonLandscape) {
+    const timestampId = jsonLandscape["data"]["relationships"]["timestamp"]["data"]["id"];
+    
+    const includedArray = jsonLandscape["included"];
+
+    for(var elem of includedArray) {
+      if(elem["id"] == timestampId) {
+
+        const currentDate = Date.now();
+
+        elem["attributes"]["timestamp"] = currentDate;
+        elem["attributes"]["totalRequests"] = getRandomInt(1000000);
+
+        // update id of timestamp
+        findAndReplace(jsonLandscape, "id", timestampId, currentDate);
+        break;
+      }
+    }
+
+    return jsonLandscape;
+  }
+
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+
+  function findAndReplace(object, key, oldValue, replacevalue) {
+    for (var x in object) {
+      if (object.hasOwnProperty(x)) {
+        if (typeof object[x] == 'object') {
+          findAndReplace(object[x], key, oldValue, replacevalue);
+        }
+        if (x == key && object[x] == oldValue) { 
+          object[key] = replacevalue;
+        }
+      }
+    }
   }
 
   sendSSE();

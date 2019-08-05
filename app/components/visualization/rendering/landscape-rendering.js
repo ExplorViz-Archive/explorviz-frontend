@@ -43,6 +43,9 @@ export default RenderingCore.extend(AlertifyHandler, {
   openSymbol: null,
   closeSymbol: null,
 
+  // there's already a property 'listener' in superclass RenderingCore
+  listeners2: null,
+
   // @Override
   /**
    * Initialize listener functions, properties and utility objects
@@ -117,11 +120,17 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.set('labeler.textLabels', {});
     this.set('labeler.textCache', []);
 
-    this.get('renderingService').off('redrawScene');
-    this.get('interaction').off('clickedEntity');
-    this.get('interaction').off('doubleClickedEntity');
+    this.removeListeners();
 
     this.get('interaction').removeHandlers();
+  },
+
+  removeListeners() {
+    // unsubscribe from all services
+    this.get('listeners2').forEach(([service, event, listenerFunction]) => {
+      this.get(service).off(event, listenerFunction);
+    });
+    this.set('listeners2', null);
   },
 
 
@@ -673,8 +682,6 @@ export default RenderingCore.extend(AlertifyHandler, {
 
   initInteraction() {
 
-    const self = this;
-
     const canvas = this.get('canvas');
     const raycastObjects = this.get('scene').children;
     const camera = this.get('camera');
@@ -687,17 +694,36 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     // Set listeners
 
-    this.get('interaction').on('redrawScene', function () {
-      self.cleanAndUpdateScene();
-    });
+    this.set('listeners2', new Set());
 
-    this.get('interaction').on('showApplication', function (emberModel) {
-      self.set('landscapeRepo.latestApplication', emberModel);
-      self.set('landscapeRepo.replayApplication', emberModel);
-    });
+    this.get('listeners2').add([
+      'interaction',
+      'redrawScene',
+      () => {
+        this.cleanAndUpdateScene();
+      }
+    ]);
 
-    this.get('renderingService').on('redrawScene', function () {
-      self.cleanAndUpdateScene();
+    this.get('listeners2').add([
+      'interaction',
+      'showApplication',
+      (emberModel) => {
+        this.set('landscapeRepo.latestApplication', emberModel);
+        this.set('landscapeRepo.replayApplication', emberModel);
+      }
+    ]);
+
+    this.get('listeners2').add([
+      'renderingService',
+      'redrawScene',
+      () => {
+        this.cleanAndUpdateScene();
+      }
+    ]);
+
+    // start subscriptions
+    this.get('listeners2').forEach(([service, event, listenerFunction]) => {
+        this.get(service).on(event, listenerFunction);
     });
 
   },

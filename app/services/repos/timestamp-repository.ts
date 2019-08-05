@@ -16,6 +16,11 @@ export default class TimestampRepository extends Service.extend(Evented) {
   latestTimestamp:any = null;
   timelineTimestamps = [];
 
+  init() {
+    this._super(...arguments);
+    this.set('timelineTimestamps', []);
+  };
+
   /**
    * Triggers the 'updated' event in the timeline for updating the chart
    * @method triggerTimelineUpdate
