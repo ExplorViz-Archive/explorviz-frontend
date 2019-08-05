@@ -52,8 +52,8 @@ export default class VisualizationController extends Controller.extend(AlertifyH
   }
 
   @action
-  timelineClicked(timestampInMilliseconds) {
-    get(this, 'reloadHandler').loadLandscapeById(timestampInMilliseconds);
+  timelineClicked(timestampInMillisecondsArray) {
+    get(this, 'reloadHandler').loadLandscapeById(timestampInMillisecondsArray[0]);
   }
 
   showTimeline() {

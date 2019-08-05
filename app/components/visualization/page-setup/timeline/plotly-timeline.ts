@@ -5,22 +5,32 @@ import Timestamp from 'explorviz-frontend/models/timestamp';
 import { get, set } from '@ember/object';
 
 export default class PlotlyTimeline extends Component.extend({
-  // anything which *must* be merged to prototype here
 }) {
 
-  debug = debugLogger();
-
-  initDone = false;
-
-  slidingWindowLowerBoundInMinutes = 4;
-  slidingWindowUpperBoundInMinutes = 4;
-
-  oldPlotlySlidingWindow = {};
-  userSlidingWindow = null;
-
+  // BEGIN user-set variables
   timestamps : Timestamp[] = [];
 
   defaultMarkerColor = "#1f77b4";
+  defaultMarkerSize = 8;
+
+  highlightedMarkerColor = "red";  
+  highlightedMarkerSize = 12;
+
+  doubleSelection = false;
+
+  slidingWindowLowerBoundInMinutes = 4;
+  slidingWindowUpperBoundInMinutes = 4;
+  // END user-set variables
+
+  _debug = debugLogger();
+
+  _initDone = false;  
+
+  _oldPlotlySlidingWindow = {};
+  _userSlidingWindow = null;  
+
+  // variable used for output when clicked
+  _selectedTimestamps = [];
 
   // BEGIN Ember Div Events
   mouseEnter() {
@@ -30,12 +40,12 @@ export default class PlotlyTimeline extends Component.extend({
     // sliding window, so that updating the 
     // plot won't modify his current viewport
     if(plotlyDiv && plotlyDiv.layout) {
-      set(this, "userSlidingWindow", plotlyDiv.layout);
+      set(this, "_userSlidingWindow", plotlyDiv.layout);
     }
   }
 
   mouseLeave() {
-    set(this, "userSlidingWindow", null);
+    set(this, "_userSlidingWindow", null);
   }
   // END Ember Div Events
 
@@ -44,11 +54,11 @@ export default class PlotlyTimeline extends Component.extend({
   didRender() {
     this._super(...arguments);
 
-    if(this.initDone) {
+    if(this._initDone) {
       this.extendPlotlyTimelineChart(get(this, "timestamps"));
     } else {
       this.setupPlotlyTimelineChart(get(this, "timestamps"));
-      if(get(this, "initDone")) {
+      if(get(this, "_initDone")) {
         this.setupPlotlyListener();
       }      
     }
@@ -63,36 +73,57 @@ export default class PlotlyTimeline extends Component.extend({
       const self : any = this;
 
       // singe click
-      plotlyDiv.on('plotly_click', function(data : any){
-        const clickedTimestamp = new Date(data.points[0].x);
+      plotlyDiv.on('plotly_click', function(data : any){      
 
         // https://plot.ly/javascript/reference/#scatter-marker
 
         const pn = data.points[0].pointNumber;
+
+        const numberOfPoints = data.points[0].fullData.x.length;
+
+        let colors = data.points[0].fullData.marker.color;
+        let sizes = data.points[0].fullData.marker.size;        
+
+        // reset double selection
+        if(get(self, "doubleSelection")) {
+          if(get(self, "_selectedTimestamps").length == 2) {
+            set(self, "_selectedTimestamps", []);
+            colors = Array(numberOfPoints).fill(get(self, "defaultMarkerColor"));
+            sizes = Array(numberOfPoints).fill(get(self, "defaultMarkerSize"));
+          }
+        }
+
+        colors[pn] = get(self, "highlightedMarkerColor");
+        sizes[pn] = get(self, "highlightedMarkerSize");
+
+        // trace number, necessary for the restyle function
         const tn = data.points[0].curveNumber;
-
-        const numberOfPoints = data.points[0].fullData.x.length;       
-
-        const colors = Array(numberOfPoints).fill(get(self, "defaultMarkerColor"));
-        colors[pn] = 'red';
-       
-        const sizes = Array(numberOfPoints).fill(8);
-        sizes[pn] = 12;
-
-        //const symbols = Array(numberOfPoints).fill("circle");
-        //symbols[pn] = "circle-open";
 
         var update = {'marker':{color: colors, size: sizes}};
         Plotly.restyle('plotlyDiv', update, [tn]);
 
-        // closure action
-        self.clicked(clickedTimestamp.getTime());
+        const clickedTimestamp = new Date(data.points[0].x);
+        get(self, "_selectedTimestamps").push(clickedTimestamp.getTime());
+
+        if(get(self, "doubleSelection")) {
+
+          if(get(self, "_selectedTimestamps").length == 2) {
+            self.clicked(get(self, "_selectedTimestamps"));
+          }
+
+        } else {
+          // closure action
+          self.clicked(get(self, "_selectedTimestamps"));
+          set(self, "_selectedTimestamps", []);
+        }
+
+        
       });
 
       // double click
       plotlyDiv.on('plotly_doubleclick', function() {
-        const min = get(self, "oldPlotlySlidingWindow.min");
-        const max = get(self, "oldPlotlySlidingWindow.max");
+        const min = get(self, "_oldPlotlySlidingWindow.min");
+        const max = get(self, "_oldPlotlySlidingWindow.max");
         const update = self.getPlotlySlidingWindowUpdateObject(min, max);
         Plotly.relayout('plotlyDiv', update);
       });
@@ -133,7 +164,7 @@ export default class PlotlyTimeline extends Component.extend({
 
     const layout = this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
 
-    set(this, "oldPlotlySlidingWindow", windowInterval)
+    set(this, "_oldPlotlySlidingWindow", windowInterval)
 
     Plotly.newPlot(
       'plotlyDiv',
@@ -142,7 +173,7 @@ export default class PlotlyTimeline extends Component.extend({
       this.getPlotlyOptionsObject()
     );
 
-    this.initDone = true;
+    this._initDone = true;
 
   };
 
@@ -166,9 +197,9 @@ export default class PlotlyTimeline extends Component.extend({
 
     const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, get(this, "slidingWindowLowerBoundInMinutes"), get(this, "slidingWindowUpperBoundInMinutes"));    
 
-    const layout = get(this, "userSlidingWindow") ? get(this, "userSlidingWindow") : this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
+    const layout = get(this, "_userSlidingWindow") ? get(this, "_userSlidingWindow") : this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
 
-    set(this, "oldPlotlySlidingWindow", windowInterval);
+    set(this, "_oldPlotlySlidingWindow", windowInterval);
 
     Plotly.react(
       'plotlyDiv',
@@ -246,6 +277,7 @@ export default class PlotlyTimeline extends Component.extend({
   getPlotlyDataObject(dates : Date[], requests : number[]) : [{}] {
 
     const colors = Array(dates.length).fill(get(this, "defaultMarkerColor"));
+    const sizes = Array(dates.length).fill(get(this, "defaultMarkerSize"));
 
     return [
       {
@@ -253,7 +285,7 @@ export default class PlotlyTimeline extends Component.extend({
         type: 'scattergl',
         mode:'lines+markers',
         //fill: 'tozeroy',
-        marker: {color: colors, size: 8},
+        marker: {color: colors, size: sizes},
         x: dates,
         y: requests, 
         hoverlabel: {
@@ -272,18 +304,6 @@ export default class PlotlyTimeline extends Component.extend({
       doubleClick: false
     };
   };
-
-  getColorUpdateObjectForPointIndex(pointIndex : number) {
-    const markerIndex = `marker.color[${pointIndex}]`;
-    const update : any = {};
-    update[markerIndex] = "red";
-
-    return update;
-  }
-
-  getColorResetObject() {
-    return { "marker.color" : "black" };
-  }
 
   // END Helper functions
 
