@@ -16,7 +16,7 @@ export default class PlotlyTimeline extends Component.extend({
   highlightedMarkerColor = "red";  
   highlightedMarkerSize = 12;
 
-  doubleSelection = false;
+  selectionCount = 1;
 
   slidingWindowLowerBoundInMinutes = 4;
   slidingWindowUpperBoundInMinutes = 4;
@@ -84,14 +84,12 @@ export default class PlotlyTimeline extends Component.extend({
         let colors = data.points[0].fullData.marker.color;
         let sizes = data.points[0].fullData.marker.size;        
 
-        // reset double selection
-        if(get(self, "doubleSelection")) {
-          if(get(self, "_selectedTimestamps").length == 2) {
-            set(self, "_selectedTimestamps", []);
-            colors = Array(numberOfPoints).fill(get(self, "defaultMarkerColor"));
-            sizes = Array(numberOfPoints).fill(get(self, "defaultMarkerSize"));
-          }
-        }
+        // reset selection       
+        if(get(self, "_selectedTimestamps").length == get(self, "selectionCount")) {
+          set(self, "_selectedTimestamps", []);
+          colors = Array(numberOfPoints).fill(get(self, "defaultMarkerColor"));
+          sizes = Array(numberOfPoints).fill(get(self, "defaultMarkerSize"));
+        }       
 
         colors[pn] = get(self, "highlightedMarkerColor");
         sizes[pn] = get(self, "highlightedMarkerSize");
@@ -105,16 +103,15 @@ export default class PlotlyTimeline extends Component.extend({
         const clickedTimestamp = new Date(data.points[0].x);
         get(self, "_selectedTimestamps").push(clickedTimestamp.getTime());
 
-        if(get(self, "doubleSelection")) {
+        if(get(self, "selectionCount") > 1) {
 
-          if(get(self, "_selectedTimestamps").length == 2) {
+          if(get(self, "_selectedTimestamps").length == get(self, "selectionCount")) {
             self.clicked(get(self, "_selectedTimestamps"));
           }
 
         } else {
           // closure action
           self.clicked(get(self, "_selectedTimestamps"));
-          set(self, "_selectedTimestamps", []);
         }
 
         
