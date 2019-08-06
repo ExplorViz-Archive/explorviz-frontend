@@ -60,7 +60,7 @@
         {{svg-jar "chevron-up" id="hidetimeline-icon" class=(if renderingService.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")}}
       {{/bs-button}}
       <div id="timeline" class="timeline {{unless renderingService.showTimeline "timelinehide"}}">
-        {{visualization/page-setup/timeline/plotly-timeline timestamps=timestampRepo.timelineTimestamps clicked=(action 'timelineClicked')}}
+        {{visualization/page-setup/timeline/plotly-timeline timestamps=timestampRepo.timelineTimestamps clicked=(action 'timelineClicked') resetHighlighting=landscapeListener.pauseVisualizationReload}}
       </div>
     </div>
   </div>
