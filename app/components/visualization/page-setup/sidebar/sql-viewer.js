@@ -7,6 +7,10 @@ export default Component.extend({
 
   // No Ember generated container
   tagName: '',
+
+  // default time units
+  responseTimeUnit: 'ms',
+
   landscapeRepo: service("repos/landscape-repository"),
   additionalData: service('additional-data'),
   store: service(),
@@ -82,6 +86,20 @@ export default Component.extend({
     filter() {
       // Case insensitive string filter
       this.set('filterTerm', this.get('filterInput').toLowerCase());
+    },
+
+    toggleResponseTimeUnit() {
+      let timeUnit = this.get('responseTimeUnit');
+
+      if (timeUnit === 'ns') {
+        this.set('responseTimeUnit', 'ms');
+      }
+      else if (timeUnit === 'ms') {
+        this.set('responseTimeUnit', 's');
+      }
+      else if (timeUnit === 's') {
+        this.set('responseTimeUnit', 'ns');
+      }
     },
 
     sortBy(property) {

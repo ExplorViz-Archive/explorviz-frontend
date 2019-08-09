@@ -24,8 +24,10 @@
         <th {{action "sortBy" "timestamp"}} scope="col">Time</th>
         <th {{action "sortBy" "sqlStatement"}} scope="col">Statement</th>
         <th {{action "sortBy" "statementType"}} scope="col">Statement Type</th>
-        <th {{action "sortBy" "returnValue"}} scope="col">Return Value</th>
-        <th {{action "sortBy" "responseTime"}} scope="col">Response Time (ms)</th>
+        <!-- <th {{action "sortBy" "returnValue"}} scope="col">Return Value</th> -->
+        <th {{action "sortBy" "responseTime"}} scope="col">Response Time in
+          {{#bs-button onClick=(action "toggleResponseTimeUnit") class="th-btn" outline=true}}{{responseTimeUnit}}{{/bs-button}}
+        </th>
       </tr>
     </thead>
     <tbody>
@@ -36,8 +38,8 @@
           "time"}}</th>
         <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
         <td title={{query.statementType}}>{{string-shortener query.statementType 9}}</td>
-        <td title={{query.returnValue}}>{{query.returnValue}}</td>
-        <td title={{query.responseTime}}>{{query.responseTime}}</td>
+        <!-- <td title={{query.returnValue}}>{{query.returnValue}}</td> -->
+        <td title={{query.responseTime}}>{{format-number query.responseTime responseTimeUnit}}</td>
       </tr>
       {{else}}
       <tr {{action "queryClicked" query}} style="cursor: pointer">
@@ -46,7 +48,7 @@
         <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
         <td title={{query.statementType}}>{{string-shortener query.statementType 9}}</td>
         <td title={{query.returnValue}}>{{query.returnValue}}</td>
-        <td title={{query.responseTime}}>{{format-number query.responseTime}}</td>
+        <td title={{query.responseTime}}>{{format-number query.responseTime responseTimeUnit}}</td>
       </tr>
       {{/if}}
       {{/each}}
@@ -77,8 +79,10 @@
       <td class="col-9 container-word-wrap">{{query.returnValue}}</td>
     </tr>
     <tr class="d-flex">
-      <th class="col-3">Response Time (ms)</th>
-      <td class="col-9 container-word-wrap">{{format-number query.responseTime}}</td>
+      <th class="col-3">Response Time in
+         {{#bs-button onClick=(action "toggleResponseTimeUnit") class="th-btn" outline=true}}{{responseTimeUnit}}{{/bs-button}}
+        </th>
+      <td class="col-9 container-word-wrap">{{format-number query.responseTime responseTimeUnit}}</td>
     </tr>
   </tbody>
 </table>
