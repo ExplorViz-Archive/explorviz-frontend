@@ -18,6 +18,8 @@ export default class PlotlyTimeline extends Component.extend({
   // BEGIN user-set variables
   timestamps : Timestamp[] = [];
 
+  setChildReference : any = null;
+
   defaultMarkerColor = "#1f77b4";
   defaultMarkerSize = 8;
 
@@ -28,8 +30,6 @@ export default class PlotlyTimeline extends Component.extend({
 
   slidingWindowLowerBoundInMinutes = 4;
   slidingWindowUpperBoundInMinutes = 4;
-
-  resetHighlighting = false;
   // END user-set variables
 
   _debug = debugLogger();
@@ -65,6 +65,12 @@ export default class PlotlyTimeline extends Component.extend({
   // @Override
   didRender() {
     this._super(...arguments);
+
+    // register this component at its parent if set via template
+    const parentFunction = get(this, "setChildReference");
+    if(parentFunction) {
+      parentFunction(this);
+    }
 
     if(this._initDone) {
       this.extendPlotlyTimelineChart(get(this, "timestamps"));
@@ -200,7 +206,7 @@ export default class PlotlyTimeline extends Component.extend({
   };
 
 
-  extendPlotlyTimelineChart(timestamps : Timestamp[]) {    
+  extendPlotlyTimelineChart(timestamps : Timestamp[]) {
 
     if(!timestamps || timestamps.length == 0) {
       return;
@@ -217,32 +223,23 @@ export default class PlotlyTimeline extends Component.extend({
 
     set(this, "_oldPlotlySlidingWindow", windowInterval);
 
-    if(get(this, "resetHighlighting")) {
-      
-      data[0].marker.color = Array(timestamps.length).fill(get(this, "defaultMarkerColor"));
-
-      data[0].marker.size = Array(timestamps.length).fill(get(this, "defaultMarkerSize"));
-
-      const selTimestamps : Timestamp[] = get(this, "_selectedTimestamps");
-
-      const defaultMarkerColor = get(this, "defaultMarkerColor");
-      const defaulMarkerSize = get(this, "defaultMarkerSize");
-
-      for(const t of selTimestamps) {
-        get(this, "_markerState")[get(t, "id")].color = defaultMarkerColor;
-        get(this, "_markerState")[get(t, "id")].size = defaulMarkerSize;
-      }
-
-      set(this, "_selectedTimestamps", []);
-    }
-
     Plotly.react(
       'plotlyDiv',
       data,
       layout,
       this.getPlotlyOptionsObject()
     );
-  };
+  }
+
+  continueTimeline() {
+    this.resetHighlingInStateObjects();
+    this.extendPlotlyTimelineChart(get(this, "timestamps"));
+  }
+
+  resetHighlighting() {
+    this.resetHighlingInStateObjects();
+    this.extendPlotlyTimelineChart(get(this, "timestamps"));
+  }
 
   // END Plot Logic
 
@@ -350,8 +347,6 @@ export default class PlotlyTimeline extends Component.extend({
     return this.getPlotlyDataObject(x, y, colors, sizes, timestampIds);
   }
 
-
-
   getPlotlyDataObject(dates : Date[], requests : number[], colors: string[], sizes: number[], timestampIds: string[]) : [{}] {
 
     return [
@@ -370,7 +365,14 @@ export default class PlotlyTimeline extends Component.extend({
         text: this.hoverText(dates, requests) 
       }
     ];
-  };
+  }
+
+  resetHighlingInStateObjects() {
+
+    set(this, "_selectedTimestamps", []);
+
+    set(this, "_markerState", {});
+  }
 
   getPlotlyOptionsObject() : {} {
     return {

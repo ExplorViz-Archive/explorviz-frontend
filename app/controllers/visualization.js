@@ -1,6 +1,6 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service'; 
-import { computed, action, get, set } from '@ember/object';
+import { computed, action, get, set, observer } from '@ember/object';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 /**
@@ -12,7 +12,23 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 * @module explorviz
 * @submodule visualization
 */
-export default class VisualizationController extends Controller.extend(AlertifyHandler) {
+export default class VisualizationController extends Controller.extend(AlertifyHandler, {
+
+  // @Override
+  init(){
+    this._super(...arguments);
+
+    // must be called once, so that observer works
+    get(this, 'landscapeListener');
+  },
+
+  timelineResetObserver: observer('landscapeListener.pauseVisualizationReload', function() {
+    if(!get(this, "landscapeListener.pauseVisualizationReload")) {      
+      get(this, 'plotlyTimelineRef').resetHighlighting();
+    }
+  })
+
+}) {
 
   @service("rendering-service") renderingService;
   @service("repos/landscape-repository") landscapeRepo;
@@ -24,6 +40,10 @@ export default class VisualizationController extends Controller.extend(AlertifyH
   state = null;
 
   type = 'landscape';
+
+  plotlyTimelineRef = null;
+
+  
 
   @computed('landscapeRepo.latestApplication')
   get showLandscape() {
@@ -38,6 +58,7 @@ export default class VisualizationController extends Controller.extend(AlertifyH
   @action
   resetView() {
     get(this, 'renderingService').reSetupScene();
+    get(this, 'plotlyTimelineRef').continueTimeline();
   }
 
   @action
@@ -54,6 +75,11 @@ export default class VisualizationController extends Controller.extend(AlertifyH
   @action
   timelineClicked(timestampInMillisecondsArray) {
     get(this, 'reloadHandler').loadLandscapeById(timestampInMillisecondsArray[0]);
+  }
+
+  @action
+  getTimelineReference(plotlyTimelineRef) {
+    set(this, 'plotlyTimelineRef', plotlyTimelineRef);
   }
 
   showTimeline() {
