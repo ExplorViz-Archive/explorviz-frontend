@@ -1,1 +1,16 @@
-{{outlet}}
+<div class="col-12 d-flex flex-column">
+    <h3>Upload or download a landscape</h3>
+    {{#if this.currentUser.user.isAdmin}}
+    <div class="mb-3">
+        <div class="float-right">
+            {{#bs-button type="success" outline=true onClick=(action "downloadLandscape") title="Download landscape"}}{{svg-jar "cloud-download"}}
+            <span>Download landscape</span>{{/bs-button}}
+            <input id="selectBoxUploadLandscape" onchange={{action "uploadLandscape"}} type="file" style="display:none;" />
+            {{#bs-button type="success" outline=true onClick=(action "triggerSelectBox")}}{{svg-jar "cloud-upload"}}
+            <span>Upload landscape</span>{{/bs-button}}
+        </div>
+    </div>
+    {{else}}
+    You have to be an administrator to upload or download landscapes at the moment!
+    {{/if}}
+</div>

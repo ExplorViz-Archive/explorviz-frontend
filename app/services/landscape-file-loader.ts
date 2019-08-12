@@ -22,19 +22,19 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
   fileExtension: string = ".json";
 
   //downloads a landscape from the backend
-  downloadLandscape(id: string, timestamp: string, totalRequests: number) {
+  downloadLandscape(timestamp: string, totalRequests: number) {
 
     const self = this;
 
     const { access_token } = this.get('session.data.authenticated');
 
-    const urlPath = `/v1/landscapes/${id}/download`;
+    const urlPath = `/v1/landscapes/download?timestamp=${timestamp}`;
     const savedFileName = timestamp + "-" + totalRequests + this.get('fileExtension');
     const url = `${ENV.APP.API_ROOT}${urlPath}`
 
     this.get('ajax').raw(url, {
       'id': this,
-      headers: { 'Authorization': `Basic ${access_token}` },
+      headers: { 'Authorization': `Bearer ${access_token}` },
       dataType: 'text',
       options: {
         arraybuffer: true
@@ -42,53 +42,54 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
     }
     ).then((content: any) => {
       this.saveFileAs(savedFileName, content.payload, 'application/json');
-      self.showAlertifySuccess("Landscape with id [" + id + "] downloaded!");
-      this.debug("Landscape with id [" + id + "] downloaded!");
+      self.showAlertifySuccess("Landscape with timestamp [" + timestamp + "] downloaded!");
+      this.debug("Landscape with timestamp [" + timestamp + "] downloaded!");
     }).catch((error: any) => {
       self.showAlertifyError(error.text);
-      this.debug("Could not download landscape with id [" + id + "]", error.text);
-      throw new Error("Could not download landscape with id [" + id + "]. Enable debugging in console");
+      this.debug("Could not download landscape with timestamp [" + timestamp + "]", error.text);
+      throw new Error("Could not download landscape with timestamp [" + timestamp + "]. Enable debugging in console");
     });
   }
 
-  // // uploads a tutorial from the client to the backend and pushes the response into the store
-  // uploadTutorial(evt) {
+  // uploads a landscape from the client to the backend and pushes the response into the store
+  uploadLandscape(evt: any) {
 
-  //   const self = this;
+    const self = this;
 
-  //   let { access_token } = this.get('session.data.authenticated');
+    let { access_token } = this.get('session.data.authenticated');
 
-  //   const urlPath = `/v1/tutorials/upload`;
-  //   const url = `${ENV.APP.API_ROOT}${urlPath}`;
+    const file = evt.target.files[0];
 
-  //   const file = evt.target.files[0];
+    const fileName = file.name;
+    const urlPath = `/v1/landscapes/replay/upload?filename=${fileName}`;
+    const url = `${ENV.APP.API_ROOT}${urlPath}`;
 
-  //   const fd = new FormData();
-  //   fd.append('file', file);
+    const fd = new FormData();
+    fd.append('file', file);
 
-  //   // use dataType: "text" since Ember-Ajax expects a JSON
-  //   // response by default and a simple HTTP 200 response would throw
-  //   // an error
-  //   this.get('ajax').raw(url, {
-  //     method: 'POST',
-  //     data: fd,
-  //     processData: false,
-  //     contentType: false,
-  //     headers: { 'Authorization': `Basic ${access_token}` },
-  //     dataType: "text"
-  //   }).then((payload) => {
-  //     const jsonTutorial = payload.jqXHR.responseText;
-  //     const parsedTutorial = JSON.parse(jsonTutorial);
-  //     self.get('store').push(parsedTutorial);
+    // use dataType: "text" since Ember-Ajax expects a JSON
+    // response by default and a simple HTTP 200 response would throw
+    // an error
+    this.get('ajax').raw(url, {
+      method: 'POST',
+      data: fd,
+      processData: false,
+      contentType: false,
+      headers: { 'Authorization': `Bearer ${access_token}` },
+      dataType: "text"
+    }).then((payload: any) => {
+      const jsonLandscape = payload.jqXHR.responseText;
+      const parsedLandscape = JSON.parse(jsonLandscape);
+      self.get('store').push(parsedLandscape);
 
-  //     self.showAlertifySuccess("Tutorial sucessfully uploaded!");
-  //     this.debug("Tutorial sucessfully uploaded!");
-  //   }).catch((error) => {
-  //     self.showAlertifyError(error.payload.errors[0].detail);
-  //     this.debug("Could not upload tutorial.", error.payload.errors[0].detail);
-  //     throw new Error("Could not upload tutorial. Enable debugging in console");
-  //   });
-  // }
+      self.showAlertifySuccess("Landscape sucessfully uploaded!");
+      this.debug("Landscape sucessfully uploaded!");
+    }).catch((error: any) => {
+      self.showAlertifyError(error.payload.errors[0].detail);
+      this.debug("Could not upload landscape.", error.payload.errors[0].detail);
+      throw new Error("Could not upload landscape. Enable debugging in console");
+    });
+  }
 
 }
 
