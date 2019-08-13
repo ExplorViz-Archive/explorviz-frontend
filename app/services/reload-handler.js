@@ -12,7 +12,6 @@ export default Service.extend(AlertifyHandler, Evented, {
   store: service(),
   landscapeListener: service("landscape-listener"),
   landscapeRepo: service("repos/landscape-repository"),
-  timestampRepo: service("repos/timestamp-repository"),
 
   debug: debugLogger(),
   modelUpdater: null,
@@ -37,7 +36,7 @@ export default Service.extend(AlertifyHandler, Evented, {
     self.get('store').queryRecord('landscape', { timestamp: timestamp }).then(success, failure).catch(error);
 
     function success(landscape) {
-      // Pause the visulization
+      // Pause the visualization
       self.get('landscapeListener').stopVisualizationReload();
       self.get('modelUpdater').addDrawableCommunication();
 
