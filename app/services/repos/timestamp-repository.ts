@@ -3,6 +3,8 @@ import { inject as service } from "@ember/service";
 import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
 import Timestamp from 'explorviz-frontend/models/timestamp';
+import DS from 'ember-data';
+import MutableArray from '@ember/array/mutable';
 
 /**
 * TODO
@@ -49,7 +51,16 @@ export default class TimestampRepository extends Service.extend(Evented) {
 
     self.get('store').query('timestamp', { type: 'replay' }).then(success, failure).catch(error);
 
-    function success(replayTimestamps: Timestamp[]) {
+    function success(fetchedTimestamps: DS.PromiseArray<Timestamp>) {
+      
+      const replayTimestamps: Timestamp[] = [];
+
+      fetchedTimestamps.forEach(timestamp => {
+        // console.log(timestamp);
+        // timestamp.set('extensionAttributes','replay');
+        replayTimestamps.push(timestamp);
+      });
+      
       self.set('replayTimelineTimestamps', replayTimestamps);
       self.debug("Replay Timestamps successfully loaded!");
     }
