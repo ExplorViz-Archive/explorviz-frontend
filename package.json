@@ -78,13 +78,14 @@
     "stats.js": "^0.17.0",
     "typescript": "^3.4.5",
     "yuidoc-bootstrap-theme": "^1.0.6",
-    "yuidocjs": "^0.10.2"
-	},
-	
+    "yuidocjs": "^0.10.2",
+    "explorviz-frontend-extension-tutorial": "latest"
+  },
   "engines": {
-    "node": ">= 10.15.0"
+    "node": ">= 12.7.0"
   },
   "dependencies": {
+    "@types/chart.js": "^2.7.56",
     "@types/hammerjs": "^2.0.36",
     "chart.js": "^2.7.3",
     "ember-ajax": "^5.0.0",
