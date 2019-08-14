@@ -42,7 +42,7 @@ export default class Replay extends Controller.extend(AlertifyHandler) {
   }
 
   @action
-  timelineClicked(timestampInMillisecondsArray) {
+  timelineClicked(timestampInMillisecondsArray: any) {
     get(this, 'reloadHandler').loadReplayLandscapeByTimestamp(timestampInMillisecondsArray[0]);
   }
 

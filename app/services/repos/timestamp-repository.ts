@@ -36,6 +36,7 @@ export default class TimestampRepository extends Service.extend(Evented) {
     this.trigger("updated", this.get('latestTimestamp'));
   }
 
+  // TODO triggerTimelineUpdate for replay timeline
   fetchReplayTimestamps() {
     const self = this;
     self.debug("Start fetching replay timestamps");
