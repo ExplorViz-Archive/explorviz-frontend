@@ -17,11 +17,9 @@ export default class VisualizationController extends Controller.extend(AlertifyH
   // @Override
   init(){
     this._super(...arguments);
-
-    // must be called once, so that observer works
-    get(this, 'landscapeListener');
   },
 
+  // eslint-disable-next-line ember/no-observers
   timelineResetObserver: observer('landscapeListener.pauseVisualizationReload', function() {
     if(!get(this, "landscapeListener.pauseVisualizationReload")) {      
       get(this, 'plotlyTimelineRef').resetHighlighting();

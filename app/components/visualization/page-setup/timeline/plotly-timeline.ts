@@ -54,7 +54,7 @@ export default class PlotlyTimeline extends Component.extend({
     if(plotlyDiv && plotlyDiv.layout) {
       set(this, "_userSlidingWindow", plotlyDiv.layout);
     }
-  }
+  }  
 
   mouseLeave() {
     set(this, "_userSlidingWindow", null);
@@ -170,6 +170,15 @@ export default class PlotlyTimeline extends Component.extend({
         
         plotlyDiv.on('plotly_unhover', function(){
           dragLayer.style.cursor = '';
+        });
+
+        plotlyDiv.on('plotly_relayouting', function(){
+          // if user hovers over plotly, save his 
+          // sliding window, so that updating the 
+          // plot won't modify his current viewport
+          if(plotlyDiv && plotlyDiv.layout) {
+            set(self, "_userSlidingWindow", plotlyDiv.layout);
+          }
         });
       }
     }    
