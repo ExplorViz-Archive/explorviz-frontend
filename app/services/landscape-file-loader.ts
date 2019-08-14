@@ -1,6 +1,8 @@
 import Service, { inject as service } from '@ember/service';
 import ENV from 'explorviz-frontend/config/environment';
 import FileSaverMixin from 'ember-cli-file-saver/mixins/file-saver';
+import Session from 'ember-simple-auth/services/session';
+import AjaxService from 'ember-ajax/services/ajax';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import debugLogger from 'ember-debug-logger';
 import DS from 'ember-data';
@@ -15,15 +17,14 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
 
   debug = debugLogger();
 
-  @service('session') session !: any;
+  @service('session') session !: Session;
   @service('store') store !: DS.Store;
-  @service('ajax') ajax !: any;
+  @service('ajax') ajax !: Ajax;
 
   fileExtension: string = ".json";
 
-  //downloads a landscape from the backend
+  // downloads a landscape from the backend
   downloadLandscape(timestamp: string, totalRequests: number) {
-
     const self = this;
 
     const { access_token } = this.get('session.data.authenticated');
@@ -53,7 +54,6 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
 
   // uploads a landscape from the client to the backend and pushes the response into the store
   uploadLandscape(evt: any) {
-
     const self = this;
 
     let { access_token } = this.get('session.data.authenticated');

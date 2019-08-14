@@ -4,10 +4,9 @@ import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
 import Timestamp from 'explorviz-frontend/models/timestamp';
 import DS from 'ember-data';
-import MutableArray from '@ember/array/mutable';
 
 /**
-* TODO
+* Handles all landscape-related timestamps within the application, especially for the timelines
 *
 * @class Timestamp-Repository-Service
 * @extends Ember.Service
@@ -37,14 +36,6 @@ export default class TimestampRepository extends Service.extend(Evented) {
     this.trigger("updated", this.get('latestTimestamp'));
   }
 
-  /**
-   * Triggers the 'updated' event in the replayTimeline for updating the chart
-   * @method triggerReplayTimelineUpdate
-   */
-  triggerReplayTimelineUpdate() {
-    this.trigger("updated", this.get('replayTimelineTimestamps'));
-  }
-
   fetchReplayTimestamps() {
     const self = this;
     self.debug("Start fetching replay timestamps");
@@ -52,16 +43,15 @@ export default class TimestampRepository extends Service.extend(Evented) {
     self.get('store').query('timestamp', { type: 'replay' }).then(success, failure).catch(error);
 
     function success(fetchedTimestamps: DS.PromiseArray<Timestamp>) {
-      
+
       const replayTimestamps: Timestamp[] = [];
 
       fetchedTimestamps.forEach(timestamp => {
-        // console.log(timestamp);
-        // timestamp.set('extensionAttributes','replay');
         replayTimestamps.push(timestamp);
       });
-      
+
       self.set('replayTimelineTimestamps', replayTimestamps);
+      self.triggerTimelineUpdate();
       self.debug("Replay Timestamps successfully loaded!");
     }
 

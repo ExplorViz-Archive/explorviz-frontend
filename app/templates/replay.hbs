@@ -1,22 +1,22 @@
 <div class="col-12 d-flex flex-column">
-    <h3>Upload or download a landscape</h3>
+    <h3>Replay Landscape Management</h3>
+    <h6>Previously exported landscapes can be uploaded here</h6>
     {{#if this.currentUser.user.isAdmin}}
     <div class="mb-3">
         <div class="float-right">
-            {{#bs-button type="success" outline=true onClick=(action "downloadLandscape") title="Download landscape"}}{{svg-jar "cloud-download"}}
-            <span>Download landscape</span>{{/bs-button}}
             <input id="selectBoxUploadLandscape" onchange={{action "uploadLandscape"}} type="file"
                 style="display:none;" />
-            {{#bs-button type="success" outline=true onClick=(action "triggerSelectBox")}}{{svg-jar "cloud-upload"}}
+            {{#bs-button type="success" outline=true onClick=(action "triggerSelectBox") title="Upload a landscape"}}{{svg-jar "cloud-upload"}}
             <span>Upload landscape</span>{{/bs-button}}
             {{#bs-button type="info" outline=true onClick=(action "fetchReplayTimestamps") title="Fetch replay timestamps"}}{{svg-jar "watch"}}
-            <span>Fetch replay timestamps</span>{{/bs-button}}
+            <span>Reload</span>{{/bs-button}}
         </div>
     </div>
     {{else}}
     You have to be an administrator to upload or download landscapes at the moment!
     {{/if}}
 
+    <h4>Uploaded landscapes: {{timestampRepo.replayTimelineTimestamps.length}}</h4>
     <!-- timeline -->
     <div id="replay-timeline-content">
         <div id="timeline" class="timeline">

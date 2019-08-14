@@ -227,7 +227,7 @@ export default class PlotlyTimeline extends Component.extend({
   };
 
   hoverText(x : Date[] ,y : number[]) {
-    return x.map((xi, i) => `<b>Time</b>: ${xi}<br><b>Total Requests</b>: ${y[i]}<br>`);
+    return x.map((xi, i) => `<b>Time</b>: ${xi}<br><b>Requests</b>: ${y[i]}<br>`);
   };
 
   getSlidingWindowInterval(t : Date, lowerBound : number, upperBound : number) : {"min" : number, "max" : number} {
@@ -281,7 +281,7 @@ export default class PlotlyTimeline extends Component.extend({
         hoverinfo: 'text',
         type: 'scattergl',
         mode:'lines+markers',
-        //fill: 'tozeroy',
+        fill: 'tozeroy',
         marker: {color: colors, size: sizes},
         x: dates,
         y: requests, 
