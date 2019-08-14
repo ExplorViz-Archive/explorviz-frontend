@@ -1,16 +1,57 @@
 import Controller from '@ember/controller';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import { inject as service } from "@ember/service";
-import { action } from '@ember/object';
+import { computed, action, get, set } from '@ember/object';
+import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 
 export default class Replay extends Controller.extend(AlertifyHandler) {
 
   @service('current-user') currentUser !: any;
   @service('landscape-file-loader') landscapeFileLoader !: any;
   @service('repos/timestamp-repository') timestampRepo !: any;
+  @service("repos/landscape-repository") landscapeRepo !: LandscapeRepository;
+  @service("rendering-service") renderingService : any;
+  @service("reload-handler") reloadHandler : any;
 
-  @action timelineClicked(timestampInMillisecondsArray: number) {
-    // this.get(this, 'reloadHandler').loadLandscapeById(timestampInMillisecondsArray[0]);
+  state = null;
+
+  @computed('landscapeRepo.latestApplication')
+  get showLandscape() {
+    return !get(this, 'landscapeRepo.latestApplication');
+  }
+
+  @action
+  resize() {
+    get(this, 'renderingService').resizeCanvas();
+  }
+
+  @action
+  resetView() {
+    get(this, 'renderingService').reSetupScene();
+  }
+
+  @action
+  openLandscapeView() {
+    set(this, 'landscapeRepo.latestApplication', null);
+    set(this, 'landscapeRepo.replayApplication', null);
+  }
+
+  @action
+  toggleTimeline() {
+    get(this, 'renderingService').toggleTimeline();
+  }
+
+  @action
+  timelineClicked(timestampInMillisecondsArray) {
+    get(this, 'reloadHandler').loadReplayLandscapeByTimestamp(timestampInMillisecondsArray[0]);
+  }
+
+  showTimeline() {
+    set(this, 'renderingService.showTimeline', true);
+  }
+
+  hideVersionbar(){
+    set(this, 'renderingService.showVersionbar', false);
   }
 
   // necessary for hidded input box to select a file for uploading

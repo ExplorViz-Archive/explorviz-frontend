@@ -57,6 +57,42 @@ export default Service.extend(AlertifyHandler, Evented, {
       self.set('landscapeRepo.latestLandscape', undefined);
       self.debug("Error when fetching landscape: ", e);
     }
+  },
+
+  /**
+   * Loads a replaylandscape from the backend and triggers a visualization update
+   * @method loadReplayLandscapeByTimestamp
+   * @param {*} timestamp 
+   */
+  loadReplayLandscapeByTimestamp(timestamp) {
+    const self = this;
+
+    self.debug("Start import replay landscape-request");
+
+    self.get('store').queryRecord('landscape', { timestamp: timestamp }).then(success, failure).catch(error);
+
+    function success(landscape) {
+      // Pause the visualization
+      self.get('landscapeListener').stopVisualizationReload();
+      self.get('modelUpdater').addDrawableCommunication();
+
+      self.set('landscapeRepo.replayLandscape', landscape);
+      self.get('landscapeRepo').triggerLatestReplayLandscapeUpdate();
+
+      self.debug("end import replay landscape-request");
+    }
+
+    function failure(e) {
+      self.set('landscapeRepo.replayLandscape', undefined);
+      self.showAlertifyMessage("Replay Landscape couldn't be requested!" +
+        " Backend offline?");
+      self.debug("Repplay Landscape couldn't be requested!", e);
+    }
+
+    function error(e) {
+      self.set('landscapeRepo.replayLandscape', undefined);
+      self.debug("Error when fetching replaylandscape: ", e);
+    }
   }
 
 });

@@ -1,27 +1,78 @@
-<div class="col-12 d-flex flex-column">
-    <h3>Replay Landscape Management</h3>
-    <h6>Previously exported landscapes can be uploaded here</h6>
-    {{#if this.currentUser.user.isAdmin}}
-    <div class="mb-3">
-        <div class="float-right">
-            <input id="selectBoxUploadLandscape" onchange={{action "uploadLandscape"}} type="file"
-                style="display:none;" />
-            {{#bs-button type="success" outline=true onClick=(action "triggerSelectBox") title="Upload a landscape"}}{{svg-jar "cloud-upload"}}
-            <span>Upload landscape</span>{{/bs-button}}
-            {{#bs-button type="info" outline=true onClick=(action "fetchReplayTimestamps") title="Fetch replay timestamps"}}{{svg-jar "watch"}}
-            <span>Reload</span>{{/bs-button}}
+<div class="mb-1">
+    <div class="float-right">
+        <input id="selectBoxUploadLandscape" onchange={{action "uploadLandscape"}} type="file" style="display:none;" />
+        {{#bs-button type="success" outline=true onClick=(action "triggerSelectBox") title="Upload a landscape"}}{{svg-jar "cloud-upload"}}
+        <span>Upload landscape</span>{{/bs-button}}
+    </div>
+</div>
+<div class="row" style="max-height:100%">
+    <div class="col-12" id="vizspace" {{did-resize this.resize debounce=100}}>
+        {{#if showLandscape}}
+        {{#if landscapeRepo.replayLandscape.systems}}
+        {{visualization/page-setup/visualization-navbar
+          content=(array
+            (component "visualization/page-setup/navbar/reset-visualization")
+            (component "visualization/page-setup/navbar/pause-reload")
+            (component "visualization/page-setup/navbar/event-opener")
+            (component "visualization/page-setup/navbar/landscape-downloader")
+          )
+        }}
+        <div id="rendering">
+            {{visualization/rendering/landscape-rendering}}
+            <!-- popup(s) -->
+            {{visualization/rendering/popups/popup-coordinator
+          popupData=additionalData.popupContent}}
+        </div>
+        {{else}}
+        <div class="container-fluid">
+            <div class="jumbotron">
+                <h2>No Replay Landscape Selected!</h2>
+                <p>Please select a landscape from the timeline.
+                    If the timeline is empty, please <i>upload</i> a landscape first.
+                </p>
+            </div>
+            <div class="spinner-center-3" role="status"></div>
+        </div>
+        {{/if}}
+        {{else}}
+        {{visualization/page-setup/visualization-navbar
+        content=(array
+          (component "visualization/page-setup/navbar/reset-visualization")
+          (component "visualization/page-setup/navbar/pause-reload")
+          (component "visualization/page-setup/navbar/trace-overview")
+          (component "visualization/page-setup/navbar/sql-opener")
+          (component "visualization/page-setup/navbar/landscape-downloader")
+          (component "visualization/page-setup/navbar/application-opener")
+          (component "visualization/page-setup/navbar/application-search")    
+        )
+      }}
+        <div id="rendering">
+            <div style="position: absolute!important" class="pl-1">
+                {{#bs-button onClick=(action "openLandscapeView") type="secondary" outline=true title="Back to Landscape"}}
+                {{svg-jar "reply" class="octicon align-middle"}}
+                {{/bs-button}}
+            </div>
+            {{visualization/rendering/application-rendering latestApplication=landscapeRepo.replayApplication}}
+            <!-- popup(s) -->
+            {{visualization/rendering/popups/popup-coordinator
+        popupData=additionalData.popupContent}}
+        </div>
+        {{/if}}
+        <!-- timeline -->
+        <div id="timeline-content">
+            {{#bs-button
+        onClick=(action "toggleTimeline")
+        type="secondary"
+        outline=true
+        class="btn-timeline"
+        title=(if renderingService.showTimeline "Hide Timeline" "Show Timeline")
+      }}
+            {{#unless renderingService.showTimeline}}<span class="pr-1">Show Timeline</span>{{/unless}}
+            {{svg-jar "chevron-up" id="hidetimeline-icon" class=(if renderingService.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")}}
+            {{/bs-button}}
+            <div id="timeline" class="timeline {{unless renderingService.showTimeline "timelinehide"}}">
+                {{replay/page-setup/timeline/plotly-timeline timestamps=timestampRepo.replayTimelineTimestamps clicked=(action 'timelineClicked')}}
+            </div>
         </div>
     </div>
-    {{else}}
-    You have to be an administrator to upload or download landscapes at the moment!
-    {{/if}}
-
-    <h4>Uploaded landscapes: {{timestampRepo.replayTimelineTimestamps.length}}</h4>
-    <!-- timeline -->
-    <div id="replay-timeline-content">
-        <div id="timeline" class="timeline">
-            {{replay/page-setup/timeline/plotly-timeline timestamps=timestampRepo.replayTimelineTimestamps clicked=(action 'timelineClicked')}}
-        </div>
-    </div>
-
 </div>
