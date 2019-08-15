@@ -14,19 +14,17 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 */
 export default class VisualizationController extends Controller.extend(AlertifyHandler, {
 
-  // @Override
-  init(){
-    this._super(...arguments);
-  },
-
   // eslint-disable-next-line ember/no-observers
   timelineResetObserver: observer('landscapeListener.pauseVisualizationReload', function() {
-    if(!get(this, "landscapeListener.pauseVisualizationReload")) {      
+    // reset highlighting and selection in timeline, if unpause was clicked
+    if(!get(this, "landscapeListener.pauseVisualizationReload")) {
+      set(this, "selectedTimestampRecords", []);
       get(this, 'plotlyTimelineRef').resetHighlighting();
     }
   })
 
-}) {
+}) 
+{
 
   @service("rendering-service") renderingService;
   @service("repos/landscape-repository") landscapeRepo;
@@ -41,7 +39,7 @@ export default class VisualizationController extends Controller.extend(AlertifyH
 
   plotlyTimelineRef = null;
 
-  
+  selectedTimestampRecords = [];
 
   @computed('landscapeRepo.latestApplication')
   get showLandscape() {
@@ -56,7 +54,7 @@ export default class VisualizationController extends Controller.extend(AlertifyH
   @action
   resetView() {
     get(this, 'renderingService').reSetupScene();
-    get(this, 'plotlyTimelineRef').continueTimeline();
+    get(this, 'plotlyTimelineRef').continueTimeline(get(this, "selectedTimestampRecords"));
   }
 
   @action
@@ -71,12 +69,14 @@ export default class VisualizationController extends Controller.extend(AlertifyH
   }
 
   @action
-  timelineClicked(timestampInMillisecondsArray) {
-    get(this, 'reloadHandler').loadLandscapeById(timestampInMillisecondsArray[0]);
+  timelineClicked(timestampRecordArray) {
+    set(this, "selectedTimestampRecords", timestampRecordArray);
+    get(this, 'reloadHandler').loadLandscapeById(timestampRecordArray[0].get("timestamp"));
   }
 
   @action
   getTimelineReference(plotlyTimelineRef) {
+    // called from within the plotly timeline component
     set(this, 'plotlyTimelineRef', plotlyTimelineRef);
   }
 
