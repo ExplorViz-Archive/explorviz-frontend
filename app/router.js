@@ -22,6 +22,7 @@ Router.map(function () {
   this.route('login');
   this.route('visualization');
   this.route('discovery');
+  this.route('replay');
 
   this.route('configuration', function () {
 
@@ -32,7 +33,6 @@ Router.map(function () {
     });
 
     this.route('settings');
-
 
     // add nested configuration routes which are added by extensions
     const configurationRouteContext = this;

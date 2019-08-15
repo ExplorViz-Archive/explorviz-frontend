@@ -9,22 +9,23 @@ import RenderingService from 'explorviz-frontend/services/rendering-service';
 import Trace from 'explorviz-frontend/models/trace';
 import Clazz from 'explorviz-frontend/models/clazz';
 
-export type TimeUnit = 'ms'|'s';
+export type TimeUnit = 'ns' | 'ms' | 's';
 
 export default class TraceSelection extends Component {
 
   // No Ember generated container
   tagName = '';
 
-  traceTimeUnit:TimeUnit = 'ms';
-  traceStepTimeUnit:TimeUnit = 'ms';
-  
-  sortBy:any = 'traceId';
-  isSortedAsc:boolean = true;
-  filterTerm:string = '';
-  filterInput:string = '';
+  // default time units
+  traceTimeUnit: TimeUnit = 'ms';
+  traceStepTimeUnit: TimeUnit = 'ms';
 
-  isReplayAnimated:boolean = true;
+  sortBy: any = 'traceId';
+  isSortedAsc: boolean = true;
+  filterTerm: string = '';
+  filterInput: string = '';
+
+  isReplayAnimated: boolean = true;
 
   @service('store')
   store!: DS.Store;
@@ -34,7 +35,7 @@ export default class TraceSelection extends Component {
 
   @service('visualization/application/highlighter')
   highlighter!: Highlighter;
-  
+
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
 
@@ -49,7 +50,7 @@ export default class TraceSelection extends Component {
       return [highlighter.get('highlightedEntity')];
     } else {
       const latestApplication = this.get('landscapeRepo').get('latestApplication');
-      if(latestApplication === null) {
+      if (latestApplication === null) {
         return [];
       } else {
         return this.filterAndSortTraces(latestApplication.get('traces'));
@@ -62,7 +63,7 @@ export default class TraceSelection extends Component {
       return [];
     }
 
-    let filteredTraces:Trace[] = [];
+    let filteredTraces: Trace[] = [];
     let filter = this.get('filterTerm');
     traces.forEach((trace) => {
       let sourceClazz = trace.get('sourceClazz');
@@ -124,19 +125,28 @@ export default class TraceSelection extends Component {
 
     toggleTraceTimeUnit(this: TraceSelection) {
       let timeUnit = this.get('traceTimeUnit');
-      if (timeUnit === 'ms') {
-        this.set('traceTimeUnit', 's');
-      } else if (timeUnit === 's') {
+
+      if (timeUnit === 'ns') {
         this.set('traceTimeUnit', 'ms');
+      }
+      else if (timeUnit === 'ms') {
+        this.set('traceTimeUnit', 's');
+      }
+      else if (timeUnit === 's') {
+        this.set('traceTimeUnit', 'ns');
       }
     },
 
     toggleTraceStepTimeUnit(this: TraceSelection) {
       let timeUnit = this.get('traceStepTimeUnit');
-      if (timeUnit === 'ms') {
-        this.set('traceStepTimeUnit', 's');
-      } else if (timeUnit === 's') {
+      if (timeUnit === 'ns') {
         this.set('traceStepTimeUnit', 'ms');
+      }
+      else if (timeUnit === 'ms') {
+        this.set('traceStepTimeUnit', 's');
+      }
+      else if (timeUnit === 's') {
+        this.set('traceStepTimeUnit', 'ns');
       }
     },
 
@@ -147,12 +157,12 @@ export default class TraceSelection extends Component {
     lookAtClazz(this: TraceSelection, proxyClazz: Clazz) {
       let clazzId = proxyClazz.get('id');
       let clazz = this.get('store').peekRecord('clazz', clazzId);
-      if(clazz !== null) {
+      if (clazz !== null) {
         this.get('renderingService').moveCameraTo(clazz);
       }
     },
 
-    sortBy(this: TraceSelection, property:any) {
+    sortBy(this: TraceSelection, property: any) {
       // Determine order for sorting
       if (this.get('sortBy') === property) {
         // Toggle sorting order
@@ -161,7 +171,7 @@ export default class TraceSelection extends Component {
         // Sort in ascending order by default
         this.set('isSortedAsc', true);
       }
-      
+
       this.set('sortBy', property);
     },
 
@@ -177,7 +187,7 @@ export default class TraceSelection extends Component {
       let storeId = currentTraceStep.get('clazzCommunication').get('id');
       // Avoid proxy object by requesting clazz from store
       let clazzCommunication = this.get('store').peekRecord('clazzcommunication', storeId);
-      if(clazzCommunication !== null) {
+      if (clazzCommunication !== null) {
         this.get('renderingService').moveCameraTo(clazzCommunication);
       }
     }
