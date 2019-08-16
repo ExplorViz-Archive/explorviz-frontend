@@ -148,9 +148,11 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.set('interaction.raycastObjects', this.get('scene.children'));
   },
 
-  
+  /**
+   * The landscape is bound in the template, e.g., landscape=landscapeRepo.latestLandscape
+   */
   getLandscape() {
-    return this.get('landscapeRepo.latestLandscape');
+    return this.get('landscape');
   },
 
 

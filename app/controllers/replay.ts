@@ -3,15 +3,19 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import { inject as service } from "@ember/service";
 import { computed, action, get, set } from '@ember/object';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
+import LandscapeFileLoader from 'explorviz-frontend/services/landscape-file-loader';
+import CurrentUser from 'explorviz-frontend/services/current-user';
+import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
+import RenderingService from 'explorviz-frontend/services/rendering-service';
 
 export default class Replay extends Controller.extend(AlertifyHandler) {
 
-  @service('current-user') currentUser !: any;
-  @service('landscape-file-loader') landscapeFileLoader !: any;
-  @service('repos/timestamp-repository') timestampRepo !: any;
+  @service('current-user') currentUser !: CurrentUser;
+  @service('landscape-file-loader') landscapeFileLoader !: LandscapeFileLoader;
+  @service('repos/timestamp-repository') timestampRepo !: TimestampRepository
   @service("repos/landscape-repository") landscapeRepo !: LandscapeRepository;
-  @service("rendering-service") renderingService : any;
-  @service("reload-handler") reloadHandler : any;
+  @service("rendering-service") renderingService !: RenderingService;
+  @service("reload-handler") reloadHandler !: any;
 
   state = null;
 
@@ -43,7 +47,6 @@ export default class Replay extends Controller.extend(AlertifyHandler) {
 
   @action
   timelineClicked(timestampInMillisecondsArray: any) {
-    console.log("landscape with timestamp [" + timestampInMillisecondsArray[0] + "] clicked.");
     get(this, 'reloadHandler').loadReplayLandscapeByTimestamp(timestampInMillisecondsArray[0]);
   }
 
