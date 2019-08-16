@@ -7,11 +7,11 @@
             (component "visualization/page-setup/navbar/reset-visualization")
             (component "visualization/page-setup/navbar/pause-reload")
             (component "visualization/page-setup/navbar/event-opener")
-            (component "visualization/page-setup/navbar/landscape-downloader")
+            (component "visualization/page-setup/navbar/landscape-downloader" landscape=landscapeRepo.latestLandscape)
           )
         }}
         <div id="rendering">
-          {{visualization/rendering/landscape-rendering}}
+          {{visualization/rendering/landscape-rendering landscape=landscapeRepo.latestLandscape}}
           <!-- popup(s) -->
           {{visualization/rendering/popups/popup-coordinator
           popupData=additionalData.popupContent}}
@@ -32,7 +32,7 @@
           (component "visualization/page-setup/navbar/pause-reload")
           (component "visualization/page-setup/navbar/trace-overview")
           (component "visualization/page-setup/navbar/sql-opener")
-          (component "visualization/page-setup/navbar/landscape-downloader")
+          (component "visualization/page-setup/navbar/landscape-downloader" landscape=landscapeRepo.latestLandscape)
           (component "visualization/page-setup/navbar/application-opener")
           (component "visualization/page-setup/navbar/application-search")    
         )

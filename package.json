@@ -1,6 +1,6 @@
 {
   "name": "explorviz-frontend",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Explorviz Frontend",
   "author": "",
   "license": "Apache-2.0",
@@ -78,8 +78,7 @@
     "stats.js": "^0.17.0",
     "typescript": "^3.4.5",
     "yuidoc-bootstrap-theme": "^1.0.6",
-    "yuidocjs": "^0.10.2",
-    "explorviz-frontend-extension-tutorial": "latest"
+    "yuidocjs": "^0.10.2"
   },
   "engines": {
     "node": ">= 12.7.0"
