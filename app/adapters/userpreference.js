@@ -1,14 +1,10 @@
 import JSONAPIAdapter from 'ember-data/adapters/json-api';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 import ENV from 'explorviz-frontend/config/environment';
-import { inject as service } from "@ember/service";
-import { isEmpty } from '@ember/utils';
 
 export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
   host: ENV.APP.API_ROOT,
-
-  session: service(),
 
   init() {
 
@@ -19,9 +15,12 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
   },
 
   // @Override
-  urlForQuery() {
+  urlForQuery(query) {
+    let id = query.userId;
+    // delete s.t. query parameter won't be attached (i.e. ?userId=id)
+    delete query.userId;
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/settings/preferences`;
+    return `${baseUrl}/v1/users/${id}/settings/preferences`;
   },
 
   // @Override
@@ -39,22 +38,6 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
   urlForDeleteRecord(id) {
     const baseUrl = this.buildURL();
     return `${baseUrl}/v1/users/settings/preferences/${id}`;
-  },
-
-  urlForFindAll(modelName, snapshot) {
-
-    const baseUrl = this.buildURL();
-    let userId = undefined;
-
-    // TODO Why is passed userId undefined from second execution on?
-    // this is a workaround for retrieving the user id from the session
-    if (isEmpty(snapshot.adapterOptions.userId)) {
-      userId = this.get('session').get('session.content.authenticated.rawUserData.data.id');
-    }
-    else {
-      userId = snapshot.adapterOptions.userId;
-    }
-    return `${baseUrl}/v1/users/${userId}/settings/preferences`;
   },
 
   authorize(xhr) {

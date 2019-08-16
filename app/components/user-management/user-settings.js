@@ -55,7 +55,7 @@ export default Component.extend(AlertifyHandler, {
     }
 
     let origins = [...new Set(allSettings.mapBy('origin'))];
-    let preferences = yield this.store.findAll('userpreference', { adapterOptions: { uid: this.get('user').get('id') }});
+    let preferences = yield this.store.query('userpreference', { userId: this.get('user').get('id') });
 
     // stores settings by origin and type
     // see settings property above for structure
