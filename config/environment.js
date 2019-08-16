@@ -93,8 +93,8 @@ module.exports = function (environment) {
     ENV.APP.API_ROOT = 'http://192.168.91.128:4200/api';
   }
 
-  if (environment === 'czi') {
-    ENV.APP.API_ROOT = 'http://192.168.48.215:8080';
+  if (environment === 'node2') {
+    ENV.APP.API_ROOT = 'http://192.168.48.32:8090';
   }
 
   return ENV;

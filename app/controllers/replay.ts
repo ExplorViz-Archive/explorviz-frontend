@@ -15,9 +15,9 @@ export default class Replay extends Controller.extend(AlertifyHandler) {
 
   state = null;
 
-  @computed('landscapeRepo.latestApplication')
+  @computed('landscapeRepo.replayApplication')
   get showLandscape() {
-    return !get(this, 'landscapeRepo.latestApplication');
+    return !get(this, 'landscapeRepo.replayApplication');
   }
 
   @action
@@ -43,6 +43,7 @@ export default class Replay extends Controller.extend(AlertifyHandler) {
 
   @action
   timelineClicked(timestampInMillisecondsArray: any) {
+    console.log("landscape with timestamp [" + timestampInMillisecondsArray[0] + "] clicked.");
     get(this, 'reloadHandler').loadReplayLandscapeByTimestamp(timestampInMillisecondsArray[0]);
   }
 
