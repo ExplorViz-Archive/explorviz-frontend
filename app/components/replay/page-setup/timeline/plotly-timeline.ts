@@ -254,7 +254,7 @@ export default class PlotlyTimeline extends Component.extend({
       },
       xaxis: {
         type: 'date',
-        range: [minRange,maxRange],
+        // range: [minRange,maxRange],
         title: {
           text: 'Time',
           font: {

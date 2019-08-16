@@ -79,12 +79,12 @@
     "typescript": "^3.4.5",
     "yuidoc-bootstrap-theme": "^1.0.6",
     "yuidocjs": "^0.10.2"
-	},
-	
+  },
   "engines": {
-    "node": ">= 10.15.0"
+    "node": ">= 12.7.0"
   },
   "dependencies": {
+    "@types/chart.js": "^2.7.56",
     "@types/hammerjs": "^2.0.36",
     "chart.js": "^2.7.3",
     "ember-ajax": "^5.0.0",
