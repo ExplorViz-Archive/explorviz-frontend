@@ -27,8 +27,7 @@ abstract class Logger {
 
 class LogstashEvent {
     constructor(public name: string, 
-        public levelName: string, 
-        public levelCode: number, 
+        public level: string,
         public message: string, 
         public time: number){}
 }
@@ -38,7 +37,7 @@ class LogstashLogger extends Logger {
     log(level: LogLevel, message: string): void {
         let lvlName = LogLevel[level]
         let now = new Date().getDate();
-        let event = new LogstashEvent(this.name, lvlName, level, message, now);
+        let event = new LogstashEvent(this.name, lvlName, message, now);
         this.dispatch(event);
     }
 

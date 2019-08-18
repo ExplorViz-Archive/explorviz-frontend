@@ -162,7 +162,7 @@ export default RenderingCore.extend(AlertifyHandler, {
    */
   populateScene() {
     this._super(...arguments);
-    this.debug("populate landscape-rendering");
+    this.logger.debug("clean and populate landscape-rendering");
 
     const self = this;
 

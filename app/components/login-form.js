@@ -2,6 +2,7 @@ import { inject as service } from "@ember/service";
 import Component from '@ember/component';
 import debugLogger from 'ember-debug-logger';
 import $ from 'jquery';
+import logger from 'explorviz-frontend/utils/logging'
 
 /**
 * TODO
@@ -18,6 +19,7 @@ export default Component.extend({
   tagName: '',
 
   debug: debugLogger(),
+  logger: logger(this._debugContainerKey),
 
   session: service(),
   router: service('-routing'),
@@ -47,7 +49,8 @@ export default Component.extend({
         this.set('session.session.content.message', "");
         this.set('session.session.content.errorMessage', "");
       } catch(exception) {
-        this.debug("Error when resetting login page labels", exception);
+        this.logger.error("Error when resetting login page labels: "+ exception.errorMessage);
+        debug(errorMessage)
       }
 
 
@@ -72,7 +75,7 @@ export default Component.extend({
 
             if (errorPayload && errorPayload.status && errorPayload.title && errorPayload.detail) {
 
-              self.debug(errorPayload.detail);
+              self.logger.error(errorPayload.detail);
 
               errorMessage = `${errorPayload.status}: ${errorPayload.title} / ${errorPayload.detail}`;
             }

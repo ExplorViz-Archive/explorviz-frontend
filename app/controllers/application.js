@@ -1,5 +1,6 @@
 import Controller from '@ember/controller';
 import { inject as service } from "@ember/service";
+import logger from 'explorviz-frontend/utils/logging'
 
 
 /**
@@ -14,9 +15,11 @@ import { inject as service } from "@ember/service";
 export default Controller.extend({
   
   session: service('session'),
+  logger: logger("Applications"),
 
   init(){
     this._super();
+    this.logger.debug("Application loaded")
   }
 
 });
