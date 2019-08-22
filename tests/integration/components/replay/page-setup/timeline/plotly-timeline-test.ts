@@ -12,7 +12,7 @@ module('Integration | Component | replay/page-setup/timeline/plotly-timeline', f
 
     await render(hbs`{{replay/page-setup/timeline/plotly-timeline}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    assert.equal(this.element.textContent!.trim(), '');
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +21,6 @@ module('Integration | Component | replay/page-setup/timeline/plotly-timeline', f
       {{/replay/page-setup/timeline/plotly-timeline}}
     `);
 
-    assert.equal(this.element.textContent.trim(), 'template block text');
+    assert.equal(this.element.textContent!.trim(), 'template block text');
   });
 });

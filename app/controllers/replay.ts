@@ -8,7 +8,7 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 
-export default class Replay extends Controller.extend(AlertifyHandler) {
+export default class ReplayController extends Controller.extend(AlertifyHandler) {
 
   @service('current-user') currentUser !: CurrentUser;
   @service('landscape-file-loader') landscapeFileLoader !: LandscapeFileLoader;
@@ -83,6 +83,6 @@ export default class Replay extends Controller.extend(AlertifyHandler) {
 // DO NOT DELETE: this is how TypeScript knows how to look up your controllers.
 declare module '@ember/controller' {
   interface Registry {
-    'replay': Replay;
+    'replayController': ReplayController;
   }
 }
