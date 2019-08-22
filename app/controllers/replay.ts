@@ -15,13 +15,14 @@ export default class ReplayController extends Controller.extend(AlertifyHandler)
   @service('repos/timestamp-repository') timestampRepo !: TimestampRepository
   @service("repos/landscape-repository") landscapeRepo !: LandscapeRepository;
   @service("rendering-service") renderingService !: RenderingService;
+  //@ts-ignore
   @service("reload-handler") reloadHandler !: any;
 
   state = null;
 
   @computed('landscapeRepo.replayApplication')
   get showLandscape() {
-    return !get(this, 'landscapeRepo.replayApplication');
+    return !get(this.landscapeRepo, 'replayApplication');
   }
 
   @action
@@ -36,8 +37,8 @@ export default class ReplayController extends Controller.extend(AlertifyHandler)
 
   @action
   openLandscapeView() {
-    set(this, 'landscapeRepo.latestApplication', null);
-    set(this, 'landscapeRepo.replayApplication', null);
+    set(this.landscapeRepo, 'latestApplication', null);
+    set(this.landscapeRepo, 'replayApplication', null);
   }
 
   @action
@@ -51,11 +52,11 @@ export default class ReplayController extends Controller.extend(AlertifyHandler)
   }
 
   showTimeline() {
-    set(this, 'renderingService.showTimeline', true);
+    set(this.renderingService, 'showTimeline', true);
   }
 
   hideVersionbar() {
-    set(this, 'renderingService.showVersionbar', false);
+    set(this.renderingService, 'showVersionbar', false);
   }
 
   // necessary for hidded input box to select a file for uploading

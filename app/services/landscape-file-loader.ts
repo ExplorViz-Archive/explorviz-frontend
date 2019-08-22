@@ -17,7 +17,7 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
 
   debug = debugLogger();
 
-  @service('session') session !: any; 
+  @service('session') session !: any;
   @service('store') store !: DS.Store;
   @service('ajax') ajax !: AjaxServiceClass;
 
@@ -27,13 +27,14 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
   downloadLandscape(timestamp: number, totalRequests: number) {
     const self = this;
 
-    const { access_token } = get(this, 'session.data.authenticated');
+    let { access_token } = get(this.session, 'data.authenticated');
 
     const urlPath = `/v1/landscapes/download?timestamp=${timestamp}`;
     const savedFileName = timestamp + "-" + totalRequests + get(this, 'fileExtension');
     const url = `${ENV.APP.API_ROOT}${urlPath}`
 
     this.get('ajax').raw(url, {
+      //@ts-ignore
       'id': this,
       headers: { 'Authorization': `Bearer ${access_token}` },
       dataType: 'text',
@@ -42,6 +43,7 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
       }
     }
     ).then((content: any) => {
+      //@ts-ignore
       this.saveFileAs(savedFileName, content.payload, 'application/json');
       self.showAlertifySuccess("Landscape with timestamp [" + timestamp + "] downloaded!");
       this.debug("Landscape with timestamp [" + timestamp + "] downloaded!");
@@ -56,7 +58,7 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
   uploadLandscape(evt: any) {
     const self = this;
 
-    let { access_token } = this.get('session.data.authenticated');
+    let { access_token } = get(this.session, 'data.authenticated');
 
     const file = evt.target.files[0];
 

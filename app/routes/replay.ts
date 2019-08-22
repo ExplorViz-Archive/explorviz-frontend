@@ -1,6 +1,6 @@
 import BaseRoute from 'explorviz-frontend/routes/base-route';
 import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
-import { action } from '@ember/object';
+import { action, set } from '@ember/object';
 import ReplayController from 'explorviz-frontend/controllers/replay';
 
 export default class Replay extends BaseRoute.extend(AuthenticatedRouteMixin) {
@@ -17,13 +17,13 @@ export default class Replay extends BaseRoute.extend(AuthenticatedRouteMixin) {
     this.controller.send('resetView');
 
     // reset visualization rendering
-    this.controller.set('landscapeRepo.latestApplication', null);
-    this.controller.set('landscapeRepo.replayApplication', null);
+    set((this.controller as ReplayController).landscapeRepo, 'latestApplication', null);
+    set((this.controller as ReplayController).landscapeRepo, 'replayApplication', null);
   }
 
   // @Override
   @action didTransition() {
-    this.controller.hideVersionbar();
-    this.controller.showTimeline();
+    (this.controller as ReplayController).hideVersionbar();
+    (this.controller as ReplayController).showTimeline();
   }
 }
