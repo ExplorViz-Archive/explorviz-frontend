@@ -27,8 +27,6 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
   downloadLandscape(timestamp: number, totalRequests: number) {
     const self = this;
 
-    console.log(timestamp + " | " + totalRequests);
-
     const { access_token } = this.get('session.data.authenticated');
 
     const urlPath = `/v1/landscapes/download?timestamp=${timestamp}`;

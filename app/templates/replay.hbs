@@ -12,8 +12,6 @@
         {{visualization/page-setup/visualization-navbar
           content=(array
             (component "visualization/page-setup/navbar/reset-visualization")
-            (component "visualization/page-setup/navbar/pause-reload")
-            (component "visualization/page-setup/navbar/event-opener")
             (component "visualization/page-setup/navbar/landscape-downloader" landscape=landscapeRepo.replayLandscape)
           )
         }}
@@ -37,13 +35,10 @@
         {{else}}
         {{visualization/page-setup/visualization-navbar
         content=(array
-          (component "visualization/page-setup/navbar/reset-visualization")
-          (component "visualization/page-setup/navbar/pause-reload")
-          (component "visualization/page-setup/navbar/trace-overview")
-          (component "visualization/page-setup/navbar/sql-opener")
+          (component "visualization/page-setup/navbar/reset-visualization") 
           (component "visualization/page-setup/navbar/landscape-downloader" landscape=landscapeRepo.replayLandscape)
           (component "visualization/page-setup/navbar/application-opener")
-          (component "visualization/page-setup/navbar/application-search")    
+          (component "visualization/page-setup/navbar/application-search")  
         )
       }}
         <div id="rendering">
@@ -52,7 +47,7 @@
                 {{svg-jar "reply" class="octicon align-middle"}}
                 {{/bs-button}}
             </div>
-            {{visualization/rendering/application-rendering latestApplication=landscapeRepo.replayApplication}}
+            {{visualization/rendering/application-rendering mode=replay latestApplication=landscapeRepo.replayApplication}}
             <!-- popup(s) -->
             {{visualization/rendering/popups/popup-coordinator
         popupData=additionalData.popupContent}}

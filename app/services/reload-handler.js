@@ -73,7 +73,6 @@ export default Service.extend(AlertifyHandler, Evented, {
 
     function success(landscape) {
       // Pause the visualization
-      self.get('landscapeListener').stopVisualizationReload();
       self.get('modelUpdater').addDrawableCommunication();
 
       self.set('landscapeRepo.replayLandscape', landscape);

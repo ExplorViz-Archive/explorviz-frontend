@@ -47,7 +47,6 @@ export default class Replay extends Controller.extend(AlertifyHandler) {
 
   @action
   timelineClicked(timestampInMillisecondsArray: any) {
-    console.log(timestampInMillisecondsArray[0]);
     get(this, 'reloadHandler').loadReplayLandscapeByTimestamp(timestampInMillisecondsArray[0]);
   }
 
@@ -55,7 +54,7 @@ export default class Replay extends Controller.extend(AlertifyHandler) {
     set(this, 'renderingService.showTimeline', true);
   }
 
-  hideVersionbar(){
+  hideVersionbar() {
     set(this, 'renderingService.showVersionbar', false);
   }
 

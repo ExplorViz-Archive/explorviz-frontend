@@ -152,7 +152,14 @@ export default RenderingCore.extend(AlertifyHandler, {
    * The landscape is bound in the template, e.g., landscape=landscapeRepo.latestLandscape
    */
   getLandscape() {
-    return this.get('landscape');
+    // landscape is passed via the template, e.g., for the replay mode
+    if (this.get('landscape') != null|undefined) {
+      return this.get('landscape');
+    }
+    // the visualization route needs to get the landscape directly from the landscapeRepo to work correctly
+    else {
+      return this.get('landscapeRepo.latestLandscape');
+    }
   },
 
 

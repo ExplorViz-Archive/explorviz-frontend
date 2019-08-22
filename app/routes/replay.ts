@@ -14,6 +14,8 @@ export default class Replay extends BaseRoute.extend(AuthenticatedRouteMixin) {
   // @Override BaseRoute
   @action resetRoute() {
     this.controller.send('resetView');
+
+    // reset visualization rendering
     this.controller.set('landscapeRepo.latestApplication', null);
     this.controller.set('landscapeRepo.repoApplication', null);
   }
