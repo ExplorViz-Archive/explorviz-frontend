@@ -12,15 +12,12 @@ module('Integration | Component | replay/page-setup/timeline/plotly-timeline', f
 
     await render(hbs`{{replay/page-setup/timeline/plotly-timeline}}`);
 
-    assert.equal(this.element.textContent!.trim(), '');
+    const el:any = this.element;
 
-    // Template block usage:
-    await render(hbs`
-      {{#replay/page-setup/timeline/plotly-timeline}}
-        template block text
-      {{/replay/page-setup/timeline/plotly-timeline}}
-    `);
-
-    assert.equal(this.element.textContent!.trim(), 'template block text');
-  });
+    if(el) {
+      assert.equal(el.textContent.trim(), 'No replay timestamps available.');
+    } else {
+      assert.notOk( "empty element", "There was no element to test." );
+    }
+});
 });

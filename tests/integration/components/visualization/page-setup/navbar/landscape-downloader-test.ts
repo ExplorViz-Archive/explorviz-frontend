@@ -12,7 +12,13 @@ module('Integration | Component | visualization/page-setup/navbar/landscape-down
 
     await render(hbs`{{visualization/page-setup/navbar/landscape-downloader}}`);
 
-    assert.equal(this.element.textContent!.trim(), '');
+    let textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'no text content');
+    } else {
+      assert.equal(textContent.trim(), '');
+    }
 
     // Template block usage:
     await render(hbs`
@@ -21,6 +27,12 @@ module('Integration | Component | visualization/page-setup/navbar/landscape-down
       {{/visualization/page-setup/navbar/landscape-downloader}}
     `);
 
-    assert.equal(this.element.textContent!.trim(), 'template block text');
+    textContent = this.element.textContent;
+
+    if(textContent === null) {
+      assert.ok(null, 'no text content');
+    } else {
+      assert.equal(textContent.trim(), '');
+    }
   });
 });
