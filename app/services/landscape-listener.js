@@ -57,19 +57,15 @@ export default Service.extend(Evented, {
 
         // Pause active -> no landscape visualization update
         // Do avoid update of store to prevent inconsistencies between visualization and e.g. trace data
-        if (this.get('pauseVisualizationReload')) {
-          this.debug("SSE: Updating paused");
-          return;
+        if (!this.get('pauseVisualizationReload')) {
+          this.debug("Visualization update paused");
+
+          this.get('store').unloadAll('tracestep');
+          this.get('store').unloadAll('trace');
+          this.get('store').unloadAll('clazzcommunication');
+          this.get('store').unloadAll('event');
+          
         }
-
-        this.debug("SSE: Updating.");
-
-        this.get('store').unloadAll('tracestep');
-        this.get('store').unloadAll('trace');
-        this.get('store').unloadAll('clazzcommunication');
-        this.get('store').unloadAll('event');
-
-        // console.log("JSON: " + JSON.stringify(jsonLandscape));
 
         // ATTENTION: Mind the push operation, push != pushPayload in terms of 
         // serializer usage
@@ -77,10 +73,12 @@ export default Service.extend(Evented, {
         this.set('latestJsonLandscape', jsonLandscape);
         const landscapeRecord = this.get('store').push(jsonLandscape);
 
-        this.get('modelUpdater').addDrawableCommunication();
+        if (!this.get('pauseVisualizationReload')) {
+          this.get('modelUpdater').addDrawableCommunication();
 
-        this.set('landscapeRepo.latestLandscape', landscapeRecord);
-        this.get('landscapeRepo').triggerLatestLandscapeUpdate();
+          this.set('landscapeRepo.latestLandscape', landscapeRecord);
+          this.get('landscapeRepo').triggerLatestLandscapeUpdate();          
+        }        
 
         const timestamp = landscapeRecord.get('timestamp');
 
