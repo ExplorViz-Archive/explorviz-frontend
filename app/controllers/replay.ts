@@ -15,6 +15,8 @@ export default class ReplayController extends Controller.extend(AlertifyHandler)
   @service('repos/timestamp-repository') timestampRepo !: TimestampRepository
   @service("repos/landscape-repository") landscapeRepo !: LandscapeRepository;
   @service("rendering-service") renderingService !: RenderingService;
+  @service("additional-data") additionalData !: any;
+
   //@ts-ignore
   @service("reload-handler") reloadHandler !: any;
 
