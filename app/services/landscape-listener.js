@@ -55,40 +55,66 @@ export default Service.extend(Evented, {
 
       if (jsonLandscape && jsonLandscape.hasOwnProperty("data")) {
 
+        let timestampRecord;
+
         // Pause active -> no landscape visualization update
         // Do avoid update of store to prevent inconsistencies between visualization and e.g. trace data
-        if (this.get('pauseVisualizationReload')) {
-          this.debug("SSE: Updating paused");
-          return;
+        if (!this.get('pauseVisualizationReload')) {
+
+          this.get('store').unloadAll('tracestep');
+          this.get('store').unloadAll('trace');
+          this.get('store').unloadAll('clazzcommunication');
+          this.get('store').unloadAll('event');
+
+          // ATTENTION: Mind the push operation, push != pushPayload in terms of 
+          // serializer usage
+          // https://github.com/emberjs/data/issues/3455
+          
+          this.set('latestJsonLandscape', jsonLandscape);
+          const landscapeRecord = this.get('store').push(jsonLandscape);
+          
+          this.get('modelUpdater').addDrawableCommunication();
+
+          this.set('landscapeRepo.latestLandscape', landscapeRecord);
+          this.get('landscapeRepo').triggerLatestLandscapeUpdate();          
+                
+
+          timestampRecord = landscapeRecord.get('timestamp');
+                    
+        } else {
+
+          // visualization is paused
+          this.debug("Visualization update paused");
+
+          // hacky way to obtain the timestamp record, without deserializing 
+          // the complete landscape record and poluting the store
+          const timestampId = jsonLandscape["data"]["relationships"]["timestamp"]["data"]["id"];
+    
+          const includedArray = jsonLandscape["included"];
+
+          let timestampValue;          
+          let totalRequests;
+
+          for(var elem of includedArray) {
+            if(elem["id"] == timestampId) {
+              timestampValue = elem["attributes"]["timestamp"];
+              totalRequests = elem["attributes"]["totalRequests"];              
+              break;
+            }
+          }
+
+          timestampRecord = this.get('store').createRecord('timestamp', {
+            id: timestampId,
+            timestamp: timestampValue,
+            totalRequests: totalRequests
+          });     
         }
 
-        this.debug("SSE: Updating.");
-
-        this.get('store').unloadAll('tracestep');
-        this.get('store').unloadAll('trace');
-        this.get('store').unloadAll('clazzcommunication');
-        this.get('store').unloadAll('event');
-
-        // console.log("JSON: " + JSON.stringify(jsonLandscape));
-
-        // ATTENTION: Mind the push operation, push != pushPayload in terms of 
-        // serializer usage
-        // https://github.com/emberjs/data/issues/3455
-        this.set('latestJsonLandscape', jsonLandscape);
-        const landscapeRecord = this.get('store').push(jsonLandscape);
-
-        this.get('modelUpdater').addDrawableCommunication();
-
-        this.set('landscapeRepo.latestLandscape', landscapeRecord);
-        this.get('landscapeRepo').triggerLatestLandscapeUpdate();
-
-        const timestamp = landscapeRecord.get('timestamp');
-
-        this.set('timestampRepo.latestTimestamp', timestamp);
+        this.set('timestampRepo.latestTimestamp', timestampRecord);
 
         // this syntax will notify the template engine to redraw all components
         // with a binding to this attribute
-        this.set('timestampRepo.timelineTimestamps', [...this.timestampRepo.timelineTimestamps, timestamp]);
+        this.set('timestampRepo.timelineTimestamps', [...this.timestampRepo.timelineTimestamps, timestampRecord]);
 
         this.get('timestampRepo').triggerTimelineUpdate();
       }

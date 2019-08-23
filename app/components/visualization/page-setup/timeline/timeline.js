@@ -9,7 +9,7 @@ import Chart from "chart.js";
 import $ from 'jquery';
 
 /**
- * Renderer for athe timeline.
+ * Renderer for the visualization timeline.
  *
  * @class Timeline-Component
  *

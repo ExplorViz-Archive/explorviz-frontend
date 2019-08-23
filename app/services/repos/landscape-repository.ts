@@ -14,11 +14,15 @@ export default class LandscapeRepository extends Service.extend(Evented) {
   latestLandscape:Landscape|null = null;
   latestApplication:Application|null = null;
 
-  replayLandscape = null;
-  replayApplication = null;
+  replayLandscape:Landscape|null = null;
+  replayApplication:Application|null = null;
 
   triggerLatestLandscapeUpdate() {
     this.trigger("updated", this.get("latestLandscape"));
+  }
+
+  triggerLatestReplayLandscapeUpdate() {
+    this.trigger("updated", this.get("replayLandscape"));
   }
 
 }

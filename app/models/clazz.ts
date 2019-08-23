@@ -43,6 +43,14 @@ export default class Clazz extends Draw3DNodeEntity {
     }
   }
 
+  closeParents(this: Clazz) {
+    let parent = this.belongsTo('parent').value() as Component;
+    if(parent !== null) {
+      parent.set('opened', false);
+      parent.closeParents();
+    }
+  }
+
   isVisible() {
     return this.get('parent').get('opened');
   }

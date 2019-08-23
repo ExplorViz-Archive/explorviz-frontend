@@ -26,7 +26,7 @@
             </tr>
             <tr>
                 <td>&nbsp;{{svg-jar "clock" class="octicon align-middle"}}&nbsp; Avg. Response Time (ms):</td>
-                <td style="text-align:right;padding-left:10px;"> {{data.responseTime}}
+                <td style="text-align:right;padding-left:10px;"> {{format-number data.responseTime 'ms'}}
                 </td>
             </tr>
         </table>

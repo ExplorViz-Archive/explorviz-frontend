@@ -1,11 +1,11 @@
 import Route from '@ember/routing/route';
-import {inject as service} from '@ember/service';
+import { inject as service } from '@ember/service';
 import { isEmpty } from '@ember/utils';
-import ApplicationRouteMixin from 
-'ember-simple-auth/mixins/application-route-mixin';
+import ApplicationRouteMixin from
+  'ember-simple-auth/mixins/application-route-mixin';
 import { resolve, all } from 'rsvp';
 import ENV from 'explorviz-frontend/config/environment';
- 
+
 const { environment } = ENV;
 
 /**
@@ -22,7 +22,7 @@ export default Route.extend(ApplicationRouteMixin, {
   userSettings: service(),
 
   beforeModel() {
-    if(environment === 'test')
+    if (environment === 'test')
       return resolve();
 
     return new all([
@@ -35,7 +35,7 @@ export default Route.extend(ApplicationRouteMixin, {
   sessionAuthenticated() {
     this._super(...arguments);
 
-    if(environment === 'test')
+    if (environment === 'test')
       return;
 
     this._loadCurrentUser();
@@ -44,15 +44,15 @@ export default Route.extend(ApplicationRouteMixin, {
   },
 
   _loadCurrentUser() {
-    return this.get('currentUser').load().catch(() => this.get('session').invalidate({message: 'User could not be loaded'}));
+    return this.get('currentUser').load().catch(() => this.get('session').invalidate({ message: 'User could not be loaded' }));
   },
 
   _loadCurrentUserPreferences() {
     let userId = this.get('session').get('session.content.authenticated.rawUserData.data.id');
     if (!isEmpty(userId)) {
-      return this.store.findAll('userpreference', { adapterOptions: {userId: userId} }).catch(() => this.get('session').invalidate({message: 'User preferences could not be loaded'}));
+      return this.store.query('userpreference', { userId }).catch(() => this.get('session').invalidate({message: 'User preferences could not be loaded'}));
     } else {
-      this.get('session').invalidate({message: 'Session invalid'});
+      this.get('session').invalidate({ message: 'Session invalid' });
       return resolve();
     }
   },
@@ -64,20 +64,20 @@ export default Route.extend(ApplicationRouteMixin, {
     // get all setting types and save them for future access
     settings.then(() => {
       let types = new Set();
-      for(let i = 0; i < settings.get('length'); i++) {
+      for (let i = 0; i < settings.get('length'); i++) {
         types.add(settings.objectAt(i).constructor.modelName);
       }
       this.get('userSettings').set('types', types);
     }, () => {
-      this.get('session').invalidate({message: 'Settings could not be loaded'});
+      this.get('session').invalidate({ message: 'Settings could not be loaded' });
     });
     return resolve();
   },
 
   actions: {
-      logout() {
-        this.get('session').invalidate({message: "Logout successful"});
-      }
+    logout() {
+      this.get('session').invalidate({ message: "Logout successful" });
     }
+  }
 
 });

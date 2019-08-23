@@ -1,9 +1,10 @@
-dist: xenial
+dist: bionic
 
 language: node_js
 
+# Use the latest stable version
 node_js:
-  - "10"
+  - node
 
 services:
   - docker

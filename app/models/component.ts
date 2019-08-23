@@ -198,6 +198,14 @@ export default class Component extends Draw3DNodeEntity {
       parentComponent.openParents();
     }
   }
+
+  closeParents(this:Component) {
+    let parentComponent = this.belongsTo('parentComponent').value() as Component;
+    if(parentComponent !== null) {
+      parentComponent.set('opened', false);
+      parentComponent.closeParents();
+    }
+  }
 }
 
 declare module 'ember-data/types/registries/model' {

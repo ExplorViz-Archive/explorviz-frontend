@@ -148,9 +148,18 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.set('interaction.raycastObjects', this.get('scene.children'));
   },
 
-  
+  /**
+   * The landscape is bound in the template, e.g., landscape=landscapeRepo.latestLandscape
+   */
   getLandscape() {
-    return this.get('landscapeRepo.latestLandscape');
+    // landscape is passed via the template, e.g., for the replay mode
+    if (this.get('landscape') != null|undefined) {
+      return this.get('landscape');
+    }
+    // the visualization route needs to get the landscape directly from the landscapeRepo to work correctly
+    else {
+      return this.get('landscapeRepo.latestLandscape');
+    }
   },
 
 
