@@ -1,4 +1,5 @@
 import debugLogger from 'ember-debug-logger';
+import config from 'explorviz-frontend/config/environment';
 import $ from 'jquery';
 
 abstract class Logger {
@@ -41,7 +42,7 @@ class LogstashLogger extends Logger {
         this.dispatch(event);
     }
 
-    private logstashURL: string = "http://localhost:4563/"
+    private logstashURL: string = config.APP.LOGSTASH_URL;
 
 
     constructor(name: string) {
@@ -108,7 +109,7 @@ enum LogLevel {
 }
 
 // Configuration
-const logstashEnabled = true;
+const logstashEnabled = config.APP.LOGSTASG_ENABLED;
 
 export default function logger(name: string): Logger{
     let l = new CompositLogger(name);
