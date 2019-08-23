@@ -19,7 +19,7 @@ export default Component.extend({
   tagName: '',
 
   debug: debugLogger(),
-  logger: logger(this._debugContainerKey),
+  logger: logger("Login"),
 
   session: service(),
   router: service('-routing'),
@@ -50,7 +50,7 @@ export default Component.extend({
         this.set('session.session.content.errorMessage', "");
       } catch(exception) {
         this.logger.error("Error when resetting login page labels: "+ exception.errorMessage);
-        debug(errorMessage)
+        this.debug(exception.errorMessage)
       }
 
 

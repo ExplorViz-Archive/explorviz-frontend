@@ -32,7 +32,7 @@ export default Component.extend(Evented, THREEPerformance, {
 
 
   debug: debugLogger(),
-  logger: logger(this._debugContainerKey),
+  logger: logger("Rendering"),
 
 
 

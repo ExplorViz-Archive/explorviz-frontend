@@ -3,6 +3,8 @@
 var sass = require('sass');
 var EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
+SRI: { enabled: false }
+
 module.exports = function(defaults) {
 
   var app = new EmberApp(defaults, {
