@@ -43,7 +43,7 @@ class LogstashLogger extends Logger {
     }
 
     private logstashURL: string = config.APP.LOGSTASH_URL;
-
+   
 
     constructor(name: string) {
         super(name);
@@ -53,8 +53,9 @@ class LogstashLogger extends Logger {
         $.ajax(this.logstashURL, { 
             type: "POST",
             data: JSON.stringify(event),
-            mimeType: "json"
-          })
+            contentType: "application/json",
+	    dataType: "text/plain"
+          });
     }
     
 }
@@ -109,7 +110,7 @@ enum LogLevel {
 }
 
 // Configuration
-const logstashEnabled = config.APP.LOGSTASG_ENABLED;
+const logstashEnabled = config.APP.LOGSTASH_ENABLED;
 
 export default function logger(name: string): Logger{
     let l = new CompositLogger(name);

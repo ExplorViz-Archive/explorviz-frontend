@@ -47,8 +47,8 @@ module.exports = function (environment) {
       LOGSTASH_ENABLED = (process.env.LOGSTASH_ENABLED.toLowerCase() === 'true')
       if(process.env.LOGSTASH_HOST) {
         LOGSTASH_HOST = process.env.LOGSTASH_HOST;
-        LOGSTASH_URL = LOGSTASH_HOST+":"+LOGSTASH_PORT;
-        console.log(`EXPL-INFO: Logstash host set to ${logstashURL}.`)
+        LOGSTASH_URL = 'http://' + LOGSTASH_HOST + ":" + LOGSTASH_PORT;
+        console.log(`EXPL-INFO: Logstash host set to ${LOGSTASH_URL}.`)
       } else {
         console.log(`EXPL-WARNING: You enabled logging to logstash but did not specify a logstash host. Logstash logging is disabled.`)
         LOGSTASH_ENABLED = false;
@@ -75,8 +75,8 @@ module.exports = function (environment) {
       LOGSTASH_ENABLED = (process.env.LOGSTASH_ENABLED.toLowerCase() === 'true')
       if(process.env.LOGSTASH_HOST) {
         LOGSTASH_HOST = process.env.LOGSTASH_HOST;
-        LOGSTASH_URL = LOGSTASH_HOST+":"+LOGSTASH_PORT;
-        console.log(`EXPL-INFO: Logstash host set to ${logstashURL}.`)
+        LOGSTASH_URL = 'http://' + LOGSTASH_HOST + ":" + LOGSTASH_PORT;
+        console.log(`EXPL-INFO: Logstash host set to ${LOGSTASH_URL}.`)
       } else {
         console.log(`EXPL-WARNING: You enabled logging to logstash but did not specify a logstash host. Logstash logging is disabled.`)
         LOGSTASH_ENABLED = false;
