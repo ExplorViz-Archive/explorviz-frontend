@@ -5,15 +5,20 @@
     {{#if this.initSettings.isRunning}}
       <div class="spinner-center-3" role="status"></div>
     {{else}}
-      {{user-management/user-settings-default settings=this.settings useDefaultSettings=this.useDefaultSettings}}
+      {{#let (component "user-management/user-settings-default") as |UserSettingsDefault|}}
+        <UserSettingsDefault
+          @settings={{this.settings}}
+          @useDefaultSettings={{this.useDefaultSettings}}
+        />
+      {{/let}}
 
       {{#if this.saveSettings.isRunning}}
-        {{#bs-button type="primary" buttonType="submit" disabled=true}}
+        <BsButton @type="primary" @buttonType="submit" @disabled={{true}}>
           <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           Saving...
-        {{/bs-button}}
+        </BsButton>
       {{else}}
-        {{bs-button defaultText="Save Changes" onClick=(perform saveSettings) type="primary" buttonType="submit"}}
+        <BsButton @defaultText="Save Changes" @onClick={{perform this.saveSettings}} @type="primary" @buttonType="submit" />
       {{/if}}
     {{/if}}
   </div>

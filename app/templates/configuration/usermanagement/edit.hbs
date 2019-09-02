@@ -1,21 +1,26 @@
 <div class="col-12 d-flex flex-column">
   <div class="mb-4">
-    {{#bs-button onClick=(route-action "goBack") type="secondary" outline=true title="Back to User List"}}
+    <BsButton @onClick={{route-action "goBack"}} @type="secondary" @outline={{true}} @title="Back to User List">
       {{svg-jar "reply" class="octicon align-middle"}}
-    {{/bs-button}}
+    </BsButton>
   </div>
   <div style="overflow-y: auto">
     <div class="row" style="margin-right: 0">
       <div class="col-12 col-xl-6 mb-4">
         <div class="card">
           <div class="card-body">
-            {{user-management/user-data user=this.model.user}}
+            {{#let (component "user-management/user-data") as |UserData|}}
+              <UserData @user={{this.model.user}} />
+            {{/let}}
           </div>
         </div>
       </div>
       <div class="col-12 col-xl-6">
         <div class="card">
           <div class="card-body">
+            {{#let (component "user-management/user-settings") as |UserSettings|}}
+              <UserSettings @user={{this.model.user}} />
+            {{/let}}
             {{user-management/user-settings user=this.model.user}}
           </div>
         </div>

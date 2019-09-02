@@ -1,5 +1,7 @@
 <div class="container" style="overflow-y: auto">
   <div class="col-12">
-    {{user-management/user-settings user=this.model.user}}
+    {{#let (component "user-management/user-settings") as |UserSettings|}}
+      <UserSettings @user={{this.model.user}} />
+    {{/let}}
   </div>
 </div>
