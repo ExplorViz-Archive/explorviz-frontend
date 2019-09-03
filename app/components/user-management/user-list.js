@@ -5,6 +5,8 @@ import { all } from 'rsvp';
 import { task } from 'ember-concurrency';
 import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
+import logger from 'explorviz-frontend/utils/logging';
+
 export default Component.extend(AlertifyHandler, {
 
   // No Ember generated container
@@ -22,6 +24,8 @@ export default Component.extend(AlertifyHandler, {
 
   showDeleteUsersButton: null,
   showDeleteUsersDialog: null,
+
+  logger: logger('user-list'),
 
   didInsertElement() {
     this._super(...arguments);
@@ -59,6 +63,7 @@ export default Component.extend(AlertifyHandler, {
       this.set('showDeleteUsersButton', false);
     } catch(reason) {
       this.showAlertifyMessage('Could not load users!');
+      this.get('logger').error("Could not load users: "+reason);
       this.set('allSelected', false);
       this.set('users', []);
       this.set('selected', {});
