@@ -9,17 +9,16 @@ export default class DataSelection extends Component {
   // No Ember generated container
   tagName = '';
 
-  @service('additional-data')
-  additionalData!: AdditionalData;
+  @service('additional-data') additionalData!: AdditionalData;
 
   @action
   closeWindow() {
-    this.get('additionalData').emptyAndClose();
+    this.additionalData.emptyAndClose();
   }
 
   @action
   openWindow() {
-    this.get('additionalData').openAdditionalData();
+    this.additionalData.openAdditionalData();
   }
 
   closeDataSelection() {
@@ -35,7 +34,7 @@ export default class DataSelection extends Component {
   }
 
   onShowWindow() {
-    if(this.get('additionalData').get('showWindow'))
+    if(this.additionalData.showWindow)
       this.openDataSelection();
     else
       this.closeDataSelection();
@@ -43,11 +42,11 @@ export default class DataSelection extends Component {
 
   init() {
     super.init();
-    this.get('additionalData').on('showWindow', this, this.onShowWindow);
+    this.additionalData.on('showWindow', this, this.onShowWindow);
   }
 
   willDestroyElement() {
     super.willDestroyElement();
-    this.get('additionalData').off('showWindow', this, this.onShowWindow);
+    this.additionalData.off('showWindow', this, this.onShowWindow);
   }
 }

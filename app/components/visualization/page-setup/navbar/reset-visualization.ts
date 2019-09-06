@@ -12,7 +12,7 @@ export default class ResetVisualization extends Component {
 
   @action
   resetView() {
-    this.get('renderingService').reSetupScene();
+    this.renderingService.reSetupScene();
   }
 
 }

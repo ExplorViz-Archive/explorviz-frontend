@@ -10,22 +10,20 @@ export default class EventOpener extends Component.extend(AlertifyHandler) {
   // No Ember generated container
   tagName = '';
 
-  @service('additional-data')
-  additionalData!: AdditionalData;
+  @service('additional-data') additionalData!: AdditionalData;
 
-  @service('repos/landscape-repository')
-  landscapeRepo!: LandscapeRepository;
+  @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
 
   @action
   showEvents() {
-    const latestLandscape = this.get("landscapeRepo").get('latestLandscape');
+    const latestLandscape = this.landscapeRepo.latestLandscape;
     if(latestLandscape !== null) {
-      if (latestLandscape.get('events').length === 0){
+      if (latestLandscape.events.length === 0){
         this.showAlertifyMessage("No events found!");
         return;
       }
-      this.get('additionalData').addComponent("visualization/page-setup/sidebar/event-viewer");
-      this.get('additionalData').openAdditionalData();
+      this.additionalData.addComponent("visualization/page-setup/sidebar/event-viewer");
+      this.additionalData.openAdditionalData();
     }
   }
 

@@ -13,10 +13,10 @@ export default class LandscapeDownloader extends Component.extend({}) {
   @action
   downloadLandscape(landscape: Landscape) {
     if (landscape !== null) {
-      var timestamp: number = landscape.get('timestamp').get('timestamp');
-      var totalRequests: number = landscape.get('timestamp').get('totalRequests');
+      var timestamp: number = landscape.timestamp.timestamp;
+      var totalRequests: number = landscape.timestamp.totalRequests;
 
-      this.get('landscapeFileLoader').downloadLandscape(timestamp, totalRequests);
+      this.landscapeFileLoader.downloadLandscape(timestamp, totalRequests);
     }
   }
 };
