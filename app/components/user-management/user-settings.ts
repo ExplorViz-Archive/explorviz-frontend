@@ -3,7 +3,7 @@ import { inject as service } from "@ember/service";
 import { task } from 'ember-concurrency-decorators';
 import { all } from 'rsvp';
 
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import DS from 'ember-data';
 import UserSettings from 'explorviz-frontend/services/user-settings';
 import User from 'explorviz-frontend/models/user';
@@ -16,7 +16,7 @@ type Settings = {
   }
 };
 
-export default class UserManagementUserSettings extends Component.extend(AlertifyHandler) {
+export default class UserManagementUserSettings extends Component {
 
   // No Ember generated container
   tagName = '';
@@ -155,10 +155,10 @@ export default class UserManagementUserSettings extends Component.extend(Alertif
 
     // wait for all records to be saved. Give out error if one fails
     yield all(settingsPromiseArray).then(()=>{
-      this.showAlertifySuccess('Settings saved.');
+      AlertifyHandler.showAlertifySuccess('Settings saved.');
     }).catch((reason)=>{
       const {title, detail} = reason.errors[0];
-      this.showAlertifyError(`<b>${title}:</b> ${detail}`);
+      AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
     });
   });
 }

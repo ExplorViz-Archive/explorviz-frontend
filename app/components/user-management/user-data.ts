@@ -2,13 +2,13 @@ import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 
 import { task } from 'ember-concurrency-decorators';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import DS from 'ember-data';
 import { set } from '@ember/object';
 import User from 'explorviz-frontend/models/user';
 import Role from 'explorviz-frontend/models/role';
 
-export default class UserData extends Component.extend(AlertifyHandler) {
+export default class UserData extends Component {
 
   // No Ember generated container
   tagName = '';
@@ -43,10 +43,10 @@ export default class UserData extends Component.extend(AlertifyHandler) {
     if(user) {
       // check for valid input
       if(!username_change || username_change.length === 0) {
-        this.showAlertifyWarning('Username cannot be empty.');
+        AlertifyHandler.showAlertifyWarning('Username cannot be empty.');
         return;
       } else if(!roles_change || roles_change.length === 0) {
-        this.showAlertifyWarning('User needs at least 1 role.');
+        AlertifyHandler.showAlertifyWarning('User needs at least 1 role.');
         return;
       }
 
@@ -60,13 +60,13 @@ export default class UserData extends Component.extend(AlertifyHandler) {
 
       try {
         yield user.save();
-        this.showAlertifySuccess(`User updated.`);
+        AlertifyHandler.showAlertifySuccess(`User updated.`);
         clearInputFields.bind(this)();
       } catch(reason) {
         this.showReasonErrorAlert(reason);
       }
     } else {
-      this.showAlertifyError(`User not found.`);
+      AlertifyHandler.showAlertifyError(`User not found.`);
     }
 
     function clearInputFields(this:UserData) {
@@ -76,7 +76,7 @@ export default class UserData extends Component.extend(AlertifyHandler) {
 
   showReasonErrorAlert(reason:any) {
     const { title, detail } = reason.errors[0];
-    this.showAlertifyError(`<b>${title}:</b> ${detail}`);
+    AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
   }
 
   @task

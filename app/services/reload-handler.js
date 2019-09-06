@@ -3,11 +3,11 @@ import Evented from '@ember/object/evented';
 import { inject as service } from '@ember/service';
 import { getOwner } from '@ember/application';
 import debugLogger from 'ember-debug-logger';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import ModelUpdater from 'explorviz-frontend/utils/model-update';
 
 
-export default Service.extend(AlertifyHandler, Evented, {
+export default Service.extend(Evented, {
 
   store: service(),
   landscapeListener: service("landscape-listener"),
@@ -48,7 +48,7 @@ export default Service.extend(AlertifyHandler, Evented, {
 
     function failure(e) {
       self.set('landscapeRepo.latestLandscape', undefined);
-      self.showAlertifyMessage("Landscape couldn't be requested!" +
+      AlertifyHandler.showAlertifyMessage("Landscape couldn't be requested!" +
         " Backend offline?");
       self.debug("Landscape couldn't be requested!", e);
     }
@@ -83,7 +83,7 @@ export default Service.extend(AlertifyHandler, Evented, {
 
     function failure(e) {
       self.set('landscapeRepo.replayLandscape', undefined);
-      self.showAlertifyMessage("Replay Landscape couldn't be requested!" +
+      AlertifyHandler.showAlertifyMessage("Replay Landscape couldn't be requested!" +
         " Backend offline?");
       self.debug("Repplay Landscape couldn't be requested!", e);
     }

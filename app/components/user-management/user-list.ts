@@ -3,14 +3,14 @@ import { inject as service } from "@ember/service";
 import { all } from 'rsvp';
 
 import { task } from 'ember-concurrency-decorators';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import DS from 'ember-data';
 import { Router } from '@ember/routing';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import { action, set } from '@ember/object';
 import User from 'explorviz-frontend/models/user';
 
-export default class UserList extends Component.extend(AlertifyHandler) {
+export default class UserList extends Component {
 
   // No Ember generated container
   tagName = '';
@@ -59,7 +59,7 @@ export default class UserList extends Component.extend(AlertifyHandler) {
       }
       set(this, 'showDeleteUsersButton', false);
     } catch(reason) {
-      this.showAlertifyMessage('Could not load users!');
+      AlertifyHandler.showAlertifyMessage('Could not load users!');
       set(this, 'allSelected', false);
       set(this, 'users', []);
       set(this, 'selected', {});
@@ -82,10 +82,10 @@ export default class UserList extends Component.extend(AlertifyHandler) {
     // should do an all settled here to make sure all promises are resolved
     // and only then update the user list
     yield all(settingsPromiseArray).then(()=>{
-      this.showAlertifySuccess('All users successfully deleted.');
+      AlertifyHandler.showAlertifySuccess('All users successfully deleted.');
     }).catch((reason)=>{
       const {title, detail} = reason.errors[0];
-      this.showAlertifyError(`<b>${title}:</b> ${detail}`);
+      AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
     }).finally(() => {
       this.updateUserList.perform();
       set(this, 'showDeleteUsersDialog', false);
@@ -127,7 +127,7 @@ export default class UserList extends Component.extend(AlertifyHandler) {
       let username = user.username;
       yield user.destroyRecord();
       const message = `User <b>${username}</b> deleted.`;
-      this.showAlertifyMessage(message);
+      AlertifyHandler.showAlertifyMessage(message);
       yield this.updateUserList.perform(false);
     } catch(reason) {
       this.showReasonErrorAlert(reason);
@@ -137,7 +137,7 @@ export default class UserList extends Component.extend(AlertifyHandler) {
 
   showReasonErrorAlert(reason:any) {
     const {title, detail} = reason.errors[0];
-    this.showAlertifyError(`<b>${title}:</b> ${detail}`);
+    AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
   }
 
 }

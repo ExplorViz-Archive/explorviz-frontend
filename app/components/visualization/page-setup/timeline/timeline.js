@@ -1,7 +1,7 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import Evented from '@ember/object/evented';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import debugLogger from 'ember-debug-logger';
 import { timestampToDate } from 'explorviz-frontend/helpers/timestamp-to-date';
 
@@ -16,7 +16,7 @@ import $ from 'jquery';
  * @module explorviz
  * @submodule visualization.page-setup.timeline
  */
-export default Component.extend(AlertifyHandler, Evented, {
+export default Component.extend(Evented, {
 
     // No Ember generated container
     tagName: '',
@@ -287,7 +287,7 @@ export default Component.extend(AlertifyHandler, Evented, {
                 // convert timestamp to readable date for notification
                 const formattedTimestamp = timestampToDate([retrievedTimestamp]);
 
-                self.showAlertifyMessage("Loading landscape [" + formattedTimestamp + "]");
+                AlertifyHandler.showAlertifyMessage("Loading landscape [" + formattedTimestamp + "]");
                 self.handleNotificationMessage(false);
 
                 self.get('reloadHandler').loadLandscapeById(retrievedTimestamp);
@@ -426,11 +426,11 @@ export default Component.extend(AlertifyHandler, Evented, {
      */
     handleNotificationMessage(pause) {
         if (pause) {
-            this.showAlertifyMessage("Visualization resumed!");
+            AlertifyHandler.showAlertifyMessage("Visualization resumed!");
             this.get('landscapeListener').startVisualizationReload();
         }
         else {
-            this.showAlertifyMessage("Visualization paused!");
+            AlertifyHandler.showAlertifyMessage("Visualization paused!");
             this.get('landscapeListener').stopVisualizationReload();
         }
     }

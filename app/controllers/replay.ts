@@ -1,5 +1,4 @@
 import Controller from '@ember/controller';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 import { inject as service } from "@ember/service";
 import { computed, action, get, set } from '@ember/object';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
@@ -8,7 +7,7 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 
-export default class ReplayController extends Controller.extend(AlertifyHandler) {
+export default class ReplayController extends Controller {
 
   @service('current-user') currentUser !: CurrentUser;
   @service('landscape-file-loader') landscapeFileLoader !: LandscapeFileLoader;

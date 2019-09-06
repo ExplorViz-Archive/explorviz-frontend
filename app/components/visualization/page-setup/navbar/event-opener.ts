@@ -1,11 +1,11 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import AdditionalData from 'explorviz-frontend/services/additional-data';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import { action } from '@ember/object';
 
-export default class EventOpener extends Component.extend(AlertifyHandler) {
+export default class EventOpener extends Component {
 
   // No Ember generated container
   tagName = '';
@@ -19,7 +19,7 @@ export default class EventOpener extends Component.extend(AlertifyHandler) {
     const latestLandscape = this.landscapeRepo.latestLandscape;
     if(latestLandscape !== null) {
       if (latestLandscape.events.length === 0){
-        this.showAlertifyMessage("No events found!");
+        AlertifyHandler.showAlertifyMessage("No events found!");
         return;
       }
       this.additionalData.addComponent("visualization/page-setup/sidebar/event-viewer");

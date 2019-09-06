@@ -2,7 +2,7 @@ import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 
 import { task } from 'ember-concurrency-decorators';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { all } from 'rsvp';
 import { action, set } from '@ember/object';
 import DS from 'ember-data';
@@ -25,7 +25,7 @@ type UserTrimmed = {
   password: string
 }
 
-export default class UserCreation extends Component.extend(AlertifyHandler) {
+export default class UserCreation extends Component {
 
   // No Ember generated container
   tagName = '';
@@ -133,13 +133,13 @@ export default class UserCreation extends Component.extend(AlertifyHandler) {
 
     // check for valid input
     if(!username || username.length === 0) {
-      this.showAlertifyWarning('Username cannot be empty.');
+      AlertifyHandler.showAlertifyWarning('Username cannot be empty.');
       return;
     } else if(!password || password.length === 0) {
-      this.showAlertifyWarning('Password cannot be empty.');
+      AlertifyHandler.showAlertifyWarning('Password cannot be empty.');
       return;
     } else if(!roles_selected_single || roles_selected_single.length === 0) {
-      this.showAlertifyWarning('User needs at least 1 role.');
+      AlertifyHandler.showAlertifyWarning('User needs at least 1 role.');
       return;
     }
 
@@ -152,7 +152,7 @@ export default class UserCreation extends Component.extend(AlertifyHandler) {
     try {
       yield userRecord.save();
       yield createPreferences.bind(this)(userRecord.id);
-      this.showAlertifySuccess(`User <b>${username}</b> was created.`);
+      AlertifyHandler.showAlertifySuccess(`User <b>${username}</b> was created.`);
       clearInputFields.bind(this)();
     } catch(reason) {
       this.showReasonErrorAlert(reason);
@@ -201,18 +201,18 @@ export default class UserCreation extends Component.extend(AlertifyHandler) {
 
     // check for valid input
     if(!usernameprefix || usernameprefix.length === 0) {
-      this.showAlertifyWarning('Username prefix cannot be empty.');
+      AlertifyHandler.showAlertifyWarning('Username prefix cannot be empty.');
       return;
     } else if(!numberofusers || numberOfUsers <= 1) {
-      this.showAlertifyWarning('# of users must be at least 2.');
+      AlertifyHandler.showAlertifyWarning('# of users must be at least 2.');
       return;
     } else if(!roles_selected_multiple || roles_selected_multiple.length === 0) {
-      this.showAlertifyWarning('Users need at least 1 role.');
+      AlertifyHandler.showAlertifyWarning('Users need at least 1 role.');
       return;
     }
     
     if(numberOfUsers >= 65) {
-      this.showAlertifyMessageWithDuration("User creation might take some time. You will be notified when it's done.", 5, "warning");
+      AlertifyHandler.showAlertifyMessageWithDuration("User creation might take some time. You will be notified when it's done.", 5, "warning");
     }
 
     let passwords = this.generatePasswords(numberOfUsers, PASSWORD_LENGTH);
@@ -248,7 +248,7 @@ export default class UserCreation extends Component.extend(AlertifyHandler) {
     try {
       yield userBatchRecord.save();
       let users:DS.PromiseManyArray<User> = yield userBatchRecord.users;
-      this.showAlertifySuccess(`All users were successfully created.`);
+      AlertifyHandler.showAlertifySuccess(`All users were successfully created.`);
       clearInputFields.bind(this)();
       this.showCreatedUsers(users, passwords);
     } catch(reason) {
@@ -286,7 +286,7 @@ export default class UserCreation extends Component.extend(AlertifyHandler) {
 
   showReasonErrorAlert(reason:any) {
     const { title, detail } = reason.errors[0];
-    this.showAlertifyError(`<b>${title}:</b> ${detail}`);
+    AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
   }
 
   showCreatedUsers(userList:DS.PromiseManyArray<User>, passwords:string[]) {

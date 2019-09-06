@@ -1,11 +1,11 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import AdditionalData from 'explorviz-frontend/services/additional-data';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import { action } from '@ember/object';
 
-export default class SQLOpener extends Component.extend(AlertifyHandler) {
+export default class SQLOpener extends Component {
 
   // No Ember generated container
   tagName = '';
@@ -22,7 +22,7 @@ export default class SQLOpener extends Component.extend(AlertifyHandler) {
 
     if(latestApplication !== null) {
       if (latestApplication.get('databaseQueries').length === 0){
-        this.showAlertifyMessage("No SQL statements found!");
+        AlertifyHandler.showAlertifyMessage("No SQL statements found!");
         return;
       }
       this.get('additionalData').addComponent("visualization/page-setup/sidebar/sql-viewer");
