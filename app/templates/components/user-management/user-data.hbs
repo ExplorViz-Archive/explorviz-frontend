@@ -1,7 +1,7 @@
 
 <h3>User Data</h3>
 <hr>
-<BsForm @model={{this}} @onSubmit={{perform saveUserChanges}} as |form|>
+<BsForm @model={{this}} @onSubmit={{perform this.saveUserChanges}} as |form|>
   <form.element @controlType="text" @label="ID" @property="id_change" @disabled={{true}} />
   <form.element @controlType="text" @label="Username" @placeholder="Enter New Username" @property="username_change" />
   <form.element @controlType="password" @label="Password" @placeholder="Enter New Password" @property="password_change" />

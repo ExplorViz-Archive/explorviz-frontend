@@ -48,7 +48,7 @@
         <div class="spinner-center-3 mb-5 mt-5" style="position:relative" role="status"></div>
       {{else}}
         {{#if (eq this.page "createSingleUser")}}
-          <BsForm @model={{this}} @onSubmit={{perform saveUser}} as |form|>
+          <BsForm @model={{this}} @onSubmit={{perform this.saveUser}} as |form|>
             <form.element @controlType="text" @label="Username" @placeholder="Username" @property="username" />
             <form.element @controlType="password" @label="Password" @placeholder="Password" @property="password" />
             <form.element @controlType="power-select-multiple" @property="roles_selected_single" @label="Choose Roles" @options={{this.roles}}
@@ -84,8 +84,8 @@
               <BsButton @defaultText="Create" @type="primary" @buttonType="submit" />
             {{/if}}
           </BsForm>
-        {{else if (eq page "createMultipleUsers")}}
-          <BsForm @model={{this}} @onSubmit={{perform saveMultipleUsers}} as |form|>
+        {{else if (eq this.page "createMultipleUsers")}}
+          <BsForm @model={{this}} @onSubmit={{perform this.saveMultipleUsers}} as |form|>
             <form.element @controlType="text" @label="Username Prefix" @placeholder="Username Prefix" @property="usernameprefix" />
             <form.element @controlType="number" @label="Number of Users" @placeholder="# of users" @property="numberofusers" />
             <form.element @controlType="power-select-multiple" @property="roles_selected_multiple" @label="Choose Roles" @options={{this.roles}}
@@ -112,7 +112,7 @@
                 </div>
               </div>
             </form.element>
-            {{#if saveMultipleUsers.isRunning}}
+            {{#if this.saveMultipleUsers.isRunning}}
               <BsButton @type="primary" @buttonType="submit" @disabled={{true}}>
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                 Creating Users...

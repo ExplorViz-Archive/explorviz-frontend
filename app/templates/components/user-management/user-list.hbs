@@ -107,7 +107,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
               <td scope="col">
                 {{#unless (eq this.currentUser.user.id user.id)}}
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="check-{{user.id}}" checked={{get selected user.id}} onchange={{action "selectCheckbox" user.id}}>
+                    <input type="checkbox" class="custom-control-input" id="check-{{user.id}}" checked={{get this.selected user.id}} onchange={{action "selectCheckbox" user.id}}>
                     <label class="custom-control-label" for="check-{{user.id}}"></label>
                   </div>
                 {{/unless}}
