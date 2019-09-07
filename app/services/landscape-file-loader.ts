@@ -25,8 +25,6 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin) 
 
   // downloads a landscape from the backend
   downloadLandscape(timestamp: number, totalRequests: number) {
-    const self = this;
-
     let { access_token } = get(this.session, 'data.authenticated');
 
     const urlPath = `/v1/landscapes/download?timestamp=${timestamp}`;
@@ -48,7 +46,7 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin) 
       AlertifyHandler.showAlertifySuccess("Landscape with timestamp [" + timestamp + "] downloaded!");
       this.debug("Landscape with timestamp [" + timestamp + "] downloaded!");
     }).catch((error: any) => {
-      AlertifyHandler.closeAlertifyMessages(error.text);
+      AlertifyHandler.closeAlertifyMessages(/* error.text */);
       this.debug("Could not download landscape with timestamp [" + timestamp + "]", error.text);
       throw new Error("Could not download landscape with timestamp [" + timestamp + "]. Enable debugging in console");
     });
@@ -87,7 +85,7 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin) 
       AlertifyHandler.showAlertifySuccess("Landscape sucessfully uploaded!");
       this.debug("Landscape sucessfully uploaded!");
     }).catch((error: any) => {
-      AlertifyHandler.closeAlertifyMessages(error.payload.errors[0].detail);
+      AlertifyHandler.closeAlertifyMessages(/* error.payload.errors[0].detail */);
       this.debug("Could not upload landscape.", error.payload.errors[0].detail);
       throw new Error("Could not upload landscape. Enable debugging in console");
     });
