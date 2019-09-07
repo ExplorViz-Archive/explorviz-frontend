@@ -1,11 +1,24 @@
 import Service from '@ember/service';
+import { set } from '@ember/object';
+
+type Colors = {
+  [type:string]: string
+}
+
+export type ExtensionDescription = {
+  id: string,
+  title: string,
+  link: string,
+  nestedRoute: string,
+  paneName: string
+};
 
 /**
 * The Configuration Service handles color settings for the visualization and configuration extensions
 * @class Configuration-Service
 * @extends Ember.Service
 */
-export default Service.extend({
+export default class Configuration extends Service {
 
   /**
   * Array for component-based settings dialogs. Any extension may push an object  
@@ -15,7 +28,7 @@ export default Service.extend({
   * @property configurationExtensions
   * @type Array
   */
-  configurationExtensions: null,
+  configurationExtensions:ExtensionDescription[] = [];
 
   /**
   * Current colors for landscape visualization
@@ -23,7 +36,7 @@ export default Service.extend({
   * @property landscapeColors
   * @type Object
   */
-  landscapeColors: null,
+  landscapeColors:Colors = {};
 
   /**
   * Current colors for application visualization
@@ -31,7 +44,7 @@ export default Service.extend({
   * @property applicationColors
   * @type Object
   */
-  applicationColors: null,
+  applicationColors:Colors = {};
 
   /**
   * Default colors for landscape visualization
@@ -39,7 +52,7 @@ export default Service.extend({
   * @property landscapeColorsDefault
   * @type Object
   */
-  landscapeColorsDefault: null,
+  landscapeColorsDefault:Colors = {};
 
   /**
   * Default colors for application visualization
@@ -47,21 +60,20 @@ export default Service.extend({
   * @property applicationColorsDefault
   * @type Object
   */
-  applicationColorsDefault: null,
+  applicationColorsDefault:Colors = {};
 
 
-  init() {
-    this._super(...arguments);
-    this.set('configurationExtensions', []);
+  constructor() {
+    super(...arguments);
     this.initDefaultColors();
     this.resetColors();
-  },
+  }
 
   /**
    * Sets the default visualization colors
    */
   initDefaultColors() {
-    this.set('landscapeColorsDefault', {
+    set(this, 'landscapeColorsDefault', {
       system: "rgb(199, 199, 199)",
       nodegroup: "rgb(22, 158, 43)",
       node: "rgb(0, 187, 65)",
@@ -74,7 +86,7 @@ export default Service.extend({
       background: "rgb(255, 255, 255)"
     });
 
-    this.set('applicationColorsDefault', {
+    set(this, 'applicationColorsDefault', {
       foundation: "rgb(199, 199, 199)",
       componentOdd: "rgb(22, 158, 43)",
       componentEven: "rgb(0, 187, 65)",
@@ -87,15 +99,21 @@ export default Service.extend({
       communicationArrow: "rgb(0, 0, 0)",
       background: "rgb(255, 255, 255)"
     });
-  },
+  }
 
   /**
    * Resets all visualization colors to default values
    * Needs to be a deep copy of the object, otherwise the default colors got overridden when the colors are in the extension
    */
   resetColors() {
-    this.set('landscapeColors', Object.assign({}, this.get('landscapeColorsDefault')));
-    this.set('applicationColors', Object.assign({}, this.get('applicationColorsDefault')));
+    set(this, 'landscapeColors', Object.assign({}, this.landscapeColorsDefault));
+    set(this, 'applicationColors', Object.assign({}, this.applicationColorsDefault));
   }
 
-});
+}
+
+declare module '@ember/service' {
+  interface Registry {
+    'configuration': Configuration;
+  }
+}
