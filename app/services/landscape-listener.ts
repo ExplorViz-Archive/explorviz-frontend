@@ -5,81 +5,93 @@ import { getOwner } from '@ember/application';
 import Evented from '@ember/object/evented';
 import ModelUpdater from 'explorviz-frontend/utils/model-update';
 import debugLogger from 'ember-debug-logger';
+import DS from 'ember-data';
+import TimestampRepository from './repos/timestamp-repository';
+import LandscapeRepository from './repos/landscape-repository';
+import { set } from '@ember/object';
+import Landscape from 'explorviz-frontend/models/landscape';
 
-/* global EventSourcePolyfill */
-export default Service.extend(Evented, {
+declare const EventSourcePolyfill: any;
+
+export default class LandscapeListener extends Service.extend(Evented) {
 
   // https://github.com/segmentio/sse/blob/master/index.js
 
-  content: null,
-  session: service(),
-  store: service(),
-  timestampRepo: service("repos/timestamp-repository"),
-  landscapeRepo: service("repos/landscape-repository"),
-  latestJsonLandscape: null,
-  modelUpdater: null,
-  es: null,
+  content:any = null;
+  @service('session') session!: any;
+  @service('store') store!: DS.Store;
+  @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
+  @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
+  latestJsonLandscape = null;
+  modelUpdater = null;
+  es = null;
 
-  pauseVisualizationReload: false,
+  pauseVisualizationReload = false;
 
-  debug: debugLogger(),
+  debug = debugLogger();
 
-  init() {
-    this._super(...arguments);
-    if (!this.get('modelUpdater')) {
-      this.set('modelUpdater', ModelUpdater.create(getOwner(this).ownerInjection()));
+  constructor() {
+    super(...arguments);
+    if (this.modelUpdater === null) {
+      set(this, 'modelUpdater', ModelUpdater.create(getOwner(this).ownerInjection()));
     }
-  },
+  }
 
   initSSE() {
-    this.set('content', []);
+    set(this, 'content', []);
 
     const url = config.APP.API_ROOT;
-    const { access_token } = this.get('session.data.authenticated');
+    const { access_token } = this.session.data.authenticated;
 
     // Close former event source. Multiple (>= 6) instances cause the ember store to no longer work
-    if (this.get('es')) {
-      this.get('es').close();
+    let es:any = this.es;
+    if (es) {
+      es.close();
     }
 
     // ATTENTION: This is a polyfill (see vendor folder)
     // Replace if original EventSource API allows HTTP-Headers
-    this.set('es', new EventSourcePolyfill(`${url}/v1/landscapes/broadcast/`, {
+    set(this, 'es', new EventSourcePolyfill(`${url}/v1/landscapes/broadcast/`, {
       headers: {
         Authorization: `Bearer ${access_token}`
       }
     }));
 
-    this.set('es.onmessage', (event) => {
+    es = this.es;
+
+    set(es, 'onmessage', (event:any) => {
       const jsonLandscape = JSON.parse(event.data);
 
-      if (jsonLandscape && jsonLandscape.hasOwnProperty("data")) {
+      if (jsonLandscape && jsonLandscape.hasOwnProperty('data')) {
 
         let timestampRecord;
 
         // Pause active -> no landscape visualization update
         // Do avoid update of store to prevent inconsistencies between visualization and e.g. trace data
-        if (!this.get('pauseVisualizationReload')) {
+        if (!this.pauseVisualizationReload) {
 
-          this.get('store').unloadAll('tracestep');
-          this.get('store').unloadAll('trace');
-          this.get('store').unloadAll('clazzcommunication');
-          this.get('store').unloadAll('event');
+          this.store.unloadAll('tracestep');
+          this.store.unloadAll('trace');
+          this.store.unloadAll('clazzcommunication');
+          this.store.unloadAll('event');
 
           // ATTENTION: Mind the push operation, push != pushPayload in terms of 
           // serializer usage
           // https://github.com/emberjs/data/issues/3455
           
-          this.set('latestJsonLandscape', jsonLandscape);
-          const landscapeRecord = this.get('store').push(jsonLandscape);
+          set(this, 'latestJsonLandscape', jsonLandscape);
+          const landscapeRecord = this.store.push(jsonLandscape) as Landscape;
           
-          this.get('modelUpdater').addDrawableCommunication();
+          let modelUpdater:any = this.modelUpdater;
+          if(modelUpdater !== null) {
+            modelUpdater.addDrawableCommunication();
+          }
 
-          this.set('landscapeRepo.latestLandscape', landscapeRecord);
-          this.get('landscapeRepo').triggerLatestLandscapeUpdate();          
+          set(this.landscapeRepo, 'latestLandscape', landscapeRecord);
+          this.landscapeRepo.triggerLatestLandscapeUpdate();          
                 
 
-          timestampRecord = landscapeRecord.get('timestamp');
+          timestampRecord = landscapeRecord.timestamp;
                     
         } else {
 
@@ -103,25 +115,25 @@ export default Service.extend(Evented, {
             }
           }
 
-          timestampRecord = this.get('store').createRecord('timestamp', {
+          timestampRecord = this.store.createRecord('timestamp', {
             id: timestampId,
             timestamp: timestampValue,
             totalRequests: totalRequests
           });     
         }
 
-        this.set('timestampRepo.latestTimestamp', timestampRecord);
+        set(this.timestampRepo, 'latestTimestamp', timestampRecord);
 
         // this syntax will notify the template engine to redraw all components
         // with a binding to this attribute
-        this.set('timestampRepo.timelineTimestamps', [...this.timestampRepo.timelineTimestamps, timestampRecord]);
+        set(this.timestampRepo, 'timelineTimestamps', [...this.timestampRepo.timelineTimestamps, timestampRecord]);
 
-        this.get('timestampRepo').triggerTimelineUpdate();
+        this.timestampRepo.triggerTimelineUpdate();
       }
     });
-  },
+  }
 
-  subscribe(url, fn) {
+  subscribe(url:string, fn:Function) {
     let source = new EventSource(url);
 
     source.onmessage = (event) => {
@@ -130,11 +142,11 @@ export default Service.extend(Evented, {
 
     source.onerror = (event) => {
       if (source.readyState !== EventSource.CLOSED)
-        this.error(event);
+        console.error(event);
     };
 
     return source.close.bind(source);
-  },
+  }
 
   toggleVisualizationReload() {
     // TODO: need to notify the timeline
@@ -143,15 +155,21 @@ export default Service.extend(Evented, {
     } else {
       this.stopVisualizationReload();
     }
-  },
-
-  startVisualizationReload() {
-    this.set('pauseVisualizationReload', false);
-    this.trigger("visualizationResumed");
-  },
-
-  stopVisualizationReload() {
-    this.set('pauseVisualizationReload', true);
   }
 
-});
+  startVisualizationReload() {
+    set(this, 'pauseVisualizationReload', false);
+    this.trigger("visualizationResumed");
+  }
+
+  stopVisualizationReload() {
+    set(this, 'pauseVisualizationReload', true);
+  }
+
+}
+
+declare module '@ember/service' {
+  interface Registry {
+    'landscape-listener': LandscapeListener;
+  }
+}
