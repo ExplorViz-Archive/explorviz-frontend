@@ -21,10 +21,10 @@
         </div>
         <form {{action 'authenticate' on='submit'}} class="form center-block">
           <div class="form-group">
-            {{input id="username" value=identification placeholder='admin' class="form-control input-lg" autofocus="autofocus"}}
+            {{input id="username" value=identification placeholder='admin' class="form-control input-lg" autofocus="autofocus" autocomplete="username"}}
           </div>
           <div class="form-group">
-            {{input value=password placeholder='password' class='form-control input-lg' type='password'}}
+            {{input value=password placeholder='password' class='form-control input-lg' type='password' autocomplete="current-password"}}
           </div>
           <div class="form-group">
             <button class="btn btn-outline-primary btn-lg btn-block btn-exp-login">Sign In</button>
