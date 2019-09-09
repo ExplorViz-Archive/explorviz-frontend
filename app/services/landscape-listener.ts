@@ -10,6 +10,7 @@ import TimestampRepository from './repos/timestamp-repository';
 import LandscapeRepository from './repos/landscape-repository';
 import { set } from '@ember/object';
 import Landscape from 'explorviz-frontend/models/landscape';
+import Timestamp from 'explorviz-frontend/models/timestamp';
 
 declare const EventSourcePolyfill: any;
 
@@ -63,8 +64,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
       const jsonLandscape = JSON.parse(event.data);
 
       if (jsonLandscape && jsonLandscape.hasOwnProperty('data')) {
-
-        let timestampRecord;
+        const self = this;
 
         // Pause active -> no landscape visualization update
         // Do avoid update of store to prevent inconsistencies between visualization and e.g. trace data
@@ -90,8 +90,11 @@ export default class LandscapeListener extends Service.extend(Evented) {
           set(this.landscapeRepo, 'latestLandscape', landscapeRecord);
           this.landscapeRepo.triggerLatestLandscapeUpdate();          
                 
-
-          timestampRecord = landscapeRecord.timestamp;
+          let timestampRecord = landscapeRecord.timestamp;
+          
+          timestampRecord.then((record) => {
+            updateTimestampRepoAndTimeline(record);
+          });
                     
         } else {
 
@@ -115,20 +118,23 @@ export default class LandscapeListener extends Service.extend(Evented) {
             }
           }
 
-          timestampRecord = this.store.createRecord('timestamp', {
+          let timestampRecord = this.store.createRecord('timestamp', {
             id: timestampId,
             timestamp: timestampValue,
             totalRequests: totalRequests
-          });     
+          });
+          updateTimestampRepoAndTimeline(timestampRecord);
         }
 
-        set(this.timestampRepo, 'latestTimestamp', timestampRecord);
-
-        // this syntax will notify the template engine to redraw all components
-        // with a binding to this attribute
-        set(this.timestampRepo, 'timelineTimestamps', [...this.timestampRepo.timelineTimestamps, timestampRecord]);
-
-        this.timestampRepo.triggerTimelineUpdate();
+        function updateTimestampRepoAndTimeline(timestamp:Timestamp) {
+          set(self.timestampRepo, 'latestTimestamp', timestamp);
+  
+          // this syntax will notify the template engine to redraw all components
+          // with a binding to this attribute
+          set(self.timestampRepo, 'timelineTimestamps', [...self.timestampRepo.timelineTimestamps, timestamp]);
+  
+          self.timestampRepo.triggerTimelineUpdate();
+        }
       }
     });
   }
