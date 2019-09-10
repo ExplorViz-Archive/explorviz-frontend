@@ -69,7 +69,7 @@ export default class UserCreation extends Component {
   numberofusers = '';
   roles_selected_multiple:Role[] = [];
 
-  roles:DS.PromiseArray<Role>|null = null;
+  roles:Role[] = [];
 
   constructor() {
     super(...arguments);
@@ -247,10 +247,10 @@ export default class UserCreation extends Component {
 
     try {
       yield userBatchRecord.save();
-      let users:DS.PromiseManyArray<User> = yield userBatchRecord.users;
+      let users:DS.ManyArray<User> = yield userBatchRecord.users;
       AlertifyHandler.showAlertifySuccess(`All users were successfully created.`);
       clearInputFields.bind(this)();
-      this.showCreatedUsers(users, passwords);
+      this.showCreatedUsers(users.toArray(), passwords);
     } catch(reason) {
       this.showReasonErrorAlert(reason);
     } finally {
@@ -289,10 +289,10 @@ export default class UserCreation extends Component {
     AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
   }
 
-  showCreatedUsers(userList:DS.PromiseManyArray<User>, passwords:string[]) {
+  showCreatedUsers(userList:User[], passwords:string[]) {
     let createdUsers:UserTrimmed[] = [];
     for(let i = 0; i < userList.length; i++) {
-      let user = userList.objectAt(i);
+      let user = userList[i];
       if(user !== undefined) {
         let password = passwords[i];
         createdUsers.push({
@@ -308,6 +308,7 @@ export default class UserCreation extends Component {
 
   @task
   getRoles = task(function * (this:UserCreation) {
-    yield set(this, 'roles', this.store.findAll('role'));
+    let roles = yield this.store.findAll('role');
+    set(this, 'roles', roles.toArray());
   });
 }
