@@ -1,5 +1,5 @@
 <div class="d-flex flex-row vh-100">
-  {{#if session.isAuthenticated}}
+  {{#if (and this.session.isAuthenticated (not this.loadUserAndSettings.isRunning))}}
     {{#let (component "page-setup/navbar") as |Navbar|}}
       <Navbar />
     {{/let}}
