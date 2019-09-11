@@ -16,23 +16,23 @@ export default class PlotlyTimeline extends Component.extend({
 }) {
 
   // BEGIN user-set variables
-  timestamps : Timestamp[] = [];
+  readonly timestamps : Timestamp[] = [];
 
-  setChildReference : any = null;
+  readonly setChildReference : any = null;
 
-  defaultMarkerColor = "#1f77b4";
-  defaultMarkerSize = 8;
+  readonly defaultMarkerColor = "#1f77b4";
+  readonly defaultMarkerSize = 8;
 
-  highlightedMarkerColor = "red";  
-  highlightedMarkerSize = 12;
+  readonly highlightedMarkerColor = "red";  
+  readonly highlightedMarkerSize = 12;
 
-  selectionCount = 1;
+  readonly selectionCount = 1;
 
-  slidingWindowLowerBoundInMinutes = 4;
-  slidingWindowUpperBoundInMinutes = 4;
+  readonly slidingWindowLowerBoundInMinutes = 4;
+  readonly slidingWindowUpperBoundInMinutes = 4;
   // END user-set variables
 
-  _debug = debugLogger();
+  readonly _debug = debugLogger();
 
   _initDone = false;  
 
