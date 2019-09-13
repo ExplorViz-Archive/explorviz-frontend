@@ -1,15 +1,12 @@
-dist: bionic
-
 language: node_js
 
 # Use the latest stable version
 node_js:
   - node
-
-services:
-  - docker
-
-sudo: false
+  
+# Disable npm caching
+cache:
+  npm: false
 
 # For testing environment
 addons:
@@ -18,8 +15,15 @@ addons:
 branches:
   only:
   - master
-  - /^greenkeeper/.*$/
+  - travis-fix
   - dev-1
+  
+before_install:
+- export TZ=Europe/Berlin
+
+install:
+  - npm install -g yuidocjs
+  - npm install --no-package-lock
 
 # Version Matrix
 jobs:
@@ -49,10 +53,3 @@ jobs:
       env:
         - EMBER_VERSION=release
       script: chmod +x .travis/yuidoc_push.sh && .travis/yuidoc_push.sh
-
-before_install:
-- export TZ=Europe/Berlin
-
-install:
-  - npm install -g yuidocjs
-  - npm install --no-package-lock
