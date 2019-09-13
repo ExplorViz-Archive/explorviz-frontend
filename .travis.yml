@@ -15,7 +15,6 @@ addons:
 branches:
   only:
   - master
-  - travis-fix
   - dev-1
   
 before_install:
