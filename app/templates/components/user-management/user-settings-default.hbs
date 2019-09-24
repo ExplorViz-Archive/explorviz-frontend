@@ -15,9 +15,7 @@
     </div>
     {{#unless (get this.useDefaultSettings key)}}
       <div class="pt-2">
-        {{#let (component "user-management/user-settings-base") as |UserSettingsBase|}}
-          <UserSettingsBase @settings={{value}} />
-        {{/let}}
+        <UserManagement::UserSettingsBase @settings={{value}} />
       </div>
     {{/unless}}
   </div>

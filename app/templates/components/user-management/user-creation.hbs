@@ -66,12 +66,10 @@
             <form.element @label="Settings">
               <div class="card mb-3">
                 <div id="settings-card" class="card-body">
-                  {{#let (component "user-management/user-settings-default") as |UserSettingsDefault|}}
-                    <UserSettingsDefault
-                      @settings={{this.settings}}
-                      @useDefaultSettings={{this.useDefaultSettings}}
-                    />
-                  {{/let}}
+                  <UserManagement::UserSettingsDefault
+                    @settings={{this.settings}}
+                    @useDefaultSettings={{this.useDefaultSettings}}
+                  />
                 </div>
               </div>
             </form.element>
@@ -103,12 +101,10 @@
             <form.element label="Settings">
               <div class="card mb-3">
                 <div id="settings-card" class="card-body">
-                  {{#let (component "user-management/user-settings-default") as |UserSettingsDefault|}}
-                    <UserSettingsDefault
-                      @settings={{this.settings}}
-                      @useDefaultSettings={{this.useDefaultSettings}}
-                    />
-                  {{/let}}
+                  <UserManagement::UserSettingsDefault
+                    @settings={{this.settings}}
+                    @useDefaultSettings={{this.useDefaultSettings}}
+                  />
                 </div>
               </div>
             </form.element>
