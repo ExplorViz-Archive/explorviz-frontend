@@ -68,24 +68,10 @@ module.exports = function (environment) {
 
   if (environment === 'production') {
 
-    console.log("");
-
-    // Logstash
-    if (process.env.LOGSTASH_ENABLED) {
-      LOGSTASH_ENABLED = (process.env.LOGSTASH_ENABLED.toLowerCase() === 'true')
-      if(process.env.LOGSTASH_HOST) {
-        LOGSTASH_HOST = process.env.LOGSTASH_HOST;
-        LOGSTASH_URL = 'http://' + LOGSTASH_HOST + ":" + LOGSTASH_PORT;
-        console.log(`EXPL-INFO: Logstash host set to ${LOGSTASH_URL}.`)
-      } else {
-        console.log(`EXPL-WARNING: You enabled logging to logstash but did not specify a logstash host. Logstash logging is disabled.`)
-        LOGSTASH_ENABLED = false;
-      }
-    } else{
-      LOGSTASH_ENABLED = false;
-    }
-    ENV.APP.LOGSTASH_ENABLED = LOGSTASH_ENABLED;
-    ENV.APP.LOGSTASH_URL = LOGSTASH_URL;
+    // To be overridden with environment variables
+    ENV.APP.LOGSTASH_ENABLED = "logstash-enabled";
+    ENV.APP.LOGSTASH_HOST = "logstash-host"
+    ENV.APP.LOGSTASH_URL = 'http://' + ENV.APP.LOGSTASH_HOST + ":" + LOGSTASH_PORT;
 
     //var rootURL = 'change-rootURL';
     API_ROOT = 'change-API_ROOT';
