@@ -2,7 +2,7 @@ import Component from '@ember/component';
 import { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
 import THREE from "three";
-import THREEPerformance from 'explorviz-frontend/mixins/threejs-performance';
+import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import debugLogger from 'ember-debug-logger';
 import $ from 'jquery';
 
@@ -24,7 +24,7 @@ import $ from 'jquery';
 * @module explorviz
 * @submodule visualization.rendering
 */
-export default Component.extend(Evented, THREEPerformance, {
+export default Component.extend(Evented, {
 
   // No Ember generated container
   tagName: '',
@@ -57,6 +57,8 @@ export default Component.extend(Evented, THREEPerformance, {
   initImport: true,
 
   listeners: null,
+
+  threePerformance: null,
 
   init() {
     this._super(...arguments);
@@ -126,8 +128,8 @@ export default Component.extend(Evented, THREEPerformance, {
 
     let showFpsCounter = this.get('currentUser').getPreferenceOrDefaultValue('flagsetting', 'showFpsCounter');
 
-    if (!showFpsCounter) {
-      this.removePerformanceMeasurement();
+    if (showFpsCounter) {
+      this.threePerformance = new THREEPerformance();
     }
 
     // Rendering loop //
@@ -140,14 +142,14 @@ export default Component.extend(Evented, THREEPerformance, {
       self.set('animationFrameId', animationId);
 
       if (showFpsCounter) {
-        self.get('threexStats').update(self.get('webglrenderer'));
-        self.get('stats').begin();
+        self.threePerformance.threexStats.update(self.get('webglrenderer'));
+        self.threePerformance.stats.begin();
       }
 
       self.get('webglrenderer').render(self.get('scene'), self.get('camera'));
 
       if (showFpsCounter) {
-        self.get('stats').end();
+        self.threePerformance.stats.end();
       }
     }
 
@@ -438,7 +440,9 @@ export default Component.extend(Evented, THREEPerformance, {
 
     this.set('camera', null);
 
-    this.removePerformanceMeasurement();
+    if(this.threePerformance) {
+      this.threePerformance.removePerformanceMeasurement();
+    }
 
     // unsubscribe from all services
     this.get('listeners').forEach(([service, event, listenerFunction]) => {
