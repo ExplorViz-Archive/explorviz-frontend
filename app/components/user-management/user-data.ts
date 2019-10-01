@@ -88,7 +88,7 @@ export default class UserData extends Component {
 
   @task
   getRoles = task(function * (this:UserData) {
-    let roles:DS.RecordArray<Role> = yield this.store.findAll('role');
+    let roles:DS.RecordArray<Role> = yield this.store.findAll('role', { reload: true });
     set(this, 'roles', roles.toArray());
   });
 }
