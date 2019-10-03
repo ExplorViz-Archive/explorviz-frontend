@@ -19,13 +19,15 @@ export default Controller.extend({
   userSettings: service(),
 
   loadUserAndSettings: task(function * () {
-    this._loadCurrentUser();
-    yield this._loadCurrentUserPreferences();
-    yield this._loadSettingsAndTypes();
+    yield this._loadCurrentUser();
+    if(this.session.isAuthenticated) {
+      yield this._loadCurrentUserPreferences();
+      yield this._loadSettingsAndTypes();
+    }
   }),
 
-  _loadCurrentUser() {
-    return this.get('currentUser').load().catch(() => this.get('session').invalidate({ message: 'User could not be loaded' }));
+  async _loadCurrentUser() {
+    return await this.get('currentUser').load().catch(() => this.get('session').invalidate({ message: 'User could not be loaded' }));
   },
 
   async _loadCurrentUserPreferences() {
