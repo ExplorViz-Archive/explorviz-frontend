@@ -12,6 +12,7 @@ import User from 'explorviz-frontend/models/user';
 // @ts-ignore
 import { waitForProperty } from 'ember-concurrency';
 import { observes } from '@ember-decorators/object';
+import $ from 'jquery';
 
 export default class UserList extends Component {
 
@@ -35,6 +36,8 @@ export default class UserList extends Component {
 
   showNewUsers:boolean = false;
 
+  pageSizes:number[] = [5, 10, 25, 50];
+
   init() {
     super.init();
     
@@ -44,6 +47,7 @@ export default class UserList extends Component {
   @observes('users')
   resetCheckboxesOnUsersUpdated() {
     if(this.users !== null) {
+      $("#user-list-table-div").animate({ scrollTop: 0 }, "fast");
       this.resetCheckboxes();
     }
   }

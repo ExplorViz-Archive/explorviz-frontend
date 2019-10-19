@@ -73,7 +73,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
       </div>
     </div>
   </div>
-  <div class="d-flex flex-grow-1 flex-column" style="overflow-y: auto">
+  <div id="user-list-table-div" class="d-flex flex-grow-1 flex-column" style="overflow-y: auto">
     {{!-- User List --}}
     <table class="table table-striped">
       <thead class="thead-light">
@@ -153,9 +153,11 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         {{/unless}}
       </tbody>
     </table>
+  </div>
+  <div class="d-flex justify-content-between mt-3 mb-1">
     {{!-- Page Navigation --}}
     <nav aria-label="User list page navigation">
-      <ul class="pagination justify-content-center">
+      <ul class="pagination justify-content-center mb-0">
         <li class="page-item {{if (eq this.users.meta.pagination.first.number this.page) "disabled"}}">
           <LinkTo
             @class="page-link"
@@ -208,5 +210,19 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         </li>
       </ul>
     </nav>
+    <div class="d-flex flex-row">
+      <div class="mr-2 align-self-center">Users per page</div>
+      <div class="user-list-page-size-select">
+        <PowerSelect
+          @verticalPosition="above"
+          @searchEnabled={{false}}
+          @options={{this.pageSizes}}
+          @renderInPlace={{true}}
+          @selected={{this.size}}
+          @onchange={{action (mut this.size)}} as |name|>
+          {{name}}
+        </PowerSelect>
+      </div>
+    </div>
   </div>
 </div>
