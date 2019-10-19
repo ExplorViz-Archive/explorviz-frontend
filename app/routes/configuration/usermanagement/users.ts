@@ -1,6 +1,7 @@
 import BaseRoute from 'explorviz-frontend/routes/base-route';
 // @ts-ignore
 import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
+import { action } from '@ember/object';
 
 export default class UserManagementUsersRoute extends BaseRoute.extend(AuthenticatedRouteMixin) {
   queryParams = {
@@ -10,6 +11,11 @@ export default class UserManagementUsersRoute extends BaseRoute.extend(Authentic
     size: {
       refreshModel: true
     }
+  }
+
+  @action
+  refreshRoute() {
+    return this.refresh();
   }
 
   model(params:any) {
