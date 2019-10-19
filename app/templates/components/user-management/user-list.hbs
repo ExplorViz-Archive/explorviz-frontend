@@ -27,6 +27,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
   <div class="mb-3">
     <div class="d-flex justify-content-between">
       <div class="d-flex">
+        {{!-- Delete Multiple Users Button --}}
         {{#if this.showDeleteUsersButton}}
           <BsButton
             class="d-flex-center mr-2"
@@ -40,6 +41,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         {{/if}}
       </div>
       <div class="d-flex">
+        {{!-- User Creation Button --}}
         <BsButton
           class="d-flex-center mr-2"
           @onClick={{perform this.openUserCreation}}
@@ -55,25 +57,24 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
           {{/if}}
           <span>Create Users</span>
         </BsButton>
+        {{!-- Refresh Button --}}
         <BsButton
           class="d-flex-center"
-          @onClick={{perform this.updateUserList true}}
+          @onClick={{action 'updateUserList'}}
           @outline={{true}}
           @title="Reload Users"
         >
-          {{#if this.updateUserList.isRunning}}
+          {{#unless this.users}}
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           {{else}}
             {{svg-jar "sync" class="octicon"}}
-          {{/if}}
+          {{/unless}}
         </BsButton>
       </div>
     </div>
   </div>
-  <div class="d-flex flex-grow-1" style="overflow-y: auto">
-    {{#if this.showSpinner}}
-      <div class="spinner-center-3" role="status"></div>
-    {{/if}}
+  <div class="d-flex flex-grow-1 flex-column" style="overflow-y: auto">
+    {{!-- User List --}}
     <table class="table table-striped">
       <thead class="thead-light">
         <tr>
@@ -90,7 +91,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         </tr>
       </thead>
       <tbody>
-        {{#if this.updateUserList.isRunning}}
+        {{#unless this.users}}
           <tr>
             <th scope="row"></th>
             <td>
@@ -149,8 +150,63 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
               </td>
             </tr>
           {{/each}}
-        {{/if}}
+        {{/unless}}
       </tbody>
     </table>
+    {{!-- Page Navigation --}}
+    <nav aria-label="User list page navigation">
+      <ul class="pagination justify-content-center">
+        <li class="page-item {{if (eq this.users.meta.pagination.first.number this.page) "disabled"}}">
+          <LinkTo
+            @class="page-link"
+            @route="configuration.usermanagement.users"
+            @query={{hash page=this.users.meta.pagination.first.number}}
+            @tabindex="{{unless this.users.meta.pagination.first "-1" "0"}}"
+          >
+            First
+          </LinkTo>
+        </li>
+        <li class="page-item {{unless this.users.meta.pagination.prev "disabled"}}">
+          <LinkTo
+            @class="page-link"
+            @route="configuration.usermanagement.users"
+            @query={{hash page=this.users.meta.pagination.prev.number}}
+            @tabindex="{{unless this.users.meta.pagination.prev "-1" "0"}}"
+          >
+            Previous
+          </LinkTo>
+        </li>
+        <li class="page-item disabled">
+          <LinkTo
+            @class="page-link"
+            @route="configuration.usermanagement.users"
+            @query={{hash page=this.page}}
+            @tabindex="-1"
+          >
+            {{inc this.page}}
+          </LinkTo>
+        </li>
+        <li class="page-item {{unless this.users.meta.pagination.next "disabled"}}">
+          <LinkTo
+            @class="page-link"
+            @route="configuration.usermanagement.users"
+            @query={{hash page=this.users.meta.pagination.next.number}}
+            @tabindex="{{unless this.users.meta.pagination.next "-1" "0"}}"
+          >
+            Next
+          </LinkTo>
+        </li>
+        <li class="page-item {{if (eq this.users.meta.pagination.last.number this.page) "disabled"}}">
+          <LinkTo
+            @class="page-link"
+            @route="configuration.usermanagement.users"
+            @query={{hash page=this.users.meta.pagination.last.number}}
+            @tabindex="{{unless this.users.meta.pagination.last "-1" "0"}}"
+          >
+            Last
+          </LinkTo>
+        </li>
+      </ul>
+    </nav>
   </div>
 </div>
