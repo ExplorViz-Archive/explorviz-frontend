@@ -1,0 +1,16 @@
+<div class="d-flex flex-row">
+	{{#if this.label}}
+		<div class="mr-2 align-self-center">{{this.label}}</div>
+	{{/if}}
+	<div class="page-size-select">
+		<PowerSelect
+			@verticalPosition={{this.position}}
+			@searchEnabled={{false}}
+			@options={{this.pageSizes}}
+			@renderInPlace={{true}}
+			@selected={{this.size}}
+			@onchange={{action (mut this.size)}} as |name|>
+			{{name}}
+		</PowerSelect>
+	</div>
+</div>
