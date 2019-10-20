@@ -1,0 +1,50 @@
+<nav>
+	<ul class="pagination justify-content-center mb-0">
+		<li class="page-item {{if (eq this.first this.self) "disabled"}}">
+			<LinkTo
+				@class="page-link"
+				@route={{this.route}}
+				@query={{hash page=this.first}}
+				@tabindex="{{unless this.first "-1" "0"}}">
+				First
+			</LinkTo>
+		</li>
+		{{!-- Need gte here, because if this.prev is 0, its truth value was false --}}
+		<li class="page-item {{unless (gte this.prev 0) "disabled"}}">
+			<LinkTo
+				@class="page-link"
+				@route={{this.route}}
+				@query={{hash page=this.prev}}
+				@tabindex="{{unless this.prev "-1" "0"}}">
+				Previous
+			</LinkTo>
+		</li>
+		<li class="page-item disabled">
+			<LinkTo
+				@class="page-link" 
+				@route={{this.route}}
+				@query={{hash page=this.self}}
+				@tabindex="-1">
+				{{inc this.self}}
+			</LinkTo>
+		</li>
+		<li class="page-item {{unless this.next "disabled"}}">
+			<LinkTo
+				@class="page-link"
+				@route={{this.route}}
+				@query={{hash page=this.next}}
+				@tabindex="{{unless this.next "-1" "0"}}">
+				Next
+			</LinkTo>
+		</li>
+		<li class="page-item {{if (eq this.last this.self) "disabled"}}">
+			<LinkTo
+				@class="page-link"
+				@route={{this.route}}
+				@query={{hash page=this.last}}
+				@tabindex="{{unless this.last "-1" "0"}}">
+				Last
+			</LinkTo>
+		</li>
+	</ul>
+</nav>
