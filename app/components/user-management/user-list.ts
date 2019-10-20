@@ -45,7 +45,7 @@ export default class UserList extends Component {
   }
 
   @observes('users')
-  resetCheckboxesOnUsersUpdated() {
+  resetTable() {
     if(this.users !== null) {
       $("#user-list-table-div").animate({ scrollTop: 0 }, "fast");
       this.resetCheckboxes();
@@ -110,6 +110,12 @@ export default class UserList extends Component {
     set(this, 'showDeleteUsersButton', Object.values(this.selected).some(Boolean));
   }
 
+  @action
+  updateUserList() {
+    set(this, 'users', null);
+    this.refreshUsers();
+  }
+
   @task({ drop: true })
   openUserCreation = task(function * (this: UserList) {
     yield this.router.transitionTo('configuration.usermanagement.new');
@@ -132,12 +138,6 @@ export default class UserList extends Component {
       this.showReasonErrorAlert(reason);
     }
   });
-
-  @action
-  updateUserList() {
-    set(this, 'users', null);
-    this.refreshUsers();
-  }
 
   showReasonErrorAlert(reason:any) {
     const {title, detail} = reason.errors[0];

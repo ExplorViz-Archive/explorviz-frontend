@@ -155,74 +155,18 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
     </table>
   </div>
   <div class="d-flex justify-content-between mt-3 mb-1">
-    {{!-- Page Navigation --}}
-    <nav aria-label="User list page navigation">
-      <ul class="pagination justify-content-center mb-0">
-        <li class="page-item {{if (eq this.users.meta.pagination.first.number this.page) "disabled"}}">
-          <LinkTo
-            @class="page-link"
-            @route="configuration.usermanagement.users"
-            @query={{hash page=this.users.meta.pagination.first.number}}
-            @tabindex="{{unless this.users.meta.pagination.first "-1" "0"}}"
-          >
-            First
-          </LinkTo>
-        </li>
-        <li class="page-item {{unless this.users.meta.pagination.prev "disabled"}}">
-          <LinkTo
-            @class="page-link"
-            @route="configuration.usermanagement.users"
-            @query={{hash page=this.users.meta.pagination.prev.number}}
-            @tabindex="{{unless this.users.meta.pagination.prev "-1" "0"}}"
-          >
-            Previous
-          </LinkTo>
-        </li>
-        <li class="page-item disabled">
-          <LinkTo
-            @class="page-link"
-            @route="configuration.usermanagement.users"
-            @query={{hash page=this.page}}
-            @tabindex="-1"
-          >
-            {{inc this.page}}
-          </LinkTo>
-        </li>
-        <li class="page-item {{unless this.users.meta.pagination.next "disabled"}}">
-          <LinkTo
-            @class="page-link"
-            @route="configuration.usermanagement.users"
-            @query={{hash page=this.users.meta.pagination.next.number}}
-            @tabindex="{{unless this.users.meta.pagination.next "-1" "0"}}"
-          >
-            Next
-          </LinkTo>
-        </li>
-        <li class="page-item {{if (eq this.users.meta.pagination.last.number this.page) "disabled"}}">
-          <LinkTo
-            @class="page-link"
-            @route="configuration.usermanagement.users"
-            @query={{hash page=this.users.meta.pagination.last.number}}
-            @tabindex="{{unless this.users.meta.pagination.last "-1" "0"}}"
-          >
-            Last
-          </LinkTo>
-        </li>
-      </ul>
-    </nav>
-    <div class="d-flex flex-row">
-      <div class="mr-2 align-self-center">Users per page</div>
-      <div class="user-list-page-size-select">
-        <PowerSelect
-          @verticalPosition="above"
-          @searchEnabled={{false}}
-          @options={{this.pageSizes}}
-          @renderInPlace={{true}}
-          @selected={{this.size}}
-          @onchange={{action (mut this.size)}} as |name|>
-          {{name}}
-        </PowerSelect>
-      </div>
-    </div>
+    <PageNavigation
+      @first={{this.users.meta.pagination.first.number}}
+      @prev={{this.users.meta.pagination.prev.number}}
+      @self={{this.page}}
+      @next={{this.users.meta.pagination.next.number}}
+      @last={{this.users.meta.pagination.last.number}}
+      @route="configuration.usermanagement.users"
+    />
+    <PageSizeSelector
+      @pageSizes={{this.pageSizes}}
+      @size={{this.size}}
+      @label="Users per page"
+    />
   </div>
 </div>
