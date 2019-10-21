@@ -1,4 +1,4 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
 import {inject as service} from '@ember/service';
 import PageSetup from 'explorviz-frontend/services/page-setup';
 
@@ -13,10 +13,6 @@ import PageSetup from 'explorviz-frontend/services/page-setup';
 * @submodule page
 */
 export default class NavbarRoutes extends Component {
-
-  // No Ember generated container
-  tagName = '';
-
   @service('page-setup')
   pageSetupService!: PageSetup;
 }
