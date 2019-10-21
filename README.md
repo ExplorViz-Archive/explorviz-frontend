@@ -15,7 +15,7 @@ Given the 3D city metaphor visualization of an application, we investigate new i
 
 The usability and effectiveness of ExplorViz has been investigated in controlled experiments which resulted in increased efficiency and effectiveness over competing approaches.
 
-This project is a WIP replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) client-code with [EmberJS](https://www.emberjs.com/). This is only the frontend, you will need the [backend](https://github.com/ExplorViz/explorviz-backend) as well for production. However, you can mock the backend as shown in the development section below.
+This project is a WIP replica of ExplorViz's visualization component. It substitutes [GWT](http://www.gwtproject.org/) client-code with [EmberJS](https://www.emberjs.com/). This is only the frontend, you will need the [backend](https://github.com/ExplorViz/explorviz-backend) as well for production.
 
 ## Reference
 Citing ExplorViz as a tool:
@@ -52,11 +52,6 @@ You will need the following things properly installed on your computer.
 ### Running / Development
 * `ember serve` or `ember s`
 * Visit the frontend at [http://localhost:4200](http://localhost:4200).
-
-### Mocking the Backend
-You can mock the backend, for example if you don't need live data for your development (or as showcase).
-Therefore, you are not required to download and run the ExplorViz Backen Java project.
-To achieve this, run the frontend with `ENABLE_MOCK=true ember s --environment=mocked`.
 
 #### Testing
 * `npm test` or `ember test` / `ember test --server`
