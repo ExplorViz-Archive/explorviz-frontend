@@ -1,6 +1,12 @@
 import Component from '@ember/component';
 
-export default Component.extend({
+type Settings = {
+  [origin: string]: {
+    [settingsype:string]: [[string, any]]|[]
+  }
+};
+
+export default class UserSettingsDefault extends Component {
   /*
     {
       origin1: {
@@ -10,7 +16,7 @@ export default Component.extend({
       origin2: {...}
     }
   */
-  settings: null,
+  settings:Settings = {};
   /*
     {
       origin1: boolean1,
@@ -18,5 +24,5 @@ export default Component.extend({
       ...
     }
   */
-  useDefaultSettings: null
-});
+  useDefaultSettings:{[origin:string]: boolean} = {};
+}

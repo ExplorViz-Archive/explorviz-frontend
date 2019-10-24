@@ -4,7 +4,7 @@ import LandscapeFileLoader from 'explorviz-frontend/services/landscape-file-load
 import Landscape from 'explorviz-frontend/models/landscape';
 import { action } from '@ember/object';
 
-export default class LandscapeDownloader extends Component.extend({}) {
+export default class LandscapeDownloader extends Component {
   // No Ember generated container
   tagName = '';
 
@@ -13,10 +13,10 @@ export default class LandscapeDownloader extends Component.extend({}) {
   @action
   downloadLandscape(landscape: Landscape) {
     if (landscape !== null) {
-      var timestamp: number = landscape.get('timestamp').get('timestamp');
-      var totalRequests: number = landscape.get('timestamp').get('totalRequests');
+      var timestamp: number = landscape.timestamp.get('timestamp');
+      var totalRequests: number = landscape.timestamp.get('totalRequests');
 
-      this.get('landscapeFileLoader').downloadLandscape(timestamp, totalRequests);
+      this.landscapeFileLoader.downloadLandscape(timestamp, totalRequests);
     }
   }
 };

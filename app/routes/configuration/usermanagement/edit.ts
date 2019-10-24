@@ -1,13 +1,13 @@
 import BaseRoute from 'explorviz-frontend/routes/base-route';
 import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
 import { inject as service } from "@ember/service";
 import DS from 'ember-data';
 import User from 'explorviz-frontend/models/user';
 import { action } from '@ember/object';
 
-export default class UserManagementEditRoute extends BaseRoute.extend(AuthenticatedRouteMixin, AlertifyHandler) {
+export default class UserManagementEditRoute extends BaseRoute.extend(AuthenticatedRouteMixin) {
 
   @service('store')
   store!: DS.Store;
@@ -18,7 +18,7 @@ export default class UserManagementEditRoute extends BaseRoute.extend(Authentica
         user
       };
     }, () => {
-      this.showAlertifyWarning('User was not found.');
+      AlertifyHandler.showAlertifyWarning('User was not found.');
       this.transitionTo('configuration.usermanagement');
     });
   }

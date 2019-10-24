@@ -1,7 +1,6 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service'; 
 import { computed, action, get, set, observer } from '@ember/object';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 /**
 * TODO
@@ -12,7 +11,7 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 * @module explorviz
 * @submodule visualization
 */
-export default class VisualizationController extends Controller.extend(AlertifyHandler, {
+export default class VisualizationController extends Controller.extend({
 
   // eslint-disable-next-line ember/no-observers
   timelineResetObserver: observer('landscapeListener.pauseVisualizationReload', function() {

@@ -1,7 +1,6 @@
 import RenderingCore from './rendering-core';
 import { inject as service } from '@ember/service';
 import { getOwner } from '@ember/application';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 
 import THREE from "three";
@@ -26,7 +25,7 @@ import FoundationBuilder from
  * @module explorviz
  * @submodule visualization.rendering
  */
-export default RenderingCore.extend(AlertifyHandler, {
+export default RenderingCore.extend({
 
   store: service('store'),
   highlighter: service('visualization/application/highlighter'),

@@ -1,8 +1,8 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
-export default Component.extend(AlertifyHandler, {
+export default Component.extend({
 
   // No Ember generated container
   tagName: '',
@@ -22,10 +22,10 @@ export default Component.extend(AlertifyHandler, {
 
   handleMessageForUser(pauseReload) {
     if(!pauseReload) {
-      this.showAlertifyMessage("Visualization paused!");
+      AlertifyHandler.showAlertifyMessage("Visualization paused!");
     }
     else {
-      this.showAlertifyMessage("Visualization resumed!");
+      AlertifyHandler.showAlertifyMessage("Visualization resumed!");
     }
   }
 

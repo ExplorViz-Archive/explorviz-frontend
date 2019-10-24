@@ -1,11 +1,10 @@
 import Service, { inject as service } from '@ember/service';
 import User from 'explorviz-frontend/models/user';
 
-import { resolve } from 'rsvp';
+import { resolve, reject } from 'rsvp';
 import { isEmpty } from '@ember/utils';
 import DS from 'ember-data';
 import UserSettings from './user-settings';
-import { computed } from '@ember/object';
 
 type Setting = 'rangesetting' | 'flagsetting';
 
@@ -27,12 +26,10 @@ export default class CurrentUser extends Service {
   // Thus okay to mark it as not null
   user!: User;
 
-  @computed('user')
   get id(this: CurrentUser) {
     return this.get('user').get('id');
   }
 
-  @computed('user')
   get username(this: CurrentUser) {
     return this.get('user').get('username');
   }
@@ -46,12 +43,13 @@ export default class CurrentUser extends Service {
   load(this:CurrentUser) {
     let userId = this.get('session').get('session.content.authenticated.rawUserData.data.id');
     if (!isEmpty(userId)) {
-      return this.get('store').findRecord('user', userId).then((user:User) => {
+      const user = this.get('store').peekRecord('user', userId);
+      if(user !== null) {
         this.set('user', user);
-      });
-    } else {
-      return resolve();
+        return resolve();
+      }
     }
+    return reject();
   }
 
 

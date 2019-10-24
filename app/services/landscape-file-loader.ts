@@ -2,7 +2,7 @@ import Service, { inject as service } from '@ember/service';
 import ENV from 'explorviz-frontend/config/environment';
 import FileSaverMixin from 'ember-cli-file-saver/mixins/file-saver';
 import { AjaxServiceClass } from 'ember-ajax/services/ajax';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import debugLogger from 'ember-debug-logger';
 import DS from 'ember-data';
 import { get } from '@ember/object';
@@ -13,7 +13,7 @@ import { get } from '@ember/object';
  * @class LandscapeFileLoader
  * @extends {Service}
  */
-export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, AlertifyHandler) {
+export default class LandscapeFileLoader extends Service.extend(FileSaverMixin) {
 
   debug = debugLogger();
 
@@ -25,8 +25,6 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
 
   // downloads a landscape from the backend
   downloadLandscape(timestamp: number, totalRequests: number) {
-    const self = this;
-
     let { access_token } = get(this.session, 'data.authenticated');
 
     const urlPath = `/v1/landscapes/download?timestamp=${timestamp}`;
@@ -45,10 +43,10 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
     ).then((content: any) => {
       //@ts-ignore
       this.saveFileAs(savedFileName, content.payload, 'application/json');
-      self.showAlertifySuccess("Landscape with timestamp [" + timestamp + "] downloaded!");
+      AlertifyHandler.showAlertifySuccess("Landscape with timestamp [" + timestamp + "] downloaded!");
       this.debug("Landscape with timestamp [" + timestamp + "] downloaded!");
     }).catch((error: any) => {
-      self.showAlertifyError(error.text);
+      AlertifyHandler.closeAlertifyMessages(/* error.text */);
       this.debug("Could not download landscape with timestamp [" + timestamp + "]", error.text);
       throw new Error("Could not download landscape with timestamp [" + timestamp + "]. Enable debugging in console");
     });
@@ -84,10 +82,10 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin, 
       const parsedLandscape = JSON.parse(jsonLandscape);
       self.get('store').push(parsedLandscape);
 
-      self.showAlertifySuccess("Landscape sucessfully uploaded!");
+      AlertifyHandler.showAlertifySuccess("Landscape sucessfully uploaded!");
       this.debug("Landscape sucessfully uploaded!");
     }).catch((error: any) => {
-      self.showAlertifyError(error.payload.errors[0].detail);
+      AlertifyHandler.closeAlertifyMessages(/* error.payload.errors[0].detail */);
       this.debug("Could not upload landscape.", error.payload.errors[0].detail);
       throw new Error("Could not upload landscape. Enable debugging in console");
     });

@@ -2,7 +2,7 @@ import Component from '@ember/component';
 import { inject as service } from "@ember/service";
 import DS from 'ember-data';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
-import { action } from '@ember/object';
+import { action, set } from '@ember/object';
 
 export default class ApplicationOpener extends Component {
 
@@ -10,7 +10,7 @@ export default class ApplicationOpener extends Component {
   tagName = '';
 
   // saves the state whether 'openAllComponents' was clicked and the packages are opened or not
-  openedActive: Boolean = false;
+  openedActive: boolean = false;
 
   @service('store') store!: DS.Store;
 
@@ -18,26 +18,26 @@ export default class ApplicationOpener extends Component {
 
   @action
   openAllComponents() {
-    const allClazzes = this.get('store').peekAll('clazz');
+    const allClazzes = this.store.peekAll('clazz');
 
     allClazzes.forEach(function (clazz) {
       clazz.openParents();
     });
 
-    this.set('openedActive', true);
-    this.get('renderingService').redrawScene();
+    set(this, 'openedActive', true);
+    this.renderingService.redrawScene();
   }
 
   @action
   closeAllComponents() {
-    const allClazzes = this.get('store').peekAll('clazz');
+    const allClazzes = this.store.peekAll('clazz');
 
     allClazzes.forEach(function (clazz) {
       clazz.closeParents();
     });
 
-    this.set('openedActive', false);
-    this.get('renderingService').redrawScene();
+    set(this, 'openedActive', false);
+    this.renderingService.redrawScene();
   }
 
 }

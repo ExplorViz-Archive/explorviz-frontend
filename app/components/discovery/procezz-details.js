@@ -1,8 +1,8 @@
 import Component from '@ember/component';
 import { inject as service } from "@ember/service";
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
-export default Component.extend(AlertifyHandler, {
+export default Component.extend({
 
   // No Ember generated container
   tagName: '',
@@ -137,7 +137,7 @@ export default Component.extend(AlertifyHandler, {
 
     this.set('monitoredFlag', this.get('procezz').get('monitoredFlag'));
 
-    this.showAlertifyMessageWithDuration(
+    AlertifyHandler.showAlertifyMessageWithDuration(
       `${message} Click on <b>Discovery</b> to go back.`, 4);
   }
 

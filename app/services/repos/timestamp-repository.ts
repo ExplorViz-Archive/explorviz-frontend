@@ -15,18 +15,12 @@ export default class TimestampRepository extends Service.extend(Evented) {
 
   debug = debugLogger();
 
-  @service('store') store !: any;
+  @service('store') store !: DS.Store;
 
-  latestTimestamp: any = null;
+  latestTimestamp: Timestamp|null = null;
   timelineTimestamps: Timestamp[] = [];
 
   replayTimelineTimestamps: Timestamp[] = [];
-
-  init() {
-    this._super(...arguments);
-    this.set('timelineTimestamps', []);
-    this.set('replayTimelineTimestamps', []);
-  };
 
   /**
    * Triggers the 'updated' event in the timeline for updating the chart
@@ -57,12 +51,12 @@ export default class TimestampRepository extends Service.extend(Evented) {
     }
 
     function failure(e: any) {
-      self.set('timelineTimestamps', undefined);
+      self.set('timelineTimestamps', []);
       self.debug("Replay Timestamps couldn't be requested!", e);
     }
 
     function error(e: any) {
-      self.set('timelineTimestamps', undefined);
+      self.set('timelineTimestamps', []);
       self.debug("Error when fetching replay timestamps: ", e);
     }
 

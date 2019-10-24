@@ -1,7 +1,8 @@
-<div id="exp-navbar" class="{{unless navbarActive "active"}}">
+<div id="exp-navbar" class="{{unless this.navbarActive "active"}}">
   {{!-- Button to toggle navbar with (closed/open) --}}
   <div id="exp-navbar-btn">
-    <button type="button" onclick={{action "toggleNavbar"}} class="btn btn-primary" title={{if navbarActive "Close Navbar" "Open Navbar"}}>
+    <button type="button" {{on "click" this.toggleNavbar}} class="btn btn-primary"
+      title={{if this.navbarActive "Close Navbar" "Open Navbar"}}>
       {{svg-jar "three-bars" class="octicon"}}
     </button>
   </div>
@@ -14,12 +15,12 @@
           </a>
         </div>
         <div class="d-flex flex-column flex-grow-1 justify-content-between pt-3">
-          {{page-setup/navbar-routes}}
-          {{page-setup/navbar-adv}}
+          <PageSetup::NavbarRoutes />
+          <PageSetup::NavbarAdv />
         </div>
       </div>
       <div id="exp-navbar-footer">
-        {{page-setup/footer}}
+        <PageSetup::Footer />
       </div>
     {{/ember-scrollable}}
   </div>

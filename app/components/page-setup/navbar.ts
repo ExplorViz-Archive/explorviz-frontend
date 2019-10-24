@@ -1,15 +1,14 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 
 export default class Navbar extends Component {
-
-  // No Ember generated container
-  tagName = '';
+  @tracked
   navbarActive = true;
 
   @action
   toggleNavbar(this: Navbar) {
-    this.toggleProperty('navbarActive');
+    this.navbarActive = !this.navbarActive;
   }
 
 }
