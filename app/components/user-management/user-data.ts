@@ -26,11 +26,10 @@ export default class UserData extends Component {
   didInsertElement() {
     super.didInsertElement();
 
-    this.initFields.perform();
+    this.initFields();
   }
 
-  @task
-  initFields = task(function * (this:UserData) {
+  initFields(this:UserData) {
     const user = this.user;
 
     if(user) {
@@ -38,7 +37,7 @@ export default class UserData extends Component {
       set(this, 'username_change', user.username);
       set(this, 'roles_change', [...user.roles]);
     }
-  });
+  }
 
   @task({ drop: true })
   saveUserChanges = task(function * (this:UserData) {
