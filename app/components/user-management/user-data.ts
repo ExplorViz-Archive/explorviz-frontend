@@ -34,10 +34,9 @@ export default class UserData extends Component {
     const user = this.user;
 
     if(user) {
-      let roles:string[] = yield user.roles;
       set(this, 'id_change', user.id);
       set(this, 'username_change', user.username);
-      set(this, 'roles_change', roles.toArray());
+      set(this, 'roles_change', [...user.roles]);
     }
   });
 
@@ -63,7 +62,7 @@ export default class UserData extends Component {
       if(password_change && password_change !== '')
         set(user, 'password', password_change);
 
-      user.roles.setObjects(roles_change);
+      set(user, 'roles', roles_change);
 
       try {
         yield user.save();

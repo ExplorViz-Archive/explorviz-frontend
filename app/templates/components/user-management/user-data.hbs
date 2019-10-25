@@ -16,7 +16,7 @@
     <el.control
       @onopen={{perform this.getRoles}}
     as |item|>
-      {{item.id}}
+      {{item}}
     </el.control>
   </form.element>
   {{#if this.saveUserChanges.isRunning}}
