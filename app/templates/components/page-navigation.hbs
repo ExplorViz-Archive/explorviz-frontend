@@ -1,48 +1,56 @@
+{{!-- Arguements:
+  first: number|undefined/null - First page's number
+  prev: number|undefined/null - Previous page's number
+  self: number - Current page's number
+  next: number|undefined/null - Next page's number
+  last: number|undefined/null - Last page's number
+  route: string - Route to call on page change
+ --}}
 <nav>
 	<ul class="pagination justify-content-center mb-0">
-		<li class="page-item {{if (eq this.first this.self) "disabled"}}">
+		<li class="page-item {{if (eq @first @self) "disabled"}}">
 			<LinkTo
 				@class="page-link"
-				@route={{this.route}}
-				@query={{hash page=this.first}}
-				@tabindex="{{unless this.first "-1" "0"}}">
+				@route={{@route}}
+				@query={{hash page=@first}}
+				@tabindex="{{unless @first "-1" "0"}}">
 				First
 			</LinkTo>
 		</li>
 		{{!-- Need gte here, because if this.prev is 0, its truth value was false --}}
-		<li class="page-item {{unless (gte this.prev 0) "disabled"}}">
+		<li class="page-item {{unless (gte @prev 0) "disabled"}}">
 			<LinkTo
 				@class="page-link"
-				@route={{this.route}}
-				@query={{hash page=this.prev}}
-				@tabindex="{{unless this.prev "-1" "0"}}">
+				@route={{@route}}
+				@query={{hash page=@prev}}
+				@tabindex="{{unless @prev "-1" "0"}}">
 				Previous
 			</LinkTo>
 		</li>
 		<li class="page-item disabled">
 			<LinkTo
 				@class="page-link" 
-				@route={{this.route}}
-				@query={{hash page=this.self}}
+				@route={{@route}}
+				@query={{hash page=@self}}
 				@tabindex="-1">
-				{{inc this.self}}
+				{{inc @self}}
 			</LinkTo>
 		</li>
-		<li class="page-item {{unless this.next "disabled"}}">
+		<li class="page-item {{unless @next "disabled"}}">
 			<LinkTo
 				@class="page-link"
-				@route={{this.route}}
-				@query={{hash page=this.next}}
-				@tabindex="{{unless this.next "-1" "0"}}">
+				@route={{@route}}
+				@query={{hash page=@next}}
+				@tabindex="{{unless @next "-1" "0"}}">
 				Next
 			</LinkTo>
 		</li>
-		<li class="page-item {{if (eq this.last this.self) "disabled"}}">
+		<li class="page-item {{if (eq @last @self) "disabled"}}">
 			<LinkTo
 				@class="page-link"
-				@route={{this.route}}
-				@query={{hash page=this.last}}
-				@tabindex="{{unless this.last "-1" "0"}}">
+				@route={{@route}}
+				@query={{hash page=@last}}
+				@tabindex="{{unless @last "-1" "0"}}">
 				Last
 			</LinkTo>
 		</li>
