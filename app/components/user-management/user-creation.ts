@@ -148,7 +148,7 @@ export default class UserCreation extends Component {
     const userRecord = this.store.createRecord('user', {
       username,
       password,
-      roles: roles
+      roles
     });
 
     try {
