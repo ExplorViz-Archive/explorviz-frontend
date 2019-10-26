@@ -143,10 +143,12 @@ export default class UserCreation extends Component {
       return;
     }
 
+    const roles = roles_selected_single.map((role:Role) => role.id);
+
     const userRecord = this.store.createRecord('user', {
       username,
       password,
-      roles: roles_selected_single
+      roles
     });
 
     try {
@@ -217,8 +219,7 @@ export default class UserCreation extends Component {
 
     let passwords = this.generatePasswords(numberOfUsers, PASSWORD_LENGTH);
 
-    // property in backend is called descriptor and not id
-    const roles = roles_selected_multiple.map((role:Role) => new Object({descriptor: role.id}));
+    const roles = roles_selected_multiple.map((role:Role) => role.id);
 
     let preferences:{[settingId:string]: any} = {};
 

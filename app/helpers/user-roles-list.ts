@@ -1,15 +1,13 @@
 import { helper } from '@ember/component/helper';
-import Role from 'explorviz-frontend/models/role';
-import DS from 'ember-data';
 
-export function userRolesList([roles]:[DS.PromiseManyArray<Role>]) {
+export function userRolesList([roles]:[string]) {
 
   let rawRoleList:Array<string> = [];
 
-  for(let i = 0; i < roles.get('length'); i++) {
-    let role:Role|undefined = roles.objectAt(i);
+  for(let i = 0; i < roles.length; i++) {
+    let role:string|undefined = roles[i];
     if(role !== undefined) {
-      rawRoleList.push(role.get('id'));
+      rawRoleList.push(role);
     }
   }
 

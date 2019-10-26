@@ -16,30 +16,28 @@ export default class UserData extends Component {
   @service('store') store!: DS.Store;
 
   user:User|null = null;
-  roles:Role[]|null = null;
+  roles:string[]|null = null;
 
   id_change = '';
   username_change = '';
   password_change = '';
-  roles_change:Role[]|null = null;
+  roles_change:string[]|null = null;
 
   didInsertElement() {
     super.didInsertElement();
 
-    this.initFields.perform();
+    this.initFields();
   }
 
-  @task
-  initFields = task(function * (this:UserData) {
+  initFields(this:UserData) {
     const user = this.user;
 
     if(user) {
-      let roles:DS.ManyArray<Role> = yield user.roles;
       set(this, 'id_change', user.id);
       set(this, 'username_change', user.username);
-      set(this, 'roles_change', roles.toArray());
+      set(this, 'roles_change', [...user.roles]);
     }
-  });
+  }
 
   @task({ drop: true })
   saveUserChanges = task(function * (this:UserData) {
@@ -63,7 +61,7 @@ export default class UserData extends Component {
       if(password_change && password_change !== '')
         set(user, 'password', password_change);
 
-      user.roles.setObjects(roles_change);
+      set(user, 'roles', roles_change);
 
       try {
         yield user.save();
@@ -89,6 +87,6 @@ export default class UserData extends Component {
   @task
   getRoles = task(function * (this:UserData) {
     let roles:DS.RecordArray<Role> = yield this.store.findAll('role', { reload: true });
-    set(this, 'roles', roles.toArray());
+    set(this, 'roles', roles.toArray().map((role:Role) => role.id));
   });
 }

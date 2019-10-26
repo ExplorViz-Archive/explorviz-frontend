@@ -34,6 +34,12 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     return `${baseUrl}/v1/users`;
   },
 
+  // @Override
+  urlForQuery() {
+    const baseUrl = this.buildURL();
+    return `${baseUrl}/v1/users`;
+  },
+
   urlForFindRecord(id) {
     const baseUrl = this.buildURL();
     return `${baseUrl}/v1/users/${id}`;

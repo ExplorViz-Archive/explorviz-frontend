@@ -55,6 +55,7 @@
     "ember-concurrency": "^1.1.0",
     "ember-concurrency-decorators": "^1.1.0-alpha.1",
     "ember-debug-logger": "^2.0.0",
+    "ember-decorators": "^6.1.1",
     "ember-did-resize-modifier": "^0.2.0",
     "ember-export-application-global": "^2.0.0",
     "ember-file-upload": "^2.5.3",
