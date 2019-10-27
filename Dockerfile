@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-ENV ROOT_URL=
+ENV FRONTEND_IP=localhost
 ENV API_ROOT=change-API_ROOT
 
 COPY prod-env-updater.sh .
