@@ -1,4 +1,4 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
 import { inject as service } from "@ember/service";
 import { action } from '@ember/object';
 
@@ -6,8 +6,6 @@ import $ from 'jquery';
 import AdditionalData from 'explorviz-frontend/services/additional-data';
 
 export default class DataSelection extends Component {
-  // No Ember generated container
-  tagName = '';
 
   @service('additional-data') additionalData!: AdditionalData;
 
@@ -40,13 +38,12 @@ export default class DataSelection extends Component {
       this.closeDataSelection();
   }
 
-  init() {
-    super.init();
+  constructor(owner:any, args:any) {
+    super(owner, args);
     this.additionalData.on('showWindow', this, this.onShowWindow);
   }
 
-  willDestroyElement() {
-    super.willDestroyElement();
+  willDestroy() {
     this.additionalData.off('showWindow', this, this.onShowWindow);
   }
 }
