@@ -19,6 +19,7 @@
     "@ember/edition-utils": "^1.1.1",
     "@ember/jquery": "^0.6.0",
     "@ember/optional-features": "^1.0.0",
+    "@ember/render-modifiers": "^1.0.2",
     "@glimmer/component": "^0.14.0-alpha.13",
     "@glimmer/tracking": "^0.14.0-alpha.13",
     "@types/ember": "^3.1.1",

@@ -13,8 +13,8 @@
     <div id="rendering">
       {{visualization/rendering/landscape-rendering}}
       <!-- popup(s) -->
-      {{visualization/rendering/popups/popup-coordinator
-          popupData=additionalData.popupContent}}
+      <Visualization::Rendering::Popups::PopupCoordinator
+          @popupData={{this.additionalData.popupContent}} />
     </div>
     {{else}}
     <div class="container-fluid">
@@ -45,8 +45,8 @@
       </div>
       {{visualization/rendering/application-rendering latestApplication=landscapeRepo.latestApplication}}
       <!-- popup(s) -->
-      {{visualization/rendering/popups/popup-coordinator
-        popupData=additionalData.popupContent}}
+      <Visualization::Rendering::Popups::PopupCoordinator
+        @popupData={{this.additionalData.popupContent}} />
     </div>
     {{/if}}
     <!-- timeline -->

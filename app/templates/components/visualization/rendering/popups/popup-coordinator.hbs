@@ -1,29 +1,35 @@
-    <!-- landscape popups -->
-{{#if (string-comparison popupData.popupType "system")}}
-    {{visualization/rendering/popups/landscape-popups/system-popup
-        data=popupData}}
-{{/if}} {{#if (string-comparison popupData.popupType "nodeGroup")}}
-    {{visualization/rendering/popups/landscape-popups/nodegroup-popup
-        data=popupData}}
-{{/if}} {{#if (string-comparison popupData.popupType "node")}}
-    {{visualization/rendering/popups/landscape-popups/node-popup
-        data=popupData}}
-{{/if}} {{#if (string-comparison popupData.popupType "application")}}
-    {{visualization/rendering/popups/landscape-popups/application-popup
-        data=popupData}}
-{{/if}} {{#if (string-comparison popupData.popupType "applicationCommunication")}}
-    {{visualization/rendering/popups/landscape-popups/landscape-communication-popup
-        data=popupData}}
+<!-- landscape popups -->
+{{#if (string-comparison @popupData.popupType "system")}}
+  <Visualization::Rendering::Popups::LandscapePopups::SystemPopup
+    @data={{@popupData}} />
+{{/if}}
+{{#if (string-comparison @popupData.popupType "nodeGroup")}}
+  <Visualization::Rendering::Popups::LandscapePopups::NodegroupPopup
+    @data={{@popupData}} />
+{{/if}}
+{{#if (string-comparison @popupData.popupType "node")}}
+  <Visualization::Rendering::Popups::LandscapePopups::NodePopup
+    @data={{@popupData}} />
+{{/if}}
+{{#if (string-comparison @popupData.popupType "application")}}
+  <Visualization::Rendering::Popups::LandscapePopups::ApplicationPopup
+    @data={{@popupData}} />
+{{/if}}
+{{#if (string-comparison @popupData.popupType "applicationCommunication")}}
+  <Visualization::Rendering::Popups::LandscapePopups::LandscapeCommunicationPopup
+    @data={{@popupData}} />
 {{/if}}
 
-    <!-- application popups -->
-{{#if (string-comparison popupData.popupType "component")}}
-    {{visualization/rendering/popups/application-popups/component-popup
-        data=popupData}}
-{{/if}} {{#if (string-comparison popupData.popupType "clazz")}}
-    {{visualization/rendering/popups/application-popups/clazz-popup
-        data=popupData}}
-{{/if}} {{#if (string-comparison popupData.popupType "clazzCommunication")}}
-    {{visualization/rendering/popups/application-popups/communication-popup
-        data=popupData}}
+<!-- application popups -->
+{{#if (string-comparison @popupData.popupType "component")}}
+  <Visualization::Rendering::Popups::ApplicationPopups::ComponentPopup
+    @data={{@popupData}} />
+{{/if}}
+{{#if (string-comparison @popupData.popupType "clazz")}}
+  <Visualization::Rendering::Popups::ApplicationPopups::ClazzPopup
+    @data={{@popupData}} />
+{{/if}}
+{{#if (string-comparison @popupData.popupType "clazzCommunication")}}
+  <Visualization::Rendering::Popups::ApplicationPopups::CommunicationPopup
+    @data={{@popupData}} />
 {{/if}}

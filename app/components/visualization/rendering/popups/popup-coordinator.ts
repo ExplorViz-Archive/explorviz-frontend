@@ -1,25 +1,19 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
 import $ from 'jquery';
-import { inject as service } from '@ember/service';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
+import { action } from '@ember/object';
 
-export default class PopupCoordinator extends Component {
+interface Args {
+  data: {
+    mouseX: number,
+    mouseY: number
+  };
+}
 
-  tagName = '';
-  
-  @service('additional-data')
-  additionalData!: AdditionalData;
+export default class PopupCoordinator extends Component<Args> {
 
-  didRender() {
-    this._super(...arguments);
-
-    if (this.get('additionalData').get('popupContent')) {
-      this.setPopupPosition();
-    }
-  }
-
+  @action
   setPopupPosition() {
-    let popupData = this.get('additionalData').get('popupContent');
+    let popupData = this.args.data;
 
     const popoverDiv = $('.popover');
 
