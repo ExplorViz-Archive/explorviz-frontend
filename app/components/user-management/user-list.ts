@@ -12,7 +12,6 @@ import User from 'explorviz-frontend/models/user';
 // @ts-ignore
 import { waitForProperty } from 'ember-concurrency';
 import { observes } from '@ember-decorators/object';
-import $ from 'jquery';
 
 export default class UserList extends Component {
 
@@ -47,7 +46,10 @@ export default class UserList extends Component {
   @observes('users')
   resetTable() {
     if(this.users !== null) {
-      $("#user-list-table-div").animate({ scrollTop: 0 }, "fast");
+      const tableElement = document.querySelector('#user-list-table-div');
+      if(tableElement !== null) {
+        tableElement.scrollTo(0, 0);
+      }
       this.resetCheckboxes();
     }
   }
