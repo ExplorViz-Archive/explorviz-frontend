@@ -41,7 +41,7 @@ Use our Docker images as described in our [Wiki](https://github.com/ExplorViz/do
 You will need the following things properly installed on your computer.
 
 * [Git](http://git-scm.com/)
-* [Node.js](http://nodejs.org/) with NPM (currently 12.7.0 / npm 6.10.0)
+* [Node.js](http://nodejs.org/) with NPM (currently 12.13.0 / npm 6.12.0)
 
 ### Installation (Generic)
 * `git clone <repository-url>` this repository
