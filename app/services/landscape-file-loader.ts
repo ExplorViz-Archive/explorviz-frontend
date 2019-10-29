@@ -35,7 +35,7 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin) 
       //@ts-ignore
       'id': this,
       headers: { 'Authorization': `Bearer ${access_token}` },
-      contentType: 'application/json; charset=utf-8',
+      contentType: false,
       options: {
         arraybuffer: true
       }
