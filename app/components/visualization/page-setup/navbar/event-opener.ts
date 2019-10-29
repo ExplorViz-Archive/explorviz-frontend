@@ -1,4 +1,4 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
 import { inject as service } from "@ember/service";
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import AdditionalData from 'explorviz-frontend/services/additional-data';
@@ -6,9 +6,6 @@ import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-rep
 import { action } from '@ember/object';
 
 export default class EventOpener extends Component {
-
-  // No Ember generated container
-  tagName = '';
 
   @service('additional-data') additionalData!: AdditionalData;
 

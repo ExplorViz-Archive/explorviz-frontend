@@ -1,15 +1,14 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
 import { inject as service } from "@ember/service";
 import DS from 'ember-data';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
-import { action, set } from '@ember/object';
+import { action } from '@ember/object';
 
 export default class ApplicationOpener extends Component {
 
-  // No Ember generated container
-  tagName = '';
-
   // saves the state whether 'openAllComponents' was clicked and the packages are opened or not
+  @tracked
   openedActive: boolean = false;
 
   @service('store') store!: DS.Store;
@@ -24,7 +23,7 @@ export default class ApplicationOpener extends Component {
       clazz.openParents();
     });
 
-    set(this, 'openedActive', true);
+    this.openedActive = true;
     this.renderingService.redrawScene();
   }
 
@@ -36,7 +35,7 @@ export default class ApplicationOpener extends Component {
       clazz.closeParents();
     });
 
-    set(this, 'openedActive', false);
+    this.openedActive = false;
     this.renderingService.redrawScene();
   }
 
