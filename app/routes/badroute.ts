@@ -6,10 +6,10 @@
 * @class Badroute-Route
 * @extends Ember.Route
 */
-export default Route.extend({
+export default class Badroute extends Route {
 
-  redirect : function(){
-        this.replaceWith('index');
-    }
+  redirect() {
+    this.replaceWith('index');
+  }
 
-});
+}

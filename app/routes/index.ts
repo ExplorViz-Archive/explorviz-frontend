@@ -6,11 +6,11 @@ import Route from '@ember/routing/route';
 * @class Index-Route
 * @extends Ember.Route
 */
-export default Route.extend({
+export default class IndexRoute extends Route {
 
-  beforeModel() {
-    this._super(...arguments);
+  beforeModel(transition:any) {
+    super.beforeModel(transition);
     this.replaceWith('login');
   }
   
-});
+}
