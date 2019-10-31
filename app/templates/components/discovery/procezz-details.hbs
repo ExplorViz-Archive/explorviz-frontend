@@ -29,13 +29,13 @@
   </nav>
   <div class="tab-content">
       <div class="tab-pane fade show active" id="nav-general" role="tabpanel" aria-labelledby="nav-general-tab">
-        {{discovery/procezz-details-tables/general-information procezz=procezz}}
+        <Discovery::ProcezzDetailsTables::GeneralInformation @procezz={{@procezz}} />
       </div>
       <div class="tab-pane fade" id="nav-execution" role="tabpanel" aria-labelledby="nav-execution-tab">
-        {{discovery/procezz-details-tables/execution-information procezz=procezz}}
+        <Discovery::ProcezzDetailsTables::ExecutionInformation @procezz={{@procezz}} />
       </div>
       <div class="tab-pane fade" id="nav-monitoring" role="tabpanel" aria-labelledby="nav-monitoring-tab">
-        {{discovery/procezz-details-tables/monitoring-information procezz=procezz}}
+        <Discovery::ProcezzDetailsTables::MonitoringInformation @procezz={{@procezz}} />
       </div>
   </div>
 </div>

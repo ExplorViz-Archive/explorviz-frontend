@@ -1,4 +1,4 @@
-{{#if showHiddenMessage}}
+{{#if this.showHiddenMessage}}
   <div class="container-fluid">
     <div class="jumbotron">
       <h2>All agents are hidden!</h2>
@@ -8,7 +8,7 @@
     <div class="spinner-center-3" role="status"></div>
   </div>
 {{else}}
-  {{#if agentRepo.agentList}}
+  {{#if this.agentRepo.agentList}}
     <div id="cy" class="cytoscape-container"></div>
   {{else}}
     <div class="container-fluid">

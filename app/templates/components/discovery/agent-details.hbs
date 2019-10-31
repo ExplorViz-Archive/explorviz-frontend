@@ -13,13 +13,13 @@
   <nav>
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
       <a class="nav-item nav-link active" id="nav-general-tab" data-toggle="tab" href="#nav-general" role="tab" aria-controls="nav-general" aria-selected="true">
-        {{name-selector agent.ip agent.name}}
+        {{name-selector @agent.ip @agent.name}}
       </a>
     </div>
   </nav>
   <div class="tab-content">
       <div class="tab-pane fade show active" id="nav-general" role="tabpanel" aria-labelledby="nav-general-tab">
-        {{discovery/agent-details-tables/general-information agent=agent}}
+        <Discovery::AgentDetailsTables::GeneralInformation @agent={{@agent}} />
       </div>
   </div>
 </div>
