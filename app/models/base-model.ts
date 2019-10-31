@@ -6,9 +6,9 @@ export default class BaseModel extends Model {
 
   @attr("string") name!: string;
 
-  @attr("number") lastDiscoveryTime!: string;
+  @attr("number") lastDiscoveryTime!: number;
 
-  @attr("number") errorMessage!: string;
+  @attr("string") errorMessage!: string;
 
   @attr("boolean") errorOccured!: boolean;
 
