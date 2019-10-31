@@ -24,6 +24,8 @@ export default Component.extend({
   initDone: false,
   showHiddenMessage: false,
 
+  cytoscapeGraphListener: null,
+
   actions: {
     enableShowHidden() {
       this.set('initDone', false);
@@ -65,32 +67,29 @@ export default Component.extend({
 
 
   setupListener() {
-    const self = this;
+    this.set('cytoscapeGraphListener', (evt) => { this.cytoscapeOnTap(evt); } );
 
     if(this.get('cytoscapeGraph')) {
-      this.get('cytoscapeGraph').on('tap', 'node', function (evt) {
-
-        const emberModel = evt.target.data().emberModel;
-
-        if(emberModel) {
-          // closure action of discovery controller        
-          self.showDetails(emberModel);
-        }
-
-      });
+      this.get('cytoscapeGraph').on('tap', 'node', this.cytoscapeGraphListener);
     }
   },
 
+  cytoscapeOnTap(evt) {
+
+    const emberModel = evt.target.data().emberModel;
+
+    if(emberModel) {
+      // closure action of discovery controller        
+      this.showDetails(emberModel);
+    }
+
+  },
 
   removeListener() {
-    if(this.get('initDone')) {
-
-      if(this.get('agentRepo')) {
-        this.get('agentRepo').off('updated');
-      }
+     if(this.get('initDone')) {
 
       if(this.get('cytoscapeGraph')) {
-        this.get('cytoscapeGraph').off('tap');
+        this.get('cytoscapeGraph').off('tap', 'node', this.cytoscapeGraphListener);
       }     
       
     }
