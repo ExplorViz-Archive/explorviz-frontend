@@ -1,5 +1,6 @@
 import Service from '@ember/service';
 import Evented from '@ember/object/evented';
+import Agent from 'explorviz-frontend/models/agent';
 
 /**
 * TODO
@@ -9,7 +10,7 @@ import Evented from '@ember/object/evented';
 */
 export default class AgentRepository extends Service.extend(Evented) {
 
-  agentList = null;
+  agentList:Agent[] = [];
 
 }
 
