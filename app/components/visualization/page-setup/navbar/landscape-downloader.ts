@@ -10,7 +10,6 @@ export default class LandscapeDownloader extends Component {
 
   @action
   downloadLandscape(landscape: Landscape) {
-    console.log(landscape)
     if (landscape !== null) {
       var timestamp: number = landscape.timestamp.get('timestamp');
       var totalRequests: number = landscape.timestamp.get('totalRequests');
