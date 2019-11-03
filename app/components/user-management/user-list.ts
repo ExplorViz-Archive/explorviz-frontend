@@ -1,71 +1,87 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
 import { inject as service } from "@ember/service";
 import { all } from 'rsvp';
 
 import { task } from 'ember-concurrency-decorators';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import DS from 'ember-data';
-import { Router } from '@ember/routing';
 import CurrentUser from 'explorviz-frontend/services/current-user';
-import { action, set } from '@ember/object';
+import { action, computed } from '@ember/object';
 import User from 'explorviz-frontend/models/user';
-// @ts-ignore
-import { waitForProperty } from 'ember-concurrency';
-import { observes } from '@ember-decorators/object';
+import RouterService from '@ember/routing/router-service';
+import { addObserver } from '@ember/object/observers';
 
-export default class UserList extends Component {
+interface Args {
+  refreshUsers: Function,
+  users: DS.RecordArray<User>|null,
+  page: number,
+  size: number
+}
 
-  // No Ember generated container
-  tagName = '';
+export default class UserList extends Component<Args> {
 
   @service('store') store!: DS.Store;
-  @service('router') router!: Router;
+  @service('router') router!: RouterService;
 
   @service('current-user') currentUser!: CurrentUser;
 
-  users: DS.RecordArray<User>|null = null;
-
-  refreshUsers !: Function;
-
-  allSelected:boolean = false;
+  @tracked
   selected:{[userId: string]: boolean} = {};
 
-  showDeleteUsersButton:boolean = false;
+  @tracked
   showDeleteUsersDialog:boolean = false;
 
+  @tracked
   showNewUsers:boolean = false;
 
   pageSizes:number[] = [5, 10, 25, 50];
 
-  init() {
-    super.init();
-    
+  @tracked
+  isLoading:boolean = false;
+
+  // needs to be a computed property.
+  // Otherwise the observer won't work
+  @computed('args.users')
+  get users() {
+    return this.args.users;
+  }
+
+  constructor(owner:any, args:any) {
+    super(owner, args);
+
+    addObserver(this, 'users', this.resetTable);
     this.resetCheckboxes();
   }
 
-  @observes('users')
+  get showDeleteUsersButton() {
+    return Object.values(this.selected).some(Boolean);
+  }
+
+  get allSelected() {
+    return Object.values(this.selected).every(Boolean);
+  }
+
   resetTable() {
-    if(this.users !== null) {
-      const tableElement = document.querySelector('#user-list-table-div');
-      if(tableElement !== null) {
-        tableElement.scrollTo(0, 0);
-      }
-      this.resetCheckboxes();
+    const tableElement = document.querySelector('#user-list-table-div');
+    if(tableElement !== null) {
+      tableElement.scrollTo(0, 0);
     }
+    this.resetCheckboxes();
   }
 
   resetCheckboxes() {
     // init checkbox values
-    set(this, 'allSelected', false);
-    set(this, 'selected', {});
-    const users = this.users;
+    let selectedNew:{[userId: string]: boolean} = {};
+    const { users } = this.args;
     if(users !== null) {
-      users.forEach(user => {
+      let userArray = users.toArray();
+      for(let user of userArray) {
         if(this.currentUser.user !== user)
-          this.selected[user.id] = false;
-      });
+          selectedNew[user.id] = false;
+      }
     }
-    set(this, 'showDeleteUsersButton', false);
+    this.selected = selectedNew;
   }
 
   @task({ enqueue: true })
@@ -89,33 +105,34 @@ export default class UserList extends Component {
       AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
     }).finally(() => {
       this.updateUserList();
-      set(this, 'showDeleteUsersDialog', false);
+      this.showDeleteUsersDialog = false;
     });
 
   });
 
   @action
   selectCheckbox(userId:string) {
-    set(this.selected, userId, !this.selected[userId]);
-    let allTrue = Object.values(this.selected).every(Boolean);
-    set(this, 'allSelected', allTrue);
-    set(this, 'showDeleteUsersButton', Object.values(this.selected).some(Boolean));
+    let selectedNew = { ...this.selected };
+    selectedNew[userId] = !selectedNew[userId];
+    this.selected = selectedNew;
   }
 
   @action
   selectAllCheckboxes() {
-    set(this, 'allSelected', !this.allSelected);
-    let value = this.allSelected;
-    for(const [id] of Object.entries(this.selected)) {
-      set(this.selected, id, value);
+    let value = !this.allSelected;
+    let selectedNew:{[userId: string]: boolean} = {...this.selected};
+    for(const [id] of Object.entries(selectedNew)) {
+      selectedNew[id] = value;
     }
-    set(this, 'showDeleteUsersButton', Object.values(this.selected).some(Boolean));
+    this.selected = selectedNew;
   }
 
   @action
   updateUserList() {
-    set(this, 'users', null);
-    this.refreshUsers();
+    this.isLoading = true;
+    this.args.refreshUsers().finally(() => {
+      this.isLoading = false;
+    });
   }
 
   @task({ drop: true })

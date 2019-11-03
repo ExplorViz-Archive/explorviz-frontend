@@ -91,7 +91,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         </tr>
       </thead>
       <tbody>
-        {{#unless this.users}}
+        {{#if this.isLoading}}
           <tr>
             <th scope="row"></th>
             <td>
@@ -103,7 +103,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
             <td></td>
           </tr>
         {{else}}
-          {{#each users as |user|}}
+          {{#each this.users as |user|}}
             <tr>
               <td scope="col">
                 {{#unless (eq this.currentUser.user.id user.id)}}
@@ -150,22 +150,22 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
               </td>
             </tr>
           {{/each}}
-        {{/unless}}
+        {{/if}}
       </tbody>
     </table>
   </div>
   <div class="d-flex justify-content-between mt-3 mb-1">
     <PageNavigation
-      @first={{this.users.meta.pagination.first.number}}
-      @prev={{this.users.meta.pagination.prev.number}}
-      @self={{this.page}}
-      @next={{this.users.meta.pagination.next.number}}
-      @last={{this.users.meta.pagination.last.number}}
+      @first={{@users.meta.pagination.first.number}}
+      @prev={{@users.meta.pagination.prev.number}}
+      @self={{@page}}
+      @next={{@users.meta.pagination.next.number}}
+      @last={{@users.meta.pagination.last.number}}
       @route="configuration.usermanagement.users"
     />
     <PageSizeSelector
       @pageSizes={{this.pageSizes}}
-      @size={{this.size}}
+      @size={{@size}}
       @label="Users per page"
       @position="above"
     />
