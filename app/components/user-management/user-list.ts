@@ -10,7 +10,7 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 import { action, computed } from '@ember/object';
 import User from 'explorviz-frontend/models/user';
 import RouterService from '@ember/routing/router-service';
-import { addObserver } from '@ember/object/observers';
+import { addObserver, removeObserver } from '@ember/object/observers';
 import Transition from '@ember/routing/-private/transition';
 
 interface Args {
@@ -75,7 +75,7 @@ export default class UserList extends Component<Args> {
     // init checkbox values
     let selectedNew:{[userId: string]: boolean} = {};
     const { users } = this.args;
-    if(users) {
+    if(users instanceof DS.RecordArray) {
       let userArray = users.toArray();
       for(let user of userArray) {
         if(this.currentUser.user !== user)
@@ -159,6 +159,10 @@ export default class UserList extends Component<Args> {
   showReasonErrorAlert(reason:any) {
     const {title, detail} = reason.errors[0];
     AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
+  }
+
+  willDestroy() {
+    removeObserver(this, 'users', this.resetTable);
   }
 
 }
