@@ -11,10 +11,11 @@ import { action, computed } from '@ember/object';
 import User from 'explorviz-frontend/models/user';
 import RouterService from '@ember/routing/router-service';
 import { addObserver } from '@ember/object/observers';
+import Transition from '@ember/routing/-private/transition';
 
 interface Args {
-  refreshUsers: Function,
-  users: DS.RecordArray<User>|null,
+  refreshUsers(): Transition,
+  users: DS.RecordArray<User>|null|undefined,
   page: number,
   size: number
 }
@@ -74,7 +75,7 @@ export default class UserList extends Component<Args> {
     // init checkbox values
     let selectedNew:{[userId: string]: boolean} = {};
     const { users } = this.args;
-    if(users !== null) {
+    if(users) {
       let userArray = users.toArray();
       for(let user of userArray) {
         if(this.currentUser.user !== user)
@@ -104,7 +105,7 @@ export default class UserList extends Component<Args> {
       const {title, detail} = reason.errors[0];
       AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
     }).finally(() => {
-      this.updateUserList();
+      this.updateUserList.perform();
       this.showDeleteUsersDialog = false;
     });
 
@@ -127,13 +128,10 @@ export default class UserList extends Component<Args> {
     this.selected = selectedNew;
   }
 
-  @action
-  updateUserList() {
-    this.isLoading = true;
-    this.args.refreshUsers().finally(() => {
-      this.isLoading = false;
-    });
-  }
+  @task({ drop: true })
+  updateUserList = task(function * (this: UserList) {
+    yield this.args.refreshUsers();
+  });
 
   @task({ drop: true })
   openUserCreation = task(function * (this: UserList) {
@@ -152,7 +150,7 @@ export default class UserList extends Component<Args> {
       yield user.destroyRecord();
       const message = `User <b>${username}</b> deleted.`;
       AlertifyHandler.showAlertifyMessage(message);
-      this.updateUserList();
+      this.updateUserList.perform();
     } catch(reason) {
       this.showReasonErrorAlert(reason);
     }

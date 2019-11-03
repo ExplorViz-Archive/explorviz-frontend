@@ -48,27 +48,18 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
           @type="success"
           @outline={{true}}
           @title="Add Users"
-          @disabled={{this.openUserCreation.isRunning}}
         >
-          {{#if this.openUserCreation.isRunning}}
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-          {{else}}
-            {{svg-jar "organization" class="octicon"}}{{svg-jar "plus-small" class="octicon"}}
-          {{/if}}
+          {{svg-jar "organization" class="octicon"}}{{svg-jar "plus-small" class="octicon"}}
           <span>Create Users</span>
         </BsButton>
         {{!-- Refresh Button --}}
         <BsButton
           class="d-flex-center"
-          @onClick={{action 'updateUserList'}}
+          @onClick={{perform this.updateUserList}}
           @outline={{true}}
           @title="Reload Users"
         >
-          {{#unless this.users}}
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-          {{else}}
-            {{svg-jar "sync" class="octicon"}}
-          {{/unless}}
+          {{svg-jar "sync" class="octicon"}}
         </BsButton>
       </div>
     </div>
@@ -91,7 +82,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         </tr>
       </thead>
       <tbody>
-        {{#if this.isLoading}}
+        {{#if this.updateUserList.isRunning}}
           <tr>
             <th scope="row"></th>
             <td>
