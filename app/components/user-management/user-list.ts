@@ -33,13 +33,7 @@ export default class UserList extends Component<Args> {
   @tracked
   showDeleteUsersDialog:boolean = false;
 
-  @tracked
-  showNewUsers:boolean = false;
-
   pageSizes:number[] = [5, 10, 25, 50];
-
-  @tracked
-  isLoading:boolean = false;
 
   // needs to be a computed property.
   // Otherwise the observer won't work
