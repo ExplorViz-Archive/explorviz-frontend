@@ -3,12 +3,6 @@ html, body {
   height: 100vh;
 }
 
-body > .ember-view {
-  height: 100%;
-  @extend .d-flex;
-  @extend .flex-column;
-}
-
 .main-content {
   overflow: hidden;
   @extend .ml-3;
