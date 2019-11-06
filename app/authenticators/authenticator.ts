@@ -1,8 +1,13 @@
-import { inject as service } from "@ember/service";
+import { inject as service } from '@ember/service';
 import { isEmpty } from '@ember/utils';
 import RSVP, { resolve, reject } from 'rsvp';
-import BaseAuthenticator from 'ember-simple-auth/authenticators/base';
 import config from 'explorviz-frontend/config/environment';
+import DS from 'ember-data';
+import { AjaxServiceClass } from 'ember-ajax/services/ajax';
+import { set, get } from '@ember/object';
+import User from 'explorviz-frontend/models/user';
+// @ts-ignore
+import BaseAuthenticator from 'ember-simple-auth/authenticators/base';
 
 /**
 * This Authenticator sends a single AJAX request with data fields "username" 
@@ -20,11 +25,11 @@ import config from 'explorviz-frontend/config/environment';
 * @module explorviz
 * @submodule security
 */
-export default BaseAuthenticator.extend({
+export default class Authenticator extends BaseAuthenticator {
 
-  session: service(),
-  store: service(),
-  ajax: service(),
+  @service('session') session!: any;
+  @service('store') store!: DS.Store;
+  @service('ajax') ajax!: AjaxServiceClass;
 
   // @Override
   /**
@@ -32,7 +37,7 @@ export default BaseAuthenticator.extend({
    *
    * @method restore
    */
-  restore(data) {
+  restore(data:any) {
 
     const self = this;
     const url = config.APP.API_ROOT;
@@ -41,9 +46,9 @@ export default BaseAuthenticator.extend({
 
     return new RSVP.Promise(function(resolve, reject) {
 
-      function fulfill(newTokenPayload) {
-        const userRecord = self.get('store').push(data.rawUserData);
-        userRecord.set("token", newTokenPayload.token);
+      function fulfill(newTokenPayload:any) {
+        const userRecord:User = self.store.push(data.rawUserData) as User;
+        set(userRecord, 'token', newTokenPayload.token);
         resolve({
           access_token: newTokenPayload.token,
           user: userRecord,
@@ -51,7 +56,7 @@ export default BaseAuthenticator.extend({
         });
       }
   
-      function failure(answer) {
+      function failure(answer:any) {
         let reason = "Please login again.";
 
         try {
@@ -59,14 +64,14 @@ export default BaseAuthenticator.extend({
         } catch(exception) {
           //self.debug("During authentication refreshment, the following error was reported", exception);
         }
-        self.set('session.errorMessage', reason);
+        set(self.session, 'errorMessage', reason);
         reject(reason);
       }
 
       if (!isEmpty(data.access_token)) {
 
         // check if token is still valid
-        self.get('ajax').request(`${url}/v1/tokens/refresh`, {
+        self.ajax.request(`${url}/v1/tokens/refresh`, {
           method: 'POST',
           contentType: 'application/json;',
           headers: {
@@ -78,7 +83,7 @@ export default BaseAuthenticator.extend({
           reject();
       }
     });
-  },
+  }
 
 
   // @Override
@@ -87,14 +92,14 @@ export default BaseAuthenticator.extend({
    *
    * @method authenticate
    */
-  authenticate(user) {
+  authenticate(user: {identification: string, password: string}) {
     const url = config.APP.API_ROOT;
 
     const self = this;
 
     // TODO refactor with Ember-Data
 
-    return this.get('ajax').request(`${url}/v1/tokens`, {
+    return this.ajax.request(`${url}/v1/tokens`, {
       method: 'POST',
       contentType: 'application/json;',
       data: {
@@ -103,22 +108,22 @@ export default BaseAuthenticator.extend({
       }
     }).then(fulfill, failure);
 
-    function fulfill(userPayload) {
-      const userRecord = self.get('store').push(userPayload);
+    function fulfill(userPayload:any) {
+      const userRecord = self.store.push(userPayload) as User;
       return resolve({
         // rawUserData is necessary, because the userRecord is transformed 
         // to typical JSON on page refresh (see "restore" above)
-        access_token: userRecord.get('token'),
+        access_token: get(userRecord, 'token'),
         user: userRecord,
         rawUserData: userPayload
       });
     }
 
-    function failure(reason) {
+    function failure(reason:any) {
       return reject(reason);
     }
 
-  },
+  }
 
 
   // @Override
@@ -127,9 +132,9 @@ export default BaseAuthenticator.extend({
    *
    * @method invalidate
    */
-  invalidate(data, args) {
-    this.set('session.session.content.message', args.message);
+  invalidate(_data:any, args:any) {
+    set(this.session.session.content, 'message', args.message);
     return RSVP.resolve();
   }
 
-});
+}
