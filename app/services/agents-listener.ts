@@ -85,3 +85,9 @@ export default class AgentsListener extends Service {
   }
 
 }
+
+declare module '@ember/service' {
+  interface Registry {
+    'agents-listener': AgentsListener;
+  }
+}
