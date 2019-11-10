@@ -1,6 +1,6 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
 import { inject as service } from "@ember/service";
-import { computed } from '@ember/object';
+import { computed, action } from '@ember/object';
 import DS from 'ember-data';
 import AdditionalData from 'explorviz-frontend/services/additional-data';
 import Highlighter from 'explorviz-frontend/services/visualization/application/highlighter';
@@ -8,23 +8,28 @@ import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-rep
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import Trace from 'explorviz-frontend/models/trace';
 import Clazz from 'explorviz-frontend/models/clazz';
+import { tracked } from '@glimmer/tracking';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
 export default class TraceSelection extends Component {
 
-  // No Ember generated container
-  tagName = '';
-
   // default time units
+  @tracked
   traceTimeUnit: TimeUnit = 'ms';
+  @tracked
   traceStepTimeUnit: TimeUnit = 'ms';
 
+  @tracked
   sortBy: any = 'traceId';
+  @tracked
   isSortedAsc: boolean = true;
+  @tracked
   filterTerm: string = '';
+  @tracked
   filterInput: string = '';
 
+  @tracked
   isReplayAnimated: boolean = true;
 
   @service('store')
@@ -45,11 +50,11 @@ export default class TraceSelection extends Component {
   // Compute current traces when highlighting changes
   @computed('highlighter.highlightedEntity', 'landscapeRepo.latestApplication', 'sortBy', 'isSortedAsc', 'filterTerm')
   get traces() {
-    let highlighter = this.get('highlighter');
+    let highlighter = this.highlighter;
     if (highlighter.get('isTrace')) {
       return [highlighter.get('highlightedEntity')];
     } else {
-      const latestApplication = this.get('landscapeRepo').get('latestApplication');
+      const latestApplication = this.landscapeRepo.latestApplication;
       if (latestApplication === null) {
         return [];
       } else {
@@ -64,7 +69,7 @@ export default class TraceSelection extends Component {
     }
 
     let filteredTraces: Trace[] = [];
-    let filter = this.get('filterTerm');
+    let filter = this.filterTerm;
     traces.forEach((trace) => {
       let sourceClazz = trace.get('sourceClazz');
       let targetClazz = trace.get('targetClazz');
@@ -76,128 +81,132 @@ export default class TraceSelection extends Component {
       }
     });
 
-    if (this.get('isSortedAsc')) {
-      filteredTraces.sort((a, b) => (a.get(this.get('sortBy')) > b.get(this.get('sortBy'))) ? 1 : ((b.get(this.get('sortBy')) > a.get(this.get('sortBy'))) ? -1 : 0));
+    if (this.isSortedAsc) {
+      filteredTraces.sort((a, b) => (a.get(this.sortBy) > b.get(this.sortBy)) ? 1 : ((b.get(this.sortBy) > a.get(this.sortBy)) ? -1 : 0));
     } else {
-      filteredTraces.sort((a, b) => (a.get(this.get('sortBy')) < b.get(this.get('sortBy'))) ? 1 : ((b.get(this.get('sortBy')) < a.get(this.get('sortBy'))) ? -1 : 0));
+      filteredTraces.sort((a, b) => (a.get(this.sortBy) < b.get(this.sortBy)) ? 1 : ((b.get(this.sortBy) < a.get(this.sortBy)) ? -1 : 0));
     }
 
     return filteredTraces;
   }
 
-  init() {
-    this.get('additionalData').on('showWindow', this, this.onWindowChange);
-    super.init();
+  @action
+  clickedTrace(this: TraceSelection, trace: Trace) {
+    if (trace.get('highlighted')) {
+      this.highlighter.unhighlightAll();
+    } else {
+      this.highlighter.highlightTrace(trace);
+      this.moveCameraToTraceStep();
+    }
+
+    this.renderingService.redrawScene();
   }
 
-  actions = {
-    clickedTrace(this: TraceSelection, trace: Trace) {
-      if (trace.get('highlighted')) {
-        this.get('highlighter').unhighlightAll();
-      } else {
-        this.get('highlighter').highlightTrace(trace);
-        this.moveCameraToTraceStep();
-      }
+  @action
+  filter(this: TraceSelection) {
+    // Case insensitive string filter
+    this.filterTerm = this.filterInput.toLowerCase();
+  }
 
-      this.get('renderingService').redrawScene();
-    },
+  @action
+  selectNextTraceStep(this: TraceSelection) {
+    this.highlighter.highlightNextTraceStep();
+    this.renderingService.redrawScene();
+    if (this.isReplayAnimated) {
+      this.moveCameraToTraceStep();
+    }
+  }
 
-    filter(this: TraceSelection) {
-      // Case insensitive string filter
-      this.set('filterTerm', this.get('filterInput').toLowerCase());
-    },
+  @action
+  selectPreviousTraceStep(this: TraceSelection) {
+    this.highlighter.highlightPreviousTraceStep();
+    this.renderingService.redrawScene();
+    if (this.isReplayAnimated) {
+      this.moveCameraToTraceStep();
+    }
+  }
 
-    selectNextTraceStep(this: TraceSelection) {
-      this.get('highlighter').highlightNextTraceStep();
-      this.get('renderingService').redrawScene();
-      if (this.get('isReplayAnimated')) {
-        this.moveCameraToTraceStep();
-      }
-    },
+  @action
+  toggleTraceTimeUnit(this: TraceSelection) {
+    let timeUnit = this.traceTimeUnit;
 
-    selectPreviousTraceStep(this: TraceSelection) {
-      this.get('highlighter').highlightPreviousTraceStep();
-      this.get('renderingService').redrawScene();
-      if (this.get('isReplayAnimated')) {
-        this.moveCameraToTraceStep();
-      }
-    },
+    if (timeUnit === 'ns') {
+      this.traceTimeUnit = 'ms';
+    }
+    else if (timeUnit === 'ms') {
+      this.traceTimeUnit = 's';
+    }
+    else if (timeUnit === 's') {
+      this.traceTimeUnit = 'ns';
+    }
+  }
 
-    toggleTraceTimeUnit(this: TraceSelection) {
-      let timeUnit = this.get('traceTimeUnit');
+  @action
+  toggleTraceStepTimeUnit(this: TraceSelection) {
+    let timeUnit = this.traceStepTimeUnit;
+    if (timeUnit === 'ns') {
+      this.traceStepTimeUnit = 'ms';
+    }
+    else if (timeUnit === 'ms') {
+      this.traceStepTimeUnit = 's';
+    }
+    else if (timeUnit === 's') {
+      this.traceStepTimeUnit = 'ns';
+    }
+  }
 
-      if (timeUnit === 'ns') {
-        this.set('traceTimeUnit', 'ms');
-      }
-      else if (timeUnit === 'ms') {
-        this.set('traceTimeUnit', 's');
-      }
-      else if (timeUnit === 's') {
-        this.set('traceTimeUnit', 'ns');
-      }
-    },
+  @action
+  toggleAnimation(this: TraceSelection) {
+    this.isReplayAnimated = !this.isReplayAnimated;
+  }
 
-    toggleTraceStepTimeUnit(this: TraceSelection) {
-      let timeUnit = this.get('traceStepTimeUnit');
-      if (timeUnit === 'ns') {
-        this.set('traceStepTimeUnit', 'ms');
-      }
-      else if (timeUnit === 'ms') {
-        this.set('traceStepTimeUnit', 's');
-      }
-      else if (timeUnit === 's') {
-        this.set('traceStepTimeUnit', 'ns');
-      }
-    },
+  @action
+  lookAtClazz(this: TraceSelection, proxyClazz: Clazz) {
+    let clazzId = proxyClazz.get('id');
+    let clazz = this.store.peekRecord('clazz', clazzId);
+    if (clazz !== null) {
+      this.renderingService.moveCameraTo(clazz);
+    }
+  }
 
-    toggleAnimation(this: TraceSelection) {
-      this.set('isReplayAnimated', !this.get('isReplayAnimated'));
-    },
+  @action
+  sortByProperty(this: TraceSelection, property: any) {
+    // Determine order for sorting
+    if (this.sortBy === property) {
+      // Toggle sorting order
+      this.isSortedAsc = !this.isSortedAsc;
+    } else {
+      // Sort in ascending order by default
+      this.isSortedAsc = true;
+    }
 
-    lookAtClazz(this: TraceSelection, proxyClazz: Clazz) {
-      let clazzId = proxyClazz.get('id');
-      let clazz = this.get('store').peekRecord('clazz', clazzId);
-      if (clazz !== null) {
-        this.get('renderingService').moveCameraTo(clazz);
-      }
-    },
+    this.sortBy = property;
+  }
 
-    sortBy(this: TraceSelection, property: any) {
-      // Determine order for sorting
-      if (this.get('sortBy') === property) {
-        // Toggle sorting order
-        this.set('isSortedAsc', !this.get('isSortedAsc'));
-      } else {
-        // Sort in ascending order by default
-        this.set('isSortedAsc', true);
-      }
-
-      this.set('sortBy', property);
-    },
-
-    close(this: TraceSelection) {
-      this.get('additionalData').removeComponent("visualization/page-setup/sidebar/trace-selection");
-    },
+  @action
+  close(this: TraceSelection) {
+    this.additionalData.removeComponent('visualization/page-setup/sidebar/trace-selection');
   }
 
   moveCameraToTraceStep(this: TraceSelection) {
-    let currentTraceStep = this.get('highlighter').get('currentTraceStep');
+    let currentTraceStep = this.highlighter.get('currentTraceStep');
 
     if (currentTraceStep) {
       let storeId = currentTraceStep.get('clazzCommunication').get('id');
       // Avoid proxy object by requesting clazz from store
-      let clazzCommunication = this.get('store').peekRecord('clazzcommunication', storeId);
+      let clazzCommunication = this.store.peekRecord('clazzcommunication', storeId);
       if (clazzCommunication !== null) {
-        this.get('renderingService').moveCameraTo(clazzCommunication);
+        this.renderingService.moveCameraTo(clazzCommunication);
       }
     }
   }
 
+  @action
   onWindowChange(this: TraceSelection) {
-    if (!this.get('additionalData').get('showWindow') && this.get('highlighter').get('isTrace')) {
-      let highlighter = this.get('highlighter');
+    if (!this.additionalData.get('showWindow') && this.highlighter.get('isTrace')) {
+      let highlighter = this.highlighter;
       highlighter.unhighlightAll();
-      this.get('renderingService').redrawScene();
+      this.renderingService.redrawScene();
     }
   }
 
