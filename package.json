@@ -33,6 +33,7 @@
     "babel-eslint": "^10.0.1",
     "body-parser": "^1.18.3",
     "bootstrap": "^4.2.1",
+    "ember-add-listener-helper": "^0.1.0",
     "ember-auto-import": "^1.2.19",
     "ember-bootstrap": "^3.0.2",
     "ember-bootstrap-power-select": "^1.0.0",
