@@ -31,19 +31,11 @@ export default class DataSelection extends Component {
     $('#vizspace').removeClass('col-12');
   }
 
+  @action
   onShowWindow() {
     if(this.additionalData.showWindow)
       this.openDataSelection();
     else
       this.closeDataSelection();
-  }
-
-  constructor(owner:any, args:any) {
-    super(owner, args);
-    this.additionalData.on('showWindow', this, this.onShowWindow);
-  }
-
-  willDestroy() {
-    this.additionalData.off('showWindow', this, this.onShowWindow);
   }
 }
