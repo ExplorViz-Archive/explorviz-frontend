@@ -54,7 +54,11 @@ export default class UserList extends Component<Args> {
   }
 
   get allSelected() {
-    return Object.values(this.selected).every(Boolean);
+    return this.selectedCount !== 0 && Object.values(this.selected).every(Boolean);
+  }
+
+  get selectedCount() {
+    return Object.entries(this.selected).length;
   }
 
   resetTable() {

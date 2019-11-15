@@ -71,7 +71,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         <tr>
           <th style="width: 20px">
             <div class="custom-control custom-checkbox">
-              <input type="checkbox" class="custom-control-input" id="checkAll" checked={{this.allSelected}} onchange={{action "selectAllCheckboxes"}}>
+              <input type="checkbox" class="custom-control-input" id="checkAll" disabled={{eq this.selectedCount 0}} checked={{this.allSelected}} onchange={{action "selectAllCheckboxes"}}>
               <label class="custom-control-label" for="checkAll"></label>
             </div>
           </th>
