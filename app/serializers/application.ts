@@ -1,43 +1,47 @@
 import DS from 'ember-data';
+import { camelize } from '@ember/string';
+import { ModelRegistry } from 'ember-data/model';
 
-const {JSONAPISerializer} = DS;
+const { JSONAPISerializer } = DS;
+
+type Links = { first: string, last: string, next: string, prev: string };
 
 /**
 * TODO
 *
-* @class Application-Serializer
+* @class ApplicationSerializer
 * @extends DS.JSONAPISerializer
 */
-export default JSONAPISerializer.extend({
+export default class ApplicationSerializer extends JSONAPISerializer {
 
   // workaround for camel-cased attributes
-  keyForAttribute: function(attr) {
-    return attr.camelize();
-  },
+  keyForAttribute(key: string) {
+    return camelize(key);
+  }
 
   // workaround for camel-cased attributes
   // every value will now be camelized (camel-cased)
-  keyForRelationship(key) {
-    return key.camelize();
-  },
+  keyForRelationship(key: string) {
+    return camelize(key);
+  }
 
   // Now the type of an Ember-Object isn't pluralized anymore, when it's serialized. Instead the Type will always be camel-case
   //@override
-  payloadKeyFromModelName(key){
-    return key.camelize();
-  },
+  payloadKeyFromModelName(modelName: keyof ModelRegistry){
+    return camelize(`${modelName}`);
+  }
 
   //this function will be used to bring the format of the server into the JSONAPI convention
   //@override
-  normalizeQueryRecordResponse (store, primaryModelClass, payload, id, requestType){
+  normalizeQueryRecordResponse(store: DS.Store, primaryModelClass: DS.Model, payload: {}, id: string | number, requestType: string) {
     //Here you'll change payload to your needs
-    return this._super(store, primaryModelClass, payload, id, requestType);
-  },
+    return super.normalizeQueryRecordResponse(store, primaryModelClass, payload, id, requestType);
+  }
 
   // adds links from payload to the query response
   // see: https://emberigniter.com/pagination-in-ember-with-json-api-backend/
-  normalizeQueryResponse(store, clazz, payload) {
-    const result = this._super(...arguments);
+  normalizeQueryResponse(store: DS.Store, primaryModelClass: DS.Model, payload: any, id: string | number, requestType: string) {
+    const result:any = super.normalizeQueryResponse(store, primaryModelClass, payload, id, requestType);
     result.meta = result.meta || {};
 
     if (payload.links) {
@@ -45,14 +49,13 @@ export default JSONAPISerializer.extend({
     }
 
     return result;
-  },
+  }
 
   // see: https://emberigniter.com/pagination-in-ember-with-json-api-backend/
-  createPageMeta(data) {
+  createPageMeta(data:Links) {
+    let meta: any = {};
 
-    let meta = {};
-
-    Object.keys(data).forEach(type => {
+    Object.keys(data).forEach((type: keyof Links) => {
       const link = data[type];
       meta[type] = {};
       let a = document.createElement('a');
@@ -70,11 +73,11 @@ export default JSONAPISerializer.extend({
         }
 
       });
-      a = null;
+      a.remove();
     });
 
     return meta;
 
   }
 
-});
+}
