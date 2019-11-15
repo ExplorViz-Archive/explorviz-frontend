@@ -32,6 +32,7 @@ export default class UserCreation extends Component {
   @service('user-settings') userSettings!: UserSettings;
   @service printThis!: any;
 
+  @tracked
   createdUsers:UserTrimmed[] = [];
 
   @tracked
