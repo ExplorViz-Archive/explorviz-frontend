@@ -8,7 +8,7 @@ import Agent from 'explorviz-frontend/models/agent';
 
 interface Args {
   agent: Agent,
-  errorHandling: Function
+  errorHandling(errorArray:any): void
 }
 
 export default class AgentDetails extends Component<Args> {
