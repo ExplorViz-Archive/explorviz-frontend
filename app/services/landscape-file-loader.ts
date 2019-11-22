@@ -35,14 +35,14 @@ export default class LandscapeFileLoader extends Service.extend(FileSaverMixin) 
       //@ts-ignore
       'id': this,
       headers: { 'Authorization': `Bearer ${access_token}` },
-      dataType: 'text',
+      contentType: false,
       options: {
         arraybuffer: true
       }
     }
     ).then((content: any) => {
       //@ts-ignore
-      this.saveFileAs(savedFileName, content.payload, 'application/json');
+      this.saveFileAs(savedFileName, JSON.stringify(content.payload), 'application/json');
       AlertifyHandler.showAlertifySuccess("Landscape with timestamp [" + timestamp + "] downloaded!");
       this.debug("Landscape with timestamp [" + timestamp + "] downloaded!");
     }).catch((error: any) => {
