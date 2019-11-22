@@ -18,7 +18,7 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   // Overrides URL for model.save()
   urlForCreateRecord() {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/batch`;
+    return `${baseUrl}/v1/userbatch`;
   },
 
   authorize(xhr) {
