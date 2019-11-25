@@ -20,24 +20,24 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
     // delete s.t. query parameter won't be attached (i.e. ?userId=id)
     delete query.userId;
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/${id}/settings/preferences`;
+    return `${baseUrl}/v1/preferences?filter[user]=${id}`;
   },
 
   // @Override
   // Overrides URL for model.save()
   urlForCreateRecord() {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/settings/preferences`;
+    return `${baseUrl}/v1/preferences`;
   },
 
   urlForUpdateRecord(id) {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/settings/preferences/${id}`;
+    return `${baseUrl}/v1/preferences/${id}`;
   },
 
   urlForDeleteRecord(id) {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/settings/preferences/${id}`;
+    return `${baseUrl}/v1/preferences/${id}`;
   },
 
   authorize(xhr) {
