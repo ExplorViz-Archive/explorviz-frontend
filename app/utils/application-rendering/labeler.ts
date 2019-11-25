@@ -1,6 +1,6 @@
 import Object from '@ember/object';
 import THREE from "three";
-import { shortenString } from '../helpers/string-helpers';
+import { stringShortener as shortenString} from '../../helpers/string-shortener'
 import { inject as service } from "@ember/service";
 
 export default Object.extend({
@@ -85,7 +85,7 @@ export default Object.extend({
 
       // Fixed text length for clazz labels
       if (type === 'clazz' && labelString.length > 10) {
-        labelString = shortenString(labelString, 8);
+        labelString = shortenString([labelString, 8]);
       }
 
       let textGeometry = new THREE.TextGeometry(labelString, {
@@ -149,7 +149,7 @@ export default Object.extend({
           // Shorten label to reach minimal text height, 
           // Accounting for later added "..." to label by substracting '3'
           let labelLength = Math.max(Math.round(labelString.length * (textHeight / minTextHeight) - 3), minTextLength);
-          labelString = shortenString(labelString, labelLength);
+          labelString = shortenString([labelString, labelLength]);
 
           // Update geometry and mesh based upon new label text
           textGeometry = new THREE.TextGeometry(labelString, {

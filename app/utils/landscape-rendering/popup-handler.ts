@@ -1,5 +1,4 @@
 import Object from '@ember/object';
-import { encodeStringForPopUp } from '../helpers/string-helpers';
 import { round } from '../helpers/number-helpers';
 import { inject as service } from '@ember/service';
 
@@ -55,7 +54,12 @@ export default Object.extend({
   },
 
   buildSystemData(system : any) {
-    let systemName = encodeStringForPopUp(system.get('name'));
+    // String formatting
+    let systemName = String(system.get('name'))
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 
     let nodeCount = 0;
     let applicationCount = 0;
