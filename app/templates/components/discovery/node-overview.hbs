@@ -9,7 +9,7 @@
   </div>
 {{else}}
   {{#if this.agentRepo.agentList}}
-    <div id="cy" class="cytoscape-container"></div>
+    <div id="cy" class="cytoscape-container" {{did-insert this.renderGraph}}></div>
   {{else}}
     <div class="container-fluid">
       <div class="jumbotron">
