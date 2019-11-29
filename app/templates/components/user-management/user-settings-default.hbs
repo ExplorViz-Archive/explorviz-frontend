@@ -1,4 +1,4 @@
-{{#each-in this.settings as |key value|}}
+{{#each-in @settings as |key value|}}
   <h6>{{capitalize key}}</h6>
   <div class="pl-3">
     <div class="d-flex justify-content-between pr-3">
@@ -9,11 +9,11 @@
         @theme='skewed'
         @onLabel='Yes'
         @offLabel='No'
-        @value={{get this.useDefaultSettings key}}
-        @onToggle={{action (mut (get this.useDefaultSettings key))}}
+        @value={{get @useDefaultSettings key}}
+        @onToggle={{action (mut (get @useDefaultSettings key))}}
       />
     </div>
-    {{#unless (get this.useDefaultSettings key)}}
+    {{#unless (get @useDefaultSettings key)}}
       <div class="pt-2">
         <UserManagement::UserSettingsBase @settings={{value}} />
       </div>
