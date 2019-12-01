@@ -5,7 +5,7 @@
 </div>
 
 <div class="sidebar-component-close">
-  <label {{action "close"}} title="Close Trace Selection" aria-label="Close">
+  <label {{on "click" this.close}} title="Close Trace Selection" aria-label="Close">
     <font size="6">&times;</font>
   </label>
 </div>
@@ -55,9 +55,9 @@
     <tbody>
       {{#each this.traces as |trace|}}
         <tr {{on "click" (fn this.clickedTrace trace)}} style="cursor: pointer" bgcolor="{{if trace.highlighted "#cc8a8a"}}">
-          <th title={{trace.traceId}}>{{string-shortener trace.traceId 7}}</th>
-          <td title={{trace.sourceClazz.name}}>{{string-shortener trace.sourceClazz.name 11}}</td>
-          <td title={{trace.targetClazz.name}}>{{string-shortener trace.targetClazz.name 13}}</td>
+          <th title={{trace.traceId}}>{{truncate trace.traceId 8 true}}</th>
+          <td title={{trace.sourceClazz.name}}>{{truncate trace.sourceClazz.name 12 true}}</td>
+          <td title={{trace.targetClazz.name}}>{{truncate trace.targetClazz.name 14 true}}</td>
           <td>{{format-number trace.totalTraceDuration this.traceTimeUnit}}</td>
         </tr>
       {{/each}}
@@ -114,7 +114,7 @@
           <td class="col-9 container-word-wrap">
             {{this.highlighter.currentTraceStep.clazzCommunication.sourceClazz.name}}
             <BsButton
-              @onClick={{action "lookAtClazz" this.highlighter.currentTraceStep.clazzCommunication.sourceClazz}}
+              @onClick={{action (fn this.lookAtClazz this.highlighter.currentTraceStep.clazzCommunication.sourceClazz)}}
               @type="button"
               class="th-btn"
             >
@@ -127,7 +127,7 @@
           <td class="col-9 container-word-wrap">
             {{this.highlighter.currentTraceStep.clazzCommunication.targetClazz.name}}
             <BsButton
-              @onClick={{action "lookAtClazz" this.highlighter.currentTraceStep.clazzCommunication.targetClazz}}
+              @onClick={{action (fn this.lookAtClazz this.highlighter.currentTraceStep.clazzCommunication.targetClazz)}}
               @type="button"
               class="th-btn"
             >
@@ -147,7 +147,7 @@
           <th class="col-3" title="Average Response Time">
             Avg. Resp. Time in
             <BsButton
-              @onClick={{action "toggleTraceStepTimeUnit"}}
+              @onClick={{action this.toggleTraceStepTimeUnit}}
               class="th-btn"
               outline={{true}}
             >

@@ -23,15 +23,15 @@
         <tr {{action "eventClicked" event}} style="cursor: pointer" bgcolor="#cc8a8a">
           <th scope="row" title={{timestamp-to-date event.timestamp "localString"}}>{{timestamp-to-date event.timestamp
             "time"}}</th>
-          <td title={{event.eventType}}>{{string-shortener event.eventType 9}}</td>
-          <td title={{event.eventMessage}}>{{string-shortener event.eventMessage 9}}</td>
+          <td title={{event.eventType}}>{{truncate event.eventType 10 true}}</td>
+          <td title={{event.eventMessage}}>{{truncate event.eventMessage 10 true}}</td>
         </tr>
         {{else}}
         <tr {{action "eventClicked" event}} style="cursor: pointer">
           <th scope="row" title={{timestamp-to-date event.timestamp "localString"}}>{{timestamp-to-date event.timestamp
             "time"}}</th>
-          <td title={{event.eventType}}>{{string-shortener event.eventType 9}}</td>
-          <td title={{event.eventMessage}}>{{string-shortener event.eventMessage 9}}</td>
+          <td title={{event.eventType}}>{{truncate event.eventType 10 true}}</td>
+          <td title={{event.eventMessage}}>{{truncate event.eventMessage 10 true}}</td>
         </tr>
         {{/if}}
       {{/each}}

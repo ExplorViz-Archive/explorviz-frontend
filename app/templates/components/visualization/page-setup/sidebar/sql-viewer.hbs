@@ -16,12 +16,12 @@
       autofocus="autofocus"
       @value={{this.filterInput}}
       @placeholder="Filter statements"
-      @focus-out={{action "filter"}}
-      @enter={{action "filter"}}
+      @focus-out={{action this.filter}}
+      @enter={{action this.filter}}
     />
   </div>
   <div>
-    <BsButton @onClick={{action "filter"}} @type="button" class="ml-1 btn btn-light">
+    <BsButton @onClick={{action this.filter}} @type="button" class="ml-1 btn btn-light">
       {{svg-jar "search" class="octicon align-middle"}}
     </BsButton>
   </div>
@@ -36,7 +36,7 @@
         <th {{on "click" (fn this.sortByProperty "statementType")}} scope="col">Statement Type</th>
         <!-- <th {{action "sortByProperty" "returnValue"}} scope="col">Return Value</th> -->
         <th {{on "click" (fn this.sortByProperty "responseTime")}} scope="col">Response Time in
-          <BsButton @onClick={{action "toggleResponseTimeUnit"}} class="th-btn" outline={{true}}>
+          <BsButton @onClick={{action this.toggleResponseTimeUnit}} class="th-btn" outline={{true}}>
             {{responseTimeUnit}}
           </BsButton>
         </th>
@@ -50,7 +50,7 @@
               {{timestamp-to-date query.timestamp "time"}}
             </th>
             <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
-            <td title={{query.statementType}}>{{string-shortener query.statementType 9}}</td>
+            <td title={{query.statementType}}>{{truncate query.statementType 10 true}}</td>
             <!-- <td title={{query.returnValue}}>{{query.returnValue}}</td> -->
             <td title={{query.responseTime}}>{{format-number query.responseTime this.responseTimeUnit}}</td>
           </tr>
@@ -60,7 +60,7 @@
               {{timestamp-to-date query.timestamp "time"}}
             </th>
             <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
-            <td title={{query.statementType}}>{{string-shortener query.statementType 9}}</td>
+            <td title={{query.statementType}}>{{truncate query.statementType 10 true}}</td>
             <!-- <td title={{query.returnValue}}>{{query.returnValue}}</td> -->
             <td title={{query.responseTime}}>{{format-number query.responseTime this.responseTimeUnit}}</td>
           </tr>
@@ -94,7 +94,7 @@
         </tr>
         <tr class="d-flex">
           <th class="col-3">Response Time in
-            <BsButton @onClick={{action "toggleResponseTimeUnit"}} class="th-btn" @outline={{true}}>
+            <BsButton @onClick={{action this.toggleResponseTimeUnit}} class="th-btn" @outline={{true}}>
               {{responseTimeUnit}}
             </BsButton>
             </th>
