@@ -1,99 +1,105 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
 import { inject as service } from '@ember/service';
 import nameSelector from 'explorviz-frontend/utils/helpers/name-selector';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import debugLogger from 'ember-debug-logger';
+import AgentRepository from 'explorviz-frontend/services/repos/agent-repository';
+import Configuration from 'explorviz-frontend/services/configuration';
+import { action, set } from '@ember/object';
+import Agent from 'explorviz-frontend/models/agent';
+import Procezz from 'explorviz-frontend/models/procezz';
+import { tracked } from '@glimmer/tracking';
 
-/* global cytoscape */
+declare const cytoscape: any;
 
-export default Component.extend({
+interface Args {
+  showDetails(emberRecord: any): void
+}
 
-  // No Ember generated container
-  tagName: '',
+export default class NodeOverview extends Component<Args> {
 
-  debug: debugLogger(),
+  debug = debugLogger('NodeOverview');
 
-  agentRepo: service("repos/agent-repository"),
-  configuration: service("configuration"),
+  @service('repos/agent-repository')
+  agentRepo!: AgentRepository;
 
-  cytoscapeGraph: null,
-  cytoscapeLayout: null,
+  @service('configuration')
+  configuration!: Configuration;
 
-  showCytoscape: false,
+  cytoscapeGraph: any = null;
+  cytoscapeLayout: any = null;
 
-  initDone: false,
-  showHiddenMessage: false,
+  showCytoscape = false;
 
-  cytoscapeGraphListener: null,
+  initDone = false;
 
-  actions: {
-    enableShowHidden() {
-      this.set('initDone', false);
-      this.set('configuration.discoverySettings.showHiddenEntities', true);
-      this.set('showHiddenMessage', false);
-    }
-  },
+  @tracked
+  showHiddenMessage = false;
 
-  // @Override
+  cytoscapeGraphListener: Function|null = null;
+
+  @action
+  enableShowHidden() {
+    this.initDone = false;
+    set(this.configuration.discoverySettings, 'showHiddenEntities', true);
+    this.showHiddenMessage = false;
+  }
+
   /**
-   * This overridden Ember Component lifecycle hook is used
-   * to render the actual cytoscapeGraph
-   *
-   * @method didRender
+   * This method renders the actual cytoscapeGraph
    */
-  didRender(){    
-    this._super(...arguments);
-    
-    if(!this.get('initDone') && this.get('agentRepo.agentList.length') > 0) {
+  @action
+  renderGraph(){
+    if(!this.initDone && this.agentRepo.agentList.length > 0) {
       this.initCytoscape();
       this.setupListener();
-      this.set('initDone', true);
+      this.initDone = true;
     }
-    this.updateCytoscapeGraph(this.get('agentRepo.agentList'));
-  },
+    this.updateCytoscapeGraph(this.agentRepo.agentList);
+  }
 
 
   // @Override
   /**
-   * This overridden Ember Component lifecycle hook enables calling
+   * This overridden Glimmer Component lifecycle hook enables calling
    * custom cleanup code.
    *
-   * @method willDestroyElement
+   * @method willDestroy
    */
-  willDestroyElement() {
-    this._super(...arguments);
+  willDestroy() {
+    super.willDestroy();
     this.removeListener();
-  },
+  }
 
 
   setupListener() {
-    this.set('cytoscapeGraphListener', (evt) => { this.cytoscapeOnTap(evt); } );
+    this.cytoscapeGraphListener = (evt:any) => { this.cytoscapeOnTap(evt); };
 
-    if(this.get('cytoscapeGraph')) {
-      this.get('cytoscapeGraph').on('tap', 'node', this.cytoscapeGraphListener);
+    if(this.cytoscapeGraph) {
+      this.cytoscapeGraph.on('tap', 'node', this.cytoscapeGraphListener);
     }
-  },
+  }
 
-  cytoscapeOnTap(evt) {
+  cytoscapeOnTap(evt: any) {
 
     const emberModel = evt.target.data().emberModel;
 
     if(emberModel) {
       // closure action of discovery controller        
-      this.showDetails(emberModel);
+      this.args.showDetails(emberModel);
     }
 
-  },
+  }
 
   removeListener() {
-     if(this.get('initDone')) {
+     if(this.initDone) {
 
-      if(this.get('cytoscapeGraph')) {
-        this.get('cytoscapeGraph').off('tap', 'node', this.cytoscapeGraphListener);
+      if(this.cytoscapeGraph) {
+        this.cytoscapeGraph.off('tap', 'node', this.cytoscapeGraphListener);
       }     
       
     }
-  },
+  }
 
 
   //possible TODO https://github.com/cytoscape/cytoscape.js-cola/issues/14
@@ -205,17 +211,17 @@ export default Component.extend({
       padding: 10
     });
 
-    this.set('cytoscapeGraph', cy);
-    this.set('cytoscapeLayout', layout);
+    this.cytoscapeGraph = cy;
+    this.cytoscapeLayout = layout;
 
     layout.run();
-  },
+  }
 
 
-  updateCytoscapeGraph(newAgentList) {
+  updateCytoscapeGraph(newAgentList: Agent[]) {
 
-    const cy = this.get('cytoscapeGraph');
-    const layout = this.get('cytoscapeLayout');
+    const cy = this.cytoscapeGraph;
+    const layout = this.cytoscapeLayout;
 
     if(!(cy && layout) || !newAgentList) {
       return;
@@ -249,7 +255,7 @@ export default Component.extend({
 
     cy.add(explorVizNode);
 
-    const showHiddenEntities = this.get('configuration.discoverySettings.showHiddenEntities');
+    const showHiddenEntities = this.configuration.discoverySettings.showHiddenEntities;
 
     let isAtLeastOneSet = false;
 
@@ -303,7 +309,7 @@ export default Component.extend({
 
       // look for procezzes and add to graph
       const procezzes = agentRecord.get('procezzes');
-      procezzes.forEach((procezzRecord) => {
+      procezzes.forEach((procezzRecord: Procezz) => {
 
         const procezzHidden = procezzRecord.get('isHidden');
 
@@ -314,7 +320,7 @@ export default Component.extend({
           return;
         }
 
-        const procezzName = nameSelector(procezzRecord.get('pid'), procezzRecord.get('name'));
+        const procezzName = nameSelector(`${procezzRecord.get('pid')}`, procezzRecord.get('name'));
 
         const procezzID = procezzRecord.get('id');
 
@@ -367,8 +373,8 @@ export default Component.extend({
     });
     // END agentList loop
 
-    this.set('showCytoscape', isAtLeastOneSet);
-    this.set('showHiddenMessage', !isAtLeastOneSet);
+    this.showCytoscape = isAtLeastOneSet;
+    this.showHiddenMessage = !isAtLeastOneSet;
 
     //cy.endBatch();
     layout.options.eles = cy.elements();
@@ -396,4 +402,4 @@ export default Component.extend({
     }
   }
 
-});
+}

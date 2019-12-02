@@ -1,7 +1,19 @@
 <li class="nav-item mx-2">
   {{#unless this.openedActive}}
-  <button class="nav-link btn btn-sm btn-outline-secondary" {{on "click" this.openAllComponents}} type="button">Open All Components</button>
+    <button
+      class="nav-link btn btn-sm btn-outline-secondary"
+      {{on "click" this.openAllComponents}}
+      type="button"
+    >
+      Open All Components
+    </button>
   {{else}}
-  <button class="nav-link btn btn-sm btn-outline-secondary" {{on "click" this.closeAllComponents}} type="button">Close All Components</button>
+    <button
+      class="nav-link btn btn-sm btn-outline-secondary"
+      {{on "click" this.closeAllComponents}}
+      type="button"
+    >
+      Close All Components
+    </button>
   {{/unless}}
 </li>

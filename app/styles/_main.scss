@@ -187,7 +187,6 @@ svg.octicon {
 * { @include centerSpinners(); }
 
 .spinner-center-3-relative {
-  @extend .spinner-border;
-  width: 3rem;
-  height: 3rem;
+  @extend .spinner-center-3;
+  position: relative;
 }

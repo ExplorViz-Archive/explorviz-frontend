@@ -5,18 +5,18 @@
   position: 'below'|'above'|'auto' - The position of the selection list
  --}}
 <div class="d-flex flex-row">
-	{{#if @label}}
-		<div class="mr-2 align-self-center">{{@label}}</div>
-	{{/if}}
-	<div class="page-size-select">
-		<PowerSelect
-			@verticalPosition={{@position}}
-			@searchEnabled={{false}}
-			@options={{@pageSizes}}
-			@renderInPlace={{true}}
-			@selected={{@size}}
-			@onchange={{fn (mut @size)}} as |name|>
-			{{name}}
-		</PowerSelect>
-	</div>
+  {{#if @label}}
+    <div class="mr-2 align-self-center">{{@label}}</div>
+  {{/if}}
+  <div class="page-size-select">
+    <PowerSelect
+      @verticalPosition={{@position}}
+      @searchEnabled={{false}}
+      @options={{@pageSizes}}
+      @renderInPlace={{true}}
+      @selected={{@size}}
+      @onchange={{fn (mut @size)}} as |name|>
+      {{name}}
+    </PowerSelect>
+  </div>
 </div>
