@@ -1,5 +1,8 @@
 import Object from '@ember/object';
 import THREE from "three";
+import System from 'explorviz-frontend/models/system';
+import Node from 'explorviz-frontend/models/node';
+import Application from 'explorviz-frontend/models/application';
 
 export default Object.extend({
 
@@ -22,18 +25,18 @@ export default Object.extend({
   },
  
   saveTextForLabeling(textToShow: string | null, parent: THREE.Mesh, color: string): void {
-    const emberModelName = parent.userData.model.constructor.modelName;
-    const text = textToShow ? textToShow : parent.userData.model.get('name');
+    let emberModel = parent.userData.model;
+    const text = textToShow ? textToShow : emberModel.get('name');
 
     let textCache: any = null;
 
-    if (emberModelName === "system") {
+    if (emberModel instanceof System) {
       textCache = this.get('systemTextCache');
     }
-    else if (emberModelName === "node") {
+    else if (emberModel instanceof Node) {
       textCache = this.get('nodeTextCache');
     }
-    else if (emberModelName === "application") {
+    else if (emberModel instanceof Application) {
       textCache = this.get('appTextCache');
     }
 

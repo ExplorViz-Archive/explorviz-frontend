@@ -2,7 +2,6 @@ import RenderingCore from './rendering-core';
 import { inject as service } from '@ember/service';
 import { getOwner } from '@ember/application';
 
-
 import THREE from "three";
 
 import applyCityLayout from
@@ -434,7 +433,7 @@ export default RenderingCore.extend({
     const clazzColor = this.get('configuration.applicationColors.clazz');
     const highlightedEntityColor = this.get('configuration.applicationColors.highlightedEntity');
 
-    this.createBox(component, color, false);
+    this.createBox(component, color);
 
     component.set('color', color);
 
@@ -444,9 +443,9 @@ export default RenderingCore.extend({
     clazzes.forEach((clazz) => {
       if (component.get('opened')) {
         if (clazz.get('highlighted')) {
-          this.createBox(clazz, highlightedEntityColor, true);
+          this.createBox(clazz, highlightedEntityColor);
         } else {
-          this.createBox(clazz, clazzColor, true);
+          this.createBox(clazz, clazzColor);
         }
       }
     });
@@ -472,9 +471,8 @@ export default RenderingCore.extend({
    * @method createBox
    * @param {emberModel} boxEntity Component or clazz
    * @param {string}     color     Color for box
-   * @param {boolean}    isClazz   Distinguishes between component and clazz
    */
-  createBox(boxEntity, color, isClazz) {
+  createBox(boxEntity, color) {
     let centerPoint = new THREE.Vector3(boxEntity.get('positionX') +
       boxEntity.get('width') / 2.0, boxEntity.get('positionY') +
       boxEntity.get('height') / 2.0,
@@ -510,7 +508,6 @@ export default RenderingCore.extend({
     mesh.userData.model = boxEntity;
     mesh.userData.name = boxEntity.get('name');
     mesh.userData.foundation = boxEntity.get('foundation');
-    mesh.userData.type = isClazz ? 'clazz' : 'package';
     mesh.userData.opened = boxEntity.get('opened');
 
     this.get('labeler').createLabel(mesh, this.get('application3D'),

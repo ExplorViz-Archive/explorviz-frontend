@@ -7,12 +7,11 @@ import { action } from '@ember/object';
 
 export default class ApplicationOpener extends Component {
 
-  // saves the state whether 'openAllComponents' was clicked and the packages are opened or not
+  // Saves the state whether 'openAllComponents' was clicked and the packages are opened or not
   @tracked
   openedActive: boolean = false;
 
   @service('store') store!: DS.Store;
-
   @service('rendering-service') renderingService!: RenderingService;
 
   @action

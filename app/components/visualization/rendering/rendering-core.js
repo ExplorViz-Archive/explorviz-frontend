@@ -444,7 +444,7 @@ export default Component.extend(Evented, {
       this.threePerformance.removePerformanceMeasurement();
     }
 
-    // unsubscribe from all services
+    // Unsubscribe from all services
     this.get('listeners').forEach(([service, event, listenerFunction]) => {
       this.get(service).off(event, listenerFunction);
     });

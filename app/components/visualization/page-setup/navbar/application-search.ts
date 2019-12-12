@@ -1,4 +1,4 @@
-import Component from '@glimmer/component';
+import GlimmerComponent from '@glimmer/component';
 import { inject as service } from "@ember/service";
 import { task } from 'ember-concurrency-decorators';
 import { isBlank } from '@ember/utils';
@@ -6,10 +6,12 @@ import $ from 'jquery';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import Highlighter from 'explorviz-frontend/services/visualization/application/highlighter';
+import Clazz from 'explorviz-frontend/models/clazz';
+import Component from 'explorviz-frontend/models/component';
 import { action } from '@ember/object';
 
 /* eslint-disable require-yield */
-export default class ApplicationSearch extends Component {
+export default class ApplicationSearch extends GlimmerComponent {
 
   @service('rendering-service') renderingService!: RenderingService;
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
@@ -30,29 +32,24 @@ export default class ApplicationSearch extends Component {
       return;
     }
 
-    const entity = emberPowerSelectObject[0];
-    const modelType = entity.constructor.modelName;
-
-    if(!modelType || modelType === "") {
-      return;
-    }
+    const model = emberPowerSelectObject[0];
 
     this.highlighter.unhighlightAll();
   
-    if (modelType === "clazz") {
-      entity.openParents();
+    if (model instanceof Clazz) {
+      model.openParents();
     }
-    else if (modelType === "component") {
-      if (entity.opened) {
-        // close and highlight, since it is already open
-        entity.setOpenedStatus(false);
+    else if (model instanceof Component) {
+      if (model.opened) {
+        // Close and highlight, since it is already open
+        model.setOpenedStatus(false);
       } else {
-        // open all parents, since component is hidden
-        entity.openParents();
+        // Open all parents, since component is hidden
+        model.openParents();
       }
     }
 
-    this.highlighter.highlight(entity);
+    this.highlighter.highlight(model);
     this.renderingService.redrawScene();
   }
 
@@ -105,7 +102,7 @@ export default class ApplicationSearch extends Component {
       if(!component)
         continue;
 
-      // skip foundation, since it can't be highlighted anyways
+      // Skip foundation, since it can't be highlighted anyways
       if(component.foundation)
         continue;
 

@@ -2,6 +2,8 @@ import Object from '@ember/object';
 import THREE from "three";
 import { stringShortener as shortenString} from '../../helpers/string-shortener'
 import { inject as service } from "@ember/service";
+import Component from 'explorviz-frontend/models/component';
+import Clazz from 'explorviz-frontend/models/clazz';
 
 export default Object.extend({
 
@@ -76,15 +78,15 @@ export default Object.extend({
     }
     // New TextGeometry necessary
     else {
-      let { name: labelString, foundation, type, opened } = parentMesh.userData;
-
+      let model = parentMesh.userData.model;
+      let { name: labelString, foundation, opened } = model;
       // Text properties for TextGeometry
       const textSize = 2;
       const textHeight = 0.1;
       const curveSegments = 1;
 
       // Fixed text length for clazz labels
-      if (type === 'clazz' && labelString.length > 10) {
+      if (model instanceof Clazz && labelString.length > 10) {
         labelString = shortenString([labelString, 8]);
       }
 
@@ -102,9 +104,9 @@ export default Object.extend({
 
       if (foundation && foundationTextMaterial) {
         material = foundationTextMaterial.clone();
-      } else if (type === 'clazz' && clazzTextMaterial) {
+      } else if (model instanceof Clazz && clazzTextMaterial) {
         material = clazzTextMaterial.clone();
-      } else if (type === 'package' && componentTextMaterial) {
+      } else if (model instanceof Component && componentTextMaterial) {
         material = componentTextMaterial.clone();
       } else {
         return;
@@ -131,7 +133,7 @@ export default Object.extend({
       const minTextLength = 3;
 
       // Static size for clazz text
-      if (type === 'clazz') {
+      if (model instanceof Clazz) {
         textGeometry.scale(staticScaleFactor, staticScaleFactor, staticScaleFactor);
       }
       // Handle label which is too big for parent component
@@ -186,7 +188,7 @@ export default Object.extend({
         textMesh.position.z = centerParentBox.z;
         textMesh.rotation.x = -(Math.PI / 2);
 
-        if (type === 'clazz') {
+        if (model instanceof Clazz) {
           textMesh.rotation.z = -(Math.PI / 3);
         } else {
           textMesh.rotation.z = -(Math.PI / 4);
