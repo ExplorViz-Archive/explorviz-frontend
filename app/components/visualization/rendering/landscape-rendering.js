@@ -98,15 +98,6 @@ export default RenderingCore.extend({
     const dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
     this.get('scene').add(dirLight);
-
-    // Set default model
-    this.set('imageLoader.logos', {});
-    this.set('labeler.textLabels', {});
-    this.set('labeler.systemTextCache', []);
-    this.set('labeler.nodeTextCache', []);
-    this.set('labeler.appTextCache', []);
-
-    this.set('centerAndZoomCalculator.centerPoint', null);
   },
 
   // @Override

@@ -47,7 +47,7 @@ export default RenderingCore.extend({
   centerAndZoomCalculator: null,
   foundationBuilder: null,
 
-  // there's already a property 'listener' in superclass RenderingCore
+  // There's already a property 'listener' in superclass RenderingCore
   listeners2: null,
 
   // @Override
@@ -170,8 +170,6 @@ export default RenderingCore.extend({
     const light = new THREE.AmbientLight(
       new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
-
-    this.set('centerAndZoomCalculator.centerPoint', null);
   },
 
   // @Override
