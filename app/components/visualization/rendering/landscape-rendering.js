@@ -39,9 +39,6 @@ export default RenderingCore.extend({
 
   renderingService: service("rendering-service"),
 
-  openSymbol: null,
-  closeSymbol: null,
-
   // there's already a property 'listener' in superclass RenderingCore
   listeners2: null,
 
@@ -83,7 +80,9 @@ export default RenderingCore.extend({
     }
 
     if (!this.get('labeler')) {
-      this.set('labeler', Labeler.create());
+      this.set('labeler', Labeler.create({
+        configuration: this.get('configuration')
+      }));
     }
 
     if (!this.get('centerAndZoomCalculator')) {
@@ -107,8 +106,6 @@ export default RenderingCore.extend({
     this.debug("cleanup landscape rendering");
     
     this.set('imageLoader.logos', {});
-    this.set('labeler.textLabels', {});
-    this.set('labeler.textCache', []);
 
     this.removeListeners();
 
@@ -180,14 +177,6 @@ export default RenderingCore.extend({
       height: 0.5
     };
 
-    // Create plus or minus, if not already done
-    if (!(this.get('openSymbol') && this.get('closeSymbol')) &&
-      this.get('font')) {
-
-      createCollapseSymbols();
-
-    }
-
     if (systems) {
 
       // Calculate new center and update zoom
@@ -221,35 +210,8 @@ export default RenderingCore.extend({
           self.get('scene').add(systemMesh);
           system.set('threeJSModel', systemMesh);
 
-          const textColor =
-            self.get('configuration.landscapeColors.systemText');
-
-          self.get('labeler').saveTextForLabeling(null, systemMesh, textColor);
-
-          // Add respective open / close symbol
-          systemMesh.geometry.computeBoundingBox();
-          const bboxSystem = systemMesh.geometry.boundingBox;
-
-          let collapseSymbol = null;
-
-          if (system.get('opened')) {
-            if (self.get('closeSymbol')) {
-              collapseSymbol = self.get('closeSymbol').clone();
-            }
-          } else {
-            if (self.get('openSymbol')) {
-              collapseSymbol = self.get('openSymbol').clone();
-            }
-          }
-
-          if (collapseSymbol) {
-            collapseSymbol.position.x = bboxSystem.max.x - 0.35;
-            collapseSymbol.position.y = bboxSystem.max.y - 0.35;
-            collapseSymbol.position.z = systemMesh.position.z + 0.0001;
-            systemMesh.add(collapseSymbol);
-          }
-
-
+          self.get('labeler').drawCollapseSymbol(systemMesh, self.font);
+          self.get('labeler').drawSystemTextLabel(systemMesh, self.font);
         }
 
         const nodegroups = system.get('nodegroups');
@@ -275,28 +237,7 @@ export default RenderingCore.extend({
             nodegroupMesh.position.set(centerX, centerY,
               nodegroup.get('positionZ') + 0.001);
 
-            // Add respective open / close symbol
-            nodegroupMesh.geometry.computeBoundingBox();
-            const bboxNodegroup = nodegroupMesh.geometry.boundingBox;
-
-            let collapseSymbol = null;
-
-            if (nodegroup.get('opened')) {
-              if (self.get('closeSymbol')) {
-                collapseSymbol = self.get('closeSymbol').clone();
-              }
-            } else {
-              if (self.get('openSymbol')) {
-                collapseSymbol = self.get('openSymbol').clone();
-              }
-            }
-
-            if (collapseSymbol) {
-              collapseSymbol.position.x = bboxNodegroup.max.x - 0.35;
-              collapseSymbol.position.y = bboxNodegroup.max.y - 0.35;
-              collapseSymbol.position.z = nodegroupMesh.position.z + 0.0001;
-              nodegroupMesh.add(collapseSymbol);
-            }
+            self.get('labeler').drawCollapseSymbol(nodegroupMesh, self.get('font'));
           }
 
           const nodes = nodegroup.get('nodes');
@@ -305,6 +246,7 @@ export default RenderingCore.extend({
           if (nodes.content.length > 1) {
             self.get('scene').add(nodegroupMesh);
             nodegroup.set('threeJSModel', nodegroupMesh);
+            self.get('labeler').drawNodeTextLabel(nodegroupMesh, self.get('font'));
           }
 
           // Draw boxes for nodes
@@ -328,6 +270,7 @@ export default RenderingCore.extend({
 
               self.get('scene').add(nodeMesh);
               node.set('threeJSModel', nodeMesh);
+              self.get('labeler').drawNodeTextLabel(nodeMesh, self.get('font'));
 
             }
 
@@ -384,16 +327,7 @@ export default RenderingCore.extend({
                   texturePartialPath, applicationMesh, "label");
 
                 // Create text labels
-
-                let textColor =
-                  self.get('configuration.landscapeColors.applicationText');
-
-                self.get('labeler').saveTextForLabeling(null, applicationMesh,
-                  textColor);
-
-                textColor = self.get('configuration.landscapeColors.nodeText');
-                self.get('labeler').saveTextForLabeling(node.getDisplayName(),
-                  nodeMesh, textColor);
+                self.get('labeler').drawApplicationTextLabel(applicationMesh, self.get('font'));
 
               } else {
                 // Draw request logo
@@ -473,36 +407,6 @@ export default RenderingCore.extend({
     }
 
     // Helper functions //
-
-    function createCollapseSymbols() {
-
-      const material = new THREE.MeshBasicMaterial({
-        color: self.get('configuration.landscapeColors.collapseSymbol')
-      });
-
-
-      // Plus symbol
-
-      const labelGeoOpen = new THREE.TextBufferGeometry("+", {
-        font: self.get('font'),
-        size: 0.35,
-        height: 0
-      });
-
-      const labelMeshOpen = new THREE.Mesh(labelGeoOpen, material);
-      self.set('openSymbol', labelMeshOpen);
-
-      // Minus symbol
-
-      const labelGeoClose = new THREE.TextBufferGeometry("-", {
-        font: self.get('font'),
-        size: 0.35,
-        height: 0
-      });
-
-      const labelMeshClose = new THREE.Mesh(labelGeoClose, material);
-      self.set('closeSymbol', labelMeshClose);
-    }
 
     // This function is only neccessary to find the right index
     function isSameTile(tile) {
@@ -601,10 +505,6 @@ export default RenderingCore.extend({
 
       return (x && y);
     }
-
-    this.get('labeler').drawTextLabels(self.get('font'),
-      self.get('configuration'));
-
 
     this.debug("Landscape loaded");
 
