@@ -1,4 +1,6 @@
-import Object from '@ember/object';
+import Application from "explorviz-frontend/models/application";
+import DS from "ember-data";
+import Component from "explorviz-frontend/models/component";
 
 /**
  * The foundation is the grey all-encompassing tile. It shows
@@ -8,11 +10,11 @@ import Object from '@ember/object';
  * 
  * @class foundation-builder
  */
-export default Object.extend({
+export default class FoundationBuilder {
 
-  foundationObj: null,
+  foundationObj: null|Component = null;
 
-  createFoundation(emberApplication : any, store : any) {
+  createFoundation(emberApplication : Application, store : DS.Store) {
     // Use big random ID to avoid conflicts with IDs of regular components
     const idRandom = Math.round(Math.random() * 10000 + 10000);
     const foundation = store.createRecord('component', {
@@ -39,13 +41,13 @@ export default Object.extend({
 
     emberApplication.set('components', [foundation]);
 
-    this.set('foundationObj', foundation);
+    this.foundationObj = foundation;
 
     return foundation;
-  },
+  }
 
   removeFoundation(store : any) : boolean{
-    const foundation : any = this.get('foundationObj');
+    const foundation : any = this.foundationObj;
     if(!foundation) {
       return false;
     }
@@ -59,9 +61,9 @@ export default Object.extend({
 
     store.unloadRecord(foundation);
 
-    this.set('foundationObj', null);
+    this.foundationObj = null;
 
     return true;
    }
 
-});
+}
