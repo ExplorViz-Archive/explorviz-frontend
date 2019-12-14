@@ -43,7 +43,9 @@
             {{svg-jar "reply" class="octicon align-middle"}}
           </BsButton>
         </div>
-        <Visualization::Rendering::ApplicationRendering @latestApplication={{this.landscapeRepo.latestApplication}} />
+        {{#if this.landscapeRepo.latestApplication}}
+          <Visualization::Rendering::ApplicationRendering @id="app1" @application={{this.landscapeRepo.latestApplication}} />
+        {{/if}}
         <!-- popup(s) -->
         <Visualization::Rendering::Popups::PopupCoordinator
           @popupData={{this.additionalData.popupContent}} />
