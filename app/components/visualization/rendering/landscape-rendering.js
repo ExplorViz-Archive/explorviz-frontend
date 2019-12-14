@@ -12,6 +12,8 @@ import Labeler from
   'explorviz-frontend/utils/landscape-rendering/labeler';
 import CalcCenterAndZoom from
   'explorviz-frontend/utils/landscape-rendering/center-and-zoom-calculator';
+import CommunicationRendering from
+  'explorviz-frontend/utils/landscape-rendering/communication-rendering'
 
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 
@@ -212,170 +214,13 @@ export default RenderingCore.extend({
 
     if (appCommunications) {
       const color = this.get('configuration.landscapeColors.communication');
-      const tiles = this.computeCommunicationTiles(appCommunications, color);
+      const tiles = CommunicationRendering.computeCommunicationTiles(appCommunications, color);
 
-      this.addCommunicationLineDrawing(tiles, this.get('scene'), centerPoint);
+      CommunicationRendering.addCommunicationLineDrawing(tiles, this.get('scene'), centerPoint);
     }
 
     this.debug("Landscape loaded");
   }, // END populateScene
-
-
-  computeCommunicationTiles(appCommunications, color) {
-    let tiles = [];
-    let tile;
-
-    appCommunications.forEach((applicationCommunication) => {
-
-      const points = applicationCommunication.get('points');
-
-      if (points.length > 0) {
-
-        for (var i = 1; i < points.length; i++) {
-
-          const lastPoint = points[i - 1];
-          const thisPoint = points[i];
-
-          let tileWay = {
-            startPoint: lastPoint,
-            endPoint: thisPoint
-          };
-
-          let id = tiles.findIndex(this.isSameTile, tileWay);
-
-
-          if (id !== -1) {
-            tile = tiles[id];
-          }
-          else {
-            id = tiles.length; // Gets a new index
-
-            tile = {
-              startPoint: lastPoint,
-              endPoint: thisPoint,
-              positionZ: 0.0025,
-              requestsCache: 0,
-              communications: [],
-              pipeColor: new THREE.Color(color),
-              emberModel: applicationCommunication
-            };
-            tiles.push(tile);
-          }
-
-          tile.communications.push(appCommunications);
-          tile.requestsCache = tile.requestsCache +
-            applicationCommunication.get('requests');
-
-          tiles[id] = tile;
-        }
-
-      }
-
-    });
-
-    return tiles;
-  },
-
-  // Helper functions //
-
-  // This function is only neccessary to find the right index
-  isSameTile(tile) {
-    return this.checkEqualityOfPoints(this.endPoint, tile.endPoint) &&
-      this.checkEqualityOfPoints(this.startPoint, tile.startPoint);
-  },
-
-
-  addCommunicationLineDrawing(tiles, parent, centerPoint) {
-
-    const requestsList = {};
-
-    tiles.forEach((tile) => {
-      requestsList[tile.requestsCache] = 0;
-    });
-
-    const categories = this.getCategories(requestsList, true);
-
-    for (let i = 0; i < tiles.length; i++) {
-      let tile = tiles[i];
-      tile.lineThickness = 0.7 * categories[tile.requestsCache] + 0.1;
-      self.createLine(tile, parent, centerPoint);
-    }
-
-  },
-
-
-  checkEqualityOfPoints(p1, p2) {
-    let x = Math.abs(p1.x - p2.x) <= 0.01;
-    let y = Math.abs(p1.y - p2.y) <= 0.01;
-
-    return (x && y);
-  },
-
-
-  getCategories(list, linear) {
-
-    if (linear) {
-      this.useLinear(list);
-    }
-    else {
-      this.useThreshholds(list);
-    }
-
-    return list;
-  },
-
-
-  useThreshholds(list) {
-    let max = 1;
-
-    for (let request in list) {
-      request = parseInt(request);
-      max = (request > max) ? request : max;
-    }
-
-    const oneStep = max / 3.0;
-
-    const t1 = oneStep;
-    const t2 = oneStep * 2;
-
-    for (let request in list) {
-      let categoryValue = this.getCategoryFromValues(request, t1, t2);
-      list[request] = categoryValue;
-    }
-
-  },
-
-
-  getCategoryFromValues(value, t1, t2) {
-    value = parseInt(value);
-    if (value === 0) {
-      return 0.0;
-    } else if (value === 1) {
-      return 1.0;
-    } else if (value <= t1) {
-      return 2.0;
-    } else if (value <= t2) {
-      return 3.0;
-    } else {
-      return 4.0;
-    }
-  },
-
-
-  useLinear(list) {
-    let max = 1;
-
-    for (let request in list) {
-      request = parseInt(request);
-      max = (request > max) ? request : max;
-    }
-
-    for (let requests in list) {
-      let help = parseInt(requests);
-      list[requests] = help / max;
-    }
-
-  },
 
 
   renderSystem(system, centerPoint) {
@@ -505,61 +350,6 @@ export default RenderingCore.extend({
     }
     return this.get('centerAndZoomCalculator.centerPoint');
   },
-
-
-  createLine(tile, parent, centerPoint) {
-
-    let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x,
-      tile.startPoint.y - centerPoint.y, tile.positionZ);
-    let secondVector = new THREE.Vector3(tile.endPoint.x - centerPoint.x,
-      tile.endPoint.y - centerPoint.y, tile.positionZ);
-
-    // New line approach (draw planes)
-
-    // Euclidean distance
-    const lengthPlane = Math.sqrt(
-      Math.pow((firstVector.x - secondVector.x), 2) +
-      Math.pow((firstVector.y - secondVector.y), 2));
-
-    const geometryPlane = new THREE.PlaneGeometry(lengthPlane,
-      tile.lineThickness * 0.4);
-
-    const materialPlane = new THREE.MeshBasicMaterial({ color: tile.pipeColor });
-    const plane = new THREE.Mesh(geometryPlane, materialPlane);
-
-    let isDiagonalPlane = false;
-    const diagonalPos = new THREE.Vector3();
-
-    // Rotate plane => diagonal plane (diagonal commu line)
-    if (Math.abs(firstVector.y - secondVector.y) > 0.1) {
-      isDiagonalPlane = true;
-
-      const distanceVector = new THREE.Vector3()
-        .subVectors(secondVector, firstVector);
-
-      plane.rotateZ(Math.atan2(distanceVector.y, distanceVector.x));
-
-      diagonalPos.copy(distanceVector).multiplyScalar(0.5).add(firstVector);
-    }
-
-    // Set plane position
-    if (!isDiagonalPlane) {
-      const posX = firstVector.x + (lengthPlane / 2);
-      const posY = firstVector.y;
-      const posZ = firstVector.z;
-
-      plane.position.set(posX, posY, posZ);
-    }
-    else {
-      plane.position.copy(diagonalPos);
-    }
-
-    plane.userData['model'] = tile.emberModel;
-
-    parent.add(plane);
-
-  }, // END createLine
-
 
   createPlane(model) {
     const emberModelName = model.constructor.modelName;
