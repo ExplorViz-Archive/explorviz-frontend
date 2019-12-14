@@ -30,8 +30,6 @@ export default RenderingCore.extend({
 
   configuration: service("configuration"),
 
-  hammerManager: null,
-
   interaction: null,
   labeler: null,
   imageLoader: null,
@@ -168,12 +166,6 @@ export default RenderingCore.extend({
 
     applyKlayLayout(emberLandscape);
 
-
-    const scaleFactor = {
-      width: 0.5,
-      height: 0.5
-    };
-
     let centerPoint = this.updateCameraAndCenterPoint(emberLandscape);
     let systems = emberLandscape.get('systems');
 
@@ -181,7 +173,7 @@ export default RenderingCore.extend({
       // Draw boxes for systems
       systems.forEach((system) => {
 
-        this.renderSystem(system, scaleFactor, centerPoint);
+        this.renderSystem(system, centerPoint);
 
         const nodegroups = system.get('nodegroups');
 
@@ -192,21 +184,21 @@ export default RenderingCore.extend({
             return;
           }
 
-          this.renderNodeGroup(nodegroup, scaleFactor, centerPoint);
+          this.renderNodeGroup(nodegroup, centerPoint);
 
           const nodes = nodegroup.get('nodes');
 
           // Draw boxes for nodes
           nodes.forEach((node) => {
 
-            this.renderNode(node, scaleFactor, centerPoint);
+            this.renderNode(node, centerPoint);
 
             const applications = node.get('applications');
 
             // Draw boxes for applications
             applications.forEach((application) => {
 
-              this.renderApplication(application, scaleFactor, centerPoint);
+              this.renderApplication(application, centerPoint);
             });
 
           });
@@ -386,16 +378,12 @@ export default RenderingCore.extend({
   },
 
 
-  renderSystem(system, scaleFactor, centerPoint) {
+  renderSystem(system, centerPoint) {
     let isRequestObject = system.get('name') === "Requests";
 
     if (!isRequestObject) {
-
-      var extensionX = system.get('width') * scaleFactor.width;
-      var extensionY = system.get('height') * scaleFactor.height;
-
-      var centerX = system.get('positionX') + extensionX - centerPoint.x;
-      var centerY = system.get('positionY') - extensionY - centerPoint.y;
+      var centerX = system.get('positionX') + system.get('width') / 2 - centerPoint.x;
+      var centerY = system.get('positionY') - system.get('height') / 2 - centerPoint.y;
 
       var systemMesh = this.createPlane(system);
       systemMesh.position.set(centerX, centerY, system.get('positionZ'));
@@ -408,14 +396,11 @@ export default RenderingCore.extend({
   },
 
 
-  renderNodeGroup(nodegroup, scaleFactor, centerPoint) {
+  renderNodeGroup(nodegroup, centerPoint) {
     let nodegroupMesh;
 
-    let extensionX = nodegroup.get('width') * scaleFactor.width;
-    let extensionY = nodegroup.get('height') * scaleFactor.height;
-
-    let centerX = nodegroup.get('positionX') + extensionX - centerPoint.x;
-    let centerY = nodegroup.get('positionY') - extensionY - centerPoint.y;
+    let centerX = nodegroup.get('positionX') + nodegroup.get('width') / 2 - centerPoint.x;
+    let centerY = nodegroup.get('positionY') - nodegroup.get('height') / 2 - centerPoint.y;
 
     nodegroupMesh = this.createPlane(nodegroup);
     nodegroupMesh.position.set(centerX, centerY,
@@ -433,17 +418,13 @@ export default RenderingCore.extend({
   },
 
 
-  renderNode(node, scaleFactor, centerPoint) {
+  renderNode(node, centerPoint) {
     if (!node.get('visible')) {
       return;
     }
 
-
-    let extensionX = node.get('width') * scaleFactor.width;
-    let extensionY = node.get('height') * scaleFactor.height;
-
-    let centerX = node.get('positionX') + extensionX - centerPoint.x;
-    let centerY = node.get('positionY') - extensionY - centerPoint.y;
+    let centerX = node.get('positionX') + node.get('width') / 2 - centerPoint.x;
+    let centerY = node.get('positionY') - node.get('height') / 2 - centerPoint.y;
 
     var nodeMesh = this.createPlane(node);
     nodeMesh.position.set(centerX, centerY, node.get('positionZ') +
@@ -455,14 +436,11 @@ export default RenderingCore.extend({
   },
 
 
-  renderApplication(application, scaleFactor, centerPoint) {
-    let extensionX = application.get('width') * scaleFactor.width;
-    let extensionY = application.get('height') * scaleFactor.width;
-
-    let centerX = application.get('positionX') + extensionX -
+  renderApplication(application, centerPoint) {
+    let centerX = application.get('positionX') + application.get('width') / 2 -
       centerPoint.x;
 
-    let centerY = application.get('positionY') - extensionY -
+    let centerY = application.get('positionY') - application.get('height') / 2 -
       centerPoint.y;
 
     // if (!isRequestObject) {
