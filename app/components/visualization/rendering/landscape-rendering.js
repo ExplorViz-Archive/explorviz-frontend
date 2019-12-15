@@ -12,6 +12,8 @@ import Labeler from
   'explorviz-frontend/utils/landscape-rendering/labeler';
 import CalcCenterAndZoom from
   'explorviz-frontend/utils/landscape-rendering/center-and-zoom-calculator';
+import EntityRendering from
+  'explorviz-frontend/utils/landscape-rendering/entity-rendering'
 import CommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering'
 
@@ -35,7 +37,6 @@ export default RenderingCore.extend({
   interaction: null,
   labeler: null,
   imageLoader: null,
-  centerAndZoomCalculator: null,
 
   renderingService: service("rendering-service"),
 
@@ -54,7 +55,6 @@ export default RenderingCore.extend({
     this.debug("init landscape-rendering");
 
     this.onReSetupScene = function () {
-      this.set('centerAndZoomCalculator.centerPoint', null);
       this.get('camera.position').set(0, 0, 0);
       this.cleanAndUpdateScene();
     };
@@ -66,7 +66,6 @@ export default RenderingCore.extend({
     };
 
     this.onResized = function () {
-      this.set('centerAndZoomCalculator.centerPoint', null);
       this.cleanAndUpdateScene();
     };
 
@@ -81,10 +80,6 @@ export default RenderingCore.extend({
 
     if (!this.get('labeler')) {
       this.set('labeler', Labeler.create());
-    }
-
-    if (!this.get('centerAndZoomCalculator')) {
-      this.set('centerAndZoomCalculator', CalcCenterAndZoom.create());
     }
 
     const backgroundColor = this.get('configuration.landscapeColors.background');
@@ -231,7 +226,7 @@ export default RenderingCore.extend({
       let centerX = system.get('positionX') + system.get('width') / 2 - centerPoint.x;
       let centerY = system.get('positionY') - system.get('height') / 2 - centerPoint.y;
 
-      let systemMesh = this.createPlane(system, systemColor);
+      let systemMesh = EntityRendering.createPlane(system, systemColor);
       systemMesh.position.set(centerX, centerY, system.get('positionZ'));
       this.get('scene').add(systemMesh);
       system.set('threeJSModel', systemMesh);
@@ -258,7 +253,7 @@ export default RenderingCore.extend({
     let nodeGroupColor = new THREE.Color(this.get('configuration.landscapeColors.nodegroup'));
     let labelColor = new THREE.Color(this.get('configuration.landscapeColors.nodeText'));
 
-    nodegroupMesh = this.createPlane(nodegroup, nodeGroupColor);
+    nodegroupMesh = EntityRendering.createPlane(nodegroup, nodeGroupColor);
     nodegroupMesh.position.set(centerX, centerY,
       nodegroup.get('positionZ') + 0.001);
 
@@ -280,7 +275,7 @@ export default RenderingCore.extend({
     let nodeColor = new THREE.Color(this.get('configuration.landscapeColors.node'));
     let labelColor = new THREE.Color(this.get('configuration.landscapeColors.nodeText'));
 
-    var nodeMesh = this.createPlane(node, nodeColor);
+    var nodeMesh = EntityRendering.createPlane(node, nodeColor);
     nodeMesh.position.set(centerX, centerY, node.get('positionZ') + 0.002);
 
     node.set('threeJSModel', nodeMesh);
@@ -300,7 +295,7 @@ export default RenderingCore.extend({
 
     // if (!isRequestObject) {
 
-    var applicationMesh = this.createPlane(application, applicationColor);
+    var applicationMesh = EntityRendering.createPlane(application, applicationColor);
 
     applicationMesh.position.set(centerX, centerY,
       application.get('positionZ') + 0.003);
@@ -349,28 +344,13 @@ export default RenderingCore.extend({
 
   updateCameraAndCenterPoint(emberLandscape) {
     // Calculate new center and update zoom
-    if (!this.get('centerAndZoomCalculator.centerPoint')) {
-      this.get('centerAndZoomCalculator')
-        .calculateLandscapeCenterAndZZoom(emberLandscape,
-          this.get('webglrenderer'));
+    let center = CalcCenterAndZoom
+      .calculateLandscapeCenterAndZZoom(emberLandscape, this.get('webglrenderer'));
 
-      const cameraZ = this.get('centerAndZoomCalculator.cameraZ');
-      this.set('camera.position.z', cameraZ);
-      this.get('camera').updateProjectionMatrix();
-    }
-    return this.get('centerAndZoomCalculator.centerPoint');
-  },
+    this.set('camera.position.z', center.z);
+    this.get('camera').updateProjectionMatrix();
 
-  createPlane(model, color) {
-    const material = new THREE.MeshBasicMaterial({
-      color
-    });
-
-    const plane = new THREE.Mesh(new THREE.PlaneGeometry(model.get('width'),
-      model.get('height')), material);
-
-    plane.userData['model'] = model;
-    return plane;
+    return center;
   },
 
 
