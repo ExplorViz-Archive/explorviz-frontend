@@ -80,9 +80,7 @@ export default RenderingCore.extend({
     }
 
     if (!this.get('labeler')) {
-      this.set('labeler', Labeler.create({
-        configuration: this.get('configuration')
-      }));
+      this.set('labeler', Labeler.create());
     }
 
     if (!this.get('centerAndZoomCalculator')) {
@@ -227,39 +225,47 @@ export default RenderingCore.extend({
     let isRequestObject = system.get('name') === "Requests";
 
     if (!isRequestObject) {
-      var centerX = system.get('positionX') + system.get('width') / 2 - centerPoint.x;
-      var centerY = system.get('positionY') - system.get('height') / 2 - centerPoint.y;
+      let systemColor = new THREE.Color(this.get('configuration.landscapeColors.system'));
+      let labelColor = new THREE.Color(this.get('configuration.landscapeColors.systemText'));
 
-      var systemMesh = this.createPlane(system);
+      let centerX = system.get('positionX') + system.get('width') / 2 - centerPoint.x;
+      let centerY = system.get('positionY') - system.get('height') / 2 - centerPoint.y;
+
+      let systemMesh = this.createPlane(system, systemColor);
       systemMesh.position.set(centerX, centerY, system.get('positionZ'));
       this.get('scene').add(systemMesh);
       system.set('threeJSModel', systemMesh);
 
-      this.get('labeler').drawCollapseSymbol(systemMesh, this.font);
-      this.get('labeler').drawSystemTextLabel(systemMesh, this.font);
+      this.get('labeler').drawCollapseSymbol(systemMesh, this.font, labelColor);
+      this.get('labeler').drawSystemTextLabel(systemMesh, this.font, labelColor);
     }
   },
 
 
   renderNodeGroup(nodegroup, centerPoint) {
+    let nodes = nodegroup.get('nodes');
+
+    // Add box for nodegroup if it contains more than one node
+    if (nodes.content.length < 2) {
+      return;
+    }
+
     let nodegroupMesh;
 
     let centerX = nodegroup.get('positionX') + nodegroup.get('width') / 2 - centerPoint.x;
     let centerY = nodegroup.get('positionY') - nodegroup.get('height') / 2 - centerPoint.y;
 
-    nodegroupMesh = this.createPlane(nodegroup);
+    let nodeGroupColor = new THREE.Color(this.get('configuration.landscapeColors.nodegroup'));
+    let labelColor = new THREE.Color(this.get('configuration.landscapeColors.nodeText'));
+
+    nodegroupMesh = this.createPlane(nodegroup, nodeGroupColor);
     nodegroupMesh.position.set(centerX, centerY,
       nodegroup.get('positionZ') + 0.001);
 
-    this.get('labeler').drawCollapseSymbol(nodegroupMesh, this.get('font'));
-
-    const nodes = nodegroup.get('nodes');
-    // Add box for nodegroup if it contains more than one node
-    if (nodes.content.length > 1) {
-      this.get('scene').add(nodegroupMesh);
-      nodegroup.set('threeJSModel', nodegroupMesh);
-      this.get('labeler').drawNodeTextLabel(nodegroupMesh, this.get('font'));
-    }
+    nodegroup.set('threeJSModel', nodegroupMesh);
+    this.get('labeler').drawNodeTextLabel(nodegroupMesh, this.get('font'), labelColor);
+    this.get('labeler').drawCollapseSymbol(nodegroupMesh, this.get('font'), labelColor);
+    this.get('scene').add(nodegroupMesh);
   },
 
 
@@ -271,35 +277,37 @@ export default RenderingCore.extend({
     let centerX = node.get('positionX') + node.get('width') / 2 - centerPoint.x;
     let centerY = node.get('positionY') - node.get('height') / 2 - centerPoint.y;
 
-    var nodeMesh = this.createPlane(node);
-    nodeMesh.position.set(centerX, centerY, node.get('positionZ') +
-      0.002);
+    let nodeColor = new THREE.Color(this.get('configuration.landscapeColors.node'));
+    let labelColor = new THREE.Color(this.get('configuration.landscapeColors.nodeText'));
 
-    this.get('scene').add(nodeMesh);
+    var nodeMesh = this.createPlane(node, nodeColor);
+    nodeMesh.position.set(centerX, centerY, node.get('positionZ') + 0.002);
+
     node.set('threeJSModel', nodeMesh);
-    this.get('labeler').drawNodeTextLabel(nodeMesh, this.get('font'));
+    this.get('labeler').drawNodeTextLabel(nodeMesh, this.get('font'), labelColor);
+    this.get('scene').add(nodeMesh);
   },
 
 
   renderApplication(application, centerPoint) {
     let centerX = application.get('positionX') + application.get('width') / 2 -
       centerPoint.x;
-
     let centerY = application.get('positionY') - application.get('height') / 2 -
       centerPoint.y;
 
+    let applicationColor = new THREE.Color(this.get('configuration.landscapeColors.application'));
+    let labelColor = new THREE.Color(this.get('configuration.landscapeColors.applicationText'));
+
     // if (!isRequestObject) {
 
-    var applicationMesh = this.createPlane(application);
+    var applicationMesh = this.createPlane(application, applicationColor);
 
     applicationMesh.position.set(centerX, centerY,
       application.get('positionZ') + 0.003);
 
-    this.get('scene').add(applicationMesh);
     application.set('threeJSModel', applicationMesh);
 
     // Create logos
-
     applicationMesh.geometry.computeBoundingBox();
 
     const logoSize = {
@@ -327,7 +335,9 @@ export default RenderingCore.extend({
       texturePartialPath, applicationMesh, "label");
 
     // Create text labels
-    this.get('labeler').drawApplicationTextLabel(applicationMesh, this.get('font'));
+    this.get('labeler').drawApplicationTextLabel(applicationMesh, this.get('font'), labelColor);
+
+    this.get('scene').add(applicationMesh);
 
     /*} else {
       // Draw request logo
@@ -351,11 +361,9 @@ export default RenderingCore.extend({
     return this.get('centerAndZoomCalculator.centerPoint');
   },
 
-  createPlane(model) {
-    const emberModelName = model.constructor.modelName;
-
+  createPlane(model, color) {
     const material = new THREE.MeshBasicMaterial({
-      color: this.get('configuration.landscapeColors.' + emberModelName)
+      color
     });
 
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(model.get('width'),
