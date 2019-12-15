@@ -14,10 +14,6 @@ const { attr } = DS;
 */
 export default class DrawNodeEntity extends BaseEntity {
 
-  @attr() plusColor: any;
-  @attr() foregroundColor: any;
-  @attr() backgroundColor: any;
-
   @attr('boolean', { defaultValue: false }) highlighted!: boolean;
 
   @attr('number', { defaultValue: 0}) width!: number;
