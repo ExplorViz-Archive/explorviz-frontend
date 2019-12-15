@@ -1,65 +1,68 @@
 import Object from '@ember/object';
 import { round } from '../helpers/number-helpers';
 import { inject as service } from '@ember/service';
+import System from 'explorviz-frontend/models/system';
+import Node from 'explorviz-frontend/models/node';
+import NodeGroup from 'explorviz-frontend/models/nodegroup';
+import Application from 'explorviz-frontend/models/application';
+import ApplicationCommunication from 'explorviz-frontend/models/applicationcommunication';
 
 export default Object.extend({
 
   additionalData: service(),
   enableTooltips: true,
 
-  showTooltip(mouse : {x : number, y : number}, emberModel : any) {
+
+  showTooltip(mouse: { x: number, y: number },
+    emberModel: System | NodeGroup | Node | Application | ApplicationCommunication) {
 
     if (!this.get('enableTooltips')) {
       return;
     }
 
-    let popupData : any;
-    const modelType = emberModel.constructor.modelName;
+    let popupData: any;
 
-    switch (modelType) {
-      case "system":
-        popupData = this.buildSystemData(emberModel);
-        break;
-      case "nodegroup":
-        popupData = this.buildNodeGroupData(emberModel);
-        break;
-      case "node":
-        popupData = this.buildNodeData(emberModel);
-        break;
-      case "application":
-        popupData = this.buildApplicationData(emberModel);
-        break;
-      case "applicationcommunication":
-        popupData = this.buildCommunicationData(emberModel);
-        break;
-      default:
-        popupData = null;
-        break;
+    // Build popup data based upon ember model type
+    if (emberModel instanceof System) {
+      popupData = this.buildSystemData(emberModel);
+    }
+    else if (emberModel instanceof NodeGroup) {
+      popupData = this.buildNodeGroupData(emberModel);
+    }
+    else if (emberModel instanceof Node) {
+      popupData = this.buildNodeData(emberModel);
+    }
+    else if (emberModel instanceof Application) {
+      popupData = this.buildApplicationData(emberModel);
+    }
+    else if (emberModel instanceof ApplicationCommunication) {
+      popupData = this.buildCommunicationData(emberModel);
     }
 
     // Add mouse position for calculating div position
-    if (popupData){
+    if (popupData) {
       popupData.mouseX = mouse.x;
       popupData.mouseY = mouse.y;
     }
 
-    const additionalData : any = this.get("additionalData");
+    const additionalData: any = this.get("additionalData");
     additionalData.setPopupContent(popupData);
   },
 
 
   hideTooltip() {
-    const additionalData : any = this.get("additionalData");
+    const additionalData: any = this.get("additionalData");
     additionalData.removePopup();
   },
 
-  buildSystemData(system : any) {
+
+  buildSystemData(system: System) {
     // String formatting
     let systemName = String(system.get('name'))
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
 
     let nodeCount = 0;
     let applicationCount = 0;
@@ -67,12 +70,12 @@ export default Object.extend({
     // Calculate node and application count
     const nodeGroups = system.get('nodegroups');
 
-    nodeGroups.forEach((nodeGroup : any) => {
+    nodeGroups.forEach((nodeGroup) => {
 
       nodeCount += nodeGroup.get('nodes').get('length');
       const nodes = nodeGroup.get('nodes');
 
-      nodes.forEach((node : any) => {
+      nodes.forEach((node) => {
         applicationCount += node.get('applications').get('length');
       });
     });
@@ -88,15 +91,15 @@ export default Object.extend({
     return popupData;
   },
 
-  buildNodeGroupData(nodeGroup : any){
 
+  buildNodeGroupData(nodeGroup: NodeGroup) {
     let avgNodeCPUUtil = 0.0;
     let applicationCount = 0;
 
     const nodes = nodeGroup.get('nodes');
     const nodeCount = nodes.get('length');
 
-    nodes.forEach((node : any) => {
+    nodes.forEach((node) => {
       avgNodeCPUUtil += node.get('cpuUtilization');
       applicationCount += node.get('applications').get('length');
     });
@@ -115,10 +118,11 @@ export default Object.extend({
     return popupData;
   },
 
-  buildNodeData(node : any){
+
+  buildNodeData(node: any) {
     const formatFactor = (1024 * 1024 * 1024);
     let cpuUtilization = round(node.get('cpuUtilization') * 100, 0);
-    let freeRAM =  round(node.get('freeRAM') / formatFactor, 2).toFixed(2);
+    let freeRAM = round(node.get('freeRAM') / formatFactor, 2).toFixed(2);
     let totalRAM = round((node.get('usedRAM') + node.get('freeRAM')) / formatFactor, 2).toFixed(2);
 
 
@@ -134,7 +138,8 @@ export default Object.extend({
     return popupData;
   },
 
-  buildApplicationData(application : any){
+
+  buildApplicationData(application: Application) {
     const lastUsage = new Date(application.get('lastUsage')).toLocaleString();
 
     let popupData = {
@@ -148,7 +153,8 @@ export default Object.extend({
     return popupData;
   },
 
-  buildCommunicationData(communication : any){
+
+  buildCommunicationData(communication: ApplicationCommunication) {
     const sourceApplicationName = communication.get('sourceApplication').get('name');
     const targetApplicationName = communication.get('targetApplication').get('name');
 
@@ -166,10 +172,10 @@ export default Object.extend({
 
     return popupData;
 
-    function round(value : number, precision : number) {
+    function round(value: number, precision: number) {
       let multiplier = Math.pow(10, precision || 0);
       return Math.round(value * multiplier) / multiplier;
-    } 
+    }
   },
 
 });

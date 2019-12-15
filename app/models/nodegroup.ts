@@ -2,6 +2,7 @@ import DrawNodeEntity from './drawnodeentity';
 import { computed } from '@ember/object'; 
 import DS from 'ember-data';
 import System from './system';
+import Node from './node';
 
 const { attr, hasMany, belongsTo } = DS;
 
@@ -22,7 +23,7 @@ export default class NodeGroup extends DrawNodeEntity {
   parent!: DS.PromiseObject<System> & System;
 
   @hasMany('node', { inverse: 'parent' })
-  nodes!: DS.PromiseObject<Node> & Node;
+  nodes!: DS.PromiseManyArray<Node>;
 
   @attr('boolean', {defaultValue: true}) visible!: boolean;
 
