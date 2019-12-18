@@ -1,1 +1,6 @@
-{{user-management/user-list}}
+<UserManagement::UserList
+  @refreshUsers={{route-action "refreshRoute"}}
+  @users={{this.model}}
+  @page={{this.page}}
+  @size={{this.size}}
+/>

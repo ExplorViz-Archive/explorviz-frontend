@@ -1,7 +1,6 @@
 import Controller from '@ember/controller';
 import { inject as service } from '@ember/service'; 
-import { computed, action } from '@ember/object';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import { computed, action, get, set, observer } from '@ember/object';
 
 /**
 * TODO
@@ -12,59 +11,88 @@ import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 * @module explorviz
 * @submodule visualization
 */
-export default class VisualizationController extends Controller.extend(AlertifyHandler, {
+export default class VisualizationController extends Controller.extend({
 
-  renderingService: service("rendering-service"),
-  landscapeRepo: service("repos/landscape-repository"),
-  landscapeListener: service("landscape-listener"),
-  additionalData: service("additional-data"),
-  timestampRepo: service("repos/timestamp-repository"),
-
-  state: null,
-
-  type: 'landscape',
-
-  showLandscape: computed('landscapeRepo.latestApplication', function() {
-    return !this.get('landscapeRepo.latestApplication');
-  }),
-
-
-  actions: {
-    resetView() {
-      this.get('renderingService').reSetupScene();
-    },
-
-    openLandscapeView() {
-      this.set('landscapeRepo.latestApplication', null);
-      this.set('landscapeRepo.replayApplication', null);
-    },
-
-    toggleTimeline() {
-      this.get('renderingService').toggleTimeline();
+  // eslint-disable-next-line ember/no-observers
+  timelineResetObserver: observer('landscapeListener.pauseVisualizationReload', function() {
+    // reset highlighting and selection in timeline, if unpause was clicked
+    if(!get(this, "landscapeListener.pauseVisualizationReload")) {
+      set(this, "selectedTimestampRecords", []);
+      get(this, 'plotlyTimelineRef').resetHighlighting();
     }
-    
-  },
+  })
+
+}) 
+{
+
+  @service("rendering-service") renderingService;
+  @service("repos/landscape-repository") landscapeRepo;
+  @service("landscape-listener") landscapeListener;
+  @service("additional-data") additionalData;
+  @service("repos/timestamp-repository") timestampRepo;
+  @service("reload-handler") reloadHandler;
+
+  state = null;
+
+  type = 'landscape';
+
+  plotlyTimelineRef = null;
+
+  selectedTimestampRecords = [];
+
+  @computed('landscapeRepo.latestApplication')
+  get showLandscape() {
+    return !get(this, 'landscapeRepo.latestApplication');
+  }
+
+  @action
+  resize() {
+    get(this, 'renderingService').resizeCanvas();
+  }
+
+  @action
+  resetView() {
+    get(this, 'renderingService').reSetupScene();
+    get(this, 'plotlyTimelineRef').continueTimeline(get(this, "selectedTimestampRecords"));
+  }
+
+  @action
+  openLandscapeView() {
+    set(this, 'landscapeRepo.latestApplication', null);
+    set(this, 'landscapeRepo.replayApplication', null);
+  }
+
+  @action
+  toggleTimeline() {
+    get(this, 'renderingService').toggleTimeline();
+  }
+
+  @action
+  timelineClicked(timestampRecordArray) {
+    set(this, "selectedTimestampRecords", timestampRecordArray);
+    get(this, 'reloadHandler').loadLandscapeById(timestampRecordArray[0].get("timestamp"));
+  }
+
+  @action
+  getTimelineReference(plotlyTimelineRef) {
+    // called from within the plotly timeline component
+    set(this, 'plotlyTimelineRef', plotlyTimelineRef);
+  }
 
   showTimeline() {
-    this.set('renderingService.showTimeline', true);
-  },
+    set(this, 'renderingService.showTimeline', true);
+  }
 
   hideVersionbar(){
-    this.set('renderingService.showVersionbar', false);
-  },
+    set(this, 'renderingService.showVersionbar', false);
+  }
 
   initRendering() {
-    this.get('landscapeListener').initSSE();
-  },
+    get(this, 'landscapeListener').initSSE();
+  }
 
   // @Override
   cleanup() {
     this._super(...arguments);
-  }
-  
-}) {
-  @action
-  resize() {
-    this.get('renderingService').resizeCanvas();
   }
 }

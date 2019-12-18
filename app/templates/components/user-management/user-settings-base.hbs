@@ -3,34 +3,34 @@
   {{#if this.loadDescriptions.isRunning}}
     <div class="spinner-center-3 mb-5 mt-5" style="position:relative" role="status"></div>
   {{else}}
-    {{#bs-form model=this as |form|}}
+    <BsForm model={{this}} as |form|>
       {{#each this.settings.flagsetting as |setting|}}
         {{!-- setting.[0] = settingId, setting.[1] = settingValue --}}
         <div class="d-flex justify-content-between pr-3">
           <div>
-            {{help-tooltip title=(get this.descriptions (concat setting.[0] ".description"))}}
+            <HelpTooltip @title={{get this.descriptions (concat setting.[0] ".description")}} />
             {{get this.descriptions (concat setting.[0] ".displayName")}}
           </div>
-          {{x-toggle
-            theme='skewed'
-            value=setting.[1]
-            onToggle=(action (mut setting.[1]))
-          }}
+          <XToggle
+            @theme='skewed'
+            @value={{setting.[1]}}
+            @onToggle={{action (mut setting.[1])}}
+          />
         </div>
       {{/each}}
       {{#each this.settings.rangesetting as |setting index|}}
         <div class="mb-3">
-          {{help-tooltip title=(get this.descriptions (concat setting.[0] ".description"))}}
-          {{form.element
+          <HelpTooltip @title={{get this.descriptions (concat setting.[0] ".description")}} />
+          <form.element
             class="d-contents"
-            controlType="number"
-            step=".01"
-            label=(get this.descriptions (concat setting.[0] ".displayName"))
-            value=setting.[1]
-            onChange=(action "onRangeSettingChange" index)
-          }}
+            @controlType="number"
+            @step=".01"
+            @label={{get this.descriptions (concat setting.[0] ".displayName")}}
+            @value={{setting.[1]}}
+            @onChange={{action "onRangeSettingChange" index}}
+          />
         </div>
       {{/each}}
-    {{/bs-form}}
+    </BsForm>
   {{/if}}
 </div>

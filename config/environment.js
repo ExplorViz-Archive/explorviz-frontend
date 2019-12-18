@@ -66,12 +66,6 @@ module.exports = function (environment) {
     }
   }
 
-  if (environment === 'mocked') {
-    API_ROOT = 'http://localhost:4200/api';
-    ENV.APP.API_ROOT = 'http://localhost:4200/api';
-    console.log(`EXPL-INFO: Mocked API mode: Using ${API_ROOT} as API_ROOT`.blue);
-  }
-
   if (environment === 'test') {
     // Testem prefers this...
     ENV.locationType = 'none';
@@ -86,15 +80,11 @@ module.exports = function (environment) {
   // User specific environment, e.g. for usage in a virtual machine
 
   if (environment === 'akr') {
-    ENV.APP.API_ROOT = 'http://192.168.91.132:8080';
+    ENV.APP.API_ROOT = 'http://192.168.91.128:8080';
   }
 
-  if (environment === 'akr-mocked') {
-    ENV.APP.API_ROOT = 'http://192.168.91.132:4200/api';
-  }
-
-  if (environment === 'czi') {
-    ENV.APP.API_ROOT = 'http://192.168.48.215:8080';
+  if (environment === 'node2') {
+    ENV.APP.API_ROOT = 'http://192.168.48.32:8090';
   }
 
   return ENV;

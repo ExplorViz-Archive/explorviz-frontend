@@ -8,12 +8,12 @@ import THREE from "three";
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import PopUpHandler from 
   'explorviz-frontend/utils/landscape-rendering/popup-handler';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import Raycaster from 'explorviz-frontend/utils/raycaster';
 import HoverHandler from 'explorviz-frontend/utils/hover-effect-handler';
 
 
-export default Object.extend(Evented, AlertifyHandler, {
+export default Object.extend(Evented, {
 
   canvas: null,
   camera: null,
@@ -246,6 +246,7 @@ export default Object.extend(Evented, AlertifyHandler, {
 
       emberModel = intersectedViewObj.object.userData.model;
       const emberModelName = emberModel.constructor.modelName;
+      this.trigger('doubleClick', emberModel);
 
       if(emberModelName === "application"){
 
@@ -255,11 +256,11 @@ export default Object.extend(Evented, AlertifyHandler, {
           const message = "Sorry, there is no information for application <b>" + emberModel.get('name') +
             "</b> available.";
 
-          this.showAlertifyMessage(message);
+          AlertifyHandler.showAlertifyMessage(message);
 
         } else {
           // data available => open application-rendering
-          this.closeAlertifyMessages();
+          AlertifyHandler.closeAlertifyMessages();
           this.trigger('showApplication', emberModel);
         }
 
@@ -275,8 +276,6 @@ export default Object.extend(Evented, AlertifyHandler, {
       }
 
     }
-
-    this.trigger('doubleClick', emberModel);
 
   },
 

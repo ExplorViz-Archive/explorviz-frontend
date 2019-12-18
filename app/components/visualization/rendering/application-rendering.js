@@ -1,7 +1,6 @@
 import RenderingCore from './rendering-core';
 import { inject as service } from '@ember/service';
 import { getOwner } from '@ember/application';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 
 import THREE from "three";
@@ -26,7 +25,7 @@ import FoundationBuilder from
  * @module explorviz
  * @submodule visualization.rendering
  */
-export default RenderingCore.extend(AlertifyHandler, {
+export default RenderingCore.extend({
 
   store: service('store'),
   highlighter: service('visualization/application/highlighter'),
@@ -192,6 +191,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     // Clean up landscapeRepo for visualization template
     this.set('landscapeRepo.latestApplication', null);
+    this.set('landscapeRepo.replayApplication', null);
 
     this.get('interaction').removeHandlers();
   },
@@ -199,7 +199,7 @@ export default RenderingCore.extend(AlertifyHandler, {
   removeListeners() {
     // unsubscribe from all services
     this.get('listeners2').forEach(([service, event, listenerFunction]) => {
-        this.get(service).off(event, listenerFunction);
+      this.get(service).off(event, listenerFunction);
     });
     this.set('listeners2', null);
   },
@@ -233,7 +233,14 @@ export default RenderingCore.extend(AlertifyHandler, {
   preProcessEntity() {
     const application = this.get('store').peekRecord('application',
       this.get('applicationID'));
-    this.set('landscapeRepo.latestApplication', application);
+
+    // depending on the mode set the replay applcation
+    if (this.get("mode") === "replay") {
+      this.set('landscapeRepo.replayApplication', application);
+    }
+    else {
+      this.set('landscapeRepo.latestApplication', application);
+    }
   },
 
 
@@ -575,7 +582,7 @@ export default RenderingCore.extend(AlertifyHandler, {
 
     // start subscriptions
     this.get('listeners2').forEach(([service, event, listenerFunction]) => {
-        this.get(service).on(event, listenerFunction);
+      this.get(service).on(event, listenerFunction);
     });
   }, // END initInteraction
 

@@ -16,7 +16,7 @@ const { JSONAPIAdapter } = DS;
 * @module explorviz
 * @submodule network
 */
-export default JSONAPIAdapter.extend(DataAdapterMixin,{
+export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
   host: ENV.APP.API_ROOT,
   namespace: "v1",
@@ -25,7 +25,21 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     this.set('headers', {
       "Accept": "application/vnd.api+json"
     });
- 
+
+  },
+
+  /**
+   * Queries landscape or replay timestamps
+   * @param {*} query 
+   */
+  urlForQuery(query) {
+    const baseUrl = this.buildURL();
+    if (query.type === 'replay') {
+      return `${baseUrl}/timestamps?filter[type]=replay`
+    }
+    else {
+      return `${baseUrl}/timestamps?filter[type]=landscape`
+    }
   },
 
   authorize(xhr) {

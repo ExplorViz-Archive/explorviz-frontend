@@ -1,6 +1,6 @@
 <div class="d-flex flex-row vh-100">
-  {{#if session.isAuthenticated}}
-    {{page-setup/navbar}}
+  {{#if (and this.session.isAuthenticated (not this.loadUserAndSettings.isRunning))}}
+    <PageSetup::Navbar />
   {{/if}}
 
   <div id="vizContainer" class="main-content">

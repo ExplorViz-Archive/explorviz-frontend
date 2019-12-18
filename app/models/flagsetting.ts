@@ -1,16 +1,12 @@
 import DS from 'ember-data';
+import Setting from './setting';
 
 const { attr } = DS;
 
-export default class FlagSetting extends DS.Model {
-
-  @attr('string') description!: string;
-  
-  @attr('string') displayName!: string;
+export default class FlagSetting extends Setting {
 
   @attr('boolean') defaultValue!: boolean;
 
-  @attr('string') origin!: string;
 }
 
 declare module 'ember-data/types/registries/model' {

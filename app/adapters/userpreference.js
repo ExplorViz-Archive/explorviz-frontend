@@ -2,7 +2,7 @@ import JSONAPIAdapter from 'ember-data/adapters/json-api';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 import ENV from 'explorviz-frontend/config/environment';
 
-export default JSONAPIAdapter.extend(DataAdapterMixin,{
+export default JSONAPIAdapter.extend(DataAdapterMixin, {
 
   host: ENV.APP.API_ROOT,
 
@@ -11,35 +11,33 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     this.set('headers', {
       "Accept": "application/vnd.api+json"
     });
- 
+
   },
-  
+
   // @Override
-  urlForQuery() {
+  urlForQuery(query) {
+    let id = query.userId;
+    // delete s.t. query parameter won't be attached (i.e. ?userId=id)
+    delete query.userId;
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/settings/preferences`;
+    return `${baseUrl}/v1/preferences?filter[user]=${id}`;
   },
 
   // @Override
   // Overrides URL for model.save()
   urlForCreateRecord() {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/settings/preferences`;
+    return `${baseUrl}/v1/preferences`;
   },
 
   urlForUpdateRecord(id) {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/settings/preferences/${id}`;
+    return `${baseUrl}/v1/preferences/${id}`;
   },
 
   urlForDeleteRecord(id) {
     const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/settings/preferences/${id}`;
-  },
-
-  urlForFindAll(modelName, snapshot) {
-    const baseUrl = this.buildURL();
-    return `${baseUrl}/v1/users/${snapshot.adapterOptions.userId}/settings/preferences`;
+    return `${baseUrl}/v1/preferences/${id}`;
   },
 
   authorize(xhr) {

@@ -1,8 +1,8 @@
 import Controller from '@ember/controller';
 import { inject as service } from "@ember/service";
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
-export default Controller.extend(AlertifyHandler, {
+export default Controller.extend({
 
   procezzForDetailView: null,
   agentForDetailView: null,
@@ -55,7 +55,7 @@ export default Controller.extend(AlertifyHandler, {
         `<b><font color="black">${errorTitle}</font></b>
         ${errorDetail} Your Modification is discarded.`;
 
-      this.showAlertifyMessageWithDuration(alertifyMessage, 8);
+      AlertifyHandler.showAlertifyMessageWithDuration(alertifyMessage, 8);
     }
     this.resetState();
   }

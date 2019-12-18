@@ -1,9 +1,8 @@
 import Model from 'ember-data/model';
 import DS from 'ember-data';
 import { computed } from '@ember/object';
-import Role from './role';
 
-const { attr, hasMany } = DS;
+const { attr } = DS;
 
 /**
  * Ember model for a User.
@@ -23,12 +22,12 @@ export default class User extends Model {
 
 	@attr('string') token!: string;
 
-	@hasMany('role') roles!: DS.PromiseManyArray<Role>;
+	@attr() roles!: string[];
 
 	hasRole(this: User, rolename:string): boolean {
-		const roles = this.get('roles').toArray();
+		const roles = this.get('roles');
 		for (const role of roles) {
-			if(rolename === role.get('id'))
+			if(rolename === role)
 				return true;
 		}
 		return false;

@@ -27,7 +27,7 @@ module('Integration | Component | user-management/user-creation', function(hooks
   });
 
   test('generatePassword should return a string', function(assert) {
-    const component = this.owner.lookup('component:user-management.user-creation');
+    const component = this.owner.lookup('component:user-management/user-creation');
 
     const password_zero = component.generatePassword(0);
     const password_negative = component.generatePassword(-1);
@@ -39,7 +39,7 @@ module('Integration | Component | user-management/user-creation', function(hooks
   });
 
   test('generatePassword should return value of correct length', function(assert) {
-    const component = this.owner.lookup('component:user-management.user-creation');
+    const component = this.owner.lookup('component:user-management/user-creation');
 
     const password_zero = component.generatePassword(0);
     const password_negative = component.generatePassword(-2);

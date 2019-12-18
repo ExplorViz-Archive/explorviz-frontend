@@ -30,7 +30,7 @@ export default class PageSetup extends Service {
   init() {
     super.init();
     // TODO: replay button not shown until implemented
-    this.set('navbarRoutes', ["visualization", "discovery"]);
+    this.set('navbarRoutes', ["visualization", "discovery", "replay"]);
     this.set('navbarOcticons', []);
   }
 }

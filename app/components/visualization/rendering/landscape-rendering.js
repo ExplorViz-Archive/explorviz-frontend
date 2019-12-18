@@ -1,7 +1,6 @@
 import RenderingCore from './rendering-core';
 import { inject as service } from '@ember/service';
 import { getOwner } from '@ember/application';
-import AlertifyHandler from 'explorviz-frontend/mixins/alertify-handler';
 
 import THREE from "three";
 
@@ -27,7 +26,7 @@ import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 * @module explorviz
 * @submodule visualization.rendering
 */
-export default RenderingCore.extend(AlertifyHandler, {
+export default RenderingCore.extend({
 
   configuration: service("configuration"),
 
@@ -115,7 +114,7 @@ export default RenderingCore.extend(AlertifyHandler, {
     this._super(...arguments);
 
     this.debug("cleanup landscape rendering");
-
+    
     this.set('imageLoader.logos', {});
     this.set('labeler.textLabels', {});
     this.set('labeler.textCache', []);
@@ -148,9 +147,18 @@ export default RenderingCore.extend(AlertifyHandler, {
     this.set('interaction.raycastObjects', this.get('scene.children'));
   },
 
-  
+  /**
+   * The landscape is bound in the template, e.g., landscape=landscapeRepo.latestLandscape
+   */
   getLandscape() {
-    return this.get('landscapeRepo.latestLandscape');
+    // landscape is passed via the template, e.g., for the replay mode
+    if (this.get('landscape') != null|undefined) {
+      return this.get('landscape');
+    }
+    // the visualization route needs to get the landscape directly from the landscapeRepo to work correctly
+    else {
+      return this.get('landscapeRepo.latestLandscape');
+    }
   },
 
 

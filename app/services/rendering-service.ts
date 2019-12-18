@@ -6,8 +6,8 @@ import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 
 export default class RenderingService extends Service.extend(Evented) {
 
-  showTimeline:boolean = true;
-  showVersionbar:boolean = true;
+  showTimeline: boolean = true;
+  showVersionbar: boolean = true;
 
   reSetupScene() {
     // Redraws and repositions scene to default
@@ -27,7 +27,7 @@ export default class RenderingService extends Service.extend(Evented) {
    * Triggers camera to move to a specified ember model
    * @param {*} emberModel Model which the camera should focus on
    */
-  moveCameraTo(emberModel:Clazz|DrawableClazzCommunication|ClazzCommunication) {
+  moveCameraTo(emberModel: Clazz | DrawableClazzCommunication | ClazzCommunication) {
     this.trigger('moveCameraTo', emberModel);
   }
 
