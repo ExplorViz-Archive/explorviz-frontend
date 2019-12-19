@@ -5,5 +5,6 @@ module.exports = {
 
     Setting `disableAnalytics` to true will prevent any data from being sent.
   */
-  "disableAnalytics": true
+  "disableAnalytics": true,
+  "host": "0.0.0.0"
 }
