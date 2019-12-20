@@ -46,6 +46,8 @@ export default class Draw3DNodeEntity extends BaseEntity {
     this.set('highlighted', true);
   }
 
+  threeJSModel!: THREE.Mesh;
+
 }
 
 declare module 'ember-data/types/registries/model' {
