@@ -19,22 +19,15 @@ export default class PopupHandler extends Object {
     }
 
     let popupData: any = {};
-    let modelType:string = emberModel.constructor.modelName;
 
-    switch (modelType) {
-      case "component":
-        popupData = this.buildComponentData(emberModel);
-        break;
-      case "clazz":
-        popupData = this.buildClazzData(emberModel);
-        break;
-      case "drawableclazzcommunication":
-        popupData = this.buildCommunicationData(emberModel);
-        break;
-      default:
-        popupData = null;
-        break;
-    }
+    if(emberModel instanceof Component)
+      popupData = this.buildComponentData(emberModel);
+    else if(emberModel instanceof Clazz)
+      popupData = this.buildClazzData(emberModel);
+    else if(emberModel instanceof DrawableClazzCommunication)
+      popupData = this.buildCommunicationData(emberModel);
+    else
+      popupData = null;
 
 
     // add mouse position for calculating div position
