@@ -346,9 +346,9 @@ export default RenderingCore.extend({
     let center = CalcCenterAndZoom
       .calculateLandscapeCenterAndZZoom(emberLandscape, this.get('webglrenderer'));
 
-    // Update zoom if camera is at initial position
+    // Update zoom if camera has not been moved by user
     if (camera.position.z === 0){
-      camera.position.z, center.z;
+      camera.position.z = center.z;
       camera.updateProjectionMatrix();
     }
 
