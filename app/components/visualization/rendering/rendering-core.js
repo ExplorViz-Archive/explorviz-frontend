@@ -331,21 +331,6 @@ export default Component.extend(Evented, {
     }
     this.populateScene();
   },
-
-
-  /**
-   * This function is called automatically when a new landscape was fetched. It
-   * is executed before
-   * {{#crossLink "Rendering-Core/cleanAndUpdateScene:method"}}{{/crossLink}}.
-   * Inherit this function to preprocess the
-   * {{#crossLink "Landscape"}}{{/crossLink}} for rendering, e.g. filter some
-   * value.
-   *
-   * See {{#crossLink "Application-Rendering"}}{{/crossLink}} for example usage.
-   *
-   * @method preProcessEntity
-   */
-  preProcessEntity() { },
   
 
   // Listener-Callbacks. Override in extending components

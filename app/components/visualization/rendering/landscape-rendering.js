@@ -2,7 +2,7 @@ import RenderingCore from './rendering-core';
 import { inject as service } from '@ember/service';
 import { getOwner } from '@ember/application';
 
-import THREE from "three";
+import THREE from 'three';
 
 import applyKlayLayout from
   'explorviz-frontend/utils/landscape-rendering/klay-layouter';
@@ -161,7 +161,7 @@ export default RenderingCore.extend({
 
     applyKlayLayout(emberLandscape);
 
-    let centerPoint = this.updateCameraAndCenterPoint(emberLandscape);
+    let centerPoint = this.updateCameraAndCenterPoint(emberLandscape, this.get('camera'));
     let systems = emberLandscape.get('systems');
 
     if (systems) {
@@ -185,6 +185,10 @@ export default RenderingCore.extend({
 
           // Draw boxes for nodes
           nodes.forEach((node) => {
+
+            if (!node.get('visible')) {
+              return;
+            }
 
             this.renderNode(node, centerPoint);
 
@@ -258,17 +262,12 @@ export default RenderingCore.extend({
       nodegroup.get('positionZ') + 0.001);
 
     nodegroup.set('threeJSModel', nodegroupMesh);
-    this.get('labeler').drawNodeTextLabel(nodegroupMesh, this.get('font'), labelColor);
     this.get('labeler').drawCollapseSymbol(nodegroupMesh, this.get('font'), labelColor);
     this.get('scene').add(nodegroupMesh);
   },
 
 
   renderNode(node, centerPoint) {
-    if (!node.get('visible')) {
-      return;
-    }
-
     let centerX = node.get('positionX') + node.get('width') / 2 - centerPoint.x;
     let centerY = node.get('positionY') - node.get('height') / 2 - centerPoint.y;
 
@@ -293,62 +292,65 @@ export default RenderingCore.extend({
     let applicationColor = new THREE.Color(this.get('configuration.landscapeColors.application'));
     let labelColor = new THREE.Color(this.get('configuration.landscapeColors.applicationText'));
 
-    // if (!isRequestObject) {
+    if (application.get('name') !== "Requests") {
 
-    var applicationMesh = EntityRendering.createPlane(application, applicationColor);
+      var applicationMesh = EntityRendering.createPlane(application, applicationColor);
 
-    applicationMesh.position.set(centerX, centerY,
-      application.get('positionZ') + 0.003);
+      applicationMesh.position.set(centerX, centerY,
+        application.get('positionZ') + 0.003);
 
-    application.set('threeJSModel', applicationMesh);
+      application.set('threeJSModel', applicationMesh);
 
-    // Create logos
-    applicationMesh.geometry.computeBoundingBox();
+      // Create logos
+      applicationMesh.geometry.computeBoundingBox();
 
-    const logoSize = {
-      width: 0.4,
-      height: 0.4
-    };
-    const appBBox = applicationMesh.geometry.boundingBox;
+      const logoSize = {
+        width: 0.4,
+        height: 0.4
+      };
+      const appBBox = applicationMesh.geometry.boundingBox;
 
-    const logoPos = {
-      x: 0,
-      y: 0,
-      z: 0
-    };
+      const logoPos = {
+        x: 0,
+        y: 0,
+        z: 0
+      };
 
-    const logoRightPadding = logoSize.width * 0.7;
+      const logoRightPadding = logoSize.width * 0.7;
 
-    logoPos.x = appBBox.max.x - logoRightPadding;
+      logoPos.x = appBBox.max.x - logoRightPadding;
 
-    const texturePartialPath = application.get('database') ?
-      'database2' : application.get('programmingLanguage')
-        .toLowerCase();
+      const texturePartialPath = application.get('database') ?
+        'database2' : application.get('programmingLanguage')
+          .toLowerCase();
 
-    this.get('imageLoader').createPicture(logoPos.x, logoPos.y,
-      logoPos.z, logoSize.width, logoSize.height,
-      texturePartialPath, applicationMesh, "label");
+      this.get('imageLoader').createPicture(logoPos.x, logoPos.y,
+        logoPos.z, logoSize.width, logoSize.height,
+        texturePartialPath, applicationMesh, "label");
 
-    // Create text labels
-    this.get('labeler').drawApplicationTextLabel(applicationMesh, this.get('font'), labelColor);
+      // Create text labels
+      this.get('labeler').drawApplicationTextLabel(applicationMesh, this.get('font'), labelColor);
 
-    this.get('scene').add(applicationMesh);
+      this.get('scene').add(applicationMesh);
 
-    /*} else {
+    } else {
       // Draw request logo
-      self.get('imageLoader').createPicture((centerX + 0.47), centerY, 0,
-        1.6, 1.6, "requests", self.get('scene'), "label");
-    }*/
+      this.get('imageLoader').createPicture((centerX + 0.47), centerY, 0,
+        1.6, 1.6, "requests", this.get('scene'), "label");
+    }
   },
 
 
-  updateCameraAndCenterPoint(emberLandscape) {
+  updateCameraAndCenterPoint(emberLandscape, camera) {
     // Calculate new center and update zoom
     let center = CalcCenterAndZoom
       .calculateLandscapeCenterAndZZoom(emberLandscape, this.get('webglrenderer'));
 
-    this.set('camera.position.z', center.z);
-    this.get('camera').updateProjectionMatrix();
+    // Update zoom if camera is at initial position
+    if (camera.position.z === 0){
+      camera.position.z, center.z;
+      camera.updateProjectionMatrix();
+    }
 
     return center;
   },
