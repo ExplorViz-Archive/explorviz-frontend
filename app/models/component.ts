@@ -127,34 +127,6 @@ export default class Component extends Draw3DNodeEntity {
     });
   }
 
-/*   filterClazzes(attributeString: string, predicateValue: any) {
-    const filteredClazzes:Clazz[] = [];
-
-    const allClazzes = new Set();
-    this.getContainedClazzes(allClazzes);
-
-    allClazzes.forEach((clazz) => {
-      if(clazz.get(attributeString) === predicateValue) {
-        filteredClazzes.push(clazz);
-      }
-    });
-
-    return filteredClazzes;
-  }
-
-  filterChildComponents(attributeString: string, predicateValue: any) {
-    const filteredComponents:Component[] = [];
-
-    this.get('children').forEach((component) => {
-      if(component.get(attributeString) === predicateValue) {
-        filteredComponents.push(component);
-      }
-      component.filterChildComponents(attributeString, predicateValue);
-    });
-
-    return filteredComponents;
-  } */
-
   @computed('children')
   get hasOnlyOneChildComponent(this: Component) {
     return this.hasMany('children').ids().length < 2;
@@ -175,7 +147,7 @@ export default class Component extends Draw3DNodeEntity {
     const components = this.get('children');
     const clazzes = this.get('clazzes');
 
-    if(components.get('length') + clazzes.get('length') > 1) {
+    if(components.get('length') + clazzes.get('length') > 10) {
       // there are two entities on this level
       // therefore, here is nothing to do
       return;
@@ -197,6 +169,10 @@ export default class Component extends Draw3DNodeEntity {
       parentComponent.set('opened', true);
       parentComponent.openParents();
     }
+  }
+
+  getParentComponent(this:Component) {
+    return this.belongsTo('parentComponent').value() as Component;
   }
 
   closeParents(this:Component) {

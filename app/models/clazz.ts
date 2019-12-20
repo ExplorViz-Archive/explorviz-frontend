@@ -55,6 +55,10 @@ export default class Clazz extends Draw3DNodeEntity {
     return this.get('parent').get('opened');
   }
 
+  getParent(this: Clazz) {
+    return this.belongsTo('parent').value() as Component;
+  }
+
 }
 
 declare module 'ember-data/types/registries/model' {
