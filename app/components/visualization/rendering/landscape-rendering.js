@@ -2,7 +2,7 @@ import RenderingCore from './rendering-core';
 import { inject as service } from '@ember/service';
 import { getOwner } from '@ember/application';
 
-import THREE from "three";
+import THREE from 'three';
 
 import applyKlayLayout from
   'explorviz-frontend/utils/landscape-rendering/klay-layouter';
@@ -12,6 +12,10 @@ import Labeler from
   'explorviz-frontend/utils/landscape-rendering/labeler';
 import CalcCenterAndZoom from
   'explorviz-frontend/utils/landscape-rendering/center-and-zoom-calculator';
+import EntityRendering from
+  'explorviz-frontend/utils/landscape-rendering/entity-rendering'
+import CommunicationRendering from
+  'explorviz-frontend/utils/landscape-rendering/communication-rendering'
 
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 
@@ -33,7 +37,6 @@ export default RenderingCore.extend({
   interaction: null,
   labeler: null,
   imageLoader: null,
-  centerAndZoomCalculator: null,
 
   renderingService: service("rendering-service"),
 
@@ -52,7 +55,6 @@ export default RenderingCore.extend({
     this.debug("init landscape-rendering");
 
     this.onReSetupScene = function () {
-      this.set('centerAndZoomCalculator.centerPoint', null);
       this.get('camera.position').set(0, 0, 0);
       this.cleanAndUpdateScene();
     };
@@ -64,7 +66,6 @@ export default RenderingCore.extend({
     };
 
     this.onResized = function () {
-      this.set('centerAndZoomCalculator.centerPoint', null);
       this.cleanAndUpdateScene();
     };
 
@@ -78,13 +79,7 @@ export default RenderingCore.extend({
     }
 
     if (!this.get('labeler')) {
-      this.set('labeler', Labeler.create({
-        configuration: this.get('configuration')
-      }));
-    }
-
-    if (!this.get('centerAndZoomCalculator')) {
-      this.set('centerAndZoomCalculator', CalcCenterAndZoom.create());
+      this.set('labeler', Labeler.create());
     }
 
     const backgroundColor = this.get('configuration.landscapeColors.background');
@@ -166,7 +161,7 @@ export default RenderingCore.extend({
 
     applyKlayLayout(emberLandscape);
 
-    let centerPoint = this.updateCameraAndCenterPoint(emberLandscape);
+    let centerPoint = this.updateCameraAndCenterPoint(emberLandscape, this.get('camera'));
     let systems = emberLandscape.get('systems');
 
     if (systems) {
@@ -191,6 +186,10 @@ export default RenderingCore.extend({
           // Draw boxes for nodes
           nodes.forEach((node) => {
 
+            if (!node.get('visible')) {
+              return;
+            }
+
             this.renderNode(node, centerPoint);
 
             const applications = node.get('applications');
@@ -212,367 +211,148 @@ export default RenderingCore.extend({
 
     if (appCommunications) {
       const color = this.get('configuration.landscapeColors.communication');
-      const tiles = this.computeCommunicationTiles(appCommunications, color);
+      const tiles = CommunicationRendering.computeCommunicationTiles(appCommunications, color);
 
-      this.addCommunicationLineDrawing(tiles, this.get('scene'), centerPoint);
+      CommunicationRendering.addCommunicationLineDrawing(tiles, this.get('scene'), centerPoint);
     }
 
     this.debug("Landscape loaded");
   }, // END populateScene
 
 
-  computeCommunicationTiles(appCommunications, color) {
-    let tiles = [];
-    let tile;
-
-    appCommunications.forEach((applicationCommunication) => {
-
-      const points = applicationCommunication.get('points');
-
-      if (points.length > 0) {
-
-        for (var i = 1; i < points.length; i++) {
-
-          const lastPoint = points[i - 1];
-          const thisPoint = points[i];
-
-          let tileWay = {
-            startPoint: lastPoint,
-            endPoint: thisPoint
-          };
-
-          let id = tiles.findIndex(this.isSameTile, tileWay);
-
-
-          if (id !== -1) {
-            tile = tiles[id];
-          }
-          else {
-            id = tiles.length; // Gets a new index
-
-            tile = {
-              startPoint: lastPoint,
-              endPoint: thisPoint,
-              positionZ: 0.0025,
-              requestsCache: 0,
-              communications: [],
-              pipeColor: new THREE.Color(color),
-              emberModel: applicationCommunication
-            };
-            tiles.push(tile);
-          }
-
-          tile.communications.push(appCommunications);
-          tile.requestsCache = tile.requestsCache +
-            applicationCommunication.get('requests');
-
-          tiles[id] = tile;
-        }
-
-      }
-
-    });
-
-    return tiles;
-  },
-
-  // Helper functions //
-
-  // This function is only neccessary to find the right index
-  isSameTile(tile) {
-    return this.checkEqualityOfPoints(this.endPoint, tile.endPoint) &&
-      this.checkEqualityOfPoints(this.startPoint, tile.startPoint);
-  },
-
-
-  addCommunicationLineDrawing(tiles, parent, centerPoint) {
-
-    const requestsList = {};
-
-    tiles.forEach((tile) => {
-      requestsList[tile.requestsCache] = 0;
-    });
-
-    const categories = this.getCategories(requestsList, true);
-
-    for (let i = 0; i < tiles.length; i++) {
-      let tile = tiles[i];
-      tile.lineThickness = 0.7 * categories[tile.requestsCache] + 0.1;
-      self.createLine(tile, parent, centerPoint);
-    }
-
-  },
-
-
-  checkEqualityOfPoints(p1, p2) {
-    let x = Math.abs(p1.x - p2.x) <= 0.01;
-    let y = Math.abs(p1.y - p2.y) <= 0.01;
-
-    return (x && y);
-  },
-
-
-  getCategories(list, linear) {
-
-    if (linear) {
-      this.useLinear(list);
-    }
-    else {
-      this.useThreshholds(list);
-    }
-
-    return list;
-  },
-
-
-  useThreshholds(list) {
-    let max = 1;
-
-    for (let request in list) {
-      request = parseInt(request);
-      max = (request > max) ? request : max;
-    }
-
-    const oneStep = max / 3.0;
-
-    const t1 = oneStep;
-    const t2 = oneStep * 2;
-
-    for (let request in list) {
-      let categoryValue = this.getCategoryFromValues(request, t1, t2);
-      list[request] = categoryValue;
-    }
-
-  },
-
-
-  getCategoryFromValues(value, t1, t2) {
-    value = parseInt(value);
-    if (value === 0) {
-      return 0.0;
-    } else if (value === 1) {
-      return 1.0;
-    } else if (value <= t1) {
-      return 2.0;
-    } else if (value <= t2) {
-      return 3.0;
-    } else {
-      return 4.0;
-    }
-  },
-
-
-  useLinear(list) {
-    let max = 1;
-
-    for (let request in list) {
-      request = parseInt(request);
-      max = (request > max) ? request : max;
-    }
-
-    for (let requests in list) {
-      let help = parseInt(requests);
-      list[requests] = help / max;
-    }
-
-  },
-
-
   renderSystem(system, centerPoint) {
     let isRequestObject = system.get('name') === "Requests";
 
     if (!isRequestObject) {
-      var centerX = system.get('positionX') + system.get('width') / 2 - centerPoint.x;
-      var centerY = system.get('positionY') - system.get('height') / 2 - centerPoint.y;
+      let systemColor = new THREE.Color(this.get('configuration.landscapeColors.system'));
+      let labelColor = new THREE.Color(this.get('configuration.landscapeColors.systemText'));
 
-      var systemMesh = this.createPlane(system);
+      let centerX = system.get('positionX') + system.get('width') / 2 - centerPoint.x;
+      let centerY = system.get('positionY') - system.get('height') / 2 - centerPoint.y;
+
+      let systemMesh = EntityRendering.createPlane(system, systemColor);
       systemMesh.position.set(centerX, centerY, system.get('positionZ'));
       this.get('scene').add(systemMesh);
       system.set('threeJSModel', systemMesh);
 
-      this.get('labeler').drawCollapseSymbol(systemMesh, this.font);
-      this.get('labeler').drawSystemTextLabel(systemMesh, this.font);
+      this.get('labeler').drawCollapseSymbol(systemMesh, this.font, labelColor);
+      this.get('labeler').drawSystemTextLabel(systemMesh, this.font, labelColor);
     }
   },
 
 
   renderNodeGroup(nodegroup, centerPoint) {
+    let nodes = nodegroup.get('nodes');
+
+    // Add box for nodegroup if it contains more than one node
+    if (nodes.content.length < 2) {
+      return;
+    }
+
     let nodegroupMesh;
 
     let centerX = nodegroup.get('positionX') + nodegroup.get('width') / 2 - centerPoint.x;
     let centerY = nodegroup.get('positionY') - nodegroup.get('height') / 2 - centerPoint.y;
 
-    nodegroupMesh = this.createPlane(nodegroup);
+    let nodeGroupColor = new THREE.Color(this.get('configuration.landscapeColors.nodegroup'));
+    let labelColor = new THREE.Color(this.get('configuration.landscapeColors.nodeText'));
+
+    nodegroupMesh = EntityRendering.createPlane(nodegroup, nodeGroupColor);
     nodegroupMesh.position.set(centerX, centerY,
       nodegroup.get('positionZ') + 0.001);
 
-    this.get('labeler').drawCollapseSymbol(nodegroupMesh, this.get('font'));
-
-    const nodes = nodegroup.get('nodes');
-    // Add box for nodegroup if it contains more than one node
-    if (nodes.content.length > 1) {
-      this.get('scene').add(nodegroupMesh);
-      nodegroup.set('threeJSModel', nodegroupMesh);
-      this.get('labeler').drawNodeTextLabel(nodegroupMesh, this.get('font'));
-    }
+    nodegroup.set('threeJSModel', nodegroupMesh);
+    this.get('labeler').drawCollapseSymbol(nodegroupMesh, this.get('font'), labelColor);
+    this.get('scene').add(nodegroupMesh);
   },
 
 
   renderNode(node, centerPoint) {
-    if (!node.get('visible')) {
-      return;
-    }
-
     let centerX = node.get('positionX') + node.get('width') / 2 - centerPoint.x;
     let centerY = node.get('positionY') - node.get('height') / 2 - centerPoint.y;
 
-    var nodeMesh = this.createPlane(node);
-    nodeMesh.position.set(centerX, centerY, node.get('positionZ') +
-      0.002);
+    let nodeColor = new THREE.Color(this.get('configuration.landscapeColors.node'));
+    let labelColor = new THREE.Color(this.get('configuration.landscapeColors.nodeText'));
 
-    this.get('scene').add(nodeMesh);
+    var nodeMesh = EntityRendering.createPlane(node, nodeColor);
+    nodeMesh.position.set(centerX, centerY, node.get('positionZ') + 0.002);
+
     node.set('threeJSModel', nodeMesh);
-    this.get('labeler').drawNodeTextLabel(nodeMesh, this.get('font'));
+    this.get('labeler').drawNodeTextLabel(nodeMesh, this.get('font'), labelColor);
+    this.get('scene').add(nodeMesh);
   },
 
 
   renderApplication(application, centerPoint) {
     let centerX = application.get('positionX') + application.get('width') / 2 -
       centerPoint.x;
-
     let centerY = application.get('positionY') - application.get('height') / 2 -
       centerPoint.y;
 
-    // if (!isRequestObject) {
+    let applicationColor = new THREE.Color(this.get('configuration.landscapeColors.application'));
+    let labelColor = new THREE.Color(this.get('configuration.landscapeColors.applicationText'));
 
-    var applicationMesh = this.createPlane(application);
+    if (application.get('name') !== "Requests") {
 
-    applicationMesh.position.set(centerX, centerY,
-      application.get('positionZ') + 0.003);
+      var applicationMesh = EntityRendering.createPlane(application, applicationColor);
 
-    this.get('scene').add(applicationMesh);
-    application.set('threeJSModel', applicationMesh);
+      applicationMesh.position.set(centerX, centerY,
+        application.get('positionZ') + 0.003);
 
-    // Create logos
+      application.set('threeJSModel', applicationMesh);
 
-    applicationMesh.geometry.computeBoundingBox();
+      // Create logos
+      applicationMesh.geometry.computeBoundingBox();
 
-    const logoSize = {
-      width: 0.4,
-      height: 0.4
-    };
-    const appBBox = applicationMesh.geometry.boundingBox;
+      const logoSize = {
+        width: 0.4,
+        height: 0.4
+      };
+      const appBBox = applicationMesh.geometry.boundingBox;
 
-    const logoPos = {
-      x: 0,
-      y: 0,
-      z: 0
-    };
+      const logoPos = {
+        x: 0,
+        y: 0,
+        z: 0
+      };
 
-    const logoRightPadding = logoSize.width * 0.7;
+      const logoRightPadding = logoSize.width * 0.7;
 
-    logoPos.x = appBBox.max.x - logoRightPadding;
+      logoPos.x = appBBox.max.x - logoRightPadding;
 
-    const texturePartialPath = application.get('database') ?
-      'database2' : application.get('programmingLanguage')
-        .toLowerCase();
+      const texturePartialPath = application.get('database') ?
+        'database2' : application.get('programmingLanguage')
+          .toLowerCase();
 
-    this.get('imageLoader').createPicture(logoPos.x, logoPos.y,
-      logoPos.z, logoSize.width, logoSize.height,
-      texturePartialPath, applicationMesh, "label");
+      this.get('imageLoader').createPicture(logoPos.x, logoPos.y,
+        logoPos.z, logoSize.width, logoSize.height,
+        texturePartialPath, applicationMesh, "label");
 
-    // Create text labels
-    this.get('labeler').drawApplicationTextLabel(applicationMesh, this.get('font'));
+      // Create text labels
+      this.get('labeler').drawApplicationTextLabel(applicationMesh, this.get('font'), labelColor);
 
-    /*} else {
+      this.get('scene').add(applicationMesh);
+
+    } else {
       // Draw request logo
-      self.get('imageLoader').createPicture((centerX + 0.47), centerY, 0,
-        1.6, 1.6, "requests", self.get('scene'), "label");
-    }*/
+      this.get('imageLoader').createPicture((centerX + 0.47), centerY, 0,
+        1.6, 1.6, "requests", this.get('scene'), "label");
+    }
   },
 
 
-  updateCameraAndCenterPoint(emberLandscape) {
+  updateCameraAndCenterPoint(emberLandscape, camera) {
     // Calculate new center and update zoom
-    if (!this.get('centerAndZoomCalculator.centerPoint')) {
-      this.get('centerAndZoomCalculator')
-        .calculateLandscapeCenterAndZZoom(emberLandscape,
-          this.get('webglrenderer'));
+    let center = CalcCenterAndZoom
+      .calculateLandscapeCenterAndZZoom(emberLandscape, this.get('webglrenderer'));
 
-      const cameraZ = this.get('centerAndZoomCalculator.cameraZ');
-      this.set('camera.position.z', cameraZ);
-      this.get('camera').updateProjectionMatrix();
-    }
-    return this.get('centerAndZoomCalculator.centerPoint');
-  },
-
-
-  createLine(tile, parent, centerPoint) {
-
-    let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x,
-      tile.startPoint.y - centerPoint.y, tile.positionZ);
-    let secondVector = new THREE.Vector3(tile.endPoint.x - centerPoint.x,
-      tile.endPoint.y - centerPoint.y, tile.positionZ);
-
-    // New line approach (draw planes)
-
-    // Euclidean distance
-    const lengthPlane = Math.sqrt(
-      Math.pow((firstVector.x - secondVector.x), 2) +
-      Math.pow((firstVector.y - secondVector.y), 2));
-
-    const geometryPlane = new THREE.PlaneGeometry(lengthPlane,
-      tile.lineThickness * 0.4);
-
-    const materialPlane = new THREE.MeshBasicMaterial({ color: tile.pipeColor });
-    const plane = new THREE.Mesh(geometryPlane, materialPlane);
-
-    let isDiagonalPlane = false;
-    const diagonalPos = new THREE.Vector3();
-
-    // Rotate plane => diagonal plane (diagonal commu line)
-    if (Math.abs(firstVector.y - secondVector.y) > 0.1) {
-      isDiagonalPlane = true;
-
-      const distanceVector = new THREE.Vector3()
-        .subVectors(secondVector, firstVector);
-
-      plane.rotateZ(Math.atan2(distanceVector.y, distanceVector.x));
-
-      diagonalPos.copy(distanceVector).multiplyScalar(0.5).add(firstVector);
+    // Update zoom if camera has not been moved by user
+    if (camera.position.z === 0){
+      camera.position.z = center.z;
+      camera.updateProjectionMatrix();
     }
 
-    // Set plane position
-    if (!isDiagonalPlane) {
-      const posX = firstVector.x + (lengthPlane / 2);
-      const posY = firstVector.y;
-      const posZ = firstVector.z;
-
-      plane.position.set(posX, posY, posZ);
-    }
-    else {
-      plane.position.copy(diagonalPos);
-    }
-
-    plane.userData['model'] = tile.emberModel;
-
-    parent.add(plane);
-
-  }, // END createLine
-
-
-  createPlane(model) {
-    const emberModelName = model.constructor.modelName;
-
-    const material = new THREE.MeshBasicMaterial({
-      color: this.get('configuration.landscapeColors.' + emberModelName)
-    });
-
-    const plane = new THREE.Mesh(new THREE.PlaneGeometry(model.get('width'),
-      model.get('height')), material);
-
-    plane.userData['model'] = model;
-    return plane;
+    return center;
   },
 
 

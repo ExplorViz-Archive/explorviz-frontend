@@ -8,10 +8,6 @@ export default Object.extend({
 
   textLabels: new Map(),
 
-  // Set as this object is created
-  configuration: null,
-
-
   init() {
     this._super(...arguments);
 
@@ -19,9 +15,7 @@ export default Object.extend({
   },
 
 
-  drawSystemTextLabel(threejsModel: any, font: THREE.Font) {
-    let configuration: any = this.get('configuration');
-    let color: string = configuration.get('landscapeColors.systemText');
+  drawSystemTextLabel(threejsModel: THREE.Mesh, font: THREE.Font, color: THREE.Color) {
     let emberModel: System = threejsModel.userData.model;
     let text = emberModel.get('name');
 
@@ -30,9 +24,7 @@ export default Object.extend({
   },
 
 
-  drawNodeTextLabel(threejsModel: any, font: THREE.Font) {
-    let configuration: any = this.get('configuration');
-    let color: string = configuration.get('landscapeColors.nodeText');
+  drawNodeTextLabel(threejsModel: THREE.Mesh, font: THREE.Font, color: THREE.Color) {
     let emberModel: Node = threejsModel.userData.model;
     let text = emberModel.getDisplayName();
 
@@ -47,9 +39,7 @@ export default Object.extend({
   },
 
 
-  drawApplicationTextLabel(threejsModel: any, font: THREE.Font) {
-    let configuration: any = this.get('configuration');
-    let color: string = configuration.get('landscapeColors.applicationText');
+  drawApplicationTextLabel(threejsModel: THREE.Mesh, font: THREE.Font, color: THREE.Color) {
     let emberModel: System = threejsModel.userData.model;
     let text = emberModel.get('name');
 
@@ -58,9 +48,9 @@ export default Object.extend({
   },
 
 
-  drawTextLabel(threejsModel: any, text: string, font: THREE.Font, fontSize: number, color: string) {
+  drawTextLabel(threejsModel: THREE.Mesh, text: string, font: THREE.Font, fontSize: number, color: THREE.Color) {
     let emberModel: any = threejsModel.userData.model;
-    let labelMesh: any = this.isLabelAlreadyCreated(emberModel);
+    let labelMesh: THREE.Mesh = this.isLabelAlreadyCreated(emberModel);
 
     if (labelMesh) {
       // Update meta-info for model
@@ -94,7 +84,7 @@ export default Object.extend({
     labelMesh.userData['type'] = 'label';
     labelMesh.userData['model'] = emberModel;
 
-    let textLabels: any = this.get('textLabels');
+    let textLabels = this.get('textLabels');
     textLabels.set(emberModel.get('id'), labelMesh);
 
     // TODO: Is this property used?
@@ -149,7 +139,7 @@ export default Object.extend({
     labelMesh.position.z = parent.position.z + 0.001;
   },
 
-  drawCollapseSymbol(mesh: THREE.Mesh, font: THREE.Font) {
+  drawCollapseSymbol(mesh: THREE.Mesh, font: THREE.Font, color: THREE.Color) {
     // Add respective open / close symbol
     mesh.geometry.computeBoundingBox();
     let emberModel: System | NodeGroup = mesh.userData.model;
@@ -158,9 +148,9 @@ export default Object.extend({
     let collapseSymbol = null;
 
     if (emberModel.opened) {
-      collapseSymbol = this.createCollapseSymbols('+', 0.35, font);
+      collapseSymbol = this.createCollapseSymbols('-', 0.35, font, color);
     } else {
-      collapseSymbol = this.createCollapseSymbols('-', 0.35, font);
+      collapseSymbol = this.createCollapseSymbols('+', 0.35, font, color);
     }
 
     if (collapseSymbol) {
@@ -172,36 +162,30 @@ export default Object.extend({
   },
 
 
-  createCollapseSymbols(label: string, size: number, font: THREE.Font) {
-    let configuration: any = this.get('configuration');
-
-    if (!configuration)
-      return;
-
-    const material = new THREE.MeshBasicMaterial({
-      color: configuration.get('landscapeColors.collapseSymbol')
+  createCollapseSymbols(label: string, size: number, font: THREE.Font, color: THREE.Color) {
+    let material = new THREE.MeshBasicMaterial({
+      color
     });
 
-
-    const collapseGeometry = new THREE.TextBufferGeometry(label, {
+    let collapseGeometry = new THREE.TextBufferGeometry(label, {
       font,
       size,
       height: 0
     });
 
-    const collapseMesh = new THREE.Mesh(collapseGeometry, material);
+    let collapseMesh = new THREE.Mesh(collapseGeometry, material);
 
     return collapseMesh;
   },
 
 
   isLabelAlreadyCreated(emberModel: any) {
-    let textLabels: any = this.get('textLabels');
+    let textLabels = this.get('textLabels');
 
     if (textLabels === null)
       return null;
 
-    let labelMesh: any = textLabels.get(emberModel.get('id'));
+    let labelMesh = textLabels.get(emberModel.get('id'));
 
     // Label exists and text + text color did not change?
     if (labelMesh && labelMesh.name === emberModel.get('name')) {
