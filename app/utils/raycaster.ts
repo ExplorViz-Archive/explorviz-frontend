@@ -7,14 +7,9 @@ export default Object.extend({
 
   landscapeObjects: null,
   applicationObjects: null,
-  objectCatalog: null,
 
   init() {
     this._super(...arguments);
-
-    this.set('landscapeObjects', ['system', 'nodegroup', 'node', 'application', 'applicationcommunication']);
-    this.set('applicationObjects', ['component', 'clazz', 'drawableclazzcommunication']);
-    this.set('objectCatalog', 'landscapeObjects');
     this.set('raycaster', new THREE.Raycaster());
   },
 
@@ -38,21 +33,7 @@ export default Object.extend({
       true);
 
     if (intersections.length > 0) {
-      const result = intersections.filter((obj: any) => {
-        if (obj.object.userData.model) {
-          const modelName = obj.object.userData.model.constructor.modelName;
-          let objectCatalog: any = this.get('objectCatalog');
-          if (objectCatalog) {
-            return this.get(objectCatalog).includes(modelName);
-          }
-        }
-      });
-
-      if (result.length <= 0) {
-        return null;
-      } else {
-        return result[0];
-      }
+      return intersections[0];
     }
     return null;
   }
