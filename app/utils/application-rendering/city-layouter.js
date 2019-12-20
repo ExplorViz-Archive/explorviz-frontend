@@ -44,9 +44,7 @@ export default function applyCityLayout(application) {
       children.forEach((child) => {
         child.set('positionX', child.get('positionX') + component.get('positionX'));
         child.set('positionY', child.get('positionY') + component.get('positionY'));
-        if (component.get('opened')) {
-          child.set('positionY', child.get('positionY') + component.get('height'));
-        }
+        child.set('positionY', child.get('positionY') + 0.75 * 4.0);
         child.set('positionZ', child.get('positionZ') + component.get('positionZ'));
         setAbsoluteLayoutPosition(child);
       });
@@ -55,9 +53,7 @@ export default function applyCityLayout(application) {
       clazzes.forEach((clazz) => {
         clazz.set('positionX', clazz.get('positionX') + component.get('positionX'));
         clazz.set('positionY', clazz.get('positionY') + component.get('positionY'));
-        if (component.get('opened')) {
-          clazz.set('positionY', clazz.get('positionY') + component.get('height'));
-        }
+        clazz.set('positionY', clazz.get('positionY') + 0.75 * 4.0);
         clazz.set('positionZ', clazz.get('positionZ') + component.get('positionZ'));
       });
     }
@@ -254,28 +250,25 @@ export default function applyCityLayout(application) {
     function getHeightOfComponent(component) {
       const floorHeight = 0.75 * 4.0;
 
-      if (!component.get('opened')) {
-        let childrenHeight = floorHeight;
+      let childrenHeight = floorHeight;
 
-        const children = component.get('children');
-        const clazzes = component.get('clazzes');
+      const children = component.get('children');
+      const clazzes = component.get('clazzes');
 
-        clazzes.forEach((clazz) => {
-          if (clazz.get('height') > childrenHeight) {
-            childrenHeight = clazz.get('height');
-          }
-        });
+      clazzes.forEach((clazz) => {
+        const height = clazz.get('height') / 2;
+        if (height > childrenHeight) {
+          childrenHeight = height;
+        }
+      });
 
-        children.forEach((child) => {
-          if (child.get('height') > childrenHeight) {
-            childrenHeight = child.get('height');
-          }
-        });
+      children.forEach((child) => {
+        if (child.get('height') > childrenHeight) {
+          childrenHeight = child.get('height');
+        }
+      });
 
-        return childrenHeight + 0.1;
-      } else {
-        return floorHeight;
-      }
+      return childrenHeight + 0.1;
     }
 
 
