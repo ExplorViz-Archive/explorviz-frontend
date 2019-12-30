@@ -1,5 +1,6 @@
 import THREE from 'three';
 import AppCommunication from 'explorviz-frontend/models/applicationcommunication';
+import DS from 'ember-data';
 
 type Point = { x: number, y: number };
 
@@ -13,7 +14,7 @@ type Tile = {
 type TileWay = { startPoint: Point, endPoint: Point };
 
 
-export function computeCommunicationTiles(appCommunications: AppCommunication[], color: string) {
+export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray<AppCommunication>, color: string) {
   let tiles: Tile[] = [];
   let tile: Tile;
 
@@ -170,7 +171,7 @@ export function linearCategorization(requestMap: Map<number, number>) {
 }
 
 
-export function addCommunicationLineDrawing(tiles: Tile[], parent: THREE.Mesh, centerPoint: Point) {
+export function addCommunicationLineDrawing(tiles: Tile[], parent: THREE.Object3D, centerPoint: Point) {
   const requestsToCategory =  new Map();
 
   // Initialize Category mapping with default value 0
@@ -193,7 +194,7 @@ export function addCommunicationLineDrawing(tiles: Tile[], parent: THREE.Mesh, c
 }
 
 
-export function createLine(tile: Tile, parent: THREE.Mesh, centerPoint: Point) {
+export function createLine(tile: Tile, parent: THREE.Object3D, centerPoint: Point) {
   let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x,
     tile.startPoint.y - centerPoint.y, tile.positionZ);
   let secondVector = new THREE.Vector3(tile.endPoint.x - centerPoint.x,
