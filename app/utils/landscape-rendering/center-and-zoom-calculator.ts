@@ -2,6 +2,20 @@ import THREE from 'three';
 import Landscape from 'explorviz-frontend/models/landscape';
 import DrawNodeEntity from 'explorviz-frontend/models/drawnodeentity';
 
+export function getCenterAndZoom(emberLandscape: Landscape, camera: THREE.PerspectiveCamera,
+  webglrenderer: THREE.WebGLRenderer) {
+  // Calculate new center and update zoom
+  let center = calculateLandscapeCenterAndZZoom(emberLandscape, webglrenderer);
+
+  // Update zoom if camera has not been moved by user
+  if (camera.position.z === 0) {
+    camera.position.z = center.z;
+    camera.updateProjectionMatrix();
+  }
+
+  return center;
+}
+
 
 export function calculateLandscapeCenterAndZZoom(emberLandscape: Landscape, renderer: THREE.WebGLRenderer) {
   // Semantics of rect entries
