@@ -2,6 +2,7 @@ import DS from 'ember-data';
 import BaseEntity from './baseentity';
 import Timestamp from './timestamp';
 import Event from './event';
+import System from './system';
 import ApplicationCommunication from './applicationcommunication';
 
 const { belongsTo, hasMany } = DS;
@@ -24,7 +25,7 @@ export default class Landscape extends BaseEntity {
   events!: DS.PromiseManyArray<Event>;
 
   @hasMany('system', { inverse: 'parent' })
-  systems!: DS.PromiseManyArray<Event>;
+  systems!: DS.PromiseManyArray<System>;
 
   // list of applicationCommunication for rendering purposes
   @hasMany('applicationcommunication', { inverse: null })
