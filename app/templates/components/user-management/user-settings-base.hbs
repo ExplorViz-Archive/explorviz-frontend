@@ -27,7 +27,7 @@
             @step=".01"
             @label={{get this.descriptions (concat setting.[0] ".displayName")}}
             @value={{setting.[1]}}
-            @onChange={{action "onRangeSettingChange" index}}
+            @onChange={{action (fn this.onRangeSettingChange index)}}
           />
         </div>
       {{/each}}

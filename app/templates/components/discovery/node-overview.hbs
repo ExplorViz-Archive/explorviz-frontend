@@ -3,7 +3,7 @@
     <div class="jumbotron">
       <h2>All agents are hidden!</h2>
       <p>Go to Settings an enable 'Show hidden entities' or click
-        <a {{action "enableShowHidden" preventDefault=false}}>here</a>
+        <a {{on "click" this.enableShowHidden}}>here</a>
       </p>
     </div>
     <div class="spinner-center-3" role="status"></div>

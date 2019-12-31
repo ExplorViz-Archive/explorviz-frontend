@@ -7,9 +7,9 @@
 
 
 <div class="btn-group align-self-center d-block" role="group">
-  <button {{action "saveProcezz"}} type="button" class="btn btn-secondary">Save</button>
-  <button {{action "restartProcezz"}} type="button" class="btn btn-secondary">Restart</button>
-  <button {{action "stopProcezz"}} type="button" class="btn btn-secondary">Stop</button>
+  <button {{on "click" this.saveProcezz}} type="button" class="btn btn-secondary">Save</button>
+  <button {{on "click" this.restartProcezz}} type="button" class="btn btn-secondary">Restart</button>
+  <button {{on "click" this.stopProcezz}} type="button" class="btn btn-secondary">Stop</button>
 </div>
 
 

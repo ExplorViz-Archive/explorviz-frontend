@@ -6,7 +6,7 @@
 {{/if}}
 
 <div class="btn-group align-self-center d-block" role="group">
-  <button {{action "saveAgent"}} type="button" class="btn btn-secondary">Save</button>
+  <button {{on "click" this.saveAgent}} type="button" class="btn btn-secondary">Save</button>
 </div>
 
 <div id="discovery-details-tab" class="mt-3">

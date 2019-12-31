@@ -1,4 +1,4 @@
-<BsModal @open={{this.showNewUsers}} @backdropClose={{false}} @keyboard={{false}} @onHidden={{action "hideNewUsersCreatedModal"}} as |modal|>
+<BsModal @open={{this.showNewUsers}} @backdropClose={{false}} @keyboard={{false}} @onHidden={{action this.hideNewUsersCreatedModal}} as |modal|>
   <modal.header>
     <h4 class="modal-title">New Users</h4>
   </modal.header>
@@ -6,7 +6,7 @@
     <div class="alert alert-danger" role="alert">
       <p>Print now using the button below.</p>
       <p>You cannot access the passwords again after closing this window!</p>
-      <BsButton @onClick={{action "printNewUsers"}} @type="primary">Print</BsButton>
+      <BsButton @onClick={{action this.printNewUsers}} @type="primary">Print</BsButton>
     </div>
     <table class="table" id="new-user-list">
       <thead>

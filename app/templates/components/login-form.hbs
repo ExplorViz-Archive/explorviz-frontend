@@ -10,16 +10,16 @@
       </div>
       <div class="modal-body">
         <div id="failure" style="color: #ef5350; text-align: center; font-weight: bold; font-size: 150%; padding-bottom: 1em">
-          {{#if session.session.content.errorMessage}}              
-            {{session.session.content.errorMessage}}
+          {{#if this.session.session.content.errorMessage}}              
+            {{this.session.session.content.errorMessage}}
           {{/if}}
         </div>
         <div id="succeededLogout" style="color: #a5d6a7; text-align: center; font-weight: bold; font-size: 150%; padding-bottom: 1em">
-          {{#if session.session.content.message}}
-            {{session.session.content.message}}
+          {{#if this.session.session.content.message}}
+            {{this.session.session.content.message}}
           {{/if}}
         </div>
-        <form {{action 'authenticate' on='submit'}} class="form center-block">
+        <form {{action this.authenticate on='submit'}} class="form center-block">
           <div class="form-group">
             <Input @id="username" @value={{this.identification}} @placeholder='admin' @class="form-control input-lg" @autofocus="autofocus" @autocomplete="username" />
           </div>
