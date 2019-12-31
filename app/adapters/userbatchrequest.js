@@ -21,11 +21,6 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
   urlForCreateRecord() {
     const baseUrl = this.buildURL();
     return `${baseUrl}/v1/userbatch`;
-  },
-
-  authorize(xhr) {
-    let { access_token } = this.get('session.data.authenticated');
-    xhr.setRequestHeader('Authorization', `Bearer ${access_token}`);
   }
 
 });
