@@ -1,6 +1,7 @@
 import DS from 'ember-data';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 import ENV from 'explorviz-frontend/config/environment';
+import { computed } from '@ember/object';
 
 const { JSONAPIAdapter } = DS;
 
@@ -21,12 +22,14 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
   host: ENV.APP.API_ROOT,
   namespace: "v1",
 
-  init() {
-    this.set('headers', {
-      "Accept": "application/vnd.api+json"
-    });
+  headers: computed('session.data.authenticated.access_token', function() {
+    let headers = { 'Accept': 'application/vnd.api+json' };
+    if (this.session.isAuthenticated) {
+      headers['Authorization'] = `Bearer ${this.session.data.authenticated.access_token}`;
+    }
 
-  },
+    return headers;
+  }),
 
   /**
    * Queries landscape or replay timestamps
@@ -40,11 +43,6 @@ export default JSONAPIAdapter.extend(DataAdapterMixin, {
     else {
       return `${baseUrl}/timestamps?filter[type]=landscape`
     }
-  },
-
-  authorize(xhr) {
-    let { access_token } = this.get('session.data.authenticated');
-    xhr.setRequestHeader('Authorization', `Bearer ${access_token}`);
   }
 
 });
