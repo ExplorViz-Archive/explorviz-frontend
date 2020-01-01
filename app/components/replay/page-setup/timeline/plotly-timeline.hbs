@@ -1,5 +1,8 @@
 {{#if timestamps.length}}
-  <div id='plotlyDiv'></div>
+  <div id='plotlyDiv'
+    {{on "mouseenter" this.handleMouseEnter}}
+    {{on "mouseleave" this.handleMouseLeave}}
+  ></div>
 {{else}}
   <div class="d-flex justify-content-center timeline-no-content">
     No replay timestamps available.

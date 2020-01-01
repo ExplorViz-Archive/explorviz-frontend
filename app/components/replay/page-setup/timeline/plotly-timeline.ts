@@ -2,7 +2,7 @@ import Component from '@ember/component';
 import Plotly from 'plotly.js-dist';
 import debugLogger from 'ember-debug-logger';
 import Timestamp from 'explorviz-frontend/models/timestamp';
-import { get, set } from '@ember/object';
+import { get, set, action } from '@ember/object';
 
 export default class PlotlyTimeline extends Component.extend({
 }) {
@@ -33,7 +33,8 @@ export default class PlotlyTimeline extends Component.extend({
   _selectedTimestamps = [];
 
   // BEGIN Ember Div Events
-  mouseEnter() {
+  @action
+  handleMouseEnter() {
     const plotlyDiv: any = document.getElementById("plotlyDiv");
 
     // if user hovers over plotly, save his 
@@ -44,7 +45,8 @@ export default class PlotlyTimeline extends Component.extend({
     }
   }
 
-  mouseLeave() {
+  @action
+  handleMouseLeave() {
     set(this, "_userSlidingWindow", null);
   }
   // END Ember Div Events
