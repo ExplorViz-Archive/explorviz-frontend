@@ -7,10 +7,9 @@ import { task } from 'ember-concurrency-decorators';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import DS from 'ember-data';
 import CurrentUser from 'explorviz-frontend/services/current-user';
-import { action, computed } from '@ember/object';
+import { action } from '@ember/object';
 import User from 'explorviz-frontend/models/user';
 import RouterService from '@ember/routing/router-service';
-import { addObserver, removeObserver } from '@ember/object/observers';
 import Transition from '@ember/routing/-private/transition';
 
 interface Args {
@@ -35,20 +34,6 @@ export default class UserList extends Component<Args> {
 
   pageSizes:number[] = [5, 10, 25, 50];
 
-  // needs to be a computed property.
-  // Otherwise the observer won't work
-  @computed('args.users')
-  get users() {
-    return this.args.users;
-  }
-
-  constructor(owner:any, args:any) {
-    super(owner, args);
-
-    addObserver(this, 'users', this.resetTable);
-    this.resetCheckboxes();
-  }
-
   get showDeleteUsersButton() {
     return Object.values(this.selected).some(Boolean);
   }
@@ -61,11 +46,9 @@ export default class UserList extends Component<Args> {
     return Object.entries(this.selected).length;
   }
 
-  resetTable() {
-    const tableElement = document.querySelector('#user-list-table-div');
-    if(tableElement !== null) {
-      tableElement.scrollTo(0, 0);
-    }
+  @action
+  resetTable(tableElement: HTMLDivElement) {
+    tableElement.scrollTo(0, 0);
     this.resetCheckboxes();
   }
 
@@ -157,10 +140,6 @@ export default class UserList extends Component<Args> {
   showReasonErrorAlert(reason:any) {
     const {title, detail} = reason.errors[0];
     AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
-  }
-
-  willDestroy() {
-    removeObserver(this, 'users', this.resetTable);
   }
 
 }
