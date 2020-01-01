@@ -1,11 +1,9 @@
-import DS from 'ember-data';
+import JSONAPIAdapter from '@ember-data/adapter/json-api';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 import ENV from 'explorviz-frontend/config/environment';
 import { computed } from '@ember/object';
  
-const {JSONAPIAdapter} = DS;
-const {APP} = ENV;
-
+const { APP } = ENV;
 
 /**
 * This Adapter operates as communication abstraction for all network requests, 
@@ -20,24 +18,26 @@ const {APP} = ENV;
 * @module explorviz.discovery
 * @submodule network
 */
-export default JSONAPIAdapter.extend(DataAdapterMixin,{
+export default class AgentAdapter extends JSONAPIAdapter.extend(DataAdapterMixin) {
 
-  host: APP.API_ROOT,
+  host = APP.API_ROOT;
+  namespace = 'v1';
 
-  headers: computed('session.data.authenticated.access_token', function() {
+  @computed('session.data.authenticated.access_token')
+  get headers() {
     let headers = { 'Accept': 'application/vnd.api+json' };
     if (this.session.isAuthenticated) {
       headers['Authorization'] = `Bearer ${this.session.data.authenticated.access_token}`;
     }
 
     return headers;
-  }),
+  }
 
   //@Override
   urlForQueryRecord(query) {
     const baseUrl = this.buildURL();
     return `${baseUrl}/${query}`;
-  },
+  }
 
   // @Override
   // Overrides URL for model.save()
@@ -47,4 +47,4 @@ export default JSONAPIAdapter.extend(DataAdapterMixin,{
     return `${baseUrl}/v1/agents/${id}`;
   }
 
-});
+}
