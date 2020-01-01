@@ -19,7 +19,7 @@
             {{this.session.session.content.message}}
           {{/if}}
         </div>
-        <form {{action this.authenticate on='submit'}} class="form center-block">
+        <form {{on 'submit' this.authenticate}} class="form center-block">
           <div class="form-group">
             <Input @id="username" @value={{this.identification}} @placeholder='admin' @class="form-control input-lg" @autofocus="autofocus" @autocomplete="username" />
           </div>
