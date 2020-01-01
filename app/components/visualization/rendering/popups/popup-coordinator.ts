@@ -1,9 +1,8 @@
 import Component from '@glimmer/component';
-import $ from 'jquery';
 import { action } from '@ember/object';
 
 interface Args {
-  data: {
+  popupData: {
     mouseX: number,
     mouseY: number
   };
@@ -12,18 +11,16 @@ interface Args {
 export default class PopupCoordinator extends Component<Args> {
 
   @action
-  setPopupPosition() {
-    let popupData = this.args.data;
-
-    const popoverDiv = $('.popover');
+  setPopupPosition(popoverDiv: HTMLDivElement) {
+    let popupData = this.args.popupData;
 
     // Sorrounding div for position calculations
-    const containerDiv = $('#rendering');
+    const containerDiv = popoverDiv.parentElement as HTMLElement;
 
-    let popoverHeight = popoverDiv.height();
-    let popoverWidth = popoverDiv.width();
+    let popoverHeight = popoverDiv.clientHeight;
+    let popoverWidth = popoverDiv.clientWidth;
 
-    let containerWidth = containerDiv.width();
+    let containerWidth = containerDiv.clientWidth;
 
     if(popoverHeight === undefined || popoverWidth === undefined || containerWidth === undefined)
       return;
@@ -53,7 +50,7 @@ export default class PopupCoordinator extends Component<Args> {
     }
 
     // Set popup position
-    popoverDiv.css('top', popupTopPosition + 'px');
-    popoverDiv.css('left', popupLeftPosition + 'px');
+    popoverDiv.style.top = popupTopPosition + 'px';
+    popoverDiv.style.left = popupLeftPosition + 'px';
   }
 }
