@@ -40,7 +40,7 @@ interface Args {
 * Renderer for landscape visualization.
 *
 * @class Landscape-Rendering-Component
-* @extends Rendering-Core-Component
+* @extends GlimmerComponent
 *
 * @module explorviz
 * @submodule visualization.rendering
@@ -157,18 +157,18 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    * @method initRenderings
    */
   initRendering() {
-    const self = this;
+    let self = this;
 
     // Get size if outer ember div
-    const height = $('#rendering').innerHeight();
-    const width = $('#rendering').innerWidth();
+    let height = $('#rendering').innerHeight();
+    let width = $('#rendering').innerWidth();
 
     if (!height || !width) {
       return;
     }
 
     this.scene = new THREE.Scene();
-    const backgroundColor = this.configuration.landscapeColors.background;
+    let backgroundColor = this.configuration.landscapeColors.background;
     this.scene.background = new THREE.Color(backgroundColor);
 
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
@@ -204,7 +204,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.initInteraction();
 
-    const dirLight = new THREE.DirectionalLight();
+    let dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
     this.scene.add(dirLight);
 
@@ -214,7 +214,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         return;
       }
 
-      const animationId = requestAnimationFrame(render);
+      let animationId = requestAnimationFrame(render);
       self.animationFrameId = animationId;
 
       if (showFpsCounter) {
@@ -256,7 +256,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   updateCanvasSize() {
-    const outerDiv = $('#vizspace')[0];
+    let outerDiv = $('#vizspace')[0];
 
     if (outerDiv) {
       if (!this.camera || !this.webglrenderer)
@@ -268,8 +268,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       let renderingWidth = $('#rendering').innerWidth();
 
       if (renderingHeight && renderingWidth) {
-        const height = Math.round(renderingHeight);
-        const width = Math.round(renderingWidth);
+        let height = Math.round(renderingHeight);
+        let width = Math.round(renderingWidth);
 
         this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
@@ -294,7 +294,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    */
   @action
   cleanAndUpdateScene() {
-    const scene = this.scene;
+    let scene = this.scene;
 
     removeAllChildren(scene);
 
@@ -354,7 +354,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   populateScene() {
     this.debug("populate landscape-rendering");
 
-    const emberLandscape = this.args.landscape;
+    let emberLandscape = this.args.landscape;
 
     if (!emberLandscape || !this.font) {
       return;
@@ -374,7 +374,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
           this.configuration, this.labeler, this.font);
         this.scene.add(systemMesh);
 
-        const nodegroups = system.nodegroups;
+        let nodegroups = system.nodegroups;
 
         // Draw boxes for nodegroups
         nodegroups.forEach((nodegroup) => {
@@ -389,7 +389,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
             this.scene.add(nodegroupMesh);
           }
 
-          const nodes = nodegroup.get('nodes');
+          let nodes = nodegroup.get('nodes');
 
           // Draw boxes for nodes
           nodes.forEach((node) => {
@@ -402,7 +402,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
               this.configuration, this.labeler, this.font);
             this.scene.add(nodeMesh);
 
-            const applications = node.get('applications');
+            let applications = node.get('applications');
 
             // Draw boxes for applications
             applications.forEach((application) => {

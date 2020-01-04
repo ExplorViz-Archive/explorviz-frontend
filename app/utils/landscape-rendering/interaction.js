@@ -1,6 +1,5 @@
 import Object from '@ember/object';
 import Evented from '@ember/object/evented';
-import { inject as service } from "@ember/service";
 import { getOwner } from '@ember/application';
 
 
@@ -20,7 +19,6 @@ export default Object.extend(Evented, {
   renderer: null,
   raycaster: null,
   raycastObjects: null,
-  highlighter: service('visualization/application/highlighter'),
 
   hammerHandler: null,
   popUpHandler: null,
