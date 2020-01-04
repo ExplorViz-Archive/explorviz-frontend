@@ -8,6 +8,20 @@ export default function applyCityLayout(application) {
 
     const foundationComponent = components.objectAt(0);
 
+    let map = new Map();
+
+    let allEntities = application.getAllClazzes().concat(application.getAllComponents());
+    allEntities.forEach((entity) => {
+      map.set(entity.get('id'), {
+        height: 0,
+        width: 0,
+        depth: 0,
+        positionX: 0,
+        positionY: 0,
+        positionZ: 0
+      });
+    });
+
     /*
     const EdgeState = {
       NORMAL: 'NORMAL',
@@ -41,20 +55,24 @@ export default function applyCityLayout(application) {
       const children = component.get('children');
       const clazzes = component.get('clazzes');
 
+      let componentData = map.get(component.id);
+
       children.forEach((child) => {
-        child.set('positionX', child.get('positionX') + component.get('positionX'));
-        child.set('positionY', child.get('positionY') + component.get('positionY'));
-        child.set('positionY', child.get('positionY') + 0.75 * 4.0);
-        child.set('positionZ', child.get('positionZ') + component.get('positionZ'));
+        let childData = map.get(child.id);
+        childData.positionX = childData.positionX + componentData.positionX;
+        childData.positionY = childData.positionY + componentData.positionY;
+        childData.positionY = childData.positionY + 0.75 * 2.0;
+        childData.positionZ = childData.positionZ + componentData.positionZ;
         setAbsoluteLayoutPosition(child);
       });
 
 
       clazzes.forEach((clazz) => {
-        clazz.set('positionX', clazz.get('positionX') + component.get('positionX'));
-        clazz.set('positionY', clazz.get('positionY') + component.get('positionY'));
-        clazz.set('positionY', clazz.get('positionY') + 0.75 * 4.0);
-        clazz.set('positionZ', clazz.get('positionZ') + component.get('positionZ'));
+        let clazzData = map.get(clazz.id);
+        clazzData.positionX = clazzData.positionX + componentData.positionX;
+        clazzData.positionY = clazzData.positionY + componentData.positionY;
+        clazzData.positionY = clazzData.positionY + 0.75 * 2.0;
+        clazzData.positionZ = clazzData.positionZ + componentData.positionZ;
       });
     }
 
@@ -76,7 +94,8 @@ export default function applyCityLayout(application) {
       const categories = getCategories(instanceCountList, false);
 
       clazzes.forEach((clazz) => {
-        clazz.set('height', (clazzSizeEachStep * categories[clazz.get('instanceCount')] + clazzSizeDefault) * 4.0);
+        let clazzData = map.get(clazz.id);
+        clazzData.height = (clazzSizeEachStep * categories[clazz.get('instanceCount')] + clazzSizeDefault) * 2.0;
       });
     }
 
@@ -237,13 +256,15 @@ export default function applyCityLayout(application) {
       });
 
       clazzes.forEach((clazz) => {
-        clazz.set('depth', clazzWidth);
-        clazz.set('width', clazzWidth);
+        let clazzData = map.get(clazz.id);
+        clazzData.depth = clazzWidth;
+        clazzData.width = clazzWidth;
       });
 
-      component.set('height', getHeightOfComponent(component));
-      component.set('width', -1.0);
-      component.set('depth', -1.0);
+      let componentData = map.get(component.id);
+      componentData.height = getHeightOfComponent(component);
+      componentData.width = -1.0;
+      componentData.depth = -1.0;
     }
 
 
@@ -256,15 +277,17 @@ export default function applyCityLayout(application) {
       const clazzes = component.get('clazzes');
 
       clazzes.forEach((clazz) => {
-        const height = clazz.get('height') / 2;
+        let clazzData = map.get(clazz.id);
+        const height = clazzData.height;
         if (height > childrenHeight) {
           childrenHeight = height;
         }
       });
 
       children.forEach((child) => {
-        if (child.get('height') > childrenHeight) {
-          childrenHeight = child.get('height');
+        let childData = map.get(child.id);
+        if (childData.height > childrenHeight) {
+          childrenHeight = childData.height;
         }
       });
 
@@ -299,8 +322,9 @@ export default function applyCityLayout(application) {
 
       const segment = layoutGeneric(tempList);
 
-      component.set('width', segment.width);
-      component.set('depth', segment.height);
+      let componentData = map.get(component.id);
+      componentData.width = segment.width;
+      componentData.depth = segment.height;
     }
 
 
@@ -310,8 +334,11 @@ export default function applyCityLayout(application) {
       let maxX = 0.0;
       let maxZ = 0.0;
 
+      // Sort by width and by name (for entities with same width)
       children.sort(function(e1, e2) {
-        const result = e1.get('width') - e2.get('width');
+        let e1Width = map.get(e1.id).width;
+        let e2Width = map.get(e2.id).width;
+        const result = e1Width - e2Width;
 
         if ((-0.00001 < result) && (result < 0.00001)) {
           return e1.get('name').localeCompare(e2.get('name'));
@@ -325,15 +352,15 @@ export default function applyCityLayout(application) {
       });
 
       children.forEach((child) => {
-
-        const childWidth = (child.get('width') + insetSpace * 2);
-        const childHeight = (child.get('depth') + insetSpace * 2);
-        child.set('positionY', 0.0);
+        let childData = map.get(child.id);
+        const childWidth = (childData.width + insetSpace * 2);
+        const childHeight = (childData.depth + insetSpace * 2);
+        childData.positionY = 0.0;
 
         const foundSegment = insertFittingSegment(rootSegment, childWidth, childHeight);
 
-        child.set('positionX', foundSegment.startX + insetSpace);
-        child.set('positionZ', foundSegment.startZ + insetSpace);
+        childData.positionX = foundSegment.startX + insetSpace;
+        childData.positionZ = foundSegment.startZ + insetSpace;
 
         if (foundSegment.startX + childWidth > maxX) {
           maxX = foundSegment.startX + childWidth;
@@ -351,7 +378,8 @@ export default function applyCityLayout(application) {
       const labelInsetSpace = 8.0;
 
       children.forEach((child) => {
-        child.set('positionX', child.get('positionX') + labelInsetSpace);
+        let childData = map.get(child.id);
+        childData.positionX = childData.positionX + labelInsetSpace;
       });
 
       rootSegment.width = rootSegment.width + labelInsetSpace;
@@ -435,8 +463,9 @@ export default function applyCityLayout(application) {
       let worstCaseHeight = 0.0;
 
       children.forEach((child) => {
-        worstCaseWidth = worstCaseWidth + (child.get('width') + insetSpace * 2);
-        worstCaseHeight = worstCaseHeight + (child.get('depth') + insetSpace * 2);
+        let childData = map.get(child.id);
+        worstCaseWidth = worstCaseWidth + (childData.width + insetSpace * 2);
+        worstCaseHeight = worstCaseHeight + (childData.depth + insetSpace * 2);
       });
 
 
@@ -610,5 +639,7 @@ export default function applyCityLayout(application) {
         commu.get('pointsFor3D').push(end);
       }
     }
+
+    return map;
 
 }

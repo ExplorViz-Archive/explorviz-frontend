@@ -1,7 +1,6 @@
 import THREE from 'three';
-import Application from 'explorviz-frontend/models/application';
 
-export default function calculateAppCenterAndZZoom(emberApplication : Application) {
+export default function calculateAppCenterAndZZoom(data: any) {
   const MIN_X = 0;
   const MAX_X = 1;
   const MIN_Y = 2;
@@ -9,19 +8,13 @@ export default function calculateAppCenterAndZZoom(emberApplication : Applicatio
   const MIN_Z = 4;
   const MAX_Z = 5;
 
-  const foundation = emberApplication.get('components').objectAt(0);
-
-  if(foundation === undefined) {
-    return new THREE.Vector3();
-  }
-
   const rect : number[] = [];
-  rect.push(foundation.get('positionX'));
-  rect.push(foundation.get('positionY') + foundation.get('width'));
-  rect.push(foundation.get('positionY'));
-  rect.push(foundation.get('positionY') + foundation.get('height'));
-  rect.push(foundation.get('positionZ'));
-  rect.push(foundation.get('positionZ') + foundation.get('depth'));
+  rect.push(data.positionX);
+  rect.push(data.positionY + data.width);
+  rect.push(data.positionY);
+  rect.push(data.positionY + data.height);
+  rect.push(data.positionZ);
+  rect.push(data.positionZ + data.depth);
 
   const viewCenterPoint = new THREE.Vector3(rect.get(MIN_X) + 
     ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
