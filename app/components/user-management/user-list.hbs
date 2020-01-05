@@ -156,12 +156,14 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
       @next={{@users.meta.pagination.next.number}}
       @last={{@users.meta.pagination.last.number}}
       @route="configuration.usermanagement.users"
+      @goToPage={{@goToPage}}
     />
     <PageSizeSelector
-      @pageSizes={{this.pageSizes}}
+      @pageSizes={{@pageSizes}}
       @size={{@size}}
       @label="Users per page"
       @position="above"
+      @changePageSize={{@changePageSize}}
     />
   </div>
 </div>

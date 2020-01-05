@@ -1,7 +1,6 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { inject as service } from "@ember/service";
-import { all } from 'rsvp';
 
 import { task } from 'ember-concurrency-decorators';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
@@ -14,9 +13,13 @@ import Transition from '@ember/routing/-private/transition';
 
 interface Args {
   refreshUsers(): Transition,
+  deleteUsers(users:User[]): Promise<User[]>,
+  goToPage(page: number): void,
+  changePageSize(size: number): void,
   users: DS.RecordArray<User>|null|undefined,
   page: number,
-  size: number
+  size: number,
+  pageSizes: number
 }
 
 export default class UserList extends Component<Args> {
@@ -31,8 +34,6 @@ export default class UserList extends Component<Args> {
 
   @tracked
   showDeleteUsersDialog:boolean = false;
-
-  pageSizes:number[] = [5, 10, 25, 50];
 
   get showDeleteUsersButton() {
     return Object.values(this.selected).some(Boolean);
@@ -69,27 +70,23 @@ export default class UserList extends Component<Args> {
   @task({ enqueue: true })
   deleteUsers = task(function * (this: UserList) {
     // delete all selected users
-    let settingsPromiseArray:Promise<User>[] = [];
+    let listOfUsersToDelete:User[] = [];
     for(const [id, bool] of Object.entries(this.selected)) {
       if(bool) {
         let user = this.store.peekRecord('user', id);
         if(user !== null)
-          settingsPromiseArray.push(user.destroyRecord());
+          listOfUsersToDelete.push(user);
       }
     }
 
-    // should do an all settled here to make sure all promises are resolved
-    // and only then update the user list
-    yield all(settingsPromiseArray).then(()=>{
+    try {
+      yield this.args.deleteUsers(listOfUsersToDelete);
       AlertifyHandler.showAlertifySuccess('All users successfully deleted.');
-    }).catch((reason)=>{
-      const {title, detail} = reason.errors[0];
-      AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
-    }).finally(() => {
-      this.updateUserList.perform();
+    } catch(reason) {
+      this.showReasonErrorAlert(reason);
+    } finally {
       this.showDeleteUsersDialog = false;
-    });
-
+    }
   });
 
   @action
@@ -128,10 +125,9 @@ export default class UserList extends Component<Args> {
   deleteUser = task(function * (this: UserList, user:User) {
     try {
       let username = user.username;
-      yield user.destroyRecord();
+      yield this.args.deleteUsers([user]);
       const message = `User <b>${username}</b> deleted.`;
       AlertifyHandler.showAlertifyMessage(message);
-      this.updateUserList.perform();
     } catch(reason) {
       this.showReasonErrorAlert(reason);
     }
