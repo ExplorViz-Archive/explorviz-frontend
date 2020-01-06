@@ -18,6 +18,7 @@ import Component from "explorviz-frontend/models/component";
 import { getOwner } from "@ember/application";
 import Highlighter from "explorviz-frontend/services/visualization/application/highlighter";
 import FoundationMesh from "explorviz-frontend/utils/3d/application/foundation-mesh";
+import ClazzMesh from "explorviz-frontend/utils/3d/application/clazz-mesh";
 import ComponentMesh from "explorviz-frontend/utils/3d/application/component-mesh";
 
 interface Args {
@@ -124,7 +125,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     } else {
       const { id } = mesh;
       const model = this.meshIdToModel.get(id)
-      console.log("Mesh height: " + mesh.scale.y);
 
       if (model instanceof Component && !model.get('foundation')) {
         this.highlight(model, mesh);
@@ -137,28 +137,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   handleDoubleClick(mesh: THREE.Mesh | undefined) {
-    if (mesh !== undefined) {
-      const { id } = mesh;
-      console.log("Clicked mesh " + id)
-      const model = this.meshIdToModel.get(id);
-      if (mesh instanceof ComponentMesh) {
-        if (mesh.opened) {
-          this.closeComponentMesh(mesh);
-        } else {
-          this.openComponentMesh(mesh);
-          /*
-          model.getAllClazzes().forEach(clazz => {
-            clazz.threeJSModel.visible = false;
-          })
-          model.getAllComponents().forEach(component => {
-            component.threeJSModel.visible = false;
-            console.log("Component invisible: ${component.id}")
-            if (!component.get('opened'))
-              return;
-            component.set('opened', false);
-            this.closeComponentMesh(component.threeJSModel, component);
-          })*/
-        }
+    if (mesh instanceof ComponentMesh) {
+      if (mesh.opened) {
+        this.closeComponentMesh(mesh);
+      } else {
+        this.openComponentMesh(mesh);
       }
     }
   }
@@ -183,8 +166,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       }
     });
 
-    // TODO: Make clazzes visible
-
+    let clazzes = mesh.dataModel.get('clazzes');
+    clazzes.forEach((clazz) => {
+      let mesh = this.modelIdToMesh.get(clazz.get('id'));
+      if (mesh) {
+        mesh.visible = true;
+      }
+    });
   }
 
   closeComponentMesh(mesh: ComponentMesh) {
@@ -206,6 +194,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       }
       if (mesh instanceof ComponentMesh && mesh.opened) {
         this.closeComponentMesh(mesh);
+      }
+    });
+
+    let clazzes = mesh.dataModel.get('clazzes');
+    clazzes.forEach((clazz) => {
+      let mesh = this.modelIdToMesh.get(clazz.get('id'));
+      if (mesh) {
+        mesh.visible = false;
       }
     });
   }
@@ -372,17 +368,35 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const children = component.get('children');
 
     clazzes.forEach((clazz: Clazz) => {
-      let height = this.map.get(clazz.id).height;
+      let clazzData = this.map.get(clazz.get('id'));
+      layoutPos = new THREE.Vector3(clazzData.positionX, clazzData.positionY, clazzData.positionZ)
+
       if (clazz.highlighted) {
-        const mesh = this.createBox(clazz, highlightedEntityColor, height);
-        clazz.set('threeJSModel', mesh);
-        if (!clazz.getParent().opened)
-          mesh.visible = false;
+        // TODO
       } else {
-        const mesh = this.createBox(clazz, clazzColor, height);
-        clazz.set('threeJSModel', mesh);
-        if (!clazz.getParent().opened)
-          mesh.visible = false;
+        mesh = new ClazzMesh(layoutPos, clazzData.height, clazzData.width, clazzData.depth, clazz, new THREE.Color(clazzColor), false);
+        let centerPoint = new THREE.Vector3(
+          clazzData.positionX + clazzData.width / 2.0,
+          clazzData.positionY + clazzData.height / 2.0,
+          clazzData.positionZ + clazzData.depth / 2.0);
+
+        let applicationCenter = CalcCenterAndZoom(this.foundationData);
+        centerPoint.sub(applicationCenter);
+        centerPoint.x *= 0.5;
+        centerPoint.z *= 0.5;
+
+        mesh.position.copy(centerPoint);
+
+        this.applicationObject3D.add(mesh);
+
+        let parent = mesh.dataModel.get('parent');
+        let parentMesh = this.modelIdToMesh.get(parent.get('id'));
+        if (parentMesh instanceof ComponentMesh) {
+          mesh.visible = parentMesh.opened;
+        }
+
+        this.meshIdToModel.set(mesh.id, clazz);
+        this.modelIdToMesh.set(clazz.id, mesh);
       }
     });
 

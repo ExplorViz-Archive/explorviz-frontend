@@ -16,12 +16,5 @@ export default class FoundationMesh extends EntityMesh {
     this.geometry = geometry;
     this.material = material;
     this.dataModel = foundation;
-
-    // Set default dimensions to layout data
-    this.height = layoutHeight;
-    this.width = layoutWidth / 2;
-    this.depth = layoutDepth / 2;
-
-    return this;
   }
 }
