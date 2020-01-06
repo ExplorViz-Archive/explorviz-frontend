@@ -1,52 +1,27 @@
 import THREE from 'three';
 import Component from 'explorviz-frontend/models/component';
+import EntityMesh from '../entity-mesh';
 
-export default class FoundationMesh extends THREE.Mesh {
+export default class FoundationMesh extends EntityMesh {
 
-  height:number;
-  width:number;
-  depth:number;
+  dataModel: Component;
 
-  positionX:number;
-  positionY:number;
-  positionZ:number;
+  constructor(layoutPos: THREE.Vector3, layoutHeight: number, layoutWidth: number, layoutDepth: number,
+    foundation: Component, color: THREE.Color) {
 
-  hightlighted:boolean;
-  opened:boolean;
-  visible:boolean;
+    super(layoutPos, layoutHeight, layoutWidth, layoutDepth);
 
-  constructor(foundation: Component, color: string, height: number = 0, width: number = 0, depth: number = 0, opened: boolean = false) {
-    const material = FoundationMesh.createMaterial(color);
+    const material = new THREE.MeshLambertMaterial({color});
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    super(geometry, material);
-    this.height = 1;
-    this.width = 1;
-    this.depth = 1;
+    this.geometry = geometry;
+    this.material = material;
+    this.dataModel = foundation;
 
-    this.scale.x = width / 2;
-    this.scale.y = height;
-    this.scale.z = depth / 2;
-  
-    this.positionX = 0;
-    this.positionY = 0;
-    this.positionZ = 0;
-  
-    this.hightlighted = false;
-    this.opened = opened;
-    this.visible = true;
+    // Set default dimensions to layout data
+    this.height = layoutHeight;
+    this.width = layoutWidth / 2;
+    this.depth = layoutDepth / 2;
 
-    this.userData.dataModel = foundation;
-  }
-
-  static createMaterial(color: string) {
-    let transparent = false;
-    let opacityValue = 1.0;
-    const material = new THREE.MeshLambertMaterial({
-      opacity: opacityValue,
-      transparent: transparent
-    });
-
-    material.color = new THREE.Color(color);
-    return material;
+    return this;
   }
 }
