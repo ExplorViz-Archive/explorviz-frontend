@@ -71,10 +71,10 @@
         }}
       {{/bs-button}}
       <div id="timeline" class="timeline {{unless renderingService.showTimeline "timelinehide"}}">
-          {{replay/page-setup/timeline/plotly-timeline
-            timestamps=timestampRepo.replayTimelineTimestamps
-            clicked=(action 'timelineClicked')
-          }}
+        <Replay::PageSetup::Timeline::PlotlyTimeline
+          @timestamps={{this.timestampRepo.replayTimelineTimestamps}}
+          @clicked={{action this.timelineClicked}}
+        />
       </div>
     </div>
   </div>
