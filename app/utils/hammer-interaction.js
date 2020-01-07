@@ -2,9 +2,9 @@ import Object from '@ember/object';
 import Evented from '@ember/object/evented';
 import Hammer from "hammerjs";
 
-export default Object.extend(Evented, {
+export default class HammerInteraction extends Object.extend(Evented) {
 
-  hammerManager: null,
+  hammerManager = null;
 
   setupHammer(canvas) {
 
@@ -45,10 +45,9 @@ export default Object.extend(Evented, {
 
       const event = evt.srcEvent;
 
-      mouseDeltaX = event.clientX;
-      mouseDeltaY = event.clientY;
+      mouseDeltaX = event.offsetX;
+      mouseDeltaY = event.offsetY;
     });
-
 
     hammer.on('panmove', (evt) => {
       if(evt.button !== 1 && evt.button !== 3) {
@@ -57,11 +56,11 @@ export default Object.extend(Evented, {
 
       const delta = {};
 
-      delta.x = evt.srcEvent.clientX - mouseDeltaX;
-      delta.y = evt.srcEvent.clientY - mouseDeltaY;
+      delta.x = evt.srcEvent.offsetX - mouseDeltaX;
+      delta.y = evt.srcEvent.offsetY - mouseDeltaY;
 
-      mouseDeltaX = evt.srcEvent.clientX;
-      mouseDeltaY = evt.srcEvent.clientY;
+      mouseDeltaX = evt.srcEvent.offsetX;
+      mouseDeltaY = evt.srcEvent.offsetY;
 
       self.trigger('panning', delta, evt);
     });
@@ -74,8 +73,8 @@ export default Object.extend(Evented, {
 
       var mouse = {};
 
-      mouse.x = evt.srcEvent.clientX;
-      mouse.y = evt.srcEvent.clientY;
+      mouse.x = evt.srcEvent.offsetX;
+      mouse.y = evt.srcEvent.offsetY;
 
       self.trigger('panningEnd', mouse);
     });
@@ -87,12 +86,11 @@ export default Object.extend(Evented, {
 
       var mouse = {};
 
-      mouse.x = evt.srcEvent.clientX;
-      mouse.y = evt.srcEvent.clientY;
+      mouse.x = evt.srcEvent.offsetX;
+      mouse.y = evt.srcEvent.offsetY;
 
       self.trigger('doubletap', mouse);
     });
-
 
     hammer.on('singletap', function(evt){
       if(evt.button !== 1) {
@@ -101,8 +99,8 @@ export default Object.extend(Evented, {
 
       var mouse = {};
 
-      mouse.x = evt.srcEvent.clientX;
-      mouse.y = evt.srcEvent.clientY;
+      mouse.x = evt.srcEvent.offsetX;
+      mouse.y = evt.srcEvent.offsetY;
 
       self.trigger('singletap', mouse);      
     });
@@ -182,4 +180,4 @@ export default Object.extend(Evented, {
     }
   }
 
-});
+}
