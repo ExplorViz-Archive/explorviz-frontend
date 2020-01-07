@@ -1,5 +1,6 @@
 import THREE from 'three';
 
+
 export default abstract class EntityMesh extends THREE.Mesh {
 
   layoutPos: THREE.Vector3;
@@ -8,31 +9,13 @@ export default abstract class EntityMesh extends THREE.Mesh {
   layoutWidth: number;
   layoutdDepth: number;
 
-  get width(){
-    return this.scale.x;
-  }
+  highlighted: boolean = false;
+  defaultColor: THREE.Color;
+  highlightingColor: THREE.Color;
 
-  set width(width: number) {
-    this.scale.x = width;
-  }
 
-  get height() {
-    return this.scale.y;
-  }
-
-  set height(height: number) {
-    this.scale.y = height;
-  }
-
-  get depth(){
-    return this.scale.z;
-  }
-  
-  set depth(depth: number) {
-    this.scale.z = depth;
-  }
-
-  constructor(layoutPos: THREE.Vector3, layoutHeight: number, layoutWidth: number, layoutDepth: number) {
+  constructor(layoutPos: THREE.Vector3, layoutHeight: number, layoutWidth: number, layoutDepth: number,
+    defaultColor: THREE.Color, highlightingColor: THREE.Color) {
     super();
 
     this.layoutPos = layoutPos;
@@ -48,6 +31,50 @@ export default abstract class EntityMesh extends THREE.Mesh {
     this.height = layoutHeight;
     this.width = layoutWidth / 2;
     this.depth = layoutDepth / 2;
+
+    this.defaultColor = defaultColor;
+    this.highlightingColor = highlightingColor;
+  }
+
+  get width() {
+    return this.scale.x;
+  }
+
+  set width(width: number) {
+    this.scale.x = width;
+  }
+
+  get height() {
+    return this.scale.y;
+  }
+
+  set height(height: number) {
+    this.scale.y = height;
+  }
+
+  get depth() {
+    return this.scale.z;
+  }
+
+  set depth(depth: number) {
+    this.scale.z = depth;
+  }
+
+
+  highlight() {
+    this.highlighted = true;
+    if (this.material instanceof THREE.MeshLambertMaterial) {
+      this.material.color = this.highlightingColor;
+    }
+  }
+
+  unhighlight() {
+    this.highlighted = false;
+    if (this.material instanceof THREE.MeshLambertMaterial) {
+      this.material.color = this.defaultColor;
+      this.material.transparent = false;
+      this.material.opacity = 1.0;
+    }
   }
 
 }

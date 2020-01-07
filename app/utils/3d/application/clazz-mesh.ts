@@ -4,20 +4,20 @@ import Clazz from 'explorviz-frontend/models/clazz';
 
 export default class ClazzMesh extends EntityMesh {
 
+  geometry: THREE.BoxGeometry;
+  material: THREE.MeshLambertMaterial;
   dataModel: Clazz;
-  highlighted: boolean;
 
 
   constructor(layoutPos: THREE.Vector3, layoutHeight: number, layoutWidth: number, layoutDepth: number,
-    clazz: Clazz, color: THREE.Color, highlighted: boolean = false) {
+    clazz: Clazz, defaultColor: THREE.Color, highlightingColor: THREE.Color) {
 
-    super(layoutPos, layoutHeight, layoutWidth, layoutDepth);
+    super(layoutPos, layoutHeight, layoutWidth, layoutDepth, defaultColor, highlightingColor);
 
-    let material = new THREE.MeshLambertMaterial({ color });
+    let material = new THREE.MeshLambertMaterial({ color: defaultColor });
     let geometry = new THREE.BoxGeometry(1, 1, 1);
     this.geometry = geometry;
     this.material = material;
-    this.highlighted = highlighted;
     this.dataModel = clazz;
   }
 }

@@ -4,22 +4,21 @@ import EntityMesh from '../entity-mesh';
 
 export default class ComponentMesh extends EntityMesh {
 
+  geometry: THREE.BoxGeometry;
+  material: THREE.MeshLambertMaterial;
   dataModel: Component;
-  opened: boolean;
-  highlighted: boolean;
+  opened: boolean = false;
 
 
   constructor(layoutPos: THREE.Vector3, layoutHeight: number, layoutWidth: number, layoutDepth: number,
-    component: Component, color: THREE.Color, opened: boolean = false, highlighted: boolean = false) {
+    component: Component, defaultColor: THREE.Color, highlightingColor: THREE.Color) {
 
-    super(layoutPos, layoutHeight, layoutWidth, layoutDepth);
+    super(layoutPos, layoutHeight, layoutWidth, layoutDepth, defaultColor, highlightingColor);
 
-    let material = new THREE.MeshLambertMaterial({ color });
+    let material = new THREE.MeshLambertMaterial({ color: defaultColor });
     let geometry = new THREE.BoxGeometry(1, 1, 1);
     this.geometry = geometry;
     this.material = material;
-    this.opened = opened;
-    this.highlighted = highlighted;
     this.dataModel = component;
   }
 }
