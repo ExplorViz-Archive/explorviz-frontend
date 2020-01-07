@@ -2,7 +2,7 @@ import Component from '@glimmer/component';
 import Plotly from 'plotly.js-dist';
 import debugLogger from 'ember-debug-logger';
 import Timestamp from 'explorviz-frontend/models/timestamp';
-import { get, set, action } from '@ember/object';
+import { get, action } from '@ember/object';
 
 interface Args {
   timestamps?: Timestamp[],
