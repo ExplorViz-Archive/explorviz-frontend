@@ -15,7 +15,7 @@ module('Integration | Component | replay/page-setup/timeline/plotly-timeline', f
     const el:any = this.element;
 
     if(el) {
-      assert.equal(el.textContent.trim(), 'No replay timestamps available.');
+      assert.equal(el.textContent.trim(), 'No replay timestamps available!');
     } else {
       assert.notOk( "empty element", "There was no element to test." );
     }

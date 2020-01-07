@@ -15,7 +15,7 @@ module('Integration | Component | visualization/page-setup/timeline/plotly-timel
       const el:any = this.element;
 
       if(el) {
-        assert.equal(el.textContent.trim(), 'No timestamps available.');
+        assert.equal(el.textContent.trim(), 'No timestamps available!');
       } else {
         assert.notOk( "empty element", "There was no element to test." );
       }
