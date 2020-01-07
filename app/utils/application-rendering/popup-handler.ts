@@ -1,20 +1,18 @@
-import Object from '@ember/object';
-import { inject as service } from '@ember/service';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
 import Component from 'explorviz-frontend/models/component';
 import Clazz from 'explorviz-frontend/models/clazz';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
+import { tracked } from '@glimmer/tracking';
 
-export default class PopupHandler extends Object {
-
-  @service("additional-data")
-  additionalData!: AdditionalData;
+export default class PopupHandler {
 
   enableTooltips:boolean = true;
 
+  @tracked
+  popupContent: any = null;
+
   showTooltip(mouse:{x:number, y:number}, emberModel:any) : void {
 
-    if (!this.get('enableTooltips')){
+    if (!this.enableTooltips){
       return;
     }
 
@@ -36,11 +34,11 @@ export default class PopupHandler extends Object {
       popupData.mouseY = mouse.y;
     }
 
-    this.get("additionalData").setPopupContent(popupData);
+    this.popupContent = popupData;
   }
 
   hideTooltip() : void {
-    this.get("additionalData").removePopup();
+    this.popupContent = null;
   }
 
 
