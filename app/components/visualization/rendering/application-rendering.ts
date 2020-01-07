@@ -9,7 +9,7 @@ import LandscapeRepository from "explorviz-frontend/services/repos/landscape-rep
 import FoundationBuilder from 'explorviz-frontend/utils/application-rendering/foundation-builder';
 import applyCityLayout from 'explorviz-frontend/utils/application-rendering/city-layouter';
 import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
-import Interaction from 'explorviz-frontend/utils/application-rendering/interaction';
+import Interaction, { Position2D } from 'explorviz-frontend/utils/application-rendering/interaction';
 import DS from "ember-data";
 import Configuration from "explorviz-frontend/services/configuration";
 import Clazz from "explorviz-frontend/models/clazz";
@@ -18,6 +18,8 @@ import Component from "explorviz-frontend/models/component";
 import { getOwner } from "@ember/application";
 import Highlighter from "explorviz-frontend/services/visualization/application/highlighter";
 import FoundationMesh from "explorviz-frontend/utils/3d/application/foundation-mesh";
+import PopupHandler from "explorviz-frontend/utils/application-rendering/popup-handler";
+import HoverEffectHandler from "explorviz-frontend/utils/hover-effect-handler";
 
 interface Args {
   id: string,
@@ -69,6 +71,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   foundationData: any;
 
+  hoverHandler: HoverEffectHandler = new HoverEffectHandler();
+  popUpHandler: PopupHandler = new PopupHandler();
+
   constructor(owner: any, args: Args) {
     super(owner, args);
     this.debug("Constructor called");
@@ -95,12 +100,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.initThreeJs();
     this.initInteraction();
-    this.render();
-
-    this.interaction = Interaction.create(getOwner(this).ownerInjection());
-    this.interaction.setupInteraction(this.canvas, this.camera, this.renderer, this.applicationObject3D);
-    this.interaction.on('singleClick', this.handleSingleClick);
-    this.interaction.on('doubleClick', this.handleDoubleClick);
+    this.render();    
 
     const renderingContext: RenderingContext = {
       scene: this.scene,
@@ -117,7 +117,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  handleSingleClick(mesh: THREE.Mesh | undefined) {
+  handleSingleClick(mesh: THREE.Mesh|undefined) {
     if (mesh === undefined) {
       // unhighlight all
     } else {
@@ -135,7 +135,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  handleDoubleClick(mesh: THREE.Mesh | undefined) {
+  handleDoubleClick(mesh: THREE.Mesh|undefined) {
     if (mesh !== undefined) {
       const { id } = mesh;
       console.log("Clicked mesh ${id}")
@@ -167,6 +167,66 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
           })
         }
       }
+    }
+  }
+
+  @action
+  handleMouseMove(mesh: THREE.Mesh|undefined) {
+    let enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
+    if(enableHoverEffects)
+      this.hoverHandler.handleHoverEffect(mesh);
+
+    this.popUpHandler.hideTooltip();
+  }
+
+  @action
+  handleMouseWheel(delta: number) {
+    this.popUpHandler.hideTooltip()
+    this.camera.position.z += delta * 3.5;
+  }
+
+  @action
+  handleMouseOut() {
+    this.popUpHandler.enableTooltips = false;
+    this.popUpHandler.hideTooltip();
+  }
+
+  @action
+  handleMouseEnter() {
+    this.popUpHandler.enableTooltips = true;
+  }
+
+  @action
+  handleMouseStop(mesh: THREE.Mesh|undefined, mouseOnCanvas: Position2D) {
+    if(mesh === undefined)
+      return;
+
+    this.popUpHandler.showTooltip(
+      mouseOnCanvas,
+      this.meshIdToModel.get(mesh.id)
+    );
+  }
+
+  @action
+  handlePanning(delta: {x:number,y:number}, button: 1|2|3) {
+    if(button === 3) {
+      // rotate object
+      this.applicationObject3D.rotation.x += delta.y / 100;
+      this.applicationObject3D.rotation.y += delta.x / 100;
+    }
+
+    else if(button === 1){
+      // translate camera
+      const distanceXInPercent = (delta.x / this.canvas.clientWidth) * 100.0;
+
+      const distanceYInPercent = (delta.y / this.canvas.clientHeight) * 100.0;
+
+      const xVal = this.camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(this.camera.position.z) / 4.0);
+
+      const yVal = this.camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(this.camera.position.z) / 4.0);
+
+      this.camera.position.x = xVal;
+      this.camera.position.y = yVal;
     }
   }
 
@@ -472,7 +532,16 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   initInteraction() {
-
+    this.interaction = new Interaction(this.canvas, this.camera, this.renderer, this.applicationObject3D, {
+      singleClick: this.handleSingleClick,
+      doubleClick: this.handleDoubleClick,
+      mouseMove: this.handleMouseMove,
+      mouseWheel: this.handleMouseWheel,
+      mouseOut: this.handleMouseOut,
+      mouseEnter: this.handleMouseEnter,
+      mouseStop: this.handleMouseStop,
+      panning: this.handlePanning
+    });
   }
 
   // Rendering loop //
