@@ -133,8 +133,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   handleMouseMove(mesh: THREE.Mesh|undefined) {
     let enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
-    if(enableHoverEffects)
-      this.hoverHandler.handleHoverEffect(mesh);
+
+    if(mesh instanceof EntityMesh) {
+      if(enableHoverEffects)
+        this.hoverHandler.handleHoverEffect(mesh);
+    }
 
     this.popUpHandler.hideTooltip();
   }

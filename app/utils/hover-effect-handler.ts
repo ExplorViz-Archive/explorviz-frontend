@@ -1,28 +1,25 @@
 import { calculateColorBrightness } from
   'explorviz-frontend/utils/helpers/threejs-helpers';
 import THREE from "three";
-
-type EntityColorObject = {
-  entity: THREE.Mesh,
-  color: THREE.Color
-}
+import EntityMesh from './3d/entity-mesh';
 
 export default class HoverEffectHandler {
 
-  hoveredEntityColorObj:null|EntityColorObject = null;
+  hoveredEntityObj:null|EntityMesh = null;
 
   resetHoverEffect() : void {
-    let hoveredEntityColorObj = this.hoveredEntityColorObj;
-    if (hoveredEntityColorObj) {
+    let hoveredEntityObj = this.hoveredEntityObj;
+    if (hoveredEntityObj) {
       // Restore old color and reset cached object
-      const material = hoveredEntityColorObj.entity.material as THREE.MeshBasicMaterial|THREE.MeshLambertMaterial;
-      material.color = hoveredEntityColorObj.color;
-      this.hoveredEntityColorObj = null;
+      const material = hoveredEntityObj.material as THREE.MeshBasicMaterial|THREE.MeshLambertMaterial;
+      const { highlighted, defaultColor, highlightingColor } = hoveredEntityObj;
+
+      material.color = highlighted ? highlightingColor : defaultColor;
+      this.hoveredEntityObj = null;
     }
   }
 
-
-  handleHoverEffect(mesh: THREE.Mesh|undefined): void {
+  handleHoverEffect(mesh: EntityMesh|undefined): void {
     // No raycastTarget, do nothing and return
     if (mesh === undefined) {
       this.resetHoverEffect();
@@ -30,8 +27,8 @@ export default class HoverEffectHandler {
     }
 
     // Same object, do nothing and return
-    let hoveredEntityColorObj = this.hoveredEntityColorObj;
-    if (hoveredEntityColorObj && hoveredEntityColorObj.entity === mesh) {
+    let hoveredEntityColorObj = this.hoveredEntityObj;
+    if (hoveredEntityColorObj && hoveredEntityColorObj === mesh) {
       return;
     }
 
@@ -40,10 +37,7 @@ export default class HoverEffectHandler {
     const material = mesh.material as THREE.MeshBasicMaterial|THREE.MeshLambertMaterial;
     const oldColor = material.color;
 
-    this.hoveredEntityColorObj = {
-      entity: mesh,
-      color: new THREE.Color().copy(oldColor)
-    };
+    this.hoveredEntityObj = mesh;
 
     material.color = calculateColorBrightness(oldColor, 1.1);
   }
