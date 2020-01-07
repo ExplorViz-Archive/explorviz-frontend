@@ -51,17 +51,20 @@
           <BsForm @model={{this}} @onSubmit={{perform this.saveUser}} as |form|>
             <form.element @controlType="text" @label="Username" @placeholder="Username" @property="username" />
             <form.element @controlType="password" @label="Password" @placeholder="Password" @property="password" />
-            <form.element @controlType="power-select-multiple" @property="roles_selected_single" @label="Choose Roles" @options={{this.roles}}
-            as |el|>
-              <el.control 
+            <form.element @property="roles_selected_single" @label="Roles" as |el|>
+              <PowerSelectMultiple
+                @options={{this.roles}}
                 @placeholder="Choose roles"
                 @loadingMessage="loading..."
                 @onopen={{perform this.getRoles}}
+                @onchange={{action (mut this.roles_selected_single)}}
                 @searchEnabled={{false}}
                 @searchField="default"
-                as |item|>
-                  {{item.id}}
-              </el.control>
+                @selected={{this.roles_selected_single}}
+                as |item|
+              >
+                {{item.id}}
+              </PowerSelectMultiple>
             </form.element>
             <form.element @label="Settings">
               <div class="card mb-3">
@@ -86,17 +89,20 @@
           <BsForm @model={{this}} @onSubmit={{perform this.saveMultipleUsers}} as |form|>
             <form.element @controlType="text" @label="Username Prefix" @placeholder="Username Prefix" @property="usernameprefix" />
             <form.element @controlType="number" @label="Number of Users" @placeholder="# of users" @property="numberofusers" />
-            <form.element @controlType="power-select-multiple" @property="roles_selected_multiple" @label="Choose Roles" @options={{this.roles}}
-            as |el|>
-              <el.control 
+            <form.element @property="roles_selected_multiple" @label="Roles" as |el|>
+              <PowerSelectMultiple
+                @options={{this.roles}}
                 @placeholder="Choose roles"
                 @loadingMessage="loading..."
                 @onopen={{perform this.getRoles}}
+                @onchange={{action (mut this.roles_selected_multiple)}}
                 @searchEnabled={{false}}
-                @searchField="default" 
-                as |item|>
-                  {{item.id}}
-              </el.control>
+                @searchField="default"
+                @selected={{this.roles_selected_multiple}}
+                as |item|
+              >
+                {{item.id}}
+              </PowerSelectMultiple>
             </form.element>
             <form.element label="Settings">
               <div class="card mb-3">

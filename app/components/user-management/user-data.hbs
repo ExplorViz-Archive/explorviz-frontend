@@ -4,19 +4,20 @@
   <form.element @controlType="text" @label="ID" @property="id_change" @disabled={{true}} />
   <form.element @controlType="text" @label="Username" @placeholder="Enter New Username" @property="username_change" />
   <form.element @controlType="password" @label="Password" @placeholder="Enter New Password" @property="password_change" />
-  <form.element
-    @controlType="power-select-multiple"
-    @property="roles_change"
-    @label="Change Roles"
-    @searchEnabled={{false}}
-    @loadingMessage="Loading..."
-    @options={{this.roles}}
-  as |el|>
-    <el.control
+  <form.element @property="roles_change" @label="Roles" as |el|>
+    <PowerSelectMultiple
+      @options={{this.roles}}
+      @placeholder="Choose roles"
+      @loadingMessage="loading..."
       @onopen={{perform this.getRoles}}
-    as |item|>
+      @onchange={{action (mut this.roles_change)}}
+      @searchEnabled={{false}}
+      @searchField="default"
+      @selected={{this.roles_change}}
+      as |item|
+    >
       {{item}}
-    </el.control>
+    </PowerSelectMultiple>
   </form.element>
   {{#if this.saveUserChanges.isRunning}}
     <BsButton @type="primary" @buttonType="submit" @disabled={{true}}>
