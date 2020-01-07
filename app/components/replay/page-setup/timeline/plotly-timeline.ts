@@ -1,78 +1,103 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
 import Plotly from 'plotly.js-dist';
 import debugLogger from 'ember-debug-logger';
 import Timestamp from 'explorviz-frontend/models/timestamp';
 import { get, set, action } from '@ember/object';
 
-export default class PlotlyTimeline extends Component.extend({
-}) {
+interface Args {
+  timestamps?: Timestamp[],
+  clicked?(selectedTimestamps: number[]): void,
+  defaultMarkerColor?: string,
+  defaultMarkerSize?: number,
+  highlightedMarkerColor?: string,
+  highlightedMarkerSize?: number,
+  selectionCount?: number,
+  slidingWindowLowerBoundInMinutes?: number,
+  slidingWindowUpperBoundInMinutes?: number,
+}
 
-  // BEGIN user-set variables
-  timestamps: Timestamp[] = [];
+export default class PlotlyTimeline extends Component<Args> {
 
-  defaultMarkerColor = "#1f77b4";
-  defaultMarkerSize = 8;
+  // BEGIN template-argument getters for default values
+  get defaultMarkerColor() {
+    return this.args.defaultMarkerColor || "#1f77b4";
+  }
 
-  highlightedMarkerColor = "red";
-  highlightedMarkerSize = 12;
+  get defaultMarkerSize() {
+    return this.args.defaultMarkerSize || 8;
+  }
 
-  selectionCount = 1;
+  get highlightedMarkerColor() {
+    return this.args.highlightedMarkerColor || "red";
+  }
 
-  slidingWindowLowerBoundInMinutes = 4;
-  slidingWindowUpperBoundInMinutes = 4;
-  // END user-set variables
+  get highlightedMarkerSize() {
+    return this.args.highlightedMarkerSize || 12;
+  }
+
+  get selectionCount() {
+    return this.args.selectionCount || 1;
+  }
+
+  get slidingWindowLowerBoundInMinutes() {
+    return this.args.slidingWindowLowerBoundInMinutes || 4;
+  }
+
+  get slidingWindowUpperBoundInMinutes() {
+    return this.args.slidingWindowUpperBoundInMinutes || 4;
+  }
+
+  get timestamps() {
+    return this.args.timestamps || [];
+  }
+  // END template-argument getters for default values
 
   _debug = debugLogger();
 
   _initDone = false;
 
-  _oldPlotlySlidingWindow = {};
+  _oldPlotlySlidingWindow = {min: 0, max: 0};
   _userSlidingWindow = null;
 
   // variable used for output when clicked
-  _selectedTimestamps = [];
+  _selectedTimestamps : number[] = [];
 
   // BEGIN Ember Div Events
   @action
-  handleMouseEnter() {
-    const plotlyDiv: any = document.getElementById("plotlyDiv");
-
+  handleMouseEnter(plotlyDiv: any) {
     // if user hovers over plotly, save his 
     // sliding window, so that updating the 
     // plot won't modify his current viewport
     if (plotlyDiv && plotlyDiv.layout) {
-      set(this, "_userSlidingWindow", plotlyDiv.layout);
+      this._userSlidingWindow = plotlyDiv.layout;
     }
   }
 
   @action
   handleMouseLeave() {
-    set(this, "_userSlidingWindow", null);
+    this._userSlidingWindow = null;
   }
   // END Ember Div Events
 
 
-  // @Override
-  didRender() {
-    this._super(...arguments);
-
-    if (this._initDone) {
-      this.extendPlotlyTimelineChart(get(this, "timestamps"));
+  @action
+  didRender(plotlyDiv: any) {
+    if(this._initDone) {
+      this.extendPlotlyTimelineChart(this.timestamps);
     } else {
-      this.setupPlotlyTimelineChart(get(this, "timestamps"));
-      if (get(this, "_initDone")) {
-        this.setupPlotlyListener();
-      }
+      this.setupPlotlyTimelineChart(this.timestamps);
+      if(this._initDone) {
+        this.setupPlotlyListener(plotlyDiv);
+      }      
     }
   };
 
-  setupPlotlyListener() {
-    const plotlyDiv: any = document.getElementById("plotlyDiv");
+  setupPlotlyListener(plotlyDiv: any) {
     const dragLayer: any = document.getElementsByClassName('nsewdrag')[0];
 
     if (plotlyDiv && plotlyDiv.layout) {
 
-      const self: any = this;
+      const self: PlotlyTimeline = this;
 
       // singe click
       plotlyDiv.on('plotly_click', function (data: any) {
@@ -87,14 +112,14 @@ export default class PlotlyTimeline extends Component.extend({
         let sizes = data.points[0].fullData.marker.size;
 
         // reset selection       
-        if (get(self, "_selectedTimestamps").length == get(self, "selectionCount")) {
-          set(self, "_selectedTimestamps", []);
-          colors = Array(numberOfPoints).fill(get(self, "defaultMarkerColor"));
-          sizes = Array(numberOfPoints).fill(get(self, "defaultMarkerSize"));
+        if(self._selectedTimestamps.length == self.selectionCount) {
+          self._selectedTimestamps = [];
+          colors = Array(numberOfPoints).fill(self.defaultMarkerColor);
+          sizes = Array(numberOfPoints).fill(self.defaultMarkerSize);
         }
 
-        colors[pn] = get(self, "highlightedMarkerColor");
-        sizes[pn] = get(self, "highlightedMarkerSize");
+        colors[pn] = self.highlightedMarkerColor;
+        sizes[pn] = self.highlightedMarkerSize;
 
         // trace number, necessary for the restyle function
         const tn = data.points[0].curveNumber;
@@ -103,17 +128,17 @@ export default class PlotlyTimeline extends Component.extend({
         Plotly.restyle('plotlyDiv', update, [tn]);
 
         const clickedTimestamp = new Date(data.points[0].x);
-        get(self, "_selectedTimestamps").push(clickedTimestamp.getTime());
+        self._selectedTimestamps.push(clickedTimestamp.getTime());
 
         if (get(self, "selectionCount") > 1) {
 
-          if (get(self, "_selectedTimestamps").length == get(self, "selectionCount")) {
-            self.clicked(get(self, "_selectedTimestamps"));
+          if (self._selectedTimestamps.length == self.selectionCount) {
+            if(self.args.clicked) self.args.clicked(self._selectedTimestamps);
           }
 
         } else {
           // closure action
-          self.clicked(get(self, "_selectedTimestamps"));
+          if(self.args.clicked) self.args.clicked(self._selectedTimestamps);
         }
 
 
@@ -121,8 +146,8 @@ export default class PlotlyTimeline extends Component.extend({
 
       // double click
       plotlyDiv.on('plotly_doubleclick', function () {
-        const min = get(self, "_oldPlotlySlidingWindow.min");
-        const max = get(self, "_oldPlotlySlidingWindow.max");
+        const min = self._oldPlotlySlidingWindow.min;
+        const max = self._oldPlotlySlidingWindow.max;
         const update = self.getPlotlySlidingWindowUpdateObject(min, max);
         Plotly.relayout('plotlyDiv', update);
       });
@@ -144,7 +169,7 @@ export default class PlotlyTimeline extends Component.extend({
 
   setupPlotlyTimelineChart(timestamps: Timestamp[]) {
 
-    if (!timestamps || timestamps.length == 0) {
+    if (timestamps.length == 0) {
       return;
     }
 
@@ -159,11 +184,12 @@ export default class PlotlyTimeline extends Component.extend({
     const latestTimestamp: any = timestamps.lastObject;
     const latestTimestampValue = new Date(get(latestTimestamp, 'timestamp'));
 
-    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, get(this, "slidingWindowLowerBoundInMinutes"), get(this, "slidingWindowUpperBoundInMinutes"));
+    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue,
+      this.slidingWindowLowerBoundInMinutes, this.slidingWindowUpperBoundInMinutes);
 
     const layout = this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
 
-    set(this, "_oldPlotlySlidingWindow", windowInterval)
+    this._oldPlotlySlidingWindow = windowInterval;
 
     Plotly.newPlot(
       'plotlyDiv',
@@ -179,7 +205,7 @@ export default class PlotlyTimeline extends Component.extend({
 
   extendPlotlyTimelineChart(timestamps: Timestamp[]) {
 
-    if (!timestamps || timestamps.length == 0) {
+    if (timestamps.length == 0) {
       return;
     }
 
@@ -194,11 +220,13 @@ export default class PlotlyTimeline extends Component.extend({
     const latestTimestamp: any = timestamps.lastObject;
     const latestTimestampValue = new Date(get(latestTimestamp, 'timestamp'));
 
-    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue, get(this, "slidingWindowLowerBoundInMinutes"), get(this, "slidingWindowUpperBoundInMinutes"));
+    const windowInterval = this.getSlidingWindowInterval(latestTimestampValue,
+      this.slidingWindowLowerBoundInMinutes, this.slidingWindowUpperBoundInMinutes);
 
-    const layout = get(this, "_userSlidingWindow") ? get(this, "_userSlidingWindow") : this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
+    const layout = this._userSlidingWindow ? this._userSlidingWindow :
+      this.getPlotlyLayoutObject(windowInterval.min, windowInterval.max);
 
-    set(this, "_oldPlotlySlidingWindow", windowInterval);
+    this._oldPlotlySlidingWindow = windowInterval;
 
     Plotly.react(
       'plotlyDiv',
@@ -276,8 +304,8 @@ export default class PlotlyTimeline extends Component.extend({
 
   getPlotlyDataObject(dates: Date[], requests: number[]): [{}] {
 
-    const colors = Array(dates.length).fill(get(this, "defaultMarkerColor"));
-    const sizes = Array(dates.length).fill(get(this, "defaultMarkerSize"));
+    const colors = Array(dates.length).fill(this.defaultMarkerColor);
+    const sizes = Array(dates.length).fill(this.defaultMarkerSize);
 
     return [
       {
