@@ -15,11 +15,12 @@ import Configuration from "explorviz-frontend/services/configuration";
 import Clazz from "explorviz-frontend/models/clazz";
 import CurrentUser from "explorviz-frontend/services/current-user";
 import Component from "explorviz-frontend/models/component";
-import { getOwner } from "@ember/application";
-import Highlighter from "explorviz-frontend/services/visualization/application/highlighter";
 import FoundationMesh from "explorviz-frontend/utils/3d/application/foundation-mesh";
 import PopupHandler from "explorviz-frontend/utils/application-rendering/popup-handler";
 import HoverEffectHandler from "explorviz-frontend/utils/hover-effect-handler";
+import ClazzMesh from "explorviz-frontend/utils/3d/application/clazz-mesh";
+import ComponentMesh from "explorviz-frontend/utils/3d/application/component-mesh";
+import EntityMesh from "explorviz-frontend/utils/3d/entity-mesh";
 
 interface Args {
   id: string,
@@ -43,9 +44,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
 
-  @service('visualization/application/highlighter')
-  highlighter!: Highlighter;
-
   debug = debugLogger('ApplicationRendering');
 
   canvas!: HTMLCanvasElement;
@@ -63,11 +61,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   interaction !: any;
 
-  meshIdToModel: Map<number, Clazz | Component> = new Map();
+  modelIdToMesh: Map<string, THREE.Mesh> = new Map();
 
-  modelToMesh: Map<Clazz | Component, THREE.Mesh> = new Map();
-
-  map: any;
+  layoutMap: any;
 
   foundationData: any;
 
@@ -117,55 +113,19 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  handleSingleClick(mesh: THREE.Mesh|undefined) {
-    if (mesh === undefined) {
-      // unhighlight all
-    } else {
-      const { id } = mesh;
-      const model = this.meshIdToModel.get(id)
-      console.log("Mesh height: " + mesh.scale.y);
-
-      if (model instanceof Component && !model.get('foundation')) {
-        this.highlight(model, mesh);
-      }
-      if (model instanceof Clazz) {
-        this.highlight(model, mesh);
-      }
+  handleSingleClick(mesh: THREE.Mesh | undefined) {
+    if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
+      this.highlight(mesh);
     }
   }
 
   @action
-  handleDoubleClick(mesh: THREE.Mesh|undefined) {
-    if (mesh !== undefined) {
-      const { id } = mesh;
-      console.log("Clicked mesh ${id}")
-      const model = this.meshIdToModel.get(id);
-      if (model instanceof Component && !model.get('foundation')) {
-        model.toggleProperty('opened');
-        // Component shall be opened
-        if (model.get('opened')) {
-          this.openComponentMesh(mesh);
-          model.get('clazzes').forEach(clazz => {
-            clazz.threeJSModel.visible = true;
-          })
-          model.get('children').forEach(component => {
-            component.threeJSModel.visible = true;
-          })
-          // Component shall be closed
-        } else {
-          this.closeComponentMesh(mesh, model);
-          model.getAllClazzes().forEach(clazz => {
-            clazz.threeJSModel.visible = false;
-          })
-          model.getAllComponents().forEach(component => {
-            component.threeJSModel.visible = false;
-            console.log("Component invisible: ${component.id}")
-            if (!component.get('opened'))
-              return;
-            component.set('opened', false);
-            this.closeComponentMesh(component.threeJSModel, component);
-          })
-        }
+  handleDoubleClick(mesh: THREE.Mesh | undefined) {
+    if (mesh instanceof ComponentMesh) {
+      if (mesh.opened) {
+        this.closeComponentMesh(mesh);
+      } else {
+        this.openComponentMesh(mesh);
       }
     }
   }
@@ -201,10 +161,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if(mesh === undefined)
       return;
 
-    this.popUpHandler.showTooltip(
-      mouseOnCanvas,
-      this.meshIdToModel.get(mesh.id)
-    );
+    if(mesh instanceof ClazzMesh || mesh instanceof ComponentMesh || mesh instanceof FoundationMesh) {
+      this.popUpHandler.showTooltip(
+        mouseOnCanvas,
+        mesh
+      );
+    }
   }
 
   @action
@@ -230,35 +192,87 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
-  openComponentMesh(mesh: THREE.Mesh) {
+  openComponentMesh(mesh: ComponentMesh) {
     const HEIGHT_OPENED_COMPONENT = 1.5;
+    mesh.height = HEIGHT_OPENED_COMPONENT;
 
-    let model = this.meshIdToModel.get(mesh.id);
-    if (model === undefined)
-      return;
+    // Reset y coordinate
+    mesh.position.y -= mesh.layoutHeight / 2;
+    // Set y coordinate according to open component height
+    mesh.position.y += HEIGHT_OPENED_COMPONENT / 2;
 
-    let meshHeight = mesh.scale.y;
-    mesh.position.y = mesh.position.y + HEIGHT_OPENED_COMPONENT / 2 - meshHeight / 2;
-    mesh.scale.y = HEIGHT_OPENED_COMPONENT;
+    mesh.opened = true;
+    mesh.visible = true;
+
+    let childComponents = mesh.dataModel.get('children');
+    childComponents.forEach((childComponent) => {
+      let mesh = this.modelIdToMesh.get(childComponent.get('id'));
+      if (mesh) {
+        mesh.visible = true;
+      }
+    });
+
+    let clazzes = mesh.dataModel.get('clazzes');
+    clazzes.forEach((clazz) => {
+      let mesh = this.modelIdToMesh.get(clazz.get('id'));
+      if (mesh) {
+        mesh.visible = true;
+      }
+    });
   }
 
-  closeComponentMesh(mesh: THREE.Mesh, model: Component) {
+
+  closeComponentMesh(mesh: ComponentMesh) {
     const HEIGHT_OPENED_COMPONENT = 1.5;
-    mesh.scale.y = this.map.get(model.id).height;
-    mesh.position.y += this.map.get(model.id).height / 2 - HEIGHT_OPENED_COMPONENT / 2;
+    mesh.height = mesh.layoutHeight;
+
+    // Reset y coordinate
+    mesh.position.y -= HEIGHT_OPENED_COMPONENT / 2;
+    // Set y coordinate according to closed component height
+    mesh.position.y += mesh.layoutHeight / 2;
+
+    mesh.opened = false;
+
+    let childComponents = mesh.dataModel.get('children');
+    childComponents.forEach((childComponent) => {
+      let mesh = this.modelIdToMesh.get(childComponent.get('id'));
+      if (mesh instanceof ComponentMesh) {
+        mesh.visible = false;
+        if (mesh.opened) {
+          this.closeComponentMesh(mesh);
+        }
+        // Reset highlighting if highlighted entity is no longer visible
+        if (mesh.highlighted) {
+          this.unhighlightAll();
+        }
+      }
+    });
+
+    let clazzes = mesh.dataModel.get('clazzes');
+    clazzes.forEach((clazz) => {
+      let mesh = this.modelIdToMesh.get(clazz.get('id'));
+      if (mesh instanceof ClazzMesh) {
+        mesh.visible = false;
+        // Reset highlighting if highlighted entity is no longer visible
+        if (mesh.highlighted) {
+          this.unhighlightAll();
+        }
+      }
+    });
   }
 
-  highlight(clazz: Clazz, mesh: THREE.Mesh): void
-  highlight(component: Component, mesh: THREE.Mesh): void
-  highlight(entity: Component | Clazz, mesh: THREE.Mesh): void {
-    if (entity.highlighted) {
-      // Reset entire application highlighting
-      entity.unhighlight();
-      const material = mesh.material as THREE.MeshLambertMaterial;
-      material.color = new THREE.Color(this.configuration.applicationColors.clazz);
+  highlight(mesh: ComponentMesh | ClazzMesh): void {
+    // Reset highlighting if highlighted mesh is clicked
+    if (mesh.highlighted) {
+      this.unhighlightAll();
       return;
     }
-    // get all clazzes
+
+    // Reset highlighting
+    this.unhighlightAll();
+    let model = mesh.dataModel;
+
+    // Get all clazzes
     let foundation = this.foundationBuilder.foundationObj;
     if (foundation === null)
       return;
@@ -268,17 +282,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     foundation.getContainedClazzes(allClazzes);
 
     // Highlight the entity itself
-    entity.highlight();
-    const material = mesh.material as THREE.MeshLambertMaterial;
-    material.color = new THREE.Color(this.configuration.applicationColors.highlightedEntity);
+    mesh.highlight();
 
     // Get all clazzes in current component
     let containedClazzes = new Set<Clazz>();
 
-    if (entity instanceof Component)
-      entity.getContainedClazzes(containedClazzes);
+    if (model instanceof Component)
+      model.getContainedClazzes(containedClazzes);
     else
-      containedClazzes.add(entity)
+      containedClazzes.add(model);
 
     let allInvolvedClazzes = new Set<Clazz>(containedClazzes);
 
@@ -297,12 +309,23 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
 
     nonInvolvedClazzes.forEach(clazz => {
-      if (clazz.getParent().get('opened')) {
-        (clazz.get('threeJSModel').material as THREE.MeshLambertMaterial).opacity = 0.3;
-        (clazz.get('threeJSModel').material as THREE.MeshLambertMaterial).transparent = true;
+      let clazzMesh = this.modelIdToMesh.get(clazz.get('id'));
+      let componentMesh = this.modelIdToMesh.get(clazz.parent.get('id'));
+      if (clazzMesh instanceof ClazzMesh && componentMesh instanceof ComponentMesh && componentMesh.opened) {
+        clazzMesh.material.opacity = 0.3;
+        clazzMesh.material.transparent = true;
       }
       this.turnComponentAndAncestorsTransparent(clazz.getParent(), componentSet);
     });
+  }
+
+  unhighlightAll() {
+    let meshes = this.modelIdToMesh.values();
+    for (let mesh of meshes) {
+      if (mesh instanceof EntityMesh) {
+        mesh.unhighlight();
+      }
+    }
   }
 
   turnComponentAndAncestorsTransparent(component: Component, ignorableComponents: Set<Component>) {
@@ -311,9 +334,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     ignorableComponents.add(component);
     const parent = component.getParentComponent();
-    if (parent.get('opened')) {
-      (component.get('threeJSModel').material as THREE.MeshLambertMaterial).opacity = 0.3;
-      (component.get('threeJSModel').material as THREE.MeshLambertMaterial).transparent = true;
+    let parentMesh = this.modelIdToMesh.get(component.get('id'));
+    if (parentMesh instanceof ComponentMesh && parentMesh.opened) {
+      parentMesh.material.opacity = 0.3;
+      parentMesh.material.transparent = true;
     }
     this.turnComponentAndAncestorsTransparent(parent, ignorableComponents);
   }
@@ -337,7 +361,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   step2() {
     // this.args.application.applyDefaultOpenLayout(false);
     let map = applyCityLayout(this.args.application);
-    this.map = map;
+    this.layoutMap = map;
   }
 
   @action
@@ -354,59 +378,47 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     const OPENED_COMPONENT_HEIGHT = 1.5;
 
-    const { componentOdd: componentOddColor, componentEven: componentEvenColor,
+    const { foundation: foundationColor, componentOdd: componentOddColor, componentEven: componentEvenColor,
       clazz: clazzColor, highlightedEntity: highlightedEntityColor } = this.configuration.applicationColors;
 
     let mesh;
+    let componentData = this.layoutMap.get(component.id);
+    let layoutPos = new THREE.Vector3(componentData.positionX, componentData.positionY, componentData.positionZ);
+
     if (component.get('foundation')) {
-      let componentData = this.map.get(component.id);
       this.foundationData = componentData;
 
-      mesh = new FoundationMesh(component, color, OPENED_COMPONENT_HEIGHT, componentData.width, componentData.depth, false);
-      let centerPoint = new THREE.Vector3(
-        componentData.positionX + componentData.width / 2.0,
-        componentData.positionY + OPENED_COMPONENT_HEIGHT / 2.0,
-        componentData.positionZ + componentData.depth / 2.0);
+      mesh = new FoundationMesh(layoutPos, OPENED_COMPONENT_HEIGHT, componentData.width, componentData.depth,
+        component, new THREE.Color(foundationColor), new THREE.Color(highlightedEntityColor));
+      this.addMeshToScene(mesh, componentData, OPENED_COMPONENT_HEIGHT);
 
-      centerPoint.sub(CalcCenterAndZoom(this.foundationData));
-      centerPoint.x *= 0.5;
-      centerPoint.z *= 0.5;
-
-      mesh.position.set(centerPoint.x, centerPoint.y, centerPoint.z);
-
-      mesh.updateMatrix();
-      this.applicationObject3D.add(mesh);
-      this.meshIdToModel.set(mesh.id, component);
+      // Regular component
     } else {
-      let height = component.get('opened') ? OPENED_COMPONENT_HEIGHT : this.map.get(component.id).height;
-      mesh = this.createBox(component, color, height);
+      mesh = new ComponentMesh(layoutPos, componentData.height, componentData.width, componentData.depth,
+        component, new THREE.Color(color), new THREE.Color(highlightedEntityColor));
+      this.addMeshToScene(mesh, componentData, componentData.height);
+      this.updateMeshVisiblity(mesh);
     }
-    component.set('threeJSModel', mesh);
-    if (!component.foundation && !component.getParentComponent().opened)
-      mesh.visible = false;
 
     const clazzes = component.get('clazzes');
     const children = component.get('children');
 
     clazzes.forEach((clazz: Clazz) => {
-      let height = this.map.get(clazz.id).height;
+      let clazzData = this.layoutMap.get(clazz.get('id'));
+      layoutPos = new THREE.Vector3(clazzData.positionX, clazzData.positionY, clazzData.positionZ)
+
       if (clazz.highlighted) {
-        const mesh = this.createBox(clazz, highlightedEntityColor, height);
-        clazz.set('threeJSModel', mesh);
-        if (!clazz.getParent().opened)
-          mesh.visible = false;
+        // TODO
       } else {
-        const mesh = this.createBox(clazz, clazzColor, height);
-        clazz.set('threeJSModel', mesh);
-        if (!clazz.getParent().opened)
-          mesh.visible = false;
+        mesh = new ClazzMesh(layoutPos, clazzData.height, clazzData.width, clazzData.depth,
+          clazz, new THREE.Color(clazzColor), new THREE.Color(highlightedEntityColor));
+        this.addMeshToScene(mesh, clazzData, clazzData.height);
+        this.updateMeshVisiblity(mesh);
       }
     });
 
     children.forEach((child: Component) => {
-      if (child.highlighted) {
-        this.addComponentToScene(child, highlightedEntityColor);
-      } else if (component.get('foundation')) {
+      if (component.get('foundation')) {
         this.addComponentToScene(child, componentOddColor);
       } else if (color === componentEvenColor) {
         this.addComponentToScene(child, componentOddColor);
@@ -416,67 +428,37 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   } // END addComponentToScene
 
-  static calculateCenter(componentData: any) {
+
+  addMeshToScene(mesh: ComponentMesh | ClazzMesh | FoundationMesh, boxData: any, height: number) {
     let centerPoint = new THREE.Vector3(
-      componentData.positionX + componentData.width / 2.0,
-      componentData.positionY + componentData.height / 2.0,
-      componentData.positionZ + componentData.depth / 2.0);
+      boxData.positionX + boxData.width / 2.0,
+      boxData.positionY + height / 2.0,
+      boxData.positionZ + boxData.depth / 2.0);
 
-    centerPoint.sub(CalcCenterAndZoom(componentData));
-    centerPoint.multiplyScalar(0.5);
-    return centerPoint;
-  }
-
-
-  /**
-   * Adds a Box to an application, therefore also computes color, size etc.
-   * @method createBox
-   * @param {emberModel} boxEntity Component or clazz
-   * @param {string}     color     Color for box
-   */
-  createBox(boxEntity: any, color: string, height: number) {
-    let data = this.map.get(boxEntity.id);
-
-    let centerPoint = new THREE.Vector3(
-      data.positionX + data.width / 2.0,
-      data.positionY + height / 2.0,
-      data.positionZ + data.depth / 2.0);
-
-    let transparent = false;
-    let opacityValue = 1.0;
-
-    if (boxEntity.get('state') === "TRANSPARENT") {
-      transparent = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'appVizTransparency') as boolean | undefined || transparent;
-      opacityValue = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizTransparencyIntensity') as number | undefined || opacityValue;
-    }
-
-    const material = new THREE.MeshLambertMaterial({
-      opacity: opacityValue,
-      transparent: transparent
-    });
-
-    material.color = new THREE.Color(color);
-
-    centerPoint.sub(CalcCenterAndZoom(this.foundationData));
+    let applicationCenter = CalcCenterAndZoom(this.foundationData);
+    centerPoint.sub(applicationCenter);
     centerPoint.x *= 0.5;
     centerPoint.z *= 0.5;
 
-    const extension = new THREE.Vector3(data.width / 2.0,
-      height, data.depth / 2.0);
-
-    const cube = new THREE.BoxGeometry(1, 1, 1);
-    const mesh = new THREE.Mesh(cube, material);
-    mesh.scale.x = extension.x;
-    mesh.scale.y = extension.y;
-    mesh.scale.z = extension.z;
-
-    mesh.position.set(centerPoint.x, centerPoint.y, centerPoint.z);
-    mesh.updateMatrix();
+    mesh.position.copy(centerPoint);
 
     this.applicationObject3D.add(mesh);
-    this.meshIdToModel.set(mesh.id, boxEntity);
-    return mesh;
-  } // END createBox
+    this.modelIdToMesh.set(mesh.dataModel.id, mesh);
+  }
+
+
+  updateMeshVisiblity(mesh: ComponentMesh | ClazzMesh) {
+    let parent: Component;
+    if (mesh instanceof ComponentMesh) {
+      parent = mesh.dataModel.parentComponent;
+    } else {
+      parent = mesh.dataModel.parent;
+    }
+    let parentMesh = this.modelIdToMesh.get(parent.get('id'));
+    if (parentMesh instanceof ComponentMesh) {
+      mesh.visible = parentMesh.opened;
+    }
+  }
 
 
   resetRotation() {
