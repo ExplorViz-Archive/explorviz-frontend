@@ -10,7 +10,7 @@ module('Integration | Component | visualization/page-setup/timeline/plotly-timel
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{visualization/page-setup/timeline/plotly-timeline}}`);
+    await render(hbs`<Visualization::PageSetup::Timeline::PlotlyTimeline />`);
 
       const el:any = this.element;
 

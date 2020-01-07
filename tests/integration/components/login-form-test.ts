@@ -11,7 +11,7 @@ module('Integration | Component | login form', function(hooks) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.on('myAction', function(val) { ... });
 
-    await this.render(hbs`{{login-form}}`);
+    await this.render(hbs`<LoginForm />`);
 
     assert.equal($('#loginModal').text().trim(), 'Sign In');
 

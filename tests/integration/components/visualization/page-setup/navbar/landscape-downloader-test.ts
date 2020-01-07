@@ -10,7 +10,7 @@ module('Integration | Component | visualization/page-setup/navbar/landscape-down
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{visualization/page-setup/navbar/landscape-downloader}}`);
+    await render(hbs`<Visualization::PageSetup::Navbar::LandscapeDownloader />`);
 
     let textContent = this.element.textContent;
 
@@ -22,9 +22,9 @@ module('Integration | Component | visualization/page-setup/navbar/landscape-down
 
     // Template block usage:
     await render(hbs`
-      {{#visualization/page-setup/navbar/landscape-downloader}}
+      <Visualization::PageSetup::Navbar::LandscapeDownloader>
         template block text
-      {{/visualization/page-setup/navbar/landscape-downloader}}
+      </Visualization::PageSetup::Navbar::LandscapeDownloader>
     `);
 
     textContent = this.element.textContent;
