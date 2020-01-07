@@ -48,9 +48,6 @@
         {{#if this.landscapeRepo.latestApplication}}
           <Visualization::Rendering::ApplicationRendering @id="app1" @application={{this.landscapeRepo.latestApplication}} />
         {{/if}}
-        <!-- popup(s) -->
-        <Visualization::Rendering::Popups::PopupCoordinator
-          @popupData={{this.additionalData.popupContent}} />
       </div>
     {{/if}}
     <!-- timeline -->
