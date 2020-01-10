@@ -143,6 +143,7 @@ export default class PlotlyTimeline extends Component.extend({
   setupPlotlyTimelineChart(timestamps: Timestamp[]) {
 
     if (!timestamps || timestamps.length == 0) {
+      this.createDummyTimeline();
       return;
     }
 
@@ -205,6 +206,15 @@ export default class PlotlyTimeline extends Component.extend({
       this.getPlotlyOptionsObject()
     );
   };
+
+  createDummyTimeline() {
+    Plotly.newPlot(
+      'plotlyDiv',
+      null,
+      this.getPlotlyLayoutObject(0, 90),
+      this.getPlotlyOptionsObject()
+    );
+  }
 
   // END Plot Logic
 
