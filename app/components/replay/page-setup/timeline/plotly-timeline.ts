@@ -62,6 +62,8 @@ export default class PlotlyTimeline extends Component<Args> {
   // variable used for output when clicked
   _selectedTimestamps : number[] = [];
 
+  _timelineDiv : any;
+
   // BEGIN Ember Div Events
   @action
   handleMouseEnter(plotlyDiv: any) {
@@ -82,18 +84,22 @@ export default class PlotlyTimeline extends Component<Args> {
 
   @action
   didRender(plotlyDiv: any) {
+    this._timelineDiv = plotlyDiv;
+
     if(this._initDone) {
       this.extendPlotlyTimelineChart(this.timestamps);
     } else {
       this.setupPlotlyTimelineChart(this.timestamps);
       if(this._initDone) {
-        this.setupPlotlyListener(plotlyDiv);
+        this.setupPlotlyListener();
       }      
     }
   };
 
-  setupPlotlyListener(plotlyDiv: any) {
+  setupPlotlyListener() {
     const dragLayer: any = document.getElementsByClassName('nsewdrag')[0];
+
+    let plotlyDiv = this._timelineDiv;
 
     if (plotlyDiv && plotlyDiv.layout) {
 
@@ -125,12 +131,12 @@ export default class PlotlyTimeline extends Component<Args> {
         const tn = data.points[0].curveNumber;
 
         var update = { 'marker': { color: colors, size: sizes } };
-        Plotly.restyle('plotlyDiv', update, [tn]);
+        Plotly.restyle(plotlyDiv, update, [tn]);
 
         const clickedTimestamp = new Date(data.points[0].x);
         self._selectedTimestamps.push(clickedTimestamp.getTime());
 
-        if (get(self, "selectionCount") > 1) {
+        if (self.selectionCount > 1) {
 
           if (self._selectedTimestamps.length == self.selectionCount) {
             if(self.args.clicked) self.args.clicked(self._selectedTimestamps);
@@ -149,7 +155,7 @@ export default class PlotlyTimeline extends Component<Args> {
         const min = self._oldPlotlySlidingWindow.min;
         const max = self._oldPlotlySlidingWindow.max;
         const update = self.getPlotlySlidingWindowUpdateObject(min, max);
-        Plotly.relayout('plotlyDiv', update);
+        Plotly.relayout(plotlyDiv, update);
       });
 
       // Show cursor when hovering data point
@@ -170,6 +176,7 @@ export default class PlotlyTimeline extends Component<Args> {
   setupPlotlyTimelineChart(timestamps: Timestamp[]) {
 
     if (timestamps.length == 0) {
+      this.createDummyTimeline();
       return;
     }
 
@@ -192,7 +199,7 @@ export default class PlotlyTimeline extends Component<Args> {
     this._oldPlotlySlidingWindow = windowInterval;
 
     Plotly.newPlot(
-      'plotlyDiv',
+      this._timelineDiv,
       this.getPlotlyDataObject(x, y),
       layout,
       this.getPlotlyOptionsObject()
@@ -229,12 +236,21 @@ export default class PlotlyTimeline extends Component<Args> {
     this._oldPlotlySlidingWindow = windowInterval;
 
     Plotly.react(
-      'plotlyDiv',
+      this._timelineDiv,
       this.getPlotlyDataObject(x, y),
       layout,
       this.getPlotlyOptionsObject()
     );
   };
+
+  createDummyTimeline() {
+    Plotly.newPlot(
+      this._timelineDiv,
+      null,
+      this.getPlotlyLayoutObject(0, 90),
+      this.getPlotlyOptionsObject()
+    );
+  }
 
   // END Plot Logic
 
