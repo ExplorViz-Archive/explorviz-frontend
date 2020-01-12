@@ -7,7 +7,7 @@ import { inject as service } from '@ember/service';
 import RenderingService, { RenderingContext } from "explorviz-frontend/services/rendering-service";
 import LandscapeRepository from "explorviz-frontend/services/repos/landscape-repository";
 import FoundationBuilder from 'explorviz-frontend/utils/application-rendering/foundation-builder';
-import applyCityLayout from 'explorviz-frontend/utils/application-rendering/city-layouter';
+import { applyBoxLayout, applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
 import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
 import Interaction, { Position2D } from 'explorviz-frontend/utils/application-rendering/interaction';
 import DS from "ember-data";
@@ -21,6 +21,7 @@ import HoverEffectHandler from "explorviz-frontend/utils/hover-effect-handler";
 import ClazzMesh from "explorviz-frontend/utils/3d/application/clazz-mesh";
 import ComponentMesh from "explorviz-frontend/utils/3d/application/component-mesh";
 import EntityMesh from "explorviz-frontend/utils/3d/entity-mesh";
+import CommunicationMesh from "explorviz-frontend/utils/3d/communication-mesh";
 
 interface Args {
   id: string,
@@ -63,7 +64,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   modelIdToMesh: Map<string, THREE.Mesh> = new Map();
 
-  layoutMap: any;
+  boxLayoutMap: any;
 
   foundationData: any;
 
@@ -96,7 +97,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.initThreeJs();
     this.initInteraction();
-    this.render();    
+    this.render();
 
     const renderingContext: RenderingContext = {
       scene: this.scene,
@@ -131,11 +132,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  handleMouseMove(mesh: THREE.Mesh|undefined) {
+  handleMouseMove(mesh: THREE.Mesh | undefined) {
     let enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
-    if(mesh instanceof EntityMesh) {
-      if(enableHoverEffects)
+    if (mesh instanceof EntityMesh) {
+      if (enableHoverEffects)
         this.hoverHandler.handleHoverEffect(mesh);
     }
 
@@ -158,11 +159,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  handleMouseStop(mesh: THREE.Mesh|undefined, mouseOnCanvas: Position2D) {
-    if(mesh === undefined)
+  handleMouseStop(mesh: THREE.Mesh | undefined, mouseOnCanvas: Position2D) {
+    if (mesh === undefined)
       return;
 
-    if(mesh instanceof ClazzMesh || mesh instanceof ComponentMesh || mesh instanceof FoundationMesh) {
+    if (mesh instanceof ClazzMesh || mesh instanceof ComponentMesh || mesh instanceof FoundationMesh) {
       this.popUpHandler.showTooltip(
         mouseOnCanvas,
         mesh.dataModel
@@ -171,14 +172,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  handlePanning(delta: {x:number,y:number}, button: 1|2|3) {
-    if(button === 3) {
+  handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
+    if (button === 3) {
       // rotate object
       this.applicationObject3D.rotation.x += delta.y / 100;
       this.applicationObject3D.rotation.y += delta.x / 100;
     }
 
-    else if(button === 1){
+    else if (button === 1) {
       // translate camera
       const distanceXInPercent = (delta.x / this.canvas.clientWidth) * 100.0;
 
@@ -361,8 +362,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   step2() {
     // this.args.application.applyDefaultOpenLayout(false);
-    let map = applyCityLayout(this.args.application);
-    this.layoutMap = map;
+    this.boxLayoutMap = applyBoxLayout(this.args.application);
   }
 
   @action
@@ -384,7 +384,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       clazz: clazzColor, highlightedEntity: highlightedEntityColor } = this.configuration.applicationColors;
 
     let mesh;
-    let componentData = this.layoutMap.get(component.id);
+    let componentData = this.boxLayoutMap.get(component.id);
     let layoutPos = new THREE.Vector3(componentData.positionX, componentData.positionY, componentData.positionZ);
 
     if (component.get('foundation')) {
@@ -406,7 +406,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const children = component.get('children');
 
     clazzes.forEach((clazz: Clazz) => {
-      let clazzData = this.layoutMap.get(clazz.get('id'));
+      let clazzData = this.boxLayoutMap.get(clazz.get('id'));
       layoutPos = new THREE.Vector3(clazzData.positionX, clazzData.positionY, clazzData.positionZ)
 
       if (clazz.highlighted) {
@@ -463,49 +463,50 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
 
-  addCommunicationToScene(application: Application){
+  addCommunicationToScene(application: Application) {
+    let commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap);
+
     const drawableClazzCommunications = application.get('drawableClazzCommunications');
-    const { communication: communicationColor } = this.configuration.applicationColors;
+    const { communication: communicationColor, highlightedEntity: highlightedEntityColor } = this.configuration.applicationColors;
     let viewCenterPoint = CalcCenterAndZoom(this.foundationData);
 
     drawableClazzCommunications.forEach((drawableClazzComm) => {
-      let communicationData = this.layoutMap.get(drawableClazzComm.get('id'));
+      let commLayout = commLayoutMap.get(drawableClazzComm.get('id'));
 
-      let lineThickness = communicationData.lineThickness * 0.3;
+      let lineThickness = commLayout.lineThickness * 0.3;
+
+      let pipe = new CommunicationMesh(commLayout, drawableClazzComm, 
+        new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor));
 
       const start = new THREE.Vector3();
-      start.subVectors(communicationData.startPoint, viewCenterPoint);
+      start.subVectors(commLayout.startPoint, viewCenterPoint);
       start.x *= 0.5;
       start.z *= 0.5;
 
       const end = new THREE.Vector3();
-      end.subVectors(communicationData.endPoint, viewCenterPoint);
+      end.subVectors(commLayout.endPoint, viewCenterPoint);
       end.x *= 0.5;
       end.z *= 0.5;
 
-
-      // let mesh = new CommunicationMesh(communicationData.startPoint, communicationData.endPoint, communicationData.lineThickness);
-      const material = new THREE.MeshBasicMaterial({
-        color: new THREE.Color(communicationColor)
-      });
-      
       const direction = new THREE.Vector3().subVectors(end, start);
       const orientation = new THREE.Matrix4();
       orientation.lookAt(start, end, new THREE.Object3D().up);
       orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1,
         0, 0, -1, 0, 0, 0, 0, 0, 1));
+
       const edgeGeometry = new THREE.CylinderGeometry(lineThickness, lineThickness,
         direction.length(), 20, 1);
-      const pipe = new THREE.Mesh(edgeGeometry, material);
+
+      pipe.geometry = edgeGeometry;
       pipe.applyMatrix(orientation);
-  
+
       pipe.position.x = (end.x + start.x) / 2.0;
       pipe.position.y = (end.y + start.y) / 2.0;
       pipe.position.z = (end.z + start.z) / 2.0;
 
       this.applicationObject3D.add(pipe);
-      });
-    
+      this.modelIdToMesh.set(drawableClazzComm.get('id'), pipe);
+    });
   }
 
   resetRotation() {
