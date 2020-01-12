@@ -1,6 +1,5 @@
 import { inject as service } from '@ember/service';
 import GlimmerComponent from "@glimmer/component";
-import { getOwner } from '@ember/application';
 import { action } from "@ember/object";
 import debugLogger from "ember-debug-logger";
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
@@ -16,8 +15,8 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 
 import applyKlayLayout from
   'explorviz-frontend/utils/landscape-rendering/klay-layouter';
-import Interaction from
-  'explorviz-frontend/utils/landscape-rendering/interaction';
+import Interaction, { Position2D } from
+  'explorviz-frontend/utils/application-rendering/interaction';
 import Labeler from
   'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as CalcCenterAndZoom from
@@ -28,7 +27,11 @@ import * as CommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering'
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import Application from 'explorviz-frontend/models/application';
-import { tracked } from '@glimmer/tracking';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
+import NodeGroup from 'explorviz-frontend/models/nodegroup';
+import System from 'explorviz-frontend/models/system';
+import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
+import PopupHandler from 'explorviz-frontend/utils/application-rendering/popup-handler';
 
 
 interface Args {
@@ -80,11 +83,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   threePerformance!: any;
 
-  @tracked
-  interaction!: any;
+  interaction!: Interaction;
 
   labeler!: any;
   imageLoader!: any;
+
+  meshIdToModel: Map<number, any> = new Map();
+
+  hoverHandler: HoverEffectHandler = new HoverEffectHandler();
+  popUpHandler: PopupHandler = new PopupHandler();
 
   constructor(owner: any, args: Args) {
     super(owner, args);
@@ -188,11 +195,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
 
     this.debug("init landscape-rendering");
-
-    if (!this.interaction) {
-      // Owner necessary to inject service into util
-      this.interaction = Interaction.create(getOwner(this).ownerInjection());
-    }
 
     if (!this.imageLoader) {
       this.imageLoader = ImageLoader.create();
@@ -321,8 +323,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.populateScene();
 
     this.debug("clean and populate landscape-rendering");
-
-    this.interaction.raycastObjects = this.scene.children;
   }
 
 
@@ -373,6 +373,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         let systemMesh = EntityRendering.renderSystem(system, centerPoint,
           this.configuration, this.labeler, this.font);
         this.scene.add(systemMesh);
+        this.meshIdToModel.set(systemMesh.id, system);
 
         let nodegroups = system.nodegroups;
 
@@ -387,6 +388,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
             this.configuration, this.labeler, this.font);
           if (nodegroupMesh) {
             this.scene.add(nodegroupMesh);
+            this.meshIdToModel.set(nodegroupMesh.id, system);
           }
 
           let nodes = nodegroup.get('nodes');
@@ -401,6 +403,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
             let nodeMesh = EntityRendering.renderNode(node, centerPoint,
               this.configuration, this.labeler, this.font);
             this.scene.add(nodeMesh);
+            this.meshIdToModel.set(nodeMesh.id, node);
 
             let applications = node.get('applications');
 
@@ -410,6 +413,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
               let applicationMesh = EntityRendering.renderApplication(application, centerPoint,
                 this.imageLoader, this.configuration, this.labeler, this.font);
               this.scene.add(applicationMesh);
+              this.meshIdToModel.set(applicationMesh.id, application);
             });
 
           });
@@ -438,15 +442,95 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.landscapeRepo.set('replayApplication', emberModel);
   }
 
-  initInteraction() {
-    const canvas = this.canvas;
-    const raycastObjects = this.scene.children;
-    const camera = this.camera;
-    const webglrenderer = this.webglrenderer;
+  @action
+  handleDoubleClick(mesh?: THREE.Mesh) {
+    if(mesh) {
+      // hide tooltip
+      // this.get('popUpHandler').hideTooltip();
 
-    // Init interaction objects
-    this.interaction.setupInteraction(canvas, camera, webglrenderer,
-      raycastObjects);
+      let emberModel = this.meshIdToModel.get(mesh.id);
+
+      if(emberModel instanceof Application){
+        if(emberModel.get('components').get('length') === 0) {
+          // no data => show message
+          const message = "Sorry, there is no information for application <b>" + emberModel.get('name') +
+            "</b> available.";
+
+          AlertifyHandler.showAlertifyMessage(message);
+        } else {
+          // data available => open application-rendering
+          AlertifyHandler.closeAlertifyMessages();
+          this.showApplication(emberModel);
+        }
+      } else if (emberModel instanceof NodeGroup){
+        emberModel.setOpened(!emberModel.get('opened'));
+        this.cleanAndUpdateScene();
+      } else if(emberModel instanceof System) {
+        emberModel.setOpened(!emberModel.get('opened'));
+        this.cleanAndUpdateScene();
+      }
+    }
+  }
+
+  @action
+  handlePanning(delta: {x:number,y:number}, button: 1|2|3) {
+    if(button === 1) {
+      const distanceXInPercent = (delta.x / this.canvas.clientWidth) * 100.0;
+      const distanceYInPercent = (delta.y / this.canvas.clientHeight) * 100.0;
+
+      const xVal = this.camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(this.camera.position.z) / 4.0);
+      const yVal = this.camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(this.camera.position.z) / 4.0);
+      this.camera.position.x = xVal;
+      this.camera.position.y = yVal;
+    }
+  }
+
+  @action
+  handleMouseWheel(delta: number) {
+    // Hide (old) tooltip
+    this.popUpHandler.hideTooltip();
+
+    const scrollVector = new THREE.Vector3(0, 0, delta * 1.5);
+
+    let landscapeVisible = this.camera.position.z + scrollVector.z > 0.2; 
+    // apply zoom, prevent to zoom behind 2D-Landscape (z-direction)
+    if (landscapeVisible){
+      this.camera.position.addVectors(this.camera.position, scrollVector);
+    }
+  }
+
+  @action
+  handleMouseMove(_mesh?: any) {
+/*     this.hoverHandler.handleHoverEffect(mesh); */
+  }
+
+  @action
+  handleMouseOut() {
+    this.popUpHandler.hideTooltip();
+  }
+
+  @action
+  handleMouseEnter() {
+  }
+
+  @action
+  handleMouseStop(_mesh: THREE.Mesh|undefined, _mouseOnCanvas: Position2D) {
+/*     this.popUpHandler.showTooltip(
+      mouseOnCanvas,
+      mesh
+    ); */
+  }
+
+  initInteraction() {
+    this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer, this.scene, {
+      doubleClick: this.handleDoubleClick,
+      mouseMove: this.handleMouseMove,
+      mouseWheel: this.handleMouseWheel,
+      mouseOut: this.handleMouseOut,
+      mouseEnter: this.handleMouseEnter,
+      mouseStop: this.handleMouseStop,
+      panning: this.handlePanning
+    });
   }
 
 }

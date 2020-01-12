@@ -14,9 +14,6 @@
           {{#if this.landscapeRepo.latestLandscape}}
           <Visualization::Rendering::LandscapeRendering @id="landscape1" @landscape={{this.landscapeRepo.latestLandscape}} />
           {{/if}}
-          <!-- popup(s) -->
-          <Visualization::Rendering::Popups::PopupCoordinator
-              @popupData={{this.additionalData.popupContent}} />
         </div>
       {{else}}
         <div class="container-fluid">
