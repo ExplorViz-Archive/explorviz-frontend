@@ -109,11 +109,7 @@ export function renderApplication(application: Application, centerPoint: THREE.V
   };
   const appBBox = applicationMesh.geometry.boundingBox;
 
-  const logoPos = {
-    x: 0,
-    y: 0,
-    z: 0
-  };
+  const logoPos = new THREE.Vector3();
 
   const logoRightPadding = logoSize.width * 0.7;
 
@@ -121,8 +117,7 @@ export function renderApplication(application: Application, centerPoint: THREE.V
 
   const texturePartialPath = application.get('programmingLanguage').toLowerCase();
 
-  imageLoader.createPicture(logoPos.x, logoPos.y,
-    logoPos.z, logoSize.width, logoSize.height,
+  imageLoader.createPicture(logoPos, logoSize.width, logoSize.height,
     texturePartialPath, applicationMesh, "label");
 
   // Create text labels

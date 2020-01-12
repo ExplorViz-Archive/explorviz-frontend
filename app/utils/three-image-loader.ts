@@ -1,59 +1,40 @@
-import Object from '@ember/object';
 import THREE from "three";
 
-export default Object.extend({
+type LogoTextures = {
+  [textureName: string]: THREE.Texture
+}
+export default class ThreeImageLoader {
 
-  logos: null,
+  logos: LogoTextures = {};
 
-  init() {
-    this._super(...arguments);
-    this.set('logos', {});
-  },
+  textureLoader: THREE.TextureLoader = new THREE.TextureLoader();
 
-  createPicture(x: number, y: number, z: number, width: number, height: number, textureName: string, parent: THREE.Object3D, type: string): THREE.Mesh | null {
-    let logos = this.get('logos');
-    if (!logos) {
-      return null;
-    }
-
-    if (logos[textureName]) {
-      const material = new THREE.MeshBasicMaterial({
-        map: logos[textureName],
-        transparent: true
-      });
-
-      const geo = new THREE.PlaneGeometry(width, height);
-
-      const plane = new THREE.Mesh(geo, material);
-      plane.position.set(x, y, z);
-      parent.add(plane);
-      plane.userData['type'] = type;
-      return plane;
+  createPicture(position: THREE.Vector3, width: number, height: number, textureName: string, parent: THREE.Object3D, type: string): void {
+    if (this.logos[textureName]) {
+      addTextureToObject(position, this.logos[textureName], width, height, parent, type);
     }
     else {
-      new THREE.TextureLoader().load('/images/logos/' + textureName + '.png', (texture) => {
-        let logos: any = this.get('logos');
-        if (!logos) {
-          return null;
-        }
+      this.textureLoader.load('/images/logos/' + textureName + '.png', (texture) => {
+        this.logos[textureName] = texture;
+        
+        addTextureToObject(position, this.logos[textureName], width, height, parent, type);
 
-        const material = new THREE.MeshBasicMaterial({
-          map: texture,
-          transparent: true
-        });
-        const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height),
-          material);
-
-        plane.position.set(x, y, z);
-        parent.add(plane);
-        plane.userData['type'] = type;
-
-        logos[textureName] = texture;
-
-        return plane;
       });
     }
-    return null;
-  }
 
-});
+    function addTextureToObject(position: THREE.Vector3, texture: THREE.Texture, width: number, height: number,
+        object: THREE.Object3D, type: string) {
+
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true
+      });
+      const geo = new THREE.PlaneGeometry(width, height);
+  
+      const plane = new THREE.Mesh(geo, material);
+      plane.position.copy(position);
+      object.add(plane);
+      plane.userData['type'] = type;
+    }
+  }
+}
