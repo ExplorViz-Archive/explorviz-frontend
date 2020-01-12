@@ -195,9 +195,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.debug("init landscape-rendering");
 
-    if (!this.imageLoader) {
-      this.imageLoader = ImageLoader.create();
-    }
+    this.imageLoader = new ImageLoader();
 
     if (!this.labeler) {
       this.labeler = Labeler.create();
