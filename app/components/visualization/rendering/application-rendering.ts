@@ -607,8 +607,41 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   willDestroy() {
+    cancelAnimationFrame(this.animationFrameId);
+    this.cleanUpObject3D(this.scene);
+    this.scene.dispose();
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
     this.renderingService.removeRendering(this.args.id);
     this.foundationBuilder.removeFoundation(this.store);
     this.interaction.removeHandlers();
+
+    this.debug("Cleaned up application rendering");
+  }
+
+  cleanUpObject3D(obj: THREE.Object3D) {
+    obj.children.forEach((object: THREE.Object3D) => {
+      this.cleanUpObject3D(object);
+      if(object instanceof THREE.Mesh) {
+        this.disposeMesh(object);
+      }
+    });
+  }
+
+  disposeMesh(mesh: THREE.Mesh) {
+    mesh.geometry.dispose();
+    if(mesh.material instanceof THREE.Material) {
+      mesh.material.dispose();
+    } else {
+      mesh.material.forEach(material => {
+        material.dispose();
+      });
+    }
+  }
+
+  disposeApplicationMeshes() {
+    this.modelIdToMesh.forEach(mesh => {
+      this.disposeMesh(mesh);
+    });
   }
 }
