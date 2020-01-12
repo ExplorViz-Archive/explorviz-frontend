@@ -59,7 +59,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   animationFrameId = 0;
 
-  interaction !: any;
+  interaction !: Interaction;
 
   modelIdToMesh: Map<string, THREE.Mesh> = new Map();
 
@@ -565,5 +565,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   willDestroy() {
     this.renderingService.removeRendering(this.args.id);
     this.foundationBuilder.removeFoundation(this.store);
+    this.interaction.removeHandlers();
   }
 }
