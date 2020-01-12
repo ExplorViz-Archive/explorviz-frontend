@@ -1,8 +1,9 @@
-import DS from 'ember-data';
+import JSONAPIAdapter from '@ember-data/adapter/json-api';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 import ENV from 'explorviz-frontend/config/environment';
+import { computed } from '@ember/object';
 
-const { JSONAPIAdapter } = DS;
+const { APP } = ENV;
 
 /**
 * This Adapter operates as communication abstraction for all network requests,
@@ -18,20 +19,19 @@ const { JSONAPIAdapter } = DS;
 * @module explorviz
 * @submodule network
 */
-export default JSONAPIAdapter.extend(DataAdapterMixin, {
+export default class LandscapeAdapter extends JSONAPIAdapter.extend(DataAdapterMixin) {
 
-  host: ENV.APP.API_ROOT,
-  namespace: "v1",
+  host = APP.API_ROOT;
+  namespace = 'v1';
 
-  init() {
-    this.set('headers', {
-      "Accept": "application/vnd.api+json"
-    }); 
-  },
+  @computed('session.data.authenticated.access_token')
+  get headers() {
+    let headers = { 'Accept': 'application/vnd.api+json' };
+    if (this.session.isAuthenticated) {
+      headers['Authorization'] = `Bearer ${this.session.data.authenticated.access_token}`;
+    }
 
-  authorize(xhr) {
-    let { access_token } = this.get('session.data.authenticated');
-    xhr.setRequestHeader('Authorization', `Bearer ${access_token}`);
+    return headers;
   }
 
-});
+}

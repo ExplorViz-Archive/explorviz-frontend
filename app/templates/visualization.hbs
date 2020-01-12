@@ -41,7 +41,7 @@
       />
       <div id="rendering">
         <div style="position: absolute!important" class="pl-1">
-          <BsButton @onClick={{action "openLandscapeView"}} @type="secondary" @outline={{true}} @title="Back to Landscape">
+          <BsButton @onClick={{action this.openLandscapeView}} @type="secondary" @outline={{true}} @title="Back to Landscape">
             {{svg-jar "reply" class="octicon align-middle"}}
           </BsButton>
         </div>
@@ -70,8 +70,8 @@
       <div id="timeline" class="timeline {{unless this.renderingService.showTimeline "timelinehide"}}">
         <Visualization::PageSetup::Timeline::PlotlyTimeline
           @timestamps={{this.timestampRepo.timelineTimestamps}}
-          @clicked={{action "timelineClicked"}}
-          @setChildReference={{action "getTimelineReference"}}
+          @clicked={{action this.timelineClicked}}
+          @setChildReference={{action this.getTimelineReference}}
         />
       </div>
     </div>

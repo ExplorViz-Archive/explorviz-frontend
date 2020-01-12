@@ -24,7 +24,7 @@ export default class AgentDetails extends Component<Args> {
 
     let agent = this.args.agent;
 
-    if(agent.hasDirtyAttributes){
+    if(agent.get('hasDirtyAttributes')){
       this.showSpinner = true;
 
       agent.save().then(() => {

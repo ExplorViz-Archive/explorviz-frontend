@@ -10,7 +10,7 @@ module('Integration | Component | visualization/page-setup/timeline/timeline', f
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{visualization/page-setup/timeline/timeline}}`);
+    await render(hbs`<Visualization::PageSetup::Timeline::Timeline />`);
 
     let textContent = this.element.textContent;
 
@@ -22,8 +22,8 @@ module('Integration | Component | visualization/page-setup/timeline/timeline', f
 
     // Template block usage:
     await render(hbs`
-      {{#visualization/page-setup/timeline/timeline}}
-      {{/visualization/page-setup/timeline/timeline}}
+      <Visualization::PageSetup::Timeline::Timeline>
+      </Visualization::PageSetup::Timeline::Timeline>
     `);
 
     textContent = this.element.textContent;

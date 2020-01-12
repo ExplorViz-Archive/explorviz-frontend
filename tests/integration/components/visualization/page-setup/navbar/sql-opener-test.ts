@@ -10,7 +10,7 @@ module('Integration | Component | visualization/page-setup/navbar/sql-opener', f
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{visualization/page-setup/navbar/sql-opener}}`);
+    await render(hbs`<Visualization::PageSetup::Navbar::SqlOpener />`);
 
     let textContent = this.element.textContent;
 
@@ -22,8 +22,8 @@ module('Integration | Component | visualization/page-setup/navbar/sql-opener', f
 
     // Template block usage:
     await render(hbs`
-      {{#visualization/page-setup/navbar/sql-opener}}
-      {{/visualization/page-setup/navbar/sql-opener}}
+      <Visualization::PageSetup::Navbar::SqlOpener>
+      </Visualization::PageSetup::Navbar::SqlOpener>
     `);
 
     textContent = this.element.textContent;

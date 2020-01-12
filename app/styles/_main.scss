@@ -49,41 +49,14 @@ html, body {
   flex-grow: 1;
 }
 
-.explorviz-visualization-navbar {
-  @extend .mb-3;
-}
-
 //Additional classes
-
-.scrollable-extension {
-  max-height: 40%;
-}
-
-.container-shadow:hover {
-  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
-}
 
 .container-word-wrap {
   word-break: break-word;
 }
 
-.cytoscape-container {
-  @extend .d-flex;
-  @extend .flex-grow-1;
-}
-
-.scroll-container {
-  overflow-y: scroll;
-  overflow-x: hidden;
-  max-height: 100%;
-}
-
 .no-horizontal-scroll {
   resize: vertical;
-}
-
-.darker-accordion-header {
-  background-color: #e8e8e8 !important;
 }
 
 .relative {
@@ -106,10 +79,6 @@ html, body {
 
 .inline {
   display: inline;
-}
-
-.tooltip-component > a {
-  color: #777;
 }
 
 /* Custom Scrollbar */
@@ -161,14 +130,15 @@ svg.octicon {
   display: contents!important;
 }
 
-.btn-exp-login {
-  color: #64b5f6;
-  border-color: #64b5f6;
+.btn-primary {
+  color: #fff;
+  background-color: #22497c;
+  border-color: #22497c;
 }
 
-.btn-exp-login:hover {
-  background-color: #9be7ff;
-  border-color: #9be7ff;
+.btn-primary:hover {
+  background-color: #406da7;
+  border-color: #406da7;
 }
 
 @mixin centerSpinners() {

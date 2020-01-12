@@ -37,7 +37,8 @@ export default class LoginForm extends Component {
    * @method authenticate
    */
   @action
-  authenticate() {
+  authenticate(event: MouseEvent) {
+    event.preventDefault();
 
     const self = this;
 
