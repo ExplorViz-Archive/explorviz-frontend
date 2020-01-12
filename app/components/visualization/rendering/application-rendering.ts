@@ -150,13 +150,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   handleMouseOut() {
-    this.popUpHandler.enableTooltips = false;
     this.popUpHandler.hideTooltip();
   }
 
   @action
   handleMouseEnter() {
-    this.popUpHandler.enableTooltips = true;
   }
 
   @action
@@ -167,7 +165,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if(mesh instanceof ClazzMesh || mesh instanceof ComponentMesh || mesh instanceof FoundationMesh) {
       this.popUpHandler.showTooltip(
         mouseOnCanvas,
-        mesh
+        mesh.dataModel
       );
     }
   }
