@@ -1,48 +1,21 @@
 import THREE from "three";
+import BoxLayout from "../layout-models/box-layout";
+import CommunicationLayout from "../layout-models/communication-layout";
 
-export default function applyCityLayout(application) {
+export function applyBoxLayout(application) {
 
-    const insetSpace = 4.0;
+    const INSET_SPACE = 4.0;
 
     const components = application.get('components');
 
     const foundationComponent = components.objectAt(0);
 
-    let map = new Map();
+    let layoutMap = new Map();
 
     let boxEntities = application.getAllClazzes().concat(application.getAllComponents());
     boxEntities.forEach((entity) => {
-      map.set(entity.get('id'), {
-        height: 0,
-        width: 0,
-        depth: 0,
-        positionX: 0,
-        positionY: 0,
-        positionZ: 0
-      });
+      layoutMap.set(entity.get('id'), new BoxLayout(entity));
     });
-
-    let communications = application.get('drawableClazzCommunications');
-    communications.forEach((communication) => {
-      map.set(communication.get('id'), {
-        startPoint: new THREE.Vector3(),
-        endPoint: new THREE.Vector3(),
-        lineThickness: 0,
-        pointsFor3D: []
-      });
-    });
-
-    /*
-    const EdgeState = {
-      NORMAL: 'NORMAL',
-      TRANSPARENT: 'TRANSPARENT',
-      SHOW_DIRECTION_IN: 'SHOW_DIRECTION_IN',
-      SHOW_DIRECTION_OUT: 'SHOW_DIRECTION_OUT',
-      SHOW_DIRECTION_IN_AND_OUT: 'SHOW_DIRECTION_IN_AND_OUT',
-      REPLAY_HIGHLIGHT: 'REPLAY_HIGHLIGHT',
-      HIDDEN: 'HIDDEN'
-    };
-    */
 
     calcClazzHeight(foundationComponent);
     initNodes(foundationComponent);
@@ -50,47 +23,39 @@ export default function applyCityLayout(application) {
     doLayout(foundationComponent);
     setAbsoluteLayoutPosition(foundationComponent);
 
-    layoutEdges(application);
-
-    const drawableClazzCommunications = application.get('drawableClazzCommunications');
-
-    drawableClazzCommunications.forEach((clazzcommunication) => {
-      layoutDrawableCommunication(clazzcommunication, application.get('components').objectAt(0));
-    });
-
+    return layoutMap;
 
     // Helper functions
 
     function setAbsoluteLayoutPosition(component){
-      const children = component.get('children');
+      const childComponents = component.get('children');
       const clazzes = component.get('clazzes');
 
-      let componentData = map.get(component.id);
+      let componentLayout = layoutMap.get(component.id);
 
-      children.forEach((child) => {
-        let childData = map.get(child.id);
-        childData.positionX = childData.positionX + componentData.positionX;
-        childData.positionY = childData.positionY + componentData.positionY;
-        childData.positionY = childData.positionY + 0.75 * 2.0;
-        childData.positionZ = childData.positionZ + componentData.positionZ;
-        setAbsoluteLayoutPosition(child);
+      childComponents.forEach((childComponent) => {
+        let childCompLayout = layoutMap.get(childComponent.get('id'));
+        childCompLayout.positionX =  childCompLayout.positionX + componentLayout.positionX;
+        childCompLayout.positionY += componentLayout.positionY + 0.75 * 2.0;
+        childCompLayout.positionZ =  childCompLayout.positionZ + componentLayout.positionZ;
+        setAbsoluteLayoutPosition(childComponent);
       });
 
 
       clazzes.forEach((clazz) => {
-        let clazzData = map.get(clazz.id);
-        clazzData.positionX = clazzData.positionX + componentData.positionX;
-        clazzData.positionY = clazzData.positionY + componentData.positionY;
-        clazzData.positionY = clazzData.positionY + 0.75 * 2.0;
-        clazzData.positionZ = clazzData.positionZ + componentData.positionZ;
+        let clazzLayout = layoutMap.get(clazz.get('id'));
+        clazzLayout.positionX = clazzLayout.positionX + componentLayout.positionX;
+        clazzLayout.positionY = clazzLayout.positionY + componentLayout.positionY;
+        clazzLayout.positionY = clazzLayout.positionY + 0.75 * 2.0;
+        clazzLayout.positionZ = clazzLayout.positionZ + componentLayout.positionZ;
       });
     }
 
 
     function calcClazzHeight(component) {
 
-      const clazzSizeDefault = 0.05;
-      const clazzSizeEachStep = 1.1;
+      const CLAZZ_SIZE_DEFAULT = 0.05;
+      const CLAZZ_SIZE_EACH_STEP = 1.1;
 
       const clazzes = [];
       getClazzList(component, clazzes);
@@ -104,8 +69,8 @@ export default function applyCityLayout(application) {
       const categories = getCategories(instanceCountList, false);
 
       clazzes.forEach((clazz) => {
-        let clazzData = map.get(clazz.id);
-        clazzData.height = (clazzSizeEachStep * categories[clazz.get('instanceCount')] + clazzSizeDefault) * 2.0;
+        let clazzData = layoutMap.get(clazz.id);
+        clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.get('instanceCount')] + CLAZZ_SIZE_DEFAULT) * 2.0;
       });
     }
 
@@ -266,12 +231,12 @@ export default function applyCityLayout(application) {
       });
 
       clazzes.forEach((clazz) => {
-        let clazzData = map.get(clazz.id);
+        let clazzData = layoutMap.get(clazz.id);
         clazzData.depth = clazzWidth;
         clazzData.width = clazzWidth;
       });
 
-      let componentData = map.get(component.id);
+      let componentData = layoutMap.get(component.id);
       componentData.height = getHeightOfComponent(component);
       componentData.width = -1.0;
       componentData.depth = -1.0;
@@ -287,7 +252,7 @@ export default function applyCityLayout(application) {
       const clazzes = component.get('clazzes');
 
       clazzes.forEach((clazz) => {
-        let clazzData = map.get(clazz.id);
+        let clazzData = layoutMap.get(clazz.id);
         const height = clazzData.height;
         if (height > childrenHeight) {
           childrenHeight = height;
@@ -295,7 +260,7 @@ export default function applyCityLayout(application) {
       });
 
       children.forEach((child) => {
-        let childData = map.get(child.id);
+        let childData = layoutMap.get(child.id);
         if (childData.height > childrenHeight) {
           childrenHeight = childData.height;
         }
@@ -332,7 +297,7 @@ export default function applyCityLayout(application) {
 
       const segment = layoutGeneric(tempList);
 
-      let componentData = map.get(component.id);
+      let componentData = layoutMap.get(component.id);
       componentData.width = segment.width;
       componentData.depth = segment.height;
     }
@@ -346,8 +311,8 @@ export default function applyCityLayout(application) {
 
       // Sort by width and by name (for entities with same width)
       children.sort(function(e1, e2) {
-        let e1Width = map.get(e1.id).width;
-        let e2Width = map.get(e2.id).width;
+        let e1Width = layoutMap.get(e1.id).width;
+        let e2Width = layoutMap.get(e2.id).width;
         const result = e1Width - e2Width;
 
         if ((-0.00001 < result) && (result < 0.00001)) {
@@ -362,15 +327,15 @@ export default function applyCityLayout(application) {
       });
 
       children.forEach((child) => {
-        let childData = map.get(child.id);
-        const childWidth = (childData.width + insetSpace * 2);
-        const childHeight = (childData.depth + insetSpace * 2);
+        let childData = layoutMap.get(child.id);
+        const childWidth = (childData.width + INSET_SPACE * 2);
+        const childHeight = (childData.depth + INSET_SPACE * 2);
         childData.positionY = 0.0;
 
         const foundSegment = insertFittingSegment(rootSegment, childWidth, childHeight);
 
-        childData.positionX = foundSegment.startX + insetSpace;
-        childData.positionZ = foundSegment.startZ + insetSpace;
+        childData.positionX = foundSegment.startX + INSET_SPACE;
+        childData.positionZ = foundSegment.startZ + INSET_SPACE;
 
         if (foundSegment.startX + childWidth > maxX) {
           maxX = foundSegment.startX + childWidth;
@@ -388,7 +353,7 @@ export default function applyCityLayout(application) {
       const labelInsetSpace = 8.0;
 
       children.forEach((child) => {
-        let childData = map.get(child.id);
+        let childData = layoutMap.get(child.id);
         childData.positionX = childData.positionX + labelInsetSpace;
       });
 
@@ -473,9 +438,9 @@ export default function applyCityLayout(application) {
       let worstCaseHeight = 0.0;
 
       children.forEach((child) => {
-        let childData = map.get(child.id);
-        worstCaseWidth = worstCaseWidth + (childData.width + insetSpace * 2);
-        worstCaseHeight = worstCaseHeight + (childData.depth + insetSpace * 2);
+        let childData = layoutMap.get(child.id);
+        worstCaseWidth = worstCaseWidth + (childData.width + INSET_SPACE * 2);
+        worstCaseHeight = worstCaseHeight + (childData.depth + INSET_SPACE * 2);
       });
 
 
@@ -507,156 +472,176 @@ export default function applyCityLayout(application) {
       return layoutSegment;
     } // END createLayoutSegment
 
-    function layoutEdges(application) {
+}
 
+export function applyCommunicationLayout(application, boxLayoutMap){
+  let layoutMap = new Map();
+
+  let communications = application.get('drawableClazzCommunications');
+  communications.forEach((communication) => {
+    layoutMap.set(communication.get('id'), new CommunicationLayout(communication));
+  });
+
+  layoutEdges(application);
+
+  const drawableClazzCommunications = application.get('drawableClazzCommunications');
+
+  drawableClazzCommunications.forEach((clazzcommunication) => {
+    layoutDrawableCommunication(clazzcommunication, application.get('components').objectAt(0));
+  });
+
+  return layoutMap;
+
+  // HELPER FUNCTIONS
+
+  function layoutEdges(application) {
+
+    const drawableClazzCommunications = application.get('drawableClazzCommunications');
+
+    drawableClazzCommunications.forEach((clazzCommunication) => {
+      if (!clazzCommunication.get('hidden')) {
+
+        let sourceClazz = null;
+        let targetClazz = null;
+
+        if (true) {
+          sourceClazz = clazzCommunication.get('sourceClazz');
+        } else {
+          sourceClazz = findFirstParentOpenComponent(clazzCommunication.get('sourceClazz').get('parent'));
+        }
+
+        if (true) {
+          targetClazz = clazzCommunication.get('targetClazz');
+        }
+        else {
+          targetClazz = findFirstParentOpenComponent(clazzCommunication.get('targetClazz').get('parent'));
+        }
+
+        let communicationData = layoutMap.get(clazzCommunication.get('id'));
+        let sourceClazzData = boxLayoutMap.get(sourceClazz.get('id'));
+        let targetClazzData = boxLayoutMap.get(targetClazz.get('id'));
+
+        if (sourceClazz !== null && targetClazz !== null) {
+          communicationData.startPoint = new THREE.Vector3(sourceClazzData.positionX + sourceClazzData.width / 2.0, sourceClazzData.positionY, sourceClazzData.positionZ + sourceClazzData.depth / 2.0);
+          communicationData.endPoint = new THREE.Vector3(targetClazzData.positionX + targetClazzData.width / 2.0, targetClazzData.positionY + 0.05, targetClazzData.positionZ + targetClazzData.depth / 2.0);
+        }
+      }
+
+      calculatePipeSizeFromQuantiles(application);
+    });
+
+    // Calculates the size of the pipes regarding the number of requests
+    function calculatePipeSizeFromQuantiles(application) {
+
+      // constant factors for rendering communication lines (pipes)
+      const pipeSizeEachStep = 0.45;
+      const pipeSizeDefault = 0.1;
+
+      const requestsList = gatherRequestsIntoList(application);
+      const categories = calculateCategories(requestsList);
       const drawableClazzCommunications = application.get('drawableClazzCommunications');
 
       drawableClazzCommunications.forEach((clazzCommunication) => {
-        if (!clazzCommunication.get('hidden')) {
-
-          let sourceClazz = null;
-          let targetClazz = null;
-
-          if (true) {
-            sourceClazz = clazzCommunication.get('sourceClazz');
-          } else {
-            sourceClazz = findFirstParentOpenComponent(clazzCommunication.get('sourceClazz').get('parent'));
-          }
-
-          if (true) {
-            targetClazz = clazzCommunication.get('targetClazz');
-          }
-          else {
-            targetClazz = findFirstParentOpenComponent(clazzCommunication.get('targetClazz').get('parent'));
-          }
-
-          let communicationData = map.get(clazzCommunication.get('id'));
-          let sourceClazzData = map.get(sourceClazz.get('id'));
-          let targetClazzData = map.get(targetClazz.get('id'));
-
-          if (sourceClazz !== null && targetClazz !== null) {
-            communicationData.startPoint = new THREE.Vector3(sourceClazzData.positionX + sourceClazzData.width / 2.0, sourceClazzData.positionY, sourceClazzData.positionZ + sourceClazzData.depth / 2.0);
-            communicationData.endPoint = new THREE.Vector3(targetClazzData.positionX + targetClazzData.width / 2.0, targetClazzData.positionY + 0.05, targetClazzData.positionZ + targetClazzData.depth / 2.0);
-          }
-        }
-
-        calculatePipeSizeFromQuantiles(application);
+        const calculatedCategory = getMatchingCategory(clazzCommunication.get('requests'), categories);
+        let communicationData = layoutMap.get(clazzCommunication.get('id'));
+        communicationData.lineThickness = (calculatedCategory  * pipeSizeEachStep) + pipeSizeDefault;
       });
 
-      // Calculates the size of the pipes regarding the number of requests
-      function calculatePipeSizeFromQuantiles(application) {
+      // generates four default categories for rendering (thickness of communication lines)
+      function calculateCategories(requestsList) {
+        const minNumber = Math.min.apply(Math, requestsList);
+        const avgNumber = requestsList.reduce(addUpRequests) / requestsList.length;
+        const maxNumber = Math.max.apply(Math,requestsList);
+        const categories = [0, minNumber, avgNumber, maxNumber];
 
-        // constant factors for rendering communication lines (pipes)
-        const pipeSizeEachStep = 0.45;
-        const pipeSizeDefault = 0.1;
+        return categories;
+      } // END calculateCategories
 
-        const requestsList = gatherRequestsIntoList(application);
-        const categories = calculateCategories(requestsList);
+      // retrieves a matching category for a specific clazzCommunication
+      function getMatchingCategory(numOfRequests, categories) {
+
+        // default category = lowest category
+        let calculatedCategory = 0;
+
+        for (var i = 1; i < categories.length; i++) {
+          if (numOfRequests >= categories[i]) {
+            calculatedCategory = i;
+          }
+          else {
+            return calculatedCategory;
+          }
+        }
+        return calculatedCategory;
+      } // END getMatchingCategory
+
+      // Retrieves all requests and pushes them to a list for further processing
+      function gatherRequestsIntoList(application) {
+
+        let requestsList = [];
         const drawableClazzCommunications = application.get('drawableClazzCommunications');
 
         drawableClazzCommunications.forEach((clazzCommunication) => {
-          const calculatedCategory = getMatchingCategory(clazzCommunication.get('requests'), categories);
-          let communicationData = map.get(clazzCommunication.get('id'));
-          communicationData.lineThickness = (calculatedCategory  * pipeSizeEachStep) + pipeSizeDefault;
+          if ((clazzCommunication.get('sourceClazz') !== clazzCommunication.get('targetClazz'))) {
+            requestsList.push(clazzCommunication.get('requests'));
+          }
         });
 
-        // generates four default categories for rendering (thickness of communication lines)
-        function calculateCategories(requestsList) {
-          const minNumber = Math.min.apply(Math, requestsList);
-          const avgNumber = requestsList.reduce(addUpRequests) / requestsList.length;
-          const maxNumber = Math.max.apply(Math,requestsList);
-          const categories = [0, minNumber, avgNumber, maxNumber];
+        return requestsList;
+      } // END gatherRequestsIntoList
 
-          return categories;
-        } // END calculateCategories
+      // adds up a number to an existing number
+      function addUpRequests(requestSum, requestCount) {
+        return requestSum + requestCount;
+      } // END addUpRequests
 
-        // retrieves a matching category for a specific clazzCommunication
-        function getMatchingCategory(numOfRequests, categories) {
+    } // END calculatePipeSizeFromQuantiles
 
-          // default category = lowest category
-          let calculatedCategory = 0;
-
-          for (var i = 1; i < categories.length; i++) {
-            if (numOfRequests >= categories[i]) {
-              calculatedCategory = i;
-            }
-            else {
-              return calculatedCategory;
-            }
-          }
-          return calculatedCategory;
-        } // END getMatchingCategory
-
-        // Retrieves all requests and pushes them to a list for further processing
-        function gatherRequestsIntoList(application) {
-
-          let requestsList = [];
-          const drawableClazzCommunications = application.get('drawableClazzCommunications');
-
-          drawableClazzCommunications.forEach((clazzCommunication) => {
-            if ((clazzCommunication.get('sourceClazz') !== clazzCommunication.get('targetClazz'))) {
-              requestsList.push(clazzCommunication.get('requests'));
-            }
-          });
-
-          return requestsList;
-        } // END gatherRequestsIntoList
-
-        // adds up a number to an existing number
-        function addUpRequests(requestSum, requestCount) {
-          return requestSum + requestCount;
-        } // END addUpRequests
-
-      } // END calculatePipeSizeFromQuantiles
-
-      // TODO: change again later on
-      function findFirstParentOpenComponent(entity) {
-        /*
-        if (entity.get('parentComponent') == null || entity.get('parentComponent').get('opened')) {
-          return entity;
-        }
-
-        return findFirstParentOpenComponent(entity.get('parentComponent'));*/
-        return entity.get('parentComponent');
+    // TODO: change again later on
+    function findFirstParentOpenComponent(entity) {
+      /*
+      if (entity.get('parentComponent') == null || entity.get('parentComponent').get('opened')) {
+        return entity;
       }
 
-    } // END layoutEdges
-
-    function layoutDrawableCommunication(commu, foundation) {
-
-      const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
-
-      const centerCommuIcon =
-      new THREE.Vector3(foundation.get('positionX') + foundation.get('extension').x * 2.0 +
-        externalPortsExtension.x * 4.0, foundation.get('positionY') -
-        foundation.get('extension').y + externalPortsExtension.y,
-        foundation.get('positionZ') + foundation.get('extension').z * 2.0 -
-        externalPortsExtension.z - 12.0);
-
-      layoutInAndOutCommunication(commu, commu.get('sourceClazz'), centerCommuIcon);
+      return findFirstParentOpenComponent(entity.get('parentComponent'));*/
+      return entity.get('parentComponent');
     }
 
-    function layoutInAndOutCommunication(commu, internalClazz, centerCommuIcon) {
-      let communicationData = map.get(commu.get('id'));
-      communicationData.pointsFor3D = [];
-      communicationData.pointsFor3D.push(centerCommuIcon);
+  } // END layoutEdges
 
-      if (internalClazz !== null) {
-        const end = new THREE.Vector3();
+  function layoutDrawableCommunication(commu, foundation) {
 
-        const centerPoint =
-        new THREE.Vector3(internalClazz.get('positionX') +
-          internalClazz.get('width') / 2.0,
-          internalClazz.get('positionY') + internalClazz.get('height') / 2.0,
-          internalClazz.get('positionZ') + internalClazz.get('depth') / 2.0);
+    const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
 
-        end.x = internalClazz.get('positionX') + internalClazz.get('width') / 2.0;
-        end.y = centerPoint.y;
-        end.z = internalClazz.get('positionZ') + internalClazz.get('depth') / 2.0;
-        communicationData.pointsFor3D.push(end);
-      }
+    const centerCommuIcon =
+    new THREE.Vector3(foundation.get('positionX') + foundation.get('extension').x * 2.0 +
+      externalPortsExtension.x * 4.0, foundation.get('positionY') -
+      foundation.get('extension').y + externalPortsExtension.y,
+      foundation.get('positionZ') + foundation.get('extension').z * 2.0 -
+      externalPortsExtension.z - 12.0);
+
+    layoutInAndOutCommunication(commu, commu.get('sourceClazz'), centerCommuIcon);
+  }
+
+  function layoutInAndOutCommunication(commu, internalClazz, centerCommuIcon) {
+    let communicationData = layoutMap.get(commu.get('id'));
+    communicationData.pointsFor3D = [];
+    communicationData.pointsFor3D.push(centerCommuIcon);
+
+    if (internalClazz !== null) {
+      const end = new THREE.Vector3();
+
+      const centerPoint =
+      new THREE.Vector3(internalClazz.get('positionX') +
+        internalClazz.get('width') / 2.0,
+        internalClazz.get('positionY') + internalClazz.get('height') / 2.0,
+        internalClazz.get('positionZ') + internalClazz.get('depth') / 2.0);
+
+      end.x = internalClazz.get('positionX') + internalClazz.get('width') / 2.0;
+      end.y = centerPoint.y;
+      end.z = internalClazz.get('positionZ') + internalClazz.get('depth') / 2.0;
+      communicationData.pointsFor3D.push(end);
     }
-
-    return map;
+  }
 
 }
