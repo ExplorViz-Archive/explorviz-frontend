@@ -1,5 +1,3 @@
-import Component from 'explorviz-frontend/models/component';
-import Clazz from 'explorviz-frontend/models/clazz';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 import { tracked } from '@glimmer/tracking';
 
@@ -12,15 +10,10 @@ export default class PopupHandler {
 
     let popupData: any = {};
 
-    if(emberModel instanceof Component)
-      popupData = this.buildComponentData(emberModel);
-    else if(emberModel instanceof Clazz)
-      popupData = this.buildClazzData(emberModel);
-    else if(emberModel instanceof DrawableClazzCommunication)
+    if(emberModel instanceof DrawableClazzCommunication)
       popupData = this.buildCommunicationData(emberModel);
-    else
-      popupData = null;
 
+    popupData.entity = emberModel;
 
     // add mouse position for calculating div position
     if (popupData){
@@ -33,58 +26,6 @@ export default class PopupHandler {
 
   hideTooltip() : void {
     this.popupContent = null;
-  }
-
-
-  buildComponentData(component:Component){
-    let name = component.get("name");
-    let clazzCount = getClazzesCount(component);
-    let packageCount = getPackagesCount(component);
-
-    let popupData = {
-      isShown: true,
-      popupType: "component",
-      componentName: name,
-      containedClazzes: clazzCount,
-      containedPackages: packageCount,
-    }
-  
-    return popupData;
-
-    function getClazzesCount(component:Component) : number {
-      let result = component.get('clazzes').get('length');
-      const children = component.get('children');
-      children.forEach((child) => {
-        result += getClazzesCount(child);
-      });
-      return result;
-    }
-    function getPackagesCount(component:Component) : number {
-      let result = component.get('children').get('length');
-      const children = component.get('children');
-      children.forEach((child) => {
-        result += getPackagesCount(child);
-      });
-      return result;
-    }
-  }
-
-  buildClazzData(clazz:Clazz){
-    let clazzName = clazz.get('name');
-    let instanceCount = clazz.get('instanceCount');
-
-    const clazzCommunications = clazz.get('clazzCommunications');
-    let operationCount = clazzCommunications.get('length');
-
-    let popupData = {
-      isShown: true,
-      popupType: "clazz",
-      clazzName: clazzName,
-      activeInstances: instanceCount,
-      calledOps: operationCount,
-    }
-  
-    return popupData;
   }
 
   buildCommunicationData(drawableClazzCommunication:DrawableClazzCommunication) {

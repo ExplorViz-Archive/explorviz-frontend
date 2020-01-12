@@ -23,15 +23,15 @@
     {{/if}}
 
     <!-- application popups -->
-    {{#if (eq @popupData.popupType "component")}}
+    {{#if (eq @popupData.entity.constructor.name "Component")}}
       <Visualization::Rendering::Popups::ApplicationPopups::ComponentPopup
-        @data={{@popupData}} />
+        @component={{@popupData.entity}} />
     {{/if}}
-    {{#if (eq @popupData.popupType "clazz")}}
+    {{#if (eq @popupData.entity.constructor.name "Clazz")}}
       <Visualization::Rendering::Popups::ApplicationPopups::ClazzPopup
-        @data={{@popupData}} />
+        @clazz={{@popupData.entity}}/>
     {{/if}}
-    {{#if (eq @popupData.popupType "clazzCommunication")}}
+    {{#if (eq @popupData.popupType "ClazzCommunication")}}
       <Visualization::Rendering::Popups::ApplicationPopups::CommunicationPopup
         @data={{@popupData}} />
     {{/if}}
