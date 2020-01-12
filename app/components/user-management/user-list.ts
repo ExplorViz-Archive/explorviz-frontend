@@ -1,23 +1,25 @@
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { inject as service } from "@ember/service";
-import { all } from 'rsvp';
 
 import { task } from 'ember-concurrency-decorators';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import DS from 'ember-data';
 import CurrentUser from 'explorviz-frontend/services/current-user';
-import { action, computed } from '@ember/object';
+import { action } from '@ember/object';
 import User from 'explorviz-frontend/models/user';
 import RouterService from '@ember/routing/router-service';
-import { addObserver, removeObserver } from '@ember/object/observers';
 import Transition from '@ember/routing/-private/transition';
 
 interface Args {
   refreshUsers(): Transition,
+  deleteUsers(users:User[]): Promise<User[]>,
+  goToPage(page: number): void,
+  changePageSize(size: number): void,
   users: DS.RecordArray<User>|null|undefined,
   page: number,
-  size: number
+  size: number,
+  pageSizes: number
 }
 
 export default class UserList extends Component<Args> {
@@ -33,22 +35,6 @@ export default class UserList extends Component<Args> {
   @tracked
   showDeleteUsersDialog:boolean = false;
 
-  pageSizes:number[] = [5, 10, 25, 50];
-
-  // needs to be a computed property.
-  // Otherwise the observer won't work
-  @computed('args.users')
-  get users() {
-    return this.args.users;
-  }
-
-  constructor(owner:any, args:any) {
-    super(owner, args);
-
-    addObserver(this, 'users', this.resetTable);
-    this.resetCheckboxes();
-  }
-
   get showDeleteUsersButton() {
     return Object.values(this.selected).some(Boolean);
   }
@@ -61,11 +47,9 @@ export default class UserList extends Component<Args> {
     return Object.entries(this.selected).length;
   }
 
-  resetTable() {
-    const tableElement = document.querySelector('#user-list-table-div');
-    if(tableElement !== null) {
-      tableElement.scrollTo(0, 0);
-    }
+  @action
+  resetTable(tableElement: HTMLDivElement) {
+    tableElement.scrollTo(0, 0);
     this.resetCheckboxes();
   }
 
@@ -86,27 +70,23 @@ export default class UserList extends Component<Args> {
   @task({ enqueue: true })
   deleteUsers = task(function * (this: UserList) {
     // delete all selected users
-    let settingsPromiseArray:Promise<User>[] = [];
+    let listOfUsersToDelete:User[] = [];
     for(const [id, bool] of Object.entries(this.selected)) {
       if(bool) {
         let user = this.store.peekRecord('user', id);
         if(user !== null)
-          settingsPromiseArray.push(user.destroyRecord());
+          listOfUsersToDelete.push(user);
       }
     }
 
-    // should do an all settled here to make sure all promises are resolved
-    // and only then update the user list
-    yield all(settingsPromiseArray).then(()=>{
+    try {
+      yield this.args.deleteUsers(listOfUsersToDelete);
       AlertifyHandler.showAlertifySuccess('All users successfully deleted.');
-    }).catch((reason)=>{
-      const {title, detail} = reason.errors[0];
-      AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
-    }).finally(() => {
-      this.updateUserList.perform();
+    } catch(reason) {
+      this.showReasonErrorAlert(reason);
+    } finally {
       this.showDeleteUsersDialog = false;
-    });
-
+    }
   });
 
   @action
@@ -145,10 +125,9 @@ export default class UserList extends Component<Args> {
   deleteUser = task(function * (this: UserList, user:User) {
     try {
       let username = user.username;
-      yield user.destroyRecord();
+      yield this.args.deleteUsers([user]);
       const message = `User <b>${username}</b> deleted.`;
       AlertifyHandler.showAlertifyMessage(message);
-      this.updateUserList.perform();
     } catch(reason) {
       this.showReasonErrorAlert(reason);
     }
@@ -157,10 +136,6 @@ export default class UserList extends Component<Args> {
   showReasonErrorAlert(reason:any) {
     const {title, detail} = reason.errors[0];
     AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
-  }
-
-  willDestroy() {
-    removeObserver(this, 'users', this.resetTable);
   }
 
 }

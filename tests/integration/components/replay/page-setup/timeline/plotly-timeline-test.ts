@@ -10,12 +10,12 @@ module('Integration | Component | replay/page-setup/timeline/plotly-timeline', f
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{replay/page-setup/timeline/plotly-timeline}}`);
+    await render(hbs`<Replay::PageSetup::Timeline::PlotlyTimeline />`);
 
     const el:any = this.element;
 
     if(el) {
-      assert.equal(el.textContent.trim(), 'No replay timestamps available.');
+      assert.ok(el.textContent.trim().includes('No replay timestamps available!'));
     } else {
       assert.notOk( "empty element", "There was no element to test." );
     }

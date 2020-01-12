@@ -10,7 +10,7 @@ module('Integration | Component | visualization/page-setup/navbar/pause-reload',
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{visualization/page-setup/navbar/pause-reload}}`);
+    await render(hbs`<Visualization::PageSetup::Navbar::PauseReload />`);
 
     let textContent = this.element.textContent;
 

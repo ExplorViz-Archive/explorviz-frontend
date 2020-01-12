@@ -1,23 +1,44 @@
 import Controller from '@ember/controller';
-import { observes } from '@ember-decorators/object';
+import { action } from "@ember/object";
+import User from 'explorviz-frontend/models/user';
+import { all, reject } from 'rsvp';
 
 export default class ConfigurationUsermanagementUsers extends Controller {
   queryParams = ['page', 'size'];
   page = 0;
   size = 10;
 
-  // If page would be empty, redirect to valid page
-  // Could happen if on last page and all users are delted
-  @observes('page', 'size', 'model')
-  updateInvalidPage() {
-    if(this.model) {
-      let maxPage = this.model.meta.pagination.last.number;
-      if(this.page > maxPage) {
-        this.transitionToRoute('configuration.usermanagement.users', { queryParams: { page: maxPage }});
-      } else if(this.page < 0) {
-        this.transitionToRoute('configuration.usermanagement.users', { queryParams: { page: 0 }});
-      }
-    }
+  pageSizes:number[] = [5, 10, 25, 50];
+
+  @action
+  async deleteUsers(users: User[]) {
+    if(users.length <= 0)
+      return reject({
+        errors: [{
+          title: 'Invalid selection',
+          detail: 'No users selected for deletion'
+        }]
+      });
+
+    let settingsPromiseArray:Promise<User>[] = [];
+    users.forEach((user) => {
+      settingsPromiseArray.push(user.destroyRecord());
+    });
+    return all(settingsPromiseArray).finally(() => {
+      this.send('refreshRoute');
+    });
+  }
+
+  @action
+  changePageSize(size: number) {
+    if(size > 0)
+      this.set('size', size);
+  }
+
+  @action
+  goToPage(page: number) {
+    if(page >= 0 && page <= this.model.meta.pagination.last.number)
+      this.set('page', page);
   }
 }
 

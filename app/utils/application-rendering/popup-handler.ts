@@ -5,16 +5,10 @@ import { tracked } from '@glimmer/tracking';
 
 export default class PopupHandler {
 
-  enableTooltips:boolean = true;
-
   @tracked
   popupContent: any = null;
 
   showTooltip(mouse:{x:number, y:number}, emberModel:any) : void {
-
-    if (!this.enableTooltips){
-      return;
-    }
 
     let popupData: any = {};
 

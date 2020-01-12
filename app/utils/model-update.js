@@ -4,13 +4,8 @@ import { inject as service } from "@ember/service";
 export default Object.extend({
 
   store: service(),
-  highlighter: service('visualization/application/highlighter'),
-  additionalData: service('additional-data'),
-  renderingService: service(),
 
-  init() {
-  },
-
+  
   /**
    *  Computes (possibly) bidirectional communication and saves 
    *  it as a model. Later used to draw communication between clazzes
@@ -19,16 +14,6 @@ export default Object.extend({
    */
   addDrawableCommunication() {
     let store = this.get('store');
-
-    let highlightedEntity = this.get('highlighter.highlightedEntity');
-
-    // Reset communication highlighting due to new communication
-    // TODO: persist highlighting if drawableCommunication is still present in new landscape
-    if (highlightedEntity &&
-      (highlightedEntity.constructor.modelName === "drawableclazzcommunication" || this.get('highlighter.isTrace'))) {
-      this.get('highlighter').unhighlightAll();
-      this.get('renderingService').redrawScene();
-    }
 
     let applications = store.peekAll('application');
     applications.forEach((application) => {
@@ -48,11 +33,17 @@ export default Object.extend({
       });
     });
 
+
     function addNewDrawableCommunication(application, aggregatedComm) {
-      let drawableComm = store.createRecord('drawableclazzcommunication', {});
-      drawableComm.set('requests', aggregatedComm.get('totalRequests'));
-      drawableComm.set('averageResponseTime', aggregatedComm.get('averageResponseTime'));
-      drawableComm.set('isBidirectional', false);
+      const idRandom = uuidv4();
+      let drawableComm = store.createRecord('drawableclazzcommunication', {
+        id: idRandom,
+        requests: aggregatedComm.get('totalRequests'),
+        averageResponseTime: aggregatedComm.get('averageResponseTime'),
+        isBidirectional: false,
+        sourceClazz: aggregatedComm.get('sourceClazz'),
+        targetClazz: aggregatedComm.get('targetClazz'),
+      });
 
       // Set relationships
       drawableComm.set('sourceClazz', aggregatedComm.get('sourceClazz'));
@@ -60,6 +51,7 @@ export default Object.extend({
       drawableComm.get('aggregatedClazzCommunications').addObject(aggregatedComm);
       application.get('drawableClazzCommunications').addObject(drawableComm);
     }
+
 
     function updateExistingDrawableComm(existingCommunication, aggregatedComm) {
       let existingRequests = existingCommunication.get('requests');
@@ -72,6 +64,7 @@ export default Object.extend({
       // Set relationship which does not yet exist
       existingCommunication.get('aggregatedClazzCommunications').addObject(aggregatedComm);
     }
+
 
     // Check for a given aggregated communication is there already exists a corresponding
     // drawable communication which would imply bidirectionality
@@ -86,6 +79,15 @@ export default Object.extend({
         }
       });
       return possibleCommunication;
+    }
+
+
+    //  https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+    function uuidv4() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
     }
   },
 

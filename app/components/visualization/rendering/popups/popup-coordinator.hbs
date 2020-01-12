@@ -1,0 +1,39 @@
+{{#if @popupData}}
+  <div class="popover" {{did-insert this.setPopupPosition}}>
+    <!-- landscape popups -->
+    {{#if (eq @popupData.popupType "system")}}
+      <Visualization::Rendering::Popups::LandscapePopups::SystemPopup
+        @data={{@popupData}} />
+    {{/if}}
+    {{#if (eq @popupData.popupType "nodeGroup")}}
+      <Visualization::Rendering::Popups::LandscapePopups::NodegroupPopup
+        @data={{@popupData}} />
+    {{/if}}
+    {{#if (eq @popupData.popupType "node")}}
+      <Visualization::Rendering::Popups::LandscapePopups::NodePopup
+        @data={{@popupData}} />
+    {{/if}}
+    {{#if (eq @popupData.popupType "application")}}
+      <Visualization::Rendering::Popups::LandscapePopups::ApplicationPopup
+        @data={{@popupData}} />
+    {{/if}}
+    {{#if (eq @popupData.popupType "applicationCommunication")}}
+      <Visualization::Rendering::Popups::LandscapePopups::LandscapeCommunicationPopup
+        @data={{@popupData}} />
+    {{/if}}
+
+    <!-- application popups -->
+    {{#if (eq @popupData.popupType "component")}}
+      <Visualization::Rendering::Popups::ApplicationPopups::ComponentPopup
+        @data={{@popupData}} />
+    {{/if}}
+    {{#if (eq @popupData.popupType "clazz")}}
+      <Visualization::Rendering::Popups::ApplicationPopups::ClazzPopup
+        @data={{@popupData}} />
+    {{/if}}
+    {{#if (eq @popupData.popupType "clazzCommunication")}}
+      <Visualization::Rendering::Popups::ApplicationPopups::CommunicationPopup
+        @data={{@popupData}} />
+    {{/if}}
+  </div>
+{{/if}}

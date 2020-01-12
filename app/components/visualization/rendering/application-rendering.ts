@@ -150,13 +150,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   handleMouseOut() {
-    this.popUpHandler.enableTooltips = false;
     this.popUpHandler.hideTooltip();
   }
 
   @action
   handleMouseEnter() {
-    this.popUpHandler.enableTooltips = true;
   }
 
   @action
@@ -167,7 +165,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if(mesh instanceof ClazzMesh || mesh instanceof ComponentMesh || mesh instanceof FoundationMesh) {
       this.popUpHandler.showTooltip(
         mouseOnCanvas,
-        mesh
+        mesh.dataModel
       );
     }
   }
@@ -372,6 +370,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const foundationColor = this.configuration.applicationColors.foundation;
     // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
     this.addComponentToScene(this.foundationBuilder.foundationObj as Component, foundationColor);
+    this.addCommunicationToScene(this.args.application);
 
     this.scene.add(this.applicationObject3D);
     this.resetRotation();
@@ -463,6 +462,51 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
+
+  addCommunicationToScene(application: Application){
+    const drawableClazzCommunications = application.get('drawableClazzCommunications');
+    const { communication: communicationColor } = this.configuration.applicationColors;
+    let viewCenterPoint = CalcCenterAndZoom(this.foundationData);
+
+    drawableClazzCommunications.forEach((drawableClazzComm) => {
+      let communicationData = this.layoutMap.get(drawableClazzComm.get('id'));
+
+      let lineThickness = communicationData.lineThickness * 0.3;
+
+      const start = new THREE.Vector3();
+      start.subVectors(communicationData.startPoint, viewCenterPoint);
+      start.x *= 0.5;
+      start.z *= 0.5;
+
+      const end = new THREE.Vector3();
+      end.subVectors(communicationData.endPoint, viewCenterPoint);
+      end.x *= 0.5;
+      end.z *= 0.5;
+
+
+      // let mesh = new CommunicationMesh(communicationData.startPoint, communicationData.endPoint, communicationData.lineThickness);
+      const material = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(communicationColor)
+      });
+      
+      const direction = new THREE.Vector3().subVectors(end, start);
+      const orientation = new THREE.Matrix4();
+      orientation.lookAt(start, end, new THREE.Object3D().up);
+      orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1,
+        0, 0, -1, 0, 0, 0, 0, 0, 1));
+      const edgeGeometry = new THREE.CylinderGeometry(lineThickness, lineThickness,
+        direction.length(), 20, 1);
+      const pipe = new THREE.Mesh(edgeGeometry, material);
+      pipe.applyMatrix(orientation);
+  
+      pipe.position.x = (end.x + start.x) / 2.0;
+      pipe.position.y = (end.y + start.y) / 2.0;
+      pipe.position.z = (end.z + start.z) / 2.0;
+
+      this.applicationObject3D.add(pipe);
+      });
+    
+  }
 
   resetRotation() {
     const rotationX = 0.65;

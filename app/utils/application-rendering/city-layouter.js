@@ -10,8 +10,8 @@ export default function applyCityLayout(application) {
 
     let map = new Map();
 
-    let allEntities = application.getAllClazzes().concat(application.getAllComponents());
-    allEntities.forEach((entity) => {
+    let boxEntities = application.getAllClazzes().concat(application.getAllComponents());
+    boxEntities.forEach((entity) => {
       map.set(entity.get('id'), {
         height: 0,
         width: 0,
@@ -19,6 +19,16 @@ export default function applyCityLayout(application) {
         positionX: 0,
         positionY: 0,
         positionZ: 0
+      });
+    });
+
+    let communications = application.get('drawableClazzCommunications');
+    communications.forEach((communication) => {
+      map.set(communication.get('id'), {
+        startPoint: new THREE.Vector3(),
+        endPoint: new THREE.Vector3(),
+        lineThickness: 0,
+        pointsFor3D: []
       });
     });
 
@@ -507,23 +517,26 @@ export default function applyCityLayout(application) {
           let sourceClazz = null;
           let targetClazz = null;
 
-          if (clazzCommunication.get('sourceClazz').get('parent').get('opened')) {
+          if (true) {
             sourceClazz = clazzCommunication.get('sourceClazz');
           } else {
             sourceClazz = findFirstParentOpenComponent(clazzCommunication.get('sourceClazz').get('parent'));
           }
 
-          if (clazzCommunication.get('targetClazz').get('parent').get('opened')) {
+          if (true) {
             targetClazz = clazzCommunication.get('targetClazz');
           }
           else {
             targetClazz = findFirstParentOpenComponent(clazzCommunication.get('targetClazz').get('parent'));
           }
 
+          let communicationData = map.get(clazzCommunication.get('id'));
+          let sourceClazzData = map.get(sourceClazz.get('id'));
+          let targetClazzData = map.get(targetClazz.get('id'));
+
           if (sourceClazz !== null && targetClazz !== null) {
-              clazzCommunication.set('state', 'NORMAL');
-              clazzCommunication.set('startPoint', new THREE.Vector3(sourceClazz.get('positionX') + sourceClazz.get('width') / 2.0, sourceClazz.get('positionY'), sourceClazz.get('positionZ') + sourceClazz.get('depth') / 2.0));
-              clazzCommunication.set('endPoint', new THREE.Vector3(targetClazz.get('positionX') + targetClazz.get('width') / 2.0, targetClazz.get('positionY') + 0.05, targetClazz.get('positionZ') + targetClazz.get('depth') / 2.0));
+            communicationData.startPoint = new THREE.Vector3(sourceClazzData.positionX + sourceClazzData.width / 2.0, sourceClazzData.positionY, sourceClazzData.positionZ + sourceClazzData.depth / 2.0);
+            communicationData.endPoint = new THREE.Vector3(targetClazzData.positionX + targetClazzData.width / 2.0, targetClazzData.positionY + 0.05, targetClazzData.positionZ + targetClazzData.depth / 2.0);
           }
         }
 
@@ -543,7 +556,8 @@ export default function applyCityLayout(application) {
 
         drawableClazzCommunications.forEach((clazzCommunication) => {
           const calculatedCategory = getMatchingCategory(clazzCommunication.get('requests'), categories);
-          clazzCommunication.set('lineThickness', (calculatedCategory  * pipeSizeEachStep) + pipeSizeDefault);
+          let communicationData = map.get(clazzCommunication.get('id'));
+          communicationData.lineThickness = (calculatedCategory  * pipeSizeEachStep) + pipeSizeDefault;
         });
 
         // generates four default categories for rendering (thickness of communication lines)
@@ -595,12 +609,15 @@ export default function applyCityLayout(application) {
 
       } // END calculatePipeSizeFromQuantiles
 
+      // TODO: change again later on
       function findFirstParentOpenComponent(entity) {
+        /*
         if (entity.get('parentComponent') == null || entity.get('parentComponent').get('opened')) {
           return entity;
         }
 
-        return findFirstParentOpenComponent(entity.get('parentComponent'));
+        return findFirstParentOpenComponent(entity.get('parentComponent'));*/
+        return entity.get('parentComponent');
       }
 
     } // END layoutEdges
@@ -620,9 +637,9 @@ export default function applyCityLayout(application) {
     }
 
     function layoutInAndOutCommunication(commu, internalClazz, centerCommuIcon) {
-
-      commu.set('pointsFor3D', []);
-      commu.get('pointsFor3D').push(centerCommuIcon);
+      let communicationData = map.get(commu.get('id'));
+      communicationData.pointsFor3D = [];
+      communicationData.pointsFor3D.push(centerCommuIcon);
 
       if (internalClazz !== null) {
         const end = new THREE.Vector3();
@@ -636,7 +653,7 @@ export default function applyCityLayout(application) {
         end.x = internalClazz.get('positionX') + internalClazz.get('width') / 2.0;
         end.y = centerPoint.y;
         end.z = internalClazz.get('positionZ') + internalClazz.get('depth') / 2.0;
-        commu.get('pointsFor3D').push(end);
+        communicationData.pointsFor3D.push(end);
       }
     }
 
