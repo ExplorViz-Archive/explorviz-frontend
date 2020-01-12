@@ -31,7 +31,6 @@ import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import NodeGroup from 'explorviz-frontend/models/nodegroup';
 import System from 'explorviz-frontend/models/system';
 import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
-import PopupHandler from 'explorviz-frontend/utils/application-rendering/popup-handler';
 
 
 interface Args {
@@ -91,7 +90,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   meshIdToModel: Map<number, any> = new Map();
 
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
-  popUpHandler: PopupHandler = new PopupHandler();
+/*   popUpHandler: PopupHandler = new PopupHandler(); */
 
   constructor(owner: any, args: Args) {
     super(owner, args);
@@ -488,7 +487,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @action
   handleMouseWheel(delta: number) {
     // Hide (old) tooltip
-    this.popUpHandler.hideTooltip();
+/*     this.popUpHandler.hideTooltip(); */
 
     const scrollVector = new THREE.Vector3(0, 0, delta * 1.5);
 
@@ -506,7 +505,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   handleMouseOut() {
-    this.popUpHandler.hideTooltip();
+/*     this.popUpHandler.hideTooltip(); */
   }
 
   @action

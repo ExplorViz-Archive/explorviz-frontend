@@ -16,16 +16,23 @@ import Clazz from "explorviz-frontend/models/clazz";
 import CurrentUser from "explorviz-frontend/services/current-user";
 import Component from "explorviz-frontend/models/component";
 import FoundationMesh from "explorviz-frontend/utils/3d/application/foundation-mesh";
-import PopupHandler from "explorviz-frontend/utils/application-rendering/popup-handler";
 import HoverEffectHandler from "explorviz-frontend/utils/hover-effect-handler";
 import ClazzMesh from "explorviz-frontend/utils/3d/application/clazz-mesh";
 import ComponentMesh from "explorviz-frontend/utils/3d/application/component-mesh";
 import EntityMesh from "explorviz-frontend/utils/3d/entity-mesh";
 import CommunicationMesh from "explorviz-frontend/utils/3d/communication-mesh";
+import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
+import { tracked } from "@glimmer/tracking";
 
 interface Args {
   id: string,
   application: Application
+}
+
+type PopupData = {
+  mouseX: number,
+  mouseY: number,
+  entity: Component|Clazz|DrawableClazzCommunication
 }
 
 export default class ApplicationRendering extends GlimmerComponent<Args> {
@@ -69,7 +76,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   foundationData: any;
 
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
-  popUpHandler: PopupHandler = new PopupHandler();
+
+  @tracked
+  popupData: PopupData|null = null;
 
   constructor(owner: any, args: Args) {
     super(owner, args);
@@ -140,18 +149,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.hoverHandler.handleHoverEffect(mesh);
     }
 
-    this.popUpHandler.hideTooltip();
+    this.popupData = null;
   }
 
   @action
   handleMouseWheel(delta: number) {
-    this.popUpHandler.hideTooltip()
+    this.popupData = null;
     this.camera.position.z += delta * 3.5;
   }
 
   @action
   handleMouseOut() {
-    this.popUpHandler.hideTooltip();
+    this.popupData = null;
   }
 
   @action
@@ -163,11 +172,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (mesh === undefined)
       return;
 
-    if (mesh instanceof ClazzMesh || mesh instanceof ComponentMesh || mesh instanceof FoundationMesh) {
-      this.popUpHandler.showTooltip(
-        mouseOnCanvas,
-        mesh.dataModel
-      );
+    if (mesh instanceof ClazzMesh || mesh instanceof ComponentMesh || mesh instanceof CommunicationMesh) {
+      this.popupData = {
+        mouseX: mouseOnCanvas.x,
+        mouseY: mouseOnCanvas.y,
+        entity: mesh.dataModel
+      };
     }
   }
 

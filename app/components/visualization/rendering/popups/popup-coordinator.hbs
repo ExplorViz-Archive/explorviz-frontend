@@ -31,9 +31,9 @@
       <Visualization::Rendering::Popups::ApplicationPopups::ClazzPopup
         @clazz={{@popupData.entity}}/>
     {{/if}}
-    {{#if (eq @popupData.popupType "ClazzCommunication")}}
+    {{#if (eq @popupData.entity.constructor.name "DrawableClazzCommunication")}}
       <Visualization::Rendering::Popups::ApplicationPopups::CommunicationPopup
-        @data={{@popupData}} />
+        @communication={{@popupData.entity}} />
     {{/if}}
   </div>
 {{/if}}
