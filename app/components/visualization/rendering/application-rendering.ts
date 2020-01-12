@@ -16,16 +16,23 @@ import Clazz from "explorviz-frontend/models/clazz";
 import CurrentUser from "explorviz-frontend/services/current-user";
 import Component from "explorviz-frontend/models/component";
 import FoundationMesh from "explorviz-frontend/utils/3d/application/foundation-mesh";
-import PopupHandler from "explorviz-frontend/utils/application-rendering/popup-handler";
 import HoverEffectHandler from "explorviz-frontend/utils/hover-effect-handler";
 import ClazzMesh from "explorviz-frontend/utils/3d/application/clazz-mesh";
 import ComponentMesh from "explorviz-frontend/utils/3d/application/component-mesh";
 import EntityMesh from "explorviz-frontend/utils/3d/entity-mesh";
 import CommunicationMesh from "explorviz-frontend/utils/3d/communication-mesh";
+import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
+import { tracked } from "@glimmer/tracking";
 
 interface Args {
   id: string,
   application: Application
+}
+
+type PopupData = {
+  mouseX: number,
+  mouseY: number,
+  entity: Component|Clazz|DrawableClazzCommunication
 }
 
 export default class ApplicationRendering extends GlimmerComponent<Args> {
@@ -69,7 +76,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   foundationData: any;
 
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
-  popUpHandler: PopupHandler = new PopupHandler();
+
+  @tracked
+  popupData: PopupData|null = null;
 
   constructor(owner: any, args: Args) {
     super(owner, args);
@@ -141,18 +150,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.hoverHandler.handleHoverEffect(mesh);
     }
 
-    this.popUpHandler.hideTooltip();
+    this.popupData = null;
   }
 
   @action
   handleMouseWheel(delta: number) {
-    this.popUpHandler.hideTooltip()
+    this.popupData = null;
     this.camera.position.z += delta * 3.5;
   }
 
   @action
   handleMouseOut() {
-    this.popUpHandler.hideTooltip();
+    this.popupData = null;
   }
 
   @action
@@ -164,11 +173,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (mesh === undefined)
       return;
 
-    if (mesh instanceof ClazzMesh || mesh instanceof ComponentMesh || mesh instanceof FoundationMesh) {
-      this.popUpHandler.showTooltip(
-        mouseOnCanvas,
-        mesh.dataModel
-      );
+    if (mesh instanceof ClazzMesh || mesh instanceof ComponentMesh || mesh instanceof CommunicationMesh) {
+      this.popupData = {
+        mouseX: mouseOnCanvas.x,
+        mouseY: mouseOnCanvas.y,
+        entity: mesh.dataModel
+      };
     }
   }
 
@@ -639,8 +649,41 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   willDestroy() {
+    cancelAnimationFrame(this.animationFrameId);
+    this.cleanUpObject3D(this.scene);
+    this.scene.dispose();
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
     this.renderingService.removeRendering(this.args.id);
     this.foundationBuilder.removeFoundation(this.store);
     this.interaction.removeHandlers();
+
+    this.debug("Cleaned up application rendering");
+  }
+
+  cleanUpObject3D(obj: THREE.Object3D) {
+    obj.children.forEach((object: THREE.Object3D) => {
+      this.cleanUpObject3D(object);
+      if(object instanceof THREE.Mesh) {
+        this.disposeMesh(object);
+      }
+    });
+  }
+
+  disposeMesh(mesh: THREE.Mesh) {
+    mesh.geometry.dispose();
+    if(mesh.material instanceof THREE.Material) {
+      mesh.material.dispose();
+    } else {
+      mesh.material.forEach(material => {
+        material.dispose();
+      });
+    }
+  }
+
+  disposeApplicationMeshes() {
+    this.modelIdToMesh.forEach(mesh => {
+      this.disposeMesh(mesh);
+    });
   }
 }
