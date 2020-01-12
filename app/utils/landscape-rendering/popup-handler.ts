@@ -1,22 +1,23 @@
-import Object from '@ember/object';
 import { round } from '../helpers/number-helpers';
-import { inject as service } from '@ember/service';
 import System from 'explorviz-frontend/models/system';
 import Node from 'explorviz-frontend/models/node';
 import NodeGroup from 'explorviz-frontend/models/nodegroup';
 import Application from 'explorviz-frontend/models/application';
 import ApplicationCommunication from 'explorviz-frontend/models/applicationcommunication';
+import { tracked } from '@glimmer/tracking';
 
-export default Object.extend({
+export default class PopupHandler {
 
-  additionalData: service(),
-  enableTooltips: true,
+  enableTooltips:boolean = true;
+
+  @tracked
+  popupContent: any = null;
 
 
   showTooltip(mouse: { x: number, y: number },
     emberModel: System | NodeGroup | Node | Application | ApplicationCommunication) {
 
-    if (!this.get('enableTooltips')) {
+    if (!this.enableTooltips) {
       return;
     }
 
@@ -45,15 +46,13 @@ export default Object.extend({
       popupData.mouseY = mouse.y;
     }
 
-    const additionalData: any = this.get("additionalData");
-    additionalData.setPopupContent(popupData);
-  },
+    this.popupContent = popupData;
+  }
 
 
   hideTooltip() {
-    const additionalData: any = this.get("additionalData");
-    additionalData.removePopup();
-  },
+    this.popupContent = null;
+  }
 
 
   buildSystemData(system: System) {
@@ -89,7 +88,7 @@ export default Object.extend({
     }
 
     return popupData;
-  },
+  }
 
 
   buildNodeGroupData(nodeGroup: NodeGroup) {
@@ -116,7 +115,7 @@ export default Object.extend({
     }
 
     return popupData;
-  },
+  }
 
 
   buildNodeData(node: any) {
@@ -136,7 +135,7 @@ export default Object.extend({
     }
 
     return popupData;
-  },
+  }
 
 
   buildApplicationData(application: Application) {
@@ -151,7 +150,7 @@ export default Object.extend({
     }
 
     return popupData;
-  },
+  }
 
 
   buildCommunicationData(communication: ApplicationCommunication) {
@@ -176,6 +175,6 @@ export default Object.extend({
       let multiplier = Math.pow(10, precision || 0);
       return Math.round(value * multiplier) / multiplier;
     }
-  },
+  }
 
-});
+}
