@@ -29,8 +29,8 @@ export default abstract class EntityMesh extends THREE.Mesh {
 
     // Set default dimensions to layout data
     this.height = layoutHeight;
-    this.width = layoutWidth / 2;
-    this.depth = layoutDepth / 2;
+    this.width = layoutWidth;
+    this.depth = layoutDepth;
 
     this.defaultColor = defaultColor;
     this.highlightingColor = highlightingColor;

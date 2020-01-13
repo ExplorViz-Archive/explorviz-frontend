@@ -472,8 +472,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     let applicationCenter = CalcCenterAndZoom(this.foundationData);
     centerPoint.sub(applicationCenter);
-    centerPoint.x *= 0.5;
-    centerPoint.z *= 0.5;
 
     mesh.position.copy(centerPoint);
 
@@ -519,13 +517,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       const start = new THREE.Vector3();
       start.subVectors(commLayout.startPoint, viewCenterPoint);
-      start.x *= 0.5;
-      start.z *= 0.5;
 
       const end = new THREE.Vector3();
       end.subVectors(commLayout.endPoint, viewCenterPoint);
-      end.x *= 0.5;
-      end.z *= 0.5;
 
       const direction = new THREE.Vector3().subVectors(end, start);
       const orientation = new THREE.Matrix4();

@@ -22,6 +22,7 @@ type layoutSegment = {
 export function applyBoxLayout(application: Application) {
 
   const INSET_SPACE = 4.0;
+  const OPENED_COMPONENT_HEIGHT = 1.5;
 
   const components = application.get('components');
 
@@ -47,6 +48,14 @@ export function applyBoxLayout(application: Application) {
   doLayout(foundationComponent);
   setAbsoluteLayoutPosition(foundationComponent);
 
+  // Scale dimensions for needs of application rendering
+  layoutMap.forEach((box) => {
+    box.positionX *= 0.5;
+    box.positionZ *= 0.5;
+    box.width *= 0.5;
+    box.depth *= 0.5;
+  });
+
   return layoutMap;
 
   // Helper functions
@@ -59,19 +68,21 @@ export function applyBoxLayout(application: Application) {
 
     childComponents.forEach((childComponent) => {
       let childCompLayout = layoutMap.get(childComponent.get('id'));
-      childCompLayout.positionX = childCompLayout.positionX + componentLayout.positionX;
-      childCompLayout.positionY += componentLayout.positionY + 0.75 * 2.0;
-      childCompLayout.positionZ = childCompLayout.positionZ + componentLayout.positionZ;
+
+      childCompLayout.positionX += componentLayout.positionX;
+      childCompLayout.positionY += componentLayout.positionY + OPENED_COMPONENT_HEIGHT;
+      childCompLayout.positionZ += componentLayout.positionZ;
+
       setAbsoluteLayoutPosition(childComponent);
     });
 
 
     clazzes.forEach((clazz) => {
       let clazzLayout = layoutMap.get(clazz.get('id'));
-      clazzLayout.positionX = clazzLayout.positionX + componentLayout.positionX;
-      clazzLayout.positionY = clazzLayout.positionY + componentLayout.positionY;
-      clazzLayout.positionY = clazzLayout.positionY + 0.75 * 2.0;
-      clazzLayout.positionZ = clazzLayout.positionZ + componentLayout.positionZ;
+
+      clazzLayout.positionX += componentLayout.positionX;
+      clazzLayout.positionY += componentLayout.positionY + OPENED_COMPONENT_HEIGHT;
+      clazzLayout.positionZ += componentLayout.positionZ;
     });
   }
 
@@ -374,16 +385,14 @@ export function applyBoxLayout(application: Application) {
     rootSegment.width = maxX;
     rootSegment.height = maxZ;
 
-    // add labelInset space
-
-    const labelInsetSpace = 8.0;
+    // Add labelInset space
 
     children.forEach((child: any) => {
       let childData = layoutMap.get(child.get('id'));
-      childData.positionX = childData.positionX + labelInsetSpace;
+      childData.positionX = childData.positionX + INSET_SPACE;
     });
 
-    rootSegment.width = rootSegment.width + labelInsetSpace;
+    rootSegment.width += INSET_SPACE;
 
     return rootSegment;
 
@@ -595,7 +604,7 @@ export function applyCommunicationLayout(application: Application,
         if (layoutMap.has(clazzCommunication.get('id'))) {
           // Contains a number from 0 to 3 depending on the number of requests
           const calculatedCategory = getMatchingCategory(clazzCommunication.get('requests'), categories);
-          
+
           let communicationData = layoutMap.get(clazzCommunication.get('id'));
           if (communicationData) {
             communicationData.lineThickness = (calculatedCategory * PIPE_SIZE_EACH_STEP) + PIPE_SIZE_DEFAULT;
