@@ -385,7 +385,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
             this.configuration, this.labeler, this.font);
           if (nodegroupMesh) {
             this.scene.add(nodegroupMesh);
-            this.meshIdToModel.set(nodegroupMesh.id, system);
+            this.meshIdToModel.set(nodegroupMesh.id, nodegroup);
           }
 
           let nodes = nodegroup.get('nodes');
