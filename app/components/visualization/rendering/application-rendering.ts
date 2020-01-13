@@ -285,7 +285,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.unhighlightAll();
     let model = mesh.dataModel;
 
-    // Get all clazzes
     let foundation = this.foundationBuilder.foundationObj;
     if (foundation === null)
       return;
@@ -351,8 +350,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const parent = component.getParentComponent();
     let parentMesh = this.modelIdToMesh.get(component.get('id'));
     if (parentMesh instanceof ComponentMesh && parentMesh.opened) {
-      parentMesh.material.opacity = 0.3;
-      parentMesh.material.transparent = true;
+      parentMesh.turnTransparent(0.3);
     }
     this.turnComponentAndAncestorsTransparent(parent, ignorableComponents);
   }
@@ -492,6 +490,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       }
 
       let commLayout = commLayoutMap.get(drawableClazzComm.get('id'));
+
+      if (!commLayout){
+        return;
+      }
 
       let lineThickness = commLayout.lineThickness * 0.3;
 
