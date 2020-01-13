@@ -31,7 +31,6 @@ export default class VisualizationRoute extends BaseRoute.extend(AuthenticatedRo
   // @Override
   @action
   didTransition() {
-    (this.controller as VisualizationController).hideVersionbar();
     (this.controller as VisualizationController).showTimeline();
   }
 

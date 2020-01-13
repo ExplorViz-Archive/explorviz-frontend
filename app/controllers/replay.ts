@@ -55,10 +55,6 @@ export default class ReplayController extends Controller {
     set(this.renderingService, 'showTimeline', true);
   }
 
-  hideVersionbar() {
-    set(this.renderingService, 'showVersionbar', false);
-  }
-
   // necessary for hidded input box to select a file for uploading
   @action triggerSelectBox() {
     let queryBox = document.querySelector("#selectBoxUploadLandscape") as HTMLElement;

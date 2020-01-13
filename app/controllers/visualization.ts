@@ -130,10 +130,6 @@ export default class VisualizationController extends Controller {
     set(this.renderingService, 'showTimeline', true);
   }
 
-  hideVersionbar(){
-    set(this.renderingService, 'showVersionbar', false);
-  }
-
   initRendering() {
     get(this, 'landscapeListener').initSSE();
   }

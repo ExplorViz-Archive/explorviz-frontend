@@ -16,7 +16,6 @@ export interface RenderingContext {
 export default class RenderingService extends Service.extend(Evented) {
 
   showTimeline: boolean = true;
-  showVersionbar: boolean = true;
 
   renderingContexts: Map<string, RenderingContext> = new Map();
   customRenderingPipelines: Map<string, Function[]> = new Map();
