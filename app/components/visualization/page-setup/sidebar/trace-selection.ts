@@ -2,7 +2,6 @@ import Component from '@glimmer/component';
 import { inject as service } from "@ember/service";
 import { computed, action } from '@ember/object';
 import DS from 'ember-data';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
 import Highlighter from 'explorviz-frontend/services/visualization/application/highlighter';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
@@ -12,7 +11,11 @@ import { tracked } from '@glimmer/tracking';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
-export default class TraceSelection extends Component {
+interface Args {
+  removeComponent(componentPath: string): void
+}
+
+export default class TraceSelection extends Component<Args> {
 
   // default time units
   @tracked
@@ -34,9 +37,6 @@ export default class TraceSelection extends Component {
 
   @service('store')
   store!: DS.Store;
-
-  @service('additional-data')
-  additionalData!: AdditionalData;
 
   @service('visualization/application/highlighter')
   highlighter!: Highlighter;
@@ -185,7 +185,7 @@ export default class TraceSelection extends Component {
 
   @action
   close(this: TraceSelection) {
-    this.additionalData.removeComponent('visualization/page-setup/sidebar/trace-selection');
+    this.args.removeComponent('visualization/page-setup/sidebar/trace-selection');
   }
 
   moveCameraToTraceStep(this: TraceSelection) {
@@ -198,15 +198,6 @@ export default class TraceSelection extends Component {
       if (clazzCommunication !== null) {
         this.renderingService.moveCameraTo(clazzCommunication);
       }
-    }
-  }
-
-  @action
-  onWindowChange(this: TraceSelection) {
-    if (!this.additionalData.get('showWindow') && this.highlighter.get('isTrace')) {
-      let highlighter = this.highlighter;
-      highlighter.unhighlightAll();
-      this.renderingService.redrawScene();
     }
   }
 
