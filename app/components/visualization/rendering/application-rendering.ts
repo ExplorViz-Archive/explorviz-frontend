@@ -27,6 +27,7 @@ import { tracked } from "@glimmer/tracking";
 interface Args {
   id: string,
   application: Application
+  addComponent(componentPath: string): void // is passed down to the viz navbar
 }
 
 type PopupData = {
@@ -203,6 +204,32 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.camera.position.x = xVal;
       this.camera.position.y = yVal;
     }
+  }
+
+  @action
+  openAllComponents() {
+    let foundation = this.foundationBuilder.foundationObj;
+    if(foundation === null)
+      return;
+
+    foundation.children.forEach((child) => {
+      let mesh = this.modelIdToMesh.get(child.get('id'));
+      if(mesh !== undefined && mesh instanceof ComponentMesh) {
+        this.openComponentMesh(mesh);
+      }
+      this.openComponentsRecursively(child);
+    });
+  }
+
+  openComponentsRecursively(component: Component) {
+    let components = component.children;
+    components.forEach((child) => {
+      let mesh = this.modelIdToMesh.get(child.get('id'));
+      if(mesh !== undefined && mesh instanceof ComponentMesh) {
+        this.openComponentMesh(mesh);
+      }
+      this.openComponentsRecursively(child);
+    });
   }
 
   openComponentMesh(mesh: ComponentMesh) {

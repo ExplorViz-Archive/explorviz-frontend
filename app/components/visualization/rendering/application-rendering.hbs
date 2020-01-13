@@ -1,5 +1,17 @@
 {{add-listener this.renderingService 'redrawScene' this.cleanAndUpdateScene}}
 
+
+<Visualization::PageSetup::VisualizationNavbar
+  @content={{array
+    (component "visualization/page-setup/navbar/reset-visualization")
+    (component "visualization/page-setup/navbar/pause-reload")
+    (component "visualization/page-setup/navbar/trace-overview" addComponent=@addComponent)
+    (component "visualization/page-setup/navbar/sql-opener" addComponent=@addComponent)
+    (component "visualization/page-setup/navbar/application-opener" openAllComponents=this.openAllComponents)
+    (component "visualization/page-setup/navbar/application-search")
+  }}
+/>
+
 <div style="width: 100%; height: 100%" {{did-insert this.outerDivInserted}}>
   <canvas class="main-content-majority" oncontextmenu="return false;" style="width:100%; height: 100%" {{did-insert this.canvasInserted}}>
   </canvas>
