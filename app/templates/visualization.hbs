@@ -1,5 +1,5 @@
 <div class="row" style="max-height:100%">
-  <div class="{{if this.showDataSelection "col-8" "col-12"}}" id="vizspace" {{did-resize this.resize debounce=100}}>
+  <div class="{{if this.showDataSelection "col-8" "col-12"}}" id="vizspace">
     {{#if this.showLandscape}}
       {{#if this.landscapeRepo.latestLandscape.systems}}
         <Visualization::PageSetup::VisualizationNavbar
@@ -25,20 +25,18 @@
         </div>
       {{/if}}
     {{else}}
-      <div id="rendering">
-        <div style="position: absolute!important" class="pl-1">
-          <BsButton @onClick={{action this.openLandscapeView}} @type="secondary" @outline={{true}} @title="Back to Landscape">
-            {{svg-jar "reply" class="octicon align-middle"}}
-          </BsButton>
-        </div>
-        {{#if this.landscapeRepo.latestApplication}}
-          <Visualization::Rendering::ApplicationRendering
-            @id="app1"
-            @application={{this.landscapeRepo.latestApplication}}
-            @addComponent={{this.addComponent}}
-          />
-        {{/if}}
+      <div style="position: absolute!important" class="pl-1">
+        <BsButton @onClick={{action this.openLandscapeView}} @type="secondary" @outline={{true}} @title="Back to Landscape">
+          {{svg-jar "reply" class="octicon align-middle"}}
+        </BsButton>
       </div>
+      {{#if this.landscapeRepo.latestApplication}}
+        <Visualization::Rendering::ApplicationRendering
+          @id="app1"
+          @application={{this.landscapeRepo.latestApplication}}
+          @addComponent={{this.addComponent}}
+        />
+      {{/if}}
     {{/if}}
     <!-- timeline -->
     <div id="timeline-content">

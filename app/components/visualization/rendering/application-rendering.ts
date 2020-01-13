@@ -100,14 +100,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   outerDivInserted(outerDiv: HTMLElement) {
     this.debug("Outer Div inserted");
-    this.canvas.height = outerDiv.clientHeight;
-    this.canvas.width = outerDiv.clientWidth;
-    this.canvas.style.width = "";
-    this.canvas.style.height = "";
 
     this.initThreeJs();
     this.initInteraction();
     this.render();
+
+    this.resize(outerDiv);
 
     const renderingContext: RenderingContext = {
       scene: this.scene,
@@ -116,6 +114,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     };
     this.renderingService.addRendering(this.args.id, renderingContext, [this.step1, this.step2, this.step3]);
     this.renderingService.render(this.args.id, this.args.application);
+  }
+
+  @action
+  resize(outerDiv: HTMLElement) {
+    const width = Number(outerDiv.clientWidth);
+    const height = Number(outerDiv.clientHeight);
+    this.renderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
   }
 
   resetScene() {
