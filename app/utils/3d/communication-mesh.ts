@@ -2,7 +2,6 @@ import THREE from 'three';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 import CommunicationLayout from '../layout-models/communication-layout';
 
-
 export default class CommunicationMesh extends THREE.Mesh {
 
   dataModel: DrawableClazzCommunication;
@@ -12,7 +11,7 @@ export default class CommunicationMesh extends THREE.Mesh {
   defaultColor: THREE.Color;
   highlightingColor: THREE.Color;
 
-  constructor(layout: CommunicationLayout, dataModel: DrawableClazzCommunication, 
+  constructor(layout: CommunicationLayout, dataModel: DrawableClazzCommunication,
     defaultColor: THREE.Color, highlightingColor: THREE.Color) {
     super();
     this.layout = layout;

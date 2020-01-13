@@ -124,7 +124,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   handleSingleClick(mesh: THREE.Mesh | undefined) {
-    if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
+    if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh || mesh instanceof CommunicationMesh) {
       this.highlight(mesh);
     }
   }
@@ -137,6 +137,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       } else {
         this.openComponentMesh(mesh);
       }
+      this.addCommunicationToScene(this.args.application);
     }
   }
 
@@ -273,7 +274,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
-  highlight(mesh: ComponentMesh | ClazzMesh): void {
+  highlight(mesh: ComponentMesh | ClazzMesh | CommunicationMesh): void {
     // Reset highlighting if highlighted mesh is clicked
     if (mesh.highlighted) {
       this.unhighlightAll();
@@ -284,7 +285,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.unhighlightAll();
     let model = mesh.dataModel;
 
-    // Get all clazzes
     let foundation = this.foundationBuilder.foundationObj;
     if (foundation === null)
       return;
@@ -301,8 +301,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     if (model instanceof Component)
       model.getContainedClazzes(containedClazzes);
-    else
+    else if (model instanceof Clazz)
       containedClazzes.add(model);
+    else
+      return;
 
     let allInvolvedClazzes = new Set<Clazz>(containedClazzes);
 
@@ -334,7 +336,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   unhighlightAll() {
     let meshes = this.modelIdToMesh.values();
     for (let mesh of meshes) {
-      if (mesh instanceof EntityMesh) {
+      if (mesh instanceof EntityMesh || mesh instanceof CommunicationMesh) {
         mesh.unhighlight();
       }
     }
@@ -348,8 +350,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const parent = component.getParentComponent();
     let parentMesh = this.modelIdToMesh.get(component.get('id'));
     if (parentMesh instanceof ComponentMesh && parentMesh.opened) {
-      parentMesh.material.opacity = 0.3;
-      parentMesh.material.transparent = true;
+      parentMesh.turnTransparent(0.3);
     }
     this.turnComponentAndAncestorsTransparent(parent, ignorableComponents);
   }
@@ -474,18 +475,29 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
 
   addCommunicationToScene(application: Application) {
-    let commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap);
+    this.removeCommunicationFromScene(application);
+
+    let commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap, this.modelIdToMesh);
 
     const drawableClazzCommunications = application.get('drawableClazzCommunications');
     const { communication: communicationColor, highlightedEntity: highlightedEntityColor } = this.configuration.applicationColors;
     let viewCenterPoint = CalcCenterAndZoom(this.foundationData);
 
     drawableClazzCommunications.forEach((drawableClazzComm) => {
+      // No layouting information available due to hidden communication
+      if (!commLayoutMap.has(drawableClazzComm.get('id'))) {
+        return;
+      }
+
       let commLayout = commLayoutMap.get(drawableClazzComm.get('id'));
+
+      if (!commLayout){
+        return;
+      }
 
       let lineThickness = commLayout.lineThickness * 0.3;
 
-      let pipe = new CommunicationMesh(commLayout, drawableClazzComm, 
+      let pipe = new CommunicationMesh(commLayout, drawableClazzComm,
         new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor));
 
       const start = new THREE.Vector3();
@@ -516,6 +528,27 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       this.applicationObject3D.add(pipe);
       this.modelIdToMesh.set(drawableClazzComm.get('id'), pipe);
+    });
+  }
+
+  removeCommunicationFromScene(application: Application) {
+    let drawableClazzCommunications = application.get('drawableClazzCommunications');
+
+    drawableClazzCommunications.forEach((drawableClazzComm) => {
+      // No mesh available due to hidden communication
+      if (this.modelIdToMesh.has(drawableClazzComm.get('id'))) {
+        let communicationMesh = this.modelIdToMesh.get(drawableClazzComm.get('id'));
+        if (communicationMesh && communicationMesh.parent) {
+          communicationMesh.parent.remove(communicationMesh);
+          if (communicationMesh.geometry) {
+            communicationMesh.geometry.dispose();
+          }
+          if (communicationMesh.material instanceof THREE.Material) {
+            communicationMesh.material.dispose();
+          }
+        }
+        this.modelIdToMesh.delete(drawableClazzComm.get('id'));
+      }
     });
   }
 

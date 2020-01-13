@@ -72,8 +72,21 @@ export default abstract class EntityMesh extends THREE.Mesh {
     this.highlighted = false;
     if (this.material instanceof THREE.MeshLambertMaterial) {
       this.material.color = this.defaultColor;
+      this.turnOpaque();
+    }
+  }
+
+  turnOpaque(){
+    if (this.material instanceof THREE.MeshLambertMaterial) {
+      this.material.opacity = 1;
       this.material.transparent = false;
-      this.material.opacity = 1.0;
+    }
+  }
+
+  turnTransparent(opacity: number){
+    if (this.material instanceof THREE.MeshLambertMaterial) {
+      this.material.opacity = opacity;
+      this.material.transparent = true;
     }
   }
 

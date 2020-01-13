@@ -5,7 +5,7 @@ export default Object.extend({
 
   store: service(),
 
-  
+
   /**
    *  Computes (possibly) bidirectional communication and saves 
    *  it as a model. Later used to draw communication between clazzes
