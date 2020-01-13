@@ -24,7 +24,6 @@ export default class ConfigurationController extends Controller {
 
   hideTimeline() {
     set(this.renderingService, 'showTimeline', false);
-    set(this.renderingService, 'showVersionbar', false);
   }
 
 }

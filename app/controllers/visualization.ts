@@ -5,11 +5,11 @@ import { observes } from '@ember-decorators/object';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import Timestamp from 'explorviz-frontend/models/timestamp';
 import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-setup/timeline/plotly-timeline';
+import { tracked } from '@glimmer/tracking';
 
 /**
 * TODO
@@ -25,7 +25,6 @@ export default class VisualizationController extends Controller {
   @service("rendering-service") renderingService!: RenderingService;
   @service("repos/landscape-repository") landscapeRepo!: LandscapeRepository;
   @service("landscape-listener") landscapeListener!: LandscapeListener;
-  @service("additional-data") additionalData!: AdditionalData;
   @service("repos/timestamp-repository") timestampRepo!: TimestampRepository;
   @service("reload-handler") reloadHandler!: ReloadHandler;
 
@@ -36,6 +35,12 @@ export default class VisualizationController extends Controller {
   plotlyTimelineRef!: PlotlyTimeline;
 
   selectedTimestampRecords:Timestamp[] = [];
+
+  @tracked
+  showDataSelection = false;
+
+  @tracked
+  components: string[] = [];
 
   @observes('landscapeListener.pauseVisualizationReload')
   timelineResetObserver() {
@@ -74,6 +79,42 @@ export default class VisualizationController extends Controller {
   }
 
   @action
+  closeDataSelection() {
+    this.showDataSelection = false;
+    this.components = [];
+  }
+
+  @action
+  addComponent(component: string) {
+    if(this.components.includes(component))
+      return;
+
+    this.components = [...this.components, component]
+    if(this.components.length > 0) {
+      this.showDataSelection = true;
+    }
+  }
+
+  @action
+  removeComponent(path: string) {
+    if(this.components.length === 0)
+      return;
+
+    let index = this.components.indexOf(path);
+    // Remove existing sidebar component
+    if (index !== -1) {
+      let components = [...this.components];
+      components.splice(index, 1);
+      this.components = components;
+    }
+
+    // Close sidebar if it would be empty otherwise
+    if(this.components.length === 0) {
+      this.showDataSelection = false;
+    }
+  }
+
+  @action
   timelineClicked(timestampRecordArray:Timestamp[]) {
     set(this, "selectedTimestampRecords", timestampRecordArray);
     get(this, 'reloadHandler').loadLandscapeById(timestampRecordArray[0].get("timestamp"));
@@ -89,16 +130,7 @@ export default class VisualizationController extends Controller {
     set(this.renderingService, 'showTimeline', true);
   }
 
-  hideVersionbar(){
-    set(this.renderingService, 'showVersionbar', false);
-  }
-
   initRendering() {
     get(this, 'landscapeListener').initSSE();
-  }
-
-  // @Override
-  cleanup() {
-    this._super(...arguments);
   }
 }

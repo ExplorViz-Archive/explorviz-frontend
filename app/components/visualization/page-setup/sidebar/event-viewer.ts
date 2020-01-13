@@ -1,18 +1,18 @@
 import Component from '@glimmer/component';
 import { inject as service } from '@ember/service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
 import DS from 'ember-data';
 import { action } from '@ember/object';
 import Event from 'explorviz-frontend/models/event';
 
-export default class EventViewer extends Component {
+interface Args {
+  removeComponent(componentPath: string): void
+}
+
+export default class EventViewer extends Component<Args> {
 
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
-
-  @service('additional-data')
-  additionalData!: AdditionalData;
 
   @service('store')
   store!: DS.Store;
@@ -35,7 +35,7 @@ export default class EventViewer extends Component {
 
   @action
   close() {
-    this.additionalData.removeComponent('visualization/page-setup/sidebar/event-viewer');
+    this.args.removeComponent('visualization/page-setup/sidebar/event-viewer');
   }
 
 }

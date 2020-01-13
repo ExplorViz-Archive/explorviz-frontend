@@ -1,14 +1,16 @@
 import Component from '@glimmer/component';
 import { inject as service } from "@ember/service";
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
 import { action, set } from '@ember/object';
 
-export default class TraceOverview extends Component {
+interface Args {
+  addComponent(componentPath: string): void
+}
 
-  @service('additional-data') additionalData!: AdditionalData;
+export default class TraceOverview extends Component<Args> {
+
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
   @service('landscape-listener') landscapeListener!: LandscapeListener;
   
@@ -23,8 +25,7 @@ export default class TraceOverview extends Component {
       }      
       set(this.landscapeListener, 'pauseVisualizationReload', true);
       AlertifyHandler.showAlertifyMessage("Visualization paused!");
-      this.additionalData.addComponent("visualization/page-setup/sidebar/trace-selection");
-      this.additionalData.openAdditionalData();
+      this.args.addComponent('visualization/page-setup/sidebar/trace-selection');
     }
   }
 }

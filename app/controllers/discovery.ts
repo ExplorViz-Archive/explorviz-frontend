@@ -29,7 +29,6 @@ export default class DiscoveryController extends Controller {
 
   setup() {
     set(this.renderingService, 'showTimeline', false);
-    set(this.renderingService, 'showVersionbar', false);
     this.resetState();
     
     // start SSE transmission from backend

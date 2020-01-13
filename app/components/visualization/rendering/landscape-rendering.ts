@@ -8,7 +8,6 @@ import THREE from 'three';
 import Landscape from 'explorviz-frontend/models/landscape';
 import RenderingService from "explorviz-frontend/services/rendering-service";
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
 import Configuration from 'explorviz-frontend/services/configuration';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import CurrentUser from 'explorviz-frontend/services/current-user';
@@ -51,9 +50,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
-
-  @service('additional-data')
-  additionalData!: AdditionalData;
 
   @service('configuration')
   configuration!: Configuration;
@@ -144,8 +140,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (this.threePerformance) {
       this.threePerformance.removePerformanceMeasurement();
     }
-
-    this.additionalData.emptyAndClose();
 
     this.debug("cleanup landscape rendering");
 

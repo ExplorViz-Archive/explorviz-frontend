@@ -23,7 +23,6 @@ export default class Replay extends BaseRoute.extend(AuthenticatedRouteMixin) {
 
   // @Override
   @action didTransition() {
-    (this.controller as ReplayController).hideVersionbar();
     (this.controller as ReplayController).showTimeline();
   }
 }

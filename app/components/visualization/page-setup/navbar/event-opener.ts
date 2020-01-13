@@ -1,13 +1,14 @@
 import Component from '@glimmer/component';
 import { inject as service } from "@ember/service";
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import { action } from '@ember/object';
 
-export default class EventOpener extends Component {
+interface Args {
+  addComponent(componentPath: string): void
+}
 
-  @service('additional-data') additionalData!: AdditionalData;
+export default class EventOpener extends Component<Args> {
 
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
 
@@ -19,8 +20,7 @@ export default class EventOpener extends Component {
         AlertifyHandler.showAlertifyMessage("No events found!");
         return;
       }
-      this.additionalData.addComponent("visualization/page-setup/sidebar/event-viewer");
-      this.additionalData.openAdditionalData();
+      this.args.addComponent('visualization/page-setup/sidebar/event-viewer');
     }
   }
 

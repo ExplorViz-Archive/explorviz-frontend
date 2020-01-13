@@ -19,9 +19,6 @@
         />
         <div id="rendering">
           {{visualization/rendering/landscape-rendering landscape=landscapeRepo.replayLandscape}}
-          <!-- popup(s) -->
-          <Visualization::Rendering::Popups::PopupCoordinator
-              @popupData={{this.additionalData.popupContent}} />
         </div>
       {{else}}
         <div class="container-fluid">
@@ -50,9 +47,6 @@
           {{/bs-button}}
         </div>
         {{visualization/rendering/application-rendering mode=replay latestApplication=landscapeRepo.replayApplication}}
-        <!-- popup(s) -->
-        <Visualization::Rendering::Popups::PopupCoordinator
-            @popupData={{this.additionalData.popupContent}} />
       </div>
     {{/if}}
     <!-- timeline -->

@@ -5,19 +5,19 @@ import { computed, action } from '@ember/object';
 import $ from 'jquery';
 import DS from 'ember-data';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
 import DatabaseQuery from 'explorviz-frontend/models/databasequery';
 
 type SortingProperty = 'timestamp'|'sqlStatement'|'statementType'|'responseTime';
 type TimeUnit = 's'|'ms'|'ns';
 
-export default class SQLViewer extends Component {
+interface Args {
+  removeComponent(componentPath: string): void
+}
+
+export default class SQLViewer extends Component<Args> {
 
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
-
-  @service('additional-data')
-  additionalData!: AdditionalData;
 
   @service('store')
   store!: DS.Store;
@@ -141,7 +141,7 @@ export default class SQLViewer extends Component {
 
   @action
   close() {
-    this.additionalData.removeComponent('visualization/page-setup/sidebar/sql-viewer');
+    this.args.removeComponent('visualization/page-setup/sidebar/sql-viewer');
   }
 
 }
