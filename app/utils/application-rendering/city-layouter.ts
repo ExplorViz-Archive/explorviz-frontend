@@ -467,8 +467,8 @@ export function applyBoxLayout(application: Application) {
 
     children.forEach((child: any) => {
       let childData = layoutMap.get(child.get('id'));
-      worstCaseWidth = worstCaseWidth + (childData.width + INSET_SPACE * 2);
-      worstCaseHeight = worstCaseHeight + (childData.depth + INSET_SPACE * 2);
+      worstCaseWidth += childData.width + INSET_SPACE * 2;
+      worstCaseHeight += childData.depth + INSET_SPACE * 2;
     });
 
 
@@ -542,6 +542,7 @@ export function applyCommunicationLayout(application: Application,
         let sourceParent = clazzCommunication.get('sourceClazz').get('parent');
         let sourceParentMesh = modelIdToMesh.get(sourceParent.get('id'));
 
+        // Determine where the communication should begin (clazz or component - based upon their visiblity)
         if (sourceParentMesh instanceof ComponentMesh && sourceParentMesh.opened) {
           sourceEntity = clazzCommunication.get('sourceClazz');
         } else {
@@ -552,14 +553,14 @@ export function applyCommunicationLayout(application: Application,
         let targetParent = clazzCommunication.get('targetClazz').get('parent');
         let targetParentMesh = modelIdToMesh.get(targetParent.get('id'));
 
+        // Determine where the communication should end (clazz or component - based upon their visiblity)
         if (targetParentMesh instanceof ComponentMesh && targetParentMesh.opened) {
           targetEntity = clazzCommunication.get('targetClazz');
-        }
-        else {
+        } else {
           targetEntity = findFirstParentOpenComponent(clazzCommunication.get('targetClazz').get('parent'));
         }
 
-        if (sourceEntity && targetEntity && typeof sourceEntity.get === "function") {
+        if (sourceEntity && targetEntity) {
           let commLayout = layoutMap.get(clazzCommunication.get('id'));
           let sourceLayout = boxLayoutMap.get(sourceEntity.get('id'));
           let targetLayout = boxLayoutMap.get(targetEntity.get('id'));
@@ -575,15 +576,16 @@ export function applyCommunicationLayout(application: Application,
           }
         }
       }
+
       calculatePipeSizeFromQuantiles(application);
     });
 
     // Calculates the size of the pipes regarding the number of requests
     function calculatePipeSizeFromQuantiles(application: Application) {
 
-      // constant factors for rendering communication lines (pipes)
-      const pipeSizeEachStep = 0.45;
-      const pipeSizeDefault = 0.1;
+      // Constant factors for rendering communication lines (pipes)
+      const PIPE_SIZE_EACH_STEP = 0.15;
+      const PIPE_SIZE_DEFAULT = 0.1;
 
       const requestsList = gatherRequestsIntoList(application);
       const categories = calculateCategories(requestsList);
@@ -591,39 +593,43 @@ export function applyCommunicationLayout(application: Application,
 
       drawableClazzCommunications.forEach((clazzCommunication) => {
         if (layoutMap.has(clazzCommunication.get('id'))) {
+          // Contains a number from 0 to 3 depending on the number of requests
           const calculatedCategory = getMatchingCategory(clazzCommunication.get('requests'), categories);
+          
           let communicationData = layoutMap.get(clazzCommunication.get('id'));
-          if (communicationData)
-            communicationData.lineThickness = (calculatedCategory * pipeSizeEachStep) + pipeSizeDefault;
+          if (communicationData) {
+            communicationData.lineThickness = (calculatedCategory * PIPE_SIZE_EACH_STEP) + PIPE_SIZE_DEFAULT;
+          }
         }
       });
 
-      // generates four default categories for rendering (thickness of communication lines)
+      // Generates four default categories for rendering (thickness of communication lines)
       function calculateCategories(requestsList: number[]) {
-        const minNumber = Math.min.apply(Math, requestsList);
-        const avgNumber = requestsList.reduce(addUpRequests) / requestsList.length;
-        const maxNumber = Math.max.apply(Math, requestsList);
-        const categories = [0, minNumber, avgNumber, maxNumber];
+        const MIN = Math.min(...requestsList);
+        const AVERAGE = requestsList.reduce((a, b) => a + b) / requestsList.length;
+        const MAX = Math.max(...requestsList);
+        const categories = [0, MIN, AVERAGE, MAX];
 
         return categories;
-      } // END calculateCategories
+      }
 
-      // retrieves a matching category for a specific clazzCommunication
+      // Retrieves a matching category for a specific clazzCommunication
       function getMatchingCategory(numOfRequests: number, categories: number[]) {
 
         // default category = lowest category
         let calculatedCategory = 0;
 
-        for (var i = 1; i < categories.length; i++) {
+        for (let i = 0; i < categories.length; i++) {
           if (numOfRequests >= categories[i]) {
             calculatedCategory = i;
           }
           else {
-            return calculatedCategory;
+            break;
           }
         }
+
         return calculatedCategory;
-      } // END getMatchingCategory
+      }
 
       // Retrieves all requests and pushes them to a list for further processing
       function gatherRequestsIntoList(application: Application) {
@@ -638,12 +644,7 @@ export function applyCommunicationLayout(application: Application,
         });
 
         return requestsList;
-      } // END gatherRequestsIntoList
-
-      // adds up a number to an existing number
-      function addUpRequests(requestSum: number, requestCount: number) {
-        return requestSum + requestCount;
-      } // END addUpRequests
+      }
 
     } // END calculatePipeSizeFromQuantiles
 

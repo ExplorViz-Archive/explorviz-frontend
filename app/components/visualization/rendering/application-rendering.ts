@@ -453,15 +453,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     clazzes.forEach((clazz: Clazz) => {
       let clazzData = this.boxLayoutMap.get(clazz.get('id'));
       layoutPos = new THREE.Vector3(clazzData.positionX, clazzData.positionY, clazzData.positionZ)
-
-      if (clazz.highlighted) {
-        // TODO
-      } else {
         mesh = new ClazzMesh(layoutPos, clazzData.height, clazzData.width, clazzData.depth,
           clazz, new THREE.Color(clazzColor), new THREE.Color(highlightedEntityColor));
         this.addMeshToScene(mesh, clazzData, clazzData.height);
         this.updateMeshVisiblity(mesh);
-      }
     });
 
     children.forEach((child: Component) => {
@@ -513,23 +508,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     let commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap, this.modelIdToMesh);
 
-    const drawableClazzCommunications = application.get('drawableClazzCommunications');
+    let drawableClazzCommunications = application.get('drawableClazzCommunications');
     const { communication: communicationColor, highlightedEntity: highlightedEntityColor } = this.configuration.applicationColors;
+
     let viewCenterPoint = CalcCenterAndZoom(this.foundationData);
 
     drawableClazzCommunications.forEach((drawableClazzComm) => {
-      // No layouting information available due to hidden communication
-      if (!commLayoutMap.has(drawableClazzComm.get('id'))) {
-        return;
-      }
-
       let commLayout = commLayoutMap.get(drawableClazzComm.get('id'));
 
-      if (!commLayout){
+      // No layouting information available due to hidden communication
+      if (!commLayout) {
         return;
       }
-
-      let lineThickness = commLayout.lineThickness * 0.3;
 
       let pipe = new CommunicationMesh(commLayout, drawableClazzComm,
         new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor));
@@ -550,15 +540,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1,
         0, 0, -1, 0, 0, 0, 0, 0, 1));
 
+      let lineThickness = commLayout.lineThickness;
       const edgeGeometry = new THREE.CylinderGeometry(lineThickness, lineThickness,
         direction.length(), 20, 1);
-
       pipe.geometry = edgeGeometry;
       pipe.applyMatrix(orientation);
 
-      pipe.position.x = (end.x + start.x) / 2.0;
-      pipe.position.y = (end.y + start.y) / 2.0;
-      pipe.position.z = (end.z + start.z) / 2.0;
+      // Set position to center of pipe
+      pipe.position.copy(end.add(start).divideScalar(2));
 
       this.applicationObject3D.add(pipe);
       this.modelIdToMesh.set(drawableClazzComm.get('id'), pipe);
