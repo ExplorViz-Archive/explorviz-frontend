@@ -23,6 +23,7 @@ import EntityMesh from "explorviz-frontend/utils/3d/entity-mesh";
 import CommunicationMesh from "explorviz-frontend/utils/3d/communication-mesh";
 import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
 import { tracked } from "@glimmer/tracking";
+import CommunicationSegmentMesh from "explorviz-frontend/utils/3d/application/communication-segment-mesh";
 
 interface Args {
   id: string,
@@ -146,7 +147,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       } else {
         this.openComponentMesh(mesh);
       }
-      this.addCommunication(this.args.application);
+      const curveHeight = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
+      this.addCommunication(this.args.application, curveHeight);
     }
   }
 
@@ -421,7 +423,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.addCommunication(this.args.application);
 
     this.scene.add(this.applicationObject3D);
-    this.resetRotation();
+    this.resetRotation(this.applicationObject3D);
   }
 
   addComponentToScene(component: Component, color: string) {
@@ -504,7 +506,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
 
-  addCommunication(application: Application) {
+  addCommunication(application: Application, curveHeight: number) {
     this.removeAllCommunication();
 
     let commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap, this.modelIdToMesh);
@@ -523,62 +525,36 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       let pipe = new CommunicationMesh(commLayout, drawableClazzComm,
         new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor));
-      pipe = this.positionCommunication(pipe);
+
+      let viewCenterPoint = CalcCenterAndZoom(this.foundationData);
+
+      let curvedMeshes = CommunicationSegmentMesh.
+        computeCurveMeshes(commLayout, drawableClazzComm,
+          new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor), viewCenterPoint, 20);
+
+      for (let curveMesh of curvedMeshes) {
+        pipe.add(curveMesh);
+      }
 
       this.applicationObject3D.add(pipe);
       this.commIdToMesh.set(drawableClazzComm.get('id'), pipe);
     });
   }
 
-  positionCommunication(pipe: CommunicationMesh) {
-    let commLayout = pipe.layout;
-    let viewCenterPoint = CalcCenterAndZoom(this.foundationData);
-
-    const start = new THREE.Vector3();
-    start.subVectors(commLayout.startPoint, viewCenterPoint);
-
-    const end = new THREE.Vector3();
-    end.subVectors(commLayout.endPoint, viewCenterPoint);
-
-    const direction = new THREE.Vector3().subVectors(end, start);
-    const orientation = new THREE.Matrix4();
-    orientation.lookAt(start, end, new THREE.Object3D().up);
-    orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1,
-      0, 0, -1, 0, 0, 0, 0, 0, 1));
-
-    let lineThickness = commLayout.lineThickness;
-    const edgeGeometry = new THREE.CylinderGeometry(lineThickness, lineThickness,
-      direction.length(), 20, 1);
-    pipe.geometry = edgeGeometry;
-    pipe.applyMatrix(orientation);
-
-    // Set position to center of pipe
-    pipe.position.copy(end.add(start).divideScalar(2));
-
-    return pipe;
-  }
 
   removeAllCommunication() {
     this.commIdToMesh.forEach(mesh => {
-      if (mesh && mesh.parent) {
-        mesh.parent.remove(mesh);
-        if (mesh.geometry) {
-          mesh.geometry.dispose();
-        }
-        if (mesh.material instanceof THREE.Material) {
-          mesh.material.dispose();
-        }
-      }
+       mesh.delete();
     });
     this.commIdToMesh.clear();
   }
 
-  resetRotation() {
-    const rotationX = 0.65;
-    const rotationY = 0.80;
+  resetRotation(application: THREE.Object3D) {
+    const ROTATION_X = 0.65;
+    const ROTATION_Y = 0.80;
 
-    this.applicationObject3D.rotation.x = rotationX;
-    this.applicationObject3D.rotation.y = rotationY;
+    application.rotation.x = ROTATION_X;
+    application.rotation.y = ROTATION_Y;
   }
 
   initThreeJs() {
