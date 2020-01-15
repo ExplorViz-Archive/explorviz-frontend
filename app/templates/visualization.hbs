@@ -10,11 +10,9 @@
             (component "visualization/page-setup/navbar/landscape-downloader" landscape=this.landscapeRepo.latestLandscape)
           }}
         />
-        <div id="rendering">
-          {{#if this.landscapeRepo.latestLandscape}}
+        {{#if this.landscapeRepo.latestLandscape}}
           <Visualization::Rendering::LandscapeRendering @id="landscape1" @landscape={{this.landscapeRepo.latestLandscape}} />
-          {{/if}}
-        </div>
+        {{/if}}
       {{else}}
         <div class="container-fluid">
           <div class="jumbotron">

@@ -26,11 +26,6 @@ export default class ReplayController extends Controller {
   }
 
   @action
-  resize() {
-    get(this, 'renderingService').resizeCanvas();
-  }
-
-  @action
   resetView() {
     get(this, 'renderingService').reSetupScene();
   }

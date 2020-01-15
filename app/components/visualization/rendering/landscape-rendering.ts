@@ -98,11 +98,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @action
   outerDivInserted(outerDiv: HTMLElement) {
     this.debug("Outer Div inserted");
-    this.canvas.height = outerDiv.clientHeight;
-    this.canvas.width = outerDiv.clientWidth;
-    this.canvas.style.width = "";
-    this.canvas.style.height = "";
+    
     this.initRendering();
+    this.resize(outerDiv);
   }
 
 
@@ -115,6 +113,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     canvas.oncontextmenu = function (e) {
       e.preventDefault();
     };
+  }
+
+  @action
+  resize(outerDiv: HTMLElement) {
+    const width = Number(outerDiv.clientWidth);
+    const height = Number(outerDiv.clientHeight);
+    this.webglrenderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
   }
 
 
@@ -246,37 +253,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   }
 
-
-  @action
-  updateCanvasSize() {
-    let outerDiv = $('#vizspace')[0];
-
-    if (outerDiv) {
-      if (!this.camera || !this.webglrenderer)
-        return;
-
-      $('#threeCanvas').hide();
-
-      let renderingHeight = $('#rendering').innerHeight();
-      let renderingWidth = $('#rendering').innerWidth();
-
-      if (renderingHeight && renderingWidth) {
-        let height = Math.round(renderingHeight);
-        let width = Math.round(renderingWidth);
-
-        this.camera.aspect = width / height;
-        this.camera.updateProjectionMatrix();
-
-        this.webglrenderer.setSize(width, height);
-
-        this.onResized();
-
-        $('#threeCanvas').show();
-      }
-    }
-  }
-
-
   /**
    * Inherit this function to update the scene with a new renderingModel. It
    * automatically removes every mesh from the scene and finally calls
@@ -329,10 +305,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (this.initDone) {
       this.cleanAndUpdateScene();
     }
-  }
-
-  onResized() {
-    this.cleanAndUpdateScene();
   }
 
 
