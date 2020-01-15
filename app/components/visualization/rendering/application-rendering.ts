@@ -245,6 +245,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   openComponentMesh(mesh: ComponentMesh) {
+    if(mesh.opened)
+      return;
+
     const HEIGHT_OPENED_COMPONENT = 1.5;
     mesh.height = HEIGHT_OPENED_COMPONENT;
 
@@ -273,8 +276,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
-
   closeComponentMesh(mesh: ComponentMesh) {
+    if(!mesh.opened)
+      return;
+
     const HEIGHT_OPENED_COMPONENT = 1.5;
     mesh.height = mesh.layoutHeight;
 
