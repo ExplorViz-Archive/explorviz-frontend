@@ -594,7 +594,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#DDD');
+    this.scene.background = new THREE.Color(this.configuration.applicationColors.background);
     this.debug('Scene created');
   }
 
