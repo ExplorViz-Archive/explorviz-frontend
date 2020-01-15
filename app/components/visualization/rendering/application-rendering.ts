@@ -71,6 +71,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   interaction !: Interaction;
 
   modelIdToMesh: Map<string, THREE.Mesh> = new Map();
+  commIdToMesh: Map<string, CommunicationMesh> = new Map();
 
   boxLayoutMap: any;
 
@@ -145,7 +146,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       } else {
         this.openComponentMesh(mesh);
       }
-      this.addCommunicationToScene(this.args.application);
+      this.addCommunication(this.args.application);
     }
   }
 
@@ -368,7 +369,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   unhighlightAll() {
-    let meshes = this.modelIdToMesh.values();
+    let boxMeshes = Array.from(this.modelIdToMesh.values());
+    let commMeshes = Array.from(this.commIdToMesh.values());
+    let meshes = boxMeshes.concat(commMeshes);
     for (let mesh of meshes) {
       if (mesh instanceof EntityMesh || mesh instanceof CommunicationMesh) {
         mesh.unhighlight();
@@ -415,7 +418,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const foundationColor = this.configuration.applicationColors.foundation;
     // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
     this.addComponentToScene(this.foundationBuilder.foundationObj as Component, foundationColor);
-    this.addCommunicationToScene(this.args.application);
+    this.addCommunication(this.args.application);
 
     this.scene.add(this.applicationObject3D);
     this.resetRotation();
@@ -501,15 +504,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
 
-  addCommunicationToScene(application: Application) {
-    this.removeCommunicationFromScene(application);
+  addCommunication(application: Application) {
+    this.removeAllCommunication();
 
     let commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap, this.modelIdToMesh);
-
-    let drawableClazzCommunications = application.get('drawableClazzCommunications');
     const { communication: communicationColor, highlightedEntity: highlightedEntityColor } = this.configuration.applicationColors;
 
-    let viewCenterPoint = CalcCenterAndZoom(this.foundationData);
+    let drawableClazzCommunications = application.get('drawableClazzCommunications');
 
     drawableClazzCommunications.forEach((drawableClazzComm) => {
       let commLayout = commLayoutMap.get(drawableClazzComm.get('id'));
@@ -519,54 +520,57 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         return;
       }
 
+
       let pipe = new CommunicationMesh(commLayout, drawableClazzComm,
         new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor));
-
-      const start = new THREE.Vector3();
-      start.subVectors(commLayout.startPoint, viewCenterPoint);
-
-      const end = new THREE.Vector3();
-      end.subVectors(commLayout.endPoint, viewCenterPoint);
-
-      const direction = new THREE.Vector3().subVectors(end, start);
-      const orientation = new THREE.Matrix4();
-      orientation.lookAt(start, end, new THREE.Object3D().up);
-      orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1,
-        0, 0, -1, 0, 0, 0, 0, 0, 1));
-
-      let lineThickness = commLayout.lineThickness;
-      const edgeGeometry = new THREE.CylinderGeometry(lineThickness, lineThickness,
-        direction.length(), 20, 1);
-      pipe.geometry = edgeGeometry;
-      pipe.applyMatrix(orientation);
-
-      // Set position to center of pipe
-      pipe.position.copy(end.add(start).divideScalar(2));
+      pipe = this.positionCommunication(pipe);
 
       this.applicationObject3D.add(pipe);
-      this.modelIdToMesh.set(drawableClazzComm.get('id'), pipe);
+      this.commIdToMesh.set(drawableClazzComm.get('id'), pipe);
     });
   }
 
-  removeCommunicationFromScene(application: Application) {
-    let drawableClazzCommunications = application.get('drawableClazzCommunications');
+  positionCommunication(pipe: CommunicationMesh) {
+    let commLayout = pipe.layout;
+    let viewCenterPoint = CalcCenterAndZoom(this.foundationData);
 
-    drawableClazzCommunications.forEach((drawableClazzComm) => {
-      // No mesh available due to hidden communication
-      if (this.modelIdToMesh.has(drawableClazzComm.get('id'))) {
-        let communicationMesh = this.modelIdToMesh.get(drawableClazzComm.get('id'));
-        if (communicationMesh && communicationMesh.parent) {
-          communicationMesh.parent.remove(communicationMesh);
-          if (communicationMesh.geometry) {
-            communicationMesh.geometry.dispose();
-          }
-          if (communicationMesh.material instanceof THREE.Material) {
-            communicationMesh.material.dispose();
-          }
+    const start = new THREE.Vector3();
+    start.subVectors(commLayout.startPoint, viewCenterPoint);
+
+    const end = new THREE.Vector3();
+    end.subVectors(commLayout.endPoint, viewCenterPoint);
+
+    const direction = new THREE.Vector3().subVectors(end, start);
+    const orientation = new THREE.Matrix4();
+    orientation.lookAt(start, end, new THREE.Object3D().up);
+    orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1,
+      0, 0, -1, 0, 0, 0, 0, 0, 1));
+
+    let lineThickness = commLayout.lineThickness;
+    const edgeGeometry = new THREE.CylinderGeometry(lineThickness, lineThickness,
+      direction.length(), 20, 1);
+    pipe.geometry = edgeGeometry;
+    pipe.applyMatrix(orientation);
+
+    // Set position to center of pipe
+    pipe.position.copy(end.add(start).divideScalar(2));
+
+    return pipe;
+  }
+
+  removeAllCommunication() {
+    this.commIdToMesh.forEach(mesh => {
+      if (mesh && mesh.parent) {
+        mesh.parent.remove(mesh);
+        if (mesh.geometry) {
+          mesh.geometry.dispose();
         }
-        this.modelIdToMesh.delete(drawableClazzComm.get('id'));
+        if (mesh.material instanceof THREE.Material) {
+          mesh.material.dispose();
+        }
       }
     });
+    this.commIdToMesh.clear();
   }
 
   resetRotation() {
@@ -702,6 +706,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   disposeApplicationMeshes() {
     this.modelIdToMesh.forEach(mesh => {
+      this.disposeMesh(mesh);
+    });
+    this.commIdToMesh.forEach(mesh => {
       this.disposeMesh(mesh);
     });
   }
