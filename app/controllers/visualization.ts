@@ -57,11 +57,6 @@ export default class VisualizationController extends Controller {
   }
 
   @action
-  resize() {
-    get(this, 'renderingService').resizeCanvas();
-  }
-
-  @action
   resetView() {
     get(this, 'renderingService').reSetupScene();
     get(this, 'plotlyTimelineRef').continueTimeline(get(this, "selectedTimestampRecords"));

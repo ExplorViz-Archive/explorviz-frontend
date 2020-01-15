@@ -156,6 +156,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleMouseMove(mesh: THREE.Mesh | undefined) {
     let enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
+    if(mesh === undefined) {
+      this.hoverHandler.handleHoverEffect(mesh);
+    }
+
     if (mesh instanceof EntityMesh) {
       if (enableHoverEffects)
         this.hoverHandler.handleHoverEffect(mesh);
@@ -243,6 +247,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   openComponentMesh(mesh: ComponentMesh) {
+    if(mesh.opened)
+      return;
+
     const HEIGHT_OPENED_COMPONENT = 1.5;
     mesh.height = HEIGHT_OPENED_COMPONENT;
 
@@ -271,8 +278,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
-
   closeComponentMesh(mesh: ComponentMesh) {
+    if(!mesh.opened)
+      return;
+
     const HEIGHT_OPENED_COMPONENT = 1.5;
     mesh.height = mesh.layoutHeight;
 
@@ -568,7 +577,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#DDD');
+    this.scene.background = new THREE.Color(this.configuration.applicationColors.background);
     this.debug('Scene created');
   }
 

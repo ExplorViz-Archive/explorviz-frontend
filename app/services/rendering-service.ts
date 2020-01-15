@@ -25,10 +25,6 @@ export default class RenderingService extends Service.extend(Evented) {
     this.trigger('reSetupScene');
   }
 
-  resizeCanvas() {
-    this.trigger('resizeCanvas');
-  }
-
   redrawScene() {
     // Only redraws
     this.trigger('redrawScene');
