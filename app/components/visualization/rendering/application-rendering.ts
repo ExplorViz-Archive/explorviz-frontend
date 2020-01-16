@@ -23,7 +23,6 @@ import EntityMesh from "explorviz-frontend/utils/3d/entity-mesh";
 import CommunicationMesh from "explorviz-frontend/utils/3d/communication-mesh";
 import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
 import { tracked } from "@glimmer/tracking";
-import CommunicationSegmentMesh from "explorviz-frontend/utils/3d/application/communication-segment-mesh";
 
 interface Args {
   id: string,
@@ -34,7 +33,7 @@ interface Args {
 type PopupData = {
   mouseX: number,
   mouseY: number,
-  entity: Component|Clazz|DrawableClazzCommunication
+  entity: Component | Clazz | DrawableClazzCommunication
 }
 
 export default class ApplicationRendering extends GlimmerComponent<Args> {
@@ -81,7 +80,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
 
   @tracked
-  popupData: PopupData|null = null;
+  popupData: PopupData | null = null;
 
   constructor(owner: any, args: Args) {
     super(owner, args);
@@ -148,7 +147,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.openComponentMesh(mesh);
       }
       const curveHeight = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
-      this.addCommunication(this.args.application, curveHeight);
+      if (typeof curveHeight === "number") {
+        this.addCommunication(this.args.application, curveHeight);
+      } else {
+        this.addCommunication(this.args.application);
+      }
     }
   }
 
@@ -156,7 +159,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleMouseMove(mesh: THREE.Mesh | undefined) {
     let enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
-    if(mesh === undefined) {
+    if (mesh === undefined) {
       this.hoverHandler.handleHoverEffect(mesh);
     }
 
@@ -223,12 +226,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   openAllComponents() {
     let foundation = this.foundationBuilder.foundationObj;
-    if(foundation === null)
+    if (foundation === null)
       return;
 
     foundation.children.forEach((child) => {
       let mesh = this.modelIdToMesh.get(child.get('id'));
-      if(mesh !== undefined && mesh instanceof ComponentMesh) {
+      if (mesh !== undefined && mesh instanceof ComponentMesh) {
         this.openComponentMesh(mesh);
       }
       this.openComponentsRecursively(child);
@@ -239,7 +242,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     let components = component.children;
     components.forEach((child) => {
       let mesh = this.modelIdToMesh.get(child.get('id'));
-      if(mesh !== undefined && mesh instanceof ComponentMesh) {
+      if (mesh !== undefined && mesh instanceof ComponentMesh) {
         this.openComponentMesh(mesh);
       }
       this.openComponentsRecursively(child);
@@ -247,7 +250,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   openComponentMesh(mesh: ComponentMesh) {
-    if(mesh.opened)
+    if (mesh.opened)
       return;
 
     const HEIGHT_OPENED_COMPONENT = 1.5;
@@ -279,7 +282,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   closeComponentMesh(mesh: ComponentMesh) {
-    if(!mesh.opened)
+    if (!mesh.opened)
       return;
 
     const HEIGHT_OPENED_COMPONENT = 1.5;
@@ -429,7 +432,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const foundationColor = this.configuration.applicationColors.foundation;
     // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
     this.addComponentToScene(this.foundationBuilder.foundationObj as Component, foundationColor);
-    this.addCommunication(this.args.application);
+    let curveHeight = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
+    if (typeof curveHeight === "number") {
+      this.addCommunication(this.args.application, curveHeight);
+    } else {
+      this.addCommunication(this.args.application);
+    }
 
     this.scene.add(this.applicationObject3D);
     this.resetRotation(this.applicationObject3D);
@@ -467,10 +475,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     clazzes.forEach((clazz: Clazz) => {
       let clazzData = this.boxLayoutMap.get(clazz.get('id'));
       layoutPos = new THREE.Vector3(clazzData.positionX, clazzData.positionY, clazzData.positionZ)
-        mesh = new ClazzMesh(layoutPos, clazzData.height, clazzData.width, clazzData.depth,
-          clazz, new THREE.Color(clazzColor), new THREE.Color(highlightedEntityColor));
-        this.addMeshToScene(mesh, clazzData, clazzData.height);
-        this.updateMeshVisiblity(mesh);
+      mesh = new ClazzMesh(layoutPos, clazzData.height, clazzData.width, clazzData.depth,
+        clazz, new THREE.Color(clazzColor), new THREE.Color(highlightedEntityColor));
+      this.addMeshToScene(mesh, clazzData, clazzData.height);
+      this.updateMeshVisiblity(mesh);
     });
 
     children.forEach((child: Component) => {
@@ -515,7 +523,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
 
-  addCommunication(application: Application, curveHeight: number) {
+  addCommunication(application: Application, curveHeight = 0.0) {
     this.removeAllCommunication();
 
     let commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap, this.modelIdToMesh);
@@ -531,18 +539,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         return;
       }
 
+      let viewCenterPoint = CalcCenterAndZoom(this.foundationData);
 
       let pipe = new CommunicationMesh(commLayout, drawableClazzComm,
         new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor));
 
-      let viewCenterPoint = CalcCenterAndZoom(this.foundationData);
+      let isCurved = curveHeight !== 0.0;
 
-      let curvedMeshes = CommunicationSegmentMesh.
-        computeCurveMeshes(commLayout, drawableClazzComm,
-          new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor), viewCenterPoint, 20);
-
-      for (let curveMesh of curvedMeshes) {
-        pipe.add(curveMesh);
+      if (isCurved) {
+        pipe.renderAsCurve(viewCenterPoint, curveHeight);
+      } else {
+        pipe.renderAsLine(viewCenterPoint);
       }
 
       this.applicationObject3D.add(pipe);
@@ -553,7 +560,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   removeAllCommunication() {
     this.commIdToMesh.forEach(mesh => {
-       mesh.delete();
+      mesh.delete();
     });
     this.commIdToMesh.clear();
   }
@@ -672,7 +679,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   cleanUpObject3D(obj: THREE.Object3D) {
     obj.children.forEach((object: THREE.Object3D) => {
       this.cleanUpObject3D(object);
-      if(object instanceof THREE.Mesh) {
+      if (object instanceof THREE.Mesh) {
         this.disposeMesh(object);
       }
     });
@@ -680,7 +687,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   disposeMesh(mesh: THREE.Mesh) {
     mesh.geometry.dispose();
-    if(mesh.material instanceof THREE.Material) {
+    if (mesh.material instanceof THREE.Material) {
       mesh.material.dispose();
     } else {
       mesh.material.forEach(material => {
