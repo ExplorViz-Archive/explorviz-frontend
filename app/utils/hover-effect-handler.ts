@@ -1,7 +1,7 @@
 import { calculateColorBrightness } from
   'explorviz-frontend/utils/helpers/threejs-helpers';
 import THREE from "three";
-import EntityMesh from './3d/entity-mesh';
+import EntityMesh from '../view-objects/3d/entity-mesh';
 
 export default class HoverEffectHandler {
 
