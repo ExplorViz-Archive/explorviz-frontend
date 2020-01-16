@@ -18,6 +18,9 @@ export default class CommunicationLayout {
     this.model = model;
   }
 
+  get startPoint() {
+    return new THREE.Vector3(this.startX, this.startY, this.startZ);
+  }
 
   set startPoint(start: THREE.Vector3) {
     this.startX = start.x;
@@ -25,21 +28,13 @@ export default class CommunicationLayout {
     this.startZ = start.z;
   }
 
-
-  get startPoint() {
-    return new THREE.Vector3(this.startX, this.startY, this.startZ);
+  get endPoint() {
+    return new THREE.Vector3(this.endX, this.endY, this.endZ);
   }
-
-
+  
   set endPoint(end: THREE.Vector3) {
     this.endX = end.x;
     this.endY = end.y;
     this.endZ = end.z;
   }
-
-
-  get endPoint() {
-    return new THREE.Vector3(this.endX, this.endY, this.endZ);
-  }
-
 }

@@ -1,5 +1,6 @@
 import Component from "explorviz-frontend/models/component";
 import Clazz from "explorviz-frontend/models/clazz";
+import THREE from "three";
 
 export default class BoxLayout {
 
@@ -13,6 +14,16 @@ export default class BoxLayout {
 
   constructor(model: Component | Clazz) {
     this.model = model;
+  }
+
+  get position() {
+    return new THREE.Vector3(this.positionX, this.positionY, this.positionZ);
+  }
+
+  set position(position: THREE.Vector3) {
+    this.positionX = position.x;
+    this.positionY = position.y;
+    this.positionZ = position.z;
   }
 
 }
