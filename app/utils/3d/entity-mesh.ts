@@ -60,7 +60,6 @@ export default abstract class EntityMesh extends THREE.Mesh {
     this.scale.z = depth;
   }
 
-
   highlight() {
     this.highlighted = true;
     if (this.material instanceof THREE.MeshLambertMaterial) {
@@ -76,17 +75,30 @@ export default abstract class EntityMesh extends THREE.Mesh {
     }
   }
 
-  turnOpaque(){
+  turnOpaque() {
     if (this.material instanceof THREE.MeshLambertMaterial) {
       this.material.opacity = 1;
       this.material.transparent = false;
     }
   }
 
-  turnTransparent(opacity: number){
+  turnTransparent(opacity: number) {
     if (this.material instanceof THREE.MeshLambertMaterial) {
       this.material.opacity = opacity;
       this.material.transparent = true;
+    }
+  }
+
+  delete() {
+    if (this.parent) {
+      this.parent.remove(this);
+    }
+
+    if (this.geometry) {
+      this.geometry.dispose();
+    }
+    if (this.material instanceof THREE.Material) {
+      this.material.dispose();
     }
   }
 

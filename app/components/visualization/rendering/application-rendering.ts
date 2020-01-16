@@ -527,7 +527,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.removeAllCommunication();
 
     let commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap, this.modelIdToMesh);
-    const { communication: communicationColor, highlightedEntity: highlightedEntityColor } = this.configuration.applicationColors;
+    const { communication: communicationColor, highlightedEntity: highlightedEntityColor, 
+      communicationArrow: arrowColorString } = this.configuration.applicationColors;
 
     let drawableClazzCommunications = application.get('drawableClazzCommunications');
 
@@ -551,6 +552,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       } else {
         pipe.renderAsLine(viewCenterPoint);
       }
+
+      let arrowHeight = isCurved ? curveHeight / 2 + 1 : 0.8;
+      let arrowThickness = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
+      let arrowColor = new THREE.Color(arrowColorString).getHex();
+
+      if (typeof arrowThickness === "number")
+        pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColor);
 
       this.applicationObject3D.add(pipe);
       this.commIdToMesh.set(drawableClazzComm.get('id'), pipe);

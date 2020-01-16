@@ -1,11 +1,13 @@
-import THREE, { TubeGeometry } from 'three';
+import THREE from 'three';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 import CommunicationLayout from '../layout-models/communication-layout';
+import CommunicationArrowMesh from './application/communication-arrow-mesh';
 
 export default class CommunicationMesh extends THREE.Mesh {
 
   dataModel: DrawableClazzCommunication;
   layout: CommunicationLayout;
+  geometry: THREE.TubeGeometry | THREE.CylinderGeometry = new THREE.CylinderGeometry();
 
   highlighted: boolean = false;
   defaultColor: THREE.Color;
@@ -42,8 +44,10 @@ export default class CommunicationMesh extends THREE.Mesh {
     }
   }
 
-  renderAsLine(viewCenterPoint: THREE.Vector3, startPoint = this.layout.startPoint, endPoint = this.layout.endPoint) {
-    let commLayout = this.layout;
+  renderAsLine(viewCenterPoint: THREE.Vector3) {
+    let layout = this.layout;
+    let startPoint = layout.startPoint;
+    let endPoint = layout.endPoint;
 
     const start = new THREE.Vector3();
     start.subVectors(startPoint, viewCenterPoint);
@@ -57,7 +61,7 @@ export default class CommunicationMesh extends THREE.Mesh {
     orientation.multiply(new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1,
       0, 0, -1, 0, 0, 0, 0, 0, 1));
 
-    let lineThickness = commLayout.lineThickness;
+    let lineThickness = layout.lineThickness;
     const edgeGeometry = new THREE.CylinderGeometry(lineThickness, lineThickness,
       direction.length(), 20, 1);
     this.geometry = edgeGeometry;
@@ -89,13 +93,62 @@ export default class CommunicationMesh extends THREE.Mesh {
       end
     );
 
-    this.geometry = new TubeGeometry(curve, curveSegments, layout.lineThickness);
+    this.geometry = new THREE.TubeGeometry(curve, curveSegments, layout.lineThickness);
+  }
+
+  addArrows(viewCenterPoint = new THREE.Vector3(), width = 1, yOffset = 1, color = 0x000000) {
+    let layout = this.layout;
+    // Scale arrow with communication line thickness
+    width *= layout.lineThickness;
+    let startPoint = layout.startPoint;
+    let endPoint = layout.endPoint;
+
+
+    const start = new THREE.Vector3();
+    start.subVectors(startPoint, viewCenterPoint);
+
+    const end = new THREE.Vector3();
+    end.subVectors(endPoint, viewCenterPoint);
+
+    this.addArrow(start, end, width, yOffset, color);
+
+    // Add 2nd arrow to visualize bidirectional communication
+    if (this.dataModel.isBidirectional) {
+      this.addArrow(end, start, width, yOffset, color);
+    }
+  }
+
+  addArrow(start: THREE.Vector3, end: THREE.Vector3, width: number, yOffset: number, color: number) {
+    const dir = new THREE.Vector3().subVectors(end, start);
+    let len = dir.length();
+    // Do not draw precisely in the middle to leave a small gap in case of bidirectional communication
+    let halfVector = dir.normalize().multiplyScalar(len * 0.51);
+    let middle = start.clone().add(halfVector);
+
+    // Normalize the direction vector (convert to vector of length 1)
+    dir.normalize();
+
+    // Arrow properties
+    let origin = new THREE.Vector3(middle.x, middle.y + yOffset, middle.z);
+    let headWidth = Math.max(1.2, width);
+    let headLength = Math.min(2 * headWidth, 0.3 * len);
+    let length = headLength + 0.00001; // body of arrow not visible
+
+    let arrow = new CommunicationArrowMesh(this.dataModel, dir, origin, length, color, headLength, headWidth);
+
+    this.add(arrow);
   }
 
   delete() {
     if (this.parent) {
       this.parent.remove(this);
     }
+    this.children.forEach(child => {
+      if (child instanceof CommunicationArrowMesh) {
+        child.delete();
+      }
+    });
+
     if (this.geometry) {
       this.geometry.dispose();
     }
