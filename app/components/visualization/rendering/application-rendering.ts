@@ -7,7 +7,7 @@ import { inject as service } from '@ember/service';
 import RenderingService, { RenderingContext } from "explorviz-frontend/services/rendering-service";
 import LandscapeRepository from "explorviz-frontend/services/repos/landscape-repository";
 import FoundationBuilder from 'explorviz-frontend/utils/application-rendering/foundation-builder';
-import { applyBoxLayout, applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
+import { applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
 import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
 import Interaction, { Position2D } from 'explorviz-frontend/utils/application-rendering/interaction';
 import DS from "ember-data";
@@ -36,6 +36,15 @@ type PopupData = {
   entity: Component | Clazz | DrawableClazzCommunication
 }
 
+export type BoxLayout = {
+  height: number,
+  width: number,
+  depth: number,
+  positionX: number,
+  positionY: number,
+  positionZ: number
+}
+
 export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @service('store')
@@ -52,6 +61,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
+
+  @service()
+  worker !: any
 
   debug = debugLogger('ApplicationRendering');
 
@@ -73,7 +85,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   modelIdToMesh: Map<string, THREE.Mesh> = new Map();
   commIdToMesh: Map<string, CommunicationMesh> = new Map();
 
-  boxLayoutMap: any;
+  boxLayoutMap: Map<string, BoxLayout> = new Map();
 
   foundationData: any;
 
@@ -113,7 +125,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       camera: this.camera,
       renderer: this.renderer
     };
-    this.renderingService.addRendering(this.args.id, renderingContext, [this.step1, this.step2, this.step3]);
+    this.renderingService.addRendering(this.args.id, renderingContext, [this.step1, this.step2]);
     this.renderingService.render(this.args.id, this.args.application);
   }
 
@@ -427,21 +439,26 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   step2() {
     // this.args.application.applyDefaultOpenLayout(false);
     let serializedApp = this.serializeApplication(this.args.application);
-    this.boxLayoutMap = applyBoxLayout(serializedApp);
-  }
 
-  @action
-  step3() {
-    const foundationColor = this.configuration.applicationColors.foundation;
-    // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
-    this.addComponentToScene(this.foundationBuilder.foundationObj as Component, foundationColor);
-    this.addCommunication(this.args.application);
-
-    this.scene.add(this.applicationObject3D);
-    this.resetRotation(this.applicationObject3D);
+    this.worker.postMessage('city-layouter', serializedApp).then((layoutedApplication: Map<string, BoxLayout>) => {
+      this.boxLayoutMap = layoutedApplication;
+      const foundationColor = this.configuration.applicationColors.foundation;
+      // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
+      this.addComponentToScene(this.foundationBuilder.foundationObj as Component, foundationColor);
+      this.addCommunication(this.args.application);
+  
+      this.scene.add(this.applicationObject3D);
+      this.resetRotation(this.applicationObject3D);
+    }, (error: any) => {
+      console.log(error)
+    });
   }
 
   addComponentToScene(component: Component, color: string) {
+    let componentData = this.boxLayoutMap.get(component.id);
+
+    if(componentData === undefined)
+      return;
 
     const OPENED_COMPONENT_HEIGHT = 1.5;
 
@@ -449,7 +466,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       clazz: clazzColor, highlightedEntity: highlightedEntityColor } = this.configuration.applicationColors;
 
     let mesh;
-    let componentData = this.boxLayoutMap.get(component.id);
     let layoutPos = new THREE.Vector3(componentData.positionX, componentData.positionY, componentData.positionZ);
 
     if (component.get('foundation')) {
@@ -472,6 +488,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     clazzes.forEach((clazz: Clazz) => {
       let clazzData = this.boxLayoutMap.get(clazz.get('id'));
+
+      if(clazzData === undefined)
+        return;
+
       layoutPos = new THREE.Vector3(clazzData.positionX, clazzData.positionY, clazzData.positionZ)
       mesh = new ClazzMesh(layoutPos, clazzData.height, clazzData.width, clazzData.depth,
         clazz, new THREE.Color(clazzColor), new THREE.Color(highlightedEntityColor));
