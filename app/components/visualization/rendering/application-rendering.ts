@@ -15,12 +15,12 @@ import Configuration from "explorviz-frontend/services/configuration";
 import Clazz from "explorviz-frontend/models/clazz";
 import CurrentUser from "explorviz-frontend/services/current-user";
 import Component from "explorviz-frontend/models/component";
-import FoundationMesh from "explorviz-frontend/utils/3d/application/foundation-mesh";
+import FoundationMesh from "explorviz-frontend/view-objects/3d/application/foundation-mesh";
 import HoverEffectHandler from "explorviz-frontend/utils/hover-effect-handler";
-import ClazzMesh from "explorviz-frontend/utils/3d/application/clazz-mesh";
-import ComponentMesh from "explorviz-frontend/utils/3d/application/component-mesh";
-import EntityMesh from "explorviz-frontend/utils/3d/entity-mesh";
-import CommunicationMesh from "explorviz-frontend/utils/3d/communication-mesh";
+import ClazzMesh from "explorviz-frontend/view-objects/3d/application/clazz-mesh";
+import ComponentMesh from "explorviz-frontend/view-objects/3d/application/component-mesh";
+import EntityMesh from "explorviz-frontend/view-objects/3d/entity-mesh";
+import CommunicationMesh from "explorviz-frontend/view-objects/3d/communication-mesh";
 import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
 import { tracked } from "@glimmer/tracking";
 

@@ -1,11 +1,11 @@
 import THREE from "three";
-import BoxLayout from "../layout-models/box-layout";
-import CommunicationLayout from "../layout-models/communication-layout";
-import FoundationMesh from "../3d/application/foundation-mesh";
+import BoxLayout from "../../view-objects/layout-models/box-layout";
+import CommunicationLayout from "../../view-objects/layout-models/communication-layout";
+import FoundationMesh from "../../view-objects/3d/application/foundation-mesh";
 import Application from "explorviz-frontend/models/application";
 import Component from "explorviz-frontend/models/component";
 import Clazz from "explorviz-frontend/models/clazz";
-import ComponentMesh from "../3d/application/component-mesh";
+import ComponentMesh from "../../view-objects/3d/application/component-mesh";
 import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
 
 type layoutSegment = {

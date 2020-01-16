@@ -1,6 +1,6 @@
 import THREE from 'three';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
-import CommunicationLayout from '../layout-models/communication-layout';
+import CommunicationLayout from '../../view-objects/layout-models/communication-layout';
 import CommunicationArrowMesh from './application/communication-arrow-mesh';
 
 export default class CommunicationMesh extends THREE.Mesh {
