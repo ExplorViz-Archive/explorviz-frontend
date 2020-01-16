@@ -7,6 +7,7 @@ import Component from "explorviz-frontend/models/component";
 import Clazz from "explorviz-frontend/models/clazz";
 import ComponentMesh from "../../view-objects/3d/application/component-mesh";
 import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
+import { SerializedApplication, SerializedClazz, SerializedComponent } from "explorviz-frontend/components/visualization/rendering/application-rendering";
 
 type layoutSegment = {
   parent: null | layoutSegment,
@@ -19,12 +20,42 @@ type layoutSegment = {
   used: boolean
 }
 
-export function applyBoxLayout(application: Application) {
+export function applyBoxLayout(application: SerializedApplication) {
 
-  const INSET_SPACE = 4.0;
+  function getAllClazzesInApplication(application: SerializedApplication): SerializedClazz[] {
+    let allComponents: SerializedComponent[] = getAllComponentsInApplication(application);
+
+    let allClazzes:SerializedClazz[] = [];
+    allComponents.forEach(component => {
+      allClazzes.push(...component.clazzes);
+    });
+    return allClazzes;
+  }
+
+  function getAllComponentsInApplication(application: SerializedApplication): SerializedComponent[] {
+    let children = application.components;
+
+    let components: SerializedComponent[] = [];
+
+    children.forEach((component) => {
+      components.push(...getAllComponents(component), component);
+    });
+    return components;
+  }
+
+  function getAllComponents(component: SerializedComponent): SerializedComponent[] {
+    let components:SerializedComponent[] = [];
+    component.children.forEach((component: SerializedComponent) => {
+      components.push(...getAllComponents(component), component);
+    });
+
+    return components;
+  }
+
+  const INSET_SPACE: number = 4.0;
   const OPENED_COMPONENT_HEIGHT = 1.5;
 
-  const components = application.get('components');
+  const components = application.components;
 
   const foundationComponent = components.objectAt(0);
 
@@ -34,12 +65,12 @@ export function applyBoxLayout(application: Application) {
 
   let layoutMap = new Map();
 
-  application.getAllClazzes().forEach((clazz) => {
-    layoutMap.set(clazz.get('id'), new BoxLayout(clazz));
+  getAllClazzesInApplication(application).forEach((clazz) => {
+    layoutMap.set(clazz.id, new BoxLayout());
   });
 
-  application.getAllComponents().forEach((component) => {
-    layoutMap.set(component.get('id'), new BoxLayout(component));
+  getAllComponentsInApplication(application).forEach((component) => {
+    layoutMap.set(component.id, new BoxLayout());
   });
 
   calcClazzHeight(foundationComponent);
@@ -60,14 +91,14 @@ export function applyBoxLayout(application: Application) {
 
   // Helper functions
 
-  function setAbsoluteLayoutPosition(component: Component) {
-    const childComponents = component.get('children');
-    const clazzes = component.get('clazzes');
+  function setAbsoluteLayoutPosition(component: SerializedComponent) {
+    const childComponents = component.children;
+    const clazzes = component.clazzes;
 
-    let componentLayout = layoutMap.get(component.get('id'));
+    let componentLayout = layoutMap.get(component.id);
 
     childComponents.forEach((childComponent) => {
-      let childCompLayout = layoutMap.get(childComponent.get('id'));
+      let childCompLayout = layoutMap.get(childComponent.id);
 
       childCompLayout.positionX += componentLayout.positionX;
       childCompLayout.positionY += componentLayout.positionY + OPENED_COMPONENT_HEIGHT;
@@ -78,7 +109,7 @@ export function applyBoxLayout(application: Application) {
 
 
     clazzes.forEach((clazz) => {
-      let clazzLayout = layoutMap.get(clazz.get('id'));
+      let clazzLayout = layoutMap.get(clazz.id);
 
       clazzLayout.positionX += componentLayout.positionX;
       clazzLayout.positionY += componentLayout.positionY + OPENED_COMPONENT_HEIGHT;
@@ -87,25 +118,25 @@ export function applyBoxLayout(application: Application) {
   }
 
 
-  function calcClazzHeight(component: Component) {
+  function calcClazzHeight(component: SerializedComponent) {
 
     const CLAZZ_SIZE_DEFAULT = 0.05;
     const CLAZZ_SIZE_EACH_STEP = 1.1;
 
-    const clazzes: Clazz[] = [];
+    const clazzes: SerializedClazz[] = [];
     getClazzList(component, clazzes);
 
     const instanceCountList: number[] = [];
 
     clazzes.forEach((clazz) => {
-      instanceCountList.push(clazz.get('instanceCount'));
+      instanceCountList.push(clazz.instanceCount);
     });
 
     const categories = getCategories(instanceCountList, false);
 
     clazzes.forEach((clazz) => {
-      let clazzData = layoutMap.get(clazz.get('id'));
-      clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.get('instanceCount')] + CLAZZ_SIZE_DEFAULT) * 2.0;
+      let clazzData = layoutMap.get(clazz.id);
+      clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT) * 2.0;
     });
   }
 
@@ -241,9 +272,9 @@ export function applyBoxLayout(application: Application) {
   } // END getCategories
 
 
-  function getClazzList(component: Component, clazzesArray: Clazz[]) {
-    const children = component.get('children');
-    const clazzes = component.get('clazzes');
+  function getClazzList(component: SerializedComponent, clazzesArray: SerializedClazz[]) {
+    const children = component.children;
+    const clazzes = component.clazzes;
 
     children.forEach((child) => {
       getClazzList(child, clazzesArray);
@@ -255,9 +286,9 @@ export function applyBoxLayout(application: Application) {
   }
 
 
-  function initNodes(component: Component) {
-    const children = component.get('children');
-    const clazzes = component.get('clazzes');
+  function initNodes(component: SerializedComponent) {
+    const children = component.children;
+    const clazzes = component.clazzes;
 
     const clazzWidth = 2.0;
 
@@ -266,28 +297,28 @@ export function applyBoxLayout(application: Application) {
     });
 
     clazzes.forEach((clazz) => {
-      let clazzData = layoutMap.get(clazz.get('id'));
+      let clazzData = layoutMap.get(clazz.id);
       clazzData.depth = clazzWidth;
       clazzData.width = clazzWidth;
     });
 
-    let componentData = layoutMap.get(component.get('id'));
+    let componentData = layoutMap.get(component.id);
     componentData.height = getHeightOfComponent(component);
     componentData.width = -1.0;
     componentData.depth = -1.0;
   }
 
 
-  function getHeightOfComponent(component: Component) {
+  function getHeightOfComponent(component: SerializedComponent) {
     const floorHeight = 0.75 * 4.0;
 
     let childrenHeight = floorHeight;
 
-    const children = component.get('children');
-    const clazzes = component.get('clazzes');
+    const children = component.children;
+    const clazzes = component.clazzes;
 
     clazzes.forEach((clazz) => {
-      let clazzData = layoutMap.get(clazz.get('id'));
+      let clazzData = layoutMap.get(clazz.id);
       const height = clazzData.height;
       if (height > childrenHeight) {
         childrenHeight = height;
@@ -295,7 +326,7 @@ export function applyBoxLayout(application: Application) {
     });
 
     children.forEach((child) => {
-      let childData = layoutMap.get(child.get('id'));
+      let childData = layoutMap.get(child.id);
       if (childData.height > childrenHeight) {
         childrenHeight = childData.height;
       }
@@ -305,8 +336,8 @@ export function applyBoxLayout(application: Application) {
   }
 
 
-  function doLayout(component: Component) {
-    const children = component.get('children');
+  function doLayout(component: SerializedComponent) {
+    const children = component.children;
 
     children.forEach((child) => {
       doLayout(child);
@@ -316,11 +347,11 @@ export function applyBoxLayout(application: Application) {
   }
 
 
-  function layoutChildren(component: Component) {
-    let tempList: (Clazz | Component)[] = [];
+  function layoutChildren(component: SerializedComponent) {
+    let tempList: (SerializedClazz | SerializedComponent)[] = [];
 
-    const children = component.get('children');
-    const clazzes = component.get('clazzes');
+    const children = component.children;
+    const clazzes = component.clazzes;
 
     clazzes.forEach((clazz) => {
       tempList.push(clazz);
@@ -332,22 +363,22 @@ export function applyBoxLayout(application: Application) {
 
     const segment = layoutGeneric(tempList);
 
-    let componentData = layoutMap.get(component.get('id'));
+    let componentData = layoutMap.get(component.id);
     componentData.width = segment.width;
     componentData.depth = segment.height;
   }
 
 
-  function layoutGeneric(children: (Clazz | Component)[]) {
+  function layoutGeneric(children: (SerializedClazz | SerializedComponent)[]) {
     const rootSegment = createRootSegment(children);
 
     let maxX = 0.0;
     let maxZ = 0.0;
 
     // Sort by width and by name (for entities with same width)
-    children.sort(function (e1: any, e2: any) {
-      let e1Width = layoutMap.get(e1.get('id')).width;
-      let e2Width = layoutMap.get(e2.get('id')).width;
+    children.sort(function (e1, e2) {
+      let e1Width = layoutMap.get(e1.id).width;
+      let e2Width = layoutMap.get(e2.id).width;
       const result = e1Width - e2Width;
 
       if ((-0.00001 < result) && (result < 0.00001)) {
@@ -361,8 +392,8 @@ export function applyBoxLayout(application: Application) {
       }
     });
 
-    children.forEach((child: any) => {
-      let childData = layoutMap.get(child.get('id'));
+    children.forEach((child) => {
+      let childData = layoutMap.get(child.id);
       const childWidth = (childData.width + INSET_SPACE * 2);
       const childHeight = (childData.depth + INSET_SPACE * 2);
       childData.positionY = 0.0;
@@ -387,8 +418,8 @@ export function applyBoxLayout(application: Application) {
 
     // Add labelInset space
 
-    children.forEach((child: any) => {
-      let childData = layoutMap.get(child.get('id'));
+    children.forEach((child) => {
+      let childData = layoutMap.get(child.id);
       childData.positionX = childData.positionX + INSET_SPACE;
     });
 
@@ -470,12 +501,12 @@ export function applyBoxLayout(application: Application) {
   } // END layoutGeneric
 
 
-  function createRootSegment(children: (Clazz | Component)[]) {
+  function createRootSegment(children: (SerializedClazz | SerializedComponent)[]) {
     let worstCaseWidth = 0.0;
     let worstCaseHeight = 0.0;
 
-    children.forEach((child: any) => {
-      let childData = layoutMap.get(child.get('id'));
+    children.forEach((child) => {
+      let childData = layoutMap.get(child.id);
       worstCaseWidth += childData.width + INSET_SPACE * 2;
       worstCaseHeight += childData.depth + INSET_SPACE * 2;
     });

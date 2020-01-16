@@ -424,7 +424,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   step2() {
     // this.args.application.applyDefaultOpenLayout(false);
-    this.boxLayoutMap = applyBoxLayout(this.args.application);
+    let serializedApp = this.serializeApplication(this.args.application);
+    this.boxLayoutMap = applyBoxLayout(serializedApp);
   }
 
   @action
@@ -712,4 +713,54 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.disposeMesh(mesh);
     });
   }
+
+  serializeApplication(application: Application) : SerializedApplication {
+    let childComponents = application.get('components').toArray();
+    let serializedComponents = childComponents.map(child => this.serializeComponent(child));
+    return {
+      id: application.get('id'),
+      components: serializedComponents
+    }
+  }
+
+  serializeComponent(component: Component) : SerializedComponent {
+    let childComponents = component.get('children').toArray();
+    let clazzes = component.get('clazzes').toArray();
+
+    let serializedClazzes = clazzes.map(clazz => this.serializeClazz(clazz));
+    let serializedComponents = childComponents.map(child => this.serializeComponent(child));
+
+    return {
+      id: component.get('id'),
+      name: component.get('name'),
+      clazzes: serializedClazzes,
+      children: serializedComponents
+    }
+  }
+
+  serializeClazz(clazz: Clazz) : SerializedClazz {
+    return {
+      id: clazz.get('id'),
+      name: clazz.get('name'),
+      instanceCount: clazz.get('instanceCount')
+    }
+  }
+}
+
+export type SerializedClazz = {
+  id: string,
+  name: string,
+  instanceCount: number
+}
+
+export type SerializedComponent = {
+  id: string,
+  name: string,
+  clazzes: SerializedClazz[],
+  children: SerializedComponent[]
+}
+
+export type SerializedApplication = {
+  id: string,
+  components: SerializedComponent[]
 }
