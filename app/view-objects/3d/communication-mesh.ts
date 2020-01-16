@@ -7,7 +7,6 @@ export default class CommunicationMesh extends THREE.Mesh {
 
   dataModel: DrawableClazzCommunication;
   layout: CommunicationLayout;
-  geometry: THREE.TubeGeometry | THREE.CylinderGeometry = new THREE.CylinderGeometry();
 
   highlighted: boolean = false;
   defaultColor: THREE.Color;
@@ -71,7 +70,7 @@ export default class CommunicationMesh extends THREE.Mesh {
     this.position.copy(end.add(start).divideScalar(2));
   }
 
-  renderAsCurve(viewCenterPoint = new THREE.Vector3(), curveHeight = 5, curveSegments = 20) {
+  render(viewCenterPoint = new THREE.Vector3(), curveHeight = 0.0, curveSegments = 20) {
     let layout = this.layout;
 
     let start = new THREE.Vector3();
@@ -92,6 +91,11 @@ export default class CommunicationMesh extends THREE.Mesh {
       middle,
       end
     );
+
+    // Render straigt tube if curve height of 0.0 is provided
+    if (curveHeight == 0.0) {
+      curveSegments = 1;
+    }
 
     this.geometry = new THREE.TubeGeometry(curve, curveSegments, layout.lineThickness);
   }
@@ -135,7 +139,6 @@ export default class CommunicationMesh extends THREE.Mesh {
     let length = headLength + 0.00001; // body of arrow not visible
 
     let arrow = new CommunicationArrowMesh(this.dataModel, dir, origin, length, color, headLength, headWidth);
-
     this.add(arrow);
   }
 
