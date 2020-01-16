@@ -148,7 +148,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       }
       const curveHeight = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
       if (typeof curveHeight === "number") {
-        this.addCommunication(this.args.application, curveHeight);
+        this.addCommunication(this.args.application);
       } else {
         this.addCommunication(this.args.application);
       }
@@ -236,6 +236,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       }
       this.openComponentsRecursively(child);
     });
+
+    this.addCommunication(this.args.application);
   }
 
   openComponentsRecursively(component: Component) {
@@ -432,12 +434,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const foundationColor = this.configuration.applicationColors.foundation;
     // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
     this.addComponentToScene(this.foundationBuilder.foundationObj as Component, foundationColor);
-    let curveHeight = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
-    if (typeof curveHeight === "number") {
-      this.addCommunication(this.args.application, curveHeight);
-    } else {
-      this.addCommunication(this.args.application);
-    }
+    this.addCommunication(this.args.application);
 
     this.scene.add(this.applicationObject3D);
     this.resetRotation(this.applicationObject3D);
@@ -523,8 +520,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
 
-  addCommunication(application: Application, curveHeight = 0.0) {
+  addCommunication(application: Application) {
     this.removeAllCommunication();
+
+    let maybeCurveHeight = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
+    let curveHeight = typeof maybeCurveHeight === "number" ? maybeCurveHeight : 0.0;
+    let isCurved = curveHeight !== 0.0;
 
     let commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap, this.modelIdToMesh);
     const { communication: communicationColor, highlightedEntity: highlightedEntityColor, 
@@ -545,13 +546,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       let pipe = new CommunicationMesh(commLayout, drawableClazzComm,
         new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor));
 
-      let isCurved = curveHeight !== 0.0;
-
-      if (isCurved) {
-        pipe.renderAsCurve(viewCenterPoint, curveHeight);
-      } else {
-        pipe.renderAsLine(viewCenterPoint);
-      }
+      pipe.render(viewCenterPoint, curveHeight);
 
       let arrowHeight = isCurved ? curveHeight / 2 + 1 : 0.8;
       let arrowThickness = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
