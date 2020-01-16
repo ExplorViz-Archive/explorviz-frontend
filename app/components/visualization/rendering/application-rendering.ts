@@ -552,7 +552,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       let arrowThickness = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
       let arrowColor = new THREE.Color(arrowColorString).getHex();
 
-      if (typeof arrowThickness === "number")
+      if (typeof arrowThickness === "number" && arrowThickness > 0.0)
         pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColor);
 
       this.applicationObject3D.add(pipe);

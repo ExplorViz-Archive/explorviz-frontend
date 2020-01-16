@@ -103,10 +103,9 @@ export default class CommunicationMesh extends THREE.Mesh {
   addArrows(viewCenterPoint = new THREE.Vector3(), width = 1, yOffset = 1, color = 0x000000) {
     let layout = this.layout;
     // Scale arrow with communication line thickness
-    width *= layout.lineThickness;
     let startPoint = layout.startPoint;
     let endPoint = layout.endPoint;
-
+    width += layout.lineThickness / 2;
 
     const start = new THREE.Vector3();
     start.subVectors(startPoint, viewCenterPoint);
@@ -134,7 +133,7 @@ export default class CommunicationMesh extends THREE.Mesh {
 
     // Arrow properties
     let origin = new THREE.Vector3(middle.x, middle.y + yOffset, middle.z);
-    let headWidth = Math.max(1.2, width);
+    let headWidth = Math.max(0.5, width);
     let headLength = Math.min(2 * headWidth, 0.3 * len);
     let length = headLength + 0.00001; // body of arrow not visible
 
