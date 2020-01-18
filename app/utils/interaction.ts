@@ -1,6 +1,5 @@
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import Raycaster from 'explorviz-frontend/utils/raycaster';
-import { action } from "@ember/object";
 import THREE from 'three';
 
 type CallbackFunctions = {
@@ -24,7 +23,7 @@ export type Position2D = {
   y: number
 }
 
-export default class ApplicationInteraction {
+export default class Interaction {
 
   canvas: HTMLCanvasElement;
   camera: THREE.Camera;
