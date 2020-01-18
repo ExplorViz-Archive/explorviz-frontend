@@ -60,36 +60,6 @@ export default class Trace extends BaseEntity {
     return targetClazz;
   }
 
-  highlight() {
-    this.set('highlighted', true);
-    this.get('traceSteps').forEach((traceStep: TraceStep) => {
-      if (traceStep.get('tracePosition') === 1) {
-        traceStep.highlight();
-      } else {
-        traceStep.unhighlight();
-      }
-    });
-  }
-
-  unhighlight() {
-    this.set('highlighted', false);
-    this.get('traceSteps').forEach((traceStep) => {
-      traceStep.unhighlight();
-    });
-  }
-
-  openParents(this: Trace) {
-    let traceSteps = this.hasMany('traceSteps').value();
-
-    if(traceSteps !== null) {
-      traceSteps.forEach((traceStep) => {
-        if (traceStep !== null) {
-          traceStep.openParents();
-        }
-      });
-    }
-  }
-
 }
 
 declare module 'ember-data/types/registries/model' {

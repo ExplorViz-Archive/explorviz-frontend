@@ -55,18 +55,6 @@ export default class Application extends DrawNodeEntity {
   // used for text labeling performance in respective renderers
   state = "application";
 
-  unhighlight() {
-    this.get('components').forEach((component) => {
-      component.unhighlight();
-    });
-    this.get('drawableClazzCommunications').forEach((communication) => {
-      communication.unhighlight();
-    });
-    this.get('traces').forEach((trace) => {
-      trace.unhighlight();
-    });
-  }
-
   contains(emberEntity: any) {
     let found = false;
 
@@ -101,50 +89,6 @@ export default class Application extends DrawNodeEntity {
     });
 
     return clazzes;
-  }
-
-/*   filterComponents(attributeString: string, predicateValue: any) {
-    const filteredComponents:Component[] = [];
-
-    this.get('components').forEach((component) => {
-      if(component.get(attributeString) === predicateValue) {
-        filteredComponents.push(component);
-      }
-      component.filterChildComponents(attributeString, predicateValue);
-    });
-
-    return filteredComponents;
-  },
-
-  filterClazzes(attributeString: string, predicateValue: any) {
-    const filteredClazzes:Clazz[] = [];
-
-    this.get('components').forEach((component) => {
-      filteredClazzes.push(component.filterClazzes(attributeString, predicateValue));
-    });
-
-    return filteredClazzes;
-  }, */
-
-  applyDefaultOpenLayout(userAlreadyActed: boolean) {
-    // opens all components until at least two entities are on the same level
-
-    if(userAlreadyActed) {
-      return;
-    }
-    
-    const components = this.get('components');
-
-    if(components.length > 1) {
-      // there are two components on the first level
-      // therefore, here is nothing to do
-      return;
-    }
-
-    let component = components.objectAt(0);
-    if(component !== undefined) {
-      component.applyDefaultOpenLayout();
-    }    
   }
 
 }

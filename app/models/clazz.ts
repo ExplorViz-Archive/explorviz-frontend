@@ -1,7 +1,7 @@
 import DS from 'ember-data';
-import Draw3DNodeEntity from './draw3dnodeentity';
 import Component from './component';
 import ClazzCommunication from './clazzcommunication';
+import BaseEntitity from './baseentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -14,7 +14,7 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default class Clazz extends Draw3DNodeEntity {
+export default class Clazz extends BaseEntitity {
 
   @attr('string') name!: string;
 
@@ -29,31 +29,6 @@ export default class Clazz extends Draw3DNodeEntity {
 
   @belongsTo('component', { inverse: 'clazzes' })
   parent!: DS.PromiseObject<Component> & Component;
-
-  unhighlight() {
-    this.set('highlighted', false);
-    this.set('state', 'NORMAL');
-  }
-
-  openParents(this: Clazz) {
-    let parent = this.belongsTo('parent').value() as Component;
-    if(parent !== null) {
-      parent.set('opened', true);
-      parent.openParents();
-    }
-  }
-
-  closeParents(this: Clazz) {
-    let parent = this.belongsTo('parent').value() as Component;
-    if(parent !== null) {
-      parent.set('opened', false);
-      parent.closeParents();
-    }
-  }
-
-  isVisible() {
-    return this.get('parent').get('opened');
-  }
 
   getParent(this: Clazz) {
     return this.belongsTo('parent').value() as Component;

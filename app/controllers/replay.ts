@@ -7,6 +7,7 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
+import { tracked } from '@glimmer/tracking';
 
 export default class ReplayController extends Controller {
 
@@ -19,6 +20,9 @@ export default class ReplayController extends Controller {
   @service("reload-handler") reloadHandler !: ReloadHandler;
 
   state = null;
+
+  @tracked
+  showTimeline: boolean = true;
 
   @computed('landscapeRepo.replayApplication')
   get showLandscape() {
@@ -37,17 +41,8 @@ export default class ReplayController extends Controller {
   }
 
   @action
-  toggleTimeline() {
-    get(this, 'renderingService').toggleTimeline();
-  }
-
-  @action
   timelineClicked(timestampInMillisecondsArray: any) {
     get(this, 'reloadHandler').loadReplayLandscapeByTimestamp(timestampInMillisecondsArray[0]);
-  }
-
-  showTimeline() {
-    set(this.renderingService, 'showTimeline', true);
   }
 
   // necessary for hidded input box to select a file for uploading
@@ -64,6 +59,11 @@ export default class ReplayController extends Controller {
   // fetches replay timestamps from the backend
   @action fetchReplayTimestamps() {
     this.get('timestampRepo').fetchReplayTimestamps();
+  }
+
+  @action
+  toggleTimeline() {
+    this.showTimeline = !this.showTimeline;
   }
 
   // called when on 'setupController() from the replay route

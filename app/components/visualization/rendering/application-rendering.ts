@@ -7,7 +7,7 @@ import { inject as service } from '@ember/service';
 import RenderingService, { RenderingContext } from "explorviz-frontend/services/rendering-service";
 import LandscapeRepository from "explorviz-frontend/services/repos/landscape-repository";
 import FoundationBuilder from 'explorviz-frontend/utils/application-rendering/foundation-builder';
-import { applyBoxLayout, applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
+import { applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
 import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
 import Interaction, { Position2D } from 'explorviz-frontend/utils/application-rendering/interaction';
 import DS from "ember-data";
@@ -36,6 +36,15 @@ type PopupData = {
   entity: Component | Clazz | DrawableClazzCommunication
 }
 
+export type BoxLayout = {
+  height: number,
+  width: number,
+  depth: number,
+  positionX: number,
+  positionY: number,
+  positionZ: number
+}
+
 export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @service('store')
@@ -52,6 +61,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
+
+  @service()
+  worker !: any
 
   debug = debugLogger('ApplicationRendering');
 
@@ -73,7 +85,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   modelIdToMesh: Map<string, THREE.Mesh> = new Map();
   commIdToMesh: Map<string, CommunicationMesh> = new Map();
 
-  boxLayoutMap: any;
+  boxLayoutMap: Map<string, BoxLayout> = new Map();
 
   foundationData: any;
 
@@ -113,7 +125,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       camera: this.camera,
       renderer: this.renderer
     };
-    this.renderingService.addRendering(this.args.id, renderingContext, [this.step1, this.step2, this.step3]);
+    this.renderingService.addRendering(this.args.id, renderingContext, [this.step1, this.step2]);
     this.renderingService.render(this.args.id, this.args.application);
   }
 
@@ -223,6 +235,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
+  closeAllComponents() {
+    this.modelIdToMesh.forEach(mesh => {
+      if(mesh instanceof ComponentMesh) {
+        this.closeComponentMesh(mesh);
+      }
+    });
+  }
+
   @action
   openAllComponents() {
     let foundation = this.foundationBuilder.foundationObj;
@@ -325,6 +345,45 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
+  @action
+  openParents(entity: Component|Clazz) {
+    if(entity instanceof Component) {
+      let ancestors:Set<Component> = new Set();
+      this.getAllAncestorComponents(entity, ancestors);
+      ancestors.forEach(anc => {
+        let ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
+        if(ancestorMesh instanceof ComponentMesh) {
+          this.openComponentMesh(ancestorMesh);
+        }
+      });
+    } else if(entity instanceof Clazz) {
+      let ancestors:Set<Component> = new Set();
+      this.getAllAncestorComponents(entity.getParent(), ancestors);
+      ancestors.forEach(anc => {
+        let ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
+        if(ancestorMesh instanceof ComponentMesh) {
+          this.openComponentMesh(ancestorMesh);
+        }
+      });
+    }
+  }
+
+  @action
+  closeComponent(component: Component) {
+    let mesh = this.modelIdToMesh.get(component.get('id'));
+    if(mesh instanceof ComponentMesh) {
+      this.closeComponentMesh(mesh);
+    }
+  }
+
+  @action
+  highlightModel(entity: Component|Clazz) {
+    let mesh = this.modelIdToMesh.get(entity.id);
+    if(mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
+      mesh.highlight();
+    }
+  }
+
   highlight(mesh: ComponentMesh | ClazzMesh | CommunicationMesh): void {
     // Reset highlighting if highlighted mesh is clicked
     if (mesh.highlighted) {
@@ -384,6 +443,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
+  @action
   unhighlightAll() {
     let boxMeshes = Array.from(this.modelIdToMesh.values());
     let commMeshes = Array.from(this.commIdToMesh.values());
@@ -426,21 +486,27 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   step2() {
     // this.args.application.applyDefaultOpenLayout(false);
-    this.boxLayoutMap = applyBoxLayout(this.args.application);
-  }
+    let serializedApp = this.serializeApplication(this.args.application);
 
-  @action
-  step3() {
-    const foundationColor = this.configuration.applicationColors.foundation;
-    // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
-    this.addComponentToScene(this.foundationBuilder.foundationObj as Component, foundationColor);
-    this.addCommunication(this.args.application);
-
-    this.scene.add(this.applicationObject3D);
-    this.resetRotation(this.applicationObject3D);
+    this.worker.postMessage('city-layouter', serializedApp).then((layoutedApplication: Map<string, BoxLayout>) => {
+      this.boxLayoutMap = layoutedApplication;
+      const foundationColor = this.configuration.applicationColors.foundation;
+      // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
+      this.addComponentToScene(this.foundationBuilder.foundationObj as Component, foundationColor);
+      this.addCommunication(this.args.application);
+  
+      this.scene.add(this.applicationObject3D);
+      this.resetRotation(this.applicationObject3D);
+    }, (error: any) => {
+      console.log(error)
+    });
   }
 
   addComponentToScene(component: Component, color: string) {
+    let componentData = this.boxLayoutMap.get(component.id);
+
+    if(componentData === undefined)
+      return;
 
     const OPENED_COMPONENT_HEIGHT = 1.5;
 
@@ -448,7 +514,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       clazz: clazzColor, highlightedEntity: highlightedEntityColor } = this.configuration.applicationColors;
 
     let mesh;
-    let componentData = this.boxLayoutMap.get(component.id);
     let layoutPos = new THREE.Vector3(componentData.positionX, componentData.positionY, componentData.positionZ);
 
     if (component.get('foundation')) {
@@ -471,6 +536,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     clazzes.forEach((clazz: Clazz) => {
       let clazzData = this.boxLayoutMap.get(clazz.get('id'));
+
+      if(clazzData === undefined)
+        return;
+
       layoutPos = new THREE.Vector3(clazzData.positionX, clazzData.positionY, clazzData.positionZ)
       mesh = new ClazzMesh(layoutPos, clazzData.height, clazzData.width, clazzData.depth,
         clazz, new THREE.Color(clazzColor), new THREE.Color(highlightedEntityColor));
@@ -574,6 +643,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     application.rotation.x = ROTATION_X;
     application.rotation.y = ROTATION_Y;
+  }
+
+  @action
+  resetView() {
+    this.unhighlightAll();
+    this.closeAllComponents();
+    this.resetRotation(this.applicationObject3D);
   }
 
   initThreeJs() {
@@ -716,4 +792,54 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.disposeMesh(mesh);
     });
   }
+
+  serializeApplication(application: Application) : SerializedApplication {
+    let childComponents = application.get('components').toArray();
+    let serializedComponents = childComponents.map(child => this.serializeComponent(child));
+    return {
+      id: application.get('id'),
+      components: serializedComponents
+    }
+  }
+
+  serializeComponent(component: Component) : SerializedComponent {
+    let childComponents = component.get('children').toArray();
+    let clazzes = component.get('clazzes').toArray();
+
+    let serializedClazzes = clazzes.map(clazz => this.serializeClazz(clazz));
+    let serializedComponents = childComponents.map(child => this.serializeComponent(child));
+
+    return {
+      id: component.get('id'),
+      name: component.get('name'),
+      clazzes: serializedClazzes,
+      children: serializedComponents
+    }
+  }
+
+  serializeClazz(clazz: Clazz) : SerializedClazz {
+    return {
+      id: clazz.get('id'),
+      name: clazz.get('name'),
+      instanceCount: clazz.get('instanceCount')
+    }
+  }
+}
+
+export type SerializedClazz = {
+  id: string,
+  name: string,
+  instanceCount: number
+}
+
+export type SerializedComponent = {
+  id: string,
+  name: string,
+  clazzes: SerializedClazz[],
+  children: SerializedComponent[]
+}
+
+export type SerializedApplication = {
+  id: string,
+  components: SerializedComponent[]
 }

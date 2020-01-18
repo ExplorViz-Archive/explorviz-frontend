@@ -15,8 +15,6 @@ export interface RenderingContext {
 
 export default class RenderingService extends Service.extend(Evented) {
 
-  showTimeline: boolean = true;
-
   renderingContexts: Map<string, RenderingContext> = new Map();
   customRenderingPipelines: Map<string, Function[]> = new Map();
 
@@ -36,10 +34,6 @@ export default class RenderingService extends Service.extend(Evented) {
    */
   moveCameraTo(emberModel: Clazz | DrawableClazzCommunication | ClazzCommunication) {
     this.trigger('moveCameraTo', emberModel);
-  }
-
-  toggleTimeline() {
-    this.toggleProperty('showTimeline');
   }
 
   addRendering(id: string, context: RenderingContext, pipeline: Function[]) : boolean {

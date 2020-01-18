@@ -39,28 +39,6 @@ export default class Component extends Draw3DNodeEntity {
     inverse: 'components'
   }),*/
 
-  setOpenedStatus(status: boolean) {
-    this.get('children').forEach((child:Component) => {
-      child.set('highlighted', false);
-      child.setOpenedStatus(false);
-    });
-
-    this.set('opened', status);
-  }
-
-  unhighlight() {
-    this.set('highlighted', false);
-    this.set('state', "NORMAL");
-
-    this.get('children').forEach((child) => {
-      child.unhighlight();
-    });
-
-    this.get('clazzes').forEach((clazz) => {
-      clazz.unhighlight();
-    });
-  }
-
   contains(possibleElem: Clazz|Component) {
 
     let found = false;
@@ -132,55 +110,8 @@ export default class Component extends Draw3DNodeEntity {
     return this.hasMany('children').ids().length < 2;
   }
 
-  applyDefaultOpenLayout() {
-    // opens all nested components until at least two entities are on the same level
-
-    if(this.get('opened') && !this.get('foundation')) {
-      // package already open,
-      // therefore users must have opened it
-      // Do not change the user's state
-      return;
-    }
-
-    this.set('opened', true);
-
-    const components = this.get('children');
-    const clazzes = this.get('clazzes');
-
-    if(components.get('length') + clazzes.get('length') > 10) {
-      // there are two entities on this level
-      // therefore, here is nothing to do
-      return;
-    }
-
-    let component = components.objectAt(0);
-    if(component) {
-      component.applyDefaultOpenLayout();
-    }
-  }
-
-  isVisible() {
-    return this.get('parentComponent').get('opened');
-  }
-
-  openParents(this:Component) {
-    let parentComponent = this.belongsTo('parentComponent').value() as Component;
-    if(parentComponent !== null) {
-      parentComponent.set('opened', true);
-      parentComponent.openParents();
-    }
-  }
-
   getParentComponent(this:Component) {
     return this.belongsTo('parentComponent').value() as Component;
-  }
-
-  closeParents(this:Component) {
-    let parentComponent = this.belongsTo('parentComponent').value() as Component;
-    if(parentComponent !== null) {
-      parentComponent.set('opened', false);
-      parentComponent.closeParents();
-    }
   }
 }
 
