@@ -1,30 +1,28 @@
 {{add-listener this.renderingService 'redrawScene' this.cleanAndUpdateScene}}
 
 
-<Visualization::PageSetup::VisualizationNavbar
-  @content={{array
-    (component "visualization/page-setup/navbar/reset-visualization"
-      resetView=this.resetView
-    )
-    (component "visualization/page-setup/navbar/pause-reload")
-    (component "visualization/page-setup/navbar/trace-overview"
-      addComponent=@addComponent
-    )
-    (component "visualization/page-setup/navbar/sql-opener"
-      addComponent=@addComponent
-    )
-    (component "visualization/page-setup/navbar/application-opener"
-      openAllComponents=this.openAllComponents
-    )
-    (component "visualization/page-setup/navbar/application-search"
-      application=@application
-      unhighlightAll=this.unhighlightAll
-      openParents=this.openParents
-      closeComponent=this.closeComponent
-      highlightModel=this.highlightModel
-    )
-  }}
-/>
+<Visualization::PageSetup::VisualizationNavbar>
+  <Visualization::PageSetup::Navbar::ResetVisualization
+    @resetView={{this.resetView}}
+  />
+  <Visualization::PageSetup::Navbar::PauseReload />
+  <Visualization::PageSetup::Navbar::TraceOverview
+    @addComponent={{@addComponent}}
+  />
+  <Visualization::PageSetup::Navbar::SqlOpener
+    @addComponent={{@addComponent}}
+  />
+  <Visualization::PageSetup::Navbar::ApplicationOpener
+    @openAllComponents={{this.openAllComponents}}
+  />
+  <Visualization::PageSetup::Navbar::ApplicationSearch
+    @application={{@application}}
+    @unhighlightAll={{this.unhighlightAll}}
+    @openParents={{this.openParents}}
+    @closeComponent={{this.closeComponent}}
+    @highlightModel={{this.highlightModel}}
+  />
+</Visualization::PageSetup::VisualizationNavbar>
 
 <div id="rendering" {{did-insert this.outerDivInserted}} {{did-resize this.resize debounce=100}}>
   <canvas class="main-content-majority" oncontextmenu="return false;" {{did-insert this.canvasInserted}}>
