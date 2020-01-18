@@ -28,10 +28,4 @@ export default class VisualizationRoute extends BaseRoute.extend(AuthenticatedRo
     (this.controller as VisualizationController).landscapeRepo.set('latestApplication', null);
   }
 
-  // @Override
-  @action
-  didTransition() {
-    (this.controller as VisualizationController).showTimeline();
-  }
-
 }

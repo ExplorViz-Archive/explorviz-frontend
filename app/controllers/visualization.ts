@@ -42,6 +42,9 @@ export default class VisualizationController extends Controller {
   @tracked
   components: string[] = [];
 
+  @tracked
+  showTimeline: boolean = true;
+
   @observes('landscapeListener.pauseVisualizationReload')
   timelineResetObserver() {
     // reset highlighting and selection in timeline, if unpause was clicked
@@ -66,11 +69,6 @@ export default class VisualizationController extends Controller {
   openLandscapeView() {
     set(this.landscapeRepo, 'latestApplication', null);
     set(this.landscapeRepo, 'replayApplication', null);
-  }
-
-  @action
-  toggleTimeline() {
-    get(this, 'renderingService').toggleTimeline();
   }
 
   @action
@@ -121,8 +119,9 @@ export default class VisualizationController extends Controller {
     set(this, 'plotlyTimelineRef', plotlyTimelineRef);
   }
 
-  showTimeline() {
-    set(this.renderingService, 'showTimeline', true);
+  @action
+  toggleTimeline() {
+    this.showTimeline = !this.showTimeline;
   }
 
   initRendering() {

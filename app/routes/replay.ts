@@ -20,9 +20,4 @@ export default class Replay extends BaseRoute.extend(AuthenticatedRouteMixin) {
     set((this.controller as ReplayController).landscapeRepo, 'latestApplication', null);
     set((this.controller as ReplayController).landscapeRepo, 'replayApplication', null);
   }
-
-  // @Override
-  @action didTransition() {
-    (this.controller as ReplayController).showTimeline();
-  }
 }
