@@ -34,12 +34,14 @@ export default class ApplicationInteraction {
   hammerHandler: HammerInteraction;
   eventCallbackFunctions: CallbackFunctions;
 
+  mouseOnCanvas = true;
+
   constructor(canvas: HTMLCanvasElement, camera: THREE.Camera, renderer:THREE.WebGLRenderer, application: THREE.Object3D, eventCallbackFunctions: CallbackFunctions) {
     this.canvas = canvas;
     this.camera = camera;
     this.renderer = renderer;
     this.application = application;
-    this.eventCallbackFunctions = eventCallbackFunctions;
+    this.eventCallbackFunctions = {...eventCallbackFunctions};
 
     this.raycaster = new Raycaster();
 
@@ -51,6 +53,23 @@ export default class ApplicationInteraction {
   }
 
   setupInteraction() {
+    this.bindThisOnEventListeners();
+    this.setupEventListener();
+    this.setupHammerListener();
+  }
+
+  bindThisOnEventListeners() {
+    this.onMouseOut = this.onMouseOut.bind(this);
+    this.onMouseEnter = this.onMouseEnter.bind(this);
+    this.onMouseWheelStart = this.onMouseWheelStart.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseStop = this.onMouseStop.bind(this);
+    this.onDoubleClick = this.onDoubleClick.bind(this);
+    this.onPanning = this.onPanning.bind(this);
+    this.onSingleClick = this.onSingleClick.bind(this);
+  }
+
+  setupEventListener() {
     // mouseout handler for disabling notifications
     if(this.eventCallbackFunctions.mouseOut)
       this.canvas.addEventListener('mouseout', this.onMouseOut, false);
@@ -71,49 +90,38 @@ export default class ApplicationInteraction {
       this.createMouseStopEvent();
       this.canvas.addEventListener('mousestop', this.onMouseStop, false);
     }
-
-    this.setupHammerListener();
   }
 
   setupHammerListener() {
-    const self = this;
-
     if(this.eventCallbackFunctions.doubleClick) {
-      this.hammerHandler.on('doubletap', function(mouse: Position2D) {
-        self.onDoubleClick(mouse);
-      });
+      this.hammerHandler.on('doubletap', this.onDoubleClick);
     }
 
     if(this.eventCallbackFunctions.panning) {
-      this.hammerHandler.on('panning', function(delta, event) {
-        self.onPanning(delta, event);
-      });
+      this.hammerHandler.on('panning', this.onPanning);
     }
 
     if(this.eventCallbackFunctions.singleClick) {
-      this.hammerHandler.on('singletap', function(mouse: Position2D) {
-        self.onSingleClick(mouse);
-      });
+      this.hammerHandler.on('singletap', this.onSingleClick);
     }
   }
 
-  @action
   onMouseEnter() {
+    this.mouseOnCanvas = true;
     if(!this.eventCallbackFunctions.mouseEnter)
       return;
 
     this.eventCallbackFunctions.mouseEnter();
   }
 
-  @action
   onMouseOut() {
+    this.mouseOnCanvas = false;
     if(!this.eventCallbackFunctions.mouseOut)
       return;
 
     this.eventCallbackFunctions.mouseOut();
   }
 
-  @action
   onMouseMove(evt: MouseEvent) {
     if(!this.eventCallbackFunctions.mouseMove)
       return;
@@ -132,9 +140,11 @@ export default class ApplicationInteraction {
     }
   }
 
-  @action
   onMouseStop(evt: CustomEvent<MouseOffsetPosition>) {
     if(!this.eventCallbackFunctions.mouseStop)
+      return;
+
+    if(!this.mouseOnCanvas)
       return;
 
     const mouse = {
@@ -151,7 +161,6 @@ export default class ApplicationInteraction {
     }
   }
 
-  @action
   onMouseWheelStart(evt: WheelEvent) {
     if(!this.eventCallbackFunctions.mouseWheel)
       return;
@@ -161,7 +170,6 @@ export default class ApplicationInteraction {
     this.eventCallbackFunctions.mouseWheel(delta);
   }
 
-  @action
   onSingleClick(mouse: Position2D) {
     if(!this.eventCallbackFunctions.singleClick)
       return;
@@ -175,7 +183,6 @@ export default class ApplicationInteraction {
     }
   }
 
-  @action
   onDoubleClick(mouse: Position2D) {
     if(!this.eventCallbackFunctions.doubleClick)
       return;
@@ -189,7 +196,6 @@ export default class ApplicationInteraction {
     }
   }
 
-  @action
   onPanning(delta: {x:number, y:number}, event: any) {
     if(!this.eventCallbackFunctions.panning)
       return;
@@ -243,13 +249,28 @@ export default class ApplicationInteraction {
   }
 
   removeHandlers() {
-    this.hammerHandler.hammerManager.off('doubletap');
-    this.hammerHandler.hammerManager.off('panning');
-    this.hammerHandler.hammerManager.off('singletap');
-    this.canvas.removeEventListener('mouseout', this.onMouseOut);
-    this.canvas.removeEventListener('mouseenter', this.onMouseEnter);
-    this.canvas.removeEventListener('wheel', this.onMouseWheelStart);
-    this.canvas.removeEventListener('mousemove', this.onMouseMove);
-    this.canvas.removeEventListener('mousestop', this.onMouseStop);
+    if(this.eventCallbackFunctions.doubleClick)
+      this.hammerHandler.hammerManager.off('doubletap');
+
+    if(this.eventCallbackFunctions.panning)
+      this.hammerHandler.hammerManager.off('panning');
+
+    if(this.eventCallbackFunctions.singleClick)
+      this.hammerHandler.hammerManager.off('singletap');
+
+    if(this.eventCallbackFunctions.mouseOut)
+      this.canvas.removeEventListener('mouseout', this.onMouseOut);
+
+    if(this.eventCallbackFunctions.mouseEnter)
+      this.canvas.removeEventListener('mouseenter', this.onMouseEnter);
+
+    if(this.eventCallbackFunctions.mouseWheel)
+      this.canvas.removeEventListener('wheel', this.onMouseWheelStart);
+
+    if(this.eventCallbackFunctions.mouseMove)
+      this.canvas.removeEventListener('mousemove', this.onMouseMove);
+
+    if(this.eventCallbackFunctions.mouseStop)
+      this.canvas.removeEventListener('mousestop', this.onMouseStop);
   }
 }
