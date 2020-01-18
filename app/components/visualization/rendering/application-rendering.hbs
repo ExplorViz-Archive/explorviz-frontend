@@ -8,7 +8,13 @@
     (component "visualization/page-setup/navbar/trace-overview" addComponent=@addComponent)
     (component "visualization/page-setup/navbar/sql-opener" addComponent=@addComponent)
     (component "visualization/page-setup/navbar/application-opener" openAllComponents=this.openAllComponents)
-    (component "visualization/page-setup/navbar/application-search")
+    (component "visualization/page-setup/navbar/application-search"
+      application=@application
+      unhighlightAll=this.unhighlightAll
+      openParents=this.openParents
+      closeComponent=this.closeComponent
+      highlightModel=this.highlightModel
+    )
   }}
 />
 

@@ -337,6 +337,45 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
+  @action
+  openParents(entity: Component|Clazz) {
+    if(entity instanceof Component) {
+      let ancestors:Set<Component> = new Set();
+      this.getAllAncestorComponents(entity, ancestors);
+      ancestors.forEach(anc => {
+        let ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
+        if(ancestorMesh instanceof ComponentMesh) {
+          this.openComponentMesh(ancestorMesh);
+        }
+      });
+    } else if(entity instanceof Clazz) {
+      let ancestors:Set<Component> = new Set();
+      this.getAllAncestorComponents(entity.getParent(), ancestors);
+      ancestors.forEach(anc => {
+        let ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
+        if(ancestorMesh instanceof ComponentMesh) {
+          this.openComponentMesh(ancestorMesh);
+        }
+      });
+    }
+  }
+
+  @action
+  closeComponent(component: Component) {
+    let mesh = this.modelIdToMesh.get(component.get('id'));
+    if(mesh instanceof ComponentMesh) {
+      this.closeComponentMesh(mesh);
+    }
+  }
+
+  @action
+  highlightModel(entity: Component|Clazz) {
+    let mesh = this.modelIdToMesh.get(entity.id);
+    if(mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
+      mesh.highlight();
+    }
+  }
+
   highlight(mesh: ComponentMesh | ClazzMesh | CommunicationMesh): void {
     // Reset highlighting if highlighted mesh is clicked
     if (mesh.highlighted) {
@@ -396,6 +435,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
+  @action
   unhighlightAll() {
     let boxMeshes = Array.from(this.modelIdToMesh.values());
     let commMeshes = Array.from(this.commIdToMesh.values());

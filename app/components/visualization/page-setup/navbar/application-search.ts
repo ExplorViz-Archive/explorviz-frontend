@@ -5,17 +5,23 @@ import { isBlank } from '@ember/utils';
 import $ from 'jquery';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import Highlighter from 'explorviz-frontend/services/visualization/application/highlighter';
 import Clazz from 'explorviz-frontend/models/clazz';
 import Component from 'explorviz-frontend/models/component';
 import { action } from '@ember/object';
+import Application from 'explorviz-frontend/models/application';
 
+interface Args {
+  application: Application,
+  unhighlightAll(): void,
+  highlightModel(entity: Clazz|Component): void,
+  openParents(entity: Clazz|Component): void,
+  closeComponent(component: Component): void
+}
 /* eslint-disable require-yield */
-export default class ApplicationSearch extends GlimmerComponent {
+export default class ApplicationSearch extends GlimmerComponent<Args> {
 
   @service('rendering-service') renderingService!: RenderingService;
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
-  @service('visualization/application/highlighter') highlighter!: Highlighter;
 
   componentLabel = "-- Components --";
   clazzLabel = "-- Classes --";
@@ -34,23 +40,17 @@ export default class ApplicationSearch extends GlimmerComponent {
 
     const model = emberPowerSelectObject[0];
 
-    this.highlighter.unhighlightAll();
+    this.args.unhighlightAll();
   
     if (model instanceof Clazz) {
-      model.openParents();
+      this.args.openParents(model);
     }
     else if (model instanceof Component) {
-      if (model.opened) {
-        // Close and highlight, since it is already open
-        model.setOpenedStatus(false);
-      } else {
-        // Open all parents, since component is hidden
-        model.openParents();
-      }
+      this.args.openParents(model);
+      this.args.closeComponent(model);
     }
 
-    this.highlighter.highlight(model);
-    this.renderingService.redrawScene();
+    this.args.highlightModel(model);
   }
 
   reCalculateDropdown(trigger:Element) {
@@ -76,7 +76,7 @@ export default class ApplicationSearch extends GlimmerComponent {
 
     const searchString = name.toLowerCase();
 
-    const latestApp = this.landscapeRepo.latestApplication;
+    const latestApp = this.args.application;
 
     if(latestApp === null) {
       return [];
@@ -84,6 +84,7 @@ export default class ApplicationSearch extends GlimmerComponent {
 
     // re-calculate since there might be an update to the app (e.g. new class)
     const components = latestApp.getAllComponents();
+    console.log(components)
     const clazzes = latestApp.getAllClazzes();
     const entities = [];
 
@@ -146,6 +147,7 @@ export default class ApplicationSearch extends GlimmerComponent {
         currentNumberOfClazzNames++;
       }  
     }
+    console.log(entities)
     return entities;
 
     function searchEngineFindsHit(name:string, searchString:string) {
