@@ -32,19 +32,6 @@ export default class TraceStep extends BaseEntity {
   @belongsTo('clazzcommunication', { inverse: null })
   clazzCommunication!: DS.PromiseObject<ClazzCommunication> & ClazzCommunication;
 
-  openParents(this: TraceStep) {
-    let clazzCommunication = this.belongsTo('clazzCommunication').value() as ClazzCommunication;
-    clazzCommunication.openParents();
-  }
-
-  highlight() {
-    this.set('highlighted', true);
-  }
-
-  unhighlight() {
-    this.set('highlighted', false);
-  }
-
 }
 
 declare module 'ember-data/types/registries/model' {

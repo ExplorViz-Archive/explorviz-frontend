@@ -1,7 +1,7 @@
 import DS from 'ember-data';
-import DrawEdgeEntity from './drawedgeentity';
 import Clazz from './clazz';
 import ClazzCommunication from './clazzcommunication';
+import BaseEntitity from './baseentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -14,7 +14,7 @@ const { attr, belongsTo, hasMany } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default class AggregatedClazzCommunication extends DrawEdgeEntity {
+export default class AggregatedClazzCommunication extends BaseEntitity {
 
   @attr('number') totalRequests!: number;
 
