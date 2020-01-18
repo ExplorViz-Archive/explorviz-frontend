@@ -192,15 +192,19 @@ export function applyCommunicationLayout(application: Application,
     if (internalClazz !== null) {
       const end = new THREE.Vector3();
 
-      const centerPoint =
-        new THREE.Vector3(internalClazz.get('positionX') +
-          internalClazz.get('width') / 2.0,
-          internalClazz.get('positionY') + internalClazz.get('height') / 2.0,
-          internalClazz.get('positionZ') + internalClazz.get('depth') / 2.0);
+      let clazzBoxLayout = boxLayoutMap.get(internalClazz.get('id'));
+      if(clazzBoxLayout === undefined)
+        return;
 
-      end.x = internalClazz.get('positionX') + internalClazz.get('width') / 2.0;
+      const centerPoint =
+        new THREE.Vector3(clazzBoxLayout.positionX +
+          clazzBoxLayout.width / 2.0,
+          clazzBoxLayout.positionY + clazzBoxLayout.height / 2.0,
+          clazzBoxLayout.positionZ + clazzBoxLayout.depth / 2.0);
+
+      end.x = clazzBoxLayout.positionX + clazzBoxLayout.width / 2.0;
       end.y = centerPoint.y;
-      end.z = internalClazz.get('positionZ') + internalClazz.get('depth') / 2.0;
+      end.z = clazzBoxLayout.positionZ + clazzBoxLayout.depth / 2.0;
       communicationData.pointsFor3D.push(end);
     }
   }
