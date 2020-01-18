@@ -1,8 +1,9 @@
 import THREE from 'three';
-import EntityMesh from '../entity-mesh';
+import BoxMesh from './box-mesh';
 import Clazz from 'explorviz-frontend/models/clazz';
+import ClazzLabelMesh from './clazz-label-mesh';
 
-export default class ClazzMesh extends EntityMesh {
+export default class ClazzMesh extends BoxMesh {
 
   geometry: THREE.BoxGeometry;
   material: THREE.MeshLambertMaterial;
@@ -19,5 +20,23 @@ export default class ClazzMesh extends EntityMesh {
     this.geometry = geometry;
     this.material = material;
     this.dataModel = clazz;
+  }
+
+  createLabel(font: THREE.Font){
+    let label = new ClazzLabelMesh(font, this.dataModel.name, new THREE.Color(0xffffff));
+    
+    this.positionLabel(label);
+    this.add(label);
+  }
+
+  positionLabel(label: ClazzLabelMesh){
+    // Set label origin to center of clazz mesh
+    label.geometry.center();
+    // Set y-position just above the clazz mesh
+    label.position.y = this.geometry.parameters.height / 2 + 0.01;
+
+    // Rotate text
+    label.rotation.x = -(Math.PI / 2);
+    label.rotation.z = -(Math.PI / 3);
   }
 }

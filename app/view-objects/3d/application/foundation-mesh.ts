@@ -1,8 +1,8 @@
 import THREE from 'three';
 import Component from 'explorviz-frontend/models/component';
-import EntityMesh from '../entity-mesh';
+import BoxMesh from './box-mesh';
 
-export default class FoundationMesh extends EntityMesh {
+export default class FoundationMesh extends BoxMesh {
 
   dataModel: Component;
 
@@ -17,4 +17,7 @@ export default class FoundationMesh extends EntityMesh {
     this.material = material;
     this.dataModel = foundation;
   }
+
+  // Foundation is not labeled
+  createLabel(){}
 }
