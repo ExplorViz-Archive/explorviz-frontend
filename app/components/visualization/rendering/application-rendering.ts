@@ -235,6 +235,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
+  closeAllComponents() {
+    this.modelIdToMesh.forEach(mesh => {
+      if(mesh instanceof ComponentMesh) {
+        this.closeComponentMesh(mesh);
+      }
+    });
+  }
+
   @action
   openAllComponents() {
     let foundation = this.foundationBuilder.foundationObj;
@@ -635,6 +643,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     application.rotation.x = ROTATION_X;
     application.rotation.y = ROTATION_Y;
+  }
+
+  @action
+  resetView() {
+    this.unhighlightAll();
+    this.closeAllComponents();
+    this.resetRotation(this.applicationObject3D);
   }
 
   initThreeJs() {

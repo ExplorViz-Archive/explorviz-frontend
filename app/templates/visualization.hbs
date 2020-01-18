@@ -2,14 +2,14 @@
   <div class="{{if this.showDataSelection "col-8" "col-12"}}" id="vizspace">
     {{#if this.showLandscape}}
       {{#if this.landscapeRepo.latestLandscape.systems}}
-        <Visualization::PageSetup::VisualizationNavbar
+{{!--         <Visualization::PageSetup::VisualizationNavbar
           @content={{array
             (component "visualization/page-setup/navbar/reset-visualization")
             (component "visualization/page-setup/navbar/pause-reload")
             (component "visualization/page-setup/navbar/event-opener" addComponent=this.addComponent)
             (component "visualization/page-setup/navbar/landscape-downloader" landscape=this.landscapeRepo.latestLandscape)
           }}
-        />
+        /> --}}
         {{#if this.landscapeRepo.latestLandscape}}
           <Visualization::Rendering::LandscapeRendering @id="landscape1" @landscape={{this.landscapeRepo.latestLandscape}} />
         {{/if}}
