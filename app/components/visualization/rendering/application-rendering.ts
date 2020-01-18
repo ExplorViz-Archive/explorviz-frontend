@@ -662,8 +662,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
         this.font = font;
         this.debug("(THREE.js) font sucessfully loaded.");
+        this.labelComponents();
       }
     );
+  }
+
+  labelComponents(){
+    this.modelIdToMesh.forEach(mesh => {
+      if (mesh instanceof ComponentMesh){
+        mesh.addLabel(this.font);
+      }
+    });
   }
 
   willDestroy() {
