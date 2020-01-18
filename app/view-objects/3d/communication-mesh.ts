@@ -2,45 +2,22 @@ import THREE from 'three';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 import CommunicationLayout from '../../view-objects/layout-models/communication-layout';
 import CommunicationArrowMesh from './application/communication-arrow-mesh';
+import BaseMesh from './base-mesh';
 
-export default class CommunicationMesh extends THREE.Mesh {
+export default class CommunicationMesh extends BaseMesh {
 
   dataModel: DrawableClazzCommunication;
   layout: CommunicationLayout;
 
-  highlighted: boolean = false;
-  defaultColor: THREE.Color;
-  highlightingColor: THREE.Color;
-
   constructor(layout: CommunicationLayout, dataModel: DrawableClazzCommunication,
     defaultColor: THREE.Color, highlightingColor: THREE.Color) {
-    super();
+    super(defaultColor, highlightingColor);
     this.layout = layout;
     this.dataModel = dataModel;
-    this.defaultColor = defaultColor;
-    this.highlightingColor = highlightingColor;
 
     this.material = new THREE.MeshBasicMaterial({
       color: new THREE.Color(defaultColor)
     });
-  }
-
-
-  highlight() {
-    this.highlighted = true;
-    if (this.material instanceof THREE.MeshBasicMaterial) {
-      this.material.color = this.highlightingColor;
-    }
-  }
-
-
-  unhighlight() {
-    this.highlighted = false;
-    if (this.material instanceof THREE.MeshBasicMaterial) {
-      this.material.color = this.defaultColor;
-      this.material.transparent = false;
-      this.material.opacity = 1.0;
-    }
   }
 
   renderAsLine(viewCenterPoint: THREE.Vector3) {
@@ -139,24 +116,6 @@ export default class CommunicationMesh extends THREE.Mesh {
 
     let arrow = new CommunicationArrowMesh(this.dataModel, dir, origin, length, color, headLength, headWidth);
     this.add(arrow);
-  }
-
-  delete() {
-    if (this.parent) {
-      this.parent.remove(this);
-    }
-    this.children.forEach(child => {
-      if (child instanceof CommunicationArrowMesh) {
-        child.delete();
-      }
-    });
-
-    if (this.geometry) {
-      this.geometry.dispose();
-    }
-    if (this.material instanceof THREE.Material) {
-      this.material.dispose();
-    }
   }
 
 }

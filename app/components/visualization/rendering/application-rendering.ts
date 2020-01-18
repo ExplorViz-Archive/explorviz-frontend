@@ -19,7 +19,7 @@ import FoundationMesh from "explorviz-frontend/view-objects/3d/application/found
 import HoverEffectHandler from "explorviz-frontend/utils/hover-effect-handler";
 import ClazzMesh from "explorviz-frontend/view-objects/3d/application/clazz-mesh";
 import ComponentMesh from "explorviz-frontend/view-objects/3d/application/component-mesh";
-import EntityMesh from "explorviz-frontend/view-objects/3d/entity-mesh";
+import BoxMesh from "explorviz-frontend/view-objects/3d/application/box-mesh";
 import CommunicationMesh from "explorviz-frontend/view-objects/3d/communication-mesh";
 import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
 import { tracked } from "@glimmer/tracking";
@@ -158,12 +158,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       } else {
         this.openComponentMesh(mesh);
       }
-      const curveHeight = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
-      if (typeof curveHeight === "number") {
-        this.addCommunication(this.args.application);
-      } else {
-        this.addCommunication(this.args.application);
-      }
+      this.addCommunication(this.args.application);
     }
   }
 
@@ -175,7 +170,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.hoverHandler.handleHoverEffect(mesh);
     }
 
-    if (mesh instanceof EntityMesh) {
+    if (mesh instanceof BoxMesh) {
       if (enableHoverEffects)
         this.hoverHandler.handleHoverEffect(mesh);
     }
@@ -449,7 +444,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     let commMeshes = Array.from(this.commIdToMesh.values());
     let meshes = boxMeshes.concat(commMeshes);
     for (let mesh of meshes) {
-      if (mesh instanceof EntityMesh || mesh instanceof CommunicationMesh) {
+      if (mesh instanceof BoxMesh || mesh instanceof CommunicationMesh) {
         mesh.unhighlight();
       }
     }
@@ -748,8 +743,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       return;
     
     this.modelIdToMesh.forEach(mesh => {
-      if (mesh instanceof ComponentMesh){
-        mesh.addLabel(this.font);
+      if (mesh instanceof BoxMesh){
+        mesh.createLabel(this.font);
       }
     });
   }

@@ -1,11 +1,11 @@
 import { calculateColorBrightness } from
   'explorviz-frontend/utils/helpers/threejs-helpers';
 import THREE from "three";
-import EntityMesh from '../view-objects/3d/entity-mesh';
+import BoxMesh from '../view-objects/3d/application/box-mesh';
 
 export default class HoverEffectHandler {
 
-  hoveredEntityObj:null|EntityMesh = null;
+  hoveredEntityObj:null|BoxMesh = null;
 
   resetHoverEffect() : void {
     let hoveredEntityObj = this.hoveredEntityObj;
@@ -19,7 +19,7 @@ export default class HoverEffectHandler {
     }
   }
 
-  handleHoverEffect(mesh: EntityMesh|undefined): void {
+  handleHoverEffect(mesh: BoxMesh|undefined): void {
     // No raycastTarget, do nothing and return
     if (mesh === undefined) {
       this.resetHoverEffect();
