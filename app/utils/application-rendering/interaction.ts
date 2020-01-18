@@ -34,6 +34,8 @@ export default class ApplicationInteraction {
   hammerHandler: HammerInteraction;
   eventCallbackFunctions: CallbackFunctions;
 
+  mouseOnCanvas = true;
+
   constructor(canvas: HTMLCanvasElement, camera: THREE.Camera, renderer:THREE.WebGLRenderer, application: THREE.Object3D, eventCallbackFunctions: CallbackFunctions) {
     this.canvas = canvas;
     this.camera = camera;
@@ -99,6 +101,7 @@ export default class ApplicationInteraction {
 
   @action
   onMouseEnter() {
+    this.mouseOnCanvas = true;
     if(!this.eventCallbackFunctions.mouseEnter)
       return;
 
@@ -107,6 +110,7 @@ export default class ApplicationInteraction {
 
   @action
   onMouseOut() {
+    this.mouseOnCanvas = false;
     if(!this.eventCallbackFunctions.mouseOut)
       return;
 
@@ -135,6 +139,9 @@ export default class ApplicationInteraction {
   @action
   onMouseStop(evt: CustomEvent<MouseOffsetPosition>) {
     if(!this.eventCallbackFunctions.mouseStop)
+      return;
+
+    if(!this.mouseOnCanvas)
       return;
 
     const mouse = {
