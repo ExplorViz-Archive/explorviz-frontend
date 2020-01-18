@@ -43,6 +43,9 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
+      if(evt.srcEvent.target !== canvas)
+        return;
+
       const event = evt.srcEvent;
 
       mouseDeltaX = event.offsetX;
@@ -55,6 +58,9 @@ export default class HammerInteraction extends Object.extend(Evented) {
       }
 
       const delta = {};
+
+      if(evt.srcEvent.target !== canvas)
+        return;
 
       delta.x = evt.srcEvent.offsetX - mouseDeltaX;
       delta.y = evt.srcEvent.offsetY - mouseDeltaY;
@@ -71,6 +77,9 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
+      if(evt.srcEvent.target !== canvas)
+        return;
+
       var mouse = {};
 
       mouse.x = evt.srcEvent.offsetX;
@@ -84,6 +93,9 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
+      if(evt.srcEvent.target !== canvas)
+        return;
+
       var mouse = {};
 
       mouse.x = evt.srcEvent.offsetX;
@@ -96,6 +108,9 @@ export default class HammerInteraction extends Object.extend(Evented) {
       if(evt.button !== 1) {
         return;
       }
+
+      if(evt.srcEvent.target !== canvas)
+        return;
 
       var mouse = {};
 
