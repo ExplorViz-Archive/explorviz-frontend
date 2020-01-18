@@ -494,6 +494,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
       this.addComponentToScene(this.foundationBuilder.foundationObj as Component, foundationColor);
       this.addCommunication(this.args.application);
+      this.labelComponents();
   
       this.scene.add(this.applicationObject3D);
       this.resetRotation(this.applicationObject3D);
@@ -621,7 +622,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       let arrowThickness = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
       let arrowColor = new THREE.Color(arrowColorString).getHex();
 
-      if (typeof arrowThickness === "number")
+      if (typeof arrowThickness === "number" && arrowThickness > 0.0)
         pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColor);
 
       this.applicationObject3D.add(pipe);
@@ -740,6 +741,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.debug("(THREE.js) font sucessfully loaded.");
       }
     );
+  }
+
+  labelComponents(){
+    if (!this.font)
+      return;
+    
+    this.modelIdToMesh.forEach(mesh => {
+      if (mesh instanceof ComponentMesh){
+        mesh.addLabel(this.font);
+      }
+    });
   }
 
   willDestroy() {
