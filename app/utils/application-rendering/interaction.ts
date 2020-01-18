@@ -41,7 +41,7 @@ export default class ApplicationInteraction {
     this.camera = camera;
     this.renderer = renderer;
     this.application = application;
-    this.eventCallbackFunctions = eventCallbackFunctions;
+    this.eventCallbackFunctions = {...eventCallbackFunctions};
 
     this.raycaster = new Raycaster();
 
