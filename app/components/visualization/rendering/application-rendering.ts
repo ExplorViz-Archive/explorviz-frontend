@@ -9,7 +9,7 @@ import LandscapeRepository from "explorviz-frontend/services/repos/landscape-rep
 import FoundationBuilder from 'explorviz-frontend/utils/application-rendering/foundation-builder';
 import { applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
 import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
-import Interaction, { Position2D } from 'explorviz-frontend/utils/application-rendering/interaction';
+import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import DS from "ember-data";
 import Configuration from "explorviz-frontend/services/configuration";
 import Clazz from "explorviz-frontend/models/clazz";

@@ -15,7 +15,7 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 import applyKlayLayout from
   'explorviz-frontend/utils/landscape-rendering/klay-layouter';
 import Interaction, { Position2D } from
-  'explorviz-frontend/utils/application-rendering/interaction';
+  'explorviz-frontend/utils/interaction';
 import Labeler from
   'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as CalcCenterAndZoom from
