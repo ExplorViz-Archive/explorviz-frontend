@@ -1,15 +1,15 @@
 {{#unless @timestamps.length}}
   <div class="timeline-no-timestamps-outer">
     <div class='timeline-no-timestamps-inner'>
-      No replay timestamps available.
+      No replay timestamps available!
     </div>
   </div>
-  <div id="asd" class="plotlyDiv timeline-blur-effect"
+  <div class="plotlyDiv timeline-blur-effect"
     {{did-insert this.didRender}}
   >
   </div>
 {{else}}
-  <div id="asd" class='plotlyDiv'
+  <div class='plotlyDiv'
     {{on "mouseenter" this.handleMouseEnter}}
     {{on "mouseleave" this.handleMouseLeave}}
     {{did-update this.didRender @timestamps}}
