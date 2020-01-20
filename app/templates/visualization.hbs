@@ -16,10 +16,18 @@
           <Visualization::Rendering::Popups::PopupCoordinator
               @popupData={{this.additionalData.popupContent}} />
         </div>
+      {{else if this.landscapeRepo.latestLandscape}}
+        <div class="container-fluid">
+          <div class="jumbotron">
+            <h2>Empty Landscape received!</h2>
+            <p>A new landscape will be fetched every 10 seconds.</p>
+          </div>
+          <div class="spinner-center-3" role="status"></div>
+        </div>
       {{else}}
         <div class="container-fluid">
           <div class="jumbotron">
-            <h2>No Landscape Found!</h2>
+            <h2>No Landscape found!</h2>
             <p>A new landscape will be fetched every 10 seconds.</p>
           </div>
           <div class="spinner-center-3" role="status"></div>
