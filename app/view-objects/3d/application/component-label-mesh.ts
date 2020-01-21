@@ -1,15 +1,17 @@
 import THREE from "three";
 import LabelMesh from "../label-mesh";
 import ComponentMesh from "./component-mesh";
+import FoundationMesh from "./foundation-mesh";
 
 export default class ComponentLabelMesh extends LabelMesh {
 
-  constructor(font: THREE.Font, labelText: string, textColor = new THREE.Color(0x000000), componentMesh: ComponentMesh) {
+  constructor(componentMesh: ComponentMesh | FoundationMesh, font: THREE.Font, textColor = new THREE.Color(0x000000)) {
+    let labelText = componentMesh.dataModel.name;
     super(font, labelText, textColor);
     this.computeLabel(componentMesh, labelText);
   }
 
-  computeLabel(componentMesh: ComponentMesh, labelText: string) {
+  computeLabel(componentMesh: ComponentMesh |FoundationMesh, labelText: string) {
     const MIN_HEIGHT = 1.5;
     const MIN_LENGTH = 4;
 
@@ -46,6 +48,9 @@ export default class ComponentLabelMesh extends LabelMesh {
       textDimensions = computeBoxSize(this.geometry)
     }
 
+    // Avoid distorted text due to parent scaling
+    this.scale.y /= componentMesh.scale.x / componentMesh.scale.z;
+
     // Text height as percepted by the user
     let absoluteTextHeight = textSize * parentScale.x * scaleFactor;
 
@@ -54,6 +59,7 @@ export default class ComponentLabelMesh extends LabelMesh {
       // Dispose objects because new text object needs to be computed
       this.geometry.dispose();
       this.material.dispose();
+      this.scale.set(1, 1, 1);
 
       // Calculate theoretical label length based on height mismatch
       let desiredLength = (absoluteTextHeight / MIN_HEIGHT) * Math.floor(labelText.length);

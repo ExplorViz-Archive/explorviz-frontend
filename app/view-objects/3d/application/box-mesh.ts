@@ -54,6 +54,6 @@ export default abstract class BoxMesh extends BaseMesh {
     this.scale.z = depth;
   }
 
-  abstract createLabel(font: THREE.Font): void
+  abstract createLabel(font: THREE.Font, color: THREE.Color): void
 
 }
