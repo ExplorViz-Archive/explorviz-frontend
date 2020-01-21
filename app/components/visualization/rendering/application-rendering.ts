@@ -22,6 +22,7 @@ import BoxMesh from "explorviz-frontend/view-objects/3d/application/box-mesh";
 import CommunicationMesh from "explorviz-frontend/view-objects/3d/communication-mesh";
 import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
 import { tracked } from "@glimmer/tracking";
+import BaseMesh from "explorviz-frontend/view-objects/3d/base-mesh";
 
 interface Args {
   id: string,
@@ -92,6 +93,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   constructor(owner: any, args: Args) {
     super(owner, args);
     this.debug("Constructor called");
+
+    this.loadFont();
   }
 
   @action
@@ -115,13 +118,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.resize(outerDiv);
 
-    const renderingContext: RenderingContext = {
-      scene: this.scene,
-      camera: this.camera,
-      renderer: this.renderer
-    };
-    this.renderingService.addRendering(this.args.id, renderingContext, [this.step1, this.step2]);
-    this.renderingService.render(this.args.id, this.args.application);
+    this.populateScene();
   }
 
   @action
@@ -131,11 +128,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
-  }
-
-  resetScene() {
-    this.scene.remove(this.applicationObject3D);
-    this.renderingService.render(this.args.id, this.args.application);
   }
 
   @action
@@ -470,16 +462,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.getAllAncestorComponents(parent, set);
   }
 
-  @action
-  step1() {
-  }
-
-  @action
-  step2() {
-    // this.args.application.applyDefaultOpenLayout(false);
+  async populateScene() {
     let serializedApp = this.serializeApplication(this.args.application);
 
-    this.worker.postMessage('city-layouter', serializedApp).then((layoutedApplication: Map<string, BoxLayout>) => {
+    try {
+      let layoutedApplication: Map<string, BoxLayout> = await this.worker.postMessage('city-layouter', serializedApp);
       this.boxLayoutMap = layoutedApplication;
       // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
       this.addFoundationToScene(this.args.application);
@@ -488,9 +475,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   
       this.scene.add(this.applicationObject3D);
       this.resetRotation(this.applicationObject3D);
-    }, (error: any) => {
-      console.log(error)
-    });
+    } catch(e) {
+      console.log(e)
+    }
   }
 
   addFoundationToScene(application: Application) {
@@ -670,8 +657,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   initThreeJs() {
-    this.loadFont();
-
     this.initScene();
     this.initCamera();
     this.initRenderer();
@@ -780,7 +765,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   willDestroy() {
     cancelAnimationFrame(this.animationFrameId);
-    this.cleanUpObject3D(this.scene);
+    this.cleanUpApplication();
     this.scene.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
@@ -790,33 +775,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug("Cleaned up application rendering");
   }
 
-  cleanUpObject3D(obj: THREE.Object3D) {
-    obj.children.forEach((object: THREE.Object3D) => {
-      this.cleanUpObject3D(object);
-      if (object instanceof THREE.Mesh) {
-        this.disposeMesh(object);
+  cleanUpApplication() {
+    this.modelIdToMesh.forEach((mesh) => {
+      if(mesh instanceof BaseMesh) {
+        mesh.delete();
       }
     });
-  }
-
-  disposeMesh(mesh: THREE.Mesh) {
-    mesh.geometry.dispose();
-    if (mesh.material instanceof THREE.Material) {
-      mesh.material.dispose();
-    } else {
-      mesh.material.forEach(material => {
-        material.dispose();
-      });
-    }
-  }
-
-  disposeApplicationMeshes() {
-    this.modelIdToMesh.forEach(mesh => {
-      this.disposeMesh(mesh);
+    this.commIdToMesh.forEach((mesh) => {
+      mesh.delete();
     });
-    this.commIdToMesh.forEach(mesh => {
-      this.disposeMesh(mesh);
-    });
+    this.modelIdToMesh.clear();
+    this.commIdToMesh.clear();
   }
 
   serializeApplication(application: Application) : SerializedApplication {
