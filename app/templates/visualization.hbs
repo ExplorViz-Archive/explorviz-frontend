@@ -10,16 +10,22 @@
             (component "visualization/page-setup/navbar/landscape-downloader" landscape=this.landscapeRepo.latestLandscape)
           }}
         /> --}}
-        {{#if this.landscapeRepo.latestLandscape}}
-          <Visualization::Rendering::LandscapeRendering
-            @id="landscape1"
-            @landscape={{this.landscapeRepo.latestLandscape}}
-          />
-        {{/if}}
+        <Visualization::Rendering::LandscapeRendering
+          @id="landscape1"
+          @landscape={{this.landscapeRepo.latestLandscape}}
+        />
+      {{else if this.landscapeRepo.latestLandscape}}
+        <div class="container-fluid">
+          <div class="jumbotron">
+            <h2>Empty Landscape received!</h2>
+            <p>A new landscape will be fetched every 10 seconds.</p>
+          </div>
+          <div class="spinner-center-3" role="status"></div>
+        </div>
       {{else}}
         <div class="container-fluid">
           <div class="jumbotron">
-            <h2>No Landscape Found!</h2>
+            <h2>No Landscape found!</h2>
             <p>A new landscape will be fetched every 10 seconds.</p>
           </div>
           <div class="spinner-center-3" role="status"></div>
