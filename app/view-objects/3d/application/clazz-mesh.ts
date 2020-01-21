@@ -22,8 +22,8 @@ export default class ClazzMesh extends BoxMesh {
     this.dataModel = clazz;
   }
 
-  createLabel(font: THREE.Font){
-    let label = new ClazzLabelMesh(font, this.dataModel.name, new THREE.Color(0xffffff));
+  createLabel(font: THREE.Font, color: THREE.Color){
+    let label = new ClazzLabelMesh(font, this.dataModel.name, color);
     
     this.positionLabel(label);
     this.add(label);

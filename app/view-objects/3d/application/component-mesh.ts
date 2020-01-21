@@ -8,6 +8,7 @@ export default class ComponentMesh extends BoxMesh {
   material: THREE.MeshLambertMaterial;
   dataModel: Component;
   opened: boolean = false;
+  labelMesh: ComponentLabelMesh | null = null;
 
 
   constructor(layoutPos: THREE.Vector3, layoutHeight: number, layoutWidth: number, layoutDepth: number,
@@ -22,33 +23,36 @@ export default class ComponentMesh extends BoxMesh {
     this.dataModel = component;
   }
 
-  createLabel(font: THREE.Font){
-    let label = new ComponentLabelMesh(font, this.dataModel.name, new THREE.Color(0x000000), this);
+  createLabel(font: THREE.Font, color: THREE.Color) {
+    let label = new ComponentLabelMesh(this, font, color);
+    this.labelMesh = label;
 
-    this.positionLabel(label);
+    this.positionLabel();
     this.add(label);
   }
 
-  positionLabel(label: ComponentLabelMesh){
-    const MARGIN_BOTTOM = 0.7;
-    let aspectRatio = this.scale.x / this.scale.z;
-    let textDimensions = new THREE.Vector3();
-    label.geometry.boundingBox.getSize(textDimensions)
+  positionLabel() {
+    let label = this.labelMesh;
+    if (!label)
+      return;
 
-    // Note: The initial label's origin is in the center of their parent mesh
+    label.geometry.center();
 
-    // Position Label just above the bottom edge
-    label.position.x = - this.geometry.parameters.width / 2 + MARGIN_BOTTOM / this.scale.x;
     // Set y-position just above the box of the parent mesh
     label.position.y = this.geometry.parameters.height / 2 + 0.01;
-    // Position mesh centered (adjust for text width)
-    label.position.z = - textDimensions.x / 2;
-
-    // Avoid distorted letters due to scaled parent
-    label.scale.y /= aspectRatio;
 
     // Align text with component parent
     label.rotation.x = -(Math.PI / 2);
     label.rotation.z = -(Math.PI / 2);
+
+    if (this.opened) {
+      const OFFSET_BOTTOM = 1.5;
+
+      // Position Label just above the bottom edge
+      label.position.x = - this.geometry.parameters.width / 2 + OFFSET_BOTTOM / this.scale.x;
+    } else {
+      label.position.x = 0;
+    }
   }
+
 }

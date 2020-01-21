@@ -273,6 +273,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     mesh.opened = true;
     mesh.visible = true;
+    mesh.positionLabel();
 
     let childComponents = mesh.dataModel.get('children');
     childComponents.forEach((childComponent) => {
@@ -304,6 +305,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     mesh.position.y += mesh.layoutHeight / 2;
 
     mesh.opened = false;
+    mesh.positionLabel();
 
     let childComponents = mesh.dataModel.get('children');
     childComponents.forEach((childComponent) => {
@@ -481,7 +483,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
       this.addFoundationToScene(this.args.application);
       this.addCommunication(this.args.application);
-      this.labelComponents();
+      this.addLabels();
   
       this.scene.add(this.applicationObject3D);
       this.resetRotation(this.applicationObject3D);
@@ -620,7 +622,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       pipe.render(viewCenterPoint, curveHeight);
 
-      let arrowHeight = isCurved ? curveHeight / 2 + 1 : 0.8;
+      const ARROW_OFFSET = 0.8;
+      let arrowHeight = isCurved ? curveHeight / 2 + ARROW_OFFSET : ARROW_OFFSET;
       let arrowThickness = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
       let arrowColor = new THREE.Color(arrowColorString).getHex();
 
@@ -652,6 +655,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   resetView() {
     this.unhighlightAll();
     this.closeAllComponents();
+    this.removeAllCommunication();
+    this.camera.position.set(0, 0, 100);
     this.resetRotation(this.applicationObject3D);
   }
 
@@ -745,13 +750,21 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     );
   }
 
-  labelComponents(){
+  addLabels(){
     if (!this.font)
       return;
     
+    let clazzTextColor = this.configuration.applicationColors.clazzText;
+    let componentTextColor = this.configuration.applicationColors.componentText;
+    let foundationTextColor = this.configuration.applicationColors.foundationText;
+
     this.modelIdToMesh.forEach(mesh => {
-      if (mesh instanceof BoxMesh){
-        mesh.createLabel(this.font);
+      if (mesh instanceof ClazzMesh){
+        mesh.createLabel(this.font, new THREE.Color(clazzTextColor));
+      } else if (mesh instanceof ComponentMesh){
+        mesh.createLabel(this.font, new THREE.Color(componentTextColor));
+      } else if (mesh instanceof FoundationMesh){
+        mesh.createLabel(this.font, new THREE.Color(foundationTextColor));
       }
     });
   }
