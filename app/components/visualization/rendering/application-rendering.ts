@@ -4,7 +4,7 @@ import { action } from "@ember/object";
 import debugLogger from "ember-debug-logger";
 import THREE from 'three';
 import { inject as service } from '@ember/service';
-import RenderingService, { RenderingContext } from "explorviz-frontend/services/rendering-service";
+import RenderingService from "explorviz-frontend/services/rendering-service";
 import LandscapeRepository from "explorviz-frontend/services/repos/landscape-repository";
 import { applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
 import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
@@ -726,6 +726,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   cleanAndUpdateScene() {
     this.debug("cleanAndUpdateScene");
+
+    this.cleanUpApplication();
+    this.populateScene();
   }
 
   loadFont() {
