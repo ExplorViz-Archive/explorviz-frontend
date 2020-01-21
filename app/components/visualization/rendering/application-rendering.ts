@@ -156,6 +156,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.openComponentMesh(mesh);
       }
       this.addCommunication(this.args.application);
+    } else if(mesh instanceof FoundationMesh) {
+      this.closeAllComponents();
     }
   }
 
@@ -233,6 +235,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.closeComponentMesh(mesh);
       }
     });
+    this.addCommunication(this.args.application);
   }
 
   @action
