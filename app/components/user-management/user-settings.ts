@@ -1,4 +1,4 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
 import { inject as service } from "@ember/service";
 import { task } from 'ember-concurrency-decorators';
 import { all } from 'rsvp';
@@ -16,17 +16,15 @@ type Settings = {
   }
 };
 
-export default class UserManagementUserSettings extends Component {
+interface Args {
+  user: User|null
+}
 
-  // No Ember generated container
-  tagName = '';
+export default class UserManagementUserSettings extends Component<Args> {
 
   @service('store') store!: DS.Store;
   @service('session') session!: any;
   @service('user-settings') userSettings!: UserSettings;
-
-  // set through hb template
-  user:User|null = null;
 
   /*
     {
@@ -48,17 +46,15 @@ export default class UserManagementUserSettings extends Component {
   */
   useDefaultSettings:{[origin:string]: boolean} = {};
 
-  init() {
-    super.init();
-
-    set(this, 'useDefaultSettings', {});
+  constructor(owner: any, args: Args) {
+    super(owner, args);
 
     this.initSettings.perform();
   }
 
   @task
   initSettings = task(function * (this:UserManagementUserSettings) {
-    if(this.user === null) {
+    if(this.args.user === null) {
       return;
     }
     // load all settings from store
@@ -70,7 +66,7 @@ export default class UserManagementUserSettings extends Component {
     }
 
     let origins = [...new Set(allSettings.mapBy('origin'))];
-    let preferences = yield this.store.query('userpreference', { userId: this.user.id });
+    let preferences = yield this.store.query('userpreference', { userId: this.args.user.id });
 
     // stores settings by origin and type
     let settingsByOrigin:Settings = {};
@@ -109,15 +105,15 @@ export default class UserManagementUserSettings extends Component {
       settingsByOrigin[setting.origin][setting.constructor.modelName].push([setting.id, value]);
     }
 
-    set(this, 'settings', settingsByOrigin);
+    this.settings = settingsByOrigin;
   });
 
   @task({ drop: true })
   saveSettings = task(function * (this:UserManagementUserSettings) {
-    if(this.user === null) {
+    if(this.args.user === null) {
       return;
     }
-    let userId = this.user.id;
+    let userId = this.args.user.id;
 
     const settings = Object.entries(this.settings);
     
@@ -142,7 +138,7 @@ export default class UserManagementUserSettings extends Component {
             set(oldRecord, 'value', preferenceValueNew);
             settingsPromiseArray.push(oldRecord.save());
           }
-        } else if(!this.get('useDefaultSettings')[origin]) { // create preference if user used default settings before
+        } else if(!this.useDefaultSettings[origin]) { // create preference if user used default settings before
           const preferenceRecord = this.store.createRecord('userpreference', {
             userId,
             settingId,

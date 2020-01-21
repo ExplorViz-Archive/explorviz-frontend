@@ -26,3 +26,8 @@
 #discovery-details-tab table {
   @extend .mb-0;
 }
+
+.cytoscape-container {
+  @extend .d-flex;
+  @extend .flex-grow-1;
+}

@@ -10,7 +10,7 @@ module('Integration | Component | visualization/page-setup/navbar/event-opener',
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{visualization/page-setup/navbar/event-opener}}`);
+    await render(hbs`<Visualization::PageSetup::Navbar::EventOpener />`);
 
     let textContent = this.element.textContent;
 
@@ -22,8 +22,8 @@ module('Integration | Component | visualization/page-setup/navbar/event-opener',
 
     // Template block usage:
     await render(hbs`
-      {{#visualization/page-setup/navbar/event-opener}}
-      {{/visualization/page-setup/navbar/event-opener}}
+      <Visualization::PageSetup::Navbar::EventOpener>
+      </Visualization::PageSetup::Navbar::EventOpener>
     `);
 
 

@@ -1,72 +1,3 @@
-.nav-link-with-cursor {
-  @extend .nav-link;
-  cursor: pointer;
-}
-
-.nav-item-with-def-cursor {
-  @extend .nav-item;
-  cursor: default!important;
-}
-
-.navbar-highlight{
-  color: red;
-}
-
-.explorviz-visualization-navbar {
-  @extend .bg-light;
-  @extend .pl-3;
-  @extend .pr-3;
-  align-self: center;
-  border-radius: .5rem;
-  border-style: solid;
-  border-width: 1px;
-  border-color: lightgray;
-}
-
-.explorviz-visualization-navbar > ul {
-  list-style: none;
-  padding-left: 0;
-  display: flex;
-  flex-direction: row;
-}
-
-.explorviz-visualization-navbar > ul > li {
-  @extend .my-2;
-}
-
-.explorviz-visualization-navbar > ul.nav > li.nav-item {
-  cursor: pointer;
-  color: rgba(0, 0, 0, 0.5);
-}
-
-.explorviz-visualization-navbar > ul.nav > li.nav-item:hover {
-  color: rgba(0, 0, 0, 0.7);
-}
-
-#navbar-octicons:last-child{
-  border-right-style: solid;
-  border-right-color: #e6e6e6;
-  border-right-width: 1px;
-}
-
-.navbar-no-hover-effect {
-  background-color:transparent !important;
-  cursor: default !important;
-  box-shadow: none !important;
-}
-
-.navbar-button-height-fix {
-  height: 30px !important;
-  padding-top: 0px !important;
-  padding-bottom: 0px !important;
-  vertical-align: middle !important;
-}
-
-// navbar dropdown alignment
-.explorviz-top-navbar .nav.navbar-nav > li.dropdown > .dropdown-menu {
-  @extend .dropdown-menu-right;
-}
-
 #exp-navbar {
   min-width: 220px;
   max-width: 220px;
@@ -222,15 +153,4 @@
       transform: translateX(10px);
     }
   }
-}
-
-.btn-primary {
-  color: #fff;
-  background-color: #22497c;
-  border-color: #22497c;
-}
-
-.btn-primary:hover {
-  background-color: #406da7;
-  border-color: #406da7;
 }

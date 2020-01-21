@@ -1,0 +1,164 @@
+{{add-listener this.additionalData 'showWindow' this.onWindowChange}}
+
+<div class="sidebar-component-title">
+  <h5>Trace Selection</h5>
+</div>
+
+<div class="sidebar-component-close">
+  <label {{on "click" this.close}} title="Close Trace Selection" aria-label="Close">
+    <font size="6">&times;</font>
+  </label>
+</div>
+
+<div class="mt-2 mb-1 d-flex justify-content-end">
+  <div>
+    {{input id="filterInput"
+      value=filterInput
+      placeholder='Filter traces'
+      class="form-control input-lg"
+      autofocus="autofocus"
+      focus-out=(action "filter")
+      enter=(action "filter")
+    }}
+  </div>
+  <div>
+    <BsButton
+      @onClick={{action "filter"}}
+      @type="button"
+      class="btn btn-light"
+    >
+      {{svg-jar "search" class="octicon align-middle"}}
+    </BsButton>
+  </div>
+</div>
+
+
+<div style="max-height:500px; overflow:auto; width:100%;">
+  <table class="table table-hover">
+    <thead>
+      <tr style="cursor: pointer">
+        <th {{on "click" (fn this.sortByProperty "traceId")}} scope="col">Trace ID</th>
+        <th {{on "click" (fn this.sortByProperty "sourceClazz.name")}} scope="col">Soure Clazz</th>
+        <th {{on "click" (fn this.sortByProperty "targetClazz.name")}} scope="col">Target Clazz</th>
+        <th {{on "click" (fn this.sortByProperty "totalTraceDuration")}} scope="col">
+          Duration in
+          <BsButton
+            @onClick={{action "toggleTraceTimeUnit"}}
+            class="th-btn"
+            @outline={{true}}
+          >
+            {{this.traceTimeUnit}}
+          </BsButton>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each this.traces as |trace|}}
+        <tr {{on "click" (fn this.clickedTrace trace)}} style="cursor: pointer" bgcolor="{{if trace.highlighted "#cc8a8a"}}">
+          <th title={{trace.traceId}}>{{truncate trace.traceId 8 true}}</th>
+          <td title={{trace.sourceClazz.name}}>{{truncate trace.sourceClazz.name 12 true}}</td>
+          <td title={{trace.targetClazz.name}}>{{truncate trace.targetClazz.name 14 true}}</td>
+          <td>{{format-number trace.totalTraceDuration this.traceTimeUnit}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>
+
+{{#if this.highlighter.isTrace}}
+  <hr>
+
+  <h5 align="center">Trace Replayer
+    <BsButton
+      @onClick={{action "toggleAnimation"}}
+      @title={{if this.isReplayAnimated "Pause animation" "Resume animation"}}
+      @type="button"
+      class="th-btn {{if this.isReplayAnimated "navbar-highlight red-hover"}}"
+    >
+      {{svg-jar "device-camera-video" class="octicon align-middle"}}
+    </BsButton>
+  </h5>
+
+  <div class="mt-3 d-flex justify-content-between align-items-center">
+    <BsButton
+      @onClick={{action "selectPreviousTraceStep"}}
+      @type="secondary"
+      @outline={{true}}
+      @title="One step back"
+      @disabled={{lte this.highlighter.currentTracePosition 1}}
+    >
+      {{svg-jar "chevron-left" class="octicon align-middle"}}
+    </BsButton>
+    <div>
+      Step <strong>{{this.highlighter.currentTracePosition}}</strong> of {{this.highlighter.highlightedEntity.length}}
+    </div>
+    <BsButton
+      @onClick={{action "selectNextTraceStep"}}
+      @type="secondary"
+      @outline={{true}}
+      @title="One step forth"
+      @disabled={{gte this.highlighter.currentTracePosition this.highlighter.highlightedEntity.length}}
+    >
+      {{svg-jar "chevron-right" class="octicon align-middle"}}
+    </BsButton>
+  </div>
+
+  <hr>
+
+  <h5 align="center">Trace Step Details</h5>
+  <div class="mt-3 d-flex justify-content-between">
+    <table class="table table-striped">
+      <tbody>
+        <tr class="d-flex">
+          <th class="col-3">Soure Clazz</th>
+          <td class="col-9 container-word-wrap">
+            {{this.highlighter.currentTraceStep.clazzCommunication.sourceClazz.name}}
+            <BsButton
+              @onClick={{action (fn this.lookAtClazz this.highlighter.currentTraceStep.clazzCommunication.sourceClazz)}}
+              @type="button"
+              class="th-btn"
+            >
+              {{svg-jar "eye" class="octicon align-middle"}}
+            </BsButton>
+          </td>
+        </tr>
+        <tr class="d-flex">
+          <th class="col-3">Target Clazz</th>
+          <td class="col-9 container-word-wrap">
+            {{this.highlighter.currentTraceStep.clazzCommunication.targetClazz.name}}
+            <BsButton
+              @onClick={{action (fn this.lookAtClazz this.highlighter.currentTraceStep.clazzCommunication.targetClazz)}}
+              @type="button"
+              class="th-btn"
+            >
+              {{svg-jar "eye" class="octicon align-middle"}}
+            </BsButton>
+          </td>
+        </tr>
+        <tr class="d-flex">
+          <th class="col-3">Operation Name</th>
+          <td class="col-9 container-word-wrap">{{this.highlighter.currentTraceStep.clazzCommunication.operationName}}</td>
+        </tr>
+        <tr class="d-flex">
+          <th class="col-3">Requests</th>
+          <td class="col-9 container-word-wrap">{{this.highlighter.currentTraceStep.requests}}</td>
+        </tr>
+        <tr class="d-flex">
+          <th class="col-3" title="Average Response Time">
+            Avg. Resp. Time in
+            <BsButton
+              @onClick={{action this.toggleTraceStepTimeUnit}}
+              class="th-btn"
+              outline={{true}}
+            >
+              {{this.traceStepTimeUnit}}
+            </BsButton>
+          </th>
+          <td class="col-9 container-word-wrap">
+            {{format-number this.highlighter.currentTraceStep.averageResponseTime this.traceStepTimeUnit}}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{{/if}}

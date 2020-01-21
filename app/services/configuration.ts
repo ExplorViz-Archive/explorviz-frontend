@@ -13,6 +13,10 @@ export type ExtensionDescription = {
   paneName: string
 };
 
+export type DiscoverySettings = {
+  showHiddenEntities?: boolean
+}
+
 /**
 * The Configuration Service handles color settings for the visualization and configuration extensions
 * @class Configuration-Service
@@ -61,6 +65,8 @@ export default class Configuration extends Service {
   * @type Object
   */
   applicationColorsDefault:Colors = {};
+
+  discoverySettings: DiscoverySettings = {};
 
 
   constructor() {

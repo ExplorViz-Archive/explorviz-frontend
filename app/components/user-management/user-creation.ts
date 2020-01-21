@@ -1,10 +1,11 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
 import { inject as service } from "@ember/service";
 
 import { task } from 'ember-concurrency-decorators';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { all } from 'rsvp';
-import { action, set } from '@ember/object';
+import { action } from '@ember/object';
 import DS from 'ember-data';
 import UserSettings from 'explorviz-frontend/services/user-settings';
 import Role from 'explorviz-frontend/models/role';
@@ -27,15 +28,17 @@ type UserTrimmed = {
 
 export default class UserCreation extends Component {
 
-  // No Ember generated container
-  tagName = '';
-
   @service('store') store!: DS.Store;
   @service('user-settings') userSettings!: UserSettings;
   @service printThis!: any;
 
+  @tracked
   createdUsers:UserTrimmed[] = [];
+
+  @tracked
   showNewUsers:boolean = false;
+
+  @tracked
   page:Page = 'createSingleUser';
 
   // {
@@ -57,22 +60,30 @@ export default class UserCreation extends Component {
       origin2: {...}
     }
   */
+  @tracked
   settings:Settings = {};
 
   // single user creation input fields
+  @tracked
   username = '';
+  @tracked
   password = '';
+  @tracked
   roles_selected_single:Role[] = [];
 
   // multiple user creation input fields
+  @tracked
   usernameprefix = '';
+  @tracked
   numberofusers = '';
+  @tracked
   roles_selected_multiple:Role[] = [];
 
+  @tracked
   roles:Role[] = [];
 
-  constructor() {
-    super(...arguments);
+  constructor(owner:any, args:any) {
+    super(owner, args);
 
     this.initSettings.perform();
   }
@@ -108,7 +119,7 @@ export default class UserCreation extends Component {
       settingsByOrigin[setting.origin][setting.constructor.modelName].push([setting.id, setting.defaultValue]);
     }
 
-    set(this, 'settings', settingsByOrigin);
+    this.settings = settingsByOrigin;
   });
 
   @action
@@ -123,8 +134,8 @@ export default class UserCreation extends Component {
 
   @action
   hideNewUsersCreatedModal() {
-    set(this, 'createdUsers', []);
-    set(this, 'showNewUsers', false);
+    this.createdUsers = [];
+    this.showNewUsers = false;
   }
 
   @task
@@ -162,11 +173,9 @@ export default class UserCreation extends Component {
     }
 
     function clearInputFields(this:UserCreation) {
-      this.setProperties({
-        username: '',
-        password: '',
-        roles_selected_single: []
-      });
+      this.username = '';
+      this.password = '';
+      this.roles_selected_single = [];
     }
 
     function createPreferences(this:UserCreation, uid:string) {
@@ -259,11 +268,9 @@ export default class UserCreation extends Component {
     }
 
     function clearInputFields(this:UserCreation) {
-      this.setProperties({
-        usernameprefix: '',
-        numberofusers: '',
-        roles_selected_multiple: []
-      });
+      this.usernameprefix = '';
+      this.numberofusers = '';
+      this.roles_selected_multiple = [];
     }
   });
 
@@ -303,13 +310,13 @@ export default class UserCreation extends Component {
         });
       }
     }
-    set(this, 'createdUsers', createdUsers);
-    set(this, 'showNewUsers', true);
+    this.createdUsers = createdUsers;
+    this.showNewUsers = true;
   }
 
   @task
   getRoles = task(function * (this:UserCreation) {
     let roles:DS.RecordArray<Role> = yield this.store.findAll('role', { reload: true });
-    set(this, 'roles', roles.toArray());
+    this.roles = roles.toArray();
   });
 }

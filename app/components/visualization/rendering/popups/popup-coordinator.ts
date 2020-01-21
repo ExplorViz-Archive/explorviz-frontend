@@ -1,35 +1,26 @@
-import Component from '@ember/component';
-import $ from 'jquery';
-import { inject as service } from '@ember/service';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
+import Component from '@glimmer/component';
+import { action } from '@ember/object';
 
-export default class PopupCoordinator extends Component {
+interface Args {
+  popupData: {
+    mouseX: number,
+    mouseY: number
+  };
+}
 
-  tagName = '';
-  
-  @service('additional-data')
-  additionalData!: AdditionalData;
+export default class PopupCoordinator extends Component<Args> {
 
-  didRender() {
-    this._super(...arguments);
-
-    if (this.get('additionalData').get('popupContent')) {
-      this.setPopupPosition();
-    }
-  }
-
-  setPopupPosition() {
-    let popupData = this.get('additionalData').get('popupContent');
-
-    const popoverDiv = $('.popover');
+  @action
+  setPopupPosition(popoverDiv: HTMLDivElement) {
+    let popupData = this.args.popupData;
 
     // Sorrounding div for position calculations
-    const containerDiv = $('#rendering');
+    const containerDiv = popoverDiv.parentElement as HTMLElement;
 
-    let popoverHeight = popoverDiv.height();
-    let popoverWidth = popoverDiv.width();
+    let popoverHeight = popoverDiv.clientHeight;
+    let popoverWidth = popoverDiv.clientWidth;
 
-    let containerWidth = containerDiv.width();
+    let containerWidth = containerDiv.clientWidth;
 
     if(popoverHeight === undefined || popoverWidth === undefined || containerWidth === undefined)
       return;
@@ -59,7 +50,7 @@ export default class PopupCoordinator extends Component {
     }
 
     // Set popup position
-    popoverDiv.css('top', popupTopPosition + 'px');
-    popoverDiv.css('left', popupLeftPosition + 'px');
+    popoverDiv.style.top = popupTopPosition + 'px';
+    popoverDiv.style.left = popupLeftPosition + 'px';
   }
 }

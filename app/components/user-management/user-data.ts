@@ -1,4 +1,5 @@
-import Component from '@ember/component';
+import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
 import { inject as service } from "@ember/service";
 
 import { task } from 'ember-concurrency-decorators';
@@ -8,34 +9,42 @@ import { set } from '@ember/object';
 import User from 'explorviz-frontend/models/user';
 import Role from 'explorviz-frontend/models/role';
 
-export default class UserData extends Component {
+interface Args {
+  user: User|null|undefined
+}
 
-  // No Ember generated container
-  tagName = '';
+export default class UserData extends Component<Args> {
 
   @service('store') store!: DS.Store;
 
-  user:User|null = null;
+  @tracked
+  id_change = '';
+
+  @tracked
+  username_change = '';
+
+  @tracked
+  password_change = '';
+
+  @tracked
   roles:string[]|null = null;
 
-  id_change = '';
-  username_change = '';
-  password_change = '';
+  @tracked
   roles_change:string[]|null = null;
 
-  didInsertElement() {
-    super.didInsertElement();
+  constructor(owner:any, args:Args) {
+    super(owner, args);
 
     this.initFields();
   }
 
   initFields(this:UserData) {
-    const user = this.user;
+    const user = this.args.user;
 
     if(user) {
-      set(this, 'id_change', user.id);
-      set(this, 'username_change', user.username);
-      set(this, 'roles_change', [...user.roles]);
+      this.id_change = user.id;
+      this.username_change = user.username;
+      this.roles_change = [...user.roles];
     }
   }
 
@@ -43,7 +52,7 @@ export default class UserData extends Component {
   saveUserChanges = task(function * (this:UserData) {
     const { username_change, password_change, roles_change } = this;
 
-    const user = this.user;
+    const user = this.args.user;
 
     if(user) {
       // check for valid input
@@ -75,7 +84,7 @@ export default class UserData extends Component {
     }
 
     function clearInputFields(this:UserData) {
-      set(this, 'password_change', '');
+      this.password_change = '';
     }
   });
 
@@ -87,6 +96,6 @@ export default class UserData extends Component {
   @task
   getRoles = task(function * (this:UserData) {
     let roles:DS.RecordArray<Role> = yield this.store.findAll('role', { reload: true });
-    set(this, 'roles', roles.toArray().map((role:Role) => role.id));
+    this.roles = roles.toArray().map((role:Role) => role.id);
   });
 }

@@ -10,7 +10,7 @@ module('Integration | Component | replay/page-setup/timeline/plotly-timeline', f
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{replay/page-setup/timeline/plotly-timeline}}`);
+    await render(hbs`<Replay::PageSetup::Timeline::PlotlyTimeline />`);
 
     const el:any = this.element;
 

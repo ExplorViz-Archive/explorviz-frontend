@@ -10,7 +10,7 @@ module('Integration | Component | visualization/page-setup/sidebar/event-viewer'
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{visualization/page-setup/sidebar/event-viewer}}`);
+    await render(hbs`<Visualization::PageSetup::Sidebar::EventViewer />`);
 
     let textContent = this.element.textContent;
 
