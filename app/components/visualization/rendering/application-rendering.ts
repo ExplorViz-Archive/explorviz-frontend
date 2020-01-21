@@ -649,6 +649,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.unhighlightAll();
     this.closeAllComponents();
     this.removeAllCommunication();
+    this.camera.position.set(0, 0, 100);
     this.resetRotation(this.applicationObject3D);
   }
 
