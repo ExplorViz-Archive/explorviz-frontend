@@ -615,7 +615,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       pipe.render(viewCenterPoint, curveHeight);
 
-      let arrowHeight = isCurved ? curveHeight / 2 + 1 : 0.8;
+      const ARROW_OFFSET = 0.8;
+      let arrowHeight = isCurved ? curveHeight / 2 + ARROW_OFFSET : ARROW_OFFSET;
       let arrowThickness = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
       let arrowColor = new THREE.Color(arrowColorString).getHex();
 
@@ -647,6 +648,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   resetView() {
     this.unhighlightAll();
     this.closeAllComponents();
+    this.removeAllCommunication();
     this.resetRotation(this.applicationObject3D);
   }
 
@@ -754,7 +756,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       } else if (mesh instanceof ComponentMesh){
         mesh.createLabel(this.font, new THREE.Color(componentTextColor));
       } else if (mesh instanceof FoundationMesh){
-        mesh.createLabel(this.font, foundationTextColor);
+        mesh.createLabel(this.font, new THREE.Color(foundationTextColor));
       }
     });
   }
