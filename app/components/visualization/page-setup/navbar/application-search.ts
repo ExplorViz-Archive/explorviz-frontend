@@ -103,10 +103,6 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
       if(!component)
         continue;
 
-      // Skip foundation, since it can't be highlighted anyways
-      if(component.foundation)
-        continue;
-
       const componentName = component.name.toLowerCase();
       if(searchEngineFindsHit(componentName, searchString)) {
 

@@ -6,7 +6,6 @@ import THREE from 'three';
 import { inject as service } from '@ember/service';
 import RenderingService, { RenderingContext } from "explorviz-frontend/services/rendering-service";
 import LandscapeRepository from "explorviz-frontend/services/repos/landscape-repository";
-import FoundationBuilder from 'explorviz-frontend/utils/application-rendering/foundation-builder';
 import { applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
 import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
@@ -73,8 +72,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   camera!: THREE.PerspectiveCamera;
   renderer!: THREE.WebGLRenderer;
   font !: THREE.Font;
-
-  foundationBuilder = new FoundationBuilder();
 
   applicationObject3D = new THREE.Object3D();
 
@@ -240,11 +237,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   openAllComponents() {
-    let foundation = this.foundationBuilder.foundationObj;
-    if (foundation === null)
-      return;
-
-    foundation.children.forEach((child) => {
+    this.args.application.components.forEach((child) => {
       let mesh = this.modelIdToMesh.get(child.get('id'));
       if (mesh !== undefined && mesh instanceof ComponentMesh) {
         this.openComponentMesh(mesh);
@@ -390,13 +383,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.unhighlightAll();
     let model = mesh.dataModel;
 
-    let foundation = this.foundationBuilder.foundationObj;
-    if (foundation === null)
-      return;
-
     // All clazzes in application
-    let allClazzes = new Set<Clazz>();
-    foundation.getContainedClazzes(allClazzes);
+    let allClazzesAsArray = this.args.application.getAllClazzes();
+    let allClazzes = new Set<Clazz>(allClazzesAsArray);
 
     // Highlight the entity itself
     mesh.highlight();
@@ -451,11 +440,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   turnComponentAndAncestorsTransparent(component: Component, ignorableComponents: Set<Component>) {
-    if (ignorableComponents.has(component) || component.get('foundation'))
+    if (ignorableComponents.has(component))
       return;
 
     ignorableComponents.add(component);
     const parent = component.getParentComponent();
+
     let parentMesh = this.modelIdToMesh.get(component.get('id'));
     if (parentMesh instanceof ComponentMesh && parentMesh.opened) {
       parentMesh.turnTransparent(0.3);
@@ -464,18 +454,21 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   getAllAncestorComponents(component: Component, set: Set<Component>) {
-    if (component.get('foundation') || set.has(component))
+    if (set.has(component))
       return;
 
     set.add(component);
 
     const parent = component.getParentComponent();
+    if(parent === null) {
+      return;
+    }
+
     this.getAllAncestorComponents(parent, set);
   }
 
   @action
   step1() {
-    this.foundationBuilder.createFoundation(this.args.application, this.store);
   }
 
   @action
@@ -485,9 +478,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.worker.postMessage('city-layouter', serializedApp).then((layoutedApplication: Map<string, BoxLayout>) => {
       this.boxLayoutMap = layoutedApplication;
-      const foundationColor = this.configuration.applicationColors.foundation;
       // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
-      this.addComponentToScene(this.foundationBuilder.foundationObj as Component, foundationColor);
+      this.addFoundationToScene(this.args.application);
       this.addCommunication(this.args.application);
       this.labelComponents();
   
@@ -498,34 +490,51 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
+  addFoundationToScene(application: Application) {
+    let foundationData = this.boxLayoutMap.get(application.id);
+
+    if(foundationData === undefined)
+      return;
+
+    this.foundationData = foundationData;
+
+    const OPENED_COMPONENT_HEIGHT = 1.5;
+
+    const {
+      foundation: foundationColor,
+      componentOdd: componentOddColor,
+      highlightedEntity: highlightedEntityColor
+    } = this.configuration.applicationColors;
+
+    let layoutPos = new THREE.Vector3(foundationData.positionX, foundationData.positionY, foundationData.positionZ);
+
+    let mesh = new FoundationMesh(layoutPos, OPENED_COMPONENT_HEIGHT, foundationData.width, foundationData.depth,
+      application, new THREE.Color(foundationColor), new THREE.Color(highlightedEntityColor));
+    this.addMeshToScene(mesh, foundationData, OPENED_COMPONENT_HEIGHT);
+
+    const children = application.get('components');
+
+    children.forEach((child: Component) => {
+      this.addComponentToScene(child, componentOddColor);
+    });
+
+  }
+
   addComponentToScene(component: Component, color: string) {
     let componentData = this.boxLayoutMap.get(component.id);
 
     if(componentData === undefined)
       return;
 
-    const OPENED_COMPONENT_HEIGHT = 1.5;
-
-    const { foundation: foundationColor, componentOdd: componentOddColor, componentEven: componentEvenColor,
+    const { componentOdd: componentOddColor, componentEven: componentEvenColor,
       clazz: clazzColor, highlightedEntity: highlightedEntityColor } = this.configuration.applicationColors;
 
-    let mesh;
     let layoutPos = new THREE.Vector3(componentData.positionX, componentData.positionY, componentData.positionZ);
 
-    if (component.get('foundation')) {
-      this.foundationData = componentData;
-
-      mesh = new FoundationMesh(layoutPos, OPENED_COMPONENT_HEIGHT, componentData.width, componentData.depth,
-        component, new THREE.Color(foundationColor), new THREE.Color(highlightedEntityColor));
-      this.addMeshToScene(mesh, componentData, OPENED_COMPONENT_HEIGHT);
-
-      // Regular component
-    } else {
-      mesh = new ComponentMesh(layoutPos, componentData.height, componentData.width, componentData.depth,
-        component, new THREE.Color(color), new THREE.Color(highlightedEntityColor));
-      this.addMeshToScene(mesh, componentData, componentData.height);
-      this.updateMeshVisiblity(mesh);
-    }
+    let mesh = new ComponentMesh(layoutPos, componentData.height, componentData.width, componentData.depth,
+      component, new THREE.Color(color), new THREE.Color(highlightedEntityColor));
+    this.addMeshToScene(mesh, componentData, componentData.height);
+    this.updateMeshVisiblity(mesh);
 
     const clazzes = component.get('clazzes');
     const children = component.get('children');
@@ -537,16 +546,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         return;
 
       layoutPos = new THREE.Vector3(clazzData.positionX, clazzData.positionY, clazzData.positionZ)
-      mesh = new ClazzMesh(layoutPos, clazzData.height, clazzData.width, clazzData.depth,
+      let mesh = new ClazzMesh(layoutPos, clazzData.height, clazzData.width, clazzData.depth,
         clazz, new THREE.Color(clazzColor), new THREE.Color(highlightedEntityColor));
       this.addMeshToScene(mesh, clazzData, clazzData.height);
       this.updateMeshVisiblity(mesh);
     });
 
     children.forEach((child: Component) => {
-      if (component.get('foundation')) {
-        this.addComponentToScene(child, componentOddColor);
-      } else if (color === componentEvenColor) {
+      if (color === componentEvenColor) {
         this.addComponentToScene(child, componentOddColor);
       } else {
         this.addComponentToScene(child, componentEvenColor);
@@ -756,7 +763,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.renderer.dispose();
     this.renderer.forceContextLoss();
     this.renderingService.removeRendering(this.args.id);
-    this.foundationBuilder.removeFoundation(this.store);
     this.interaction.removeHandlers();
 
     this.debug("Cleaned up application rendering");

@@ -20,10 +20,19 @@ postMessage(true);
 
 /******* Define Layouter *******/
 
-type layoutSegment = {
-  parent: null | layoutSegment,
-  lowerChild: null | layoutSegment,
-  upperRightChild: null | layoutSegment,
+type LayoutData = {
+  height: number,
+  width: number,
+  depth: number,
+  positionX: number,
+  positionY: number,
+  positionZ: number
+}
+
+type LayoutSegment = {
+  parent: null | LayoutSegment,
+  lowerChild: null | LayoutSegment,
+  upperRightChild: null | LayoutSegment,
   startX: number,
   startZ: number,
   width: number,
@@ -84,15 +93,16 @@ function applyBoxLayout(application: SerializedApplication) {
   const INSET_SPACE: number = 4.0;
   const OPENED_COMPONENT_HEIGHT = 1.5;
 
-  const components = application.components;
+  let layoutMap: Map<string, LayoutData> = new Map();
 
-  const foundationComponent = components[0];
-
-  if (!foundationComponent) {
-    return;
-  }
-
-  let layoutMap = new Map();
+  layoutMap.set(application.id, {
+    height: 1,
+    width: 1,
+    depth: 1,
+    positionX: 0,
+    positionY: 0,
+    positionZ: 0
+  });
 
   getAllClazzesInApplication(application).forEach((clazz) => {
     layoutMap.set(clazz.id, {
@@ -116,11 +126,11 @@ function applyBoxLayout(application: SerializedApplication) {
     });
   });
 
-  calcClazzHeight(foundationComponent);
-  initNodes(foundationComponent);
+  calcClazzHeight(application);
+  initApplication(application);
 
-  doLayout(foundationComponent);
-  setAbsoluteLayoutPosition(foundationComponent);
+  doApplicationLayout(application);
+  setAbsoluteLayoutPositionOfApplication(application);
 
   // Scale dimensions for needs of application rendering
   layoutMap.forEach((box) => {
@@ -133,6 +143,22 @@ function applyBoxLayout(application: SerializedApplication) {
   return layoutMap;
 
   // Helper functions
+
+  function setAbsoluteLayoutPositionOfApplication(application: SerializedApplication) {
+    const { components } = application;
+
+    let componentLayout = layoutMap.get(application.id);
+
+    components.forEach((childComponent) => {
+      let childCompLayout = layoutMap.get(childComponent.id);
+
+      childCompLayout.positionX += componentLayout.positionX;
+      childCompLayout.positionY += componentLayout.positionY + OPENED_COMPONENT_HEIGHT;
+      childCompLayout.positionZ += componentLayout.positionZ;
+
+      setAbsoluteLayoutPosition(childComponent);
+    });
+  }
 
   function setAbsoluteLayoutPosition(component: SerializedComponent) {
     const childComponents = component.children;
@@ -161,13 +187,15 @@ function applyBoxLayout(application: SerializedApplication) {
   }
 
 
-  function calcClazzHeight(component: SerializedComponent) {
+  function calcClazzHeight(application: SerializedApplication) {
 
     const CLAZZ_SIZE_DEFAULT = 0.05;
     const CLAZZ_SIZE_EACH_STEP = 1.1;
 
     const clazzes: SerializedClazz[] = [];
-    getClazzList(component, clazzes);
+    application.components.forEach((component) => {
+      getClazzList(component, clazzes);
+    });
 
     const instanceCountList: number[] = [];
 
@@ -328,6 +356,19 @@ function applyBoxLayout(application: SerializedApplication) {
     });
   }
 
+  function initApplication(application: SerializedApplication) {
+    const { components } = application;
+
+    components.forEach((child) => {
+      initNodes(child);
+    });
+
+    let componentData = layoutMap.get(application.id);
+    componentData.height = getHeightOfApplication(application);
+    componentData.width = -1.0;
+    componentData.depth = -1.0;
+  }
+
 
   function initNodes(component: SerializedComponent) {
     const children = component.children;
@@ -378,6 +419,49 @@ function applyBoxLayout(application: SerializedApplication) {
     return childrenHeight + 0.1;
   }
 
+
+  function getHeightOfApplication(application: SerializedApplication) {
+    const floorHeight = 0.75 * 4.0;
+
+    let childrenHeight = floorHeight;
+
+    const { components } = application;
+
+    components.forEach((child) => {
+      let childData = layoutMap.get(child.id);
+      if (childData.height > childrenHeight) {
+        childrenHeight = childData.height;
+      }
+    });
+
+    return childrenHeight + 0.1;
+  }
+
+  function doApplicationLayout(application: SerializedApplication) {
+    const { components } = application;
+
+    components.forEach((child) => {
+      doLayout(child);
+    });
+
+    layoutChildrenOfApplication(application);
+  }
+
+  function layoutChildrenOfApplication(application: SerializedApplication) {
+    let tempList: SerializedComponent[] = [];
+
+    const { components } = application;
+
+    components.forEach((child) => {
+      tempList.push(child);
+    });
+
+    const segment = layoutGeneric(tempList);
+
+    let componentData = layoutMap.get(application.id);
+    componentData.width = segment.width;
+    componentData.depth = segment.height;
+  }
 
   function doLayout(component: SerializedComponent) {
     const children = component.children;
@@ -471,7 +555,7 @@ function applyBoxLayout(application: SerializedApplication) {
     return rootSegment;
 
 
-    function insertFittingSegment(rootSegment: layoutSegment, toFitWidth: number, toFitHeight: number): null | layoutSegment {
+    function insertFittingSegment(rootSegment: LayoutSegment, toFitWidth: number, toFitHeight: number): null | LayoutSegment {
       if (!rootSegment.used && toFitWidth <= rootSegment.width && toFitHeight <= rootSegment.height) {
         const resultSegment = createLayoutSegment();
         rootSegment.upperRightChild = createLayoutSegment();
@@ -567,7 +651,7 @@ function applyBoxLayout(application: SerializedApplication) {
   }
 
 
-  function createLayoutSegment(): layoutSegment {
+  function createLayoutSegment(): LayoutSegment {
     const layoutSegment =
     {
       parent: null,
