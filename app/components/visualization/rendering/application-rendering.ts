@@ -84,8 +84,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   boxLayoutMap: Map<string, BoxLayout> = new Map();
 
-  foundationData: any;
-
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
 
   @tracked
@@ -501,8 +499,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if(foundationData === undefined)
       return;
 
-    this.foundationData = foundationData;
-
     const OPENED_COMPONENT_HEIGHT = 1.5;
 
     const {
@@ -568,12 +564,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
 
   addMeshToScene(mesh: ComponentMesh | ClazzMesh | FoundationMesh, boxData: any, height: number) {
+    let foundationData = this.boxLayoutMap.get(this.args.application.id);
+
+    if(foundationData === undefined)
+      return;
+
     let centerPoint = new THREE.Vector3(
       boxData.positionX + boxData.width / 2.0,
       boxData.positionY + height / 2.0,
       boxData.positionZ + boxData.depth / 2.0);
 
-    let applicationCenter = CalcCenterAndZoom(this.foundationData);
+    let applicationCenter = CalcCenterAndZoom(foundationData);
     centerPoint.sub(applicationCenter);
 
     mesh.position.copy(centerPoint);
@@ -598,6 +599,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
 
   addCommunication(application: Application) {
+    let foundationData = this.boxLayoutMap.get(this.args.application.id);
+
+    if(foundationData === undefined)
+      return;
+
     this.removeAllCommunication();
 
     let maybeCurveHeight = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
@@ -618,7 +624,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         return;
       }
 
-      let viewCenterPoint = CalcCenterAndZoom(this.foundationData);
+      let viewCenterPoint = CalcCenterAndZoom(foundationData);
 
       let pipe = new CommunicationMesh(commLayout, drawableClazzComm,
         new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor));
