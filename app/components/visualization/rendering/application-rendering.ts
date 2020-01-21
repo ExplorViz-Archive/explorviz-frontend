@@ -90,9 +90,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @tracked
   popupData: PopupData | null = null;
 
+  //#region COMPONENT AND SCENE INITIALIZATION
+
   constructor(owner: any, args: Args) {
     super(owner, args);
     this.debug("Constructor called");
+
+    this.render = this.render.bind(this);
 
     this.loadFont();
   }
@@ -121,23 +125,97 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.populateScene();
   }
 
-  @action
-  resize(outerDiv: HTMLElement) {
-    const width = Number(outerDiv.clientWidth);
-    const height = Number(outerDiv.clientHeight);
-    this.renderer.setSize(width, height);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+  initThreeJs() {
+    this.initScene();
+    this.initCamera();
+    this.initRenderer();
+    this.initLights();
   }
 
-  @action
+  initScene() {
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(this.configuration.applicationColors.background);
+    this.debug('Scene created');
+  }
+
+  initCamera() {
+    const { width, height } = this.canvas;
+    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    this.camera.position.set(0, 0, 100);
+    this.debug('Camera added');
+  }
+
+  initRenderer() {
+    const { width, height } = this.canvas;
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      canvas: this.canvas
+    });
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(width, height);
+    this.debug('Renderer set up');
+  }
+
+  initLights() {
+    const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
+    spotLight.position.set(100, 100, 100);
+    spotLight.castShadow = false;
+    this.scene.add(spotLight);
+
+    const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
+    this.scene.add(light);
+    this.debug('Lights added');
+  }
+
+  initInteraction() {
+    this.handleSingleClick = this.handleSingleClick.bind(this);
+    this.handleDoubleClick = this.handleDoubleClick.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.handleMouseWheel = this.handleMouseWheel.bind(this);
+    this.handleMouseOut = this.handleMouseOut.bind(this);
+    this.handleMouseEnter = this.handleMouseEnter.bind(this);
+    this.handleMouseStop = this.handleMouseStop.bind(this);
+    this.handlePanning = this.handlePanning.bind(this);
+
+    this.interaction = new Interaction(this.canvas, this.camera, this.renderer, this.applicationObject3D, {
+      singleClick: this.handleSingleClick,
+      doubleClick: this.handleDoubleClick,
+      mouseMove: this.handleMouseMove,
+      mouseWheel: this.handleMouseWheel,
+      mouseOut: this.handleMouseOut,
+      mouseEnter: this.handleMouseEnter,
+      mouseStop: this.handleMouseStop,
+      panning: this.handlePanning
+    });
+  }
+
+  loadFont() {
+    new THREE.FontLoader().load(
+      // resource URL
+      '/three.js/fonts/roboto_mono_bold_typeface.json',
+
+      // onLoad callback
+      font => {
+        if (this.isDestroyed)
+          return;
+
+        this.font = font;
+        this.debug("(THREE.js) font sucessfully loaded.");
+      }
+    );
+  }
+
+  //#endregion COMPONENT AND SCENE INITIALIZATION
+
+
+  //#region MOUSE EVENT HANDLER
+
   handleSingleClick(mesh: THREE.Mesh | undefined) {
     if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh || mesh instanceof CommunicationMesh) {
       this.highlight(mesh);
     }
   }
 
-  @action
   handleDoubleClick(mesh: THREE.Mesh | undefined) {
     if (mesh instanceof ComponentMesh) {
       if (mesh.opened) {
@@ -151,7 +229,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
-  @action
   handleMouseMove(mesh: THREE.Mesh | undefined) {
     let enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
@@ -167,22 +244,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.popupData = null;
   }
 
-  @action
   handleMouseWheel(delta: number) {
     this.popupData = null;
     this.camera.position.z += delta * 3.5;
   }
 
-  @action
   handleMouseOut() {
     this.popupData = null;
   }
 
-  @action
   handleMouseEnter() {
   }
 
-  @action
   handleMouseStop(mesh: THREE.Mesh | undefined, mouseOnCanvas: Position2D) {
     if (mesh === undefined)
       return;
@@ -196,7 +269,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
-  @action
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     if (button === 3) {
       // rotate object
@@ -219,25 +291,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
+  //#endregion MOUSE EVENT HANDLER
+
+
+  //#region COMPONENT OPENING AND CLOSING
+
   closeAllComponents() {
     this.modelIdToMesh.forEach(mesh => {
       if(mesh instanceof ComponentMesh) {
         this.closeComponentMesh(mesh);
       }
     });
-    this.addCommunication(this.args.application);
-  }
-
-  @action
-  openAllComponents() {
-    this.args.application.components.forEach((child) => {
-      let mesh = this.modelIdToMesh.get(child.get('id'));
-      if (mesh !== undefined && mesh instanceof ComponentMesh) {
-        this.openComponentMesh(mesh);
-      }
-      this.openComponentsRecursively(child);
-    });
-
     this.addCommunication(this.args.application);
   }
 
@@ -310,7 +374,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         }
         // Reset highlighting if highlighted entity is no longer visible
         if (mesh.highlighted) {
-          this.unhighlightAll();
+          this.removeHighlighting();
         }
       }
     });
@@ -322,60 +386,26 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         mesh.visible = false;
         // Reset highlighting if highlighted entity is no longer visible
         if (mesh.highlighted) {
-          this.unhighlightAll();
+          this.removeHighlighting();
         }
       }
     });
   }
 
-  @action
-  openParents(entity: Component|Clazz) {
-    if(entity instanceof Component) {
-      let ancestors:Set<Component> = new Set();
-      this.getAllAncestorComponents(entity, ancestors);
-      ancestors.forEach(anc => {
-        let ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
-        if(ancestorMesh instanceof ComponentMesh) {
-          this.openComponentMesh(ancestorMesh);
-        }
-      });
-    } else if(entity instanceof Clazz) {
-      let ancestors:Set<Component> = new Set();
-      this.getAllAncestorComponents(entity.getParent(), ancestors);
-      ancestors.forEach(anc => {
-        let ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
-        if(ancestorMesh instanceof ComponentMesh) {
-          this.openComponentMesh(ancestorMesh);
-        }
-      });
-    }
-  }
+  //#endregion COMPONENT OPENING AND CLOSING
 
-  @action
-  closeComponent(component: Component) {
-    let mesh = this.modelIdToMesh.get(component.get('id'));
-    if(mesh instanceof ComponentMesh) {
-      this.closeComponentMesh(mesh);
-    }
-  }
-
-  @action
-  highlightModel(entity: Component|Clazz) {
-    let mesh = this.modelIdToMesh.get(entity.id);
-    if(mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
-      mesh.highlight();
-    }
-  }
+  
+  //#region COMPONENT AND CLAZZ HIGHLIGHTING
 
   highlight(mesh: ComponentMesh | ClazzMesh | CommunicationMesh): void {
     // Reset highlighting if highlighted mesh is clicked
     if (mesh.highlighted) {
-      this.unhighlightAll();
+      this.removeHighlighting();
       return;
     }
 
     // Reset highlighting
-    this.unhighlightAll();
+    this.removeHighlighting();
     let model = mesh.dataModel;
 
     // All clazzes in application
@@ -423,7 +453,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  unhighlightAll() {
+  removeHighlighting() {
     let boxMeshes = Array.from(this.modelIdToMesh.values());
     let commMeshes = Array.from(this.commIdToMesh.values());
     let meshes = boxMeshes.concat(commMeshes);
@@ -461,6 +491,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.getAllAncestorComponents(parent, set);
   }
+
+  //#endregion COMPONENT AND CLAZZ HIGHLIGHTING
+
+  
+  //#region SCENE POPULATION
 
   async populateScene() {
     let serializedApp = this.serializeApplication(this.args.application);
@@ -549,7 +584,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   } // END addComponentToScene
 
-
   addMeshToScene(mesh: ComponentMesh | ClazzMesh | FoundationMesh, boxData: any, height: number) {
     let foundationData = this.boxLayoutMap.get(this.args.application.id);
 
@@ -570,7 +604,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.modelIdToMesh.set(mesh.dataModel.id, mesh);
   }
 
-
   updateMeshVisiblity(mesh: ComponentMesh | ClazzMesh) {
     let parent: Component;
     if (mesh instanceof ComponentMesh) {
@@ -583,7 +616,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       mesh.visible = parentMesh.opened;
     }
   }
-
 
   addCommunication(application: Application) {
     let foundationData = this.boxLayoutMap.get(this.args.application.id);
@@ -631,122 +663,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
-
-  removeAllCommunication() {
-    this.commIdToMesh.forEach(mesh => {
-      mesh.delete();
-    });
-    this.commIdToMesh.clear();
-  }
-
-  resetRotation(application: THREE.Object3D) {
-    const ROTATION_X = 0.65;
-    const ROTATION_Y = 0.80;
-
-    application.rotation.x = ROTATION_X;
-    application.rotation.y = ROTATION_Y;
-  }
-
-  @action
-  resetView() {
-    this.unhighlightAll();
-    this.closeAllComponents();
-    this.removeAllCommunication();
-    this.camera.position.set(0, 0, 100);
-    this.resetRotation(this.applicationObject3D);
-  }
-
-  initThreeJs() {
-    this.initScene();
-    this.initCamera();
-    this.initRenderer();
-    this.initLights();
-  }
-
-  initScene() {
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(this.configuration.applicationColors.background);
-    this.debug('Scene created');
-  }
-
-  initCamera() {
-    const { width, height } = this.canvas;
-    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    this.camera.position.set(0, 0, 100);
-    this.debug('Camera added');
-  }
-
-  initRenderer() {
-    const { width, height } = this.canvas;
-    this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      canvas: this.canvas
-    });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(width, height);
-    this.debug('Renderer set up');
-  }
-
-  initLights() {
-    const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
-    spotLight.position.set(100, 100, 100);
-    spotLight.castShadow = false;
-    this.scene.add(spotLight);
-
-    const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
-    this.scene.add(light);
-    this.debug('Lights added');
-  }
-
-  initInteraction() {
-    this.interaction = new Interaction(this.canvas, this.camera, this.renderer, this.applicationObject3D, {
-      singleClick: this.handleSingleClick,
-      doubleClick: this.handleDoubleClick,
-      mouseMove: this.handleMouseMove,
-      mouseWheel: this.handleMouseWheel,
-      mouseOut: this.handleMouseOut,
-      mouseEnter: this.handleMouseEnter,
-      mouseStop: this.handleMouseStop,
-      panning: this.handlePanning
-    });
-  }
-
-  // Rendering loop //
-  @action
-  render() {
-    if (this.isDestroyed)
-      return;
-
-    const animationId = requestAnimationFrame(this.render);
-    this.animationFrameId = animationId;
-
-    this.renderer.render(this.scene, this.camera);
-  }
-
-  @action
-  cleanAndUpdateScene() {
-    this.debug("cleanAndUpdateScene");
-
-    this.cleanUpApplication();
-    this.populateScene();
-  }
-
-  loadFont() {
-    new THREE.FontLoader().load(
-      // resource URL
-      '/three.js/fonts/roboto_mono_bold_typeface.json',
-
-      // onLoad callback
-      font => {
-        if (this.isDestroyed)
-          return;
-
-        this.font = font;
-        this.debug("(THREE.js) font sucessfully loaded.");
-      }
-    );
-  }
-
   addLabels(){
     if (!this.font)
       return;
@@ -766,6 +682,105 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
+  //#endregion SCENE POPULATION
+
+
+  //#region RENDERING LOOP
+  render() {
+    if (this.isDestroyed)
+      return;
+
+    const animationId = requestAnimationFrame(this.render);
+    this.animationFrameId = animationId;
+
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  //#endregion RENDERING LOOP
+
+
+  //#region ACTIONS
+
+  @action
+  openParents(entity: Component|Clazz) {
+    if(entity instanceof Component) {
+      let ancestors:Set<Component> = new Set();
+      this.getAllAncestorComponents(entity, ancestors);
+      ancestors.forEach(anc => {
+        let ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
+        if(ancestorMesh instanceof ComponentMesh) {
+          this.openComponentMesh(ancestorMesh);
+        }
+      });
+    } else if(entity instanceof Clazz) {
+      let ancestors:Set<Component> = new Set();
+      this.getAllAncestorComponents(entity.getParent(), ancestors);
+      ancestors.forEach(anc => {
+        let ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
+        if(ancestorMesh instanceof ComponentMesh) {
+          this.openComponentMesh(ancestorMesh);
+        }
+      });
+    }
+  }
+
+  @action
+  closeComponent(component: Component) {
+    let mesh = this.modelIdToMesh.get(component.get('id'));
+    if(mesh instanceof ComponentMesh) {
+      this.closeComponentMesh(mesh);
+    }
+  }
+
+  @action
+  openAllComponents() {
+    this.args.application.components.forEach((child) => {
+      let mesh = this.modelIdToMesh.get(child.get('id'));
+      if (mesh !== undefined && mesh instanceof ComponentMesh) {
+        this.openComponentMesh(mesh);
+      }
+      this.openComponentsRecursively(child);
+    });
+
+    this.addCommunication(this.args.application);
+  }
+
+  @action
+  highlightModel(entity: Component|Clazz) {
+    let mesh = this.modelIdToMesh.get(entity.id);
+    if(mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
+      mesh.highlight();
+    }
+  }
+
+  @action
+  unhighlightAll() {
+    this.removeHighlighting();
+  }
+
+  @action
+  resetView() {
+    this.removeHighlighting();
+    this.closeAllComponents();
+    this.removeAllCommunication();
+    this.camera.position.set(0, 0, 100);
+    this.resetRotation(this.applicationObject3D);
+  }
+
+  @action
+  resize(outerDiv: HTMLElement) {
+    const width = Number(outerDiv.clientWidth);
+    const height = Number(outerDiv.clientHeight);
+    this.renderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+  }
+
+  //#endregion ACTIONS
+
+
+  //#region COMPONENT AND SCENE CLEAN-UP
+
   willDestroy() {
     cancelAnimationFrame(this.animationFrameId);
     this.cleanUpApplication();
@@ -784,12 +799,25 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         mesh.delete();
       }
     });
-    this.commIdToMesh.forEach((mesh) => {
+    this.modelIdToMesh.clear();
+    this.removeAllCommunication();
+  }
+
+  cleanAndUpdateScene() {
+    this.debug("cleanAndUpdateScene");
+
+    this.cleanUpApplication();
+    this.populateScene();
+  }
+
+  removeAllCommunication() {
+    this.commIdToMesh.forEach(mesh => {
       mesh.delete();
     });
-    this.modelIdToMesh.clear();
     this.commIdToMesh.clear();
   }
+
+  //#endregion COMPONENT AND SCENE CLEAN-UP
 
   serializeApplication(application: Application) : SerializedApplication {
     let childComponents = application.get('components').toArray();
@@ -822,6 +850,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       instanceCount: clazz.get('instanceCount')
     }
   }
+  
+  //#region ADDITIONAL HELPER FUNCTIONS
+
+  resetRotation(application: THREE.Object3D) {
+    const ROTATION_X = 0.65;
+    const ROTATION_Y = 0.80;
+
+    application.rotation.x = ROTATION_X;
+    application.rotation.y = ROTATION_Y;
+  }
+
+  //#endregion ADDITIONAL HELPER FUNCTIONS
 }
 
 export type SerializedClazz = {
