@@ -30,6 +30,7 @@ import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import NodeGroup from 'explorviz-frontend/models/nodegroup';
 import System from 'explorviz-frontend/models/system';
 import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
+import SystemMesh from 'explorviz-frontend/view-objects/landscape/system-mesh';
 
 
 interface Args {
@@ -323,7 +324,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       return;
     }
 
-    applyKlayLayout(emberLandscape);
+    let modelIdToLayout = applyKlayLayout(emberLandscape);
 
     let centerPoint = CalcCenterAndZoom.
       getCenterAndZoom(emberLandscape, this.camera, this.webglrenderer);
@@ -332,9 +333,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (systems) {
       // Draw boxes for systems
       systems.forEach((system) => {
+        let systemLayout = modelIdToLayout.get(system.get('id'));
 
-        let systemMesh = EntityRendering.renderSystem(system, centerPoint,
-          this.configuration, this.labeler, this.font);
+        if (!systemLayout)
+          return;
+
+        let systemMesh = new SystemMesh(systemLayout, new THREE.Color(this.configuration.landscapeColors.system));
+        systemMesh.setToDefaultPosition(centerPoint);
         this.scene.add(systemMesh);
         this.meshIdToModel.set(systemMesh.id, system);
 

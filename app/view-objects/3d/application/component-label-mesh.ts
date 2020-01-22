@@ -11,7 +11,7 @@ export default class ComponentLabelMesh extends LabelMesh {
     this.computeLabel(componentMesh, labelText);
   }
 
-  computeLabel(componentMesh: ComponentMesh |FoundationMesh, labelText: string) {
+  computeLabel(componentMesh: ComponentMesh | FoundationMesh, labelText: string) {
     const MIN_HEIGHT = 1.5;
     const MIN_LENGTH = 4;
 

@@ -22,14 +22,14 @@ export default class ClazzMesh extends BoxMesh {
     this.dataModel = clazz;
   }
 
-  createLabel(font: THREE.Font, color: THREE.Color){
+  createLabel(font: THREE.Font, color: THREE.Color) {
     let label = new ClazzLabelMesh(font, this.dataModel.name, color);
-    
+
     this.positionLabel(label);
     this.add(label);
   }
 
-  positionLabel(label: ClazzLabelMesh){
+  positionLabel(label: ClazzLabelMesh) {
     // Set label origin to center of clazz mesh
     label.geometry.center();
     // Set y-position just above the clazz mesh

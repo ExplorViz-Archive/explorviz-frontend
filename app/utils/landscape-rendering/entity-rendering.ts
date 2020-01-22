@@ -1,11 +1,10 @@
-import THREE from 'three';
+import THREE, { Object3D } from 'three';
 import DrawNodeEntity from 'explorviz-frontend/models/drawnodeentity';
 import Configuration from 'explorviz-frontend/services/configuration';
 import System from 'explorviz-frontend/models/system';
 import NodeGroup from 'explorviz-frontend/models/nodegroup';
 import Node from 'explorviz-frontend/models/node';
 import Application from 'explorviz-frontend/models/application';
-
 
 export function createPlane(model: DrawNodeEntity, color: THREE.Color) {
   const material = new THREE.MeshBasicMaterial({

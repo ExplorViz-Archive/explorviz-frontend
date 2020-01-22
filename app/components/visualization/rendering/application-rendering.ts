@@ -23,6 +23,7 @@ import BoxMesh from "explorviz-frontend/view-objects/3d/application/box-mesh";
 import CommunicationMesh from "explorviz-frontend/view-objects/3d/communication-mesh";
 import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
 import { tracked } from "@glimmer/tracking";
+import BaseMesh from "explorviz-frontend/view-objects/3d/base-mesh";
 
 interface Args {
   id: string,
@@ -446,7 +447,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     let commMeshes = Array.from(this.commIdToMesh.values());
     let meshes = boxMeshes.concat(commMeshes);
     for (let mesh of meshes) {
-      if (mesh instanceof BoxMesh || mesh instanceof CommunicationMesh) {
+      if (mesh instanceof BaseMesh) {
         mesh.unhighlight();
       }
     }
@@ -648,7 +649,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   resetView() {
     this.unhighlightAll();
     this.closeAllComponents();
-    this.removeAllCommunication();
+    this.addCommunication(this.args.application);
     this.camera.position.set(0, 0, 100);
     this.resetRotation(this.applicationObject3D);
   }
