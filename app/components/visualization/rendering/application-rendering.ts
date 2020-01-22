@@ -498,10 +498,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   //#region SCENE POPULATION
 
   async populateScene() {
-    let serializedApp = this.serializeApplication(this.args.application);
+    let reducedApplication = this.reduceApplication(this.args.application);
 
     try {
-      let layoutedApplication: Map<string, BoxLayout> = await this.worker.postMessage('city-layouter', serializedApp);
+      let layoutedApplication: Map<string, BoxLayout> = await this.worker.postMessage('city-layouter', reducedApplication);
       this.boxLayoutMap = layoutedApplication;
       // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
       this.addFoundationToScene(this.args.application);
@@ -787,7 +787,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.scene.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
-    this.renderingService.removeRendering(this.args.id);
     this.interaction.removeHandlers();
 
     this.debug("Cleaned up application rendering");
@@ -819,31 +818,31 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   //#endregion COMPONENT AND SCENE CLEAN-UP
 
-  serializeApplication(application: Application) : SerializedApplication {
+  reduceApplication(application: Application) : ReducedApplication {
     let childComponents = application.get('components').toArray();
-    let serializedComponents = childComponents.map(child => this.serializeComponent(child));
+    let reducedComponents = childComponents.map(child => this.reduceComponent(child));
     return {
       id: application.get('id'),
-      components: serializedComponents
+      components: reducedComponents
     }
   }
 
-  serializeComponent(component: Component) : SerializedComponent {
+  reduceComponent(component: Component) : ReducedComponent {
     let childComponents = component.get('children').toArray();
     let clazzes = component.get('clazzes').toArray();
 
-    let serializedClazzes = clazzes.map(clazz => this.serializeClazz(clazz));
-    let serializedComponents = childComponents.map(child => this.serializeComponent(child));
+    let reducedClazzes = clazzes.map(clazz => this.reduceClazz(clazz));
+    let reducedComponents = childComponents.map(child => this.reduceComponent(child));
 
     return {
       id: component.get('id'),
       name: component.get('name'),
-      clazzes: serializedClazzes,
-      children: serializedComponents
+      clazzes: reducedClazzes,
+      children: reducedComponents
     }
   }
 
-  serializeClazz(clazz: Clazz) : SerializedClazz {
+  reduceClazz(clazz: Clazz) : ReducedClazz {
     return {
       id: clazz.get('id'),
       name: clazz.get('name'),
@@ -864,20 +863,20 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   //#endregion ADDITIONAL HELPER FUNCTIONS
 }
 
-export type SerializedClazz = {
+export type ReducedClazz = {
   id: string,
   name: string,
   instanceCount: number
 }
 
-export type SerializedComponent = {
+export type ReducedComponent = {
   id: string,
   name: string,
-  clazzes: SerializedClazz[],
-  children: SerializedComponent[]
+  clazzes: ReducedClazz[],
+  children: ReducedComponent[]
 }
 
-export type SerializedApplication = {
+export type ReducedApplication = {
   id: string,
-  components: SerializedComponent[]
+  components: ReducedComponent[]
 }
