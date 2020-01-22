@@ -40,40 +40,40 @@ type LayoutSegment = {
   used: boolean
 }
 
-type SerializedClazz = {
+type ReducedClazz = {
   id: string,
   name: string,
   instanceCount: number
 }
 
-type SerializedComponent = {
+type ReducedComponent = {
   id: string,
   name: string,
-  clazzes: SerializedClazz[],
-  children: SerializedComponent[]
+  clazzes: ReducedClazz[],
+  children: ReducedComponent[]
 }
 
-type SerializedApplication = {
+type ReducedApplication = {
   id: string,
-  components: SerializedComponent[]
+  components: ReducedComponent[]
 }
 
-function applyBoxLayout(application: SerializedApplication) {
+function applyBoxLayout(application: ReducedApplication) {
 
-  function getAllClazzesInApplication(application: SerializedApplication): SerializedClazz[] {
-    let allComponents: SerializedComponent[] = getAllComponentsInApplication(application);
+  function getAllClazzesInApplication(application: ReducedApplication): ReducedClazz[] {
+    let allComponents: ReducedComponent[] = getAllComponentsInApplication(application);
 
-    let allClazzes:SerializedClazz[] = [];
+    let allClazzes:ReducedClazz[] = [];
     allComponents.forEach(component => {
       allClazzes.push(...component.clazzes);
     });
     return allClazzes;
   }
 
-  function getAllComponentsInApplication(application: SerializedApplication): SerializedComponent[] {
+  function getAllComponentsInApplication(application: ReducedApplication): ReducedComponent[] {
     let children = application.components;
 
-    let components: SerializedComponent[] = [];
+    let components: ReducedComponent[] = [];
 
     children.forEach((component) => {
       components.push(...getAllComponents(component), component);
@@ -81,9 +81,9 @@ function applyBoxLayout(application: SerializedApplication) {
     return components;
   }
 
-  function getAllComponents(component: SerializedComponent): SerializedComponent[] {
-    let components:SerializedComponent[] = [];
-    component.children.forEach((component: SerializedComponent) => {
+  function getAllComponents(component: ReducedComponent): ReducedComponent[] {
+    let components:ReducedComponent[] = [];
+    component.children.forEach((component: ReducedComponent) => {
       components.push(...getAllComponents(component), component);
     });
 
@@ -144,7 +144,7 @@ function applyBoxLayout(application: SerializedApplication) {
 
   // Helper functions
 
-  function setAbsoluteLayoutPositionOfApplication(application: SerializedApplication) {
+  function setAbsoluteLayoutPositionOfApplication(application: ReducedApplication) {
     const { components } = application;
 
     let componentLayout = layoutMap.get(application.id);
@@ -160,7 +160,7 @@ function applyBoxLayout(application: SerializedApplication) {
     });
   }
 
-  function setAbsoluteLayoutPosition(component: SerializedComponent) {
+  function setAbsoluteLayoutPosition(component: ReducedComponent) {
     const childComponents = component.children;
     const clazzes = component.clazzes;
 
@@ -187,12 +187,12 @@ function applyBoxLayout(application: SerializedApplication) {
   }
 
 
-  function calcClazzHeight(application: SerializedApplication) {
+  function calcClazzHeight(application: ReducedApplication) {
 
     const CLAZZ_SIZE_DEFAULT = 0.05;
     const CLAZZ_SIZE_EACH_STEP = 1.1;
 
-    const clazzes: SerializedClazz[] = [];
+    const clazzes: ReducedClazz[] = [];
     application.components.forEach((component) => {
       getClazzList(component, clazzes);
     });
@@ -343,7 +343,7 @@ function applyBoxLayout(application: SerializedApplication) {
   } // END getCategories
 
 
-  function getClazzList(component: SerializedComponent, clazzesArray: SerializedClazz[]) {
+  function getClazzList(component: ReducedComponent, clazzesArray: ReducedClazz[]) {
     const children = component.children;
     const clazzes = component.clazzes;
 
@@ -356,7 +356,7 @@ function applyBoxLayout(application: SerializedApplication) {
     });
   }
 
-  function initApplication(application: SerializedApplication) {
+  function initApplication(application: ReducedApplication) {
     const { components } = application;
 
     components.forEach((child) => {
@@ -370,7 +370,7 @@ function applyBoxLayout(application: SerializedApplication) {
   }
 
 
-  function initNodes(component: SerializedComponent) {
+  function initNodes(component: ReducedComponent) {
     const children = component.children;
     const clazzes = component.clazzes;
 
@@ -393,7 +393,7 @@ function applyBoxLayout(application: SerializedApplication) {
   }
 
 
-  function getHeightOfComponent(component: SerializedComponent) {
+  function getHeightOfComponent(component: ReducedComponent) {
     const floorHeight = 0.75 * 4.0;
 
     let childrenHeight = floorHeight;
@@ -420,7 +420,7 @@ function applyBoxLayout(application: SerializedApplication) {
   }
 
 
-  function getHeightOfApplication(application: SerializedApplication) {
+  function getHeightOfApplication(application: ReducedApplication) {
     const floorHeight = 0.75 * 4.0;
 
     let childrenHeight = floorHeight;
@@ -437,7 +437,7 @@ function applyBoxLayout(application: SerializedApplication) {
     return childrenHeight + 0.1;
   }
 
-  function doApplicationLayout(application: SerializedApplication) {
+  function doApplicationLayout(application: ReducedApplication) {
     const { components } = application;
 
     components.forEach((child) => {
@@ -447,8 +447,8 @@ function applyBoxLayout(application: SerializedApplication) {
     layoutChildrenOfApplication(application);
   }
 
-  function layoutChildrenOfApplication(application: SerializedApplication) {
-    let tempList: SerializedComponent[] = [];
+  function layoutChildrenOfApplication(application: ReducedApplication) {
+    let tempList: ReducedComponent[] = [];
 
     const { components } = application;
 
@@ -463,7 +463,7 @@ function applyBoxLayout(application: SerializedApplication) {
     componentData.depth = segment.height;
   }
 
-  function doLayout(component: SerializedComponent) {
+  function doLayout(component: ReducedComponent) {
     const children = component.children;
 
     children.forEach((child) => {
@@ -474,8 +474,8 @@ function applyBoxLayout(application: SerializedApplication) {
   }
 
 
-  function layoutChildren(component: SerializedComponent) {
-    let tempList: (SerializedClazz | SerializedComponent)[] = [];
+  function layoutChildren(component: ReducedComponent) {
+    let tempList: (ReducedClazz | ReducedComponent)[] = [];
 
     const children = component.children;
     const clazzes = component.clazzes;
@@ -496,7 +496,7 @@ function applyBoxLayout(application: SerializedApplication) {
   }
 
 
-  function layoutGeneric(children: (SerializedClazz | SerializedComponent)[]) {
+  function layoutGeneric(children: (ReducedClazz | ReducedComponent)[]) {
     const rootSegment = createRootSegment(children);
 
     let maxX = 0.0;
@@ -628,7 +628,7 @@ function applyBoxLayout(application: SerializedApplication) {
   } // END layoutGeneric
 
 
-  function createRootSegment(children: (SerializedClazz | SerializedComponent)[]) {
+  function createRootSegment(children: (ReducedClazz | ReducedComponent)[]) {
     let worstCaseWidth = 0.0;
     let worstCaseHeight = 0.0;
 
