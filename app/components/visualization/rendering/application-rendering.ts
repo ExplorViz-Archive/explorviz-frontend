@@ -1,29 +1,29 @@
-import GlimmerComponent from "@glimmer/component";
-import Application from "explorviz-frontend/models/application";
-import { action } from "@ember/object";
-import debugLogger from "ember-debug-logger";
+import GlimmerComponent from '@glimmer/component';
+import Application from 'explorviz-frontend/models/application';
+import { action } from '@ember/object';
+import debugLogger from 'ember-debug-logger';
 import THREE from 'three';
 import { inject as service } from '@ember/service';
-import RenderingService from "explorviz-frontend/services/rendering-service";
-import LandscapeRepository from "explorviz-frontend/services/repos/landscape-repository";
+import RenderingService from 'explorviz-frontend/services/rendering-service';
+import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import { applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
 import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
-import DS from "ember-data";
-import Configuration from "explorviz-frontend/services/configuration";
-import Clazz from "explorviz-frontend/models/clazz";
-import CurrentUser from "explorviz-frontend/services/current-user";
-import Component from "explorviz-frontend/models/component";
-import FoundationMesh from "explorviz-frontend/view-objects/3d/application/foundation-mesh";
-import HoverEffectHandler from "explorviz-frontend/utils/hover-effect-handler";
-import ClazzMesh from "explorviz-frontend/view-objects/3d/application/clazz-mesh";
-import ComponentMesh from "explorviz-frontend/view-objects/3d/application/component-mesh";
-import BoxMesh from "explorviz-frontend/view-objects/3d/application/box-mesh";
-import CommunicationMesh from "explorviz-frontend/view-objects/3d/communication-mesh";
-import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
-import { tracked } from "@glimmer/tracking";
-import BaseMesh from "explorviz-frontend/view-objects/3d/base-mesh";
-import { reduceApplication } from "explorviz-frontend/utils/application-rendering/model-reducer";
+import DS from 'ember-data';
+import Configuration from 'explorviz-frontend/services/configuration';
+import Clazz from 'explorviz-frontend/models/clazz';
+import CurrentUser from 'explorviz-frontend/services/current-user';
+import Component from 'explorviz-frontend/models/component';
+import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
+import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
+import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
+import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
+import BoxMesh from 'explorviz-frontend/view-objects/3d/application/box-mesh';
+import CommunicationMesh from 'explorviz-frontend/view-objects/3d/communication-mesh';
+import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
+import { tracked } from '@glimmer/tracking';
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import { reduceApplication } from 'explorviz-frontend/utils/application-rendering/model-reducer';
 
 interface Args {
   id: string,
@@ -95,7 +95,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   constructor(owner: any, args: Args) {
     super(owner, args);
-    this.debug("Constructor called");
+    this.debug('Constructor called');
 
     this.render = this.render.bind(this);
 
@@ -104,7 +104,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   canvasInserted(canvas: HTMLCanvasElement) {
-    this.debug("Canvas inserted");
+    this.debug('Canvas inserted');
 
     this.canvas = canvas;
 
@@ -115,7 +115,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   outerDivInserted(outerDiv: HTMLElement) {
-    this.debug("Outer Div inserted");
+    this.debug('Outer Div inserted');
 
     this.initThreeJs();
     this.initInteraction();
@@ -201,7 +201,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
           return;
 
         this.font = font;
-        this.debug("(THREE.js) font sucessfully loaded.");
+        this.debug('(THREE.js) font sucessfully loaded.');
       }
     );
   }
@@ -627,7 +627,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.removeAllCommunication();
 
     let maybeCurveHeight = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
-    let curveHeight = typeof maybeCurveHeight === "number" ? maybeCurveHeight : 0.0;
+    let curveHeight = typeof maybeCurveHeight === 'number' ? maybeCurveHeight : 0.0;
     let isCurved = curveHeight !== 0.0;
 
     let commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap, this.modelIdToMesh);
@@ -656,7 +656,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       let arrowThickness = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
       let arrowColor = new THREE.Color(arrowColorString).getHex();
 
-      if (typeof arrowThickness === "number" && arrowThickness > 0.0)
+      if (typeof arrowThickness === 'number' && arrowThickness > 0.0)
         pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColor);
 
       this.applicationObject3D.add(pipe);
@@ -790,7 +790,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.renderer.forceContextLoss();
     this.interaction.removeHandlers();
 
-    this.debug("Cleaned up application rendering");
+    this.debug('Cleaned up application rendering');
   }
 
   cleanUpApplication() {
@@ -804,7 +804,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   cleanAndUpdateScene() {
-    this.debug("cleanAndUpdateScene");
+    this.debug('cleanAndUpdateScene');
 
     this.cleanUpApplication();
     this.populateScene();
