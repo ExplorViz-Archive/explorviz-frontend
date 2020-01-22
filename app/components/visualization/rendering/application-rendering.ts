@@ -23,6 +23,7 @@ import CommunicationMesh from "explorviz-frontend/view-objects/3d/communication-
 import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
 import { tracked } from "@glimmer/tracking";
 import BaseMesh from "explorviz-frontend/view-objects/3d/base-mesh";
+import { reduceApplication } from "explorviz-frontend/utils/application-rendering/model-reducer";
 
 interface Args {
   id: string,
@@ -498,7 +499,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   //#region SCENE POPULATION
 
   async populateScene() {
-    let reducedApplication = this.reduceApplication(this.args.application);
+    let reducedApplication = reduceApplication(this.args.application);
 
     try {
       let layoutedApplication: Map<string, BoxLayout> = await this.worker.postMessage('city-layouter', reducedApplication);
@@ -817,38 +818,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   //#endregion COMPONENT AND SCENE CLEAN-UP
-
-  reduceApplication(application: Application) : ReducedApplication {
-    let childComponents = application.get('components').toArray();
-    let reducedComponents = childComponents.map(child => this.reduceComponent(child));
-    return {
-      id: application.get('id'),
-      components: reducedComponents
-    }
-  }
-
-  reduceComponent(component: Component) : ReducedComponent {
-    let childComponents = component.get('children').toArray();
-    let clazzes = component.get('clazzes').toArray();
-
-    let reducedClazzes = clazzes.map(clazz => this.reduceClazz(clazz));
-    let reducedComponents = childComponents.map(child => this.reduceComponent(child));
-
-    return {
-      id: component.get('id'),
-      name: component.get('name'),
-      clazzes: reducedClazzes,
-      children: reducedComponents
-    }
-  }
-
-  reduceClazz(clazz: Clazz) : ReducedClazz {
-    return {
-      id: clazz.get('id'),
-      name: clazz.get('name'),
-      instanceCount: clazz.get('instanceCount')
-    }
-  }
   
   //#region ADDITIONAL HELPER FUNCTIONS
 
@@ -861,22 +830,4 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   //#endregion ADDITIONAL HELPER FUNCTIONS
-}
-
-export type ReducedClazz = {
-  id: string,
-  name: string,
-  instanceCount: number
-}
-
-export type ReducedComponent = {
-  id: string,
-  name: string,
-  clazzes: ReducedClazz[],
-  children: ReducedComponent[]
-}
-
-export type ReducedApplication = {
-  id: string,
-  components: ReducedComponent[]
 }
