@@ -27,7 +27,8 @@ import { reduceApplication } from 'explorviz-frontend/utils/application-renderin
 
 interface Args {
   id: string,
-  application: Application
+  application: Application,
+  font: THREE.Font,
   addComponent(componentPath: string): void // is passed down to the viz navbar
 }
 
@@ -73,7 +74,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   scene!: THREE.Scene;
   camera!: THREE.PerspectiveCamera;
   renderer!: THREE.WebGLRenderer;
-  font !: THREE.Font;
 
   applicationObject3D = new THREE.Object3D();
 
@@ -91,6 +91,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @tracked
   popupData: PopupData | null = null;
 
+  get font() {
+    return this.args.font;
+  }
+
   //#region COMPONENT AND SCENE INITIALIZATION
 
   constructor(owner: any, args: Args) {
@@ -98,8 +102,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Constructor called');
 
     this.render = this.render.bind(this);
-
-    this.loadFont();
   }
 
   @action
@@ -188,22 +190,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       mouseStop: this.handleMouseStop,
       panning: this.handlePanning
     });
-  }
-
-  loadFont() {
-    new THREE.FontLoader().load(
-      // resource URL
-      '/three.js/fonts/roboto_mono_bold_typeface.json',
-
-      // onLoad callback
-      font => {
-        if (this.isDestroyed)
-          return;
-
-        this.font = font;
-        this.debug('(THREE.js) font sucessfully loaded.');
-      }
-    );
   }
 
   //#endregion COMPONENT AND SCENE INITIALIZATION
