@@ -22,8 +22,6 @@ export default class Component extends Draw3DNodeEntity {
 
   @attr('boolean', {defaultValue: false}) synthetic!: boolean;
 
-  @attr('boolean', {defaultValue: false}) foundation!: boolean;
-
   @hasMany('component', { inverse: 'parentComponent' })
   children!: DS.PromiseManyArray<Component>;
 

@@ -13,6 +13,7 @@
         <Visualization::Rendering::LandscapeRendering
           @id="landscape1"
           @landscape={{this.landscapeRepo.latestLandscape}}
+          @font={{@model}}
         />
       {{else if this.landscapeRepo.latestLandscape}}
         <div class="container-fluid">
@@ -47,6 +48,7 @@
           @id="app1"
           @application={{this.landscapeRepo.latestApplication}}
           @addComponent={{this.addComponent}}
+          @font={{@model}}
         />
       {{/if}}
     {{/if}}

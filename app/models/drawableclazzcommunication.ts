@@ -65,7 +65,7 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity {
       let parentComponent = sourceClazz.belongsTo('parent').value() as Component;
       if(parentComponent !== null) {
         sourceClazzComponents.push(parentComponent);
-        while (parentComponent !== null && !parentComponent.get('foundation')){
+        while (parentComponent !== null){
           parentComponent = parentComponent.belongsTo('parentComponent').value() as Component;
           sourceClazzComponents.push(parentComponent);
         }
@@ -79,7 +79,7 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity {
       let parentComponent = targetClazz.belongsTo('parent').value() as Component;
       if(parentComponent !== null) {
         targetClazzComponents.push(parentComponent);
-        while (parentComponent !== null && !parentComponent.get('foundation')){
+        while (parentComponent !== null){
           parentComponent = parentComponent.belongsTo('parentComponent').value() as Component;
           targetClazzComponents.push(parentComponent);
         }

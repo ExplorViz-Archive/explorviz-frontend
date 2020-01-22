@@ -1,16 +1,16 @@
 import THREE from 'three';
-import Component from 'explorviz-frontend/models/component';
 import BoxMesh from './box-mesh';
 import ComponentLabelMesh from './component-label-mesh';
+import Application from 'explorviz-frontend/models/application';
 
 export default class FoundationMesh extends BoxMesh {
 
   geometry: THREE.BoxGeometry;
-  dataModel: Component;
+  dataModel: Application;
   labelMesh: ComponentLabelMesh | null = null;
 
   constructor(layoutPos: THREE.Vector3, layoutHeight: number, layoutWidth: number, layoutDepth: number,
-    foundation: Component, defaultColor: THREE.Color, highlightingColor: THREE.Color) {
+    foundation: Application, defaultColor: THREE.Color, highlightingColor: THREE.Color) {
 
     super(layoutPos, layoutHeight, layoutWidth, layoutDepth, defaultColor, highlightingColor);
 

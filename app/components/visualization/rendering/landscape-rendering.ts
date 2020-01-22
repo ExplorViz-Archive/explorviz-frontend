@@ -35,7 +35,8 @@ import SystemMesh from 'explorviz-frontend/view-objects/landscape/system-mesh';
 
 interface Args {
   id: string,
-  landscape: Landscape
+  landscape: Landscape,
+  font: THREE.Font
 }
 
 /**
@@ -72,7 +73,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   debug = debugLogger('LandscapeRendering');
 
-  font!: THREE.Font;
   animationFrameId = 0;
 
   initDone: Boolean;
@@ -88,6 +88,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
 /*   popUpHandler: PopupHandler = new PopupHandler(); */
+
+  get font() {
+    return this.args.font;
+  }
 
   constructor(owner: any, args: Args) {
     super(owner, args);
@@ -131,7 +135,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    * This overridden Ember Component lifecycle hook enables calling
    * ExplorViz's custom cleanup code.
    *
-   * @method willDestroyElement
+   * @method willDestroy
    */
   willDestroy() {
     cancelAnimationFrame(this.animationFrameId);
@@ -232,26 +236,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     render();
 
-    ////////////////////
-
-    // Load font for labels and synchronously proceed with populating the scene
-    new THREE.FontLoader().load(
-      // Resource URL
-      '/three.js/fonts/roboto_mono_bold_typeface.json',
-
-      // onLoad callback
-      function (font) {
-
-        if (self.isDestroyed)
-          return;
-
-        self.font = font;
-        self.debug("(THREE.js) font sucessfully loaded.");
-        self.initDone = true;
-        self.populateScene();
-      }
-    );
-
+    this.initDone = true;
+    this.populateScene();
   }
 
   /**

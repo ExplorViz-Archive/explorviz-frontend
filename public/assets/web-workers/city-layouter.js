@@ -48,12 +48,15 @@ function applyBoxLayout(application) {
     }
     var INSET_SPACE = 4.0;
     var OPENED_COMPONENT_HEIGHT = 1.5;
-    var components = application.components;
-    var foundationComponent = components[0];
-    if (!foundationComponent) {
-        return;
-    }
     var layoutMap = new Map();
+    layoutMap.set(application.id, {
+        height: 1,
+        width: 1,
+        depth: 1,
+        positionX: 0,
+        positionY: 0,
+        positionZ: 0
+    });
     getAllClazzesInApplication(application).forEach(function (clazz) {
         layoutMap.set(clazz.id, {
             height: 1,
@@ -74,10 +77,10 @@ function applyBoxLayout(application) {
             positionZ: 0
         });
     });
-    calcClazzHeight(foundationComponent);
-    initNodes(foundationComponent);
-    doLayout(foundationComponent);
-    setAbsoluteLayoutPosition(foundationComponent);
+    calcClazzHeight(application);
+    initApplication(application);
+    doApplicationLayout(application);
+    setAbsoluteLayoutPositionOfApplication(application);
     // Scale dimensions for needs of application rendering
     layoutMap.forEach(function (box) {
         box.positionX *= 0.5;
@@ -87,6 +90,17 @@ function applyBoxLayout(application) {
     });
     return layoutMap;
     // Helper functions
+    function setAbsoluteLayoutPositionOfApplication(application) {
+        var components = application.components;
+        var componentLayout = layoutMap.get(application.id);
+        components.forEach(function (childComponent) {
+            var childCompLayout = layoutMap.get(childComponent.id);
+            childCompLayout.positionX += componentLayout.positionX;
+            childCompLayout.positionY += componentLayout.positionY + OPENED_COMPONENT_HEIGHT;
+            childCompLayout.positionZ += componentLayout.positionZ;
+            setAbsoluteLayoutPosition(childComponent);
+        });
+    }
     function setAbsoluteLayoutPosition(component) {
         var childComponents = component.children;
         var clazzes = component.clazzes;
@@ -105,11 +119,13 @@ function applyBoxLayout(application) {
             clazzLayout.positionZ += componentLayout.positionZ;
         });
     }
-    function calcClazzHeight(component) {
+    function calcClazzHeight(application) {
         var CLAZZ_SIZE_DEFAULT = 0.05;
         var CLAZZ_SIZE_EACH_STEP = 1.1;
         var clazzes = [];
-        getClazzList(component, clazzes);
+        application.components.forEach(function (component) {
+            getClazzList(component, clazzes);
+        });
         var instanceCountList = [];
         clazzes.forEach(function (clazz) {
             instanceCountList.push(clazz.instanceCount);
@@ -233,6 +249,16 @@ function applyBoxLayout(application) {
             clazzesArray.push(clazz);
         });
     }
+    function initApplication(application) {
+        var components = application.components;
+        components.forEach(function (child) {
+            initNodes(child);
+        });
+        var componentData = layoutMap.get(application.id);
+        componentData.height = getHeightOfApplication(application);
+        componentData.width = -1.0;
+        componentData.depth = -1.0;
+    }
     function initNodes(component) {
         var children = component.children;
         var clazzes = component.clazzes;
@@ -269,6 +295,36 @@ function applyBoxLayout(application) {
             }
         });
         return childrenHeight + 0.1;
+    }
+    function getHeightOfApplication(application) {
+        var floorHeight = 0.75 * 4.0;
+        var childrenHeight = floorHeight;
+        var components = application.components;
+        components.forEach(function (child) {
+            var childData = layoutMap.get(child.id);
+            if (childData.height > childrenHeight) {
+                childrenHeight = childData.height;
+            }
+        });
+        return childrenHeight + 0.1;
+    }
+    function doApplicationLayout(application) {
+        var components = application.components;
+        components.forEach(function (child) {
+            doLayout(child);
+        });
+        layoutChildrenOfApplication(application);
+    }
+    function layoutChildrenOfApplication(application) {
+        var tempList = [];
+        var components = application.components;
+        components.forEach(function (child) {
+            tempList.push(child);
+        });
+        var segment = layoutGeneric(tempList);
+        var componentData = layoutMap.get(application.id);
+        componentData.width = segment.width;
+        componentData.depth = segment.height;
     }
     function doLayout(component) {
         var children = component.children;
