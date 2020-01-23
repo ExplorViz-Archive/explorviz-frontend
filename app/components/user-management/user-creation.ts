@@ -123,6 +123,11 @@ export default class UserCreation extends Component {
   });
 
   @action
+  changePage(pageName: Page) {
+    this.page = pageName;
+  }
+
+  @action
   printNewUsers() {
     const selector = '#new-user-list';
     const options = {
@@ -136,6 +141,16 @@ export default class UserCreation extends Component {
   hideNewUsersCreatedModal() {
     this.createdUsers = [];
     this.showNewUsers = false;
+  }
+
+  @action
+  updateSingleUserRoles(roles: Role[]) {
+    this.roles_selected_single = roles;
+  }
+
+  @action
+  updateMultipleUserRoles(roles: Role[]) {
+    this.roles_selected_multiple = roles;
   }
 
   @task
