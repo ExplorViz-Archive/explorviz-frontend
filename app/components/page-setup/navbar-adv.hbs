@@ -3,10 +3,15 @@
     {{svg-jar "person" class="octicon"}}
     <span><b>{{this.currentUser.username}}</b></span>
   </span>
-  {{#link-to "configuration" class="d-flex-center" title="Configuration"}}
+  <LinkTo @route="configuration" class="d-flex-center" @title="Configuration">
     {{svg-jar "gear" class="octicon"}}<span>Configuration</span>
-  {{/link-to}}
-  <a style="cursor: pointer" class="d-flex-center" {{action (route-action 'logout')}} title="Logout">
+  </LinkTo>
+  <div
+    class="d-flex-center"
+    style="cursor: pointer"
+    title="Logout"
+    {{on "click" (route-action "logout")}}
+  >
     {{svg-jar "sign-out" class="octicon"}}<span>Logout</span>
-  </a>
+  </div>
 </div>
