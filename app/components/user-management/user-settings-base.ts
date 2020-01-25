@@ -12,7 +12,7 @@ interface Args {
   // }
   settings:{
     [type:string]: [[string, any]]
-  },
+  }
 }
 export default class UserSettingsBase extends Component<Args> {
 
@@ -49,5 +49,10 @@ export default class UserSettingsBase extends Component<Args> {
   @action
   onRangeSettingChange(index:number, valueNew:any) {
     this.args.settings.rangesetting[index].set(1, Number(valueNew));
+  }
+
+  @action
+  onFlagSettingChange(index:number, valueNew: boolean) {
+    this.args.settings.flagsetting[index].set(1, valueNew);
   }
 }

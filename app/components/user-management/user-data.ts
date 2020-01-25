@@ -5,7 +5,7 @@ import { inject as service } from "@ember/service";
 import { task } from 'ember-concurrency-decorators';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import DS from 'ember-data';
-import { set } from '@ember/object';
+import { set, action } from '@ember/object';
 import User from 'explorviz-frontend/models/user';
 import Role from 'explorviz-frontend/models/role';
 
@@ -46,6 +46,11 @@ export default class UserData extends Component<Args> {
       this.username_change = user.username;
       this.roles_change = [...user.roles];
     }
+  }
+
+  @action
+  updateRoleSelection(roles: string[]) {
+    this.roles_change = roles;
   }
 
   @task({ drop: true })

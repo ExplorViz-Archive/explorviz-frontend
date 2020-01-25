@@ -46,6 +46,7 @@ export default class UserCreation extends Component {
   //   origin2: boolean2
   //   ...
   // }
+  @tracked
   useDefaultSettings:{
     [origin: string]: boolean
   } = {};
@@ -151,6 +152,14 @@ export default class UserCreation extends Component {
   @action
   updateMultipleUserRoles(roles: Role[]) {
     this.roles_selected_multiple = roles;
+  }
+
+  @action
+  toggleDefaultSetting(origin: string) {
+    this.useDefaultSettings = {
+      ...this.useDefaultSettings,
+      [origin]: !this.useDefaultSettings[origin]
+    }
   }
 
   @task

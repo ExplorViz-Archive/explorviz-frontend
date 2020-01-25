@@ -133,6 +133,20 @@ export default class UserList extends Component<Args> {
     }
   });
 
+  @action
+  openUserDeletionDialogue() {
+    this.showDeleteUsersDialog = true;
+  }
+
+  @action
+  hideUserDeletionDialogue() {
+    this.showDeleteUsersDialog = false;
+  }
+
+  isCurrentUser(user: User) {
+    return user === this.currentUser.user;
+  }
+
   showReasonErrorAlert(reason:any) {
     const {title, detail} = reason.errors[0];
     AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);

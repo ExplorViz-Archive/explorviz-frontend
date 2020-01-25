@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { inject as service } from "@ember/service";
 import { task } from 'ember-concurrency-decorators';
 import { all } from 'rsvp';
+import { action } from '@ember/object';
 
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import DS from 'ember-data';
@@ -9,6 +10,7 @@ import UserSettings from 'explorviz-frontend/services/user-settings';
 import User from 'explorviz-frontend/models/user';
 import { set } from '@ember/object';
 import Setting from 'explorviz-frontend/models/setting';
+import { tracked } from '@glimmer/tracking';
 
 type Settings = {
   [origin: string]: {
@@ -44,6 +46,7 @@ export default class UserManagementUserSettings extends Component<Args> {
       ...
     }
   */
+  @tracked
   useDefaultSettings:{[origin:string]: boolean} = {};
 
   constructor(owner: any, args: Args) {
@@ -157,4 +160,12 @@ export default class UserManagementUserSettings extends Component<Args> {
       AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
     });
   });
+
+  @action
+  toggleDefaultSetting(origin: string) {
+    this.useDefaultSettings = {
+      ...this.useDefaultSettings,
+      [origin]: !this.useDefaultSettings[origin]
+    }
+  }
 }
