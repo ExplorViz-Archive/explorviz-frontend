@@ -6,13 +6,13 @@
     </tr>
   </thead>
   <tbody>
-  <tr>
-    <td>
-      <b>Programming language</b>
-      <HelpTooltip @title="Underlying programming language for this procezz" />
-    </td>
-    <td>{{@procezz.programmingLanguage}}</td>
-  </tr>
+    <tr>
+      <td>
+        <b>Programming language</b>
+        <HelpTooltip @title="Underlying programming language for this procezz" />
+      </td>
+      <td>{{@procezz.programmingLanguage}}</td>
+    </tr>
     <tr>
       <td>
         <b>Internal ID</b>
@@ -23,7 +23,9 @@
     <tr>
       <td>
         <b>OS Process ID (PID)</b>
-        <HelpTooltip @title="Unique Process ID from Operating System. Will be updated if process is restarted." />
+        <HelpTooltip
+          @title="Unique Process ID from Operating System. Will be updated if process is restarted."
+        />
       </td>
       <td>{{@procezz.pid}}</td>
     </tr>
@@ -31,8 +33,7 @@
       <td>
         <b>Last Discovery Time</b>
         <HelpTooltip
-          @title="Last time this process was discovered. Does not show actual start time of process,
-            but date when agent discovered this process."
+          @title="Last time this process was discovered. Does not show actual start time of process, but date when agent discovered this process."
         />
       </td>
       <td>{{this.lastDiscoveryTimeAsDate}}</td>
@@ -41,28 +42,28 @@
       <td>
         <b>Name</b>
         <HelpTooltip
-          @title="Name attribute has a higher priority than PID in all views.
-            This attribute will also be considered for monitoring. If it's not filled,
-            a monitored application will be named after the PID."
+          @title="Name attribute has a higher priority than PID in all views. This attribute will also be considered for monitoring. If it's not filled, a monitored application will be named after the PID."
         />
       </td>
       <td>
-        {{input class="form-control" value=@procezz.name}}
+        <Input class="form-control" @value={{@procezz.name}} />
       </td>
     </tr>
     <tr>
       <td>
         <b>Is web server?</b>
-        <HelpTooltip @title="Mark a process as web server. This attribute is only for your information." />
+        <HelpTooltip
+          @title="Mark a process as web server. This attribute is only for your information."
+        />
       </td>
       <td>
         <div style="float: left;">
           <XToggle
-            @theme='skewed'
-            @onLabel='Yes'
-            @offLabel='No'
+            @theme="skewed"
+            @onLabel="Yes"
+            @offLabel="No"
             @value={{@procezz.webserverFlag}}
-            @onToggle={{action (mut @procezz.webserverFlag)}}
+            @onToggle={{@toggleProcezzWebserverFlag}}
           />
         </div>
       </td>
@@ -71,18 +72,17 @@
       <td>
         <b>Hide process?</b>
         <HelpTooltip
-          @title="Hide this process. It will not be visible on the overview page.
-            Enable 'Show hidden entities' in settings dialog to undo."
+          @title="Hide this process. It will not be visible on the overview page. Enable 'Show hidden entities' in settings dialog to undo."
         />
       </td>
       <td>
         <div style="float: left;">
           <XToggle
-            @theme='skewed'
-            @onLabel='Yes'
-            @offLabel='No'
+            @theme="skewed"
+            @onLabel="Yes"
+            @offLabel="No"
             @value={{@procezz.isHidden}}
-            @onToggle={{action (mut @procezz.isHidden)}}
+            @onToggle={{@toggleProcezzVisibility}}
           />
         </div>
       </td>
@@ -90,12 +90,14 @@
     {{#if @procezz.errorOccured}}
       <tr>
         <td>
-          <b><font color="red">Error message</font></b>
-          <HelpTooltip @title="An error occured. The message might be a hint on what's wrong." />
+          <b><p style="color: red">Error message</p></b>
+          <HelpTooltip
+            @title="An error occured. The message might be a hint on what's wrong."
+          />
         </td>
         <td>
           <div class="well well-sm container-word-wrap" style="margin-bottom: 0px;">
-            <font color="red">{{@procezz.errorMessage}}</font>
+            <p style="color: red">{{@procezz.errorMessage}}</p>
           </div>
         </td>
       </tr>

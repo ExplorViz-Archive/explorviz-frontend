@@ -8,7 +8,9 @@ import { tracked } from '@glimmer/tracking';
 
 interface Args {
   procezz: Procezz
-  errorHandling(errorArray:any): void
+  errorHandling(errorArray:any): void,
+  toggleProcezzVisibility(): void,
+  toggleProcezzWebserverFlag(): void
 }
 
 export default class ProcezzDetails extends Component<Args> {

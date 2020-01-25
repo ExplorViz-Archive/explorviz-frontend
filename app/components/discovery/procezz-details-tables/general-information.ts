@@ -3,7 +3,8 @@ import { computed } from '@ember/object';
 import Procezz from 'explorviz-frontend/models/procezz';
 
 interface Args {
-  procezz: Procezz
+  procezz: Procezz,
+  toggleProcezzVisibility(): void
 }
 
 export default class GeneralInformation extends Component<Args> {

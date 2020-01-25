@@ -5,7 +5,7 @@ import RenderingService from 'explorviz-frontend/services/rendering-service';
 import AgentsListener from 'explorviz-frontend/services/agents-listener';
 import Procezz from 'explorviz-frontend/models/procezz';
 import Agent from 'explorviz-frontend/models/agent';
-import { set } from '@ember/object';
+import { set, action } from '@ember/object';
 
 export default class DiscoveryController extends Controller {
 
@@ -19,6 +19,7 @@ export default class DiscoveryController extends Controller {
   agentListener!: AgentsListener;
 
   // closure action for node-overview component
+  @action
   showDetailsComponent(emberRecord:any) {
     if(emberRecord instanceof Procezz) {
       set(this, 'procezzForDetailView', emberRecord);
@@ -43,6 +44,7 @@ export default class DiscoveryController extends Controller {
   }
 
   // closure action for embedded components
+  @action
   errorHandling(errorArray:any) {
 
     if(errorArray) {
@@ -64,6 +66,34 @@ export default class DiscoveryController extends Controller {
       AlertifyHandler.showAlertifyMessageWithDuration(alertifyMessage, 8);
     }
     this.resetState();
+  }
+
+  @action
+  toggleAgentVisibility() {
+    if(this.agentForDetailView) {
+      this.agentForDetailView.toggleProperty('isHidden');
+    }
+  }
+
+  @action
+  toggleProcezzVisibility() {
+    if(this.procezzForDetailView) {
+      this.procezzForDetailView.toggleProperty('isHidden');
+    }
+  }
+
+  @action
+  toggleProcezzWebserverFlag() {
+    if(this.procezzForDetailView) {
+      this.procezzForDetailView.toggleProperty('webserverFlag');
+    }
+  }
+
+  @action
+  toggleProcezzMonitoredFlag() {
+    if(this.procezzForDetailView) {
+      this.procezzForDetailView.toggleProperty('monitoredFlag');
+    }
   }
 
 }
