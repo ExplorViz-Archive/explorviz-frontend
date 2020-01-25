@@ -12,9 +12,10 @@
         />
         <div id="rendering">
           <Visualization::Rendering::LandscapeRendering />
-          <!-- popup(s) -->
+          {{!-- popup(s) --}}
           <Visualization::Rendering::Popups::PopupCoordinator
-              @popupData={{this.additionalData.popupContent}} />
+            @popupData={{this.additionalData.popupContent}}
+          />
         </div>
       {{else if this.landscapeRepo.latestLandscape}}
         <div class="container-fluid">
@@ -47,20 +48,28 @@
       />
       <div id="rendering">
         <div style="position: absolute!important" class="pl-1">
-          <BsButton @onClick={{action this.openLandscapeView}} @type="secondary" @outline={{true}} @title="Back to Landscape">
+          <BsButton
+            @onClick={{this.openLandscapeView}}
+            @type="secondary"
+            @outline={{true}}
+            @title="Back to Landscape"
+          >
             {{svg-jar "reply" class="octicon align-middle"}}
           </BsButton>
         </div>
-        <Visualization::Rendering::ApplicationRendering @latestApplication={{this.landscapeRepo.latestApplication}} />
-        <!-- popup(s) -->
+        <Visualization::Rendering::ApplicationRendering
+          @latestApplication={{this.landscapeRepo.latestApplication}}
+        />
+        {{!-- popup(s) --}}
         <Visualization::Rendering::Popups::PopupCoordinator
-          @popupData={{this.additionalData.popupContent}} />
+          @popupData={{this.additionalData.popupContent}}
+        />
       </div>
     {{/if}}
-    <!-- timeline -->
+    {{!-- timeline --}}
     <div id="timeline-content">
       <BsButton
-        @onClick={{action "toggleTimeline"}}
+        @onClick={{this.toggleTimeline}}
         @type="secondary"
         @outline={{true}}
         class="btn-timeline"
@@ -69,16 +78,20 @@
         {{#unless this.renderingService.showTimeline}}
           <span class="pr-1">Show Timeline</span>
         {{/unless}}
-        {{svg-jar "chevron-up"
+        {{svg-jar
+          "chevron-up"
           id="hidetimeline-icon"
           class=(if this.renderingService.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")
         }}
       </BsButton>
-      <div id="timeline" class="timeline {{unless this.renderingService.showTimeline "timelinehide"}}">
+      <div
+        id="timeline"
+        class="timeline {{unless this.renderingService.showTimeline "timelinehide"}}"
+      >
         <Visualization::PageSetup::Timeline::PlotlyTimeline
           @timestamps={{this.timestampRepo.timelineTimestamps}}
-          @clicked={{action this.timelineClicked}}
-          @setChildReference={{action this.getTimelineReference}}
+          @clicked={{this.timelineClicked}}
+          @setChildReference={{this.getTimelineReference}}
         />
       </div>
     </div>

@@ -1,7 +1,16 @@
-{{#if procezzForDetailView}}
-  <Discovery::ProcezzDetails @errorHandling={{action this.errorHandling}} @procezz={{this.procezzForDetailView}} />
+{{#if this.procezzForDetailView}}
+  <Discovery::ProcezzDetails
+    @errorHandling={{this.errorHandling}}
+    @procezz={{this.procezzForDetailView}}
+  />
 {{else if this.agentForDetailView}}
-  <Discovery::AgentDetails @errorHandling={{action this.errorHandling}} @agent={{this.agentForDetailView}} />
+  <Discovery::AgentDetails
+    @errorHandling={{this.errorHandling}}
+    @agent={{this.agentForDetailView}}
+    @toggleAgentVisibility={{this.toggleAgentVisibility}}
+  />
 {{else}}
-  <Discovery::NodeOverview @showDetails={{action this.showDetailsComponent}} />
+  <Discovery::NodeOverview
+    @showDetails={{this.showDetailsComponent}}
+  />
 {{/if}}
