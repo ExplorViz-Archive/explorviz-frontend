@@ -9,4 +9,7 @@ export default class UserManagementNewRoute extends BaseRoute.extend(Authenticat
   goBack(this:UserManagementNewRoute) {
     this.transitionTo('configuration.usermanagement.users');
   }
+
+  @action
+  resetRoute() {}
 }

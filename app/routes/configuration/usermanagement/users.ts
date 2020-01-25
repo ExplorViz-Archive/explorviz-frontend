@@ -44,4 +44,7 @@ export default class UserManagementUsersRoute extends BaseRoute.extend(Authentic
       }
     }
   }
+
+  @action
+  resetRoute() {}
 }

@@ -1,4 +1,5 @@
 import {inject as service} from '@ember/service';
+import { action } from '@ember/object';
 
 import BaseRoute from 'explorviz-frontend/routes/base-route';
 // @ts-ignore
@@ -16,4 +17,7 @@ export default class ConfigurationSettingsRoute extends BaseRoute.extend(Authent
       user
     }
   }
+
+  @action
+  resetRoute() {}
 }

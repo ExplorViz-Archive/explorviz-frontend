@@ -3,6 +3,7 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 import { inject as service } from '@ember/service';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import RouterService from '@ember/routing/router-service';
+import { action } from '@ember/object';
 
 export default class ConfigurationUserManagementRoute extends BaseRoute.extend(AuthenticatedRouteMixin) {
   @service('current-user') currentUser!: CurrentUser;
@@ -13,4 +14,7 @@ export default class ConfigurationUserManagementRoute extends BaseRoute.extend(A
     if(!this.currentUser.user.hasRole('admin'))
       this.router.transitionTo('configuration.settings');
   }
+
+  @action
+  resetRoute() {}
 }
