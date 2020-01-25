@@ -1,39 +1,47 @@
 {{#if @popupData}}
   <div class="popover" {{did-insert this.setPopupPosition}}>
-    <!-- landscape popups -->
+    {{!-- landscape popups --}}
     {{#if (string-comparison @popupData.popupType "system")}}
       <Visualization::Rendering::Popups::LandscapePopups::SystemPopup
-        @data={{@popupData}} />
+        @data={{@popupData}}
+      />
     {{/if}}
     {{#if (string-comparison @popupData.popupType "nodeGroup")}}
       <Visualization::Rendering::Popups::LandscapePopups::NodegroupPopup
-        @data={{@popupData}} />
+        @data={{@popupData}}
+      />
     {{/if}}
     {{#if (string-comparison @popupData.popupType "node")}}
       <Visualization::Rendering::Popups::LandscapePopups::NodePopup
-        @data={{@popupData}} />
+        @data={{@popupData}}
+      />
     {{/if}}
     {{#if (string-comparison @popupData.popupType "application")}}
       <Visualization::Rendering::Popups::LandscapePopups::ApplicationPopup
-        @data={{@popupData}} />
+        @data={{@popupData}}
+      />
     {{/if}}
     {{#if (string-comparison @popupData.popupType "applicationCommunication")}}
       <Visualization::Rendering::Popups::LandscapePopups::LandscapeCommunicationPopup
-        @data={{@popupData}} />
+        @data={{@popupData}}
+      />
     {{/if}}
 
-    <!-- application popups -->
+    {{!-- application popups --}}
     {{#if (string-comparison @popupData.popupType "component")}}
       <Visualization::Rendering::Popups::ApplicationPopups::ComponentPopup
-        @data={{@popupData}} />
+        @data={{@popupData}}
+      />
     {{/if}}
     {{#if (string-comparison @popupData.popupType "clazz")}}
       <Visualization::Rendering::Popups::ApplicationPopups::ClazzPopup
-        @data={{@popupData}} />
+        @data={{@popupData}} 
+      />
     {{/if}}
     {{#if (string-comparison @popupData.popupType "clazzCommunication")}}
       <Visualization::Rendering::Popups::ApplicationPopups::CommunicationPopup
-        @data={{@popupData}} />
+        @data={{@popupData}}
+      />
     {{/if}}
   </div>
 {{/if}}
