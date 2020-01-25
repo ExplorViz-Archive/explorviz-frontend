@@ -9,7 +9,7 @@
     <tr>
       <td>
         <b>Is stopped?</b>
-        <HelpTooltip @title="Flag that indicates if the process is stopped." />
+        <HelpTooltip @title={{this.tooltipTexts.stopped}} />
       </td>
       <td>        
         {{@procezz.stopped}}
@@ -19,7 +19,7 @@
       <td>
         <b>Working Directory</b>
         <HelpTooltip
-          @title="Shows the file system directory of the process. Some processes don't contain the absolute path to their execution artifact. Therefore, this attribute might be a hint on how to start a process."
+          @title={{this.tooltipTexts.workingDirectory}}
         />
       </td>
       <td>
@@ -42,7 +42,7 @@
       <td>
         <b>User Execution Command</b>
         <HelpTooltip
-          @title="The User Execution Command has a higher priority than the OS Execution Command when restarting a process. It might be filled with content. Press the button to insert this recommendation. Always double check this execution command."
+          @title={{this.tooltipTexts.userExecutionCommand}}
         />
       </td>
       <td>
@@ -66,7 +66,7 @@
       <td>
         <b>Agend Execution Command</b>
         <HelpTooltip
-          @title="If filled, this attribute shows the execution command that was internally used by the agent to restart this process. It is based on the User or OS Execution command. This attribute is only for your information."
+          @title={{this.tooltipTexts.agentExecutionCommand}}
         />
       </td>
       <td>
@@ -79,7 +79,7 @@
       <td>
         <b>OS (initial) Execution Command</b>
         <HelpTooltip
-          @title="This attribute holds the Operating System execution command that was found by the agent for this process."
+          @title={{this.tooltipTexts.osExecutionCommand}}
         />
       </td>
       <td>

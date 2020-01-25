@@ -82,7 +82,10 @@
       role="tabpanel"
       aria-labelledby="nav-monitoring-tab"
     >
-      <Discovery::ProcezzDetailsTables::MonitoringInformation @procezz={{@procezz}} />
+      <Discovery::ProcezzDetailsTables::MonitoringInformation
+        @procezz={{@procezz}}
+        @toggleProcezzMonitoredFlag={{@toggleProcezzMonitoredFlag}}
+      />
     </div>
   </div>
 </div>
