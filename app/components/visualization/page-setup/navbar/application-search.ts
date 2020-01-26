@@ -1,87 +1,35 @@
-import Component from '@glimmer/component';
-import { inject as service } from "@ember/service";
-import { task } from 'ember-concurrency-decorators';
+import { action } from '@ember/object';
+import { inject as service } from '@ember/service';
 import { isBlank } from '@ember/utils';
-import $ from 'jquery';
+import Component from '@glimmer/component';
+import { task } from 'ember-concurrency-decorators';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import Highlighter from 'explorviz-frontend/services/visualization/application/highlighter';
-import { action } from '@ember/object';
+import $ from 'jquery';
 
 /* eslint-disable require-yield */
 export default class ApplicationSearch extends Component {
-
   @service('rendering-service') renderingService!: RenderingService;
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
   @service('visualization/application/highlighter') highlighter!: Highlighter;
 
-  componentLabel = "-- Components --";
-  clazzLabel = "-- Classes --";
-
-  @action
-  removePowerselectArrow() {
-    $('.ember-power-select-status-icon').remove();
-  }
-
-  @action
-  onSelect(emberPowerSelectObject:any) {
-
-    if(!emberPowerSelectObject || emberPowerSelectObject.length < 1) {
-      return;
-    }
-
-    const entity = emberPowerSelectObject[0];
-    const modelType = entity.constructor.modelName;
-
-    if(!modelType || modelType === "") {
-      return;
-    }
-
-    this.highlighter.unhighlightAll();
-  
-    if (modelType === "clazz") {
-      entity.openParents();
-    }
-    else if (modelType === "component") {
-      if (entity.opened) {
-        // close and highlight, since it is already open
-        entity.setOpenedStatus(false);
-      } else {
-        // open all parents, since component is hidden
-        entity.openParents();
-      }
-    }
-
-    this.highlighter.highlight(entity);
-    this.renderingService.redrawScene();
-  }
-
-  reCalculateDropdown(trigger:Element) {
-
-    // https://ember-basic-dropdown.com/docs/custom-position/
-
-    let { top, left, height } = trigger.getBoundingClientRect();
-    let style = {
-      left: left,
-      top: top +  height
-    };
-    return { style };
-  }
+  componentLabel = '-- Components --';
+  clazzLabel = '-- Classes --';
 
   @task({ restartable: true })
-  searchEntity = task(function * (this: ApplicationSearch, term:string) {
+  searchEntity = task(function *(this: ApplicationSearch, term: string) {
     if (isBlank(term)) { return []; }
     return yield this.getPossibleEntityNames.perform(term);
   });
 
   @task
-  getPossibleEntityNames = task(function * (this: ApplicationSearch, name:string) {
-
+  getPossibleEntityNames = task(function *(this: ApplicationSearch, name: string) {
     const searchString = name.toLowerCase();
 
     const latestApp = this.landscapeRepo.latestApplication;
 
-    if(latestApp === null) {
+    if (latestApp === null) {
       return [];
     }
 
@@ -95,26 +43,27 @@ export default class ApplicationSearch extends Component {
 
     let isComponentLabelSet = false;
 
-    for (let i = 0; i < components.length; i++) {      
-      if(currentNumberOfCompNames === maxNumberOfCompNames) {
+    for (let i = 0; i < components.length; i++) {
+      if (currentNumberOfCompNames === maxNumberOfCompNames) {
         break;
       }
 
       const component = components.objectAt(i);
 
-      if(!component)
+      if (!component) {
         continue;
+      }
 
       // skip foundation, since it can't be highlighted anyways
-      if(component.foundation)
+      if (component.foundation) {
         continue;
+      }
 
       const componentName = component.name.toLowerCase();
-      if(searchEngineFindsHit(componentName, searchString)) {
-
-        if(!isComponentLabelSet) {
+      if (searchEngineFindsHit(componentName, searchString)) {
+        if (!isComponentLabelSet) {
           isComponentLabelSet = true;
-          entities.push({name: this.componentLabel});
+          entities.push({ name: this.componentLabel });
         }
 
         entities.push(component);
@@ -128,36 +77,82 @@ export default class ApplicationSearch extends Component {
     let isClazzLabelSet = false;
 
     for (let i = 0; i < clazzes.length; i++) {
-      if(currentNumberOfClazzNames === maxNumberOfClazzNames) {
+      if (currentNumberOfClazzNames === maxNumberOfClazzNames) {
         break;
       }
 
       const clazz = clazzes.objectAt(i);
 
-      if(!clazz)
+      if (!clazz) {
         continue;
+      }
 
       const clazzName = clazz.name.toLowerCase();
-      if(searchEngineFindsHit(clazzName, searchString)) {
-
-        if(!isClazzLabelSet) {
+      if (searchEngineFindsHit(clazzName, searchString)) {
+        if (!isClazzLabelSet) {
           isClazzLabelSet = true;
-          entities.push({name: this.clazzLabel});
+          entities.push({ name: this.clazzLabel });
         }
 
         entities.push(clazz);
         currentNumberOfClazzNames++;
-      }  
+      }
     }
     return entities;
 
-    function searchEngineFindsHit(name:string, searchString:string) {
-      if(searchString.startsWith('*')) {
-        const searchName = searchString.substring(1);
-        return name.includes(searchName);
+    function searchEngineFindsHit(clazzNameToCheckAgainst: string, searchWord: string) {
+      if (searchString.startsWith('*')) {
+        const searchName = searchWord.substring(1);
+        return clazzNameToCheckAgainst.includes(searchName);
+      }
+      return clazzNameToCheckAgainst.startsWith(searchWord);
+    }
+  });
+
+  @action
+  removePowerselectArrow() {
+    $('.ember-power-select-status-icon').remove();
+  }
+
+  @action
+  onSelect(emberPowerSelectObject: any) {
+    if (!emberPowerSelectObject || emberPowerSelectObject.length < 1) {
+      return;
+    }
+
+    const entity = emberPowerSelectObject[0];
+    const modelType = entity.constructor.modelName;
+
+    if (!modelType || modelType === '') {
+      return;
+    }
+
+    this.highlighter.unhighlightAll();
+
+    if (modelType === 'clazz') {
+      entity.openParents();
+    } else if (modelType === 'component') {
+      if (entity.opened) {
+        // close and highlight, since it is already open
+        entity.setOpenedStatus(false);
       } else {
-        return name.startsWith(searchString);
+        // open all parents, since component is hidden
+        entity.openParents();
       }
     }
-  })
+
+    this.highlighter.highlight(entity);
+    this.renderingService.redrawScene();
+  }
+
+  reCalculateDropdown(trigger: Element) {
+    // https://ember-basic-dropdown.com/docs/custom-position/
+
+    const { top, left, height } = trigger.getBoundingClientRect();
+    const style = {
+      left,
+      top: top + height,
+    };
+    return { style };
+  }
 }
