@@ -1,28 +1,27 @@
-import Draw3DNodeEntity from './draw3dnodeentity';
-import DS from 'ember-data';
 import { computed } from '@ember/object';
+import DS from 'ember-data';
 import Clazz from './clazz';
+import Draw3DNodeEntity from './draw3dnodeentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
 /**
-* Ember model for a Component, e.g. a Java package.
-*
-* @class Component-Model
-* @extends Draw3DNodeEntity-Model
-*
-* @module explorviz
-* @submodule model.meta
-*/
+ * Ember model for a Component, e.g. a Java package.
+ *
+ * @class Component-Model
+ * @extends Draw3DNodeEntity-Model
+ *
+ * @module explorviz
+ * @submodule model.meta
+ */
 export default class Component extends Draw3DNodeEntity {
-
   @attr('string') name!: string;
 
   @attr('string') fullQualifiedName!: string;
 
-  @attr('boolean', {defaultValue: false}) synthetic!: boolean;
+  @attr('boolean', { defaultValue: false }) synthetic!: boolean;
 
-  @attr('boolean', {defaultValue: false}) foundation!: boolean;
+  @attr('boolean', { defaultValue: false }) foundation!: boolean;
 
   @hasMany('component', { inverse: 'parentComponent' })
   children!: DS.PromiseManyArray<Component>;
@@ -32,7 +31,7 @@ export default class Component extends Draw3DNodeEntity {
 
   @belongsTo('component', { inverse: 'children' })
   parentComponent!: DS.PromiseObject<Component> & Component;
-  
+
   // breaks Ember, maybe because of circle ?
 
   /*belongingApplication: belongsTo('application', {
@@ -40,7 +39,7 @@ export default class Component extends Draw3DNodeEntity {
   }),*/
 
   setOpenedStatus(status: boolean) {
-    this.get('children').forEach((child:Component) => {
+    this.get('children').forEach((child: Component) => {
       child.set('highlighted', false);
       child.setOpenedStatus(false);
     });
@@ -50,7 +49,7 @@ export default class Component extends Draw3DNodeEntity {
 
   unhighlight() {
     this.set('highlighted', false);
-    this.set('state', "NORMAL");
+    this.set('state', 'NORMAL');
 
     this.get('children').forEach((child) => {
       child.unhighlight();
@@ -62,22 +61,21 @@ export default class Component extends Draw3DNodeEntity {
   }
 
   contains(possibleElem: Clazz|Component) {
-
     let found = false;
 
     this.get('clazzes').forEach((clazz) => {
-      if(clazz === possibleElem) {
+      if (clazz === possibleElem) {
         found = true;
       }
     });
 
-    if(!found) {
+    if (!found) {
       this.get('children').forEach((child) => {
-        if(child === possibleElem) {
+        if (child === possibleElem) {
           found = true;
         } else {
           const tempResult = child.contains(possibleElem);
-          if(tempResult) {
+          if (tempResult) {
             found = true;
           }
         }
@@ -88,9 +86,9 @@ export default class Component extends Draw3DNodeEntity {
   }
 
   getAllComponents() {
-    let components:Component[] = [];
+    let components: Component[] = [];
 
-    this.get('children').forEach((child) => {      
+    this.get('children').forEach((child) => {
       components.push(child);
       components = components.concat(child.getAllComponents());
     });
@@ -99,13 +97,13 @@ export default class Component extends Draw3DNodeEntity {
   }
 
   getAllClazzes() {
-    let clazzes:Clazz[] = [];
+    let clazzes: Clazz[] = [];
 
     this.get('clazzes').forEach((clazz) => {
       clazzes.push(clazz);
     });
 
-    this.get('children').forEach((child) => {      
+    this.get('children').forEach((child) => {
       clazzes = clazzes.concat(child.getAllClazzes());
     });
 
@@ -113,7 +111,7 @@ export default class Component extends Draw3DNodeEntity {
   }
 
   // adds all clazzes of the component or underlying components to a Set
-  getContainedClazzes(containedClazzes: Set<Clazz>){
+  getContainedClazzes(containedClazzes: Set<Clazz>) {
     const clazzes = this.get('clazzes');
 
     clazzes.forEach((clazz) => {
@@ -157,13 +155,14 @@ export default class Component extends Draw3DNodeEntity {
 
   @computed('children')
   get hasOnlyOneChildComponent(this: Component) {
+    // tslint:disable-next-line: no-magic-numbers
     return this.hasMany('children').ids().length < 2;
   }
 
   applyDefaultOpenLayout() {
     // opens all nested components until at least two entities are on the same level
 
-    if(this.get('opened') && !this.get('foundation')) {
+    if (this.get('opened') && !this.get('foundation')) {
       // package already open,
       // therefore users must have opened it
       // Do not change the user's state
@@ -175,14 +174,14 @@ export default class Component extends Draw3DNodeEntity {
     const components = this.get('children');
     const clazzes = this.get('clazzes');
 
-    if(components.get('length') + clazzes.get('length') > 1) {
+    if (components.get('length') + clazzes.get('length') > 1) {
       // there are two entities on this level
       // therefore, here is nothing to do
       return;
     }
 
-    let component = components.objectAt(0);
-    if(component) {
+    const component = components.objectAt(0);
+    if (component) {
       component.applyDefaultOpenLayout();
     }
   }
@@ -191,17 +190,17 @@ export default class Component extends Draw3DNodeEntity {
     return this.get('parentComponent').get('opened');
   }
 
-  openParents(this:Component) {
-    let parentComponent = this.belongsTo('parentComponent').value() as Component;
-    if(parentComponent !== null) {
+  openParents(this: Component) {
+    const parentComponent = this.belongsTo('parentComponent').value() as Component;
+    if (parentComponent !== null) {
       parentComponent.set('opened', true);
       parentComponent.openParents();
     }
   }
 
-  closeParents(this:Component) {
-    let parentComponent = this.belongsTo('parentComponent').value() as Component;
-    if(parentComponent !== null) {
+  closeParents(this: Component) {
+    const parentComponent = this.belongsTo('parentComponent').value() as Component;
+    if (parentComponent !== null) {
       parentComponent.set('opened', false);
       parentComponent.closeParents();
     }
@@ -209,6 +208,7 @@ export default class Component extends Draw3DNodeEntity {
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'component': Component;
   }

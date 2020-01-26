@@ -15,7 +15,6 @@ const { attr, belongsTo } = DS;
  * @submodule model.meta
  */
 export default class TraceStep extends BaseEntity {
-
   @attr('number') tracePosition!: number;
 
   @attr('number') requests!: number;
@@ -33,7 +32,7 @@ export default class TraceStep extends BaseEntity {
   clazzCommunication!: DS.PromiseObject<ClazzCommunication> & ClazzCommunication;
 
   openParents(this: TraceStep) {
-    let clazzCommunication = this.belongsTo('clazzCommunication').value() as ClazzCommunication;
+    const clazzCommunication = this.belongsTo('clazzCommunication').value() as ClazzCommunication;
     clazzCommunication.openParents();
   }
 
@@ -44,10 +43,10 @@ export default class TraceStep extends BaseEntity {
   unhighlight() {
     this.set('highlighted', false);
   }
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'tracestep': TraceStep;
   }

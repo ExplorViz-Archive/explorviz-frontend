@@ -1,6 +1,6 @@
 import DS from 'ember-data';
-import DrawEdgeEntity from './drawedgeentity';
 import Clazz from './clazz';
+import DrawEdgeEntity from './drawedgeentity';
 import TraceStep from './tracestep';
 
 const { attr, belongsTo, hasMany } = DS;
@@ -15,7 +15,6 @@ const { attr, belongsTo, hasMany } = DS;
  * @submodule model.meta
  */
 export default class ClazzCommunication extends DrawEdgeEntity {
-
   @attr('string') operationName!: string;
 
   @attr() requests: any;
@@ -30,15 +29,16 @@ export default class ClazzCommunication extends DrawEdgeEntity {
   targetClazz!: DS.PromiseObject<Clazz> & Clazz;
 
   openParents(this: ClazzCommunication) {
-    let sourceClazz = this.belongsTo('sourceClazz').value() as Clazz;
+    const sourceClazz = this.belongsTo('sourceClazz').value() as Clazz;
     sourceClazz.openParents();
 
-    let targetClazz = this.belongsTo('targetClazz').value() as Clazz;
+    const targetClazz = this.belongsTo('targetClazz').value() as Clazz;
     targetClazz.openParents();
   }
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'clazzcommunication': ClazzCommunication;
   }

@@ -1,6 +1,6 @@
+import { computed } from '@ember/object';
 import DS from 'ember-data';
 import BaseEntity from './baseentity';
-import { computed } from '@ember/object';
 import TraceStep from './tracestep';
 
 const { attr, hasMany } = DS;
@@ -15,7 +15,6 @@ const { attr, hasMany } = DS;
  * @submodule model.meta
  */
 export default class Trace extends BaseEntity {
-
   @attr('string') traceId!: string;
 
   @attr('number') totalRequests!: number;
@@ -35,28 +34,30 @@ export default class Trace extends BaseEntity {
   }
 
   @computed('traceSteps')
-  get sourceClazz () {
-    let traceSteps = this.get('traceSteps');
+  get sourceClazz() {
+    const traceSteps = this.get('traceSteps');
     // Assumption: Tracesteps non-empty and in order
-    let firstTraceStep = traceSteps.objectAt(0);
+    const firstTraceStep = traceSteps.objectAt(0);
 
-    if(firstTraceStep === undefined)
+    if (firstTraceStep === undefined) {
       return undefined;
+    }
 
-    let sourceClazz = firstTraceStep.get('clazzCommunication').get('sourceClazz');
+    const sourceClazz = firstTraceStep.get('clazzCommunication').get('sourceClazz');
     return sourceClazz;
   }
 
   @computed('traceSteps')
-  get targetClazz () {
-    let traceSteps = this.get('traceSteps');
+  get targetClazz() {
+    const traceSteps = this.get('traceSteps');
     // Assumption: Tracesteps non-empty and in order
-    let lastTraceStep = traceSteps.objectAt(this.get('length') - 1);
+    const lastTraceStep = traceSteps.objectAt(this.get('length') - 1);
 
-    if(lastTraceStep === undefined)
+    if (lastTraceStep === undefined) {
       return undefined;
+    }
 
-    let targetClazz = lastTraceStep.get('clazzCommunication').get('targetClazz');
+    const targetClazz = lastTraceStep.get('clazzCommunication').get('targetClazz');
     return targetClazz;
   }
 
@@ -79,9 +80,9 @@ export default class Trace extends BaseEntity {
   }
 
   openParents(this: Trace) {
-    let traceSteps = this.hasMany('traceSteps').value();
+    const traceSteps = this.hasMany('traceSteps').value();
 
-    if(traceSteps !== null) {
+    if (traceSteps !== null) {
       traceSteps.forEach((traceStep) => {
         if (traceStep !== null) {
           traceStep.openParents();
@@ -89,10 +90,10 @@ export default class Trace extends BaseEntity {
       });
     }
   }
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'trace': Trace;
   }

@@ -1,5 +1,5 @@
-import BaseEntity from './baseentity';
 import DS from 'ember-data';
+import BaseEntity from './baseentity';
 
 const { attr } = DS;
 
@@ -13,7 +13,6 @@ const { attr } = DS;
  * @submodule model.meta
  */
 export default class Event extends BaseEntity {
-
   @attr('number') timestamp!: number;
 
   @attr('string') eventType!: string;
@@ -21,12 +20,12 @@ export default class Event extends BaseEntity {
   @attr('string') eventMessage!: string;
 
   @attr('boolean', { defaultValue: false }) isSelected!: boolean;
-
 }
 
 declare module 'ember-data/types/registries/model' {
-	export default interface ModelRegistry {
-	  'event': Event;
-	}
+  // tslint:disable-next-line: interface-name
+  export default interface ModelRegistry {
+    'event': Event;
+  }
 }
 

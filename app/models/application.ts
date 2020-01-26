@@ -1,26 +1,25 @@
 import DS from 'ember-data';
-import DrawNodeEntity from './drawnodeentity';
-import Component from './component';
-import Clazz from './clazz';
-import DatabaseQuery from './databasequery';
-import Trace from './trace';
-import ApplicationCommunication from './applicationcommunication';
 import AggregatedClazzCommunication from './aggregatedclazzcommunication';
+import ApplicationCommunication from './applicationcommunication';
+import Clazz from './clazz';
+import Component from './component';
+import DatabaseQuery from './databasequery';
 import DrawableClazzCommunication from './drawableclazzcommunication';
+import DrawNodeEntity from './drawnodeentity';
+import Trace from './trace';
 
 const { attr, belongsTo, hasMany } = DS;
 
 /**
-* Ember model for an Application.
-*
-* @class Application-Model
-* @extends DrawNodeEntity-Model
-*
-* @module explorviz
-* @submodule model.meta
-*/
+ * Ember model for an Application.
+ *
+ * @class Application-Model
+ * @extends DrawNodeEntity-Model
+ *
+ * @module explorviz
+ * @submodule model.meta
+ */
 export default class Application extends DrawNodeEntity {
-
   @attr('string') name!: string;
 
   @attr('number') lastUsage!: number;
@@ -32,7 +31,7 @@ export default class Application extends DrawNodeEntity {
 
   @hasMany('component', {
     // breaks Ember, maybe because of circle ?
-    //inverse: 'belongingApplication'
+    // inverse: 'belongingApplication'
   })
   components!: DS.PromiseManyArray<Component>;
 
@@ -53,7 +52,7 @@ export default class Application extends DrawNodeEntity {
   drawableClazzCommunications!: DS.PromiseManyArray<DrawableClazzCommunication>;
 
   // used for text labeling performance in respective renderers
-  state = "application";
+  state = 'application';
 
   unhighlight() {
     this.get('components').forEach((component) => {
@@ -78,9 +77,9 @@ export default class Application extends DrawNodeEntity {
   }
 
   getAllComponents() {
-    let components:Component[] = [];
+    let components: Component[] = [];
 
-    this.get('components').forEach((component) => {      
+    this.get('components').forEach((component) => {
       components.push(component);
 
       const children = component.get('children');
@@ -94,7 +93,7 @@ export default class Application extends DrawNodeEntity {
   }
 
   getAllClazzes() {
-    let clazzes:Clazz[] = [];
+    let clazzes: Clazz[] = [];
 
     this.get('components').forEach((component) => {
       clazzes = clazzes.concat(component.getAllClazzes());
@@ -129,27 +128,27 @@ export default class Application extends DrawNodeEntity {
   applyDefaultOpenLayout(userAlreadyActed: boolean) {
     // opens all components until at least two entities are on the same level
 
-    if(userAlreadyActed) {
+    if (userAlreadyActed) {
       return;
     }
-    
+
     const components = this.get('components');
 
-    if(components.length > 1) {
+    if (components.length > 1) {
       // there are two components on the first level
       // therefore, here is nothing to do
       return;
     }
 
-    let component = components.objectAt(0);
-    if(component !== undefined) {
+    const component = components.objectAt(0);
+    if (component !== undefined) {
       component.applyDefaultOpenLayout();
-    }    
+    }
   }
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'application': Application;
   }
