@@ -1,12 +1,10 @@
-import Component from '@glimmer/component';
-import { inject as service } from "@ember/service";
 import { action } from '@ember/object';
-
-import $ from 'jquery';
+import { inject as service } from '@ember/service';
+import Component from '@glimmer/component';
 import AdditionalData from 'explorviz-frontend/services/additional-data';
+import $ from 'jquery';
 
 export default class DataSelection extends Component {
-
   @service('additional-data') additionalData!: AdditionalData;
 
   @action
@@ -33,9 +31,10 @@ export default class DataSelection extends Component {
 
   @action
   onShowWindow() {
-    if(this.additionalData.showWindow)
+    if (this.additionalData.showWindow) {
       this.openDataSelection();
-    else
+    } else {
       this.closeDataSelection();
+    }
   }
 }
