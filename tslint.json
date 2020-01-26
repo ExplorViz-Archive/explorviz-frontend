@@ -6,7 +6,8 @@
   ],
   "jsRules": {},
   "rules": {
-    "member-access": false
+    "member-access": false,
+    "linebreak-style": false
   },
   "rulesDirectory": []
 }

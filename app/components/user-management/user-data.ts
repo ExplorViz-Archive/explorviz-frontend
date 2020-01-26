@@ -1,106 +1,107 @@
+import { action, set } from '@ember/object';
+import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import { inject as service } from "@ember/service";
-
 import { task } from 'ember-concurrency-decorators';
-import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import DS from 'ember-data';
-import { set, action } from '@ember/object';
-import User from 'explorviz-frontend/models/user';
 import Role from 'explorviz-frontend/models/role';
+import User from 'explorviz-frontend/models/user';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
-interface Args {
-  user: User|null|undefined
+interface IArgs {
+  user: User|null|undefined;
 }
 
-export default class UserData extends Component<Args> {
-
+export default class UserData extends Component<IArgs> {
   @service('store') store!: DS.Store;
 
   @tracked
-  id_change = '';
+  idChange = '';
 
   @tracked
-  username_change = '';
+  usernameChange = '';
 
   @tracked
-  password_change = '';
+  passwordChange = '';
 
   @tracked
-  roles:string[]|null = null;
+  roles: string[]|null = null;
 
   @tracked
-  roles_change:string[]|null = null;
-
-  constructor(owner:any, args:Args) {
-    super(owner, args);
-
-    this.initFields();
-  }
-
-  initFields(this:UserData) {
-    const user = this.args.user;
-
-    if(user) {
-      this.id_change = user.id;
-      this.username_change = user.username;
-      this.roles_change = [...user.roles];
-    }
-  }
-
-  @action
-  updateRoleSelection(roles: string[]) {
-    this.roles_change = roles;
-  }
+  rolesChange: string[]|null = null;
 
   @task({ drop: true })
-  saveUserChanges = task(function * (this:UserData) {
-    const { username_change, password_change, roles_change } = this;
+  saveUserChanges = task(function *(this: UserData) {
+    const { usernameChange, passwordChange, rolesChange } = this;
 
     const user = this.args.user;
 
-    if(user) {
+    if (user) {
       // check for valid input
-      if(!username_change || username_change.length === 0) {
+      if (!usernameChange || usernameChange.length === 0) {
         AlertifyHandler.showAlertifyWarning('Username cannot be empty.');
         return;
-      } else if(!roles_change || roles_change.length === 0) {
+      }
+      if (!rolesChange || rolesChange.length === 0) {
         AlertifyHandler.showAlertifyWarning('User needs at least 1 role.');
         return;
       }
 
-      if(user.username !== username_change)
-        set(user, 'username', username_change);
+      if (user.username !== usernameChange) {
+        set(user, 'username', usernameChange);
+      }
 
-      if(password_change && password_change !== '')
-        set(user, 'password', password_change);
+      if (passwordChange && passwordChange !== '') {
+        set(user, 'password', passwordChange);
+      }
 
-      set(user, 'roles', roles_change);
+      set(user, 'roles', rolesChange);
 
       try {
         yield user.save();
         AlertifyHandler.showAlertifySuccess(`User updated.`);
         clearInputFields.bind(this)();
-      } catch(reason) {
+      } catch (reason) {
         this.showReasonErrorAlert(reason);
       }
     } else {
       AlertifyHandler.showAlertifyError(`User not found.`);
     }
 
-    function clearInputFields(this:UserData) {
-      this.password_change = '';
+    function clearInputFields(this: UserData) {
+      this.passwordChange = '';
     }
   });
 
-  showReasonErrorAlert(reason:any) {
+  @task
+  getRoles = task(function *(this: UserData) {
+    const roles: DS.RecordArray<Role> = yield this.store.findAll('role', { reload: true });
+    this.roles = roles.toArray().map((role: Role) => role.id);
+  });
+
+  constructor(owner: any, args: IArgs) {
+    super(owner, args);
+
+    this.initFields();
+  }
+
+  initFields(this: UserData) {
+    const user = this.args.user;
+
+    if (user) {
+      this.idChange = user.id;
+      this.usernameChange = user.username;
+      this.rolesChange = [...user.roles];
+    }
+  }
+
+  @action
+  updateRoleSelection(roles: string[]) {
+    this.rolesChange = roles;
+  }
+
+  showReasonErrorAlert(reason: any) {
     const { title, detail } = reason.errors[0];
     AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
   }
-
-  @task
-  getRoles = task(function * (this:UserData) {
-    let roles:DS.RecordArray<Role> = yield this.store.findAll('role', { reload: true });
-    this.roles = roles.toArray().map((role:Role) => role.id);
-  });
 }

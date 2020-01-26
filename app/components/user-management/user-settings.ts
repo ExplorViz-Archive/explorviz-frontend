@@ -1,29 +1,27 @@
-import Component from '@glimmer/component';
-import { inject as service } from "@ember/service";
-import { task } from 'ember-concurrency-decorators';
-import { all } from 'rsvp';
 import { action } from '@ember/object';
-
-import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import DS from 'ember-data';
-import UserSettings from 'explorviz-frontend/services/user-settings';
-import User from 'explorviz-frontend/models/user';
 import { set } from '@ember/object';
-import Setting from 'explorviz-frontend/models/setting';
+import { inject as service } from '@ember/service';
+import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
+import { task } from 'ember-concurrency-decorators';
+import DS from 'ember-data';
+import Setting from 'explorviz-frontend/models/setting';
+import User from 'explorviz-frontend/models/user';
+import UserSettings from 'explorviz-frontend/services/user-settings';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
+import { all } from 'rsvp';
 
-type Settings = {
+interface ISettings {
   [origin: string]: {
-    [settingsype:string]: [[string, any]]|[]
-  }
-};
-
-interface Args {
-  user: User|null
+    [settingsype: string]: [[string, any]]|[],
+  };
 }
 
-export default class UserManagementUserSettings extends Component<Args> {
+interface IArgs {
+  user: User|null;
+}
 
+export default class UserManagementUserSettings extends Component<IArgs> {
   @service('store') store!: DS.Store;
   @service('session') session!: any;
   @service('user-settings') userSettings!: UserSettings;
@@ -37,7 +35,7 @@ export default class UserManagementUserSettings extends Component<Args> {
       origin2: {...}
     }
   */
-  settings:Settings = {};
+  settings: ISettings = {};
 
   /*
     {
@@ -47,62 +45,56 @@ export default class UserManagementUserSettings extends Component<Args> {
     }
   */
   @tracked
-  useDefaultSettings:{[origin:string]: boolean} = {};
-
-  constructor(owner: any, args: Args) {
-    super(owner, args);
-
-    this.initSettings.perform();
-  }
+  useDefaultSettings: {[origin: string]: boolean} = {};
 
   @task
-  initSettings = task(function * (this:UserManagementUserSettings) {
-    if(this.args.user === null) {
+  initSettings = task(function *(this: UserManagementUserSettings) {
+    if (this.args.user === null) {
       return;
     }
     // load all settings from store
-    let settingTypes = [...this.userSettings.types];
-    let allSettings:Setting[] = [];
+    const settingTypes = [...this.userSettings.types];
+    const allSettings: Setting[] = [];
     for (const type of settingTypes) {
-      let settings = yield this.store.peekAll(type);
+      const settings = yield this.store.peekAll(type);
       allSettings.pushObjects(settings.toArray());
     }
 
-    let origins = [...new Set(allSettings.mapBy('origin'))];
-    let preferences = yield this.store.query('userpreference', { userId: this.args.user.id });
+    const origins = [...new Set(allSettings.mapBy('origin'))];
+    const preferences = yield this.store.query('userpreference', { userId: this.args.user.id });
 
     // stores settings by origin and type
-    let settingsByOrigin:Settings = {};
+    const settingsByOrigin: ISettings = {};
 
-    for(let i = 0; i < origins.length; i++) {
-      this.useDefaultSettings[origins[i]] = true;
-      let settingsWithOrigin = allSettings.filterBy('origin', origins[i]);
+    for (const origin of origins) {
+      this.useDefaultSettings[origin] = true;
+      const settingsWithOrigin = allSettings.filterBy('origin', origin);
 
       // use default settings for settings of origin if there are no user preferences for it
-      for(let j = 0; j < preferences.get('length'); j++) {
-        if(settingsWithOrigin.filterBy('id', preferences.objectAt(j).get('settingId')).length > 0) {
-          this.useDefaultSettings[origins[i]] = false;
+      for (let j = 0; j < preferences.get('length'); j++) {
+        if (settingsWithOrigin.filterBy('id', preferences.objectAt(j).get('settingId')).length > 0) {
+          this.useDefaultSettings[origin] = false;
           break;
         }
       }
 
       // initialize settings object for origin containing arrays for every type
-      settingsByOrigin[origins[i]] = {};
+      settingsByOrigin[origin] = {};
       for (const type of settingTypes) {
-        settingsByOrigin[origins[i]][type] = [];
+        settingsByOrigin[origin][type] = [];
       }
     }
 
     // copy all settings to settingsByOrigin
     // use default if no perefenrece exists for user, else use preference value
-    for(let i = 0; i < allSettings.length; i++) {
-      let setting = allSettings[i];
-      let preference = preferences.findBy('settingId', setting.get('id'));
+    for (const setting of allSettings) {
+      const preference = preferences.findBy('settingId', setting.get('id'));
       let value;
-      if(preference !== undefined)
+      if (preference !== undefined) {
         value = preference.get('value');
-      else
+      } else {
         value = setting.get('defaultValue');
+      }
 
       // @ts-ignore
       settingsByOrigin[setting.origin][setting.constructor.modelName].push([setting.id, value]);
@@ -112,40 +104,38 @@ export default class UserManagementUserSettings extends Component<Args> {
   });
 
   @task({ drop: true })
-  saveSettings = task(function * (this:UserManagementUserSettings) {
-    if(this.args.user === null) {
+  saveSettings = task(function *(this: UserManagementUserSettings) {
+    if (this.args.user === null) {
       return;
     }
-    let userId = this.args.user.id;
+    const userId = this.args.user.id;
 
     const settings = Object.entries(this.settings);
-    
-    let settingsPromiseArray = [];
+
+    const settingsPromiseArray = [];
 
     for (const [origin, settingsGroupedByType] of settings) {
-      let allSettings = [...Object.values(settingsGroupedByType)].flat();
+      const allSettings = [...Object.values(settingsGroupedByType)].flat();
 
       // patch, create or delete preference based on whether the default button for
       // the corresponding origin is enabled or not and whether or not a prefenrece already exists
-      for(let i = 0; i < allSettings.length; i++) {
-        let settingId = allSettings[i][0];
-        let preferenceValueNew = allSettings[i][1];
+      for (const [settingId, preferenceValueNew] of allSettings) {
+        const oldRecord = this.userSettings.getUserPreference(userId, settingId);
 
-        let oldRecord = this.userSettings.getUserPreference(userId, settingId);
-
-        if(oldRecord) {
+        if (oldRecord) {
           // delete preference if user wants default settings
-          if(this.useDefaultSettings[origin]) {
+          if (this.useDefaultSettings[origin]) {
             settingsPromiseArray.push(oldRecord.destroyRecord());
           } else { // edit preference if user does not want default settings
             set(oldRecord, 'value', preferenceValueNew);
             settingsPromiseArray.push(oldRecord.save());
           }
-        } else if(!this.useDefaultSettings[origin]) { // create preference if user used default settings before
+        } else if (!this.useDefaultSettings[origin]) {
+          // create preference if user used default settings before
           const preferenceRecord = this.store.createRecord('userpreference', {
-            userId,
             settingId,
-            value: preferenceValueNew
+            userId,
+            value: preferenceValueNew,
           });
           settingsPromiseArray.push(preferenceRecord.save());
         }
@@ -153,19 +143,25 @@ export default class UserManagementUserSettings extends Component<Args> {
     }
 
     // wait for all records to be saved. Give out error if one fails
-    yield all(settingsPromiseArray).then(()=>{
+    yield all(settingsPromiseArray).then(() => {
       AlertifyHandler.showAlertifySuccess('Settings saved.');
-    }).catch((reason)=>{
-      const {title, detail} = reason.errors[0];
+    }).catch((reason) => {
+      const { title, detail } = reason.errors[0];
       AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
     });
   });
+
+  constructor(owner: any, args: IArgs) {
+    super(owner, args);
+
+    this.initSettings.perform();
+  }
 
   @action
   toggleDefaultSetting(origin: string) {
     this.useDefaultSettings = {
       ...this.useDefaultSettings,
-      [origin]: !this.useDefaultSettings[origin]
-    }
+      [origin]: !this.useDefaultSettings[origin],
+    };
   }
 }

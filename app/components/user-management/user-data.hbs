@@ -4,22 +4,22 @@
   <form.element
     @controlType="text"
     @label="ID"
-    @property="id_change"
+    @property="idChange"
     @disabled={{true}}
   />
   <form.element
     @controlType="text"
     @label="Username"
     @placeholder="Enter New Username"
-    @property="username_change"
+    @property="usernameChange"
   />
   <form.element
     @controlType="password"
     @label="Password"
     @placeholder="Enter New Password"
-    @property="password_change"
+    @property="passwordChange"
   />
-  <form.element @property="roles_change" @label="Roles">
+  <form.element @property="rolesChange" @label="Roles">
     <PowerSelectMultiple
       @options={{this.roles}}
       @placeholder="Choose roles"
@@ -28,7 +28,7 @@
       @onchange={{this.updateRoleSelection}}
       @searchEnabled={{false}}
       @searchField="default"
-      @selected={{this.roles_change}} as |item|
+      @selected={{this.rolesChange}} as |item|
     >
       {{item}}
     </PowerSelectMultiple>

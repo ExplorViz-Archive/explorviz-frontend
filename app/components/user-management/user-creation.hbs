@@ -73,7 +73,7 @@
               @property="password"
             />
             <form.element 
-              @property="roles_selected_single"
+              @property="rolesSelectedSingle"
               @label="Roles"
             >
               <PowerSelectMultiple
@@ -84,7 +84,7 @@
                 @onchange={{this.updateSingleUserRoles}}
                 @searchEnabled={{false}}
                 @searchField="default"
-                @selected={{this.roles_selected_single}} as |item|
+                @selected={{this.rolesSelectedSingle}} as |item|
               >
                 {{item.id}}
               </PowerSelectMultiple>
@@ -129,7 +129,7 @@
               @property="numberofusers"
             />
             <form.element
-              @property="roles_selected_multiple"
+              @property="rolesSelectedMultiple"
               @label="Roles"
             >
               <PowerSelectMultiple
@@ -140,7 +140,7 @@
                 @onchange={{this.updateMultipleUserRoles}}
                 @searchEnabled={{false}}
                 @searchField="default"
-                @selected={{this.roles_selected_multiple}} as |item|
+                @selected={{this.rolesSelectedMultiple}} as |item|
               >
                 {{item.id}}
               </PowerSelectMultiple>
