@@ -1,5 +1,10 @@
 import Controller from '@ember/controller';
-import { action, computed, get, set } from '@ember/object';
+import {
+  action,
+  computed,
+  get,
+  set,
+} from '@ember/object';
 import { inject as service } from '@ember/service';
 import AdditionalData from 'explorviz-frontend/services/additional-data';
 import CurrentUser from 'explorviz-frontend/services/current-user';
@@ -11,10 +16,15 @@ import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-rep
 
 export default class ReplayController extends Controller {
   @service('current-user') currentUser !: CurrentUser;
+
   @service('landscape-file-loader') landscapeFileLoader !: LandscapeFileLoader;
+
   @service('repos/timestamp-repository') timestampRepo !: TimestampRepository;
+
   @service('repos/landscape-repository') landscapeRepo !: LandscapeRepository;
+
   @service('rendering-service') renderingService !: RenderingService;
+
   @service('additional-data') additionalData !: AdditionalData;
 
   @service('reload-handler') reloadHandler !: ReloadHandler;
@@ -61,7 +71,8 @@ export default class ReplayController extends Controller {
   }
 
   // necessary for hidded input box to select a file for uploading
-  @action triggerSelectBox() {
+  @action
+  static triggerSelectBox() {
     const queryBox = document.querySelector('#selectBoxUploadLandscape') as HTMLElement;
     queryBox.click();
   }

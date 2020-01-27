@@ -5,10 +5,11 @@ import { all, reject } from 'rsvp';
 
 export default class ConfigurationUsermanagementUsers extends Controller {
   queryParams = ['page', 'size'];
+
   page = 0;
+
   size = 10;
 
-  // tslint:disable-next-line: no-magic-numbers
   pageSizes: number[] = [5, 10, 25, 50];
 
   @action

@@ -9,6 +9,7 @@ import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
 export default class DiscoveryController extends Controller {
   procezzForDetailView: Procezz|null = null;
+
   agentForDetailView: Agent|null = null;
 
   @service('rendering-service')
@@ -56,8 +57,7 @@ export default class DiscoveryController extends Controller {
         errorDetail = errorObject.detail ? errorObject.detail : errorDetail;
       }
 
-      const alertifyMessage =
-        `<b><font color="black">${errorTitle}</font></b>
+      const alertifyMessage = `<b><font color="black">${errorTitle}</font></b>
         ${errorDetail} Your Modification is discarded.`;
 
       const alertifyMessageDuration = 8;

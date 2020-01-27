@@ -1,4 +1,4 @@
- import { helper } from '@ember/component/helper';
+import { helper } from '@ember/component/helper';
 
 // TODO use this as generic comparison helper
 // not only for string equality

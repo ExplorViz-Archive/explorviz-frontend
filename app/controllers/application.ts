@@ -17,23 +17,26 @@ import UserSettings from 'explorviz-frontend/services/user-settings';
  */
 export default class ApplicationController extends Controller {
   @service('session') session!: any;
+
   @service('current-user') currentUser!: CurrentUser;
+
   @service('user-settings') userSettings!: UserSettings;
 
   @task
-  loadUserAndSettings = task(function *(this: ApplicationController) {
-    yield this._loadCurrentUser();
+  // eslint-disable-next-line
+  loadUserAndSettings = task(function* (this: ApplicationController) {
+    yield this.loadCurrentUser();
     if (this.session.isAuthenticated) {
-      yield this._loadCurrentUserPreferences();
-      yield this._loadSettingsAndTypes();
+      yield this.loadCurrentUserPreferences();
+      yield this.loadSettingsAndTypes();
     }
   });
 
-  async _loadCurrentUser() {
-    return await this.currentUser.load().catch(() => this.session.invalidate({ message: 'User could not be loaded' }));
+  async loadCurrentUser() {
+    return this.currentUser.load().catch(() => this.session.invalidate({ message: 'User could not be loaded' }));
   }
 
-  async _loadCurrentUserPreferences() {
+  async loadCurrentUserPreferences() {
     const userId = get(this.session, 'session.content.authenticated.rawUserData.data.id');
     if (!isEmpty(userId)) {
       await this.store.query('userpreference', { userId }).catch(() => {
@@ -44,7 +47,7 @@ export default class ApplicationController extends Controller {
     }
   }
 
-  async _loadSettingsAndTypes() {
+  async loadSettingsAndTypes() {
     try {
       // request all settings and load into store
       const settings = await this.store.query('settingsinfo', {});
@@ -68,4 +71,3 @@ declare module '@ember/controller' {
     'applicationController': ApplicationController;
   }
 }
-

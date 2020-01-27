@@ -1,6 +1,13 @@
+
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { observes } from '@ember-decorators/object';
 import Controller from '@ember/controller';
-import { action, computed, get, set } from '@ember/object';
+import {
+  action,
+  computed,
+  get,
+  set,
+} from '@ember/object';
 import { inject as service } from '@ember/service';
 import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-setup/timeline/plotly-timeline';
 import Timestamp from 'explorviz-frontend/models/timestamp';
@@ -22,10 +29,15 @@ import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-rep
  */
 export default class VisualizationController extends Controller {
   @service('rendering-service') renderingService!: RenderingService;
+
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
+
   @service('landscape-listener') landscapeListener!: LandscapeListener;
+
   @service('additional-data') additionalData!: AdditionalData;
+
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
+
   @service('reload-handler') reloadHandler!: ReloadHandler;
 
   state = null;
@@ -36,6 +48,7 @@ export default class VisualizationController extends Controller {
 
   selectedTimestampRecords: Timestamp[] = [];
 
+  // eslint-disable-next-line ember/no-observers
   @observes('landscapeListener.pauseVisualizationReload')
   timelineResetObserver() {
     // reset highlighting and selection in timeline, if unpause was clicked
@@ -94,11 +107,6 @@ export default class VisualizationController extends Controller {
 
   initRendering() {
     get(this, 'landscapeListener').initSSE();
-  }
-
-  // @Override
-  cleanup() {
-    this._super(...arguments);
   }
 }
 

@@ -19,6 +19,7 @@ export default class ConfigurationController extends Controller {
   @service('configuration') configurationService!: Configuration;
 
   @service('rendering-service') renderingService!: RenderingService;
+
   @service('current-user') currentUser!: CurrentUser;
 
   hideTimeline() {
