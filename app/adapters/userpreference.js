@@ -6,15 +6,15 @@ import { computed } from '@ember/object';
 const { APP } = ENV;
 
 export default class UserpreferenceAdapter extends JSONAPIAdapter.extend(DataAdapterMixin) {
-
   host = APP.API_ROOT;
+
   namespace = 'v1';
 
   @computed('session.data.authenticated.access_token')
   get headers() {
-    let headers = { 'Accept': 'application/vnd.api+json' };
+    const headers = { Accept: 'application/vnd.api+json' };
     if (this.session.isAuthenticated) {
-      headers['Authorization'] = `Bearer ${this.session.data.authenticated.access_token}`;
+      headers.Authorization = `Bearer ${this.session.data.authenticated.access_token}`;
     }
 
     return headers;
@@ -22,9 +22,7 @@ export default class UserpreferenceAdapter extends JSONAPIAdapter.extend(DataAda
 
   // @Override
   urlForQuery(query) {
-    let id = query.userId;
-    // delete s.t. query parameter won't be attached (i.e. ?userId=id)
-    delete query.userId;
+    const id = query.userId;
     const baseUrl = this.buildURL();
     return `${baseUrl}/preferences?filter[user]=${id}`;
   }
@@ -45,5 +43,4 @@ export default class UserpreferenceAdapter extends JSONAPIAdapter.extend(DataAda
     const baseUrl = this.buildURL();
     return `${baseUrl}/preferences/${id}`;
   }
-
 }

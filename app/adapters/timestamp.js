@@ -18,15 +18,15 @@ const { APP } = ENV;
 * @submodule network
 */
 export default class TimestampAdapter extends JSONAPIAdapter.extend(DataAdapterMixin) {
-
   host = APP.API_ROOT;
+
   namespace = 'v1';
 
   @computed('session.data.authenticated.access_token')
   get headers() {
-    let headers = { 'Accept': 'application/vnd.api+json' };
+    const headers = { Accept: 'application/vnd.api+json' };
     if (this.session.isAuthenticated) {
-      headers['Authorization'] = `Bearer ${this.session.data.authenticated.access_token}`;
+      headers.Authorization = `Bearer ${this.session.data.authenticated.access_token}`;
     }
 
     return headers;
@@ -34,16 +34,14 @@ export default class TimestampAdapter extends JSONAPIAdapter.extend(DataAdapterM
 
   /**
    * Queries landscape or replay timestamps
-   * @param {*} query 
+   * @param {*} query
    */
   urlForQuery(query) {
     const baseUrl = this.buildURL();
     if (query.type === 'replay') {
-      return `${baseUrl}/timestamps?filter[type]=replay`
+      return `${baseUrl}/timestamps?filter[type]=replay`;
     }
-    else {
-      return `${baseUrl}/timestamps?filter[type]=landscape`
-    }
-  }
 
+    return `${baseUrl}/timestamps?filter[type]=landscape`;
+  }
 }

@@ -20,18 +20,17 @@ const { APP } = ENV;
 * @submodule network
 */
 export default class LandscapeAdapter extends JSONAPIAdapter.extend(DataAdapterMixin) {
-
   host = APP.API_ROOT;
+
   namespace = 'v1';
 
   @computed('session.data.authenticated.access_token')
   get headers() {
-    let headers = { 'Accept': 'application/vnd.api+json' };
+    const headers = { Accept: 'application/vnd.api+json' };
     if (this.session.isAuthenticated) {
-      headers['Authorization'] = `Bearer ${this.session.data.authenticated.access_token}`;
+      headers.Authorization = `Bearer ${this.session.data.authenticated.access_token}`;
     }
 
     return headers;
   }
-
 }
