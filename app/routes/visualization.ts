@@ -1,20 +1,18 @@
-import BaseRoute from './base-route';
-import AuthenticatedRouteMixin from 
-  'ember-simple-auth/mixins/authenticated-route-mixin';
-import { action } from '@ember/object';
-import VisualizationController from 'explorviz-frontend/controllers/visualization';
 import Controller from '@ember/controller';
+import { action } from '@ember/object';
+import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
+import VisualizationController from 'explorviz-frontend/controllers/visualization';
+import BaseRoute from './base-route';
 
 /**
-* TODO
-*
-* @class Visualization-Route
-* @extends Ember.Route
-*/
+ * TODO
+ *
+ * @class Visualization-Route
+ * @extends Ember.Route
+ */
 export default class VisualizationRoute extends BaseRoute.extend(AuthenticatedRouteMixin) {
-
   // @Override
-  setupController(controller:Controller, model:any) {
+  setupController(controller: Controller, model: any) {
     // Call _super for default behavior
     super.setupController(controller, model);
 
@@ -34,5 +32,4 @@ export default class VisualizationRoute extends BaseRoute.extend(AuthenticatedRo
     (this.controller as VisualizationController).hideVersionbar();
     (this.controller as VisualizationController).showTimeline();
   }
-
 }

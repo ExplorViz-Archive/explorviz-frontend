@@ -1,16 +1,15 @@
-import BaseRoute from 'explorviz-frontend/routes/base-route';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { on } from '@ember-decorators/object';
-import AuthenticatedRouteMixin from 
-  'ember-simple-auth/mixins/authenticated-route-mixin';
 import { action, set } from '@ember/object';
+import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 import DiscoveryController from 'explorviz-frontend/controllers/discovery';
+import BaseRoute from 'explorviz-frontend/routes/base-route';
 
 
 export default class DiscoveryRoute extends BaseRoute.extend(AuthenticatedRouteMixin) {
-
   @action
   resetRoute() {
-    this.cleanupController();      
+    this.cleanupController();
   }
 
   // @Override Ember-Hook
@@ -25,13 +24,12 @@ export default class DiscoveryRoute extends BaseRoute.extend(AuthenticatedRouteM
     set(this.controller as DiscoveryController, 'agentForDetailView', null);
 
     // stop first, there might be an old service instance running
-    //this.get("agentReload").stopUpdate();
-    //this.get("agentReload").startUpdate();
+    // this.get("agentReload").stopUpdate();
+    // this.get("agentReload").startUpdate();
   }
 
   @on('activate')
   setupProcessView() {
     (this.controllerFor('discovery') as DiscoveryController).setup();
   }
-
 }

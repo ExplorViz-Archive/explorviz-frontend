@@ -1,14 +1,13 @@
-import BaseRoute from 'explorviz-frontend/routes/base-route';
-import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 import { action, set } from '@ember/object';
+import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 import ReplayController from 'explorviz-frontend/controllers/replay';
+import BaseRoute from 'explorviz-frontend/routes/base-route';
 
 export default class Replay extends BaseRoute.extend(AuthenticatedRouteMixin) {
-
-  // @Override
+// @Override
   setupController(controller: ReplayController, model: any) {
     // Call _super for default behavior
-    this._super(controller, model);
+    super.setupController(controller, model);
     controller.initController();
   }
 

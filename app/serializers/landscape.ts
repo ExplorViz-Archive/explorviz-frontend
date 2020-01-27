@@ -1,22 +1,19 @@
 import ApplicationSerializer from './application';
 
 /**
-* TODO
-*
-* @class LandscapeSerializer
-* @extends ApplicationSerializer
-*/
+ * TODO
+ *
+ * @class LandscapeSerializer
+ * @extends ApplicationSerializer
+ */
 export default class LandscapeSerializer extends ApplicationSerializer {
-
-  //This attribute will declare to serialize hasMany-relationships
+  // This attribute will declare to serialize hasMany-relationships
   attrs = {
     systems: {
-      serialize: true
+      serialize: true,
     },
     totalApplicationCommunications: {
-      serialize: true
-    }
-  }
-
+      serialize: true,
+    },
+  };
 }
-
