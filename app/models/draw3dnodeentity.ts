@@ -17,24 +17,28 @@ const { attr } = DS;
  */
 export default class Draw3DNodeEntity extends BaseEntity {
   @attr('number', { defaultValue: 0 }) width!: number;
+
   @attr('number', { defaultValue: 0 }) height!: number;
+
   @attr('number', { defaultValue: 0 }) depth!: number;
 
   @attr('number', { defaultValue: 0 }) positionX!: number;
+
   @attr('number', { defaultValue: 0 }) positionY!: number;
+
   @attr('number', { defaultValue: 0 }) positionZ!: number;
 
   @attr('boolean', { defaultValue: false }) highlighted!: boolean;
+
   @attr('boolean', { defaultValue: false }) opened!: boolean;
+
   @attr('boolean', { defaultValue: true }) visible!: boolean;
 
   @computed('width', 'height', 'depth')
   get extension() {
-    // tslint:disable: no-magic-numbers
     const width = this.get('width') / 2.0;
     const height = this.get('height') / 2.0;
     const depth = this.get('depth') / 2.0;
-    // tslint:enable: no-magic-numbers
 
     return new THREE.Vector3(width, height, depth);
   }

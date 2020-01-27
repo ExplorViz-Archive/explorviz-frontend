@@ -38,14 +38,17 @@ export default class DrawEdgeEntity extends BaseEntity {
    * @type objects
    */
   @attr() points: any;
+
   @attr() pointsFor3D: any;
 
   @attr() startPoint: any;
+
   @attr() endPoint: any;
 
   @attr() state: any;
 
   @attr() pipeSize: any;
+
   @attr() pipeColor: any;
 
   kielerEdgeReferences = null;

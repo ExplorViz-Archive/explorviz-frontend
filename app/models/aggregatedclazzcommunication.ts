@@ -35,4 +35,3 @@ declare module 'ember-data/types/registries/model' {
     'aggregatedclazzcommunication': AggregatedClazzCommunication;
   }
 }
-

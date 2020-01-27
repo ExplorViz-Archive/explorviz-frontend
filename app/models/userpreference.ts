@@ -4,7 +4,9 @@ const { attr } = DS;
 
 export default class Userpreference extends DS.Model {
   @attr() value: any;
+
   @attr('string') settingId!: string;
+
   @attr('string') userId!: string;
 }
 

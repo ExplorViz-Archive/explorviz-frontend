@@ -98,4 +98,3 @@ declare module 'ember-data/types/registries/model' {
     'trace': Trace;
   }
 }
-

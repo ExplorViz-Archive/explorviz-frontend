@@ -91,7 +91,7 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity {
 
     // find the most inner common component
     let commonComponent = sourceClazzComponents[0];
-    for (let i = 0; i < sourceClazzComponents.length && i < targetClazzComponents.length ; i++) {
+    for (let i = 0; i < sourceClazzComponents.length && i < targetClazzComponents.length; i++) {
       if (sourceClazzComponents[i] === targetClazzComponents[i]) {
         commonComponent = sourceClazzComponents[i];
       } else {

@@ -24,13 +24,7 @@ export default class User extends Model {
   @attr() roles!: string[];
 
   hasRole(this: User, rolename: string): boolean {
-    const roles = this.get('roles');
-    for (const role of roles) {
-      if (rolename === role) {
-        return true;
-      }
-    }
-    return false;
+    return this.roles.includes(rolename);
   }
 
   @computed('roles')

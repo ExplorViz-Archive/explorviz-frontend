@@ -34,9 +34,9 @@ export default class Component extends Draw3DNodeEntity {
 
   // breaks Ember, maybe because of circle ?
 
-  /*belongingApplication: belongsTo('application', {
+  /* belongingApplication: belongsTo('application', {
     inverse: 'components'
-  }),*/
+  }), */
 
   setOpenedStatus(status: boolean) {
     this.get('children').forEach((child: Component) => {
@@ -125,7 +125,7 @@ export default class Component extends Draw3DNodeEntity {
     });
   }
 
-/*   filterClazzes(attributeString: string, predicateValue: any) {
+  /* filterClazzes(attributeString: string, predicateValue: any) {
     const filteredClazzes:Clazz[] = [];
 
     const allClazzes = new Set();

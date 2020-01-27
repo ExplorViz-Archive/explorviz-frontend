@@ -102,7 +102,7 @@ export default class Application extends DrawNodeEntity {
     return clazzes;
   }
 
-/*   filterComponents(attributeString: string, predicateValue: any) {
+  /* filterComponents(attributeString: string, predicateValue: any) {
     const filteredComponents:Component[] = [];
 
     this.get('components').forEach((component) => {
