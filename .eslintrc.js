@@ -1,21 +1,24 @@
 module.exports = {
   root: true,
-  parser: 'babel-eslint',
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 2017,
     sourceType: 'module'
   },
   plugins: [
-    'ember'
+    'ember',
+    '@typescript-eslint'
   ],
   extends: [
-    'eslint:recommended',
-    'plugin:ember/recommended'
+    'airbnb-typescript/base',
+    'plugin:ember/recommended',
   ],
   env: {
     browser: true
   },
   rules: {
+    'linebreak-style': 'off',
+    'import/no-unresolved': 'off'
   },
   overrides: [
     // node files
