@@ -1,3 +1,4 @@
+/* eslint-disable */
 import RenderingCore from './rendering-core';
 import { inject as service } from '@ember/service';
 import { getOwner } from '@ember/application';
