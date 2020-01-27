@@ -27,7 +27,7 @@ export default class ProcezzDetails extends Component<IArgs> {
     // Save the monitoring flag on component setup
     // We can therefore use it to show a message for the user
     // (showMessageForUser)
-    const monitoredFlag = this.args.procezz.monitoredFlag;
+    const { monitoredFlag } = this.args.procezz;
     this.monitoredFlag = monitoredFlag;
   }
 
@@ -40,19 +40,19 @@ export default class ProcezzDetails extends Component<IArgs> {
 
       this.args.procezz.save().then(() => {
         self.showSpinner = false;
-        self.showMessageForUser(self.buildUpdateMessageForUser(true));
+        self.showMessageForUser(ProcezzDetails.buildUpdateMessageForUser(true));
       })
-      .catch((errorObject: any) => {
-        self.args.procezz.rollbackAttributes();
+        .catch((errorObject: any) => {
+          self.args.procezz.rollbackAttributes();
 
-        self.args.procezz.set('errorOccured', true);
-        self.args.procezz.set('errorMessage', errorObject);
+          self.args.procezz.set('errorOccured', true);
+          self.args.procezz.set('errorMessage', errorObject);
 
-        // closure action from discovery controller
-        self.args.errorHandling(errorObject);
-      });
+          // closure action from discovery controller
+          self.args.errorHandling(errorObject);
+        });
     } else {
-      self.showMessageForUser(self.buildUpdateMessageForUser(false));
+      self.showMessageForUser(ProcezzDetails.buildUpdateMessageForUser(false));
     }
   }
 
@@ -67,17 +67,16 @@ export default class ProcezzDetails extends Component<IArgs> {
 
     this.showSpinner = true;
 
-    this.args.procezz.save()
-    .then(() => {
+    this.args.procezz.save().then(() => {
       self.showSpinner = false;
       self.showMessageForUser(self.buildRestartMessageForUser());
     })
-    .catch((errorObject: any) => {
-      self.args.procezz.rollbackAttributes();
+      .catch((errorObject: any) => {
+        self.args.procezz.rollbackAttributes();
 
-      // closure action from discovery controller
-      self.args.errorHandling(errorObject);
-    });
+        // closure action from discovery controller
+        self.args.errorHandling(errorObject);
+      });
   }
 
   @action
@@ -91,17 +90,16 @@ export default class ProcezzDetails extends Component<IArgs> {
 
     this.showSpinner = true;
 
-    this.args.procezz.save()
-    .then(() => {
+    this.args.procezz.save().then(() => {
       self.showSpinner = false;
       self.showMessageForUser('Procezz was stopped.');
     })
-    .catch((errorObject: any) => {
-      self.args.procezz.rollbackAttributes();
+      .catch((errorObject: any) => {
+        self.args.procezz.rollbackAttributes();
 
-      // closure action from discovery controller
-      self.args.errorHandling(errorObject);
-    });
+        // closure action from discovery controller
+        self.args.errorHandling(errorObject);
+      });
   }
 
   buildRestartMessageForUser() {
@@ -122,7 +120,7 @@ export default class ProcezzDetails extends Component<IArgs> {
     return `${mainMessage} ${monitoringMessage}`;
   }
 
-  buildUpdateMessageForUser(hasDirtyAttributes: boolean) {
+  static buildUpdateMessageForUser(hasDirtyAttributes: boolean) {
     let mainMessage = 'No change detected.';
 
     if (hasDirtyAttributes) {
@@ -138,6 +136,7 @@ export default class ProcezzDetails extends Component<IArgs> {
     const alertifyMessageDuration = 4;
 
     AlertifyHandler.showAlertifyMessageWithDuration(
-      `${message} Click on <b>Discovery</b> to go back.`, alertifyMessageDuration);
+      `${message} Click on <b>Discovery</b> to go back.`, alertifyMessageDuration,
+    );
   }
 }

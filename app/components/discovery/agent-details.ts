@@ -22,30 +22,30 @@ export default class AgentDetails extends Component<IArgs> {
   saveAgent() {
     const self = this;
 
-    const agent = this.args.agent;
+    const { agent } = this.args;
 
     if (agent.get('hasDirtyAttributes')) {
       this.showSpinner = true;
 
       agent.save().then(() => {
         self.showSpinner = false;
-        self.handleMessageForUser();
+        AgentDetails.handleMessageForUser();
       })
-      .catch((errorObject) => {
-        agent.rollbackAttributes();
+        .catch((errorObject) => {
+          agent.rollbackAttributes();
 
-        set(agent, 'errorOccured', true);
-        set(agent, 'errorMessage', errorObject);
+          set(agent, 'errorOccured', true);
+          set(agent, 'errorMessage', errorObject);
 
-        // closure action from discovery controller
-        self.args.errorHandling(errorObject);
-      });
+          // closure action from discovery controller
+          self.args.errorHandling(errorObject);
+        });
     } else {
-      self.handleMessageForUser();
+      AgentDetails.handleMessageForUser();
     }
   }
 
-  handleMessageForUser() {
+  static handleMessageForUser() {
     AlertifyHandler.showAlertifyMessage('Agent updated. Click on <b>Discovery</b> to go back.');
   }
 }

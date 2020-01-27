@@ -26,6 +26,7 @@ export default class NodeOverview extends Component<IArgs> {
   configuration!: Configuration;
 
   cytoscapeGraph: any = null;
+
   cytoscapeLayout: any = null;
 
   showCytoscape = false;
@@ -80,7 +81,7 @@ export default class NodeOverview extends Component<IArgs> {
   }
 
   cytoscapeOnTap(evt: any) {
-    const emberModel = evt.target.data().emberModel;
+    const { emberModel } = evt.target.data();
 
     if (emberModel) {
       // closure action of discovery controller
@@ -115,81 +116,81 @@ export default class NodeOverview extends Component<IArgs> {
 
       style: cytoscape.stylesheet()
         .selector('#expLogo')
-          .css({
-            'background-fit': 'cover',
-            'background-image': 'images/explorviz-logo.png',
-            content: '',
-          })
+        .css({
+          'background-fit': 'cover',
+          'background-image': 'images/explorviz-logo.png',
+          content: '',
+        })
         .selector('.edge')
-          .css({
-            'curve-style': 'bezier',
-            'line-color': '#ddd',
-            'target-arrow-color': '#ddd',
-            'target-arrow-shape': 'triangle',
-            width: 10,
-          })
+        .css({
+          'curve-style': 'bezier',
+          'line-color': '#ddd',
+          'target-arrow-color': '#ddd',
+          'target-arrow-shape': 'triangle',
+          width: 10,
+        })
         .selector('.edge-monitoring-enabled')
-          .css({
-            'curve-style': 'bezier',
-            'line-color': '#94f2a2',
-            'target-arrow-color': '#94f2a2',
-            'target-arrow-shape': 'triangle',
-            width: 10,
-          })
+        .css({
+          'curve-style': 'bezier',
+          'line-color': '#94f2a2',
+          'target-arrow-color': '#94f2a2',
+          'target-arrow-shape': 'triangle',
+          width: 10,
+        })
         .selector('.edge-stopped')
-          .css({
-            'curve-style': 'bezier',
-            'line-color': '#f4ffa8',
-            'target-arrow-color': '#f4ffa8',
-            'target-arrow-shape': 'triangle',
-            width: 10,
-          })
+        .css({
+          'curve-style': 'bezier',
+          'line-color': '#f4ffa8',
+          'target-arrow-color': '#f4ffa8',
+          'target-arrow-shape': 'triangle',
+          width: 10,
+        })
         .selector('.edge-error')
-          .css({
-            'curve-style': 'bezier',
-            'line-color': '#ff0000',
-            'target-arrow-color': '#ff0000',
-            'target-arrow-shape': 'triangle',
-            width: 10,
-          })
+        .css({
+          'curve-style': 'bezier',
+          'line-color': '#ff0000',
+          'target-arrow-color': '#ff0000',
+          'target-arrow-shape': 'triangle',
+          width: 10,
+        })
         .selector('.procezz')
-          .css({
-            content: 'data(name)',
-          })
+        .css({
+          content: 'data(name)',
+        })
         .selector('.procezz-monitoring-enabled')
-          .css({
-            'background-color': '#37ca4d',
-          })
+        .css({
+          'background-color': '#37ca4d',
+        })
         .selector('.procezz-stopped')
-          .css({
-            'background-color': '#e4ff19',
-          })
+        .css({
+          'background-color': '#e4ff19',
+        })
         .selector('.procezz-error')
-          .css({
-            'background-color': '#ff0000',
-          })
+        .css({
+          'background-color': '#ff0000',
+        })
         .selector('.agent')
-          .css({
-            'background-color': '#90EE90',
-            content: 'data(id)',
-          })
+        .css({
+          'background-color': '#90EE90',
+          content: 'data(id)',
+        })
         .selector('.agent-error')
-          .css({
-            'background-color': '#ff0000',
-            content: 'data(id)',
-          })
+        .css({
+          'background-color': '#ff0000',
+          content: 'data(id)',
+        })
         .selector('.hidden')
-          .css({
-            opacity: 0.5,
-          })
+        .css({
+          opacity: 0.5,
+        })
         .selector('.highlighted')
-          .css({
-            'background-color': '#61bffc',
-            'line-color': '#61bffc',
-            'target-arrow-color': '#61bffc',
-            'transition-duration': '0.5s',
-            'transition-property': 'background-color, line-color, target-arrow-color',
-          }),
+        .css({
+          'background-color': '#61bffc',
+          'line-color': '#61bffc',
+          'target-arrow-color': '#61bffc',
+          'transition-duration': '0.5s',
+          'transition-property': 'background-color, line-color, target-arrow-color',
+        }),
 
       elements: {
         edges: [],
@@ -248,7 +249,7 @@ export default class NodeOverview extends Component<IArgs> {
 
     cy.add(explorVizNode);
 
-    const showHiddenEntities = this.configuration.discoverySettings.showHiddenEntities;
+    const { showHiddenEntities } = this.configuration.discoverySettings;
 
     let isAtLeastOneSet = false;
 
@@ -270,11 +271,11 @@ export default class NodeOverview extends Component<IArgs> {
 
       let cssClassAgent = faultyAgent ? 'agent-error' : 'agent';
 
-      cssClassAgent = agentHidden ? 'hidden ' + cssClassAgent : cssClassAgent;
+      cssClassAgent = agentHidden ? `hidden ${cssClassAgent}` : cssClassAgent;
 
       let cssClassAgentEdge = faultyAgent ? 'edge-error' : 'edge';
 
-      cssClassAgentEdge = agentHidden ? 'hidden ' + cssClassAgentEdge : cssClassAgentEdge;
+      cssClassAgentEdge = agentHidden ? `hidden ${cssClassAgentEdge}` : cssClassAgentEdge;
 
       const agentAndEdge = {
         edges: [
@@ -311,9 +312,9 @@ export default class NodeOverview extends Component<IArgs> {
 
         const procezzID = procezzRecord.get('id');
 
-        const edgeID = procezzID + 'To' + agentName;
+        const edgeID = `${procezzID}To${agentName}`;
 
-/*         const monitoredEnabled =
+        /* const monitoredEnabled =
           procezzRecord.get('wasFoundByBackend') && procezzRecord.get('monitoredFlag'); */
 
         const monitoredEnabled = procezzRecord.get('monitoredFlag');

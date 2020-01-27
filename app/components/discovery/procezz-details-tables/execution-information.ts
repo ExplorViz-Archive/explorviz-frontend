@@ -27,11 +27,11 @@ export default class ExecutionInformation extends Component<IArgs> {
 
   @computed('args.procezz.workingDirectory')
   get workingDirectory() {
-    const workingDirectory = this.args.procezz.workingDirectory;
+    const { workingDirectory } = this.args.procezz;
 
-    const fallbackString = '<font color="red"><b>ATTENTION</b></font>: ' +
-      'Working Directory could not be found. Check if execution path looks ' +
-      'valid.';
+    const fallbackString = '<font color="red"><b>ATTENTION</b></font>: '
+      + 'Working Directory could not be found. Check if execution path looks '
+      + 'valid.';
 
     const htmlString = htmlSafe(fallbackString);
 

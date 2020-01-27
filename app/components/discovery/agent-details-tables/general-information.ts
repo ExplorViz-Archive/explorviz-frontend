@@ -10,7 +10,7 @@ interface IArgs {
 export default class GeneralInformation extends Component<IArgs> {
   @computed('args.agent.lastDiscoveryTime')
   get lastDiscoveryTimeAsDate() {
-    const lastDiscoveryTime = this.args.agent.lastDiscoveryTime;
+    const { lastDiscoveryTime } = this.args.agent;
     return new Date(lastDiscoveryTime).toLocaleString();
   }
 }
