@@ -1,5 +1,4 @@
-import { action } from '@ember/object';
-import { set } from '@ember/object';
+import { action, set } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
@@ -9,7 +8,8 @@ import Setting from 'explorviz-frontend/models/setting';
 import User from 'explorviz-frontend/models/user';
 import UserSettings from 'explorviz-frontend/services/user-settings';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import { all } from 'rsvp';
+import RSVP, { all } from 'rsvp';
+import Userpreference from 'explorviz-frontend/models/userpreference';
 
 interface ISettings {
   [origin: string]: {
@@ -23,7 +23,9 @@ interface IArgs {
 
 export default class UserManagementUserSettings extends Component<IArgs> {
   @service('store') store!: DS.Store;
+
   @service('session') session!: any;
+
   @service('user-settings') userSettings!: UserSettings;
 
   /*
@@ -48,17 +50,18 @@ export default class UserManagementUserSettings extends Component<IArgs> {
   useDefaultSettings: {[origin: string]: boolean} = {};
 
   @task
-  initSettings = task(function *(this: UserManagementUserSettings) {
+  // eslint-disable-next-line
+  initSettings = task(function* (this: UserManagementUserSettings) {
     if (this.args.user === null) {
       return;
     }
     // load all settings from store
     const settingTypes = [...this.userSettings.types];
     const allSettings: Setting[] = [];
-    for (const type of settingTypes) {
-      const settings = yield this.store.peekAll(type);
+    settingTypes.forEach((type) => {
+      const settings = this.store.peekAll(type);
       allSettings.pushObjects(settings.toArray());
-    }
+    });
 
     const origins = [...new Set(allSettings.mapBy('origin'))];
     const preferences = yield this.store.query('userpreference', { userId: this.args.user.id });
@@ -66,7 +69,7 @@ export default class UserManagementUserSettings extends Component<IArgs> {
     // stores settings by origin and type
     const settingsByOrigin: ISettings = {};
 
-    for (const origin of origins) {
+    origins.forEach((origin) => {
       this.useDefaultSettings[origin] = true;
       const settingsWithOrigin = allSettings.filterBy('origin', origin);
 
@@ -80,14 +83,14 @@ export default class UserManagementUserSettings extends Component<IArgs> {
 
       // initialize settings object for origin containing arrays for every type
       settingsByOrigin[origin] = {};
-      for (const type of settingTypes) {
+      settingTypes.forEach((type) => {
         settingsByOrigin[origin][type] = [];
-      }
-    }
+      });
+    });
 
     // copy all settings to settingsByOrigin
     // use default if no perefenrece exists for user, else use preference value
-    for (const setting of allSettings) {
+    allSettings.forEach((setting) => {
       const preference = preferences.findBy('settingId', setting.get('id'));
       let value;
       if (preference !== undefined) {
@@ -98,13 +101,14 @@ export default class UserManagementUserSettings extends Component<IArgs> {
 
       // @ts-ignore
       settingsByOrigin[setting.origin][setting.constructor.modelName].push([setting.id, value]);
-    }
+    });
 
     this.settings = settingsByOrigin;
   });
 
   @task({ drop: true })
-  saveSettings = task(function *(this: UserManagementUserSettings) {
+  // eslint-disable-next-line
+  saveSettings = task(function* (this: UserManagementUserSettings) {
     if (this.args.user === null) {
       return;
     }
@@ -112,14 +116,14 @@ export default class UserManagementUserSettings extends Component<IArgs> {
 
     const settings = Object.entries(this.settings);
 
-    const settingsPromiseArray = [];
+    const settingsPromiseArray:RSVP.Promise<Userpreference>[] = [];
 
-    for (const [origin, settingsGroupedByType] of settings) {
+    settings.forEach(([origin, settingsGroupedByType]) => {
       const allSettings = [...Object.values(settingsGroupedByType)].flat();
 
       // patch, create or delete preference based on whether the default button for
       // the corresponding origin is enabled or not and whether or not a prefenrece already exists
-      for (const [settingId, preferenceValueNew] of allSettings) {
+      allSettings.forEach(([settingId, preferenceValueNew]) => {
         const oldRecord = this.userSettings.getUserPreference(userId, settingId);
 
         if (oldRecord) {
@@ -139,8 +143,8 @@ export default class UserManagementUserSettings extends Component<IArgs> {
           });
           settingsPromiseArray.push(preferenceRecord.save());
         }
-      }
-    }
+      });
+    });
 
     // wait for all records to be saved. Give out error if one fails
     yield all(settingsPromiseArray).then(() => {

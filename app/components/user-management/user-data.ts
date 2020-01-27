@@ -31,10 +31,15 @@ export default class UserData extends Component<IArgs> {
   rolesChange: string[]|null = null;
 
   @task({ drop: true })
-  saveUserChanges = task(function *(this: UserData) {
+  // eslint-disable-next-line
+  saveUserChanges = task(function* (this: UserData) {
     const { usernameChange, passwordChange, rolesChange } = this;
 
-    const user = this.args.user;
+    const { user } = this.args;
+
+    function clearInputFields(this: UserData) {
+      this.passwordChange = '';
+    }
 
     if (user) {
       // check for valid input
@@ -59,22 +64,19 @@ export default class UserData extends Component<IArgs> {
 
       try {
         yield user.save();
-        AlertifyHandler.showAlertifySuccess(`User updated.`);
+        AlertifyHandler.showAlertifySuccess('User updated.');
         clearInputFields.bind(this)();
       } catch (reason) {
-        this.showReasonErrorAlert(reason);
+        UserData.showReasonErrorAlert(reason);
       }
     } else {
-      AlertifyHandler.showAlertifyError(`User not found.`);
-    }
-
-    function clearInputFields(this: UserData) {
-      this.passwordChange = '';
+      AlertifyHandler.showAlertifyError('User not found.');
     }
   });
 
   @task
-  getRoles = task(function *(this: UserData) {
+  // eslint-disable-next-line
+  getRoles = task(function* (this: UserData) {
     const roles: DS.RecordArray<Role> = yield this.store.findAll('role', { reload: true });
     this.roles = roles.toArray().map((role: Role) => role.id);
   });
@@ -86,7 +88,7 @@ export default class UserData extends Component<IArgs> {
   }
 
   initFields(this: UserData) {
-    const user = this.args.user;
+    const { user } = this.args;
 
     if (user) {
       this.idChange = user.id;
@@ -100,7 +102,7 @@ export default class UserData extends Component<IArgs> {
     this.rolesChange = roles;
   }
 
-  showReasonErrorAlert(reason: any) {
+  static showReasonErrorAlert(reason: any) {
     const { title, detail } = reason.errors[0];
     AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
   }

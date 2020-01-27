@@ -23,6 +23,7 @@ interface IArgs {
 
 export default class UserList extends Component<IArgs> {
   @service('store') store!: DS.Store;
+
   @service('router') router!: RouterService;
 
   @service('current-user') currentUser!: CurrentUser;
@@ -46,52 +47,57 @@ export default class UserList extends Component<IArgs> {
   showDeleteUsersDialog: boolean = false;
 
   @task({ enqueue: true })
-  deleteUsers = task(function *(this: UserList) {
+  // eslint-disable-next-line
+  deleteUsers = task(function* (this: UserList) {
     // delete all selected users
     const listOfUsersToDelete: User[] = [];
-    for (const [id, bool] of Object.entries(this.selected)) {
+    Object.entries(this.selected).forEach(([id, bool]) => {
       if (bool) {
         const user = this.store.peekRecord('user', id);
         if (user !== null) {
           listOfUsersToDelete.push(user);
         }
       }
-    }
+    });
 
     try {
       yield this.args.deleteUsers(listOfUsersToDelete);
       AlertifyHandler.showAlertifySuccess('All users successfully deleted.');
     } catch (reason) {
-      this.showReasonErrorAlert(reason);
+      UserList.showReasonErrorAlert(reason);
     } finally {
       this.showDeleteUsersDialog = false;
     }
   });
 
   @task({ drop: true })
+  // eslint-disable-next-line
   updateUserList = task(function *(this: UserList) {
     yield this.args.refreshUsers();
   });
 
   @task({ drop: true })
+  // eslint-disable-next-line
   openUserCreation = task(function *(this: UserList) {
     yield this.router.transitionTo('configuration.usermanagement.new');
   });
 
   @task({ drop: true })
+  // eslint-disable-next-line
   openUserEdit = task(function *(this: UserList, userId: string) {
     yield this.router.transitionTo('configuration.usermanagement.edit', userId);
   });
 
   @task({ enqueue: true })
+  // eslint-disable-next-line
   deleteUser = task(function *(this: UserList, user: User) {
     try {
-      const username = user.username;
+      const { username } = user;
       yield this.args.deleteUsers([user]);
       const message = `User <b>${username}</b> deleted.`;
       AlertifyHandler.showAlertifyMessage(message);
     } catch (reason) {
-      this.showReasonErrorAlert(reason);
+      UserList.showReasonErrorAlert(reason);
     }
   });
 
@@ -107,11 +113,11 @@ export default class UserList extends Component<IArgs> {
     const { users } = this.args;
     if (users instanceof DS.RecordArray) {
       const userArray = users.toArray();
-      for (const user of userArray) {
+      userArray.forEach((user) => {
         if (this.currentUser.user !== user) {
           selectedNew[user.id] = false;
         }
-      }
+      });
     }
     this.selected = selectedNew;
   }
@@ -127,9 +133,9 @@ export default class UserList extends Component<IArgs> {
   selectAllCheckboxes() {
     const value = !this.allSelected;
     const selectedNew: {[userId: string]: boolean} = { ...this.selected };
-    for (const [id] of Object.entries(selectedNew)) {
+    Object.entries(selectedNew).forEach(([id]) => {
       selectedNew[id] = value;
-    }
+    });
     this.selected = selectedNew;
   }
 
@@ -147,7 +153,7 @@ export default class UserList extends Component<IArgs> {
     return user === this.currentUser.user;
   }
 
-  showReasonErrorAlert(reason: any) {
+  static showReasonErrorAlert(reason: any) {
     const { title, detail } = reason.errors[0];
     AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
   }

@@ -9,7 +9,8 @@ import Setting from 'explorviz-frontend/models/setting';
 import User from 'explorviz-frontend/models/user';
 import UserSettings from 'explorviz-frontend/services/user-settings';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import { all } from 'rsvp';
+import RSVP, { all } from 'rsvp';
+import Userpreference from 'explorviz-frontend/models/userpreference';
 
 interface ISettings {
   [origin: string]: {
@@ -27,7 +28,9 @@ interface IUserTrimmed {
 
 export default class UserCreation extends Component {
   @service('store') store!: DS.Store;
+
   @service('user-settings') userSettings!: UserSettings;
+
   @service printThis!: any;
 
   @tracked
@@ -65,16 +68,20 @@ export default class UserCreation extends Component {
   // single user creation input fields
   @tracked
   username = '';
+
   @tracked
   password = '';
+
   @tracked
   rolesSelectedSingle: Role[] = [];
 
   // multiple user creation input fields
   @tracked
   usernameprefix = '';
+
   @tracked
   numberofusers = '';
+
   @tracked
   rolesSelectedMultiple: Role[] = [];
 
@@ -82,42 +89,44 @@ export default class UserCreation extends Component {
   roles: Role[] = [];
 
   @task
-  initSettings = task(function *(this: UserCreation) {
+  // eslint-disable-next-line
+  initSettings = task(function* (this: UserCreation) {
     const settingTypes = [...this.userSettings.types];
     const allSettings: Setting[] = [];
     // get all settings
-    for (const type of settingTypes) {
-      const settings = yield this.store.peekAll(type);
+    settingTypes.forEach((type) => {
+      const settings = this.store.peekAll(type);
       allSettings.pushObjects(settings.toArray());
-    }
+    });
 
     const origins: string[] = [...new Set(allSettings.mapBy('origin'))];
 
     const settingsByOrigin: ISettings = {};
 
-    for (const origin of origins) {
+    origins.forEach((origin) => {
       this.useDefaultSettings[origin] = true;
       // initialize settings object for origin containing arrays for every type
       settingsByOrigin[origin] = {};
-      for (const type of settingTypes) {
+      settingTypes.forEach((type) => {
         settingsByOrigin[origin][type] = [];
-      }
-    }
+      });
+    });
 
     // copy all settings to settingsByOrigin
     // use default if no perefenrece exists for user, else use preference value
-    for (const setting of allSettings) {
+    allSettings.forEach((setting) => {
       // @ts-ignore
       settingsByOrigin[setting.origin][setting.constructor.modelName].push(
         // @ts-ignore
-        [setting.id, setting.defaultValue]);
-    }
-
+        [setting.id, setting.defaultValue],
+      );
+    });
     this.settings = settingsByOrigin;
   });
 
   @task
-  saveUser = task(function *(this: UserCreation) {
+  // eslint-disable-next-line
+  saveUser = task(function* (this: UserCreation) {
     const { username, password, rolesSelectedSingle } = this;
 
     // check for valid input
@@ -142,14 +151,29 @@ export default class UserCreation extends Component {
       username,
     });
 
-    try {
-      yield userRecord.save();
-      yield createPreferences.bind(this)(userRecord.id);
-      AlertifyHandler.showAlertifySuccess(`User <b>${username}</b> was created.`);
-      clearInputFields.bind(this)();
-    } catch (reason) {
-      this.showReasonErrorAlert(reason);
-      userRecord.deleteRecord();
+    function createPreferences(this: UserCreation, uid: string) {
+      const settingsPromiseArray:RSVP.Promise<Userpreference>[] = [];
+
+      const settings = Object.entries(this.settings);
+
+      settings.forEach(([origin, settingsObject]) => {
+        if (this.useDefaultSettings[origin]) {
+          return;
+        }
+
+        const allSettings = [...Object.values(settingsObject)].flat();
+        // create records for the preferences and save them
+        allSettings.forEach(([settingId, value]) => {
+          const preferenceRecord = this.store.createRecord('userpreference', {
+            settingId,
+            userId: uid,
+            value,
+          });
+          settingsPromiseArray.push(preferenceRecord.save());
+        });
+      });
+
+      return all(settingsPromiseArray);
     }
 
     function clearInputFields(this: UserCreation) {
@@ -158,34 +182,20 @@ export default class UserCreation extends Component {
       this.rolesSelectedSingle = [];
     }
 
-    function createPreferences(this: UserCreation, uid: string) {
-      const settingsPromiseArray = [];
-
-      const settings = Object.entries(this.settings);
-
-      for (const [origin, settingsObject] of settings) {
-        if (this.useDefaultSettings[origin]) {
-          continue;
-        }
-
-        const allSettings = [...Object.values(settingsObject)].flat();
-        // create records for the preferences and save them
-        for (const [settingId, value] of allSettings) {
-          const preferenceRecord = this.store.createRecord('userpreference', {
-            settingId,
-            userId: uid,
-            value,
-          });
-          settingsPromiseArray.push(preferenceRecord.save());
-        }
-      }
-
-      return all(settingsPromiseArray);
+    try {
+      yield userRecord.save();
+      yield createPreferences.bind(this)(userRecord.id);
+      AlertifyHandler.showAlertifySuccess(`User <b>${username}</b> was created.`);
+      clearInputFields.bind(this)();
+    } catch (reason) {
+      UserCreation.showReasonErrorAlert(reason);
+      userRecord.deleteRecord();
     }
   });
 
   @task
-  saveMultipleUsers = task(function *(this: UserCreation) {
+  // eslint-disable-next-line
+  saveMultipleUsers = task(function* (this: UserCreation) {
     const PASSWORD_LENGTH = 8;
 
     const { usernameprefix, numberofusers, rolesSelectedMultiple } = this;
@@ -216,7 +226,7 @@ export default class UserCreation extends Component {
       );
     }
 
-    const passwords = this.generatePasswords(numberOfUsers, PASSWORD_LENGTH);
+    const passwords = UserCreation.generatePasswords(numberOfUsers, PASSWORD_LENGTH);
 
     const roles = rolesSelectedMultiple.map((role: Role) => role.id);
 
@@ -224,17 +234,17 @@ export default class UserCreation extends Component {
 
     // for all settings, add a preference for the new users if default settings was not chosen.
     const settings = Object.entries(this.settings);
-    for (const [origin, settingsObject] of settings) {
+    settings.forEach(([origin, settingsObject]) => {
       if (this.useDefaultSettings[origin]) {
-        continue;
+        return;
       }
 
       const allSettings = [...Object.values(settingsObject)].flat();
       // create records for the preferences and save them
-      for (const [settingId, value] of allSettings) {
+      allSettings.forEach(([settingId, value]) => {
         preferences[settingId] = value;
-      }
-    }
+      });
+    });
 
     const userBatchRecord = this.store.createRecord('userbatchrequest', {
       count: numberOfUsers,
@@ -244,27 +254,28 @@ export default class UserCreation extends Component {
       roles,
     });
 
-    try {
-      yield userBatchRecord.save();
-      const users: DS.ManyArray<User> = yield userBatchRecord.users;
-      AlertifyHandler.showAlertifySuccess(`All users were successfully created.`);
-      clearInputFields.bind(this)();
-      this.showCreatedUsers(users.toArray(), passwords);
-    } catch (reason) {
-      this.showReasonErrorAlert(reason);
-    } finally {
-      userBatchRecord.unloadRecord();
-    }
-
     function clearInputFields(this: UserCreation) {
       this.usernameprefix = '';
       this.numberofusers = '';
       this.rolesSelectedMultiple = [];
     }
+
+    try {
+      yield userBatchRecord.save();
+      const users: DS.ManyArray<User> = yield userBatchRecord.users;
+      AlertifyHandler.showAlertifySuccess('All users were successfully created.');
+      clearInputFields.bind(this)();
+      this.showCreatedUsers(users.toArray(), passwords);
+    } catch (reason) {
+      UserCreation.showReasonErrorAlert(reason);
+    } finally {
+      userBatchRecord.unloadRecord();
+    }
   });
 
   @task
-  getRoles = task(function *(this: UserCreation) {
+  // eslint-disable-next-line
+  getRoles = task(function* (this: UserCreation) {
     const roles: DS.RecordArray<Role> = yield this.store.findAll('role', { reload: true });
     this.roles = roles.toArray();
   });
@@ -314,16 +325,16 @@ export default class UserCreation extends Component {
     };
   }
 
-  generatePasswords(count: number, length: number) {
+  static generatePasswords(count: number, length: number) {
     const passwords = [];
 
     for (let i = 1; i <= count; i++) {
-      passwords.push(this.generatePassword(length));
+      passwords.push(UserCreation.generatePassword(length));
     }
     return passwords;
   }
 
-  generatePassword(length: number) {
+  static generatePassword(length: number) {
     const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const n = charset.length;
 
@@ -334,7 +345,7 @@ export default class UserCreation extends Component {
     return retVal;
   }
 
-  showReasonErrorAlert(reason: any) {
+  static showReasonErrorAlert(reason: any) {
     const { title, detail } = reason.errors[0];
     AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
   }

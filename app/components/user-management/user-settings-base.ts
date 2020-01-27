@@ -16,6 +16,7 @@ interface IArgs {
 }
 export default class UserSettingsBase extends Component<IArgs> {
   @service('store') store!: DS.Store;
+
   @service('user-settings') userSettings!: UserSettings;
 
   descriptions: {
@@ -26,11 +27,12 @@ export default class UserSettingsBase extends Component<IArgs> {
   } = {};
 
   @task
+  // eslint-disable-next-line
   loadDescriptions = task(function *(this: UserSettingsBase, type: string) {
-    for (const [id] of this.args.settings[type]) {
-      const { description, displayName } = yield this.store.peekRecord(type, id);
+    this.args.settings[type].forEach(([id]) => {
+      const { description, displayName } = this.store.peekRecord(type, id);
       set(this.descriptions, id, { description, displayName });
-    }
+    });
   });
 
   constructor(owner: any, args: IArgs) {
@@ -40,9 +42,9 @@ export default class UserSettingsBase extends Component<IArgs> {
 
     const typesArray = [...Object.keys(this.args.settings)].flat();
 
-    for (const type of typesArray) {
+    typesArray.forEach((type) => {
       this.loadDescriptions.perform(type);
-    }
+    });
   }
 
   @action
