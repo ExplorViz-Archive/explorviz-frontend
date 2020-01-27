@@ -10,7 +10,6 @@ import Service from '@ember/service';
 * @submodule page
 */
 export default class PageSetup extends Service {
-
   /**
   * Latest fetched entity
   *
@@ -25,18 +24,18 @@ export default class PageSetup extends Service {
   * @property navbarOcticons
   * @type Array
   */
- navbarOcticons = null;
+  navbarOcticons = null;
 
   init() {
     super.init();
     // TODO: replay button not shown until implemented
-    this.set('navbarRoutes', ["visualization", "discovery", "replay"]);
+    this.set('navbarRoutes', ['visualization', 'discovery', 'replay']);
     this.set('navbarOcticons', []);
   }
 }
 
-declare module "@ember/service" {
+declare module '@ember/service' {
   interface Registry {
-    "page-setup": PageSetup;
+    'page-setup': PageSetup;
   }
 }

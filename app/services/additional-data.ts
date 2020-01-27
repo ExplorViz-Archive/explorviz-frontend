@@ -2,9 +2,10 @@ import Service from '@ember/service';
 import Evented from '@ember/object/evented';
 
 export default class AdditionalData extends Service.extend(Evented) {
-
   showWindow:boolean = false;
+
   shownComponents:string[] = [];
+
   popupContent:any = null;
 
   addComponent(path:string) {
@@ -15,10 +16,11 @@ export default class AdditionalData extends Service.extend(Evented) {
   }
 
   removeComponent(path: string) {
-    if (!this.get('shownComponents'))
+    if (!this.get('shownComponents')) {
       return;
+    }
 
-    let index = this.get('shownComponents').indexOf(path);
+    const index = this.get('shownComponents').indexOf(path);
     // Remove existing sidebar component
     if (index !== -1) {
       this.get('shownComponents').splice(index, 1);
@@ -26,8 +28,9 @@ export default class AdditionalData extends Service.extend(Evented) {
     }
 
     // Close sidebar if it would be empty otherwise
-    if (this.get('shownComponents').length === 0)
-      this.emptyAndClose()
+    if (this.get('shownComponents').length === 0) {
+      this.emptyAndClose();
+    }
   }
 
   emptyAndClose() {
@@ -54,11 +57,10 @@ export default class AdditionalData extends Service.extend(Evented) {
   removePopup() {
     this.set('popupContent', null);
   }
-
 }
 
-declare module "@ember/service" {
+declare module '@ember/service' {
   interface Registry {
-    "additional-data": AdditionalData;
+    'additional-data': AdditionalData;
   }
 }

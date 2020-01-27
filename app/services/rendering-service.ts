@@ -5,8 +5,8 @@ import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzc
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 
 export default class RenderingService extends Service.extend(Evented) {
-
   showTimeline: boolean = true;
+
   showVersionbar: boolean = true;
 
   reSetupScene() {
@@ -34,11 +34,10 @@ export default class RenderingService extends Service.extend(Evented) {
   toggleTimeline() {
     this.toggleProperty('showTimeline');
   }
-
 }
 
-declare module "@ember/service" {
+declare module '@ember/service' {
   interface Registry {
-    "rendering-service": RenderingService;
+    'rendering-service': RenderingService;
   }
 }
