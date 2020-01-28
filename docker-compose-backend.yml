@@ -117,7 +117,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: zookeeper:3.5
     expose:
       - "2181"
 
