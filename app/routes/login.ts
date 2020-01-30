@@ -13,7 +13,6 @@ export default class LoginRoute extends BaseRoute.extend(UnauthenticatedRouteMix
 
   // @Override BaseRoute
   @action
-  resetRoute() {
-    // overwrite BaseRoute's method as required
-  }
+  // eslint-disable-next-line class-methods-use-this
+  resetRoute() {}
 }
