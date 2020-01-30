@@ -4,15 +4,18 @@
 }
 
 .sidebar-component-title {
-  position: relative;
-  margin-top: 20px;
-  left: 50%;
-  transform: translateX(-50%); 
-  display:inline-block;
+  display: flex;
+  justify-content: center;
 }
 
 .sidebar-component-close {
-  float: right;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sidebar-component-close-button {
+  all: unset;
+  cursor: pointer;
 }
 
 .th-btn{
