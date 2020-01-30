@@ -12,7 +12,7 @@ module.exports = {
     'no-action': true,
     'no-args-paths': true,
     'no-attrs-in-components': true,
-    'no-curly-component-invocation': true,
+    'no-curly-component-invocation': { allow: ['app-version'] },
     'no-debugger': true,
     'no-duplicate-attributes': true,
     'no-element-event-actions': true,

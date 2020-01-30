@@ -18,7 +18,11 @@ module.exports = {
   },
   rules: {
     'linebreak-style': 'off',
-    'import/no-unresolved': 'off'
+    'import/no-unresolved': 'off',
+    'require-yield': 'off',
+    'no-plusplus': 'off',
+    'import/no-cycle': 'off',
+    'prefer-rest-params': 'off'
   },
   overrides: [
     // node files
