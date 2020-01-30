@@ -1,29 +1,29 @@
-import Component from '@glimmer/component';
 import { action } from '@ember/object';
+import Component from '@glimmer/component';
 
-interface Args {
+interface IArgs {
   popupData: {
     mouseX: number,
-    mouseY: number
+    mouseY: number,
   };
 }
 
-export default class PopupCoordinator extends Component<Args> {
-
+export default class PopupCoordinator extends Component<IArgs> {
   @action
   setPopupPosition(popoverDiv: HTMLDivElement) {
-    let popupData = this.args.popupData;
+    const { popupData } = this.args;
 
     // Sorrounding div for position calculations
     const containerDiv = popoverDiv.parentElement as HTMLElement;
 
-    let popoverHeight = popoverDiv.clientHeight;
-    let popoverWidth = popoverDiv.clientWidth;
+    const popoverHeight = popoverDiv.clientHeight;
+    const popoverWidth = popoverDiv.clientWidth;
 
-    let containerWidth = containerDiv.clientWidth;
+    const containerWidth = containerDiv.clientWidth;
 
-    if(popoverHeight === undefined || popoverWidth === undefined || containerWidth === undefined)
+    if (popoverHeight === undefined || popoverWidth === undefined || containerWidth === undefined) {
       return;
+    }
 
     const popupTopOffset = popoverHeight + 10;
     const popupLeftOffset = popoverWidth / 2;
@@ -31,26 +31,29 @@ export default class PopupCoordinator extends Component<Args> {
     let popupTopPosition = popupData.mouseY - popupTopOffset;
     let popupLeftPosition = popupData.mouseX - popupLeftOffset;
 
-    // Prevent popup positioning on top of rendering canvas => 
+    // Prevent popup positioning on top of rendering canvas =>
     // position under mouse cursor
     if (popupTopPosition < 0) {
-      popupTopPosition = popupData.mouseY + 35;
+      const approximateMouseHeight = 35;
+      popupTopPosition = popupData.mouseY + approximateMouseHeight;
     }
 
-    // Prevent popup positioning right(outside) of rendering canvas => 
+    // Prevent popup positioning right(outside) of rendering canvas =>
     // position at right edge of canvas
     if (popupLeftPosition + popoverWidth > containerWidth) {
-      popupLeftPosition = containerWidth - popoverWidth - 5;
+      const extraPopupMarginFromAtBottom = 5;
+      popupLeftPosition = containerWidth - popoverWidth - extraPopupMarginFromAtBottom;
     }
 
-    // Prevent popup positioning left(outside) of rendering canvas => 
+    // Prevent popup positioning left(outside) of rendering canvas =>
     // position at left edge of canvas
     if (popupLeftPosition < 0) {
       popupLeftPosition = 0;
     }
 
     // Set popup position
-    popoverDiv.style.top = popupTopPosition + 'px';
-    popoverDiv.style.left = popupLeftPosition + 'px';
+    /* eslint-disable no-param-reassign */
+    popoverDiv.style.top = `${popupTopPosition}px`;
+    popoverDiv.style.left = `${popupLeftPosition}px`;
   }
 }
