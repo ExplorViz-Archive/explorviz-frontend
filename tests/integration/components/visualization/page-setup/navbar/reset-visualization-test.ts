@@ -20,10 +20,10 @@ module('Integration | Component | visualization/page-setup/navbar/reset-visualiz
       assert.equal(firstSVGElement.getAttribute('class'), 'octicon align-middle');
     }
 
-    let firstAElement = this.element.querySelector('a');
+    let firstAElement = this.element.querySelector('div[title]');
 
     if(firstAElement === null) {
-      assert.ok(null, 'no <a> tag found');
+      assert.ok(null, 'no <div> tag found');
     } else {
       assert.equal(firstAElement.getAttribute('title'), 'Reset View');
     }
