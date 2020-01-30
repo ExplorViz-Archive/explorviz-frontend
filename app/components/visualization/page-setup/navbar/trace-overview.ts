@@ -8,12 +8,14 @@ import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
 export default class TraceOverview extends Component {
   @service('additional-data') additionalData!: AdditionalData;
+
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
+
   @service('landscape-listener') landscapeListener!: LandscapeListener;
 
   @action
   showTraces() {
-    const latestApplication = this.landscapeRepo.latestApplication;
+    const { latestApplication } = this.landscapeRepo;
 
     if (latestApplication !== null) {
       if (latestApplication.traces.length === 0) {

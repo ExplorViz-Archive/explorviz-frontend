@@ -27,15 +27,19 @@ export default class SQLViewer extends Component {
 
   @tracked
   isSortedAsc: boolean = true;
+
   @tracked
   sortBy: SortingProperty = 'timestamp';
+
   @tracked
   selectedQuery: DatabaseQuery|null = null;
+
   @tracked
   scrollPosition: null|number = null;
 
   @tracked
   filterTerm: string = '';
+
   @tracked
   filterInput: string = '';
 
@@ -46,13 +50,11 @@ export default class SQLViewer extends Component {
     let queries: DatabaseQuery[];
     if (this.selectedQuery) {
       queries = [this.selectedQuery];
+    } else if (this.landscapeRepo.latestApplication !== null) {
+      const databaseQueriesArray = this.landscapeRepo.latestApplication.databaseQueries.toArray();
+      queries = this.filterAndSortQueries(databaseQueriesArray);
     } else {
-      if (this.landscapeRepo.latestApplication !== null) {
-        const databaseQueriesArray = this.landscapeRepo.latestApplication.databaseQueries.toArray();
-        queries = this.filterAndSortQueries(databaseQueriesArray);
-      } else {
-        queries = [];
-      }
+      queries = [];
     }
     return queries;
   }
@@ -68,11 +70,25 @@ export default class SQLViewer extends Component {
     });
 
     if (this.isSortedAsc) {
-      filteredQueries.sort((a, b) => (a.get(this.sortBy) > b.get(this.sortBy)) ?
-        1 : ((b.get(this.sortBy) > a.get(this.sortBy)) ? -1 : 0));
+      filteredQueries.sort((a, b) => {
+        if (a.get(this.sortBy) > b.get(this.sortBy)) {
+          return 1;
+        }
+        if (b.get(this.sortBy) > a.get(this.sortBy)) {
+          return -1;
+        }
+        return 0;
+      });
     } else {
-      filteredQueries.sort((a, b) => (a.get(this.sortBy) < b.get(this.sortBy)) ?
-        1 : ((b.get(this.sortBy) < a.get(this.sortBy)) ? -1 : 0));
+      filteredQueries.sort((a, b) => {
+        if (a.get(this.sortBy) < b.get(this.sortBy)) {
+          return 1;
+        }
+        if (b.get(this.sortBy) < a.get(this.sortBy)) {
+          return -1;
+        }
+        return 0;
+      });
     }
 
     return filteredQueries;

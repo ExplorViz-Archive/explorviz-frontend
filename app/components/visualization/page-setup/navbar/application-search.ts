@@ -11,20 +11,25 @@ import $ from 'jquery';
 /* eslint-disable require-yield */
 export default class ApplicationSearch extends Component {
   @service('rendering-service') renderingService!: RenderingService;
+
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
+
   @service('visualization/application/highlighter') highlighter!: Highlighter;
 
   componentLabel = '-- Components --';
+
   clazzLabel = '-- Classes --';
 
   @task({ restartable: true })
-  searchEntity = task(function *(this: ApplicationSearch, term: string) {
+  // eslint-disable-next-line
+  searchEntity = task(function* (this: ApplicationSearch, term: string) {
     if (isBlank(term)) { return []; }
     return yield this.getPossibleEntityNames.perform(term);
   });
 
   @task
-  getPossibleEntityNames = task(function *(this: ApplicationSearch, name: string) {
+  // eslint-disable-next-line
+  getPossibleEntityNames = task(function* (this: ApplicationSearch, name: string) {
     const searchString = name.toLowerCase();
 
     const latestApp = this.landscapeRepo.latestApplication;
@@ -43,6 +48,14 @@ export default class ApplicationSearch extends Component {
 
     let isComponentLabelSet = false;
 
+    function searchEngineFindsHit(clazzNameToCheckAgainst: string, searchWord: string) {
+      if (searchString.startsWith('*')) {
+        const searchName = searchWord.substring(1);
+        return clazzNameToCheckAgainst.includes(searchName);
+      }
+      return clazzNameToCheckAgainst.startsWith(searchWord);
+    }
+
     for (let i = 0; i < components.length; i++) {
       if (currentNumberOfCompNames === maxNumberOfCompNames) {
         break;
@@ -50,24 +63,17 @@ export default class ApplicationSearch extends Component {
 
       const component = components.objectAt(i);
 
-      if (!component) {
-        continue;
-      }
+      if (component && !component.foundation) {
+        const componentName = component.name.toLowerCase();
+        if (searchEngineFindsHit(componentName, searchString)) {
+          if (!isComponentLabelSet) {
+            isComponentLabelSet = true;
+            entities.push({ name: this.componentLabel });
+          }
 
-      // skip foundation, since it can't be highlighted anyways
-      if (component.foundation) {
-        continue;
-      }
-
-      const componentName = component.name.toLowerCase();
-      if (searchEngineFindsHit(componentName, searchString)) {
-        if (!isComponentLabelSet) {
-          isComponentLabelSet = true;
-          entities.push({ name: this.componentLabel });
+          entities.push(component);
+          currentNumberOfCompNames++;
         }
-
-        entities.push(component);
-        currentNumberOfCompNames++;
       }
     }
 
@@ -83,33 +89,24 @@ export default class ApplicationSearch extends Component {
 
       const clazz = clazzes.objectAt(i);
 
-      if (!clazz) {
-        continue;
-      }
+      if (clazz) {
+        const clazzName = clazz.name.toLowerCase();
+        if (searchEngineFindsHit(clazzName, searchString)) {
+          if (!isClazzLabelSet) {
+            isClazzLabelSet = true;
+            entities.push({ name: this.clazzLabel });
+          }
 
-      const clazzName = clazz.name.toLowerCase();
-      if (searchEngineFindsHit(clazzName, searchString)) {
-        if (!isClazzLabelSet) {
-          isClazzLabelSet = true;
-          entities.push({ name: this.clazzLabel });
+          entities.push(clazz);
+          currentNumberOfClazzNames++;
         }
-
-        entities.push(clazz);
-        currentNumberOfClazzNames++;
       }
     }
     return entities;
-
-    function searchEngineFindsHit(clazzNameToCheckAgainst: string, searchWord: string) {
-      if (searchString.startsWith('*')) {
-        const searchName = searchWord.substring(1);
-        return clazzNameToCheckAgainst.includes(searchName);
-      }
-      return clazzNameToCheckAgainst.startsWith(searchWord);
-    }
   });
 
   @action
+  // eslint-disable-next-line
   removePowerselectArrow() {
     $('.ember-power-select-status-icon').remove();
   }
@@ -143,16 +140,5 @@ export default class ApplicationSearch extends Component {
 
     this.highlighter.highlight(entity);
     this.renderingService.redrawScene();
-  }
-
-  reCalculateDropdown(trigger: Element) {
-    // https://ember-basic-dropdown.com/docs/custom-position/
-
-    const { top, left, height } = trigger.getBoundingClientRect();
-    const style = {
-      left,
-      top: top + height,
-    };
-    return { style };
   }
 }

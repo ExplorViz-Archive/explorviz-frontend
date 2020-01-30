@@ -17,15 +17,19 @@ export default class TraceSelection extends Component {
   // default time units
   @tracked
   traceTimeUnit: TimeUnit = 'ms';
+
   @tracked
   traceStepTimeUnit: TimeUnit = 'ms';
 
   @tracked
   sortBy: any = 'traceId';
+
   @tracked
   isSortedAsc: boolean = true;
+
   @tracked
   filterTerm: string = '';
+
   @tracked
   filterInput: string = '';
 
@@ -50,12 +54,12 @@ export default class TraceSelection extends Component {
   // Compute current traces when highlighting changes
   @computed('highlighter.highlightedEntity', 'landscapeRepo.latestApplication', 'sortBy', 'isSortedAsc', 'filterTerm')
   get traces() {
-    const highlighter = this.highlighter;
+    const { highlighter } = this;
     if (highlighter.get('isTrace')) {
       return [highlighter.get('highlightedEntity')];
     }
 
-    const latestApplication = this.landscapeRepo.latestApplication;
+    const { latestApplication } = this.landscapeRepo;
     if (latestApplication === null) {
       return [];
     }
@@ -82,11 +86,25 @@ export default class TraceSelection extends Component {
     });
 
     if (this.isSortedAsc) {
-      filteredTraces.sort((a, b) => (a.get(this.sortBy) > b.get(this.sortBy)) ?
-        1 : ((b.get(this.sortBy) > a.get(this.sortBy)) ? -1 : 0));
+      filteredTraces.sort((a, b) => {
+        if (a.get(this.sortBy) > b.get(this.sortBy)) {
+          return 1;
+        }
+        if (b.get(this.sortBy) > a.get(this.sortBy)) {
+          return -1;
+        }
+        return 0;
+      });
     } else {
-      filteredTraces.sort((a, b) => (a.get(this.sortBy) < b.get(this.sortBy)) ?
-        1 : ((b.get(this.sortBy) < a.get(this.sortBy)) ? -1 : 0));
+      filteredTraces.sort((a, b) => {
+        if (a.get(this.sortBy) < b.get(this.sortBy)) {
+          return 1;
+        }
+        if (b.get(this.sortBy) < a.get(this.sortBy)) {
+          return -1;
+        }
+        return 0;
+      });
     }
 
     return filteredTraces;
@@ -202,8 +220,7 @@ export default class TraceSelection extends Component {
   @action
   onWindowChange(this: TraceSelection) {
     if (!this.additionalData.get('showWindow') && this.highlighter.get('isTrace')) {
-      const highlighter = this.highlighter;
-      highlighter.unhighlightAll();
+      this.highlighter.unhighlightAll();
       this.renderingService.redrawScene();
     }
   }

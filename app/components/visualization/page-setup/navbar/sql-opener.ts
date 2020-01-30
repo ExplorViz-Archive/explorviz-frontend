@@ -14,7 +14,7 @@ export default class SQLOpener extends Component {
 
   @action
   showSql() {
-    const latestApplication = this.landscapeRepo.latestApplication;
+    const { latestApplication } = this.landscapeRepo;
 
     if (latestApplication !== null) {
       if (latestApplication.databaseQueries.length === 0) {

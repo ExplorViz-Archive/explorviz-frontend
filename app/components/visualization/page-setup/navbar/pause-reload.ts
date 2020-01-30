@@ -11,11 +11,11 @@ export default class PauseReload extends Component {
   toggleVisualizationReload() {
     const pauseReload = this.landscapeListener.pauseVisualizationReload;
 
-    this.handleMessageForUser(pauseReload);
+    PauseReload.handleMessageForUser(pauseReload);
     this.landscapeListener.toggleVisualizationReload();
   }
 
-  handleMessageForUser(pauseReload: boolean) {
+  static handleMessageForUser(pauseReload: boolean) {
     if (!pauseReload) {
       AlertifyHandler.showAlertifyMessage('Visualization paused!');
     } else {

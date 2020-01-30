@@ -17,13 +17,13 @@ export default class DataSelection extends Component {
     this.additionalData.openAdditionalData();
   }
 
-  closeDataSelection() {
+  static closeDataSelection() {
     $('#dataselection').addClass('hide');
     $('#vizspace').addClass('col-12');
     $('#vizspace').removeClass('col-8');
   }
 
-  openDataSelection() {
+  static openDataSelection() {
     $('#dataselection').removeClass('hide');
     $('#vizspace').addClass('col-8');
     $('#vizspace').removeClass('col-12');
@@ -32,9 +32,9 @@ export default class DataSelection extends Component {
   @action
   onShowWindow() {
     if (this.additionalData.showWindow) {
-      this.openDataSelection();
+      DataSelection.openDataSelection();
     } else {
-      this.closeDataSelection();
+      DataSelection.closeDataSelection();
     }
   }
 }

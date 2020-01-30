@@ -12,7 +12,7 @@ export default class EventOpener extends Component {
 
   @action
   showEvents() {
-    const latestLandscape = this.landscapeRepo.latestLandscape;
+    const { latestLandscape } = this.landscapeRepo;
     if (latestLandscape !== null) {
       if (latestLandscape.events.length === 0) {
         AlertifyHandler.showAlertifyMessage('No events found!');
@@ -23,4 +23,3 @@ export default class EventOpener extends Component {
     }
   }
 }
-
