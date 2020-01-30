@@ -1,2 +1,10 @@
+app/router.js
+app/app.ts
+vendor/
+dist/
+
 app/utils/*.js
 app/utils/*.ts
+app/utils/**/*.js
+app/utils/**/*.ts
+tests/
