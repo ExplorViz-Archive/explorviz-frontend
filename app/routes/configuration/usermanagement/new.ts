@@ -1,9 +1,9 @@
-import BaseRoute from 'explorviz-frontend/routes/base-route';
+import Route from '@ember/routing/route';
 // @ts-ignore
 import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 import { action } from '@ember/object';
 
-export default class UserManagementNewRoute extends BaseRoute.extend(AuthenticatedRouteMixin) {
+export default class UserManagementNewRoute extends Route.extend(AuthenticatedRouteMixin) {
 
   @action
   goBack(this:UserManagementNewRoute) {

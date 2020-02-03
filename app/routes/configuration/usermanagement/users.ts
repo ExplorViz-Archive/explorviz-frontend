@@ -1,4 +1,4 @@
-import BaseRoute from 'explorviz-frontend/routes/base-route';
+import Route from '@ember/routing/route';
 // @ts-ignore
 import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 import { action } from '@ember/object';
@@ -6,7 +6,7 @@ import DS from 'ember-data';
 import User from 'explorviz-frontend/models/user';
 import Transition from '@ember/routing/-private/transition';
 
-export default class UserManagementUsersRoute extends BaseRoute.extend(AuthenticatedRouteMixin) {
+export default class UserManagementUsersRoute extends Route.extend(AuthenticatedRouteMixin) {
   queryParams = {
     page: {
       type: 'number',
