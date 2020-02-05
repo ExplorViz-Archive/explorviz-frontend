@@ -2,13 +2,13 @@ import Service from '@ember/service';
 import Evented from '@ember/object/evented';
 
 export default class AdditionalData extends Service.extend(Evented) {
-  showWindow:boolean = false;
+  showWindow: boolean = false;
 
-  shownComponents:string[] = [];
+  shownComponents: string[] = [];
 
-  popupContent:any = null;
+  popupContent: any = null;
 
-  addComponent(path:string) {
+  addComponent(path: string) {
     if (!this.get('shownComponents').includes(path)) {
       this.get('shownComponents').unshift(path);
       this.notifyPropertyChange('shownComponents');

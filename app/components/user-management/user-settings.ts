@@ -116,7 +116,7 @@ export default class UserManagementUserSettings extends Component<IArgs> {
 
     const settings = Object.entries(this.settings);
 
-    const settingsPromiseArray:RSVP.Promise<Userpreference>[] = [];
+    const settingsPromiseArray: RSVP.Promise<Userpreference>[] = [];
 
     settings.forEach(([origin, settingsGroupedByType]) => {
       const allSettings = [...Object.values(settingsGroupedByType)].flat();

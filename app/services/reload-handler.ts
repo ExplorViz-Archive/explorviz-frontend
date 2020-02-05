@@ -21,7 +21,7 @@ export default class ReloadHandler extends Service.extend(Evented) {
 
   debug = debugLogger();
 
-  modelUpdater:any = null;
+  modelUpdater: any = null;
 
   constructor() {
     super(...arguments);
@@ -35,12 +35,12 @@ export default class ReloadHandler extends Service.extend(Evented) {
    * @method loadLandscapeById
    * @param {*} timestamp
    */
-  loadLandscapeById(timestamp:number) {
+  loadLandscapeById(timestamp: number) {
     const self = this;
 
     self.debug('Start import landscape-request');
 
-    function success(landscape:Landscape) {
+    function success(landscape: Landscape) {
       // Pause the visualization
       self.landscapeListener.stopVisualizationReload();
       self.modelUpdater.addDrawableCommunication();
@@ -51,14 +51,14 @@ export default class ReloadHandler extends Service.extend(Evented) {
       self.debug('end import landscape-request');
     }
 
-    function failure(e:any) {
+    function failure(e: any) {
       set(self.landscapeRepo, 'latestLandscape', null);
       AlertifyHandler.showAlertifyMessage("Landscape couldn't be requested!"
         + ' Backend offline?');
       self.debug("Landscape couldn't be requested!", e);
     }
 
-    function error(e:any) {
+    function error(e: any) {
       set(self.landscapeRepo, 'latestLandscape', null);
       self.debug('Error when fetching landscape: ', e);
     }
@@ -71,12 +71,12 @@ export default class ReloadHandler extends Service.extend(Evented) {
    * @method loadReplayLandscapeByTimestamp
    * @param {*} timestamp
    */
-  loadReplayLandscapeByTimestamp(timestamp:number) {
+  loadReplayLandscapeByTimestamp(timestamp: number) {
     const self = this;
 
     self.debug('Start import replay landscape-request');
 
-    function success(landscape:Landscape) {
+    function success(landscape: Landscape) {
       // Pause the visualization
       self.modelUpdater.addDrawableCommunication();
 
@@ -86,14 +86,14 @@ export default class ReloadHandler extends Service.extend(Evented) {
       self.debug('end import replay landscape-request');
     }
 
-    function failure(e:any) {
+    function failure(e: any) {
       set(self.landscapeRepo, 'replayLandscape', null);
       AlertifyHandler.showAlertifyMessage("Replay Landscape couldn't be requested!"
         + ' Backend offline?');
       self.debug("Repplay Landscape couldn't be requested!", e);
     }
 
-    function error(e:any) {
+    function error(e: any) {
       set(self.landscapeRepo, 'replayLandscape', null);
       self.debug('Error when fetching replaylandscape: ', e);
     }

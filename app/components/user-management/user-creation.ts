@@ -152,7 +152,7 @@ export default class UserCreation extends Component {
     });
 
     function createPreferences(this: UserCreation, uid: string) {
-      const settingsPromiseArray:RSVP.Promise<Userpreference>[] = [];
+      const settingsPromiseArray: RSVP.Promise<Userpreference>[] = [];
 
       const settings = Object.entries(this.settings);
 

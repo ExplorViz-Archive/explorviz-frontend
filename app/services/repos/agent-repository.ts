@@ -9,7 +9,7 @@ import Agent from 'explorviz-frontend/models/agent';
 * @extends Ember.Service
 */
 export default class AgentRepository extends Service.extend(Evented) {
-  agentList:Agent[] = [];
+  agentList: Agent[] = [];
 }
 
 declare module '@ember/service' {

@@ -2,7 +2,7 @@ import Service from '@ember/service';
 import { set } from '@ember/object';
 
 type Colors = {
-  [type:string]: string
+  [type: string]: string
 };
 
 export type ExtensionDescription = {
@@ -32,7 +32,7 @@ export default class Configuration extends Service {
   * @property configurationExtensions
   * @type Array
   */
-  configurationExtensions:ExtensionDescription[] = [];
+  configurationExtensions: ExtensionDescription[] = [];
 
   /**
   * Current colors for landscape visualization
@@ -40,7 +40,7 @@ export default class Configuration extends Service {
   * @property landscapeColors
   * @type Object
   */
-  landscapeColors:Colors = {};
+  landscapeColors: Colors = {};
 
   /**
   * Current colors for application visualization
@@ -48,7 +48,7 @@ export default class Configuration extends Service {
   * @property applicationColors
   * @type Object
   */
-  applicationColors:Colors = {};
+  applicationColors: Colors = {};
 
   /**
   * Default colors for landscape visualization
@@ -56,7 +56,7 @@ export default class Configuration extends Service {
   * @property landscapeColorsDefault
   * @type Object
   */
-  landscapeColorsDefault:Colors = {};
+  landscapeColorsDefault: Colors = {};
 
   /**
   * Default colors for application visualization
@@ -64,7 +64,7 @@ export default class Configuration extends Service {
   * @property applicationColorsDefault
   * @type Object
   */
-  applicationColorsDefault:Colors = {};
+  applicationColorsDefault: Colors = {};
 
   discoverySettings: DiscoverySettings = {};
 

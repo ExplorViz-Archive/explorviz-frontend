@@ -367,8 +367,8 @@ export default class PlotlyTimeline extends Component<IArgs> {
   }
 
   getUpdatedPlotlyDataObject(timestamps: Timestamp[], markerStates: IMarkerStates): [{}] {
-    const colors:string[] = [];
-    const sizes:number[] = [];
+    const colors: string[] = [];
+    const sizes: number[] = [];
 
     const x: Date[] = [];
     const y: number[] = [];

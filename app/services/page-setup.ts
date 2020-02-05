@@ -16,7 +16,7 @@ export default class PageSetup extends Service {
   * @property navbarRoutes
   * @type Array
   */
-  navbarRoutes:string[] = [];
+  navbarRoutes: string[] = [];
 
   /**
   * Latest fetched entity

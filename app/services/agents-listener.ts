@@ -17,9 +17,9 @@ export default class AgentsListener extends Service {
 
   @service('repos/agent-repository') agentRepo!: AgentRepository;
 
-  content:any = null;
+  content: any = null;
 
-  es:any = null;
+  es: any = null;
 
   initSSE() {
     set(this, 'content', []);
@@ -45,7 +45,7 @@ export default class AgentsListener extends Service {
 
     es = this.es;
 
-    set(es, 'onmessage', (event:any) => {
+    set(es, 'onmessage', (event: any) => {
       const agentListJson = JSON.parse(event.data);
 
       // ATTENTION: Mind the push operation, push != pushPayload in terms of
@@ -53,10 +53,10 @@ export default class AgentsListener extends Service {
       // https://github.com/emberjs/data/issues/3455
       this.store.pushPayload(agentListJson);
 
-      const idArray:string[] = [];
-      const agentRecordList:Agent[] = [];
+      const idArray: string[] = [];
+      const agentRecordList: Agent[] = [];
 
-      agentListJson.data.forEach((agentJson:any) => {
+      agentListJson.data.forEach((agentJson: any) => {
         idArray.push(agentJson.id);
       });
 

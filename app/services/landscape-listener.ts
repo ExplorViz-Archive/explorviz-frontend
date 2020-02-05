@@ -17,7 +17,7 @@ declare const EventSourcePolyfill: any;
 export default class LandscapeListener extends Service.extend(Evented) {
   // https://github.com/segmentio/sse/blob/master/index.js
 
-  content:any = null;
+  content: any = null;
 
   @service('session') session!: any;
 
@@ -66,7 +66,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
     es = this.es;
 
-    set(es, 'onmessage', (event:any) => {
+    set(es, 'onmessage', (event: any) => {
       const jsonLandscape = JSON.parse(event.data);
 
       if (jsonLandscape && Object.prototype.hasOwnProperty.call(jsonLandscape, 'data')) {
@@ -133,7 +133,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
     });
   }
 
-  updateTimestampRepoAndTimeline(this: LandscapeListener, timestamp:Timestamp) {
+  updateTimestampRepoAndTimeline(this: LandscapeListener, timestamp: Timestamp) {
     set(this.timestampRepo, 'latestTimestamp', timestamp);
 
     // this syntax will notify the template engine to redraw all components

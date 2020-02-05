@@ -41,7 +41,7 @@ export default class CurrentUser extends Service {
    * @returns Promise
    * @memberof CurrentUser
    */
-  load(this:CurrentUser) {
+  load(this: CurrentUser) {
     const userId = this.get('session').get('session.content.authenticated.rawUserData.data.id');
     if (!isEmpty(userId)) {
       const user = this.get('store').peekRecord('user', userId);
@@ -61,7 +61,7 @@ export default class CurrentUser extends Service {
    * @memberof CurrentUser
    *
    */
-  getPreference(this:CurrentUser, settingId:string) {
+  getPreference(this: CurrentUser, settingId: string) {
     const userId = this.get('id');
 
     if (userId === undefined) {
@@ -79,7 +79,7 @@ export default class CurrentUser extends Service {
    * @returns
    * @memberof CurrentUser
    */
-  getPreferenceOrDefaultValue(this:CurrentUser, type: Setting, settingId:string) {
+  getPreferenceOrDefaultValue(this: CurrentUser, type: Setting, settingId: string) {
     const userId = this.get('id');
 
     if (userId === undefined) {

@@ -38,15 +38,15 @@ export default class Authenticator extends BaseAuthenticator {
    *
    * @method restore
    */
-  restore(data:any) {
+  restore(data: any) {
     const self = this;
     const url = config.APP.API_ROOT;
 
     // TODO refactor with Ember-Data
 
     return new RSVP.Promise((resolve, reject) => {
-      function fulfill(newTokenPayload:any) {
-        const userRecord:User = self.store.push(data.rawUserData) as User;
+      function fulfill(newTokenPayload: any) {
+        const userRecord: User = self.store.push(data.rawUserData) as User;
         set(userRecord, 'token', newTokenPayload.token);
         resolve({
           access_token: newTokenPayload.token,
@@ -55,7 +55,7 @@ export default class Authenticator extends BaseAuthenticator {
         });
       }
 
-      function failure(answer:any) {
+      function failure(answer: any) {
         let reason = 'Please login again.';
 
         try {
@@ -95,7 +95,7 @@ export default class Authenticator extends BaseAuthenticator {
 
     const self = this;
 
-    function fulfill(userPayload:any) {
+    function fulfill(userPayload: any) {
       const userRecord = self.store.push(userPayload) as User;
       return RSVP.resolve({
         // rawUserData is necessary, because the userRecord is transformed
@@ -106,7 +106,7 @@ export default class Authenticator extends BaseAuthenticator {
       });
     }
 
-    function failure(reason:any) {
+    function failure(reason: any) {
       return RSVP.reject(reason);
     }
 
@@ -129,7 +129,7 @@ export default class Authenticator extends BaseAuthenticator {
    *
    * @method invalidate
    */
-  invalidate(_data:any, args:any) {
+  invalidate(_data: any, args: any) {
     set(this.session.session.content, 'message', args.message);
     return RSVP.resolve();
   }
