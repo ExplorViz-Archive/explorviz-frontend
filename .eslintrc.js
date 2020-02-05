@@ -22,7 +22,10 @@ module.exports = {
     'require-yield': 'off',
     'no-plusplus': 'off',
     'import/no-cycle': 'off',
-    'prefer-rest-params': 'off'
+    'prefer-rest-params': 'off',
+    "comma-spacing": "off",
+    "@typescript-eslint/comma-spacing": ["error"],
+    "@typescript-eslint/type-annotation-spacing": ["error"],
   },
   overrides: [
     // node files
