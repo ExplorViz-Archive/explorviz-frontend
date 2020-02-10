@@ -1,6 +1,6 @@
 import THREE from 'three';
-import BaseMesh from '../3d/base-mesh';
-import PlaneLayout from '../layout-models/plane-layout';
+import BaseMesh from '../base-mesh';
+import PlaneLayout from '../../layout-models/plane-layout';
 
 
 export default abstract class PlaneMesh extends BaseMesh {
@@ -12,6 +12,6 @@ export default abstract class PlaneMesh extends BaseMesh {
     this.layout = layout;
   }
 
-  abstract createLabel(font: THREE.Font, color: THREE.Color): void
+  abstract createLabel(font: THREE.Font, fontSize: number, color: THREE.Color): void
 
 }

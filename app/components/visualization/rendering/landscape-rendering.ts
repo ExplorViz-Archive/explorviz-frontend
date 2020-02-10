@@ -30,7 +30,7 @@ import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import NodeGroup from 'explorviz-frontend/models/nodegroup';
 import System from 'explorviz-frontend/models/system';
 import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
-import SystemMesh from 'explorviz-frontend/view-objects/landscape/system-mesh';
+import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
 
 
 interface Args {
@@ -324,8 +324,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         if (!systemLayout)
           return;
 
-        let systemMesh = new SystemMesh(systemLayout, new THREE.Color(this.configuration.landscapeColors.system));
+        let systemMesh = new SystemMesh(systemLayout, system, new THREE.Color(this.configuration.landscapeColors.system));
         systemMesh.setToDefaultPosition(centerPoint);
+        systemMesh.createLabel(this.font, 0.4);
+        systemMesh.createCollapseSymbol(this.font, 0.35);
         this.scene.add(systemMesh);
         this.meshIdToModel.set(systemMesh.id, system);
 
