@@ -31,6 +31,7 @@ import NodeGroup from 'explorviz-frontend/models/nodegroup';
 import System from 'explorviz-frontend/models/system';
 import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
 import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
+import NodeGroupMesh from 'explorviz-frontend/view-objects/3d/landscape/nodegroup-mesh';
 
 
 interface Args {
@@ -331,23 +332,22 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         this.scene.add(systemMesh);
         this.meshIdToModel.set(systemMesh.id, system);
 
-        let nodegroups = system.nodegroups;
+        let nodeGroups = system.nodegroups;
 
         // Draw boxes for nodegroups
-        nodegroups.forEach((nodegroup) => {
+        nodeGroups.forEach((nodeGroup) => {
 
-          if (!nodegroup.get('visible')) {
-            return;
+          let nodeGroupLayout = modelIdToLayout.get(nodeGroup.get('id'));
+
+          if (nodeGroupLayout) {
+            let nodeGroupMesh = new NodeGroupMesh(nodeGroupLayout, nodeGroup, new THREE.Color(this.configuration.landscapeColors.nodegroup));
+            nodeGroupMesh.setToDefaultPosition(centerPoint);
+            nodeGroupMesh.createCollapseSymbol(this.font, 0.35);
+            this.scene.add(nodeGroupMesh);
+            this.meshIdToModel.set(nodeGroupMesh.id, nodeGroup);
           }
 
-          let nodegroupMesh = EntityRendering.renderNodeGroup(nodegroup, centerPoint,
-            this.configuration, this.labeler, this.font);
-          if (nodegroupMesh) {
-            this.scene.add(nodegroupMesh);
-            this.meshIdToModel.set(nodegroupMesh.id, nodegroup);
-          }
-
-          let nodes = nodegroup.get('nodes');
+          let nodes = nodeGroup.get('nodes');
 
           // Draw boxes for nodes
           nodes.forEach((node) => {
@@ -405,6 +405,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       // this.get('popUpHandler').hideTooltip();
 
       let emberModel = this.meshIdToModel.get(mesh.id);
+      console.log("Double clicked ember model: ", emberModel);
 
       if(emberModel instanceof Application){
         if(emberModel.get('components').get('length') === 0) {
