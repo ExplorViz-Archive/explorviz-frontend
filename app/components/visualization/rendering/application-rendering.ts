@@ -64,7 +64,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   landscapeRepo!: LandscapeRepository;
 
   @service()
-  worker !: any;
+  worker!: any;
 
   debug = debugLogger('ApplicationRendering');
 
@@ -80,7 +80,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   animationFrameId = 0;
 
-  interaction !: Interaction;
+  interaction!: Interaction;
 
   modelIdToMesh: Map<string, THREE.Mesh> = new Map();
 
@@ -492,7 +492,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     try {
       const layoutedApplication: Map<string, BoxLayout> = await this.worker.postMessage('city-layouter', reducedApplication);
       this.boxLayoutMap = layoutedApplication;
-      // Foundation is created in step1(), so we can safely assume the foundationObj to be not null
       this.addFoundationToScene(this.args.application);
       this.addCommunication(this.args.application);
       this.addLabels();
@@ -721,6 +720,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (mesh instanceof ComponentMesh) {
       this.closeComponentMesh(mesh);
     }
+    this.addCommunication(this.args.application);
   }
 
   @action
@@ -801,7 +801,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   removeAllCommunication() {
-    this.commIdToMesh.forEach((mesh) => {
+    this.commIdToMesh.forEach((mesh: CommunicationMesh) => {
       mesh.delete();
     });
     this.commIdToMesh.clear();
