@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import Clazz from './clazz';
 import ClazzCommunication from './clazzcommunication';
-import BaseEntitity from './baseentity';
+import BaseEntity from './baseentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -14,8 +14,7 @@ const { attr, belongsTo, hasMany } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default class AggregatedClazzCommunication extends BaseEntitity {
-
+export default class AggregatedClazzCommunication extends BaseEntity {
   @attr('number') totalRequests!: number;
 
   @attr('number') averageResponseTime!: number;
@@ -28,12 +27,11 @@ export default class AggregatedClazzCommunication extends BaseEntitity {
 
   @hasMany('clazzcommunication', { inverse: null })
   clazzCommunications!: DS.PromiseManyArray<ClazzCommunication>;
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'aggregatedclazzcommunication': AggregatedClazzCommunication;
   }
 }
-

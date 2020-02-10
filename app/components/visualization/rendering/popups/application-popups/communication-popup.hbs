@@ -1,5 +1,6 @@
 <h3 class="popover-header">
-  <div style="font-weight:bold;text-align:center;">{{this.sourceClazz}}
+  <div style="font-weight:bold;text-align:center;">
+    {{this.sourceClazz}}
     {{#if this.isBidirectional}}
       {{svg-jar "arrow-both" class="octicon align-middle"}}
     {{else}}
@@ -10,22 +11,25 @@
 </h3>
 <div class="popover-body" style="white-space: nowrap;">
   <table style="width:100%">
-    <tr>
-      <td>&nbsp;{{svg-jar "code" class="octicon align-middle"}}&nbsp; Requests:</td>
-      <td style="text-align:right;padding-left:10px;">
-        {{this.requests}}
-      </td>
-    </tr>
-    <tr>
-      <td>&nbsp;{{svg-jar "list-ordered" class="octicon align-middle"}}&nbsp; Involved Traces:</td>
-      <td style="text-align:right;padding-left:10px;"> {{this.traceSize}}
-      </td>
-    </tr>
-    <tr>
-      <td>&nbsp;{{svg-jar "clock" class="octicon align-middle"}}&nbsp; Avg. Response Time (ms):</td>
-      <td style="text-align:right;padding-left:10px;">
-        {{format-number this.responseTime 'ms'}}
-      </td>
-    </tr>
+    <tbody>
+      <tr>
+        <td>&nbsp;{{svg-jar "code" class="octicon align-middle"}}&nbsp;Requests:</td>
+        <td style="text-align:right;padding-left:10px;">
+          {{this.requests}}
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;{{svg-jar "list-ordered" class="octicon align-middle"}}&nbsp;Involved Traces:</td>
+        <td style="text-align:right;padding-left:10px;">
+          {{this.traceSize}}
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;{{svg-jar "clock" class="octicon align-middle"}}&nbsp;Avg. Response Time (ms):</td>
+        <td style="text-align:right;padding-left:10px;">
+          {{format-number this.responseTime "ms"}}
+        </td>
+      </tr>
+    </tbody>
   </table>
 </div>

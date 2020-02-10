@@ -1,11 +1,11 @@
-import DS from 'ember-data';
-import DrawEdgeEntity from './drawedgeentity';
 import { computed } from '@ember/object';
+import DS from 'ember-data';
 import AggregatedClazzCommunication from './aggregatedclazzcommunication';
-import ClazzCommunication from './clazzcommunication';
-import TraceStep from './tracestep';
 import Clazz from './clazz';
+import ClazzCommunication from './clazzcommunication';
 import Component from './component';
+import DrawEdgeEntity from './drawedgeentity';
+import TraceStep from './tracestep';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -20,8 +20,7 @@ const { attr, belongsTo, hasMany } = DS;
  * @submodule model.meta
  */
 export default class DrawableClazzCommunication extends DrawEdgeEntity {
-
-  @attr('boolean', { defaultValue: false}) isBidirectional!: boolean;
+  @attr('boolean', { defaultValue: false }) isBidirectional!: boolean;
 
   @attr('number') requests!: number;
 
@@ -37,15 +36,15 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity {
   aggregatedClazzCommunications!: DS.PromiseManyArray<AggregatedClazzCommunication>;
 
   @computed('aggregatedClazzCommunications')
-  get containedTraces(){
-    let traces = new Set();
+  get containedTraces() {
+    const traces = new Set();
 
     // Find all belonging traces
     this.get('aggregatedClazzCommunications').forEach((aggClazzComm: AggregatedClazzCommunication) => {
       aggClazzComm.get('clazzCommunications').forEach((clazzComm: ClazzCommunication) => {
         clazzComm.get('traceSteps').forEach((traceStep: TraceStep) => {
-          let containedTrace = traceStep.belongsTo('parentTrace').value();
-          if (containedTrace){
+          const containedTrace = traceStep.belongsTo('parentTrace').value();
+          if (containedTrace) {
             traces.add(containedTrace);
           }
         });
@@ -57,15 +56,15 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity {
 
   // most inner component which common to both source and target clazz of communication
   @computed('sourceClazz', 'targetClazz')
-  get parentComponent(this: DrawableClazzCommunication){
+  get parentComponent(this: DrawableClazzCommunication) {
     // contains all parent components of source clazz incl. foundation in hierarchical order
-    let sourceClazzComponents = [];
-    let sourceClazz = this.belongsTo('sourceClazz').value() as Clazz;
-    if(sourceClazz !== null) {
+    const sourceClazzComponents = [];
+    const sourceClazz = this.belongsTo('sourceClazz').value() as Clazz;
+    if (sourceClazz !== null) {
       let parentComponent = sourceClazz.belongsTo('parent').value() as Component;
-      if(parentComponent !== null) {
+      if (parentComponent !== null) {
         sourceClazzComponents.push(parentComponent);
-        while (parentComponent !== null){
+        while (parentComponent !== null) {
           parentComponent = parentComponent.belongsTo('parentComponent').value() as Component;
           sourceClazzComponents.push(parentComponent);
         }
@@ -73,13 +72,13 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity {
     }
 
     // contains all parent components of target clazz incl. foundation in hierarchical order
-    let targetClazzComponents = [];
-    let targetClazz = this.belongsTo('targetClazz').value() as Clazz;
-    if(targetClazz !== null) {
+    const targetClazzComponents = [];
+    const targetClazz = this.belongsTo('targetClazz').value() as Clazz;
+    if (targetClazz !== null) {
       let parentComponent = targetClazz.belongsTo('parent').value() as Component;
-      if(parentComponent !== null) {
+      if (parentComponent !== null) {
         targetClazzComponents.push(parentComponent);
-        while (parentComponent !== null){
+        while (parentComponent !== null) {
           parentComponent = parentComponent.belongsTo('parentComponent').value() as Component;
           targetClazzComponents.push(parentComponent);
         }
@@ -92,8 +91,8 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity {
 
     // find the most inner common component
     let commonComponent = sourceClazzComponents[0];
-    for (let i = 0; i < sourceClazzComponents.length && i < targetClazzComponents.length ; i++){
-      if (sourceClazzComponents[i] === targetClazzComponents[i]){
+    for (let i = 0; i < sourceClazzComponents.length && i < targetClazzComponents.length; i++) {
+      if (sourceClazzComponents[i] === targetClazzComponents[i]) {
         commonComponent = sourceClazzComponents[i];
       } else {
         break;
@@ -104,21 +103,20 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity {
   }
 
   toggleCommunicationDirection() {
-
     // Toggle of communication direction only sensible for bidirectional communication
-    if (!this.get('isBidirectional')){
+    if (!this.get('isBidirectional')) {
       return;
     }
 
     // Swap source and target clazz
-    let oldSourceClazz = this.get('sourceClazz');
-    let oldTargetClazz = this.get('targetClazz');
+    const oldSourceClazz = this.get('sourceClazz');
+    const oldTargetClazz = this.get('targetClazz');
     this.set('sourceClazz', oldTargetClazz);
     this.set('targetClazz', oldSourceClazz);
 
     // Swap start and end point for rendering (e.g. drawing of arrows)
-    let oldStartPoint = this.get('startPoint');
-    let oldEndPoint = this.get('endPoint');
+    const oldStartPoint = this.get('startPoint');
+    const oldEndPoint = this.get('endPoint');
     this.set('startPoint', oldEndPoint);
     this.set('endPoint', oldStartPoint);
   }
@@ -126,10 +124,10 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity {
   isVisible() {
     return this.get('parentComponent').get('opened');
   }
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'drawableclazzcommunication': DrawableClazzCommunication;
   }

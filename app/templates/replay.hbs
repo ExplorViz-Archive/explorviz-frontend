@@ -1,6 +1,11 @@
 <div class="mb-1">
   <div class="float-right">
-    <input id="selectBoxUploadLandscape" onchange={{this.uploadLandscape}} type="file" style="display:none;" />
+    <input
+      id="selectBoxUploadLandscape"
+      type="file"
+      style="display:none;"
+      {{on "change" this.uploadLandscape}}
+    >
     <BsButton
       @type="success"
       @outline={{true}}
@@ -22,10 +27,11 @@
       {{else}}
         <div class="container-fluid">
           <div class="jumbotron">
-              <h2>No replay landscape selected!</h2>
-              <p>Please select a landscape from the timeline.
-                  If the timeline is empty, please <i>upload</i> a landscape first.
-              </p>
+            <h2>No replay landscape selected!</h2>
+            <p>
+              Please select a landscape from the timeline.
+              If the timeline is empty, please <i>upload</i> a landscape first.
+            </p>
           </div>
           <div class="spinner-center-3" role="status"></div>
         </div>
@@ -33,7 +39,7 @@
     {{else}}
       <div style="position: absolute!important" class="pl-1">
         <BsButton
-          onClick={{this.openLandscapeView}}
+          @onClick={{this.openLandscapeView}}
           @type="secondary"
           @outline={{true}}
           @title="Back to Landscape"
@@ -45,7 +51,7 @@
         @application={{this.landscapeRepo.replayApplication}}
       />
     {{/if}}
-    <!-- timeline -->
+    {{!-- timeline --}}
     <div id="timeline-content">
       <BsButton
         @onClick={{this.toggleTimeline}}
@@ -57,7 +63,8 @@
         {{#unless this.showTimeline}}
           <span class="pr-1">Show Timeline</span>
         {{/unless}}
-        {{svg-jar "chevron-up"
+        {{svg-jar
+          "chevron-up"
           id="hidetimeline-icon"
           class=(if this.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")
         }}

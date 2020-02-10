@@ -1,11 +1,19 @@
 <li class="nav-item">
   {{#if this.landscapeListener.pauseVisualizationReload}}
-    <a class="nav-link-with-cursor" title="Resume Visualization" {{on "click" this.toggleVisualizationReload}}>
+    <div
+      class="nav-link-with-cursor"
+      title="Resume Visualization"
+      {{on "click" this.toggleVisualizationReload}}
+    >
       {{svg-jar "history" class="octicon align-middle navbar-highlight"}}
-    </a>
+    </div>
   {{else}}
-    <a class="nav-link-with-cursor" title="Pause Visualization" {{on "click" this.toggleVisualizationReload}}>
+    <div
+      class="nav-link-with-cursor"
+      title="Pause Visualization"
+      {{on "click" this.toggleVisualizationReload}}
+    >
       {{svg-jar "history" class="octicon align-middle"}}
-    </a>
+    </div>
   {{/if}}
 </li>

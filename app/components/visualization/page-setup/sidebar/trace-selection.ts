@@ -1,13 +1,14 @@
+
+import { action, computed } from '@ember/object';
+import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
-import { inject as service } from "@ember/service";
-import { computed, action } from '@ember/object';
-import DS from 'ember-data';
-import Highlighter from 'explorviz-frontend/services/visualization/application/highlighter';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import RenderingService from 'explorviz-frontend/services/rendering-service';
-import Trace from 'explorviz-frontend/models/trace';
-import Clazz from 'explorviz-frontend/models/clazz';
 import { tracked } from '@glimmer/tracking';
+import DS from 'ember-data';
+import Clazz from 'explorviz-frontend/models/clazz';
+import Trace from 'explorviz-frontend/models/trace';
+import RenderingService from 'explorviz-frontend/services/rendering-service';
+import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
+import Highlighter from 'explorviz-frontend/services/visualization/application/highlighter';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
@@ -16,19 +17,22 @@ interface Args {
 }
 
 export default class TraceSelection extends Component<Args> {
-
   // default time units
   @tracked
   traceTimeUnit: TimeUnit = 'ms';
+
   @tracked
   traceStepTimeUnit: TimeUnit = 'ms';
 
   @tracked
   sortBy: any = 'traceId';
+
   @tracked
   isSortedAsc: boolean = true;
+
   @tracked
   filterTerm: string = '';
+
   @tracked
   filterInput: string = '';
 
@@ -50,17 +54,17 @@ export default class TraceSelection extends Component<Args> {
   // Compute current traces when highlighting changes
   @computed('highlighter.highlightedEntity', 'landscapeRepo.latestApplication', 'sortBy', 'isSortedAsc', 'filterTerm')
   get traces() {
-    let highlighter = this.highlighter;
+    const { highlighter } = this;
     if (highlighter.get('isTrace')) {
       return [highlighter.get('highlightedEntity')];
-    } else {
-      const latestApplication = this.landscapeRepo.latestApplication;
-      if (latestApplication === null) {
-        return [];
-      } else {
-        return this.filterAndSortTraces(latestApplication.get('traces'));
-      }
     }
+
+    const { latestApplication } = this.landscapeRepo;
+    if (latestApplication === null) {
+      return [];
+    }
+
+    return this.filterAndSortTraces(latestApplication.get('traces'));
   }
 
   filterAndSortTraces(this: TraceSelection, traces: DS.PromiseManyArray<Trace>) {
@@ -68,11 +72,11 @@ export default class TraceSelection extends Component<Args> {
       return [];
     }
 
-    let filteredTraces: Trace[] = [];
-    let filter = this.filterTerm;
+    const filteredTraces: Trace[] = [];
+    const filter = this.filterTerm;
     traces.forEach((trace) => {
-      let sourceClazz = trace.get('sourceClazz');
-      let targetClazz = trace.get('targetClazz');
+      const sourceClazz = trace.get('sourceClazz');
+      const targetClazz = trace.get('targetClazz');
       if (filter === ''
         || trace.get('traceId').includes(filter)
         || (sourceClazz !== undefined && sourceClazz.get('name').toLowerCase().includes(filter))
@@ -82,9 +86,25 @@ export default class TraceSelection extends Component<Args> {
     });
 
     if (this.isSortedAsc) {
-      filteredTraces.sort((a, b) => (a.get(this.sortBy) > b.get(this.sortBy)) ? 1 : ((b.get(this.sortBy) > a.get(this.sortBy)) ? -1 : 0));
+      filteredTraces.sort((a, b) => {
+        if (a.get(this.sortBy) > b.get(this.sortBy)) {
+          return 1;
+        }
+        if (b.get(this.sortBy) > a.get(this.sortBy)) {
+          return -1;
+        }
+        return 0;
+      });
     } else {
-      filteredTraces.sort((a, b) => (a.get(this.sortBy) < b.get(this.sortBy)) ? 1 : ((b.get(this.sortBy) < a.get(this.sortBy)) ? -1 : 0));
+      filteredTraces.sort((a, b) => {
+        if (a.get(this.sortBy) < b.get(this.sortBy)) {
+          return 1;
+        }
+        if (b.get(this.sortBy) < a.get(this.sortBy)) {
+          return -1;
+        }
+        return 0;
+      });
     }
 
     return filteredTraces;
@@ -128,29 +148,25 @@ export default class TraceSelection extends Component<Args> {
 
   @action
   toggleTraceTimeUnit(this: TraceSelection) {
-    let timeUnit = this.traceTimeUnit;
+    const timeUnit = this.traceTimeUnit;
 
     if (timeUnit === 'ns') {
       this.traceTimeUnit = 'ms';
-    }
-    else if (timeUnit === 'ms') {
+    } else if (timeUnit === 'ms') {
       this.traceTimeUnit = 's';
-    }
-    else if (timeUnit === 's') {
+    } else if (timeUnit === 's') {
       this.traceTimeUnit = 'ns';
     }
   }
 
   @action
   toggleTraceStepTimeUnit(this: TraceSelection) {
-    let timeUnit = this.traceStepTimeUnit;
+    const timeUnit = this.traceStepTimeUnit;
     if (timeUnit === 'ns') {
       this.traceStepTimeUnit = 'ms';
-    }
-    else if (timeUnit === 'ms') {
+    } else if (timeUnit === 'ms') {
       this.traceStepTimeUnit = 's';
-    }
-    else if (timeUnit === 's') {
+    } else if (timeUnit === 's') {
       this.traceStepTimeUnit = 'ns';
     }
   }
@@ -162,8 +178,8 @@ export default class TraceSelection extends Component<Args> {
 
   @action
   lookAtClazz(this: TraceSelection, proxyClazz: Clazz) {
-    let clazzId = proxyClazz.get('id');
-    let clazz = this.store.peekRecord('clazz', clazzId);
+    const clazzId = proxyClazz.get('id');
+    const clazz = this.store.peekRecord('clazz', clazzId);
     if (clazz !== null) {
       this.renderingService.moveCameraTo(clazz);
     }
@@ -189,16 +205,15 @@ export default class TraceSelection extends Component<Args> {
   }
 
   moveCameraToTraceStep(this: TraceSelection) {
-    let currentTraceStep = this.highlighter.get('currentTraceStep');
+    const currentTraceStep = this.highlighter.get('currentTraceStep');
 
     if (currentTraceStep) {
-      let storeId = currentTraceStep.get('clazzCommunication').get('id');
+      const storeId = currentTraceStep.get('clazzCommunication').get('id');
       // Avoid proxy object by requesting clazz from store
-      let clazzCommunication = this.store.peekRecord('clazzcommunication', storeId);
+      const clazzCommunication = this.store.peekRecord('clazzcommunication', storeId);
       if (clazzCommunication !== null) {
         this.renderingService.moveCameraTo(clazzCommunication);
       }
     }
   }
-
 }

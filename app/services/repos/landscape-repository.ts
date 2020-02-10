@@ -10,25 +10,25 @@ import Application from 'explorviz-frontend/models/application';
 * @extends Ember.Service
 */
 export default class LandscapeRepository extends Service.extend(Evented) {
+  latestLandscape: Landscape|null = null;
 
-  latestLandscape:Landscape|null = null;
-  latestApplication:Application|null = null;
+  latestApplication: Application|null = null;
 
-  replayLandscape:Landscape|null = null;
-  replayApplication:Application|null = null;
+  replayLandscape: Landscape|null = null;
+
+  replayApplication: Application|null = null;
 
   triggerLatestLandscapeUpdate() {
-    this.trigger("updated", this.get("latestLandscape"));
+    this.trigger('updated', this.get('latestLandscape'));
   }
 
   triggerLatestReplayLandscapeUpdate() {
-    this.trigger("updated", this.get("replayLandscape"));
+    this.trigger('updated', this.get('replayLandscape'));
   }
-
 }
 
-declare module "@ember/service" {
+declare module '@ember/service' {
   interface Registry {
-    "repos/landscape-repository": LandscapeRepository;
+    'repos/landscape-repository': LandscapeRepository;
   }
 }

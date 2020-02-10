@@ -1,23 +1,22 @@
 import DS from 'ember-data';
+import ApplicationCommunication from './applicationcommunication';
 import BaseEntity from './baseentity';
-import Timestamp from './timestamp';
 import Event from './event';
 import System from './system';
-import ApplicationCommunication from './applicationcommunication';
+import Timestamp from './timestamp';
 
 const { belongsTo, hasMany } = DS;
 
 /**
-* Ember model for a landscape.
-*
-* @class Landscape-Model
-* @extends BaseEntity-Model
-*
-* @module explorviz
-* @submodule model.meta
-*/
+ * Ember model for a landscape.
+ *
+ * @class Landscape-Model
+ * @extends BaseEntity-Model
+ *
+ * @module explorviz
+ * @submodule model.meta
+ */
 export default class Landscape extends BaseEntity {
-
   @belongsTo('timestamp')
   timestamp!: DS.PromiseObject<Timestamp> & Timestamp;
 
@@ -30,11 +29,11 @@ export default class Landscape extends BaseEntity {
   // list of applicationCommunication for rendering purposes
   @hasMany('applicationcommunication', { inverse: null })
   totalApplicationCommunications!: DS.PromiseManyArray<ApplicationCommunication>;
-
 }
 
 declare module 'ember-data/types/registries/model' {
-	export default interface ModelRegistry {
-	  'landscape': Landscape;
-	}
+  // tslint:disable-next-line: interface-name
+  export default interface ModelRegistry {
+    'landscape': Landscape;
+  }
 }

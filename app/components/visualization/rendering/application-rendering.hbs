@@ -21,10 +21,20 @@
   />
 </Visualization::PageSetup::VisualizationNavbar>
 
-<div id="rendering" {{did-insert this.outerDivInserted}} {{did-resize this.resize debounce=100}}>
-  <canvas class="main-content-majority" oncontextmenu="return false;" {{did-insert this.canvasInserted}}>
+<div
+  id="rendering"
+  {{did-insert this.outerDivInserted}}
+  {{did-resize this.resize debounce=100}}
+>
+  <canvas
+    class="main-content-majority"
+    oncontextmenu="return false;"
+    {{did-insert this.canvasInserted}}
+  >
   </canvas>
 
-  <!-- popup(s) -->
-  <Visualization::Rendering::Popups::PopupCoordinator @popupData={{this.popupData}} />
+  {{!-- popup(s) --}}
+  <Visualization::Rendering::Popups::PopupCoordinator
+    @popupData={{this.popupData}}
+  />
 </div>

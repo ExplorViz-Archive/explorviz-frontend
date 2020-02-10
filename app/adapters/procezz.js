@@ -2,12 +2,12 @@ import JSONAPIAdapter from '@ember-data/adapter/json-api';
 import DataAdapterMixin from 'ember-simple-auth/mixins/data-adapter-mixin';
 import ENV from 'explorviz-frontend/config/environment';
 import { computed } from '@ember/object';
- 
+
 const { APP } = ENV;
 
 /**
-* This Adapter operates as communication abstraction for all network requests, 
-* that refer to Procezz objects. It provides functions for fetching, 
+* This Adapter operates as communication abstraction for all network requests,
+* that refer to Procezz objects. It provides functions for fetching,
 * updating and uploading.
 *
 * TODO more description
@@ -19,15 +19,15 @@ const { APP } = ENV;
 * @submodule network
 */
 export default class ProcezzAdapter extends JSONAPIAdapter.extend(DataAdapterMixin) {
-
   host = APP.API_ROOT;
+
   namespace = 'v1';
 
   @computed('session.data.authenticated.access_token')
   get headers() {
-    let headers = { 'Accept': 'application/vnd.api+json' };
+    const headers = { Accept: 'application/vnd.api+json' };
     if (this.session.isAuthenticated) {
-      headers['Authorization'] = `Bearer ${this.session.data.authenticated.access_token}`;
+      headers.Authorization = `Bearer ${this.session.data.authenticated.access_token}`;
     }
 
     return headers;
@@ -41,5 +41,4 @@ export default class ProcezzAdapter extends JSONAPIAdapter.extend(DataAdapterMix
     const agentId = snapshot.belongsTo('agent', { id: true });
     return `${baseUrl}/agents/${agentId}/procezzes/${id}`;
   }
-
 }

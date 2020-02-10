@@ -14,7 +14,7 @@ type LandscapeColors = {
   applicationText: ColorString,
   collapseSymbol: ColorString,
   background: ColorString
-}
+};
 
 type ApplicationColors = {
   foundation: ColorString,
@@ -28,7 +28,7 @@ type ApplicationColors = {
   communication: ColorString,
   communicationArrow: ColorString,
   background: ColorString
-}
+};
 
 export type ExtensionDescription = {
   id: string,
@@ -40,24 +40,24 @@ export type ExtensionDescription = {
 
 export type DiscoverySettings = {
   showHiddenEntities?: boolean
-}
+};
 
 /**
-* The Configuration Service handles color settings for the visualization and configuration extensions
-* @class Configuration-Service
-* @extends Ember.Service
-*/
+ * The Configuration Service handles color settings for the
+ * visualization and configuration extensions
+ * @class Configuration-Service
+ * @extends Ember.Service
+ */
 export default class Configuration extends Service {
-
   /**
-  * Array for component-based settings dialogs. Any extension may push an object  
-  * with the name of it's settings-component and it's title in this array. See 
+  * Array for component-based settings dialogs. Any extension may push an object
+  * with the name of it's settings-component and it's title in this array. See
   * the extension "colorpicker"" for exemplary usage.
   *
   * @property configurationExtensions
   * @type Array
   */
-  configurationExtensions:ExtensionDescription[] = [];
+  configurationExtensions: ExtensionDescription[] = [];
 
   /**
   * Current colors for landscape visualization
@@ -65,7 +65,7 @@ export default class Configuration extends Service {
   * @property landscapeColors
   * @type LandscapeColors
   */
-  landscapeColors:LandscapeColors;
+  landscapeColors: LandscapeColors;
 
   /**
   * Current colors for application visualization
@@ -73,7 +73,7 @@ export default class Configuration extends Service {
   * @property applicationColors
   * @type ApplicationColors
   */
-  applicationColors:ApplicationColors;
+  applicationColors: ApplicationColors;
 
   /**
   * Default colors for landscape visualization
@@ -81,17 +81,17 @@ export default class Configuration extends Service {
   * @property landscapeColorsDefault
   * @type LandscapeColors
   */
-  landscapeColorsDefault:LandscapeColors = {
-    system: "rgb(199, 199, 199)",
-    nodegroup: "rgb(22, 158, 43)",
-    node: "rgb(0, 187, 65)",
-    application: "rgb(62, 20, 160)",
-    communication: "rgb(244, 145, 0)",
-    systemText: "rgb(0, 0, 0)",
-    nodeText: "rgb(255, 255, 255)",
-    applicationText: "rgb(255, 255, 255)",
-    collapseSymbol: "rgb(0, 0, 0)",
-    background: "rgb(255, 255, 255)"
+  landscapeColorsDefault: LandscapeColors = {
+    system: 'rgb(199, 199, 199)',
+    nodegroup: 'rgb(22, 158, 43)',
+    node: 'rgb(0, 187, 65)',
+    application: 'rgb(62, 20, 160)',
+    communication: 'rgb(244, 145, 0)',
+    systemText: 'rgb(0, 0, 0)',
+    nodeText: 'rgb(255, 255, 255)',
+    applicationText: 'rgb(255, 255, 255)',
+    collapseSymbol: 'rgb(0, 0, 0)',
+    background: 'rgb(255, 255, 255)',
   };
 
   /**
@@ -100,18 +100,18 @@ export default class Configuration extends Service {
   * @property applicationColorsDefault
   * @type ApplicationColors
   */
-  applicationColorsDefault:ApplicationColors = {
-    foundation: "rgb(199, 199, 199)",
-    componentOdd: "rgb(22, 158, 43)",
-    componentEven: "rgb(0, 187, 65)",
-    clazz: "rgb(62, 20, 160)",
-    highlightedEntity: "rgb(255, 0, 0)",
-    componentText: "rgb(255, 255, 255)",
-    clazzText: "rgb(255, 255, 255)",
-    foundationText: "rgb(0, 0, 0)",
-    communication: "rgb(244, 145, 0)",
-    communicationArrow: "rgb(0, 0, 0)",
-    background: "rgb(255, 255, 255)"
+  applicationColorsDefault: ApplicationColors = {
+    foundation: 'rgb(199, 199, 199)',
+    componentOdd: 'rgb(22, 158, 43)',
+    componentEven: 'rgb(0, 187, 65)',
+    clazz: 'rgb(62, 20, 160)',
+    highlightedEntity: 'rgb(255, 0, 0)',
+    componentText: 'rgb(255, 255, 255)',
+    clazzText: 'rgb(255, 255, 255)',
+    foundationText: 'rgb(0, 0, 0)',
+    communication: 'rgb(244, 145, 0)',
+    communicationArrow: 'rgb(0, 0, 0)',
+    background: 'rgb(255, 255, 255)',
   };
 
   discoverySettings: DiscoverySettings = {};
@@ -119,19 +119,19 @@ export default class Configuration extends Service {
 
   constructor() {
     super(...arguments);
-    this.landscapeColors = {...this.landscapeColorsDefault};
-    this.applicationColors = {...this.applicationColorsDefault};
+    this.landscapeColors = { ...this.landscapeColorsDefault };
+    this.applicationColors = { ...this.applicationColorsDefault };
   }
 
   /**
    * Resets all visualization colors to default values
-   * Needs to be a deep copy of the object, otherwise the default colors got overridden when the colors are in the extension
+   * Needs to be a deep copy of the object, otherwise the default
+   * colors got overridden when the colors are in the extension
    */
   resetColors() {
-    set(this, 'landscapeColors', {...this.landscapeColorsDefault});
-    set(this, 'applicationColors', {...this.applicationColorsDefault});
+    set(this, 'landscapeColors', { ...this.landscapeColorsDefault });
+    set(this, 'applicationColors', { ...this.applicationColorsDefault });
   }
-
 }
 
 declare module '@ember/service' {

@@ -1,22 +1,21 @@
-import DrawNodeEntity from './drawnodeentity';
 import { computed } from '@ember/object';
 import DS from 'ember-data';
-import NodeGroup from './nodegroup';
+import DrawNodeEntity from './drawnodeentity';
 import Landscape from './landscape';
+import NodeGroup from './nodegroup';
 
 const { attr, hasMany, belongsTo } = DS;
 
 /**
-* Ember model for a System.
-*
-* @class System-Model
-* @extends DrawNodeEntity-Model
-*
-* @module explorviz
-* @submodule model.meta
-*/
+ * Ember model for a System.
+ *
+ * @class System-Model
+ * @extends DrawNodeEntity-Model
+ *
+ * @module explorviz
+ * @submodule model.meta
+ */
 export default class System extends DrawNodeEntity {
-
   @attr('string') name!: string;
 
   @hasMany('nodegroup', { inverse: 'parent' })
@@ -25,7 +24,7 @@ export default class System extends DrawNodeEntity {
   @belongsTo('landscape', { inverse: 'systems' })
   parent!: DS.PromiseObject<Landscape> & Landscape;
 
-  @attr('boolean', {defaultValue: true}) opened!: boolean;
+  @attr('boolean', { defaultValue: true }) opened!: boolean;
 
   // used for text labeling performance in respective labelers
   @computed('opened')
@@ -35,9 +34,9 @@ export default class System extends DrawNodeEntity {
 
   setOpened(this: System, openedParam: boolean) {
     if (openedParam) {
-      let nodegroups = this.hasMany('nodegroups').value();
-      
-      if(nodegroups !== null) {
+      const nodegroups = this.hasMany('nodegroups').value();
+
+      if (nodegroups !== null) {
         nodegroups.forEach((nodegroup) => {
           nodegroup.set('visible', true);
           if (nodegroups !== null && nodegroups.get('length') === 1) {
@@ -47,8 +46,7 @@ export default class System extends DrawNodeEntity {
           }
         });
       }
-    }
-    else {
+    } else {
       this.get('nodegroups').forEach((nodegroup) => {
         nodegroup.set('visible', false);
         nodegroup.setAllChildrenVisibility(false);
@@ -57,10 +55,10 @@ export default class System extends DrawNodeEntity {
 
     this.set('opened', openedParam);
   }
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'system': System;
   }

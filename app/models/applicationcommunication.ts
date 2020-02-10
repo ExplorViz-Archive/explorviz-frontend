@@ -1,7 +1,7 @@
 import DS from 'ember-data';
-import DrawEdgeEntity from './drawedgeentity';
 import Application from './application';
 import Clazz from './clazz';
+import DrawEdgeEntity from './drawedgeentity';
 
 const { attr, belongsTo } = DS;
 
@@ -15,7 +15,6 @@ const { attr, belongsTo } = DS;
  * @submodule model.meta
  */
 export default class ApplicationCommunication extends DrawEdgeEntity {
-
   @attr('number') requests!: number;
 
   @attr('string') technology!: string;
@@ -33,10 +32,10 @@ export default class ApplicationCommunication extends DrawEdgeEntity {
 
   @belongsTo('clazz', { inverse: null })
   targetClazz!: DS.PromiseObject<Clazz> & Clazz;
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'applicationcommunication': ApplicationCommunication;
   }

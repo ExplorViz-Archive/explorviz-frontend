@@ -1,8 +1,8 @@
 <div class="row" style="max-height:100%">
-  <div class="{{if this.showDataSelection "col-8" "col-12"}}" id="vizspace">
+  <div class={{if this.showDataSelection "col-8" "col-12"}} id="vizspace">
     {{#if this.showLandscape}}
       {{#if this.landscapeRepo.latestLandscape.systems}}
-{{!--         <Visualization::PageSetup::VisualizationNavbar
+        {{!-- <Visualization::PageSetup::VisualizationNavbar
           @content={{array
             (component "visualization/page-setup/navbar/reset-visualization")
             (component "visualization/page-setup/navbar/pause-reload")
@@ -35,7 +35,7 @@
     {{else}}
       <div style="position: absolute!important" class="pl-1">
         <BsButton
-          @onClick={{action this.openLandscapeView}}
+          @onClick={{this.openLandscapeView}}
           @type="secondary"
           @outline={{true}}
           @title="Back to Landscape"
@@ -52,7 +52,7 @@
         />
       {{/if}}
     {{/if}}
-    <!-- timeline -->
+    {{!-- timeline --}}
     <div id="timeline-content">
       <BsButton
         @onClick={{this.toggleTimeline}}
@@ -64,7 +64,8 @@
         {{#unless this.showTimeline}}
           <span class="pr-1">Show Timeline</span>
         {{/unless}}
-        {{svg-jar "chevron-up"
+        {{svg-jar
+          "chevron-up"
           id="hidetimeline-icon"
           class=(if this.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")
         }}
@@ -72,13 +73,13 @@
       <div id="timeline" class="timeline {{unless this.showTimeline "timelinehide"}}">
         <Visualization::PageSetup::Timeline::PlotlyTimeline
           @timestamps={{this.timestampRepo.timelineTimestamps}}
-          @clicked={{action this.timelineClicked}}
-          @setChildReference={{action this.getTimelineReference}}
+          @clicked={{this.timelineClicked}}
+          @setChildReference={{this.getTimelineReference}}
         />
       </div>
     </div>
   </div>
-  <div class="{{if this.showDataSelection "col-4" "hide"}}" id="dataselection">
+  <div class={{if this.showDataSelection "col-4" "hide"}} id="dataselection">
     <Visualization::PageSetup::Sidebar::DataSelection
       @components={{this.components}}
       @removeComponent={{this.removeComponent}}
