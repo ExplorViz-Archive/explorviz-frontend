@@ -1,5 +1,5 @@
-import BaseEntity from './baseentity';
 import DS from 'ember-data';
+import BaseEntity from './baseentity';
 
 const { attr } = DS;
 
@@ -13,7 +13,6 @@ const { attr } = DS;
  * @submodule model.meta
  */
 export default class DatabaseQuery extends BaseEntity {
-
   @attr('number') timestamp!: number;
 
   @attr('string') statementType!: string;
@@ -24,12 +23,12 @@ export default class DatabaseQuery extends BaseEntity {
 
   @attr('number') responseTime!: number;
 
-  @attr('boolean', {defaultValue: false}) isSelected!: boolean;
-
+  @attr('boolean', { defaultValue: false }) isSelected!: boolean;
 }
 
 declare module 'ember-data/types/registries/model' {
-	export default interface ModelRegistry {
-	  'databasequery': DatabaseQuery;
-	}
+  // tslint:disable-next-line: interface-name
+  export default interface ModelRegistry {
+    'databasequery': DatabaseQuery;
+  }
 }

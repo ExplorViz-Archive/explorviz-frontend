@@ -1,32 +1,42 @@
-import Controller from '@ember/controller';
-import { inject as service } from '@ember/service'; 
-import { computed, action, get, set } from '@ember/object';
+
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { observes } from '@ember-decorators/object';
+import Controller from '@ember/controller';
+import {
+  action,
+  computed,
+  get,
+  set,
+} from '@ember/object';
+import { inject as service } from '@ember/service';
+import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-setup/timeline/plotly-timeline';
+import Timestamp from 'explorviz-frontend/models/timestamp';
+import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
+import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
-import ReloadHandler from 'explorviz-frontend/services/reload-handler';
-import Timestamp from 'explorviz-frontend/models/timestamp';
-import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-setup/timeline/plotly-timeline';
 import { tracked } from '@glimmer/tracking';
 
 /**
-* TODO
-*
-* @class Visualization-Controller
-* @extends Ember.Controller
-*
-* @module explorviz
-* @submodule visualization
-*/
+ * TODO
+ *
+ * @class Visualization-Controller
+ * @extends Ember.Controller
+ *
+ * @module explorviz
+ * @submodule visualization
+ */
 export default class VisualizationController extends Controller {
+  @service('rendering-service') renderingService!: RenderingService;
 
-  @service("rendering-service") renderingService!: RenderingService;
-  @service("repos/landscape-repository") landscapeRepo!: LandscapeRepository;
-  @service("landscape-listener") landscapeListener!: LandscapeListener;
-  @service("repos/timestamp-repository") timestampRepo!: TimestampRepository;
-  @service("reload-handler") reloadHandler!: ReloadHandler;
+  @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
+
+  @service('landscape-listener') landscapeListener!: LandscapeListener;
+
+  @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
+
+  @service('reload-handler') reloadHandler!: ReloadHandler;
 
   state = null;
 
@@ -34,7 +44,7 @@ export default class VisualizationController extends Controller {
 
   plotlyTimelineRef!: PlotlyTimeline;
 
-  selectedTimestampRecords:Timestamp[] = [];
+  selectedTimestampRecords: Timestamp[] = [];
 
   @tracked
   showDataSelection = false;
@@ -45,11 +55,12 @@ export default class VisualizationController extends Controller {
   @tracked
   showTimeline: boolean = true;
 
+  // eslint-disable-next-line ember/no-observers
   @observes('landscapeListener.pauseVisualizationReload')
   timelineResetObserver() {
     // reset highlighting and selection in timeline, if unpause was clicked
-    if(!get(this.landscapeListener, "pauseVisualizationReload")) {
-      set(this, "selectedTimestampRecords", []);
+    if (!get(this.landscapeListener, 'pauseVisualizationReload')) {
+      set(this, 'selectedTimestampRecords', []);
       get(this, 'plotlyTimelineRef').resetHighlighting();
     }
   }
@@ -62,7 +73,7 @@ export default class VisualizationController extends Controller {
   @action
   resetView() {
     get(this, 'renderingService').reSetupScene();
-    get(this, 'plotlyTimelineRef').continueTimeline(get(this, "selectedTimestampRecords"));
+    get(this, 'plotlyTimelineRef').continueTimeline(get(this, 'selectedTimestampRecords'));
   }
 
   @action
@@ -79,42 +90,40 @@ export default class VisualizationController extends Controller {
 
   @action
   addComponent(component: string) {
-    if(this.components.includes(component))
-      return;
+    if (this.components.includes(component)) { return; }
 
-    this.components = [...this.components, component]
-    if(this.components.length > 0) {
+    this.components = [...this.components, component];
+    if (this.components.length > 0) {
       this.showDataSelection = true;
     }
   }
 
   @action
   removeComponent(path: string) {
-    if(this.components.length === 0)
-      return;
+    if (this.components.length === 0) { return; }
 
-    let index = this.components.indexOf(path);
+    const index = this.components.indexOf(path);
     // Remove existing sidebar component
     if (index !== -1) {
-      let components = [...this.components];
+      const components = [...this.components];
       components.splice(index, 1);
       this.components = components;
     }
 
     // Close sidebar if it would be empty otherwise
-    if(this.components.length === 0) {
+    if (this.components.length === 0) {
       this.showDataSelection = false;
     }
   }
 
   @action
-  timelineClicked(timestampRecordArray:Timestamp[]) {
-    set(this, "selectedTimestampRecords", timestampRecordArray);
-    get(this, 'reloadHandler').loadLandscapeById(timestampRecordArray[0].get("timestamp"));
+  timelineClicked(timestampRecordArray: Timestamp[]) {
+    set(this, 'selectedTimestampRecords', timestampRecordArray);
+    get(this, 'reloadHandler').loadLandscapeById(timestampRecordArray[0].get('timestamp'));
   }
 
   @action
-  getTimelineReference(plotlyTimelineRef:PlotlyTimeline) {
+  getTimelineReference(plotlyTimelineRef: PlotlyTimeline) {
     // called from within the plotly timeline component
     set(this, 'plotlyTimelineRef', plotlyTimelineRef);
   }
@@ -126,5 +135,13 @@ export default class VisualizationController extends Controller {
 
   initRendering() {
     get(this, 'landscapeListener').initSSE();
+  }
+}
+
+// DO NOT DELETE: this is how TypeScript knows how to look up your controllers.
+declare module '@ember/controller' {
+  // tslint:disable-next-line: interface-name
+  interface Registry {
+    'visualizationController': VisualizationController;
   }
 }

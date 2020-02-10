@@ -17,9 +17,10 @@ type Setting = 'rangesetting' | 'flagsetting';
  * @extends {Service}
  */
 export default class CurrentUser extends Service {
-
   @service('session') session !: any;
+
   @service('store') store !: DS.Store;
+
   @service('user-settings') userSettings !: UserSettings;
 
   // application route calls load(), which sets this field
@@ -40,11 +41,11 @@ export default class CurrentUser extends Service {
    * @returns Promise
    * @memberof CurrentUser
    */
-  load(this:CurrentUser) {
-    let userId = this.get('session').get('session.content.authenticated.rawUserData.data.id');
+  load(this: CurrentUser) {
+    const userId = this.get('session').get('session.content.authenticated.rawUserData.data.id');
     if (!isEmpty(userId)) {
       const user = this.get('store').peekRecord('user', userId);
-      if(user !== null) {
+      if (user !== null) {
         this.set('user', user);
         return resolve();
       }
@@ -54,17 +55,18 @@ export default class CurrentUser extends Service {
 
 
   /**
-   * Returns userpreference record for current user matching given settingId 
+   * Returns userpreference record for current user matching given settingId
    *
    * @param {string} settingId
    * @memberof CurrentUser
-   * 
+   *
    */
-  getPreference(this:CurrentUser, settingId:string) {
-    let userId = this.get('id');
+  getPreference(this: CurrentUser, settingId: string) {
+    const userId = this.get('id');
 
-    if(userId === undefined)
+    if (userId === undefined) {
       return undefined;
+    }
 
     return this.get('userSettings').getUserPreference(userId, settingId);
   }
@@ -77,11 +79,12 @@ export default class CurrentUser extends Service {
    * @returns
    * @memberof CurrentUser
    */
-  getPreferenceOrDefaultValue(this:CurrentUser, type: Setting, settingId:string) {
-    let userId = this.get('id');
+  getPreferenceOrDefaultValue(this: CurrentUser, type: Setting, settingId: string) {
+    const userId = this.get('id');
 
-    if(userId === undefined)
+    if (userId === undefined) {
       return undefined;
+    }
 
     return this.get('userSettings').getUserPreferenceOrDefaultValue(userId, type, settingId);
   }

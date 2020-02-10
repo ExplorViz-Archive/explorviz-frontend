@@ -4,17 +4,32 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
 <BsModal
   @open={{this.showDeleteUsersDialog}}
   @onSubmit={{perform this.deleteUsers}}
-  @onHide={{action (mut this.showDeleteUsersDialog) false}}
-  as |modal|>
+  @onHide={{this.hideUserDeletionDialogue}} as |modal|
+>
   <modal.header>
     <h4 class="modal-title">Please confirm</h4>
   </modal.header>
   <modal.body>Are you sure you want to delete the selected users?</modal.body>
-  <modal.footer as |footer|>
-    <BsButton @onClick={{action modal.close}} @type="danger">Cancel</BsButton>
-    <BsButton @onClick={{action modal.submit}} @type="success" @disabled={{this.deleteUsers.isRunning}}>
+  <modal.footer>
+    <BsButton
+      @onClick={{modal.close}}
+      @type="danger"
+    >
+      Cancel
+    </BsButton>
+    <BsButton
+      @onClick={{modal.submit}}
+      @type="success"
+      @disabled={{this.deleteUsers.isRunning}}
+    >
       {{#if this.deleteUsers.isRunning}}
-        Deleting <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Deleting
+        <span 
+          class="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+        >
+        </span>
       {{else}}
         Confirm
       {{/if}}
@@ -31,7 +46,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         {{#if this.showDeleteUsersButton}}
           <BsButton
             class="d-flex-center mr-2"
-            @onClick={{action (mut this.showDeleteUsersDialog) true}}
+            @onClick={{this.openUserDeletionDialogue}}
             @type="danger"
             @outline={{true}}
             @title="Delete Selected Users"
@@ -64,7 +79,10 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
       </div>
     </div>
   </div>
-  <div id="user-list-table-div" class="d-flex flex-grow-1 flex-column" style="overflow-y: auto"
+  <div
+    id="user-list-table-div"
+    class="d-flex flex-grow-1 flex-column"
+    style="overflow-y: auto"
     {{did-update this.resetTable @users}}
     {{did-insert this.resetTable}}
   >
@@ -74,7 +92,14 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         <tr>
           <th style="width: 20px">
             <div class="custom-control custom-checkbox">
-              <input type="checkbox" class="custom-control-input" id="checkAll" disabled={{eq this.selectedCount 0}} checked={{this.allSelected}} {{on "change" this.selectAllCheckboxes}}>
+              <input
+                type="checkbox"
+                class="custom-control-input"
+                id="checkAll"
+                disabled={{eq this.selectedCount 0}}
+                checked={{this.allSelected}}
+                {{on "change" this.selectAllCheckboxes}}
+              >
               <label class="custom-control-label" for="checkAll"></label>
             </div>
           </th>
@@ -90,7 +115,12 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
             <th scope="row"></th>
             <td>
               Loading User List
-              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span
+                class="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              >
+              </span>
             </td>
             <td></td>
             <td></td>
@@ -100,12 +130,18 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
           {{#each @users as |user|}}
             <tr>
               <td scope="col">
-                {{#unless (eq this.currentUser.user.id user.id)}}
+                {{#if (not-eq this.currentUser.user.id user.id)}}
                   <div class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input" id="check-{{user.id}}" checked={{get this.selected user.id}} {{on "change" (fn this.selectCheckbox user.id)}}>
+                    <input
+                      type="checkbox"
+                      class="custom-control-input"
+                      id="check-{{user.id}}"
+                      checked={{get this.selected user.id}}
+                      {{on "change" (fn this.selectCheckbox user.id)}}
+                    >
                     <label class="custom-control-label" for="check-{{user.id}}"></label>
                   </div>
-                {{/unless}}
+                {{/if}}
               </td>
               <th scope="row">{{user.id}}</th>
               <td>{{user.username}}</td>
@@ -114,14 +150,20 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
               </td>
               <td class="text-right">
                 {{!-- Hide Edit/Delete for the admin user themself --}}
-                {{#unless (eq this.currentUser.user.id user.id)}}
+                {{#if (not-eq this.currentUser.user.id user.id)}}
                   <BsDropdown as |dd|>
                     {{!-- Show spinner instead of edit button, if user edit or deletion was called --}}
-                    {{#if (or
+                    {{#if
+                      (or
                       (and this.deleteUser.isRunning (eq (get this.deleteUser.last.args 0) user))
                       (and this.openUserEdit.isRunning (eq (get this.openUserEdit.last.args 0) user.id)))
                     }}
-                      <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+                      <span
+                        class="spinner-border spinner-border-sm text-primary"
+                        role="status"
+                        aria-hidden="true"
+                      >
+                      </span>
                     {{else}}
                       <dd.button class="removecaret d-flex-center" @size="sm" @title="Options">
                         {{svg-jar "kebab-vertical" class="octicon"}}
@@ -129,18 +171,27 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
                     {{/if}}
                     <dd.menu as |ddm|>
                       <ddm.item @title="Edit">
-                        <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Edit" onclick={{perform this.openUserEdit user.id}}>
+                        <button
+                          type="button"
+                          class="dropdown-item d-flex-center"
+                          style="cursor: pointer"
+                          {{on "click" (perform this.openUserEdit user.id)}}
+                        >
                           {{svg-jar "pencil" class="octicon" id="edit-button"}}<span>Edit</span>
-                        </a>
+                        </button>
                       </ddm.item>
                       <ddm.item @title="Delete">
-                        <a class="dropdown-item d-flex-center" style="cursor: pointer" title="Delete" onclick={{perform this.deleteUser user}}>
+                        <button
+                          type="button"
+                          class="dropdown-item d-flex-center"
+                          {{on "click" (perform this.deleteUser user)}}
+                        >
                           {{svg-jar "x" class="octicon" id="delete-button"}}<span>Delete</span>
-                        </a>
+                        </button>
                       </ddm.item>
                     </dd.menu>
                   </BsDropdown>
-                {{/unless}}
+                {{/if}}
               </td>
             </tr>
           {{/each}}
@@ -155,7 +206,6 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
       @self={{@page}}
       @next={{@users.meta.pagination.next.number}}
       @last={{@users.meta.pagination.last.number}}
-      @route="configuration.usermanagement.users"
       @goToPage={{@goToPage}}
     />
     <PageSizeSelector

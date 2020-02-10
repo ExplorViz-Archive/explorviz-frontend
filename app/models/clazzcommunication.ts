@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import Clazz from './clazz';
 import TraceStep from './tracestep';
-import BaseEntitity from './baseentity';
+import BaseEntity from './baseentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -14,8 +14,7 @@ const { attr, belongsTo, hasMany } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default class ClazzCommunication extends BaseEntitity {
-
+export default class ClazzCommunication extends BaseEntity {
   @attr('string') operationName!: string;
 
   @attr() requests: any;
@@ -31,6 +30,7 @@ export default class ClazzCommunication extends BaseEntitity {
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'clazzcommunication': ClazzCommunication;
   }

@@ -10,17 +10,17 @@
       <td>
         <b>Monitoring Active</b>
         <HelpTooltip
-          @title="Use this button to enable or disable the monitoring for this process. Restart is necessary."
+          @title={{this.tooltipTexts.monitoredFlag}}
         />
       </td>
       <td>
         <div style="float: left;">
           <XToggle
-            @theme='skewed'
-            @onLabel='Yes'
-            @offLabel='No'
+            @theme="skewed"
+            @onLabel="Yes"
+            @offLabel="No"
             @value={{@procezz.monitoredFlag}}
-            @onToggle={{action (mut @procezz.monitoredFlag)}}
+            @onToggle={{@toggleProcezzMonitoredFlag}}
           />
         </div>
       </td>
@@ -29,16 +29,16 @@
       <td>
         <b>aop.xml</b>
         <HelpTooltip
-          @title="The aop.xml file contains instruction for monitoring.
-            The embedded include element considers all classes for monitoring.
-            You can try to start your monitoring with this approach,
-            but experience showed that this fails most of the time.
-            Alternatively, insert the source code package which you want to monitor recursively."
+          @title={{this.tooltipTexts.aopContent}}
         />
       </td>
       <td>
         <div class="form-group">
-          {{textarea class="form-control no-horizontal-scroll" rows="15" value=@procezz.aopContent}}
+          <Textarea
+            class="form-control no-horizontal-scroll"
+            @rows="15"
+            @value={{@procezz.aopContent}}
+          />
         </div>
       </td>
     </tr>

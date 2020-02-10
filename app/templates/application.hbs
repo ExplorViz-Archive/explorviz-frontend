@@ -1,5 +1,7 @@
 <div class="d-flex flex-row vh-100">
-  {{#if (and this.session.isAuthenticated (not this.loadUserAndSettings.isRunning))}}
+  {{#if
+    (and this.session.isAuthenticated (not this.loadUserAndSettings.isRunning))
+  }}
     <PageSetup::Navbar />
   {{/if}}
 

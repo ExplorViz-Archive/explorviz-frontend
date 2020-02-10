@@ -1,10 +1,9 @@
-{{!-- Arguements:
+{{!-- Arguments:
   first: number|undefined/null - First page's number
   prev: number|undefined/null - Previous page's number
   self: number - Current page's number
   next: number|undefined/null - Next page's number
   last: number|undefined/null - Last page's number
-  route: string - Route to call on page change
   goToPage(page: number) - Function to update page number
  --}}
 <nav>
@@ -15,7 +14,7 @@
       </span>
     </li>
     {{!-- Need gte here, because if this.prev is 0, its truth value was false --}}
-    <li class="page-item {{unless (gte @prev 0) "disabled"}}">
+    <li class="page-item {{if (is-empty @prev) "disabled"}}">
       <span class="page-link-pointer" {{on "click" (fn @goToPage @prev)}}>
         Previous
       </span>

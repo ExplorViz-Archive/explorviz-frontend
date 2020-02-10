@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import Service from '@ember/service';
 import { inject as service } from "@ember/service";
 import DS from 'ember-data';

@@ -15,7 +15,6 @@ const { attr, belongsTo } = DS;
  * @submodule model.meta
  */
 export default class TraceStep extends BaseEntity {
-
   @attr('number') tracePosition!: number;
 
   @attr('number') requests!: number;
@@ -31,10 +30,10 @@ export default class TraceStep extends BaseEntity {
 
   @belongsTo('clazzcommunication', { inverse: null })
   clazzCommunication!: DS.PromiseObject<ClazzCommunication> & ClazzCommunication;
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'tracestep': TraceStep;
   }

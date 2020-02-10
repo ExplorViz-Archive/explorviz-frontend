@@ -1,16 +1,22 @@
 <div>
-  <button {{on 'click' @closeDataSelection}} title="Close Sidebar" type="button" class="btn btn-outline-dark" aria-label="Close">
+  <button
+    type="button"
+    class="btn btn-outline-dark"
+    title="Close Sidebar"
+    aria-label="Close"
+    {{on "click" @closeDataSelection}}
+  >
     <span aria-hidden="true">&times;</span>
   </button>
 </div>
-{{#ember-scrollable}}
+<EmberScrollable>
   <div class="pr-3 ml-2">
     {{#each @components as |componentName|}}
       <div class="card mb-3">
-        <div class="card-body">
-          {{component componentName removeComponent=@removeComponent}}
+        <div class="card-body d-flex flex-column">
+          {{component componentName}}
         </div>
       </div>
     {{/each}}
   </div>
-{{/ember-scrollable}}
+</EmberScrollable>

@@ -1,17 +1,15 @@
-import Route from '@ember/routing/route';
-import ApplicationRouteMixin from
-  'ember-simple-auth/mixins/application-route-mixin';
 import { action } from '@ember/object';
+import Route from '@ember/routing/route';
+import ApplicationRouteMixin from 'ember-simple-auth/mixins/application-route-mixin';
 import ApplicationController from 'explorviz-frontend/controllers/application';
 
 /**
-* TODO
-* 
-* @class Application-Route
-* @extends Ember.Route
-*/
+ * TODO
+ *
+ * @class Application-Route
+ * @extends Ember.Route
+ */
 export default class ApplicationRoute extends Route.extend(ApplicationRouteMixin) {
-
   routeAfterAuthentication = 'visualization';
 
   async beforeModel() {
@@ -26,7 +24,6 @@ export default class ApplicationRoute extends Route.extend(ApplicationRouteMixin
 
   @action
   logout() {
-    this.session.invalidate({ message: "Logout successful" });
+    this.session.invalidate({ message: 'Logout successful' });
   }
-
 }

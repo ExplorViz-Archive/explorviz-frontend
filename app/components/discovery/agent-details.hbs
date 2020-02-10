@@ -1,4 +1,4 @@
-{{#if showSpinner}}
+{{#if this.showSpinner}}
   <div class="explorVizModal">
     <div class="spinner-center-5" style="color: white">
     </div>
@@ -12,7 +12,8 @@
 <div id="discovery-details-tab" class="mt-3">
   <nav>
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-      <a class="nav-item nav-link active"
+      <a
+        class="nav-item nav-link active"
         id="nav-general-tab"
         data-toggle="tab"
         href="#nav-general"
@@ -25,10 +26,18 @@
     </div>
   </nav>
   <div class="tab-content">
-    <div class="tab-pane fade show active" id="nav-general" role="tabpanel" aria-labelledby="nav-general-tab">
-      <Discovery::AgentDetailsTables::GeneralInformation @agent={{@agent}} />
+    <div
+      class="tab-pane fade show active"
+      id="nav-general"
+      role="tabpanel"
+      aria-labelledby="nav-general-tab"
+    >
+      <Discovery::AgentDetailsTables::GeneralInformation
+        @agent={{@agent}}
+        @toggleAgentVisibility={{@toggleAgentVisibility}}
+      />
     </div>
   </div>
 </div>
 
-<!-- {{name-selector agent.ip agent.name}} - <b>General Information</b> -->
+{{!-- {{name-selector agent.ip agent.name}} - <b>General Information</b> --}}

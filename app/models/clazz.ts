@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import Component from './component';
 import ClazzCommunication from './clazzcommunication';
-import BaseEntitity from './baseentity';
+import BaseEntity from './baseentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -14,13 +14,12 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default class Clazz extends BaseEntitity {
-
+export default class Clazz extends BaseEntity {
   @attr('string') name!: string;
 
   @attr('string') fullQualifiedName!: string;
 
-  @attr('number', {defaultValue: 0}) instanceCount!: number;
+  @attr('number', { defaultValue: 0 }) instanceCount!: number;
 
   @attr() objectIds: any;
 
@@ -33,10 +32,10 @@ export default class Clazz extends BaseEntitity {
   getParent(this: Clazz) {
     return this.belongsTo('parent').value() as Component;
   }
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'clazz': Clazz;
   }

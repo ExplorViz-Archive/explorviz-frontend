@@ -1,6 +1,6 @@
-import Model from 'ember-data/model';
-import DS from 'ember-data';
 import { computed } from '@ember/object';
+import DS from 'ember-data';
+import Model from 'ember-data/model';
 
 const { attr } = DS;
 
@@ -15,33 +15,27 @@ const { attr } = DS;
  *
  */
 export default class User extends Model {
+  @attr('string') username!: string;
 
-	@attr('string') username!: string;
+  @attr('string') password!: string;
 
-	@attr('string') password!: string;
+  @attr('string') token!: string;
 
-	@attr('string') token!: string;
+  @attr() roles!: string[];
 
-	@attr() roles!: string[];
-
-	hasRole(this: User, rolename:string): boolean {
-		const roles = this.get('roles');
-		for (const role of roles) {
-			if(rolename === role)
-				return true;
-		}
-		return false;
+  hasRole(this: User, rolename: string): boolean {
+    return this.roles.includes(rolename);
   }
-  
-	@computed('roles')
-	get isAdmin(this: User): boolean {
-    return this.hasRole('admin');
-	}
 
+  @computed('roles')
+  get isAdmin(this: User): boolean {
+    return this.hasRole('admin');
+  }
 }
 
 declare module 'ember-data/types/registries/model' {
-	export default interface ModelRegistry {
-	  'user': User;
-	}
+  // tslint:disable-next-line: interface-name
+  export default interface ModelRegistry {
+    'user': User;
+  }
 }

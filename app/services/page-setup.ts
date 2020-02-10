@@ -10,18 +10,17 @@ import Service from '@ember/service';
 * @submodule page
 */
 export default class PageSetup extends Service {
-
   /**
   * Latest fetched entity
   *
   * @property navbarRoutes
   * @type Array
   */
-  navbarRoutes:string[] = ["visualization", "discovery", "replay"];
+  navbarRoutes: string[] = ['visualization', 'discovery', 'replay'];
 }
 
-declare module "@ember/service" {
+declare module '@ember/service' {
   interface Registry {
-    "page-setup": PageSetup;
+    'page-setup': PageSetup;
   }
 }

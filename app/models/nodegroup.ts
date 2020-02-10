@@ -1,22 +1,21 @@
-import DrawNodeEntity from './drawnodeentity';
-import { computed } from '@ember/object'; 
+import { computed } from '@ember/object';
 import DS from 'ember-data';
+import DrawNodeEntity from './drawnodeentity';
 import System from './system';
 import Node from './node';
 
 const { attr, hasMany, belongsTo } = DS;
 
 /**
-* Ember model for a NodeGroup.
-*
-* @class NodeGroup-Model
-* @extends DrawNodeEntity-Model
-*
-* @module explorviz
-* @submodule model.meta
-*/
+ * Ember model for a NodeGroup.
+ *
+ * @class NodeGroup-Model
+ * @extends DrawNodeEntity-Model
+ *
+ * @module explorviz
+ * @submodule model.meta
+ */
 export default class NodeGroup extends DrawNodeEntity {
-
   @attr('string') name!: string;
 
   @belongsTo('system', { inverse: 'nodegroups' })
@@ -25,15 +24,15 @@ export default class NodeGroup extends DrawNodeEntity {
   @hasMany('node', { inverse: 'parent' })
   nodes!: DS.PromiseManyArray<Node>;
 
-  @attr('boolean', {defaultValue: true}) visible!: boolean;
+  @attr('boolean', { defaultValue: true }) visible!: boolean;
 
-  @attr('boolean', {defaultValue: true}) opened!: boolean;
+  @attr('boolean', { defaultValue: true }) opened!: boolean;
 
   // used for text labeling performance in respective renderers
   @computed('visible', 'opened')
   get state() {
-    let opened = this.get('opened');
-    let visible = this.get('visible');
+    const opened = this.get('opened');
+    const visible = this.get('visible');
     return `${opened}/${visible}`;
   }
 
@@ -42,11 +41,11 @@ export default class NodeGroup extends DrawNodeEntity {
       this.setAllChildrenVisibility(true);
     } else {
       this.setAllChildrenVisibility(false);
-      let nodes = this.hasMany('nodes').value();
-      
+      const nodes = this.hasMany('nodes').value();
+
       if (nodes !== null && nodes.get('length') > 0) {
         const firstNode = nodes.objectAt(0);
-        if(firstNode !== undefined) {
+        if (firstNode !== undefined) {
           firstNode.set('visible', true);
         }
       }
@@ -56,18 +55,18 @@ export default class NodeGroup extends DrawNodeEntity {
   }
 
   setAllChildrenVisibility(this: NodeGroup, visiblity: boolean) {
-    let nodes = this.hasMany('nodes').value();
+    const nodes = this.hasMany('nodes').value();
 
-    if(nodes !== null) {
+    if (nodes !== null) {
       nodes.forEach((node) => {
         node.set('visible', visiblity);
       });
     }
   }
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'nodegroup': NodeGroup;
   }
