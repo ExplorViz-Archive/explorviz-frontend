@@ -2,9 +2,10 @@ import THREE from 'three';
 
 
 export default abstract class BaseMesh extends THREE.Mesh {
-
   highlighted: boolean = false;
+
   defaultColor: THREE.Color;
+
   highlightingColor: THREE.Color;
 
 
@@ -16,16 +17,16 @@ export default abstract class BaseMesh extends THREE.Mesh {
 
   highlight() {
     this.highlighted = true;
-    if (this.material instanceof THREE.MeshLambertMaterial ||
-      this.material instanceof THREE.MeshBasicMaterial) {
+    if (this.material instanceof THREE.MeshLambertMaterial
+      || this.material instanceof THREE.MeshBasicMaterial) {
       this.material.color = this.highlightingColor;
     }
   }
 
   unhighlight() {
     this.highlighted = false;
-    if (this.material instanceof THREE.MeshLambertMaterial ||
-      this.material instanceof THREE.MeshBasicMaterial) {
+    if (this.material instanceof THREE.MeshLambertMaterial
+      || this.material instanceof THREE.MeshBasicMaterial) {
       this.material.color = this.defaultColor;
       this.turnOpaque();
     }
@@ -58,11 +59,10 @@ export default abstract class BaseMesh extends THREE.Mesh {
     }
 
     // Recursively delete all child objects
-    this.children.forEach(child => {
+    this.children.forEach((child) => {
       if (child instanceof BaseMesh) {
         child.delete();
       }
     });
   }
-
 }

@@ -3,15 +3,17 @@ import BaseMesh from '../base-mesh';
 
 
 export default abstract class BoxMesh extends BaseMesh {
-
   layoutPos: THREE.Vector3;
 
   layoutHeight: number;
+
   layoutWidth: number;
+
   layoutdDepth: number;
 
 
-  constructor(layoutPos: THREE.Vector3, layoutHeight: number, layoutWidth: number, layoutDepth: number,
+  constructor(layoutPos: THREE.Vector3, layoutHeight: number,
+    layoutWidth: number, layoutDepth: number,
     defaultColor: THREE.Color, highlightingColor: THREE.Color) {
     super(defaultColor, highlightingColor);
 
@@ -54,6 +56,5 @@ export default abstract class BoxMesh extends BaseMesh {
     this.scale.z = depth;
   }
 
-  abstract createLabel(font: THREE.Font, color: THREE.Color): void
-
+  abstract createLabel(font: THREE.Font, color: THREE.Color): void;
 }

@@ -333,22 +333,22 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         this.scene.add(systemMesh);
         this.meshIdToModel.set(systemMesh.id, system);
 
-        let nodeGroups = system.nodegroups;
+        const nodeGroups = system.nodegroups;
 
         // Draw boxes for nodegroups
         nodeGroups.forEach((nodeGroup) => {
-
-          let nodeGroupLayout = modelIdToLayout.get(nodeGroup.get('id'));
+          const nodeGroupLayout = modelIdToLayout.get(nodeGroup.get('id'));
 
           if (nodeGroupLayout) {
-            let nodeGroupMesh = new NodeGroupMesh(nodeGroupLayout, nodeGroup, new THREE.Color(this.configuration.landscapeColors.nodegroup));
+            const nodeGroupMesh = new NodeGroupMesh(nodeGroupLayout, nodeGroup,
+              new THREE.Color(this.configuration.landscapeColors.nodegroup));
             nodeGroupMesh.setToDefaultPosition(centerPoint);
             nodeGroupMesh.createCollapseSymbol(this.font, 0.35);
             this.scene.add(nodeGroupMesh);
             this.meshIdToModel.set(nodeGroupMesh.id, nodeGroup);
           }
 
-          let nodes = nodeGroup.get('nodes');
+          const nodes = nodeGroup.get('nodes');
 
           // Draw boxes for nodes
           nodes.forEach((node) => {
@@ -425,7 +425,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  handlePanning(delta: {x: number, y: number}, button: 1|2|3) {
+  handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     if (button === 1) {
       const distanceXInPercent = (delta.x / this.canvas.clientWidth) * 100.0;
       const distanceYInPercent = (delta.y / this.canvas.clientHeight) * 100.0;

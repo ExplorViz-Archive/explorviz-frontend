@@ -1,12 +1,16 @@
-import THREE from "three";
+import THREE from 'three';
 
 export default class BoxLayout {
-
   height: number = 1;
+
   width: number = 1;
+
   depth: number = 1;
+
   positionX: number = 0;
+
   positionY: number = 0;
+
   positionZ: number = 0;
 
   get position() {
@@ -18,5 +22,4 @@ export default class BoxLayout {
     this.positionY = position.y;
     this.positionZ = position.z;
   }
-
 }

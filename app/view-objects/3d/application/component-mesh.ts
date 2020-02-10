@@ -2,29 +2,33 @@ import THREE from 'three';
 import Component from 'explorviz-frontend/models/component';
 import BoxMesh from './box-mesh';
 import ComponentLabelMesh from './component-label-mesh';
-export default class ComponentMesh extends BoxMesh {
 
+export default class ComponentMesh extends BoxMesh {
   geometry: THREE.BoxGeometry;
+
   material: THREE.MeshLambertMaterial;
+
   dataModel: Component;
+
   opened: boolean = false;
+
   labelMesh: ComponentLabelMesh | null = null;
 
 
-  constructor(layoutPos: THREE.Vector3, layoutHeight: number, layoutWidth: number, layoutDepth: number,
+  constructor(layoutPos: THREE.Vector3, layoutHeight: number,
+    layoutWidth: number, layoutDepth: number,
     component: Component, defaultColor: THREE.Color, highlightingColor: THREE.Color) {
-
     super(layoutPos, layoutHeight, layoutWidth, layoutDepth, defaultColor, highlightingColor);
 
-    let material = new THREE.MeshLambertMaterial({ color: defaultColor });
-    let geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshLambertMaterial({ color: defaultColor });
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
     this.geometry = geometry;
     this.material = material;
     this.dataModel = component;
   }
 
   createLabel(font: THREE.Font, color: THREE.Color) {
-    let label = new ComponentLabelMesh(this, font, color);
+    const label = new ComponentLabelMesh(this, font, color);
     this.labelMesh = label;
 
     this.positionLabel();
@@ -32,9 +36,8 @@ export default class ComponentMesh extends BoxMesh {
   }
 
   positionLabel() {
-    let label = this.labelMesh;
-    if (!label)
-      return;
+    const label = this.labelMesh;
+    if (!label) { return; }
 
     label.geometry.center();
 
@@ -49,10 +52,9 @@ export default class ComponentMesh extends BoxMesh {
       const OFFSET_BOTTOM = 1.5;
 
       // Position Label just above the bottom edge
-      label.position.x = - this.geometry.parameters.width / 2 + OFFSET_BOTTOM / this.scale.x;
+      label.position.x = -this.geometry.parameters.width / 2 + OFFSET_BOTTOM / this.scale.x;
     } else {
       label.position.x = 0;
     }
   }
-
 }

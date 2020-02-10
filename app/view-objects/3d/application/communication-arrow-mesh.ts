@@ -2,7 +2,6 @@ import THREE from 'three';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 
 export default class CommunicationArrowMesh extends THREE.ArrowHelper {
-
   dataModel: DrawableClazzCommunication;
 
 
@@ -16,15 +15,13 @@ export default class CommunicationArrowMesh extends THREE.ArrowHelper {
     if (this.parent) {
       this.parent.remove(this);
     }
-    let line = this.line;
+    const { line } = this;
     line.geometry.dispose();
 
-    if (line.material instanceof THREE.Material)
-      line.material.dispose();
+    if (line.material instanceof THREE.Material) { line.material.dispose(); }
 
-    let cone = this.cone;
+    const { cone } = this;
     cone.geometry.dispose();
-    if (cone.material instanceof THREE.Material)
-      cone.material.dispose();
+    if (cone.material instanceof THREE.Material) { cone.material.dispose(); }
   }
 }
