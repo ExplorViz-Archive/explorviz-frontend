@@ -1,29 +1,26 @@
 import { inject as service } from '@ember/service';
-import GlimmerComponent from "@glimmer/component";
-import { action } from "@ember/object";
-import debugLogger from "ember-debug-logger";
+import GlimmerComponent from '@glimmer/component';
+import { action } from '@ember/object';
+import debugLogger from 'ember-debug-logger';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import $ from 'jquery';
 import THREE from 'three';
 import Landscape from 'explorviz-frontend/models/landscape';
-import RenderingService from "explorviz-frontend/services/rendering-service";
+import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import Configuration from 'explorviz-frontend/services/configuration';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 
-import applyKlayLayout from
-  'explorviz-frontend/utils/landscape-rendering/klay-layouter';
-import Interaction, { Position2D } from
-  'explorviz-frontend/utils/interaction';
-import Labeler from
-  'explorviz-frontend/utils/landscape-rendering/labeler';
+import applyKlayLayout from 'explorviz-frontend/utils/landscape-rendering/klay-layouter';
+import Interaction from 'explorviz-frontend/utils/interaction';
+import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as CalcCenterAndZoom from
   'explorviz-frontend/utils/landscape-rendering/center-and-zoom-calculator';
 import * as EntityRendering from
-  'explorviz-frontend/utils/landscape-rendering/entity-rendering'
+  'explorviz-frontend/utils/landscape-rendering/entity-rendering';
 import * as CommunicationRendering from
-  'explorviz-frontend/utils/landscape-rendering/communication-rendering'
+  'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import Application from 'explorviz-frontend/models/application';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
@@ -49,7 +46,6 @@ interface Args {
 * @submodule visualization.rendering
 */
 export default class LandscapeRendering extends GlimmerComponent<Args> {
-
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
 
@@ -66,7 +62,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   currentUser!: CurrentUser;
 
   scene!: THREE.Scene;
+
   webglrenderer!: THREE.WebGLRenderer;
+
   camera!: THREE.PerspectiveCamera;
 
   canvas!: HTMLCanvasElement;
@@ -82,12 +80,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   interaction!: Interaction;
 
   labeler!: any;
+
   imageLoader!: any;
 
   meshIdToModel: Map<number, any> = new Map();
 
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
-/*   popUpHandler: PopupHandler = new PopupHandler(); */
+  /*   popUpHandler: PopupHandler = new PopupHandler(); */
 
   get font() {
     return this.args.font;
@@ -96,14 +95,14 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   constructor(owner: any, args: Args) {
     super(owner, args);
     this.initDone = false;
-    this.debug("Constructor called");
+    this.debug('Constructor called');
   }
 
 
   @action
   outerDivInserted(outerDiv: HTMLElement) {
-    this.debug("Outer Div inserted");
-    
+    this.debug('Outer Div inserted');
+
     this.initRendering();
     this.resize(outerDiv);
   }
@@ -111,11 +110,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   canvasInserted(canvas: HTMLCanvasElement) {
-    this.debug("Canvas inserted");
+    this.debug('Canvas inserted');
 
     this.canvas = canvas;
 
-    canvas.oncontextmenu = function (e) {
+    canvas.oncontextmenu = (e) => {
       e.preventDefault();
     };
   }
@@ -141,11 +140,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     cancelAnimationFrame(this.animationFrameId);
 
     // Clean up WebGL rendering context by forcing context loss
-    let gl = this.canvas.getContext('webgl');
+    const gl = this.canvas.getContext('webgl');
     if (!gl) {
       return;
     }
-    let glExtension = gl.getExtension('WEBGL_lose_context');
+    const glExtension = gl.getExtension('WEBGL_lose_context');
     if (!glExtension) return;
     glExtension.loseContext();
 
@@ -153,7 +152,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       this.threePerformance.removePerformanceMeasurement();
     }
 
-    this.debug("cleanup landscape rendering");
+    this.debug('cleanup landscape rendering');
 
     this.imageLoader.logos = {};
 
@@ -169,37 +168,37 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    * @method initRenderings
    */
   initRendering() {
-    let self = this;
+    const self = this;
 
     // Get size if outer ember div
-    let height = $('#rendering').innerHeight();
-    let width = $('#rendering').innerWidth();
+    const height = $('#rendering').innerHeight();
+    const width = $('#rendering').innerWidth();
 
     if (!height || !width) {
       return;
     }
 
     this.scene = new THREE.Scene();
-    let backgroundColor = this.configuration.landscapeColors.background;
+    const backgroundColor = this.configuration.landscapeColors.background;
     this.scene.background = new THREE.Color(backgroundColor);
 
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
 
     this.webglrenderer = new THREE.WebGLRenderer({
       antialias: true,
-      canvas: this.canvas
+      canvas: this.canvas,
     });
 
     this.webglrenderer.setPixelRatio(window.devicePixelRatio);
     this.webglrenderer.setSize(width, height);
 
-    let showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'showFpsCounter');
+    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'showFpsCounter');
 
     if (showFpsCounter) {
       this.threePerformance = new THREEPerformance();
     }
 
-    this.debug("init landscape-rendering");
+    this.debug('init landscape-rendering');
 
     this.imageLoader = new ImageLoader();
 
@@ -209,7 +208,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.initInteraction();
 
-    let dirLight = new THREE.DirectionalLight();
+    const dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
     this.scene.add(dirLight);
 
@@ -219,7 +218,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         return;
       }
 
-      let animationId = requestAnimationFrame(render);
+      const animationId = requestAnimationFrame(render);
       self.animationFrameId = animationId;
 
       if (showFpsCounter) {
@@ -250,13 +249,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    */
   @action
   cleanAndUpdateScene() {
-    let scene = this.scene;
-
-    removeAllChildren(scene);
-
     function removeAllChildren(entity: THREE.Object3D | THREE.Mesh) {
       for (let i = entity.children.length - 1; i >= 0; i--) {
-        let child = entity.children[i];
+        const child = entity.children[i];
 
         removeAllChildren(child);
 
@@ -266,17 +261,23 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
             if (child.material instanceof THREE.Material) {
               child.material.dispose();
             } else {
-              for (let material of child.material)
+              for (let j = 0; j < child.material.length; j++) {
+                const material = child.material[j];
                 material.dispose();
+              }
             }
           }
           entity.remove(child);
         }
       }
     }
+
+    const { scene } = this;
+
+    removeAllChildren(scene);
     this.populateScene();
 
-    this.debug("clean and populate landscape-rendering");
+    this.debug('clean and populate landscape-rendering');
   }
 
 
@@ -302,91 +303,85 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    * @method populateScene
    */
   populateScene() {
-    this.debug("populate landscape-rendering");
+    this.debug('populate landscape-rendering');
 
-    let emberLandscape = this.args.landscape;
+    const emberLandscape = this.args.landscape;
 
     if (!emberLandscape || !this.font) {
       return;
     }
 
-    let modelIdToLayout = applyKlayLayout(emberLandscape);
+    const modelIdToLayout = applyKlayLayout(emberLandscape);
 
-    let centerPoint = CalcCenterAndZoom.
-      getCenterAndZoom(emberLandscape, this.camera, this.webglrenderer);
-    let systems = emberLandscape.systems;
+    const centerPoint = CalcCenterAndZoom
+      .getCenterAndZoom(emberLandscape, this.camera, this.webglrenderer);
+    const { systems } = emberLandscape;
 
     if (systems) {
       // Draw boxes for systems
       systems.forEach((system) => {
-        let systemLayout = modelIdToLayout.get(system.get('id'));
+        const systemLayout = modelIdToLayout.get(system.get('id'));
 
-        if (!systemLayout)
-          return;
+        if (!systemLayout) { return; }
 
-        let systemMesh = new SystemMesh(systemLayout, new THREE.Color(this.configuration.landscapeColors.system));
+        const systemMesh = new SystemMesh(systemLayout,
+          new THREE.Color(this.configuration.landscapeColors.system));
         systemMesh.setToDefaultPosition(centerPoint);
         this.scene.add(systemMesh);
         this.meshIdToModel.set(systemMesh.id, system);
 
-        let nodegroups = system.nodegroups;
+        const { nodegroups } = system;
 
         // Draw boxes for nodegroups
         nodegroups.forEach((nodegroup) => {
-
           if (!nodegroup.get('visible')) {
             return;
           }
 
-          let nodegroupMesh = EntityRendering.renderNodeGroup(nodegroup, centerPoint,
+          const nodegroupMesh = EntityRendering.renderNodeGroup(nodegroup, centerPoint,
             this.configuration, this.labeler, this.font);
           if (nodegroupMesh) {
             this.scene.add(nodegroupMesh);
             this.meshIdToModel.set(nodegroupMesh.id, nodegroup);
           }
 
-          let nodes = nodegroup.get('nodes');
+          const nodes = nodegroup.get('nodes');
 
           // Draw boxes for nodes
           nodes.forEach((node) => {
-
             if (!node.get('visible')) {
               return;
             }
 
-            let nodeMesh = EntityRendering.renderNode(node, centerPoint,
+            const nodeMesh = EntityRendering.renderNode(node, centerPoint,
               this.configuration, this.labeler, this.font);
             this.scene.add(nodeMesh);
             this.meshIdToModel.set(nodeMesh.id, node);
 
-            let applications = node.get('applications');
+            const applications = node.get('applications');
 
             // Draw boxes for applications
             applications.forEach((application) => {
-
-              let applicationMesh = EntityRendering.renderApplication(application, centerPoint,
+              const applicationMesh = EntityRendering.renderApplication(application, centerPoint,
                 this.imageLoader, this.configuration, this.labeler, this.font);
               this.scene.add(applicationMesh);
               this.meshIdToModel.set(applicationMesh.id, application);
             });
-
           });
-
         });
-
       });
     }
 
-    let appCommunications = emberLandscape.get('totalApplicationCommunications');
+    const appCommunications = emberLandscape.get('totalApplicationCommunications');
 
     if (appCommunications) {
-      let color = this.configuration.landscapeColors.communication;
-      let tiles = CommunicationRendering.computeCommunicationTiles(appCommunications, color);
+      const color = this.configuration.landscapeColors.communication;
+      const tiles = CommunicationRendering.computeCommunicationTiles(appCommunications, color);
 
       CommunicationRendering.addCommunicationLineDrawing(tiles, this.scene, centerPoint);
     }
 
-    this.debug("Landscape loaded");
+    this.debug('Landscape loaded');
   }
 
 
@@ -398,17 +393,17 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   handleDoubleClick(mesh?: THREE.Mesh) {
-    if(mesh) {
+    if (mesh) {
       // hide tooltip
       // this.get('popUpHandler').hideTooltip();
 
-      let emberModel = this.meshIdToModel.get(mesh.id);
+      const emberModel = this.meshIdToModel.get(mesh.id);
 
-      if(emberModel instanceof Application){
-        if(emberModel.get('components').get('length') === 0) {
+      if (emberModel instanceof Application) {
+        if (emberModel.get('components').get('length') === 0) {
           // no data => show message
-          const message = "Sorry, there is no information for application <b>" + emberModel.get('name') +
-            "</b> available.";
+          const message = `Sorry, there is no information for application <b>${emberModel.get('name')
+          }</b> available.`;
 
           AlertifyHandler.showAlertifyMessage(message);
         } else {
@@ -416,10 +411,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
           AlertifyHandler.closeAlertifyMessages();
           this.showApplication(emberModel);
         }
-      } else if (emberModel instanceof NodeGroup){
+      } else if (emberModel instanceof NodeGroup) {
         emberModel.setOpened(!emberModel.get('opened'));
         this.cleanAndUpdateScene();
-      } else if(emberModel instanceof System) {
+      } else if (emberModel instanceof System) {
         emberModel.setOpened(!emberModel.get('opened'));
         this.cleanAndUpdateScene();
       }
@@ -427,13 +422,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  handlePanning(delta: {x:number,y:number}, button: 1|2|3) {
-    if(button === 1) {
+  handlePanning(delta: {x: number, y: number}, button: 1|2|3) {
+    if (button === 1) {
       const distanceXInPercent = (delta.x / this.canvas.clientWidth) * 100.0;
       const distanceYInPercent = (delta.y / this.canvas.clientHeight) * 100.0;
 
-      const xVal = this.camera.position.x + distanceXInPercent * 6.0 * 0.015 * -(Math.abs(this.camera.position.z) / 4.0);
-      const yVal = this.camera.position.y + distanceYInPercent * 4.0 * 0.01 * (Math.abs(this.camera.position.z) / 4.0);
+      const xVal = this.camera.position.x + distanceXInPercent * 6.0 * 0.015
+        * -(Math.abs(this.camera.position.z) / 4.0);
+      const yVal = this.camera.position.y + distanceYInPercent * 4.0 * 0.01
+        * (Math.abs(this.camera.position.z) / 4.0);
       this.camera.position.x = xVal;
       this.camera.position.y = yVal;
     }
@@ -442,25 +439,25 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @action
   handleMouseWheel(delta: number) {
     // Hide (old) tooltip
-/*     this.popUpHandler.hideTooltip(); */
+    /*     this.popUpHandler.hideTooltip(); */
 
     const scrollVector = new THREE.Vector3(0, 0, delta * 1.5);
 
-    let landscapeVisible = this.camera.position.z + scrollVector.z > 0.2; 
+    const landscapeVisible = this.camera.position.z + scrollVector.z > 0.2;
     // apply zoom, prevent to zoom behind 2D-Landscape (z-direction)
-    if (landscapeVisible){
+    if (landscapeVisible) {
       this.camera.position.addVectors(this.camera.position, scrollVector);
     }
   }
 
-  @action
+  /* @action
   handleMouseMove(_mesh?: any) {
-/*     this.hoverHandler.handleHoverEffect(mesh); */
+    // this.hoverHandler.handleHoverEffect(mesh);
   }
 
   @action
   handleMouseOut() {
-/*     this.popUpHandler.hideTooltip(); */
+    // this.popUpHandler.hideTooltip();
   }
 
   @action
@@ -469,22 +466,21 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   handleMouseStop(_mesh: THREE.Mesh|undefined, _mouseOnCanvas: Position2D) {
-/*     this.popUpHandler.showTooltip(
-      mouseOnCanvas,
-      mesh
-    ); */
-  }
+    // this.popUpHandler.showTooltip(
+    //  mouseOnCanvas,
+    //  mesh
+    // );
+  } */
 
   initInteraction() {
     this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer, this.scene, {
       doubleClick: this.handleDoubleClick,
-      mouseMove: this.handleMouseMove,
+      /* mouseMove: this.handleMouseMove, */
       mouseWheel: this.handleMouseWheel,
-      mouseOut: this.handleMouseOut,
-      mouseEnter: this.handleMouseEnter,
-      mouseStop: this.handleMouseStop,
-      panning: this.handlePanning
+      /* mouseOut: this.handleMouseOut, */
+      /* mouseEnter: this.handleMouseEnter, */
+      /* mouseStop: this.handleMouseStop, */
+      panning: this.handlePanning,
     });
   }
-
 }
