@@ -555,7 +555,7 @@ export default function applyKlayLayout(landscape: Landscape) {
 
       if (childLayout && parentLayout && parentGraph && parentGraph.padding) {
         childLayout.positionX += parentLayout.positionX + parentGraph.padding.left;
-        childLayout.positionY += parentLayout.positionY + parentGraph.padding.top;
+        childLayout.positionY += parentLayout.positionY - parentGraph.padding.top;
       }
     }
   }
