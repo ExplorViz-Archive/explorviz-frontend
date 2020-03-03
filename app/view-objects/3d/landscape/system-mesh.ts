@@ -62,6 +62,6 @@ export default class SystemMesh extends PlaneMesh {
     const bboxSystem = this.geometry.boundingBox;
     collapseSymbol.position.x = bboxSystem.max.x - 0.35;
     collapseSymbol.position.y = bboxSystem.max.y - 0.35;
-    collapseSymbol.position.z = this.position.z + 0.0001;
+    collapseSymbol.position.z = this.position.z + 0.01;
   }
 }

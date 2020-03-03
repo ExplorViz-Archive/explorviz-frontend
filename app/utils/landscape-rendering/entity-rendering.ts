@@ -95,7 +95,7 @@ export function renderApplication(application: Application, centerPoint: THREE.V
   let applicationMesh = createPlane(application, applicationColor);
 
   applicationMesh.position.set(centerX, centerY,
-    application.get('positionZ') + 0.003);
+    application.get('positionZ') + 0.03);
 
   application.set('threeJSModel', applicationMesh);
 

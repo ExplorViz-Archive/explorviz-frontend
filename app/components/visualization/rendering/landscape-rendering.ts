@@ -29,6 +29,7 @@ import System from 'explorviz-frontend/models/system';
 import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
 import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
 import NodeGroupMesh from 'explorviz-frontend/view-objects/3d/landscape/nodegroup-mesh';
+import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 
 
 interface Args {
@@ -336,7 +337,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         const nodeGroups = system.nodegroups;
 
         // Draw boxes for nodegroups
-        nodeGroups.forEach((nodeGroup) => {
+        nodeGroups.forEach((nodeGroup: NodeGroup) => {
           const nodeGroupLayout = modelIdToLayout.get(nodeGroup.get('id'));
 
           if (nodeGroupLayout) {
@@ -352,14 +353,16 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
           // Draw boxes for nodes
           nodes.forEach((node) => {
-            if (!node.get('visible')) {
-              return;
-            }
+            const nodeLayout = modelIdToLayout.get(node.get('id'));
 
-            const nodeMesh = EntityRendering.renderNode(node, centerPoint,
-              this.configuration, this.labeler, this.font);
-            this.scene.add(nodeMesh);
-            this.meshIdToModel.set(nodeMesh.id, node);
+            if (nodeLayout) {
+              const nodeMesh = new NodeMesh(nodeLayout, node,
+                new THREE.Color(this.configuration.landscapeColors.node));
+              nodeMesh.setToDefaultPosition(centerPoint);
+              nodeMesh.createLabel(this.font);
+              this.scene.add(nodeMesh);
+              this.meshIdToModel.set(nodeMesh.id, node);
+            }
 
             const applications = node.get('applications');
 

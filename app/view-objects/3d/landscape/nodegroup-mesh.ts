@@ -24,7 +24,7 @@ export default class NodeGroupMesh extends PlaneMesh {
     const centerX = this.layout.positionX + this.layout.width / 2 - centerPoint.x;
     const centerY = this.layout.positionY - this.layout.height / 2 - centerPoint.y;
 
-    this.position.set(centerX, centerY, 0.0001);
+    this.position.set(centerX, centerY, 0.01);
   }
 
   createCollapseSymbol(font: THREE.Font, fontSize: number = 0.35,
@@ -41,6 +41,6 @@ export default class NodeGroupMesh extends PlaneMesh {
     const bboxSystem = this.geometry.boundingBox;
     collapseSymbol.position.x = bboxSystem.max.x - 0.35;
     collapseSymbol.position.y = bboxSystem.max.y - 0.35;
-    collapseSymbol.position.z = this.position.z + 0.0001;
+    collapseSymbol.position.z = this.position.z + 0.01;
   }
 }
