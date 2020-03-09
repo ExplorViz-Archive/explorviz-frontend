@@ -9,7 +9,7 @@ export default class ApplicationMesh extends PlaneMesh {
   material: THREE.MeshBasicMaterial;
 
   constructor(layout: PlaneLayout, applicationModel: Application,
-    defaultColor: THREE.Color, highlightingColor: THREE.Color = new THREE.Color(255, 0, 0)) {
+    defaultColor: THREE.Color, highlightingColor = new THREE.Color('red')) {
     super(defaultColor, highlightingColor, layout);
 
     this.dataModel = applicationModel;

@@ -366,8 +366,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Create and add label + icon
     systemMesh.setToDefaultPosition(centerPoint);
-    systemMesh.createLabel(this.font, 0.4);
-    systemMesh.createCollapseSymbol(this.font, 0.35);
+    const labelText = system.get('name');
+    const labelColor = new THREE.Color('black');
+    Labeler.addSystemTextLabel(systemMesh, labelText, this.font, labelColor);
+    Labeler.addCollapseSymbol(systemMesh, this.font, labelColor);
 
     // Add to scene
     this.scene.add(systemMesh);
@@ -384,7 +386,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Create and add label + icon
     nodeGroupMesh.setToDefaultPosition(centerPoint);
-    nodeGroupMesh.createCollapseSymbol(this.font, 0.35);
+    const labelColor = new THREE.Color('white');
+    Labeler.addCollapseSymbol(nodeGroupMesh, this.font, labelColor);
 
     // Add to scene
     this.scene.add(nodeGroupMesh);
@@ -401,7 +404,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Create and add label + icon
     nodeMesh.setToDefaultPosition(centerPoint);
-    nodeMesh.createLabel(this.font);
+
+    const labelText = node.getDisplayName();
+    const labelColor = new THREE.Color('white');
+    Labeler.addNodeTextLabel(nodeMesh, labelText, this.font, labelColor);
 
     // Add to scene
     this.scene.add(nodeMesh);
@@ -419,7 +425,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Create and add label + icon
     Labeler.addApplicationTextLabel(applicationMesh, application.get('name'), this.font,
-      new THREE.Color(0xffffff));
+      new THREE.Color('white'));
     Labeler.addApplicationLogo(applicationMesh, application, this.imageLoader);
 
     // Add to scene

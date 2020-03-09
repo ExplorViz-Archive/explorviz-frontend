@@ -3,7 +3,7 @@ import LabelMesh from '../label-mesh';
 
 export default class PlaneLabelMesh extends LabelMesh {
   constructor(font: THREE.Font, labelText: string, fontSize = 0.4,
-    textColor = new THREE.Color(0x000000)) {
+    textColor = new THREE.Color('black')) {
     super(font, labelText, textColor);
     this.computeLabel(labelText, fontSize);
   }

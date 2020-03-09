@@ -2,7 +2,7 @@ import THREE from 'three';
 import LabelMesh from '../label-mesh';
 
 export default class ClazzLabelMesh extends LabelMesh {
-  constructor(font: THREE.Font, labelText: string, textColor = new THREE.Color(0x000000)) {
+  constructor(font: THREE.Font, labelText: string, textColor = new THREE.Color('black')) {
     super(font, labelText, textColor);
     this.computeLabel(labelText);
   }

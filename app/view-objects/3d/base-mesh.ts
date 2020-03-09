@@ -9,7 +9,7 @@ export default abstract class BaseMesh extends THREE.Mesh {
   highlightingColor: THREE.Color;
 
 
-  constructor(defaultColor: THREE.Color, highlightingColor = new THREE.Color(0xff0000)) {
+  constructor(defaultColor: THREE.Color, highlightingColor = new THREE.Color('red')) {
     super();
     this.defaultColor = defaultColor;
     this.highlightingColor = highlightingColor;
