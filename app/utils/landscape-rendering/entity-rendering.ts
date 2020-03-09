@@ -5,6 +5,7 @@ import System from 'explorviz-frontend/models/system';
 import NodeGroup from 'explorviz-frontend/models/nodegroup';
 import Node from 'explorviz-frontend/models/node';
 import Application from 'explorviz-frontend/models/application';
+import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 
 export function createPlane(model: DrawNodeEntity, color: THREE.Color) {
   const material = new THREE.MeshBasicMaterial({

@@ -24,7 +24,7 @@ export default class SystemMesh extends PlaneMesh {
     const centerX = this.layout.positionX + this.layout.width / 2 - centerPoint.x;
     const centerY = this.layout.positionY - this.layout.height / 2 - centerPoint.y;
 
-    this.position.set(centerX, centerY, 0);
+    this.position.set(centerX, centerY, 0.0);
   }
 
   createLabel(font: THREE.Font, fontSize: number = 0.4,

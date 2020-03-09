@@ -14,11 +14,9 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 
 import applyKlayLayout from 'explorviz-frontend/utils/landscape-rendering/klay-layouter';
 import Interaction from 'explorviz-frontend/utils/interaction';
-import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
+import * as Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as CalcCenterAndZoom from
   'explorviz-frontend/utils/landscape-rendering/center-and-zoom-calculator';
-import * as EntityRendering from
-  'explorviz-frontend/utils/landscape-rendering/entity-rendering';
 import * as CommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
@@ -30,6 +28,9 @@ import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
 import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
 import NodeGroupMesh from 'explorviz-frontend/view-objects/3d/landscape/nodegroup-mesh';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
+import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
+import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
+import Node from 'explorviz-frontend/models/node';
 
 
 interface Args {
@@ -80,8 +81,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   threePerformance!: any;
 
   interaction!: Interaction;
-
-  labeler!: any;
 
   imageLoader!: any;
 
@@ -204,10 +203,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.imageLoader = new ImageLoader();
 
-    if (!this.labeler) {
-      this.labeler = Labeler.create();
-    }
-
     this.initInteraction();
 
     const dirLight = new THREE.DirectionalLight();
@@ -317,67 +312,38 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     const centerPoint = CalcCenterAndZoom
       .getCenterAndZoom(emberLandscape, this.camera, this.webglrenderer);
+
     const { systems } = emberLandscape;
 
+    // Render systems, nodegroups, nodes & applications
     if (systems) {
       // Draw boxes for systems
       systems.forEach((system) => {
-        const systemLayout = modelIdToLayout.get(system.get('id'));
-
-        if (!systemLayout) { return; }
-
-        const systemMesh = new SystemMesh(systemLayout, system,
-          new THREE.Color(this.configuration.landscapeColors.system));
-        systemMesh.setToDefaultPosition(centerPoint);
-        systemMesh.createLabel(this.font, 0.4);
-        systemMesh.createCollapseSymbol(this.font, 0.35);
-        this.scene.add(systemMesh);
-        this.meshIdToModel.set(systemMesh.id, system);
+        this.renderSystem(system, modelIdToLayout.get(system.get('id')), centerPoint);
 
         const nodeGroups = system.nodegroups;
 
         // Draw boxes for nodegroups
         nodeGroups.forEach((nodeGroup: NodeGroup) => {
-          const nodeGroupLayout = modelIdToLayout.get(nodeGroup.get('id'));
-
-          if (nodeGroupLayout) {
-            const nodeGroupMesh = new NodeGroupMesh(nodeGroupLayout, nodeGroup,
-              new THREE.Color(this.configuration.landscapeColors.nodegroup));
-            nodeGroupMesh.setToDefaultPosition(centerPoint);
-            nodeGroupMesh.createCollapseSymbol(this.font, 0.35);
-            this.scene.add(nodeGroupMesh);
-            this.meshIdToModel.set(nodeGroupMesh.id, nodeGroup);
-          }
-
+          this.renderNodeGroup(nodeGroup, modelIdToLayout.get(nodeGroup.get('id')), centerPoint);
           const nodes = nodeGroup.get('nodes');
 
           // Draw boxes for nodes
           nodes.forEach((node) => {
-            const nodeLayout = modelIdToLayout.get(node.get('id'));
-
-            if (nodeLayout) {
-              const nodeMesh = new NodeMesh(nodeLayout, node,
-                new THREE.Color(this.configuration.landscapeColors.node));
-              nodeMesh.setToDefaultPosition(centerPoint);
-              nodeMesh.createLabel(this.font);
-              this.scene.add(nodeMesh);
-              this.meshIdToModel.set(nodeMesh.id, node);
-            }
+            this.renderNode(node, modelIdToLayout.get(node.get('id')), centerPoint);
 
             const applications = node.get('applications');
 
             // Draw boxes for applications
             applications.forEach((application) => {
-              const applicationMesh = EntityRendering.renderApplication(application, centerPoint,
-                this.imageLoader, this.configuration, this.labeler, this.font);
-              this.scene.add(applicationMesh);
-              this.meshIdToModel.set(applicationMesh.id, application);
+              this.renderApplication(application, modelIdToLayout.get(application.get('id')), centerPoint);
             });
           });
         });
       });
     }
 
+    // Render application communication
     const appCommunications = emberLandscape.get('totalApplicationCommunications');
 
     if (appCommunications) {
@@ -388,6 +354,77 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
 
     this.debug('Landscape loaded');
+  }
+
+  renderSystem(system: System, layout: PlaneLayout | undefined,
+    centerPoint: THREE.Vector3) {
+    if (!layout) { return; }
+
+    // Create system mesh
+    const systemMesh = new SystemMesh(layout, system,
+      new THREE.Color(this.configuration.landscapeColors.system));
+
+    // Create and add label + icon
+    systemMesh.setToDefaultPosition(centerPoint);
+    systemMesh.createLabel(this.font, 0.4);
+    systemMesh.createCollapseSymbol(this.font, 0.35);
+
+    // Add to scene
+    this.scene.add(systemMesh);
+    this.meshIdToModel.set(systemMesh.id, system);
+  }
+
+  renderNodeGroup(nodeGroup: NodeGroup, layout: PlaneLayout | undefined,
+    centerPoint: THREE.Vector3) {
+    if (!layout) { return; }
+
+    // Create nodeGroup mesh
+    const nodeGroupMesh = new NodeGroupMesh(layout, nodeGroup,
+      new THREE.Color(this.configuration.landscapeColors.nodegroup));
+
+    // Create and add label + icon
+    nodeGroupMesh.setToDefaultPosition(centerPoint);
+    nodeGroupMesh.createCollapseSymbol(this.font, 0.35);
+
+    // Add to scene
+    this.scene.add(nodeGroupMesh);
+    this.meshIdToModel.set(nodeGroupMesh.id, nodeGroup);
+  }
+
+  renderNode(node: Node, layout: PlaneLayout | undefined,
+    centerPoint: THREE.Vector3) {
+    if (!layout) { return; }
+
+    // Create node mesh
+    const nodeMesh = new NodeMesh(layout, node,
+      new THREE.Color(this.configuration.landscapeColors.node));
+
+    // Create and add label + icon
+    nodeMesh.setToDefaultPosition(centerPoint);
+    nodeMesh.createLabel(this.font);
+
+    // Add to scene
+    this.scene.add(nodeMesh);
+    this.meshIdToModel.set(nodeMesh.id, node);
+  }
+
+  renderApplication(application: Application, layout: PlaneLayout | undefined,
+    centerPoint: THREE.Vector3) {
+    if (!layout) { return; }
+
+    // Create application mesh
+    const applicationMesh = new ApplicationMesh(layout, application,
+      new THREE.Color(this.configuration.landscapeColors.application));
+    applicationMesh.setToDefaultPosition(centerPoint);
+
+    // Create and add label + icon
+    Labeler.addApplicationTextLabel(applicationMesh, application.get('name'), this.font,
+      new THREE.Color(0xffffff));
+    Labeler.addApplicationLogo(applicationMesh, application, this.imageLoader);
+
+    // Add to scene
+    this.scene.add(applicationMesh);
+    this.meshIdToModel.set(applicationMesh.id, application);
   }
 
 
@@ -408,8 +445,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       if (emberModel instanceof Application) {
         if (emberModel.get('components').get('length') === 0) {
           // no data => show message
-          const message = `Sorry, there is no information for application <b>${emberModel.get('name')
-          }</b> available.`;
+          const message = `Sorry, there is no information for application <b>
+          ${emberModel.get('name')}</b> available.`;
 
           AlertifyHandler.showAlertifyMessage(message);
         } else {
@@ -457,26 +494,26 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   /* @action
-  handleMouseMove(_mesh?: any) {
-    // this.hoverHandler.handleHoverEffect(mesh);
-  }
+handleMouseMove(_mesh?: any) {
+  // this.hoverHandler.handleHoverEffect(mesh);
+}
 
-  @action
-  handleMouseOut() {
-    // this.popUpHandler.hideTooltip();
-  }
+@action
+handleMouseOut() {
+  // this.popUpHandler.hideTooltip();
+}
 
-  @action
-  handleMouseEnter() {
-  }
+@action
+handleMouseEnter() {
+}
 
-  @action
-  handleMouseStop(_mesh: THREE.Mesh|undefined, _mouseOnCanvas: Position2D) {
-    // this.popUpHandler.showTooltip(
-    //  mouseOnCanvas,
-    //  mesh
-    // );
-  } */
+@action
+handleMouseStop(_mesh: THREE.Mesh|undefined, _mouseOnCanvas: Position2D) {
+  // this.popUpHandler.showTooltip(
+  //  mouseOnCanvas,
+  //  mesh
+  // );
+} */
 
   initInteraction() {
     this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer, this.scene, {
