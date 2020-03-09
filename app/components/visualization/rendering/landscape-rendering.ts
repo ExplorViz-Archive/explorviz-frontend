@@ -436,31 +436,30 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   handleDoubleClick(mesh?: THREE.Mesh) {
-    if (mesh) {
-      // hide tooltip
-      // this.get('popUpHandler').hideTooltip();
+    // Handle application
+    if (mesh instanceof ApplicationMesh) {
+      const application = mesh.dataModel;
+      // No data => show message
+      if (application.get('components').get('length') === 0) {
+        const message = `Sorry, there is no information for application <b>
+          ${application.get('name')}</b> available.`;
 
-      const emberModel = this.meshIdToModel.get(mesh.id);
-
-      if (emberModel instanceof Application) {
-        if (emberModel.get('components').get('length') === 0) {
-          // no data => show message
-          const message = `Sorry, there is no information for application <b>
-          ${emberModel.get('name')}</b> available.`;
-
-          AlertifyHandler.showAlertifyMessage(message);
-        } else {
-          // data available => open application-rendering
-          AlertifyHandler.closeAlertifyMessages();
-          this.showApplication(emberModel);
-        }
-      } else if (emberModel instanceof NodeGroup) {
-        emberModel.setOpened(!emberModel.get('opened'));
-        this.cleanAndUpdateScene();
-      } else if (emberModel instanceof System) {
-        emberModel.setOpened(!emberModel.get('opened'));
-        this.cleanAndUpdateScene();
+        AlertifyHandler.showAlertifyMessage(message);
+      } else {
+        // data available => open application-rendering
+        AlertifyHandler.closeAlertifyMessages();
+        this.showApplication(application);
       }
+      // Handle nodeGroup
+    } else if (mesh instanceof NodeGroupMesh) {
+      const nodeGroup = mesh.dataModel;
+      nodeGroup.setOpened(!nodeGroup.get('opened'));
+      this.cleanAndUpdateScene();
+      // Handle system
+    } else if (mesh instanceof SystemMesh) {
+      const system = mesh.dataModel;
+      system.setOpened(!system.get('opened'));
+      this.cleanAndUpdateScene();
     }
   }
 
@@ -495,12 +494,12 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   /* @action
 handleMouseMove(_mesh?: any) {
-  // this.hoverHandler.handleHoverEffect(mesh);
+// this.hoverHandler.handleHoverEffect(mesh);
 }
 
 @action
 handleMouseOut() {
-  // this.popUpHandler.hideTooltip();
+// this.popUpHandler.hideTooltip();
 }
 
 @action
@@ -509,10 +508,10 @@ handleMouseEnter() {
 
 @action
 handleMouseStop(_mesh: THREE.Mesh|undefined, _mouseOnCanvas: Position2D) {
-  // this.popUpHandler.showTooltip(
-  //  mouseOnCanvas,
-  //  mesh
-  // );
+// this.popUpHandler.showTooltip(
+//  mouseOnCanvas,
+//  mesh
+// );
 } */
 
   initInteraction() {
