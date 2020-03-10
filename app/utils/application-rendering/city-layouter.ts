@@ -19,9 +19,8 @@ export function applyCommunicationLayout(application: Application,
   const drawableClazzCommunications = application.get('drawableClazzCommunications');
 
   drawableClazzCommunications.forEach((clazzcommunication) => {
-    let foundation = application.get('components').objectAt(0);
-    if (layoutMap.has(clazzcommunication.get('id')) && foundation) {
-      layoutDrawableCommunication(clazzcommunication, foundation);
+    if (layoutMap.has(clazzcommunication.get('id'))) {
+      layoutDrawableCommunication(clazzcommunication, application);
     }
   });
 
@@ -31,37 +30,62 @@ export function applyCommunicationLayout(application: Application,
 
   function layoutEdges(application: Application) {
 
-    const drawableClazzCommunications = application.get('drawableClazzCommunications');
+    const drawableClazzCommunications = application.hasMany('drawableClazzCommunications').value();
 
-    drawableClazzCommunications.forEach((clazzCommunication) => {
+    if(!drawableClazzCommunications)
+      return;
+
+    for(let i = 0; i < drawableClazzCommunications.length; i++) {
+      const clazzCommunication: DrawableClazzCommunication = drawableClazzCommunications.objectAt(i);
+
       let parentComponent = clazzCommunication.get('parentComponent');
-      let parentMesh = modelIdToMesh.get(parentComponent.get('id'));
 
-      if (parentMesh instanceof ComponentMesh && parentMesh.opened) {
+      let parentMesh;
+
+      if(parentComponent === null) {
+        // common ancestor must be the foundation
+        parentMesh = modelIdToMesh.get(application.get('id'));
+      } else {
+        parentMesh = modelIdToMesh.get(parentComponent.get('id'));
+      }
+
+      if ((parentMesh instanceof ComponentMesh && parentMesh.opened) || parentMesh instanceof FoundationMesh) {
         layoutMap.set(clazzCommunication.get('id'), new CommunicationLayout(clazzCommunication));
 
         let sourceEntity: any = null;
         let targetEntity: any = null;
 
-        let sourceParent = clazzCommunication.get('sourceClazz').get('parent');
+        let sourceClazz = clazzCommunication.belongsTo('sourceClazz').value() as Clazz|null;
+
+        if(sourceClazz === null) {
+          continue;
+        }
+
+        let sourceParent = sourceClazz.belongsTo('parent').value() as Component;
         let sourceParentMesh = modelIdToMesh.get(sourceParent.get('id'));
 
         // Determine where the communication should begin (clazz or component - based upon their visiblity)
         if (sourceParentMesh instanceof ComponentMesh && sourceParentMesh.opened) {
           sourceEntity = clazzCommunication.get('sourceClazz');
         } else {
-          sourceEntity = findFirstParentOpenComponent(clazzCommunication.get('sourceClazz').get('parent'));
+          sourceEntity = findFirstParentOpenComponent(sourceParent);
         }
 
 
-        let targetParent = clazzCommunication.get('targetClazz').get('parent');
+        let targetClazz = clazzCommunication.belongsTo('targetClazz').value() as Clazz|null;
+
+        if(targetClazz === null) {
+          continue;
+        }
+
+        let targetParent = targetClazz.belongsTo('parent').value() as Component;
         let targetParentMesh = modelIdToMesh.get(targetParent.get('id'));
 
         // Determine where the communication should end (clazz or component - based upon their visiblity)
         if (targetParentMesh instanceof ComponentMesh && targetParentMesh.opened) {
           targetEntity = clazzCommunication.get('targetClazz');
         } else {
-          targetEntity = findFirstParentOpenComponent(clazzCommunication.get('targetClazz').get('parent'));
+          targetEntity = findFirstParentOpenComponent(targetParent);
         }
 
         if (sourceEntity && targetEntity) {
@@ -82,7 +106,7 @@ export function applyCommunicationLayout(application: Application,
       }
 
       calculatePipeSizeFromQuantiles(application);
-    });
+    }
 
     // Calculates the size of the pipes regarding the number of requests
     function calculatePipeSizeFromQuantiles(application: Application) {
@@ -152,29 +176,36 @@ export function applyCommunicationLayout(application: Application,
 
     } // END calculatePipeSizeFromQuantiles
 
-    function findFirstParentOpenComponent(entity: Component): Component {
-      let parentComponent: Component = entity.get('parentComponent');
+    function findFirstParentOpenComponent(entity: Component): Component|null {
+      let parentComponent: Component = entity.getParentComponent();
+
+      if(!parentComponent)
+        return entity;
 
       let parentMesh = modelIdToMesh.get(parentComponent.get('id'));
-      if (parentMesh instanceof FoundationMesh ||
-        (parentMesh instanceof ComponentMesh && parentMesh.opened)) {
+      if (parentMesh instanceof ComponentMesh && parentMesh.opened) {
         return entity;
       } else {
-        return findFirstParentOpenComponent(entity.get('parentComponent'));
+        return findFirstParentOpenComponent(parentComponent);
       }
     }
 
   } // END layoutEdges
 
-  function layoutDrawableCommunication(commu: DrawableClazzCommunication, foundation: Component) {
+  function layoutDrawableCommunication(commu: DrawableClazzCommunication, foundation: Application) {
 
     const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
 
+    let foundationLayout = boxLayoutMap.get(foundation.id);
+
+    if(!foundationLayout)
+      return;
+
     const centerCommuIcon =
-      new THREE.Vector3(foundation.get('positionX') + foundation.get('extension').x * 2.0 +
-        externalPortsExtension.x * 4.0, foundation.get('positionY') -
-        foundation.get('extension').y + externalPortsExtension.y,
-        foundation.get('positionZ') + foundation.get('extension').z * 2.0 -
+      new THREE.Vector3(foundationLayout.positionX + foundationLayout.width * 2.0 +
+        externalPortsExtension.x * 4.0, foundationLayout.positionY -
+        foundationLayout.height + externalPortsExtension.y,
+        foundationLayout.positionZ + foundationLayout.depth * 2.0 -
         externalPortsExtension.z - 12.0);
 
     layoutInAndOutCommunication(commu, commu.get('sourceClazz'), centerCommuIcon);
