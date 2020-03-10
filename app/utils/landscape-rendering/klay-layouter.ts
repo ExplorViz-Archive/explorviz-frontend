@@ -4,6 +4,8 @@ import Node from "explorviz-frontend/models/node";
 import Application from "explorviz-frontend/models/application";
 import DrawNodeEntity from "explorviz-frontend/models/drawnodeentity";
 import PlaneLayout from "explorviz-frontend/view-objects/layout-models/plane-layout";
+import System from "explorviz-frontend/models/system";
+import DS from "ember-data";
 
 /* global $klay */
 
@@ -153,7 +155,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
         system.set('sourcePorts', {});
         system.set('targetPorts', {});
 
-        if (system.get('opened')) {
+        if (isOpen(system)) {
 
           const minWidth = Math.max(2.5 * DEFAULT_WIDTH *
             CONVERT_TO_KIELER_FACTOR,
@@ -192,7 +194,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
             nodegroup.set('sourcePorts', {});
             nodegroup.set('targetPorts', {});
 
-            if (nodegroup.get('visible')) {
+            if (isVisible(nodegroup)) {
               createNodeGroup(systemKielerGraph, nodegroup);
             }
 
@@ -271,7 +273,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
         node.set('sourcePorts', {});
         node.set('targetPorts', {});
 
-        if (node.get('visible')) {
+        if (isVisible(node)) {
           createNodeAndItsApplications(nodeGroupKielerGraph, node);
           let kielerGraphReference = modelIdToGraph.get(node.get('id'));
 
@@ -292,7 +294,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
         node.set('sourcePorts', {});
         node.set('targetPorts', {});
 
-        if (node.get('visible')) {
+        if (isVisible(node)) {
           createNodeAndItsApplications(systemKielerGraph, node);
         }
 
@@ -396,14 +398,21 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
       if (appSource.get('parent') == null || appTarget.get('parent') == null) {
         return;
       }
-      // console.log("edge: " + appSource.get('name') + " -> " + appTarget.get('name'));
 
-      if (!appTarget.get('parent').get('visible')) {
-        appTarget = (appTarget.get('parent').get('parent').get('parent').get('opened')) ? seekRepresentativeApplication(appTarget) : appTarget.get('parent').get('parent').get('parent');
+      let sourceNode = appSource.belongsTo('parent').value() as Node;
+      let sourceNodeGroup = sourceNode.belongsTo('parent').value() as NodeGroup;
+      let sourceSystem = sourceNodeGroup.belongsTo('parent').value() as System;
+
+      if (!isVisible(sourceNode)) {
+        appSource = isOpen(sourceSystem) ? seekRepresentativeApplication(appSource) : sourceSystem;
       }
 
-      if (!appSource.get('parent').get('visible')) {
-        appSource = (appSource.get('parent').get('parent').get('parent').get('opened')) ? seekRepresentativeApplication(appSource) : appSource.get('parent').get('parent').get('parent');
+      let targetNode = appTarget.belongsTo('parent').value() as Node;
+      let targetNodeGroup = targetNode.belongsTo('parent').value() as NodeGroup;
+      let targetSystem = targetNodeGroup.belongsTo('parent').value() as System;
+
+      if (!isVisible(targetNode)) {
+        appTarget = isOpen(targetSystem) ? seekRepresentativeApplication(appTarget) : targetSystem;
       }
 
       if (appSource.get("id") !== appTarget.get("id")) {
@@ -426,7 +435,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
       nodegroups.forEach((nodegroup) => {
 
-        if (nodegroup.get('visible')) {
+        if (isVisible(nodegroup)) {
 
           const nodes = nodegroup.get('nodes');
 
@@ -438,7 +447,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
           nodes.forEach((node) => {
 
-            if (node.get('visible')) {
+            if (isVisible(node)) {
 
               updateNodeValues(node);
 
@@ -475,13 +484,13 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
       nodegroups.forEach((nodegroup) => {
 
-        if (nodegroup.get('visible')) {
+        if (isVisible(nodegroup)) {
 
           const nodes = nodegroup.get('nodes');
 
           nodes.forEach((node) => {
 
-            if (node.get('visible')) {
+            if (isVisible(node)) {
 
               const applications = node.get('applications');
 
@@ -513,7 +522,8 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
 
   function getDisplayName(nodeGroup: NodeGroup, node: Node) {
-    if (nodeGroup.get('opened')) {
+
+    if (isOpen(nodeGroup)) {
       if (node.get('name') && node.get('name').length !== 0 && !node.get('name').startsWith("<")) {
         return node.get('name');
       } else {
@@ -571,6 +581,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
       layout.positionY = entityGraph.y * -1;
       layout.width = entityGraph.width;
       layout.height = entityGraph.height;
+      layout.opened = openEntitiesIds.size === 0 ? true : openEntitiesIds.has(entity.get('id'));
       modelIdToLayout.set(entity.get('id'), layout);
 
       entity.set('positionX', entityGraph.x);
@@ -923,8 +934,11 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   function getRightParent(sourceApplication: Application, targetApplication: Application) {
     let result = sourceApplication.get('parent');
 
-    if (!sourceApplication.get('parent').get('visible')) {
-      if (!sourceApplication.get('parent').get('parent').get('parent').get('opened')) {
+    let sourceNode = sourceApplication.belongsTo('parent').value() as Node;
+    if (!isVisible(sourceNode)) {
+      let sourceNodeGroup = sourceNode.belongsTo('parent').value() as NodeGroup;
+      let sourceSystem = sourceNodeGroup.belongsTo('parent').value() as System;
+      if (!isOpen(sourceSystem)) {
         if (sourceApplication.get('parent').get('parent').get('parent') !== targetApplication.get('parent').get('parent').get('parent')) {
           result = sourceApplication.get('parent').get('parent').get('parent');
         } else {
@@ -943,18 +957,21 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
   /**
    * Searches for an application with the same name as the 
-   * given application within the same nodegroup. 
+   * given application within the same nodegroup. This can be
+   * be done because a nodegroup only contains nodes which run
+   * the same applications.
    * @param application 
    */
   function seekRepresentativeApplication(application: Application) {
     let parentNode = application.belongsTo('parent').value() as Node;
+    let parentNodeGroup = parentNode.belongsTo('parent').value() as NodeGroup;
 
-    let nodes = parentNode.get('parent').get('nodes');
+    let nodes = parentNodeGroup.hasMany('nodes').value() as DS.ManyArray<Node>;
 
     let returnValue = null;
 
     nodes.forEach((node) => {
-      if (node.get('visible')) {
+      if (isVisible(node)) {
 
         const applications = node.get('applications');
 
@@ -967,7 +984,23 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
       }
     });
 
-    return returnValue ? returnValue : null;
+    return returnValue;
+  }
+
+  function isOpen(system: System): boolean;
+  function isOpen(nodeGroup: NodeGroup): boolean;
+
+  function isOpen(entity: System | NodeGroup) {
+    if (openEntitiesIds.size === 0) {
+      return true;
+    }
+    if (entity instanceof System) {
+      return openEntitiesIds.has(entity.get('id'));
+    } else if (entity instanceof NodeGroup) {
+      return entity.get("nodes").length < 2 || openEntitiesIds.has(entity.get('id'));
+    }
+    // TODO: Check why this can happen
+    return openEntitiesIds.has(entity.get('id'));
   }
 
   function isVisible(application: Application): boolean;
@@ -976,12 +1009,16 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
   function isVisible(entity: Application | Node | NodeGroup) {
     if (entity instanceof NodeGroup) {
-      let system = entity.get('parent');
-      return openEntitiesIds.has(system.get('id'));;
+      let system = entity.belongsTo('parent').value() as System;
+      return isOpen(system);
     } else if (entity instanceof Node) {
       let nodeGroup = entity.belongsTo('parent').value() as NodeGroup;
-      let isNodeGroupOpen = openEntitiesIds.has(nodeGroup.get('id'));
-      return isNodeGroupOpen && isVisible(nodeGroup);
+      if (isOpen(nodeGroup)) {
+        return isVisible(nodeGroup);
+      } else {
+        let nodes = nodeGroup.hasMany('nodes').value() as DS.ManyArray<Node>;
+        return nodes.objectAt(0)?.get('id') === entity.get('id') && isVisible(nodeGroup);
+      }
     } else if (entity instanceof Application) {
       let node = entity.belongsTo('parent').value() as Node;
       return isVisible(node);

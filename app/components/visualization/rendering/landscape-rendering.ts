@@ -84,7 +84,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   imageLoader!: any;
 
-  meshIdToModel: Map<number, any> = new Map();
+  modelIdToMesh: Map<string, THREE.Mesh> = new Map();
 
   systemMeshes: Set<SystemMesh> = new Set();
 
@@ -317,7 +317,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     const modelIdToLayout = applyKlayLayout(emberLandscape, openEntitiesIds);
 
     // Reset mesh related data structures
-    this.meshIdToModel.clear();
+    this.modelIdToMesh.clear();
     this.systemMeshes.clear();
     this.nodeGroupMeshes.clear();
 
@@ -372,11 +372,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     const { systemMeshes, nodeGroupMeshes } = this;
     systemMeshes.forEach((systemMesh) => {
-      if (systemMesh.opened) { openEntitiesIds.add(systemMesh.dataModel.id); }
+      if (systemMesh.opened) {
+        openEntitiesIds.add(systemMesh.dataModel.id);
+      }
     });
 
     nodeGroupMeshes.forEach((nodeGroupMesh) => {
-      if (nodeGroupMesh.opened) { openEntitiesIds.add(nodeGroupMesh.dataModel.id); }
+      if (nodeGroupMesh.opened) {
+        openEntitiesIds.add(nodeGroupMesh.dataModel.id);
+      }
     });
 
     return openEntitiesIds;
@@ -400,7 +404,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     // Add to scene
     this.scene.add(systemMesh);
     this.systemMeshes.add(systemMesh);
-    this.meshIdToModel.set(systemMesh.id, system);
+    this.modelIdToMesh.set(system.get('id'), systemMesh);
   }
 
   renderNodeGroup(nodeGroup: NodeGroup, layout: PlaneLayout | undefined,
@@ -419,7 +423,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     // Add to scene
     this.scene.add(nodeGroupMesh);
     this.nodeGroupMeshes.add(nodeGroupMesh);
-    this.meshIdToModel.set(nodeGroupMesh.id, nodeGroup);
+    this.modelIdToMesh.set(nodeGroup.get('id'), nodeGroupMesh);
   }
 
   renderNode(node: Node, layout: PlaneLayout | undefined,
@@ -439,7 +443,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Add to scene
     this.scene.add(nodeMesh);
-    this.meshIdToModel.set(nodeMesh.id, node);
+    this.modelIdToMesh.set(node.get('id'), nodeMesh);
   }
 
   renderApplication(application: Application, layout: PlaneLayout | undefined,
@@ -458,7 +462,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Add to scene
     this.scene.add(applicationMesh);
-    this.meshIdToModel.set(applicationMesh.id, application);
+    this.modelIdToMesh.set(application.get('id'), applicationMesh);
   }
 
   @action
@@ -494,6 +498,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       const system = mesh.dataModel;
       system.setOpened(!system.get('opened'));
       mesh.opened = !mesh.opened;
+      // Close nodegroups in system
+      if (!mesh.opened) {
+        system.get('nodegroups').forEach((nodeGroup) => {
+          const nodeGroupMesh = this.modelIdToMesh.get(nodeGroup.get('id'));
+          if (nodeGroupMesh instanceof NodeGroupMesh) {
+            nodeGroupMesh.opened = false;
+          }
+        });
+      }
       this.cleanAndUpdateScene();
     }
   }
