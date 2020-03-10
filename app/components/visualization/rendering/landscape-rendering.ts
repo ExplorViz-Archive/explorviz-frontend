@@ -86,6 +86,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   meshIdToModel: Map<number, any> = new Map();
 
+  systemMeshes: Set<SystemMesh> = new Set();
+
+  nodeGroupMeshes: Set<NodeGroupMesh> = new Set();
+
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
   /*   popUpHandler: PopupHandler = new PopupHandler(); */
 
@@ -132,11 +136,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // @Override
   /**
-   * This overridden Ember Component lifecycle hook enables calling
-   * ExplorViz's custom cleanup code.
-   *
-   * @method willDestroy
-   */
+ * This overridden Ember Component lifecycle hook enables calling
+ * ExplorViz's custom cleanup code.
+ *
+ * @method willDestroy
+ */
   willDestroy() {
     cancelAnimationFrame(this.animationFrameId);
 
@@ -162,12 +166,12 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
 
   /**
-   * This function is called once on the didRender event. Inherit this function
-   * to call other important function, e.g. "initInteraction" as shown in
-   * {{#crossLink "Landscape-Rendering/initInteraction:method"}}{{/crossLink}}.
-   *
-   * @method initRenderings
-   */
+ * This function is called once on the didRender event. Inherit this function
+ * to call other important function, e.g. "initInteraction" as shown in
+ * {{#crossLink "Landscape-Rendering/initInteraction:method"}}{{/crossLink}}.
+ *
+ * @method initRenderings
+ */
   initRendering() {
     const self = this;
 
@@ -237,13 +241,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   /**
-   * Inherit this function to update the scene with a new renderingModel. It
-   * automatically removes every mesh from the scene and finally calls
-   * the (overridden) "populateScene" function. Add your custom code
-   * as shown in landscape-rendering.
-   *
-   * @method cleanAndUpdateScene
-   */
+ * Inherit this function to update the scene with a new renderingModel. It
+ * automatically removes every mesh from the scene and finally calls
+ * the (overridden) "populateScene" function. Add your custom code
+ * as shown in landscape-rendering.
+ *
+ * @method cleanAndUpdateScene
+ */
   @action
   cleanAndUpdateScene() {
     function removeAllChildren(entity: THREE.Object3D | THREE.Mesh) {
@@ -295,10 +299,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // @Override
   /**
-   * TODO
-   *
-   * @method populateScene
-   */
+ * TODO
+ *
+ * @method populateScene
+ */
   populateScene() {
     this.debug('populate landscape-rendering');
 
@@ -308,7 +312,14 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       return;
     }
 
-    const modelIdToLayout = applyKlayLayout(emberLandscape);
+    const openEntitiesIds = this.computeOpenEntities();
+
+    const modelIdToLayout = applyKlayLayout(emberLandscape, openEntitiesIds);
+
+    // Reset mesh related data structures
+    this.meshIdToModel.clear();
+    this.systemMeshes.clear();
+    this.nodeGroupMeshes.clear();
 
     const centerPoint = CalcCenterAndZoom
       .getCenterAndZoom(emberLandscape, this.camera, this.webglrenderer);
@@ -356,6 +367,21 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Landscape loaded');
   }
 
+  computeOpenEntities() {
+    const openEntitiesIds: Set<string> = new Set();
+
+    const { systemMeshes, nodeGroupMeshes } = this;
+    systemMeshes.forEach((systemMesh) => {
+      if (systemMesh.opened) { openEntitiesIds.add(systemMesh.dataModel.id); }
+    });
+
+    nodeGroupMeshes.forEach((nodeGroupMesh) => {
+      if (nodeGroupMesh.opened) { openEntitiesIds.add(nodeGroupMesh.dataModel.id); }
+    });
+
+    return openEntitiesIds;
+  }
+
   renderSystem(system: System, layout: PlaneLayout | undefined,
     centerPoint: THREE.Vector3) {
     if (!layout) { return; }
@@ -373,6 +399,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Add to scene
     this.scene.add(systemMesh);
+    this.systemMeshes.add(systemMesh);
     this.meshIdToModel.set(systemMesh.id, system);
   }
 
@@ -391,6 +418,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Add to scene
     this.scene.add(nodeGroupMesh);
+    this.nodeGroupMeshes.add(nodeGroupMesh);
     this.meshIdToModel.set(nodeGroupMesh.id, nodeGroup);
   }
 
@@ -433,7 +461,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.meshIdToModel.set(applicationMesh.id, application);
   }
 
-
   @action
   showApplication(emberModel: Application) {
     this.landscapeRepo.set('latestApplication', emberModel);
@@ -460,11 +487,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     } else if (mesh instanceof NodeGroupMesh) {
       const nodeGroup = mesh.dataModel;
       nodeGroup.setOpened(!nodeGroup.get('opened'));
+      mesh.opened = !mesh.opened;
       this.cleanAndUpdateScene();
       // Handle system
     } else if (mesh instanceof SystemMesh) {
       const system = mesh.dataModel;
       system.setOpened(!system.get('opened'));
+      mesh.opened = !mesh.opened;
       this.cleanAndUpdateScene();
     }
   }

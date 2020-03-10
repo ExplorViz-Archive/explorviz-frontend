@@ -32,11 +32,13 @@ type edge = {
   targetNode?: DrawNodeEntity;
   sourcePort?: string;
   targetPort?: string;
+  sPort?: port;
+  tPort?: port;
 }
 
 type point = {
-  x: number;
-  y: number;
+  x: number | undefined;
+  y: number | undefined;
 }
 
 type padding = {
@@ -73,7 +75,7 @@ type port = {
   node?: kielerGraph | null;
 };
 
-export default function applyKlayLayout(landscape: Landscape) {
+export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: Set<string>) {
 
   let topLevelKielerGraph: kielerGraph = {};
 
@@ -384,8 +386,8 @@ export default function applyKlayLayout(landscape: Landscape) {
       applicationcommunication.set('kielerEdgeReferences', []);
       applicationcommunication.set('points', []);
 
-      let appSource = applicationcommunication.get('sourceApplication');
-      let appTarget = applicationcommunication.get('targetApplication');
+      let appSource = applicationcommunication.belongsTo('sourceApplication').value() as Application;
+      let appTarget = applicationcommunication.belongsTo('targetApplication').value() as Application;
 
       if (appSource == null || appTarget == null) {
         return;
@@ -394,7 +396,7 @@ export default function applyKlayLayout(landscape: Landscape) {
       if (appSource.get('parent') == null || appTarget.get('parent') == null) {
         return;
       }
-      //console.log("edge: " + appSource.get('name') + " -> " + appTarget.get('name'));
+      // console.log("edge: " + appSource.get('name') + " -> " + appTarget.get('name'));
 
       if (!appTarget.get('parent').get('visible')) {
         appTarget = (appTarget.get('parent').get('parent').get('parent').get('opened')) ? seekRepresentativeApplication(appTarget) : appTarget.get('parent').get('parent').get('parent');
@@ -533,7 +535,7 @@ export default function applyKlayLayout(landscape: Landscape) {
 
 
     let layout = modelIdToLayout.get(entity.get('id'));
-    if (layout){
+    if (layout) {
       layout.positionX /= CONVERT_TO_KIELER_FACTOR;
       layout.positionY /= CONVERT_TO_KIELER_FACTOR;
       layout.width /= CONVERT_TO_KIELER_FACTOR;
@@ -777,8 +779,9 @@ export default function applyKlayLayout(landscape: Landscape) {
             return;
           }
 
-          let parentNode = getRightParent(applicationcommunication.get('sourceApplication'),
-            applicationcommunication.get('targetApplication'));
+          let sourceApplication = applicationcommunication.belongsTo('sourceApplication').value() as Application;
+          let targetApplication = applicationcommunication.belongsTo('targetApplication').value() as Application;
+          let parentNode = getRightParent(sourceApplication, targetApplication);
 
           var points = [];
 
@@ -938,12 +941,13 @@ export default function applyKlayLayout(landscape: Landscape) {
   }
 
 
+  /**
+   * Searches for an application with the same name as the 
+   * given application within the same nodegroup. 
+   * @param application 
+   */
   function seekRepresentativeApplication(application: Application) {
-    let parentNode = application.get('parent');
-
-    if (!(parentNode instanceof Node))
-      return;
-
+    let parentNode = application.belongsTo('parent').value() as Node;
 
     let nodes = parentNode.get('parent').get('nodes');
 
@@ -966,4 +970,23 @@ export default function applyKlayLayout(landscape: Landscape) {
     return returnValue ? returnValue : null;
   }
 
+  function isVisible(application: Application): boolean;
+  function isVisible(node: Node): boolean;
+  function isVisible(nodeGroup: NodeGroup): boolean;
+
+  function isVisible(entity: Application | Node | NodeGroup) {
+    if (entity instanceof NodeGroup) {
+      let system = entity.get('parent');
+      return openEntitiesIds.has(system.get('id'));;
+    } else if (entity instanceof Node) {
+      let nodeGroup = entity.belongsTo('parent').value() as NodeGroup;
+      let isNodeGroupOpen = openEntitiesIds.has(nodeGroup.get('id'));
+      return isNodeGroupOpen && isVisible(nodeGroup);
+    } else if (entity instanceof Application) {
+      let node = entity.belongsTo('parent').value() as Node;
+      return isVisible(node);
+    } else {
+      return false;
+    }
+  }
 }

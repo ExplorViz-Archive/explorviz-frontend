@@ -7,6 +7,8 @@ import PlaneLayout from '../../layout-models/plane-layout';
 export default class NodeGroupMesh extends PlaneMesh {
   dataModel: NodeGroup;
 
+  opened: boolean;
+
   material: THREE.MeshBasicMaterial;
 
   constructor(layout: PlaneLayout, nodeGroupModel: NodeGroup,
@@ -14,6 +16,7 @@ export default class NodeGroupMesh extends PlaneMesh {
     super(defaultColor, highlightingColor, layout);
 
     this.dataModel = nodeGroupModel;
+    this.opened = layout.opened;
     this.material = new THREE.MeshBasicMaterial({ color: defaultColor });
     this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
   }

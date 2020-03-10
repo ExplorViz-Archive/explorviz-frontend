@@ -7,6 +7,8 @@ import PlaneLayout from '../../layout-models/plane-layout';
 export default class SystemMesh extends PlaneMesh {
   dataModel: System;
 
+  opened: boolean;
+
   material: THREE.MeshBasicMaterial;
 
   constructor(layout: PlaneLayout, systemModel: System,
@@ -14,6 +16,7 @@ export default class SystemMesh extends PlaneMesh {
     super(defaultColor, highlightingColor, layout);
 
     this.dataModel = systemModel;
+    this.opened = layout.opened;
     this.material = new THREE.MeshBasicMaterial({ color: defaultColor });
     this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
   }
