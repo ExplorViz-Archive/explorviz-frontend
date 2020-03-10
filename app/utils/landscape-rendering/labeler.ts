@@ -1,198 +1,103 @@
-import Object from '@ember/object';
 import THREE from "three";
-import System from 'explorviz-frontend/models/system';
-import Node from 'explorviz-frontend/models/node';
-import NodeGroup from 'explorviz-frontend/models/nodegroup';
+import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
+import Application from 'explorviz-frontend/models/application';
+import PlaneLabelMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-label-mesh';
+import NodeMesh from "explorviz-frontend/view-objects/3d/landscape/node-mesh";
+import SystemMesh from "explorviz-frontend/view-objects/3d/landscape/system-mesh";
+import NodeGroupMesh from "explorviz-frontend/view-objects/3d/landscape/nodegroup-mesh";
 
-export default Object.extend({
+export function addSystemTextLabel(systemMesh: SystemMesh, text: string, font: THREE.Font, color: THREE.Color) {
+  const labelMesh = new PlaneLabelMesh(font, text, 0.4, color);
 
-  textLabels: new Map(),
+  systemMesh.geometry.computeBoundingBox();
+  const bboxParent = systemMesh.geometry.boundingBox;
 
-  init() {
-    this._super(...arguments);
+  labelMesh.geometry.computeBoundingBox();
+  const labelBoundingBox = labelMesh.geometry.boundingBox;
 
-    this.set('textLabels', new Map());
-  },
+  const labelLength = Math.abs(labelBoundingBox.max.x)
+    - Math.abs(labelBoundingBox.min.x);
 
+  labelMesh.position.x = -(labelLength / 2.0);
+  labelMesh.position.y = bboxParent.max.y - 0.6;
+  labelMesh.position.z = systemMesh.position.z + 0.001;
 
-  drawSystemTextLabel(threejsModel: THREE.Mesh, font: THREE.Font, color: THREE.Color) {
-    let emberModel: System = threejsModel.userData.model;
-    let text = emberModel.get('name');
+  systemMesh.add(labelMesh);
+}
 
-    let labelMesh = this.drawTextLabel(threejsModel, text, font, 0.4, color);
-    this.repositionLabel(labelMesh, -0.6);
-  },
+export function addCollapseSymbol(entityMesh: SystemMesh | NodeGroupMesh, font: THREE.Font, color: THREE.Color) {
+  const collapseSymbol = entityMesh.dataModel.opened ? '-' : '+';
+  const collapseSymbolMesh = new PlaneLabelMesh(font, collapseSymbol, 0.35, color);
 
+  entityMesh.geometry.computeBoundingBox();
+  const bboxSystem = entityMesh.geometry.boundingBox;
+  collapseSymbolMesh.position.x = bboxSystem.max.x - 0.35;
+  collapseSymbolMesh.position.y = bboxSystem.max.y - 0.35;
+  collapseSymbolMesh.position.z = entityMesh.position.z + 0.01;
 
-  drawNodeTextLabel(threejsModel: THREE.Mesh, font: THREE.Font, color: THREE.Color) {
-    let emberModel: Node = threejsModel.userData.model;
-    let text = emberModel.getDisplayName();
+  entityMesh.add(collapseSymbolMesh);
+}
 
-    if (threejsModel.userData['nodegroupopenstate'] !== emberModel.parent.get('opened')) {
-      let textLabels: Map<string, any> = this.get('textLabels');
-      textLabels.delete(emberModel.get('id'));
-    }
+export function addNodeTextLabel(nodeMesh: NodeMesh, text: string, font: THREE.Font, color: THREE.Color) {
+  const labelMesh = new PlaneLabelMesh(font, text, 0.22, color);
 
-    let labelMesh = this.drawTextLabel(threejsModel, text, font, 0.22, color);
-    labelMesh.userData['nodegroupopenstate'] = emberModel.parent.get('opened');
-    this.repositionLabel(labelMesh, 0.2);
-  },
+  nodeMesh.geometry.computeBoundingBox();
+  const bboxParent = nodeMesh.geometry.boundingBox;
 
+  labelMesh.geometry.computeBoundingBox();
+  const labelBoundingBox = labelMesh.geometry.boundingBox;
 
-  drawApplicationTextLabel(threejsModel: THREE.Mesh, font: THREE.Font, color: THREE.Color) {
-    let emberModel: System = threejsModel.userData.model;
-    let text = emberModel.get('name');
+  const labelLength = Math.abs(labelBoundingBox.max.x)
+    - Math.abs(labelBoundingBox.min.x);
 
-    let labelMesh = this.drawTextLabel(threejsModel, text, font, 0.25, color);
-    this.repositionAppLabel(labelMesh);
-  },
+  labelMesh.position.x = -(labelLength / 2.0);
+  labelMesh.position.y = bboxParent.min.y + 0.2;
+  labelMesh.position.z = nodeMesh.position.z + 0.001;
 
+  nodeMesh.add(labelMesh);
+}
 
-  drawTextLabel(threejsModel: THREE.Mesh, text: string, font: THREE.Font, fontSize: number, color: THREE.Color) {
-    let emberModel: any = threejsModel.userData.model;
-    let labelMesh: THREE.Mesh = this.isLabelAlreadyCreated(emberModel);
+export function addApplicationTextLabel(applicationMesh: ApplicationMesh, text: string, font: THREE.Font, color: THREE.Color) {
+  const labelMesh = new PlaneLabelMesh(font, text, 0.25, color);
 
-    if (labelMesh) {
-      // Update meta-info for model
-      this.updateLabelData(labelMesh, emberModel, text);
-      threejsModel.add(labelMesh);
-    }
-    else {
-      const labelGeo = new THREE.TextBufferGeometry(text, {
-        font,
-        size: fontSize,
-        height: 0
-      });
+  // Position label
+  applicationMesh.geometry.computeBoundingBox();
+  const bboxParent = applicationMesh.geometry.boundingBox;
 
-      const material = new THREE.MeshBasicMaterial({
-        color
-      });
+  labelMesh.geometry.computeBoundingBox();
+  const labelBoundingBox = labelMesh.geometry.boundingBox;
 
-      labelMesh = new THREE.Mesh(labelGeo, material);
+  const labelHeight = Math.abs(labelBoundingBox.max.y) -
+    Math.abs(labelBoundingBox.min.y);
 
-      this.updateLabelData(labelMesh, emberModel, text);
+  const PADDING_LEFT = 0.1;
 
-      threejsModel.add(labelMesh);
-    }
+  labelMesh.position.x = bboxParent.min.x + PADDING_LEFT;
+  labelMesh.position.y = -(labelHeight / 2.0);
+  labelMesh.position.z = applicationMesh.position.z + 0.001;
 
-    return labelMesh;
-  },
+  applicationMesh.add(labelMesh);
+}
 
+export function addApplicationLogo(applicationMesh: ApplicationMesh,
+  application: Application, imageLoader: any) {
+  // Create logos
+  applicationMesh.geometry.computeBoundingBox();
 
-  updateLabelData(labelMesh: THREE.Mesh, emberModel: any, text: string) {
-    labelMesh.name = text;
-    labelMesh.userData['type'] = 'label';
-    labelMesh.userData['model'] = emberModel;
+  const logoSize = {
+    width: 0.4,
+    height: 0.4
+  };
+  const appBBox = applicationMesh.geometry.boundingBox;
 
-    let textLabels = this.get('textLabels');
-    textLabels.set(emberModel.get('id'), labelMesh);
+  const logoPos = new THREE.Vector3();
 
-    // TODO: Is this property used?
-    if (labelMesh.parent)
-      labelMesh.parent.userData['label'] = labelMesh;
-  },
+  const logoRightPadding = logoSize.width * 0.7;
 
+  logoPos.x = appBBox.max.x - logoRightPadding;
 
-  repositionLabel(labelMesh: THREE.Mesh, offset: number) {
-    const parent = labelMesh.parent as THREE.Mesh;
-    if (!parent) {
-      return;
-    }
+  const texturePartialPath = application.get('programmingLanguage').toLowerCase();
 
-    parent.geometry.computeBoundingBox();
-    const bboxParent = parent.geometry.boundingBox;
-
-    labelMesh.geometry.computeBoundingBox();
-    const labelBoundingBox = labelMesh.geometry.boundingBox;
-
-    const labelLength = Math.abs(labelBoundingBox.max.x) -
-      Math.abs(labelBoundingBox.min.x);
-
-    labelMesh.position.x = - (labelLength / 2.0);
-
-    if (labelMesh.userData.model instanceof System) {
-      labelMesh.position.y = bboxParent.max.y + offset;
-    } else {
-      labelMesh.position.y = bboxParent.min.y + offset;
-    }
-
-    labelMesh.position.z = parent.position.z + 0.001;
-  },
-
-
-  repositionAppLabel(labelMesh: THREE.Mesh) {
-    const parent = labelMesh.parent as THREE.Mesh;
-
-    parent.geometry.computeBoundingBox();
-    const bboxParent = parent.geometry.boundingBox;
-
-    labelMesh.geometry.computeBoundingBox();
-    const labelBoundingBox = labelMesh.geometry.boundingBox;
-
-    const labelHeight = Math.abs(labelBoundingBox.max.y) -
-      Math.abs(labelBoundingBox.min.y);
-
-    const xOffset = 0.1;
-
-    labelMesh.position.x = bboxParent.min.x + xOffset;
-    labelMesh.position.y = -(labelHeight / 2.0);
-    labelMesh.position.z = parent.position.z + 0.001;
-  },
-
-  drawCollapseSymbol(mesh: THREE.Mesh, font: THREE.Font, color: THREE.Color) {
-    // Add respective open / close symbol
-    mesh.geometry.computeBoundingBox();
-    let emberModel: System | NodeGroup = mesh.userData.model;
-    const bboxSystem = mesh.geometry.boundingBox;
-
-    let collapseSymbol = null;
-
-    if (emberModel.opened) {
-      collapseSymbol = this.createCollapseSymbols('-', 0.35, font, color);
-    } else {
-      collapseSymbol = this.createCollapseSymbols('+', 0.35, font, color);
-    }
-
-    if (collapseSymbol) {
-      collapseSymbol.position.x = bboxSystem.max.x - 0.35;
-      collapseSymbol.position.y = bboxSystem.max.y - 0.35;
-      collapseSymbol.position.z = mesh.position.z + 0.0001;
-      mesh.add(collapseSymbol);
-    }
-  },
-
-
-  createCollapseSymbols(label: string, size: number, font: THREE.Font, color: THREE.Color) {
-    let material = new THREE.MeshBasicMaterial({
-      color
-    });
-
-    let collapseGeometry = new THREE.TextBufferGeometry(label, {
-      font,
-      size,
-      height: 0
-    });
-
-    let collapseMesh = new THREE.Mesh(collapseGeometry, material);
-
-    return collapseMesh;
-  },
-
-
-  isLabelAlreadyCreated(emberModel: any) {
-    let textLabels = this.get('textLabels');
-
-    if (textLabels === null)
-      return null;
-
-    let labelMesh = textLabels.get(emberModel.get('id'));
-
-    // Label exists and text + text color did not change?
-    if (labelMesh && labelMesh.name === emberModel.get('name')) {
-      return labelMesh;
-    } else {
-      return null;
-    }
-  },
-
-});
+  imageLoader.createPicture(logoPos, logoSize.width, logoSize.height,
+    texturePartialPath, applicationMesh, "label");
+}

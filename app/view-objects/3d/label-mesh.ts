@@ -6,7 +6,7 @@ export default class LabelMesh extends BaseMesh {
 
   font: THREE.Font;
 
-  constructor(font: THREE.Font, labelText: string, textColor = new THREE.Color(0x000000)) {
+  constructor(font: THREE.Font, labelText: string, textColor = new THREE.Color('black')) {
     super(textColor);
     this.font = font;
     this.labelText = labelText;

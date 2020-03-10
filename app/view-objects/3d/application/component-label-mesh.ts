@@ -5,7 +5,7 @@ import FoundationMesh from './foundation-mesh';
 
 export default class ComponentLabelMesh extends LabelMesh {
   constructor(componentMesh: ComponentMesh | FoundationMesh,
-    font: THREE.Font, textColor = new THREE.Color(0x000000)) {
+    font: THREE.Font, textColor = new THREE.Color('black')) {
     const labelText = componentMesh.dataModel.name;
     super(font, labelText, textColor);
     this.computeLabel(componentMesh, labelText);
