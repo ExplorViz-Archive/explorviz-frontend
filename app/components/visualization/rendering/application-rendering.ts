@@ -416,27 +416,37 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     const allInvolvedClazzes = new Set<Clazz>(containedClazzes);
 
-    containedClazzes.forEach((clazz: Clazz) => {
-      clazz.clazzCommunications.forEach((clazzCommunication) => {
-        allInvolvedClazzes.add(clazzCommunication.belongsTo('sourceClazz').value() as Clazz);
-        allInvolvedClazzes.add(clazzCommunication.belongsTo('targetClazz').value() as Clazz);
-      });
+    const drawableComm = this.args.application.hasMany('drawableClazzCommunications').value() as DS.ManyArray<DrawableClazzCommunication>|null;
+
+    if (!drawableComm) {
+      return;
+    }
+
+    drawableComm.forEach((comm) => {
+      const sourceClazz = comm.belongsTo('sourceClazz').value() as Clazz;
+      const targetClazz = comm.belongsTo('targetClazz').value() as Clazz;
+
+      if (containedClazzes.has(sourceClazz)) {
+        allInvolvedClazzes.add(targetClazz);
+      } else if (containedClazzes.has(targetClazz)) {
+        allInvolvedClazzes.add(sourceClazz);
+      }
     });
 
     const nonInvolvedClazzes = new Set([...allClazzes].filter((x) => !allInvolvedClazzes.has(x)));
 
     const componentSet = new Set<Component>();
     allInvolvedClazzes.forEach((clazz) => {
+      console.log(clazz.name);
       this.getAllAncestorComponents(clazz.getParent(), componentSet);
     });
 
     nonInvolvedClazzes.forEach((clazz) => {
       const clazzMesh = this.modelIdToMesh.get(clazz.get('id'));
-      const componentMesh = this.modelIdToMesh.get(clazz.parent.get('id'));
+      const componentMesh = this.modelIdToMesh.get(clazz.getParent().get('id'));
       if (clazzMesh instanceof ClazzMesh && componentMesh instanceof ComponentMesh
         && componentMesh.opened) {
-        clazzMesh.material.opacity = 0.3;
-        clazzMesh.material.transparent = true;
+        clazzMesh.turnTransparent(0.3);
       }
       this.turnComponentAndAncestorsTransparent(clazz.getParent(), componentSet);
     });
@@ -459,11 +469,22 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (ignorableComponents.has(component)) { return; }
 
     ignorableComponents.add(component);
+
     const parent = component.getParentComponent();
 
-    const parentMesh = this.modelIdToMesh.get(component.get('id'));
-    if (parentMesh instanceof ComponentMesh && parentMesh.opened) {
-      parentMesh.turnTransparent(0.3);
+    const componentMesh = this.modelIdToMesh.get(component.get('id'));
+
+    if (!parent) {
+      if (componentMesh instanceof ComponentMesh) {
+        componentMesh.turnTransparent(0.3);
+      }
+      return;
+    }
+
+    const parentMesh = this.modelIdToMesh.get(parent.get('id'));
+    if (componentMesh instanceof ComponentMesh
+      && parentMesh instanceof ComponentMesh && parentMesh.opened) {
+      componentMesh.turnTransparent(0.3);
     }
     this.turnComponentAndAncestorsTransparent(parent, ignorableComponents);
   }
@@ -608,9 +629,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   addCommunication(application: Application) {
-    const foundationData = this.boxLayoutMap.get(this.args.application.id);
+    const foundationData = this.boxLayoutMap.get(application.id);
 
-    if (foundationData === undefined) { return; }
+    if (foundationData === undefined) {
+      return;
+    }
 
     this.removeAllCommunication();
 
@@ -740,7 +763,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   highlightModel(entity: Component|Clazz) {
     const mesh = this.modelIdToMesh.get(entity.id);
     if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
-      mesh.highlight();
+      this.highlight(mesh);
     }
   }
 
