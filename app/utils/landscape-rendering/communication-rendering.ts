@@ -1,6 +1,8 @@
 import THREE from 'three';
 import AppCommunication from 'explorviz-frontend/models/applicationcommunication';
 import DS from 'ember-data';
+// @ts-ignore
+import { MeshLine, MeshLineMaterial } from 'threejs-meshline'
 
 type Point = { x: number, y: number };
 
@@ -14,6 +16,14 @@ type Tile = {
 type TileWay = { startPoint: Point, endPoint: Point };
 
 
+/**
+ * Aggregate points and request cache numbers of application communication 
+ * to get communication tiles. Those can later on be used to determine the 
+ * corresponding line thickness for the visualization.
+ * 
+ * @param appCommunications Array of all application communications
+ * @param color Desired color for the tiles
+ */
 export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray<AppCommunication>, color: string) {
   let tiles: Tile[] = [];
   let tile: Tile;
@@ -24,11 +34,12 @@ export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray
 
     if (points.length > 0) {
 
-      for (var i = 1; i < points.length; i++) {
+      for (let i = 1; i < points.length; i++) {
 
         const lastPoint = points[i - 1];
         const thisPoint = points[i];
 
+        // Simpliefied tile to check for equality of tiles
         let tileWay = {
           startPoint: lastPoint,
           endPoint: thisPoint
@@ -46,7 +57,7 @@ export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray
           tile = {
             startPoint: lastPoint,
             endPoint: thisPoint,
-            positionZ: 0.0025,
+            positionZ: 0.0025, // Tiles should be in front of systems
             requestsCache: 0,
             lineThickness: 0,
             pipeColor: new THREE.Color(color),
@@ -57,8 +68,6 @@ export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray
 
         tile.requestsCache = tile.requestsCache +
           applicationCommunication.get('requests');
-
-        tiles[id] = tile;
       }
 
     }
@@ -111,6 +120,8 @@ export function getCategories(requestMap: Map<number, number>, isLinear: boolean
 
 /**
  * Maps number of requests to a numerical category
+ * 
+ * @param requestMap Maps number of requests to a numerical category
  */
 export function categorizeByThreshold(requestMap: Map<number, number>) {
   let maxRequests = 1;
@@ -155,7 +166,7 @@ export function getCategoryFromValue(requests: number, lowerThreshold: number, u
  * Scales all entries of a given liste linearly such that 
  * the biggest item is set to 1.
  * 
- * @param list Contains # of  requests as strings
+ * @param requestMap Maps number of requests to a numerical category
  */
 export function linearCategorization(requestMap: Map<number, number>) {
   let maxRequests = 1;
@@ -172,7 +183,7 @@ export function linearCategorization(requestMap: Map<number, number>) {
 
 
 export function addCommunicationLineDrawing(tiles: Tile[], parent: THREE.Object3D, centerPoint: Point) {
-  const requestsToCategory =  new Map();
+  const requestsToCategory = new Map();
 
   // Initialize Category mapping with default value 0
   tiles.forEach((tile) => {
@@ -181,66 +192,45 @@ export function addCommunicationLineDrawing(tiles: Tile[], parent: THREE.Object3
 
   const categoryMapping = getCategories(requestsToCategory, true);
 
-  if(!categoryMapping && categoryMapping === undefined) return;
+  if (!categoryMapping && categoryMapping === undefined) return;
 
   for (let i = 0; i < tiles.length; i++) {
     let tile = tiles[i];
     let category = categoryMapping.get(tile.requestsCache);
-    if (category){
+    if (category) {
       tile.lineThickness = 0.7 * category + 0.1;
       createLine(tile, parent, centerPoint);
     }
   }
 }
 
-
+/**
+ * Draws a line according to the given parameters.
+ * 
+ * @param tile Tile containing data for drawing the line
+ * @param parent Object to which the line shall be added
+ * @param centerPoint Offset for drawing
+ */
 export function createLine(tile: Tile, parent: THREE.Object3D, centerPoint: Point) {
   let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x,
     tile.startPoint.y - centerPoint.y, tile.positionZ);
   let secondVector = new THREE.Vector3(tile.endPoint.x - centerPoint.x,
     tile.endPoint.y - centerPoint.y, tile.positionZ);
 
-  // New line approach (draw planes)
+  let points = [firstVector, secondVector];
 
-  // Euclidean distance
-  const lengthPlane = Math.sqrt(
-    Math.pow((firstVector.x - secondVector.x), 2) +
-    Math.pow((firstVector.y - secondVector.y), 2));
+  // We cannot use default lines here since they do not
+  // support different line thicknesses
+  const geometry = new MeshLine();
+  geometry.setVertices(points, () => tile.lineThickness * 0.4);
 
-  const geometryPlane = new THREE.PlaneGeometry(lengthPlane,
-    tile.lineThickness * 0.4);
+  const material = new MeshLineMaterial({
+    color: tile.pipeColor,
+  });
 
-  const materialPlane = new THREE.MeshBasicMaterial({ color: tile.pipeColor });
-  const plane = new THREE.Mesh(geometryPlane, materialPlane);
+  const line = new THREE.Mesh(geometry, material)
 
-  let isDiagonalPlane = false;
-  const diagonalPos = new THREE.Vector3();
+  line.userData['model'] = tile.emberModel;
 
-  // Rotate plane => diagonal plane (diagonal commu line)
-  if (Math.abs(firstVector.y - secondVector.y) > 0.1) {
-    isDiagonalPlane = true;
-
-    const distanceVector = new THREE.Vector3()
-      .subVectors(secondVector, firstVector);
-
-    plane.rotateZ(Math.atan2(distanceVector.y, distanceVector.x));
-
-    diagonalPos.copy(distanceVector).multiplyScalar(0.5).add(firstVector);
-  }
-
-  // Set plane position
-  if (!isDiagonalPlane) {
-    const posX = firstVector.x + (lengthPlane / 2);
-    const posY = firstVector.y;
-    const posZ = firstVector.z;
-
-    plane.position.set(posX, posY, posZ);
-  }
-  else {
-    plane.position.copy(diagonalPos);
-  }
-
-  plane.userData['model'] = tile.emberModel;
-
-  parent.add(plane);
+  parent.add(line);
 }
