@@ -521,14 +521,6 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
 
   function convertToExplorVizCoords(entity: any) {
-
-    entity.set('positionX', entity.get('positionX') / CONVERT_TO_KIELER_FACTOR);
-    entity.set('positionY', entity.get('positionY') / CONVERT_TO_KIELER_FACTOR);
-
-    entity.set('width', entity.get('width') / CONVERT_TO_KIELER_FACTOR);
-    entity.set('height', entity.get('height') / CONVERT_TO_KIELER_FACTOR);
-
-
     let layout = modelIdToLayout.get(entity.get('id'));
     if (layout) {
       layout.positionX /= CONVERT_TO_KIELER_FACTOR;
@@ -539,21 +531,13 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   }
 
   function setAbsolutePositionForNode(child: DrawNodeEntity, parent: DrawNodeEntity) {
-    let graph = modelIdToGraph.get(parent.get('id'));
+    let childLayout = modelIdToLayout.get(child.get('id'));
+    let parentLayout = modelIdToLayout.get(parent.get('id'));
+    let parentGraph = modelIdToGraph.get(parent.get('id'));
 
-    if (graph && graph.padding) {
-      let padding = graph.padding;
-      child.set('positionX', parent.get('positionX') + child.get('positionX') + padding.left);
-      child.set('positionY', parent.get('positionY') + child.get('positionY') - padding.top);
-
-      let childLayout = modelIdToLayout.get(child.get('id'));
-      let parentLayout = modelIdToLayout.get(parent.get('id'));
-      let parentGraph = modelIdToGraph.get(parent.get('id'));
-
-      if (childLayout && parentLayout && parentGraph && parentGraph.padding) {
-        childLayout.positionX += parentLayout.positionX + parentGraph.padding.left;
-        childLayout.positionY += parentLayout.positionY - parentGraph.padding.top;
-      }
+    if (childLayout && parentLayout && parentGraph && parentGraph.padding) {
+      childLayout.positionX += parentLayout.positionX + parentGraph.padding.left;
+      childLayout.positionY += parentLayout.positionY - parentGraph.padding.top;
     }
   }
 
@@ -568,14 +552,6 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
       layout.height = entityGraph.height;
       layout.opened = openEntitiesIds.size === 0 ? true : openEntitiesIds.has(entity.get('id'));
       modelIdToLayout.set(entity.get('id'), layout);
-
-      entity.set('positionX', entityGraph.x);
-
-      // KIELER has inverted Y coords
-      entity.set('positionY', entityGraph.y * -1);
-
-      entity.set('width', entityGraph.width);
-      entity.set('height', entityGraph.height);
     }
   }
 
@@ -858,9 +834,11 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
                 pOffsetX = insetLeft;
                 pOffsetY = insetTop * -1;
               } else {
-                pOffsetX = parentNode.get('positionX') + insetLeft;
-                pOffsetY = parentNode.get('positionY') - insetTop;
-
+                let layout = modelIdToLayout.get(parentNode.get('id'));
+                if (layout){
+                  pOffsetX = layout?.positionX + insetLeft;
+                  pOffsetY = layout?.positionY - insetTop;
+                }
               }
             }
 
