@@ -39,8 +39,8 @@ type edge = {
 }
 
 type point = {
-  x: number | undefined;
-  y: number | undefined;
+  x: number;
+  y: number;
 }
 
 type padding = {
@@ -85,6 +85,10 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
   let modelIdToGraph: Map<string, kielerGraph> = new Map();
   let modelIdToLayout: Map<string, PlaneLayout> = new Map();
+
+  let modelIdToSourcePort: Map<string, port> = new Map();
+  let modelIdToTargetPort: Map<string, port> = new Map();
+  let modeldToKielerEdgeReference: Map<string, any> = new Map();
 
   setupKieler(landscape);
   updateGraphWithResults(landscape);
@@ -388,23 +392,18 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
       applicationcommunication.set('kielerEdgeReferences', []);
       applicationcommunication.set('points', []);
 
-      let appSource = applicationcommunication.belongsTo('sourceApplication').value() as Application;
-      let appTarget = applicationcommunication.belongsTo('targetApplication').value() as Application;
-
-      if (appSource == null || appTarget == null) {
-        return;
-      }
-
-      if (appSource.get('parent') == null || appTarget.get('parent') == null) {
-        return;
-      }
+      let appSource: Application | System = applicationcommunication.
+        belongsTo('sourceApplication').value() as Application;
+      let appTarget: Application | System = applicationcommunication.
+        belongsTo('targetApplication').value() as Application;
 
       let sourceNode = appSource.belongsTo('parent').value() as Node;
       let sourceNodeGroup = sourceNode.belongsTo('parent').value() as NodeGroup;
       let sourceSystem = sourceNodeGroup.belongsTo('parent').value() as System;
 
       if (!isVisible(sourceNode)) {
-        appSource = isOpen(sourceSystem) ? seekRepresentativeApplication(appSource) : sourceSystem;
+        let maybeSource = isOpen(sourceSystem) ? seekRepresentativeApplication(appSource) : sourceSystem;
+        if (maybeSource) appSource = maybeSource;
       }
 
       let targetNode = appTarget.belongsTo('parent').value() as Node;
@@ -412,10 +411,11 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
       let targetSystem = targetNodeGroup.belongsTo('parent').value() as System;
 
       if (!isVisible(targetNode)) {
-        appTarget = isOpen(targetSystem) ? seekRepresentativeApplication(appTarget) : targetSystem;
+        let maybeTarget = isOpen(targetSystem) ? seekRepresentativeApplication(appTarget) : targetSystem;
+        if (maybeTarget) appTarget = maybeTarget;
       }
 
-      if (appSource.get("id") !== appTarget.get("id")) {
+      if (appSource.id !== appTarget.id) {
         const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
         applicationcommunication.get('kielerEdgeReferences').push(edge);
       }
@@ -605,7 +605,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   }
 
 
-  function createEdgeBetweenSourceTarget(sourceApplication: Application, targetApplication: Application) {
+  function createEdgeBetweenSourceTarget(sourceApplication: DrawNodeEntity, targetApplication: DrawNodeEntity) {
 
     const port1 = createSourcePortIfNotExisting(sourceApplication);
     const port2 = createTargetPortIfNotExisting(targetApplication);
@@ -617,6 +617,8 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     function createSourcePortIfNotExisting(sourceDrawnode: DrawNodeEntity) {
 
       let ports = sourceDrawnode.get("sourcePorts");
+
+      if (!ports) return;
 
       const DEFAULT_PORT_WIDTH = 0.000001;
 
@@ -651,7 +653,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
         sourceGraph?.ports?.push(port);
 
-        ports[sourceDrawnode.get('id')] = port;
+        ports[id] = port;
       }
 
       return ports[sourceDrawnode.get('id')];
@@ -728,8 +730,11 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     edge.sourcePort = port1.id;
     edge.targetPort = port2.id;
 
-    edge.sourcePoint = { x: port1.x, y: port1.y };
-    edge.targetPoint = { x: port2.x, y: port2.y };
+    if (port1.x && port1.y)
+      edge.sourcePoint = { x: port1.x, y: port1.y };
+    
+    if (port2.x && port2.y)
+      edge.targetPoint = { x: port2.x, y: port2.y };
 
     edge.sPort = port1;
     edge.tPort = port2;
@@ -883,7 +888,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
               // why is parentNode.constructor.modelName undefined?
               // "alternative": parentNode.content._internalModel.modelName
-              if (parentNode.content._internalModel.modelName === "system") {
+              if (parentNode instanceof System) {
                 pOffsetX = insetLeft;
                 pOffsetY = insetTop * -1;
               } else {
@@ -915,7 +920,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     });
   } // END addBendPoints
 
-  function isDescendant(child, parent) {
+  function isDescendant(child: DrawNodeEntity, parent: DrawNodeEntity) {
 
     let current = child;
     let next = child.get('parent');
@@ -931,23 +936,29 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     return false;
   }
 
-  function getRightParent(sourceApplication: Application, targetApplication: Application) {
-    let result = sourceApplication.get('parent');
-
+  function getRightParent(sourceApplication: Application, targetApplication: Application): System | Node | null {
     let sourceNode = sourceApplication.belongsTo('parent').value() as Node;
+
+    let result: System | Node | null = sourceNode;
+
     if (!isVisible(sourceNode)) {
       let sourceNodeGroup = sourceNode.belongsTo('parent').value() as NodeGroup;
       let sourceSystem = sourceNodeGroup.belongsTo('parent').value() as System;
+
+      let targetNode = targetApplication.belongsTo('parent').value() as Node;
+      let targetNodeGroup = targetNode.belongsTo('parent').value() as NodeGroup;
+      let targetSystem = targetNodeGroup.belongsTo('parent').value() as System;
+
       if (!isOpen(sourceSystem)) {
-        if (sourceApplication.get('parent').get('parent').get('parent') !== targetApplication.get('parent').get('parent').get('parent')) {
-          result = sourceApplication.get('parent').get('parent').get('parent');
+        if (sourceSystem !== targetSystem) {
+          result = sourceSystem;
         } else {
           result = null; // means don't draw
         }
       } else {
-        result = seekRepresentativeApplication(sourceApplication);
-        if (result != null) {
-          result = result.get('parent');
+        let maybeApp = seekRepresentativeApplication(sourceApplication);
+        if (maybeApp) {
+          result = maybeApp.belongsTo('parent').value() as Node;
         }
       }
     }
@@ -962,7 +973,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
    * the same applications.
    * @param application 
    */
-  function seekRepresentativeApplication(application: Application) {
+  function seekRepresentativeApplication(application: Application): Application | null {
     let parentNode = application.belongsTo('parent').value() as Node;
     let parentNodeGroup = parentNode.belongsTo('parent').value() as NodeGroup;
 
