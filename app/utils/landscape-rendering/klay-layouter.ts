@@ -156,9 +156,6 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
         const PADDING = 0.1;
         const SYSTEM_LABEL_HEIGHT = 0.4;
 
-        system.set('sourcePorts', {});
-        system.set('targetPorts', {});
-
         if (isOpen(system)) {
 
           const minWidth = Math.max(2.5 * DEFAULT_WIDTH *
@@ -194,9 +191,6 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
           const nodegroups = system.get('nodegroups');
 
           nodegroups.forEach((nodegroup) => {
-
-            nodegroup.set('sourcePorts', {});
-            nodegroup.set('targetPorts', {});
 
             if (isVisible(nodegroup)) {
               createNodeGroup(systemKielerGraph, nodegroup);
@@ -274,9 +268,6 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
       sortedNodes.forEach((node) => {
 
-        node.set('sourcePorts', {});
-        node.set('targetPorts', {});
-
         if (isVisible(node)) {
           createNodeAndItsApplications(nodeGroupKielerGraph, node);
           let kielerGraphReference = modelIdToGraph.get(node.get('id'));
@@ -294,9 +285,6 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     } else {
 
       nodes.forEach((node) => {
-
-        node.set('sourcePorts', {});
-        node.set('targetPorts', {});
 
         if (isVisible(node)) {
           createNodeAndItsApplications(systemKielerGraph, node);
@@ -354,9 +342,6 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
       const APPLICATION_PIC_SIZE = 0.16;
       const APPLICATION_PIC_PADDING_SIZE = 0.15;
       const APPLICATION_LABEL_HEIGHT = 0.21;
-
-      application.set('sourcePorts', {});
-      application.set('targetPorts', {});
 
       const width = Math.max(DEFAULT_WIDTH * CONVERT_TO_KIELER_FACTOR,
         (calculateRequiredLabelLength(application.get('name'), APPLICATION_LABEL_HEIGHT) +
@@ -616,25 +601,18 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     //---------------------------inner functions
     function createSourcePortIfNotExisting(sourceDrawnode: DrawNodeEntity) {
 
-      let ports = sourceDrawnode.get("sourcePorts");
+      // Do not create duplicate port
+      let maybePort = modelIdToSourcePort.get(sourceDrawnode.get('id'));
+      if (maybePort && modelIdToSourcePort.has(sourceDrawnode.get('id'))){
+        return maybePort;
+      } else {
+        const DEFAULT_PORT_WIDTH = 0.000001;
 
-      if (!ports) return;
+        const DEFAULT_PORT_HEIGHT = 0.000001;
+  
+        const CONVERT_TO_KIELER_FACTOR = 180;
 
-      const DEFAULT_PORT_WIDTH = 0.000001;
-
-      const DEFAULT_PORT_HEIGHT = 0.000001;
-
-      const CONVERT_TO_KIELER_FACTOR = 180;
-
-      let id = sourceDrawnode.get("id");
-
-      const maybePort = ports[id];
-
-      if (maybePort == null) {
-
-        const length = Object.keys(ports).length;
-
-        const portId = sourceDrawnode.get('id') + "_sp" + (length + 1);
+        const portId = sourceDrawnode.get('id') + "_sp1";
 
         let port: port = {
           id: portId,
@@ -647,38 +625,31 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
           y: 0
         };
 
-
         let sourceGraph = modelIdToGraph.get(sourceDrawnode.get('id'));
         port.node = sourceGraph;
 
+        modelIdToSourcePort.set(sourceDrawnode.get('id'), port);
         sourceGraph?.ports?.push(port);
 
-        ports[id] = port;
+        return port;
       }
-
-      return ports[sourceDrawnode.get('id')];
     }
 
 
     function createTargetPortIfNotExisting(targetDrawnode: DrawNodeEntity) {
 
-      let ports = targetDrawnode.get("targetPorts");
+      // Do not create duplicate port
+      let maybePort = modelIdToTargetPort.get(targetDrawnode.get('id'));
+      if (maybePort && modelIdToTargetPort.has(targetDrawnode.get('id'))){
+        return maybePort;
+      } else {
+        const DEFAULT_PORT_WIDTH = 0.000001;
 
-      const DEFAULT_PORT_WIDTH = 0.000001;
+        const DEFAULT_PORT_HEIGHT = 0.000001;
+  
+        const CONVERT_TO_KIELER_FACTOR = 180;
 
-      const DEFAULT_PORT_HEIGHT = 0.000001;
-
-      const CONVERT_TO_KIELER_FACTOR = 180;
-
-      let id = targetDrawnode.get("id");
-
-      const maybePort = ports[id];
-
-      if (maybePort == null) {
-
-        const length = Object.keys(ports).length;
-
-        const portId = targetDrawnode.get('id') + "_tp" + (length + 1);
+        const portId = targetDrawnode.get('id') + "_tp1";
 
         let port: port = {
           id: portId,
@@ -692,18 +663,13 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
         };
 
         let targetGraph = modelIdToGraph.get(targetDrawnode.get('id'));
-        if (!targetGraph) {
-          return;
-        }
-
         port.node = targetGraph;
 
+        modelIdToTargetPort.set(targetDrawnode.get('id'), port);
         targetGraph?.ports?.push(port);
 
-        ports[targetDrawnode.get('id')] = port;
+        return port;
       }
-
-      return ports[targetDrawnode.get('id')];
     }
 
     //---------------------------- end inner functions
