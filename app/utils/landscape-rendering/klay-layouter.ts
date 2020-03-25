@@ -374,7 +374,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
     totalApplicationCommunications.forEach((applicationcommunication) => {
 
-      applicationcommunication.set('kielerEdgeReferences', []);
+      modeldToKielerEdgeReference.set(applicationcommunication.get('id'), []);
       applicationcommunication.set('points', []);
 
       let appSource: Application | System = applicationcommunication.
@@ -402,7 +402,8 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
       if (appSource.id !== appTarget.id) {
         const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
-        applicationcommunication.get('kielerEdgeReferences').push(edge);
+        let edgeReference = modeldToKielerEdgeReference.get(applicationcommunication.get('id'));
+        edgeReference.push(edge);
       }
     });
   } // END addEdges
@@ -727,7 +728,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
     totalApplicationCommunications.forEach((applicationcommunication) => {
 
-      const kielerEdgeReferences: edge[] = applicationcommunication.get('kielerEdgeReferences');
+      const kielerEdgeReferences: edge[] = modeldToKielerEdgeReference.get(applicationcommunication.get('id'));
 
       kielerEdgeReferences.forEach((edge: edge) => {
         if (edge != null) {
@@ -864,7 +865,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     });
   } // END addBendPoints
 
-  function isDescendant(child: DrawNodeEntity, parent: DrawNodeEntity) {
+  function isDescendant(child: any, parent: DrawNodeEntity) {
 
     let current = child;
     let next = child.get('parent');
