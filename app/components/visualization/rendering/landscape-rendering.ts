@@ -314,7 +314,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     const openEntitiesIds = this.computeOpenEntities();
 
-    const modelIdToLayout = applyKlayLayout(emberLandscape, openEntitiesIds);
+    const layoutData = applyKlayLayout(emberLandscape, openEntitiesIds);
+
+    const { modelIdToLayout, modelIdToPoints } = layoutData;
+
 
     // Reset mesh related data structures
     this.modelIdToMesh.clear();
@@ -359,7 +362,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     if (appCommunications) {
       const color = this.configuration.landscapeColors.communication;
-      const tiles = CommunicationRendering.computeCommunicationTiles(appCommunications, color);
+      const tiles = CommunicationRendering.computeCommunicationTiles(appCommunications,
+        modelIdToPoints, color);
 
       CommunicationRendering.addCommunicationLineDrawing(tiles, this.scene, centerPoint);
     }

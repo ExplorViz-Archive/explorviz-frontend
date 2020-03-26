@@ -89,11 +89,12 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   let modelIdToSourcePort: Map<string, port> = new Map();
   let modelIdToTargetPort: Map<string, port> = new Map();
   let modeldToKielerEdgeReference: Map<string, any> = new Map();
+  let modelIdToPoints: Map<string, point[]> = new Map();
 
   setupKieler(landscape);
   updateGraphWithResults(landscape);
 
-  return modelIdToLayout;
+  return {modelIdToLayout, modelIdToPoints};
 
   // Functions
 
@@ -375,7 +376,8 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     totalApplicationCommunications.forEach((applicationcommunication) => {
 
       modeldToKielerEdgeReference.set(applicationcommunication.get('id'), []);
-      applicationcommunication.set('points', []);
+
+      modelIdToPoints.set(applicationcommunication.get('id'), []);
 
       let appSource: Application | System = applicationcommunication.
         belongsTo('sourceApplication').value() as Application;
@@ -734,7 +736,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
         if (edge != null) {
 
           if (alreadyCalculatedPoints[edge.id]) {
-            applicationcommunication.set('points', alreadyCalculatedPoints[edge.id]);
+            modelIdToPoints.set(applicationcommunication.get('id'), alreadyCalculatedPoints[edge.id]);
             return;
           }
 
@@ -852,7 +854,11 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
               resultPoint.x = (point.x + pOffsetX) / CONVERT_TO_KIELER_FACTOR;
               resultPoint.y = (point.y * -1 + pOffsetY) / CONVERT_TO_KIELER_FACTOR; // KIELER has inverted Y coords
-              applicationcommunication.get('points').push(resultPoint);
+              let points = modelIdToPoints.get(applicationcommunication.get('id'));
+              if (points){
+                points.push(resultPoint);
+                modelIdToPoints.set(applicationcommunication.get('id'), points);
+              }
               updatedPoints.push(resultPoint);
 
             });
@@ -953,7 +959,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     if (entity instanceof System) {
       return openEntitiesIds.has(entity.get('id'));
     } else if (entity instanceof NodeGroup) {
-      return entity.get("nodes").length < 2 || openEntitiesIds.has(entity.get('id'));
+      return entity.get('nodes').length < 2 || openEntitiesIds.has(entity.get('id'));
     }
     // TODO: Check why this can happen
     return openEntitiesIds.has(entity.get('id'));

@@ -4,16 +4,16 @@ import DS from 'ember-data';
 // @ts-ignore
 import { MeshLine, MeshLineMaterial } from 'threejs-meshline'
 
-type Point = { x: number, y: number };
+type point = { x: number, y: number };
 
 // Model for a drawable application communication
-type Tile = {
-  startPoint: Point, endPoint: Point, positionZ: number, requestsCache: number,
+type tile = {
+  startPoint: point, endPoint: point, positionZ: number, requestsCache: number,
   lineThickness: number, pipeColor: THREE.Color, emberModel: AppCommunication
 }
 
 // Simplified Tile
-type TileWay = { startPoint: Point, endPoint: Point };
+type tileWay = { startPoint: point, endPoint: point };
 
 
 /**
@@ -24,13 +24,15 @@ type TileWay = { startPoint: Point, endPoint: Point };
  * @param appCommunications Array of all application communications
  * @param color Desired color for the tiles
  */
-export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray<AppCommunication>, color: string) {
-  let tiles: Tile[] = [];
-  let tile: Tile;
+export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray<AppCommunication>, modelIdToPoints: Map<string, point[]>, color: string) {
+  let tiles: tile[] = [];
+  let tile: tile;
 
   appCommunications.forEach((applicationCommunication: AppCommunication) => {
 
-    const points = applicationCommunication.get('points');
+    const points = modelIdToPoints.get(applicationCommunication.get('id'));
+
+    if (!points) return;
 
     if (points.length > 0) {
 
@@ -85,13 +87,13 @@ export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray
  * @param this First Tile for comparison check
  * @param tile Second Tile for comparison check
  */
-export function isSameTile(this: TileWay, tile: any) {
+export function isSameTile(this: tileWay, tile: any) {
   return checkEqualityOfPoints(this.endPoint, tile.endPoint) &&
     checkEqualityOfPoints(this.startPoint, tile.startPoint);
 }
 
 
-export function checkEqualityOfPoints(p1: Point, p2: Point) {
+export function checkEqualityOfPoints(p1: point, p2: point) {
   let x = Math.abs(p1.x - p2.x) <= 0.01;
   let y = Math.abs(p1.y - p2.y) <= 0.01;
 
@@ -182,7 +184,7 @@ export function linearCategorization(requestMap: Map<number, number>) {
 }
 
 
-export function addCommunicationLineDrawing(tiles: Tile[], parent: THREE.Object3D, centerPoint: Point) {
+export function addCommunicationLineDrawing(tiles: tile[], parent: THREE.Object3D, centerPoint: point) {
   const requestsToCategory = new Map();
 
   // Initialize Category mapping with default value 0
@@ -211,7 +213,7 @@ export function addCommunicationLineDrawing(tiles: Tile[], parent: THREE.Object3
  * @param parent Object to which the line shall be added
  * @param centerPoint Offset for drawing
  */
-export function createLine(tile: Tile, parent: THREE.Object3D, centerPoint: Point) {
+export function createLine(tile: tile, parent: THREE.Object3D, centerPoint: point) {
   let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x,
     tile.startPoint.y - centerPoint.y, tile.positionZ);
   let secondVector = new THREE.Vector3(tile.endPoint.x - centerPoint.x,
