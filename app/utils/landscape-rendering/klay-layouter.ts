@@ -83,12 +83,14 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
   const CONVERT_TO_KIELER_FACTOR = 180.0;
 
+  // Maps for internal computations
   let modelIdToGraph: Map<string, kielerGraph> = new Map();
-  let modelIdToLayout: Map<string, PlaneLayout> = new Map();
-
   let modelIdToSourcePort: Map<string, port> = new Map();
   let modelIdToTargetPort: Map<string, port> = new Map();
   let modeldToKielerEdgeReference: Map<string, any> = new Map();
+
+  // Maps for output
+  let modelIdToLayout: Map<string, PlaneLayout> = new Map();
   let modelIdToPoints: Map<string, point[]> = new Map();
 
   setupKieler(landscape);
@@ -180,6 +182,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
           systemKielerGraph.padding = {
             left: PADDING * CONVERT_TO_KIELER_FACTOR,
             right: PADDING * CONVERT_TO_KIELER_FACTOR,
+            // Leave space for system label
             top: 8 * PADDING * CONVERT_TO_KIELER_FACTOR,
             bottom: PADDING * CONVERT_TO_KIELER_FACTOR
           };

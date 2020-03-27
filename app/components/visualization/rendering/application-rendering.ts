@@ -437,7 +437,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     const componentSet = new Set<Component>();
     allInvolvedClazzes.forEach((clazz) => {
-      console.log(clazz.name);
       this.getAllAncestorComponents(clazz.getParent(), componentSet);
     });
 

@@ -1,7 +1,7 @@
 import DS from 'ember-data';
 import Application from './application';
 import Clazz from './clazz';
-import DrawEdgeEntity from './drawedgeentity';
+import BaseEntitity from './baseentity';
 
 const { attr, belongsTo } = DS;
 
@@ -9,12 +9,12 @@ const { attr, belongsTo } = DS;
  * Ember model for an ApplicationCommunication.
  *
  * @class ApplicationCommunication-Model
- * @extends DrawEdgeEntity-Model
+ * @extends BaseEntitity
  *
  * @module explorviz
  * @submodule model.meta
  */
-export default class ApplicationCommunication extends DrawEdgeEntity {
+export default class ApplicationCommunication extends BaseEntitity {
   @attr('number') requests!: number;
 
   @attr('string') technology!: string;

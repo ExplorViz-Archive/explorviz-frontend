@@ -4,8 +4,8 @@ import AggregatedClazzCommunication from './aggregatedclazzcommunication';
 import Clazz from './clazz';
 import ClazzCommunication from './clazzcommunication';
 import Component from './component';
-import DrawEdgeEntity from './drawedgeentity';
 import TraceStep from './tracestep';
+import BaseEntitity from './baseentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -14,12 +14,12 @@ const { attr, belongsTo, hasMany } = DS;
  * Bi-directional between two clazzes
  *
  * @class DrawableClazzCommunication-Model
- * @extends DrawEdgeEntity-Model
+ * @extends BaseEntitity
  *
  * @module explorviz
  * @submodule model.meta
  */
-export default class DrawableClazzCommunication extends DrawEdgeEntity {
+export default class DrawableClazzCommunication extends BaseEntitity {
   @attr('boolean', { defaultValue: false }) isBidirectional!: boolean;
 
   @attr('number') requests!: number;
@@ -100,29 +100,6 @@ export default class DrawableClazzCommunication extends DrawEdgeEntity {
     }
 
     return commonComponent;
-  }
-
-  toggleCommunicationDirection() {
-    // Toggle of communication direction only sensible for bidirectional communication
-    if (!this.get('isBidirectional')) {
-      return;
-    }
-
-    // Swap source and target clazz
-    const oldSourceClazz = this.get('sourceClazz');
-    const oldTargetClazz = this.get('targetClazz');
-    this.set('sourceClazz', oldTargetClazz);
-    this.set('targetClazz', oldSourceClazz);
-
-    // Swap start and end point for rendering (e.g. drawing of arrows)
-    const oldStartPoint = this.get('startPoint');
-    const oldEndPoint = this.get('endPoint');
-    this.set('startPoint', oldEndPoint);
-    this.set('endPoint', oldStartPoint);
-  }
-
-  isVisible() {
-    return this.get('parentComponent').get('opened');
   }
 }
 

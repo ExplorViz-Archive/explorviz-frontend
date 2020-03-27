@@ -318,14 +318,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     const { modelIdToLayout, modelIdToPoints } = layoutData;
 
-
     // Reset mesh related data structures
     this.modelIdToMesh.clear();
     this.systemMeshes.clear();
     this.nodeGroupMeshes.clear();
 
     const centerPoint = CalcCenterAndZoom
-      .getCenterAndZoom(emberLandscape, this.camera, this.webglrenderer);
+      .getCenterAndZoom(emberLandscape, modelIdToLayout, this.camera, this.webglrenderer);
 
     const { systems } = emberLandscape;
 
@@ -500,7 +499,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       // Handle system
     } else if (mesh instanceof SystemMesh) {
       const system = mesh.dataModel;
-      system.setOpened(!system.get('opened'));
       mesh.opened = !mesh.opened;
       // Close nodegroups in system
       if (!mesh.opened) {

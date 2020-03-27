@@ -1,7 +1,7 @@
 import { computed } from '@ember/object';
 import DS from 'ember-data';
 import Clazz from './clazz';
-import Draw3DNodeEntity from './draw3dnodeentity';
+import BaseEntitity from './baseentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -9,12 +9,12 @@ const { attr, belongsTo, hasMany } = DS;
  * Ember model for a Component, e.g. a Java package.
  *
  * @class Component-Model
- * @extends Draw3DNodeEntity-Model
+ * @extends BaseEntitity
  *
  * @module explorviz
  * @submodule model.meta
  */
-export default class Component extends Draw3DNodeEntity {
+export default class Component extends BaseEntitity {
   @attr('string') name!: string;
 
   @attr('string') fullQualifiedName!: string;

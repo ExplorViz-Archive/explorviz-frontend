@@ -1,8 +1,8 @@
 import { computed } from '@ember/object';
 import DS from 'ember-data';
-import DrawNodeEntity from './drawnodeentity';
 import System from './system';
 import Node from './node';
+import BaseEntitity from './baseentity';
 
 const { attr, hasMany, belongsTo } = DS;
 
@@ -10,12 +10,12 @@ const { attr, hasMany, belongsTo } = DS;
  * Ember model for a NodeGroup.
  *
  * @class NodeGroup-Model
- * @extends DrawNodeEntity-Model
+ * @extends BaseEntitity
  *
  * @module explorviz
  * @submodule model.meta
  */
-export default class NodeGroup extends DrawNodeEntity {
+export default class NodeGroup extends BaseEntitity {
   @attr('string') name!: string;
 
   @belongsTo('system', { inverse: 'nodegroups' })

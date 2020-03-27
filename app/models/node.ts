@@ -1,8 +1,8 @@
 import { computed } from '@ember/object';
 import DS from 'ember-data';
 import Application from './application';
-import DrawNodeEntity from './drawnodeentity';
 import NodeGroup from './nodegroup';
+import BaseEntitity from './baseentity';
 
 const { attr, hasMany, belongsTo } = DS;
 
@@ -10,12 +10,12 @@ const { attr, hasMany, belongsTo } = DS;
  * Ember model for a Node.
  *
  * @class Node-Model
- * @extends DrawNodeEntity-Model
+ * @extends BaseEntitity
  *
  * @module explorviz
  * @submodule model.meta
  */
-export default class Node extends DrawNodeEntity {
+export default class Node extends BaseEntitity {
   @attr('string') name!: string;
 
   @attr('string') ipAddress!: string;

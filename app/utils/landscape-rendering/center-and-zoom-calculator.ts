@@ -1,14 +1,16 @@
 import THREE from 'three';
 import Landscape from 'explorviz-frontend/models/landscape';
-import DrawNodeEntity from 'explorviz-frontend/models/drawnodeentity';
+import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 
-export function getCenterAndZoom(emberLandscape: Landscape, camera: THREE.PerspectiveCamera,
+export function getCenterAndZoom(emberLandscape: Landscape, 
+  modelIdToLayout: Map<string, PlaneLayout>, camera: THREE.PerspectiveCamera,
   webglrenderer: THREE.WebGLRenderer) {
   // Calculate new center and update zoom
-  let center = calculateLandscapeCenterAndZZoom(emberLandscape, webglrenderer);
+  let center = calculateLandscapeCenterAndZZoom(emberLandscape, modelIdToLayout, webglrenderer);
 
+  const INITIAL_CAM_ZOOM = 0;
   // Update zoom if camera has not been moved by user
-  if (camera.position.z === 0) {
+  if (camera.position.z === INITIAL_CAM_ZOOM) {
     camera.position.z = center.z;
     camera.updateProjectionMatrix();
   }
@@ -17,7 +19,8 @@ export function getCenterAndZoom(emberLandscape: Landscape, camera: THREE.Perspe
 }
 
 
-export function calculateLandscapeCenterAndZZoom(emberLandscape: Landscape, renderer: THREE.WebGLRenderer) {
+export function calculateLandscapeCenterAndZZoom(emberLandscape: Landscape, 
+  modelIdToLayout: Map<string, PlaneLayout>, renderer: THREE.WebGLRenderer) {
   // Semantics of rect entries
   const MIN_X = 0;
   const MAX_X = 1;
@@ -27,7 +30,7 @@ export function calculateLandscapeCenterAndZZoom(emberLandscape: Landscape, rend
   const EXTRA_SPACE_IN_PERCENT = 0.02;
   const SIZE_FACTOR = 0.65;
 
-  let rect = getLandscapeRect(emberLandscape);
+  let rect = getLandscapeRect(emberLandscape, modelIdToLayout);
 
   let requiredWidth = Math.abs(rect.get(MAX_X) - rect.get(MIN_X));
   requiredWidth += requiredWidth * EXTRA_SPACE_IN_PERCENT;
@@ -51,7 +54,7 @@ export function calculateLandscapeCenterAndZZoom(emberLandscape: Landscape, rend
 }
 
 
-export function getLandscapeRect(emberLandscape: Landscape) {
+export function getLandscapeRect(emberLandscape: Landscape, modelIdToLayout: Map<string, PlaneLayout>) {
   // Semantics of rect entries
   const MIN_X = 0;
   const MAX_X = 1;
@@ -73,13 +76,17 @@ export function getLandscapeRect(emberLandscape: Landscape) {
     rect[MAX_Y] = 1.0;
   } else {
     systems.forEach((system: any) => {
-      getMinMaxFromQuad(system, rect);
+      let systemLayout = modelIdToLayout.get(system.get('id'));
+      if (systemLayout)
+        getMinMaxFromQuad(systemLayout, rect);
 
       let nodegroups = system.get('nodegroups');
       nodegroups.forEach((nodegroup: any) => {
         let nodes = nodegroup.get('nodes');
         nodes.forEach((node: any) => {
-          getMinMaxFromQuad(node, rect);
+          let nodeLayout = modelIdToLayout.get(node.get('id'));
+          if (nodeLayout)
+            getMinMaxFromQuad(nodeLayout, rect);
         });
       });
     });
@@ -88,26 +95,26 @@ export function getLandscapeRect(emberLandscape: Landscape) {
 }
 
 
-export function getMinMaxFromQuad(drawnodeentity: DrawNodeEntity, rect: number[]) {
+export function getMinMaxFromQuad(layout: PlaneLayout, rect: number[]) {
   // Semantics of rect entries
   const MIN_X = 0;
   const MAX_X = 1;
   const MIN_Y = 2;
   const MAX_Y = 3;
 
-  let curX = drawnodeentity.get('positionX');
-  let curY = drawnodeentity.get('positionY');
+  let curX = layout.positionX;
+  let curY = layout.positionY;
 
   if (curX < rect[MIN_X]) {
     rect[MIN_X] = curX;
   }
-  if (rect[MAX_X] < curX + drawnodeentity.get('width')) {
-    rect[MAX_X] = curX + drawnodeentity.get('width');
+  if (rect[MAX_X] < curX + layout.width) {
+    rect[MAX_X] = curX + layout.width;
   }
   if (curY > rect[MAX_Y]) {
     rect[MAX_Y] = curY;
   }
-  if (rect[MIN_Y] > curY - drawnodeentity.get('height')) {
-    rect[MIN_Y] = curY - drawnodeentity.get('height');
+  if (rect[MIN_Y] > curY - layout.height) {
+    rect[MIN_Y] = curY - layout.height;
   }
 }

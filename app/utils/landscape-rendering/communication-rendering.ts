@@ -31,10 +31,9 @@ export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray
   appCommunications.forEach((applicationCommunication: AppCommunication) => {
 
     const points = modelIdToPoints.get(applicationCommunication.get('id'));
+  
 
-    if (!points) return;
-
-    if (points.length > 0) {
+    if (points && points.length > 0) {
 
       for (let i = 1; i < points.length; i++) {
 
@@ -231,8 +230,6 @@ export function createLine(tile: tile, parent: THREE.Object3D, centerPoint: poin
   });
 
   const line = new THREE.Mesh(geometry, material)
-
-  line.userData['model'] = tile.emberModel;
 
   parent.add(line);
 }

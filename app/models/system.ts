@@ -1,8 +1,7 @@
-import { computed } from '@ember/object';
 import DS from 'ember-data';
-import DrawNodeEntity from './drawnodeentity';
 import Landscape from './landscape';
 import NodeGroup from './nodegroup';
+import BaseEntitity from './baseentity';
 
 const { attr, hasMany, belongsTo } = DS;
 
@@ -15,7 +14,7 @@ const { attr, hasMany, belongsTo } = DS;
  * @module explorviz
  * @submodule model.meta
  */
-export default class System extends DrawNodeEntity {
+export default class System extends BaseEntitity {
   @attr('string') name!: string;
 
   @hasMany('nodegroup', { inverse: 'parent' })
@@ -23,38 +22,6 @@ export default class System extends DrawNodeEntity {
 
   @belongsTo('landscape', { inverse: 'systems' })
   parent!: DS.PromiseObject<Landscape> & Landscape;
-
-  @attr('boolean', { defaultValue: true }) opened!: boolean;
-
-  // used for text labeling performance in respective labelers
-  @computed('opened')
-  get state() {
-    return this.get('opened');
-  }
-
-  setOpened(this: System, openedParam: boolean) {
-    if (openedParam) {
-      const nodegroups = this.hasMany('nodegroups').value();
-
-      if (nodegroups !== null) {
-        nodegroups.forEach((nodegroup) => {
-          nodegroup.set('visible', true);
-          if (nodegroups !== null && nodegroups.get('length') === 1) {
-            nodegroup.setOpened(true);
-          } else {
-            nodegroup.setOpened(false);
-          }
-        });
-      }
-    } else {
-      this.get('nodegroups').forEach((nodegroup) => {
-        nodegroup.set('visible', false);
-        nodegroup.setAllChildrenVisibility(false);
-      });
-    }
-
-    this.set('opened', openedParam);
-  }
 }
 
 declare module 'ember-data/types/registries/model' {

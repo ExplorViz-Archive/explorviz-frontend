@@ -5,8 +5,8 @@ import Clazz from './clazz';
 import Component from './component';
 import DatabaseQuery from './databasequery';
 import DrawableClazzCommunication from './drawableclazzcommunication';
-import DrawNodeEntity from './drawnodeentity';
 import Trace from './trace';
+import BaseEntitity from './baseentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -14,12 +14,12 @@ const { attr, belongsTo, hasMany } = DS;
  * Ember model for an Application.
  *
  * @class Application-Model
- * @extends DrawNodeEntity-Model
+ * @extends BaseEntitity
  *
  * @module explorviz
  * @submodule model.meta
  */
-export default class Application extends DrawNodeEntity {
+export default class Application extends BaseEntitity {
   @attr('string') name!: string;
 
   @attr('number') lastUsage!: number;
