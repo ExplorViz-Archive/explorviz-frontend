@@ -461,7 +461,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     // Create and add label + icon
     Labeler.addApplicationTextLabel(applicationMesh, application.get('name'), this.font,
       new THREE.Color('white'));
-    Labeler.addApplicationLogo(applicationMesh, application, this.imageLoader);
+    Labeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
     this.scene.add(applicationMesh);
