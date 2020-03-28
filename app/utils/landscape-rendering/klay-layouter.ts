@@ -2,7 +2,6 @@ import Landscape from "explorviz-frontend/models/landscape";
 import NodeGroup from "explorviz-frontend/models/nodegroup";
 import Node from "explorviz-frontend/models/node";
 import Application from "explorviz-frontend/models/application";
-import DrawNodeEntity from "explorviz-frontend/models/drawnodeentity";
 import PlaneLayout from "explorviz-frontend/view-objects/layout-models/plane-layout";
 import System from "explorviz-frontend/models/system";
 import DS from "ember-data";
@@ -23,15 +22,15 @@ type kielerGraph = {
 }
 
 type edge = {
-  id?: string;
+  id: string;
   thickness?: number;
   sourcePoint?: point;
   targetPoint?: point;
   bendPoints?: point[];
   source?: string;
   target?: string;
-  sourceNode?: DrawNodeEntity;
-  targetNode?: DrawNodeEntity;
+  sourceNode?: any;
+  targetNode?: any;
   sourcePort?: string;
   targetPort?: string;
   sPort?: port;
@@ -536,7 +535,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     }
   }
 
-  function setAbsolutePositionForNode(child: DrawNodeEntity, parent: DrawNodeEntity) {
+  function setAbsolutePositionForNode(child: any, parent: any) {
     let childLayout = modelIdToLayout.get(child.get('id'));
     let parentLayout = modelIdToLayout.get(parent.get('id'));
     let parentGraph = modelIdToGraph.get(parent.get('id'));
@@ -548,7 +547,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   }
 
 
-  function updateNodeValues(entity: DrawNodeEntity) {
+  function updateNodeValues(entity: any) {
     let entityGraph = modelIdToGraph.get(entity.get('id'));
     if (entityGraph && entityGraph.x && entityGraph.y && entityGraph.width && entityGraph.height) {
       let layout = new PlaneLayout();
@@ -572,7 +571,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   }
 
 
-  function createEdgeBetweenSourceTarget(sourceApplication: DrawNodeEntity, targetApplication: DrawNodeEntity) {
+  function createEdgeBetweenSourceTarget(sourceApplication: any, targetApplication: any) {
 
     const port1 = createSourcePortIfNotExisting(sourceApplication);
     const port2 = createTargetPortIfNotExisting(targetApplication);
@@ -581,7 +580,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     return edge;
 
     //---------------------------inner functions
-    function createSourcePortIfNotExisting(sourceDrawnode: DrawNodeEntity) {
+    function createSourcePortIfNotExisting(sourceDrawnode: any) {
 
       // Do not create duplicate port
       let maybePort = modelIdToSourcePort.get(sourceDrawnode.get('id'));
@@ -618,7 +617,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     }
 
 
-    function createTargetPortIfNotExisting(targetDrawnode: DrawNodeEntity) {
+    function createTargetPortIfNotExisting(targetDrawnode: any) {
 
       // Do not create duplicate port
       let maybePort = modelIdToTargetPort.get(targetDrawnode.get('id'));
@@ -658,7 +657,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
   } // END createEdgeBetweenSourceTarget
 
-  function createEdgeHelper(sourceDrawnode: DrawNodeEntity, port1: port, targetDrawnode: DrawNodeEntity, port2: port) {
+  function createEdgeHelper(sourceDrawnode: any, port1: port, targetDrawnode: any, port2: port) {
 
     const id = sourceDrawnode.get('id') + "_to_" + targetDrawnode.get('id');
 
@@ -698,7 +697,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
     //inner function
     // looks for already existing edges
-    function lookForExistingEdge(sourceDrawnode: DrawNodeEntity, id: string) {
+    function lookForExistingEdge(sourceDrawnode: any, id: string) {
       let edges = modelIdToGraph.get(sourceDrawnode.get('id'))?.edges;
       if (edges) {
         let length = edges.length;
@@ -729,7 +728,8 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   function addBendPointsInAbsoluteCoordinates(landscape: Landscape) {
 
     const totalApplicationCommunications = landscape.get('totalApplicationCommunications');
-    const alreadyCalculatedPoints = {};
+    // Points for drawing which represent an edge
+    const edgeIdToPoints: Map<string, point[]> = new Map();
 
     totalApplicationCommunications.forEach((applicationcommunication) => {
 
@@ -738,8 +738,9 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
       kielerEdgeReferences.forEach((edge: edge) => {
         if (edge != null) {
 
-          if (alreadyCalculatedPoints[edge.id]) {
-            modelIdToPoints.set(applicationcommunication.get('id'), alreadyCalculatedPoints[edge.id]);
+          let maybePoints = edgeIdToPoints.get(edge.id);
+          if (maybePoints) {
+            modelIdToPoints.set(applicationcommunication.get('id'), maybePoints);
             return;
           }
 
@@ -751,12 +752,13 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
           var edgeOffset: padding = { bottom: 0.0, left: 0.0, right: 0.0, top: 0.0 };
 
-          if (parentNode != null) {
+          if (parentNode) {
 
             points = edge.bendPoints ? edge.bendPoints : [];
 
             edgeOffset = { bottom: 0.0, left: 0.0, right: 0.0, top: 0.0 };
 
+            // @ts-ignore Since overlapping id property is not detected
             let parentGraph = modelIdToGraph.get(parentNode.get('id'));
             if (parentGraph && parentGraph.padding) {
               edgeOffset = parentGraph.padding;
@@ -766,8 +768,10 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
             if (isDescendant(edge.targetNode, edge.sourceNode)) {
 
-              // self edges..
+              // Self edges..
               let sourcePort = edge.sPort;
+
+              if (!sourcePort?.x || !sourcePort.y) return;
 
               sourcePoint = {
                 x: sourcePort.x,
@@ -775,46 +779,57 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
               };
 
               let sourceGraph = modelIdToGraph.get(edge.sourceNode.get('id'));
+
+              if (!sourceGraph) return;
+
               let sourceInsets = sourceGraph.padding;
 
-              sourcePoint.x -= sourceInsets.left;
-              sourcePoint.y -= sourceInsets.top;
+              if (sourcePoint.x && sourcePoint.y &&
+                sourceInsets?.left && sourceInsets.top){
+                  sourcePoint.x -= sourceInsets.left;
+                  sourcePoint.y -= sourceInsets.top;
+              }
+
 
               let nestedGraph = sourceGraph;
 
-              if (nestedGraph != null) {
+              if (nestedGraph?.padding) {
                 edgeOffset = nestedGraph.padding;
               }
             }
             else {
 
-              if (edge.source) {
+              if (edge.source && edge?.sourcePoint) {
                 sourcePoint = {
                   x: edge.sourcePoint.x,
                   y: edge.sourcePoint.y
                 };
-              } else {
+              } else if (edge.sPort?.x && edge.sPort.y){
                 sourcePoint = {
                   x: edge.sPort.x,
                   y: edge.sPort.y
                 };
+              } else {
+                return;
               }
 
             }
 
             points.unshift(sourcePoint);
 
-            var targetPoint = edge.targetPoint ? {
+            if (!edge.tPort?.x || !edge.tPort.y) return;
+
+            let targetPoint = edge.targetPoint ? {
               x: edge.targetPoint.x,
               y: edge.targetPoint.y
             } : {
                 x: edge.tPort.x,
                 y: edge.tPort.y
-              };
+              }
 
             let targetGraph = modelIdToGraph.get(edge.targetNode.get('id'));
 
-            if (targetGraph.padding) {
+            if (targetGraph?.padding && targetPoint?.x && targetPoint.y) {
               targetPoint.x += targetGraph.padding.left;
               targetPoint.y += targetGraph.padding.top;
             }
@@ -866,7 +881,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
             });
 
-            alreadyCalculatedPoints[edge.id] = updatedPoints;
+            edgeIdToPoints.set(edge.id, updatedPoints);
 
           } // END if (parentNode != null)
         }
@@ -874,7 +889,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     });
   } // END addBendPoints
 
-  function isDescendant(child: any, parent: DrawNodeEntity) {
+  function isDescendant(child: any, parent: any) {
 
     let current = child;
     let next = child.get('parent');
@@ -959,13 +974,12 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     if (openEntitiesIds.size === 0) {
       return true;
     }
-    if (entity instanceof System) {
-      return openEntitiesIds.has(entity.get('id'));
-    } else if (entity instanceof NodeGroup) {
+    
+    if (entity instanceof NodeGroup) {
       return entity.get('nodes').length < 2 || openEntitiesIds.has(entity.get('id'));
+    } else {
+      return openEntitiesIds.has(entity.get('id'));
     }
-    // TODO: Check why this can happen
-    return openEntitiesIds.has(entity.get('id'));
   }
 
   function isVisible(application: Application): boolean;
