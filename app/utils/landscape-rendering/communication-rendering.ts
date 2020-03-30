@@ -1,15 +1,16 @@
 import THREE from 'three';
 import AppCommunication from 'explorviz-frontend/models/applicationcommunication';
 import DS from 'ember-data';
-// @ts-ignore
+// @ts-ignore: Typescript does not recognize meshline package
 import { MeshLine, MeshLineMaterial } from 'threejs-meshline'
 
+// Simple 2-dimensional point
 type point = { x: number, y: number };
 
-// Model for a drawable application communication
+// Blueprint for a drawable application communication
 type tile = {
   startPoint: point, endPoint: point, positionZ: number, requestsCache: number,
-  lineThickness: number, pipeColor: THREE.Color, emberModel: AppCommunication
+  lineThickness: number, pipeColor: THREE.Color
 }
 
 // Simplified Tile
@@ -60,9 +61,8 @@ export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray
             endPoint: thisPoint,
             positionZ: 0.0025, // Tiles should be in front of systems
             requestsCache: 0,
-            lineThickness: 0,
+            lineThickness: 1, // Determined later on
             pipeColor: new THREE.Color(color),
-            emberModel: applicationCommunication
           };
           tiles.push(tile);
         }
@@ -86,13 +86,20 @@ export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray
  * @param this First Tile for comparison check
  * @param tile Second Tile for comparison check
  */
-export function isSameTile(this: tileWay, tile: any) {
+function isSameTile(this: tileWay, tile: any) {
   return checkEqualityOfPoints(this.endPoint, tile.endPoint) &&
     checkEqualityOfPoints(this.startPoint, tile.startPoint);
 }
 
 
-export function checkEqualityOfPoints(p1: point, p2: point) {
+/**
+ * Checks wheter two given 2-d-points are equal based on their x- and 
+ * y-coordinate.
+ * 
+ * @param p1 First point
+ * @param p2 Second point
+ */
+function checkEqualityOfPoints(p1: point, p2: point) {
   let x = Math.abs(p1.x - p2.x) <= 0.01;
   let y = Math.abs(p1.y - p2.y) <= 0.01;
 
@@ -106,7 +113,7 @@ export function checkEqualityOfPoints(p1: point, p2: point) {
  * @param requestMap Maps number of requests to a numerical category
  * @param isLinear Whether to use linear (continious) or threshold based categories
  */
-export function getCategories(requestMap: Map<number, number>, isLinear: boolean) {
+function getCategories(requestMap: Map<number, number>, isLinear: boolean) {
 
   if (isLinear) {
     linearCategorization(requestMap);
@@ -124,14 +131,15 @@ export function getCategories(requestMap: Map<number, number>, isLinear: boolean
  * 
  * @param requestMap Maps number of requests to a numerical category
  */
-export function categorizeByThreshold(requestMap: Map<number, number>) {
-  let maxRequests = 1;
+function categorizeByThreshold(requestMap: Map<number, number>) {
+  let maxRequests = 1; // Keep track of max known requests
 
   for (let requests of requestMap.keys()) {
     maxRequests = (requests > maxRequests) ? requests : maxRequests;
   }
 
   const lowerThreshold = maxRequests * (1 / 3);
+
   const upperThreshold = maxRequests * (2 / 3);
 
   for (let requests of requestMap.keys()) {
@@ -148,7 +156,7 @@ export function categorizeByThreshold(requestMap: Map<number, number>) {
  * @param lowerThreshold Value which is used to define categories
  * @param upperThreshold Value which is used to define categories
  */
-export function getCategoryFromValue(requests: number, lowerThreshold: number, upperThreshold: number) {
+function getCategoryFromValue(requests: number, lowerThreshold: number, upperThreshold: number) {
   if (requests === 0) {
     return 0.0;
   } else if (requests === 1) {
@@ -169,7 +177,7 @@ export function getCategoryFromValue(requests: number, lowerThreshold: number, u
  * 
  * @param requestMap Maps number of requests to a numerical category
  */
-export function linearCategorization(requestMap: Map<number, number>) {
+function linearCategorization(requestMap: Map<number, number>) {
   let maxRequests = 1;
 
   for (let requests of requestMap.keys()) {
@@ -182,7 +190,14 @@ export function linearCategorization(requestMap: Map<number, number>) {
   }
 }
 
-
+/**
+ * Takes a list of tiles and requests their corresponding request category.
+ * Those are used to draw a line with a specific thickness.
+ * 
+ * @param tiles List of tiles (blueprints for communication drawing)
+ * @param parent Object to which communication lines are added
+ * @param centerPoint Offset of landscape objects: Used to align communication
+ */
 export function addCommunicationLineDrawing(tiles: tile[], parent: THREE.Object3D, centerPoint: point) {
   const requestsToCategory = new Map();
 
@@ -212,11 +227,17 @@ export function addCommunicationLineDrawing(tiles: tile[], parent: THREE.Object3
  * @param parent Object to which the line shall be added
  * @param centerPoint Offset for drawing
  */
-export function createLine(tile: tile, parent: THREE.Object3D, centerPoint: point) {
-  let firstVector = new THREE.Vector3(tile.startPoint.x - centerPoint.x,
-    tile.startPoint.y - centerPoint.y, tile.positionZ);
-  let secondVector = new THREE.Vector3(tile.endPoint.x - centerPoint.x,
-    tile.endPoint.y - centerPoint.y, tile.positionZ);
+function createLine(tile: tile, parent: THREE.Object3D, centerPoint: point) {
+  // Take offset (centerPoint) into account
+  let firstVector = new THREE.Vector3(
+    tile.startPoint.x - centerPoint.x,
+    tile.startPoint.y - centerPoint.y, 
+    tile.positionZ);
+
+  let secondVector = new THREE.Vector3(
+    tile.endPoint.x - centerPoint.x,
+    tile.endPoint.y - centerPoint.y, 
+    tile.positionZ);
 
   let points = [firstVector, secondVector];
 
