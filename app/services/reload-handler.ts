@@ -1,10 +1,9 @@
 import Service, { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
 
-import { getOwner } from '@ember/application';
 import debugLogger from 'ember-debug-logger';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import ModelUpdater from 'explorviz-frontend/utils/model-update';
+import * as ModelUpdater from 'explorviz-frontend/utils/model-update';
 import DS from 'ember-data';
 import { set } from '@ember/object';
 import Landscape from 'explorviz-frontend/models/landscape';
@@ -21,15 +20,6 @@ export default class ReloadHandler extends Service.extend(Evented) {
 
   debug = debugLogger();
 
-  modelUpdater: any = null;
-
-  constructor() {
-    super(...arguments);
-    if (!this.modelUpdater) {
-      set(this, 'modelUpdater', ModelUpdater.create(getOwner(this).ownerInjection()));
-    }
-  }
-
   /**
    * Loads a landscape from the backend and triggers a visualization update
    * @method loadLandscapeById
@@ -43,7 +33,7 @@ export default class ReloadHandler extends Service.extend(Evented) {
     function success(landscape: Landscape) {
       // Pause the visualization
       self.landscapeListener.stopVisualizationReload();
-      self.modelUpdater.addDrawableCommunication();
+      ModelUpdater.addDrawableCommunication(self.store);
 
       set(self.landscapeRepo, 'latestLandscape', landscape);
       self.landscapeRepo.triggerLatestLandscapeUpdate();
@@ -78,7 +68,7 @@ export default class ReloadHandler extends Service.extend(Evented) {
 
     function success(landscape: Landscape) {
       // Pause the visualization
-      self.modelUpdater.addDrawableCommunication();
+      ModelUpdater.addDrawableCommunication(self.store);
 
       set(self.landscapeRepo, 'replayLandscape', landscape);
       self.landscapeRepo.triggerLatestReplayLandscapeUpdate();
