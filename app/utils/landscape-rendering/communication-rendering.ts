@@ -3,6 +3,7 @@ import AppCommunication from 'explorviz-frontend/models/applicationcommunication
 import DS from 'ember-data';
 // @ts-ignore: Typescript does not recognize meshline package
 import { MeshLine, MeshLineMaterial } from 'threejs-meshline'
+import AppCommunicationMesh from 'explorviz-frontend/view-objects/3d/landscape/app-communication-mesh';
 
 // Simple 2-dimensional point
 type point = { x: number, y: number };
@@ -198,7 +199,7 @@ function linearCategorization(requestMap: Map<number, number>) {
  * @param parent Object to which communication lines are added
  * @param centerPoint Offset of landscape objects: Used to align communication
  */
-export function addCommunicationLineDrawing(tiles: tile[], parent: THREE.Object3D, centerPoint: point) {
+export function addCommunicationLineDrawing(tiles: tile[], parent: THREE.Object3D, centerPoint: THREE.Vector3) {
   const requestsToCategory = new Map();
 
   // Initialize Category mapping with default value 0
@@ -214,43 +215,10 @@ export function addCommunicationLineDrawing(tiles: tile[], parent: THREE.Object3
     let tile = tiles[i];
     let category = categoryMapping.get(tile.requestsCache);
     if (category) {
-      tile.lineThickness = 0.7 * category + 0.1;
-      createLine(tile, parent, centerPoint);
+      tile.lineThickness = 0.28 * category + 0.04;
+      let line = new AppCommunicationMesh(tile);
+      line.addOffset(centerPoint);
+      parent.add(line);
     }
   }
-}
-
-/**
- * Draws a line according to the given parameters.
- * 
- * @param tile Tile containing data for drawing the line
- * @param parent Object to which the line shall be added
- * @param centerPoint Offset for drawing
- */
-function createLine(tile: tile, parent: THREE.Object3D, centerPoint: point) {
-  // Take offset (centerPoint) into account
-  let firstVector = new THREE.Vector3(
-    tile.startPoint.x - centerPoint.x,
-    tile.startPoint.y - centerPoint.y, 
-    tile.positionZ);
-
-  let secondVector = new THREE.Vector3(
-    tile.endPoint.x - centerPoint.x,
-    tile.endPoint.y - centerPoint.y, 
-    tile.positionZ);
-
-  let points = [firstVector, secondVector];
-
-  // We cannot use default lines here since they do not
-  // support different line thicknesses
-  const geometry = new MeshLine();
-  geometry.setVertices(points, () => tile.lineThickness * 0.4);
-
-  const material = new MeshLineMaterial({
-    color: tile.pipeColor,
-  });
-
-  const line = new THREE.Mesh(geometry, material)
-
-  parent.add(line);
 }
