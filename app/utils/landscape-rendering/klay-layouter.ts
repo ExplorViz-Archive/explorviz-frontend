@@ -1,5 +1,4 @@
 import PlaneLayout from "explorviz-frontend/view-objects/layout-models/plane-layout";
-import System from "explorviz-frontend/models/system";
 import { ReducedLandscape, ReducedSystem, ReducedApplication, ReducedNodeGroup, ReducedNode } from "./model-reducer";
 
 /* global $klay */
@@ -840,7 +839,7 @@ export default function applyKlayLayout(landscape: ReducedLandscape, openEntitie
 
               // why is parentNode.constructor.modelName undefined?
               // "alternative": parentNode.content._internalModel.modelName
-              if (parentNode instanceof System) {
+              if (isReducedSystem(parentNode)) {
                 pOffsetX = insetLeft;
                 pOffsetY = insetTop * -1;
               } else {
