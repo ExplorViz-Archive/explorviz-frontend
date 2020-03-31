@@ -1,10 +1,6 @@
-import Landscape from "explorviz-frontend/models/landscape";
-import NodeGroup from "explorviz-frontend/models/nodegroup";
-import Node from "explorviz-frontend/models/node";
-import Application from "explorviz-frontend/models/application";
 import PlaneLayout from "explorviz-frontend/view-objects/layout-models/plane-layout";
 import System from "explorviz-frontend/models/system";
-import DS from "ember-data";
+import { ReducedLandscape, ReducedSystem, ReducedApplication, ReducedNodeGroup, ReducedNode } from "./model-reducer";
 
 /* global $klay */
 
@@ -76,7 +72,7 @@ type port = {
   node?: kielerGraph | null;
 };
 
-export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: Set<string>) {
+export default function applyKlayLayout(landscape: ReducedLandscape, openEntitiesIds: Set<string>) {
 
   let topLevelKielerGraph: kielerGraph = {};
 
@@ -99,7 +95,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
   // Functions
 
-  function setupKieler(landscape: Landscape) {
+  function setupKieler(landscape: ReducedLandscape) {
 
     const graph = createEmptyGraph("root");
     topLevelKielerGraph = graph;
@@ -145,8 +141,8 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   }
 
 
-  function addNodes(landscape: Landscape) {
-    const systems = landscape.get('systems');
+  function addNodes(landscape: ReducedLandscape) {
+    const systems = landscape.systems;
 
     if (systems) {
 
@@ -162,13 +158,13 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
           const minWidth = Math.max(2.5 * DEFAULT_WIDTH *
             CONVERT_TO_KIELER_FACTOR,
-            (calculateRequiredLabelLength(system.get('name'), SYSTEM_LABEL_HEIGHT) +
+            (calculateRequiredLabelLength(system.name, SYSTEM_LABEL_HEIGHT) +
               PADDING * 6.0) * CONVERT_TO_KIELER_FACTOR);
 
           const minHeight = 2.5 * DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
 
-          const systemKielerGraph = createEmptyGraph(system.get('id'));
-          modelIdToGraph.set(system.get('id'), systemKielerGraph);
+          const systemKielerGraph = createEmptyGraph(system.id);
+          modelIdToGraph.set(system.id, systemKielerGraph);
 
           if (!systemKielerGraph.properties)
             return;
@@ -191,12 +187,12 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
           topLevelKielerGraph.children.push(systemKielerGraph);
 
-          const nodegroups = system.get('nodegroups');
+          const nodegroups = system.nodeGroups;
 
-          nodegroups.forEach((nodegroup) => {
+          nodegroups.forEach((nodeGroup) => {
 
-            if (isVisible(nodegroup)) {
-              createNodeGroup(systemKielerGraph, nodegroup);
+            if (isVisible(nodeGroup)) {
+              createNodeGroup(systemKielerGraph, nodeGroup);
             }
 
           });
@@ -205,13 +201,13 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
           const width = Math.max(2.5 * DEFAULT_WIDTH *
             CONVERT_TO_KIELER_FACTOR,
-            (calculateRequiredLabelLength(system.get('name'), SYSTEM_LABEL_HEIGHT) +
+            (calculateRequiredLabelLength(system.name, SYSTEM_LABEL_HEIGHT) +
               PADDING * 6.0) * CONVERT_TO_KIELER_FACTOR);
 
           const height = 2.5 * DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
 
           const systemKielerNode: kielerGraph = {
-            "id": system.get('id'),
+            "id": system.id,
             "width": width,
             "height": height,
             "edges": [],
@@ -225,7 +221,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
             bottom: PADDING * CONVERT_TO_KIELER_FACTOR
           };
 
-          modelIdToGraph.set(system.get('id'), systemKielerNode);
+          modelIdToGraph.set(system.id, systemKielerNode);
 
           if (!topLevelKielerGraph.children)
             return;
@@ -237,15 +233,15 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
   } // END addNodes
 
-  function createNodeGroup(systemKielerGraph: kielerGraph, nodegroup: NodeGroup) {
+  function createNodeGroup(systemKielerGraph: kielerGraph, nodegroup: ReducedNodeGroup) {
 
-    const nodes = nodegroup.get('nodes');
+    const nodes = nodegroup.nodes;
     const PADDING = 0.1;
 
-    if (nodes.get('length') > 1) {
+    if (nodes.length > 1) {
 
-      const nodeGroupKielerGraph = createEmptyGraph(nodegroup.get('id'));
-      modelIdToGraph.set(nodegroup.get('id'), nodeGroupKielerGraph);
+      const nodeGroupKielerGraph = createEmptyGraph(nodegroup.id);
+      modelIdToGraph.set(nodegroup.id, nodeGroupKielerGraph);
 
       if (!nodeGroupKielerGraph.properties || !systemKielerGraph.children)
         return;
@@ -262,18 +258,13 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
       systemKielerGraph.children.push(nodeGroupKielerGraph);
 
-      const sortedNodes = nodes.sortBy('ipAddress');
-
-      nodegroup.set('nodes', sortedNodes);
-
-
       let yCoord = 0.0;
 
-      sortedNodes.forEach((node) => {
+      nodes.forEach((node) => {
 
         if (isVisible(node)) {
           createNodeAndItsApplications(nodeGroupKielerGraph, node);
-          let kielerGraphReference = modelIdToGraph.get(node.get('id'));
+          let kielerGraphReference = modelIdToGraph.get(node.id);
 
           if (kielerGraphReference) {
             kielerGraphReference.x = 0;
@@ -299,15 +290,15 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
   } // END createNodeGroup
 
-  function createNodeAndItsApplications(kielerParentGraph: kielerGraph, node: Node) {
+  function createNodeAndItsApplications(kielerParentGraph: kielerGraph, node: ReducedNode) {
 
     const PADDING = 0.1;
     const NODE_LABEL_HEIGHT = 0.2;
     const DEFAULT_WIDTH = 1.5;
     const DEFAULT_HEIGHT = 0.75;
 
-    const nodeKielerGraph = createEmptyGraph(node.get('id'));
-    modelIdToGraph.set(node.get('id'), nodeKielerGraph);
+    const nodeKielerGraph = createEmptyGraph(node.id);
+    modelIdToGraph.set(node.id, nodeKielerGraph);
 
     nodeKielerGraph.padding = {
       left: PADDING * CONVERT_TO_KIELER_FACTOR,
@@ -316,7 +307,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
       bottom: 6 * PADDING * CONVERT_TO_KIELER_FACTOR
     };
 
-    const parent = node.get('parent');
+    const parent = node.parent as ReducedNodeGroup;
 
     const minWidth = Math.max(DEFAULT_WIDTH *
       CONVERT_TO_KIELER_FACTOR,
@@ -335,7 +326,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
     kielerParentGraph.children.push(nodeKielerGraph);
 
-    const applications = node.get('applications');
+    const applications = node.applications;
 
     applications.forEach((application) => {
 
@@ -347,14 +338,14 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
       const APPLICATION_LABEL_HEIGHT = 0.21;
 
       const width = Math.max(DEFAULT_WIDTH * CONVERT_TO_KIELER_FACTOR,
-        (calculateRequiredLabelLength(application.get('name'), APPLICATION_LABEL_HEIGHT) +
+        (calculateRequiredLabelLength(application.name, APPLICATION_LABEL_HEIGHT) +
           APPLICATION_PIC_PADDING_SIZE + APPLICATION_PIC_SIZE +
           PADDING * 3.0) * CONVERT_TO_KIELER_FACTOR);
 
       const height = DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
 
       const applicationKielerNode = {
-        "id": application.get('id'),
+        "id": application.id,
         "width": width,
         "height": height,
         "children": [],
@@ -362,7 +353,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
         "ports": []
       };
 
-      modelIdToGraph.set(application.get('id'), applicationKielerNode);
+      modelIdToGraph.set(application.id, applicationKielerNode);
 
       if (nodeKielerGraph.children)
         nodeKielerGraph.children.push(applicationKielerNode);
@@ -371,33 +362,31 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   } // END createNodeAndItsApplications
 
 
-  function addEdges(landscape: Landscape) {
+  function addEdges(landscape: ReducedLandscape) {
 
-    const totalApplicationCommunications = landscape.get('totalApplicationCommunications');
+    const totalApplicationCommunications = landscape.applicationCommunications;
 
     totalApplicationCommunications.forEach((applicationcommunication) => {
 
-      modeldToKielerEdgeReference.set(applicationcommunication.get('id'), []);
+      modeldToKielerEdgeReference.set(applicationcommunication.id, []);
 
-      modelIdToPoints.set(applicationcommunication.get('id'), []);
+      modelIdToPoints.set(applicationcommunication.id, []);
 
-      let appSource: Application | System = applicationcommunication.
-        belongsTo('sourceApplication').value() as Application;
-      let appTarget: Application | System = applicationcommunication.
-        belongsTo('targetApplication').value() as Application;
+      let appSource: ReducedApplication | ReducedSystem = applicationcommunication.sourceApplication;
+      let appTarget: ReducedApplication | ReducedSystem = applicationcommunication.targetApplication;
 
-      let sourceNode = appSource.belongsTo('parent').value() as Node;
-      let sourceNodeGroup = sourceNode.belongsTo('parent').value() as NodeGroup;
-      let sourceSystem = sourceNodeGroup.belongsTo('parent').value() as System;
+      let sourceNode = appSource.parent as ReducedNode;
+      let sourceNodeGroup = sourceNode.parent as ReducedNodeGroup;
+      let sourceSystem = sourceNodeGroup.parent as ReducedSystem;
 
       if (!isVisible(sourceNode)) {
         let maybeSource = isOpen(sourceSystem) ? seekRepresentativeApplication(appSource) : sourceSystem;
         if (maybeSource) appSource = maybeSource;
       }
 
-      let targetNode = appTarget.belongsTo('parent').value() as Node;
-      let targetNodeGroup = targetNode.belongsTo('parent').value() as NodeGroup;
-      let targetSystem = targetNodeGroup.belongsTo('parent').value() as System;
+      let targetNode = appTarget.parent as ReducedNode;
+      let targetNodeGroup = targetNode.parent as ReducedNodeGroup;
+      let targetSystem = targetNodeGroup.parent as ReducedSystem;
 
       if (!isVisible(targetNode)) {
         let maybeTarget = isOpen(targetSystem) ? seekRepresentativeApplication(appTarget) : targetSystem;
@@ -406,30 +395,30 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
       if (appSource.id !== appTarget.id) {
         const edge = createEdgeBetweenSourceTarget(appSource, appTarget);
-        let edgeReference = modeldToKielerEdgeReference.get(applicationcommunication.get('id'));
+        let edgeReference = modeldToKielerEdgeReference.get(applicationcommunication.id);
         edgeReference.push(edge);
       }
     });
   } // END addEdges
 
 
-  function updateGraphWithResults(landscape: Landscape) {
+  function updateGraphWithResults(landscape: ReducedLandscape) {
 
-    const systems = landscape.get('systems');
+    const systems = landscape.systems;
 
     systems.forEach((system) => {
 
       updateNodeValues(system);
 
-      const nodegroups = system.get('nodegroups');
+      const nodegroups = system.nodeGroups;
 
       nodegroups.forEach((nodegroup) => {
 
         if (isVisible(nodegroup)) {
 
-          const nodes = nodegroup.get('nodes');
+          const nodes = nodegroup.nodes;
 
-          if (nodes.get('length') > 1) {
+          if (nodes.length > 1) {
             updateNodeValues(nodegroup);
           }
 
@@ -441,13 +430,13 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
               updateNodeValues(node);
 
-              if (nodes.get('length') > 1) {
+              if (nodes.length > 1) {
                 setAbsolutePositionForNode(node, nodegroup);
-              } else if (nodes.get('length') === 1) {
+              } else if (nodes.length === 1) {
                 setAbsolutePositionForNode(node, system);
               }
 
-              const applications = node.get('applications');
+              const applications = node.applications;
 
               applications.forEach((application) => {
 
@@ -470,19 +459,19 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
     systems.forEach((system) => {
 
-      const nodegroups = system.get('nodegroups');
+      const nodegroups = system.nodeGroups;
 
       nodegroups.forEach((nodegroup) => {
 
         if (isVisible(nodegroup)) {
 
-          const nodes = nodegroup.get('nodes');
+          const nodes = nodegroup.nodes;
 
           nodes.forEach((node) => {
 
             if (isVisible(node)) {
 
-              const applications = node.get('applications');
+              const applications = node.applications;
 
               applications.forEach((application) => {
 
@@ -496,7 +485,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
           });
 
-          if (nodes.get('length') > 1) {
+          if (nodes.length > 1) {
             convertToExplorVizCoords(nodegroup);
           }
 
@@ -511,22 +500,22 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   } // END updateGraphWithResults
 
 
-  function getDisplayName(nodeGroup: NodeGroup, node: Node) {
+  function getDisplayName(nodeGroup: ReducedNodeGroup, node: ReducedNode) {
 
     if (isOpen(nodeGroup)) {
-      if (node.get('name') && node.get('name').length !== 0 && !node.get('name').startsWith("<")) {
-        return node.get('name');
+      if (node.name && node.name.length !== 0 && !node.name.startsWith("<")) {
+        return node.name;
       } else {
-        return node.get('ipAddress');
+        return node.ipAddress;
       }
     } else {
-      return nodeGroup.get('name');
+      return nodeGroup.name;
     }
   }
 
 
   function convertToExplorVizCoords(entity: any) {
-    let layout = modelIdToLayout.get(entity.get('id'));
+    let layout = modelIdToLayout.get(entity.id);
     if (layout) {
       layout.positionX /= CONVERT_TO_KIELER_FACTOR;
       layout.positionY /= CONVERT_TO_KIELER_FACTOR;
@@ -536,9 +525,9 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   }
 
   function setAbsolutePositionForNode(child: any, parent: any) {
-    let childLayout = modelIdToLayout.get(child.get('id'));
-    let parentLayout = modelIdToLayout.get(parent.get('id'));
-    let parentGraph = modelIdToGraph.get(parent.get('id'));
+    let childLayout = modelIdToLayout.get(child.id);
+    let parentLayout = modelIdToLayout.get(parent.id);
+    let parentGraph = modelIdToGraph.get(parent.id);
 
     if (childLayout && parentLayout && parentGraph && parentGraph.padding) {
       childLayout.positionX += parentLayout.positionX + parentGraph.padding.left;
@@ -548,15 +537,15 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
 
   function updateNodeValues(entity: any) {
-    let entityGraph = modelIdToGraph.get(entity.get('id'));
+    let entityGraph = modelIdToGraph.get(entity.id);
     if (entityGraph && entityGraph.x && entityGraph.y && entityGraph.width && entityGraph.height) {
       let layout = new PlaneLayout();
       layout.positionX = entityGraph.x;
       layout.positionY = entityGraph.y * -1;
       layout.width = entityGraph.width;
       layout.height = entityGraph.height;
-      layout.opened = openEntitiesIds.size === 0 ? true : openEntitiesIds.has(entity.get('id'));
-      modelIdToLayout.set(entity.get('id'), layout);
+      layout.opened = openEntitiesIds.size === 0 ? true : openEntitiesIds.has(entity.id);
+      modelIdToLayout.set(entity.id, layout);
     }
   }
 
@@ -583,8 +572,8 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     function createSourcePortIfNotExisting(sourceDrawnode: any) {
 
       // Do not create duplicate port
-      let maybePort = modelIdToSourcePort.get(sourceDrawnode.get('id'));
-      if (maybePort && modelIdToSourcePort.has(sourceDrawnode.get('id'))){
+      let maybePort = modelIdToSourcePort.get(sourceDrawnode.id);
+      if (maybePort && modelIdToSourcePort.has(sourceDrawnode.id)){
         return maybePort;
       } else {
         const DEFAULT_PORT_WIDTH = 0.000001;
@@ -593,7 +582,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   
         const CONVERT_TO_KIELER_FACTOR = 180;
 
-        const portId = sourceDrawnode.get('id') + "_sp1";
+        const portId = sourceDrawnode.id + "_sp1";
 
         let port: port = {
           id: portId,
@@ -606,10 +595,10 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
           y: 0
         };
 
-        let sourceGraph = modelIdToGraph.get(sourceDrawnode.get('id'));
+        let sourceGraph = modelIdToGraph.get(sourceDrawnode.id);
         port.node = sourceGraph;
 
-        modelIdToSourcePort.set(sourceDrawnode.get('id'), port);
+        modelIdToSourcePort.set(sourceDrawnode.id, port);
         sourceGraph?.ports?.push(port);
 
         return port;
@@ -620,8 +609,8 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     function createTargetPortIfNotExisting(targetDrawnode: any) {
 
       // Do not create duplicate port
-      let maybePort = modelIdToTargetPort.get(targetDrawnode.get('id'));
-      if (maybePort && modelIdToTargetPort.has(targetDrawnode.get('id'))){
+      let maybePort = modelIdToTargetPort.get(targetDrawnode.id);
+      if (maybePort && modelIdToTargetPort.has(targetDrawnode.id)){
         return maybePort;
       } else {
         const DEFAULT_PORT_WIDTH = 0.000001;
@@ -630,7 +619,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   
         const CONVERT_TO_KIELER_FACTOR = 180;
 
-        const portId = targetDrawnode.get('id') + "_tp1";
+        const portId = targetDrawnode.id + "_tp1";
 
         let port: port = {
           id: portId,
@@ -643,10 +632,10 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
           y: 0
         };
 
-        let targetGraph = modelIdToGraph.get(targetDrawnode.get('id'));
+        let targetGraph = modelIdToGraph.get(targetDrawnode.id);
         port.node = targetGraph;
 
-        modelIdToTargetPort.set(targetDrawnode.get('id'), port);
+        modelIdToTargetPort.set(targetDrawnode.id, port);
         targetGraph?.ports?.push(port);
 
         return port;
@@ -659,7 +648,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
   function createEdgeHelper(sourceDrawnode: any, port1: port, targetDrawnode: any, port2: port) {
 
-    const id = sourceDrawnode.get('id') + "_to_" + targetDrawnode.get('id');
+    const id = sourceDrawnode.id + "_to_" + targetDrawnode.id;
 
     let edge = lookForExistingEdge(sourceDrawnode, id);
 
@@ -671,8 +660,8 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
     setEdgeLayoutProperties(edge);
 
-    edge.source = sourceDrawnode.get('id');
-    edge.target = targetDrawnode.get('id');
+    edge.source = sourceDrawnode.id;
+    edge.target = targetDrawnode.id;
 
     edge.sourcePort = port1.id;
     edge.targetPort = port2.id;
@@ -689,7 +678,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     edge.sourceNode = sourceDrawnode;
     edge.targetNode = targetDrawnode;
 
-    let graph = modelIdToGraph.get(sourceDrawnode.get('id'));
+    let graph = modelIdToGraph.get(sourceDrawnode.id);
     graph?.edges?.push(edge);
 
     return edge;
@@ -698,7 +687,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     //inner function
     // looks for already existing edges
     function lookForExistingEdge(sourceDrawnode: any, id: string) {
-      let edges = modelIdToGraph.get(sourceDrawnode.get('id'))?.edges;
+      let edges = modelIdToGraph.get(sourceDrawnode.id)?.edges;
       if (edges) {
         let length = edges.length;
         for (let i = 0; i < length; i++) {
@@ -725,27 +714,27 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     edge.thickness = Math.max(lineThickness * CONVERT_TO_KIELER_FACTOR, oldThickness);
   }
 
-  function addBendPointsInAbsoluteCoordinates(landscape: Landscape) {
+  function addBendPointsInAbsoluteCoordinates(landscape: ReducedLandscape) {
 
-    const totalApplicationCommunications = landscape.get('totalApplicationCommunications');
+    const totalApplicationCommunications = landscape.applicationCommunications;
     // Points for drawing which represent an edge
     const edgeIdToPoints: Map<string, point[]> = new Map();
 
     totalApplicationCommunications.forEach((applicationcommunication) => {
 
-      const kielerEdgeReferences: edge[] = modeldToKielerEdgeReference.get(applicationcommunication.get('id'));
+      const kielerEdgeReferences: edge[] = modeldToKielerEdgeReference.get(applicationcommunication.id);
 
       kielerEdgeReferences.forEach((edge: edge) => {
         if (edge != null) {
 
           let maybePoints = edgeIdToPoints.get(edge.id);
           if (maybePoints) {
-            modelIdToPoints.set(applicationcommunication.get('id'), maybePoints);
+            modelIdToPoints.set(applicationcommunication.id, maybePoints);
             return;
           }
 
-          let sourceApplication = applicationcommunication.belongsTo('sourceApplication').value() as Application;
-          let targetApplication = applicationcommunication.belongsTo('targetApplication').value() as Application;
+          let sourceApplication = applicationcommunication.sourceApplication as ReducedApplication;
+          let targetApplication = applicationcommunication.targetApplication as ReducedApplication;
           let parentNode = getRightParent(sourceApplication, targetApplication);
 
           var points = [];
@@ -759,7 +748,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
             edgeOffset = { bottom: 0.0, left: 0.0, right: 0.0, top: 0.0 };
 
             // @ts-ignore Since overlapping id property is not detected
-            let parentGraph = modelIdToGraph.get(parentNode.get('id'));
+            let parentGraph = modelIdToGraph.get(parentNode.id);
             if (parentGraph && parentGraph.padding) {
               edgeOffset = parentGraph.padding;
             }
@@ -778,7 +767,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
                 y: sourcePort.y
               };
 
-              let sourceGraph = modelIdToGraph.get(edge.sourceNode.get('id'));
+              let sourceGraph = modelIdToGraph.get(edge.sourceNode.id);
 
               if (!sourceGraph) return;
 
@@ -827,7 +816,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
                 y: edge.tPort.y
               }
 
-            let targetGraph = modelIdToGraph.get(edge.targetNode.get('id'));
+            let targetGraph = modelIdToGraph.get(edge.targetNode.id);
 
             if (targetGraph?.padding && targetPoint?.x && targetPoint.y) {
               targetPoint.x += targetGraph.padding.left;
@@ -855,7 +844,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
                 pOffsetX = insetLeft;
                 pOffsetY = insetTop * -1;
               } else {
-                let layout = modelIdToLayout.get(parentNode.get('id'));
+                let layout = modelIdToLayout.get(parentNode.id);
                 if (layout){
                   pOffsetX = layout?.positionX + insetLeft;
                   pOffsetY = layout?.positionY - insetTop;
@@ -872,10 +861,10 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
 
               resultPoint.x = (point.x + pOffsetX) / CONVERT_TO_KIELER_FACTOR;
               resultPoint.y = (point.y * -1 + pOffsetY) / CONVERT_TO_KIELER_FACTOR; // KIELER has inverted Y coords
-              let points = modelIdToPoints.get(applicationcommunication.get('id'));
+              let points = modelIdToPoints.get(applicationcommunication.id);
               if (points){
                 points.push(resultPoint);
-                modelIdToPoints.set(applicationcommunication.get('id'), points);
+                modelIdToPoints.set(applicationcommunication.id, points);
               }
               updatedPoints.push(resultPoint);
 
@@ -892,31 +881,31 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
   function isDescendant(child: any, parent: any) {
 
     let current = child;
-    let next = child.get('parent');
+    let next = child.parent;
 
     while (next) {
       current = next;
       if (current === parent) {
         return true;
       }
-      next = current.get('parent');
+      next = current.parent;
     }
 
     return false;
   }
 
-  function getRightParent(sourceApplication: Application, targetApplication: Application): System | Node | null {
-    let sourceNode = sourceApplication.belongsTo('parent').value() as Node;
+  function getRightParent(sourceApplication: ReducedApplication, targetApplication: ReducedApplication): ReducedSystem | ReducedNode | null {
+    let sourceNode = sourceApplication.parent as ReducedNode;
 
-    let result: System | Node | null = sourceNode;
+    let result: ReducedSystem | ReducedNode | null = sourceNode;
 
     if (!isVisible(sourceNode)) {
-      let sourceNodeGroup = sourceNode.belongsTo('parent').value() as NodeGroup;
-      let sourceSystem = sourceNodeGroup.belongsTo('parent').value() as System;
+      let sourceNodeGroup = sourceNode.parent as ReducedNodeGroup;
+      let sourceSystem = sourceNodeGroup.parent as ReducedSystem;
 
-      let targetNode = targetApplication.belongsTo('parent').value() as Node;
-      let targetNodeGroup = targetNode.belongsTo('parent').value() as NodeGroup;
-      let targetSystem = targetNodeGroup.belongsTo('parent').value() as System;
+      let targetNode = targetApplication.parent as ReducedNode;
+      let targetNodeGroup = targetNode.parent as ReducedNodeGroup;
+      let targetSystem = targetNodeGroup.parent as ReducedSystem;
 
       if (!isOpen(sourceSystem)) {
         if (sourceSystem !== targetSystem) {
@@ -927,7 +916,7 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
       } else {
         let maybeApp = seekRepresentativeApplication(sourceApplication);
         if (maybeApp) {
-          result = maybeApp.belongsTo('parent').value() as Node;
+          result = maybeApp.parent as ReducedNode;
         }
       }
     }
@@ -942,22 +931,22 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
    * the same applications.
    * @param application 
    */
-  function seekRepresentativeApplication(application: Application): Application | null {
-    let parentNode = application.belongsTo('parent').value() as Node;
-    let parentNodeGroup = parentNode.belongsTo('parent').value() as NodeGroup;
+  function seekRepresentativeApplication(application: ReducedApplication): ReducedApplication | null {
+    let parentNode = application.parent as ReducedNode;
+    let parentNodeGroup = parentNode.parent as ReducedNodeGroup;
 
-    let nodes = parentNodeGroup.hasMany('nodes').value() as DS.ManyArray<Node>;
+    let nodes = parentNodeGroup.nodes;
 
     let returnValue = null;
 
     nodes.forEach((node) => {
       if (isVisible(node)) {
 
-        const applications = node.get('applications');
+        const applications = node.applications;
 
         applications.forEach((representiveApplication) => {
 
-          if (representiveApplication.get('name') === application.get('name')) {
+          if (representiveApplication.name === application.name) {
             returnValue = representiveApplication;
           }
         });
@@ -967,42 +956,58 @@ export default function applyKlayLayout(landscape: Landscape, openEntitiesIds: S
     return returnValue;
   }
 
-  function isOpen(system: System): boolean;
-  function isOpen(nodeGroup: NodeGroup): boolean;
+  function isOpen(system: ReducedSystem): boolean;
+  function isOpen(nodeGroup: ReducedNodeGroup): boolean;
 
-  function isOpen(entity: System | NodeGroup) {
+  function isOpen(entity: ReducedSystem | ReducedNodeGroup) {
     if (openEntitiesIds.size === 0) {
       return true;
     }
     
-    if (entity instanceof NodeGroup) {
-      return entity.get('nodes').length < 2 || openEntitiesIds.has(entity.get('id'));
+    if (isReducedNodeGroup(entity)) {
+      return entity.nodes.length < 2 || openEntitiesIds.has(entity.id);
     } else {
-      return openEntitiesIds.has(entity.get('id'));
+      return openEntitiesIds.has(entity.id);
     }
   }
 
-  function isVisible(application: Application): boolean;
-  function isVisible(node: Node): boolean;
-  function isVisible(nodeGroup: NodeGroup): boolean;
+  function isVisible(application: ReducedApplication): boolean;
+  function isVisible(node: ReducedNode): boolean;
+  function isVisible(nodeGroup: ReducedNodeGroup): boolean;
 
-  function isVisible(entity: Application | Node | NodeGroup) {
-    if (entity instanceof NodeGroup) {
-      let system = entity.belongsTo('parent').value() as System;
+  function isVisible(entity: ReducedApplication | ReducedNode | ReducedNodeGroup) {
+    if (isReducedNodeGroup(entity)) {
+      let system = entity.parent as ReducedSystem;
       return isOpen(system);
-    } else if (entity instanceof Node) {
-      let nodeGroup = entity.belongsTo('parent').value() as NodeGroup;
+    } else if (isReducedNode(entity)) {
+      let nodeGroup = entity.parent as ReducedNodeGroup;
       if (isOpen(nodeGroup)) {
         return isVisible(nodeGroup);
       } else {
-        let nodes = nodeGroup.hasMany('nodes').value() as DS.ManyArray<Node>;
-        return nodes.objectAt(0)?.get('id') === entity.get('id') && isVisible(nodeGroup);
+        let nodes = nodeGroup.nodes;
+        return nodes[0]?.id === entity.id && isVisible(nodeGroup);
       }
-    } else if (entity instanceof Application) {
-      let node = entity.belongsTo('parent').value() as Node;
+    } else if (isReducedApplication(entity)) {
+      let node = entity.parent as ReducedNode;
       return isVisible(node);
     } else {
       return false;
     }
+  }
+
+  function isReducedSystem(arg: any): arg is ReducedSystem {
+    return arg.nodeGroups !== undefined;
+  }
+
+  function isReducedNodeGroup(arg: any): arg is ReducedNodeGroup {
+    return arg.nodes !== undefined;
+  }
+
+  function isReducedNode(arg: any): arg is ReducedNode {
+    return arg.applications !== undefined;
+  }
+
+  function isReducedApplication(arg: any): arg is ReducedApplication {
+    return arg.type !== undefined && arg.type === 'application';
   }
 }
