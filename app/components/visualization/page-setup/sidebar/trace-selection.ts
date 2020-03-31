@@ -8,7 +8,6 @@ import Clazz from 'explorviz-frontend/models/clazz';
 import Trace from 'explorviz-frontend/models/trace';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import Highlighter from 'explorviz-frontend/services/visualization/application/highlighter';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
@@ -42,9 +41,6 @@ export default class TraceSelection extends Component<Args> {
   @service('store')
   store!: DS.Store;
 
-  @service('visualization/application/highlighter')
-  highlighter!: Highlighter;
-
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
 
@@ -52,12 +48,9 @@ export default class TraceSelection extends Component<Args> {
   renderingService!: RenderingService;
 
   // Compute current traces when highlighting changes
-  @computed('highlighter.highlightedEntity', 'landscapeRepo.latestApplication', 'sortBy', 'isSortedAsc', 'filterTerm')
+  @computed('landscapeRepo.latestApplication', 'sortBy', 'isSortedAsc', 'filterTerm')
   get traces() {
-    const { highlighter } = this;
-    if (highlighter.get('isTrace')) {
-      return [highlighter.get('highlightedEntity')];
-    }
+    // TODO: Return highlighted trace if it exists
 
     const { latestApplication } = this.landscapeRepo;
     if (latestApplication === null) {
@@ -113,10 +106,10 @@ export default class TraceSelection extends Component<Args> {
   @action
   clickedTrace(this: TraceSelection, trace: Trace) {
     if (trace.get('highlighted')) {
-      this.highlighter.unhighlightAll();
+      // TODO: Unhighlight trace
     } else {
-      this.highlighter.highlightTrace(trace);
-      this.moveCameraToTraceStep();
+      // TODO: Highlight trace
+      // this.moveCameraToTraceStep();
     }
 
     this.renderingService.redrawScene();
@@ -130,19 +123,19 @@ export default class TraceSelection extends Component<Args> {
 
   @action
   selectNextTraceStep(this: TraceSelection) {
-    this.highlighter.highlightNextTraceStep();
+    // TODO: Highlight next trace step
     this.renderingService.redrawScene();
     if (this.isReplayAnimated) {
-      this.moveCameraToTraceStep();
+      // this.moveCameraToTraceStep();
     }
   }
 
   @action
   selectPreviousTraceStep(this: TraceSelection) {
-    this.highlighter.highlightPreviousTraceStep();
+    // TODO: Highlight previous trace step
     this.renderingService.redrawScene();
     if (this.isReplayAnimated) {
-      this.moveCameraToTraceStep();
+      // this.moveCameraToTraceStep();
     }
   }
 
@@ -202,18 +195,5 @@ export default class TraceSelection extends Component<Args> {
   @action
   close(this: TraceSelection) {
     this.args.removeComponent('visualization/page-setup/sidebar/trace-selection');
-  }
-
-  moveCameraToTraceStep(this: TraceSelection) {
-    const currentTraceStep = this.highlighter.get('currentTraceStep');
-
-    if (currentTraceStep) {
-      const storeId = currentTraceStep.get('clazzCommunication').get('id');
-      // Avoid proxy object by requesting clazz from store
-      const clazzCommunication = this.store.peekRecord('clazzcommunication', storeId);
-      if (clazzCommunication !== null) {
-        this.renderingService.moveCameraTo(clazzCommunication);
-      }
-    }
   }
 }

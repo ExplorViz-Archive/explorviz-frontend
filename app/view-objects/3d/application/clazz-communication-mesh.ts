@@ -1,10 +1,10 @@
 import THREE from 'three';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
-import CommunicationLayout from '../layout-models/communication-layout';
-import CommunicationArrowMesh from './application/communication-arrow-mesh';
-import BaseMesh from './base-mesh';
+import CommunicationLayout from '../../layout-models/communication-layout';
+import BaseMesh from '../base-mesh';
+import CommunicationArrowMesh from './communication-arrow-mesh';
 
-export default class CommunicationMesh extends BaseMesh {
+export default class ClazzCommunicationMesh extends BaseMesh {
   dataModel: DrawableClazzCommunication;
 
   layout: CommunicationLayout;

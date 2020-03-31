@@ -19,7 +19,7 @@ import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import BoxMesh from 'explorviz-frontend/view-objects/3d/application/box-mesh';
-import CommunicationMesh from 'explorviz-frontend/view-objects/3d/communication-mesh';
+import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 import { tracked } from '@glimmer/tracking';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
@@ -84,7 +84,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   modelIdToMesh: Map<string, THREE.Mesh> = new Map();
 
-  commIdToMesh: Map<string, CommunicationMesh> = new Map();
+  commIdToMesh: Map<string, ClazzCommunicationMesh> = new Map();
 
   boxLayoutMap: Map<string, BoxLayout> = new Map();
 
@@ -202,7 +202,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   handleSingleClick(mesh: THREE.Mesh | undefined) {
     if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
-      || mesh instanceof CommunicationMesh) {
+      || mesh instanceof ClazzCommunicationMesh) {
       this.highlight(mesh);
     }
   }
@@ -250,7 +250,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (mesh === undefined) { return; }
 
     if (mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
-      || mesh instanceof CommunicationMesh) {
+      || mesh instanceof ClazzCommunicationMesh) {
       this.popupData = {
         mouseX: mouseOnCanvas.x,
         mouseY: mouseOnCanvas.y,
@@ -385,7 +385,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region COMPONENT AND CLAZZ HIGHLIGHTING
 
-  highlight(mesh: ComponentMesh | ClazzMesh | CommunicationMesh): void {
+  highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMesh): void {
     // Reset highlighting if highlighted mesh is clicked
     if (mesh.highlighted) {
       this.removeHighlighting();
@@ -660,7 +660,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       const viewCenterPoint = CalcCenterAndZoom(foundationData);
 
-      const pipe = new CommunicationMesh(commLayout, drawableClazzComm,
+      const pipe = new ClazzCommunicationMesh(commLayout, drawableClazzComm,
         new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor));
 
       pipe.render(viewCenterPoint, curveHeight);
@@ -823,7 +823,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   removeAllCommunication() {
-    this.commIdToMesh.forEach((mesh: CommunicationMesh) => {
+    this.commIdToMesh.forEach((mesh: ClazzCommunicationMesh) => {
       mesh.delete();
     });
     this.commIdToMesh.clear();
