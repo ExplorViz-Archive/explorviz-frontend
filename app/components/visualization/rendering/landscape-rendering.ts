@@ -31,6 +31,7 @@ import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import Node from 'explorviz-frontend/models/node';
+import { reduceLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
 
 
 interface Args {
@@ -314,7 +315,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     const openEntitiesIds = this.computeOpenEntities();
 
-    const layoutData = applyKlayLayout(emberLandscape, openEntitiesIds);
+    const layoutData = applyKlayLayout(reduceLandscape(emberLandscape), openEntitiesIds);
 
     const { modelIdToLayout, modelIdToPoints } = layoutData;
 
