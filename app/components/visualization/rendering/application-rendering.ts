@@ -18,7 +18,6 @@ import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/found
 import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
-import BoxMesh from 'explorviz-frontend/view-objects/3d/application/box-mesh';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 import { tracked } from '@glimmer/tracking';
@@ -224,11 +223,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
     if (mesh === undefined) {
-      this.hoverHandler.handleHoverEffect(mesh);
-    }
-
-    if (mesh instanceof BoxMesh) {
-      if (enableHoverEffects) { this.hoverHandler.handleHoverEffect(mesh); }
+      this.hoverHandler.resetHoverEffect();
+    } else if (mesh instanceof BaseMesh && enableHoverEffects) {
+      this.hoverHandler.applyHoverEffect(mesh);
     }
 
     this.popupData = null;

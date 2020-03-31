@@ -31,6 +31,7 @@ import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import Node from 'explorviz-frontend/models/node';
+import PlaneMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-mesh';
 import { reduceLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
 
 
@@ -543,11 +544,19 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
-  /* @action
-handleMouseMove(_mesh?: any) {
-// this.hoverHandler.handleHoverEffect(mesh);
-}
+  @action
+  handleMouseMove(mesh: THREE.Mesh | undefined) {
+    const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
+    if (mesh === undefined) {
+      this.hoverHandler.resetHoverEffect();
+    } else if (mesh instanceof PlaneMesh && enableHoverEffects) {
+      this.hoverHandler.applyHoverEffect(mesh);
+    }
+
+    // this.popupData = null;
+  }
+  /*
 @action
 handleMouseOut() {
 // this.popUpHandler.hideTooltip();
@@ -568,7 +577,7 @@ handleMouseStop(_mesh: THREE.Mesh|undefined, _mouseOnCanvas: Position2D) {
   initInteraction() {
     this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer, this.scene, {
       doubleClick: this.handleDoubleClick,
-      /* mouseMove: this.handleMouseMove, */
+      mouseMove: this.handleMouseMove,
       mouseWheel: this.handleMouseWheel,
       /* mouseOut: this.handleMouseOut, */
       /* mouseEnter: this.handleMouseEnter, */
