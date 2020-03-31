@@ -35,7 +35,6 @@ export default class AppCommunicationMesh extends BaseMesh {
     );
 
     const points = [firstVector, secondVector];
-
     const geometry = new MeshLine();
     geometry.setVertices(points, () => tile.lineThickness);
     this.geometry = geometry;
