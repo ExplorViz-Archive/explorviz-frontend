@@ -10,6 +10,9 @@ import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzc
  * @param store Used to access applications etc.
  */
 export function addDrawableCommunication(store: DS.Store) {
+  // Remove outdated communication from store
+  store.unloadAll('drawableclazzcommunication');
+
   let applications = store.peekAll('application');
 
   applications.forEach((application: Application) => {
