@@ -20,6 +20,24 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     });
   }
 
+  turnTransparent(opacity: number) {
+    super.turnTransparent(opacity);
+    this.children.forEach((childObject) => {
+      if (childObject instanceof CommunicationArrowMesh) {
+        childObject.turnTransparent(opacity);
+      }
+    });
+  }
+
+  turnOpaque() {
+    super.turnOpaque();
+    this.children.forEach((childObject) => {
+      if (childObject instanceof CommunicationArrowMesh) {
+        childObject.turnOpaque();
+      }
+    });
+  }
+
   renderAsLine(viewCenterPoint: THREE.Vector3) {
     const { layout } = this;
     const { startPoint } = layout;
