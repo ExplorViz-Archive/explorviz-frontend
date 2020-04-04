@@ -407,6 +407,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       model.getContainedClazzes(containedClazzes);
     } else if (model instanceof Clazz) {
       containedClazzes.add(model);
+    } else if (model instanceof DrawableClazzCommunication) {
+      const sourceClazz = model.belongsTo('sourceClazz').value() as Clazz;
+      const targetClazz = model.belongsTo('targetClazz').value() as Clazz;
+      containedClazzes.add(sourceClazz);
+      containedClazzes.add(targetClazz);
     } else {
       return;
     }
@@ -427,6 +432,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         allInvolvedClazzes.add(targetClazz);
       } else if (containedClazzes.has(targetClazz)) {
         allInvolvedClazzes.add(sourceClazz);
+      } else {
+        const commMesh = this.commIdToMesh.get(comm.get('id'));
+        if (commMesh) {
+          commMesh.turnTransparent(0.3);
+        }
       }
     });
 
