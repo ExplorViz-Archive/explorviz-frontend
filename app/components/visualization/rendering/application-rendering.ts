@@ -23,6 +23,8 @@ import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzc
 import { tracked } from '@glimmer/tracking';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import { reduceApplication } from 'explorviz-frontend/utils/application-rendering/model-reducer';
+import Trace from 'explorviz-frontend/models/trace';
+import TraceStep from 'explorviz-frontend/models/tracestep';
 
 interface Args {
   id: string,
@@ -81,7 +83,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   interaction!: Interaction;
 
-  modelIdToMesh: Map<string, THREE.Mesh> = new Map();
+  modelIdToMesh: Map<string, BaseMesh> = new Map();
 
   commIdToMesh: Map<string, ClazzCommunicationMesh> = new Map();
 
@@ -444,6 +446,67 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     const componentSet = new Set<Component>();
     allInvolvedClazzes.forEach((clazz) => {
+      this.getAllAncestorComponents(clazz.getParent(), componentSet);
+    });
+
+    nonInvolvedClazzes.forEach((clazz) => {
+      const clazzMesh = this.modelIdToMesh.get(clazz.get('id'));
+      const componentMesh = this.modelIdToMesh.get(clazz.getParent().get('id'));
+      if (clazzMesh instanceof ClazzMesh && componentMesh instanceof ComponentMesh
+        && componentMesh.opened) {
+        clazzMesh.turnTransparent(0.3);
+      }
+      this.turnComponentAndAncestorsTransparent(clazz.getParent(), componentSet);
+    });
+  }
+
+  @action
+  highlightTrace(trace: Trace, step = 1) {
+    this.removeHighlighting();
+    // TODO: Rather only open necessary components
+    this.openAllComponents();
+
+    const drawableComms = this.args.application.hasMany('drawableClazzCommunications').value() as DS.ManyArray<DrawableClazzCommunication>|null;
+
+    if (!drawableComms) {
+      return;
+    }
+
+    // All clazzes in application
+    const allClazzesAsArray = this.args.application.getAllClazzes();
+    const allClazzes = new Set<Clazz>(allClazzesAsArray);
+
+    const involvedClazzes = new Set<Clazz>();
+
+    let highlightedTraceStep: TraceStep;
+
+    trace.get('traceSteps').forEach((traceStep) => {
+      if (traceStep.tracePosition === step) {
+        highlightedTraceStep = traceStep;
+      }
+    });
+
+
+    drawableComms.forEach((comm) => {
+      const commMesh = this.commIdToMesh.get(comm.get('id'));
+
+      if (comm.containedTraces.has(trace)) {
+        const sourceClazz = comm.belongsTo('sourceClazz').value() as Clazz;
+        const targetClazz = comm.belongsTo('targetClazz').value() as Clazz;
+        involvedClazzes.add(sourceClazz);
+        involvedClazzes.add(targetClazz);
+        if (comm.containedTraceSteps.has(highlightedTraceStep)) {
+          commMesh?.highlight();
+        }
+      } else {
+        commMesh?.turnTransparent(0.3);
+      }
+    });
+
+    const nonInvolvedClazzes = new Set([...allClazzes].filter((x) => !involvedClazzes.has(x)));
+
+    const componentSet = new Set<Component>();
+    involvedClazzes.forEach((clazz) => {
       this.getAllAncestorComponents(clazz.getParent(), componentSet);
     });
 
