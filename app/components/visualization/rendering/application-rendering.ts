@@ -437,7 +437,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       } else {
         const commMesh = this.commIdToMesh.get(comm.get('id'));
         if (commMesh) {
-          commMesh.turnTransparent(0.3);
+          commMesh.turnTransparent();
         }
       }
     });
@@ -454,7 +454,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       const componentMesh = this.modelIdToMesh.get(clazz.getParent().get('id'));
       if (clazzMesh instanceof ClazzMesh && componentMesh instanceof ComponentMesh
         && componentMesh.opened) {
-        clazzMesh.turnTransparent(0.3);
+        clazzMesh.turnTransparent();
       }
       this.turnComponentAndAncestorsTransparent(clazz.getParent(), componentSet);
     });
@@ -499,7 +499,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
           commMesh?.highlight();
         }
       } else {
-        commMesh?.turnTransparent(0.3);
+        commMesh?.turnTransparent();
       }
     });
 
@@ -515,7 +515,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       const componentMesh = this.modelIdToMesh.get(clazz.getParent().get('id'));
       if (clazzMesh instanceof ClazzMesh && componentMesh instanceof ComponentMesh
         && componentMesh.opened) {
-        clazzMesh.turnTransparent(0.3);
+        clazzMesh.turnTransparent();
       }
       this.turnComponentAndAncestorsTransparent(clazz.getParent(), componentSet);
     });
@@ -545,7 +545,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     if (!parent) {
       if (componentMesh instanceof ComponentMesh) {
-        componentMesh.turnTransparent(0.3);
+        componentMesh.turnTransparent();
       }
       return;
     }
@@ -553,7 +553,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const parentMesh = this.modelIdToMesh.get(parent.get('id'));
     if (componentMesh instanceof ComponentMesh
       && parentMesh instanceof ComponentMesh && parentMesh.opened) {
-      componentMesh.turnTransparent(0.3);
+      componentMesh.turnTransparent();
     }
     this.turnComponentAndAncestorsTransparent(parent, ignorableComponents);
   }
