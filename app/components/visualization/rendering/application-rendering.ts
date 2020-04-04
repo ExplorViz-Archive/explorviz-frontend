@@ -395,12 +395,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.removeHighlighting();
     const model = mesh.dataModel;
 
+    // Highlight the entity itself
+    mesh.highlight();
+
     // All clazzes in application
     const allClazzesAsArray = this.args.application.getAllClazzes();
     const allClazzes = new Set<Clazz>(allClazzesAsArray);
-
-    // Highlight the entity itself
-    mesh.highlight();
 
     // Get all clazzes in current component
     const containedClazzes = new Set<Clazz>();
@@ -426,15 +426,21 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       return;
     }
 
+
     drawableComm.forEach((comm) => {
       const sourceClazz = comm.belongsTo('sourceClazz').value() as Clazz;
       const targetClazz = comm.belongsTo('targetClazz').value() as Clazz;
 
-      if (containedClazzes.has(sourceClazz)) {
+      // Add clazzes which communicate directly with highlighted entity
+      // For a highlighted communication all involved clazzes are already known
+      if (containedClazzes.has(sourceClazz)
+      && !(model instanceof DrawableClazzCommunication)) {
         allInvolvedClazzes.add(targetClazz);
-      } else if (containedClazzes.has(targetClazz)) {
+      } else if (containedClazzes.has(targetClazz)
+      && !(model instanceof DrawableClazzCommunication)) {
         allInvolvedClazzes.add(sourceClazz);
-      } else {
+      // Hide communication which is not directly connected to highlighted entity
+      } else if (!containedClazzes.has(sourceClazz) || !containedClazzes.has(targetClazz)) {
         const commMesh = this.commIdToMesh.get(comm.get('id'));
         if (commMesh) {
           commMesh.turnTransparent();
