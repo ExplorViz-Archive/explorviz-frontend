@@ -26,6 +26,7 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import { reduceApplication } from 'explorviz-frontend/utils/application-rendering/model-reducer';
 import Trace from 'explorviz-frontend/models/trace';
 import TraceStep from 'explorviz-frontend/models/tracestep';
+import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 
 interface Args {
   id: string,
@@ -852,6 +853,63 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   unhighlightAll() {
     this.removeHighlighting();
+  }
+
+  @action
+  moveCameraTo(emberModel: Clazz|ClazzCommunication) {
+    if (!emberModel) {
+      return;
+    }
+
+    // Calculate center point of application
+    const foundationData = this.boxLayoutMap.get(this.args.application.id);
+
+    if (foundationData === undefined) { return; }
+
+    const applicationCenter = CalcCenterAndZoom(foundationData);
+
+    if (emberModel instanceof ClazzCommunication) {
+      const sourceClazzMesh = this.modelIdToMesh.get(emberModel.sourceClazz.get('id'));
+      const targetClazzMesh = this.modelIdToMesh.get(emberModel.targetClazz.get('id'));
+
+      if (sourceClazzMesh instanceof ClazzMesh && targetClazzMesh instanceof ClazzMesh) {
+        const sourceLayoutPos = new THREE.Vector3().copy(sourceClazzMesh.layoutPos);
+        const targetLayoutPos = new THREE.Vector3().copy(targetClazzMesh.layoutPos);
+
+        const directionVector = targetLayoutPos.sub(sourceLayoutPos);
+
+        const middleLayoutPos = sourceLayoutPos.add(directionVector.divideScalar(2));
+        this.applyCameraPosition(applicationCenter, this.camera, middleLayoutPos);
+        // Apply zoom
+        this.camera.position.z += 50;
+      }
+    } else {
+      const clazzMesh = this.modelIdToMesh.get(emberModel.get('id'));
+      if (clazzMesh instanceof ClazzMesh) {
+        const layoutPos = new THREE.Vector3().copy(clazzMesh.layoutPos);
+        this.applyCameraPosition(applicationCenter, this.camera, layoutPos);
+        // Apply zoom
+        this.camera.position.z += 25;
+      }
+    }
+  }
+
+  applyCameraPosition(centerPoint: THREE.Vector3, camera: THREE.PerspectiveCamera,
+    layoutPos: THREE.Vector3) {
+    layoutPos.sub(centerPoint);
+    layoutPos.multiplyScalar(0.5);
+
+    const appQuaternion = new THREE.Quaternion();
+
+    this.applicationObject3D.getWorldQuaternion(appQuaternion);
+    layoutPos.applyQuaternion(appQuaternion);
+
+    const appPosition = new THREE.Vector3();
+    this.applicationObject3D.getWorldPosition(appPosition);
+    layoutPos.sub(appPosition);
+
+    // Move camera on to given position
+    camera.position.set(layoutPos.x, layoutPos.y, layoutPos.z);
   }
 
   @action

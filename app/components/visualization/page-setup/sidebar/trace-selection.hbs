@@ -126,7 +126,7 @@
             {{this.currentTraceStep.clazzCommunication.sourceClazz.name}}
             <BsButton
               @onClick={{fn
-                this.lookAtClazz
+                this.args.moveCameraTo
                 this.currentTraceStep.clazzCommunication.sourceClazz
               }}
               @type="button"
@@ -142,7 +142,7 @@
             {{this.currentTraceStep.clazzCommunication.targetClazz.name}}
             <BsButton
               @onClick={{fn
-                this.lookAtClazz
+                this.args.moveCameraTo
                 this.currentTraceStep.clazzCommunication.targetClazz
               }}
               @type="button"

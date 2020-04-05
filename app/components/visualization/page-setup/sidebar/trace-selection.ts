@@ -9,12 +9,14 @@ import Trace from 'explorviz-frontend/models/trace';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import TraceStep from 'explorviz-frontend/models/tracestep';
+import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
 interface Args {
   removeComponent(componentPath: string): void,
   highlightTrace(trace: Trace, traceStep: number): void,
+  moveCameraTo(emberModel: Clazz|ClazzCommunication): void,
 }
 
 export default class TraceSelection extends Component<Args> {
@@ -151,8 +153,10 @@ export default class TraceSelection extends Component<Args> {
 
     this.args.highlightTrace(this.trace, nextStepPosition);
 
-    if (this.isReplayAnimated) {
-      // this.moveCameraToTraceStep();
+    const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
+
+    if (this.isReplayAnimated && clazzCommunication) {
+      this.args.moveCameraTo(clazzCommunication);
     }
   }
 
@@ -175,8 +179,10 @@ export default class TraceSelection extends Component<Args> {
 
     this.args.highlightTrace(this.trace, previousStepPosition);
 
-    if (this.isReplayAnimated) {
-      // this.moveCameraToTraceStep();
+    const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
+
+    if (this.isReplayAnimated && clazzCommunication) {
+      this.args.moveCameraTo(clazzCommunication);
     }
   }
 
