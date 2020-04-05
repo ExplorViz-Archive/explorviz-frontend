@@ -12,7 +12,7 @@ export default class Raycaster extends THREE.Raycaster {
   raycasting(coords: {x: number, y: number}, camera: THREE.Camera, possibleObjects: THREE.Object3D[]): THREE.Intersection | null {
     this.setFromCamera(coords, camera);
 
-    // Calculate objects intersecting the picking ray (true => recursive)
+    // Calculate objects intersecting the picking ray
     const intersections = this.intersectObjects(possibleObjects);
 
     if (intersections.length > 0) {

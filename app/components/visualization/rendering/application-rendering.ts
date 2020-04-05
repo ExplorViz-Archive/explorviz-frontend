@@ -4,6 +4,7 @@ import { action } from '@ember/object';
 import debugLogger from 'ember-debug-logger';
 import THREE from 'three';
 import { inject as service } from '@ember/service';
+import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import { applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
@@ -209,6 +210,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   handleDoubleClick(mesh: THREE.Mesh | undefined) {
+    // Toggle open state of component
     if (mesh instanceof ComponentMesh) {
       if (mesh.opened) {
         this.closeComponentMesh(mesh);
@@ -216,6 +218,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.openComponentMesh(mesh);
       }
       this.addCommunication(this.args.application);
+    // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
       this.closeAllComponents();
     }
@@ -260,11 +263,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     if (button === 3) {
-      // rotate object
+      // Rotate object
       this.applicationObject3D.rotation.x += delta.y / 100;
       this.applicationObject3D.rotation.y += delta.x / 100;
     } else if (button === 1) {
-      // translate camera
+      // Translate camera
       const distanceXInPercent = (delta.x / this.canvas.clientWidth) * 100.0;
 
       const distanceYInPercent = (delta.y / this.canvas.clientHeight) * 100.0;
@@ -318,7 +321,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     mesh.opened = true;
     mesh.visible = true;
-    mesh.positionLabel();
+    Labeler.positionBoxLabel(mesh);
 
     const childComponents = mesh.dataModel.get('children');
     childComponents.forEach((childComponent) => {
@@ -349,7 +352,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     mesh.position.y += mesh.layoutHeight / 2;
 
     mesh.opened = false;
-    mesh.positionLabel();
+    Labeler.positionBoxLabel(mesh);
 
     const childComponents = mesh.dataModel.get('children');
     childComponents.forEach((childComponent) => {
@@ -753,6 +756,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
+  /**
+   * Iterates over all box meshes and calls respective functions to label them
+   */
   addLabels() {
     if (!this.font) { return; }
 
@@ -760,13 +766,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const componentTextColor = this.configuration.applicationColors.componentText;
     const foundationTextColor = this.configuration.applicationColors.foundationText;
 
+    // Label all entities (excluding communication)
     this.modelIdToMesh.forEach((mesh) => {
       if (mesh instanceof ClazzMesh) {
-        mesh.createLabel(this.font, new THREE.Color(clazzTextColor));
+        Labeler.addClazzTextLabel(mesh, this.font, new THREE.Color(clazzTextColor));
       } else if (mesh instanceof ComponentMesh) {
-        mesh.createLabel(this.font, new THREE.Color(componentTextColor));
+        Labeler.addBoxTextLabel(mesh, this.font, new THREE.Color(componentTextColor));
       } else if (mesh instanceof FoundationMesh) {
-        mesh.createLabel(this.font, new THREE.Color(foundationTextColor));
+        Labeler.addBoxTextLabel(mesh, this.font, new THREE.Color(foundationTextColor));
       }
     });
   }
