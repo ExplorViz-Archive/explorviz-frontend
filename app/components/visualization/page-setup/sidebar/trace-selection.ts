@@ -8,11 +8,15 @@ import Clazz from 'explorviz-frontend/models/clazz';
 import Trace from 'explorviz-frontend/models/trace';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
+import TraceStep from 'explorviz-frontend/models/tracestep';
+import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
 interface Args {
-  removeComponent(componentPath: string): void
+  removeComponent(componentPath: string): void,
+  highlightTrace(trace: Trace, traceStep: number): void,
+  moveCameraTo(emberModel: Clazz|ClazzCommunication): void,
 }
 
 export default class TraceSelection extends Component<Args> {
@@ -37,6 +41,15 @@ export default class TraceSelection extends Component<Args> {
 
   @tracked
   isReplayAnimated: boolean = true;
+
+  @tracked
+  isHighlighted = false;
+
+  @tracked
+  trace: Trace|null = null;
+
+  @tracked
+  currentTraceStep: TraceStep|null = null;
 
   @service('store')
   store!: DS.Store;
@@ -105,14 +118,14 @@ export default class TraceSelection extends Component<Args> {
 
   @action
   clickedTrace(this: TraceSelection, trace: Trace) {
-    if (trace.get('highlighted')) {
-      // TODO: Unhighlight trace
-    } else {
-      // TODO: Highlight trace
-      // this.moveCameraToTraceStep();
-    }
+    this.isHighlighted = true;
+    this.trace = trace;
 
-    this.renderingService.redrawScene();
+
+    const traceSteps = trace.hasMany('traceSteps').value();
+    this.currentTraceStep = traceSteps?.objectAt(0);
+
+    this.args.highlightTrace(trace, 1);
   }
 
   @action
@@ -123,19 +136,53 @@ export default class TraceSelection extends Component<Args> {
 
   @action
   selectNextTraceStep(this: TraceSelection) {
-    // TODO: Highlight next trace step
-    this.renderingService.redrawScene();
-    if (this.isReplayAnimated) {
-      // this.moveCameraToTraceStep();
+    // Can only select next step if a trace is selected
+    if (!this.isHighlighted || !this.currentTraceStep || !this.trace) {
+      return;
+    }
+
+    const nextStepPosition = this.currentTraceStep.tracePosition + 1;
+
+    if (nextStepPosition > this.trace.length) {
+      return;
+    }
+
+
+    const traceSteps = this.trace.hasMany('traceSteps').value();
+    this.currentTraceStep = traceSteps?.objectAt(nextStepPosition - 1);
+
+    this.args.highlightTrace(this.trace, nextStepPosition);
+
+    const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
+
+    if (this.isReplayAnimated && clazzCommunication) {
+      this.args.moveCameraTo(clazzCommunication);
     }
   }
 
   @action
   selectPreviousTraceStep(this: TraceSelection) {
-    // TODO: Highlight previous trace step
-    this.renderingService.redrawScene();
-    if (this.isReplayAnimated) {
-      // this.moveCameraToTraceStep();
+    // Can only select next step if a trace is selected
+    if (!this.isHighlighted || !this.currentTraceStep || !this.trace) {
+      return;
+    }
+
+    const previousStepPosition = this.currentTraceStep.tracePosition - 1;
+
+    if (previousStepPosition < 1) {
+      return;
+    }
+
+
+    const traceSteps = this.trace.hasMany('traceSteps').value();
+    this.currentTraceStep = traceSteps?.objectAt(previousStepPosition - 1);
+
+    this.args.highlightTrace(this.trace, previousStepPosition);
+
+    const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
+
+    if (this.isReplayAnimated && clazzCommunication) {
+      this.args.moveCameraTo(clazzCommunication);
     }
   }
 

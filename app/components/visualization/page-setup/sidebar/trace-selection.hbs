@@ -72,7 +72,7 @@
   </table>
 </div>
 
-{{#if this.highlighter.isTrace}}
+{{#if this.isHighlighted}}
   <hr>
 
   <h5 align="center">
@@ -93,12 +93,12 @@
       @type="secondary"
       @outline={{true}}
       @title="One step back"
-      @disabled={{lte this.highlighter.currentTracePosition 1}}
+      @disabled={{lte this.currentTraceStep.tracePosition 1}}
     >
       {{svg-jar "chevron-left" class="octicon align-middle"}}
     </BsButton>
     <div>
-      Step <strong>{{this.highlighter.currentTracePosition}}</strong> of {{this.highlighter.highlightedEntity.length}}
+      Step <strong>{{this.currentTraceStep.tracePosition}}</strong> of {{this.trace.length}}
     </div>
     <BsButton
       @onClick={{this.selectNextTraceStep}}
@@ -106,8 +106,8 @@
       @outline={{true}}
       @title="One step forth"
       @disabled={{gte
-        this.highlighter.currentTracePosition
-        this.highlighter.highlightedEntity.length
+        this.currentTraceStep.tracePosition
+        this.trace.length
       }}
     >
       {{svg-jar "chevron-right" class="octicon align-middle"}}
@@ -123,11 +123,11 @@
         <tr class="d-flex">
           <th class="col-3">Soure Clazz</th>
           <td class="col-9 container-word-wrap">
-            {{this.highlighter.currentTraceStep.clazzCommunication.sourceClazz.name}}
+            {{this.currentTraceStep.clazzCommunication.sourceClazz.name}}
             <BsButton
               @onClick={{fn
-                this.lookAtClazz
-                this.highlighter.currentTraceStep.clazzCommunication.sourceClazz
+                this.args.moveCameraTo
+                this.currentTraceStep.clazzCommunication.sourceClazz
               }}
               @type="button"
               class="th-btn"
@@ -139,11 +139,11 @@
         <tr class="d-flex">
           <th class="col-3">Target Clazz</th>
           <td class="col-9 container-word-wrap">
-            {{this.highlighter.currentTraceStep.clazzCommunication.targetClazz.name}}
+            {{this.currentTraceStep.clazzCommunication.targetClazz.name}}
             <BsButton
               @onClick={{fn
-                this.lookAtClazz
-                this.highlighter.currentTraceStep.clazzCommunication.targetClazz
+                this.args.moveCameraTo
+                this.currentTraceStep.clazzCommunication.targetClazz
               }}
               @type="button"
               class="th-btn"
@@ -154,11 +154,11 @@
         </tr>
         <tr class="d-flex">
           <th class="col-3">Operation Name</th>
-          <td class="col-9 container-word-wrap">{{this.highlighter.currentTraceStep.clazzCommunication.operationName}}</td>
+          <td class="col-9 container-word-wrap">{{this.currentTraceStep.clazzCommunication.operationName}}</td>
         </tr>
         <tr class="d-flex">
           <th class="col-3">Requests</th>
-          <td class="col-9 container-word-wrap">{{this.highlighter.currentTraceStep.requests}}</td>
+          <td class="col-9 container-word-wrap">{{this.currentTraceStep.requests}}</td>
         </tr>
         <tr class="d-flex">
           <th class="col-3" title="Average Response Time">
@@ -173,7 +173,7 @@
           </th>
           <td class="col-9 container-word-wrap">
             {{format-number
-              this.highlighter.currentTraceStep.averageResponseTime
+              this.currentTraceStep.averageResponseTime
               this.traceStepTimeUnit
             }}
           </td>

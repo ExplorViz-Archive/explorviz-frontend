@@ -6,6 +6,7 @@ import ClazzCommunication from './clazzcommunication';
 import Component from './component';
 import TraceStep from './tracestep';
 import BaseEntitity from './baseentity';
+import Trace from './trace';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -37,13 +38,13 @@ export default class DrawableClazzCommunication extends BaseEntitity {
 
   @computed('aggregatedClazzCommunications')
   get containedTraces() {
-    const traces = new Set();
+    const traces: Set<Trace> = new Set();
 
     // Find all belonging traces
     this.get('aggregatedClazzCommunications').forEach((aggClazzComm: AggregatedClazzCommunication) => {
       aggClazzComm.get('clazzCommunications').forEach((clazzComm: ClazzCommunication) => {
         clazzComm.get('traceSteps').forEach((traceStep: TraceStep) => {
-          const containedTrace = traceStep.belongsTo('parentTrace').value();
+          const containedTrace = traceStep.belongsTo('parentTrace').value() as Trace;
           if (containedTrace) {
             traces.add(containedTrace);
           }
@@ -52,6 +53,22 @@ export default class DrawableClazzCommunication extends BaseEntitity {
     });
 
     return traces;
+  }
+
+  @computed('aggregatedClazzCommunications')
+  get containedTraceSteps() {
+    const traceSteps: Set<TraceStep> = new Set();
+
+    // Find all belonging traceSteps
+    this.get('aggregatedClazzCommunications').forEach((aggClazzComm: AggregatedClazzCommunication) => {
+      aggClazzComm.get('clazzCommunications').forEach((clazzComm: ClazzCommunication) => {
+        clazzComm.get('traceSteps').forEach((traceStep: TraceStep) => {
+          traceSteps.add(traceStep);
+        });
+      });
+    });
+
+    return traceSteps;
   }
 
   // most inner component which common to both source and target clazz of communication

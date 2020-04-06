@@ -21,31 +21,4 @@ export default class FoundationMesh extends BoxMesh {
     this.material = material;
     this.dataModel = foundation;
   }
-
-  createLabel(font: THREE.Font, color: THREE.Color) {
-    const label = new ComponentLabelMesh(this, font, color);
-    this.labelMesh = label;
-
-    this.positionLabel();
-    this.add(label);
-  }
-
-  positionLabel() {
-    const label = this.labelMesh;
-    if (!label) { return; }
-
-    label.geometry.center();
-
-    // Set y-position just above the box of the parent mesh
-    label.position.y = this.geometry.parameters.height / 2 + 0.01;
-
-    // Align text with component parent
-    label.rotation.x = -(Math.PI / 2);
-    label.rotation.z = -(Math.PI / 2);
-
-    const OFFSET_BOTTOM = 1.5;
-
-    // Position Label just above the bottom edge
-    label.position.x = -this.geometry.parameters.width / 2 + OFFSET_BOTTOM / this.scale.x;
-  }
 }
