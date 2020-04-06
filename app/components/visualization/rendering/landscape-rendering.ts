@@ -12,7 +12,6 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 
-import applyKlayLayout from 'explorviz-frontend/utils/landscape-rendering/klay-layouter';
 import Interaction from 'explorviz-frontend/utils/interaction';
 import * as Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as CalcCenterAndZoom from
@@ -36,9 +35,22 @@ import { reduceLandscape } from 'explorviz-frontend/utils/landscape-rendering/mo
 
 
 interface Args {
-  id: string,
-  landscape: Landscape,
-  font: THREE.Font
+  id: string;
+  landscape: Landscape;
+  font: THREE.Font;
+}
+
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface SimplePlaneLayout {
+  height: number;
+  width: number;
+  positionX: number;
+  positionY: number;
+  opened: boolean;
 }
 
 /**
@@ -65,6 +77,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @service('current-user')
   currentUser!: CurrentUser;
+
+  @service()
+  worker!: any;
 
   scene!: THREE.Scene;
 
@@ -94,6 +109,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
   /*   popUpHandler: PopupHandler = new PopupHandler(); */
+
+  asd = 0;
 
   get font() {
     return this.args.font;
@@ -305,7 +322,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  *
  * @method populateScene
  */
-  populateScene() {
+  async populateScene() {
     this.debug('populate landscape-rendering');
 
     const emberLandscape = this.args.landscape;
@@ -314,62 +331,92 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       return;
     }
 
+    const reducedLandscape = reduceLandscape(emberLandscape);
+
     const openEntitiesIds = this.computeOpenEntities();
 
-    const layoutData = applyKlayLayout(reduceLandscape(emberLandscape), openEntitiesIds);
+    try {
+      // Reset mesh related data structures
+      this.modelIdToMesh.clear();
+      this.systemMeshes.clear();
+      this.nodeGroupMeshes.clear();
 
-    const { modelIdToLayout, modelIdToPoints } = layoutData;
+      const {
+        graph,
+        modelIdToPoints,
+      }: any = await this.worker.postMessage('layout1', { reducedLandscape, openEntitiesIds });
 
-    // Reset mesh related data structures
-    this.modelIdToMesh.clear();
-    this.systemMeshes.clear();
-    this.nodeGroupMeshes.clear();
+      const newGraph: any = await this.worker.postMessage('klay', { graph });
 
-    const centerPoint = CalcCenterAndZoom
-      .getCenterAndZoom(emberLandscape, modelIdToLayout, this.camera, this.webglrenderer);
+      const layoutedLandscape: any = await this.worker.postMessage('layout3', {
+        graph: newGraph,
+        modelIdToPoints,
+        reducedLandscape,
+        openEntitiesIds,
+      });
 
-    const { systems } = emberLandscape;
+      const { modelIdToLayout, modelIdToPoints: modelIdToPointsComplete } = layoutedLandscape;
 
-    // Render systems, nodegroups, nodes & applications
-    if (systems) {
-      // Draw boxes for systems
-      systems.forEach((system) => {
-        this.renderSystem(system, modelIdToLayout.get(system.get('id')), centerPoint);
+      const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
 
-        const nodeGroups = system.nodegroups;
+      modelIdToLayout.forEach((simplePlaneLayout: SimplePlaneLayout, modelId: string) => {
+        const planeLayoutObject = new PlaneLayout();
+        planeLayoutObject.height = simplePlaneLayout.height;
+        planeLayoutObject.width = simplePlaneLayout.width;
+        planeLayoutObject.positionX = simplePlaneLayout.positionX;
+        planeLayoutObject.positionY = simplePlaneLayout.positionY;
+        planeLayoutObject.opened = simplePlaneLayout.opened;
+        modelIdToPlaneLayout.set(modelId, planeLayoutObject);
+      });
 
-        // Draw boxes for nodegroups
-        nodeGroups.forEach((nodeGroup: NodeGroup) => {
-          this.renderNodeGroup(nodeGroup, modelIdToLayout.get(nodeGroup.get('id')), centerPoint);
-          const nodes = nodeGroup.get('nodes');
+      const centerPoint = CalcCenterAndZoom
+        .getCenterAndZoom(emberLandscape, modelIdToPlaneLayout, this.camera, this.webglrenderer);
 
-          // Draw boxes for nodes
-          nodes.forEach((node) => {
-            this.renderNode(node, modelIdToLayout.get(node.get('id')), centerPoint);
+      const { systems } = emberLandscape;
 
-            const applications = node.get('applications');
+      // Render systems, nodegroups, nodes & applications
+      if (systems) {
+        // Draw boxes for systems
+        systems.forEach((system) => {
+          this.renderSystem(system, modelIdToPlaneLayout.get(system.get('id')), centerPoint);
 
-            // Draw boxes for applications
-            applications.forEach((application) => {
-              this.renderApplication(application, modelIdToLayout.get(application.get('id')), centerPoint);
+          const nodeGroups = system.nodegroups;
+
+          // Draw boxes for nodegroups
+          nodeGroups.forEach((nodeGroup: NodeGroup) => {
+            this.renderNodeGroup(nodeGroup, modelIdToPlaneLayout.get(nodeGroup.get('id')), centerPoint);
+            const nodes = nodeGroup.get('nodes');
+
+            // Draw boxes for nodes
+            nodes.forEach((node) => {
+              this.renderNode(node, modelIdToPlaneLayout.get(node.get('id')), centerPoint);
+
+              const applications = node.get('applications');
+
+              // Draw boxes for applications
+              applications.forEach((application) => {
+                this.renderApplication(application, modelIdToPlaneLayout.get(application.get('id')), centerPoint);
+              });
             });
           });
         });
-      });
+      }
+
+      // Render application communication
+      const appCommunications = emberLandscape.get('totalApplicationCommunications');
+
+      if (appCommunications) {
+        const color = this.configuration.landscapeColors.communication;
+        const tiles = CommunicationRendering.computeCommunicationTiles(appCommunications,
+          modelIdToPointsComplete, color);
+
+        CommunicationRendering.addCommunicationLineDrawing(tiles, this.scene, centerPoint);
+      }
+
+      this.debug('Landscape loaded');
+    } catch (e) {
+      console.log(e);
     }
-
-    // Render application communication
-    const appCommunications = emberLandscape.get('totalApplicationCommunications');
-
-    if (appCommunications) {
-      const color = this.configuration.landscapeColors.communication;
-      const tiles = CommunicationRendering.computeCommunicationTiles(appCommunications,
-        modelIdToPoints, color);
-
-      CommunicationRendering.addCommunicationLineDrawing(tiles, this.scene, centerPoint);
-    }
-
-    this.debug('Landscape loaded');
   }
 
   computeOpenEntities() {
