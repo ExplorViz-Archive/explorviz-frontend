@@ -3,7 +3,6 @@ import GlimmerComponent from '@glimmer/component';
 import { action } from '@ember/object';
 import debugLogger from 'ember-debug-logger';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
-import $ from 'jquery';
 import THREE from 'three';
 import Landscape from 'explorviz-frontend/models/landscape';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
@@ -84,6 +83,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   scene!: THREE.Scene;
 
+  landscapeObject3D = new THREE.Object3D();
+
   webglrenderer!: THREE.WebGLRenderer;
 
   camera!: THREE.PerspectiveCamera;
@@ -94,13 +95,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   animationFrameId = 0;
 
-  initDone: Boolean;
+  initDone: boolean;
 
-  threePerformance!: any;
+  threePerformance: THREEPerformance = new THREEPerformance();
 
   interaction!: Interaction;
 
-  imageLoader!: any;
+  imageLoader: ImageLoader = new ImageLoader();
 
   modelIdToMesh: Map<string, THREE.Mesh> = new Map();
 
@@ -111,8 +112,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
   /*   popUpHandler: PopupHandler = new PopupHandler(); */
 
-  asd = 0;
-
   get font() {
     return this.args.font;
   }
@@ -121,6 +120,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     super(owner, args);
     this.initDone = false;
     this.debug('Constructor called');
+
+    this.render = this.render.bind(this);
   }
 
 
@@ -128,10 +129,16 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   outerDivInserted(outerDiv: HTMLElement) {
     this.debug('Outer Div inserted');
 
-    this.initRendering();
-    this.resize(outerDiv);
-  }
+    this.initThreeJs();
+    this.initInteraction();
+    this.render();
 
+    this.resize(outerDiv);
+
+    this.initDone = true;
+
+    this.populateScene.perform();
+  }
 
   @action
   canvasInserted(canvas: HTMLCanvasElement) {
@@ -144,6 +151,47 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     };
   }
 
+  initThreeJs() {
+    this.initScene();
+    this.initCamera();
+    this.initRenderer();
+    this.initLights();
+  }
+
+  initScene() {
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(this.configuration.landscapeColors.background);
+
+    this.scene.add(this.landscapeObject3D);
+
+    this.debug('Scene created');
+  }
+
+  initCamera() {
+    const { width, height } = this.canvas;
+    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    this.camera.position.set(0, 0, 0);
+    this.debug('Camera added');
+  }
+
+  initRenderer() {
+    const { width, height } = this.canvas;
+    this.webglrenderer = new THREE.WebGLRenderer({
+      antialias: true,
+      canvas: this.canvas,
+    });
+    this.webglrenderer.setPixelRatio(window.devicePixelRatio);
+    this.webglrenderer.setSize(width, height);
+    this.debug('Renderer set up');
+  }
+
+  initLights() {
+    const dirLight = new THREE.DirectionalLight();
+    dirLight.position.set(30, 10, 20);
+    this.scene.add(dirLight);
+    this.debug('Lights added');
+  }
+
   @action
   resize(outerDiv: HTMLElement) {
     const width = Number(outerDiv.clientWidth);
@@ -152,6 +200,19 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
   }
+
+
+  // #region RENDERING LOOP
+  render() {
+    if (this.isDestroyed) { return; }
+
+    const animationId = requestAnimationFrame(this.render);
+    this.animationFrameId = animationId;
+
+    this.webglrenderer.render(this.scene, this.camera);
+  }
+
+  // #endregion RENDERING LOOP
 
 
   // @Override
@@ -182,82 +243,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.imageLoader.logos = {};
 
     this.interaction.removeHandlers();
-  }
-
-
-  /**
- * This function is called once on the didRender event. Inherit this function
- * to call other important function, e.g. "initInteraction" as shown in
- * {{#crossLink "Landscape-Rendering/initInteraction:method"}}{{/crossLink}}.
- *
- * @method initRenderings
- */
-  initRendering() {
-    const self = this;
-
-    // Get size if outer ember div
-    const height = $('#rendering').innerHeight();
-    const width = $('#rendering').innerWidth();
-
-    if (!height || !width) {
-      return;
-    }
-
-    this.scene = new THREE.Scene();
-    const backgroundColor = this.configuration.landscapeColors.background;
-    this.scene.background = new THREE.Color(backgroundColor);
-
-    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-
-    this.webglrenderer = new THREE.WebGLRenderer({
-      antialias: true,
-      canvas: this.canvas,
-    });
-
-    this.webglrenderer.setPixelRatio(window.devicePixelRatio);
-    this.webglrenderer.setSize(width, height);
-
-    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'showFpsCounter');
-
-    if (showFpsCounter) {
-      this.threePerformance = new THREEPerformance();
-    }
-
-    this.debug('init landscape-rendering');
-
-    this.imageLoader = new ImageLoader();
-
-    this.initInteraction();
-
-    const dirLight = new THREE.DirectionalLight();
-    dirLight.position.set(30, 10, 20);
-    this.scene.add(dirLight);
-
-    // Rendering loop //
-    function render() {
-      if (self.isDestroyed) {
-        return;
-      }
-
-      const animationId = requestAnimationFrame(render);
-      self.animationFrameId = animationId;
-
-      if (showFpsCounter) {
-        self.threePerformance.threexStats.update(self.webglrenderer);
-        self.threePerformance.stats.begin();
-      }
-
-      self.webglrenderer.render(self.scene, self.camera);
-
-      if (showFpsCounter) {
-        self.threePerformance.stats.end();
-      }
-    }
-
-    render();
-
-    this.initDone = true;
-    this.populateScene.perform();
   }
 
   /**
@@ -293,9 +278,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       }
     }
 
-    const { scene } = this;
+    const { landscapeObject3D } = this;
 
-    removeAllChildren(scene);
+    removeAllChildren(landscapeObject3D);
     this.populateScene.perform();
 
     this.debug('clean and populate landscape-rendering');
@@ -413,7 +398,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         const tiles = CommunicationRendering.computeCommunicationTiles(appCommunications,
           modelIdToPointsComplete, color);
 
-        CommunicationRendering.addCommunicationLineDrawing(tiles, this.scene, centerPoint);
+        CommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
+          centerPoint);
       }
 
       this.debug('Landscape loaded');
@@ -457,7 +443,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     Labeler.addCollapseSymbol(systemMesh, this.font, labelColor);
 
     // Add to scene
-    this.scene.add(systemMesh);
+    this.landscapeObject3D.add(systemMesh);
     this.systemMeshes.add(systemMesh);
     this.modelIdToMesh.set(system.get('id'), systemMesh);
   }
@@ -476,7 +462,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     Labeler.addCollapseSymbol(nodeGroupMesh, this.font, labelColor);
 
     // Add to scene
-    this.scene.add(nodeGroupMesh);
+    this.landscapeObject3D.add(nodeGroupMesh);
     this.nodeGroupMeshes.add(nodeGroupMesh);
     this.modelIdToMesh.set(nodeGroup.get('id'), nodeGroupMesh);
   }
@@ -497,7 +483,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     Labeler.addNodeTextLabel(nodeMesh, labelText, this.font, labelColor);
 
     // Add to scene
-    this.scene.add(nodeMesh);
+    this.landscapeObject3D.add(nodeMesh);
     this.modelIdToMesh.set(node.get('id'), nodeMesh);
   }
 
@@ -516,7 +502,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     Labeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
-    this.scene.add(applicationMesh);
+    this.landscapeObject3D.add(applicationMesh);
     this.modelIdToMesh.set(application.get('id'), applicationMesh);
   }
 
@@ -526,7 +512,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.landscapeRepo.set('replayApplication', emberModel);
   }
 
-  @action
   handleDoubleClick(mesh?: THREE.Mesh) {
     // Handle application
     if (mesh instanceof ApplicationMesh) {
@@ -565,7 +550,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
-  @action
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     if (button === 1) {
       const distanceXInPercent = (delta.x / this.canvas.clientWidth) * 100.0;
@@ -580,7 +564,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
-  @action
   handleMouseWheel(delta: number) {
     // Hide (old) tooltip
     /*     this.popUpHandler.hideTooltip(); */
@@ -594,7 +577,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
-  @action
   handleMouseMove(mesh: THREE.Mesh | undefined) {
     const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
@@ -625,7 +607,16 @@ handleMouseStop(_mesh: THREE.Mesh|undefined, _mouseOnCanvas: Position2D) {
 } */
 
   initInteraction() {
-    this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer, this.scene, {
+    // this.handleSingleClick = this.handleSingleClick.bind(this);
+    this.handleDoubleClick = this.handleDoubleClick.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.handleMouseWheel = this.handleMouseWheel.bind(this);
+    // this.handleMouseOut = this.handleMouseOut.bind(this);
+    // this.handleMouseEnter = this.handleMouseEnter.bind(this);
+    // this.handleMouseStop = this.handleMouseStop.bind(this);
+    this.handlePanning = this.handlePanning.bind(this);
+
+    this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer, this.landscapeObject3D, {
       doubleClick: this.handleDoubleClick,
       mouseMove: this.handleMouseMove,
       mouseWheel: this.handleMouseWheel,
