@@ -32,6 +32,7 @@ import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-lay
 import Node from 'explorviz-frontend/models/node';
 import PlaneMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-mesh';
 import { reduceLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
+import { task } from 'ember-concurrency-decorators';
 
 
 interface Args {
@@ -256,7 +257,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     render();
 
     this.initDone = true;
-    this.populateScene();
+    this.populateScene.perform();
   }
 
   /**
@@ -295,7 +296,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     const { scene } = this;
 
     removeAllChildren(scene);
-    this.populateScene();
+    this.populateScene.perform();
 
     this.debug('clean and populate landscape-rendering');
   }
@@ -322,7 +323,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  *
  * @method populateScene
  */
-  async populateScene() {
+  @task({ enqueue: true })
+  // eslint-disable-next-line
+  populateScene = task(function* (this: LandscapeRendering) {
     this.debug('populate landscape-rendering');
 
     const emberLandscape = this.args.landscape;
@@ -344,11 +347,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       const {
         graph,
         modelIdToPoints,
-      }: any = await this.worker.postMessage('layout1', { reducedLandscape, openEntitiesIds });
+      }: any = yield this.worker.postMessage('layout1', { reducedLandscape, openEntitiesIds });
 
-      const newGraph: any = await this.worker.postMessage('klay', { graph });
+      const newGraph: any = yield this.worker.postMessage('klay', { graph });
 
-      const layoutedLandscape: any = await this.worker.postMessage('layout3', {
+      const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
         reducedLandscape,
@@ -417,7 +420,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     } catch (e) {
       console.log(e);
     }
-  }
+  });
 
   computeOpenEntities() {
     const openEntitiesIds: Set<string> = new Set();
