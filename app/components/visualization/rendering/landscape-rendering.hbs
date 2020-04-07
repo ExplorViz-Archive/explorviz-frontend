@@ -3,6 +3,19 @@
 
 {{add-listener this.landscapeRepo "updated" this.onUpdated}}
 
+<Visualization::PageSetup::VisualizationNavbar>
+  <Visualization::PageSetup::Navbar::ResetVisualization
+    @resetView={{this.onReSetupScene}}
+  />
+  <Visualization::PageSetup::Navbar::PauseReload />
+  <Visualization::PageSetup::Navbar::EventOpener
+    @addComponent={{@addComponent}}
+  />
+  <Visualization::PageSetup::Navbar::LandscapeDownloader
+    @landscape={{@landscape}}
+  />
+</Visualization::PageSetup::VisualizationNavbar>
+
 <div
   id="rendering"
   {{did-insert this.outerDivInserted}}
