@@ -7,12 +7,12 @@ declare const THREEx: any;
 /**
 * TODO
 *
-* @class ThreejsPerformance
+* @class THREEPerformance
 *
 * @module explorviz
 * @submodule visualization.rendering
 */
-export default class ThreejsPerformance {
+export default class THREEPerformance {
 
   stats:any = new Stats();
   threexStats:any = new THREEx.RendererStats();

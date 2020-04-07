@@ -97,7 +97,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   initDone: boolean;
 
-  threePerformance: THREEPerformance = new THREEPerformance();
+  threePerformance: THREEPerformance|undefined;
 
   interaction!: Interaction;
 
@@ -156,6 +156,12 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.initCamera();
     this.initRenderer();
     this.initLights();
+
+    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'showFpsCounter');
+
+    if (showFpsCounter) {
+      this.threePerformance = new THREEPerformance();
+    }
   }
 
   initScene() {
@@ -209,7 +215,16 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     const animationId = requestAnimationFrame(this.render);
     this.animationFrameId = animationId;
 
+    if (this.threePerformance) {
+      this.threePerformance.threexStats.update(this.webglrenderer);
+      this.threePerformance.stats.begin();
+    }
+
     this.webglrenderer.render(this.scene, this.camera);
+
+    if (this.threePerformance) {
+      this.threePerformance.stats.end();
+    }
   }
 
   // #endregion RENDERING LOOP
