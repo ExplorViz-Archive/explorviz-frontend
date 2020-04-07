@@ -27,6 +27,7 @@ import { reduceApplication } from 'explorviz-frontend/utils/application-renderin
 import Trace from 'explorviz-frontend/models/trace';
 import TraceStep from 'explorviz-frontend/models/tracestep';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
+import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 
 interface Args {
   id: string,
@@ -78,6 +79,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   camera!: THREE.PerspectiveCamera;
 
   renderer!: THREE.WebGLRenderer;
+
+  threePerformance: THREEPerformance|undefined;
 
   applicationObject3D = new THREE.Object3D();
 
@@ -138,6 +141,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.initCamera();
     this.initRenderer();
     this.initLights();
+
+    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'showFpsCounter');
+
+    if (showFpsCounter) {
+      this.threePerformance = new THREEPerformance();
+    }
   }
 
   initScene() {
@@ -789,7 +798,16 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const animationId = requestAnimationFrame(this.render);
     this.animationFrameId = animationId;
 
+    if (this.threePerformance) {
+      this.threePerformance.threexStats.update(this.renderer);
+      this.threePerformance.stats.begin();
+    }
+
     this.renderer.render(this.scene, this.camera);
+
+    if (this.threePerformance) {
+      this.threePerformance.stats.end();
+    }
   }
 
   // #endregion RENDERING LOOP
@@ -942,6 +960,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.renderer.dispose();
     this.renderer.forceContextLoss();
     this.interaction.removeHandlers();
+
+    if (this.threePerformance) {
+      this.threePerformance.removePerformanceMeasurement();
+    }
 
     this.debug('Cleaned up application rendering');
   }
