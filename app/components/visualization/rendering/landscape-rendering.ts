@@ -42,11 +42,6 @@ interface Args {
   font: THREE.Font;
 }
 
-interface Point {
-  x: number;
-  y: number;
-}
-
 interface SimplePlaneLayout {
   height: number;
   width: number;
@@ -431,7 +426,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
       this.debug('Landscape loaded');
     } catch (e) {
-      console.log(e);
+      // console.log(e);
     }
   });
 
@@ -620,7 +615,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.popupData = null;
   }
 
-/*   @action
+  /*   @action
   handleMouseEnter() {
   } */
 
@@ -647,14 +642,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.handleMouseStop = this.handleMouseStop.bind(this);
     this.handlePanning = this.handlePanning.bind(this);
 
-    this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer, this.landscapeObject3D, {
-      doubleClick: this.handleDoubleClick,
-      mouseMove: this.handleMouseMove,
-      mouseWheel: this.handleMouseWheel,
-      mouseOut: this.handleMouseOut,
-      /* mouseEnter: this.handleMouseEnter, */
-      mouseStop: this.handleMouseStop,
-      panning: this.handlePanning,
-    });
+    this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer,
+      this.landscapeObject3D, {
+        doubleClick: this.handleDoubleClick,
+        mouseMove: this.handleMouseMove,
+        mouseWheel: this.handleMouseWheel,
+        mouseOut: this.handleMouseOut,
+        /* mouseEnter: this.handleMouseEnter, */
+        mouseStop: this.handleMouseStop,
+        panning: this.handlePanning,
+      });
   }
 }
