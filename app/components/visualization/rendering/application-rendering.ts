@@ -252,8 +252,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleMouseStop(mesh: THREE.Mesh | undefined, mouseOnCanvas: Position2D) {
     if (mesh === undefined) { return; }
 
-    if (mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
-      || mesh instanceof ClazzCommunicationMesh) {
+    if ((mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
+      || mesh instanceof ClazzCommunicationMesh) && !mesh.dataModel.isDestroyed) {
       this.popupData = {
         mouseX: mouseOnCanvas.x,
         mouseY: mouseOnCanvas.y,
