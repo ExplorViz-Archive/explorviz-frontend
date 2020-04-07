@@ -1,29 +1,29 @@
 {{#if @popupData}}
   <div class="popover" {{did-insert this.setPopupPosition}}>
     {{!-- landscape popups --}}
-    {{#if (eq @popupData.popupType "system")}}
+    {{#if (eq @popupData.entity.constructor.name "System")}}
       <Visualization::Rendering::Popups::LandscapePopups::SystemPopup
-        @data={{@popupData}}
+        @system={{@popupData.entity}}
       />
     {{/if}}
-    {{#if (eq @popupData.popupType "nodeGroup")}}
+    {{#if (eq @popupData.entity.constructor.name "NodeGroup")}}
       <Visualization::Rendering::Popups::LandscapePopups::NodegroupPopup
-        @data={{@popupData}}
+        @nodeGroup={{@popupData.entity}}
       />
     {{/if}}
-    {{#if (eq @popupData.popupType "node")}}
+    {{#if (eq @popupData.entity.constructor.name "Node")}}
       <Visualization::Rendering::Popups::LandscapePopups::NodePopup
-        @data={{@popupData}}
+        @node={{@popupData.entity}}
       />
     {{/if}}
-    {{#if (eq @popupData.popupType "application")}}
+    {{#if (eq @popupData.entity.constructor.name "Application")}}
       <Visualization::Rendering::Popups::LandscapePopups::ApplicationPopup
-        @data={{@popupData}}
+        @application={{@popupData.entity}}
       />
     {{/if}}
-    {{#if (eq @popupData.popupType "applicationCommunication")}}
+    {{#if (eq @popupData.entity.constructor.name "ApplicationCommunication")}}
       <Visualization::Rendering::Popups::LandscapePopups::LandscapeCommunicationPopup
-        @data={{@popupData}}
+        @applicationCommunication={{@popupData.entity}}
       />
     {{/if}}
 

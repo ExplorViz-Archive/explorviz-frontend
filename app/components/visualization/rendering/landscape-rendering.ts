@@ -11,7 +11,7 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 
-import Interaction from 'explorviz-frontend/utils/interaction';
+import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import * as Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as CalcCenterAndZoom from
   'explorviz-frontend/utils/landscape-rendering/center-and-zoom-calculator';
@@ -32,6 +32,8 @@ import Node from 'explorviz-frontend/models/node';
 import PlaneMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-mesh';
 import { reduceLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
 import { task } from 'ember-concurrency-decorators';
+import PopupHandler from 'explorviz-frontend/utils/landscape-rendering/popup-handler';
+import { tracked } from '@glimmer/tracking';
 
 
 interface Args {
@@ -52,6 +54,12 @@ interface SimplePlaneLayout {
   positionY: number;
   opened: boolean;
 }
+
+type PopupData = {
+  mouseX: number,
+  mouseY: number,
+  entity: System | NodeGroup | Node | Application
+};
 
 /**
 * Renderer for landscape visualization.
@@ -110,7 +118,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   nodeGroupMeshes: Set<NodeGroupMesh> = new Set();
 
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
-  /*   popUpHandler: PopupHandler = new PopupHandler(); */
+
+  popUpHandler: PopupHandler = new PopupHandler();
+
+  @tracked
+  popupData: PopupData | null = null;
 
   get font() {
     return this.args.font;
@@ -581,7 +593,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   handleMouseWheel(delta: number) {
     // Hide (old) tooltip
-    /*     this.popUpHandler.hideTooltip(); */
+    this.popupData = null;
 
     const scrollVector = new THREE.Vector3(0, 0, delta * 1.5);
 
@@ -601,43 +613,47 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       this.hoverHandler.applyHoverEffect(mesh);
     }
 
-    // this.popupData = null;
+    this.popupData = null;
   }
-  /*
-@action
-handleMouseOut() {
-// this.popUpHandler.hideTooltip();
-}
 
-@action
-handleMouseEnter() {
-}
+  handleMouseOut() {
+    this.popupData = null;
+  }
 
-@action
-handleMouseStop(_mesh: THREE.Mesh|undefined, _mouseOnCanvas: Position2D) {
-// this.popUpHandler.showTooltip(
-//  mouseOnCanvas,
-//  mesh
-// );
-} */
+/*   @action
+  handleMouseEnter() {
+  } */
+
+  handleMouseStop(mesh: THREE.Mesh | undefined, mouseOnCanvas: Position2D) {
+    if (mesh === undefined) { return; }
+
+    if (mesh instanceof SystemMesh || mesh instanceof NodeGroupMesh
+      || mesh instanceof NodeMesh || mesh instanceof ApplicationMesh) {
+      this.popupData = {
+        mouseX: mouseOnCanvas.x,
+        mouseY: mouseOnCanvas.y,
+        entity: mesh.dataModel,
+      };
+    }
+  }
 
   initInteraction() {
     // this.handleSingleClick = this.handleSingleClick.bind(this);
     this.handleDoubleClick = this.handleDoubleClick.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseWheel = this.handleMouseWheel.bind(this);
-    // this.handleMouseOut = this.handleMouseOut.bind(this);
+    this.handleMouseOut = this.handleMouseOut.bind(this);
     // this.handleMouseEnter = this.handleMouseEnter.bind(this);
-    // this.handleMouseStop = this.handleMouseStop.bind(this);
+    this.handleMouseStop = this.handleMouseStop.bind(this);
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer, this.landscapeObject3D, {
       doubleClick: this.handleDoubleClick,
       mouseMove: this.handleMouseMove,
       mouseWheel: this.handleMouseWheel,
-      /* mouseOut: this.handleMouseOut, */
+      mouseOut: this.handleMouseOut,
       /* mouseEnter: this.handleMouseEnter, */
-      /* mouseStop: this.handleMouseStop, */
+      mouseStop: this.handleMouseStop,
       panning: this.handlePanning,
     });
   }

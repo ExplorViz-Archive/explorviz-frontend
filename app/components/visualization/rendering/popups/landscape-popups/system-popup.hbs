@@ -1,5 +1,5 @@
 <h3 class="popover-header">
-  <div style="font-weight:bold;text-align:center;">{{@data.systemName}}</div>
+  <div style="font-weight:bold;text-align:center;">{{this.name}}</div>
 </h3>
 <div class="popover-body" style="white-space: nowrap;">
   <table style="width:100%">
@@ -7,13 +7,13 @@
       <tr>
         <td>Nodes:</td>
         <td style="text-align:right;padding-left:10px;">
-          {{@data.numOfNodes}}
+          {{this.nodeCount}}
         </td>
       </tr>
       <tr>
         <td>Applications:</td>
         <td style="text-align:right;padding-left:10px;">
-          {{@data.numOfApps}}
+          {{this.applicationCount}}
         </td>
       </tr>
     </tbody>
