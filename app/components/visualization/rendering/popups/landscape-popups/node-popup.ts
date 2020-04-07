@@ -8,7 +8,11 @@ interface Args {
 
 export default class NodePopup extends Component<Args> {
   get displayName() {
-    return this.args.node.getDisplayName();
+    const { node } = this.args;
+    if (node.get('name') && node.get('name').length > 0 && !node.get('name').startsWith('<')) {
+      return node.get('name');
+    }
+    return node.get('ipAddress');
   }
 
   get cpuUtilization() {

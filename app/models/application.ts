@@ -30,8 +30,8 @@ export default class Application extends BaseEntitity {
   parent!: DS.PromiseObject<Node> & Node;
 
   @hasMany('component', {
-    // breaks Ember, maybe because of circle ?
-    // inverse: 'belongingApplication'
+    // Breaks Ember, maybe because of circle ?
+    // Inverse: 'belongingApplication'
   })
   components!: DS.PromiseManyArray<Component>;
 
@@ -43,15 +43,15 @@ export default class Application extends BaseEntitity {
   @hasMany('applicationcommunication', { inverse: 'sourceApplication' })
   applicationCommunications!: DS.PromiseManyArray<ApplicationCommunication>;
 
-  // list of aggregated clazzCommunication for rendering purposes
+  // List of aggregated clazzCommunication for rendering purposes
   @hasMany('aggregatedclazzcommunication', { inverse: null })
   aggregatedClazzCommunications!: DS.PromiseManyArray<AggregatedClazzCommunication>;
 
-  // list of aggregated clazzCommunication for rendering purposes
+  // List of aggregated clazzCommunication for rendering purposes
   @hasMany('drawableclazzcommunication', { inverse: null })
   drawableClazzCommunications!: DS.PromiseManyArray<DrawableClazzCommunication>;
 
-  // used for text labeling performance in respective renderers
+  // Used for text labeling performance in respective renderers
   state = 'application';
 
   contains(emberEntity: any) {

@@ -21,8 +21,6 @@ export default class Clazz extends BaseEntity {
 
   @attr('number', { defaultValue: 0 }) instanceCount!: number;
 
-  @attr() objectIds: any;
-
   @hasMany('clazzcommunication', { inverse: 'sourceClazz' })
   clazzCommunications!: DS.PromiseManyArray<ClazzCommunication>;
 

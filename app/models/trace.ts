@@ -23,8 +23,6 @@ export default class Trace extends BaseEntity {
 
   @attr('number') averageResponseTime!: number;
 
-  @attr('boolean', { defaultValue: false }) highlighted!: boolean;
-
   @hasMany('tracestep', { inverse: 'parentTrace' })
   traceSteps!: DS.PromiseManyArray<TraceStep>;
 

@@ -500,8 +500,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     // Create and add label + icon
     nodeMesh.setToDefaultPosition(centerPoint);
 
-    const labelText = node.getDisplayName();
+    const nodeGroupMesh = this.modelIdToMesh.get(node.get('parent').get('id'));
+
+    // Label with own ip-address by default
+    const labelText = nodeMesh.getDisplayName(nodeGroupMesh);
     const labelColor = new THREE.Color('white');
+
+
     Labeler.addNodeTextLabel(nodeMesh, labelText, this.font, labelColor);
 
     // Add to scene
@@ -551,8 +556,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       }
       // Handle nodeGroup
     } else if (mesh instanceof NodeGroupMesh) {
-      const nodeGroup = mesh.dataModel;
-      nodeGroup.setOpened(!nodeGroup.get('opened'));
       mesh.opened = !mesh.opened;
       this.cleanAndUpdateScene();
       // Handle system

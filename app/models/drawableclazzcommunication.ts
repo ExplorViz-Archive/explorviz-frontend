@@ -71,10 +71,10 @@ export default class DrawableClazzCommunication extends BaseEntitity {
     return traceSteps;
   }
 
-  // most inner component which common to both source and target clazz of communication
+  // Most inner component which common to both source and target clazz of communication
   @computed('sourceClazz', 'targetClazz')
   get parentComponent(this: DrawableClazzCommunication) {
-    // contains all parent components of source clazz incl. foundation in hierarchical order
+    // Contains all parent components of source clazz incl. foundation in hierarchical order
     const sourceClazzComponents = [];
     const sourceClazz = this.belongsTo('sourceClazz').value() as Clazz;
     if (sourceClazz !== null) {
@@ -88,7 +88,7 @@ export default class DrawableClazzCommunication extends BaseEntitity {
       }
     }
 
-    // contains all parent components of target clazz incl. foundation in hierarchical order
+    // Contains all parent components of target clazz incl. foundation in hierarchical order
     const targetClazzComponents = [];
     const targetClazz = this.belongsTo('targetClazz').value() as Clazz;
     if (targetClazz !== null) {
@@ -102,11 +102,11 @@ export default class DrawableClazzCommunication extends BaseEntitity {
       }
     }
 
-    // let component arrays start with foundation (reversed hierarchical order)
+    // Let component arrays start with foundation (reversed hierarchical order)
     sourceClazzComponents.reverse();
     targetClazzComponents.reverse();
 
-    // find the most inner common component
+    // Find the most inner common component
     let commonComponent = sourceClazzComponents[0];
     for (let i = 0; i < sourceClazzComponents.length && i < targetClazzComponents.length; i++) {
       if (sourceClazzComponents[i] === targetClazzComponents[i]) {

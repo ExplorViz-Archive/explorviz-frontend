@@ -26,7 +26,7 @@ export default class Landscape extends BaseEntity {
   @hasMany('system', { inverse: 'parent' })
   systems!: DS.PromiseManyArray<System>;
 
-  // list of applicationCommunication for rendering purposes
+  // List of applicationCommunication for rendering purposes
   @hasMany('applicationcommunication', { inverse: null })
   totalApplicationCommunications!: DS.PromiseManyArray<ApplicationCommunication>;
 }
