@@ -585,6 +585,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.applicationObject3D.add(pipe);
       this.commIdToMesh.set(drawableClazzComm.get('id'), pipe);
     });
+
+    this.highlighter.updateHighlighting(this.args.application);
   }
 
   /**
