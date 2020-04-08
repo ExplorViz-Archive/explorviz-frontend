@@ -32,11 +32,11 @@ function layout3(landscape: ReducedLandscape,
 
   return { modelIdToLayout, modelIdToPoints, modeldToKielerEdgeReference, modelIdToGraph, graph };
 
-  function createModelIdToGraphMap(graf: kielerGraph) {
-    if(graf.id !== 'root') {
-      modelIdToGraph.set(graf.id, graf);
+  function createModelIdToGraphMap(kielerGraph: kielerGraph) {
+    if(kielerGraph.id !== 'root') {
+      modelIdToGraph.set(kielerGraph.id, kielerGraph);
     }
-    graf.children?.forEach((childGraph) => {
+    kielerGraph.children?.forEach((childGraph) => {
       createModelIdToGraphMap(childGraph);
     });
   }
