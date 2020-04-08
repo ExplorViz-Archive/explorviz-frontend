@@ -90,8 +90,9 @@ export default class Interaction {
     const nonInvolvedClazzes = new Set([...allClazzes].filter((x) => !allInvolvedClazzes.has(x)));
 
     const componentSet = new Set<Component>();
+
     allInvolvedClazzes.forEach((clazz) => {
-      this.getAllAncestorComponents(clazz.getParent(), componentSet);
+      clazz.getParent().getAllAncestorComponents(componentSet);
     });
 
     nonInvolvedClazzes.forEach((clazz) => {
@@ -156,7 +157,7 @@ export default class Interaction {
 
     const componentSet = new Set<Component>();
     involvedClazzes.forEach((clazz) => {
-      this.getAllAncestorComponents(clazz.getParent(), componentSet);
+      clazz.getParent().getAllAncestorComponents(componentSet);
     });
 
     nonInvolvedClazzes.forEach((clazz) => {
@@ -204,18 +205,5 @@ export default class Interaction {
       componentMesh.turnTransparent();
     }
     this.turnComponentAndAncestorsTransparent(parent, ignorableComponents);
-  }
-
-  getAllAncestorComponents(component: Component, set: Set<Component>) {
-    if (set.has(component)) { return; }
-
-    set.add(component);
-
-    const parent = component.getParentComponent();
-    if (parent === null) {
-      return;
-    }
-
-    this.getAllAncestorComponents(parent, set);
   }
 }

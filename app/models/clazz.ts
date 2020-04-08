@@ -30,6 +30,10 @@ export default class Clazz extends BaseEntity {
   getParent(this: Clazz) {
     return this.belongsTo('parent').value() as Component;
   }
+
+  getAllAncestorComponents(componentSet: Set<Component> = new Set()) {
+    return this.getParent().getAllAncestorComponents(componentSet);
+  }
 }
 
 declare module 'ember-data/types/registries/model' {

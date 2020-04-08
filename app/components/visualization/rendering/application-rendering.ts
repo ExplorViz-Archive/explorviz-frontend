@@ -637,25 +637,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   openParents(entity: Component|Clazz) {
-    if (entity instanceof Component) {
-      const ancestors: Set<Component> = new Set();
-      this.getAllAncestorComponents(entity, ancestors);
-      ancestors.forEach((anc) => {
-        const ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
-        if (ancestorMesh instanceof ComponentMesh) {
-          this.openComponentMesh(ancestorMesh);
-        }
-      });
-    } else if (entity instanceof Clazz) {
-      const ancestors: Set<Component> = new Set();
-      this.getAllAncestorComponents(entity.getParent(), ancestors);
-      ancestors.forEach((anc) => {
-        const ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
-        if (ancestorMesh instanceof ComponentMesh) {
-          this.openComponentMesh(ancestorMesh);
-        }
-      });
-    }
+    const ancestors = entity.getAllAncestorComponents();
+    ancestors.forEach((anc) => {
+      const ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
+      if (ancestorMesh instanceof ComponentMesh) {
+        this.openComponentMesh(ancestorMesh);
+      }
+    });
+    this.addCommunication(this.args.application);
   }
 
   @action
@@ -745,19 +734,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     // Move camera on to given position
     camera.position.set(layoutPos.x, layoutPos.y, layoutPos.z);
-  }
-
-  getAllAncestorComponents(component: Component, set: Set<Component>) {
-    if (set.has(component)) { return; }
-
-    set.add(component);
-
-    const parent = component.getParentComponent();
-    if (parent === null) {
-      return;
-    }
-
-    this.getAllAncestorComponents(parent, set);
   }
 
   @action

@@ -110,6 +110,25 @@ export default class Component extends BaseEntitity {
   getParentComponent(this: Component) {
     return this.belongsTo('parentComponent').value() as Component;
   }
+
+  getAllAncestorComponents(componentSet: Set<Component> = new Set()) {
+    function getAncestors(component: Component, set: Set<Component>) {
+      if (set.has(component)) { return; }
+
+      set.add(component);
+
+      const parent = component.getParentComponent();
+      if (parent === null) {
+        return;
+      }
+
+      getAncestors(parent, set);
+    }
+
+    getAncestors(this, componentSet);
+
+    return componentSet;
+  }
 }
 
 declare module 'ember-data/types/registries/model' {
