@@ -6,27 +6,10 @@ import ComponentLabelMesh from 'explorviz-frontend/view-objects/3d/application/c
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 
 /**
- * Creates a label and adds it at a calculated position to the given
- * component or foundation mesh
- * 
- * @param boxMesh The mesh which shall be labeled
- * @param font Desired font of the text
- * @param color Desired color of the text
- */
-export function addBoxTextLabel(boxMesh: ComponentMesh|FoundationMesh, font: THREE.Font, color: THREE.Color) {
-  const labelMesh = new ComponentLabelMesh(boxMesh, font, color);
-
-  boxMesh.labelMesh = labelMesh;
-  boxMesh.add(labelMesh);
-
-  positionBoxLabel(boxMesh)
-}
-
-/**
  * Positions label of a given component mesh. This function is standalone and not part
  * of addComponentTextLabel because the position of a component label needs to be adapted
  * every time a component is opened or closed.
- * 
+ *
  * @param boxMesh Mesh which is labeled
  */
 export function positionBoxLabel(boxMesh: ComponentMesh|FoundationMesh) {
@@ -55,8 +38,26 @@ export function positionBoxLabel(boxMesh: ComponentMesh|FoundationMesh) {
 }
 
 /**
+ * Creates a label and adds it at a calculated position to the given
+ * component or foundation mesh
+ *
+ * @param boxMesh The mesh which shall be labeled
+ * @param font Desired font of the text
+ * @param color Desired color of the text
+ */
+export function addBoxTextLabel(boxMesh: ComponentMesh|FoundationMesh,
+  font: THREE.Font, color: THREE.Color) {
+  const labelMesh = new ComponentLabelMesh(boxMesh, font, color);
+
+  boxMesh.labelMesh = labelMesh;
+  boxMesh.add(labelMesh);
+
+  positionBoxLabel(boxMesh);
+}
+
+/**
  * Creates a label and adds it at a calculated position to the given clazz mesh
- * 
+ *
  * @param clazzMesh The mesh which shall be labeled
  * @param font Desired font of the text
  * @param color Desired color of the text

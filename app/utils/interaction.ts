@@ -10,35 +10,41 @@ type CallbackFunctions = {
   mouseWheel?(delta: number): void,
   singleClick?(mesh?: THREE.Mesh): void,
   doubleClick?(mesh?: THREE.Mesh): void,
-  panning?(delta: {x:number,y:number}, button: 1|2|3): void
-}
+  panning?(delta: {x: number, y: number}, button: 1|2|3): void
+};
 
 type MouseOffsetPosition = {
   offsetX: number,
   offsetY: number
-}
+};
 
 export type Position2D = {
   x: number,
   y: number
-}
+};
 
 export default class Interaction {
-
   canvas: HTMLCanvasElement;
+
   camera: THREE.Camera;
+
   renderer: THREE.WebGLRenderer;
+
   application: THREE.Object3D;
+
   raycaster: Raycaster;
+
   hammerHandler: HammerInteraction;
+
   eventCallbackFunctions: CallbackFunctions;
 
-  constructor(canvas: HTMLCanvasElement, camera: THREE.Camera, renderer:THREE.WebGLRenderer, application: THREE.Object3D, eventCallbackFunctions: CallbackFunctions) {
+  constructor(canvas: HTMLCanvasElement, camera: THREE.Camera, renderer: THREE.WebGLRenderer,
+    application: THREE.Object3D, eventCallbackFunctions: CallbackFunctions) {
     this.canvas = canvas;
     this.camera = camera;
     this.renderer = renderer;
     this.application = application;
-    this.eventCallbackFunctions = {...eventCallbackFunctions};
+    this.eventCallbackFunctions = { ...eventCallbackFunctions };
 
     this.raycaster = new Raycaster();
 
@@ -68,85 +74,77 @@ export default class Interaction {
 
   setupEventListener() {
     // mouseout handler for disabling notifications
-    if(this.eventCallbackFunctions.mouseOut)
-      this.canvas.addEventListener('mouseout', this.onMouseOut, false);
+    if (this.eventCallbackFunctions.mouseOut) { this.canvas.addEventListener('mouseout', this.onMouseOut, false); }
 
     // mouseenter handler for disabling notifications
-    if(this.eventCallbackFunctions.mouseEnter)
-      this.canvas.addEventListener('mouseenter', this.onMouseEnter, false);
+    if (this.eventCallbackFunctions.mouseEnter) { this.canvas.addEventListener('mouseenter', this.onMouseEnter, false); }
 
     // zoom handler
-    if(this.eventCallbackFunctions.mouseWheel)
-      this.canvas.addEventListener('wheel', this.onMouseWheelStart, false);
+    if (this.eventCallbackFunctions.mouseWheel) { this.canvas.addEventListener('wheel', this.onMouseWheelStart, false); }
 
     // mouse move handler
-    if(this.eventCallbackFunctions.mouseMove)
-      this.canvas.addEventListener('mousemove', this.onMouseMove, false);
+    if (this.eventCallbackFunctions.mouseMove) { this.canvas.addEventListener('mousemove', this.onMouseMove, false); }
 
-    if(this.eventCallbackFunctions.mouseStop) {
+    if (this.eventCallbackFunctions.mouseStop) {
       this.createMouseStopEvent();
       this.canvas.addEventListener('mousestop', this.onMouseStop, false);
     }
   }
 
   setupHammerListener() {
-    if(this.eventCallbackFunctions.doubleClick) {
+    if (this.eventCallbackFunctions.doubleClick) {
       this.hammerHandler.on('doubletap', this.onDoubleClick);
     }
 
-    if(this.eventCallbackFunctions.panning) {
+    if (this.eventCallbackFunctions.panning) {
       this.hammerHandler.on('panning', this.onPanning);
     }
 
-    if(this.eventCallbackFunctions.singleClick) {
+    if (this.eventCallbackFunctions.singleClick) {
       this.hammerHandler.on('singletap', this.onSingleClick);
     }
   }
 
   onMouseEnter() {
-    if(!this.eventCallbackFunctions.mouseEnter)
-      return;
+    if (!this.eventCallbackFunctions.mouseEnter) { return; }
 
     this.eventCallbackFunctions.mouseEnter();
   }
 
   onMouseOut() {
-    if(!this.eventCallbackFunctions.mouseOut)
-      return;
+    if (!this.eventCallbackFunctions.mouseOut) { return; }
 
     this.eventCallbackFunctions.mouseOut();
   }
 
   onMouseMove(evt: MouseEvent) {
-    if(!this.eventCallbackFunctions.mouseMove)
-      return;
+    if (!this.eventCallbackFunctions.mouseMove) { return; }
 
     const mouse = {
       x: evt.offsetX,
-      y: evt.offsetY
+      y: evt.offsetY,
     };
 
     const intersectedViewObj = this.raycast(mouse);
 
-    if(intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
-      this.eventCallbackFunctions.mouseMove(intersectedViewObj.object)
+    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
+      this.eventCallbackFunctions.mouseMove(intersectedViewObj.object);
     } else {
       this.eventCallbackFunctions.mouseMove();
     }
   }
 
   onMouseStop(evt: CustomEvent<MouseOffsetPosition>) {
-    if(!this.eventCallbackFunctions.mouseStop)
-      return;
+    if (!this.eventCallbackFunctions.mouseStop) { return; }
 
     const mouse = {
       x: evt.detail.offsetX,
-      y: evt.detail.offsetY
+      y: evt.detail.offsetY,
     };
 
     const intersectedViewObj = this.raycast(mouse);
 
-    if(intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
+    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
       this.eventCallbackFunctions.mouseStop(intersectedViewObj.object, mouse);
     } else {
       this.eventCallbackFunctions.mouseStop();
@@ -154,8 +152,7 @@ export default class Interaction {
   }
 
   onMouseWheelStart(evt: WheelEvent) {
-    if(!this.eventCallbackFunctions.mouseWheel)
-      return;
+    if (!this.eventCallbackFunctions.mouseWheel) { return; }
 
     const delta = Math.sign(evt.deltaY);
 
@@ -163,12 +160,11 @@ export default class Interaction {
   }
 
   onSingleClick(mouse: Position2D) {
-    if(!this.eventCallbackFunctions.singleClick)
-      return;
+    if (!this.eventCallbackFunctions.singleClick) { return; }
 
     const intersectedViewObj = this.raycast(mouse);
 
-    if(intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
+    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
       this.eventCallbackFunctions.singleClick(intersectedViewObj.object);
     } else {
       this.eventCallbackFunctions.singleClick();
@@ -176,21 +172,19 @@ export default class Interaction {
   }
 
   onDoubleClick(mouse: Position2D) {
-    if(!this.eventCallbackFunctions.doubleClick)
-      return;
+    if (!this.eventCallbackFunctions.doubleClick) { return; }
 
     const intersectedViewObj = this.raycast(mouse);
 
-    if(intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
+    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
       this.eventCallbackFunctions.doubleClick(intersectedViewObj.object);
     } else {
       this.eventCallbackFunctions.doubleClick();
     }
   }
 
-  onPanning(delta: {x:number, y:number}, event: any) {
-    if(!this.eventCallbackFunctions.panning)
-      return;
+  onPanning(delta: {x: number, y: number}, event: any) {
+    if (!this.eventCallbackFunctions.panning) { return; }
 
     this.eventCallbackFunctions.panning(delta, event.button);
   }
@@ -198,9 +192,9 @@ export default class Interaction {
   // Handler
 
   calculatePositionInScene(mouseOnCanvas: Position2D) {
-    let x = (mouseOnCanvas.x / this.renderer.domElement.clientWidth) * 2 - 1;
+    const x = (mouseOnCanvas.x / this.renderer.domElement.clientWidth) * 2 - 1;
 
-    let y = -(mouseOnCanvas.y / this.renderer.domElement.clientHeight) * 2 + 1;
+    const y = -(mouseOnCanvas.y / this.renderer.domElement.clientHeight) * 2 + 1;
 
     const origin = { x, y };
 
@@ -208,10 +202,10 @@ export default class Interaction {
   }
 
   raycast(mouseOnCanvas: Position2D) {
-    let origin = this.calculatePositionInScene(mouseOnCanvas);
+    const origin = this.calculatePositionInScene(mouseOnCanvas);
 
-    const intersectedViewObj =
-      this.raycaster.raycasting(origin, this.camera, this.application.children);
+    const intersectedViewObj = this.raycaster.raycasting(origin, this.camera,
+      this.application.children);
 
     return intersectedViewObj;
   }
@@ -219,50 +213,41 @@ export default class Interaction {
   createMouseStopEvent() {
     const self = this;
 
-    // custom event for mousemovement end
-    (function (delay) {
-      var timeout: NodeJS.Timeout;
-      self.canvas.addEventListener('mousemove', function (evt: MouseEvent) {
+    // Custom event for mousemovement end
+    (function computeMouseMoveEvent(delay) {
+      let timeout: NodeJS.Timeout;
+      self.canvas.addEventListener('mousemove', (evt: MouseEvent) => {
         clearTimeout(timeout);
-        timeout = setTimeout(function () {
-          var event = new CustomEvent<MouseOffsetPosition>("mousestop", {
+        timeout = setTimeout(() => {
+          const event = new CustomEvent<MouseOffsetPosition>('mousestop', {
             detail: {
               offsetX: evt.offsetX,
-              offsetY: evt.offsetY
+              offsetY: evt.offsetY,
             },
             bubbles: true,
-            cancelable: true
+            cancelable: true,
           });
-          if(evt.target)
-            evt.target.dispatchEvent(event);
+          if (evt.target) evt.target.dispatchEvent(event);
         }, delay);
       });
-    })(300);
+    }(300));
   }
 
   removeHandlers() {
-    if(this.eventCallbackFunctions.doubleClick)
-      this.hammerHandler.hammerManager.off('doubletap');
+    if (this.eventCallbackFunctions.doubleClick) { this.hammerHandler.hammerManager.off('doubletap'); }
 
-    if(this.eventCallbackFunctions.panning)
-      this.hammerHandler.hammerManager.off('panning');
+    if (this.eventCallbackFunctions.panning) { this.hammerHandler.hammerManager.off('panning'); }
 
-    if(this.eventCallbackFunctions.singleClick)
-      this.hammerHandler.hammerManager.off('singletap');
+    if (this.eventCallbackFunctions.singleClick) { this.hammerHandler.hammerManager.off('singletap'); }
 
-    if(this.eventCallbackFunctions.mouseOut)
-      this.canvas.removeEventListener('mouseout', this.onMouseOut);
+    if (this.eventCallbackFunctions.mouseOut) { this.canvas.removeEventListener('mouseout', this.onMouseOut); }
 
-    if(this.eventCallbackFunctions.mouseEnter)
-      this.canvas.removeEventListener('mouseenter', this.onMouseEnter);
+    if (this.eventCallbackFunctions.mouseEnter) { this.canvas.removeEventListener('mouseenter', this.onMouseEnter); }
 
-    if(this.eventCallbackFunctions.mouseWheel)
-      this.canvas.removeEventListener('wheel', this.onMouseWheelStart);
+    if (this.eventCallbackFunctions.mouseWheel) { this.canvas.removeEventListener('wheel', this.onMouseWheelStart); }
 
-    if(this.eventCallbackFunctions.mouseMove)
-      this.canvas.removeEventListener('mousemove', this.onMouseMove);
+    if (this.eventCallbackFunctions.mouseMove) { this.canvas.removeEventListener('mousemove', this.onMouseMove); }
 
-    if(this.eventCallbackFunctions.mouseStop)
-      this.canvas.removeEventListener('mousestop', this.onMouseStop);
+    if (this.eventCallbackFunctions.mouseStop) { this.canvas.removeEventListener('mousestop', this.onMouseStop); }
   }
 }
