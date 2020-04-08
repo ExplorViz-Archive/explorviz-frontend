@@ -25,9 +25,9 @@ import { tracked } from '@glimmer/tracking';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import { reduceApplication } from 'explorviz-frontend/utils/application-rendering/model-reducer';
 import Trace from 'explorviz-frontend/models/trace';
-import TraceStep from 'explorviz-frontend/models/tracestep';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
+import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 
 interface Args {
   id: string,
@@ -95,6 +95,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   boxLayoutMap: Map<string, BoxLayout> = new Map();
 
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
+
+  highlighter: Highlighting = new Highlighting(this.modelIdToMesh, this.commIdToMesh);
 
   @tracked
   popupData: PopupData | null = null;
@@ -215,7 +217,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleSingleClick(mesh: THREE.Mesh | undefined) {
     if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
-      this.highlight(mesh);
+      this.highlighter.highlight(mesh, this.args.application);
     }
   }
 
@@ -374,7 +376,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         }
         // Reset highlighting if highlighted entity is no longer visible
         if (childMesh.highlighted) {
-          this.removeHighlighting();
+          this.highlighter.removeHighlighting();
         }
       }
     });
@@ -386,7 +388,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         childMesh.visible = false;
         // Reset highlighting if highlighted entity is no longer visible
         if (childMesh.highlighted) {
-          this.removeHighlighting();
+          this.highlighter.removeHighlighting();
         }
       }
     });
@@ -397,197 +399,16 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region COMPONENT AND CLAZZ HIGHLIGHTING
 
-  highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMesh): void {
-    // Reset highlighting if highlighted mesh is clicked
-    if (mesh.highlighted) {
-      this.removeHighlighting();
-      return;
-    }
-
-    // Reset highlighting
-    this.removeHighlighting();
-    const model = mesh.dataModel;
-
-    // Highlight the entity itself
-    mesh.highlight();
-
-    // All clazzes in application
-    const allClazzesAsArray = this.args.application.getAllClazzes();
-    const allClazzes = new Set<Clazz>(allClazzesAsArray);
-
-    // Get all clazzes in current component
-    const containedClazzes = new Set<Clazz>();
-
-    if (model instanceof Component) {
-      model.getContainedClazzes(containedClazzes);
-    } else if (model instanceof Clazz) {
-      containedClazzes.add(model);
-    } else if (model instanceof DrawableClazzCommunication) {
-      const sourceClazz = model.belongsTo('sourceClazz').value() as Clazz;
-      const targetClazz = model.belongsTo('targetClazz').value() as Clazz;
-      containedClazzes.add(sourceClazz);
-      containedClazzes.add(targetClazz);
-    } else {
-      return;
-    }
-
-    const allInvolvedClazzes = new Set<Clazz>(containedClazzes);
-
-    const drawableComm = this.args.application.hasMany('drawableClazzCommunications').value() as DS.ManyArray<DrawableClazzCommunication>|null;
-
-    if (!drawableComm) {
-      return;
-    }
-
-
-    drawableComm.forEach((comm) => {
-      const sourceClazz = comm.belongsTo('sourceClazz').value() as Clazz;
-      const targetClazz = comm.belongsTo('targetClazz').value() as Clazz;
-
-      // Add clazzes which communicate directly with highlighted entity
-      // For a highlighted communication all involved clazzes are already known
-      if (containedClazzes.has(sourceClazz)
-      && !(model instanceof DrawableClazzCommunication)) {
-        allInvolvedClazzes.add(targetClazz);
-      } else if (containedClazzes.has(targetClazz)
-      && !(model instanceof DrawableClazzCommunication)) {
-        allInvolvedClazzes.add(sourceClazz);
-      // Hide communication which is not directly connected to highlighted entity
-      } else if (!containedClazzes.has(sourceClazz) || !containedClazzes.has(targetClazz)) {
-        const commMesh = this.commIdToMesh.get(comm.get('id'));
-        if (commMesh) {
-          commMesh.turnTransparent();
-        }
-      }
-    });
-
-    const nonInvolvedClazzes = new Set([...allClazzes].filter((x) => !allInvolvedClazzes.has(x)));
-
-    const componentSet = new Set<Component>();
-    allInvolvedClazzes.forEach((clazz) => {
-      this.getAllAncestorComponents(clazz.getParent(), componentSet);
-    });
-
-    nonInvolvedClazzes.forEach((clazz) => {
-      const clazzMesh = this.modelIdToMesh.get(clazz.get('id'));
-      const componentMesh = this.modelIdToMesh.get(clazz.getParent().get('id'));
-      if (clazzMesh instanceof ClazzMesh && componentMesh instanceof ComponentMesh
-        && componentMesh.opened) {
-        clazzMesh.turnTransparent();
-      }
-      this.turnComponentAndAncestorsTransparent(clazz.getParent(), componentSet);
-    });
-  }
-
   @action
   highlightTrace(trace: Trace, step = 1) {
-    this.removeHighlighting();
-    // TODO: Rather only open necessary components
+    // Open components such that complete trace is visible
     this.openAllComponents();
-
-    const drawableComms = this.args.application.hasMany('drawableClazzCommunications').value() as DS.ManyArray<DrawableClazzCommunication>|null;
-
-    if (!drawableComms) {
-      return;
-    }
-
-    // All clazzes in application
-    const allClazzesAsArray = this.args.application.getAllClazzes();
-    const allClazzes = new Set<Clazz>(allClazzesAsArray);
-
-    const involvedClazzes = new Set<Clazz>();
-
-    let highlightedTraceStep: TraceStep;
-
-    trace.get('traceSteps').forEach((traceStep) => {
-      if (traceStep.tracePosition === step) {
-        highlightedTraceStep = traceStep;
-      }
-    });
-
-
-    drawableComms.forEach((comm) => {
-      const commMesh = this.commIdToMesh.get(comm.get('id'));
-
-      if (comm.containedTraces.has(trace)) {
-        const sourceClazz = comm.belongsTo('sourceClazz').value() as Clazz;
-        const targetClazz = comm.belongsTo('targetClazz').value() as Clazz;
-        involvedClazzes.add(sourceClazz);
-        involvedClazzes.add(targetClazz);
-        if (comm.containedTraceSteps.has(highlightedTraceStep)) {
-          commMesh?.highlight();
-        }
-      } else {
-        commMesh?.turnTransparent();
-      }
-    });
-
-    const nonInvolvedClazzes = new Set([...allClazzes].filter((x) => !involvedClazzes.has(x)));
-
-    const componentSet = new Set<Component>();
-    involvedClazzes.forEach((clazz) => {
-      this.getAllAncestorComponents(clazz.getParent(), componentSet);
-    });
-
-    nonInvolvedClazzes.forEach((clazz) => {
-      const clazzMesh = this.modelIdToMesh.get(clazz.get('id'));
-      const componentMesh = this.modelIdToMesh.get(clazz.getParent().get('id'));
-      if (clazzMesh instanceof ClazzMesh && componentMesh instanceof ComponentMesh
-        && componentMesh.opened) {
-        clazzMesh.turnTransparent();
-      }
-      this.turnComponentAndAncestorsTransparent(clazz.getParent(), componentSet);
-    });
+    this.highlighter.highlightTrace(trace, step, this.args.application);
   }
 
   @action
   removeHighlighting() {
-    const boxMeshes = Array.from(this.modelIdToMesh.values());
-    const commMeshes = Array.from(this.commIdToMesh.values());
-    const meshes = boxMeshes.concat(commMeshes);
-    for (let i = 0; i < meshes.length; i++) {
-      const mesh = meshes[i];
-      if (mesh instanceof BaseMesh) {
-        mesh.unhighlight();
-      }
-    }
-  }
-
-  turnComponentAndAncestorsTransparent(component: Component, ignorableComponents: Set<Component>) {
-    if (ignorableComponents.has(component)) { return; }
-
-    ignorableComponents.add(component);
-
-    const parent = component.getParentComponent();
-
-    const componentMesh = this.modelIdToMesh.get(component.get('id'));
-
-    if (!parent) {
-      if (componentMesh instanceof ComponentMesh) {
-        componentMesh.turnTransparent();
-      }
-      return;
-    }
-
-    const parentMesh = this.modelIdToMesh.get(parent.get('id'));
-    if (componentMesh instanceof ComponentMesh
-      && parentMesh instanceof ComponentMesh && parentMesh.opened) {
-      componentMesh.turnTransparent();
-    }
-    this.turnComponentAndAncestorsTransparent(parent, ignorableComponents);
-  }
-
-  getAllAncestorComponents(component: Component, set: Set<Component>) {
-    if (set.has(component)) { return; }
-
-    set.add(component);
-
-    const parent = component.getParentComponent();
-    if (parent === null) {
-      return;
-    }
-
-    this.getAllAncestorComponents(parent, set);
+    this.highlighter.removeHighlighting();
   }
 
   // #endregion COMPONENT AND CLAZZ HIGHLIGHTING
@@ -812,7 +633,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #endregion RENDERING LOOP
 
-
   // #region ACTIONS
 
   @action
@@ -862,15 +682,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   highlightModel(entity: Component|Clazz) {
-    const mesh = this.modelIdToMesh.get(entity.id);
-    if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
-      this.highlight(mesh);
-    }
+    this.highlighter.highlightModel(entity, this.args.application);
   }
 
   @action
   unhighlightAll() {
-    this.removeHighlighting();
+    this.highlighter.removeHighlighting();
   }
 
   @action
@@ -930,9 +747,22 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     camera.position.set(layoutPos.x, layoutPos.y, layoutPos.z);
   }
 
+  getAllAncestorComponents(component: Component, set: Set<Component>) {
+    if (set.has(component)) { return; }
+
+    set.add(component);
+
+    const parent = component.getParentComponent();
+    if (parent === null) {
+      return;
+    }
+
+    this.getAllAncestorComponents(parent, set);
+  }
+
   @action
   resetView() {
-    this.removeHighlighting();
+    this.highlighter.removeHighlighting();
     this.closeAllComponents();
     this.addCommunication(this.args.application);
     this.camera.position.set(0, 0, 100);
