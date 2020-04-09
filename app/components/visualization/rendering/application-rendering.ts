@@ -7,7 +7,6 @@ import { inject as service } from '@ember/service';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import { applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
 import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import DS from 'ember-data';
@@ -29,6 +28,7 @@ import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
+import CommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 
 interface Args {
   id: string,
@@ -101,6 +101,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   entityRendering = new EntityRendering(this.modelIdToMesh, this.commIdToMesh,
     this.applicationObject3D, this.configuration);
+
+  communicationRendering = new CommunicationRendering(this.modelIdToMesh, this.commIdToMesh,
+    this.applicationObject3D, this.configuration, this.currentUser);
 
   @tracked
   popupData: PopupData | null = null;
@@ -233,7 +236,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       } else {
         this.openComponentMesh(mesh);
       }
-      this.addCommunication(this.args.application);
+      this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
+      this.highlighter.updateHighlighting(this.args.application);
     // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
       this.closeAllComponents();
@@ -310,7 +314,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.closeComponentMesh(mesh);
       }
     });
-    this.addCommunication(this.args.application);
+    this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
+    this.highlighter.updateHighlighting(this.args.application);
   }
 
   openComponentsRecursively(component: Component) {
@@ -428,8 +433,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.boxLayoutMap = layoutedApplication;
 
       this.entityRendering.addFoundationAndChildrenToScene(this.args.application,
-        this.boxLayoutMap);
-      this.addCommunication(this.args.application);
+        layoutedApplication);
+      this.communicationRendering.addCommunication(this.args.application, layoutedApplication);
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
@@ -437,61 +442,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     } catch (e) {
       // console.log(e);
     }
-  }
-
-  addCommunication(application: Application) {
-    const foundationData = this.boxLayoutMap.get(application.id);
-
-    if (foundationData === undefined) {
-      return;
-    }
-
-    this.removeAllCommunication();
-
-    const maybeCurveHeight = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
-    const curveHeight = typeof maybeCurveHeight === 'number' ? maybeCurveHeight : 0.0;
-    const isCurved = curveHeight !== 0.0;
-
-    const commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap,
-      this.modelIdToMesh);
-
-    const {
-      communication: communicationColor,
-      highlightedEntity: highlightedEntityColor,
-      communicationArrow: arrowColorString,
-    } = this.configuration.applicationColors;
-
-    const drawableClazzCommunications = application.get('drawableClazzCommunications');
-
-    drawableClazzCommunications.forEach((drawableClazzComm) => {
-      const commLayout = commLayoutMap.get(drawableClazzComm.get('id'));
-
-      // No layouting information available due to hidden communication
-      if (!commLayout) {
-        return;
-      }
-
-      const viewCenterPoint = CalcCenterAndZoom(foundationData);
-
-      const pipe = new ClazzCommunicationMesh(commLayout, drawableClazzComm,
-        new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor));
-
-      pipe.render(viewCenterPoint, curveHeight);
-
-      const ARROW_OFFSET = 0.8;
-      const arrowHeight = isCurved ? curveHeight / 2 + ARROW_OFFSET : ARROW_OFFSET;
-      const arrowThickness = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
-      const arrowColor = new THREE.Color(arrowColorString).getHex();
-
-      if (typeof arrowThickness === 'number' && arrowThickness > 0.0) {
-        pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColor);
-      }
-
-      this.applicationObject3D.add(pipe);
-      this.commIdToMesh.set(drawableClazzComm.get('id'), pipe);
-    });
-
-    this.highlighter.updateHighlighting(this.args.application);
   }
 
   /**
@@ -551,7 +501,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.openComponentMesh(ancestorMesh);
       }
     });
-    this.addCommunication(this.args.application);
+    this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
+    this.highlighter.updateHighlighting(this.args.application);
   }
 
   @action
@@ -560,7 +511,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (mesh instanceof ComponentMesh) {
       this.closeComponentMesh(mesh);
     }
-    this.addCommunication(this.args.application);
+    this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
+    this.highlighter.updateHighlighting(this.args.application);
   }
 
   @action
@@ -573,7 +525,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.openComponentsRecursively(child);
     });
 
-    this.addCommunication(this.args.application);
+    this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
+    this.highlighter.updateHighlighting(this.args.application);
   }
 
   @action
@@ -647,7 +600,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   resetView() {
     this.highlighter.removeHighlighting();
     this.closeAllComponents();
-    this.addCommunication(this.args.application);
+    this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
     this.camera.position.set(0, 0, 100);
     ApplicationRendering.resetRotation(this.applicationObject3D);
   }
@@ -688,7 +641,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       }
     });
     this.modelIdToMesh.clear();
-    this.removeAllCommunication();
+    this.communicationRendering.removeAllCommunication();
   }
 
   cleanAndUpdateScene() {
@@ -696,13 +649,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.cleanUpApplication();
     this.populateScene();
-  }
-
-  removeAllCommunication() {
-    this.commIdToMesh.forEach((mesh: ClazzCommunicationMesh) => {
-      mesh.delete();
-    });
-    this.commIdToMesh.clear();
   }
 
   // #endregion COMPONENT AND SCENE CLEAN-UP
