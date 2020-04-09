@@ -28,6 +28,7 @@ import Trace from 'explorviz-frontend/models/trace';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
+import EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
 
 interface Args {
   id: string,
@@ -94,9 +95,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   boxLayoutMap: Map<string, BoxLayout> = new Map();
 
-  hoverHandler: HoverEffectHandler = new HoverEffectHandler();
+  hoverHandler = new HoverEffectHandler();
 
-  highlighter: Highlighting = new Highlighting(this.modelIdToMesh, this.commIdToMesh);
+  highlighter = new Highlighting(this.modelIdToMesh, this.commIdToMesh);
+
+  entityRendering = new EntityRendering(this.modelIdToMesh, this.commIdToMesh,
+    this.applicationObject3D, this.configuration);
 
   @tracked
   popupData: PopupData | null = null;
@@ -422,7 +426,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     try {
       const layoutedApplication: Map<string, BoxLayout> = await this.worker.postMessage('city-layouter', reducedApplication);
       this.boxLayoutMap = layoutedApplication;
-      this.addFoundationToScene(this.args.application);
+
+      this.entityRendering.addFoundationAndChildrenToScene(this.args.application,
+        this.boxLayoutMap);
       this.addCommunication(this.args.application);
       this.addLabels();
 
@@ -430,110 +436,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       ApplicationRendering.resetRotation(this.applicationObject3D);
     } catch (e) {
       // console.log(e);
-    }
-  }
-
-  addFoundationToScene(application: Application) {
-    const foundationData = this.boxLayoutMap.get(application.id);
-
-    if (foundationData === undefined) { return; }
-
-    const OPENED_COMPONENT_HEIGHT = 1.5;
-
-    const {
-      foundation: foundationColor,
-      componentOdd: componentOddColor,
-      highlightedEntity: highlightedEntityColor,
-    } = this.configuration.applicationColors;
-
-    const layoutPos = new THREE.Vector3(foundationData.positionX, foundationData.positionY,
-      foundationData.positionZ);
-
-    const mesh = new FoundationMesh(layoutPos, OPENED_COMPONENT_HEIGHT, foundationData.width,
-      foundationData.depth, application, new THREE.Color(foundationColor),
-      new THREE.Color(highlightedEntityColor));
-    this.addMeshToScene(mesh, foundationData, OPENED_COMPONENT_HEIGHT);
-
-    const children = application.get('components');
-
-    children.forEach((child: Component) => {
-      this.addComponentToScene(child, componentOddColor);
-    });
-  }
-
-  addComponentToScene(component: Component, color: string) {
-    const componentData = this.boxLayoutMap.get(component.id);
-
-    if (componentData === undefined) { return; }
-
-    const {
-      componentOdd: componentOddColor, componentEven: componentEvenColor,
-      clazz: clazzColor, highlightedEntity: highlightedEntityColor,
-    } = this.configuration.applicationColors;
-
-    let layoutPos = new THREE.Vector3(componentData.positionX, componentData.positionY,
-      componentData.positionZ);
-
-    const mesh = new ComponentMesh(layoutPos, componentData.height, componentData.width,
-      componentData.depth, component, new THREE.Color(color),
-      new THREE.Color(highlightedEntityColor));
-    this.addMeshToScene(mesh, componentData, componentData.height);
-    this.updateMeshVisiblity(mesh);
-
-    const clazzes = component.get('clazzes');
-    const children = component.get('children');
-
-    clazzes.forEach((clazz: Clazz) => {
-      const clazzData = this.boxLayoutMap.get(clazz.get('id'));
-
-      if (clazzData === undefined) { return; }
-
-      layoutPos = new THREE.Vector3(clazzData.positionX, clazzData.positionY, clazzData.positionZ);
-      const clazzMesh = new ClazzMesh(layoutPos, clazzData.height, clazzData.width, clazzData.depth,
-        clazz, new THREE.Color(clazzColor), new THREE.Color(highlightedEntityColor));
-      this.addMeshToScene(clazzMesh, clazzData, clazzData.height);
-      this.updateMeshVisiblity(clazzMesh);
-    });
-
-    children.forEach((child: Component) => {
-      if (color === componentEvenColor) {
-        this.addComponentToScene(child, componentOddColor);
-      } else {
-        this.addComponentToScene(child, componentEvenColor);
-      }
-    });
-  } // END addComponentToScene
-
-  addMeshToScene(mesh: ComponentMesh | ClazzMesh | FoundationMesh, boxData: any, height: number) {
-    const foundationData = this.boxLayoutMap.get(this.args.application.id);
-
-    if (foundationData === undefined) { return; }
-
-    const centerPoint = new THREE.Vector3(
-      boxData.positionX + boxData.width / 2.0,
-      boxData.positionY + height / 2.0,
-      boxData.positionZ + boxData.depth / 2.0,
-    );
-
-    const applicationCenter = CalcCenterAndZoom(foundationData);
-    centerPoint.sub(applicationCenter);
-
-    mesh.position.copy(centerPoint);
-
-    this.applicationObject3D.add(mesh);
-    this.modelIdToMesh.set(mesh.dataModel.id, mesh);
-  }
-
-  updateMeshVisiblity(mesh: ComponentMesh | ClazzMesh) {
-    let parent: Component;
-    if (mesh instanceof ComponentMesh) {
-      parent = mesh.dataModel.parentComponent;
-    } else {
-      parent = mesh.dataModel.parent;
-    }
-    const parentMesh = this.modelIdToMesh.get(parent.get('id'));
-    if (parentMesh instanceof ComponentMesh) {
-      mesh.visible = parentMesh.opened;
     }
   }
 

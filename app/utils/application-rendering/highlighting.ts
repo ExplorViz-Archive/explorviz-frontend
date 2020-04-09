@@ -10,7 +10,7 @@ import Component from 'explorviz-frontend/models/component';
 import Trace from 'explorviz-frontend/models/trace';
 import TraceStep from 'explorviz-frontend/models/tracestep';
 
-export default class Interaction {
+export default class Highlighting {
   // References to mesh maps of rendering
   modelIdToMesh: Map<string, BaseMesh> = new Map();
 
