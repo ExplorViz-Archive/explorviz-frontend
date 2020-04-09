@@ -552,6 +552,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     const commLayoutMap = applyCommunicationLayout(application, this.boxLayoutMap,
       this.modelIdToMesh);
+
     const {
       communication: communicationColor,
       highlightedEntity: highlightedEntityColor,
@@ -580,7 +581,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       const arrowThickness = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
       const arrowColor = new THREE.Color(arrowColorString).getHex();
 
-      if (typeof arrowThickness === 'number' && arrowThickness > 0.0) { pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColor); }
+      if (typeof arrowThickness === 'number' && arrowThickness > 0.0) {
+        pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColor);
+      }
 
       this.applicationObject3D.add(pipe);
       this.commIdToMesh.set(drawableClazzComm.get('id'), pipe);

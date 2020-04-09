@@ -21,11 +21,6 @@
         @application={{@popupData.entity}}
       />
     {{/if}}
-    {{#if (eq @popupData.entity.constructor.name "ApplicationCommunication")}}
-      <Visualization::Rendering::Popups::LandscapePopups::LandscapeCommunicationPopup
-        @applicationCommunication={{@popupData.entity}}
-      />
-    {{/if}}
 
     {{!-- application popups --}}
     {{#if (eq @popupData.entity.constructor.name "Component")}}
