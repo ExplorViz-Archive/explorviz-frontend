@@ -229,7 +229,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   handleDoubleClick(mesh: THREE.Mesh | undefined) {
-    // Toggle open state of component
+    // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
       if (mesh.opened) {
         this.closeComponentMesh(mesh);
@@ -247,17 +247,20 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleMouseMove(mesh: THREE.Mesh | undefined) {
     const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
+    // Indicate on top of which mesh mouse is located (using a hover effect)
     if (mesh === undefined) {
       this.hoverHandler.resetHoverEffect();
     } else if (mesh instanceof BaseMesh && enableHoverEffects) {
       this.hoverHandler.applyHoverEffect(mesh);
     }
 
+    // Hide popups when mouse moves
     this.popupData = null;
   }
 
   handleMouseWheel(delta: number) {
     this.popupData = null;
+    // Change zoom depending on mouse wheel direction
     this.camera.position.z += delta * 3.5;
   }
 
@@ -269,8 +272,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   } */
 
   handleMouseStop(mesh: THREE.Mesh | undefined, mouseOnCanvas: Position2D) {
-    if (mesh === undefined) { return; }
-
+    // Show information as popup is mouse stopped on top of a mesh
     if ((mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
       || mesh instanceof ClazzCommunicationMesh) && !mesh.dataModel.isDestroyed) {
       this.popupData = {
@@ -635,12 +637,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   cleanUpApplication() {
-    this.modelIdToMesh.forEach((mesh) => {
-      if (mesh instanceof BaseMesh) {
-        mesh.delete();
-      }
-    });
-    this.modelIdToMesh.clear();
+    this.entityRendering.removeAllEntities();
     this.communicationRendering.removeAllCommunication();
   }
 

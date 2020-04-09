@@ -145,4 +145,13 @@ export default class EntityRendering {
       mesh.visible = parentMesh.opened;
     }
   }
+
+  removeAllEntities() {
+    this.modelIdToMesh.forEach((mesh) => {
+      if (mesh instanceof BaseMesh) {
+        mesh.delete();
+      }
+    });
+    this.modelIdToMesh.clear();
+  }
 }
