@@ -29,6 +29,7 @@ import Highlighting from 'explorviz-frontend/utils/application-rendering/highlig
 import EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
 import CommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
+import EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 
 interface Args {
   id: string,
@@ -104,6 +105,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   communicationRendering = new CommunicationRendering(this.modelIdToMesh, this.commIdToMesh,
     this.applicationObject3D, this.configuration, this.currentUser);
+
+  entityManipulation = new EntityManipulation(this.modelIdToMesh, this.communicationRendering,
+    this.highlighter);
 
   @tracked
   popupData: PopupData | null = null;
@@ -232,15 +236,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
       if (mesh.opened) {
-        this.closeComponentMesh(mesh);
+        this.entityManipulation.closeComponentMesh(mesh);
       } else {
-        this.openComponentMesh(mesh);
+        this.entityManipulation.openComponentMesh(mesh);
       }
       this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
       this.highlighter.updateHighlighting(this.args.application);
     // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
-      this.closeAllComponents();
+      this.entityManipulation.closeAllComponents(this.args.application, this.boxLayoutMap);
     }
   }
 
@@ -307,107 +311,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #endregion MOUSE EVENT HANDLER
 
-
-  // #region COMPONENT OPENING AND CLOSING
-
-  closeAllComponents() {
-    this.modelIdToMesh.forEach((mesh) => {
-      if (mesh instanceof ComponentMesh) {
-        this.closeComponentMesh(mesh);
-      }
-    });
-    this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
-    this.highlighter.updateHighlighting(this.args.application);
-  }
-
-  openComponentsRecursively(component: Component) {
-    const components = component.children;
-    components.forEach((child) => {
-      const mesh = this.modelIdToMesh.get(child.get('id'));
-      if (mesh !== undefined && mesh instanceof ComponentMesh) {
-        this.openComponentMesh(mesh);
-      }
-      this.openComponentsRecursively(child);
-    });
-  }
-
-  openComponentMesh(mesh: ComponentMesh) {
-    if (mesh.opened) { return; }
-
-    const HEIGHT_OPENED_COMPONENT = 1.5;
-    mesh.height = HEIGHT_OPENED_COMPONENT;
-
-    // Reset y coordinate
-    mesh.position.y -= mesh.layoutHeight / 2;
-    // Set y coordinate according to open component height
-    mesh.position.y += HEIGHT_OPENED_COMPONENT / 2;
-
-    mesh.opened = true;
-    mesh.visible = true;
-    Labeler.positionBoxLabel(mesh);
-
-    const childComponents = mesh.dataModel.get('children');
-    childComponents.forEach((childComponent) => {
-      const childMesh = this.modelIdToMesh.get(childComponent.get('id'));
-      if (childMesh) {
-        childMesh.visible = true;
-      }
-    });
-
-    const clazzes = mesh.dataModel.get('clazzes');
-    clazzes.forEach((clazz) => {
-      const childMesh = this.modelIdToMesh.get(clazz.get('id'));
-      if (childMesh) {
-        childMesh.visible = true;
-      }
-    });
-  }
-
-  closeComponentMesh(mesh: ComponentMesh) {
-    if (!mesh.opened) { return; }
-
-    const HEIGHT_OPENED_COMPONENT = 1.5;
-    mesh.height = mesh.layoutHeight;
-
-    // Reset y coordinate
-    mesh.position.y -= HEIGHT_OPENED_COMPONENT / 2;
-    // Set y coordinate according to closed component height
-    mesh.position.y += mesh.layoutHeight / 2;
-
-    mesh.opened = false;
-    Labeler.positionBoxLabel(mesh);
-
-    const childComponents = mesh.dataModel.get('children');
-    childComponents.forEach((childComponent) => {
-      const childMesh = this.modelIdToMesh.get(childComponent.get('id'));
-      if (childMesh instanceof ComponentMesh) {
-        childMesh.visible = false;
-        if (childMesh.opened) {
-          this.closeComponentMesh(childMesh);
-        }
-        // Reset highlighting if highlighted entity is no longer visible
-        if (childMesh.highlighted) {
-          this.highlighter.removeHighlighting();
-        }
-      }
-    });
-
-    const clazzes = mesh.dataModel.get('clazzes');
-    clazzes.forEach((clazz) => {
-      const childMesh = this.modelIdToMesh.get(clazz.get('id'));
-      if (childMesh instanceof ClazzMesh) {
-        childMesh.visible = false;
-        // Reset highlighting if highlighted entity is no longer visible
-        if (childMesh.highlighted) {
-          this.highlighter.removeHighlighting();
-        }
-      }
-    });
-  }
-
-  // #endregion COMPONENT OPENING AND CLOSING
-
-
   // #region COMPONENT AND CLAZZ HIGHLIGHTING
 
   @action
@@ -442,7 +345,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
-      ApplicationRendering.resetRotation(this.applicationObject3D);
+      EntityManipulation.resetAppRotation(this.applicationObject3D);
     } catch (e) {
       // console.log(e);
     }
@@ -502,7 +405,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     ancestors.forEach((anc) => {
       const ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
       if (ancestorMesh instanceof ComponentMesh) {
-        this.openComponentMesh(ancestorMesh);
+        this.entityManipulation.openComponentMesh(ancestorMesh);
       }
     });
     this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
@@ -513,7 +416,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   closeComponent(component: Component) {
     const mesh = this.modelIdToMesh.get(component.get('id'));
     if (mesh instanceof ComponentMesh) {
-      this.closeComponentMesh(mesh);
+      this.entityManipulation.closeComponentMesh(mesh);
     }
     this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
     this.highlighter.updateHighlighting(this.args.application);
@@ -524,9 +427,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.args.application.components.forEach((child) => {
       const mesh = this.modelIdToMesh.get(child.get('id'));
       if (mesh !== undefined && mesh instanceof ComponentMesh) {
-        this.openComponentMesh(mesh);
+        this.entityManipulation.openComponentMesh(mesh);
       }
-      this.openComponentsRecursively(child);
+      this.entityManipulation.openComponentsRecursively(child);
     });
 
     this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
@@ -545,68 +448,22 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   moveCameraTo(emberModel: Clazz|ClazzCommunication) {
-    if (!emberModel) {
+    const applicationData = this.boxLayoutMap.get(this.args.application.id);
+
+    if (!emberModel || !applicationData) {
       return;
     }
 
-    // Calculate center point of application
-    const foundationData = this.boxLayoutMap.get(this.args.application.id);
-
-    if (foundationData === undefined) { return; }
-
-    const applicationCenter = foundationData.center;
-
-    if (emberModel instanceof ClazzCommunication) {
-      const sourceClazzMesh = this.modelIdToMesh.get(emberModel.sourceClazz.get('id'));
-      const targetClazzMesh = this.modelIdToMesh.get(emberModel.targetClazz.get('id'));
-
-      if (sourceClazzMesh instanceof ClazzMesh && targetClazzMesh instanceof ClazzMesh) {
-        const sourceLayoutPos = new THREE.Vector3().copy(sourceClazzMesh.layoutPos);
-        const targetLayoutPos = new THREE.Vector3().copy(targetClazzMesh.layoutPos);
-
-        const directionVector = targetLayoutPos.sub(sourceLayoutPos);
-
-        const middleLayoutPos = sourceLayoutPos.add(directionVector.divideScalar(2));
-        this.applyCameraPosition(applicationCenter, this.camera, middleLayoutPos);
-        // Apply zoom
-        this.camera.position.z += 50;
-      }
-    } else {
-      const clazzMesh = this.modelIdToMesh.get(emberModel.get('id'));
-      if (clazzMesh instanceof ClazzMesh) {
-        const layoutPos = new THREE.Vector3().copy(clazzMesh.layoutPos);
-        this.applyCameraPosition(applicationCenter, this.camera, layoutPos);
-        // Apply zoom
-        this.camera.position.z += 25;
-      }
-    }
-  }
-
-  applyCameraPosition(centerPoint: THREE.Vector3, camera: THREE.PerspectiveCamera,
-    layoutPos: THREE.Vector3) {
-    layoutPos.sub(centerPoint);
-    layoutPos.multiplyScalar(0.5);
-
-    const appQuaternion = new THREE.Quaternion();
-
-    this.applicationObject3D.getWorldQuaternion(appQuaternion);
-    layoutPos.applyQuaternion(appQuaternion);
-
-    const appPosition = new THREE.Vector3();
-    this.applicationObject3D.getWorldPosition(appPosition);
-    layoutPos.sub(appPosition);
-
-    // Move camera on to given position
-    camera.position.set(layoutPos.x, layoutPos.y, layoutPos.z);
+    this.entityManipulation.moveCameraTo(emberModel, applicationData.center,
+      this.camera, this.applicationObject3D);
   }
 
   @action
   resetView() {
     this.highlighter.removeHighlighting();
-    this.closeAllComponents();
-    this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
+    this.entityManipulation.closeAllComponents(this.args.application, this.boxLayoutMap);
     this.camera.position.set(0, 0, 100);
-    ApplicationRendering.resetRotation(this.applicationObject3D);
+    EntityManipulation.resetAppRotation(this.applicationObject3D);
   }
 
   @action
@@ -653,14 +510,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #endregion COMPONENT AND SCENE CLEAN-UP
 
   // #region ADDITIONAL HELPER FUNCTIONS
-
-  static resetRotation(application: THREE.Object3D) {
-    const ROTATION_X = 0.65;
-    const ROTATION_Y = 0.80;
-
-    application.rotation.x = ROTATION_X;
-    application.rotation.y = ROTATION_Y;
-  }
 
   static convertToBoxLayoutMap(layoutedApplication: Map<string, LayoutData>) {
     const boxLayoutMap: Map<string, BoxLayout> = new Map();
