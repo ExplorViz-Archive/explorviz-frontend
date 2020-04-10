@@ -8,8 +8,7 @@ import Clazz from 'explorviz-frontend/models/clazz';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import Component from 'explorviz-frontend/models/component';
 import Configuration from 'explorviz-frontend/services/configuration';
-import { BoxLayout } from 'explorviz-frontend/components/visualization/rendering/application-rendering';
-import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
+import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 
 
 export default class EntityRendering {
@@ -56,7 +55,7 @@ export default class EntityRendering {
       foundationData.depth, application, new THREE.Color(foundationColor),
       new THREE.Color(highlightedEntityColor));
 
-    const applicationCenter = CalcCenterAndZoom(foundationData);
+    const applicationCenter = foundationData.center;
 
     this.addMeshToScene(mesh, applicationCenter);
 
@@ -70,8 +69,9 @@ export default class EntityRendering {
   addComponentAndChildrenToScene(component: Component, color: string,
     boxLayoutMap: Map<string, BoxLayout>, application: Application) {
     const componentData = boxLayoutMap.get(component.id);
+    const foundationData = boxLayoutMap.get(application.id);
 
-    if (componentData === undefined) { return; }
+    if (componentData === undefined || foundationData === undefined) { return; }
 
     const {
       componentOdd: componentOddColor, componentEven: componentEvenColor,
@@ -85,8 +85,7 @@ export default class EntityRendering {
       componentData.depth, component, new THREE.Color(color),
       new THREE.Color(highlightedEntityColor));
 
-    const foundationData = boxLayoutMap.get(application.id);
-    const applicationCenter = CalcCenterAndZoom(foundationData);
+    const applicationCenter = foundationData.center;
 
     this.addMeshToScene(mesh, applicationCenter);
     this.updateMeshVisiblity(mesh);

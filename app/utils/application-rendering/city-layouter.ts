@@ -1,5 +1,4 @@
 import THREE from "three";
-import { BoxLayout } from "explorviz-frontend/components/visualization/rendering/application-rendering";
 import CommunicationLayout from "../../view-objects/layout-models/communication-layout";
 import FoundationMesh from "../../view-objects/3d/application/foundation-mesh";
 import Application from "explorviz-frontend/models/application";
@@ -7,6 +6,7 @@ import Component from "explorviz-frontend/models/component";
 import Clazz from "explorviz-frontend/models/clazz";
 import ComponentMesh from "../../view-objects/3d/application/component-mesh";
 import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
+import BoxLayout from "explorviz-frontend/view-objects/layout-models/box-layout";
 
 // Communication Layouting //
 export function applyCommunicationLayout(application: Application,

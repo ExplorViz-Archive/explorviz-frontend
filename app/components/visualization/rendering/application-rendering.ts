@@ -7,7 +7,6 @@ import { inject as service } from '@ember/service';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import DS from 'ember-data';
 import Configuration from 'explorviz-frontend/services/configuration';
@@ -29,6 +28,7 @@ import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
 import CommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
+import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 
 interface Args {
   id: string,
@@ -43,7 +43,7 @@ type PopupData = {
   entity: Component | Clazz | DrawableClazzCommunication
 };
 
-export type BoxLayout = {
+type LayoutData = {
   height: number,
   width: number,
   depth: number,
@@ -431,12 +431,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const reducedApplication = reduceApplication(this.args.application);
 
     try {
-      const layoutedApplication: Map<string, BoxLayout> = await this.worker.postMessage('city-layouter', reducedApplication);
-      this.boxLayoutMap = layoutedApplication;
+      const layoutedApplication: Map<string, LayoutData> = await this.worker.postMessage('city-layouter', reducedApplication);
+
+      // Converting plain JSON layout data due to worker limitations
+      this.boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
 
       this.entityRendering.addFoundationAndChildrenToScene(this.args.application,
-        layoutedApplication);
-      this.communicationRendering.addCommunication(this.args.application, layoutedApplication);
+        this.boxLayoutMap);
+      this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
@@ -552,7 +554,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     if (foundationData === undefined) { return; }
 
-    const applicationCenter = CalcCenterAndZoom(foundationData);
+    const applicationCenter = foundationData.center;
 
     if (emberModel instanceof ClazzCommunication) {
       const sourceClazzMesh = this.modelIdToMesh.get(emberModel.sourceClazz.get('id'));
@@ -658,6 +660,23 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     application.rotation.x = ROTATION_X;
     application.rotation.y = ROTATION_Y;
+  }
+
+  static convertToBoxLayoutMap(layoutedApplication: Map<string, LayoutData>) {
+    const boxLayoutMap: Map<string, BoxLayout> = new Map();
+
+    layoutedApplication.forEach((value, key) => {
+      const boxLayout = new BoxLayout();
+      boxLayout.positionX = value.positionX;
+      boxLayout.positionY = value.positionY;
+      boxLayout.positionZ = value.positionZ;
+      boxLayout.width = value.width;
+      boxLayout.height = value.height;
+      boxLayout.depth = value.depth;
+      boxLayoutMap.set(key, boxLayout);
+    });
+
+    return boxLayoutMap;
   }
 
   // #endregion ADDITIONAL HELPER FUNCTIONS

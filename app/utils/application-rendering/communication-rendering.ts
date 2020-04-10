@@ -4,9 +4,8 @@ import Application from 'explorviz-frontend/models/application';
 import THREE from 'three';
 import { applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
 import Configuration from 'explorviz-frontend/services/configuration';
-import { BoxLayout } from 'explorviz-frontend/components/visualization/rendering/application-rendering';
-import CalcCenterAndZoom from 'explorviz-frontend/utils/application-rendering/center-and-zoom-calculator';
 import CurrentUser from 'explorviz-frontend/services/current-user';
+import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 
 
 export default class CommunicationRendering {
@@ -41,7 +40,7 @@ export default class CommunicationRendering {
       return;
     }
 
-    const viewCenterPoint = CalcCenterAndZoom(foundationData);
+    const viewCenterPoint = foundationData.center;
 
     // Remove old communication
     this.removeAllCommunication();
