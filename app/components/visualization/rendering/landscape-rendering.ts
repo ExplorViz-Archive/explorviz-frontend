@@ -137,7 +137,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.initDone = true;
 
-    this.populateScene.perform();
+    this.loadNewLandscape.perform();
   }
 
   @action
@@ -305,7 +305,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  *
  * @method populateScene
  */
-  @task({ enqueue: true })
+  @task({ restartable: true })
   // eslint-disable-next-line
   populateScene = task(function* (this: LandscapeRendering) {
     this.debug('populate landscape-rendering');
