@@ -1,7 +1,7 @@
 import Service, { inject as service } from '@ember/service';
 import config from 'explorviz-frontend/config/environment';
 import Evented from '@ember/object/evented';
-import * as ModelUpdater from 'explorviz-frontend/utils/model-update';
+import addDrawableCommunication from 'explorviz-frontend/utils/model-update';
 import debugLogger from 'ember-debug-logger';
 import DS from 'ember-data';
 import { set } from '@ember/object';
@@ -77,7 +77,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
           set(this, 'latestJsonLandscape', jsonLandscape);
           const landscapeRecord = this.store.push(jsonLandscape) as Landscape;
 
-          ModelUpdater.addDrawableCommunication(this.store);
+          addDrawableCommunication(this.store);
 
           set(this.landscapeRepo, 'latestLandscape', landscapeRecord);
           this.landscapeRepo.triggerLatestLandscapeUpdate();

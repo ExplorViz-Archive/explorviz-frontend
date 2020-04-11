@@ -3,7 +3,7 @@ import Evented from '@ember/object/evented';
 
 import debugLogger from 'ember-debug-logger';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import * as ModelUpdater from 'explorviz-frontend/utils/model-update';
+import addDrawableCommunication from 'explorviz-frontend/utils/model-update';
 import DS from 'ember-data';
 import { set } from '@ember/object';
 import Landscape from 'explorviz-frontend/models/landscape';
@@ -33,7 +33,7 @@ export default class ReloadHandler extends Service.extend(Evented) {
     function success(landscape: Landscape) {
       // Pause the visualization
       self.landscapeListener.stopVisualizationReload();
-      ModelUpdater.addDrawableCommunication(self.store);
+      addDrawableCommunication(self.store);
 
       set(self.landscapeRepo, 'latestLandscape', landscape);
       self.landscapeRepo.triggerLatestLandscapeUpdate();
@@ -68,7 +68,7 @@ export default class ReloadHandler extends Service.extend(Evented) {
 
     function success(landscape: Landscape) {
       // Pause the visualization
-      ModelUpdater.addDrawableCommunication(self.store);
+      addDrawableCommunication(self.store);
 
       set(self.landscapeRepo, 'replayLandscape', landscape);
       self.landscapeRepo.triggerLatestReplayLandscapeUpdate();

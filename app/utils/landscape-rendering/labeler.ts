@@ -3,17 +3,18 @@ import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/applic
 import PlaneLabelMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-label-mesh';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
-import NodeGroupMesh from "explorviz-frontend/view-objects/3d/landscape/nodegroup-mesh";
+import NodeGroupMesh from 'explorviz-frontend/view-objects/3d/landscape/nodegroup-mesh';
 
 /**
  * Creates a label and adds it at a calculated position to the given system mesh
- * 
+ *
  * @param systemMesh The mesh which shall be labeled
  * @param text Desired text
  * @param font Desired font of the text
  * @param color Desired color of the text
  */
-export function addSystemTextLabel(systemMesh: SystemMesh, text: string, font: THREE.Font, color: THREE.Color) {
+export function addSystemTextLabel(systemMesh: SystemMesh, text: string, font: THREE.Font,
+  color: THREE.Color) {
   const labelMesh = new PlaneLabelMesh(font, text, 0.4, color);
 
   systemMesh.geometry.computeBoundingBox();
@@ -34,14 +35,15 @@ export function addSystemTextLabel(systemMesh: SystemMesh, text: string, font: T
 }
 
 /**
- * Creates a label with a collapse symbol and adds it at a calculated 
+ * Creates a label with a collapse symbol and adds it at a calculated
  * position to the given mesh
- * 
+ *
  * @param entityMesh Mesh which shall be labeled with a collapse symbol
  * @param font Desired font of the text
  * @param color Desired color of the text
  */
-export function addCollapseSymbol(entityMesh: SystemMesh | NodeGroupMesh, font: THREE.Font, color: THREE.Color) {
+export function addCollapseSymbol(entityMesh: SystemMesh | NodeGroupMesh, font: THREE.Font,
+  color: THREE.Color) {
   const collapseSymbol = entityMesh.opened ? '-' : '+';
   const collapseSymbolMesh = new PlaneLabelMesh(font, collapseSymbol, 0.35, color);
 
@@ -59,13 +61,14 @@ export function addCollapseSymbol(entityMesh: SystemMesh | NodeGroupMesh, font: 
 
 /**
  * Creates a label and adds it at a calculated position to the given node mesh
- * 
+ *
  * @param nodeMesh The mesh which shall be labeled
  * @param text Desired text
  * @param font Desired font of the text
  * @param color Desired color of the text
  */
-export function addNodeTextLabel(nodeMesh: NodeMesh, text: string, font: THREE.Font, color: THREE.Color) {
+export function addNodeTextLabel(nodeMesh: NodeMesh, text: string, font: THREE.Font,
+  color: THREE.Color) {
   const labelMesh = new PlaneLabelMesh(font, text, 0.22, color);
 
   nodeMesh.geometry.computeBoundingBox();
@@ -87,13 +90,13 @@ export function addNodeTextLabel(nodeMesh: NodeMesh, text: string, font: THREE.F
 
 /**
  * Creates a label and adds it at a calculated position to the given application mesh
- * 
+ *
  * @param applicationMesh The mesh which shall be labeled
  * @param text Desired text
  * @param font Desired font of the text
  * @param color Desired color of the text
  */
-export function addApplicationTextLabel(applicationMesh: ApplicationMesh, text: string, 
+export function addApplicationTextLabel(applicationMesh: ApplicationMesh, text: string,
   font: THREE.Font, color: THREE.Color) {
   const labelMesh = new PlaneLabelMesh(font, text, 0.25, color);
 
@@ -103,8 +106,7 @@ export function addApplicationTextLabel(applicationMesh: ApplicationMesh, text: 
   labelMesh.geometry.computeBoundingBox();
   const labelBoundingBox = labelMesh.geometry.boundingBox;
 
-  const labelHeight = Math.abs(labelBoundingBox.max.y) -
-    Math.abs(labelBoundingBox.min.y);
+  const labelHeight = Math.abs(labelBoundingBox.max.y) - Math.abs(labelBoundingBox.min.y);
 
   const PADDING_LEFT = 0.1;
 
@@ -117,9 +119,9 @@ export function addApplicationTextLabel(applicationMesh: ApplicationMesh, text: 
 }
 
 /**
- * Calculates position of application logo and uses imageloader 
+ * Calculates position of application logo and uses imageloader
  * to add the logo to the application mesh
- * 
+ *
  * @param applicationMesh Mesh of application which shall be labeled
  * @param imageLoader Creates or returns cached image
  */
@@ -130,7 +132,7 @@ export function addApplicationLogo(applicationMesh: ApplicationMesh, imageLoader
 
   const logoSize = {
     width: 0.4,
-    height: 0.4
+    height: 0.4,
   };
 
   const appBBox = applicationMesh.geometry.boundingBox;
@@ -146,5 +148,5 @@ export function addApplicationLogo(applicationMesh: ApplicationMesh, imageLoader
 
   // Create and add image to application mesh
   imageLoader.createPicture(logoPos, logoSize.width, logoSize.height,
-    texturePartialPath, applicationMesh, "label");
+    texturePartialPath, applicationMesh, 'label');
 }
