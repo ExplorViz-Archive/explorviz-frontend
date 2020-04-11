@@ -98,16 +98,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   hoverHandler = new HoverEffectHandler();
 
-  highlighter = new Highlighting(this.modelIdToMesh, this.commIdToMesh);
+  highlighter: Highlighting;
 
-  entityRendering = new EntityRendering(this.modelIdToMesh, this.commIdToMesh,
-    this.applicationObject3D, this.configuration);
+  entityRendering: EntityRendering;
 
-  communicationRendering = new CommunicationRendering(this.modelIdToMesh, this.commIdToMesh,
-    this.applicationObject3D, this.configuration, this.currentUser);
+  communicationRendering: CommunicationRendering;
 
-  entityManipulation = new EntityManipulation(this.modelIdToMesh, this.communicationRendering,
-    this.highlighter);
+  entityManipulation: EntityManipulation;
 
   @tracked
   popupData: PopupData | null = null;
@@ -123,6 +120,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Constructor called');
 
     this.render = this.render.bind(this);
+
+    this.highlighter = new Highlighting(this.modelIdToMesh, this.commIdToMesh);
+
+    this.entityRendering = new EntityRendering(this.modelIdToMesh, this.commIdToMesh,
+      this.applicationObject3D, this.configuration);
+
+    this.communicationRendering = new CommunicationRendering(this.modelIdToMesh, this.commIdToMesh,
+      this.applicationObject3D, this.configuration, this.currentUser);
+
+    this.entityManipulation = new EntityManipulation(this.modelIdToMesh,
+      this.communicationRendering, this.highlighter);
   }
 
   @action
