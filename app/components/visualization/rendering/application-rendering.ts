@@ -468,8 +468,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   resetView() {
-    this.highlighter.removeHighlighting();
-    this.entityManipulation.closeAllComponents(this.args.application, this.boxLayoutMap);
     this.camera.position.set(0, 0, 100);
     EntityManipulation.resetAppRotation(this.applicationObject3D);
   }

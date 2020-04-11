@@ -109,6 +109,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   reducedLandscape: ReducedLandscape|null = null;
 
+  modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
+
   @tracked
   popupData: PopupData | null = null;
 
@@ -276,9 +278,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // Listener-Callbacks. Override in extending components
   @action
-  onReSetupScene() {
-    this.camera.position.set(0, 0, 0);
-    this.cleanAndUpdateScene();
+  resetView() {
+    if (this.modelIdToPlaneLayout) {
+      this.camera.position.set(0, 0, 0);
+      const landscapeRect = this.landscapeObject3D.getMinMaxRect(this.modelIdToPlaneLayout);
+
+      updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
+    }
   }
 
   @action
@@ -340,6 +346,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       const { modelIdToLayout, modelIdToPoints: modelIdToPointsComplete } = layoutedLandscape;
 
       const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
+
+      this.modelIdToPlaneLayout = modelIdToPlaneLayout;
 
       modelIdToLayout.forEach((simplePlaneLayout: SimplePlaneLayout, modelId: string) => {
         const planeLayoutObject = new PlaneLayout();
