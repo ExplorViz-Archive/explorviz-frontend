@@ -32,7 +32,6 @@ import Node from 'explorviz-frontend/models/node';
 import PlaneMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-mesh';
 import { reduceLandscape, ReducedLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
 import { task } from 'ember-concurrency-decorators';
-import PopupHandler from 'explorviz-frontend/utils/landscape-rendering/popup-handler';
 import { tracked } from '@glimmer/tracking';
 
 
@@ -114,8 +113,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
 
-  popUpHandler: PopupHandler = new PopupHandler();
-
   reducedLandscape: ReducedLandscape|null = null;
 
   @tracked
@@ -146,7 +143,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.initDone = true;
 
-    this.populateScene.perform();
+    this.loadNewLandscape.perform();
   }
 
   @action
@@ -264,8 +261,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.debug('cleanup landscape rendering');
 
-    this.imageLoader.logos = {};
-
     this.interaction.removeHandlers();
   }
 
@@ -345,7 +340,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  *
  * @method populateScene
  */
-  @task({ enqueue: true })
+  @task({ restartable: true })
   // eslint-disable-next-line
   populateScene = task(function* (this: LandscapeRendering) {
     this.debug('populate landscape-rendering');
