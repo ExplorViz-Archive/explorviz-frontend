@@ -32,8 +32,8 @@ import Node from 'explorviz-frontend/models/node';
 import PlaneMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-mesh';
 import { reduceLandscape, ReducedLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
 import { task } from 'ember-concurrency-decorators';
-import PopupHandler from 'explorviz-frontend/utils/landscape-rendering/popup-handler';
 import { tracked } from '@glimmer/tracking';
+import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 
 
 interface Args {
@@ -86,7 +86,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   scene!: THREE.Scene;
 
-  landscapeObject3D = new THREE.Object3D();
+  landscapeObject3D = new LandscapeObject3D(this.args.landscape);
 
   webglrenderer!: THREE.WebGLRenderer;
 
@@ -106,15 +106,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   imageLoader: ImageLoader = new ImageLoader();
 
-  modelIdToMesh: Map<string, THREE.Mesh> = new Map();
-
-  systemMeshes: Set<SystemMesh> = new Set();
-
-  nodeGroupMeshes: Set<NodeGroupMesh> = new Set();
-
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
-
-  popUpHandler: PopupHandler = new PopupHandler();
 
   reducedLandscape: ReducedLandscape|null = null;
 
@@ -264,8 +256,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.debug('cleanup landscape rendering');
 
-    this.imageLoader.logos = {};
-
     this.interaction.removeHandlers();
   }
 
@@ -279,41 +269,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  */
   @action
   cleanAndUpdateScene() {
-    this.cleanScene();
+    this.landscapeObject3D.removeAllChildren();
     this.populateScene.perform();
 
     this.debug('clean and populate landscape-rendering');
   }
-
-  cleanScene() {
-    function removeAllChildren(entity: THREE.Object3D | THREE.Mesh) {
-      for (let i = entity.children.length - 1; i >= 0; i--) {
-        const child = entity.children[i];
-
-        removeAllChildren(child);
-
-        if (!(child instanceof THREE.Light)) {
-          if (child instanceof THREE.Mesh) {
-            child.geometry.dispose();
-            if (child.material instanceof THREE.Material) {
-              child.material.dispose();
-            } else {
-              for (let j = 0; j < child.material.length; j++) {
-                const material = child.material[j];
-                material.dispose();
-              }
-            }
-          }
-          entity.remove(child);
-        }
-      }
-    }
-
-    const { landscapeObject3D } = this;
-
-    removeAllChildren(landscapeObject3D);
-  }
-
 
   // Listener-Callbacks. Override in extending components
   @action
@@ -333,8 +293,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   // eslint-disable-next-line
   loadNewLandscape = task(function* (this: LandscapeRendering) {
     const emberLandscape = this.args.landscape;
+    this.landscapeObject3D.dataModel = emberLandscape;
+    this.landscapeObject3D.removeAllChildren();
     this.reducedLandscape = reduceLandscape(emberLandscape);
-    this.cleanScene();
     yield this.populateScene.perform();
   });
 
@@ -351,12 +312,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('populate landscape-rendering');
 
     const emberLandscape = this.args.landscape;
+    this.landscapeObject3D.dataModel = emberLandscape;
 
     if (!emberLandscape || !this.font) {
       return;
     }
 
-    const openEntitiesIds = this.computeOpenEntities();
+    const openEntitiesIds = this.landscapeObject3D.openEntityIds;
 
     try {
       const {
@@ -374,9 +336,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       });
 
       // Reset mesh related data structures
-      this.modelIdToMesh.clear();
-      this.systemMeshes.clear();
-      this.nodeGroupMeshes.clear();
+      this.landscapeObject3D.resetMeshReferences();
 
       const { modelIdToLayout, modelIdToPoints: modelIdToPointsComplete } = layoutedLandscape;
 
@@ -443,25 +403,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   });
 
-  computeOpenEntities() {
-    const openEntitiesIds: Set<string> = new Set();
-
-    const { systemMeshes, nodeGroupMeshes } = this;
-    systemMeshes.forEach((systemMesh) => {
-      if (systemMesh.opened) {
-        openEntitiesIds.add(systemMesh.dataModel.id);
-      }
-    });
-
-    nodeGroupMeshes.forEach((nodeGroupMesh) => {
-      if (nodeGroupMesh.opened) {
-        openEntitiesIds.add(nodeGroupMesh.dataModel.id);
-      }
-    });
-
-    return openEntitiesIds;
-  }
-
   renderSystem(system: System, layout: PlaneLayout | undefined,
     centerPoint: THREE.Vector3) {
     if (!layout) { return; }
@@ -479,8 +420,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Add to scene
     this.landscapeObject3D.add(systemMesh);
-    this.systemMeshes.add(systemMesh);
-    this.modelIdToMesh.set(system.get('id'), systemMesh);
   }
 
   renderNodeGroup(nodeGroup: NodeGroup, layout: PlaneLayout | undefined,
@@ -498,8 +437,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Add to scene
     this.landscapeObject3D.add(nodeGroupMesh);
-    this.nodeGroupMeshes.add(nodeGroupMesh);
-    this.modelIdToMesh.set(nodeGroup.get('id'), nodeGroupMesh);
   }
 
   renderNode(node: Node, layout: PlaneLayout | undefined,
@@ -513,7 +450,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     // Create and add label + icon
     nodeMesh.setToDefaultPosition(centerPoint);
 
-    const nodeGroupMesh = this.modelIdToMesh.get(node.get('parent').get('id'));
+    const nodeGroupId = node.get('parent').get('id');
+    const nodeGroupMesh = this.landscapeObject3D.getMeshbyModelId(nodeGroupId);
 
     // Label with own ip-address by default
     const labelText = nodeMesh.getDisplayName(nodeGroupMesh);
@@ -524,7 +462,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Add to scene
     this.landscapeObject3D.add(nodeMesh);
-    this.modelIdToMesh.set(node.get('id'), nodeMesh);
   }
 
   renderApplication(application: Application, layout: PlaneLayout | undefined,
@@ -543,7 +480,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Add to scene
     this.landscapeObject3D.add(applicationMesh);
-    this.modelIdToMesh.set(application.get('id'), applicationMesh);
   }
 
   @action
@@ -578,7 +514,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       // Close nodegroups in system
       if (!mesh.opened) {
         system.get('nodegroups').forEach((nodeGroup) => {
-          const nodeGroupMesh = this.modelIdToMesh.get(nodeGroup.get('id'));
+          const nodeGroupMesh = this.landscapeObject3D.getMeshbyModelId(nodeGroup.get('id'));
           if (nodeGroupMesh instanceof NodeGroupMesh) {
             nodeGroupMesh.opened = false;
           }
