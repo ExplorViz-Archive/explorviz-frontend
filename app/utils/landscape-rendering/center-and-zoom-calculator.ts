@@ -3,57 +3,23 @@ import Landscape from 'explorviz-frontend/models/landscape';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import NodeGroup from 'explorviz-frontend/models/nodegroup';
 import Node from 'explorviz-frontend/models/node';
-
-export function getMinMaxFromQuad(layout: PlaneLayout, rect: number[]) {
-  // Semantics of rect entries
-  const MIN_X = 0;
-  const MAX_X = 1;
-  const MIN_Y = 2;
-  const MAX_Y = 3;
-
-  const curX = layout.positionX;
-  const curY = layout.positionY;
-
-  if (curX < rect[MIN_X]) {
-    rect[MIN_X] = curX;
-  }
-  if (rect[MAX_X] < curX + layout.width) {
-    rect[MAX_X] = curX + layout.width;
-  }
-  if (curY > rect[MAX_Y]) {
-    rect[MAX_Y] = curY;
-  }
-  if (rect[MIN_Y] > curY - layout.height) {
-    rect[MIN_Y] = curY - layout.height;
-  }
-}
+import MinMaxRectangle from 'explorviz-frontend/view-objects/layout-models/min-max-rectangle';
 
 export function getLandscapeRect(emberLandscape: Landscape,
   modelIdToLayout: Map<string, PlaneLayout>) {
-  // Semantics of rect entries
-  const MIN_X = 0;
-  const MAX_X = 1;
-  const MIN_Y = 2;
-  const MAX_Y = 3;
-
-  const rect: number[] = [];
-  rect.push(Number.MAX_VALUE);
-  rect.push(-Number.MAX_VALUE);
-  rect.push(Number.MAX_VALUE);
-  rect.push(-Number.MAX_VALUE);
+  // Rectangle which can be used to find smallest and greatest x/y coordinates
+  const rect = new MinMaxRectangle();
 
   const systems = emberLandscape.get('systems');
 
   if (systems.get('length') === 0) {
-    rect[MIN_X] = 0.0;
-    rect[MAX_X] = 1.0;
-    rect[MIN_Y] = 0.0;
-    rect[MAX_Y] = 1.0;
+    rect.setMinValues(0, 0);
+    rect.setMaxValues(1, 1);
   } else {
     systems.forEach((system: any) => {
       const systemLayout = modelIdToLayout.get(system.get('id'));
       if (systemLayout) {
-        getMinMaxFromQuad(systemLayout, rect);
+        rect.setMinMaxFromLayout(systemLayout);
       }
 
       const nodegroups = system.get('nodegroups');
@@ -62,7 +28,7 @@ export function getLandscapeRect(emberLandscape: Landscape,
         nodes.forEach((node: Node) => {
           const nodeLayout = modelIdToLayout.get(node.get('id'));
           if (nodeLayout) {
-            getMinMaxFromQuad(nodeLayout, rect);
+            rect.setMinMaxFromLayout(nodeLayout);
           }
         });
       });
@@ -73,22 +39,14 @@ export function getLandscapeRect(emberLandscape: Landscape,
 
 export function calculateLandscapeCenterAndZZoom(emberLandscape: Landscape,
   modelIdToLayout: Map<string, PlaneLayout>, renderer: THREE.WebGLRenderer) {
-  // Semantics of rect entries
-  const MIN_X = 0;
-  const MAX_X = 1;
-  const MIN_Y = 2;
-  const MAX_Y = 3;
-
-  const EXTRA_SPACE_IN_PERCENT = 0.02;
+  // Add 2% to calculated space
+  const EXTRA_SPACE_IN_PERCENT = 1.02;
   const SIZE_FACTOR = 0.65;
 
   const rect = getLandscapeRect(emberLandscape, modelIdToLayout);
 
-  let requiredWidth = Math.abs(rect.get(MAX_X) - rect.get(MIN_X));
-  requiredWidth += requiredWidth * EXTRA_SPACE_IN_PERCENT;
-
-  let requiredHeight = Math.abs(rect.get(MAX_Y) - rect.get(MIN_Y));
-  requiredHeight += requiredHeight * EXTRA_SPACE_IN_PERCENT;
+  const requiredWidth = rect.width * EXTRA_SPACE_IN_PERCENT;
+  const requiredHeight = rect.height * EXTRA_SPACE_IN_PERCENT;
 
   const viewPortSize = new THREE.Vector2();
   renderer.getSize(viewPortSize);
@@ -99,8 +57,11 @@ export function calculateLandscapeCenterAndZZoom(emberLandscape: Landscape,
   const newZByHeight = requiredHeight * SIZE_FACTOR;
   const cameraZ = Math.max(newZByHeight, newZByWidth, 10.0);
 
-  const center = new THREE.Vector3(rect.get(MIN_X) + ((rect.get(MAX_X) - rect.get(MIN_X)) / 2.0),
-    rect.get(MIN_Y) + ((rect.get(MAX_Y) - rect.get(MIN_Y)) / 2.0), cameraZ);
+  const center = new THREE.Vector3(
+    rect.min_x + ((rect.max_x - rect.min_x) / 2.0),
+    rect.min_y + ((rect.max_y - rect.min_y) / 2.0),
+    cameraZ,
+  );
 
   return center;
 }
