@@ -10,11 +10,13 @@ import Component from 'explorviz-frontend/models/component';
 import Trace from 'explorviz-frontend/models/trace';
 import TraceStep from 'explorviz-frontend/models/tracestep';
 
-export default class Interaction {
+export default class Highlighting {
   // References to mesh maps of rendering
   modelIdToMesh: Map<string, BaseMesh> = new Map();
 
   commIdToMesh: Map<string, ClazzCommunicationMesh> = new Map();
+
+  highlightedEntity: BaseMesh | null = null;
 
   constructor(modelIdToMesh: Map<string, BaseMesh>,
     commIdToMesh: Map<string, ClazzCommunicationMesh>) {
@@ -23,9 +25,9 @@ export default class Interaction {
   }
 
   highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMesh,
-    application: Application): void {
+    application: Application, toggleHighlighting = true): void {
     // Reset highlighting if highlighted mesh is clicked
-    if (mesh.highlighted) {
+    if (mesh.highlighted && toggleHighlighting) {
       this.removeHighlighting();
       return;
     }
@@ -36,6 +38,7 @@ export default class Interaction {
 
     // Highlight the entity itself
     mesh.highlight();
+    this.highlightedEntity = mesh;
 
     // All clazzes in application
     const allClazzesAsArray = application.getAllClazzes();
@@ -171,6 +174,20 @@ export default class Interaction {
     });
   }
 
+  updateHighlighting(application: Application) {
+    const { highlightedEntity } = this;
+
+    if (!highlightedEntity) {
+      return;
+    }
+
+    if (highlightedEntity instanceof ClazzMesh
+        || highlightedEntity instanceof ComponentMesh
+        || highlightedEntity instanceof ClazzCommunicationMesh) {
+      this.highlight(highlightedEntity, application, false);
+    }
+  }
+
   removeHighlighting() {
     const boxMeshes = Array.from(this.modelIdToMesh.values());
     const commMeshes = Array.from(this.commIdToMesh.values());
@@ -181,6 +198,7 @@ export default class Interaction {
         mesh.unhighlight();
       }
     }
+    this.highlightedEntity = null;
   }
 
   turnComponentAndAncestorsTransparent(component: Component, ignorableComponents: Set<Component>) {
