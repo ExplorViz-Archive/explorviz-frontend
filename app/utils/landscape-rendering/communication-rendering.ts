@@ -169,7 +169,6 @@ function categorizeByThreshold(requestMap: Map<number, number>) {
  * @param isLinear Whether to use linear (continious) or threshold based categories
  */
 function getCategories(requestMap: Map<number, number>, isLinear: boolean) {
-
   if (isLinear) {
     linearCategorization(requestMap);
   } else {

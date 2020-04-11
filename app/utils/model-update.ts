@@ -4,46 +4,37 @@ import AggregatedClazzCommunication from 'explorviz-frontend/models/aggregatedcl
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 
 /**
- * Computes (possibly) bidirectional drawable communication from 
+ * Computes (possibly) bidirectional drawable communication from
  * aggregated communication and adds it to the store.
- * 
+ *
  * @param store Used to access applications etc.
  */
-export function addDrawableCommunication(store: DS.Store) {
-  // Remove outdated communication from store
-  store.unloadAll('drawableclazzcommunication');
-
-  let applications = store.peekAll('application');
-
-  applications.forEach((application: Application) => {
-    // Reset relationship in application
-    application.set('drawableClazzCommunications', []);
-
-    let aggregatedComms = application.get('aggregatedClazzCommunications');
-    aggregatedComms.forEach((aggregatedComm) => {
-
-      let possibleExistingComm = checkForExistingComm(application, aggregatedComm);
-
-      if (possibleExistingComm) {
-        updateExistingDrawableComm(possibleExistingComm, aggregatedComm);
-      } else {
-        addNewDrawableCommunication(application, aggregatedComm);
-      }
+export default function addDrawableCommunication(store: DS.Store) {
+  /**
+   * Generates a unique string ID
+   */
+  //  See: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+  function uuidv4() {
+    /* eslint-disable */
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
     });
-  });
-
+    /* eslint-enable */
+  }
 
   /**
    * Takes a aggregated communication and computes a new drawable communication using it.
-   * 
+   *
    * @param application Application to which the communication belongs
    * @param aggregatedComm Aggregated communication which is used to compute drawable communication
    */
-  function addNewDrawableCommunication(application: Application, aggregatedComm: AggregatedClazzCommunication) {
+  function addNewDrawableCommunication(application: Application,
+    aggregatedComm: AggregatedClazzCommunication) {
     const UNIQUE_ID = uuidv4();
 
     // Create record of drawable communication
-    let drawableComm = store.createRecord('drawableclazzcommunication', {
+    const drawableComm = store.createRecord('drawableclazzcommunication', {
       id: UNIQUE_ID,
       requests: aggregatedComm.get('totalRequests'),
       averageResponseTime: aggregatedComm.get('averageResponseTime'),
@@ -62,14 +53,15 @@ export function addDrawableCommunication(store: DS.Store) {
   /**
    * Takes an existing unidirectional drawable communication and adds a aggregated communication
    * to it such that it becomes bidirectional.
-   * 
+   *
    * @param existingCommunication Drawable communication which is unidirectional up to now
    * @param aggregatedComm Newly discovered aggregated communication
    */
-  function updateExistingDrawableComm(existingCommunication: DrawableClazzCommunication, aggregatedComm: AggregatedClazzCommunication) {
+  function updateExistingDrawableComm(existingCommunication: DrawableClazzCommunication,
+    aggregatedComm: AggregatedClazzCommunication) {
     const existingRequests = existingCommunication.get('requests');
-    const newAverageResponseTime =
-      (existingCommunication.get('averageResponseTime') + aggregatedComm.get('averageResponseTime')) / 2;
+    const newAverageResponseTime = (existingCommunication.get('averageResponseTime')
+      + aggregatedComm.get('averageResponseTime')) / 2;
 
     // Adapt properties of existing drawable communication
     existingCommunication.set('requests', existingRequests + aggregatedComm.get('totalRequests'));
@@ -83,18 +75,19 @@ export function addDrawableCommunication(store: DS.Store) {
   /**
    * Checks for a given aggregated communication if there already exists a corresponding
    * drawable communication which would imply bidirectionality.
-   * 
+   *
    * @param application Application which is to be checked for communication
-   * @param aggregatedComm 
+   * @param aggregatedComm
    */
-  function checkForExistingComm(application: Application, aggregatedComm: AggregatedClazzCommunication) {
-    let drawableComms = application.get('drawableClazzCommunications');
-    let possibleCommunication : DrawableClazzCommunication | undefined;
+  function checkForExistingComm(application: Application,
+    aggregatedComm: AggregatedClazzCommunication) {
+    const drawableComms = application.get('drawableClazzCommunications');
+    let possibleCommunication: DrawableClazzCommunication | undefined;
 
     drawableComms.forEach((drawableComm) => {
       // Check if drawableCommunication (with reversed communication) is already created
-      if (aggregatedComm.sourceClazz.get('id') == drawableComm.targetClazz.get('id') &&
-        aggregatedComm.targetClazz.get('id') == drawableComm.sourceClazz.get('id')) {
+      if (aggregatedComm.sourceClazz.get('id') === drawableComm.targetClazz.get('id')
+        && aggregatedComm.targetClazz.get('id') === drawableComm.sourceClazz.get('id')) {
         possibleCommunication = drawableComm;
       }
     });
@@ -102,15 +95,24 @@ export function addDrawableCommunication(store: DS.Store) {
     return possibleCommunication;
   }
 
+  // Remove outdated communication from store
+  store.unloadAll('drawableclazzcommunication');
 
-  /**
-   * Generates a unique string ID
-   */
-  //  See: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-  function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
+  const applications = store.peekAll('application');
+
+  applications.forEach((application: Application) => {
+    // Reset relationship in application
+    application.set('drawableClazzCommunications', []);
+
+    const aggregatedComms = application.get('aggregatedClazzCommunications');
+    aggregatedComms.forEach((aggregatedComm) => {
+      const possibleExistingComm = checkForExistingComm(application, aggregatedComm);
+
+      if (possibleExistingComm) {
+        updateExistingDrawableComm(possibleExistingComm, aggregatedComm);
+      } else {
+        addNewDrawableCommunication(application, aggregatedComm);
+      }
     });
-  }
+  });
 }

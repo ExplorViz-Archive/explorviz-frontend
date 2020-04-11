@@ -1,4 +1,4 @@
-export function round(value: number, precision: number) : number {
-  let multiplier = Math.pow(10, precision || 0);
+export default function round(value: number, precision?: number): number {
+  const multiplier = 10 ** (precision || 0);
   return Math.round(value * multiplier) / multiplier;
 }

@@ -13,18 +13,18 @@ declare const THREEx: any;
 * @submodule visualization.rendering
 */
 export default class THREEPerformance {
+  stats: any = new Stats();
 
-  stats:any = new Stats();
-  threexStats:any = new THREEx.RendererStats();
+  threexStats: any = new THREEx.RendererStats();
 
   // @Override
   constructor() {
     // 0: fps, 1: ms, 2: mb, 3+: custom or just click the window to toggle
-    this.stats.showPanel(0); 
-    this.stats.dom.style.position = "absolute";
-    this.stats.dom.style.bottom = "368px";
+    this.stats.showPanel(0);
+    this.stats.dom.style.position = 'absolute';
+    this.stats.dom.style.bottom = '368px';
     this.stats.dom.style.top = null;
-    this.stats.dom.style.zIndex = "100";
+    this.stats.dom.style.zIndex = '100';
     this.stats.dom.style.left = '0px';
     $('#rendering').append(this.stats.dom);
 
@@ -37,5 +37,4 @@ export default class THREEPerformance {
     $(this.stats.dom).remove();
     $(this.threexStats.domElement).remove();
   }
-
 }
