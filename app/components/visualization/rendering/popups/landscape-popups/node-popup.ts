@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import Node from 'explorviz-frontend/models/node';
-import { round } from 'explorviz-frontend/utils/helpers/number-helpers';
+import round from 'explorviz-frontend/utils/helpers/number-helpers';
 
 interface Args {
   node: Node

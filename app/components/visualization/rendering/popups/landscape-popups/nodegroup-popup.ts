@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import NodeGroup from 'explorviz-frontend/models/nodegroup';
-import { round } from 'explorviz-frontend/utils/helpers/number-helpers';
+import round from 'explorviz-frontend/utils/helpers/number-helpers';
 
 interface Args {
   nodeGroup: NodeGroup
