@@ -1,5 +1,9 @@
 import THREE from 'three';
 import Landscape from 'explorviz-frontend/models/landscape';
+import MinMaxRectangle from 'explorviz-frontend/view-objects/layout-models/min-max-rectangle';
+import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
+import NodeGroup from 'explorviz-frontend/models/nodegroup';
+import Node from 'explorviz-frontend/models/node';
 import SystemMesh from './system-mesh';
 import NodeGroupMesh from './nodegroup-mesh';
 import NodeMesh from './node-mesh';
@@ -69,6 +73,10 @@ export default class LandscapeObject3D extends THREE.Object3D {
     removeChildren(this);
   }
 
+  /**
+   * Iterates over all openable meshes which are currently added to the
+   * landscape and returns a set with ids of the opened meshes.
+   */
   get openEntityIds() {
     const openEntityIds: Set<string> = new Set();
 
@@ -80,5 +88,36 @@ export default class LandscapeObject3D extends THREE.Object3D {
     });
 
     return openEntityIds;
+  }
+
+  getMinMaxRect(modelIdToLayout: Map<string, PlaneLayout>) {
+    // Rectangle which can be used to find smallest and greatest x/y coordinates
+    const rect = new MinMaxRectangle();
+
+    const systems = this.dataModel.get('systems');
+
+    if (systems.get('length') === 0) {
+      rect.setMinValues(0, 0);
+      rect.setMaxValues(1, 1);
+    } else {
+      systems.forEach((system: any) => {
+        const systemLayout = modelIdToLayout.get(system.get('id'));
+        if (systemLayout) {
+          rect.setMinMaxFromLayout(systemLayout);
+        }
+
+        const nodegroups = system.get('nodegroups');
+        nodegroups.forEach((nodegroup: NodeGroup) => {
+          const nodes = nodegroup.get('nodes');
+          nodes.forEach((node: Node) => {
+            const nodeLayout = modelIdToLayout.get(node.get('id'));
+            if (nodeLayout) {
+              rect.setMinMaxFromLayout(nodeLayout);
+            }
+          });
+        });
+      });
+    }
+    return rect;
   }
 }

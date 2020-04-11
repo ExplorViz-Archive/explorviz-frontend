@@ -44,7 +44,7 @@ export default class AppCommunicationMesh extends BaseMesh {
     });
   }
 
-  addOffset(centerPoint: THREE.Vector3) {
+  addOffset(centerPoint: THREE.Vector2) {
     this.position.x -= centerPoint.x;
     this.position.y -= centerPoint.y;
   }

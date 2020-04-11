@@ -17,7 +17,7 @@ export default class ApplicationMesh extends PlaneMesh {
     this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
   }
 
-  setToDefaultPosition(centerPoint: THREE.Vector3) {
+  setToDefaultPosition(centerPoint: THREE.Vector2) {
     const centerX = this.layout.positionX + this.layout.width / 2 - centerPoint.x;
     const centerY = this.layout.positionY - this.layout.height / 2 - centerPoint.y;
 

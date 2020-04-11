@@ -13,8 +13,7 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import * as Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
-import * as CalcCenterAndZoom from
-  'explorviz-frontend/utils/landscape-rendering/center-and-zoom-calculator';
+import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
 import * as CommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
@@ -352,8 +351,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         modelIdToPlaneLayout.set(modelId, planeLayoutObject);
       });
 
-      const centerPoint = CalcCenterAndZoom
-        .getCenterAndZoom(emberLandscape, modelIdToPlaneLayout, this.camera, this.webglrenderer);
+      const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
+      const centerPoint = landscapeRect.center;
+
+      updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
 
       const { systems } = emberLandscape;
 
@@ -404,7 +405,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   });
 
   renderSystem(system: System, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector3) {
+    centerPoint: THREE.Vector2) {
     if (!layout) { return; }
 
     // Create system mesh
@@ -423,7 +424,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   renderNodeGroup(nodeGroup: NodeGroup, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector3) {
+    centerPoint: THREE.Vector2) {
     if (!layout) { return; }
 
     // Create nodeGroup mesh
@@ -440,7 +441,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   renderNode(node: Node, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector3) {
+    centerPoint: THREE.Vector2) {
     if (!layout) { return; }
 
     // Create node mesh
@@ -465,7 +466,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   renderApplication(application: Application, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector3) {
+    centerPoint: THREE.Vector2) {
     if (!layout) { return; }
 
     // Create application mesh
