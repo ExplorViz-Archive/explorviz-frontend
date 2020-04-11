@@ -30,7 +30,7 @@ import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/applic
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import Node from 'explorviz-frontend/models/node';
 import PlaneMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-mesh';
-import { reduceLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
+import { reduceLandscape, ReducedLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
 import { task } from 'ember-concurrency-decorators';
 import PopupHandler from 'explorviz-frontend/utils/landscape-rendering/popup-handler';
 import { tracked } from '@glimmer/tracking';
@@ -115,6 +115,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
 
   popUpHandler: PopupHandler = new PopupHandler();
+
+  reducedLandscape: ReducedLandscape|null = null;
 
   @tracked
   popupData: PopupData | null = null;
@@ -277,6 +279,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  */
   @action
   cleanAndUpdateScene() {
+    this.cleanScene();
+    this.populateScene.perform();
+
+    this.debug('clean and populate landscape-rendering');
+  }
+
+  cleanScene() {
     function removeAllChildren(entity: THREE.Object3D | THREE.Mesh) {
       for (let i = entity.children.length - 1; i >= 0; i--) {
         const child = entity.children[i];
@@ -303,9 +312,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     const { landscapeObject3D } = this;
 
     removeAllChildren(landscapeObject3D);
-    this.populateScene.perform();
-
-    this.debug('clean and populate landscape-rendering');
   }
 
 
@@ -319,9 +325,18 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @action
   onUpdated() {
     if (this.initDone) {
-      this.cleanAndUpdateScene();
+      this.loadNewLandscape.perform();
     }
   }
+
+  @task
+  // eslint-disable-next-line
+  loadNewLandscape = task(function* (this: LandscapeRendering) {
+    const emberLandscape = this.args.landscape;
+    this.reducedLandscape = reduceLandscape(emberLandscape);
+    this.cleanScene();
+    yield this.populateScene.perform();
+  });
 
 
   // @Override
@@ -341,29 +356,27 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       return;
     }
 
-    const reducedLandscape = reduceLandscape(emberLandscape);
-
     const openEntitiesIds = this.computeOpenEntities();
 
     try {
-      // Reset mesh related data structures
-      this.modelIdToMesh.clear();
-      this.systemMeshes.clear();
-      this.nodeGroupMeshes.clear();
-
       const {
         graph,
         modelIdToPoints,
-      }: any = yield this.worker.postMessage('layout1', { reducedLandscape, openEntitiesIds });
+      }: any = yield this.worker.postMessage('layout1', { reducedLandscape: this.reducedLandscape, openEntitiesIds });
 
       const newGraph: any = yield this.worker.postMessage('klay', { graph });
 
       const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
-        reducedLandscape,
+        reducedLandscape: this.reducedLandscape,
         openEntitiesIds,
       });
+
+      // Reset mesh related data structures
+      this.modelIdToMesh.clear();
+      this.systemMeshes.clear();
+      this.nodeGroupMeshes.clear();
 
       const { modelIdToLayout, modelIdToPoints: modelIdToPointsComplete } = layoutedLandscape;
 
