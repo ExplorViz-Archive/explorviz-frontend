@@ -23,6 +23,13 @@ export type Position2D = {
   y: number
 };
 
+/**
+ * This class provides generic interaction functions which are triggered by
+ * (mouse) events on a canvas. These functions in turn are calling
+ * callback functions which are passed via the constructor. For some
+ * events additional computing (e.g. raycasting) is provided to determine
+ * the nature of the event.
+ */
 export default class Interaction {
   canvas: HTMLCanvasElement;
 
@@ -30,7 +37,8 @@ export default class Interaction {
 
   renderer: THREE.WebGLRenderer;
 
-  application: THREE.Object3D;
+  // Contains all Objects3D which shall be raycasted
+  raycastObject3D: THREE.Object3D;
 
   raycaster: Raycaster;
 
@@ -43,12 +51,12 @@ export default class Interaction {
     this.canvas = canvas;
     this.camera = camera;
     this.renderer = renderer;
-    this.application = application;
+    this.raycastObject3D = application;
     this.eventCallbackFunctions = { ...eventCallbackFunctions };
 
     this.raycaster = new Raycaster();
 
-    // init Hammer
+    // Init Hammer
     this.hammerHandler = HammerInteraction.create();
     this.hammerHandler.setupHammer(canvas);
 
@@ -120,6 +128,7 @@ export default class Interaction {
   onMouseMove(evt: MouseEvent) {
     if (!this.eventCallbackFunctions.mouseMove) { return; }
 
+    // Extract mouse position
     const mouse = {
       x: evt.offsetX,
       y: evt.offsetY,
@@ -137,6 +146,7 @@ export default class Interaction {
   onMouseStop(evt: CustomEvent<MouseOffsetPosition>) {
     if (!this.eventCallbackFunctions.mouseStop) { return; }
 
+    // Extract mouse position
     const mouse = {
       x: evt.detail.offsetX,
       y: evt.detail.offsetY,
@@ -154,6 +164,7 @@ export default class Interaction {
   onMouseWheelStart(evt: WheelEvent) {
     if (!this.eventCallbackFunctions.mouseWheel) { return; }
 
+    // Either 1 or -1 (depending on mouse wheel direction)
     const delta = Math.sign(evt.deltaY);
 
     this.eventCallbackFunctions.mouseWheel(delta);
@@ -205,7 +216,7 @@ export default class Interaction {
     const origin = this.calculatePositionInScene(mouseOnCanvas);
 
     const intersectedViewObj = this.raycaster.raycasting(origin, this.camera,
-      this.application.children);
+      this.raycastObject3D.children);
 
     return intersectedViewObj;
   }
