@@ -31,6 +31,7 @@ import CommunicationRendering from 'explorviz-frontend/utils/application-renderi
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import { task } from 'ember-concurrency-decorators';
+import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
 interface Args {
   id: string,
@@ -85,19 +86,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   threePerformance: THREEPerformance|undefined;
 
-  applicationObject3D = new THREE.Object3D();
+  applicationObject3D: ApplicationObject3D;
 
   animationFrameId = 0;
 
   interaction!: Interaction;
 
-  modelIdToMesh: Map<string, BaseMesh> = new Map();
+  boxLayoutMap: Map<string, BoxLayout>;
 
-  commIdToMesh: Map<string, ClazzCommunicationMesh> = new Map();
-
-  boxLayoutMap: Map<string, BoxLayout> = new Map();
-
-  hoverHandler = new HoverEffectHandler();
+  hoverHandler: HoverEffectHandler;
 
   highlighter: Highlighting;
 
@@ -124,15 +121,20 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.render = this.render.bind(this);
 
-    this.highlighter = new Highlighting(this.modelIdToMesh, this.commIdToMesh);
+    this.applicationObject3D = new ApplicationObject3D(this.args.application);
 
-    this.entityRendering = new EntityRendering(this.modelIdToMesh, this.commIdToMesh,
-      this.applicationObject3D, this.configuration);
+    this.boxLayoutMap = new Map();
 
-    this.communicationRendering = new CommunicationRendering(this.modelIdToMesh, this.commIdToMesh,
-      this.applicationObject3D, this.configuration, this.currentUser);
+    this.hoverHandler = new HoverEffectHandler();
 
-    this.entityManipulation = new EntityManipulation(this.modelIdToMesh,
+    this.highlighter = new Highlighting(this.applicationObject3D);
+
+    this.entityRendering = new EntityRendering(this.applicationObject3D, this.configuration);
+
+    this.communicationRendering = new CommunicationRendering(this.applicationObject3D,
+      this.configuration, this.currentUser);
+
+    this.entityManipulation = new EntityManipulation(this.applicationObject3D,
       this.communicationRendering, this.highlighter);
   }
 
@@ -148,7 +150,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  outerDivInserted(outerDiv: HTMLElement) {
+  async outerDivInserted(outerDiv: HTMLElement) {
     this.debug('Outer Div inserted');
 
     this.initThreeJs();
@@ -157,7 +159,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.resize(outerDiv);
 
-    this.loadNewApplication.perform();
+    await this.loadNewApplication.perform();
+
+    this.entityManipulation.applyDefaultApplicationLayout();
+    this.applicationObject3D.resetRotation();
   }
 
   initThreeJs() {
@@ -251,11 +256,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       } else {
         this.entityManipulation.openComponentMesh(mesh);
       }
-      this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
-      this.highlighter.updateHighlighting(this.args.application);
+      this.communicationRendering.addCommunication(this.boxLayoutMap);
+      this.highlighter.updateHighlighting();
     // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
-      this.entityManipulation.closeAllComponents(this.args.application, this.boxLayoutMap);
+      this.entityManipulation.closeAllComponents(this.boxLayoutMap);
     }
   }
 
@@ -346,6 +351,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   loadNewApplication = task(function* (this: ApplicationRendering) {
     this.reducedApplication = reduceApplication(this.args.application);
     this.cleanUpApplication();
+    this.applicationObject3D.dataModel = this.args.application;
     yield this.populateScene.perform();
   });
 
@@ -362,11 +368,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       this.entityRendering.addFoundationAndChildrenToScene(this.args.application,
         this.boxLayoutMap);
-      this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
+      this.communicationRendering.addCommunication(this.boxLayoutMap);
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
-      EntityManipulation.resetAppRotation(this.applicationObject3D);
     } catch (e) {
       // console.log(e);
     }
@@ -383,7 +388,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const foundationTextColor = this.configuration.applicationColors.foundationText;
 
     // Label all entities (excluding communication)
-    this.modelIdToMesh.forEach((mesh) => {
+    this.applicationObject3D.getBoxMeshes().forEach((mesh) => {
       if (mesh instanceof ClazzMesh) {
         Labeler.addClazzTextLabel(mesh, this.font, new THREE.Color(clazzTextColor));
       } else if (mesh instanceof ComponentMesh) {
@@ -424,42 +429,42 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   openParents(entity: Component|Clazz) {
     const ancestors = entity.getAllAncestorComponents();
     ancestors.forEach((anc) => {
-      const ancestorMesh = this.modelIdToMesh.get(anc.get('id'));
+      const ancestorMesh = this.applicationObject3D.getBoxMeshbyModelId(anc.get('id'));
       if (ancestorMesh instanceof ComponentMesh) {
         this.entityManipulation.openComponentMesh(ancestorMesh);
       }
     });
-    this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
-    this.highlighter.updateHighlighting(this.args.application);
+    this.communicationRendering.addCommunication(this.boxLayoutMap);
+    this.highlighter.updateHighlighting();
   }
 
   @action
   closeComponent(component: Component) {
-    const mesh = this.modelIdToMesh.get(component.get('id'));
+    const mesh = this.applicationObject3D.getBoxMeshbyModelId(component.get('id'));
     if (mesh instanceof ComponentMesh) {
       this.entityManipulation.closeComponentMesh(mesh);
     }
-    this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
-    this.highlighter.updateHighlighting(this.args.application);
+    this.communicationRendering.addCommunication(this.boxLayoutMap);
+    this.highlighter.updateHighlighting();
   }
 
   @action
   openAllComponents() {
     this.args.application.components.forEach((child) => {
-      const mesh = this.modelIdToMesh.get(child.get('id'));
+      const mesh = this.applicationObject3D.getBoxMeshbyModelId(child.get('id'));
       if (mesh !== undefined && mesh instanceof ComponentMesh) {
         this.entityManipulation.openComponentMesh(mesh);
       }
       this.entityManipulation.openComponentsRecursively(child);
     });
 
-    this.communicationRendering.addCommunication(this.args.application, this.boxLayoutMap);
-    this.highlighter.updateHighlighting(this.args.application);
+    this.communicationRendering.addCommunication(this.boxLayoutMap);
+    this.highlighter.updateHighlighting();
   }
 
   @action
   highlightModel(entity: Component|Clazz) {
-    this.highlighter.highlightModel(entity, this.args.application);
+    this.highlighter.highlightModel(entity);
   }
 
   @action
@@ -482,7 +487,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   resetView() {
     this.camera.position.set(0, 0, 100);
-    EntityManipulation.resetAppRotation(this.applicationObject3D);
+    this.applicationObject3D.resetRotation();
   }
 
   @action
@@ -520,8 +525,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   cleanUpApplication() {
-    this.entityRendering.removeAllEntities();
-    this.communicationRendering.removeAllCommunication();
+    this.applicationObject3D.removeAllEntities();
+    this.highlighter.removeHighlighting();
   }
 
   // #endregion COMPONENT AND SCENE CLEAN-UP

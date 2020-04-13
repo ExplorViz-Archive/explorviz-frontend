@@ -7,10 +7,13 @@ import Clazz from "explorviz-frontend/models/clazz";
 import ComponentMesh from "../../view-objects/3d/application/component-mesh";
 import DrawableClazzCommunication from "explorviz-frontend/models/drawableclazzcommunication";
 import BoxLayout from "explorviz-frontend/view-objects/layout-models/box-layout";
+import ApplicationObject3D from "explorviz-frontend/view-objects/3d/application/application-object-3d";
 
 // Communication Layouting //
-export function applyCommunicationLayout(application: Application,
-  boxLayoutMap: Map<string, BoxLayout>, modelIdToMesh: Map<string, THREE.Mesh>) {
+export function applyCommunicationLayout(applicationObject3D: ApplicationObject3D,
+  boxLayoutMap: Map<string, BoxLayout>) {
+
+    const application = applicationObject3D.dataModel;
 
   let layoutMap: Map<string, CommunicationLayout> = new Map();
 
@@ -44,9 +47,9 @@ export function applyCommunicationLayout(application: Application,
 
       if(parentComponent === null) {
         // common ancestor must be the foundation
-        parentMesh = modelIdToMesh.get(application.get('id'));
+        parentMesh = applicationObject3D.getBoxMeshbyModelId(application.get('id'));
       } else {
-        parentMesh = modelIdToMesh.get(parentComponent.get('id'));
+        parentMesh = applicationObject3D.getBoxMeshbyModelId(parentComponent.get('id'));
       }
 
       if ((parentMesh instanceof ComponentMesh && parentMesh.opened) || parentMesh instanceof FoundationMesh) {
@@ -62,7 +65,7 @@ export function applyCommunicationLayout(application: Application,
         }
 
         let sourceParent = sourceClazz.belongsTo('parent').value() as Component;
-        let sourceParentMesh = modelIdToMesh.get(sourceParent.get('id'));
+        let sourceParentMesh = applicationObject3D.getBoxMeshbyModelId(sourceParent.get('id'));
 
         // Determine where the communication should begin (clazz or component - based upon their visiblity)
         if (sourceParentMesh instanceof ComponentMesh && sourceParentMesh.opened) {
@@ -79,7 +82,7 @@ export function applyCommunicationLayout(application: Application,
         }
 
         let targetParent = targetClazz.belongsTo('parent').value() as Component;
-        let targetParentMesh = modelIdToMesh.get(targetParent.get('id'));
+        let targetParentMesh = applicationObject3D.getBoxMeshbyModelId(targetParent.get('id'));
 
         // Determine where the communication should end (clazz or component - based upon their visiblity)
         if (targetParentMesh instanceof ComponentMesh && targetParentMesh.opened) {
@@ -182,7 +185,7 @@ export function applyCommunicationLayout(application: Application,
       if(!parentComponent)
         return entity;
 
-      let parentMesh = modelIdToMesh.get(parentComponent.get('id'));
+      let parentMesh = applicationObject3D.getBoxMeshbyModelId(parentComponent.get('id'));
       if (parentMesh instanceof ComponentMesh && parentMesh.opened) {
         return entity;
       } else {

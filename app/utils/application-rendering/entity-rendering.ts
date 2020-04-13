@@ -1,5 +1,3 @@
-import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import Application from 'explorviz-frontend/models/application';
 import THREE from 'three';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
@@ -9,24 +7,17 @@ import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh
 import Component from 'explorviz-frontend/models/component';
 import Configuration from 'explorviz-frontend/services/configuration';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
+import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
 
 export default class EntityRendering {
-  // References to mesh maps of rendering
-  modelIdToMesh: Map<string, BaseMesh>;
-
-  commIdToMesh: Map<string, ClazzCommunicationMesh>;
-
   // Functions as parent object for all application objects
-  applicationObject3D: THREE.Object3D;
+  applicationObject3D: ApplicationObject3D;
 
   // Service to access color preferences
   configuration: Configuration;
 
-  constructor(modelIdToMesh: Map<string, BaseMesh>, commIdToMesh: Map<string,
-  ClazzCommunicationMesh>, applicationObject3D: THREE.Object3D, configuration: Configuration) {
-    this.modelIdToMesh = modelIdToMesh;
-    this.commIdToMesh = commIdToMesh;
+  constructor(applicationObject3D: ApplicationObject3D, configuration: Configuration) {
     this.applicationObject3D = applicationObject3D;
     this.configuration = configuration;
   }
@@ -129,7 +120,6 @@ export default class EntityRendering {
     mesh.position.copy(centerPoint);
 
     this.applicationObject3D.add(mesh);
-    this.modelIdToMesh.set(mesh.dataModel.id, mesh);
   }
 
   updateMeshVisiblity(mesh: ComponentMesh | ClazzMesh) {
@@ -139,18 +129,9 @@ export default class EntityRendering {
     } else {
       parent = mesh.dataModel.parent;
     }
-    const parentMesh = this.modelIdToMesh.get(parent.get('id'));
+    const parentMesh = this.applicationObject3D.getBoxMeshbyModelId(parent.get('id'));
     if (parentMesh instanceof ComponentMesh) {
       mesh.visible = parentMesh.opened;
     }
-  }
-
-  removeAllEntities() {
-    this.modelIdToMesh.forEach((mesh) => {
-      if (mesh instanceof BaseMesh) {
-        mesh.delete();
-      }
-    });
-    this.modelIdToMesh.clear();
   }
 }
