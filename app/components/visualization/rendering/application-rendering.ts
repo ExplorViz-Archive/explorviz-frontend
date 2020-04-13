@@ -30,6 +30,7 @@ import EntityRendering from 'explorviz-frontend/utils/application-rendering/enti
 import CommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
+import { task } from 'ember-concurrency-decorators';
 
 interface Args {
   id: string,
@@ -106,6 +107,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   entityManipulation: EntityManipulation;
 
+  reducedApplication: ReducedApplication|null = null;
+
   @tracked
   popupData: PopupData | null = null;
 
@@ -154,7 +157,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.resize(outerDiv);
 
-    this.populateScene();
+    this.loadNewApplication.perform();
   }
 
   initThreeJs() {
@@ -338,11 +341,21 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region SCENE POPULATION
 
-  async populateScene() {
-    const reducedApplication = reduceApplication(this.args.application);
+  @task
+  // eslint-disable-next-line
+  loadNewApplication = task(function* (this: ApplicationRendering) {
+    this.reducedApplication = reduceApplication(this.args.application);
+    this.cleanUpApplication();
+    yield this.populateScene.perform();
+  });
+
+  @task({ restartable: true })
+  // eslint-disable-next-line
+  populateScene = task(function* (this: ApplicationRendering) {
+    const { reducedApplication } = this;
 
     try {
-      const layoutedApplication: Map<string, LayoutData> = await this.worker.postMessage('city-layouter', reducedApplication);
+      const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', reducedApplication);
 
       // Converting plain JSON layout data due to worker limitations
       this.boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
@@ -357,7 +370,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     } catch (e) {
       // console.log(e);
     }
-  }
+  });
 
   /**
    * Iterates over all box meshes and calls respective functions to label them
@@ -483,6 +496,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.camera.updateProjectionMatrix();
   }
 
+  @action
+  onLandscapeUpdated() {
+    this.loadNewApplication.perform();
+  }
+
   // #endregion ACTIONS
 
 
@@ -506,13 +524,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   cleanUpApplication() {
     this.entityRendering.removeAllEntities();
     this.communicationRendering.removeAllCommunication();
-  }
-
-  cleanAndUpdateScene() {
-    this.debug('cleanAndUpdateScene');
-
-    this.cleanUpApplication();
-    this.populateScene();
   }
 
   // #endregion COMPONENT AND SCENE CLEAN-UP
