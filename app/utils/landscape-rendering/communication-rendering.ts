@@ -187,7 +187,7 @@ function getCategories(requestMap: Map<number, number>, isLinear: boolean) {
  * @param centerPoint Offset of landscape objects: Used to align communication
  */
 export function addCommunicationLineDrawing(tiles: tile[], parent: THREE.Object3D,
-  centerPoint: THREE.Vector3) {
+  centerPoint: THREE.Vector2) {
   const requestsToCategory = new Map();
 
   // Initialize Category mapping with default value 0

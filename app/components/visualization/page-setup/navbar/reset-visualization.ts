@@ -1,13 +1,13 @@
 import { action } from '@ember/object';
-import { inject as service } from '@ember/service';
-import Component from '@glimmer/component';
-import RenderingService from 'explorviz-frontend/services/rendering-service';
+import GlimmerComponent from '@glimmer/component';
 
-export default class ResetVisualization extends Component {
-  @service('rendering-service') renderingService!: RenderingService;
+interface Args {
+  resetView(): void,
+}
 
+export default class ResetVisualization extends GlimmerComponent<Args> {
   @action
   resetView() {
-    this.renderingService.reSetupScene();
+    this.args.resetView();
   }
 }

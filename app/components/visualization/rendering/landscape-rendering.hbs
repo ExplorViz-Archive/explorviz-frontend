@@ -5,7 +5,7 @@
 
 <Visualization::PageSetup::VisualizationNavbar>
   <Visualization::PageSetup::Navbar::ResetVisualization
-    @resetView={{this.onReSetupScene}}
+    @resetView={{this.resetView}}
   />
   <Visualization::PageSetup::Navbar::PauseReload />
   <Visualization::PageSetup::Navbar::EventOpener
@@ -13,6 +13,9 @@
   />
   <Visualization::PageSetup::Navbar::LandscapeDownloader
     @landscape={{@landscape}}
+  />
+  <Visualization::PageSetup::Navbar::ResetVisualization
+    @resetView={{this.resetView}}
   />
 </Visualization::PageSetup::VisualizationNavbar>
 

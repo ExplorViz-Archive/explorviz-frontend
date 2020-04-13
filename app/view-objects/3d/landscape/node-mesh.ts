@@ -41,7 +41,7 @@ export default class NodeMesh extends PlaneMesh {
     return node.get('ipAddress');
   }
 
-  setToDefaultPosition(centerPoint: THREE.Vector3) {
+  setToDefaultPosition(centerPoint: THREE.Vector2) {
     const centerX = this.layout.positionX + this.layout.width / 2 - centerPoint.x;
     const centerY = this.layout.positionY - this.layout.height / 2 - centerPoint.y;
 

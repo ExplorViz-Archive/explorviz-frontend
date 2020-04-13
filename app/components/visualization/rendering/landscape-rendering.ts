@@ -13,8 +13,7 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import * as Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
-import * as CalcCenterAndZoom from
-  'explorviz-frontend/utils/landscape-rendering/center-and-zoom-calculator';
+import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
 import * as CommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
@@ -109,6 +108,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   hoverHandler: HoverEffectHandler = new HoverEffectHandler();
 
   reducedLandscape: ReducedLandscape|null = null;
+
+  modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
 
   @tracked
   popupData: PopupData | null = null;
@@ -277,9 +278,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // Listener-Callbacks. Override in extending components
   @action
-  onReSetupScene() {
-    this.camera.position.set(0, 0, 0);
-    this.cleanAndUpdateScene();
+  resetView() {
+    if (this.modelIdToPlaneLayout) {
+      this.camera.position.set(0, 0, 0);
+      const landscapeRect = this.landscapeObject3D.getMinMaxRect(this.modelIdToPlaneLayout);
+
+      updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
+    }
   }
 
   @action
@@ -342,6 +347,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
       const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
 
+      this.modelIdToPlaneLayout = modelIdToPlaneLayout;
+
       modelIdToLayout.forEach((simplePlaneLayout: SimplePlaneLayout, modelId: string) => {
         const planeLayoutObject = new PlaneLayout();
         planeLayoutObject.height = simplePlaneLayout.height;
@@ -352,8 +359,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         modelIdToPlaneLayout.set(modelId, planeLayoutObject);
       });
 
-      const centerPoint = CalcCenterAndZoom
-        .getCenterAndZoom(emberLandscape, modelIdToPlaneLayout, this.camera, this.webglrenderer);
+      const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
+      const centerPoint = landscapeRect.center;
+
+      updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
 
       const { systems } = emberLandscape;
 
@@ -404,7 +413,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   });
 
   renderSystem(system: System, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector3) {
+    centerPoint: THREE.Vector2) {
     if (!layout) { return; }
 
     // Create system mesh
@@ -423,7 +432,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   renderNodeGroup(nodeGroup: NodeGroup, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector3) {
+    centerPoint: THREE.Vector2) {
     if (!layout) { return; }
 
     // Create nodeGroup mesh
@@ -440,7 +449,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   renderNode(node: Node, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector3) {
+    centerPoint: THREE.Vector2) {
     if (!layout) { return; }
 
     // Create node mesh
@@ -465,7 +474,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   renderApplication(application: Application, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector3) {
+    centerPoint: THREE.Vector2) {
     if (!layout) { return; }
 
     // Create application mesh
