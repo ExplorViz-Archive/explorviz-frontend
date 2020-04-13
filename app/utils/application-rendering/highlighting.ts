@@ -9,19 +9,15 @@ import DS from 'ember-data';
 import Component from 'explorviz-frontend/models/component';
 import Trace from 'explorviz-frontend/models/trace';
 import TraceStep from 'explorviz-frontend/models/tracestep';
+import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
 export default class Highlighting {
-  // References to mesh maps of rendering
-  modelIdToMesh: Map<string, BaseMesh> = new Map();
-
-  commIdToMesh: Map<string, ClazzCommunicationMesh> = new Map();
+  applicationObject3D: ApplicationObject3D;
 
   highlightedEntity: BaseMesh | null = null;
 
-  constructor(modelIdToMesh: Map<string, BaseMesh>,
-    commIdToMesh: Map<string, ClazzCommunicationMesh>) {
-    this.modelIdToMesh = modelIdToMesh;
-    this.commIdToMesh = commIdToMesh;
+  constructor(applicationObject3D: ApplicationObject3D) {
+    this.applicationObject3D = applicationObject3D;
   }
 
   highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMesh,
@@ -83,7 +79,7 @@ export default class Highlighting {
         allInvolvedClazzes.add(sourceClazz);
         // Hide communication which is not directly connected to highlighted entity
       } else if (!containedClazzes.has(sourceClazz) || !containedClazzes.has(targetClazz)) {
-        const commMesh = this.commIdToMesh.get(comm.get('id'));
+        const commMesh = this.applicationObject3D.getBoxMeshbyModelId(comm.get('id'));
         if (commMesh) {
           commMesh.turnTransparent();
         }
@@ -99,8 +95,8 @@ export default class Highlighting {
     });
 
     nonInvolvedClazzes.forEach((clazz) => {
-      const clazzMesh = this.modelIdToMesh.get(clazz.get('id'));
-      const componentMesh = this.modelIdToMesh.get(clazz.getParent().get('id'));
+      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
+      const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.getParent().get('id'));
       if (clazzMesh instanceof ClazzMesh && componentMesh instanceof ComponentMesh
             && componentMesh.opened) {
         clazzMesh.turnTransparent();
@@ -109,8 +105,9 @@ export default class Highlighting {
     });
   }
 
-  highlightModel(entity: Component|Clazz, application: Application) {
-    const mesh = this.modelIdToMesh.get(entity.id);
+  highlightModel(entity: Component|Clazz) {
+    const application = this.applicationObject3D.dataModel;
+    const mesh = this.applicationObject3D.getBoxMeshbyModelId(entity.id);
     if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
       this.highlight(mesh, application);
     }
@@ -141,7 +138,7 @@ export default class Highlighting {
 
 
     drawableComms.forEach((comm) => {
-      const commMesh = this.commIdToMesh.get(comm.get('id'));
+      const commMesh = this.applicationObject3D.getCommMeshByModelId(comm.get('id'));
 
       if (comm.containedTraces.has(trace)) {
         const sourceClazz = comm.belongsTo('sourceClazz').value() as Clazz;
@@ -164,8 +161,8 @@ export default class Highlighting {
     });
 
     nonInvolvedClazzes.forEach((clazz) => {
-      const clazzMesh = this.modelIdToMesh.get(clazz.get('id'));
-      const componentMesh = this.modelIdToMesh.get(clazz.getParent().get('id'));
+      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
+      const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.getParent().get('id'));
       if (clazzMesh instanceof ClazzMesh && componentMesh instanceof ComponentMesh
             && componentMesh.opened) {
         clazzMesh.turnTransparent();
@@ -174,7 +171,8 @@ export default class Highlighting {
     });
   }
 
-  updateHighlighting(application: Application) {
+  updateHighlighting() {
+    const application = this.applicationObject3D.dataModel;
     const { highlightedEntity } = this;
 
     if (!highlightedEntity) {
@@ -189,15 +187,10 @@ export default class Highlighting {
   }
 
   removeHighlighting() {
-    const boxMeshes = Array.from(this.modelIdToMesh.values());
-    const commMeshes = Array.from(this.commIdToMesh.values());
-    const meshes = boxMeshes.concat(commMeshes);
-    for (let i = 0; i < meshes.length; i++) {
-      const mesh = meshes[i];
-      if (mesh instanceof BaseMesh) {
-        mesh.unhighlight();
-      }
-    }
+    const meshes = this.applicationObject3D.getAllMeshes();
+    meshes.forEach((mesh) => {
+      mesh.unhighlight();
+    });
     this.highlightedEntity = null;
   }
 
@@ -208,7 +201,7 @@ export default class Highlighting {
 
     const parent = component.getParentComponent();
 
-    const componentMesh = this.modelIdToMesh.get(component.get('id'));
+    const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(component.get('id'));
 
     if (!parent) {
       if (componentMesh instanceof ComponentMesh) {
@@ -217,7 +210,7 @@ export default class Highlighting {
       return;
     }
 
-    const parentMesh = this.modelIdToMesh.get(parent.get('id'));
+    const parentMesh = this.applicationObject3D.getBoxMeshbyModelId(parent.get('id'));
     if (componentMesh instanceof ComponentMesh
           && parentMesh instanceof ComponentMesh && parentMesh.opened) {
       componentMesh.turnTransparent();

@@ -25,7 +25,7 @@ export default class LandscapeObject3D extends THREE.Object3D {
   add(object: THREE.Object3D) {
     super.add(object);
 
-    // Ensure fast access to landscape meshes by storing them in maps
+    // Ensure fast access to landscape meshes by additionally storing them in maps
     if (object instanceof SystemMesh || object instanceof NodeGroupMesh) {
       this.openableMeshes.add(object);
       this.modelIdToMesh.set(object.dataModel.id, object);
