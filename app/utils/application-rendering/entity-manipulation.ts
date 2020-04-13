@@ -7,6 +7,7 @@ import THREE, { PerspectiveCamera } from 'three';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 import Clazz from 'explorviz-frontend/models/clazz';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import DS from 'ember-data';
 import CommunicationRendering from './communication-rendering';
 import Highlighting from './highlighting';
 
@@ -155,6 +156,34 @@ export default class EntityManipulation {
         camera.position.z += 25;
       }
     }
+  }
+
+  /**
+   * Opens components of the application until at least two components are visible.
+   */
+  applyDefaultApplicationLayout() {
+    const self = this;
+
+    function applyComponentLayout(components: DS.PromiseManyArray<Component>) {
+      if (components.length > 1) {
+        // There are two components on the first level
+        // therefore, here is nothing to do
+        return;
+      }
+
+      const component = components.objectAt(0);
+
+      if (component !== undefined) {
+        const mesh = self.applicationObject3D.getBoxMeshbyModelId(component.id);
+        if (mesh instanceof ComponentMesh) {
+          self.openComponentMesh(mesh);
+        }
+
+        applyComponentLayout(component.get('children'));
+      }
+    }
+
+    applyComponentLayout(this.applicationObject3D.dataModel.components);
   }
 
   static applyCameraPosition(centerPoint: THREE.Vector3, camera: THREE.PerspectiveCamera,

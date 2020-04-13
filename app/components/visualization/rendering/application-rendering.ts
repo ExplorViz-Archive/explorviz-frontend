@@ -144,7 +144,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  outerDivInserted(outerDiv: HTMLElement) {
+  async outerDivInserted(outerDiv: HTMLElement) {
     this.debug('Outer Div inserted');
 
     this.initThreeJs();
@@ -153,7 +153,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.resize(outerDiv);
 
-    this.loadNewApplication.perform();
+    await this.loadNewApplication.perform();
+
+    this.entityManipulation.applyDefaultApplicationLayout();
+    this.applicationObject3D.resetRotation();
   }
 
   initThreeJs() {
@@ -363,7 +366,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
-      this.applicationObject3D.resetRotation();
     } catch (e) {
       // console.log(e);
     }
