@@ -86,15 +86,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   threePerformance: THREEPerformance|undefined;
 
-  applicationObject3D = new ApplicationObject3D(this.args.application);
+  applicationObject3D: ApplicationObject3D;
 
   animationFrameId = 0;
 
   interaction!: Interaction;
 
-  boxLayoutMap: Map<string, BoxLayout> = new Map();
+  boxLayoutMap: Map<string, BoxLayout>;
 
-  hoverHandler = new HoverEffectHandler();
+  hoverHandler: HoverEffectHandler;
 
   highlighter: Highlighting;
 
@@ -120,6 +120,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Constructor called');
 
     this.render = this.render.bind(this);
+
+    this.applicationObject3D = new ApplicationObject3D(this.args.application);
+
+    this.boxLayoutMap = new Map();
+
+    this.hoverHandler = new HoverEffectHandler();
 
     this.highlighter = new Highlighting(this.applicationObject3D);
 
