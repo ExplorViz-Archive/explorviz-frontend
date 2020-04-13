@@ -27,6 +27,18 @@
     {{did-insert this.canvasInserted}}
   >
   </canvas>
+  {{#if this.loadNewLandscape.isRunning}}
+    <div class="d-flex text-secondary" style="position: absolute">
+      <div
+        class="spinner-grow spinner-grow-sm"
+        style="place-self: center"
+        role="status"
+      >
+        <span class="sr-only">Loading...</span>
+      </div>
+      <span class="ml-1" style="place-self: center">Loading Landscape</span>
+    </div>
+  {{/if}}
 
   {{!-- popup(s) --}}
   <Visualization::Rendering::Popups::PopupCoordinator
