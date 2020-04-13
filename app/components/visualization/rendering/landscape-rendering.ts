@@ -269,9 +269,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  * @method cleanAndUpdateScene
  */
   @action
-  cleanAndUpdateScene() {
+  async cleanAndUpdateScene() {
     this.landscapeObject3D.removeAllChildren();
-    this.populateScene.perform();
+    await this.populateScene.perform();
 
     this.debug('clean and populate landscape-rendering');
   }
@@ -497,39 +497,89 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.landscapeRepo.set('replayApplication', emberModel);
   }
 
+  openApplicationIfExistend(applicationMesh: ApplicationMesh) {
+    const application = applicationMesh.dataModel;
+    // No data => show message
+    if (application.get('components').get('length') === 0) {
+      const message = `Sorry, there is no information for application <b>
+        ${application.get('name')}</b> available.`;
+
+      AlertifyHandler.showAlertifyMessage(message);
+    } else {
+      // data available => open application-rendering
+      AlertifyHandler.closeAlertifyMessages();
+      this.showApplication(application);
+    }
+  }
+
+  @task
+  // eslint-disable-next-line
+  openNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
+    nodeGroupMesh.opened = true;
+    yield this.cleanAndUpdateScene();
+  });
+
+  @task
+  // eslint-disable-next-line
+  closeNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
+    nodeGroupMesh.opened = false;
+    yield this.cleanAndUpdateScene();
+  });
+
+  toggleNodeGroupAndRedraw(nodeGroupMesh: NodeGroupMesh) {
+    if (nodeGroupMesh.opened) {
+      this.closeNodeGroupAndRedraw.perform(nodeGroupMesh);
+    } else {
+      this.openNodeGroupAndRedraw.perform(nodeGroupMesh);
+    }
+  }
+
+  @task
+  // eslint-disable-next-line
+  openSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
+    systemMesh.opened = true;
+    yield this.cleanAndUpdateScene();
+  });
+
+  @task
+  // eslint-disable-next-line
+  closeSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
+    systemMesh.opened = false;
+    this.closeNogeGroupsInSystem(systemMesh);
+    yield this.cleanAndUpdateScene();
+  });
+
+  toggleSystemAndRedraw(systemMesh: SystemMesh) {
+    if (systemMesh.opened) {
+      this.closeSystemAndRedraw.perform(systemMesh);
+    } else {
+      this.openSystemAndRedraw.perform(systemMesh);
+    }
+  }
+
+  closeNogeGroupsInSystem(systemMesh: SystemMesh) {
+    const system = systemMesh.dataModel;
+    // Close nodegroups in system
+    if (!systemMesh.opened) {
+      system.get('nodegroups').forEach((nodeGroup) => {
+        const nodeGroupMesh = this.landscapeObject3D.getMeshbyModelId(nodeGroup.get('id'));
+        if (nodeGroupMesh instanceof NodeGroupMesh) {
+          nodeGroupMesh.opened = false;
+        }
+      });
+    }
+  }
+
   handleDoubleClick(mesh?: THREE.Mesh) {
     // Handle application
     if (mesh instanceof ApplicationMesh) {
-      const application = mesh.dataModel;
-      // No data => show message
-      if (application.get('components').get('length') === 0) {
-        const message = `Sorry, there is no information for application <b>
-          ${application.get('name')}</b> available.`;
-
-        AlertifyHandler.showAlertifyMessage(message);
-      } else {
-        // data available => open application-rendering
-        AlertifyHandler.closeAlertifyMessages();
-        this.showApplication(application);
-      }
+      this.openApplicationIfExistend(mesh);
       // Handle nodeGroup
     } else if (mesh instanceof NodeGroupMesh) {
-      mesh.opened = !mesh.opened;
-      this.cleanAndUpdateScene();
+      this.toggleNodeGroupAndRedraw(mesh);
       // Handle system
     } else if (mesh instanceof SystemMesh) {
-      const system = mesh.dataModel;
-      mesh.opened = !mesh.opened;
-      // Close nodegroups in system
-      if (!mesh.opened) {
-        system.get('nodegroups').forEach((nodeGroup) => {
-          const nodeGroupMesh = this.landscapeObject3D.getMeshbyModelId(nodeGroup.get('id'));
-          if (nodeGroupMesh instanceof NodeGroupMesh) {
-            nodeGroupMesh.opened = false;
-          }
-        });
-      }
-      this.cleanAndUpdateScene();
+      this.toggleSystemAndRedraw(mesh);
     }
   }
 
