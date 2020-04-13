@@ -270,7 +270,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  */
   @action
   async cleanAndUpdateScene() {
-    this.landscapeObject3D.removeAllChildren();
     await this.populateScene.perform();
 
     this.debug('clean and populate landscape-rendering');
@@ -299,7 +298,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   loadNewLandscape = task(function* (this: LandscapeRendering) {
     const emberLandscape = this.args.landscape;
     this.landscapeObject3D.dataModel = emberLandscape;
-    this.landscapeObject3D.removeAllChildren();
     this.reducedLandscape = reduceLandscape(emberLandscape);
     yield this.populateScene.perform();
   });
@@ -339,6 +337,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         reducedLandscape: this.reducedLandscape,
         openEntitiesIds,
       });
+
+      this.landscapeObject3D.removeAllChildren();
 
       // Reset mesh related data structures
       this.landscapeObject3D.resetMeshReferences();
