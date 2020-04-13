@@ -128,7 +128,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
 
   @action
-  outerDivInserted(outerDiv: HTMLElement) {
+  async outerDivInserted(outerDiv: HTMLElement) {
     this.debug('Outer Div inserted');
 
     this.initThreeJs();
@@ -137,9 +137,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.resize(outerDiv);
 
-    this.initDone = true;
+    await this.loadNewLandscape.perform();
 
-    this.loadNewLandscape.perform();
+    this.initDone = true;
   }
 
   @action

@@ -76,16 +76,34 @@ export default class LandscapeObject3D extends THREE.Object3D {
   /**
    * Iterates over all openable meshes which are currently added to the
    * landscape and returns a set with ids of the opened meshes.
+   * Returns all openable mesh ids if landscape has not yet been layouted.
    */
   get openEntityIds() {
     const openEntityIds: Set<string> = new Set();
 
-    const { openableMeshes } = this;
-    openableMeshes.forEach((openableMesh) => {
-      if (openableMesh.opened) {
-        openEntityIds.add(openableMesh.dataModel.id);
+    // If Landscape is computed for the first time,
+    // all Systems & NodeGroups shall be opened
+    if (this.modelIdToMesh.size === 0) {
+      const { systems } = this.dataModel;
+      if (systems) {
+        systems.forEach((system) => {
+          openEntityIds.add(system.id);
+          const nodeGroups = system.nodegroups;
+
+          nodeGroups.forEach((nodeGroup: NodeGroup) => {
+            openEntityIds.add(nodeGroup.id);
+          });
+        });
       }
-    });
+    // Determine which Systems & NodeGroups are opened
+    } else {
+      const { openableMeshes } = this;
+      openableMeshes.forEach((openableMesh) => {
+        if (openableMesh.opened) {
+          openEntityIds.add(openableMesh.dataModel.id);
+        }
+      });
+    }
 
     return openEntityIds;
   }
