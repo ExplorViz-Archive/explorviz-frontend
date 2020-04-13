@@ -60,7 +60,11 @@ export default class ApplicationObject3D extends THREE.Object3D {
   }
 
   getAllMeshes(): Set<BaseMesh> {
-    return new Set((this.getBoxMeshes(), this.getCommMeshes()));
+    const allMeshes = this.getBoxMeshes();
+    this.getCommMeshes().forEach((mesh) => {
+      allMeshes.add(mesh);
+    });
+    return allMeshes;
   }
 
   resetMeshReferences() {

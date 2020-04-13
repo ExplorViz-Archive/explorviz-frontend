@@ -244,7 +244,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleSingleClick(mesh: THREE.Mesh | undefined) {
     if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
-      this.highlighter.highlight(mesh, this.args.application);
+      this.highlighter.highlight(mesh);
     }
   }
 

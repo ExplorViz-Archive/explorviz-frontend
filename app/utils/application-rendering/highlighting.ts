@@ -21,7 +21,7 @@ export default class Highlighting {
   }
 
   highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMesh,
-    application: Application, toggleHighlighting = true): void {
+    toggleHighlighting = true): void {
     // Reset highlighting if highlighted mesh is clicked
     if (mesh.highlighted && toggleHighlighting) {
       this.removeHighlighting();
@@ -37,6 +37,7 @@ export default class Highlighting {
     this.highlightedEntity = mesh;
 
     // All clazzes in application
+    const application = this.applicationObject3D.dataModel;
     const allClazzesAsArray = application.getAllClazzes();
     const allClazzes = new Set<Clazz>(allClazzesAsArray);
 
@@ -106,10 +107,9 @@ export default class Highlighting {
   }
 
   highlightModel(entity: Component|Clazz) {
-    const application = this.applicationObject3D.dataModel;
     const mesh = this.applicationObject3D.getBoxMeshbyModelId(entity.id);
     if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
-      this.highlight(mesh, application);
+      this.highlight(mesh);
     }
   }
 
@@ -172,7 +172,6 @@ export default class Highlighting {
   }
 
   updateHighlighting() {
-    const application = this.applicationObject3D.dataModel;
     const { highlightedEntity } = this;
 
     if (!highlightedEntity) {
@@ -182,7 +181,7 @@ export default class Highlighting {
     if (highlightedEntity instanceof ClazzMesh
         || highlightedEntity instanceof ComponentMesh
         || highlightedEntity instanceof ClazzCommunicationMesh) {
-      this.highlight(highlightedEntity, application, false);
+      this.highlight(highlightedEntity, false);
     }
   }
 
