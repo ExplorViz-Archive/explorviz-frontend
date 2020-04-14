@@ -5,7 +5,6 @@ import debugLogger from 'ember-debug-logger';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import THREE from 'three';
 import Landscape from 'explorviz-frontend/models/landscape';
-import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import Configuration from 'explorviz-frontend/services/configuration';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
@@ -73,9 +72,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @service('reload-handler')
   reloadHandler!: ReloadHandler;
-
-  @service('rendering-service')
-  renderingService!: RenderingService;
 
   @service('current-user')
   currentUser!: CurrentUser;

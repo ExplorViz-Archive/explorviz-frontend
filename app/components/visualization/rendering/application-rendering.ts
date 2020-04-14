@@ -5,7 +5,6 @@ import debugLogger from 'ember-debug-logger';
 import THREE from 'three';
 import { inject as service } from '@ember/service';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import DS from 'ember-data';
@@ -64,9 +63,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @service('current-user')
   currentUser!: CurrentUser;
-
-  @service('rendering-service')
-  renderingService!: RenderingService;
 
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;

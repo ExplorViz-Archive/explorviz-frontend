@@ -13,7 +13,6 @@ import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-set
 import Timestamp from 'explorviz-frontend/models/timestamp';
 import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
-import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import { tracked } from '@glimmer/tracking';
@@ -28,8 +27,6 @@ import { tracked } from '@glimmer/tracking';
  * @submodule visualization
  */
 export default class VisualizationController extends Controller {
-  @service('rendering-service') renderingService!: RenderingService;
-
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
 
   @service('landscape-listener') landscapeListener!: LandscapeListener;
@@ -72,7 +69,6 @@ export default class VisualizationController extends Controller {
 
   @action
   resetView() {
-    get(this, 'renderingService').reSetupScene();
     get(this, 'plotlyTimelineRef').continueTimeline(get(this, 'selectedTimestampRecords'));
   }
 

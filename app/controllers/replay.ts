@@ -13,7 +13,6 @@ import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import { tracked } from '@glimmer/tracking';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
-import RenderingService from 'explorviz-frontend/services/rendering-service';
 
 export default class ReplayController extends Controller {
   @service('current-user') currentUser !: CurrentUser;
@@ -23,8 +22,6 @@ export default class ReplayController extends Controller {
   @service('repos/timestamp-repository') timestampRepo !: TimestampRepository;
 
   @service('repos/landscape-repository') landscapeRepo !: LandscapeRepository;
-
-  @service('rendering-service') renderingService !: RenderingService;
 
   @service('additional-data') additionalData !: AdditionalData;
 
@@ -38,11 +35,6 @@ export default class ReplayController extends Controller {
   @computed('landscapeRepo.replayApplication')
   get showLandscape() {
     return !get(this.landscapeRepo, 'replayApplication');
-  }
-
-  @action
-  resetView() {
-    get(this, 'renderingService').reSetupScene();
   }
 
   @action

@@ -4,16 +4,12 @@ import { inject as service } from '@ember/service';
 import Agent from 'explorviz-frontend/models/agent';
 import Procezz from 'explorviz-frontend/models/procezz';
 import AgentsListener from 'explorviz-frontend/services/agents-listener';
-import RenderingService from 'explorviz-frontend/services/rendering-service';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
 export default class DiscoveryController extends Controller {
   procezzForDetailView: Procezz|null = null;
 
   agentForDetailView: Agent|null = null;
-
-  @service('rendering-service')
-  renderingService!: RenderingService;
 
   @service('agents-listener')
   agentListener!: AgentsListener;

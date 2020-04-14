@@ -6,7 +6,6 @@ import { tracked } from '@glimmer/tracking';
 import DS from 'ember-data';
 import Clazz from 'explorviz-frontend/models/clazz';
 import Trace from 'explorviz-frontend/models/trace';
-import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import TraceStep from 'explorviz-frontend/models/tracestep';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
@@ -56,9 +55,6 @@ export default class TraceSelection extends Component<Args> {
 
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
-
-  @service('rendering-service')
-  renderingService!: RenderingService;
 
   // Compute current traces when highlighting changes
   @computed('landscapeRepo.latestApplication', 'sortBy', 'isSortedAsc', 'filterTerm')
@@ -221,7 +217,7 @@ export default class TraceSelection extends Component<Args> {
     const clazzId = proxyClazz.get('id');
     const clazz = this.store.peekRecord('clazz', clazzId);
     if (clazz !== null) {
-      this.renderingService.moveCameraTo(clazz);
+      this.args.moveCameraTo(clazz);
     }
   }
 

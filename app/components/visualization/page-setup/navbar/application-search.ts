@@ -1,7 +1,6 @@
 import GlimmerComponent from '@glimmer/component';
 import { inject as service } from '@ember/service';
 import { task } from 'ember-concurrency-decorators';
-import RenderingService from 'explorviz-frontend/services/rendering-service';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import Clazz from 'explorviz-frontend/models/clazz';
 import Component from 'explorviz-frontend/models/component';
@@ -19,8 +18,6 @@ interface Args {
 }
 /* eslint-disable require-yield */
 export default class ApplicationSearch extends GlimmerComponent<Args> {
-  @service('rendering-service') renderingService!: RenderingService;
-
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
 
   componentLabel = '-- Components --';
