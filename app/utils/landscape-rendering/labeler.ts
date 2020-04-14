@@ -139,11 +139,33 @@ export default class Labeler {
     applicationMesh.add(labelMesh);
   }
 
+  /**
+   * Dispose all meshes and remove references
+   */
   clearCache() {
+    this.systemLabelCache.forEach((label) => {
+      label.delete();
+    });
     this.systemLabelCache.clear();
+
+    this.nodeGroupLabelCache.forEach((label) => {
+      label.delete();
+    });
     this.nodeGroupLabelCache.clear();
+
+    this.nodeLabelCache.forEach((label) => {
+      label.delete();
+    });
     this.nodeLabelCache.clear();
+
+    this.appLabelCache.forEach((label) => {
+      label.delete();
+    });
     this.appLabelCache.clear();
+
+    this.collapseLabelCache.forEach((label) => {
+      label.delete();
+    });
     this.collapseLabelCache.clear();
   }
 
@@ -194,6 +216,8 @@ export default class Labeler {
     let labelMesh: PlaneLabelMesh;
 
     const maybeLabel = labelCache.get(text);
+
+    // Only use cached labels which are not already in use
     if (maybeLabel && !maybeLabel.parent) {
       labelMesh = maybeLabel;
     } else {

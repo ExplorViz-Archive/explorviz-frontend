@@ -259,6 +259,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.debug('cleanup landscape rendering');
 
+    // Clean up all remaining meshes
+    this.landscapeObject3D.removeAllChildren();
+    this.labeler.clearCache();
+
     this.interaction.removeHandlers();
   }
 
@@ -368,8 +372,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
       const { systems } = emberLandscape;
 
-      const start = Date.now();
-
       // Render systems, nodegroups, nodes & applications
       if (systems) {
         // Draw boxes for systems
@@ -397,8 +399,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
           });
         });
       }
-
-      console.log('Time: ', Date.now() - start);
 
       // Render application communication
       const appCommunications = emberLandscape.get('totalApplicationCommunications');

@@ -49,15 +49,16 @@ export default abstract class BaseMesh extends THREE.Mesh {
   }
 
   delete() {
-    if (this.parent) {
-      this.parent.remove(this);
-    }
-
     if (this.geometry) {
       this.geometry.dispose();
     }
     if (this.material instanceof THREE.Material) {
       this.material.dispose();
+    } else {
+      for (let j = 0; j < this.material.length; j++) {
+        const material = this.material[j];
+        material.dispose();
+      }
     }
 
     // Recursively delete all child objects
@@ -66,5 +67,9 @@ export default abstract class BaseMesh extends THREE.Mesh {
         child.delete();
       }
     });
+
+    if (this.parent) {
+      this.parent.remove(this);
+    }
   }
 }
