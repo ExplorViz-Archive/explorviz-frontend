@@ -217,8 +217,9 @@ export default class Labeler {
 
     const maybeLabel = labelCache.get(text);
 
-    // Only use cached labels which are not already in use
-    if (maybeLabel && !maybeLabel.parent) {
+    // Only use matching cached labels which are not already in use
+    if (maybeLabel && maybeLabel.defaultColor.getHexString() === color.getHexString()
+    && maybeLabel.fontSize === size && !maybeLabel.parent) {
       labelMesh = maybeLabel;
     } else {
       labelMesh = new PlaneLabelMesh(font, text, size, color);
