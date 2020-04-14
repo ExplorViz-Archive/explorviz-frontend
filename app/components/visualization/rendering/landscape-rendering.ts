@@ -12,7 +12,6 @@ import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
-import * as Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
 import * as CommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
@@ -33,6 +32,7 @@ import { reduceLandscape, ReducedLandscape } from 'explorviz-frontend/utils/land
 import { task } from 'ember-concurrency-decorators';
 import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
+import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 
 
 interface Args {
@@ -86,6 +86,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   scene!: THREE.Scene;
 
   landscapeObject3D = new LandscapeObject3D(this.args.landscape);
+
+  labeler = new Labeler();
 
   webglrenderer!: THREE.WebGLRenderer;
 
@@ -366,6 +368,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
       const { systems } = emberLandscape;
 
+      const start = Date.now();
+
       // Render systems, nodegroups, nodes & applications
       if (systems) {
         // Draw boxes for systems
@@ -393,6 +397,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
           });
         });
       }
+
+      console.log('Time: ', Date.now() - start);
 
       // Render application communication
       const appCommunications = emberLandscape.get('totalApplicationCommunications');
@@ -424,8 +430,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     systemMesh.setToDefaultPosition(centerPoint);
     const labelText = system.get('name');
     const labelColor = new THREE.Color('black');
-    Labeler.addSystemTextLabel(systemMesh, labelText, this.font, labelColor);
-    Labeler.addCollapseSymbol(systemMesh, this.font, labelColor);
+    this.labeler.addSystemTextLabel(systemMesh, labelText, this.font, labelColor);
+    this.labeler.addCollapseSymbol(systemMesh, this.font, labelColor);
 
     // Add to scene
     this.landscapeObject3D.add(systemMesh);
@@ -442,7 +448,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     // Create and add label + icon
     nodeGroupMesh.setToDefaultPosition(centerPoint);
     const labelColor = new THREE.Color('white');
-    Labeler.addCollapseSymbol(nodeGroupMesh, this.font, labelColor);
+    this.labeler.addCollapseSymbol(nodeGroupMesh, this.font, labelColor);
 
     // Add to scene
     this.landscapeObject3D.add(nodeGroupMesh);
@@ -467,7 +473,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     const labelColor = new THREE.Color('white');
 
 
-    Labeler.addNodeTextLabel(nodeMesh, labelText, this.font, labelColor);
+    this.labeler.addNodeTextLabel(nodeMesh, labelText, this.font, labelColor);
 
     // Add to scene
     this.landscapeObject3D.add(nodeMesh);
@@ -483,7 +489,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     applicationMesh.setToDefaultPosition(centerPoint);
 
     // Create and add label + icon
-    Labeler.addApplicationTextLabel(applicationMesh, application.get('name'), this.font,
+    this.labeler.addApplicationTextLabel(applicationMesh, application.get('name'), this.font,
       new THREE.Color('white'));
     Labeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
