@@ -242,7 +242,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #region MOUSE EVENT HANDLER
 
   handleSingleClick(mesh: THREE.Mesh | undefined) {
-    if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
+    // user clicked on blank spot on the canvas
+    if (mesh === undefined) {
+      this.highlighter.removeHighlighting();
+    } else if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
       this.highlighter.highlight(mesh, this.args.application);
     }
