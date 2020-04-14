@@ -86,23 +86,23 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   threePerformance: THREEPerformance|undefined;
 
-  applicationObject3D: ApplicationObject3D;
-
   animationFrameId = 0;
 
   interaction!: Interaction;
 
   boxLayoutMap: Map<string, BoxLayout>;
 
-  hoverHandler: HoverEffectHandler;
+  readonly applicationObject3D: ApplicationObject3D;
 
-  highlighter: Highlighting;
+  readonly hoverHandler: HoverEffectHandler;
 
-  entityRendering: EntityRendering;
+  readonly highlighter: Highlighting;
 
-  communicationRendering: CommunicationRendering;
+  readonly entityRendering: EntityRendering;
 
-  entityManipulation: EntityManipulation;
+  readonly communicationRendering: CommunicationRendering;
+
+  readonly entityManipulation: EntityManipulation;
 
   reducedApplication: ReducedApplication|null = null;
 
