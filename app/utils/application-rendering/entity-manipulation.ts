@@ -128,6 +128,14 @@ export default class EntityManipulation {
     });
   }
 
+  toggleComponentMeshState(mesh: ComponentMesh) {
+    if (mesh.opened) {
+      this.closeComponentMesh(mesh);
+    } else {
+      this.openComponentMesh(mesh);
+    }
+  }
+
   moveCameraTo(emberModel: Clazz|ClazzCommunication, applicationCenter: THREE.Vector3,
     camera: PerspectiveCamera, applicationObject3D: THREE.Object3D) {
     if (emberModel instanceof ClazzCommunication) {

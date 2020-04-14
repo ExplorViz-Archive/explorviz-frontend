@@ -251,11 +251,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleDoubleClick(mesh: THREE.Mesh | undefined) {
     // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
-      if (mesh.opened) {
-        this.entityManipulation.closeComponentMesh(mesh);
-      } else {
-        this.entityManipulation.openComponentMesh(mesh);
-      }
+      this.entityManipulation.toggleComponentMeshState(mesh);
       this.communicationRendering.addCommunication(this.boxLayoutMap);
       this.highlighter.updateHighlighting();
     // Close all components since foundation shall never be closed itself
