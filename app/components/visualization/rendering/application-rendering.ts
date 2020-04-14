@@ -247,7 +247,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.highlighter.removeHighlighting();
     } else if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
-      this.highlighter.highlight(mesh, this.args.application);
+      this.highlighter.highlight(mesh);
     }
   }
 
