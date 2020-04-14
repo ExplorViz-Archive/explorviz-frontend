@@ -48,7 +48,7 @@ export default class ApplicationObject3D extends THREE.Object3D {
   }
 
   getBoxMeshes() {
-    return new Set(this.modelIdToMesh.values());
+    return new Set([...this.modelIdToMesh.values()]);
   }
 
   getCommMeshByModelId(id: string) {
@@ -56,11 +56,11 @@ export default class ApplicationObject3D extends THREE.Object3D {
   }
 
   getCommMeshes() {
-    return new Set(this.commIdToMesh.values());
+    return new Set([...this.commIdToMesh.values()]);
   }
 
   getAllMeshes(): Set<BaseMesh> {
-    return new Set((this.getBoxMeshes(), this.getCommMeshes()));
+    return new Set([...this.getBoxMeshes(), ...this.getCommMeshes()]);
   }
 
   resetMeshReferences() {
