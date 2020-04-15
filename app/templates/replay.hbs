@@ -9,7 +9,7 @@
     <BsButton
       @type="success"
       @outline={{true}}
-      onClick={{this.triggerSelectBox}}
+      @onClick={{this.triggerSelectBox}}
       @title="Upload a landscape"
     >
       {{svg-jar "cloud-upload"}}
@@ -23,6 +23,9 @@
       {{#if this.landscapeRepo.replayLandscape.systems}}
         <Visualization::Rendering::LandscapeRendering
           @landscape={{this.landscapeRepo.replayLandscape}}
+          @font={{@model}}
+          @showApplication={{this.showApplication}}
+          @isReplay={{true}}
         />
       {{else}}
         <div class="container-fluid">
@@ -37,18 +40,11 @@
         </div>
       {{/if}}
     {{else}}
-      <div style="position: absolute!important" class="pl-1">
-        <BsButton
-          @onClick={{this.openLandscapeView}}
-          @type="secondary"
-          @outline={{true}}
-          @title="Back to Landscape"
-        >
-          {{svg-jar "reply" class="octicon align-middle"}}
-        </BsButton>
-      </div>
       <Visualization::Rendering::ApplicationRendering
         @application={{this.landscapeRepo.replayApplication}}
+        @font={{@model}}
+        @isReplay={{true}}
+        @openLandscapeView={{this.openLandscapeView}}
       />
     {{/if}}
     {{!-- timeline --}}
@@ -78,3 +74,15 @@
     </div>
   </div>
 </div>
+{{#unless this.showLandscape}}
+  <div style="position: absolute!important">
+    <BsButton
+      @onClick={{this.openLandscapeView}}
+      @type="secondary"
+      @outline={{true}}
+      @title="Back to Landscape"
+    >
+      {{svg-jar "reply" class="octicon align-middle"}}
+    </BsButton>
+  </div>
+{{/unless}}

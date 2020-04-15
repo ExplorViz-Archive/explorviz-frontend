@@ -16,6 +16,7 @@ import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import { tracked } from '@glimmer/tracking';
+import Application from 'explorviz-frontend/models/application';
 
 /**
  * TODO
@@ -65,6 +66,16 @@ export default class VisualizationController extends Controller {
   @computed('landscapeRepo.latestApplication')
   get showLandscape() {
     return !get(this.landscapeRepo, 'latestApplication');
+  }
+
+  @action
+  openLandscapeView() {
+    this.landscapeRepo.set('latestApplication', null);
+  }
+
+  @action
+  showApplication(emberModel: Application) {
+    this.landscapeRepo.set('latestApplication', emberModel);
   }
 
   @action

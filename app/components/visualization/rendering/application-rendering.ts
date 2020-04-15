@@ -114,11 +114,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #endregion CLASS FIELDS AND GETTERS
 
 
-  @action
-  openLandscapeView() {
-    this.landscapeRepo.set('latestApplication', null);
-  }
-
   // #region COMPONENT AND SCENE INITIALIZATION
 
   constructor(owner: any, args: Args) {

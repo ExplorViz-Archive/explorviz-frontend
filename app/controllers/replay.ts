@@ -13,6 +13,7 @@ import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import { tracked } from '@glimmer/tracking';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
+import Application from 'explorviz-frontend/models/application';
 
 export default class ReplayController extends Controller {
   @service('current-user') currentUser !: CurrentUser;
@@ -39,8 +40,12 @@ export default class ReplayController extends Controller {
 
   @action
   openLandscapeView() {
-    set(this.landscapeRepo, 'latestApplication', null);
     set(this.landscapeRepo, 'replayApplication', null);
+  }
+
+  @action
+  showApplication(emberModel: Application) {
+    this.landscapeRepo.set('replayApplication', emberModel);
   }
 
   @action
@@ -50,7 +55,7 @@ export default class ReplayController extends Controller {
 
   // necessary for hidded input box to select a file for uploading
   @action
-  static triggerSelectBox() {
+  triggerSelectBox() {
     const queryBox = document.querySelector('#selectBoxUploadLandscape') as HTMLElement;
     queryBox.click();
   }
