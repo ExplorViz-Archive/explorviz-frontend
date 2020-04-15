@@ -11,6 +11,7 @@
           @closeDataSelection={{this.closeDataSelection}}
           @showDataSelection={{this.showDataSelection}}
           @addComponent={{this.addComponent}}
+          @showApplication={{this.showApplication}}
         />
       {{else if this.landscapeRepo.latestLandscape}}
         <div class="container-fluid">
@@ -71,3 +72,15 @@
     </div>
   </div>
 </div>
+{{#unless this.showLandscape}}
+  <div style="position: absolute!important">
+    <BsButton
+      @onClick={{this.openLandscapeView}}
+      @type="secondary"
+      @outline={{true}}
+      @title="Back to Landscape"
+    >
+      {{svg-jar "reply" class="octicon align-middle"}}
+    </BsButton>
+  </div>
+{{/unless}}

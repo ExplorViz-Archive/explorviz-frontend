@@ -38,6 +38,8 @@ interface Args {
   readonly id: string;
   readonly landscape: Landscape;
   readonly font: THREE.Font;
+  readonly isReplay: boolean;
+  showApplication(application: Application): void;
 }
 
 interface SimplePlaneLayout {
@@ -681,12 +683,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #endregion MOUSE EVENT HANDLER
 
-
-  showApplication(emberModel: Application) {
-    this.landscapeRepo.set('latestApplication', emberModel);
-    this.landscapeRepo.set('replayApplication', emberModel);
-  }
-
   openApplicationIfExistend(applicationMesh: ApplicationMesh) {
     const application = applicationMesh.dataModel;
     // No data => show message
@@ -698,7 +694,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     } else {
       // data available => open application-rendering
       AlertifyHandler.closeAlertifyMessages();
-      this.showApplication(application);
+      this.args.showApplication(application);
     }
   }
 }
