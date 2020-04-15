@@ -86,12 +86,15 @@ export default class VisualizationController extends Controller {
 
   @action
   addComponent(component: string) {
-    if (this.components.includes(component)) { return; }
-
-    this.components = [...this.components, component];
-    if (this.components.length > 0) {
-      this.showDataSelection = true;
+    if (this.components.includes(component)) {
+      // remove it and readd it in the code below,
+      // so it again appears on top inside the sidebar
+      // This will not reset the component
+      this.removeComponent(component);
     }
+
+    this.components = [component, ...this.components];
+    this.showDataSelection = true;
   }
 
   @action

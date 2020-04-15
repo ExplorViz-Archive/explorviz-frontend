@@ -1,11 +1,16 @@
 <div class="row" style="max-height:100%">
-  <div class={{if this.showDataSelection "col-8" "col-12"}} id="vizspace">
+  <div class="col-12" id="vizspace">
     {{#if this.showLandscape}}
       {{#if this.landscapeRepo.latestLandscape.systems}}
         <Visualization::Rendering::LandscapeRendering
           @id="landscape1"
           @landscape={{this.landscapeRepo.latestLandscape}}
           @font={{@model}}
+          @components={{this.components}}
+          @removeComponent={{this.removeComponent}}
+          @closeDataSelection={{this.closeDataSelection}}
+          @showDataSelection={{this.showDataSelection}}
+          @addComponent={{this.addComponent}}
         />
       {{else if this.landscapeRepo.latestLandscape}}
         <div class="container-fluid">
@@ -41,6 +46,10 @@
           @application={{this.landscapeRepo.latestApplication}}
           @addComponent={{this.addComponent}}
           @font={{@model}}
+          @components={{this.components}}
+          @removeComponent={{this.removeComponent}}
+          @closeDataSelection={{this.closeDataSelection}}
+          @showDataSelection={{this.showDataSelection}}
         />
       {{/if}}
     {{/if}}
@@ -70,12 +79,5 @@
         />
       </div>
     </div>
-  </div>
-  <div class={{if this.showDataSelection "col-4" "hide"}} id="dataselection">
-    <Visualization::PageSetup::Sidebar::DataSelection
-      @components={{this.components}}
-      @removeComponent={{this.removeComponent}}
-      @closeDataSelection={{this.closeDataSelection}}
-    />
   </div>
 </div>
