@@ -339,13 +339,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // eslint-disable-next-line
   loadNewApplication = task(function* (this: ApplicationRendering) {
     this.reducedApplication = reduceApplication(this.args.application);
-    const openComponentids = this.applicationObject3D.openComponentIds;
-    this.cleanUpApplication();
     this.applicationObject3D.dataModel = this.args.application;
     yield this.populateScene.perform();
-
-    // Restore old state of components
-    this.entityManipulation.setComponentState(openComponentids, this.boxLayoutMap);
   });
 
   @task({ restartable: true })
@@ -358,9 +353,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       // Converting plain JSON layout data due to worker limitations
       this.boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
+      const { openComponentIds } = this.applicationObject3D;
 
+      // Clean up old application
+      this.cleanUpApplication();
+
+      // Add new meshes to application
       this.entityRendering.addFoundationAndChildrenToScene(this.args.application,
         this.boxLayoutMap);
+
+      // Restore old state of components
+      this.entityManipulation.setComponentState(openComponentIds);
       this.communicationRendering.addCommunication(this.boxLayoutMap);
       this.addLabels();
 
