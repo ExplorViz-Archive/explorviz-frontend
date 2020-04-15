@@ -5,6 +5,16 @@
     class="d-flex {{if @showDataSelection "col-8" "col-12"}}"
     style="flex-direction: column; height: 100%"
   >
+    <div style="position: absolute!important" class="pl-1">
+      <BsButton
+        @onClick={{this.openLandscapeView}}
+        @type="secondary"
+        @outline={{true}}
+        @title="Back to Landscape"
+      >
+        {{svg-jar "reply" class="octicon align-middle"}}
+      </BsButton>
+    </div>
     <Visualization::PageSetup::VisualizationNavbar>
       <Visualization::PageSetup::Navbar::ResetVisualization
         @resetView={{this.resetView}}
