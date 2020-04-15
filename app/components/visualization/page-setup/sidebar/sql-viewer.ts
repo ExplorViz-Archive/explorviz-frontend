@@ -156,6 +156,6 @@ export default class SQLViewer extends Component<Args> {
 
   @action
   close() {
-    this.args.removeComponent('visualization/page-setup/sidebar/sql-viewer');
+    this.args.removeComponent('sql-viewer');
   }
 }

@@ -21,7 +21,7 @@ export default class SQLOpener extends Component<Args> {
         AlertifyHandler.showAlertifyMessage('No SQL statements found!');
         return;
       }
-      this.args.addComponent('visualization/page-setup/sidebar/sql-viewer');
+      this.args.addComponent('sql-viewer');
     }
   }
 }

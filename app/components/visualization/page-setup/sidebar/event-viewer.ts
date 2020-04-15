@@ -34,6 +34,6 @@ export default class EventViewer extends Component<Args> {
 
   @action
   close() {
-    this.args.removeComponent('visualization/page-setup/sidebar/event-viewer');
+    this.args.removeComponent('event-viewer');
   }
 }

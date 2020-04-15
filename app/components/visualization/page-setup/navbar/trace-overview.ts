@@ -25,7 +25,7 @@ export default class TraceOverview extends Component<Args> {
       }
       set(this.landscapeListener, 'pauseVisualizationReload', true);
       AlertifyHandler.showAlertifyMessage('Visualization paused!');
-      this.args.addComponent('visualization/page-setup/sidebar/trace-selection');
+      this.args.addComponent('trace-selection');
     }
   }
 }

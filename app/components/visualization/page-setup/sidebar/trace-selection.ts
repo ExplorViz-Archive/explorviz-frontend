@@ -237,6 +237,6 @@ export default class TraceSelection extends Component<Args> {
 
   @action
   close(this: TraceSelection) {
-    this.args.removeComponent('visualization/page-setup/sidebar/trace-selection');
+    this.args.removeComponent('trace-selection');
   }
 }

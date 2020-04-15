@@ -1,43 +1,67 @@
 {{add-listener this.landscapeRepo "updated" this.onUpdated}}
 
-<Visualization::PageSetup::VisualizationNavbar>
-  <Visualization::PageSetup::Navbar::ResetVisualization
-    @resetView={{this.resetView}}
-  />
-  <Visualization::PageSetup::Navbar::PauseReload />
-  <Visualization::PageSetup::Navbar::EventOpener
-    @addComponent={{@addComponent}}
-  />
-  <Visualization::PageSetup::Navbar::LandscapeDownloader
-    @landscape={{@landscape}}
-  />
-</Visualization::PageSetup::VisualizationNavbar>
-
-<div
-  id="rendering"
-  {{did-insert this.outerDivInserted}}
-  {{did-resize this.resize debounce=100}}
->
-  <canvas
-    class="main-content-majority"
-    oncontextmenu="return false;"
-    {{did-insert this.canvasInserted}}
+<div class="row" style="height:100%">
+  <div
+    class="d-flex {{if @showDataSelection "col-8" "col-12"}}"
+    style="flex-direction: column; height: 100%"
   >
-  </canvas>
-  {{#if this.loadNewLandscape.isRunning}}
-    <Visualization::Rendering::LoadingIndicator @text="Loading New Landscape" />
-  {{else if this.openSystemAndRedraw.isRunning}}
-    <Visualization::Rendering::LoadingIndicator @text="Opening System" />
-  {{else if this.closeSystemAndRedraw.isRunning}}
-    <Visualization::Rendering::LoadingIndicator @text="Closing System" />
-  {{else if this.openNodeGroupAndRedraw.isRunning}}
-    <Visualization::Rendering::LoadingIndicator @text="Opening Nodegroup" />
-  {{else if this.closeNodeGroupAndRedraw.isRunning}}
-    <Visualization::Rendering::LoadingIndicator @text="Closing Nodegroup" />
-  {{/if}}
+    <Visualization::PageSetup::VisualizationNavbar>
+      <Visualization::PageSetup::Navbar::ResetVisualization
+        @resetView={{this.resetView}}
+      />
+      <Visualization::PageSetup::Navbar::PauseReload />
+      <Visualization::PageSetup::Navbar::EventOpener
+        @addComponent={{@addComponent}}
+      />
+      <Visualization::PageSetup::Navbar::LandscapeDownloader
+        @landscape={{@landscape}}
+      />
+    </Visualization::PageSetup::VisualizationNavbar>
 
-  {{!-- popup(s) --}}
-  <Visualization::Rendering::Popups::PopupCoordinator
-    @popupData={{this.popupData}}
-  />
+    <div
+      id="rendering"
+      {{did-insert this.outerDivInserted}}
+      {{did-resize this.resize debounce=100}}
+    >
+      <canvas
+        class="main-content-majority"
+        oncontextmenu="return false;"
+        {{did-insert this.canvasInserted}}
+      >
+      </canvas>
+      {{#if this.loadNewLandscape.isRunning}}
+        <Visualization::Rendering::LoadingIndicator @text="Loading New Landscape" />
+      {{else if this.openSystemAndRedraw.isRunning}}
+        <Visualization::Rendering::LoadingIndicator @text="Opening System" />
+      {{else if this.closeSystemAndRedraw.isRunning}}
+        <Visualization::Rendering::LoadingIndicator @text="Closing System" />
+      {{else if this.openNodeGroupAndRedraw.isRunning}}
+        <Visualization::Rendering::LoadingIndicator @text="Opening Nodegroup" />
+      {{else if this.closeNodeGroupAndRedraw.isRunning}}
+        <Visualization::Rendering::LoadingIndicator @text="Closing Nodegroup" />
+      {{/if}}
+
+      {{!-- popup(s) --}}
+      <Visualization::Rendering::Popups::PopupCoordinator
+        @popupData={{this.popupData}}
+      />
+    </div>
+  </div>
+  <div class={{if @showDataSelection "col-4" "hide"}} id="dataselection">
+    <Visualization::PageSetup::Sidebar::DataSelection
+      @components={{@components}}
+      @removeComponent={{@removeComponent}}
+      @closeDataSelection={{@closeDataSelection}}
+    >
+      {{#each @components as |componentName|}}
+        <div class="card mb-3">
+          <div class="card-body d-flex flex-column">
+            {{#if (eq componentName "visualization/page-setup/sidebar/event-viewer")}}
+              <Visualization::PageSetup::Sidebar::EventViewer />
+            {{/if}}
+          </div>
+        </div>
+      {{/each}}
+    </Visualization::PageSetup::Sidebar::DataSelection>
+  </div>
 </div>

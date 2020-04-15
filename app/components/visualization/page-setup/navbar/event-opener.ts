@@ -19,7 +19,7 @@ export default class EventOpener extends Component<Args> {
         AlertifyHandler.showAlertifyMessage('No events found!');
         return;
       }
-      this.args.addComponent('visualization/page-setup/sidebar/event-viewer');
+      this.args.addComponent('event-viewer');
     }
   }
 }
