@@ -217,10 +217,16 @@ export default class Labeler {
 
     const maybeLabel = labelCache.get(text);
 
-    // Only use matching cached labels which are not already in use
-    if (maybeLabel && maybeLabel.defaultColor.getHexString() === color.getHexString()
-    && maybeLabel.fontSize === size && !maybeLabel.parent) {
-      labelMesh = maybeLabel;
+    // Label with matching text and text size exists
+    if (maybeLabel && maybeLabel.fontSize === size) {
+      // Color also matches and label mesh is not in use => Use cached label
+      if (maybeLabel.defaultColor.getHexString() === color.getHexString() && !maybeLabel.parent) {
+        labelMesh = maybeLabel;
+      // Only text and text size fit => Re-use text geometry
+      } else {
+        labelMesh = new PlaneLabelMesh(font, text, size, color, maybeLabel.geometry);
+      }
+    // No matching label mesh is cached => Create new label and cache it
     } else {
       labelMesh = new PlaneLabelMesh(font, text, size, color);
       labelCache.set(text, labelMesh);
