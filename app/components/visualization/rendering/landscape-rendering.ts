@@ -64,6 +64,8 @@ type PopupData = {
 * @submodule visualization.rendering
 */
 export default class LandscapeRendering extends GlimmerComponent<Args> {
+  // #region CLASS FIELDS AND GETTERS
+
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
 
@@ -115,6 +117,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   get font() {
     return this.args.font;
   }
+
+  // #endregion CLASS FIELDS AND GETTERS
+
 
   constructor(owner: any, args: Args) {
     super(owner, args);

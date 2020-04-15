@@ -55,6 +55,8 @@ type LayoutData = {
 };
 
 export default class ApplicationRendering extends GlimmerComponent<Args> {
+  // #region CLASS FIELDS AND GETTERS
+
   @service('store')
   store!: DS.Store;
 
@@ -108,6 +110,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   get font() {
     return this.args.font;
   }
+
+  // #endregion CLASS FIELDS AND GETTERS
+
 
   // #region COMPONENT AND SCENE INITIALIZATION
 
