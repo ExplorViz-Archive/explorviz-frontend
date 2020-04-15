@@ -121,6 +121,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   // #endregion CLASS FIELDS AND GETTERS
 
 
+  // #region COMPONENT AND SCENE INITIALIZATION
+
   constructor(owner: any, args: Args) {
     super(owner, args);
     this.initDone = false;
@@ -129,6 +131,16 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.render = this.render.bind(this);
   }
 
+  @action
+  canvasInserted(canvas: HTMLCanvasElement) {
+    this.debug('Canvas inserted');
+
+    this.canvas = canvas;
+
+    canvas.oncontextmenu = (e) => {
+      e.preventDefault();
+    };
+  }
 
   @action
   async outerDivInserted(outerDiv: HTMLElement) {
@@ -143,17 +155,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     await this.loadNewLandscape.perform();
 
     this.initDone = true;
-  }
-
-  @action
-  canvasInserted(canvas: HTMLCanvasElement) {
-    this.debug('Canvas inserted');
-
-    this.canvas = canvas;
-
-    canvas.oncontextmenu = (e) => {
-      e.preventDefault();
-    };
   }
 
   initThreeJs() {
@@ -203,17 +204,33 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Lights added');
   }
 
-  @action
-  resize(outerDiv: HTMLElement) {
-    const width = Number(outerDiv.clientWidth);
-    const height = Number(outerDiv.clientHeight);
-    this.webglrenderer.setSize(width, height);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+  initInteraction() {
+    // this.handleSingleClick = this.handleSingleClick.bind(this);
+    this.handleDoubleClick = this.handleDoubleClick.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.handleMouseWheel = this.handleMouseWheel.bind(this);
+    this.handleMouseOut = this.handleMouseOut.bind(this);
+    // this.handleMouseEnter = this.handleMouseEnter.bind(this);
+    this.handleMouseStop = this.handleMouseStop.bind(this);
+    this.handlePanning = this.handlePanning.bind(this);
+
+    this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer,
+      this.landscapeObject3D, {
+        doubleClick: this.handleDoubleClick,
+        mouseMove: this.handleMouseMove,
+        mouseWheel: this.handleMouseWheel,
+        mouseOut: this.handleMouseOut,
+        /* mouseEnter: this.handleMouseEnter, */
+        mouseStop: this.handleMouseStop,
+        panning: this.handlePanning,
+      });
   }
+
+  // #endregion COMPONENT AND SCENE INITIALIZATION
 
 
   // #region RENDERING LOOP
+
   render() {
     if (this.isDestroyed) { return; }
 
@@ -234,6 +251,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #endregion RENDERING LOOP
 
+
+  // #region COMPONENT AND SCENE CLEAN-UP
 
   // @Override
   /**
@@ -265,6 +284,20 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.labeler.clearCache();
 
     this.interaction.removeHandlers();
+  }
+
+  // #endregion COMPONENT AND SCENE CLEAN-UP
+
+
+  // #region ACTIONS
+
+  @action
+  resize(outerDiv: HTMLElement) {
+    const width = Number(outerDiv.clientWidth);
+    const height = Number(outerDiv.clientHeight);
+    this.webglrenderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
   }
 
   /**
@@ -299,6 +332,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       this.loadNewLandscape.perform();
     }
   }
+
+  // #endregion ACTIONS
+
+
+  // #region SCENE POPULATION
 
   @task
   // eslint-disable-next-line
@@ -498,26 +536,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.landscapeObject3D.add(applicationMesh);
   }
 
-  @action
-  showApplication(emberModel: Application) {
-    this.landscapeRepo.set('latestApplication', emberModel);
-    this.landscapeRepo.set('replayApplication', emberModel);
-  }
+  // #endregion SCENE POPULATION
 
-  openApplicationIfExistend(applicationMesh: ApplicationMesh) {
-    const application = applicationMesh.dataModel;
-    // No data => show message
-    if (application.get('components').get('length') === 0) {
-      const message = `Sorry, there is no information for application <b>
-        ${application.get('name')}</b> available.`;
 
-      AlertifyHandler.showAlertifyMessage(message);
-    } else {
-      // data available => open application-rendering
-      AlertifyHandler.closeAlertifyMessages();
-      this.showApplication(application);
-    }
-  }
+  // #region SCENE MANIPULATION
 
   @task
   // eslint-disable-next-line
@@ -576,6 +598,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       });
     }
   }
+
+  // #endregion SCENE MANIPULATION
+
+
+  // #region MOUSE EVENT HANDLER
 
   handleDoubleClick(mesh?: THREE.Mesh) {
     // Handle application
@@ -650,25 +677,26 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
-  initInteraction() {
-    // this.handleSingleClick = this.handleSingleClick.bind(this);
-    this.handleDoubleClick = this.handleDoubleClick.bind(this);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleMouseWheel = this.handleMouseWheel.bind(this);
-    this.handleMouseOut = this.handleMouseOut.bind(this);
-    // this.handleMouseEnter = this.handleMouseEnter.bind(this);
-    this.handleMouseStop = this.handleMouseStop.bind(this);
-    this.handlePanning = this.handlePanning.bind(this);
+  // #endregion MOUSE EVENT HANDLER
 
-    this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer,
-      this.landscapeObject3D, {
-        doubleClick: this.handleDoubleClick,
-        mouseMove: this.handleMouseMove,
-        mouseWheel: this.handleMouseWheel,
-        mouseOut: this.handleMouseOut,
-        /* mouseEnter: this.handleMouseEnter, */
-        mouseStop: this.handleMouseStop,
-        panning: this.handlePanning,
-      });
+
+  showApplication(emberModel: Application) {
+    this.landscapeRepo.set('latestApplication', emberModel);
+    this.landscapeRepo.set('replayApplication', emberModel);
+  }
+
+  openApplicationIfExistend(applicationMesh: ApplicationMesh) {
+    const application = applicationMesh.dataModel;
+    // No data => show message
+    if (application.get('components').get('length') === 0) {
+      const message = `Sorry, there is no information for application <b>
+        ${application.get('name')}</b> available.`;
+
+      AlertifyHandler.showAlertifyMessage(message);
+    } else {
+      // data available => open application-rendering
+      AlertifyHandler.closeAlertifyMessages();
+      this.showApplication(application);
+    }
   }
 }

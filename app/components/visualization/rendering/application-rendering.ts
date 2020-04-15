@@ -327,22 +327,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #endregion MOUSE EVENT HANDLER
 
-  // #region COMPONENT AND CLAZZ HIGHLIGHTING
-
-  @action
-  highlightTrace(trace: Trace, step = 1) {
-    // Open components such that complete trace is visible
-    this.openAllComponents();
-    this.highlighter.highlightTrace(trace, step, this.args.application);
-  }
-
-  @action
-  removeHighlighting() {
-    this.highlighter.removeHighlighting();
-  }
-
-  // #endregion COMPONENT AND CLAZZ HIGHLIGHTING
-
 
   // #region SCENE POPULATION
 
@@ -403,6 +387,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
 
   // #region RENDERING LOOP
+
   render() {
     if (this.isDestroyed) { return; }
 
@@ -422,6 +407,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion RENDERING LOOP
+
 
   // #region ACTIONS
 
@@ -504,6 +490,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.loadNewApplication.perform();
   }
 
+  @action
+  highlightTrace(trace: Trace, step = 1) {
+    // Open components such that complete trace is visible
+    this.openAllComponents();
+    this.highlighter.highlightTrace(trace, step, this.args.application);
+  }
+
   // #endregion ACTIONS
 
 
@@ -530,6 +523,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion COMPONENT AND SCENE CLEAN-UP
+
 
   // #region ADDITIONAL HELPER FUNCTIONS
 
