@@ -35,9 +35,9 @@ import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 
 
 interface Args {
-  id: string;
-  landscape: Landscape;
-  font: THREE.Font;
+  readonly id: string;
+  readonly landscape: Landscape;
+  readonly font: THREE.Font;
 }
 
 interface SimplePlaneLayout {
@@ -83,10 +83,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   scene!: THREE.Scene;
 
-  landscapeObject3D = new LandscapeObject3D(this.args.landscape);
-
-  labeler = new Labeler();
-
   webglrenderer!: THREE.WebGLRenderer;
 
   camera!: THREE.PerspectiveCamera;
@@ -103,13 +99,17 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   interaction!: Interaction;
 
-  imageLoader: ImageLoader = new ImageLoader();
-
-  hoverHandler: HoverEffectHandler = new HoverEffectHandler();
-
   reducedLandscape: ReducedLandscape|null = null;
 
   modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
+
+  readonly landscapeObject3D: LandscapeObject3D;
+
+  readonly labeler = new Labeler();
+
+  readonly imageLoader: ImageLoader = new ImageLoader();
+
+  readonly hoverHandler: HoverEffectHandler = new HoverEffectHandler();
 
   @tracked
   popupData: PopupData | null = null;
@@ -129,6 +129,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Constructor called');
 
     this.render = this.render.bind(this);
+
+    this.landscapeObject3D = new LandscapeObject3D(this.args.landscape);
   }
 
   @action

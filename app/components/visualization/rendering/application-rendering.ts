@@ -33,9 +33,9 @@ import { task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
 interface Args {
-  id: string,
-  application: Application,
-  font: THREE.Font,
+  readonly id: string,
+  readonly application: Application,
+  readonly font: THREE.Font,
   addComponent(componentPath: string): void // is passed down to the viz navbar
 }
 
