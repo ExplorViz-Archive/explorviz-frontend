@@ -2,9 +2,11 @@ import calculateColorBrightness from
   'explorviz-frontend/utils/helpers/threejs-helpers';
 import THREE from 'three';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import { tracked } from '@glimmer/tracking';
 
 export default class HoverEffectHandler {
-  hoveredEntityObj: null|BaseMesh = null;
+  @tracked
+  hoveredEntityObj: BaseMesh|null = null;
 
   /**
    * Alters the color of a given mesh such that it is clear which mesh
