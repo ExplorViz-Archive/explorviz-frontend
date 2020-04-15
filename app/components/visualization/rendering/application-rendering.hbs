@@ -51,7 +51,6 @@
   </div>
   <div class={{if @showDataSelection "col-4" "hide"}} id="dataselection">
     <Visualization::PageSetup::Sidebar::DataSelection
-      @components={{@components}}
       @closeDataSelection={{@closeDataSelection}}
     >
       {{#each @components as |componentName|}}
