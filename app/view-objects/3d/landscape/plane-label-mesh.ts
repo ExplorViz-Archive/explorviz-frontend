@@ -19,6 +19,7 @@ export default class PlaneLabelMesh extends LabelMesh {
   computeLabel(text: string, fontSize: number) {
     const labelGeo = new THREE.TextBufferGeometry(text, {
       font: this.font,
+      curveSegments: 1,
       size: fontSize,
       height: 0,
     });
