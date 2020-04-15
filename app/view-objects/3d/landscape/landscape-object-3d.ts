@@ -52,11 +52,7 @@ export default class LandscapeObject3D extends THREE.Object3D {
       for (let i = entity.children.length - 1; i >= 0; i--) {
         const child = entity.children[i];
 
-        if (child instanceof BaseMesh) {
-          child.delete();
-        } else {
-          removeChildren(child);
-        }
+        removeChildren(child);
 
         if (!(child instanceof THREE.Light)) {
           if (child instanceof THREE.Mesh) {
