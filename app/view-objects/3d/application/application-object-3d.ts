@@ -80,7 +80,7 @@ export default class ApplicationObject3D extends THREE.Object3D {
    * Iterates over all component meshes which are currently added to the
    * application and returns a set with ids of the opened components.
    */
-  getOpenComponentIds() {
+  get openComponentIds() {
     const openComponentIds: Set<string> = new Set();
 
     this.componentMeshes.forEach((componentMesh) => {

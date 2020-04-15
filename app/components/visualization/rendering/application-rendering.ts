@@ -339,9 +339,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // eslint-disable-next-line
   loadNewApplication = task(function* (this: ApplicationRendering) {
     this.reducedApplication = reduceApplication(this.args.application);
+    const openComponentids = this.applicationObject3D.openComponentIds;
     this.cleanUpApplication();
     this.applicationObject3D.dataModel = this.args.application;
     yield this.populateScene.perform();
+
+    // Restore old state of components
+    this.entityManipulation.setComponentState(openComponentids, this.boxLayoutMap);
   });
 
   @task({ restartable: true })
