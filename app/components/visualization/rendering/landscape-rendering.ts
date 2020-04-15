@@ -324,7 +324,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   resetView() {
     if (this.modelIdToPlaneLayout) {
       this.camera.position.set(0, 0, 0);
-      const landscapeRect = this.landscapeObject3D.getMinMaxRect(this.modelIdToPlaneLayout);
+      const landscapeRect = this.landscapeObject3D.getMinMaxRect();
 
       updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
     }
@@ -408,7 +408,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         modelIdToPlaneLayout.set(modelId, planeLayoutObject);
       });
 
-      const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
+      const landscapeRect = this.landscapeObject3D.getMinMaxRect();
       const centerPoint = landscapeRect.center;
 
       updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
