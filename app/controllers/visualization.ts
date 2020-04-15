@@ -73,12 +73,6 @@ export default class VisualizationController extends Controller {
   }
 
   @action
-  openLandscapeView() {
-    set(this.landscapeRepo, 'latestApplication', null);
-    set(this.landscapeRepo, 'replayApplication', null);
-  }
-
-  @action
   closeDataSelection() {
     this.showDataSelection = false;
     this.components = [];
