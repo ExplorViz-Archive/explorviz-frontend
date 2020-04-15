@@ -35,7 +35,7 @@
     >
       <canvas
         class="main-content-majority"
-        oncontextmenu="return false;"
+        style={{if this.hoverHandler.hoveredEntityObj "cursor: pointer"}}
         {{did-insert this.canvasInserted}}
       >
       </canvas>
