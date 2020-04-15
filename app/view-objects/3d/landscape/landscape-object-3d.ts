@@ -8,7 +8,6 @@ import SystemMesh from './system-mesh';
 import NodeGroupMesh from './nodegroup-mesh';
 import NodeMesh from './node-mesh';
 import ApplicationMesh from './application-mesh';
-import BaseMesh from '../base-mesh';
 
 export default class LandscapeObject3D extends THREE.Object3D {
   dataModel: Landscape;
