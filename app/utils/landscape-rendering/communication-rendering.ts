@@ -79,7 +79,7 @@ export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray
           tile = {
             startPoint: lastPoint,
             endPoint: thisPoint,
-            positionZ: 0.0025, // Tiles should be in front of systems
+            positionZ: 0.025, // Tiles should be in front of nodes
             requestsCache: 0,
             lineThickness: 1, // Determined later on
             pipeColor: new THREE.Color(color),

@@ -136,6 +136,21 @@ export default class EntityManipulation {
     }
   }
 
+  /**
+   * Takes a set of open component ids and opens them.
+   *
+   * @param openComponentids Set with ids of components which shall be opened
+   * @param boxLayoutMap Map which contains communication layout
+   */
+  setComponentState(openComponentids: Set<string>) {
+    openComponentids.forEach((componentId) => {
+      const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(componentId);
+      if (componentMesh instanceof ComponentMesh) {
+        this.openComponentMesh(componentMesh);
+      }
+    });
+  }
+
   moveCameraTo(emberModel: Clazz|ClazzCommunication, applicationCenter: THREE.Vector3,
     camera: PerspectiveCamera, applicationObject3D: THREE.Object3D) {
     if (emberModel instanceof ClazzCommunication) {

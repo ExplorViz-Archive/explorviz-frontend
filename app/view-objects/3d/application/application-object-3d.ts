@@ -10,14 +10,22 @@ import BaseMesh from '../base-mesh';
 export default class ApplicationObject3D extends THREE.Object3D {
   dataModel: Application;
 
-  modelIdToMesh: Map<string, BaseMesh> = new Map();
+  modelIdToMesh: Map<string, BaseMesh>;
 
-  commIdToMesh: Map<string, ClazzCommunicationMesh> = new Map();
+  commIdToMesh: Map<string, ClazzCommunicationMesh>;
+
+  componentMeshes: Set<ComponentMesh>;
 
   constructor(application: Application) {
     super();
 
     this.dataModel = application;
+
+    this.modelIdToMesh = new Map();
+
+    this.commIdToMesh = new Map();
+
+    this.componentMeshes = new Set();
   }
 
   resetRotation() {
@@ -38,6 +46,11 @@ export default class ApplicationObject3D extends THREE.Object3D {
     // Store communication separately to allow efficient iteration over meshes
     } else if (object instanceof ClazzCommunicationMesh) {
       this.commIdToMesh.set(object.dataModel.id, object);
+    }
+
+    // Keep track of all components (e.g. to find opened components)
+    if (object instanceof ComponentMesh) {
+      this.componentMeshes.add(object);
     }
 
     return this;
@@ -63,9 +76,26 @@ export default class ApplicationObject3D extends THREE.Object3D {
     return new Set([...this.getBoxMeshes(), ...this.getCommMeshes()]);
   }
 
+  /**
+   * Iterates over all component meshes which are currently added to the
+   * application and returns a set with ids of the opened components.
+   */
+  get openComponentIds() {
+    const openComponentIds: Set<string> = new Set();
+
+    this.componentMeshes.forEach((componentMesh) => {
+      if (componentMesh.opened) {
+        openComponentIds.add(componentMesh.dataModel.id);
+      }
+    });
+
+    return openComponentIds;
+  }
+
   resetMeshReferences() {
     this.modelIdToMesh.clear();
     this.commIdToMesh.clear();
+    this.componentMeshes.clear();
   }
 
   removeAllCommunication() {

@@ -4,8 +4,13 @@ import NodeGroup from 'explorviz-frontend/models/nodegroup';
 import Node from 'explorviz-frontend/models/node';
 import Application from 'explorviz-frontend/models/application';
 
+/**
+ * Takes a landscape and produces a plain JSON version of it
+ * which can be used in workers. Only the relevant properties
+ * are kept.
+ */
 export function reduceLandscape(landscape: Landscape): ReducedLandscape {
-  const applicationIdToApplicationMap = new Map<string, ReducedApplication>();
+  const applicationIdToApplication = new Map<string, ReducedApplication>();
 
   function reduceApplication(application: Application): ReducedApplication {
     return {
@@ -20,7 +25,7 @@ export function reduceLandscape(landscape: Landscape): ReducedLandscape {
     const reducedApplications = applications.map((application) => reduceApplication(application));
 
     reducedApplications.forEach((application) => {
-      applicationIdToApplicationMap.set(application.id, application);
+      applicationIdToApplication.set(application.id, application);
     });
 
     const reducedNode = {
@@ -79,8 +84,11 @@ export function reduceLandscape(landscape: Landscape): ReducedLandscape {
 
   const reducedApplicationCommunications = applicationCommunications.map(
     (applicationCommunication) => {
-      const sourceApplication = applicationIdToApplicationMap.get(applicationCommunication.get('sourceApplication').get('id')) as ReducedApplication;
-      const targetApplication = applicationIdToApplicationMap.get(applicationCommunication.get('targetApplication').get('id')) as ReducedApplication;
+      const sourceAppID = applicationCommunication.get('sourceApplication').get('id');
+      const sourceApplication = applicationIdToApplication.get(sourceAppID) as ReducedApplication;
+
+      const targetAppID = applicationCommunication.get('targetApplication').get('id');
+      const targetApplication = applicationIdToApplication.get(targetAppID) as ReducedApplication;
 
       return {
         id: applicationCommunication.get('id'),
