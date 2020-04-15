@@ -142,6 +142,10 @@ svg.octicon {
   border-color: #406da7;
 }
 
+.pointer-cursor {
+  cursor: pointer;
+}
+
 @mixin centerSpinners() {
   @for $i from 1 through 5 {
     .spinner-center-#{$i} {

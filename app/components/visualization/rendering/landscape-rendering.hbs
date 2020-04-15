@@ -24,8 +24,7 @@
       {{did-resize this.resize debounce=100}}
     >
       <canvas
-        class="main-content-majority"
-        style={{if this.hoverHandler.hoveredEntityObj "cursor: pointer"}}
+        class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
         {{did-insert this.canvasInserted}}
       >
       </canvas>
