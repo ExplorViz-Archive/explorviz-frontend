@@ -3,12 +3,24 @@ import BaseMesh from '../base-mesh';
 
 
 export default abstract class BoxMesh extends BaseMesh {
+  /**
+   * The layout position returned by the city-layouter
+   */
   layoutPos: THREE.Vector3;
 
+  /**
+   * The layout height returned by the city-layouter
+   */
   layoutHeight: number;
 
+  /**
+   * The layout width returned by the city-layouter
+   */
   layoutWidth: number;
 
+  /**
+   * The layout depth returned by the city-layouter
+   */
   layoutdDepth: number;
 
 

@@ -2,7 +2,7 @@ import Application from 'explorviz-frontend/models/application';
 import Component from 'explorviz-frontend/models/component';
 import Clazz from 'explorviz-frontend/models/clazz';
 
-export function reduceClazz(clazz: Clazz): ReducedClazz {
+function reduceClazz(clazz: Clazz): ReducedClazz {
   return {
     id: clazz.get('id'),
     name: clazz.get('name'),
@@ -10,7 +10,7 @@ export function reduceClazz(clazz: Clazz): ReducedClazz {
   };
 }
 
-export function reduceComponent(component: Component): ReducedComponent {
+function reduceComponent(component: Component): ReducedComponent {
   const childComponents = component.get('children').toArray();
   const clazzes = component.get('clazzes').toArray();
 
@@ -25,6 +25,12 @@ export function reduceComponent(component: Component): ReducedComponent {
   };
 }
 
+/**
+ * Takes and application and reduces it to simple a simple JS object,
+ * containing only the data and structure necessary for the city-layouter
+ *
+ * @param application The Application to reduce
+ */
 export function reduceApplication(application: Application): ReducedApplication {
   const childComponents = application.get('components').toArray();
   const reducedComponents = childComponents.map((child) => reduceComponent(child));

@@ -20,6 +20,11 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     });
   }
 
+  /**
+   * Turns the mesh and its arrows transparent, if value in [0,1). Fully transparent at 0.0
+   *
+   * @param opacity Desired transparency of mesh and its arrows. Default 0.3
+   */
   turnTransparent(opacity = 0.3) {
     super.turnTransparent(opacity);
     this.children.forEach((childObject) => {
@@ -29,6 +34,9 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     });
   }
 
+  /**
+   * Turns mesh and communication arrows back to fully opaque.
+   */
   turnOpaque() {
     super.turnOpaque();
     this.children.forEach((childObject) => {
@@ -38,16 +46,21 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     });
   }
 
-  renderAsLine(viewCenterPoint: THREE.Vector3) {
+  /**
+   * Renders the communication mesh as straight cylinder geometry.
+   *
+   * @param applicationCenter The center point of the application
+   */
+  renderAsLine(applicationCenter: THREE.Vector3) {
     const { layout } = this;
     const { startPoint } = layout;
     const { endPoint } = layout;
 
     const start = new THREE.Vector3();
-    start.subVectors(startPoint, viewCenterPoint);
+    start.subVectors(startPoint, applicationCenter);
 
     const end = new THREE.Vector3();
-    end.subVectors(endPoint, viewCenterPoint);
+    end.subVectors(endPoint, applicationCenter);
 
     const direction = new THREE.Vector3().subVectors(end, start);
     const orientation = new THREE.Matrix4();
@@ -65,14 +78,21 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     this.position.copy(end.add(start).divideScalar(2));
   }
 
-  render(viewCenterPoint = new THREE.Vector3(), curveHeight = 0.0, desiredSegments = 20) {
+  /**
+   * Renders the communication mesh as straight cylinder geometry.
+   *
+   * @param applicationCenter The center point of the application.
+   * @param curveHeight Max height of the communication. Default 0.0
+   * @param desiredSegments The number of segments (tubes) the geometry persists of. Default 20
+   */
+  render(applicationCenter = new THREE.Vector3(), curveHeight = 0.0, desiredSegments = 20) {
     const { layout } = this;
 
     const start = new THREE.Vector3();
-    start.subVectors(layout.startPoint, viewCenterPoint);
+    start.subVectors(layout.startPoint, applicationCenter);
 
     const end = new THREE.Vector3();
-    end.subVectors(layout.endPoint, viewCenterPoint);
+    end.subVectors(layout.endPoint, applicationCenter);
 
     // Determine middle
     const dir = end.clone().sub(start);
@@ -96,7 +116,16 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     this.geometry = new THREE.TubeGeometry(curve, curveSegments, layout.lineThickness);
   }
 
-  addArrows(viewCenterPoint = new THREE.Vector3(), width = 1, yOffset = 1, color = 0x000000) {
+  /**
+   * Adds communication arrows on top of the communication mesh
+   * to visualize communication direction
+   *
+   * @param applicationCenter The application's center point
+   * @param width The width of the arrow. Default 1.0
+   * @param yOffset Units to move the communication arrows up by. Default 1.0
+   * @param color The color of the arrows. Default black
+   */
+  addArrows(applicationCenter = new THREE.Vector3(), width = 1, yOffset = 1, color = 0x000000) {
     const { layout } = this;
     // Scale arrow with communication line thickness
     const { startPoint } = layout;
@@ -105,10 +134,10 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     const arrowWidth = width + layout.lineThickness / 2;
 
     const start = new THREE.Vector3();
-    start.subVectors(startPoint, viewCenterPoint);
+    start.subVectors(startPoint, applicationCenter);
 
     const end = new THREE.Vector3();
-    end.subVectors(endPoint, viewCenterPoint);
+    end.subVectors(endPoint, applicationCenter);
 
     this.addArrow(start, end, arrowWidth, yOffset, color);
 
@@ -118,7 +147,16 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     }
   }
 
-  addArrow(start: THREE.Vector3, end: THREE.Vector3,
+  /**
+   * Adds a single communication arrow.
+   *
+   * @param start The start point of the communication.
+   * @param end The end point of the communication.
+   * @param width The width of the arrow.
+   * @param yOffset Units to move the communication arrow up by. Default 1.0
+   * @param color The color of the arrow.
+   */
+  private addArrow(start: THREE.Vector3, end: THREE.Vector3,
     width: number, yOffset: number, color: number) {
     const dir = new THREE.Vector3().subVectors(end, start);
     const len = dir.length();

@@ -19,6 +19,12 @@ export default class NodeMesh extends PlaneMesh {
     this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
   }
 
+  /**
+   * Returns the display name for the node, which is either the node's
+   * name, ip address or parent's name.
+   *
+   * @param parent The parent mesh of this node
+   */
   getDisplayName(parent: THREE.Mesh | undefined) {
     const node = this.dataModel;
 

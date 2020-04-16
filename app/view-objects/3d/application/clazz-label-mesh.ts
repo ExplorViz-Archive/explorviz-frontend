@@ -7,7 +7,13 @@ export default class ClazzLabelMesh extends LabelMesh {
     this.computeLabel(labelText);
   }
 
-  computeLabel(labelText: string) {
+  /**
+   * Create the geometry and material for the desired label
+   * and add it to this mesh.
+   *
+   * @param labelText Desired text for the clazz label
+   */
+  private computeLabel(labelText: string) {
     // Adjust desired text size with possible scaling
     const TEXT_SIZE = 0.5;
     // Text should look like it is written on the parent's box (no height required)

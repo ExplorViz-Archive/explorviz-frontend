@@ -9,6 +9,12 @@ import NodeGroupMesh from './nodegroup-mesh';
 import NodeMesh from './node-mesh';
 import ApplicationMesh from './application-mesh';
 
+/**
+ * This extended Object3D adds additional functionality to
+ * add and retrieve landscape regarded meshes efficiently and
+ * some functionality to easily remove child meshes and dispose
+ * all their THREE.Geometry's and THREE.Material's.
+ */
 export default class LandscapeObject3D extends THREE.Object3D {
   dataModel: Landscape;
 
@@ -22,6 +28,13 @@ export default class LandscapeObject3D extends THREE.Object3D {
     this.dataModel = landscape;
   }
 
+  /**
+   * Adds object as child of this object.
+   * Furthermore, application related meshes are stored inside
+   * the class's {@link modelIdToMesh} map for easier future access.
+   *
+   * @param object Object to add as child
+   */
   add(object: THREE.Object3D) {
     super.add(object);
 
@@ -37,15 +50,26 @@ export default class LandscapeObject3D extends THREE.Object3D {
     return this;
   }
 
+  /**
+   * Returns Sytem, NodeGroup, Node or Application mesh matching given id
+   *
+   * @param id The id of Sytem, NodeGroup, Node or Application
+   */
   getMeshbyModelId(id: string) {
     return this.modelIdToMesh.get(id);
   }
 
+  /**
+   * Resets all maps and sets governing meshes
+   */
   resetMeshReferences() {
     this.modelIdToMesh.clear();
     this.openableMeshes.clear();
   }
 
+  /**
+   * Removes all child meshes and disposes their geometries and materials
+   */
   removeAllChildren() {
     function removeChildren(entity: THREE.Object3D | THREE.Mesh) {
       for (let i = entity.children.length - 1; i >= 0; i--) {
@@ -108,6 +132,9 @@ export default class LandscapeObject3D extends THREE.Object3D {
     return openEntityIds;
   }
 
+  /**
+   * Computes a minimum bounding rectangle for the layouted landscape
+   */
   getMinMaxRect(modelIdToLayout: Map<string, PlaneLayout>) {
     // Rectangle which can be used to find smallest and greatest x/y coordinates
     const rect = new MinMaxRectangle();

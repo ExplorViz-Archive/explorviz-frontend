@@ -4,20 +4,20 @@ import { MeshLine, MeshLineMaterial } from 'threejs-meshline';
 import BaseMesh from '../base-mesh';
 
 // Simple 2-dimensional point
-type point = { x: number, y: number };
+type Point = { x: number, y: number };
 
 // Blueprint for application communication
-type tile = {
-  startPoint: point, endPoint: point, positionZ: number, requestsCache: number,
+type Tile = {
+  startPoint: Point, endPoint: Point, positionZ: number, requestsCache: number,
   lineThickness: number, pipeColor: THREE.Color
 };
 
 export default class AppCommunicationMesh extends BaseMesh {
-  dataModel: tile;
+  dataModel: Tile;
 
   material: THREE.MeshBasicMaterial;
 
-  constructor(tile: tile, highlightingColor = new THREE.Color('red')) {
+  constructor(tile: Tile, highlightingColor = new THREE.Color('red')) {
     super(tile.pipeColor, highlightingColor);
 
     this.dataModel = tile;

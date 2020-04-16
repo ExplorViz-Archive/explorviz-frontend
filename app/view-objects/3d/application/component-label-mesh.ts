@@ -11,7 +11,13 @@ export default class ComponentLabelMesh extends LabelMesh {
     this.computeLabel(componentMesh, labelText);
   }
 
-  computeLabel(componentMesh: ComponentMesh | FoundationMesh, labelText: string) {
+  /**
+   * Adds a label mesh to a given component or foundation mesh with given text.
+   *
+   * @param componentMesh The component or foundation mesh to add a label to
+   * @param labelText The desired text for the label
+   */
+  private computeLabel(componentMesh: ComponentMesh | FoundationMesh, labelText: string) {
     /**
      * Updates bounding box of geometry and returns respective dimensions
      */

@@ -11,6 +11,9 @@ export default class CommunicationArrowMesh extends THREE.ArrowHelper {
     this.dataModel = dataModel;
   }
 
+  /**
+   * Deletes this arrow from its parent and dispose the arrow's geomeries and materials
+   */
   delete() {
     if (this.parent) {
       this.parent.remove(this);
@@ -25,6 +28,11 @@ export default class CommunicationArrowMesh extends THREE.ArrowHelper {
     if (cone.material instanceof THREE.Material) { cone.material.dispose(); }
   }
 
+  /**
+   * Changes the transparency of the arrow. Fully transprarent: 0.0
+   *
+   * @param opacity The desired transparancy of the arrow
+   */
   changeOpacity(opacity: number) {
     const isTransparent = opacity < 1;
     if (this.line.material instanceof THREE.Material) {
@@ -37,10 +45,18 @@ export default class CommunicationArrowMesh extends THREE.ArrowHelper {
     }
   }
 
-  turnTransparent(opacity: number) {
+  /**
+   * Turns the arrow transparent.
+   *
+   * @param opacity The desired transparency. Default 0.3
+   */
+  turnTransparent(opacity: number = 0.3) {
     this.changeOpacity(opacity);
   }
 
+  /**
+   * Turns the arrow fully opaque again.
+   */
   turnOpaque() {
     this.changeOpacity(1);
   }
