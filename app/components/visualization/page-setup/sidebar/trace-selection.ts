@@ -9,6 +9,7 @@ import Trace from 'explorviz-frontend/models/trace';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import TraceStep from 'explorviz-frontend/models/tracestep';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
+import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
@@ -16,6 +17,7 @@ interface Args {
   removeComponent(componentPath: string): void,
   highlightTrace(trace: Trace, traceStep: number): void,
   moveCameraTo(emberModel: Clazz|ClazzCommunication): void,
+  highlighter: Highlighting;
 }
 
 export default class TraceSelection extends Component<Args> {
@@ -42,10 +44,7 @@ export default class TraceSelection extends Component<Args> {
   isReplayAnimated: boolean = true;
 
   @tracked
-  isHighlighted = false;
-
-  @tracked
-  trace: Trace|null = null;
+  selectedTrace: Trace|null = null;
 
   @tracked
   currentTraceStep: TraceStep|null = null;
@@ -57,9 +56,17 @@ export default class TraceSelection extends Component<Args> {
   landscapeRepo!: LandscapeRepository;
 
   // Compute current traces when highlighting changes
-  @computed('landscapeRepo.latestApplication', 'sortBy', 'isSortedAsc', 'filterTerm')
+  @computed('landscapeRepo.latestApplication', 'args.highlighter.highlightedEntity', 'sortBy', 'isSortedAsc', 'filterTerm')
   get traces() {
-    // TODO: Return highlighted trace if it exists
+    // Only show highlighted trace and set highlighting status accordingly
+    const maybeTrace = this.args.highlighter.highlightedEntity;
+    if (maybeTrace instanceof Trace) {
+      this.selectedTrace = maybeTrace;
+      return [maybeTrace];
+    }
+
+    // Reset selected trace
+    this.selectedTrace = null;
 
     const { latestApplication } = this.landscapeRepo;
     if (latestApplication === null) {
@@ -114,9 +121,14 @@ export default class TraceSelection extends Component<Args> {
 
   @action
   clickedTrace(this: TraceSelection, trace: Trace) {
-    this.isHighlighted = true;
-    this.trace = trace;
+    // Reset highlighting when highlighted trace is clicked again
+    if (trace === this.selectedTrace) {
+      this.selectedTrace = null;
+      this.args.highlighter.removeHighlighting();
+      return;
+    }
 
+    this.selectedTrace = trace;
 
     const traceSteps = trace.hasMany('traceSteps').value();
     this.currentTraceStep = traceSteps?.objectAt(0);
@@ -133,21 +145,21 @@ export default class TraceSelection extends Component<Args> {
   @action
   selectNextTraceStep(this: TraceSelection) {
     // Can only select next step if a trace is selected
-    if (!this.isHighlighted || !this.currentTraceStep || !this.trace) {
+    if (!this.currentTraceStep || !this.selectedTrace) {
       return;
     }
 
     const nextStepPosition = this.currentTraceStep.tracePosition + 1;
 
-    if (nextStepPosition > this.trace.length) {
+    if (nextStepPosition > this.selectedTrace.length) {
       return;
     }
 
 
-    const traceSteps = this.trace.hasMany('traceSteps').value();
+    const traceSteps = this.selectedTrace.hasMany('traceSteps').value();
     this.currentTraceStep = traceSteps?.objectAt(nextStepPosition - 1);
 
-    this.args.highlightTrace(this.trace, nextStepPosition);
+    this.args.highlightTrace(this.selectedTrace, nextStepPosition);
 
     const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
 
@@ -159,7 +171,7 @@ export default class TraceSelection extends Component<Args> {
   @action
   selectPreviousTraceStep(this: TraceSelection) {
     // Can only select next step if a trace is selected
-    if (!this.isHighlighted || !this.currentTraceStep || !this.trace) {
+    if (!this.selectedTrace || !this.currentTraceStep) {
       return;
     }
 
@@ -170,10 +182,10 @@ export default class TraceSelection extends Component<Args> {
     }
 
 
-    const traceSteps = this.trace.hasMany('traceSteps').value();
+    const traceSteps = this.selectedTrace.hasMany('traceSteps').value();
     this.currentTraceStep = traceSteps?.objectAt(previousStepPosition - 1);
 
-    this.args.highlightTrace(this.trace, previousStepPosition);
+    this.args.highlightTrace(this.selectedTrace, previousStepPosition);
 
     const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
 

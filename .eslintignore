@@ -3,8 +3,6 @@ app/app.ts
 vendor/
 dist/
 
-app/utils/application-rendering/city-layouter.ts
-
 public/assets/web-workers/*
 
 tests/

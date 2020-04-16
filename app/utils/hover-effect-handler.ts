@@ -20,15 +20,14 @@ export default class HoverEffectHandler {
       return;
     }
 
-    // Reset old hover effect
+    // Reset old hover effect, only one object can be hovered upon at a time
     this.resetHoverEffect();
 
     const material = mesh.material as THREE.MeshBasicMaterial|THREE.MeshLambertMaterial;
-    const oldColor = material.color;
-
     this.hoveredEntityObj = mesh;
 
-    material.color = calculateColorBrightness(oldColor, 1.1);
+    // Calculate and apply brighter color to material ('hover effect')
+    material.color = calculateColorBrightness(material.color, 1.1);
   }
 
   /**
@@ -36,13 +35,15 @@ export default class HoverEffectHandler {
    */
   resetHoverEffect(): void {
     const { hoveredEntityObj } = this;
+    // If hover entity is null, hover effect is not active
     if (hoveredEntityObj) {
-      // Restore old color and reset cached object
       const material = hoveredEntityObj.material as THREE.MeshBasicMaterial
       |THREE.MeshLambertMaterial;
       const { highlighted, defaultColor, highlightingColor } = hoveredEntityObj;
 
+      // Restore normal color (depends on highlighting status)
       material.color = highlighted ? highlightingColor : defaultColor;
+      // Indicate that no entity is currently hovered upon
       this.hoveredEntityObj = null;
     }
   }

@@ -23,9 +23,9 @@ export default class EntityRendering {
   }
 
   addFoundationAndChildrenToScene(application: Application, boxLayoutMap: Map<string, BoxLayout>) {
-    const foundationData = boxLayoutMap.get(application.id);
+    const applicationLayout = boxLayoutMap.get(application.id);
 
-    if (foundationData === undefined) { return; }
+    if (applicationLayout === undefined) { return; }
 
     const OPENED_COMPONENT_HEIGHT = 1.5;
 
@@ -37,16 +37,16 @@ export default class EntityRendering {
     } = this.configuration.applicationColors;
 
     const layoutPos = new THREE.Vector3(
-      foundationData.positionX,
-      foundationData.positionY,
-      foundationData.positionZ,
+      applicationLayout.positionX,
+      applicationLayout.positionY,
+      applicationLayout.positionZ,
     );
 
-    const mesh = new FoundationMesh(layoutPos, OPENED_COMPONENT_HEIGHT, foundationData.width,
-      foundationData.depth, application, new THREE.Color(foundationColor),
+    const mesh = new FoundationMesh(layoutPos, OPENED_COMPONENT_HEIGHT, applicationLayout.width,
+      applicationLayout.depth, application, new THREE.Color(foundationColor),
       new THREE.Color(highlightedEntityColor));
 
-    const applicationCenter = foundationData.center;
+    const applicationCenter = applicationLayout.center;
 
     this.addMeshToScene(mesh, applicationCenter);
 
@@ -60,9 +60,9 @@ export default class EntityRendering {
   addComponentAndChildrenToScene(component: Component, color: string,
     boxLayoutMap: Map<string, BoxLayout>, application: Application) {
     const componentData = boxLayoutMap.get(component.id);
-    const foundationData = boxLayoutMap.get(application.id);
+    const applicationLayout = boxLayoutMap.get(application.id);
 
-    if (componentData === undefined || foundationData === undefined) { return; }
+    if (componentData === undefined || applicationLayout === undefined) { return; }
 
     const {
       componentOdd: componentOddColor, componentEven: componentEvenColor,
@@ -76,7 +76,7 @@ export default class EntityRendering {
       componentData.depth, component, new THREE.Color(color),
       new THREE.Color(highlightedEntityColor));
 
-    const applicationCenter = foundationData.center;
+    const applicationCenter = applicationLayout.center;
 
     this.addMeshToScene(mesh, applicationCenter);
     this.updateMeshVisiblity(mesh);
