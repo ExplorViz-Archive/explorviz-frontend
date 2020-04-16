@@ -70,11 +70,13 @@ export default class VisualizationController extends Controller {
 
   @action
   openLandscapeView() {
+    this.closeDataSelection();
     this.landscapeRepo.set('latestApplication', null);
   }
 
   @action
   showApplication(emberModel: Application) {
+    this.closeDataSelection();
     this.landscapeRepo.set('latestApplication', emberModel);
   }
 
