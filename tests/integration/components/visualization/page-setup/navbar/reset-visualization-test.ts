@@ -7,10 +7,11 @@ module('Integration | Component | visualization/page-setup/navbar/reset-visualiz
   setupRenderingTest(hooks);
 
   test('it renders', async function (assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
+    this.set('resetView', () => {});
 
-    await render(hbs`<Visualization::PageSetup::Navbar::ResetVisualization />`);
+    await render(hbs`<Visualization::PageSetup::Navbar::ResetVisualization
+                       @resetView={{this.resetView}}
+                     />`);
 
     let firstSVGElement = this.element.querySelector('svg');
 

@@ -6,21 +6,9 @@ import hbs from 'htmlbars-inline-precompile';
 module('Integration | Component | visualization/rendering/loading-indicator', function(hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', async function(assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
+  test('shows given loading text', async function(assert) {
+    await render(hbs`<Visualization::Rendering::LoadingIndicator @text="Loading landscape"/>`);
 
-    await render(hbs`{{visualization/rendering/loading-indicator}}`);
-
-    assert.equal(this.element.textContent.trim(), '');
-
-    // Template block usage:
-    await render(hbs`
-      {{#visualization/rendering/loading-indicator}}
-        template block text
-      {{/visualization/rendering/loading-indicator}}
-    `);
-
-    assert.equal(this.element.textContent.trim(), 'template block text');
+    assert.ok(this.element.textContent !== null && this.element.textContent.trim() === 'Loading landscape');
   });
 });

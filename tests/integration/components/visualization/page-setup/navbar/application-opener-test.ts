@@ -7,10 +7,11 @@ module('Integration | Component | visualization/page-setup/navbar/application-op
   setupRenderingTest(hooks);
 
   test('it renders', async function (assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
+    this.set('openAllComponents', () => {});
 
-    await render(hbs`<Visualization::PageSetup::Navbar::ApplicationOpener />`);
+    await render(hbs`<Visualization::PageSetup::Navbar::ApplicationOpener
+                       @openAllComponents={{this.openAllComponents}}
+                     />`);
 
     let textContent = this.element.textContent;
 
