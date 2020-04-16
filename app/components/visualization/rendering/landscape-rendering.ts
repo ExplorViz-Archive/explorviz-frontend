@@ -93,20 +93,28 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   debug = debugLogger('LandscapeRendering');
 
+  // Incremented every time a frame is rendered
   animationFrameId = 0;
 
+  // Is set to false until first landscape is rendered
   initDone: boolean;
 
+  // Used to display performance and memory usage information
   threePerformance: THREEPerformance|undefined;
 
+  // Used to register (mouse) events
   interaction!: Interaction;
 
+  // Plain JSON variant of the landscape with fewer properties, used for layouting
   reducedLandscape: ReducedLandscape|null = null;
 
+  // Maps models to a computed layout
   modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
 
+  // Extended Object3D which manages landscape meshes
   readonly landscapeObject3D: LandscapeObject3D;
 
+  // Provides functions to label landscape meshes
   readonly labeler = new Labeler();
 
   readonly imageLoader: ImageLoader = new ImageLoader();
@@ -161,6 +169,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.initDone = true;
   }
 
+  /**
+   * Calls all three related init functions and adds the three
+   * performance panel if it is activated in user settings
+   */
   initThreeJs() {
     this.initScene();
     this.initCamera();
@@ -174,6 +186,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
+  /**
+   * Creates a scene, its background and adds a landscapeObject3D to it
+   */
   initScene() {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(this.configuration.landscapeColors.background);
@@ -183,6 +198,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Scene created');
   }
 
+  /**
+   * Creates a PerspectiveCamera according to canvas size and sets its initial position
+   */
   initCamera() {
     const { width, height } = this.canvas;
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
@@ -190,6 +208,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Camera added');
   }
 
+  /**
+   * Initiates a WebGLRenderer
+   */
   initRenderer() {
     const { width, height } = this.canvas;
     this.webglrenderer = new THREE.WebGLRenderer({
@@ -201,6 +222,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Renderer set up');
   }
 
+  /**
+   * Creates a DirectionalLight and adds it to the scene
+   */
   initLights() {
     const dirLight = new THREE.DirectionalLight();
     dirLight.position.set(30, 10, 20);
@@ -208,6 +232,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Lights added');
   }
 
+  /**
+   * Binds this context to all event handling functions and
+   * passes them to a newly created Interaction object
+   */
   initInteraction() {
     // this.handleSingleClick = this.handleSingleClick.bind(this);
     this.handleDoubleClick = this.handleDoubleClick.bind(this);
@@ -235,6 +263,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #region RENDERING LOOP
 
+  /**
+   * Main rendering function
+   */
   render() {
     if (this.isDestroyed) { return; }
 
@@ -258,7 +289,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #region COMPONENT AND SCENE CLEAN-UP
 
-  // @Override
   /**
  * This overridden Ember Component lifecycle hook enables calling
  * ExplorViz's custom cleanup code.
@@ -299,6 +329,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   resize(outerDiv: HTMLElement) {
     const width = Number(outerDiv.clientWidth);
     const height = Number(outerDiv.clientHeight);
+
+    // Update renderer and camera according to canvas size
     this.webglrenderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
@@ -352,9 +384,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   });
 
 
-  // @Override
   /**
- * TODO
+ * Computes new meshes for the landscape and adds them to the scene
  *
  * @method populateScene
  */
@@ -372,14 +403,18 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     const openEntitiesIds = this.landscapeObject3D.openEntityIds;
 
+    // Run Klay layouting in 3 steps within workers
     try {
+      // Do layout pre-processing (1st step)
       const {
         graph,
         modelIdToPoints,
       }: any = yield this.worker.postMessage('layout1', { reducedLandscape: this.reducedLandscape, openEntitiesIds });
 
+      // Run actual klay function (2nd step)
       const newGraph: any = yield this.worker.postMessage('klay', { graph });
 
+      // Post-process layout graph (3rd step)
       const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
@@ -387,9 +422,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         openEntitiesIds,
       });
 
+      // Clean old landscape
       this.landscapeObject3D.removeAllChildren();
-
-      // Reset mesh related data structures
       this.landscapeObject3D.resetMeshReferences();
 
       const { modelIdToLayout, modelIdToPoints: modelIdToPointsComplete } = layoutedLandscape;
@@ -398,21 +432,17 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
       this.modelIdToPlaneLayout = modelIdToPlaneLayout;
 
-      modelIdToLayout.forEach((simplePlaneLayout: SimplePlaneLayout, modelId: string) => {
-        const planeLayoutObject = new PlaneLayout();
-        planeLayoutObject.height = simplePlaneLayout.height;
-        planeLayoutObject.width = simplePlaneLayout.width;
-        planeLayoutObject.positionX = simplePlaneLayout.positionX;
-        planeLayoutObject.positionY = simplePlaneLayout.positionY;
-        planeLayoutObject.opened = simplePlaneLayout.opened;
-        modelIdToPlaneLayout.set(modelId, planeLayoutObject);
-      });
+      // Convert the simple to a PlaneLayout map
+      LandscapeRendering.convertToPlaneLayoutMap(modelIdToLayout, modelIdToPlaneLayout);
 
+      // Compute center of landscape
       const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
       const centerPoint = landscapeRect.center;
 
+      // Update camera zoom accordingly
       updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
 
+      // Render all landscape entities
       const { systems } = emberLandscape;
 
       // Render systems, nodegroups, nodes & applications
@@ -461,6 +491,14 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   });
 
+  /**
+   * Creates & positions a system mesh with corresponding labels.
+   * Then adds it to the landscapeObject3D.
+   *
+   * @param system Data model for the system mesh
+   * @param layout Layout data to position the mesh correctly
+   * @param centerPoint Offset of landscape object
+   */
   renderSystem(system: System, layout: PlaneLayout | undefined,
     centerPoint: THREE.Vector2) {
     if (!layout) { return; }
@@ -480,6 +518,14 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.landscapeObject3D.add(systemMesh);
   }
 
+  /**
+   * Creates & positions a nodegroup mesh with corresponding labels.
+   * Then adds it to the landscapeObject3D.
+   *
+   * @param nodeGroup Data model for the nodegroup mesh
+   * @param layout Layout data to position the mesh correctly
+   * @param centerPoint Offset of landscape object
+   */
   renderNodeGroup(nodeGroup: NodeGroup, layout: PlaneLayout | undefined,
     centerPoint: THREE.Vector2) {
     if (!layout) { return; }
@@ -497,6 +543,14 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.landscapeObject3D.add(nodeGroupMesh);
   }
 
+  /**
+   * Creates & positions a node mesh with corresponding labels.
+   * Then adds it to the landscapeObject3D.
+   *
+   * @param node Data model for the node mesh
+   * @param layout Layout data to position the mesh correctly
+   * @param centerPoint Offset of landscape object
+   */
   renderNode(node: Node, layout: PlaneLayout | undefined,
     centerPoint: THREE.Vector2) {
     if (!layout) { return; }
@@ -522,6 +576,14 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.landscapeObject3D.add(nodeMesh);
   }
 
+  /**
+   * Creates & positions an application mesh with corresponding labels.
+   * Then adds it to the landscapeObject3D.
+   *
+   * @param application Data model for the application mesh
+   * @param layout Layout data to position the mesh correctly
+   * @param centerPoint Offset of landscape object
+   */
   renderApplication(application: Application, layout: PlaneLayout | undefined,
     centerPoint: THREE.Vector2) {
     if (!layout) { return; }
@@ -559,14 +621,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     yield this.cleanAndUpdateScene();
   });
 
-  toggleNodeGroupAndRedraw(nodeGroupMesh: NodeGroupMesh) {
-    if (nodeGroupMesh.opened) {
-      this.closeNodeGroupAndRedraw.perform(nodeGroupMesh);
-    } else {
-      this.openNodeGroupAndRedraw.perform(nodeGroupMesh);
-    }
-  }
-
   @task
   // eslint-disable-next-line
   openSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
@@ -582,6 +636,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     yield this.cleanAndUpdateScene();
   });
 
+  /**
+   * Toggles the open status of a system mesh and redraws the landscape
+   *
+   * @param systemMesh System mesh of which the open state should be toggled
+   */
   toggleSystemAndRedraw(systemMesh: SystemMesh) {
     if (systemMesh.opened) {
       this.closeSystemAndRedraw.perform(systemMesh);
@@ -590,6 +649,24 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
+  /**
+   * Toggles the open status of a nodegroup and redraws the landscape
+   *
+   * @param nodeGroupMesh nodegroup mesh of which the open state should be toggled
+   */
+  toggleNodeGroupAndRedraw(nodeGroupMesh: NodeGroupMesh) {
+    if (nodeGroupMesh.opened) {
+      this.closeNodeGroupAndRedraw.perform(nodeGroupMesh);
+    } else {
+      this.openNodeGroupAndRedraw.perform(nodeGroupMesh);
+    }
+  }
+
+  /**
+   * Sets all nodegroup meshes inside a closed system mesh to closed
+   *
+   * @param systemMesh System mesh which contains closable nodegroup meshes
+   */
   closeNogeGroupsInSystem(systemMesh: SystemMesh) {
     const system = systemMesh.dataModel;
     // Close nodegroups in system
@@ -622,16 +699,19 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
-    if (button === 1) {
-      const distanceXInPercent = (delta.x / this.canvas.clientWidth) * 100.0;
-      const distanceYInPercent = (delta.y / this.canvas.clientHeight) * 100.0;
+    const LEFT_MOUSE_BUTTON = 1;
 
-      const xVal = this.camera.position.x + distanceXInPercent * 6.0 * 0.015
-        * -(Math.abs(this.camera.position.z) / 4.0);
-      const yVal = this.camera.position.y + distanceYInPercent * 4.0 * 0.01
-        * (Math.abs(this.camera.position.z) / 4.0);
-      this.camera.position.x = xVal;
-      this.camera.position.y = yVal;
+    if (button === LEFT_MOUSE_BUTTON) {
+      // Move landscape further if camera is far away
+      const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 4.0);
+
+      // Divide delta by 100 to achieve reasonable panning speeds
+      const xOffset = (delta.x / 100) * -ZOOM_CORRECTION;
+      const yOffset = (delta.y / 100) * ZOOM_CORRECTION;
+
+      // Adapt camera position (apply panning)
+      this.camera.position.x += xOffset;
+      this.camera.position.y += yOffset;
     }
   }
 
@@ -639,24 +719,27 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     // Hide (old) tooltip
     this.popupData = null;
 
-    const scrollVector = new THREE.Vector3(0, 0, delta * 1.5);
+    const scrollDelta = delta * 1.5;
 
-    const landscapeVisible = this.camera.position.z + scrollVector.z > 0.2;
-    // apply zoom, prevent to zoom behind 2D-Landscape (z-direction)
+    const landscapeVisible = this.camera.position.z + scrollDelta > 0.2;
+
+    // Apply zoom, prevent to zoom behind 2D-Landscape (z-direction)
     if (landscapeVisible) {
-      this.camera.position.addVectors(this.camera.position, scrollVector);
+      this.camera.position.z += scrollDelta;
     }
   }
 
   handleMouseMove(mesh: THREE.Mesh | undefined) {
     const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
+    // Update hover effect
     if (mesh === undefined) {
       this.hoverHandler.resetHoverEffect();
     } else if (mesh instanceof PlaneMesh && enableHoverEffects) {
       this.hoverHandler.applyHoverEffect(mesh);
     }
 
+    // Do not show popups while mouse is moving
     this.popupData = null;
   }
 
@@ -683,6 +766,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #endregion MOUSE EVENT HANDLER
 
+  /**
+   * Takes an application mesh and tries to enter application-rendering
+   * with that application. Displays an errors message if application does
+   * not contain any data.
+   *
+   * @param applicationMesh Mesh of application which shall be opened
+   */
   openApplicationIfExistend(applicationMesh: ApplicationMesh) {
     const application = applicationMesh.dataModel;
     // No data => show message
@@ -696,5 +786,25 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       AlertifyHandler.closeAlertifyMessages();
       this.args.showApplication(application);
     }
+  }
+
+  /**
+   * Takes a map with plain JSON layout objects and creates PlaneLayout objects from it
+   *
+   * @param layoutedApplication Map containing plain JSON layout data
+   */
+  static convertToPlaneLayoutMap(modelIdToSimpleLayout: Map<string, SimplePlaneLayout>,
+    modelIdToPlaneLayout: Map<string, PlaneLayout>) {
+    // Construct a layout map from plain JSON layouts
+    modelIdToSimpleLayout.forEach((simplePlaneLayout: SimplePlaneLayout, modelId: string) => {
+      const planeLayoutObject = new PlaneLayout();
+      planeLayoutObject.height = simplePlaneLayout.height;
+      planeLayoutObject.width = simplePlaneLayout.width;
+      planeLayoutObject.positionX = simplePlaneLayout.positionX;
+      planeLayoutObject.positionY = simplePlaneLayout.positionY;
+      planeLayoutObject.opened = simplePlaneLayout.opened;
+
+      modelIdToPlaneLayout.set(modelId, planeLayoutObject);
+    });
   }
 }

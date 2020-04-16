@@ -82,14 +82,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
+  // Used to display performance and memory usage information
   threePerformance: THREEPerformance|undefined;
 
+  // Incremented every time a frame is rendered
   animationFrameId = 0;
 
+  // Used to register (mouse) events
   interaction!: Interaction;
 
   boxLayoutMap: Map<string, BoxLayout>;
 
+  // Extended Object3D which manages application meshes
   readonly applicationObject3D: ApplicationObject3D;
 
   readonly hoverHandler: HoverEffectHandler;
@@ -102,6 +106,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   readonly entityManipulation: EntityManipulation;
 
+  // Plain JSON variant of the application with fewer properties, used for layouting
   reducedApplication: ReducedApplication|null = null;
 
   @tracked
@@ -168,6 +173,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.applicationObject3D.resetRotation();
   }
 
+  /**
+   * Calls all three related init functions and adds the three
+   * performance panel if it is activated in user settings
+   */
   initThreeJs() {
     this.initScene();
     this.initCamera();
@@ -181,12 +190,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
+  /**
+   * Creates a scene, its background and adds a landscapeObject3D to it
+   */
   initScene() {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(this.configuration.applicationColors.background);
     this.debug('Scene created');
   }
 
+  /**
+   * Creates a PerspectiveCamera according to canvas size and sets its initial position
+   */
   initCamera() {
     const { width, height } = this.canvas;
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
@@ -194,6 +209,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Camera added');
   }
 
+  /**
+   * Initiates a WebGLRenderer
+   */
   initRenderer() {
     const { width, height } = this.canvas;
     this.renderer = new THREE.WebGLRenderer({
@@ -205,6 +223,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Renderer set up');
   }
 
+  /**
+   * Creates a SpotLight and an AmbientLight and adds it to the scene
+   */
   initLights() {
     const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
     spotLight.position.set(100, 100, 100);
@@ -216,6 +237,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Lights added');
   }
 
+  /**
+   * Binds this context to all event handling functions and
+   * passes them to a newly created Interaction object
+   */
   initInteraction() {
     this.handleSingleClick = this.handleSingleClick.bind(this);
     this.handleDoubleClick = this.handleDoubleClick.bind(this);
@@ -245,7 +270,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #region MOUSE EVENT HANDLER
 
   handleSingleClick(mesh: THREE.Mesh | undefined) {
-    // user clicked on blank spot on the canvas
+    // User clicked on blank spot on the canvas
     if (mesh === undefined) {
       this.highlighter.removeHighlighting();
     } else if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
@@ -281,7 +306,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   handleMouseWheel(delta: number) {
+    // Do not show popups while zooming
     this.popupData = null;
+
     // Change zoom depending on mouse wheel direction
     this.camera.position.z += delta * 3.5;
   }
@@ -306,24 +333,24 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
-    if (button === 3) {
+    const LEFT_MOUSE_BUTTON = 1;
+    const RIGHT_MOUSE_BUTTON = 3;
+
+    if (button === RIGHT_MOUSE_BUTTON) {
       // Rotate object
       this.applicationObject3D.rotation.x += delta.y / 100;
       this.applicationObject3D.rotation.y += delta.x / 100;
-    } else if (button === 1) {
-      // Translate camera
-      const distanceXInPercent = (delta.x / this.canvas.clientWidth) * 100.0;
+    } else if (button === LEFT_MOUSE_BUTTON) {
+      // Move landscape further if camera is far away
+      const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 4.0);
 
-      const distanceYInPercent = (delta.y / this.canvas.clientHeight) * 100.0;
+      // Divide delta by 100 to achieve reasonable panning speeds
+      const xOffset = (delta.x / 100) * -ZOOM_CORRECTION;
+      const yOffset = (delta.y / 100) * ZOOM_CORRECTION;
 
-      const xVal = this.camera.position.x + distanceXInPercent * 6.0 * 0.015
-        * -(Math.abs(this.camera.position.z) / 4.0);
-
-      const yVal = this.camera.position.y + distanceYInPercent * 4.0 * 0.01
-        * (Math.abs(this.camera.position.z) / 4.0);
-
-      this.camera.position.x = xVal;
-      this.camera.position.y = yVal;
+      // Adapt camera position (apply panning)
+      this.camera.position.x += xOffset;
+      this.camera.position.y += yOffset;
     }
   }
 
@@ -397,6 +424,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region RENDERING LOOP
 
+  /**
+   * Main rendering function
+   */
   render() {
     if (this.isDestroyed) { return; }
 
@@ -420,6 +450,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region ACTIONS
 
+  /**
+   * Opens all parents / components of a given component or clazz.
+   * Adds communication and restores highlighting.
+   *
+   * @param entity Component or Clazz of which the mesh parents shall be opened
+   */
   @action
   openParents(entity: Component|Clazz) {
     const ancestors = entity.getAllAncestorComponents();
@@ -433,6 +469,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.highlighter.updateHighlighting();
   }
 
+  /**
+   * Closes the corresponding component mesh to a given component
+   *
+   * @param component Data model of the component which shall be closed
+   */
   @action
   closeComponent(component: Component) {
     const mesh = this.applicationObject3D.getBoxMeshbyModelId(component.get('id'));
@@ -443,6 +484,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.highlighter.updateHighlighting();
   }
 
+  /**
+   * Opens all component meshes. Then adds communication and restores highlighting.
+   */
   @action
   openAllComponents() {
     this.args.application.components.forEach((child) => {
@@ -457,16 +501,29 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.highlighter.updateHighlighting();
   }
 
+  /**
+   * Highlights a given component or clazz
+   *
+   * @param entity Component or clazz which shall be highlighted
+   */
   @action
   highlightModel(entity: Component|Clazz) {
     this.highlighter.highlightModel(entity);
   }
 
+  /**
+   * Removes all (possibly) existing highlighting.
+   */
   @action
   unhighlightAll() {
     this.highlighter.removeHighlighting();
   }
 
+  /**
+   * Moves camera such that a specified clazz or clazz communication is in focus.
+   *
+   * @param emberModel Clazz or clazz communication which shall be in focus of the camera
+   */
   @action
   moveCameraTo(emberModel: Clazz|ClazzCommunication) {
     const applicationLayout = this.boxLayoutMap.get(this.args.application.id);
@@ -479,26 +536,47 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.camera, this.applicationObject3D);
   }
 
+  /**
+   * Sets rotation of application and position of camera to default positon
+   */
   @action
   resetView() {
     this.camera.position.set(0, 0, 100);
     this.applicationObject3D.resetRotation();
   }
 
+  /**
+   * Call this whenever the canvas is resized. Updated properties of camera
+   * and renderer.
+   *
+   * @param outerDiv HTML element containing the canvas
+   */
   @action
   resize(outerDiv: HTMLElement) {
     const width = Number(outerDiv.clientWidth);
     const height = Number(outerDiv.clientHeight);
+
+    // Update renderer and camera according to new canvas size
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
   }
 
+  /**
+   * Performs a run to re-populate the scene
+   */
   @action
   onLandscapeUpdated() {
     this.loadNewApplication.perform();
   }
 
+  /**
+   * Highlights a trace or specified trace step.
+   * Opens all component meshes to make whole trace visible.
+   *
+   * @param trace Trace which shall be highlighted.
+   * @param step Step of the trace which shall be highlighted. Default is 1.
+   */
   @action
   highlightTrace(trace: Trace, step = 1) {
     // Open components such that complete trace is visible
@@ -536,6 +614,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region ADDITIONAL HELPER FUNCTIONS
 
+  /**
+   * Takes a map with plain JSON layout objects and creates BoxLayout objects from it
+   *
+   * @param layoutedApplication Map containing plain JSON layout data
+   */
   static convertToBoxLayoutMap(layoutedApplication: Map<string, LayoutData>) {
     const boxLayoutMap: Map<string, BoxLayout> = new Map();
 
