@@ -467,13 +467,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   moveCameraTo(emberModel: Clazz|ClazzCommunication) {
-    const applicationData = this.boxLayoutMap.get(this.args.application.id);
+    const applicationLayout = this.boxLayoutMap.get(this.args.application.id);
 
-    if (!emberModel || !applicationData) {
+    if (!emberModel || !applicationLayout) {
       return;
     }
 
-    this.entityManipulation.moveCameraTo(emberModel, applicationData.center,
+    this.entityManipulation.moveCameraTo(emberModel, applicationLayout.center,
       this.camera, this.applicationObject3D);
   }
 

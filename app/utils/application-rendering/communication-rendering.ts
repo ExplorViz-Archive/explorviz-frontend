@@ -26,13 +26,13 @@ export default class CommunicationRendering {
 
   addCommunication(boxLayoutMap: Map<string, BoxLayout>) {
     const application = this.applicationObject3D.dataModel;
-    const foundationData = boxLayoutMap.get(application.id);
+    const applicationLayout = boxLayoutMap.get(application.id);
 
-    if (foundationData === undefined) {
+    if (applicationLayout === undefined) {
       return;
     }
 
-    const viewCenterPoint = foundationData.center;
+    const viewCenterPoint = applicationLayout.center;
 
     // Remove old communication
     this.applicationObject3D.removeAllCommunication();
