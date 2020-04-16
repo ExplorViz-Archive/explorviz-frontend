@@ -1,6 +1,6 @@
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import THREE from 'three';
-import { applyCommunicationLayout } from 'explorviz-frontend/utils/application-rendering/city-layouter';
+import applyCommunicationLayout from 'explorviz-frontend/utils/application-rendering/communication-layouter';
 import Configuration from 'explorviz-frontend/services/configuration';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
@@ -24,6 +24,13 @@ export default class CommunicationRendering {
     this.currentUser = currentUser;
   }
 
+  /**
+   * Computes commnication and communication arrows and adds them to the
+   * applicationObject3D
+   *
+   * @param boxLayoutMap Contains box layout informationen which
+   *                     is needed for the communication layouting
+   */
   addCommunication(boxLayoutMap: Map<string, BoxLayout>) {
     const application = this.applicationObject3D.dataModel;
     const applicationLayout = boxLayoutMap.get(application.id);

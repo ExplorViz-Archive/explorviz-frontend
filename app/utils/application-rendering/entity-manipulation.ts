@@ -27,6 +27,12 @@ export default class EntityManipulation {
     this.highlighter = highlighter;
   }
 
+  /**
+   * Closes all component meshes which are currently added to the applicationObject3D
+   * and re-adds the communication.
+   *
+   * @param boxLayoutMap Contains layout information for re-computation of communication
+   */
   closeAllComponents(boxLayoutMap: Map<string, BoxLayout>) {
     const application = this.applicationObject3D.dataModel;
 
@@ -43,6 +49,11 @@ export default class EntityManipulation {
     this.highlighter.updateHighlighting();
   }
 
+  /**
+   * Takes a component and open all children component meshes recursively
+   *
+   * @param component Component of which the children shall be opened
+   */
   openComponentsRecursively(component: Component) {
     const components = component.children;
     components.forEach((child) => {
@@ -54,6 +65,11 @@ export default class EntityManipulation {
     });
   }
 
+  /**
+   * Opens a given component mesh.
+   *
+   * @param mesh Component mesh which shall be opened
+   */
   openComponentMesh(mesh: ComponentMesh) {
     if (mesh.opened) { return; }
 
@@ -86,6 +102,11 @@ export default class EntityManipulation {
     });
   }
 
+  /**
+   * Closes a given component mesh.
+   *
+   * @param mesh Component mesh which shall be closed
+   */
   closeComponentMesh(mesh: ComponentMesh) {
     if (!mesh.opened) { return; }
 
@@ -128,6 +149,11 @@ export default class EntityManipulation {
     });
   }
 
+  /**
+   * Opens a component mesh which is closed and vice versa
+   *
+   * @param mesh Mesh which shall be opened / closed
+   */
   toggleComponentMeshState(mesh: ComponentMesh) {
     if (mesh.opened) {
       this.closeComponentMesh(mesh);
@@ -151,8 +177,16 @@ export default class EntityManipulation {
     });
   }
 
+  /**
+   * Moves camera such that a specified model is in focus
+   *
+   * @param emberModel Model of interest
+   * @param applicationCenter Offset for position calculation
+   * @param camera Camera which shall be moved
+   * @param applicationObject3D Object which contains all application meshes
+   */
   moveCameraTo(emberModel: Clazz|ClazzCommunication, applicationCenter: THREE.Vector3,
-    camera: PerspectiveCamera, applicationObject3D: THREE.Object3D) {
+    camera: PerspectiveCamera, applicationObject3D: ApplicationObject3D) {
     if (emberModel instanceof ClazzCommunication) {
       const sourceClazzMesh = this.applicationObject3D.getBoxMeshbyModelId(emberModel.sourceClazz.get('id'));
       const targetClazzMesh = this.applicationObject3D.getBoxMeshbyModelId(emberModel.targetClazz.get('id'));
@@ -209,8 +243,16 @@ export default class EntityManipulation {
     applyComponentLayout(this.applicationObject3D.dataModel.components);
   }
 
+  /**
+   * Moves camera to a specified position.
+   *
+   * @param centerPoint Offset of application
+   * @param camera Camera which shall be positioned
+   * @param layoutPos Desired position
+   * @param applicationObject3D Contains all application meshes
+   */
   static applyCameraPosition(centerPoint: THREE.Vector3, camera: THREE.PerspectiveCamera,
-    layoutPos: THREE.Vector3, applicationObject3D: THREE.Object3D) {
+    layoutPos: THREE.Vector3, applicationObject3D: ApplicationObject3D) {
     layoutPos.sub(centerPoint);
     layoutPos.multiplyScalar(0.5);
 
