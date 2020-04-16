@@ -22,6 +22,13 @@ export default class Highlighting {
     this.applicationObject3D = applicationObject3D;
   }
 
+  /**
+   * Highlights a given mesh
+   *
+   * @param mesh Either component, clazz or clazz communication mesh which shall be highlighted
+   * @param toggleHighlighting Determines whether highlighting a already highlighted entity
+   *                           causes removal of all highlighting
+   */
   highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMesh,
     toggleHighlighting = true): void {
     // Reset highlighting if highlighted mesh is clicked
@@ -46,15 +53,19 @@ export default class Highlighting {
     // Get all clazzes in current component
     const containedClazzes = new Set<Clazz>();
 
+    // Add all clazzes which are contained in a component
     if (model instanceof Component) {
       model.getContainedClazzes(containedClazzes);
+    // Add clazz itself
     } else if (model instanceof Clazz) {
       containedClazzes.add(model);
+    // Add source and target clazz of communication
     } else if (model instanceof DrawableClazzCommunication) {
       const sourceClazz = model.belongsTo('sourceClazz').value() as Clazz;
       const targetClazz = model.belongsTo('targetClazz').value() as Clazz;
       containedClazzes.add(sourceClazz);
       containedClazzes.add(targetClazz);
+    // Given model is not supported
     } else {
       return;
     }
@@ -97,6 +108,7 @@ export default class Highlighting {
       clazz.getParent().getAllAncestorComponents(componentSet);
     });
 
+    // Turn non involved clazzes transparent
     nonInvolvedClazzes.forEach((clazz) => {
       const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
       const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.getParent().get('id'));
@@ -108,6 +120,11 @@ export default class Highlighting {
     });
   }
 
+  /**
+   * Highlights the mesh which belongs to a given data model
+   *
+   * @param entity Component or clazz of which the corresponding mesh shall be highlighted
+   */
   highlightModel(entity: Component|Clazz) {
     const mesh = this.applicationObject3D.getBoxMeshbyModelId(entity.id);
     if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
@@ -115,6 +132,13 @@ export default class Highlighting {
     }
   }
 
+  /**
+   * Highlights a trace.
+   *
+   * @param trace Trace which shall be highlighted
+   * @param step Step of the trace which shall be highlighted. Default is 1
+   * @param application Application which belongs to the trace
+   */
   highlightTrace(trace: Trace, step = 1, application: Application) {
     this.removeHighlighting();
 
@@ -175,6 +199,9 @@ export default class Highlighting {
     });
   }
 
+  /**
+   * Highlights the stored highlighted entity again.
+   */
   updateHighlighting() {
     const { highlightedEntity } = this;
 
@@ -182,6 +209,7 @@ export default class Highlighting {
       return;
     }
 
+    // Re-run highlighting for entity
     if (highlightedEntity instanceof ClazzMesh
         || highlightedEntity instanceof ComponentMesh
         || highlightedEntity instanceof ClazzCommunicationMesh) {
@@ -189,6 +217,9 @@ export default class Highlighting {
     }
   }
 
+  /**
+   * Restores default color and transparency for all application meshes
+   */
   removeHighlighting() {
     const meshes = this.applicationObject3D.getAllMeshes();
     meshes.forEach((mesh) => {
@@ -197,6 +228,13 @@ export default class Highlighting {
     this.highlightedEntity = null;
   }
 
+  /**
+   * Turns the mesh which belongs to a component and all its child meshes if
+   * they are not part of the ignorableComponents set.
+   *
+   * @param component Component which shall be turned transparent
+   * @param ignorableComponents Set of components which shall not be turned transparent
+   */
   turnComponentAndAncestorsTransparent(component: Component, ignorableComponents: Set<Component>) {
     if (ignorableComponents.has(component)) { return; }
 
