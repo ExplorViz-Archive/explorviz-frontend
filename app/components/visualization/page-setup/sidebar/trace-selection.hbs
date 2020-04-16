@@ -59,7 +59,7 @@
       {{#each this.traces as |trace|}}
         <tr
           style="cursor: pointer"
-          bgcolor={{if trace.highlighted "#cc8a8a"}}
+          bgcolor={{if this.selectedTrace "#cc8a8a"}}
           {{on "click" (fn this.clickedTrace trace)}}
         >
           <th title={{trace.traceId}}>{{truncate trace.traceId 8 true}}</th>
@@ -72,7 +72,7 @@
   </table>
 </div>
 
-{{#if this.isHighlighted}}
+{{#if this.selectedTrace}}
   <hr>
 
   <h5 align="center">
@@ -98,7 +98,7 @@
       {{svg-jar "chevron-left" class="octicon align-middle"}}
     </BsButton>
     <div>
-      Step <strong>{{this.currentTraceStep.tracePosition}}</strong> of {{this.trace.length}}
+      Step <strong>{{this.currentTraceStep.tracePosition}}</strong> of {{this.selectedTrace.length}}
     </div>
     <BsButton
       @onClick={{this.selectNextTraceStep}}
@@ -107,7 +107,7 @@
       @title="One step forth"
       @disabled={{gte
         this.currentTraceStep.tracePosition
-        this.trace.length
+        this.selectedTrace.length
       }}
     >
       {{svg-jar "chevron-right" class="octicon align-middle"}}

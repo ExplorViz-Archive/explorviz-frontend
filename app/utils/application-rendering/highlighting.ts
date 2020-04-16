@@ -10,11 +10,13 @@ import Component from 'explorviz-frontend/models/component';
 import Trace from 'explorviz-frontend/models/trace';
 import TraceStep from 'explorviz-frontend/models/tracestep';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import { tracked } from '@glimmer/tracking';
 
 export default class Highlighting {
   applicationObject3D: ApplicationObject3D;
 
-  highlightedEntity: BaseMesh | null = null;
+  @tracked
+  highlightedEntity: BaseMesh | Trace | null = null;
 
   constructor(applicationObject3D: ApplicationObject3D) {
     this.applicationObject3D = applicationObject3D;
@@ -115,6 +117,8 @@ export default class Highlighting {
 
   highlightTrace(trace: Trace, step = 1, application: Application) {
     this.removeHighlighting();
+
+    this.highlightedEntity = trace;
 
     const drawableComms = application.hasMany('drawableClazzCommunications').value() as DS.ManyArray<DrawableClazzCommunication>|null;
 
