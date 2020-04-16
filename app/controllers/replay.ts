@@ -6,7 +6,6 @@ import {
   set,
 } from '@ember/object';
 import { inject as service } from '@ember/service';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import LandscapeFileLoader from 'explorviz-frontend/services/landscape-file-loader';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
@@ -23,8 +22,6 @@ export default class ReplayController extends Controller {
   @service('repos/timestamp-repository') timestampRepo !: TimestampRepository;
 
   @service('repos/landscape-repository') landscapeRepo !: LandscapeRepository;
-
-  @service('additional-data') additionalData !: AdditionalData;
 
   @service('reload-handler') reloadHandler !: ReloadHandler;
 
