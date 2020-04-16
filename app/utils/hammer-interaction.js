@@ -2,9 +2,15 @@ import Object from '@ember/object';
 import Evented from '@ember/object/evented';
 import Hammer from 'hammerjs';
 
+/* eslint-disable no-bitwise */
 export default class HammerInteraction extends Object.extend(Evented) {
   hammerManager = null;
 
+  /**
+   * Setups events which are triggered by hammer interaction
+   *
+   * @param {*} canvas Events are registered on the canvas
+   */
   setupHammer(canvas) {
     const self = this;
 
@@ -31,7 +37,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
           const eventType = POINTER_INPUT_MAP[eventTypeNormalized];
           const { pointerType } = ev;
 
-          // modified to handle all buttons
+          // Modified to handle all buttons
           // left=0, middle=1, right=2
           if (eventType & Hammer.INPUT_START) {
             // firefox sends button 0 for mousemove, so store it here
@@ -44,10 +50,10 @@ export default class HammerInteraction extends Object.extend(Evented) {
             return element.pointerId === ev.pointerId;
           }
 
-          // get index of the event in the store
+          // Get index of the event in the store
           let storeIndex = store.findIndex(isCorrectPointerId);
 
-          // start and mouse must be down
+          // Start and mouse must be down
           if (eventType & Hammer.INPUT_START
             && (ev.button === 0 || ev.button === 1 || ev.button === 2)) {
             if (storeIndex < 0) {
@@ -58,12 +64,12 @@ export default class HammerInteraction extends Object.extend(Evented) {
             removePointer = true;
           }
 
-          // it not found, so the pointer hasn't been down (so it's probably a hover)
+          // Not found, so the pointer hasn't been down (so it's probably a hover)
           if (storeIndex < 0) {
             return;
           }
 
-          // update the event in the store
+          // Update the event in the store
           store[storeIndex] = ev;
 
           this.callback(this.manager, eventType, {
@@ -75,7 +81,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
           });
 
           if (removePointer) {
-            // remove from the store
+            // Remove from the store
             store.splice(storeIndex, 1);
           }
         },
@@ -123,6 +129,9 @@ export default class HammerInteraction extends Object.extend(Evented) {
       mouseDeltaY = event.offsetY;
     });
 
+    /**
+     * Triggers a panning event
+     */
     hammer.on('panmove', (evt) => {
       if (evt.button !== 1 && evt.button !== 3) {
         return;
@@ -144,6 +153,10 @@ export default class HammerInteraction extends Object.extend(Evented) {
     });
 
     // END of mouse movement
+
+    /**
+     * Triggers a panningEnd event if mouse is moved without clicking a button
+     */
     hammer.on('mousemove', (evt) => {
       if (evt.button !== 1 && evt.button !== 3) {
         return;
@@ -161,6 +174,9 @@ export default class HammerInteraction extends Object.extend(Evented) {
       self.trigger('panningEnd', mouse);
     });
 
+    /**
+     * Triggers a doubletap event for the right mouse button
+     */
     hammer.on('doubletap', (evt) => {
       if (evt.button !== 1) {
         return;
@@ -178,6 +194,9 @@ export default class HammerInteraction extends Object.extend(Evented) {
       self.trigger('doubletap', mouse);
     });
 
+    /**
+     * Triggers a single tap event for the left mouse button
+     */
     hammer.on('singletap', (evt) => {
       if (evt.button !== 1) {
         return;
