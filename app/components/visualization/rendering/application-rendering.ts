@@ -162,7 +162,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     await this.loadNewApplication.perform();
 
+    // Display application nicely for first rendering
     this.entityManipulation.applyDefaultApplicationLayout();
+    this.communicationRendering.addCommunication(this.boxLayoutMap);
     this.applicationObject3D.resetRotation();
   }
 
