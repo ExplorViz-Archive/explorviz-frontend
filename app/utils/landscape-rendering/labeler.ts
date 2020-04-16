@@ -199,7 +199,7 @@ export default class Labeler {
 
     // Create and add image to application mesh
     imageLoader.createPicture(logoPos, logoSize.width, logoSize.height,
-      texturePartialPath, applicationMesh, 'label');
+      texturePartialPath, applicationMesh);
   }
 
   /**

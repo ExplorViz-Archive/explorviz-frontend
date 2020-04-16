@@ -108,8 +108,10 @@ export default function addDrawableCommunication(store: DS.Store) {
     aggregatedComms.forEach((aggregatedComm) => {
       const possibleExistingComm = checkForExistingComm(application, aggregatedComm);
 
+      // Handle bidirectional communication
       if (possibleExistingComm) {
         updateExistingDrawableComm(possibleExistingComm, aggregatedComm);
+      // Create new drawable communication from an aggregated communication
       } else {
         addNewDrawableCommunication(application, aggregatedComm);
       }

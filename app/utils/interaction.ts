@@ -31,19 +31,25 @@ export type Position2D = {
  * the nature of the event.
  */
 export default class Interaction {
+  // Needed to register event listeners
   canvas: HTMLCanvasElement;
 
+  // Needed for raycasting
   camera: THREE.Camera;
 
+  // Needed to calculate current position of mouse in the scene
   renderer: THREE.WebGLRenderer;
 
   // Contains all Objects3D which shall be raycasted
   raycastObject3D: THREE.Object3D;
 
+  // Used to determine if and which object was hit
   raycaster: Raycaster;
 
+  // Needed for events like 'double tap'
   hammerHandler: HammerInteraction;
 
+  // Contains functions which should be called in case of an event
   eventCallbackFunctions: CallbackFunctions;
 
   constructor(canvas: HTMLCanvasElement, camera: THREE.Camera, renderer: THREE.WebGLRenderer,
@@ -56,7 +62,7 @@ export default class Interaction {
 
     this.raycaster = new Raycaster();
 
-    // Init Hammer
+    // Init Hammer interaction
     this.hammerHandler = HammerInteraction.create();
     this.hammerHandler.setupHammer(canvas);
 
@@ -244,6 +250,9 @@ export default class Interaction {
     }(300));
   }
 
+  /**
+   * Removes all listeners for mouse and hammer events
+   */
   removeHandlers() {
     if (this.eventCallbackFunctions.doubleClick) { this.hammerHandler.hammerManager.off('doubletap'); }
 

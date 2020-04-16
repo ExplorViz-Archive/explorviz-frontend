@@ -8,15 +8,12 @@ export default class LogoMesh extends BaseMesh {
 
   height: number;
 
-  type: string;
-
-  constructor(texture: THREE.Texture, width: number, height: number, type: string, defaultColor = new THREE.Color('white')) {
+  constructor(texture: THREE.Texture, width: number, height: number, defaultColor = new THREE.Color('white')) {
     super(defaultColor);
 
     this.texture = texture;
     this.width = width;
     this.height = height;
-    this.type = type;
 
     this.material = new THREE.MeshBasicMaterial({
       map: texture,
