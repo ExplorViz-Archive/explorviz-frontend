@@ -27,7 +27,7 @@ import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/applic
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import Node from 'explorviz-frontend/models/node';
 import PlaneMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-mesh';
-import { reduceLandscape, ReducedLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
+import reduceLandscape, { ReducedLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
 import { task } from 'ember-concurrency-decorators';
 import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';

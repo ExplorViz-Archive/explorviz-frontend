@@ -9,7 +9,7 @@ import Application from 'explorviz-frontend/models/application';
  * which can be used in workers. Only the relevant properties
  * are kept.
  */
-export function reduceLandscape(landscape: Landscape): ReducedLandscape {
+export default function reduceLandscape(landscape: Landscape): ReducedLandscape {
   const applicationIdToApplication = new Map<string, ReducedApplication>();
 
   function reduceApplication(application: Application): ReducedApplication {

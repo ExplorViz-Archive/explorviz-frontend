@@ -20,7 +20,7 @@ import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/applicati
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 import { tracked } from '@glimmer/tracking';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import { reduceApplication, ReducedApplication } from 'explorviz-frontend/utils/application-rendering/model-reducer';
+import reduceApplication, { ReducedApplication } from 'explorviz-frontend/utils/application-rendering/model-reducer';
 import Trace from 'explorviz-frontend/models/trace';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';

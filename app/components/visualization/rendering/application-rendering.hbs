@@ -1,7 +1,15 @@
 {{#if @isReplay}}
-  {{add-listener this.landscapeRepo "updatedReplayLandscape" this.onLandscapeUpdated}}
+  {{add-listener
+    this.landscapeRepo
+    "updatedReplayLandscape"
+    this.onLandscapeUpdated
+  }}
 {{else}}
-  {{add-listener this.landscapeRepo "updatedLatestLandscape" this.onLandscapeUpdated}}
+  {{add-listener
+    this.landscapeRepo
+    "updatedLatestLandscape"
+    this.onLandscapeUpdated
+  }}
 {{/if}}
 
 <div class="row" style="height:100%">

@@ -31,7 +31,7 @@ function reduceComponent(component: Component): ReducedComponent {
  *
  * @param application The Application to reduce
  */
-export function reduceApplication(application: Application): ReducedApplication {
+export default function reduceApplication(application: Application): ReducedApplication {
   const childComponents = application.get('components').toArray();
   const reducedComponents = childComponents.map((child) => reduceComponent(child));
   return {
