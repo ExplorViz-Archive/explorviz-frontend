@@ -1,441 +1,570 @@
 // Wait for the initial message event.
-self.addEventListener('message', function (e) {
-    var _a = e.data, reducedLandscape = _a.reducedLandscape, openEntitiesIds = _a.openEntitiesIds;
-    var port = e.ports[0];
-    // Do your stuff here.
-    if (port) {
-        // Message sent through a worker created with 'open' method.
-        port.postMessage({ foo: 'foo' });
-    }
-    else {
-        // Message sent through a worker created with 'send' or 'on' method.
-        var kielerGraph = layout1(reducedLandscape, openEntitiesIds);
-        postMessage(kielerGraph);
-    }
+self.addEventListener('message', function(e) {
+  let { reducedLandscape, openEntitiesIds } = e.data;
+
+  let kielerGraph = layout1(reducedLandscape, openEntitiesIds);
+  postMessage(kielerGraph);
 }, false);
+
 // Ping the Ember service to say that everything is ok.
 postMessage(true);
-var CONVERT_TO_KIELER_FACTOR = 180.0;
+
+const CONVERT_TO_KIELER_FACTOR = 180.0;
+
 function layout1(landscape, openEntitiesIds) {
-    var topLevelKielerGraph = {};
-    // Maps for internal computations
-    var modelIdToGraph = new Map();
-    var modelIdToSourcePort = new Map();
-    var modelIdToTargetPort = new Map();
-    var modeldToKielerEdgeReference = new Map();
-    // Maps for output
-    var modelIdToPoints = new Map();
-    var graph = createEmptyGraph("root");
-    topLevelKielerGraph = graph;
-    addNodes(landscape);
-    addEdges(landscape);
-    graph.commId = "asdasd";
-    return {
-        graph: graph,
-        modelIdToPoints: modelIdToPoints
+  let topLevelKielerGraph = {};
+
+  // Maps for internal computations
+  let modelIdToGraph = new Map();
+  let modelIdToSourcePort = new Map();
+  let modelIdToTargetPort = new Map();
+  let modeldToKielerEdgeReference = new Map();
+
+  // Maps for output
+  let modelIdToPoints = new Map();
+
+  const graph = createEmptyGraph("root");
+  topLevelKielerGraph = graph;
+
+  addNodes(landscape);
+  addEdges(landscape);
+
+  return {
+    graph,
+    modelIdToPoints
+  };
+
+  function createEmptyGraph(id) {
+  
+    const layoutOptions = {
+      "edgeRouting": "POLYLINE",
+      "spacing": 0.2 * CONVERT_TO_KIELER_FACTOR,
+      "borderSpacing": 0.2 * CONVERT_TO_KIELER_FACTOR,
+      "direction": "RIGHT",
+      "interactive": true,
+      "nodePlace": "LINEAR_SEGMENTS",
+      "unnecessaryBendpoints": true,
+      "edgeSpacingFactor": 1.0
     };
-    function createEmptyGraph(id) {
-        var layoutOptions = {
-            "edgeRouting": "POLYLINE",
-            "spacing": 0.2 * CONVERT_TO_KIELER_FACTOR,
-            "borderSpacing": 0.2 * CONVERT_TO_KIELER_FACTOR,
-            "direction": "RIGHT",
-            "interactive": true,
-            "nodePlace": "LINEAR_SEGMENTS",
-            "unnecessaryBendpoints": true,
-            "edgeSpacingFactor": 1.0
-        };
-        var graph = {
-            "id": id,
-            "properties": layoutOptions,
-            "children": [],
-            "edges": []
-        };
-        return graph;
-    }
-    function addNodes(landscape) {
-        var systems = landscape.systems;
-        if (systems) {
-            systems.forEach(function (system) {
-                var DEFAULT_WIDTH = 1.5;
-                var DEFAULT_HEIGHT = 0.75;
-                var PADDING = 0.1;
-                var SYSTEM_LABEL_HEIGHT = 0.4;
-                if (isOpen(system)) {
-                    var minWidth = Math.max(2.5 * DEFAULT_WIDTH *
-                        CONVERT_TO_KIELER_FACTOR, (calculateRequiredLabelLength(system.name, SYSTEM_LABEL_HEIGHT) +
-                        PADDING * 6.0) * CONVERT_TO_KIELER_FACTOR);
-                    var minHeight = 2.5 * DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
-                    var systemKielerGraph_1 = createEmptyGraph(system.id);
-                    modelIdToGraph.set(system.id, systemKielerGraph_1);
-                    if (!systemKielerGraph_1.properties)
-                        return;
-                    systemKielerGraph_1.properties["de.cau.cs.kieler.sizeConstraint"] = "MINIMUM_SIZE";
-                    systemKielerGraph_1.properties["de.cau.cs.kieler.minWidth"] = minWidth;
-                    systemKielerGraph_1.properties["de.cau.cs.kieler.minHeight"] = minHeight;
-                    systemKielerGraph_1.properties["de.cau.cs.kieler.klay.layered.contentAlignment"] = "V_CENTER, H_CENTER";
-                    systemKielerGraph_1.padding = {
-                        left: PADDING * CONVERT_TO_KIELER_FACTOR,
-                        right: PADDING * CONVERT_TO_KIELER_FACTOR,
-                        // Leave space for system label
-                        top: 8 * PADDING * CONVERT_TO_KIELER_FACTOR,
-                        bottom: PADDING * CONVERT_TO_KIELER_FACTOR
-                    };
-                    if (!topLevelKielerGraph.children)
-                        return;
-                    topLevelKielerGraph.children.push(systemKielerGraph_1);
-                    var nodegroups = system.nodeGroups;
-                    nodegroups.forEach(function (nodeGroup) {
-                        if (isVisible(nodeGroup)) {
-                            createNodeGroup(systemKielerGraph_1, nodeGroup);
-                        }
-                    });
-                }
-                else {
-                    var width = Math.max(2.5 * DEFAULT_WIDTH *
-                        CONVERT_TO_KIELER_FACTOR, (calculateRequiredLabelLength(system.name, SYSTEM_LABEL_HEIGHT) +
-                        PADDING * 6.0) * CONVERT_TO_KIELER_FACTOR);
-                    var height = 2.5 * DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
-                    var systemKielerNode = {
-                        "id": system.id,
-                        "width": width,
-                        "height": height,
-                        "edges": [],
-                        "ports": []
-                    };
-                    systemKielerNode.padding = {
-                        left: PADDING * CONVERT_TO_KIELER_FACTOR,
-                        right: PADDING * CONVERT_TO_KIELER_FACTOR,
-                        top: PADDING * CONVERT_TO_KIELER_FACTOR,
-                        bottom: PADDING * CONVERT_TO_KIELER_FACTOR
-                    };
-                    modelIdToGraph.set(system.id, systemKielerNode);
-                    if (!topLevelKielerGraph.children)
-                        return;
-                    topLevelKielerGraph.children.push(systemKielerNode);
-                }
-            });
-        }
-    } // END addNodes
-    function addEdges(landscape) {
-        var totalApplicationCommunications = landscape.applicationCommunications;
-        totalApplicationCommunications.forEach(function (applicationcommunication) {
-            modeldToKielerEdgeReference.set(applicationcommunication.id, []);
-            modelIdToPoints.set(applicationcommunication.id, []);
-            var appSource = applicationcommunication.sourceApplication;
-            var appTarget = applicationcommunication.targetApplication;
-            var sourceNode = appSource.parent;
-            var sourceNodeGroup = sourceNode.parent;
-            var sourceSystem = sourceNodeGroup.parent;
-            if (!isVisible(sourceNode)) {
-                var maybeSource = isOpen(sourceSystem) ? seekRepresentativeApplication(appSource) : sourceSystem;
-                if (maybeSource)
-                    appSource = maybeSource;
+  
+    const graph = {
+      "id": id,
+      "properties": layoutOptions,
+      "children": [],
+      "edges": []
+    };
+  
+    return graph;
+  }
+  
+  
+  function addNodes(landscape) {
+    const systems = landscape.systems;
+  
+    if (systems) {
+  
+      systems.forEach((system) => {
+  
+        const DEFAULT_WIDTH = 1.5;
+        const DEFAULT_HEIGHT = 0.75;
+  
+        const PADDING = 0.1;
+        const SYSTEM_LABEL_HEIGHT = 0.4;
+  
+        if (isOpen(system)) {
+  
+          const minWidth = Math.max(2.5 * DEFAULT_WIDTH *
+            CONVERT_TO_KIELER_FACTOR,
+            (calculateRequiredLabelLength(system.name, SYSTEM_LABEL_HEIGHT) +
+              PADDING * 6.0) * CONVERT_TO_KIELER_FACTOR);
+  
+          const minHeight = 2.5 * DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
+  
+          const systemKielerGraph = createEmptyGraph(system.id);
+          modelIdToGraph.set(system.id, systemKielerGraph);
+  
+          if (!systemKielerGraph.properties)
+            return;
+  
+          systemKielerGraph.properties["de.cau.cs.kieler.sizeConstraint"] = "MINIMUM_SIZE";
+          systemKielerGraph.properties["de.cau.cs.kieler.minWidth"] = minWidth;
+          systemKielerGraph.properties["de.cau.cs.kieler.minHeight"] = minHeight;
+          systemKielerGraph.properties["de.cau.cs.kieler.klay.layered.contentAlignment"] = "V_CENTER, H_CENTER";
+  
+          systemKielerGraph.padding = {
+            left: PADDING * CONVERT_TO_KIELER_FACTOR,
+            right: PADDING * CONVERT_TO_KIELER_FACTOR,
+            // Leave space for system label
+            top: 8 * PADDING * CONVERT_TO_KIELER_FACTOR,
+            bottom: PADDING * CONVERT_TO_KIELER_FACTOR
+          };
+  
+          if (!topLevelKielerGraph.children)
+            return;
+  
+          topLevelKielerGraph.children.push(systemKielerGraph);
+  
+          const nodegroups = system.nodeGroups;
+  
+          nodegroups.forEach((nodeGroup) => {
+  
+            if (isVisible(nodeGroup)) {
+              createNodeGroup(systemKielerGraph, nodeGroup);
             }
-            var targetNode = appTarget.parent;
-            var targetNodeGroup = targetNode.parent;
-            var targetSystem = targetNodeGroup.parent;
-            if (!isVisible(targetNode)) {
-                var maybeTarget = isOpen(targetSystem) ? seekRepresentativeApplication(appTarget) : targetSystem;
-                if (maybeTarget)
-                    appTarget = maybeTarget;
-            }
-            if (appSource.id !== appTarget.id) {
-                var edge = createEdgeBetweenSourceTarget(appSource, appTarget, applicationcommunication.id);
-                var edgeReference = modeldToKielerEdgeReference.get(applicationcommunication.id);
-                edgeReference.push(edge);
-            }
-        });
-    } // END addEdges
-    function createNodeGroup(systemKielerGraph, nodegroup) {
-        var nodes = nodegroup.nodes;
-        var PADDING = 0.1;
-        if (nodes.length > 1) {
-            var nodeGroupKielerGraph_1 = createEmptyGraph(nodegroup.id);
-            modelIdToGraph.set(nodegroup.id, nodeGroupKielerGraph_1);
-            if (!nodeGroupKielerGraph_1.properties || !systemKielerGraph.children)
-                return;
-            nodeGroupKielerGraph_1.properties["de.cau.cs.kieler.klay.layered.crossMin"] = "LAYER_SWEEP";
-            nodeGroupKielerGraph_1.padding = {
-                left: PADDING * CONVERT_TO_KIELER_FACTOR,
-                right: PADDING * CONVERT_TO_KIELER_FACTOR,
-                top: PADDING * CONVERT_TO_KIELER_FACTOR,
-                bottom: PADDING * CONVERT_TO_KIELER_FACTOR
-            };
-            systemKielerGraph.children.push(nodeGroupKielerGraph_1);
-            var yCoord_1 = 0.0;
-            nodes.forEach(function (node) {
-                if (isVisible(node)) {
-                    createNodeAndItsApplications(nodeGroupKielerGraph_1, node);
-                    var kielerGraphReference = modelIdToGraph.get(node.id);
-                    if (kielerGraphReference) {
-                        kielerGraphReference.x = 0;
-                        kielerGraphReference.y = yCoord_1;
-                        yCoord_1 += CONVERT_TO_KIELER_FACTOR;
-                    }
-                }
-            });
-        }
-        else {
-            nodes.forEach(function (node) {
-                if (isVisible(node)) {
-                    createNodeAndItsApplications(systemKielerGraph, node);
-                }
-            });
-        }
-    } // END createNodeGroup
-    /**
-     * Searches for an application with the same name as the
-     * given application within the same nodegroup. This can be
-     * be done because a nodegroup only contains nodes which run
-     * the same applications.
-     * @param application
-     */
-    function seekRepresentativeApplication(application) {
-        var parentNode = application.parent;
-        var parentNodeGroup = parentNode.parent;
-        var nodes = parentNodeGroup.nodes;
-        var returnValue = null;
-        nodes.forEach(function (node) {
-            if (isVisible(node)) {
-                var applications = node.applications;
-                applications.forEach(function (representiveApplication) {
-                    if (representiveApplication.name === application.name) {
-                        returnValue = representiveApplication;
-                    }
-                });
-            }
-        });
-        return returnValue;
-    }
-    function createNodeAndItsApplications(kielerParentGraph, node) {
-        var PADDING = 0.1;
-        var NODE_LABEL_HEIGHT = 0.2;
-        var DEFAULT_WIDTH = 1.5;
-        var DEFAULT_HEIGHT = 0.75;
-        var nodeKielerGraph = createEmptyGraph(node.id);
-        modelIdToGraph.set(node.id, nodeKielerGraph);
-        nodeKielerGraph.padding = {
+  
+          });
+  
+        } else {
+  
+          const width = Math.max(2.5 * DEFAULT_WIDTH *
+            CONVERT_TO_KIELER_FACTOR,
+            (calculateRequiredLabelLength(system.name, SYSTEM_LABEL_HEIGHT) +
+              PADDING * 6.0) * CONVERT_TO_KIELER_FACTOR);
+  
+          const height = 2.5 * DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
+  
+          const systemKielerNode = {
+            "id": system.id,
+            "width": width,
+            "height": height,
+            "edges": [],
+            "ports": []
+          };
+  
+          systemKielerNode.padding = {
             left: PADDING * CONVERT_TO_KIELER_FACTOR,
             right: PADDING * CONVERT_TO_KIELER_FACTOR,
             top: PADDING * CONVERT_TO_KIELER_FACTOR,
-            bottom: 6 * PADDING * CONVERT_TO_KIELER_FACTOR
-        };
-        var parent = node.parent;
-        var minWidth = Math.max(DEFAULT_WIDTH *
-            CONVERT_TO_KIELER_FACTOR, (calculateRequiredLabelLength(getDisplayName(parent, node), NODE_LABEL_HEIGHT) +
-            PADDING * 2.0) * CONVERT_TO_KIELER_FACTOR);
-        var minHeight = DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
-        if (!nodeKielerGraph.properties || !kielerParentGraph.children)
+            bottom: PADDING * CONVERT_TO_KIELER_FACTOR
+          };
+  
+          modelIdToGraph.set(system.id, systemKielerNode);
+  
+          if (!topLevelKielerGraph.children)
             return;
-        nodeKielerGraph.properties["de.cau.cs.kieler.sizeConstraint"] = "MINIMUM_SIZE";
-        nodeKielerGraph.properties["de.cau.cs.kieler.minWidth"] = minWidth;
-        nodeKielerGraph.properties["de.cau.cs.kieler.minHeight"] = minHeight;
-        nodeKielerGraph.properties["de.cau.cs.kieler.klay.layered.contentAlignment"] = "V_CENTER,H_CENTER";
-        kielerParentGraph.children.push(nodeKielerGraph);
-        var applications = node.applications;
-        applications.forEach(function (application) {
-            var DEFAULT_WIDTH = 1.5;
-            var DEFAULT_HEIGHT = 0.75;
-            var APPLICATION_PIC_SIZE = 0.16;
-            var APPLICATION_PIC_PADDING_SIZE = 0.15;
-            var APPLICATION_LABEL_HEIGHT = 0.21;
-            var width = Math.max(DEFAULT_WIDTH * CONVERT_TO_KIELER_FACTOR, (calculateRequiredLabelLength(application.name, APPLICATION_LABEL_HEIGHT) +
-                APPLICATION_PIC_PADDING_SIZE + APPLICATION_PIC_SIZE +
-                PADDING * 3.0) * CONVERT_TO_KIELER_FACTOR);
-            var height = DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
-            var applicationKielerNode = {
-                "id": application.id,
-                "width": width,
-                "height": height,
-                "children": [],
-                "edges": [],
-                "ports": []
-            };
-            modelIdToGraph.set(application.id, applicationKielerNode);
-            if (nodeKielerGraph.children)
-                nodeKielerGraph.children.push(applicationKielerNode);
+          topLevelKielerGraph.children.push(systemKielerNode);
+  
+        }
+      });
+    }
+  
+  } // END addNodes
+
+
+  function addEdges(landscape) {
+
+    const totalApplicationCommunications = landscape.applicationCommunications;
+
+    totalApplicationCommunications.forEach((applicationcommunication) => {
+
+      modeldToKielerEdgeReference.set(applicationcommunication.id, []);
+
+      modelIdToPoints.set(applicationcommunication.id, []);
+
+      let appSource = applicationcommunication.sourceApplication;
+      let appTarget = applicationcommunication.targetApplication;
+
+      let sourceNode = appSource.parent;
+      let sourceNodeGroup = sourceNode.parent;
+      let sourceSystem = sourceNodeGroup.parent;
+
+      if (!isVisible(sourceNode)) {
+        let maybeSource = isOpen(sourceSystem) ? seekRepresentativeApplication(appSource) : sourceSystem;
+        if (maybeSource) appSource = maybeSource;
+      }
+
+      let targetNode = appTarget.parent;
+      let targetNodeGroup = targetNode.parent;
+      let targetSystem = targetNodeGroup.parent;
+
+      if (!isVisible(targetNode)) {
+        let maybeTarget = isOpen(targetSystem) ? seekRepresentativeApplication(appTarget) : targetSystem;
+        if (maybeTarget) appTarget = maybeTarget;
+      }
+
+      if (appSource.id !== appTarget.id) {
+        const edge = createEdgeBetweenSourceTarget(appSource, appTarget, applicationcommunication.id);
+        let edgeReference = modeldToKielerEdgeReference.get(applicationcommunication.id);
+        edgeReference.push(edge);
+      }
+    });
+  } // END addEdges
+
+  function createNodeGroup(systemKielerGraph, nodegroup) {
+
+    const nodes = nodegroup.nodes;
+    const PADDING = 0.1;
+
+    if (nodes.length > 1) {
+
+      const nodeGroupKielerGraph = createEmptyGraph(nodegroup.id);
+      modelIdToGraph.set(nodegroup.id, nodeGroupKielerGraph);
+
+      if (!nodeGroupKielerGraph.properties || !systemKielerGraph.children)
+        return;
+
+      nodeGroupKielerGraph.properties["de.cau.cs.kieler.klay.layered.crossMin"] = "LAYER_SWEEP";
+
+
+      nodeGroupKielerGraph.padding = {
+        left: PADDING * CONVERT_TO_KIELER_FACTOR,
+        right: PADDING * CONVERT_TO_KIELER_FACTOR,
+        top: PADDING * CONVERT_TO_KIELER_FACTOR,
+        bottom: PADDING * CONVERT_TO_KIELER_FACTOR
+      };
+
+      systemKielerGraph.children.push(nodeGroupKielerGraph);
+
+      let yCoord = 0.0;
+
+      nodes.forEach((node) => {
+
+        if (isVisible(node)) {
+          createNodeAndItsApplications(nodeGroupKielerGraph, node);
+          let kielerGraphReference = modelIdToGraph.get(node.id);
+
+          if (kielerGraphReference) {
+            kielerGraphReference.x = 0;
+            kielerGraphReference.y = yCoord;
+            yCoord += CONVERT_TO_KIELER_FACTOR;
+          }
+
+        }
+
+      });
+
+    } else {
+
+      nodes.forEach((node) => {
+
+        if (isVisible(node)) {
+          createNodeAndItsApplications(systemKielerGraph, node);
+        }
+
+      });
+
+    }
+
+  } // END createNodeGroup
+
+  /**
+   * Searches for an application with the same name as the 
+   * given application within the same nodegroup. This can be
+   * be done because a nodegroup only contains nodes which run
+   * the same applications.
+   * @param application 
+   */
+  function seekRepresentativeApplication(application) {
+    let parentNode = application.parent;
+    let parentNodeGroup = parentNode.parent;
+
+    let nodes = parentNodeGroup.nodes;
+
+    let returnValue = null;
+
+    nodes.forEach((node) => {
+      if (isVisible(node)) {
+
+        const applications = node.applications;
+
+        applications.forEach((representiveApplication) => {
+
+          if (representiveApplication.name === application.name) {
+            returnValue = representiveApplication;
+          }
         });
-    } // END createNodeAndItsApplications
-    function createEdgeBetweenSourceTarget(sourceApplication, targetApplication, commId) {
-        var port1 = createSourcePortIfNotExisting(sourceApplication);
-        var port2 = createTargetPortIfNotExisting(targetApplication);
-        var edge = createEdgeHelper(sourceApplication, port1, targetApplication, port2, commId);
-        return edge;
-        //---------------------------inner functions
-        function createSourcePortIfNotExisting(sourceDrawnode) {
-            var _a, _b;
-            // Do not create duplicate port
-            var maybePort = modelIdToSourcePort.get(sourceDrawnode.id);
-            if (maybePort && modelIdToSourcePort.has(sourceDrawnode.id)) {
-                return maybePort;
-            }
-            else {
-                var DEFAULT_PORT_WIDTH = 0.000001;
-                var DEFAULT_PORT_HEIGHT = 0.000001;
-                var CONVERT_TO_KIELER_FACTOR_1 = 180;
-                var portId = sourceDrawnode.id + "_sp1";
-                var port = {
-                    id: portId,
-                    width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR_1,
-                    height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR_1,
-                    properties: {
-                        "de.cau.cs.kieler.portSide": "EAST"
-                    },
-                    x: 0,
-                    y: 0
-                };
-                var sourceGraph = modelIdToGraph.get(sourceDrawnode.id);
-                port.node = sourceGraph;
-                modelIdToSourcePort.set(sourceDrawnode.id, port);
-                (_b = (_a = sourceGraph) === null || _a === void 0 ? void 0 : _a.ports) === null || _b === void 0 ? void 0 : _b.push(port);
-                return port;
-            }
-        }
-        function createTargetPortIfNotExisting(targetDrawnode) {
-            var _a, _b;
-            // Do not create duplicate port
-            var maybePort = modelIdToTargetPort.get(targetDrawnode.id);
-            if (maybePort && modelIdToTargetPort.has(targetDrawnode.id)) {
-                return maybePort;
-            }
-            else {
-                var DEFAULT_PORT_WIDTH = 0.000001;
-                var DEFAULT_PORT_HEIGHT = 0.000001;
-                var CONVERT_TO_KIELER_FACTOR_2 = 180;
-                var portId = targetDrawnode.id + "_tp1";
-                var port = {
-                    id: portId,
-                    width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR_2,
-                    height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR_2,
-                    properties: {
-                        "de.cau.cs.kieler.portSide": "WEST"
-                    },
-                    x: 0,
-                    y: 0
-                };
-                var targetGraph = modelIdToGraph.get(targetDrawnode.id);
-                port.node = targetGraph;
-                modelIdToTargetPort.set(targetDrawnode.id, port);
-                (_b = (_a = targetGraph) === null || _a === void 0 ? void 0 : _a.ports) === null || _b === void 0 ? void 0 : _b.push(port);
-                return port;
-            }
-        }
-        //---------------------------- end inner functions
-    } // END createEdgeBetweenSourceTarget
-    function createEdgeHelper(sourceDrawnode, port1, targetDrawnode, port2, commId) {
-        var _a, _b;
-        var id = sourceDrawnode.id + "_to_" + targetDrawnode.id;
-        var edge = lookForExistingEdge(sourceDrawnode, id);
-        if (edge) {
-            return edge;
-        }
-        edge = createNewEdge(id);
-        setEdgeLayoutProperties(edge);
-        edge.source = sourceDrawnode.id;
-        edge.target = targetDrawnode.id;
-        edge.sourcePort = port1.id;
-        edge.targetPort = port2.id;
-        if (port1.x && port1.y)
-            edge.sourcePoint = { x: port1.x, y: port1.y };
-        if (port2.x && port2.y)
-            edge.targetPoint = { x: port2.x, y: port2.y };
-        edge.sPort = port1;
-        edge.tPort = port2;
-        edge.sourceNode = sourceDrawnode;
-        edge.targetNode = targetDrawnode;
-        edge.communicationId = commId;
-        var graph = modelIdToGraph.get(sourceDrawnode.id);
-        (_b = (_a = graph) === null || _a === void 0 ? void 0 : _a.edges) === null || _b === void 0 ? void 0 : _b.push(edge);
-        return edge;
-        //inner function
-        // looks for already existing edges
-        function lookForExistingEdge(sourceDrawnode, id) {
-            var _a;
-            var edges = (_a = modelIdToGraph.get(sourceDrawnode.id)) === null || _a === void 0 ? void 0 : _a.edges;
-            if (edges) {
-                var length_1 = edges.length;
-                for (var i = 0; i < length_1; i++) {
-                    if (edges[i].id === id) {
-                        return edges[i];
-                    }
-                }
-            }
-            return undefined;
-        }
-    } // END createEdgeHelper
-    function createNewEdge(id) {
-        var kielerEdge = {
-            id: id
+      }
+    });
+
+    return returnValue;
+  }
+
+  function createNodeAndItsApplications(kielerParentGraph, node) {
+
+    const PADDING = 0.1;
+    const NODE_LABEL_HEIGHT = 0.2;
+    const DEFAULT_WIDTH = 1.5;
+    const DEFAULT_HEIGHT = 0.75;
+
+    const nodeKielerGraph = createEmptyGraph(node.id);
+    modelIdToGraph.set(node.id, nodeKielerGraph);
+
+    nodeKielerGraph.padding = {
+      left: PADDING * CONVERT_TO_KIELER_FACTOR,
+      right: PADDING * CONVERT_TO_KIELER_FACTOR,
+      top: PADDING * CONVERT_TO_KIELER_FACTOR,
+      bottom: 6 * PADDING * CONVERT_TO_KIELER_FACTOR
+    };
+
+    const parent = node.parent;
+
+    const minWidth = Math.max(DEFAULT_WIDTH *
+      CONVERT_TO_KIELER_FACTOR,
+      (calculateRequiredLabelLength(getDisplayName(parent, node), NODE_LABEL_HEIGHT) +
+        PADDING * 2.0) * CONVERT_TO_KIELER_FACTOR);
+
+    const minHeight = DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
+
+    if (!nodeKielerGraph.properties || !kielerParentGraph.children)
+      return;
+
+    nodeKielerGraph.properties["de.cau.cs.kieler.sizeConstraint"] = "MINIMUM_SIZE";
+    nodeKielerGraph.properties["de.cau.cs.kieler.minWidth"] = minWidth;
+    nodeKielerGraph.properties["de.cau.cs.kieler.minHeight"] = minHeight;
+    nodeKielerGraph.properties["de.cau.cs.kieler.klay.layered.contentAlignment"] = "V_CENTER,H_CENTER";
+
+    kielerParentGraph.children.push(nodeKielerGraph);
+
+    const applications = node.applications;
+
+    applications.forEach((application) => {
+
+      const DEFAULT_WIDTH = 1.5;
+      const DEFAULT_HEIGHT = 0.75;
+
+      const APPLICATION_PIC_SIZE = 0.16;
+      const APPLICATION_PIC_PADDING_SIZE = 0.15;
+      const APPLICATION_LABEL_HEIGHT = 0.21;
+
+      const width = Math.max(DEFAULT_WIDTH * CONVERT_TO_KIELER_FACTOR,
+        (calculateRequiredLabelLength(application.name, APPLICATION_LABEL_HEIGHT) +
+          APPLICATION_PIC_PADDING_SIZE + APPLICATION_PIC_SIZE +
+          PADDING * 3.0) * CONVERT_TO_KIELER_FACTOR);
+
+      const height = DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
+
+      const applicationKielerNode = {
+        "id": application.id,
+        "width": width,
+        "height": height,
+        "children": [],
+        "edges": [],
+        "ports": []
+      };
+
+      modelIdToGraph.set(application.id, applicationKielerNode);
+
+      if (nodeKielerGraph.children)
+        nodeKielerGraph.children.push(applicationKielerNode);
+    });
+
+  } // END createNodeAndItsApplications
+
+  function createEdgeBetweenSourceTarget(sourceApplication, targetApplication, commId) {
+
+    const port1 = createSourcePortIfNotExisting(sourceApplication);
+    const port2 = createTargetPortIfNotExisting(targetApplication);
+
+    let edge = createEdgeHelper(sourceApplication, port1, targetApplication, port2, commId);
+    return edge;
+
+    //---------------------------inner functions
+    function createSourcePortIfNotExisting(sourceDrawnode) {
+
+      // Do not create duplicate port
+      let maybePort = modelIdToSourcePort.get(sourceDrawnode.id);
+      if (maybePort && modelIdToSourcePort.has(sourceDrawnode.id)){
+        return maybePort;
+      } else {
+        const DEFAULT_PORT_WIDTH = 0.000001;
+
+        const DEFAULT_PORT_HEIGHT = 0.000001;
+  
+        const CONVERT_TO_KIELER_FACTOR = 180;
+
+        const portId = sourceDrawnode.id + "_sp1";
+
+        let port = {
+          id: portId,
+          width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR,
+          height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
+          properties: {
+            "de.cau.cs.kieler.portSide": "EAST"
+          },
+          x: 0,
+          y: 0
         };
-        return kielerEdge;
+
+        let sourceGraph = modelIdToGraph.get(sourceDrawnode.id);
+        port.node = sourceGraph;
+
+        modelIdToSourcePort.set(sourceDrawnode.id, port);
+        sourceGraph?.ports?.push(port);
+
+        return port;
+      }
     }
-    function setEdgeLayoutProperties(edge) {
-        var lineThickness = 0.06 * 4.0 + 0.01;
-        var oldThickness = edge.thickness ? edge.thickness : 0.0;
-        edge.thickness = Math.max(lineThickness * CONVERT_TO_KIELER_FACTOR, oldThickness);
+
+
+    function createTargetPortIfNotExisting(targetDrawnode) {
+
+      // Do not create duplicate port
+      let maybePort = modelIdToTargetPort.get(targetDrawnode.id);
+      if (maybePort && modelIdToTargetPort.has(targetDrawnode.id)){
+        return maybePort;
+      } else {
+        const DEFAULT_PORT_WIDTH = 0.000001;
+
+        const DEFAULT_PORT_HEIGHT = 0.000001;
+  
+        const CONVERT_TO_KIELER_FACTOR = 180;
+
+        const portId = targetDrawnode.id + "_tp1";
+
+        let port = {
+          id: portId,
+          width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR,
+          height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
+          properties: {
+            "de.cau.cs.kieler.portSide": "WEST"
+          },
+          x: 0,
+          y: 0
+        };
+
+        let targetGraph = modelIdToGraph.get(targetDrawnode.id);
+        port.node = targetGraph;
+
+        modelIdToTargetPort.set(targetDrawnode.id, port);
+        targetGraph?.ports?.push(port);
+
+        return port;
+      }
     }
-    function getDisplayName(nodeGroup, node) {
-        if (isOpen(nodeGroup)) {
-            if (node.name && node.name.length !== 0 && !node.name.startsWith("<")) {
-                return node.name;
-            }
-            else {
-                return node.ipAddress;
-            }
-        }
-        else {
-            return nodeGroup.name;
-        }
+
+    //---------------------------- end inner functions
+
+  } // END createEdgeBetweenSourceTarget
+
+  function createEdgeHelper(sourceDrawnode, port1, targetDrawnode, port2, commId) {
+
+    const id = sourceDrawnode.id + "_to_" + targetDrawnode.id;
+
+    let edge = lookForExistingEdge(sourceDrawnode, id);
+
+    if (edge) {
+      return edge;
     }
-    function calculateRequiredLabelLength(text, quadSize) {
-        if (text === null || text === "") {
-            return 0;
+
+    edge = createNewEdge(id);
+
+    setEdgeLayoutProperties(edge);
+
+    edge.source = sourceDrawnode.id;
+    edge.target = targetDrawnode.id;
+
+    edge.sourcePort = port1.id;
+    edge.targetPort = port2.id;
+
+    if (port1.x && port1.y)
+      edge.sourcePoint = { x: port1.x, y: port1.y };
+    
+    if (port2.x && port2.y)
+      edge.targetPoint = { x: port2.x, y: port2.y };
+
+    edge.sPort = port1;
+    edge.tPort = port2;
+
+    edge.sourceNode = sourceDrawnode;
+    edge.targetNode = targetDrawnode;
+
+    edge.communicationId = commId;
+
+    let graph = modelIdToGraph.get(sourceDrawnode.id);
+    graph?.edges?.push(edge);
+
+    return edge;
+
+
+    //inner function
+    // looks for already existing edges
+    function lookForExistingEdge(sourceDrawnode, id) {
+      let edges = modelIdToGraph.get(sourceDrawnode.id)?.edges;
+      if (edges) {
+        let length = edges.length;
+        for (let i = 0; i < length; i++) {
+          if (edges[i].id === id) {
+            return edges[i];
+          }
         }
-        return text.length * quadSize;
+      }
+      return undefined;
     }
-    function isOpen(entity) {
-        if (openEntitiesIds.size === 0) {
-            return true;
-        }
-        if (isReducedNodeGroup(entity)) {
-            return entity.nodes.length < 2 || openEntitiesIds.has(entity.id);
-        }
-        else {
-            return openEntitiesIds.has(entity.id);
-        }
+
+  } // END createEdgeHelper
+
+  function createNewEdge(id) {
+    const kielerEdge = {
+      id: id
+    };
+    return kielerEdge;
+  }
+
+  function setEdgeLayoutProperties(edge) {
+    const lineThickness = 0.06 * 4.0 + 0.01;
+    const oldThickness = edge.thickness ? edge.thickness : 0.0;
+    edge.thickness = Math.max(lineThickness * CONVERT_TO_KIELER_FACTOR, oldThickness);
+  }
+
+  function getDisplayName(nodeGroup, node) {
+
+    if (isOpen(nodeGroup)) {
+      if (node.name && node.name.length !== 0 && !node.name.startsWith("<")) {
+        return node.name;
+      } else {
+        return node.ipAddress;
+      }
+    } else {
+      return nodeGroup.name;
     }
-    function isVisible(entity) {
-        var _a;
-        if (isReducedNodeGroup(entity)) {
-            var system = entity.parent;
-            return isOpen(system);
-        }
-        else if (isReducedNode(entity)) {
-            var nodeGroup = entity.parent;
-            if (isOpen(nodeGroup)) {
-                return isVisible(nodeGroup);
-            }
-            else {
-                var nodes = nodeGroup.nodes;
-                return ((_a = nodes[0]) === null || _a === void 0 ? void 0 : _a.id) === entity.id && isVisible(nodeGroup);
-            }
-        }
-        else if (isReducedApplication(entity)) {
-            var node = entity.parent;
-            return isVisible(node);
-        }
-        else {
-            return false;
-        }
+  }
+
+  function calculateRequiredLabelLength(text, quadSize) {
+
+    if (text === null || text === "") {
+      return 0;
     }
-    function isReducedNodeGroup(arg) {
-        return arg.nodes !== undefined;
+
+    return text.length * quadSize;
+  }
+
+  function isOpen(entity) {    
+    if (isReducedNodeGroup(entity)) {
+      return entity.nodes.length < 2 || openEntitiesIds.has(entity.id);
+    } else {
+      return openEntitiesIds.has(entity.id);
     }
-    function isReducedNode(arg) {
-        return arg.applications !== undefined;
+  }
+
+  function isVisible(entity) {
+    if (isReducedNodeGroup(entity)) {
+      let system = entity.parent;
+      return isOpen(system);
+    } else if (isReducedNode(entity)) {
+      let nodeGroup = entity.parent;
+      if (isOpen(nodeGroup)) {
+        return isVisible(nodeGroup);
+      } else {
+        let nodes = nodeGroup.nodes;
+        return nodes[0]?.id === entity.id && isVisible(nodeGroup);
+      }
+    } else if (isReducedApplication(entity)) {
+      let node = entity.parent;
+      return isVisible(node);
+    } else {
+      return false;
     }
-    function isReducedApplication(arg) {
-        return arg.type !== undefined && arg.type === 'application';
-    }
+  }
+
+  function isReducedNodeGroup(arg) {
+    return arg.nodes !== undefined;
+  }
+
+  function isReducedNode(arg) {
+    return arg.applications !== undefined;
+  }
+
+  function isReducedApplication(arg) {
+    return arg.type !== undefined && arg.type === 'application';
+  }
 }
