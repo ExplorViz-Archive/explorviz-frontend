@@ -1,17 +1,9 @@
 // Wait for the initial message event.
 self.addEventListener('message', function(e) {
   let data = e.data;
-  let port = e.ports[0];
   
-  // Do your stuff here.
-  if (port) {
-    // Message sent through a worker created with 'open' method.
-    port.postMessage({ foo: 'foo' });
-  } else {
-    // Message sent through a worker created with 'send' or 'on' method.
-    let application = applyBoxLayout(data);
-    postMessage(application);
-  }
+  let application = applyBoxLayout(data);
+  postMessage(application);
 }, false);
   
 // Ping the Ember service to say that everything is ok.

@@ -1,17 +1,9 @@
 // Wait for the initial message event.
 self.addEventListener('message', function(e) {
   let { reducedLandscape, openEntitiesIds, modelIdToPoints, graph } = e.data;
-  let port = e.ports[0];
-  
-  // Do your stuff here.
-  if (port) {
-    // Message sent through a worker created with 'open' method.
-    port.postMessage({ foo: 'foo' });
-  } else {
-    // Message sent through a worker created with 'send' or 'on' method.
-    let landscape = layout3(reducedLandscape, openEntitiesIds, modelIdToPoints, graph);
-    postMessage(landscape); 
-  }
+
+  let landscape = layout3(reducedLandscape, openEntitiesIds, modelIdToPoints, graph);
+  postMessage(landscape);
 }, false);
 
 const CONVERT_TO_KIELER_FACTOR = 180.0;
