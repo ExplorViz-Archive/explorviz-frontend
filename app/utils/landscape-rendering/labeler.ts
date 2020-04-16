@@ -6,23 +6,15 @@ import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh
 import NodeGroupMesh from 'explorviz-frontend/view-objects/3d/landscape/nodegroup-mesh';
 
 export default class Labeler {
-  systemLabelCache: Map<string, PlaneLabelMesh>;
+  systemLabelCache: Map<string, PlaneLabelMesh> = new Map();
 
-  nodeGroupLabelCache: Map<string, PlaneLabelMesh>;
+  nodeGroupLabelCache: Map<string, PlaneLabelMesh> = new Map();
 
-  nodeLabelCache: Map<string, PlaneLabelMesh>;
+  nodeLabelCache: Map<string, PlaneLabelMesh> = new Map();
 
-  appLabelCache: Map<string, PlaneLabelMesh>;
+  appLabelCache: Map<string, PlaneLabelMesh> = new Map();
 
-  collapseLabelCache: Map<string, PlaneLabelMesh>;
-
-  constructor() {
-    this.systemLabelCache = new Map();
-    this.nodeGroupLabelCache = new Map();
-    this.nodeLabelCache = new Map();
-    this.appLabelCache = new Map();
-    this.collapseLabelCache = new Map();
-  }
+  collapseLabelCache: Map<string, PlaneLabelMesh> = new Map();
 
   /**
  * Creates a label and adds it at a calculated position to the given system mesh
@@ -144,27 +136,27 @@ export default class Labeler {
    */
   clearCache() {
     this.systemLabelCache.forEach((label) => {
-      label.delete();
+      label.disposeRecursively();
     });
     this.systemLabelCache.clear();
 
     this.nodeGroupLabelCache.forEach((label) => {
-      label.delete();
+      label.disposeRecursively();
     });
     this.nodeGroupLabelCache.clear();
 
     this.nodeLabelCache.forEach((label) => {
-      label.delete();
+      label.disposeRecursively();
     });
     this.nodeLabelCache.clear();
 
     this.appLabelCache.forEach((label) => {
-      label.delete();
+      label.disposeRecursively();
     });
     this.appLabelCache.clear();
 
     this.collapseLabelCache.forEach((label) => {
-      label.delete();
+      label.disposeRecursively();
     });
     this.collapseLabelCache.clear();
   }

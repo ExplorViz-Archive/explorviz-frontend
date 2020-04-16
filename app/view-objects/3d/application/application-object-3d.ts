@@ -99,13 +99,22 @@ export default class ApplicationObject3D extends THREE.Object3D {
   }
 
   removeAllCommunication() {
-    this.getCommMeshes().forEach((mesh) => mesh.delete());
+    this.getCommMeshes().forEach((mesh) => {
+      mesh.disposeRecursively();
+      mesh.deleteFromParent();
+    });
     this.commIdToMesh.clear();
   }
 
   removeAllEntities() {
-    this.getBoxMeshes().forEach((mesh) => mesh.delete());
-    this.getCommMeshes().forEach((mesh) => mesh.delete());
+    this.getBoxMeshes().forEach((mesh) => {
+      mesh.disposeRecursively();
+      mesh.deleteFromParent();
+    });
+    this.getCommMeshes().forEach((mesh) => {
+      mesh.disposeRecursively();
+      mesh.deleteFromParent();
+    });
     this.resetMeshReferences();
   }
 }

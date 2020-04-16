@@ -48,28 +48,31 @@ export default abstract class BaseMesh extends THREE.Mesh {
     this.changeOpacity(opacity);
   }
 
-  delete() {
-    if (this.geometry) {
-      this.geometry.dispose();
-    }
-    if (this.material instanceof THREE.Material) {
-      this.material.dispose();
-    } else {
-      for (let j = 0; j < this.material.length; j++) {
-        const material = this.material[j];
-        material.dispose();
-      }
-    }
-
-    // Recursively delete all child objects
-    this.children.forEach((child) => {
-      if (child instanceof BaseMesh) {
-        child.delete();
-      }
-    });
-
+  deleteFromParent() {
     if (this.parent) {
       this.parent.remove(this);
     }
+  }
+
+  /**
+   * Disposes the mesh's geometry and material
+   * and does so recursively for the child BaseMeshes
+   */
+  disposeRecursively() {
+    this.traverse((child) => {
+      if (child instanceof BaseMesh) {
+        if (child.geometry) {
+          child.geometry.dispose();
+        }
+        if (child.material instanceof THREE.Material) {
+          child.material.dispose();
+        } else {
+          for (let j = 0; j < child.material.length; j++) {
+            const material = child.material[j];
+            material.dispose();
+          }
+        }
+      }
+    });
   }
 }
