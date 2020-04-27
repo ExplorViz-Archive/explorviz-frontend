@@ -13,9 +13,8 @@ type CallbackFunctions = {
   panning?(delta: {x: number, y: number}, button: 1|2|3): void
 };
 
-type MouseOffsetPosition = {
-  offsetX: number,
-  offsetY: number
+type MouseStopEvent = {
+  srcEvent: MouseEvent
 };
 
 export type Position2D = {
@@ -135,10 +134,7 @@ export default class Interaction {
     if (!this.eventCallbackFunctions.mouseMove) { return; }
 
     // Extract mouse position
-    const mouse = {
-      x: evt.offsetX,
-      y: evt.offsetY,
-    };
+    const mouse: Position2D = Interaction.getMousePos(this.canvas, evt);
 
     const intersectedViewObj = this.raycast(mouse);
 
@@ -149,14 +145,11 @@ export default class Interaction {
     }
   }
 
-  onMouseStop(evt: CustomEvent<MouseOffsetPosition>) {
+  onMouseStop(evt: CustomEvent<MouseStopEvent>) {
     if (!this.eventCallbackFunctions.mouseStop) { return; }
 
     // Extract mouse position
-    const mouse = {
-      x: evt.detail.offsetX,
-      y: evt.detail.offsetY,
-    };
+    const mouse: Position2D = Interaction.getMousePos(this.canvas, evt.detail.srcEvent);
 
     const intersectedViewObj = this.raycast(mouse);
 
@@ -236,10 +229,9 @@ export default class Interaction {
       self.canvas.addEventListener('mousemove', (evt: MouseEvent) => {
         clearTimeout(timeout);
         timeout = setTimeout(() => {
-          const event = new CustomEvent<MouseOffsetPosition>('mousestop', {
+          const event = new CustomEvent<MouseStopEvent>('mousestop', {
             detail: {
-              offsetX: evt.offsetX,
-              offsetY: evt.offsetY,
+              srcEvent: evt,
             },
             bubbles: true,
             cancelable: true,
@@ -269,5 +261,13 @@ export default class Interaction {
     if (this.eventCallbackFunctions.mouseMove) { this.canvas.removeEventListener('mousemove', this.onMouseMove); }
 
     if (this.eventCallbackFunctions.mouseStop) { this.canvas.removeEventListener('mousestop', this.onMouseStop); }
+  }
+
+  static getMousePos(canvas: HTMLCanvasElement, evt: MouseEvent) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top,
+    };
   }
 }

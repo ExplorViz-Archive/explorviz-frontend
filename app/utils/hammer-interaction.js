@@ -1,6 +1,7 @@
 import Object from '@ember/object';
 import Evented from '@ember/object/evented';
 import Hammer from 'hammerjs';
+import Interaction from './interaction';
 
 /* eslint-disable no-bitwise */
 export default class HammerInteraction extends Object.extend(Evented) {
@@ -123,10 +124,10 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const event = evt.srcEvent;
+      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
 
-      mouseDeltaX = event.offsetX;
-      mouseDeltaY = event.offsetY;
+      mouseDeltaX = mousePosition.x;
+      mouseDeltaY = mousePosition.y;
     });
 
     /**
@@ -143,11 +144,13 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      delta.x = evt.srcEvent.offsetX - mouseDeltaX;
-      delta.y = evt.srcEvent.offsetY - mouseDeltaY;
+      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
 
-      mouseDeltaX = evt.srcEvent.offsetX;
-      mouseDeltaY = evt.srcEvent.offsetY;
+      delta.x = mousePosition.x - mouseDeltaX;
+      delta.y = mousePosition.y - mouseDeltaY;
+
+      mouseDeltaX = mousePosition.x;
+      mouseDeltaY = mousePosition.y;
 
       self.trigger('panning', delta, evt);
     });
@@ -166,12 +169,9 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mouse = {};
+      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
 
-      mouse.x = evt.srcEvent.offsetX;
-      mouse.y = evt.srcEvent.offsetY;
-
-      self.trigger('panningEnd', mouse);
+      self.trigger('panningEnd', mousePosition);
     });
 
     /**
@@ -186,12 +186,9 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mouse = {};
+      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
 
-      mouse.x = evt.srcEvent.offsetX;
-      mouse.y = evt.srcEvent.offsetY;
-
-      self.trigger('doubletap', mouse);
+      self.trigger('doubletap', mousePosition);
     });
 
     /**
@@ -206,12 +203,9 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mouse = {};
+      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
 
-      mouse.x = evt.srcEvent.offsetX;
-      mouse.y = evt.srcEvent.offsetY;
-
-      self.trigger('singletap', mouse);
+      self.trigger('singletap', mousePosition);
     });
   }
 }
