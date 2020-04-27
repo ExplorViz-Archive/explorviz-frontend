@@ -74,12 +74,7 @@ export default class Highlighting {
 
     const drawableComm = application.hasMany('drawableClazzCommunications').value() as DS.ManyArray<DrawableClazzCommunication>|null;
 
-    if (!drawableComm) {
-      return;
-    }
-
-
-    drawableComm.forEach((comm) => {
+    drawableComm?.forEach((comm) => {
       const sourceClazz = comm.belongsTo('sourceClazz').value() as Clazz;
       const targetClazz = comm.belongsTo('targetClazz').value() as Clazz;
 
