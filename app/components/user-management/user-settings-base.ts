@@ -13,6 +13,8 @@ interface IArgs {
   settings: {
     [type: string]: [[string, any]],
   };
+  updateSetting(origin: string, type: string, index: number, value: any): void;
+  origin: string;
 }
 export default class UserSettingsBase extends Component<IArgs> {
   @service('store') store!: DS.Store;
@@ -49,11 +51,11 @@ export default class UserSettingsBase extends Component<IArgs> {
 
   @action
   onRangeSettingChange(index: number, valueNew: any) {
-    this.args.settings.rangesetting[index].set(1, Number(valueNew));
+    this.args.updateSetting(this.args.origin, 'rangesetting', index, Number(valueNew));
   }
 
   @action
   onFlagSettingChange(index: number, valueNew: boolean) {
-    this.args.settings.flagsetting[index].set(1, valueNew);
+    this.args.updateSetting(this.args.origin, 'flagsetting', index, valueNew);
   }
 }

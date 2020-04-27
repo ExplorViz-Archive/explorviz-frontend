@@ -325,6 +325,14 @@ export default class UserCreation extends Component {
     };
   }
 
+  @action
+  updateSetting(origin: string, type: string, index: number, value: any) {
+    this.settings[origin][type][index][1] = value;
+
+    // copy settings, so update is recognized -> reassignment of field needed
+    this.settings = { ...this.settings };
+  }
+
   static generatePasswords(count: number, length: number) {
     const passwords = [];
 

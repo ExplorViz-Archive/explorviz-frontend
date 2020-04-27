@@ -37,6 +37,7 @@ export default class UserManagementUserSettings extends Component<IArgs> {
       origin2: {...}
     }
   */
+  @tracked
   settings: ISettings = {};
 
   /*
@@ -167,5 +168,13 @@ export default class UserManagementUserSettings extends Component<IArgs> {
       ...this.useDefaultSettings,
       [origin]: !this.useDefaultSettings[origin],
     };
+  }
+
+  @action
+  updateSetting(origin: string, type: string, index: number, value: any) {
+    this.settings[origin][type][index][1] = value;
+
+    // copy settings, so update is recognized -> reassignment of field needed
+    this.settings = { ...this.settings };
   }
 }

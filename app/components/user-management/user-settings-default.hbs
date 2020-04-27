@@ -15,7 +15,11 @@
     </div>
     {{#if (not (get @useDefaultSettings key))}}
       <div class="pt-2">
-        <UserManagement::UserSettingsBase @settings={{value}} />
+        <UserManagement::UserSettingsBase
+          @settings={{value}}
+          @updateSetting={{@updateSetting}}
+          @origin={{key}}
+        />
       </div>
     {{/if}}
   </div>
