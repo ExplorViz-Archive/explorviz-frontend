@@ -1,4 +1,4 @@
-import { action, set } from '@ember/object';
+import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
@@ -40,7 +40,7 @@ export default class LoginForm extends Component {
   authenticate(event: MouseEvent) {
     event.preventDefault();
 
-    const self = this;
+/*     const self = this;
 
     const user: IUser = {
       identification: this.identification,
@@ -80,7 +80,19 @@ export default class LoginForm extends Component {
       set(self.session.session.content, 'errorMessage', errorMessage);
     }
 
-    this.session.authenticate('authenticator:authenticator', user).then(undefined, failure);
+    this.session.authenticate('authenticator:authenticator', user).then(undefined, failure); */
+
+    // Check out Auth0 Lock's documentation for all the options:
+    // https://auth0.com/docs/libraries/lock/customization
+    const lockOptions = {
+      auth: {
+        params: {
+          scope: 'openid email profile',
+        },
+      },
+    };
+
+    this.session.authenticate('authenticator:auth0-lock', lockOptions);
   }
 
   static checkForValidInput(user: IUser) {

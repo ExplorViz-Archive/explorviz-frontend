@@ -26,10 +26,10 @@ export default class ApplicationController extends Controller {
   // eslint-disable-next-line
   loadUserAndSettings = task(function* (this: ApplicationController) {
     yield this.loadCurrentUser();
-    if (this.session.isAuthenticated) {
+/*     if (this.session.isAuthenticated) {
       yield this.loadCurrentUserPreferences();
       yield this.loadSettingsAndTypes();
-    }
+    } */
   });
 
   async loadCurrentUser() {

@@ -5,9 +5,9 @@
 var colors = require('colors'); // eslint-disable-line
 
 module.exports = function (environment) {
-  var ENV = {
+  const ENV = {
     modulePrefix: 'explorviz-frontend',
-    environment: environment,
+    environment,
     rootURL: '/',
     locationType: 'auto',
     EmberENV: {
@@ -17,20 +17,33 @@ module.exports = function (environment) {
       },
       EXTEND_PROTOTYPES: {
         // Prevent Ember Data from overriding Date.parse.
-        Date: false
-      }
+        Date: false,
+      },
     },
 
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created
-    }
+    },
+    'ember-simple-auth': {
+      authenticationRoute: 'visualization',
+      auth0: {
+        clientID: '7p8yE0P22rXDog2z1wHTp5xvgUbMgoK2',
+        domain: 'dev-0kw21a7w.auth0.com',
+        logoutReturnToURL: '/logout',
+        enableImpersonation: false,
+        silentAuth: {
+          // Silent authentication is off by default.
+          // See 'Silent Authentication' section in this
+          // readme for a list of options that go here.
+        },
+      },
+    },
   };
 
-  var API_ROOT;
+  let API_ROOT;
 
   if (environment === 'development') {
-
     API_ROOT = 'http://localhost:8080';
 
     if (process.env.API_ROOT) {
@@ -39,30 +52,29 @@ module.exports = function (environment) {
 
     ENV.APP.API_ROOT = API_ROOT;
 
-    console.log("");
+    console.log('');
     console.log(`EXPL-INFO: Development mode: Using ${API_ROOT} as API_ROOT`.blue);
   }
 
   if (environment === 'production') {
+    console.log('');
 
-    console.log("");
-
-    //var rootURL = 'change-rootURL';
+    // var rootURL = 'change-rootURL';
     API_ROOT = 'change-API_ROOT';
 
     if (process.env.API_ROOT) {
-      console.log(`EXPL-INFO: Using environment variable as API_ROOT`.blue);
+      console.log('EXPL-INFO: Using environment variable as API_ROOT'.blue);
       API_ROOT = process.env.API_ROOT;
     }
 
     ENV.APP.API_ROOT = API_ROOT;
 
-    console.log("");
+    console.log('');
     console.log(`EXPL-INFO: Production mode: Using ${API_ROOT} as API_ROOT`.blue);
 
-    if (API_ROOT == 'change-API_ROOT') {
+    if (API_ROOT === 'change-API_ROOT') {
       console.log(`EXPL-WARNING: This is prodution mode. You must override the 'API_ROOT' variable with its current value: ${API_ROOT}`.yellow);
-      console.log(`EXPL-WARNING: Set the environment variable API_ROOT=XXX`.yellow);
+      console.log('EXPL-WARNING: Set the environment variable API_ROOT=XXX'.yellow);
     }
   }
 

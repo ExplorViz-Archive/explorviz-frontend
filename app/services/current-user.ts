@@ -42,7 +42,7 @@ export default class CurrentUser extends Service {
    * @memberof CurrentUser
    */
   load(this: CurrentUser) {
-    const userId = this.get('session').get('session.content.authenticated.rawUserData.data.id');
+    const userId = this.get('session').get('data.authenticated.profile.sub');
     if (!isEmpty(userId)) {
       const user = this.get('store').peekRecord('user', userId);
       if (user !== null) {
