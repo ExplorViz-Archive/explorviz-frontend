@@ -3,6 +3,7 @@
 /* eslint no-console: 0 */
 
 var colors = require('colors'); // eslint-disable-line
+const AUTH_CONFIG = require('./auth0-variables');
 
 module.exports = function (environment) {
   const ENV = {
@@ -20,24 +21,17 @@ module.exports = function (environment) {
         Date: false,
       },
     },
+    auth0: {
+      clientId: AUTH_CONFIG.clientId,
+      domain: AUTH_CONFIG.domain,
+      callbackUrl: AUTH_CONFIG.callbackUrl,
+      logoutReturnUrl: AUTH_CONFIG.logoutReturnUrl,
+      routeAfterLogin: AUTH_CONFIG.routeAfterLogin,
+    },
 
     APP: {
       // Here you can pass flags/options to your application instance
       // when it is created
-    },
-    'ember-simple-auth': {
-      authenticationRoute: 'visualization',
-      auth0: {
-        clientID: '7p8yE0P22rXDog2z1wHTp5xvgUbMgoK2',
-        domain: 'dev-0kw21a7w.auth0.com',
-        logoutReturnToURL: '/logout',
-        enableImpersonation: false,
-        silentAuth: {
-          // Silent authentication is off by default.
-          // See 'Silent Authentication' section in this
-          // readme for a list of options that go here.
-        },
-      },
     },
   };
 
