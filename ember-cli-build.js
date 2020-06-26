@@ -63,5 +63,7 @@ module.exports = function(defaults) {
 
   app.import('node_modules/bootstrap/dist/js/bootstrap.min.js');
 
+  app.import('node_modules/auth0-js/build/auth0.js');
+
   return app.toTree();
 };
