@@ -1,9 +1,7 @@
-import AuthenticatedRouteMixin from
-  'ember-simple-auth/mixins/authenticated-route-mixin';
 import VisualizationController from 'explorviz-frontend/controllers/visualization';
 import THREE from 'three';
 import debugLogger from 'ember-debug-logger';
-import Route from '@ember/routing/route';
+import BaseRoute from './base-route';
 
 /**
 * TODO
@@ -11,7 +9,7 @@ import Route from '@ember/routing/route';
 * @class Visualization-Route
 * @extends Ember.Route
 */
-export default class VisualizationRoute extends Route.extend(AuthenticatedRouteMixin) {
+export default class VisualizationRoute extends BaseRoute {
   debug = debugLogger();
 
   model() {

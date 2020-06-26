@@ -1,13 +1,12 @@
-import Route from '@ember/routing/route';
-import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import DS from 'ember-data';
 import User from 'explorviz-frontend/models/user';
+import BaseRoute from 'explorviz-frontend/routes/base-route';
 
-export default class UserManagementEditRoute extends Route.extend(AuthenticatedRouteMixin) {
+export default class UserManagementEditRoute extends BaseRoute {
   @service('store')
   store!: DS.Store;
 

@@ -1,11 +1,10 @@
-import Route from '@ember/routing/route';
-import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 import { set } from '@ember/object';
 import ReplayController from 'explorviz-frontend/controllers/replay';
 import debugLogger from 'ember-debug-logger';
 import THREE from 'three';
+import BaseRoute from './base-route';
 
-export default class Replay extends Route.extend(AuthenticatedRouteMixin) {
+export default class Replay extends BaseRoute {
   debug = debugLogger();
 
   model() {

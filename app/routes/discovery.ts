@@ -1,12 +1,10 @@
-import Route from '@ember/routing/route';
 import { on } from '@ember-decorators/object';
-import AuthenticatedRouteMixin from
-  'ember-simple-auth/mixins/authenticated-route-mixin';
 import { set } from '@ember/object';
 import DiscoveryController from 'explorviz-frontend/controllers/discovery';
+import BaseRoute from './base-route';
 
 
-export default class DiscoveryRoute extends Route.extend(AuthenticatedRouteMixin) {
+export default class DiscoveryRoute extends BaseRoute {
   // @Override Ember-Hook
   resetController(controller: DiscoveryController, isExiting: boolean, transition: any) {
     if (isExiting && transition.targetName !== 'error') {
