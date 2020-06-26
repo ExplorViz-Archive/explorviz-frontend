@@ -5,6 +5,7 @@ import { isEmpty } from '@ember/utils';
 import { task } from 'ember-concurrency-decorators';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import UserSettings from 'explorviz-frontend/services/user-settings';
+import Auth from 'explorviz-frontend/services/auth';
 
 /**
  * TODO
@@ -21,6 +22,10 @@ export default class ApplicationController extends Controller {
   @service('current-user') currentUser!: CurrentUser;
 
   @service('user-settings') userSettings!: UserSettings;
+
+  @service('auth') auth!: Auth;
+
+  @service('router') router!: any;
 
   @task
   // eslint-disable-next-line
