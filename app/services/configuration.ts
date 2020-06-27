@@ -128,8 +128,11 @@ export default class Configuration extends Service {
    * Needs to be a deep copy of the object, otherwise the default
    * colors got overridden when the colors are in the extension
    */
-  resetColors() {
+  resetLandscapeColors() {
     set(this, 'landscapeColors', { ...this.landscapeColorsDefault });
+  }
+
+  resetApplicationColors() {
     set(this, 'applicationColors', { ...this.applicationColorsDefault });
   }
 }

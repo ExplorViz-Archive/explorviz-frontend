@@ -1,12 +1,37 @@
+<div class="sidebar-component-close">
+  <button
+    type="button"
+    class="sidebar-component-close-button"
+    title="Close Color Configuration"
+    {{on "click" this.close}}
+  >
+    {{svg-jar "x" class="octicon"}}
+  </button>
+</div>
+
+<div class="sidebar-component-title">
+  <h5>Color Configuration</h5>
+</div>
+
 <div class="container">
 
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+            Presets
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="#" name="defaultScheme" {{action "applyColorScheme" "default"}}>Default Color
+                Scheme</a>
+            <a class="dropdown-item" href="#" name="impairedScheme" {{action "applyColorScheme" "impaired"}}>Vision
+                Impairment Color Scheme</a>
+        </div>
+    </div>
 
     {{#if this.args.isLandscapeView}}
 
-    <h5>Landscape Colors</h5>
-
     {{#each-in this.configuration.landscapeColors as |key color|}}
-    <div class="row">
+    <div id={{concat "cp-landscape-" key}} class="row">
         <span>
             {{input type="color" value=(mut (get this.configuration.landscapeColors key))}}
         </span>
@@ -16,10 +41,8 @@
 
     {{else}}
 
-    <h5>Application Colors</h5>
-
     {{#each-in this.configuration.applicationColors as |key color|}}
-    <div class="row">
+    <div id={{concat "cp-application-" key}} class="row">
         <span>
             {{input type="color" value=(mut (get this.configuration.applicationColors key))}}
         </span>
