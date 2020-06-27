@@ -6,6 +6,7 @@ import Configuration from 'explorviz-frontend/services/configuration';
 interface Args {
   isLandscapeView: Boolean
   removeComponent(componentPath: string): void
+  updateView(): void
 }
 
 export default class ColorPicker extends Component<Args> {
@@ -19,6 +20,12 @@ export default class ColorPicker extends Component<Args> {
     } else if (scheme === 'impaired') {
       this.applyVisuallyImpairedColors();
     }
+    this.args.updateView();
+  }
+
+  @action
+  updateColors() {
+    this.args.updateView();
   }
 
   @action
@@ -69,5 +76,6 @@ export default class ColorPicker extends Component<Args> {
         background: '#ffffff', // white
       });
     }
+    this.args.updateView();
   }
 }

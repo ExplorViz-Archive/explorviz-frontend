@@ -1,16 +1,12 @@
 <div class="sidebar-component-close">
-  <button
-    type="button"
-    class="sidebar-component-close-button"
-    title="Close Color Configuration"
-    {{on "click" this.close}}
-  >
-    {{svg-jar "x" class="octicon"}}
-  </button>
+    <button type="button" class="sidebar-component-close-button" title="Close Color Configuration"
+        {{on "click" this.close}}>
+        {{svg-jar "x" class="octicon"}}
+    </button>
 </div>
 
 <div class="sidebar-component-title">
-  <h5>Color Configuration</h5>
+    <h5>Color Configuration</h5>
 </div>
 
 <div class="container">
@@ -33,7 +29,7 @@
     {{#each-in this.configuration.landscapeColors as |key color|}}
     <div id={{concat "cp-landscape-" key}} class="row">
         <span>
-            {{input type="color" value=(mut (get this.configuration.landscapeColors key))}}
+            {{input type="color"  change=(action "updateColors") value=(mut (get this.configuration.landscapeColors key))}}
         </span>
         <span>{{format-color-property key}}</span>
     </div>
@@ -44,7 +40,7 @@
     {{#each-in this.configuration.applicationColors as |key color|}}
     <div id={{concat "cp-application-" key}} class="row">
         <span>
-            {{input type="color" value=(mut (get this.configuration.applicationColors key))}}
+            {{input type="color" change=(action "updateColors") value=(mut (get this.configuration.applicationColors key))}}
         </span>
         <span>{{format-color-property key}}</span>
     </div>
