@@ -23,8 +23,8 @@
           @resetView={{this.resetView}}
         />
         <Visualization::PageSetup::Navbar::PauseReload />
-        <Visualization::PageSetup::Navbar::ColorPicker 
-          @isLandscapeView={{false}}
+        <Visualization::PageSetup::Navbar::ColorPickerOpener 
+          @addComponent={{@addComponent}}
         />
         <Visualization::PageSetup::Navbar::TraceOverview
           @addComponent={{@addComponent}}
@@ -83,6 +83,12 @@
               {{/if}}
               {{#if (eq componentName "sql-viewer")}}
                 <Visualization::PageSetup::Sidebar::SqlViewer
+                  @removeComponent={{@removeComponent}}
+                />
+              {{/if}}
+              {{#if (eq componentName "color-picker")}}
+                <Visualization::PageSetup::Sidebar::ColorPicker
+                  @isLandscapeView={{false}}
                   @removeComponent={{@removeComponent}}
                 />
               {{/if}}

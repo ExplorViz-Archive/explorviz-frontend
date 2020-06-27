@@ -1,0 +1,33 @@
+<div class="container">
+
+
+    {{#if this.args.isLandscapeView}}
+
+    <h5>Landscape Colors</h5>
+
+    {{#each-in this.configuration.landscapeColors as |key color|}}
+    <div class="row">
+        <span>
+            {{input type="color" value=(mut (get this.configuration.landscapeColors key))}}
+        </span>
+        <span>{{format-color-property key}}</span>
+    </div>
+    {{/each-in}}
+
+    {{else}}
+
+    <h5>Application Colors</h5>
+
+    {{#each-in this.configuration.applicationColors as |key color|}}
+    <div class="row">
+        <span>
+            {{input type="color" value=(mut (get this.configuration.applicationColors key))}}
+        </span>
+        <span>{{format-color-property key}}</span>
+    </div>
+    {{/each-in}}
+
+    {{/if}}
+
+
+</div>
