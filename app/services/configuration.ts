@@ -82,16 +82,16 @@ export default class Configuration extends Service {
   * @type LandscapeColors
   */
   landscapeColorsDefault: LandscapeColors = {
-    system: 'rgb(199, 199, 199)',
-    nodegroup: 'rgb(22, 158, 43)',
-    node: 'rgb(0, 187, 65)',
-    application: 'rgb(62, 20, 160)',
-    communication: 'rgb(244, 145, 0)',
-    systemText: 'rgb(0, 0, 0)',
-    nodeText: 'rgb(255, 255, 255)',
-    applicationText: 'rgb(255, 255, 255)',
-    collapseSymbol: 'rgb(0, 0, 0)',
-    background: 'rgb(255, 255, 255)',
+    system: '#c7c7c7', // grey
+    nodegroup: '#169e2b', // dark green
+    node: '#00bb41', // green
+    application: '#3e14a0', // purple-blue
+    communication: '#f49100', // orange
+    systemText: '#000000', // black
+    nodeText: '#ffffff', // white
+    applicationText: '#ffffff', // white
+    collapseSymbol: '#000000', // black
+    background: '#ffffff', // white
   };
 
   /**
@@ -101,17 +101,17 @@ export default class Configuration extends Service {
   * @type ApplicationColors
   */
   applicationColorsDefault: ApplicationColors = {
-    foundation: 'rgb(199, 199, 199)',
-    componentOdd: 'rgb(22, 158, 43)',
-    componentEven: 'rgb(0, 187, 65)',
-    clazz: 'rgb(62, 20, 160)',
-    highlightedEntity: 'rgb(255, 0, 0)',
-    componentText: 'rgb(255, 255, 255)',
-    clazzText: 'rgb(255, 255, 255)',
-    foundationText: 'rgb(0, 0, 0)',
-    communication: 'rgb(244, 145, 0)',
-    communicationArrow: 'rgb(0, 0, 0)',
-    background: 'rgb(255, 255, 255)',
+    foundation: '#c7c7c7', // grey
+    componentOdd: '#169e2b', // dark green
+    componentEven: '#00bb41', // light green
+    clazz: '#3e14a0', // purple-blue
+    highlightedEntity: '#ff0000', // red
+    componentText: '#ffffff', // white
+    clazzText: '#ffffff', // white
+    foundationText: '#000000', // black
+    communication: '#f49100', // orange
+    communicationArrow: '#000000', // black
+    background: '#ffffff', // white
   };
 
   discoverySettings: DiscoverySettings = {};
