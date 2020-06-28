@@ -32,6 +32,13 @@ export default abstract class BaseMesh extends THREE.Mesh {
     }
   }
 
+  updateColor() {
+    if (this.material instanceof THREE.MeshLambertMaterial
+      || this.material instanceof THREE.MeshBasicMaterial) {
+      this.material.color = this.defaultColor;
+    }
+  }
+
   changeOpacity(opacity: number) {
     const isTransparent = opacity < 1;
     if (this.material instanceof THREE.Material) {

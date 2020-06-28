@@ -1,5 +1,4 @@
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
-import THREE from 'three';
 import applyCommunicationLayout from 'explorviz-frontend/utils/application-rendering/communication-layouter';
 import Configuration from 'explorviz-frontend/services/configuration';
 import CurrentUser from 'explorviz-frontend/services/current-user';
@@ -51,7 +50,7 @@ export default class CommunicationRendering {
     const {
       communication: communicationColor,
       highlightedEntity: highlightedEntityColor,
-      communicationArrow: arrowColorString,
+      communicationArrow: arrowColor,
     } = this.configuration.applicationColors;
 
     // Retrieve curve preferences
@@ -72,7 +71,7 @@ export default class CommunicationRendering {
 
       // Add communication to application
       const pipe = new ClazzCommunicationMesh(commLayout, drawableClazzComm,
-        new THREE.Color(communicationColor), new THREE.Color(highlightedEntityColor));
+        communicationColor, highlightedEntityColor);
 
       pipe.render(viewCenterPoint, curveHeight);
 
@@ -82,10 +81,10 @@ export default class CommunicationRendering {
       const ARROW_OFFSET = 0.8;
       const arrowHeight = isCurved ? curveHeight / 2 + ARROW_OFFSET : ARROW_OFFSET;
       const arrowThickness = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
-      const arrowColor = new THREE.Color(arrowColorString).getHex();
+      const arrowColorHex = arrowColor.getHex();
 
       if (typeof arrowThickness === 'number' && arrowThickness > 0.0) {
-        pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColor);
+        pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColorHex);
       }
     });
   }

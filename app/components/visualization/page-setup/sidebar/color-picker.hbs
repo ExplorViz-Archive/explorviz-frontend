@@ -29,7 +29,7 @@
     {{#each-in this.configuration.landscapeColors as |key color|}}
     <div id={{concat "cp-landscape-" key}} class="row">
         <span>
-            {{input type="color"  change=(action "updateColors") value=(mut (get this.configuration.landscapeColors key))}}
+            {{input type="color" change=(action "updateColors") value=(mut (get this.landscapeColors key))}}
         </span>
         <span>{{format-color-property key}}</span>
     </div>
@@ -40,7 +40,7 @@
     {{#each-in this.configuration.applicationColors as |key color|}}
     <div id={{concat "cp-application-" key}} class="row">
         <span>
-            {{input type="color" change=(action "updateColors") value=(mut (get this.configuration.applicationColors key))}}
+            {{input type="color" change=(action "updateColors") value=(mut (get this.appColors key))}}
         </span>
         <span>{{format-color-property key}}</span>
     </div>

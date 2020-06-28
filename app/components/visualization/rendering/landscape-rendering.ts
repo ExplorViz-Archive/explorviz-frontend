@@ -32,6 +32,7 @@ import { task } from 'ember-concurrency-decorators';
 import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 
 
 interface Args {
@@ -191,7 +192,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    */
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(this.configuration.landscapeColors.background);
+    this.scene.background = this.configuration.landscapeColors.background;
 
     this.scene.add(this.landscapeObject3D);
 
@@ -505,14 +506,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Create system mesh
     const systemMesh = new SystemMesh(layout, system,
-      new THREE.Color(this.configuration.landscapeColors.system));
+      this.configuration.landscapeColors.system);
 
     // Create and add label + icon
     systemMesh.setToDefaultPosition(centerPoint);
     const labelText = system.get('name');
-    const labelColor = new THREE.Color('black');
-    this.labeler.addSystemTextLabel(systemMesh, labelText, this.font, labelColor);
-    this.labeler.addCollapseSymbol(systemMesh, this.font, labelColor);
+    this.labeler.addSystemTextLabel(systemMesh, labelText, this.font,
+      this.configuration.landscapeColors.systemText);
+    this.labeler.addCollapseSymbol(systemMesh, this.font,
+      this.configuration.landscapeColors.collapseSymbol);
 
     // Add to scene
     this.landscapeObject3D.add(systemMesh);
@@ -532,12 +534,12 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Create nodeGroup mesh
     const nodeGroupMesh = new NodeGroupMesh(layout, nodeGroup,
-      new THREE.Color(this.configuration.landscapeColors.nodegroup));
+      this.configuration.landscapeColors.nodegroup);
 
     // Create and add label + icon
     nodeGroupMesh.setToDefaultPosition(centerPoint);
-    const labelColor = new THREE.Color('white');
-    this.labeler.addCollapseSymbol(nodeGroupMesh, this.font, labelColor);
+    this.labeler.addCollapseSymbol(nodeGroupMesh, this.font,
+      this.configuration.landscapeColors.collapseSymbol);
 
     // Add to scene
     this.landscapeObject3D.add(nodeGroupMesh);
@@ -556,8 +558,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (!layout) { return; }
 
     // Create node mesh
-    const nodeMesh = new NodeMesh(layout, node,
-      new THREE.Color(this.configuration.landscapeColors.node));
+    const nodeMesh = new NodeMesh(layout, node, this.configuration.landscapeColors.node);
 
     // Create and add label + icon
     nodeMesh.setToDefaultPosition(centerPoint);
@@ -567,10 +568,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Label with own ip-address by default
     const labelText = nodeMesh.getDisplayName(nodeGroupMesh);
-    const labelColor = new THREE.Color('white');
 
-
-    this.labeler.addNodeTextLabel(nodeMesh, labelText, this.font, labelColor);
+    this.labeler.addNodeTextLabel(nodeMesh, labelText, this.font,
+      this.configuration.landscapeColors.nodeText);
 
     // Add to scene
     this.landscapeObject3D.add(nodeMesh);
@@ -590,12 +590,12 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Create application mesh
     const applicationMesh = new ApplicationMesh(layout, application,
-      new THREE.Color(this.configuration.landscapeColors.application));
+      this.configuration.landscapeColors.application);
     applicationMesh.setToDefaultPosition(centerPoint);
 
     // Create and add label + icon
     this.labeler.addApplicationTextLabel(applicationMesh, application.get('name'), this.font,
-      new THREE.Color('white'));
+      this.configuration.landscapeColors.applicationText);
     Labeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
@@ -678,6 +678,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         }
       });
     }
+  }
+
+  @action
+  updateColors() {
+    this.scene.traverse((object3D) => {
+      if (object3D instanceof BaseMesh) {
+        object3D.updateColor();
+      }
+    });
   }
 
   // #endregion SCENE MANIPULATION

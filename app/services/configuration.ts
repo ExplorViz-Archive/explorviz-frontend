@@ -1,33 +1,31 @@
 import Service from '@ember/service';
-import { set } from '@ember/object';
-
-type ColorString = string;
+import THREE from 'three';
 
 type LandscapeColors = {
-  system: ColorString,
-  nodegroup: ColorString,
-  node: ColorString,
-  application: ColorString,
-  communication: ColorString,
-  systemText: ColorString,
-  nodeText: ColorString,
-  applicationText: ColorString,
-  collapseSymbol: ColorString,
-  background: ColorString
+  system: THREE.Color,
+  nodegroup: THREE.Color,
+  node: THREE.Color,
+  application: THREE.Color,
+  communication: THREE.Color,
+  systemText: THREE.Color,
+  nodeText: THREE.Color,
+  applicationText: THREE.Color,
+  collapseSymbol: THREE.Color,
+  background: THREE.Color
 };
 
 type ApplicationColors = {
-  foundation: ColorString,
-  componentOdd: ColorString,
-  componentEven: ColorString,
-  clazz: ColorString,
-  highlightedEntity: ColorString,
-  componentText: ColorString,
-  clazzText: ColorString,
-  foundationText: ColorString,
-  communication: ColorString,
-  communicationArrow: ColorString,
-  background: ColorString
+  foundation: THREE.Color,
+  componentOdd: THREE.Color,
+  componentEven: THREE.Color,
+  clazz: THREE.Color,
+  highlightedEntity: THREE.Color,
+  componentText: THREE.Color,
+  clazzText: THREE.Color,
+  foundationText: THREE.Color,
+  communication: THREE.Color,
+  communicationArrow: THREE.Color,
+  background: THREE.Color
 };
 
 export type ExtensionDescription = {
@@ -60,80 +58,57 @@ export default class Configuration extends Service {
   configurationExtensions: ExtensionDescription[] = [];
 
   /**
-  * Current colors for landscape visualization
+  * Colors for landscape visualization
   *
   * @property landscapeColors
   * @type LandscapeColors
   */
   landscapeColors: LandscapeColors;
 
+
   /**
-  * Current colors for application visualization
+  * Colors for application visualization
   *
   * @property applicationColors
   * @type ApplicationColors
   */
   applicationColors: ApplicationColors;
 
-  /**
-  * Default colors for landscape visualization
-  *
-  * @property landscapeColorsDefault
-  * @type LandscapeColors
-  */
-  landscapeColorsDefault: LandscapeColors = {
-    system: '#c7c7c7', // grey
-    nodegroup: '#169e2b', // dark green
-    node: '#00bb41', // green
-    application: '#3e14a0', // purple-blue
-    communication: '#f49100', // orange
-    systemText: '#000000', // black
-    nodeText: '#ffffff', // white
-    applicationText: '#ffffff', // white
-    collapseSymbol: '#000000', // black
-    background: '#ffffff', // white
-  };
-
-  /**
-  * Default colors for application visualization
-  *
-  * @property applicationColorsDefault
-  * @type ApplicationColors
-  */
-  applicationColorsDefault: ApplicationColors = {
-    foundation: '#c7c7c7', // grey
-    componentOdd: '#169e2b', // dark green
-    componentEven: '#00bb41', // light green
-    clazz: '#3e14a0', // purple-blue
-    highlightedEntity: '#ff0000', // red
-    componentText: '#ffffff', // white
-    clazzText: '#ffffff', // white
-    foundationText: '#000000', // black
-    communication: '#f49100', // orange
-    communicationArrow: '#000000', // black
-    background: '#ffffff', // white
-  };
-
   discoverySettings: DiscoverySettings = {};
 
 
+  /**
+   * Sets default colors
+   */
   constructor() {
     super(...arguments);
-    this.landscapeColors = { ...this.landscapeColorsDefault };
-    this.applicationColors = { ...this.applicationColorsDefault };
-  }
 
-  /**
-   * Resets all visualization colors to default values
-   * Needs to be a deep copy of the object, otherwise the default
-   * colors got overridden when the colors are in the extension
-   */
-  resetLandscapeColors() {
-    set(this, 'landscapeColors', { ...this.landscapeColorsDefault });
-  }
+    this.landscapeColors = {
+      system: new THREE.Color('#c7c7c7'), // grey
+      nodegroup: new THREE.Color('#169e2b'), // dark green
+      node: new THREE.Color('#00bb41'), // green
+      application: new THREE.Color('#3e14a0'), // purple-blue
+      communication: new THREE.Color('#f49100'), // orange
+      systemText: new THREE.Color('#000000'), // black
+      nodeText: new THREE.Color('#ffffff'), // white
+      applicationText: new THREE.Color('#ffffff'), // white
+      collapseSymbol: new THREE.Color('#000000'), // black
+      background: new THREE.Color('#ffffff'), // white
+    };
 
-  resetApplicationColors() {
-    set(this, 'applicationColors', { ...this.applicationColorsDefault });
+    this.applicationColors = {
+      foundation: new THREE.Color('#c7c7c7'), // grey
+      componentOdd: new THREE.Color('#169e2b'), // dark green
+      componentEven: new THREE.Color('#00bb41'), // light green
+      clazz: new THREE.Color('#3e14a0'), // purple-blue
+      highlightedEntity: new THREE.Color('#ff0000'), // red
+      componentText: new THREE.Color('#ffffff'), // white
+      clazzText: new THREE.Color('#ffffff'), // white
+      foundationText: new THREE.Color('#000000'), // black
+      communication: new THREE.Color('#f49100'), // orange
+      communicationArrow: new THREE.Color('#000000'), // black
+      background: new THREE.Color('#ffffff'), // white
+    };
   }
 }
 
