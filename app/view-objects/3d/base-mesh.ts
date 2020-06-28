@@ -35,7 +35,11 @@ export default abstract class BaseMesh extends THREE.Mesh {
   updateColor() {
     if (this.material instanceof THREE.MeshLambertMaterial
       || this.material instanceof THREE.MeshBasicMaterial) {
-      this.material.color = this.defaultColor;
+      if (this.highlighted) {
+        this.material.color = this.highlightingColor;
+      } else {
+        this.material.color = this.defaultColor;
+      }
     }
   }
 
