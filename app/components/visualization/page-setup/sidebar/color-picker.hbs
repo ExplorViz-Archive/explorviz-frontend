@@ -1,52 +1,79 @@
 <div class="sidebar-component-close">
-    <button type="button" class="sidebar-component-close-button" title="Close Color Configuration"
-        {{on "click" this.close}}>
-        {{svg-jar "x" class="octicon"}}
-    </button>
+  <button 
+    type="button" 
+    class="sidebar-component-close-button" 
+    title="Close Color Configuration"
+    {{on "click" this.close}}
+  >
+    {{svg-jar "x" class="octicon"}}
+  </button>
 </div>
 
 <div class="sidebar-component-title">
-    <h5>Color Configuration</h5>
+  <h5>Color Configuration</h5>
 </div>
 
 <div class="container">
 
-    <div class="dropdown">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
-            aria-haspopup="true" aria-expanded="false">
-            Presets
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            <a class="dropdown-item" href="#" name="defaultScheme" {{action "applyColorScheme" "default"}}>Default Color
-                Scheme</a>
-            <a class="dropdown-item" href="#" name="impairedScheme" {{action "applyColorScheme" "impaired"}}>Vision
-                Impairment Color Scheme</a>
-        </div>
+  <div class="dropdown">
+    <button 
+      class="btn btn-secondary dropdown-toggle" 
+      type="button" 
+      id="dropdownMenuButton" 
+      data-toggle="dropdown"
+      aria-haspopup="true" 
+      aria-expanded="false"
+    >
+      Presets
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <a 
+        class="dropdown-item" 
+        href="#" 
+        name="defaultScheme" 
+        {{on "click" (fn this.applyColorScheme "default")}}
+      >
+        Default Color Scheme
+      </a>
+      <a 
+        class="dropdown-item" 
+        href="#" 
+        name="impairedScheme"
+        {{on "click" (fn this.applyColorScheme "impaired")}}
+      >
+        Vision Impairment Color Scheme
+      </a>
     </div>
+  </div>
 
-    {{#if this.args.isLandscapeView}}
+  {{#if @isLandscapeView}}
 
     {{#each-in this.configuration.landscapeColors as |key color|}}
-    <div id={{concat "cp-landscape-" key}} class="row">
+      <div id={{concat "cp-landscape-" key}} class="row">
         <span>
-            {{input type="color" change=(action "updateColors") value=(mut (get this.landscapeColors key))}}
+          <Input 
+            @type="color" 
+            @value={{mut (get this.landscapeColors key)}}
+            {{on "change" this.updateColors}}
+          />
         </span>
         <span>{{format-color-property key}}</span>
-    </div>
+      </div>
     {{/each-in}}
 
-    {{else}}
+  {{else}}
 
     {{#each-in this.configuration.applicationColors as |key color|}}
-    <div id={{concat "cp-application-" key}} class="row">
+      <div id={{concat "cp-application-" key}} class="row">
         <span>
-            {{input type="color" change=(action "updateColors") value=(mut (get this.appColors key))}}
+          <Input 
+            @type="color" 
+            @value={{mut (get this.appColors key)}}
+            {{on "change" this.updateColors}}
+          />
         </span>
         <span>{{format-color-property key}}</span>
-    </div>
+      </div>
     {{/each-in}}
-
-    {{/if}}
-
-
+  {{/if}}
 </div>
