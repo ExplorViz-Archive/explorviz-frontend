@@ -119,5 +119,10 @@
     "rsvp": "^4.8.5",
     "three": "^0.112.1",
     "threejs-meshline": "^2.0.10"
+  },
+  "ember-addon": {
+    "paths": [
+      "lib/heatmap"
+    ]
   }
 }

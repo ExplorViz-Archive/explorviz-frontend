@@ -26,16 +26,30 @@
         "tests/*"
       ],
       "explorviz-frontend/*": [
-        "app/*"
+        "app/*",
+        "lib/heatmap/app/*"
       ],
       "*": [
         "types/*"
+      ],
+      "heatmap": [
+        "lib/heatmap/addon"
+      ],
+      "heatmap/*": [
+        "lib/heatmap/addon/*"
+      ],
+      "heatmap/test-support": [
+        "lib/heatmap/addon-test-support"
+      ],
+      "heatmap/test-support/*": [
+        "lib/heatmap/addon-test-support/*"
       ]
     }
   },
   "include": [
     "app/**/*",
     "tests/**/*",
-    "types/**/*"
+    "types/**/*",
+    "lib/heatmap"
   ]
 }
