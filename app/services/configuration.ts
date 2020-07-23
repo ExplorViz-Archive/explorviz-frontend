@@ -2,7 +2,7 @@ import Service from '@ember/service';
 import THREE from 'three';
 import { tracked } from '@glimmer/tracking';
 
-type LandscapeColors = {
+export type LandscapeColors = {
   system: THREE.Color,
   nodegroup: THREE.Color,
   node: THREE.Color,
@@ -15,7 +15,7 @@ type LandscapeColors = {
   background: THREE.Color
 };
 
-type ApplicationColors = {
+export type ApplicationColors = {
   foundation: THREE.Color,
   componentOdd: THREE.Color,
   componentEven: THREE.Color,
