@@ -8,16 +8,13 @@
     {{svg-jar "x" class="octicon"}}
   </button>
 </div>
-
-<div class="sidebar-component-title">
-  <h5>Color Configuration</h5>
-</div>
-
-<div class="container">
-
-  <div class="dropdown">
+<div id="colorHeader">
+  <div id="colorTitle" class="sidebar-component-title">
+    <h5>Colors</h5>
+  </div>
+  <div id="colorPresets" class="dropdown">
     <button 
-      class="btn btn-secondary dropdown-toggle" 
+      class="btn btn-info dropdown-toggle" 
       type="button" 
       id="dropdownMenuButton" 
       data-toggle="dropdown"
@@ -27,53 +24,54 @@
       Presets
     </button>
     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-      <a 
+      <div 
         class="dropdown-item" 
-        href="#" 
         name="defaultScheme" 
         {{on "click" (fn this.applyColorScheme "default")}}
       >
         Default Color Scheme
-      </a>
-      <a 
+      </div>
+      <div 
         class="dropdown-item" 
-        href="#" 
         name="impairedScheme"
         {{on "click" (fn this.applyColorScheme "impaired")}}
       >
         Vision Impairment Color Scheme
-      </a>
+      </div>
     </div>
   </div>
+</div>
 
+
+<div>
   {{#if @isLandscapeView}}
 
-    {{#each-in this.configuration.landscapeColors as |key color|}}
-      <div id={{concat "cp-landscape-" key}} class="row">
-        <span>
-          <Input 
-            @type="color" 
-            @value={{mut (get this.landscapeColors key)}}
-            {{on "change" this.updateColors}}
-          />
+    {{#each (entries this.configuration.landscapeColors) as |entry|}}
+      <div 
+        id={{concat "cp-landscape-" (get entry 0)}} 
+        class="input-group" 
+        {{did-insert (fn this.setupLandscapeColorpicker (get entry 0))}}
+      >
+        <span class="input-group-append color-picker-input">
+          <span class="input-group-text colorpicker-input-addon"><i></i></span>
         </span>
-        <span>{{format-color-property key}}</span>
+        <span class="color-picker-label">{{format-color-property (get entry 0)}}</span>
       </div>
-    {{/each-in}}
+    {{/each}}
 
   {{else}}
 
-    {{#each-in this.configuration.applicationColors as |key color|}}
-      <div id={{concat "cp-application-" key}} class="row">
-        <span>
-          <Input 
-            @type="color" 
-            @value={{mut (get this.appColors key)}}
-            {{on "change" this.updateColors}}
-          />
+    {{#each (entries this.configuration.applicationColors) as |entry|}}
+      <div 
+        id={{concat "cp-application-" (get entry 0)}} 
+        class="input-group" 
+        {{did-insert (fn this.setupApplicationColorPicker (get entry 0))}}
+      >
+        <span class="input-group-append color-picker-input">
+          <span class="input-group-text colorpicker-input-addon"><i></i></span>
         </span>
-        <span>{{format-color-property key}}</span>
+        <span class="color-picker-label">{{format-color-property (get entry 0)}}</span>
       </div>
-    {{/each-in}}
+    {{/each}}
   {{/if}}
 </div>
