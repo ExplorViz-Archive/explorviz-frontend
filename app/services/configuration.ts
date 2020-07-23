@@ -1,5 +1,6 @@
 import Service from '@ember/service';
 import THREE from 'three';
+import { tracked } from '@glimmer/tracking';
 
 type LandscapeColors = {
   system: THREE.Color,
@@ -63,6 +64,7 @@ export default class Configuration extends Service {
   * @property landscapeColors
   * @type LandscapeColors
   */
+  @tracked
   landscapeColors: LandscapeColors;
 
 
@@ -72,6 +74,7 @@ export default class Configuration extends Service {
   * @property applicationColors
   * @type ApplicationColors
   */
+  @tracked
   applicationColors: ApplicationColors;
 
   discoverySettings: DiscoverySettings = {};
