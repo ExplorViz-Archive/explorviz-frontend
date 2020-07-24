@@ -1,12 +1,10 @@
 {{#if this.showHiddenMessage}}
   <div class="container-fluid">
+    <div class="spinner-center-3" role="status"></div>
     <div class="jumbotron">
       <h2>All agents are hidden!</h2>
-      <p>Go to Settings an enable 'Show hidden entities' or click
-        <a {{on "click" this.enableShowHidden}}>here</a>
-      </p>
+      <button type="button" {{on "click" this.enableShowHidden}}>Show hidden entities</button>
     </div>
-    <div class="spinner-center-3" role="status"></div>
   </div>
 {{else}}
   {{#if this.agentRepo.agentList}}
@@ -15,11 +13,12 @@
     <div class="container-fluid">
       <div class="jumbotron">
         <h2>No agents found!</h2>
-        <p>To enable the discovery mode, follow
+        <p>
+          To enable the discovery mode, follow
           <a href="https://github.com/explorviz/explorviz-discovery-agent">
             the setup steps as shown in the related Github README file.
           </a>
-        </p>        
+        </p>
         <p>
           No agent registered with the backend at the moment. A new list will be fetched every 10 seconds.
         </p>

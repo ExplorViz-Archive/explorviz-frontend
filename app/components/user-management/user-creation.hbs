@@ -1,4 +1,9 @@
-<BsModal @open={{this.showNewUsers}} @backdropClose={{false}} @keyboard={{false}} @onHidden={{action this.hideNewUsersCreatedModal}} as |modal|>
+<BsModal
+  @open={{this.showNewUsers}}
+  @backdropClose={{false}}
+  @keyboard={{false}}
+  @onHidden={{this.hideNewUsersCreatedModal}} as |modal|
+>
   <modal.header>
     <h4 class="modal-title">New Users</h4>
   </modal.header>
@@ -6,7 +11,7 @@
     <div class="alert alert-danger" role="alert">
       <p>Print now using the button below.</p>
       <p>You cannot access the passwords again after closing this window!</p>
-      <BsButton @onClick={{action this.printNewUsers}} @type="primary">Print</BsButton>
+      <BsButton @onClick={{this.printNewUsers}} @type="primary">Print</BsButton>
     </div>
     <table class="table" id="new-user-list">
       <thead>
@@ -39,29 +44,47 @@
           @value={{this.page}}
           @type="radio"
           class="mt-2 mb-2 float-right"
-          @onChange={{action (mut this.page)}} as |bg|>
+          @onChange={{this.changePage}} as |bg|
+        >
           <bg.button @value="createSingleUser">Single User</bg.button>
           <bg.button @value="createMultipleUsers">Multiple Users</bg.button>
         </BsButtonGroup>
       </div>
       {{#if this.initSettings.isRunning}}
-        <div class="spinner-center-3 mb-5 mt-5" style="position:relative" role="status"></div>
+        <div
+          class="spinner-center-3 mb-5 mt-5"
+          style="position:relative"
+          role="status"
+        >
+        </div>
       {{else}}
         {{#if (eq this.page "createSingleUser")}}
           <BsForm @model={{this}} @onSubmit={{perform this.saveUser}} as |form|>
-            <form.element @controlType="text" @label="Username" @placeholder="Username" @property="username" />
-            <form.element @controlType="password" @label="Password" @placeholder="Password" @property="password" />
-            <form.element @property="roles_selected_single" @label="Roles" as |el|>
+            <form.element
+              @controlType="text"
+              @label="Username"
+              @placeholder="Username"
+              @property="username"
+            />
+            <form.element
+              @controlType="password"
+              @label="Password"
+              @placeholder="Password"
+              @property="password"
+            />
+            <form.element
+              @property="rolesSelectedSingle"
+              @label="Roles"
+            >
               <PowerSelectMultiple
                 @options={{this.roles}}
                 @placeholder="Choose roles"
                 @loadingMessage="loading..."
                 @onopen={{perform this.getRoles}}
-                @onchange={{action (mut this.roles_selected_single)}}
+                @onchange={{this.updateSingleUserRoles}}
                 @searchEnabled={{false}}
                 @searchField="default"
-                @selected={{this.roles_selected_single}}
-                as |item|
+                @selected={{this.rolesSelectedSingle}} as |item|
               >
                 {{item.id}}
               </PowerSelectMultiple>
@@ -72,13 +95,20 @@
                   <UserManagement::UserSettingsDefault
                     @settings={{this.settings}}
                     @useDefaultSettings={{this.useDefaultSettings}}
+                    @toggleDefaultSetting={{this.toggleDefaultSetting}}
+                    @updateSetting={{this.updateSetting}}
                   />
                 </div>
               </div>
             </form.element>
             {{#if this.saveUser.isRunning}}
               <BsButton @type="primary" @buttonType="submit" @disabled={{true}}>
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                >
+                </span>
                 Creating User...
               </BsButton>
             {{else}}
@@ -87,19 +117,31 @@
           </BsForm>
         {{else if (eq this.page "createMultipleUsers")}}
           <BsForm @model={{this}} @onSubmit={{perform this.saveMultipleUsers}} as |form|>
-            <form.element @controlType="text" @label="Username Prefix" @placeholder="Username Prefix" @property="usernameprefix" />
-            <form.element @controlType="number" @label="Number of Users" @placeholder="# of users" @property="numberofusers" />
-            <form.element @property="roles_selected_multiple" @label="Roles" as |el|>
+            <form.element
+              @controlType="text"
+              @label="Username Prefix"
+              @placeholder="Username Prefix"
+              @property="usernameprefix"
+            />
+            <form.element
+              @controlType="number"
+              @label="Number of Users"
+              @placeholder="# of users"
+              @property="numberofusers"
+            />
+            <form.element
+              @property="rolesSelectedMultiple"
+              @label="Roles"
+            >
               <PowerSelectMultiple
                 @options={{this.roles}}
                 @placeholder="Choose roles"
                 @loadingMessage="loading..."
                 @onopen={{perform this.getRoles}}
-                @onchange={{action (mut this.roles_selected_multiple)}}
+                @onchange={{this.updateMultipleUserRoles}}
                 @searchEnabled={{false}}
                 @searchField="default"
-                @selected={{this.roles_selected_multiple}}
-                as |item|
+                @selected={{this.rolesSelectedMultiple}} as |item|
               >
                 {{item.id}}
               </PowerSelectMultiple>
@@ -110,13 +152,19 @@
                   <UserManagement::UserSettingsDefault
                     @settings={{this.settings}}
                     @useDefaultSettings={{this.useDefaultSettings}}
+                    @toggleDefaultSetting={{this.toggleDefaultSetting}}
                   />
                 </div>
               </div>
             </form.element>
             {{#if this.saveMultipleUsers.isRunning}}
               <BsButton @type="primary" @buttonType="submit" @disabled={{true}}>
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                >
+                </span>
                 Creating Users...
               </BsButton>
             {{else}}

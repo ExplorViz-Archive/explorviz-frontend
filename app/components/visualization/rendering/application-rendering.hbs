@@ -1,2 +1,92 @@
-<canvas id="threeCanvas" class="main-content-majority" oncontextmenu="return false;">
-</canvas>
+{{#if @isReplay}}
+  {{add-listener
+    this.landscapeRepo
+    "updatedReplayLandscape"
+    this.onLandscapeUpdated
+  }}
+{{else}}
+  {{add-listener
+    this.landscapeRepo
+    "updatedLatestLandscape"
+    this.onLandscapeUpdated
+  }}
+{{/if}}
+
+<div class="row" style="height:100%">
+  <div
+    class="d-flex {{if @showDataSelection "col-8" "col-12"}}"
+    style="flex-direction: column; height: 100%"
+  >
+    {{#unless @isReplay}}
+      <Visualization::PageSetup::VisualizationNavbar>
+        <Visualization::PageSetup::Navbar::ResetVisualization
+          @resetView={{this.resetView}}
+        />
+        <Visualization::PageSetup::Navbar::PauseReload />
+        <Visualization::PageSetup::Navbar::TraceOverview
+          @addComponent={{@addComponent}}
+        />
+        <Visualization::PageSetup::Navbar::SqlOpener
+          @addComponent={{@addComponent}}
+        />
+        <Visualization::PageSetup::Navbar::ApplicationOpener
+          @openAllComponents={{this.openAllComponents}}
+        />
+        <Visualization::PageSetup::Navbar::ApplicationSearch
+          @application={{@application}}
+          @unhighlightAll={{this.unhighlightAll}}
+          @openParents={{this.openParents}}
+          @closeComponent={{this.closeComponent}}
+          @highlightModel={{this.highlightModel}}
+        />
+      </Visualization::PageSetup::VisualizationNavbar>
+    {{/unless}}
+
+    <div
+      id="rendering"
+      {{did-insert this.outerDivInserted}}
+      {{did-resize this.resize debounce=100}}
+    >
+      <canvas
+        class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
+        {{did-insert this.canvasInserted}}
+      >
+      </canvas>
+      {{#if this.loadNewApplication.isRunning}}
+        <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
+      {{/if}}
+
+      {{!-- popup(s) --}}
+      <Visualization::Rendering::Popups::PopupCoordinator
+        @popupData={{this.popupData}}
+      />
+    </div>
+  </div>
+  {{#unless @isReplay}}
+    <div class={{if @showDataSelection "col-4" "hide"}} id="dataselection">
+      <Visualization::PageSetup::Sidebar::DataSelection
+        @closeDataSelection={{@closeDataSelection}}
+      >
+        {{#each @components as |componentName|}}
+          <div class="card mb-3">
+            <div class="card-body d-flex flex-column">
+              {{#if (eq componentName "trace-selection")}}
+                <Visualization::PageSetup::sidebar::TraceSelection
+                  @highlightTrace={{this.highlightTrace}}
+                  @moveCameraTo={{this.moveCameraTo}}
+                  @removeComponent={{@removeComponent}}
+                  @highlighter={{this.highlighter}}
+                />
+              {{/if}}
+              {{#if (eq componentName "sql-viewer")}}
+                <Visualization::PageSetup::Sidebar::SqlViewer
+                  @removeComponent={{@removeComponent}}
+                />
+              {{/if}}
+            </div>
+          </div>
+        {{/each}}
+      </Visualization::PageSetup::Sidebar::DataSelection>
+    </div>
+  {{/unless}}
+</div>

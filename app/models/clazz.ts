@@ -1,7 +1,7 @@
 import DS from 'ember-data';
-import Draw3DNodeEntity from './draw3dnodeentity';
 import Component from './component';
 import ClazzCommunication from './clazzcommunication';
+import BaseEntity from './baseentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
@@ -14,15 +14,12 @@ const { attr, belongsTo, hasMany } = DS;
 * @module explorviz
 * @submodule model.meta
 */
-export default class Clazz extends Draw3DNodeEntity {
-
+export default class Clazz extends BaseEntity {
   @attr('string') name!: string;
 
   @attr('string') fullQualifiedName!: string;
 
-  @attr('number', {defaultValue: 0}) instanceCount!: number;
-
-  @attr() objectIds: any;
+  @attr('number', { defaultValue: 0 }) instanceCount!: number;
 
   @hasMany('clazzcommunication', { inverse: 'sourceClazz' })
   clazzCommunications!: DS.PromiseManyArray<ClazzCommunication>;
@@ -30,34 +27,17 @@ export default class Clazz extends Draw3DNodeEntity {
   @belongsTo('component', { inverse: 'clazzes' })
   parent!: DS.PromiseObject<Component> & Component;
 
-  unhighlight() {
-    this.set('highlighted', false);
-    this.set('state', 'NORMAL');
+  getParent(this: Clazz) {
+    return this.belongsTo('parent').value() as Component;
   }
 
-  openParents(this: Clazz) {
-    let parent = this.belongsTo('parent').value() as Component;
-    if(parent !== null) {
-      parent.set('opened', true);
-      parent.openParents();
-    }
+  getAllAncestorComponents(componentSet: Set<Component> = new Set()) {
+    return this.getParent().getAllAncestorComponents(componentSet);
   }
-
-  closeParents(this: Clazz) {
-    let parent = this.belongsTo('parent').value() as Component;
-    if(parent !== null) {
-      parent.set('opened', false);
-      parent.closeParents();
-    }
-  }
-
-  isVisible() {
-    return this.get('parent').get('opened');
-  }
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'clazz': Clazz;
   }

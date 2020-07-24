@@ -1,11 +1,16 @@
-<div class="sidebar-component-title">
-  <h5>Database Queries</h5>
+<div class="sidebar-component-close">
+  <button
+    type="button"
+    class="sidebar-component-close-button"
+    title="Close Database Queries"
+    {{on "click" this.close}}
+  >
+    {{svg-jar "x" class="octicon"}}
+  </button>
 </div>
 
-<div class="sidebar-component-close">
-  <label {{on "click" this.close}} title="Close Database Queries" aria-label="Close">
-    <font size="6">&times;</font>
-  </label>
+<div class="sidebar-component-title">
+  <h5>Database Queries</h5>
 </div>
 
 <div class="mt-2 mb-1 d-flex justify-content-end">
@@ -16,12 +21,12 @@
       autofocus="autofocus"
       @value={{this.filterInput}}
       @placeholder="Filter statements"
-      @focus-out={{action this.filter}}
-      @enter={{action this.filter}}
+      @focus-out={{this.filter}}
+      @enter={{this.filter}}
     />
   </div>
   <div>
-    <BsButton @onClick={{action this.filter}} @type="button" class="ml-1 btn btn-light">
+    <BsButton @onClick={{this.filter}} @type="button" class="ml-1 btn btn-light">
       {{svg-jar "search" class="octicon align-middle"}}
     </BsButton>
   </div>
@@ -34,10 +39,15 @@
         <th {{on "click" (fn this.sortByProperty "timestamp")}} scope="col">Time</th>
         <th {{on "click" (fn this.sortByProperty "sqlStatement")}} scope="col">Statement</th>
         <th {{on "click" (fn this.sortByProperty "statementType")}} scope="col">Statement Type</th>
-        <!-- <th {{action "sortByProperty" "returnValue"}} scope="col">Return Value</th> -->
-        <th {{on "click" (fn this.sortByProperty "responseTime")}} scope="col">Response Time in
-          <BsButton @onClick={{action this.toggleResponseTimeUnit}} class="th-btn" outline={{true}}>
-            {{responseTimeUnit}}
+        {{!-- <th {{action "sortByProperty" "returnValue"}} scope="col">Return Value</th> --}}
+        <th {{on "click" (fn this.sortByProperty "responseTime")}} scope="col">
+          Response Time in
+          <BsButton 
+            onClick={{this.toggleResponseTimeUnit}}
+            class="th-btn"
+            outline={{true}}
+          >
+            {{this.responseTimeUnit}}
           </BsButton>
         </th>
       </tr>
@@ -45,13 +55,17 @@
     <tbody>
       {{#each this.databaseQueries as |query|}}
         {{#if query.isSelected}}
-          <tr {{on "click" (fn this.queryClicked query)}} style="cursor: pointer" bgcolor="#cc8a8a">
+          <tr
+            style="cursor: pointer"
+            bgcolor="#cc8a8a"
+            {{on "click" (fn this.queryClicked query)}}
+          >
             <th scope="row" title={{timestamp-to-date query.timestamp "localString"}}>
               {{timestamp-to-date query.timestamp "time"}}
             </th>
             <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
             <td title={{query.statementType}}>{{truncate query.statementType 10 true}}</td>
-            <!-- <td title={{query.returnValue}}>{{query.returnValue}}</td> -->
+            {{!-- <td title={{query.returnValue}}>{{query.returnValue}}</td> --}}
             <td title={{query.responseTime}}>{{format-number query.responseTime this.responseTimeUnit}}</td>
           </tr>
         {{else}}
@@ -61,7 +75,7 @@
             </th>
             <td title={{query.sqlStatement}}>{{first-word query.sqlStatement}} ...</td>
             <td title={{query.statementType}}>{{truncate query.statementType 10 true}}</td>
-            <!-- <td title={{query.returnValue}}>{{query.returnValue}}</td> -->
+            {{!-- <td title={{query.returnValue}}>{{query.returnValue}}</td> --}}
             <td title={{query.responseTime}}>{{format-number query.responseTime this.responseTimeUnit}}</td>
           </tr>
         {{/if}}
@@ -93,11 +107,16 @@
           <td class="col-9 container-word-wrap">{{query.returnValue}}</td>
         </tr>
         <tr class="d-flex">
-          <th class="col-3">Response Time in
-            <BsButton @onClick={{action this.toggleResponseTimeUnit}} class="th-btn" @outline={{true}}>
-              {{responseTimeUnit}}
+          <th class="col-3">
+            Response Time in
+            <BsButton
+              @onClick={{this.toggleResponseTimeUnit}}
+              class="th-btn"
+              @outline={{true}}
+            >
+              {{this.responseTimeUnit}}
             </BsButton>
-            </th>
+          </th>
           <td class="col-9 container-word-wrap">{{format-number query.responseTime this.responseTimeUnit}}</td>
         </tr>
       </tbody>

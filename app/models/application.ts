@@ -1,26 +1,25 @@
 import DS from 'ember-data';
-import DrawNodeEntity from './drawnodeentity';
-import Component from './component';
-import Clazz from './clazz';
-import DatabaseQuery from './databasequery';
-import Trace from './trace';
-import ApplicationCommunication from './applicationcommunication';
 import AggregatedClazzCommunication from './aggregatedclazzcommunication';
+import ApplicationCommunication from './applicationcommunication';
+import Clazz from './clazz';
+import Component from './component';
+import DatabaseQuery from './databasequery';
 import DrawableClazzCommunication from './drawableclazzcommunication';
+import Trace from './trace';
+import BaseEntitity from './baseentity';
 
 const { attr, belongsTo, hasMany } = DS;
 
 /**
-* Ember model for an Application.
-*
-* @class Application-Model
-* @extends DrawNodeEntity-Model
-*
-* @module explorviz
-* @submodule model.meta
-*/
-export default class Application extends DrawNodeEntity {
-
+ * Ember model for an Application.
+ *
+ * @class Application-Model
+ * @extends BaseEntitity
+ *
+ * @module explorviz
+ * @submodule model.meta
+ */
+export default class Application extends BaseEntitity {
   @attr('string') name!: string;
 
   @attr('number') lastUsage!: number;
@@ -31,8 +30,8 @@ export default class Application extends DrawNodeEntity {
   parent!: DS.PromiseObject<Node> & Node;
 
   @hasMany('component', {
-    // breaks Ember, maybe because of circle ?
-    //inverse: 'belongingApplication'
+    // Breaks Ember, maybe because of circle ?
+    // Inverse: 'belongingApplication'
   })
   components!: DS.PromiseManyArray<Component>;
 
@@ -44,28 +43,16 @@ export default class Application extends DrawNodeEntity {
   @hasMany('applicationcommunication', { inverse: 'sourceApplication' })
   applicationCommunications!: DS.PromiseManyArray<ApplicationCommunication>;
 
-  // list of aggregated clazzCommunication for rendering purposes
+  // List of aggregated clazzCommunication for rendering purposes
   @hasMany('aggregatedclazzcommunication', { inverse: null })
   aggregatedClazzCommunications!: DS.PromiseManyArray<AggregatedClazzCommunication>;
 
-  // list of aggregated clazzCommunication for rendering purposes
+  // List of aggregated clazzCommunication for rendering purposes
   @hasMany('drawableclazzcommunication', { inverse: null })
   drawableClazzCommunications!: DS.PromiseManyArray<DrawableClazzCommunication>;
 
-  // used for text labeling performance in respective renderers
-  state = "application";
-
-  unhighlight() {
-    this.get('components').forEach((component) => {
-      component.unhighlight();
-    });
-    this.get('drawableClazzCommunications').forEach((communication) => {
-      communication.unhighlight();
-    });
-    this.get('traces').forEach((trace) => {
-      trace.unhighlight();
-    });
-  }
+  // Used for text labeling performance in respective renderers
+  state = 'application';
 
   contains(emberEntity: any) {
     let found = false;
@@ -78,9 +65,9 @@ export default class Application extends DrawNodeEntity {
   }
 
   getAllComponents() {
-    let components:Component[] = [];
+    let components: Component[] = [];
 
-    this.get('components').forEach((component) => {      
+    this.get('components').forEach((component) => {
       components.push(component);
 
       const children = component.get('children');
@@ -94,7 +81,7 @@ export default class Application extends DrawNodeEntity {
   }
 
   getAllClazzes() {
-    let clazzes:Clazz[] = [];
+    let clazzes: Clazz[] = [];
 
     this.get('components').forEach((component) => {
       clazzes = clazzes.concat(component.getAllClazzes());
@@ -102,54 +89,10 @@ export default class Application extends DrawNodeEntity {
 
     return clazzes;
   }
-
-/*   filterComponents(attributeString: string, predicateValue: any) {
-    const filteredComponents:Component[] = [];
-
-    this.get('components').forEach((component) => {
-      if(component.get(attributeString) === predicateValue) {
-        filteredComponents.push(component);
-      }
-      component.filterChildComponents(attributeString, predicateValue);
-    });
-
-    return filteredComponents;
-  },
-
-  filterClazzes(attributeString: string, predicateValue: any) {
-    const filteredClazzes:Clazz[] = [];
-
-    this.get('components').forEach((component) => {
-      filteredClazzes.push(component.filterClazzes(attributeString, predicateValue));
-    });
-
-    return filteredClazzes;
-  }, */
-
-  applyDefaultOpenLayout(userAlreadyActed: boolean) {
-    // opens all components until at least two entities are on the same level
-
-    if(userAlreadyActed) {
-      return;
-    }
-    
-    const components = this.get('components');
-
-    if(components.length > 1) {
-      // there are two components on the first level
-      // therefore, here is nothing to do
-      return;
-    }
-
-    let component = components.objectAt(0);
-    if(component !== undefined) {
-      component.applyDefaultOpenLayout();
-    }    
-  }
-
 }
 
 declare module 'ember-data/types/registries/model' {
+  // tslint:disable-next-line: interface-name
   export default interface ModelRegistry {
     'application': Application;
   }

@@ -1,19 +1,21 @@
 <h3 class="popover-header">
-  <div style="font-weight:bold;text-align:center;">{{@data.clazzName}}</div>
+  <div style="font-weight:bold;text-align:center;">{{this.name}}</div>
 </h3>
 <div class="popover-body" style="white-space: nowrap;">
   <table style="width:100%">
-    <tr>
-      <td>Active Instances:</td>
-      <td style="text-align:right;padding-left:10px;">
-        {{@data.activeInstances}}
-      </td>
-    </tr>
-    <tr>
-      <td>Called Operations:</td>
-      <td style="text-align:right;padding-left:10px;">
-        {{@data.calledOps}}
-      </td>
-    </tr>
+    <tbody>
+      <tr>
+        <td>Active Instances:</td>
+        <td style="text-align:right;padding-left:10px;">
+          {{this.activeInstances}}
+        </td>
+      </tr>
+      <tr>
+        <td>Called Operations:</td>
+        <td style="text-align:right;padding-left:10px;">
+          {{this.calledOps}}
+        </td>
+      </tr>
+    </tbody>
   </table>
 </div>

@@ -4,7 +4,6 @@ import Setting from './setting';
 const { attr } = DS;
 
 export default class RangeSetting extends Setting {
-
   @attr('number') min!: number;
 
   @attr('number') max!: number;
@@ -13,7 +12,8 @@ export default class RangeSetting extends Setting {
 }
 
 declare module 'ember-data/types/registries/model' {
-	export default interface ModelRegistry {
-	  'rangesetting': RangeSetting;
-	}
+  // tslint:disable-next-line: interface-name
+  export default interface ModelRegistry {
+    'rangesetting': RangeSetting;
+  }
 }

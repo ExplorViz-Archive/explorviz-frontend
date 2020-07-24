@@ -1,25 +1,27 @@
 <h3 class="popover-header">
-  <div style="font-weight:bold;text-align:center;">{{@data.nodeGroupName}}</div>
+  <div style="font-weight:bold;text-align:center;">{{@nodeGroup.name}}</div>
 </h3>
 <div class="popover-body" style="white-space: nowrap;">
   <table style="width:100%">
-    <tr>
-      <td>Nodes:</td>
-      <td style="text-align:right;padding-left:10px;">
-        {{@data.numOfNodes}}
-      </td>
-    </tr>
-    <tr>
-      <td>Applications:</td>
-      <td style="text-align:right;padding-left:10px;">
-        {{@data.numOfApps}}
-      </td>
-    </tr>
-    <tr>
-      <td>Avg. CPU Utilization:</td>
-      <td style="text-align:right;padding-left:10px;">
-        {{@data.avgCPUtil}}
-      </td>
-    </tr>
+    <tbody>
+      <tr>
+        <td>Nodes:</td>
+        <td style="text-align:right;padding-left:10px;">
+          {{@nodeGroup.nodes.length}}
+        </td>
+      </tr>
+      <tr>
+        <td>Applications:</td>
+        <td style="text-align:right;padding-left:10px;">
+          {{this.numberOfApplications}}
+        </td>
+      </tr>
+      <tr>
+        <td>Avg. CPU Utilization:</td>
+        <td style="text-align:right;padding-left:10px;">
+          {{this.averageCPUUtilization}}
+        </td>
+      </tr>
+    </tbody>
   </table>
 </div>

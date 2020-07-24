@@ -1,39 +1,32 @@
+import { action } from '@ember/object';
+import Transition from '@ember/routing/-private/transition';
+import RouterService from '@ember/routing/router-service';
+import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import { inject as service } from "@ember/service";
-
 import { task } from 'ember-concurrency-decorators';
-import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import DS from 'ember-data';
-import CurrentUser from 'explorviz-frontend/services/current-user';
-import { action } from '@ember/object';
 import User from 'explorviz-frontend/models/user';
-import RouterService from '@ember/routing/router-service';
-import Transition from '@ember/routing/-private/transition';
+import CurrentUser from 'explorviz-frontend/services/current-user';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
-interface Args {
-  refreshUsers(): Transition,
-  deleteUsers(users:User[]): Promise<User[]>,
-  goToPage(page: number): void,
-  changePageSize(size: number): void,
-  users: DS.RecordArray<User>|null|undefined,
-  page: number,
-  size: number,
-  pageSizes: number
+interface IArgs {
+  users: DS.RecordArray<User>|null|undefined;
+  page: number;
+  size: number;
+  pageSizes: number;
+  refreshUsers(): Transition;
+  deleteUsers(users: User[]): Promise<User[]>;
+  goToPage(page: number): void;
+  changePageSize(size: number): void;
 }
 
-export default class UserList extends Component<Args> {
-
+export default class UserList extends Component<IArgs> {
   @service('store') store!: DS.Store;
+
   @service('router') router!: RouterService;
 
   @service('current-user') currentUser!: CurrentUser;
-
-  @tracked
-  selected:{[userId: string]: boolean} = {};
-
-  @tracked
-  showDeleteUsersDialog:boolean = false;
 
   get showDeleteUsersButton() {
     return Object.values(this.selected).some(Boolean);
@@ -47,6 +40,67 @@ export default class UserList extends Component<Args> {
     return Object.entries(this.selected).length;
   }
 
+  @tracked
+  selected: {[userId: string]: boolean} = {};
+
+  @tracked
+  showDeleteUsersDialog: boolean = false;
+
+  @task({ enqueue: true })
+  // eslint-disable-next-line
+  deleteUsers = task(function* (this: UserList) {
+    // delete all selected users
+    const listOfUsersToDelete: User[] = [];
+    Object.entries(this.selected).forEach(([id, bool]) => {
+      if (bool) {
+        const user = this.store.peekRecord('user', id);
+        if (user !== null) {
+          listOfUsersToDelete.push(user);
+        }
+      }
+    });
+
+    try {
+      yield this.args.deleteUsers(listOfUsersToDelete);
+      AlertifyHandler.showAlertifySuccess('All users successfully deleted.');
+    } catch (reason) {
+      UserList.showReasonErrorAlert(reason);
+    } finally {
+      this.showDeleteUsersDialog = false;
+    }
+  });
+
+  @task({ drop: true })
+  // eslint-disable-next-line
+  updateUserList = task(function *(this: UserList) {
+    yield this.args.refreshUsers();
+  });
+
+  @task({ drop: true })
+  // eslint-disable-next-line
+  openUserCreation = task(function *(this: UserList) {
+    yield this.router.transitionTo('configuration.usermanagement.new');
+  });
+
+  @task({ drop: true })
+  // eslint-disable-next-line
+  openUserEdit = task(function *(this: UserList, userId: string) {
+    yield this.router.transitionTo('configuration.usermanagement.edit', userId);
+  });
+
+  @task({ enqueue: true })
+  // eslint-disable-next-line
+  deleteUser = task(function *(this: UserList, user: User) {
+    try {
+      const { username } = user;
+      yield this.args.deleteUsers([user]);
+      const message = `User <b>${username}</b> deleted.`;
+      AlertifyHandler.showAlertifyMessage(message);
+    } catch (reason) {
+      UserList.showReasonErrorAlert(reason);
+    }
+  });
+
   @action
   resetTable(tableElement: HTMLDivElement) {
     tableElement.scrollTo(0, 0);
@@ -55,87 +109,52 @@ export default class UserList extends Component<Args> {
 
   resetCheckboxes() {
     // init checkbox values
-    let selectedNew:{[userId: string]: boolean} = {};
+    const selectedNew: {[userId: string]: boolean} = {};
     const { users } = this.args;
-    if(users instanceof DS.RecordArray) {
-      let userArray = users.toArray();
-      for(let user of userArray) {
-        if(this.currentUser.user !== user)
+    if (users instanceof DS.RecordArray) {
+      const userArray = users.toArray();
+      userArray.forEach((user) => {
+        if (this.currentUser.user !== user) {
           selectedNew[user.id] = false;
-      }
+        }
+      });
     }
     this.selected = selectedNew;
   }
 
-  @task({ enqueue: true })
-  deleteUsers = task(function * (this: UserList) {
-    // delete all selected users
-    let listOfUsersToDelete:User[] = [];
-    for(const [id, bool] of Object.entries(this.selected)) {
-      if(bool) {
-        let user = this.store.peekRecord('user', id);
-        if(user !== null)
-          listOfUsersToDelete.push(user);
-      }
-    }
-
-    try {
-      yield this.args.deleteUsers(listOfUsersToDelete);
-      AlertifyHandler.showAlertifySuccess('All users successfully deleted.');
-    } catch(reason) {
-      this.showReasonErrorAlert(reason);
-    } finally {
-      this.showDeleteUsersDialog = false;
-    }
-  });
-
   @action
-  selectCheckbox(userId:string) {
-    let selectedNew = { ...this.selected };
+  selectCheckbox(userId: string) {
+    const selectedNew = { ...this.selected };
     selectedNew[userId] = !selectedNew[userId];
     this.selected = selectedNew;
   }
 
   @action
   selectAllCheckboxes() {
-    let value = !this.allSelected;
-    let selectedNew:{[userId: string]: boolean} = {...this.selected};
-    for(const [id] of Object.entries(selectedNew)) {
+    const value = !this.allSelected;
+    const selectedNew: {[userId: string]: boolean} = { ...this.selected };
+    Object.entries(selectedNew).forEach(([id]) => {
       selectedNew[id] = value;
-    }
+    });
     this.selected = selectedNew;
   }
 
-  @task({ drop: true })
-  updateUserList = task(function * (this: UserList) {
-    yield this.args.refreshUsers();
-  });
-
-  @task({ drop: true })
-  openUserCreation = task(function * (this: UserList) {
-    yield this.router.transitionTo('configuration.usermanagement.new');
-  });
-
-  @task({ drop: true })
-  openUserEdit = task(function * (this: UserList, userId: string) {
-    yield this.router.transitionTo('configuration.usermanagement.edit', userId);
-  });
-
-  @task({ enqueue: true })
-  deleteUser = task(function * (this: UserList, user:User) {
-    try {
-      let username = user.username;
-      yield this.args.deleteUsers([user]);
-      const message = `User <b>${username}</b> deleted.`;
-      AlertifyHandler.showAlertifyMessage(message);
-    } catch(reason) {
-      this.showReasonErrorAlert(reason);
-    }
-  });
-
-  showReasonErrorAlert(reason:any) {
-    const {title, detail} = reason.errors[0];
-    AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
+  @action
+  openUserDeletionDialogue() {
+    this.showDeleteUsersDialog = true;
   }
 
+  @action
+  hideUserDeletionDialogue() {
+    this.showDeleteUsersDialog = false;
+  }
+
+  isCurrentUser(user: User) {
+    return user === this.currentUser.user;
+  }
+
+  static showReasonErrorAlert(reason: any) {
+    const { title, detail } = reason.errors[0];
+    AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
+  }
 }

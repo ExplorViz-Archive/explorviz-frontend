@@ -66,7 +66,7 @@
 }
 
 #exp-navbar-routes {
-  a {
+  p {
     color: black;
     font-size: 1.15rem;
     cursor: pointer;
@@ -74,6 +74,7 @@
     @extend .pr-3;
     @extend .pt-2;
     @extend .pb-2;
+    @extend .mb-0;
     transition: 0.2s ease;
   }
   li {
@@ -85,14 +86,14 @@
   }
   li.active {
     background-color: #22497c;
-    a {
+    p {
       color: white;
       transform: translateX(10px);
     }
   }
   li:hover {
     background-color: #406da7;
-    a {
+    p {
       color: white;
       transform: translateX(10px);
     }
@@ -119,7 +120,7 @@
     @extend .pt-1;
     @extend .mb-3;
   }
-  a {
+  a, div {
     @extend .pl-4;
     @extend .pr-3;
     @extend .pt-1;
@@ -137,7 +138,7 @@
     @extend .mt-1;
     border-top: #a3a6a8 solid 1px;
   }
-  a.active {
+  a.active, div.active {
     background-color: #22497c;
     color: white;
     
@@ -145,7 +146,7 @@
       transform: translateX(10px);
     }
   }
-  a:hover {
+  a:hover, div:hover {
     background-color: #406da7;
     color: white;
     

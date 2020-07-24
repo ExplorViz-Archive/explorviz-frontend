@@ -1,66 +1,79 @@
+
+import { action, computed } from '@ember/object';
+import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
-import { inject as service } from "@ember/service";
-import { computed, action } from '@ember/object';
-import DS from 'ember-data';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
-import Highlighter from 'explorviz-frontend/services/visualization/application/highlighter';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import RenderingService from 'explorviz-frontend/services/rendering-service';
-import Trace from 'explorviz-frontend/models/trace';
-import Clazz from 'explorviz-frontend/models/clazz';
 import { tracked } from '@glimmer/tracking';
+import DS from 'ember-data';
+import Clazz from 'explorviz-frontend/models/clazz';
+import Trace from 'explorviz-frontend/models/trace';
+import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
+import TraceStep from 'explorviz-frontend/models/tracestep';
+import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
+import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
-export default class TraceSelection extends Component {
+interface Args {
+  removeComponent(componentPath: string): void,
+  highlightTrace(trace: Trace, traceStep: number): void,
+  moveCameraTo(emberModel: Clazz|ClazzCommunication): void,
+  highlighter: Highlighting;
+}
 
+export default class TraceSelection extends Component<Args> {
   // default time units
   @tracked
   traceTimeUnit: TimeUnit = 'ms';
+
   @tracked
   traceStepTimeUnit: TimeUnit = 'ms';
 
   @tracked
   sortBy: any = 'traceId';
+
   @tracked
   isSortedAsc: boolean = true;
+
   @tracked
   filterTerm: string = '';
+
   @tracked
   filterInput: string = '';
 
   @tracked
   isReplayAnimated: boolean = true;
 
+  @tracked
+  selectedTrace: Trace|null = null;
+
+  @tracked
+  currentTraceStep: TraceStep|null = null;
+
   @service('store')
   store!: DS.Store;
-
-  @service('additional-data')
-  additionalData!: AdditionalData;
-
-  @service('visualization/application/highlighter')
-  highlighter!: Highlighter;
 
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
 
-  @service('rendering-service')
-  renderingService!: RenderingService;
-
   // Compute current traces when highlighting changes
-  @computed('highlighter.highlightedEntity', 'landscapeRepo.latestApplication', 'sortBy', 'isSortedAsc', 'filterTerm')
+  @computed('landscapeRepo.latestApplication', 'args.highlighter.highlightedEntity', 'sortBy', 'isSortedAsc', 'filterTerm')
   get traces() {
-    let highlighter = this.highlighter;
-    if (highlighter.get('isTrace')) {
-      return [highlighter.get('highlightedEntity')];
-    } else {
-      const latestApplication = this.landscapeRepo.latestApplication;
-      if (latestApplication === null) {
-        return [];
-      } else {
-        return this.filterAndSortTraces(latestApplication.get('traces'));
-      }
+    // Only show highlighted trace and set highlighting status accordingly
+    const maybeTrace = this.args.highlighter.highlightedEntity;
+    if (maybeTrace instanceof Trace) {
+      this.selectedTrace = maybeTrace;
+      return [maybeTrace];
     }
+
+    // Reset selected trace
+    this.selectedTrace = null;
+
+    const { latestApplication } = this.landscapeRepo;
+    if (latestApplication === null) {
+      return [];
+    }
+
+    return this.filterAndSortTraces(latestApplication.get('traces'));
   }
 
   filterAndSortTraces(this: TraceSelection, traces: DS.PromiseManyArray<Trace>) {
@@ -68,11 +81,11 @@ export default class TraceSelection extends Component {
       return [];
     }
 
-    let filteredTraces: Trace[] = [];
-    let filter = this.filterTerm;
+    const filteredTraces: Trace[] = [];
+    const filter = this.filterTerm;
     traces.forEach((trace) => {
-      let sourceClazz = trace.get('sourceClazz');
-      let targetClazz = trace.get('targetClazz');
+      const sourceClazz = trace.get('sourceClazz');
+      const targetClazz = trace.get('targetClazz');
       if (filter === ''
         || trace.get('traceId').includes(filter)
         || (sourceClazz !== undefined && sourceClazz.get('name').toLowerCase().includes(filter))
@@ -82,9 +95,25 @@ export default class TraceSelection extends Component {
     });
 
     if (this.isSortedAsc) {
-      filteredTraces.sort((a, b) => (a.get(this.sortBy) > b.get(this.sortBy)) ? 1 : ((b.get(this.sortBy) > a.get(this.sortBy)) ? -1 : 0));
+      filteredTraces.sort((a, b) => {
+        if (a.get(this.sortBy) > b.get(this.sortBy)) {
+          return 1;
+        }
+        if (b.get(this.sortBy) > a.get(this.sortBy)) {
+          return -1;
+        }
+        return 0;
+      });
     } else {
-      filteredTraces.sort((a, b) => (a.get(this.sortBy) < b.get(this.sortBy)) ? 1 : ((b.get(this.sortBy) < a.get(this.sortBy)) ? -1 : 0));
+      filteredTraces.sort((a, b) => {
+        if (a.get(this.sortBy) < b.get(this.sortBy)) {
+          return 1;
+        }
+        if (b.get(this.sortBy) < a.get(this.sortBy)) {
+          return -1;
+        }
+        return 0;
+      });
     }
 
     return filteredTraces;
@@ -92,14 +121,19 @@ export default class TraceSelection extends Component {
 
   @action
   clickedTrace(this: TraceSelection, trace: Trace) {
-    if (trace.get('highlighted')) {
-      this.highlighter.unhighlightAll();
-    } else {
-      this.highlighter.highlightTrace(trace);
-      this.moveCameraToTraceStep();
+    // Reset highlighting when highlighted trace is clicked again
+    if (trace === this.selectedTrace) {
+      this.selectedTrace = null;
+      this.args.highlighter.removeHighlighting();
+      return;
     }
 
-    this.renderingService.redrawScene();
+    this.selectedTrace = trace;
+
+    const traceSteps = trace.hasMany('traceSteps').value();
+    this.currentTraceStep = traceSteps?.objectAt(0);
+
+    this.args.highlightTrace(trace, 1);
   }
 
   @action
@@ -110,47 +144,77 @@ export default class TraceSelection extends Component {
 
   @action
   selectNextTraceStep(this: TraceSelection) {
-    this.highlighter.highlightNextTraceStep();
-    this.renderingService.redrawScene();
-    if (this.isReplayAnimated) {
-      this.moveCameraToTraceStep();
+    // Can only select next step if a trace is selected
+    if (!this.currentTraceStep || !this.selectedTrace) {
+      return;
+    }
+
+    const nextStepPosition = this.currentTraceStep.tracePosition + 1;
+
+    if (nextStepPosition > this.selectedTrace.length) {
+      return;
+    }
+
+
+    const traceSteps = this.selectedTrace.hasMany('traceSteps').value();
+    this.currentTraceStep = traceSteps?.objectAt(nextStepPosition - 1);
+
+    this.args.highlightTrace(this.selectedTrace, nextStepPosition);
+
+    const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
+
+    if (this.isReplayAnimated && clazzCommunication) {
+      this.args.moveCameraTo(clazzCommunication);
     }
   }
 
   @action
   selectPreviousTraceStep(this: TraceSelection) {
-    this.highlighter.highlightPreviousTraceStep();
-    this.renderingService.redrawScene();
-    if (this.isReplayAnimated) {
-      this.moveCameraToTraceStep();
+    // Can only select next step if a trace is selected
+    if (!this.selectedTrace || !this.currentTraceStep) {
+      return;
+    }
+
+    const previousStepPosition = this.currentTraceStep.tracePosition - 1;
+
+    if (previousStepPosition < 1) {
+      return;
+    }
+
+
+    const traceSteps = this.selectedTrace.hasMany('traceSteps').value();
+    this.currentTraceStep = traceSteps?.objectAt(previousStepPosition - 1);
+
+    this.args.highlightTrace(this.selectedTrace, previousStepPosition);
+
+    const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
+
+    if (this.isReplayAnimated && clazzCommunication) {
+      this.args.moveCameraTo(clazzCommunication);
     }
   }
 
   @action
   toggleTraceTimeUnit(this: TraceSelection) {
-    let timeUnit = this.traceTimeUnit;
+    const timeUnit = this.traceTimeUnit;
 
     if (timeUnit === 'ns') {
       this.traceTimeUnit = 'ms';
-    }
-    else if (timeUnit === 'ms') {
+    } else if (timeUnit === 'ms') {
       this.traceTimeUnit = 's';
-    }
-    else if (timeUnit === 's') {
+    } else if (timeUnit === 's') {
       this.traceTimeUnit = 'ns';
     }
   }
 
   @action
   toggleTraceStepTimeUnit(this: TraceSelection) {
-    let timeUnit = this.traceStepTimeUnit;
+    const timeUnit = this.traceStepTimeUnit;
     if (timeUnit === 'ns') {
       this.traceStepTimeUnit = 'ms';
-    }
-    else if (timeUnit === 'ms') {
+    } else if (timeUnit === 'ms') {
       this.traceStepTimeUnit = 's';
-    }
-    else if (timeUnit === 's') {
+    } else if (timeUnit === 's') {
       this.traceStepTimeUnit = 'ns';
     }
   }
@@ -162,10 +226,10 @@ export default class TraceSelection extends Component {
 
   @action
   lookAtClazz(this: TraceSelection, proxyClazz: Clazz) {
-    let clazzId = proxyClazz.get('id');
-    let clazz = this.store.peekRecord('clazz', clazzId);
+    const clazzId = proxyClazz.get('id');
+    const clazz = this.store.peekRecord('clazz', clazzId);
     if (clazz !== null) {
-      this.renderingService.moveCameraTo(clazz);
+      this.args.moveCameraTo(clazz);
     }
   }
 
@@ -185,29 +249,6 @@ export default class TraceSelection extends Component {
 
   @action
   close(this: TraceSelection) {
-    this.additionalData.removeComponent('visualization/page-setup/sidebar/trace-selection');
+    this.args.removeComponent('trace-selection');
   }
-
-  moveCameraToTraceStep(this: TraceSelection) {
-    let currentTraceStep = this.highlighter.get('currentTraceStep');
-
-    if (currentTraceStep) {
-      let storeId = currentTraceStep.get('clazzCommunication').get('id');
-      // Avoid proxy object by requesting clazz from store
-      let clazzCommunication = this.store.peekRecord('clazzcommunication', storeId);
-      if (clazzCommunication !== null) {
-        this.renderingService.moveCameraTo(clazzCommunication);
-      }
-    }
-  }
-
-  @action
-  onWindowChange(this: TraceSelection) {
-    if (!this.additionalData.get('showWindow') && this.highlighter.get('isTrace')) {
-      let highlighter = this.highlighter;
-      highlighter.unhighlightAll();
-      this.renderingService.redrawScene();
-    }
-  }
-
 }

@@ -1,39 +1,42 @@
 {{#if @popupData}}
   <div class="popover" {{did-insert this.setPopupPosition}}>
-    <!-- landscape popups -->
-    {{#if (string-comparison @popupData.popupType "system")}}
+    {{!-- landscape popups --}}
+    {{#if (eq @popupData.entity.constructor.name "System")}}
       <Visualization::Rendering::Popups::LandscapePopups::SystemPopup
-        @data={{@popupData}} />
+        @system={{@popupData.entity}}
+      />
     {{/if}}
-    {{#if (string-comparison @popupData.popupType "nodeGroup")}}
+    {{#if (eq @popupData.entity.constructor.name "NodeGroup")}}
       <Visualization::Rendering::Popups::LandscapePopups::NodegroupPopup
-        @data={{@popupData}} />
+        @nodeGroup={{@popupData.entity}}
+      />
     {{/if}}
-    {{#if (string-comparison @popupData.popupType "node")}}
+    {{#if (eq @popupData.entity.constructor.name "Node")}}
       <Visualization::Rendering::Popups::LandscapePopups::NodePopup
-        @data={{@popupData}} />
+        @node={{@popupData.entity}}
+      />
     {{/if}}
-    {{#if (string-comparison @popupData.popupType "application")}}
+    {{#if (eq @popupData.entity.constructor.name "Application")}}
       <Visualization::Rendering::Popups::LandscapePopups::ApplicationPopup
-        @data={{@popupData}} />
-    {{/if}}
-    {{#if (string-comparison @popupData.popupType "applicationCommunication")}}
-      <Visualization::Rendering::Popups::LandscapePopups::LandscapeCommunicationPopup
-        @data={{@popupData}} />
+        @application={{@popupData.entity}}
+      />
     {{/if}}
 
-    <!-- application popups -->
-    {{#if (string-comparison @popupData.popupType "component")}}
+    {{!-- application popups --}}
+    {{#if (eq @popupData.entity.constructor.name "Component")}}
       <Visualization::Rendering::Popups::ApplicationPopups::ComponentPopup
-        @data={{@popupData}} />
+        @component={{@popupData.entity}}
+      />
     {{/if}}
-    {{#if (string-comparison @popupData.popupType "clazz")}}
+    {{#if (eq @popupData.entity.constructor.name "Clazz")}}
       <Visualization::Rendering::Popups::ApplicationPopups::ClazzPopup
-        @data={{@popupData}} />
+        @clazz={{@popupData.entity}}
+      />
     {{/if}}
-    {{#if (string-comparison @popupData.popupType "clazzCommunication")}}
+    {{#if (eq @popupData.entity.constructor.name "DrawableClazzCommunication")}}
       <Visualization::Rendering::Popups::ApplicationPopups::CommunicationPopup
-        @data={{@popupData}} />
+        @communication={{@popupData.entity}}
+      />
     {{/if}}
   </div>
 {{/if}}

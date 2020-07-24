@@ -1,27 +1,46 @@
 <h3>User Data</h3>
 <hr>
 <BsForm @model={{this}} @onSubmit={{perform this.saveUserChanges}} as |form|>
-  <form.element @controlType="text" @label="ID" @property="id_change" @disabled={{true}} />
-  <form.element @controlType="text" @label="Username" @placeholder="Enter New Username" @property="username_change" />
-  <form.element @controlType="password" @label="Password" @placeholder="Enter New Password" @property="password_change" />
-  <form.element @property="roles_change" @label="Roles" as |el|>
+  <form.element
+    @controlType="text"
+    @label="ID"
+    @property="idChange"
+    @disabled={{true}}
+  />
+  <form.element
+    @controlType="text"
+    @label="Username"
+    @placeholder="Enter New Username"
+    @property="usernameChange"
+  />
+  <form.element
+    @controlType="password"
+    @label="Password"
+    @placeholder="Enter New Password"
+    @property="passwordChange"
+  />
+  <form.element @property="rolesChange" @label="Roles">
     <PowerSelectMultiple
       @options={{this.roles}}
       @placeholder="Choose roles"
       @loadingMessage="loading..."
       @onopen={{perform this.getRoles}}
-      @onchange={{action (mut this.roles_change)}}
+      @onchange={{this.updateRoleSelection}}
       @searchEnabled={{false}}
       @searchField="default"
-      @selected={{this.roles_change}}
-      as |item|
+      @selected={{this.rolesChange}} as |item|
     >
       {{item}}
     </PowerSelectMultiple>
   </form.element>
   {{#if this.saveUserChanges.isRunning}}
     <BsButton @type="primary" @buttonType="submit" @disabled={{true}}>
-      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      <span
+        class="spinner-border spinner-border-sm"
+        role="status"
+        aria-hidden="true"
+      >
+      </span>
       Saving...
     </BsButton>
   {{else}}

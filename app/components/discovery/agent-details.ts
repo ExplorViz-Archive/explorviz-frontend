@@ -1,18 +1,18 @@
+import { action, set } from '@ember/object';
+import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import { inject as service } from "@ember/service";
-import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import { action, set } from '@ember/object';
 import DS from 'ember-data';
 import Agent from 'explorviz-frontend/models/agent';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
-interface Args {
-  agent: Agent,
-  errorHandling(errorArray:any): void
+interface IArgs {
+  agent: Agent;
+  errorHandling(errorArray: any): void;
+  toggleAgentVisibility(): void;
 }
 
-export default class AgentDetails extends Component<Args> {
-
+export default class AgentDetails extends Component<IArgs> {
   @service('store') store!: DS.Store;
 
   @tracked
@@ -22,31 +22,30 @@ export default class AgentDetails extends Component<Args> {
   saveAgent() {
     const self = this;
 
-    let agent = this.args.agent;
+    const { agent } = this.args;
 
-    if(agent.get('hasDirtyAttributes')){
+    if (agent.get('hasDirtyAttributes')) {
       this.showSpinner = true;
 
       agent.save().then(() => {
         self.showSpinner = false;
-        self.handleMessageForUser();
+        AgentDetails.handleMessageForUser();
       })
-      .catch((errorObject) => {
-        agent.rollbackAttributes();
+        .catch((errorObject) => {
+          agent.rollbackAttributes();
 
-        set(agent, 'errorOccured', true);
-        set(agent, 'errorMessage', errorObject);
+          set(agent, 'errorOccured', true);
+          set(agent, 'errorMessage', errorObject);
 
-        // closure action from discovery controller
-        self.args.errorHandling(errorObject);
-      });   
+          // closure action from discovery controller
+          self.args.errorHandling(errorObject);
+        });
     } else {
-      self.handleMessageForUser();
-    }      
+      AgentDetails.handleMessageForUser();
+    }
   }
 
-  handleMessageForUser() {
-    AlertifyHandler.showAlertifyMessage("Agent updated. Click on <b>Discovery</b> to go back.");
+  static handleMessageForUser() {
+    AlertifyHandler.showAlertifyMessage('Agent updated. Click on <b>Discovery</b> to go back.');
   }
-
 }

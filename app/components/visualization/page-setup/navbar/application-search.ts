@@ -1,87 +1,70 @@
-import Component from '@glimmer/component';
-import { inject as service } from "@ember/service";
+import GlimmerComponent from '@glimmer/component';
+import { inject as service } from '@ember/service';
 import { task } from 'ember-concurrency-decorators';
+import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
+import Clazz from 'explorviz-frontend/models/clazz';
+import Component from 'explorviz-frontend/models/component';
+import { action } from '@ember/object';
+import Application from 'explorviz-frontend/models/application';
 import { isBlank } from '@ember/utils';
 import $ from 'jquery';
-import RenderingService from 'explorviz-frontend/services/rendering-service';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import Highlighter from 'explorviz-frontend/services/visualization/application/highlighter';
-import { action } from '@ember/object';
 
+interface Args {
+  application: Application,
+  unhighlightAll(): void,
+  highlightModel(entity: Clazz|Component): void,
+  openParents(entity: Clazz|Component): void,
+  closeComponent(component: Component): void
+}
 /* eslint-disable require-yield */
-export default class ApplicationSearch extends Component {
-
-  @service('rendering-service') renderingService!: RenderingService;
+export default class ApplicationSearch extends GlimmerComponent<Args> {
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
-  @service('visualization/application/highlighter') highlighter!: Highlighter;
 
-  componentLabel = "-- Components --";
-  clazzLabel = "-- Classes --";
+  componentLabel = '-- Components --';
+
+  clazzLabel = '-- Classes --';
 
   @action
+  /* eslint-disable-next-line class-methods-use-this */
   removePowerselectArrow() {
     $('.ember-power-select-status-icon').remove();
   }
 
   @action
-  onSelect(emberPowerSelectObject:any) {
-
-    if(!emberPowerSelectObject || emberPowerSelectObject.length < 1) {
+  onSelect(emberPowerSelectObject: any) {
+    if (!emberPowerSelectObject || emberPowerSelectObject.length < 1) {
       return;
     }
 
-    const entity = emberPowerSelectObject[0];
-    const modelType = entity.constructor.modelName;
+    const model = emberPowerSelectObject[0];
 
-    if(!modelType || modelType === "") {
-      return;
+    this.args.unhighlightAll();
+
+    if (model instanceof Clazz) {
+      this.args.openParents(model);
+    } else if (model instanceof Component) {
+      this.args.openParents(model);
+      this.args.closeComponent(model);
     }
 
-    this.highlighter.unhighlightAll();
-  
-    if (modelType === "clazz") {
-      entity.openParents();
-    }
-    else if (modelType === "component") {
-      if (entity.opened) {
-        // close and highlight, since it is already open
-        entity.setOpenedStatus(false);
-      } else {
-        // open all parents, since component is hidden
-        entity.openParents();
-      }
-    }
-
-    this.highlighter.highlight(entity);
-    this.renderingService.redrawScene();
-  }
-
-  reCalculateDropdown(trigger:Element) {
-
-    // https://ember-basic-dropdown.com/docs/custom-position/
-
-    let { top, left, height } = trigger.getBoundingClientRect();
-    let style = {
-      left: left,
-      top: top +  height
-    };
-    return { style };
+    this.args.highlightModel(model);
   }
 
   @task({ restartable: true })
-  searchEntity = task(function * (this: ApplicationSearch, term:string) {
+  // eslint-disable-next-line
+  searchEntity = task(function* (this: ApplicationSearch, term: string) {
     if (isBlank(term)) { return []; }
     return yield this.getPossibleEntityNames.perform(term);
   });
 
   @task
-  getPossibleEntityNames = task(function * (this: ApplicationSearch, name:string) {
-
+  // eslint-disable-next-line
+  getPossibleEntityNames = task(function* (this: ApplicationSearch, name: string) {
     const searchString = name.toLowerCase();
 
-    const latestApp = this.landscapeRepo.latestApplication;
+    const latestApp = this.args.application;
 
-    if(latestApp === null) {
+    if (latestApp === null) {
       return [];
     }
 
@@ -93,32 +76,27 @@ export default class ApplicationSearch extends Component {
     const maxNumberOfCompNames = 20;
     let currentNumberOfCompNames = 0;
 
-    let isComponentLabelSet = false;
+    function searchEngineFindsHit(clazzNameToCheckAgainst: string, searchWord: string) {
+      if (searchString.startsWith('*')) {
+        const searchName = searchWord.substring(1);
+        return clazzNameToCheckAgainst.includes(searchName);
+      }
+      return clazzNameToCheckAgainst.startsWith(searchWord);
+    }
 
-    for (let i = 0; i < components.length; i++) {      
-      if(currentNumberOfCompNames === maxNumberOfCompNames) {
+    for (let i = 0; i < components.length; i++) {
+      if (currentNumberOfCompNames === maxNumberOfCompNames) {
         break;
       }
 
       const component = components.objectAt(i);
 
-      if(!component)
-        continue;
-
-      // skip foundation, since it can't be highlighted anyways
-      if(component.foundation)
-        continue;
-
-      const componentName = component.name.toLowerCase();
-      if(searchEngineFindsHit(componentName, searchString)) {
-
-        if(!isComponentLabelSet) {
-          isComponentLabelSet = true;
-          entities.push({name: this.componentLabel});
+      if (component) {
+        const componentName = component.name.toLowerCase();
+        if (searchEngineFindsHit(componentName, searchString)) {
+          entities.push(component);
+          currentNumberOfCompNames++;
         }
-
-        entities.push(component);
-        currentNumberOfCompNames++;
       }
     }
 
@@ -128,36 +106,25 @@ export default class ApplicationSearch extends Component {
     let isClazzLabelSet = false;
 
     for (let i = 0; i < clazzes.length; i++) {
-      if(currentNumberOfClazzNames === maxNumberOfClazzNames) {
+      if (currentNumberOfClazzNames === maxNumberOfClazzNames) {
         break;
       }
 
       const clazz = clazzes.objectAt(i);
 
-      if(!clazz)
-        continue;
+      if (clazz) {
+        const clazzName = clazz.name.toLowerCase();
+        if (searchEngineFindsHit(clazzName, searchString)) {
+          if (!isClazzLabelSet) {
+            isClazzLabelSet = true;
+            entities.push({ name: this.clazzLabel });
+          }
 
-      const clazzName = clazz.name.toLowerCase();
-      if(searchEngineFindsHit(clazzName, searchString)) {
-
-        if(!isClazzLabelSet) {
-          isClazzLabelSet = true;
-          entities.push({name: this.clazzLabel});
+          entities.push(clazz);
+          currentNumberOfClazzNames++;
         }
-
-        entities.push(clazz);
-        currentNumberOfClazzNames++;
-      }  
-    }
-    return entities;
-
-    function searchEngineFindsHit(name:string, searchString:string) {
-      if(searchString.startsWith('*')) {
-        const searchName = searchString.substring(1);
-        return name.includes(searchName);
-      } else {
-        return name.startsWith(searchString);
       }
     }
-  })
+    return entities;
+  });
 }

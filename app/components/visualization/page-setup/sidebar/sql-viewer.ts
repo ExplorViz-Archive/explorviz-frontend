@@ -1,65 +1,67 @@
+import { action, computed } from '@ember/object';
+import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import { inject as service } from '@ember/service';
-import { computed, action } from '@ember/object';
-import $ from 'jquery';
 import DS from 'ember-data';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import AdditionalData from 'explorviz-frontend/services/additional-data';
 import DatabaseQuery from 'explorviz-frontend/models/databasequery';
+import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
+import $ from 'jquery';
 
 type SortingProperty = 'timestamp'|'sqlStatement'|'statementType'|'responseTime';
 type TimeUnit = 's'|'ms'|'ns';
 
-export default class SQLViewer extends Component {
+interface Args {
+  removeComponent(componentPath: string): void
+}
 
+export default class SQLViewer extends Component<Args> {
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
-
-  @service('additional-data')
-  additionalData!: AdditionalData;
 
   @service('store')
   store!: DS.Store;
 
   // default time units
   @tracked
-  responseTimeUnit:TimeUnit = 'ms';
+  responseTimeUnit: TimeUnit = 'ms';
 
   @tracked
   isSortedAsc: boolean = true;
+
   @tracked
-  sortBy:SortingProperty = 'timestamp';
+  sortBy: SortingProperty = 'timestamp';
+
   @tracked
-  selectedQuery:DatabaseQuery|null = null;
+  selectedQuery: DatabaseQuery|null = null;
+
   @tracked
-  scrollPosition:null|number = null;
+  scrollPosition: null|number = null;
 
   @tracked
   filterTerm: string = '';
+
   @tracked
   filterInput: string = '';
 
   // Compute current traces when highlighting changes
   @computed('landscapeRepo.latestApplication.databaseQueries', 'isSortedAsc', 'sortBy',
-  'filterTerm', 'selectedQuery')
+    'filterTerm', 'selectedQuery')
   get databaseQueries() {
     let queries: DatabaseQuery[];
     if (this.selectedQuery) {
       queries = [this.selectedQuery];
+    } else if (this.landscapeRepo.latestApplication !== null) {
+      const databaseQueriesArray = this.landscapeRepo.latestApplication.databaseQueries.toArray();
+      queries = this.filterAndSortQueries(databaseQueriesArray);
     } else {
-      if(this.landscapeRepo.latestApplication !== null) {
-        queries = this.filterAndSortQueries(this.landscapeRepo.latestApplication.databaseQueries.toArray());
-      } else {
-        queries = [];
-      }
+      queries = [];
     }
     return queries;
   }
 
   filterAndSortQueries(queries: DatabaseQuery[]) {
-    let filteredQueries: DatabaseQuery[] = [];
-    let filter = this.filterTerm;
+    const filteredQueries: DatabaseQuery[] = [];
+    const filter = this.filterTerm;
     queries.forEach((query) => {
       if (filter === ''
         || query.get('sqlStatement').toLowerCase().includes(filter)) {
@@ -68,9 +70,25 @@ export default class SQLViewer extends Component {
     });
 
     if (this.isSortedAsc) {
-      filteredQueries.sort((a, b) => (a.get(this.sortBy) > b.get(this.sortBy)) ? 1 : ((b.get(this.sortBy) > a.get(this.sortBy)) ? -1 : 0));
+      filteredQueries.sort((a, b) => {
+        if (a.get(this.sortBy) > b.get(this.sortBy)) {
+          return 1;
+        }
+        if (b.get(this.sortBy) > a.get(this.sortBy)) {
+          return -1;
+        }
+        return 0;
+      });
     } else {
-      filteredQueries.sort((a, b) => (a.get(this.sortBy) < b.get(this.sortBy)) ? 1 : ((b.get(this.sortBy) < a.get(this.sortBy)) ? -1 : 0));
+      filteredQueries.sort((a, b) => {
+        if (a.get(this.sortBy) < b.get(this.sortBy)) {
+          return 1;
+        }
+        if (b.get(this.sortBy) < a.get(this.sortBy)) {
+          return -1;
+        }
+        return 0;
+      });
     }
 
     return filteredQueries;
@@ -85,21 +103,20 @@ export default class SQLViewer extends Component {
       if (this.scrollPosition) {
         $('#sqlScrollDiv').animate({ scrollTop: this.scrollPosition }, 'slow');
       }
-    }
-    // Select query
-    else {
+    } else { // Select query
       // Deselect potentially selected query
-      let queries = this.store.peekAll('databasequery');
-      queries.forEach((query) => {
-        query.set('isSelected', false);
+      const queries = this.store.peekAll('databasequery');
+      queries.forEach((queryRecord) => {
+        queryRecord.set('isSelected', false);
       });
       // Mark new query as selected
       query.set('isSelected', true);
       this.selectedQuery = query;
       // Remember scroll position
-      let scrollPos = $('#sqlScrollDiv').scrollTop();
-      if(scrollPos !== undefined)
+      const scrollPos = $('#sqlScrollDiv').scrollTop();
+      if (scrollPos !== undefined) {
         this.scrollPosition = scrollPos;
+      }
     }
   }
 
@@ -111,15 +128,13 @@ export default class SQLViewer extends Component {
 
   @action
   toggleResponseTimeUnit() {
-    let timeUnit = this.responseTimeUnit;
+    const timeUnit = this.responseTimeUnit;
 
     if (timeUnit === 'ns') {
       this.responseTimeUnit = 'ms';
-    }
-    else if (timeUnit === 'ms') {
+    } else if (timeUnit === 'ms') {
       this.responseTimeUnit = 's';
-    }
-    else if (timeUnit === 's') {
+    } else if (timeUnit === 's') {
       this.responseTimeUnit = 'ns';
     }
   }
@@ -141,7 +156,6 @@ export default class SQLViewer extends Component {
 
   @action
   close() {
-    this.additionalData.removeComponent('visualization/page-setup/sidebar/sql-viewer');
+    this.args.removeComponent('sql-viewer');
   }
-
 }

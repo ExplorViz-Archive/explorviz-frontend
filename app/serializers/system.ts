@@ -7,12 +7,10 @@ import ApplicationSerializer from './application';
  * @extends ApplicationSerializer
  */
 export default class SystemSerializer extends ApplicationSerializer {
-
-  //This attribute will declare to serialize hasMany-relationships
+  // This attribute will declare to serialize hasMany-relationships
   attrs = {
     nodegroups: {
-      serialize: true
-    }
-  }
-
+      serialize: true,
+    },
+  };
 }

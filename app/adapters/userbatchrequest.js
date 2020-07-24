@@ -6,15 +6,15 @@ import { computed } from '@ember/object';
 const { APP } = ENV;
 
 export default class UserbatchrequestAdapter extends JSONAPIAdapter.extend(DataAdapterMixin) {
-
   host = APP.API_ROOT;
+
   namespace = 'v1';
 
   @computed('session.data.authenticated.access_token')
   get headers() {
-    let headers = { 'Accept': 'application/vnd.api+json' };
+    const headers = { Accept: 'application/vnd.api+json' };
     if (this.session.isAuthenticated) {
-      headers['Authorization'] = `Bearer ${this.session.data.authenticated.access_token}`;
+      headers.Authorization = `Bearer ${this.session.data.authenticated.access_token}`;
     }
 
     return headers;
@@ -26,5 +26,4 @@ export default class UserbatchrequestAdapter extends JSONAPIAdapter.extend(DataA
     const baseUrl = this.buildURL();
     return `${baseUrl}/userbatch`;
   }
-
 }

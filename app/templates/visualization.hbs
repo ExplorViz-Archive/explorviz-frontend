@@ -1,21 +1,18 @@
 <div class="row" style="max-height:100%">
-  <div class="col-12" id="vizspace" {{did-resize this.resize debounce=100}}>
+  <div class="col-12" id="vizspace">
     {{#if this.showLandscape}}
       {{#if this.landscapeRepo.latestLandscape.systems}}
-        <Visualization::PageSetup::VisualizationNavbar
-          @content={{array
-            (component "visualization/page-setup/navbar/reset-visualization")
-            (component "visualization/page-setup/navbar/pause-reload")
-            (component "visualization/page-setup/navbar/event-opener")
-            (component "visualization/page-setup/navbar/landscape-downloader" landscape=this.landscapeRepo.latestLandscape)
-          }}
+        <Visualization::Rendering::LandscapeRendering
+          @id="landscape1"
+          @landscape={{this.landscapeRepo.latestLandscape}}
+          @font={{@model}}
+          @components={{this.components}}
+          @removeComponent={{this.removeComponent}}
+          @closeDataSelection={{this.closeDataSelection}}
+          @showDataSelection={{this.showDataSelection}}
+          @addComponent={{this.addComponent}}
+          @showApplication={{this.showApplication}}
         />
-        <div id="rendering">
-          <Visualization::Rendering::LandscapeRendering />
-          <!-- popup(s) -->
-          <Visualization::Rendering::Popups::PopupCoordinator
-              @popupData={{this.additionalData.popupContent}} />
-        </div>
       {{else if this.landscapeRepo.latestLandscape}}
         <div class="container-fluid">
           <div class="jumbotron">
@@ -34,56 +31,56 @@
         </div>
       {{/if}}
     {{else}}
-      <Visualization::PageSetup::VisualizationNavbar
-        @content={{array
-          (component "visualization/page-setup/navbar/reset-visualization")
-          (component "visualization/page-setup/navbar/pause-reload")
-          (component "visualization/page-setup/navbar/trace-overview")
-          (component "visualization/page-setup/navbar/sql-opener")
-          (component "visualization/page-setup/navbar/landscape-downloader" landscape=this.landscapeRepo.latestLandscape)
-          (component "visualization/page-setup/navbar/application-opener")
-          (component "visualization/page-setup/navbar/application-search")
-        }}
-      />
-      <div id="rendering">
-        <div style="position: absolute!important" class="pl-1">
-          <BsButton @onClick={{action this.openLandscapeView}} @type="secondary" @outline={{true}} @title="Back to Landscape">
-            {{svg-jar "reply" class="octicon align-middle"}}
-          </BsButton>
-        </div>
-        <Visualization::Rendering::ApplicationRendering @latestApplication={{this.landscapeRepo.latestApplication}} />
-        <!-- popup(s) -->
-        <Visualization::Rendering::Popups::PopupCoordinator
-          @popupData={{this.additionalData.popupContent}} />
-      </div>
+      {{#if this.landscapeRepo.latestApplication}}
+        <Visualization::Rendering::ApplicationRendering
+          @id="app1"
+          @application={{this.landscapeRepo.latestApplication}}
+          @addComponent={{this.addComponent}}
+          @font={{@model}}
+          @components={{this.components}}
+          @removeComponent={{this.removeComponent}}
+          @closeDataSelection={{this.closeDataSelection}}
+          @showDataSelection={{this.showDataSelection}}
+        />
+      {{/if}}
     {{/if}}
-    <!-- timeline -->
+    {{!-- timeline --}}
     <div id="timeline-content">
       <BsButton
-        @onClick={{action "toggleTimeline"}}
+        @onClick={{this.toggleTimeline}}
         @type="secondary"
         @outline={{true}}
         class="btn-timeline"
-        @title={{if this.renderingService.showTimeline "Hide Timeline" "Show Timeline"}}
+        @title={{if this.showTimeline "Hide Timeline" "Show Timeline"}}
       >
-        {{#unless this.renderingService.showTimeline}}
+        {{#unless this.showTimeline}}
           <span class="pr-1">Show Timeline</span>
         {{/unless}}
-        {{svg-jar "chevron-up"
+        {{svg-jar
+          "chevron-up"
           id="hidetimeline-icon"
-          class=(if this.renderingService.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")
+          class=(if this.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")
         }}
       </BsButton>
-      <div id="timeline" class="timeline {{unless this.renderingService.showTimeline "timelinehide"}}">
+      <div id="timeline" class="timeline {{unless this.showTimeline "timelinehide"}}">
         <Visualization::PageSetup::Timeline::PlotlyTimeline
           @timestamps={{this.timestampRepo.timelineTimestamps}}
-          @clicked={{action this.timelineClicked}}
-          @setChildReference={{action this.getTimelineReference}}
+          @clicked={{this.timelineClicked}}
+          @setChildReference={{this.getTimelineReference}}
         />
       </div>
     </div>
   </div>
-  <div class="col-4 hide" id="dataselection">
-    <Visualization::PageSetup::Sidebar::DataSelection />
-  </div>
 </div>
+{{#unless this.showLandscape}}
+  <div style="position: absolute!important">
+    <BsButton
+      @onClick={{this.openLandscapeView}}
+      @type="secondary"
+      @outline={{true}}
+      @title="Back to Landscape"
+    >
+      {{svg-jar "reply" class="octicon align-middle"}}
+    </BsButton>
+  </div>
+{{/unless}}

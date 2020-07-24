@@ -1,0 +1,8 @@
+app/router.js
+app/app.ts
+vendor/
+dist/
+
+public/assets/web-workers/*
+
+tests/

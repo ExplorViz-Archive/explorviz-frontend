@@ -1,57 +1,50 @@
-import Object from '@ember/object';
-import { inject as service } from "@ember/service";
-import { calculateColorBrightness } from
+import calculateColorBrightness from
   'explorviz-frontend/utils/helpers/threejs-helpers';
-import THREE from "three";
-import CurrentUser from 'explorviz-frontend/services/current-user';
+import THREE from 'three';
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import { tracked } from '@glimmer/tracking';
 
-export default Object.extend({
+export default class HoverEffectHandler {
+  @tracked
+  hoveredEntityObj: BaseMesh|null = null;
 
-  hoveredEntityColorObj: null,
-  currentUser: service(),
-
-  resetHoverEffect() : void {
-    let hoveredEntityColorObj: any = this.get('hoveredEntityColorObj');
-    if (hoveredEntityColorObj) {
-      // Restore old color and reset cached object
-      hoveredEntityColorObj.entity.material.color = hoveredEntityColorObj.color;
-      this.set('hoveredEntityColorObj', null);
-    }
-  },
-
-
-  handleHoverEffect(raycastTarget: {
-    distance: number, point: THREE.Vector3,
-    face: THREE.Face3, faceIndex: number, object: THREE.Mesh, uv: THREE.Vector2
-  }): void {
-    let currentUser: CurrentUser = this.get('currentUser') as CurrentUser;
-    let enableHoverEffects = currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects');
-
-    // No raycastTarget, do nothing and return
-    if (!raycastTarget || !enableHoverEffects) {
-      this.resetHoverEffect();
-      return;
-    }
-
-    const newHoverEntity = raycastTarget.object;
-
+  /**
+   * Alters the color of a given mesh such that it is clear which mesh
+   * the mouse points at
+   *
+   * @param mesh Mesh which shall receive a hover effect
+   */
+  applyHoverEffect(mesh: BaseMesh): void {
     // Same object, do nothing and return
-    let hoveredEntityColorObj: any = this.get('hoveredEntityColorObj');
-    if (hoveredEntityColorObj && hoveredEntityColorObj.entity === newHoverEntity) {
+    if (this.hoveredEntityObj === mesh) {
       return;
     }
 
+    // Reset old hover effect, only one object can be hovered upon at a time
     this.resetHoverEffect();
 
-    const material = newHoverEntity.material as THREE.MeshBasicMaterial;
-    const oldColor = material.color;
+    const material = mesh.material as THREE.MeshBasicMaterial|THREE.MeshLambertMaterial;
+    this.hoveredEntityObj = mesh;
 
-    this.set('hoveredEntityColorObj', {
-      entity: newHoverEntity,
-      color: new THREE.Color().copy(oldColor)
-    });
+    // Calculate and apply brighter color to material ('hover effect')
+    material.color = calculateColorBrightness(material.color, 1.1);
+  }
 
-    material.color = calculateColorBrightness(oldColor, 1.1);
-  },
+  /**
+   * Restores original color of mesh which had a hover effect
+   */
+  resetHoverEffect(): void {
+    const { hoveredEntityObj } = this;
+    // If hover entity is null, hover effect is not active
+    if (hoveredEntityObj) {
+      const material = hoveredEntityObj.material as THREE.MeshBasicMaterial
+      |THREE.MeshLambertMaterial;
+      const { highlighted, defaultColor, highlightingColor } = hoveredEntityObj;
 
-});
+      // Restore normal color (depends on highlighting status)
+      material.color = highlighted ? highlightingColor : defaultColor;
+      // Indicate that no entity is currently hovered upon
+      this.hoveredEntityObj = null;
+    }
+  }
+}

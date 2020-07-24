@@ -6,18 +6,22 @@
         Use Default Settings
       </div>
       <XToggle
-        @theme='skewed'
-        @onLabel='Yes'
-        @offLabel='No'
+        @theme="skewed"
+        @onLabel="Yes"
+        @offLabel="No"
         @value={{get @useDefaultSettings key}}
-        @onToggle={{action (mut (get @useDefaultSettings key))}}
+        @onToggle={{fn @toggleDefaultSetting key}}
       />
     </div>
-    {{#unless (get @useDefaultSettings key)}}
+    {{#if (not (get @useDefaultSettings key))}}
       <div class="pt-2">
-        <UserManagement::UserSettingsBase @settings={{value}} />
+        <UserManagement::UserSettingsBase
+          @settings={{value}}
+          @updateSetting={{@updateSetting}}
+          @origin={{key}}
+        />
       </div>
-    {{/unless}}
+    {{/if}}
   </div>
   <hr>
 {{/each-in}}

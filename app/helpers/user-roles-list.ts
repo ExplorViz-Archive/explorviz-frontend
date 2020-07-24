@@ -1,6 +1,6 @@
 import { helper } from '@ember/component/helper';
 
-export function userRolesList([roles]:[string[]]) {
+export function userRolesList([roles]: [string[]]) {
   const roleListString = roles.sort().join(', ');
   return `{ ${roleListString} }`;
 }

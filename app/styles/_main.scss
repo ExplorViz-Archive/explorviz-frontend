@@ -25,6 +25,7 @@ html, body {
 }
 
 #rendering {
+  @extend .d-flex;
   @extend .flex-grow-1;
   max-height: 100%;
   position: relative;
@@ -139,6 +140,10 @@ svg.octicon {
 .btn-primary:hover {
   background-color: #406da7;
   border-color: #406da7;
+}
+
+.pointer-cursor {
+  cursor: pointer;
 }
 
 @mixin centerSpinners() {

@@ -8,15 +8,26 @@
       <UserManagement::UserSettingsDefault
         @settings={{this.settings}}
         @useDefaultSettings={{this.useDefaultSettings}}
+        @toggleDefaultSetting={{this.toggleDefaultSetting}}
+        @updateSetting={{this.updateSetting}}
       />
-
       {{#if this.saveSettings.isRunning}}
         <BsButton @type="primary" @buttonType="submit" @disabled={{true}}>
-          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span
+            class="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          >
+          </span>
           Saving...
         </BsButton>
       {{else}}
-        <BsButton @defaultText="Save Changes" @onClick={{perform this.saveSettings}} @type="primary" @buttonType="submit" />
+        <BsButton
+          @defaultText="Save Changes"
+          @onClick={{perform this.saveSettings}}
+          @type="primary"
+          @buttonType="submit"
+        />
       {{/if}}
     {{/if}}
   </div>
