@@ -37,7 +37,6 @@ export default Component.extend(Evented, {
 
   listeners: null,
 
-
   // @Override
   /**
      * This overridden Ember Component lifecycle hook enables calling
