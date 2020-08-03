@@ -3,8 +3,16 @@
   "keywords": [
     "ember-addon"
   ],
+  "devDependencies": {
+    "typescript": "3.7.4"
+  },
   "dependencies": {
-    "ember-cli-babel": "*",
-    "ember-cli-typescript": "*"
+    "@ember/render-modifiers": "^1.0.2",
+    "@glimmer/component": "^1.0.0",
+    "ember-cli-babel": "^7.13.2",
+    "ember-cli-htmlbars": "^4.2.0",
+    "ember-cli-typescript": "^3.1.2",
+    "ember-debug-logger": "^2.1.1",
+    "three": "^0.112.1"
   }
 }
