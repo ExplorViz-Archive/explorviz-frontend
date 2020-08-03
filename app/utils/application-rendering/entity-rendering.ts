@@ -43,8 +43,8 @@ export default class EntityRendering {
     );
 
     const mesh = new FoundationMesh(layoutPos, OPENED_COMPONENT_HEIGHT, applicationLayout.width,
-      applicationLayout.depth, application, new THREE.Color(foundationColor),
-      new THREE.Color(highlightedEntityColor));
+      applicationLayout.depth, application, foundationColor,
+      highlightedEntityColor);
 
     const applicationCenter = applicationLayout.center;
 
@@ -57,7 +57,7 @@ export default class EntityRendering {
     });
   }
 
-  addComponentAndChildrenToScene(component: Component, color: string,
+  addComponentAndChildrenToScene(component: Component, color: THREE.Color,
     boxLayoutMap: Map<string, BoxLayout>, application: Application) {
     const componentData = boxLayoutMap.get(component.id);
     const applicationLayout = boxLayoutMap.get(application.id);
@@ -73,8 +73,8 @@ export default class EntityRendering {
       componentData.positionZ);
 
     const mesh = new ComponentMesh(layoutPos, componentData.height, componentData.width,
-      componentData.depth, component, new THREE.Color(color),
-      new THREE.Color(highlightedEntityColor));
+      componentData.depth, component, color,
+      highlightedEntityColor);
 
     const applicationCenter = applicationLayout.center;
 
@@ -91,7 +91,7 @@ export default class EntityRendering {
 
       layoutPos = new THREE.Vector3(clazzData.positionX, clazzData.positionY, clazzData.positionZ);
       const clazzMesh = new ClazzMesh(layoutPos, clazzData.height, clazzData.width, clazzData.depth,
-        clazz, new THREE.Color(clazzColor), new THREE.Color(highlightedEntityColor));
+        clazz, clazzColor, highlightedEntityColor);
       this.addMeshToScene(clazzMesh, applicationCenter);
       this.updateMeshVisiblity(clazzMesh);
     });
