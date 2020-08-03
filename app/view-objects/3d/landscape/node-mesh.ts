@@ -4,19 +4,22 @@ import PlaneMesh from './plane-mesh';
 import PlaneLayout from '../../layout-models/plane-layout';
 import NodeGroupMesh from './nodegroup-mesh';
 
-
 export default class NodeMesh extends PlaneMesh {
   dataModel: Node;
 
   material: THREE.MeshBasicMaterial;
 
   constructor(layout: PlaneLayout, nodeModel: Node,
-    defaultColor: THREE.Color, highlightingColor = new THREE.Color('red')) {
+    defaultColor: THREE.Color, highlightingColor = new THREE.Color('red'), depth = 0) {
     super(defaultColor, highlightingColor, layout);
 
     this.dataModel = nodeModel;
     this.material = new THREE.MeshBasicMaterial({ color: defaultColor });
-    this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
+    if (depth <= 0) {
+      this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
+    } else {
+      this.geometry = new THREE.BoxGeometry(layout.width, layout.height, depth);
+    }
   }
 
   /**

@@ -3,7 +3,6 @@ import NodeGroup from 'explorviz-frontend/models/nodegroup';
 import PlaneMesh from './plane-mesh';
 import PlaneLayout from '../../layout-models/plane-layout';
 
-
 export default class NodeGroupMesh extends PlaneMesh {
   dataModel: NodeGroup;
 
@@ -12,13 +11,17 @@ export default class NodeGroupMesh extends PlaneMesh {
   material: THREE.MeshBasicMaterial;
 
   constructor(layout: PlaneLayout, nodeGroupModel: NodeGroup,
-    defaultColor: THREE.Color, highlightingColor = new THREE.Color('red')) {
+    defaultColor: THREE.Color, highlightingColor = new THREE.Color('red'), depth = 0) {
     super(defaultColor, highlightingColor, layout);
 
     this.dataModel = nodeGroupModel;
     this.opened = layout.opened;
     this.material = new THREE.MeshBasicMaterial({ color: defaultColor });
-    this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
+    if (depth <= 0) {
+      this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
+    } else {
+      this.geometry = new THREE.BoxGeometry(layout.width, layout.height, depth);
+    }
   }
 
   setToDefaultPosition(centerPoint: THREE.Vector2) {
