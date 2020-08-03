@@ -9,7 +9,6 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
-
 export default class EntityRendering {
   // Functions as parent object for all application objects
   applicationObject3D: ApplicationObject3D;
@@ -42,9 +41,13 @@ export default class EntityRendering {
       applicationLayout.positionZ,
     );
 
+    const segmentScalar = 0.45;
+    const widthSegments = Math.floor(applicationLayout.width * segmentScalar);
+    const depthSegments = Math.floor(applicationLayout.depth * segmentScalar);
+
     const mesh = new FoundationMesh(layoutPos, OPENED_COMPONENT_HEIGHT, applicationLayout.width,
       applicationLayout.depth, application, new THREE.Color(foundationColor),
-      new THREE.Color(highlightedEntityColor));
+      new THREE.Color(highlightedEntityColor), widthSegments, depthSegments);
 
     const applicationCenter = applicationLayout.center;
 

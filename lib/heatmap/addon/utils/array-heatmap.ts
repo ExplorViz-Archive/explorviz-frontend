@@ -1,4 +1,4 @@
-import { Mesh, Geometry } from 'three';
+import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 
 export function getDefaultGradient() {
   return {
@@ -15,8 +15,8 @@ export function getDefaultGradient() {
 }
 
 export function setColorValues(index: number, heatValue: number, colorMap: number[],
-  foundationMesh: Mesh) {
-  const { depthSegments, widthSegments } = foundationMesh.userData;
+  foundationMesh: FoundationMesh) {
+  const { depthSegments, widthSegments } = foundationMesh.geometry.parameters;
 
   // Compute face numbers of top side of the cube
   const size = widthSegments * depthSegments * 2;
@@ -123,9 +123,9 @@ export function computeGradient(requestedValue: number, maximumValue: number, gr
    * @param {*} foundationMesh
    * @param {Number} maximumValue
    */
-export function invokeRecoloring(colorMap: number[], foundationMesh: Mesh, maximumValue: number,
-  gradient: Gradient) {
-  const { depthSegments, widthSegments } = foundationMesh.userData;
+export function invokeRecoloring(colorMap: number[], foundationMesh: FoundationMesh,
+  maximumValue: number, gradient: Gradient) {
+  const { depthSegments, widthSegments } = foundationMesh.geometry.parameters;
 
   // The number of faces at front and back of the foundation mesh,
   // i.e. the starting index for the faces on top.
@@ -135,11 +135,11 @@ export function invokeRecoloring(colorMap: number[], foundationMesh: Mesh, maxim
   for (let i = 0; i < size; i += 1) {
     if (colorMap[i]) {
       const color = computeGradient(colorMap[i], maximumValue, gradient);
-      (foundationMesh.geometry as Geometry).faces[i + depthOffset].color.set(color);
+      foundationMesh.geometry.faces[i + depthOffset].color.set(color);
     }
   }
 
-  (foundationMesh.geometry as Geometry).colorsNeedUpdate = true;
+  foundationMesh.geometry.colorsNeedUpdate = true;
 }
 
 export type Gradient = {

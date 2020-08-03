@@ -117,7 +117,8 @@
     "npm-check-updates": "^4.0.1",
     "plotly.js-dist": "^1.51.1",
     "rsvp": "^4.8.5",
-    "three": "^0.112.1",
+    "simpleheat": "^0.4.0",
+    "three": "0.113.1",
     "threejs-meshline": "^2.0.10"
   },
   "ember-addon": {

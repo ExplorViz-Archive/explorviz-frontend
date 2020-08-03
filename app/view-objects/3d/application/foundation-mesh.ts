@@ -12,11 +12,12 @@ export default class FoundationMesh extends BoxMesh {
 
   constructor(layoutPos: THREE.Vector3, layoutHeight: number,
     layoutWidth: number, layoutDepth: number, foundation: Application,
-    defaultColor: THREE.Color, highlightingColor: THREE.Color) {
+    defaultColor: THREE.Color, highlightingColor: THREE.Color,
+    widthSegments: number = 1, depthSegments: number = 1) {
     super(layoutPos, layoutHeight, layoutWidth, layoutDepth, defaultColor, highlightingColor);
 
     const material = new THREE.MeshLambertMaterial({ color: defaultColor });
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const geometry = new THREE.BoxGeometry(1, 1, 1, widthSegments, 1, depthSegments);
     this.geometry = geometry;
     this.material = material;
     this.dataModel = foundation;
