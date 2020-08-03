@@ -22,6 +22,7 @@ import * as CommunicationRendering from
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import reduceLandscape, { ReducedLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
+import FloorMesh from 'virtual-reality/utils/floor-mesh';
 
 // Declare globals
 /* global VRButton */
@@ -123,6 +124,11 @@ export default class VrRendering extends Component<Args> {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(this.configuration.landscapeColors.background);
     this.scene.add(this.landscapeObject3D);
+
+    // Add floor
+    const floorMesh = new FloorMesh(25, 30);
+    this.scene.add(floorMesh);
+
     this.debug('Scene created');
   }
 
