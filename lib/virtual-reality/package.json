@@ -1,0 +1,10 @@
+{
+  "name": "virtual-reality",
+  "keywords": [
+    "ember-addon"
+  ],
+  "dependencies": {
+    "ember-cli-babel": "*",
+    "ember-cli-typescript": "*"
+  }
+}
