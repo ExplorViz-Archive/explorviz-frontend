@@ -1,7 +1,7 @@
 import THREE from 'three';
 
 export default class FloorMesh extends THREE.Mesh {
-  constructor(width: number, length: number) {
+  constructor(width: number, length: number, path = 'images/materials/floor.jpg') {
     super();
 
     /**
@@ -11,7 +11,7 @@ export default class FloorMesh extends THREE.Mesh {
      * Title: Seamless Dark Texture With Small Grid
      * Source: https://tiled-bg.blogspot.com/2014/08/seamless-dark-texture-with-small-grid.html
      */
-    const floorTexture = new THREE.TextureLoader().load('images/materials/floor.jpg');
+    const floorTexture = new THREE.TextureLoader().load(path);
     floorTexture.wrapS = THREE.MirroredRepeatWrapping;
     floorTexture.wrapT = THREE.MirroredRepeatWrapping;
     floorTexture.repeat.set(width, length);

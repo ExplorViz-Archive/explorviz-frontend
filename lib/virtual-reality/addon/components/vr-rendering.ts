@@ -23,6 +23,7 @@ import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/land
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import reduceLandscape, { ReducedLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
 import FloorMesh from 'virtual-reality/utils/floor-mesh';
+import WebXRPolyfill from 'webxr-polyfill';
 
 // Declare globals
 /* global VRButton */
@@ -154,6 +155,11 @@ export default class VrRendering extends Component<Args> {
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
     this.renderer.xr.enabled = true;
+
+    const polyfill = new WebXRPolyfill();
+    if (polyfill) {
+      this.debug('Polyfill enabled');
+    }
     this.debug('Renderer set up');
   }
 
