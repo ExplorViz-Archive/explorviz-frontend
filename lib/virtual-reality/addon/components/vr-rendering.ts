@@ -78,6 +78,16 @@ export default class VrRendering extends Component<Args> {
     const { replayLandscape } = this.landscapeRepo;
     if (replayLandscape) {
       this.landscapeObject3D = new LandscapeObject3D(replayLandscape);
+
+      // Scale landscape to appropiate size for VR
+      const scaleFactor = 0.1;
+      this.landscapeObject3D.scale.set(scaleFactor, scaleFactor, scaleFactor);
+      this.landscapeObject3D.updateMatrixWorld(true);
+
+      // Rotate landscape such that it lays flat on the floor
+      this.landscapeObject3D.translateY((this.boxDepth * scaleFactor) / 2);
+      this.landscapeObject3D.rotateX(-90 * THREE.Math.DEG2RAD);
+      this.landscapeObject3D.updateMatrix();
     }
   }
 
@@ -127,7 +137,9 @@ export default class VrRendering extends Component<Args> {
     this.scene.add(this.landscapeObject3D);
 
     // Add floor
-    const floorMesh = new FloorMesh(25, 30);
+    // TODO: Increase floor size if landscape is too large
+    const floorSize = 10;
+    const floorMesh = new FloorMesh(floorSize, floorSize);
     this.scene.add(floorMesh);
 
     this.debug('Scene created');
