@@ -73,19 +73,14 @@ export default class VrRendering extends Component<Args> {
   constructor(owner: any, args: Args) {
     super(owner, args);
     this.debug('Constructor called');
-    this.boxDepth = 1.5;
+    this.boxDepth = 0.15;
 
     const { replayLandscape } = this.landscapeRepo;
     if (replayLandscape) {
       this.landscapeObject3D = new LandscapeObject3D(replayLandscape);
 
-      // Scale landscape to appropiate size for VR
-      const scaleFactor = 0.1;
-      this.landscapeObject3D.scale.set(scaleFactor, scaleFactor, scaleFactor);
-      this.landscapeObject3D.updateMatrixWorld(true);
-
       // Rotate landscape such that it lays flat on the floor
-      this.landscapeObject3D.translateY((this.boxDepth * scaleFactor) / 2);
+      this.landscapeObject3D.translateY((this.boxDepth) / 2);
       this.landscapeObject3D.rotateX(-90 * THREE.Math.DEG2RAD);
       this.landscapeObject3D.updateMatrix();
     }
@@ -151,7 +146,7 @@ export default class VrRendering extends Component<Args> {
   initCamera() {
     const { width, height } = this.canvas;
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    this.camera.position.set(0, 0, 100);
+    this.camera.position.set(0, 1, 2);
     this.debug('Camera added');
   }
 
@@ -278,6 +273,11 @@ populateScene = task(function* (this: VrRendering) {
 
       // Convert the simple to a PlaneLayout map
       LandscapeRendering.convertToPlaneLayoutMap(modelIdToLayout, modelIdToPlaneLayout);
+
+      // Scale landscape extensions
+      Array.from(modelIdToPlaneLayout.values()).forEach((layout) => {
+        layout.scale(0.1);
+      });
 
       // Compute center of landscape
       const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
@@ -470,9 +470,7 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   handleMouseWheel(delta: number) {
-    const scrollDelta = delta * 1.5;
-
-    this.camera.position.z += scrollDelta;
+    this.camera.position.z += delta;
   }
 
   // #endregion MOUSE EVENT HANDLER
