@@ -3,6 +3,7 @@ import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import debugLogger from 'ember-debug-logger';
 import THREE from 'three';
+import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import Configuration from 'explorviz-frontend/services/configuration';
 import System from 'explorviz-frontend/models/system';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
@@ -24,11 +25,14 @@ import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-rep
 import reduceLandscape, { ReducedLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
 import FloorMesh from 'virtual-reality/utils/floor-mesh';
 import WebXRPolyfill from 'webxr-polyfill';
+import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 
 // Declare globals
 /* global VRButton */
 
-interface Args {}
+interface Args {
+  readonly font: THREE.Font;
+}
 
 export default class VrRendering extends Component<Args> {
   // #region CLASS FIELDS AND GETTERS
@@ -62,6 +66,15 @@ export default class VrRendering extends Component<Args> {
   renderer!: THREE.WebGLRenderer;
 
   boxDepth: number;
+
+  get font() {
+    return this.args.font;
+  }
+
+  readonly imageLoader: ImageLoader = new ImageLoader();
+
+  // Provides functions to label landscape meshes
+  readonly labeler = new Labeler();
 
   // Extended Object3D which manages landscape meshes
   readonly landscapeObject3D!: LandscapeObject3D;
@@ -359,6 +372,14 @@ populateScene = task(function* (this: VrRendering) {
     // Create and add label + icon
     systemMesh.setToDefaultPosition(centerPoint);
 
+    // Create and add label + icon
+    systemMesh.setToDefaultPosition(centerPoint);
+    const labelText = system.get('name');
+    this.labeler.addSystemTextLabel(systemMesh, labelText, this.font,
+      this.configuration.landscapeColors.systemText, 0.04, 0.06);
+    this.labeler.addCollapseSymbol(systemMesh, this.font,
+      this.configuration.landscapeColors.collapseSymbol, 0.035, 0.035, 0.035);
+
     // Add to scene
     this.landscapeObject3D.add(systemMesh);
   }
@@ -381,8 +402,11 @@ populateScene = task(function* (this: VrRendering) {
       this.configuration.applicationColors.highlightedEntity,
       this.boxDepth);
 
-    // Create and add label + icon
     nodeGroupMesh.setToDefaultPosition(centerPoint);
+
+    // Add collapse symbol (+/-)
+    this.labeler.addCollapseSymbol(nodeGroupMesh, this.font,
+      this.configuration.landscapeColors.collapseSymbol, 0.035, 0.035, 0.035);
 
     // Add to scene
     this.landscapeObject3D.add(nodeGroupMesh);
@@ -407,6 +431,15 @@ populateScene = task(function* (this: VrRendering) {
     // Create and add label + icon
     nodeMesh.setToDefaultPosition(centerPoint);
 
+    const nodeGroupId = node.get('parent').get('id');
+    const nodeGroupMesh = this.landscapeObject3D.getMeshbyModelId(nodeGroupId);
+
+    // Label with own ip-address by default
+    const labelText = nodeMesh.getDisplayName(nodeGroupMesh);
+
+    this.labeler.addNodeTextLabel(nodeMesh, labelText, this.font,
+      this.configuration.landscapeColors.nodeText, 0.022, 0.02);
+
     // Add to scene
     this.landscapeObject3D.add(nodeMesh);
   }
@@ -428,6 +461,11 @@ populateScene = task(function* (this: VrRendering) {
       this.configuration.landscapeColors.application,
       this.configuration.applicationColors.highlightedEntity, this.boxDepth);
     applicationMesh.setToDefaultPosition(centerPoint);
+
+    // Create and add label + icon
+    this.labeler.addApplicationTextLabel(applicationMesh, application.get('name'), this.font,
+      this.configuration.landscapeColors.applicationText, 0.025, 0.01);
+    Labeler.addApplicationLogo(applicationMesh, this.imageLoader, 0.04, 0.04);
 
     // Add to scene
     this.landscapeObject3D.add(applicationMesh);
@@ -470,7 +508,7 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   handleMouseWheel(delta: number) {
-    this.camera.position.z += delta;
+    this.camera.position.z += delta * 0.2;
   }
 
   // #endregion MOUSE EVENT HANDLER
