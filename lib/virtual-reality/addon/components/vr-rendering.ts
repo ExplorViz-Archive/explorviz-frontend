@@ -210,6 +210,11 @@ export default class VrRendering extends Component<Args> {
         mouseWheel: this.handleMouseWheel,
         panning: this.handlePanning,
       });
+
+    // Add key listener for room positioning
+    window.onkeydown = (event: any) => {
+      this.handleKeyboard(event);
+    };
   }
 
   /**
@@ -487,8 +492,34 @@ populateScene = task(function* (this: VrRendering) {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
   }
+  // #region MOUSE & KEYBOARD EVENT HANDLER
 
-  // #region MOUSE EVENT HANDLER
+  handleKeyboard(event: any) {
+    const mvDst = 0.05;
+    // Handle keys
+    switch (event.key) {
+      case 'q':
+        this.landscapeObject3D.rotation.x -= mvDst;
+        break;
+      case 'e':
+        this.landscapeObject3D.rotation.x += mvDst;
+        break;
+      case 'w':
+        this.landscapeObject3D.position.y += mvDst;
+        break;
+      case 's':
+        this.landscapeObject3D.position.y -= mvDst;
+        break;
+      case 'a':
+        this.landscapeObject3D.position.x -= mvDst;
+        break;
+      case 'd':
+        this.landscapeObject3D.position.x += mvDst;
+        break;
+      default:
+        break;
+    }
+  }
 
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     const LEFT_MOUSE_BUTTON = 1;
@@ -511,5 +542,5 @@ populateScene = task(function* (this: VrRendering) {
     this.camera.position.z += delta * 0.2;
   }
 
-  // #endregion MOUSE EVENT HANDLER
+  // #endregion MOUSE & KEYBOARD EVENT HANDLER
 }
