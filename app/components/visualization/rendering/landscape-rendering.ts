@@ -34,7 +34,6 @@ import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/land
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 
-
 interface Args {
   readonly id: string;
   readonly landscape: Landscape;
@@ -130,7 +129,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion CLASS FIELDS AND GETTERS
-
 
   // #region COMPONENT AND SCENE INITIALIZATION
 
@@ -261,7 +259,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
-
   // #region RENDERING LOOP
 
   /**
@@ -286,7 +283,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion RENDERING LOOP
-
 
   // #region COMPONENT AND SCENE CLEAN-UP
 
@@ -322,7 +318,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion COMPONENT AND SCENE CLEAN-UP
-
 
   // #region ACTIONS
 
@@ -372,7 +367,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #endregion ACTIONS
 
-
   // #region SCENE POPULATION
 
   @task
@@ -383,7 +377,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.reducedLandscape = reduceLandscape(emberLandscape);
     yield this.populateScene.perform();
   });
-
 
   /**
  * Computes new meshes for the landscape and adds them to the scene
@@ -604,7 +597,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #endregion SCENE POPULATION
 
-
   // #region SCENE MANIPULATION
 
   @task
@@ -690,7 +682,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion SCENE MANIPULATION
-
 
   // #region MOUSE EVENT HANDLER
 

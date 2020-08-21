@@ -26,6 +26,7 @@ import reduceLandscape, { ReducedLandscape } from 'explorviz-frontend/utils/land
 import FloorMesh from 'virtual-reality/utils/floor-mesh';
 import WebXRPolyfill from 'webxr-polyfill';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
+import { XRControllerModelFactory } from 'virtual-reality/utils/XRControllerModelFactory';
 
 // Declare globals
 /* global VRButton */
@@ -64,6 +65,10 @@ export default class VrRendering extends Component<Args> {
   camera!: THREE.PerspectiveCamera;
 
   renderer!: THREE.WebGLRenderer;
+
+  controller1: THREE.Group|undefined;
+
+  controller2: THREE.Group|undefined;
 
   boxDepth: number;
 
@@ -116,7 +121,6 @@ export default class VrRendering extends Component<Args> {
 
     this.initThreeJs();
     outerDiv.appendChild(VRButton.createButton(this.renderer));
-    // this.initInteraction();
     this.render();
 
     this.resize(outerDiv);
@@ -134,6 +138,7 @@ export default class VrRendering extends Component<Args> {
     this.initRenderer();
     this.initLights();
     this.initInteraction();
+    this.initControllers();
   }
 
   /**
@@ -215,6 +220,32 @@ export default class VrRendering extends Component<Args> {
     window.onkeydown = (event: any) => {
       this.handleKeyboard(event);
     };
+  }
+
+  initControllers() {
+    const controllerModelFactory = new XRControllerModelFactory();
+
+    this.controller1 = this.renderer.xr.getController(0);
+    this.controller1.add(controllerModelFactory.createControllerModel(this.controller1));
+    // controller1.addEventListener('selectstart', onSelectStart);
+    // controller1.addEventListener('selectend', onSelectEnd);
+    this.scene.add(this.controller1);
+
+    this.controller2 = this.renderer.xr.getController(1);
+    // controller2.addEventListener('selectstart', onSelectStart);
+    // controller2.addEventListener('selectend', onSelectEnd);
+    this.controller2.add(controllerModelFactory.createControllerModel(this.controller2));
+    this.scene.add(this.controller2);
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(
+      [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)],
+    );
+
+    const line = new THREE.Line(geometry);
+    line.scale.z = 5;
+
+    this.controller1.add(line.clone());
+    this.controller2.add(line.clone());
   }
 
   /**
@@ -515,6 +546,9 @@ populateScene = task(function* (this: VrRendering) {
         break;
       case 'd':
         this.landscapeObject3D.position.x += mvDst;
+        break;
+      case 'c':
+        this.initControllers();
         break;
       default:
         break;
