@@ -32,7 +32,7 @@
       {{/if}}
     {{else}}
       {{#if this.landscapeRepo.latestApplication}}
-        <Visualization::Rendering::ApplicationRendering
+        <HeatmapRendering
           @id="app1"
           @application={{this.landscapeRepo.latestApplication}}
           @addComponent={{this.addComponent}}
