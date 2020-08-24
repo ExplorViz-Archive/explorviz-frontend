@@ -50,6 +50,9 @@
     "app/**/*",
     "tests/**/*",
     "types/**/*",
-    "lib/virtual-reality"
+    "lib/virtual-reality",
+  ],
+  "exclude": [
+    "lib/virtual-reality/addon/utils/lib"
   ]
 }
