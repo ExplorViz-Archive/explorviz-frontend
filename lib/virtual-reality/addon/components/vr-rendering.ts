@@ -66,10 +66,6 @@ export default class VrRendering extends Component<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
-  controller1: THREE.Group|undefined;
-
-  controller2: THREE.Group|undefined;
-
   boxDepth: number;
 
   get font() {
@@ -99,7 +95,7 @@ export default class VrRendering extends Component<Args> {
 
       // Rotate landscape such that it lays flat on the floor
       this.landscapeObject3D.translateY((this.boxDepth) / 2);
-      this.landscapeObject3D.rotateX(-90 * THREE.Math.DEG2RAD);
+      this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
       this.landscapeObject3D.updateMatrix();
     }
   }
@@ -232,24 +228,19 @@ export default class VrRendering extends Component<Args> {
     const line = new THREE.Line(geometry);
     line.scale.z = 5;
 
-    this.controller1 = this.renderer.xr.getController(0);
-    if (this.controller1) {
-      this.controller1.add(controllerModelFactory.createControllerModel(this.controller1));
-      // controller1.addEventListener('selectstart', onSelectStart);
-      // controller1.addEventListener('selectend', onSelectEnd);
-      this.controller1.add(line.clone());
+    for (let controllerID = 0; controllerID < 2; controllerID++) {
+      const controller = this.renderer.xr.getController(controllerID);
 
-      this.scene.add(this.controller1);
-    }
+      if (controller) {
+        const controllerGrip = this.renderer.xr.getControllerGrip(controllerID);
 
-    this.controller2 = this.renderer.xr.getController(1);
-    if (this.controller2) {
-    // controller2.addEventListener('selectstart', onSelectStart);
-    // controller2.addEventListener('selectend', onSelectEnd);
-      this.controller2.add(controllerModelFactory.createControllerModel(this.controller2));
-      this.controller2.add(line.clone());
+        controllerGrip.add(controllerModelFactory.createControllerModel(controllerGrip));
 
-      this.scene.add(this.controller2);
+        controllerGrip.add(line.clone());
+
+        this.scene.add(controller);
+        this.scene.add(controllerGrip);
+      }
     }
   }
 

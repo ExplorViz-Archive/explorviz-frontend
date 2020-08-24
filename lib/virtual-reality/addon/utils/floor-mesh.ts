@@ -22,7 +22,7 @@ export default class FloorMesh extends THREE.Mesh {
     });
 
     // Rotate floor such that it is horizontal
-    this.rotateX(270 * THREE.Math.DEG2RAD);
+    this.rotateX(270 * THREE.MathUtils.DEG2RAD);
     this.receiveShadow = true;
   }
 }
