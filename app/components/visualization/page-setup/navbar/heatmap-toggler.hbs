@@ -1,0 +1,19 @@
+<li class="nav-item">
+  {{#if @heatmapActive}}
+    <div
+      class="nav-link-with-cursor"
+      title="Disable Heatmap"
+      {{on "click" @toggleHeatmap}}
+    >
+      {{svg-jar "flame" class="octicon align-middle navbar-highlight"}}
+    </div>
+  {{else}}
+    <div
+      class="nav-link-with-cursor"
+      title="Enable Heatmap"
+      {{on "click" @toggleHeatmap}}
+    >
+      {{svg-jar "flame" class="octicon align-middle"}}
+    </div>
+  {{/if}}
+</li>
