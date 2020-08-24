@@ -26,7 +26,7 @@ import reduceLandscape, { ReducedLandscape } from 'explorviz-frontend/utils/land
 import FloorMesh from 'virtual-reality/utils/floor-mesh';
 import WebXRPolyfill from 'webxr-polyfill';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
-import { XRControllerModelFactory } from 'virtual-reality/utils/XRControllerModelFactory';
+import XRControllerModelFactory from 'virtual-reality/utils/XRControllerModelFactory';
 
 // Declare globals
 /* global VRButton */
@@ -225,18 +225,6 @@ export default class VrRendering extends Component<Args> {
   initControllers() {
     const controllerModelFactory = new XRControllerModelFactory();
 
-    this.controller1 = this.renderer.xr.getController(0);
-    this.controller1.add(controllerModelFactory.createControllerModel(this.controller1));
-    // controller1.addEventListener('selectstart', onSelectStart);
-    // controller1.addEventListener('selectend', onSelectEnd);
-    this.scene.add(this.controller1);
-
-    this.controller2 = this.renderer.xr.getController(1);
-    // controller2.addEventListener('selectstart', onSelectStart);
-    // controller2.addEventListener('selectend', onSelectEnd);
-    this.controller2.add(controllerModelFactory.createControllerModel(this.controller2));
-    this.scene.add(this.controller2);
-
     const geometry = new THREE.BufferGeometry().setFromPoints(
       [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)],
     );
@@ -244,8 +232,25 @@ export default class VrRendering extends Component<Args> {
     const line = new THREE.Line(geometry);
     line.scale.z = 5;
 
-    this.controller1.add(line.clone());
-    this.controller2.add(line.clone());
+    this.controller1 = this.renderer.xr.getController(0);
+    if (this.controller1) {
+      this.controller1.add(controllerModelFactory.createControllerModel(this.controller1));
+      // controller1.addEventListener('selectstart', onSelectStart);
+      // controller1.addEventListener('selectend', onSelectEnd);
+      this.controller1.add(line.clone());
+
+      this.scene.add(this.controller1);
+    }
+
+    this.controller2 = this.renderer.xr.getController(1);
+    if (this.controller2) {
+    // controller2.addEventListener('selectstart', onSelectStart);
+    // controller2.addEventListener('selectend', onSelectEnd);
+      this.controller2.add(controllerModelFactory.createControllerModel(this.controller2));
+      this.controller2.add(line.clone());
+
+      this.scene.add(this.controller2);
+    }
   }
 
   /**
