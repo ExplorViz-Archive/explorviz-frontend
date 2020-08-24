@@ -27,6 +27,8 @@ import FloorMesh from 'virtual-reality/utils/floor-mesh';
 import WebXRPolyfill from 'webxr-polyfill';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import XRControllerModelFactory from 'virtual-reality/utils/XRControllerModelFactory';
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 
 // Declare globals
 /* global VRButton */
@@ -66,6 +68,12 @@ export default class VrRendering extends Component<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
+  raycaster: THREE.Raycaster;
+
+  controller1: THREE.Group;
+
+  controller2: THREE.Group;
+
   boxDepth: number;
 
   get font() {
@@ -88,6 +96,10 @@ export default class VrRendering extends Component<Args> {
     super(owner, args);
     this.debug('Constructor called');
     this.boxDepth = 0.15;
+
+    this.raycaster = new THREE.Raycaster();
+    this.controller1 = new THREE.Group();
+    this.controller2 = new THREE.Group();
 
     const { replayLandscape } = this.landscapeRepo;
     if (replayLandscape) {
@@ -220,27 +232,90 @@ export default class VrRendering extends Component<Args> {
 
   initControllers() {
     const controllerModelFactory = new XRControllerModelFactory();
+    this.controller1 = this.renderer.xr.getController(0);
+    this.controller2 = this.renderer.xr.getController(1);
 
     const geometry = new THREE.BufferGeometry().setFromPoints(
       [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)],
     );
 
     const line = new THREE.Line(geometry);
+    line.name = 'line';
     line.scale.z = 5;
 
     for (let controllerID = 0; controllerID < 2; controllerID++) {
       const controller = this.renderer.xr.getController(controllerID);
-
       if (controller) {
         const controllerGrip = this.renderer.xr.getControllerGrip(controllerID);
 
         controllerGrip.add(controllerModelFactory.createControllerModel(controllerGrip));
 
-        controllerGrip.add(line.clone());
+        controller.add(line.clone());
 
         this.scene.add(controller);
         this.scene.add(controllerGrip);
       }
+    }
+  }
+
+  getIntersections(controller: THREE.Group) {
+    const tempMatrix = new THREE.Matrix4();
+    tempMatrix.identity().extractRotation(controller.matrixWorld);
+
+    this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+    this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+
+    const intersectionObjects = [this.landscapeObject3D];
+
+    if (!this.landscapeObject3D) { return []; }
+
+    const intersections = this.raycaster.intersectObjects(intersectionObjects, true);
+
+    for (let i = 0; i < intersections.length; i++) {
+      const { object } = intersections[i];
+      if (!(object instanceof LabelMesh)) {
+        return [intersections[i]];
+      }
+    }
+
+    return [];
+  }
+
+  intersectObjects(controller: THREE.Group) {
+    const line = controller.getObjectByName('line');
+
+    if (!line) return;
+
+    const intersections = this.getIntersections(controller);
+
+    const nearestIntersection = intersections.firstObject;
+
+    if (nearestIntersection) {
+      const { object } = intersections[0];
+
+      if (object instanceof BaseMesh) {
+        VrRendering.resetHoverEffect(controller);
+        object.applyHoverEffect(1.4);
+        controller.userData.intersectedObject = object;
+      }
+
+      line.scale.z = intersections[0].distance;
+    } else {
+      VrRendering.resetHoverEffect(controller);
+      line.scale.z = 5;
+    }
+  }
+
+  /**
+   * Resets the hover effect of the object which was previously hovered upon by the controller.
+   *
+   * @param controller Controller of which the hover effect shall be reseted.
+   */
+  static resetHoverEffect(controller: THREE.Group) {
+    const currentObject = controller.userData.intersectedObject;
+    if (currentObject instanceof BaseMesh) {
+      currentObject.resetHoverEffect();
+      controller.userData.intersectedObject = null;
     }
   }
 
@@ -249,6 +324,9 @@ export default class VrRendering extends Component<Args> {
    */
   render() {
     if (this.isDestroyed) { return; }
+
+    if (this.controller1) { this.intersectObjects(this.controller1); }
+    if (this.controller2) { this.intersectObjects(this.controller2); }
 
     this.renderer.setAnimationLoop(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
