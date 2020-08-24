@@ -19,7 +19,6 @@ import Application from 'explorviz-frontend/models/application';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import NodeGroup from 'explorviz-frontend/models/nodegroup';
 import System from 'explorviz-frontend/models/system';
-import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
 import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
 import NodeGroupMesh from 'explorviz-frontend/view-objects/3d/landscape/nodegroup-mesh';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
@@ -119,7 +118,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   readonly imageLoader: ImageLoader = new ImageLoader();
 
-  readonly hoverHandler: HoverEffectHandler = new HoverEffectHandler();
+  hoveredObject: BaseMesh|null;
 
   @tracked
   popupData: PopupData | null = null;
@@ -140,6 +139,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.render = this.render.bind(this);
 
     this.landscapeObject3D = new LandscapeObject3D(this.args.landscape);
+    this.hoveredObject = null;
   }
 
   @action
@@ -733,10 +733,14 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
     // Update hover effect
-    if (mesh === undefined) {
-      this.hoverHandler.resetHoverEffect();
+    if (mesh === undefined && this.hoveredObject) {
+      this.hoveredObject.resetHoverEffect();
+      this.hoveredObject = null;
     } else if (mesh instanceof PlaneMesh && enableHoverEffects) {
-      this.hoverHandler.applyHoverEffect(mesh);
+      if (this.hoveredObject) { this.hoveredObject.resetHoverEffect(); }
+
+      this.hoveredObject = mesh;
+      mesh.applyHoverEffect();
     }
 
     // Do not show popups while mouse is moving

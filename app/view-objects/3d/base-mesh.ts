@@ -46,6 +46,7 @@ export default abstract class BaseMesh extends THREE.Mesh {
     // Calculate and apply brighter color to material ('hover effect')
     const material = this.material as THREE.MeshBasicMaterial|THREE.MeshLambertMaterial;
     material.color = calculateColorBrightness(material.color, colorShift);
+    this.isHovered = true;
   }
 
   /**
@@ -57,6 +58,7 @@ export default abstract class BaseMesh extends THREE.Mesh {
 
     // Restore normal color (depends on highlighting status)
     material.color = highlighted ? highlightingColor : defaultColor;
+    this.isHovered = false;
   }
 
   updateColor() {

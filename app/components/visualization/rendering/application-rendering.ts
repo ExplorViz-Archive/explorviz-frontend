@@ -13,7 +13,6 @@ import Clazz from 'explorviz-frontend/models/clazz';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import Component from 'explorviz-frontend/models/component';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
-import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
@@ -94,10 +93,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   boxLayoutMap: Map<string, BoxLayout>;
 
+  hoveredObject: BaseMesh|null;
+
   // Extended Object3D which manages application meshes
   readonly applicationObject3D: ApplicationObject3D;
-
-  readonly hoverHandler: HoverEffectHandler;
 
   readonly highlighter: Highlighting;
 
@@ -119,7 +118,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #endregion CLASS FIELDS AND GETTERS
 
-
   // #region COMPONENT AND SCENE INITIALIZATION
 
   constructor(owner: any, args: Args) {
@@ -132,8 +130,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.boxLayoutMap = new Map();
 
-    this.hoverHandler = new HoverEffectHandler();
-
     this.highlighter = new Highlighting(this.applicationObject3D);
 
     this.entityRendering = new EntityRendering(this.applicationObject3D, this.configuration);
@@ -143,6 +139,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.entityManipulation = new EntityManipulation(this.applicationObject3D,
       this.communicationRendering, this.highlighter);
+
+    this.hoveredObject = null;
   }
 
   @action
@@ -267,7 +265,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
-
   // #region MOUSE EVENT HANDLER
 
   handleSingleClick(mesh: THREE.Mesh | undefined) {
@@ -295,11 +292,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleMouseMove(mesh: THREE.Mesh | undefined) {
     const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
-    // Indicate on top of which mesh mouse is located (using a hover effect)
-    if (mesh === undefined) {
-      this.hoverHandler.resetHoverEffect();
+    // Update hover effect
+    if (mesh === undefined && this.hoveredObject) {
+      this.hoveredObject.resetHoverEffect();
+      this.hoveredObject = null;
     } else if (mesh instanceof BaseMesh && enableHoverEffects) {
-      this.hoverHandler.applyHoverEffect(mesh);
+      if (this.hoveredObject) { this.hoveredObject.resetHoverEffect(); }
+
+      this.hoveredObject = mesh;
+      mesh.applyHoverEffect();
     }
 
     // Hide popups when mouse moves
@@ -356,7 +357,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion MOUSE EVENT HANDLER
-
 
   // #region SCENE POPULATION
 
@@ -422,7 +422,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #endregion SCENE POPULATION
 
-
   // #region RENDERING LOOP
 
   /**
@@ -447,7 +446,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion RENDERING LOOP
-
 
   // #region ACTIONS
 
@@ -599,7 +597,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #endregion ACTIONS
 
-
   // #region COMPONENT AND SCENE CLEAN-UP
 
   willDestroy() {
@@ -623,7 +620,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion COMPONENT AND SCENE CLEAN-UP
-
 
   // #region ADDITIONAL HELPER FUNCTIONS
 
