@@ -15,9 +15,11 @@ export default class Raycaster extends THREE.Raycaster {
     // Calculate objects intersecting the picking ray
     const intersections = this.intersectObjects(possibleObjects);
 
+    const visibleObjects = intersections.filter(((intersection) => intersection.object.visible));
+
     // Returns the nearest hit object if one exists
-    if (intersections.length > 0) {
-      return intersections[0];
+    if (visibleObjects.length > 0) {
+      return visibleObjects[0];
     }
 
     // Return null to indicate that no object was found
