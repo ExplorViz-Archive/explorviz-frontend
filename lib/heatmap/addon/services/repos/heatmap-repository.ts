@@ -10,6 +10,7 @@ import addDrawableCommunication from 'explorviz-frontend/utils/model-update';
 import Heatmap from 'heatmap/models/heatmap';
 import LandscapeMetric from 'heatmap/models/landscape-metric';
 import ApplicationMetric from 'heatmap/models/application-metric';
+import { tracked } from '@glimmer/tracking';
 import { getDefaultGradient as getSimpleDefaultGradient } from '../../utils/simple-heatmap';
 import { getDefaultGradient as getArrayDefaultGradient } from '../../utils/array-heatmap';
 import { revertKey } from '../../utils/heatmap-generator';
@@ -20,12 +21,21 @@ type Heatmaps = {
   windowedHeatmap: LandscapeMetric
 };
 
+export interface Metric {
+  name: string;
+  typeName: string;
+  description: string;
+}
+
 type HeatmapMode = 'aggregatedHeatmap'|'windowedHeatmap';
 
 export default class HeatmapRepository extends Service.extend(Evented) {
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
 
   @service('store') store!: DS.Store;
+
+  @tracked
+  heatmapActive = false;
 
   // Switch for the legend
   legendActive = true;
@@ -39,9 +49,10 @@ export default class HeatmapRepository extends Service.extend(Evented) {
 
   largestValue = 0;
 
-  metrics = null;
+  metrics: Metric[] = [];
 
-  selectedMetric = 'importCoupling';
+  @tracked
+  selectedMetric: null|Metric = null;
 
   applicationID: null|string = null;
 
@@ -68,20 +79,20 @@ export default class HeatmapRepository extends Service.extend(Evented) {
 
   triggerLatestHeatmapUpdate() {
     if (this.applicationID) {
-      this.computeClazzMetrics(this.applicationID);
-      this.trigger('updatedClazzMetrics', this.latestClazzMetrics);
+      const clazzMetrics = this.computeClazzMetrics(this.applicationID);
+      if (clazzMetrics !== null) {
+        this.trigger('updatedClazzMetrics', this.latestClazzMetrics);
+      }
     }
   }
 
   triggerMetricUpdate() {
     if (this.applicationID) {
-      this.computeClazzMetrics(this.applicationID);
-      this.trigger('newSelectedMetric', this.latestClazzMetrics);
+      const clazzMetrics = this.computeClazzMetrics(this.applicationID);
+      if (clazzMetrics !== null) {
+        this.trigger('newSelectedMetric', this.latestClazzMetrics);
+      }
     }
-  }
-
-  triggerConfigChanged() {
-    this.trigger('configChanged');
   }
 
   toggleLegend() {
@@ -93,7 +104,7 @@ export default class HeatmapRepository extends Service.extend(Evented) {
     if (this.latestHeatmaps) {
       const selectedMap = this.latestHeatmaps[this.selectedMode];
       if (this.selectedMetric && applicationID) {
-        this.set('latestApplicationHeatmap', selectedMap.getApplicationMetric(applicationID, this.selectedMetric));
+        this.set('latestApplicationHeatmap', selectedMap.getApplicationMetric(applicationID, this.selectedMetric.typeName));
         if (this.latestApplicationHeatmap) {
           clazzMetrics = this.latestApplicationHeatmap.getClassMetricValues();
           this.set('latestClazzMetrics', clazzMetrics);
