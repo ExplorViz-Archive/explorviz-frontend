@@ -7,7 +7,7 @@ import DS from 'ember-data';
 import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import Heatmap from 'heatmap/models/heatmap';
-import HeatmapRepository from './repos/heatmap-repository';
+import HeatmapRepository, { Metric } from './repos/heatmap-repository';
 
 declare const EventSourcePolyfill: any;
 
@@ -74,8 +74,8 @@ export default class HeatmapListener extends Service.extend(Evented) {
           const heatmapRecord: Heatmap = this.store.push(jsonHeatmap) as Heatmap;
 
           // Register the metrics the first time they are pushed.
-          if (!this.heatmapRepo.metrics) {
-            const metrics: any[] = [];
+          if (this.heatmapRepo.metrics.length === 0) {
+            const metrics: Metric[] = [];
 
             jsonHeatmap.data.attributes.metricTypes.forEach((type: string) => {
               const metric = this.store.peekAll(type).objectAt(0);
@@ -87,7 +87,6 @@ export default class HeatmapListener extends Service.extend(Evented) {
             });
 
             set(this.heatmapRepo, 'metrics', metrics);
-            set(this.heatmapRepo, 'windowsize', jsonHeatmap.data.attributes.windowsize);
             this.debug('Updated metric list.');
           }
 
