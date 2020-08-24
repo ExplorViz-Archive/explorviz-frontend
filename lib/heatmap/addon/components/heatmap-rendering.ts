@@ -31,11 +31,12 @@ import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout'
 import EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import { task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import HeatmapRepository from 'heatmap/services/repos/heatmap-repository';
+import HeatmapRepository, { Metric } from 'heatmap/services/repos/heatmap-repository';
 import HeatmapListener from 'heatmap/services/heatmap-listener';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
 import { computeHeatmapMinMax } from 'heatmap/utils/heatmap-generator';
 import { setColorValues, invokeRecoloring } from 'heatmap/utils/array-heatmap';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
 interface Args {
   readonly id: string,
@@ -294,6 +295,9 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
       || mesh instanceof ClazzCommunicationMesh) {
       this.highlighter.highlight(mesh);
     }
+    if (this.heatmapRepo.heatmapActive) {
+      this.turnAllMeshesTransparent();
+    }
   }
 
   handleDoubleClick(mesh: THREE.Mesh | undefined) {
@@ -306,17 +310,20 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
     } else if (mesh instanceof FoundationMesh) {
       this.entityManipulation.closeAllComponents(this.boxLayoutMap);
     }
+    if (this.heatmapRepo.heatmapActive) {
+      this.turnAllMeshesTransparent();
+    }
   }
 
   handleMouseMove(mesh: THREE.Mesh | undefined) {
     const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
     // Indicate on top of which mesh mouse is located (using a hover effect)
-    /*     if (mesh === undefined) {
+    if (mesh === undefined) {
       this.hoverHandler.resetHoverEffect();
-    } else if (mesh instanceof BaseMesh && enableHoverEffects) {
+    } else if (mesh instanceof BaseMesh && !(mesh instanceof FoundationMesh) && enableHoverEffects) {
       this.hoverHandler.applyHoverEffect(mesh);
-    } */
+    }
 
     // Hide popups when mouse moves
     this.popupData = null;
@@ -378,6 +385,7 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
   @task
   // eslint-disable-next-line
   loadNewApplication = task(function* (this: HeatmapRendering) {
+    this.heatmapRepo.set('applicationID', this.args.application.id);
     this.reducedApplication = reduceApplication(this.args.application);
     this.applicationObject3D.dataModel = this.args.application;
     yield this.populateScene.perform();
@@ -408,15 +416,10 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
-      this.applyHeatmap();
 
-      const allMeshes = this.applicationObject3D.getAllMeshes();
-
-      allMeshes.forEach((mesh) => {
-        if (mesh instanceof ComponentMesh) {
-          mesh.turnTransparent(0.2);
-        }
-      });
+      if (this.heatmapRepo.heatmapActive) {
+        this.applyHeatmap();
+      }
     } catch (e) {
       // console.log(e);
     }
@@ -444,12 +447,18 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
     });
   }
 
-  applyHeatmap() {
-    this.scene.children.forEach((child) => {
-      if (child.type === 'SpotLight') {
-        child.visible = false;
+  turnAllMeshesTransparent() {
+    const allMeshes = this.applicationObject3D.getAllMeshes();
+
+    allMeshes.forEach((mesh) => {
+      if (mesh instanceof ComponentMesh) {
+        mesh.turnTransparent(0.1);
       }
     });
+  }
+
+  applyHeatmap() {
+    this.turnAllMeshesTransparent();
 
     const { useSimpleHeat, useHelperLines } = this.heatmapRepo;
 
@@ -520,10 +529,13 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
       component.getContainedClazzes(clazzList);
     });
 
+    this.removeHelperLines();
+
     clazzList.forEach((clazz) => {
       // Calculate center point of the clazz floor. This is used for computing the corresponding
       // face on the foundation box.
-      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id) as ClazzMesh | undefined;
+      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id) as
+        ClazzMesh | undefined;
 
       if (!clazzMesh) {
         return;
@@ -555,6 +567,7 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
         points.push(worldIntersectionPoint);
         const geometry1 = new THREE.BufferGeometry().setFromPoints(points);
         const line = new THREE.Line(geometry1, material1);
+        line.name = 'helperline';
         this.applicationObject3D.add(line);
       }
 
@@ -610,6 +623,20 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
       heatmapMaterial.emissiveIntensity = 1;
       heatmapMaterial.needsUpdate = true;
     }
+  }
+
+  removeHelperLines() {
+    const applicationChildren: THREE.Object3D[] = [];
+
+    // Remove helper lines if existend
+    this.applicationObject3D.traverse(((child) => {
+      if (child.name === 'helperline') {
+        applicationChildren.push(child);
+      }
+    }));
+    applicationChildren.forEach(((child) => {
+      this.applicationObject3D.remove(child);
+    }));
   }
 
   // #endregion SCENE POPULATION
@@ -774,6 +801,47 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
     // Open components such that complete trace is visible
     this.openAllComponents();
     this.highlighter.highlightTrace(trace, step, this.args.application);
+  }
+
+  @action
+  updateMetric(metric: Metric) {
+    this.heatmapRepo.set('selectedMetric', metric);
+    this.heatmapRepo.triggerMetricUpdate();
+  }
+
+  @action
+  toggleHeatmap() {
+    if (this.heatmapRepo.metrics.length === 0) {
+      AlertifyHandler.showAlertifyError('No metrics loaded yet');
+      return;
+    }
+    this.heatmapRepo.heatmapActive = !this.heatmapRepo.heatmapActive;
+
+    this.scene.children.forEach((child) => {
+      if (child.type === 'SpotLight') {
+        child.visible = !this.heatmapRepo.heatmapActive;
+      }
+    });
+    if (this.heatmapRepo.heatmapActive) {
+      if (this.heatmapRepo.metrics.length > 0 && !this.heatmapRepo.selectedMetric) {
+        const [firstMetric] = this.heatmapRepo.metrics;
+        this.updateMetric(firstMetric);
+      } else {
+        this.applyHeatmap();
+      }
+    } else {
+      this.removeHelperLines();
+      const foundationMesh = this.applicationObject3D.getBoxMeshbyModelId(this.args.application.id) as FoundationMesh | undefined;
+      if (foundationMesh) {
+        foundationMesh.material = new THREE.MeshLambertMaterial({ color: new THREE.Color(this.configuration.applicationColors.foundation) });
+      }
+
+      if (this.highlighter.highlightedEntity) {
+        this.highlighter.updateHighlighting();
+      } else {
+        this.highlighter.removeHighlighting();
+      }
+    }
   }
 
   // #endregion ACTIONS
