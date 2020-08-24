@@ -129,7 +129,8 @@ export default class VrRendering extends Component<Args> {
 
     this.initThreeJs();
     outerDiv.appendChild(VRButton.createButton(this.renderer));
-    this.render();
+
+    this.renderer.setAnimationLoop(this.render.bind(this));
 
     this.resize(outerDiv);
 
@@ -256,6 +257,15 @@ export default class VrRendering extends Component<Args> {
         this.scene.add(controllerGrip);
       }
     }
+
+    this.controller1.addEventListener('selectstart', this.onSelectStart.bind(this));
+  }
+
+  onSelectStart() {
+    const object = this.controller1.userData.intersectedObject;
+    if (object instanceof SystemMesh) {
+      this.toggleSystemAndRedraw(object);
+    }
   }
 
   getIntersections(controller: THREE.Group) {
@@ -328,7 +338,6 @@ export default class VrRendering extends Component<Args> {
     if (this.controller1) { this.intersectObjects(this.controller1); }
     if (this.controller2) { this.intersectObjects(this.controller2); }
 
-    this.renderer.setAnimationLoop(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -581,6 +590,79 @@ populateScene = task(function* (this: VrRendering) {
     this.landscapeObject3D.add(applicationMesh);
   }
 
+  @task
+  // eslint-disable-next-line
+  openNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
+    nodeGroupMesh.opened = true;
+    yield this.cleanAndUpdateScene();
+  });
+
+  @task
+  // eslint-disable-next-line
+  closeNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
+    nodeGroupMesh.opened = false;
+    yield this.cleanAndUpdateScene();
+  });
+
+  @task
+  // eslint-disable-next-line
+  openSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
+    systemMesh.opened = true;
+    yield this.cleanAndUpdateScene();
+  });
+
+  @task
+  // eslint-disable-next-line
+  closeSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
+    systemMesh.opened = false;
+    this.closeNogeGroupsInSystem(systemMesh);
+    yield this.cleanAndUpdateScene();
+  });
+
+  /**
+   * Toggles the open status of a system mesh and redraws the landscape
+   *
+   * @param systemMesh System mesh of which the open state should be toggled
+   */
+  toggleSystemAndRedraw(systemMesh: SystemMesh) {
+    if (systemMesh.opened) {
+      this.closeSystemAndRedraw.perform(systemMesh);
+    } else {
+      this.openSystemAndRedraw.perform(systemMesh);
+    }
+  }
+
+  /**
+   * Toggles the open status of a nodegroup and redraws the landscape
+   *
+   * @param nodeGroupMesh nodegroup mesh of which the open state should be toggled
+   */
+  toggleNodeGroupAndRedraw(nodeGroupMesh: NodeGroupMesh) {
+    if (nodeGroupMesh.opened) {
+      this.closeNodeGroupAndRedraw.perform(nodeGroupMesh);
+    } else {
+      this.openNodeGroupAndRedraw.perform(nodeGroupMesh);
+    }
+  }
+
+  /**
+   * Sets all nodegroup meshes inside a closed system mesh to closed
+   *
+   * @param systemMesh System mesh which contains closable nodegroup meshes
+   */
+  closeNogeGroupsInSystem(systemMesh: SystemMesh) {
+    const system = systemMesh.dataModel;
+    // Close nodegroups in system
+    if (!systemMesh.opened) {
+      system.get('nodegroups').forEach((nodeGroup) => {
+        const nodeGroupMesh = this.landscapeObject3D.getMeshbyModelId(nodeGroup.get('id'));
+        if (nodeGroupMesh instanceof NodeGroupMesh) {
+          nodeGroupMesh.opened = false;
+        }
+      });
+    }
+  }
+
   /**
    * Call this whenever the canvas is resized. Updated properties of camera
    * and renderer.
@@ -597,6 +679,22 @@ populateScene = task(function* (this: VrRendering) {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
   }
+
+  /**
+ * Inherit this function to update the scene with a new renderingModel. It
+ * automatically removes every mesh from the scene and finally calls
+ * the (overridden) "populateScene" function. Add your custom code
+ * as shown in landscape-rendering.
+ *
+ * @method cleanAndUpdateScene
+ */
+  @action
+  async cleanAndUpdateScene() {
+    await this.populateScene.perform();
+
+    this.debug('clean and populate landscape-rendering');
+  }
+
   // #region MOUSE & KEYBOARD EVENT HANDLER
 
   handleKeyboard(event: any) {
@@ -620,9 +718,6 @@ populateScene = task(function* (this: VrRendering) {
         break;
       case 'd':
         this.landscapeObject3D.position.x += mvDst;
-        break;
-      case 'c':
-        this.initControllers();
         break;
       default:
         break;
