@@ -1,0 +1,37 @@
+<div id="heatmap-legend-container" class="d-flex flex-column p-2" style="width: 150px; border: 1px solid lightgray; border-radius: 0.2rem; background-color: white; user-select: none">
+  <div id="legend-header">
+    <span id="legend-header-content">{{this.header}}</span> 
+    {{#if (eq @mode "aggregatedHeatmap")}}
+      <HelpTooltip @title={{this.descriptions.aggregatedHeatmap}} />
+    {{else}}
+      <HelpTooltip @title={{this.descriptions.windowedHeatmap}} />
+    {{/if}}
+  </div>
+  <div id="legend-subheader" class="mt-1" style="font-size: 0.75rem">
+    {{this.subHeader}}
+  </div>
+  <div class="d-flex flex-row mt-2">
+    <div id="heatmap-legend" style="width: 33.3333333333%; height: 250px" {{did-insert this.didInsertLegend}}>
+      <canvas
+        id="legend-canvas"
+        height="100%"
+        {{did-insert this.didInsertCanvas}}
+      >
+      </canvas>
+    </div>
+    <div id="heatmap-legend-label" style="width: 66.666666666%; height: 250px" {{did-insert this.didInsertLegendlabel}}>
+      <canvas
+        id="legend-canvas-label"
+        height="100%"
+        {{did-insert this.didInsertCanvaslabel}}
+      >
+      </canvas>
+    </div>
+  </div>
+</div>
+
+{{add-listener
+  this.heatmapRepo
+  "updatedClazzMetrics"
+  this.updateLabel
+}}
