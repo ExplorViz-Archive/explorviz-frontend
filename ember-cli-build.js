@@ -1,30 +1,22 @@
-/*jshint node:true*/
-/* global require, module */
-var sass = require('sass');
-var EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const sass = require('sass');
+const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
-module.exports = function(defaults) {
-
-  var app = new EmberApp(defaults, {
-    octicons: {
-      // load selected icons for popup-handler since it does not (yet) use components / templates
-      icons: ['arrow-right', 'arrow-both', 'code', 'list-ordered', 'clock', 'tools']
-    },
-
+module.exports = function (defaults) {
+  const app = new EmberApp(defaults, {
     // Default implementation for ember-cli-sass
     sassOptions: {
-      implementation: sass
+      implementation: sass,
     },
 
     svgJar: {
       sourceDirs: [
         'public', // default SVGJar lookup directory
-        'node_modules/octicons/build/svg'
-      ]
+        'node_modules/@primer/octicons/build/svg',
+      ],
     },
 
     'ember-cli-babel': {
-      includePolyfill: true
+      includePolyfill: true,
     },
 
     fingerprint: {
@@ -34,19 +26,19 @@ module.exports = function(defaults) {
     nodeModulesToVendor: [
       // add node_modules that you need in vendor modules
       // See: https://www.npmjs.com/package/ember-cli-node-modules-to-vendor
-      'node_modules/three/build'
+      'node_modules/three/build',
     ],
 
     'ember-bootstrap': {
-      'bootstrapVersion': 4,
-      'importBootstrapFont': false,
-      'importBootstrapCSS': false
-    }
+      bootstrapVersion: 4,
+      importBootstrapFont: false,
+      importBootstrapCSS: false,
+    },
   });
 
   // export for threex.dynamictexture
-  app.import('vendor/three.min.js',{
-    prepend: true
+  app.import('vendor/three.min.js', {
+    prepend: true,
   });
 
   app.import('vendor/layout/klay.js');

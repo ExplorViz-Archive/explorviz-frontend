@@ -2,9 +2,9 @@
   <div style="font-weight:bold;text-align:center;">
     {{this.sourceClazz}}
     {{#if this.isBidirectional}}
-      {{svg-jar "arrow-both" class="octicon align-middle"}}
+      {{svg-jar "arrow-both-16" class="octicon align-middle"}}
     {{else}}
-      {{svg-jar "arrow-right" class="octicon align-middle"}}
+      {{svg-jar "arrow-right-16" class="octicon align-middle"}}
     {{/if}}
     {{this.targetClazz}}
   </div>
@@ -13,19 +13,19 @@
   <table style="width:100%">
     <tbody>
       <tr>
-        <td>&nbsp;{{svg-jar "code" class="octicon align-middle"}}&nbsp;Requests:</td>
+        <td>&nbsp;{{svg-jar "code-16" class="octicon align-middle"}}&nbsp;Requests:</td>
         <td style="text-align:right;padding-left:10px;">
           {{this.requests}}
         </td>
       </tr>
       <tr>
-        <td>&nbsp;{{svg-jar "list-ordered" class="octicon align-middle"}}&nbsp;Involved Traces:</td>
+        <td>&nbsp;{{svg-jar "list-ordered-16" class="octicon align-middle"}}&nbsp;Involved Traces:</td>
         <td style="text-align:right;padding-left:10px;">
           {{this.traceSize}}
         </td>
       </tr>
       <tr>
-        <td>&nbsp;{{svg-jar "clock" class="octicon align-middle"}}&nbsp;Avg. Response Time (ms):</td>
+        <td>&nbsp;{{svg-jar "clock-16" class="octicon align-middle"}}&nbsp;Avg. Response Time (ms):</td>
         <td style="text-align:right;padding-left:10px;">
           {{format-number this.responseTime "ms"}}
         </td>

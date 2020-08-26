@@ -1,10 +1,10 @@
 <div id="exp-navbar-adv">
   <span class="d-flex-center">
-    {{svg-jar "person" class="octicon"}}
+    {{svg-jar "person-24" class="octicon"}}
     <span><b>{{this.currentUser.username}}</b></span>
   </span>
   <LinkTo @route="configuration" class="d-flex-center" @title="Configuration">
-    {{svg-jar "gear" class="octicon"}}<span>Configuration</span>
+    {{svg-jar "gear-16" class="octicon"}}<span>Configuration</span>
   </LinkTo>
   <div
     class="d-flex-center"
@@ -12,6 +12,6 @@
     title="Logout"
     {{on "click" (route-action "logout")}}
   >
-    {{svg-jar "sign-out" class="octicon"}}<span>Logout</span>
+    {{svg-jar "sign-out-16" class="octicon"}}<span>Logout</span>
   </div>
 </div>

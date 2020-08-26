@@ -57,7 +57,7 @@
           <span class="pr-1">Show Timeline</span>
         {{/unless}}
         {{svg-jar
-          "chevron-up"
+          "chevron-up-16"
           id="hidetimeline-icon"
           class=(if this.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")
         }}
@@ -79,8 +79,9 @@
       @type="secondary"
       @outline={{true}}
       @title="Back to Landscape"
+      class="px-2"
     >
-      {{svg-jar "reply" class="octicon align-middle"}}
+      {{svg-jar "arrow-left-24" class="octicon align-middle"}}
     </BsButton>
   </div>
 {{/unless}}

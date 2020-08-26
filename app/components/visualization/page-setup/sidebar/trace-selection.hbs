@@ -5,7 +5,7 @@
     title="Close Trace Selection"
     {{on "click" this.close}}
   >
-    {{svg-jar "x" class="octicon"}}
+    {{svg-jar "x-16" class="octicon"}}
   </button>
 </div>
 
@@ -31,7 +31,7 @@
       @type="button"
       class="btn btn-light"
     >
-      {{svg-jar "search" class="octicon align-middle"}}
+      {{svg-jar "search-16" class="octicon align-middle"}}
     </BsButton>
   </div>
 </div>
@@ -83,7 +83,7 @@
       @type="button"
       class="th-btn {{if this.isReplayAnimated "navbar-highlight red-hover"}}"
     >
-      {{svg-jar "device-camera-video" class="octicon align-middle"}}
+      {{svg-jar "device-camera-video-16" class="octicon align-middle"}}
     </BsButton>
   </h5>
 
@@ -95,7 +95,7 @@
       @title="One step back"
       @disabled={{lte this.currentTraceStep.tracePosition 1}}
     >
-      {{svg-jar "chevron-left" class="octicon align-middle"}}
+      {{svg-jar "chevron-left-16" class="octicon align-middle"}}
     </BsButton>
     <div>
       Step <strong>{{this.currentTraceStep.tracePosition}}</strong> of {{this.selectedTrace.length}}
@@ -110,7 +110,7 @@
         this.selectedTrace.length
       }}
     >
-      {{svg-jar "chevron-right" class="octicon align-middle"}}
+      {{svg-jar "chevron-right-16" class="octicon align-middle"}}
     </BsButton>
   </div>
 
@@ -132,7 +132,7 @@
               @type="button"
               class="th-btn"
             >
-              {{svg-jar "eye" class="octicon align-middle"}}
+              {{svg-jar "eye-16" class="octicon align-middle"}}
             </BsButton>
           </td>
         </tr>
@@ -148,7 +148,7 @@
               @type="button"
               class="th-btn"
             >
-              {{svg-jar "eye" class="octicon align-middle"}}
+              {{svg-jar "eye-16" class="octicon align-middle"}}
             </BsButton>
           </td>
         </tr>

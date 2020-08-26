@@ -51,7 +51,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
             @outline={{true}}
             @title="Delete Selected Users"
           >
-            {{svg-jar "trashcan" class="octicon"}}
+            {{svg-jar "trashcan-16" class="octicon"}}
           </BsButton>
         {{/if}}
       </div>
@@ -64,7 +64,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
           @outline={{true}}
           @title="Add Users"
         >
-          {{svg-jar "organization" class="octicon"}}{{svg-jar "plus-small" class="octicon"}}
+          {{svg-jar "people-24" class="octicon"}}{{svg-jar "plus-16" class="octicon"}}
           <span>Create Users</span>
         </BsButton>
         {{!-- Refresh Button --}}
@@ -74,7 +74,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
           @outline={{true}}
           @title="Reload Users"
         >
-          {{svg-jar "sync" class="octicon"}}
+          {{svg-jar "sync-16" class="octicon"}}
         </BsButton>
       </div>
     </div>
@@ -165,8 +165,16 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
                       >
                       </span>
                     {{else}}
-                      <dd.button class="removecaret d-flex-center" @size="sm" @title="Options">
-                        {{svg-jar "kebab-vertical" class="octicon"}}
+                      <dd.button
+                        class="removecaret d-flex-center pl-0 pr-0"
+                        @size="sm"
+                        @title="Options"
+                      >
+                        {{svg-jar
+                          "kebab-horizontal-16"
+                          class="octicon"
+                          style="transform: rotate(90deg)"
+                        }}
                       </dd.button>
                     {{/if}}
                     <dd.menu as |ddm|>
@@ -177,7 +185,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
                           style="cursor: pointer"
                           {{on "click" (perform this.openUserEdit user.id)}}
                         >
-                          {{svg-jar "pencil" class="octicon" id="edit-button"}}<span>Edit</span>
+                          {{svg-jar "pencil-16" class="octicon" id="edit-button"}}<span>Edit</span>
                         </button>
                       </ddm.item>
                       <ddm.item @title="Delete">
@@ -186,7 +194,7 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
                           class="dropdown-item d-flex-center"
                           {{on "click" (perform this.deleteUser user)}}
                         >
-                          {{svg-jar "x" class="octicon" id="delete-button"}}<span>Delete</span>
+                          {{svg-jar "x-16" class="octicon" id="delete-button"}}<span>Delete</span>
                         </button>
                       </ddm.item>
                     </dd.menu>
