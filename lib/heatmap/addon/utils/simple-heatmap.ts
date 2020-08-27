@@ -1,19 +1,6 @@
 import simpleheat from 'simpleheat';
 
-export interface Gradient {
-  '0_00': string;
-  '0_15': string;
-  '0_25': string;
-  '0_35': string;
-  '0_45': string;
-  '0_55': string;
-  '0_65': string;
-  '0_75': string;
-  '0_85': string;
-  '1_00': string;
-}
-
-export function getDefaultGradient(): Gradient {
+export function getDefaultGradient() {
   return {
     '0_00': 'rgb(0, 0, 255)',
     '0_15': 'rgb(0, 153, 255)',
@@ -28,7 +15,7 @@ export function getDefaultGradient(): Gradient {
   };
 }
 
-export function simpleHeatmap(maximumValue: number, canvas: HTMLCanvasElement, gradient: Gradient,
+export function simpleHeatmap(maximumValue: number, canvas: HTMLCanvasElement, gradient: any,
   heatmapRadius: number, blurRadius: number) {
   const simpleHeatMap = simpleheat(canvas);
   simpleHeatMap.radius(heatmapRadius, blurRadius);
