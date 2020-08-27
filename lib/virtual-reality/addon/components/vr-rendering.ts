@@ -112,31 +112,6 @@ export default class VrRendering extends Component<Args> {
     }
   }
 
-  @action
-  canvasInserted(canvas: HTMLCanvasElement) {
-    this.debug('Canvas inserted');
-
-    this.canvas = canvas;
-
-    canvas.oncontextmenu = (e) => {
-      e.preventDefault();
-    };
-  }
-
-  @action
-  async outerDivInserted(outerDiv: HTMLElement) {
-    this.debug('Outer Div inserted');
-
-    this.initThreeJs();
-    outerDiv.appendChild(VRButton.createButton(this.renderer));
-
-    this.renderer.setAnimationLoop(this.render.bind(this));
-
-    this.resize(outerDiv);
-
-    await this.loadNewLandscape.perform();
-  }
-
   /**
      * Calls all three related init functions and adds the three
      * performance panel if it is activated in user settings
@@ -261,73 +236,70 @@ export default class VrRendering extends Component<Args> {
     this.controller1.addEventListener('selectstart', this.onSelectStart.bind(this));
   }
 
-  onSelectStart() {
-    const object = this.controller1.userData.intersectedObject;
-    if (object instanceof SystemMesh) {
-      this.toggleSystemAndRedraw(object);
-    }
+  // #endregion COMPONENT AND SCENE INITIALIZATION
+
+  // #region ACTIONS
+
+  @action
+  canvasInserted(canvas: HTMLCanvasElement) {
+    this.debug('Canvas inserted');
+
+    this.canvas = canvas;
+
+    canvas.oncontextmenu = (e) => {
+      e.preventDefault();
+    };
   }
 
-  getIntersections(controller: THREE.Group) {
-    const tempMatrix = new THREE.Matrix4();
-    tempMatrix.identity().extractRotation(controller.matrixWorld);
+  @action
+  async outerDivInserted(outerDiv: HTMLElement) {
+    this.debug('Outer Div inserted');
 
-    this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-    this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+    this.initThreeJs();
+    outerDiv.appendChild(VRButton.createButton(this.renderer));
 
-    const intersectionObjects = [this.landscapeObject3D];
+    this.renderer.setAnimationLoop(this.render.bind(this));
 
-    if (!this.landscapeObject3D) { return []; }
+    this.resize(outerDiv);
 
-    const intersections = this.raycaster.intersectObjects(intersectionObjects, true);
-
-    for (let i = 0; i < intersections.length; i++) {
-      const { object } = intersections[i];
-      if (!(object instanceof LabelMesh)) {
-        return [intersections[i]];
-      }
-    }
-
-    return [];
-  }
-
-  intersectObjects(controller: THREE.Group) {
-    const line = controller.getObjectByName('line');
-
-    if (!line) return;
-
-    const intersections = this.getIntersections(controller);
-
-    const nearestIntersection = intersections.firstObject;
-
-    if (nearestIntersection) {
-      const { object } = intersections[0];
-
-      if (object instanceof BaseMesh) {
-        VrRendering.resetHoverEffect(controller);
-        object.applyHoverEffect(1.4);
-        controller.userData.intersectedObject = object;
-      }
-
-      line.scale.z = intersections[0].distance;
-    } else {
-      VrRendering.resetHoverEffect(controller);
-      line.scale.z = 5;
-    }
+    await this.loadNewLandscape.perform();
   }
 
   /**
-   * Resets the hover effect of the object which was previously hovered upon by the controller.
-   *
-   * @param controller Controller of which the hover effect shall be reseted.
-   */
-  static resetHoverEffect(controller: THREE.Group) {
-    const currentObject = controller.userData.intersectedObject;
-    if (currentObject instanceof BaseMesh) {
-      currentObject.resetHoverEffect();
-      controller.userData.intersectedObject = null;
-    }
+     * Call this whenever the canvas is resized. Updated properties of camera
+     * and renderer.
+     *
+     * @param outerDiv HTML element containing the canvas
+     */
+  @action
+  resize(outerDiv: HTMLElement) {
+    const width = Number(outerDiv.clientWidth);
+    const height = Number(outerDiv.clientHeight);
+
+    // Update renderer and camera according to new canvas size
+    this.renderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
   }
+
+  /**
+   * Inherit this function to update the scene with a new renderingModel. It
+   * automatically removes every mesh from the scene and finally calls
+   * the (overridden) "populateScene" function. Add your custom code
+   * as shown in landscape-rendering.
+   *
+   * @method cleanAndUpdateScene
+   */
+  @action
+  async cleanAndUpdateScene() {
+    await this.populateScene.perform();
+
+    this.debug('clean and populate landscape-rendering');
+  }
+
+  // #endregion ACTIONS
+
+  // #region RENDERING AND SCENE POPULATION
 
   /**
    * Main rendering function
@@ -467,6 +439,10 @@ populateScene = task(function* (this: VrRendering) {
     }
   });
 
+  // #endregion RENDERING AND SCENE POPULATION
+
+  // #region LANDSCAPE RENDERING
+
   /**
  * Creates & positions a system mesh with corresponding labels.
  * Then adds it to the landscapeObject3D.
@@ -590,6 +566,10 @@ populateScene = task(function* (this: VrRendering) {
     this.landscapeObject3D.add(applicationMesh);
   }
 
+  // #endregion LANDSCAPE RENDERING
+
+  // #region LANDSCAPE MANIPULATION
+
   @task
   // eslint-disable-next-line
   openNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
@@ -663,37 +643,18 @@ populateScene = task(function* (this: VrRendering) {
     }
   }
 
-  /**
-   * Call this whenever the canvas is resized. Updated properties of camera
-   * and renderer.
-   *
-   * @param outerDiv HTML element containing the canvas
-   */
-  @action
-  resize(outerDiv: HTMLElement) {
-    const width = Number(outerDiv.clientWidth);
-    const height = Number(outerDiv.clientHeight);
+  // #endregion LANDSCAPE MANIPULATION
 
-    // Update renderer and camera according to new canvas size
-    this.renderer.setSize(width, height);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+  // #region CONTROLLER HANDLERS
+
+  onSelectStart() {
+    const object = this.controller1.userData.intersectedObject;
+    if (object instanceof SystemMesh) {
+      this.toggleSystemAndRedraw(object);
+    }
   }
 
-  /**
- * Inherit this function to update the scene with a new renderingModel. It
- * automatically removes every mesh from the scene and finally calls
- * the (overridden) "populateScene" function. Add your custom code
- * as shown in landscape-rendering.
- *
- * @method cleanAndUpdateScene
- */
-  @action
-  async cleanAndUpdateScene() {
-    await this.populateScene.perform();
-
-    this.debug('clean and populate landscape-rendering');
-  }
+  // #endregion CONTROLLER HANDLERS
 
   // #region MOUSE & KEYBOARD EVENT HANDLER
 
@@ -746,4 +707,69 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   // #endregion MOUSE & KEYBOARD EVENT HANDLER
+
+  // #region UTILS
+
+  getIntersections(controller: THREE.Group) {
+    const tempMatrix = new THREE.Matrix4();
+    tempMatrix.identity().extractRotation(controller.matrixWorld);
+
+    this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+    this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+
+    const intersectionObjects = [this.landscapeObject3D];
+
+    if (!this.landscapeObject3D) { return []; }
+
+    const intersections = this.raycaster.intersectObjects(intersectionObjects, true);
+
+    for (let i = 0; i < intersections.length; i++) {
+      const { object } = intersections[i];
+      if (!(object instanceof LabelMesh)) {
+        return [intersections[i]];
+      }
+    }
+
+    return [];
+  }
+
+  intersectObjects(controller: THREE.Group) {
+    const line = controller.getObjectByName('line');
+
+    if (!line) return;
+
+    const intersections = this.getIntersections(controller);
+
+    const nearestIntersection = intersections.firstObject;
+
+    if (nearestIntersection) {
+      const { object } = intersections[0];
+
+      if (object instanceof BaseMesh) {
+        VrRendering.resetHoverEffect(controller);
+        object.applyHoverEffect(1.4);
+        controller.userData.intersectedObject = object;
+      }
+
+      line.scale.z = intersections[0].distance;
+    } else {
+      VrRendering.resetHoverEffect(controller);
+      line.scale.z = 5;
+    }
+  }
+
+  /**
+   * Resets the hover effect of the object which was previously hovered upon by the controller.
+   *
+   * @param controller Controller of which the hover effect shall be reseted.
+   */
+  static resetHoverEffect(controller: THREE.Group) {
+    const currentObject = controller.userData.intersectedObject;
+    if (currentObject instanceof BaseMesh) {
+      currentObject.resetHoverEffect();
+      controller.userData.intersectedObject = null;
+    }
+  }
+
+  // #endregion UTILS
 }
