@@ -20,11 +20,15 @@ export default class EntityManipulation {
 
   highlighter: Highlighting;
 
+  OPENED_COMPONENT_HEIGHT: number;
+
   constructor(applicationObject3D: ApplicationObject3D,
-    communicationRendering: CommunicationRendering, highlighter: Highlighting) {
+    communicationRendering: CommunicationRendering, highlighter: Highlighting,
+    heightOfComponent = 1.5) {
     this.applicationObject3D = applicationObject3D;
     this.communicationRendering = communicationRendering;
     this.highlighter = highlighter;
+    this.OPENED_COMPONENT_HEIGHT = heightOfComponent;
   }
 
   /**
@@ -73,13 +77,12 @@ export default class EntityManipulation {
   openComponentMesh(mesh: ComponentMesh) {
     if (mesh.opened) { return; }
 
-    const HEIGHT_OPENED_COMPONENT = 1.5;
-    mesh.height = HEIGHT_OPENED_COMPONENT;
+    mesh.height = this.OPENED_COMPONENT_HEIGHT;
 
     // Reset y coordinate
     mesh.position.y -= mesh.layoutHeight / 2;
     // Set y coordinate according to open component height
-    mesh.position.y += HEIGHT_OPENED_COMPONENT / 2;
+    mesh.position.y += this.OPENED_COMPONENT_HEIGHT / 2;
 
     mesh.opened = true;
     mesh.visible = true;
@@ -110,11 +113,10 @@ export default class EntityManipulation {
   closeComponentMesh(mesh: ComponentMesh) {
     if (!mesh.opened) { return; }
 
-    const HEIGHT_OPENED_COMPONENT = 1.5;
     mesh.height = mesh.layoutHeight;
 
     // Reset y coordinate
-    mesh.position.y -= HEIGHT_OPENED_COMPONENT / 2;
+    mesh.position.y -= this.OPENED_COMPONENT_HEIGHT / 2;
     // Set y coordinate according to closed component height
     mesh.position.y += mesh.layoutHeight / 2;
 

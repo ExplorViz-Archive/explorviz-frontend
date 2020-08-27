@@ -9,7 +9,6 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
-
 export default class EntityRendering {
   // Functions as parent object for all application objects
   applicationObject3D: ApplicationObject3D;
@@ -22,12 +21,11 @@ export default class EntityRendering {
     this.configuration = configuration;
   }
 
-  addFoundationAndChildrenToScene(application: Application, boxLayoutMap: Map<string, BoxLayout>) {
+  addFoundationAndChildrenToScene(application: Application, boxLayoutMap: Map<string, BoxLayout>,
+    openedComponentHeight = 1.5) {
     const applicationLayout = boxLayoutMap.get(application.id);
 
     if (applicationLayout === undefined) { return; }
-
-    const OPENED_COMPONENT_HEIGHT = 1.5;
 
     // Access color preferences
     const {
@@ -42,7 +40,7 @@ export default class EntityRendering {
       applicationLayout.positionZ,
     );
 
-    const mesh = new FoundationMesh(layoutPos, OPENED_COMPONENT_HEIGHT, applicationLayout.width,
+    const mesh = new FoundationMesh(layoutPos, openedComponentHeight, applicationLayout.width,
       applicationLayout.depth, application, foundationColor,
       highlightedEntityColor);
 

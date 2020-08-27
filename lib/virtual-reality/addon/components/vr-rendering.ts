@@ -18,17 +18,29 @@ import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/applic
 import LandscapeRendering from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
 import { task } from 'ember-concurrency-decorators';
 import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
-import * as CommunicationRendering from
+import * as LandscapeCommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import reduceLandscape, { ReducedLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
 import FloorMesh from 'virtual-reality/utils/floor-mesh';
 import WebXRPolyfill from 'webxr-polyfill';
-import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
+import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
+import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
+import reduceApplication from 'explorviz-frontend/utils/application-rendering/model-reducer';
 import XRControllerModelFactory from 'virtual-reality/utils/XRControllerModelFactory';
+import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
+import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
+import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
+import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
+import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
+import EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
+import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
+import EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
+import CurrentUser from 'explorviz-frontend/services/current-user';
 
 // Declare globals
 /* global VRButton */
@@ -37,11 +49,23 @@ interface Args {
   readonly font: THREE.Font;
 }
 
+type LayoutData = {
+  height: number,
+  width: number,
+  depth: number,
+  positionX: number,
+  positionY: number,
+  positionZ: number
+};
+
 export default class VrRendering extends Component<Args> {
   // #region CLASS FIELDS AND GETTERS
 
   @service('configuration')
   configuration!: Configuration;
+
+  @service('current-user')
+  currentUser!: CurrentUser;
 
   @service('repos/landscape-repository')
   landscapeRepo!: LandscapeRepository;
@@ -76,14 +100,22 @@ export default class VrRendering extends Component<Args> {
 
   boxDepth: number;
 
+  appScaleFactor: number;
+
+  defaultComponentHeight: number;
+
   get font() {
     return this.args.font;
+  }
+
+  get componentHeight() {
+    return this.defaultComponentHeight * this.appScaleFactor;
   }
 
   readonly imageLoader: ImageLoader = new ImageLoader();
 
   // Provides functions to label landscape meshes
-  readonly labeler = new Labeler();
+  readonly landscapeLabeler = new LandscapeLabeler();
 
   // Extended Object3D which manages landscape meshes
   readonly landscapeObject3D!: LandscapeObject3D;
@@ -96,6 +128,9 @@ export default class VrRendering extends Component<Args> {
     super(owner, args);
     this.debug('Constructor called');
     this.boxDepth = 0.15;
+
+    this.defaultComponentHeight = 1.5;
+    this.appScaleFactor = 0.01;
 
     this.raycaster = new THREE.Raycaster();
     this.controller1 = new THREE.Group();
@@ -426,10 +461,10 @@ populateScene = task(function* (this: VrRendering) {
 
       if (appCommunications) {
         const color = this.configuration.landscapeColors.communication;
-        const tiles = CommunicationRendering.computeCommunicationTiles(appCommunications,
+        const tiles = LandscapeCommunicationRendering.computeCommunicationTiles(appCommunications,
           modelIdToPointsComplete, color);
 
-        CommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
+        LandscapeCommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
           centerPoint);
       }
 
@@ -470,9 +505,9 @@ populateScene = task(function* (this: VrRendering) {
     // Create and add label + icon
     systemMesh.setToDefaultPosition(centerPoint);
     const labelText = system.get('name');
-    this.labeler.addSystemTextLabel(systemMesh, labelText, this.font,
+    this.landscapeLabeler.addSystemTextLabel(systemMesh, labelText, this.font,
       this.configuration.landscapeColors.systemText, 0.04, 0.06);
-    this.labeler.addCollapseSymbol(systemMesh, this.font,
+    this.landscapeLabeler.addCollapseSymbol(systemMesh, this.font,
       this.configuration.landscapeColors.collapseSymbol, 0.035, 0.035, 0.035);
 
     // Add to scene
@@ -500,7 +535,7 @@ populateScene = task(function* (this: VrRendering) {
     nodeGroupMesh.setToDefaultPosition(centerPoint);
 
     // Add collapse symbol (+/-)
-    this.labeler.addCollapseSymbol(nodeGroupMesh, this.font,
+    this.landscapeLabeler.addCollapseSymbol(nodeGroupMesh, this.font,
       this.configuration.landscapeColors.collapseSymbol, 0.035, 0.035, 0.035);
 
     // Add to scene
@@ -532,7 +567,7 @@ populateScene = task(function* (this: VrRendering) {
     // Label with own ip-address by default
     const labelText = nodeMesh.getDisplayName(nodeGroupMesh);
 
-    this.labeler.addNodeTextLabel(nodeMesh, labelText, this.font,
+    this.landscapeLabeler.addNodeTextLabel(nodeMesh, labelText, this.font,
       this.configuration.landscapeColors.nodeText, 0.022, 0.02);
 
     // Add to scene
@@ -558,15 +593,109 @@ populateScene = task(function* (this: VrRendering) {
     applicationMesh.setToDefaultPosition(centerPoint);
 
     // Create and add label + icon
-    this.labeler.addApplicationTextLabel(applicationMesh, application.get('name'), this.font,
+    this.landscapeLabeler.addApplicationTextLabel(applicationMesh, application.get('name'), this.font,
       this.configuration.landscapeColors.applicationText, 0.025, 0.01);
-    Labeler.addApplicationLogo(applicationMesh, this.imageLoader, 0.04, 0.04);
+    LandscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader, 0.04, 0.04);
 
     // Add to scene
     this.landscapeObject3D.add(applicationMesh);
   }
 
   // #endregion LANDSCAPE RENDERING
+
+  // #region APLICATION RENDERING
+
+  @task({ restartable: true })
+  // eslint-disable-next-line
+  addApplication = task(function* (this: VrRendering, application: ApplicationMesh) {
+
+    try {
+      const applicationModel = application.dataModel;
+      const reducedApplication = reduceApplication(applicationModel);
+
+      const applicationObject3D = new ApplicationObject3D(applicationModel);
+      applicationObject3D.dataModel = applicationModel;
+
+      const entityRendering = new EntityRendering(applicationObject3D, this.configuration);
+
+      const communicationRendering = new AppCommunicationRendering(applicationObject3D,
+        this.configuration, this.currentUser);
+
+      const highlighter = new Highlighting(applicationObject3D);
+
+      const entityManipulation = new EntityManipulation(applicationObject3D,
+        communicationRendering, highlighter, this.componentHeight);
+
+      const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', reducedApplication);
+
+      // Converting plain JSON layout data due to worker limitations
+      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
+
+      Array.from(boxLayoutMap.values()).forEach((layoutMap) => {
+        layoutMap.scale(this.appScaleFactor);
+      });
+
+      const { openComponentIds } = applicationObject3D;
+
+      // Add new meshes to application
+      entityRendering.addFoundationAndChildrenToScene(applicationModel,
+        boxLayoutMap, this.componentHeight);
+
+      // Restore old state of components
+      entityManipulation.setComponentState(openComponentIds);
+      communicationRendering.addCommunication(boxLayoutMap);
+      this.addLabels(applicationObject3D);
+
+      // Postion application
+
+      const bboxApp3D = new THREE.Box3().setFromObject(applicationObject3D);
+      const app3DSize = new THREE.Vector3();
+      bboxApp3D.getSize(app3DSize);
+
+      // Center x and z around hit application
+      const newPosition = new THREE.Vector3();
+      newPosition.x = application.position.x;// - app3DSize.x;
+      newPosition.z = application.position.z;// + app3DSize.z;
+      newPosition.y = application.position.y + 2;
+      applicationObject3D.position.copy(newPosition);
+
+      // Rotate app so that it is aligned with landscape
+      applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
+      applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
+      applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
+
+      this.scene.add(applicationObject3D);
+    } catch (e) {
+      // console.log(e);
+    }
+  });
+
+  /**
+   * Iterates over all box meshes and calls respective functions to label them
+   */
+  addLabels(applicationObject3D: ApplicationObject3D) {
+    if (!this.font) { return; }
+
+    const clazzTextColor = this.configuration.applicationColors.clazzText;
+    const componentTextColor = this.configuration.applicationColors.componentText;
+    const foundationTextColor = this.configuration.applicationColors.foundationText;
+
+    // Label all entities (excluding communication)
+    applicationObject3D.getBoxMeshes().forEach((mesh) => {
+      if (mesh instanceof ClazzMesh) {
+        ApplicationLabeler
+          .addClazzTextLabel(mesh, this.font, clazzTextColor, 0.5 * this.appScaleFactor);
+      } else if (mesh instanceof ComponentMesh) {
+        ApplicationLabeler
+          .addBoxTextLabel(mesh, this.font, componentTextColor, 3 * this.appScaleFactor, 4, this.appScaleFactor);
+      } else if (mesh instanceof FoundationMesh) {
+        ApplicationLabeler
+          .addBoxTextLabel(mesh, this.font, foundationTextColor, 1.5 * this.appScaleFactor, 4, this.appScaleFactor);
+      }
+    });
+  }
+
+  // #endregion APPLICATION RENDERING
 
   // #region LANDSCAPE MANIPULATION
 
@@ -651,6 +780,8 @@ populateScene = task(function* (this: VrRendering) {
     const object = this.controller1.userData.intersectedObject;
     if (object instanceof SystemMesh) {
       this.toggleSystemAndRedraw(object);
+    } else if (object instanceof ApplicationMesh) {
+      this.addApplication.perform(object);
     }
   }
 

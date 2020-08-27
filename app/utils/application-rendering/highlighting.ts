@@ -159,7 +159,6 @@ export default class Highlighting {
       }
     });
 
-
     drawableComms.forEach((comm) => {
       const commMesh = this.applicationObject3D.getCommMeshByModelId(comm.get('id'));
 
