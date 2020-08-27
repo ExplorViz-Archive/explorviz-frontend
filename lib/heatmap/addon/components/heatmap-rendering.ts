@@ -860,6 +860,8 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
       this.threePerformance.removePerformanceMeasurement();
     }
 
+    this.heatmapRepo.heatmapActive = false;
+
     this.debug('Cleaned up application rendering');
   }
 
