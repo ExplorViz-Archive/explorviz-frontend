@@ -13,7 +13,6 @@ export default class ClazzMesh extends BoxMesh {
 
   dataModel: Clazz;
 
-
   constructor(layoutPos: THREE.Vector3, layoutHeight: number,
     layoutWidth: number, layoutDepth: number, clazz: Clazz, defaultColor: THREE.Color,
     highlightingColor: THREE.Color) {

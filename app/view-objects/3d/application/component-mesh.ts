@@ -15,7 +15,6 @@ export default class ComponentMesh extends BoxMesh {
   // Set by labeler
   labelMesh: ComponentLabelMesh | null = null;
 
-
   constructor(layoutPos: THREE.Vector3, layoutHeight: number,
     layoutWidth: number, layoutDepth: number,
     component: Component, defaultColor: THREE.Color, highlightingColor: THREE.Color) {
