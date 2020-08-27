@@ -321,7 +321,8 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
     // Indicate on top of which mesh mouse is located (using a hover effect)
     if (mesh === undefined) {
       this.hoverHandler.resetHoverEffect();
-    } else if (mesh instanceof BaseMesh && !(mesh instanceof FoundationMesh) && enableHoverEffects) {
+    } else if (mesh instanceof BaseMesh && !(mesh instanceof FoundationMesh)
+      && enableHoverEffects) {
       this.hoverHandler.applyHoverEffect(mesh);
     }
 
@@ -465,9 +466,9 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
     // Get max and add 1 to avoid -0 issues.
     const maximumValue = this.heatmapRepo.largestValue + 1;
 
-    const foundationMesh = this.applicationObject3D.getBoxMeshbyModelId(this.args.application.id) as FoundationMesh | undefined;
+    const foundationMesh = this.applicationObject3D.getBoxMeshbyModelId(this.args.application.id);
 
-    if (!foundationMesh) {
+    if (!foundationMesh || !(foundationMesh instanceof FoundationMesh)) {
       return;
     }
 
@@ -591,7 +592,8 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
           if (selectedMode === 'aggregatedHeatmap') {
             simpleHeatMap.add([xPos, zPos, heatmap.get(clazz.fullQualifiedName)]);
           } else {
-            simpleHeatMap.add([xPos, zPos, heatmap.get(clazz.fullQualifiedName) + (maximumValue / 2)]);
+            simpleHeatMap.add([xPos, zPos,
+              heatmap.get(clazz.fullQualifiedName) + (maximumValue / 2)]);
           }
         }
       }
@@ -599,10 +601,13 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
 
     if (!useSimpleHeat) {
       const color = 'rgb(255, 255, 255)';
-      foundationMesh.material = new THREE.MeshLambertMaterial({ color: new THREE.Color(color) });
+      foundationMesh.material = new THREE.MeshLambertMaterial({
+        color: new THREE.Color(color),
+        vertexColors: true,
+      });
 
-      foundationMesh.material.vertexColors = THREE.FaceColors;
-      invokeRecoloring(colorMap, foundationMesh, maximumValue, this.heatmapRepo.getArrayHeatGradient());
+      invokeRecoloring(colorMap!, foundationMesh, maximumValue,
+        this.heatmapRepo.getArrayHeatGradient());
     } else {
       simpleHeatMap.draw(0.0);
 
@@ -831,9 +836,11 @@ export default class HeatmapRendering extends GlimmerComponent<Args> {
       }
     } else {
       this.removeHelperLines();
-      const foundationMesh = this.applicationObject3D.getBoxMeshbyModelId(this.args.application.id) as FoundationMesh | undefined;
-      if (foundationMesh) {
-        foundationMesh.material = new THREE.MeshLambertMaterial({ color: new THREE.Color(this.configuration.applicationColors.foundation) });
+      const foundationMesh = this.applicationObject3D.getBoxMeshbyModelId(this.args.application.id);
+      if (foundationMesh && foundationMesh instanceof FoundationMesh) {
+        foundationMesh.material = new THREE.MeshLambertMaterial({
+          color: new THREE.Color(this.configuration.applicationColors.foundation),
+        });
       }
 
       if (this.highlighter.highlightedEntity) {
