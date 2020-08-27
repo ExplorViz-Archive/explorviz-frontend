@@ -268,7 +268,7 @@ export default class VrRendering extends Component<Args> {
       }
     }
 
-    this.controller1.addEventListener('selectstart', this.onSelectStart.bind(this));
+    this.controller1.addEventListener('selectstart', this.onSelectStart1.bind(this));
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -607,24 +607,11 @@ populateScene = task(function* (this: VrRendering) {
 
   @task({ restartable: true })
   // eslint-disable-next-line
-  addApplication = task(function* (this: VrRendering, application: ApplicationMesh) {
+  addApplication = task(function* (this: VrRendering, landscapeApp: ApplicationMesh) {
 
     try {
-      const applicationModel = application.dataModel;
+      const applicationModel = landscapeApp.dataModel;
       const reducedApplication = reduceApplication(applicationModel);
-
-      const applicationObject3D = new ApplicationObject3D(applicationModel);
-      applicationObject3D.dataModel = applicationModel;
-
-      const entityRendering = new EntityRendering(applicationObject3D, this.configuration);
-
-      const communicationRendering = new AppCommunicationRendering(applicationObject3D,
-        this.configuration, this.currentUser);
-
-      const highlighter = new Highlighting(applicationObject3D);
-
-      const entityManipulation = new EntityManipulation(applicationObject3D,
-        communicationRendering, highlighter, this.componentHeight);
 
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', reducedApplication);
 
@@ -635,40 +622,52 @@ populateScene = task(function* (this: VrRendering) {
         layoutMap.scale(this.appScaleFactor);
       });
 
-      const { openComponentIds } = applicationObject3D;
+      const applicationObject3D = new ApplicationObject3D(applicationModel, boxLayoutMap);
+
+      const entityRendering = new EntityRendering(this.configuration, this.componentHeight);
+
+      const communicationRendering = new AppCommunicationRendering(this.configuration,
+        this.currentUser);
+
+      const highlighter = new Highlighting(applicationObject3D);
+
+      const entityManipulation = new EntityManipulation(communicationRendering,
+        highlighter, this.componentHeight);
 
       // Add new meshes to application
-      entityRendering.addFoundationAndChildrenToScene(applicationModel,
-        boxLayoutMap, this.componentHeight);
+      entityRendering.addFoundationAndChildrenToApplication(applicationObject3D);
 
       // Restore old state of components
-      entityManipulation.setComponentState(openComponentIds);
-      communicationRendering.addCommunication(boxLayoutMap);
+      entityManipulation.setComponentState(applicationObject3D);
+      communicationRendering.addCommunication(applicationObject3D);
       this.addLabels(applicationObject3D);
-
-      // Postion application
-
-      const bboxApp3D = new THREE.Box3().setFromObject(applicationObject3D);
-      const app3DSize = new THREE.Vector3();
-      bboxApp3D.getSize(app3DSize);
-
-      // Center x and z around hit application
-      const newPosition = new THREE.Vector3();
-      newPosition.x = application.position.x;// - app3DSize.x;
-      newPosition.z = application.position.z;// + app3DSize.z;
-      newPosition.y = application.position.y + 2;
-      applicationObject3D.position.copy(newPosition);
-
-      // Rotate app so that it is aligned with landscape
-      applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
-      applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
-      applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
+      this.positionApplication(applicationObject3D, landscapeApp);
 
       this.scene.add(applicationObject3D);
     } catch (e) {
       // console.log(e);
     }
   });
+
+  positionApplication(applicationObject3D: ApplicationObject3D, landscapeApp: ApplicationMesh) {
+  // Postion application
+
+    const bboxApp3D = new THREE.Box3().setFromObject(applicationObject3D);
+    const app3DSize = new THREE.Vector3();
+    bboxApp3D.getSize(app3DSize);
+
+    // Center x and z around hit application
+    const newPosition = new THREE.Vector3();
+    newPosition.x = landscapeApp.position.x;// - app3DSize.x;
+    newPosition.z = landscapeApp.position.z;// + app3DSize.z;
+    newPosition.y = landscapeApp.position.y + 2;
+    applicationObject3D.position.copy(newPosition);
+
+    // Rotate app so that it is aligned with landscape
+    applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
+    applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
+    applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
+  }
 
   /**
    * Iterates over all box meshes and calls respective functions to label them
@@ -680,17 +679,19 @@ populateScene = task(function* (this: VrRendering) {
     const componentTextColor = this.configuration.applicationColors.componentText;
     const foundationTextColor = this.configuration.applicationColors.foundationText;
 
+    const scalar = this.appScaleFactor;
+
     // Label all entities (excluding communication)
     applicationObject3D.getBoxMeshes().forEach((mesh) => {
       if (mesh instanceof ClazzMesh) {
         ApplicationLabeler
-          .addClazzTextLabel(mesh, this.font, clazzTextColor, 0.5 * this.appScaleFactor);
+          .addClazzTextLabel(mesh, this.font, clazzTextColor, 0.5 * scalar);
       } else if (mesh instanceof ComponentMesh) {
         ApplicationLabeler
-          .addBoxTextLabel(mesh, this.font, componentTextColor, 3 * this.appScaleFactor, 4, this.appScaleFactor);
+          .addBoxTextLabel(mesh, this.font, componentTextColor, 3 * scalar, 4, scalar);
       } else if (mesh instanceof FoundationMesh) {
         ApplicationLabeler
-          .addBoxTextLabel(mesh, this.font, foundationTextColor, 1.5 * this.appScaleFactor, 4, this.appScaleFactor);
+          .addBoxTextLabel(mesh, this.font, foundationTextColor, 1.5 * scalar, 4, scalar);
       }
     });
   }
@@ -776,13 +777,22 @@ populateScene = task(function* (this: VrRendering) {
 
   // #region CONTROLLER HANDLERS
 
-  onSelectStart() {
+  onSelectStart1() {
     const object = this.controller1.userData.intersectedObject;
     if (object instanceof SystemMesh) {
       this.toggleSystemAndRedraw(object);
     } else if (object instanceof ApplicationMesh) {
       this.addApplication.perform(object);
+    // Toggle open state of clicked component
     }
+    /* else if (object instanceof ComponentMesh) {
+      this.entityManipulation.toggleComponentMeshState(object);
+      this.communicationRendering.addCommunication(this.boxLayoutMap);
+      this.highlighter.updateHighlighting();
+    // Close all components since foundation shall never be closed itself
+    } else if (object instanceof FoundationMesh) {
+      this.entityManipulation.closeAllComponents(this.boxLayoutMap);
+    } */
   }
 
   // #endregion CONTROLLER HANDLERS

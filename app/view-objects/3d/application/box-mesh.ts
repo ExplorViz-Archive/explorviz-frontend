@@ -1,47 +1,20 @@
 import THREE from 'three';
+import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import BaseMesh from '../base-mesh';
 
-
 export default abstract class BoxMesh extends BaseMesh {
-  /**
-   * The layout position returned by the city-layouter
-   */
-  layoutPos: THREE.Vector3;
+  layout: BoxLayout;
 
-  /**
-   * The layout height returned by the city-layouter
-   */
-  layoutHeight: number;
-
-  /**
-   * The layout width returned by the city-layouter
-   */
-  layoutWidth: number;
-
-  /**
-   * The layout depth returned by the city-layouter
-   */
-  layoutdDepth: number;
-
-
-  constructor(layoutPos: THREE.Vector3, layoutHeight: number,
-    layoutWidth: number, layoutDepth: number,
+  constructor(layout: BoxLayout,
     defaultColor: THREE.Color, highlightingColor: THREE.Color) {
     super(defaultColor, highlightingColor);
 
-    this.layoutPos = layoutPos;
-
-    this.layoutHeight = layoutHeight;
-    this.layoutWidth = layoutWidth;
-    this.layoutdDepth = layoutDepth;
-
-    // Set default position to layout data
-    this.position.copy(layoutPos);
+    this.layout = layout;
 
     // Set default dimensions to layout data
-    this.height = layoutHeight;
-    this.width = layoutWidth;
-    this.depth = layoutDepth;
+    this.height = layout.height;
+    this.width = layout.width;
+    this.depth = layout.depth;
   }
 
   get width() {

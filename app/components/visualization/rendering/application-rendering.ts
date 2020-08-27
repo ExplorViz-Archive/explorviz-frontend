@@ -91,8 +91,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // Used to register (mouse) events
   interaction!: Interaction;
 
-  boxLayoutMap: Map<string, BoxLayout>;
-
   hoveredObject: BaseMesh|null;
 
   // Extended Object3D which manages application meshes
@@ -126,19 +124,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.render = this.render.bind(this);
 
-    this.applicationObject3D = new ApplicationObject3D(this.args.application);
-
-    this.boxLayoutMap = new Map();
+    this.applicationObject3D = new ApplicationObject3D(this.args.application, new Map());
 
     this.highlighter = new Highlighting(this.applicationObject3D);
 
-    this.entityRendering = new EntityRendering(this.applicationObject3D, this.configuration);
+    this.entityRendering = new EntityRendering(this.configuration);
 
-    this.communicationRendering = new CommunicationRendering(this.applicationObject3D,
-      this.configuration, this.currentUser);
+    this.communicationRendering = new CommunicationRendering(this.configuration, this.currentUser);
 
-    this.entityManipulation = new EntityManipulation(this.applicationObject3D,
-      this.communicationRendering, this.highlighter);
+    this.entityManipulation = new EntityManipulation(this.communicationRendering, this.highlighter);
 
     this.hoveredObject = null;
   }
@@ -167,8 +161,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     await this.loadNewApplication.perform();
 
     // Display application nicely for first rendering
-    this.entityManipulation.applyDefaultApplicationLayout();
-    this.communicationRendering.addCommunication(this.boxLayoutMap);
+    this.entityManipulation.applyDefaultApplicationLayout(this.applicationObject3D);
+    this.communicationRendering.addCommunication(this.applicationObject3D);
     this.applicationObject3D.resetRotation();
   }
 
@@ -280,12 +274,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleDoubleClick(mesh: THREE.Mesh | undefined) {
     // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
-      this.entityManipulation.toggleComponentMeshState(mesh);
-      this.communicationRendering.addCommunication(this.boxLayoutMap);
+      this.entityManipulation.toggleComponentMeshState(mesh, this.applicationObject3D);
+      this.communicationRendering.addCommunication(this.applicationObject3D);
       this.highlighter.updateHighlighting();
     // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
-      this.entityManipulation.closeAllComponents(this.boxLayoutMap);
+      this.entityManipulation.closeAllComponents(this.applicationObject3D);
     }
   }
 
@@ -377,19 +371,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', reducedApplication);
 
       // Converting plain JSON layout data due to worker limitations
-      this.boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
-      const { openComponentIds } = this.applicationObject3D;
+      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
+      this.applicationObject3D.boxLayoutMap = boxLayoutMap;
 
       // Clean up old application
       this.cleanUpApplication();
 
       // Add new meshes to application
-      this.entityRendering.addFoundationAndChildrenToScene(this.args.application,
-        this.boxLayoutMap);
+      this.entityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D);
 
       // Restore old state of components
-      this.entityManipulation.setComponentState(openComponentIds);
-      this.communicationRendering.addCommunication(this.boxLayoutMap);
+      this.entityManipulation.setComponentState(this.applicationObject3D);
+      this.communicationRendering.addCommunication(this.applicationObject3D);
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
@@ -461,10 +454,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     ancestors.forEach((anc) => {
       const ancestorMesh = this.applicationObject3D.getBoxMeshbyModelId(anc.get('id'));
       if (ancestorMesh instanceof ComponentMesh) {
-        this.entityManipulation.openComponentMesh(ancestorMesh);
+        this.entityManipulation.openComponentMesh(ancestorMesh, this.applicationObject3D);
       }
     });
-    this.communicationRendering.addCommunication(this.boxLayoutMap);
+    this.communicationRendering.addCommunication(this.applicationObject3D);
     this.highlighter.updateHighlighting();
   }
 
@@ -477,9 +470,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   closeComponent(component: Component) {
     const mesh = this.applicationObject3D.getBoxMeshbyModelId(component.get('id'));
     if (mesh instanceof ComponentMesh) {
-      this.entityManipulation.closeComponentMesh(mesh);
+      this.entityManipulation.closeComponentMesh(mesh, this.applicationObject3D);
     }
-    this.communicationRendering.addCommunication(this.boxLayoutMap);
+    this.communicationRendering.addCommunication(this.applicationObject3D);
     this.highlighter.updateHighlighting();
   }
 
@@ -491,12 +484,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.args.application.components.forEach((child) => {
       const mesh = this.applicationObject3D.getBoxMeshbyModelId(child.get('id'));
       if (mesh !== undefined && mesh instanceof ComponentMesh) {
-        this.entityManipulation.openComponentMesh(mesh);
+        this.entityManipulation.openComponentMesh(mesh, this.applicationObject3D);
       }
-      this.entityManipulation.openComponentsRecursively(child);
+      this.entityManipulation.openComponentsRecursively(child, this.applicationObject3D);
     });
 
-    this.communicationRendering.addCommunication(this.boxLayoutMap);
+    this.communicationRendering.addCommunication(this.applicationObject3D);
     this.highlighter.updateHighlighting();
   }
 
@@ -525,13 +518,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   @action
   moveCameraTo(emberModel: Clazz|ClazzCommunication) {
-    const applicationLayout = this.boxLayoutMap.get(this.args.application.id);
+    const applicationCenter = this.applicationObject3D.layout.center;
 
-    if (!emberModel || !applicationLayout) {
-      return;
-    }
-
-    this.entityManipulation.moveCameraTo(emberModel, applicationLayout.center,
+    EntityManipulation.moveCameraTo(emberModel, applicationCenter,
       this.camera, this.applicationObject3D);
   }
 

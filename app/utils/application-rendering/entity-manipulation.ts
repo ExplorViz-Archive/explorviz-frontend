@@ -2,7 +2,6 @@ import Component from 'explorviz-frontend/models/component';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import THREE, { PerspectiveCamera } from 'three';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 import Clazz from 'explorviz-frontend/models/clazz';
@@ -12,23 +11,18 @@ import CommunicationRendering from './communication-rendering';
 import Highlighting from './highlighting';
 
 export default class EntityManipulation {
-  // Functions as parent object for all application objects
-  applicationObject3D: ApplicationObject3D;
-
   // References to apply necessary communications to communication and highlighting
   communicationRendering: CommunicationRendering;
 
   highlighter: Highlighting;
 
-  OPENED_COMPONENT_HEIGHT: number;
+  openedComponentHeight: number;
 
-  constructor(applicationObject3D: ApplicationObject3D,
-    communicationRendering: CommunicationRendering, highlighter: Highlighting,
+  constructor(communicationRendering: CommunicationRendering, highlighter: Highlighting,
     heightOfComponent = 1.5) {
-    this.applicationObject3D = applicationObject3D;
     this.communicationRendering = communicationRendering;
     this.highlighter = highlighter;
-    this.OPENED_COMPONENT_HEIGHT = heightOfComponent;
+    this.openedComponentHeight = heightOfComponent;
   }
 
   /**
@@ -37,19 +31,19 @@ export default class EntityManipulation {
    *
    * @param boxLayoutMap Contains layout information for re-computation of communication
    */
-  closeAllComponents(boxLayoutMap: Map<string, BoxLayout>) {
-    const application = this.applicationObject3D.dataModel;
+  closeAllComponents(applicationObject3D: ApplicationObject3D) {
+    const application = applicationObject3D.dataModel;
 
     // Close each component
     application.components.forEach((component) => {
-      const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(component.id);
+      const componentMesh = applicationObject3D.getBoxMeshbyModelId(component.id);
       if (componentMesh instanceof ComponentMesh) {
-        this.closeComponentMesh(componentMesh);
+        this.closeComponentMesh(componentMesh, applicationObject3D);
       }
     });
 
     // Re-compute communication and highlighting
-    this.communicationRendering.addCommunication(boxLayoutMap);
+    this.communicationRendering.addCommunication(applicationObject3D);
     this.highlighter.updateHighlighting();
   }
 
@@ -58,14 +52,14 @@ export default class EntityManipulation {
    *
    * @param component Component of which the children shall be opened
    */
-  openComponentsRecursively(component: Component) {
+  openComponentsRecursively(component: Component, applicationObject3D: ApplicationObject3D) {
     const components = component.children;
     components.forEach((child) => {
-      const mesh = this.applicationObject3D.getBoxMeshbyModelId(child.get('id'));
+      const mesh = applicationObject3D.getBoxMeshbyModelId(child.get('id'));
       if (mesh !== undefined && mesh instanceof ComponentMesh) {
-        this.openComponentMesh(mesh);
+        this.openComponentMesh(mesh, applicationObject3D);
       }
-      this.openComponentsRecursively(child);
+      this.openComponentsRecursively(child, applicationObject3D);
     });
   }
 
@@ -74,15 +68,15 @@ export default class EntityManipulation {
    *
    * @param mesh Component mesh which shall be opened
    */
-  openComponentMesh(mesh: ComponentMesh) {
+  openComponentMesh(mesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
     if (mesh.opened) { return; }
 
-    mesh.height = this.OPENED_COMPONENT_HEIGHT;
+    mesh.height = this.openedComponentHeight;
 
     // Reset y coordinate
-    mesh.position.y -= mesh.layoutHeight / 2;
+    mesh.position.y -= mesh.layout.height / 2;
     // Set y coordinate according to open component height
-    mesh.position.y += this.OPENED_COMPONENT_HEIGHT / 2;
+    mesh.position.y += this.openedComponentHeight / 2;
 
     mesh.opened = true;
     mesh.visible = true;
@@ -90,7 +84,7 @@ export default class EntityManipulation {
 
     const childComponents = mesh.dataModel.get('children');
     childComponents.forEach((childComponent) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(childComponent.get('id'));
+      const childMesh = applicationObject3D.getBoxMeshbyModelId(childComponent.get('id'));
       if (childMesh) {
         childMesh.visible = true;
       }
@@ -98,7 +92,7 @@ export default class EntityManipulation {
 
     const clazzes = mesh.dataModel.get('clazzes');
     clazzes.forEach((clazz) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
+      const childMesh = applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
       if (childMesh) {
         childMesh.visible = true;
       }
@@ -110,26 +104,26 @@ export default class EntityManipulation {
    *
    * @param mesh Component mesh which shall be closed
    */
-  closeComponentMesh(mesh: ComponentMesh) {
+  closeComponentMesh(mesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
     if (!mesh.opened) { return; }
 
-    mesh.height = mesh.layoutHeight;
+    mesh.height = mesh.layout.height;
 
     // Reset y coordinate
-    mesh.position.y -= this.OPENED_COMPONENT_HEIGHT / 2;
+    mesh.position.y -= this.openedComponentHeight / 2;
     // Set y coordinate according to closed component height
-    mesh.position.y += mesh.layoutHeight / 2;
+    mesh.position.y += mesh.layout.height / 2;
 
     mesh.opened = false;
     Labeler.positionBoxLabel(mesh);
 
     const childComponents = mesh.dataModel.get('children');
     childComponents.forEach((childComponent) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(childComponent.get('id'));
+      const childMesh = applicationObject3D.getBoxMeshbyModelId(childComponent.get('id'));
       if (childMesh instanceof ComponentMesh) {
         childMesh.visible = false;
         if (childMesh.opened) {
-          this.closeComponentMesh(childMesh);
+          this.closeComponentMesh(childMesh, applicationObject3D);
         }
         // Reset highlighting if highlighted entity is no longer visible
         if (childMesh.highlighted) {
@@ -140,7 +134,7 @@ export default class EntityManipulation {
 
     const clazzes = mesh.dataModel.get('clazzes');
     clazzes.forEach((clazz) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
+      const childMesh = applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
       if (childMesh instanceof ClazzMesh) {
         childMesh.visible = false;
         // Reset highlighting if highlighted entity is no longer visible
@@ -156,11 +150,11 @@ export default class EntityManipulation {
    *
    * @param mesh Mesh which shall be opened / closed
    */
-  toggleComponentMeshState(mesh: ComponentMesh) {
+  toggleComponentMeshState(mesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
     if (mesh.opened) {
-      this.closeComponentMesh(mesh);
+      this.closeComponentMesh(mesh, applicationObject3D);
     } else {
-      this.openComponentMesh(mesh);
+      this.openComponentMesh(mesh, applicationObject3D);
     }
   }
 
@@ -170,11 +164,13 @@ export default class EntityManipulation {
    * @param openComponentids Set with ids of components which shall be opened
    * @param boxLayoutMap Map which contains communication layout
    */
-  setComponentState(openComponentids: Set<string>) {
-    openComponentids.forEach((componentId) => {
-      const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(componentId);
+  setComponentState(applicationObject3D: ApplicationObject3D) {
+    const { openComponentIds } = applicationObject3D;
+
+    openComponentIds.forEach((componentId) => {
+      const componentMesh = applicationObject3D.getBoxMeshbyModelId(componentId);
       if (componentMesh instanceof ComponentMesh) {
-        this.openComponentMesh(componentMesh);
+        this.openComponentMesh(componentMesh, applicationObject3D);
       }
     });
   }
@@ -187,15 +183,15 @@ export default class EntityManipulation {
    * @param camera Camera which shall be moved
    * @param applicationObject3D Object which contains all application meshes
    */
-  moveCameraTo(emberModel: Clazz|ClazzCommunication, applicationCenter: THREE.Vector3,
+  static moveCameraTo(emberModel: Clazz|ClazzCommunication, applicationCenter: THREE.Vector3,
     camera: PerspectiveCamera, applicationObject3D: ApplicationObject3D) {
     if (emberModel instanceof ClazzCommunication) {
-      const sourceClazzMesh = this.applicationObject3D.getBoxMeshbyModelId(emberModel.sourceClazz.get('id'));
-      const targetClazzMesh = this.applicationObject3D.getBoxMeshbyModelId(emberModel.targetClazz.get('id'));
+      const sourceClazzMesh = applicationObject3D.getBoxMeshbyModelId(emberModel.sourceClazz.get('id'));
+      const targetClazzMesh = applicationObject3D.getBoxMeshbyModelId(emberModel.targetClazz.get('id'));
 
       if (sourceClazzMesh instanceof ClazzMesh && targetClazzMesh instanceof ClazzMesh) {
-        const sourceLayoutPos = new THREE.Vector3().copy(sourceClazzMesh.layoutPos);
-        const targetLayoutPos = new THREE.Vector3().copy(targetClazzMesh.layoutPos);
+        const sourceLayoutPos = new THREE.Vector3().copy(sourceClazzMesh.layout.position);
+        const targetLayoutPos = new THREE.Vector3().copy(targetClazzMesh.layout.position);
 
         const directionVector = targetLayoutPos.sub(sourceLayoutPos);
 
@@ -206,9 +202,9 @@ export default class EntityManipulation {
         camera.position.z += 50;
       }
     } else {
-      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(emberModel.get('id'));
+      const clazzMesh = applicationObject3D.getBoxMeshbyModelId(emberModel.get('id'));
       if (clazzMesh instanceof ClazzMesh) {
-        const layoutPos = new THREE.Vector3().copy(clazzMesh.layoutPos);
+        const layoutPos = new THREE.Vector3().copy(clazzMesh.layout.position);
         EntityManipulation.applyCameraPosition(applicationCenter, camera, layoutPos,
           applicationObject3D);
         // Apply zoom
@@ -220,10 +216,11 @@ export default class EntityManipulation {
   /**
    * Opens components of the application until at least two components are visible.
    */
-  applyDefaultApplicationLayout() {
+  applyDefaultApplicationLayout(applicationObject3D: ApplicationObject3D) {
     const self = this;
 
-    function applyComponentLayout(components: DS.PromiseManyArray<Component>) {
+    function applyComponentLayout(appObject3D: ApplicationObject3D,
+      components: DS.PromiseManyArray<Component>) {
       if (components.length > 1) {
         // There are two components on the first level
         // therefore, here is nothing to do
@@ -233,16 +230,16 @@ export default class EntityManipulation {
       const component = components.objectAt(0);
 
       if (component !== undefined) {
-        const mesh = self.applicationObject3D.getBoxMeshbyModelId(component.id);
+        const mesh = appObject3D.getBoxMeshbyModelId(component.id);
         if (mesh instanceof ComponentMesh) {
-          self.openComponentMesh(mesh);
+          self.openComponentMesh(mesh, applicationObject3D);
         }
 
-        applyComponentLayout(component.get('children'));
+        applyComponentLayout(appObject3D, component.get('children'));
       }
     }
 
-    applyComponentLayout(this.applicationObject3D.dataModel.components);
+    applyComponentLayout(applicationObject3D, applicationObject3D.dataModel.components);
   }
 
   /**

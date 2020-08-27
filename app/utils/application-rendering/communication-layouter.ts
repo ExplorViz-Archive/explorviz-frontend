@@ -1,21 +1,18 @@
 import THREE from 'three';
-import Application from 'explorviz-frontend/models/application';
 import Component from 'explorviz-frontend/models/component';
 import Clazz from 'explorviz-frontend/models/clazz';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
-import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import ComponentMesh from '../../view-objects/3d/application/component-mesh';
 import FoundationMesh from '../../view-objects/3d/application/foundation-mesh';
 import CommunicationLayout from '../../view-objects/layout-models/communication-layout';
 
 // Communication Layouting //
-export default function applyCommunicationLayout(applicationObject3D: ApplicationObject3D,
-  boxLayoutMap: Map<string, BoxLayout>) {
+export default function applyCommunicationLayout(applicationObject3D: ApplicationObject3D) {
   const application = applicationObject3D.dataModel;
 
   const layoutMap: Map<string, CommunicationLayout> = new Map();
-
 
   // HELPER FUNCTIONS
 
@@ -100,7 +97,6 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
     });
   } // END calculatePipeSizeFromQuantiles
 
-
   /**
    * Returns the first parent component which is open or - if it does not exist -
    * the root component (which has no parent itself)
@@ -180,8 +176,8 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
 
           if (sourceEntity && targetEntity) {
             const commLayout = layoutMap.get(clazzCommunication.get('id'));
-            const sourceLayout = boxLayoutMap.get(sourceEntity.get('id'));
-            const targetLayout = boxLayoutMap.get(targetEntity.get('id'));
+            const sourceLayout = applicationObject3D.getBoxLayout(sourceEntity.get('id'));
+            const targetLayout = applicationObject3D.getBoxLayout(targetEntity.get('id'));
 
             if (commLayout && sourceLayout && targetLayout) {
               commLayout.startX = sourceLayout.positionX + sourceLayout.width / 2.0;
@@ -213,8 +209,8 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
     if (internalClazz !== null) {
       const end = new THREE.Vector3();
 
-      const clazzBoxLayout = boxLayoutMap.get(internalClazz.get('id'));
-      if (clazzBoxLayout === undefined) { return; }
+      const clazzBoxLayout = applicationObject3D.getBoxLayout(internalClazz.get('id'));
+      if (!clazzBoxLayout) { return; }
 
       const centerPoint = new THREE.Vector3(clazzBoxLayout.positionX
           + clazzBoxLayout.width / 2.0,
@@ -228,11 +224,9 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
     }
   }
 
-
-  function layoutDrawableCommunication(commu: DrawableClazzCommunication, foundation: Application) {
+  function layoutDrawableCommunication(commu: DrawableClazzCommunication,
+    foundationLayout: BoxLayout) {
     const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
-
-    const foundationLayout = boxLayoutMap.get(foundation.id);
 
     if (!foundationLayout) { return; }
 
@@ -250,8 +244,9 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
   const drawableClazzCommunications = application.get('drawableClazzCommunications');
 
   drawableClazzCommunications.forEach((clazzcommunication) => {
-    if (layoutMap.has(clazzcommunication.get('id'))) {
-      layoutDrawableCommunication(clazzcommunication, application);
+    const foundationLayout = applicationObject3D.getBoxLayout(application.id);
+    if (layoutMap.has(clazzcommunication.get('id')) && foundationLayout) {
+      layoutDrawableCommunication(clazzcommunication, foundationLayout);
     }
   });
 

@@ -1,5 +1,6 @@
 import THREE from 'three';
 import Application from 'explorviz-frontend/models/application';
+import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import FoundationMesh from './foundation-mesh';
 import ClazzMesh from './clazz-mesh';
 import ComponentMesh from './component-mesh';
@@ -18,6 +19,8 @@ export default class ApplicationObject3D extends THREE.Object3D {
    */
   dataModel: Application;
 
+  boxLayoutMap: Map<string, BoxLayout>;
+
   /**
    * Map to store all box shaped meshes (i.e., Clazz, Component, Foundation)
    */
@@ -33,10 +36,20 @@ export default class ApplicationObject3D extends THREE.Object3D {
    */
   componentMeshes: Set<ComponentMesh> = new Set();
 
-  constructor(application: Application) {
+  constructor(application: Application, boxLayoutMap: Map<string, BoxLayout>) {
     super();
 
     this.dataModel = application;
+    this.boxLayoutMap = boxLayoutMap;
+  }
+
+  get layout() {
+    const layout = this.getBoxLayout(this.dataModel.id);
+    if (layout) {
+      return layout;
+    }
+
+    return new BoxLayout();
   }
 
   /**
@@ -76,6 +89,10 @@ export default class ApplicationObject3D extends THREE.Object3D {
     }
 
     return this;
+  }
+
+  getBoxLayout(id: string) {
+    return this.boxLayoutMap.get(id);
   }
 
   /**
