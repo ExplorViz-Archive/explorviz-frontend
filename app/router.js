@@ -33,6 +33,8 @@ Router.map(function () {
 
     this.route('settings');
 
+    this.route('heatmapsettings');
+
     // add nested configuration routes which are added by extensions
     const configurationRouteContext = this;
 

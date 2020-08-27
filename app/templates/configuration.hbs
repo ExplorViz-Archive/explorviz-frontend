@@ -17,6 +17,13 @@
         </nav.item>
       {{/if}}
 
+      <nav.item
+        @onClick={{fn tab.select "heatmapSettingsPane"}}
+        @active={{eq tab.activeId "heatmapSettingsPane"}}
+      >
+        <nav.link-to @route="configuration.heatmapsettings">Heatmap Settings</nav.link-to>
+      </nav.item>
+
       {{!-- Nav item for each addon (extension) that is registered at configurationService --}}
       {{#each this.configurationService.configurationExtensions as |addon|}}
         <nav.item
