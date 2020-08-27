@@ -10,5 +10,8 @@
 @import "_pagenavigation";
 @import "_visualization_navbar";
 
+// located in lib/heatmap/addon/styles
+@import "_heatmap";
+
 @import 'ember-power-select/themes/bootstrap';
 @import "ember-power-select";

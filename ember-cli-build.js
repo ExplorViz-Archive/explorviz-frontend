@@ -6,6 +6,7 @@ module.exports = function (defaults) {
     // Default implementation for ember-cli-sass
     sassOptions: {
       implementation: sass,
+      includePaths: ['lib/heatmap/addon/styles'],
     },
 
     svgJar: {
@@ -20,7 +21,7 @@ module.exports = function (defaults) {
     },
 
     fingerprint: {
-      exclude: ['images']
+      exclude: ['images'],
     },
 
     nodeModulesToVendor: [

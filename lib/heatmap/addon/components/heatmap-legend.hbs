@@ -1,4 +1,4 @@
-<div id="heatmap-legend-container" class="d-flex flex-column p-2" style="width: 150px; border: 1px solid lightgray; border-radius: 0.2rem; background-color: white; user-select: none">
+<div id="heatmap-legend-container" class="d-flex flex-column p-2">
   <div id="legend-header">
     <span id="legend-header-content">{{this.header}}</span> 
     {{#if (eq @mode "aggregatedHeatmap")}}
@@ -11,7 +11,7 @@
     {{this.subHeader}}
   </div>
   <div class="d-flex flex-row mt-2">
-    <div id="heatmap-legend" style="width: 33.3333333333%; height: 250px" {{did-insert this.didInsertLegend}}>
+    <div id="heatmap-legend" {{did-insert this.didInsertLegend}}>
       <canvas
         id="legend-canvas"
         height="100%"
@@ -19,7 +19,7 @@
       >
       </canvas>
     </div>
-    <div id="heatmap-legend-label" style="width: 66.666666666%; height: 250px" {{did-insert this.didInsertLegendlabel}}>
+    <div id="heatmap-legend-label" {{did-insert this.didInsertLegendlabel}}>
       <canvas
         id="legend-canvas-label"
         height="100%"
