@@ -650,18 +650,12 @@ populateScene = task(function* (this: VrRendering) {
   });
 
   positionApplication(applicationObject3D: ApplicationObject3D, landscapeApp: ApplicationMesh) {
-  // Postion application
+    // Calculate position in front of landscape application
+    const newPosition = new THREE.Vector3().copy(landscapeApp.position);
+    newPosition.z += 0.3;
 
-    const bboxApp3D = new THREE.Box3().setFromObject(applicationObject3D);
-    const app3DSize = new THREE.Vector3();
-    bboxApp3D.getSize(app3DSize);
-
-    // Center x and z around hit application
-    const newPosition = new THREE.Vector3();
-    newPosition.x = landscapeApp.position.x;// - app3DSize.x;
-    newPosition.z = landscapeApp.position.z;// + app3DSize.z;
-    newPosition.y = landscapeApp.position.y + 2;
-    applicationObject3D.position.copy(newPosition);
+    // Convert position to world location and apply
+    applicationObject3D.position.copy(landscapeApp.localToWorld(newPosition));
 
     // Rotate app so that it is aligned with landscape
     applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
