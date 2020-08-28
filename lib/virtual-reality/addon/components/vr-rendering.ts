@@ -100,6 +100,8 @@ export default class VrRendering extends Component<Args> {
 
   controller2: THREE.Group;
 
+  user: THREE.Group;
+
   applicationGroup: ApplicationGroup;
 
   boxDepth: number;
@@ -107,6 +109,8 @@ export default class VrRendering extends Component<Args> {
   appScaleFactor: number;
 
   defaultComponentHeight: number;
+
+  floor!: FloorMesh;
 
   closeButtonTexture: THREE.Texture;
 
@@ -132,6 +136,8 @@ export default class VrRendering extends Component<Args> {
   // Extended Object3D which manages landscape meshes
   readonly landscapeObject3D!: LandscapeObject3D;
 
+  teleportArea!: THREE.Mesh;
+
   // #endregion CLASS FIELDS AND GETTERS
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -147,6 +153,7 @@ export default class VrRendering extends Component<Args> {
     this.raycaster = new THREE.Raycaster();
     this.controller1 = new THREE.Group();
     this.controller2 = new THREE.Group();
+    this.user = new THREE.Group();
     this.applicationGroup = new ApplicationGroup();
 
     this.entityRendering = new EntityRendering(this.configuration, this.componentHeight);
@@ -180,6 +187,7 @@ export default class VrRendering extends Component<Args> {
     this.initCamera();
     this.initRenderer();
     this.initLights();
+    this.initTeleportArea();
     this.initInteraction();
     this.initControllers();
   }
@@ -196,8 +204,11 @@ export default class VrRendering extends Component<Args> {
     // TODO: Increase floor size if landscape is too large
     const floorSize = 10;
     const floorMesh = new FloorMesh(floorSize, floorSize);
+    this.floor = floorMesh;
     this.scene.add(floorMesh);
     this.scene.add(this.applicationGroup);
+
+    this.scene.add(this.user);
 
     this.debug('Scene created');
   }
@@ -209,6 +220,7 @@ export default class VrRendering extends Component<Args> {
     const { width, height } = this.canvas;
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     this.camera.position.set(0, 1, 2);
+    this.user.add(this.camera);
     this.debug('Camera added');
   }
 
@@ -244,6 +256,20 @@ export default class VrRendering extends Component<Args> {
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
     this.debug('Lights added');
+  }
+
+  initTeleportArea() {
+    // Create teleport area
+    const geometry = new THREE.RingGeometry(0.14, 0.2, 32);
+    geometry.rotateX(-90 * THREE.MathUtils.DEG2RAD);
+    const material = new THREE.MeshLambertMaterial({
+      color: new THREE.Color(0x0000dc),
+    });
+    material.transparent = true;
+    material.opacity = 0.4;
+    this.teleportArea = new THREE.Mesh(geometry, material);
+    this.teleportArea.visible = false;
+    this.scene.add(this.teleportArea);
   }
 
   /**
@@ -288,12 +314,13 @@ export default class VrRendering extends Component<Args> {
 
         controller.add(line.clone());
 
-        this.scene.add(controller);
-        this.scene.add(controllerGrip);
+        this.user.add(controller);
+        this.user.add(controllerGrip);
       }
     }
 
     this.controller1.addEventListener('selectstart', this.onSelectStart1.bind(this));
+    this.controller2.addEventListener('selectstart', this.onSelectStart2.bind(this));
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -367,8 +394,8 @@ export default class VrRendering extends Component<Args> {
   render() {
     if (this.isDestroyed) { return; }
 
-    if (this.controller1) { this.intersectObjects(this.controller1); }
-    if (this.controller2) { this.intersectObjects(this.controller2); }
+    if (this.controller1) { this.intersectObjects(this.controller1, 'controller1'); }
+    if (this.controller2) { this.intersectObjects(this.controller2, 'controller2'); }
 
     this.renderer.render(this.scene, this.camera);
   }
@@ -811,7 +838,10 @@ populateScene = task(function* (this: VrRendering) {
   // #region CONTROLLER HANDLERS
 
   onSelectStart1() {
-    const object = this.controller1.userData.intersectedObject;
+    if (!this.controller1.userData.intersectedObject) {
+      return;
+    }
+    const { object } = this.controller1.userData.intersectedObject;
     if (object instanceof SystemMesh) {
       this.toggleSystemAndRedraw(object);
     } else if (object instanceof ApplicationMesh) {
@@ -831,7 +861,27 @@ populateScene = task(function* (this: VrRendering) {
     }
   }
 
+  onSelectStart2() {
+    if (!this.controller2.userData.intersectedObject) {
+      return;
+    }
+    const { object, point } = this.controller2.userData.intersectedObject;
+    if (object instanceof FloorMesh) {
+      this.teleportToPosition(point);
+    }
+  }
+
   // #endregion CONTROLLER HANDLERS
+
+  teleportToPosition(position: THREE.Vector3) {
+    const cameraWorldPos = new THREE.Vector3();
+
+    const xrCamera = this.renderer.xr.getCamera(this.camera);
+    xrCamera.getWorldPosition(cameraWorldPos);
+
+    this.user.position.x += position.x - cameraWorldPos.x;
+    this.user.position.z += position.z - cameraWorldPos.z;
+  }
 
   // #region MOUSE & KEYBOARD EVENT HANDLER
 
@@ -856,6 +906,12 @@ populateScene = task(function* (this: VrRendering) {
         break;
       case 'd':
         this.landscapeObject3D.position.x += mvDst;
+        break;
+      case '1':
+        this.landscapeObject3D.position.z -= mvDst;
+        break;
+      case '2':
+        this.landscapeObject3D.position.z += mvDst;
         break;
       case 'c':
         this.applicationGroup.clear();
@@ -897,7 +953,7 @@ populateScene = task(function* (this: VrRendering) {
     this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
     this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersectionObjects = [this.landscapeObject3D, this.applicationGroup];
+    const intersectionObjects = [this.landscapeObject3D, this.floor, this.applicationGroup];
 
     if (!this.landscapeObject3D) { return []; }
 
@@ -905,7 +961,7 @@ populateScene = task(function* (this: VrRendering) {
 
     for (let i = 0; i < intersections.length; i++) {
       const { object } = intersections[i];
-      if (!(object instanceof LabelMesh)) {
+      if (!(object instanceof LabelMesh) && object.visible) {
         return [intersections[i]];
       }
     }
@@ -913,29 +969,47 @@ populateScene = task(function* (this: VrRendering) {
     return [];
   }
 
-  intersectObjects(controller: THREE.Group) {
+  intersectObjects(controller: THREE.Group, controllerName: string) {
     const line = controller.getObjectByName('line');
 
     if (!line) return;
 
+    /* Reset hover effect and teleportation area */
+    VrRendering.resetHoverEffect(controller);
+    this.teleportArea.visible = false;
+
     const intersections = this.getIntersections(controller);
 
-    const nearestIntersection = intersections.firstObject;
+    const [nearestIntersection] = intersections;
 
-    if (nearestIntersection) {
-      const { object } = intersections[0];
-
-      if (object instanceof BaseMesh) {
-        VrRendering.resetHoverEffect(controller);
-        object.applyHoverEffect(1.4);
-        controller.userData.intersectedObject = object;
-      }
-
-      line.scale.z = intersections[0].distance;
-    } else {
-      VrRendering.resetHoverEffect(controller);
+    if (!nearestIntersection) {
       line.scale.z = 5;
+      return;
     }
+
+    const { object } = nearestIntersection;
+
+    if (controllerName === 'controller1') {
+      if (object instanceof BaseMesh) {
+        object.applyHoverEffect(1.4);
+      }
+    } else if (controllerName === 'controller2') {
+      if (object instanceof FloorMesh) {
+        this.showAndUpdateTeleportArea(nearestIntersection.point);
+      } else if (object instanceof BaseMesh) {
+        object.applyHoverEffect(1.4);
+      }
+    }
+
+    controller.userData.intersectedObject = nearestIntersection;
+    line.scale.z = nearestIntersection.distance;
+  }
+
+  showAndUpdateTeleportArea(position: THREE.Vector3) {
+    this.teleportArea.visible = true;
+    this.teleportArea.position.x = position.x;
+    this.teleportArea.position.y = position.y + 0.005;
+    this.teleportArea.position.z = position.z;
   }
 
   /**
@@ -944,9 +1018,12 @@ populateScene = task(function* (this: VrRendering) {
    * @param controller Controller of which the hover effect shall be reseted.
    */
   static resetHoverEffect(controller: THREE.Group) {
-    const currentObject = controller.userData.intersectedObject;
-    if (currentObject instanceof BaseMesh) {
-      currentObject.resetHoverEffect();
+    if (!controller.userData.intersectedObject) {
+      return;
+    }
+    const { object } = controller.userData.intersectedObject;
+    if (object instanceof BaseMesh) {
+      object.resetHoverEffect();
       controller.userData.intersectedObject = null;
     }
   }
