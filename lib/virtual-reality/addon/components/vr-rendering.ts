@@ -42,6 +42,7 @@ import AppCommunicationRendering from 'explorviz-frontend/utils/application-rend
 import EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import ApplicationGroup from 'virtual-reality/utils/application-group';
+import CloseIcon from 'virtual-reality/utils/close-icon';
 
 // Declare globals
 /* global VRButton */
@@ -107,6 +108,8 @@ export default class VrRendering extends Component<Args> {
 
   defaultComponentHeight: number;
 
+  closeButtonTexture: THREE.Texture;
+
   get font() {
     return this.args.font;
   }
@@ -149,6 +152,9 @@ export default class VrRendering extends Component<Args> {
     this.entityRendering = new EntityRendering(this.configuration, this.componentHeight);
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
+
+    // Load image for delete button
+    this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
     this.entityManipulation = new EntityManipulation(
       this.appCommRendering, null, this.componentHeight,
@@ -660,6 +666,8 @@ populateScene = task(function* (this: VrRendering) {
       entityManipulation.setComponentState(applicationObject3D);
       communicationRendering.addCommunication(applicationObject3D);
       this.addLabels(applicationObject3D);
+      this.addCloseIcon(applicationObject3D);
+
       this.positionApplication(applicationObject3D, landscapeApp);
 
       this.applicationGroup.addApplication(applicationObject3D);
@@ -667,6 +675,18 @@ populateScene = task(function* (this: VrRendering) {
       // console.log(e);
     }
   });
+
+  addCloseIcon(applicationObject3D: ApplicationObject3D) {
+    const closeIcon = new CloseIcon(this.closeButtonTexture);
+
+    const bboxApp3D = new THREE.Box3().setFromObject(applicationObject3D);
+    closeIcon.position.x = bboxApp3D.max.x + 0.05;
+    closeIcon.position.z = bboxApp3D.max.z + 0.05;
+
+    closeIcon.geometry.rotateX(90 * THREE.MathUtils.DEG2RAD);
+    closeIcon.geometry.rotateY(90 * THREE.MathUtils.DEG2RAD);
+    applicationObject3D.add(closeIcon);
+  }
 
   positionApplication(applicationObject3D: ApplicationObject3D, landscapeApp: ApplicationMesh) {
     // Calculate position in front of landscape application
@@ -803,6 +823,8 @@ populateScene = task(function* (this: VrRendering) {
         this.entityManipulation.toggleComponentMeshState(object, object.parent);
         this.appCommRendering.addCommunication(object.parent);
       // Hit Foundation
+      } else if (object instanceof CloseIcon) {
+        this.applicationGroup.removeApplicationById(object.parent.dataModel.id);
       } else if (object instanceof FoundationMesh) {
         this.entityManipulation.closeAllComponents(object.parent);
       }
