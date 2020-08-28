@@ -14,11 +14,11 @@ export default class EntityManipulation {
   // References to apply necessary communications to communication and highlighting
   communicationRendering: CommunicationRendering;
 
-  highlighter: Highlighting;
+  highlighter: Highlighting|null;
 
   openedComponentHeight: number;
 
-  constructor(communicationRendering: CommunicationRendering, highlighter: Highlighting,
+  constructor(communicationRendering: CommunicationRendering, highlighter: Highlighting|null,
     heightOfComponent = 1.5) {
     this.communicationRendering = communicationRendering;
     this.highlighter = highlighter;
@@ -44,7 +44,9 @@ export default class EntityManipulation {
 
     // Re-compute communication and highlighting
     this.communicationRendering.addCommunication(applicationObject3D);
-    this.highlighter.updateHighlighting();
+    if (this.highlighter) {
+      this.highlighter.updateHighlighting();
+    }
   }
 
   /**
@@ -126,7 +128,7 @@ export default class EntityManipulation {
           this.closeComponentMesh(childMesh, applicationObject3D);
         }
         // Reset highlighting if highlighted entity is no longer visible
-        if (childMesh.highlighted) {
+        if (childMesh.highlighted && this.highlighter) {
           this.highlighter.removeHighlighting();
         }
       }
@@ -138,7 +140,7 @@ export default class EntityManipulation {
       if (childMesh instanceof ClazzMesh) {
         childMesh.visible = false;
         // Reset highlighting if highlighted entity is no longer visible
-        if (childMesh.highlighted) {
+        if (childMesh.highlighted && this.highlighter) {
           this.highlighter.removeHighlighting();
         }
       }

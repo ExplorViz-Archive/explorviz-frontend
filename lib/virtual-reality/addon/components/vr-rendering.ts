@@ -41,6 +41,8 @@ import EntityRendering from 'explorviz-frontend/utils/application-rendering/enti
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import CurrentUser from 'explorviz-frontend/services/current-user';
+import ApplicationGroup from 'virtual-reality/utils/application-group';
+import CloseIcon from 'virtual-reality/utils/close-icon';
 
 // Declare globals
 /* global VRButton */
@@ -100,6 +102,8 @@ export default class VrRendering extends Component<Args> {
 
   user: THREE.Group;
 
+  applicationGroup: ApplicationGroup;
+
   boxDepth: number;
 
   appScaleFactor: number;
@@ -107,6 +111,8 @@ export default class VrRendering extends Component<Args> {
   defaultComponentHeight: number;
 
   floor!: FloorMesh;
+
+  closeButtonTexture: THREE.Texture;
 
   get font() {
     return this.args.font;
@@ -117,6 +123,12 @@ export default class VrRendering extends Component<Args> {
   }
 
   readonly imageLoader: ImageLoader = new ImageLoader();
+
+  readonly entityRendering: EntityRendering;
+
+  readonly appCommRendering: AppCommunicationRendering;
+
+  readonly entityManipulation: EntityManipulation;
 
   // Provides functions to label landscape meshes
   readonly landscapeLabeler = new LandscapeLabeler();
@@ -142,6 +154,18 @@ export default class VrRendering extends Component<Args> {
     this.controller1 = new THREE.Group();
     this.controller2 = new THREE.Group();
     this.user = new THREE.Group();
+    this.applicationGroup = new ApplicationGroup();
+
+    this.entityRendering = new EntityRendering(this.configuration, this.componentHeight);
+
+    this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
+
+    // Load image for delete button
+    this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
+
+    this.entityManipulation = new EntityManipulation(
+      this.appCommRendering, null, this.componentHeight,
+    );
 
     const { replayLandscape } = this.landscapeRepo;
     if (replayLandscape) {
@@ -181,6 +205,7 @@ export default class VrRendering extends Component<Args> {
     const floorMesh = new FloorMesh(floorSize, floorSize);
     this.floor = floorMesh;
     this.scene.add(floorMesh);
+    this.scene.add(this.applicationGroup);
 
     this.scene.add(this.user);
 
@@ -653,27 +678,35 @@ populateScene = task(function* (this: VrRendering) {
       entityManipulation.setComponentState(applicationObject3D);
       communicationRendering.addCommunication(applicationObject3D);
       this.addLabels(applicationObject3D);
+      this.addCloseIcon(applicationObject3D);
+
       this.positionApplication(applicationObject3D, landscapeApp);
 
-      this.scene.add(applicationObject3D);
+      this.applicationGroup.addApplication(applicationObject3D);
     } catch (e) {
       // console.log(e);
     }
   });
 
-  positionApplication(applicationObject3D: ApplicationObject3D, landscapeApp: ApplicationMesh) {
-  // Postion application
+  addCloseIcon(applicationObject3D: ApplicationObject3D) {
+    const closeIcon = new CloseIcon(this.closeButtonTexture);
 
     const bboxApp3D = new THREE.Box3().setFromObject(applicationObject3D);
-    const app3DSize = new THREE.Vector3();
-    bboxApp3D.getSize(app3DSize);
+    closeIcon.position.x = bboxApp3D.max.x + 0.05;
+    closeIcon.position.z = bboxApp3D.max.z + 0.05;
 
-    // Center x and z around hit application
-    const newPosition = new THREE.Vector3();
-    newPosition.x = landscapeApp.position.x;// - app3DSize.x;
-    newPosition.z = landscapeApp.position.z;// + app3DSize.z;
-    newPosition.y = landscapeApp.position.y + 2;
-    applicationObject3D.position.copy(newPosition);
+    closeIcon.geometry.rotateX(90 * THREE.MathUtils.DEG2RAD);
+    closeIcon.geometry.rotateY(90 * THREE.MathUtils.DEG2RAD);
+    applicationObject3D.add(closeIcon);
+  }
+
+  positionApplication(applicationObject3D: ApplicationObject3D, landscapeApp: ApplicationMesh) {
+    // Calculate position in front of landscape application
+    const newPosition = new THREE.Vector3().copy(landscapeApp.position);
+    newPosition.z += 0.3;
+
+    // Convert position to world location and apply
+    applicationObject3D.position.copy(landscapeApp.localToWorld(newPosition));
 
     // Rotate app so that it is aligned with landscape
     applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
@@ -798,16 +831,19 @@ populateScene = task(function* (this: VrRendering) {
       this.toggleSystemAndRedraw(object);
     } else if (object instanceof ApplicationMesh) {
       this.addApplication.perform(object);
-    // Toggle open state of clicked component
+    // Handle application hits
+    } else if (object?.parent instanceof ApplicationObject3D) {
+      // Hit Component
+      if (object instanceof ComponentMesh) {
+        this.entityManipulation.toggleComponentMeshState(object, object.parent);
+        this.appCommRendering.addCommunication(object.parent);
+      // Hit Foundation
+      } else if (object instanceof CloseIcon) {
+        this.applicationGroup.removeApplicationById(object.parent.dataModel.id);
+      } else if (object instanceof FoundationMesh) {
+        this.entityManipulation.closeAllComponents(object.parent);
+      }
     }
-    /* else if (object instanceof ComponentMesh) {
-      this.entityManipulation.toggleComponentMeshState(object);
-      this.communicationRendering.addCommunication(this.boxLayoutMap);
-      this.highlighter.updateHighlighting();
-    // Close all components since foundation shall never be closed itself
-    } else if (object instanceof FoundationMesh) {
-      this.entityManipulation.closeAllComponents(this.boxLayoutMap);
-    } */
   }
 
   onSelectStart2() {
@@ -868,6 +904,9 @@ populateScene = task(function* (this: VrRendering) {
       case '2':
         this.landscapeObject3D.position.z += mvDst;
         break;
+      case 'c':
+        this.applicationGroup.clear();
+        break;
       default:
         break;
     }
@@ -905,7 +944,7 @@ populateScene = task(function* (this: VrRendering) {
     this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
     this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersectionObjects = [this.landscapeObject3D, this.floor];
+    const intersectionObjects = [this.landscapeObject3D, this.floor, this.applicationGroup];
 
     if (!this.landscapeObject3D) { return []; }
 
