@@ -879,12 +879,6 @@ populateScene = task(function* (this: VrRendering) {
     const xrCamera = this.renderer.xr.getCamera(this.camera);
     xrCamera.getWorldPosition(cameraWorldPos);
 
-    // this.user.worldToLocal(position);
-    // this.user.worldToLocal(cameraWorldPos);
-
-    // console.log('Teleport pos: ', position);
-    console.log('Camera pos: ', cameraWorldPos);
-
     this.user.position.x += position.x - cameraWorldPos.x;
     this.user.position.z += position.z - cameraWorldPos.z;
   }
@@ -967,7 +961,7 @@ populateScene = task(function* (this: VrRendering) {
 
     for (let i = 0; i < intersections.length; i++) {
       const { object } = intersections[i];
-      if (!(object instanceof LabelMesh)) {
+      if (!(object instanceof LabelMesh) && object.visible) {
         return [intersections[i]];
       }
     }
