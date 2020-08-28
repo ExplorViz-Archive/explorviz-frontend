@@ -136,7 +136,7 @@ export default class VrRendering extends Component<Args> {
   // Extended Object3D which manages landscape meshes
   readonly landscapeObject3D!: LandscapeObject3D;
 
-  teleportArea: THREE.Mesh|undefined;
+  teleportArea!: THREE.Mesh;
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -187,6 +187,7 @@ export default class VrRendering extends Component<Args> {
     this.initCamera();
     this.initRenderer();
     this.initLights();
+    this.initTeleportArea();
     this.initInteraction();
     this.initControllers();
   }
@@ -255,6 +256,20 @@ export default class VrRendering extends Component<Args> {
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
     this.debug('Lights added');
+  }
+
+  initTeleportArea() {
+    // Create teleport area
+    const geometry = new THREE.RingGeometry(0.14, 0.2, 32);
+    geometry.rotateX(-90 * THREE.MathUtils.DEG2RAD);
+    const material = new THREE.MeshLambertMaterial({
+      color: new THREE.Color(0x0000dc),
+    });
+    material.transparent = true;
+    material.opacity = 0.4;
+    this.teleportArea = new THREE.Mesh(geometry, material);
+    this.teleportArea.visible = false;
+    this.scene.add(this.teleportArea);
   }
 
   /**
@@ -851,7 +866,7 @@ populateScene = task(function* (this: VrRendering) {
       return;
     }
     const { object, point } = this.controller2.userData.intersectedObject;
-    if (object instanceof FloorMesh && this.teleportArea) {
+    if (object instanceof FloorMesh) {
       this.teleportToPosition(point);
     }
   }
@@ -965,53 +980,42 @@ populateScene = task(function* (this: VrRendering) {
 
     if (!line) return;
 
+    /* Reset hover effect and teleportation area */
+    VrRendering.resetHoverEffect(controller);
+    this.teleportArea.visible = false;
+
     const intersections = this.getIntersections(controller);
 
-    const nearestIntersection = intersections[0];
+    const [nearestIntersection] = intersections;
 
-    if (nearestIntersection) {
-      const { object } = nearestIntersection;
-
-      if (controllerName === 'controller1') {
-        if (object instanceof BaseMesh) {
-          VrRendering.resetHoverEffect(controller);
-          object.applyHoverEffect(1.4);
-          controller.userData.intersectedObject = nearestIntersection;
-        }
-      } else if (controllerName === 'controller2') {
-        if (object instanceof FloorMesh) {
-          if (!this.teleportArea) {
-            // Create teleport area
-            const geometry = new THREE.RingGeometry(0.14, 0.2, 32);
-            geometry.rotateX(-90 * THREE.MathUtils.DEG2RAD);
-            const material = new THREE.MeshLambertMaterial({
-              color: new THREE.Color(0x0000dc),
-            });
-            material.transparent = true;
-            material.opacity = 0.4;
-            this.teleportArea = new THREE.Mesh(geometry, material);
-            this.scene.add(this.teleportArea);
-          }
-          this.teleportArea.position.x = nearestIntersection.point.x;
-          this.teleportArea.position.y = nearestIntersection.point.y + 0.005;
-          this.teleportArea.position.z = nearestIntersection.point.z;
-          controller.userData.intersectedObject = nearestIntersection;
-        } else if (object instanceof BaseMesh) {
-          this.removeTelportArea();
-          controller.userData.intersectedObject = null;
-        } else {
-          this.removeTelportArea();
-          controller.userData.intersectedObject = null;
-        }
-      }
-
-      line.scale.z = nearestIntersection.distance;
-    } else {
-      VrRendering.resetHoverEffect(controller);
+    if (!nearestIntersection) {
       line.scale.z = 5;
-
-      this.removeTelportArea();
+      return;
     }
+
+    const { object } = nearestIntersection;
+
+    if (controllerName === 'controller1') {
+      if (object instanceof BaseMesh) {
+        object.applyHoverEffect(1.4);
+      }
+    } else if (controllerName === 'controller2') {
+      if (object instanceof FloorMesh) {
+        this.showAndUpdateTeleportArea(nearestIntersection.point);
+      } else if (object instanceof BaseMesh) {
+        object.applyHoverEffect(1.4);
+      }
+    }
+
+    controller.userData.intersectedObject = nearestIntersection;
+    line.scale.z = nearestIntersection.distance;
+  }
+
+  showAndUpdateTeleportArea(position: THREE.Vector3) {
+    this.teleportArea.visible = true;
+    this.teleportArea.position.x = position.x;
+    this.teleportArea.position.y = position.y + 0.005;
+    this.teleportArea.position.z = position.z;
   }
 
   /**
@@ -1027,13 +1031,6 @@ populateScene = task(function* (this: VrRendering) {
     if (object instanceof BaseMesh) {
       object.resetHoverEffect();
       controller.userData.intersectedObject = null;
-    }
-  }
-
-  removeTelportArea() {
-    if (this.teleportArea) {
-      this.scene.remove(this.teleportArea);
-      this.teleportArea = undefined;
     }
   }
 
