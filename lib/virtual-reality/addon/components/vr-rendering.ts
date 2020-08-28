@@ -41,6 +41,7 @@ import EntityRendering from 'explorviz-frontend/utils/application-rendering/enti
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import CurrentUser from 'explorviz-frontend/services/current-user';
+import ApplicationGroup from 'virtual-reality/utils/application-group';
 
 // Declare globals
 /* global VRButton */
@@ -98,6 +99,8 @@ export default class VrRendering extends Component<Args> {
 
   controller2: THREE.Group;
 
+  applicationGroup: ApplicationGroup;
+
   boxDepth: number;
 
   appScaleFactor: number;
@@ -113,6 +116,12 @@ export default class VrRendering extends Component<Args> {
   }
 
   readonly imageLoader: ImageLoader = new ImageLoader();
+
+  readonly entityRendering: EntityRendering;
+
+  readonly appCommRendering: AppCommunicationRendering;
+
+  readonly entityManipulation: EntityManipulation;
 
   // Provides functions to label landscape meshes
   readonly landscapeLabeler = new LandscapeLabeler();
@@ -135,6 +144,15 @@ export default class VrRendering extends Component<Args> {
     this.raycaster = new THREE.Raycaster();
     this.controller1 = new THREE.Group();
     this.controller2 = new THREE.Group();
+    this.applicationGroup = new ApplicationGroup();
+
+    this.entityRendering = new EntityRendering(this.configuration, this.componentHeight);
+
+    this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
+
+    this.entityManipulation = new EntityManipulation(
+      this.appCommRendering, null, this.componentHeight,
+    );
 
     const { replayLandscape } = this.landscapeRepo;
     if (replayLandscape) {
@@ -173,6 +191,7 @@ export default class VrRendering extends Component<Args> {
     const floorSize = 10;
     const floorMesh = new FloorMesh(floorSize, floorSize);
     this.scene.add(floorMesh);
+    this.scene.add(this.applicationGroup);
 
     this.debug('Scene created');
   }
@@ -643,7 +662,7 @@ populateScene = task(function* (this: VrRendering) {
       this.addLabels(applicationObject3D);
       this.positionApplication(applicationObject3D, landscapeApp);
 
-      this.scene.add(applicationObject3D);
+      this.applicationGroup.addApplication(applicationObject3D);
     } catch (e) {
       // console.log(e);
     }
@@ -777,16 +796,17 @@ populateScene = task(function* (this: VrRendering) {
       this.toggleSystemAndRedraw(object);
     } else if (object instanceof ApplicationMesh) {
       this.addApplication.perform(object);
-    // Toggle open state of clicked component
+    // Handle application hits
+    } else if (object?.parent instanceof ApplicationObject3D) {
+      // Hit Component
+      if (object instanceof ComponentMesh) {
+        this.entityManipulation.toggleComponentMeshState(object, object.parent);
+        this.appCommRendering.addCommunication(object.parent);
+      // Hit Foundation
+      } else if (object instanceof FoundationMesh) {
+        this.entityManipulation.closeAllComponents(object.parent);
+      }
     }
-    /* else if (object instanceof ComponentMesh) {
-      this.entityManipulation.toggleComponentMeshState(object);
-      this.communicationRendering.addCommunication(this.boxLayoutMap);
-      this.highlighter.updateHighlighting();
-    // Close all components since foundation shall never be closed itself
-    } else if (object instanceof FoundationMesh) {
-      this.entityManipulation.closeAllComponents(this.boxLayoutMap);
-    } */
   }
 
   // #endregion CONTROLLER HANDLERS
@@ -814,6 +834,9 @@ populateScene = task(function* (this: VrRendering) {
         break;
       case 'd':
         this.landscapeObject3D.position.x += mvDst;
+        break;
+      case 'c':
+        this.applicationGroup.clear();
         break;
       default:
         break;
@@ -852,7 +875,7 @@ populateScene = task(function* (this: VrRendering) {
     this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
     this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersectionObjects = [this.landscapeObject3D];
+    const intersectionObjects = [this.landscapeObject3D, this.applicationGroup];
 
     if (!this.landscapeObject3D) { return []; }
 
