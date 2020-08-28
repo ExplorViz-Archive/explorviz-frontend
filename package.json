@@ -119,7 +119,8 @@
     "plotly.js-dist": "^1.51.1",
     "rsvp": "^4.8.5",
     "three": "^0.119.1",
-    "threejs-meshline": "^2.0.10"
+    "threejs-meshline": "^2.0.10",
+    "webxr-polyfill": "^2.0.3"
   },
   "ember-addon": {
     "paths": [

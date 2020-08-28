@@ -98,11 +98,15 @@ export default class VrRendering extends Component<Args> {
 
   controller2: THREE.Group;
 
+  user: THREE.Group;
+
   boxDepth: number;
 
   appScaleFactor: number;
 
   defaultComponentHeight: number;
+
+  floor!: FloorMesh;
 
   get font() {
     return this.args.font;
@@ -120,6 +124,8 @@ export default class VrRendering extends Component<Args> {
   // Extended Object3D which manages landscape meshes
   readonly landscapeObject3D!: LandscapeObject3D;
 
+  teleportArea: THREE.Mesh|undefined;
+
   // #endregion CLASS FIELDS AND GETTERS
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -135,6 +141,7 @@ export default class VrRendering extends Component<Args> {
     this.raycaster = new THREE.Raycaster();
     this.controller1 = new THREE.Group();
     this.controller2 = new THREE.Group();
+    this.user = new THREE.Group();
 
     const { replayLandscape } = this.landscapeRepo;
     if (replayLandscape) {
@@ -172,7 +179,10 @@ export default class VrRendering extends Component<Args> {
     // TODO: Increase floor size if landscape is too large
     const floorSize = 10;
     const floorMesh = new FloorMesh(floorSize, floorSize);
+    this.floor = floorMesh;
     this.scene.add(floorMesh);
+
+    this.scene.add(this.user);
 
     this.debug('Scene created');
   }
@@ -184,6 +194,7 @@ export default class VrRendering extends Component<Args> {
     const { width, height } = this.canvas;
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     this.camera.position.set(0, 1, 2);
+    this.user.add(this.camera);
     this.debug('Camera added');
   }
 
@@ -263,12 +274,13 @@ export default class VrRendering extends Component<Args> {
 
         controller.add(line.clone());
 
-        this.scene.add(controller);
-        this.scene.add(controllerGrip);
+        this.user.add(controller);
+        this.user.add(controllerGrip);
       }
     }
 
     this.controller1.addEventListener('selectstart', this.onSelectStart1.bind(this));
+    this.controller2.addEventListener('selectstart', this.onSelectStart2.bind(this));
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -342,8 +354,8 @@ export default class VrRendering extends Component<Args> {
   render() {
     if (this.isDestroyed) { return; }
 
-    if (this.controller1) { this.intersectObjects(this.controller1); }
-    if (this.controller2) { this.intersectObjects(this.controller2); }
+    if (this.controller1) { this.intersectObjects(this.controller1, 'controller1'); }
+    if (this.controller2) { this.intersectObjects(this.controller2, 'controller2'); }
 
     this.renderer.render(this.scene, this.camera);
   }
@@ -778,7 +790,10 @@ populateScene = task(function* (this: VrRendering) {
   // #region CONTROLLER HANDLERS
 
   onSelectStart1() {
-    const object = this.controller1.userData.intersectedObject;
+    if (!this.controller1.userData.intersectedObject) {
+      return;
+    }
+    const { object } = this.controller1.userData.intersectedObject;
     if (object instanceof SystemMesh) {
       this.toggleSystemAndRedraw(object);
     } else if (object instanceof ApplicationMesh) {
@@ -795,7 +810,33 @@ populateScene = task(function* (this: VrRendering) {
     } */
   }
 
+  onSelectStart2() {
+    if (!this.controller2.userData.intersectedObject) {
+      return;
+    }
+    const { object, point } = this.controller2.userData.intersectedObject;
+    if (object instanceof FloorMesh && this.teleportArea) {
+      this.teleportToPosition(point);
+    }
+  }
+
   // #endregion CONTROLLER HANDLERS
+
+  teleportToPosition(position: THREE.Vector3) {
+    const cameraWorldPos = new THREE.Vector3();
+
+    const xrCamera = this.renderer.xr.getCamera(this.camera);
+    xrCamera.getWorldPosition(cameraWorldPos);
+
+    // this.user.worldToLocal(position);
+    // this.user.worldToLocal(cameraWorldPos);
+
+    // console.log('Teleport pos: ', position);
+    console.log('Camera pos: ', cameraWorldPos);
+
+    this.user.position.x += position.x - cameraWorldPos.x;
+    this.user.position.z += position.z - cameraWorldPos.z;
+  }
 
   // #region MOUSE & KEYBOARD EVENT HANDLER
 
@@ -820,6 +861,12 @@ populateScene = task(function* (this: VrRendering) {
         break;
       case 'd':
         this.landscapeObject3D.position.x += mvDst;
+        break;
+      case '1':
+        this.landscapeObject3D.position.z -= mvDst;
+        break;
+      case '2':
+        this.landscapeObject3D.position.z += mvDst;
         break;
       default:
         break;
@@ -858,7 +905,7 @@ populateScene = task(function* (this: VrRendering) {
     this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
     this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersectionObjects = [this.landscapeObject3D];
+    const intersectionObjects = [this.landscapeObject3D, this.floor];
 
     if (!this.landscapeObject3D) { return []; }
 
@@ -874,28 +921,57 @@ populateScene = task(function* (this: VrRendering) {
     return [];
   }
 
-  intersectObjects(controller: THREE.Group) {
+  intersectObjects(controller: THREE.Group, controllerName: string) {
     const line = controller.getObjectByName('line');
 
     if (!line) return;
 
     const intersections = this.getIntersections(controller);
 
-    const nearestIntersection = intersections.firstObject;
+    const nearestIntersection = intersections[0];
 
     if (nearestIntersection) {
-      const { object } = intersections[0];
+      const { object } = nearestIntersection;
 
-      if (object instanceof BaseMesh) {
-        VrRendering.resetHoverEffect(controller);
-        object.applyHoverEffect(1.4);
-        controller.userData.intersectedObject = object;
+      if (controllerName === 'controller1') {
+        if (object instanceof BaseMesh) {
+          VrRendering.resetHoverEffect(controller);
+          object.applyHoverEffect(1.4);
+          controller.userData.intersectedObject = nearestIntersection;
+        }
+      } else if (controllerName === 'controller2') {
+        if (object instanceof FloorMesh) {
+          if (!this.teleportArea) {
+            // Create teleport area
+            const geometry = new THREE.RingGeometry(0.14, 0.2, 32);
+            geometry.rotateX(-90 * THREE.MathUtils.DEG2RAD);
+            const material = new THREE.MeshLambertMaterial({
+              color: new THREE.Color(0x0000dc),
+            });
+            material.transparent = true;
+            material.opacity = 0.4;
+            this.teleportArea = new THREE.Mesh(geometry, material);
+            this.scene.add(this.teleportArea);
+          }
+          this.teleportArea.position.x = nearestIntersection.point.x;
+          this.teleportArea.position.y = nearestIntersection.point.y + 0.005;
+          this.teleportArea.position.z = nearestIntersection.point.z;
+          controller.userData.intersectedObject = nearestIntersection;
+        } else if (object instanceof BaseMesh) {
+          this.removeTelportArea();
+          controller.userData.intersectedObject = null;
+        } else {
+          this.removeTelportArea();
+          controller.userData.intersectedObject = null;
+        }
       }
 
-      line.scale.z = intersections[0].distance;
+      line.scale.z = nearestIntersection.distance;
     } else {
       VrRendering.resetHoverEffect(controller);
       line.scale.z = 5;
+
+      this.removeTelportArea();
     }
   }
 
@@ -905,10 +981,20 @@ populateScene = task(function* (this: VrRendering) {
    * @param controller Controller of which the hover effect shall be reseted.
    */
   static resetHoverEffect(controller: THREE.Group) {
-    const currentObject = controller.userData.intersectedObject;
-    if (currentObject instanceof BaseMesh) {
-      currentObject.resetHoverEffect();
+    if (!controller.userData.intersectedObject) {
+      return;
+    }
+    const { object } = controller.userData.intersectedObject;
+    if (object instanceof BaseMesh) {
+      object.resetHoverEffect();
       controller.userData.intersectedObject = null;
+    }
+  }
+
+  removeTelportArea() {
+    if (this.teleportArea) {
+      this.scene.remove(this.teleportArea);
+      this.teleportArea = undefined;
     }
   }
 
