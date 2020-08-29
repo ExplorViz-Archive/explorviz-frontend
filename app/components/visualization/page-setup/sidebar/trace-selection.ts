@@ -1,4 +1,3 @@
-
 import { action, computed } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
@@ -9,15 +8,16 @@ import Trace from 'explorviz-frontend/models/trace';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import TraceStep from 'explorviz-frontend/models/tracestep';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
-import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
+import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
+import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
 interface Args {
+  applicationObject3D: ApplicationObject3D,
   removeComponent(componentPath: string): void,
   highlightTrace(trace: Trace, traceStep: number): void,
   moveCameraTo(emberModel: Clazz|ClazzCommunication): void,
-  highlighter: Highlighting;
 }
 
 export default class TraceSelection extends Component<Args> {
@@ -56,10 +56,10 @@ export default class TraceSelection extends Component<Args> {
   landscapeRepo!: LandscapeRepository;
 
   // Compute current traces when highlighting changes
-  @computed('landscapeRepo.latestApplication', 'args.highlighter.highlightedEntity', 'sortBy', 'isSortedAsc', 'filterTerm')
+  @computed('landscapeRepo.latestApplication', 'args.applicationObject3D.highlightedEntity', 'sortBy', 'isSortedAsc', 'filterTerm')
   get traces() {
     // Only show highlighted trace and set highlighting status accordingly
-    const maybeTrace = this.args.highlighter.highlightedEntity;
+    const maybeTrace = this.args.applicationObject3D.highlightedEntity;
     if (maybeTrace instanceof Trace) {
       this.selectedTrace = maybeTrace;
       return [maybeTrace];
@@ -124,7 +124,7 @@ export default class TraceSelection extends Component<Args> {
     // Reset highlighting when highlighted trace is clicked again
     if (trace === this.selectedTrace) {
       this.selectedTrace = null;
-      this.args.highlighter.removeHighlighting();
+      Highlighting.removeHighlighting(this.args.applicationObject3D);
       return;
     }
 
@@ -155,7 +155,6 @@ export default class TraceSelection extends Component<Args> {
       return;
     }
 
-
     const traceSteps = this.selectedTrace.hasMany('traceSteps').value();
     this.currentTraceStep = traceSteps?.objectAt(nextStepPosition - 1);
 
@@ -180,7 +179,6 @@ export default class TraceSelection extends Component<Args> {
     if (previousStepPosition < 1) {
       return;
     }
-
 
     const traceSteps = this.selectedTrace.hasMany('traceSteps').value();
     this.currentTraceStep = traceSteps?.objectAt(previousStepPosition - 1);

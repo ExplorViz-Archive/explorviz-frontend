@@ -1,6 +1,8 @@
 import THREE from 'three';
 import Application from 'explorviz-frontend/models/application';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
+import Trace from 'explorviz-frontend/models/trace';
+import { tracked } from '@glimmer/tracking';
 import FoundationMesh from './foundation-mesh';
 import ClazzMesh from './clazz-mesh';
 import ComponentMesh from './component-mesh';
@@ -35,6 +37,9 @@ export default class ApplicationObject3D extends THREE.Object3D {
    * Set to store all ComponentMeshes
    */
   componentMeshes: Set<ComponentMesh> = new Set();
+
+  @tracked
+  highlightedEntity: BaseMesh | Trace | null = null;
 
   constructor(application: Application, boxLayoutMap: Map<string, BoxLayout>) {
     super();

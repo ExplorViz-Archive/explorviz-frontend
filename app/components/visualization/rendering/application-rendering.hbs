@@ -75,10 +75,10 @@
             <div class="card-body d-flex flex-column">
               {{#if (eq componentName "trace-selection")}}
                 <Visualization::PageSetup::sidebar::TraceSelection
+                  @applicationObject3D={{this.applicationObject3D}}
                   @highlightTrace={{this.highlightTrace}}
                   @moveCameraTo={{this.moveCameraTo}}
                   @removeComponent={{@removeComponent}}
-                  @highlighter={{this.highlighter}}
                 />
               {{/if}}
               {{#if (eq componentName "sql-viewer")}}

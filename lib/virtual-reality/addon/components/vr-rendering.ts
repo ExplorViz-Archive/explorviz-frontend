@@ -36,9 +36,9 @@ import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
-import EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
+import * as EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
-import EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
+import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import ApplicationGroup from 'virtual-reality/utils/application-group';
 import CloseIcon from 'virtual-reality/utils/close-icon';
@@ -119,11 +119,7 @@ export default class VrRendering extends Component<Args> {
 
   readonly imageLoader: ImageLoader = new ImageLoader();
 
-  readonly entityRendering: EntityRendering;
-
   readonly appCommRendering: AppCommunicationRendering;
-
-  readonly entityManipulation: EntityManipulation;
 
   // Provides functions to label landscape meshes
   readonly landscapeLabeler = new LandscapeLabeler();
@@ -151,14 +147,10 @@ export default class VrRendering extends Component<Args> {
     this.user = new THREE.Group();
     this.applicationGroup = new ApplicationGroup();
 
-    this.entityRendering = new EntityRendering(this.configuration);
-
     this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
 
     // Load image for delete button
     this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
-
-    this.entityManipulation = new EntityManipulation(this.appCommRendering, null);
 
     const { latestLandscape } = this.landscapeRepo;
 
@@ -660,6 +652,7 @@ populateScene = task(function* (this: VrRendering) {
 
   // #region APLICATION RENDERING
 
+  // @ts-ignore
   @task({ restartable: true })
   // eslint-disable-next-line
   addApplication = task(function* (this: VrRendering, landscapeApp: ApplicationMesh) {
@@ -676,10 +669,9 @@ populateScene = task(function* (this: VrRendering) {
       const applicationObject3D = new ApplicationObject3D(applicationModel, boxLayoutMap);
 
       // Add new meshes to application
-      this.entityRendering.addFoundationAndChildrenToApplication(applicationObject3D);
+      EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
+        this.configuration.applicationColors);
 
-      // Restore old state of components
-      this.entityManipulation.setComponentState(applicationObject3D);
       this.appCommRendering.addCommunication(applicationObject3D);
 
       this.addLabels(applicationObject3D);
@@ -844,13 +836,13 @@ populateScene = task(function* (this: VrRendering) {
     } else if (object?.parent instanceof ApplicationObject3D) {
       // Hit Component
       if (object instanceof ComponentMesh) {
-        this.entityManipulation.toggleComponentMeshState(object, object.parent);
+        EntityManipulation.toggleComponentMeshState(object, object.parent);
         this.appCommRendering.addCommunication(object.parent);
       // Hit Foundation
       } else if (object instanceof CloseIcon) {
         this.applicationGroup.removeApplicationById(object.parent.dataModel.id);
       } else if (object instanceof FoundationMesh) {
-        this.entityManipulation.closeAllComponents(object.parent);
+        EntityManipulation.closeAllComponents(object.parent);
       }
     }
   }
