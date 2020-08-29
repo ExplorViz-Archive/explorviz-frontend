@@ -42,9 +42,7 @@ import * as EntityManipulation from 'explorviz-frontend/utils/application-render
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import ApplicationGroup from 'virtual-reality/utils/application-group';
 import CloseIcon from 'virtual-reality/utils/close-icon';
-
-// Declare globals
-/* global VRButton */
+import VRButton from 'virtual-reality/utils/VRButton';
 
 interface Args {
   readonly font: THREE.Font;
@@ -73,6 +71,8 @@ export default class VrRendering extends Component<Args> {
 
   @service()
   worker!: any;
+
+  vrButton: VRButton|null = null;
 
   // Plain JSON variant of the landscape with fewer properties, used for layouting
   reducedLandscape: ReducedLandscape|null = null;
@@ -331,7 +331,10 @@ export default class VrRendering extends Component<Args> {
     this.debug('Outer Div inserted');
 
     this.initThreeJs();
-    outerDiv.appendChild(VRButton.createButton(this.renderer));
+
+    this.vrButton = new VRButton(this.renderer);
+
+    outerDiv.appendChild(this.vrButton.createButton());
 
     this.renderer.setAnimationLoop(this.render.bind(this));
 
