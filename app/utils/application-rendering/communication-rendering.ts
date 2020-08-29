@@ -2,7 +2,6 @@ import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/applicati
 import applyCommunicationLayout from 'explorviz-frontend/utils/application-rendering/communication-layouter';
 import Configuration from 'explorviz-frontend/services/configuration';
 import CurrentUser from 'explorviz-frontend/services/current-user';
-import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
 export default class CommunicationRendering {

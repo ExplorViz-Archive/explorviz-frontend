@@ -15,7 +15,6 @@ type tile = {
 // Simplified Tile
 type tileWay = { startPoint: point, endPoint: point };
 
-
 /**
  * Checks wheter two given 2-d-points are equal based on their x- and
  * y-coordinate.
@@ -51,7 +50,7 @@ function isSameTile(this: tileWay, tile: any) {
  * @param color Desired color for the tiles
  */
 export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray<AppCommunication>,
-  modelIdToPoints: Map<string, point[]>, color: THREE.Color) {
+  modelIdToPoints: Map<string, point[]>, color: THREE.Color, zOffset = 0.025) {
   const tiles: tile[] = [];
   let tile: tile;
 
@@ -79,7 +78,7 @@ export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray
           tile = {
             startPoint: lastPoint,
             endPoint: thisPoint,
-            positionZ: 0.025, // Tiles should be in front of nodes
+            positionZ: zOffset, // Tiles should be in front of nodes
             requestsCache: 0,
             lineThickness: 1, // Determined later on
             pipeColor: color,
@@ -154,13 +153,11 @@ function categorizeByThreshold(requestMap: Map<number, number>) {
 
   const upperThreshold = maxRequests * (2 / 3);
 
-
   requestMap.forEach((_category, requests) => {
     const category = getCategoryFromValue(requests, lowerThreshold, upperThreshold);
     requestMap.set(requests, category);
   });
 }
-
 
 /**
  * Maps number of requests in a map with a specified method to numerical classes
@@ -187,7 +184,7 @@ function getCategories(requestMap: Map<number, number>, isLinear: boolean) {
  * @param centerPoint Offset of landscape objects: Used to align communication
  */
 export function addCommunicationLineDrawing(tiles: tile[], parent: THREE.Object3D,
-  centerPoint: THREE.Vector2) {
+  centerPoint: THREE.Vector2, minSize = 0.04, scalar = 0.28) {
   const requestsToCategory = new Map();
 
   // Initialize Category mapping with default value 0
@@ -203,7 +200,7 @@ export function addCommunicationLineDrawing(tiles: tile[], parent: THREE.Object3
     const tile = tiles[i];
     const category = categoryMapping.get(tile.requestsCache);
     if (category) {
-      tile.lineThickness = 0.28 * category + 0.04;
+      tile.lineThickness = scalar * category + minSize;
       const line = new AppCommunicationMesh(tile);
       line.addOffset(centerPoint);
       parent.add(line);
