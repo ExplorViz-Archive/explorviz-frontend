@@ -10,10 +10,10 @@ import TraceStep from 'explorviz-frontend/models/tracestep';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
 /**
-   * Restores default color and transparency for all application meshes
-   *
-   * @param applicationObject3D Application mesh of which the highlighting should be removed
-   */
+ * Restores default color and transparency for all application meshes
+ *
+ * @param applicationObject3D Application mesh of which the highlighting should be removed
+ */
 export function removeHighlighting(applicationObject3D: ApplicationObject3D) {
   const meshes = applicationObject3D.getAllMeshes();
   meshes.forEach((mesh) => {
@@ -23,13 +23,13 @@ export function removeHighlighting(applicationObject3D: ApplicationObject3D) {
 }
 
 /**
-   * Turns the mesh which belongs to a component and all its child meshes if
-   * they are not part of the ignorableComponents set.
-   *
-   * @param component Component which shall be turned transparent
-   * @param applicationObject3D Application mesh which contains the component
-   * @param ignorableComponents Set of components which shall not be turned transparent
-   */
+ * Turns the mesh which belongs to a component and all its child meshes if
+ * they are not part of the ignorableComponents set.
+ *
+ * @param component Component which shall be turned transparent
+ * @param applicationObject3D Application mesh which contains the component
+ * @param ignorableComponents Set of components which shall not be turned transparent
+ */
 export function turnComponentAndAncestorsTransparent(component: Component,
   applicationObject3D: ApplicationObject3D, ignorableComponents: Set<Component>) {
   if (ignorableComponents.has(component)) { return; }
@@ -56,13 +56,13 @@ export function turnComponentAndAncestorsTransparent(component: Component,
 }
 
 /**
-   * Highlights a given mesh
-   *
-   * @param mesh Either component, clazz or clazz communication mesh which shall be highlighted
-   * @param applicationObject3D Application mesh which contains the mesh
-   * @param toggleHighlighting Determines whether highlighting a already highlighted entity
-   *                           causes removal of all highlighting
-   */
+ * Highlights a given mesh
+ *
+ * @param mesh Either component, clazz or clazz communication mesh which shall be highlighted
+ * @param applicationObject3D Application mesh which contains the mesh
+ * @param toggleHighlighting Determines whether highlighting a already highlighted entity
+ *                           causes removal of all highlighting
+ */
 export function highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMesh,
   applicationObject3D: ApplicationObject3D, toggleHighlighting = true) {
   // Reset highlighting if highlighted mesh is clicked
@@ -150,11 +150,11 @@ export function highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMe
 }
 
 /**
-   * Highlights the mesh which belongs to a given data model
-   *
-   * @param entity Component or clazz of which the corresponding mesh shall be highlighted
-   * @param applicationObject3D Application mesh which contains the entity
-   */
+ * Highlights the mesh which belongs to a given data model
+ *
+ * @param entity Component or clazz of which the corresponding mesh shall be highlighted
+ * @param applicationObject3D Application mesh which contains the entity
+ */
 export function highlightModel(entity: Component|Clazz, applicationObject3D: ApplicationObject3D) {
   const mesh = applicationObject3D.getBoxMeshbyModelId(entity.id);
   if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
@@ -163,12 +163,12 @@ export function highlightModel(entity: Component|Clazz, applicationObject3D: App
 }
 
 /**
-   * Highlights a trace.
-   *
-   * @param trace Trace which shall be highlighted
-   * @param step Step of the trace which shall be highlighted. Default is 1
-   * @param applicationObject3D Application mesh which contains the trace
-   */
+ * Highlights a trace.
+ *
+ * @param trace Trace which shall be highlighted
+ * @param step Step of the trace which shall be highlighted. Default is 1
+ * @param applicationObject3D Application mesh which contains the trace
+ */
 export function highlightTrace(trace: Trace, applicationObject3D: ApplicationObject3D, step = 1) {
   const application = applicationObject3D.dataModel;
 
@@ -231,10 +231,10 @@ export function highlightTrace(trace: Trace, applicationObject3D: ApplicationObj
 }
 
 /**
-   * Highlights the stored highlighted entity again.
-   *
-   * @param applicationObject3D Application mesh which contains the highlighted entity
-   */
+ * Highlights the stored highlighted entity again.
+ *
+ * @param applicationObject3D Application mesh which contains the highlighted entity
+ */
 export function updateHighlighting(applicationObject3D: ApplicationObject3D) {
   const { highlightedEntity } = applicationObject3D;
 

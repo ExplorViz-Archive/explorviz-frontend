@@ -97,18 +97,11 @@ export function closeComponentMesh(mesh: ComponentMesh, applicationObject3D: App
    * Closes all component meshes which are currently added to the applicationObject3D
    * and re-adds the communication.
    *
-   * @param boxLayoutMap Contains layout information for re-computation of communication
    * @param applicationObject3D Application object which contains the components
    */
 export function closeAllComponents(applicationObject3D: ApplicationObject3D) {
-  const application = applicationObject3D.dataModel;
-
-  // Close each component
-  application.components.forEach((component) => {
-    const componentMesh = applicationObject3D.getBoxMeshbyModelId(component.id);
-    if (componentMesh instanceof ComponentMesh) {
-      closeComponentMesh(componentMesh, applicationObject3D);
-    }
+  applicationObject3D.componentMeshes.forEach((componentMesh) => {
+    closeComponentMesh(componentMesh, applicationObject3D);
   });
 }
 

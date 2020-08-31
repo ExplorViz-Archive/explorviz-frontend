@@ -2,6 +2,11 @@ import Application from 'explorviz-frontend/models/application';
 import Component from 'explorviz-frontend/models/component';
 import Clazz from 'explorviz-frontend/models/clazz';
 
+/**
+ * Reduces a given clazz object to an object which only contains id, name and
+ * instance count as properties.
+ * @param clazz Object which shall be reduced
+ */
 function reduceClazz(clazz: Clazz): ReducedClazz {
   return {
     id: clazz.get('id'),
@@ -10,6 +15,12 @@ function reduceClazz(clazz: Clazz): ReducedClazz {
   };
 }
 
+/**
+ * Reduces a given component object to an object which only contains id, name, clazzes
+ * and children components as properties.
+ *
+ * @param component Component which shall be reduced
+ */
 function reduceComponent(component: Component): ReducedComponent {
   const childComponents = component.get('children').toArray();
   const clazzes = component.get('clazzes').toArray();

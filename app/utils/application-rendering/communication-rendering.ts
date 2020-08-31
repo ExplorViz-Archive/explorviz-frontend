@@ -20,8 +20,8 @@ export default class CommunicationRendering {
    * Computes commnication and communication arrows and adds them to the
    * applicationObject3D
    *
-   * @param boxLayoutMap Contains box layout informationen which
-   *                     is needed for the communication layouting
+   * @param applicationObject3D Contains all application meshes.
+   *                            Computed communication is added to to object.
    */
   addCommunication(applicationObject3D: ApplicationObject3D) {
     const application = applicationObject3D.dataModel;
