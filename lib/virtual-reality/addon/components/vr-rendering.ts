@@ -21,7 +21,6 @@ import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-
 import * as LandscapeCommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import reduceLandscape, { ReducedLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
 import FloorMesh from 'virtual-reality/utils/floor-mesh';
 import WebXRPolyfill from 'webxr-polyfill';
@@ -43,8 +42,11 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 import ApplicationGroup from 'virtual-reality/utils/application-group';
 import CloseIcon from 'virtual-reality/utils/close-icon';
 import VRButton from 'virtual-reality/utils/VRButton';
+import Landscape from 'explorviz-frontend/models/landscape';
 
 interface Args {
+  readonly id: string;
+  readonly landscape: Landscape;
   readonly font: THREE.Font;
 }
 
@@ -65,9 +67,6 @@ export default class VrRendering extends Component<Args> {
 
   @service('current-user')
   currentUser!: CurrentUser;
-
-  @service('repos/landscape-repository')
-  landscapeRepo!: LandscapeRepository;
 
   @service()
   worker!: any;
@@ -152,11 +151,9 @@ export default class VrRendering extends Component<Args> {
     // Load image for delete button
     this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
-    const { latestLandscape } = this.landscapeRepo;
-
     // TODO: Change this for production code
     // @ts-ignore
-    this.landscapeObject3D = new LandscapeObject3D(latestLandscape);
+    this.landscapeObject3D = new LandscapeObject3D(this.args.landscape);
     const scale = this.landscapeScalar;
     this.landscapeObject3D.scale.set(scale, scale, scale);
 
@@ -394,11 +391,7 @@ export default class VrRendering extends Component<Args> {
   @task
   // eslint-disable-next-line
   loadNewLandscape = task(function* (this: VrRendering) {
-    const { latestLandscape } = this.landscapeRepo;
-    if (!latestLandscape) return;
-
-    this.landscapeObject3D.dataModel = latestLandscape;
-    this.reducedLandscape = reduceLandscape(latestLandscape);
+    this.reducedLandscape = reduceLandscape(this.args.landscape);
     yield this.populateScene.perform();
   });
 
@@ -413,11 +406,8 @@ export default class VrRendering extends Component<Args> {
 populateScene = task(function* (this: VrRendering) {
     this.debug('populate landscape-rendering');
 
-    const { latestLandscape: emberLandscape } = this.landscapeRepo;
-
     const { openEntityIds } = this.landscapeObject3D;
-
-    if (!emberLandscape) return;
+    const emberLandscape = this.args.landscape;
 
     this.landscapeObject3D.dataModel = emberLandscape;
 

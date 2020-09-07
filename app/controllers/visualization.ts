@@ -51,6 +51,9 @@ export default class VisualizationController extends Controller {
   components: string[] = [];
 
   @tracked
+  showVR: boolean = false;
+
+  @tracked
   showTimeline: boolean = true;
 
   // eslint-disable-next-line ember/no-observers
@@ -63,14 +66,15 @@ export default class VisualizationController extends Controller {
     }
   }
 
-  @computed('landscapeRepo.latestApplication')
+  @computed('landscapeRepo.latestApplication', 'showVR')
   get showLandscape() {
-    return !get(this.landscapeRepo, 'latestApplication');
+    return !get(this.landscapeRepo, 'latestApplication') && !this.showVR;
   }
 
   @action
   openLandscapeView() {
     this.closeDataSelection();
+    this.showVR = false;
     this.landscapeRepo.set('latestApplication', null);
   }
 
@@ -78,6 +82,12 @@ export default class VisualizationController extends Controller {
   showApplication(emberModel: Application) {
     this.closeDataSelection();
     this.landscapeRepo.set('latestApplication', emberModel);
+  }
+
+  @action
+  switchToVR() {
+    this.closeDataSelection();
+    this.showVR = true;
   }
 
   @action
