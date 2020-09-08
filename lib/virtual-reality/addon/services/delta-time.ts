@@ -3,9 +3,9 @@ import Service from '@ember/service';
 export default class DeltaTime extends Service.extend({
   // anything which *must* be merged to prototype here
 }) {
-  deltaTime: number = 0; // Time between last two frames in seconds
+  private deltaTime: number = 0; // Time between last two frames in seconds
 
-  lastFrameTime: number = 0; // Time in seconds of last frame
+  private lastFrameTime: number = 0; // Time in seconds of last frame
 
   init() {
     this.deltaTime = 0;
