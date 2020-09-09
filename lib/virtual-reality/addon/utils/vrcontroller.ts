@@ -1,3 +1,8 @@
+import THREE from 'three';
+import XRControllerModelFactory from './XRControllerModelFactory';
+import XRControllerModel from './XRControllerModel';
+import { MotionController } from './motion-controllers.module';
+
 type CallbackFunctions = {
   thumbpad? (axes: number[]): void,
   thumbpadUp?(): void,
@@ -14,8 +19,10 @@ type CallbackFunctions = {
  * A wrapper around the gamepad object which handles inputs to
  * a VR controller and provides update and callback functionalities.
  */
-export default class VRController {
-  gamepad: Gamepad;
+export default class VRController extends THREE.Group {
+  gamepadIndex: number;
+
+  gamepad: Gamepad|null = null;
 
   axes = [0, 0];
 
@@ -31,13 +38,70 @@ export default class VRController {
 
   eventCallbacks: CallbackFunctions;
 
+  gripSpace: THREE.Group;
+
+  raySpace: THREE.Group;
+
+  ray: THREE.Line|null = null;
+
+  controllerModel: XRControllerModel;
+
+  motionController: MotionController|null;
+
   /**
    * @param gamepad Object of gamepad API which grants access to VR controller inputs
    * @param eventCallbacks Object with functions that are called when certain events occur
    */
-  constructor(gamepad: Gamepad, eventCallbacks: CallbackFunctions) {
-    this.gamepad = gamepad;
-    this.eventCallbacks = eventCallbacks;
+  constructor(gamepadIndex: number, gripSpace: THREE.Group, raySpace: THREE.Group,
+    eventCallbacks: CallbackFunctions) {
+    super();
+    this.gamepadIndex = gamepadIndex;
+    this.gripSpace = gripSpace;
+    this.add(gripSpace);
+    this.raySpace = raySpace;
+    this.add(raySpace);
+
+    this.eventCallbacks = { ...eventCallbacks };
+
+    const controllerModelFactory = new XRControllerModelFactory();
+    this.controllerModel = controllerModelFactory.createControllerModel(gripSpace);
+    this.gripSpace.add(this.controllerModel);
+    this.motionController = this.controllerModel.motionController;
+    this.findGamepad();
+
+    this.gripSpace.addEventListener('connected', (/* event */) => {
+      this.findGamepad();
+    });
+    this.gripSpace.addEventListener('disconnected', () => {
+      this.findGamepad();
+    });
+  }
+
+  findGamepad() {
+    const gamepads = navigator.getGamepads();
+    gamepads.forEach((gamepad) => {
+      if (gamepad && gamepad.index === this.gamepadIndex) {
+        this.gamepad = gamepad;
+      }
+    });
+  }
+
+  addRay(color: THREE.Color) {
+    if (this.ray) return;
+
+    const geometry = new THREE.BufferGeometry().setFromPoints(
+      [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)],
+    );
+
+    const material = new THREE.LineBasicMaterial({
+      color,
+    });
+
+    const line = new THREE.Line(geometry, material);
+    line.scale.z = 5;
+
+    this.ray = line;
+    this.raySpace.add(this.ray);
   }
 
   /**
@@ -104,7 +168,7 @@ export default class VRController {
 
       // Handle clicked / released menu button
       if (gamepad.buttons[MENU_BUTTON]
-        && this.menuIsPressed !== gamepad.buttons[GRIP_BUTTON].pressed) {
+        && this.menuIsPressed !== gamepad.buttons[MENU_BUTTON].pressed) {
         this.menuIsPressed = gamepad.buttons[MENU_BUTTON].pressed;
         if (this.menuIsPressed && callbacks.menuDown) {
           callbacks.menuDown();

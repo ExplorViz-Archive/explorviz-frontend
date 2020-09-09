@@ -27,7 +27,6 @@ import WebXRPolyfill from 'webxr-polyfill';
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import reduceApplication from 'explorviz-frontend/utils/application-rendering/model-reducer';
-import XRControllerModelFactory from 'virtual-reality/utils/XRControllerModelFactory';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
@@ -45,6 +44,7 @@ import Landscape from 'explorviz-frontend/models/landscape';
 import TeleportMesh from 'virtual-reality/utils/teleport-mesh';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
+import VRController from 'virtual-reality/utils/vrcontroller';
 
 interface Args {
   readonly id: string;
@@ -94,9 +94,9 @@ export default class VrRendering extends Component<Args> {
 
   raycaster: THREE.Raycaster;
 
-  controller1: THREE.Group;
+  controller1: VRController|null = null;
 
-  controller2: THREE.Group;
+  controller2: VRController|null = null;
 
   user: THREE.Group;
 
@@ -141,8 +141,6 @@ export default class VrRendering extends Component<Args> {
     this.applicationScalar = 0.01;
 
     this.raycaster = new THREE.Raycaster();
-    this.controller1 = new THREE.Group();
-    this.controller2 = new THREE.Group();
     this.user = new THREE.Group();
     this.applicationGroup = new ApplicationGroup();
 
@@ -270,34 +268,34 @@ export default class VrRendering extends Component<Args> {
   }
 
   initControllers() {
-    const controllerModelFactory = new XRControllerModelFactory();
-    this.controller1 = this.renderer.xr.getController(0);
-    this.controller2 = this.renderer.xr.getController(1);
+    // Init first controller
+    const raySpace1 = this.renderer.xr.getController(0);
+    const gripSpace1 = this.renderer.xr.getControllerGrip(0);
 
-    const geometry = new THREE.BufferGeometry().setFromPoints(
-      [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)],
-    );
+    this.onSelectStart1 = this.onSelectStart1.bind(this);
 
-    const line = new THREE.Line(geometry);
-    line.name = 'line';
-    line.scale.z = 5;
+    const callbacks1 = {
+      triggerDown: this.onSelectStart1,
+    };
+    this.controller1 = new VRController(0, gripSpace1, raySpace1, callbacks1);
+    this.controller1.addRay(new THREE.Color('red'));
 
-    for (let controllerID = 0; controllerID < 2; controllerID++) {
-      const controller = this.renderer.xr.getController(controllerID);
-      if (controller) {
-        const controllerGrip = this.renderer.xr.getControllerGrip(controllerID);
+    this.user.add(this.controller1);
 
-        controllerGrip.add(controllerModelFactory.createControllerModel(controllerGrip));
+    // Init second controller
+    const raySpace2 = this.renderer.xr.getController(1);
+    const gripSpace2 = this.renderer.xr.getControllerGrip(1);
 
-        controller.add(line.clone());
+    this.onSelectStart2 = this.onSelectStart2.bind(this);
 
-        this.user.add(controller);
-        this.user.add(controllerGrip);
-      }
-    }
+    const callbacks2 = {
+      triggerDown: this.onSelectStart2,
+    };
 
-    this.controller1.addEventListener('selectstart', this.onSelectStart1.bind(this));
-    this.controller2.addEventListener('selectstart', this.onSelectStart2.bind(this));
+    this.controller2 = new VRController(1, gripSpace2, raySpace2, callbacks2);
+    this.controller2.addRay(new THREE.Color('blue'));
+
+    this.user.add(this.controller2);
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -390,7 +388,10 @@ export default class VrRendering extends Component<Args> {
     if (this.isDestroyed) { return; }
 
     if (this.controller1) { this.intersectObjects(this.controller1, 'controller1'); }
+    if (this.controller1) { this.controller1.update(); }
+
     if (this.controller2) { this.intersectObjects(this.controller2, 'controller2'); }
+    if (this.controller2) { this.controller2.update(); }
 
     this.renderer.render(this.scene, this.camera);
   }
@@ -824,7 +825,7 @@ populateScene = task(function* (this: VrRendering) {
   // #region CONTROLLER HANDLERS
 
   onSelectStart1() {
-    if (!this.controller1.userData.intersectedObject) {
+    if (!this.controller1 || !this.controller1.userData.intersectedObject) {
       return;
     }
     const { object } = this.controller1.userData.intersectedObject;
@@ -853,7 +854,7 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   onSelectStart2() {
-    if (!this.controller2.userData.intersectedObject) {
+    if (!this.controller2 || !this.controller2.userData.intersectedObject) {
       return;
     }
     const { object, point } = this.controller2.userData.intersectedObject;
@@ -945,11 +946,12 @@ populateScene = task(function* (this: VrRendering) {
 
   // #region UTILS
 
-  getIntersections(controller: THREE.Group) {
+  getIntersections(controller: VRController) {
+    const { raySpace } = controller;
     const tempMatrix = new THREE.Matrix4();
-    tempMatrix.identity().extractRotation(controller.matrixWorld);
+    tempMatrix.identity().extractRotation(raySpace.matrixWorld);
 
-    this.raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+    this.raycaster.ray.origin.setFromMatrixPosition(raySpace.matrixWorld);
     this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
     const intersectionObjects = [this.landscapeObject3D, this.floor, this.applicationGroup];
@@ -968,10 +970,8 @@ populateScene = task(function* (this: VrRendering) {
     return [];
   }
 
-  intersectObjects(controller: THREE.Group, controllerName: string) {
-    const line = controller.getObjectByName('line');
-
-    if (!line) return;
+  intersectObjects(controller: VRController, controllerName: string) {
+    if (!controller.ray) return;
 
     /* Reset hover effect and teleportation area */
     this.resetHoverEffect(controller);
@@ -981,7 +981,7 @@ populateScene = task(function* (this: VrRendering) {
     const [nearestIntersection] = intersections;
 
     if (!nearestIntersection) {
-      line.scale.z = 5;
+      controller.ray.scale.z = 5;
       return;
     }
 
@@ -1000,7 +1000,7 @@ populateScene = task(function* (this: VrRendering) {
     }
 
     controller.userData.intersectedObject = nearestIntersection;
-    line.scale.z = nearestIntersection.distance;
+    controller.ray.scale.z = nearestIntersection.distance;
   }
 
   /**
