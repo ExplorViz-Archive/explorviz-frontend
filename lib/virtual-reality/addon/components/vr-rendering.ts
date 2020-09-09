@@ -124,7 +124,7 @@ export default class VrRendering extends Component<Args> {
   // Extended Object3D which manages landscape meshes
   readonly landscapeObject3D!: LandscapeObject3D;
 
-  teleportArea!: TeleportMesh;
+  teleportArea: TeleportMesh | null = null;
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -341,6 +341,25 @@ export default class VrRendering extends Component<Args> {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+  }
+
+  @action
+  onVrSessionStarted(/* session: XRSession */) {
+    if (!this.teleportArea) {
+      this.initTeleportArea();
+    }
+  }
+
+  @action
+  onVrSessionEnded() {
+    let { teleportArea } = this;
+
+    // Remove teleport area
+    if (teleportArea) {
+      teleportArea.deleteFromParent();
+      teleportArea.disposeRecursively();
+      teleportArea = null;
+    }
   }
 
   /**
@@ -943,8 +962,7 @@ populateScene = task(function* (this: VrRendering) {
     if (!line) return;
 
     /* Reset hover effect and teleportation area */
-    VrRendering.resetHoverEffect(controller);
-    this.teleportArea.visible = false;
+    this.resetHoverEffect(controller);
 
     const intersections = this.getIntersections(controller);
 
@@ -963,7 +981,7 @@ populateScene = task(function* (this: VrRendering) {
       }
     } else if (controllerName === 'controller2') {
       if (object instanceof FloorMesh) {
-        this.teleportArea.showAbovePosition(nearestIntersection.point);
+        if (this.teleportArea) this.teleportArea.showAbovePosition(nearestIntersection.point);
       } else if (object instanceof BaseMesh) {
         object.applyHoverEffect(1.4);
       }
@@ -978,7 +996,7 @@ populateScene = task(function* (this: VrRendering) {
    *
    * @param controller Controller of which the hover effect shall be reseted.
    */
-  static resetHoverEffect(controller: THREE.Group) {
+  resetHoverEffect(controller: THREE.Group) {
     if (!controller.userData.intersectedObject) {
       return;
     }
@@ -986,6 +1004,8 @@ populateScene = task(function* (this: VrRendering) {
     if (object instanceof BaseMesh) {
       object.resetHoverEffect();
       controller.userData.intersectedObject = null;
+    } else if (object instanceof FloorMesh && this.teleportArea) {
+      this.teleportArea.visible = false;
     }
   }
 
