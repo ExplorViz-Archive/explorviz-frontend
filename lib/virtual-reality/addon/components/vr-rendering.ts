@@ -42,6 +42,7 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 import ApplicationGroup from 'virtual-reality/utils/application-group';
 import CloseIcon from 'virtual-reality/utils/close-icon';
 import Landscape from 'explorviz-frontend/models/landscape';
+import TeleportMesh from 'virtual-reality/utils/teleport-mesh';
 
 interface Args {
   readonly id: string;
@@ -123,7 +124,7 @@ export default class VrRendering extends Component<Args> {
   // Extended Object3D which manages landscape meshes
   readonly landscapeObject3D!: LandscapeObject3D;
 
-  teleportArea!: THREE.Mesh;
+  teleportArea!: TeleportMesh;
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -242,15 +243,7 @@ export default class VrRendering extends Component<Args> {
 
   initTeleportArea() {
     // Create teleport area
-    const geometry = new THREE.RingGeometry(0.14, 0.2, 32);
-    geometry.rotateX(-90 * THREE.MathUtils.DEG2RAD);
-    const material = new THREE.MeshLambertMaterial({
-      color: new THREE.Color(0x0000dc),
-    });
-    material.transparent = true;
-    material.opacity = 0.4;
-    this.teleportArea = new THREE.Mesh(geometry, material);
-    this.teleportArea.visible = false;
+    this.teleportArea = new TeleportMesh();
     this.scene.add(this.teleportArea);
   }
 
@@ -970,7 +963,7 @@ populateScene = task(function* (this: VrRendering) {
       }
     } else if (controllerName === 'controller2') {
       if (object instanceof FloorMesh) {
-        this.showAndUpdateTeleportArea(nearestIntersection.point);
+        this.teleportArea.showAbovePosition(nearestIntersection.point);
       } else if (object instanceof BaseMesh) {
         object.applyHoverEffect(1.4);
       }
@@ -978,13 +971,6 @@ populateScene = task(function* (this: VrRendering) {
 
     controller.userData.intersectedObject = nearestIntersection;
     line.scale.z = nearestIntersection.distance;
-  }
-
-  showAndUpdateTeleportArea(position: THREE.Vector3) {
-    this.teleportArea.visible = true;
-    this.teleportArea.position.x = position.x;
-    this.teleportArea.position.y = position.y + 0.005;
-    this.teleportArea.position.z = position.z;
   }
 
   /**
