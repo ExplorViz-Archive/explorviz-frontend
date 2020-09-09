@@ -122,7 +122,7 @@ export function highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMe
         allInvolvedClazzes.add(sourceClazz);
         // Hide communication which is not directly connected to highlighted entity
       } else if (!containedClazzes.has(sourceClazz) || !containedClazzes.has(targetClazz)) {
-        const commMesh = applicationObject3D.getBoxMeshbyModelId(comm.get('id'));
+        const commMesh = applicationObject3D.getCommMeshByModelId(comm.get('id'));
         if (commMesh) {
           commMesh.turnTransparent();
         }
