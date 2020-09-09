@@ -828,6 +828,8 @@ populateScene = task(function* (this: VrRendering) {
     const { object } = this.controller1.userData.intersectedObject;
     if (object instanceof SystemMesh) {
       this.toggleSystemAndRedraw(object);
+    } else if (object instanceof NodeGroupMesh) {
+      this.toggleNodeGroupAndRedraw(object);
     } else if (object instanceof ApplicationMesh) {
       this.addApplication.perform(object);
     // Handle application hits
