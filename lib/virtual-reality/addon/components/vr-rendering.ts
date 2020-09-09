@@ -43,6 +43,8 @@ import ApplicationGroup from 'virtual-reality/utils/application-group';
 import CloseIcon from 'virtual-reality/utils/close-icon';
 import Landscape from 'explorviz-frontend/models/landscape';
 import TeleportMesh from 'virtual-reality/utils/teleport-mesh';
+import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
+import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 
 interface Args {
   readonly id: string;
@@ -838,11 +840,14 @@ populateScene = task(function* (this: VrRendering) {
       if (object instanceof ComponentMesh) {
         EntityManipulation.toggleComponentMeshState(object, object.parent);
         this.appCommRendering.addCommunication(object.parent);
+        Highlighting.updateHighlighting(object.parent);
       // Hit Foundation
       } else if (object instanceof CloseIcon) {
         this.applicationGroup.removeApplicationById(object.parent.dataModel.id);
       } else if (object instanceof FoundationMesh) {
         EntityManipulation.closeAllComponents(object.parent);
+        this.appCommRendering.addCommunication(object.parent);
+        Highlighting.updateHighlighting(object.parent);
       }
     }
   }
@@ -854,6 +859,11 @@ populateScene = task(function* (this: VrRendering) {
     const { object, point } = this.controller2.userData.intersectedObject;
     if (object instanceof FloorMesh) {
       this.teleportToPosition(point);
+    } else if (object?.parent instanceof ApplicationObject3D) {
+      if (object instanceof ComponentMesh || object instanceof ClazzMesh
+      || object instanceof ClazzCommunicationMesh) {
+        Highlighting.highlight(object, object.parent);
+      }
     }
   }
 
