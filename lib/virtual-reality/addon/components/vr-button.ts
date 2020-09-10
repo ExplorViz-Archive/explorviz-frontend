@@ -17,17 +17,12 @@ export default class VrButton extends Component<VrButtonArgs> {
   @tracked
   buttonText = '';
 
-  constructor(owner: any, args: VrButtonArgs) {
-    super(owner, args);
-
-    this.updateVrStatus();
-  }
-
   /**
    * Checks the current status of WebXR in the browser and if compatible
    * devices are connected. Sets the tracked properties
    * 'buttonText' and 'vrSupported' accordingly.
    */
+  @action
   updateVrStatus() {
     if ('xr' in navigator) {
       // @ts-ignore
