@@ -151,16 +151,13 @@ export default class VrRendering extends Component<Args> {
     // Load image for delete button
     this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
-    // TODO: Change this for production code
-    // @ts-ignore
+    // Load and scale landscape
     this.landscapeObject3D = new LandscapeObject3D(this.args.landscape);
     const scale = this.landscapeScalar;
     this.landscapeObject3D.scale.set(scale, scale, scale);
 
     // Rotate landscape such that it lays flat on the floor
-    this.landscapeObject3D.translateY((this.landscapeDepth) / 2);
     this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
-    this.landscapeObject3D.updateMatrix();
   }
 
   /**
