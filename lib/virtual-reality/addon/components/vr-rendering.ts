@@ -112,6 +112,10 @@ export default class VrRendering extends Component<Args> {
 
   closeButtonTexture: THREE.Texture;
 
+  teleportArea: TeleportMesh | null = null;
+
+  landscapeOffset = new THREE.Vector3();
+
   get font() {
     return this.args.font;
   }
@@ -125,8 +129,6 @@ export default class VrRendering extends Component<Args> {
 
   // Extended Object3D which manages landscape meshes
   readonly landscapeObject3D!: LandscapeObject3D;
-
-  teleportArea: TeleportMesh | null = null;
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -500,6 +502,8 @@ populateScene = task(function* (this: VrRendering) {
         LandscapeCommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
           centerPoint, 0.004, 0.028);
       }
+
+      this.centerLandscape();
 
       this.debug('Landscape loaded');
     } catch (e) {
@@ -888,30 +892,35 @@ populateScene = task(function* (this: VrRendering) {
     switch (event.key) {
       case 'q':
         this.landscapeObject3D.rotation.x -= mvDst;
+        this.centerLandscape();
         break;
       case 'e':
         this.landscapeObject3D.rotation.x += mvDst;
+        this.centerLandscape();
         break;
       case 'w':
-        this.landscapeObject3D.position.y += mvDst;
+        this.moveLandscape(0, mvDst, 0);
         break;
       case 's':
-        this.landscapeObject3D.position.y -= mvDst;
+        this.moveLandscape(0, -mvDst, 0);
         break;
       case 'a':
-        this.landscapeObject3D.position.x -= mvDst;
+        this.moveLandscape(-mvDst, 0, 0);
         break;
       case 'd':
-        this.landscapeObject3D.position.x += mvDst;
+        this.moveLandscape(mvDst, 0, 0);
         break;
       case '1':
-        this.landscapeObject3D.position.z -= mvDst;
+        this.moveLandscape(0, 0, -mvDst);
         break;
       case '2':
-        this.landscapeObject3D.position.z += mvDst;
+        this.moveLandscape(0, 0, mvDst);
         break;
       case 'c':
-        this.applicationGroup.clear();
+        this.centerLandscape();
+        break;
+      case 'r':
+        this.resetLandscapePosition();
         break;
       case 'l':
         this.loadNewLandscape.perform();
@@ -945,6 +954,54 @@ populateScene = task(function* (this: VrRendering) {
   // #endregion MOUSE & KEYBOARD EVENT HANDLER
 
   // #region UTILS
+
+  moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
+    const delta = new THREE.Vector3(deltaX, deltaY, deltaZ);
+    this.landscapeOffset.add(delta);
+    this.landscapeObject3D.position.add(delta);
+  }
+
+  centerLandscape() {
+    const { floor } = this;
+    const landscape = this.landscapeObject3D;
+    const offset = this.landscapeOffset;
+
+    // Compute bounding box of the floor
+    const bboxFloor = new THREE.Box3().setFromObject(floor);
+
+    // Calculate center of the floor
+    const centerFloor = new THREE.Vector3();
+    bboxFloor.getCenter(centerFloor);
+
+    const bboxLandscape = new THREE.Box3().setFromObject(landscape);
+
+    // Calculate center of the landscape
+    const centerLandscape = new THREE.Vector3();
+    bboxLandscape.getCenter(centerLandscape);
+
+    // Set new position of landscape
+    landscape.position.x += centerFloor.x - centerLandscape.x + offset.x;
+    landscape.position.z += centerFloor.z - centerLandscape.z + offset.z;
+
+
+    // Check distance between floor and landscape
+    if (bboxLandscape.min.y > bboxFloor.max.y) {
+      landscape.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
+    }
+
+    // Check if landscape is underneath the floor
+    if (bboxLandscape.min.y < bboxFloor.min.y) {
+      landscape.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
+    }
+
+    landscape.position.y += offset.y;
+  }
+
+  resetLandscapePosition() {
+    this.landscapeObject3D.rotation.x = (-90 * THREE.MathUtils.DEG2RAD);
+    this.landscapeOffset.set(0, 0, 0);
+    this.centerLandscape();
+  }
 
   getIntersections(controller: VRController) {
     const { raySpace } = controller;
