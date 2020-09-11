@@ -4,6 +4,8 @@ import XRControllerModel from './XRControllerModel';
 import { MotionController } from './motion-controllers.module';
 
 type CallbackFunctions = {
+  connected? (event: THREE.Event): void,
+  disconnected? (): void,
   thumbpad? (axes: number[]): void,
   thumbpadUp?(): void,
   thumbpadDown?(): void,
@@ -69,11 +71,19 @@ export default class VRController extends THREE.Group {
     this.motionController = this.controllerModel.motionController;
     this.findGamepad();
 
-    this.gripSpace.addEventListener('connected', (/* event */) => {
+    this.initConnectionListeners();
+  }
+
+  initConnectionListeners() {
+    const callbacks = this.eventCallbacks;
+
+    this.gripSpace.addEventListener('connected', (event) => {
       this.findGamepad();
+      if (callbacks.connected) callbacks.connected(event);
     });
     this.gripSpace.addEventListener('disconnected', () => {
       this.findGamepad();
+      if (callbacks.disconnected) callbacks.disconnected();
     });
   }
 
