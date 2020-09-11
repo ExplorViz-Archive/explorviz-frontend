@@ -836,10 +836,10 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   onSelectStartSecondary() {
-    if (!this.controller2 || !this.controller2.userData.intersectedObject) {
+    if (!this.controller2 || !this.controller2.intersectedObject) {
       return;
     }
-    const { object, point } = this.controller2.userData.intersectedObject;
+    const { object, point } = this.controller2.intersectedObject;
     if (object instanceof FloorMesh) {
       this.teleportToPosition(point);
     } else if (object?.parent instanceof ApplicationObject3D) {
@@ -960,7 +960,6 @@ populateScene = task(function* (this: VrRendering) {
     // Set new position of landscape
     landscape.position.x += centerFloor.x - centerLandscape.x + offset.x;
     landscape.position.z += centerFloor.z - centerLandscape.z + offset.z;
-
 
     // Check distance between floor and landscape
     if (bboxLandscape.min.y > bboxFloor.max.y) {
