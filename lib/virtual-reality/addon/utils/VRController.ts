@@ -6,6 +6,7 @@ import XRControllerModel from './XRControllerModel';
 import { MotionController } from './motion-controllers.module';
 import FloorMesh from './floor-mesh';
 import TeleportMesh from './teleport-mesh';
+import BaseMenu from './menus/base-menu';
 
 type CallbackFunctions = {
   connected? (event: THREE.Event): void,
@@ -271,7 +272,7 @@ export default class VRController extends THREE.Group {
       return;
     }
 
-    const { object } = nearestIntersection;
+    const { object, uv } = nearestIntersection;
 
     // Handle hover effect and teleport area
     if (this.gamepadIndex === 0) {
@@ -283,6 +284,8 @@ export default class VRController extends THREE.Group {
         if (this.teleportArea) this.teleportArea.showAbovePosition(nearestIntersection.point);
       } else if (object instanceof BaseMesh) {
         object.applyHoverEffect(1.4);
+      } else if (object instanceof BaseMenu && uv) {
+        object.hover(uv);
       }
     }
 

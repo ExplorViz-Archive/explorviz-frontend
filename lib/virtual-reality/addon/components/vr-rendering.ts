@@ -42,6 +42,10 @@ import Landscape from 'explorviz-frontend/models/landscape';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import VRController from 'virtual-reality/utils/VRController';
+import MainMenu from 'virtual-reality/utils/menus/main-menu';
+import BaseMenu from 'virtual-reality/utils/menus/base-menu';
+import CameraMenu from 'virtual-reality/utils/menus/camera-menu';
+import LandscapeMenu from 'virtual-reality/utils/menus/landscape-menu';
 
 interface Args {
   readonly id: string;
@@ -108,6 +112,8 @@ export default class VrRendering extends Component<Args> {
   floor!: FloorMesh;
 
   closeButtonTexture: THREE.Texture;
+
+  menu: BaseMenu|undefined;
 
   landscapeOffset = new THREE.Vector3();
 
@@ -826,12 +832,15 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   onSelectStartSecondary() {
-    if (!this.controller2 || !this.controller2.userData.intersectedObject) {
+    if (!this.controller2 || !this.controller2.intersectedObject) {
       return;
     }
-    const { object, point } = this.controller2.userData.intersectedObject;
+
+    const { object, point, uv } = this.controller2.intersectedObject;
     if (object instanceof FloorMesh) {
       this.teleportToPosition(point);
+    } else if (object instanceof BaseMenu && uv) {
+      object.triggerPress(uv);
     } else if (object?.parent instanceof ApplicationObject3D) {
       if (object instanceof ComponentMesh || object instanceof ClazzMesh
       || object instanceof ClazzCommunicationMesh) {
@@ -893,8 +902,46 @@ populateScene = task(function* (this: VrRendering) {
       case 'l':
         this.loadNewLandscape.perform();
         break;
+      case 'm':
+        this.openMainMenu();
+        break;
       default:
         break;
+    }
+  }
+
+  openMainMenu() {
+    this.closeCurrentMenu();
+
+    this.menu = new MainMenu(this.closeCurrentMenu.bind(this), this.openCameraMenu.bind(this),
+      this.openLandscapeMenu.bind(this));
+    this.menu.position.y += 1;
+    this.menu.position.z += 1.5;
+    this.scene.add(this.menu);
+  }
+
+  openCameraMenu() {
+    this.closeCurrentMenu();
+
+    this.menu = new CameraMenu(this.openMainMenu.bind(this), this.user.position);
+    this.menu.position.y += 1;
+    this.menu.position.z += 1.5;
+    this.scene.add(this.menu);
+  }
+
+  openLandscapeMenu() {
+    this.closeCurrentMenu();
+
+    this.menu = new LandscapeMenu(this.openMainMenu.bind(this), this.landscapeObject3D);
+    this.menu.position.y += 1;
+    this.menu.position.z += 1.5;
+    this.scene.add(this.menu);
+  }
+
+  closeCurrentMenu() {
+    if (this.menu) {
+      this.scene.remove(this.menu);
+      this.menu = undefined;
     }
   }
 
@@ -950,7 +997,6 @@ populateScene = task(function* (this: VrRendering) {
     // Set new position of landscape
     landscape.position.x += centerFloor.x - centerLandscape.x + offset.x;
     landscape.position.z += centerFloor.z - centerLandscape.z + offset.z;
-
 
     // Check distance between floor and landscape
     if (bboxLandscape.min.y > bboxFloor.max.y) {

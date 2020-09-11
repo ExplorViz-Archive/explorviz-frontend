@@ -15,7 +15,7 @@ export default class VrButton extends Component<VrButtonArgs> {
   vrSupported = false;
 
   @tracked
-  buttonText = '';
+  buttonText: string = 'Checking ...';
 
   /**
    * Checks the current status of WebXR in the browser and if compatible
@@ -39,6 +39,7 @@ export default class VrButton extends Component<VrButtonArgs> {
         }
       });
     } else {
+      this.buttonText = 'WEBXR NOT SUPPORTED';
       this.vrSupported = false;
     }
   }
