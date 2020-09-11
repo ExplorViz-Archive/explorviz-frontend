@@ -27,8 +27,6 @@ import WebXRPolyfill from 'webxr-polyfill';
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import reduceApplication from 'explorviz-frontend/utils/application-rendering/model-reducer';
-import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
@@ -41,7 +39,6 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 import ApplicationGroup from 'virtual-reality/utils/application-group';
 import CloseIcon from 'virtual-reality/utils/close-icon';
 import Landscape from 'explorviz-frontend/models/landscape';
-import TeleportMesh from 'virtual-reality/utils/teleport-mesh';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import VRController from 'virtual-reality/utils/VRController';
@@ -112,8 +109,6 @@ export default class VrRendering extends Component<Args> {
 
   closeButtonTexture: THREE.Texture;
 
-  teleportArea: TeleportMesh | null = null;
-
   landscapeOffset = new THREE.Vector3();
 
   get font() {
@@ -169,7 +164,6 @@ export default class VrRendering extends Component<Args> {
     this.initCamera();
     this.initRenderer();
     this.initLights();
-    this.initTeleportArea();
     this.initInteraction();
     this.initControllers();
   }
@@ -240,12 +234,6 @@ export default class VrRendering extends Component<Args> {
     this.debug('Lights added');
   }
 
-  initTeleportArea() {
-    // Create teleport area
-    this.teleportArea = new TeleportMesh();
-    this.scene.add(this.teleportArea);
-  }
-
   /**
    * Binds this context to all event handling functions and
    * passes them to a newly created Interaction object
@@ -267,36 +255,37 @@ export default class VrRendering extends Component<Args> {
   }
 
   initControllers() {
-    // Init first controller
+    const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor];
+
+    // Init secondary/utility controller
     const raySpace1 = this.renderer.xr.getController(0);
     const gripSpace1 = this.renderer.xr.getControllerGrip(0);
 
-    this.onSelectStart1 = this.onSelectStart1.bind(this);
+    this.onSelectSecondary = this.onSelectSecondary.bind(this);
 
     const callbacks1 = {
-      triggerDown: this.onSelectStart1,
+      triggerDown: this.onSelectSecondary,
     };
-    this.controller1 = new VRController(0, gripSpace1, raySpace1, callbacks1);
+    this.controller1 = new VRController(0, gripSpace1, raySpace1, callbacks1, this.scene);
     this.controller1.addRay(new THREE.Color('red'));
+    this.controller1.intersectableObjects = intersectableObjects;
 
     this.user.add(this.controller1);
 
-    // Init second controller
+    // Init secondary controller
     const raySpace2 = this.renderer.xr.getController(1);
     const gripSpace2 = this.renderer.xr.getControllerGrip(1);
 
-    this.initTeleportArea = this.initTeleportArea.bind(this);
-    this.removeTeleportArea = this.removeTeleportArea.bind(this);
-    this.onSelectStart2 = this.onSelectStart2.bind(this);
+    this.onSelectStartSecondary = this.onSelectStartSecondary.bind(this);
 
     const callbacks2 = {
-      connected: this.initTeleportArea,
-      disconnected: this.removeTeleportArea,
-      triggerDown: this.onSelectStart2,
+      triggerDown: this.onSelectStartSecondary,
     };
 
-    this.controller2 = new VRController(1, gripSpace2, raySpace2, callbacks2);
+    this.controller2 = new VRController(1, gripSpace2, raySpace2, callbacks2, this.scene);
     this.controller2.addRay(new THREE.Color('blue'));
+    this.controller2.intersectableObjects = intersectableObjects;
+    this.controller2.initTeleportArea();
 
     this.user.add(this.controller2);
   }
@@ -381,10 +370,7 @@ export default class VrRendering extends Component<Args> {
   render() {
     if (this.isDestroyed) { return; }
 
-    if (this.controller1) { this.intersectObjects(this.controller1, 'controller1'); }
     if (this.controller1) { this.controller1.update(); }
-
-    if (this.controller2) { this.intersectObjects(this.controller2, 'controller2'); }
     if (this.controller2) { this.controller2.update(); }
 
     this.renderer.render(this.scene, this.camera);
@@ -820,11 +806,11 @@ populateScene = task(function* (this: VrRendering) {
 
   // #region CONTROLLER HANDLERS
 
-  onSelectStart1() {
-    if (!this.controller1 || !this.controller1.userData.intersectedObject) {
+  onSelectSecondary() {
+    if (!this.controller1 || !this.controller1.intersectedObject) {
       return;
     }
-    const { object } = this.controller1.userData.intersectedObject;
+    const { object } = this.controller1.intersectedObject;
     if (object instanceof SystemMesh) {
       this.toggleSystemAndRedraw(object);
     } else if (object instanceof NodeGroupMesh) {
@@ -849,7 +835,7 @@ populateScene = task(function* (this: VrRendering) {
     }
   }
 
-  onSelectStart2() {
+  onSelectStartSecondary() {
     if (!this.controller2 || !this.controller2.userData.intersectedObject) {
       return;
     }
@@ -993,92 +979,6 @@ populateScene = task(function* (this: VrRendering) {
     this.landscapeObject3D.rotation.x = (-90 * THREE.MathUtils.DEG2RAD);
     this.landscapeOffset.set(0, 0, 0);
     this.centerLandscape();
-  }
-
-  getIntersections(controller: VRController) {
-    const { raySpace } = controller;
-    const tempMatrix = new THREE.Matrix4();
-    tempMatrix.identity().extractRotation(raySpace.matrixWorld);
-
-    this.raycaster.ray.origin.setFromMatrixPosition(raySpace.matrixWorld);
-    this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-
-    const intersectionObjects = [this.landscapeObject3D, this.floor, this.applicationGroup];
-
-    if (!this.landscapeObject3D) { return []; }
-
-    const intersections = this.raycaster.intersectObjects(intersectionObjects, true);
-
-    for (let i = 0; i < intersections.length; i++) {
-      const { object } = intersections[i];
-      if (!(object instanceof LabelMesh) && object.visible) {
-        return [intersections[i]];
-      }
-    }
-
-    return [];
-  }
-
-  intersectObjects(controller: VRController, controllerName: string) {
-    if (!controller.ray) return;
-
-    /* Reset hover effect and teleportation area */
-    this.resetHoverEffect(controller);
-
-    const intersections = this.getIntersections(controller);
-
-    const [nearestIntersection] = intersections;
-
-    if (!nearestIntersection) {
-      controller.ray.scale.z = 5;
-      return;
-    }
-
-    const { object } = nearestIntersection;
-
-    if (controllerName === 'controller1') {
-      if (object instanceof BaseMesh) {
-        object.applyHoverEffect(1.4);
-      }
-    } else if (controllerName === 'controller2') {
-      if (object instanceof FloorMesh) {
-        if (this.teleportArea) this.teleportArea.showAbovePosition(nearestIntersection.point);
-      } else if (object instanceof BaseMesh) {
-        object.applyHoverEffect(1.4);
-      }
-    }
-
-    controller.userData.intersectedObject = nearestIntersection;
-    controller.ray.scale.z = nearestIntersection.distance;
-  }
-
-  removeTeleportArea() {
-    const { teleportArea } = this;
-
-    // Remove teleport area
-    if (teleportArea) {
-      teleportArea.deleteFromParent();
-      teleportArea.disposeRecursively();
-      this.teleportArea = null;
-    }
-  }
-
-  /**
-   * Resets the hover effect of the object which was previously hovered upon by the controller.
-   *
-   * @param controller Controller of which the hover effect shall be reseted.
-   */
-  resetHoverEffect(controller: THREE.Group) {
-    if (!controller.userData.intersectedObject) {
-      return;
-    }
-    const { object } = controller.userData.intersectedObject;
-    if (object instanceof BaseMesh) {
-      object.resetHoverEffect();
-      controller.userData.intersectedObject = null;
-    } else if (object instanceof FloorMesh && this.teleportArea) {
-      this.teleportArea.visible = false;
-    }
   }
 
   // #endregion UTILS

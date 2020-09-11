@@ -7,7 +7,7 @@ module('Unit | Utility | VRController', function() {
 
   // Replace this with your real tests.
   test('it works', function( assert ) {
-    let result = new VRController(0, new THREE.Group(), new THREE.Group(), {});
+    let result = new VRController(0, new THREE.Group(), new THREE.Group(), {}, new THREE.Scene());
     assert.ok(result);
   });
 });

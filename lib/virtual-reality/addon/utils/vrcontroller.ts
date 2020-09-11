@@ -1,7 +1,11 @@
-import THREE from 'three';
+import THREE, { Raycaster } from 'three';
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import XRControllerModelFactory from './XRControllerModelFactory';
 import XRControllerModel from './XRControllerModel';
 import { MotionController } from './motion-controllers.module';
+import FloorMesh from './floor-mesh';
+import TeleportMesh from './teleport-mesh';
 
 type CallbackFunctions = {
   connected? (event: THREE.Event): void,
@@ -50,25 +54,40 @@ export default class VRController extends THREE.Group {
 
   motionController: MotionController|null;
 
+  intersectedObject: THREE.Intersection|null = null;
+
+  raycaster: THREE.Raycaster;
+
+  scene: THREE.Scene;
+
+  intersectableObjects: THREE.Object3D[] = [];
+
+  teleportArea: TeleportMesh|null = null;
+
   /**
    * @param gamepad Object of gamepad API which grants access to VR controller inputs
    * @param eventCallbacks Object with functions that are called when certain events occur
    */
   constructor(gamepadIndex: number, gripSpace: THREE.Group, raySpace: THREE.Group,
-    eventCallbacks: CallbackFunctions) {
+    eventCallbacks: CallbackFunctions, scene: THREE.Scene) {
     super();
+    // Init properties
     this.gamepadIndex = gamepadIndex;
     this.gripSpace = gripSpace;
-    this.add(gripSpace);
     this.raySpace = raySpace;
-    this.add(raySpace);
-
+    this.raycaster = new Raycaster();
+    this.scene = scene;
     this.eventCallbacks = { ...eventCallbacks };
 
+    // Init controller model
     const controllerModelFactory = new XRControllerModelFactory();
-    this.controllerModel = controllerModelFactory.createControllerModel(gripSpace);
+    this.controllerModel = controllerModelFactory.createControllerModel(this.gripSpace);
     this.gripSpace.add(this.controllerModel);
     this.motionController = this.controllerModel.motionController;
+
+    this.add(this.gripSpace);
+    this.add(this.raySpace);
+
     this.findGamepad();
 
     this.initConnectionListeners();
@@ -79,10 +98,12 @@ export default class VRController extends THREE.Group {
 
     this.gripSpace.addEventListener('connected', (event) => {
       this.findGamepad();
+      if (this.gamepadIndex === 1) this.initTeleportArea();
       if (callbacks.connected) callbacks.connected(event);
     });
     this.gripSpace.addEventListener('disconnected', () => {
       this.findGamepad();
+      this.removeTeleportArea();
       if (callbacks.disconnected) callbacks.disconnected();
     });
   }
@@ -114,12 +135,36 @@ export default class VRController extends THREE.Group {
     this.raySpace.add(this.ray);
   }
 
+  initTeleportArea() {
+    // Create teleport area
+    this.teleportArea = new TeleportMesh();
+
+    // Add teleport area to parent (usually the scene object)
+    this.scene.add(this.teleportArea);
+  }
+
+  removeTeleportArea() {
+    const { teleportArea } = this;
+
+    // Remove teleport area
+    if (teleportArea) {
+      teleportArea.deleteFromParent();
+      teleportArea.disposeRecursively();
+      this.teleportArea = null;
+    }
+  }
+
+  update() {
+    this.updateGamepad();
+    this.updateIntersectedObject();
+  }
+
   /**
    * Updates the current button states according to the gamepad object.
    * Whenever a button change or press event is registered, the according
    * callback functions (provided via the constructor) are called.
    */
-  update() {
+  updateGamepad() {
     const { gamepad } = this;
     const callbacks = this.eventCallbacks;
 
@@ -186,6 +231,82 @@ export default class VRController extends THREE.Group {
           callbacks.menuUp();
         }
       }
+    }
+  }
+
+  computeIntersections() {
+    if (this.intersectableObjects.length === 0) return [];
+
+    const { raySpace } = this;
+    const tempMatrix = new THREE.Matrix4();
+    tempMatrix.identity().extractRotation(raySpace.matrixWorld);
+
+    this.raycaster.ray.origin.setFromMatrixPosition(raySpace.matrixWorld);
+    this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+
+    const intersections = this.raycaster.intersectObjects(this.intersectableObjects, true);
+
+    for (let i = 0; i < intersections.length; i++) {
+      const { object } = intersections[i];
+      if (!(object instanceof LabelMesh) && object.visible) {
+        return [intersections[i]];
+      }
+    }
+
+    return [];
+  }
+
+  updateIntersectedObject() {
+    if (!this.ray) return;
+
+    /* Reset hover effect and teleportation area */
+    this.resetHoverEffect();
+
+    const intersections = this.computeIntersections();
+
+    const [nearestIntersection] = intersections;
+
+    if (!nearestIntersection) {
+      this.ray.scale.z = 5;
+      return;
+    }
+
+    const { object } = nearestIntersection;
+
+    // Handle hover effect and teleport area
+    if (this.gamepadIndex === 0) {
+      if (object instanceof BaseMesh) {
+        object.applyHoverEffect(1.4);
+      }
+    } else if (this.gamepadIndex === 1) {
+      if (object instanceof FloorMesh) {
+        if (this.teleportArea) this.teleportArea.showAbovePosition(nearestIntersection.point);
+      } else if (object instanceof BaseMesh) {
+        object.applyHoverEffect(1.4);
+      }
+    }
+
+    // Store intersected object and scale ray accordingly
+    this.intersectedObject = nearestIntersection;
+    this.ray.scale.z = nearestIntersection.distance;
+  }
+
+  /**
+   * Resets the hover effect of the object which was previously hovered upon by the controller.
+   *
+   * @param controller Controller of which the hover effect shall be reseted.
+   */
+  resetHoverEffect() {
+    if (!this.intersectedObject || !this.intersectedObject.object) return;
+
+    const { object } = this.intersectedObject;
+
+    if (object instanceof BaseMesh) {
+      object.resetHoverEffect();
+      this.intersectedObject = null;
+    }
+    if (this.teleportArea) {
+      this.teleportArea.visible = false;
     }
   }
 }
