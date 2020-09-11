@@ -44,7 +44,7 @@ import Landscape from 'explorviz-frontend/models/landscape';
 import TeleportMesh from 'virtual-reality/utils/teleport-mesh';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
-import VRController from 'virtual-reality/utils/vrcontroller';
+import VRController from 'virtual-reality/utils/VRController';
 
 interface Args {
   readonly id: string;
@@ -179,7 +179,7 @@ export default class VrRendering extends Component<Args> {
      */
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(this.configuration.landscapeColors.background);
+    this.scene.background = this.configuration.landscapeColors.background;
     this.scene.add(this.landscapeObject3D);
 
     // Add floor
@@ -285,9 +285,13 @@ export default class VrRendering extends Component<Args> {
     const raySpace2 = this.renderer.xr.getController(1);
     const gripSpace2 = this.renderer.xr.getControllerGrip(1);
 
+    this.initTeleportArea = this.initTeleportArea.bind(this);
+    this.removeTeleportArea = this.removeTeleportArea.bind(this);
     this.onSelectStart2 = this.onSelectStart2.bind(this);
 
     const callbacks2 = {
+      connected: this.initTeleportArea,
+      disconnected: this.removeTeleportArea,
       triggerDown: this.onSelectStart2,
     };
 
@@ -344,21 +348,12 @@ export default class VrRendering extends Component<Args> {
 
   @action
   onVrSessionStarted(/* session: XRSession */) {
-    if (!this.teleportArea) {
-      this.initTeleportArea();
-    }
+    this.debug('WebXRSession started');
   }
 
   @action
   onVrSessionEnded() {
-    let { teleportArea } = this;
-
-    // Remove teleport area
-    if (teleportArea) {
-      teleportArea.deleteFromParent();
-      teleportArea.disposeRecursively();
-      teleportArea = null;
-    }
+    this.debug('WebXRSession ended');
   }
 
   /**
@@ -1055,6 +1050,17 @@ populateScene = task(function* (this: VrRendering) {
 
     controller.userData.intersectedObject = nearestIntersection;
     controller.ray.scale.z = nearestIntersection.distance;
+  }
+
+  removeTeleportArea() {
+    const { teleportArea } = this;
+
+    // Remove teleport area
+    if (teleportArea) {
+      teleportArea.deleteFromParent();
+      teleportArea.disposeRecursively();
+      this.teleportArea = null;
+    }
   }
 
   /**
