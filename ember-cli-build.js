@@ -13,6 +13,7 @@ module.exports = (defaults) => {
     // Default implementation for ember-cli-sass
     sassOptions: {
       implementation: sass,
+      includePaths: ['lib/virtual-reality/addon/styles'],
     },
 
     svgJar: {

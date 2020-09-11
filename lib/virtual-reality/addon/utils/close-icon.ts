@@ -2,8 +2,12 @@ import THREE from 'three';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 
 export default class CloseIcon extends BaseMesh {
-  constructor(texture: THREE.Texture, radius = 0.06, segments = 32) {
+  radius: number;
+
+  constructor(texture: THREE.Texture, radius = 6, segments = 32) {
     super(new THREE.Color());
+
+    this.radius = radius;
 
     this.geometry = new THREE.SphereGeometry(radius, segments, segments);
 

@@ -1,47 +1,56 @@
 <div class="row" style="max-height:100%">
   <div class="col-12" id="vizspace">
-    {{#if this.showLandscape}}
-      {{#if this.landscapeRepo.latestLandscape.systems}}
-        <Visualization::Rendering::LandscapeRendering
-          @id="landscape1"
-          @landscape={{this.landscapeRepo.latestLandscape}}
-          @font={{@model}}
-          @components={{this.components}}
-          @removeComponent={{this.removeComponent}}
-          @closeDataSelection={{this.closeDataSelection}}
-          @showDataSelection={{this.showDataSelection}}
-          @addComponent={{this.addComponent}}
-          @showApplication={{this.showApplication}}
-        />
-      {{else if this.landscapeRepo.latestLandscape}}
-        <div class="container-fluid">
-          <div class="jumbotron">
-            <h2>Empty Landscape received!</h2>
-            <p>A new landscape will be fetched every 10 seconds.</p>
-          </div>
-          <div class="spinner-center-3" role="status"></div>
-        </div>
-      {{else}}
-        <div class="container-fluid">
-          <div class="jumbotron">
-            <h2>No Landscape found!</h2>
-            <p>A new landscape will be fetched every 10 seconds.</p>
-          </div>
-          <div class="spinner-center-3" role="status"></div>
-        </div>
-      {{/if}}
+    {{#if this.showVR}}
+      <VrRendering
+        @id="landscape1"
+        @landscape={{this.landscapeRepo.latestLandscape}}
+        @font={{@model}}
+      />
     {{else}}
-      {{#if this.landscapeRepo.latestApplication}}
-        <Visualization::Rendering::ApplicationRendering
-          @id="app1"
-          @application={{this.landscapeRepo.latestApplication}}
-          @addComponent={{this.addComponent}}
-          @font={{@model}}
-          @components={{this.components}}
-          @removeComponent={{this.removeComponent}}
-          @closeDataSelection={{this.closeDataSelection}}
-          @showDataSelection={{this.showDataSelection}}
-        />
+      {{#if this.showLandscape}}
+        {{#if this.landscapeRepo.latestLandscape.systems}}
+          <Visualization::Rendering::LandscapeRendering
+            @id="landscape1"
+            @landscape={{this.landscapeRepo.latestLandscape}}
+            @font={{@model}}
+            @components={{this.components}}
+            @removeComponent={{this.removeComponent}}
+            @closeDataSelection={{this.closeDataSelection}}
+            @showDataSelection={{this.showDataSelection}}
+            @addComponent={{this.addComponent}}
+            @switchToVR={{this.switchToVR}}
+            @showApplication={{this.showApplication}}
+          />
+        {{else if this.landscapeRepo.latestLandscape}}
+          <div class="container-fluid">
+            <div class="jumbotron">
+              <h2>Empty Landscape received!</h2>
+              <p>A new landscape will be fetched every 10 seconds.</p>
+            </div>
+            <div class="spinner-center-3" role="status"></div>
+          </div>
+        {{else}}
+          <div class="container-fluid">
+            <div class="jumbotron">
+              <h2>No Landscape found!</h2>
+              <p>A new landscape will be fetched every 10 seconds.</p>
+            </div>
+            <div class="spinner-center-3" role="status"></div>
+          </div>
+        {{/if}}
+      {{else}}
+        {{#if this.landscapeRepo.latestApplication}}
+          <Visualization::Rendering::ApplicationRendering
+            @id="app1"
+            @application={{this.landscapeRepo.latestApplication}}
+            @addComponent={{this.addComponent}}
+            @font={{@model}}
+            @components={{this.components}}
+            @removeComponent={{this.removeComponent}}
+            @closeDataSelection={{this.closeDataSelection}}
+            @showDataSelection={{this.showDataSelection}}
+          />
+        {{/if}}
       {{/if}}
     {{/if}}
     {{!-- timeline --}}
@@ -78,7 +87,7 @@
       @onClick={{this.openLandscapeView}}
       @type="secondary"
       @outline={{true}}
-      @title="Back to Landscape"
+      @title="Back to Landscape View"
     >
       {{svg-jar "reply" class="octicon align-middle"}}
     </BsButton>

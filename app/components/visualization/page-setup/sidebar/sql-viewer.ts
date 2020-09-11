@@ -43,7 +43,7 @@ export default class SQLViewer extends Component<Args> {
   @tracked
   filterInput: string = '';
 
-  // Compute current traces when highlighting changes
+  // Compute current queries
   @computed('landscapeRepo.latestApplication.databaseQueries', 'isSortedAsc', 'sortBy',
     'filterTerm', 'selectedQuery')
   get databaseQueries() {

@@ -23,14 +23,14 @@ import reduceApplication, { ReducedApplication } from 'explorviz-frontend/utils/
 import Trace from 'explorviz-frontend/models/trace';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
-import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
-import EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
+import * as EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
 import CommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
-import EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
+import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import { task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
+import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 
 interface Args {
   readonly id: string,
@@ -96,13 +96,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // Extended Object3D which manages application meshes
   readonly applicationObject3D: ApplicationObject3D;
 
-  readonly highlighter: Highlighting;
-
-  readonly entityRendering: EntityRendering;
-
   readonly communicationRendering: CommunicationRendering;
-
-  readonly entityManipulation: EntityManipulation;
 
   // Plain JSON variant of the application with fewer properties, used for layouting
   reducedApplication: ReducedApplication|null = null;
@@ -126,13 +120,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.applicationObject3D = new ApplicationObject3D(this.args.application, new Map());
 
-    this.highlighter = new Highlighting(this.applicationObject3D);
-
-    this.entityRendering = new EntityRendering(this.configuration);
-
     this.communicationRendering = new CommunicationRendering(this.configuration, this.currentUser);
-
-    this.entityManipulation = new EntityManipulation(this.communicationRendering, this.highlighter);
 
     this.hoveredObject = null;
   }
@@ -161,7 +149,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     await this.loadNewApplication.perform();
 
     // Display application nicely for first rendering
-    this.entityManipulation.applyDefaultApplicationLayout(this.applicationObject3D);
+    EntityManipulation.applyDefaultApplicationLayout(this.applicationObject3D);
     this.communicationRendering.addCommunication(this.applicationObject3D);
     this.applicationObject3D.resetRotation();
   }
@@ -264,22 +252,25 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleSingleClick(mesh: THREE.Mesh | undefined) {
     // User clicked on blank spot on the canvas
     if (mesh === undefined) {
-      this.highlighter.removeHighlighting();
+      Highlighting.removeHighlighting(this.applicationObject3D);
     } else if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
-      this.highlighter.highlight(mesh);
+      Highlighting.highlight(mesh, this.applicationObject3D);
     }
   }
 
   handleDoubleClick(mesh: THREE.Mesh | undefined) {
     // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
-      this.entityManipulation.toggleComponentMeshState(mesh, this.applicationObject3D);
+      EntityManipulation.toggleComponentMeshState(mesh, this.applicationObject3D);
       this.communicationRendering.addCommunication(this.applicationObject3D);
-      this.highlighter.updateHighlighting();
+      Highlighting.updateHighlighting(this.applicationObject3D);
     // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
-      this.entityManipulation.closeAllComponents(this.applicationObject3D);
+      EntityManipulation.closeAllComponents(this.applicationObject3D);
+      // Re-compute communication and highlighting
+      this.communicationRendering.addCommunication(this.applicationObject3D);
+      Highlighting.updateHighlighting(this.applicationObject3D);
     }
   }
 
@@ -362,6 +353,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     yield this.populateScene.perform();
   });
 
+  // @ts-ignore
   @task({ restartable: true })
   // eslint-disable-next-line
   populateScene = task(function* (this: ApplicationRendering) {
@@ -369,6 +361,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     try {
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', reducedApplication);
+
+      // Remember state of components
+      const { openComponentIds } = this.applicationObject3D;
 
       // Converting plain JSON layout data due to worker limitations
       const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
@@ -378,10 +373,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.cleanUpApplication();
 
       // Add new meshes to application
-      this.entityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D);
+      EntityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D,
+        this.configuration.applicationColors);
 
       // Restore old state of components
-      this.entityManipulation.setComponentState(this.applicationObject3D);
+      EntityManipulation.restoreComponentState(this.applicationObject3D, openComponentIds);
       this.communicationRendering.addCommunication(this.applicationObject3D);
       this.addLabels();
 
@@ -454,11 +450,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     ancestors.forEach((anc) => {
       const ancestorMesh = this.applicationObject3D.getBoxMeshbyModelId(anc.get('id'));
       if (ancestorMesh instanceof ComponentMesh) {
-        this.entityManipulation.openComponentMesh(ancestorMesh, this.applicationObject3D);
+        EntityManipulation.openComponentMesh(ancestorMesh, this.applicationObject3D);
       }
     });
     this.communicationRendering.addCommunication(this.applicationObject3D);
-    this.highlighter.updateHighlighting();
+    Highlighting.updateHighlighting(this.applicationObject3D);
   }
 
   /**
@@ -470,10 +466,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   closeComponent(component: Component) {
     const mesh = this.applicationObject3D.getBoxMeshbyModelId(component.get('id'));
     if (mesh instanceof ComponentMesh) {
-      this.entityManipulation.closeComponentMesh(mesh, this.applicationObject3D);
+      EntityManipulation.closeComponentMesh(mesh, this.applicationObject3D);
     }
     this.communicationRendering.addCommunication(this.applicationObject3D);
-    this.highlighter.updateHighlighting();
+    Highlighting.updateHighlighting(this.applicationObject3D);
   }
 
   /**
@@ -484,13 +480,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.args.application.components.forEach((child) => {
       const mesh = this.applicationObject3D.getBoxMeshbyModelId(child.get('id'));
       if (mesh !== undefined && mesh instanceof ComponentMesh) {
-        this.entityManipulation.openComponentMesh(mesh, this.applicationObject3D);
+        EntityManipulation.openComponentMesh(mesh, this.applicationObject3D);
       }
-      this.entityManipulation.openComponentsRecursively(child, this.applicationObject3D);
+      EntityManipulation.openComponentsRecursively(child, this.applicationObject3D);
     });
 
     this.communicationRendering.addCommunication(this.applicationObject3D);
-    this.highlighter.updateHighlighting();
+    Highlighting.updateHighlighting(this.applicationObject3D);
   }
 
   /**
@@ -500,7 +496,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   @action
   highlightModel(entity: Component|Clazz) {
-    this.highlighter.highlightModel(entity);
+    Highlighting.highlightModel(entity, this.applicationObject3D);
   }
 
   /**
@@ -508,7 +504,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   @action
   unhighlightAll() {
-    this.highlighter.removeHighlighting();
+    Highlighting.removeHighlighting(this.applicationObject3D);
   }
 
   /**
@@ -569,7 +565,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   highlightTrace(trace: Trace, step = 1) {
     // Open components such that complete trace is visible
     this.openAllComponents();
-    this.highlighter.highlightTrace(trace, step, this.args.application);
+    Highlighting.highlightTrace(trace, this.applicationObject3D, step);
   }
 
   @action
@@ -605,7 +601,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   cleanUpApplication() {
     this.applicationObject3D.removeAllEntities();
-    this.highlighter.removeHighlighting();
+    Highlighting.removeHighlighting(this.applicationObject3D);
   }
 
   // #endregion COMPONENT AND SCENE CLEAN-UP

@@ -10,5 +10,8 @@
 @import "_pagenavigation";
 @import "_visualization_navbar";
 
+// located in lib/virtual-reality/addon/styles
+@import "_virtual_reality";
+
 @import 'ember-power-select/themes/bootstrap';
 @import "ember-power-select";

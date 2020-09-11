@@ -4,117 +4,132 @@ import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/compon
 import Clazz from 'explorviz-frontend/models/clazz';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import Component from 'explorviz-frontend/models/component';
-import Configuration from 'explorviz-frontend/services/configuration';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import { ApplicationColors } from 'explorviz-frontend/services/configuration';
+import BoxMesh from 'explorviz-frontend/view-objects/3d/application/box-mesh';
 
-export default class EntityRendering {
-  // Service to access color preferences
-  configuration: Configuration;
+/**
+ * Takes an application mesh, computes it position and adds it to the application object.
+ *
+ * @param mesh Mesh which should be added to the application
+ * @param applicationObject3D Object which contains all application meshes
+ */
+export function addMeshToApplication(mesh: BoxMesh, applicationObject3D: ApplicationObject3D) {
+  const layoutPosition = mesh.layout.position;
+  const applicationCenter = applicationObject3D.layout.center;
 
-  openedComponentHeight: number;
+  const centerPoint = new THREE.Vector3(
+    layoutPosition.x + mesh.layout.width / 2.0,
+    layoutPosition.y + mesh.layout.height / 2.0,
+    layoutPosition.z + mesh.layout.depth / 2.0,
+  );
 
-  constructor(configuration: Configuration, openedComponentHeight = 1.5) {
-    this.configuration = configuration;
-    this.openedComponentHeight = openedComponentHeight;
+  centerPoint.sub(applicationCenter);
+
+  mesh.position.copy(centerPoint);
+
+  applicationObject3D.add(mesh);
+}
+
+/**
+ * Sets the visibility of a mesh according to the opened state of the parent component.
+ *
+ * @param mesh Object of which the visibility shall be recalculated
+ * @param applicationMesh Object which contains all application objects
+ */
+export function updateMeshVisiblity(mesh: ComponentMesh | ClazzMesh,
+  applicationMesh: ApplicationObject3D) {
+  let parent: Component;
+  if (mesh instanceof ComponentMesh) {
+    parent = mesh.dataModel.parentComponent;
+  } else {
+    parent = mesh.dataModel.parent;
   }
-
-  addFoundationAndChildrenToApplication(applicationMesh: ApplicationObject3D) {
-    const application = applicationMesh.dataModel;
-
-    const applicationLayout = applicationMesh.layout;
-    applicationLayout.height = this.openedComponentHeight;
-
-    if (!applicationLayout) { return; }
-
-    // Access color preferences
-    const {
-      foundation: foundationColor,
-      componentOdd: componentOddColor,
-      highlightedEntity: highlightedEntityColor,
-    } = this.configuration.applicationColors;
-
-    const mesh = new FoundationMesh(applicationLayout,
-      application, foundationColor, highlightedEntityColor);
-
-    EntityRendering.addMeshToApplication(mesh, applicationMesh);
-
-    const children = application.get('components');
-
-    children.forEach((child: Component) => {
-      this.addComponentAndChildrenToScene(child, componentOddColor, applicationMesh);
-    });
+  const parentMesh = applicationMesh.getBoxMeshbyModelId(parent.get('id'));
+  if (parentMesh instanceof ComponentMesh) {
+    mesh.visible = parentMesh.opened;
   }
+}
 
-  addComponentAndChildrenToScene(component: Component, color: THREE.Color,
-    applicationMesh: ApplicationObject3D) {
-    const application = applicationMesh.dataModel;
-    const componentLayout = applicationMesh.getBoxLayout(component.id);
-    const applicationLayout = applicationMesh.getBoxLayout(application.id);
+/**
+ * Creates, positiones and adds component and clazz meshes to a given application object.
+ *
+ * @param component Data model for the component which shall be added to the scene
+ * @param applicationObject3D Object to which the component mesh and its children are added
+ * @param applicationColors Contains color objects for components and clazzes
+ * @param componentLevel
+ */
+export function addComponentAndChildrenToScene(component: Component, applicationObject3D:
+ApplicationObject3D, applicationColors: ApplicationColors, componentLevel = 1) {
+  const application = applicationObject3D.dataModel;
+  const componentLayout = applicationObject3D.getBoxLayout(component.id);
+  const applicationLayout = applicationObject3D.getBoxLayout(application.id);
 
-    if (!componentLayout || !applicationLayout) { return; }
+  if (!componentLayout || !applicationLayout) { return; }
 
-    const {
-      componentOdd: componentOddColor, componentEven: componentEvenColor,
-      clazz: clazzColor, highlightedEntity: highlightedEntityColor,
-    } = this.configuration.applicationColors;
+  const {
+    componentOdd: componentOddColor, componentEven: componentEvenColor,
+    clazz: clazzColor, highlightedEntity: highlightedEntityColor,
+  } = applicationColors;
 
-    const mesh = new ComponentMesh(componentLayout, component, color,
-      highlightedEntityColor);
+  // Set color alternating (e.g. light and dark green) according to component level
+  const color = componentLevel % 2 === 0 ? componentEvenColor : componentOddColor;
+  const mesh = new ComponentMesh(componentLayout, component, color, highlightedEntityColor);
 
-    EntityRendering.addMeshToApplication(mesh, applicationMesh);
-    EntityRendering.updateMeshVisiblity(mesh, applicationMesh);
+  addMeshToApplication(mesh, applicationObject3D);
+  updateMeshVisiblity(mesh, applicationObject3D);
 
-    const clazzes = component.get('clazzes');
-    const children = component.get('children');
+  const clazzes = component.get('clazzes');
+  const children = component.get('children');
 
-    clazzes.forEach((clazz: Clazz) => {
-      const clazzLayout = applicationMesh.getBoxLayout(clazz.get('id'));
+  // Add clazzes of given component
+  clazzes.forEach((clazz: Clazz) => {
+    const clazzLayout = applicationObject3D.getBoxLayout(clazz.get('id'));
 
-      if (!clazzLayout) { return; }
+    if (!clazzLayout) { return; }
 
-      const clazzMesh = new ClazzMesh(clazzLayout, clazz, clazzColor, highlightedEntityColor);
-      EntityRendering.addMeshToApplication(clazzMesh, applicationMesh);
-      EntityRendering.updateMeshVisiblity(clazzMesh, applicationMesh);
-    });
+    const clazzMesh = new ClazzMesh(clazzLayout, clazz, clazzColor, highlightedEntityColor);
+    addMeshToApplication(clazzMesh, applicationObject3D);
+    updateMeshVisiblity(clazzMesh, applicationObject3D);
+  });
 
-    children.forEach((child: Component) => {
-      if (color === componentEvenColor) {
-        this.addComponentAndChildrenToScene(child, componentOddColor, applicationMesh);
-      } else {
-        this.addComponentAndChildrenToScene(child, componentEvenColor, applicationMesh);
-      }
-    });
-  } // END addComponentToScene
+  // Add components with alternating colors (e.g. dark and light green)
+  children.forEach((child: Component) => {
+    addComponentAndChildrenToScene(child,
+      applicationObject3D, applicationColors, componentLevel + 1);
+  });
+}
 
-  static addMeshToApplication(mesh: ComponentMesh | ClazzMesh | FoundationMesh,
-    applicationMesh: ApplicationObject3D) {
-    const layoutPosition = mesh.layout.position;
-    const applicationCenter = applicationMesh.layout.center;
+/**
+ * Creates a FoundationMesh and adds it to the given application object.
+ * Additionally, all children of the foundation (components and clazzes)
+ * are added to the application.
+ *
+ * @param applicationObject3D Object which shall contain all application meshes
+ * @param applicationColors Object which defines the colors for different application entities
+ */
+export function addFoundationAndChildrenToApplication(applicationObject3D: ApplicationObject3D,
+  applicationColors: ApplicationColors) {
+  const application = applicationObject3D.dataModel;
+  const applicationLayout = applicationObject3D.layout;
+  // Height of foundation is always the same
+  applicationLayout.height = 1.5;
 
-    const centerPoint = new THREE.Vector3(
-      layoutPosition.x + mesh.layout.width / 2.0,
-      layoutPosition.y + mesh.layout.height / 2.0,
-      layoutPosition.z + mesh.layout.depth / 2.0,
-    );
+  if (!applicationLayout) { return; }
 
-    centerPoint.sub(applicationCenter);
+  const {
+    foundation: foundationColor,
+    highlightedEntity: highlightedEntityColor,
+  } = applicationColors;
 
-    mesh.position.copy(centerPoint);
+  const mesh = new FoundationMesh(applicationLayout,
+    application, foundationColor, highlightedEntityColor);
 
-    applicationMesh.add(mesh);
-  }
+  addMeshToApplication(mesh, applicationObject3D);
 
-  static updateMeshVisiblity(mesh: ComponentMesh | ClazzMesh,
-    applicationMesh: ApplicationObject3D) {
-    let parent: Component;
-    if (mesh instanceof ComponentMesh) {
-      parent = mesh.dataModel.parentComponent;
-    } else {
-      parent = mesh.dataModel.parent;
-    }
-    const parentMesh = applicationMesh.getBoxMeshbyModelId(parent.get('id'));
-    if (parentMesh instanceof ComponentMesh) {
-      mesh.visible = parentMesh.opened;
-    }
-  }
+  const children = application.get('components');
+
+  children.forEach((child: Component) => {
+    addComponentAndChildrenToScene(child, applicationObject3D, applicationColors);
+  });
 }

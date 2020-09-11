@@ -383,6 +383,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  *
  * @method populateScene
  */
+  // @ts-ignore
   @task({ restartable: true })
   // eslint-disable-next-line
   populateScene = task(function* (this: LandscapeRendering) {
