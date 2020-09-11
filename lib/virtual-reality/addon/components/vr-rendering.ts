@@ -657,9 +657,12 @@ populateScene = task(function* (this: VrRendering) {
 
       this.appCommRendering.addCommunication(applicationObject3D);
 
+      // Add labels and close icon to application
       this.addLabels(applicationObject3D);
-      this.addCloseIcon(applicationObject3D);
+      const closeIcon = new CloseIcon(this.closeButtonTexture);
+      closeIcon.addToApplication(applicationObject3D);
 
+      // Scale application to a reasonable size to work with it
       const scalar = this.applicationScalar;
       applicationObject3D.scale.set(scalar, scalar, scalar);
 
@@ -670,19 +673,6 @@ populateScene = task(function* (this: VrRendering) {
       // console.log(e);
     }
   });
-
-  addCloseIcon(applicationObject3D: ApplicationObject3D) {
-    const closeIcon = new CloseIcon(this.closeButtonTexture);
-    closeIcon.position.copy(applicationObject3D.position);
-
-    const bboxApp3D = new THREE.Box3().setFromObject(applicationObject3D);
-    closeIcon.position.x = bboxApp3D.max.x + closeIcon.radius;
-    closeIcon.position.z = bboxApp3D.max.z + closeIcon.radius;
-
-    closeIcon.geometry.rotateX(90 * THREE.MathUtils.DEG2RAD);
-    closeIcon.geometry.rotateY(90 * THREE.MathUtils.DEG2RAD);
-    applicationObject3D.add(closeIcon);
-  }
 
   positionApplication(applicationObject3D: ApplicationObject3D, landscapeApp: ApplicationMesh) {
     // Calculate position in front of landscape application
