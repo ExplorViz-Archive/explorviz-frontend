@@ -43,6 +43,10 @@ import EntityManipulation from 'explorviz-frontend/utils/application-rendering/e
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import ApplicationGroup from 'virtual-reality/utils/application-group';
 import CloseIcon from 'virtual-reality/utils/close-icon';
+import MainMenu from 'virtual-reality/utils/menus/main-menu';
+import BaseMenu from 'virtual-reality/utils/menus/base-menu';
+import CameraMenu from 'virtual-reality/utils/menus/camera-menu';
+import LandscapeMenu from 'virtual-reality/utils/menus/landscape-menu';
 
 // Declare globals
 /* global VRButton */
@@ -113,6 +117,8 @@ export default class VrRendering extends Component<Args> {
   floor!: FloorMesh;
 
   closeButtonTexture: THREE.Texture;
+
+  menu: BaseMenu|undefined;
 
   get font() {
     return this.args.font;
@@ -865,9 +871,11 @@ populateScene = task(function* (this: VrRendering) {
     if (!this.controller2.userData.intersectedObject) {
       return;
     }
-    const { object, point } = this.controller2.userData.intersectedObject;
+    const { object, point, uv } = this.controller2.userData.intersectedObject;
     if (object instanceof FloorMesh) {
       this.teleportToPosition(point);
+    } else if (object instanceof BaseMenu) {
+      object.triggerPress(uv);
     }
   }
 
@@ -916,8 +924,45 @@ populateScene = task(function* (this: VrRendering) {
       case 'c':
         this.applicationGroup.clear();
         break;
+      case 'm':
+        this.openMainMenu();
+        break;
       default:
         break;
+    }
+  }
+
+  openMainMenu() {
+    this.closeCurrentMenu();
+
+    this.menu = new MainMenu(this.closeCurrentMenu.bind(this), this.openCameraMenu.bind(this), this.openLandscapeMenu.bind(this));
+    this.menu.position.y += 1;
+    this.menu.position.z += 1.5;
+    this.scene.add(this.menu);
+  }
+
+  openCameraMenu() {
+    this.closeCurrentMenu();
+
+    this.menu = new CameraMenu(this.openMainMenu.bind(this), this.user.position);
+    this.menu.position.y += 1;
+    this.menu.position.z += 1.5;
+    this.scene.add(this.menu);
+  }
+
+  openLandscapeMenu() {
+    this.closeCurrentMenu();
+
+    this.menu = new LandscapeMenu(this.openMainMenu.bind(this), this.landscapeObject3D);
+    this.menu.position.y += 1;
+    this.menu.position.z += 1.5;
+    this.scene.add(this.menu);
+  }
+
+  closeCurrentMenu() {
+    if (this.menu) {
+      this.scene.remove(this.menu);
+      this.menu = undefined;
     }
   }
 
@@ -955,6 +1000,10 @@ populateScene = task(function* (this: VrRendering) {
 
     const intersectionObjects = [this.landscapeObject3D, this.floor, this.applicationGroup];
 
+    if (this.menu) {
+      intersectionObjects.push(this.menu);
+    }
+
     if (!this.landscapeObject3D) { return []; }
 
     const intersections = this.raycaster.intersectObjects(intersectionObjects, true);
@@ -983,11 +1032,12 @@ populateScene = task(function* (this: VrRendering) {
     const [nearestIntersection] = intersections;
 
     if (!nearestIntersection) {
+      controller.userData.intersectedObject = null;
       line.scale.z = 5;
       return;
     }
 
-    const { object } = nearestIntersection;
+    const { object, uv } = nearestIntersection;
 
     if (controllerName === 'controller1') {
       if (object instanceof BaseMesh) {
@@ -998,6 +1048,8 @@ populateScene = task(function* (this: VrRendering) {
         this.showAndUpdateTeleportArea(nearestIntersection.point);
       } else if (object instanceof BaseMesh) {
         object.applyHoverEffect(1.4);
+      } else if (object instanceof BaseMenu && uv) {
+        object.hover(uv);
       }
     }
 
@@ -1024,7 +1076,6 @@ populateScene = task(function* (this: VrRendering) {
     const { object } = controller.userData.intersectedObject;
     if (object instanceof BaseMesh) {
       object.resetHoverEffect();
-      controller.userData.intersectedObject = null;
     }
   }
 
