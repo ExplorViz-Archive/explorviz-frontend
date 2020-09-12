@@ -12,9 +12,6 @@ export default class VrButton extends Component<VrButtonArgs> {
   currentSession: XRSession | null = null;
 
   @tracked
-  vrSupported = false;
-
-  @tracked
   buttonText: string = 'Checking ...';
 
   /**
@@ -23,24 +20,24 @@ export default class VrButton extends Component<VrButtonArgs> {
    * 'buttonText' and 'vrSupported' accordingly.
    */
   @action
-  updateVrStatus() {
+  toggleVR() {
     if ('xr' in navigator) {
       // @ts-ignore
       navigator.xr.isSessionSupported('immersive-vr').then((supported: boolean) => {
-        if (supported) {
-          this.buttonText = 'Enter VR';
-          this.vrSupported = true;
+        if (this.currentSession) {
+          this.currentSession.end();
+        } else if (supported) {
+          const sessionInit = { optionalFeatures: ['local-floor'] };
+          // @ts-ignore
+          navigator.xr.requestSession('immersive-vr', sessionInit).then(this.onSessionStarted.bind(this));
         } else if (window.isSecureContext === false) {
           this.buttonText = 'WEBXR NEEDS HTTPS';
-          this.vrSupported = false;
         } else {
           this.buttonText = 'WEBXR NOT AVAILABLE';
-          this.vrSupported = false;
         }
       });
     } else {
       this.buttonText = 'WEBXR NOT SUPPORTED';
-      this.vrSupported = false;
     }
   }
 
@@ -79,20 +76,6 @@ export default class VrButton extends Component<VrButtonArgs> {
 
     if (this.args.onSessionEndedCallback) {
       this.args.onSessionEndedCallback();
-    }
-  }
-
-  @action
-  onClick() {
-    this.updateVrStatus();
-    if (!this.vrSupported) return;
-
-    if (!this.currentSession) {
-      const sessionInit = { optionalFeatures: ['local-floor'] };
-      // @ts-ignore
-      navigator.xr.requestSession('immersive-vr', sessionInit).then(this.onSessionStarted.bind(this));
-    } else {
-      this.currentSession.end();
     }
   }
 }
