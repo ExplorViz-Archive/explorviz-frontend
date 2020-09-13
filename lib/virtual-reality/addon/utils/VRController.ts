@@ -22,6 +22,11 @@ type CallbackFunctions = {
   menuDown? (): void,
 };
 
+export const controlMode = Object.freeze({
+  INTERACTION: 'interaction',
+  UTILITY: 'utility',
+});
+
 /**
  * A wrapper around the gamepad object which handles inputs to
  * a VR controller and provides update and callback functionalities.
@@ -30,6 +35,8 @@ export default class VRController extends THREE.Group {
   gamepadIndex: number;
 
   gamepad: Gamepad|null = null;
+
+  control: string;
 
   axes = [0, 0];
 
@@ -69,11 +76,12 @@ export default class VRController extends THREE.Group {
    * @param gamepad Object of gamepad API which grants access to VR controller inputs
    * @param eventCallbacks Object with functions that are called when certain events occur
    */
-  constructor(gamepadIndex: number, gripSpace: THREE.Group, raySpace: THREE.Group,
-    eventCallbacks: CallbackFunctions, scene: THREE.Scene) {
+  constructor(gamepadIndex: number, controlType: string, gripSpace: THREE.Group,
+    raySpace: THREE.Group, eventCallbacks: CallbackFunctions, scene: THREE.Scene) {
     super();
     // Init properties
     this.gamepadIndex = gamepadIndex;
+    this.control = controlType;
     this.gripSpace = gripSpace;
     this.raySpace = raySpace;
     this.raycaster = new Raycaster();
@@ -99,7 +107,7 @@ export default class VRController extends THREE.Group {
 
     this.gripSpace.addEventListener('connected', (event) => {
       this.findGamepad();
-      if (this.gamepadIndex === 1) this.initTeleportArea();
+      if (this.control === controlMode.UTILITY) this.initTeleportArea();
       if (callbacks.connected) callbacks.connected(event);
     });
     this.gripSpace.addEventListener('disconnected', () => {
@@ -275,11 +283,11 @@ export default class VRController extends THREE.Group {
     const { object, uv } = nearestIntersection;
 
     // Handle hover effect and teleport area
-    if (this.gamepadIndex === 0) {
+    if (this.control === controlMode.INTERACTION) {
       if (object instanceof BaseMesh) {
         object.applyHoverEffect(1.4);
       }
-    } else if (this.gamepadIndex === 1) {
+    } else if (this.control === controlMode.UTILITY) {
       if (object instanceof FloorMesh) {
         if (this.teleportArea) this.teleportArea.showAbovePosition(nearestIntersection.point);
       } else if (object instanceof BaseMesh) {

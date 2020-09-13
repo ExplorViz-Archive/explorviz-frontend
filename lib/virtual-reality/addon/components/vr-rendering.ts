@@ -41,7 +41,7 @@ import CloseIcon from 'virtual-reality/utils/close-icon';
 import Landscape from 'explorviz-frontend/models/landscape';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
-import VRController from 'virtual-reality/utils/VRController';
+import VRController, { controlMode } from 'virtual-reality/utils/VRController';
 import MainMenu from 'virtual-reality/utils/menus/main-menu';
 import BaseMenu from 'virtual-reality/utils/menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/menus/camera-menu';
@@ -272,7 +272,8 @@ export default class VrRendering extends Component<Args> {
     const callbacks1 = {
       triggerDown: this.onSelectSecondary,
     };
-    this.controller1 = new VRController(0, gripSpace1, raySpace1, callbacks1, this.scene);
+    this.controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
+      raySpace1, callbacks1, this.scene);
     this.controller1.addRay(new THREE.Color('red'));
     this.controller1.intersectableObjects = intersectableObjects;
 
@@ -288,7 +289,8 @@ export default class VrRendering extends Component<Args> {
       triggerDown: this.onSelectStartSecondary,
     };
 
-    this.controller2 = new VRController(1, gripSpace2, raySpace2, callbacks2, this.scene);
+    this.controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
+      raySpace2, callbacks2, this.scene);
     this.controller2.addRay(new THREE.Color('blue'));
     this.controller2.intersectableObjects = intersectableObjects;
     this.controller2.initTeleportArea();
