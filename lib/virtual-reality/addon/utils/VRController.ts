@@ -9,18 +9,23 @@ import TeleportMesh from './teleport-mesh';
 import BaseMenu from './menus/base-menu';
 
 type CallbackFunctions = {
-  connected? (event: THREE.Event): void,
-  disconnected? (): void,
-  thumbpad? (axes: number[]): void,
-  thumbpadUp?(): void,
-  thumbpadDown?(): void,
-  triggerUp?(): void,
-  triggerDown?(): void,
-  gripUp?(): void,
-  gripDown?(): void,
-  menuUp?(): void,
-  menuDown? (): void,
+  connected? (controller: VRController, event: THREE.Event): void,
+  disconnected? (controller: VRController): void,
+  thumbpad? (controller: VRController, axes: number[]): void,
+  thumbpadUp?(controller: VRController): void,
+  thumbpadDown?(controller: VRController): void,
+  triggerUp?(controller: VRController): void,
+  triggerDown?(controller: VRController): void,
+  gripUp?(controller: VRController): void,
+  gripDown?(controller: VRController): void,
+  menuUp?(controller: VRController): void,
+  menuDown? (controller: VRController): void,
 };
+
+export const controlMode = Object.freeze({
+  INTERACTION: 'interaction',
+  UTILITY: 'utility',
+});
 
 /**
  * A wrapper around the gamepad object which handles inputs to
@@ -30,6 +35,8 @@ export default class VRController extends THREE.Group {
   gamepadIndex: number;
 
   gamepad: Gamepad|null = null;
+
+  control: string;
 
   axes = [0, 0];
 
@@ -65,15 +72,24 @@ export default class VRController extends THREE.Group {
 
   teleportArea: TeleportMesh|null = null;
 
+  get isInteractionController() {
+    return this.control === controlMode.INTERACTION;
+  }
+
+  get isUtilityController() {
+    return this.control === controlMode.UTILITY;
+  }
+
   /**
    * @param gamepad Object of gamepad API which grants access to VR controller inputs
    * @param eventCallbacks Object with functions that are called when certain events occur
    */
-  constructor(gamepadIndex: number, gripSpace: THREE.Group, raySpace: THREE.Group,
-    eventCallbacks: CallbackFunctions, scene: THREE.Scene) {
+  constructor(gamepadIndex: number, controlType: string, gripSpace: THREE.Group,
+    raySpace: THREE.Group, eventCallbacks: CallbackFunctions, scene: THREE.Scene) {
     super();
     // Init properties
     this.gamepadIndex = gamepadIndex;
+    this.control = controlType;
     this.gripSpace = gripSpace;
     this.raySpace = raySpace;
     this.raycaster = new Raycaster();
@@ -99,13 +115,13 @@ export default class VRController extends THREE.Group {
 
     this.gripSpace.addEventListener('connected', (event) => {
       this.findGamepad();
-      if (this.gamepadIndex === 1) this.initTeleportArea();
-      if (callbacks.connected) callbacks.connected(event);
+      if (this.control === controlMode.UTILITY) this.initTeleportArea();
+      if (callbacks.connected) callbacks.connected(this, event);
     });
     this.gripSpace.addEventListener('disconnected', () => {
       this.findGamepad();
       this.removeTeleportArea();
-      if (callbacks.disconnected) callbacks.disconnected();
+      if (callbacks.disconnected) callbacks.disconnected(this);
     });
   }
 
@@ -142,6 +158,16 @@ export default class VRController extends THREE.Group {
 
     // Add teleport area to parent (usually the scene object)
     this.scene.add(this.teleportArea);
+  }
+
+  removeRay() {
+    if (!this.ray) return;
+
+    // Remove and dispose ray
+    this.raySpace.remove(this.ray);
+    if (this.ray.material instanceof THREE.Material) this.ray.material.dispose();
+    this.ray.geometry.dispose();
+    this.ray = null;
   }
 
   removeTeleportArea() {
@@ -187,7 +213,7 @@ export default class VRController extends THREE.Group {
       if (this.axes[0] !== gamepad.axes[0] || this.axes[1] !== gamepad.axes[1]) {
         [this.axes[0], this.axes[1]] = gamepad.axes;
         if (callbacks.thumbpad) {
-          callbacks.thumbpad(this.axes);
+          callbacks.thumbpad(this, this.axes);
         }
       }
 
@@ -195,9 +221,9 @@ export default class VRController extends THREE.Group {
       if (this.thumbpadIsPressed !== gamepad.buttons[THUMBPAD_BUTTON].pressed) {
         this.thumbpadIsPressed = gamepad.buttons[THUMBPAD_BUTTON].pressed;
         if (this.thumbpadIsPressed && callbacks.thumbpadDown) {
-          callbacks.thumbpadDown();
+          callbacks.thumbpadDown(this);
         } else if (!this.thumbpadIsPressed && callbacks.thumbpadUp) {
-          callbacks.thumbpadUp();
+          callbacks.thumbpadUp(this);
         }
       }
 
@@ -205,9 +231,9 @@ export default class VRController extends THREE.Group {
       if (this.triggerIsPressed !== gamepad.buttons[TRIGGER_BUTTON].pressed) {
         this.triggerIsPressed = gamepad.buttons[TRIGGER_BUTTON].pressed;
         if (this.triggerIsPressed && callbacks.triggerDown) {
-          callbacks.triggerDown();
+          callbacks.triggerDown(this);
         } else if (!this.triggerIsPressed && callbacks.triggerUp) {
-          callbacks.triggerUp();
+          callbacks.triggerUp(this);
         }
       }
 
@@ -216,9 +242,9 @@ export default class VRController extends THREE.Group {
         && this.gripIsPressed !== gamepad.buttons[GRIP_BUTTON].pressed) {
         this.gripIsPressed = gamepad.buttons[GRIP_BUTTON].pressed;
         if (this.gripIsPressed && callbacks.gripDown) {
-          callbacks.gripDown();
+          callbacks.gripDown(this);
         } else if (!this.gripIsPressed && callbacks.gripUp) {
-          callbacks.gripUp();
+          callbacks.gripUp(this);
         }
       }
 
@@ -227,9 +253,9 @@ export default class VRController extends THREE.Group {
         && this.menuIsPressed !== gamepad.buttons[MENU_BUTTON].pressed) {
         this.menuIsPressed = gamepad.buttons[MENU_BUTTON].pressed;
         if (this.menuIsPressed && callbacks.menuDown) {
-          callbacks.menuDown();
+          callbacks.menuDown(this);
         } else if (!this.menuIsPressed && callbacks.menuUp) {
-          callbacks.menuUp();
+          callbacks.menuUp(this);
         }
       }
     }
@@ -275,11 +301,11 @@ export default class VRController extends THREE.Group {
     const { object, uv } = nearestIntersection;
 
     // Handle hover effect and teleport area
-    if (this.gamepadIndex === 0) {
+    if (this.control === controlMode.INTERACTION) {
       if (object instanceof BaseMesh) {
         object.applyHoverEffect(1.4);
       }
-    } else if (this.gamepadIndex === 1) {
+    } else if (this.control === controlMode.UTILITY) {
       if (object instanceof FloorMesh) {
         if (this.teleportArea) this.teleportArea.showAbovePosition(nearestIntersection.point);
       } else if (object instanceof BaseMesh) {

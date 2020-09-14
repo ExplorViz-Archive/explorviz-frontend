@@ -41,7 +41,7 @@ import CloseIcon from 'virtual-reality/utils/close-icon';
 import Landscape from 'explorviz-frontend/models/landscape';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
-import VRController from 'virtual-reality/utils/VRController';
+import VRController, { controlMode } from 'virtual-reality/utils/VRController';
 import MainMenu from 'virtual-reality/utils/menus/main-menu';
 import BaseMenu from 'virtual-reality/utils/menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/menus/camera-menu';
@@ -267,12 +267,13 @@ export default class VrRendering extends Component<Args> {
     const raySpace1 = this.renderer.xr.getController(0);
     const gripSpace1 = this.renderer.xr.getControllerGrip(0);
 
-    this.onSelectSecondary = this.onSelectSecondary.bind(this);
+    this.onInteractionTrigger = this.onInteractionTrigger.bind(this);
 
     const callbacks1 = {
-      triggerDown: this.onSelectSecondary,
+      triggerDown: this.onInteractionTrigger,
     };
-    this.controller1 = new VRController(0, gripSpace1, raySpace1, callbacks1, this.scene);
+    this.controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
+      raySpace1, callbacks1, this.scene);
     this.controller1.addRay(new THREE.Color('red'));
     this.controller1.intersectableObjects = intersectableObjects;
 
@@ -282,13 +283,14 @@ export default class VrRendering extends Component<Args> {
     const raySpace2 = this.renderer.xr.getController(1);
     const gripSpace2 = this.renderer.xr.getControllerGrip(1);
 
-    this.onSelectStartSecondary = this.onSelectStartSecondary.bind(this);
+    this.onUtilityTrigger = this.onUtilityTrigger.bind(this);
 
     const callbacks2 = {
-      triggerDown: this.onSelectStartSecondary,
+      triggerDown: this.onUtilityTrigger,
     };
 
-    this.controller2 = new VRController(1, gripSpace2, raySpace2, callbacks2, this.scene);
+    this.controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
+      raySpace2, callbacks2, this.scene);
     this.controller2.addRay(new THREE.Color('blue'));
     this.controller2.intersectableObjects = intersectableObjects;
     this.controller2.initTeleportArea();
@@ -802,11 +804,10 @@ populateScene = task(function* (this: VrRendering) {
 
   // #region CONTROLLER HANDLERS
 
-  onSelectSecondary() {
-    if (!this.controller1 || !this.controller1.intersectedObject) {
-      return;
-    }
-    const { object } = this.controller1.intersectedObject;
+  onInteractionTrigger(controller: VRController) {
+    if (!controller.intersectedObject) return;
+
+    const { object } = controller.intersectedObject;
     if (object instanceof SystemMesh) {
       this.toggleSystemAndRedraw(object);
     } else if (object instanceof NodeGroupMesh) {
@@ -831,12 +832,10 @@ populateScene = task(function* (this: VrRendering) {
     }
   }
 
-  onSelectStartSecondary() {
-    if (!this.controller2 || !this.controller2.intersectedObject) {
-      return;
-    }
+  onUtilityTrigger(controller: VRController) {
+    if (!controller.intersectedObject) return;
 
-    const { object, point, uv } = this.controller2.intersectedObject;
+    const { object, point, uv } = controller.intersectedObject;
     if (object instanceof FloorMesh) {
       this.teleportToPosition(point);
     } else if (object instanceof BaseMenu && uv) {
@@ -905,6 +904,9 @@ populateScene = task(function* (this: VrRendering) {
       case 'm':
         this.openMainMenu();
         break;
+      case 'h':
+        this.swapControls();
+        break;
       default:
         break;
     }
@@ -969,6 +971,32 @@ populateScene = task(function* (this: VrRendering) {
   // #endregion MOUSE & KEYBOARD EVENT HANDLER
 
   // #region UTILS
+
+  swapControls() {
+    if (!this.controller1 || !this.controller2) return;
+
+    const controllers = [this.controller1, this.controller2];
+
+    controllers.forEach((controller) => {
+    // Remove attached visual indicators
+      controller.removeRay();
+      controller.removeTeleportArea();
+
+      // Swap visual control indicators
+      if (controller.control === controlMode.INTERACTION) {
+        controller.control = controlMode.UTILITY;
+        controller.addRay(new THREE.Color('blue'));
+        controller.initTeleportArea();
+      } else {
+        controller.control = controlMode.INTERACTION;
+        controller.addRay(new THREE.Color('red'));
+      }
+    });
+
+    // Swap controls (callback functions)
+    [this.controller1.eventCallbacks, this.controller2.eventCallbacks] = [this.controller2
+      .eventCallbacks, this.controller1.eventCallbacks];
+  }
 
   moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
     const delta = new THREE.Vector3(deltaX, deltaY, deltaZ);
