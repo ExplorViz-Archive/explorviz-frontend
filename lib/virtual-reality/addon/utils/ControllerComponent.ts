@@ -1,12 +1,33 @@
 import VisualResponse from './VisualResponse';
 import { Constants } from './motion-controllers.module';
 
+export type ComponentProperty = {
+  button: number|undefined,
+  xAxis: number|undefined,
+  yAxis: number|undefined,
+  state: string;
+};
+
 export default class ControllerComponent {
+  values: ComponentProperty;
+
+  gamepadIndices: {button: number, xAxis: number, yAxis: number};
+
+  id: string;
+
+  type: string;
+
+  rootNodeName: string;
+
+  touchPointNodeName: string;
+
+  visualResponses: any;
+
   /**
    * @param {Object} componentId - Id of the component
    * @param {Object} componentDescription - Description of the component to be created
    */
-  constructor(componentId, componentDescription) {
+  constructor(componentId: any, componentDescription: any) {
     if (!componentId
      || !componentDescription
      || !componentDescription.visualResponses
@@ -47,7 +68,9 @@ export default class ControllerComponent {
    * @description Poll for updated data based on current gamepad state
    * @param {Object} gamepad - The gamepad object from which the component data should be polled
    */
-  updateFromGamepad(gamepad) {
+  updateFromGamepad(gamepad: Gamepad|undefined) {
+    if (!gamepad) return;
+
     // Set the state to default before processing other data sources
     this.values.state = Constants.ComponentState.DEFAULT;
 
@@ -96,7 +119,7 @@ export default class ControllerComponent {
     }
 
     // Update the visual response weights based on the current component data
-    Object.values(this.visualResponses).forEach((visualResponse) => {
+    Object.values(this.visualResponses).forEach((visualResponse: VisualResponse) => {
       visualResponse.updateFromComponent(this.values);
     });
   }

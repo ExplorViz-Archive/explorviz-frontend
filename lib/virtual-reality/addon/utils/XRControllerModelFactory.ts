@@ -5,7 +5,9 @@
 import {
   Mesh,
   MeshBasicMaterial,
+  Object3D,
   SphereBufferGeometry,
+  Scene,
 } from 'three';
 
 import debugLogger from 'ember-debug-logger';
@@ -17,12 +19,19 @@ import {
   MotionController,
 } from './motion-controllers.module';
 import XRControllerModel from './XRControllerModel';
+import VisualResponse from './VisualResponse';
 
 const DEFAULT_PROFILES_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles';
 const DEFAULT_PROFILE = 'generic-trigger';
 
 export default class XRControllerModelFactory {
   debug = debugLogger('XRControllerModelFactory');
+
+  gltfLoader: any;
+
+  path: string;
+
+  assetCache: any;
 
   constructor(gltfLoader = null) {
     this.gltfLoader = gltfLoader;
@@ -40,11 +49,11 @@ export default class XRControllerModelFactory {
  * saves them to the motionContoller components for use in the frame loop. When
  * touchpads are found, attaches a touch dot to them.
  */
-  static findNodes(motionController, scene) {
+  static findNodes(motionController: MotionController, scene: Scene) {
     const debug = debugLogger('XRControllerModelFactory.findNodes()');
     debug('Test');
     // Loop through the components and find the nodes needed for each components' visual responses
-    Object.values(motionController.components).forEach((component) => {
+    Object.values(motionController.components).forEach((component: any) => {
       const { type, touchPointNodeName, visualResponses } = component;
 
       if (type === MotionControllerConstants.ComponentType.TOUCHPAD) {
@@ -56,29 +65,30 @@ export default class XRControllerModelFactory {
           const sphere = new Mesh(sphereGeometry, material);
           component.touchPointNode.add(sphere);
         } else {
-          this.debug(`Could not find touch dot, ${component.touchPointNodeName}, in touchpad component ${component.id}`);
+          debug(`Could not find touch dot, ${component.touchPointNodeName}, in touchpad component ${component.id}`);
         }
       }
 
       // Loop through all the visual responses to be applied to this component
-      Object.values(visualResponses).forEach((visualResponse) => {
+      Object.values(visualResponses).forEach((visualResponse: VisualResponse) => {
         const {
           valueNodeName, minNodeName, maxNodeName, valueNodeProperty,
         } = visualResponse;
 
         // If animating a transform, find the two nodes to be interpolated between.
-        if (valueNodeProperty === MotionControllerConstants.VisualResponseProperty.TRANSFORM) {
+        if (minNodeName && maxNodeName
+          && valueNodeProperty === MotionControllerConstants.VisualResponseProperty.TRANSFORM) {
           visualResponse.minNode = scene.getObjectByName(minNodeName);
           visualResponse.maxNode = scene.getObjectByName(maxNodeName);
 
           // If the extents cannot be found, skip this animation
           if (!visualResponse.minNode) {
-            this.debug(`Could not find ${minNodeName} in the model`);
+            debug(`Could not find ${minNodeName} in the model`);
             return;
           }
 
           if (!visualResponse.maxNode) {
-            this.debug(`Could not find ${maxNodeName} in the model`);
+            debug(`Could not find ${maxNodeName} in the model`);
             return;
           }
         }
@@ -86,20 +96,22 @@ export default class XRControllerModelFactory {
         // If the target node cannot be found, skip this animation
         visualResponse.valueNode = scene.getObjectByName(valueNodeName);
         if (!visualResponse.valueNode) {
-          this.debug(`Could not find ${valueNodeName} in the model`);
+          debug(`Could not find ${valueNodeName} in the model`);
         }
       });
     });
   }
 
-  static addAssetSceneToControllerModel(controllerModel, scene) {
+  static addAssetSceneToControllerModel(controllerModel: XRControllerModel, scene: Scene|null) {
+    if (!controllerModel.motionController || !scene) return;
+
     // Find the nodes needed for animation and cache them on the motionController.
     XRControllerModelFactory.findNodes(controllerModel.motionController, scene);
 
     // Apply any environment map that the mesh already has set.
     if (controllerModel.envMap) {
-      scene.traverse((child) => {
-        if (child.isMesh) {
+      scene.traverse((child: Object3D) => {
+        if (child instanceof Mesh) {
           child.material.envMap = controllerModel.envMap;
           child.material.needsUpdate = true;
         }
@@ -110,9 +122,9 @@ export default class XRControllerModelFactory {
     controllerModel.add(scene);
   }
 
-  createControllerModel(controller) {
+  createControllerModel(controller: THREE.Group) {
     const controllerModel = new XRControllerModel();
-    let scene = null;
+    let scene: Scene|null = null;
 
     controller.addEventListener('connected', (event) => {
       const xrInputSource = event.data;
@@ -137,7 +149,9 @@ export default class XRControllerModelFactory {
           }
 
           this.gltfLoader.setPath('');
-          this.gltfLoader.load(controllerModel.motionController.assetUrl, (asset) => {
+          this.gltfLoader.load(controllerModel.motionController.assetUrl, (asset: any) => {
+            if (!controllerModel.motionController) return;
+
             this.assetCache[controllerModel.motionController.assetUrl] = asset;
 
             scene = asset.scene.clone();
@@ -146,7 +160,11 @@ export default class XRControllerModelFactory {
           },
           null,
           () => {
-            throw new Error(`Asset ${controllerModel.motionController.assetUrl} missing or malformed.`);
+            let assetUrl = 'Undefined asset URL';
+            if (controllerModel.motionController && controllerModel.motionController.assetUrl) {
+              assetUrl = controllerModel.motionController.assetUrl;
+            }
+            throw new Error(`Asset ${assetUrl} missing or malformed.`);
           });
         }
       }).catch((err) => {
@@ -156,7 +174,7 @@ export default class XRControllerModelFactory {
 
     controller.addEventListener('disconnected', () => {
       controllerModel.motionController = null;
-      controllerModel.remove(scene);
+      if (scene) controllerModel.remove(scene);
       scene = null;
     });
 

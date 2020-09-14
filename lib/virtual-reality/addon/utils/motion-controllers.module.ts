@@ -46,7 +46,7 @@ const Constants = {
  * @description Static helper function to fetch a JSON file and turn it into a JS object
  * @param {string} path - Path to JSON file to be fetched
  */
-async function fetchJsonFile(path) {
+async function fetchJsonFile(path: string) {
   const response = await fetch(path);
   if (!response.ok) {
     throw new Error(response.statusText);
@@ -55,7 +55,7 @@ async function fetchJsonFile(path) {
   }
 }
 
-async function fetchProfilesList(basePath) {
+async function fetchProfilesList(basePath: string) {
   if (!basePath) {
     throw new Error('No basePath supplied');
   }
@@ -65,7 +65,8 @@ async function fetchProfilesList(basePath) {
   return profilesList;
 }
 
-async function fetchProfile(xrInputSource, basePath, defaultProfile = null, getAssetPath = true) {
+async function fetchProfile(xrInputSource: XRInputSource, basePath: string,
+  defaultProfile: any = null, getAssetPath = true) {
   if (!xrInputSource) {
     throw new Error('No xrInputSource supplied');
   }
@@ -78,7 +79,7 @@ async function fetchProfile(xrInputSource, basePath, defaultProfile = null, getA
   const supportedProfilesList = await fetchProfilesList(basePath);
 
   // Find the relative path to the first requested profile that is recognized
-  let match;
+  let match: any;
   xrInputSource.profiles.some((profileId) => {
     const supportedProfile = supportedProfilesList[profileId];
     if (supportedProfile) {
@@ -113,7 +114,7 @@ async function fetchProfile(xrInputSource, basePath, defaultProfile = null, getA
   let assetPath;
   if (getAssetPath) {
     let layout;
-    if (xrInputSource.handedness === 'any') {
+    if (xrInputSource.handedness === 'none') {
       layout = profile.layouts[Object.keys(profile.layouts)[0]];
     } else {
       layout = profile.layouts[xrInputSource.handedness];
@@ -138,12 +139,22 @@ async function fetchProfile(xrInputSource, basePath, defaultProfile = null, getA
   * @author Nell Waliczek / https://github.com/NellWaliczek
 */
 class MotionController {
+  xrInputSource: XRInputSource;
+
+  id: string;
+
+  assetUrl: string;
+
+  components: any;
+
+  layoutDescription: any;
+
   /**
    * @param {Object} xrInputSource - The XRInputSource to build the MotionController around
    * @param {Object} profile - The best matched profile description for the supplied xrInputSource
    * @param {Object} assetUrl
    */
-  constructor(xrInputSource, profile, assetUrl) {
+  constructor(xrInputSource: XRInputSource, profile: any, assetUrl: string) {
     if (!xrInputSource) {
       throw new Error('No xrInputSource supplied');
     }
@@ -180,8 +191,8 @@ class MotionController {
    * @description Returns a subset of component data for simplified debugging
    */
   get data() {
-    const data = [];
-    Object.values(this.components).forEach((component) => {
+    const data: any[] = [];
+    Object.values(this.components).forEach((component: ControllerComponent) => {
       data.push(component.data);
     });
     return data;
@@ -191,7 +202,7 @@ class MotionController {
    * @description Poll for updated data based on current gamepad state
    */
   updateFromGamepad() {
-    Object.values(this.components).forEach((component) => {
+    Object.values(this.components).forEach((component: ControllerComponent) => {
       component.updateFromGamepad(this.xrInputSource.gamepad);
     });
   }

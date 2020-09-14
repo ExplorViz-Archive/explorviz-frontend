@@ -1,3 +1,4 @@
+import { Object3D } from 'three';
 import { Constants } from './motion-controllers.module';
 
 /**
@@ -9,6 +10,26 @@ import { Constants } from './motion-controllers.module';
  * interpolating between the range of motion nodes.
  */
 export default class VisualResponse {
+  value: number|boolean|undefined;
+
+  minNode: Object3D|undefined;
+
+  minNodeName: string|undefined;
+
+  maxNode: Object|undefined;
+
+  valueNode: Object3D|undefined;
+
+  maxNodeName: string|undefined;
+
+  valueNodeName: string;
+
+  states: string[];
+
+  componentProperty: string;
+
+  valueNodeProperty: string;
+
   defaultComponentValues = {
     xAxis: 0,
     yAxis: 0,
@@ -16,7 +37,7 @@ export default class VisualResponse {
     state: Constants.ComponentState.DEFAULT,
   };
 
-  constructor(visualResponseDescription) {
+  constructor(visualResponseDescription: any) {
     this.componentProperty = visualResponseDescription.componentProperty;
     this.states = visualResponseDescription.states;
     this.valueNodeName = visualResponseDescription.valueNodeName;
@@ -72,7 +93,7 @@ export default class VisualResponse {
    */
   updateFromComponent({
     xAxis, yAxis, button, state,
-  }) {
+  }: {xAxis: number|undefined, yAxis: number|undefined, button: number|undefined, state: string}) {
     const { normalizedXAxis, normalizedYAxis } = VisualResponse.normalizeAxes(xAxis, yAxis);
     switch (this.componentProperty) {
       case Constants.ComponentProperty.X_AXIS:
