@@ -22,17 +22,14 @@ This project is a WIP replica of ExplorViz's visualization component. It substit
 If you use this software, please cite
 
 - Wilhelm Hasselbring, Alexander Krause, Christian Zirkelbach, (2020): ExplorViz: Research on software visualization, comprehension and collaboration. Software Impacts, Volume 6. DOI https://doi.org/10.1016/j.simpa.2020.100034.
-<br>
 [[BibTex]](http://eprints.uni-kiel.de/cgi/export/eprint/50471/BibTeX/cau-eprint-50471.bib) | [[Endnote]](http://eprints.uni-kiel.de/cgi/export/eprint/50471/EndNote/cau-eprint-50471.enw)
 
 - Florian Fittkau, Alexander Krause, Wilhelm Hasselbring (2017): Software landscape and application visualization for system comprehension with ExplorViz. Information and Software Technology, Volume 87. pp. 259-277. DOI https://doi.org/10.1016/j.infsof.2016.07.004.
-<br>
 [[BibTex]](http://eprints.uni-kiel.de/cgi/export/eprint/33464/BibTeX/cau-eprint-33464.bib) | [[Endnote]](http://eprints.uni-kiel.de/cgi/export/eprint/33464/EndNote/cau-eprint-33464.enw)
 
 Citing ExplorViz' collaborative modularization process:
 
 - Zirkelbach, Christian, Krause, Alexander and Hasselbring, Wilhelm (2019): Modularization of Research Software for Collaborative Open Source Development. In Proceedings of the Ninth International Conference on Advanced Collaborative Networks, Systems and Applications (COLLA 2019), June 30 - July 04, 2019, Rome, Italy.
-<br>
 [[BibTex]](http://eprints.uni-kiel.de/cgi/export/eprint/46777/BibTeX/cau-eprint-46777.bib) | [[Endnote]](http://eprints.uni-kiel.de/cgi/export/eprint/46777/EndNote/cau-eprint-46777.enw)
 
 ## Documentation
