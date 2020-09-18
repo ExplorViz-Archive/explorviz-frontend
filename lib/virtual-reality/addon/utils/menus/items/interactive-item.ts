@@ -1,22 +1,13 @@
 import Item from './item';
 
-export interface InteractionCallbackFunctions {
-  onHover?(): void;
-  onTriggerPressed?(): void;
-  onTriggerHeld?(): void;
-}
-
 export default abstract class InteractiveItem extends Item {
   isHovered = false;
 
-  interactionCallbacks: InteractionCallbackFunctions;
+  onHover: (() => void)|undefined = undefined;
 
-  constructor(id: string, position: { x: number, y: number },
-    interactionCallbacks: InteractionCallbackFunctions) {
-    super(id, position);
+  onTriggerPressed: (() => void)|undefined = undefined;
 
-    this.interactionCallbacks = interactionCallbacks;
-  }
+  onTriggerHeld: (() => void)|undefined = undefined;
 
   enableHoverEffect() {
     this.isHovered = true;
