@@ -96,20 +96,26 @@ export default class VrRendering extends Component<Args> {
 
   raycaster: THREE.Raycaster;
 
+  // Usually the left / utility controller
   controller1: VRController|null = null;
 
+  // Usually the right / primary controller
   controller2: VRController|null = null;
 
   user: THREE.Group;
 
+  // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
 
   menuGroup: THREE.Group;
 
+  // Depth of boxes for landscape entities
   landscapeDepth: number;
 
+  // Scalar with which the landscape is scaled (evenly in all dimensions)
   landscapeScalar: number;
 
+  // Scalar with which the application is scaled (evenly in all dimensions)
   applicationScalar: number;
 
   floor!: FloorMesh;
@@ -267,16 +273,21 @@ export default class VrRendering extends Component<Args> {
   }
 
   initControllers() {
-    const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor, this.menuGroup];
+    const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor,
+      this.menuGroup];
 
     // Init secondary/utility controller
     const raySpace1 = this.renderer.xr.getController(0);
     const gripSpace1 = this.renderer.xr.getControllerGrip(0);
 
+    // Event callbacks
     this.onInteractionTrigger = this.onInteractionTrigger.bind(this);
+    this.onInteractionGripUp = this.onInteractionGripUp.bind(this);
 
     const callbacks1 = {
       triggerDown: this.onInteractionTrigger,
+      gripDown: VrRendering.onInteractionGripDown,
+      gripUp: this.onInteractionGripUp,
     };
     this.controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
       raySpace1, callbacks1, this.scene);
@@ -302,6 +313,25 @@ export default class VrRendering extends Component<Args> {
     this.controller2.initTeleportArea();
 
     this.user.add(this.controller2);
+  }
+
+  static onInteractionGripDown(controller: VRController) {
+    if (!controller.intersectedObject) return;
+
+    const { object } = controller.intersectedObject;
+
+    if (object.parent instanceof ApplicationObject3D && controller.ray) {
+      controller.grabObject(object.parent);
+    }
+  }
+
+  onInteractionGripUp(controller: VRController) {
+    const object = controller.grabbedObject;
+
+    controller.releaseObject();
+    if (object instanceof ApplicationObject3D) {
+      this.applicationGroup.add(object);
+    }
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
