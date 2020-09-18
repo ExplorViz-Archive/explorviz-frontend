@@ -46,6 +46,7 @@ import MainMenu from 'virtual-reality/utils/menus/main-menu';
 import BaseMenu from 'virtual-reality/utils/menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/menus/camera-menu';
 import LandscapeMenu from 'virtual-reality/utils/menus/landscape-menu';
+import AdvancedMenu from 'virtual-reality/utils/menus/advanced-menu';
 
 interface Args {
   readonly id: string;
@@ -921,7 +922,7 @@ populateScene = task(function* (this: VrRendering) {
     this.closeCurrentMenu();
 
     this.menu = new MainMenu(this.closeCurrentMenu.bind(this), this.openCameraMenu.bind(this),
-      this.openLandscapeMenu.bind(this));
+      this.openLandscapeMenu.bind(this), this.openAdvancedMenu.bind(this));
     this.menu.position.y += 1;
     this.menu.position.z += 1.5;
     this.menuGroup.add(this.menu);
@@ -940,6 +941,15 @@ populateScene = task(function* (this: VrRendering) {
     this.closeCurrentMenu();
 
     this.menu = new LandscapeMenu(this.openMainMenu.bind(this), this.landscapeObject3D);
+    this.menu.position.y += 1;
+    this.menu.position.z += 1.5;
+    this.menuGroup.add(this.menu);
+  }
+
+  openAdvancedMenu() {
+    this.closeCurrentMenu();
+
+    this.menu = new AdvancedMenu(this.openMainMenu.bind(this));
     this.menu.position.y += 1;
     this.menu.position.z += 1.5;
     this.menuGroup.add(this.menu);
