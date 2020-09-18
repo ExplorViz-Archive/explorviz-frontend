@@ -103,6 +103,8 @@ export default class VrRendering extends Component<Args> {
 
   applicationGroup: ApplicationGroup;
 
+  menuGroup: THREE.Group;
+
   landscapeDepth: number;
 
   landscapeScalar: number;
@@ -146,6 +148,7 @@ export default class VrRendering extends Component<Args> {
     this.raycaster = new THREE.Raycaster();
     this.user = new THREE.Group();
     this.applicationGroup = new ApplicationGroup();
+    this.menuGroup = new THREE.Group();
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
 
@@ -191,6 +194,8 @@ export default class VrRendering extends Component<Args> {
     this.scene.add(this.applicationGroup);
 
     this.scene.add(this.user);
+
+    this.scene.add(this.menuGroup);
 
     this.debug('Scene created');
   }
@@ -261,7 +266,7 @@ export default class VrRendering extends Component<Args> {
   }
 
   initControllers() {
-    const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor];
+    const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor, this.menuGroup];
 
     // Init secondary/utility controller
     const raySpace1 = this.renderer.xr.getController(0);
@@ -919,7 +924,7 @@ populateScene = task(function* (this: VrRendering) {
       this.openLandscapeMenu.bind(this));
     this.menu.position.y += 1;
     this.menu.position.z += 1.5;
-    this.scene.add(this.menu);
+    this.menuGroup.add(this.menu);
   }
 
   openCameraMenu() {
@@ -928,7 +933,7 @@ populateScene = task(function* (this: VrRendering) {
     this.menu = new CameraMenu(this.openMainMenu.bind(this), this.user.position);
     this.menu.position.y += 1;
     this.menu.position.z += 1.5;
-    this.scene.add(this.menu);
+    this.menuGroup.add(this.menu);
   }
 
   openLandscapeMenu() {
@@ -937,12 +942,12 @@ populateScene = task(function* (this: VrRendering) {
     this.menu = new LandscapeMenu(this.openMainMenu.bind(this), this.landscapeObject3D);
     this.menu.position.y += 1;
     this.menu.position.z += 1.5;
-    this.scene.add(this.menu);
+    this.menuGroup.add(this.menu);
   }
 
   closeCurrentMenu() {
     if (this.menu) {
-      this.scene.remove(this.menu);
+      this.menuGroup.remove(this.menu);
       this.menu = undefined;
     }
   }
