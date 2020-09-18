@@ -4,8 +4,8 @@ import { tracked } from '@glimmer/tracking';
 
 interface VrButtonArgs {
   renderer: THREE.WebGLRenderer;
-  onSessionStartedCallback: ((session: XRSession) => void) |null;
-  onSessionEndedCallback: (() => void) |null;
+  onSessionStartedCallback: (session: XRSession) => void;
+  onSessionEndedCallback: () => void;
 }
 
 export default class VrButton extends Component<VrButtonArgs> {
@@ -29,7 +29,12 @@ export default class VrButton extends Component<VrButtonArgs> {
         } else if (supported) {
           const sessionInit = { optionalFeatures: ['local-floor'] };
           // @ts-ignore
-          navigator.xr.requestSession('immersive-vr', sessionInit).then(this.onSessionStarted.bind(this));
+          navigator.xr.requestSession('immersive-vr', sessionInit)
+            .then(this.onSessionStarted.bind(this))
+            // If no session can be initiated here, it is likely that this error is temporary
+            .catch(() => {
+              this.buttonText = 'Enter VR';
+            });
         } else if (window.isSecureContext === false) {
           this.buttonText = 'WEBXR NEEDS HTTPS';
         } else {
@@ -56,9 +61,7 @@ export default class VrButton extends Component<VrButtonArgs> {
 
     this.currentSession = session;
 
-    if (this.args.onSessionStartedCallback) {
-      this.args.onSessionStartedCallback(session);
-    }
+    this.args.onSessionStartedCallback(session);
   }
 
   /**
@@ -74,8 +77,6 @@ export default class VrButton extends Component<VrButtonArgs> {
 
     this.buttonText = 'ENTER VR';
 
-    if (this.args.onSessionEndedCallback) {
-      this.args.onSessionEndedCallback();
-    }
+    this.args.onSessionEndedCallback();
   }
 }
