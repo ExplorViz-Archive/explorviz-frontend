@@ -2,6 +2,7 @@ import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/land
 import BaseMenu from './base-menu';
 import TextbuttonItem from './items/textbutton-item';
 import RectangleItem from './items/rectangle-item';
+import ArrowbuttonItem from './items/arrowbutton-item';
 
 export default class LandscapeMenu extends BaseMenu {
   constructor(openMainMenu: () => void, landscapeObject3D: LandscapeObject3D) {
@@ -12,37 +13,37 @@ export default class LandscapeMenu extends BaseMenu {
     const moveRectangle = new RectangleItem('move_rect', { x: 226, y: 246 }, 60, 60, '#eeeeee');
     this.items.push(moveRectangle);
 
-    const moveLeftButton = new TextbuttonItem('move_left', '<', {
+    const moveLeftButton = new ArrowbuttonItem('move_left', {
       x: 160,
       y: 246,
-    }, 40, 60, 28, '#555555', '#ffc338', '#929292', {
+    }, 40, 60, '#ffc338', '#00e5ff', 'left', {
       onTriggerPressed: () => {
         landscapeObject3D.position.x -= 0.05;
       },
     });
 
-    const moveRightButton = new TextbuttonItem('move_right', '>', {
+    const moveRightButton = new ArrowbuttonItem('move_right', {
       x: 312,
       y: 246,
-    }, 40, 60, 28, '#555555', '#ffc338', '#929292', {
+    }, 40, 60, '#ffc338', '#00e5ff', 'right', {
       onTriggerPressed: () => {
         landscapeObject3D.position.x += 0.05;
       },
     });
 
-    const moveForwardButton = new TextbuttonItem('move_forward', '>', {
+    const moveForwardButton = new ArrowbuttonItem('move_forward', {
       x: 226,
       y: 180,
-    }, 60, 40, 28, '#555555', '#ffc338', '#929292', {
+    }, 60, 40, '#ffc338', '#00e5ff', 'up', {
       onTriggerPressed: () => {
         landscapeObject3D.position.z -= 0.05;
       },
     });
 
-    const moveBackwardButton = new TextbuttonItem('move_backward', '>', {
+    const moveBackwardButton = new ArrowbuttonItem('move_backward', {
       x: 226,
       y: 332,
-    }, 60, 40, 28, '#555555', '#ffc338', '#929292', {
+    }, 60, 40, '#ffc338', '#00e5ff', 'down', {
       onTriggerPressed: () => {
         landscapeObject3D.position.z += 0.05;
       },
@@ -53,19 +54,19 @@ export default class LandscapeMenu extends BaseMenu {
     const moveRectangle2 = new RectangleItem('move_rect', { x: 70, y: 178 }, 60, 4, '#eeeeee');
     this.items.push(moveRectangle2);
 
-    const moveUpwardButton = new TextbuttonItem('move_upward', '>', {
+    const moveUpwardButton = new ArrowbuttonItem('move_upward', {
       x: 80,
       y: 120,
-    }, 40, 40, 28, '#555555', '#ffc338', '#929292', {
+    }, 40, 40, '#ffc338', '#00e5ff', 'up', {
       onTriggerPressed: () => {
         landscapeObject3D.position.y += 0.05;
       },
     });
 
-    const moveDownwardButton = new TextbuttonItem('move_downward', '>', {
+    const moveDownwardButton = new ArrowbuttonItem('move_downward', {
       x: 80,
       y: 200,
-    }, 40, 40, 28, '#555555', '#ffc338', '#929292', {
+    }, 40, 40, '#ffc338', '#00e5ff', 'down', {
       onTriggerPressed: () => {
         landscapeObject3D.position.y -= 0.05;
       },
