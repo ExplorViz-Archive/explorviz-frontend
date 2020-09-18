@@ -46,6 +46,7 @@ import MainMenu from 'virtual-reality/utils/menus/main-menu';
 import BaseMenu from 'virtual-reality/utils/menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/menus/camera-menu';
 import LandscapeMenu from 'virtual-reality/utils/menus/landscape-menu';
+import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 
 interface Args {
   readonly id: string;
@@ -256,19 +257,32 @@ export default class VrRendering extends Component<Args> {
    * passes them to a newly created Interaction object
    */
   initInteraction() {
+    // this.handleSingleClick = this.handleSingleClick.bind(this);
     this.handleMouseWheel = this.handleMouseWheel.bind(this);
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      this.landscapeObject3D, {
+      [this.landscapeObject3D, this.applicationGroup, this.floor,
+        this.menuGroup], {
+        singleClick: VrRendering.handleSingleClick,
         mouseWheel: this.handleMouseWheel,
         panning: this.handlePanning,
-      });
+      }, VrRendering.raycastFilter);
 
     // Add key listener for room positioning
     window.onkeydown = (event: any) => {
       this.handleKeyboard(event);
     };
+  }
+
+  static raycastFilter(intersection: THREE.Intersection) {
+    return !(intersection.object instanceof LabelMesh);
+  }
+
+  static handleSingleClick(mesh: THREE.Mesh | undefined) {
+    // User clicked on blank spot on the canvas
+
+    console.log('Clicked mesh: ', mesh);
   }
 
   initControllers() {

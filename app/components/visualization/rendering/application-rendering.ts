@@ -233,7 +233,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      this.applicationObject3D, {
+      [this.applicationObject3D], {
         singleClick: this.handleSingleClick,
         doubleClick: this.handleDoubleClick,
         mouseMove: this.handleMouseMove,

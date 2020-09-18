@@ -40,7 +40,7 @@ export default class Interaction {
   renderer: THREE.WebGLRenderer;
 
   // Contains all Objects3D which shall be raycasted
-  raycastObject3D: THREE.Object3D;
+  raycastObjects: THREE.Object3D[];
 
   // Used to determine if and which object was hit
   raycaster: Raycaster;
@@ -51,13 +51,17 @@ export default class Interaction {
   // Contains functions which should be called in case of an event
   eventCallbackFunctions: CallbackFunctions;
 
+  raycastFilter: any;
+
   constructor(canvas: HTMLCanvasElement, camera: THREE.Camera, renderer: THREE.WebGLRenderer,
-    application: THREE.Object3D, eventCallbackFunctions: CallbackFunctions) {
+    raycastObjects: THREE.Object3D[], eventCallbackFunctions: CallbackFunctions,
+    raycastFilter: any) {
     this.canvas = canvas;
     this.camera = camera;
     this.renderer = renderer;
-    this.raycastObject3D = application;
+    this.raycastObjects = raycastObjects;
     this.eventCallbackFunctions = { ...eventCallbackFunctions };
+    this.raycastFilter = raycastFilter;
 
     this.raycaster = new Raycaster();
 
@@ -215,7 +219,7 @@ export default class Interaction {
     const origin = this.calculatePositionInScene(mouseOnCanvas);
 
     const intersectedViewObj = this.raycaster.raycasting(origin, this.camera,
-      this.raycastObject3D.children);
+      this.raycastObjects, this.raycastFilter);
 
     return intersectedViewObj;
   }

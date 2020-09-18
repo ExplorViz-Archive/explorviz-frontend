@@ -246,7 +246,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer,
-      this.landscapeObject3D, {
+      [this.landscapeObject3D], {
         doubleClick: this.handleDoubleClick,
         mouseMove: this.handleMouseMove,
         mouseWheel: this.handleMouseWheel,

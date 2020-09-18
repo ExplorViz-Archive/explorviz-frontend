@@ -9,11 +9,15 @@ export default class Raycaster extends THREE.Raycaster {
    * @param possibleObjects Objects to check for raycasting
    */
   raycasting(coords: {x: number, y: number}, camera: THREE.Camera,
-    possibleObjects: THREE.Object3D[]): THREE.Intersection | null {
+    possibleObjects: THREE.Object3D[], raycastFilter: any): THREE.Intersection | null {
     this.setFromCamera(coords, camera);
 
     // Calculate objects intersecting the picking ray
-    const intersections = this.intersectObjects(possibleObjects);
+    let intersections = this.intersectObjects(possibleObjects, true);
+
+    if (raycastFilter) {
+      intersections = intersections.filter(raycastFilter);
+    }
 
     // Returns the nearest hit object if one exists
     if (intersections.length > 0) {
