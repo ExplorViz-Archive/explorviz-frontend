@@ -1,5 +1,5 @@
 import ArrowbuttonItem from './arrowbutton-item';
-import InteractiveItem, { InteractionCallbackFunctions } from './interactive-item';
+import InteractiveItem from './interactive-item';
 
 export type CurvedArrowDirection = 'left'|'right';
 
@@ -13,9 +13,8 @@ export default class CurvedArrowbuttonItem extends InteractiveItem {
   direction: CurvedArrowDirection;
 
   constructor(id: string, position: { x: number, y: number }, size: number,
-    color: string, hoverColor: string, direction: CurvedArrowDirection,
-    callbackFunctions: InteractionCallbackFunctions) {
-    super(id, position, callbackFunctions);
+    color: string, hoverColor: string, direction: CurvedArrowDirection) {
+    super(id, position);
 
     this.size = size;
     this.color = color;

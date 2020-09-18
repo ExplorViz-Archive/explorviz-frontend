@@ -17,38 +17,38 @@ export default class LandscapeMenu extends BaseMenu {
     const moveLeftButton = new ArrowbuttonItem('move_left', {
       x: 160,
       y: 246,
-    }, 40, 60, '#ffc338', '#00e5ff', 'left', {
-      onTriggerPressed: () => {
-        landscapeObject3D.position.x -= 0.05;
-      },
-    });
+    }, 40, 60, '#ffc338', '#00e5ff', 'left');
+
+    moveLeftButton.onTriggerPressed = () => {
+      landscapeObject3D.position.x -= 0.05;
+    };
 
     const moveRightButton = new ArrowbuttonItem('move_right', {
       x: 312,
       y: 246,
-    }, 40, 60, '#ffc338', '#00e5ff', 'right', {
-      onTriggerPressed: () => {
-        landscapeObject3D.position.x += 0.05;
-      },
-    });
+    }, 40, 60, '#ffc338', '#00e5ff', 'right');
+
+    moveRightButton.onTriggerPressed = () => {
+      landscapeObject3D.position.x += 0.05;
+    };
 
     const moveForwardButton = new ArrowbuttonItem('move_forward', {
       x: 226,
       y: 180,
-    }, 60, 40, '#ffc338', '#00e5ff', 'up', {
-      onTriggerPressed: () => {
-        landscapeObject3D.position.z -= 0.05;
-      },
-    });
+    }, 60, 40, '#ffc338', '#00e5ff', 'up');
+
+    moveForwardButton.onTriggerPressed = () => {
+      landscapeObject3D.position.z -= 0.05;
+    };
 
     const moveBackwardButton = new ArrowbuttonItem('move_backward', {
       x: 226,
       y: 332,
-    }, 60, 40, '#ffc338', '#00e5ff', 'down', {
-      onTriggerPressed: () => {
-        landscapeObject3D.position.z += 0.05;
-      },
-    });
+    }, 60, 40, '#ffc338', '#00e5ff', 'down');
+
+    moveBackwardButton.onTriggerPressed = () => {
+      landscapeObject3D.position.z += 0.05;
+    };
 
     this.items.push(moveLeftButton, moveRightButton, moveForwardButton, moveBackwardButton);
 
@@ -58,59 +58,56 @@ export default class LandscapeMenu extends BaseMenu {
     const moveUpwardButton = new ArrowbuttonItem('move_upward', {
       x: 80,
       y: 120,
-    }, 40, 40, '#ffc338', '#00e5ff', 'up', {
-      onTriggerPressed: () => {
-        landscapeObject3D.position.y += 0.05;
-      },
-    });
+    }, 40, 40, '#ffc338', '#00e5ff', 'up');
+
+    moveUpwardButton.onTriggerPressed = () => {
+      landscapeObject3D.position.y += 0.05;
+    };
 
     const moveDownwardButton = new ArrowbuttonItem('move_downward', {
       x: 80,
       y: 200,
-    }, 40, 40, '#ffc338', '#00e5ff', 'down', {
-      onTriggerPressed: () => {
-        landscapeObject3D.position.y -= 0.05;
-      },
-    });
+    }, 40, 40, '#ffc338', '#00e5ff', 'down');
+
+    moveDownwardButton.onTriggerPressed = () => {
+      landscapeObject3D.position.y -= 0.05;
+    };
 
     this.items.push(moveUpwardButton, moveDownwardButton);
 
     const rotateRightButton = new CurvedArrowbuttonItem('rotate_right', {
       x: 390,
       y: 120,
-    }, 60, '#ffc338', '#00e5ff', 'right', {
-      onTriggerPressed: () => {
-        landscapeObject3D.rotation.x += 0.05;
-      },
-    });
+    }, 60, '#ffc338', '#00e5ff', 'right');
+
+    rotateRightButton.onTriggerPressed = () => {
+      landscapeObject3D.rotation.x += 0.05;
+    };
 
     const rotateLeftButton = new CurvedArrowbuttonItem('rotate_left', {
       x: 390,
       y: 200,
-    }, 60, '#ffc338', '#00e5ff', 'left', {
-      onTriggerPressed: () => {
-        landscapeObject3D.rotation.x -= 0.05;
-      },
-    });
+    }, 60, '#ffc338', '#00e5ff', 'left');
+
+    rotateLeftButton.onTriggerPressed = () => {
+      landscapeObject3D.rotation.x -= 0.05;
+    };
 
     this.items.push(rotateRightButton, rotateLeftButton);
 
     const resetButton = new TextbuttonItem('reset', 'Reset', {
       x: 420,
       y: 13,
-    }, 65, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00', {
-      onTriggerPressed: () => {
-      },
-    });
+    }, 65, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');
 
     this.items.push(resetButton);
 
     const backButton = new TextbuttonItem('back', 'Back', {
       x: 100,
       y: 402,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292', {
-      onTriggerPressed: openMainMenu,
-    });
+    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+
+    rotateLeftButton.onTriggerPressed = openMainMenu;
 
     this.items.push(backButton);
     this.update();

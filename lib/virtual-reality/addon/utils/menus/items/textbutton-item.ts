@@ -1,4 +1,4 @@
-import InteractiveItem, { InteractionCallbackFunctions } from './interactive-item';
+import InteractiveItem from './interactive-item';
 
 export default class TextbuttonItem extends InteractiveItem {
   text: string;
@@ -17,9 +17,8 @@ export default class TextbuttonItem extends InteractiveItem {
 
   constructor(id: string, text: string, position: { x: number, y: number },
     width: number, height: number, textSize: number,
-    buttonColor: string, textColor: string, hoverColor: string,
-    callbackFunctions: InteractionCallbackFunctions) {
-    super(id, position, callbackFunctions);
+    buttonColor: string, textColor: string, hoverColor: string) {
+    super(id, position);
 
     this.text = text;
     this.width = width;

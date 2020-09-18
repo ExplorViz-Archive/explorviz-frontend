@@ -1,4 +1,4 @@
-import InteractiveItem, { InteractionCallbackFunctions } from './interactive-item';
+import InteractiveItem from './interactive-item';
 
 export type ArrowDirection = 'left'|'right'|'up'|'down';
 
@@ -14,9 +14,8 @@ export default class ArrowbuttonItem extends InteractiveItem {
   direction: ArrowDirection;
 
   constructor(id: string, position: { x: number, y: number }, width: number, height: number,
-    color: string, hoverColor: string, direction: ArrowDirection,
-    callbackFunctions: InteractionCallbackFunctions) {
-    super(id, position, callbackFunctions);
+    color: string, hoverColor: string, direction: ArrowDirection) {
+    super(id, position);
 
     this.width = width;
     this.height = height;
