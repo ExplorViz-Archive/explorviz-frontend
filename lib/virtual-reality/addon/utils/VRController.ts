@@ -1,4 +1,4 @@
-import THREE, { Raycaster } from 'three';
+import THREE, { Object3D, Raycaster } from 'three';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import XRControllerModelFactory from './XRControllerModelFactory';
@@ -69,6 +69,8 @@ export default class VRController extends THREE.Group {
   scene: THREE.Scene;
 
   intersectableObjects: THREE.Object3D[] = [];
+
+  grabbedObject: THREE.Object3D|null = null;
 
   teleportArea: TeleportMesh|null = null;
 
@@ -181,6 +183,37 @@ export default class VRController extends THREE.Group {
     }
   }
 
+  grabObject(object: Object3D) {
+    if (!this.ray) return;
+
+    const controllerMatrix = new THREE.Matrix4();
+    controllerMatrix.identity().extractRotation(this.ray.matrixWorld);
+    // Get inverse of controller transformation
+    controllerMatrix.getInverse(this.gripSpace.matrixWorld);
+
+    // Set transforamtion relative to controller transformation
+    object.matrix.premultiply(controllerMatrix);
+    // Split up matrix into position, quaternion and scale
+    object.matrix.decompose(object.position, object.quaternion, object.scale);
+
+    this.grabbedObject = object;
+    this.gripSpace.add(object);
+  }
+
+  releaseObject() {
+    const { grabbedObject } = this;
+    if (!grabbedObject) return;
+
+    // Transform object back into transformation relative to local space
+    grabbedObject.matrix.premultiply(this.gripSpace.matrixWorld);
+    // Split up transforamtion into position, quaternion and scale
+    grabbedObject.matrix.decompose(grabbedObject.position,
+      grabbedObject.quaternion, grabbedObject.scale);
+
+    this.gripSpace.remove(grabbedObject);
+    this.grabbedObject = null;
+  }
+
   update() {
     this.updateGamepad();
     this.updateIntersectedObject();
@@ -284,7 +317,7 @@ export default class VRController extends THREE.Group {
   }
 
   updateIntersectedObject() {
-    if (!this.ray) return;
+    if (!this.ray || this.grabbedObject) return;
 
     /* Reset hover effect and teleportation area */
     this.resetHoverEffect();
