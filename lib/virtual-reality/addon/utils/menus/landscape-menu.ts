@@ -3,6 +3,7 @@ import BaseMenu from './base-menu';
 import TextbuttonItem from './items/textbutton-item';
 import RectangleItem from './items/rectangle-item';
 import ArrowbuttonItem from './items/arrowbutton-item';
+import CurvedArrowbuttonItem from './items/curved-arrowbutton-item';
 
 export default class LandscapeMenu extends BaseMenu {
   constructor(openMainMenu: () => void, landscapeObject3D: LandscapeObject3D) {
@@ -74,19 +75,19 @@ export default class LandscapeMenu extends BaseMenu {
 
     this.items.push(moveUpwardButton, moveDownwardButton);
 
-    const rotateRightButton = new TextbuttonItem('rotate_right', '>', {
+    const rotateRightButton = new CurvedArrowbuttonItem('rotate_right', {
       x: 390,
       y: 120,
-    }, 60, 60, 28, '#555555', '#ffc338', '#929292', {
+    }, 60, '#ffc338', '#00e5ff', 'right', {
       onTriggerPressed: () => {
         landscapeObject3D.rotation.x += 0.05;
       },
     });
 
-    const rotateLeftButton = new TextbuttonItem('rotate_left', '>', {
+    const rotateLeftButton = new CurvedArrowbuttonItem('rotate_left', {
       x: 390,
       y: 200,
-    }, 60, 60, 28, '#555555', '#ffc338', '#929292', {
+    }, 60, '#ffc338', '#00e5ff', 'left', {
       onTriggerPressed: () => {
         landscapeObject3D.rotation.x -= 0.05;
       },
