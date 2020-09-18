@@ -4,12 +4,16 @@ import TextbuttonItem from './items/textbutton-item';
 import RectangleItem from './items/rectangle-item';
 import ArrowbuttonItem from './items/arrowbutton-item';
 import CurvedArrowbuttonItem from './items/curved-arrowbutton-item';
+import TextItem from './items/text-item';
 
 export default class LandscapeMenu extends BaseMenu {
   constructor(openMainMenu: () => void, landscapeObject3D: LandscapeObject3D) {
     super();
 
     this.opacity = 0.8;
+
+    const title = new TextItem('Landscape', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
+    this.items.push(title);
 
     const moveRectangle = new RectangleItem('move_rect', { x: 226, y: 246 }, 60, 60, '#eeeeee');
     this.items.push(moveRectangle);
@@ -107,7 +111,7 @@ export default class LandscapeMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    rotateLeftButton.onTriggerPressed = openMainMenu;
+    backButton.onTriggerPressed = openMainMenu;
 
     this.items.push(backButton);
     this.update();

@@ -9,6 +9,9 @@ export default class CameraMenu extends BaseMenu {
 
     this.opacity = 0.8;
 
+    const title = new TextItem('Camera', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
+    this.items.push(title);
+
     const textItem = new TextItem(userPosition.y.toFixed(2), 'camera_height', '#ffffff', { x: 256, y: 202 }, 28, 'center');
     this.items.push(textItem);
 

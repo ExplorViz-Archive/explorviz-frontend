@@ -3,13 +3,14 @@ import BaseMenu from './base-menu';
 import TextbuttonItem from './items/textbutton-item';
 
 export default class MainMenu extends BaseMenu {
-  constructor(closeMenu: () => void, openCameraMenu: () => void, openLandscapeMenu: () => void) {
+  constructor(closeMenu: () => void, openCameraMenu: () => void, openLandscapeMenu: () => void,
+    openAdvancedMenu: () => void) {
     super();
 
     this.opacity = 0.8;
 
-    const textItem = new TextItem('Text', 'text', '#ffffff', { x: 256, y: 50 }, 50, 'center');
-    this.items.push(textItem);
+    const title = new TextItem('Options', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
+    this.items.push(title);
 
     const cameraButton = new TextbuttonItem('change_height', 'Change Camera', {
       x: 100,
@@ -37,6 +38,9 @@ export default class MainMenu extends BaseMenu {
       x: 100,
       y: 320,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+
+    advancedButton.onTriggerPressed = openAdvancedMenu;
+
     const exitButton = new TextbuttonItem('exit', 'Exit', {
       x: 100,
       y: 402,
