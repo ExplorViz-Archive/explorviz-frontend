@@ -1,16 +1,76 @@
 import Service, { inject as service } from '@ember/service';
-import config from 'explorviz-frontend/config/environment';
 import Evented from '@ember/object/evented';
-import addDrawableCommunication from 'explorviz-frontend/utils/model-update';
 import debugLogger from 'ember-debug-logger';
 import DS from 'ember-data';
 import { set } from '@ember/object';
-import Landscape from 'explorviz-frontend/models/landscape';
 import Timestamp from 'explorviz-frontend/models/timestamp';
+import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 import LandscapeRepository from './repos/landscape-repository';
 import TimestampRepository from './repos/timestamp-repository';
 
 declare const EventSourcePolyfill: any;
+
+function isObject(obj: any): obj is object {
+  return Object.prototype.toString.call(obj) === '[object Object]';
+}
+
+export interface Method {
+  name: string;
+  hashCode: string;
+}
+
+export interface Class {
+  id: string;
+  name: string;
+  methods: Method[];
+  parent: Package;
+}
+
+export interface Package {
+  id: string;
+  name: string;
+  subPackages: Package[];
+  classes: Class[];
+  parent?: Package;
+}
+
+export interface Application {
+  name: string;
+  language: string;
+  pid: string;
+  packages: Package[];
+}
+
+export interface Node {
+  ipAddress: string;
+  hostName: string;
+  applications: Application[];
+}
+
+export interface Landscape {
+  landscapeToken: string;
+  nodes: Node[];
+}
+
+export function isLandscape(x: any): x is Landscape {
+  return isObject(x) && Object.prototype.hasOwnProperty.call(x, 'nodes');
+}
+
+export function isNode(x: any): x is Node {
+  return isObject(x) && Object.prototype.hasOwnProperty.call(x, 'applications');
+}
+
+export function isApplication(x: any): x is Application {
+  return isObject(x) && Object.prototype.hasOwnProperty.call(x, 'packages');
+}
+
+export function isPackage(x: any): x is Package {
+  return isObject(x) && Object.prototype.hasOwnProperty.call(x, 'classes');
+}
+
+export function isClass(x: any): x is Class {
+  return isObject(x) && Object.prototype.hasOwnProperty.call(x, 'methods');
+}
 
 export default class LandscapeListener extends Service.extend(Evented) {
   // https://github.com/segmentio/sse/blob/master/index.js
@@ -25,7 +85,9 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
 
-  latestJsonLandscape = null;
+  @service('ajax') ajax!: AjaxServiceClass;
+
+  latestJsonLandscape: Landscape|null = null;
 
   es: any = null;
 
@@ -36,89 +98,64 @@ export default class LandscapeListener extends Service.extend(Evented) {
   initSSE() {
     set(this, 'content', []);
 
-    const url = config.APP.API_ROOT;
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    const { access_token } = this.session.data.authenticated;
+    const self = this;
 
-    // Close former event source. Multiple (>= 6) instances cause the ember store to no longer work
-    let { es } = this;
-    if (es) {
-      es.close();
+    // eslint-disable-next-line @typescript-eslint/camelcase
+    // const { access_token } = this.session.data.authenticated;
+
+    function createPackageIds(component: Package, parentId: string) {
+      component.id = `${parentId}.${component.name}`;
+      component.subPackages.forEach((subComponent) => {
+        createPackageIds(subComponent, component.id);
+      });
     }
 
-    // ATTENTION: This is a polyfill (see vendor folder)
-    // Replace if original EventSource API allows HTTP-Headers
-    set(this, 'es', new EventSourcePolyfill(`${url}/v1/landscapes/broadcast/`, {
-      headers: {
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        Authorization: `Bearer ${access_token}`,
-      },
-    }));
+    function createClassIds(components: Package[]) {
+      components.forEach((component) => {
+        component.classes.forEach((clazz) => {
+          clazz.id = `${component.id}.${clazz.name}`;
+        });
+        createClassIds(component.subPackages);
+      });
+    }
 
-    es = this.es;
+    function addParentToPackage(child: Package, parent: Package) {
+      child.parent = parent;
+      child.subPackages.forEach((subChild) => addParentToPackage(subChild, child));
+    }
 
-    set(es, 'onmessage', (event: any) => {
-      const jsonLandscape = JSON.parse(event.data);
+    function addParentToClazzes(component: Package) {
+      component.classes.forEach((clazz) => {
+        clazz.parent = component;
+      });
+      component.subPackages.forEach((subPackage) => {
+        addParentToClazzes(subPackage);
+      });
+    }
 
-      if (jsonLandscape && Object.prototype.hasOwnProperty.call(jsonLandscape, 'data')) {
-        // Pause active -> no landscape visualization update
-        // Do avoid update of store to prevent inconsistencies
-        // between visualization and e.g. trace data
-        if (!this.pauseVisualizationReload) {
-          this.store.unloadAll('tracestep');
-          this.store.unloadAll('trace');
-          this.store.unloadAll('clazzcommunication');
-          this.store.unloadAll('event');
-
-          // ATTENTION: Mind the push operation, push != pushPayload in terms of
-          // serializer usage
-          // https://github.com/emberjs/data/issues/3455
-
-          set(this, 'latestJsonLandscape', jsonLandscape);
-          const landscapeRecord = this.store.push(jsonLandscape) as Landscape;
-
-          addDrawableCommunication(this.store);
-
-          set(this.landscapeRepo, 'latestLandscape', landscapeRecord);
-          this.landscapeRepo.triggerLatestLandscapeUpdate();
-
-          const timestampRecord = landscapeRecord.timestamp;
-
-          timestampRecord.then((record) => {
-            this.updateTimestampRepoAndTimeline(record);
+    function fulfill(landscapeStructure: Landscape) {
+      set(self, 'latestJsonLandscape', landscapeStructure);
+      landscapeStructure.nodes.forEach((node) => {
+        node.applications.forEach((app) => {
+          app.packages.forEach((component) => {
+            component.id = component.name;
+            component.subPackages.forEach((subComponent) => {
+              createPackageIds(subComponent, component.id);
+              addParentToPackage(subComponent, component);
+            });
+            addParentToClazzes(component);
           });
-        } else {
-          // visualization is paused
-          this.debug('Visualization update paused');
+          createClassIds(app.packages);
+        });
+      });
+      self.landscapeRepo.triggerLatestLandscapeUpdate();
+    }
 
-          // hacky way to obtain the timestamp record, without deserializing
-          // the complete landscape record and poluting the store
-          const timestampId = jsonLandscape.data.relationships.timestamp.data.id;
+    function failure(reason: any) {
+      console.log(reason);
+    }
 
-          const includedArray = jsonLandscape.included;
-
-          let timestampValue;
-          let totalRequests;
-
-          // eslint-disable-next-line no-restricted-syntax
-          for (const elem of includedArray) {
-            /* eslint-disable-next-line eqeqeq */
-            if (elem.id == timestampId) {
-              timestampValue = elem.attributes.timestamp;
-              totalRequests = elem.attributes.totalRequests;
-              break;
-            }
-          }
-
-          const timestampRecord = this.store.createRecord('timestamp', {
-            id: timestampId,
-            timestamp: timestampValue,
-            totalRequests,
-          });
-          this.updateTimestampRepoAndTimeline(timestampRecord);
-        }
-      }
-    });
+    this.ajax.request('http://localhost:32680/v2/landscapes/fibonacci-sample-landscape/structure').then(fulfill, failure);
   }
 
   updateTimestampRepoAndTimeline(this: LandscapeListener, timestamp: Timestamp) {
