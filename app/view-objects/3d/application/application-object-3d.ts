@@ -1,5 +1,5 @@
 import THREE from 'three';
-import Application from 'explorviz-frontend/models/application';
+import { Application } from 'explorviz-frontend/services/landscape-listener';
 import FoundationMesh from './foundation-mesh';
 import ClazzMesh from './clazz-mesh';
 import ComponentMesh from './component-mesh';
@@ -62,10 +62,11 @@ export default class ApplicationObject3D extends THREE.Object3D {
     super.add(object);
 
     // Ensure fast access to application meshes by additionally storing them in maps
-    if (object instanceof FoundationMesh || object instanceof ComponentMesh
-        || object instanceof ClazzMesh) {
-      this.modelIdToMesh.set(object.dataModel.id, object);
+    if (object instanceof FoundationMesh) {
+      this.modelIdToMesh.set(object.dataModel.pid, object);
     // Store communication separately to allow efficient iteration over meshes
+    } else if (object instanceof ComponentMesh || object instanceof ClazzMesh) {
+      this.modelIdToMesh.set(object.dataModel.id, object);
     } else if (object instanceof ClazzCommunicationMesh) {
       this.commIdToMesh.set(object.dataModel.id, object);
     }

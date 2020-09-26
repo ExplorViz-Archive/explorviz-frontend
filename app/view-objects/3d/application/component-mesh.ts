@@ -1,5 +1,5 @@
 import THREE from 'three';
-import Component from 'explorviz-frontend/models/component';
+import { Package } from 'explorviz-frontend/services/landscape-listener';
 import BoxMesh from './box-mesh';
 import ComponentLabelMesh from './component-label-mesh';
 
@@ -8,17 +8,16 @@ export default class ComponentMesh extends BoxMesh {
 
   material: THREE.MeshLambertMaterial;
 
-  dataModel: Component;
+  dataModel: Package;
 
   opened: boolean = false;
 
   // Set by labeler
   labelMesh: ComponentLabelMesh | null = null;
 
-
   constructor(layoutPos: THREE.Vector3, layoutHeight: number,
     layoutWidth: number, layoutDepth: number,
-    component: Component, defaultColor: THREE.Color, highlightingColor: THREE.Color) {
+    component: Package, defaultColor: THREE.Color, highlightingColor: THREE.Color) {
     super(layoutPos, layoutHeight, layoutWidth, layoutDepth, defaultColor, highlightingColor);
 
     const material = new THREE.MeshLambertMaterial({ color: defaultColor });

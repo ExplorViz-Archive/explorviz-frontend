@@ -1,10 +1,10 @@
 <div class="row" style="max-height:100%">
   <div class="col-12" id="vizspace">
-    {{#if this.showLandscape}}
+{{!--     {{#if this.showLandscape}}
       {{#if this.landscapeRepo.latestLandscape.systems}}
         <Visualization::Rendering::LandscapeRendering
           @id="landscape1"
-          @landscape={{this.landscapeRepo.latestLandscape}}
+          @landscape={{this.landscapeListener.latestJsonLandscape}}
           @font={{@model}}
           @components={{this.components}}
           @removeComponent={{this.removeComponent}}
@@ -30,11 +30,11 @@
           <div class="spinner-center-3" role="status"></div>
         </div>
       {{/if}}
-    {{else}}
-      {{#if this.landscapeRepo.latestApplication}}
+    {{else}} --}}
+      {{#if this.landscapeListener.latestJsonLandscape}}
         <Visualization::Rendering::ApplicationRendering
           @id="app1"
-          @application={{this.landscapeRepo.latestApplication}}
+          @application={{this.landscapeListener.latestJsonLandscape}}
           @addComponent={{this.addComponent}}
           @font={{@model}}
           @components={{this.components}}
@@ -43,7 +43,7 @@
           @showDataSelection={{this.showDataSelection}}
         />
       {{/if}}
-    {{/if}}
+{{!--     {{/if}} --}}
     {{!-- timeline --}}
     <div id="timeline-content">
       <BsButton

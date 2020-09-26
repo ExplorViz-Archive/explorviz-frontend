@@ -3,7 +3,6 @@ import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/applicati
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import Clazz from 'explorviz-frontend/models/clazz';
-import Application from 'explorviz-frontend/models/application';
 import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 import DS from 'ember-data';
 import Component from 'explorviz-frontend/models/component';
@@ -11,6 +10,9 @@ import Trace from 'explorviz-frontend/models/trace';
 import TraceStep from 'explorviz-frontend/models/tracestep';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import { tracked } from '@glimmer/tracking';
+import {
+  Application, Class, isClass, isPackage, Package,
+} from 'explorviz-frontend/services/landscape-listener';
 
 export default class Highlighting {
   applicationObject3D: ApplicationObject3D;
@@ -47,17 +49,17 @@ export default class Highlighting {
 
     // All clazzes in application
     const application = this.applicationObject3D.dataModel;
-    const allClazzesAsArray = application.getAllClazzes();
-    const allClazzes = new Set<Clazz>(allClazzesAsArray);
+    const allClazzesAsArray = Highlighting.getAllClazzes(application);
+    const allClazzes = new Set<Class>(allClazzesAsArray);
 
     // Get all clazzes in current component
-    const containedClazzes = new Set<Clazz>();
+    const containedClazzes = new Set<Class>();
 
     // Add all clazzes which are contained in a component
-    if (model instanceof Component) {
-      model.getContainedClazzes(containedClazzes);
+    if (isPackage(model)) {
+      Highlighting.getContainedClazzes(model, containedClazzes);
     // Add clazz itself
-    } else if (model instanceof Clazz) {
+    } else if (isClass(model)) {
       containedClazzes.add(model);
     // Add source and target clazz of communication
     } else if (model instanceof DrawableClazzCommunication) {
@@ -70,9 +72,9 @@ export default class Highlighting {
       return;
     }
 
-    const allInvolvedClazzes = new Set<Clazz>(containedClazzes);
+    const allInvolvedClazzes = new Set<Class>(containedClazzes);
 
-    const drawableComm = application.hasMany('drawableClazzCommunications').value() as DS.ManyArray<DrawableClazzCommunication>|null;
+    /*     const drawableComm = application.hasMany('drawableClazzCommunications').value() as DS.ManyArray<DrawableClazzCommunication>|null;
 
     drawableComm?.forEach((comm) => {
       const sourceClazz = comm.belongsTo('sourceClazz').value() as Clazz;
@@ -93,25 +95,25 @@ export default class Highlighting {
           commMesh.turnTransparent();
         }
       }
-    });
+    }); */
 
     const nonInvolvedClazzes = new Set([...allClazzes].filter((x) => !allInvolvedClazzes.has(x)));
 
-    const componentSet = new Set<Component>();
+    const componentSet = new Set<Package>();
 
     allInvolvedClazzes.forEach((clazz) => {
-      clazz.getParent().getAllAncestorComponents(componentSet);
+      Highlighting.getAllAncestorComponents(clazz.parent, componentSet);
     });
 
     // Turn non involved clazzes transparent
     nonInvolvedClazzes.forEach((clazz) => {
-      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
-      const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.getParent().get('id'));
+      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id);
+      const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.parent.id);
       if (clazzMesh instanceof ClazzMesh && componentMesh instanceof ComponentMesh
             && componentMesh.opened) {
         clazzMesh.turnTransparent();
       }
-      this.turnComponentAndAncestorsTransparent(clazz.getParent(), componentSet);
+      this.turnComponentAndAncestorsTransparent(clazz.parent, componentSet);
     });
   }
 
@@ -146,10 +148,10 @@ export default class Highlighting {
     }
 
     // All clazzes in application
-    const allClazzesAsArray = application.getAllClazzes();
-    const allClazzes = new Set<Clazz>(allClazzesAsArray);
+    const allClazzesAsArray = Highlighting.getAllClazzes(application);
+    const allClazzes = new Set<Class>(allClazzesAsArray);
 
-    const involvedClazzes = new Set<Clazz>();
+    const involvedClazzes = new Set<Class>();
 
     let highlightedTraceStep: TraceStep;
 
@@ -158,7 +160,6 @@ export default class Highlighting {
         highlightedTraceStep = traceStep;
       }
     });
-
 
     drawableComms.forEach((comm) => {
       const commMesh = this.applicationObject3D.getCommMeshByModelId(comm.get('id'));
@@ -178,19 +179,19 @@ export default class Highlighting {
 
     const nonInvolvedClazzes = new Set([...allClazzes].filter((x) => !involvedClazzes.has(x)));
 
-    const componentSet = new Set<Component>();
+    const componentSet = new Set<Package>();
     involvedClazzes.forEach((clazz) => {
-      clazz.getParent().getAllAncestorComponents(componentSet);
+      Highlighting.getAllAncestorComponents(clazz.parent, componentSet);
     });
 
     nonInvolvedClazzes.forEach((clazz) => {
-      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
-      const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.getParent().get('id'));
+      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id);
+      const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.parent.id);
       if (clazzMesh instanceof ClazzMesh && componentMesh instanceof ComponentMesh
             && componentMesh.opened) {
         clazzMesh.turnTransparent();
       }
-      this.turnComponentAndAncestorsTransparent(clazz.getParent(), componentSet);
+      this.turnComponentAndAncestorsTransparent(clazz.parent, componentSet);
     });
   }
 
@@ -230,27 +231,77 @@ export default class Highlighting {
    * @param component Component which shall be turned transparent
    * @param ignorableComponents Set of components which shall not be turned transparent
    */
-  turnComponentAndAncestorsTransparent(component: Component, ignorableComponents: Set<Component>) {
+  turnComponentAndAncestorsTransparent(component: Package, ignorableComponents: Set<Package>) {
     if (ignorableComponents.has(component)) { return; }
 
     ignorableComponents.add(component);
 
-    const parent = component.getParentComponent();
+    const { parent } = component;
 
-    const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(component.get('id'));
+    const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(component.id);
 
-    if (!parent) {
+    if (parent === undefined) {
       if (componentMesh instanceof ComponentMesh) {
         componentMesh.turnTransparent();
       }
       return;
     }
 
-    const parentMesh = this.applicationObject3D.getBoxMeshbyModelId(parent.get('id'));
+    const parentMesh = this.applicationObject3D.getBoxMeshbyModelId(parent.id);
     if (componentMesh instanceof ComponentMesh
           && parentMesh instanceof ComponentMesh && parentMesh.opened) {
       componentMesh.turnTransparent();
     }
     this.turnComponentAndAncestorsTransparent(parent, ignorableComponents);
+  }
+
+  static getAllClazzes(application: Application) {
+    let clazzes: Class[] = [];
+
+    function getAllClazzesFromComponent(component: Package) {
+      clazzes = clazzes.concat(component.classes);
+      component.subPackages.forEach((subComponent) => {
+        getAllClazzesFromComponent(subComponent);
+      });
+    }
+
+    application.packages.forEach((component) => {
+      getAllClazzesFromComponent(component);
+    });
+
+    return clazzes;
+  }
+
+  static getAllAncestorComponents(component: Package, componentSet: Set<Package> = new Set()) {
+    function getAncestors(comp: Package, set: Set<Package>) {
+      if (set.has(comp)) { return; }
+
+      set.add(comp);
+
+      const { parent } = comp;
+      if (parent === undefined) {
+        return;
+      }
+
+      getAncestors(parent, set);
+    }
+
+    getAncestors(component, componentSet);
+
+    return componentSet;
+  }
+
+  static getContainedClazzes(component: Package, containedClazzes: Set<Class>) {
+    const clazzes = component.classes;
+
+    clazzes.forEach((clazz) => {
+      containedClazzes.add(clazz);
+    });
+
+    const children = component.subPackages;
+
+    children.forEach((child) => {
+      Highlighting.getContainedClazzes(child, containedClazzes);
+    });
   }
 }

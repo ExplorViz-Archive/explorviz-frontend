@@ -1,4 +1,3 @@
-import Component from 'explorviz-frontend/models/component';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
@@ -7,7 +6,7 @@ import THREE, { PerspectiveCamera } from 'three';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 import Clazz from 'explorviz-frontend/models/clazz';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import DS from 'ember-data';
+import { Package } from 'explorviz-frontend/services/landscape-listener';
 import CommunicationRendering from './communication-rendering';
 import Highlighting from './highlighting';
 
@@ -37,7 +36,7 @@ export default class EntityManipulation {
     const application = this.applicationObject3D.dataModel;
 
     // Close each component
-    application.components.forEach((component) => {
+    application.packages.forEach((component) => {
       const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(component.id);
       if (componentMesh instanceof ComponentMesh) {
         this.closeComponentMesh(componentMesh);
@@ -54,10 +53,10 @@ export default class EntityManipulation {
    *
    * @param component Component of which the children shall be opened
    */
-  openComponentsRecursively(component: Component) {
-    const components = component.children;
+  openComponentsRecursively(component: Package) {
+    const components = component.subPackages;
     components.forEach((child) => {
-      const mesh = this.applicationObject3D.getBoxMeshbyModelId(child.get('id'));
+      const mesh = this.applicationObject3D.getBoxMeshbyModelId(child.id);
       if (mesh !== undefined && mesh instanceof ComponentMesh) {
         this.openComponentMesh(mesh);
       }
@@ -85,17 +84,17 @@ export default class EntityManipulation {
     mesh.visible = true;
     Labeler.positionBoxLabel(mesh);
 
-    const childComponents = mesh.dataModel.get('children');
+    const childComponents = mesh.dataModel.subPackages;
     childComponents.forEach((childComponent) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(childComponent.get('id'));
+      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(childComponent.id);
       if (childMesh) {
         childMesh.visible = true;
       }
     });
 
-    const clazzes = mesh.dataModel.get('clazzes');
+    const clazzes = mesh.dataModel.classes;
     clazzes.forEach((clazz) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
+      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id);
       if (childMesh) {
         childMesh.visible = true;
       }
@@ -121,9 +120,9 @@ export default class EntityManipulation {
     mesh.opened = false;
     Labeler.positionBoxLabel(mesh);
 
-    const childComponents = mesh.dataModel.get('children');
+    const childComponents = mesh.dataModel.subPackages;
     childComponents.forEach((childComponent) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(childComponent.get('id'));
+      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(childComponent.id);
       if (childMesh instanceof ComponentMesh) {
         childMesh.visible = false;
         if (childMesh.opened) {
@@ -136,9 +135,9 @@ export default class EntityManipulation {
       }
     });
 
-    const clazzes = mesh.dataModel.get('clazzes');
+    const clazzes = mesh.dataModel.classes;
     clazzes.forEach((clazz) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
+      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id);
       if (childMesh instanceof ClazzMesh) {
         childMesh.visible = false;
         // Reset highlighting if highlighted entity is no longer visible
@@ -221,7 +220,7 @@ export default class EntityManipulation {
   applyDefaultApplicationLayout() {
     const self = this;
 
-    function applyComponentLayout(components: DS.PromiseManyArray<Component>) {
+    function applyComponentLayout(components: Package[]) {
       if (components.length > 1) {
         // There are two components on the first level
         // therefore, here is nothing to do
@@ -236,11 +235,11 @@ export default class EntityManipulation {
           self.openComponentMesh(mesh);
         }
 
-        applyComponentLayout(component.get('children'));
+        applyComponentLayout(component.subPackages);
       }
     }
 
-    applyComponentLayout(this.applicationObject3D.dataModel.components);
+    applyComponentLayout(this.applicationObject3D.dataModel.packages);
   }
 
   /**

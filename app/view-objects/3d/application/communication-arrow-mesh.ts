@@ -4,7 +4,6 @@ import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzc
 export default class CommunicationArrowMesh extends THREE.ArrowHelper {
   dataModel: DrawableClazzCommunication;
 
-
   constructor(dataModel: DrawableClazzCommunication, dir: THREE.Vector3,
     origin: THREE.Vector3, length: number, color: number, headLength: number, headWidth: number) {
     super(dir, origin, length, color, headLength, headWidth);

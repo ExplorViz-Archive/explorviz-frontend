@@ -1,5 +1,5 @@
+import { Application } from 'explorviz-frontend/services/landscape-listener';
 import THREE from 'three';
-import Application from 'explorviz-frontend/models/application';
 import BoxMesh from './box-mesh';
 import ComponentLabelMesh from './component-label-mesh';
 

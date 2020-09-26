@@ -5,7 +5,6 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
-
 export default class CommunicationRendering {
   // Functions as parent object for all application objects
   applicationObject3D: ApplicationObject3D;
