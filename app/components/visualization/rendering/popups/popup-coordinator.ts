@@ -1,10 +1,14 @@
 import { action } from '@ember/object';
 import Component from '@glimmer/component';
+import {
+  Application, Node, Package, Class, isNode, isApplication, isClass, isPackage,
+} from 'explorviz-frontend/services/landscape-listener';
 
 interface IArgs {
   popupData: {
     mouseX: number,
     mouseY: number,
+    entity: Node | Application | Package | Class
   };
 }
 
@@ -55,5 +59,22 @@ export default class PopupCoordinator extends Component<IArgs> {
     /* eslint-disable no-param-reassign */
     popoverDiv.style.top = `${popupTopPosition}px`;
     popoverDiv.style.left = `${popupLeftPosition}px`;
+  }
+
+  get entityType() {
+    if (isNode(this.args.popupData.entity)) {
+      return 'node';
+    }
+    if (isApplication(this.args.popupData.entity)) {
+      return 'application';
+    }
+    if (isClass(this.args.popupData.entity)) {
+      return 'class';
+    }
+    if (isPackage(this.args.popupData.entity)) {
+      return 'package';
+    }
+
+    return '';
   }
 }

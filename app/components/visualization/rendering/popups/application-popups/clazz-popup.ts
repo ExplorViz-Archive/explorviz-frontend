@@ -1,22 +1,18 @@
 import Component from '@glimmer/component';
-import Clazz from 'explorviz-frontend/models/clazz';
+import { Class } from 'explorviz-frontend/services/landscape-listener';
 
 interface Args {
-  clazz: Clazz
+  clazz: Class
 }
 
 export default class ClazzPopup extends Component<Args> {
   get name() {
-    return this.args.clazz.get('name');
+    return this.args.clazz.name;
   }
 
-  get activeInstances() {
-    return this.args.clazz.get('instanceCount');
-  }
-
-  get calledOps() {
+/*   get calledOps() {
     const clazzCommunications = this.args.clazz.get('clazzCommunications');
     const operationCount = clazzCommunications.get('length');
     return operationCount;
-  }
+  } */
 }

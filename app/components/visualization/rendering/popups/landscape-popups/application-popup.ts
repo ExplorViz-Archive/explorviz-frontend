@@ -1,12 +1,9 @@
 import Component from '@glimmer/component';
-import Application from 'explorviz-frontend/models/application';
+import { Application } from 'explorviz-frontend/services/landscape-listener';
 
 interface Args {
   application: Application
 }
 
 export default class ApplicationPopup extends Component<Args> {
-  get lastUsage() {
-    return new Date(this.args.application.get('lastUsage')).toLocaleString();
-  }
 }
