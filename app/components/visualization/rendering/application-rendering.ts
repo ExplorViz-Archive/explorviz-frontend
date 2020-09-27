@@ -30,11 +30,11 @@ import EntityManipulation from 'explorviz-frontend/utils/application-rendering/e
 import { task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
-import { Class, Landscape, Package } from 'explorviz-frontend/services/landscape-listener';
+import { Application, Class, Package } from 'explorviz-frontend/services/landscape-listener';
 
 interface Args {
   readonly id: string,
-  readonly application: Landscape,
+  readonly application: Application,
   readonly font: THREE.Font,
   addComponent(componentPath: string): void // is passed down to the viz navbar
 }
@@ -123,7 +123,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.render = this.render.bind(this);
 
-    this.applicationObject3D = new ApplicationObject3D(this.args.application.nodes[0].applications[0]);
+    this.applicationObject3D = new ApplicationObject3D(this.args.application);
 
     this.boxLayoutMap = new Map();
 
@@ -356,7 +356,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @task
   // eslint-disable-next-line
   loadNewApplication = task(function* (this: ApplicationRendering) {
-    this.applicationObject3D.dataModel = this.args.application.nodes[0].applications[0];
+    this.applicationObject3D.dataModel = this.args.application;
     yield this.populateScene.perform();
   });
 

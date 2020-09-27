@@ -1,4 +1,3 @@
-
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { observes } from '@ember-decorators/object';
 import Controller from '@ember/controller';
@@ -11,12 +10,11 @@ import {
 import { inject as service } from '@ember/service';
 import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-setup/timeline/plotly-timeline';
 import Timestamp from 'explorviz-frontend/models/timestamp';
-import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
+import LandscapeListener, { Application } from 'explorviz-frontend/services/landscape-listener';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import { tracked } from '@glimmer/tracking';
-import Application from 'explorviz-frontend/models/application';
 
 /**
  * TODO
@@ -75,9 +73,9 @@ export default class VisualizationController extends Controller {
   }
 
   @action
-  showApplication(emberModel: Application) {
+  showApplication(app: Application) {
     this.closeDataSelection();
-    this.landscapeRepo.set('latestApplication', emberModel);
+    this.landscapeRepo.set('latestApplication', app);
   }
 
   @action
@@ -140,7 +138,8 @@ export default class VisualizationController extends Controller {
   }
 
   initRendering() {
-    get(this, 'landscapeListener').initSSE();
+    get(this, 'landscapeListener').initLandscapeStructurePolling();
+    get(this, 'landscapeListener').initLandscapeDynamicPolling();
   }
 }
 

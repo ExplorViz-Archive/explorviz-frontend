@@ -20,7 +20,6 @@ export default class CommunicationLayout {
 
   pointsFor3D: THREE.Vector3[] = [];
 
-
   constructor(model: DrawableClazzCommunication) {
     this.model = model;
   }

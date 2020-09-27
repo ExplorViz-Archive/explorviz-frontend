@@ -39,14 +39,6 @@
       </canvas>
       {{#if this.loadNewLandscape.isRunning}}
         <Visualization::Rendering::LoadingIndicator @text="Loading New Landscape" />
-      {{else if this.openSystemAndRedraw.isRunning}}
-        <Visualization::Rendering::LoadingIndicator @text="Opening System" />
-      {{else if this.closeSystemAndRedraw.isRunning}}
-        <Visualization::Rendering::LoadingIndicator @text="Closing System" />
-      {{else if this.openNodeGroupAndRedraw.isRunning}}
-        <Visualization::Rendering::LoadingIndicator @text="Opening Nodegroup" />
-      {{else if this.closeNodeGroupAndRedraw.isRunning}}
-        <Visualization::Rendering::LoadingIndicator @text="Closing Nodegroup" />
       {{/if}}
 
       {{!-- popup(s) --}}

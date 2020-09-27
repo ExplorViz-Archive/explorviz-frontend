@@ -1,7 +1,7 @@
 <div class="row" style="max-height:100%">
   <div class="col-12" id="vizspace">
-{{!--     {{#if this.showLandscape}}
-      {{#if this.landscapeRepo.latestLandscape.systems}}
+    {{#if this.showLandscape}}
+      {{#if this.landscapeListener.latestJsonLandscape.nodes}}
         <Visualization::Rendering::LandscapeRendering
           @id="landscape1"
           @landscape={{this.landscapeListener.latestJsonLandscape}}
@@ -13,7 +13,7 @@
           @addComponent={{this.addComponent}}
           @showApplication={{this.showApplication}}
         />
-      {{else if this.landscapeRepo.latestLandscape}}
+      {{else if this.landscapeListener.latestJsonLandscape}}
         <div class="container-fluid">
           <div class="jumbotron">
             <h2>Empty Landscape received!</h2>
@@ -30,11 +30,11 @@
           <div class="spinner-center-3" role="status"></div>
         </div>
       {{/if}}
-    {{else}} --}}
-      {{#if this.landscapeListener.latestJsonLandscape}}
+    {{else}}
+      {{#if this.landscapeRepo.latestApplication}}
         <Visualization::Rendering::ApplicationRendering
           @id="app1"
-          @application={{this.landscapeListener.latestJsonLandscape}}
+          @application={{this.landscapeRepo.latestApplication}}
           @addComponent={{this.addComponent}}
           @font={{@model}}
           @components={{this.components}}
@@ -43,7 +43,7 @@
           @showDataSelection={{this.showDataSelection}}
         />
       {{/if}}
-{{!--     {{/if}} --}}
+    {{/if}}
     {{!-- timeline --}}
     <div id="timeline-content">
       <BsButton
