@@ -1,0 +1,12 @@
+{
+  "name": "explorviz-e2e",
+  "version": "0.0.1",
+  "description": "End-to-End (E2E) Tests using gauge and Taiko",
+  "scripts": {
+    "test": "gauge run specs"
+  },
+  "dependencies": {
+    "taiko": "git+https://github.com/getgauge/taiko.git",
+    "@getgauge/cli": "latest"
+  }
+}
