@@ -3,7 +3,7 @@ const assert = require('assert');
 var _path = require('path');
 const {
     openBrowser, closeBrowser, goto, $, button, text, click, write, screenshot, into, 
-    textBox, waitFor,
+    textBox, waitFor, evaluate,
 } = require('taiko');
 
 beforeScenario(async() => await openBrowser({headless: false, args: [ 
@@ -38,35 +38,44 @@ assert.strictEqual('OK', response);
 });
 
 step("Login", async () => {
-await login();
+    await login();
 });
 
 step("Wait for landscape", async () => {
-await waitFor(async () => (await $('button[title="Hide Timeline"]').exists()));
-await click(button({title:"Hide Timeline"}));
-await waitFor(12000);
-gauge.screenshot();
+    await waitFor(async () => (await $('button[title="Hide Timeline"]').exists()));
+    await click(button({title:"Hide Timeline"}));
+    await waitFor(12000);
+    gauge.screenshot();
 })
 
 step("Open Application", async () => {
-await click($('canvas'));
+    await evaluate($('canvas'), canvas => {
+        function doubleClickApplication(){
+            const canvasBCR = canvas.getBoundingClientRect();
+            const hammer = canvas.hammer;
+        
+            hammer.emit('doubletap', {srcEvent: {clientX: canvasBCR.left + 587, clientY: canvasBCR.top + 322, target: canvas}, button: 1});
+        }
 
-// TODO: Implement double click to open application
+        doubleClickApplication();
+    });
+    
 
-await waitFor(2000);
-gauge.screenshot();
+    await waitFor(2000);
+
+    gauge.screenshot();
 })
 
 async function navigateToExplorViz(){
-const response = await goto("localhost:4200");
+    const response = await goto("localhost:4200");
 
-return response.status.text;
+    return response.status.text;
 }
 
 async function login(){
-navigateToExplorViz();
+    navigateToExplorViz();
 
-await write("admin", into(textBox({placeholder: "admin"})));
-await write("password", into(textBox({placeholder: "password"})));
-await click(button("Sign In"));
+    await write("admin", into(textBox({placeholder: "admin"})));
+    await write("password", into(textBox({placeholder: "password"})));
+    await click(button("Sign In"));
 }
