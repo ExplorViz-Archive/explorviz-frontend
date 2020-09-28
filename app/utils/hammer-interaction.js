@@ -92,6 +92,10 @@ export default class HammerInteraction extends Object.extend(Evented) {
     registerRightClickWithPan();
 
     const hammer = new Hammer.Manager(canvas, {});
+
+    // Used to access and trigger hammer from test environment
+    canvas.hammer = hammer;
+
     this.set('hammerManager', hammer);
 
     const singleTap = new Hammer.Tap({
