@@ -33,7 +33,7 @@ import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-
+import ELK from 'elkjs/lib/elk.bundled';
 
 interface Args {
   readonly id: string;
@@ -413,7 +413,14 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       }: any = yield this.worker.postMessage('layout1', { reducedLandscape: this.reducedLandscape, openEntitiesIds });
 
       // Run actual klay function (2nd step)
-      const newGraph: any = yield this.worker.postMessage('klay', { graph });
+      // const newGraph: any = yield this.worker.postMessage('klay', { graph });
+
+      const elk = new ELK({
+        workerUrl: 'explorviz-frontend/node_modules/elkjs/lib/elk-worker.min.js',
+      });
+
+      let newGraph: any;
+      yield elk.layout(graph).then((g) => { newGraph = g; });
 
       // Post-process layout graph (3rd step)
       const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
@@ -488,7 +495,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
       this.debug('Landscape loaded');
     } catch (e) {
-      // console.log(e);
+      console.log(e);
     }
   });
 
