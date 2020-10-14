@@ -6,6 +6,16 @@
         @landscape={{this.landscapeRepo.latestLandscape}}
         @font={{@model}}
       />
+      <div style="position: absolute!important; top: 35px;">
+        <BsButton
+          @onClick={{this.openLandscapeView}}
+          @type="secondary"
+          @outline={{true}}
+          @title="Back to Landscape View"
+        >
+          {{svg-jar "reply" class="octicon align-middle"}}
+        </BsButton>
+      </div>
     {{else}}
       {{#if this.showLandscape}}
         {{#if this.landscapeRepo.latestLandscape.systems}}
@@ -50,46 +60,46 @@
             @closeDataSelection={{this.closeDataSelection}}
             @showDataSelection={{this.showDataSelection}}
           />
+          <div style="position: absolute!important">
+            <BsButton
+              @onClick={{this.openLandscapeView}}
+              @type="secondary"
+              @outline={{true}}
+              @title="Back to Landscape View"
+            >
+              {{svg-jar "reply" class="octicon align-middle"}}
+            </BsButton>
+          </div>
         {{/if}}
       {{/if}}
-    {{/if}}
-    {{!-- timeline --}}
-    <div id="timeline-content">
-      <BsButton
-        @onClick={{this.toggleTimeline}}
-        @type="secondary"
-        @outline={{true}}
-        class="btn-timeline"
-        @title={{if this.showTimeline "Hide Timeline" "Show Timeline"}}
-      >
-        {{#unless this.showTimeline}}
-          <span class="pr-1">Show Timeline</span>
-        {{/unless}}
-        {{svg-jar
-          "chevron-up"
-          id="hidetimeline-icon"
-          class=(if this.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")
-        }}
-      </BsButton>
-      <div id="timeline" class="timeline {{unless this.showTimeline "timelinehide"}}">
-        <Visualization::PageSetup::Timeline::PlotlyTimeline
-          @timestamps={{this.timestampRepo.timelineTimestamps}}
-          @clicked={{this.timelineClicked}}
-          @setChildReference={{this.getTimelineReference}}
-        />
+
+      {{!-- timeline --}}
+      <div id="timeline-content">
+        <BsButton
+          @onClick={{this.toggleTimeline}}
+          @type="secondary"
+          @outline={{true}}
+          class="btn-timeline"
+          @title={{if this.showTimeline "Hide Timeline" "Show Timeline"}}
+        >
+          {{#unless this.showTimeline}}
+            <span class="pr-1">Show Timeline</span>
+          {{/unless}}
+          {{svg-jar
+            "chevron-up"
+            id="hidetimeline-icon"
+            class=(if this.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")
+          }}
+        </BsButton>
+        <div id="timeline" class="timeline {{unless this.showTimeline "timelinehide"}}">
+          <Visualization::PageSetup::Timeline::PlotlyTimeline
+            @timestamps={{this.timestampRepo.timelineTimestamps}}
+            @clicked={{this.timelineClicked}}
+            @setChildReference={{this.getTimelineReference}}
+          />
+        </div>
       </div>
-    </div>
+
+    {{/if}}
   </div>
 </div>
-{{#unless this.showLandscape}}
-  <div style="position: absolute!important">
-    <BsButton
-      @onClick={{this.openLandscapeView}}
-      @type="secondary"
-      @outline={{true}}
-      @title="Back to Landscape View"
-    >
-      {{svg-jar "reply" class="octicon align-middle"}}
-    </BsButton>
-  </div>
-{{/unless}}
