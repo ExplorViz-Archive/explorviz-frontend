@@ -129,6 +129,8 @@ export default class VRController extends THREE.Group {
 
   findGamepad() {
     const gamepads = navigator.getGamepads();
+    if (typeof gamepads.forEach !== 'function') return;
+
     gamepads.forEach((gamepad) => {
       if (gamepad && gamepad.index === this.gamepadIndex) {
         this.gamepad = gamepad;
