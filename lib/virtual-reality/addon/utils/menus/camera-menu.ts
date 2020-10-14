@@ -4,7 +4,8 @@ import TextbuttonItem from './items/textbutton-item';
 import ArrowbuttonItem from './items/arrowbutton-item';
 
 export default class CameraMenu extends BaseMenu {
-  constructor(openMainMenu: () => void, userPosition: THREE.Vector3) {
+  constructor(openMainMenu: () => void, getCameraDelta: () => THREE.Vector3,
+    changeCameraHeight: (deltaY: number) => void) {
     super();
 
     this.opacity = 0.8;
@@ -12,17 +13,30 @@ export default class CameraMenu extends BaseMenu {
     const title = new TextItem('Camera', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
 
-    const textItem = new TextItem(userPosition.y.toFixed(2), 'camera_height', '#ffffff', { x: 256, y: 202 }, 28, 'center');
-    this.items.push(textItem);
+    const deltaItem = new TextItem(getCameraDelta().y.toFixed(2), 'camera_height', '#ffffff', { x: 256, y: 202 }, 28, 'center');
+    this.items.push(deltaItem);
+
+    const resetButton = new TextbuttonItem('reset', 'Reset', {
+      x: 420,
+      y: 13,
+    }, 65, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');
+
+    resetButton.onTriggerDown = () => {
+      const delta = getCameraDelta().y;
+      changeCameraHeight(-delta);
+      deltaItem.text = getCameraDelta().y.toFixed(2);
+    };
+
+    this.items.push(resetButton);
 
     const heightDownButton = new ArrowbuttonItem('height_down', {
       x: 100,
       y: 182,
     }, 50, 60, '#ffc338', '#00e5ff', 'down');
 
-    heightDownButton.onTriggerDown = () => {
-      userPosition.y -= 0.05;
-      textItem.text = userPosition.y.toFixed(2);
+    heightDownButton.onTriggerPressed = (value) => {
+      changeCameraHeight(-0.02 * value);
+      deltaItem.text = getCameraDelta().y.toFixed(2);
       this.update();
     };
 
@@ -31,9 +45,9 @@ export default class CameraMenu extends BaseMenu {
       y: 182,
     }, 50, 60, '#ffc338', '#00e5ff', 'up');
 
-    heightUpButton.onTriggerDown = () => {
-      userPosition.y += 0.05;
-      textItem.text = userPosition.y.toFixed(2);
+    heightUpButton.onTriggerPressed = (value) => {
+      changeCameraHeight(0.02 * value);
+      deltaItem.text = getCameraDelta().y.toFixed(2);
       this.update();
     };
 

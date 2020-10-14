@@ -993,7 +993,8 @@ populateScene = task(function* (this: VrRendering) {
   openCameraMenu() {
     this.closeCurrentMenu();
 
-    this.menu = new CameraMenu(this.openMainMenu.bind(this), this.user.position);
+    this.menu = new CameraMenu(this.openMainMenu.bind(this), this.getCameraDelta.bind(this),
+      this.changeUserHeight.bind(this));
     this.menuGroup.add(this.menu);
   }
 
@@ -1098,6 +1099,14 @@ populateScene = task(function* (this: VrRendering) {
     // Swap controls (callback functions)
     [this.controller1.eventCallbacks, this.controller2.eventCallbacks] = [this.controller2
       .eventCallbacks, this.controller1.eventCallbacks];
+  }
+
+  getCameraDelta() {
+    return this.user.position;
+  }
+
+  changeUserHeight(deltaY: number) {
+    this.user.position.add(new THREE.Vector3(0, deltaY, 0));
   }
 
   moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
