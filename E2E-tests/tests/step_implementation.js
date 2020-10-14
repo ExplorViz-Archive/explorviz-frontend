@@ -1,5 +1,8 @@
 'use strict';
 const assert = require('assert');
+const fs = require('fs');
+const PNG = require('pngjs').PNG;
+const pixelmatch = require('pixelmatch');
 var _path = require('path');
 const {
     openBrowser, closeBrowser, goto, $, button, text, click, write, screenshot, into, 
@@ -65,6 +68,37 @@ step("Open Application", async () => {
 
     gauge.screenshot();
 })
+
+step("Compare screenshots", async () => {
+    createDirectory('screenshots/actual');
+    createDirectory('screenshots/diff');
+
+    await screenshot($('canvas'), {path: 'screenshots/actual/landscape.png'});
+
+    const img1 = PNG.sync.read(fs.readFileSync('screenshots/expected/landscape.png'));
+    const img2 = PNG.sync.read(fs.readFileSync('screenshots/actual/landscape.png'));
+
+    const {width, height} = img1;
+    const diff = new PNG({width, height});
+
+    const pixelDiff = pixelmatch(img1.data, img2.data, diff.data, width, height, {threshold: 0.2});
+
+    fs.writeFileSync('screenshots/diff/landscape.png', PNG.sync.write(diff));
+    fs.writeFileSync('reports/html-report/images/landscape.png', PNG.sync.write(diff));
+
+    gauge.message("Screen diff:");
+    gauge.message('<img src="../images/landscape.png" alt="Report logo">');
+    // Force test to fail for testing purpose
+    assert(false);
+})
+
+function createDirectory(path){
+    try {
+        fs.mkdirSync(path);
+    } catch (e) {
+        if (e.code != 'EEXIST') throw e;
+    }
+}
 
 async function navigateToExplorViz(){
     const response = await goto("localhost:4200");
