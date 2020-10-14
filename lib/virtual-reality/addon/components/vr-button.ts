@@ -31,8 +31,9 @@ export default class VrButton extends Component<VrButtonArgs> {
           // @ts-ignore
           navigator.xr.requestSession('immersive-vr', sessionInit)
             .then(this.onSessionStarted.bind(this))
-            // If no session can be initiated here, it is likely that this error is temporary
             .catch(() => {
+              // If no session can be initiated at this point,
+              // it is likely that this error is only temporary
               this.buttonText = 'Enter VR';
             });
         } else if (window.isSecureContext === false) {
