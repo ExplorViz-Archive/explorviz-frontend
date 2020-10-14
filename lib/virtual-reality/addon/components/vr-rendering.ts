@@ -258,14 +258,16 @@ export default class VrRendering extends Component<Args> {
    * passes them to a newly created Interaction object
    */
   initInteraction() {
-    // this.handleSingleClick = this.handleSingleClick.bind(this);
+    this.handleSingleClick = this.handleSingleClick.bind(this);
+    this.handleDoubleClick = this.handleDoubleClick.bind(this);
     this.handleMouseWheel = this.handleMouseWheel.bind(this);
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
       [this.landscapeObject3D, this.applicationGroup, this.floor,
         this.menuGroup], {
-        singleClick: VrRendering.handleSingleClick,
+        singleClick: this.handleSingleClick,
+        doubleClick: this.handleDoubleClick,
         mouseWheel: this.handleMouseWheel,
         panning: this.handlePanning,
       }, VrRendering.raycastFilter);
@@ -278,12 +280,6 @@ export default class VrRendering extends Component<Args> {
 
   static raycastFilter(intersection: THREE.Intersection) {
     return !(intersection.object instanceof LabelMesh);
-  }
-
-  static handleSingleClick(mesh: THREE.Mesh | undefined) {
-    // User clicked on blank spot on the canvas
-
-    console.log('Clicked mesh: ', mesh);
   }
 
   initControllers() {
@@ -857,45 +853,13 @@ populateScene = task(function* (this: VrRendering) {
   onInteractionTrigger(controller: VRController) {
     if (!controller.intersectedObject) return;
 
-    const { object } = controller.intersectedObject;
-    if (object instanceof SystemMesh) {
-      this.toggleSystemAndRedraw(object);
-    } else if (object instanceof NodeGroupMesh) {
-      this.toggleNodeGroupAndRedraw(object);
-    } else if (object instanceof ApplicationMesh) {
-      this.addApplication.perform(object);
-    // Handle application hits
-    } else if (object?.parent instanceof ApplicationObject3D) {
-      // Hit Component
-      if (object instanceof ComponentMesh) {
-        EntityManipulation.toggleComponentMeshState(object, object.parent);
-        this.appCommRendering.addCommunication(object.parent);
-        Highlighting.updateHighlighting(object.parent);
-      // Hit Foundation
-      } else if (object instanceof CloseIcon) {
-        this.applicationGroup.removeApplicationById(object.parent.dataModel.id);
-      } else if (object instanceof FoundationMesh) {
-        EntityManipulation.closeAllComponents(object.parent);
-        this.appCommRendering.addCommunication(object.parent);
-        Highlighting.updateHighlighting(object.parent);
-      }
-    }
+    this.handlePrimaryInputOn(controller.intersectedObject);
   }
 
   onUtilityTrigger(controller: VRController) {
     if (!controller.intersectedObject) return;
 
-    const { object, point, uv } = controller.intersectedObject;
-    if (object instanceof FloorMesh) {
-      this.teleportToPosition(point);
-    } else if (object instanceof BaseMenu && uv) {
-      object.triggerPress(uv);
-    } else if (object?.parent instanceof ApplicationObject3D) {
-      if (object instanceof ComponentMesh || object instanceof ClazzMesh
-      || object instanceof ClazzCommunicationMesh) {
-        Highlighting.highlight(object, object.parent);
-      }
-    }
+    this.handleSecondaryInputOn(controller.intersectedObject);
   }
 
   // #endregion CONTROLLER HANDLERS
@@ -911,6 +875,39 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   // #region MOUSE & KEYBOARD EVENT HANDLER
+
+  handleDoubleClick(intersection: THREE.Intersection | null) {
+    if (!intersection) return;
+
+    this.handlePrimaryInputOn(intersection);
+  }
+
+  handleSingleClick(intersection: THREE.Intersection | null) {
+    if (!intersection) return;
+
+    this.handleSecondaryInputOn(intersection);
+  }
+
+  handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
+    const LEFT_MOUSE_BUTTON = 1;
+
+    if (button === LEFT_MOUSE_BUTTON) {
+      // Move landscape further if camera is far away
+      const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 4.0);
+
+      // Divide delta by 100 to achieve reasonable panning speeds
+      const xOffset = (delta.x / 100) * -ZOOM_CORRECTION;
+      const yOffset = (delta.y / 100) * ZOOM_CORRECTION;
+
+      // Adapt camera position (apply panning)
+      this.camera.position.x += xOffset;
+      this.camera.position.y += yOffset;
+    }
+  }
+
+  handleMouseWheel(delta: number) {
+    this.camera.position.z += delta * 0.2;
+  }
 
   handleKeyboard(event: any) {
     const mvDst = 0.05;
@@ -1006,30 +1003,55 @@ populateScene = task(function* (this: VrRendering) {
     }
   }
 
-  handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
-    const LEFT_MOUSE_BUTTON = 1;
-
-    if (button === LEFT_MOUSE_BUTTON) {
-      // Move landscape further if camera is far away
-      const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 4.0);
-
-      // Divide delta by 100 to achieve reasonable panning speeds
-      const xOffset = (delta.x / 100) * -ZOOM_CORRECTION;
-      const yOffset = (delta.y / 100) * ZOOM_CORRECTION;
-
-      // Adapt camera position (apply panning)
-      this.camera.position.x += xOffset;
-      this.camera.position.y += yOffset;
-    }
-  }
-
-  handleMouseWheel(delta: number) {
-    this.camera.position.z += delta * 0.2;
-  }
-
   // #endregion MOUSE & KEYBOARD EVENT HANDLER
 
   // #region UTILS
+
+  handlePrimaryInputOn(intersection: THREE.Intersection) {
+    const self = this;
+    const { object } = intersection;
+
+    function handleApplicationObject(appObject: THREE.Object3D) {
+      if (!(appObject.parent instanceof ApplicationObject3D)) return;
+
+      if (appObject instanceof ComponentMesh) {
+        EntityManipulation.toggleComponentMeshState(appObject, appObject.parent);
+        self.appCommRendering.addCommunication(appObject.parent);
+        Highlighting.updateHighlighting(appObject.parent);
+      } else if (appObject instanceof CloseIcon) {
+        self.applicationGroup.removeApplicationById(appObject.parent.dataModel.id);
+      } else if (appObject instanceof FoundationMesh) {
+        EntityManipulation.closeAllComponents(appObject.parent);
+        self.appCommRendering.addCommunication(appObject.parent);
+        Highlighting.updateHighlighting(appObject.parent);
+      }
+    }
+
+    if (object instanceof SystemMesh) {
+      this.toggleSystemAndRedraw(object);
+    } else if (object instanceof NodeGroupMesh) {
+      this.toggleNodeGroupAndRedraw(object);
+    } else if (object instanceof ApplicationMesh) {
+      this.addApplication.perform(object);
+    // Handle application hits
+    } else if (object?.parent instanceof ApplicationObject3D) {
+      handleApplicationObject(object);
+    }
+  }
+
+  handleSecondaryInputOn(intersection: THREE.Intersection) {
+    const { object, point, uv } = intersection;
+    if (object instanceof FloorMesh) {
+      this.teleportToPosition(point);
+    } else if (object instanceof BaseMenu && uv) {
+      object.triggerPress(uv);
+    } else if (object?.parent instanceof ApplicationObject3D) {
+      if (object instanceof ComponentMesh || object instanceof ClazzMesh
+      || object instanceof ClazzCommunicationMesh) {
+        Highlighting.highlight(object, object.parent);
+      }
+    }
+  }
 
   swapControls() {
     if (!this.controller1 || !this.controller2) return;
