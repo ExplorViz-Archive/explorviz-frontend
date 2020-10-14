@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "taiko": "git+https://github.com/getgauge/taiko.git",
+    "pixelmatch": "^5.2.1",
     "@getgauge/cli": "latest"
   }
 }
