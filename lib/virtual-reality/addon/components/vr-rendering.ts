@@ -49,6 +49,8 @@ import LandscapeMenu from 'virtual-reality/utils/menus/landscape-menu';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import AdvancedMenu from 'virtual-reality/utils/menus/advanced-menu';
+import SpectateMenu from 'virtual-reality/utils/menus/spectate-menu';
+import ConnectionMenu from 'virtual-reality/utils/menus/connection-menu';
 
 interface Args {
   readonly id: string;
@@ -984,8 +986,14 @@ populateScene = task(function* (this: VrRendering) {
 
     if (!this.controller1) return;
 
-    this.menu = new MainMenu(this.closeCurrentMenu.bind(this), this.openCameraMenu.bind(this),
-      this.openLandscapeMenu.bind(this), this.openAdvancedMenu.bind(this));
+    this.menu = new MainMenu(
+      this.closeCurrentMenu.bind(this),
+      this.openCameraMenu.bind(this),
+      this.openLandscapeMenu.bind(this),
+      this.openSpectateMenu.bind(this),
+      this.openConnectionMenu.bind(this),
+      this.openAdvancedMenu.bind(this),
+    );
 
     this.menuGroup.add(this.menu);
   }
@@ -1006,6 +1014,26 @@ populateScene = task(function* (this: VrRendering) {
       this.moveLandscape.bind(this),
       this.rotateLandscape.bind(this),
       this.resetLandscapePosition.bind(this),
+    );
+
+    this.menuGroup.add(this.menu);
+  }
+
+  openSpectateMenu() {
+    this.closeCurrentMenu();
+
+    this.menu = new SpectateMenu(
+      this.openMainMenu.bind(this),
+    );
+
+    this.menuGroup.add(this.menu);
+  }
+
+  openConnectionMenu() {
+    this.closeCurrentMenu();
+
+    this.menu = new ConnectionMenu(
+      this.openMainMenu.bind(this),
     );
 
     this.menuGroup.add(this.menu);

@@ -4,7 +4,7 @@ import TextbuttonItem from './items/textbutton-item';
 
 export default class MainMenu extends BaseMenu {
   constructor(closeMenu: () => void, openCameraMenu: () => void, openLandscapeMenu: () => void,
-    openAdvancedMenu: () => void) {
+    openSpectateMenu: () => void, openConnectionMenu: () => void, openAdvancedMenu: () => void) {
     super();
 
     this.opacity = 0.8;
@@ -30,10 +30,16 @@ export default class MainMenu extends BaseMenu {
       x: 100,
       y: 200,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+
+    spectateButton.onTriggerDown = openSpectateMenu;
+
     const connectionButton = new TextbuttonItem('connection', 'Connection', {
       x: 100,
       y: 260,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+
+    connectionButton.onTriggerDown = openConnectionMenu;
+
     const advancedButton = new TextbuttonItem('advanced', 'Advanced Options', {
       x: 100,
       y: 320,
