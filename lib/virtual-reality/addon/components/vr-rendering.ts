@@ -692,7 +692,7 @@ populateScene = task(function* (this: VrRendering) {
   // @ts-ignore
   @task({ restartable: true })
   // eslint-disable-next-line
-  addApplication = task(function* (this: VrRendering, landscapeApp: ApplicationMesh) {
+  addApplication = task(function* (this: VrRendering, landscapeApp: ApplicationMesh, origin: THREE.Vector3) {
 
     try {
       const applicationModel = landscapeApp.dataModel;
@@ -720,7 +720,7 @@ populateScene = task(function* (this: VrRendering) {
       const scalar = this.applicationScalar;
       applicationObject3D.scale.set(scalar, scalar, scalar);
 
-      this.positionApplication(applicationObject3D, landscapeApp);
+      this.positionApplication(applicationObject3D, origin);
 
       this.applicationGroup.addApplication(applicationObject3D);
     } catch (e) {
@@ -728,20 +728,13 @@ populateScene = task(function* (this: VrRendering) {
     }
   });
 
-  positionApplication(applicationObject3D: ApplicationObject3D, landscapeApp: ApplicationMesh) {
-    // Calculate position in front of landscape application
-    const newPosition = new THREE.Vector3().copy(landscapeApp.position);
-
-    // Convert position to world location and apply
-    landscapeApp.localToWorld(newPosition);
-    applicationObject3D.worldToLocal(newPosition);
-
-    applicationObject3D.position.copy(newPosition);
-
+  positionApplication(applicationObject3D: ApplicationObject3D, origin: THREE.Vector3) {
     // Rotate app so that it is aligned with landscape
     applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
     applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
     applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
+
+    applicationObject3D.position.copy(origin);
   }
 
   /**
@@ -1032,7 +1025,7 @@ populateScene = task(function* (this: VrRendering) {
     } else if (object instanceof NodeGroupMesh) {
       this.toggleNodeGroupAndRedraw(object);
     } else if (object instanceof ApplicationMesh) {
-      this.addApplication.perform(object);
+      this.addApplication.perform(object, intersection.point);
     // Handle application hits
     } else if (object?.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
