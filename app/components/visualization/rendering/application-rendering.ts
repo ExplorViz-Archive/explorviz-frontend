@@ -249,7 +249,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region MOUSE EVENT HANDLER
 
-  handleSingleClick(mesh: THREE.Mesh | undefined) {
+  handleSingleClick(intersection: THREE.Intersection | null) {
+    if (!intersection) return;
+    const mesh = intersection.object;
+
     // User clicked on blank spot on the canvas
     if (mesh === undefined) {
       Highlighting.removeHighlighting(this.applicationObject3D);
@@ -259,7 +262,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
-  handleDoubleClick(mesh: THREE.Mesh | undefined) {
+  handleDoubleClick(intersection: THREE.Intersection | null) {
+    if (!intersection) return;
+    const mesh = intersection.object;
+
     // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
       EntityManipulation.toggleComponentMeshState(mesh, this.applicationObject3D);
@@ -274,7 +280,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
-  handleMouseMove(mesh: THREE.Mesh | undefined) {
+  handleMouseMove(intersection: THREE.Intersection | null) {
+    if (!intersection) return;
+    const mesh = intersection.object;
+
     const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
     // Update hover effect
@@ -307,7 +316,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   /*   handleMouseEnter() {
   } */
 
-  handleMouseStop(mesh: THREE.Mesh | undefined, mouseOnCanvas: Position2D) {
+  handleMouseStop(intersection: THREE.Intersection | null, mouseOnCanvas: Position2D) {
+    if (!intersection) return;
+    const mesh = intersection.object;
+
     // Show information as popup is mouse stopped on top of a mesh
     if ((mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
       || mesh instanceof ClazzCommunicationMesh) && !mesh.dataModel.isDestroyed) {

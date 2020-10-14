@@ -686,7 +686,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #region MOUSE EVENT HANDLER
 
-  handleDoubleClick(mesh?: THREE.Mesh) {
+  handleDoubleClick(intersection: THREE.Intersection | null) {
+    if (!intersection) return;
+    const mesh = intersection.object;
+
     // Handle application
     if (mesh instanceof ApplicationMesh) {
       this.openApplicationIfExistend(mesh);
@@ -730,7 +733,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
-  handleMouseMove(mesh: THREE.Mesh | undefined) {
+  handleMouseMove(intersection: THREE.Intersection | null) {
+    if (!intersection) return;
+    const mesh = intersection.object;
+
     const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
     // Update hover effect
@@ -756,8 +762,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   handleMouseEnter() {
   } */
 
-  handleMouseStop(mesh: THREE.Mesh | undefined, mouseOnCanvas: Position2D) {
-    if (mesh === undefined) { return; }
+  handleMouseStop(intersection: THREE.Intersection | null, mouseOnCanvas: Position2D) {
+    if (!intersection) return;
+    const mesh = intersection.object;
 
     if (mesh instanceof SystemMesh || mesh instanceof NodeGroupMesh
       || mesh instanceof NodeMesh || mesh instanceof ApplicationMesh) {
