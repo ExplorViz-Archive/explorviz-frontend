@@ -47,6 +47,7 @@ import BaseMenu from 'virtual-reality/utils/menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/menus/camera-menu';
 import LandscapeMenu from 'virtual-reality/utils/menus/landscape-menu';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
+import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import AdvancedMenu from 'virtual-reality/utils/menus/advanced-menu';
 
 interface Args {
@@ -156,7 +157,11 @@ export default class VrRendering extends Component<Args> {
     this.raycaster = new THREE.Raycaster();
     this.user = new THREE.Group();
     this.applicationGroup = new ApplicationGroup();
+
     this.menuGroup = new THREE.Group();
+    this.menuGroup.position.y += 0.15;
+    this.menuGroup.position.z -= 0.15;
+    this.menuGroup.rotateX(340 * THREE.MathUtils.DEG2RAD);
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
 
@@ -202,8 +207,6 @@ export default class VrRendering extends Component<Args> {
     this.scene.add(this.applicationGroup);
 
     this.scene.add(this.user);
-
-    this.scene.add(this.menuGroup);
 
     this.debug('Scene created');
   }
@@ -279,7 +282,7 @@ export default class VrRendering extends Component<Args> {
   }
 
   static raycastFilter(intersection: THREE.Intersection) {
-    return !(intersection.object instanceof LabelMesh);
+    return !(intersection.object instanceof LabelMesh || intersection.object instanceof LogoMesh);
   }
 
   initControllers() {
@@ -311,14 +314,17 @@ export default class VrRendering extends Component<Args> {
     const gripSpace2 = this.renderer.xr.getControllerGrip(1);
 
     this.onUtilityTrigger = this.onUtilityTrigger.bind(this);
+    this.onUtilityMenuDown = this.onUtilityMenuDown.bind(this);
 
     const callbacks2 = {
       triggerDown: this.onUtilityTrigger,
+      menuDown: this.onUtilityMenuDown,
     };
 
     this.controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
       raySpace2, callbacks2, this.scene);
     this.controller2.addRay(new THREE.Color('blue'));
+    this.controller2.raySpace.add(this.menuGroup);
     this.controller2.intersectableObjects = intersectableObjects;
     this.controller2.initTeleportArea();
 
@@ -855,6 +861,10 @@ populateScene = task(function* (this: VrRendering) {
     this.handleSecondaryInputOn(controller.intersectedObject);
   }
 
+  onUtilityMenuDown() {
+    this.toggleMainMenu();
+  }
+
   // #endregion CONTROLLER HANDLERS
 
   teleportToPosition(position: THREE.Vector3) {
@@ -952,13 +962,22 @@ populateScene = task(function* (this: VrRendering) {
     }
   }
 
+  toggleMainMenu() {
+    if (this.menu) {
+      this.closeCurrentMenu();
+    } else {
+      this.openMainMenu();
+    }
+  }
+
   openMainMenu() {
     this.closeCurrentMenu();
 
+    if (!this.controller1) return;
+
     this.menu = new MainMenu(this.closeCurrentMenu.bind(this), this.openCameraMenu.bind(this),
       this.openLandscapeMenu.bind(this), this.openAdvancedMenu.bind(this));
-    this.menu.position.y += 1;
-    this.menu.position.z += 1.5;
+
     this.menuGroup.add(this.menu);
   }
 
@@ -966,8 +985,6 @@ populateScene = task(function* (this: VrRendering) {
     this.closeCurrentMenu();
 
     this.menu = new CameraMenu(this.openMainMenu.bind(this), this.user.position);
-    this.menu.position.y += 1;
-    this.menu.position.z += 1.5;
     this.menuGroup.add(this.menu);
   }
 
@@ -975,8 +992,6 @@ populateScene = task(function* (this: VrRendering) {
     this.closeCurrentMenu();
 
     this.menu = new LandscapeMenu(this.openMainMenu.bind(this), this.landscapeObject3D);
-    this.menu.position.y += 1;
-    this.menu.position.z += 1.5;
     this.menuGroup.add(this.menu);
   }
 
@@ -984,8 +999,6 @@ populateScene = task(function* (this: VrRendering) {
     this.closeCurrentMenu();
 
     this.menu = new AdvancedMenu(this.openMainMenu.bind(this));
-    this.menu.position.y += 1;
-    this.menu.position.z += 1.5;
     this.menuGroup.add(this.menu);
   }
 
@@ -1002,7 +1015,7 @@ populateScene = task(function* (this: VrRendering) {
 
   handlePrimaryInputOn(intersection: THREE.Intersection) {
     const self = this;
-    const { object } = intersection;
+    const { object, uv } = intersection;
 
     function handleApplicationObject(appObject: THREE.Object3D) {
       if (!(appObject.parent instanceof ApplicationObject3D)) return;
@@ -1029,15 +1042,15 @@ populateScene = task(function* (this: VrRendering) {
     // Handle application hits
     } else if (object?.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
+    } else if (object instanceof BaseMenu && uv) {
+      object.triggerPress(uv);
     }
   }
 
   handleSecondaryInputOn(intersection: THREE.Intersection) {
-    const { object, point, uv } = intersection;
+    const { object, point } = intersection;
     if (object instanceof FloorMesh) {
       this.teleportToPosition(point);
-    } else if (object instanceof BaseMenu && uv) {
-      object.triggerPress(uv);
     } else if (object?.parent instanceof ApplicationObject3D) {
       if (object instanceof ComponentMesh || object instanceof ClazzMesh
       || object instanceof ClazzCommunicationMesh) {

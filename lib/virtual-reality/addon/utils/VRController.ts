@@ -117,7 +117,7 @@ export default class VRController extends THREE.Group {
 
     this.gripSpace.addEventListener('connected', (event) => {
       this.findGamepad();
-      if (this.control === controlMode.UTILITY) this.initTeleportArea();
+      if (this.isUtilityController) this.initTeleportArea();
       if (callbacks.connected) callbacks.connected(this, event);
     });
     this.gripSpace.addEventListener('disconnected', () => {
@@ -336,17 +336,17 @@ export default class VRController extends THREE.Group {
     const { object, uv } = nearestIntersection;
 
     // Handle hover effect and teleport area
-    if (this.control === controlMode.INTERACTION) {
+    if (this.isInteractionController) {
       if (object instanceof BaseMesh) {
         object.applyHoverEffect();
+      } else if (object instanceof BaseMenu && uv) {
+        object.hover(uv);
       }
-    } else if (this.control === controlMode.UTILITY) {
+    } else if (this.isUtilityController) {
       if (object instanceof FloorMesh) {
         if (this.teleportArea) this.teleportArea.showAbovePosition(nearestIntersection.point);
       } else if (object instanceof BaseMesh) {
         object.applyHoverEffect();
-      } else if (object instanceof BaseMenu && uv) {
-        object.hover(uv);
       }
     }
 
