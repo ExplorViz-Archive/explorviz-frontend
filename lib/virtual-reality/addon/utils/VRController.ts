@@ -338,13 +338,13 @@ export default class VRController extends THREE.Group {
     // Handle hover effect and teleport area
     if (this.control === controlMode.INTERACTION) {
       if (object instanceof BaseMesh) {
-        object.applyHoverEffect(1.4);
+        object.applyHoverEffect();
       }
     } else if (this.control === controlMode.UTILITY) {
       if (object instanceof FloorMesh) {
         if (this.teleportArea) this.teleportArea.showAbovePosition(nearestIntersection.point);
       } else if (object instanceof BaseMesh) {
-        object.applyHoverEffect(1.4);
+        object.applyHoverEffect();
       } else if (object instanceof BaseMenu && uv) {
         object.hover(uv);
       }
