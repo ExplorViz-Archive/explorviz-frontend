@@ -11,14 +11,22 @@ import BaseMenu from './menus/base-menu';
 type CallbackFunctions = {
   connected? (controller: VRController, event: THREE.Event): void,
   disconnected? (controller: VRController): void,
-  thumbpad? (controller: VRController, axes: number[]): void,
-  thumbpadUp?(controller: VRController): void,
-  thumbpadDown?(controller: VRController): void,
-  triggerUp?(controller: VRController): void,
+
+  thumbpadTouch? (controller: VRController, axes: number[]): void,
+  thumbpadDown?(controller: VRController, axes: number[]): void,
+  thumbpadPress? (controller: VRController, axes: number[]): void,
+  thumbpadUp?(controller: VRController, axes: number[]): void,
+
   triggerDown?(controller: VRController): void,
-  gripUp?(controller: VRController): void,
+  triggerPress?(controller: VRController, value: number): void,
+  triggerUp?(controller: VRController): void,
+
   gripDown?(controller: VRController): void,
+  gripPress?(controller: VRController): void,
+  gripUp?(controller: VRController): void,
+
   menuUp?(controller: VRController): void,
+  menuPress?(controller: VRController): void,
   menuDown? (controller: VRController): void,
 };
 
@@ -247,19 +255,21 @@ export default class VRController extends THREE.Group {
       // Handle change in joystick / thumbpad position
       if (this.axes[0] !== gamepad.axes[0] || this.axes[1] !== gamepad.axes[1]) {
         [this.axes[0], this.axes[1]] = gamepad.axes;
-        if (callbacks.thumbpad) {
-          callbacks.thumbpad(this, this.axes);
+        if (callbacks.thumbpadTouch) {
+          callbacks.thumbpadTouch(this, this.axes);
         }
       }
 
-      // Handle clicked / released thumbpad
+      // Handle clicked / touched / released thumbpad
       if (this.thumbpadIsPressed !== gamepad.buttons[THUMBPAD_BUTTON].pressed) {
         this.thumbpadIsPressed = gamepad.buttons[THUMBPAD_BUTTON].pressed;
         if (this.thumbpadIsPressed && callbacks.thumbpadDown) {
-          callbacks.thumbpadDown(this);
+          callbacks.thumbpadDown(this, this.axes);
         } else if (!this.thumbpadIsPressed && callbacks.thumbpadUp) {
-          callbacks.thumbpadUp(this);
+          callbacks.thumbpadUp(this, this.axes);
         }
+      } else if (callbacks.thumbpadPress && this.thumbpadIsPressed) {
+        callbacks.thumbpadPress(this, this.axes);
       }
 
       // Handle clicked / released trigger
@@ -270,27 +280,35 @@ export default class VRController extends THREE.Group {
         } else if (!this.triggerIsPressed && callbacks.triggerUp) {
           callbacks.triggerUp(this);
         }
+      } else if (callbacks.triggerPress && this.triggerIsPressed) {
+        callbacks.triggerPress(this, gamepad.buttons[TRIGGER_BUTTON].value);
       }
 
       // Handle clicked released grip button
-      if (gamepad.buttons[GRIP_BUTTON]
-        && this.gripIsPressed !== gamepad.buttons[GRIP_BUTTON].pressed) {
-        this.gripIsPressed = gamepad.buttons[GRIP_BUTTON].pressed;
-        if (this.gripIsPressed && callbacks.gripDown) {
-          callbacks.gripDown(this);
-        } else if (!this.gripIsPressed && callbacks.gripUp) {
-          callbacks.gripUp(this);
+      if (gamepad.buttons[GRIP_BUTTON]) {
+        if (this.gripIsPressed !== gamepad.buttons[GRIP_BUTTON].pressed) {
+          this.gripIsPressed = gamepad.buttons[GRIP_BUTTON].pressed;
+          if (this.gripIsPressed && callbacks.gripDown) {
+            callbacks.gripDown(this);
+          } else if (!this.gripIsPressed && callbacks.gripUp) {
+            callbacks.gripUp(this);
+          }
+        } else if (callbacks.gripPress && this.gripIsPressed) {
+          callbacks.gripPress(this);
         }
       }
 
       // Handle clicked / released menu button
-      if (gamepad.buttons[MENU_BUTTON]
-        && this.menuIsPressed !== gamepad.buttons[MENU_BUTTON].pressed) {
-        this.menuIsPressed = gamepad.buttons[MENU_BUTTON].pressed;
-        if (this.menuIsPressed && callbacks.menuDown) {
-          callbacks.menuDown(this);
-        } else if (!this.menuIsPressed && callbacks.menuUp) {
-          callbacks.menuUp(this);
+      if (gamepad.buttons[MENU_BUTTON]) {
+        if (this.menuIsPressed !== gamepad.buttons[MENU_BUTTON].pressed) {
+          this.menuIsPressed = gamepad.buttons[MENU_BUTTON].pressed;
+          if (this.menuIsPressed && callbacks.menuDown) {
+            callbacks.menuDown(this);
+          } else if (!this.menuIsPressed && callbacks.menuUp) {
+            callbacks.menuUp(this);
+          }
+        } else if (callbacks.menuPress && this.menuIsPressed) {
+          callbacks.menuPress(this);
         }
       }
     }
