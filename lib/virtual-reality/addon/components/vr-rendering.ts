@@ -917,12 +917,10 @@ populateScene = task(function* (this: VrRendering) {
     // Handle keys
     switch (event.key) {
       case 'q':
-        this.landscapeObject3D.rotation.x -= mvDst;
-        this.centerLandscape();
+        this.rotateLandscape(-mvDst);
         break;
       case 'e':
-        this.landscapeObject3D.rotation.x += mvDst;
-        this.centerLandscape();
+        this.rotateLandscape(mvDst);
         break;
       case 'w':
         this.moveLandscape(0, mvDst, 0);
@@ -991,7 +989,9 @@ populateScene = task(function* (this: VrRendering) {
   openLandscapeMenu() {
     this.closeCurrentMenu();
 
-    this.menu = new LandscapeMenu(this.openMainMenu.bind(this), this.landscapeObject3D);
+    this.menu = new LandscapeMenu(this.openMainMenu.bind(this), this.landscapeObject3D,
+          this.rotateLandscape.bind(this), this.resetLandscapePosition.bind(this));
+
     this.menuGroup.add(this.menu);
   }
 
@@ -1124,6 +1124,11 @@ populateScene = task(function* (this: VrRendering) {
     }
 
     landscape.position.y += offset.y;
+  }
+
+  rotateLandscape(deltaX: number) {
+    this.landscapeObject3D.rotation.x -= deltaX;
+    this.centerLandscape();
   }
 
   resetLandscapePosition() {
