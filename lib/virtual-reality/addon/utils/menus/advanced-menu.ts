@@ -31,7 +31,7 @@ export default class AdvancedMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerPressed = openMainMenu;
+    backButton.onTriggerDown = openMainMenu;
 
     this.items.push(controlsButton, resetAllButton, backButton);
     this.update();

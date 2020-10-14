@@ -20,7 +20,7 @@ export default class CameraMenu extends BaseMenu {
       y: 182,
     }, 50, 60, '#ffc338', '#00e5ff', 'down');
 
-    heightDownButton.onTriggerPressed = () => {
+    heightDownButton.onTriggerDown = () => {
       userPosition.y -= 0.05;
       textItem.text = userPosition.y.toFixed(2);
       this.update();
@@ -31,7 +31,7 @@ export default class CameraMenu extends BaseMenu {
       y: 182,
     }, 50, 60, '#ffc338', '#00e5ff', 'up');
 
-    heightUpButton.onTriggerPressed = () => {
+    heightUpButton.onTriggerDown = () => {
       userPosition.y += 0.05;
       textItem.text = userPosition.y.toFixed(2);
       this.update();
@@ -42,7 +42,7 @@ export default class CameraMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerPressed = openMainMenu;
+    backButton.onTriggerDown = openMainMenu;
 
     this.items.push(heightDownButton, heightUpButton, backButton);
     this.update();

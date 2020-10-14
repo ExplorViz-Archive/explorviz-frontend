@@ -80,11 +80,19 @@ export default abstract class BaseMenu extends THREE.Mesh {
     this.update();
   }
 
-  triggerPress(uv: THREE.Vector2) {
+  triggerDown(uv: THREE.Vector2) {
+    const item = this.getItem(uv) as InteractiveItem|undefined;
+
+    if (item && item.onTriggerDown) {
+      item.onTriggerDown();
+    }
+  }
+
+  triggerPress(uv: THREE.Vector2, value: number) {
     const item = this.getItem(uv) as InteractiveItem|undefined;
 
     if (item && item.onTriggerPressed) {
-      item.onTriggerPressed();
+      item.onTriggerPressed(value);
     }
   }
 

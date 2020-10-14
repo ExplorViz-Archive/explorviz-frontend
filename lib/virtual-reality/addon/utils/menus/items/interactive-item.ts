@@ -5,9 +5,9 @@ export default abstract class InteractiveItem extends Item {
 
   onHover: (() => void)|undefined = undefined;
 
-  onTriggerPressed: (() => void)|undefined = undefined;
+  onTriggerDown: (() => void)|undefined = undefined;
 
-  onTriggerHeld: (() => void)|undefined = undefined;
+  onTriggerPressed: ((value: number) => void)|undefined = undefined;
 
   enableHoverEffect() {
     this.isHovered = true;

@@ -294,11 +294,12 @@ export default class VrRendering extends Component<Args> {
     const gripSpace1 = this.renderer.xr.getControllerGrip(0);
 
     // Event callbacks
-    this.onInteractionTrigger = this.onInteractionTrigger.bind(this);
+    this.onInteractionTriggerDown = this.onInteractionTriggerDown.bind(this);
     this.onInteractionGripUp = this.onInteractionGripUp.bind(this);
 
     const callbacks1 = {
-      triggerDown: this.onInteractionTrigger,
+      triggerDown: this.onInteractionTriggerDown,
+      triggerPress: VrRendering.onInteractionTriggerPress,
       gripDown: VrRendering.onInteractionGripDown,
       gripUp: this.onInteractionGripUp,
     };
@@ -849,10 +850,20 @@ populateScene = task(function* (this: VrRendering) {
 
   // #region CONTROLLER HANDLERS
 
-  onInteractionTrigger(controller: VRController) {
+  onInteractionTriggerDown(controller: VRController) {
     if (!controller.intersectedObject) return;
 
     this.handlePrimaryInputOn(controller.intersectedObject);
+  }
+
+  static onInteractionTriggerPress(controller: VRController, value: number) {
+    if (!controller.intersectedObject) return;
+
+    const { object, uv } = controller.intersectedObject;
+
+    if (object instanceof BaseMenu && uv) {
+      object.triggerPress(uv, value);
+    }
   }
 
   onUtilityTrigger(controller: VRController) {
@@ -989,8 +1000,12 @@ populateScene = task(function* (this: VrRendering) {
   openLandscapeMenu() {
     this.closeCurrentMenu();
 
-    this.menu = new LandscapeMenu(this.openMainMenu.bind(this), this.landscapeObject3D,
-          this.rotateLandscape.bind(this), this.resetLandscapePosition.bind(this));
+    this.menu = new LandscapeMenu(
+      this.openMainMenu.bind(this),
+      this.moveLandscape.bind(this),
+      this.rotateLandscape.bind(this),
+      this.resetLandscapePosition.bind(this),
+    );
 
     this.menuGroup.add(this.menu);
   }
@@ -1043,7 +1058,7 @@ populateScene = task(function* (this: VrRendering) {
     } else if (object?.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
     } else if (object instanceof BaseMenu && uv) {
-      object.triggerPress(uv);
+      object.triggerDown(uv);
     }
   }
 

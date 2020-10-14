@@ -1,4 +1,3 @@
-import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import BaseMenu from './base-menu';
 import TextbuttonItem from './items/textbutton-item';
 import RectangleItem from './items/rectangle-item';
@@ -7,9 +6,12 @@ import CurvedArrowbuttonItem from './items/curved-arrowbutton-item';
 import TextItem from './items/text-item';
 
 export default class LandscapeMenu extends BaseMenu {
-  constructor(openMainMenu: () => void, landscapeObject3D: LandscapeObject3D,
+  constructor(openMainMenu: () => void,
+    moveLandscape: (deltaX: number, deltaY: number, deltaZ: number) => void,
     rotateLandscape: (deltaX: number) => void, resetLandscape: () => void) {
     super();
+
+    const mvDist = 0.05;
 
     this.opacity = 0.8;
 
@@ -24,8 +26,8 @@ export default class LandscapeMenu extends BaseMenu {
       y: 246,
     }, 40, 60, '#ffc338', '#00e5ff', 'left');
 
-    moveLeftButton.onTriggerPressed = () => {
-      landscapeObject3D.position.x -= 0.05;
+    moveLeftButton.onTriggerPressed = (value) => {
+      moveLandscape(-mvDist * value, 0, 0);
     };
 
     const moveRightButton = new ArrowbuttonItem('move_right', {
@@ -33,8 +35,8 @@ export default class LandscapeMenu extends BaseMenu {
       y: 246,
     }, 40, 60, '#ffc338', '#00e5ff', 'right');
 
-    moveRightButton.onTriggerPressed = () => {
-      landscapeObject3D.position.x += 0.05;
+    moveRightButton.onTriggerPressed = (value) => {
+      moveLandscape(mvDist * value, 0, 0);
     };
 
     const moveForwardButton = new ArrowbuttonItem('move_forward', {
@@ -42,8 +44,8 @@ export default class LandscapeMenu extends BaseMenu {
       y: 180,
     }, 60, 40, '#ffc338', '#00e5ff', 'up');
 
-    moveForwardButton.onTriggerPressed = () => {
-      landscapeObject3D.position.z -= 0.05;
+    moveForwardButton.onTriggerPressed = (value) => {
+      moveLandscape(0, 0, -mvDist * value);
     };
 
     const moveBackwardButton = new ArrowbuttonItem('move_backward', {
@@ -51,8 +53,8 @@ export default class LandscapeMenu extends BaseMenu {
       y: 332,
     }, 60, 40, '#ffc338', '#00e5ff', 'down');
 
-    moveBackwardButton.onTriggerPressed = () => {
-      landscapeObject3D.position.z += 0.05;
+    moveBackwardButton.onTriggerPressed = (value) => {
+      moveLandscape(0, 0, mvDist * value);
     };
 
     this.items.push(moveLeftButton, moveRightButton, moveForwardButton, moveBackwardButton);
@@ -65,8 +67,8 @@ export default class LandscapeMenu extends BaseMenu {
       y: 120,
     }, 40, 40, '#ffc338', '#00e5ff', 'up');
 
-    moveUpwardButton.onTriggerPressed = () => {
-      landscapeObject3D.position.y += 0.05;
+    moveUpwardButton.onTriggerPressed = (value: number) => {
+      moveLandscape(0, mvDist * value, 0);
     };
 
     const moveDownwardButton = new ArrowbuttonItem('move_downward', {
@@ -74,8 +76,8 @@ export default class LandscapeMenu extends BaseMenu {
       y: 200,
     }, 40, 40, '#ffc338', '#00e5ff', 'down');
 
-    moveDownwardButton.onTriggerPressed = () => {
-      landscapeObject3D.position.y -= 0.05;
+    moveDownwardButton.onTriggerPressed = (value) => {
+      moveLandscape(0, -mvDist * value, 0);
     };
 
     this.items.push(moveUpwardButton, moveDownwardButton);
@@ -85,8 +87,8 @@ export default class LandscapeMenu extends BaseMenu {
       y: 120,
     }, 60, '#ffc338', '#00e5ff', 'right');
 
-    rotateRightButton.onTriggerPressed = () => {
-      rotateLandscape(0.05);
+    rotateRightButton.onTriggerPressed = (value) => {
+      rotateLandscape(mvDist * value);
     };
 
     const rotateLeftButton = new CurvedArrowbuttonItem('rotate_left', {
@@ -94,8 +96,8 @@ export default class LandscapeMenu extends BaseMenu {
       y: 200,
     }, 60, '#ffc338', '#00e5ff', 'left');
 
-    rotateLeftButton.onTriggerPressed = () => {
-      rotateLandscape(-0.05);
+    rotateLeftButton.onTriggerPressed = (value) => {
+      rotateLandscape(-mvDist * value);
     };
 
     this.items.push(rotateRightButton, rotateLeftButton);
@@ -105,7 +107,7 @@ export default class LandscapeMenu extends BaseMenu {
       y: 13,
     }, 65, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');
 
-    resetButton.onTriggerPressed = resetLandscape;
+    resetButton.onTriggerDown = resetLandscape;
 
     this.items.push(resetButton);
 
@@ -114,7 +116,7 @@ export default class LandscapeMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerPressed = openMainMenu;
+    backButton.onTriggerDown = openMainMenu;
 
     this.items.push(backButton);
     this.update();

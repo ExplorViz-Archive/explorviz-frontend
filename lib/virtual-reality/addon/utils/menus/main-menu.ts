@@ -17,14 +17,14 @@ export default class MainMenu extends BaseMenu {
       y: 80,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    cameraButton.onTriggerPressed = openCameraMenu;
+    cameraButton.onTriggerDown = openCameraMenu;
 
     const landscapeButton = new TextbuttonItem('change_landscape_position', 'Move Landscape', {
       x: 100,
       y: 140,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    landscapeButton.onTriggerPressed = openLandscapeMenu;
+    landscapeButton.onTriggerDown = openLandscapeMenu;
 
     const spectateButton = new TextbuttonItem('spectate', 'Spectate', {
       x: 100,
@@ -39,14 +39,14 @@ export default class MainMenu extends BaseMenu {
       y: 320,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    advancedButton.onTriggerPressed = openAdvancedMenu;
+    advancedButton.onTriggerDown = openAdvancedMenu;
 
     const exitButton = new TextbuttonItem('exit', 'Exit', {
       x: 100,
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    exitButton.onTriggerPressed = closeMenu;
+    exitButton.onTriggerDown = closeMenu;
 
     this.items.push(cameraButton, landscapeButton, spectateButton,
       connectionButton, advancedButton, exitButton);
