@@ -97,6 +97,13 @@ export default class LandscapeObject3D extends THREE.Object3D {
     removeChildren(this);
   }
 
+  markAllSystemsAsClosed() {
+    this.dataModel.systems.forEach((system) => {
+      const systemMesh = this.getMeshbyModelId(system.id);
+      if (systemMesh instanceof SystemMesh) systemMesh.opened = false;
+    });
+  }
+
   /**
    * Iterates over all openable meshes which are currently added to the
    * landscape and returns a set with ids of the opened meshes.
