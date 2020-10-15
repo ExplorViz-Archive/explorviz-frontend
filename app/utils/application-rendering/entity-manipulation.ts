@@ -6,9 +6,9 @@ import THREE, { PerspectiveCamera } from 'three';
 import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 import Clazz from 'explorviz-frontend/models/clazz';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import { Package } from 'explorviz-frontend/services/landscape-listener';
 import CommunicationRendering from './communication-rendering';
 import Highlighting from './highlighting';
+import { Package } from '../landscape-schemes/structure-data';
 
 export default class EntityManipulation {
   // Functions as parent object for all application objects

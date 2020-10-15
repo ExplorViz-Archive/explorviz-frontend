@@ -1,8 +1,8 @@
 import { action } from '@ember/object';
 import Component from '@glimmer/component';
 import {
-  Application, Node, Package, Class, isNode, isApplication, isClass, isPackage,
-} from 'explorviz-frontend/services/landscape-listener';
+  Application, Class, isApplication, isClass, isNode, isPackage, Node, Package,
+} from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
 interface IArgs {
   popupData: {

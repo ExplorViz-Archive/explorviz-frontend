@@ -30,7 +30,7 @@ import EntityManipulation from 'explorviz-frontend/utils/application-rendering/e
 import { task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
-import { Application, Class, Package } from 'explorviz-frontend/services/landscape-listener';
+import { Application, Class, Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
 interface Args {
   readonly id: string,

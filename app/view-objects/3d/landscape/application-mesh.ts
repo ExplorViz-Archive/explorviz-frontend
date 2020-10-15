@@ -1,5 +1,5 @@
 import THREE from 'three';
-import { Application } from 'explorviz-frontend/services/landscape-listener';
+import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import PlaneMesh from './plane-mesh';
 import PlaneLayout from '../../layout-models/plane-layout';
 

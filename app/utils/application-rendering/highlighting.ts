@@ -12,7 +12,7 @@ import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/
 import { tracked } from '@glimmer/tracking';
 import {
   Application, Class, isClass, isPackage, Package,
-} from 'explorviz-frontend/services/landscape-listener';
+} from '../landscape-schemes/structure-data';
 
 export default class Highlighting {
   applicationObject3D: ApplicationObject3D;

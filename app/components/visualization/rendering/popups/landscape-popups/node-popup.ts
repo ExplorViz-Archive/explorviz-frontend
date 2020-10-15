@@ -1,5 +1,5 @@
 import Component from '@glimmer/component';
-import { Node } from 'explorviz-frontend/services/landscape-listener';
+import { Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
 interface Args {
   node: Node

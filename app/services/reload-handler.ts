@@ -10,7 +10,6 @@ import Landscape from 'explorviz-frontend/models/landscape';
 import LandscapeListener from './landscape-listener';
 import LandscapeRepository from './repos/landscape-repository';
 
-
 export default class ReloadHandler extends Service.extend(Evented) {
   @service('store') store!: DS.Store;
 

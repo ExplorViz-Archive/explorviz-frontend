@@ -1,5 +1,5 @@
+import { Class } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import THREE from 'three';
-import { Class } from 'explorviz-frontend/services/landscape-listener';
 import BoxMesh from './box-mesh';
 import ClazzLabelMesh from './clazz-label-mesh';
 

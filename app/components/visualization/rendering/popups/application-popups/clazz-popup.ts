@@ -1,5 +1,5 @@
 import Component from '@glimmer/component';
-import { Class } from 'explorviz-frontend/services/landscape-listener';
+import { Class } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
 interface Args {
   clazz: Class

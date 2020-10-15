@@ -1,7 +1,7 @@
 import Service from '@ember/service';
 import Evented from '@ember/object/evented';
 import Landscape from 'explorviz-frontend/models/landscape';
-import { Application } from '../landscape-listener';
+import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
 /**
 * TODO

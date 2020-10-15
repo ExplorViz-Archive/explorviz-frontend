@@ -5,7 +5,7 @@ import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh
 import Configuration from 'explorviz-frontend/services/configuration';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import { Application, Package } from 'explorviz-frontend/services/landscape-listener';
+import { Application, Package } from '../landscape-schemes/structure-data';
 
 export default class EntityRendering {
   // Functions as parent object for all application objects

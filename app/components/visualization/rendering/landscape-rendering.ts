@@ -25,11 +25,14 @@ import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import { Application, Landscape, Node } from 'explorviz-frontend/services/landscape-listener';
+import { Application, Node, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 
 interface Args {
   readonly id: string;
-  readonly landscape: Landscape;
+  readonly structureData: StructureLandscapeData;
+  readonly dynamicData: DynamicLandscapeData;
   readonly font: THREE.Font;
   readonly isReplay: boolean;
   showApplication(application: Application): void;
@@ -128,7 +131,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.render = this.render.bind(this);
 
-    this.landscapeObject3D = new LandscapeObject3D(this.args.landscape);
+    this.landscapeObject3D = new LandscapeObject3D(this.args.structureData);
   }
 
   @action
@@ -361,8 +364,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @task
   // eslint-disable-next-line
   loadNewLandscape = task(function* (this: LandscapeRendering) {
-    const emberLandscape = this.args.landscape;
-    this.landscapeObject3D.dataModel = emberLandscape;
+    this.landscapeObject3D.dataModel = this.args.structureData;
     yield this.populateScene.perform();
   });
 
@@ -376,20 +378,17 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   populateScene = task(function* (this: LandscapeRendering) {
     this.debug('populate landscape-rendering');
 
-    const emberLandscape = this.args.landscape;
-    this.landscapeObject3D.dataModel = emberLandscape;
-
-    if (!emberLandscape || !this.font) {
-      return;
-    }
+    const { structureData, dynamicData } = this.args;
+    this.landscapeObject3D.dataModel = structureData;
 
     // Run Klay layouting in 3 steps within workers
     try {
+      const applicationCommunications = computeApplicationCommunication(structureData, dynamicData);
       // Do layout pre-processing (1st step)
       const {
         graph,
         modelIdToPoints,
-      }: any = yield this.worker.postMessage('layout1', { reducedLandscape: emberLandscape });
+      }: any = yield this.worker.postMessage('layout1', { structureData, applicationCommunications });
 
       // Run actual klay function (2nd step)
       const newGraph: any = yield this.worker.postMessage('klay', { graph });
@@ -398,7 +397,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
-        reducedLandscape: emberLandscape,
+        structureData,
+        applicationCommunications,
       });
 
       // Clean old landscape
@@ -422,7 +422,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
 
       // Render all landscape entities
-      const { nodes } = emberLandscape;
+      const { nodes } = structureData;
 
       // Draw boxes for nodes
       nodes.forEach((node) => {
@@ -432,25 +432,23 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
         // Draw boxes for applications
         applications.forEach((application) => {
-          this.renderApplication(application, modelIdToPlaneLayout.get(application.pid), centerPoint);
+          this.renderApplication(application, modelIdToPlaneLayout.get(application.pid),
+            centerPoint);
         });
       });
 
       // Render application communication
-      /*       const appCommunications = emberLandscape.get('totalApplicationCommunications');
 
-      if (appCommunications) {
-        const color = this.configuration.landscapeColors.communication;
-        const tiles = CommunicationRendering.computeCommunicationTiles(appCommunications,
-          modelIdToPointsComplete, color);
+      const color = this.configuration.landscapeColors.communication;
+      const tiles = CommunicationRendering.computeCommunicationTiles(applicationCommunications,
+        modelIdToPointsComplete, color);
 
-        CommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
-          centerPoint);
-      } */
+      CommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
+        centerPoint);
 
       this.debug('Landscape loaded');
     } catch (e) {
-      // console.log(e);
+      console.log(e);
     }
   });
 

@@ -10,11 +10,12 @@ import {
 import { inject as service } from '@ember/service';
 import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-setup/timeline/plotly-timeline';
 import Timestamp from 'explorviz-frontend/models/timestamp';
-import LandscapeListener, { Application } from 'explorviz-frontend/services/landscape-listener';
+import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import { tracked } from '@glimmer/tracking';
+import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
 /**
  * TODO
@@ -137,9 +138,9 @@ export default class VisualizationController extends Controller {
     this.showTimeline = !this.showTimeline;
   }
 
-  initRendering() {
-    get(this, 'landscapeListener').initLandscapeStructurePolling();
-    get(this, 'landscapeListener').initLandscapeDynamicPolling();
+  async initRendering() {
+    await get(this, 'landscapeListener').initLandscapeStructurePolling();
+    await get(this, 'landscapeListener').initLandscapeDynamicPolling();
   }
 }
 

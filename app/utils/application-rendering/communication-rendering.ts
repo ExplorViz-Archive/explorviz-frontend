@@ -31,7 +31,7 @@ export default class CommunicationRendering {
    */
   addCommunication(boxLayoutMap: Map<string, BoxLayout>) {
     const application = this.applicationObject3D.dataModel;
-    const applicationLayout = boxLayoutMap.get(application.id);
+    const applicationLayout = boxLayoutMap.get(application.pid);
 
     if (applicationLayout === undefined) {
       return;

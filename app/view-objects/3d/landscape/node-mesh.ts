@@ -1,5 +1,5 @@
 import THREE from 'three';
-import { Node } from 'explorviz-frontend/services/landscape-listener';
+import { Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import PlaneMesh from './plane-mesh';
 import PlaneLayout from '../../layout-models/plane-layout';
 
@@ -25,6 +25,10 @@ export default class NodeMesh extends PlaneMesh {
    */
   getDisplayName() {
     const node = this.dataModel;
+
+    if (node.hostName && node.hostName.length !== 0) {
+      return node.hostName;
+    }
 
     return node.ipAddress;
   }

@@ -1,7 +1,7 @@
 import THREE from 'three';
 import MinMaxRectangle from 'explorviz-frontend/view-objects/layout-models/min-max-rectangle';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
-import { Landscape, Node } from 'explorviz-frontend/services/landscape-listener';
+import { Node, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import NodeMesh from './node-mesh';
 import ApplicationMesh from './application-mesh';
 
@@ -12,11 +12,11 @@ import ApplicationMesh from './application-mesh';
  * all their THREE.Geometry's and THREE.Material's.
  */
 export default class LandscapeObject3D extends THREE.Object3D {
-  dataModel: Landscape;
+  dataModel: StructureLandscapeData;
 
   modelIdToMesh: Map<string, THREE.Mesh> = new Map();
 
-  constructor(landscape: Landscape) {
+  constructor(landscape: StructureLandscapeData) {
     super();
 
     this.dataModel = landscape;
