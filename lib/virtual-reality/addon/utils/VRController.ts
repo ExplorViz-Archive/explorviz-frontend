@@ -90,6 +90,10 @@ export default class VRController extends THREE.Group {
     return this.control === controlMode.UTILITY;
   }
 
+  get gamepadId() {
+    return this.gamepad ? this.gamepad.id : 'unknown';
+  }
+
   /**
    * @param gamepad Object of gamepad API which grants access to VR controller inputs
    * @param eventCallbacks Object with functions that are called when certain events occur
