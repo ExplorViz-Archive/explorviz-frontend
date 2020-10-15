@@ -1,14 +1,14 @@
 // Wait for the initial message event.
 self.addEventListener('message', function(e) {
-  let { reducedLandscape, modelIdToPoints, graph } = e.data;
+  let { structureData, modelIdToPoints, graph, applicationCommunications } = e.data;
 
-  let landscape = layout3(reducedLandscape, modelIdToPoints, graph);
+  let landscape = layout3(structureData, modelIdToPoints, graph, applicationCommunications);
   postMessage(landscape);
 }, false);
 
 const CONVERT_TO_KIELER_FACTOR = 180.0;
 
-function layout3(landscape, modelIdToPoints, graph) {
+function layout3(landscape, modelIdToPoints, graph, applicationCommunications) {
 
   let modelIdToGraph = new Map();
   let modeldToKielerEdgeReference = new Map();
@@ -19,7 +19,7 @@ function layout3(landscape, modelIdToPoints, graph) {
   createModelIdToGraphMap(graph);
   createModelIdToEdgeMap();
 
-  updateGraphWithResults(landscape); 
+  updateGraphWithResults(landscape, applicationCommunications); 
 
   return { modelIdToLayout, modelIdToPoints, modeldToKielerEdgeReference, modelIdToGraph, graph };
 
@@ -42,7 +42,7 @@ function layout3(landscape, modelIdToPoints, graph) {
   }
 
 
-  function updateGraphWithResults(landscape) {
+  function updateGraphWithResults(landscape, applicationCommunications) {
 
     const { nodes } = landscape;
 
@@ -61,7 +61,7 @@ function layout3(landscape, modelIdToPoints, graph) {
 
     });
 
-    /* addBendPointsInAbsoluteCoordinates(landscape); */
+    addBendPointsInAbsoluteCoordinates(applicationCommunications);
 
     nodes?.forEach((node) => {
 
@@ -79,9 +79,9 @@ function layout3(landscape, modelIdToPoints, graph) {
 
   } // END updateGraphWithResults
 
-/*   function addBendPointsInAbsoluteCoordinates(landscape) {
+  function addBendPointsInAbsoluteCoordinates(applicationCommunications) {
 
-    const totalApplicationCommunications = landscape.applicationCommunications;
+    const totalApplicationCommunications = applicationCommunications;
     // Points for drawing which represent an edge
     const edgeIdToPoints = new Map();
 
@@ -99,7 +99,7 @@ function layout3(landscape, modelIdToPoints, graph) {
           }
 
           let sourceApplication = applicationcommunication.sourceApplication;
-          let parentNode = getRightParent(sourceApplication);
+          let parentNode = sourceApplication.parent;
 
           var points = [];
 
@@ -111,8 +111,7 @@ function layout3(landscape, modelIdToPoints, graph) {
 
             edgeOffset = { bottom: 0.0, left: 0.0, right: 0.0, top: 0.0 };
 
-            // @ts-ignore Since overlapping id property is not detected
-            let parentGraph = modelIdToGraph.get(parentNode.id);
+            let parentGraph = modelIdToGraph.get(parentNode.ipAddress);
             if (parentGraph && parentGraph.padding) {
               edgeOffset = parentGraph.padding;
             }
@@ -131,7 +130,7 @@ function layout3(landscape, modelIdToPoints, graph) {
                 y: sourcePort.y
               };
 
-              let sourceGraph = modelIdToGraph.get(edge.sourceNode.id);
+              let sourceGraph = modelIdToGraph.get(edge.sourceNode.pid);
 
               if (!sourceGraph) return;
 
@@ -180,7 +179,7 @@ function layout3(landscape, modelIdToPoints, graph) {
                 y: edge.tPort.y
               }
 
-            let targetGraph = modelIdToGraph.get(edge.targetNode.id);
+            let targetGraph = modelIdToGraph.get(edge.targetNode.pid);
 
             if (targetGraph?.padding && targetPoint?.x && targetPoint.y) {
               targetPoint.x += targetGraph.padding.left;
@@ -202,17 +201,10 @@ function layout3(landscape, modelIdToPoints, graph) {
               let insetLeft = 0.0;
               let insetTop = 0.0;
 
-              // why is parentNode.constructor.modelName undefined?
-              // "alternative": parentNode.content._internalModel.modelName
-              if (isReducedSystem(parentNode)) {
-                pOffsetX = insetLeft;
-                pOffsetY = insetTop * -1;
-              } else {
-                let layout = modelIdToLayout.get(parentNode.id);
-                if (layout){
-                  pOffsetX = layout?.positionX + insetLeft;
-                  pOffsetY = layout?.positionY - insetTop;
-                }
+              let layout = modelIdToLayout.get(parentNode.ipAddress);
+              if (layout){
+                pOffsetX = layout?.positionX + insetLeft;
+                pOffsetY = layout?.positionY - insetTop;
               }
             }
 
@@ -226,7 +218,7 @@ function layout3(landscape, modelIdToPoints, graph) {
               resultPoint.x = (point.x + pOffsetX) / CONVERT_TO_KIELER_FACTOR;
               resultPoint.y = (point.y * -1 + pOffsetY) / CONVERT_TO_KIELER_FACTOR; // KIELER has inverted Y coords
               let points = modelIdToPoints.get(applicationcommunication.id);
-              if (points){
+              if (points) {
                 points.push(resultPoint);
                 modelIdToPoints.set(applicationcommunication.id, points);
               }
@@ -240,7 +232,7 @@ function layout3(landscape, modelIdToPoints, graph) {
         }
       });
     });
-  } // END addBendPoints */
+  } // END addBendPoints
 
   function updateNodeValues(entity) {
     let entityIdentifier = entity.pid ? entity.pid : entity.ipAddress;
@@ -278,13 +270,6 @@ function layout3(landscape, modelIdToPoints, graph) {
     }
   }
 
-/*   function getRightParent(sourceApplication) {
-    let sourceNode = sourceApplication.parent;
-
-    let result = sourceNode;
-    return result;
-  } */
-/* 
   function isDescendant(child, parent) {
 
     let current = child;
@@ -299,5 +284,5 @@ function layout3(landscape, modelIdToPoints, graph) {
     }
 
     return false;
-  } */
+  }
 }

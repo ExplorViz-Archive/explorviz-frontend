@@ -1,8 +1,8 @@
 // Wait for the initial message event.
 self.addEventListener('message', function(e) {
-  let { reducedLandscape } = e.data;
+  let { structureData, applicationCommunications } = e.data;
 
-  let kielerGraph = layout1(reducedLandscape);
+  let kielerGraph = layout1(structureData, applicationCommunications);
   postMessage(kielerGraph);
 }, false);
 
@@ -11,7 +11,7 @@ postMessage(true);
 
 const CONVERT_TO_KIELER_FACTOR = 180.0;
 
-function layout1(landscape) {
+function layout1(landscape, applicationCommunications) {
   let topLevelKielerGraph = {};
 
   // Maps for internal computations
@@ -27,7 +27,7 @@ function layout1(landscape) {
   topLevelKielerGraph = graph;
 
   addNodes(landscape, topLevelKielerGraph);
-  // addEdges(landscape);
+  addEdges(applicationCommunications);
 
   return {
     graph,
@@ -58,9 +58,7 @@ function layout1(landscape) {
   }
 
 
-  function addEdges(landscape) {
-
-    const totalApplicationCommunications = landscape.applicationCommunications;
+  function addEdges(totalApplicationCommunications) {
 
     totalApplicationCommunications.forEach((applicationcommunication) => {
 
@@ -71,15 +69,7 @@ function layout1(landscape) {
       let appSource = applicationcommunication.sourceApplication;
       let appTarget = applicationcommunication.targetApplication;
 
-      let sourceNode = appSource.parent;
-      let sourceNodeGroup = sourceNode.parent;
-      let sourceSystem = sourceNodeGroup.parent;
-
-      let targetNode = appTarget.parent;
-      let targetNodeGroup = targetNode.parent;
-      let targetSystem = targetNodeGroup.parent;
-
-      if (appSource.id !== appTarget.id) {
+      if (appSource.pid !== appTarget.pid) {
         const edge = createEdgeBetweenSourceTarget(appSource, appTarget, applicationcommunication.id);
         let edgeReference = modeldToKielerEdgeReference.get(applicationcommunication.id);
         edgeReference.push(edge);
@@ -173,11 +163,11 @@ function layout1(landscape) {
     return edge;
 
     //---------------------------inner functions
-    function createSourcePortIfNotExisting(sourceDrawnode) {
+    function createSourcePortIfNotExisting(sourceApplication) {
 
       // Do not create duplicate port
-      let maybePort = modelIdToSourcePort.get(sourceDrawnode.ipAddress);
-      if (maybePort && modelIdToSourcePort.has(sourceDrawnode.ipAddress)){
+      let maybePort = modelIdToSourcePort.get(sourceApplication.pid);
+      if (maybePort && modelIdToSourcePort.has(sourceApplication.pid)){
         return maybePort;
       } else {
         const DEFAULT_PORT_WIDTH = 0.000001;
@@ -186,7 +176,7 @@ function layout1(landscape) {
   
         const CONVERT_TO_KIELER_FACTOR = 180;
 
-        const portId = sourceDrawnode.ipAddress + "_sp1";
+        const portId = sourceApplication.pid + "_sp1";
 
         let port = {
           id: portId,
@@ -199,10 +189,10 @@ function layout1(landscape) {
           y: 0
         };
 
-        let sourceGraph = modelIdToGraph.get(sourceDrawnode.ipAddress);
+        let sourceGraph = modelIdToGraph.get(sourceApplication.pid);
         port.node = sourceGraph;
 
-        modelIdToSourcePort.set(sourceDrawnode.ipAddress, port);
+        modelIdToSourcePort.set(sourceApplication.pid, port);
         sourceGraph?.ports?.push(port);
 
         return port;
@@ -210,11 +200,11 @@ function layout1(landscape) {
     }
 
 
-    function createTargetPortIfNotExisting(targetDrawnode) {
+    function createTargetPortIfNotExisting(targetApplication) {
 
       // Do not create duplicate port
-      let maybePort = modelIdToTargetPort.get(targetDrawnode.ipAddress);
-      if (maybePort && modelIdToTargetPort.has(targetDrawnode.ipAddress)){
+      let maybePort = modelIdToTargetPort.get(targetApplication.pid);
+      if (maybePort && modelIdToTargetPort.has(targetApplication.pid)){
         return maybePort;
       } else {
         const DEFAULT_PORT_WIDTH = 0.000001;
@@ -223,7 +213,7 @@ function layout1(landscape) {
   
         const CONVERT_TO_KIELER_FACTOR = 180;
 
-        const portId = targetDrawnode.ipAddress + "_tp1";
+        const portId = targetApplication.pid + "_tp1";
 
         let port = {
           id: portId,
@@ -236,10 +226,10 @@ function layout1(landscape) {
           y: 0
         };
 
-        let targetGraph = modelIdToGraph.get(targetDrawnode.ipAddress);
+        let targetGraph = modelIdToGraph.get(targetApplication.pid);
         port.node = targetGraph;
 
-        modelIdToTargetPort.set(targetDrawnode.ipAddress, port);
+        modelIdToTargetPort.set(targetApplication.pid, port);
         targetGraph?.ports?.push(port);
 
         return port;
@@ -250,11 +240,11 @@ function layout1(landscape) {
 
   } // END createEdgeBetweenSourceTarget
 
-  function createEdgeHelper(sourceDrawnode, port1, targetDrawnode, port2, commId) {
+  function createEdgeHelper(sourceApplication, port1, targetApplication, port2, commId) {
 
-    const id = sourceDrawnode.ipAddress + "_to_" + targetDrawnode.ipAddress;
+    const id = sourceApplication.pid + "_to_" + targetApplication.pid;
 
-    let edge = lookForExistingEdge(sourceDrawnode, id);
+    let edge = lookForExistingEdge(sourceApplication, id);
 
     if (edge) {
       return edge;
@@ -264,8 +254,8 @@ function layout1(landscape) {
 
     setEdgeLayoutProperties(edge);
 
-    edge.source = sourceDrawnode.ipAddress;
-    edge.target = targetDrawnode.ipAddress;
+    edge.source = sourceApplication.pid;
+    edge.target = targetApplication.pid;
 
     edge.sourcePort = port1.id;
     edge.targetPort = port2.id;
@@ -279,12 +269,12 @@ function layout1(landscape) {
     edge.sPort = port1;
     edge.tPort = port2;
 
-    edge.sourceNode = sourceDrawnode;
-    edge.targetNode = targetDrawnode;
+    edge.sourceNode = sourceApplication;
+    edge.targetNode = targetApplication;
 
     edge.communicationId = commId;
 
-    let graph = modelIdToGraph.get(sourceDrawnode.ipAddress);
+    let graph = modelIdToGraph.get(sourceApplication.pid);
     graph?.edges?.push(edge);
 
     return edge;
@@ -292,8 +282,8 @@ function layout1(landscape) {
 
     //inner function
     // looks for already existing edges
-    function lookForExistingEdge(sourceDrawnode, id) {
-      let edges = modelIdToGraph.get(sourceDrawnode.ipAddress)?.edges;
+    function lookForExistingEdge(sourceApplication, id) {
+      let edges = modelIdToGraph.get(sourceApplication.pid)?.edges;
       if (edges) {
         let length = edges.length;
         for (let i = 0; i < length; i++) {
@@ -322,7 +312,7 @@ function layout1(landscape) {
 
   function getDisplayName(node) {
 
-    if (node.hostName && node.hostName.length !== 0 && !node.hostName.startsWith("<")) {
+    if (node.hostName && node.hostName.length !== 0) {
       return node.hostName;
     } else {
       return node.ipAddress;
