@@ -27,7 +27,11 @@ export default abstract class BaseMenu extends THREE.Mesh {
     const material = new THREE.MeshBasicMaterial({
       color: new THREE.Color(color),
     });
-    super(new THREE.PlaneGeometry(0.3, 0.3), material);
+    super(new THREE.PlaneGeometry(
+      (resolution.width / 512) * 0.3,
+      (resolution.height / 512) * 0.3,
+    ),
+    material);
 
     this.resolution = resolution;
     this.color = color;

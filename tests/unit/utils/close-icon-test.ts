@@ -1,11 +1,11 @@
-import closeIcon from 'explorviz-frontend/utils/close-icon';
+import CloseIcon from 'explorviz-frontend/utils/close-icon';
 import { module, test } from 'qunit';
+import { Texture } from 'three';
 
-module('Unit | Utility | close-icon', function(hooks) {
+module('Unit | Utility | close-icon', function(/* hooks */) {
 
-  // Replace this with your real tests.
-  test('it works', function(assert) {
-    let result = closeIcon();
+  test('it exists', function(assert) {
+    let result = new CloseIcon(new Texture());
     assert.ok(result);
   });
 });

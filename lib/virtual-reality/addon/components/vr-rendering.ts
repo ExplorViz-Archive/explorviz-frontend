@@ -51,6 +51,7 @@ import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import AdvancedMenu from 'virtual-reality/utils/menus/advanced-menu';
 import SpectateMenu from 'virtual-reality/utils/menus/spectate-menu';
 import ConnectionMenu from 'virtual-reality/utils/menus/connection-menu';
+import ControlsMenu from 'virtual-reality/utils/menus/controls-menu';
 
 interface Args {
   readonly id: string;
@@ -1042,8 +1043,20 @@ populateScene = task(function* (this: VrRendering) {
   openAdvancedMenu() {
     this.closeCurrentMenu();
 
-    this.menu = new AdvancedMenu(this.openMainMenu.bind(this), this.isLefty.bind(this),
-      this.swapControls.bind(this), this.resetAll.bind(this));
+    this.menu = new AdvancedMenu(this.openMainMenu.bind(this), this.openControlsMenu.bind(this),
+      this.isLefty.bind(this), this.swapControls.bind(this), this.resetAll.bind(this));
+    this.controllerMenus.add(this.menu);
+  }
+
+  openControlsMenu() {
+    this.closeCurrentMenu();
+
+    if (!this.controller1) return;
+
+    const gamepadId = this.controller1.gamepad ? this.controller1.gamepad.id : 'unknown';
+
+    this.menu = new ControlsMenu(this.openAdvancedMenu.bind(this), gamepadId,
+      this.isLefty.bind(this));
     this.controllerMenus.add(this.menu);
   }
 
