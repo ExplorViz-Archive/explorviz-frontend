@@ -2,7 +2,7 @@ import InteractiveItem from './interactive-item';
 
 export type ArrowDirection = 'left'|'right'|'up'|'down';
 
-export default class ArrowbuttonItem extends InteractiveItem {
+export default class ArrowButtonItem extends InteractiveItem {
   width: number;
 
   height: number;
@@ -30,7 +30,7 @@ export default class ArrowbuttonItem extends InteractiveItem {
     } else {
       ctx.fillStyle = this.color;
     }
-    ArrowbuttonItem.drawArrowhead(ctx, this.position, this.width, this.height, this.direction);
+    ArrowButtonItem.drawArrowhead(ctx, this.position, this.width, this.height, this.direction);
   }
 
   getBoundingBox(): { minX: number; maxX: number; minY: number; maxY: number; } {

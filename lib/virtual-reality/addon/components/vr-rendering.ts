@@ -1043,7 +1043,7 @@ populateScene = task(function* (this: VrRendering) {
     this.closeCurrentMenu();
 
     this.menu = new AdvancedMenu(this.openMainMenu.bind(this), this.isLefty.bind(this),
-      this.swapControls.bind(this));
+      this.swapControls.bind(this), this.resetAll.bind(this));
     this.controllerMenus.add(this.menu);
   }
 
@@ -1195,6 +1195,22 @@ populateScene = task(function* (this: VrRendering) {
     this.landscapeObject3D.rotation.x = (-90 * THREE.MathUtils.DEG2RAD);
     this.landscapeOffset.set(0, 0, 0);
     this.centerLandscape();
+  }
+
+  closeLandscapeSystems() {
+    this.landscapeObject3D.markAllSystemsAsClosed();
+    this.populateScene.perform();
+  }
+
+  resetUserPosition() {
+    this.user.position.set(0, 0, 0);
+  }
+
+  resetAll() {
+    this.applicationGroup.clear();
+    this.resetLandscapePosition();
+    this.closeLandscapeSystems();
+    this.resetUserPosition();
   }
 
   // #endregion UTILS

@@ -4,7 +4,8 @@ import TextbuttonItem from './items/textbutton-item';
 import CheckboxItem from './items/checkbox-item';
 
 export default class AdvancedMenu extends BaseMenu {
-  constructor(openMainMenu: () => void, isLefty: () => boolean, swapControls: () => void) {
+  constructor(openMainMenu: () => void, isLefty: () => boolean, swapControls: () => void,
+    resetAll: () => void) {
     super();
 
     this.opacity = 0.8;
@@ -35,6 +36,10 @@ export default class AdvancedMenu extends BaseMenu {
       x: 100,
       y: 266,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+
+    resetAllButton.onTriggerDown = () => {
+      resetAll();
+    };
 
     const backButton = new TextbuttonItem('back', 'Back', {
       x: 100,
