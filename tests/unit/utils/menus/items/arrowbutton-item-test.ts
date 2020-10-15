@@ -1,11 +1,10 @@
-import menusItemsArrowbuttonItem from 'explorviz-frontend/utils/menus/items/arrowbutton-item';
+import ArrowbuttonItem from 'explorviz-frontend/utils/menus/items/arrowbutton-item';
 import { module, test } from 'qunit';
 
-module('Unit | Utility | menus/items/arrowbutton-item', function(hooks) {
+module('Unit | Utility | menus/items/arrowbutton-item', function(/* hooks */) {
 
-  // Replace this with your real tests.
-  test('it works', function(assert) {
-    let result = menusItemsArrowbuttonItem();
+  test('it exists', function(assert) {
+    let result = new ArrowbuttonItem('id', {x: 0, y: 0}, 20, 20, '#ffffff', '#000000', 'right');
     assert.ok(result);
   });
 });

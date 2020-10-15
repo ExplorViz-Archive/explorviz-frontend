@@ -1,11 +1,10 @@
-import menusItemsCurvedArrowbuttonItem from 'explorviz-frontend/utils/menus/items/curved-arrowbutton-item';
+import CurvedArrowbuttonItem from 'explorviz-frontend/utils/menus/items/curved-arrowbutton-item';
 import { module, test } from 'qunit';
 
-module('Unit | Utility | menus/items/curved-arrowbutton-item', function(hooks) {
+module('Unit | Utility | menus/items/curved-arrowbutton-item', function(/* hooks */) {
 
-  // Replace this with your real tests.
-  test('it works', function(assert) {
-    let result = menusItemsCurvedArrowbuttonItem();
+  test('it exists', function(assert) {
+    let result = new CurvedArrowbuttonItem('id', {x: 0, y: 0}, 20, '#ffffff', '#000000', 'right');
     assert.ok(result);
   });
 });

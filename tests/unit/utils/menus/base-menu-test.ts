@@ -1,11 +1,12 @@
-import menusBaseMenu from 'explorviz-frontend/utils/menus/base-menu';
+import BaseMenu from 'explorviz-frontend/utils/menus/base-menu';
 import { module, test } from 'qunit';
 
-module('Unit | Utility | menus/base-menu', function(hooks) {
+module('Unit | Utility | menus/base-menu', function(/* hooks */) {
 
-  // Replace this with your real tests.
-  test('it works', function(assert) {
-    let result = menusBaseMenu();
+  class TestMenu extends BaseMenu {}
+
+  test('it exists', function(assert) {
+    let result = new TestMenu();
     assert.ok(result);
   });
 });

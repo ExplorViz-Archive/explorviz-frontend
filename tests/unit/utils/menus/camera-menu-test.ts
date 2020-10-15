@@ -1,11 +1,11 @@
-import menusCameraMenu from 'explorviz-frontend/utils/menus/camera-menu';
+import CameraMenu from 'explorviz-frontend/utils/menus/camera-menu';
 import { module, test } from 'qunit';
+import {Vector3} from 'three';
 
-module('Unit | Utility | menus/camera-menu', function(hooks) {
+module('Unit | Utility | menus/camera-menu', function(/* hooks */) {
 
-  // Replace this with your real tests.
-  test('it works', function(assert) {
-    let result = menusCameraMenu();
+  test('it exists', function(assert) {
+    let result = new CameraMenu( () => {}, () => {return new Vector3();}, () => {});
     assert.ok(result);
   });
 });

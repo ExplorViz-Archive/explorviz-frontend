@@ -1,11 +1,10 @@
-import menusItemsRectangleItem from 'explorviz-frontend/utils/menus/items/rectangle-item';
+import RectangleItem from 'explorviz-frontend/utils/menus/items/rectangle-item';
 import { module, test } from 'qunit';
 
-module('Unit | Utility | menus/items/rectangle-item', function(hooks) {
+module('Unit | Utility | menus/items/rectangle-item', function(/* hooks */) {
 
-  // Replace this with your real tests.
-  test('it works', function(assert) {
-    let result = menusItemsRectangleItem();
+  test('it exists', function(assert) {
+    let result = new RectangleItem('id', {x: 0, y: 0}, 1, 1, '#ffffff');
     assert.ok(result);
   });
 });

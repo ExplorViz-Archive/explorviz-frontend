@@ -1,11 +1,25 @@
-import menusItemsItem from 'explorviz-frontend/utils/menus/items/item';
+import Item from 'explorviz-frontend/utils/menus/items/item';
 import { module, test } from 'qunit';
 
-module('Unit | Utility | menus/items/item', function(hooks) {
+module('Unit | Utility | menus/items/item', function(/* hooks */) {
 
-  // Replace this with your real tests.
-  test('it works', function(assert) {
-    let result = menusItemsItem();
+  class TestItem extends Item{
+
+    constructor(id: string, pos: {x: number, y: number}){
+      super(id, pos);
+    }
+
+    drawToCanvas(){
+
+    }
+
+    getBoundingBox(){
+      return {minX: 0, maxX: 1, minY: 0, maxY: 0}
+    }
+  }
+
+  test('it exists', function(assert) {
+    let result = new TestItem('id', {x: 0, y: 0});
     assert.ok(result);
   });
 });
