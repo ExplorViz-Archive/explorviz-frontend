@@ -111,7 +111,7 @@ export default class VrRendering extends Component<Args> {
   // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
 
-  menuGroup: THREE.Group;
+  controllerMenus: THREE.Group;
 
   // Depth of boxes for landscape entities
   landscapeDepth: number;
@@ -160,10 +160,10 @@ export default class VrRendering extends Component<Args> {
     this.user = new THREE.Group();
     this.applicationGroup = new ApplicationGroup();
 
-    this.menuGroup = new THREE.Group();
-    this.menuGroup.position.y += 0.15;
-    this.menuGroup.position.z -= 0.15;
-    this.menuGroup.rotateX(340 * THREE.MathUtils.DEG2RAD);
+    this.controllerMenus = new THREE.Group();
+    this.controllerMenus.position.y += 0.15;
+    this.controllerMenus.position.z -= 0.15;
+    this.controllerMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
 
@@ -270,7 +270,7 @@ export default class VrRendering extends Component<Args> {
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
       [this.landscapeObject3D, this.applicationGroup, this.floor,
-        this.menuGroup], {
+        this.controllerMenus], {
         singleClick: this.handleSingleClick,
         doubleClick: this.handleDoubleClick,
         mouseWheel: this.handleMouseWheel,
@@ -289,7 +289,7 @@ export default class VrRendering extends Component<Args> {
 
   initControllers() {
     const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor,
-      this.menuGroup];
+      this.controllerMenus];
 
     // Init secondary/utility controller
     const raySpace1 = this.renderer.xr.getController(0);
@@ -327,7 +327,7 @@ export default class VrRendering extends Component<Args> {
     this.controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
       raySpace2, callbacks2, this.scene);
     this.controller2.addRay(new THREE.Color('blue'));
-    this.controller2.raySpace.add(this.menuGroup);
+    this.controller2.raySpace.add(this.controllerMenus);
     this.controller2.intersectableObjects = intersectableObjects;
     this.controller2.initTeleportArea();
 
@@ -995,7 +995,7 @@ populateScene = task(function* (this: VrRendering) {
       this.openAdvancedMenu.bind(this),
     );
 
-    this.menuGroup.add(this.menu);
+    this.controllerMenus.add(this.menu);
   }
 
   openCameraMenu() {
@@ -1003,7 +1003,7 @@ populateScene = task(function* (this: VrRendering) {
 
     this.menu = new CameraMenu(this.openMainMenu.bind(this), this.getCameraDelta.bind(this),
       this.changeUserHeight.bind(this));
-    this.menuGroup.add(this.menu);
+    this.controllerMenus.add(this.menu);
   }
 
   openLandscapeMenu() {
@@ -1016,7 +1016,7 @@ populateScene = task(function* (this: VrRendering) {
       this.resetLandscapePosition.bind(this),
     );
 
-    this.menuGroup.add(this.menu);
+    this.controllerMenus.add(this.menu);
   }
 
   openSpectateMenu() {
@@ -1026,7 +1026,7 @@ populateScene = task(function* (this: VrRendering) {
       this.openMainMenu.bind(this),
     );
 
-    this.menuGroup.add(this.menu);
+    this.controllerMenus.add(this.menu);
   }
 
   openConnectionMenu() {
@@ -1036,19 +1036,20 @@ populateScene = task(function* (this: VrRendering) {
       this.openMainMenu.bind(this),
     );
 
-    this.menuGroup.add(this.menu);
+    this.controllerMenus.add(this.menu);
   }
 
   openAdvancedMenu() {
     this.closeCurrentMenu();
 
-    this.menu = new AdvancedMenu(this.openMainMenu.bind(this));
-    this.menuGroup.add(this.menu);
+    this.menu = new AdvancedMenu(this.openMainMenu.bind(this), this.isLefty.bind(this),
+      this.swapControls.bind(this));
+    this.controllerMenus.add(this.menu);
   }
 
   closeCurrentMenu() {
     if (this.menu) {
-      this.menuGroup.remove(this.menu);
+      this.controllerMenus.remove(this.menu);
       this.menu = undefined;
     }
   }
@@ -1117,6 +1118,8 @@ populateScene = task(function* (this: VrRendering) {
       if (controller.control === controlMode.INTERACTION) {
         controller.control = controlMode.UTILITY;
         controller.addRay(new THREE.Color('blue'));
+
+        controller.raySpace.add(this.controllerMenus);
         controller.initTeleportArea();
       } else {
         controller.control = controlMode.INTERACTION;
@@ -1127,6 +1130,11 @@ populateScene = task(function* (this: VrRendering) {
     // Swap controls (callback functions)
     [this.controller1.eventCallbacks, this.controller2.eventCallbacks] = [this.controller2
       .eventCallbacks, this.controller1.eventCallbacks];
+  }
+
+  isLefty() {
+    if (!this.controller1) return false;
+    return this.controller1.isUtilityController;
   }
 
   getCameraDelta() {

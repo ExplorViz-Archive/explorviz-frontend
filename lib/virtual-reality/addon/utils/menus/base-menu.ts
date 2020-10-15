@@ -80,6 +80,15 @@ export default abstract class BaseMenu extends THREE.Mesh {
     this.update();
   }
 
+  removeHoverEffect() {
+    if (this.lastHoveredItem) {
+      this.lastHoveredItem.removeHoverEffect();
+      this.lastHoveredItem = undefined;
+    }
+
+    this.update();
+  }
+
   triggerDown(uv: THREE.Vector2) {
     const item = this.getItem(uv) as InteractiveItem|undefined;
 
