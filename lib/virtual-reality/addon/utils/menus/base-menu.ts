@@ -140,4 +140,8 @@ export default abstract class BaseMenu extends THREE.Mesh {
     }
     return undefined;
   }
+
+  getItemById(id: string) {
+    return this.items.find((item) => item.id === id);
+  }
 }

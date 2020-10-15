@@ -36,6 +36,7 @@ import * as EntityRendering from 'explorviz-frontend/utils/application-rendering
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import CurrentUser from 'explorviz-frontend/services/current-user';
+import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
 import ApplicationGroup from 'virtual-reality/utils/application-group';
 import CloseIcon from 'virtual-reality/utils/close-icon';
 import Landscape from 'explorviz-frontend/models/landscape';
@@ -77,6 +78,9 @@ export default class VrRendering extends Component<Args> {
   @service('current-user')
   currentUser!: CurrentUser;
 
+  @service('local-vr-user')
+  localUser!: LocalVrUser;
+
   @service()
   worker!: any;
 
@@ -100,14 +104,6 @@ export default class VrRendering extends Component<Args> {
   renderer!: THREE.WebGLRenderer;
 
   raycaster: THREE.Raycaster;
-
-  // Usually the left / utility controller
-  controller1: VRController|null = null;
-
-  // Usually the right / primary controller
-  controller2: VRController|null = null;
-
-  user: THREE.Group;
 
   // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
@@ -158,13 +154,13 @@ export default class VrRendering extends Component<Args> {
     this.applicationScalar = 0.01;
 
     this.raycaster = new THREE.Raycaster();
-    this.user = new THREE.Group();
     this.applicationGroup = new ApplicationGroup();
 
     this.controllerMenus = new THREE.Group();
     this.controllerMenus.position.y += 0.15;
     this.controllerMenus.position.z -= 0.15;
     this.controllerMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
+    this.localUser.controllerMenus = this.controllerMenus;
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
 
@@ -201,15 +197,13 @@ export default class VrRendering extends Component<Args> {
     this.scene.background = this.configuration.landscapeColors.background;
     this.scene.add(this.landscapeObject3D);
 
-    // Add floor
-    // TODO: Increase floor size if landscape is too large
     const floorSize = 10;
     const floorMesh = new FloorMesh(floorSize, floorSize);
     this.floor = floorMesh;
+
     this.scene.add(floorMesh);
     this.scene.add(this.applicationGroup);
-
-    this.scene.add(this.user);
+    this.scene.add(this.localUser.userGroup);
 
     this.debug('Scene created');
   }
@@ -221,7 +215,7 @@ export default class VrRendering extends Component<Args> {
     const { width, height } = this.canvas;
     this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     this.camera.position.set(0, 1, 2);
-    this.user.add(this.camera);
+    this.localUser.addCamera(this.camera);
     this.debug('Camera added');
   }
 
@@ -234,6 +228,7 @@ export default class VrRendering extends Component<Args> {
       antialias: true,
       canvas: this.canvas,
     });
+    this.localUser.renderer = this.renderer;
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
     this.renderer.xr.enabled = true;
@@ -306,12 +301,13 @@ export default class VrRendering extends Component<Args> {
       gripDown: VrRendering.onInteractionGripDown,
       gripUp: this.onInteractionGripUp,
     };
-    this.controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
+    const controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
       raySpace1, callbacks1, this.scene);
-    this.controller1.addRay(new THREE.Color('red'));
-    this.controller1.intersectableObjects = intersectableObjects;
+    controller1.addRay(new THREE.Color('red'));
+    controller1.intersectableObjects = intersectableObjects;
 
-    this.user.add(this.controller1);
+    this.localUser.controller1 = controller1;
+    this.localUser.userGroup.add(controller1);
 
     // Init secondary controller
     const raySpace2 = this.renderer.xr.getController(1);
@@ -325,14 +321,15 @@ export default class VrRendering extends Component<Args> {
       menuDown: this.onUtilityMenuDown,
     };
 
-    this.controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
+    const controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
       raySpace2, callbacks2, this.scene);
-    this.controller2.addRay(new THREE.Color('blue'));
-    this.controller2.raySpace.add(this.controllerMenus);
-    this.controller2.intersectableObjects = intersectableObjects;
-    this.controller2.initTeleportArea();
+    controller2.addRay(new THREE.Color('blue'));
+    controller2.raySpace.add(this.controllerMenus);
+    controller2.intersectableObjects = intersectableObjects;
+    controller2.initTeleportArea();
 
-    this.user.add(this.controller2);
+    this.localUser.controller2 = controller2;
+    this.localUser.userGroup.add(controller2);
   }
 
   static onInteractionGripDown(controller: VRController) {
@@ -434,8 +431,7 @@ export default class VrRendering extends Component<Args> {
   render() {
     if (this.isDestroyed) { return; }
 
-    if (this.controller1) { this.controller1.update(); }
-    if (this.controller2) { this.controller2.update(); }
+    this.localUser.updateControllers();
 
     this.renderer.render(this.scene, this.camera);
   }
@@ -881,16 +877,6 @@ populateScene = task(function* (this: VrRendering) {
 
   // #endregion CONTROLLER HANDLERS
 
-  teleportToPosition(position: THREE.Vector3) {
-    const cameraWorldPos = new THREE.Vector3();
-
-    const xrCamera = this.renderer.xr.getCamera(this.camera);
-    xrCamera.getWorldPosition(cameraWorldPos);
-
-    this.user.position.x += position.x - cameraWorldPos.x;
-    this.user.position.z += position.z - cameraWorldPos.z;
-  }
-
   // #region MOUSE & KEYBOARD EVENT HANDLER
 
   handleDoubleClick(intersection: THREE.Intersection | null) {
@@ -967,7 +953,7 @@ populateScene = task(function* (this: VrRendering) {
         this.openMainMenu();
         break;
       case 'h':
-        this.swapControls();
+        this.localUser.swapControls();
         break;
       default:
         break;
@@ -985,7 +971,7 @@ populateScene = task(function* (this: VrRendering) {
   openMainMenu() {
     this.closeCurrentMenu();
 
-    if (!this.controller1) return;
+    if (!this.localUser.controller1) return;
 
     this.menu = new MainMenu(
       this.closeCurrentMenu.bind(this),
@@ -1002,8 +988,10 @@ populateScene = task(function* (this: VrRendering) {
   openCameraMenu() {
     this.closeCurrentMenu();
 
-    this.menu = new CameraMenu(this.openMainMenu.bind(this), this.getCameraDelta.bind(this),
-      this.changeUserHeight.bind(this));
+    const user = this.localUser;
+
+    this.menu = new CameraMenu(this.openMainMenu.bind(this), user.getCameraDelta.bind(user),
+      user.changeCameraHeight.bind(user));
     this.controllerMenus.add(this.menu);
   }
 
@@ -1043,20 +1031,24 @@ populateScene = task(function* (this: VrRendering) {
   openAdvancedMenu() {
     this.closeCurrentMenu();
 
+    const user = this.localUser;
+
     this.menu = new AdvancedMenu(this.openMainMenu.bind(this), this.openControlsMenu.bind(this),
-      this.isLefty.bind(this), this.swapControls.bind(this), this.resetAll.bind(this));
+      user.isLefty.bind(user), user.swapControls.bind(user), this.resetAll.bind(this));
     this.controllerMenus.add(this.menu);
   }
 
   openControlsMenu() {
     this.closeCurrentMenu();
 
-    if (!this.controller1) return;
+    if (!this.localUser.controller1) return;
 
-    const gamepadId = this.controller1.gamepad ? this.controller1.gamepad.id : 'unknown';
+    const { gamepadId } = this.localUser.controller1;
+    const user = this.localUser;
 
     this.menu = new ControlsMenu(this.openAdvancedMenu.bind(this), gamepadId,
-      this.isLefty.bind(this));
+      user.isLefty.bind(user));
+
     this.controllerMenus.add(this.menu);
   }
 
@@ -1108,54 +1100,13 @@ populateScene = task(function* (this: VrRendering) {
   handleSecondaryInputOn(intersection: THREE.Intersection) {
     const { object, point } = intersection;
     if (object instanceof FloorMesh) {
-      this.teleportToPosition(point);
+      this.localUser.teleportToPosition(point);
     } else if (object?.parent instanceof ApplicationObject3D) {
       if (object instanceof ComponentMesh || object instanceof ClazzMesh
       || object instanceof ClazzCommunicationMesh) {
         Highlighting.highlight(object, object.parent);
       }
     }
-  }
-
-  swapControls() {
-    if (!this.controller1 || !this.controller2) return;
-
-    const controllers = [this.controller1, this.controller2];
-
-    controllers.forEach((controller) => {
-    // Remove attached visual indicators
-      controller.removeRay();
-      controller.removeTeleportArea();
-
-      // Swap visual control indicators
-      if (controller.control === controlMode.INTERACTION) {
-        controller.control = controlMode.UTILITY;
-        controller.addRay(new THREE.Color('blue'));
-
-        controller.raySpace.add(this.controllerMenus);
-        controller.initTeleportArea();
-      } else {
-        controller.control = controlMode.INTERACTION;
-        controller.addRay(new THREE.Color('red'));
-      }
-    });
-
-    // Swap controls (callback functions)
-    [this.controller1.eventCallbacks, this.controller2.eventCallbacks] = [this.controller2
-      .eventCallbacks, this.controller1.eventCallbacks];
-  }
-
-  isLefty() {
-    if (!this.controller1) return false;
-    return this.controller1.isUtilityController;
-  }
-
-  getCameraDelta() {
-    return this.user.position;
-  }
-
-  changeUserHeight(deltaY: number) {
-    this.user.position.add(new THREE.Vector3(0, deltaY, 0));
   }
 
   moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
@@ -1215,15 +1166,11 @@ populateScene = task(function* (this: VrRendering) {
     this.populateScene.perform();
   }
 
-  resetUserPosition() {
-    this.user.position.set(0, 0, 0);
-  }
-
   resetAll() {
     this.applicationGroup.clear();
     this.resetLandscapePosition();
     this.closeLandscapeSystems();
-    this.resetUserPosition();
+    this.localUser.resetPosition();
   }
 
   // #endregion UTILS
