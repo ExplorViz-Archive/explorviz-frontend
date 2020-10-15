@@ -339,21 +339,21 @@ export default class VRController extends THREE.Group {
   updateIntersectedObject() {
     if (!this.ray || this.grabbedObject) return;
 
-    /* Reset hover effect and teleportation area */
-
-    // TODO: Only call this on change of intersected object
-    this.resetHoverEffect();
-
     const intersections = this.computeIntersections();
 
     const [nearestIntersection] = intersections;
 
     if (!nearestIntersection) {
+      this.resetHoverEffect();
       this.ray.scale.z = 5;
       return;
     }
 
     const { object, uv } = nearestIntersection;
+
+    if (this.intersectedObject && object !== this.intersectedObject.object) {
+      this.resetHoverEffect();
+    }
 
     // Handle hover effect and teleport area
     if (this.isInteractionController) {
@@ -390,7 +390,6 @@ export default class VRController extends THREE.Group {
       this.intersectedObject = null;
     } else if (object instanceof BaseMenu) {
       object.removeHoverEffect();
-      console.log('Update Menu');
     }
     if (this.teleportArea) {
       this.teleportArea.visible = false;
