@@ -16,7 +16,6 @@ import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
-import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
 import { tracked } from '@glimmer/tracking';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import Trace from 'explorviz-frontend/models/trace';
@@ -30,11 +29,17 @@ import EntityManipulation from 'explorviz-frontend/utils/application-rendering/e
 import { task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
-import { Application, Class, Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import {
+  Application, Class, Package, StructureLandscapeData,
+} from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 
 interface Args {
   readonly id: string,
   readonly application: Application,
+  readonly structureData: StructureLandscapeData;
+  readonly dynamicData: DynamicLandscapeData;
   readonly font: THREE.Font,
   addComponent(componentPath: string): void // is passed down to the viz navbar
 }
@@ -42,7 +47,7 @@ interface Args {
 type PopupData = {
   mouseX: number,
   mouseY: number,
-  entity: Package | Class | DrawableClazzCommunication
+  entity: Package | Class | DrawableClassCommunication
 };
 
 type LayoutData = {
@@ -165,7 +170,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     // Display application nicely for first rendering
     this.entityManipulation.applyDefaultApplicationLayout();
-    /* this.communicationRendering.addCommunication(this.boxLayoutMap); */
+    const drawableClassCommunications = computeDrawableClassCommunication(this.args.structureData,
+      this.args.dynamicData);
+    this.communicationRendering.addCommunication(this.boxLayoutMap, drawableClassCommunications);
     this.applicationObject3D.resetRotation();
   }
 
@@ -364,6 +371,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // eslint-disable-next-line
   populateScene = task(function* (this: ApplicationRendering) {
     try {
+      const drawableClassCommunications = computeDrawableClassCommunication(this.args.structureData,
+        this.args.dynamicData);
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', this.applicationObject3D.dataModel);
 
       // Converting plain JSON layout data due to worker limitations
@@ -379,7 +388,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       // Restore old state of components
       this.entityManipulation.setComponentState(openComponentIds);
-      /* this.communicationRendering.addCommunication(this.boxLayoutMap); */
+      this.communicationRendering.addCommunication(this.boxLayoutMap, drawableClassCommunications);
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
@@ -486,7 +495,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.entityManipulation.openComponentsRecursively(child);
     });
 
-    /* this.communicationRendering.addCommunication(this.boxLayoutMap); */
+    /*  this.communicationRendering.addCommunication(this.boxLayoutMap); */
     this.highlighter.updateHighlighting();
   }
 

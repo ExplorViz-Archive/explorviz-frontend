@@ -34,10 +34,12 @@
         </div>
       {{/if}}
     {{else}}
-      {{#if this.landscapeRepo.latestApplication}}
+      {{#if (and this.landscapeRepo.latestApplication this.landscapeListener.latestDynamicData)}}
         <Visualization::Rendering::ApplicationRendering
           @id="app1"
           @application={{this.landscapeRepo.latestApplication}}
+          @structureData={{this.landscapeListener.latestStructureData}}
+          @dynamicData={{this.landscapeListener.latestDynamicData}}
           @addComponent={{this.addComponent}}
           @font={{@model}}
           @components={{this.components}}

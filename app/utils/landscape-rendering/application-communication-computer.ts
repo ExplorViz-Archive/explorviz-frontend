@@ -77,7 +77,7 @@ function sortSpanArrayByTime(spanArary: Span[]) {
   });
 }
 
-function createTraceIdToSpanTrees(landscapeDynamicData: DynamicLandscapeData) {
+export function createTraceIdToSpanTrees(landscapeDynamicData: DynamicLandscapeData) {
   const traceIdToSpanTree = new Map<string, SpanTree>();
 
   landscapeDynamicData.forEach((trace) => {
@@ -116,7 +116,7 @@ function createTraceIdToSpanTrees(landscapeDynamicData: DynamicLandscapeData) {
   return traceIdToSpanTree;
 }
 
-function createHashMapToApplicationMap(landscapeStructure: StructureLandscapeData) {
+function createHashCodeToApplicationMap(landscapeStructure: StructureLandscapeData) {
   const hashCodeToApplicationMap = new Map<string, Application>();
 
   landscapeStructure.nodes.forEach((node) => {
@@ -135,7 +135,7 @@ export default function computeApplicationCommunication(landscape: StructureLand
   if (landscapeDynamicData.length === 0) {
     return [];
   }
-  const hashCodeToApplicationMap = createHashMapToApplicationMap(landscape);
+  const hashCodeToApplicationMap = createHashCodeToApplicationMap(landscape);
 
   const traceIdToSpanTrees = createTraceIdToSpanTrees(landscapeDynamicData);
 

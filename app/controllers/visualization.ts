@@ -35,10 +35,6 @@ export default class VisualizationController extends Controller {
 
   @service('reload-handler') reloadHandler!: ReloadHandler;
 
-  state = null;
-
-  type = 'landscape';
-
   plotlyTimelineRef!: PlotlyTimeline;
 
   selectedTimestampRecords: Timestamp[] = [];
