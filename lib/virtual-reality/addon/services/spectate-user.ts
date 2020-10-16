@@ -17,6 +17,7 @@ export default class SpectateUser extends Service.extend({
   @service()
   store!: DS.Store;
 
+  // TODO: Save actual user object instead to save queries
   spectatedUserId: string|null = null; // Tells which userID (if any) is being spectated
 
   startPosition: THREE.Vector3|null = null; // Position before this user starts spectating
@@ -79,9 +80,9 @@ export default class SpectateUser extends Service.extend({
       return;
     }
 
-    const spectatedUser = this.get('store').peekRecord('remote-vr-user', this.get('spectatedUser'));
+    const spectatedUser = this.get('store').peekRecord('remote-vr-user', this.spectatedUserId);
 
-    if (!this.spectatedUserId) { return; }
+    if (!spectatedUser) { return; }
 
     spectatedUser.camera.model.visible = true;
     spectatedUser.namePlane.visible = true;

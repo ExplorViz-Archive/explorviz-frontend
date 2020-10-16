@@ -872,7 +872,11 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   onUtilityMenuDown() {
-    this.toggleMainMenu();
+    if (this.menu) {
+      this.menu.back();
+    } else {
+      this.openMainMenu();
+    }
   }
 
   // #endregion CONTROLLER HANDLERS
@@ -959,14 +963,9 @@ populateScene = task(function* (this: VrRendering) {
         break;
     }
   }
+  // #endregion MOUSE & KEYBOARD EVENT HANDLER
 
-  toggleMainMenu() {
-    if (this.menu) {
-      this.closeCurrentMenu();
-    } else {
-      this.openMainMenu();
-    }
-  }
+  // #region MENUS
 
   openMainMenu() {
     this.closeCurrentMenu();
@@ -1059,7 +1058,7 @@ populateScene = task(function* (this: VrRendering) {
     }
   }
 
-  // #endregion MOUSE & KEYBOARD EVENT HANDLER
+  // #endregion MENUS
 
   // #region UTILS
 

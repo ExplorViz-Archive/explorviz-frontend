@@ -8,6 +8,7 @@ export default class AdvancedMenu extends BaseMenu {
     isLefty: () => boolean, swapControls: () => void, resetAll: () => void) {
     super();
 
+    this.back = openMainMenu;
     this.opacity = 0.8;
 
     const textItem = new TextItem('Advanced Options', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
@@ -48,7 +49,7 @@ export default class AdvancedMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerDown = openMainMenu;
+    backButton.onTriggerDown = this.back;
 
     this.items.push(controlsButton, resetAllButton, backButton);
     this.update();

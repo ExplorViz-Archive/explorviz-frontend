@@ -7,6 +7,8 @@ export default class ControlsMenu extends BaseMenu {
   constructor(openAdvancedMenu: () => void, gamepadId: string, isLefty: () => boolean) {
     super({ width: 2 * 512, height: 542 });
 
+    this.back = openAdvancedMenu;
+
     const title = new TextItem('Controls', 'title', '#ffffff', { x: 512, y: 20 }, 50, 'center');
     this.items.push(title);
 
@@ -15,7 +17,7 @@ export default class ControlsMenu extends BaseMenu {
       y: 20,
     }, 150, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerDown = openAdvancedMenu;
+    backButton.onTriggerDown = this.back;
     this.items.push(backButton);
 
     const image = new Image();

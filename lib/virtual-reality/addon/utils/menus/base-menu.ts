@@ -13,6 +13,9 @@ export default abstract class BaseMenu extends THREE.Mesh {
 
   lastHoveredItem: InteractiveItem|undefined;
 
+  // Exptected to be overwritten by nested menus
+  back: () => void;
+
   get opacity() {
     const material = this.material as THREE.Material;
     return material.opacity;
@@ -36,6 +39,7 @@ export default abstract class BaseMenu extends THREE.Mesh {
     this.resolution = resolution;
     this.color = color;
     this.items = [];
+    this.back = () => {};
 
     this.canvas = document.createElement('canvas');
     this.canvas.width = this.resolution.width;

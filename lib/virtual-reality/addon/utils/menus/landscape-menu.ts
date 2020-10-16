@@ -11,6 +11,8 @@ export default class LandscapeMenu extends BaseMenu {
     rotateLandscape: (deltaX: number) => void, resetLandscape: () => void) {
     super();
 
+    this.back = openMainMenu;
+
     const mvDist = 0.05;
 
     this.opacity = 0.8;
@@ -116,7 +118,7 @@ export default class LandscapeMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerDown = openMainMenu;
+    backButton.onTriggerDown = this.back;
 
     this.items.push(backButton);
     this.update();

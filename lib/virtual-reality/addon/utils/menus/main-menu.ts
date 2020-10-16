@@ -7,6 +7,7 @@ export default class MainMenu extends BaseMenu {
     openSpectateMenu: () => void, openConnectionMenu: () => void, openAdvancedMenu: () => void) {
     super();
 
+    this.back = closeMenu;
     this.opacity = 0.8;
 
     const title = new TextItem('Options', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
@@ -52,7 +53,7 @@ export default class MainMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    exitButton.onTriggerDown = closeMenu;
+    exitButton.onTriggerDown = this.back;
 
     this.items.push(cameraButton, landscapeButton, spectateButton,
       connectionButton, advancedButton, exitButton);

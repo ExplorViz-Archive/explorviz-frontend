@@ -9,6 +9,7 @@ export default class CameraMenu extends BaseMenu {
     super();
 
     this.opacity = 0.8;
+    this.back = openMainMenu;
 
     const title = new TextItem('Camera', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
@@ -56,7 +57,7 @@ export default class CameraMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerDown = openMainMenu;
+    backButton.onTriggerDown = this.back;
 
     this.items.push(heightDownButton, heightUpButton, backButton);
     this.update();
