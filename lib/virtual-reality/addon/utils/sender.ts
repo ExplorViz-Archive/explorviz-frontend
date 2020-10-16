@@ -3,11 +3,33 @@ import {
   Vector3 as V3, Quaternion as Q, Color, Object3D,
 } from 'three';
 
+type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
 export default class Sender {
   webSocket: WebSocket;
 
   constructor(webSocket: WebSocket) {
     this.webSocket = webSocket;
+  }
+
+  sendPoseUpdate(camera: Pose, controller1: Pose, controller2: Pose) {
+    const positionObj = {
+      event: 'receive_user_positions',
+      controller1: {
+        position: controller1.position.toArray(),
+        quaternion: controller1.quaternion.toArray(),
+      },
+      controller2: {
+        position: controller2.position.toArray(),
+        quaternion: controller2.quaternion.toArray(),
+      },
+      camera: {
+        position: camera.position.toArray(),
+        quaternion: camera.quaternion.toArray(),
+      },
+      time: Date.now(),
+    };
+
+    this.webSocket.enqueueIfOpen(positionObj);
   }
 
   /**

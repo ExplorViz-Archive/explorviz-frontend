@@ -34,6 +34,12 @@ export default class LocalVrUser extends Service.extend({
 
   userGroup!: THREE.Group;
 
+  get isOnline() { return this.state === 'online' || this.state === 'spectating'; }
+
+  get isOffline() { return this.state === 'offline'; }
+
+  get isSpectating() { return this.state === 'spectating'; }
+
   get position() { return this.userGroup.position; }
 
   init() {
