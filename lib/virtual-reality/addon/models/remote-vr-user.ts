@@ -65,19 +65,34 @@ export default class RemoteVrUser extends DS.Model.extend({
   }
 
   removeController1() {
+    const { parent } = this.controller1.model;
+    parent.remove(this.controller.model);
     this.controller1 = null;
   }
 
   removeController2() {
+    const { parent } = this.controller2.model;
+    parent.remove(this.controller.model);
     this.controller2 = null;
   }
 
   removeCamera() {
+    const { parent } = this.camera.model;
+    parent.remove(this.camera.model);
     this.camera = null;
   }
 
   removeNamePlane() {
+    const { parent } = this.namePlane;
+    parent.remove(this.namePlane);
     this.namePlane = null;
+  }
+
+  removeAllObjects3D() {
+    this.removeController1();
+    this.removeController2();
+    this.removeCamera();
+    this.removeNamePlane();
   }
 
   /**
@@ -157,6 +172,6 @@ export default class RemoteVrUser extends DS.Model.extend({
 
 declare module 'ember-data/types/registries/model' {
   export default interface ModelRegistry {
-    'vr-user': VrUser;
+    'remote-vr-user': RemoteVrUser;
   }
 }

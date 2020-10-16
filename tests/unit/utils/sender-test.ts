@@ -1,9 +1,11 @@
-import WebSocket from 'virtual-reality/services/web-socket';
 import { module, test } from 'qunit';
+import Sender from 'virtual-reality/utils/sender';
 
 module('Unit | Utility | sender', function(/* hooks */) {
 
   test('it exists', function(assert) {
-    assert.ok(true);
+    let service = this.owner.lookup('service:web-socket')
+    let sender = new Sender(service);
+    assert.ok(sender);
   });
 });

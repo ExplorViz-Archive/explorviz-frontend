@@ -28,7 +28,7 @@ export default class SpectateUser extends Service.extend({
   */
   update() {
     if (!this.spectatedUserId) return;
-    const spectatedUser = this.store.peekRecord('vr-user', this.spectatedUserId);
+    const spectatedUser = this.store.peekRecord('remote-vr-user', this.spectatedUserId);
 
     if (!spectatedUser) {
       this.deactivate();
@@ -56,7 +56,7 @@ export default class SpectateUser extends Service.extend({
       this.deactivate();
     }
 
-    const spectatedUser = this.store.peekRecord('vr-user', userID);
+    const spectatedUser = this.store.peekRecord('remote-vr-user', userID);
 
     if (!spectatedUser) {
       return;
@@ -79,13 +79,13 @@ export default class SpectateUser extends Service.extend({
       return;
     }
 
-    const spectatedUser = this.get('store').peekRecord('vr-user', this.get('spectatedUser'));
+    const spectatedUser = this.get('store').peekRecord('remote-vr-user', this.get('spectatedUser'));
 
     if (!this.spectatedUserId) { return; }
 
     spectatedUser.camera.model.visible = true;
     spectatedUser.namePlane.visible = true;
-    this.user.state = 'connected';
+    this.user.state = 'online';
     this.spectatedUser = null;
 
     if (this.startPosition) {

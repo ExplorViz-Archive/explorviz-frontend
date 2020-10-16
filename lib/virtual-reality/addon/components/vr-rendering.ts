@@ -1090,7 +1090,7 @@ populateScene = task(function* (this: VrRendering) {
     } else if (object instanceof ApplicationMesh) {
       this.addApplication.perform(object, intersection.point);
     // Handle application hits
-    } else if (object?.parent instanceof ApplicationObject3D) {
+    } else if (object.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
     } else if (object instanceof BaseMenu && uv) {
       object.triggerDown(uv);
@@ -1101,7 +1101,7 @@ populateScene = task(function* (this: VrRendering) {
     const { object, point } = intersection;
     if (object instanceof FloorMesh) {
       this.localUser.teleportToPosition(point);
-    } else if (object?.parent instanceof ApplicationObject3D) {
+    } else if (object.parent instanceof ApplicationObject3D) {
       if (object instanceof ComponentMesh || object instanceof ClazzMesh
       || object instanceof ClazzCommunicationMesh) {
         Highlighting.highlight(object, object.parent);

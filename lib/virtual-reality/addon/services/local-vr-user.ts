@@ -1,21 +1,30 @@
-import Service from '@ember/service';
+import Service, { inject as service } from '@ember/service';
+
 import THREE from 'three';
 import VRController, { controlMode } from 'virtual-reality/utils/VRController';
+import DS from 'ember-data';
+import WebSocket from './web-socket';
 
-export type ConnectionStatus = 'disconnected'|'connecting'|'connected'|'spectating';
+export type ConnectionStatus = 'offline'|'connecting'|'online'|'spectating';
 
 export default class LocalVrUser extends Service.extend({
   // anything which *must* be merged to prototype here
 }) {
+  @service('web-socket')
+  webSocket!: WebSocket;
+
+  @service()
+  store!: DS.Store;
+
   userID!: string;
 
   state!: ConnectionStatus;
 
   color: THREE.Color|undefined;
 
-  renderer: THREE.WebGLRenderer|undefined;
+  renderer!: THREE.WebGLRenderer;
 
-  camera: THREE.Camera|undefined;
+  camera!: THREE.Camera;
 
   controller1: VRController|undefined;
 
@@ -31,7 +40,7 @@ export default class LocalVrUser extends Service.extend({
     super.init();
 
     this.userID = 'unknown';
-    this.state = 'disconnected';
+    this.state = 'offline';
     this.userGroup = new THREE.Group();
   }
 
@@ -110,12 +119,34 @@ export default class LocalVrUser extends Service.extend({
 
   reset() {
     this.userID = 'unknown';
-    this.state = 'disconnected';
+    this.state = 'offline';
     this.color = undefined;
     this.color = undefined;
     this.controller1 = undefined;
     this.controller2 = undefined;
     this.userGroup.children.forEach((child) => { this.userGroup.remove(child); });
+  }
+
+  connect() {
+    this.state = 'connecting';
+    this.webSocket.initSocket();
+  }
+
+  /**
+   * Switch to offline mode, close socket connection
+   */
+  disconnect() {
+    this.state = 'offline';
+
+    // Remove other users and their corresponding models and name tags
+    const users = this.get('store').peekAll('remote-vr-user');
+    users.forEach((user) => {
+      user.removeAllObjects3D();
+      this.get('store').unloadRecord(user);
+    });
+
+    // Close socket
+    this.get('webSocket').closeSocket();
   }
 }
 

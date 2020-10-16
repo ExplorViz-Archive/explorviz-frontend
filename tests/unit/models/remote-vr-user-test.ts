@@ -7,7 +7,7 @@ module('Unit | Model | remote vr user', function(hooks) {
 
   test('it exists', function(assert) {
     let store = this.owner.lookup('service:store');
-    let model = run(() => store.createRecord('vr-user', {}));
+    let model = run(() => store.createRecord('remote-vr-user', {}));
     assert.ok(model);
   });
 });
