@@ -115,7 +115,7 @@ const landscape = {
             name: 'sampleApplication1',
             subPackages: [],
             classes: [{
-              name: 'Main$DatabaseTask',
+              name: 'test_class',
               methods: [{
                 name: 'run',
                 hashCode: 'test_trace_hash',
