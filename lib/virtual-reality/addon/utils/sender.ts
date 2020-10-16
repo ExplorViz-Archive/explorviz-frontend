@@ -167,7 +167,7 @@ export default class Sender {
  * Informs backend that this user entered or left spectating mode
  * and additionally adds who is spectating who
  */
-  sendSpectatingUpdate(userID: string, state: string, spectatedUser: string) {
+  sendSpectatingUpdate(userID: string, state: string, spectatedUser: string|null) {
     const spectateObj = {
       event: 'receive_spectating_update',
       userID,
