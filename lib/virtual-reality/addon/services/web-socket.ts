@@ -1,10 +1,13 @@
 import Service, { inject as service } from '@ember/service';
+import debugLogger from 'ember-debug-logger';
 
 export default class WebSocket extends Service.extend({
   // anything which *must* be merged to prototype here
 }) {
   @service()
   websockets !: any;
+
+  debug = debugLogger('VrMultiUser');
 
   private socketRef: any; // WebSocket to send/receive messages to/from backend
 
@@ -86,9 +89,7 @@ export default class WebSocket extends Service.extend({
   }
 
   isWebSocketOpen() {
-    if (!this.socketRef) { return false; }
-
-    return this.socketRef.readyState() === 1;
+    return this.socketRef && this.socketRef.readyState() === 1;
   }
 
   reset() {

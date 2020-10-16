@@ -21,6 +21,7 @@
     "ember-debug-logger": "^2.1.1",
     "ember-websockets": "^7.2.0",
     "@glimmer/tracking": "^1.0.0",
+    "jquery": "^3.4.1",
     "three": "^0.119.1",
     "webxr-polyfill": "^2.0.3"
   }

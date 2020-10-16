@@ -180,7 +180,7 @@ export default class VrRendering extends Component<Args> {
      * Calls all three related init functions and adds the three
      * performance panel if it is activated in user settings
      */
-  initThreeJs() {
+  initRendering() {
     this.initScene();
     this.initCamera();
     this.initRenderer();
@@ -370,7 +370,7 @@ export default class VrRendering extends Component<Args> {
   async outerDivInserted(outerDiv: HTMLElement) {
     this.debug('Outer Div inserted');
 
-    this.initThreeJs();
+    this.initRendering();
 
     this.renderer.setAnimationLoop(this.render.bind(this));
 
@@ -1022,6 +1022,8 @@ populateScene = task(function* (this: VrRendering) {
 
     this.menu = new ConnectionMenu(
       this.openMainMenu.bind(this),
+      this.localUser.state,
+      () => { this.debug('Online mode disabled.'); },
     );
 
     this.controllerMenus.add(this.menu);

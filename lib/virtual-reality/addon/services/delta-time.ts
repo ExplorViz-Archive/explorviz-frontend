@@ -8,6 +8,8 @@ export default class DeltaTime extends Service.extend({
   private lastFrameTime: number = 0; // Time in seconds of last frame
 
   init() {
+    super.init();
+
     this.deltaTime = 0;
     this.lastFrameTime = Date.now() / 1000.0;
   }

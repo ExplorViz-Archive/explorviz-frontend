@@ -53,7 +53,7 @@ export default class SpectateUser extends Service.extend({
       return;
     }
 
-    if (this.user.state === 'spectating') {
+    if (this.user.isSpectating) {
       this.deactivate();
     }
 

@@ -3,6 +3,7 @@ import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import VRController, { controlMode } from 'virtual-reality/utils/VRController';
 import DS from 'ember-data';
+import ConnectionMenu from 'virtual-reality/utils/menus/connection-menu';
 import WebSocket from './web-socket';
 
 export type ConnectionStatus = 'offline'|'connecting'|'online'|'spectating';
@@ -18,8 +19,6 @@ export default class LocalVrUser extends Service.extend({
 
   userID!: string;
 
-  state!: ConnectionStatus;
-
   color: THREE.Color|undefined;
 
   renderer!: THREE.WebGLRenderer;
@@ -34,6 +33,10 @@ export default class LocalVrUser extends Service.extend({
 
   userGroup!: THREE.Group;
 
+  connectionMenu: ConnectionMenu | null = null;
+
+  connectionStatus: ConnectionStatus = 'offline';
+
   get isOnline() { return this.state === 'online' || this.state === 'spectating'; }
 
   get isOffline() { return this.state === 'offline'; }
@@ -41,6 +44,15 @@ export default class LocalVrUser extends Service.extend({
   get isSpectating() { return this.state === 'spectating'; }
 
   get position() { return this.userGroup.position; }
+
+  get state() { return this.connectionStatus; }
+
+  set state(state: ConnectionStatus) {
+    if (this.connectionMenu) {
+      this.connectionMenu.updateStatus(state);
+    }
+    this.connectionStatus = state;
+  }
 
   init() {
     super.init();
@@ -134,6 +146,7 @@ export default class LocalVrUser extends Service.extend({
   }
 
   connect() {
+    console.log('Start connecting');
     this.state = 'connecting';
     this.webSocket.initSocket();
   }

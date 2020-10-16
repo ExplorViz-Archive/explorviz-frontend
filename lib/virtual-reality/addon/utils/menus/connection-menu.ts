@@ -3,19 +3,26 @@ import TextbuttonItem from './items/textbutton-item';
 import TextItem from './items/text-item';
 
 export default class ConnectionMenu extends BaseMenu {
-  constructor(openMainMenu: () => void) {
-    super();
+  statusText: TextItem;
 
+  connectionButton: TextbuttonItem;
+
+  constructor(openMainMenu: () => void, state: string, connect: (() => void)) {
+    super();
     this.back = openMainMenu;
 
     const title = new TextItem('Connection', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
 
     const statusText = new TextItem('Status: ', 'status', '#ffffff', { x: 256, y: 140 }, 28, 'center');
+    this.statusText = statusText;
     this.items.push(statusText);
 
     const connectionButton = new TextbuttonItem('connect', 'Connect', { x: 100, y: 186 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+    this.connectionButton = connectionButton;
     this.items.push(connectionButton);
+
+    connectionButton.onTriggerDown = connect;
 
     const backButton = new TextbuttonItem('back', 'Back', {
       x: 100,
@@ -25,6 +32,27 @@ export default class ConnectionMenu extends BaseMenu {
     backButton.onTriggerDown = this.back;
 
     this.items.push(backButton);
+
+    this.updateStatus(state);
     this.update();
+  }
+
+  updateStatus(state: string) {
+    if (state === 'offline') {
+      this.statusText.text = 'Status: offline';
+      this.statusText.color = '#ff3a3a';
+      this.connectionButton.text = 'Connect';
+      // menu.setClickable('connect', true);
+    } else if (state === 'connecting') {
+      this.statusText.text = 'Status: connecting';
+      this.statusText.color = '#ff9719';
+      this.connectionButton.text = '...';
+      // menu.setClickable('connect', false);
+    } else if (state === 'connected') {
+      this.statusText.text = 'Status: connected';
+      this.statusText.color = '#3bba2a';
+      this.connectionButton.text = 'Disconnect';
+      // menu.setClickable('connect', true);
+    }
   }
 }

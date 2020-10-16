@@ -4,6 +4,9 @@ import SpectateUser from 'virtual-reality/services/spectate-user';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import debugLogger from 'ember-debug-logger';
+import ConnectionMenu from 'virtual-reality/utils/menus/connection-menu';
+import $ from 'jquery';
+import { bind } from '@ember/runloop';
 import VrRendering from './vr-rendering';
 import Sender from '../utils/sender';
 import * as Helper from '../utils/multi-user-helper';
@@ -25,26 +28,25 @@ export default class VrMultiUser extends VrRendering {
 
   sender!: Sender;
 
-  initThreeJs() {
-    super.initThreeJs();
+  initRendering() {
+    super.initRendering();
+
+    this.initWebSocketCallbacks();
 
     this.sender = new Sender(this.webSocket);
 
     this.localUser.state = 'offline';
 
-    let host; let
-      port;
-    $.getJSON('config/config_multiuser.json').then((json) => {
-      host = json.host;
-      port = json.port;
+    $.getJSON('config/config_multiuser.json').then(bind(this, this.applyConfiguration));
+  }
 
-      if (!host || !port) {
-        this.debug('Config not found!');
-      }
+  initWebSocketCallbacks() {
+    this.webSocket.socketCloseCallback = this.onDisconnect.bind(this);
+  }
 
-      this.webSocket.host = host;
-      this.webSocket.port = port;
-    });
+  applyConfiguration(config: any) {
+    this.webSocket.host = config.host;
+    this.webSocket.port = config.port;
   }
 
   /**
@@ -66,8 +68,8 @@ export default class VrMultiUser extends VrRendering {
     // this.updateControllers();
 
     // this.updateUserNameTags();
-    this.sendPoses();
-    this.webSocket.sendUpdates();
+    // this.sendPoses();
+    // this.webSocket.sendUpdates();
   }
 
   sendPoses() {
@@ -75,5 +77,26 @@ export default class VrMultiUser extends VrRendering {
       this.localUser.controller2);
 
     this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
+  }
+
+  openConnectionMenu() {
+    this.closeCurrentMenu();
+
+    const menu = new ConnectionMenu(
+      this.openMainMenu.bind(this),
+      this.localUser.state,
+      this.localUser.connect.bind(this.localUser),
+    );
+
+    this.menu = menu;
+    this.localUser.connectionMenu = menu;
+    this.controllerMenus.add(menu);
+  }
+
+  onDisconnect() {
+    if (this.localUser.state === 'connecting') {
+      // this.get('menus.hintMenu').showHint('Could not establish connection', 3);
+    }
+    this.localUser.disconnect();
   }
 }
