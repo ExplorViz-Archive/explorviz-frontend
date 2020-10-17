@@ -44,7 +44,8 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
      */
     function calculateCategories(requestsList: number[]) {
       const MIN = Math.min(...requestsList);
-      const AVERAGE = requestsList.reduce((a, b) => a + b) / requestsList.length;
+      const AVERAGE = requestsList.length > 0
+        ? requestsList.reduce((a, b) => a + b) / requestsList.length : Infinity;
       const MAX = Math.max(...requestsList);
       const categories = [0, MIN, AVERAGE, MAX];
 
@@ -156,6 +157,9 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
   * Calculates start and end positions for all drawable communications
   */
   function layoutEdges() {
+    if (drawableClassCommunications.length === 0) {
+      return;
+    }
     for (let i = 0; i < drawableClassCommunications.length; i++) {
       const classCommunication: DrawableClassCommunication = drawableClassCommunications[i];
 
