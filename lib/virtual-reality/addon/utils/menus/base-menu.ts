@@ -152,7 +152,7 @@ export default abstract class BaseMenu extends BaseMesh {
   }
 
   back() {
-    this.deleteFromParent();
-    this.disposeRecursively();
+    super.deleteFromParent();
+    super.disposeRecursively();
   }
 }

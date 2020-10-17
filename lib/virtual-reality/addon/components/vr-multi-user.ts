@@ -80,7 +80,7 @@ export default class VrMultiUser extends VrRendering {
   }
 
   openConnectionMenu() {
-    this.closeCurrentMenu();
+    this.closeControllerMenu();
 
     const menu = new ConnectionMenu(
       this.openMainMenu.bind(this),

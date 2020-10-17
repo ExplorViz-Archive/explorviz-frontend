@@ -1015,12 +1015,12 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   openMainMenu() {
-    this.closeCurrentMenu();
+    this.closeControllerMenu();
 
     if (!this.localUser.controller1) return;
 
     this.mainMenu = new MainMenu(
-      this.closeCurrentMenu.bind(this),
+      this.closeControllerMenu.bind(this),
       this.openCameraMenu.bind(this),
       this.openLandscapeMenu.bind(this),
       this.openSpectateMenu.bind(this),
@@ -1032,7 +1032,7 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   openCameraMenu() {
-    this.closeCurrentMenu();
+    this.closeControllerMenu();
 
     const user = this.localUser;
 
@@ -1042,7 +1042,7 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   openLandscapeMenu() {
-    this.closeCurrentMenu();
+    this.closeControllerMenu();
 
     this.mainMenu = new LandscapeMenu(
       this.openMainMenu.bind(this),
@@ -1055,7 +1055,7 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   openSpectateMenu() {
-    this.closeCurrentMenu();
+    this.closeControllerMenu();
 
     this.mainMenu = new SpectateMenu(
       this.openMainMenu.bind(this),
@@ -1065,7 +1065,7 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   openConnectionMenu() {
-    this.closeCurrentMenu();
+    this.closeControllerMenu();
 
     this.mainMenu = new ConnectionMenu(
       this.openMainMenu.bind(this),
@@ -1077,7 +1077,7 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   openAdvancedMenu() {
-    this.closeCurrentMenu();
+    this.closeControllerMenu();
 
     const user = this.localUser;
 
@@ -1087,22 +1087,22 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   openControlsMenu() {
-    this.closeCurrentMenu();
+    this.closeControllerMenu();
 
     if (!this.localUser.controller1) return;
 
     const { gamepadId } = this.localUser.controller1;
-    const user = this.localUser;
 
     this.mainMenu = new ControlsMenu(this.openAdvancedMenu.bind(this), gamepadId,
-      user.isLefty.bind(user));
+      this.localUser.isLefty.bind(this.localUser));
 
     this.controllerMainMenus.add(this.mainMenu);
   }
 
-  closeCurrentMenu() {
+  closeControllerMenu() {
     if (this.mainMenu) {
       this.controllerMainMenus.remove(this.mainMenu);
+      this.mainMenu.disposeRecursively();
     }
     this.mainMenu = undefined;
   }
