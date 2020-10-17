@@ -85,7 +85,7 @@ export default class VisualizationController extends Controller {
         application = this.landscapeData.application;
         if (application !== undefined) {
           const newApplication = VisualizationController.getApplicationFromLandscapeByPid(
-            application.pid, this.landscapeData.structureLandscapeData,
+            application.pid, structureData,
           );
 
           if (newApplication) {
