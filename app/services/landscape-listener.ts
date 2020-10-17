@@ -3,16 +3,12 @@ import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
 import DS from 'ember-data';
 import { set } from '@ember/object';
-import Timestamp from 'explorviz-frontend/models/timestamp';
 import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 import {
-  preProcessAndEnhanceStructureLandscape, RawStructureLandscapeData, StructureLandscapeData,
+  preProcessAndEnhanceStructureLandscape, StructureLandscapeData,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
-import LandscapeRepository from './repos/landscape-repository';
 import TimestampRepository from './repos/timestamp-repository';
-import TestLandscape from './test-landscape';
-import TestDynamicData from './test-dynamic-data';
 
 export default class LandscapeListener extends Service.extend(Evented) {
   @service('session') session!: any;
@@ -21,81 +17,74 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
-  @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
-
   @service('ajax') ajax!: AjaxServiceClass;
 
   latestStructureData: StructureLandscapeData|null = null;
 
   latestDynamicData: DynamicLandscapeData|null = null;
 
-  pauseVisualizationReload = false;
-
   debug = debugLogger();
 
-  async initLandscapeStructurePolling() {
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    // const { access_token } = this.session.data.authenticated;
+  timer: NodeJS.Timeout|null = null;
 
-    const fulfill = (landscapeStructure: RawStructureLandscapeData) => {
-      set(this, 'latestStructureData', preProcessAndEnhanceStructureLandscape(landscapeStructure));
-    };
+  async initLandscapePolling(intervalInSeconds: number = 10) {
+    this.timer = setInterval(async () => {
+      try {
+        const endTime = Date.now() - (10 * 1000);
+        const [structureData, dynamicData] = await this.requestData(endTime, intervalInSeconds);
 
-    const testStructure: RawStructureLandscapeData = TestLandscape as RawStructureLandscapeData;
-    fulfill(testStructure);
+        this.set('latestStructureData', preProcessAndEnhanceStructureLandscape(structureData));
+
+        this.set('latestDynamicData', dynamicData);
+
+        this.updateTimestampRepoAndTimeline(endTime, LandscapeListener.computeTotalRequests(this.latestDynamicData!));
+
+        this.trigger('newLandscapeData', this.latestStructureData, this.latestDynamicData);
+      } catch (e) {
+        // console.log(e);
+      }
+    }, intervalInSeconds * 1000);
   }
 
-  async initLandscapeDynamicPolling() {
-    const fulfill = (landscapeDynamicData: DynamicLandscapeData) => {
-      this.set('latestDynamicData', landscapeDynamicData);
-      this.landscapeRepo.triggerLatestLandscapeUpdate();
-    };
+  async requestData(endTime: number, intervalInSeconds: number) {
+    const startTime = endTime - (intervalInSeconds * 1000);
 
-    const testDynamic: DynamicLandscapeData = TestDynamicData as DynamicLandscapeData;
-    fulfill(testDynamic);
+    const structureDataPromise = this.requestStructureData(startTime, endTime);
+    const dynamicDataPromise = this.requestDynamicData(startTime, endTime);
+
+    const landscapeData = Promise.all([structureDataPromise, dynamicDataPromise]);
+    return landscapeData;
   }
 
-  requestStructureData() {
-    return new Promise((resolve /* reject */) => {
-      this.ajax.request('http://localhost:32680/v2/landscapes/sample_token/structure')
+  requestStructureData(fromTimestamp: number, toTimestamp: number) {
+    return new Promise<StructureLandscapeData>((resolve /* reject */) => {
+      this.ajax.request('http://localhost:32680/v2/landscapes/fibonacci-sample-landscape/structure')
         /* .then((data: Landscape) => resolve(data)); */
         .then((data: StructureLandscapeData) => resolve(data));
     });
   }
 
-  requestDynamicData() {
-    return new Promise((resolve /* reject */) => {
-      this.ajax.request('http://localhost:32681/v2/landscapes/fibonacci-sample-landscape/dynamic')
+  requestDynamicData(fromTimestamp: number, toTimestamp: number) {
+    return new Promise<DynamicLandscapeData>((resolve /* reject */) => {
+      this.ajax.request(`http://localhost:32681/v2/landscapes/fibonacci-sample-landscape/dynamic?from=${fromTimestamp}&to=${toTimestamp}`)
         .then((data: any) => resolve(data));
     });
   }
 
-  updateTimestampRepoAndTimeline(this: LandscapeListener, timestamp: Timestamp) {
-    set(this.timestampRepo, 'latestTimestamp', timestamp);
+  static computeTotalRequests(dynamicData: DynamicLandscapeData) {
+    const reducer = (accumulator: number, currentValue: number) => accumulator + currentValue;
+    return dynamicData.map((trace) => trace.spanList.length).reduce(reducer);
+  }
+
+  updateTimestampRepoAndTimeline(timestamp: number, totalRequests: number) {
+    const timestampRecord = this.store.createRecord('timestamp', { timestamp, totalRequests });
+    set(this.timestampRepo, 'latestTimestamp', timestampRecord);
 
     // this syntax will notify the template engine to redraw all components
     // with a binding to this attribute
-    set(this.timestampRepo, 'timelineTimestamps', [...this.timestampRepo.timelineTimestamps, timestamp]);
+    set(this.timestampRepo, 'timelineTimestamps', [...this.timestampRepo.timelineTimestamps, timestampRecord]);
 
     this.timestampRepo.triggerTimelineUpdate();
-  }
-
-  toggleVisualizationReload() {
-    // TODO: need to notify the timeline
-    if (this.pauseVisualizationReload) {
-      this.startVisualizationReload();
-    } else {
-      this.stopVisualizationReload();
-    }
-  }
-
-  startVisualizationReload() {
-    set(this, 'pauseVisualizationReload', false);
-    this.trigger('visualizationResumed');
-  }
-
-  stopVisualizationReload() {
-    set(this, 'pauseVisualizationReload', true);
   }
 }
 
