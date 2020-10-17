@@ -93,6 +93,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   boxLayoutMap: Map<string, BoxLayout>;
 
+  drawableClassCommunications: DrawableClassCommunication[] = [];
+
   // Extended Object3D which manages application meshes
   readonly applicationObject3D: ApplicationObject3D;
 
@@ -111,22 +113,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   get font() {
     return this.args.font;
-  }
-
-  get drawableClassCommunications() {
-    const { structureLandscapeData, dynamicLandscapeData, application } = this.args.landscapeData;
-    const drawableClassCommunications = computeDrawableClassCommunication(
-      structureLandscapeData,
-      dynamicLandscapeData,
-    );
-
-    const allClasses = new Set(getAllClassesFromApplication(application!));
-
-    const communicationInApplication = drawableClassCommunications.filter(
-      (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
-    );
-
-    return communicationInApplication;
   }
 
   // #endregion CLASS FIELDS AND GETTERS
@@ -398,6 +384,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       // Restore old state of components
       this.entityManipulation.setComponentState(openComponentIds);
+      this.updateDrawableClassCommunications();
       this.communicationRendering.addCommunication(this.boxLayoutMap,
         this.drawableClassCommunications);
       this.addLabels();
@@ -428,6 +415,22 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         Labeler.addBoxTextLabel(mesh, this.font, foundationTextColor);
       }
     });
+  }
+
+  updateDrawableClassCommunications() {
+    const { structureLandscapeData, dynamicLandscapeData, application } = this.args.landscapeData;
+    const drawableClassCommunications = computeDrawableClassCommunication(
+      structureLandscapeData,
+      dynamicLandscapeData,
+    );
+
+    const allClasses = new Set(getAllClassesFromApplication(application!));
+
+    const communicationInApplication = drawableClassCommunications.filter(
+      (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
+    );
+
+    this.drawableClassCommunications = communicationInApplication;
   }
 
   // #endregion SCENE POPULATION

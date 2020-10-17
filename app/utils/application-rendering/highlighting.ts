@@ -87,6 +87,13 @@ export default class Highlighting {
         if (commMesh) {
           commMesh.turnTransparent();
         }
+        // communication is self-looped and not equal to the highlighted one, i.e. model
+      } else if (isDrawableClassCommunication(model) && sourceClass === targetClass
+        && model !== comm) {
+        const commMesh = this.applicationObject3D.getCommMeshByModelId(id);
+        if (commMesh) {
+          commMesh.turnTransparent();
+        }
       }
     });
 
