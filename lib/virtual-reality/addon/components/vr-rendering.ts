@@ -784,8 +784,11 @@ populateScene = task(function* (this: VrRendering) {
     const componentTextColor = this.configuration.applicationColors.componentText;
     const foundationTextColor = this.configuration.applicationColors.foundationText;
 
-    // Label all entities (excluding communication)
     applicationObject3D.getBoxMeshes().forEach((mesh) => {
+    /* Labeling is time-consuming. Thus, label only visible meshes incrementally
+       as opposed to labeling all meshes up front (as done in application-rendering) */
+      if (!mesh.visible) return;
+
       if (mesh instanceof ClazzMesh) {
         ApplicationLabeler
           .addClazzTextLabel(mesh, this.font, clazzTextColor);
@@ -1119,6 +1122,7 @@ populateScene = task(function* (this: VrRendering) {
 
       if (appObject instanceof ComponentMesh) {
         EntityManipulation.toggleComponentMeshState(appObject, appObject.parent);
+        self.addLabels(appObject.parent);
         self.appCommRendering.addCommunication(appObject.parent);
         Highlighting.updateHighlighting(appObject.parent);
       } else if (appObject instanceof CloseIcon) {
