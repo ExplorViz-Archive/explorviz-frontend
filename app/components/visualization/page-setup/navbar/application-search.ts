@@ -1,25 +1,22 @@
 import GlimmerComponent from '@glimmer/component';
-import { inject as service } from '@ember/service';
 import { task } from 'ember-concurrency-decorators';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import Clazz from 'explorviz-frontend/models/clazz';
-import Component from 'explorviz-frontend/models/component';
 import { action } from '@ember/object';
-import Application from 'explorviz-frontend/models/application';
 import { isBlank } from '@ember/utils';
 import $ from 'jquery';
+import {
+  Application, Class, isClass, isPackage, Package,
+} from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { getAllClassesFromApplication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 
 interface Args {
   application: Application,
   unhighlightAll(): void,
-  highlightModel(entity: Clazz|Component): void,
-  openParents(entity: Clazz|Component): void,
-  closeComponent(component: Component): void
+  highlightModel(entity: Class|Package): void,
+  openParents(entity: Class|Package): void,
+  closeComponent(component: Package): void
 }
 /* eslint-disable require-yield */
 export default class ApplicationSearch extends GlimmerComponent<Args> {
-  @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
-
   componentLabel = '-- Components --';
 
   clazzLabel = '-- Classes --';
@@ -31,23 +28,23 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
   }
 
   @action
-  onSelect(emberPowerSelectObject: any) {
-    if (!emberPowerSelectObject || emberPowerSelectObject.length < 1) {
+  onSelect(emberPowerSelectObject: unknown[]) {
+    if (emberPowerSelectObject.length < 1) {
       return;
     }
 
     const model = emberPowerSelectObject[0];
 
-    this.args.unhighlightAll();
-
-    if (model instanceof Clazz) {
+    if (isClass(model)) {
+      this.args.unhighlightAll();
       this.args.openParents(model);
-    } else if (model instanceof Component) {
+      this.args.highlightModel(model);
+    } else if (isPackage(model)) {
+      this.args.unhighlightAll();
       this.args.openParents(model);
       this.args.closeComponent(model);
+      this.args.highlightModel(model);
     }
-
-    this.args.highlightModel(model);
   }
 
   @task({ restartable: true })
@@ -64,13 +61,9 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
 
     const latestApp = this.args.application;
 
-    if (latestApp === null) {
-      return [];
-    }
-
     // re-calculate since there might be an update to the app (e.g. new class)
-    const components = latestApp.getAllComponents();
-    const clazzes = latestApp.getAllClazzes();
+    const components = ApplicationSearch.getAllPackagesFromApplication(latestApp);
+    const clazzes = getAllClassesFromApplication(latestApp);
     const entities = [];
 
     const maxNumberOfCompNames = 20;
@@ -84,19 +77,23 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
       return clazzNameToCheckAgainst.startsWith(searchWord);
     }
 
+    let isComponentLabelSet = false;
+
     for (let i = 0; i < components.length; i++) {
       if (currentNumberOfCompNames === maxNumberOfCompNames) {
         break;
       }
 
-      const component = components.objectAt(i);
+      const component = components[i];
 
-      if (component) {
-        const componentName = component.name.toLowerCase();
-        if (searchEngineFindsHit(componentName, searchString)) {
-          entities.push(component);
-          currentNumberOfCompNames++;
+      const componentName = component.name.toLowerCase();
+      if (searchEngineFindsHit(componentName, searchString)) {
+        if (!isComponentLabelSet) {
+          isComponentLabelSet = true;
+          entities.push({ name: this.componentLabel });
         }
+        entities.push(component);
+        currentNumberOfCompNames++;
       }
     }
 
@@ -110,21 +107,31 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
         break;
       }
 
-      const clazz = clazzes.objectAt(i);
+      const clazz = clazzes[i];
 
-      if (clazz) {
-        const clazzName = clazz.name.toLowerCase();
-        if (searchEngineFindsHit(clazzName, searchString)) {
-          if (!isClazzLabelSet) {
-            isClazzLabelSet = true;
-            entities.push({ name: this.clazzLabel });
-          }
-
-          entities.push(clazz);
-          currentNumberOfClazzNames++;
+      const clazzName = clazz.name.toLowerCase();
+      if (searchEngineFindsHit(clazzName, searchString)) {
+        if (!isClazzLabelSet) {
+          isClazzLabelSet = true;
+          entities.push({ name: this.clazzLabel });
         }
+
+        entities.push(clazz);
+        currentNumberOfClazzNames++;
       }
     }
     return entities;
   });
+
+  static getAllPackagesFromApplication(application: Application) {
+    function getAllSubpackagesRecursively(component: Package): Package[] {
+      return component.subPackages.map(
+        (subComponent) => [subComponent, ...getAllSubpackagesRecursively(subComponent)],
+      ).flat();
+    }
+
+    return application.packages.map(
+      (component) => [component, ...getAllSubpackagesRecursively(component)],
+    ).flat();
+  }
 }
