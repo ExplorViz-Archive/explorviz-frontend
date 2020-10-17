@@ -4,6 +4,10 @@ import {
 } from '../landscape-schemes/structure-data';
 import { createTraceIdToSpanTrees } from './application-communication-computer';
 
+function isObject(obj: any): obj is object {
+  return Object.prototype.toString.call(obj) === '[object Object]';
+}
+
 function getAllClassesFromPackageRecursively(component: Package) {
   const classes = [];
   classes.push(...component.classes);
@@ -14,7 +18,7 @@ function getAllClassesFromPackageRecursively(component: Package) {
   return classes;
 }
 
-function getAllClassesFromApplication(application: Application) {
+export function getAllClassesFromApplication(application: Application) {
   return application.packages.map((component) => getAllClassesFromPackageRecursively(component))
     .flat();
 }
@@ -139,6 +143,10 @@ export default function computeDrawableClassCommunication(
   const drawableClassCommunications = [...sourceTargetClassIdToDrawable.values()];
 
   return drawableClassCommunications;
+}
+
+export function isDrawableClassCommunication(x: any): x is DrawableClassCommunication {
+  return isObject(x) && Object.prototype.hasOwnProperty.call(x, 'bidirectional');
 }
 
 interface ClassCommunication {
