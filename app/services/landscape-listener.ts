@@ -72,6 +72,10 @@ export default class LandscapeListener extends Service.extend(Evented) {
   }
 
   static computeTotalRequests(dynamicData: DynamicLandscapeData) {
+    // cant't run reduce on empty array
+    if (dynamicData.length === 0) {
+      return 0;
+    }
     const reducer = (accumulator: number, currentValue: number) => accumulator + currentValue;
     return dynamicData.map((trace) => trace.spanList.length).reduce(reducer);
   }
