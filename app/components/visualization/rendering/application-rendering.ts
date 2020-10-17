@@ -305,14 +305,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   handleMouseMove(mesh: THREE.Mesh | undefined) {
-    /*     const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
+    const enableHoverEffects = true;
+    // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
     // Indicate on top of which mesh mouse is located (using a hover effect)
     if (mesh === undefined) {
       this.hoverHandler.resetHoverEffect();
     } else if (mesh instanceof BaseMesh && enableHoverEffects) {
       this.hoverHandler.applyHoverEffect(mesh);
-    } */
+    }
 
     // Hide popups when mouse moves
     this.popupData = null;
