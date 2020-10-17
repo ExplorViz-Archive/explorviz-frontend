@@ -1,8 +1,4 @@
-{{#if @isReplay}}
-  {{add-listener this.landscapeRepo "updatedReplayLandscape" this.onUpdated}}
-{{else}}
-  <div style="display:none" {{did-update this.onUpdated @landscapeData}}></div>
-{{/if}}
+<div style="display:none" {{did-update this.onUpdated @landscapeData}}></div>
 
 <div class="row" style="height:100%">
   <div

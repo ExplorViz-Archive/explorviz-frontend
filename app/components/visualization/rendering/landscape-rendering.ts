@@ -4,9 +4,7 @@ import { action } from '@ember/object';
 import debugLogger from 'ember-debug-logger';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import THREE from 'three';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import Configuration from 'explorviz-frontend/services/configuration';
-import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
@@ -64,14 +62,8 @@ type PopupData = {
 export default class LandscapeRendering extends GlimmerComponent<Args> {
   // #region CLASS FIELDS AND GETTERS
 
-  @service('repos/landscape-repository')
-  landscapeRepo!: LandscapeRepository;
-
   @service('configuration')
   configuration!: Configuration;
-
-  @service('reload-handler')
-  reloadHandler!: ReloadHandler;
 
   @service('current-user')
   currentUser!: CurrentUser;
