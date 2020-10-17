@@ -30,14 +30,17 @@ export default class LandscapeListener extends Service.extend(Evented) {
   async initLandscapePolling(intervalInSeconds: number = 10) {
     this.timer = setInterval(async () => {
       try {
-        const endTime = Date.now() - (10 * 1000);
+        // request landscape data that is 60 seconds old
+        // that way we can be sure, all traces available
+        const endTime = Date.now() - (60 * 1000);
         const [structureData, dynamicData] = await this.requestData(endTime, intervalInSeconds);
 
         this.set('latestStructureData', preProcessAndEnhanceStructureLandscape(structureData));
 
         this.set('latestDynamicData', dynamicData);
 
-        this.updateTimestampRepoAndTimeline(endTime, LandscapeListener.computeTotalRequests(this.latestDynamicData!));
+        this.updateTimestampRepoAndTimeline(endTime,
+          LandscapeListener.computeTotalRequests(this.latestDynamicData!));
 
         this.trigger('newLandscapeData', this.latestStructureData, this.latestDynamicData);
       } catch (e) {
@@ -81,7 +84,20 @@ export default class LandscapeListener extends Service.extend(Evented) {
   }
 
   updateTimestampRepoAndTimeline(timestamp: number, totalRequests: number) {
-    const timestampRecord = this.store.createRecord('timestamp', { timestamp, totalRequests });
+    /**
+     * Generates a unique string ID
+     */
+    //  See: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+    function uuidv4() {
+      /* eslint-disable */
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+      /* eslint-enable */
+    }
+
+    const timestampRecord = this.store.createRecord('timestamp', { id: uuidv4(), timestamp, totalRequests });
     set(this.timestampRepo, 'latestTimestamp', timestampRecord);
 
     // this syntax will notify the template engine to redraw all components
