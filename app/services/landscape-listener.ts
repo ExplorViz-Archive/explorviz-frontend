@@ -44,7 +44,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
         this.trigger('newLandscapeData', this.latestStructureData, this.latestDynamicData);
       } catch (e) {
-        // console.log(e);
+        // landscape data could not be requested, try again?
       }
     }, intervalInSeconds * 1000);
   }
@@ -60,17 +60,18 @@ export default class LandscapeListener extends Service.extend(Evented) {
   }
 
   requestStructureData(fromTimestamp: number, toTimestamp: number) {
-    return new Promise<StructureLandscapeData>((resolve /* reject */) => {
+    return new Promise<StructureLandscapeData>((resolve, reject) => {
       this.ajax.request('http://localhost:32680/v2/landscapes/fibonacci-sample-landscape/structure')
-        /* .then((data: Landscape) => resolve(data)); */
-        .then((data: StructureLandscapeData) => resolve(data));
+        .then((data: StructureLandscapeData) => resolve(data))
+        .catch((e) => reject(e));
     });
   }
 
   requestDynamicData(fromTimestamp: number, toTimestamp: number) {
-    return new Promise<DynamicLandscapeData>((resolve /* reject */) => {
+    return new Promise<DynamicLandscapeData>((resolve, reject) => {
       this.ajax.request(`http://localhost:32681/v2/landscapes/fibonacci-sample-landscape/dynamic?from=${fromTimestamp}&to=${toTimestamp}`)
-        .then((data: any) => resolve(data));
+        .then((data: any) => resolve(data))
+        .catch((e) => reject(e));
     });
   }
 
