@@ -4,13 +4,11 @@ import debugLogger from 'ember-debug-logger';
 import THREE from 'three';
 import { inject as service } from '@ember/service';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import DS from 'ember-data';
 import Configuration from 'explorviz-frontend/services/configuration';
 import Clazz from 'explorviz-frontend/models/clazz';
 import CurrentUser from 'explorviz-frontend/services/current-user';
-import Component from 'explorviz-frontend/models/component';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
@@ -30,9 +28,9 @@ import { task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 import {
-  Class, Package,
+  Class, isClass, Package,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import computeDrawableClassCommunication, { DrawableClassCommunication, getAllClassesFromApplication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 
 interface Args {
@@ -70,9 +68,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @service('current-user')
   currentUser!: CurrentUser;
-
-  @service('repos/landscape-repository')
-  landscapeRepo!: LandscapeRepository;
 
   @service()
   worker!: any;
@@ -119,13 +114,19 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   get drawableClassCommunications() {
-    const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
+    const { structureLandscapeData, dynamicLandscapeData, application } = this.args.landscapeData;
     const drawableClassCommunications = computeDrawableClassCommunication(
       structureLandscapeData,
       dynamicLandscapeData,
     );
 
-    return drawableClassCommunications;
+    const allClasses = new Set(getAllClassesFromApplication(application!));
+
+    const communicationInApplication = drawableClassCommunications.filter(
+      (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
+    );
+
+    return communicationInApplication;
   }
 
   // #endregion CLASS FIELDS AND GETTERS
@@ -286,7 +287,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.highlighter.removeHighlighting();
     } else if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
-      this.highlighter.highlight(mesh);
+      this.highlighter.highlight(mesh, this.drawableClassCommunications);
     }
   }
 
@@ -464,10 +465,22 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    * @param entity Component or Clazz of which the mesh parents shall be opened
    */
   @action
-  openParents(entity: Component|Clazz) {
-    const ancestors = entity.getAllAncestorComponents();
+  openParents(entity: Package|Class) {
+    function getAllAncestorComponents(entity: Package|Class): Package[] {
+      if (isClass(entity)) {
+        return getAllAncestorComponents(entity.parent);
+      }
+
+      if (entity.parent === undefined) {
+        return [];
+      }
+
+      return [entity.parent, ...getAllAncestorComponents(entity.parent)];
+    }
+
+    const ancestors = getAllAncestorComponents(entity);
     ancestors.forEach((anc) => {
-      const ancestorMesh = this.applicationObject3D.getBoxMeshbyModelId(anc.get('id'));
+      const ancestorMesh = this.applicationObject3D.getBoxMeshbyModelId(anc.id);
       if (ancestorMesh instanceof ComponentMesh) {
         this.entityManipulation.openComponentMesh(ancestorMesh);
       }
@@ -483,8 +496,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    * @param component Data model of the component which shall be closed
    */
   @action
-  closeComponent(component: Component) {
-    const mesh = this.applicationObject3D.getBoxMeshbyModelId(component.get('id'));
+  closeComponent(component: Package) {
+    const mesh = this.applicationObject3D.getBoxMeshbyModelId(component.id);
     if (mesh instanceof ComponentMesh) {
       this.entityManipulation.closeComponentMesh(mesh);
     }
@@ -517,8 +530,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    * @param entity Component or clazz which shall be highlighted
    */
   @action
-  highlightModel(entity: Component|Clazz) {
-    this.highlighter.highlightModel(entity);
+  highlightModel(entity: Package|Class) {
+    this.highlighter.highlightModel(entity, this.drawableClassCommunications);
   }
 
   /**
