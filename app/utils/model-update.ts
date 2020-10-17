@@ -96,7 +96,7 @@ export default function addDrawableCommunication(store: DS.Store) {
   }
 
   // Remove outdated communication from store
-  store.unloadAll('drawableclazzcommunication');
+  // store.unloadAll('drawableclazzcommunication');
 
   const applications = store.peekAll('application');
 

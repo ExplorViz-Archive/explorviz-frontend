@@ -4,7 +4,7 @@ import { module, test } from 'qunit';
 module('Unit | Utility | controls-menu', function(/* hooks */) {
 
   test('it exists', function(assert) {
-    let result = new ControlsMenu();
+    let result = new ControlsMenu(() => {}, 'test', () => {return true ;});
     assert.ok(result);
   });
 });

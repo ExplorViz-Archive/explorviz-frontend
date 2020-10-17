@@ -53,6 +53,8 @@ import AdvancedMenu from 'virtual-reality/utils/menus/advanced-menu';
 import SpectateMenu from 'virtual-reality/utils/menus/spectate-menu';
 import ConnectionMenu from 'virtual-reality/utils/menus/connection-menu';
 import ControlsMenu from 'virtual-reality/utils/menus/controls-menu';
+import DetailInfoMenu from 'virtual-reality/utils/menus/detail-info-menu';
+import composeContent, { DetailedInfo } from 'virtual-reality/utils/detail-info-composer';
 
 interface Args {
   readonly id: string;
@@ -108,7 +110,9 @@ export default class VrRendering extends Component<Args> {
   // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
 
-  controllerMenus: THREE.Group;
+  controllerMainMenus: THREE.Group;
+
+  controllerInfoMenus: THREE.Group;
 
   // Depth of boxes for landscape entities
   landscapeDepth: number;
@@ -123,7 +127,9 @@ export default class VrRendering extends Component<Args> {
 
   closeButtonTexture: THREE.Texture;
 
-  menu: BaseMenu|undefined;
+  mainMenu: BaseMenu|undefined;
+
+  infoMenu: DetailInfoMenu|undefined;
 
   landscapeOffset = new THREE.Vector3();
 
@@ -156,11 +162,17 @@ export default class VrRendering extends Component<Args> {
     this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
 
-    this.controllerMenus = new THREE.Group();
-    this.controllerMenus.position.y += 0.15;
-    this.controllerMenus.position.z -= 0.15;
-    this.controllerMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
-    this.localUser.controllerMenus = this.controllerMenus;
+    this.controllerMainMenus = new THREE.Group();
+    this.controllerMainMenus.position.y += 0.15;
+    this.controllerMainMenus.position.z -= 0.15;
+    this.controllerMainMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
+    this.localUser.controllerMainMenus = this.controllerMainMenus;
+
+    this.controllerInfoMenus = new THREE.Group();
+    this.controllerInfoMenus.position.y += 0.15;
+    this.controllerInfoMenus.position.z -= 0.15;
+    this.controllerInfoMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
+    this.localUser.controllerInfoMenus = this.controllerInfoMenus;
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
 
@@ -266,7 +278,7 @@ export default class VrRendering extends Component<Args> {
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
       [this.landscapeObject3D, this.applicationGroup, this.floor,
-        this.controllerMenus], {
+        this.controllerMainMenus, this.controllerInfoMenus], {
         singleClick: this.handleSingleClick,
         doubleClick: this.handleDoubleClick,
         mouseWheel: this.handleMouseWheel,
@@ -285,7 +297,7 @@ export default class VrRendering extends Component<Args> {
 
   initControllers() {
     const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor,
-      this.controllerMenus];
+      this.controllerMainMenus, this.controllerInfoMenus];
 
     // Init secondary/utility controller
     const raySpace1 = this.renderer.xr.getController(0);
@@ -293,17 +305,20 @@ export default class VrRendering extends Component<Args> {
 
     // Event callbacks
     this.onInteractionTriggerDown = this.onInteractionTriggerDown.bind(this);
+    this.onInteractionMenuDown = this.onInteractionMenuDown.bind(this);
     this.onInteractionGripUp = this.onInteractionGripUp.bind(this);
 
     const callbacks1 = {
       triggerDown: this.onInteractionTriggerDown,
       triggerPress: VrRendering.onInteractionTriggerPress,
+      menuDown: this.onInteractionMenuDown,
       gripDown: VrRendering.onInteractionGripDown,
       gripUp: this.onInteractionGripUp,
     };
     const controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
       raySpace1, callbacks1, this.scene);
     controller1.addRay(new THREE.Color('red'));
+    controller1.raySpace.add(this.controllerInfoMenus);
     controller1.intersectableObjects = intersectableObjects;
 
     this.localUser.controller1 = controller1;
@@ -324,7 +339,7 @@ export default class VrRendering extends Component<Args> {
     const controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
       raySpace2, callbacks2, this.scene);
     controller2.addRay(new THREE.Color('blue'));
-    controller2.raySpace.add(this.controllerMenus);
+    controller2.raySpace.add(this.controllerMainMenus);
     controller2.intersectableObjects = intersectableObjects;
     controller2.initTeleportArea();
 
@@ -339,6 +354,22 @@ export default class VrRendering extends Component<Args> {
 
     if (object.parent instanceof ApplicationObject3D && controller.ray) {
       controller.grabObject(object.parent);
+    }
+  }
+
+  onInteractionMenuDown(controller: VRController) {
+    if (!controller.intersectedObject) {
+      this.closeInfoMenu();
+      return;
+    }
+
+    const { object } = controller.intersectedObject;
+
+    const content = composeContent(object);
+    if (content) {
+      this.openInfoMenu(content);
+    } else {
+      this.closeInfoMenu();
     }
   }
 
@@ -872,8 +903,8 @@ populateScene = task(function* (this: VrRendering) {
   }
 
   onUtilityMenuDown() {
-    if (this.menu) {
-      this.menu.back();
+    if (this.mainMenu) {
+      this.mainMenu.back();
     } else {
       this.openMainMenu();
     }
@@ -972,7 +1003,7 @@ populateScene = task(function* (this: VrRendering) {
 
     if (!this.localUser.controller1) return;
 
-    this.menu = new MainMenu(
+    this.mainMenu = new MainMenu(
       this.closeCurrentMenu.bind(this),
       this.openCameraMenu.bind(this),
       this.openLandscapeMenu.bind(this),
@@ -981,7 +1012,7 @@ populateScene = task(function* (this: VrRendering) {
       this.openAdvancedMenu.bind(this),
     );
 
-    this.controllerMenus.add(this.menu);
+    this.controllerMainMenus.add(this.mainMenu);
   }
 
   openCameraMenu() {
@@ -989,44 +1020,44 @@ populateScene = task(function* (this: VrRendering) {
 
     const user = this.localUser;
 
-    this.menu = new CameraMenu(this.openMainMenu.bind(this), user.getCameraDelta.bind(user),
+    this.mainMenu = new CameraMenu(this.openMainMenu.bind(this), user.getCameraDelta.bind(user),
       user.changeCameraHeight.bind(user));
-    this.controllerMenus.add(this.menu);
+    this.controllerMainMenus.add(this.mainMenu);
   }
 
   openLandscapeMenu() {
     this.closeCurrentMenu();
 
-    this.menu = new LandscapeMenu(
+    this.mainMenu = new LandscapeMenu(
       this.openMainMenu.bind(this),
       this.moveLandscape.bind(this),
       this.rotateLandscape.bind(this),
       this.resetLandscapePosition.bind(this),
     );
 
-    this.controllerMenus.add(this.menu);
+    this.controllerMainMenus.add(this.mainMenu);
   }
 
   openSpectateMenu() {
     this.closeCurrentMenu();
 
-    this.menu = new SpectateMenu(
+    this.mainMenu = new SpectateMenu(
       this.openMainMenu.bind(this),
     );
 
-    this.controllerMenus.add(this.menu);
+    this.controllerMainMenus.add(this.mainMenu);
   }
 
   openConnectionMenu() {
     this.closeCurrentMenu();
 
-    this.menu = new ConnectionMenu(
+    this.mainMenu = new ConnectionMenu(
       this.openMainMenu.bind(this),
       this.localUser.state,
       () => { this.debug('Online mode disabled.'); },
     );
 
-    this.controllerMenus.add(this.menu);
+    this.controllerMainMenus.add(this.mainMenu);
   }
 
   openAdvancedMenu() {
@@ -1034,9 +1065,9 @@ populateScene = task(function* (this: VrRendering) {
 
     const user = this.localUser;
 
-    this.menu = new AdvancedMenu(this.openMainMenu.bind(this), this.openControlsMenu.bind(this),
+    this.mainMenu = new AdvancedMenu(this.openMainMenu.bind(this), this.openControlsMenu.bind(this),
       user.isLefty.bind(user), user.swapControls.bind(user), this.resetAll.bind(this));
-    this.controllerMenus.add(this.menu);
+    this.controllerMainMenus.add(this.mainMenu);
   }
 
   openControlsMenu() {
@@ -1047,17 +1078,32 @@ populateScene = task(function* (this: VrRendering) {
     const { gamepadId } = this.localUser.controller1;
     const user = this.localUser;
 
-    this.menu = new ControlsMenu(this.openAdvancedMenu.bind(this), gamepadId,
+    this.mainMenu = new ControlsMenu(this.openAdvancedMenu.bind(this), gamepadId,
       user.isLefty.bind(user));
 
-    this.controllerMenus.add(this.menu);
+    this.controllerMainMenus.add(this.mainMenu);
   }
 
   closeCurrentMenu() {
-    if (this.menu) {
-      this.controllerMenus.remove(this.menu);
-      this.menu = undefined;
+    if (this.mainMenu) {
+      this.controllerMainMenus.remove(this.mainMenu);
     }
+    this.mainMenu = undefined;
+  }
+
+  openInfoMenu(content: DetailedInfo) {
+    this.closeInfoMenu();
+
+    this.infoMenu = new DetailInfoMenu(this.closeInfoMenu.bind(this), content);
+
+    this.controllerInfoMenus.add(this.infoMenu);
+  }
+
+  closeInfoMenu() {
+    if (this.infoMenu) {
+      this.controllerInfoMenus.remove(this.infoMenu);
+    }
+    this.infoMenu = undefined;
   }
 
   // #endregion MENUS

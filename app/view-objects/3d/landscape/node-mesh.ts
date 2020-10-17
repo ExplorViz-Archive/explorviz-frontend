@@ -35,7 +35,7 @@ export default class NodeMesh extends PlaneMesh {
    *
    * @param parent The parent mesh of this node
    */
-  getDisplayName(parent: THREE.Mesh | undefined) {
+  getDisplayName(parent: THREE.Mesh | undefined = undefined) {
     const node = this.dataModel;
 
     // Display ip address as default name

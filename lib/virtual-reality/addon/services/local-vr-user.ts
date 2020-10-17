@@ -29,7 +29,9 @@ export default class LocalVrUser extends Service.extend({
 
   controller2: VRController|undefined;
 
-  controllerMenus: THREE.Group|undefined;
+  controllerMainMenus: THREE.Group|undefined;
+
+  controllerInfoMenus: THREE.Group|undefined;
 
   userGroup!: THREE.Group;
 
@@ -87,11 +89,12 @@ export default class LocalVrUser extends Service.extend({
         controller.control = controlMode.UTILITY;
         controller.addRay(new THREE.Color('blue'));
 
-        if (this.controllerMenus) controller.raySpace.add(this.controllerMenus);
+        if (this.controllerMainMenus) controller.raySpace.add(this.controllerMainMenus);
         controller.initTeleportArea();
       } else {
         controller.control = controlMode.INTERACTION;
         controller.addRay(new THREE.Color('red'));
+        if (this.controllerInfoMenus) controller.raySpace.add(this.controllerInfoMenus);
       }
     });
 
