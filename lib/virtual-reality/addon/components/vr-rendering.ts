@@ -55,6 +55,7 @@ import ConnectionMenu from 'virtual-reality/utils/menus/connection-menu';
 import ControlsMenu from 'virtual-reality/utils/menus/controls-menu';
 import DetailInfoMenu from 'virtual-reality/utils/menus/detail-info-menu';
 import composeContent, { DetailedInfo } from 'virtual-reality/utils/detail-info-composer';
+import HintMenu from 'explorviz-frontend/utils/menus/hint-menu';
 
 interface Args {
   readonly id: string;
@@ -130,6 +131,8 @@ export default class VrRendering extends Component<Args> {
   mainMenu: BaseMenu|undefined;
 
   infoMenu: DetailInfoMenu|undefined;
+
+  hintMenu: HintMenu|undefined;
 
   landscapeOffset = new THREE.Vector3();
 
@@ -991,7 +994,7 @@ populateScene = task(function* (this: VrRendering) {
         this.openMainMenu();
         break;
       case 'h':
-        this.localUser.swapControls();
+        this.showHint('TEST');
         break;
       default:
         break;
@@ -1000,6 +1003,16 @@ populateScene = task(function* (this: VrRendering) {
   // #endregion MOUSE & KEYBOARD EVENT HANDLER
 
   // #region MENUS
+
+  showHint(title: string, text: string|null = null) {
+    if (this.hintMenu) {
+      this.hintMenu.back();
+      this.hintMenu = undefined;
+    }
+    const hintMenu = new HintMenu(this.camera, title, text);
+    this.hintMenu = hintMenu;
+    hintMenu.startAnimation();
+  }
 
   openMainMenu() {
     this.closeCurrentMenu();

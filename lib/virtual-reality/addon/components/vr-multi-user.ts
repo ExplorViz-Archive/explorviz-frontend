@@ -88,9 +88,9 @@ export default class VrMultiUser extends VrRendering {
       this.localUser.connect.bind(this.localUser),
     );
 
-    this.menu = menu;
+    this.mainMenu = menu;
     this.localUser.connectionMenu = menu;
-    this.controllerMenus.add(menu);
+    this.controllerMainMenus.add(menu);
   }
 
   onDisconnect() {

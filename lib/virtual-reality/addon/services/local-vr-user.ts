@@ -149,7 +149,6 @@ export default class LocalVrUser extends Service.extend({
   }
 
   connect() {
-    console.log('Start connecting');
     this.state = 'connecting';
     this.webSocket.initSocket();
   }

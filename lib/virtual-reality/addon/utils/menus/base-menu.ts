@@ -1,8 +1,9 @@
 import THREE from 'three';
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import Item from './items/item';
 import InteractiveItem from './items/interactive-item';
 
-export default abstract class BaseMenu extends THREE.Mesh {
+export default abstract class BaseMenu extends BaseMesh {
   canvas: HTMLCanvasElement;
 
   resolution: { width: number, height: number };
@@ -12,9 +13,6 @@ export default abstract class BaseMenu extends THREE.Mesh {
   color: string;
 
   lastHoveredItem: InteractiveItem|undefined;
-
-  // Exptected to be overwritten by nested menus
-  back: () => void;
 
   get opacity() {
     const material = this.material as THREE.Material;
@@ -30,16 +28,17 @@ export default abstract class BaseMenu extends THREE.Mesh {
     const material = new THREE.MeshBasicMaterial({
       color: new THREE.Color(color),
     });
-    super(new THREE.PlaneGeometry(
+    super(new THREE.Color(color));
+
+    this.geometry = new THREE.PlaneGeometry(
       (resolution.width / 512) * 0.3,
       (resolution.height / 512) * 0.3,
-    ),
-    material);
+    );
+    this.material = material;
 
     this.resolution = resolution;
     this.color = color;
     this.items = [];
-    this.back = () => {};
 
     this.canvas = document.createElement('canvas');
     this.canvas.width = this.resolution.width;
@@ -74,10 +73,10 @@ export default abstract class BaseMenu extends THREE.Mesh {
     const item = this.getItem(uv) as InteractiveItem|undefined;
 
     if (this.lastHoveredItem && !item) {
-      this.lastHoveredItem.removeHoverEffect();
+      this.lastHoveredItem.resetHoverEffect();
       this.lastHoveredItem = undefined;
     } else if (this.lastHoveredItem && item && this.lastHoveredItem !== item) {
-      this.lastHoveredItem.removeHoverEffect();
+      this.lastHoveredItem.resetHoverEffect();
       item.enableHoverEffect();
       this.lastHoveredItem = item;
     } else if (!this.lastHoveredItem && item) {
@@ -88,9 +87,12 @@ export default abstract class BaseMenu extends THREE.Mesh {
     this.update();
   }
 
-  removeHoverEffect() {
+  // eslint-disable-next-line
+  applyHoverEffect() {}
+
+  resetHoverEffect() {
     if (this.lastHoveredItem) {
-      this.lastHoveredItem.removeHoverEffect();
+      this.lastHoveredItem.resetHoverEffect();
       this.lastHoveredItem = undefined;
     }
 
@@ -147,5 +149,10 @@ export default abstract class BaseMenu extends THREE.Mesh {
 
   getItemById(id: string) {
     return this.items.find((item) => item.id === id);
+  }
+
+  back() {
+    this.deleteFromParent();
+    this.disposeRecursively();
   }
 }

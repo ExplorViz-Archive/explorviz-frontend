@@ -13,7 +13,7 @@ export default abstract class InteractiveItem extends Item {
     this.isHovered = true;
   }
 
-  removeHoverEffect() {
+  resetHoverEffect() {
     this.isHovered = false;
   }
 }
