@@ -21,9 +21,6 @@
         <Visualization::PageSetup::Navbar::ColorPickerOpener
           @addComponent={{@addComponent}}
         />
-        <Visualization::PageSetup::Navbar::EventOpener
-          @addComponent={{@addComponent}}
-        />
         <Visualization::PageSetup::Navbar::LandscapeDownloader
           @landscape={{@landscape}}
         />
@@ -60,9 +57,6 @@
         {{#each @components as |componentName|}}
           <div class="card mb-3">
             <div class="card-body d-flex flex-column">
-              {{#if (eq componentName "event-viewer")}}
-                <Visualization::PageSetup::Sidebar::EventViewer />
-              {{/if}}
               {{#if (eq componentName "color-picker")}}
                 <Visualization::PageSetup::Sidebar::ColorPicker
                   @isLandscapeView={{true}}
