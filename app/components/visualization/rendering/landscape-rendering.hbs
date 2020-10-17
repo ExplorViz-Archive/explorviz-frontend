@@ -1,7 +1,7 @@
 {{#if @isReplay}}
   {{add-listener this.landscapeRepo "updatedReplayLandscape" this.onUpdated}}
 {{else}}
-  {{add-listener this.landscapeRepo "updatedLatestLandscape" this.onUpdated}}
+  <div style="display:none" {{did-update this.onUpdated @landscapeData}}></div>
 {{/if}}
 
 <div class="row" style="height:100%">
@@ -14,7 +14,10 @@
         <Visualization::PageSetup::Navbar::ResetVisualization
           @resetView={{this.resetView}}
         />
-        <Visualization::PageSetup::Navbar::PauseReload />
+        <Visualization::PageSetup::Navbar::PauseReload
+          @toggleVisualizationUpdating={{@toggleVisualizationUpdating}}
+          @visualizationPaused={{@visualizationPaused}}
+        />
         <Visualization::PageSetup::Navbar::ColorPickerOpener
           @addComponent={{@addComponent}}
         />

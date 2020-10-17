@@ -5,11 +5,11 @@
     this.onLandscapeUpdated
   }}
 {{else}}
-  {{add-listener
-    this.landscapeRepo
-    "updatedLatestLandscape"
-    this.onLandscapeUpdated
-  }}
+  <div
+    style="display:none"
+    {{did-update this.onLandscapeUpdated @landscapeData}}
+  >
+  </div>
 {{/if}}
 
 <div class="row" style="height:100%">
@@ -22,7 +22,10 @@
         <Visualization::PageSetup::Navbar::ResetVisualization
           @resetView={{this.resetView}}
         />
-        <Visualization::PageSetup::Navbar::PauseReload />
+        <Visualization::PageSetup::Navbar::PauseReload
+          @toggleVisualizationUpdating={{@toggleVisualizationUpdating}}
+          @visualizationPaused={{@visualizationPaused}}
+        />
         <Visualization::PageSetup::Navbar::ColorPickerOpener
           @addComponent={{@addComponent}}
         />
@@ -36,7 +39,7 @@
           @openAllComponents={{this.openAllComponents}}
         />
         <Visualization::PageSetup::Navbar::ApplicationSearch
-          @application={{@application}}
+          @application={{@landscapeData.application}}
           @unhighlightAll={{this.unhighlightAll}}
           @openParents={{this.openParents}}
           @closeComponent={{this.closeComponent}}

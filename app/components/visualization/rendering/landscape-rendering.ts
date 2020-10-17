@@ -25,17 +25,18 @@ import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import { Application, Node, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
+import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 
 interface Args {
   readonly id: string;
-  readonly structureData: StructureLandscapeData;
-  readonly dynamicData: DynamicLandscapeData;
+  readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
   readonly isReplay: boolean;
+  readonly visualizationPaused: boolean;
   showApplication(application: Application): void;
+  toggleVisualizationUpdating(): void;
 }
 
 interface SimplePlaneLayout {
@@ -131,7 +132,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.render = this.render.bind(this);
 
-    this.landscapeObject3D = new LandscapeObject3D(this.args.structureData);
+    this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
   }
 
   @action
@@ -364,7 +365,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @task
   // eslint-disable-next-line
   loadNewLandscape = task(function* (this: LandscapeRendering) {
-    this.landscapeObject3D.dataModel = this.args.structureData;
+    this.landscapeObject3D.dataModel = this.args.landscapeData.structureLandscapeData;
     yield this.populateScene.perform();
   });
 
@@ -378,17 +379,19 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   populateScene = task(function* (this: LandscapeRendering) {
     this.debug('populate landscape-rendering');
 
-    const { structureData, dynamicData } = this.args;
-    this.landscapeObject3D.dataModel = structureData;
+    const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
+    this.landscapeObject3D.dataModel = structureLandscapeData;
 
     // Run Klay layouting in 3 steps within workers
     try {
-      const applicationCommunications = computeApplicationCommunication(structureData, dynamicData);
+      const applicationCommunications = computeApplicationCommunication(structureLandscapeData,
+        dynamicLandscapeData);
+
       // Do layout pre-processing (1st step)
       const {
         graph,
         modelIdToPoints,
-      }: any = yield this.worker.postMessage('layout1', { structureData, applicationCommunications });
+      }: any = yield this.worker.postMessage('layout1', { structureLandscapeData, applicationCommunications });
 
       // Run actual klay function (2nd step)
       const newGraph: any = yield this.worker.postMessage('klay', { graph });
@@ -397,7 +400,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
-        structureData,
+        structureLandscapeData,
         applicationCommunications,
       });
 
@@ -422,7 +425,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
 
       // Render all landscape entities
-      const { nodes } = structureData;
+      const { nodes } = structureLandscapeData;
 
       // Draw boxes for nodes
       nodes.forEach((node) => {
@@ -440,6 +443,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       // Render application communication
 
       const color = this.configuration.landscapeColors.communication;
+
       const tiles = CommunicationRendering.computeCommunicationTiles(applicationCommunications,
         modelIdToPointsComplete, color);
 

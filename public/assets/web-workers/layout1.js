@@ -1,8 +1,8 @@
 // Wait for the initial message event.
 self.addEventListener('message', function(e) {
-  let { structureData, applicationCommunications } = e.data;
+  let { structureLandscapeData, applicationCommunications } = e.data;
 
-  let kielerGraph = layout1(structureData, applicationCommunications);
+  let kielerGraph = layout1(structureLandscapeData, applicationCommunications);
   postMessage(kielerGraph);
 }, false);
 

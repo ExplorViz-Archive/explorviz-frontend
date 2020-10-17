@@ -1,22 +1,13 @@
+{{add-listener
+  this.landscapeListener
+  "newLandscapeData"
+  this.receiveNewLandscapeData
+}}
+
 <div class="row" style="max-height:100%">
   <div class="col-12" id="vizspace">
-    {{#if this.showLandscape}}
-      {{#if
-        (and this.landscapeListener.latestStructureData.nodes this.landscapeListener.latestDynamicData)
-      }}
-        <Visualization::Rendering::LandscapeRendering
-          @id="landscape1"
-          @structureData={{this.landscapeListener.latestStructureData}}
-          @dynamicData={{this.landscapeListener.latestDynamicData}}
-          @font={{@model}}
-          @components={{this.components}}
-          @removeComponent={{this.removeComponent}}
-          @closeDataSelection={{this.closeDataSelection}}
-          @showDataSelection={{this.showDataSelection}}
-          @addComponent={{this.addComponent}}
-          @showApplication={{this.showApplication}}
-        />
-      {{else if this.landscapeListener.latestJsonLandscape}}
+    {{#if this.showLandscapeView}}
+      {{#if this.isLandscapeExistendAndEmpty}}
         <div class="container-fluid">
           <div class="jumbotron">
             <h2>Empty Landscape received!</h2>
@@ -24,6 +15,20 @@
           </div>
           <div class="spinner-center-3" role="status"></div>
         </div>
+      {{else if this.allLandscapeDataExistsAndNotEmpty}}
+        <Visualization::Rendering::LandscapeRendering
+          @id="landscape1"
+          @landscapeData={{this.landscapeData}}
+          @font={{@model}}
+          @components={{this.components}}
+          @removeComponent={{this.removeComponent}}
+          @closeDataSelection={{this.closeDataSelection}}
+          @showDataSelection={{this.showDataSelection}}
+          @addComponent={{this.addComponent}}
+          @showApplication={{this.showApplication}}
+          @toggleVisualizationUpdating={{this.toggleVisualizationUpdating}}
+          @visualizationPaused={{this.visualizationPaused}}
+        />
       {{else}}
         <div class="container-fluid">
           <div class="jumbotron">
@@ -33,21 +38,19 @@
           <div class="spinner-center-3" role="status"></div>
         </div>
       {{/if}}
-    {{else}}
-      {{#if (and this.landscapeRepo.latestApplication this.landscapeListener.latestDynamicData)}}
-        <Visualization::Rendering::ApplicationRendering
-          @id="app1"
-          @application={{this.landscapeRepo.latestApplication}}
-          @structureData={{this.landscapeListener.latestStructureData}}
-          @dynamicData={{this.landscapeListener.latestDynamicData}}
-          @addComponent={{this.addComponent}}
-          @font={{@model}}
-          @components={{this.components}}
-          @removeComponent={{this.removeComponent}}
-          @closeDataSelection={{this.closeDataSelection}}
-          @showDataSelection={{this.showDataSelection}}
-        />
-      {{/if}}
+    {{else if this.showApplicationView}}
+      <Visualization::Rendering::ApplicationRendering
+        @id="app1"
+        @landscapeData={{this.landscapeData}}
+        @addComponent={{this.addComponent}}
+        @font={{@model}}
+        @components={{this.components}}
+        @removeComponent={{this.removeComponent}}
+        @closeDataSelection={{this.closeDataSelection}}
+        @showDataSelection={{this.showDataSelection}}
+        @toggleVisualizationUpdating={{this.toggleVisualizationUpdating}}
+        @visualizationPaused={{this.visualizationPaused}}
+      />
     {{/if}}
     {{!-- timeline --}}
     <div id="timeline-content">
@@ -77,7 +80,7 @@
     </div>
   </div>
 </div>
-{{#unless this.showLandscape}}
+{{#unless this.showLandscapeView}}
   <div style="position: absolute!important">
     <BsButton
       @onClick={{this.openLandscapeView}}

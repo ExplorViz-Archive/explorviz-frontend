@@ -1,8 +1,8 @@
 // Wait for the initial message event.
 self.addEventListener('message', function(e) {
-  let { structureData, modelIdToPoints, graph, applicationCommunications } = e.data;
+  let { structureLandscapeData, modelIdToPoints, graph, applicationCommunications } = e.data;
 
-  let landscape = layout3(structureData, modelIdToPoints, graph, applicationCommunications);
+  let landscape = layout3(structureLandscapeData, modelIdToPoints, graph, applicationCommunications);
   postMessage(landscape);
 }, false);
 

@@ -30,18 +30,18 @@ import { task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 import {
-  Application, Class, Package, StructureLandscapeData,
+  Class, Package,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 
 interface Args {
-  readonly id: string,
-  readonly application: Application,
-  readonly structureData: StructureLandscapeData;
-  readonly dynamicData: DynamicLandscapeData;
-  readonly font: THREE.Font,
-  addComponent(componentPath: string): void // is passed down to the viz navbar
+  readonly id: string;
+  readonly landscapeData: LandscapeData;
+  readonly font: THREE.Font;
+  readonly visualizationPaused: boolean;
+  addComponent(componentPath: string): void; // is passed down to the viz navbar
+  toggleVisualizationUpdating(): void;
 }
 
 type PopupData = {
@@ -118,6 +118,16 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     return this.args.font;
   }
 
+  get drawableClassCommunications() {
+    const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
+    const drawableClassCommunications = computeDrawableClassCommunication(
+      structureLandscapeData,
+      dynamicLandscapeData,
+    );
+
+    return drawableClassCommunications;
+  }
+
   // #endregion CLASS FIELDS AND GETTERS
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -128,7 +138,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.render = this.render.bind(this);
 
-    this.applicationObject3D = new ApplicationObject3D(this.args.application);
+    this.applicationObject3D = new ApplicationObject3D(this.args.landscapeData.application!);
 
     this.boxLayoutMap = new Map();
 
@@ -170,9 +180,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     // Display application nicely for first rendering
     this.entityManipulation.applyDefaultApplicationLayout();
-    const drawableClassCommunications = computeDrawableClassCommunication(this.args.structureData,
-      this.args.dynamicData);
-    this.communicationRendering.addCommunication(this.boxLayoutMap, drawableClassCommunications);
+    this.communicationRendering.addCommunication(this.boxLayoutMap,
+      this.drawableClassCommunications);
     this.applicationObject3D.resetRotation();
   }
 
@@ -285,7 +294,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
       this.entityManipulation.toggleComponentMeshState(mesh);
-      /* this.communicationRendering.addCommunication(this.boxLayoutMap); */
+      this.communicationRendering.addCommunication(this.boxLayoutMap,
+        this.drawableClassCommunications);
       this.highlighter.updateHighlighting();
     // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
@@ -363,7 +373,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @task
   // eslint-disable-next-line
   loadNewApplication = task(function* (this: ApplicationRendering) {
-    this.applicationObject3D.dataModel = this.args.application;
+    this.applicationObject3D.dataModel = this.args.landscapeData.application!;
     yield this.populateScene.perform();
   });
 
@@ -371,8 +381,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // eslint-disable-next-line
   populateScene = task(function* (this: ApplicationRendering) {
     try {
-      const drawableClassCommunications = computeDrawableClassCommunication(this.args.structureData,
-        this.args.dynamicData);
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', this.applicationObject3D.dataModel);
 
       // Converting plain JSON layout data due to worker limitations
@@ -388,7 +396,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       // Restore old state of components
       this.entityManipulation.setComponentState(openComponentIds);
-      this.communicationRendering.addCommunication(this.boxLayoutMap, drawableClassCommunications);
+      this.communicationRendering.addCommunication(this.boxLayoutMap,
+        this.drawableClassCommunications);
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
@@ -463,7 +472,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.entityManipulation.openComponentMesh(ancestorMesh);
       }
     });
-    /* this.communicationRendering.addCommunication(this.boxLayoutMap); */
+    this.communicationRendering.addCommunication(this.boxLayoutMap,
+      this.drawableClassCommunications);
     this.highlighter.updateHighlighting();
   }
 
@@ -478,7 +488,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (mesh instanceof ComponentMesh) {
       this.entityManipulation.closeComponentMesh(mesh);
     }
-    /* this.communicationRendering.addCommunication(this.boxLayoutMap); */
+    this.communicationRendering.addCommunication(this.boxLayoutMap,
+      this.drawableClassCommunications);
     this.highlighter.updateHighlighting();
   }
 
@@ -495,7 +506,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.entityManipulation.openComponentsRecursively(child);
     });
 
-    /*  this.communicationRendering.addCommunication(this.boxLayoutMap); */
+    this.communicationRendering.addCommunication(this.boxLayoutMap,
+      this.drawableClassCommunications);
     this.highlighter.updateHighlighting();
   }
 
