@@ -15,6 +15,7 @@ import { tracked } from '@glimmer/tracking';
 import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
+import debugLogger from 'ember-debug-logger';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
@@ -57,6 +58,8 @@ export default class VisualizationController extends Controller {
   @tracked
   visualizationPaused = false;
 
+  debug = debugLogger();
+
   get showLandscapeView() {
     return (this.landscapeData !== null && this.landscapeData.application === undefined)
       || this.landscapeData === null;
@@ -80,25 +83,30 @@ export default class VisualizationController extends Controller {
   receiveNewLandscapeData(structureData: StructureLandscapeData,
     dynamicData: DynamicLandscapeData) {
     if (!this.visualizationPaused) {
-      let application;
-      if (this.landscapeData !== null) {
-        application = this.landscapeData.application;
-        if (application !== undefined) {
-          const newApplication = VisualizationController.getApplicationFromLandscapeByPid(
-            application.pid, structureData,
-          );
+      this.updateLandscape(structureData, dynamicData);
+    }
+  }
 
-          if (newApplication) {
-            application = newApplication;
-          }
+  updateLandscape(structureData: StructureLandscapeData,
+    dynamicData: DynamicLandscapeData) {
+    let application;
+    if (this.landscapeData !== null) {
+      application = this.landscapeData.application;
+      if (application !== undefined) {
+        const newApplication = VisualizationController.getApplicationFromLandscapeByPid(
+          application.pid, structureData,
+        );
+
+        if (newApplication) {
+          application = newApplication;
         }
       }
-      this.landscapeData = {
-        structureLandscapeData: structureData,
-        dynamicLandscapeData: dynamicData,
-        application,
-      };
     }
+    this.landscapeData = {
+      structureLandscapeData: structureData,
+      dynamicLandscapeData: dynamicData,
+      application,
+    };
   }
 
   private static getApplicationFromLandscapeByPid(pid: string,
@@ -180,9 +188,23 @@ export default class VisualizationController extends Controller {
   }
 
   @action
-  timelineClicked(timestampRecordArray: Timestamp[]) {
-    set(this, 'selectedTimestampRecords', timestampRecordArray);
-    get(this, 'reloadHandler').loadLandscapeById(timestampRecordArray[0].get('timestamp'));
+  async timelineClicked(timestampRecordArray: Timestamp[]) {
+    if (this.selectedTimestampRecords.length > 0
+      && timestampRecordArray[0] === this.selectedTimestampRecords[0]) {
+      return;
+    }
+    this.pauseVisualizationUpdating();
+    try {
+      const [structureData, dynamicData] = await
+      this.reloadHandler.loadLandscapeByTimestamp(timestampRecordArray[0].get('timestamp'));
+
+      this.updateLandscape(structureData, dynamicData);
+      set(this, 'selectedTimestampRecords', timestampRecordArray);
+    } catch (e) {
+      this.debug('Landscape couldn\'t be requested!', e);
+      AlertifyHandler.showAlertifyMessage('Landscape couldn\'t be requested!');
+      this.resumeVisualizationUpdating();
+    }
   }
 
   @action
@@ -207,15 +229,19 @@ export default class VisualizationController extends Controller {
   }
 
   resumeVisualizationUpdating() {
-    this.visualizationPaused = false;
-    set(this, 'selectedTimestampRecords', []);
-    get(this, 'plotlyTimelineRef').resetHighlighting();
-    AlertifyHandler.showAlertifyMessage('Visualization resumed!');
+    if (this.visualizationPaused) {
+      this.visualizationPaused = false;
+      set(this, 'selectedTimestampRecords', []);
+      get(this, 'plotlyTimelineRef').resetHighlighting();
+      AlertifyHandler.showAlertifyMessage('Visualization resumed!');
+    }
   }
 
   pauseVisualizationUpdating() {
-    this.visualizationPaused = true;
-    AlertifyHandler.showAlertifyMessage('Visualization paused!');
+    if (!this.visualizationPaused) {
+      this.visualizationPaused = true;
+      AlertifyHandler.showAlertifyMessage('Visualization paused!');
+    }
   }
 
   initRendering() {
