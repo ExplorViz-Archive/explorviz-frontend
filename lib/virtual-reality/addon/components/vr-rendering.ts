@@ -56,6 +56,7 @@ import ControlsMenu from 'virtual-reality/utils/menus/controls-menu';
 import DetailInfoMenu from 'virtual-reality/utils/menus/detail-info-menu';
 import composeContent, { DetailedInfo } from 'virtual-reality/utils/detail-info-composer';
 import HintMenu from 'explorviz-frontend/utils/menus/hint-menu';
+import UserListMenu from 'virtual-reality/utils/menus/user-list-menu';
 
 interface Args {
   readonly id: string;
@@ -485,10 +486,10 @@ export default class VrRendering extends Component<Args> {
   // @ts-ignore
   @task({ restartable: true })
   // eslint-disable-next-line
-populateScene = task(function* (this: VrRendering) {
+populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|null = null) {
     this.debug('populate landscape-rendering');
 
-    const { openEntityIds } = this.landscapeObject3D;
+    const openEntityIds = openedEntities || this.landscapeObject3D.openEntityIds;
     const emberLandscape = this.args.landscape;
 
     this.landscapeObject3D.dataModel = emberLandscape;
@@ -732,10 +733,9 @@ populateScene = task(function* (this: VrRendering) {
   // @ts-ignore
   @task({ restartable: true })
   // eslint-disable-next-line
-  addApplication = task(function* (this: VrRendering, landscapeApp: ApplicationMesh, origin: THREE.Vector3) {
+  addApplication = task(function* (this: VrRendering, applicationModel: Application, origin: THREE.Vector3) {
 
     try {
-      const applicationModel = landscapeApp.dataModel;
       const reducedApplication = reduceApplication(applicationModel);
 
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', reducedApplication);
@@ -810,33 +810,45 @@ populateScene = task(function* (this: VrRendering) {
   // #region LANDSCAPE MANIPULATION
 
   @task
-  // eslint-disable-next-line
-  openNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
+  openNodeGroupAndRedrawTask = task(function* (this: VrRendering, nodeGroupMesh: NodeGroupMesh) {
+    this.openNodeGroupAndRedraw(nodeGroupMesh);
+  });
+
+  async openNodeGroupAndRedraw(nodeGroupMesh: NodeGroupMesh) {
     nodeGroupMesh.opened = true;
-    yield this.cleanAndUpdateScene();
-  });
+    await this.cleanAndUpdateScene();
+  }
 
   @task
-  // eslint-disable-next-line
-  closeNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
+  closeNodeGroupAndRedrawTask = task(function* (this: VrRendering, nodeGroupMesh: NodeGroupMesh) {
+    this.closeNodeGroupAndRedraw(nodeGroupMesh);
+  });
+
+  async closeNodeGroupAndRedraw(nodeGroupMesh: NodeGroupMesh) {
     nodeGroupMesh.opened = false;
-    yield this.cleanAndUpdateScene();
-  });
+    await this.cleanAndUpdateScene();
+  }
 
   @task
-  // eslint-disable-next-line
-  openSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
+  openSystemAndRedrawTask = task(function* (this: VrRendering, systemMesh: SystemMesh) {
+    yield this.openSystemAndRedraw(systemMesh);
+  });
+
+  async openSystemAndRedraw(systemMesh: SystemMesh) {
     systemMesh.opened = true;
-    yield this.cleanAndUpdateScene();
-  });
+    await this.cleanAndUpdateScene();
+  }
 
   @task
-  // eslint-disable-next-line
-  closeSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
+  closeSystemAndRedrawTask = task(function* (this: VrRendering, systemMesh: SystemMesh) {
+    yield this.closeSystemAndRedraw(systemMesh);
+  });
+
+  async closeSystemAndRedraw(systemMesh: SystemMesh) {
     systemMesh.opened = false;
     this.closeNogeGroupsInSystem(systemMesh);
-    yield this.cleanAndUpdateScene();
-  });
+    await this.cleanAndUpdateScene();
+  }
 
   /**
    * Toggles the open status of a system mesh and redraws the landscape
@@ -845,9 +857,9 @@ populateScene = task(function* (this: VrRendering) {
    */
   toggleSystemAndRedraw(systemMesh: SystemMesh) {
     if (systemMesh.opened) {
-      this.closeSystemAndRedraw.perform(systemMesh);
+      this.closeSystemAndRedrawTask.perform(systemMesh);
     } else {
-      this.openSystemAndRedraw.perform(systemMesh);
+      this.openSystemAndRedrawTask.perform(systemMesh);
     }
   }
 
@@ -858,9 +870,9 @@ populateScene = task(function* (this: VrRendering) {
    */
   toggleNodeGroupAndRedraw(nodeGroupMesh: NodeGroupMesh) {
     if (nodeGroupMesh.opened) {
-      this.closeNodeGroupAndRedraw.perform(nodeGroupMesh);
+      this.closeNodeGroupAndRedrawTask.perform(nodeGroupMesh);
     } else {
-      this.openNodeGroupAndRedraw.perform(nodeGroupMesh);
+      this.openNodeGroupAndRedrawTask.perform(nodeGroupMesh);
     }
   }
 
@@ -982,7 +994,7 @@ populateScene = task(function* (this: VrRendering) {
         this.moveLandscape(0, 0, mvDst);
         break;
       case 'c':
-        this.centerLandscape();
+        this.localUser.connect();
         break;
       case 'r':
         this.resetLandscapePosition();
@@ -994,7 +1006,7 @@ populateScene = task(function* (this: VrRendering) {
         this.openMainMenu();
         break;
       case 'h':
-        this.showHint('TEST');
+        this.showUserList();
         break;
       default:
         break;
@@ -1003,6 +1015,11 @@ populateScene = task(function* (this: VrRendering) {
   // #endregion MOUSE & KEYBOARD EVENT HANDLER
 
   // #region MENUS
+
+  showUserList() {
+    const menu = new UserListMenu(this.localUser, []);
+    this.camera.add(menu);
+  }
 
   showHint(title: string, text: string|null = null) {
     if (this.hintMenu) {
@@ -1152,7 +1169,7 @@ populateScene = task(function* (this: VrRendering) {
     } else if (object instanceof NodeGroupMesh) {
       this.toggleNodeGroupAndRedraw(object);
     } else if (object instanceof ApplicationMesh) {
-      this.addApplication.perform(object, intersection.point);
+      this.addApplication.perform(object.dataModel, intersection.point);
     // Handle application hits
     } else if (object.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
