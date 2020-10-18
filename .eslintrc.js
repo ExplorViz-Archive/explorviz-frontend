@@ -24,7 +24,8 @@ module.exports = {
     'import/no-cycle': 'off',
     'prefer-rest-params': 'off',
     "@typescript-eslint/type-annotation-spacing": ["error"],
-    "no-param-reassign": ["error", { "props": false }]
+    "no-param-reassign": ["error", { "props": false }],
+    'func-names': ["error", "always", { "generators": "never" }]
   },
   overrides: [
     // node files

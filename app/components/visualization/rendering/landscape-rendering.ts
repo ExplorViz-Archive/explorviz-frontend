@@ -370,7 +370,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   // #region SCENE POPULATION
 
   @task
-  // eslint-disable-next-line
   loadNewLandscape = task(function* (this: LandscapeRendering) {
     const emberLandscape = this.args.landscape;
     this.landscapeObject3D.dataModel = emberLandscape;
@@ -385,7 +384,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  */
   // @ts-ignore
   @task({ restartable: true })
-  // eslint-disable-next-line
+
   populateScene = task(function* (this: LandscapeRendering) {
     this.debug('populate landscape-rendering');
 
@@ -601,28 +600,25 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   // #region SCENE MANIPULATION
 
   @task
-  // eslint-disable-next-line
   openNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
     nodeGroupMesh.opened = true;
     yield this.cleanAndUpdateScene();
   });
 
   @task
-  // eslint-disable-next-line
-  closeNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
+  closeNodeGroupAndRedraw = task(function* (this: LandscapeRendering,
+    nodeGroupMesh: NodeGroupMesh) {
     nodeGroupMesh.opened = false;
     yield this.cleanAndUpdateScene();
   });
 
   @task
-  // eslint-disable-next-line
   openSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
     systemMesh.opened = true;
     yield this.cleanAndUpdateScene();
   });
 
   @task
-  // eslint-disable-next-line
   closeSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
     systemMesh.opened = false;
     this.closeNogeGroupsInSystem(systemMesh);
