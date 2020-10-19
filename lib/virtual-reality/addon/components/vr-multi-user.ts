@@ -14,7 +14,7 @@ import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh
 import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
 import VrRendering from 'virtual-reality/components/vr-rendering';
 import Sender from 'virtual-reality/utils/vr-multi-user/sender';
-import * as Helper from 'virtual-reality/utils/vr-helper/multi-user-helper';
+import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
 
 export default class VrMultiUser extends VrRendering {
   debug = debugLogger('VrMultiUser');

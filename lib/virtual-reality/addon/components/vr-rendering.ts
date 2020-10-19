@@ -54,7 +54,7 @@ import SpectateMenu from 'virtual-reality/utils/vr-menus/spectate-menu';
 import ConnectionMenu from 'virtual-reality/utils/vr-menus/connection-menu';
 import ControlsMenu from 'virtual-reality/utils/vr-menus/controls-menu';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
-import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helper/detail-info-composer';
+import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
 import UserListMenu from 'virtual-reality/utils/vr-menus/user-list-menu';
 

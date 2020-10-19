@@ -4,9 +4,9 @@ import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
 import XRControllerModel from '../lib/controller/XRControllerModel';
 import { MotionController } from '../lib/controller/motion-controllers.module';
-import FloorMesh from '../view-objects/floor-mesh';
-import TeleportMesh from '../view-objects/teleport-mesh';
-import BaseMenu from '../menus/base-menu';
+import FloorMesh from '../view-objects/vr/floor-mesh';
+import TeleportMesh from '../view-objects/vr/teleport-mesh';
+import BaseMenu from '../vr-menus/base-menu';
 
 type CallbackFunctions = {
   connected? (controller: VRController, event: THREE.Event): void,

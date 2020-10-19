@@ -1,4 +1,4 @@
-import { DetailedInfo } from '../helper/detail-info-composer';
+import { DetailedInfo } from '../vr-helpers/detail-info-composer';
 import BaseMenu from './base-menu';
 import RectangleItem from './items/rectangle-item';
 import TextItem from './items/text-item';

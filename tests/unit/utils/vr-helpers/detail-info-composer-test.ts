@@ -1,8 +1,8 @@
-import composeContent from 'explorviz-frontend/utils/vr-helper/detail-info-composer';
+import composeContent from 'explorviz-frontend/utils/vr-helpers/detail-info-composer';
 import { module, test } from 'qunit';
 import THREE from 'three';
 
-module('Unit | Utility | vr-helper/detail-info-composer', function(/* hooks */) {
+module('Unit | Utility | vr-helpers/detail-info-composer', function(/* hooks */) {
 
   test('it exists', function(assert) {
     let result = composeContent(new THREE.Object3D());

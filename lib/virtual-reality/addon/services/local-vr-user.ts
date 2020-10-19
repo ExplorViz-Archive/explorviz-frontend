@@ -1,9 +1,9 @@
 import Service, { inject as service } from '@ember/service';
 
 import THREE from 'three';
-import VRController, { controlMode } from 'virtual-reality/utils/VRController';
+import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VRController';
 import DS from 'ember-data';
-import ConnectionMenu from 'virtual-reality/utils/menus/connection-menu';
+import ConnectionMenu from 'virtual-reality/utils/vr-menus/connection-menu';
 import WebSocket from './web-socket';
 
 export type ConnectionStatus = 'offline'|'connecting'|'online'|'spectating';
