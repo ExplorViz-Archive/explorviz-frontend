@@ -155,6 +155,13 @@ export default class ApplicationObject3D extends THREE.Object3D {
     return openComponentIds;
   }
 
+  setHighlightingColor(color: THREE.Color) {
+    this.getAllMeshes().forEach((mesh) => {
+      mesh.highlightingColor = color;
+      mesh.updateColor();
+    });
+  }
+
   /**
    * Clears all class maps and sets, i.e.
    *

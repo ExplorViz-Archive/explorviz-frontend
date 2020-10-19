@@ -20,6 +20,9 @@ import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/compon
 import Application from 'explorviz-frontend/models/application';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import DS from 'ember-data';
+import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
+import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
+import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 
 export default class VrMultiUser extends VrRendering {
   debug = debugLogger('VrMultiUser');
@@ -119,6 +122,20 @@ export default class VrMultiUser extends VrRendering {
       }));
   }
 
+  highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
+    if (this.localUser.color) {
+      application.setHighlightingColor(this.localUser.color);
+    }
+
+    super.highlightAppEntity(object, application);
+
+    if (object instanceof ComponentMesh || object instanceof ClazzMesh
+      || object instanceof ClazzCommunicationMesh) {
+      this.sender.sendHighlightingUpdate(application.dataModel.id, object.constructor.name,
+        object.dataModel.id, object.highlighted);
+    }
+  }
+
   removeApplication(application: ApplicationObject3D) {
     super.removeApplication(application);
 
@@ -159,6 +176,12 @@ export default class VrMultiUser extends VrRendering {
 
     this.idToRemoteUser.forEach((user) => {
       user.removeAllObjects3D();
+    });
+
+    this.applicationGroup.children.forEach((child) => {
+      if (child instanceof ApplicationObject3D) {
+        child.setHighlightingColor(this.configuration.applicationColors.highlightedEntity);
+      }
     });
 
     this.idToRemoteUser.clear();
@@ -222,6 +245,7 @@ export default class VrMultiUser extends VrRendering {
         this.onComponentUpdate(data.isFoundation, data.appID, data.componentID);
         break;
       case 'hightlighting_update':
+        this.onHighlightingUpdate(data);
         break;
       case 'spectating_update':
         break;
@@ -253,7 +277,7 @@ export default class VrMultiUser extends VrRendering {
     // TODO: Access name, given by session
     const name = `ID: ${data.id}`;
     this.localUser.userID = data.id;
-    this.localUser.color = data.color;
+    this.localUser.color = new THREE.Color().fromArray(data.color);
 
     const JSONObj = {
       event: 'connect_request',
@@ -493,6 +517,36 @@ export default class VrMultiUser extends VrRendering {
       EntityManipulation.closeAllComponents(applicationObject3D);
     } else if (componentMesh instanceof ComponentMesh) {
       super.toggleComponentAndUpdate(componentMesh, applicationObject3D);
+    }
+  }
+
+  onHighlightingUpdate(update: {
+    userID: string, isHighlighted: boolean, appID: string, entityType: string, entityID: string,
+  }) {
+    const user = this.idToRemoteUser.get(update.userID);
+    const applicationObject3D = this.applicationGroup.getApplication(update.appID);
+
+    if (!applicationObject3D || !user || !user.color) return;
+
+    if (!update.isHighlighted) {
+      Highlighting.removeHighlighting(applicationObject3D);
+      return;
+    }
+
+    // Highlight entities in the respective user color
+    applicationObject3D.setHighlightingColor(new THREE.Color().fromArray(user.color));
+
+    // Apply highlighting
+    if (update.entityType === 'ComponentMesh' || update.entityType === 'ClazzMesh') {
+      const boxMesh = applicationObject3D.getBoxMeshbyModelId(update.entityID);
+      if (boxMesh instanceof ComponentMesh || boxMesh instanceof ClazzMesh) {
+        Highlighting.highlight(boxMesh, applicationObject3D);
+      }
+    } else {
+      const commMesh = applicationObject3D.getCommMeshByModelId(update.entityID);
+      if (commMesh instanceof ClazzCommunicationMesh) {
+        Highlighting.highlight(commMesh, applicationObject3D);
+      }
     }
   }
 

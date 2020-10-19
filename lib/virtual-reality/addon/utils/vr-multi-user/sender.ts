@@ -164,24 +164,19 @@ export default class Sender {
   /**
  * Informs the backend that an entity (clazz or component) was highlighted
  * or unhighlighted
- * @param {boolean} isHighlighted Tells whether the entity has been highlighted or not
  * @param {string} appID ID of the parent application of the entity
+ * @param {string} entityType Tells whether a clazz/component or communication was updated
  * @param {string} entityID ID of the highlighted/unhighlighted component/clazz
- * @param {string} color Original color of the entity as hex value
+ * @param {boolean} isHighlighted Tells whether the entity has been highlighted or not
  */
-  sendHighlightingUpdate(userID: string, isHighlighted: boolean, appID: string, entityID: string,
-    sourceClazzID: string, targetClazzID: string, color: any) {
-    // TODO update method documentation
-
+  sendHighlightingUpdate(appID: string, entityType: string,
+    entityID: string, isHighlighted: boolean) {
     const hightlightObj = {
       event: 'hightlighting_update',
-      userID,
       appID,
+      entityType,
       entityID,
-      sourceClazzID,
-      targetClazzID,
       isHighlighted,
-      color: color instanceof Color ? color.getStyle() : color,
     };
     this.webSocket.enqueueIfOpen(hightlightObj);
   }

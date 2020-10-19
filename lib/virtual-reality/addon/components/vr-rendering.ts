@@ -735,35 +735,39 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
   // eslint-disable-next-line
   addApplicationTask = task(function* (this: VrRendering, applicationModel: Application, origin: THREE.Vector3, 
     callback?: (applicationObject3D: ApplicationObject3D) => void) {
-    const reducedApplication = reduceApplication(applicationModel);
+    try {
+      const reducedApplication = reduceApplication(applicationModel);
 
-    const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', reducedApplication);
+      const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', reducedApplication);
 
-    // Converting plain JSON layout data due to worker limitations
-    const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
+      // Converting plain JSON layout data due to worker limitations
+      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
 
-    const applicationObject3D = new ApplicationObject3D(applicationModel, boxLayoutMap);
+      const applicationObject3D = new ApplicationObject3D(applicationModel, boxLayoutMap);
 
-    // Add new meshes to application
-    EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
-      this.configuration.applicationColors);
+      // Add new meshes to application
+      EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
+        this.configuration.applicationColors);
 
-    this.appCommRendering.addCommunication(applicationObject3D);
+      this.appCommRendering.addCommunication(applicationObject3D);
 
-    // Add labels and close icon to application
-    this.addLabels(applicationObject3D);
-    const closeIcon = new CloseIcon(this.closeButtonTexture);
-    closeIcon.addToApplication(applicationObject3D);
+      // Add labels and close icon to application
+      this.addLabels(applicationObject3D);
+      const closeIcon = new CloseIcon(this.closeButtonTexture);
+      closeIcon.addToApplication(applicationObject3D);
 
-    // Scale application to a reasonable size to work with it
-    const scalar = this.applicationScalar;
-    applicationObject3D.scale.set(scalar, scalar, scalar);
+      // Scale application to a reasonable size to work with it
+      const scalar = this.applicationScalar;
+      applicationObject3D.scale.set(scalar, scalar, scalar);
 
-    this.positionApplication(applicationObject3D, origin);
+      this.positionApplication(applicationObject3D, origin);
 
-    this.applicationGroup.addApplication(applicationObject3D);
+      this.applicationGroup.addApplication(applicationObject3D);
 
-    if (callback) callback(applicationObject3D);
+      if (callback) callback(applicationObject3D);
+    } catch (e: any) {
+      this.debug(e);
+    }
   });
 
   addApplication(applicationModel: Application, origin: THREE.Vector3) {
@@ -1193,10 +1197,15 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
     if (object instanceof FloorMesh) {
       this.localUser.teleportToPosition(point);
     } else if (object.parent instanceof ApplicationObject3D) {
-      if (object instanceof ComponentMesh || object instanceof ClazzMesh
+      this.highlightAppEntity(object, object.parent);
+    }
+  }
+
+  // eslint-disable-next-line
+  highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
+    if (object instanceof ComponentMesh || object instanceof ClazzMesh
       || object instanceof ClazzCommunicationMesh) {
-        Highlighting.highlight(object, object.parent);
-      }
+      Highlighting.highlight(object, application);
     }
   }
 
