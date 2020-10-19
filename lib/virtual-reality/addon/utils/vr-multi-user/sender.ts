@@ -1,7 +1,8 @@
 import WebSocket from 'virtual-reality/services/web-socket';
 import {
-  Vector3 as V3, Quaternion as Q, Color, Object3D,
+  Vector3 as V3, Quaternion as Q, Color,
 } from 'three';
+import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
 export default class Sender {
@@ -173,7 +174,7 @@ export default class Sender {
     // TODO update method documentation
 
     const hightlightObj = {
-      event: 'hightlight_update',
+      event: 'hightlighting_update',
       userID,
       appID,
       entityID,
@@ -215,22 +216,22 @@ export default class Sender {
   /**
  * Inform the backend that an app was opened by this
  * user
- * @param {string} id ID of nodegroup which was opened/closed
- * @param {boolean} isOpen State of the nodegroup
+ * @param ApplicationObject3D Opened application
  */
-  sendAppOpened(id: string, app: Object3D) {
+  sendAppOpened(application: ApplicationObject3D) {
     const position = new V3();
-    app.getWorldPosition(position);
+    application.getWorldPosition(position);
 
     const quaternion = new Q();
-    app.getWorldQuaternion(quaternion);
+    application.getWorldQuaternion(quaternion);
 
     const appObj = {
       event: 'app_opened',
-      id,
+      id: application.dataModel.id,
       position: position.toArray(),
       quaternion: quaternion.toArray(),
     };
+
     this.webSocket.enqueueIfOpen(appObj);
   }
 }

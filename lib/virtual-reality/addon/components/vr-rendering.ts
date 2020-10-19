@@ -733,40 +733,42 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
   // @ts-ignore
   @task({ restartable: true })
   // eslint-disable-next-line
-  addApplication = task(function* (this: VrRendering, applicationModel: Application, origin: THREE.Vector3) {
+  addApplicationTask = task(function* (this: VrRendering, applicationModel: Application, origin: THREE.Vector3, 
+    callback?: (applicationObject3D: ApplicationObject3D) => void) {
+    const reducedApplication = reduceApplication(applicationModel);
 
-    try {
-      const reducedApplication = reduceApplication(applicationModel);
+    const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', reducedApplication);
 
-      const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', reducedApplication);
+    // Converting plain JSON layout data due to worker limitations
+    const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
 
-      // Converting plain JSON layout data due to worker limitations
-      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
+    const applicationObject3D = new ApplicationObject3D(applicationModel, boxLayoutMap);
 
-      const applicationObject3D = new ApplicationObject3D(applicationModel, boxLayoutMap);
+    // Add new meshes to application
+    EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
+      this.configuration.applicationColors);
 
-      // Add new meshes to application
-      EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
-        this.configuration.applicationColors);
+    this.appCommRendering.addCommunication(applicationObject3D);
 
-      this.appCommRendering.addCommunication(applicationObject3D);
+    // Add labels and close icon to application
+    this.addLabels(applicationObject3D);
+    const closeIcon = new CloseIcon(this.closeButtonTexture);
+    closeIcon.addToApplication(applicationObject3D);
 
-      // Add labels and close icon to application
-      this.addLabels(applicationObject3D);
-      const closeIcon = new CloseIcon(this.closeButtonTexture);
-      closeIcon.addToApplication(applicationObject3D);
+    // Scale application to a reasonable size to work with it
+    const scalar = this.applicationScalar;
+    applicationObject3D.scale.set(scalar, scalar, scalar);
 
-      // Scale application to a reasonable size to work with it
-      const scalar = this.applicationScalar;
-      applicationObject3D.scale.set(scalar, scalar, scalar);
+    this.positionApplication(applicationObject3D, origin);
 
-      this.positionApplication(applicationObject3D, origin);
+    this.applicationGroup.addApplication(applicationObject3D);
 
-      this.applicationGroup.addApplication(applicationObject3D);
-    } catch (e) {
-      // console.log(e);
-    }
+    if (callback) callback(applicationObject3D);
   });
+
+  addApplication(applicationModel: Application, origin: THREE.Vector3) {
+    this.addApplicationTask.perform(applicationModel, origin);
+  }
 
   positionApplication(applicationObject3D: ApplicationObject3D, origin: THREE.Vector3) {
     // Rotate app so that it is aligned with landscape
@@ -1151,16 +1153,11 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
       if (!(appObject.parent instanceof ApplicationObject3D)) return;
 
       if (appObject instanceof ComponentMesh) {
-        EntityManipulation.toggleComponentMeshState(appObject, appObject.parent);
-        self.addLabels(appObject.parent);
-        self.appCommRendering.addCommunication(appObject.parent);
-        Highlighting.updateHighlighting(appObject.parent);
+        self.toggleComponentAndUpdate(appObject, appObject.parent);
       } else if (appObject instanceof CloseIcon) {
-        self.applicationGroup.removeApplicationById(appObject.parent.dataModel.id);
+        self.removeApplication(appObject.parent);
       } else if (appObject instanceof FoundationMesh) {
-        EntityManipulation.closeAllComponents(appObject.parent);
-        self.appCommRendering.addCommunication(appObject.parent);
-        Highlighting.updateHighlighting(appObject.parent);
+        self.closeAllComponentsAndUpdate(appObject.parent);
       }
     }
 
@@ -1169,13 +1166,26 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
     } else if (object instanceof NodeGroupMesh) {
       this.toggleNodeGroupAndRedraw(object);
     } else if (object instanceof ApplicationMesh) {
-      this.addApplication.perform(object.dataModel, intersection.point);
+      this.addApplication(object.dataModel, intersection.point);
     // Handle application hits
     } else if (object.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
     } else if (object instanceof BaseMenu && uv) {
       object.triggerDown(uv);
     }
+  }
+
+  toggleComponentAndUpdate(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
+    EntityManipulation.toggleComponentMeshState(componentMesh, applicationObject3D);
+    this.addLabels(applicationObject3D);
+    this.appCommRendering.addCommunication(applicationObject3D);
+    Highlighting.updateHighlighting(applicationObject3D);
+  }
+
+  closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
+    EntityManipulation.closeAllComponents(applicationObject3D);
+    this.appCommRendering.addCommunication(applicationObject3D);
+    Highlighting.updateHighlighting(applicationObject3D);
   }
 
   handleSecondaryInputOn(intersection: THREE.Intersection) {
@@ -1250,6 +1260,10 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
   closeLandscapeSystems() {
     this.landscapeObject3D.markAllSystemsAsClosed();
     this.populateScene.perform();
+  }
+
+  removeApplication(application: ApplicationObject3D) {
+    this.applicationGroup.removeApplicationById(application.dataModel.id);
   }
 
   resetAll() {

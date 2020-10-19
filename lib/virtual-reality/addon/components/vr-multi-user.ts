@@ -16,6 +16,10 @@ import Sender from 'virtual-reality/utils/vr-multi-user/sender';
 import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import MessageBoxMenu from 'virtual-reality/utils/vr-menus/message-box-menu';
+import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
+import Application from 'explorviz-frontend/models/application';
+import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import DS from 'ember-data';
 
 export default class VrMultiUser extends VrRendering {
   debug = debugLogger('VrMultiUser');
@@ -31,6 +35,9 @@ export default class VrMultiUser extends VrRendering {
 
   @service('spectate-user')
   spectateUser!: SpectateUser;
+
+  @service()
+  store!: DS.Store;
 
   sender!: Sender;
 
@@ -105,6 +112,32 @@ export default class VrMultiUser extends VrRendering {
     this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
   }
 
+  addApplication(applicationModel: Application, origin: THREE.Vector3) {
+    super.addApplicationTask.perform(applicationModel, origin,
+      ((applicationObject3D: ApplicationObject3D) => {
+        this.sender.sendAppOpened(applicationObject3D);
+      }));
+  }
+
+  removeApplication(application: ApplicationObject3D) {
+    super.removeApplication(application);
+
+    this.sender.sendAppClosed(application.dataModel.id);
+  }
+
+  toggleComponentAndUpdate(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
+    super.toggleComponentAndUpdate(componentMesh, applicationObject3D);
+
+    this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, componentMesh.dataModel.id,
+      componentMesh.opened, false);
+  }
+
+  closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
+    super.closeAllComponentsAndUpdate(applicationObject3D);
+
+    this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, '', false, true);
+  }
+
   openConnectionMenu() {
     this.closeControllerMenu();
 
@@ -176,16 +209,19 @@ export default class VrMultiUser extends VrRendering {
         this.onLandscapeUpdate(data);
         break;
       case 'app_opened':
+        this.onAppOpened(data.id, data.position, data.quaternion);
         break;
       case 'app_closed':
+        this.onAppClosed(data.id);
         break;
       case 'app_binded':
         break;
       case 'app_released':
         break;
       case 'component_update':
+        this.onComponentUpdate(data.isFoundation, data.appID, data.componentID);
         break;
-      case 'hightlight_update':
+      case 'hightlighting_update':
         break;
       case 'spectating_update':
         break;
@@ -386,7 +422,7 @@ export default class VrMultiUser extends VrRendering {
     this.setLandscapeState(systems, nodeGroups);
 
     openApps.forEach((app: any) => {
-      this.addApplication.perform(app.id);
+      this.addApplicationTask.perform(app.id);
       const applicationObject3D = this.applicationGroup.getApplication(app.id);
       if (applicationObject3D) {
         applicationObject3D.position.copy(new THREE.Vector3().fromArray(app.position));
@@ -410,15 +446,15 @@ export default class VrMultiUser extends VrRendering {
     super.updateLandscapeRotation(new Quaternion().fromArray(pose.quaternion));
   }
 
-  onAppPosition(appData: { appId: string, direction: number[], length: number }) {
+  onAppPosition(appData: { appId: string, position: number[], quaternion: number[] }) {
     if (!this.applicationGroup.hasApplication(appData.appId)) {
       return;
     }
     const applicationMesh = this.applicationGroup.getApplication(appData.appId);
 
     if (applicationMesh) {
-      const direction = new THREE.Vector3().fromArray(appData.direction);
-      applicationMesh.translateOnAxis(direction, appData.length);
+      applicationMesh.position.copy(new THREE.Vector3().fromArray(appData.position));
+      applicationMesh.quaternion.copy(new THREE.Quaternion().fromArray(appData.quaternion));
     }
   }
 
@@ -432,6 +468,32 @@ export default class VrMultiUser extends VrRendering {
     }
 
     this.populateScene.perform(updatedOpenEntityIds);
+  }
+
+  onAppOpened(id: string, position: number[], quaternion: number[]) {
+    const application = this.store.peekRecord('application', id);
+    if (application) {
+      super.addApplication(application, new THREE.Vector3().fromArray(position));
+
+      this.onAppPosition({ appId: id, position, quaternion });
+    }
+  }
+
+  onAppClosed(id: string) {
+    this.applicationGroup.removeApplicationById(id);
+  }
+
+  onComponentUpdate(isFoundation: boolean, appID: string, componentID: string) {
+    const applicationObject3D = this.applicationGroup.getApplication(appID);
+    if (!applicationObject3D) return;
+
+    const componentMesh = applicationObject3D.getBoxMeshbyModelId(componentID);
+
+    if (isFoundation) {
+      EntityManipulation.closeAllComponents(applicationObject3D);
+    } else if (componentMesh instanceof ComponentMesh) {
+      super.toggleComponentAndUpdate(componentMesh, applicationObject3D);
+    }
   }
 
   moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
