@@ -13,7 +13,7 @@ export default class Sender {
 
   sendPoseUpdate(camera: Pose, controller1: Pose, controller2: Pose) {
     const positionObj = {
-      event: 'receive_user_positions',
+      event: 'user_positions',
       controller1: {
         position: controller1.position.toArray(),
         quaternion: controller1.quaternion.toArray(),
@@ -38,7 +38,7 @@ export default class Sender {
  */
   sendLandscapeUpdate(deltaPosition: V3, quaternion: Q, environmentOffset: V3) {
     const landscapeObj = {
-      event: 'receive_landscape_position',
+      event: 'landscape_position',
       deltaPosition: deltaPosition.toArray(),
       offset: environmentOffset.toArray(),
       quaternion: quaternion.toArray(),
@@ -52,7 +52,7 @@ export default class Sender {
  */
   sendAppPositionUpdate(appId: string, direction: V3, length: number) {
     const applicationObj = {
-      event: 'receive_app_position',
+      event: 'app_position',
       appId,
       direction: direction.toArray(),
       length,
@@ -68,7 +68,7 @@ export default class Sender {
  */
   sendSystemUpdate(id: string, isOpen: boolean) {
     const systemObj = {
-      event: 'receive_system_update',
+      event: 'system_update',
       id,
       isOpen,
     };
@@ -83,7 +83,7 @@ export default class Sender {
  */
   sendNodegroupUpdate(id: string, isOpen: boolean) {
     const nodeGroupObj = {
-      event: 'receive_nodegroup_update',
+      event: 'nodegroup_update',
       id,
       isOpen,
     };
@@ -97,7 +97,7 @@ export default class Sender {
  */
   sendAppClosed(appID: string) {
     const appObj = {
-      event: 'receive_app_closed',
+      event: 'app_closed',
       id: appID,
     };
     this.webSocket.enqueueIfOpen(appObj);
@@ -115,7 +115,7 @@ export default class Sender {
   sendAppBinded(appID: string, appPosition: V3, appQuaternion: Q, isBoundToController1: boolean,
     controllerPosition: V3, controllerQuaternion: Q) {
     const appObj = {
-      event: 'receive_app_binded',
+      event: 'app_binded',
       appID,
       appPosition: appPosition.toArray(),
       appQuaternion: appQuaternion.toArray(),
@@ -134,7 +134,7 @@ export default class Sender {
  */
   sendAppReleased(appID: string, position: V3, quaternion: Q) {
     const appObj = {
-      event: 'receive_app_released',
+      event: 'app_released',
       id: appID,
       position: position.toArray(),
       quaternion: quaternion.toArray(),
@@ -151,7 +151,7 @@ export default class Sender {
   sendComponentUpdate(appID: string, componentID: string, isOpened: boolean,
     isFoundation: boolean) {
     const appObj = {
-      event: 'receive_component_update',
+      event: 'component_update',
       appID,
       componentID,
       isOpened,
@@ -173,7 +173,7 @@ export default class Sender {
     // TODO update method documentation
 
     const hightlightObj = {
-      event: 'receive_hightlight_update',
+      event: 'hightlight_update',
       userID,
       appID,
       entityID,
@@ -191,7 +191,7 @@ export default class Sender {
  */
   sendSpectatingUpdate(userID: string, state: string, spectatedUser: string|null) {
     const spectateObj = {
-      event: 'receive_spectating_update',
+      event: 'spectating_update',
       userID,
       isSpectating: state === 'spectating',
       spectatedUser,
@@ -204,7 +204,7 @@ export default class Sender {
  */
   sendControllerUpdate(connect: any, disconnect: any) {
     const controllerObj = {
-      event: 'receive_user_controllers',
+      event: 'user_controllers',
       connect,
       disconnect,
     };
@@ -226,7 +226,7 @@ export default class Sender {
     app.getWorldQuaternion(quaternion);
 
     const appObj = {
-      event: 'receive_app_opened',
+      event: 'app_opened',
       id,
       position: position.toArray(),
       quaternion: quaternion.toArray(),

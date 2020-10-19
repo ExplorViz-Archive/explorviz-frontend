@@ -19,6 +19,8 @@ export default class LocalVrUser extends Service.extend({
 
   userID!: string;
 
+  name: string = 'unknown';
+
   color: THREE.Color|undefined;
 
   renderer!: THREE.WebGLRenderer;

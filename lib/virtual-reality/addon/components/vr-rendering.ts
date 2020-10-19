@@ -1233,6 +1233,11 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
 
   rotateLandscape(deltaX: number) {
     this.landscapeObject3D.rotation.x -= deltaX;
+    this.updateLandscapeRotation(this.landscapeObject3D.quaternion.clone());
+  }
+
+  updateLandscapeRotation(quaternion: THREE.Quaternion) {
+    this.landscapeObject3D.quaternion.copy(quaternion);
     this.centerLandscape();
   }
 

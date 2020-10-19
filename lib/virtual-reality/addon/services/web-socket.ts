@@ -19,7 +19,7 @@ export default class WebSocket extends Service.extend({
 
   socketCloseCallback: (() => void)| null = null;
 
-  receivedEventCallback: ((event: any, data: any) => void)| null = null;
+  eventCallback: ((event: any, data: any) => void)| null = null;
 
   initSocket() {
     const socket = this.websockets.socketFor(`ws://${this.host}:${this.port}/`);
@@ -51,8 +51,8 @@ export default class WebSocket extends Service.extend({
     const messages = JSON.parse(event.data);
     for (let i = 0; i < messages.length; i++) {
       const data = messages[i];
-      if (this.receivedEventCallback) {
-        this.receivedEventCallback(data.event, data);
+      if (this.eventCallback) {
+        this.eventCallback(data.event, data);
       }
     }
   }
