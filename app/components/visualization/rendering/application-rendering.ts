@@ -7,7 +7,6 @@ import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import DS from 'ember-data';
 import Configuration from 'explorviz-frontend/services/configuration';
-import Clazz from 'explorviz-frontend/models/clazz';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
@@ -16,8 +15,6 @@ import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/compon
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import { tracked } from '@glimmer/tracking';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import Trace from 'explorviz-frontend/models/trace';
-import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
@@ -32,6 +29,7 @@ import {
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeDrawableClassCommunication, { DrawableClassCommunication, getAllClassesFromApplication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
+import { Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 
 interface Args {
   readonly id: string;
@@ -125,7 +123,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.render = this.render.bind(this);
 
-    this.applicationObject3D = new ApplicationObject3D(this.args.landscapeData.application!);
+    const { application, dynamicLandscapeData } = this.args.landscapeData;
+
+    this.applicationObject3D = new ApplicationObject3D(application!, dynamicLandscapeData);
 
     this.boxLayoutMap = new Map();
 
@@ -283,7 +283,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.entityManipulation.toggleComponentMeshState(mesh);
       this.communicationRendering.addCommunication(this.boxLayoutMap,
         this.drawableClassCommunications);
-      this.highlighter.updateHighlighting();
+      this.highlighter.updateHighlighting(this.drawableClassCommunications);
     // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
       this.entityManipulation.closeAllComponents(this.boxLayoutMap);
@@ -362,6 +362,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // eslint-disable-next-line
   loadNewApplication = task(function* (this: ApplicationRendering) {
     this.applicationObject3D.dataModel = this.args.landscapeData.application!;
+    this.applicationObject3D.traces = this.args.landscapeData.dynamicLandscapeData;
     yield this.populateScene.perform();
   });
 
@@ -418,10 +419,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   updateDrawableClassCommunications() {
-    const { structureLandscapeData, dynamicLandscapeData, application } = this.args.landscapeData;
+    const { structureLandscapeData, application } = this.args.landscapeData;
     const drawableClassCommunications = computeDrawableClassCommunication(
       structureLandscapeData,
-      dynamicLandscapeData,
+      this.applicationObject3D.traces,
     );
 
     const allClasses = new Set(getAllClassesFromApplication(application!));
@@ -491,7 +492,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
     this.communicationRendering.addCommunication(this.boxLayoutMap,
       this.drawableClassCommunications);
-    this.highlighter.updateHighlighting();
+    this.highlighter.updateHighlighting(this.drawableClassCommunications);
   }
 
   /**
@@ -507,7 +508,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
     this.communicationRendering.addCommunication(this.boxLayoutMap,
       this.drawableClassCommunications);
-    this.highlighter.updateHighlighting();
+    this.highlighter.updateHighlighting(this.drawableClassCommunications);
   }
 
   /**
@@ -525,7 +526,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.communicationRendering.addCommunication(this.boxLayoutMap,
       this.drawableClassCommunications);
-    this.highlighter.updateHighlighting();
+    this.highlighter.updateHighlighting(this.drawableClassCommunications);
   }
 
   /**
@@ -549,18 +550,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   /**
    * Moves camera such that a specified clazz or clazz communication is in focus.
    *
-   * @param emberModel Clazz or clazz communication which shall be in focus of the camera
+   * @param model Clazz or clazz communication which shall be in focus of the camera
    */
   @action
-  moveCameraTo(emberModel: Clazz|ClazzCommunication) {
+  moveCameraTo(model: Class|Span, trace: Trace) {
     const applicationLayout = this.boxLayoutMap.get(this.applicationObject3D.dataModel.pid);
 
-    if (!emberModel || !applicationLayout) {
+    if (!applicationLayout) {
       return;
     }
 
-    this.entityManipulation.moveCameraTo(emberModel, applicationLayout.center,
-      this.camera, this.applicationObject3D);
+    this.entityManipulation.moveCameraTo(model, applicationLayout.center,
+      this.camera, this.args.landscapeData.structureLandscapeData, trace);
   }
 
   /**
@@ -605,10 +606,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    * @param step Step of the trace which shall be highlighted. Default is 1.
    */
   @action
-  highlightTrace(trace: Trace, step = 1) {
+  highlightTrace(trace: Trace, traceStep: string) {
     // Open components such that complete trace is visible
     this.openAllComponents();
-    /* this.highlighter.highlightTrace(trace, step, this.applicationObject3D.dataModel); */
+    this.highlighter.highlightTrace(trace, traceStep, this.applicationObject3D.dataModel, this.drawableClassCommunications, this.args.landscapeData.structureLandscapeData);
   }
 
   @action

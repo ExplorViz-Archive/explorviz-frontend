@@ -13,7 +13,6 @@ export interface Trace {
   overallRequestCount: 1;
   traceCount: number;
   spanList: Span[];
-  tree: [Span, Map<string, Span[]>]
 }
 
 export interface Span {
@@ -30,6 +29,18 @@ export interface Span {
     nanoAdjust: number,
   };
   hashCode: string;
+}
+
+function isObject(obj: any): obj is object {
+  return Object.prototype.toString.call(obj) === '[object Object]';
+}
+
+export function isTrace(x: any): x is Trace {
+  return isObject(x) && Object.prototype.hasOwnProperty.call(x, 'traceId');
+}
+
+export function isSpan(x: any): x is Span {
+  return isObject(x) && Object.prototype.hasOwnProperty.call(x, 'spanId');
 }
 
 export type DynamicLandscapeData = Trace[];

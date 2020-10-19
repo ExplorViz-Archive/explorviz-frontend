@@ -2,15 +2,13 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
-import DS from 'ember-data';
-import Trace from 'explorviz-frontend/models/trace';
-import TraceStep from 'explorviz-frontend/models/tracestep';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import { tracked } from '@glimmer/tracking';
 import {
-  Application, Class, isClass, isPackage, Package,
+  Application, Class, isClass, isPackage, Package, StructureLandscapeData,
 } from '../landscape-schemes/structure-data';
-import { DrawableClassCommunication, isDrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
+import { DrawableClassCommunication, isDrawableClassCommunication, createHashCodeToClassMap } from '../landscape-rendering/class-communication-computer';
+import { Span, Trace } from '../landscape-schemes/dynamic-data';
 
 export default class Highlighting {
   applicationObject3D: ApplicationObject3D;
@@ -136,16 +134,13 @@ export default class Highlighting {
    * @param step Step of the trace which shall be highlighted. Default is 1
    * @param application Application which belongs to the trace
    */
-  highlightTrace(trace: Trace, step = 1, application: Application) {
+  highlightTrace(trace: Trace, traceStep: string, application: Application,
+    communication: DrawableClassCommunication[], landscapeStructureData: StructureLandscapeData) {
     this.removeHighlighting();
 
     this.highlightedEntity = trace;
 
-    const drawableComms = application.hasMany('drawableClazzCommunications').value() as DS.ManyArray<DrawableClazzCommunication>|null;
-
-    if (!drawableComms) {
-      return;
-    }
+    const drawableComms = communication;
 
     // All clazzes in application
     const allClazzesAsArray = Highlighting.getAllClazzes(application);
@@ -153,27 +148,87 @@ export default class Highlighting {
 
     const involvedClazzes = new Set<Class>();
 
-    let highlightedTraceStep: TraceStep;
+    let highlightedSpan: Span|undefined;
 
-    trace.get('traceSteps').forEach((traceStep) => {
-      if (traceStep.tracePosition === step) {
-        highlightedTraceStep = traceStep;
+    const hashCodeToClassMap = createHashCodeToClassMap(landscapeStructureData);
+
+    trace.spanList.forEach((span) => {
+      if (span.spanId === traceStep) {
+        highlightedSpan = span;
+      }
+    });
+
+    if (highlightedSpan === undefined) {
+      return;
+    }
+
+    // get classes of highlighted span
+    let highlightedSpanParentClass: Class|undefined;
+    const highlightedSpanClass = hashCodeToClassMap.get(highlightedSpan.hashCode);
+    trace.spanList.forEach((span) => {
+      if (highlightedSpan === undefined) {
+        return;
+      }
+      if (span.spanId === highlightedSpan.parentSpanId) {
+        highlightedSpanParentClass = hashCodeToClassMap.get(span.hashCode);
+      }
+    });
+
+    console.log(highlightedSpanParentClass, highlightedSpanClass);
+
+    // mark all classes in span as involved in the trace
+    trace.spanList.forEach((span) => {
+      const spanClass = hashCodeToClassMap.get(span.hashCode);
+
+      if (spanClass) {
+        involvedClazzes.add(spanClass);
+      }
+    });
+
+    const spanIdToClass = new Map<string, Class>();
+
+    trace.spanList.forEach((span) => {
+      const { hashCode, spanId } = span;
+
+      const clazz = hashCodeToClassMap.get(hashCode);
+
+      if (clazz !== undefined) {
+        spanIdToClass.set(spanId, clazz);
+      }
+    });
+
+    // strings of format sourceClass_to_targetClass
+    const classesThatCommunicateInTrace = new Set<string>();
+
+    trace.spanList.forEach((span) => {
+      const { parentSpanId, spanId } = span;
+
+      if (parentSpanId === '') {
+        return;
+      }
+
+      const sourceClass = spanIdToClass.get(parentSpanId);
+      const targetClass = spanIdToClass.get(spanId);
+
+      if (sourceClass !== undefined && targetClass !== undefined) {
+        classesThatCommunicateInTrace.add(`${sourceClass.id}_to_${targetClass.id}`);
       }
     });
 
     drawableComms.forEach((comm) => {
-      const commMesh = this.applicationObject3D.getCommMeshByModelId(comm.get('id'));
+      const { sourceClass, targetClass, id } = comm;
 
-      if (comm.containedTraces.has(trace)) {
-        const sourceClazz = comm.belongsTo('sourceClazz').value() as Clazz;
-        const targetClazz = comm.belongsTo('targetClazz').value() as Clazz;
-        involvedClazzes.add(sourceClazz);
-        involvedClazzes.add(targetClazz);
-        if (comm.containedTraceSteps.has(highlightedTraceStep)) {
-              commMesh?.highlight();
-        }
-      } else {
-            commMesh?.turnTransparent();
+      const commMesh = this.applicationObject3D.getCommMeshByModelId(id);
+
+      // highlight communication mesh that matches highlighted span
+      if ((sourceClass === highlightedSpanParentClass && targetClass === highlightedSpanClass)
+        || (sourceClass === highlightedSpanClass && targetClass === highlightedSpanParentClass)) {
+        commMesh?.highlight();
+      }
+
+      if (!classesThatCommunicateInTrace.has(`${sourceClass.id}_to_${targetClass.id}`)
+        && !classesThatCommunicateInTrace.has(`${targetClass.id}_to_${sourceClass.id}`)) {
+        commMesh?.turnTransparent();
       }
     });
 
@@ -198,7 +253,7 @@ export default class Highlighting {
   /**
    * Highlights the stored highlighted entity again.
    */
-  updateHighlighting() {
+  updateHighlighting(communication: DrawableClassCommunication[]) {
     const { highlightedEntity } = this;
 
     if (!highlightedEntity) {
@@ -209,7 +264,7 @@ export default class Highlighting {
     if (highlightedEntity instanceof ClazzMesh
         || highlightedEntity instanceof ComponentMesh
         || highlightedEntity instanceof ClazzCommunicationMesh) {
-      this.highlight(highlightedEntity, false);
+      this.highlight(highlightedEntity, communication, false);
     }
   }
 

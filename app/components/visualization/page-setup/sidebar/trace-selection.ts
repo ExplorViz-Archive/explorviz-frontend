@@ -1,23 +1,24 @@
-
 import { action, computed } from '@ember/object';
-import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import DS from 'ember-data';
-import Clazz from 'explorviz-frontend/models/clazz';
-import Trace from 'explorviz-frontend/models/trace';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import TraceStep from 'explorviz-frontend/models/tracestep';
-import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
 import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
+import { createTraceIdToSpanTrees } from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
+import { createHashCodeToClassMap, getApplicationFromClass, spanIdToClass } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import {
+  DynamicLandscapeData, Span, Trace,
+} from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import { Class, Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
 interface Args {
   removeComponent(componentPath: string): void,
-  highlightTrace(trace: Trace, traceStep: number): void,
-  moveCameraTo(emberModel: Clazz|ClazzCommunication): void,
+  highlightTrace(trace: Trace, traceStep: string): void,
+  moveCameraTo(emberModel: Class|Span, trace: Trace): void,
   highlighter: Highlighting;
+  dynamicData: DynamicLandscapeData;
+  structureData: StructureLandscapeData;
+  application: Application;
 }
 
 export default class TraceSelection extends Component<Args> {
@@ -47,37 +48,96 @@ export default class TraceSelection extends Component<Args> {
   selectedTrace: Trace|null = null;
 
   @tracked
-  currentTraceStep: TraceStep|null = null;
+  currentTraceStep: Span|null = null;
 
-  @service('store')
-  store!: DS.Store;
-
-  @service('repos/landscape-repository')
-  landscapeRepo!: LandscapeRepository;
+  @tracked
+  traceSteps: Span[] = [];
 
   // Compute current traces when highlighting changes
-  @computed('landscapeRepo.latestApplication', 'args.highlighter.highlightedEntity', 'sortBy', 'isSortedAsc', 'filterTerm')
+  @computed('args.dynamicData', 'selectedTrace', 'sortBy', 'isSortedAsc', 'filterTerm')
   get traces() {
-    // Only show highlighted trace and set highlighting status accordingly
-    const maybeTrace = this.args.highlighter.highlightedEntity;
-    if (maybeTrace instanceof Trace) {
-      this.selectedTrace = maybeTrace;
-      return [maybeTrace];
+    if (this.selectedTrace) {
+      return [this.selectedTrace];
     }
 
-    // Reset selected trace
-    this.selectedTrace = null;
-
-    const { latestApplication } = this.landscapeRepo;
-    if (latestApplication === null) {
-      return [];
-    }
-
-    return this.filterAndSortTraces(latestApplication.get('traces'));
+    return this.filterAndSortTraces(this.args.dynamicData);
   }
 
-  filterAndSortTraces(this: TraceSelection, traces: DS.PromiseManyArray<Trace>) {
-    if (!traces) {
+  get currentTraceStepIndex() {
+    return this.traceSteps.findIndex((span) => span === this.currentTraceStep);
+  }
+
+  get sourceClass() {
+    const { currentTraceStep, selectedTrace } = this;
+    if (selectedTrace && currentTraceStep) {
+      return spanIdToClass(this.args.structureData, selectedTrace, currentTraceStep.parentSpanId);
+    }
+    return undefined;
+  }
+
+  get sourceApplication() {
+    return this.sourceClass
+      ? getApplicationFromClass(this.args.structureData, this.sourceClass) : undefined;
+  }
+
+  get targetClass() {
+    const { currentTraceStep, selectedTrace } = this;
+    if (selectedTrace && currentTraceStep) {
+      return spanIdToClass(this.args.structureData, selectedTrace, currentTraceStep.spanId);
+    }
+    return undefined;
+  }
+
+  get targetApplication() {
+    return this.targetClass
+      ? getApplicationFromClass(this.args.structureData, this.targetClass) : undefined;
+  }
+
+  get operationName() {
+    const hashCodeToClassMap = createHashCodeToClassMap(this.args.structureData);
+
+    if (this.currentTraceStep) {
+      const clazz = hashCodeToClassMap.get(this.currentTraceStep.hashCode);
+
+      return clazz?.methods
+        .find((method) => method.hashCode === this.currentTraceStep?.hashCode)?.name;
+    }
+    return undefined;
+  }
+
+  get spanDuration() {
+    if (this.currentTraceStep) {
+      const { startTime, endTime } = this.currentTraceStep;
+
+      const startTimeInNs = startTime.seconds * 1000000000.0 + startTime.nanoAdjust;
+      const endTimeInNs = endTime.seconds * 1000000000.0 + endTime.nanoAdjust;
+
+      return endTimeInNs - startTimeInNs;
+    }
+
+    return undefined;
+  }
+
+  get traceDuration() {
+    if (this.selectedTrace) {
+      const { startTime, endTime } = this.selectedTrace;
+
+      const startTimeInNs = startTime.seconds * 1000000000.0 + startTime.nanoAdjust;
+      const endTimeInNs = endTime.seconds * 1000000000.0 + endTime.nanoAdjust;
+
+      return endTimeInNs - startTimeInNs;
+    }
+
+    return undefined;
+  }
+
+  filterAndSortTraces(traces: Trace[]) {
+    const hashCodeToClassMap = createHashCodeToClassMap(this.args.application);
+
+    const tracesInThisApplication = traces.filter(
+      (trace) => trace.spanList.any((span) => hashCodeToClassMap.get(span.hashCode) !== undefined),
+    );
+    /*     if (!traces) {
       return [];
     }
 
@@ -116,11 +176,13 @@ export default class TraceSelection extends Component<Args> {
       });
     }
 
-    return filteredTraces;
+    return filteredTraces; */
+
+    return tracesInThisApplication;
   }
 
   @action
-  clickedTrace(this: TraceSelection, trace: Trace) {
+  clickedTrace(trace: Trace) {
     // Reset highlighting when highlighted trace is clicked again
     if (trace === this.selectedTrace) {
       this.selectedTrace = null;
@@ -130,67 +192,110 @@ export default class TraceSelection extends Component<Args> {
 
     this.selectedTrace = trace;
 
-    const traceSteps = trace.hasMany('traceSteps').value();
-    this.currentTraceStep = traceSteps?.objectAt(0);
+    this.traceSteps = this.calculateTraceSteps();
 
-    this.args.highlightTrace(trace, 1);
+    if (this.traceSteps.length > 1) {
+      const [firstStep] = this.traceSteps;
+      this.currentTraceStep = firstStep;
+
+      this.args.highlightTrace(trace, firstStep.spanId);
+
+      if (this.isReplayAnimated) {
+        this.args.moveCameraTo(this.currentTraceStep, this.selectedTrace);
+      }
+    }
+  }
+
+  calculateTraceSteps() {
+    function getSortedTraceList(span: Span, tree: Map<string, Span[]>): Span[] {
+      const childSpans = tree.get(span.spanId);
+
+      if (childSpans === undefined || childSpans.length === 0) {
+        return [span];
+      }
+
+      const subSpans = childSpans.map((subSpan) => getSortedTraceList(subSpan, tree)).flat();
+
+      return [span, ...subSpans];
+    }
+
+    if (this.selectedTrace) {
+      const spanTree = createTraceIdToSpanTrees(this.args.dynamicData)
+        .get(this.selectedTrace.traceId);
+
+      if (spanTree === undefined) {
+        return [];
+      }
+
+      const { root, tree } = spanTree;
+
+      return getSortedTraceList(root, tree);
+    }
+
+    return [];
   }
 
   @action
-  filter(this: TraceSelection) {
+  filter() {
     // Case insensitive string filter
     this.filterTerm = this.filterInput.toLowerCase();
   }
 
   @action
-  selectNextTraceStep(this: TraceSelection) {
+  selectNextTraceStep() {
     // Can only select next step if a trace is selected
     if (!this.currentTraceStep || !this.selectedTrace) {
       return;
     }
 
-    const nextStepPosition = this.currentTraceStep.tracePosition + 1;
+    const currentTracePosition = this.traceSteps
+      .findIndex((span) => span === this.currentTraceStep);
 
-    if (nextStepPosition > this.selectedTrace.length) {
+    if (currentTracePosition === -1) {
       return;
     }
 
+    const nextStepPosition = currentTracePosition + 1;
 
-    const traceSteps = this.selectedTrace.hasMany('traceSteps').value();
-    this.currentTraceStep = traceSteps?.objectAt(nextStepPosition - 1);
+    if (nextStepPosition > this.traceSteps.length - 1) {
+      return;
+    }
 
-    this.args.highlightTrace(this.selectedTrace, nextStepPosition);
+    this.currentTraceStep = this.traceSteps[nextStepPosition];
 
-    const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
+    this.args.highlightTrace(this.selectedTrace, this.currentTraceStep.spanId);
 
-    if (this.isReplayAnimated && clazzCommunication) {
-      this.args.moveCameraTo(clazzCommunication);
+    if (this.isReplayAnimated) {
+      this.args.moveCameraTo(this.currentTraceStep, this.selectedTrace);
     }
   }
 
   @action
-  selectPreviousTraceStep(this: TraceSelection) {
+  selectPreviousTraceStep() {
     // Can only select next step if a trace is selected
     if (!this.selectedTrace || !this.currentTraceStep) {
       return;
     }
 
-    const previousStepPosition = this.currentTraceStep.tracePosition - 1;
+    const currentTracePosition = this.traceSteps
+      .findIndex((span) => span === this.currentTraceStep);
 
-    if (previousStepPosition < 1) {
+    if (currentTracePosition === -1) {
       return;
     }
 
+    const previousStepPosition = currentTracePosition - 1;
 
-    const traceSteps = this.selectedTrace.hasMany('traceSteps').value();
-    this.currentTraceStep = traceSteps?.objectAt(previousStepPosition - 1);
+    if (previousStepPosition < 0) {
+      return;
+    }
 
-    this.args.highlightTrace(this.selectedTrace, previousStepPosition);
+    this.currentTraceStep = this.traceSteps[previousStepPosition];
 
-    const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
+    this.args.highlightTrace(this.selectedTrace, this.currentTraceStep.spanId);
 
-    if (this.isReplayAnimated && clazzCommunication) {
-      this.args.moveCameraTo(clazzCommunication);
+    if (this.isReplayAnimated) {
+      this.args.moveCameraTo(this.currentTraceStep, this.selectedTrace);
     }
   }
 
@@ -222,15 +327,6 @@ export default class TraceSelection extends Component<Args> {
   @action
   toggleAnimation(this: TraceSelection) {
     this.isReplayAnimated = !this.isReplayAnimated;
-  }
-
-  @action
-  lookAtClazz(this: TraceSelection, proxyClazz: Clazz) {
-    const clazzId = proxyClazz.get('id');
-    const clazz = this.store.peekRecord('clazz', clazzId);
-    if (clazz !== null) {
-      this.args.moveCameraTo(clazz);
-    }
   }
 
   @action

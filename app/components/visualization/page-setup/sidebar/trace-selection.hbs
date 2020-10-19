@@ -65,7 +65,8 @@
           <th title={{trace.traceId}}>{{truncate trace.traceId 8 true}}</th>
           <td title={{trace.sourceClazz.name}}>{{truncate trace.sourceClazz.name 12 true}}</td>
           <td title={{trace.targetClazz.name}}>{{truncate trace.targetClazz.name 14 true}}</td>
-          <td>{{format-number trace.totalTraceDuration this.traceTimeUnit}}</td>
+          {{!-- <td>{{format-number  this.traceTimeUnit}}</td> --}}
+          <td>{{trace.duration}}</td>
         </tr>
       {{/each}}
     </tbody>
@@ -93,12 +94,12 @@
       @type="secondary"
       @outline={{true}}
       @title="One step back"
-      @disabled={{lte this.currentTraceStep.tracePosition 1}}
+      @disabled={{lte this.currentTraceStepIndex 0}}
     >
       {{svg-jar "chevron-left" class="octicon align-middle"}}
     </BsButton>
     <div>
-      Step <strong>{{this.currentTraceStep.tracePosition}}</strong> of {{this.selectedTrace.length}}
+      Step <strong>{{inc this.currentTraceStepIndex}}</strong> of {{this.traceSteps.length}}
     </div>
     <BsButton
       @onClick={{this.selectNextTraceStep}}
@@ -106,8 +107,8 @@
       @outline={{true}}
       @title="One step forth"
       @disabled={{gte
-        this.currentTraceStep.tracePosition
-        this.selectedTrace.length
+        this.currentTraceStepIndex
+        (dec this.traceSteps.length)
       }}
     >
       {{svg-jar "chevron-right" class="octicon align-middle"}}
@@ -121,13 +122,17 @@
     <table class="table table-striped">
       <tbody>
         <tr class="d-flex">
+          <th class="col-3">Operation Name</th>
+          <td class="col-9 container-word-wrap">{{this.operationName}}</td>
+        </tr>
+        <tr class="d-flex">
           <th class="col-3">Soure Clazz</th>
           <td class="col-9 container-word-wrap">
-            {{this.currentTraceStep.clazzCommunication.sourceClazz.name}}
+            {{this.sourceClass.name}}
             <BsButton
               @onClick={{fn
                 @moveCameraTo
-                this.currentTraceStep.clazzCommunication.sourceClazz
+                this.sourceClass
               }}
               @type="button"
               class="th-btn"
@@ -139,11 +144,11 @@
         <tr class="d-flex">
           <th class="col-3">Target Clazz</th>
           <td class="col-9 container-word-wrap">
-            {{this.currentTraceStep.clazzCommunication.targetClazz.name}}
+            {{this.targetClass.name}}
             <BsButton
               @onClick={{fn
                 @moveCameraTo
-                this.currentTraceStep.clazzCommunication.targetClazz
+                this.targetClass
               }}
               @type="button"
               class="th-btn"
@@ -153,16 +158,20 @@
           </td>
         </tr>
         <tr class="d-flex">
-          <th class="col-3">Operation Name</th>
-          <td class="col-9 container-word-wrap">{{this.currentTraceStep.clazzCommunication.operationName}}</td>
+          <th class="col-3">Soure Application</th>
+          <td class="col-9 container-word-wrap">
+            {{this.sourceApplication.name}}
+          </td>
         </tr>
         <tr class="d-flex">
-          <th class="col-3">Requests</th>
-          <td class="col-9 container-word-wrap">{{this.currentTraceStep.requests}}</td>
+          <th class="col-3">Target Application</th>
+          <td class="col-9 container-word-wrap">
+            {{this.targetApplication.name}}
+          </td>
         </tr>
         <tr class="d-flex">
-          <th class="col-3" title="Average Response Time">
-            Avg. Resp. Time in
+          <th class="col-3">
+            Duration
             <BsButton
               @onClick={{this.toggleTraceStepTimeUnit}}
               class="th-btn"
@@ -173,7 +182,7 @@
           </th>
           <td class="col-9 container-word-wrap">
             {{format-number
-              this.currentTraceStep.averageResponseTime
+              this.spanDuration
               this.traceStepTimeUnit
             }}
           </td>

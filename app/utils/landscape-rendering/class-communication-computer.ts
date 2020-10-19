@@ -1,6 +1,6 @@
-import { DynamicLandscapeData, Span } from '../landscape-schemes/dynamic-data';
+import { DynamicLandscapeData, Span, Trace } from '../landscape-schemes/dynamic-data';
 import {
-  Application, Class, Package, StructureLandscapeData,
+  Application, Class, isApplication, Package, StructureLandscapeData,
 } from '../landscape-schemes/structure-data';
 import { createTraceIdToSpanTrees } from './application-communication-computer';
 
@@ -23,14 +23,20 @@ export function getAllClassesFromApplication(application: Application) {
     .flat();
 }
 
-function createHashCodeToClassMap(landscapeStructureData: StructureLandscapeData) {
+export function createHashCodeToClassMap(structureData: StructureLandscapeData|Application) {
   const hashCodeToClassMap = new Map<string, Class>();
 
-  const classesInLandscape = landscapeStructureData.nodes.map((node) => node.applications.map(
-    (application) => getAllClassesFromApplication(application),
-  )).flat(2);
+  let classList: Class[];
 
-  classesInLandscape.forEach((clazz) => {
+  if (isApplication(structureData)) {
+    classList = getAllClassesFromApplication(structureData);
+  } else {
+    classList = structureData.nodes.map((node) => node.applications.map(
+      (application) => getAllClassesFromApplication(application),
+    )).flat(2);
+  }
+
+  classList.forEach((clazz) => {
     clazz.methods.forEach(({ hashCode }) => hashCodeToClassMap.set(hashCode, clazz));
   });
 
@@ -143,6 +149,70 @@ export default function computeDrawableClassCommunication(
   const drawableClassCommunications = [...sourceTargetClassIdToDrawable.values()];
 
   return drawableClassCommunications;
+}
+
+export function spanIdToClass(structureData: Application|StructureLandscapeData,
+  trace: Trace, id: string) {
+  const hashCodeToClassMap = createHashCodeToClassMap(structureData);
+
+  const spanIdToClassMap = new Map<string, Class>();
+
+  trace.spanList.forEach((span) => {
+    const { hashCode, spanId } = span;
+
+    const clazz = hashCodeToClassMap.get(hashCode);
+
+    if (clazz !== undefined) {
+      spanIdToClassMap.set(spanId, clazz);
+    }
+  });
+
+  return spanIdToClassMap.get(id);
+}
+
+export function packageContainsClass(component: Package, clazz: Class): boolean {
+  return component.classes.includes(clazz)
+    || (component.subPackages.length > 0
+      && component.subPackages.any(
+        (subPackage) => packageContainsClass(subPackage, clazz),
+      ));
+}
+
+export function applicationHasClass(application: Application, clazz: Class) {
+  return application.packages.any((component) => packageContainsClass(component, clazz));
+}
+
+export function getApplicationFromClass(structureData: StructureLandscapeData, clazz: Class) {
+  let matchingApplication: Application|undefined;
+
+  structureData.nodes.forEach((node) => {
+    const possibleMatch = node.applications
+      .find((application) => applicationHasClass(application, clazz));
+
+    if (possibleMatch) {
+      matchingApplication = possibleMatch;
+    }
+  });
+
+  return matchingApplication;
+}
+
+export function spanIdToClassAndApplication(structureData: StructureLandscapeData,
+  trace: Trace, id: string) {
+  const clazz = spanIdToClass(structureData, trace, id);
+
+  if (clazz !== undefined) {
+    const application = getApplicationFromClass(structureData, clazz);
+
+    if (application !== undefined) {
+      return {
+        application,
+        class: clazz,
+      };
+    }
+  }
+
+  return undefined;
 }
 
 export function isDrawableClassCommunication(x: any): x is DrawableClassCommunication {

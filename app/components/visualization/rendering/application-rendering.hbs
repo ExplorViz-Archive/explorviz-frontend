@@ -33,6 +33,7 @@
           @addComponent={{@addComponent}}
           @toggleVisualizationUpdating={{@toggleVisualizationUpdating}}
           @visualizationPaused={{@visualizationPaused}}
+          @dynamicData={{@landscapeData.dynamicLandscapeData}}
         />
         <Visualization::PageSetup::Navbar::ApplicationOpener
           @openAllComponents={{this.openAllComponents}}
@@ -81,6 +82,9 @@
                   @moveCameraTo={{this.moveCameraTo}}
                   @removeComponent={{@removeComponent}}
                   @highlighter={{this.highlighter}}
+                  @dynamicData={{@landscapeData.dynamicLandscapeData}}
+                  @structureData={{@landscapeData.structureLandscapeData}}
+                  @application={{@landscapeData.application}}
                 />
               {{/if}}
               {{#if (eq componentName "color-picker")}}
