@@ -15,6 +15,7 @@ import VrRendering from 'virtual-reality/components/vr-rendering';
 import Sender from 'virtual-reality/utils/vr-multi-user/sender';
 import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
+import MessageBoxMenu from 'virtual-reality/utils/vr-menus/message-box-menu';
 
 export default class VrMultiUser extends VrRendering {
   debug = debugLogger('VrMultiUser');
@@ -39,6 +40,8 @@ export default class VrMultiUser extends VrRendering {
 
   hardwareModels: HardwareModels;
 
+  messageBox!: MessageBoxMenu;
+
   constructor(owner: any, args: any) {
     super(owner, args);
 
@@ -50,6 +53,8 @@ export default class VrMultiUser extends VrRendering {
     super.initRendering();
 
     this.scene.add(this.remoteUserGroup);
+
+    this.messageBox = new MessageBoxMenu(this.camera);
 
     this.initCallbacks();
 
