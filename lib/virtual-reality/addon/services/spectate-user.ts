@@ -1,7 +1,7 @@
 import Service, { inject as service } from '@ember/service';
 import DS from 'ember-data';
 import THREE from 'three';
-import Sender from 'virtual-reality/utils/sender';
+import Sender from 'virtual-reality/utils/vr-multi-user/sender';
 import LocalVrUser from './local-vr-user';
 import WebSocket from './web-socket';
 

@@ -4,17 +4,17 @@ import SpectateUser from 'virtual-reality/services/spectate-user';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import debugLogger from 'ember-debug-logger';
-import ConnectionMenu from 'virtual-reality/utils/menus/connection-menu';
+import ConnectionMenu from 'virtual-reality/utils/vr-menus/connection-menu';
 import $ from 'jquery';
 import { bind } from '@ember/runloop';
 import THREE, { Quaternion } from 'three';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import DS from 'ember-data';
 import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
-import HardwareModels from 'virtual-reality/utils/hardware-models';
-import VrRendering from './vr-rendering';
-import Sender from '../utils/sender';
-import * as Helper from '../utils/multi-user-helper';
+import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
+import VrRendering from 'virtual-reality/components/vr-rendering';
+import Sender from 'virtual-reality/utils/vr-multi-user/sender';
+import * as Helper from 'virtual-reality/utils/vr-helper/multi-user-helper';
 
 export default class VrMultiUser extends VrRendering {
   debug = debugLogger('VrMultiUser');
@@ -124,8 +124,8 @@ export default class VrMultiUser extends VrRendering {
 
   onEvent(event: string, data: any) {
     if (event !== 'user_positions') {
-      console.log('Event: ', event);
-      console.log('Data: ', data);
+      // console.log('Event: ', event);
+      // console.log('Data: ', data);
     }
     switch (event) {
       case 'connection_closed':
@@ -243,6 +243,23 @@ export default class VrMultiUser extends VrRendering {
 
     // Remove apps and reset landscape
     this.resetAll();
+  }
+
+  /**
+   * Loads specified controller 1 model for given user and add it to scene.
+   *
+   * @param {string} controllerName
+   * @param {number} userID
+   */
+  loadController1(controllerName: string, userID: string) {
+    const user = this.store.peekRecord('vr-user', userID);
+
+    if (!user) { return; }
+
+    // user.initController1(controllerName, this.getControllerModelByName(controllerName));
+
+    this.remoteUserGroup.add(user.get('controller1.model'));
+    // this.addLineToControllerModel(user.get('controller1'), user.get('color'));
   }
 
   onUserConnected(data: any) {
