@@ -161,13 +161,6 @@ export default class LocalVrUser extends Service.extend({
   disconnect() {
     this.state = 'offline';
 
-    // Remove other users and their corresponding models and name tags
-    const users = this.get('store').peekAll('remote-vr-user');
-    users.forEach((user) => {
-      user.removeAllObjects3D();
-      this.get('store').unloadRecord(user);
-    });
-
     // Close socket
     this.get('webSocket').closeSocket();
   }

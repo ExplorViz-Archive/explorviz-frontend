@@ -1,6 +1,6 @@
 import Service, { inject as service } from '@ember/service';
-import DS from 'ember-data';
 import THREE from 'three';
+import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import Sender from 'virtual-reality/utils/vr-multi-user/sender';
 import LocalVrUser from './local-vr-user';
 import WebSocket from './web-socket';
@@ -14,11 +14,7 @@ export default class SpectateUser extends Service.extend({
   @service('web-socket')
   webSocket!: WebSocket;
 
-  @service()
-  store!: DS.Store;
-
-  // TODO: Save actual user object instead to save queries
-  spectatedUserId: string|null = null; // Tells which userID (if any) is being spectated
+  spectatedUser: RemoteVrUser|null = null; // Tells which userID (if any) is being spectated
 
   startPosition: THREE.Vector3|null = null; // Position before this user starts spectating
 
@@ -28,64 +24,46 @@ export default class SpectateUser extends Service.extend({
   * Used in spectating mode to set user's camera position to the spectated user's position
   */
   update() {
-    if (!this.spectatedUserId) return;
-    const spectatedUser = this.store.peekRecord('remote-vr-user', this.spectatedUserId);
+    if (!this.spectatedUser || !this.spectatedUser.camera) return;
 
-    if (!spectatedUser) {
-      this.deactivate();
-      return;
-    }
+    const { position } = this.spectatedUser.camera;
 
-    const { position } = spectatedUser.camera;
-
-    const cameraOffset = new THREE.Vector3();
-
-    cameraOffset.copy(this.user.camera.position);
-    this.user.getPosition().subVectors(new THREE.Vector3(position), cameraOffset);
+    const cameraOffset = new THREE.Vector3().copy(this.user.camera.position);
+    this.user.getPosition().subVectors(position, cameraOffset);
   }
 
   /**
  * Switches our user into spectator mode
  * @param {number} userID The id of the user to be spectated
  */
-  activate(userID: string) {
-    if (!userID) {
-      return;
-    }
+  activate(user: RemoteVrUser|null) {
+    if (!user) return;
 
     if (this.user.isSpectating) {
       this.deactivate();
     }
 
-    const spectatedUser = this.store.peekRecord('remote-vr-user', userID);
-
-    if (!spectatedUser) {
-      return;
-    }
     this.startPosition = this.user.position.clone();
-    this.spectatedUser = userID;
+    this.spectatedUser = user;
 
     // Other user's hmd should be invisible
-    spectatedUser.camera.model.visible = false;
-    spectatedUser.namePlane.visible = false;
+    if (user.camera) { user.camera.model.visible = false; }
+    user.namePlane.visible = false;
     this.user.state = 'spectating';
-    this.sender.sendSpectatingUpdate(this.user.userID, this.user.state, this.spectatedUserId);
+
+    this.sender.sendSpectatingUpdate(this.user.userID, this.user.state, user.ID);
   }
 
   /**
    * Deactives spectator mode for our user
    */
   deactivate() {
-    if (!this.spectatedUserId) {
+    if (!this.spectatedUser || !this.spectatedUser.camera) {
       return;
     }
 
-    const spectatedUser = this.get('store').peekRecord('remote-vr-user', this.spectatedUserId);
-
-    if (!spectatedUser) { return; }
-
-    spectatedUser.camera.model.visible = true;
-    spectatedUser.namePlane.visible = true;
+    this.spectatedUser.camera.model.visible = true;
+    this.spectatedUser.namePlane.visible = true;
     this.user.state = 'online';
     this.spectatedUser = null;
 

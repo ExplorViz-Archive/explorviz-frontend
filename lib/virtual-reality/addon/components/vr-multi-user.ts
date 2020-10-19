@@ -9,12 +9,12 @@ import $ from 'jquery';
 import { bind } from '@ember/runloop';
 import THREE, { Quaternion } from 'three';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
-import DS from 'ember-data';
 import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
 import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
 import VrRendering from 'virtual-reality/components/vr-rendering';
 import Sender from 'virtual-reality/utils/vr-multi-user/sender';
 import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
+import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 
 export default class VrMultiUser extends VrRendering {
   debug = debugLogger('VrMultiUser');
@@ -31,12 +31,11 @@ export default class VrMultiUser extends VrRendering {
   @service('spectate-user')
   spectateUser!: SpectateUser;
 
-  @service()
-  store!: DS.Store;
-
   sender!: Sender;
 
   remoteUserGroup: THREE.Group;
+
+  idToRemoteUser: Map<string, RemoteVrUser> = new Map();
 
   hardwareModels: HardwareModels;
 
@@ -119,6 +118,13 @@ export default class VrMultiUser extends VrRendering {
     if (this.localUser.state === 'connecting') {
       this.showHint('Could not establish connection');
     }
+
+    this.idToRemoteUser.forEach((user) => {
+      user.removeAllObjects3D();
+    });
+
+    this.idToRemoteUser.clear();
+
     this.localUser.disconnect();
   }
 
@@ -252,28 +258,29 @@ export default class VrMultiUser extends VrRendering {
    * @param {number} userID
    */
   loadController1(controllerName: string, userID: string) {
-    const user = this.store.peekRecord('vr-user', userID);
+    const user = this.idToRemoteUser.get(userID);
 
-    if (!user) { return; }
+    if (!user || !user.controller1) { return; }
 
     // user.initController1(controllerName, this.getControllerModelByName(controllerName));
 
-    this.remoteUserGroup.add(user.get('controller1.model'));
+    this.remoteUserGroup.add(user.controller1.model);
     // this.addLineToControllerModel(user.get('controller1'), user.get('color'));
   }
 
   onUserConnected(data: any) {
-    const user = this.store.createRecord('remote-vr-user', {
-      name: data.name,
-      id: data.id,
-      color: data.color,
-      state: 'connected',
-    });
+    const user = new RemoteVrUser();
+    user.userName = data.name;
+    user.ID = data.id;
+    user.color = data.color;
+    user.state = 'connected';
+
+    this.idToRemoteUser.set(data.id, user);
 
     if (this.hardwareModels.hmd) { user.initCamera(this.hardwareModels.hmd); }
 
     // Add 3d-models for new user
-    this.remoteUserGroup.add(user.get('camera.model'));
+    this.remoteUserGroup.add(user);
 
     // this.addUsername(data.user.id);
 
@@ -303,11 +310,11 @@ export default class VrMultiUser extends VrRendering {
       camera, id, controller1, controller2,
     } = data;
 
-    const user = this.store.peekRecord('remote-vr-user', id);
-    if (user) {
-      if (controller1) { user.updateController1(controller1); }
-      if (controller2) { user.updateController2(controller2); }
-      if (camera) { user.updateCamera(camera); }
+    const remoteUser = this.idToRemoteUser.get(id);
+    if (remoteUser) {
+      if (controller1) { remoteUser.updateController1(controller1); }
+      if (controller2) { remoteUser.updateController2(controller2); }
+      if (camera) { remoteUser.updateCamera(camera); }
     }
   }
 
@@ -319,7 +326,7 @@ export default class VrMultiUser extends VrRendering {
   onUserControllers(data: any) {
     const { id, disconnect, connect } = data;
 
-    const user = this.store.peekRecord('remote-vr-user', id);
+    const user = this.idToRemoteUser.get(id);
     if (!user) { return; }
 
     // Load newly connected controller(s)
@@ -333,10 +340,8 @@ export default class VrMultiUser extends VrRendering {
       for (let i = 0; i < disconnect.length; i++) {
         const controller = disconnect[i];
         if (controller === 'controller1') {
-          this.scene.remove(user.get('controller1.model'));
           user.removeController1();
         } else if (controller === 'controller2') {
-          this.scene.remove(user.get('controller2.model'));
           user.removeController2();
         }
       }
@@ -355,36 +360,18 @@ export default class VrMultiUser extends VrRendering {
     if (this.localUser.isSpectating && this.spectateUser.spectatedUserId === id) {
       this.spectateUser.deactivate();
     }
-    // Removes user and their models.
-    // Informs our user about their disconnect.
-    const user = this.store.peekRecord('remote-vr-user', id);
-    if (user) {
-      // Unhighlight possible objects of disconnected user
-      /*
-      this.onHighlightingUpdate({
-        userID: id,
-        isHighlighted: false,
-        appID: user.highlightedEntity.appID,
-        entityID: user.highlightedEntity.entityID,
-        originalColor: user.highlightedEntity.originalColor,
-      });
-      */
-      // Remove user's models
-      this.remoteUserGroup.remove(user.get('controller1.model'));
-      user.removeController1();
-      this.remoteUserGroup.remove(user.get('controller2.model'));
-      user.removeController2();
-      this.remoteUserGroup.remove(user.get('camera.model'));
-      user.removeCamera();
 
-      // Remove user's name tag
-      this.remoteUserGroup.remove(user.get('namePlane'));
-      user.removeNamePlane();
+    const user = this.idToRemoteUser.get(id);
+
+    if (user) {
+      // Remove user's 3d-objects
+      user.removeAllObjects3D();
+      this.remoteUserGroup.remove(user);
+      this.idToRemoteUser.delete(id);
 
       // Show disconnect notification
       // this.get('menus.messageBox').enqueueMessage({ title: 'User disconnected',
       // text: user.get('name'), color: Helper.rgbToHex(user.get('color')) }, 3000);
-      this.store.unloadRecord(user);
     }
   }
 

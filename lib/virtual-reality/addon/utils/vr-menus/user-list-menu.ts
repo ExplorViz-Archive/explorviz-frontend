@@ -1,9 +1,9 @@
-import RemoteVrUser from 'virtual-reality/models/remote-vr-user';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import THREE from 'three';
 import TextItem from './items/text-item';
 import BaseMenu from './base-menu';
 import RectangleItem from './items/rectangle-item';
+import RemoteVrUser from '../vr-multi-user/remote-vr-user';
 
 export default class UserListMenu extends BaseMenu {
   constructor(localUser: LocalVrUser, users: RemoteVrUser[]) {

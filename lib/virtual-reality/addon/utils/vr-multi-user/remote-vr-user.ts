@@ -1,4 +1,3 @@
-import DS from 'ember-data';
 import THREE from 'three';
 
 type HighlightedEntity = {
@@ -6,12 +5,25 @@ type HighlightedEntity = {
   entityID: null|string;
   sourceClazzID: null|string;
   targetClazzID: null|string;
-  originalColor: any;
 };
-export default class RemoteVrUser extends DS.Model.extend({
 
-}) {
-  name: string|undefined;
+type Controller = {
+  id: string,
+  position: THREE.Vector3,
+  quaternion: THREE.Quaternion,
+  model: THREE.Object3D,
+} |undefined;
+
+type Camera = {
+  position: THREE.Vector3,
+  quaternion: THREE.Quaternion,
+  model: THREE.Object3D,
+} | undefined;
+
+export default class RemoteVrUser extends THREE.Object3D {
+  userName: string|undefined;
+
+  ID: string = 'unknown';
 
   state: string|undefined;
 
@@ -20,71 +32,73 @@ export default class RemoteVrUser extends DS.Model.extend({
     entityID: null,
     sourceClazzID: null,
     targetClazzID: null,
-    originalColor: null,
   };
 
-  controller1: any;
+  controller1: Controller;
 
-  controller2: any;
+  controller2: Controller;
 
-  camera: any;
+  camera: Camera;
 
   color: number[]|undefined; // [r,g,b], r,g,b = 0,...,255
 
   namePlane: any; // PlaneGeometry containing username
 
   initCamera(obj: THREE.Object3D) {
-    this.set('camera', {
+    this.camera = {
       position: new THREE.Vector3(),
       quaternion: new THREE.Quaternion(),
-      model: new THREE.Object3D(),
-    });
-    this.camera.model.add(obj);
+      model: obj,
+    };
+
+    this.add(this.camera.model);
   }
 
   initController1(name: string, obj: THREE.Object3D) {
-    this.set('controller1', {
+    this.controller1 = {
       id: name,
       position: new THREE.Vector3(),
       quaternion: new THREE.Quaternion(),
-      model: new THREE.Object3D(),
-    });
+      model: obj,
+    };
 
-    this.controller1.model.add(obj);
+    this.add(this.controller1.model);
   }
 
   initController2(name: string, obj: THREE.Object3D) {
-    this.set('controller2', {
+    this.controller2 = {
       id: name,
       position: new THREE.Vector3(),
       quaternion: new THREE.Quaternion(),
-      model: new THREE.Object3D(),
-    });
+      model: obj,
+    };
 
-    this.controller2.model.add(obj);
+    this.add(this.controller2.model);
   }
 
   removeController1() {
-    const { parent } = this.controller1.model;
-    parent.remove(this.controller.model);
-    this.controller1 = null;
+    if (this.controller1 && this.controller1.model) {
+      this.remove(this.controller1.model);
+      this.controller1 = undefined;
+    }
   }
 
   removeController2() {
-    const { parent } = this.controller2.model;
-    parent.remove(this.controller.model);
-    this.controller2 = null;
+    if (this.controller2 && this.controller2.model) {
+      this.remove(this.controller2.model);
+      this.controller2 = undefined;
+    }
   }
 
   removeCamera() {
-    const { parent } = this.camera.model;
-    parent.remove(this.camera.model);
-    this.camera = null;
+    if (this.camera && this.camera.model) {
+      this.remove(this.camera.model);
+      this.camera = undefined;
+    }
   }
 
   removeNamePlane() {
-    const { parent } = this.namePlane;
-    parent.remove(this.namePlane);
+    this.remove(this.namePlane);
     this.namePlane = null;
   }
 
@@ -140,12 +154,11 @@ export default class RemoteVrUser extends DS.Model.extend({
   }
 
   setHighlightedEntity(appID: string, entityID: string, sourceClazzID: string,
-    targetClazzID: string, originalColor: any) {
+    targetClazzID: string) {
     this.highlightedEntity.appID = appID;
     this.highlightedEntity.entityID = entityID;
     this.highlightedEntity.sourceClazzID = sourceClazzID;
     this.highlightedEntity.targetClazzID = targetClazzID;
-    this.highlightedEntity.originalColor = originalColor;
   }
 
   /**
@@ -167,11 +180,5 @@ export default class RemoteVrUser extends DS.Model.extend({
     if (this.namePlane) {
       this.namePlane.visible = bool;
     }
-  }
-}
-
-declare module 'ember-data/types/registries/model' {
-  export default interface ModelRegistry {
-    'remote-vr-user': RemoteVrUser;
   }
 }
