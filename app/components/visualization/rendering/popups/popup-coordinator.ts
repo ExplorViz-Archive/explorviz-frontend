@@ -1,5 +1,6 @@
 import { action } from '@ember/object';
 import Component from '@glimmer/component';
+import { isDrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import {
   Application, Class, isApplication, isClass, isNode, isPackage, Node, Package,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
@@ -73,6 +74,9 @@ export default class PopupCoordinator extends Component<IArgs> {
     }
     if (isPackage(this.args.popupData.entity)) {
       return 'package';
+    }
+    if (isDrawableClassCommunication(this.args.popupData.entity)) {
+      return 'drawableClassCommunication';
     }
 
     return '';
