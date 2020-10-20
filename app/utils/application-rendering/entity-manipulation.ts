@@ -1,7 +1,6 @@
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import THREE, { PerspectiveCamera, Vector3 } from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import CommunicationRendering from './communication-rendering';
@@ -10,7 +9,7 @@ import {
   Class, Package,
 } from '../landscape-schemes/structure-data';
 import { isSpan, Span } from '../landscape-schemes/dynamic-data';
-import { spanIdToClass } from '../landscape-rendering/class-communication-computer';
+import { DrawableClassCommunication, spanIdToClass } from '../landscape-rendering/class-communication-computer';
 
 export default class EntityManipulation {
   // Functions as parent object for all application objects
@@ -31,10 +30,8 @@ export default class EntityManipulation {
   /**
    * Closes all component meshes which are currently added to the applicationObject3D
    * and re-adds the communication.
-   *
-   * @param boxLayoutMap Contains layout information for re-computation of communication
    */
-  closeAllComponents(boxLayoutMap: Map<string, BoxLayout>) {
+  closeAllComponents(drawableClassCommunications: DrawableClassCommunication[]) {
     const application = this.applicationObject3D.dataModel;
 
     // Close each component
@@ -46,8 +43,8 @@ export default class EntityManipulation {
     });
 
     // Re-compute communication and highlighting
-    this.communicationRendering.addCommunication(boxLayoutMap);
-    this.highlighter.updateHighlighting();
+    this.communicationRendering.addCommunication(drawableClassCommunications);
+    this.highlighter.updateHighlighting(drawableClassCommunications);
   }
 
   /**
@@ -167,7 +164,6 @@ export default class EntityManipulation {
    * Takes a set of open component ids and opens them.
    *
    * @param openComponentids Set with ids of components which shall be opened
-   * @param boxLayoutMap Map which contains communication layout
    */
   setComponentState(openComponentids: Set<string>) {
     openComponentids.forEach((componentId) => {

@@ -174,8 +174,6 @@ export default class Highlighting {
       }
     });
 
-    console.log(highlightedSpanParentClass, highlightedSpanClass);
-
     // mark all classes in span as involved in the trace
     trace.spanList.forEach((span) => {
       const spanClass = hashCodeToClassMap.get(span.hashCode);

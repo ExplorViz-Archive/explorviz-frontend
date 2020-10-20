@@ -16,24 +16,27 @@ export default class CommunicationRendering {
   // Used to access communication drawing preferences
   currentUser: CurrentUser;
 
+  // Maps model ids to layouting information
+  boxLayoutMap: Map<string, BoxLayout>;
+
   constructor(applicationObject3D: ApplicationObject3D, configuration: Configuration,
-    currentUser: CurrentUser) {
+    currentUser: CurrentUser, boxLayoutMap: Map<string, BoxLayout>) {
     this.applicationObject3D = applicationObject3D;
     this.configuration = configuration;
     this.currentUser = currentUser;
+    this.boxLayoutMap = boxLayoutMap;
   }
 
   /**
-   * Computes commnication and communication arrows and adds them to the
+   * Computes communication and communication arrows and adds them to the
    * applicationObject3D
    *
    * @param boxLayoutMap Contains box layout informationen which
    *                     is needed for the communication layouting
    */
-  addCommunication(boxLayoutMap: Map<string, BoxLayout>,
-    drawableClassCommunications: DrawableClassCommunication[]) {
+  addCommunication(drawableClassCommunications: DrawableClassCommunication[]) {
     const application = this.applicationObject3D.dataModel;
-    const applicationLayout = boxLayoutMap.get(application.pid);
+    const applicationLayout = this.boxLayoutMap.get(application.pid);
 
     if (applicationLayout === undefined) {
       return;
@@ -46,7 +49,7 @@ export default class CommunicationRendering {
 
     // Compute communication Layout
     const commLayoutMap = applyCommunicationLayout(this.applicationObject3D,
-      boxLayoutMap, drawableClassCommunications);
+      this.boxLayoutMap, drawableClassCommunications);
 
     // Retrieve color preferences
     const {

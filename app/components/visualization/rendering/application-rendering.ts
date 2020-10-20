@@ -89,7 +89,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // Used to register (mouse) events
   interaction!: Interaction;
 
-  boxLayoutMap: Map<string, BoxLayout>;
+  readonly boxLayoutMap: Map<string, BoxLayout>;
 
   drawableClassCommunications: DrawableClassCommunication[] = [];
 
@@ -136,7 +136,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.entityRendering = new EntityRendering(this.applicationObject3D, this.configuration);
 
     this.communicationRendering = new CommunicationRendering(this.applicationObject3D,
-      this.configuration, this.currentUser);
+      this.configuration, this.currentUser, this.boxLayoutMap);
 
     this.entityManipulation = new EntityManipulation(this.applicationObject3D,
       this.communicationRendering, this.highlighter);
@@ -167,8 +167,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     // Display application nicely for first rendering
     this.entityManipulation.applyDefaultApplicationLayout();
-    this.communicationRendering.addCommunication(this.boxLayoutMap,
-      this.drawableClassCommunications);
+    this.communicationRendering.addCommunication(this.drawableClassCommunications);
     this.applicationObject3D.resetRotation();
   }
 
@@ -281,12 +280,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
       this.entityManipulation.toggleComponentMeshState(mesh);
-      this.communicationRendering.addCommunication(this.boxLayoutMap,
-        this.drawableClassCommunications);
+      this.communicationRendering.addCommunication(this.drawableClassCommunications);
       this.highlighter.updateHighlighting(this.drawableClassCommunications);
     // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
-      this.entityManipulation.closeAllComponents(this.boxLayoutMap);
+      this.entityManipulation.closeAllComponents(this.drawableClassCommunications);
     }
   }
 
@@ -373,7 +371,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', this.applicationObject3D.dataModel);
 
       // Converting plain JSON layout data due to worker limitations
-      this.boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
+      this.updateBoxLayoutMap(layoutedApplication);
       const { openComponentIds } = this.applicationObject3D;
 
       // Clean up old application
@@ -386,8 +384,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       // Restore old state of components
       this.entityManipulation.setComponentState(openComponentIds);
       this.updateDrawableClassCommunications();
-      this.communicationRendering.addCommunication(this.boxLayoutMap,
-        this.drawableClassCommunications);
+      this.communicationRendering.addCommunication(this.drawableClassCommunications);
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
@@ -432,6 +429,16 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     );
 
     this.drawableClassCommunications = communicationInApplication;
+  }
+
+  updateBoxLayoutMap(layoutedApplication: Map<string, LayoutData>) {
+    const boxLayoutMapNew = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
+
+    this.boxLayoutMap.clear();
+
+    boxLayoutMapNew.forEach((boxLayout, modelId) => {
+      this.boxLayoutMap.set(modelId, boxLayout);
+    });
   }
 
   // #endregion SCENE POPULATION
@@ -490,8 +497,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.entityManipulation.openComponentMesh(ancestorMesh);
       }
     });
-    this.communicationRendering.addCommunication(this.boxLayoutMap,
-      this.drawableClassCommunications);
+    this.communicationRendering.addCommunication(this.drawableClassCommunications);
     this.highlighter.updateHighlighting(this.drawableClassCommunications);
   }
 
@@ -506,8 +512,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (mesh instanceof ComponentMesh) {
       this.entityManipulation.closeComponentMesh(mesh);
     }
-    this.communicationRendering.addCommunication(this.boxLayoutMap,
-      this.drawableClassCommunications);
+    this.communicationRendering.addCommunication(this.drawableClassCommunications);
     this.highlighter.updateHighlighting(this.drawableClassCommunications);
   }
 
@@ -524,8 +529,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.entityManipulation.openComponentsRecursively(child);
     });
 
-    this.communicationRendering.addCommunication(this.boxLayoutMap,
-      this.drawableClassCommunications);
+    this.communicationRendering.addCommunication(this.drawableClassCommunications);
     this.highlighter.updateHighlighting(this.drawableClassCommunications);
   }
 
@@ -553,15 +557,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    * @param model Clazz or clazz communication which shall be in focus of the camera
    */
   @action
-  moveCameraTo(model: Class|Span, trace: Trace) {
+  moveCameraTo(model: Class|Span) {
     const applicationLayout = this.boxLayoutMap.get(this.applicationObject3D.dataModel.pid);
 
     if (!applicationLayout) {
       return;
     }
 
-    this.entityManipulation.moveCameraTo(model, applicationLayout.center,
-      this.camera, this.args.landscapeData.structureLandscapeData, trace);
+    this.entityManipulation.moveCameraTo(model, applicationLayout.center, this.camera);
   }
 
   /**
