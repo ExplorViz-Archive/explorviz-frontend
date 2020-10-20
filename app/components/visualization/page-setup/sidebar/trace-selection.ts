@@ -12,9 +12,9 @@ import { Class, Application, StructureLandscapeData } from 'explorviz-frontend/u
 export type TimeUnit = 'ns' | 'ms' | 's';
 
 interface Args {
-  removeComponent(componentPath: string): void,
-  highlightTrace(trace: Trace, traceStep: string): void,
-  moveCameraTo(emberModel: Class|Span, trace: Trace): void,
+  removeComponent(componentPath: string): void;
+  highlightTrace(trace: Trace, traceStep: string): void;
+  moveCameraTo(emberModel: Class|Span): void;
   highlighter: Highlighting;
   dynamicData: DynamicLandscapeData;
   structureData: StructureLandscapeData;
@@ -25,9 +25,6 @@ export default class TraceSelection extends Component<Args> {
   // default time units
   @tracked
   traceTimeUnit: TimeUnit = 'ms';
-
-  @tracked
-  traceStepTimeUnit: TimeUnit = 'ms';
 
   @tracked
   sortBy: any = 'traceId';
@@ -201,7 +198,7 @@ export default class TraceSelection extends Component<Args> {
       this.args.highlightTrace(trace, firstStep.spanId);
 
       if (this.isReplayAnimated) {
-        this.args.moveCameraTo(this.currentTraceStep, this.selectedTrace);
+        this.args.moveCameraTo(this.currentTraceStep);
       }
     }
   }
@@ -266,7 +263,7 @@ export default class TraceSelection extends Component<Args> {
     this.args.highlightTrace(this.selectedTrace, this.currentTraceStep.spanId);
 
     if (this.isReplayAnimated) {
-      this.args.moveCameraTo(this.currentTraceStep, this.selectedTrace);
+      this.args.moveCameraTo(this.currentTraceStep);
     }
   }
 
@@ -295,7 +292,7 @@ export default class TraceSelection extends Component<Args> {
     this.args.highlightTrace(this.selectedTrace, this.currentTraceStep.spanId);
 
     if (this.isReplayAnimated) {
-      this.args.moveCameraTo(this.currentTraceStep, this.selectedTrace);
+      this.args.moveCameraTo(this.currentTraceStep);
     }
   }
 
@@ -309,18 +306,6 @@ export default class TraceSelection extends Component<Args> {
       this.traceTimeUnit = 's';
     } else if (timeUnit === 's') {
       this.traceTimeUnit = 'ns';
-    }
-  }
-
-  @action
-  toggleTraceStepTimeUnit(this: TraceSelection) {
-    const timeUnit = this.traceStepTimeUnit;
-    if (timeUnit === 'ns') {
-      this.traceStepTimeUnit = 'ms';
-    } else if (timeUnit === 'ms') {
-      this.traceStepTimeUnit = 's';
-    } else if (timeUnit === 's') {
-      this.traceStepTimeUnit = 'ns';
     }
   }
 
