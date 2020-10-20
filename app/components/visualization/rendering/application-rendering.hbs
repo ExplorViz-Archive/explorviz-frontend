@@ -77,11 +77,11 @@
           <div class="card mb-3">
             <div class="card-body d-flex flex-column">
               {{#if (eq componentName "trace-selection")}}
-                <Visualization::PageSetup::sidebar::TraceSelection
+                <Visualization::PageSetup::Sidebar::TraceSelectionAndReplayer
                   @highlightTrace={{this.highlightTrace}}
                   @moveCameraTo={{this.moveCameraTo}}
                   @removeComponent={{@removeComponent}}
-                  @highlighter={{this.highlighter}}
+                  @removeHighlighting={{this.removeHighlighting}}
                   @dynamicData={{@landscapeData.dynamicLandscapeData}}
                   @structureData={{@landscapeData.structureLandscapeData}}
                   @application={{@landscapeData.application}}

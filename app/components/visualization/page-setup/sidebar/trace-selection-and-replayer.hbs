@@ -1,0 +1,32 @@
+<div class="sidebar-component-close">
+  <button
+    type="button"
+    class="sidebar-component-close-button"
+    title="Close Trace Selection"
+    {{on "click" this.close}}
+  >
+    {{svg-jar "x" class="octicon"}}
+  </button>
+</div>
+
+<div class="sidebar-component-title">
+  <h5>Trace Selection</h5>
+</div>
+
+<Visualization::PageSetup::Sidebar::TraceSelection
+  @moveCameraTo={{@moveCameraTo}}
+  @selectTrace={{this.selectTrace}}
+  @dynamicData={{@dynamicData}}
+  @application={{@application}}
+  @selectedTrace={{this.selectedTrace}}
+/>
+
+{{#if this.selectedTrace}}
+  <Visualization::PageSetup::Sidebar::TraceReplayer::TraceReplayerMain
+    @selectedTrace={{this.selectedTrace}}
+    @structureData={{@structureData}}
+    @dynamicData={{@dynamicData}}
+    @highlightTrace={{@highlightTrace}}
+    @moveCameraTo={{@moveCameraTo}}
+  />
+{{/if}}

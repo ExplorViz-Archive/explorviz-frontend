@@ -1,18 +1,3 @@
-<div class="sidebar-component-close">
-  <button
-    type="button"
-    class="sidebar-component-close-button"
-    title="Close Trace Selection"
-    {{on "click" this.close}}
-  >
-    {{svg-jar "x" class="octicon"}}
-  </button>
-</div>
-
-<div class="sidebar-component-title">
-  <h5>Trace Selection</h5>
-</div>
-
 <div class="mt-2 mb-1 d-flex justify-content-end">
   <div>
     <Input
@@ -56,30 +41,20 @@
       </tr>
     </thead>
     <tbody>
-      {{#each this.traces as |trace|}}
+      {{#each this.traces as |trace index|}}
         <tr
           style="cursor: pointer"
-          bgcolor={{if this.selectedTrace "#cc8a8a"}}
-          {{on "click" (fn this.clickedTrace trace)}}
+          bgcolor={{if @selectedTrace "#cc8a8a"}}
+          {{on "click" (fn @selectTrace trace)}}
         >
           <th title={{trace.traceId}}>{{truncate trace.traceId 8 true}}</th>
           <td title={{trace.sourceClazz.name}}>{{truncate trace.sourceClazz.name 12 true}}</td>
           <td title={{trace.targetClazz.name}}>{{truncate trace.targetClazz.name 14 true}}</td>
-          {{!-- <td>{{format-number  this.traceTimeUnit}}</td> --}}
-          <td>{{trace.duration}}</td>
+          {{#let (get this.traceDurations index) as |duration|}}
+            <td>{{format-number duration this.traceTimeUnit}}</td>
+          {{/let}}
         </tr>
       {{/each}}
     </tbody>
   </table>
 </div>
-
-{{#if this.selectedTrace}}
-  <hr>
-  <Visualization::PageSetup::Sidebar::TraceReplayer::TraceReplayerMain
-    @selectedTrace={{this.selectedTrace}}
-    @structureData={{@structureData}}
-    @dynamicData={{@dynamicData}}
-    @highlightTrace={{@highlightTrace}}
-    @moveCameraTo={{@moveCameraTo}}
-  />
-{{/if}}

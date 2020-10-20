@@ -1,23 +1,20 @@
 import { action, computed } from '@ember/object';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import { createHashCodeToClassMap } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import {
   DynamicLandscapeData, Span, Trace,
 } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
-import { Class, Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { Class, Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
 interface Args {
-  removeComponent(componentPath: string): void;
-  highlightTrace(trace: Trace, traceStep: string): void;
   moveCameraTo(emberModel: Class|Span): void;
-  highlighter: Highlighting;
-  dynamicData: DynamicLandscapeData;
-  structureData: StructureLandscapeData;
-  application: Application;
+  selectTrace(trace: Trace): void;
+  readonly dynamicData: DynamicLandscapeData;
+  readonly application: Application;
+  readonly selectedTrace: Trace;
 }
 
 export default class TraceSelection extends Component<Args> {
@@ -37,30 +34,27 @@ export default class TraceSelection extends Component<Args> {
   @tracked
   filterInput: string = '';
 
-  @tracked
-  selectedTrace: Trace|null = null;
-
   // Compute current traces when highlighting changes
-  @computed('args.dynamicData', 'selectedTrace', 'sortBy', 'isSortedAsc', 'filterTerm')
+  @computed('args.selectedTrace', 'sortBy', 'isSortedAsc', 'filterTerm')
   get traces() {
-    if (this.selectedTrace) {
-      return [this.selectedTrace];
+    if (this.args.selectedTrace) {
+      return [this.args.selectedTrace];
     }
 
     return this.filterAndSortTraces(this.args.dynamicData);
   }
 
-  get traceDuration() {
-    if (this.selectedTrace) {
-      const { startTime, endTime } = this.selectedTrace;
+  get traceDurations() {
+    return this.traces.map((trace) => TraceSelection.calculateTraceDuration(trace));
+  }
 
-      const startTimeInNs = startTime.seconds * 1000000000.0 + startTime.nanoAdjust;
-      const endTimeInNs = endTime.seconds * 1000000000.0 + endTime.nanoAdjust;
+  static calculateTraceDuration(trace: Trace) {
+    const { startTime, endTime } = trace;
 
-      return endTimeInNs - startTimeInNs;
-    }
+    const startTimeInNs = startTime.seconds * 1000000000.0 + startTime.nanoAdjust;
+    const endTimeInNs = endTime.seconds * 1000000000.0 + endTime.nanoAdjust;
 
-    return undefined;
+    return endTimeInNs - startTimeInNs;
   }
 
   filterAndSortTraces(traces: Trace[]) {
@@ -114,18 +108,6 @@ export default class TraceSelection extends Component<Args> {
   }
 
   @action
-  clickedTrace(trace: Trace) {
-    // Reset highlighting when highlighted trace is clicked again
-    if (trace === this.selectedTrace) {
-      this.selectedTrace = null;
-      this.args.highlighter.removeHighlighting();
-      return;
-    }
-
-    this.selectedTrace = trace;
-  }
-
-  @action
   filter() {
     // Case insensitive string filter
     this.filterTerm = this.filterInput.toLowerCase();
@@ -156,16 +138,5 @@ export default class TraceSelection extends Component<Args> {
     }
 
     this.sortBy = property;
-  }
-
-  @action
-  close(this: TraceSelection) {
-    this.args.removeComponent('trace-selection');
-  }
-
-  willDestroy() {
-    if (this.selectedTrace) {
-      this.args.highlighter.removeHighlighting();
-    }
   }
 }

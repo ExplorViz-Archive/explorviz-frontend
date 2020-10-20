@@ -612,7 +612,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   highlightTrace(trace: Trace, traceStep: string) {
     // Open components such that complete trace is visible
     this.openAllComponents();
-    this.highlighter.highlightTrace(trace, traceStep, this.applicationObject3D.dataModel, this.drawableClassCommunications, this.args.landscapeData.structureLandscapeData);
+    this.highlighter.highlightTrace(trace, traceStep, this.applicationObject3D.dataModel,
+      this.drawableClassCommunications, this.args.landscapeData.structureLandscapeData);
+  }
+
+  @action
+  removeHighlighting() {
+    this.highlighter.removeHighlighting();
   }
 
   @action
