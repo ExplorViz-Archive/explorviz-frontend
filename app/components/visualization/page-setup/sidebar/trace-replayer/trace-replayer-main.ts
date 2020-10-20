@@ -26,7 +26,8 @@ export default class TraceReplayerMain extends Component<Args> {
 
   constructor(owner: any, args: Args) {
     super(owner, args);
-    this.traceSteps = this.calculateTraceSteps();
+    const { selectedTrace, dynamicData } = this.args;
+    this.traceSteps = TraceReplayerMain.calculateSortedTraceSteps(selectedTrace, dynamicData);
 
     if (this.traceSteps.length > 0) {
       const [firstStep] = this.traceSteps;
@@ -82,33 +83,29 @@ export default class TraceReplayerMain extends Component<Args> {
     return undefined;
   }
 
-  calculateTraceSteps() {
-    function getSortedTraceList(span: Span, tree: Map<string, Span[]>): Span[] {
+  static calculateSortedTraceSteps(trace: Trace, dynamicData: DynamicLandscapeData) {
+    function getSortedSpanList(span: Span, tree: Map<string, Span[]>): Span[] {
       const childSpans = tree.get(span.spanId);
 
       if (childSpans === undefined || childSpans.length === 0) {
         return [span];
       }
 
-      const subSpans = childSpans.map((subSpan) => getSortedTraceList(subSpan, tree)).flat();
+      const subSpans = childSpans.map((subSpan) => getSortedSpanList(subSpan, tree)).flat();
 
       return [span, ...subSpans];
     }
 
-    if (this.args.selectedTrace) {
-      const spanTree = createTraceIdToSpanTrees(this.args.dynamicData)
-        .get(this.args.selectedTrace.traceId);
+    const spanTree = createTraceIdToSpanTrees(dynamicData)
+      .get(trace.traceId);
 
-      if (spanTree === undefined) {
-        return [];
-      }
-
-      const { root, tree } = spanTree;
-
-      return getSortedTraceList(root, tree);
+    if (spanTree === undefined) {
+      return [];
     }
 
-    return [];
+    const { root, tree } = spanTree;
+
+    return getSortedSpanList(root, tree);
   }
 
   @action

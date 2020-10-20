@@ -2,22 +2,11 @@
   <div>
     <Input
       id="filterInput"
-      @value={{this.filterInput}}
-      @placeholder="Filter traces"
       class="form-control input-lg"
+      @placeholder="Filter traces"
       @autofocus="autofocus"
-      @focus-out={{this.filter}}
-      @enter={{this.filter}}
+      {{on "input" this.filter}}
     />
-  </div>
-  <div>
-    <BsButton
-      @onClick={{this.filter}}
-      @type="button"
-      class="btn btn-light"
-    >
-      {{svg-jar "search" class="octicon align-middle"}}
-    </BsButton>
   </div>
 </div>
 
@@ -26,9 +15,9 @@
     <thead>
       <tr style="cursor: pointer">
         <th {{on "click" (fn this.sortByProperty "traceId")}} scope="col">Trace ID</th>
-        <th {{on "click" (fn this.sortByProperty "sourceClazz.name")}} scope="col">Soure Clazz</th>
-        <th {{on "click" (fn this.sortByProperty "targetClazz.name")}} scope="col">Target Clazz</th>
-        <th {{on "click" (fn this.sortByProperty "totalTraceDuration")}} scope="col">
+        <th {{on "click" (fn this.sortByProperty "firstClassName")}} scope="col">First Clazz</th>
+        <th {{on "click" (fn this.sortByProperty "lastClassName")}} scope="col">Last Clazz</th>
+        <th {{on "click" (fn this.sortByProperty "traceDuration")}} scope="col">
           Duration in
           <BsButton
             @onClick={{this.toggleTraceTimeUnit}}
@@ -48,8 +37,12 @@
           {{on "click" (fn @selectTrace trace)}}
         >
           <th title={{trace.traceId}}>{{truncate trace.traceId 8 true}}</th>
-          <td title={{trace.sourceClazz.name}}>{{truncate trace.sourceClazz.name 12 true}}</td>
-          <td title={{trace.targetClazz.name}}>{{truncate trace.targetClazz.name 14 true}}</td>
+          {{#let (get-value-of-map this.firstClasses trace.traceId) as |firstClass|}}
+            <td title={{firstClass.name}}>{{truncate firstClass.name 12 true}}</td>
+          {{/let}}
+          {{#let (get-value-of-map this.lastClasses trace.traceId) as |lastClass|}}
+            <td title={{lastClass.name}}>{{truncate lastClass.name 14 true}}</td>
+          {{/let}}
           {{#let (get this.traceDurations index) as |duration|}}
             <td>{{format-number duration this.traceTimeUnit}}</td>
           {{/let}}
