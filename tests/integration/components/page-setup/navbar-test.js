@@ -31,7 +31,6 @@ module('Integration | Component | page-setup/navbar', function(hooks) {
     await render(hbs`{{page-setup/navbar}}`);
 
     assert.ok(this.element.textContent.trim().includes('Visualization'));
-    assert.ok(this.element.textContent.trim().includes('Replay'));
     assert.ok(this.element.textContent.trim().includes('Discovery'));
   });
 

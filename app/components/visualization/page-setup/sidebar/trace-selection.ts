@@ -184,19 +184,6 @@ export default class TraceSelection extends Component<Args> {
     }
   }
 
-  static sortTracesByDuration(traces: Trace[], ascending = true) {
-    traces.sort((a, b) => {
-      const traceDurationA = TraceSelection.calculateTraceDuration(a);
-      const traceDurationB = TraceSelection.calculateTraceDuration(b);
-
-      return traceDurationA - traceDurationB;
-    });
-
-    if (!ascending) {
-      traces.reverse();
-    }
-  }
-
   @action
   filter(inputEvent: InputEvent) {
     // Case insensitive string filter

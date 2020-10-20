@@ -31,7 +31,6 @@ interface Args {
   readonly id: string;
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
-  readonly isReplay: boolean;
   readonly visualizationPaused: boolean;
   showApplication(application: Application): void;
   toggleVisualizationUpdating(): void;
