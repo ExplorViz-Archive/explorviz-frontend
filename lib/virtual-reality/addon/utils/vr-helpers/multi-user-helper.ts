@@ -2,6 +2,7 @@ import VRController from 'explorviz-frontend/utils/vr-rendering/VRController';
 import {
   Camera, Object3D, Quaternion, Vector3,
 } from 'three';
+import RemoteVrUser from '../vr-multi-user/remote-vr-user';
 
 export function getCameraPose(camera: Camera) {
   const position = new Vector3();
@@ -37,4 +38,38 @@ export function getPoses(camera: Camera, controller1: VRController|undefined,
   }
 
   return { camera: cameraPose, controller1: controller1Pose, controller2: controller2Pose };
+}
+
+/**
+ * Returns measurements in pixels for a given text
+ *
+ * @param {string} text The text to measure the width, height and subline height of.
+ * @param {string} font The font to measure the size in.
+ * @return {{width: Number, height: Number, sublineHeight: Number}} The sizes of the text.
+ */
+export function getTextSize(text: string, font: string) {
+  // re-use canvas object for better performance
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  if (!context) return { width: 200, height: 50, sublineHeight: 10 };
+
+  context.font = font;
+  const { width } = context.measureText(text);
+  const height = context.measureText('W').width;
+  const sublineHeight = context.measureText('H').width;
+  return { width, height, sublineHeight };
+}
+
+export function addDummyNamePlane(user: RemoteVrUser) {
+  if (user.camera && user.camera.model) {
+    // Use dummy object to let username always face camera with lookAt() function
+    const dummy = new Object3D();
+    dummy.name = 'dummyNamePlane';
+
+    dummy.position.copy(user.camera.model.position);
+    dummy.position.y += 0.3; // Display username above hmd
+
+    user.camera.model.add(dummy);
+  }
 }

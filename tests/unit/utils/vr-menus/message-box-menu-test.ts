@@ -1,4 +1,4 @@
-import MessageBoxMenu from 'explorviz-frontend/utils/message-box-menu';
+import MessageBoxMenu from 'explorviz-frontend/utils/vr-menus/message-box-menu';
 import { module, test } from 'qunit';
 import { Object3D } from 'three';
 

@@ -1,6 +1,6 @@
 import WebSocket from 'virtual-reality/services/web-socket';
 import {
-  Vector3 as V3, Quaternion as Q, Color,
+  Vector3 as V3, Quaternion as Q,
 } from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 

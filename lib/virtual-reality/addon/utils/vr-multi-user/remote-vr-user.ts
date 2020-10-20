@@ -1,11 +1,5 @@
 import THREE from 'three';
-
-type HighlightedEntity = {
-  appID: null|string;
-  entityID: null|string;
-  sourceClazzID: null|string;
-  targetClazzID: null|string;
-};
+import NameTagMesh from '../view-objects/vr/name-tag-mesh';
 
 type Controller = {
   id: string,
@@ -21,18 +15,11 @@ type Camera = {
 } | undefined;
 
 export default class RemoteVrUser extends THREE.Object3D {
-  userName: string|undefined;
+  userName!: string;
 
   ID: string = 'unknown';
 
-  state: string|undefined;
-
-  highlightedEntity: HighlightedEntity = {
-    appID: null,
-    entityID: null,
-    sourceClazzID: null,
-    targetClazzID: null,
-  };
+  state!: string;
 
   controller1: Controller;
 
@@ -40,9 +27,9 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   camera: Camera;
 
-  color: number[]|undefined; // [r,g,b], r,g,b = 0,...,255
+  color!: THREE.Color; // [r,g,b], r,g,b = 0,...,255
 
-  namePlane: any; // PlaneGeometry containing username
+  nameTag: NameTagMesh|undefined;
 
   initCamera(obj: THREE.Object3D) {
     this.camera = {
@@ -97,16 +84,19 @@ export default class RemoteVrUser extends THREE.Object3D {
     }
   }
 
-  removeNamePlane() {
-    this.remove(this.namePlane);
-    this.namePlane = null;
+  removeNameTag() {
+    if (this.nameTag) {
+      this.remove(this.nameTag);
+      this.nameTag.disposeRecursively();
+      this.nameTag = undefined;
+    }
   }
 
   removeAllObjects3D() {
     this.removeController1();
     this.removeController2();
     this.removeCamera();
-    this.removeNamePlane();
+    this.removeNameTag();
   }
 
   /**
@@ -153,14 +143,6 @@ export default class RemoteVrUser extends THREE.Object3D {
     }
   }
 
-  setHighlightedEntity(appID: string, entityID: string, sourceClazzID: string,
-    targetClazzID: string) {
-    this.highlightedEntity.appID = appID;
-    this.highlightedEntity.entityID = entityID;
-    this.highlightedEntity.sourceClazzID = sourceClazzID;
-    this.highlightedEntity.targetClazzID = targetClazzID;
-  }
-
   /**
    * Hides user or unhides them.
    *
@@ -177,8 +159,8 @@ export default class RemoteVrUser extends THREE.Object3D {
     if (this.controller2) {
       this.controller2.model.visible = bool;
     }
-    if (this.namePlane) {
-      this.namePlane.visible = bool;
+    if (this.nameTag) {
+      this.nameTag.turnTransparent();
     }
   }
 }

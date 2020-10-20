@@ -23,6 +23,7 @@ import DS from 'ember-data';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
+import NameTagMesh from 'virtual-reality/utils/view-objects/vr/name-tag-mesh';
 
 export default class VrMultiUser extends VrRendering {
   debug = debugLogger('VrMultiUser');
@@ -103,7 +104,7 @@ export default class VrMultiUser extends VrRendering {
     // Handle own controller updates and ray intersections
     // this.updateControllers();
 
-    // this.updateUserNameTags();
+    this.updateUserNameTags();
     this.sendPoses();
     this.webSocket.sendUpdates();
   }
@@ -113,6 +114,20 @@ export default class VrMultiUser extends VrRendering {
       this.localUser.controller2);
 
     this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
+  }
+
+  /**
+   * Set user name tag to be directly above their head
+   * and set rotation such that it looks toward our camera.
+   */
+  updateUserNameTags() {
+    this.idToRemoteUser.forEach((user) => {
+      const dummyPlane = user.getObjectByName('dummyNamePlane');
+      if (user.state === 'connected' && user.nameTag && user.camera && dummyPlane) {
+        user.nameTag.position.setFromMatrixPosition(dummyPlane.matrixWorld);
+        user.nameTag.lookAt(this.localUser.camera.getWorldPosition(new THREE.Vector3()));
+      }
+    });
   }
 
   addApplication(applicationModel: Application, origin: THREE.Vector3) {
@@ -337,7 +352,7 @@ export default class VrMultiUser extends VrRendering {
     const user = new RemoteVrUser();
     user.userName = data.name;
     user.ID = data.id;
-    user.color = data.color;
+    user.color = new THREE.Color().fromArray(data.color);
     user.state = 'connected';
 
     this.idToRemoteUser.set(data.id, user);
@@ -347,11 +362,17 @@ export default class VrMultiUser extends VrRendering {
     // Add 3d-models for new user
     this.remoteUserGroup.add(user);
 
-    // this.addUsername(data.user.id);
+    // Add name tag
+    Helper.addDummyNamePlane(user);
+    const nameTag = new NameTagMesh(user.userName, user.color);
+    user.nameTag = nameTag;
+    this.scene.add(nameTag);
 
-    // Show connect notification
-    // this.get('menus.messageBox').enqueueMessage({ title: 'User connected',
-    // text: user.get('name'), color: Helper.rgbToHex(user.get('color')) }, 3000);
+    this.messageBox.enqueueMessage({
+      title: 'User connected',
+      text: user.userName,
+      color: `#${user.color.getHexString()}`,
+    }, 3000);
   }
 
   setLandscapeState(openSystems: {id: string, opened: boolean}[],
@@ -534,7 +555,7 @@ export default class VrMultiUser extends VrRendering {
     }
 
     // Highlight entities in the respective user color
-    applicationObject3D.setHighlightingColor(new THREE.Color().fromArray(user.color));
+    applicationObject3D.setHighlightingColor(user.color);
 
     // Apply highlighting
     if (update.entityType === 'ComponentMesh' || update.entityType === 'ClazzMesh') {
