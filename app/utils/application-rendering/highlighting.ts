@@ -252,17 +252,27 @@ export default class Highlighting {
    * Highlights the stored highlighted entity again.
    */
   updateHighlighting(communication: DrawableClassCommunication[]) {
-    const { highlightedEntity } = this;
-
-    if (!highlightedEntity) {
+    if (!this.highlightedEntity) {
       return;
     }
 
+    if (this.highlightedEntity instanceof ClazzCommunicationMesh) {
+      const possiblyNewMeshInstance = this.applicationObject3D
+        .getCommMeshByModelId(this.highlightedEntity.dataModel.id);
+
+      if (possiblyNewMeshInstance) {
+        this.highlightedEntity = possiblyNewMeshInstance;
+      } else {
+        // communication mesh no longer visible
+        this.removeHighlighting();
+      }
+    }
+
     // Re-run highlighting for entity
-    if (highlightedEntity instanceof ClazzMesh
-        || highlightedEntity instanceof ComponentMesh
-        || highlightedEntity instanceof ClazzCommunicationMesh) {
-      this.highlight(highlightedEntity, communication, false);
+    if (this.highlightedEntity instanceof ClazzMesh
+        || this.highlightedEntity instanceof ComponentMesh
+        || this.highlightedEntity instanceof ClazzCommunicationMesh) {
+      this.highlight(this.highlightedEntity, communication, false);
     }
   }
 
