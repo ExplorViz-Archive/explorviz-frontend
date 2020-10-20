@@ -194,7 +194,7 @@ export default class TraceSelection extends Component<Args> {
 
     this.traceSteps = this.calculateTraceSteps();
 
-    if (this.traceSteps.length > 1) {
+    if (this.traceSteps.length > 0) {
       const [firstStep] = this.traceSteps;
       this.currentTraceStep = firstStep;
 
@@ -346,5 +346,11 @@ export default class TraceSelection extends Component<Args> {
   @action
   close(this: TraceSelection) {
     this.args.removeComponent('trace-selection');
+  }
+
+  willDestroy() {
+    if (this.selectedTrace) {
+      this.args.highlighter.removeHighlighting();
+    }
   }
 }
