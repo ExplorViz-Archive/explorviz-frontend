@@ -185,11 +185,11 @@ export default class Sender {
  * Informs backend that this user entered or left spectating mode
  * and additionally adds who is spectating who
  */
-  sendSpectatingUpdate(userID: string, state: string, spectatedUser: string|null) {
+  sendSpectatingUpdate(userID: string, isSpectating: boolean, spectatedUser: string|null) {
     const spectateObj = {
       event: 'spectating_update',
       userID,
-      isSpectating: state === 'spectating',
+      isSpectating,
       spectatedUser,
     };
     this.webSocket.enqueueIfOpen(spectateObj);

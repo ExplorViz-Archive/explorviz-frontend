@@ -160,7 +160,7 @@ export default class RemoteVrUser extends THREE.Object3D {
       this.controller2.model.visible = bool;
     }
     if (this.nameTag) {
-      this.nameTag.turnTransparent();
+      this.nameTag.visible = bool;
     }
   }
 }

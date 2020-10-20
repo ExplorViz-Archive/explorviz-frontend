@@ -2,12 +2,19 @@ import TextItem from './items/text-item';
 import BaseMenu from './base-menu';
 import TextbuttonItem from './items/textbutton-item';
 
+export type MainMenuEvents = {
+  closeMenu: () => void,
+  openCameraMenu: () => void,
+  openLandscapeMenu: () => void,
+  openSpectateMenu?: () => void,
+  openConnectionMenu?: () => void,
+  openAdvancedMenu: () => void
+};
 export default class MainMenu extends BaseMenu {
-  constructor(closeMenu: () => void, openCameraMenu: () => void, openLandscapeMenu: () => void,
-    openSpectateMenu: () => void, openConnectionMenu: () => void, openAdvancedMenu: () => void) {
+  constructor(callbacks: MainMenuEvents) {
     super();
 
-    this.back = closeMenu;
+    this.back = callbacks.closeMenu;
     this.opacity = 0.8;
 
     const title = new TextItem('Options', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
@@ -18,45 +25,53 @@ export default class MainMenu extends BaseMenu {
       y: 80,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    cameraButton.onTriggerDown = openCameraMenu;
+    this.items.push(cameraButton);
+    cameraButton.onTriggerDown = callbacks.openCameraMenu;
 
     const landscapeButton = new TextbuttonItem('change_landscape_position', 'Move Landscape', {
       x: 100,
       y: 140,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    landscapeButton.onTriggerDown = openLandscapeMenu;
+    this.items.push(landscapeButton);
+    landscapeButton.onTriggerDown = callbacks.openLandscapeMenu;
 
-    const spectateButton = new TextbuttonItem('spectate', 'Spectate', {
-      x: 100,
-      y: 200,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+    if (callbacks.openSpectateMenu) {
+      const spectateButton = new TextbuttonItem('spectate', 'Spectate', {
+        x: 100,
+        y: 200,
+      }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    spectateButton.onTriggerDown = openSpectateMenu;
+      this.items.push(spectateButton);
+      spectateButton.onTriggerDown = callbacks.openSpectateMenu;
+    }
 
-    const connectionButton = new TextbuttonItem('connection', 'Connection', {
-      x: 100,
-      y: 260,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+    if (callbacks.openConnectionMenu) {
+      const connectionButton = new TextbuttonItem('connection', 'Connection', {
+        x: 100,
+        y: 260,
+      }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    connectionButton.onTriggerDown = openConnectionMenu;
+      this.items.push(connectionButton);
+      connectionButton.onTriggerDown = callbacks.openConnectionMenu;
+    }
 
     const advancedButton = new TextbuttonItem('advanced', 'Advanced Options', {
       x: 100,
       y: 320,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    advancedButton.onTriggerDown = openAdvancedMenu;
+    this.items.push(advancedButton);
+    advancedButton.onTriggerDown = callbacks.openAdvancedMenu;
 
     const exitButton = new TextbuttonItem('exit', 'Exit', {
       x: 100,
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
+    this.items.push(exitButton);
     exitButton.onTriggerDown = this.back;
 
-    this.items.push(cameraButton, landscapeButton, spectateButton,
-      connectionButton, advancedButton, exitButton);
     this.update();
   }
 }

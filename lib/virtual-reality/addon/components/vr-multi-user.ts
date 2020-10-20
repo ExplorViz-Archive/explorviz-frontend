@@ -24,6 +24,9 @@ import * as Highlighting from 'explorviz-frontend/utils/application-rendering/hi
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import NameTagMesh from 'virtual-reality/utils/view-objects/vr/name-tag-mesh';
+import SpectateMenu from 'virtual-reality/utils/vr-menus/spectate-menu';
+import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
+import UserListMenu from 'virtual-reality/utils/vr-menus/user-list-menu';
 
 export default class VrMultiUser extends VrRendering {
   debug = debugLogger('VrMultiUser');
@@ -93,15 +96,14 @@ export default class VrMultiUser extends VrRendering {
   render() {
     super.render();
 
-    if (this.localUser.isOffline) return;
+    if (!this.localUser.isOnline && !this.localUser.isConnecting) return;
 
     this.time.update();
 
-    if (this.localUser.isSpecating) {
-      this.spectateUser.update(); // Follow view of spectated user
+    if (this.spectateUser.isActive) {
+      this.spectateUser.update();
     }
 
-    // Handle own controller updates and ray intersections
     // this.updateControllers();
 
     this.updateUserNameTags();
@@ -110,8 +112,14 @@ export default class VrMultiUser extends VrRendering {
   }
 
   sendPoses() {
-    const poses = Helper.getPoses(this.camera, this.localUser.controller1,
-      this.localUser.controller2);
+    let poses;
+
+    if (this.renderer.xr.isPresenting) {
+      poses = Helper.getPoses(this.renderer.xr.getCamera(this.camera),
+        this.localUser.controller1, this.localUser.controller2);
+    } else {
+      poses = Helper.getPoses(this.camera, this.localUser.controller1, this.localUser.controller2);
+    }
 
     this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
   }
@@ -122,8 +130,8 @@ export default class VrMultiUser extends VrRendering {
    */
   updateUserNameTags() {
     this.idToRemoteUser.forEach((user) => {
-      const dummyPlane = user.getObjectByName('dummyNamePlane');
-      if (user.state === 'connected' && user.nameTag && user.camera && dummyPlane) {
+      const dummyPlane = user.getObjectByName('dummyNameTag');
+      if (user.state === 'connected' && user.nameTag && user.camera && dummyPlane && this.localUser.camera) {
         user.nameTag.position.setFromMatrixPosition(dummyPlane.matrixWorld);
         user.nameTag.lookAt(this.localUser.camera.getWorldPosition(new THREE.Vector3()));
       }
@@ -170,13 +178,64 @@ export default class VrMultiUser extends VrRendering {
     this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, '', false, true);
   }
 
+  handlePrimaryInputOn(intersection: THREE.Intersection) {
+    if (this.spectateUser.spectatedUser) {
+      const { object, uv } = intersection;
+      if (object instanceof SpectateMenu && uv) {
+        object.triggerDown(uv);
+      }
+      return;
+    }
+
+    super.handlePrimaryInputOn(intersection);
+  }
+
+  handleSecondaryInputOn(intersection: THREE.Intersection) {
+    if (this.spectateUser.spectatedUser) {
+      return;
+    }
+
+    super.handleSecondaryInputOn(intersection);
+  }
+
+  // #region menus
+
+  openMainMenu() {
+    this.closeControllerMenu();
+
+    if (!this.localUser.controller1) return;
+
+    this.mainMenu = new MainMenu({
+      closeMenu: super.closeControllerMenu.bind(this),
+      openCameraMenu: super.openCameraMenu.bind(this),
+      openLandscapeMenu: super.openLandscapeMenu.bind(this),
+      openAdvancedMenu: super.openAdvancedMenu.bind(this),
+      openSpectateMenu: this.openSpectateMenu.bind(this),
+      openConnectionMenu: this.openConnectionMenu.bind(this),
+    });
+
+    this.controllerMainMenus.add(this.mainMenu);
+  }
+
+  openSpectateMenu() {
+    this.closeControllerMenu();
+
+    this.mainMenu = new SpectateMenu(
+      this.openMainMenu.bind(this),
+      this.spectateUser,
+      this.idToRemoteUser,
+    );
+
+    this.controllerMainMenus.add(this.mainMenu);
+  }
+
   openConnectionMenu() {
     this.closeControllerMenu();
 
     const menu = new ConnectionMenu(
       this.openMainMenu.bind(this),
       this.localUser.state,
-      this.localUser.connect.bind(this.localUser),
+      this.localUser.toggleConnection.bind(this.localUser),
     );
 
     this.mainMenu = menu;
@@ -184,30 +243,17 @@ export default class VrMultiUser extends VrRendering {
     this.controllerMainMenus.add(menu);
   }
 
-  onDisconnect() {
-    if (this.localUser.state === 'connecting') {
-      this.showHint('Could not establish connection');
-    }
-
-    this.idToRemoteUser.forEach((user) => {
-      user.removeAllObjects3D();
-    });
-
-    this.applicationGroup.children.forEach((child) => {
-      if (child instanceof ApplicationObject3D) {
-        child.setHighlightingColor(this.configuration.applicationColors.highlightedEntity);
-      }
-    });
-
-    this.idToRemoteUser.clear();
-
-    this.localUser.disconnect();
+  showUserList() {
+    const menu = new UserListMenu(this.localUser, []);
+    this.camera.add(menu);
   }
+
+  // #endregion menus
 
   onEvent(event: string, data: any) {
     if (event !== 'user_positions') {
-      // console.log('Event: ', event);
-      // console.log('Data: ', data);
+      console.log('Event: ', event);
+      console.log('Data: ', data);
     }
     switch (event) {
       case 'connection_closed':
@@ -263,6 +309,7 @@ export default class VrMultiUser extends VrRendering {
         this.onHighlightingUpdate(data);
         break;
       case 'spectating_update':
+        this.onSpectatingUpdate(data.userID, data.isSpectating);
         break;
       default:
         break;
@@ -279,6 +326,26 @@ export default class VrMultiUser extends VrRendering {
     super.closeSystemAndRedraw(systemMesh);
 
     if (this.localUser.isOnline) { this.sender.sendSystemUpdate(systemMesh.dataModel.id, false); }
+  }
+
+  onDisconnect() {
+    if (this.localUser.state === 'connecting') {
+      super.showHint('Could not establish connection');
+    }
+
+    this.idToRemoteUser.forEach((user) => {
+      user.removeAllObjects3D();
+    });
+
+    this.applicationGroup.children.forEach((child) => {
+      if (child instanceof ApplicationObject3D) {
+        child.setHighlightingColor(this.configuration.applicationColors.highlightedEntity);
+      }
+    });
+
+    this.idToRemoteUser.clear();
+
+    this.localUser.disconnect();
   }
 
   /**
@@ -328,7 +395,7 @@ export default class VrMultiUser extends VrRendering {
     this.localUser.controllersConnected = { controller1: false, controller2: false };
 
     // Remove apps and reset landscape
-    this.resetAll();
+    super.resetAll();
   }
 
   /**
@@ -366,7 +433,7 @@ export default class VrMultiUser extends VrRendering {
     Helper.addDummyNamePlane(user);
     const nameTag = new NameTagMesh(user.userName, user.color);
     user.nameTag = nameTag;
-    this.scene.add(nameTag);
+    user.add(nameTag);
 
     this.messageBox.enqueueMessage({
       title: 'User connected',
@@ -456,8 +523,11 @@ export default class VrMultiUser extends VrRendering {
       this.idToRemoteUser.delete(id);
 
       // Show disconnect notification
-      // this.get('menus.messageBox').enqueueMessage({ title: 'User disconnected',
-      // text: user.get('name'), color: Helper.rgbToHex(user.get('color')) }, 3000);
+      this.messageBox.enqueueMessage({
+        title: 'User disconnected',
+        text: user.name,
+        color: `#${user.color.getHexString}`,
+      }, 3000);
     }
   }
 
@@ -571,6 +641,30 @@ export default class VrMultiUser extends VrRendering {
     }
   }
 
+  /**
+ * Updates the state of given user to spectating or connected.
+ * Hides them if spectating.
+ *
+ * @param {number} userID - The user's id.
+ * @param {boolean} isSpectating - True, if the user is now spectating, else false.
+ */
+  onSpectatingUpdate(userID: string, isSpectating: boolean) {
+    const remoteUser = this.idToRemoteUser.get(userID);
+
+    if (!remoteUser) return;
+
+    if (isSpectating) {
+      remoteUser.setVisible(false);
+      if (this.spectateUser.spectatedUser && this.spectateUser.spectatedUser.ID === userID) {
+        this.spectateUser.deactivate();
+      }
+      this.messageBox.enqueueMessage({ title: remoteUser.name, text: ' is now spectating', color: '#ffffff' }, 2000);
+    } else {
+      remoteUser.setVisible(true);
+      this.messageBox.enqueueMessage({ title: remoteUser.name, text: ' is no longer spectating', color: '#ffffff' }, 2000);
+    }
+  }
+
   moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
     super.moveLandscape(deltaX, deltaY, deltaZ);
 
@@ -583,5 +677,25 @@ export default class VrMultiUser extends VrRendering {
 
     this.sender.sendLandscapeUpdate(new THREE.Vector3(0, 0, 0), this.landscapeObject3D.quaternion,
       this.landscapeOffset);
+  }
+
+  resetAll() {
+    // Do not allow to reset everything for collaborative work
+    if (this.localUser.isOnline) {
+      this.showHint('Reset all is disabled in online mode');
+      return;
+    }
+
+    super.resetAll();
+  }
+
+  /*
+   * This overridden Ember Component lifecycle hook enables calling
+   * ExplorViz's custom cleanup code.
+   *
+   * @method willDestroy
+   */
+  willDestroy() {
+    this.localUser.disconnect();
   }
 }

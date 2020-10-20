@@ -16,42 +16,35 @@ export default class SpectateUser extends Service.extend({
 
   spectatedUser: RemoteVrUser|null = null; // Tells which userID (if any) is being spectated
 
-  startPosition: THREE.Vector3|null = null; // Position before this user starts spectating
+  startPosition: THREE.Vector3 = new THREE.Vector3(); // Position before this user starts spectating
 
   sender = new Sender(this.webSocket);
+
+  get isActive() { return this.spectatedUser !== null; }
 
   /**
   * Used in spectating mode to set user's camera position to the spectated user's position
   */
   update() {
-    if (!this.spectatedUser || !this.spectatedUser.camera) return;
-
-    const { position } = this.spectatedUser.camera;
-
-    const cameraOffset = new THREE.Vector3().copy(this.user.camera.position);
-    this.user.getPosition().subVectors(position, cameraOffset);
+    if (this.spectatedUser && this.spectatedUser.camera) {
+      this.user.teleportToPosition(this.spectatedUser.camera.position, true);
+    }
   }
 
   /**
  * Switches our user into spectator mode
  * @param {number} userID The id of the user to be spectated
  */
-  activate(user: RemoteVrUser|null) {
-    if (!user) return;
+  activate(remoteUser: RemoteVrUser|null) {
+    if (!remoteUser) return;
 
-    if (this.user.isSpectating) {
-      this.deactivate();
-    }
-
-    this.startPosition = this.user.position.clone();
-    this.spectatedUser = user;
+    this.startPosition.copy(this.user.userGroup.position);
+    this.spectatedUser = remoteUser;
 
     // Other user's hmd should be invisible
-    if (user.camera) { user.camera.model.visible = false; }
-    user.namePlane.visible = false;
-    this.user.state = 'spectating';
+    remoteUser.setVisible(false);
 
-    this.sender.sendSpectatingUpdate(this.user.userID, this.user.state, user.ID);
+    this.sender.sendSpectatingUpdate(this.user.userID, this.isActive, remoteUser.ID);
   }
 
   /**
@@ -62,21 +55,18 @@ export default class SpectateUser extends Service.extend({
       return;
     }
 
-    this.spectatedUser.camera.model.visible = true;
-    this.spectatedUser.namePlane.visible = true;
-    this.user.state = 'online';
+    this.spectatedUser.setVisible(false);
     this.spectatedUser = null;
 
-    if (this.startPosition) {
-      this.user.position.fromArray(this.startPosition.toArray());
-    }
+    this.user.state = 'online';
 
-    this.sender.sendSpectatingUpdate(this.user.userID, this.user.state, null);
+    this.user.userGroup.position.copy(this.startPosition);
+
+    this.sender.sendSpectatingUpdate(this.user.userID, this.isActive, null);
   }
 
   reset() {
     this.spectatedUserId = null;
-    this.startPosition = null;
   }
 }
 

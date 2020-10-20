@@ -7,7 +7,7 @@ export default class ConnectionMenu extends BaseMenu {
 
   connectionButton: TextbuttonItem;
 
-  constructor(openMainMenu: () => void, state: string, connect: (() => void)) {
+  constructor(openMainMenu: () => void, state: string, toggleConnection: (() => void)) {
     super();
     this.back = openMainMenu;
 
@@ -22,7 +22,7 @@ export default class ConnectionMenu extends BaseMenu {
     this.connectionButton = connectionButton;
     this.items.push(connectionButton);
 
-    connectionButton.onTriggerDown = connect;
+    connectionButton.onTriggerDown = toggleConnection;
 
     const backButton = new TextbuttonItem('back', 'Back', {
       x: 100,
@@ -48,11 +48,13 @@ export default class ConnectionMenu extends BaseMenu {
       this.statusText.color = '#ff9719';
       this.connectionButton.text = '...';
       // menu.setClickable('connect', false);
-    } else if (state === 'connected') {
-      this.statusText.text = 'Status: connected';
+    } else if (state === 'online') {
+      this.statusText.text = 'Status: online';
       this.statusText.color = '#3bba2a';
       this.connectionButton.text = 'Disconnect';
       // menu.setClickable('connect', true);
     }
+
+    this.update();
   }
 }

@@ -5,14 +5,18 @@ import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VR
 import DS from 'ember-data';
 import ConnectionMenu from 'virtual-reality/utils/vr-menus/connection-menu';
 import WebSocket from './web-socket';
+import SpectateUser from './spectate-user';
 
-export type ConnectionStatus = 'offline'|'connecting'|'online'|'spectating';
+export type ConnectionStatus = 'offline'|'connecting'|'online';
 
 export default class LocalVrUser extends Service.extend({
   // anything which *must* be merged to prototype here
 }) {
   @service('web-socket')
   webSocket!: WebSocket;
+
+  @service('spectate-user')
+  spectateUser!: SpectateUser;
 
   @service()
   store!: DS.Store;
@@ -25,7 +29,7 @@ export default class LocalVrUser extends Service.extend({
 
   renderer!: THREE.WebGLRenderer;
 
-  camera!: THREE.Camera;
+  defaultCamera!: THREE.Camera;
 
   controller1: VRController|undefined;
 
@@ -41,11 +45,20 @@ export default class LocalVrUser extends Service.extend({
 
   connectionStatus: ConnectionStatus = 'offline';
 
-  get isOnline() { return this.state === 'online' || this.state === 'spectating'; }
+  get camera() {
+    if (!this.renderer) return null;
 
-  get isOffline() { return this.state === 'offline'; }
+    if (this.renderer.xr.isPresenting) {
+      return this.renderer.xr.getCamera(this.defaultCamera);
+    }
+    return this.defaultCamera;
+  }
 
-  get isSpectating() { return this.state === 'spectating'; }
+  get isOnline() { return this.state === 'online'; }
+
+  get isConnecting() { return this.state === 'connecting'; }
+
+  get isSpectating() { return this.spectateUser.isActive; }
 
   get position() { return this.userGroup.position; }
 
@@ -67,7 +80,7 @@ export default class LocalVrUser extends Service.extend({
   }
 
   addCamera(camera: THREE.Camera) {
-    this.camera = camera;
+    this.defaultCamera = camera;
     this.userGroup.add(camera);
   }
 
@@ -122,14 +135,16 @@ export default class LocalVrUser extends Service.extend({
    *  This method is used to adapt the users view to
    *  the new position
    */
-  teleportToPosition(position: THREE.Vector3) {
-    if (!this.renderer || !this.camera) return;
+  teleportToPosition(position: THREE.Vector3, adaptCameraHeight = false) {
+    if (!this.camera) return;
 
     const cameraWorldPos = new THREE.Vector3();
-    const xrCamera = this.renderer.xr.getCamera(this.camera);
-    xrCamera.getWorldPosition(cameraWorldPos);
+    this.camera.getWorldPosition(cameraWorldPos);
 
     this.userGroup.position.x += position.x - cameraWorldPos.x;
+    if (adaptCameraHeight) {
+      this.userGroup.position.y += position.y - cameraWorldPos.y;
+    }
     this.userGroup.position.z += position.z - cameraWorldPos.z;
   }
 
@@ -163,6 +178,16 @@ export default class LocalVrUser extends Service.extend({
 
     // Close socket
     this.get('webSocket').closeSocket();
+  }
+
+  toggleConnection() {
+    if (this.isConnecting) { return; }
+
+    if (this.isOnline) {
+      this.disconnect();
+    } else {
+      this.connect();
+    }
   }
 }
 

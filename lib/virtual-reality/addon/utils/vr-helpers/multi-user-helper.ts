@@ -7,7 +7,6 @@ import RemoteVrUser from '../vr-multi-user/remote-vr-user';
 export function getCameraPose(camera: Camera) {
   const position = new Vector3();
   camera.getWorldPosition(position);
-  // Add position with regard to headset movement
 
   return { position, quaternion: camera.quaternion };
 }
@@ -65,7 +64,7 @@ export function addDummyNamePlane(user: RemoteVrUser) {
   if (user.camera && user.camera.model) {
     // Use dummy object to let username always face camera with lookAt() function
     const dummy = new Object3D();
-    dummy.name = 'dummyNamePlane';
+    dummy.name = 'dummyNameTag';
 
     dummy.position.copy(user.camera.model.position);
     dummy.position.y += 0.3; // Display username above hmd
