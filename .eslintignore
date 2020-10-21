@@ -5,6 +5,6 @@ dist/
 
 public/assets/web-workers/*
 
-lib/virtual-reality/addon/utils/lib/*
+lib/virtual-reality/addon/utils/lib/**/*
 
 tests/
