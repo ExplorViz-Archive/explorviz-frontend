@@ -77,14 +77,23 @@ export default class VrMultiUser extends VrRendering {
 
     this.messageBox = new MessageBoxMenu(this.camera);
 
-    this.initCallbacks();
+    this.initWebSocketCallbacks();
+
+    this.initControllerConnectionCallbacks();
 
     this.sender = new Sender(this.webSocket);
 
     this.localUser.state = 'offline';
 
-    $.getJSON('config/config_multiuser.json').then(bind(this, this.applyConfiguration));
+    $.getJSON('config/config_multiuser.json').then(bind(this.webSocket, this.webSocket.applyConfiguration));
+  }
 
+  initWebSocketCallbacks() {
+    this.webSocket.socketCloseCallback = this.onDisconnect.bind(this);
+    this.webSocket.eventCallback = this.onEvent.bind(this);
+  }
+
+  initControllerConnectionCallbacks() {
     if (this.localUser.controller1) {
       this.localUser.controller1.eventCallbacks.connected = this.onControllerConnected.bind(this);
       this.localUser.controller1.eventCallbacks.disconnected = this
@@ -96,11 +105,6 @@ export default class VrMultiUser extends VrRendering {
       this.localUser.controller2.eventCallbacks.disconnected = this
         .onControllerDisconnected.bind(this);
     }
-  }
-
-  initCallbacks() {
-    this.webSocket.socketCloseCallback = this.onDisconnect.bind(this);
-    this.webSocket.eventCallback = this.onEvent.bind(this);
   }
 
   // #endregion INIT
@@ -247,7 +251,7 @@ export default class VrMultiUser extends VrRendering {
 
   // #endregion INPUT EVENTS
 
-  // #region EVENT HANDLER
+  // #region REMOTE EVENT HANDLER
 
   onEvent(event: string, data: any) {
     if (event !== 'user_positions') {
@@ -315,18 +319,6 @@ export default class VrMultiUser extends VrRendering {
       default:
         break;
     }
-  }
-
-  async openSystemAndRedraw(systemMesh: SystemMesh) {
-    super.openSystemAndRedraw(systemMesh);
-
-    this.sender.sendSystemUpdate(systemMesh.dataModel.id, true);
-  }
-
-  async closeSystemAndRedraw(systemMesh: SystemMesh) {
-    super.closeSystemAndRedraw(systemMesh);
-
-    if (this.localUser.isOnline) { this.sender.sendSystemUpdate(systemMesh.dataModel.id, false); }
   }
 
   onDisconnect() {
@@ -711,9 +703,27 @@ export default class VrMultiUser extends VrRendering {
     }
   }
 
-  // #endregion EVENT HANDLER
+  // #endregion REMOTE EVENT HANDLER
 
   // #region UTIL
+
+  sendPoses() {
+    const { camera, controller1, controller2 } = this.localUser;
+
+    const poses = Helper.getPoses(camera, controller1, controller2);
+
+    this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
+  }
+
+  resetAll() {
+    // Do not allow to reset everything for collaborative work
+    if (this.localUser.isOnline) {
+      this.showHint('Reset all is disabled in online mode');
+      return;
+    }
+
+    super.resetAll();
+  }
 
   moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
     super.moveLandscape(deltaX, deltaY, deltaZ);
@@ -727,19 +737,6 @@ export default class VrMultiUser extends VrRendering {
 
     this.sender.sendLandscapeUpdate(new THREE.Vector3(0, 0, 0), this.landscapeObject3D.quaternion,
       this.landscapeOffset);
-  }
-
-  sendPoses() {
-    let poses;
-
-    if (this.renderer.xr.isPresenting) {
-      poses = Helper.getPoses(this.renderer.xr.getCamera(this.camera),
-        this.localUser.controller1, this.localUser.controller2);
-    } else {
-      poses = Helper.getPoses(this.camera, this.localUser.controller1, this.localUser.controller2);
-    }
-
-    this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
   }
 
   /**
@@ -756,6 +753,22 @@ export default class VrMultiUser extends VrRendering {
     });
   }
 
+  async openSystemAndRedraw(systemMesh: SystemMesh) {
+    super.openSystemAndRedraw(systemMesh);
+
+    this.sender.sendSystemUpdate(systemMesh.dataModel.id, true);
+  }
+
+  async closeSystemAndRedraw(systemMesh: SystemMesh) {
+    super.closeSystemAndRedraw(systemMesh);
+
+    if (this.localUser.isOnline) { this.sender.sendSystemUpdate(systemMesh.dataModel.id, false); }
+  }
+
+  /**
+   * Uses the addApplication Task of vr-rendering to add an application to the scene.
+   * Additionally, a callback function is given to send an update to the backend.
+   */
   addApplication(applicationModel: Application, origin: THREE.Vector3) {
     super.addApplicationTask.perform(applicationModel, origin,
       ((applicationObject3D: ApplicationObject3D) => {
@@ -796,21 +809,6 @@ export default class VrMultiUser extends VrRendering {
     this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, '', false, true);
   }
 
-  applyConfiguration(config: any) {
-    this.webSocket.host = config.host;
-    this.webSocket.port = config.port;
-  }
-
-  resetAll() {
-    // Do not allow to reset everything for collaborative work
-    if (this.localUser.isOnline) {
-      this.showHint('Reset all is disabled in online mode');
-      return;
-    }
-
-    super.resetAll();
-  }
-
   // #endregion UTIL
 
   /*
@@ -820,6 +818,7 @@ export default class VrMultiUser extends VrRendering {
    * @method willDestroy
    */
   willDestroy() {
+    this.cleanAndUpdateScene();
     this.localUser.disconnect();
   }
 }

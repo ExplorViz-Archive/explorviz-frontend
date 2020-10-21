@@ -28,6 +28,11 @@ export default class WebSocket extends Service.extend({
     this.socketRef = socket;
   }
 
+  applyConfiguration(config: { host: string, port: string }) {
+    this.host = config.host;
+    this.port = config.port;
+  }
+
   closeSocket() {
     this.websockets.closeSocketFor(`ws://${this.get('host')}:${this.get('port')}/`);
     // Close handlers

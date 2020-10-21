@@ -46,8 +46,6 @@ export default class LocalVrUser extends Service.extend({
   connectionStatus: ConnectionStatus = 'offline';
 
   get camera() {
-    if (!this.renderer) return null;
-
     if (this.renderer.xr.isPresenting) {
       return this.renderer.xr.getCamera(this.defaultCamera);
     }
