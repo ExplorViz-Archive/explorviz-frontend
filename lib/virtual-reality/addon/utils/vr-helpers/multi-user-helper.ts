@@ -1,6 +1,6 @@
 import VRController from 'explorviz-frontend/utils/vr-rendering/VRController';
 import {
-  Camera, Object3D, Quaternion, Vector3,
+  Camera, Object3D, Mesh, MeshStandardMaterial, Quaternion, Vector3,
 } from 'three';
 import RemoteVrUser from '../vr-multi-user/remote-vr-user';
 
@@ -71,4 +71,41 @@ export function addDummyNamePlane(user: RemoteVrUser) {
 
     user.camera.model.add(dummy);
   }
+}
+
+/**
+ * Sets MeshStandardMaterial of given object to have the given opacity.
+ * Displays object using wireframes (instead of polygons):
+ */
+export function displayAsWireframe(object: Object3D, frameLineWidth = 0.5, opacity = 0.1) {
+  if (object instanceof Mesh && object.material instanceof MeshStandardMaterial) {
+    object.material.wireframe = true;
+    object.material.wireframeLinewidth = frameLineWidth;
+
+    if (opacity < 1) {
+      object.material.transparent = true;
+      object.material.opacity = opacity;
+    }
+  }
+
+  object.children.forEach((child) => {
+    displayAsWireframe(child);
+  });
+}
+
+/**
+ * Sets MeshStandardMaterial of given object to have the given opacity.
+ * Displays object using polygons (instead of wireframe):
+ */
+export function displayAsSolidObject(object: Object3D, opacity = 1) {
+  if (object instanceof Mesh && object.material instanceof MeshStandardMaterial) {
+    object.material.wireframe = false;
+
+    object.material.transparent = opacity !== 1;
+    object.material.opacity = opacity;
+  }
+
+  object.children.forEach((child) => {
+    displayAsSolidObject(child);
+  });
 }

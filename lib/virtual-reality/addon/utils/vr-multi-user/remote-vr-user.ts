@@ -173,21 +173,30 @@ export default class RemoteVrUser extends THREE.Object3D {
   /**
    * Hides user or unhides them.
    *
-   * @param {boolean} bool - If false, hides user's controllers, camera and name tag.
+   * @param {boolean} visible - If false, hides user's controllers, camera and name tag.
    *                         Shows them if true.
    */
-  setVisible(bool: boolean) {
-    if (this.camera) {
-      this.camera.model.visible = bool;
-    }
+  setVisible(visible: boolean) {
     if (this.controller1) {
-      this.controller1.model.visible = bool;
+      this.controller1.model.visible = visible;
     }
     if (this.controller2) {
-      this.controller2.model.visible = bool;
+      this.controller2.model.visible = visible;
+    }
+    this.setHmdVisible(visible);
+  }
+
+  /**
+   * Hide or display user's HMD and name tag
+   *
+   * @param visible Determines visibility of HMD and name tag
+   */
+  setHmdVisible(visible: boolean) {
+    if (this.camera) {
+      this.camera.model.visible = visible;
     }
     if (this.nameTag) {
-      this.nameTag.visible = bool;
+      this.nameTag.visible = visible;
     }
   }
 }

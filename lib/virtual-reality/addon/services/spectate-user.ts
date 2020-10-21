@@ -14,6 +14,9 @@ export default class SpectateUser extends Service.extend({
   @service('web-socket')
   webSocket!: WebSocket;
 
+  @service('local-vr-user')
+  localUser!: LocalVrUser;
+
   spectatedUser: RemoteVrUser|null = null; // Tells which userID (if any) is being spectated
 
   startPosition: THREE.Vector3 = new THREE.Vector3(); // Position before this user starts spectating
@@ -41,8 +44,14 @@ export default class SpectateUser extends Service.extend({
     this.startPosition.copy(this.user.userGroup.position);
     this.spectatedUser = remoteUser;
 
-    // Other user's hmd should be invisible
-    remoteUser.setVisible(false);
+    if (this.localUser.controller1) {
+      this.localUser.controller1.setToSpectatingAppearance();
+    }
+    if (this.localUser.controller2) {
+      this.localUser.controller2.setToSpectatingAppearance();
+    }
+
+    remoteUser.setHmdVisible(false);
 
     this.sender.sendSpectatingUpdate(this.user.userID, this.isActive, remoteUser.ID);
   }
@@ -56,6 +65,14 @@ export default class SpectateUser extends Service.extend({
     }
 
     this.spectatedUser.setVisible(false);
+
+    if (this.localUser.controller1) {
+      this.localUser.controller1.setToDefaultAppearance();
+    }
+    if (this.localUser.controller2) {
+      this.localUser.controller2.setToDefaultAppearance();
+    }
+
     this.spectatedUser = null;
 
     this.user.state = 'online';

@@ -184,6 +184,11 @@ export default class VrMultiUser extends VrRendering {
   // #region INPUT EVENTS
 
   onControllerConnected(controller: VRController /* , event: THREE.Event */) {
+    // Set visibilty and rays accordingly
+    if (this.spectateUser.isActive) controller.setToSpectatingAppearance();
+    else controller.setToDefaultAppearance();
+
+    // Prepare update message for other users
     let connect: {controller1?: string, controller2?: string};
     if (controller === this.localUser.controller1) {
       connect = { controller1: controller.gamepadId };
@@ -196,6 +201,9 @@ export default class VrMultiUser extends VrRendering {
   }
 
   onControllerDisconnected(controller: VRController) {
+    // Avoid that user could get stuck in spectate view
+    this.spectateUser.deactivate();
+
     let disconnect: {controller1?: string, controller2?: string};
 
     if (controller === this.localUser.controller1) {

@@ -318,7 +318,7 @@ export default class VrRendering extends Component<Args> {
     };
     const controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
       raySpace1, callbacks1, this.scene);
-    controller1.addRay(new THREE.Color('red'));
+    controller1.setToDefaultAppearance();
     controller1.raySpace.add(this.controllerInfoMenus);
     controller1.intersectableObjects = intersectableObjects;
 
@@ -336,10 +336,9 @@ export default class VrRendering extends Component<Args> {
 
     const controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
       raySpace2, callbacks2, this.scene);
-    controller2.addRay(new THREE.Color('blue'));
+    controller2.setToDefaultAppearance();
     controller2.raySpace.add(this.controllerMainMenus);
     controller2.intersectableObjects = intersectableObjects;
-    controller2.initTeleportArea();
 
     this.localUser.controller2 = controller2;
     this.localUser.userGroup.add(controller2);
@@ -1050,9 +1049,6 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
         break;
       case 'l':
         this.loadNewLandscape.perform();
-        break;
-      case 'm':
-        this.openMainMenu();
         break;
       default:
         break;

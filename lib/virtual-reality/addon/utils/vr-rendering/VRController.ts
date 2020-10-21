@@ -1,4 +1,6 @@
-import THREE, { Object3D, Raycaster } from 'three';
+import THREE, {
+  Object3D, Raycaster,
+} from 'three';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
@@ -7,6 +9,7 @@ import { MotionController } from '../lib/controller/motion-controllers.module';
 import FloorMesh from '../view-objects/vr/floor-mesh';
 import TeleportMesh from '../view-objects/vr/teleport-mesh';
 import BaseMenu from '../vr-menus/base-menu';
+import { displayAsWireframe, displayAsSolidObject } from '../vr-helpers/multi-user-helper';
 
 type CallbackFunctions = {
   connected? (controller: VRController, event: THREE.Event): void,
@@ -39,7 +42,7 @@ export const controlMode = Object.freeze({
  * A wrapper around the gamepad object which handles inputs to
  * a VR controller and provides update and callback functionalities.
  */
-export default class VRController extends THREE.Group {
+export default class VRController extends BaseMesh {
   gamepadIndex: number;
 
   gamepad: Gamepad|null = null;
@@ -139,6 +142,24 @@ export default class VRController extends THREE.Group {
     });
   }
 
+  setToSpectatingAppearance() {
+    displayAsWireframe(this);
+    if (this.isUtilityController) {
+      this.removeTeleportArea();
+      this.removeRay();
+    }
+  }
+
+  setToDefaultAppearance() {
+    displayAsSolidObject(this);
+    if (this.isUtilityController) {
+      this.addRay(new THREE.Color('blue'));
+    } else {
+      this.addRay(new THREE.Color('red'));
+    }
+    this.initTeleportArea();
+  }
+
   findGamepad() {
     const gamepads = navigator.getGamepads();
     if (typeof gamepads.forEach !== 'function') return;
@@ -169,11 +190,13 @@ export default class VRController extends THREE.Group {
   }
 
   initTeleportArea() {
+    if (this.isUtilityController && !this.teleportArea) {
     // Create teleport area
-    this.teleportArea = new TeleportMesh();
+      this.teleportArea = new TeleportMesh();
 
-    // Add teleport area to parent (usually the scene object)
-    this.scene.add(this.teleportArea);
+      // Add teleport area to parent (usually the scene object)
+      this.scene.add(this.teleportArea);
+    }
   }
 
   removeRay() {
