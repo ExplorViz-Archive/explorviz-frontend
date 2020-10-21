@@ -7,7 +7,7 @@ export default class Navbar extends Component {
   navbarActive = true;
 
   @action
-  toggleNavbar(this: Navbar) {
+  toggleNavbar() {
     this.navbarActive = !this.navbarActive;
   }
 }

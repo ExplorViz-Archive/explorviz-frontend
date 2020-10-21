@@ -47,7 +47,6 @@ export default class VisualizationRoute extends Route.extend(UnauthenticatedRout
   resetController(controller: VisualizationController, isExiting: boolean, transition: any) {
     if (isExiting && transition.targetName !== 'error') {
       controller.send('resetView');
-      controller.landscapeRepo.set('latestApplication', null);
     }
   }
 }

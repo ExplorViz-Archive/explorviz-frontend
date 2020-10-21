@@ -52,7 +52,6 @@ export default class UserCreation extends Component {
     [origin: string]: boolean,
   } = {};
 
-
   /*
     {
       origin1: {

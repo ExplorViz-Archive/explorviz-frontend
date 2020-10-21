@@ -7,8 +7,7 @@ const { attr } = DS;
 /**
  * Ember model for a User.
  *
- * @class user-Model
- * @extends @extends BaseEntity-Model
+ * @class User
  *
  * @module explorviz
  * @submodule model
@@ -23,12 +22,12 @@ export default class User extends Model {
 
   @attr() roles!: string[];
 
-  hasRole(this: User, rolename: string): boolean {
+  hasRole(rolename: string): boolean {
     return this.roles.includes(rolename);
   }
 
   @computed('roles')
-  get isAdmin(this: User): boolean {
+  get isAdmin(): boolean {
     return this.hasRole('admin');
   }
 }

@@ -87,7 +87,7 @@ export default class UserData extends Component<IArgs> {
     this.initFields();
   }
 
-  initFields(this: UserData) {
+  initFields() {
     const { user } = this.args;
 
     if (user) {
