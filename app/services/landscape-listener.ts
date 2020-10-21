@@ -31,7 +31,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
     this.timer = setInterval(async () => {
       try {
         // request landscape data that is 60 seconds old
-        // that way we can be sure, all traces available
+        // that way we can be sure, all traces are available
         const endTime = Date.now() - (60 * 1000);
         const [structureData, dynamicData] = await this.requestData(endTime, intervalInSeconds);
 
@@ -52,14 +52,14 @@ export default class LandscapeListener extends Service.extend(Evented) {
   async requestData(endTime: number, intervalInSeconds: number) {
     const startTime = endTime - (intervalInSeconds * 1000);
 
-    const structureDataPromise = this.requestStructureData(startTime, endTime);
+    const structureDataPromise = this.requestStructureData(/* startTime, endTime */);
     const dynamicDataPromise = this.requestDynamicData(startTime, endTime);
 
     const landscapeData = Promise.all([structureDataPromise, dynamicDataPromise]);
     return landscapeData;
   }
 
-  requestStructureData(fromTimestamp: number, toTimestamp: number) {
+  requestStructureData(/* fromTimestamp: number, toTimestamp: number */) {
     return new Promise<StructureLandscapeData>((resolve, reject) => {
       this.ajax.request('http://localhost:32680/v2/landscapes/fibonacci-sample-landscape/structure')
         .then((data: StructureLandscapeData) => resolve(data))
