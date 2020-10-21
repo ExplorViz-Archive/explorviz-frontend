@@ -18,7 +18,7 @@ import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import PlaneMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-mesh';
-import { task } from 'ember-concurrency-decorators';
+import { restartableTask, task } from 'ember-concurrency-decorators';
 import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
@@ -26,6 +26,7 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
+import { perform } from 'ember-concurrency-ts';
 
 interface Args {
   readonly id: string;
@@ -147,7 +148,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.resize(outerDiv);
 
-    await this.loadNewLandscape.perform();
+    await perform(this.loadNewLandscape);
 
     this.initDone = true;
   }
@@ -326,7 +327,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  */
   @action
   async cleanAndUpdateScene() {
-    await this.populateScene.perform();
+    await perform(this.populateScene);
 
     this.debug('clean and populate landscape-rendering');
   }
@@ -345,7 +346,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @action
   onUpdated() {
     if (this.initDone) {
-      this.loadNewLandscape.perform();
+      perform(this.loadNewLandscape);
     }
   }
 
@@ -353,21 +354,19 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #region SCENE POPULATION
 
-  @task
-  // eslint-disable-next-line
-  loadNewLandscape = task(function* (this: LandscapeRendering) {
+  @task*
+  loadNewLandscape() {
     this.landscapeObject3D.dataModel = this.args.landscapeData.structureLandscapeData;
-    yield this.populateScene.perform();
-  });
+    yield perform(this.populateScene);
+  }
 
   /**
  * Computes new meshes for the landscape and adds them to the scene
  *
  * @method populateScene
  */
-  @task({ restartable: true })
-  // eslint-disable-next-line
-  populateScene = task(function* (this: LandscapeRendering) {
+  @restartableTask*
+  populateScene() {
     this.debug('populate landscape-rendering');
 
     const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
@@ -445,7 +444,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     } catch (e) {
       console.log(e);
     }
-  });
+  }
 
   /**
    * Creates & positions a node mesh with corresponding labels.
@@ -558,8 +557,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   handleMouseMove(mesh: THREE.Mesh | undefined) {
-    // const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
     const enableHoverEffects = true;
+    // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
     // Update hover effect
     if (mesh === undefined) {

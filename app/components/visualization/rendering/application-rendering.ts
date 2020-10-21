@@ -21,7 +21,7 @@ import EntityRendering from 'explorviz-frontend/utils/application-rendering/enti
 import CommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
-import { task } from 'ember-concurrency-decorators';
+import { restartableTask, task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 import {
@@ -31,6 +31,7 @@ import computeDrawableClassCommunication, { DrawableClassCommunication } from 'e
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
+import { perform } from 'ember-concurrency-ts';
 
 interface Args {
   readonly id: string;
@@ -164,7 +165,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.resize(outerDiv);
 
-    await this.loadNewApplication.perform();
+    await perform(this.loadNewApplication);
 
     // Display application nicely for first rendering
     this.entityManipulation.applyDefaultApplicationLayout();
@@ -357,17 +358,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region SCENE POPULATION
 
-  @task
-  // eslint-disable-next-line
-  loadNewApplication = task(function* (this: ApplicationRendering) {
+  @task*
+  loadNewApplication() {
     this.applicationObject3D.dataModel = this.args.landscapeData.application!;
     this.applicationObject3D.traces = this.args.landscapeData.dynamicLandscapeData;
-    yield this.populateScene.perform();
-  });
+    yield perform(this.populateScene);
+  }
 
-  @task({ restartable: true })
-  // eslint-disable-next-line
-  populateScene = task(function* (this: ApplicationRendering) {
+  @restartableTask*
+  populateScene() {
     try {
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', this.applicationObject3D.dataModel);
 
@@ -392,7 +391,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     } catch (e) {
       // console.log(e);
     }
-  });
+  }
 
   /**
    * Iterates over all box meshes and calls respective functions to label them
@@ -599,7 +598,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   @action
   onLandscapeUpdated() {
-    this.loadNewApplication.perform();
+    perform(this.loadNewApplication);
   }
 
   /**

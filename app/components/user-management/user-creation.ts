@@ -3,6 +3,7 @@ import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { task } from 'ember-concurrency-decorators';
+import { perform } from 'ember-concurrency-ts';
 import DS from 'ember-data';
 import Role from 'explorviz-frontend/models/role';
 import Setting from 'explorviz-frontend/models/setting';
@@ -87,9 +88,8 @@ export default class UserCreation extends Component {
   @tracked
   roles: Role[] = [];
 
-  @task
-  // eslint-disable-next-line
-  initSettings = task(function* (this: UserCreation) {
+  @task*
+  initSettings() {
     const settingTypes = [...this.userSettings.types];
     const allSettings: Setting[] = [];
     // get all settings
@@ -121,11 +121,10 @@ export default class UserCreation extends Component {
       );
     });
     this.settings = settingsByOrigin;
-  });
+  }
 
-  @task
-  // eslint-disable-next-line
-  saveUser = task(function* (this: UserCreation) {
+  @task*
+  saveUser() {
     const { username, password, rolesSelectedSingle } = this;
 
     // check for valid input
@@ -190,11 +189,10 @@ export default class UserCreation extends Component {
       UserCreation.showReasonErrorAlert(reason);
       userRecord.deleteRecord();
     }
-  });
+  }
 
-  @task
-  // eslint-disable-next-line
-  saveMultipleUsers = task(function* (this: UserCreation) {
+  @task*
+  saveMultipleUsers() {
     const PASSWORD_LENGTH = 8;
 
     const { usernameprefix, numberofusers, rolesSelectedMultiple } = this;
@@ -270,19 +268,18 @@ export default class UserCreation extends Component {
     } finally {
       userBatchRecord.unloadRecord();
     }
-  });
+  }
 
-  @task
-  // eslint-disable-next-line
-  getRoles = task(function* (this: UserCreation) {
+  @task*
+  getRoles() {
     const roles: DS.RecordArray<Role> = yield this.store.findAll('role', { reload: true });
     this.roles = roles.toArray();
-  });
+  }
 
   constructor(owner: any, args: any) {
     super(owner, args);
 
-    this.initSettings.perform();
+    perform(this.initSettings);
   }
 
   @action

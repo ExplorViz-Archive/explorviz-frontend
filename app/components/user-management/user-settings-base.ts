@@ -2,6 +2,7 @@ import { action, set } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { task } from 'ember-concurrency-decorators';
+import { perform } from 'ember-concurrency-ts';
 import DS from 'ember-data';
 import UserSettings from 'explorviz-frontend/services/user-settings';
 
@@ -28,14 +29,13 @@ export default class UserSettingsBase extends Component<IArgs> {
     },
   } = {};
 
-  @task
-  // eslint-disable-next-line
-  loadDescriptions = task(function *(this: UserSettingsBase, type: string) {
+  @task*
+  loadDescriptions(type: string) {
     this.args.settings[type].forEach(([id]) => {
       const { description, displayName } = this.store.peekRecord(type, id);
       set(this.descriptions, id, { description, displayName });
     });
-  });
+  }
 
   constructor(owner: any, args: IArgs) {
     super(owner, args);
@@ -45,7 +45,7 @@ export default class UserSettingsBase extends Component<IArgs> {
     const typesArray = [...Object.keys(this.args.settings)].flat();
 
     typesArray.forEach((type) => {
-      this.loadDescriptions.perform(type);
+      perform(this.loadDescriptions, type);
     });
   }
 

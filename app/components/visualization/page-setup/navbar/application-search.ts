@@ -1,5 +1,5 @@
 import GlimmerComponent from '@glimmer/component';
-import { task } from 'ember-concurrency-decorators';
+import { restartableTask, task } from 'ember-concurrency-decorators';
 import { action } from '@ember/object';
 import { isBlank } from '@ember/utils';
 import $ from 'jquery';
@@ -7,6 +7,12 @@ import {
   Application, Class, isClass, isPackage, Package,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { getAllClassesInApplication, getAllPackagesInApplication } from 'explorviz-frontend/utils/application-helpers';
+import { perform } from 'ember-concurrency-ts';
+import { TaskGenerator } from 'ember-concurrency';
+
+interface SearchSeperator {
+  name: string;
+}
 
 interface Args {
   application: Application,
@@ -47,16 +53,14 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
     }
   }
 
-  @task({ restartable: true })
-  // eslint-disable-next-line
-  searchEntity = task(function* (this: ApplicationSearch, term: string) {
+  @restartableTask*
+  searchEntity(term: string): TaskGenerator<(Class|Package|SearchSeperator)[]> {
     if (isBlank(term)) { return []; }
-    return yield this.getPossibleEntityNames.perform(term);
-  });
+    return yield perform(this.getPossibleEntityNames, term);
+  }
 
-  @task
-  // eslint-disable-next-line
-  getPossibleEntityNames = task(function* (this: ApplicationSearch, name: string) {
+  @task*
+  getPossibleEntityNames(name: string): TaskGenerator<(Class|Package|SearchSeperator)[]> {
     const searchString = name.toLowerCase();
 
     const latestApp = this.args.application;
@@ -90,7 +94,7 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
       if (searchEngineFindsHit(componentName, searchString)) {
         if (!isComponentLabelSet) {
           isComponentLabelSet = true;
-          entities.push({ name: this.componentLabel });
+          entities.push({ name: this.componentLabel } as SearchSeperator);
         }
         entities.push(component);
         currentNumberOfCompNames++;
@@ -113,7 +117,7 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
       if (searchEngineFindsHit(clazzName, searchString)) {
         if (!isClazzLabelSet) {
           isClazzLabelSet = true;
-          entities.push({ name: this.clazzLabel });
+          entities.push({ name: this.clazzLabel } as SearchSeperator);
         }
 
         entities.push(clazz);
@@ -121,5 +125,5 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
       }
     }
     return entities;
-  });
+  }
 }
