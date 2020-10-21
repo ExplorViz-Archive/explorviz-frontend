@@ -41,7 +41,11 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.add(this.camera.model);
   }
 
-  initController1(name: string, obj: THREE.Object3D) {
+  initController1(name: string, obj: THREE.Object3D|undefined) {
+    if (!obj) return;
+
+    this.removeController1();
+
     this.controller1 = {
       id: name,
       position: new THREE.Vector3(),
@@ -49,10 +53,15 @@ export default class RemoteVrUser extends THREE.Object3D {
       model: obj,
     };
 
+    RemoteVrUser.addRayToControllerModel(this.controller1.model, this.color);
     this.add(this.controller1.model);
   }
 
-  initController2(name: string, obj: THREE.Object3D) {
+  initController2(name: string, obj: THREE.Object3D | undefined) {
+    if (!obj) return;
+
+    this.removeController2();
+
     this.controller2 = {
       id: name,
       position: new THREE.Vector3(),
@@ -60,7 +69,25 @@ export default class RemoteVrUser extends THREE.Object3D {
       model: obj,
     };
 
+    RemoteVrUser.addRayToControllerModel(this.controller2.model, this.color);
     this.add(this.controller2.model);
+  }
+
+  static addRayToControllerModel(controller: THREE.Object3D, color: THREE.Color) {
+    const geometry = new THREE.BufferGeometry().setFromPoints(
+      [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)],
+    );
+
+    const material = new THREE.LineBasicMaterial({
+      color,
+    });
+
+    const line = new THREE.Line(geometry, material);
+    line.scale.z = 5;
+
+    line.position.y -= 0.005;
+    line.position.z -= 0.02;
+    controller.add(line);
   }
 
   removeController1() {

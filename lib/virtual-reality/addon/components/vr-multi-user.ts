@@ -27,6 +27,7 @@ import NameTagMesh from 'virtual-reality/utils/view-objects/vr/name-tag-mesh';
 import SpectateMenu from 'virtual-reality/utils/vr-menus/spectate-menu';
 import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
 import UserListMenu from 'virtual-reality/utils/vr-menus/user-list-menu';
+import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 
 export default class VrMultiUser extends VrRendering {
   debug = debugLogger('VrMultiUser');
@@ -77,6 +78,42 @@ export default class VrMultiUser extends VrRendering {
     this.localUser.state = 'offline';
 
     $.getJSON('config/config_multiuser.json').then(bind(this, this.applyConfiguration));
+
+    if (this.localUser.controller1) {
+      this.localUser.controller1.eventCallbacks.connected = this.onControllerConnected.bind(this);
+      this.localUser.controller1.eventCallbacks.disconnected = this
+        .onControllerDisconnected.bind(this);
+    }
+
+    if (this.localUser.controller2) {
+      this.localUser.controller2.eventCallbacks.connected = this.onControllerConnected.bind(this);
+      this.localUser.controller2.eventCallbacks.disconnected = this
+        .onControllerDisconnected.bind(this);
+    }
+  }
+
+  onControllerConnected(controller: VRController /* , event: THREE.Event */) {
+    let connect: {controller1?: string, controller2?: string};
+    if (controller === this.localUser.controller1) {
+      connect = { controller1: controller.gamepadId };
+    } else {
+      connect = { controller2: controller.gamepadId };
+    }
+    const disconnect = {};
+
+    this.sender.sendControllerUpdate(connect, disconnect);
+  }
+
+  onControllerDisconnected(controller: VRController) {
+    let disconnect: {controller1?: string, controller2?: string};
+
+    if (controller === this.localUser.controller1) {
+      disconnect = { controller1: controller.gamepadId };
+    } else {
+      disconnect = { controller2: controller.gamepadId };
+    }
+
+    this.sender.sendControllerUpdate({}, disconnect);
   }
 
   initCallbacks() {
@@ -250,6 +287,24 @@ export default class VrMultiUser extends VrRendering {
 
   // #endregion menus
 
+  onInteractionGripDown(controller: VRController) {
+    const application = controller.grabbedObject;
+    if (application instanceof ApplicationObject3D) {
+      this.sender.sendAppBinded(application, controller);
+    }
+
+    super.onInteractionGripDown(controller);
+  }
+
+  onInteractionGripUp(controller: VRController) {
+    const application = controller.grabbedObject;
+    if (application instanceof ApplicationObject3D) {
+      this.sender.sendAppReleased(application);
+    }
+
+    super.onInteractionGripUp(controller);
+  }
+
   onEvent(event: string, data: any) {
     if (event !== 'user_positions') {
       console.log('Event: ', event);
@@ -284,7 +339,7 @@ export default class VrMultiUser extends VrRendering {
         this.onLandscapePosition(data);
         break;
       case 'app_position':
-        this.onAppPosition(data);
+        this.onAppPosition(data.appID, data.position, data.quaternion);
         break;
       case 'system_update':
         this.onLandscapeUpdate(data);
@@ -379,17 +434,6 @@ export default class VrMultiUser extends VrRendering {
     for (let i = 0; i < data.users.length; i++) {
       const userData = data.users[i];
       this.onUserConnected(userData);
-
-      // load controllers
-      // if (userData.controllers.controller1)
-      // { this.loadController1(userData.controllers.controller1, userData.id); }
-      // if (userData.controllers.controller2)
-      // { this.loadController2(userData.controllers.controller2, userData.id); }
-
-      // user.initCamera(Models.getHMDModel());
-
-      // Set name for user on top of his hmd
-      // this.addUsername(userData.id);
     }
     this.localUser.state = 'online';
     this.localUser.controllersConnected = { controller1: false, controller2: false };
@@ -407,12 +451,34 @@ export default class VrMultiUser extends VrRendering {
   loadController1(controllerName: string, userID: string) {
     const user = this.idToRemoteUser.get(userID);
 
-    if (!user || !user.controller1) { return; }
+    if (!user) { return; }
 
-    // user.initController1(controllerName, this.getControllerModelByName(controllerName));
+    user.initController1(controllerName, this.getControllerModelByName(controllerName));
+  }
 
-    this.remoteUserGroup.add(user.controller1.model);
-    // this.addLineToControllerModel(user.get('controller1'), user.get('color'));
+  /**
+   * Loads specified controller 2 model for given user and add it to scene.
+   *
+   * @param {string} controllerName
+   * @param {number} userID
+   */
+  loadController2(controllerName: string, userID: string) {
+    const user = this.idToRemoteUser.get(userID);
+
+    if (!user) { return; }
+
+    user.initController2(controllerName, this.getControllerModelByName(controllerName));
+  }
+
+  /**
+   * Returns controller model that best matches the controller's name.
+   *
+   * @param {string} name - The contoller's id.
+   */
+  getControllerModelByName(name: string) {
+    if (name === 'Oculus Touch (Left)') return this.hardwareModels.getLeftOculusController();
+    if (name === 'Oculus Touch (Right)') return this.hardwareModels.getRightOculusController();
+    return this.hardwareModels.getViveController();
   }
 
   onUserConnected(data: any) {
@@ -479,25 +545,19 @@ export default class VrMultiUser extends VrRendering {
   onUserControllers(data: any) {
     const { id, disconnect, connect } = data;
 
+    // Load newly connected controller(s)
+    if (connect) {
+      if (connect.controller1) { this.loadController1(connect.controller1, id); }
+      if (connect.controller2) { this.loadController2(connect.controller2, id); }
+    }
+
     const user = this.idToRemoteUser.get(id);
     if (!user) { return; }
 
-    // Load newly connected controller(s)
-    if (connect) {
-      // if (connect.controller1) { this.loadController1(connect.controller1, user.get('id')); }
-      // if (connect.controller2) { this.loadController2(connect.controller2, user.get('id')); }
-    }
-
     // Remove controller model(s) due to controller disconnect
     if (disconnect) {
-      for (let i = 0; i < disconnect.length; i++) {
-        const controller = disconnect[i];
-        if (controller === 'controller1') {
-          user.removeController1();
-        } else if (controller === 'controller2') {
-          user.removeController2();
-        }
-      }
+      if (disconnect.controller1) { user.removeController1(); }
+      if (disconnect.controller2) { user.removeController2(); }
     }
   }
 
@@ -561,15 +621,12 @@ export default class VrMultiUser extends VrRendering {
     super.updateLandscapeRotation(new Quaternion().fromArray(pose.quaternion));
   }
 
-  onAppPosition(appData: { appId: string, position: number[], quaternion: number[] }) {
-    if (!this.applicationGroup.hasApplication(appData.appId)) {
-      return;
-    }
-    const applicationMesh = this.applicationGroup.getApplication(appData.appId);
+  onAppPosition(id: string, position: number[], quaternion: number[]) {
+    const applicationMesh = this.applicationGroup.getApplication(id);
 
     if (applicationMesh) {
-      applicationMesh.position.copy(new THREE.Vector3().fromArray(appData.position));
-      applicationMesh.quaternion.copy(new THREE.Quaternion().fromArray(appData.quaternion));
+      applicationMesh.position.copy(new THREE.Vector3().fromArray(position));
+      applicationMesh.quaternion.copy(new THREE.Quaternion().fromArray(quaternion));
     }
   }
 
@@ -590,7 +647,7 @@ export default class VrMultiUser extends VrRendering {
     if (application) {
       super.addApplication(application, new THREE.Vector3().fromArray(position));
 
-      this.onAppPosition({ appId: id, position, quaternion });
+      this.onAppPosition(id, position, quaternion);
     }
   }
 
@@ -608,6 +665,49 @@ export default class VrMultiUser extends VrRendering {
       EntityManipulation.closeAllComponents(applicationObject3D);
     } else if (componentMesh instanceof ComponentMesh) {
       super.toggleComponentAndUpdate(componentMesh, applicationObject3D);
+    }
+  }
+
+  onAppBinded(update: {
+    userID: string,
+    appID: string,
+    appPosition: number[],
+    appQuaternion: number[],
+    isBoundToController1: boolean,
+    controllerPosition: number[],
+    controllerQuaternion: number[] }) {
+    this.onAppPosition(update.appID, update.appPosition, update.appQuaternion);
+
+    const remoteUser = this.idToRemoteUser.get(update.userID);
+
+    if (!remoteUser) {
+      return;
+    }
+
+    let controller: THREE.Object3D|null;
+
+    if (update.isBoundToController1 && remoteUser.controller1) {
+      controller = remoteUser.controller1.model;
+    } else if (update.isBoundToController1 && remoteUser.controller2) {
+      controller = remoteUser.controller2.model;
+    } else {
+      controller = null;
+    }
+
+    if (controller) {
+      controller.position.fromArray(update.controllerPosition);
+      controller.quaternion.fromArray(update.controllerQuaternion);
+
+      this.applicationGroup.attachApplicationTo(update.appID, controller);
+    }
+  }
+
+  onAppReleased(id: string, position: number[], quaternion: number[]) {
+    this.onAppPosition(id, position, quaternion);
+
+    const application = this.applicationGroup.getApplication(id);
+    if (application) {
+      this.applicationGroup.add(application);
     }
   }
 

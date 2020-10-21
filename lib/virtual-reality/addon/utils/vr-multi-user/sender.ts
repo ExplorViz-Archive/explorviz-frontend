@@ -3,6 +3,7 @@ import {
   Vector3 as V3, Quaternion as Q,
 } from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import VRController from '../vr-rendering/VRController';
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
 export default class Sender {
@@ -106,39 +107,33 @@ export default class Sender {
 
   /**
  * Informs the backend that this user holds/moves an application
- * @param {string} appID ID of the bound app
- * @param {Vector3} appPosition Position of the app (x, y, z)
- * @param {Quaternion} appQuaternion Quaternion of the app (x, y, z, w)
- * @param {boolean} isBoundToController1 Tells if app is hold by left controller
- * @param {Vector3} controllerPosition Position of the controller which holds the application
- * @param {Quaternion} controllerQuaternion Quaternion of the controller which holds the application
+ * @param {ApplicationObject3D} application Application which is bound
+ * @param {VRController} controller Controller which binds application
  */
-  sendAppBinded(appID: string, appPosition: V3, appQuaternion: Q, isBoundToController1: boolean,
-    controllerPosition: V3, controllerQuaternion: Q) {
+  sendAppBinded(application: ApplicationObject3D, controller: VRController) {
     const appObj = {
       event: 'app_binded',
-      appID,
-      appPosition: appPosition.toArray(),
-      appQuaternion: appQuaternion.toArray(),
-      isBoundToController1,
-      controllerPosition: controllerPosition.toArray(),
-      controllerQuaternion: controllerQuaternion.toArray(),
+      appID: application.dataModel.id,
+      appPostion: application.position.toArray(),
+      appQuaternion: application.quaternion.toArray(),
+      isBoundToController1: controller.gamepadIndex === 1,
+      controllerPosition: controller.position.toArray(),
+      controllerQuaternion: controller.quaternion.toArray(),
     };
+
     this.webSocket.enqueueIfOpen(appObj);
   }
 
   /**
  * Informs the backend that an application is no stringer bound but released
- * @param {string} appID ID of the bound app
- * @param {Vector3} position Position of the app (x, y, z)
- * @param {Quaternion} quaternion Quaternion of the app (x, y, z, w)
+ * @param {ApplicationObject3D} application Application which is released
  */
-  sendAppReleased(appID: string, position: V3, quaternion: Q) {
+  sendAppReleased(application: ApplicationObject3D) {
     const appObj = {
       event: 'app_released',
-      id: appID,
-      position: position.toArray(),
-      quaternion: quaternion.toArray(),
+      id: application.dataModel.id,
+      position: application.position.toArray(),
+      quaternion: application.quaternion.toArray(),
     };
     this.webSocket.enqueueIfOpen(appObj);
   }

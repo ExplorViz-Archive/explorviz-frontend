@@ -1,3 +1,7 @@
+/**
+ * Adapted from: https://github.com/mrdoob/three.js/blob/master/examples/jsm/webxr/XRControllerModelFactory.js
+ */
+
 import VisualResponse from './VisualResponse';
 import { Constants } from './motion-controllers.module';
 

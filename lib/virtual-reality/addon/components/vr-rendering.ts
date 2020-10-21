@@ -308,12 +308,13 @@ export default class VrRendering extends Component<Args> {
     this.onInteractionTriggerDown = this.onInteractionTriggerDown.bind(this);
     this.onInteractionMenuDown = this.onInteractionMenuDown.bind(this);
     this.onInteractionGripUp = this.onInteractionGripUp.bind(this);
+    this.onInteractionGripDown = this.onInteractionGripDown.bind(this);
 
     const callbacks1 = {
       triggerDown: this.onInteractionTriggerDown,
       triggerPress: VrRendering.onInteractionTriggerPress,
       menuDown: this.onInteractionMenuDown,
-      gripDown: VrRendering.onInteractionGripDown,
+      gripDown: this.onInteractionGripDown,
       gripUp: this.onInteractionGripUp,
     };
     const controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
@@ -348,7 +349,8 @@ export default class VrRendering extends Component<Args> {
     this.localUser.userGroup.add(controller2);
   }
 
-  static onInteractionGripDown(controller: VRController) {
+  // eslint-disable-next-line
+  onInteractionGripDown(controller: VRController) {
     if (!controller.intersectedObject) return;
 
     const { object } = controller.intersectedObject;
