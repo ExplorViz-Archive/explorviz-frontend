@@ -11,6 +11,8 @@ import { DrawableClassCommunication, isDrawableClassCommunication } from '../lan
 import { Span, Trace } from '../landscape-schemes/dynamic-data';
 import { getHashCodeToClassMap } from '../landscape-structure-helpers';
 import { getAllClassesInApplication } from '../application-helpers';
+import { getClassAncestorPackages } from '../class-helpers';
+import { getClassesInPackage } from '../package-helpers';
 
 export default class Highlighting {
   applicationObject3D: ApplicationObject3D;
@@ -55,7 +57,7 @@ export default class Highlighting {
 
     // Add all clazzes which are contained in a component
     if (isPackage(model)) {
-      Highlighting.getContainedClazzes(model, containedClazzes);
+      getClassesInPackage(model).forEach((clss) => containedClazzes.add(clss));
     // Add clazz itself
     } else if (isClass(model)) {
       containedClazzes.add(model);
@@ -102,7 +104,7 @@ export default class Highlighting {
     const componentSet = new Set<Package>();
 
     allInvolvedClazzes.forEach((clazz) => {
-      Highlighting.getAllAncestorComponents(clazz.parent, componentSet);
+      getClassAncestorPackages(clazz).forEach((pckg) => componentSet.add(pckg));
     });
 
     // Turn non involved clazzes transparent
@@ -235,8 +237,9 @@ export default class Highlighting {
     const nonInvolvedClazzes = new Set([...allClazzes].filter((x) => !involvedClazzes.has(x)));
 
     const componentSet = new Set<Package>();
+
     involvedClazzes.forEach((clazz) => {
-      Highlighting.getAllAncestorComponents(clazz.parent, componentSet);
+      getClassAncestorPackages(clazz).forEach((pckg) => componentSet.add(pckg));
     });
 
     nonInvolvedClazzes.forEach((clazz) => {
@@ -318,38 +321,5 @@ export default class Highlighting {
       componentMesh.turnTransparent();
     }
     this.turnComponentAndAncestorsTransparent(parent, ignorableComponents);
-  }
-
-  static getAllAncestorComponents(component: Package, componentSet: Set<Package> = new Set()) {
-    function getAncestors(comp: Package, set: Set<Package>) {
-      if (set.has(comp)) { return; }
-
-      set.add(comp);
-
-      const { parent } = comp;
-      if (parent === undefined) {
-        return;
-      }
-
-      getAncestors(parent, set);
-    }
-
-    getAncestors(component, componentSet);
-
-    return componentSet;
-  }
-
-  static getContainedClazzes(component: Package, containedClazzes: Set<Class>) {
-    const clazzes = component.classes;
-
-    clazzes.forEach((clazz) => {
-      containedClazzes.add(clazz);
-    });
-
-    const children = component.subPackages;
-
-    children.forEach((child) => {
-      Highlighting.getContainedClazzes(child, containedClazzes);
-    });
   }
 }
