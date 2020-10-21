@@ -52,7 +52,7 @@ export default class Interaction {
   eventCallbackFunctions: CallbackFunctions;
 
   // Function to filter raycast results as desired
-  raycastFilter: any;
+  raycastFilter: ((intersection: THREE.Intersection) => boolean) | undefined;
 
   constructor(canvas: HTMLCanvasElement, camera: THREE.Camera, renderer: THREE.WebGLRenderer,
     raycastObjects: THREE.Object3D[], eventCallbackFunctions: CallbackFunctions,
