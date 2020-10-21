@@ -6,12 +6,13 @@ import hbs from 'htmlbars-inline-precompile';
 module('Integration | Helper | getValueOfMap', function(hooks) {
   setupRenderingTest(hooks);
 
-  // Replace this with your real tests.
   test('it renders', async function(assert) {
-    this.set('inputValue', '1234');
+    const map = new Map<string, string>();
+    map.set('hello', 'world');
+    this.set('map', map);
 
-    await render(hbs`{{get-value-of-map inputValue}}`);
+    await render(hbs`{{get-value-of-map this.map "hello"}}`);
 
-    assert.equal(this.element.textContent.trim(), '1234');
+    assert.equal(this.element.textContent!.trim(), 'world');
   });
 });
