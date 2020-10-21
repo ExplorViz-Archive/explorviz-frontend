@@ -5,13 +5,13 @@ import { module, test } from 'qunit';
 module('Unit | Utility | trace-helpers', function() {
   test('sortTracesByDuration', function(assert) {
     const testTraces = getTestTraces();
-    sortTracesByDuration(testTraces)
+    sortTracesByDuration(testTraces);
     assert.ok(testTraces[0].traceId === 'trace2'
       && testTraces[1].traceId === 'trace3'
       && testTraces[2].traceId === 'trace1', "Traces must be sorted in ascending order and original array mutated");
 
     const testTraces2 = getTestTraces();
-    sortTracesByDuration(testTraces2, false)
+    sortTracesByDuration(testTraces2, false);
     assert.ok(testTraces2[0].traceId === 'trace1'
       && testTraces2[1].traceId === 'trace3'
       && testTraces2[2].traceId === 'trace2', "Traces must be sorted in descending order and original array mutated");
@@ -26,13 +26,13 @@ module('Unit | Utility | trace-helpers', function() {
 
   test('sortTracesById', function(assert) {
     const testTraces = getTestTraces();
-    sortTracesById(testTraces)
+    sortTracesById(testTraces);
     assert.ok(testTraces[0].traceId === 'trace1'
       && testTraces[1].traceId === 'trace2'
       && testTraces[2].traceId === 'trace3', "Traces must be sorted in ascending order and original array mutated");
 
     const testTraces2 = getTestTraces();
-    sortTracesById(testTraces2, false)
+    sortTracesById(testTraces2, false);
     assert.ok(testTraces2[0].traceId === 'trace3'
       && testTraces2[1].traceId === 'trace2'
       && testTraces2[2].traceId === 'trace1', "Traces must be sorted in descending order and original array mutated");
@@ -47,7 +47,7 @@ module('Unit | Utility | trace-helpers', function() {
 
   test('sortSpanArrayByTime', function(assert) {
     const testSpanList = getTestSpanList();
-    sortSpanArrayByTime(testSpanList)
+    sortSpanArrayByTime(testSpanList);
     // test spans are defined in a way that the time sorted array matches the
     // also matches the array sorted by spanId
     assert.ok(testSpanList[0].spanId === 'span1'
@@ -64,8 +64,6 @@ module('Unit | Utility | trace-helpers', function() {
       && sortedArray !== testSpanList2, "Spans must be sorted in ascending order and original array unmutated");
   });
 });
-
-realTrace
 
 function getTestTraces(): Trace[] {
   return [{
