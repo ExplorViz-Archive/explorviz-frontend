@@ -125,7 +125,7 @@ export function sortSpanArrayByTime(spanArary: Span[], copy = false) {
       && span1.startTime.nanoAdjust === span2.startTime.nanoAdjust) {
       return 0;
     }
-    return -1;
+    return 1;
   });
 }
 
