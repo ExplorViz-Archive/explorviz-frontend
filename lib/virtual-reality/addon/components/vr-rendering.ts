@@ -54,6 +54,7 @@ import ControlsMenu from 'virtual-reality/utils/vr-menus/controls-menu';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
 import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
+import DeltaTime from 'virtual-reality/services/delta-time';
 
 interface Args {
   readonly id: string;
@@ -81,6 +82,9 @@ export default class VrRendering extends Component<Args> {
 
   @service('local-vr-user')
   localUser!: LocalVrUser;
+
+  @service('delta-time')
+  time!: DeltaTime;
 
   @service()
   worker!: any;
@@ -304,18 +308,13 @@ export default class VrRendering extends Component<Args> {
     const raySpace1 = this.renderer.xr.getController(0);
     const gripSpace1 = this.renderer.xr.getControllerGrip(0);
 
-    // Event callbacks
-    this.onInteractionTriggerDown = this.onInteractionTriggerDown.bind(this);
-    this.onInteractionMenuDown = this.onInteractionMenuDown.bind(this);
-    this.onInteractionGripUp = this.onInteractionGripUp.bind(this);
-    this.onInteractionGripDown = this.onInteractionGripDown.bind(this);
-
     const callbacks1 = {
-      triggerDown: this.onInteractionTriggerDown,
-      triggerPress: VrRendering.onInteractionTriggerPress,
-      menuDown: this.onInteractionMenuDown,
-      gripDown: this.onInteractionGripDown,
-      gripUp: this.onInteractionGripUp,
+      thumbpadTouch: this.onThumbpadTouch.bind(this),
+      triggerDown: this.onInteractionTriggerDown.bind(this),
+      triggerPress: VrRendering.onInteractionTriggerPress.bind(this),
+      menuDown: this.onInteractionMenuDown.bind(this),
+      gripDown: this.onInteractionGripDown.bind(this),
+      gripUp: this.onInteractionGripUp.bind(this),
     };
     const controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
       raySpace1, callbacks1, this.scene);
@@ -330,12 +329,9 @@ export default class VrRendering extends Component<Args> {
     const raySpace2 = this.renderer.xr.getController(1);
     const gripSpace2 = this.renderer.xr.getControllerGrip(1);
 
-    this.onUtilityTrigger = this.onUtilityTrigger.bind(this);
-    this.onUtilityMenuDown = this.onUtilityMenuDown.bind(this);
-
     const callbacks2 = {
-      triggerDown: this.onUtilityTrigger,
-      menuDown: this.onUtilityMenuDown,
+      triggerDown: this.onUtilityTrigger.bind(this),
+      menuDown: this.onUtilityMenuDown.bind(this),
     };
 
     const controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
@@ -464,6 +460,8 @@ export default class VrRendering extends Component<Args> {
    */
   render() {
     if (this.isDestroyed) { return; }
+
+    this.time.update();
 
     this.localUser.updateControllers();
 
@@ -923,6 +921,52 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
     if (!controller.intersectedObject) return;
 
     this.handleSecondaryInputOn(controller.intersectedObject);
+  }
+
+  /**
+   * This method handles inputs of the touchpad or analog stick respectively.
+   * This input is used to move a grabbed application towards or away from the controller.
+   */
+  onThumbpadTouch(controller: VRController, axes: number[]) {
+    const application = controller.grabbedObject;
+
+    if (!application) return;
+
+    controller.updateIntersectedObject();
+
+    const { intersectedObject } = controller;
+
+    if (!intersectedObject) return;
+
+    // Position where ray hits the application
+    const intersectionPosWorld = intersectedObject.point;
+    const intersectionPosLocal = intersectionPosWorld.clone();
+    application.worldToLocal(intersectionPosLocal);
+
+    const controllerPosition = new THREE.Vector3();
+    controller.getWorldPosition(controllerPosition);
+    const controllerPositionLocal = controllerPosition.clone();
+    application.worldToLocal(controllerPositionLocal);
+
+    const direction = new THREE.Vector3();
+    direction.subVectors(intersectionPosLocal, controllerPositionLocal);
+
+    const worldDirection = new THREE.Vector3().subVectors(controllerPosition, intersectionPosWorld);
+
+    const yAxis = axes[1];
+
+    // Stop application from moving too close to controller
+    if ((worldDirection.length() > 0.5 && Math.abs(yAxis) > 0.1)
+        || (worldDirection.length() <= 0.5 && yAxis > 0.1)) {
+      // Adapt distance for moving according to trigger value
+      direction.normalize();
+      const length = yAxis * this.time.getDeltaTime();
+
+      application.translateOnAxis(direction, length);
+      application.updateMatrix();
+    }
+
+    if (controller.ray) { controller.ray.scale.z = intersectedObject.distance; }
   }
 
   onUtilityMenuDown() {
