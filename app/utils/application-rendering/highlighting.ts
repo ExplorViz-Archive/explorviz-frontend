@@ -7,8 +7,10 @@ import { tracked } from '@glimmer/tracking';
 import {
   Application, Class, isClass, isPackage, Package, StructureLandscapeData,
 } from '../landscape-schemes/structure-data';
-import { DrawableClassCommunication, isDrawableClassCommunication, createHashCodeToClassMap } from '../landscape-rendering/class-communication-computer';
+import { DrawableClassCommunication, isDrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
 import { Span, Trace } from '../landscape-schemes/dynamic-data';
+import { getHashCodeToClassMap } from '../landscape-structure-helpers';
+import { getAllClassesInApplication } from '../application-helpers';
 
 export default class Highlighting {
   applicationObject3D: ApplicationObject3D;
@@ -45,7 +47,7 @@ export default class Highlighting {
 
     // All clazzes in application
     const application = this.applicationObject3D.dataModel;
-    const allClazzesAsArray = Highlighting.getAllClazzes(application);
+    const allClazzesAsArray = getAllClassesInApplication(application);
     const allClazzes = new Set<Class>(allClazzesAsArray);
 
     // Get all clazzes in current component
@@ -143,14 +145,14 @@ export default class Highlighting {
     const drawableComms = communication;
 
     // All clazzes in application
-    const allClazzesAsArray = Highlighting.getAllClazzes(application);
+    const allClazzesAsArray = getAllClassesInApplication(application);
     const allClazzes = new Set<Class>(allClazzesAsArray);
 
     const involvedClazzes = new Set<Class>();
 
     let highlightedSpan: Span|undefined;
 
-    const hashCodeToClassMap = createHashCodeToClassMap(landscapeStructureData);
+    const hashCodeToClassMap = getHashCodeToClassMap(landscapeStructureData);
 
     trace.spanList.forEach((span) => {
       if (span.spanId === traceStep) {
@@ -316,23 +318,6 @@ export default class Highlighting {
       componentMesh.turnTransparent();
     }
     this.turnComponentAndAncestorsTransparent(parent, ignorableComponents);
-  }
-
-  static getAllClazzes(application: Application) {
-    let clazzes: Class[] = [];
-
-    function getAllClazzesFromComponent(component: Package) {
-      clazzes = clazzes.concat(component.classes);
-      component.subPackages.forEach((subComponent) => {
-        getAllClazzesFromComponent(subComponent);
-      });
-    }
-
-    application.packages.forEach((component) => {
-      getAllClazzesFromComponent(component);
-    });
-
-    return clazzes;
   }
 
   static getAllAncestorComponents(component: Package, componentSet: Set<Package> = new Set()) {

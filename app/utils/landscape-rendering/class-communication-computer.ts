@@ -1,47 +1,10 @@
-import { DynamicLandscapeData, Span, Trace } from '../landscape-schemes/dynamic-data';
+import { DynamicLandscapeData, Span } from '../landscape-schemes/dynamic-data';
 import {
-  Application, Class, isApplication, Package, StructureLandscapeData,
+  Class, StructureLandscapeData,
 } from '../landscape-schemes/structure-data';
-import { createTraceIdToSpanTrees } from './application-communication-computer';
-
-function isObject(obj: any): obj is object {
-  return Object.prototype.toString.call(obj) === '[object Object]';
-}
-
-function getAllClassesFromPackageRecursively(component: Package) {
-  const classes = [];
-  classes.push(...component.classes);
-  component.subPackages.forEach((subComponent) => {
-    classes.push(...getAllClassesFromPackageRecursively(subComponent));
-  });
-
-  return classes;
-}
-
-export function getAllClassesFromApplication(application: Application) {
-  return application.packages.map((component) => getAllClassesFromPackageRecursively(component))
-    .flat();
-}
-
-export function createHashCodeToClassMap(structureData: StructureLandscapeData|Application) {
-  const hashCodeToClassMap = new Map<string, Class>();
-
-  let classList: Class[];
-
-  if (isApplication(structureData)) {
-    classList = getAllClassesFromApplication(structureData);
-  } else {
-    classList = structureData.nodes.map((node) => node.applications.map(
-      (application) => getAllClassesFromApplication(application),
-    )).flat(2);
-  }
-
-  classList.forEach((clazz) => {
-    clazz.methods.forEach(({ hashCode }) => hashCodeToClassMap.set(hashCode, clazz));
-  });
-
-  return hashCodeToClassMap;
-}
+import { getHashCodeToClassMap } from '../landscape-structure-helpers';
+import isObject from '../object-helpers';
+import { getTraceIdToSpanTreeMap } from '../trace-helpers';
 
 function computeClassCommunicationRecursively(span: Span, spanIdToChildSpanMap: Map<string, Span[]>,
   hashCodeToClassMap: Map<string, Class>) {
@@ -80,9 +43,9 @@ export default function computeDrawableClassCommunication(
   if (landscapeDynamicData.length === 0) {
     return [];
   }
-  const hashCodeToClassMap = createHashCodeToClassMap(landscapeStructureData);
+  const hashCodeToClassMap = getHashCodeToClassMap(landscapeStructureData);
 
-  const traceIdToSpanTrees = createTraceIdToSpanTrees(landscapeDynamicData);
+  const traceIdToSpanTrees = getTraceIdToSpanTreeMap(landscapeDynamicData);
 
   const totalClassCommunications: ClassCommunication[] = [];
 
@@ -149,70 +112,6 @@ export default function computeDrawableClassCommunication(
   const drawableClassCommunications = [...sourceTargetClassIdToDrawable.values()];
 
   return drawableClassCommunications;
-}
-
-export function spanIdToClass(structureData: Application|StructureLandscapeData,
-  trace: Trace, id: string) {
-  const hashCodeToClassMap = createHashCodeToClassMap(structureData);
-
-  const spanIdToClassMap = new Map<string, Class>();
-
-  trace.spanList.forEach((span) => {
-    const { hashCode, spanId } = span;
-
-    const clazz = hashCodeToClassMap.get(hashCode);
-
-    if (clazz !== undefined) {
-      spanIdToClassMap.set(spanId, clazz);
-    }
-  });
-
-  return spanIdToClassMap.get(id);
-}
-
-export function packageContainsClass(component: Package, clazz: Class): boolean {
-  return component.classes.includes(clazz)
-    || (component.subPackages.length > 0
-      && component.subPackages.any(
-        (subPackage) => packageContainsClass(subPackage, clazz),
-      ));
-}
-
-export function applicationHasClass(application: Application, clazz: Class) {
-  return application.packages.any((component) => packageContainsClass(component, clazz));
-}
-
-export function getApplicationFromClass(structureData: StructureLandscapeData, clazz: Class) {
-  let matchingApplication: Application|undefined;
-
-  structureData.nodes.forEach((node) => {
-    const possibleMatch = node.applications
-      .find((application) => applicationHasClass(application, clazz));
-
-    if (possibleMatch) {
-      matchingApplication = possibleMatch;
-    }
-  });
-
-  return matchingApplication;
-}
-
-export function spanIdToClassAndApplication(structureData: StructureLandscapeData,
-  trace: Trace, id: string) {
-  const clazz = spanIdToClass(structureData, trace, id);
-
-  if (clazz !== undefined) {
-    const application = getApplicationFromClass(structureData, clazz);
-
-    if (application !== undefined) {
-      return {
-        application,
-        class: clazz,
-      };
-    }
-  }
-
-  return undefined;
 }
 
 export function isDrawableClassCommunication(x: any): x is DrawableClassCommunication {

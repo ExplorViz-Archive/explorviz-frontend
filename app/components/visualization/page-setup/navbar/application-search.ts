@@ -6,7 +6,7 @@ import $ from 'jquery';
 import {
   Application, Class, isClass, isPackage, Package,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import { getAllClassesFromApplication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import { getAllClassesInApplication, getAllPackagesInApplication } from 'explorviz-frontend/utils/application-helpers';
 
 interface Args {
   application: Application,
@@ -62,8 +62,8 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
     const latestApp = this.args.application;
 
     // re-calculate since there might be an update to the app (e.g. new class)
-    const components = ApplicationSearch.getAllPackagesFromApplication(latestApp);
-    const clazzes = getAllClassesFromApplication(latestApp);
+    const components = getAllPackagesInApplication(latestApp);
+    const clazzes = getAllClassesInApplication(latestApp);
     const entities = [];
 
     const maxNumberOfCompNames = 20;
@@ -122,16 +122,4 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
     }
     return entities;
   });
-
-  static getAllPackagesFromApplication(application: Application) {
-    function getAllSubpackagesRecursively(component: Package): Package[] {
-      return component.subPackages.map(
-        (subComponent) => [subComponent, ...getAllSubpackagesRecursively(subComponent)],
-      ).flat();
-    }
-
-    return application.packages.map(
-      (component) => [component, ...getAllSubpackagesRecursively(component)],
-    ).flat();
-  }
 }

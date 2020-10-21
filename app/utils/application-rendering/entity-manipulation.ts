@@ -9,7 +9,8 @@ import {
   Class, Package,
 } from '../landscape-schemes/structure-data';
 import { isSpan, Span } from '../landscape-schemes/dynamic-data';
-import { DrawableClassCommunication, spanIdToClass } from '../landscape-rendering/class-communication-computer';
+import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
+import { spanIdToClass } from '../landscape-structure-helpers';
 
 export default class EntityManipulation {
   // Functions as parent object for all application objects

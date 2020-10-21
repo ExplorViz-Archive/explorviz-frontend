@@ -27,9 +27,10 @@ import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/applicati
 import {
   Class, isClass, Package,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import computeDrawableClassCommunication, { DrawableClassCommunication, getAllClassesFromApplication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 
 interface Args {
   readonly id: string;
@@ -422,7 +423,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.applicationObject3D.traces,
     );
 
-    const allClasses = new Set(getAllClassesFromApplication(application!));
+    const allClasses = new Set(getAllClassesInApplication(application!));
 
     const communicationInApplication = drawableClassCommunications.filter(
       (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),

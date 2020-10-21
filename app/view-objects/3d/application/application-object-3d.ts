@@ -1,7 +1,6 @@
 import THREE from 'three';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
-import { getAllClassesFromApplication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import FoundationMesh from './foundation-mesh';
 import ClazzMesh from './clazz-mesh';
 import ComponentMesh from './component-mesh';

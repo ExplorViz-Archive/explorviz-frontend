@@ -3,7 +3,7 @@ import { tracked } from '@glimmer/tracking';
 import { DynamicLandscapeData, Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { action } from '@ember/object';
 import { Application, Class, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import { createHashCodeToClassMap } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import { getHashCodeToClassMap } from 'explorviz-frontend/utils/landscape-structure-helpers';
 
 interface Args {
   moveCameraTo(emberModel: Class|Span): void;
@@ -20,7 +20,7 @@ export default class TraceSelectionAndReplayer extends Component<Args> {
   selectedTrace: Trace|null = null;
 
   get applicationTraces() {
-    const hashCodeToClassMap = createHashCodeToClassMap(this.args.application);
+    const hashCodeToClassMap = getHashCodeToClassMap(this.args.application);
 
     return this.args.dynamicData.filter(
       (trace) => trace.spanList.any((span) => hashCodeToClassMap.get(span.hashCode) !== undefined),

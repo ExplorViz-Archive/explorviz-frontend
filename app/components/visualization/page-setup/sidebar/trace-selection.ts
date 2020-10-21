@@ -1,19 +1,20 @@
 import { action, computed } from '@ember/object';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import { createHashCodeToClassMap } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import {
-  DynamicLandscapeData, Span, Trace,
+  Span, Trace,
 } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { Class, Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import TraceReplayerMain from './trace-replayer/trace-replayer-main';
+import { getHashCodeToClassMap } from 'explorviz-frontend/utils/landscape-structure-helpers';
+import {
+  calculateDuration, getSortedTraceSpans, sortTracesByDuration, sortTracesById,
+} from 'explorviz-frontend/utils/trace-helpers';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
 interface Args {
   moveCameraTo(emberModel: Class|Span): void;
   selectTrace(trace: Trace): void;
-  readonly dynamicData: DynamicLandscapeData;
   readonly structureData: StructureLandscapeData;
   readonly application: Application;
   readonly selectedTrace: Trace;
@@ -41,24 +42,15 @@ export default class TraceSelection extends Component<Args> {
 
   @computed('traces')
   get traceDurations() {
-    return this.traces.map((trace) => TraceSelection.calculateTraceDuration(trace));
-  }
-
-  static calculateTraceDuration(trace: Trace) {
-    const { startTime, endTime } = trace;
-
-    const startTimeInNs = startTime.seconds * 1000000000.0 + startTime.nanoAdjust;
-    const endTimeInNs = endTime.seconds * 1000000000.0 + endTime.nanoAdjust;
-
-    return endTimeInNs - startTimeInNs;
+    return this.traces.map((trace) => calculateDuration(trace));
   }
 
   @computed('args.applicationTraces')
   get firstClasses() {
     const sortedSpanLists = this.args.applicationTraces
-      .map((trace) => TraceReplayerMain.calculateSortedTraceSteps(trace, this.args.dynamicData));
+      .map((trace) => getSortedTraceSpans(trace));
 
-    const hashCodeToClassInLandscapeMap = createHashCodeToClassMap(this.args.structureData);
+    const hashCodeToClassInLandscapeMap = getHashCodeToClassMap(this.args.structureData);
 
     const traceIdToFirstClassMap = new Map<string, Class>();
 
@@ -77,9 +69,9 @@ export default class TraceSelection extends Component<Args> {
   @computed('args.applicationTraces')
   get lastClasses() {
     const sortedSpanLists = this.args.applicationTraces
-      .map((trace) => TraceReplayerMain.calculateSortedTraceSteps(trace, this.args.dynamicData));
+      .map((trace) => getSortedTraceSpans(trace));
 
-    const hashCodeToClassInLandscapeMap = createHashCodeToClassMap(this.args.structureData);
+    const hashCodeToClassInLandscapeMap = getHashCodeToClassMap(this.args.structureData);
 
     const traceIdToLastClassMap = new Map<string, Class>();
 
@@ -119,7 +111,7 @@ export default class TraceSelection extends Component<Args> {
     });
 
     if (this.sortBy === 'traceId') {
-      TraceSelection.sortTracesById(filteredTraces, this.isSortedAsc);
+      sortTracesById(filteredTraces, this.isSortedAsc);
     }
     if (this.sortBy === 'firstClassName') {
       this.sortTracesByfirstClassName(filteredTraces, this.isSortedAsc);
@@ -128,22 +120,10 @@ export default class TraceSelection extends Component<Args> {
       this.sortTracesBylastClassName(filteredTraces, this.isSortedAsc);
     }
     if (this.sortBy === 'traceDuration') {
-      TraceSelection.sortTracesByDuration(filteredTraces, this.isSortedAsc);
+      sortTracesByDuration(filteredTraces, this.isSortedAsc);
     }
 
     return filteredTraces;
-  }
-
-  static sortTracesById(traces: Trace[], ascending = true) {
-    traces.sort((a, b) => {
-      if (a.traceId > b.traceId) { return 1; }
-      if (b.traceId > a.traceId) { return -1; }
-      return 0;
-    });
-
-    if (!ascending) {
-      traces.reverse();
-    }
   }
 
   sortTracesByfirstClassName(traces: Trace[], ascending = true) {

@@ -1,15 +1,14 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
-import { DynamicLandscapeData, Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import { Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { Class, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import { createHashCodeToClassMap, getApplicationFromClass, spanIdToClass } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
-import { createTraceIdToSpanTrees } from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
+import { getSortedTraceSpans } from 'explorviz-frontend/utils/trace-helpers';
+import { getApplicationFromClass, getHashCodeToClassMap, spanIdToClass } from 'explorviz-frontend/utils/landscape-structure-helpers';
 
 interface Args {
   selectedTrace: Trace;
   structureData: StructureLandscapeData;
-  dynamicData: DynamicLandscapeData;
   highlightTrace(trace: Trace, traceStep: string): void;
   moveCameraTo(emberModel: Class|Span): void;
 }
@@ -26,8 +25,8 @@ export default class TraceReplayerMain extends Component<Args> {
 
   constructor(owner: any, args: Args) {
     super(owner, args);
-    const { selectedTrace, dynamicData } = this.args;
-    this.traceSteps = TraceReplayerMain.calculateSortedTraceSteps(selectedTrace, dynamicData);
+    const { selectedTrace } = this.args;
+    this.traceSteps = getSortedTraceSpans(selectedTrace);
 
     if (this.traceSteps.length > 0) {
       const [firstStep] = this.traceSteps;
@@ -72,7 +71,7 @@ export default class TraceReplayerMain extends Component<Args> {
   }
 
   get operationName() {
-    const hashCodeToClassMap = createHashCodeToClassMap(this.args.structureData);
+    const hashCodeToClassMap = getHashCodeToClassMap(this.args.structureData);
 
     if (this.currentTraceStep) {
       const clazz = hashCodeToClassMap.get(this.currentTraceStep.hashCode);
@@ -81,31 +80,6 @@ export default class TraceReplayerMain extends Component<Args> {
         .find((method) => method.hashCode === this.currentTraceStep?.hashCode)?.name;
     }
     return undefined;
-  }
-
-  static calculateSortedTraceSteps(trace: Trace, dynamicData: DynamicLandscapeData) {
-    function getSortedSpanList(span: Span, tree: Map<string, Span[]>): Span[] {
-      const childSpans = tree.get(span.spanId);
-
-      if (childSpans === undefined || childSpans.length === 0) {
-        return [span];
-      }
-
-      const subSpans = childSpans.map((subSpan) => getSortedSpanList(subSpan, tree)).flat();
-
-      return [span, ...subSpans];
-    }
-
-    const spanTree = createTraceIdToSpanTrees(dynamicData)
-      .get(trace.traceId);
-
-    if (spanTree === undefined) {
-      return [];
-    }
-
-    const { root, tree } = spanTree;
-
-    return getSortedSpanList(root, tree);
   }
 
   @action

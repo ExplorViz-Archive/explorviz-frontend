@@ -1,3 +1,5 @@
+import isObject from '../object-helpers';
+
 export interface Trace {
   landscapeToken: string;
   traceId: string;
@@ -29,10 +31,6 @@ export interface Span {
     nanoAdjust: number,
   };
   hashCode: string;
-}
-
-function isObject(obj: any): obj is object {
-  return Object.prototype.toString.call(obj) === '[object Object]';
 }
 
 export function isTrace(x: any): x is Trace {

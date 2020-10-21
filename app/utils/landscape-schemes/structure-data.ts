@@ -1,6 +1,4 @@
-function isObject(obj: any): obj is object {
-  return Object.prototype.toString.call(obj) === '[object Object]';
-}
+import isObject from '../object-helpers';
 
 export interface Method {
   name: string;
