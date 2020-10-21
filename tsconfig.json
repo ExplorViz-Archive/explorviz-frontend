@@ -53,6 +53,6 @@
     "lib/virtual-reality",
   ],
   "exclude": [
-    "lib/virtual-reality/addon/utils/lib"
+    "lib/virtual-reality/addon/utils/lib/**/*"
   ]
 }
