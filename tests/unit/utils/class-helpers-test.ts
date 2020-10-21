@@ -2,7 +2,7 @@ import { getClassMethodHashCodes, getClassAncestorPackages } from 'explorviz-fro
 import { Class, Method, Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { module, test } from 'qunit';
 
-module('Unit | Utility | class-helpers', function(hooks) {
+module('Unit | Utility | class-helpers', function() {
   test('getClassMethodHashCodes with 1 method', function(assert) {
     const testClass = getTestPackageWithOneClassAndOneMethod().classes[0];
     let hashCodeArray = getClassMethodHashCodes(testClass);
