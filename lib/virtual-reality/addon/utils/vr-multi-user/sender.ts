@@ -110,13 +110,13 @@ export default class Sender {
  * @param {ApplicationObject3D} application Application which is bound
  * @param {VRController} controller Controller which binds application
  */
-  sendAppBinded(application: ApplicationObject3D, controller: VRController) {
+  sendAppGrabbed(application: ApplicationObject3D, controller: VRController) {
     const appObj = {
-      event: 'app_binded',
+      event: 'app_grabbed',
       appID: application.dataModel.id,
       appPostion: application.position.toArray(),
       appQuaternion: application.quaternion.toArray(),
-      isBoundToController1: controller.gamepadIndex === 1,
+      isGrabbedByController1: controller.gamepadIndex === 1,
       controllerPosition: controller.position.toArray(),
       controllerQuaternion: controller.quaternion.toArray(),
     };

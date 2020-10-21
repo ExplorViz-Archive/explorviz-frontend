@@ -30,6 +30,8 @@ import UserListMenu from 'virtual-reality/utils/vr-menus/user-list-menu';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 
 export default class VrMultiUser extends VrRendering {
+  // #region CLASS FIELDS AND GETTERS
+
   debug = debugLogger('VrMultiUser');
 
   @service('web-socket')
@@ -56,6 +58,10 @@ export default class VrMultiUser extends VrRendering {
   hardwareModels: HardwareModels;
 
   messageBox!: MessageBoxMenu;
+
+  // #endregion CLASS FIELDS AND GETTERS
+
+  // #region INIT
 
   constructor(owner: any, args: any) {
     super(owner, args);
@@ -92,39 +98,12 @@ export default class VrMultiUser extends VrRendering {
     }
   }
 
-  onControllerConnected(controller: VRController /* , event: THREE.Event */) {
-    let connect: {controller1?: string, controller2?: string};
-    if (controller === this.localUser.controller1) {
-      connect = { controller1: controller.gamepadId };
-    } else {
-      connect = { controller2: controller.gamepadId };
-    }
-    const disconnect = {};
-
-    this.sender.sendControllerUpdate(connect, disconnect);
-  }
-
-  onControllerDisconnected(controller: VRController) {
-    let disconnect: {controller1?: string, controller2?: string};
-
-    if (controller === this.localUser.controller1) {
-      disconnect = { controller1: controller.gamepadId };
-    } else {
-      disconnect = { controller2: controller.gamepadId };
-    }
-
-    this.sender.sendControllerUpdate({}, disconnect);
-  }
-
   initCallbacks() {
     this.webSocket.socketCloseCallback = this.onDisconnect.bind(this);
     this.webSocket.eventCallback = this.onEvent.bind(this);
   }
 
-  applyConfiguration(config: any) {
-    this.webSocket.host = config.host;
-    this.webSocket.port = config.port;
-  }
+  // #endregion INIT
 
   /**
   * Main loop contains all methods which need to be called
@@ -134,8 +113,6 @@ export default class VrMultiUser extends VrRendering {
     super.render();
 
     if (!this.localUser.isOnline && !this.localUser.isConnecting) return;
-
-    this.time.update();
 
     if (this.spectateUser.isActive) {
       this.spectateUser.update();
@@ -148,94 +125,7 @@ export default class VrMultiUser extends VrRendering {
     this.webSocket.sendUpdates();
   }
 
-  sendPoses() {
-    let poses;
-
-    if (this.renderer.xr.isPresenting) {
-      poses = Helper.getPoses(this.renderer.xr.getCamera(this.camera),
-        this.localUser.controller1, this.localUser.controller2);
-    } else {
-      poses = Helper.getPoses(this.camera, this.localUser.controller1, this.localUser.controller2);
-    }
-
-    this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
-  }
-
-  /**
-   * Set user name tag to be directly above their head
-   * and set rotation such that it looks toward our camera.
-   */
-  updateUserNameTags() {
-    this.idToRemoteUser.forEach((user) => {
-      const dummyPlane = user.getObjectByName('dummyNameTag');
-      if (user.state === 'connected' && user.nameTag && user.camera && dummyPlane && this.localUser.camera) {
-        user.nameTag.position.setFromMatrixPosition(dummyPlane.matrixWorld);
-        user.nameTag.lookAt(this.localUser.camera.getWorldPosition(new THREE.Vector3()));
-      }
-    });
-  }
-
-  addApplication(applicationModel: Application, origin: THREE.Vector3) {
-    super.addApplicationTask.perform(applicationModel, origin,
-      ((applicationObject3D: ApplicationObject3D) => {
-        this.sender.sendAppOpened(applicationObject3D);
-      }));
-  }
-
-  highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
-    if (this.localUser.color) {
-      application.setHighlightingColor(this.localUser.color);
-    }
-
-    super.highlightAppEntity(object, application);
-
-    if (object instanceof ComponentMesh || object instanceof ClazzMesh
-      || object instanceof ClazzCommunicationMesh) {
-      this.sender.sendHighlightingUpdate(application.dataModel.id, object.constructor.name,
-        object.dataModel.id, object.highlighted);
-    }
-  }
-
-  removeApplication(application: ApplicationObject3D) {
-    super.removeApplication(application);
-
-    this.sender.sendAppClosed(application.dataModel.id);
-  }
-
-  toggleComponentAndUpdate(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
-    super.toggleComponentAndUpdate(componentMesh, applicationObject3D);
-
-    this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, componentMesh.dataModel.id,
-      componentMesh.opened, false);
-  }
-
-  closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
-    super.closeAllComponentsAndUpdate(applicationObject3D);
-
-    this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, '', false, true);
-  }
-
-  handlePrimaryInputOn(intersection: THREE.Intersection) {
-    if (this.spectateUser.spectatedUser) {
-      const { object, uv } = intersection;
-      if (object instanceof SpectateMenu && uv) {
-        object.triggerDown(uv);
-      }
-      return;
-    }
-
-    super.handlePrimaryInputOn(intersection);
-  }
-
-  handleSecondaryInputOn(intersection: THREE.Intersection) {
-    if (this.spectateUser.spectatedUser) {
-      return;
-    }
-
-    super.handleSecondaryInputOn(intersection);
-  }
-
-  // #region menus
+  // #region MENUS
 
   openMainMenu() {
     this.closeControllerMenu();
@@ -285,12 +175,42 @@ export default class VrMultiUser extends VrRendering {
     this.camera.add(menu);
   }
 
-  // #endregion menus
+  // #endregion MENUS
+
+  // #region INPUT EVENTS
+
+  onControllerConnected(controller: VRController /* , event: THREE.Event */) {
+    let connect: {controller1?: string, controller2?: string};
+    if (controller === this.localUser.controller1) {
+      connect = { controller1: controller.gamepadId };
+    } else {
+      connect = { controller2: controller.gamepadId };
+    }
+    const disconnect = {};
+
+    this.sender.sendControllerUpdate(connect, disconnect);
+  }
+
+  onControllerDisconnected(controller: VRController) {
+    let disconnect: {controller1?: string, controller2?: string};
+
+    if (controller === this.localUser.controller1) {
+      disconnect = { controller1: controller.gamepadId };
+    } else {
+      disconnect = { controller2: controller.gamepadId };
+    }
+
+    this.sender.sendControllerUpdate({}, disconnect);
+  }
 
   onInteractionGripDown(controller: VRController) {
     const application = controller.grabbedObject;
     if (application instanceof ApplicationObject3D) {
-      this.sender.sendAppBinded(application, controller);
+      if (this.applicationGroup.isApplicationGrabbed(application.dataModel.id)) {
+        this.showHint('Application is currently grabbed by another user');
+        return;
+      }
+      this.sender.sendAppGrabbed(application, controller);
     }
 
     super.onInteractionGripDown(controller);
@@ -304,6 +224,30 @@ export default class VrMultiUser extends VrRendering {
 
     super.onInteractionGripUp(controller);
   }
+
+  handlePrimaryInputOn(intersection: THREE.Intersection) {
+    if (this.spectateUser.spectatedUser) {
+      const { object, uv } = intersection;
+      if (object instanceof SpectateMenu && uv) {
+        object.triggerDown(uv);
+      }
+      return;
+    }
+
+    super.handlePrimaryInputOn(intersection);
+  }
+
+  handleSecondaryInputOn(intersection: THREE.Intersection) {
+    if (this.spectateUser.spectatedUser) {
+      return;
+    }
+
+    super.handleSecondaryInputOn(intersection);
+  }
+
+  // #endregion INPUT EVENTS
+
+  // #region EVENT HANDLER
 
   onEvent(event: string, data: any) {
     if (event !== 'user_positions') {
@@ -353,9 +297,11 @@ export default class VrMultiUser extends VrRendering {
       case 'app_closed':
         this.onAppClosed(data.id);
         break;
-      case 'app_binded':
+      case 'app_grabbed':
+        this.onAppGrabbed(data);
         break;
       case 'app_released':
+        this.onAppReleased(data.id, data.position, data.quaternion);
         break;
       case 'component_update':
         this.onComponentUpdate(data.isFoundation, data.appID, data.componentID);
@@ -668,12 +614,12 @@ export default class VrMultiUser extends VrRendering {
     }
   }
 
-  onAppBinded(update: {
+  onAppGrabbed(update: {
     userID: string,
     appID: string,
     appPosition: number[],
     appQuaternion: number[],
-    isBoundToController1: boolean,
+    isGrabbedByController1: boolean,
     controllerPosition: number[],
     controllerQuaternion: number[] }) {
     this.onAppPosition(update.appID, update.appPosition, update.appQuaternion);
@@ -686,9 +632,9 @@ export default class VrMultiUser extends VrRendering {
 
     let controller: THREE.Object3D|null;
 
-    if (update.isBoundToController1 && remoteUser.controller1) {
+    if (update.isGrabbedByController1 && remoteUser.controller1) {
       controller = remoteUser.controller1.model;
-    } else if (update.isBoundToController1 && remoteUser.controller2) {
+    } else if (update.isGrabbedByController1 && remoteUser.controller2) {
       controller = remoteUser.controller2.model;
     } else {
       controller = null;
@@ -765,6 +711,10 @@ export default class VrMultiUser extends VrRendering {
     }
   }
 
+  // #endregion EVENT HANDLER
+
+  // #region UTIL
+
   moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
     super.moveLandscape(deltaX, deltaY, deltaZ);
 
@@ -779,6 +729,78 @@ export default class VrMultiUser extends VrRendering {
       this.landscapeOffset);
   }
 
+  sendPoses() {
+    let poses;
+
+    if (this.renderer.xr.isPresenting) {
+      poses = Helper.getPoses(this.renderer.xr.getCamera(this.camera),
+        this.localUser.controller1, this.localUser.controller2);
+    } else {
+      poses = Helper.getPoses(this.camera, this.localUser.controller1, this.localUser.controller2);
+    }
+
+    this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
+  }
+
+  /**
+   * Set user name tag to be directly above their head
+   * and set rotation such that it looks toward our camera.
+   */
+  updateUserNameTags() {
+    this.idToRemoteUser.forEach((user) => {
+      const dummyPlane = user.getObjectByName('dummyNameTag');
+      if (user.state === 'connected' && user.nameTag && user.camera && dummyPlane && this.localUser.camera) {
+        user.nameTag.position.setFromMatrixPosition(dummyPlane.matrixWorld);
+        user.nameTag.lookAt(this.localUser.camera.getWorldPosition(new THREE.Vector3()));
+      }
+    });
+  }
+
+  addApplication(applicationModel: Application, origin: THREE.Vector3) {
+    super.addApplicationTask.perform(applicationModel, origin,
+      ((applicationObject3D: ApplicationObject3D) => {
+        this.sender.sendAppOpened(applicationObject3D);
+      }));
+  }
+
+  highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
+    if (this.localUser.color) {
+      application.setHighlightingColor(this.localUser.color);
+    }
+
+    super.highlightAppEntity(object, application);
+
+    if (object instanceof ComponentMesh || object instanceof ClazzMesh
+      || object instanceof ClazzCommunicationMesh) {
+      this.sender.sendHighlightingUpdate(application.dataModel.id, object.constructor.name,
+        object.dataModel.id, object.highlighted);
+    }
+  }
+
+  removeApplication(application: ApplicationObject3D) {
+    super.removeApplication(application);
+
+    this.sender.sendAppClosed(application.dataModel.id);
+  }
+
+  toggleComponentAndUpdate(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
+    super.toggleComponentAndUpdate(componentMesh, applicationObject3D);
+
+    this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, componentMesh.dataModel.id,
+      componentMesh.opened, false);
+  }
+
+  closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
+    super.closeAllComponentsAndUpdate(applicationObject3D);
+
+    this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, '', false, true);
+  }
+
+  applyConfiguration(config: any) {
+    this.webSocket.host = config.host;
+    this.webSocket.port = config.port;
+  }
+
   resetAll() {
     // Do not allow to reset everything for collaborative work
     if (this.localUser.isOnline) {
@@ -788,6 +810,8 @@ export default class VrMultiUser extends VrRendering {
 
     super.resetAll();
   }
+
+  // #endregion UTIL
 
   /*
    * This overridden Ember Component lifecycle hook enables calling
