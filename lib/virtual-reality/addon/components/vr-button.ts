@@ -4,8 +4,8 @@ import { tracked } from '@glimmer/tracking';
 
 interface VrButtonArgs {
   renderer: THREE.WebGLRenderer;
-  onSessionStartedCallback: ((session: XRSession) => void) |null;
-  onSessionEndedCallback: (() => void) |null;
+  onSessionStartedCallback?(session: XRSession): void;
+  onSessionEndedCallback?(): void;
 }
 
 export default class VrButton extends Component<VrButtonArgs> {
@@ -52,8 +52,6 @@ export default class VrButton extends Component<VrButtonArgs> {
    * @param session
    */
   onSessionStarted(session: any) {
-    session.addEventListener('end', this.onSessionEnded.bind(this));
-
     this.args.renderer.xr.setSession(session);
     this.buttonText = 'EXIT VR';
 
@@ -69,10 +67,9 @@ export default class VrButton extends Component<VrButtonArgs> {
    * Removes listeners, updates button text and triggers
    * registered callback function.
    */
-  onSessionEnded(/* event */) {
+  onSessionEnded() {
     if (!this.currentSession) return;
 
-    this.currentSession.removeEventListener('end', this.onSessionEnded);
     this.currentSession = null;
 
     this.buttonText = 'ENTER VR';
@@ -83,7 +80,7 @@ export default class VrButton extends Component<VrButtonArgs> {
   }
 
   @action
-  onClick() {
+  async onClick() {
     this.updateVrStatus();
     if (!this.vrSupported) return;
 
@@ -92,7 +89,8 @@ export default class VrButton extends Component<VrButtonArgs> {
       // @ts-ignore
       navigator.xr.requestSession('immersive-vr', sessionInit).then(this.onSessionStarted.bind(this));
     } else {
-      this.currentSession.end();
+      await this.currentSession.end();
+      this.onSessionEnded();
     }
   }
 }

@@ -433,6 +433,10 @@ export default class VrRendering extends Component<Args> {
   @action
   onVrSessionEnded() {
     this.debug('WebXRSession ended');
+    const outerDiv = this.canvas?.parentElement;
+    if (outerDiv) {
+      this.resize(outerDiv);
+    }
   }
 
   /**
