@@ -65,3 +65,6 @@ typings/
 .gauge/
 package-lock.json
 reports
+
+# don’t ignore keep files
+!.gitkeep
