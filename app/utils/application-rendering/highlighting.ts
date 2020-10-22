@@ -156,6 +156,7 @@ export default class Highlighting {
 
     const hashCodeToClassMap = getHashCodeToClassMap(landscapeStructureData);
 
+    // find span matching traceStep
     trace.spanList.forEach((span) => {
       if (span.spanId === traceStep) {
         highlightedSpan = span;
@@ -166,7 +167,7 @@ export default class Highlighting {
       return;
     }
 
-    // get classes of highlighted span
+    // get both classes involved in the procedure call of the highlighted span
     let highlightedSpanParentClass: Class|undefined;
     const highlightedSpanClass = hashCodeToClassMap.get(highlightedSpan.hashCode);
     trace.spanList.forEach((span) => {
@@ -189,6 +190,7 @@ export default class Highlighting {
 
     const spanIdToClass = new Map<string, Class>();
 
+    // map all spans to their respective clazz
     trace.spanList.forEach((span) => {
       const { hashCode, spanId } = span;
 
@@ -228,6 +230,7 @@ export default class Highlighting {
         commMesh?.highlight();
       }
 
+      // turn all communication meshes that are not involved in the trace transparent
       if (!classesThatCommunicateInTrace.has(`${sourceClass.id}_to_${targetClass.id}`)
         && !classesThatCommunicateInTrace.has(`${targetClass.id}_to_${sourceClass.id}`)) {
         commMesh?.turnTransparent();
@@ -242,6 +245,7 @@ export default class Highlighting {
       getClassAncestorPackages(clazz).forEach((pckg) => componentSet.add(pckg));
     });
 
+    // turn clazzes and packages transparent, which are not involved in the trace
     nonInvolvedClazzes.forEach((clazz) => {
       const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id);
       const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.parent.id);
