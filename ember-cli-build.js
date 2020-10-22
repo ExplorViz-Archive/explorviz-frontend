@@ -44,11 +44,10 @@ module.exports = (defaults) => {
   });
 
   // export for threex.dynamictexture
-  app.import('vendor/three.min.js', {
+  app.import('node_modules/three/build/three.min.js', {
     prepend: true,
   });
 
-  app.import('vendor/layout/klay.js');
   app.import('vendor/threex/threex.rendererstats.min.js');
   app.import('vendor/threex/threex.dynamictexture.min.js');
 
