@@ -9,7 +9,9 @@ const {
     textBox, waitFor, evaluate,
 } = require('taiko');
 
-beforeScenario(async() => await openBrowser({headless: false, args: [ 
+beforeScenario(async() => await openBrowser({
+    // headless: false, 
+    args: [ 
         '--disable-gpu',
         '--disable-dev-shm-usage',
         '--disable-setuid-sandbox',
@@ -19,9 +21,12 @@ beforeScenario(async() => await openBrowser({headless: false, args: [
         '--window-size=1440,900']}
 ));
 
-gauge.screenshotFn = async function () {
-    return await screenshot({encoding: "base64"});
+gauge.customScreenshotWriter = async function () {
+    const path = _path.join(process.env['gauge_screenshots_dir'], `screenshot-${process.hrtime.bigint()}.png`);
+    await screenshot({path});
+    return path;
 };
+
 
 afterScenario(async() => await closeBrowser());
 
@@ -48,7 +53,7 @@ step("Wait for landscape", async () => {
     await waitFor(async () => (await $('button[title="Hide Timeline"]').exists()));
     await click(button({title:"Hide Timeline"}));
     await waitFor(12000);
-    gauge.screenshot();
+    await gauge.screenshot();
 })
 
 step("Open Application", async () => {
@@ -66,7 +71,7 @@ step("Open Application", async () => {
 
     await waitFor(2000);
 
-    gauge.screenshot();
+    await gauge.screenshot();
 })
 
 step("Compare screenshots", async () => {
