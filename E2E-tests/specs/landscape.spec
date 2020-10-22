@@ -3,5 +3,5 @@
 ## Enter Landscape View
 * Login
 * Wait for landscape
-* Compare screenshots
+* Compare "landscape" screenshots
 * Open Application

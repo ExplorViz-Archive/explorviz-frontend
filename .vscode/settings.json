@@ -3,4 +3,8 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
+    "files.associations": {
+        "*.spec": "gauge",
+        "*.cpt": "gauge"
+    },
 }

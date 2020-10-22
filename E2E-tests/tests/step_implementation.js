@@ -74,27 +74,25 @@ step("Open Application", async () => {
     await gauge.screenshot();
 })
 
-step("Compare screenshots", async () => {
+step("Compare <screenshotFileName> screenshots", async (screenshotFileName) => {
     createDirectory('screenshots/actual');
     createDirectory('screenshots/diff');
 
-    await screenshot($('canvas'), {path: 'screenshots/actual/landscape.png'});
+    await screenshot($('canvas'), {path: 'screenshots/actual/'+ screenshotFileName + '.png'});
 
-    const img1 = PNG.sync.read(fs.readFileSync('screenshots/expected/landscape.png'));
-    const img2 = PNG.sync.read(fs.readFileSync('screenshots/actual/landscape.png'));
+    const img1 = PNG.sync.read(fs.readFileSync('screenshots/expected/' + screenshotFileName + '.png'));
+    const img2 = PNG.sync.read(fs.readFileSync('screenshots/actual/' + screenshotFileName + '.png'));
 
     const {width, height} = img1;
     const diff = new PNG({width, height});
 
-    const pixelDiff = pixelmatch(img1.data, img2.data, diff.data, width, height, {threshold: 0.2});
+    pixelmatch(img1.data, img2.data, diff.data, width, height, {threshold: 0.2});
 
-    fs.writeFileSync('screenshots/diff/landscape.png', PNG.sync.write(diff));
-    fs.writeFileSync('reports/html-report/images/landscape.png', PNG.sync.write(diff));
+    fs.writeFileSync('screenshots/diff/' + screenshotFileName + '.png', PNG.sync.write(diff));
+    fs.writeFileSync('reports/html-report/images/' + screenshotFileName + '.png', PNG.sync.write(diff));
 
     gauge.message("Screen diff:");
-    gauge.message('<img src="../images/landscape.png" alt="Report logo">');
-    // Force test to fail for testing purpose
-    assert(false);
+    gauge.message('<img src="../images/' + screenshotFileName + '.png" alt="Report logo">');
 })
 
 function createDirectory(path){
