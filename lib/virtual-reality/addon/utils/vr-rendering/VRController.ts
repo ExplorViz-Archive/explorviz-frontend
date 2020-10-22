@@ -351,7 +351,9 @@ export default class VRController extends BaseMesh {
     this.raycaster.ray.origin.setFromMatrixPosition(raySpace.matrixWorld);
     this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersections = this.raycaster.intersectObjects(this.intersectableObjects, true);
+    const intersections = this.grabbedObject
+      ? this.raycaster.intersectObjects([this.grabbedObject], true)
+      : this.raycaster.intersectObjects(this.intersectableObjects, true);
 
     for (let i = 0; i < intersections.length; i++) {
       const { object } = intersections[i];
@@ -364,13 +366,17 @@ export default class VRController extends BaseMesh {
   }
 
   updateIntersectedObject() {
-    if (!this.ray || this.grabbedObject) return;
+    if (!this.ray) return;
 
     const intersections = this.computeIntersections();
 
     const [nearestIntersection] = intersections;
 
     if (!nearestIntersection) {
+      this.intersectedObject = null;
+      if (this.teleportArea) {
+        this.teleportArea.visible = false;
+      }
       this.resetHoverEffect();
       this.ray.scale.z = 5;
       return;
@@ -379,6 +385,11 @@ export default class VRController extends BaseMesh {
     const { object, uv } = nearestIntersection;
 
     if (this.intersectedObject && object !== this.intersectedObject.object) {
+      if (this.intersectedObject.object instanceof FloorMesh) {
+        if (this.teleportArea) {
+          this.teleportArea.visible = false;
+        }
+      }
       this.resetHoverEffect();
     }
 
@@ -414,10 +425,6 @@ export default class VRController extends BaseMesh {
 
     if (object instanceof BaseMesh) {
       object.resetHoverEffect();
-      this.intersectedObject = null;
-    }
-    if (this.teleportArea) {
-      this.teleportArea.visible = false;
     }
   }
 }
