@@ -4,6 +4,7 @@ import {
 } from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import VRController from '../vr-rendering/VRController';
+import { getObjectPose } from '../vr-helpers/multi-user-helper';
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
 export default class Sender {
@@ -49,12 +50,11 @@ export default class Sender {
   }
 
   /**
- * Send update of position + quaternion of the
- * landscape (vrEnvironment)
+ * Send update of direction and length which encode the translation of the application object.
  */
-  sendAppPositionUpdate(appId: string, direction: V3, length: number) {
+  sendAppTranslationUpdate(appId: string, direction: V3, length: number) {
     const applicationObj = {
-      event: 'app_position',
+      event: 'app_translated',
       appId,
       direction: direction.toArray(),
       length,
@@ -114,7 +114,7 @@ export default class Sender {
     const appObj = {
       event: 'app_grabbed',
       appID: application.dataModel.id,
-      appPostion: application.position.toArray(),
+      appPosition: application.position.toArray(),
       appQuaternion: application.quaternion.toArray(),
       isGrabbedByController1: controller.gamepadIndex === 1,
       controllerPosition: controller.position.toArray(),
@@ -129,11 +129,13 @@ export default class Sender {
  * @param {ApplicationObject3D} application Application which is released
  */
   sendAppReleased(application: ApplicationObject3D) {
+    const { position, quaternion } = getObjectPose(application);
+
     const appObj = {
       event: 'app_released',
       id: application.dataModel.id,
-      position: application.position.toArray(),
-      quaternion: application.quaternion.toArray(),
+      position: position.toArray(),
+      quaternion: quaternion.toArray(),
     };
     this.webSocket.enqueueIfOpen(appObj);
   }

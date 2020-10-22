@@ -6,6 +6,7 @@ type Controller = {
   position: THREE.Vector3,
   quaternion: THREE.Quaternion,
   model: THREE.Object3D,
+  ray: THREE.Object3D,
 } |undefined;
 
 type Camera = {
@@ -41,35 +42,39 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.add(this.camera.model);
   }
 
-  initController1(name: string, obj: THREE.Object3D|undefined) {
-    if (!obj) return;
+  initController1(name: string, controllerModel: THREE.Object3D|undefined) {
+    if (!controllerModel) return;
 
     this.removeController1();
+
+    const ray = RemoteVrUser.addRayToControllerModel(controllerModel, this.color);
 
     this.controller1 = {
       id: name,
       position: new THREE.Vector3(),
       quaternion: new THREE.Quaternion(),
-      model: obj,
+      model: controllerModel,
+      ray,
     };
 
-    RemoteVrUser.addRayToControllerModel(this.controller1.model, this.color);
     this.add(this.controller1.model);
   }
 
-  initController2(name: string, obj: THREE.Object3D | undefined) {
-    if (!obj) return;
+  initController2(name: string, controllerModel: THREE.Object3D | undefined) {
+    if (!controllerModel) return;
 
     this.removeController2();
+
+    const ray = RemoteVrUser.addRayToControllerModel(controllerModel, this.color);
 
     this.controller2 = {
       id: name,
       position: new THREE.Vector3(),
       quaternion: new THREE.Quaternion(),
-      model: obj,
+      model: controllerModel,
+      ray,
     };
 
-    RemoteVrUser.addRayToControllerModel(this.controller2.model, this.color);
     this.add(this.controller2.model);
   }
 
@@ -88,6 +93,8 @@ export default class RemoteVrUser extends THREE.Object3D {
     line.position.y -= 0.005;
     line.position.z -= 0.02;
     controller.add(line);
+
+    return line;
   }
 
   removeController1() {

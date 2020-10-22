@@ -197,7 +197,9 @@ export default class VrMultiUser extends VrRendering {
     }
     const disconnect = {};
 
-    this.sender.sendControllerUpdate(connect, disconnect);
+    if (this.localUser.isOnline) {
+      this.sender.sendControllerUpdate(connect, disconnect);
+    }
   }
 
   onControllerDisconnected(controller: VRController) {
@@ -212,25 +214,29 @@ export default class VrMultiUser extends VrRendering {
       disconnect = { controller2: controller.gamepadId };
     }
 
-    this.sender.sendControllerUpdate({}, disconnect);
+    if (this.localUser.isOnline) {
+      this.sender.sendControllerUpdate({}, disconnect);
+    }
   }
 
   onInteractionGripDown(controller: VRController) {
-    const application = controller.grabbedObject;
-    if (application instanceof ApplicationObject3D) {
-      if (this.applicationGroup.isApplicationGrabbed(application.dataModel.id)) {
-        this.showHint('Application is currently grabbed by another user');
-        return;
-      }
-      this.sender.sendAppGrabbed(application, controller);
-    }
+    if (!controller.intersectedObject) return;
 
-    super.onInteractionGripDown(controller);
+    const { object } = controller.intersectedObject;
+
+    if (object.parent instanceof ApplicationObject3D && controller.ray) {
+      if (this.applicationGroup.isApplicationGrabbed(object.parent.dataModel.id)) {
+        this.showHint('Application is currently grabbed by another user');
+      } else {
+        controller.grabObject(object.parent);
+        this.sender.sendAppGrabbed(object.parent, controller);
+      }
+    }
   }
 
   onInteractionGripUp(controller: VRController) {
     const application = controller.grabbedObject;
-    if (application instanceof ApplicationObject3D) {
+    if (application instanceof ApplicationObject3D && this.localUser.isOnline) {
       this.sender.sendAppReleased(application);
     }
 
@@ -255,6 +261,14 @@ export default class VrMultiUser extends VrRendering {
     }
 
     super.handleSecondaryInputOn(intersection);
+  }
+
+  translateApplication(application: THREE.Object3D, direction: THREE.Vector3, length: number) {
+    if (application instanceof ApplicationObject3D && this.localUser.isOnline) {
+      this.sender.sendAppTranslationUpdate(application.dataModel.id, direction, length);
+    }
+
+    super.translateApplication(application, direction, length);
   }
 
   // #endregion INPUT EVENTS
@@ -294,8 +308,8 @@ export default class VrMultiUser extends VrRendering {
       case 'landscape_position':
         this.onLandscapePosition(data);
         break;
-      case 'app_position':
-        this.onAppPosition(data.appID, data.position, data.quaternion);
+      case 'app_translated':
+        this.onAppTranslation(data.appID, data.direction, data.length);
         break;
       case 'system_update':
         this.onLandscapeUpdate(data);
@@ -384,8 +398,7 @@ export default class VrMultiUser extends VrRendering {
     this.localUser.state = 'online';
     this.localUser.controllersConnected = { controller1: false, controller2: false };
 
-    // Remove apps and reset landscape
-    super.resetAll();
+    // this.applicationGroup.clear();
   }
 
   /**
@@ -428,6 +441,11 @@ export default class VrMultiUser extends VrRendering {
   }
 
   onUserConnected(data: any) {
+    // If a user triggers multiple connects, simulate a disconnect first
+    if (this.idToRemoteUser.has(data.id)) {
+      this.onUserDisconnect({ id: data.id });
+    }
+
     const user = new RemoteVrUser();
     user.userName = data.name;
     user.ID = data.id;
@@ -537,19 +555,31 @@ export default class VrMultiUser extends VrRendering {
     }
   }
 
-  onInitialLandscape(data: any) {
+  async onInitialLandscape(data: any) {
     const { systems, nodeGroups, openApps } = data;
 
-    this.setLandscapeState(systems, nodeGroups);
+    await this.setLandscapeState(systems, nodeGroups);
 
     openApps.forEach((app: any) => {
-      this.addApplicationTask.perform(app.id);
-      const applicationObject3D = this.applicationGroup.getApplication(app.id);
-      if (applicationObject3D) {
-        applicationObject3D.position.copy(new THREE.Vector3().fromArray(app.position));
-        applicationObject3D.quaternion.copy(new THREE.Quaternion().fromArray(app.quaternion));
+      const application = this.store.peekRecord('application', app.id);
+      if (application) {
+        this.addApplicationTask.perform(application, new THREE.Vector3(),
+          (applicationObject3D: ApplicationObject3D) => {
+            const position = new THREE.Vector3().fromArray(app.position);
+            const quaternion = new THREE.Quaternion().fromArray(app.quaternion);
 
-        EntityManipulation.restoreComponentState(applicationObject3D, new Set(app.openComponents));
+            applicationObject3D.worldToLocal(position);
+
+            applicationObject3D.position.copy(position);
+            applicationObject3D.quaternion.copy(quaternion);
+
+            EntityManipulation.restoreComponentState(applicationObject3D,
+              new Set(app.openComponents));
+
+            super.addLabels(applicationObject3D);
+
+            
+          });
       }
     });
 
@@ -567,12 +597,11 @@ export default class VrMultiUser extends VrRendering {
     super.updateLandscapeRotation(new Quaternion().fromArray(pose.quaternion));
   }
 
-  onAppPosition(id: string, position: number[], quaternion: number[]) {
+  onAppTranslation(id: string, direction: number[], length: number) {
     const applicationMesh = this.applicationGroup.getApplication(id);
 
     if (applicationMesh) {
-      applicationMesh.position.copy(new THREE.Vector3().fromArray(position));
-      applicationMesh.quaternion.copy(new THREE.Quaternion().fromArray(quaternion));
+      super.translateApplication(applicationMesh, new THREE.Vector3().fromArray(direction), length);
     }
   }
 
@@ -593,7 +622,8 @@ export default class VrMultiUser extends VrRendering {
     if (application) {
       super.addApplication(application, new THREE.Vector3().fromArray(position));
 
-      this.onAppPosition(id, position, quaternion);
+      this.setAppPose(id, new THREE.Vector3().fromArray(position),
+        new THREE.Quaternion().fromArray(quaternion));
     }
   }
 
@@ -622,7 +652,10 @@ export default class VrMultiUser extends VrRendering {
     isGrabbedByController1: boolean,
     controllerPosition: number[],
     controllerQuaternion: number[] }) {
-    this.onAppPosition(update.appID, update.appPosition, update.appQuaternion);
+    /*
+    super.setAppPose(update.appID, new THREE.Vector3().fromArray(update.appPosition),
+      new THREE.Quaternion().fromArray(update.appQuaternion));
+    */
 
     const remoteUser = this.idToRemoteUser.get(update.userID);
 
@@ -630,30 +663,49 @@ export default class VrMultiUser extends VrRendering {
       return;
     }
 
-    let controller: THREE.Object3D|null;
+    let controller: THREE.Object3D|null = null;
+    let ray: THREE.Object3D|null = null;
 
     if (update.isGrabbedByController1 && remoteUser.controller1) {
       controller = remoteUser.controller1.model;
-    } else if (update.isGrabbedByController1 && remoteUser.controller2) {
+      ray = remoteUser.controller1.ray;
+    } else if (remoteUser.controller2) {
       controller = remoteUser.controller2.model;
-    } else {
-      controller = null;
+      ray = remoteUser.controller2.ray;
     }
 
-    if (controller) {
-      controller.position.fromArray(update.controllerPosition);
-      controller.quaternion.fromArray(update.controllerQuaternion);
+    const application = this.applicationGroup.getApplication(update.appID);
 
-      this.applicationGroup.attachApplicationTo(update.appID, controller);
+    if (controller && ray && application) {
+      const controllerMatrix = new THREE.Matrix4();
+      controllerMatrix.identity().extractRotation(ray.matrixWorld);
+      // Get inverse of controller transformation
+      controllerMatrix.getInverse(controller.matrixWorld);
+
+      // Set transforamtion relative to controller transformation
+      application.matrix.premultiply(controllerMatrix);
+      // Split up matrix into position, quaternion and scale
+      application.matrix.decompose(application.position, application.quaternion, application.scale);
+
+      controller.add(application);
+      // this.applicationGroup.attachApplicationTo(update.appID, controller);
     }
   }
 
   onAppReleased(id: string, position: number[], quaternion: number[]) {
-    this.onAppPosition(id, position, quaternion);
-
     const application = this.applicationGroup.getApplication(id);
     if (application) {
+      // Transform object back into transformation relative to local space
+      if (application.parent) {
+        application.matrix.premultiply(application.parent.matrixWorld);
+      }
+      // Split up transforamtion into position, quaternion and scale
+      application.matrix.decompose(application.position, application.quaternion, application.scale);
+
       this.applicationGroup.add(application);
+
+      super.setAppPose(id, new THREE.Vector3().fromArray(position),
+        new THREE.Quaternion().fromArray(quaternion));
     }
   }
 
@@ -736,15 +788,20 @@ export default class VrMultiUser extends VrRendering {
   moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
     super.moveLandscape(deltaX, deltaY, deltaZ);
 
-    const delta = new THREE.Vector3(deltaX, deltaY, deltaZ);
-    this.sender.sendLandscapeUpdate(delta, this.landscapeObject3D.quaternion, this.landscapeOffset);
+    if (this.localUser.isOnline) {
+      const delta = new THREE.Vector3(deltaX, deltaY, deltaZ);
+      this.sender.sendLandscapeUpdate(delta, this.landscapeObject3D.quaternion,
+        this.landscapeOffset);
+    }
   }
 
   updateLandscapeRotation(quaternion: THREE.Quaternion) {
     super.updateLandscapeRotation(quaternion);
 
-    this.sender.sendLandscapeUpdate(new THREE.Vector3(0, 0, 0), this.landscapeObject3D.quaternion,
-      this.landscapeOffset);
+    if (this.localUser.isOnline) {
+      this.sender.sendLandscapeUpdate(new THREE.Vector3(0, 0, 0), this.landscapeObject3D.quaternion,
+        this.landscapeOffset);
+    }
   }
 
   /**
@@ -764,7 +821,9 @@ export default class VrMultiUser extends VrRendering {
   async openSystemAndRedraw(systemMesh: SystemMesh) {
     super.openSystemAndRedraw(systemMesh);
 
-    this.sender.sendSystemUpdate(systemMesh.dataModel.id, true);
+    if (this.localUser.isOnline) {
+      this.sender.sendSystemUpdate(systemMesh.dataModel.id, true);
+    }
   }
 
   async closeSystemAndRedraw(systemMesh: SystemMesh) {
@@ -780,7 +839,9 @@ export default class VrMultiUser extends VrRendering {
   addApplication(applicationModel: Application, origin: THREE.Vector3) {
     super.addApplicationTask.perform(applicationModel, origin,
       ((applicationObject3D: ApplicationObject3D) => {
-        this.sender.sendAppOpened(applicationObject3D);
+        if (this.localUser.isOnline) {
+          this.sender.sendAppOpened(applicationObject3D);
+        }
       }));
   }
 
@@ -793,28 +854,36 @@ export default class VrMultiUser extends VrRendering {
 
     if (object instanceof ComponentMesh || object instanceof ClazzMesh
       || object instanceof ClazzCommunicationMesh) {
-      this.sender.sendHighlightingUpdate(application.dataModel.id, object.constructor.name,
-        object.dataModel.id, object.highlighted);
+      if (this.localUser.isOnline) {
+        this.sender.sendHighlightingUpdate(application.dataModel.id, object.constructor.name,
+          object.dataModel.id, object.highlighted);
+      }
     }
   }
 
   removeApplication(application: ApplicationObject3D) {
     super.removeApplication(application);
 
-    this.sender.sendAppClosed(application.dataModel.id);
+    if (this.localUser.isOnline) {
+      this.sender.sendAppClosed(application.dataModel.id);
+    }
   }
 
   toggleComponentAndUpdate(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
     super.toggleComponentAndUpdate(componentMesh, applicationObject3D);
 
-    this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, componentMesh.dataModel.id,
-      componentMesh.opened, false);
+    if (this.localUser.isOnline) {
+      this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, componentMesh.dataModel.id,
+        componentMesh.opened, false);
+    }
   }
 
   closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
     super.closeAllComponentsAndUpdate(applicationObject3D);
 
-    this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, '', false, true);
+    if (this.localUser.isOnline) {
+      this.sender.sendComponentUpdate(applicationObject3D.dataModel.id, '', false, true);
+    }
   }
 
   // #endregion UTIL

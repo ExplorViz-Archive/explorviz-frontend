@@ -482,8 +482,10 @@ export default class VrRendering extends Component<Args> {
   // @ts-ignore
   @task({ restartable: true })
   // eslint-disable-next-line
-populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|null = null) {
+  populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|null = null) {
     this.debug('populate landscape-rendering');
+
+    console.log('Landscape: ', this.args.landscape);
 
     const openEntityIds = openedEntities || this.landscapeObject3D.openEntityIds;
     const emberLandscape = this.args.landscape;
@@ -576,7 +578,7 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
 
       this.debug('Landscape loaded');
     } catch (e) {
-    // console.log(e);
+      console.log(e);
     }
   });
 
@@ -727,7 +729,7 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
   // #region APLICATION RENDERING
 
   // @ts-ignore
-  @task({ restartable: true })
+  @task({ enqueue: true })
   // eslint-disable-next-line
   addApplicationTask = task(function* (this: VrRendering, applicationModel: Application, origin: THREE.Vector3, 
     callback?: (applicationObject3D: ApplicationObject3D) => void) {
@@ -961,8 +963,7 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
       direction.normalize();
       const length = yAxis * this.time.getDeltaTime();
 
-      application.translateOnAxis(direction, length);
-      application.updateMatrix();
+      this.translateApplication(application, direction, length);
     }
 
     if (controller.ray) { controller.ray.scale.z = intersectedObject.distance; }
@@ -1214,6 +1215,23 @@ populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|n
       || object instanceof ClazzCommunicationMesh) {
       Highlighting.highlight(object, application);
     }
+  }
+
+  setAppPose(id: string, position: THREE.Vector3, quaternion: THREE.Quaternion) {
+    const application = this.applicationGroup.getApplication(id);
+
+    if (application) {
+      application.worldToLocal(position);
+
+      application.position.copy(position);
+      application.quaternion.copy(quaternion);
+    }
+  }
+
+  // eslint-disable-next-line
+  translateApplication(application: THREE.Object3D, direction: THREE.Vector3, length: number){
+    application.translateOnAxis(direction, length);
+    application.updateMatrix();
   }
 
   moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {

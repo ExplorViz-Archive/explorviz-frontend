@@ -1,5 +1,6 @@
 import THREE from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 
 export default class ApplicationGroup extends THREE.Group {
   openedApps: Map<string, ApplicationObject3D>;
@@ -42,6 +43,7 @@ export default class ApplicationGroup extends THREE.Group {
 
     const application = this.getApplication(id);
     if (application) {
+      console.log('Application added to controller');
       object.add(application);
     }
   }
@@ -68,6 +70,11 @@ export default class ApplicationGroup extends THREE.Group {
   clear() {
     Array.from(this.openedApps.values()).forEach((application) => {
       this.remove(application);
+      application.children.forEach((child) => {
+        if (child instanceof BaseMesh) {
+          child.disposeRecursively();
+        }
+      });
     });
 
     this.openedApps.clear();
