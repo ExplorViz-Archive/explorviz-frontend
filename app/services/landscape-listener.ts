@@ -28,7 +28,12 @@ export default class LandscapeListener extends Service.extend(Evented) {
   timer: NodeJS.Timeout|null = null;
 
   async initLandscapePolling(intervalInSeconds: number = 10) {
-    this.timer = setInterval(async () => {
+    function setIntervalImmediately(func: () => void, interval: number) {
+      func();
+      return setInterval(func, interval);
+    }
+
+    this.timer = setIntervalImmediately(async () => {
       try {
         // request landscape data that is 60 seconds old
         // that way we can be sure, all traces are available
