@@ -397,8 +397,6 @@ export default class VrMultiUser extends VrRendering {
     }
     this.localUser.state = 'online';
     this.localUser.controllersConnected = { controller1: false, controller2: false };
-
-    // this.applicationGroup.clear();
   }
 
   /**
@@ -558,6 +556,12 @@ export default class VrMultiUser extends VrRendering {
   async onInitialLandscape(data: any) {
     const { systems, nodeGroups, openApps } = data;
 
+    this.applicationGroup.traverse((application) => {
+      if (application instanceof ApplicationObject3D) {
+        this.removeApplication(application);
+      }
+    });
+
     await this.setLandscapeState(systems, nodeGroups);
 
     openApps.forEach((app: any) => {
@@ -577,8 +581,6 @@ export default class VrMultiUser extends VrRendering {
               new Set(app.openComponents));
 
             super.addLabels(applicationObject3D);
-
-            
           });
       }
     });
@@ -837,12 +839,14 @@ export default class VrMultiUser extends VrRendering {
    * Additionally, a callback function is given to send an update to the backend.
    */
   addApplication(applicationModel: Application, origin: THREE.Vector3) {
-    super.addApplicationTask.perform(applicationModel, origin,
-      ((applicationObject3D: ApplicationObject3D) => {
-        if (this.localUser.isOnline) {
-          this.sender.sendAppOpened(applicationObject3D);
-        }
-      }));
+    if (!this.applicationGroup.hasApplication(applicationModel.id)) {
+      super.addApplicationTask.perform(applicationModel, origin,
+        ((applicationObject3D: ApplicationObject3D) => {
+          if (this.localUser.isOnline) {
+            this.sender.sendAppOpened(applicationObject3D);
+          }
+        }));
+    }
   }
 
   highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
