@@ -6,7 +6,7 @@ import RectangleItem from './items/rectangle-item';
 import RemoteVrUser from '../vr-multi-user/remote-vr-user';
 
 export default class UserListMenu extends BaseMenu {
-  constructor(localUser: LocalVrUser, users: RemoteVrUser[]) {
+  constructor(localUser: LocalVrUser, users: RemoteVrUser[], userName: string) {
     super({ width: 256, height: 256 });
 
     const titleBackground = new RectangleItem('delimeter', { x: 0, y: 0 }, 256, 33, '#777777');
@@ -23,14 +23,14 @@ export default class UserListMenu extends BaseMenu {
 
     if (localUser.isOnline && !localUser.isSpectating) {
       const color = localUser.color ? localUser.color : new THREE.Color();
-      const localUserText = new TextItem(localUser.name, 'localUser', color.getHexString(), { x: 50, y: yPos }, 12, 'left');
+      const localUserText = new TextItem(userName, 'localUser', `#${color.getHexString()}`, { x: 50, y: yPos }, 12, 'left');
       this.items.push(localUserText);
       yPos += yOffset;
     }
 
     users.forEach((user) => {
       if (user.state === 'connected' && user.name) {
-        const remoteUserText = new TextItem(user.name, user.name, '#adadad', { x: 50, y: yPos }, 12, 'left');
+        const remoteUserText = new TextItem(user.name, user.name, `#${user.color.getHexString()}`, { x: 50, y: yPos }, 12, 'left');
         this.items.push(remoteUserText);
         yPos += yOffset;
       }

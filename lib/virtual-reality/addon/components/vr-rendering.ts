@@ -159,6 +159,14 @@ export default class VrRendering extends Component<Args> {
   constructor(owner: any, args: Args) {
     super(owner, args);
     this.debug('Constructor called');
+
+    // The getHexString function of threejs is faulty, thus we need to replace it for now
+    /* eslint-disable */
+    THREE.Color.prototype.getHexString = function () {
+      return ((1 << 24) + (this.r << 16) + (this.g << 8) + this.b).toString(16).slice(1);
+    };
+    /* eslint-enable */
+
     this.landscapeDepth = 0.7;
 
     this.landscapeScalar = 0.1;
@@ -332,6 +340,8 @@ export default class VrRendering extends Component<Args> {
     const callbacks2 = {
       triggerDown: this.onUtilityTrigger.bind(this),
       menuDown: this.onUtilityMenuDown.bind(this),
+      gripDown: this.onUtilityGripDown.bind(this),
+      gripUp: this.onUtilityGripUp.bind(this),
     };
 
     const controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
@@ -379,6 +389,12 @@ export default class VrRendering extends Component<Args> {
       this.applicationGroup.add(object);
     }
   }
+
+  // eslint-disable-next-line
+  onUtilityGripDown(controller: VRController) {}
+
+  // eslint-disable-next-line
+  onUtilityGripUp(controller: VRController) {}
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
 

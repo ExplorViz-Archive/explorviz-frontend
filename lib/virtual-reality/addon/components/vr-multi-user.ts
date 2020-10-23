@@ -175,8 +175,23 @@ export default class VrMultiUser extends VrRendering {
   }
 
   showUserList() {
-    const menu = new UserListMenu(this.localUser, []);
+    if (this.camera.getObjectByName('userlist-menu')) {
+      this.hideUserList();
+    }
+    const remoteUsers = Array.from(this.idToRemoteUser.values());
+    const menu = new UserListMenu(this.localUser, remoteUsers, this.currentUser.username);
+    menu.name = 'userlist-menu';
     this.camera.add(menu);
+    menu.position.z += 0.25;
+    menu.position.x += 0.03;
+  }
+
+  hideUserList() {
+    const menu = this.camera.getObjectByName('userlist-menu');
+
+    if (menu) {
+      this.camera.remove(menu);
+    }
   }
 
   // #endregion MENUS
@@ -245,6 +260,15 @@ export default class VrMultiUser extends VrRendering {
     if (application instanceof ApplicationObject3D && this.localUser.isOnline) {
       this.sender.sendAppReleased(application);
     }
+  }
+
+  onUtilityGripDown(/* controller: VRController */) {
+    this.showUserList();
+  }
+
+  // eslint-disable-next-line
+  onUtilityGripUp(/* controller: VRController */) {
+    this.hideUserList();
   }
 
   handlePrimaryInputOn(intersection: THREE.Intersection) {
