@@ -182,8 +182,6 @@ export default class VrMultiUser extends VrRendering {
     const menu = new UserListMenu(this.localUser, remoteUsers, this.currentUser.username);
     menu.name = 'userlist-menu';
     this.camera.add(menu);
-    menu.position.z += 0.25;
-    menu.position.x += 0.03;
   }
 
   hideUserList() {
