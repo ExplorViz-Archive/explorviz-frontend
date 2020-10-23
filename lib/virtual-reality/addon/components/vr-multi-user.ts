@@ -7,7 +7,7 @@ import debugLogger from 'ember-debug-logger';
 import ConnectionMenu from 'virtual-reality/utils/vr-menus/connection-menu';
 import $ from 'jquery';
 import { bind } from '@ember/runloop';
-import THREE, { Quaternion, Vector3 } from 'three';
+import THREE, { Quaternion } from 'three';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
 import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
@@ -613,6 +613,10 @@ export default class VrMultiUser extends VrRendering {
               new Set(app.openComponents));
 
             super.addLabels(applicationObject3D);
+
+            app.highlightedComponents.forEach((highlightingUpdate: any) => {
+              this.onHighlightingUpdate(highlightingUpdate);
+            });
           });
       }
     });
