@@ -781,10 +781,16 @@ export default class VrMultiUser extends VrRendering {
         Highlighting.highlight(boxMesh, applicationObject3D);
       }
     } else {
-      const commMesh = applicationObject3D.getCommMeshByModelId(update.entityID);
-      if (commMesh instanceof ClazzCommunicationMesh) {
-        Highlighting.highlight(commMesh, applicationObject3D);
-      }
+      // The target and source class id of communication
+      const classIds = new Set<string>(update.entityID.split('###'));
+
+      applicationObject3D.getCommMeshes().forEach((commMesh) => {
+        if (classIds.has(commMesh.dataModel.get('sourceClazz').get('id'))
+          && classIds.has(commMesh.dataModel.get('targetClazz').get('id'))) {
+          console.log('found mesh');
+          Highlighting.highlight(commMesh, applicationObject3D);
+        }
+      });
     }
   }
 
@@ -918,17 +924,32 @@ export default class VrMultiUser extends VrRendering {
   }
 
   highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
+    console.log('highlightAppEntity');
     if (this.localUser.color) {
       application.setHighlightingColor(this.localUser.color);
     }
 
     super.highlightAppEntity(object, application);
 
-    if (object instanceof ComponentMesh || object instanceof ClazzMesh
-      || object instanceof ClazzCommunicationMesh) {
-      if (this.localUser.isOnline) {
+    if (this.localUser.isOnline) {
+      if (object instanceof ComponentMesh || object instanceof ClazzMesh) {
         this.sender.sendHighlightingUpdate(application.dataModel.id, object.constructor.name,
           object.dataModel.id, object.highlighted);
+      } else if (object instanceof ClazzCommunicationMesh) {
+        console.log('highlight comm');
+        const { sourceClazz, targetClazz } = object.dataModel;
+
+        // this is necessary, since drawable class communications are created on
+        // client side, thus their ids do not match, since they are uuids
+        let combinedId: string;
+        if (sourceClazz.get('id') < targetClazz.get('id')) {
+          combinedId = `${sourceClazz.get('id')}###${targetClazz.get('id')}`;
+        } else {
+          combinedId = `${targetClazz.get('id')}###${sourceClazz.get('id')}`;
+        }
+
+        this.sender.sendHighlightingUpdate(application.dataModel.id, object.constructor.name,
+          combinedId, object.highlighted);
       }
     }
   }
