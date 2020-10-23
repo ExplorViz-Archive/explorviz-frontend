@@ -426,7 +426,6 @@ export default class VrMultiUser extends VrRendering {
       this.onUserConnected(userData, false);
     }
     this.localUser.state = 'online';
-    this.localUser.controllersConnected = { controller1: false, controller2: false };
 
     this.sendInitialControllerConnectState();
   }
@@ -488,6 +487,13 @@ export default class VrMultiUser extends VrRendering {
 
     // Add 3d-models for new user
     this.remoteUserGroup.add(user);
+
+    if (data.controllers?.controller1) {
+      this.loadController1(data.controllers.controller1, user.ID);
+    }
+    if (data.controllers?.controller2) {
+      this.loadController2(data.controllers.controller2, user.ID);
+    }
 
     // Add name tag
     Helper.addDummyNamePlane(user);
