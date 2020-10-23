@@ -15,7 +15,6 @@ type tile = {
 // Simplified Tile
 type tileWay = { startPoint: point, endPoint: point };
 
-
 /**
  * Checks wheter two given 2-d-points are equal based on their x- and
  * y-coordinate.
@@ -154,13 +153,11 @@ function categorizeByThreshold(requestMap: Map<number, number>) {
 
   const upperThreshold = maxRequests * (2 / 3);
 
-
   requestMap.forEach((_category, requests) => {
     const category = getCategoryFromValue(requests, lowerThreshold, upperThreshold);
     requestMap.set(requests, category);
   });
 }
-
 
 /**
  * Maps number of requests in a map with a specified method to numerical classes
