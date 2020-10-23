@@ -463,38 +463,28 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   applyHeatmap() {
     this.setAppComponentVisibility(0.1);
 
-    const { useSimpleHeat, useHelperLines } = this.heatmapRepo;
-
-    // Get max and add 1 to avoid -0 issues.
-    const maximumValue = this.heatmapRepo.largestValue + 1;
-
     const foundationMesh = this.applicationObject3D.getBoxMeshbyModelId(this.args.application.id);
 
-    if (!foundationMesh || !(foundationMesh instanceof FoundationMesh)) {
+    if (!(foundationMesh instanceof FoundationMesh)) {
       return;
     }
 
     let colorMap: number[];
-    let depthOffset: number;
     let simpleHeatMap: any;
     let canvas: any;
+    // Get max and add 1 to avoid -0 issues.
+    const maximumValue = this.heatmapRepo.largestValue + 1;
 
-    const foundationWidth = foundationMesh.width;
-    const foundationDepth = foundationMesh.depth;
-
-    if (!useSimpleHeat) {
+    if (!this.heatmapRepo.useSimpleHeat) {
       const { depthSegments, widthSegments } = foundationMesh.geometry.parameters;
-      // The number of faces at front and back of the foundation mesh,
-      // i.e. the starting index for the faces on top.
-      depthOffset = depthSegments * 4;
       // Compute face numbers of top side of the cube
       const size = widthSegments * depthSegments * 2;
       // Prepare color map with same size as the surface of the foundation topside
       colorMap = new Array(size).fill(0);
     } else {
       canvas = document.createElement('canvas');
-      canvas.width = foundationWidth;
-      canvas.height = foundationDepth;
+      canvas.width = foundationMesh.width;
+      canvas.height = foundationMesh.depth;
       simpleHeatMap = simpleHeatmap(maximumValue, canvas,
         this.heatmapRepo.getSimpleHeatGradient(),
         this.heatmapRepo.heatmapRadius, this.heatmapRepo.blurRadius);
@@ -504,21 +494,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     foundationMesh.getWorldPosition(foundationWorldPosition);
 
-    // Create viewpoint from which the faces of the foundation are computed for each clazz.
-    const viewPos = foundationMesh.position.clone();
-    viewPos.y = Math.max(this.camera.position.z * 0.8, 100);
-    /*     viewPos.x -= foundationWidth * 0.25; */
-
-    foundationMesh.localToWorld(viewPos);
-
-    const raycaster = new THREE.Raycaster();
-
     const heatmap = this.clazzMetrics;
 
     const minmax = computeHeatmapMinMax(heatmap);
     this.debug(`Heatmap max: ${maximumValue} | Clazz min: ${minmax.min}, max: ${minmax.max}`);
-
-    const { selectedMode } = this.heatmapRepo;
 
     const components = this.args.application.hasMany('components').value() as DS.ManyArray<Component> | null;
 
@@ -532,76 +511,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       component.getContainedClazzes(clazzList);
     });
 
-    this.removeHelperLines();
+    this.removeHeatmapHelperLines();
 
     clazzList.forEach((clazz) => {
-      // Calculate center point of the clazz floor. This is used for computing the corresponding
-      // face on the foundation box.
-      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id) as
-        ClazzMesh | undefined;
-
-      if (!clazzMesh) {
-        return;
-      }
-
-      const clazzPos = clazzMesh.position.clone();
-
-      clazzPos.y -= clazzMesh.height / 2;
-
-      this.applicationObject3D.localToWorld(clazzPos);
-
-      // The vector from the viewPos to the clazz floor center point
-      const rayVector = clazzPos.clone().sub(viewPos);
-
-      // Following the ray vector from the floor center get the intersection with the foundation.
-      raycaster.set(clazzPos, rayVector.normalize());
-
-      const firstIntersection = raycaster.intersectObject(foundationMesh, false)[0];
-
-      const worldIntersectionPoint = firstIntersection.point.clone();
-      this.applicationObject3D.worldToLocal(worldIntersectionPoint);
-
-      if (useHelperLines) {
-        // let material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
-        const material1 = new THREE.LineBasicMaterial({ color: 0x808080 });
-        const points = [];
-        // points.push(viewPos)
-        points.push(this.applicationObject3D.worldToLocal(clazzPos));
-        points.push(worldIntersectionPoint);
-        const geometry1 = new THREE.BufferGeometry().setFromPoints(points);
-        const line = new THREE.Line(geometry1, material1);
-        line.name = 'helperline';
-        this.applicationObject3D.add(line);
-      }
-
-      // Compute color only for the first intersection point for consistency if one was found.
-      if (firstIntersection) {
-        if (!useSimpleHeat && firstIntersection.faceIndex) {
-          if (selectedMode === 'aggregatedHeatmap') {
-            setColorValues(firstIntersection.faceIndex - depthOffset,
-              heatmap.get(clazz.fullQualifiedName) - (maximumValue / 2),
-              colorMap,
-              foundationMesh);
-          } else {
-            setColorValues(firstIntersection.faceIndex - depthOffset,
-              heatmap.get(clazz.fullQualifiedName),
-              colorMap,
-              foundationMesh);
-          }
-        } else if (useSimpleHeat && firstIntersection.uv) {
-          const xPos = firstIntersection.uv.x * foundationWidth;
-          const zPos = (1 - firstIntersection.uv.y) * foundationDepth;
-          if (selectedMode === 'aggregatedHeatmap') {
-            simpleHeatMap.add([xPos, zPos, heatmap.get(clazz.fullQualifiedName)]);
-          } else {
-            simpleHeatMap.add([xPos, zPos,
-              heatmap.get(clazz.fullQualifiedName) + (maximumValue / 2)]);
-          }
-        }
-      }
+      this.heatmapClazzUpdate(clazz, foundationMesh, simpleHeatMap, colorMap);
     });
 
-    if (!useSimpleHeat) {
+    if (!this.heatmapRepo.useSimpleHeat) {
       const color = 'rgb(255, 255, 255)';
       foundationMesh.material = new THREE.MeshLambertMaterial({
         color: new THREE.Color(color),
@@ -613,26 +529,30 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     } else {
       simpleHeatMap.draw(0.0);
 
-      const color = 'rgb(255, 255, 255)';
-      foundationMesh.material = [
-        new THREE.MeshLambertMaterial({ color: new THREE.Color(color) }),
-        new THREE.MeshLambertMaterial({ color: new THREE.Color(color) }),
-        new THREE.MeshLambertMaterial({ color: new THREE.Color(color) }),
-        new THREE.MeshLambertMaterial({ color: new THREE.Color(color) }),
-        new THREE.MeshLambertMaterial({ color: new THREE.Color(color) }),
-        new THREE.MeshLambertMaterial({ color: new THREE.Color(color) }),
-      ];
-
-      const { material } = foundationMesh;
-      const heatmapMaterial = material[2] as THREE.MeshLambertMaterial;
-      heatmapMaterial.emissiveMap = new THREE.CanvasTexture(canvas);
-      heatmapMaterial.emissive = new THREE.Color('rgb(125, 125, 125)');
-      heatmapMaterial.emissiveIntensity = 1;
-      heatmapMaterial.needsUpdate = true;
+      ApplicationRendering.applySimpleHeatOnFoundation(foundationMesh, canvas);
     }
   }
 
-  removeHelperLines() {
+  /**
+   * Adds a line to visualize the vertical line from a clazz to the foundation mesh
+   */
+  addHeatmapHelperLine(clazzPos: THREE.Vector3, worldIntersectionPoint: THREE.Vector3) {
+    const material1 = new THREE.LineBasicMaterial({ color: 0x808080 });
+    const points = [];
+
+    points.push(this.applicationObject3D.worldToLocal(clazzPos));
+    points.push(worldIntersectionPoint);
+    const geometry1 = new THREE.BufferGeometry().setFromPoints(points);
+    const line = new THREE.Line(geometry1, material1);
+    line.name = 'helperline';
+
+    this.applicationObject3D.add(line);
+  }
+
+  /**
+   * Removes the vertical lines which visualize position of a clazz on the foundation mesh
+   */
+  removeHeatmapHelperLines() {
     const applicationChildren: THREE.Object3D[] = [];
 
     // Remove helper lines if existend
@@ -644,6 +564,101 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     applicationChildren.forEach(((child) => {
       this.applicationObject3D.remove(child);
     }));
+  }
+
+  heatmapClazzUpdate(clazz: Clazz, foundationMesh: FoundationMesh, simpleHeatMap: any,
+    colorMap: number[]) {
+    // Calculate center point of the clazz floor. This is used for computing the corresponding
+    // face on the foundation box.
+    const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id) as
+        ClazzMesh | undefined;
+
+    if (!clazzMesh) {
+      return;
+    }
+
+    const raycaster = new THREE.Raycaster();
+    const { selectedMode } = this.heatmapRepo;
+
+    const clazzPos = clazzMesh.position.clone();
+    const heatmap = this.clazzMetrics;
+    const viewPos = this.computeHeatMapViewPos(foundationMesh);
+    const maximumValue = this.heatmapRepo.largestValue + 1;
+
+    clazzPos.y -= clazzMesh.height / 2;
+
+    this.applicationObject3D.localToWorld(clazzPos);
+
+    // The vector from the viewPos to the clazz floor center point
+    const rayVector = clazzPos.clone().sub(viewPos);
+
+    // Following the ray vector from the floor center get the intersection with the foundation.
+    raycaster.set(clazzPos, rayVector.normalize());
+
+    const firstIntersection = raycaster.intersectObject(foundationMesh, false)[0];
+
+    const worldIntersectionPoint = firstIntersection.point.clone();
+    this.applicationObject3D.worldToLocal(worldIntersectionPoint);
+
+    if (this.heatmapRepo.useHelperLines) {
+      this.addHeatmapHelperLine(clazzPos, worldIntersectionPoint);
+    }
+
+    // Compute color only for the first intersection point for consistency if one was found.
+    if (firstIntersection) {
+      if (!this.heatmapRepo.useSimpleHeat && firstIntersection.faceIndex) {
+        // The number of faces at front and back of the foundation mesh,
+        // i.e. the starting index for the faces on top.
+        const depthOffset = foundationMesh.geometry.parameters.depthSegments * 4;
+        if (selectedMode === 'aggregatedHeatmap') {
+          setColorValues(firstIntersection.faceIndex - depthOffset,
+            heatmap.get(clazz.fullQualifiedName) - (maximumValue / 2),
+            colorMap,
+            foundationMesh);
+        } else {
+          setColorValues(firstIntersection.faceIndex - depthOffset,
+            heatmap.get(clazz.fullQualifiedName),
+            colorMap,
+            foundationMesh);
+        }
+      } else if (this.heatmapRepo.useSimpleHeat && firstIntersection.uv) {
+        const xPos = firstIntersection.uv.x * foundationMesh.width;
+        const zPos = (1 - firstIntersection.uv.y) * foundationMesh.depth;
+        if (selectedMode === 'aggregatedHeatmap') {
+          simpleHeatMap.add([xPos, zPos, heatmap.get(clazz.fullQualifiedName)]);
+        } else {
+          simpleHeatMap.add([xPos, zPos,
+            heatmap.get(clazz.fullQualifiedName) + (maximumValue / 2)]);
+        }
+      }
+    }
+  }
+
+  static applySimpleHeatOnFoundation(foundationMesh: FoundationMesh, canvas: HTMLCanvasElement) {
+    const color = 'rgb(255, 255, 255)';
+
+    foundationMesh.material = [];
+
+    const sideMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color(color) });
+    for (let i = 1; i <= 6; i++) foundationMesh.material.push(sideMaterial.clone());
+
+    // Edit upper side of foundation
+    const heatmapMaterial = foundationMesh.material[2] as THREE.MeshLambertMaterial;
+
+    heatmapMaterial.emissiveMap = new THREE.CanvasTexture(canvas);
+    heatmapMaterial.emissive = new THREE.Color('rgb(125, 125, 125)');
+    heatmapMaterial.emissiveIntensity = 1;
+    heatmapMaterial.needsUpdate = true;
+  }
+
+  computeHeatMapViewPos(foundationMesh: FoundationMesh) {
+    // Create viewpoint from which the faces of the foundation are computed for each clazz.
+    const viewPos = foundationMesh.position.clone();
+    viewPos.y = Math.max(this.camera.position.z * 0.8, 100);
+
+    foundationMesh.localToWorld(viewPos);
+
+    return viewPos;
   }
 
   // #endregion SCENE POPULATION
@@ -853,7 +868,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   removeHeatmap() {
     this.setAppComponentVisibility(1);
-    this.removeHelperLines();
+    this.removeHeatmapHelperLines();
 
     const foundationMesh = this.applicationObject3D.getBoxMeshbyModelId(this.args.application.id);
 

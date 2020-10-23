@@ -33,7 +33,6 @@ import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 
-
 interface Args {
   readonly id: string;
   readonly landscape: Landscape;
@@ -129,7 +128,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion CLASS FIELDS AND GETTERS
-
 
   // #region COMPONENT AND SCENE INITIALIZATION
 
@@ -260,7 +258,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
-
   // #region RENDERING LOOP
 
   /**
@@ -285,7 +282,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion RENDERING LOOP
-
 
   // #region COMPONENT AND SCENE CLEAN-UP
 
@@ -321,7 +317,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion COMPONENT AND SCENE CLEAN-UP
-
 
   // #region ACTIONS
 
@@ -371,7 +366,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #endregion ACTIONS
 
-
   // #region SCENE POPULATION
 
   @task
@@ -382,7 +376,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.reducedLandscape = reduceLandscape(emberLandscape);
     yield this.populateScene.perform();
   });
-
 
   /**
  * Computes new meshes for the landscape and adds them to the scene
@@ -569,7 +562,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     const labelText = nodeMesh.getDisplayName(nodeGroupMesh);
     const labelColor = new THREE.Color('white');
 
-
     this.labeler.addNodeTextLabel(nodeMesh, labelText, this.font, labelColor);
 
     // Add to scene
@@ -603,7 +595,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion SCENE POPULATION
-
 
   // #region SCENE MANIPULATION
 
@@ -681,7 +672,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion SCENE MANIPULATION
-
 
   // #region MOUSE EVENT HANDLER
 
