@@ -1351,6 +1351,7 @@ export default class VrRendering extends Component<Args> {
 
   willDestroy() {
     this.cleanUpLandscape();
+    this.applicationGroup.clear();
     this.localUser.reset();
   }
 

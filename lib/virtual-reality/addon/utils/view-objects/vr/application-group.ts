@@ -68,6 +68,7 @@ export default class ApplicationGroup extends THREE.Group {
    * Removes all applications.
    */
   clear() {
+    this.releaseAllApplications();
     Array.from(this.openedApps.values()).forEach((application) => {
       this.remove(application);
       application.children.forEach((child) => {

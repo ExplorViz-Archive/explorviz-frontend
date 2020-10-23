@@ -715,8 +715,7 @@ export default class VrMultiUser extends VrRendering {
       // Split up matrix into position, quaternion and scale
       application.matrix.decompose(application.position, application.quaternion, application.scale);
 
-      controller.add(application);
-      // this.applicationGroup.attachApplicationTo(update.appID, controller);
+      this.applicationGroup.attachApplicationTo(update.appID, controller);
     }
   }
 
@@ -730,7 +729,7 @@ export default class VrMultiUser extends VrRendering {
       // Split up transforamtion into position, quaternion and scale
       application.matrix.decompose(application.position, application.quaternion, application.scale);
 
-      this.applicationGroup.add(application);
+      this.applicationGroup.releaseApplication(id);
 
       super.setAppPose(id, new THREE.Vector3().fromArray(position),
         new THREE.Quaternion().fromArray(quaternion));
