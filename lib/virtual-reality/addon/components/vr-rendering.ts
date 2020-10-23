@@ -1345,5 +1345,9 @@ export default class VrRendering extends Component<Args> {
     this.localUser.resetPosition();
   }
 
+  willDestroy() {
+    this.localUser.reset();
+  }
+
   // #endregion UTILS
 }

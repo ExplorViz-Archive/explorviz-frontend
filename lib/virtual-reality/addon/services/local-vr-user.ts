@@ -156,6 +156,18 @@ export default class LocalVrUser extends Service.extend({
     this.state = 'offline';
     this.color = undefined;
     this.color = undefined;
+
+    // remove controller rays and models
+    // since raySpace and gripSpace will else persist
+    this.controller1?.raySpace?.children.forEach((child) => {
+      this.controller1?.raySpace?.remove(child);
+    });
+    this.controller2?.gripSpace?.children.forEach((child) => {
+      this.controller2?.gripSpace?.remove(child);
+    });
+    this.controller1?.children.forEach((child) => { this.controller1?.remove(child); });
+    this.controller2?.children.forEach((child) => { this.controller2?.remove(child); });
+
     this.controller1 = undefined;
     this.controller2 = undefined;
     this.userGroup.children.forEach((child) => { this.userGroup.remove(child); });

@@ -925,7 +925,8 @@ export default class VrMultiUser extends VrRendering {
    * @method willDestroy
    */
   willDestroy() {
-    this.cleanAndUpdateScene();
+    super.willDestroy();
+    // this.cleanAndUpdateScene();
     this.localUser.disconnect();
   }
 }
