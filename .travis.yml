@@ -54,6 +54,7 @@ jobs:
         - docker-compose -f docker-compose-complete.yml up -d
         - cd E2E-tests
         - npm install
+        - gauge install js
         - npm test # starts gauge and taiko test scenarios
     
       sudo: true
