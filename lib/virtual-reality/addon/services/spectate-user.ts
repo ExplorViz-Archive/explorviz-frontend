@@ -64,7 +64,7 @@ export default class SpectateUser extends Service.extend({
       return;
     }
 
-    this.spectatedUser.setVisible(false);
+    this.spectatedUser.setHmdVisible(true);
 
     if (this.localUser.controller1) {
       this.localUser.controller1.setToDefaultAppearance();
