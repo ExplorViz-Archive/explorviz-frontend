@@ -6,7 +6,7 @@
     "test": "gauge run specs"
   },
   "dependencies": {
-    "taiko": "git+https://github.com/getgauge/taiko.git",
+    "taiko": "^1.0.25",
     "pixelmatch": "^5.2.1",
     "@getgauge/cli": "latest"
   }
