@@ -532,8 +532,7 @@ export default class VrRendering extends Component<Args> {
       });
 
       // Clean old landscape
-      this.landscapeObject3D.removeAllChildren();
-      this.landscapeObject3D.resetMeshReferences();
+      this.cleanUpLandscape();
 
       const { modelIdToLayout, modelIdToPoints: modelIdToPointsComplete } = layoutedLandscape;
 
@@ -1338,6 +1337,11 @@ export default class VrRendering extends Component<Args> {
     }
   }
 
+  cleanUpLandscape() {
+    this.landscapeObject3D.removeAllChildren();
+    this.landscapeObject3D.resetMeshReferences();
+  }
+
   resetAll() {
     this.applicationGroup.clear();
     this.resetLandscapePosition();
@@ -1346,6 +1350,7 @@ export default class VrRendering extends Component<Args> {
   }
 
   willDestroy() {
+    this.cleanUpLandscape();
     this.localUser.reset();
   }
 
