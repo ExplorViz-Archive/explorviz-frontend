@@ -268,11 +268,11 @@ export default class VrMultiUser extends VrRendering {
   }
 
   translateApplication(application: THREE.Object3D, direction: THREE.Vector3, length: number) {
+    super.translateApplication(application, direction, length);
+
     if (application instanceof ApplicationObject3D && this.localUser.isOnline) {
       this.sender.sendAppTranslationUpdate(application.dataModel.id, direction, length);
     }
-
-    super.translateApplication(application, direction, length);
   }
 
   // #endregion INPUT EVENTS
@@ -313,7 +313,7 @@ export default class VrMultiUser extends VrRendering {
         this.onLandscapePosition(data);
         break;
       case 'app_translated':
-        this.onAppTranslation(data.appID, data.direction, data.length);
+        this.onAppTranslation(data.appId, data.direction, data.length);
         break;
       case 'system_update':
         this.onLandscapeUpdate(data);
