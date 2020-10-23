@@ -588,7 +588,7 @@ export default class VrRendering extends Component<Args> {
       if (appCommunications) {
         const color = this.configuration.landscapeColors.communication;
         const tiles = LandscapeCommunicationRendering.computeCommunicationTiles(appCommunications,
-          modelIdToPointsComplete, color, this.landscapeDepth / 2 + 0.3);
+          modelIdToPointsComplete, color, this.landscapeDepth / 2 + 0.25);
 
         LandscapeCommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
           centerPoint, 0.004, 0.028);
