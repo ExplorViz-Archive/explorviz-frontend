@@ -136,7 +136,6 @@ export default class VRController extends BaseMesh {
       if (callbacks.connected) callbacks.connected(this, event);
     });
     this.gripSpace.addEventListener('disconnected', () => {
-      this.findGamepad();
       this.removeTeleportArea();
       if (callbacks.disconnected) callbacks.disconnected(this);
     });
