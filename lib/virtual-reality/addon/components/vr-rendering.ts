@@ -751,6 +751,10 @@ export default class VrRendering extends Component<Args> {
   addApplicationTask = task(function* (this: VrRendering, applicationModel: Application, origin: THREE.Vector3, 
     callback?: (applicationObject3D: ApplicationObject3D) => void) {
     try {
+      if (this.applicationGroup.hasApplication(applicationModel.id))  {
+        return;
+      }
+
       const reducedApplication = reduceApplication(applicationModel);
 
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', reducedApplication);
