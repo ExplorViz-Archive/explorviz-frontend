@@ -5,7 +5,7 @@ The E2E-tests folder is concerned with End-To-End (E2E) tests using [gauge](http
 ## Prerequisites
 To run the provided E2E tests, a realistic environment needs to be supplied. In general, the following steps are necessary.
 * Build and run the backend (e.g. using a docker configuration and `docker-compose`)
-* Build and run the frontend (using `ember serve`)
+* Build and run the frontend (using `ember serve` or a docker file)
 * Start a monitored applciation like the ExplorViz [Sample application](https://github.com/ExplorViz/sampleApplication)
 * Install the required node modules for gauge and taiko.
 
@@ -13,6 +13,10 @@ To run the provided E2E tests, a realistic environment needs to be supplied. In 
 The provided tests can be run by executing `gauge run specs`. 
 Ideally, the E2E tests should be executed automatically (via TravisCI) to recognize severe failures quickly. 
 Such a failure could be as a simple as a failing login due to a minor change in the frontend or backend.
+Currently, the TravisCI builds both backend and frontend using 
+`docker-compose -f docker-compose-complete.yml up -d`. 
+After that, the gauge dependencies are installed and the test scenarios are executed.
+This can be achieved by running `npm test` in this directory.
 
 
 ## Caveats
