@@ -458,14 +458,14 @@ export default class VrRendering extends Component<Args> {
   /**
    * Inherit this function to update the scene with a new renderingModel. It
    * automatically removes every mesh from the scene and finally calls
-   * the (overridden) "populateScene" function. Add your custom code
+   * the (overridden) "populateLandscape" function. Add your custom code
    * as shown in landscape-rendering.
    *
    * @method cleanAndUpdateScene
    */
   @action
   async cleanAndUpdateScene() {
-    await this.populateScene.perform();
+    await this.populateLandscape.perform();
 
     this.debug('clean and populate landscape-rendering');
   }
@@ -491,21 +491,23 @@ export default class VrRendering extends Component<Args> {
   // eslint-disable-next-line
   loadNewLandscape = task(function* (this: VrRendering) {
     this.reducedLandscape = reduceLandscape(this.args.landscape);
-    yield this.populateScene.perform();
+    yield this.populateLandscape.perform();
   });
 
   /**
  * Computes new meshes for the landscape and adds them to the scene
  *
- * @method populateScene
+ * @method populateLandscape
  */
   // @ts-ignore
   @task({ restartable: true })
   // eslint-disable-next-line
-  populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|null = null) {
+  populateLandscape = task(function* (this: VrRendering) {
     this.debug('populate landscape-rendering');
 
-    const openEntityIds = openedEntities || this.landscapeObject3D.openEntityIds;
+    console.log('Landscape: ', this.args.landscape);
+
+    const { openEntityIds } = this.landscapeObject3D;
     const emberLandscape = this.args.landscape;
 
     this.landscapeObject3D.dataModel = emberLandscape;
@@ -751,7 +753,7 @@ export default class VrRendering extends Component<Args> {
   addApplicationTask = task(function* (this: VrRendering, applicationModel: Application, origin: THREE.Vector3, 
     callback?: (applicationObject3D: ApplicationObject3D) => void) {
     try {
-      if (this.applicationGroup.hasApplication(applicationModel.id))  {
+      if (this.applicationGroup.hasApplication(applicationModel.id)) {
         return;
       }
 
@@ -1322,7 +1324,7 @@ export default class VrRendering extends Component<Args> {
 
   closeLandscapeSystems() {
     this.landscapeObject3D.markAllSystemsAsClosed();
-    this.populateScene.perform();
+    this.populateLandscape.perform();
   }
 
   removeApplication(application: ApplicationObject3D) {

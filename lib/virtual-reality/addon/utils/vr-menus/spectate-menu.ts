@@ -52,7 +52,8 @@ export default class SpectateMenu extends BaseMenu {
   }
 
   getSortedUsers() {
-    return Array.from(this.idToRemoteVrUsers.values()).sort((a, b) => ((a.ID > b.ID) ? 1 : -1));
+    return Array.from(this.idToRemoteVrUsers.values())
+      .sort((a, b) => ((a.userName > b.userName) ? 1 : -1));
   }
 
   onPreviousUser() {
@@ -67,7 +68,7 @@ export default class SpectateMenu extends BaseMenu {
     // Active Spectating if previously inactive
     if (!this.spectateUser.spectatedUser) {
       this.spectateUser.activate(users[users.length - 1]);
-      this.spectateInfo.text = users[users.length - 1].ID;
+      this.spectateInfo.text = users[users.length - 1].userName;
       this.update();
       return;
     }
@@ -82,7 +83,7 @@ export default class SpectateMenu extends BaseMenu {
       // Spectate previous user
       } else {
         this.spectateUser.activate(users[users.indexOf(spectatedUser) - 1]);
-        this.spectateInfo.text = users[users.indexOf(spectatedUser) - 1].ID;
+        this.spectateInfo.text = users[users.indexOf(spectatedUser) - 1].userName;
       }
     }
 
@@ -97,7 +98,7 @@ export default class SpectateMenu extends BaseMenu {
     // Active Spectating if previously inactive
     if (!this.spectateUser.spectatedUser) {
       this.spectateUser.activate(users[0]);
-      this.spectateInfo.text = users[0].ID;
+      this.spectateInfo.text = users[0].userName;
       this.update();
       return;
     }
@@ -112,7 +113,7 @@ export default class SpectateMenu extends BaseMenu {
       // Spectate previous user
       } else {
         this.spectateUser.activate(users[users.indexOf(spectatedUser) + 1]);
-        this.spectateInfo.text = users[users.indexOf(spectatedUser) + 1].ID;
+        this.spectateInfo.text = users[users.indexOf(spectatedUser) + 1].userName;
       }
     }
 

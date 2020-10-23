@@ -519,7 +519,13 @@ export default class VrMultiUser extends VrRendering {
         .map((element) => element.id),
     );
 
-    this.populateScene.perform(openEntityIds);
+    this.landscapeObject3D.openEntityIds.clear();
+
+    openEntityIds.forEach((id) => {
+      this.landscapeObject3D.openEntityIds.add(id);
+    });
+
+    this.populateLandscape.perform();
   }
 
   /**
@@ -651,15 +657,13 @@ export default class VrMultiUser extends VrRendering {
   }
 
   onLandscapeUpdate(updatedElement: { id: string, isOpen: boolean }) {
-    const updatedOpenEntityIds = new Set(this.landscapeObject3D.openEntityIds);
-
     if (updatedElement.isOpen) {
-      updatedOpenEntityIds.add(updatedElement.id);
+      this.landscapeObject3D.openEntityIds.add(updatedElement.id);
     } else {
-      updatedOpenEntityIds.delete(updatedElement.id);
+      this.landscapeObject3D.openEntityIds.delete(updatedElement.id);
     }
 
-    this.populateScene.perform(updatedOpenEntityIds);
+    this.populateLandscape.perform();
   }
 
   onAppOpened(id: string, position: number[], quaternion: number[]) {
