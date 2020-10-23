@@ -747,15 +747,18 @@ export default class VrMultiUser extends VrRendering {
   onHighlightingUpdate(update: {
     userID: string, isHighlighted: boolean, appID: string, entityType: string, entityID: string,
   }) {
-    const user = this.idToRemoteUser.get(update.userID);
     const applicationObject3D = this.applicationGroup.getApplication(update.appID);
 
-    if (!applicationObject3D || !user || !user.color) return;
+    if (!applicationObject3D) return;
 
     if (!update.isHighlighted) {
       Highlighting.removeHighlighting(applicationObject3D);
       return;
     }
+
+    const user = this.idToRemoteUser.get(update.userID);
+
+    if (!user || !user.color) return;
 
     // Highlight entities in the respective user color
     applicationObject3D.setHighlightingColor(user.color);
