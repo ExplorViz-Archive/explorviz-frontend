@@ -27,7 +27,7 @@ export default class SpectateUser extends Service.extend({
   */
   update() {
     if (this.spectatedUser && this.spectatedUser.camera) {
-      this.user.teleportToPosition(this.spectatedUser.camera.position, true);
+      this.localUser.teleportToPosition(this.spectatedUser.camera.position, true);
     }
   }
 
@@ -38,7 +38,9 @@ export default class SpectateUser extends Service.extend({
   activate(remoteUser: RemoteVrUser|null) {
     if (!remoteUser) return;
 
-    this.startPosition.copy(this.user.userGroup.position);
+    this.spectatedUserId = remoteUser.ID;
+
+    this.startPosition.copy(this.localUser.userGroup.position);
     this.spectatedUser = remoteUser;
 
     if (this.localUser.controller1) {
@@ -50,19 +52,13 @@ export default class SpectateUser extends Service.extend({
 
     remoteUser.setHmdVisible(false);
 
-    this.sender.sendSpectatingUpdate(this.user.userID, this.isActive, remoteUser.ID);
+    this.sender.sendSpectatingUpdate(this.localUser.userID, this.isActive, remoteUser.ID);
   }
 
   /**
    * Deactives spectator mode for our user
    */
   deactivate() {
-    if (!this.spectatedUser || !this.spectatedUser.camera) {
-      return;
-    }
-
-    this.spectatedUser.setHmdVisible(true);
-
     if (this.localUser.controller1) {
       this.localUser.controller1.setToDefaultAppearance();
     }
@@ -70,13 +66,21 @@ export default class SpectateUser extends Service.extend({
       this.localUser.controller2.setToDefaultAppearance();
     }
 
+    this.localUser.state = 'online';
+
+    this.localUser.userGroup.position.copy(this.startPosition);
+
+    if (!this.spectatedUser || !this.spectatedUser.camera) {
+      return;
+    }
+
+    this.spectatedUser.setHmdVisible(true);
+
     this.spectatedUser = null;
 
-    this.user.state = 'online';
+    this.spectatedUserId = null;
 
-    this.user.userGroup.position.copy(this.startPosition);
-
-    this.sender.sendSpectatingUpdate(this.user.userID, this.isActive, null);
+    this.sender.sendSpectatingUpdate(this.localUser.userID, this.isActive, null);
   }
 
   reset() {

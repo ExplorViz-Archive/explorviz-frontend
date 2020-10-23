@@ -582,7 +582,7 @@ export default class VrMultiUser extends VrRendering {
     const { id } = data;
 
     // Do not spectate a disconnected user
-    if (this.localUser.isSpectating && this.spectateUser.spectatedUserId === id) {
+    if (this.spectateUser.spectatedUserId === id) {
       this.spectateUser.deactivate();
     }
 
