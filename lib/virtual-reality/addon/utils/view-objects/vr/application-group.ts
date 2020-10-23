@@ -43,7 +43,7 @@ export default class ApplicationGroup extends THREE.Group {
 
     const application = this.getApplication(id);
     if (application) {
-      console.log('Application added to controller');
+      this.remove(application);
       object.add(application);
     }
   }
@@ -56,6 +56,9 @@ export default class ApplicationGroup extends THREE.Group {
     const application = this.getApplication(id);
     this.grabbedApplications.delete(id);
     if (application) {
+      if (application.parent) {
+        application.parent.remove(application);
+      }
       this.add(application);
     }
   }
@@ -71,13 +74,12 @@ export default class ApplicationGroup extends THREE.Group {
     this.releaseAllApplications();
     Array.from(this.openedApps.values()).forEach((application) => {
       this.remove(application);
+      this.openedApps.delete(application.dataModel.id);
       application.children.forEach((child) => {
         if (child instanceof BaseMesh) {
           child.disposeRecursively();
         }
       });
     });
-
-    this.openedApps.clear();
   }
 }

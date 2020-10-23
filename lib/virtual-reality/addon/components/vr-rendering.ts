@@ -384,10 +384,10 @@ export default class VrRendering extends Component<Args> {
   }
 
   // eslint-disable-next-line
-  onUtilityGripDown(controller: VRController) {}
+  onUtilityGripDown(/* controller: VRController */) {}
 
   // eslint-disable-next-line
-  onUtilityGripUp(controller: VRController) {}
+  onUtilityGripUp(/* controller: VRController */) {}
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
@@ -498,8 +498,6 @@ export default class VrRendering extends Component<Args> {
   populateLandscape = task(function* (this: VrRendering) {
     this.debug('populate landscape-rendering');
 
-    console.log('Landscape: ', this.args.landscape);
-
     const { openEntityIds } = this.landscapeObject3D;
     const emberLandscape = this.args.landscape;
 
@@ -590,7 +588,7 @@ export default class VrRendering extends Component<Args> {
 
       this.debug('Landscape loaded');
     } catch (e) {
-      console.log(e);
+      this.debug(e);
     }
   });
 
@@ -658,7 +656,7 @@ export default class VrRendering extends Component<Args> {
 
     nodeGroupMesh.setToDefaultPosition(centerPoint);
 
-    // Add collapse symbol (+/-)
+    // Add collapse symbol (i.e. + or -)
     this.landscapeLabeler.addCollapseSymbol(nodeGroupMesh, this.font,
       this.configuration.landscapeColors.collapseSymbol);
 
@@ -794,6 +792,12 @@ export default class VrRendering extends Component<Args> {
     }
   }
 
+  /**
+   * Sets a (newly opened) application to its default position.
+   *
+   * @param applicationObject3D Application which shall be positioned
+   * @param origin Point of reference (position of application in landscape object)
+   */
   positionApplication(applicationObject3D: ApplicationObject3D, origin: THREE.Vector3) {
     // Rotate app so that it is aligned with landscape
     applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
@@ -804,7 +808,7 @@ export default class VrRendering extends Component<Args> {
   }
 
   /**
-   * Iterates over all box meshes and calls respective functions to label them
+   * Adds labels to all box meshes of a given application
    */
   addLabels(applicationObject3D: ApplicationObject3D) {
     if (!this.font) { return; }
@@ -1027,7 +1031,7 @@ export default class VrRendering extends Component<Args> {
       // Move landscape further if camera is far away
       const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 4.0);
 
-      // Divide delta by 100 to achieve reasonable panning speeds
+      // Adapt panning speed
       const xOffset = (delta.x / 100) * -ZOOM_CORRECTION;
       const yOffset = (delta.y / 100) * ZOOM_CORRECTION;
 
@@ -1328,10 +1332,6 @@ export default class VrRendering extends Component<Args> {
   }
 
   removeApplication(application: ApplicationObject3D) {
-    if (this.applicationGroup.grabbedApplications.has(application.dataModel.id)) {
-      return;
-    }
-
     this.applicationGroup.removeApplicationById(application.dataModel.id);
 
     const { controller1, controller2 } = this.localUser;
