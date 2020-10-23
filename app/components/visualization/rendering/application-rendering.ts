@@ -852,7 +852,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   toggleHeatmap() {
     if (this.heatmapRepo.metrics.length === 0) {
-      AlertifyHandler.showAlertifyError('No metrics loaded yet');
+      AlertifyHandler.showAlertifyError('No metrics available');
       return;
     }
 
