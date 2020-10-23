@@ -446,19 +446,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
-  setAppComponentVisibility(opacity = 1) {
-    const allMeshes = this.applicationObject3D.getAllMeshes();
+  // #endregion SCENE POPULATION
 
-    allMeshes.forEach((mesh) => {
-      if (mesh instanceof ComponentMesh) {
-        if (opacity === 1) {
-          mesh.turnOpaque();
-        } else {
-          mesh.turnTransparent(opacity);
-        }
-      }
-    });
-  }
+  // #region HEATMAP
 
   applyHeatmap() {
     this.setAppComponentVisibility(0.1);
@@ -531,6 +521,24 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       ApplicationRendering.applySimpleHeatOnFoundation(foundationMesh, canvas);
     }
+  }
+
+  /**
+   * Sets the visiblity of all component meshes with the current application
+   * @param opaccity Determines how opaque/visible component meshes should be
+   */
+  setAppComponentVisibility(opacity = 1) {
+    const allMeshes = this.applicationObject3D.getAllMeshes();
+
+    allMeshes.forEach((mesh) => {
+      if (mesh instanceof ComponentMesh) {
+        if (opacity === 1) {
+          mesh.turnOpaque();
+        } else {
+          mesh.turnTransparent(opacity);
+        }
+      }
+    });
   }
 
   /**
@@ -661,7 +669,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     return viewPos;
   }
 
-  // #endregion SCENE POPULATION
+  // #endregion HEATMAP
 
   // #region RENDERING LOOP
 
