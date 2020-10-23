@@ -1,5 +1,3 @@
-/* jshint node:true */
-/* global require, module */
 const sass = require('sass');
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
@@ -31,12 +29,6 @@ module.exports = (defaults) => {
       exclude: ['images'],
     },
 
-    nodeModulesToVendor: [
-      // add node_modules that you need in vendor modules
-      // See: https://www.npmjs.com/package/ember-cli-node-modules-to-vendor
-      'node_modules/three/build',
-    ],
-
     'ember-bootstrap': {
       bootstrapVersion: 4,
       importBootstrapFont: false,
@@ -45,11 +37,10 @@ module.exports = (defaults) => {
   });
 
   // export for threex.dynamictexture
-  app.import('vendor/three.min.js', {
+  app.import('node_modules/three/build/three.min.js', {
     prepend: true,
   });
 
-  app.import('vendor/layout/klay.js');
   app.import('vendor/threex/threex.rendererstats.min.js');
   app.import('vendor/threex/threex.dynamictexture.min.js');
 
@@ -65,6 +56,8 @@ module.exports = (defaults) => {
 
   app.import('node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css');
   app.import('node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js');
+
+  app.import('node_modules/webxr-polyfill/build/webxr-polyfill.min.js');
 
   return app.toTree();
 };
