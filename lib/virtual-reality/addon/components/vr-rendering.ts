@@ -383,8 +383,8 @@ export default class VrRendering extends Component<Args> {
 
   onInteractionGripUp(controller: VRController) {
     const object = controller.grabbedObject;
-
     controller.releaseObject();
+
     if (object instanceof ApplicationObject3D) {
       this.applicationGroup.add(object);
     }
@@ -794,7 +794,9 @@ export default class VrRendering extends Component<Args> {
   });
 
   addApplication(applicationModel: Application, origin: THREE.Vector3) {
-    if (!this.applicationGroup.hasApplication(applicationModel.id)) {
+    if (applicationModel.get('components').get('length') === 0) {
+      this.showHint('No data available');
+    } else if (!this.applicationGroup.hasApplication(applicationModel.id)) {
       this.addApplicationTask.perform(applicationModel, origin);
     }
   }
@@ -1328,6 +1330,10 @@ export default class VrRendering extends Component<Args> {
   }
 
   removeApplication(application: ApplicationObject3D) {
+    if (this.applicationGroup.grabbedApplications.has(application.dataModel.id)) {
+      return;
+    }
+
     this.applicationGroup.removeApplicationById(application.dataModel.id);
 
     const { controller1, controller2 } = this.localUser;

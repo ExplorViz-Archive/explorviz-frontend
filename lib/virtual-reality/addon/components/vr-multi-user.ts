@@ -900,6 +900,11 @@ export default class VrMultiUser extends VrRendering {
    * Additionally, a callback function is given to send an update to the backend.
    */
   addApplication(applicationModel: Application, origin: THREE.Vector3) {
+    if (applicationModel.get('components').get('length') === 0) {
+      this.showHint('No data available');
+      return;
+    }
+
     if (!this.applicationGroup.hasApplication(applicationModel.id)) {
       super.addApplicationTask.perform(applicationModel, origin,
         ((applicationObject3D: ApplicationObject3D) => {
@@ -907,6 +912,8 @@ export default class VrMultiUser extends VrRendering {
             this.sender.sendAppOpened(applicationObject3D);
           }
         }));
+    } else {
+      this.showHint('Application already opened');
     }
   }
 
