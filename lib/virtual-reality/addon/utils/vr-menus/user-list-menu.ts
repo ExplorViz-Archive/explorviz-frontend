@@ -43,9 +43,16 @@ export default class UserListMenu extends BaseMenu {
 
     yPos += yOffset;
 
+    if (localUser.isOnline && localUser.isSpectating) {
+      const color = localUser.color ? localUser.color : new THREE.Color();
+      const localUserText = new TextItem(userName, 'localUser', `#${color.getHexString()}`, { x: 50, y: yPos }, 12, 'left');
+      this.items.push(localUserText);
+      yPos += yOffset;
+    }
+
     users.forEach((user) => {
       if (user.state === 'spectating' && user.userName) {
-        const remoteUserText = new TextItem(user.userName, user.userName, '#adadad', { x: 50, y: yPos }, 12, 'left');
+        const remoteUserText = new TextItem(user.userName, user.userName, `#${user.color.getHexString()}`, { x: 50, y: yPos }, 12, 'left');
         this.items.push(remoteUserText);
         yPos += yOffset;
       }

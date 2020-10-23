@@ -8,9 +8,6 @@ import WebSocket from './web-socket';
 export default class SpectateUser extends Service.extend({
   // anything which *must* be merged to prototype here
 }) {
-  @service('local-vr-user')
-  user!: LocalVrUser;
-
   @service('web-socket')
   webSocket!: WebSocket;
 

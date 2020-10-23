@@ -806,6 +806,8 @@ export default class VrMultiUser extends VrRendering {
 
     if (!remoteUser) return;
 
+    remoteUser.state = isSpectating ? 'spectating' : 'online';
+
     const remoteUserHexColor = `#${remoteUser.color.getHexString()}`;
     if (isSpectating) {
       remoteUser.setVisible(false);
