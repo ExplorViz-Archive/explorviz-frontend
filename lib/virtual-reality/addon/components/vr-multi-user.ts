@@ -476,7 +476,7 @@ export default class VrMultiUser extends VrRendering {
     user.userName = data.name;
     user.ID = data.id;
     user.color = new THREE.Color().fromArray(data.color);
-    user.state = 'connected';
+    user.state = 'online';
 
     this.idToRemoteUser.set(data.id, user);
 
@@ -575,8 +575,8 @@ export default class VrMultiUser extends VrRendering {
       // Show disconnect notification
       this.messageBox.enqueueMessage({
         title: 'User disconnected',
-        text: user.name,
-        color: `#${user.color.getHexString}`,
+        text: user.userName,
+        color: `#${user.color.getHexString()}`,
       }, 3000);
     }
   }
@@ -784,10 +784,10 @@ export default class VrMultiUser extends VrRendering {
       if (this.spectateUser.spectatedUser && this.spectateUser.spectatedUser.ID === userID) {
         this.spectateUser.deactivate();
       }
-      this.messageBox.enqueueMessage({ title: remoteUser.name, text: ' is now spectating', color: '#ffffff' }, 2000);
+      this.messageBox.enqueueMessage({ title: remoteUser.userName, text: ' is now spectating', color: '#ffffff' }, 2000);
     } else {
       remoteUser.setVisible(true);
-      this.messageBox.enqueueMessage({ title: remoteUser.name, text: ' is no longer spectating', color: '#ffffff' }, 2000);
+      this.messageBox.enqueueMessage({ title: remoteUser.userName, text: ' is no longer spectating', color: '#ffffff' }, 2000);
     }
   }
 
@@ -839,7 +839,7 @@ export default class VrMultiUser extends VrRendering {
   updateUserNameTags() {
     this.idToRemoteUser.forEach((user) => {
       const dummyPlane = user.getObjectByName('dummyNameTag');
-      if (user.state === 'connected' && user.nameTag && user.camera && dummyPlane && this.localUser.camera) {
+      if (user.state === 'online' && user.nameTag && user.camera && dummyPlane && this.localUser.camera) {
         user.nameTag.position.setFromMatrixPosition(dummyPlane.matrixWorld);
         user.nameTag.lookAt(this.localUser.camera.getWorldPosition(new THREE.Vector3()));
       }

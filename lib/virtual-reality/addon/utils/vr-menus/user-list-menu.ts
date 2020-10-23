@@ -29,8 +29,8 @@ export default class UserListMenu extends BaseMenu {
     }
 
     users.forEach((user) => {
-      if (user.state === 'connected' && user.name) {
-        const remoteUserText = new TextItem(user.name, user.name, `#${user.color.getHexString()}`, { x: 50, y: yPos }, 12, 'left');
+      if (user.state === 'online' && user.userName) {
+        const remoteUserText = new TextItem(user.userName, user.userName, `#${user.color.getHexString()}`, { x: 50, y: yPos }, 12, 'left');
         this.items.push(remoteUserText);
         yPos += yOffset;
       }
@@ -44,8 +44,8 @@ export default class UserListMenu extends BaseMenu {
     yPos += yOffset;
 
     users.forEach((user) => {
-      if (user.state === 'spectating' && user.name) {
-        const remoteUserText = new TextItem(user.name, user.name, '#adadad', { x: 50, y: yPos }, 12, 'left');
+      if (user.state === 'spectating' && user.userName) {
+        const remoteUserText = new TextItem(user.userName, user.userName, '#adadad', { x: 50, y: yPos }, 12, 'left');
         this.items.push(remoteUserText);
         yPos += yOffset;
       }
