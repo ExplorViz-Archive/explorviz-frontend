@@ -4,9 +4,13 @@ import TextbuttonItem from './items/textbutton-item';
 import CheckboxItem from './items/checkbox-item';
 
 export default class AdvancedMenu extends BaseMenu {
+  isLefty: boolean;
+
   constructor(openMainMenu: () => void, openControlsMenu: () => {},
-    isLefty: () => boolean, swapControls: () => void, resetAll: () => void) {
+    toggleLeftyMode: () => void, userIsLefty: boolean, resetAll: () => void) {
     super();
+
+    this.isLefty = userIsLefty;
 
     this.back = openMainMenu;
     this.opacity = 0.8;
@@ -20,12 +24,14 @@ export default class AdvancedMenu extends BaseMenu {
     const leftyCB = new CheckboxItem('isLefty', {
       x: 366,
       y: 126,
-    }, 50, 50, '#ffc338', '#ffffff', '#00e5ff', 5, isLefty(), true);
+    }, 50, 50, '#ffc338', '#ffffff', '#00e5ff', 5, this.isLefty, true);
     this.items.push(leftyCB);
 
     leftyCB.onTriggerDown = () => {
-      swapControls();
-      leftyCB.isChecked = isLefty();
+      toggleLeftyMode();
+      this.isLefty = !this.isLefty;
+      leftyCB.isChecked = this.isLefty;
+      this.update();
     };
 
     const controlsButton = new TextbuttonItem('controls', 'Controls', {

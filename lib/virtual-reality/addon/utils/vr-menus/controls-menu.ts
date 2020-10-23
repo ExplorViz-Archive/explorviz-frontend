@@ -4,7 +4,7 @@ import TextItem from './items/text-item';
 import ImageItem from './items/image-item';
 
 export default class ControlsMenu extends BaseMenu {
-  constructor(openAdvancedMenu: () => void, gamepadId: string, isLefty: () => boolean) {
+  constructor(openAdvancedMenu: () => void, gamepadId: string, isLefty: boolean) {
     super({ width: 2 * 512, height: 542 });
 
     this.back = openAdvancedMenu;
@@ -21,7 +21,7 @@ export default class ControlsMenu extends BaseMenu {
     this.items.push(backButton);
 
     const image = new Image();
-    image.src = ControlsMenu.getControlsImageUrl(gamepadId, isLefty());
+    image.src = ControlsMenu.getControlsImageUrl(gamepadId, isLefty);
 
     image.onload = () => {
       const imageItem = new ImageItem('controlsImg', image, { x: 33, y: 99 }, 1024 - 2 * 33, 512 - 99);

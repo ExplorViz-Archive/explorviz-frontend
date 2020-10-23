@@ -203,6 +203,8 @@ export default class VrMultiUser extends VrRendering {
     if (this.spectateUser.isActive) controller.setToSpectatingAppearance();
     else controller.setToDefaultAppearance();
 
+    this.localUser.setControlsAccordingToHand();
+
     // Prepare update message for other users
     let connect: {controller1?: string, controller2?: string};
     if (controller === this.localUser.controller1) {

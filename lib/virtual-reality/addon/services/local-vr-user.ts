@@ -43,6 +43,8 @@ export default class LocalVrUser extends Service.extend({
 
   connectionStatus: ConnectionStatus = 'offline';
 
+  isLefty = false;
+
   get camera() {
     if (this.renderer.xr.isPresenting) {
       return this.renderer.xr.getCamera(this.defaultCamera);
@@ -85,6 +87,22 @@ export default class LocalVrUser extends Service.extend({
     if (this.controller2) { this.controller2.update(); }
   }
 
+  setControlsAccordingToHand() {
+    const hand = this.controller1?.gamepad?.hand;
+
+    if ((hand === 'right' && this.isLefty && this.controller1?.isInteractionController)
+      || (hand === 'right' && !this.isLefty && this.controller1?.isUtilityController)
+      || (hand === 'left' && this.isLefty && this.controller1?.isUtilityController)
+      || (hand === 'left' && !this.isLefty && this.controller1?.isInteractionController)) {
+      this.swapControls();
+    }
+  }
+
+  toggleLeftyMode() {
+    this.isLefty = !this.isLefty;
+    this.swapControls();
+  }
+
   swapControls() {
     if (!this.controller1 || !this.controller2) return;
 
@@ -112,11 +130,6 @@ export default class LocalVrUser extends Service.extend({
     // Swap controls (callback functions)
     [this.controller1.eventCallbacks, this.controller2.eventCallbacks] = [this.controller2
       .eventCallbacks, this.controller1.eventCallbacks];
-  }
-
-  isLefty() {
-    if (!this.controller1) return false;
-    return this.controller1.isUtilityController;
   }
 
   getCameraDelta() {

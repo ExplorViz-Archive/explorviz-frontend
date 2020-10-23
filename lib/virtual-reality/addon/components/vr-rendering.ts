@@ -1136,7 +1136,7 @@ export default class VrRendering extends Component<Args> {
     const user = this.localUser;
 
     this.mainMenu = new AdvancedMenu(this.openMainMenu.bind(this), this.openControlsMenu.bind(this),
-      user.isLefty.bind(user), user.swapControls.bind(user), this.resetAll.bind(this));
+      user.toggleLeftyMode.bind(user), user.isLefty, this.resetAll.bind(this));
     this.controllerMainMenus.add(this.mainMenu);
   }
 
@@ -1147,8 +1147,8 @@ export default class VrRendering extends Component<Args> {
 
     const { gamepadId } = this.localUser.controller1;
 
-    this.mainMenu = new ControlsMenu(this.openAdvancedMenu.bind(this), gamepadId,
-      this.localUser.isLefty.bind(this.localUser));
+    this.mainMenu = new ControlsMenu(this.openAdvancedMenu.bind(this),
+      gamepadId, this.localUser.isLefty);
 
     this.controllerMainMenus.add(this.mainMenu);
   }
