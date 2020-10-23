@@ -86,13 +86,16 @@ step("Compare <screenshotFileName> screenshots", async (screenshotFileName) => {
     const {width, height} = img1;
     const diff = new PNG({width, height});
 
-    pixelmatch(img1.data, img2.data, diff.data, width, height, {threshold: 0.2});
+    const diffPixels = pixelmatch(img1.data, img2.data, diff.data, width, height, {threshold: 0.2});
 
     fs.writeFileSync('screenshots/diff/' + screenshotFileName + '.png', PNG.sync.write(diff));
     fs.writeFileSync('reports/html-report/images/' + screenshotFileName + '.png', PNG.sync.write(diff));
 
     gauge.message("Screen diff:");
     gauge.message('<img src="../images/' + screenshotFileName + '.png" alt="Report logo">');
+
+    // Test a sample application to get this value right, in this case 10% wrong pixels are tolerated
+    assert(diffPixels < width * height * 0.1);
 })
 
 function createDirectory(path){
