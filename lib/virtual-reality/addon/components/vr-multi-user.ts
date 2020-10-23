@@ -421,10 +421,12 @@ export default class VrMultiUser extends VrRendering {
     // Create User model for all users and add them to the users map
     for (let i = 0; i < data.users.length; i++) {
       const userData = data.users[i];
-      this.onUserConnected(userData);
+      this.onUserConnected(userData, false);
     }
     this.localUser.state = 'online';
     this.localUser.controllersConnected = { controller1: false, controller2: false };
+
+    this.sendInitialControllerConnectState();
   }
 
   /**
@@ -466,7 +468,7 @@ export default class VrMultiUser extends VrRendering {
     return this.hardwareModels.getViveController();
   }
 
-  onUserConnected(data: any) {
+  onUserConnected(data: any, showConnectMessage = true) {
     // If a user triggers multiple connects, simulate a disconnect first
     if (this.idToRemoteUser.has(data.id)) {
       this.onUserDisconnect({ id: data.id });
@@ -491,11 +493,13 @@ export default class VrMultiUser extends VrRendering {
     user.nameTag = nameTag;
     user.add(nameTag);
 
-    this.messageBox.enqueueMessage({
-      title: 'User connected',
-      text: user.userName,
-      color: `#${user.color.getHexString()}`,
-    }, 3000);
+    if (showConnectMessage) {
+      this.messageBox.enqueueMessage({
+        title: 'User connected',
+        text: user.userName,
+        color: `#${user.color.getHexString()}`,
+      }, 3000);
+    }
   }
 
   setLandscapeState(openSystems: {id: string, opened: boolean}[],
@@ -800,6 +804,19 @@ export default class VrMultiUser extends VrRendering {
     const poses = Helper.getPoses(camera, controller1, controller2);
 
     this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
+  }
+
+  sendInitialControllerConnectState() {
+    if (this.localUser.isOnline) {
+      const connect: {controller1?: string, controller2?: string} = {};
+      if (this.localUser.controller1?.connected) {
+        connect.controller1 = this.localUser.controller1.gamepadId;
+      }
+      if (this.localUser.controller2?.connected) {
+        connect.controller2 = this.localUser.controller2.gamepadId;
+      }
+      this.sender.sendControllerUpdate(connect, {});
+    }
   }
 
   resetAll() {

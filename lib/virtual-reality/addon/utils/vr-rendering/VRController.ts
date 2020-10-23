@@ -85,6 +85,8 @@ export default class VRController extends BaseMesh {
 
   teleportArea: TeleportMesh|null = null;
 
+  connected = false;
+
   get isInteractionController() {
     return this.control === controlMode.INTERACTION;
   }
@@ -131,11 +133,13 @@ export default class VRController extends BaseMesh {
     const callbacks = this.eventCallbacks;
 
     this.gripSpace.addEventListener('connected', (event) => {
+      this.connected = true;
       this.findGamepad();
       if (this.isUtilityController) this.initTeleportArea();
       if (callbacks.connected) callbacks.connected(this, event);
     });
     this.gripSpace.addEventListener('disconnected', () => {
+      this.connected = false;
       this.removeTeleportArea();
       if (callbacks.disconnected) callbacks.disconnected(this);
     });
