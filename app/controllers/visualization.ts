@@ -1,4 +1,3 @@
-
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { observes } from '@ember-decorators/object';
 import Controller from '@ember/controller';
@@ -17,6 +16,7 @@ import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-rep
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import { tracked } from '@glimmer/tracking';
 import Application from 'explorviz-frontend/models/application';
+import HeatmapListener from 'heatmap/services/heatmap-listener';
 
 /**
  * TODO
@@ -31,6 +31,8 @@ export default class VisualizationController extends Controller {
   @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
 
   @service('landscape-listener') landscapeListener!: LandscapeListener;
+
+  @service('heatmap-listener') heatmapListener!: HeatmapListener;
 
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
@@ -141,6 +143,7 @@ export default class VisualizationController extends Controller {
 
   initRendering() {
     get(this, 'landscapeListener').initSSE();
+    get(this, 'heatmapListener').initSSE();
   }
 }
 

@@ -174,8 +174,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.heatmapRepo.set('applicationID', this.args.application.id);
 
-    this.heatmapListener.initSSE();
-
     this.clazzMetrics = this.heatmapRepo.computeClazzMetrics(this.args.application.id);
 
     this.initThreeJs();
