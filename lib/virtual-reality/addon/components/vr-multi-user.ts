@@ -7,7 +7,7 @@ import debugLogger from 'ember-debug-logger';
 import ConnectionMenu from 'virtual-reality/utils/vr-menus/connection-menu';
 import $ from 'jquery';
 import { bind } from '@ember/runloop';
-import THREE, { Quaternion } from 'three';
+import THREE, { Quaternion, Vector3 } from 'three';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
 import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
@@ -228,19 +228,23 @@ export default class VrMultiUser extends VrRendering {
       if (this.applicationGroup.isApplicationGrabbed(object.parent.dataModel.id)) {
         this.showHint('Application is currently grabbed by another user');
       } else {
-        controller.grabObject(object.parent);
         this.sender.sendAppGrabbed(object.parent, controller);
+        controller.grabObject(object.parent);
       }
     }
   }
 
   onInteractionGripUp(controller: VRController) {
     const application = controller.grabbedObject;
+
+    controller.releaseObject();
+    if (application instanceof ApplicationObject3D) {
+      this.applicationGroup.add(application);
+    }
+
     if (application instanceof ApplicationObject3D && this.localUser.isOnline) {
       this.sender.sendAppReleased(application);
     }
-
-    super.onInteractionGripUp(controller);
   }
 
   handlePrimaryInputOn(intersection: THREE.Intersection) {
@@ -372,7 +376,7 @@ export default class VrMultiUser extends VrRendering {
   onSelfConnecting(data: any) {
     // Use ID as default
     // TODO: Access name, given by session
-    const name = `ID: ${data.id}`;
+    const name = this.currentUser.username;
     this.localUser.userID = data.id;
     this.localUser.color = new THREE.Color().fromArray(data.color);
 
@@ -654,10 +658,8 @@ export default class VrMultiUser extends VrRendering {
     isGrabbedByController1: boolean,
     controllerPosition: number[],
     controllerQuaternion: number[] }) {
-    /*
     super.setAppPose(update.appID, new THREE.Vector3().fromArray(update.appPosition),
-      new THREE.Quaternion().fromArray(update.appQuaternion));
-    */
+      new THREE.Quaternion().fromArray(update.appQuaternion), true);
 
     const remoteUser = this.idToRemoteUser.get(update.userID);
 

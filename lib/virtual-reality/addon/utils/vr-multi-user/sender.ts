@@ -1,6 +1,6 @@
 import WebSocket from 'virtual-reality/services/web-socket';
 import {
-  Vector3 as V3, Quaternion as Q,
+  Vector3 as V3, Quaternion as Q, Vector3, Quaternion,
 } from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import VRController from '../vr-rendering/VRController';
@@ -111,12 +111,14 @@ export default class Sender {
  * @param {VRController} controller Controller which binds application
  */
   sendAppGrabbed(application: ApplicationObject3D, controller: VRController) {
+    const worldPos = new Vector3();
+    const worldQuat = new Quaternion();
     const appObj = {
       event: 'app_grabbed',
       appID: application.dataModel.id,
-      appPosition: application.position.toArray(),
-      appQuaternion: application.quaternion.toArray(),
-      isGrabbedByController1: controller.gamepadIndex === 1,
+      appPosition: application.getWorldPosition(worldPos).toArray(),
+      appQuaternion: application.getWorldQuaternion(worldQuat).toArray(),
+      isGrabbedByController1: controller.gamepadIndex === 0,
       controllerPosition: controller.position.toArray(),
       controllerQuaternion: controller.quaternion.toArray(),
     };
@@ -129,13 +131,14 @@ export default class Sender {
  * @param {ApplicationObject3D} application Application which is released
  */
   sendAppReleased(application: ApplicationObject3D) {
-    const { position, quaternion } = getObjectPose(application);
+    const worldPos = new Vector3();
+    const worldQuat = new Quaternion();
 
     const appObj = {
       event: 'app_released',
       id: application.dataModel.id,
-      position: position.toArray(),
-      quaternion: quaternion.toArray(),
+      position: application.getWorldPosition(worldPos).toArray(),
+      quaternion: application.getWorldQuaternion(worldQuat).toArray(),
     };
     this.webSocket.enqueueIfOpen(appObj);
   }

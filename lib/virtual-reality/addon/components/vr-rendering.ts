@@ -775,7 +775,9 @@ export default class VrRendering extends Component<Args> {
   });
 
   addApplication(applicationModel: Application, origin: THREE.Vector3) {
-    this.addApplicationTask.perform(applicationModel, origin);
+    if (!this.applicationGroup.hasApplication(applicationModel.id)) {
+      this.addApplicationTask.perform(applicationModel, origin);
+    }
   }
 
   positionApplication(applicationObject3D: ApplicationObject3D, origin: THREE.Vector3) {
@@ -1223,15 +1225,19 @@ export default class VrRendering extends Component<Args> {
     }
   }
 
-  setAppPose(id: string, position: THREE.Vector3, quaternion: THREE.Quaternion) {
+  setAppPose(id: string, position: THREE.Vector3, quaternion: THREE.Quaternion, world = false) {
     const application = this.applicationGroup.getApplication(id);
 
-    if (application) {
-      application.worldToLocal(position);
-
-      application.position.copy(position);
-      application.quaternion.copy(quaternion);
+    if (!application) {
+      return;
     }
+
+    if (world) {
+      application.worldToLocal(position);
+    }
+
+    application.position.copy(position);
+    /* application.quaternion.copy(quaternion); */
   }
 
   // eslint-disable-next-line
