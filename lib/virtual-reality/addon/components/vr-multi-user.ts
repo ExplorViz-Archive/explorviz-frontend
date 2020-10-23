@@ -588,11 +588,7 @@ export default class VrMultiUser extends VrRendering {
   async onInitialLandscape(data: any) {
     const { systems, nodeGroups, openApps } = data;
 
-    this.applicationGroup.traverse((application) => {
-      if (application instanceof ApplicationObject3D) {
-        this.removeApplication(application);
-      }
-    });
+    this.applicationGroup.clear();
 
     await this.setLandscapeState(systems, nodeGroups);
 
