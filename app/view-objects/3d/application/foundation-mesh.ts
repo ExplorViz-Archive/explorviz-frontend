@@ -16,10 +16,16 @@ export default class FoundationMesh extends BoxMesh {
     widthSegments: number = 1, depthSegments: number = 1) {
     super(layoutPos, layoutHeight, layoutWidth, layoutDepth, defaultColor, highlightingColor);
 
-    const material = new THREE.MeshLambertMaterial({ color: defaultColor });
+    this.setDefaultMaterial();
+
     const geometry = new THREE.BoxGeometry(1, 1, 1, widthSegments, 1, depthSegments);
     this.geometry = geometry;
-    this.material = material;
+
     this.dataModel = foundation;
+  }
+
+  setDefaultMaterial() {
+    const material = new THREE.MeshLambertMaterial({ color: this.defaultColor });
+    this.material = material;
   }
 }

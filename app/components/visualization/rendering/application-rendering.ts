@@ -294,7 +294,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.highlighter.highlight(mesh);
     }
     if (this.heatmapRepo.heatmapActive) {
-      this.turnAllMeshesTransparent();
+      this.setAppComponentVisibility(0.1);
     }
   }
 
@@ -309,7 +309,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.entityManipulation.closeAllComponents(this.boxLayoutMap);
     }
     if (this.heatmapRepo.heatmapActive) {
-      this.turnAllMeshesTransparent();
+      this.setAppComponentVisibility(0.1);
     }
   }
 
@@ -446,18 +446,22 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
   }
 
-  turnAllMeshesTransparent() {
+  setAppComponentVisibility(opacity = 1) {
     const allMeshes = this.applicationObject3D.getAllMeshes();
 
     allMeshes.forEach((mesh) => {
       if (mesh instanceof ComponentMesh) {
-        mesh.turnTransparent(0.1);
+        if (opacity === 1) {
+          mesh.turnOpaque();
+        } else {
+          mesh.turnTransparent(opacity);
+        }
       }
     });
   }
 
   applyHeatmap() {
-    this.turnAllMeshesTransparent();
+    this.setAppComponentVisibility(0.1);
 
     const { useSimpleHeat, useHelperLines } = this.heatmapRepo;
 
@@ -797,7 +801,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   onHeatmapUpdated(clazzMetrics: Map<string, number>) {
     this.clazzMetrics = clazzMetrics;
-    this.applyHeatmap();
+    if (this.heatmapRepo.heatmapActive) {
+      this.applyHeatmap();
+    }
   }
 
   /**
@@ -826,35 +832,36 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       AlertifyHandler.showAlertifyError('No metrics loaded yet');
       return;
     }
+
     this.heatmapRepo.heatmapActive = !this.heatmapRepo.heatmapActive;
 
-    this.scene.children.forEach((child) => {
-      if (child.type === 'SpotLight') {
-        child.visible = !this.heatmapRepo.heatmapActive;
-      }
-    });
+    // Avoid unwanted reflections in heatmap mode
+    this.setSpotLightVisibilityInScene(!this.heatmapRepo.heatmapActive);
+
     if (this.heatmapRepo.heatmapActive) {
-      if (this.heatmapRepo.metrics.length > 0 && !this.heatmapRepo.selectedMetric) {
+      // Use first metric as default
+      if (!this.heatmapRepo.selectedMetric) {
         const [firstMetric] = this.heatmapRepo.metrics;
         this.updateMetric(firstMetric);
       } else {
         this.applyHeatmap();
       }
     } else {
-      this.removeHelperLines();
-      const foundationMesh = this.applicationObject3D.getBoxMeshbyModelId(this.args.application.id);
-      if (foundationMesh && foundationMesh instanceof FoundationMesh) {
-        foundationMesh.material = new THREE.MeshLambertMaterial({
-          color: new THREE.Color(this.configuration.applicationColors.foundation),
-        });
-      }
-
-      if (this.highlighter.highlightedEntity) {
-        this.highlighter.updateHighlighting();
-      } else {
-        this.highlighter.removeHighlighting();
-      }
+      this.removeHeatmap();
     }
+  }
+
+  removeHeatmap() {
+    this.setAppComponentVisibility(1);
+    this.removeHelperLines();
+
+    const foundationMesh = this.applicationObject3D.getBoxMeshbyModelId(this.args.application.id);
+
+    if (foundationMesh && foundationMesh instanceof FoundationMesh) {
+      foundationMesh.setDefaultMaterial();
+    }
+
+    this.highlighter.updateHighlighting();
   }
 
   // #endregion ACTIONS
@@ -886,6 +893,19 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #endregion COMPONENT AND SCENE CLEAN-UP
 
   // #region ADDITIONAL HELPER FUNCTIONS
+
+  /**
+   * Sets all objects within the scene of type SpotLight to desired visibility
+   *
+   * @param isVisible Determines whether a spotlight is visible or not
+   */
+  setSpotLightVisibilityInScene(isVisible = true) {
+    this.scene.children.forEach((child) => {
+      if (child instanceof THREE.SpotLight) {
+        child.visible = isVisible;
+      }
+    });
+  }
 
   /**
    * Takes a map with plain JSON layout objects and creates BoxLayout objects from it
