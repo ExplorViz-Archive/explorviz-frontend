@@ -107,7 +107,7 @@ function createDirectory(path){
 }
 
 async function navigateToExplorViz(){
-    const response = await goto("localhost:4200");
+    const response = await goto("localhost:8090");
 
     return response.status.text;
 }
