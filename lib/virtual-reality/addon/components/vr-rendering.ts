@@ -160,13 +160,6 @@ export default class VrRendering extends Component<Args> {
     super(owner, args);
     this.debug('Constructor called');
 
-    // The getHexString function of threejs is faulty, thus we need to replace it for now
-    /* eslint-disable */
-    THREE.Color.prototype.getHexString = function () {
-      return ((1 << 24) + (this.r << 16) + (this.g << 8) + this.b).toString(16).slice(1);
-    };
-    /* eslint-enable */
-
     this.landscapeDepth = 0.7;
 
     this.landscapeScalar = 0.1;
