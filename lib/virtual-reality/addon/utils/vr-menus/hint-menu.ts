@@ -32,9 +32,9 @@ export default class HintMenu extends BaseMenu {
       this.items.push(contentItem);
     }
 
-    this.position.y -= 0.1;
-    this.position.z -= 0.3;
-    this.position.x += 0.03;
+    this.position.x = 0.035;
+    this.position.y = -0.1;
+    this.position.z = -0.3;
     this.rotateX(-0.18);
     this.scale.x = 0;
 

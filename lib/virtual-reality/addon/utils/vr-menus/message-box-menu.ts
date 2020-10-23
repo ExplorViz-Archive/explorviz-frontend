@@ -22,6 +22,7 @@ export default class MessageBoxMenu extends BaseMenu {
   }
 
   positionMessageBox() {
+    this.position.x = 0.035;
     this.position.y = 0.3;
     this.position.z = -0.3;
     this.rotation.x = 0.45;

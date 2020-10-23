@@ -58,7 +58,8 @@ export default class UserListMenu extends BaseMenu {
       }
     });
 
-    this.position.z = -0.5;
+    this.position.x = 0.035;
+    this.position.z = -0.25;
 
     this.update();
   }
