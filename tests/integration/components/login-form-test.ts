@@ -17,9 +17,9 @@ module('Integration | Component | login form', function(hooks) {
 
     // Template block usage:
     await this.render(hbs`
-      {{#login-form}}
+      <LoginForm>
         template block text
-      {{/login-form}}
+      </LoginForm>
     `);
 
     assert.equal($('#loginModal').text().trim(), 'Sign In');

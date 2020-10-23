@@ -6,22 +6,7 @@ import { setupRenderingTest } from 'ember-qunit';
 module('Integration | Component | help tooltip', function(hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', function(assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.on('myAction', function(val) { ... });
-
-    /*this.render(hbs`{{help-tooltip}}`);
-
-    assert.equal(this.$().text().trim(), '');
-
-    // Template block usage:
-    this.render(hbs`
-      {{#help-tooltip}}
-        template block text
-      {{/help-tooltip}}
-    `);
-
-    assert.equal(this.$().text().trim(), 'template block text');*/
+  test('dummy test', function(assert) {
     assert.equal(true, true, 'TODO');
   });
 });
