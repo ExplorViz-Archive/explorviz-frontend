@@ -243,7 +243,7 @@ export default class VrMultiUser extends VrRendering {
 
     if (object.parent instanceof ApplicationObject3D && controller.ray) {
       if (this.applicationGroup.isApplicationGrabbed(object.parent.dataModel.id)) {
-        this.showHint('Application is currently grabbed by another user');
+        this.showHint('Application already grabbed');
       } else {
         this.sender.sendAppGrabbed(object.parent, controller);
         controller.grabObject(object.parent);
@@ -483,6 +483,7 @@ export default class VrMultiUser extends VrRendering {
 
     this.idToRemoteUser.set(data.id, user);
 
+    console.log('Hardware: ', this.hardwareModels.hmd);
     if (this.hardwareModels.hmd) { user.initCamera(this.hardwareModels.hmd); }
 
     // Add 3d-models for new user
@@ -616,7 +617,9 @@ export default class VrMultiUser extends VrRendering {
             EntityManipulation.restoreComponentState(applicationObject3D,
               new Set(app.openComponents));
 
-            super.addLabels(applicationObject3D);
+            this.addLabels(applicationObject3D);
+            this.appCommRendering.addCommunication(applicationObject3D);
+            Highlighting.updateHighlighting(applicationObject3D);
 
             app.highlightedComponents.forEach((highlightingUpdate: any) => {
               this.onHighlightingUpdate(highlightingUpdate);
@@ -793,15 +796,16 @@ export default class VrMultiUser extends VrRendering {
 
     if (!remoteUser) return;
 
+    const remoteUserHexColor = `#${remoteUser.color.getHexString()}`;
     if (isSpectating) {
       remoteUser.setVisible(false);
       if (this.spectateUser.spectatedUser && this.spectateUser.spectatedUser.ID === userID) {
         this.spectateUser.deactivate();
       }
-      this.messageBox.enqueueMessage({ title: remoteUser.userName, text: ' is now spectating', color: '#ffffff' }, 2000);
+      this.messageBox.enqueueMessage({ title: remoteUser.userName, text: ' is now spectating', color: remoteUserHexColor }, 2000);
     } else {
       remoteUser.setVisible(true);
-      this.messageBox.enqueueMessage({ title: remoteUser.userName, text: ' is no longer spectating', color: '#ffffff' }, 2000);
+      this.messageBox.enqueueMessage({ title: remoteUser.userName, text: ' stopped spectating', color: remoteUserHexColor }, 2000);
     }
   }
 

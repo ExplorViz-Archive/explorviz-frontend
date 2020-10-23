@@ -505,8 +505,6 @@ export default class VrRendering extends Component<Args> {
   populateScene = task(function* (this: VrRendering, openedEntities: Set<string>|null = null) {
     this.debug('populate landscape-rendering');
 
-    console.log('Landscape: ', this.args.landscape);
-
     const openEntityIds = openedEntities || this.landscapeObject3D.openEntityIds;
     const emberLandscape = this.args.landscape;
 
