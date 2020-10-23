@@ -849,6 +849,7 @@ export default class VrRendering extends Component<Args> {
 
   async openNodeGroupAndRedraw(nodeGroupMesh: NodeGroupMesh) {
     nodeGroupMesh.opened = true;
+    this.landscapeObject3D.openEntityIds.add(nodeGroupMesh.dataModel.id);
     await this.cleanAndUpdateScene();
   }
 
@@ -859,6 +860,7 @@ export default class VrRendering extends Component<Args> {
 
   async closeNodeGroupAndRedraw(nodeGroupMesh: NodeGroupMesh) {
     nodeGroupMesh.opened = false;
+    this.landscapeObject3D.openEntityIds.delete(nodeGroupMesh.dataModel.id);
     await this.cleanAndUpdateScene();
   }
 
@@ -869,6 +871,7 @@ export default class VrRendering extends Component<Args> {
 
   async openSystemAndRedraw(systemMesh: SystemMesh) {
     systemMesh.opened = true;
+    this.landscapeObject3D.openEntityIds.add(systemMesh.dataModel.id);
     await this.cleanAndUpdateScene();
   }
 
@@ -879,6 +882,7 @@ export default class VrRendering extends Component<Args> {
 
   async closeSystemAndRedraw(systemMesh: SystemMesh) {
     systemMesh.opened = false;
+    this.landscapeObject3D.openEntityIds.delete(systemMesh.dataModel.id);
     this.closeNogeGroupsInSystem(systemMesh);
     await this.cleanAndUpdateScene();
   }
@@ -922,6 +926,7 @@ export default class VrRendering extends Component<Args> {
         const nodeGroupMesh = this.landscapeObject3D.getMeshbyModelId(nodeGroup.get('id'));
         if (nodeGroupMesh instanceof NodeGroupMesh) {
           nodeGroupMesh.opened = false;
+          this.landscapeObject3D.openEntityIds.delete(nodeGroupMesh.dataModel.id);
         }
       });
     }

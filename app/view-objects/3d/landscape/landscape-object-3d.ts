@@ -20,12 +20,15 @@ export default class LandscapeObject3D extends THREE.Object3D {
 
   modelIdToMesh: Map<string, THREE.Mesh> = new Map();
 
-  openableMeshes: Set<SystemMesh|NodeGroupMesh> = new Set();
+  openEntityIds: Set<string>;
 
   constructor(landscape: Landscape) {
     super();
 
     this.dataModel = landscape;
+
+    this.openEntityIds = new Set();
+    this.setInitialLandscapeState();
   }
 
   /**
@@ -40,7 +43,6 @@ export default class LandscapeObject3D extends THREE.Object3D {
 
     // Ensure fast access to landscape meshes by additionally storing them in maps
     if (object instanceof SystemMesh || object instanceof NodeGroupMesh) {
-      this.openableMeshes.add(object);
       this.modelIdToMesh.set(object.dataModel.id, object);
     } else if (object instanceof NodeMesh
         || object instanceof ApplicationMesh) {
@@ -64,7 +66,6 @@ export default class LandscapeObject3D extends THREE.Object3D {
    */
   resetMeshReferences() {
     this.modelIdToMesh.clear();
-    this.openableMeshes.clear();
   }
 
   /**
@@ -104,39 +105,22 @@ export default class LandscapeObject3D extends THREE.Object3D {
     });
   }
 
-  /**
-   * Iterates over all openable meshes which are currently added to the
-   * landscape and returns a set with ids of the opened meshes.
-   * Returns all openable mesh ids if landscape has not yet been layouted.
-   */
-  get openEntityIds() {
-    const openEntityIds: Set<string> = new Set();
+  isEmpty() {
+    return this.modelIdToMesh.size === 0;
+  }
 
-    // If Landscape is computed for the first time,
-    // all Systems & NodeGroups shall be opened
-    if (this.modelIdToMesh.size === 0) {
-      const { systems } = this.dataModel;
-      if (systems) {
-        systems.forEach((system) => {
-          openEntityIds.add(system.id);
-          const nodeGroups = system.nodegroups;
+  setInitialLandscapeState() {
+    const { systems } = this.dataModel;
+    if (systems) {
+      systems.forEach((system) => {
+        this.openEntityIds.add(system.id);
+        const nodeGroups = system.nodegroups;
 
-          nodeGroups.forEach((nodeGroup: NodeGroup) => {
-            openEntityIds.add(nodeGroup.id);
-          });
+        nodeGroups.forEach((nodeGroup: NodeGroup) => {
+          this.openEntityIds.add(nodeGroup.id);
         });
-      }
-    // Determine which Systems & NodeGroups are opened
-    } else {
-      const { openableMeshes } = this;
-      openableMeshes.forEach((openableMesh) => {
-        if (openableMesh.opened) {
-          openEntityIds.add(openableMesh.dataModel.id);
-        }
       });
     }
-
-    return openEntityIds;
   }
 
   /**

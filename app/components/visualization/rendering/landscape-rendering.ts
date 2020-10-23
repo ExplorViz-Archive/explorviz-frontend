@@ -602,6 +602,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @task
   openNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
     nodeGroupMesh.opened = true;
+    this.landscapeObject3D.openEntityIds.add(nodeGroupMesh.dataModel.id);
     yield this.cleanAndUpdateScene();
   });
 
@@ -609,18 +610,21 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   closeNodeGroupAndRedraw = task(function* (this: LandscapeRendering,
     nodeGroupMesh: NodeGroupMesh) {
     nodeGroupMesh.opened = false;
+    this.landscapeObject3D.openEntityIds.delete(nodeGroupMesh.dataModel.id);
     yield this.cleanAndUpdateScene();
   });
 
   @task
   openSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
     systemMesh.opened = true;
+    this.landscapeObject3D.openEntityIds.add(systemMesh.dataModel.id);
     yield this.cleanAndUpdateScene();
   });
 
   @task
   closeSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
     systemMesh.opened = false;
+    this.landscapeObject3D.openEntityIds.delete(systemMesh.dataModel.id);
     this.closeNogeGroupsInSystem(systemMesh);
     yield this.cleanAndUpdateScene();
   });
@@ -664,6 +668,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         const nodeGroupMesh = this.landscapeObject3D.getMeshbyModelId(nodeGroup.get('id'));
         if (nodeGroupMesh instanceof NodeGroupMesh) {
           nodeGroupMesh.opened = false;
+          this.landscapeObject3D.openEntityIds.delete(nodeGroupMesh.dataModel.id);
         }
       });
     }
