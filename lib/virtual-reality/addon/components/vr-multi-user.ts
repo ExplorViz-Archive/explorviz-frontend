@@ -49,12 +49,14 @@ export default class VrMultiUser extends VrRendering {
   @service()
   store!: DS.Store;
 
+  // Used to format and send messages to the backend
   sender!: Sender;
 
   remoteUserGroup: THREE.Group;
 
   idToRemoteUser: Map<string, RemoteVrUser> = new Map();
 
+  // Contains clonable objects of HMD, camera and controllers for other users
   hardwareModels: HardwareModels;
 
   messageBox!: MessageBoxMenu;
@@ -255,7 +257,8 @@ export default class VrMultiUser extends VrRendering {
     const application = controller.grabbedObject;
 
     controller.releaseObject();
-    if (application instanceof ApplicationObject3D) {
+    if (application instanceof ApplicationObject3D
+      && this.applicationGroup.hasApplication(application.dataModel.id)) {
       this.applicationGroup.add(application);
     }
 
@@ -603,7 +606,7 @@ export default class VrMultiUser extends VrRendering {
   async onInitialLandscape(data: any) {
     const { systems, nodeGroups, openApps } = data;
 
-    this.applicationGroup.clear();
+    this.removeAllApplications();
 
     await this.setLandscapeState(systems, nodeGroups);
 
@@ -934,10 +937,27 @@ export default class VrMultiUser extends VrRendering {
   }
 
   removeApplication(application: ApplicationObject3D) {
+    if (this.applicationGroup.grabbedApplications.has(application.dataModel.id)) {
+      return;
+    }
+
     super.removeApplication(application);
 
     if (this.localUser.isOnline) {
       this.sender.sendAppClosed(application.dataModel.id);
+    }
+  }
+
+  removeAllApplications() {
+    this.applicationGroup.clear();
+
+    const filterAppsFn = (object: THREE.Object3D) => !(object instanceof ApplicationObject3D);
+
+    if (this.localUser.controller1) {
+      this.localUser.controller1.filterIntersectableObjects(filterAppsFn);
+    }
+    if (this.localUser.controller2) {
+      this.localUser.controller2.filterIntersectableObjects(filterAppsFn);
     }
   }
 

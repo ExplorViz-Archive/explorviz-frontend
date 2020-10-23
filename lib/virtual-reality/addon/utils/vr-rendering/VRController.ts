@@ -153,6 +153,10 @@ export default class VRController extends BaseMesh {
     }
   }
 
+  /**
+   * Sets controller to be opaque, adds the respective ray and
+   * initiates a teleport area.
+   */
   setToDefaultAppearance() {
     displayAsSolidObject(this);
     if (this.isUtilityController) {
@@ -174,6 +178,12 @@ export default class VRController extends BaseMesh {
     });
   }
 
+  /**
+   * Adds a line to the controller which is a visual representation of the hit
+   * objects for raycasting.
+   *
+   * @param color Color of the ray
+   */
   addRay(color: THREE.Color) {
     if (this.ray) return;
 
@@ -192,6 +202,9 @@ export default class VRController extends BaseMesh {
     this.raySpace.add(this.ray);
   }
 
+  /**
+   * Adds a teleport area to the controller (if it is the utility controller)
+   */
   initTeleportArea() {
     if (this.isUtilityController && !this.teleportArea) {
     // Create teleport area
@@ -237,6 +250,9 @@ export default class VRController extends BaseMesh {
     object.matrix.decompose(object.position, object.quaternion, object.scale);
 
     this.grabbedObject = object;
+    if (object.parent) {
+      object.parent.remove(object);
+    }
     this.gripSpace.add(object);
   }
 
@@ -414,6 +430,10 @@ export default class VRController extends BaseMesh {
     // Store intersected object and scale ray accordingly
     this.intersectedObject = nearestIntersection;
     this.ray.scale.z = nearestIntersection.distance;
+  }
+
+  filterIntersectableObjects(filterFn: (obj: Object3D) => boolean) {
+    this.intersectableObjects = this.intersectableObjects.filter(filterFn);
   }
 
   /**

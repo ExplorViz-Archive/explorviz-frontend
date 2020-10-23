@@ -13,7 +13,8 @@ export default class ApplicationMesh extends PlaneMesh {
   defaultZ: number;
 
   constructor(layout: PlaneLayout, applicationModel: Application,
-    defaultColor: THREE.Color, highlightingColor = new THREE.Color('red'), depth = 0, zPos = 0.03) {
+    defaultColor: THREE.Color, highlightingColor = new THREE.Color('red'),
+    depth = 0, zPos = 0.03) {
     super(defaultColor, highlightingColor, layout);
 
     this.dataModel = applicationModel;
