@@ -16,7 +16,7 @@ branches:
   only:
   - master
   - dev-1
-  - e2e-tests
+  - e2e-tests # TODO: Delete after merge in dev-1
   
 before_install:
 - export TZ=Europe/Berlin
@@ -29,16 +29,16 @@ install:
 jobs:
   fast_finish: true
   include:
-    # - stage: Test (Ember release version)
-    #   env:
-    #     - EMBER_VERSION=release
-    # script: ember test
+    - stage: Test (Ember release version)
+      env:
+        - EMBER_VERSION=release
+    script: ember test
 
-    #- stage: Test (Ember beta version)
-    #  allow_failure: true
-    #  env:
-    #    - EMBER_VERSION=beta
-    #  script: ember test
+    - stage: Test (Ember beta version)
+     allow_failure: true
+     env:
+       - EMBER_VERSION=beta
+     script: ember test
 
     - stage: E2E Test (gauge + taiko)
       addons:
