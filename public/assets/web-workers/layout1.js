@@ -44,6 +44,8 @@ function layout1(landscape, openEntitiesIds) {
       "elk.edgeRouting": "POLYLINE",
       "elk.hierarchyHandling": "INCLUDE_CHILDREN",
       "elk.spacing.nodeNode": spacing,
+      "elk.spacing.edgeNode": 2 * spacing,
+      "elk.layered.spacing.edgeEdgeBetweenLayers": 2.5 * spacing,
       "elk.layered.spacing.nodeNodeBetweenLayers": 2.5 * spacing,
       "elk.direction": "RIGHT",
       "elk.interactive": true,
