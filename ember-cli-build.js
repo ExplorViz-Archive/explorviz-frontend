@@ -66,7 +66,6 @@ module.exports = (defaults) => {
   app.import('node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js');
 
   app.import('node_modules/elkjs/lib/elk-api.js');
-  app.import('node_modules/elkjs/lib/elk-worker.min.js');
 
   return app.toTree();
 };
