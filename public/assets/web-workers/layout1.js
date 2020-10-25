@@ -10,6 +10,8 @@ self.addEventListener('message', function(e) {
 postMessage(true);
 
 const CONVERT_TO_KIELER_FACTOR = 180.0;
+  
+const PADDING = 0.1;
 
 function layout1(landscape, openEntitiesIds) {
   let topLevelKielerGraph = {};
@@ -39,13 +41,14 @@ function layout1(landscape, openEntitiesIds) {
     const spacing = 0.2 * CONVERT_TO_KIELER_FACTOR;
 
     const layoutOptions = {
-      "edgeRouting": "POLYLINE",
-      "hierarchyHandling": "INCLUDE_CHILDREN",
-      "spacing": spacing,
-      "direction": "RIGHT",
-      "interactive": true,
-      "layered.nodePlacement": "LINEAR_SEGMENTS",
-      "layered.unnecessaryBendpoints": true,
+      "elk.edgeRouting": "POLYLINE",
+      "elk.hierarchyHandling": "INCLUDE_CHILDREN",
+      "elk.spacing.nodeNode": spacing,
+      "elk.layered.spacing.nodeNodeBetweenLayers": 2.5 * spacing,
+      "elk.direction": "RIGHT",
+      "elk.interactive": true,
+      "elk.layered.nodePlacement.strategy": "LINEAR_SEGMENTS",
+      "elk.layered.unnecessaryBendpoints": true,
       "edgeSpacingFactor": 1.0
     };
   
@@ -69,8 +72,6 @@ function layout1(landscape, openEntitiesIds) {
   
         const DEFAULT_WIDTH = 1.5;
         const DEFAULT_HEIGHT = 0.75;
-  
-        const PADDING = 0.1;
         const SYSTEM_LABEL_HEIGHT = 0.4;
   
         if (isOpen(system)) {
@@ -88,17 +89,14 @@ function layout1(landscape, openEntitiesIds) {
           if (!systemKielerGraph.properties)
             return;
   
-          systemKielerGraph.properties["nodeSize.constraints"] = "MINIMUM_SIZE";
-          systemKielerGraph.properties["nodeSize.minimum"] = "( "+ minWidth+", " + minHeight + ")";
-          systemKielerGraph.properties["contentAlignment"] = "V_CENTER, H_CENTER";
-  
-          systemKielerGraph.padding = {
-            left: PADDING * CONVERT_TO_KIELER_FACTOR,
-            right: PADDING * CONVERT_TO_KIELER_FACTOR,
-            // Leave space for system label
-            top: 8 * PADDING * CONVERT_TO_KIELER_FACTOR,
-            bottom: PADDING * CONVERT_TO_KIELER_FACTOR
-          };
+          systemKielerGraph.properties["elk.nodeSize.constraints"] = "MINIMUM_SIZE";
+          systemKielerGraph.properties["elk.nodeSize.minimum"] = "( "+ minWidth+", " + minHeight + ")";
+          systemKielerGraph.properties["elk.contentAlignment"] = "V_CENTER, H_CENTER";
+
+          // kieler scaled padding
+          const ksp = 2.5 * PADDING * CONVERT_TO_KIELER_FACTOR;
+    
+          systemKielerGraph.properties['elk.padding'] = `[top=${4 * ksp}, left=${ksp}, bottom=${ksp}, right=${ksp}]`;
   
           if (!topLevelKielerGraph.children)
             return;
@@ -123,22 +121,21 @@ function layout1(landscape, openEntitiesIds) {
               PADDING * 6.0) * CONVERT_TO_KIELER_FACTOR);
   
           const height = 2.5 * DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
+
+          // kieler scaled padding
+          const ksp = 2.5 * PADDING * CONVERT_TO_KIELER_FACTOR;
   
           const systemKielerNode = {
             "id": system.id,
             "width": width,
             "height": height,
             "edges": [],
-            "ports": []
+            "ports": [],
+            "properties": {
+              "elk.padding": `[top=${3 * ksp}, left=${ksp}, bottom=${ksp}, right=${ksp}]`
+            }
           };
 
-          systemKielerNode.padding = {
-            left: PADDING * CONVERT_TO_KIELER_FACTOR,
-            right: PADDING * CONVERT_TO_KIELER_FACTOR,
-            top: PADDING * CONVERT_TO_KIELER_FACTOR,
-            bottom: PADDING * CONVERT_TO_KIELER_FACTOR
-          };
-  
           modelIdToGraph.set(system.id, systemKielerNode);
   
           if (!topLevelKielerGraph.children)
@@ -194,7 +191,6 @@ function layout1(landscape, openEntitiesIds) {
   function createNodeGroup(systemKielerGraph, nodegroup) {
 
     const nodes = nodegroup.nodes;
-    const PADDING = 0.1;
 
     if (nodes.length > 1) {
 
@@ -204,16 +200,13 @@ function layout1(landscape, openEntitiesIds) {
       if (!nodeGroupKielerGraph.properties || !systemKielerGraph.children)
         return;
 
-      nodeGroupKielerGraph.properties["layered.crossingMinimization.strategy"] = "LAYER_SWEEP";
+      nodeGroupKielerGraph.properties["elk.layered.crossingMinimization.strategy"] = "LAYER_SWEEP";
 
-
-      nodeGroupKielerGraph.padding = {
-        left: PADDING * CONVERT_TO_KIELER_FACTOR,
-        right: PADDING * CONVERT_TO_KIELER_FACTOR,
-        top: PADDING * CONVERT_TO_KIELER_FACTOR,
-        bottom: PADDING * CONVERT_TO_KIELER_FACTOR
-      };
-
+      // kieler scaled padding
+      const ksp = 2.5 * PADDING * CONVERT_TO_KIELER_FACTOR;
+  
+      nodeGroupKielerGraph.properties['elk.padding'] = `[top=${1.5 * ksp}, left=${ksp}, bottom=${1.5 * ksp}, right=${ksp}]`;
+  
       systemKielerGraph.children.push(nodeGroupKielerGraph);
 
       let yCoord = 0.0;
@@ -282,7 +275,6 @@ function layout1(landscape, openEntitiesIds) {
 
   function createNodeAndItsApplications(kielerParentGraph, node) {
 
-    const PADDING = 0.1;
     const NODE_LABEL_HEIGHT = 0.2;
     const DEFAULT_WIDTH = 1.5;
     const DEFAULT_HEIGHT = 0.75;
@@ -290,12 +282,10 @@ function layout1(landscape, openEntitiesIds) {
     const nodeKielerGraph = createEmptyGraph(node.id);
     modelIdToGraph.set(node.id, nodeKielerGraph);
 
-    nodeKielerGraph.padding = {
-      left: PADDING * CONVERT_TO_KIELER_FACTOR,
-      right: PADDING * CONVERT_TO_KIELER_FACTOR,
-      top: PADDING * CONVERT_TO_KIELER_FACTOR,
-      bottom: 6 * PADDING * CONVERT_TO_KIELER_FACTOR
-    };
+    // kieler scaled padding
+    const ksp = 2.5 * PADDING * CONVERT_TO_KIELER_FACTOR;
+
+    nodeKielerGraph.properties['elk.padding'] = `[top=${ksp}, left=${ksp}, bottom=${3 * ksp}, right=${ksp}]`;
 
     const parent = node.parent;
 
@@ -309,9 +299,9 @@ function layout1(landscape, openEntitiesIds) {
     if (!nodeKielerGraph.properties || !kielerParentGraph.children)
       return;
 
-    nodeKielerGraph.properties["nodeSize.constraints"] = "MINIMUM_SIZE";
-    nodeKielerGraph.properties["nodeSize.minimum"] =  "( "+ minWidth+", " + minHeight + "})";
-    nodeKielerGraph.properties["contentAlignment"] = "V_CENTER,H_CENTER";
+    nodeKielerGraph.properties["elk.nodeSize.constraints"] = "MINIMUM_SIZE";
+    nodeKielerGraph.properties["elk.nodeSize.minimum"] =  "( "+ minWidth+", " + minHeight + "})";
+    nodeKielerGraph.properties["elk.contentAlignment"] = "V_CENTER,H_CENTER";
 
     kielerParentGraph.children.push(nodeKielerGraph);
 
@@ -379,7 +369,7 @@ function layout1(landscape, openEntitiesIds) {
           width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR,
           height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
           properties: {
-            "port.side": "EAST"
+            "elk.port.side": "EAST"
           },
           x: 0,
           y: 0
@@ -416,7 +406,7 @@ function layout1(landscape, openEntitiesIds) {
           width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR,
           height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
           properties: {
-            "port.side": "WEST"
+            "elk.port.side": "WEST"
           },
           x: 0,
           y: 0
@@ -450,8 +440,8 @@ function layout1(landscape, openEntitiesIds) {
 
     setEdgeLayoutProperties(edge);
 
-    edge.sources = [sourceDrawnode.id];
-    edge.targets = [targetDrawnode.id];
+    edge.source = sourceDrawnode.id;
+    edge.target = targetDrawnode.id;
 
     edge.sourcePort = port1.id;
     edge.targetPort = port2.id;
