@@ -48,7 +48,6 @@ module.exports = (defaults) => {
     prepend: true,
   });
 
-  app.import('vendor/layout/klay.js');
   app.import('vendor/threex/threex.rendererstats.min.js');
   app.import('vendor/threex/threex.dynamictexture.min.js');
 
