@@ -100,6 +100,7 @@
     "@glimmer/tracking": "^1.0.0",
     "bootstrap-colorpicker": "3.0.3",
     "chart.js": "^2.9.3",
+    "elkjs": "^0.7.0",
     "ember-ajax": "^5.0.0",
     "ember-cli-babel": "^7.13.2",
     "ember-cli-htmlbars": "^4.2.0",

@@ -48,7 +48,6 @@ module.exports = (defaults) => {
     prepend: true,
   });
 
-  app.import('vendor/layout/klay.js');
   app.import('vendor/threex/threex.rendererstats.min.js');
   app.import('vendor/threex/threex.dynamictexture.min.js');
 
@@ -64,6 +63,8 @@ module.exports = (defaults) => {
 
   app.import('node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css');
   app.import('node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js');
+
+  app.import('node_modules/elkjs/lib/elk-api.js');
 
   return app.toTree();
 };
