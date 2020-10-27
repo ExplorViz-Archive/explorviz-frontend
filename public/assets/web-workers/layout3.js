@@ -162,20 +162,12 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
           let targetApplication = applicationcommunication.targetApplication;
           let parentNode = getRightParent(sourceApplication, targetApplication);
 
-          var points = [];
-
-          var edgeOffset = { bottom: 0.0, left: 0.0, right: 0.0, top: 0.0 };
-
           if (parentNode) {
 
-            points = edge.bendPoints ? edge.bendPoints : [];
+            let points = [];
 
-            edgeOffset = { bottom: 0.0, left: 0.0, right: 0.0, top: 0.0 };
-
-            // @ts-ignore Since overlapping id property is not detected
-            let parentGraph = modelIdToGraph.get(parentNode.id);
-            if (parentGraph && parentGraph.padding) {
-              edgeOffset = parentGraph.padding;
+            if (edge.sections && edge.sections[0]?.bendPoints) {
+              points = edge.sections[0]?.bendPoints;
             }
 
             var sourcePoint = null;
@@ -195,28 +187,13 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
               let sourceGraph = modelIdToGraph.get(edge.sourceNode.id);
 
               if (!sourceGraph) return;
-
-              let sourceInsets = sourceGraph.padding;
-
-              if (sourcePoint.x && sourcePoint.y &&
-                sourceInsets?.left && sourceInsets.top){
-                  sourcePoint.x -= sourceInsets.left;
-                  sourcePoint.y -= sourceInsets.top;
-              }
-
-
-              let nestedGraph = sourceGraph;
-
-              if (nestedGraph?.padding) {
-                edgeOffset = nestedGraph.padding;
-              }
             }
             else {
 
-              if (edge.source && edge?.sourcePoint) {
+              if (edge.source && edge.sections && edge.sections[0]?.startPoint) {
                 sourcePoint = {
-                  x: edge.sourcePoint.x,
-                  y: edge.sourcePoint.y
+                  x: edge.sections[0].startPoint.x,
+                  y: edge.sections[0].startPoint.y
                 };
               } else if (edge.sPort?.x && edge.sPort.y){
                 sourcePoint = {
@@ -233,28 +210,15 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
 
             if (!edge.tPort?.x || !edge.tPort.y) return;
 
-            let targetPoint = edge.targetPoint ? {
-              x: edge.targetPoint.x,
-              y: edge.targetPoint.y
+            let targetPoint = (edge.sections && edge.sections[0]?.endPoint) ? {
+              x: edge.sections[0].endPoint.x,
+              y: edge.sections[0].endPoint.y
             } : {
                 x: edge.tPort.x,
                 y: edge.tPort.y
               }
 
-            let targetGraph = modelIdToGraph.get(edge.targetNode.id);
-
-            if (targetGraph?.padding && targetPoint?.x && targetPoint.y) {
-              targetPoint.x += targetGraph.padding.left;
-              targetPoint.y += targetGraph.padding.top;
-            }
-
             points.push(targetPoint);
-
-            points?.forEach((point) => {
-              point.x += edgeOffset.left;
-              point.y += edgeOffset.top;
-            });
-
 
             let pOffsetX = 0.0;
             let pOffsetY = 0.0;
@@ -332,9 +296,9 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
     let parentLayout = modelIdToLayout.get(parent.id);
     let parentGraph = modelIdToGraph.get(parent.id);
 
-    if (childLayout && parentLayout && parentGraph && parentGraph.padding) {
-      childLayout.positionX += parentLayout.positionX + parentGraph.padding.left;
-      childLayout.positionY += parentLayout.positionY - parentGraph.padding.top;
+    if (childLayout && parentLayout) {
+      childLayout.positionX += parentLayout.positionX;
+      childLayout.positionY += parentLayout.positionY;
     }
   }
 

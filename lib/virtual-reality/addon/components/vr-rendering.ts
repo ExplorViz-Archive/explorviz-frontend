@@ -15,7 +15,7 @@ import Node from 'explorviz-frontend/models/node';
 import Interaction from 'explorviz-frontend/utils/interaction';
 import Application from 'explorviz-frontend/models/application';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
-import LandscapeRendering from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
+import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
 import { task } from 'ember-concurrency-decorators';
 import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
 import * as LandscapeCommunicationRendering from
@@ -55,6 +55,7 @@ import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
 import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
 import DeltaTime from 'virtual-reality/services/delta-time';
+import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 
 interface Args {
   readonly id: string;
@@ -142,6 +143,8 @@ export default class VrRendering extends Component<Args> {
     return this.args.font;
   }
 
+  readonly elk: ELK;
+
   readonly imageLoader: ImageLoader = new ImageLoader();
 
   readonly appCommRendering: AppCommunicationRendering;
@@ -159,6 +162,10 @@ export default class VrRendering extends Component<Args> {
   constructor(owner: any, args: Args) {
     super(owner, args);
     this.debug('Constructor called');
+
+    this.elk = new ElkConstructor({
+      workerUrl: './assets/web-workers/elk-worker.min.js',
+    });
 
     this.landscapeDepth = 0.7;
 
@@ -498,34 +505,37 @@ export default class VrRendering extends Component<Args> {
   populateLandscape = task(function* (this: VrRendering) {
     this.debug('populate landscape-rendering');
 
-    const { openEntityIds } = this.landscapeObject3D;
+    const openEntitiesIds = this.landscapeObject3D.openEntityIds;
     const emberLandscape = this.args.landscape;
 
     this.landscapeObject3D.dataModel = emberLandscape;
 
     // Run Klay layouting in 3 steps within workers
     try {
-    // Do layout pre-processing (1st step)
-      const {
-        graph,
-        modelIdToPoints,
-      }: any = yield this.worker.postMessage('layout1', { reducedLandscape: this.reducedLandscape, openEntitiesIds: openEntityIds });
+      // Do layout pre-processing (1st step)
+      const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
+        reducedLandscape: this.reducedLandscape,
+        openEntitiesIds,
+      });
 
       // Run actual klay function (2nd step)
-      const newGraph: any = yield this.worker.postMessage('klay', { graph });
+      const newGraph: ElkNode = yield this.elk.layout(graph);
 
       // Post-process layout graph (3rd step)
       const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
         reducedLandscape: this.reducedLandscape,
-        openEntitiesIds: openEntityIds,
+        openEntitiesIds,
       });
 
       // Clean old landscape
       this.cleanUpLandscape();
 
-      const { modelIdToLayout, modelIdToPoints: modelIdToPointsComplete } = layoutedLandscape;
+      const {
+        modelIdToLayout,
+        modelIdToPoints: modelIdToPointsComplete,
+      }: Layout3Return = layoutedLandscape;
 
       const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
 

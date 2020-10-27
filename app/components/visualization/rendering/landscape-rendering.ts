@@ -32,6 +32,7 @@ import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 
 interface Args {
   readonly id: string;
@@ -54,6 +55,21 @@ type PopupData = {
   mouseY: number,
   entity: System | NodeGroup | Node | Application
 };
+
+export type Point = {
+  x: number,
+  y: number
+};
+
+export interface Layout1Return {
+  graph: ElkNode,
+  modelIdToPoints: Map<string, Point[]>,
+}
+
+export interface Layout3Return {
+  modelIdToLayout: Map<string, SimplePlaneLayout>,
+  modelIdToPoints: Map<string, Point[]>,
+}
 
 /**
 * Renderer for landscape visualization.
@@ -118,7 +134,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   readonly imageLoader: ImageLoader = new ImageLoader();
 
-  hoveredObject: BaseMesh|null;
+  hoveredObject: BaseMesh|null = null;
+
+  readonly elk: ELK;
 
   @tracked
   popupData: PopupData | null = null;
@@ -139,7 +157,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.render = this.render.bind(this);
 
     this.landscapeObject3D = new LandscapeObject3D(this.args.landscape);
-    this.hoveredObject = null;
+
+    this.elk = new ElkConstructor({
+      workerUrl: './assets/web-workers/elk-worker.min.js',
+    });
   }
 
   @action
@@ -400,13 +421,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     // Run Klay layouting in 3 steps within workers
     try {
       // Do layout pre-processing (1st step)
-      const {
-        graph,
-        modelIdToPoints,
-      }: any = yield this.worker.postMessage('layout1', { reducedLandscape: this.reducedLandscape, openEntitiesIds });
+      const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
+        reducedLandscape: this.reducedLandscape,
+        openEntitiesIds,
+      });
 
       // Run actual klay function (2nd step)
-      const newGraph: any = yield this.worker.postMessage('klay', { graph });
+      const newGraph: ElkNode = yield this.elk.layout(graph);
 
       // Post-process layout graph (3rd step)
       const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
@@ -420,7 +441,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       this.landscapeObject3D.removeAllChildren();
       this.landscapeObject3D.resetMeshReferences();
 
-      const { modelIdToLayout, modelIdToPoints: modelIdToPointsComplete } = layoutedLandscape;
+      const {
+        modelIdToLayout,
+        modelIdToPoints: modelIdToPointsComplete,
+      }: Layout3Return = layoutedLandscape;
 
       const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
 

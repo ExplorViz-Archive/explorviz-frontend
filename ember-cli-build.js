@@ -58,6 +58,7 @@ module.exports = (defaults) => {
   app.import('node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js');
 
   app.import('node_modules/webxr-polyfill/build/webxr-polyfill.min.js');
+  app.import('node_modules/elkjs/lib/elk-api.js');
 
   return app.toTree();
 };
