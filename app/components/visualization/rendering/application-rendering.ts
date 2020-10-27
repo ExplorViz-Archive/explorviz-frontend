@@ -37,6 +37,7 @@ import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
 import { computeHeatmapMinMax } from 'heatmap/utils/heatmap-generator';
 import { setColorValues, invokeRecoloring } from 'heatmap/utils/array-heatmap';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
+import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 
 interface Args {
   readonly id: string,
@@ -212,7 +213,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(this.configuration.applicationColors.background);
+    this.scene.background = this.configuration.applicationColors.background;
     this.debug('Scene created');
   }
 
@@ -437,11 +438,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Label all entities (excluding communication)
     this.applicationObject3D.getBoxMeshes().forEach((mesh) => {
       if (mesh instanceof ClazzMesh) {
-        Labeler.addClazzTextLabel(mesh, this.font, new THREE.Color(clazzTextColor));
+        Labeler.addClazzTextLabel(mesh, this.font, clazzTextColor);
       } else if (mesh instanceof ComponentMesh) {
-        Labeler.addBoxTextLabel(mesh, this.font, new THREE.Color(componentTextColor));
+        Labeler.addBoxTextLabel(mesh, this.font, componentTextColor);
       } else if (mesh instanceof FoundationMesh) {
-        Labeler.addBoxTextLabel(mesh, this.font, new THREE.Color(foundationTextColor));
+        Labeler.addBoxTextLabel(mesh, this.font, foundationTextColor);
       }
     });
   }
@@ -841,6 +842,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Open components such that complete trace is visible
     this.openAllComponents();
     this.highlighter.highlightTrace(trace, step, this.args.application);
+  }
+
+  @action
+  updateColors() {
+    this.scene.traverse((object3D) => {
+      if (object3D instanceof BaseMesh) {
+        object3D.updateColor();
+      // Special case because communication arrow is no base mesh
+      } else if (object3D instanceof CommunicationArrowMesh) {
+        object3D.updateColor(this.configuration.applicationColors.communicationArrow);
+      }
+    });
   }
 
   @action

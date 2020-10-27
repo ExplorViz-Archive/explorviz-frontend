@@ -42,7 +42,6 @@ module.exports = function (defaults) {
     prepend: true,
   });
 
-  app.import('vendor/layout/klay.js');
   app.import('vendor/threex/threex.rendererstats.min.js');
   app.import('vendor/threex/threex.dynamictexture.min.js');
 
@@ -55,6 +54,11 @@ module.exports = function (defaults) {
   app.import('vendor/eventsource-polyfill/eventsource.min.js');
 
   app.import('node_modules/bootstrap/dist/js/bootstrap.min.js');
+
+  app.import('node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css');
+  app.import('node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js');
+
+  app.import('node_modules/elkjs/lib/elk-api.js');
 
   return app.toTree();
 };

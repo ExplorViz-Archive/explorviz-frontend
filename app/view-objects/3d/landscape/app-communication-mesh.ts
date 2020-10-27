@@ -15,7 +15,7 @@ type Tile = {
 export default class AppCommunicationMesh extends BaseMesh {
   dataModel: Tile;
 
-  material: THREE.MeshBasicMaterial;
+  material: MeshLineMaterial;
 
   constructor(tile: Tile, highlightingColor = new THREE.Color('red')) {
     super(tile.pipeColor, highlightingColor);
@@ -42,6 +42,12 @@ export default class AppCommunicationMesh extends BaseMesh {
     this.material = new MeshLineMaterial({
       color: tile.pipeColor,
     });
+  }
+
+  updateColor() {
+    if (this.material instanceof MeshLineMaterial) {
+      this.material.color = this.defaultColor;
+    }
   }
 
   addOffset(centerPoint: THREE.Vector2) {

@@ -16,7 +16,7 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     this.dataModel = dataModel;
 
     this.material = new THREE.MeshBasicMaterial({
-      color: new THREE.Color(defaultColor),
+      color: defaultColor,
     });
   }
 

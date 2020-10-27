@@ -50,7 +50,7 @@ function isSameTile(this: tileWay, tile: any) {
  * @param color Desired color for the tiles
  */
 export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray<AppCommunication>,
-  modelIdToPoints: Map<string, point[]>, color: string) {
+  modelIdToPoints: Map<string, point[]>, color: THREE.Color) {
   const tiles: tile[] = [];
   let tile: tile;
 
@@ -81,7 +81,7 @@ export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray
             positionZ: 0.025, // Tiles should be in front of nodes
             requestsCache: 0,
             lineThickness: 1, // Determined later on
-            pipeColor: new THREE.Color(color),
+            pipeColor: color,
           };
           tiles.push(tile);
         }

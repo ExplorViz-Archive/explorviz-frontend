@@ -1,16 +1,8 @@
-{{#if @isReplay}}
-  {{add-listener
-    this.landscapeRepo
-    "updatedReplayLandscape"
-    this.onLandscapeUpdated
-  }}
-{{else}}
-  {{add-listener
-    this.landscapeRepo
-    "updatedLatestLandscape"
-    this.onLandscapeUpdated
-  }}
-{{/if}}
+{{add-listener
+  this.landscapeRepo
+  "updatedLatestLandscape"
+  this.onLandscapeUpdated
+}}
 
 {{add-listener
   this.heatmapRepo
@@ -34,6 +26,9 @@
         @resetView={{this.resetView}}
       />
       <Visualization::PageSetup::Navbar::PauseReload />
+      <Visualization::PageSetup::Navbar::ColorPickerOpener
+        @addComponent={{@addComponent}}
+      />
       <Visualization::PageSetup::Navbar::TraceOverview
         @addComponent={{@addComponent}}
       />
@@ -71,7 +66,7 @@
           />
         </div>
       {{/if}}
-      
+
       <canvas
         class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
         {{did-insert this.canvasInserted}}
@@ -80,7 +75,6 @@
       {{#if this.loadNewApplication.isRunning}}
         <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
       {{/if}}
-      
 
       {{!-- popup(s) --}}
       <Visualization::Rendering::Popups::PopupCoordinator
@@ -106,6 +100,13 @@
             {{#if (eq componentName "sql-viewer")}}
               <Visualization::PageSetup::Sidebar::SqlViewer
                 @removeComponent={{@removeComponent}}
+              />
+            {{/if}}
+            {{#if (eq componentName "color-picker")}}
+              <Visualization::PageSetup::Sidebar::ColorPicker
+                @isLandscapeView={{false}}
+                @removeComponent={{@removeComponent}}
+                @updateView={{this.updateColors}}
               />
             {{/if}}
           </div>

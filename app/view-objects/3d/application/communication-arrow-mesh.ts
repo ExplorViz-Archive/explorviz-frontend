@@ -28,6 +28,15 @@ export default class CommunicationArrowMesh extends THREE.ArrowHelper {
     if (cone.material instanceof THREE.Material) { cone.material.dispose(); }
   }
 
+  updateColor(color: THREE.Color) {
+    if (this.line.material instanceof THREE.LineBasicMaterial) {
+      this.line.material.color = color;
+    }
+    if (this.cone.material instanceof THREE.MeshBasicMaterial) {
+      this.cone.material.color = color;
+    }
+  }
+
   /**
    * Changes the transparency of the arrow. Fully transprarent: 0.0
    *
