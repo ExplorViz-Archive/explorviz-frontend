@@ -307,10 +307,6 @@ export default class VrMultiUser extends VrRendering {
   // #region REMOTE EVENT HANDLER
 
   onEvent(event: string, data: any) {
-    if (event !== 'user_positions') {
-      console.log('Event: ', event);
-      console.log('Data: ', data);
-    }
     switch (event) {
       case 'connection_closed':
         this.onDisconnect();
@@ -374,9 +370,20 @@ export default class VrMultiUser extends VrRendering {
     }
   }
 
-  onDisconnect() {
+  onDisconnect(event?: any) {
     if (this.localUser.state === 'connecting') {
-      super.showHint('Could not establish connection');
+      super.showHint('Backend extension not responding');
+    } else if (event) {
+      switch (event.code) {
+        case 1000: // Normal Closure
+          super.showHint('Successfully disconnected');
+          break;
+        case 1006: // Abnormal closure
+          super.showHint('Backend extension not responding');
+          break;
+        default:
+          super.showHint('Unexpected disconnect');
+      }
     }
 
     this.idToRemoteUser.forEach((user) => {
@@ -484,7 +491,6 @@ export default class VrMultiUser extends VrRendering {
 
     this.idToRemoteUser.set(data.id, user);
 
-    console.log('Hardware: ', this.hardwareModels.hmd);
     if (this.hardwareModels.hmd) { user.initCamera(this.hardwareModels.hmd); }
 
     // Add 3d-models for new user
@@ -788,7 +794,6 @@ export default class VrMultiUser extends VrRendering {
       applicationObject3D.getCommMeshes().forEach((commMesh) => {
         if (classIds.has(commMesh.dataModel.get('sourceClazz').get('id'))
           && classIds.has(commMesh.dataModel.get('targetClazz').get('id'))) {
-          console.log('found mesh');
           Highlighting.highlight(commMesh, applicationObject3D);
         }
       });
@@ -927,7 +932,6 @@ export default class VrMultiUser extends VrRendering {
   }
 
   highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
-    console.log('highlightAppEntity');
     if (this.localUser.color) {
       application.setHighlightingColor(this.localUser.color);
     }
@@ -939,7 +943,6 @@ export default class VrMultiUser extends VrRendering {
         this.sender.sendHighlightingUpdate(application.dataModel.id, object.constructor.name,
           object.dataModel.id, object.highlighted);
       } else if (object instanceof ClazzCommunicationMesh) {
-        console.log('highlight comm');
         const { sourceClazz, targetClazz } = object.dataModel;
 
         // this is necessary, since drawable class communications are created on

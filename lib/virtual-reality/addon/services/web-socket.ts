@@ -17,7 +17,7 @@ export default class WebSocket extends Service.extend({
 
   port: string|null = '';
 
-  socketCloseCallback: (() => void)| null = null;
+  socketCloseCallback: ((event: any) => void)| null = null;
 
   eventCallback: ((event: any, data: any) => void)| null = null;
 
@@ -45,9 +45,12 @@ export default class WebSocket extends Service.extend({
     this.updateQueue = [];
   }
 
-  private closeHandler(/* event */) {
+  private closeHandler(event: any) {
+    if (event && event.code && event.target.url) {
+      this.debug(`Connection to Backend-Extension ( ${event.target.url} ) closed, WebSocket close code ${event.code}.`);
+    }
     if (this.socketCloseCallback) {
-      this.socketCloseCallback();
+      this.socketCloseCallback(event);
     }
   }
 
