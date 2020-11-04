@@ -28,21 +28,30 @@ export default class ReplayController extends Controller {
   state = null;
 
   @tracked
+  showVR: boolean = false;
+
+  @tracked
   showTimeline: boolean = true;
 
-  @computed('landscapeRepo.replayApplication')
+  @computed('landscapeRepo.latestApplication', 'showVR')
   get showLandscape() {
-    return !get(this.landscapeRepo, 'replayApplication');
+    return !get(this.landscapeRepo, 'latestApplication') && !this.showVR;
   }
 
   @action
   openLandscapeView() {
+    this.showVR = false;
     set(this.landscapeRepo, 'replayApplication', null);
   }
 
   @action
   showApplication(emberModel: Application) {
     this.landscapeRepo.set('replayApplication', emberModel);
+  }
+
+  @action
+  switchToVR() {
+    this.showVR = true;
   }
 
   @action

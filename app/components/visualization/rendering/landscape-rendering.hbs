@@ -9,26 +9,29 @@
     class="d-flex {{if @showDataSelection "col-8" "col-12"}}"
     style="flex-direction: column; height: 100%"
   >
-    {{#unless @isReplay}}
-      <Visualization::PageSetup::VisualizationNavbar>
-        <Visualization::PageSetup::Navbar::ResetVisualization
-          @resetView={{this.resetView}}
-        />
-        <Visualization::PageSetup::Navbar::PauseReload />
-        <Visualization::PageSetup::Navbar::ColorPickerOpener
-          @addComponent={{@addComponent}}
-        />
-        <Visualization::PageSetup::Navbar::VrToggler
-          @switchToVR={{@switchToVR}}
-        />
-        <Visualization::PageSetup::Navbar::EventOpener
-          @addComponent={{@addComponent}}
-        />
-        <Visualization::PageSetup::Navbar::LandscapeDownloader
-          @landscape={{@landscape}}
-        />
-      </Visualization::PageSetup::VisualizationNavbar>
-    {{/unless}}
+    <Visualization::PageSetup::VisualizationNavbar>
+      <Visualization::PageSetup::Navbar::ResetVisualization
+        @resetView={{this.resetView}}
+      />
+      {{#unless @isReplay}}
+      <Visualization::PageSetup::Navbar::PauseReload />
+      <Visualization::PageSetup::Navbar::ColorPickerOpener
+        @addComponent={{@addComponent}}
+      />
+      {{/unless}}
+      <Visualization::PageSetup::Navbar::VrToggler
+        @switchToVR={{@switchToVR}}
+        @isReplay={{@isReplay}}
+      />
+      {{#unless @isReplay}}
+      <Visualization::PageSetup::Navbar::EventOpener
+        @addComponent={{@addComponent}}
+      />
+      {{/unless}}
+      <Visualization::PageSetup::Navbar::LandscapeDownloader
+        @landscape={{@landscape}}
+      />
+    </Visualization::PageSetup::VisualizationNavbar>
 
     <div
       id="rendering"

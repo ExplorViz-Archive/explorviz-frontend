@@ -19,59 +19,69 @@
 </div>
 <div class="row" style="max-height:100%">
   <div class="col-12" id="vizspace">
-    {{#if this.showLandscape}}
-      {{#if this.landscapeRepo.replayLandscape.systems}}
-        <Visualization::Rendering::LandscapeRendering
-          @landscape={{this.landscapeRepo.replayLandscape}}
-          @font={{@model}}
-          @showApplication={{this.showApplication}}
-          @isReplay={{true}}
-        />
-      {{else}}
-        <div class="container-fluid">
-          <div class="jumbotron">
-            <h2>No replay landscape selected!</h2>
-            <p>
-              Please select a landscape from the timeline.
-              If the timeline is empty, please <i>upload</i> a landscape first.
-            </p>
-          </div>
-          <div class="spinner-center-3" role="status"></div>
-        </div>
-      {{/if}}
-    {{else}}
-      <Visualization::Rendering::ApplicationRendering
-        @application={{this.landscapeRepo.replayApplication}}
+    {{#if this.showVR}}
+      <VrMultiUser
+        @id="landscape1"
+        @landscape={{this.landscapeRepo.replayLandscape}}
         @font={{@model}}
-        @isReplay={{true}}
-        @openLandscapeView={{this.openLandscapeView}}
       />
-    {{/if}}
-    {{!-- timeline --}}
-    <div id="timeline-content">
-      <BsButton
-        @onClick={{this.toggleTimeline}}
-        @type="secondary"
-        @outline={{true}}
-        class="btn-timeline"
-        @title={{if this.showTimeline "Hide Timeline" "Show Timeline"}}
-      >
-        {{#unless this.showTimeline}}
-          <span class="pr-1">Show Timeline</span>
-        {{/unless}}
-        {{svg-jar
-          "chevron-up"
-          id="hidetimeline-icon"
-          class=(if this.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")
-        }}
-      </BsButton>
-      <div id="timeline" class="timeline {{unless this.showTimeline "timelinehide"}}">
-        <Replay::PageSetup::Timeline::PlotlyTimeline
-          @timestamps={{this.timestampRepo.replayTimelineTimestamps}}
-          @clicked={{this.timelineClicked}}
+    {{else}}
+      {{#if this.showLandscape}}
+        {{#if this.landscapeRepo.replayLandscape.systems}}
+          <Visualization::Rendering::LandscapeRendering
+            @landscape={{this.landscapeRepo.replayLandscape}}
+            @font={{@model}}
+            @showApplication={{this.showApplication}}
+            @isReplay={{true}}
+            @addComponent={{this.addComponent}}
+            @switchToVR={{this.switchToVR}}
+          />
+        {{else}}
+          <div class="container-fluid">
+            <div class="jumbotron">
+              <h2>No replay landscape selected!</h2>
+              <p>
+                Please select a landscape from the timeline.
+                If the timeline is empty, please <i>upload</i> a landscape first.
+              </p>
+            </div>
+            <div class="spinner-center-3" role="status"></div>
+          </div>
+        {{/if}}
+      {{else}}
+        <Visualization::Rendering::ApplicationRendering
+          @application={{this.landscapeRepo.replayApplication}}
+          @font={{@model}}
+          @isReplay={{true}}
+          @openLandscapeView={{this.openLandscapeView}}
         />
+      {{/if}}
+      {{!-- timeline --}}
+      <div id="timeline-content">
+        <BsButton
+          @onClick={{this.toggleTimeline}}
+          @type="secondary"
+          @outline={{true}}
+          class="btn-timeline"
+          @title={{if this.showTimeline "Hide Timeline" "Show Timeline"}}
+        >
+          {{#unless this.showTimeline}}
+            <span class="pr-1">Show Timeline</span>
+          {{/unless}}
+          {{svg-jar
+            "chevron-up"
+            id="hidetimeline-icon"
+            class=(if this.showTimeline "octicon align-middle hidetimeline-icon-down" "octicon align-middle")
+          }}
+        </BsButton>
+        <div id="timeline" class="timeline {{unless this.showTimeline "timelinehide"}}">
+          <Replay::PageSetup::Timeline::PlotlyTimeline
+            @timestamps={{this.timestampRepo.replayTimelineTimestamps}}
+            @clicked={{this.timelineClicked}}
+          />
+        </div>
       </div>
-    </div>
+    {{/if}}
   </div>
 </div>
 {{#unless this.showLandscape}}

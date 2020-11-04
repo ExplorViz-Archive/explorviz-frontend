@@ -5,6 +5,7 @@ import { inject as service } from '@ember/service';
 
 interface VrTogglerArgs {
   switchToVR: () => void;
+  isReplay: boolean;
 }
 
 export default class VrToggler extends Component<VrTogglerArgs> {
@@ -13,8 +14,10 @@ export default class VrToggler extends Component<VrTogglerArgs> {
 
   @action
   openVrMode() {
-    if (this.landscapeListener.landscapeRepo.latestLandscape) {
-      this.landscapeListener.stopVisualizationReload();
+    if (this.args.isReplay ? this.landscapeListener.landscapeRepo.replayLandscape : this.landscapeListener.landscapeRepo.latestLandscape) {
+      if (!this.args.isReplay) {
+        this.landscapeListener.stopVisualizationReload();
+      }
       this.args.switchToVR();
     }
   }
