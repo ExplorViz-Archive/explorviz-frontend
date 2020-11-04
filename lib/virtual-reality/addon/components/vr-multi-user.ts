@@ -265,15 +265,6 @@ export default class VrMultiUser extends VrRendering {
     }
   }
 
-  onUtilityGripDown(/* controller: VRController */) {
-    this.showUserList();
-  }
-
-  // eslint-disable-next-line
-  onUtilityGripUp(/* controller: VRController */) {
-    this.hideUserList();
-  }
-
   handlePrimaryInputOn(intersection: THREE.Intersection) {
     if (this.spectateUser.spectatedUser) {
       const { object, uv } = intersection;

@@ -56,6 +56,7 @@ import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/d
 import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
+import ZoomMenu from 'virtual-reality/utils/vr-menus/zoom-menu';
 
 interface Args {
   readonly id: string;
@@ -391,10 +392,16 @@ export default class VrRendering extends Component<Args> {
   }
 
   // eslint-disable-next-line
-  onUtilityGripDown(/* controller: VRController */) {}
+  onUtilityGripDown(/* controller: VRController */) {
+    this.openZoomMenu();
+  }
 
   // eslint-disable-next-line
-  onUtilityGripUp(/* controller: VRController */) {}
+  onUtilityGripUp(/* controller: VRController */) {
+    if (this.mainMenu instanceof ZoomMenu) {
+      this.closeControllerMenu();
+    }
+  }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
@@ -485,6 +492,10 @@ export default class VrRendering extends Component<Args> {
     this.localUser.updateControllers();
 
     this.renderer.render(this.scene, this.camera);
+
+    if (this.mainMenu instanceof ZoomMenu) {
+      this.mainMenu.renderLens();
+    }
   }
 
   @task
@@ -1122,6 +1133,13 @@ export default class VrRendering extends Component<Args> {
       openAdvancedMenu: this.openAdvancedMenu.bind(this),
     });
 
+    this.controllerMainMenus.add(this.mainMenu);
+  }
+
+  openZoomMenu() {
+    this.closeControllerMenu();
+
+    this.mainMenu = new ZoomMenu(this.closeControllerMenu.bind(this), this.renderer, this.scene, this.camera);
     this.controllerMainMenus.add(this.mainMenu);
   }
 

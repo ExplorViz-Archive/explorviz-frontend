@@ -30,19 +30,23 @@ export default abstract class BaseMenu extends BaseMesh {
     });
     super(new THREE.Color(color));
 
-    this.geometry = new THREE.PlaneGeometry(
-      (resolution.width / 512) * 0.3,
-      (resolution.height / 512) * 0.3,
-    );
-    this.material = material;
-
     this.resolution = resolution;
     this.color = color;
     this.items = [];
 
+    this.initGeometry();
+    this.material = material;
+
     this.canvas = document.createElement('canvas');
     this.canvas.width = this.resolution.width;
     this.canvas.height = this.resolution.height;
+  }
+
+  initGeometry() {
+    this.geometry = new THREE.PlaneGeometry(
+      (this.resolution.width / 512) * 0.3,
+      (this.resolution.height / 512) * 0.3,
+    );
   }
 
   update() {
