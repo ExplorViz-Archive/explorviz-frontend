@@ -21,7 +21,6 @@ Router.map(function () {
   this.route('login');
   this.route('visualization');
   this.route('discovery');
-  this.route('replay');
 
   this.route('configuration', function () {
 

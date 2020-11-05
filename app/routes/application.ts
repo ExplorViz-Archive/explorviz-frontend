@@ -1,5 +1,6 @@
 import { action } from '@ember/object';
 import Route from '@ember/routing/route';
+import { perform } from 'ember-concurrency-ts';
 import ApplicationRouteMixin from 'ember-simple-auth/mixins/application-route-mixin';
 import ApplicationController from 'explorviz-frontend/controllers/application';
 
@@ -13,11 +14,11 @@ export default class ApplicationRoute extends Route.extend(ApplicationRouteMixin
   routeAfterAuthentication = 'visualization';
 
   async beforeModel() {
-    await (this.controllerFor('application') as ApplicationController).loadUserAndSettings.perform();
+    await perform((this.controllerFor('application') as ApplicationController).loadUserAndSettings);
   }
 
   async sessionAuthenticated() {
-    await (this.controllerFor('application') as ApplicationController).loadUserAndSettings.perform();
+    await perform((this.controllerFor('application') as ApplicationController).loadUserAndSettings);
 
     super.sessionAuthenticated(...arguments);
   }

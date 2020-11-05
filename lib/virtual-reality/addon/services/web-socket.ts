@@ -1,9 +1,7 @@
 import Service, { inject as service } from '@ember/service';
 import debugLogger from 'ember-debug-logger';
 
-export default class WebSocket extends Service.extend({
-  // anything which *must* be merged to prototype here
-}) {
+export default class WebSocket extends Service {
   @service()
   websockets !: any;
 
@@ -34,9 +32,9 @@ export default class WebSocket extends Service.extend({
   }
 
   closeSocket() {
-    this.websockets.closeSocketFor(`ws://${this.get('host')}:${this.get('port')}/`);
+    this.websockets.closeSocketFor(`ws://${this.host}:${this.port}/`);
     // Close handlers
-    const socket = this.get('_socketRef');
+    const socket = this.socketRef;
     if (socket) {
       socket.off('message', this.messageHandler);
       socket.off('close', this.closeHandler);

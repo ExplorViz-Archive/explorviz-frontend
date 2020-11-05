@@ -1,13 +1,13 @@
 import GlimmerComponent from '@glimmer/component';
-import Component from 'explorviz-frontend/models/component';
+import { Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
 interface Args {
-  component: Component
+  component: Package
 }
 
 export default class ComponentPopup extends GlimmerComponent<Args> {
   get name() {
-    return this.args.component.get('name');
+    return this.args.component.name;
   }
 
   get clazzCount() {
@@ -18,18 +18,18 @@ export default class ComponentPopup extends GlimmerComponent<Args> {
     return this.getPackagesCount(this.args.component);
   }
 
-  getClazzesCount(component: Component): number {
-    let result = component.get('clazzes').get('length');
-    const children = component.get('children');
+  getClazzesCount(component: Package): number {
+    let result = component.classes.length;
+    const children = component.subPackages;
     children.forEach((child) => {
       result += this.getClazzesCount(child);
     });
     return result;
   }
 
-  getPackagesCount(component: Component): number {
-    let result = component.get('children').get('length');
-    const children = component.get('children');
+  getPackagesCount(component: Package): number {
+    let result = component.subPackages.length;
+    const children = component.subPackages;
     children.forEach((child) => {
       result += this.getPackagesCount(child);
     });

@@ -7,17 +7,14 @@ module('Integration | Component | visualization/page-setup/navbar/pause-reload',
   setupRenderingTest(hooks);
 
   test('it renders', async function(assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
+    this.set('toggleVisualizationUpdating', () => {});
 
-    await render(hbs`<Visualization::PageSetup::Navbar::PauseReload />`);
+    await render(hbs`<Visualization::PageSetup::Navbar::PauseReload
+                       @toggleVisualizationUpdating={{this.toggleVisualizationUpdating}}
+                     />`);
 
     let textContent = this.element.textContent;
 
-    if(textContent === null) {
-      assert.ok(null, 'textContent is null');
-    } else {
-      assert.equal(textContent.trim(), '');
-    }
+    assert.ok(textContent !== null && textContent.trim() === '');
   });
 });

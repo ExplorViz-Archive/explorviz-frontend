@@ -1,8 +1,8 @@
 import THREE from 'three';
-import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
+import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 
 export default class CommunicationLayout {
-  model: DrawableClazzCommunication;
+  model: DrawableClassCommunication;
 
   startX: number = 0;
 
@@ -20,7 +20,7 @@ export default class CommunicationLayout {
 
   pointsFor3D: THREE.Vector3[] = [];
 
-  constructor(model: DrawableClazzCommunication) {
+  constructor(model: DrawableClassCommunication) {
     this.model = model;
   }
 

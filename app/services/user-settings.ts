@@ -15,7 +15,7 @@ export default class UserSettings extends Service {
    * @param {string} settingId - The settings's id
    * @memberof UserSettings
    */
-  getUserPreference(this: UserSettings, userId: string, settingId: string) {
+  getUserPreference(userId: string, settingId: string) {
     const allPreferences = this.store.peekAll('userpreference');
     const userPreference = allPreferences.filterBy('userId', userId).filterBy('settingId', settingId).objectAt(0);
 
@@ -31,8 +31,8 @@ export default class UserSettings extends Service {
    * @param {string} settingId - The settings's id
    * @memberof UserSettings
    */
-  getUserPreferenceOrDefaultValue(this: UserSettings, userId: string,
-    type: Setting, settingId: string): number|boolean|undefined {
+  getUserPreferenceOrDefaultValue(userId: string, type: Setting,
+    settingId: string): number|boolean|undefined {
     const userPreference = this.getUserPreference(userId, settingId);
 
     if (userPreference !== undefined) {

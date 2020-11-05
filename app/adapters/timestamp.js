@@ -33,14 +33,11 @@ export default class TimestampAdapter extends JSONAPIAdapter.extend(DataAdapterM
   }
 
   /**
-   * Queries landscape or replay timestamps
+   * Queries landscape timestamps
    * @param {*} query
    */
-  urlForQuery(query) {
+  urlForQuery() {
     const baseUrl = this.buildURL();
-    if (query.type === 'replay') {
-      return `${baseUrl}/timestamps?filter[type]=replay`;
-    }
 
     return `${baseUrl}/timestamps?filter[type]=landscape`;
   }

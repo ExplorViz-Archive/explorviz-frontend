@@ -9,7 +9,7 @@ export default class ConfigurationSettingsRoute extends Route.extend(Authenticat
   @service('current-user')
   currentUser!: CurrentUser;
 
-  model(this: ConfigurationSettingsRoute) {
+  model() {
     const user = this.get('currentUser').get('user');
     return {
       user,

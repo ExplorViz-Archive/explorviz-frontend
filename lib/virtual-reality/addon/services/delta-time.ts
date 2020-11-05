@@ -1,8 +1,6 @@
 import Service from '@ember/service';
 
-export default class DeltaTime extends Service.extend({
-  // anything which *must* be merged to prototype here
-}) {
+export default class DeltaTime extends Service {
   private deltaTime: number = 0; // Time between last two frames in seconds
 
   private lastFrameTime: number = 0; // Time in seconds of last frame

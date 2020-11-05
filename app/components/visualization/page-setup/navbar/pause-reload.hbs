@@ -1,9 +1,9 @@
 <li class="nav-item">
-  {{#if this.landscapeListener.pauseVisualizationReload}}
+  {{#if @visualizationPaused}}
     <div
       class="nav-link-with-cursor"
       title="Resume Visualization"
-      {{on "click" this.toggleVisualizationReload}}
+      {{on "click" @toggleVisualizationUpdating}}
     >
       {{svg-jar "history" class="octicon align-middle navbar-highlight"}}
     </div>
@@ -11,7 +11,7 @@
     <div
       class="nav-link-with-cursor"
       title="Pause Visualization"
-      {{on "click" this.toggleVisualizationReload}}
+      {{on "click" @toggleVisualizationUpdating}}
     >
       {{svg-jar "history" class="octicon align-middle"}}
     </div>
