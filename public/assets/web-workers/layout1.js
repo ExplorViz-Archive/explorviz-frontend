@@ -10,6 +10,8 @@ self.addEventListener('message', function(e) {
 postMessage(true);
 
 const CONVERT_TO_KIELER_FACTOR = 180.0;
+  
+const PADDING = 0.1;
 
 function layout1(landscape, applicationCommunications) {
   let topLevelKielerGraph = {};
@@ -36,14 +38,19 @@ function layout1(landscape, applicationCommunications) {
 
   function createEmptyGraph(id) {
   
+    const spacing = 0.2 * CONVERT_TO_KIELER_FACTOR;
+
     const layoutOptions = {
-      "edgeRouting": "POLYLINE",
-      "spacing": 0.2 * CONVERT_TO_KIELER_FACTOR,
-      "borderSpacing": 0.2 * CONVERT_TO_KIELER_FACTOR,
-      "direction": "RIGHT",
-      "interactive": true,
-      "nodePlace": "LINEAR_SEGMENTS",
-      "unnecessaryBendpoints": true,
+      "elk.edgeRouting": "POLYLINE",
+      "elk.hierarchyHandling": "INCLUDE_CHILDREN",
+      "elk.spacing.nodeNode": spacing,
+      "elk.spacing.edgeNode": 2 * spacing,
+      "elk.layered.spacing.edgeEdgeBetweenLayers": 2.5 * spacing,
+      "elk.layered.spacing.nodeNodeBetweenLayers": 2.5 * spacing,
+      "elk.direction": "RIGHT",
+      "elk.interactive": true,
+      "elk.layered.nodePlacement.strategy": "LINEAR_SEGMENTS",
+      "elk.layered.unnecessaryBendpoints": true,
       "edgeSpacingFactor": 1.0
     };
   
@@ -87,7 +94,6 @@ function layout1(landscape, applicationCommunications) {
 
   function createNodeAndItsApplications(kielerParentGraph, node) {
 
-    const PADDING = 0.1;
     const NODE_LABEL_HEIGHT = 0.2;
     const DEFAULT_WIDTH = 1.5;
     const DEFAULT_HEIGHT = 0.75;
@@ -95,12 +101,10 @@ function layout1(landscape, applicationCommunications) {
     const nodeKielerGraph = createEmptyGraph(node.ipAddress);
     modelIdToGraph.set(node.ipAddress, nodeKielerGraph);
 
-    nodeKielerGraph.padding = {
-      left: PADDING * CONVERT_TO_KIELER_FACTOR,
-      right: PADDING * CONVERT_TO_KIELER_FACTOR,
-      top: PADDING * CONVERT_TO_KIELER_FACTOR,
-      bottom: 6 * PADDING * CONVERT_TO_KIELER_FACTOR
-    };
+    // kieler scaled padding
+    const ksp = 2.5 * PADDING * CONVERT_TO_KIELER_FACTOR;
+
+    nodeKielerGraph.properties['elk.padding'] = `[top=${ksp}, left=${ksp}, bottom=${3 * ksp}, right=${ksp}]`;
 
     const minWidth = Math.max(DEFAULT_WIDTH *
       CONVERT_TO_KIELER_FACTOR,
@@ -112,10 +116,9 @@ function layout1(landscape, applicationCommunications) {
     if (!nodeKielerGraph.properties || !kielerParentGraph.children)
       return;
 
-    nodeKielerGraph.properties["de.cau.cs.kieler.sizeConstraint"] = "MINIMUM_SIZE";
-    nodeKielerGraph.properties["de.cau.cs.kieler.minWidth"] = minWidth;
-    nodeKielerGraph.properties["de.cau.cs.kieler.minHeight"] = minHeight;
-    nodeKielerGraph.properties["de.cau.cs.kieler.klay.layered.contentAlignment"] = "V_CENTER,H_CENTER";
+    nodeKielerGraph.properties["elk.nodeSize.constraints"] = "MINIMUM_SIZE";
+    nodeKielerGraph.properties["elk.nodeSize.minimum"] =  "( "+ minWidth+", " + minHeight + "})";
+    nodeKielerGraph.properties["elk.contentAlignment"] = "V_CENTER,H_CENTER";
 
     kielerParentGraph.children.push(nodeKielerGraph);
 
@@ -183,7 +186,7 @@ function layout1(landscape, applicationCommunications) {
           width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR,
           height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
           properties: {
-            "de.cau.cs.kieler.portSide": "EAST"
+            "elk.port.side": "EAST"
           },
           x: 0,
           y: 0
@@ -220,7 +223,7 @@ function layout1(landscape, applicationCommunications) {
           width: DEFAULT_PORT_WIDTH * CONVERT_TO_KIELER_FACTOR,
           height: DEFAULT_PORT_HEIGHT * CONVERT_TO_KIELER_FACTOR,
           properties: {
-            "de.cau.cs.kieler.portSide": "WEST"
+            "elk.port.side": "WEST"
           },
           x: 0,
           y: 0

@@ -27,6 +27,7 @@ import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/st
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
+import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 
 interface Args {
   readonly id: string;
@@ -49,6 +50,21 @@ type PopupData = {
   mouseY: number,
   entity: Node | Application,
 };
+
+type Point = {
+  x: number,
+  y: number
+};
+
+interface Layout1Return {
+  graph: ElkNode,
+  modelIdToPoints: Map<string, Point[]>,
+}
+
+interface Layout3Return {
+  modelIdToLayout: Map<string, SimplePlaneLayout>,
+  modelIdToPoints: Map<string, Point[]>,
+}
 
 /**
 * Renderer for landscape visualization.
@@ -106,6 +122,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   readonly hoverHandler: HoverEffectHandler = new HoverEffectHandler();
 
+  readonly elk: ELK;
+
   @tracked
   popupData: PopupData | null = null;
 
@@ -125,6 +143,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.render = this.render.bind(this);
 
     this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
+
+    this.elk = new ElkConstructor({
+      workerUrl: './assets/web-workers/elk-worker.min.js',
+    });
   }
 
   @action
@@ -163,7 +185,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    /*     const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'showFpsCounter');
+    /*
+    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting',
+      'showFpsCounter');
 
     if (showFpsCounter) {
       this.threePerformance = new THREEPerformance();
@@ -378,13 +402,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
         dynamicLandscapeData);
 
       // Do layout pre-processing (1st step)
-      const {
-        graph,
-        modelIdToPoints,
-      }: any = yield this.worker.postMessage('layout1', { structureLandscapeData, applicationCommunications });
+      const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
+        structureLandscapeData,
+        applicationCommunications,
+      });
 
       // Run actual klay function (2nd step)
-      const newGraph: any = yield this.worker.postMessage('klay', { graph });
+      const newGraph: ElkNode = yield this.elk.layout(graph);
 
       // Post-process layout graph (3rd step)
       const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
@@ -398,7 +422,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       this.landscapeObject3D.removeAllChildren();
       this.landscapeObject3D.resetMeshReferences();
 
-      const { modelIdToLayout, modelIdToPoints: modelIdToPointsComplete } = layoutedLandscape;
+      const {
+        modelIdToLayout,
+        modelIdToPoints: modelIdToPointsComplete,
+      }: Layout3Return = layoutedLandscape;
 
       const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
 
@@ -442,7 +469,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
       this.debug('Landscape loaded');
     } catch (e) {
-      console.log(e);
+      // console.log(e);
     }
   }
 

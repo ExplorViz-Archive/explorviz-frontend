@@ -2,7 +2,6 @@
 import Controller from '@ember/controller';
 import {
   action,
-  get,
   set,
 } from '@ember/object';
 import { inject as service } from '@ember/service';
@@ -147,7 +146,7 @@ export default class VisualizationController extends Controller {
 
   @action
   resetView() {
-    get(this, 'plotlyTimelineRef').continueTimeline(get(this, 'selectedTimestampRecords'));
+    this.plotlyTimelineRef.continueTimeline(this.selectedTimestampRecords);
   }
 
   @action
@@ -232,7 +231,7 @@ export default class VisualizationController extends Controller {
     if (this.visualizationPaused) {
       this.visualizationPaused = false;
       set(this, 'selectedTimestampRecords', []);
-      get(this, 'plotlyTimelineRef').resetHighlighting();
+      this.plotlyTimelineRef.resetHighlighting();
       AlertifyHandler.showAlertifyMessage('Visualization resumed!');
     }
   }
@@ -245,7 +244,7 @@ export default class VisualizationController extends Controller {
   }
 
   initRendering() {
-    get(this, 'landscapeListener').initLandscapePolling();
+    this.landscapeListener.initLandscapePolling();
   }
 
   willDestroy() {

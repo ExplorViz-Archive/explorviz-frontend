@@ -35,9 +35,9 @@ export default class VisualizationRoute extends Route.extend(UnauthenticatedRout
   }
 
   // @Override
-  setupController(controller: VisualizationController, model: any) {
+  setupController(controller: VisualizationController, model: any, transition: any) {
     // Call _super for default behavior
-    super.setupController(controller, model);
+    super.setupController(controller, model, transition);
 
     controller.initRendering();
   }

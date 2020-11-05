@@ -55,7 +55,6 @@ export default class LoginForm extends Component {
       this.debug('Error when resetting login page labels', exception);
     }
 
-
     if (!LoginForm.checkForValidInput(user)) {
       const errorMessage = 'Enter valid credentials.';
       set(this.session.session.content, 'errorMessage', errorMessage);
