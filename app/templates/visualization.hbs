@@ -55,11 +55,11 @@
     {{!-- timeline --}}
     <div id="timeline-content">
       <BsButton
+        class="btn-timeline"
+        title={{if this.showTimeline "Hide Timeline" "Show Timeline"}}
         @onClick={{this.toggleTimeline}}
         @type="secondary"
         @outline={{true}}
-        class="btn-timeline"
-        @title={{if this.showTimeline "Hide Timeline" "Show Timeline"}}
       >
         {{#unless this.showTimeline}}
           <span class="pr-1">Show Timeline</span>
@@ -83,10 +83,10 @@
 {{#unless this.showLandscapeView}}
   <div style="position: absolute!important">
     <BsButton
+      title="Back to Landscape"
       @onClick={{this.openLandscapeView}}
       @type="secondary"
       @outline={{true}}
-      @title="Back to Landscape"
     >
       {{svg-jar "reply" class="octicon align-middle"}}
     </BsButton>
