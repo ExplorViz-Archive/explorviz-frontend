@@ -28,6 +28,7 @@ import UserListMenu from 'virtual-reality/utils/vr-menus/user-list-menu';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { perform } from 'ember-concurrency-ts';
+import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 
 export default class VrMultiUser extends VrRendering {
   // #region CLASS FIELDS AND GETTERS
@@ -45,9 +46,6 @@ export default class VrMultiUser extends VrRendering {
 
   @service('spectate-user')
   spectateUser!: SpectateUser;
-
-  @service()
-  store!: DS.Store;
 
   // Used to format and send messages to the backend
   sender!: Sender;
@@ -181,7 +179,7 @@ export default class VrMultiUser extends VrRendering {
       this.hideUserList();
     }
     const remoteUsers = Array.from(this.idToRemoteUser.values());
-    const menu = new UserListMenu(this.localUser, remoteUsers, this.currentUser.username);
+    const menu = new UserListMenu(this.localUser, remoteUsers, this.localUser.userID);
     menu.name = 'userlist-menu';
     this.camera.add(menu);
   }
@@ -404,13 +402,13 @@ export default class VrMultiUser extends VrRendering {
   onSelfConnecting(data: any) {
     // Use ID as default
     // TODO: Access name, given by session
-    const name = this.currentUser.username;
+    // const name = this.currentUser.username;
     this.localUser.userID = data.id;
     this.localUser.color = new THREE.Color().fromArray(data.color);
 
     const JSONObj = {
       event: 'connect_request',
-      name,
+      name: this.localUser.userID,
     };
 
     this.webSocket.enqueueIfOpen(JSONObj);
@@ -589,8 +587,10 @@ export default class VrMultiUser extends VrRendering {
 
     this.removeAllApplications();
 
+    const { structureLandscapeData } = this.args.landscapeData;
+
     openApps.forEach((app: any) => {
-      const application = this.store.peekRecord('application', app.id);
+      const application = getApplicationInLandscapeById(structureLandscapeData, app.id);
       if (application) {
         perform(this.addApplicationTask, application, new THREE.Vector3(),
           (applicationObject3D: ApplicationObject3D) => {
@@ -645,7 +645,9 @@ export default class VrMultiUser extends VrRendering {
   }
 
   onAppOpened(id: string, position: number[], quaternion: number[]) {
-    const application = this.store.peekRecord('application', id);
+    const { structureLandscapeData } = this.args.landscapeData;
+    const application = getApplicationInLandscapeById(structureLandscapeData, id);
+
     if (application) {
       super.addApplication(application, new THREE.Vector3().fromArray(position));
 

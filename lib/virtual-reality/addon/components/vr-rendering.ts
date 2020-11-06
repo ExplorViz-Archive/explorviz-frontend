@@ -1119,7 +1119,7 @@ export default class VrRendering extends Component<Args> {
     }
 
     application.position.copy(position);
-    /* application.quaternion.copy(quaternion); */
+    application.quaternion.copy(quaternion);
   }
 
   // eslint-disable-next-line
