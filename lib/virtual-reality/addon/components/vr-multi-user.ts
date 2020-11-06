@@ -657,7 +657,11 @@ export default class VrMultiUser extends VrRendering {
   }
 
   onAppClosed(id: string) {
-    this.applicationGroup.removeApplicationById(id);
+    const application = this.applicationGroup.getApplication(id);
+
+    if (application !== undefined) {
+      super.removeApplication(application);
+    }
   }
 
   onComponentUpdate(isFoundation: boolean, appID: string, componentID: string) {
