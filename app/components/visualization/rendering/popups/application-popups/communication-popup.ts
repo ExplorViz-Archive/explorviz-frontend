@@ -1,37 +1,24 @@
 import GlimmerComponent from '@glimmer/component';
-import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
+import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 
 interface Args {
-  communication: DrawableClazzCommunication
+  communication: DrawableClassCommunication
 }
 
 export default class CommunicationPopup extends GlimmerComponent<Args> {
   get isBidirectional() {
-    return this.args.communication.get('isBidirectional');
+    return this.args.communication.bidirectional;
   }
 
   get sourceClazz() {
-    return this.args.communication.get('sourceClazz').get('name');
+    return this.args.communication.sourceClass.name;
   }
 
   get targetClazz() {
-    return this.args.communication.get('targetClazz').get('name');
+    return this.args.communication.targetClass.name;
   }
 
   get requests() {
-    return this.args.communication.get('requests');
-  }
-
-  get traceSize() {
-    return this.args.communication.get('containedTraces').size;
-  }
-
-  get responseTime() {
-    function round(value: number, precision: number): number {
-      const multiplier = 10 ** precision;
-      return Math.round(value * multiplier) / multiplier;
-    }
-
-    return round(this.args.communication.get('averageResponseTime'), 2);
+    return this.args.communication.totalRequests;
   }
 }

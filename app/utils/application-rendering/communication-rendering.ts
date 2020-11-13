@@ -4,7 +4,7 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-
+import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
 
 export default class CommunicationRendering {
   // Functions as parent object for all application objects
@@ -16,23 +16,27 @@ export default class CommunicationRendering {
   // Used to access communication drawing preferences
   currentUser: CurrentUser;
 
+  // Maps model ids to layouting information
+  boxLayoutMap: Map<string, BoxLayout>;
+
   constructor(applicationObject3D: ApplicationObject3D, configuration: Configuration,
-    currentUser: CurrentUser) {
+    currentUser: CurrentUser, boxLayoutMap: Map<string, BoxLayout>) {
     this.applicationObject3D = applicationObject3D;
     this.configuration = configuration;
     this.currentUser = currentUser;
+    this.boxLayoutMap = boxLayoutMap;
   }
 
   /**
-   * Computes commnication and communication arrows and adds them to the
+   * Computes communication and communication arrows and adds them to the
    * applicationObject3D
    *
    * @param boxLayoutMap Contains box layout informationen which
    *                     is needed for the communication layouting
    */
-  addCommunication(boxLayoutMap: Map<string, BoxLayout>) {
+  addCommunication(drawableClassCommunications: DrawableClassCommunication[]) {
     const application = this.applicationObject3D.dataModel;
-    const applicationLayout = boxLayoutMap.get(application.id);
+    const applicationLayout = this.boxLayoutMap.get(application.pid);
 
     if (applicationLayout === undefined) {
       return;
@@ -44,7 +48,8 @@ export default class CommunicationRendering {
     this.applicationObject3D.removeAllCommunication();
 
     // Compute communication Layout
-    const commLayoutMap = applyCommunicationLayout(this.applicationObject3D, boxLayoutMap);
+    const commLayoutMap = applyCommunicationLayout(this.applicationObject3D,
+      this.boxLayoutMap, drawableClassCommunications);
 
     // Retrieve color preferences
     const {
@@ -54,15 +59,14 @@ export default class CommunicationRendering {
     } = this.configuration.applicationColors;
 
     // Retrieve curve preferences
-    const maybeCurveHeight = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
+    const maybeCurveHeight = 20;
+    // this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
     const curveHeight = typeof maybeCurveHeight === 'number' ? maybeCurveHeight : 0.0;
     const isCurved = curveHeight !== 0.0;
 
-    const drawableClazzCommunications = application.get('drawableClazzCommunications');
-
     // Render all drawable communications
-    drawableClazzCommunications.forEach((drawableClazzComm) => {
-      const commLayout = commLayoutMap.get(drawableClazzComm.get('id'));
+    drawableClassCommunications.forEach((drawableClazzComm) => {
+      const commLayout = commLayoutMap.get(drawableClazzComm.id);
 
       // No layouting information available due to hidden communication
       if (!commLayout) {
@@ -80,7 +84,8 @@ export default class CommunicationRendering {
       // Add arrow indicators for communication
       const ARROW_OFFSET = 0.8;
       const arrowHeight = isCurved ? curveHeight / 2 + ARROW_OFFSET : ARROW_OFFSET;
-      const arrowThickness = this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
+      const arrowThickness = 0.5;
+      // this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
       const arrowColorHex = arrowColor.getHex();
 
       if (typeof arrowThickness === 'number' && arrowThickness > 0.0) {

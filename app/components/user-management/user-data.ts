@@ -2,7 +2,7 @@ import { action, set } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import { task } from 'ember-concurrency-decorators';
+import { dropTask, task } from 'ember-concurrency-decorators';
 import DS from 'ember-data';
 import Role from 'explorviz-frontend/models/role';
 import User from 'explorviz-frontend/models/user';
@@ -30,9 +30,8 @@ export default class UserData extends Component<IArgs> {
   @tracked
   rolesChange: string[]|null = null;
 
-  @task({ drop: true })
-  // eslint-disable-next-line
-  saveUserChanges = task(function* (this: UserData) {
+  @dropTask*
+  saveUserChanges() {
     const { usernameChange, passwordChange, rolesChange } = this;
 
     const { user } = this.args;
@@ -72,14 +71,13 @@ export default class UserData extends Component<IArgs> {
     } else {
       AlertifyHandler.showAlertifyError('User not found.');
     }
-  });
+  }
 
-  @task
-  // eslint-disable-next-line
-  getRoles = task(function* (this: UserData) {
+  @task*
+  getRoles() {
     const roles: DS.RecordArray<Role> = yield this.store.findAll('role', { reload: true });
     this.roles = roles.toArray().map((role: Role) => role.id);
-  });
+  }
 
   constructor(owner: any, args: IArgs) {
     super(owner, args);
@@ -87,7 +85,7 @@ export default class UserData extends Component<IArgs> {
     this.initFields();
   }
 
-  initFields(this: UserData) {
+  initFields() {
     const { user } = this.args;
 
     if (user) {

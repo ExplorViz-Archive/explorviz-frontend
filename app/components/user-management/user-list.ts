@@ -4,7 +4,7 @@ import RouterService from '@ember/routing/router-service';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import { task } from 'ember-concurrency-decorators';
+import { dropTask, enqueueTask } from 'ember-concurrency-decorators';
 import DS from 'ember-data';
 import User from 'explorviz-frontend/models/user';
 import CurrentUser from 'explorviz-frontend/services/current-user';
@@ -46,9 +46,8 @@ export default class UserList extends Component<IArgs> {
   @tracked
   showDeleteUsersDialog: boolean = false;
 
-  @task({ enqueue: true })
-  // eslint-disable-next-line
-  deleteUsers = task(function* (this: UserList) {
+  @enqueueTask*
+  deleteUsers() {
     // delete all selected users
     const listOfUsersToDelete: User[] = [];
     Object.entries(this.selected).forEach(([id, bool]) => {
@@ -68,29 +67,26 @@ export default class UserList extends Component<IArgs> {
     } finally {
       this.showDeleteUsersDialog = false;
     }
-  });
+  }
 
-  @task({ drop: true })
+  @dropTask*
   // eslint-disable-next-line
-  updateUserList = task(function *(this: UserList) {
+  updateUserList() {
     yield this.args.refreshUsers();
-  });
+  }
 
-  @task({ drop: true })
-  // eslint-disable-next-line
-  openUserCreation = task(function *(this: UserList) {
+  @dropTask*
+  openUserCreation() {
     yield this.router.transitionTo('configuration.usermanagement.new');
-  });
+  }
 
-  @task({ drop: true })
-  // eslint-disable-next-line
-  openUserEdit = task(function *(this: UserList, userId: string) {
+  @dropTask*
+  openUserEdit(userId: string) {
     yield this.router.transitionTo('configuration.usermanagement.edit', userId);
-  });
+  }
 
-  @task({ enqueue: true })
-  // eslint-disable-next-line
-  deleteUser = task(function *(this: UserList, user: User) {
+  @enqueueTask*
+  deleteUser(user: User) {
     try {
       const { username } = user;
       yield this.args.deleteUsers([user]);
@@ -99,7 +95,7 @@ export default class UserList extends Component<IArgs> {
     } catch (reason) {
       UserList.showReasonErrorAlert(reason);
     }
-  });
+  }
 
   @action
   resetTable(tableElement: HTMLDivElement) {

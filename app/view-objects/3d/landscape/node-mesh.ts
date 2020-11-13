@@ -1,9 +1,7 @@
 import THREE from 'three';
-import Node from 'explorviz-frontend/models/node';
+import { Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import PlaneMesh from './plane-mesh';
 import PlaneLayout from '../../layout-models/plane-layout';
-import NodeGroupMesh from './nodegroup-mesh';
-
 
 export default class NodeMesh extends PlaneMesh {
   dataModel: Node;
@@ -25,26 +23,14 @@ export default class NodeMesh extends PlaneMesh {
    *
    * @param parent The parent mesh of this node
    */
-  getDisplayName(parent: THREE.Mesh | undefined) {
+  getDisplayName() {
     const node = this.dataModel;
 
-    // Display ip address as default name
-    if (!(parent instanceof NodeGroupMesh)) {
-      return node.get('ipAddress');
+    if (node.hostName && node.hostName.length !== 0) {
+      return node.hostName;
     }
 
-    const parentModel = parent.dataModel;
-
-    if (parent.opened
-      && node.get('name') && node.get('name').length > 0 && !node.get('name').startsWith('<')) {
-      return node.get('name');
-    } if (!parent.opened) {
-      // Display parent name (e.g. range of ip-addresses) if only
-      // this node is visible with parent nodegroup
-      return parentModel.get('name');
-    }
-
-    return node.get('ipAddress');
+    return node.ipAddress;
   }
 
   setToDefaultPosition(centerPoint: THREE.Vector2) {

@@ -1,11 +1,7 @@
-
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { observes } from '@ember-decorators/object';
 import Controller from '@ember/controller';
 import {
   action,
-  computed,
-  get,
   set,
 } from '@ember/object';
 import { inject as service } from '@ember/service';
@@ -13,10 +9,18 @@ import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-set
 import Timestamp from 'explorviz-frontend/models/timestamp';
 import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import { tracked } from '@glimmer/tracking';
-import Application from 'explorviz-frontend/models/application';
+import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
+import debugLogger from 'ember-debug-logger';
+
+export interface LandscapeData {
+  structureLandscapeData: StructureLandscapeData;
+  dynamicLandscapeData: DynamicLandscapeData;
+  application?: Application;
+}
 
 /**
  * TODO
@@ -28,17 +32,11 @@ import Application from 'explorviz-frontend/models/application';
  * @submodule visualization
  */
 export default class VisualizationController extends Controller {
-  @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
-
   @service('landscape-listener') landscapeListener!: LandscapeListener;
 
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
   @service('reload-handler') reloadHandler!: ReloadHandler;
-
-  state = null;
-
-  type = 'landscape';
 
   plotlyTimelineRef!: PlotlyTimeline;
 
@@ -53,36 +51,102 @@ export default class VisualizationController extends Controller {
   @tracked
   showTimeline: boolean = true;
 
-  // eslint-disable-next-line ember/no-observers
-  @observes('landscapeListener.pauseVisualizationReload')
-  timelineResetObserver() {
-    // reset highlighting and selection in timeline, if unpause was clicked
-    if (!get(this.landscapeListener, 'pauseVisualizationReload')) {
-      set(this, 'selectedTimestampRecords', []);
-      get(this, 'plotlyTimelineRef').resetHighlighting();
+  @tracked
+  landscapeData: LandscapeData|null = null;
+
+  @tracked
+  visualizationPaused = false;
+
+  debug = debugLogger();
+
+  get showLandscapeView() {
+    return (this.landscapeData !== null && this.landscapeData.application === undefined)
+      || this.landscapeData === null;
+  }
+
+  get isLandscapeExistendAndEmpty() {
+    return this.landscapeData !== null
+      && this.landscapeData.structureLandscapeData.nodes.length === 0;
+  }
+
+  get allLandscapeDataExistsAndNotEmpty() {
+    return this.landscapeData !== null
+      && this.landscapeData.structureLandscapeData.nodes.length > 0;
+  }
+
+  get showApplicationView() {
+    return this.landscapeData !== null && this.landscapeData.application !== undefined;
+  }
+
+  @action
+  receiveNewLandscapeData(structureData: StructureLandscapeData,
+    dynamicData: DynamicLandscapeData) {
+    if (!this.visualizationPaused) {
+      this.updateLandscape(structureData, dynamicData);
     }
   }
 
-  @computed('landscapeRepo.latestApplication')
-  get showLandscape() {
-    return !get(this.landscapeRepo, 'latestApplication');
+  updateLandscape(structureData: StructureLandscapeData,
+    dynamicData: DynamicLandscapeData) {
+    let application;
+    if (this.landscapeData !== null) {
+      application = this.landscapeData.application;
+      if (application !== undefined) {
+        const newApplication = VisualizationController.getApplicationFromLandscapeByPid(
+          application.pid, structureData,
+        );
+
+        if (newApplication) {
+          application = newApplication;
+        }
+      }
+    }
+    this.landscapeData = {
+      structureLandscapeData: structureData,
+      dynamicLandscapeData: dynamicData,
+      application,
+    };
+  }
+
+  private static getApplicationFromLandscapeByPid(pid: string,
+    structureData: StructureLandscapeData) {
+    let foundApplication: Application|undefined;
+    structureData.nodes.forEach((node) => {
+      node.applications.forEach((application) => {
+        if (application.pid === pid) {
+          foundApplication = application;
+        }
+      });
+    });
+
+    return foundApplication;
   }
 
   @action
   openLandscapeView() {
     this.closeDataSelection();
-    this.landscapeRepo.set('latestApplication', null);
+    if (this.landscapeData !== null) {
+      this.landscapeData = {
+        ...this.landscapeData,
+        application: undefined,
+      };
+    }
   }
 
   @action
-  showApplication(emberModel: Application) {
+  showApplication(app: Application) {
     this.closeDataSelection();
-    this.landscapeRepo.set('latestApplication', emberModel);
+    if (this.landscapeData !== null) {
+      this.landscapeData = {
+        ...this.landscapeData,
+        application: app,
+      };
+    }
   }
 
   @action
   resetView() {
-    get(this, 'plotlyTimelineRef').continueTimeline(get(this, 'selectedTimestampRecords'));
+    this.plotlyTimelineRef.continueTimeline(this.selectedTimestampRecords);
   }
 
   @action
@@ -123,9 +187,23 @@ export default class VisualizationController extends Controller {
   }
 
   @action
-  timelineClicked(timestampRecordArray: Timestamp[]) {
-    set(this, 'selectedTimestampRecords', timestampRecordArray);
-    get(this, 'reloadHandler').loadLandscapeById(timestampRecordArray[0].get('timestamp'));
+  async timelineClicked(timestampRecordArray: Timestamp[]) {
+    if (this.selectedTimestampRecords.length > 0
+      && timestampRecordArray[0] === this.selectedTimestampRecords[0]) {
+      return;
+    }
+    this.pauseVisualizationUpdating();
+    try {
+      const [structureData, dynamicData] = await
+      this.reloadHandler.loadLandscapeByTimestamp(timestampRecordArray[0].get('timestamp'));
+
+      this.updateLandscape(structureData, dynamicData);
+      set(this, 'selectedTimestampRecords', timestampRecordArray);
+    } catch (e) {
+      this.debug('Landscape couldn\'t be requested!', e);
+      AlertifyHandler.showAlertifyMessage('Landscape couldn\'t be requested!');
+      this.resumeVisualizationUpdating();
+    }
   }
 
   @action
@@ -139,8 +217,40 @@ export default class VisualizationController extends Controller {
     this.showTimeline = !this.showTimeline;
   }
 
+  @action
+  toggleVisualizationUpdating() {
+    // TODO: need to notify the timeline
+    if (this.visualizationPaused) {
+      this.resumeVisualizationUpdating();
+    } else {
+      this.pauseVisualizationUpdating();
+    }
+  }
+
+  resumeVisualizationUpdating() {
+    if (this.visualizationPaused) {
+      this.visualizationPaused = false;
+      set(this, 'selectedTimestampRecords', []);
+      this.plotlyTimelineRef.resetHighlighting();
+      AlertifyHandler.showAlertifyMessage('Visualization resumed!');
+    }
+  }
+
+  pauseVisualizationUpdating() {
+    if (!this.visualizationPaused) {
+      this.visualizationPaused = true;
+      AlertifyHandler.showAlertifyMessage('Visualization paused!');
+    }
+  }
+
   initRendering() {
-    get(this, 'landscapeListener').initSSE();
+    this.landscapeListener.initLandscapePolling();
+  }
+
+  willDestroy() {
+    if (this.landscapeListener.timer !== null) {
+      clearTimeout(this.landscapeListener.timer);
+    }
   }
 }
 

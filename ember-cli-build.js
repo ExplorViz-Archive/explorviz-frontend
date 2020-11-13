@@ -44,7 +44,7 @@ module.exports = (defaults) => {
   });
 
   // export for threex.dynamictexture
-  app.import('vendor/three.min.js', {
+  app.import('node_modules/three/build/three.min.js', {
     prepend: true,
   });
 

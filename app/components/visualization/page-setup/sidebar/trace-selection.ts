@@ -1,32 +1,30 @@
-
 import { action, computed } from '@ember/object';
-import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import DS from 'ember-data';
-import Clazz from 'explorviz-frontend/models/clazz';
-import Trace from 'explorviz-frontend/models/trace';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
-import TraceStep from 'explorviz-frontend/models/tracestep';
-import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
-import Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
+import {
+  Span, Trace,
+} from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import { Class, Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { getHashCodeToClassMap } from 'explorviz-frontend/utils/landscape-structure-helpers';
+import {
+  calculateDuration, getSortedTraceSpans, sortTracesByDuration, sortTracesById,
+} from 'explorviz-frontend/utils/trace-helpers';
 
 export type TimeUnit = 'ns' | 'ms' | 's';
 
 interface Args {
-  removeComponent(componentPath: string): void,
-  highlightTrace(trace: Trace, traceStep: number): void,
-  moveCameraTo(emberModel: Clazz|ClazzCommunication): void,
-  highlighter: Highlighting;
+  moveCameraTo(emberModel: Class|Span): void;
+  selectTrace(trace: Trace): void;
+  readonly structureData: StructureLandscapeData;
+  readonly application: Application;
+  readonly selectedTrace: Trace;
+  readonly applicationTraces: Trace[];
 }
 
 export default class TraceSelection extends Component<Args> {
   // default time units
   @tracked
   traceTimeUnit: TimeUnit = 'ms';
-
-  @tracked
-  traceStepTimeUnit: TimeUnit = 'ms';
 
   @tracked
   sortBy: any = 'traceId';
@@ -37,165 +35,143 @@ export default class TraceSelection extends Component<Args> {
   @tracked
   filterTerm: string = '';
 
-  @tracked
-  filterInput: string = '';
-
-  @tracked
-  isReplayAnimated: boolean = true;
-
-  @tracked
-  selectedTrace: Trace|null = null;
-
-  @tracked
-  currentTraceStep: TraceStep|null = null;
-
-  @service('store')
-  store!: DS.Store;
-
-  @service('repos/landscape-repository')
-  landscapeRepo!: LandscapeRepository;
-
-  // Compute current traces when highlighting changes
-  @computed('landscapeRepo.latestApplication', 'args.highlighter.highlightedEntity', 'sortBy', 'isSortedAsc', 'filterTerm')
+  @computed('args.selectedTrace', 'firstClasses', 'lastClasses', 'sortBy', 'isSortedAsc', 'filterTerm')
   get traces() {
-    // Only show highlighted trace and set highlighting status accordingly
-    const maybeTrace = this.args.highlighter.highlightedEntity;
-    if (maybeTrace instanceof Trace) {
-      this.selectedTrace = maybeTrace;
-      return [maybeTrace];
-    }
-
-    // Reset selected trace
-    this.selectedTrace = null;
-
-    const { latestApplication } = this.landscapeRepo;
-    if (latestApplication === null) {
-      return [];
-    }
-
-    return this.filterAndSortTraces(latestApplication.get('traces'));
+    return this.filterAndSortTraces();
   }
 
-  filterAndSortTraces(this: TraceSelection, traces: DS.PromiseManyArray<Trace>) {
-    if (!traces) {
-      return [];
+  @computed('traces')
+  get traceDurations() {
+    return this.traces.map((trace) => calculateDuration(trace));
+  }
+
+  @computed('args.applicationTraces')
+  get firstClasses() {
+    const sortedSpanLists = this.args.applicationTraces
+      .map((trace) => getSortedTraceSpans(trace));
+
+    const hashCodeToClassInLandscapeMap = getHashCodeToClassMap(this.args.structureData);
+
+    const traceIdToFirstClassMap = new Map<string, Class>();
+
+    this.args.applicationTraces.forEach((trace, index) => {
+      const spanList = sortedSpanLists[index];
+
+      const firstClassHashCode = spanList[0].hashCode;
+      const firstClass = hashCodeToClassInLandscapeMap.get(firstClassHashCode)!;
+
+      traceIdToFirstClassMap.set(trace.traceId, firstClass);
+    });
+
+    return traceIdToFirstClassMap;
+  }
+
+  @computed('args.applicationTraces')
+  get lastClasses() {
+    const sortedSpanLists = this.args.applicationTraces
+      .map((trace) => getSortedTraceSpans(trace));
+
+    const hashCodeToClassInLandscapeMap = getHashCodeToClassMap(this.args.structureData);
+
+    const traceIdToLastClassMap = new Map<string, Class>();
+
+    this.args.applicationTraces.forEach((trace, index) => {
+      const spanList = sortedSpanLists[index];
+
+      const lastClassHashCode = spanList[spanList.length - 1].hashCode;
+      const lastClass = hashCodeToClassInLandscapeMap.get(lastClassHashCode)!;
+
+      traceIdToLastClassMap.set(trace.traceId, lastClass);
+    });
+
+    return traceIdToLastClassMap;
+  }
+
+  filterAndSortTraces() {
+    if (this.args.selectedTrace) {
+      return [this.args.selectedTrace];
     }
 
     const filteredTraces: Trace[] = [];
     const filter = this.filterTerm;
-    traces.forEach((trace) => {
-      const sourceClazz = trace.get('sourceClazz');
-      const targetClazz = trace.get('targetClazz');
+    this.args.applicationTraces.forEach((trace) => {
       if (filter === ''
-        || trace.get('traceId').includes(filter)
-        || (sourceClazz !== undefined && sourceClazz.get('name').toLowerCase().includes(filter))
-        || (targetClazz !== undefined && targetClazz.get('name').toLowerCase().includes(filter))) {
+        || trace.traceId.toLowerCase().includes(filter)) {
+        filteredTraces.push(trace);
+        return;
+      }
+
+      const firstClass = this.firstClasses.get(trace.traceId);
+      const lastClass = this.lastClasses.get(trace.traceId);
+
+      if ((firstClass && firstClass.name.toLowerCase().includes(filter))
+        || (lastClass && lastClass.name.toLowerCase().includes(filter))) {
         filteredTraces.push(trace);
       }
     });
 
-    if (this.isSortedAsc) {
-      filteredTraces.sort((a, b) => {
-        if (a.get(this.sortBy) > b.get(this.sortBy)) {
-          return 1;
-        }
-        if (b.get(this.sortBy) > a.get(this.sortBy)) {
-          return -1;
-        }
-        return 0;
-      });
-    } else {
-      filteredTraces.sort((a, b) => {
-        if (a.get(this.sortBy) < b.get(this.sortBy)) {
-          return 1;
-        }
-        if (b.get(this.sortBy) < a.get(this.sortBy)) {
-          return -1;
-        }
-        return 0;
-      });
+    if (this.sortBy === 'traceId') {
+      sortTracesById(filteredTraces, this.isSortedAsc);
+    }
+    if (this.sortBy === 'firstClassName') {
+      this.sortTracesByfirstClassName(filteredTraces, this.isSortedAsc);
+    }
+    if (this.sortBy === 'lastClassName') {
+      this.sortTracesBylastClassName(filteredTraces, this.isSortedAsc);
+    }
+    if (this.sortBy === 'traceDuration') {
+      sortTracesByDuration(filteredTraces, this.isSortedAsc);
     }
 
     return filteredTraces;
   }
 
-  @action
-  clickedTrace(this: TraceSelection, trace: Trace) {
-    // Reset highlighting when highlighted trace is clicked again
-    if (trace === this.selectedTrace) {
-      this.selectedTrace = null;
-      this.args.highlighter.removeHighlighting();
-      return;
+  sortTracesByfirstClassName(traces: Trace[], ascending = true) {
+    traces.sort((a, b) => {
+      const firstClassA = this.firstClasses.get(a.traceId)!;
+      const firstClassB = this.firstClasses.get(b.traceId)!;
+
+      if (firstClassA.name > firstClassB.name) {
+        return 1;
+      }
+      if (firstClassB.name > firstClassA.name) {
+        return -1;
+      }
+      return 0;
+    });
+
+    if (!ascending) {
+      traces.reverse();
     }
+  }
 
-    this.selectedTrace = trace;
+  sortTracesBylastClassName(traces: Trace[], ascending = true) {
+    traces.sort((a, b) => {
+      const lastClassA = this.lastClasses.get(a.traceId)!;
+      const lastClassB = this.lastClasses.get(b.traceId)!;
 
-    const traceSteps = trace.hasMany('traceSteps').value();
-    this.currentTraceStep = traceSteps?.objectAt(0);
+      if (lastClassA.name > lastClassB.name) {
+        return 1;
+      }
+      if (lastClassB.name > lastClassA.name) {
+        return -1;
+      }
+      return 0;
+    });
 
-    this.args.highlightTrace(trace, 1);
+    if (!ascending) {
+      traces.reverse();
+    }
   }
 
   @action
-  filter(this: TraceSelection) {
+  filter(inputEvent: InputEvent) {
     // Case insensitive string filter
-    this.filterTerm = this.filterInput.toLowerCase();
+    this.filterTerm = (inputEvent.target as HTMLInputElement).value.toLowerCase();
   }
 
   @action
-  selectNextTraceStep(this: TraceSelection) {
-    // Can only select next step if a trace is selected
-    if (!this.currentTraceStep || !this.selectedTrace) {
-      return;
-    }
-
-    const nextStepPosition = this.currentTraceStep.tracePosition + 1;
-
-    if (nextStepPosition > this.selectedTrace.length) {
-      return;
-    }
-
-
-    const traceSteps = this.selectedTrace.hasMany('traceSteps').value();
-    this.currentTraceStep = traceSteps?.objectAt(nextStepPosition - 1);
-
-    this.args.highlightTrace(this.selectedTrace, nextStepPosition);
-
-    const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
-
-    if (this.isReplayAnimated && clazzCommunication) {
-      this.args.moveCameraTo(clazzCommunication);
-    }
-  }
-
-  @action
-  selectPreviousTraceStep(this: TraceSelection) {
-    // Can only select next step if a trace is selected
-    if (!this.selectedTrace || !this.currentTraceStep) {
-      return;
-    }
-
-    const previousStepPosition = this.currentTraceStep.tracePosition - 1;
-
-    if (previousStepPosition < 1) {
-      return;
-    }
-
-
-    const traceSteps = this.selectedTrace.hasMany('traceSteps').value();
-    this.currentTraceStep = traceSteps?.objectAt(previousStepPosition - 1);
-
-    this.args.highlightTrace(this.selectedTrace, previousStepPosition);
-
-    const clazzCommunication = this.currentTraceStep?.belongsTo('clazzCommunication').value() as ClazzCommunication;
-
-    if (this.isReplayAnimated && clazzCommunication) {
-      this.args.moveCameraTo(clazzCommunication);
-    }
-  }
-
-  @action
-  toggleTraceTimeUnit(this: TraceSelection) {
+  toggleTraceTimeUnit() {
     const timeUnit = this.traceTimeUnit;
 
     if (timeUnit === 'ns') {
@@ -208,33 +184,7 @@ export default class TraceSelection extends Component<Args> {
   }
 
   @action
-  toggleTraceStepTimeUnit(this: TraceSelection) {
-    const timeUnit = this.traceStepTimeUnit;
-    if (timeUnit === 'ns') {
-      this.traceStepTimeUnit = 'ms';
-    } else if (timeUnit === 'ms') {
-      this.traceStepTimeUnit = 's';
-    } else if (timeUnit === 's') {
-      this.traceStepTimeUnit = 'ns';
-    }
-  }
-
-  @action
-  toggleAnimation(this: TraceSelection) {
-    this.isReplayAnimated = !this.isReplayAnimated;
-  }
-
-  @action
-  lookAtClazz(this: TraceSelection, proxyClazz: Clazz) {
-    const clazzId = proxyClazz.get('id');
-    const clazz = this.store.peekRecord('clazz', clazzId);
-    if (clazz !== null) {
-      this.args.moveCameraTo(clazz);
-    }
-  }
-
-  @action
-  sortByProperty(this: TraceSelection, property: any) {
+  sortByProperty(property: any) {
     // Determine order for sorting
     if (this.sortBy === property) {
       // Toggle sorting order
@@ -245,10 +195,5 @@ export default class TraceSelection extends Component<Args> {
     }
 
     this.sortBy = property;
-  }
-
-  @action
-  close(this: TraceSelection) {
-    this.args.removeComponent('trace-selection');
   }
 }

@@ -1,13 +1,11 @@
 import THREE from 'three';
 
-
 export default abstract class BaseMesh extends THREE.Mesh {
   highlighted: boolean = false;
 
   defaultColor: THREE.Color;
 
   highlightingColor: THREE.Color;
-
 
   constructor(defaultColor: THREE.Color, highlightingColor = new THREE.Color('red')) {
     super();

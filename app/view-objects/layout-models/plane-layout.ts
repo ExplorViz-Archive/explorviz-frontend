@@ -9,8 +9,6 @@ export default class PlaneLayout {
 
   positionY: number = 0;
 
-  opened: boolean = true;
-
   get position() {
     return new THREE.Vector2(this.positionX, this.positionY);
   }

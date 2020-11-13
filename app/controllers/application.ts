@@ -22,15 +22,14 @@ export default class ApplicationController extends Controller {
 
   @service('user-settings') userSettings!: UserSettings;
 
-  @task
-  // eslint-disable-next-line
-  loadUserAndSettings = task(function* (this: ApplicationController) {
+  @task*
+  loadUserAndSettings() {
     yield this.loadCurrentUser();
     if (this.session.isAuthenticated) {
       yield this.loadCurrentUserPreferences();
       yield this.loadSettingsAndTypes();
     }
-  });
+  }
 
   async loadCurrentUser() {
     return this.currentUser.load().catch(() => this.session.invalidate({ message: 'User could not be loaded' }));
