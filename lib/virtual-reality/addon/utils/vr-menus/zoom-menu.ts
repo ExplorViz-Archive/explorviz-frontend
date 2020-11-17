@@ -36,8 +36,6 @@ export default class ZoomMenu extends BaseMenu {
     const fov = 75, near = 0.1, far = 1000;
     const aspect = this.resolution.width / this.resolution.height;
     this.lensCamera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    this.lensCamera.zoom = 2.0;
-    this.lensCamera.updateProjectionMatrix();
     this.add(this.lensCamera);
 
     this.update();
@@ -58,12 +56,21 @@ export default class ZoomMenu extends BaseMenu {
       headsetPosition.setFromMatrixPosition(this.headsetCamera.matrixWorld);
 
       const lensPosition = new THREE.Vector3();
-      lensPosition.setFromMatrixPosition(this.lensCamera.matrixWorld);
+      lensPosition.setFromMatrixPosition(this.matrixWorld);
 
-      const targetPosition = new THREE.Vector3();
-      targetPosition.subVectors(lensPosition, headsetPosition).add(lensPosition);
+      const direction = new THREE.Vector3();
+      direction.subVectors(this.worldToLocal(lensPosition), this.worldToLocal(headsetPosition));
 
-      this.lensCamera.lookAt(this.lensCamera.worldToLocal(targetPosition));
+      const rotationX = Math.atan2(direction.z, direction.y) + Math.PI/2;
+      const rotationY = - Math.atan2(direction.z, direction.x) - Math.PI/2;
+      this.lensCamera.rotation.set(rotationX, rotationY, 0);
+
+      const zoomMax = 4;
+      const zoomMin = 2;
+      const maxZoomDistance = 1;
+      const slope = (zoomMax - zoomMin) / maxZoomDistance;
+      this.lensCamera.zoom = Math.max(zoomMax - slope * direction.length(), zoomMin);
+      this.lensCamera.updateProjectionMatrix();
 
       this.renderer.render(this.scene, this.lensCamera);
       this.renderer.setRenderTarget(oldTarget);
