@@ -24,7 +24,7 @@ export default class Auth extends Service {
       {
         auth: {
           redirectUrl: config.auth0.callbackUrl,
-          audience: `https://${config.auth0.domain}/userinfo`,
+          audience: `https://${config.auth0.domain}/api/v2/`,
           responseType: 'token',
           params: {
             scope: 'openid profile',
