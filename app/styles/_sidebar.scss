@@ -1,6 +1,21 @@
 #dataselection {
   display: flex;
   @extend .flex-row;
+  height: 100%;
+}
+
+#colorHeader{
+  display: flex; 
+  justify-content: space-between;
+}
+
+#colorTitle{
+  padding-top: 6px;
+}
+
+#colorPresets {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .sidebar-component-title {
@@ -30,4 +45,12 @@
 .red-hover:hover{
   color: red !important;
   text-decoration: none;
+}
+
+.color-picker-input{
+  padding: 3px 10px 3px 0;
+}
+
+.color-picker-label{
+  padding: 5px 0 0 0;
 }

@@ -4,10 +4,7 @@ import { action } from '@ember/object';
 import debugLogger from 'ember-debug-logger';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import THREE from 'three';
-import Landscape from 'explorviz-frontend/models/landscape';
-import LandscapeRepository from 'explorviz-frontend/services/repos/landscape-repository';
 import Configuration from 'explorviz-frontend/services/configuration';
-import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
@@ -15,31 +12,30 @@ import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-
 import * as CommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
-import Application from 'explorviz-frontend/models/application';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import NodeGroup from 'explorviz-frontend/models/nodegroup';
-import System from 'explorviz-frontend/models/system';
 import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
-import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
-import NodeGroupMesh from 'explorviz-frontend/view-objects/3d/landscape/nodegroup-mesh';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
-import Node from 'explorviz-frontend/models/node';
 import PlaneMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-mesh';
-import reduceLandscape, { ReducedLandscape } from 'explorviz-frontend/utils/landscape-rendering/model-reducer';
-import { task } from 'ember-concurrency-decorators';
+import { restartableTask, task } from 'ember-concurrency-decorators';
 import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
-
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
+import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
+import { perform } from 'ember-concurrency-ts';
+import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 
 interface Args {
   readonly id: string;
-  readonly landscape: Landscape;
+  readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
-  readonly isReplay: boolean;
+  readonly visualizationPaused: boolean;
   showApplication(application: Application): void;
+  toggleVisualizationUpdating(): void;
 }
 
 interface SimplePlaneLayout {
@@ -47,14 +43,28 @@ interface SimplePlaneLayout {
   width: number;
   positionX: number;
   positionY: number;
-  opened: boolean;
 }
 
 type PopupData = {
   mouseX: number,
   mouseY: number,
-  entity: System | NodeGroup | Node | Application
+  entity: Node | Application,
 };
+
+type Point = {
+  x: number,
+  y: number
+};
+
+interface Layout1Return {
+  graph: ElkNode,
+  modelIdToPoints: Map<string, Point[]>,
+}
+
+interface Layout3Return {
+  modelIdToLayout: Map<string, SimplePlaneLayout>,
+  modelIdToPoints: Map<string, Point[]>,
+}
 
 /**
 * Renderer for landscape visualization.
@@ -68,14 +78,8 @@ type PopupData = {
 export default class LandscapeRendering extends GlimmerComponent<Args> {
   // #region CLASS FIELDS AND GETTERS
 
-  @service('repos/landscape-repository')
-  landscapeRepo!: LandscapeRepository;
-
   @service('configuration')
   configuration!: Configuration;
-
-  @service('reload-handler')
-  reloadHandler!: ReloadHandler;
 
   @service('current-user')
   currentUser!: CurrentUser;
@@ -105,9 +109,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   // Used to register (mouse) events
   interaction!: Interaction;
 
-  // Plain JSON variant of the landscape with fewer properties, used for layouting
-  reducedLandscape: ReducedLandscape|null = null;
-
   // Maps models to a computed layout
   modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
 
@@ -121,6 +122,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   readonly hoverHandler: HoverEffectHandler = new HoverEffectHandler();
 
+  readonly elk: ELK;
+
   @tracked
   popupData: PopupData | null = null;
 
@@ -129,7 +132,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion CLASS FIELDS AND GETTERS
-
 
   // #region COMPONENT AND SCENE INITIALIZATION
 
@@ -140,7 +142,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.render = this.render.bind(this);
 
-    this.landscapeObject3D = new LandscapeObject3D(this.args.landscape);
+    this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
+
+    this.elk = new ElkConstructor({
+      workerUrl: './assets/web-workers/elk-worker.min.js',
+    });
   }
 
   @action
@@ -164,7 +170,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.resize(outerDiv);
 
-    await this.loadNewLandscape.perform();
+    await perform(this.loadNewLandscape);
 
     this.initDone = true;
   }
@@ -179,11 +185,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'showFpsCounter');
+    /*
+    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting',
+      'showFpsCounter');
 
     if (showFpsCounter) {
       this.threePerformance = new THREEPerformance();
-    }
+    } */
   }
 
   /**
@@ -191,7 +199,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    */
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(this.configuration.landscapeColors.background);
+    this.scene.background = this.configuration.landscapeColors.background;
 
     this.scene.add(this.landscapeObject3D);
 
@@ -260,7 +268,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
-
   // #region RENDERING LOOP
 
   /**
@@ -285,7 +292,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion RENDERING LOOP
-
 
   // #region COMPONENT AND SCENE CLEAN-UP
 
@@ -322,7 +328,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #endregion COMPONENT AND SCENE CLEAN-UP
 
-
   // #region ACTIONS
 
   @action
@@ -346,7 +351,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  */
   @action
   async cleanAndUpdateScene() {
-    await this.populateScene.perform();
+    await perform(this.populateScene);
 
     this.debug('clean and populate landscape-rendering');
   }
@@ -365,68 +370,62 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @action
   onUpdated() {
     if (this.initDone) {
-      this.loadNewLandscape.perform();
+      perform(this.loadNewLandscape);
     }
   }
 
   // #endregion ACTIONS
 
-
   // #region SCENE POPULATION
 
-  @task
-  // eslint-disable-next-line
-  loadNewLandscape = task(function* (this: LandscapeRendering) {
-    const emberLandscape = this.args.landscape;
-    this.landscapeObject3D.dataModel = emberLandscape;
-    this.reducedLandscape = reduceLandscape(emberLandscape);
-    yield this.populateScene.perform();
-  });
-
+  @task*
+  loadNewLandscape() {
+    this.landscapeObject3D.dataModel = this.args.landscapeData.structureLandscapeData;
+    yield perform(this.populateScene);
+  }
 
   /**
  * Computes new meshes for the landscape and adds them to the scene
  *
  * @method populateScene
  */
-  @task({ restartable: true })
-  // eslint-disable-next-line
-  populateScene = task(function* (this: LandscapeRendering) {
+  @restartableTask*
+  populateScene() {
     this.debug('populate landscape-rendering');
 
-    const emberLandscape = this.args.landscape;
-    this.landscapeObject3D.dataModel = emberLandscape;
-
-    if (!emberLandscape || !this.font) {
-      return;
-    }
-
-    const openEntitiesIds = this.landscapeObject3D.openEntityIds;
+    const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
+    this.landscapeObject3D.dataModel = structureLandscapeData;
 
     // Run Klay layouting in 3 steps within workers
     try {
+      const applicationCommunications = computeApplicationCommunication(structureLandscapeData,
+        dynamicLandscapeData);
+
       // Do layout pre-processing (1st step)
-      const {
-        graph,
-        modelIdToPoints,
-      }: any = yield this.worker.postMessage('layout1', { reducedLandscape: this.reducedLandscape, openEntitiesIds });
+      const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
+        structureLandscapeData,
+        applicationCommunications,
+      });
 
       // Run actual klay function (2nd step)
-      const newGraph: any = yield this.worker.postMessage('klay', { graph });
+      const newGraph: ElkNode = yield this.elk.layout(graph);
 
       // Post-process layout graph (3rd step)
       const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
-        reducedLandscape: this.reducedLandscape,
-        openEntitiesIds,
+        structureLandscapeData,
+        applicationCommunications,
       });
 
       // Clean old landscape
       this.landscapeObject3D.removeAllChildren();
       this.landscapeObject3D.resetMeshReferences();
 
-      const { modelIdToLayout, modelIdToPoints: modelIdToPointsComplete } = layoutedLandscape;
+      const {
+        modelIdToLayout,
+        modelIdToPoints: modelIdToPointsComplete,
+      }: Layout3Return = layoutedLandscape;
 
       const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
 
@@ -443,104 +442,35 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       updateCameraZoom(landscapeRect, this.camera, this.webglrenderer);
 
       // Render all landscape entities
-      const { systems } = emberLandscape;
+      const { nodes } = structureLandscapeData;
 
-      // Render systems, nodegroups, nodes & applications
-      if (systems) {
-        // Draw boxes for systems
-        systems.forEach((system) => {
-          this.renderSystem(system, modelIdToPlaneLayout.get(system.get('id')), centerPoint);
+      // Draw boxes for nodes
+      nodes.forEach((node) => {
+        this.renderNode(node, modelIdToPlaneLayout.get(node.ipAddress), centerPoint);
 
-          const nodeGroups = system.nodegroups;
+        const { applications } = node;
 
-          // Draw boxes for nodegroups
-          nodeGroups.forEach((nodeGroup: NodeGroup) => {
-            this.renderNodeGroup(nodeGroup, modelIdToPlaneLayout.get(nodeGroup.get('id')), centerPoint);
-            const nodes = nodeGroup.get('nodes');
-
-            // Draw boxes for nodes
-            nodes.forEach((node) => {
-              this.renderNode(node, modelIdToPlaneLayout.get(node.get('id')), centerPoint);
-
-              const applications = node.get('applications');
-
-              // Draw boxes for applications
-              applications.forEach((application) => {
-                this.renderApplication(application, modelIdToPlaneLayout.get(application.get('id')), centerPoint);
-              });
-            });
-          });
+        // Draw boxes for applications
+        applications.forEach((application) => {
+          this.renderApplication(application, modelIdToPlaneLayout.get(application.pid),
+            centerPoint);
         });
-      }
+      });
 
       // Render application communication
-      const appCommunications = emberLandscape.get('totalApplicationCommunications');
 
-      if (appCommunications) {
-        const color = this.configuration.landscapeColors.communication;
-        const tiles = CommunicationRendering.computeCommunicationTiles(appCommunications,
-          modelIdToPointsComplete, color);
+      const color = this.configuration.landscapeColors.communication;
 
-        CommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
-          centerPoint);
-      }
+      const tiles = CommunicationRendering.computeCommunicationTiles(applicationCommunications,
+        modelIdToPointsComplete, color);
+
+      CommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
+        centerPoint);
 
       this.debug('Landscape loaded');
     } catch (e) {
       // console.log(e);
     }
-  });
-
-  /**
-   * Creates & positions a system mesh with corresponding labels.
-   * Then adds it to the landscapeObject3D.
-   *
-   * @param system Data model for the system mesh
-   * @param layout Layout data to position the mesh correctly
-   * @param centerPoint Offset of landscape object
-   */
-  renderSystem(system: System, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
-
-    // Create system mesh
-    const systemMesh = new SystemMesh(layout, system,
-      new THREE.Color(this.configuration.landscapeColors.system));
-
-    // Create and add label + icon
-    systemMesh.setToDefaultPosition(centerPoint);
-    const labelText = system.get('name');
-    const labelColor = new THREE.Color('black');
-    this.labeler.addSystemTextLabel(systemMesh, labelText, this.font, labelColor);
-    this.labeler.addCollapseSymbol(systemMesh, this.font, labelColor);
-
-    // Add to scene
-    this.landscapeObject3D.add(systemMesh);
-  }
-
-  /**
-   * Creates & positions a nodegroup mesh with corresponding labels.
-   * Then adds it to the landscapeObject3D.
-   *
-   * @param nodeGroup Data model for the nodegroup mesh
-   * @param layout Layout data to position the mesh correctly
-   * @param centerPoint Offset of landscape object
-   */
-  renderNodeGroup(nodeGroup: NodeGroup, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
-
-    // Create nodeGroup mesh
-    const nodeGroupMesh = new NodeGroupMesh(layout, nodeGroup,
-      new THREE.Color(this.configuration.landscapeColors.nodegroup));
-
-    // Create and add label + icon
-    nodeGroupMesh.setToDefaultPosition(centerPoint);
-    const labelColor = new THREE.Color('white');
-    this.labeler.addCollapseSymbol(nodeGroupMesh, this.font, labelColor);
-
-    // Add to scene
-    this.landscapeObject3D.add(nodeGroupMesh);
   }
 
   /**
@@ -556,21 +486,16 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (!layout) { return; }
 
     // Create node mesh
-    const nodeMesh = new NodeMesh(layout, node,
-      new THREE.Color(this.configuration.landscapeColors.node));
+    const nodeMesh = new NodeMesh(layout, node, this.configuration.landscapeColors.node);
 
     // Create and add label + icon
     nodeMesh.setToDefaultPosition(centerPoint);
 
-    const nodeGroupId = node.get('parent').get('id');
-    const nodeGroupMesh = this.landscapeObject3D.getMeshbyModelId(nodeGroupId);
-
     // Label with own ip-address by default
-    const labelText = nodeMesh.getDisplayName(nodeGroupMesh);
-    const labelColor = new THREE.Color('white');
+    const labelText = nodeMesh.getDisplayName();
 
-
-    this.labeler.addNodeTextLabel(nodeMesh, labelText, this.font, labelColor);
+    this.labeler.addNodeTextLabel(nodeMesh, labelText, this.font,
+      this.configuration.landscapeColors.nodeText);
 
     // Add to scene
     this.landscapeObject3D.add(nodeMesh);
@@ -590,12 +515,12 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Create application mesh
     const applicationMesh = new ApplicationMesh(layout, application,
-      new THREE.Color(this.configuration.landscapeColors.application));
+      this.configuration.landscapeColors.application);
     applicationMesh.setToDefaultPosition(centerPoint);
 
     // Create and add label + icon
-    this.labeler.addApplicationTextLabel(applicationMesh, application.get('name'), this.font,
-      new THREE.Color('white'));
+    this.labeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
+      this.configuration.landscapeColors.applicationText);
     Labeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
@@ -604,84 +529,18 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #endregion SCENE POPULATION
 
-
   // #region SCENE MANIPULATION
 
-  @task
-  // eslint-disable-next-line
-  openNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
-    nodeGroupMesh.opened = true;
-    yield this.cleanAndUpdateScene();
-  });
-
-  @task
-  // eslint-disable-next-line
-  closeNodeGroupAndRedraw = task(function* (this: LandscapeRendering, nodeGroupMesh: NodeGroupMesh) {
-    nodeGroupMesh.opened = false;
-    yield this.cleanAndUpdateScene();
-  });
-
-  @task
-  // eslint-disable-next-line
-  openSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
-    systemMesh.opened = true;
-    yield this.cleanAndUpdateScene();
-  });
-
-  @task
-  // eslint-disable-next-line
-  closeSystemAndRedraw = task(function* (this: LandscapeRendering, systemMesh: SystemMesh) {
-    systemMesh.opened = false;
-    this.closeNogeGroupsInSystem(systemMesh);
-    yield this.cleanAndUpdateScene();
-  });
-
-  /**
-   * Toggles the open status of a system mesh and redraws the landscape
-   *
-   * @param systemMesh System mesh of which the open state should be toggled
-   */
-  toggleSystemAndRedraw(systemMesh: SystemMesh) {
-    if (systemMesh.opened) {
-      this.closeSystemAndRedraw.perform(systemMesh);
-    } else {
-      this.openSystemAndRedraw.perform(systemMesh);
-    }
-  }
-
-  /**
-   * Toggles the open status of a nodegroup and redraws the landscape
-   *
-   * @param nodeGroupMesh nodegroup mesh of which the open state should be toggled
-   */
-  toggleNodeGroupAndRedraw(nodeGroupMesh: NodeGroupMesh) {
-    if (nodeGroupMesh.opened) {
-      this.closeNodeGroupAndRedraw.perform(nodeGroupMesh);
-    } else {
-      this.openNodeGroupAndRedraw.perform(nodeGroupMesh);
-    }
-  }
-
-  /**
-   * Sets all nodegroup meshes inside a closed system mesh to closed
-   *
-   * @param systemMesh System mesh which contains closable nodegroup meshes
-   */
-  closeNogeGroupsInSystem(systemMesh: SystemMesh) {
-    const system = systemMesh.dataModel;
-    // Close nodegroups in system
-    if (!systemMesh.opened) {
-      system.get('nodegroups').forEach((nodeGroup) => {
-        const nodeGroupMesh = this.landscapeObject3D.getMeshbyModelId(nodeGroup.get('id'));
-        if (nodeGroupMesh instanceof NodeGroupMesh) {
-          nodeGroupMesh.opened = false;
-        }
-      });
-    }
+  @action
+  updateColors() {
+    this.scene.traverse((object3D) => {
+      if (object3D instanceof BaseMesh) {
+        object3D.updateColor();
+      }
+    });
   }
 
   // #endregion SCENE MANIPULATION
-
 
   // #region MOUSE EVENT HANDLER
 
@@ -690,11 +549,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (mesh instanceof ApplicationMesh) {
       this.openApplicationIfExistend(mesh);
       // Handle nodeGroup
-    } else if (mesh instanceof NodeGroupMesh) {
-      this.toggleNodeGroupAndRedraw(mesh);
-      // Handle system
-    } else if (mesh instanceof SystemMesh) {
-      this.toggleSystemAndRedraw(mesh);
     }
   }
 
@@ -730,7 +584,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   handleMouseMove(mesh: THREE.Mesh | undefined) {
-    const enableHoverEffects = this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
+    const enableHoverEffects = true;
+    // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
     // Update hover effect
     if (mesh === undefined) {
@@ -754,8 +609,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   handleMouseStop(mesh: THREE.Mesh | undefined, mouseOnCanvas: Position2D) {
     if (mesh === undefined) { return; }
 
-    if (mesh instanceof SystemMesh || mesh instanceof NodeGroupMesh
-      || mesh instanceof NodeMesh || mesh instanceof ApplicationMesh) {
+    if (mesh instanceof NodeMesh || mesh instanceof ApplicationMesh) {
       this.popupData = {
         mouseX: mouseOnCanvas.x,
         mouseY: mouseOnCanvas.y,
@@ -776,9 +630,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   openApplicationIfExistend(applicationMesh: ApplicationMesh) {
     const application = applicationMesh.dataModel;
     // No data => show message
-    if (application.get('components').get('length') === 0) {
+    if (application.packages.length === 0) {
       const message = `Sorry, there is no information for application <b>
-        ${application.get('name')}</b> available.`;
+        ${application.name}</b> available.`;
 
       AlertifyHandler.showAlertifyMessage(message);
     } else {
@@ -802,7 +656,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       planeLayoutObject.width = simplePlaneLayout.width;
       planeLayoutObject.positionX = simplePlaneLayout.positionX;
       planeLayoutObject.positionY = simplePlaneLayout.positionY;
-      planeLayoutObject.opened = simplePlaneLayout.opened;
 
       modelIdToPlaneLayout.set(modelId, planeLayoutObject);
     });

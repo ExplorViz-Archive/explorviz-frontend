@@ -19,13 +19,13 @@ function applyBoxLayout(application) {
 
     let allClazzes = [];
     allComponents.forEach(component => {
-      allClazzes.push(...component.clazzes);
+      allClazzes.push(...component.classes);
     });
     return allClazzes;
   }
 
   function getAllComponentsInApplication(application) {
-    let children = application.components;
+    let children = application.packages;
 
     let components = [];
 
@@ -37,7 +37,7 @@ function applyBoxLayout(application) {
 
   function getAllComponents(component) {
     let components = [];
-    component.children.forEach((component) => {
+    component.subPackages.forEach((component) => {
       components.push(...getAllComponents(component), component);
     });
 
@@ -49,7 +49,7 @@ function applyBoxLayout(application) {
 
   let layoutMap = new Map();
 
-  layoutMap.set(application.id, {
+  layoutMap.set(application.pid, {
     height: 1,
     width: 1,
     depth: 1,
@@ -99,11 +99,11 @@ function applyBoxLayout(application) {
   // Helper functions
 
   function setAbsoluteLayoutPositionOfApplication(application) {
-    const { components } = application;
+    const { packages } = application;
 
-    let componentLayout = layoutMap.get(application.id);
+    let componentLayout = layoutMap.get(application.pid);
 
-    components.forEach((childComponent) => {
+    packages.forEach((childComponent) => {
       let childCompLayout = layoutMap.get(childComponent.id);
 
       childCompLayout.positionX += componentLayout.positionX;
@@ -115,8 +115,8 @@ function applyBoxLayout(application) {
   }
 
   function setAbsoluteLayoutPosition(component) {
-    const childComponents = component.children;
-    const clazzes = component.clazzes;
+    const childComponents = component.subPackages;
+    const clazzes = component.classes;
 
     let componentLayout = layoutMap.get(component.id);
 
@@ -147,21 +147,25 @@ function applyBoxLayout(application) {
     const CLAZZ_SIZE_EACH_STEP = 1.1;
 
     const clazzes = [];
-    application.components.forEach((component) => {
+    application.packages.forEach((component) => {
       getClazzList(component, clazzes);
     });
 
-    const instanceCountList = [];
+/*     const instanceCountList = [];
 
     clazzes.forEach((clazz) => {
       instanceCountList.push(clazz.instanceCount);
-    });
+    }); */
+
+    const instanceCount = 0;
+
+    const instanceCountList = new Array(clazzes.length).fill(instanceCount, 0);
 
     const categories = getCategories(instanceCountList, false);
 
     clazzes.forEach((clazz) => {
       let clazzData = layoutMap.get(clazz.id);
-      clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT) * 2.0;
+      clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[instanceCount] + CLAZZ_SIZE_DEFAULT) * 2.0;
     });
   }
 
@@ -298,8 +302,8 @@ function applyBoxLayout(application) {
 
 
   function getClazzList(component, clazzesArray) {
-    const children = component.children;
-    const clazzes = component.clazzes;
+    const children = component.subPackages;
+    const clazzes = component.classes;
 
     children.forEach((child) => {
       getClazzList(child, clazzesArray);
@@ -311,13 +315,13 @@ function applyBoxLayout(application) {
   }
 
   function initApplication(application) {
-    const { components } = application;
+    const { packages } = application;
 
-    components.forEach((child) => {
+    packages.forEach((child) => {
       initNodes(child);
     });
 
-    let componentData = layoutMap.get(application.id);
+    let componentData = layoutMap.get(application.pid);
     componentData.height = getHeightOfApplication(application);
     componentData.width = -1.0;
     componentData.depth = -1.0;
@@ -325,8 +329,8 @@ function applyBoxLayout(application) {
 
 
   function initNodes(component) {
-    const children = component.children;
-    const clazzes = component.clazzes;
+    const children = component.subPackages;
+    const clazzes = component.classes;
 
     const clazzWidth = 2.0;
 
@@ -352,8 +356,8 @@ function applyBoxLayout(application) {
 
     let childrenHeight = floorHeight;
 
-    const children = component.children;
-    const clazzes = component.clazzes;
+    const children = component.subPackages;
+    const clazzes = component.classes;
 
     clazzes.forEach((clazz) => {
       let clazzData = layoutMap.get(clazz.id);
@@ -379,9 +383,9 @@ function applyBoxLayout(application) {
 
     let childrenHeight = floorHeight;
 
-    const { components } = application;
+    const { packages } = application;
 
-    components.forEach((child) => {
+    packages.forEach((child) => {
       let childData = layoutMap.get(child.id);
       if (childData.height > childrenHeight) {
         childrenHeight = childData.height;
@@ -392,9 +396,9 @@ function applyBoxLayout(application) {
   }
 
   function doApplicationLayout(application) {
-    const { components } = application;
+    const { packages } = application;
 
-    components.forEach((child) => {
+    packages.forEach((child) => {
       doLayout(child);
     });
 
@@ -404,21 +408,21 @@ function applyBoxLayout(application) {
   function layoutChildrenOfApplication(application) {
     let tempList = [];
 
-    const { components } = application;
+    const { packages } = application;
 
-    components.forEach((child) => {
+    packages.forEach((child) => {
       tempList.push(child);
     });
 
     const segment = layoutGeneric(tempList);
 
-    let componentData = layoutMap.get(application.id);
+    let componentData = layoutMap.get(application.pid);
     componentData.width = segment.width;
     componentData.depth = segment.height;
   }
 
   function doLayout(component) {
-    const children = component.children;
+    const children = component.subPackages;
 
     children.forEach((child) => {
       doLayout(child);
@@ -431,8 +435,8 @@ function applyBoxLayout(application) {
   function layoutChildren(component) {
     let tempList = [];
 
-    const children = component.children;
-    const clazzes = component.clazzes;
+    const children = component.subPackages;
+    const clazzes = component.classes;
 
     clazzes.forEach((clazz) => {
       tempList.push(clazz);

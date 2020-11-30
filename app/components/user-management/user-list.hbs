@@ -46,10 +46,10 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         {{#if this.showDeleteUsersButton}}
           <BsButton
             class="d-flex-center mr-2"
+            title="Delete Selected Users"
             @onClick={{this.openUserDeletionDialogue}}
             @type="danger"
             @outline={{true}}
-            @title="Delete Selected Users"
           >
             {{svg-jar "trashcan" class="octicon"}}
           </BsButton>
@@ -59,10 +59,10 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         {{!-- User Creation Button --}}
         <BsButton
           class="d-flex-center mr-2"
+          title="Add Users"
           @onClick={{perform this.openUserCreation}}
           @type="success"
           @outline={{true}}
-          @title="Add Users"
         >
           {{svg-jar "organization" class="octicon"}}{{svg-jar "plus-small" class="octicon"}}
           <span>Create Users</span>
@@ -70,9 +70,9 @@ https://github.com/kaliber5/ember-bootstrap/issues/441}}
         {{!-- Refresh Button --}}
         <BsButton
           class="d-flex-center"
+          title="Reload Users"
           @onClick={{perform this.updateUserList}}
           @outline={{true}}
-          @title="Reload Users"
         >
           {{svg-jar "sync" class="octicon"}}
         </BsButton>

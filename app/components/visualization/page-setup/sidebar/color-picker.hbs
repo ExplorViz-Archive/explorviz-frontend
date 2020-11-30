@@ -1,0 +1,77 @@
+<div class="sidebar-component-close">
+  <button 
+    type="button" 
+    class="sidebar-component-close-button" 
+    title="Close Color Configuration"
+    {{on "click" this.close}}
+  >
+    {{svg-jar "x" class="octicon"}}
+  </button>
+</div>
+<div id="colorHeader">
+  <div id="colorTitle" class="sidebar-component-title">
+    <h5>Colors</h5>
+  </div>
+  <div id="colorPresets" class="dropdown">
+    <button 
+      class="btn btn-info dropdown-toggle" 
+      type="button" 
+      id="dropdownMenuButton" 
+      data-toggle="dropdown"
+      aria-haspopup="true" 
+      aria-expanded="false"
+    >
+      Presets
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+      <div 
+        class="dropdown-item" 
+        name="defaultScheme" 
+        {{on "click" (fn this.applyColorScheme "default")}}
+      >
+        Default Color Scheme
+      </div>
+      <div 
+        class="dropdown-item" 
+        name="impairedScheme"
+        {{on "click" (fn this.applyColorScheme "impaired")}}
+      >
+        Vision Impairment Color Scheme
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div>
+  {{#if @isLandscapeView}}
+
+    {{#each (entries this.configuration.landscapeColors) as |entry|}}
+      <div 
+        id={{concat "cp-landscape-" (get entry 0)}} 
+        class="input-group" 
+        {{did-insert (fn this.setupLandscapeColorpicker (get entry 0))}}
+      >
+        <span class="input-group-append color-picker-input">
+          <span class="input-group-text colorpicker-input-addon"><i></i></span>
+        </span>
+        <span class="color-picker-label">{{format-color-property (get entry 0)}}</span>
+      </div>
+    {{/each}}
+
+  {{else}}
+
+    {{#each (entries this.configuration.applicationColors) as |entry|}}
+      <div 
+        id={{concat "cp-application-" (get entry 0)}} 
+        class="input-group" 
+        {{did-insert (fn this.setupApplicationColorPicker (get entry 0))}}
+      >
+        <span class="input-group-append color-picker-input">
+          <span class="input-group-text colorpicker-input-addon"><i></i></span>
+        </span>
+        <span class="color-picker-label">{{format-color-property (get entry 0)}}</span>
+      </div>
+    {{/each}}
+  {{/if}}
+</div>

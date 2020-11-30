@@ -1,15 +1,16 @@
-import Component from 'explorviz-frontend/models/component';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
-import THREE, { PerspectiveCamera } from 'three';
-import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
-import Clazz from 'explorviz-frontend/models/clazz';
+import THREE, { PerspectiveCamera, Vector3 } from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import DS from 'ember-data';
 import CommunicationRendering from './communication-rendering';
 import Highlighting from './highlighting';
+import {
+  Class, Package,
+} from '../landscape-schemes/structure-data';
+import { isSpan, Span } from '../landscape-schemes/dynamic-data';
+import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
+import { spanIdToClass } from '../landscape-structure-helpers';
 
 export default class EntityManipulation {
   // Functions as parent object for all application objects
@@ -30,14 +31,12 @@ export default class EntityManipulation {
   /**
    * Closes all component meshes which are currently added to the applicationObject3D
    * and re-adds the communication.
-   *
-   * @param boxLayoutMap Contains layout information for re-computation of communication
    */
-  closeAllComponents(boxLayoutMap: Map<string, BoxLayout>) {
+  closeAllComponents(drawableClassCommunications: DrawableClassCommunication[]) {
     const application = this.applicationObject3D.dataModel;
 
     // Close each component
-    application.components.forEach((component) => {
+    application.packages.forEach((component) => {
       const componentMesh = this.applicationObject3D.getBoxMeshbyModelId(component.id);
       if (componentMesh instanceof ComponentMesh) {
         this.closeComponentMesh(componentMesh);
@@ -45,8 +44,8 @@ export default class EntityManipulation {
     });
 
     // Re-compute communication and highlighting
-    this.communicationRendering.addCommunication(boxLayoutMap);
-    this.highlighter.updateHighlighting();
+    this.communicationRendering.addCommunication(drawableClassCommunications);
+    this.highlighter.updateHighlighting(drawableClassCommunications);
   }
 
   /**
@@ -54,10 +53,10 @@ export default class EntityManipulation {
    *
    * @param component Component of which the children shall be opened
    */
-  openComponentsRecursively(component: Component) {
-    const components = component.children;
+  openComponentsRecursively(component: Package) {
+    const components = component.subPackages;
     components.forEach((child) => {
-      const mesh = this.applicationObject3D.getBoxMeshbyModelId(child.get('id'));
+      const mesh = this.applicationObject3D.getBoxMeshbyModelId(child.id);
       if (mesh !== undefined && mesh instanceof ComponentMesh) {
         this.openComponentMesh(mesh);
       }
@@ -85,17 +84,17 @@ export default class EntityManipulation {
     mesh.visible = true;
     Labeler.positionBoxLabel(mesh);
 
-    const childComponents = mesh.dataModel.get('children');
+    const childComponents = mesh.dataModel.subPackages;
     childComponents.forEach((childComponent) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(childComponent.get('id'));
+      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(childComponent.id);
       if (childMesh) {
         childMesh.visible = true;
       }
     });
 
-    const clazzes = mesh.dataModel.get('clazzes');
+    const clazzes = mesh.dataModel.classes;
     clazzes.forEach((clazz) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
+      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id);
       if (childMesh) {
         childMesh.visible = true;
       }
@@ -121,9 +120,9 @@ export default class EntityManipulation {
     mesh.opened = false;
     Labeler.positionBoxLabel(mesh);
 
-    const childComponents = mesh.dataModel.get('children');
+    const childComponents = mesh.dataModel.subPackages;
     childComponents.forEach((childComponent) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(childComponent.get('id'));
+      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(childComponent.id);
       if (childMesh instanceof ComponentMesh) {
         childMesh.visible = false;
         if (childMesh.opened) {
@@ -136,9 +135,9 @@ export default class EntityManipulation {
       }
     });
 
-    const clazzes = mesh.dataModel.get('clazzes');
+    const clazzes = mesh.dataModel.classes;
     clazzes.forEach((clazz) => {
-      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
+      const childMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id);
       if (childMesh instanceof ClazzMesh) {
         childMesh.visible = false;
         // Reset highlighting if highlighted entity is no longer visible
@@ -166,7 +165,6 @@ export default class EntityManipulation {
    * Takes a set of open component ids and opens them.
    *
    * @param openComponentids Set with ids of components which shall be opened
-   * @param boxLayoutMap Map which contains communication layout
    */
   setComponentState(openComponentids: Set<string>) {
     openComponentids.forEach((componentId) => {
@@ -185,30 +183,61 @@ export default class EntityManipulation {
    * @param camera Camera which shall be moved
    * @param applicationObject3D Object which contains all application meshes
    */
-  moveCameraTo(emberModel: Clazz|ClazzCommunication, applicationCenter: THREE.Vector3,
-    camera: PerspectiveCamera, applicationObject3D: ApplicationObject3D) {
-    if (emberModel instanceof ClazzCommunication) {
-      const sourceClazzMesh = this.applicationObject3D.getBoxMeshbyModelId(emberModel.sourceClazz.get('id'));
-      const targetClazzMesh = this.applicationObject3D.getBoxMeshbyModelId(emberModel.targetClazz.get('id'));
+  moveCameraTo(model: Class|Span, applicationCenter: THREE.Vector3,
+    camera: PerspectiveCamera) {
+    if (isSpan(model)) {
+      const traceOfSpan = this.applicationObject3D.traces.find(
+        (trace) => trace.traceId === model.traceId,
+      );
 
-      if (sourceClazzMesh instanceof ClazzMesh && targetClazzMesh instanceof ClazzMesh) {
-        const sourceLayoutPos = new THREE.Vector3().copy(sourceClazzMesh.layoutPos);
-        const targetLayoutPos = new THREE.Vector3().copy(targetClazzMesh.layoutPos);
+      if (!traceOfSpan) {
+        return;
+      }
 
-        const directionVector = targetLayoutPos.sub(sourceLayoutPos);
+      const { dataModel: application } = this.applicationObject3D;
 
-        const middleLayoutPos = sourceLayoutPos.add(directionVector.divideScalar(2));
-        EntityManipulation.applyCameraPosition(applicationCenter, camera, middleLayoutPos,
-          applicationObject3D);
-        // Apply zoom
-        camera.position.z += 50;
+      const sourceClass = spanIdToClass(application, traceOfSpan, model.parentSpanId);
+      const targetClass = spanIdToClass(application, traceOfSpan, model.spanId);
+
+      if (sourceClass && targetClass) {
+        const sourceClazzMesh = this.applicationObject3D.getBoxMeshbyModelId(sourceClass.id);
+        const targetClazzMesh = this.applicationObject3D.getBoxMeshbyModelId(targetClass.id);
+
+        if (sourceClazzMesh instanceof ClazzMesh && targetClazzMesh instanceof ClazzMesh) {
+          const sourceLayoutPos = new THREE.Vector3().copy(sourceClazzMesh.layoutPos);
+          const targetLayoutPos = new THREE.Vector3().copy(targetClazzMesh.layoutPos);
+
+          const directionVector = targetLayoutPos.sub(sourceLayoutPos);
+
+          const middleLayoutPos = sourceLayoutPos.add(directionVector.divideScalar(2));
+          EntityManipulation.applyCameraPosition(applicationCenter, camera, middleLayoutPos,
+            this.applicationObject3D);
+          // Apply zoom
+          camera.position.z += 50;
+        }
+      } else if (sourceClass || targetClass) {
+        const existendClass = (sourceClass || targetClass)!;
+
+        const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(existendClass.id);
+
+        if (clazzMesh instanceof ClazzMesh) {
+          const classLayoutPos = new THREE.Vector3().copy(clazzMesh.layoutPos);
+
+          const directionVector = new Vector3().sub(classLayoutPos);
+
+          const middleLayoutPos = classLayoutPos.add(directionVector.divideScalar(2));
+          EntityManipulation.applyCameraPosition(applicationCenter, camera, middleLayoutPos,
+            this.applicationObject3D);
+          // Apply zoom
+          camera.position.z += 50;
+        }
       }
     } else {
-      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(emberModel.get('id'));
+      const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(model.id);
       if (clazzMesh instanceof ClazzMesh) {
         const layoutPos = new THREE.Vector3().copy(clazzMesh.layoutPos);
         EntityManipulation.applyCameraPosition(applicationCenter, camera, layoutPos,
-          applicationObject3D);
+          this.applicationObject3D);
         // Apply zoom
         camera.position.z += 25;
       }
@@ -221,7 +250,7 @@ export default class EntityManipulation {
   applyDefaultApplicationLayout() {
     const self = this;
 
-    function applyComponentLayout(components: DS.PromiseManyArray<Component>) {
+    function applyComponentLayout(components: Package[]) {
       if (components.length > 1) {
         // There are two components on the first level
         // therefore, here is nothing to do
@@ -236,11 +265,11 @@ export default class EntityManipulation {
           self.openComponentMesh(mesh);
         }
 
-        applyComponentLayout(component.get('children'));
+        applyComponentLayout(component.subPackages);
       }
     }
 
-    applyComponentLayout(this.applicationObject3D.dataModel.components);
+    applyComponentLayout(this.applicationObject3D.dataModel.packages);
   }
 
   /**
@@ -254,7 +283,6 @@ export default class EntityManipulation {
   static applyCameraPosition(centerPoint: THREE.Vector3, camera: THREE.PerspectiveCamera,
     layoutPos: THREE.Vector3, applicationObject3D: ApplicationObject3D) {
     layoutPos.sub(centerPoint);
-    layoutPos.multiplyScalar(0.5);
 
     const appQuaternion = new THREE.Quaternion();
 

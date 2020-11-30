@@ -6,7 +6,7 @@ export default class ConfigurationSettingsRoute extends BaseRoute {
   @service('current-user')
   currentUser!: CurrentUser;
 
-  model(this: ConfigurationSettingsRoute) {
+  model() {
     const user = this.get('currentUser').get('user');
     return {
       user,

@@ -33,9 +33,9 @@ export default class VisualizationRoute extends BaseRoute {
   }
 
   // @Override
-  setupController(controller: VisualizationController, model: any) {
+  setupController(controller: VisualizationController, model: any, transition: any) {
     // Call _super for default behavior
-    super.setupController(controller, model);
+    super.setupController(controller, model, transition);
 
     controller.initRendering();
   }
@@ -45,7 +45,6 @@ export default class VisualizationRoute extends BaseRoute {
   resetController(controller: VisualizationController, isExiting: boolean, transition: any) {
     if (isExiting && transition.targetName !== 'error') {
       controller.send('resetView');
-      controller.landscapeRepo.set('latestApplication', null);
     }
   }
 }
