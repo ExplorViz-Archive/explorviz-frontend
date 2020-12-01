@@ -5,9 +5,7 @@ import Sender from 'virtual-reality/utils/vr-multi-user/sender';
 import LocalVrUser from './local-vr-user';
 import WebSocket from './web-socket';
 
-export default class SpectateUser extends Service.extend({
-  // anything which *must* be merged to prototype here
-}) {
+export default class SpectateUser extends Service {
   @service('web-socket')
   webSocket!: WebSocket;
 
@@ -37,8 +35,6 @@ export default class SpectateUser extends Service.extend({
  */
   activate(remoteUser: RemoteVrUser|null) {
     if (!remoteUser) return;
-
-    this.spectatedUserId = remoteUser.ID;
 
     this.startPosition.copy(this.localUser.userGroup.position);
     this.spectatedUser = remoteUser;
@@ -78,13 +74,11 @@ export default class SpectateUser extends Service.extend({
 
     this.spectatedUser = null;
 
-    this.spectatedUserId = null;
-
     this.sender.sendSpectatingUpdate(this.localUser.userID, this.isActive, null);
   }
 
   reset() {
-    this.spectatedUserId = null;
+    this.spectatedUser = null;
   }
 }
 

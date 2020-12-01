@@ -4,7 +4,6 @@ import {
 } from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import VRController from '../vr-rendering/VRController';
-import { getObjectPose } from '../vr-helpers/multi-user-helper';
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
 export default class Sender {
@@ -115,7 +114,7 @@ export default class Sender {
     const worldQuat = new Quaternion();
     const appObj = {
       event: 'app_grabbed',
-      appID: application.dataModel.id,
+      appID: application.dataModel.pid,
       appPosition: application.getWorldPosition(worldPos).toArray(),
       appQuaternion: application.getWorldQuaternion(worldQuat).toArray(),
       isGrabbedByController1: controller.gamepadIndex === 0,
@@ -136,7 +135,7 @@ export default class Sender {
 
     const appObj = {
       event: 'app_released',
-      id: application.dataModel.id,
+      id: application.dataModel.pid,
       position: application.getWorldPosition(worldPos).toArray(),
       quaternion: application.getWorldQuaternion(worldQuat).toArray(),
     };
@@ -222,7 +221,7 @@ export default class Sender {
 
     const appObj = {
       event: 'app_opened',
-      id: application.dataModel.id,
+      id: application.dataModel.pid,
       position: position.toArray(),
       quaternion: quaternion.toArray(),
     };

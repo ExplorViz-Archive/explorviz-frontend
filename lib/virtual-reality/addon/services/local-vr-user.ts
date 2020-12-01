@@ -9,9 +9,7 @@ import SpectateUser from './spectate-user';
 
 export type ConnectionStatus = 'offline'|'connecting'|'online';
 
-export default class LocalVrUser extends Service.extend({
-  // anything which *must* be merged to prototype here
-}) {
+export default class LocalVrUser extends Service {
   @service('web-socket')
   webSocket!: WebSocket;
 
@@ -198,7 +196,7 @@ export default class LocalVrUser extends Service.extend({
     this.state = 'offline';
 
     // Close socket
-    this.get('webSocket').closeSocket();
+    this.webSocket.closeSocket();
   }
 
   toggleConnection() {

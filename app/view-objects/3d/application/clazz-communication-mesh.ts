@@ -1,15 +1,15 @@
 import THREE from 'three';
-import DrawableClazzCommunication from 'explorviz-frontend/models/drawableclazzcommunication';
+import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import CommunicationLayout from '../../layout-models/communication-layout';
 import BaseMesh from '../base-mesh';
 import CommunicationArrowMesh from './communication-arrow-mesh';
 
 export default class ClazzCommunicationMesh extends BaseMesh {
-  dataModel: DrawableClazzCommunication;
+  dataModel: DrawableClassCommunication;
 
   layout: CommunicationLayout;
 
-  constructor(layout: CommunicationLayout, dataModel: DrawableClazzCommunication,
+  constructor(layout: CommunicationLayout, dataModel: DrawableClassCommunication,
     defaultColor: THREE.Color, highlightingColor: THREE.Color) {
     super(defaultColor, highlightingColor);
     this.layout = layout;
@@ -142,7 +142,7 @@ export default class ClazzCommunicationMesh extends BaseMesh {
     this.addArrow(start, end, arrowWidth, yOffset, color);
 
     // Add 2nd arrow to visualize bidirectional communication
-    if (this.dataModel.isBidirectional) {
+    if (this.dataModel.bidirectional) {
       this.addArrow(end, start, arrowWidth, yOffset, color);
     }
   }

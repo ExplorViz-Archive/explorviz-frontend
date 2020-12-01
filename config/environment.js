@@ -31,7 +31,7 @@ module.exports = function (environment) {
 
   if (environment === 'development') {
 
-    API_ROOT = 'http://localhost:8080';
+    API_ROOT = 'https://192.168.48.209';
 
     if (process.env.API_ROOT) {
       API_ROOT = process.env.API_ROOT;

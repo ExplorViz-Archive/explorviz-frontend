@@ -1,13 +1,14 @@
-import Component from 'explorviz-frontend/models/component';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import THREE, { PerspectiveCamera } from 'three';
-import ClazzCommunication from 'explorviz-frontend/models/clazzcommunication';
-import Clazz from 'explorviz-frontend/models/clazz';
+import THREE, { PerspectiveCamera, Vector3 } from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import DS from 'ember-data';
-import * as Highlighting from './highlighting';
+import {
+  Class, Package,
+} from '../landscape-schemes/structure-data';
+import { isSpan, Span } from '../landscape-schemes/dynamic-data';
+import { spanIdToClass } from '../landscape-structure-helpers';
+import { removeHighlighting } from './highlighting';
 
 /**
    * Opens a given component mesh.
@@ -29,17 +30,17 @@ export function openComponentMesh(mesh: ComponentMesh, applicationObject3D: Appl
   mesh.visible = true;
   Labeler.positionBoxLabel(mesh);
 
-  const childComponents = mesh.dataModel.get('children');
+  const childComponents = mesh.dataModel.subPackages;
   childComponents.forEach((childComponent) => {
-    const childMesh = applicationObject3D.getBoxMeshbyModelId(childComponent.get('id'));
+    const childMesh = applicationObject3D.getBoxMeshbyModelId(childComponent.id);
     if (childMesh) {
       childMesh.visible = true;
     }
   });
 
-  const clazzes = mesh.dataModel.get('clazzes');
+  const clazzes = mesh.dataModel.classes;
   clazzes.forEach((clazz) => {
-    const childMesh = applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
+    const childMesh = applicationObject3D.getBoxMeshbyModelId(clazz.id);
     if (childMesh) {
       childMesh.visible = true;
     }
@@ -65,9 +66,9 @@ export function closeComponentMesh(mesh: ComponentMesh, applicationObject3D: App
   mesh.opened = false;
   Labeler.positionBoxLabel(mesh);
 
-  const childComponents = mesh.dataModel.get('children');
+  const childComponents = mesh.dataModel.subPackages;
   childComponents.forEach((childComponent) => {
-    const childMesh = applicationObject3D.getBoxMeshbyModelId(childComponent.get('id'));
+    const childMesh = applicationObject3D.getBoxMeshbyModelId(childComponent.id);
     if (childMesh instanceof ComponentMesh) {
       childMesh.visible = false;
       if (childMesh.opened) {
@@ -75,19 +76,19 @@ export function closeComponentMesh(mesh: ComponentMesh, applicationObject3D: App
       }
       // Reset highlighting if highlighted entity is no longer visible
       if (childMesh.highlighted) {
-        Highlighting.removeHighlighting(applicationObject3D);
+        removeHighlighting(applicationObject3D);
       }
     }
   });
 
-  const clazzes = mesh.dataModel.get('clazzes');
+  const clazzes = mesh.dataModel.classes;
   clazzes.forEach((clazz) => {
-    const childMesh = applicationObject3D.getBoxMeshbyModelId(clazz.get('id'));
+    const childMesh = applicationObject3D.getBoxMeshbyModelId(clazz.id);
     if (childMesh instanceof ClazzMesh) {
       childMesh.visible = false;
       // Reset highlighting if highlighted entity is no longer visible
       if (childMesh.highlighted) {
-        Highlighting.removeHighlighting(applicationObject3D);
+        removeHighlighting(applicationObject3D);
       }
     }
   });
@@ -100,8 +101,14 @@ export function closeComponentMesh(mesh: ComponentMesh, applicationObject3D: App
    * @param applicationObject3D Application object which contains the components
    */
 export function closeAllComponents(applicationObject3D: ApplicationObject3D) {
-  applicationObject3D.componentMeshes.forEach((componentMesh) => {
-    closeComponentMesh(componentMesh, applicationObject3D);
+  const application = applicationObject3D.dataModel;
+
+  // Close each component
+  application.packages.forEach((component) => {
+    const componentMesh = applicationObject3D.getBoxMeshbyModelId(component.id);
+    if (componentMesh instanceof ComponentMesh) {
+      closeComponentMesh(componentMesh, applicationObject3D);
+    }
   });
 }
 
@@ -111,11 +118,11 @@ export function closeAllComponents(applicationObject3D: ApplicationObject3D) {
      * @param component Component of which the children shall be opened
      * @param applicationObject3D Application object which contains the component
      */
-export function openComponentsRecursively(component: Component,
+export function openComponentsRecursively(component: Package,
   applicationObject3D: ApplicationObject3D) {
-  const components = component.children;
+  const components = component.subPackages;
   components.forEach((child) => {
-    const mesh = applicationObject3D.getBoxMeshbyModelId(child.get('id'));
+    const mesh = applicationObject3D.getBoxMeshbyModelId(child.id);
     if (mesh !== undefined && mesh instanceof ComponentMesh) {
       openComponentMesh(mesh, applicationObject3D);
     }
@@ -160,8 +167,7 @@ export function restoreComponentState(applicationObject3D: ApplicationObject3D,
    * @param applicationObject3D Application object
    */
 export function applyDefaultApplicationLayout(applicationObject3D: ApplicationObject3D) {
-  function applyComponentLayout(appObject3D: ApplicationObject3D,
-    components: DS.PromiseManyArray<Component>) {
+  function applyComponentLayout(appObject3D: ApplicationObject3D, components: Package[]) {
     if (components.length > 1) {
       // There are two components on the first level
       // therefore, here is nothing to do
@@ -176,11 +182,11 @@ export function applyDefaultApplicationLayout(applicationObject3D: ApplicationOb
         openComponentMesh(mesh, applicationObject3D);
       }
 
-      applyComponentLayout(appObject3D, component.get('children'));
+      applyComponentLayout(appObject3D, component.subPackages);
     }
   }
 
-  applyComponentLayout(applicationObject3D, applicationObject3D.dataModel.components);
+  applyComponentLayout(applicationObject3D, applicationObject3D.dataModel.packages);
 }
 
 /**
@@ -194,7 +200,6 @@ export function applyDefaultApplicationLayout(applicationObject3D: ApplicationOb
 export function applyCameraPosition(centerPoint: THREE.Vector3, camera: THREE.PerspectiveCamera,
   layoutPos: THREE.Vector3, applicationObject3D: ApplicationObject3D) {
   layoutPos.sub(centerPoint);
-  layoutPos.multiplyScalar(0.5);
 
   const appQuaternion = new THREE.Quaternion();
 
@@ -217,30 +222,58 @@ export function applyCameraPosition(centerPoint: THREE.Vector3, camera: THREE.Pe
    * @param camera Camera which shall be moved
    * @param applicationObject3D Object which contains all application meshes
    */
-export function moveCameraTo(emberModel: Clazz|ClazzCommunication, applicationCenter: THREE.Vector3,
+export function moveCameraTo(model: Class|Span, applicationCenter: THREE.Vector3,
   camera: PerspectiveCamera, applicationObject3D: ApplicationObject3D) {
-  if (emberModel instanceof ClazzCommunication) {
-    const sourceClazzMesh = applicationObject3D.getBoxMeshbyModelId(emberModel.sourceClazz.get('id'));
-    const targetClazzMesh = applicationObject3D.getBoxMeshbyModelId(emberModel.targetClazz.get('id'));
+  if (isSpan(model)) {
+    const traceOfSpan = applicationObject3D.traces.find(
+      (trace) => trace.traceId === model.traceId,
+    );
 
-    if (sourceClazzMesh instanceof ClazzMesh && targetClazzMesh instanceof ClazzMesh) {
-      const sourceLayoutPos = new THREE.Vector3().copy(sourceClazzMesh.layout.position);
-      const targetLayoutPos = new THREE.Vector3().copy(targetClazzMesh.layout.position);
+    if (!traceOfSpan) {
+      return;
+    }
 
-      const directionVector = targetLayoutPos.sub(sourceLayoutPos);
+    const { dataModel: application } = applicationObject3D;
 
-      const middleLayoutPos = sourceLayoutPos.add(directionVector.divideScalar(2));
-      applyCameraPosition(applicationCenter, camera, middleLayoutPos,
-        applicationObject3D);
-      // Apply zoom
-      camera.position.z += 50;
+    const sourceClass = spanIdToClass(application, traceOfSpan, model.parentSpanId);
+    const targetClass = spanIdToClass(application, traceOfSpan, model.spanId);
+
+    if (sourceClass && targetClass) {
+      const sourceClazzMesh = applicationObject3D.getBoxMeshbyModelId(sourceClass.id);
+      const targetClazzMesh = applicationObject3D.getBoxMeshbyModelId(targetClass.id);
+
+      if (sourceClazzMesh instanceof ClazzMesh && targetClazzMesh instanceof ClazzMesh) {
+        const sourceLayoutPos = new THREE.Vector3().copy(sourceClazzMesh.layout.position);
+        const targetLayoutPos = new THREE.Vector3().copy(targetClazzMesh.layout.position);
+
+        const directionVector = targetLayoutPos.sub(sourceLayoutPos);
+
+        const middleLayoutPos = sourceLayoutPos.add(directionVector.divideScalar(2));
+        applyCameraPosition(applicationCenter, camera, middleLayoutPos, applicationObject3D);
+        // Apply zoom
+        camera.position.z += 50;
+      }
+    } else if (sourceClass || targetClass) {
+      const existendClass = (sourceClass || targetClass)!;
+
+      const clazzMesh = applicationObject3D.getBoxMeshbyModelId(existendClass.id);
+
+      if (clazzMesh instanceof ClazzMesh) {
+        const classLayoutPos = new THREE.Vector3().copy(clazzMesh.layout.position);
+
+        const directionVector = new Vector3().sub(classLayoutPos);
+
+        const middleLayoutPos = classLayoutPos.add(directionVector.divideScalar(2));
+        applyCameraPosition(applicationCenter, camera, middleLayoutPos, applicationObject3D);
+        // Apply zoom
+        camera.position.z += 50;
+      }
     }
   } else {
-    const clazzMesh = applicationObject3D.getBoxMeshbyModelId(emberModel.get('id'));
+    const clazzMesh = applicationObject3D.getBoxMeshbyModelId(model.id);
     if (clazzMesh instanceof ClazzMesh) {
       const layoutPos = new THREE.Vector3().copy(clazzMesh.layout.position);
-      applyCameraPosition(applicationCenter, camera, layoutPos,
-        applicationObject3D);
+      applyCameraPosition(applicationCenter, camera, layoutPos, applicationObject3D);
       // Apply zoom
       camera.position.z += 25;
     }

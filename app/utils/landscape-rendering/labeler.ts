@@ -2,74 +2,11 @@ import THREE from 'three';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import PlaneLabelMesh from 'explorviz-frontend/view-objects/3d/landscape/plane-label-mesh';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
-import SystemMesh from 'explorviz-frontend/view-objects/3d/landscape/system-mesh';
-import NodeGroupMesh from 'explorviz-frontend/view-objects/3d/landscape/nodegroup-mesh';
 
 export default class Labeler {
-  systemLabelCache: Map<string, PlaneLabelMesh> = new Map();
-
-  nodeGroupLabelCache: Map<string, PlaneLabelMesh> = new Map();
-
   nodeLabelCache: Map<string, PlaneLabelMesh> = new Map();
 
   appLabelCache: Map<string, PlaneLabelMesh> = new Map();
-
-  collapseLabelCache: Map<string, PlaneLabelMesh> = new Map();
-
-  /**
- * Creates a label and adds it at a calculated position to the given system mesh
- *
- * @param systemMesh The mesh which shall be labeled
- * @param text Desired text
- * @param font Desired font of the text
- * @param color Desired color of the text
- */
-  addSystemTextLabel(systemMesh: SystemMesh, text: string, font: THREE.Font,
-    color: THREE.Color, fontSize = 0.4, yOffset = 0.6) {
-    const labelMesh = Labeler.getLabel(this.systemLabelCache, font, text, fontSize, color);
-
-    systemMesh.geometry.computeBoundingBox();
-    const bboxParent = systemMesh.geometry.boundingBox;
-
-    labelMesh.geometry.computeBoundingBox();
-    const labelBoundingBox = labelMesh.geometry.boundingBox;
-
-    const labelMeshLength = Math.abs(labelBoundingBox.max.x)
-    - Math.abs(labelBoundingBox.min.x);
-
-    // Position label centered at top of system mesh
-    labelMesh.position.x = -(labelMeshLength / 2.0);
-    labelMesh.position.y = bboxParent.max.y - yOffset;
-    labelMesh.position.z = bboxParent.max.z + 0.001; // Just in front of parent mesh
-
-    systemMesh.add(labelMesh);
-  }
-
-  /**
- * Creates a label with a collapse symbol and adds it at a calculated
- * position to the given mesh
- *
- * @param entityMesh Mesh which shall be labeled with a collapse symbol
- * @param font Desired font of the text
- * @param color Desired color of the text
- */
-  addCollapseSymbol(entityMesh: SystemMesh | NodeGroupMesh, font: THREE.Font,
-    color: THREE.Color, fontSize = 0.35, xOffset = 0.35, yOffset = 0.35) {
-    const collapseSymbol = entityMesh.opened ? '-' : '+';
-
-    const collapseSymbolMesh = Labeler.getLabel(this.collapseLabelCache, font,
-      collapseSymbol, fontSize, color);
-
-    entityMesh.geometry.computeBoundingBox();
-    const bboxSystem = entityMesh.geometry.boundingBox;
-
-    // Position on the top right corner of parent mesh
-    collapseSymbolMesh.position.x = bboxSystem.max.x - xOffset;
-    collapseSymbolMesh.position.y = bboxSystem.max.y - yOffset;
-    collapseSymbolMesh.position.z = bboxSystem.max.z + 0.001;
-
-    entityMesh.add(collapseSymbolMesh);
-  }
 
   /**
  * Creates a label and adds it at a calculated position to the given node mesh
@@ -84,10 +21,10 @@ export default class Labeler {
     const labelMesh = Labeler.getLabel(this.nodeLabelCache, font, text, fontSize, color);
 
     nodeMesh.geometry.computeBoundingBox();
-    const bboxParent = nodeMesh.geometry.boundingBox;
+    const bboxParent = nodeMesh.geometry.boundingBox!;
 
     labelMesh.geometry.computeBoundingBox();
-    const labelBoundingBox = labelMesh.geometry.boundingBox;
+    const labelBoundingBox = labelMesh.geometry.boundingBox!;
 
     const labelMeshLength = Math.abs(labelBoundingBox.max.x)
     - Math.abs(labelBoundingBox.min.x);
@@ -113,10 +50,10 @@ export default class Labeler {
     const labelMesh = Labeler.getLabel(this.appLabelCache, font, text, fontSize, color);
 
     applicationMesh.geometry.computeBoundingBox();
-    const bboxParent = applicationMesh.geometry.boundingBox;
+    const bboxParent = applicationMesh.geometry.boundingBox!;
 
     labelMesh.geometry.computeBoundingBox();
-    const labelBoundingBox = labelMesh.geometry.boundingBox;
+    const labelBoundingBox = labelMesh.geometry.boundingBox!;
 
     const labelHeight = Math.abs(labelBoundingBox.max.y) - Math.abs(labelBoundingBox.min.y);
 
@@ -132,16 +69,6 @@ export default class Labeler {
    * Dispose all meshes and remove references
    */
   clearCache() {
-    this.systemLabelCache.forEach((label) => {
-      label.disposeRecursively();
-    });
-    this.systemLabelCache.clear();
-
-    this.nodeGroupLabelCache.forEach((label) => {
-      label.disposeRecursively();
-    });
-    this.nodeGroupLabelCache.clear();
-
     this.nodeLabelCache.forEach((label) => {
       label.disposeRecursively();
     });
@@ -151,11 +78,6 @@ export default class Labeler {
       label.disposeRecursively();
     });
     this.appLabelCache.clear();
-
-    this.collapseLabelCache.forEach((label) => {
-      label.disposeRecursively();
-    });
-    this.collapseLabelCache.clear();
   }
 
   /**
@@ -171,7 +93,7 @@ export default class Labeler {
 
     applicationMesh.geometry.computeBoundingBox();
 
-    const appBBox = applicationMesh.geometry.boundingBox;
+    const appBBox = applicationMesh.geometry.boundingBox!;
 
     const logoPos = new THREE.Vector3();
 
@@ -181,7 +103,7 @@ export default class Labeler {
     logoPos.x = appBBox.max.x - RIGHT_PADDING;
     logoPos.z = appBBox.max.z + 0.001;
 
-    const texturePartialPath = application.get('programmingLanguage').toLowerCase();
+    const texturePartialPath = application.language.toLowerCase();
 
     // Create and add image to application mesh
     imageLoader.createPicture(logoPos, width, height,

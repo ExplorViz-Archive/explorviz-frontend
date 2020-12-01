@@ -1,12 +1,11 @@
 import THREE from 'three';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
-import Clazz from 'explorviz-frontend/models/clazz';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
-import Component from 'explorviz-frontend/models/component';
-import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import { ApplicationColors } from 'explorviz-frontend/services/configuration';
+import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import BoxMesh from 'explorviz-frontend/view-objects/3d/application/box-mesh';
+import { Class, Package } from '../landscape-schemes/structure-data';
 
 /**
  * Takes an application mesh, computes it position and adds it to the application object.
@@ -38,14 +37,14 @@ export function addMeshToApplication(mesh: BoxMesh, applicationObject3D: Applica
  * @param applicationMesh Object which contains all application objects
  */
 export function updateMeshVisiblity(mesh: ComponentMesh | ClazzMesh,
-  applicationMesh: ApplicationObject3D) {
-  let parent: Component;
-  if (mesh instanceof ComponentMesh) {
-    parent = mesh.dataModel.parentComponent;
-  } else {
-    parent = mesh.dataModel.parent;
+  applicationObject3D: ApplicationObject3D) {
+  const { parent } = mesh.dataModel;
+
+  if (parent === undefined) {
+    return;
   }
-  const parentMesh = applicationMesh.getBoxMeshbyModelId(parent.get('id'));
+
+  const parentMesh = applicationObject3D.getBoxMeshbyModelId(parent.id);
   if (parentMesh instanceof ComponentMesh) {
     mesh.visible = parentMesh.opened;
   }
@@ -59,13 +58,13 @@ export function updateMeshVisiblity(mesh: ComponentMesh | ClazzMesh,
  * @param applicationColors Contains color objects for components and clazzes
  * @param componentLevel
  */
-export function addComponentAndChildrenToScene(component: Component, applicationObject3D:
+export function addComponentAndChildrenToScene(component: Package, applicationObject3D:
 ApplicationObject3D, applicationColors: ApplicationColors, componentLevel = 1) {
   const application = applicationObject3D.dataModel;
   const componentLayout = applicationObject3D.getBoxLayout(component.id);
-  const applicationLayout = applicationObject3D.getBoxLayout(application.id);
+  const applicationLayout = applicationObject3D.getBoxLayout(application.pid);
 
-  if (!componentLayout || !applicationLayout) { return; }
+  if (componentLayout === undefined || applicationLayout === undefined) { return; }
 
   const {
     componentOdd: componentOddColor, componentEven: componentEvenColor,
@@ -79,14 +78,14 @@ ApplicationObject3D, applicationColors: ApplicationColors, componentLevel = 1) {
   addMeshToApplication(mesh, applicationObject3D);
   updateMeshVisiblity(mesh, applicationObject3D);
 
-  const clazzes = component.get('clazzes');
-  const children = component.get('children');
+  const clazzes = component.classes;
+  const children = component.subPackages;
 
   // Add clazzes of given component
-  clazzes.forEach((clazz: Clazz) => {
-    const clazzLayout = applicationObject3D.getBoxLayout(clazz.get('id'));
+  clazzes.forEach((clazz: Class) => {
+    const clazzLayout = applicationObject3D.getBoxLayout(clazz.id);
 
-    if (!clazzLayout) { return; }
+    if (clazzLayout === undefined) { return; }
 
     const clazzMesh = new ClazzMesh(clazzLayout, clazz, clazzColor, highlightedEntityColor);
     addMeshToApplication(clazzMesh, applicationObject3D);
@@ -94,7 +93,7 @@ ApplicationObject3D, applicationColors: ApplicationColors, componentLevel = 1) {
   });
 
   // Add components with alternating colors (e.g. dark and light green)
-  children.forEach((child: Component) => {
+  children.forEach((child: Package) => {
     addComponentAndChildrenToScene(child,
       applicationObject3D, applicationColors, componentLevel + 1);
   });
@@ -127,9 +126,9 @@ export function addFoundationAndChildrenToApplication(applicationObject3D: Appli
 
   addMeshToApplication(mesh, applicationObject3D);
 
-  const children = application.get('components');
+  const children = application.packages;
 
-  children.forEach((child: Component) => {
+  children.forEach((child: Package) => {
     addComponentAndChildrenToScene(child, applicationObject3D, applicationColors);
   });
 }

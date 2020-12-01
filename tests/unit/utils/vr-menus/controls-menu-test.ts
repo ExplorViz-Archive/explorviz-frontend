@@ -4,7 +4,7 @@ import { module, test } from 'qunit';
 module('Unit | Utility | vr-menus/controls-menu', function(/* hooks */) {
 
   test('it exists', function(assert) {
-    let result = new ControlsMenu(() => {}, 'test', () => {return true ;});
+    let result = new ControlsMenu(() => {}, 'test', true);
     assert.ok(result);
   });
 });

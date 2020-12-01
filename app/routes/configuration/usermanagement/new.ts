@@ -5,7 +5,7 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 
 export default class UserManagementNewRoute extends Route.extend(AuthenticatedRouteMixin) {
   @action
-  goBack(this: UserManagementNewRoute) {
+  goBack() {
     this.transitionTo('configuration.usermanagement.users');
   }
 }

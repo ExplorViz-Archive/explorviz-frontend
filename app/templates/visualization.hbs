@@ -1,9 +1,15 @@
+{{add-listener
+  this.landscapeListener
+  "newLandscapeData"
+  this.receiveNewLandscapeData
+}}
+
 <div class="row" style="max-height:100%">
   <div class="col-12" id="vizspace">
     {{#if this.showVR}}
       <VrMultiUser
         @id="landscape1"
-        @landscape={{this.landscapeRepo.latestLandscape}}
+        @landscapeData={{this.landscapeData}}
         @font={{@model}}
       />
       <div style="position: absolute!important; top: 35px;">
@@ -17,21 +23,8 @@
         </BsButton>
       </div>
     {{else}}
-      {{#if this.showLandscape}}
-        {{#if this.landscapeRepo.latestLandscape.systems}}
-          <Visualization::Rendering::LandscapeRendering
-            @id="landscape1"
-            @landscape={{this.landscapeRepo.latestLandscape}}
-            @font={{@model}}
-            @components={{this.components}}
-            @removeComponent={{this.removeComponent}}
-            @closeDataSelection={{this.closeDataSelection}}
-            @showDataSelection={{this.showDataSelection}}
-            @addComponent={{this.addComponent}}
-            @switchToVR={{this.switchToVR}}
-            @showApplication={{this.showApplication}}
-          />
-        {{else if this.landscapeRepo.latestLandscape}}
+      {{#if this.showLandscapeView}}
+        {{#if this.isLandscapeExistendAndEmpty}}
           <div class="container-fluid">
             <div class="jumbotron">
               <h2>Empty Landscape received!</h2>
@@ -39,6 +32,21 @@
             </div>
             <div class="spinner-center-3" role="status"></div>
           </div>
+        {{else if this.allLandscapeDataExistsAndNotEmpty}}
+          <Visualization::Rendering::LandscapeRendering
+            @id="landscape1"
+            @landscapeData={{this.landscapeData}}
+            @font={{@model}}
+            @components={{this.components}}
+            @removeComponent={{this.removeComponent}}
+            @closeDataSelection={{this.closeDataSelection}}
+            @showDataSelection={{this.showDataSelection}}
+            @addComponent={{this.addComponent}}
+            @showApplication={{this.showApplication}}
+            @toggleVisualizationUpdating={{this.toggleVisualizationUpdating}}
+            @visualizationPaused={{this.visualizationPaused}}
+            @switchToVR={{this.switchToVR}}
+          />
         {{else}}
           <div class="container-fluid">
             <div class="jumbotron">
@@ -48,31 +56,30 @@
             <div class="spinner-center-3" role="status"></div>
           </div>
         {{/if}}
-      {{else}}
-        {{#if this.landscapeRepo.latestApplication}}
-          <Visualization::Rendering::ApplicationRendering
-            @id="app1"
-            @application={{this.landscapeRepo.latestApplication}}
-            @addComponent={{this.addComponent}}
-            @font={{@model}}
-            @components={{this.components}}
-            @removeComponent={{this.removeComponent}}
-            @closeDataSelection={{this.closeDataSelection}}
-            @showDataSelection={{this.showDataSelection}}
-          />
-          <div style="position: absolute!important">
-            <BsButton
-              @onClick={{this.openLandscapeView}}
-              @type="secondary"
-              @outline={{true}}
-              @title="Back to Landscape View"
-            >
-              {{svg-jar "reply" class="octicon align-middle"}}
-            </BsButton>
-          </div>
-        {{/if}}
+      {{else if this.showApplicationView}}
+        <Visualization::Rendering::ApplicationRendering
+          @id="app1"
+          @landscapeData={{this.landscapeData}}
+          @addComponent={{this.addComponent}}
+          @font={{@model}}
+          @components={{this.components}}
+          @removeComponent={{this.removeComponent}}
+          @closeDataSelection={{this.closeDataSelection}}
+          @showDataSelection={{this.showDataSelection}}
+          @toggleVisualizationUpdating={{this.toggleVisualizationUpdating}}
+          @visualizationPaused={{this.visualizationPaused}}
+        />
+        <div style="position: absolute!important">
+          <BsButton
+            @onClick={{this.openLandscapeView}}
+            @type="secondary"
+            @outline={{true}}
+            @title="Back to Landscape"
+          >
+            {{svg-jar "reply" class="octicon align-middle"}}
+          </BsButton>
+        </div>
       {{/if}}
-
       {{!-- timeline --}}
       <div id="timeline-content">
         <BsButton
@@ -99,7 +106,6 @@
           />
         </div>
       </div>
-
     {{/if}}
   </div>
 </div>

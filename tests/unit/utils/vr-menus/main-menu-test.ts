@@ -4,7 +4,12 @@ import { module, test } from 'qunit';
 module('Unit | Utility | vr-menus/main-menu', function(/* hooks */) {
 
   test('it exists', function(assert) {
-    let result = new MainMenu( () => {}, () => {}, () => {}, () => {}, () => {}, () => {});
+    let result = new MainMenu({
+      closeMenu: () => {},
+      openCameraMenu: () => {},
+      openLandscapeMenu: () => {},
+      openAdvancedMenu: () => {},
+    });
     assert.ok(result);
   });
 });
