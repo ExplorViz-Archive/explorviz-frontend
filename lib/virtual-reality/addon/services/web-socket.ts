@@ -15,24 +15,34 @@ export default class WebSocket extends Service {
 
   port: string|null = '';
 
+  secure: boolean|null = false;
+
+  path: string|null = '';
+
+  getSocketUrl() {
+    return `${this.secure ? "wss" : "ws"}://${this.host}:${this.port}/${this.path}`;
+  }
+
   socketCloseCallback: ((event: any) => void)| null = null;
 
   eventCallback: ((event: any, data: any) => void)| null = null;
 
   initSocket() {
-    const socket = this.websockets.socketFor(`ws://${this.host}:${this.port}/`);
+    const socket = this.websockets.socketFor(this.getSocketUrl());
     socket.on('message', this.messageHandler, this);
     socket.on('close', this.closeHandler, this);
     this.socketRef = socket;
   }
 
-  applyConfiguration(config: { host: string, port: string }) {
+  applyConfiguration(config: { host: string, port: string, secure: boolean, path: string }) {
     this.host = config.host;
     this.port = config.port;
+    this.secure = config.secure;
+    this.path = config.path;
   }
 
   closeSocket() {
-    this.websockets.closeSocketFor(`ws://${this.host}:${this.port}/`);
+    this.websockets.closeSocketFor(this.getSocketUrl());
     // Close handlers
     const socket = this.socketRef;
     if (socket) {
@@ -103,6 +113,8 @@ export default class WebSocket extends Service {
     this.updateQueue = [];
     this.host = null;
     this.port = null;
+    this.secure = null;
+    this.path = null;
   }
 }
 
