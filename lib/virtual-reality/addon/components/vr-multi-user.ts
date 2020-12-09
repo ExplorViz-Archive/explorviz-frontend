@@ -245,6 +245,7 @@ export default class VrMultiUser extends VrRendering {
       if (object.parent instanceof ApplicationObject3D && controller.ray) {
         if (this.applicationGroup.isApplicationGrabbed(object.parent.dataModel.pid)) {
           this.showHint('Application already grabbed');
+          return;
         } else {
           this.sender.sendAppGrabbed(object.parent, controller);
         }
@@ -322,6 +323,7 @@ export default class VrMultiUser extends VrRendering {
         this.onInitialLandscape(data);
         break;
       case 'landscape_position':
+        data.position = data.deltaPosition; // TODO: remove me
         this.onLandscapePosition(data);
         break;
       case 'app_translated':
@@ -615,15 +617,12 @@ export default class VrMultiUser extends VrRendering {
 
     if (data.landscape) {
       this.landscapeOffset = new THREE.Vector3(0, 0, 0);
-      const { position } = data.landscape;
-      const { quaternion } = data.landscape;
-      this.onLandscapePosition({ deltaPosition: position, quaternion });
+      this.onLandscapePosition(data);
     }
   }
 
-  onLandscapePosition(pose: { deltaPosition: number[], quaternion: number[] }) {
-    super.moveLandscape(pose.deltaPosition[0], pose.deltaPosition[1], pose.deltaPosition[2]);
-
+  onLandscapePosition(pose: { position: number[], quaternion: number[] }) {
+    this.landscapeObject3D.position.set(pose.position[0], pose.position[1], pose.position[2])
     super.updateLandscapeRotation(new Quaternion().fromArray(pose.quaternion));
   }
 
@@ -918,7 +917,7 @@ export default class VrMultiUser extends VrRendering {
 
   removeApplication(application: ApplicationObject3D) {
     if (this.applicationGroup.isApplicationGrabbed(application.dataModel.pid)) {
-      this.showHint('Application already grabbed');
+      this.showHint('Application is grabbed');
       return;
     }
 
