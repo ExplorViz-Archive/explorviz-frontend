@@ -7,7 +7,6 @@ module('Unit | Utility | vr-menus/main-menu', function(/* hooks */) {
     let result = new MainMenu({
       closeMenu: () => {},
       openCameraMenu: () => {},
-      openLandscapeMenu: () => {},
       openAdvancedMenu: () => {},
     });
     assert.ok(result);

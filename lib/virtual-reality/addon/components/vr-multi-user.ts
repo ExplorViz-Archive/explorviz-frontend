@@ -17,7 +17,6 @@ import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import MessageBoxMenu from 'virtual-reality/utils/vr-menus/message-box-menu';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import DS from 'ember-data';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
@@ -29,6 +28,7 @@ import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { perform } from 'ember-concurrency-ts';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
+import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 
 export default class VrMultiUser extends VrRendering {
   // #region CLASS FIELDS AND GETTERS
@@ -58,6 +58,7 @@ export default class VrMultiUser extends VrRendering {
   hardwareModels: HardwareModels;
 
   messageBox!: MessageBoxMenu;
+
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -126,6 +127,7 @@ export default class VrMultiUser extends VrRendering {
 
     this.updateUserNameTags();
     this.sendPoses();
+    this.sendLandscapePosition();
     this.webSocket.sendUpdates();
   }
 
@@ -139,7 +141,6 @@ export default class VrMultiUser extends VrRendering {
     this.mainMenu = new MainMenu({
       closeMenu: super.closeControllerMenu.bind(this),
       openCameraMenu: super.openCameraMenu.bind(this),
-      openLandscapeMenu: super.openLandscapeMenu.bind(this),
       openAdvancedMenu: super.openAdvancedMenu.bind(this),
       openSpectateMenu: this.openSpectateMenu.bind(this),
       openConnectionMenu: this.openConnectionMenu.bind(this),
@@ -239,13 +240,17 @@ export default class VrMultiUser extends VrRendering {
 
     const { object } = controller.intersectedObject;
 
-    if (object.parent instanceof ApplicationObject3D && controller.ray) {
-      if (this.applicationGroup.isApplicationGrabbed(object.parent.dataModel.pid)) {
-        this.showHint('Application already grabbed');
-      } else {
-        this.sender.sendAppGrabbed(object.parent, controller);
-        controller.grabObject(object.parent);
+    if (object.parent) {
+
+      if (object.parent instanceof ApplicationObject3D && controller.ray) {
+        if (this.applicationGroup.isApplicationGrabbed(object.parent.dataModel.pid)) {
+          this.showHint('Application already grabbed');
+        } else {
+          this.sender.sendAppGrabbed(object.parent, controller);
+        }
       }
+
+      controller.grabObject(object.parent);
     }
   }
 
@@ -253,11 +258,6 @@ export default class VrMultiUser extends VrRendering {
     const application = controller.grabbedObject;
 
     controller.releaseObject();
-    if (application instanceof ApplicationObject3D
-      && this.applicationGroup.hasApplication(application.dataModel.pid)) {
-      this.applicationGroup.add(application);
-    }
-
     if (application instanceof ApplicationObject3D && this.localUser.isOnline) {
       this.sender.sendAppReleased(application);
     }
@@ -814,6 +814,20 @@ export default class VrMultiUser extends VrRendering {
     this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
   }
 
+  sendLandscapePosition() {
+    const controllers = [ this.localUser.controller1, this.localUser.controller2 ];
+
+    controllers.forEach(controller => {
+      if (controller) {
+        const grabbedObject = controller.grabbedObject;
+        if (grabbedObject instanceof LandscapeObject3D) {
+          this.sender.sendLandscapeUpdate(this.landscapeObject3D.position, this.landscapeObject3D.quaternion,
+            this.landscapeOffset);
+        }
+      } 
+    });
+  }
+
   sendInitialControllerConnectState() {
     if (this.localUser.isOnline) {
       const connect: {controller1?: string, controller2?: string} = {};
@@ -835,25 +849,6 @@ export default class VrMultiUser extends VrRendering {
     }
 
     super.resetAll();
-  }
-
-  moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
-    super.moveLandscape(deltaX, deltaY, deltaZ);
-
-    if (this.localUser.isOnline) {
-      const delta = new THREE.Vector3(deltaX, deltaY, deltaZ);
-      this.sender.sendLandscapeUpdate(delta, this.landscapeObject3D.quaternion,
-        this.landscapeOffset);
-    }
-  }
-
-  updateLandscapeRotation(quaternion: THREE.Quaternion) {
-    super.updateLandscapeRotation(quaternion);
-
-    if (this.localUser.isOnline) {
-      this.sender.sendLandscapeUpdate(new THREE.Vector3(0, 0, 0), this.landscapeObject3D.quaternion,
-        this.landscapeOffset);
-    }
   }
 
   /**
@@ -922,7 +917,8 @@ export default class VrMultiUser extends VrRendering {
   }
 
   removeApplication(application: ApplicationObject3D) {
-    if (this.applicationGroup.grabbedApplications.has(application.dataModel.pid)) {
+    if (this.applicationGroup.isApplicationGrabbed(application.dataModel.pid)) {
+      this.showHint('Application already grabbed');
       return;
     }
 

@@ -83,6 +83,8 @@ export default class VRController extends BaseMesh {
 
   grabbedObject: THREE.Object3D|null = null;
 
+  grabbedObjectParent : THREE.Object3D|null = null;
+
   teleportArea: TeleportMesh|null = null;
 
   connected = false;
@@ -251,7 +253,8 @@ export default class VRController extends BaseMesh {
 
     this.grabbedObject = object;
     if (object.parent) {
-      object.parent.remove(object);
+      this.grabbedObjectParent = object.parent;
+      this.grabbedObjectParent.remove(object);
     }
     this.gripSpace.add(object);
   }
@@ -267,7 +270,14 @@ export default class VRController extends BaseMesh {
       grabbedObject.quaternion, grabbedObject.scale);
 
     this.gripSpace.remove(grabbedObject);
+
+    if (this.grabbedObjectParent) {
+      this.grabbedObjectParent.add(grabbedObject);
+      this.grabbedObjectParent = null;
+    }
+
     this.grabbedObject = null;
+
   }
 
   update() {

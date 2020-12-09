@@ -5,7 +5,6 @@ import TextbuttonItem from './items/textbutton-item';
 export type MainMenuEvents = {
   closeMenu: () => void,
   openCameraMenu: () => void,
-  openLandscapeMenu: () => void,
   openSpectateMenu?: () => void,
   openConnectionMenu?: () => void,
   openAdvancedMenu: () => void
@@ -27,14 +26,6 @@ export default class MainMenu extends BaseMenu {
 
     this.items.push(cameraButton);
     cameraButton.onTriggerDown = callbacks.openCameraMenu;
-
-    const landscapeButton = new TextbuttonItem('change_landscape_position', 'Move Landscape', {
-      x: 100,
-      y: 140,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
-
-    this.items.push(landscapeButton);
-    landscapeButton.onTriggerDown = callbacks.openLandscapeMenu;
 
     if (callbacks.openSpectateMenu) {
       const spectateButton = new TextbuttonItem('spectate', 'Spectate', {

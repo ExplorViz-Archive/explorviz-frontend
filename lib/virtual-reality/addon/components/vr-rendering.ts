@@ -37,7 +37,6 @@ import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VR
 import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
 import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
-import LandscapeMenu from 'virtual-reality/utils/vr-menus/landscape-menu';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import AdvancedMenu from 'virtual-reality/utils/vr-menus/advanced-menu';
@@ -357,9 +356,11 @@ export default class VrRendering extends Component<Args> {
 
     const { object } = controller.intersectedObject;
 
-    if (object.parent instanceof ApplicationObject3D && controller.ray) {
+    if ((object.parent instanceof ApplicationObject3D || object.parent instanceof LandscapeObject3D) && controller.ray) {
       controller.grabObject(object.parent);
     }
+    // @ts-ignore
+    console.log(controller.grabbedObject);
   }
 
   onInteractionMenuDown(controller: VRController) {
@@ -562,13 +563,13 @@ export default class VrRendering extends Component<Args> {
       const { nodes } = structureLandscapeData;
 
       // Draw boxes for nodes
-      nodes.forEach((node) => {
+      nodes.forEach((node: Node) => {
         this.renderNode(node, modelIdToPlaneLayout.get(node.ipAddress), centerPoint);
 
         const { applications } = node;
 
         // Draw boxes for applications
-        applications.forEach((application) => {
+        applications.forEach((application: Application) => {
           this.renderApplication(application, modelIdToPlaneLayout.get(application.pid),
             centerPoint);
         });
@@ -820,9 +821,9 @@ export default class VrRendering extends Component<Args> {
    * This input is used to move a grabbed application towards or away from the controller.
    */
   onThumbpadTouch(controller: VRController, axes: number[]) {
-    const application = controller.grabbedObject;
+    const grabbedObject = controller.grabbedObject;
 
-    if (!application) return;
+    if (!grabbedObject) return;
 
     controller.updateIntersectedObject();
 
@@ -833,12 +834,12 @@ export default class VrRendering extends Component<Args> {
     // Position where ray hits the application
     const intersectionPosWorld = intersectedObject.point;
     const intersectionPosLocal = intersectionPosWorld.clone();
-    application.worldToLocal(intersectionPosLocal);
+    grabbedObject.worldToLocal(intersectionPosLocal);
 
     const controllerPosition = new THREE.Vector3();
     controller.raySpace.getWorldPosition(controllerPosition);
     const controllerPositionLocal = controllerPosition.clone();
-    application.worldToLocal(controllerPositionLocal);
+    grabbedObject.worldToLocal(controllerPositionLocal);
 
     const direction = new THREE.Vector3();
     direction.subVectors(intersectionPosLocal, controllerPositionLocal);
@@ -854,7 +855,7 @@ export default class VrRendering extends Component<Args> {
       direction.normalize();
       const length = yAxis * this.time.getDeltaTime();
 
-      this.translateApplication(application, direction, length);
+      this.translateApplication(grabbedObject, direction, length);
     }
 
     if (controller.ray) { controller.ray.scale.z = intersectedObject.distance; }
@@ -968,7 +969,6 @@ export default class VrRendering extends Component<Args> {
     this.mainMenu = new MainMenu({
       closeMenu: this.closeControllerMenu.bind(this),
       openCameraMenu: this.openCameraMenu.bind(this),
-      openLandscapeMenu: this.openLandscapeMenu.bind(this),
       openAdvancedMenu: this.openAdvancedMenu.bind(this),
     });
 
@@ -989,19 +989,6 @@ export default class VrRendering extends Component<Args> {
 
     this.mainMenu = new CameraMenu(this.openMainMenu.bind(this), user.getCameraDelta.bind(user),
       user.changeCameraHeight.bind(user));
-    this.controllerMainMenus.add(this.mainMenu);
-  }
-
-  openLandscapeMenu() {
-    this.closeControllerMenu();
-
-    this.mainMenu = new LandscapeMenu(
-      this.openMainMenu.bind(this),
-      this.moveLandscape.bind(this),
-      this.rotateLandscape.bind(this),
-      this.resetLandscapePosition.bind(this),
-    );
-
     this.controllerMainMenus.add(this.mainMenu);
   }
 
@@ -1199,6 +1186,8 @@ export default class VrRendering extends Component<Args> {
 
   resetLandscapePosition() {
     this.landscapeObject3D.rotation.x = (-90 * THREE.MathUtils.DEG2RAD);
+    this.landscapeObject3D.rotation.y = (0);
+    this.landscapeObject3D.rotation.z = (0);
     this.landscapeOffset.set(0, 0, 0);
     this.centerLandscape();
   }
