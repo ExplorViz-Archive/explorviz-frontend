@@ -4,11 +4,10 @@ import RectangleItem from './items/rectangle-item';
 import TextItem from './items/text-item';
 
 export default class DetailInfoMenu extends BaseMenu {
-  constructor(closeMenu: () => void, content: DetailedInfo) {
+  constructor(content: DetailedInfo) {
     super({ width: 768, height: 512 });
 
     this.opacity = 0.8;
-    this.back = closeMenu;
 
     const titleBackground = new RectangleItem('title_background', { x: 0, y: 0 }, 768, 66, '#777777');
     this.items.push(titleBackground);

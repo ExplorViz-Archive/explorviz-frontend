@@ -6,13 +6,11 @@ import CheckboxItem from './items/checkbox-item';
 export default class AdvancedMenu extends BaseMenu {
   isLefty: boolean;
 
-  constructor(openMainMenu: () => void, openControlsMenu: () => {},
-    toggleLeftyMode: () => void, userIsLefty: boolean, resetAll: () => void) {
+  constructor(openControlsMenu: () => void, toggleLeftyMode: () => void, userIsLefty: boolean, resetAll: () => void) {
     super();
 
     this.isLefty = userIsLefty;
 
-    this.back = openMainMenu;
     this.opacity = 0.8;
 
     const textItem = new TextItem('Advanced Options', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
@@ -55,7 +53,7 @@ export default class AdvancedMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerDown = this.back;
+    backButton.onTriggerDown = this.closeMenu.bind(this);
 
     this.items.push(controlsButton, resetAllButton, backButton);
     this.update();

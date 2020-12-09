@@ -4,12 +4,11 @@ import TextbuttonItem from './items/textbutton-item';
 import ArrowbuttonItem from './items/arrowbutton-item';
 
 export default class CameraMenu extends BaseMenu {
-  constructor(openMainMenu: () => void, getCameraDelta: () => THREE.Vector3,
+  constructor(getCameraDelta: () => THREE.Vector3,
     changeCameraHeight: (deltaY: number) => void) {
     super();
 
     this.opacity = 0.8;
-    this.back = openMainMenu;
 
     const title = new TextItem('Camera', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
@@ -57,7 +56,7 @@ export default class CameraMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerDown = this.back;
+    backButton.onTriggerDown = this.closeMenu.bind(this);
 
     this.items.push(heightDownButton, heightUpButton, backButton);
     this.update();

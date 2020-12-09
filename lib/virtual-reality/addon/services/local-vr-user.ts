@@ -6,6 +6,7 @@ import DS from 'ember-data';
 import ConnectionMenu from 'virtual-reality/utils/vr-menus/connection-menu';
 import WebSocket from './web-socket';
 import SpectateUser from './spectate-user';
+import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 
 export type ConnectionStatus = 'offline'|'connecting'|'online';
 
@@ -31,9 +32,9 @@ export default class LocalVrUser extends Service {
 
   controller2: VRController|undefined;
 
-  controllerMainMenus: THREE.Group|undefined;
+  mainMenus: MenuGroup|undefined;
 
-  controllerInfoMenus: THREE.Group|undefined;
+  infoMenus: MenuGroup|undefined;
 
   userGroup!: THREE.Group;
 
@@ -116,12 +117,12 @@ export default class LocalVrUser extends Service {
         controller.control = controlMode.UTILITY;
         controller.addRay(new THREE.Color('blue'));
 
-        if (this.controllerMainMenus) controller.raySpace.add(this.controllerMainMenus);
+        if (this.mainMenus) controller.raySpace.add(this.mainMenus);
         controller.initTeleportArea();
       } else {
         controller.control = controlMode.INTERACTION;
         controller.addRay(new THREE.Color('red'));
-        if (this.controllerInfoMenus) controller.raySpace.add(this.controllerInfoMenus);
+        if (this.infoMenus) controller.raySpace.add(this.infoMenus);
       }
     });
 

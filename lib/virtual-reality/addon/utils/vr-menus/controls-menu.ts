@@ -4,10 +4,8 @@ import TextItem from './items/text-item';
 import ImageItem from './items/image-item';
 
 export default class ControlsMenu extends BaseMenu {
-  constructor(openAdvancedMenu: () => void, gamepadId: string, isLefty: boolean) {
+  constructor(gamepadId: string, isLefty: boolean) {
     super({ width: 2 * 512, height: 542 });
-
-    this.back = openAdvancedMenu;
 
     const title = new TextItem('Controls', 'title', '#ffffff', { x: 512, y: 20 }, 50, 'center');
     this.items.push(title);

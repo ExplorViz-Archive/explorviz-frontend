@@ -11,7 +11,7 @@ import TeleportMesh from '../view-objects/vr/teleport-mesh';
 import BaseMenu from '../vr-menus/base-menu';
 import { displayAsWireframe, displayAsSolidObject } from '../vr-helpers/multi-user-helper';
 
-type CallbackFunctions = {
+export type VRControllerCallbackFunctions = {
   connected? (controller: VRController, event: THREE.Event): void,
   disconnected? (controller: VRController): void,
 
@@ -61,7 +61,7 @@ export default class VRController extends BaseMesh {
 
   timestamp = 0;
 
-  eventCallbacks: CallbackFunctions;
+  eventCallbacks: VRControllerCallbackFunctions;
 
   gripSpace: THREE.Group;
 
@@ -106,7 +106,7 @@ export default class VRController extends BaseMesh {
    * @param eventCallbacks Object with functions that are called when certain events occur
    */
   constructor(gamepadIndex: number, controlType: string, gripSpace: THREE.Group,
-    raySpace: THREE.Group, eventCallbacks: CallbackFunctions, scene: THREE.Scene) {
+    raySpace: THREE.Group, eventCallbacks: VRControllerCallbackFunctions, scene: THREE.Scene) {
     super();
     // Init properties
     this.gamepadIndex = gamepadIndex;

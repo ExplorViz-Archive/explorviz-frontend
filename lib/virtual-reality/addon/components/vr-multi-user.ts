@@ -134,45 +134,31 @@ export default class VrMultiUser extends VrRendering {
   // #region MENUS
 
   openMainMenu() {
-    this.closeControllerMenu();
-
     if (!this.localUser.controller1) return;
 
-    this.mainMenu = new MainMenu({
-      closeMenu: super.closeControllerMenu.bind(this),
-      openCameraMenu: super.openCameraMenu.bind(this),
-      openAdvancedMenu: super.openAdvancedMenu.bind(this),
+    this.mainMenus.openMenu(new MainMenu({
+      openCameraMenu: this.openCameraMenu.bind(this),
+      openAdvancedMenu: this.openAdvancedMenu.bind(this),
       openSpectateMenu: this.openSpectateMenu.bind(this),
       openConnectionMenu: this.openConnectionMenu.bind(this),
-    });
-
-    this.controllerMainMenus.add(this.mainMenu);
+    }));
   }
 
   openSpectateMenu() {
-    this.closeControllerMenu();
-
-    this.mainMenu = new SpectateMenu(
-      this.openMainMenu.bind(this),
+    this.mainMenus.openMenu(new SpectateMenu(
       this.spectateUser,
       this.idToRemoteUser,
-    );
-
-    this.controllerMainMenus.add(this.mainMenu);
+    ));
   }
 
   openConnectionMenu() {
-    this.closeControllerMenu();
-
     const menu = new ConnectionMenu(
-      this.openMainMenu.bind(this),
       this.localUser.state,
       this.localUser.toggleConnection.bind(this.localUser),
     );
 
-    this.mainMenu = menu;
+    this.mainMenus.openMenu(menu);
     this.localUser.connectionMenu = menu;
-    this.controllerMainMenus.add(menu);
   }
 
   showUserList() {

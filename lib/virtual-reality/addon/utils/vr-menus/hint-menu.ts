@@ -53,7 +53,7 @@ export default class HintMenu extends BaseMenu {
       this.moved = 0;
 
       // Remove menu
-      this.back();
+      this.closeMenu();
       return;
     }
     requestAnimationFrame(this.endAnimation.bind(this));
@@ -91,5 +91,13 @@ export default class HintMenu extends BaseMenu {
       return;
     }
     requestAnimationFrame(this.startAnimation.bind(this));
+  }
+
+  closeMenu() {
+    // Since hint menus are not part of a menu group, they have to
+    // be removed manually when they are closed.
+    this.onClose();
+    this.deleteFromParent();
+    this.disposeRecursively();
   }
 }

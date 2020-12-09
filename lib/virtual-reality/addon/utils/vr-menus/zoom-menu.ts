@@ -1,5 +1,6 @@
 import BaseMenu from './base-menu';
 import THREE from 'three';
+import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
 
 export default class ZoomMenu extends BaseMenu {
 
@@ -15,10 +16,9 @@ export default class ZoomMenu extends BaseMenu {
 
   static readonly segments = 48;
 
-  constructor(back: () => void, renderer: THREE.WebGLRenderer, scene: THREE.Scene, headsetCamera: THREE.PerspectiveCamera) {
+  constructor(renderer: THREE.WebGLRenderer, scene: THREE.Scene, headsetCamera: THREE.PerspectiveCamera) {
     super();
 
-    this.back = back;
     this.renderer = renderer;
     this.scene = scene;
     this.headsetCamera = headsetCamera;
@@ -75,7 +75,12 @@ export default class ZoomMenu extends BaseMenu {
       this.renderer.render(this.scene, this.lensCamera);
       this.renderer.setRenderTarget(oldTarget);
       this.renderer.xr.enabled = oldXREnabled;
-    
+  }
+
+  makeGripButtonBinding() {
+    return new VRControllerButtonBinding('Close Magnifying Glass', {
+      onButtonUp: this.closeMenu.bind(this)
+    });
   }
 
 }

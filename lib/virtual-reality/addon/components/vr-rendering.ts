@@ -53,6 +53,11 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
+import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
+import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-controller-bindings-list';
+import VRControllerBindings from 'virtual-reality/utils/vr-controller/vr-controller-bindings';
+import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
+import VRControllerThumbpadBinding from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 
 interface Args {
   readonly id: string;
@@ -108,9 +113,11 @@ export default class VrRendering extends Component<Args> {
   // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
 
-  controllerMainMenus: THREE.Group;
+  mainMenus: MenuGroup;
 
-  controllerInfoMenus: THREE.Group;
+  infoMenus: MenuGroup;
+
+  hintMenu: HintMenu|undefined;
 
   // Depth of boxes for landscape entities
   landscapeDepth: number;
@@ -124,12 +131,6 @@ export default class VrRendering extends Component<Args> {
   floor!: FloorMesh;
 
   closeButtonTexture: THREE.Texture;
-
-  mainMenu: BaseMenu|undefined;
-
-  infoMenu: DetailInfoMenu|undefined;
-
-  hintMenu: HintMenu|undefined;
 
   landscapeOffset = new THREE.Vector3();
 
@@ -171,17 +172,17 @@ export default class VrRendering extends Component<Args> {
     this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
 
-    this.controllerMainMenus = new THREE.Group();
-    this.controllerMainMenus.position.y += 0.15;
-    this.controllerMainMenus.position.z -= 0.15;
-    this.controllerMainMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
-    this.localUser.controllerMainMenus = this.controllerMainMenus;
+    this.mainMenus = new MenuGroup();
+    this.mainMenus.position.y += 0.15;
+    this.mainMenus.position.z -= 0.15;
+    this.mainMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
+    this.localUser.mainMenus = this.mainMenus;
 
-    this.controllerInfoMenus = new THREE.Group();
-    this.controllerInfoMenus.position.y += 0.15;
-    this.controllerInfoMenus.position.z -= 0.15;
-    this.controllerInfoMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
-    this.localUser.controllerInfoMenus = this.controllerInfoMenus;
+    this.infoMenus = new MenuGroup();
+    this.infoMenus.position.y += 0.15;
+    this.infoMenus.position.z -= 0.15;
+    this.infoMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
+    this.localUser.infoMenus = this.infoMenus;
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
 
@@ -287,7 +288,7 @@ export default class VrRendering extends Component<Args> {
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
       [this.landscapeObject3D, this.applicationGroup, this.floor,
-        this.controllerMainMenus, this.controllerInfoMenus], {
+        this.mainMenus, this.infoMenus], {
         singleClick: this.handleSingleClick,
         doubleClick: this.handleDoubleClick,
         mouseWheel: this.handleMouseWheel,
@@ -306,24 +307,17 @@ export default class VrRendering extends Component<Args> {
 
   initControllers() {
     const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor,
-      this.controllerMainMenus, this.controllerInfoMenus];
+      this.mainMenus, this.infoMenus];
 
     // Init secondary/utility controller
     const raySpace1 = this.renderer.xr.getController(0);
     const gripSpace1 = this.renderer.xr.getControllerGrip(0);
 
-    const callbacks1 = {
-      thumbpadTouch: this.onThumbpadTouch.bind(this),
-      triggerDown: this.onInteractionTriggerDown.bind(this),
-      triggerPress: VrRendering.onInteractionTriggerPress.bind(this),
-      menuDown: this.onInteractionMenuDown.bind(this),
-      gripDown: this.onInteractionGripDown.bind(this),
-      gripUp: this.onInteractionGripUp.bind(this),
-    };
+    const bindings1 = new VRControllerBindingsList(this.makeInteractionBindings(), this.infoMenus.controllerBindings);
     const controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
-      raySpace1, callbacks1, this.scene);
+      raySpace1, bindings1.callbacks, this.scene);
     controller1.setToDefaultAppearance();
-    controller1.raySpace.add(this.controllerInfoMenus);
+    controller1.raySpace.add(this.infoMenus);
     controller1.intersectableObjects = intersectableObjects;
 
     this.localUser.controller1 = controller1;
@@ -333,71 +327,15 @@ export default class VrRendering extends Component<Args> {
     const raySpace2 = this.renderer.xr.getController(1);
     const gripSpace2 = this.renderer.xr.getControllerGrip(1);
 
-    const callbacks2 = {
-      triggerDown: this.onUtilityTrigger.bind(this),
-      menuDown: this.onUtilityMenuDown.bind(this),
-      gripDown: this.onUtilityGripDown.bind(this),
-      gripUp: this.onUtilityGripUp.bind(this),
-    };
-
+    const bindings2 = new VRControllerBindingsList(this.makeUtilityBindings(), this.mainMenus.controllerBindings);
     const controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
-      raySpace2, callbacks2, this.scene);
+      raySpace2, bindings2.callbacks, this.scene);
     controller2.setToDefaultAppearance();
-    controller2.raySpace.add(this.controllerMainMenus);
+    controller2.raySpace.add(this.mainMenus);
     controller2.intersectableObjects = intersectableObjects;
 
     this.localUser.controller2 = controller2;
     this.localUser.userGroup.add(controller2);
-  }
-
-  // eslint-disable-next-line
-  onInteractionGripDown(controller: VRController) {
-    if (!controller.intersectedObject) return;
-
-    const { object } = controller.intersectedObject;
-
-    if ((object.parent instanceof ApplicationObject3D || object.parent instanceof LandscapeObject3D) && controller.ray) {
-      controller.grabObject(object.parent);
-    }
-    // @ts-ignore
-    console.log(controller.grabbedObject);
-  }
-
-  onInteractionMenuDown(controller: VRController) {
-    if (!controller.intersectedObject) {
-      this.closeInfoMenu();
-      return;
-    }
-
-    const { object } = controller.intersectedObject;
-
-    const content = composeContent(object);
-    if (content) {
-      this.openInfoMenu(content);
-    } else {
-      this.closeInfoMenu();
-    }
-  }
-
-  onInteractionGripUp(controller: VRController) {
-    const object = controller.grabbedObject;
-    controller.releaseObject();
-
-    if (object instanceof ApplicationObject3D) {
-      this.applicationGroup.add(object);
-    }
-  }
-
-  // eslint-disable-next-line
-  onUtilityGripDown(/* controller: VRController */) {
-    this.openZoomMenu();
-  }
-
-  // eslint-disable-next-line
-  onUtilityGripUp(/* controller: VRController */) {
-    if (this.mainMenu instanceof ZoomMenu) {
-      this.closeControllerMenu();
-    }
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -490,8 +428,8 @@ export default class VrRendering extends Component<Args> {
 
     this.renderer.render(this.scene, this.camera);
 
-    if (this.mainMenu instanceof ZoomMenu) {
-      this.mainMenu.renderLens();
+    if (this.mainMenus.currentMenu instanceof ZoomMenu) {
+      this.mainMenus.currentMenu.renderLens();
     }
   }
 
@@ -794,33 +732,89 @@ export default class VrRendering extends Component<Args> {
 
   // #region CONTROLLER HANDLERS
 
-  onInteractionTriggerDown(controller: VRController) {
-    if (!controller.intersectedObject) return;
+  makeInteractionBindings(): VRControllerBindings {
+    return new VRControllerBindings({
+      thumbpad: new VRControllerThumbpadBinding({
+        labelUp: 'Move Away',
+        labelDown: 'Move Closer'
+      }, {
+        onThumbpadTouch: this.moveGrabbedObject.bind(this)
+      }),
 
-    this.handlePrimaryInputOn(controller.intersectedObject);
+      gripButton: new VRControllerButtonBinding('Grab Object', {
+        onButtonDown: (controller: VRController) => {
+          if (!controller.intersectedObject) return;
+      
+          const { object } = controller.intersectedObject;
+          if ((object.parent instanceof ApplicationObject3D || object.parent instanceof LandscapeObject3D) && controller.ray) {
+            controller.grabObject(object.parent);
+          }
+        },
+        onButtonUp: (controller: VRController) => {
+          const object = controller.grabbedObject;
+          controller.releaseObject();
+      
+          if (object instanceof ApplicationObject3D) {
+            this.applicationGroup.add(object);
+          }
+        }
+      }),
+
+      menuButton: new VRControllerButtonBinding('Show Details', {
+        onButtonDown: (controller: VRController) => {
+          if (!controller.intersectedObject) return;
+      
+          const { object } = controller.intersectedObject;
+          const content = composeContent(object);
+          if (content) {
+            this.openInfoMenu(content);
+          }
+        }
+      }),
+
+      triggerButton: new VRControllerButtonBinding('Open / Close', {
+        onButtonDown: (controller: VRController) => {
+          if (!controller.intersectedObject) return;
+      
+          this.handlePrimaryInputOn(controller.intersectedObject);
+        },
+        onButtonPress: (controller: VRController, value: number) => {
+          if (!controller.intersectedObject) return;
+      
+          const { object, uv } = controller.intersectedObject;
+      
+          if (object instanceof BaseMenu && uv) {
+            object.triggerPress(uv, value);
+          }
+        }
+      })
+    });
   }
 
-  static onInteractionTriggerPress(controller: VRController, value: number) {
-    if (!controller.intersectedObject) return;
+  makeUtilityBindings(): VRControllerBindings {
+    return new VRControllerBindings({
+      gripButton: new VRControllerButtonBinding('Open Magnifying Glass', {
+        onButtonDown: () => this.openZoomMenu()
+      }),
 
-    const { object, uv } = controller.intersectedObject;
+      menuButton: new VRControllerButtonBinding('Options', {
+        onButtonDown: () => this.openMainMenu()
+      }),
 
-    if (object instanceof BaseMenu && uv) {
-      object.triggerPress(uv, value);
-    }
-  }
-
-  onUtilityTrigger(controller: VRController) {
-    if (!controller.intersectedObject) return;
-
-    this.handleSecondaryInputOn(controller.intersectedObject);
+      triggerButton: new VRControllerButtonBinding('Teleport / Highlight', {
+        onButtonDown: (controller: VRController) => {
+          if (!controller.intersectedObject) return;
+          this.handleSecondaryInputOn(controller.intersectedObject)
+        }
+      }),
+    });
   }
 
   /**
    * This method handles inputs of the touchpad or analog stick respectively.
    * This input is used to move a grabbed application towards or away from the controller.
    */
-  onThumbpadTouch(controller: VRController, axes: number[]) {
+  moveGrabbedObject(controller: VRController, axes: number[]) {
     const grabbedObject = controller.grabbedObject;
 
     if (!grabbedObject) return;
@@ -859,14 +853,6 @@ export default class VrRendering extends Component<Args> {
     }
 
     if (controller.ray) { controller.ray.scale.z = intersectedObject.distance; }
-  }
-
-  onUtilityMenuDown() {
-    if (this.mainMenu) {
-      this.mainMenu.back();
-    } else {
-      this.openMainMenu();
-    }
   }
 
   // #endregion CONTROLLER HANDLERS
@@ -953,113 +939,67 @@ export default class VrRendering extends Component<Args> {
 
   showHint(title: string, text: string|null = null) {
     if (this.hintMenu) {
-      this.hintMenu.back();
+      this.hintMenu.closeMenu();
       this.hintMenu = undefined;
     }
-    const hintMenu = new HintMenu(this.camera, title, text);
-    this.hintMenu = hintMenu;
-    hintMenu.startAnimation();
+    this.hintMenu = new HintMenu(this.camera, title, text);
+    this.hintMenu.startAnimation();
   }
 
   openMainMenu() {
-    this.closeControllerMenu();
-
     if (!this.localUser.controller1) return;
 
-    this.mainMenu = new MainMenu({
-      closeMenu: this.closeControllerMenu.bind(this),
+    this.mainMenus.openMenu(new MainMenu({
       openCameraMenu: this.openCameraMenu.bind(this),
       openAdvancedMenu: this.openAdvancedMenu.bind(this),
-    });
-
-    this.controllerMainMenus.add(this.mainMenu);
+    }));
   }
 
   openZoomMenu() {
-    this.closeControllerMenu();
-
-    this.mainMenu = new ZoomMenu(this.closeControllerMenu.bind(this), this.renderer, this.scene, this.camera);
-    this.controllerMainMenus.add(this.mainMenu);
+    this.mainMenus.openMenu(new ZoomMenu(this.renderer, this.scene, this.camera));
   }
 
   openCameraMenu() {
-    this.closeControllerMenu();
-
     const user = this.localUser;
 
-    this.mainMenu = new CameraMenu(this.openMainMenu.bind(this), user.getCameraDelta.bind(user),
-      user.changeCameraHeight.bind(user));
-    this.controllerMainMenus.add(this.mainMenu);
+    this.mainMenus.openMenu(new CameraMenu(user.getCameraDelta.bind(user), user.changeCameraHeight.bind(user)));
   }
 
   openAdvancedMenu() {
-    this.closeControllerMenu();
-
     const user = this.localUser;
-
-    this.mainMenu = new AdvancedMenu(this.openMainMenu.bind(this), this.openControlsMenu.bind(this),
-      user.toggleLeftyMode.bind(user), user.isLefty, this.resetAll.bind(this));
-    this.controllerMainMenus.add(this.mainMenu);
+    this.mainMenus.openMenu(new AdvancedMenu(this.openControlsMenu.bind(this), user.toggleLeftyMode.bind(user), user.isLefty, this.resetAll.bind(this)));
   }
 
   openControlsMenu() {
-    this.closeControllerMenu();
-
     if (!this.localUser.controller1) return;
 
     const { gamepadId } = this.localUser.controller1;
-
-    this.mainMenu = new ControlsMenu(this.openAdvancedMenu.bind(this),
-      gamepadId, this.localUser.isLefty);
-
-    this.controllerMainMenus.add(this.mainMenu);
-  }
-
-  closeControllerMenu() {
-    if (this.mainMenu) {
-      this.controllerMainMenus.remove(this.mainMenu);
-      this.mainMenu.disposeRecursively();
-    }
-    this.mainMenu = undefined;
+    this.mainMenus.openMenu(new ControlsMenu(gamepadId, this.localUser.isLefty));
   }
 
   openInfoMenu(content: DetailedInfo) {
-    this.closeInfoMenu();
-
-    this.infoMenu = new DetailInfoMenu(this.closeInfoMenu.bind(this), content);
-
-    this.controllerInfoMenus.add(this.infoMenu);
-  }
-
-  closeInfoMenu() {
-    if (this.infoMenu) {
-      this.controllerInfoMenus.remove(this.infoMenu);
-    }
-    this.infoMenu = undefined;
+    this.infoMenus.openMenu(new DetailInfoMenu(content));
   }
 
   // #endregion MENUS
 
   // #region UTILS
 
-  handlePrimaryInputOn(intersection: THREE.Intersection) {
-    const self = this;
-    const { object, uv } = intersection;
-
-    function handleApplicationObject(appObject: THREE.Object3D) {
+  handlePrimaryInputOn({ object, uv, point }: THREE.Intersection) {
+    const handleApplicationObject = (appObject: THREE.Object3D) => {
       if (!(appObject.parent instanceof ApplicationObject3D)) return;
 
       if (appObject instanceof ComponentMesh) {
-        self.toggleComponentAndUpdate(appObject, appObject.parent);
+        this.toggleComponentAndUpdate(appObject, appObject.parent);
       } else if (appObject instanceof CloseIcon) {
-        self.removeApplication(appObject.parent);
+        this.removeApplication(appObject.parent);
       } else if (appObject instanceof FoundationMesh) {
-        self.closeAllComponentsAndUpdate(appObject.parent);
+        this.closeAllComponentsAndUpdate(appObject.parent);
       }
     }
 
     if (object instanceof ApplicationMesh) {
-      this.addApplication(object.dataModel, intersection.point);
+      this.addApplication(object.dataModel, point);
     // Handle application hits
     } else if (object.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
@@ -1091,8 +1031,7 @@ export default class VrRendering extends Component<Args> {
     }
   }
 
-  handleSecondaryInputOn(intersection: THREE.Intersection) {
-    const { object, point } = intersection;
+  handleSecondaryInputOn({ object, point }: THREE.Intersection) {
     if (object instanceof FloorMesh) {
       this.localUser.teleportToPosition(point);
     } else if (object.parent instanceof ApplicationObject3D) {

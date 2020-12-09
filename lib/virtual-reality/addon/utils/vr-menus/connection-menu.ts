@@ -7,9 +7,8 @@ export default class ConnectionMenu extends BaseMenu {
 
   connectionButton: TextbuttonItem;
 
-  constructor(openMainMenu: () => void, state: string, toggleConnection: (() => void)) {
+  constructor(state: string, toggleConnection: (() => void)) {
     super();
-    this.back = openMainMenu;
 
     const title = new TextItem('Connection', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
@@ -29,7 +28,7 @@ export default class ConnectionMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerDown = this.back;
+    backButton.onTriggerDown = this.closeMenu.bind(this);
 
     this.items.push(backButton);
 

@@ -13,14 +13,11 @@ export default class SpectateMenu extends BaseMenu {
 
   spectateInfo: TextItem;
 
-  constructor(openMainMenu: () => void, spectateUser: SpectateUser,
-    idToRemoteVrUsers: Map<string, RemoteVrUser>) {
+  constructor(spectateUser: SpectateUser, idToRemoteVrUsers: Map<string, RemoteVrUser>) {
     super();
 
     this.idToRemoteVrUsers = idToRemoteVrUsers;
     this.spectateUser = spectateUser;
-
-    this.back = () => { this.spectateUser.deactivate(); openMainMenu(); };
 
     const title = new TextItem('Spectate', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
@@ -45,7 +42,7 @@ export default class SpectateMenu extends BaseMenu {
       y: 402,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerDown = this.back;
+    backButton.onTriggerDown = this.closeMenu.bind(this);
 
     this.items.push(backButton);
     this.update();
@@ -118,5 +115,9 @@ export default class SpectateMenu extends BaseMenu {
     }
 
     this.update();
+  }
+
+  onClose() {
+    this.spectateUser.deactivate();
   }
 }

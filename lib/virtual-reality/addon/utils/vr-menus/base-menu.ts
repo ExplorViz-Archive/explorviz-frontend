@@ -2,6 +2,10 @@ import THREE from 'three';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import Item from './items/item';
 import InteractiveItem from './items/interactive-item';
+import VRControllerBindings from '../vr-controller/vr-controller-bindings';
+import VRControllerThumbpadBinding from '../vr-controller/vr-controller-thumbpad-binding';
+import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
+import MenuGroup from './menu-group';
 
 export default abstract class BaseMenu extends BaseMesh {
   canvas: HTMLCanvasElement;
@@ -119,6 +123,33 @@ export default abstract class BaseMenu extends BaseMesh {
     }
   }
 
+  makeThumbpadBinding(): VRControllerThumbpadBinding|undefined {
+    return undefined;
+  }
+
+  makeTriggerButtonBinding(): VRControllerButtonBinding<number>|undefined {
+    return undefined;
+  }
+
+  makeGripButtonBinding(): VRControllerButtonBinding<undefined>|undefined {
+    return undefined;
+  }
+
+  makeMenuButtonBinding(): VRControllerButtonBinding<undefined>|undefined {
+    return new VRControllerButtonBinding('Back', {
+      onButtonDown: this.closeMenu.bind(this)
+    });
+  }
+
+  makeControllerBindings(): VRControllerBindings {
+    return new VRControllerBindings({
+      thumbpad: this.makeThumbpadBinding(),
+      triggerButton: this.makeTriggerButtonBinding(),
+      gripButton: this.makeGripButtonBinding(),
+      menuButton: this.makeMenuButtonBinding()
+    });
+  }
+
   /**
    * Finds the menu item at given uv position.
    *
@@ -155,8 +186,11 @@ export default abstract class BaseMenu extends BaseMesh {
     return this.items.find((item) => item.id === id);
   }
 
-  back() {
-    super.deleteFromParent();
-    super.disposeRecursively();
+  closeMenu() {
+    if (this.parent instanceof MenuGroup) {
+      this.parent.closeMenu();
+    }
   }
+
+  onClose() {}
 }

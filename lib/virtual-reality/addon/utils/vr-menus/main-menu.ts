@@ -1,9 +1,9 @@
 import TextItem from './items/text-item';
 import BaseMenu from './base-menu';
 import TextbuttonItem from './items/textbutton-item';
+import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
 
 export type MainMenuEvents = {
-  closeMenu: () => void,
   openCameraMenu: () => void,
   openSpectateMenu?: () => void,
   openConnectionMenu?: () => void,
@@ -13,7 +13,6 @@ export default class MainMenu extends BaseMenu {
   constructor(callbacks: MainMenuEvents) {
     super();
 
-    this.back = callbacks.closeMenu;
     this.opacity = 0.8;
 
     const title = new TextItem('Options', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
@@ -61,8 +60,16 @@ export default class MainMenu extends BaseMenu {
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
     this.items.push(exitButton);
-    exitButton.onTriggerDown = this.back;
+    exitButton.onTriggerDown = this.closeMenu.bind(this);
 
     this.update();
+  }
+
+  makeTriggerButtonBinding() {
+    return new VRControllerButtonBinding('test', {
+      onButtonDown: () => console.log("Pressed Trigger Down"),
+      onButtonPress: () => console.log("Pressing Trigger"),
+      onButtonUp: () => console.log("Released Trigger"),
+    });
   }
 }
