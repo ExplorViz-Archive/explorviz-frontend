@@ -29,6 +29,7 @@ import { Application } from 'explorviz-frontend/utils/landscape-schemes/structur
 import { perform } from 'ember-concurrency-ts';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
+import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
 
 export default class VrMultiUser extends VrRendering {
   // #region CLASS FIELDS AND GETTERS
@@ -144,6 +145,7 @@ export default class VrMultiUser extends VrRendering {
       openAdvancedMenu: super.openAdvancedMenu.bind(this),
       openSpectateMenu: this.openSpectateMenu.bind(this),
       openConnectionMenu: this.openConnectionMenu.bind(this),
+      openMultiUserMenu: this.openMultiUserMenu.bind(this)
     });
 
     this.controllerMainMenus.add(this.mainMenu);
@@ -172,6 +174,21 @@ export default class VrMultiUser extends VrRendering {
 
     this.mainMenu = menu;
     this.localUser.connectionMenu = menu;
+    this.controllerMainMenus.add(menu);
+  }
+
+  openMultiUserMenu() {
+    this.closeControllerMenu()
+
+    const menu = new MultiUserMenu(
+      this.openMainMenu.bind(this),
+      this.localUser.toggleConnection.bind(this.localUser),
+      this.localUser,
+      this.spectateUser,
+      this.idToRemoteUser,
+    );
+    this.mainMenu = menu;
+    this.localUser.multiUserMenu = menu;
     this.controllerMainMenus.add(menu);
   }
 

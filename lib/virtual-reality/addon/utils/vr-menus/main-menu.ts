@@ -7,7 +7,8 @@ export type MainMenuEvents = {
   openCameraMenu: () => void,
   openSpectateMenu?: () => void,
   openConnectionMenu?: () => void,
-  openAdvancedMenu: () => void
+  openAdvancedMenu: () => void,
+  openMultiUserMenu?: () => void
 };
 export default class MainMenu extends BaseMenu {
   constructor(callbacks: MainMenuEvents) {
@@ -30,7 +31,7 @@ export default class MainMenu extends BaseMenu {
     if (callbacks.openSpectateMenu) {
       const spectateButton = new TextbuttonItem('spectate', 'Spectate', {
         x: 100,
-        y: 200,
+        y: 140,
       }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
       this.items.push(spectateButton);
@@ -40,7 +41,7 @@ export default class MainMenu extends BaseMenu {
     if (callbacks.openConnectionMenu) {
       const connectionButton = new TextbuttonItem('connection', 'Connection', {
         x: 100,
-        y: 260,
+        y: 200,
       }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
       this.items.push(connectionButton);
@@ -49,11 +50,19 @@ export default class MainMenu extends BaseMenu {
 
     const advancedButton = new TextbuttonItem('advanced', 'Advanced Options', {
       x: 100,
-      y: 320,
+      y: 260,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
     this.items.push(advancedButton);
     advancedButton.onTriggerDown = callbacks.openAdvancedMenu;
+
+    const multiUserButton = new TextbuttonItem('multi-user', 'Multi User', {
+      x: 100,
+      y: 320,
+    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+
+    this.items.push(multiUserButton);
+    multiUserButton.onTriggerDown = callbacks.openMultiUserMenu;
 
     const exitButton = new TextbuttonItem('exit', 'Exit', {
       x: 100,

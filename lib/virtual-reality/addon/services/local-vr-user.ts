@@ -6,6 +6,7 @@ import DS from 'ember-data';
 import ConnectionMenu from 'virtual-reality/utils/vr-menus/connection-menu';
 import WebSocket from './web-socket';
 import SpectateUser from './spectate-user';
+import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
 
 export type ConnectionStatus = 'offline'|'connecting'|'online';
 
@@ -39,6 +40,8 @@ export default class LocalVrUser extends Service {
 
   connectionMenu: ConnectionMenu | null = null;
 
+  multiUserMenu: MultiUserMenu | null = null;
+
   connectionStatus: ConnectionStatus = 'offline';
 
   isLefty = false;
@@ -63,6 +66,9 @@ export default class LocalVrUser extends Service {
   set state(state: ConnectionStatus) {
     if (this.connectionMenu) {
       this.connectionMenu.updateStatus(state);
+    }
+    if (this.multiUserMenu) {
+      this.multiUserMenu.updateStatus(state);
     }
     this.connectionStatus = state;
   }
