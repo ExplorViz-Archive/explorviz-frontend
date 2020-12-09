@@ -323,7 +323,7 @@ export default class VrMultiUser extends VrRendering {
         this.onInitialLandscape(data);
         break;
       case 'landscape_position':
-        data.position = data.deltaPosition; // TODO: remove me
+        data.position = data.position || data.deltaPosition; // TODO: remove me
         this.onLandscapePosition(data);
         break;
       case 'app_translated':
@@ -622,8 +622,8 @@ export default class VrMultiUser extends VrRendering {
   }
 
   onLandscapePosition(pose: { position: number[], quaternion: number[] }) {
-    this.landscapeObject3D.position.set(pose.position[0], pose.position[1], pose.position[2])
     super.updateLandscapeRotation(new Quaternion().fromArray(pose.quaternion));
+    this.landscapeObject3D.position.set(pose.position[0], pose.position[1], pose.position[2]);
   }
 
   onAppTranslation(id: string, direction: number[], length: number) {
@@ -820,8 +820,12 @@ export default class VrMultiUser extends VrRendering {
       if (controller) {
         const grabbedObject = controller.grabbedObject;
         if (grabbedObject instanceof LandscapeObject3D) {
-          this.sender.sendLandscapeUpdate(this.landscapeObject3D.position, this.landscapeObject3D.quaternion,
-            this.landscapeOffset);
+          const position = new THREE.Vector3();
+          this.landscapeObject3D.updateMatrixWorld();
+          this.landscapeObject3D.getWorldPosition(position);
+          const quaternion = new THREE.Quaternion();
+          this.landscapeObject3D.getWorldQuaternion(quaternion);
+          this.sender.sendLandscapeUpdate(position, quaternion, this.landscapeOffset);
         }
       } 
     });
