@@ -3,21 +3,19 @@ import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
 import DS from 'ember-data';
 import { set } from '@ember/object';
-import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 import {
   preProcessAndEnhanceStructureLandscape, StructureLandscapeData,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import TimestampRepository from './repos/timestamp-repository';
+import Auth from './auth';
 
 export default class LandscapeListener extends Service.extend(Evented) {
-  @service('session') session!: any;
-
   @service('store') store!: DS.Store;
 
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
-  @service('ajax') ajax!: AjaxServiceClass;
+  @service('auth') auth!: Auth;
 
   latestStructureData: StructureLandscapeData|null = null;
 
@@ -66,16 +64,38 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
   requestStructureData(/* fromTimestamp: number, toTimestamp: number */) {
     return new Promise<StructureLandscapeData>((resolve, reject) => {
-      this.ajax.request('http://localhost:32680/v2/landscapes/fibonacci-sample-landscape/structure')
-        .then((data: StructureLandscapeData) => resolve(data))
+      fetch('http://localhost:32680/v2/landscapes/fibonacci-sample-landscape/structure', {
+        headers: {
+          Authorization: `Bearer ${this.auth.accessToken}`,
+        },
+      })
+        .then(async (response: Response) => {
+          if (response.ok) {
+            const structureData = await response.json() as StructureLandscapeData;
+            resolve(structureData);
+          } else {
+            reject();
+          }
+        })
         .catch((e) => reject(e));
     });
   }
 
   requestDynamicData(fromTimestamp: number, toTimestamp: number) {
     return new Promise<DynamicLandscapeData>((resolve, reject) => {
-      this.ajax.request(`http://localhost:32681/v2/landscapes/fibonacci-sample-landscape/dynamic?from=${fromTimestamp}&to=${toTimestamp}`)
-        .then((data: any) => resolve(data))
+      fetch(`http://localhost:32681/v2/landscapes/fibonacci-sample-landscape/dynamic?from=${fromTimestamp}&to=${toTimestamp}`, {
+        headers: {
+          Authorization: `Bearer ${this.auth.accessToken}`,
+        },
+      })
+        .then(async (response: Response) => {
+          if (response.ok) {
+            const dynamicData = await response.json() as DynamicLandscapeData;
+            resolve(dynamicData);
+          } else {
+            reject();
+          }
+        })
         .catch((e) => reject(e));
     });
   }
