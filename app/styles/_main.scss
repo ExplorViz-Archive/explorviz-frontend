@@ -3,19 +3,10 @@ html, body {
   height: 100vh;
 }
 
-.main-content {
-  overflow: hidden;
-  @extend .ml-3;
-  @extend .mr-3;
-  @extend .mt-5;
-  @extend .mb-3;
-  @extend .flex-grow-1;
+#main-container {
+  height: 100vh;
   @extend .d-flex;
   @extend .flex-column;
-}
-
-.main-content > .row {
-  @extend .flex-grow-1;
 }
 
 #vizspace {
@@ -62,6 +53,10 @@ html, body {
 
 .relative {
   position: relative;
+}
+
+.flex-1 {
+  flex: 1;
 }
 
 .explorVizModal {

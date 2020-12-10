@@ -339,8 +339,9 @@ export default class PlotlyTimeline extends Component<IArgs> {
       hovermode: 'closest',
       margin: {
         b: 40,
-        pad: 4,
+        pad: 5,
         t: 20,
+        r: 40,
       },
       xaxis: {
         range: [minRange, maxRange],

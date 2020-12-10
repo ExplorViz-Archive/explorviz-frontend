@@ -1,157 +1,24 @@
-#exp-navbar {
-  min-width: 220px;
-  max-width: 220px;
-  @extend .d-block;
-  transition-duration: 0.6s;
+#navbar-token-item button:hover>.dropdown-menu {
 
-  #exp-navbar-btn {
-    position: absolute;
-    margin-left: 220px;
-    cursor: pointer;
-  
-    button {
-      @extend .d-flex-center;
-      @extend .pt-2;
-      @extend .pb-2;
-      border-radius: 0;
-      -webkit-box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, 0.25);
-      -moz-box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, 0.25);
-      box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, 0.25);
-    }
-  }
 }
 
-@include media-breakpoint-down(sm) {
-  #exp-navbar {
-    position: absolute;
-    z-index: 500;
-  }
+#navbar-token-item .dropdown-menu {
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-#exp-navbar.active {
-  margin-left: -220px;
-  transition-duration: 0.6s;
+.navbar-user-button {
+  all: unset;
 }
 
-#exp-navbar-main {
-  background-color: #eaeaea;
-  @extend .d-flex;
-  @extend .flex-column;
-  @extend .justify-content-between;
-  @extend .flex-grow-1;
-  @extend .vh-100;
-  -webkit-box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, 0.25);
-  -moz-box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, 0.25);
-  box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, 0.25);
-
-  /* for ember-scrollable, else the navbar won't take full height */
-  .tse-scroll-content {
-    @extend .d-flex;
-    @extend .flex-grow-1;
-    @extend .flex-column;
-    >.tse-content {
-      @extend .d-flex;
-      @extend .flex-grow-1;
-      @extend .flex-column;
-    }
-  }
+#navbar-user-options > .dropdown-menu.show ~ .navbar-user-button::after {
+  transform: rotateX(180deg);
 }
 
-#exp-navbar-logo {
-  @extend .pt-3;
-  @extend .pb-3;
-  @extend .pl-3;
-  @extend .pr-3;
-  background-color: white;
+.pointer-events-none {
+  pointer-events: none;
 }
 
-#exp-navbar-routes {
-  p {
-    color: black;
-    font-size: 1.15rem;
-    cursor: pointer;
-    @extend .pl-3;
-    @extend .pr-3;
-    @extend .pt-2;
-    @extend .pb-2;
-    @extend .mb-0;
-    transition: 0.2s ease;
-  }
-  li {
-    transition: 0.2s ease;
-    border-bottom: #a3a6a8 solid 1px;
-  }
-  li:first-of-type {
-    border-top: #a3a6a8 solid 1px;
-  }
-  li.active {
-    background-color: #22497c;
-    p {
-      color: white;
-      transform: translateX(10px);
-    }
-  }
-  li:hover {
-    background-color: #406da7;
-    p {
-      color: white;
-      transform: translateX(10px);
-    }
-  }
-}
-
-#exp-navbar-footer {
-  @extend .pt-3;
-  @extend .pb-3;
-  @extend .pl-3;
-  @extend .pr-3;
-  @extend .justify-content-end;
-}
-
-#exp-navbar-adv {
-  background-color: #22497c29;
-  font-size: 1.15rem;
-  @extend .pt-2;
-  @extend .pb-3;
-
-  >span {
-    @extend .pl-3;
-    @extend .pr-3;
-    @extend .pt-1;
-    @extend .mb-3;
-  }
-  a, div {
-    @extend .pl-4;
-    @extend .pr-3;
-    @extend .pt-1;
-    @extend .pb-1;
-    border-top: #212529;
-    border-bottom: #212529;
-    text-decoration: none;
-    color: inherit;
-    border-bottom: #a3a6a8 solid 1px;
-    span {
-      transition: 0.2s ease;
-    }
-  }
-  a:first-of-type {
-    @extend .mt-1;
-    border-top: #a3a6a8 solid 1px;
-  }
-  a.active, div.active {
-    background-color: #22497c;
-    color: white;
-    
-    span {
-      transform: translateX(10px);
-    }
-  }
-  a:hover, div:hover {
-    background-color: #406da7;
-    color: white;
-    
-    span {
-      transform: translateX(10px);
-    }
-  }
+.pointer-events-all {
+  pointer-events: all;
 }

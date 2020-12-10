@@ -4,6 +4,8 @@ import VisualizationController from 'explorviz-frontend/controllers/visualizatio
 import THREE from 'three';
 import debugLogger from 'ember-debug-logger';
 import Route from '@ember/routing/route';
+import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
+import { inject as service } from '@ember/service';
 
 /**
 * TODO
@@ -12,7 +14,16 @@ import Route from '@ember/routing/route';
 * @extends Ember.Route
 */
 export default class VisualizationRoute extends Route.extend(AuthenticatedRouteMixin) {
+  @service('landscape-token')
+  landscapeToken!: LandscapeTokenService;
+
   debug = debugLogger();
+
+  beforeModel() {
+    if (this.landscapeToken.token === null) {
+      this.transitionTo('landscapes');
+    }
+  }
 
   model() {
     return new Promise((resolve, reject) => {

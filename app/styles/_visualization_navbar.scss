@@ -18,10 +18,9 @@
   @extend .pr-3;
   @extend .mb-3;
   align-self: center;
-  border-radius: .5rem;
-  border-style: solid;
-  border-width: 1px;
-  border-color: lightgray;
+  border-radius: 2rem;
+  background-color: #dbdbdb;
+  box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.5);
 }
 
 .explorviz-visualization-navbar > ul {
@@ -37,9 +36,11 @@
 
 .explorviz-visualization-navbar > ul.nav > li.nav-item {
   cursor: pointer;
+  transition: all .2s ease-in-out;
   color: rgba(0, 0, 0, 0.5);
 }
 
 .explorviz-visualization-navbar > ul.nav > li.nav-item:hover {
-  color: rgba(0, 0, 0, 0.7);
+  color: rgb(85 126 187 / 95%);
+  transform: scale(1.3);
 }

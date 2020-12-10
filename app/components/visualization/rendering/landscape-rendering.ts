@@ -103,6 +103,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   threePerformance: THREEPerformance|undefined;
 
   // Used to register (mouse) events
+  @tracked
   interaction!: Interaction;
 
   // Plain JSON variant of the landscape with fewer properties, used for layouting
@@ -120,6 +121,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   readonly imageLoader: ImageLoader = new ImageLoader();
 
   readonly hoverHandler: HoverEffectHandler = new HoverEffectHandler();
+
+  items = [
+    { title: 'Reset View', action: this.resetView },
+    { title: 'Zelda', action: this.resize, disabled: true },
+  ];
 
   @tracked
   popupData: PopupData | null = null;

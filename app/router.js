@@ -16,7 +16,6 @@ const Router = EmberRouter.extend({
 });
 
 Router.map(function () {
-
   this.route('badroute', { path: "/*path" });
   this.route('login');
   this.route('visualization');
@@ -43,6 +42,7 @@ Router.map(function () {
     });
 
   });
+  this.route('landscapes');
 });
 
 export default Router;

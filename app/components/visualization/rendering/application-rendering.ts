@@ -89,6 +89,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   animationFrameId = 0;
 
   // Used to register (mouse) events
+  @tracked
   interaction!: Interaction;
 
   boxLayoutMap: Map<string, BoxLayout>;
@@ -105,6 +106,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   readonly communicationRendering: CommunicationRendering;
 
   readonly entityManipulation: EntityManipulation;
+
+  items = [
+    { title: 'Reset View', action: this.resetView },
+    { title: 'Open All Components', action: this.openAllComponents },
+  ];
 
   // Plain JSON variant of the application with fewer properties, used for layouting
   reducedApplication: ReducedApplication|null = null;

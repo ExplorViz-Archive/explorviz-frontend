@@ -17,7 +17,7 @@
     class="d-flex {{if @showDataSelection "col-8" "col-12"}}"
     style="flex-direction: column; height: 100%"
   >
-    {{#unless @isReplay}}
+{{!--     {{#unless @isReplay}}
       <Visualization::PageSetup::VisualizationNavbar>
         <Visualization::PageSetup::Navbar::ResetVisualization
           @resetView={{this.resetView}}
@@ -40,7 +40,7 @@
           @highlightModel={{this.highlightModel}}
         />
       </Visualization::PageSetup::VisualizationNavbar>
-    {{/unless}}
+    {{/unless}} --}}
 
     <div
       id="rendering"
@@ -51,6 +51,12 @@
         class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
         {{did-insert this.canvasInserted}}
       >
+        {{#if this.interaction}}
+          <RightClickMenuHammer
+            @items={{this.items}}
+            @hammer={{this.interaction.hammerHandler}}
+          />
+        {{/if}}
       </canvas>
       {{#if this.loadNewApplication.isRunning}}
         <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />

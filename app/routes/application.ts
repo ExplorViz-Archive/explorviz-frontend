@@ -2,6 +2,8 @@ import { action } from '@ember/object';
 import Route from '@ember/routing/route';
 import ApplicationRouteMixin from 'ember-simple-auth/mixins/application-route-mixin';
 import ApplicationController from 'explorviz-frontend/controllers/application';
+import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
+import { inject as service } from '@ember/service';
 
 /**
  * TODO
@@ -10,7 +12,10 @@ import ApplicationController from 'explorviz-frontend/controllers/application';
  * @extends Ember.Route
  */
 export default class ApplicationRoute extends Route.extend(ApplicationRouteMixin) {
-  routeAfterAuthentication = 'visualization';
+  routeAfterAuthentication = 'landscapes';
+
+  @service('landscape-token')
+  landscapeToken!: LandscapeTokenService;
 
   async beforeModel() {
     await (this.controllerFor('application') as ApplicationController).loadUserAndSettings.perform();

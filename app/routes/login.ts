@@ -8,5 +8,5 @@ import UnauthenticatedRouteMixin from 'ember-simple-auth/mixins/unauthenticated-
 * @extends Ember.Route
 */
 export default class LoginRoute extends Route.extend(UnauthenticatedRouteMixin) {
-  routeIfAlreadyAuthenticated = 'visualization';
+  routeIfAlreadyAuthenticated = 'landscapes';
 }

@@ -1,0 +1,13 @@
+#token-selection-table {
+}
+
+#token-selection-table {
+  > tbody > tr, > thead > tr > th {
+    cursor: pointer;
+  }
+}
+
+#token-selection-table > tbody > tr:hover {
+  background-color: #bfbfbf;
+  transition: all 0.1s ease-in-out;
+}
