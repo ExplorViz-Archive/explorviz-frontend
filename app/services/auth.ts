@@ -5,15 +5,17 @@ import Auth0Lock from 'auth0-lock';
 import debugLogger from 'ember-debug-logger';
 
 export default class Auth extends Service {
-  debug = debugLogger();
+  private debug = debugLogger();
 
   @service('router')
   router!: any;
 
   // is initialized in the init()
-  lock!: Auth0LockStatic;
+  private lock!: Auth0LockStatic;
 
   user: Auth0UserProfile|undefined = undefined;
+
+  accessToken: string|undefined = undefined;
 
   init() {
     super.init();
@@ -36,6 +38,7 @@ export default class Auth extends Service {
 
     this.lock.on('authenticated', (authResult) => {
       this.router.transitionTo(config.auth0.routeAfterLogin).then(() => {
+        this.set('accessToken', authResult.accessToken);
         this.setUser(authResult.accessToken);
       });
     });
@@ -69,6 +72,7 @@ export default class Auth extends Service {
         if (err || authResult === undefined) {
           reject(err);
         } else {
+          this.set('accessToken', authResult.accessToken);
           this.setUser(authResult.accessToken);
           resolve(authResult);
         }
