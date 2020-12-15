@@ -62,7 +62,6 @@ export default class SpectateUser extends Service {
       this.localUser.controller2.setToDefaultAppearance();
     }
 
-    this.localUser.state = 'online';
 
     this.localUser.userGroup.position.copy(this.startPosition);
 

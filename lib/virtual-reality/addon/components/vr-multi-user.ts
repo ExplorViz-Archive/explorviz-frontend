@@ -4,7 +4,6 @@ import SpectateUser from 'virtual-reality/services/spectate-user';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import debugLogger from 'ember-debug-logger';
-import ConnectionMenu from 'virtual-reality/utils/vr-menus/connection-menu';
 import $ from 'jquery';
 import { bind } from '@ember/runloop';
 import THREE, { Quaternion } from 'three';
@@ -21,14 +20,13 @@ import * as Highlighting from 'explorviz-frontend/utils/application-rendering/hi
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import NameTagMesh from 'virtual-reality/utils/view-objects/vr/name-tag-mesh';
-import SpectateMenu from 'virtual-reality/utils/vr-menus/spectate-menu';
 import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
-import UserListMenu from 'virtual-reality/utils/vr-menus/user-list-menu';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { perform } from 'ember-concurrency-ts';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
+import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
 
 export default class VrMultiUser extends VrRendering {
   // #region CLASS FIELDS AND GETTERS
@@ -139,43 +137,25 @@ export default class VrMultiUser extends VrRendering {
     this.mainMenus.openMenu(new MainMenu({
       openCameraMenu: this.openCameraMenu.bind(this),
       openAdvancedMenu: this.openAdvancedMenu.bind(this),
-      openSpectateMenu: this.openSpectateMenu.bind(this),
-      openConnectionMenu: this.openConnectionMenu.bind(this),
+      openMultiUserMenu: this.openMultiUserMenu.bind(this)
     }));
-  }
-
-  openSpectateMenu() {
-    this.mainMenus.openMenu(new SpectateMenu(
+  } 
+  
+  openMultiUserMenu() {
+    const menu = new MultiUserMenu(
+      this.localUser.toggleConnection.bind(this.localUser),
+      this.localUser,
       this.spectateUser,
       this.idToRemoteUser,
-    ));
-  }
-
-  openConnectionMenu() {
-    const menu = new ConnectionMenu(
-      this.localUser.state,
-      this.localUser.toggleConnection.bind(this.localUser),
     );
 
     this.mainMenus.openMenu(menu);
-    this.localUser.connectionMenu = menu;
+    this.localUser.multiUserMenu = menu;
   }
 
-  showUserList() {
-    if (this.camera.getObjectByName('userlist-menu')) {
-      this.hideUserList();
-    }
-    const remoteUsers = Array.from(this.idToRemoteUser.values());
-    const menu = new UserListMenu(this.localUser, remoteUsers, this.localUser.userID);
-    menu.name = 'userlist-menu';
-    this.camera.add(menu);
-  }
-
-  hideUserList() {
-    const menu = this.camera.getObjectByName('userlist-menu');
-
-    if (menu) {
-      this.camera.remove(menu);
+  updateMultiUserMenu() {
+    if (this.mainMenus.currentMenu instanceof MultiUserMenu) {
+      this.mainMenus.currentMenu.updateUserList(this.idToRemoteUser);
     }
   }
 
@@ -248,7 +228,7 @@ export default class VrMultiUser extends VrRendering {
   handlePrimaryInputOn(intersection: THREE.Intersection) {
     if (this.spectateUser.spectatedUser) {
       const { object, uv } = intersection;
-      if (object instanceof SpectateMenu && uv) {
+      if (object instanceof MultiUserMenu && uv) {
         object.triggerDown(uv);
       }
       return;
@@ -482,6 +462,7 @@ export default class VrMultiUser extends VrRendering {
         color: `#${user.color.getHexString()}`,
       }, 3000);
     }
+    this.updateMultiUserMenu();
   }
 
   /**
@@ -554,6 +535,7 @@ export default class VrMultiUser extends VrRendering {
         color: `#${user.color.getHexString()}`,
       }, 3000);
     }
+    this.updateMultiUserMenu();
   }
 
   async onInitialLandscape(data: any) {

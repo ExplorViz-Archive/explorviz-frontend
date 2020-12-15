@@ -40,7 +40,6 @@ import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import AdvancedMenu from 'virtual-reality/utils/vr-menus/advanced-menu';
-import ControlsMenu from 'virtual-reality/utils/vr-menus/controls-menu';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
 import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
@@ -1005,15 +1004,8 @@ export default class VrRendering extends Component<Args> {
   }
 
   openAdvancedMenu() {
-    const user = this.localUser;
-    this.mainMenus.openMenu(new AdvancedMenu(this.openControlsMenu.bind(this), user.toggleLeftyMode.bind(user), user.isLefty, this.resetAll.bind(this)));
-  }
-
-  openControlsMenu() {
-    if (!this.localUser.controller1) return;
-
-    const { gamepadId } = this.localUser.controller1;
-    this.mainMenus.openMenu(new ControlsMenu(gamepadId, this.localUser.isLefty));
+    const user = this.localUser;    
+    this.mainMenus.openMenu(new AdvancedMenu(user.toggleLeftyMode.bind(user), user.isLefty, this.resetAll.bind(this)));
   }
 
   openInfoMenu(content: DetailedInfo) {

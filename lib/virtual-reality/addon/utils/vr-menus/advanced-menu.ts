@@ -6,7 +6,7 @@ import CheckboxItem from './items/checkbox-item';
 export default class AdvancedMenu extends BaseMenu {
   isLefty: boolean;
 
-  constructor(openControlsMenu: () => void, toggleLeftyMode: () => void, userIsLefty: boolean, resetAll: () => void) {
+  constructor(toggleLeftyMode: () => void, userIsLefty: boolean, resetAll: () => void) {
     super();
 
     this.isLefty = userIsLefty;
@@ -32,13 +32,6 @@ export default class AdvancedMenu extends BaseMenu {
       this.update();
     };
 
-    const controlsButton = new TextbuttonItem('controls', 'Controls', {
-      x: 100,
-      y: 208,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
-
-    controlsButton.onTriggerDown = openControlsMenu;
-
     const resetAllButton = new TextbuttonItem('resetAll', 'Reset all', {
       x: 100,
       y: 266,
@@ -55,7 +48,7 @@ export default class AdvancedMenu extends BaseMenu {
 
     backButton.onTriggerDown = this.closeMenu.bind(this);
 
-    this.items.push(controlsButton, resetAllButton, backButton);
+    this.items.push(resetAllButton, backButton);
     this.update();
   }
 }
