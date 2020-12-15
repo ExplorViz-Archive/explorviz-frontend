@@ -151,6 +151,19 @@ export default abstract class BaseMenu extends BaseMesh {
   }
 
   /**
+   * Whether the controller's ray should be shown when this menu is open.
+   *
+   * By default, the controller's ray is hidden since the controller cannot
+   * be used to interact with the environment while a menu is open. If the
+   * controller bindings are overridden by a subclass such that the controller
+   * can interact with the environment again, this getter should be overridden
+   * as well.
+   */
+  get enableControllerRay(): boolean {
+    return false;
+  }
+
+  /**
    * Finds the menu item at given uv position.
    *
    * @param position - The uv position.

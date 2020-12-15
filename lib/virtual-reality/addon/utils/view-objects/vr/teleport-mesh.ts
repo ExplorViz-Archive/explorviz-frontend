@@ -16,8 +16,6 @@ export default class TeleportMesh extends BaseMesh {
   }
 
   showAbovePosition(position: THREE.Vector3, yOffset = 0.005) {
-    this.visible = true;
-
     // Set teleport mesh (just) above the given position
     this.position.copy(position);
     this.position.y += yOffset;

@@ -431,7 +431,13 @@ export default class VRController extends BaseMesh {
       }
     } else if (this.isUtilityController) {
       if (object instanceof FloorMesh) {
-        if (this.teleportArea) this.teleportArea.showAbovePosition(nearestIntersection.point);
+        if (this.teleportArea) {
+          // Show teleport area above intersected point on floor. However, if
+          // the controller's ray is invisible, don't show the teleport area
+          // either.
+          this.teleportArea.showAbovePosition(nearestIntersection.point);
+          this.teleportArea.visible = this.ray.visible;
+        }
       } else if (object instanceof BaseMesh) {
         object.applyHoverEffect();
       }
