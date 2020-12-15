@@ -4,7 +4,7 @@ import { module, test } from 'qunit';
 module('Unit | Utility | vr-menus/advanced-menu', function(/* hooks */) {
 
   test('it exists', function(assert) {
-    let result = new AdvancedMenu(() => {}, () => { return {}; }, () => {}, false, () => {});
+    let result = new AdvancedMenu(() => {}, false, () => {});
     assert.ok(result);
   });
 });
