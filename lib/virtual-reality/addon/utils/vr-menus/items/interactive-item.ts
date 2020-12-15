@@ -1,7 +1,9 @@
 import Item from './item';
 
 export default abstract class InteractiveItem extends Item {
-  isHovered = false;
+  counter = 0;
+
+  get isHovered() { return this.counter > 0;}
 
   onHover: (() => void)|undefined = undefined;
 
@@ -10,10 +12,10 @@ export default abstract class InteractiveItem extends Item {
   onTriggerPressed: ((value: number) => void)|undefined = undefined;
 
   enableHoverEffect() {
-    this.isHovered = true;
+    this.counter++;
   }
 
   resetHoverEffect() {
-    this.isHovered = false;
+    this.counter--;
   }
 }
