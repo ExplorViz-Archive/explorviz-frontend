@@ -34,18 +34,20 @@ export default class MultiUserMenu extends BaseMenu {
   initMenu(state: String) {
 
     if(state == 'offline') {
-        this.initOfflineMenu();
+        this.initOfflineMenu('Connect');
+    } else if (state == 'connecting') {
+        this.initOfflineMenu('Connecting...');
     } else if (state == 'online') {
         this.initOnlineMenu();
     }
     this.update();
   }
 
-  initOfflineMenu() {
+  initOfflineMenu(buttonState: string) {
     const title = new TextItem('Multi User', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
 
-    const connectButton = new TextbuttonItem('connect', 'Connect', { x: 100, y: 186 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+    const connectButton = new TextbuttonItem('connect', buttonState, { x: 100, y: 186 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
     this.items.push(connectButton);
     connectButton.onTriggerDown = this.toggleConnection;
   }
@@ -83,6 +85,12 @@ export default class MultiUserMenu extends BaseMenu {
     this.initMenu(state);
   }
 
+  updateUserList(idToRemoteVrUsers: Map<string, RemoteVrUser>) {
+    this.idToRemoteVrUsers = idToRemoteVrUsers;
+    this.users = Array.from(idToRemoteVrUsers.values());
+    this.updateStatus(this.localUser.state);
+  }
+
   deactivateSpectate() {
     if (this.spectateUser.isActive) {
       const id = this.spectateUser.spectatedUser?.ID
@@ -94,16 +102,17 @@ export default class MultiUserMenu extends BaseMenu {
       }
       this.spectateUser.deactivate();
     }
-    this.update()
+    this.update();
   }
 
   spectate(remoteUser: RemoteVrUser) {
+    this.deactivateSpectate();
     this.spectateUser.activate(remoteUser);
     const remoteUserButton = this.remoteUserButtons.get(remoteUser.ID);
     if (remoteUserButton) {
         remoteUserButton.text += ' (spectated)';
     }
-    this.update()
+    this.update();
   }
 
 }

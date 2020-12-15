@@ -4,7 +4,6 @@ import SpectateUser from 'virtual-reality/services/spectate-user';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import debugLogger from 'ember-debug-logger';
-import ConnectionMenu from 'virtual-reality/utils/vr-menus/connection-menu';
 import $ from 'jquery';
 import { bind } from '@ember/runloop';
 import THREE, { Quaternion } from 'three';
@@ -21,9 +20,7 @@ import * as Highlighting from 'explorviz-frontend/utils/application-rendering/hi
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import NameTagMesh from 'virtual-reality/utils/view-objects/vr/name-tag-mesh';
-import SpectateMenu from 'virtual-reality/utils/vr-menus/spectate-menu';
 import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
-import UserListMenu from 'virtual-reality/utils/vr-menus/user-list-menu';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { perform } from 'ember-concurrency-ts';
@@ -143,39 +140,12 @@ export default class VrMultiUser extends VrRendering {
       closeMenu: super.closeControllerMenu.bind(this),
       openCameraMenu: super.openCameraMenu.bind(this),
       openAdvancedMenu: super.openAdvancedMenu.bind(this),
-      openSpectateMenu: this.openSpectateMenu.bind(this),
-      openConnectionMenu: this.openConnectionMenu.bind(this),
       openMultiUserMenu: this.openMultiUserMenu.bind(this)
     });
 
     this.controllerMainMenus.add(this.mainMenu);
   }
 
-  openSpectateMenu() {
-    this.closeControllerMenu();
-
-    this.mainMenu = new SpectateMenu(
-      this.openMainMenu.bind(this),
-      this.spectateUser,
-      this.idToRemoteUser,
-    );
-
-    this.controllerMainMenus.add(this.mainMenu);
-  }
-
-  openConnectionMenu() {
-    this.closeControllerMenu();
-
-    const menu = new ConnectionMenu(
-      this.openMainMenu.bind(this),
-      this.localUser.state,
-      this.localUser.toggleConnection.bind(this.localUser),
-    );
-
-    this.mainMenu = menu;
-    this.localUser.connectionMenu = menu;
-    this.controllerMainMenus.add(menu);
-  }
 
   openMultiUserMenu() {
     this.closeControllerMenu()
@@ -192,23 +162,12 @@ export default class VrMultiUser extends VrRendering {
     this.controllerMainMenus.add(menu);
   }
 
-  showUserList() {
-    if (this.camera.getObjectByName('userlist-menu')) {
-      this.hideUserList();
-    }
-    const remoteUsers = Array.from(this.idToRemoteUser.values());
-    const menu = new UserListMenu(this.localUser, remoteUsers, this.localUser.userID);
-    menu.name = 'userlist-menu';
-    this.camera.add(menu);
-  }
-
-  hideUserList() {
-    const menu = this.camera.getObjectByName('userlist-menu');
-
-    if (menu) {
-      this.camera.remove(menu);
+  updateMultiUserMenu() {
+    if (this.mainMenu instanceof MultiUserMenu) {
+      this.mainMenu.updateUserList(this.idToRemoteUser);
     }
   }
+
 
   // #endregion MENUS
 
@@ -284,7 +243,7 @@ export default class VrMultiUser extends VrRendering {
   handlePrimaryInputOn(intersection: THREE.Intersection) {
     if (this.spectateUser.spectatedUser) {
       const { object, uv } = intersection;
-      if (object instanceof SpectateMenu && uv) {
+      if (object instanceof MultiUserMenu && uv) {
         object.triggerDown(uv);
       }
       return;
@@ -518,6 +477,7 @@ export default class VrMultiUser extends VrRendering {
         color: `#${user.color.getHexString()}`,
       }, 3000);
     }
+    this.updateMultiUserMenu();
   }
 
   /**
@@ -590,6 +550,7 @@ export default class VrMultiUser extends VrRendering {
         color: `#${user.color.getHexString()}`,
       }, 3000);
     }
+    this.updateMultiUserMenu();
   }
 
   async onInitialLandscape(data: any) {
