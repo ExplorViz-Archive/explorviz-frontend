@@ -1,6 +1,6 @@
 <div id="ember-right-click-menu-wormhole"></div>
 <div id="main-container">
-  {{#if this.session.isAuthenticated}}
+  {{#if this.auth.user}}
     <PageSetup::Navbar />
   {{/if}}
   {{outlet}}

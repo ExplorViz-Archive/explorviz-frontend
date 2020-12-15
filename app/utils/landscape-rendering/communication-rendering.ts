@@ -1,7 +1,6 @@
 import THREE from 'three';
-import AppCommunication from 'explorviz-frontend/models/applicationcommunication';
-import DS from 'ember-data';
 import AppCommunicationMesh from 'explorviz-frontend/view-objects/3d/landscape/app-communication-mesh';
+import { ApplicationCommunication } from './application-communication-computer';
 
 // Simple 2-dimensional point
 type point = { x: number, y: number };
@@ -14,7 +13,6 @@ type tile = {
 
 // Simplified Tile
 type tileWay = { startPoint: point, endPoint: point };
-
 
 /**
  * Checks wheter two given 2-d-points are equal based on their x- and
@@ -50,13 +48,13 @@ function isSameTile(this: tileWay, tile: any) {
  * @param appCommunications Array of all application communications
  * @param color Desired color for the tiles
  */
-export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray<AppCommunication>,
-  modelIdToPoints: Map<string, point[]>, color: string) {
+export function computeCommunicationTiles(appCommunications: ApplicationCommunication[],
+  modelIdToPoints: Map<string, point[]>, color: THREE.Color) {
   const tiles: tile[] = [];
   let tile: tile;
 
-  appCommunications.forEach((applicationCommunication: AppCommunication) => {
-    const points = modelIdToPoints.get(applicationCommunication.get('id'));
+  appCommunications.forEach((applicationCommunication) => {
+    const points = modelIdToPoints.get(applicationCommunication.id);
 
     if (points && points.length > 0) {
       for (let i = 1; i < points.length; i++) {
@@ -82,12 +80,14 @@ export function computeCommunicationTiles(appCommunications: DS.PromiseManyArray
             positionZ: 0.025, // Tiles should be in front of nodes
             requestsCache: 0,
             lineThickness: 1, // Determined later on
-            pipeColor: new THREE.Color(color),
+            pipeColor: color,
           };
           tiles.push(tile);
         }
 
-        tile.requestsCache += applicationCommunication.get('requests');
+        // TODO: use actual request count for thickness
+        // tile.requestsCache += applicationCommunication.requests;
+        tile.requestsCache += 10;
       }
     }
   });
@@ -154,13 +154,11 @@ function categorizeByThreshold(requestMap: Map<number, number>) {
 
   const upperThreshold = maxRequests * (2 / 3);
 
-
   requestMap.forEach((_category, requests) => {
     const category = getCategoryFromValue(requests, lowerThreshold, upperThreshold);
     requestMap.set(requests, category);
   });
 }
-
 
 /**
  * Maps number of requests in a map with a specified method to numerical classes

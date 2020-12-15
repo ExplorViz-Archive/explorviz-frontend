@@ -1,6 +1,4 @@
-import Route from '@ember/routing/route';
-import AuthenticatedRouteMixin from
-  'ember-simple-auth/mixins/authenticated-route-mixin';
+import BaseRoute from './base-route';
 
 /**
 * TODO
@@ -8,6 +6,6 @@ import AuthenticatedRouteMixin from
 * @class Configuration-Route
 * @extends Ember.Route
 */
-export default class ConfigurationRoute extends Route.extend(AuthenticatedRouteMixin) {
+export default class ConfigurationRoute extends BaseRoute {
 
 }

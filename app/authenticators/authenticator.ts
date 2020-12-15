@@ -42,6 +42,8 @@ export default class Authenticator extends BaseAuthenticator {
     const self = this;
     const url = config.APP.API_ROOT;
 
+    console.log('asdddd')
+
     // TODO refactor with Ember-Data
 
     return new RSVP.Promise((resolve, reject) => {

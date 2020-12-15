@@ -1,5 +1,6 @@
 import Route from '@ember/routing/route';
-import UnauthenticatedRouteMixin from 'ember-simple-auth/mixins/unauthenticated-route-mixin';
+import { inject as service } from '@ember/service';
+import Auth from 'explorviz-frontend/services/auth';
 
 /**
 * TODO
@@ -7,6 +8,13 @@ import UnauthenticatedRouteMixin from 'ember-simple-auth/mixins/unauthenticated-
 * @class Login-Route
 * @extends Ember.Route
 */
-export default class LoginRoute extends Route.extend(UnauthenticatedRouteMixin) {
-  routeIfAlreadyAuthenticated = 'landscapes';
+export default class LoginRoute extends Route {
+  @service session: any;
+
+  @service
+  auth!: Auth;
+
+  beforeModel() {
+    this.auth.login();
+  }
 }

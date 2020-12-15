@@ -8,7 +8,6 @@ import UserSettings from './user-settings';
 
 type Setting = 'rangesetting' | 'flagsetting';
 
-
 /**
  * This Service provides easy access to the logged-in user
  * and methods to access the user's preferences
@@ -27,12 +26,12 @@ export default class CurrentUser extends Service {
   // Thus okay to mark it as not null
   user!: User;
 
-  get id(this: CurrentUser) {
-    return this.get('user').get('id');
+  get id() {
+    return this.user.get('id');
   }
 
-  get username(this: CurrentUser) {
-    return this.get('user').get('username');
+  get username() {
+    return this.user.get('username');
   }
 
   /**
@@ -42,9 +41,9 @@ export default class CurrentUser extends Service {
    * @memberof CurrentUser
    */
   load(this: CurrentUser) {
-    const userId = this.get('session').get('session.content.authenticated.rawUserData.data.id');
+    const userId = this.session.get('data.authenticated.profile.sub');
     if (!isEmpty(userId)) {
-      const user = this.get('store').peekRecord('user', userId);
+      const user = this.store.peekRecord('user', userId);
       if (user !== null) {
         this.set('user', user);
         return resolve();
@@ -53,7 +52,6 @@ export default class CurrentUser extends Service {
     return reject();
   }
 
-
   /**
    * Returns userpreference record for current user matching given settingId
    *
@@ -61,14 +59,14 @@ export default class CurrentUser extends Service {
    * @memberof CurrentUser
    *
    */
-  getPreference(this: CurrentUser, settingId: string) {
-    const userId = this.get('id');
+  getPreference(settingId: string) {
+    const userId = this.id;
 
     if (userId === undefined) {
       return undefined;
     }
 
-    return this.get('userSettings').getUserPreference(userId, settingId);
+    return this.userSettings.getUserPreference(userId, settingId);
   }
 
   /**
@@ -79,14 +77,14 @@ export default class CurrentUser extends Service {
    * @returns
    * @memberof CurrentUser
    */
-  getPreferenceOrDefaultValue(this: CurrentUser, type: Setting, settingId: string) {
-    const userId = this.get('id');
+  getPreferenceOrDefaultValue(type: Setting, settingId: string) {
+    const userId = this.id;
 
     if (userId === undefined) {
       return undefined;
     }
 
-    return this.get('userSettings').getUserPreferenceOrDefaultValue(userId, type, settingId);
+    return this.userSettings.getUserPreferenceOrDefaultValue(userId, type, settingId);
   }
 }
 

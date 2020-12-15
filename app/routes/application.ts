@@ -1,34 +1,18 @@
-import { action } from '@ember/object';
 import Route from '@ember/routing/route';
-import ApplicationRouteMixin from 'ember-simple-auth/mixins/application-route-mixin';
-import ApplicationController from 'explorviz-frontend/controllers/application';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 import { inject as service } from '@ember/service';
+import Auth from 'explorviz-frontend/services/auth';
 
 /**
  * TODO
  *
- * @class Application-Route
- * @extends Ember.Route
+ * @class ApplicationRoute
+ * @extends Route
  */
-export default class ApplicationRoute extends Route.extend(ApplicationRouteMixin) {
-  routeAfterAuthentication = 'landscapes';
+export default class ApplicationRoute extends Route {
+  @service
+  auth!: Auth;
 
   @service('landscape-token')
   landscapeToken!: LandscapeTokenService;
-
-  async beforeModel() {
-    await (this.controllerFor('application') as ApplicationController).loadUserAndSettings.perform();
-  }
-
-  async sessionAuthenticated() {
-    await (this.controllerFor('application') as ApplicationController).loadUserAndSettings.perform();
-
-    super.sessionAuthenticated(...arguments);
-  }
-
-  @action
-  logout() {
-    this.session.invalidate({ message: 'Logout successful' });
-  }
 }

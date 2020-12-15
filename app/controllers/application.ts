@@ -1,10 +1,11 @@
 import Controller from '@ember/controller';
-import { get, set } from '@ember/object';
+import { set } from '@ember/object';
 import { inject as service } from '@ember/service';
 import { isEmpty } from '@ember/utils';
 import { task } from 'ember-concurrency-decorators';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import UserSettings from 'explorviz-frontend/services/user-settings';
+import Auth from 'explorviz-frontend/services/auth';
 
 /**
  * TODO
@@ -22,22 +23,25 @@ export default class ApplicationController extends Controller {
 
   @service('user-settings') userSettings!: UserSettings;
 
-  @task
-  // eslint-disable-next-line
-  loadUserAndSettings = task(function* (this: ApplicationController) {
+  @service('auth') auth!: Auth;
+
+  @service('router') router!: any;
+
+  @task*
+  loadUserAndSettings() {
     yield this.loadCurrentUser();
-    if (this.session.isAuthenticated) {
+    /* if (this.session.isAuthenticated) {
       yield this.loadCurrentUserPreferences();
       yield this.loadSettingsAndTypes();
-    }
-  });
+    } */
+  }
 
   async loadCurrentUser() {
     return this.currentUser.load().catch(() => this.session.invalidate({ message: 'User could not be loaded' }));
   }
 
   async loadCurrentUserPreferences() {
-    const userId = get(this.session, 'session.content.authenticated.rawUserData.data.id');
+    const userId = this.session.get('session.content.authenticated.rawUserData.data.id');
     if (!isEmpty(userId)) {
       await this.store.query('userpreference', { userId }).catch(() => {
         this.session.invalidate({ message: 'User preferences could not be loaded' });

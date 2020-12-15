@@ -11,6 +11,13 @@ declare const config: {
   podModulePrefix: string;
   locationType: string;
   rootURL: string;
+  auth0: {
+    clientId: string,
+    domain: string,
+    callbackUrl: string,
+    logoutReturnUrl: string,
+    routeAfterLogin: string
+  },
   APP: any;
 };
 

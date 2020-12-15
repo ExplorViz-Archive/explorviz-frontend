@@ -1,11 +1,9 @@
-import AuthenticatedRouteMixin from
-  'ember-simple-auth/mixins/authenticated-route-mixin';
 import VisualizationController from 'explorviz-frontend/controllers/visualization';
 import THREE from 'three';
 import debugLogger from 'ember-debug-logger';
-import Route from '@ember/routing/route';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 import { inject as service } from '@ember/service';
+import BaseRoute from './base-route';
 
 /**
 * TODO
@@ -13,16 +11,17 @@ import { inject as service } from '@ember/service';
 * @class Visualization-Route
 * @extends Ember.Route
 */
-export default class VisualizationRoute extends Route.extend(AuthenticatedRouteMixin) {
+export default class VisualizationRoute extends BaseRoute {
   @service('landscape-token')
   landscapeToken!: LandscapeTokenService;
 
   debug = debugLogger();
 
-  beforeModel() {
+  async beforeModel() {
     if (this.landscapeToken.token === null) {
       this.transitionTo('landscapes');
     }
+    super.beforeModel();
   }
 
   model() {
@@ -46,9 +45,9 @@ export default class VisualizationRoute extends Route.extend(AuthenticatedRouteM
   }
 
   // @Override
-  setupController(controller: VisualizationController, model: any) {
+  setupController(controller: VisualizationController, model: any, transition: any) {
     // Call _super for default behavior
-    super.setupController(controller, model);
+    super.setupController(controller, model, transition);
 
     controller.initRendering();
   }
@@ -57,8 +56,7 @@ export default class VisualizationRoute extends Route.extend(AuthenticatedRouteM
   /* eslint-disable-next-line class-methods-use-this */
   resetController(controller: VisualizationController, isExiting: boolean, transition: any) {
     if (isExiting && transition.targetName !== 'error') {
-      controller.send('resetView');
-      controller.landscapeRepo.set('latestApplication', null);
+      controller.send('resetLandscapeListenerPolling');
     }
   }
 }

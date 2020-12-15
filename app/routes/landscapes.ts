@@ -1,7 +1,21 @@
-import Route from '@ember/routing/route';
-import AuthenticatedRouteMixin from
-  'ember-simple-auth/mixins/authenticated-route-mixin';
+import { LandscapeToken } from 'explorviz-frontend/services/landscape-token';
+import BaseRoute from './base-route';
 
-export default class Landscapes extends Route.extend(AuthenticatedRouteMixin) {
+export default class Landscapes extends BaseRoute {
+  tokens: LandscapeToken[] = [
+    {
+      id: 'wll4TQ3TM0WybrliNBKg', alias: 'Landscape 1', creationDate: '23.07.2020', lastUpdated: '12.08.2020 - 11:30:20',
+    },
+    {
+      id: 'mD9u7lA3GtDw0FmP30Yq', alias: 'Landscape 2', creationDate: '28.07.2020', lastUpdated: '12.08.2020 - 11:35:10',
+    },
+    {
+      id: 'qOZJ7IZzNXL3rpZflyQs', alias: 'Landscape 3', creationDate: '11.08.2020', lastUpdated: '12.08.2020 - 11:20:45',
+    },
+  ];
 
+  model() {
+    // fetch tokens from backend here, in the future
+    return this.tokens;
+  }
 }

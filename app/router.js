@@ -18,9 +18,9 @@ const Router = EmberRouter.extend({
 Router.map(function () {
   this.route('badroute', { path: "/*path" });
   this.route('login');
+  this.route('callback');
   this.route('visualization');
   this.route('discovery');
-  this.route('replay');
 
   this.route('configuration', function () {
 
