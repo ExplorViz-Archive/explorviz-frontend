@@ -70,7 +70,11 @@ export default class MultiUserMenu extends BaseMenu {
     
     this.users.forEach((user) => {
         if (user.state === 'online' && user.userName) {
-          const remoteUserButton = new TextbuttonItem(user.ID, user.userName, { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+          let text = user.userName;
+          if (this.spectateUser.spectatedUser?.ID == user.ID) {
+            text += ' (spectated)';
+          }
+          const remoteUserButton = new TextbuttonItem(user.ID, text, { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
           this.remoteUserButtons.set(user.ID, remoteUserButton)
           this.items.push(remoteUserButton);
           remoteUserButton.onTriggerDown = () => this.spectate(user);

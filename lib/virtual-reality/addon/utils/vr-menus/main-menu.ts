@@ -13,7 +13,6 @@ export default class MainMenu extends BaseMenu {
     super();
 
     this.back = callbacks.closeMenu;
-    this.opacity = 0.8;
 
     const title = new TextItem('Options', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);

@@ -8,7 +8,6 @@ export default class CameraMenu extends BaseMenu {
     changeCameraHeight: (deltaY: number) => void) {
     super();
 
-    this.opacity = 0.8;
     this.back = openMainMenu;
 
     const title = new TextItem('Camera', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');

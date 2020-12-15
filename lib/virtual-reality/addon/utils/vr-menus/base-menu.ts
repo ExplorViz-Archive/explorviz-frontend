@@ -40,6 +40,8 @@ export default abstract class BaseMenu extends BaseMesh {
     this.canvas = document.createElement('canvas');
     this.canvas.width = this.resolution.width;
     this.canvas.height = this.resolution.height;
+
+    this.opacity = 0.8;
   }
 
   initGeometry() {

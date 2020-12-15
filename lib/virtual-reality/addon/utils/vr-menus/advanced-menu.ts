@@ -12,7 +12,6 @@ export default class AdvancedMenu extends BaseMenu {
     this.isLefty = userIsLefty;
 
     this.back = openMainMenu;
-    this.opacity = 0.8;
 
     const textItem = new TextItem('Advanced Options', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(textItem);
