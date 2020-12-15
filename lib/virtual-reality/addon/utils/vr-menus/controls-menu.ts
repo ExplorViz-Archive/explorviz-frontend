@@ -15,7 +15,7 @@ export default class ControlsMenu extends BaseMenu {
       y: 20,
     }, 150, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerDown = this.back;
+    backButton.onTriggerDown = this.closeMenu.bind(this);
     this.items.push(backButton);
 
     const image = new Image();

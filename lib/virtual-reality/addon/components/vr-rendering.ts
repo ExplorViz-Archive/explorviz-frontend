@@ -742,22 +742,8 @@ export default class VrRendering extends Component<Args> {
       }),
 
       gripButton: new VRControllerButtonBinding('Grab Object', {
-        onButtonDown: (controller: VRController) => {
-          if (!controller.intersectedObject) return;
-      
-          const { object } = controller.intersectedObject;
-          if ((object.parent instanceof ApplicationObject3D || object.parent instanceof LandscapeObject3D) && controller.ray) {
-            controller.grabObject(object.parent);
-          }
-        },
-        onButtonUp: (controller: VRController) => {
-          const object = controller.grabbedObject;
-          controller.releaseObject();
-      
-          if (object instanceof ApplicationObject3D) {
-            this.applicationGroup.add(object);
-          }
-        }
+        onButtonDown: this.grabIntersectedObject.bind(this),
+        onButtonUp: this.releaseGrabbedObject.bind(this)
       }),
 
       menuButton: new VRControllerButtonBinding('Show Details', {
@@ -809,6 +795,59 @@ export default class VrRendering extends Component<Args> {
       }),
     });
   }
+
+  /**
+   * Grabs the object currently intersected by the given controllers ray.
+   * 
+   * @param controller The controller that should grab the intersected object.
+   */
+  grabIntersectedObject(controller: VRController) {
+    if (!controller.intersectedObject || !controller.ray) return;
+
+    const { object: { parent: object } } = controller.intersectedObject;
+    if (object && this.isObjectGrabable(object)) {
+      controller.grabObject(object);
+      this.onGrabObject(object, controller);
+    }
+  }
+
+  /**
+   * Predicate that tests whether an object can be grabbed.
+   * 
+   * @param object The object to grab.
+   */
+  isObjectGrabable(object: THREE.Object3D): boolean {
+    return object instanceof ApplicationObject3D || object instanceof LandscapeObject3D;
+  }
+
+  /**
+   * Callback that is invoked after the given object is grabbed.
+   * 
+   * @param _object The grabbed object.
+   * @param _controller The controller that grabbed the object.
+   */
+  onGrabObject(_object: THREE.Object3D, _controller: VRController): void {}
+
+  /**
+   * Releases the object currently grabbed by the given controller.
+   * 
+   * @param controller The controller which should release its grabbed object.
+   */
+  releaseGrabbedObject(controller: VRController) {
+    const object = controller.grabbedObject;
+    if (object) {
+      controller.releaseObject();
+      this.onReleaseObject(object, controller);
+    }
+  }
+
+  /**
+   * Callback that is invoked after the given object is released.
+   * 
+   * @param _object The released object.
+   * @param _controller The controller had grabbed the object before it was released.
+   */
+  onReleaseObject(_object: THREE.Object3D, _controller: VRController): void {}
 
   /**
    * This method handles inputs of the touchpad or analog stick respectively.

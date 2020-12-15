@@ -80,8 +80,6 @@ export default class VrMultiUser extends VrRendering {
 
     this.initWebSocketCallbacks();
 
-    this.initControllerConnectionCallbacks();
-
     this.sender = new Sender(this.webSocket);
 
     this.localUser.state = 'offline';
@@ -94,7 +92,9 @@ export default class VrMultiUser extends VrRendering {
     this.webSocket.eventCallback = this.onEvent.bind(this);
   }
 
-  initControllerConnectionCallbacks() {
+  initControllers() {
+    super.initControllers();
+
     if (this.localUser.controller1) {
       this.localUser.controller1.eventCallbacks.connected = this.onControllerConnected.bind(this);
       this.localUser.controller1.eventCallbacks.disconnected = this
@@ -221,32 +221,27 @@ export default class VrMultiUser extends VrRendering {
     }
   }
 
-  onInteractionGripDown(controller: VRController) {
-    if (!controller.intersectedObject) return;
-
-    const { object } = controller.intersectedObject;
-
-    if (object.parent) {
-
-      if (object.parent instanceof ApplicationObject3D && controller.ray) {
-        if (this.applicationGroup.isApplicationGrabbed(object.parent.dataModel.pid)) {
-          this.showHint('Application already grabbed');
-          return;
-        } else {
-          this.sender.sendAppGrabbed(object.parent, controller);
-        }
+  isObjectGrabable(object: THREE.Object3D): boolean {
+    if (object instanceof ApplicationObject3D) {
+      if (this.applicationGroup.isApplicationGrabbed(object.dataModel.pid)) {
+        this.showHint('Application already grabbed');
+        return false;
       }
+    }
+    return super.isObjectGrabable(object);
+  }
 
-      controller.grabObject(object.parent);
+  onGrabObject(object: THREE.Object3D, controller: VRController): void {
+    super.onGrabObject(object, controller);
+    if (object instanceof ApplicationObject3D) {
+      this.sender.sendAppGrabbed(object, controller);
     }
   }
 
-  onInteractionGripUp(controller: VRController) {
-    const application = controller.grabbedObject;
-
-    controller.releaseObject();
-    if (application instanceof ApplicationObject3D && this.localUser.isOnline) {
-      this.sender.sendAppReleased(application);
+  onReleaseObject(object: THREE.Object3D, controller: VRController) {
+    super.onReleaseObject(object, controller);
+    if (object instanceof ApplicationObject3D && this.localUser.isOnline) {
+      this.sender.sendAppReleased(object);
     }
   }
 
