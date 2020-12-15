@@ -1,7 +1,6 @@
 import TextItem from './items/text-item';
 import BaseMenu from './base-menu';
 import TextbuttonItem from './items/textbutton-item';
-import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
 
 export type MainMenuEvents = {
   openCameraMenu: () => void,
@@ -51,13 +50,5 @@ export default class MainMenu extends BaseMenu {
     exitButton.onTriggerDown = this.closeMenu.bind(this);
 
     this.update();
-  }
-
-  makeTriggerButtonBinding() {
-    return new VRControllerButtonBinding('test', {
-      onButtonDown: () => console.log("Pressed Trigger Down"),
-      onButtonPress: () => console.log("Pressing Trigger"),
-      onButtonUp: () => console.log("Released Trigger"),
-    });
   }
 }
