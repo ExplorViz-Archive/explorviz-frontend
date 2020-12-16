@@ -133,7 +133,7 @@ export default abstract class BaseMenu extends BaseMesh {
   makeThumbpadBinding() {
     if (this.thumbpadTargets.length == 0) {
       return undefined;
-    } 
+    }
     return new VRControllerThumbpadBinding({ labelUp: 'Next', labelDown: 'Previous' }, {
       onThumbpadDown: (_controller, axes) => {
         this.activeTarget = axes[this.thumbpadAxis] > 0 ? this.getNext() : this.getPrevious();
@@ -150,7 +150,7 @@ export default abstract class BaseMenu extends BaseMesh {
   makeTriggerButtonBinding() {
     if (this.thumbpadTargets.length == 0) {
       return undefined;
-    } 
+    }
     return new VRControllerButtonBinding('Select', {
         onButtonDown: () => {
           if (!(typeof this.activeTarget === 'undefined')) this.thumbpadTargets[this.activeTarget].onTriggerDown?.call(this.thumbpadTargets[this.activeTarget]);

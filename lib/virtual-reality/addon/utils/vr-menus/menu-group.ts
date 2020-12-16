@@ -35,12 +35,12 @@ export default class MenuGroup extends THREE.Group {
     }
 
     /**
-     * Makes the ray and teleport area of the parent controller of this menu 
+     * Makes the ray and teleport area of the parent controller of this menu
      * group visible or invisible based on the currently open menu.
      */
     toggleControllerRay() {
         let controller = this.findController();
-        if (controller && controller.ray) {
+        if (controller) {
             let visible = !this.currentMenu || this.currentMenu.enableControllerRay;
             if (controller.ray) controller.ray.visible = visible;
             if (controller.teleportArea) controller.teleportArea.visible = visible;
@@ -71,7 +71,7 @@ export default class MenuGroup extends THREE.Group {
 
     /**
      * Closes the currently open menu.
-     * 
+     *
      * If a previously open menu was hidden by {@link MenuGroup.openMenu},
      * it is shown again by adding the mesh back to this group.
      */
@@ -83,7 +83,7 @@ export default class MenuGroup extends THREE.Group {
             this.remove(closedMenu);
             closedMenu.disposeRecursively();
         }
-        
+
         // Show previously hidden menu if any.
         if (this.currentMenu) {
             this.add(this.currentMenu);

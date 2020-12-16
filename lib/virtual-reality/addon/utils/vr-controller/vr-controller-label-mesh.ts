@@ -17,22 +17,22 @@ export default class VRControllerLabelMesh extends BaseMesh {
 
     constructor(label: string, labelPosition: VRControllerLabelPosition) {
         super();
-    
+
         // Set width and height based on text size.
         const font = '30px arial';
         const textSize = Helper.getTextSize(label, font);
         const padding = 10;
         const width = textSize.width + padding;
         const height = textSize.height + padding;
-    
+
         // Use canvas to display text.
         this.canvas = document.createElement('canvas');
         this.canvas.width = width;
         this.canvas.height = height;
-        
+
         const ctx = this.canvas.getContext('2d');
         if (!ctx) return;
-    
+
         // Fill background with default menu background color.
         ctx.fillStyle = '#444444';
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -54,7 +54,7 @@ export default class VRControllerLabelMesh extends BaseMesh {
         const worldWidth = width / 512 * 0.15;
         const worldHeight = height / 512 * 0.15;
         this.geometry = new THREE.PlaneGeometry(worldWidth, worldHeight);
-    
+
         // Make label slightly transparent.
         this.material.transparent = true;
         this.material.opacity = 0.8;
@@ -68,8 +68,8 @@ export default class VRControllerLabelMesh extends BaseMesh {
 
         // Draw a line from the edge of the label to the button.
         const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(-(labelOffset + labelPadding), 0, 0), 
-          new THREE.Vector3(-labelOffset, 0, 0), 
+          new THREE.Vector3(-(labelOffset + labelPadding), 0, 0),
+          new THREE.Vector3(-labelOffset, 0, 0),
         ]);
         const lineMaterial = new THREE.LineBasicMaterial({
           color: new THREE.Color(0x444444),

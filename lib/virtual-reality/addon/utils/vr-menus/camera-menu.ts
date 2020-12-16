@@ -43,7 +43,7 @@ export default class CameraMenu extends BaseMenu {
 
     this.heightDownButton.onTriggerPressed = (value) => {this.heightDown(value); this.update()};
 
-  
+
     this.heightUpButton = new ArrowbuttonItem('height_up', {
       x: 366,
       y: 182,

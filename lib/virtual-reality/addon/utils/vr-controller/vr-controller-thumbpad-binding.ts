@@ -33,7 +33,7 @@ export default class VRControllerThumbpadBinding {
         if (angle < 225) return 'left';
         return 'down';
     }
-    
+
     labels: VRControllerThumbpadLabels;
     callbacks: VRControllerThumbpadCallbacks;
 

@@ -318,18 +318,18 @@ export default class VrRendering extends Component<Args> {
   }
 
   initController({id, mode, intersectableObjects, defaultBindings, menuGroup}: {
-    id: number, 
+    id: number,
     mode: VRControllerMode,
-    intersectableObjects: THREE.Object3D[], 
+    intersectableObjects: THREE.Object3D[],
     defaultBindings: VRControllerBindings,
     menuGroup: MenuGroup
   }): VRController {
     const controller = new VRController({
-      gamepadIndex: id, 
+      gamepadIndex: id,
       scene: this.scene,
       bindings: new VRControllerBindingsList(defaultBindings, menuGroup.controllerBindings),
-      gripSpace: this.renderer.xr.getControllerGrip(id), 
-      raySpace: this.renderer.xr.getController(id), 
+      gripSpace: this.renderer.xr.getControllerGrip(id),
+      raySpace: this.renderer.xr.getController(id),
       mode, menuGroup
     });
     controller.setToDefaultAppearance();
@@ -619,7 +619,7 @@ export default class VrRendering extends Component<Args> {
   // @ts-ignore
   @enqueueTask*
   // eslint-disable-next-line
-  addApplicationTask(applicationModel: Application, origin: THREE.Vector3, 
+  addApplicationTask(applicationModel: Application, origin: THREE.Vector3,
     callback?: (applicationObject3D: ApplicationObject3D) => void) {
     try {
       if (this.applicationGroup.hasApplication(applicationModel.pid)) {
@@ -748,14 +748,14 @@ export default class VrRendering extends Component<Args> {
       triggerButton: new VRControllerButtonBinding('Open / Close', {
         onButtonDown: (controller: VRController) => {
           if (!controller.intersectedObject) return;
-      
+
           this.handlePrimaryInputOn(controller.intersectedObject);
         },
         onButtonPress: (controller: VRController, value: number) => {
           if (!controller.intersectedObject) return;
-      
+
           const { object, uv } = controller.intersectedObject;
-      
+
           if (object instanceof BaseMenu && uv) {
             object.triggerPress(uv, value);
           }
@@ -801,7 +801,7 @@ export default class VrRendering extends Component<Args> {
 
   /**
    * Grabs the object currently intersected by the given controllers ray.
-   * 
+   *
    * @param controller The controller that should grab the intersected object.
    */
   grabIntersectedObject(controller: VRController) {
@@ -816,7 +816,7 @@ export default class VrRendering extends Component<Args> {
 
   /**
    * Predicate that tests whether an object can be grabbed.
-   * 
+   *
    * @param object The object to grab.
    */
   isObjectGrabable(object: THREE.Object3D): boolean {
@@ -825,7 +825,7 @@ export default class VrRendering extends Component<Args> {
 
   /**
    * Callback that is invoked after the given object is grabbed.
-   * 
+   *
    * @param _object The grabbed object.
    * @param _controller The controller that grabbed the object.
    */
@@ -833,7 +833,7 @@ export default class VrRendering extends Component<Args> {
 
   /**
    * Releases the object currently grabbed by the given controller.
-   * 
+   *
    * @param controller The controller which should release its grabbed object.
    */
   releaseGrabbedObject(controller: VRController) {
@@ -846,7 +846,7 @@ export default class VrRendering extends Component<Args> {
 
   /**
    * Callback that is invoked after the given object is released.
-   * 
+   *
    * @param _object The released object.
    * @param _controller The controller had grabbed the object before it was released.
    */
@@ -1013,7 +1013,7 @@ export default class VrRendering extends Component<Args> {
   }
 
   openSettingsMenu() {
-    const user = this.localUser;    
+    const user = this.localUser;
     this.mainMenus.openMenu(new SettingsMenu(this.openCameraMenu.bind(this), user.toggleLeftyMode.bind(user), user.isLefty));
   }
 

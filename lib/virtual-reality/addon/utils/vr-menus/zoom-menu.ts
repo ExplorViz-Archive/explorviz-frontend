@@ -26,7 +26,7 @@ export default class ZoomMenu extends BaseMenu {
     const radius = this.resolution.width/512 * 0.15;
 
     this.target = new THREE.WebGLRenderTarget(this.resolution.width, this.resolution.height);
-    
+
     const geometry = new THREE.CircleBufferGeometry(radius, ZoomMenu.segments);
     const material = new THREE.MeshBasicMaterial({map: this.target.texture});
     const lens = new THREE.Mesh(geometry, material);

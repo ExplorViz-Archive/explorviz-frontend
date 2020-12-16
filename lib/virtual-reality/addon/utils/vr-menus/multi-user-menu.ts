@@ -9,7 +9,7 @@ import VRControllerButtonBinding from '../vr-controller/vr-controller-button-bin
 export default class MultiUserMenu extends BaseMenu {
 
     toggleConnection: (() => void)
-    
+
     users: RemoteVrUser[];
 
     localUser: LocalVrUser;
@@ -66,7 +66,7 @@ export default class MultiUserMenu extends BaseMenu {
     this.disconnectButton = new TextbuttonItem('disconnect', 'Disconnect', {x: 370,y: 13,}, 115, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');
     this.items.push(this.disconnectButton);
     this.disconnectButton.onTriggerDown = this.toggleConnection;
-    
+
     const yOffset = 60;
     let yPos = 50 + yOffset;
 
@@ -75,7 +75,7 @@ export default class MultiUserMenu extends BaseMenu {
           this.thumbpadTargets.push(localUserButton);
           localUserButton.onTriggerDown = this.deactivateSpectate.bind(this);
           yPos += yOffset;
-    
+
     this.users.forEach((user) => {
         if (user.state === 'online' && user.userName) {
           const remoteUserButton = new TextbuttonItem(user.ID, user.userName, { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');

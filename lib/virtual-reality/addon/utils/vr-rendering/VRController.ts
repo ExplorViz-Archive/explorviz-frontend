@@ -5,7 +5,6 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
 import XRControllerModel from '../lib/controller/XRControllerModel';
-import { MotionController } from '../lib/controller/motion-controllers.module';
 import FloorMesh from '../view-objects/vr/floor-mesh';
 import TeleportMesh from '../view-objects/vr/teleport-mesh';
 import BaseMenu from '../vr-menus/base-menu';
@@ -86,8 +85,6 @@ export default class VRController extends BaseMesh {
 
   controllerModel: XRControllerModel;
 
-  motionController: MotionController|null;
-
   intersectedObject: THREE.Intersection|null = null;
 
   raycaster: THREE.Raycaster;
@@ -149,7 +146,6 @@ export default class VRController extends BaseMesh {
     const controllerModelFactory = new XRControllerModelFactory();
     this.controllerModel = controllerModelFactory.createControllerModel(this.gripSpace);
     this.gripSpace.add(this.controllerModel);
-    this.motionController = this.controllerModel.motionController;
 
     // Init children
     this.initChildren();
