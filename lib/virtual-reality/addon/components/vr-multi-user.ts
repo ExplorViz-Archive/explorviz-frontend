@@ -121,8 +121,6 @@ export default class VrMultiUser extends VrRendering {
       this.spectateUser.update();
     }
 
-    // this.updateControllers();
-
     this.updateUserNameTags();
     this.sendPoses();
     this.sendLandscapePosition();

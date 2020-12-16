@@ -26,7 +26,7 @@ export default class MenuGroup extends THREE.Group {
      * have a parent controller.
      */
     findController(): VRController|null {
-        var current = this.parent;
+        let current = this.parent;
         while (current) {
             if (current instanceof VRController) return current;
             current = current.parent;
@@ -39,9 +39,9 @@ export default class MenuGroup extends THREE.Group {
      * group visible or invisible based on the currently open menu.
      */
     toggleControllerRay() {
-        var controller = this.findController();
+        let controller = this.findController();
         if (controller && controller.ray) {
-            var visible = !this.currentMenu || this.currentMenu.enableControllerRay;
+            let visible = !this.currentMenu || this.currentMenu.enableControllerRay;
             if (controller.ray) controller.ray.visible = visible;
             if (controller.teleportArea) controller.teleportArea.visible = visible;
         }
@@ -76,7 +76,7 @@ export default class MenuGroup extends THREE.Group {
      * it is shown again by adding the mesh back to this group.
      */
     closeMenu() {
-        var closedMenu = this.menus.pop();
+        let closedMenu = this.menus.pop();
         this.controllerBindings.pop();
         if (closedMenu) {
             closedMenu.onClose();

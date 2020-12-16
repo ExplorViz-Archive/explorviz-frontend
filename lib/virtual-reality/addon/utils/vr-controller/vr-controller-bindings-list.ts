@@ -15,7 +15,7 @@ export default class VRControllerBindingsList {
         return this.controllerBindings[this.controllerBindings.length - 1];
     }
 
-    get callbacks(): VRControllerCallbackFunctions {
+    makeCallbacks(): VRControllerCallbackFunctions {
         return {
             thumbpadTouch: (controller, axes) => this.currentBindings.thumbpad?.callbacks.onThumbpadTouch?.call(null, controller, axes),
             thumbpadDown: (controller, axes) => this.currentBindings.thumbpad?.callbacks.onThumbpadDown?.call(null, controller, axes),

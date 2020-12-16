@@ -10,6 +10,9 @@ import FloorMesh from '../view-objects/vr/floor-mesh';
 import TeleportMesh from '../view-objects/vr/teleport-mesh';
 import BaseMenu from '../vr-menus/base-menu';
 import { displayAsWireframe, displayAsSolidObject } from '../vr-helpers/multi-user-helper';
+import VRControllerLabelGroup from '../vr-controller/vr-controller-label-group';
+import VRControllerBindingsList from '../vr-controller/vr-controller-bindings-list';
+import MenuGroup from '../vr-menus/menu-group';
 
 export type VRControllerCallbackFunctions = {
   connected? (controller: VRController, event: THREE.Event): void,
@@ -31,12 +34,20 @@ export type VRControllerCallbackFunctions = {
   menuUp?(controller: VRController): void,
   menuPress?(controller: VRController): void,
   menuDown? (controller: VRController): void,
-};
+}
 
-export const controlMode = Object.freeze({
-  INTERACTION: 'interaction',
-  UTILITY: 'utility',
-});
+export class VRControllerMode {
+  static readonly INTERACTION = new VRControllerMode('interaction', new THREE.Color('red'));
+  static readonly UTILITY = new VRControllerMode('utility', new THREE.Color('blue'));
+
+  readonly name: string;
+  readonly defaultRayColor: THREE.Color;
+
+  private constructor(name: string, defaultRayColor: THREE.Color) {
+    this.name = name;
+    this.defaultRayColor = defaultRayColor
+  }
+}
 
 /**
  * A wrapper around the gamepad object which handles inputs to
@@ -47,7 +58,7 @@ export default class VRController extends BaseMesh {
 
   gamepad: Gamepad|null = null;
 
-  control: string;
+  mode: VRControllerMode;
 
   axes = [0, 0];
 
@@ -66,6 +77,10 @@ export default class VRController extends BaseMesh {
   gripSpace: THREE.Group;
 
   raySpace: THREE.Group;
+
+  labelGroup: VRControllerLabelGroup;
+
+  menuGroup: MenuGroup;
 
   ray: THREE.Line|null = null;
 
@@ -90,32 +105,45 @@ export default class VRController extends BaseMesh {
   connected = false;
 
   get isInteractionController() {
-    return this.control === controlMode.INTERACTION;
+    return this.mode === VRControllerMode.INTERACTION;
   }
 
   get isUtilityController() {
-    return this.control === controlMode.UTILITY;
+    return this.mode === VRControllerMode.UTILITY;
   }
 
   get gamepadId() {
     return this.gamepad ? this.gamepad.id : 'unknown';
   }
 
-  /**
-   * @param gamepad Object of gamepad API which grants access to VR controller inputs
-   * @param eventCallbacks Object with functions that are called when certain events occur
-   */
-  constructor(gamepadIndex: number, controlType: string, gripSpace: THREE.Group,
-    raySpace: THREE.Group, eventCallbacks: VRControllerCallbackFunctions, scene: THREE.Scene) {
+  constructor({
+    gamepadIndex,
+    mode,
+    gripSpace,
+    raySpace,
+    menuGroup,
+    bindings,
+    scene
+  } : {
+    gamepadIndex: number,
+    mode: VRControllerMode,
+    gripSpace: THREE.Group,
+    raySpace: THREE.Group,
+    menuGroup: MenuGroup,
+    bindings: VRControllerBindingsList,
+    scene: THREE.Scene
+  }) {
     super();
     // Init properties
     this.gamepadIndex = gamepadIndex;
-    this.control = controlType;
+    this.mode = mode;
     this.gripSpace = gripSpace;
     this.raySpace = raySpace;
+    this.labelGroup = new VRControllerLabelGroup(bindings);
+    this.menuGroup = menuGroup;
     this.raycaster = new Raycaster();
     this.scene = scene;
-    this.eventCallbacks = { ...eventCallbacks };
+    this.eventCallbacks = bindings.makeCallbacks();
 
     // Init controller model
     const controllerModelFactory = new XRControllerModelFactory();
@@ -123,8 +151,8 @@ export default class VRController extends BaseMesh {
     this.gripSpace.add(this.controllerModel);
     this.motionController = this.controllerModel.motionController;
 
-    this.add(this.gripSpace);
-    this.add(this.raySpace);
+    // Init children
+    this.initChildren();
 
     this.findGamepad();
 
@@ -161,12 +189,15 @@ export default class VRController extends BaseMesh {
    */
   setToDefaultAppearance() {
     displayAsSolidObject(this);
-    if (this.isUtilityController) {
-      this.addRay(new THREE.Color('blue'));
-    } else {
-      this.addRay(new THREE.Color('red'));
-    }
+    this.addRay(this.mode.defaultRayColor);
     this.initTeleportArea();
+  }
+
+  initChildren() {
+    this.add(this.gripSpace);
+    this.add(this.raySpace);
+    this.raySpace.add(this.menuGroup);
+    this.gripSpace.add(this.labelGroup);
   }
 
   findGamepad() {
@@ -283,6 +314,7 @@ export default class VRController extends BaseMesh {
   update() {
     this.updateGamepad();
     this.updateIntersectedObject();
+    this.labelGroup.updateLabels();
   }
 
   /**

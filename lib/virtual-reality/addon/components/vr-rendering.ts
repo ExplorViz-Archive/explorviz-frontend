@@ -33,7 +33,7 @@ import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
-import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VRController';
+import VRController, { VRControllerMode } from 'virtual-reality/utils/vr-rendering/VRController';
 import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
 import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
@@ -172,16 +172,7 @@ export default class VrRendering extends Component<Args> {
     this.applicationGroup = new ApplicationGroup();
 
     this.mainMenus = new MenuGroup();
-    this.mainMenus.position.y += 0.15;
-    this.mainMenus.position.z -= 0.15;
-    this.mainMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
-    this.localUser.mainMenus = this.mainMenus;
-
     this.infoMenus = new MenuGroup();
-    this.infoMenus.position.y += 0.15;
-    this.infoMenus.position.z -= 0.15;
-    this.infoMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
-    this.localUser.infoMenus = this.infoMenus;
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
 
@@ -308,33 +299,53 @@ export default class VrRendering extends Component<Args> {
     const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor,
       this.mainMenus, this.infoMenus];
 
-    // Init secondary/utility controller
-    const raySpace1 = this.renderer.xr.getController(0);
-    const gripSpace1 = this.renderer.xr.getControllerGrip(0);
+    this.localUser.controller1 = this.initController({
+      id: 0,
+      mode: VRControllerMode.INTERACTION,
+      intersectableObjects: intersectableObjects,
+      defaultBindings: this.makeInteractionBindings(),
+      menuGroup: this.infoMenus
+    });
 
-    const bindings1 = new VRControllerBindingsList(this.makeInteractionBindings(), this.infoMenus.controllerBindings);
-    const controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
-      raySpace1, bindings1.callbacks, this.scene);
-    controller1.setToDefaultAppearance();
-    controller1.raySpace.add(this.infoMenus);
-    controller1.intersectableObjects = intersectableObjects;
+    this.localUser.controller2 = this.initController({
+      id: 1,
+      mode: VRControllerMode.UTILITY,
+      intersectableObjects: intersectableObjects,
+      defaultBindings: this.makeUtilityBindings(),
+      menuGroup: this.mainMenus
+    });
+  }
 
-    this.localUser.controller1 = controller1;
-    this.localUser.userGroup.add(controller1);
+  initController({id, mode, intersectableObjects, defaultBindings, menuGroup}: {
+    id: number, 
+    mode: VRControllerMode,
+    intersectableObjects: THREE.Object3D[], 
+    defaultBindings: VRControllerBindings,
+    menuGroup: MenuGroup
+  }): VRController {
+    const controller = new VRController({
+      gamepadIndex: id, 
+      scene: this.scene,
+      bindings: new VRControllerBindingsList(defaultBindings, menuGroup.controllerBindings),
+      gripSpace: this.renderer.xr.getControllerGrip(id), 
+      raySpace: this.renderer.xr.getController(id), 
+      mode, menuGroup
+    });
+    controller.setToDefaultAppearance();
+    controller.intersectableObjects = intersectableObjects;
 
-    // Init secondary controller
-    const raySpace2 = this.renderer.xr.getController(1);
-    const gripSpace2 = this.renderer.xr.getControllerGrip(1);
+    // Position menus above controller at an angle.
+    controller.menuGroup.position.y += 0.15;
+    controller.menuGroup.position.z -= 0.15;
+    controller.menuGroup.rotateX(340 * THREE.MathUtils.DEG2RAD);
 
-    const bindings2 = new VRControllerBindingsList(this.makeUtilityBindings(), this.mainMenus.controllerBindings);
-    const controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
-      raySpace2, bindings2.callbacks, this.scene);
-    controller2.setToDefaultAppearance();
-    controller2.raySpace.add(this.mainMenus);
-    controller2.intersectableObjects = intersectableObjects;
+    // Position labels correctly by undoing the controllers rotation and translation.
+    controller.labelGroup.rotateX(-90 * THREE.MathUtils.DEG2RAD);
+    controller.labelGroup.translateY(0.07);
+    controller.labelGroup.translateZ(0.01);
 
-    this.localUser.controller2 = controller2;
-    this.localUser.userGroup.add(controller2);
+    this.localUser.userGroup.add(controller);
+    return controller;
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION

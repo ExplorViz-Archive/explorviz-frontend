@@ -22,44 +22,38 @@ export default class HardwareModels extends Object {
 
   loadHMDModel(loader: OBJLoader) {
     loader.load('/generic_hmd/generic_hmd.obj', (object) => {
-      const obj = object;
-      obj.name = 'hmdTexture';
+      object.name = 'hmdTexture';
       const textureLoader = new THREE.TextureLoader();
       textureLoader.setPath('/generic_hmd/');
-      obj.children[0].material.map = textureLoader.load('generic_hmd.tga');
-      this.hmd = obj;
+      object.children[0].material.map = textureLoader.load('generic_hmd.tga');
+      this.hmd = object;
     });
   }
 
   loadOculusLeftControllerModel(loader: OBJLoader) {
     loader.load('controller/oculus_controller/oculus_cv1_controller_left.obj', (object) => {
-      const obj = object;
-
-      const controller = HardwareModels.addTexture(obj, 'controller/oculus_controller/', 'external_controller01_col.png', 'external_controller01_spec.png');
+      const controller = HardwareModels.addTexture(object, 'controller/oculus_controller/', 'external_controller01_col.png', 'external_controller01_spec.png');
       HardwareModels.positionController(controller);
 
-      this.leftOculusController = obj;
+      this.leftOculusController = object;
     });
   }
 
   loadOculusRightControllerModel(loader: OBJLoader) {
     loader.load('controller/oculus_controller/oculus_cv1_controller_right.obj', (object) => {
-      const obj = object;
-
-      const controller = HardwareModels.addTexture(obj, 'controller/oculus_controller/', 'external_controller01_col.png', 'external_controller01_spec.png');
+      const controller = HardwareModels.addTexture(object, 'controller/oculus_controller/', 'external_controller01_col.png', 'external_controller01_spec.png');
       HardwareModels.positionController(controller);
 
-      this.rightOculusController = obj;
+      this.rightOculusController = object;
     });
   }
 
   loadViveControllerModel(loader: OBJLoader) {
     loader.load('controller/vive_controller/vr_controller_vive_1_5.obj', (object) => {
-      const obj = object;
-      const controller = HardwareModels.addTexture(obj, 'controller/vive_controller/', 'onepointfive_texture.png', 'onepointfive_spec.png');
+      const controller = HardwareModels.addTexture(object, 'controller/vive_controller/', 'onepointfive_texture.png', 'onepointfive_spec.png');
       HardwareModels.positionController(controller);
 
-      this.viveController = obj;
+      this.viveController = object;
     });
   }
 

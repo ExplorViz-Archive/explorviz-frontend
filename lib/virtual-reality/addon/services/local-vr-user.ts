@@ -1,11 +1,10 @@
 import Service, { inject as service } from '@ember/service';
 
 import THREE from 'three';
-import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VRController';
+import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import DS from 'ember-data';
 import WebSocket from './web-socket';
 import SpectateUser from './spectate-user';
-import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
 
 export type ConnectionStatus = 'offline'|'connecting'|'online';
@@ -31,10 +30,6 @@ export default class LocalVrUser extends Service {
   controller1: VRController|undefined;
 
   controller2: VRController|undefined;
-
-  mainMenus: MenuGroup|undefined;
-
-  infoMenus: MenuGroup|undefined;
 
   userGroup!: THREE.Group;
 
@@ -105,30 +100,24 @@ export default class LocalVrUser extends Service {
   swapControls() {
     if (!this.controller1 || !this.controller2) return;
 
+    // Swap controller modes, callbacks, menus and labels.
+    [this.controller1.mode, this.controller2.mode] =
+      [this.controller2.mode, this.controller1.mode];
+    [this.controller1.eventCallbacks, this.controller2.eventCallbacks] =
+      [this.controller2.eventCallbacks, this.controller1.eventCallbacks];
+    [this.controller1.menuGroup, this.controller2.menuGroup] =
+      [this.controller2.menuGroup, this.controller1.menuGroup];
+    [this.controller1.labelGroup, this.controller2.labelGroup] =
+      [this.controller2.labelGroup, this.controller1.labelGroup];
+
+     // Reset visual indicators.
     const controllers = [this.controller1, this.controller2];
-
-    controllers.forEach((controller) => {
-      // Remove attached visual indicators
-      controller.removeRay();
-      controller.removeTeleportArea();
-
-      // Swap visual control indicators
-      if (controller.control === controlMode.INTERACTION) {
-        controller.control = controlMode.UTILITY;
-        controller.addRay(new THREE.Color('blue'));
-
-        if (this.mainMenus) controller.raySpace.add(this.mainMenus);
-        controller.initTeleportArea();
-      } else {
-        controller.control = controlMode.INTERACTION;
-        controller.addRay(new THREE.Color('red'));
-        if (this.infoMenus) controller.raySpace.add(this.infoMenus);
-      }
-    });
-
-    // Swap controls (callback functions)
-    [this.controller1.eventCallbacks, this.controller2.eventCallbacks] = [this.controller2
-      .eventCallbacks, this.controller1.eventCallbacks];
+     for (let controller of controllers) {
+       controller.removeRay();
+       controller.removeTeleportArea();
+       controller.setToDefaultAppearance();
+       controller.initChildren();
+     }
   }
 
   getCameraDelta() {

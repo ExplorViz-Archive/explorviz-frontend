@@ -30,7 +30,7 @@ export default class MultiUserMenu extends BaseMenu {
 
   }
 
-  initMenu(state: String) {
+  initMenu(state: string) {
 
     if(state == 'offline') {
         this.initOfflineMenu('Connect');
@@ -79,7 +79,7 @@ export default class MultiUserMenu extends BaseMenu {
 
   }
 
-  updateStatus(state: String) {
+  updateStatus(state: string) {
     this.items.clear();
     this.initMenu(state);
   }
