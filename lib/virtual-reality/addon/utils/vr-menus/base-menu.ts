@@ -18,6 +18,13 @@ export default abstract class BaseMenu extends BaseMesh {
 
   lastHoveredItem: InteractiveItem|undefined;
 
+  thumbpadTargets: InteractiveItem[];
+
+  activeTarget: number|undefined;
+
+  thumbpadAxis: number;
+
+
   get opacity() {
     const material = this.material as THREE.Material;
     return material.opacity;
@@ -44,6 +51,10 @@ export default abstract class BaseMenu extends BaseMesh {
     this.canvas = document.createElement('canvas');
     this.canvas.width = this.resolution.width;
     this.canvas.height = this.resolution.height;
+
+    this.thumbpadTargets = [];
+    this.activeTarget = undefined;
+    this.thumbpadAxis = 1;
   }
 
   initGeometry() {
@@ -78,6 +89,7 @@ export default abstract class BaseMenu extends BaseMesh {
   }
 
   hover(uv: THREE.Vector2) {
+    this.activeTarget = undefined;
     const item = this.getItem(uv) as InteractiveItem|undefined;
 
     if (this.lastHoveredItem && !item) {
@@ -107,6 +119,45 @@ export default abstract class BaseMenu extends BaseMesh {
     this.update();
   }
 
+  getNext() {
+    if (typeof this.activeTarget === 'undefined') return 0;
+    if (this.activeTarget == 0) return this.thumbpadTargets.length - 1;
+    return this.activeTarget - 1;
+  }
+
+  getPrevious() {
+    if (typeof this.activeTarget === 'undefined' || this.activeTarget == this.thumbpadTargets.length - 1) return 0;
+    return this.activeTarget + 1;
+  }
+
+  makeThumbpadBinding() {
+    if (this.thumbpadTargets.length == 0) {
+      return undefined;
+    } 
+    return new VRControllerThumbpadBinding({ labelUp: 'Next', labelDown: 'Previous' }, {
+      onThumbpadDown: (_controller, axes) => {
+        this.activeTarget = axes[this.thumbpadAxis] > 0 ? this.getNext() : this.getPrevious();
+        this.lastHoveredItem?.resetHoverEffect()
+        this.lastHoveredItem = undefined;
+        const item = this.thumbpadTargets[this.activeTarget];
+        item.enableHoverEffect();
+        this.lastHoveredItem = item;
+        this.update();
+      }
+    })
+  }
+
+  makeTriggerButtonBinding() {
+    if (this.thumbpadTargets.length == 0) {
+      return undefined;
+    } 
+    return new VRControllerButtonBinding('Select', {
+        onButtonDown: () => {
+          if (!(typeof this.activeTarget === 'undefined')) this.thumbpadTargets[this.activeTarget].onTriggerDown?.call(this.thumbpadTargets[this.activeTarget]);
+        }
+    })
+  }
+
   triggerDown(uv: THREE.Vector2) {
     const item = this.getItem(uv) as InteractiveItem|undefined;
 
@@ -121,14 +172,6 @@ export default abstract class BaseMenu extends BaseMesh {
     if (item && item.onTriggerPressed) {
       item.onTriggerPressed(value);
     }
-  }
-
-  makeThumbpadBinding(): VRControllerThumbpadBinding|undefined {
-    return undefined;
-  }
-
-  makeTriggerButtonBinding(): VRControllerButtonBinding<number>|undefined {
-    return undefined;
   }
 
   makeGripButtonBinding(): VRControllerButtonBinding<undefined>|undefined {

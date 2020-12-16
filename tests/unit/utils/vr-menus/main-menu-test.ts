@@ -5,9 +5,9 @@ module('Unit | Utility | vr-menus/main-menu', function(/* hooks */) {
 
   test('it exists', function(assert) {
     let result = new MainMenu({
-      closeMenu: () => {},
-      openCameraMenu: () => {},
-      openAdvancedMenu: () => {},
+      openSettingsMenu: () => {},
+      openMultiUserMenu: () => {},
+      openResetMenu: () => {}
     });
     assert.ok(result);
   });

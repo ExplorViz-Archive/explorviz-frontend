@@ -135,9 +135,9 @@ export default class VrMultiUser extends VrRendering {
     if (!this.localUser.controller1) return;
 
     this.mainMenus.openMenu(new MainMenu({
-      openCameraMenu: this.openCameraMenu.bind(this),
-      openAdvancedMenu: this.openAdvancedMenu.bind(this),
-      openMultiUserMenu: this.openMultiUserMenu.bind(this)
+      openSettingsMenu: this.openSettingsMenu.bind(this),
+      openMultiUserMenu: this.openMultiUserMenu.bind(this),
+      openResetMenu: this.openResetMenu.bind(this)
     }));
   } 
   

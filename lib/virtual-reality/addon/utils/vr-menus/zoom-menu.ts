@@ -1,6 +1,7 @@
 import BaseMenu from './base-menu';
 import THREE from 'three';
 import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
+import VRControllerThumbpadBinding from '../vr-controller/vr-controller-thumbpad-binding';
 
 export default class ZoomMenu extends BaseMenu {
 
@@ -78,7 +79,7 @@ export default class ZoomMenu extends BaseMenu {
   }
 
   makeGripButtonBinding() {
-    return new VRControllerButtonBinding('Close Magnifying Glass', {
+    return new VRControllerButtonBinding('Close', {
       onButtonUp: this.closeMenu.bind(this)
     });
   }
