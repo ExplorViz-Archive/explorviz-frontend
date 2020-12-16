@@ -313,7 +313,7 @@ export default class VrRendering extends Component<Args> {
     const raySpace1 = this.renderer.xr.getController(0);
     const gripSpace1 = this.renderer.xr.getControllerGrip(0);
 
-    const bindings1 = new VRControllerBindingsList(this.makeInteractionBindings(), this.infoMenus.controllerBindings);
+    const bindings1 = new VRControllerBindingsList(this.makeControllerBindings(), this.infoMenus.controllerBindings);
     const controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
       raySpace1, bindings1.callbacks, this.scene);
     controller1.setToDefaultAppearance();
@@ -327,7 +327,7 @@ export default class VrRendering extends Component<Args> {
     const raySpace2 = this.renderer.xr.getController(1);
     const gripSpace2 = this.renderer.xr.getControllerGrip(1);
 
-    const bindings2 = new VRControllerBindingsList(this.makeUtilityBindings(), this.mainMenus.controllerBindings);
+    const bindings2 = new VRControllerBindingsList(this.makeControllerBindings(), this.mainMenus.controllerBindings);
     const controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
       raySpace2, bindings2.callbacks, this.scene);
     controller2.setToDefaultAppearance();
@@ -732,32 +732,8 @@ export default class VrRendering extends Component<Args> {
 
   // #region CONTROLLER HANDLERS
 
-  makeInteractionBindings(): VRControllerBindings {
+  makeControllerBindings(): VRControllerBindings {
     return new VRControllerBindings({
-      thumbpad: new VRControllerThumbpadBinding({
-        labelUp: 'Move Away',
-        labelDown: 'Move Closer'
-      }, {
-        onThumbpadTouch: this.moveGrabbedObject.bind(this)
-      }),
-
-      gripButton: new VRControllerButtonBinding('Grab Object', {
-        onButtonDown: this.grabIntersectedObject.bind(this),
-        onButtonUp: this.releaseGrabbedObject.bind(this)
-      }),
-
-      menuButton: new VRControllerButtonBinding('Show Details', {
-        onButtonDown: (controller: VRController) => {
-          if (!controller.intersectedObject) return;
-      
-          const { object } = controller.intersectedObject;
-          const content = composeContent(object);
-          if (content) {
-            this.openInfoMenu(content);
-          }
-        }
-      }),
-
       triggerButton: new VRControllerButtonBinding('Open / Close', {
         onButtonDown: (controller: VRController) => {
           if (!controller.intersectedObject) return;
@@ -773,27 +749,43 @@ export default class VrRendering extends Component<Args> {
             object.triggerPress(uv, value);
           }
         }
-      })
-    });
-  }
-
-  makeUtilityBindings(): VRControllerBindings {
-    return new VRControllerBindings({
-      gripButton: new VRControllerButtonBinding('Open Magnifying Glass', {
-        onButtonDown: () => this.openZoomMenu()
       }),
 
       menuButton: new VRControllerButtonBinding('Options', {
         onButtonDown: () => this.openMainMenu()
       }),
 
-      triggerButton: new VRControllerButtonBinding('Teleport / Highlight', {
-        onButtonDown: (controller: VRController) => {
-          if (!controller.intersectedObject) return;
-          this.handleSecondaryInputOn(controller.intersectedObject)
-        }
+      gripButton: new VRControllerButtonBinding('Grab Object', {
+        onButtonDown: this.grabIntersectedObject.bind(this),
+        onButtonUp: this.releaseGrabbedObject.bind(this)
       }),
-    });
+
+      thumbpad: new VRControllerThumbpadBinding({ labelUp: 'Teleport / Highlight', labelDown: 'Show Details', labelRight: 'Zoom' }, {
+        onThumbpadDown: (controller, axes) => {
+          const d = VRControllerThumbpadBinding.getDirection(axes);
+
+          if (d == 'up') {
+            if (!controller.intersectedObject) return;
+          this.handleSecondaryInputOn(controller.intersectedObject)
+          }
+
+          if (d == 'down') {
+            if (!controller.intersectedObject) return;
+
+            const { object } = controller.intersectedObject;
+            const content = composeContent(object);
+            if (content) {
+              this.openInfoMenu(content);
+            }
+          }
+
+          if (d == 'right') {
+            this.openZoomMenu()
+          }
+        }
+      })
+
+    })
   }
 
   /**
