@@ -1,19 +1,19 @@
 import TextItem from './items/text-item';
 import BaseMenu from './base-menu';
-import TextbuttonItem from './items/textbutton-item';
 import CheckboxItem from './items/checkbox-item';
+import TextbuttonItem from './items/textbutton-item';
 
-export default class AdvancedMenu extends BaseMenu {
+export default class SettingsMenu extends BaseMenu {
   isLefty: boolean;
 
-  constructor(toggleLeftyMode: () => void, userIsLefty: boolean, resetAll: () => void) {
+  constructor(openCameraMenu: () => void, toggleLeftyMode: () => void, userIsLefty: boolean) {
     super();
 
     this.isLefty = userIsLefty;
 
     this.opacity = 0.8;
 
-    const textItem = new TextItem('Advanced Options', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
+    const textItem = new TextItem('Settings', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(textItem);
 
     const leftyText = new TextItem('Lefty Mode', 'isLeftyText', '#ffffff', { x: 100, y: 148 }, 28, 'left');
@@ -24,6 +24,7 @@ export default class AdvancedMenu extends BaseMenu {
       y: 126,
     }, 50, 50, '#ffc338', '#ffffff', '#00e5ff', 5, this.isLefty, true);
     this.items.push(leftyCB);
+    this.thumbpadTargets.push(leftyCB);
 
     leftyCB.onTriggerDown = () => {
       toggleLeftyMode();
@@ -32,23 +33,17 @@ export default class AdvancedMenu extends BaseMenu {
       this.update();
     };
 
-    const resetAllButton = new TextbuttonItem('resetAll', 'Reset all', {
+    const cameraButton = new TextbuttonItem('change_height', 'Change Camera', {
       x: 100,
-      y: 266,
+      y: 220,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    resetAllButton.onTriggerDown = () => {
-      resetAll();
-    };
+    this.items.push(cameraButton);
+    this.thumbpadTargets.push(cameraButton);
+    cameraButton.onTriggerDown = openCameraMenu;
 
-    const backButton = new TextbuttonItem('back', 'Back', {
-      x: 100,
-      y: 402,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    backButton.onTriggerDown = this.closeMenu.bind(this);
-
-    this.items.push(resetAllButton, backButton);
     this.update();
   }
+
 }

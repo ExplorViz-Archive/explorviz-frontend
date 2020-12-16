@@ -1,6 +1,7 @@
 import VRController from "explorviz-frontend/utils/vr-rendering/VRController";
 import VRControllerLabelGroup from "./vr-controller-label-group";
 import VRControllerLabelMesh, { VRControllerLabelPosition } from "./vr-controller-label-mesh";
+import THREE from "three";
 
 type VRControllerThumbpadLabels = {
     labelUp?: string;
@@ -25,6 +26,14 @@ type VRControllerThumbpadCallbacks = {
 };
 
 export default class VRControllerThumbpadBinding {
+    static getDirection(axes: number[]) {
+        const angle = THREE.MathUtils.RAD2DEG * Math.atan(axes[1] / axes[0]);
+        if (angle < 45) return 'right';
+        if (angle < 135) return 'up';
+        if (angle < 225) return 'left';
+        return 'down';
+    }
+    
     labels: VRControllerThumbpadLabels;
     callbacks: VRControllerThumbpadCallbacks;
 

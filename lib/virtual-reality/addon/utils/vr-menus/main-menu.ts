@@ -3,51 +3,46 @@ import BaseMenu from './base-menu';
 import TextbuttonItem from './items/textbutton-item';
 
 export type MainMenuEvents = {
-  openCameraMenu: () => void,
-  openAdvancedMenu: () => void,
-  openMultiUserMenu?: () => void
+  openMultiUserMenu?: () => void,
+  openSettingsMenu: () => void,
+  openResetMenu: () => void
 };
+
 export default class MainMenu extends BaseMenu {
   constructor(callbacks: MainMenuEvents) {
     super();
 
     this.opacity = 0.8;
 
-    const title = new TextItem('Options', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
+    const title = new TextItem('Main Menu', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
 
-    const cameraButton = new TextbuttonItem('change_height', 'Change Camera', {
+    const multiUserButton = new TextbuttonItem('multi-user', 'Multi User', {
       x: 100,
       y: 80,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    this.items.push(cameraButton);
-    cameraButton.onTriggerDown = callbacks.openCameraMenu;
+    this.items.push(multiUserButton);
+    multiUserButton.onTriggerDown = callbacks.openMultiUserMenu;
+    this.thumbpadTargets.push(multiUserButton);
 
-
-    const advancedButton = new TextbuttonItem('advanced', 'Advanced Options', {
+    const settingsButton = new TextbuttonItem('settings', 'Settings', {
       x: 100,
       y: 140,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    this.items.push(advancedButton);
-    advancedButton.onTriggerDown = callbacks.openAdvancedMenu;
+    this.items.push(settingsButton);
+    settingsButton.onTriggerDown = callbacks.openSettingsMenu;
+    this.thumbpadTargets.push(settingsButton);
 
-    const multiUserButton = new TextbuttonItem('multi-user', 'Multi User', {
+    const resetButton = new TextbuttonItem('reset', 'Reset', {
       x: 100,
       y: 200,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
-    this.items.push(multiUserButton);
-    multiUserButton.onTriggerDown = callbacks.openMultiUserMenu;
-
-    const exitButton = new TextbuttonItem('exit', 'Exit', {
-      x: 100,
-      y: 402,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
-
-    this.items.push(exitButton);
-    exitButton.onTriggerDown = this.closeMenu.bind(this);
+    this.items.push(resetButton);
+    resetButton.onTriggerDown = callbacks.openResetMenu;
+    this.thumbpadTargets.push(resetButton);
 
     this.update();
   }

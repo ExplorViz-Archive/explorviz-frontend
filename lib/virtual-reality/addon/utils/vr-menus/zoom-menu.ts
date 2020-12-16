@@ -78,7 +78,7 @@ export default class ZoomMenu extends BaseMenu {
   }
 
   makeGripButtonBinding() {
-    return new VRControllerButtonBinding('Close Magnifying Glass', {
+    return new VRControllerButtonBinding('Close', {
       onButtonUp: this.closeMenu.bind(this)
     });
   }

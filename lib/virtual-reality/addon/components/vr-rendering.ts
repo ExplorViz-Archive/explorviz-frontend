@@ -39,7 +39,6 @@ import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
-import AdvancedMenu from 'virtual-reality/utils/vr-menus/advanced-menu';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
 import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
@@ -57,6 +56,8 @@ import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-con
 import VRControllerBindings from 'virtual-reality/utils/vr-controller/vr-controller-bindings';
 import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
+import SettingsMenu from 'virtual-reality/utils/vr-menus/settings-menu';
+import ResetMenu from 'virtual-reality/utils/vr-menus/reset-menu';
 
 interface Args {
   readonly id: string;
@@ -303,7 +304,7 @@ export default class VrRendering extends Component<Args> {
       id: 0,
       mode: VRControllerMode.INTERACTION,
       intersectableObjects: intersectableObjects,
-      defaultBindings: this.makeInteractionBindings(),
+      defaultBindings: this.makeControllerBindings(),
       menuGroup: this.infoMenus
     });
 
@@ -311,7 +312,7 @@ export default class VrRendering extends Component<Args> {
       id: 1,
       mode: VRControllerMode.UTILITY,
       intersectableObjects: intersectableObjects,
-      defaultBindings: this.makeUtilityBindings(),
+      defaultBindings: this.makeControllerBindings(),
       menuGroup: this.mainMenus
     });
   }
@@ -742,32 +743,8 @@ export default class VrRendering extends Component<Args> {
 
   // #region CONTROLLER HANDLERS
 
-  makeInteractionBindings(): VRControllerBindings {
+  makeControllerBindings(): VRControllerBindings {
     return new VRControllerBindings({
-      thumbpad: new VRControllerThumbpadBinding({
-        labelUp: 'Move Away',
-        labelDown: 'Move Closer'
-      }, {
-        onThumbpadTouch: this.moveGrabbedObject.bind(this)
-      }),
-
-      gripButton: new VRControllerButtonBinding('Grab Object', {
-        onButtonDown: this.grabIntersectedObject.bind(this),
-        onButtonUp: this.releaseGrabbedObject.bind(this)
-      }),
-
-      menuButton: new VRControllerButtonBinding('Show Details', {
-        onButtonDown: (controller: VRController) => {
-          if (!controller.intersectedObject) return;
-      
-          const { object } = controller.intersectedObject;
-          const content = composeContent(object);
-          if (content) {
-            this.openInfoMenu(content);
-          }
-        }
-      }),
-
       triggerButton: new VRControllerButtonBinding('Open / Close', {
         onButtonDown: (controller: VRController) => {
           if (!controller.intersectedObject) return;
@@ -783,27 +760,43 @@ export default class VrRendering extends Component<Args> {
             object.triggerPress(uv, value);
           }
         }
-      })
-    });
-  }
-
-  makeUtilityBindings(): VRControllerBindings {
-    return new VRControllerBindings({
-      gripButton: new VRControllerButtonBinding('Open Magnifying Glass', {
-        onButtonDown: () => this.openZoomMenu()
       }),
 
       menuButton: new VRControllerButtonBinding('Options', {
         onButtonDown: () => this.openMainMenu()
       }),
 
-      triggerButton: new VRControllerButtonBinding('Teleport / Highlight', {
-        onButtonDown: (controller: VRController) => {
-          if (!controller.intersectedObject) return;
-          this.handleSecondaryInputOn(controller.intersectedObject)
-        }
+      gripButton: new VRControllerButtonBinding('Grab Object', {
+        onButtonDown: this.grabIntersectedObject.bind(this),
+        onButtonUp: this.releaseGrabbedObject.bind(this)
       }),
-    });
+
+      thumbpad: new VRControllerThumbpadBinding({ labelUp: 'Teleport / Highlight', labelDown: 'Show Details', labelRight: 'Zoom' }, {
+        onThumbpadDown: (controller, axes) => {
+          const d = VRControllerThumbpadBinding.getDirection(axes);
+
+          if (d == 'up') {
+            if (!controller.intersectedObject) return;
+          this.handleSecondaryInputOn(controller.intersectedObject)
+          }
+
+          if (d == 'down') {
+            if (!controller.intersectedObject) return;
+
+            const { object } = controller.intersectedObject;
+            const content = composeContent(object);
+            if (content) {
+              this.openInfoMenu(content);
+            }
+          }
+
+          if (d == 'right') {
+            this.openZoomMenu()
+          }
+        }
+      })
+
+    })
   }
 
   /**
@@ -999,9 +992,14 @@ export default class VrRendering extends Component<Args> {
     if (!this.localUser.controller1) return;
 
     this.mainMenus.openMenu(new MainMenu({
-      openCameraMenu: this.openCameraMenu.bind(this),
-      openAdvancedMenu: this.openAdvancedMenu.bind(this),
+      openSettingsMenu: this.openSettingsMenu.bind(this),
+      openResetMenu: this.openResetMenu.bind(this)
     }));
+  }
+
+  openResetMenu() {
+    const user = this.localUser;
+    this.mainMenus.openMenu(new ResetMenu(this.resetAll.bind(this), user));
   }
 
   openZoomMenu() {
@@ -1014,9 +1012,9 @@ export default class VrRendering extends Component<Args> {
     this.mainMenus.openMenu(new CameraMenu(user.getCameraDelta.bind(user), user.changeCameraHeight.bind(user)));
   }
 
-  openAdvancedMenu() {
+  openSettingsMenu() {
     const user = this.localUser;    
-    this.mainMenus.openMenu(new AdvancedMenu(user.toggleLeftyMode.bind(user), user.isLefty, this.resetAll.bind(this)));
+    this.mainMenus.openMenu(new SettingsMenu(this.openCameraMenu.bind(this), user.toggleLeftyMode.bind(user), user.isLefty));
   }
 
   openInfoMenu(content: DetailedInfo) {

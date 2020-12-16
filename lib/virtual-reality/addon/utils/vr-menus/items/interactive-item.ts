@@ -1,7 +1,10 @@
 import Item from './item';
 
 export default abstract class InteractiveItem extends Item {
-  isHovered = false;
+  hoveredByButton = false;
+  hoveredByRay = false;
+
+  get isHovered() { return this.hoveredByButton || this.hoveredByRay;}
 
   onHover: (() => void)|undefined = undefined;
 
@@ -10,10 +13,18 @@ export default abstract class InteractiveItem extends Item {
   onTriggerPressed: ((value: number) => void)|undefined = undefined;
 
   enableHoverEffect() {
-    this.isHovered = true;
+    this.hoveredByRay = true;
   }
 
   resetHoverEffect() {
-    this.isHovered = false;
+    this.hoveredByRay = false;
+  }
+
+  enableHoverEffectByButton() {
+    this.hoveredByButton = true;
+  }
+
+  resetHoverEffectByButton() {
+    this.hoveredByButton = false
   }
 }
