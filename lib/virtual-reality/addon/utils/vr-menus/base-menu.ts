@@ -55,6 +55,7 @@ export default abstract class BaseMenu extends BaseMesh {
     this.thumbpadTargets = [];
     this.activeTarget = undefined;
     this.thumbpadAxis = 1;
+    this.opacity = 0.8;
   }
 
   initGeometry() {

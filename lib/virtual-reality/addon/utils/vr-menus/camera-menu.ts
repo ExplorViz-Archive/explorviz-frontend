@@ -19,7 +19,6 @@ export default class CameraMenu extends BaseMenu {
     super();
     this.getCameraDelta = getCameraDelta;
     this.changeCameraHeight = changeCameraHeight;
-    this.opacity = 0.8;
 
     const title = new TextItem('Camera', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);

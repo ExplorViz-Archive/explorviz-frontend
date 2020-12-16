@@ -11,8 +11,6 @@ export default class SettingsMenu extends BaseMenu {
 
     this.isLefty = userIsLefty;
 
-    this.opacity = 0.8;
-
     const textItem = new TextItem('Settings', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(textItem);
 
@@ -41,7 +39,6 @@ export default class SettingsMenu extends BaseMenu {
     this.items.push(cameraButton);
     this.thumbpadTargets.push(cameraButton);
     cameraButton.onTriggerDown = openCameraMenu;
-
 
     this.update();
   }

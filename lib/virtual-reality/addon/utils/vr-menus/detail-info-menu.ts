@@ -7,8 +7,6 @@ export default class DetailInfoMenu extends BaseMenu {
   constructor(content: DetailedInfo) {
     super({ width: 768, height: 512 });
 
-    this.opacity = 0.8;
-
     const titleBackground = new RectangleItem('title_background', { x: 0, y: 0 }, 768, 66, '#777777');
     this.items.push(titleBackground);
 

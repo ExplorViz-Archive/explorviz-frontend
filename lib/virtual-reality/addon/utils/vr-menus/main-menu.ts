@@ -12,8 +12,6 @@ export default class MainMenu extends BaseMenu {
   constructor(callbacks: MainMenuEvents) {
     super();
 
-    this.opacity = 0.8;
-
     const title = new TextItem('Main Menu', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
 
