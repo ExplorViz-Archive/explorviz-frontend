@@ -37,9 +37,9 @@ export default class Auth extends Service {
     );
 
     this.lock.on('authenticated', (authResult) => {
-      this.router.transitionTo(config.auth0.routeAfterLogin).then(() => {
+      this.router.transitionTo(config.auth0.routeAfterLogin).then(async () => {
+        await this.setUser(authResult.accessToken);
         this.set('accessToken', authResult.accessToken);
-        this.setUser(authResult.accessToken);
       });
     });
   }
@@ -56,9 +56,16 @@ export default class Auth extends Service {
    */
   setUser(token: string) {
     // once we have a token, we are able to go get the users information
-    this.lock.getUserInfo(token, (_err: Auth0Error, profile: Auth0UserProfile) => {
-      this.debug('User set', profile);
-      this.set('user', profile);
+    return new Promise<Auth0UserProfile>((resolve, reject) => {
+      this.lock.getUserInfo(token, (_err: Auth0Error, profile: Auth0UserProfile) => {
+        if (_err) {
+          reject(_err);
+        } else {
+          this.debug('User set', profile);
+          this.set('user', profile);
+          resolve(profile);
+        }
+      });
     });
   }
 
@@ -68,12 +75,12 @@ export default class Auth extends Service {
   checkLogin() {
     // check to see if a user is authenticated, we'll get a token back
     return new Promise((resolve, reject) => {
-      this.lock.checkSession({}, (err, authResult) => {
+      this.lock.checkSession({}, async (err, authResult) => {
         if (err || authResult === undefined) {
           reject(err);
         } else {
           this.set('accessToken', authResult.accessToken);
-          this.setUser(authResult.accessToken);
+          await this.setUser(authResult.accessToken);
           resolve(authResult);
         }
       });
