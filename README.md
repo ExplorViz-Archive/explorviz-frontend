@@ -50,8 +50,10 @@ You will need the following things properly installed on your computer.
 * `npm install`
 
 ### Running / Development
+* Generate a SSL certificate and place the `server.key` and `server.crt` files in the `.ssl` directory.
+* Unless the backend is running on `localhost`, specify the backend's base URL in the `API_ROOT` environment variable.
 * `ember serve` or `ember s`
-* Visit the frontend at [http://localhost:4200](http://localhost:4200).
+* Visit the frontend at [https://localhost:4200](https://localhost:4200).
 
 #### Testing
 * `npm test` or `ember test` / `ember test --server`

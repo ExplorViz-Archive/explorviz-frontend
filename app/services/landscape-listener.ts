@@ -4,6 +4,7 @@ import debugLogger from 'ember-debug-logger';
 import DS from 'ember-data';
 import { set } from '@ember/object';
 import { AjaxServiceClass } from 'ember-ajax/services/ajax';
+import config from 'explorviz-frontend/config/environment';
 import {
   preProcessAndEnhanceStructureLandscape, StructureLandscapeData,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
@@ -66,7 +67,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
   requestStructureData(/* fromTimestamp: number, toTimestamp: number */) {
     return new Promise<StructureLandscapeData>((resolve, reject) => {
-      this.ajax.request('https://192.168.48.209/v2/landscapes/fibonacci-sample-landscape/structure')
+      this.ajax.request(`${config.APP.API_ROOT}/v2/landscapes/fibonacci-sample-landscape/structure`)
         .then((data: StructureLandscapeData) => resolve(data))
         .catch((e) => reject(e));
     });
@@ -74,7 +75,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
   requestDynamicData(fromTimestamp: number, toTimestamp: number) {
     return new Promise<DynamicLandscapeData>((resolve, reject) => {
-      this.ajax.request(`https://192.168.48.209/v2/landscapes/fibonacci-sample-landscape/dynamic?from=${fromTimestamp}&to=${toTimestamp}`)
+      this.ajax.request(`${config.APP.API_ROOT}/v2/landscapes/fibonacci-sample-landscape/dynamic?from=${fromTimestamp}&to=${toTimestamp}`)
         .then((data: any) => resolve(data))
         .catch((e) => reject(e));
     });

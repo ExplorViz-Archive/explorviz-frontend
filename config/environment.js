@@ -31,7 +31,7 @@ module.exports = function (environment) {
 
   if (environment === 'development') {
 
-    API_ROOT = 'https://192.168.48.209';
+    API_ROOT = 'https://127.0.0.1';
 
     if (process.env.API_ROOT) {
       API_ROOT = process.env.API_ROOT;
@@ -82,11 +82,11 @@ module.exports = function (environment) {
   // User specific environment, e.g. for usage in a virtual machine
 
   if (environment === 'akr') {
-    ENV.APP.API_ROOT = 'http://192.168.91.128:8080';
+    ENV.APP.API_ROOT = 'https://192.168.91.128:8080';
   }
 
   if (environment === 'node2') {
-    ENV.APP.API_ROOT = 'http://192.168.48.32:8090';
+    ENV.APP.API_ROOT = 'https://192.168.48.32:8090';
   }
 
   return ENV;
