@@ -1,6 +1,7 @@
 import Route from '@ember/routing/route';
 import { inject as service } from '@ember/service';
 import Auth from 'explorviz-frontend/services/auth';
+import config from 'explorviz-frontend/config/environment';
 
 /**
 * TODO
@@ -9,12 +10,12 @@ import Auth from 'explorviz-frontend/services/auth';
 * @extends Ember.Route
 */
 export default class LoginRoute extends Route {
-  @service session: any;
-
   @service
   auth!: Auth;
 
-  beforeModel() {
-    this.auth.login();
+  async beforeModel() {
+    await this.auth.checkLogin()
+      .then(() => this.transitionTo(config.auth0.routeAfterLogin))
+      .catch(() => this.auth.login());
   }
 }
