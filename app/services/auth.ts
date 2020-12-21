@@ -33,6 +33,13 @@ export default class Auth extends Service {
           },
           autoParseHash: true,
         },
+        theme: {
+          logo: config.auth0.logoUrl,
+        },
+        closable: false,
+        languageDictionary: {
+          title: 'ExplorViz',
+        },
       },
     );
 
@@ -77,6 +84,8 @@ export default class Auth extends Service {
     return new Promise((resolve, reject) => {
       this.lock.checkSession({}, async (err, authResult) => {
         if (err || authResult === undefined) {
+          this.set('user', undefined);
+          this.set('accessToken', undefined);
           reject(err);
         } else {
           this.set('accessToken', authResult.accessToken);
@@ -92,6 +101,7 @@ export default class Auth extends Service {
    */
   logout() {
     this.set('user', undefined);
+    this.set('accessToken', undefined);
     this.lock.logout({
       clientID: config.auth0.clientId,
       returnTo: config.auth0.logoutReturnUrl,
