@@ -33,7 +33,7 @@ import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
-import VRController, { VRControllerMode } from 'virtual-reality/utils/vr-rendering/VRController';
+import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
 import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
@@ -113,10 +113,6 @@ export default class VrRendering extends Component<Args> {
   // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
 
-  mainMenus: MenuGroup;
-
-  infoMenus: MenuGroup;
-
   hintMenu: HintMenu|undefined;
 
   // Depth of boxes for landscape entities
@@ -171,9 +167,6 @@ export default class VrRendering extends Component<Args> {
 
     this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
-
-    this.mainMenus = new MenuGroup();
-    this.infoMenus = new MenuGroup();
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
 
@@ -278,8 +271,7 @@ export default class VrRendering extends Component<Args> {
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      [this.landscapeObject3D, this.applicationGroup, this.floor,
-        this.mainMenus, this.infoMenus], {
+      [this.landscapeObject3D, this.applicationGroup, this.floor], {
         singleClick: this.handleSingleClick,
         doubleClick: this.handleDoubleClick,
         mouseWheel: this.handleMouseWheel,
@@ -297,43 +289,34 @@ export default class VrRendering extends Component<Args> {
   }
 
   initControllers() {
-    const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor,
-      this.mainMenus, this.infoMenus];
 
     this.localUser.controller1 = this.initController({
       id: 0,
-      mode: VRControllerMode.INTERACTION,
-      intersectableObjects: intersectableObjects,
-      defaultBindings: this.makeControllerBindings(),
-      menuGroup: this.infoMenus
+      color: new THREE.Color('red'),
     });
 
     this.localUser.controller2 = this.initController({
       id: 1,
-      mode: VRControllerMode.UTILITY,
-      intersectableObjects: intersectableObjects,
-      defaultBindings: this.makeControllerBindings(),
-      menuGroup: this.mainMenus
+      color: new THREE.Color('blue'),
     });
   }
 
-  initController({id, mode, intersectableObjects, defaultBindings, menuGroup}: {
+  initController({id, color}: {
     id: number,
-    mode: VRControllerMode,
-    intersectableObjects: THREE.Object3D[],
-    defaultBindings: VRControllerBindings,
-    menuGroup: MenuGroup
+    color: THREE.Color
   }): VRController {
+    const menuGroup = new MenuGroup();
     const controller = new VRController({
       gamepadIndex: id,
       scene: this.scene,
-      bindings: new VRControllerBindingsList(defaultBindings, menuGroup.controllerBindings),
+      bindings: new VRControllerBindingsList(this.makeControllerBindings(), menuGroup.controllerBindings),
       gripSpace: this.renderer.xr.getControllerGrip(id),
       raySpace: this.renderer.xr.getController(id),
-      mode, menuGroup
+      color, menuGroup
     });
     controller.setToDefaultAppearance();
-    controller.intersectableObjects = intersectableObjects;
+    controller.intersectableObjects = this.interaction.raycastObjects;
+    controller.intersectableObjects.push(menuGroup);
 
     // Position menus above controller at an angle.
     menuGroup.position.y += 0.15;
@@ -433,10 +416,6 @@ export default class VrRendering extends Component<Args> {
     this.localUser.updateControllers();
 
     this.renderer.render(this.scene, this.camera);
-
-    if (this.mainMenus.currentMenu instanceof ZoomMenu) {
-      this.mainMenus.currentMenu.renderLens();
-    }
   }
 
   @task*
@@ -758,7 +737,7 @@ export default class VrRendering extends Component<Args> {
       }),
 
       menuButton: new VRControllerButtonBinding('Options', {
-        onButtonDown: () => this.openMainMenu()
+        onButtonDown: (controller) => this.openMainMenu(controller)
       }),
 
       gripButton: new VRControllerButtonBinding('Grab Object', {
@@ -781,12 +760,12 @@ export default class VrRendering extends Component<Args> {
             const { object } = controller.intersectedObject;
             const content = composeContent(object);
             if (content) {
-              this.openInfoMenu(content);
+              this.openInfoMenu(controller, content);
             }
           }
 
           if (d == 'right') {
-            this.openZoomMenu()
+            this.openZoomMenu(controller)
           }
         }
       })
@@ -815,7 +794,7 @@ export default class VrRendering extends Component<Args> {
    * @param object The object to grab.
    */
   isObjectGrabable(object: THREE.Object3D): boolean {
-    return object instanceof ApplicationObject3D || object instanceof LandscapeObject3D;
+    return VRController.findController(object) === null && (object instanceof ApplicationObject3D || object instanceof LandscapeObject3D);
   }
 
   /**
@@ -983,37 +962,36 @@ export default class VrRendering extends Component<Args> {
     this.hintMenu.startAnimation();
   }
 
-  openMainMenu() {
+  openMainMenu(controller: VRController) {
     if (!this.localUser.controller1) return;
 
-    this.mainMenus.openMenu(new MainMenu({
-      openSettingsMenu: this.openSettingsMenu.bind(this),
-      openResetMenu: this.openResetMenu.bind(this)
+    controller.menuGroup.openMenu(new MainMenu({
+      openSettingsMenu: this.openSettingsMenu.bind(this, controller),
+      openResetMenu: this.openResetMenu.bind(this, controller)
     }));
   }
 
-  openResetMenu() {
+  openResetMenu(controller: VRController) {
     const user = this.localUser;
-    this.mainMenus.openMenu(new ResetMenu(this.resetAll.bind(this), user));
+    controller.menuGroup.openMenu(new ResetMenu(this.resetAll.bind(this), user));
   }
 
-  openZoomMenu() {
-    this.mainMenus.openMenu(new ZoomMenu(this.renderer, this.scene, this.camera));
+  openZoomMenu(controller: VRController) {
+    controller.menuGroup.openMenu(new ZoomMenu(this.renderer, this.scene, this.camera));
   }
 
-  openCameraMenu() {
+  openCameraMenu(controller: VRController) {
     const user = this.localUser;
 
-    this.mainMenus.openMenu(new CameraMenu(user.getCameraDelta.bind(user), user.changeCameraHeight.bind(user)));
+    controller.menuGroup.openMenu(new CameraMenu(user.getCameraDelta.bind(user), user.changeCameraHeight.bind(user)));
   }
 
-  openSettingsMenu() {
-    const user = this.localUser;
-    this.mainMenus.openMenu(new SettingsMenu(this.openCameraMenu.bind(this), user.toggleLeftyMode.bind(user), user.isLefty));
+  openSettingsMenu(controller: VRController) {
+    controller.menuGroup.openMenu(new SettingsMenu(this.openCameraMenu.bind(this, controller)));
   }
 
-  openInfoMenu(content: DetailedInfo) {
-    this.infoMenus.openMenu(new DetailInfoMenu(content));
+  openInfoMenu(controller: VRController, content: DetailedInfo) {
+    controller.menuGroup.openMenu(new DetailInfoMenu(content));
   }
 
   // #endregion MENUS

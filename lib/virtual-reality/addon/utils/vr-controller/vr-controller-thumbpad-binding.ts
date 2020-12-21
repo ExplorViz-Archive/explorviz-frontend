@@ -20,11 +20,13 @@ type VRControllerThumbpadCallbacks = {
 
 export default class VRControllerThumbpadBinding {
     static getDirection(axes: number[]) {
-        const angle = THREE.MathUtils.RAD2DEG * Math.atan(axes[1] / axes[0]);
-        if (angle < 45) return 'right';
-        if (angle < 135) return 'up';
-        if (angle < 225) return 'left';
-        return 'down';
+        if (axes[0] == 0 && axes[1] == 0) return '';
+        const angle = THREE.MathUtils.RAD2DEG * Math.atan2(axes[1], axes[0]) + 180;
+        
+        if (angle < 45) return 'left';
+        if (angle < 135) return 'down';
+        if (angle < 225) return 'right';
+        return 'up';
     }
 
     labels: VRControllerThumbpadLabels;

@@ -57,6 +57,9 @@ export default class VrMultiUser extends VrRendering {
 
   messageBox!: MessageBoxMenu;
 
+  getRemoteUsers() {
+    return this.idToRemoteUser;
+  }
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -129,33 +132,28 @@ export default class VrMultiUser extends VrRendering {
 
   // #region MENUS
 
-  openMainMenu() {
+  openMainMenu(controller: VRController) {
     if (!this.localUser.controller1) return;
 
-    this.mainMenus.openMenu(new MainMenu({
-      openSettingsMenu: this.openSettingsMenu.bind(this),
-      openMultiUserMenu: this.openMultiUserMenu.bind(this),
-      openResetMenu: this.openResetMenu.bind(this)
+    controller.menuGroup.openMenu(new MainMenu({
+      openSettingsMenu: this.openSettingsMenu.bind(this, controller),
+      openMultiUserMenu: this.openMultiUserMenu.bind(this, controller),
+      openResetMenu: this.openResetMenu.bind(this, controller)
     }));
   } 
   
-  openMultiUserMenu() {
+  openMultiUserMenu(controller: VRController) {
     const menu = new MultiUserMenu(
       this.localUser.toggleConnection.bind(this.localUser),
       this.localUser,
       this.spectateUser,
       this.idToRemoteUser,
+      this.getRemoteUsers.bind(this)
     );
 
-    this.mainMenus.openMenu(menu);
-    this.localUser.multiUserMenu = menu;
+    controller.menuGroup.openMenu(menu);
   }
 
-  updateMultiUserMenu() {
-    if (this.mainMenus.currentMenu instanceof MultiUserMenu) {
-      this.mainMenus.currentMenu.updateUserList(this.idToRemoteUser);
-    }
-  }
 
   // #endregion MENUS
 
@@ -165,8 +163,6 @@ export default class VrMultiUser extends VrRendering {
     // Set visibilty and rays accordingly
     if (this.spectateUser.isActive) controller.setToSpectatingAppearance();
     else controller.setToDefaultAppearance();
-
-    this.localUser.setControlsAccordingToHand();
 
     // Prepare update message for other users
     let connect: {controller1?: string, controller2?: string};
@@ -460,7 +456,6 @@ export default class VrMultiUser extends VrRendering {
         color: `#${user.color.getHexString()}`,
       }, 3000);
     }
-    this.updateMultiUserMenu();
   }
 
   /**
@@ -533,7 +528,6 @@ export default class VrMultiUser extends VrRendering {
         color: `#${user.color.getHexString()}`,
       }, 3000);
     }
-    this.updateMultiUserMenu();
   }
 
   async onInitialLandscape(data: any) {

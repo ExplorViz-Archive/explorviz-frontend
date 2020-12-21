@@ -22,24 +22,11 @@ export default class MenuGroup extends THREE.Group {
     }
 
     /**
-     * Finds the controller this menu group is held by or `null` if it does not
-     * have a parent controller.
-     */
-    findController(): VRController|null {
-        let current = this.parent;
-        while (current) {
-            if (current instanceof VRController) return current;
-            current = current.parent;
-        }
-        return null;
-    }
-
-    /**
      * Makes the ray and teleport area of the parent controller of this menu
      * group visible or invisible based on the currently open menu.
      */
     toggleControllerRay() {
-        let controller = this.findController();
+        let controller = VRController.findController(this);
         if (controller) {
             let visible = !this.currentMenu || this.currentMenu.enableControllerRay;
             if (controller.ray) controller.ray.visible = visible;

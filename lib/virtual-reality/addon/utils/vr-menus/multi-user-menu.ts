@@ -22,33 +22,37 @@ export default class MultiUserMenu extends BaseMenu {
 
     disconnectButton: TextbuttonItem | undefined;
 
-    menuMode = 'offline';
+    state : string;
 
-  constructor(toggleConnection: (() => void), localUser: LocalVrUser, spectateUser: SpectateUser, idToRemoteVrUsers : Map<string, RemoteVrUser>) {
+    getRemoteUsers: (() => Map<string, RemoteVrUser>);
+
+
+  constructor(toggleConnection: (() => void), localUser: LocalVrUser, spectateUser: SpectateUser, idToRemoteVrUsers : Map<string, RemoteVrUser>, getRemoteUsers: (() => Map<string, RemoteVrUser>)) {
     super();
     this.localUser = localUser;
     this.spectateUser = spectateUser;
     this.idToRemoteVrUsers = idToRemoteVrUsers;
     this.users = Array.from(this.idToRemoteVrUsers.values());
     this.toggleConnection = toggleConnection;
-    this.initMenu(localUser.state);
+    this.state = this.localUser.state;
+    this.initMenu();
+    this.getRemoteUsers = getRemoteUsers;
 
   }
 
-  initMenu(state: string) {
+  initMenu() {
 
-    if(state == 'offline') {
+    if(this.state == 'offline') {
         this.initOfflineMenu('Connect');
-    } else if (state == 'connecting') {
+    } else if (this.state == 'connecting') {
         this.initOfflineMenu('Connecting...');
-    } else if (state == 'online') {
+    } else if (this.state == 'online') {
         this.initOnlineMenu();
     }
     this.update();
   }
 
   initOfflineMenu(buttonState: string) {
-    this.menuMode = 'offline';
     const title = new TextItem('Multi User', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
 
@@ -59,7 +63,6 @@ export default class MultiUserMenu extends BaseMenu {
   }
 
   initOnlineMenu() {
-    this.menuMode = 'online';
     const title = new TextItem('Users (' + (this.users.length + 1) + ')', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
 
@@ -93,16 +96,24 @@ export default class MultiUserMenu extends BaseMenu {
 
   }
 
-  updateStatus(state: string) {
-    this.items.clear();
-    this.thumbpadTargets.clear();
-    this.initMenu(state);
+
+  updateMenu() {
+    const state = this.localUser.state;
+    const idToRemoteVrUsers = this.getRemoteUsers();
+    const users = Array.from(idToRemoteVrUsers.values()); 
+
+    if (this.state != state || !this.arrayEquals(users, this.users)) {
+      this.state = state;
+      this.users = users;
+      this.idToRemoteVrUsers = idToRemoteVrUsers;
+      this.items.clear();
+      this.thumbpadTargets.clear();
+      this.initMenu();
+    }
   }
 
-  updateUserList(idToRemoteVrUsers: Map<string, RemoteVrUser>) {
-    this.idToRemoteVrUsers = idToRemoteVrUsers;
-    this.users = Array.from(idToRemoteVrUsers.values());
-    this.updateStatus(this.localUser.state);
+  arrayEquals(a: RemoteVrUser[], b: RemoteVrUser[]) {
+    return a.length === b.length && a.every((val, index) => val === b[index]);
   }
 
   deactivateSpectate() {
@@ -132,7 +143,7 @@ export default class MultiUserMenu extends BaseMenu {
   makeGripButtonBinding() {
     return new VRControllerButtonBinding('Disconnect', {
       onButtonDown: () => {
-        if (this.menuMode == 'online') {
+        if (this.state == 'online') {
 
           this.toggleConnection();
           this.disconnectButton?.enableHoverEffectByButton();
@@ -140,7 +151,7 @@ export default class MultiUserMenu extends BaseMenu {
         }
       },
       onButtonUp: () => {
-        if (this.menuMode == 'online') {
+        if (this.state == 'online') {
           this.disconnectButton?.resetHoverEffectByButton();
           this.update()
         }

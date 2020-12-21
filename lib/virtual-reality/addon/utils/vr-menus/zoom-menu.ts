@@ -1,6 +1,5 @@
 import BaseMenu from './base-menu';
 import THREE from 'three';
-import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
 
 export default class ZoomMenu extends BaseMenu {
 
@@ -77,10 +76,9 @@ export default class ZoomMenu extends BaseMenu {
       this.renderer.xr.enabled = oldXREnabled;
   }
 
-  makeGripButtonBinding() {
-    return new VRControllerButtonBinding('Close', {
-      onButtonUp: this.closeMenu.bind(this)
-    });
+  updateMenu() {
+    this.renderLens();
   }
+
 
 }
