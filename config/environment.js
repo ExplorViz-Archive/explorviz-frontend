@@ -24,6 +24,7 @@ module.exports = function (environment) {
     auth0: {
       clientId: AUTH_CONFIG.clientId,
       domain: AUTH_CONFIG.domain,
+      logoUrl: AUTH_CONFIG.logoUrl,
       callbackUrl: AUTH_CONFIG.callbackUrl,
       logoutReturnUrl: AUTH_CONFIG.logoutReturnUrl,
       routeAfterLogin: AUTH_CONFIG.routeAfterLogin,
