@@ -2,7 +2,7 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import THREE from 'three';
 
 export default class TeleportMesh extends BaseMesh {
-  constructor(color = new THREE.Color(0x0000dc)) {
+  constructor(color: THREE.Color) {
     super(color);
 
     this.geometry = new THREE.RingGeometry(0.14, 0.2, 32);

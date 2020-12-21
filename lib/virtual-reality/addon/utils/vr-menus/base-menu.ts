@@ -135,7 +135,7 @@ export default abstract class BaseMenu extends BaseMesh {
     if (this.thumbpadTargets.length == 0) {
       return undefined;
     }
-    return new VRControllerThumbpadBinding({ labelUp: 'Next', labelDown: 'Previous' }, {
+    return new VRControllerThumbpadBinding({ labelUp: 'Previous', labelDown: 'Next' }, {
       onThumbpadDown: (_controller, axes) => {
         this.activeTarget = axes[this.thumbpadAxis] > 0 ? this.getNext() : this.getPrevious();
         this.lastHoveredItem?.resetHoverEffect()
@@ -248,6 +248,8 @@ export default abstract class BaseMenu extends BaseMesh {
       this.parent.closeMenu();
     }
   }
+
+  updateMenu() {}
 
   onClose() {}
 }

@@ -5,7 +5,6 @@ import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import DS from 'ember-data';
 import WebSocket from './web-socket';
 import SpectateUser from './spectate-user';
-import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
 
 export type ConnectionStatus = 'offline'|'connecting'|'online';
 
@@ -33,8 +32,6 @@ export default class LocalVrUser extends Service {
 
   userGroup!: THREE.Group;
 
-  multiUserMenu: MultiUserMenu | null = null;
-
   connectionStatus: ConnectionStatus = 'offline';
 
   isLefty = false;
@@ -57,9 +54,6 @@ export default class LocalVrUser extends Service {
   get state() { return this.connectionStatus; }
 
   set state(state: ConnectionStatus) {
-    if (this.multiUserMenu) {
-      this.multiUserMenu.updateStatus(state);
-    }
     this.connectionStatus = state;
   }
 
@@ -81,44 +75,7 @@ export default class LocalVrUser extends Service {
     if (this.controller2) { this.controller2.update(); }
   }
 
-  setControlsAccordingToHand() {
-    const hand = this.controller1?.gamepad?.hand;
 
-    if ((hand === 'right' && this.isLefty && this.controller1?.isInteractionController)
-      || (hand === 'right' && !this.isLefty && this.controller1?.isUtilityController)
-      || (hand === 'left' && this.isLefty && this.controller1?.isUtilityController)
-      || (hand === 'left' && !this.isLefty && this.controller1?.isInteractionController)) {
-      this.swapControls();
-    }
-  }
-
-  toggleLeftyMode() {
-    this.isLefty = !this.isLefty;
-    this.swapControls();
-  }
-
-  swapControls() {
-    if (!this.controller1 || !this.controller2) return;
-
-    // Swap controller modes, callbacks, menus and labels.
-    [this.controller1.mode, this.controller2.mode] =
-      [this.controller2.mode, this.controller1.mode];
-    [this.controller1.eventCallbacks, this.controller2.eventCallbacks] =
-      [this.controller2.eventCallbacks, this.controller1.eventCallbacks];
-    [this.controller1.menuGroup, this.controller2.menuGroup] =
-      [this.controller2.menuGroup, this.controller1.menuGroup];
-    [this.controller1.labelGroup, this.controller2.labelGroup] =
-      [this.controller2.labelGroup, this.controller1.labelGroup];
-
-     // Reset visual indicators.
-    const controllers = [this.controller1, this.controller2];
-     for (let controller of controllers) {
-       controller.removeRay();
-       controller.removeTeleportArea();
-       controller.setToDefaultAppearance();
-       controller.initChildren();
-     }
-  }
 
   getCameraDelta() {
     return this.userGroup.position;

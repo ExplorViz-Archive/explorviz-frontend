@@ -92,6 +92,11 @@ export default class CameraMenu extends BaseMenu {
     this.update();
   }
 
+  updateMenu() {
+    this.deltaItem.text = this.getCameraDelta().y.toFixed(2);
+    this.update();
+  }
+
   makeThumbpadBinding() {
     return new VRControllerThumbpadBinding({ labelUp: 'Up', labelDown: 'Down' }, {
       onThumbpadPress: this.onThumbpadPress.bind(this),

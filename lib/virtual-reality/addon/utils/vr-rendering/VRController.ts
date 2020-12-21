@@ -35,18 +35,6 @@ export type VRControllerCallbackFunctions = {
   menuDown? (controller: VRController): void,
 }
 
-export class VRControllerMode {
-  static readonly INTERACTION = new VRControllerMode('interaction', new THREE.Color('red'));
-  static readonly UTILITY = new VRControllerMode('utility', new THREE.Color('blue'));
-
-  readonly name: string;
-  readonly defaultRayColor: THREE.Color;
-
-  private constructor(name: string, defaultRayColor: THREE.Color) {
-    this.name = name;
-    this.defaultRayColor = defaultRayColor
-  }
-}
 
 /**
  * A wrapper around the gamepad object which handles inputs to
@@ -57,7 +45,7 @@ export default class VRController extends BaseMesh {
 
   gamepad: Gamepad|null = null;
 
-  mode: VRControllerMode;
+  color: THREE.Color;
 
   axes = [0, 0];
 
@@ -101,21 +89,27 @@ export default class VRController extends BaseMesh {
 
   connected = false;
 
-  get isInteractionController() {
-    return this.mode === VRControllerMode.INTERACTION;
-  }
-
-  get isUtilityController() {
-    return this.mode === VRControllerMode.UTILITY;
-  }
 
   get gamepadId() {
     return this.gamepad ? this.gamepad.id : 'unknown';
   }
 
+  /**
+ * Finds the controller whose buttons the labels in this group point to or
+ * returns `null` if the group does not have a parent controller.
+ */
+  static findController(object: Object3D): VRController | null {
+    let current = object.parent;
+    while (current) {
+      if (current instanceof VRController) return current;
+      current = current.parent;
+    }
+    return null;
+  }
+
   constructor({
     gamepadIndex,
-    mode,
+    color,
     gripSpace,
     raySpace,
     menuGroup,
@@ -123,7 +117,7 @@ export default class VRController extends BaseMesh {
     scene
   } : {
     gamepadIndex: number,
-    mode: VRControllerMode,
+    color: THREE.Color,
     gripSpace: THREE.Group,
     raySpace: THREE.Group,
     menuGroup: MenuGroup,
@@ -133,7 +127,7 @@ export default class VRController extends BaseMesh {
     super();
     // Init properties
     this.gamepadIndex = gamepadIndex;
-    this.mode = mode;
+    this.color = color;
     this.gripSpace = gripSpace;
     this.raySpace = raySpace;
     this.labelGroup = new VRControllerLabelGroup(bindings);
@@ -161,7 +155,7 @@ export default class VRController extends BaseMesh {
     this.gripSpace.addEventListener('connected', (event) => {
       this.connected = true;
       this.findGamepad();
-      if (this.isUtilityController) this.initTeleportArea();
+      this.initTeleportArea();
       if (callbacks.connected) callbacks.connected(this, event);
     });
     this.gripSpace.addEventListener('disconnected', () => {
@@ -173,10 +167,8 @@ export default class VRController extends BaseMesh {
 
   setToSpectatingAppearance() {
     displayAsWireframe(this);
-    if (this.isUtilityController) {
       this.removeTeleportArea();
       this.removeRay();
-    }
   }
 
   /**
@@ -185,7 +177,7 @@ export default class VRController extends BaseMesh {
    */
   setToDefaultAppearance() {
     displayAsSolidObject(this);
-    this.addRay(this.mode.defaultRayColor);
+    this.addRay(this.color);
     this.initTeleportArea();
   }
 
@@ -235,9 +227,9 @@ export default class VRController extends BaseMesh {
    * Adds a teleport area to the controller (if it is the utility controller)
    */
   initTeleportArea() {
-    if (this.isUtilityController && !this.teleportArea) {
+    if (!this.teleportArea) {
     // Create teleport area
-      this.teleportArea = new TeleportMesh();
+      this.teleportArea = new TeleportMesh(this.color);
 
       // Add teleport area to parent (usually the scene object)
       this.scene.add(this.teleportArea);
@@ -311,6 +303,7 @@ export default class VRController extends BaseMesh {
     this.updateGamepad();
     this.updateIntersectedObject();
     this.labelGroup.updateLabels();
+    this.menuGroup.currentMenu?.updateMenu();
   }
 
   /**
@@ -451,13 +444,13 @@ export default class VRController extends BaseMesh {
     }
 
     // Handle hover effect and teleport area
-    if (this.isInteractionController) {
+
       if (object instanceof BaseMenu && uv) {
         object.hover(uv);
       } else if (object instanceof BaseMesh) {
         object.applyHoverEffect();
       }
-    } else if (this.isUtilityController) {
+
       if (object instanceof FloorMesh) {
         if (this.teleportArea) {
           // Show teleport area above intersected point on floor. However, if
@@ -469,7 +462,7 @@ export default class VRController extends BaseMesh {
       } else if (object instanceof BaseMesh) {
         object.applyHoverEffect();
       }
-    }
+    
 
     // Store intersected object and scale ray accordingly
     this.intersectedObject = nearestIntersection;

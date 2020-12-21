@@ -96,7 +96,7 @@ export default class VRControllerBindings {
 
     addLabels(group: VRControllerLabelGroup): void {
         // Add labels only if the group has a parent controller.
-        const controller = group.findController();
+        const controller = VRController.findController(group);
         if (controller) {
             // The label positions depend on the controller model.
             const positions = this.getLabelPositions(controller);
