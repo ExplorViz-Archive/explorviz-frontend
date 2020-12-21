@@ -1,11 +1,16 @@
 import { inject as service } from '@ember/service';
 import LandscapeTokenService, { LandscapeToken } from 'explorviz-frontend/services/landscape-token';
-
+import { action } from '@ember/object';
 import BaseRoute from './base-route';
 
 export default class Landscapes extends BaseRoute {
   @service('landscape-token')
   tokenService!: LandscapeTokenService;
+
+  @action
+  refreshRoute() {
+    return this.refresh();
+  }
 
   model() {
     const uId = this.auth.user?.sub;
@@ -34,7 +39,11 @@ export default class Landscapes extends BaseRoute {
 
   afterModel(landscapeTokens: LandscapeToken[]) {
     const currentToken = this.tokenService.token;
-    if (currentToken !== null && !landscapeTokens.includes(currentToken)) {
+    const tokenCandidates = landscapeTokens.filter((token) => token.value === currentToken?.value);
+    if (tokenCandidates.length > 0) {
+      this.tokenService.setToken(tokenCandidates[0]);
+    } else {
+      // selected token does not exist anymore
       this.tokenService.removeToken();
     }
   }

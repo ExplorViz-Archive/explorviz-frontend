@@ -14,6 +14,7 @@ declare const config: {
   auth0: {
     clientId: string,
     domain: string,
+    logoUrl: string,
     callbackUrl: string,
     logoutReturnUrl: string,
     routeAfterLogin: string

@@ -9,6 +9,7 @@ import {
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import TimestampRepository from './repos/timestamp-repository';
 import Auth from './auth';
+import LandscapeTokenService from './landscape-token';
 
 export default class LandscapeListener extends Service.extend(Evented) {
   @service('store') store!: DS.Store;
@@ -16,6 +17,8 @@ export default class LandscapeListener extends Service.extend(Evented) {
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
   @service('auth') auth!: Auth;
+
+  @service('landscape-token') tokenService!: LandscapeTokenService;
 
   latestStructureData: StructureLandscapeData|null = null;
 
@@ -64,7 +67,11 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
   requestStructureData(/* fromTimestamp: number, toTimestamp: number */) {
     return new Promise<StructureLandscapeData>((resolve, reject) => {
-      fetch('http://localhost:32680/v2/landscapes/fibonacci-sample-landscape/structure', {
+      if (this.tokenService.token === null) {
+        reject(new Error('No landscape token selected'));
+        return;
+      }
+      fetch(`http://localhost:32680/v2/landscapes/${this.tokenService.token.value}/structure`, {
         headers: {
           Authorization: `Bearer ${this.auth.accessToken}`,
         },
@@ -83,7 +90,11 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
   requestDynamicData(fromTimestamp: number, toTimestamp: number) {
     return new Promise<DynamicLandscapeData>((resolve, reject) => {
-      fetch(`http://localhost:32681/v2/landscapes/fibonacci-sample-landscape/dynamic?from=${fromTimestamp}&to=${toTimestamp}`, {
+      if (this.tokenService.token === null) {
+        reject(new Error('No landscape token selected'));
+        return;
+      }
+      fetch(`http://localhost:32681/v2/landscapes/${this.tokenService.token.value}/dynamic?from=${fromTimestamp}&to=${toTimestamp}`, {
         headers: {
           Authorization: `Bearer ${this.auth.accessToken}`,
         },

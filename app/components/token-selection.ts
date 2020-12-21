@@ -6,11 +6,12 @@ import { action } from '@ember/object';
 interface Args {
   tokens: LandscapeToken[];
   selectToken(token: LandscapeToken): void;
+  deleteToken(tokenId: string): Promise<undefined>;
 }
 
 export default class TokenSelection extends Component<Args> {
   @tracked
-  sortProperty: keyof LandscapeToken = 'alias';
+  sortProperty: keyof LandscapeToken = 'value';
 
   @tracked
   sortOrder: 'asc'|'desc' = 'asc';

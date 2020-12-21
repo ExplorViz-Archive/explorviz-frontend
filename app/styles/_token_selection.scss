@@ -1,10 +1,10 @@
 #token-selection-table {
-}
-
-#token-selection-table {
   > tbody > tr, > thead > tr > th {
     cursor: pointer;
   }
+  
+  min-width: 400px;
+  width: auto;
 }
 
 #token-selection-table > tbody > tr:hover {

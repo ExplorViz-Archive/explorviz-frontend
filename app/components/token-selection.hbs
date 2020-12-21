@@ -1,10 +1,11 @@
-<table id="token-selection-table" class="table table-striped" style="min-width: 400px; width: auto;">
+<table
+  id="token-selection-table"
+  class="table table-striped"
+>
   <thead>
     <tr>
-      <th scope="col" {{on "click" (fn this.sortBy "id")}}>ID</th>
-      <th scope="col" {{on "click" (fn this.sortBy "alias")}}>Alias</th>
-      <th scope="col" {{on "click" (fn this.sortBy "creationDate")}}>Date created</th>
-      <th scope="col" {{on "click" (fn this.sortBy "lastUpdated")}}>Last updated</th>
+      <th scope="col" {{on "click" (fn this.sortBy "value")}}>ID</th>
+      <th scope="col"></th>
     </tr>
   </thead>
   <tbody>
@@ -13,10 +14,8 @@
         style="background-color: #aecce1"
         {{on "click" (fn @selectToken @currentToken)}}
       >
-        <th scope="row" class="text-center">{{@currentToken.id}}</th>
-        <td>{{@currentToken.alias}}</td>
-        <td>{{@currentToken.creationDate}}</td>
-        <td>{{@currentToken.lastUpdated}}</td>
+        <th scope="row" class="text-center">{{@currentToken.value}}</th>
+        <th scope="row" class="text-center"></th>
       </tr>
       <tr
         style="height: 10px"
@@ -24,15 +23,21 @@
       </tr>
     {{/if}}
     {{#each
-      (sort-by (concat this.sortProperty ":" this.sortOrder) "id" @tokens)
+      (sort-by (concat this.sortProperty ":" this.sortOrder) "value" @tokens)
     as |token|
     }}
-      <tr {{on "click" (fn @selectToken token)}} >
-        <th scope="row">{{token.id}}</th>
-        <td>{{token.alias}}</td>
-        <td>{{token.creationDate}}</td>
-        <td>{{token.lastUpdated}}</td>
+      <tr>
+        <th scope="row" class="text-center" {{on "click" (fn @selectToken token)}}>{{token.value}}</th>
+        <th
+          scope="row"
+          class="text-center"
+          {{on "click" (fn @deleteToken token.value)}}
+        >
+          Delete
+        </th>
       </tr>
+    {{else}}
+      There are no tokens linked to your account at the moment.
     {{/each}}
   </tbody>
 </table>

@@ -5,6 +5,14 @@
       @selectToken={{this.selectToken}}
       @tokens={{@model}}
       @currentToken={{this.tokenService.token}}
+      @deleteToken={{this.deleteToken}}
     />
   </div>
+  <BsButton
+    @type="primary"
+    class="align-self-center pt-2 px-3"
+    @onClick={{this.createToken}}
+  >
+    {{svg-jar "plus" class="octicon"}}
+  </BsButton>
 </div>
