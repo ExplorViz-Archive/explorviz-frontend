@@ -2,6 +2,7 @@ import THREE from "three";
 import VRController from "../vr-rendering/VRController";
 import VRControllerBindings from "./vr-controller-bindings";
 import VRControllerBindingsList from "./vr-controller-bindings-list";
+import { getVRControllerLabelPositions } from "./vr-controller-label-positions";
 
 export default class VRControllerLabelGroup extends THREE.Group {
     controllerBindings: VRControllerBindingsList;
@@ -27,15 +28,22 @@ export default class VRControllerLabelGroup extends THREE.Group {
     }
 
     updateLabels() {
-        // Test whether the controller bindings changed since the last update.
-        let bindings = this.controllerBindings.currentBindings;
+        // Test whether the controller bindings or motion controller changed
+        // since the last update.
+        const bindings = this.controllerBindings.currentBindings;
         if (bindings !== this.lastControllerBindings) {
             // Remove all existing labels.
             this.remove(...this.children);
 
             // Add new meshes for the labels of the current bindings.
-            bindings.addLabels(this);
-            this.lastControllerBindings = bindings;
+            const controller = this.findController();
+            const positions = getVRControllerLabelPositions(controller);
+            if (positions) {
+                bindings.addLabels(this, positions);
+                this.lastControllerBindings = bindings;
+            } else {
+                this.lastControllerBindings = null;
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 import VRController from "explorviz-frontend/utils/vr-rendering/VRController";
 import VRControllerLabelGroup from "./vr-controller-label-group";
-import VRControllerLabelMesh, { VRControllerLabelPosition } from "./vr-controller-label-mesh";
+import VRControllerLabelMesh from "./vr-controller-label-mesh";
+import { VRControllerLabelPosition } from "./vr-controller-label-positions";
 
 type VRControllerButtonCallbacks<V> = {
     onButtonDown?(controller: VRController): void;

@@ -193,7 +193,7 @@ export default class VRController extends BaseMesh {
     this.add(this.gripSpace);
     this.add(this.raySpace);
     this.raySpace.add(this.menuGroup);
-    this.gripSpace.add(this.labelGroup);
+    this.controllerModel.add(this.labelGroup);
   }
 
   findGamepad() {

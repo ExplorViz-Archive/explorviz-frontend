@@ -1,21 +1,14 @@
 import VRController from "explorviz-frontend/utils/vr-rendering/VRController";
 import VRControllerLabelGroup from "./vr-controller-label-group";
-import VRControllerLabelMesh, { VRControllerLabelPosition } from "./vr-controller-label-mesh";
+import VRControllerLabelMesh from "./vr-controller-label-mesh";
 import THREE from "three";
+import { VRControllerThumbpadLabelPositions } from "./vr-controller-label-positions";
 
 type VRControllerThumbpadLabels = {
     labelUp?: string;
     labelRight?: string;
     labelDown?: string;
     labelLeft?: string;
-};
-
-
-export type VRControllerThumbpadLabelPositions = {
-    positionUp: VRControllerLabelPosition;
-    positionRight: VRControllerLabelPosition;
-    positionDown: VRControllerLabelPosition;
-    positionLeft: VRControllerLabelPosition;
 };
 
 type VRControllerThumbpadCallbacks = {
@@ -43,9 +36,9 @@ export default class VRControllerThumbpadBinding {
     }
 
     addLabels(group: VRControllerLabelGroup, positions: VRControllerThumbpadLabelPositions): void {
-        if (this.labels.labelUp) group.add(new VRControllerLabelMesh(this.labels.labelUp, positions.positionUp));
-        if (this.labels.labelRight) group.add(new VRControllerLabelMesh(this.labels.labelRight, positions.positionRight));
-        if (this.labels.labelDown) group.add(new VRControllerLabelMesh(this.labels.labelDown, positions.positionDown));
-        if (this.labels.labelLeft) group.add(new VRControllerLabelMesh(this.labels.labelLeft, positions.positionLeft));
+        if (this.labels.labelUp && positions.positionUp) group.add(new VRControllerLabelMesh(this.labels.labelUp, positions.positionUp));
+        if (this.labels.labelRight && positions.positionRight) group.add(new VRControllerLabelMesh(this.labels.labelRight, positions.positionRight));
+        if (this.labels.labelDown && positions.positionDown) group.add(new VRControllerLabelMesh(this.labels.labelDown, positions.positionDown));
+        if (this.labels.labelLeft && positions.positionLeft) group.add(new VRControllerLabelMesh(this.labels.labelLeft, positions.positionLeft));
     }
 }

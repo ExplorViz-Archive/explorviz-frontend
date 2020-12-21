@@ -336,14 +336,9 @@ export default class VrRendering extends Component<Args> {
     controller.intersectableObjects = intersectableObjects;
 
     // Position menus above controller at an angle.
-    controller.menuGroup.position.y += 0.15;
-    controller.menuGroup.position.z -= 0.15;
-    controller.menuGroup.rotateX(340 * THREE.MathUtils.DEG2RAD);
-
-    // Position labels correctly by undoing the controllers rotation and translation.
-    controller.labelGroup.rotateX(-90 * THREE.MathUtils.DEG2RAD);
-    controller.labelGroup.translateY(0.07);
-    controller.labelGroup.translateZ(0.01);
+    menuGroup.position.y += 0.15;
+    menuGroup.position.z -= 0.15;
+    menuGroup.rotateX(340 * THREE.MathUtils.DEG2RAD);
 
     this.localUser.userGroup.add(controller);
     return controller;

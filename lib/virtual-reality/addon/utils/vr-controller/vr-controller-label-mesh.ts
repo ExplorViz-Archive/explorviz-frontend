@@ -1,16 +1,7 @@
 import BaseMesh from "explorviz-frontend/view-objects/3d/base-mesh";
 import THREE from "three";
 import * as Helper from '../vr-helpers/multi-user-helper';
-
-export enum VRControllerLabelOffsetDirection {
-  LEFT = -1,
-  RIGHT = 1
-}
-
-export type VRControllerLabelPosition = {
-  buttonPosition: THREE.Vector3
-  offsetDirection: VRControllerLabelOffsetDirection
-}
+import { VRControllerLabelPosition } from "./vr-controller-label-positions";
 
 export default class VRControllerLabelMesh extends BaseMesh {
     canvas: HTMLCanvasElement;
@@ -41,14 +32,14 @@ export default class VRControllerLabelMesh extends BaseMesh {
         ctx.font = font;
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
-        ctx.fillText(label, width / 2, height - padding / 2);
+        ctx.fillText(label, width / 2, height - padding);
 
         // Use canvas as texture for this mesh.
         const texture = new THREE.Texture(this.canvas);
         texture.needsUpdate = true;
         this.material = new THREE.MeshBasicMaterial({
           map: texture,
-          side: THREE.DoubleSide,
+          side: THREE.DoubleSide
         });
 
         const worldWidth = width / 512 * 0.15;
@@ -76,5 +67,8 @@ export default class VRControllerLabelMesh extends BaseMesh {
         });
         const line = new THREE.Line(lineGeometry, lineMaterial);
         this.add(line);
+
+        // Rotate such that the label faces up.
+        this.rotateX(-90 * THREE.MathUtils.DEG2RAD);
     }
 }
