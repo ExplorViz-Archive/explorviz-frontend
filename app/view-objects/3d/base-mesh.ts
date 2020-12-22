@@ -2,7 +2,10 @@ import THREE from 'three';
 import calculateColorBrightness from
   'explorviz-frontend/utils/helpers/threejs-helpers';
 
-export default abstract class BaseMesh extends THREE.Mesh {
+export default abstract class BaseMesh<
+  TGeometry extends THREE.Geometry | THREE.BufferGeometry = THREE.Geometry | THREE.BufferGeometry,
+  TMaterial extends THREE.MeshBasicMaterial | THREE.MeshLambertMaterial = THREE.MeshBasicMaterial | THREE.MeshLambertMaterial
+> extends THREE.Mesh<TGeometry, TMaterial> {
   highlighted: boolean = false;
 
   defaultColor: THREE.Color;
@@ -44,8 +47,7 @@ export default abstract class BaseMesh extends THREE.Mesh {
     if (this.isHovered) return;
 
     // Calculate and apply brighter color to material ('hover effect')
-    const material = this.material as THREE.MeshBasicMaterial|THREE.MeshLambertMaterial;
-    material.color = calculateColorBrightness(material.color, colorShift);
+    this.material.color = calculateColorBrightness(this.material.color, colorShift);
     this.isHovered = true;
   }
 
@@ -53,11 +55,10 @@ export default abstract class BaseMesh extends THREE.Mesh {
    * Restores original color of mesh which had a hover effect
    */
   resetHoverEffect(): void {
-    const material = this.material as THREE.MeshBasicMaterial|THREE.MeshLambertMaterial;
     const { highlighted, defaultColor, highlightingColor } = this;
 
     // Restore normal color (depends on highlighting status)
-    material.color = highlighted ? highlightingColor : defaultColor;
+    this.material.color = highlighted ? highlightingColor : defaultColor;
     this.isHovered = false;
   }
 
