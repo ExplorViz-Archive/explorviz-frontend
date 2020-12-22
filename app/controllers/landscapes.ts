@@ -4,6 +4,9 @@ import LandscapeTokenService, { LandscapeToken } from 'explorviz-frontend/servic
 import { inject as service } from '@ember/service';
 import Auth from 'explorviz-frontend/services/auth';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
+import ENV from 'explorviz-frontend/config/environment';
+
+const { userService } = ENV.backendAddresses;
 
 export default class Landscapes extends Controller {
   @service('landscape-token')
@@ -51,7 +54,7 @@ export default class Landscapes extends Controller {
     }
 
     return new Promise<any>((resolve, reject) => {
-      fetch(`http://localhost:32682/user/${uId}/token`, {
+      fetch(`${userService}/user/${uId}/token`, {
         headers: {
           Authorization: `Bearer ${this.auth.accessToken}`,
         },
@@ -71,7 +74,7 @@ export default class Landscapes extends Controller {
 
   sendTokenDeleteRequest(tokenId: string) {
     return new Promise<undefined>((resolve, reject) => {
-      fetch(`http://localhost:32682/token/${tokenId}`, {
+      fetch(`${userService}/token/${tokenId}`, {
         headers: {
           Authorization: `Bearer ${this.auth.accessToken}`,
         },

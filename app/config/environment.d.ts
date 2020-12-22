@@ -19,6 +19,11 @@ declare const config: {
     logoutReturnUrl: string,
     routeAfterLogin: string
   },
+  backendAddresses: {
+    landscapeService: string,
+    traceService: string,
+    userService: string,
+  },
   APP: any;
 };
 

@@ -7,9 +7,12 @@ import {
   preProcessAndEnhanceStructureLandscape, StructureLandscapeData,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import ENV from 'explorviz-frontend/config/environment';
 import TimestampRepository from './repos/timestamp-repository';
 import Auth from './auth';
 import LandscapeTokenService from './landscape-token';
+
+const { landscapeService, traceService } = ENV.backendAddresses;
 
 export default class LandscapeListener extends Service.extend(Evented) {
   @service('store') store!: DS.Store;
@@ -71,7 +74,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
         reject(new Error('No landscape token selected'));
         return;
       }
-      fetch(`http://localhost:32680/v2/landscapes/${this.tokenService.token.value}/structure`, {
+      fetch(`${landscapeService}/v2/landscapes/${this.tokenService.token.value}/structure`, {
         headers: {
           Authorization: `Bearer ${this.auth.accessToken}`,
         },
@@ -94,7 +97,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
         reject(new Error('No landscape token selected'));
         return;
       }
-      fetch(`http://localhost:32681/v2/landscapes/${this.tokenService.token.value}/dynamic?from=${fromTimestamp}&to=${toTimestamp}`, {
+      fetch(`${traceService}/v2/landscapes/${this.tokenService.token.value}/dynamic?from=${fromTimestamp}&to=${toTimestamp}`, {
         headers: {
           Authorization: `Bearer ${this.auth.accessToken}`,
         },

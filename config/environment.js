@@ -4,6 +4,7 @@
 
 var colors = require('colors'); // eslint-disable-line
 const AUTH_CONFIG = require('./auth0-variables');
+const BACKEND_CONFIG = require('./backend-addresses');
 
 module.exports = function (environment) {
   const ENV = {
@@ -28,6 +29,11 @@ module.exports = function (environment) {
       callbackUrl: AUTH_CONFIG.callbackUrl,
       logoutReturnUrl: AUTH_CONFIG.logoutReturnUrl,
       routeAfterLogin: AUTH_CONFIG.routeAfterLogin,
+    },
+    backendAddresses: {
+      landscapeService: BACKEND_CONFIG.landscapeService,
+      traceService: BACKEND_CONFIG.traceService,
+      userService: BACKEND_CONFIG.userService,
     },
 
     APP: {

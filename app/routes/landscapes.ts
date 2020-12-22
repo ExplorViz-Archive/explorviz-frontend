@@ -1,7 +1,10 @@
 import { inject as service } from '@ember/service';
 import LandscapeTokenService, { LandscapeToken } from 'explorviz-frontend/services/landscape-token';
+import ENV from 'explorviz-frontend/config/environment';
 import { action } from '@ember/object';
 import BaseRoute from './base-route';
+
+const { userService } = ENV.backendAddresses;
 
 export default class Landscapes extends BaseRoute {
   @service('landscape-token')
@@ -20,7 +23,7 @@ export default class Landscapes extends BaseRoute {
     }
 
     return new Promise<any>((resolve, reject) => {
-      fetch(`http://localhost:32682/user/${uId}/token`, {
+      fetch(`${userService}/user/${uId}/token`, {
         headers: {
           Authorization: `Bearer ${this.auth.accessToken}`,
         },
