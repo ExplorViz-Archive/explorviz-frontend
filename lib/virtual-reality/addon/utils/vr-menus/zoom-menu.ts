@@ -51,8 +51,9 @@ export default class ZoomMenu extends BaseMenu {
       this.renderer.setRenderTarget(this.target);
       this.renderer.xr.enabled = false;
 
+      const headsetMatrix = this.headsetCamera.matrixWorld.clone();
       const headsetPosition = new THREE.Vector3();
-      headsetPosition.setFromMatrixPosition(this.headsetCamera.matrixWorld);
+      headsetPosition.setFromMatrixPosition(headsetMatrix);
 
       const lensPosition = new THREE.Vector3();
       lensPosition.setFromMatrixPosition(this.matrixWorld);
@@ -72,6 +73,8 @@ export default class ZoomMenu extends BaseMenu {
       this.lensCamera.updateProjectionMatrix();
 
       this.renderer.render(this.scene, this.lensCamera);
+      this.headsetCamera.matrixWorld.copy(headsetMatrix);
+
       this.renderer.setRenderTarget(oldTarget);
       this.renderer.xr.enabled = oldXREnabled;
   }
