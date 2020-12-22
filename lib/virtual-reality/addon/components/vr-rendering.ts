@@ -987,7 +987,10 @@ export default class VrRendering extends Component<Args> {
   }
 
   openSettingsMenu(controller: VRController) {
-    controller.menuGroup.openMenu(new SettingsMenu(this.openCameraMenu.bind(this, controller)));
+    controller.menuGroup.openMenu(new SettingsMenu({
+      openCameraMenu: this.openCameraMenu.bind(this, controller),
+      labelGroups: [this.localUser.controller1?.labelGroup, this.localUser.controller2?.labelGroup]
+    }));
   }
 
   openInfoMenu(controller: VRController, content: DetailedInfo) {

@@ -5,6 +5,14 @@ import VRControllerBindingsList from "./vr-controller-bindings-list";
 import { getVRControllerLabelPositions } from "./vr-controller-label-positions";
 
 export default class VRControllerLabelGroup extends THREE.Group {
+    static get visibilitySetting(): boolean {
+        return window.localStorage.getItem('explorviz.vr.labels.visible') !== 'false';
+    }
+
+    static set visibilitySetting(visible: boolean) {
+        window.localStorage.setItem('explorviz.vr.labels.visible', visible.toString());
+    }
+
     controllerBindings: VRControllerBindingsList;
     lastControllerBindings: VRControllerBindings|null;
 
@@ -12,6 +20,7 @@ export default class VRControllerLabelGroup extends THREE.Group {
         super();
         this.controllerBindings = controllerBindings;
         this.lastControllerBindings = null;
+        this.visible = VRControllerLabelGroup.visibilitySetting;
     }
 
 
