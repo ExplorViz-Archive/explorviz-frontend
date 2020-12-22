@@ -8,13 +8,13 @@ import VRControllerButtonBinding from '../vr-controller/vr-controller-button-bin
 import MenuGroup from './menu-group';
 
 export default abstract class BaseMenu extends BaseMesh {
-  canvas: HTMLCanvasElement;
+  canvas!: HTMLCanvasElement;
+
+  canvasMesh!: THREE.Mesh<THREE.Geometry | THREE.BufferGeometry, THREE.MeshBasicMaterial>;
 
   resolution: { width: number, height: number };
 
   items: Item[];
-
-  color: string;
 
   lastHoveredItem: InteractiveItem|undefined;
 
@@ -26,36 +26,25 @@ export default abstract class BaseMenu extends BaseMesh {
 
 
   get opacity() {
-    const material = this.material as THREE.Material;
-    return material.opacity;
+    return this.material.opacity;
   }
 
   set opacity(value: number) {
-    const material = this.material as THREE.Material;
-    material.opacity = value;
+    this.material.opacity = value;
   }
 
   constructor(resolution: { width: number, height: number } = { width: 512, height: 512 }, color = '#444444') {
-    const material = new THREE.MeshBasicMaterial({
-      color: new THREE.Color(color),
-    });
     super(new THREE.Color(color));
 
     this.resolution = resolution;
-    this.color = color;
     this.items = [];
-
-    this.initGeometry();
-    this.material = material;
-
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = this.resolution.width;
-    this.canvas.height = this.resolution.height;
-
     this.thumbpadTargets = [];
     this.activeTarget = undefined;
     this.thumbpadAxis = 1;
-    this.opacity = 0.8;
+
+    this.initGeometry();
+    this.initMaterial();
+    this.initCanvas();
   }
 
   initGeometry() {
@@ -65,28 +54,48 @@ export default abstract class BaseMenu extends BaseMesh {
     );
   }
 
+  initMaterial() {
+    this.material = new THREE.MeshBasicMaterial({
+      color: this.defaultColor,
+      side: THREE.DoubleSide
+    });
+    this.material.transparent = true;
+    this.material.opacity = 0.8;
+  }
+
+  initCanvas() {
+    this.canvas = document.createElement('canvas');
+    this.canvas.width = this.resolution.width;
+    this.canvas.height = this.resolution.height;
+
+    // Create a mesh that displays the canvas as a texture. This is needed
+    // such that the
+    const geometry = this.geometry.clone();
+    const material = new THREE.MeshBasicMaterial({
+      map: new THREE.CanvasTexture(this.canvas),
+      depthTest: true
+    });
+    material.transparent = true;
+    this.canvasMesh = new THREE.Mesh(geometry, material);
+
+    // Move the mesh slightly in front of the background.
+    this.canvasMesh.position.z = 0.001;
+    this.add(this.canvasMesh);
+  }
+
   update() {
     const { canvas } = this;
     const ctx = canvas.getContext('2d')!;
-    ctx.fillStyle = this.color;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];
       item.drawToCanvas(ctx);
     }
 
-    // create texture out of canvas
-    const texture = new THREE.CanvasTexture(canvas);
-    // Map texture
-    const material = new THREE.MeshBasicMaterial({ map: texture, depthTest: true });
-    material.transparent = true;
-    material.opacity = this.opacity;
-
-    // Update texture
-    texture.needsUpdate = true;
-    // Update mesh material
-    this.material = material;
+    if (this.canvasMesh.material.map) {
+      this.canvasMesh.material.map.needsUpdate = true;
+    }
   }
 
   hover(uv: THREE.Vector2) {
@@ -120,14 +129,13 @@ export default abstract class BaseMenu extends BaseMesh {
     this.update();
   }
 
-  getNext() {
-    if (typeof this.activeTarget === 'undefined') return 0;
-    if (this.activeTarget == 0) return this.thumbpadTargets.length - 1;
+  getPrevious() {
+    if (typeof this.activeTarget === 'undefined' || this.activeTarget === 0) return this.thumbpadTargets.length - 1;
     return this.activeTarget - 1;
   }
 
-  getPrevious() {
-    if (typeof this.activeTarget === 'undefined' || this.activeTarget == this.thumbpadTargets.length - 1) return 0;
+  getNext() {
+    if (typeof this.activeTarget === 'undefined' || this.activeTarget === this.thumbpadTargets.length - 1) return 0;
     return this.activeTarget + 1;
   }
 
@@ -135,17 +143,31 @@ export default abstract class BaseMenu extends BaseMesh {
     if (this.thumbpadTargets.length == 0) {
       return undefined;
     }
-    return new VRControllerThumbpadBinding({ labelUp: 'Previous', labelDown: 'Next' }, {
-      onThumbpadDown: (_controller, axes) => {
-        this.activeTarget = axes[this.thumbpadAxis] > 0 ? this.getNext() : this.getPrevious();
-        this.lastHoveredItem?.resetHoverEffect()
-        this.lastHoveredItem = undefined;
-        const item = this.thumbpadTargets[this.activeTarget];
-        item.enableHoverEffect();
-        this.lastHoveredItem = item;
-        this.update();
+    return new VRControllerThumbpadBinding(
+      this.thumbpadAxis === 0 
+        ? {labelLeft: 'Previous', labelRight: 'Next'} 
+        : {labelUp: 'Previous', labelDown: 'Next'}, 
+      {
+        onThumbpadDown: (_controller, axes) => {
+          let direction = VRControllerThumbpadBinding.getDirection(axes);
+          if (direction === 'right' && this.thumbpadAxis === 0 ||
+              direction === 'down' && this.thumbpadAxis === 1) {
+            this.activeTarget = this.getNext();
+          } else if (direction === 'left' && this.thumbpadAxis === 0 ||
+                     direction === 'up' && this.thumbpadAxis === 1) {
+            this.activeTarget = this.getPrevious();
+          } else {
+            return;
+          }
+          this.lastHoveredItem?.resetHoverEffect()
+          this.lastHoveredItem = undefined;
+          const item = this.thumbpadTargets[this.activeTarget];
+          item.enableHoverEffect();
+          this.lastHoveredItem = item;
+          this.update();
+        }
       }
-    })
+    );
   }
 
   makeTriggerButtonBinding() {

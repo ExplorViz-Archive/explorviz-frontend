@@ -79,6 +79,4 @@ export default class ZoomMenu extends BaseMenu {
   updateMenu() {
     this.renderLens();
   }
-
-
 }
