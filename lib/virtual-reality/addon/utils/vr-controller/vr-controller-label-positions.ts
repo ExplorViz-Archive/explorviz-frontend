@@ -26,44 +26,55 @@ export type VRControllerLabelPositions = {
 };
 
 export function getVRControllerLabelPositions(controller: VRController|null): VRControllerLabelPositions|null {
+    // Wait until the input profile of the controller model is fully loaded.
     const motionController = controller?.controllerModel.motionController;
     if (!controller || !motionController) return null;
 
-    // Gets the position of a node of a visual response with the given name of
-    // the given component. Returns `undefined` when thre is no such node.
-    let visualResponsePosition = (component: any, name: string, nodeName: string): THREE.Vector3|undefined => {
-        let visualResponse = component.visualResponses[`${component.rootNodeName}_${name}`];
-        if (visualResponse && visualResponse[nodeName]) {
-            let position = new THREE.Vector3();
-            visualResponse[nodeName].getWorldPosition(position);
+    // Make sure that the controller model position is up to date.
+    controller.controllerModel.updateMatrixWorld(true);
+
+    // Gets the position of mesh in the controller model. We cannot use the
+    // motion controller API directly here, because the menu button is reserved.
+    // Instead, this code relies on naming conventions. The name of a mesh is
+    // usually `<rootNodeName>_<visualResponse>_<value|min|max>` where
+    // `<rootNodeName>` is the name of the component with dashes replaced
+    // by underscores. Accessing the 3D object this way is equivalent to 
+    // accessing the `valueNode`, `minNode` or `maxNode`, respectively, of
+    // `motionController.components[componentName].visualResponses[visualResponse]`.
+    const meshPosition = (componentName: string, visualResponseName: string, nodeName: string): THREE.Vector3|undefined => {
+        const rootNodeName = componentName.replace(/-/g, '_');
+        const meshName = `${rootNodeName}_${visualResponseName}_${nodeName}`;
+        const mesh = controller.controllerModel.getObjectByName(meshName);
+        if (mesh) {
+            const position = new THREE.Vector3();
+            mesh.getWorldPosition(position);
             return controller.controllerModel.worldToLocal(position);
         }
         return undefined;
     };
 
     // Gets the positions of the outermost points of the thumbpad
-    let thumbpadPosition = (...componentNames: string[]): VRControllerThumbpadLabelPositions => {
+    const thumbpadPosition = (...componentNames: string[]): VRControllerThumbpadLabelPositions => {
         for (let componentName of componentNames) {
-            let component = motionController.components[componentName];
-            if (component) {
-                let up = visualResponsePosition(component, 'yaxis_touched', 'minNode');
-                let right = visualResponsePosition(component, 'xaxis_touched', 'maxNode');
-                let down = visualResponsePosition(component, 'yaxis_touched', 'maxNode');
-                let left = visualResponsePosition(component, 'xaxis_touched', 'minNode');
+            const up = meshPosition(componentName, 'yaxis_touched', 'min');
+            const right = meshPosition(componentName, 'xaxis_touched', 'max');
+            const down = meshPosition(componentName, 'yaxis_touched', 'max');
+            const left = meshPosition(componentName, 'xaxis_touched', 'min');
+            if (up && right && down && left) {
                 return {
-                    positionUp: up && {
+                    positionUp: {
                         buttonPosition: up,
                         offsetDirection: VRControllerLabelOffsetDirection.RIGHT
                     },
-                    positionRight: right && {
+                    positionRight: {
                         buttonPosition: right,
                         offsetDirection: VRControllerLabelOffsetDirection.RIGHT
                     },
-                    positionDown: down && {
+                    positionDown: {
                         buttonPosition: down,
                         offsetDirection: VRControllerLabelOffsetDirection.LEFT
                     },
-                    positionLeft: left && {
+                    positionLeft: {
                         buttonPosition: left,
                         offsetDirection: VRControllerLabelOffsetDirection.LEFT
                     },
@@ -75,12 +86,9 @@ export function getVRControllerLabelPositions(controller: VRController|null): VR
 
     // Gets the position of the value node of the first existing component
     // with one of the given names of the motion controller. 
-    let buttonPosition = (...componentNames: string[]): VRControllerLabelPosition|undefined => {
+    const buttonPosition = (...componentNames: string[]): VRControllerLabelPosition|undefined => {
         for (let componentName of componentNames) {
-            let component = motionController.components[componentName];
-            if (!component) continue;
-            
-            let position = visualResponsePosition(component, 'pressed', 'valueNode');
+            const position = meshPosition(componentName, 'pressed', 'value');
             if (!position) continue;
             
             return {
