@@ -30,7 +30,10 @@ export function getVRControllerLabelPositions(controller: VRController|null): VR
     const motionController = controller?.controllerModel.motionController;
     if (!controller || !motionController) return null;
 
-    // Make sure that the controller model position is up to date.
+    // Make sure that the controller model has been loaded and its position is
+    // up to date.
+    const controllerNodeName = motionController.layoutDescription.rootNodeName;
+    if (!controller.controllerModel.getObjectByName(controllerNodeName)) return null;
     controller.controllerModel.updateMatrixWorld(true);
 
     // Gets the position of mesh in the controller model. We cannot use the
