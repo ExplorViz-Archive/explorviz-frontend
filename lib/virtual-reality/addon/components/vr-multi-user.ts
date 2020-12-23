@@ -159,17 +159,18 @@ export default class VrMultiUser extends VrRendering {
 
   // #region INPUT EVENTS
 
-  onControllerConnected(controller: VRController /* , event: THREE.Event */) {
+  async onControllerConnected(controller: VRController /* , event: THREE.Event */) {
     // Set visibilty and rays accordingly
     if (this.spectateUser.isActive) controller.setToSpectatingAppearance();
     else controller.setToDefaultAppearance();
 
     // Prepare update message for other users
     let connect: {controller1?: string, controller2?: string};
+    const motionController = await controller.controllerModel.motionControllerPromise;
     if (controller === this.localUser.controller1) {
-      connect = { controller1: controller.gamepadId };
+      connect = { controller1: motionController.assetUrl };
     } else {
-      connect = { controller2: controller.gamepadId };
+      connect = { controller2: motionController.assetUrl };
     }
     const disconnect = {};
 
@@ -381,40 +382,23 @@ export default class VrMultiUser extends VrRendering {
   /**
    * Loads specified controller 1 model for given user and add it to scene.
    *
-   * @param {string} controllerName
+   * @param {string} assetUrl
    * @param {number} userID
    */
-  loadController1(controllerName: string, userID: string) {
+  loadController1(assetUrl: string, userID: string) {
     const user = this.idToRemoteUser.get(userID);
-
-    if (!user) { return; }
-
-    user.initController1(controllerName, this.getControllerModelByName(controllerName));
+    user?.initController1(assetUrl);
   }
 
   /**
    * Loads specified controller 2 model for given user and add it to scene.
    *
-   * @param {string} controllerName
+   * @param {string} assetUrl
    * @param {number} userID
    */
-  loadController2(controllerName: string, userID: string) {
+  loadController2(assetUrl: string, userID: string) {
     const user = this.idToRemoteUser.get(userID);
-
-    if (!user) { return; }
-
-    user.initController2(controllerName, this.getControllerModelByName(controllerName));
-  }
-
-  /**
-   * Returns controller model that best matches the controller's name.
-   *
-   * @param {string} name - The contoller's id.
-   */
-  getControllerModelByName(name: string) {
-    if (name === 'Oculus Touch (Left)') return this.hardwareModels.getLeftOculusController();
-    if (name === 'Oculus Touch (Right)') return this.hardwareModels.getRightOculusController();
-    return this.hardwareModels.getViveController();
+    user?.initController2(assetUrl);
   }
 
   onUserConnected(data: any, showConnectMessage = true) {
@@ -576,9 +560,13 @@ export default class VrMultiUser extends VrRendering {
     }
   }
 
-  onLandscapePosition(pose: { position: number[], quaternion: number[] }) {
-    super.updateLandscapeRotation(new Quaternion().fromArray(pose.quaternion));
-    this.landscapeObject3D.position.set(pose.position[0], pose.position[1], pose.position[2]);
+  onLandscapePosition(pose: { position: number[]|undefined, quaternion: number[]|undefined }) {
+    if (pose.quaternion) {
+      super.updateLandscapeRotation(new Quaternion().fromArray(pose.quaternion));
+    }
+    if (pose.position) {
+      this.landscapeObject3D.position.set(pose.position[0], pose.position[1], pose.position[2]);
+    }
   }
 
   onAppTranslation(id: string, direction: number[], length: number) {
@@ -790,10 +778,10 @@ export default class VrMultiUser extends VrRendering {
     if (this.localUser.isOnline) {
       const connect: {controller1?: string, controller2?: string} = {};
       if (this.localUser.controller1?.connected) {
-        connect.controller1 = this.localUser.controller1.gamepadId;
+        connect.controller1 = this.localUser.controller1.controllerModel.motionController?.assetUrl;
       }
       if (this.localUser.controller2?.connected) {
-        connect.controller2 = this.localUser.controller2.gamepadId;
+        connect.controller2 = this.localUser.controller2.controllerModel.motionController?.assetUrl;
       }
       this.sender.sendControllerUpdate(connect, {});
     }

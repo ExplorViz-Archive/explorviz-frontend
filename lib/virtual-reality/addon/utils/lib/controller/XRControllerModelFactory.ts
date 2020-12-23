@@ -25,23 +25,20 @@ const DEFAULT_PROFILES_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profile
 const DEFAULT_PROFILE = 'generic-trigger';
 
 export default class XRControllerModelFactory {
+  static INSTANCE = new XRControllerModelFactory();
+
   debug = debugLogger('XRControllerModelFactory');
 
   gltfLoader: any;
 
   path: string;
 
-  assetCache: any;
+  assetSceneCache: { [key: string]: Promise<THREE.Scene> };
 
   constructor(gltfLoader = null) {
-    this.gltfLoader = gltfLoader;
+    this.gltfLoader = gltfLoader || new GLTFLoader();
     this.path = DEFAULT_PROFILES_PATH;
-    this.assetCache = {};
-
-    // If a GLTFLoader wasn't supplied to the constructor create a new one.
-    if (!this.gltfLoader) {
-      this.gltfLoader = new GLTFLoader();
-    }
+    this.assetSceneCache = {};
   }
 
   /**
@@ -124,60 +121,50 @@ export default class XRControllerModelFactory {
 
   createControllerModel(controller: THREE.Group) {
     const controllerModel = new XRControllerModel();
-    let scene: Scene|null = null;
+    let lastAssetScene: THREE.Scene|null = null;
 
-    controller.addEventListener('connected', (event) => {
-      const xrInputSource = event.data;
+    controller.addEventListener('connected', async (event) => {
+      try {
+        const xrInputSource = event.data;
+        if (xrInputSource.targetRayMode !== 'tracked-pointer' || !xrInputSource.gamepad) return;
 
-      if (xrInputSource.targetRayMode !== 'tracked-pointer' || !xrInputSource.gamepad) return;
-
-      fetchProfile(xrInputSource, this.path, DEFAULT_PROFILE).then(({ profile, assetPath }) => {
-        controllerModel.motionController = new MotionController(
+        let {profile, assetPath} = await fetchProfile(xrInputSource, this.path, DEFAULT_PROFILE);
+        controllerModel.onMotionControllerConnect(new MotionController(
           xrInputSource,
           profile,
           assetPath,
-        );
+        ));
 
-        const cachedAsset = this.assetCache[controllerModel.motionController.assetUrl];
-        if (cachedAsset) {
-          scene = cachedAsset.scene.clone();
-
-          XRControllerModelFactory.addAssetSceneToControllerModel(controllerModel, scene);
-        } else {
-          if (!this.gltfLoader) {
-            throw new Error('GLTFLoader not set.');
-          }
-
-          this.gltfLoader.setPath('');
-          this.gltfLoader.load(controllerModel.motionController.assetUrl, (asset: any) => {
-            if (!controllerModel.motionController) return;
-
-            this.assetCache[controllerModel.motionController.assetUrl] = asset;
-
-            scene = asset.scene.clone();
-
-            XRControllerModelFactory.addAssetSceneToControllerModel(controllerModel, scene);
-          },
-          null,
-          () => {
-            let assetUrl = 'Undefined asset URL';
-            if (controllerModel.motionController && controllerModel.motionController.assetUrl) {
-              assetUrl = controllerModel.motionController.assetUrl;
-            }
-            throw new Error(`Asset ${assetUrl} missing or malformed.`);
-          });
-        }
-      }).catch((err) => {
+        this.loadAssetScene(assetPath).then((assetScene) => {
+          XRControllerModelFactory.addAssetSceneToControllerModel(controllerModel, assetScene);
+          lastAssetScene = assetScene;
+        });
+      } catch (err) {
         this.debug(err);
-      });
+      }
     });
 
     controller.addEventListener('disconnected', () => {
-      controllerModel.motionController = null;
-      if (scene) controllerModel.remove(scene);
-      scene = null;
+      controllerModel.onMotionControllerDisconnect();
+      if (lastAssetScene) controllerModel.remove(lastAssetScene);
+      lastAssetScene = null;
     });
 
     return controllerModel;
+  }
+
+  async loadAssetScene(assetUrl: string): Promise<THREE.Scene> {
+    if (!this.assetSceneCache[assetUrl]) {
+      this.assetSceneCache[assetUrl] = new Promise((resolve, reject) => {
+        this.gltfLoader.setPath('');
+        this.gltfLoader.load(assetUrl, (asset: any) => {
+          resolve(asset.scene);
+        },
+        null,
+        () => reject(`Failed to load asset from ${assetUrl}`));
+      });
+    }
+    let cachedAsset = await this.assetSceneCache[assetUrl];
+    return cachedAsset.clone();
   }
 }

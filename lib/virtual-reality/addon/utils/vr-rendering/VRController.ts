@@ -137,7 +137,7 @@ export default class VRController extends BaseMesh {
     this.eventCallbacks = bindings.makeCallbacks();
 
     // Init controller model
-    const controllerModelFactory = new XRControllerModelFactory();
+    const controllerModelFactory = XRControllerModelFactory.INSTANCE;
     this.controllerModel = controllerModelFactory.createControllerModel(this.gripSpace);
     this.gripSpace.add(this.controllerModel);
 

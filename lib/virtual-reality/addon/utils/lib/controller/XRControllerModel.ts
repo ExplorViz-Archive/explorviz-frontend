@@ -15,14 +15,59 @@ import {
 } from './motion-controllers.module';
 
 export default class XRControllerModel extends Object3D {
-  motionController: MotionController|null;
+  private _motionController!: MotionController|null;
+  private _motionControllerPromise!: Promise<MotionController>;
+  private _onMotionControllerConnect: ((motionController: MotionController) => void)|null;
 
   envMap: any;
 
   constructor() {
     super();
-    this.motionController = null;
+    this._motionController = null;
+    this._onMotionControllerConnect = null;
+    this._motionControllerPromise = new Promise((resolve) => {
+      this._onMotionControllerConnect = resolve;
+    });
     this.envMap = null;
+  }
+
+  /**
+   * Gets profile information for the connected motion controller.
+   * 
+   * This property is `null` unless the 3D model of the controller has been
+   * loaded.
+   */
+  get motionController(): MotionController|null {
+    return this._motionController;
+  }
+
+  /**
+   * Promise for {@link motionController}.
+   * 
+   * The promise completes once the controller's 3D model has been loaded.
+   * When the controller reconnects, a new promise is created.
+   */
+  get motionControllerPromise(): Promise<MotionController> {
+    return this._motionControllerPromise;
+  }
+
+  onMotionControllerConnect(motionController: MotionController) {
+    this._motionController = motionController;
+    if (this._onMotionControllerConnect) {
+      // The controller was disconnected: resolve current promise.
+      this._onMotionControllerConnect(this._motionController);
+      this._onMotionControllerConnect = null;
+    } else {
+      // The controller was not disconnected: replace promise.
+      this._motionControllerPromise = Promise.resolve(motionController);
+    }
+  }
+
+  onMotionControllerDisconnect() {
+    this._motionController = null;
+    this._motionControllerPromise = new Promise((resolve) => {
+      this._onMotionControllerConnect = resolve;
+    });
   }
 
   setEnvironmentMap(envMap: any) {

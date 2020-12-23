@@ -1,19 +1,20 @@
 import THREE from 'three';
+import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
 import NameTagMesh from '../view-objects/vr/name-tag-mesh';
 
 type Controller = {
-  id: string,
+  assetUrl: string,
   position: THREE.Vector3,
   quaternion: THREE.Quaternion,
   model: THREE.Object3D,
   ray: THREE.Object3D,
-} |undefined;
+};
 
 type Camera = {
   position: THREE.Vector3,
   quaternion: THREE.Quaternion,
   model: THREE.Object3D,
-} | undefined;
+};
 
 export default class RemoteVrUser extends THREE.Object3D {
   userName!: string;
@@ -22,11 +23,11 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   state!: string;
 
-  controller1: Controller;
+  controller1: Controller | undefined;
 
-  controller2: Controller;
+  controller2: Controller | undefined;
 
-  camera: Camera;
+  camera: Camera | undefined;
 
   color!: THREE.Color; // [r,g,b], r,g,b = 0,...,255
 
@@ -42,40 +43,29 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.add(this.camera.model);
   }
 
-  initController1(name: string, controllerModel: THREE.Object3D|undefined) {
-    if (!controllerModel) return;
-
+  async initController1(assetUrl: string) {
     this.removeController1();
-
-    const ray = RemoteVrUser.addRayToControllerModel(controllerModel, this.color);
-
-    this.controller1 = {
-      id: name,
-      position: new THREE.Vector3(),
-      quaternion: new THREE.Quaternion(),
-      model: controllerModel,
-      ray,
-    };
-
-    this.add(this.controller1.model);
+    this.controller1 = await this.initController(assetUrl);
   }
 
-  initController2(name: string, controllerModel: THREE.Object3D | undefined) {
-    if (!controllerModel) return;
-
+  async initController2(assetUrl: string) {
     this.removeController2();
+    this.controller2 = await this.initController(assetUrl);
+  }
 
+  async initController(assetUrl: string): Promise<Controller> {
+    const controllerModel = await XRControllerModelFactory.INSTANCE.loadAssetScene(assetUrl);
     const ray = RemoteVrUser.addRayToControllerModel(controllerModel, this.color);
 
-    this.controller2 = {
-      id: name,
+    let controller = {
+      assetUrl: assetUrl,
       position: new THREE.Vector3(),
       quaternion: new THREE.Quaternion(),
       model: controllerModel,
       ray,
     };
-
-    this.add(this.controller2.model);
+    this.add(controller.model);
+    return controller;
   }
 
   static addRayToControllerModel(controller: THREE.Object3D, color: THREE.Color) {
