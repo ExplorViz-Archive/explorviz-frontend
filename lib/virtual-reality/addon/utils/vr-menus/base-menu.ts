@@ -3,7 +3,7 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import Item from './items/item';
 import InteractiveItem from './items/interactive-item';
 import VRControllerBindings from '../vr-controller/vr-controller-bindings';
-import VRControllerThumbpadBinding from '../vr-controller/vr-controller-thumbpad-binding';
+import VRControllerThumbpadBinding, { thumbpadDirectionToVector2 } from '../vr-controller/vr-controller-thumbpad-binding';
 import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
 import MenuGroup from './menu-group';
 
@@ -20,7 +20,7 @@ export default abstract class BaseMenu extends BaseMesh {
 
   thumbpadTargets: InteractiveItem[];
 
-  activeTarget: number|undefined;
+  activeTarget: InteractiveItem|undefined;
 
   thumbpadAxis: number;
 
@@ -99,22 +99,24 @@ export default abstract class BaseMenu extends BaseMesh {
   }
 
   hover(uv: THREE.Vector2) {
-    this.activeTarget = undefined;
-    const item = this.getItem(uv) as InteractiveItem|undefined;
+    const item = this.getItem(uv);
+    if (!item || item instanceof InteractiveItem) this.hoverItem(item);
+  }
 
-    if (this.lastHoveredItem && !item) {
-      this.lastHoveredItem.resetHoverEffect();
-      this.lastHoveredItem = undefined;
-    } else if (this.lastHoveredItem && item && this.lastHoveredItem !== item) {
-      this.lastHoveredItem.resetHoverEffect();
-      item.enableHoverEffect();
+  hoverItem(item: InteractiveItem|undefined) {
+    item = item || this.activeTarget;
+    if (item !== this.lastHoveredItem) {
+      this.lastHoveredItem?.resetHoverEffect();
+      item?.enableHoverEffect();
       this.lastHoveredItem = item;
-    } else if (!this.lastHoveredItem && item) {
-      item.enableHoverEffect();
-      this.lastHoveredItem = item;
+      this.update();
     }
+    if (item) this.activeTarget = undefined;
+  }
 
-    this.update();
+  activateItem(item: InteractiveItem) {
+    this.hoverItem(item);
+    this.activeTarget = item;
   }
 
   // eslint-disable-next-line
@@ -124,59 +126,45 @@ export default abstract class BaseMenu extends BaseMesh {
     if (this.lastHoveredItem) {
       this.lastHoveredItem.resetHoverEffect();
       this.lastHoveredItem = undefined;
+      this.update();
     }
-
-    this.update();
-  }
-
-  getPrevious() {
-    if (typeof this.activeTarget === 'undefined' || this.activeTarget === 0) return this.thumbpadTargets.length - 1;
-    return this.activeTarget - 1;
-  }
-
-  getNext() {
-    if (typeof this.activeTarget === 'undefined' || this.activeTarget === this.thumbpadTargets.length - 1) return 0;
-    return this.activeTarget + 1;
   }
 
   makeThumbpadBinding() {
-    if (this.thumbpadTargets.length == 0) {
-      return undefined;
-    }
+    if (this.thumbpadTargets.length == 0) return undefined;
     return new VRControllerThumbpadBinding(
       this.thumbpadAxis === 0 
         ? {labelLeft: 'Previous', labelRight: 'Next'} 
         : {labelUp: 'Previous', labelDown: 'Next'}, 
       {
         onThumbpadDown: (_controller, axes) => {
-          let direction = VRControllerThumbpadBinding.getDirection(axes);
-          if (direction === 'right' && this.thumbpadAxis === 0 ||
-              direction === 'down' && this.thumbpadAxis === 1) {
-            this.activeTarget = this.getNext();
-          } else if (direction === 'left' && this.thumbpadAxis === 0 ||
-                     direction === 'up' && this.thumbpadAxis === 1) {
-            this.activeTarget = this.getPrevious();
-          } else {
-            return;
+          const direction = VRControllerThumbpadBinding.getDirection(axes);
+          const vector = thumbpadDirectionToVector2(direction);
+          const offset = vector.toArray()[this.thumbpadAxis];
+          if (offset !== 0) {
+            // Get index of currently selected item or if no item is selected,
+            // get `0` if the user wants to select the previous (i.e., if 
+            // `offset = -1`) or `-1` if the user want to select the next item 
+            // (i.e., if `offset = 1`).
+            let index = this.activeTarget
+              ? this.thumbpadTargets.indexOf(this.activeTarget) 
+              : -(offset + 1) / 2;
+
+            // Wrap index at start and end of list.
+            const len = this.thumbpadTargets.length;
+            index = ((index + offset) % len + len) % len;
+            this.activateItem(this.thumbpadTargets[index]);
           }
-          this.lastHoveredItem?.resetHoverEffect()
-          this.lastHoveredItem = undefined;
-          const item = this.thumbpadTargets[this.activeTarget];
-          item.enableHoverEffect();
-          this.lastHoveredItem = item;
-          this.update();
         }
       }
     );
   }
 
   makeTriggerButtonBinding() {
-    if (this.thumbpadTargets.length == 0) {
-      return undefined;
-    }
+    if (this.thumbpadTargets.length == 0) return undefined;
     return new VRControllerButtonBinding('Select', {
         onButtonDown: () => {
-          if (!(typeof this.activeTarget === 'undefined')) this.thumbpadTargets[this.activeTarget].onTriggerDown?.call(this.thumbpadTargets[this.activeTarget]);
+          if (this.activeTarget) this.activeTarget.onTriggerDown?.call(this.activeTarget);
         }
     })
   }

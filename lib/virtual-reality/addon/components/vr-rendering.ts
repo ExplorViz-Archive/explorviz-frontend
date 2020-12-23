@@ -55,7 +55,7 @@ import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-controller-bindings-list';
 import VRControllerBindings from 'virtual-reality/utils/vr-controller/vr-controller-bindings';
 import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
-import VRControllerThumbpadBinding from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
+import VRControllerThumbpadBinding, { VRControllerThumbpadDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import SettingsMenu from 'virtual-reality/utils/vr-menus/settings-menu';
 import ResetMenu from 'virtual-reality/utils/vr-menus/reset-menu';
 
@@ -730,8 +730,8 @@ export default class VrRendering extends Component<Args> {
 
           const { object, uv } = controller.intersectedObject;
 
-          if (object instanceof BaseMenu && uv) {
-            object.triggerPress(uv, value);
+          if (object.parent instanceof BaseMenu && uv) {
+            object.parent.triggerPress(uv, value);
           }
         }
       }),
@@ -745,27 +745,31 @@ export default class VrRendering extends Component<Args> {
         onButtonUp: this.releaseGrabbedObject.bind(this)
       }),
 
-      thumbpad: new VRControllerThumbpadBinding({ labelUp: 'Teleport / Highlight', labelDown: 'Show Details', labelRight: 'Zoom' }, {
+      thumbpad: new VRControllerThumbpadBinding({ 
+        labelUp: 'Teleport / Highlight', 
+        labelDown: 'Show Details', 
+        labelRight: 'Zoom'
+      }, {
         onThumbpadDown: (controller, axes) => {
-          const d = VRControllerThumbpadBinding.getDirection(axes);
-
-          if (d == 'up') {
-            if (!controller.intersectedObject) return;
-          this.handleSecondaryInputOn(controller.intersectedObject)
-          }
-
-          if (d == 'down') {
-            if (!controller.intersectedObject) return;
-
-            const { object } = controller.intersectedObject;
-            const content = composeContent(object);
-            if (content) {
-              this.openInfoMenu(controller, content);
-            }
-          }
-
-          if (d == 'right') {
-            this.openZoomMenu(controller)
+          const direction = VRControllerThumbpadBinding.getDirection(axes);
+          switch (direction) {
+            case VRControllerThumbpadDirection.UP:
+              if (controller.intersectedObject) {
+                this.handleSecondaryInputOn(controller.intersectedObject)
+              }
+              break;
+            case VRControllerThumbpadDirection.DOWN:
+              if (controller.intersectedObject) {
+                const { object } = controller.intersectedObject;
+                const content = composeContent(object);
+                if (content) {
+                  this.openInfoMenu(controller, content);
+                }
+              }
+              break;
+            case VRControllerThumbpadDirection.RIGHT:
+              this.openZoomMenu(controller)
+              break;
           }
         }
       })
@@ -1019,8 +1023,8 @@ export default class VrRendering extends Component<Args> {
     // Handle application hits
     } else if (object.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
-    } else if (object instanceof BaseMenu && uv) {
-      object.triggerDown(uv);
+    } else if (object.parent instanceof BaseMenu && uv) {
+      object.parent.triggerDown(uv);
     }
   }
 

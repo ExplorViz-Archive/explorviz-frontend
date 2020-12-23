@@ -445,8 +445,8 @@ export default class VRController extends BaseMesh {
 
     // Handle hover effect and teleport area
 
-      if (object instanceof BaseMenu && uv) {
-        object.hover(uv);
+      if (object.parent instanceof BaseMenu && uv) {
+        object.parent.hover(uv);
       } else if (object instanceof BaseMesh) {
         object.applyHoverEffect();
       }
