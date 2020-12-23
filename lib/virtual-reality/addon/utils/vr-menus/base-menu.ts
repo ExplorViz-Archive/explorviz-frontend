@@ -95,14 +95,22 @@ export default abstract class BaseMenu extends BaseMesh {
   }
 
   hoverItem(item: InteractiveItem|undefined) {
-    item = item || this.activeTarget;
+    // If an item is hovered, reset the item selected with the touchpad.
+    // If no item is hovered, but an item has been selected, don't reset the
+    // selection.
+    if (item) {
+      this.activeTarget = undefined;
+    } else {
+      item = this.activeTarget;
+    }
+
+    // Update hover effect if hovered item changed.
     if (item !== this.lastHoveredItem) {
       this.lastHoveredItem?.resetHoverEffect();
       item?.enableHoverEffect();
       this.lastHoveredItem = item;
       this.update();
     }
-    if (item) this.activeTarget = undefined;
   }
 
   activateItem(item: InteractiveItem) {
@@ -129,6 +137,10 @@ export default abstract class BaseMenu extends BaseMesh {
         : {labelUp: 'Previous', labelDown: 'Next'}, 
       {
         onThumbpadDown: (_controller, axes) => {
+          // No item can be selected with the touchpad, if an item is selected
+          // with the other controller's ray.
+          if (this.lastHoveredItem && !this.activeTarget) return;
+
           const direction = VRControllerThumbpadBinding.getDirection(axes);
           const vector = thumbpadDirectionToVector2(direction);
           const offset = vector.toArray()[this.thumbpadAxis];
