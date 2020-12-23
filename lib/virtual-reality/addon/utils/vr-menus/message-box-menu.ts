@@ -14,11 +14,15 @@ export default class MessageBoxMenu extends BaseMenu {
   constructor(parent: Object3D) {
     super({ width: 256, height: 64 }, '#000000');
 
-    this.opacity = 0.7;
     this.messageQueue = [];
     this.timeBetweenMessages = 800;
     this.parent = parent;
     this.visible = false;
+  }
+
+  initMaterial() {
+    super.initMaterial();
+    this.material.opacity = 0.7;
   }
 
   positionMessageBox() {

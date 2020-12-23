@@ -21,8 +21,6 @@ export default class HintMenu extends BaseMenu {
     this.moved = 0.0;
     this.counter = 0;
 
-    this.opacity = 0.7;
-
     const titleItem = new TextItem(title, 'text', '#ffffff', { x: 256, y: 50 }, 28, 'center');
     this.items.push(titleItem);
 
@@ -40,6 +38,11 @@ export default class HintMenu extends BaseMenu {
 
     parent.add(this);
     this.update();
+  }
+
+  initMaterial() {
+    super.initMaterial();
+    this.material.opacity = 0.7;
   }
 
   // Animates menu closing animation, the reverse of the open animation

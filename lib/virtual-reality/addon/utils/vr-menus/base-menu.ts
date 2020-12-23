@@ -24,15 +24,6 @@ export default abstract class BaseMenu extends BaseMesh {
 
   thumbpadAxis: number;
 
-
-  get opacity() {
-    return this.material.opacity;
-  }
-
-  set opacity(value: number) {
-    this.material.opacity = value;
-  }
-
   constructor(resolution: { width: number, height: number } = { width: 512, height: 512 }, color = '#444444') {
     super(new THREE.Color(color));
 
