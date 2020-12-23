@@ -166,9 +166,10 @@ export default class VRController extends BaseMesh {
   }
 
   setToSpectatingAppearance() {
+    if (!this.connected) return;
     displayAsWireframe(this);
-      this.removeTeleportArea();
-      this.removeRay();
+    this.removeTeleportArea();
+    this.removeRay();
   }
 
   /**
@@ -176,6 +177,7 @@ export default class VRController extends BaseMesh {
    * initiates a teleport area.
    */
   setToDefaultAppearance() {
+    if (!this.connected) return;
     displayAsSolidObject(this);
     this.addRay(this.color);
     this.initTeleportArea();
