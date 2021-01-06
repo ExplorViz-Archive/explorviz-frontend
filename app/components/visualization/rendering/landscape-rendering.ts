@@ -35,6 +35,7 @@ interface Args {
   readonly font: THREE.Font;
   readonly visualizationPaused: boolean;
   showApplication(application: Application): void;
+  openDataSelection(): void;
   toggleVisualizationUpdating(): void;
 }
 
@@ -123,10 +124,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   readonly hoverHandler: HoverEffectHandler = new HoverEffectHandler();
 
-  items = [
-    { title: 'Reset View', action: this.resetView },
-    { title: 'Zelda', action: this.resize, disabled: true },
-  ];
+  get rightClickMenuItems() {
+    const pauseItemtitle = this.args.visualizationPaused ? 'Resume Visualization' : 'Pause Visualization';
+
+    return [
+      { title: 'Reset View', action: this.resetView },
+      { title: pauseItemtitle, action: this.args.toggleVisualizationUpdating },
+      { title: 'Open Sidebar', action: this.args.openDataSelection },
+    ];
+  }
 
   readonly elk: ELK;
 

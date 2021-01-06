@@ -16,11 +16,9 @@
   @extend .bg-light;
   @extend .pl-3;
   @extend .pr-3;
-  @extend .mb-3;
   align-self: center;
-  border-radius: 2rem;
   background-color: #dbdbdb;
-  box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.5);
+  width: 100%;
 }
 
 .explorviz-visualization-navbar > ul {
@@ -31,16 +29,16 @@
 }
 
 .explorviz-visualization-navbar > ul > li {
-  @extend .my-2;
+  @extend .my-1;
 }
 
 .explorviz-visualization-navbar > ul.nav > li.nav-item {
   cursor: pointer;
-  transition: all .2s ease-in-out;
+  transition: all .1s ease-in-out;
   color: rgba(0, 0, 0, 0.5);
 }
 
 .explorviz-visualization-navbar > ul.nav > li.nav-item:hover {
   color: rgb(85 126 187 / 95%);
-  transform: scale(1.3);
+  transform: scale(1.1);
 }

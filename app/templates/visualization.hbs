@@ -16,12 +16,12 @@
       </div>
     {{else if this.allLandscapeDataExistsAndNotEmpty}}
       <Visualization::Rendering::LandscapeRendering
-        @id="landscape1"
         @landscapeData={{this.landscapeData}}
         @font={{@model}}
         @components={{this.components}}
         @removeComponent={{this.removeComponent}}
         @closeDataSelection={{this.closeDataSelection}}
+        @openDataSelection={{this.openDataSelection}}
         @showDataSelection={{this.showDataSelection}}
         @addComponent={{this.addComponent}}
         @showApplication={{this.showApplication}}
@@ -39,12 +39,12 @@
     {{/if}}
   {{else if this.showApplicationView}}
     <Visualization::Rendering::ApplicationRendering
-      @id="app1"
       @landscapeData={{this.landscapeData}}
       @addComponent={{this.addComponent}}
       @font={{@model}}
       @components={{this.components}}
       @removeComponent={{this.removeComponent}}
+      @openDataSelection={{this.openDataSelection}}
       @closeDataSelection={{this.closeDataSelection}}
       @showDataSelection={{this.showDataSelection}}
       @toggleVisualizationUpdating={{this.toggleVisualizationUpdating}}

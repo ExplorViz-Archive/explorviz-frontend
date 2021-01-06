@@ -34,11 +34,15 @@ import { getAllClassesInApplication } from 'explorviz-frontend/utils/application
 import { perform } from 'ember-concurrency-ts';
 
 interface Args {
-  readonly id: string;
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
   readonly visualizationPaused: boolean;
+  readonly components: string[];
+  readonly showDataSelection: boolean;
   addComponent(componentPath: string): void; // is passed down to the viz navbar
+  removeComponent(component: string): void;
+  openDataSelection(): void;
+  closeDataSelection(): void;
   toggleVisualizationUpdating(): void;
 }
 
@@ -109,10 +113,16 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   readonly entityManipulation: EntityManipulation;
 
-  items = [
-    { title: 'Reset View', action: this.resetView },
-    { title: 'Open All Components', action: this.openAllComponents },
-  ];
+  get rightClickMenuItems() {
+    const pauseButtonTitle = this.args.visualizationPaused ? 'Resume Visualization' : 'Pause Visualization';
+
+    return [
+      { title: 'Reset View', action: this.resetView },
+      { title: 'Open All Components', action: this.openAllComponents },
+      { title: pauseButtonTitle, action: this.args.toggleVisualizationUpdating },
+      { title: 'Open Sidebar', action: this.args.openDataSelection },
+    ];
+  }
 
   @tracked
   popupData: PopupData | null = null;

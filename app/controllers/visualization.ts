@@ -163,6 +163,11 @@ export default class VisualizationController extends Controller {
   }
 
   @action
+  openDataSelection() {
+    this.showDataSelection = true;
+  }
+
+  @action
   addComponent(component: string) {
     if (this.components.includes(component)) {
       // remove it and readd it in the code below,
@@ -172,7 +177,6 @@ export default class VisualizationController extends Controller {
     }
 
     this.components = [component, ...this.components];
-    this.showDataSelection = true;
   }
 
   @action
@@ -185,11 +189,6 @@ export default class VisualizationController extends Controller {
       const components = [...this.components];
       components.splice(index, 1);
       this.components = components;
-    }
-
-    // Close sidebar if it would be empty otherwise
-    if (this.components.length === 0) {
-      this.showDataSelection = false;
     }
   }
 
