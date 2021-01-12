@@ -20,6 +20,8 @@ export default class LocalVrUser extends Service {
 
   userID!: string;
 
+  userName?: string;
+
   color: THREE.Color|undefined;
 
   renderer!: THREE.WebGLRenderer;

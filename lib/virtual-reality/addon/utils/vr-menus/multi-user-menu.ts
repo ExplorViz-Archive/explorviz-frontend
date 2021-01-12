@@ -73,7 +73,7 @@ export default class MultiUserMenu extends BaseMenu {
     const yOffset = 60;
     let yPos = 50 + yOffset;
 
-    const localUserButton = new TextbuttonItem('local-user', this.localUser.userID + ' (you)', { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+    const localUserButton = new TextbuttonItem('local-user', this.localUser.userName + ' (you)', { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
           this.items.push(localUserButton);
           this.thumbpadTargets.push(localUserButton);
           localUserButton.onTriggerDown = this.deactivateSpectate.bind(this);

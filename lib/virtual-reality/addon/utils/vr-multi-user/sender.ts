@@ -38,10 +38,10 @@ export default class Sender {
  * Send update of position + quaternion of the
  * landscape (vrEnvironment)
  */
-  sendLandscapeUpdate(deltaPosition: V3, quaternion: Q, environmentOffset: V3) {
+  sendLandscapeUpdate(position: V3, quaternion: Q, environmentOffset: V3) {
     const landscapeObj = {
       event: 'landscape_position',
-      deltaPosition: deltaPosition.toArray(),
+      position: position.toArray(),
       offset: environmentOffset.toArray(),
       quaternion: quaternion.toArray(),
     };
