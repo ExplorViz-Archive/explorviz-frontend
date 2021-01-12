@@ -62,36 +62,6 @@ export default class Sender {
   }
 
   /**
- * Send the backend the information that a system was
- * closed or opened by this user
- * @param {string} id ID of system which was opened/closed
- * @param {boolean} isOpen State of the system
- */
-  sendSystemUpdate(id: string, isOpen: boolean) {
-    const systemObj = {
-      event: 'system_update',
-      id,
-      isOpen,
-    };
-    this.webSocket.enqueueIfOpen(systemObj);
-  }
-
-  /**
- * Send the backend the information that a nodegroup was
- * closed or opened by this user
- * @param {string} id ID of nodegroup which was opened/closed
- * @param {boolean} isOpen State of the nodegroup
- */
-  sendNodegroupUpdate(id: string, isOpen: boolean) {
-    const nodeGroupObj = {
-      event: 'nodegroup_update',
-      id,
-      isOpen,
-    };
-    this.webSocket.enqueueIfOpen(nodeGroupObj);
-  }
-
-  /**
  * Inform the backend that an application was closed
  * by this user
  * @param {string} appID ID of the closed application
