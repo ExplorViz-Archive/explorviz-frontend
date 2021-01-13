@@ -31,7 +31,7 @@ export default class Sender {
       time: Date.now(),
     };
 
-    this.webSocket.enqueueIfOpen(positionObj);
+    this.webSocket.send(positionObj);
   }
 
   /**
@@ -45,7 +45,7 @@ export default class Sender {
       offset: environmentOffset.toArray(),
       quaternion: quaternion.toArray(),
     };
-    this.webSocket.enqueueIfOpen(landscapeObj);
+    this.webSocket.send(landscapeObj);
   }
 
   /**
@@ -58,7 +58,7 @@ export default class Sender {
       direction: direction.toArray(),
       length,
     };
-    this.webSocket.enqueueIfOpen(applicationObj);
+    this.webSocket.send(applicationObj);
   }
 
   /**
@@ -71,7 +71,7 @@ export default class Sender {
       event: 'app_closed',
       id: appID,
     };
-    this.webSocket.enqueueIfOpen(appObj);
+    this.webSocket.send(appObj);
   }
 
   /**
@@ -92,7 +92,7 @@ export default class Sender {
       controllerQuaternion: controller.quaternion.toArray(),
     };
 
-    this.webSocket.enqueueIfOpen(appObj);
+    this.webSocket.send(appObj);
   }
 
   /**
@@ -109,7 +109,7 @@ export default class Sender {
       position: application.getWorldPosition(worldPos).toArray(),
       quaternion: application.getWorldQuaternion(worldQuat).toArray(),
     };
-    this.webSocket.enqueueIfOpen(appObj);
+    this.webSocket.send(appObj);
   }
 
   /**
@@ -127,7 +127,7 @@ export default class Sender {
       isOpened,
       isFoundation,
     };
-    this.webSocket.enqueueIfOpen(appObj);
+    this.webSocket.send(appObj);
   }
 
   /**
@@ -147,7 +147,7 @@ export default class Sender {
       entityID,
       isHighlighted,
     };
-    this.webSocket.enqueueIfOpen(hightlightObj);
+    this.webSocket.send(hightlightObj);
   }
 
   /**
@@ -161,7 +161,7 @@ export default class Sender {
       isSpectating,
       spectatedUser,
     };
-    this.webSocket.enqueueIfOpen(spectateObj);
+    this.webSocket.send(spectateObj);
   }
 
   /**
@@ -174,7 +174,7 @@ export default class Sender {
       disconnect,
     };
 
-    this.webSocket.enqueueIfOpen(controllerObj);
+    this.webSocket.send(controllerObj);
   }
 
   /**
@@ -196,6 +196,6 @@ export default class Sender {
       quaternion: quaternion.toArray(),
     };
 
-    this.webSocket.enqueueIfOpen(appObj);
+    this.webSocket.send(appObj);
   }
 }
