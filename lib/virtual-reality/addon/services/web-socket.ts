@@ -38,7 +38,11 @@ export default class WebSocket extends Service {
     this.host = config.host;
     this.port = config.port;
     this.secure = config.secure;
-    this.path = config.path;
+
+    // Remove leading and tailing slashes such that the URL returned by 
+    // `getSocketUrl` does not contain two leading slashes or any trailing
+    // slash.
+    this.path = config.path.replace(/^\/|\/$/g, "");
   }
 
   closeSocket() {
