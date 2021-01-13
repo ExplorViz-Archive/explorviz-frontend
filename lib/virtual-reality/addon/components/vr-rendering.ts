@@ -741,8 +741,7 @@ export default class VrRendering extends Component<Args> {
       }),
 
       gripButton: new VRControllerButtonBinding('Grab Object', {
-        onButtonDown: this.grabIntersectedObject.bind(this),
-        onButtonUp: this.releaseGrabbedObject.bind(this)
+        onButtonDown: this.grabIntersectedObject.bind(this)
       }),
 
       thumbpad: new VRControllerThumbpadBinding({ 
@@ -782,97 +781,8 @@ export default class VrRendering extends Component<Args> {
    *
    * @param controller The controller that should grab the intersected object.
    */
-  grabIntersectedObject(controller: VRController) {
-    if (!controller.intersectedObject || !controller.ray) return;
-
-    const { object: { parent: object } } = controller.intersectedObject;
-    if (object && this.isObjectGrabable(object)) {
-      controller.grabObject(object);
-      this.onGrabObject(object, controller);
-    }
-  }
-
-  /**
-   * Predicate that tests whether an object can be grabbed.
-   *
-   * @param object The object to grab.
-   */
-  isObjectGrabable(object: THREE.Object3D): boolean {
-    return VRController.findController(object) === null && (object instanceof ApplicationObject3D || object instanceof LandscapeObject3D);
-  }
-
-  /**
-   * Callback that is invoked after the given object is grabbed.
-   *
-   * @param _object The grabbed object.
-   * @param _controller The controller that grabbed the object.
-   */
-  onGrabObject(_object: THREE.Object3D, _controller: VRController): void {}
-
-  /**
-   * Releases the object currently grabbed by the given controller.
-   *
-   * @param controller The controller which should release its grabbed object.
-   */
-  releaseGrabbedObject(controller: VRController) {
-    const object = controller.grabbedObject;
-    if (object) {
-      controller.releaseObject();
-      this.onReleaseObject(object, controller);
-    }
-  }
-
-  /**
-   * Callback that is invoked after the given object is released.
-   *
-   * @param _object The released object.
-   * @param _controller The controller had grabbed the object before it was released.
-   */
-  onReleaseObject(_object: THREE.Object3D, _controller: VRController): void {}
-
-  /**
-   * This method handles inputs of the touchpad or analog stick respectively.
-   * This input is used to move a grabbed application towards or away from the controller.
-   */
-  moveGrabbedObject(controller: VRController, axes: number[]) {
-    const grabbedObject = controller.grabbedObject;
-
-    if (!grabbedObject) return;
-
-    controller.updateIntersectedObject();
-
-    const { intersectedObject } = controller;
-
-    if (!intersectedObject) return;
-
-    // Position where ray hits the application
-    const intersectionPosWorld = intersectedObject.point;
-    const intersectionPosLocal = intersectionPosWorld.clone();
-    grabbedObject.worldToLocal(intersectionPosLocal);
-
-    const controllerPosition = new THREE.Vector3();
-    controller.raySpace.getWorldPosition(controllerPosition);
-    const controllerPositionLocal = controllerPosition.clone();
-    grabbedObject.worldToLocal(controllerPositionLocal);
-
-    const direction = new THREE.Vector3();
-    direction.subVectors(intersectionPosLocal, controllerPositionLocal);
-
-    const worldDirection = new THREE.Vector3().subVectors(controllerPosition, intersectionPosWorld);
-
-    const yAxis = axes[1];
-
-    // Stop application from moving too close to controller
-    if ((worldDirection.length() > 0.5 && Math.abs(yAxis) > 0.1)
-        || (worldDirection.length() <= 0.5 && yAxis > 0.1)) {
-      // Adapt distance for moving according to trigger value
-      direction.normalize();
-      const length = yAxis * this.time.getDeltaTime();
-
-      this.translateApplication(grabbedObject, direction, length);
-    }
-
-    if (controller.ray) { controller.ray.scale.z = intersectedObject.distance; }
+  grabIntersectedObject(_controller: VRController) {
+    // Supported in multi-user mode only.
   }
 
   // #endregion CONTROLLER HANDLERS

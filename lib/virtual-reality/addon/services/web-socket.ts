@@ -1,13 +1,13 @@
 import Service, { inject as service } from '@ember/service';
 import debugLogger from 'ember-debug-logger';
 
-export default class WebSocket extends Service {
+export default class WebSocketService extends Service {
   @service()
   websockets !: any;
 
   debug = debugLogger('VrMultiUser');
 
-  private socketRef: any; // WebSocket to send/receive messages to/from backend
+  private socket: any; // WebSocket to send/receive messages to/from backend
 
   host: string | null = '';
 
@@ -29,7 +29,7 @@ export default class WebSocket extends Service {
     const socket = this.websockets.socketFor(this.getSocketUrl());
     socket.on('message', this.messageHandler, this);
     socket.on('close', this.closeHandler, this);
-    this.socketRef = socket;
+    this.socket = socket;
   }
 
   applyConfiguration(config: { host: string, port: string, secure: boolean, path: string }) {
@@ -59,9 +59,9 @@ export default class WebSocket extends Service {
     }
 
     // Remove internal event listeners.
-    this.socketRef.off('message', this.messageHandler);
-    this.socketRef.off('close', this.closeHandler);
-    this.socketRef = null;
+    this.socket.off('message', this.messageHandler);
+    this.socket.off('close', this.closeHandler);
+    this.socket = null;
   }
 
   private messageHandler(event: any) {
@@ -73,7 +73,7 @@ export default class WebSocket extends Service {
 
   // Used to send messages to the backend
   send(obj: any) {
-    if (this.isWebSocketOpen()) { this.socketRef.send(JSON.stringify(obj)); }
+    if (this.isWebSocketOpen()) { this.socket.send(JSON.stringify(obj)); }
   }
 
   sendDisconnectRequest() {
@@ -84,11 +84,11 @@ export default class WebSocket extends Service {
   }
 
   isWebSocketOpen() {
-    return this.socketRef && this.socketRef.readyState() === 1;
+    return this.socket && this.socket.readyState() === 1;
   }
 
   reset() {
-    this.socketRef = null;
+    this.socket = null;
     this.host = null;
     this.port = null;
     this.secure = null;
@@ -98,6 +98,6 @@ export default class WebSocket extends Service {
 
 declare module '@ember/service' {
   interface Registry {
-    'web-socket': WebSocket;
+    'web-socket': WebSocketService;
   }
 }

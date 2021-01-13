@@ -110,6 +110,8 @@ export default class MultiUserMenu extends BaseMenu {
       this.thumbpadTargets.clear();
       this.initMenu();
     }
+    
+    super.onUpdateMenu();
   }
 
   arrayEquals(a: RemoteVrUser[], b: RemoteVrUser[]) {
@@ -159,8 +161,8 @@ export default class MultiUserMenu extends BaseMenu {
     });
   }
 
-  onClose() {
-    super.onClose();
+  onCloseMenu() {
+    super.onCloseMenu();
     this.spectateUser.deactivate();
   }
 }

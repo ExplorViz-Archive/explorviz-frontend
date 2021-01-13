@@ -3,14 +3,14 @@ import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import DS from 'ember-data';
-import WebSocket from './web-socket';
+import WebSocketService from './web-socket';
 import SpectateUser from './spectate-user';
 
 export type ConnectionStatus = 'offline'|'connecting'|'online';
 
 export default class LocalVrUser extends Service {
   @service('web-socket')
-  webSocket!: WebSocket;
+  webSocket!: WebSocketService;
 
   @service('spectate-user')
   spectateUser!: SpectateUser;

@@ -40,9 +40,10 @@ export default class ZoomMenu extends BaseMenu {
     this.update();
   }
 
-  initGeometry() {
+  makeBackgroundGeometry() {
     const radius = this.resolution.width/512 * 0.16;
-    this.geometry = new THREE.CircleGeometry(radius, ZoomMenu.segments);
+    const geometry = new THREE.CircleGeometry(radius, ZoomMenu.segments);
+    return geometry;
   }
 
   renderLens() {
@@ -81,5 +82,6 @@ export default class ZoomMenu extends BaseMenu {
 
   updateMenu() {
     this.renderLens();
+    super.onUpdateMenu();
   }
 }

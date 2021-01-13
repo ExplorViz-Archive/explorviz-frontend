@@ -1,5 +1,4 @@
 import THREE from 'three';
-import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import Item from './items/item';
 import InteractiveItem from './items/interactive-item';
 import VRControllerBindings from '../vr-controller/vr-controller-bindings';
@@ -7,7 +6,9 @@ import VRControllerThumbpadBinding, { thumbpadDirectionToVector2 } from '../vr-c
 import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
 import MenuGroup from './menu-group';
 
-export default abstract class BaseMenu extends BaseMesh {
+export default abstract class BaseMenu extends THREE.Group {
+  isMenuOpen: boolean;
+ 
   canvas!: HTMLCanvasElement;
 
   canvasMesh!: THREE.Mesh<THREE.Geometry | THREE.BufferGeometry, THREE.MeshBasicMaterial>;
@@ -25,33 +26,40 @@ export default abstract class BaseMenu extends BaseMesh {
   thumbpadAxis: number;
 
   constructor(resolution: { width: number, height: number } = { width: 512, height: 512 }, color = '#444444') {
-    super(new THREE.Color(color));
+    super();
 
     this.resolution = resolution;
     this.items = [];
     this.thumbpadTargets = [];
     this.activeTarget = undefined;
     this.thumbpadAxis = 1;
+    this.isMenuOpen = false;
 
-    this.initGeometry();
-    this.initMaterial();
+    this.initBackground(new THREE.Color(color));
     this.initCanvas();
   }
 
-  initGeometry() {
-    this.geometry = new THREE.PlaneGeometry(
+  initBackground(color: THREE.Color) {
+    const background = new THREE.Mesh();
+    background.geometry = this.makeBackgroundGeometry();
+    background.material = this.makeBackgroundMaterial(color);
+  }
+
+  makeBackgroundGeometry(): THREE.Geometry {
+    return new THREE.PlaneGeometry(
       (this.resolution.width / 512) * 0.3,
       (this.resolution.height / 512) * 0.3,
     );
   }
 
-  initMaterial() {
-    this.material = new THREE.MeshBasicMaterial({
-      color: this.defaultColor,
+  makeBackgroundMaterial(color: THREE.Color): THREE.Material {
+    const material = new THREE.MeshBasicMaterial({
+      color: color,
       side: THREE.DoubleSide
     });
-    this.material.transparent = true;
-    this.material.opacity = 0.8;
+    material.transparent = true;
+    material.opacity = 0.8;
+    return material;
   }
 
   initCanvas() {
@@ -60,8 +68,9 @@ export default abstract class BaseMenu extends BaseMesh {
     this.canvas.height = this.resolution.height;
 
     // Create a mesh that displays the canvas as a texture. This is needed
-    // such that the
-    const geometry = this.geometry.clone();
+    // such that the back face of the background can be visible while the
+    // user interface's background is not.
+    const geometry = this.makeBackgroundGeometry();
     const material = new THREE.MeshBasicMaterial({
       map: new THREE.CanvasTexture(this.canvas),
       depthTest: true
@@ -262,7 +271,34 @@ export default abstract class BaseMenu extends BaseMesh {
     }
   }
 
-  updateMenu() {}
+  /**
+   * Callback that is invoked by the menu group when this menu is opened.
+   */
+  onOpenMenu() {
+    this.isMenuOpen = true;
+  }
 
-  onClose() {}
+  /**
+   * Callback that is invoked by the menu group once per frame.
+   */
+  onUpdateMenu() {}
+
+  /**
+   * Callback that is invoked by the menu group when this menu is hidden because
+   * another menu is openend instead.
+   */
+  onPauseMenu() {}
+
+  /**
+   * Callback that is invoked by the menu group when this menu is shown again
+   * after it was hidden becaus ethe other menu was closed.
+   */
+  onResumeMenu() {}
+
+  /**
+   * Callback that is invoked by the menu group when this menu is closed.
+   */
+  onCloseMenu() {
+    this.isMenuOpen = false;
+  }
 }

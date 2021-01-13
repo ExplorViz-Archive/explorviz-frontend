@@ -45,19 +45,28 @@ export default class MenuGroup extends THREE.Group {
     openMenu(menu: BaseMenu) {
         // Hide current menu before opening the new menu.
         if (this.currentMenu) {
+            this.currentMenu.onPauseMenu();
             this.remove(this.currentMenu);
         }
 
         this.menus.push(menu);
         this.controllerBindings.push(menu.makeControllerBindings());
         this.add(menu);
+        menu.onOpenMenu();
 
         // Hide or show the controllers ray.
         this.toggleControllerRay();
     }
 
     /**
-     * Closes the currently open menu.
+     * Updates the currently open menu if any.
+     */
+    updateMenu() {
+        this.currentMenu?.onUpdateMenu();
+    }
+
+    /**
+     * Closes the currently open menu if any.
      *
      * If a previously open menu was hidden by {@link MenuGroup.openMenu},
      * it is shown again by adding the mesh back to this group.
@@ -66,14 +75,14 @@ export default class MenuGroup extends THREE.Group {
         let closedMenu = this.menus.pop();
         this.controllerBindings.pop();
         if (closedMenu) {
-            closedMenu.onClose();
+            closedMenu.onCloseMenu();
             this.remove(closedMenu);
-            closedMenu.disposeRecursively();
         }
 
         // Show previously hidden menu if any.
         if (this.currentMenu) {
             this.add(this.currentMenu);
+            this.currentMenu.onResumeMenu();
         }
 
         // Hide or show the controllers ray.

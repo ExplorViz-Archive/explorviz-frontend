@@ -92,9 +92,10 @@ export default class CameraMenu extends BaseMenu {
     this.update();
   }
 
-  updateMenu() {
+  onUpdateMenu() {
     this.deltaItem.text = this.getCameraDelta().y.toFixed(2);
     this.update();
+    super.onUpdateMenu();
   }
 
   makeThumbpadBinding() {

@@ -40,9 +40,10 @@ export default class HintMenu extends BaseMenu {
     this.update();
   }
 
-  initMaterial() {
-    super.initMaterial();
-    this.material.opacity = 0.7;
+  makeBackgroundMaterial(color: THREE.Color) {
+    const material = super.makeBackgroundMaterial(color);
+    material.opacity = 0.7;
+    return material;
   }
 
   // Animates menu closing animation, the reverse of the open animation

@@ -20,9 +20,10 @@ export default class MessageBoxMenu extends BaseMenu {
     this.visible = false;
   }
 
-  initMaterial() {
-    super.initMaterial();
-    this.material.opacity = 0.7;
+  makeBackgroundMaterial() {
+    const material = super.makeBackgroundMaterial();
+    material.opacity = 0.7;
+    return material;
   }
 
   positionMessageBox() {

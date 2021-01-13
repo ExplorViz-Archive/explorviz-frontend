@@ -81,10 +81,6 @@ export default class VRController extends BaseMesh {
 
   intersectableObjects: THREE.Object3D[] = [];
 
-  grabbedObject: THREE.Object3D|null = null;
-
-  grabbedObjectParent : THREE.Object3D|null = null;
-
   teleportArea: TeleportMesh|null = null;
 
   connected = false;
@@ -259,53 +255,11 @@ export default class VRController extends BaseMesh {
     }
   }
 
-  grabObject(object: Object3D) {
-    if (!this.ray) return;
-
-    const controllerMatrix = new THREE.Matrix4();
-    controllerMatrix.identity().extractRotation(this.ray.matrixWorld);
-    // Get inverse of controller transformation
-    controllerMatrix.getInverse(this.gripSpace.matrixWorld);
-
-    // Set transforamtion relative to controller transformation
-    object.matrix.premultiply(controllerMatrix);
-    // Split up matrix into position, quaternion and scale
-    object.matrix.decompose(object.position, object.quaternion, object.scale);
-
-    this.grabbedObject = object;
-    if (object.parent) {
-      this.grabbedObjectParent = object.parent;
-      this.grabbedObjectParent.remove(object);
-    }
-    this.gripSpace.add(object);
-  }
-
-  releaseObject() {
-    const { grabbedObject } = this;
-    if (!grabbedObject) return;
-
-    // Transform object back into transformation relative to local space
-    grabbedObject.matrix.premultiply(this.gripSpace.matrixWorld);
-    // Split up transforamtion into position, quaternion and scale
-    grabbedObject.matrix.decompose(grabbedObject.position,
-      grabbedObject.quaternion, grabbedObject.scale);
-
-    this.gripSpace.remove(grabbedObject);
-
-    if (this.grabbedObjectParent) {
-      this.grabbedObjectParent.add(grabbedObject);
-      this.grabbedObjectParent = null;
-    }
-
-    this.grabbedObject = null;
-
-  }
-
   update() {
     this.updateGamepad();
     this.updateIntersectedObject();
     this.labelGroup.updateLabels();
-    this.menuGroup.currentMenu?.updateMenu();
+    this.menuGroup.updateMenu();
   }
 
   /**
@@ -403,9 +357,7 @@ export default class VRController extends BaseMesh {
     this.raycaster.ray.origin.setFromMatrixPosition(raySpace.matrixWorld);
     this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersections = this.grabbedObject
-      ? this.raycaster.intersectObjects([this.grabbedObject], true)
-      : this.raycaster.intersectObjects(this.intersectableObjects, true);
+    const intersections = this.raycaster.intersectObjects(this.intersectableObjects, true);
 
     for (let i = 0; i < intersections.length; i++) {
       const { object } = intersections[i];

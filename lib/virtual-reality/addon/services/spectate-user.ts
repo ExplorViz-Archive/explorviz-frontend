@@ -3,11 +3,11 @@ import THREE from 'three';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import Sender from 'virtual-reality/utils/vr-multi-user/sender';
 import LocalVrUser from './local-vr-user';
-import WebSocket from './web-socket';
+import WebSocketService from './web-socket';
 
 export default class SpectateUser extends Service {
   @service('web-socket')
-  webSocket!: WebSocket;
+  webSocket!: WebSocketService;
 
   @service('local-vr-user')
   localUser!: LocalVrUser;
