@@ -317,14 +317,14 @@ export default class VrMultiUser extends VrRendering {
 
   onDisconnect(event?: any) {
     if (this.localUser.state === 'connecting') {
-      super.showHint('Backend extension not responding');
+      super.showHint('VR service not responding');
     } else if (event) {
       switch (event.code) {
         case 1000: // Normal Closure
           super.showHint('Successfully disconnected');
           break;
         case 1006: // Abnormal closure
-          super.showHint('Backend extension not responding');
+          super.showHint('VR service closed abnormally');
           break;
         default:
           super.showHint('Unexpected disconnect');
