@@ -45,31 +45,30 @@ export default class WebSocket extends Service {
 
   closeSocket() {
     this.websockets.closeSocketFor(this.getSocketUrl());
-    // Close handlers
-    const socket = this.socketRef;
-    if (socket) {
-      socket.off('message', this.messageHandler);
-      socket.off('close', this.closeHandler);
-    }
-    this.socketRef = null;
   }
 
   private closeHandler(event: any) {
+    // Log that connection has been closed.
     if (event && event.code && event.target.url) {
       this.debug(`Connection to Backend-Extension ( ${event.target.url} ) closed, WebSocket close code ${event.code}.`);
     }
+
+    // Invoke external event listener for close event.
     if (this.socketCloseCallback) {
       this.socketCloseCallback(event);
     }
+
+    // Remove internal event listeners.
+    this.socketRef.off('message', this.messageHandler);
+    this.socketRef.off('close', this.closeHandler);
+    this.socketRef = null;
   }
 
   private messageHandler(event: any) {
-    // Backend could have sent multiple messages at a time
     const message = JSON.parse(event.data);
     if (this.eventCallback) {
       this.eventCallback(message.event, message);
     }
-
   }
 
   // Used to send messages to the backend
