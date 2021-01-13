@@ -74,7 +74,7 @@ export default class WebSocket extends Service {
 
   // Used to send messages to the backend
   send(obj: any) {
-    if (this.socketRef) { this.socketRef.send(JSON.stringify(obj)); }
+    if (this.isWebSocketOpen()) { this.socketRef.send(JSON.stringify(obj)); }
   }
 
   sendDisconnectRequest() {
