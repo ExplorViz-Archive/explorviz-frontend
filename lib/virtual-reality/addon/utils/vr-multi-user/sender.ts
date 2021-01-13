@@ -38,10 +38,10 @@ export default class Sender {
  * Send update of position + quaternion of the
  * landscape (vrEnvironment)
  */
-  sendLandscapeUpdate(deltaPosition: V3, quaternion: Q, environmentOffset: V3) {
+  sendLandscapeUpdate(position: V3, quaternion: Q, environmentOffset: V3) {
     const landscapeObj = {
       event: 'landscape_position',
-      deltaPosition: deltaPosition.toArray(),
+      position: position.toArray(),
       offset: environmentOffset.toArray(),
       quaternion: quaternion.toArray(),
     };
@@ -59,36 +59,6 @@ export default class Sender {
       length,
     };
     this.webSocket.enqueueIfOpen(applicationObj);
-  }
-
-  /**
- * Send the backend the information that a system was
- * closed or opened by this user
- * @param {string} id ID of system which was opened/closed
- * @param {boolean} isOpen State of the system
- */
-  sendSystemUpdate(id: string, isOpen: boolean) {
-    const systemObj = {
-      event: 'system_update',
-      id,
-      isOpen,
-    };
-    this.webSocket.enqueueIfOpen(systemObj);
-  }
-
-  /**
- * Send the backend the information that a nodegroup was
- * closed or opened by this user
- * @param {string} id ID of nodegroup which was opened/closed
- * @param {boolean} isOpen State of the nodegroup
- */
-  sendNodegroupUpdate(id: string, isOpen: boolean) {
-    const nodeGroupObj = {
-      event: 'nodegroup_update',
-      id,
-      isOpen,
-    };
-    this.webSocket.enqueueIfOpen(nodeGroupObj);
   }
 
   /**
