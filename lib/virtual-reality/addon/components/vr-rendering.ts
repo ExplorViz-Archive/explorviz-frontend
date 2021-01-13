@@ -128,8 +128,6 @@ export default class VrRendering extends Component<Args> {
 
   closeButtonTexture: THREE.Texture;
 
-  landscapeOffset = new THREE.Vector3();
-
   get font() {
     return this.args.font;
   }
@@ -1004,14 +1002,12 @@ export default class VrRendering extends Component<Args> {
 
   moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
     const delta = new THREE.Vector3(deltaX, deltaY, deltaZ);
-    this.landscapeOffset.add(delta);
     this.landscapeObject3D.position.add(delta);
   }
 
   centerLandscape() {
     const { floor } = this;
     const landscape = this.landscapeObject3D;
-    const offset = this.landscapeOffset;
 
     // Compute bounding box of the floor
     const bboxFloor = new THREE.Box3().setFromObject(floor);
@@ -1027,8 +1023,8 @@ export default class VrRendering extends Component<Args> {
     bboxLandscape.getCenter(centerLandscape);
 
     // Set new position of landscape
-    landscape.position.x += centerFloor.x - centerLandscape.x + offset.x;
-    landscape.position.z += centerFloor.z - centerLandscape.z + offset.z;
+    landscape.position.x += centerFloor.x - centerLandscape.x;
+    landscape.position.z += centerFloor.z - centerLandscape.z;
 
     // Check distance between floor and landscape
     if (bboxLandscape.min.y > bboxFloor.max.y) {
@@ -1040,7 +1036,6 @@ export default class VrRendering extends Component<Args> {
       landscape.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
     }
 
-    landscape.position.y += offset.y;
   }
 
   rotateLandscape(deltaX: number) {
@@ -1054,10 +1049,9 @@ export default class VrRendering extends Component<Args> {
   }
 
   resetLandscapePosition() {
-    this.landscapeObject3D.rotation.x = (-90 * THREE.MathUtils.DEG2RAD);
-    this.landscapeObject3D.rotation.y = (0);
-    this.landscapeObject3D.rotation.z = (0);
-    this.landscapeOffset.set(0, 0, 0);
+    this.landscapeObject3D.rotation.x = -90 * THREE.MathUtils.DEG2RAD;
+    this.landscapeObject3D.rotation.y = 0;
+    this.landscapeObject3D.rotation.z = 0;
     this.centerLandscape();
   }
 
