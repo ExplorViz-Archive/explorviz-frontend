@@ -127,7 +127,6 @@ export default class VrMultiUser extends VrRendering {
     this.updateUserNameTags();
     this.sendPoses();
     this.sendLandscapePosition();
-    this.webSocket.sendUpdates();
   }
 
   // #region MENUS

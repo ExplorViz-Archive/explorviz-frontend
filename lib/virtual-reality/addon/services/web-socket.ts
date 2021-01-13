@@ -9,23 +9,21 @@ export default class WebSocket extends Service {
 
   private socketRef: any; // WebSocket to send/receive messages to/from backend
 
-  private updateQueue: any[] = []; // Messages which are ready to be sent to backend
+  host: string | null = '';
 
-  host: string|null = '';
+  port: string | null = '';
 
-  port: string|null = '';
+  secure: boolean | null = false;
 
-  secure: boolean|null = false;
-
-  path: string|null = '';
+  path: string | null = '';
 
   getSocketUrl() {
     return `${this.secure ? "wss" : "ws"}://${this.host}:${this.port}/${this.path}`;
   }
 
-  socketCloseCallback: ((event: any) => void)| null = null;
+  socketCloseCallback: ((event: any) => void) | null = null;
 
-  eventCallback: ((event: any, data: any) => void)| null = null;
+  eventCallback: ((event: any, data: any) => void) | null = null;
 
   initSocket() {
     const socket = this.websockets.socketFor(this.getSocketUrl());
@@ -54,7 +52,6 @@ export default class WebSocket extends Service {
       socket.off('close', this.closeHandler);
     }
     this.socketRef = null;
-    this.updateQueue = [];
   }
 
   private closeHandler(event: any) {
@@ -68,13 +65,11 @@ export default class WebSocket extends Service {
 
   private messageHandler(event: any) {
     // Backend could have sent multiple messages at a time
-    const messages = JSON.parse(event.data);
-    for (let i = 0; i < messages.length; i++) {
-      const data = messages[i];
-      if (this.eventCallback) {
-        this.eventCallback(data.event, data);
-      }
+    const message = JSON.parse(event.data);
+    if (this.eventCallback) {
+      this.eventCallback(message.event, message);
     }
+
   }
 
   // Used to send messages to the backend
@@ -89,32 +84,12 @@ export default class WebSocket extends Service {
     this.send(disconnectMessage);
   }
 
-  /**
-   * Check wether there are messages in the update queue and send them to the backend.
-   */
-  sendUpdates() {
-    // there are updates to send
-    if (this.updateQueue && this.updateQueue.length > 0) {
-      this.send(this.updateQueue);
-      this.updateQueue = [];
-    }
-  }
-
-  enqueueIfOpen(JSONObj: any) {
-    if (!this.isWebSocketOpen()) { return; }
-
-    if (this.updateQueue) {
-      this.updateQueue.push(JSONObj);
-    }
-  }
-
   isWebSocketOpen() {
     return this.socketRef && this.socketRef.readyState() === 1;
   }
 
   reset() {
     this.socketRef = null;
-    this.updateQueue = [];
     this.host = null;
     this.port = null;
     this.secure = null;
