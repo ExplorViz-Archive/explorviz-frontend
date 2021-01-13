@@ -737,7 +737,7 @@ sendLandscapePosition() {
         this.landscapeObject3D.getWorldPosition(position);
         const quaternion = new THREE.Quaternion();
         this.landscapeObject3D.getWorldQuaternion(quaternion);
-        this.sender.sendLandscapeUpdate(position, quaternion, this.landscapeOffset);
+        this.sender.sendLandscapeUpdate(position, quaternion);
       }
     }
   });

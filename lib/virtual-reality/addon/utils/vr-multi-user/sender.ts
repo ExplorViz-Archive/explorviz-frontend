@@ -38,11 +38,10 @@ export default class Sender {
  * Send update of position + quaternion of the
  * landscape (vrEnvironment)
  */
-  sendLandscapeUpdate(position: V3, quaternion: Q, environmentOffset: V3) {
+  sendLandscapeUpdate(position: V3, quaternion: Q) {
     const landscapeObj = {
       event: 'landscape_position',
       position: position.toArray(),
-      offset: environmentOffset.toArray(),
       quaternion: quaternion.toArray(),
     };
     this.webSocket.send(landscapeObj);
