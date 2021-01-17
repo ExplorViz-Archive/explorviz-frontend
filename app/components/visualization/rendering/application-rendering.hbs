@@ -4,6 +4,12 @@
 >
 </div>
 
+{{ add-listener this.collaborativeService "singleClick" this.receiveSingleClick }}
+{{ add-listener this.collaborativeService "doubleClick" this.receiveDoubleClick }}
+{{ add-listener this.collaborativeService "mouseMove" this.receiveMouseMove }}
+{{ add-listener this.collaborativeService "mouseStop" this.receiveMouseStop }}
+{{ add-listener this.collaborativeService "perspective" this.receivePerspective}}
+
 <div class="row" style="height:100%">
   <div
     class="d-flex {{if @showDataSelection "col-8" "col-12"}}"
@@ -55,6 +61,9 @@
       {{!-- popup(s) --}}
       <Visualization::Rendering::Popups::PopupCoordinator
         @popupData={{this.popupData}}
+      />
+      <Cursor
+        @cursorData={{this.cursorPosition}}
       />
     </div>
   </div>

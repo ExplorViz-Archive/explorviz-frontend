@@ -6,6 +6,8 @@ import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import THREE from 'three';
 import Configuration from 'explorviz-frontend/services/configuration';
 import CurrentUser from 'explorviz-frontend/services/current-user';
+import CollaborativeService from 'collaborative-mode/services/collaborative-service';
+import { Perspective, CursorPosition, instanceOfIdentifiableMesh, Click } from 'collaborative-mode/utils/collaborative-data';
 
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
@@ -34,8 +36,10 @@ interface Args {
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
   readonly visualizationPaused: boolean;
+  readonly collaborativeModeActive: boolean;
   showApplication(application: Application): void;
   toggleVisualizationUpdating(): void;
+  toggleCollaborativeMode(): void;
 }
 
 interface SimplePlaneLayout {
@@ -81,6 +85,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @service('configuration')
   configuration!: Configuration;
 
+  @service('collaborative-service')
+  collaborativeService!: CollaborativeService;
+
   @service('current-user')
   currentUser!: CurrentUser;
 
@@ -104,13 +111,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   initDone: boolean;
 
   // Used to display performance and memory usage information
-  threePerformance: THREEPerformance|undefined;
+  threePerformance: THREEPerformance | undefined;
 
   // Used to register (mouse) events
   interaction!: Interaction;
 
   // Maps models to a computed layout
-  modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
+  modelIdToPlaneLayout: Map<string, PlaneLayout> | null = null;
 
   // Extended Object3D which manages landscape meshes
   readonly landscapeObject3D: LandscapeObject3D;
@@ -126,6 +133,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @tracked
   popupData: PopupData | null = null;
+
+  @tracked
+  cursorPosition: CursorPosition | null = null;
 
   get font() {
     return this.args.font;
@@ -255,18 +265,54 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer,
-      this.landscapeObject3D, {
-        doubleClick: this.handleDoubleClick,
-        mouseMove: this.handleMouseMove,
-        mouseWheel: this.handleMouseWheel,
-        mouseOut: this.handleMouseOut,
-        /* mouseEnter: this.handleMouseEnter, */
-        mouseStop: this.handleMouseStop,
-        panning: this.handlePanning,
-      });
+      this.landscapeObject3D, this.collaborativeService, {
+      doubleClick: this.handleDoubleClick,
+      mouseMove: this.handleMouseMove,
+      mouseWheel: this.handleMouseWheel,
+      mouseOut: this.handleMouseOut,
+      /* mouseEnter: this.handleMouseEnter, */
+      mouseStop: this.handleMouseStop,
+      panning: this.handlePanning,
+    });
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
+
+  // #region COLLABORATIVE
+  @action
+  receivePerspective(cameraa: Perspective) {
+    this.camera.position.set(cameraa.position.x, cameraa.position.y, cameraa.position.z);
+  }
+
+  @action
+  receiveMouseMove(mouse: CursorPosition) {
+    this.interaction.onMouseMove2(mouse);
+    this.cursorPosition = this.interaction.calculateMousePosition(mouse);
+  }
+
+  @action
+  receiveMouseStop(mouse: CursorPosition) {
+    this.interaction.onMouseStop2(mouse);
+  }
+
+  @action
+  receiveDoubleClick(click: Click) {
+    var applicationMesh = this.getApplicationMeshByColabId(click.id)
+    if (applicationMesh instanceof THREE.Mesh) {
+      this.handleDoubleClick(applicationMesh);
+    }
+  }
+
+  getApplicationMeshByColabId(colabId: String) {
+    return this.landscapeObject3D.children.find(obj => {
+      if (instanceOfIdentifiableMesh(obj)) {
+        return obj.colabId === colabId;
+      }
+      return false;
+    })
+  }
+
+  // #endregion COLLABORATIVE
 
   // #region RENDERING LOOP
 

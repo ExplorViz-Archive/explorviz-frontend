@@ -1,6 +1,8 @@
+import CollaborativeService from 'collaborative-mode/services/collaborative-service';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import Raycaster from 'explorviz-frontend/utils/raycaster';
 import THREE from 'three';
+import { CursorPosition } from './collaborative-mode/collaborative-data';
 
 type CallbackFunctions = {
   mouseEnter?(): void,
@@ -10,7 +12,7 @@ type CallbackFunctions = {
   mouseWheel?(delta: number): void,
   singleClick?(mesh?: THREE.Mesh): void,
   doubleClick?(mesh?: THREE.Mesh): void,
-  panning?(delta: {x: number, y: number}, button: 1|2|3): void
+  panning?(delta: { x: number, y: number }, button: 1 | 2 | 3): void
 };
 
 type MouseStopEvent = {
@@ -51,8 +53,10 @@ export default class Interaction {
   // Contains functions which should be called in case of an event
   eventCallbackFunctions: CallbackFunctions;
 
+  collaborativeService: CollaborativeService;
+
   constructor(canvas: HTMLCanvasElement, camera: THREE.Camera, renderer: THREE.WebGLRenderer,
-    application: THREE.Object3D, eventCallbackFunctions: CallbackFunctions) {
+    application: THREE.Object3D, collaborativeService: CollaborativeService, eventCallbackFunctions: CallbackFunctions) {
     this.canvas = canvas;
     this.camera = camera;
     this.renderer = renderer;
@@ -64,6 +68,8 @@ export default class Interaction {
     // Init Hammer interaction
     this.hammerHandler = HammerInteraction.create();
     this.hammerHandler.setupHammer(canvas);
+
+    this.collaborativeService = collaborativeService
 
     this.setupInteraction();
   }
@@ -143,6 +149,34 @@ export default class Interaction {
     } else {
       this.eventCallbackFunctions.mouseMove();
     }
+    const payload = this.getPointerPosition(mouse);
+    this.collaborativeService.sendMouseMove(payload);
+  }
+
+  onMouseMove2(cursorPosition: CursorPosition) {
+    if (!this.eventCallbackFunctions.mouseMove) { return; }
+
+    const mouse = this.calculateMousePosition(cursorPosition);
+    const intersectedViewObj = this.raycast(mouse);
+
+    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
+      this.eventCallbackFunctions.mouseMove(intersectedViewObj.object);
+    } else {
+      this.eventCallbackFunctions.mouseMove();
+    }
+  }
+
+  calculateMousePosition(cursorPosition: CursorPosition) {
+    var mouse = new THREE.Vector3(); // create once and reuse
+    mouse.set(cursorPosition.x, cursorPosition.y, 0);
+    mouse.project(this.camera);
+    mouse.x = Math.round((0.5 + mouse.x / 2) * (this.renderer.domElement.width / window.devicePixelRatio));
+    mouse.y = Math.round((0.5 - mouse.y / 2) * (this.renderer.domElement.height / window.devicePixelRatio));
+    // console.log("Vec2: " + mouse.x + "==" +  mouse.y)
+
+    const pointerX = mouse.x - 5;
+    const pointerY = mouse.y - 5;
+    return {x: pointerX, y: pointerY, color: 'grey'};
   }
 
   onMouseStop(evt: CustomEvent<MouseStopEvent>) {
@@ -158,6 +192,38 @@ export default class Interaction {
     } else {
       this.eventCallbackFunctions.mouseStop();
     }
+    const payload = this.getPointerPosition(mouse);
+    this.collaborativeService.sendMouseStop(payload);
+  }
+
+  onMouseStop2(cursorPosition: CursorPosition) {
+    if (!this.eventCallbackFunctions.mouseStop) { return; }
+    const mouse = this.calculateMousePosition(cursorPosition);
+    const intersectedViewObj = this.raycast(mouse);
+
+    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
+      this.eventCallbackFunctions.mouseStop(intersectedViewObj.object, mouse);
+    } else {
+      this.eventCallbackFunctions.mouseStop();
+    }
+  }
+
+
+  getPointerPosition(mouse: Position2D) {
+    const pointerPosition = this.calculatePositionInScene(mouse)
+
+    var vec = new THREE.Vector3(); // create once and reuse
+    var pos = new THREE.Vector3(); // create once and reuse
+    vec.set(pointerPosition.x, pointerPosition.y, 0);
+    // vec.set(mouse.x, mouse.y, 0);
+    vec.unproject(this.camera);
+
+    vec.sub(this.camera.position).normalize();
+    var distance = - this.camera.position.z / vec.z;
+
+    pos.copy(this.camera.position).add(vec.multiplyScalar(distance))
+
+    return {x: pos.x, y: pos.y};
   }
 
   onMouseWheelStart(evt: WheelEvent) {
@@ -167,6 +233,7 @@ export default class Interaction {
     const delta = Math.sign(evt.deltaY);
 
     this.eventCallbackFunctions.mouseWheel(delta);
+    this.sendPerspective();
   }
 
   onSingleClick(mouse: Position2D) {
@@ -176,6 +243,7 @@ export default class Interaction {
 
     if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
       this.eventCallbackFunctions.singleClick(intersectedViewObj.object);
+      this.collaborativeService.sendSingleClick(intersectedViewObj.object);
     } else {
       this.eventCallbackFunctions.singleClick();
     }
@@ -188,17 +256,25 @@ export default class Interaction {
 
     if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
       this.eventCallbackFunctions.doubleClick(intersectedViewObj.object);
+      this.collaborativeService.sendDoubleClick(intersectedViewObj.object);
     } else {
       this.eventCallbackFunctions.doubleClick();
     }
   }
 
-  onPanning(delta: {x: number, y: number}, event: any) {
+  onPanning(delta: { x: number, y: number }, event: any) {
     if (!this.eventCallbackFunctions.panning) { return; }
 
     this.eventCallbackFunctions.panning(delta, event.button);
+    this.sendPerspective();
   }
 
+  sendPerspective() {
+    this.collaborativeService.sendPerspective( {
+        position: {x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z},
+        rotation: {x: this.raycastObject3D.rotation?.x, y: this.raycastObject3D.rotation?.y, z: this.raycastObject3D.rotation?.z}
+    });
+  }
   // Handler
 
   calculatePositionInScene(mouseOnCanvas: Position2D) {

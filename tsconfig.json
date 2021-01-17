@@ -26,16 +26,30 @@
         "tests/*"
       ],
       "explorviz-frontend/*": [
-        "app/*"
+        "app/*",
+        "lib/collaborative-mode/app/*"
       ],
       "*": [
         "types/*"
+      ],
+      "collaborative-mode": [
+        "lib/collaborative-mode/addon"
+      ],
+      "collaborative-mode/*": [
+        "lib/collaborative-mode/addon/*"
+      ],
+      "collaborative-mode/test-support": [
+        "lib/collaborative-mode/addon-test-support"
+      ],
+      "collaborative-mode/test-support/*": [
+        "lib/collaborative-mode/addon-test-support/*"
       ]
     }
   },
   "include": [
     "app/**/*",
     "tests/**/*",
-    "types/**/*"
+    "types/**/*",
+    "lib/collaborative-mode"
   ]
 }

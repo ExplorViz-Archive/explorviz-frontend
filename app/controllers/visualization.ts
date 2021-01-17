@@ -8,6 +8,7 @@ import { inject as service } from '@ember/service';
 import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-setup/timeline/plotly-timeline';
 import Timestamp from 'explorviz-frontend/models/timestamp';
 import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
+import CollaborativeService from 'collaborative-mode/services/collaborative-service';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import { tracked } from '@glimmer/tracking';
@@ -34,6 +35,8 @@ export interface LandscapeData {
 export default class VisualizationController extends Controller {
   @service('landscape-listener') landscapeListener!: LandscapeListener;
 
+  @service('collaborative-service') collaborativeService!: CollaborativeService;
+
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
   @service('reload-handler') reloadHandler!: ReloadHandler;
@@ -56,6 +59,9 @@ export default class VisualizationController extends Controller {
 
   @tracked
   visualizationPaused = false;
+
+  @tracked
+  collaborativeModeActive = false;
 
   debug = debugLogger();
 
@@ -215,6 +221,18 @@ export default class VisualizationController extends Controller {
   @action
   toggleTimeline() {
     this.showTimeline = !this.showTimeline;
+  }
+
+  @action
+  toggleCollaborativeMode() {
+    if (this.collaborativeModeActive) {
+      this.collaborativeModeActive = false;
+      AlertifyHandler.showAlertifyMessage('Collaborative Mode paused!');
+    } else {
+      this.collaborativeModeActive = true;
+      this.collaborativeService.openSocket();
+      AlertifyHandler.showAlertifyMessage('Collaborative Mode active!');
+    }
   }
 
   @action

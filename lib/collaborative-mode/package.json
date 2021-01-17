@@ -1,0 +1,12 @@
+{
+  "name": "collaborative-mode",
+  "keywords": [
+    "ember-addon"
+  ],
+  "dependencies": {
+    "babel-plugin-htmlbars-inline-precompile": "^4.2.0",
+    "ember-cli-babel": "*",
+    "ember-cli-typescript": "*",
+    "ember-cli-htmlbars": "*"
+  }
+}

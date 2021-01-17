@@ -2,11 +2,14 @@ import THREE from 'three';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import PlaneMesh from './plane-mesh';
 import PlaneLayout from '../../layout-models/plane-layout';
+import { IdentifiableMesh } from 'collaborative-mode/utils/collaborative-data';
 
-export default class ApplicationMesh extends PlaneMesh {
+export default class ApplicationMesh extends PlaneMesh implements IdentifiableMesh {
   dataModel: Application;
 
   material: THREE.MeshBasicMaterial;
+
+  colabId: String;
 
   constructor(layout: PlaneLayout, applicationModel: Application,
     defaultColor: THREE.Color, highlightingColor = new THREE.Color('red')) {
@@ -15,6 +18,7 @@ export default class ApplicationMesh extends PlaneMesh {
     this.dataModel = applicationModel;
     this.material = new THREE.MeshBasicMaterial({ color: defaultColor });
     this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
+    this.colabId = applicationModel.pid
   }
 
   setToDefaultPosition(centerPoint: THREE.Vector2) {

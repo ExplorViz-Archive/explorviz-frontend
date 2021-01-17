@@ -3,17 +3,21 @@ import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-r
 import CommunicationLayout from '../../layout-models/communication-layout';
 import BaseMesh from '../base-mesh';
 import CommunicationArrowMesh from './communication-arrow-mesh';
+import { IdentifiableMesh } from 'collaborative-mode/utils/collaborative-data';
 
-export default class ClazzCommunicationMesh extends BaseMesh {
+export default class ClazzCommunicationMesh extends BaseMesh implements IdentifiableMesh {
   dataModel: DrawableClassCommunication;
 
   layout: CommunicationLayout;
+
+  colabId: String;
 
   constructor(layout: CommunicationLayout, dataModel: DrawableClassCommunication,
     defaultColor: THREE.Color, highlightingColor: THREE.Color) {
     super(defaultColor, highlightingColor);
     this.layout = layout;
     this.dataModel = dataModel;
+    this.colabId = dataModel.id;
 
     this.material = new THREE.MeshBasicMaterial({
       color: defaultColor,

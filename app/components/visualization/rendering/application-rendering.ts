@@ -32,12 +32,16 @@ import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 import { perform } from 'ember-concurrency-ts';
+import { Click, Perspective, instanceOfIdentifiableMesh, CursorPosition } from 'collaborative-mode/utils/collaborative-data';
+import CollaborativeService from 'collaborative-mode/services/collaborative-service';
 
 interface Args {
   readonly id: string;
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
   readonly visualizationPaused: boolean;
+  readonly collaborativeModeActive: boolean;
+  Perspective: Perspective;
   addComponent(componentPath: string): void; // is passed down to the viz navbar
   toggleVisualizationUpdating(): void;
 }
@@ -65,6 +69,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @service('configuration')
   configuration!: Configuration;
+
+  @service('collaborative-service') collaborativeService!: CollaborativeService;
 
   @service('current-user')
   currentUser!: CurrentUser;
@@ -110,6 +116,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @tracked
   popupData: PopupData | null = null;
+
+  @tracked
+  cursorPosition: CursorPosition | null = null;
 
   get font() {
     return this.args.font;
@@ -254,7 +263,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      this.applicationObject3D, {
+      this.applicationObject3D, this.collaborativeService, {
         singleClick: this.handleSingleClick,
         doubleClick: this.handleDoubleClick,
         mouseMove: this.handleMouseMove,
@@ -444,6 +453,51 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   // #endregion SCENE POPULATION
+
+  // #region COLLABORATIVE
+
+  @action
+  receivePerspective(cameraa: Perspective) {
+    this.camera.position.set(cameraa.position.x, cameraa.position.y, cameraa.position.z);
+    this.applicationObject3D.rotation.set(cameraa.rotation.x, cameraa.rotation.y, cameraa.rotation.z);
+  }
+
+  @action
+  receiveMouseMove(mouse: CursorPosition) {
+    this.interaction.onMouseMove2(mouse);
+    this.cursorPosition = this.interaction.calculateMousePosition(mouse);
+  }
+
+  @action
+  receiveMouseStop(mouse: CursorPosition) {
+    this.interaction.onMouseStop2(mouse);
+  }
+
+  @action
+  receiveSingleClick(click: Click) {
+    var applicationMesh = this.getApplicationMeshByColabId(click.id)
+    if (applicationMesh instanceof THREE.Mesh) {
+      this.handleSingleClick(applicationMesh);
+    }
+  }
+
+  @action
+  receiveDoubleClick(click: Click) {
+    var applicationMesh = this.getApplicationMeshByColabId(click.id)
+    if (applicationMesh instanceof THREE.Mesh) {
+      this.handleDoubleClick(applicationMesh);
+    }
+  }
+
+  getApplicationMeshByColabId(colabId: String) {
+    return this.applicationObject3D.children.find(obj => {
+      if (instanceOfIdentifiableMesh(obj)) {
+        return obj.colabId === colabId;
+      }
+      return false;
+    })
+  }
+  // #endregion COLLABORATIVE
 
   // #region RENDERING LOOP
 

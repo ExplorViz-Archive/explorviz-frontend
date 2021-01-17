@@ -1,5 +1,10 @@
 <div style="display:none" {{did-update this.onUpdated @landscapeData}}></div>
 
+{{ add-listener this.collaborativeService "doubleClick" this.receiveDoubleClick }}
+{{ add-listener this.collaborativeService "mouseMove" this.receiveMouseMove }}
+{{ add-listener this.collaborativeService "mouseStop" this.receiveMouseStop }}
+{{ add-listener this.collaborativeService "perspective" this.receivePerspective }}
+
 <div class="row" style="height:100%">
   <div
     class="d-flex {{if @showDataSelection "col-8" "col-12"}}"
@@ -13,7 +18,14 @@
         @toggleVisualizationUpdating={{@toggleVisualizationUpdating}}
         @visualizationPaused={{@visualizationPaused}}
       />
+      <Visualization::PageSetup::Navbar::ToggleCollaborative
+        @toggleCollaborativeMode={{@toggleCollaborativeMode}}
+        @collaborativeModeActive={{@collaborativeModeActive}}
+      />
       <Visualization::PageSetup::Navbar::ColorPickerOpener
+        @addComponent={{@addComponent}}
+      />
+      <Visualization::PageSetup::Navbar::ShareLandscapeOpener
         @addComponent={{@addComponent}}
       />
     </Visualization::PageSetup::VisualizationNavbar>
@@ -36,6 +48,9 @@
       <Visualization::Rendering::Popups::PopupCoordinator
         @popupData={{this.popupData}}
       />
+      <Cursor
+        @cursorData={{this.cursorPosition}}
+      />
     </div>
   </div>
   <div class={{if @showDataSelection "col-4" "hide"}} id="dataselection">
@@ -49,6 +64,13 @@
           <div class="card-body d-flex flex-column">
             {{#if (eq componentName "color-picker")}}
               <Visualization::PageSetup::Sidebar::ColorPicker
+                @isLandscapeView={{true}}
+                @removeComponent={{@removeComponent}}
+                @updateView={{this.updateColors}}
+              />
+            {{/if}}
+            {{#if (eq componentName "share-landscape")}}
+              <Visualization::PageSetup::Sidebar::ShareLandscape
                 @isLandscapeView={{true}}
                 @removeComponent={{@removeComponent}}
                 @updateView={{this.updateColors}}
