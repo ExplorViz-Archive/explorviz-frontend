@@ -10,7 +10,7 @@ import THREE from 'three';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
 import VrRendering from 'virtual-reality/components/vr-rendering';
-import Sender from 'virtual-reality/utils/vr-multi-user/sender';
+import VrMessageSender from 'virtual-reality/utils/vr-message/sender';
 import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import MessageBoxMenu from 'virtual-reality/utils/vr-menus/message-box-menu';
@@ -27,9 +27,9 @@ import { Application } from 'explorviz-frontend/utils/landscape-schemes/structur
 import { perform } from 'ember-concurrency-ts';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
-import Receiver, { MessageListener } from 'virtual-reality/utils/receiver';
+import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/utils/vr-message/receiver';
 
-export default class VrMultiUser extends VrRendering implements MessageListener {
+export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
 
   debug = debugLogger('VrMultiUser');
@@ -47,10 +47,10 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
   spectateUser!: SpectateUser;
 
   // Used to format and send messages to the backend
-  sender!: Sender;
+  sender!: VrMessageSender;
 
   // Used to subscribe to response for requested.
-  receiver!: Receiver;
+  receiver!: VrMessageReceiver;
 
   remoteUserGroup: THREE.Group;
 

@@ -1,10 +1,11 @@
 import THREE from 'three';
-import Receiver from 'virtual-reality/utils/receiver';
+import VrMessageReceiver from 'virtual-reality/utils/vr-message/receiver';
 import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
-import Sender from 'virtual-reality/utils/vr-multi-user/sender';
+import VrMessageSender from 'virtual-reality/utils/vr-message/sender';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import PseudoMenu from '../pseudo-menu';
+import { isObjectGrabbedResponse, ObjectGrabbedResponse } from 'virtual-reality/utils/vr-message/receivable/response/grab';
 
 export interface GrabbableObject extends THREE.Object3D {
     getGrabId(): string;
@@ -15,14 +16,14 @@ export function isGrabbableObject(object: any): object is GrabbableObject {
 }
 
 export default class GrabMenu extends PseudoMenu {
-    sender: Sender;
-    receiver: Receiver;
+    sender: VrMessageSender;
+    receiver: VrMessageReceiver;
     grabbedObject: GrabbableObject;
     grabbedObjectParent: THREE.Object3D|null;
     grabbedSuccessfully: boolean;
     originalIntersectableObjects: THREE.Object3D[]|null;
 
-    constructor(grabbedObject: GrabbableObject, sender: Sender, receiver: Receiver) {
+    constructor(grabbedObject: GrabbableObject, sender: VrMessageSender, receiver: VrMessageReceiver) {
         super();
         this.sender = sender;
         this.receiver = receiver;
@@ -84,7 +85,7 @@ export default class GrabMenu extends PseudoMenu {
         const nonce = this.sender.sendObjectGrabbed(objectId);
 
         // Wait for response.
-        this.receiver.awaitResponse(nonce, (response: {success: boolean}) => {
+        this.receiver.awaitResponse(isObjectGrabbedResponse, nonce, (response: ObjectGrabbedResponse) => {
             // If we receive the answer too late, we ignore it.
             if (this.isMenuOpen) return;
             this.grabbedSuccessfully = response.success;

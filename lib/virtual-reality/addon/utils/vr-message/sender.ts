@@ -3,7 +3,7 @@ import THREE from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
-export default class Sender {
+export default class VrMessageSender {
   webSocket: WebSocketService;
   lastNonce: number;
 
