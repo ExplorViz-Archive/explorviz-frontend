@@ -44,6 +44,7 @@ import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receiv
 import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_opened';
 import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
 import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
+import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -118,6 +119,9 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
     let listener = (event: MenuDistachedEvent) => {
       let menuContainer = event.menuContainer;
+      //add close icon
+      const closeIcon = new CloseIcon(this.closeButtonTexture);
+      closeIcon.addToObject(menuContainer.menu);
       this.detachedMenus.add(menuContainer);
       this.scene.add(menuContainer);
       const position = new THREE.Vector3;

@@ -1,4 +1,4 @@
-import THREE, { Scene, Texture } from "three";
+import THREE from "three";
 import CloseIcon from "../view-objects/vr/close-icon";
 import VRControllerBindings from "../vr-controller/vr-controller-bindings";
 import VRController from "../vr-rendering/VRController";
@@ -33,13 +33,11 @@ export class GrabbableMenuContainer extends THREE.Group implements GrabbableObje
 export default class MenuGroup extends THREE.Group {
     menus: BaseMenu[];
     controllerBindings: VRControllerBindings[];
-    closeButtonTexture: Texture
 
-    constructor(closeButtonTexture: Texture) {
+    constructor() {
         super();
         this.menus = [];
         this.controllerBindings = [];
-        this.closeButtonTexture = closeButtonTexture;
     }
 
     /**
@@ -90,8 +88,8 @@ export default class MenuGroup extends THREE.Group {
     /**
      * Updates the currently open menu if any.
      */
-    updateMenu() {
-        this.currentMenu?.onUpdateMenu();
+    updateMenu(delta: number) {
+        this.currentMenu?.onUpdateMenu(delta);
     }
 
     /**
@@ -121,10 +119,6 @@ export default class MenuGroup extends THREE.Group {
     detachMenu() {
         let menu = this.currentMenu;
         if (menu && isDetachableMenu(menu)) {
-
-            //add close icon
-            const closeIcon = new CloseIcon(this.closeButtonTexture);
-            closeIcon.addToObject(menu);
             
             this.closeMenu(true);
 

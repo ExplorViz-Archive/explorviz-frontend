@@ -58,6 +58,8 @@ import VRControllerThumbpadBinding, { VRControllerThumbpadDirection } from 'virt
 import SettingsMenu from 'virtual-reality/utils/vr-menus/settings-menu';
 import ResetMenu from 'virtual-reality/utils/vr-menus/reset-menu';
 import { hasContent } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
+import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
+import VrLandscapeObject3D from 'virtual-reality/utils/view-objects/landscape/vr-landscape-object-3d';
 
 interface Args {
   readonly id: string;
@@ -106,14 +108,14 @@ export default class VrRendering extends Component<Args> {
 
   camera!: THREE.PerspectiveCamera;
 
+  hintMenuGroup!: MenuGroup;
+
   renderer!: THREE.WebGLRenderer;
 
   raycaster: THREE.Raycaster;
 
   // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
-
-  hintMenu: HintMenu|undefined;
 
   // Depth of boxes for landscape entities
   landscapeDepth: number;
@@ -172,7 +174,7 @@ export default class VrRendering extends Component<Args> {
     this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
     // Load and scale landscape
-    this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
+    this.landscapeObject3D = new VrLandscapeObject3D(this.args.landscapeData.structureLandscapeData);
     const scale = this.landscapeScalar;
     this.landscapeObject3D.scale.set(scale, scale, scale);
 
@@ -191,6 +193,7 @@ export default class VrRendering extends Component<Args> {
     this.initLights();
     this.initInteraction();
     this.initControllers();
+    this.initHintMenuGroup();
   }
 
   /**
@@ -303,7 +306,7 @@ export default class VrRendering extends Component<Args> {
     id: number,
     color: THREE.Color
   }): VRController {
-    const menuGroup = new MenuGroup(this.closeButtonTexture);
+    const menuGroup = new MenuGroup();
     const controller = new VRController({
       gamepadIndex: id,
       scene: this.scene,
@@ -323,6 +326,14 @@ export default class VrRendering extends Component<Args> {
 
     this.localUser.userGroup.add(controller);
     return controller;
+  }
+
+  /**
+   * Adds a menu group for {@link HintMenu}s to the {@link camera}.
+   */
+  initHintMenuGroup() {
+    this.hintMenuGroup = new MenuGroup();
+    this.camera.add(this.hintMenuGroup);
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -410,8 +421,10 @@ export default class VrRendering extends Component<Args> {
     if (this.isDestroyed) { return; }
 
     this.time.update();
+    const delta = this.time.getDeltaTime();
 
-    this.localUser.updateControllers();
+    this.localUser.updateControllers(delta);
+    this.hintMenuGroup.updateMenu(delta);
 
     this.renderer.render(this.scene, this.camera);
   }
@@ -605,7 +618,7 @@ export default class VrRendering extends Component<Args> {
       // Converting plain JSON layout data due to worker limitations
       const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
 
-      const applicationObject3D = new ApplicationObject3D(applicationModel, boxLayoutMap,
+      const applicationObject3D = new VrApplicationObject3D(applicationModel, boxLayoutMap,
         dynamicLandscapeData);
 
       // Add new meshes to application
@@ -865,12 +878,7 @@ export default class VrRendering extends Component<Args> {
   // #region MENUS
 
   showHint(title: string, text: string|null = null) {
-    if (this.hintMenu) {
-      this.hintMenu.closeMenu();
-      this.hintMenu = undefined;
-    }
-    this.hintMenu = new HintMenu(this.camera, title, text);
-    this.hintMenu.startAnimation();
+    this.hintMenuGroup.openMenu(new HintMenu(title, text));
   }
 
   openMainMenu(controller: VRController) {

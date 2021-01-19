@@ -255,11 +255,11 @@ export default class VRController extends BaseMesh {
     }
   }
 
-  update() {
+  update(delta: number) {
     this.updateGamepad();
     this.updateIntersectedObject();
     this.labelGroup.updateLabels();
-    this.menuGroup.updateMenu();
+    this.menuGroup.updateMenu(delta);
   }
 
   /**
