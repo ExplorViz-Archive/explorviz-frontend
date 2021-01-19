@@ -20,8 +20,8 @@ export default class MessageBoxMenu extends BaseMenu {
     this.visible = false;
   }
 
-  makeBackgroundMaterial() {
-    const material = super.makeBackgroundMaterial();
+  makeBackgroundMaterial(color: THREE.Color) {
+    const material = super.makeBackgroundMaterial(color);
     material.opacity = 0.7;
     return material;
   }

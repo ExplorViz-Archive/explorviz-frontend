@@ -61,8 +61,8 @@ export default class MenuGroup extends THREE.Group {
     /**
      * Updates the currently open menu if any.
      */
-    updateMenu() {
-        this.currentMenu?.onUpdateMenu();
+    updateMenu(delta: number) {
+        this.currentMenu?.onUpdateMenu(delta);
     }
 
     /**

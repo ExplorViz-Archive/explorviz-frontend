@@ -6,6 +6,11 @@ import VRControllerThumbpadBinding, { thumbpadDirectionToVector2 } from '../vr-c
 import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
 import MenuGroup from './menu-group';
 
+type AnimationFinishedEvent =  {
+  type: 'finished', 
+  action: THREE.AnimationAction
+};
+
 export default abstract class BaseMenu extends THREE.Group {
   isMenuOpen: boolean;
  
@@ -25,6 +30,8 @@ export default abstract class BaseMenu extends THREE.Group {
 
   thumbpadAxis: number;
 
+  animationMixer!: THREE.AnimationMixer;
+
   constructor(resolution: { width: number, height: number } = { width: 512, height: 512 }, color = '#444444') {
     super();
 
@@ -37,6 +44,7 @@ export default abstract class BaseMenu extends THREE.Group {
 
     this.initBackground(new THREE.Color(color));
     this.initCanvas();
+    this.initAnimations();
   }
 
   initBackground(color: THREE.Color) {
@@ -82,6 +90,26 @@ export default abstract class BaseMenu extends THREE.Group {
     // Move the mesh slightly in front of the background.
     this.canvasMesh.position.z = 0.001;
     this.add(this.canvasMesh);
+  }
+
+  initAnimations() {
+    this.animationMixer = new THREE.AnimationMixer(this);
+  }
+
+  /**
+   * Waits the given animation action to finish and returns a promise that
+   * is fullfilled once the animation is finished.
+   */
+  waitForAnimation(action: THREE.AnimationAction): Promise<null> {
+    return new Promise((resolve) => {
+      const listener = (evt: AnimationFinishedEvent) => {
+        if (evt.action === action) {
+          this.animationMixer.removeEventListener('finished', listener);
+          resolve(null);
+        }
+      };
+      this.animationMixer.addEventListener('finished', listener);
+    });
   }
 
   update() {
@@ -281,8 +309,12 @@ export default abstract class BaseMenu extends THREE.Group {
 
   /**
    * Callback that is invoked by the menu group once per frame.
+   * 
+   * @param delta The time in seconds since the last frame.
    */
-  onUpdateMenu() {}
+  onUpdateMenu(delta: number) {
+    this.animationMixer.update(delta);
+  }
 
   /**
    * Callback that is invoked by the menu group when this menu is hidden because

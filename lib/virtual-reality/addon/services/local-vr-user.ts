@@ -72,12 +72,10 @@ export default class LocalVrUser extends Service {
     this.userGroup.add(camera);
   }
 
-  updateControllers() {
-    if (this.controller1) { this.controller1.update(); }
-    if (this.controller2) { this.controller2.update(); }
+  updateControllers(delta: number) {
+    if (this.controller1) { this.controller1.update(delta); }
+    if (this.controller2) { this.controller2.update(delta); }
   }
-
-
 
   getCameraDelta() {
     return this.userGroup.position;

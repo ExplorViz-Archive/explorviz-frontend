@@ -80,8 +80,8 @@ export default class ZoomMenu extends BaseMenu {
       this.renderer.xr.enabled = oldXREnabled;
   }
 
-  updateMenu() {
+  updateMenu(delta: number) {
     this.renderLens();
-    super.onUpdateMenu();
+    super.onUpdateMenu(delta);
   }
 }

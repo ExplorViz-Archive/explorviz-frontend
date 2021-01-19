@@ -108,14 +108,14 @@ export default class VrRendering extends Component<Args> {
 
   camera!: THREE.PerspectiveCamera;
 
+  hintMenuGroup!: MenuGroup;
+
   renderer!: THREE.WebGLRenderer;
 
   raycaster: THREE.Raycaster;
 
   // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
-
-  hintMenu: HintMenu|undefined;
 
   // Depth of boxes for landscape entities
   landscapeDepth: number;
@@ -193,6 +193,7 @@ export default class VrRendering extends Component<Args> {
     this.initLights();
     this.initInteraction();
     this.initControllers();
+    this.initHintMenuGroup();
   }
 
   /**
@@ -327,6 +328,14 @@ export default class VrRendering extends Component<Args> {
     return controller;
   }
 
+  /**
+   * Adds a menu group for {@link HintMenu}s to the {@link camera}.
+   */
+  initHintMenuGroup() {
+    this.hintMenuGroup = new MenuGroup();
+    this.camera.add(this.hintMenuGroup);
+  }
+
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
   // #region ACTIONS
@@ -412,8 +421,10 @@ export default class VrRendering extends Component<Args> {
     if (this.isDestroyed) { return; }
 
     this.time.update();
+    const delta = this.time.getDeltaTime();
 
-    this.localUser.updateControllers();
+    this.localUser.updateControllers(delta);
+    this.hintMenuGroup.updateMenu(delta);
 
     this.renderer.render(this.scene, this.camera);
   }
@@ -868,12 +879,7 @@ export default class VrRendering extends Component<Args> {
   // #region MENUS
 
   showHint(title: string, text: string|null = null) {
-    if (this.hintMenu) {
-      this.hintMenu.closeMenu();
-      this.hintMenu = undefined;
-    }
-    this.hintMenu = new HintMenu(this.camera, title, text);
-    this.hintMenu.startAnimation();
+    this.hintMenuGroup.openMenu(new HintMenu(title, text));
   }
 
   openMainMenu(controller: VRController) {

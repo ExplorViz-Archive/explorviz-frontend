@@ -102,8 +102,8 @@ export default class GrabMenu extends PseudoMenu {
         });
     }
 
-    onUpdateMenu() {
-        super.onUpdateMenu();
+    onUpdateMenu(delta: number) {
+        super.onUpdateMenu(delta);
 
         // Send new position every frame if we are allowed to grab the object.
         if (this.grabbedSuccessfully) {

@@ -97,7 +97,7 @@ export default class MultiUserMenu extends BaseMenu {
   }
 
 
-  updateMenu() {
+  onUpdateMenu(delta: number) {
     const state = this.localUser.state;
     const idToRemoteVrUsers = this.getRemoteUsers();
     const users = Array.from(idToRemoteVrUsers.values()); 
@@ -111,7 +111,7 @@ export default class MultiUserMenu extends BaseMenu {
       this.initMenu();
     }
     
-    super.onUpdateMenu();
+    super.onUpdateMenu(delta);
   }
 
   arrayEquals(a: RemoteVrUser[], b: RemoteVrUser[]) {
