@@ -58,6 +58,8 @@ import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-co
 import VRControllerThumbpadBinding, { VRControllerThumbpadDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import SettingsMenu from 'virtual-reality/utils/vr-menus/settings-menu';
 import ResetMenu from 'virtual-reality/utils/vr-menus/reset-menu';
+import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
+import VrLandscapeObject3D from 'virtual-reality/utils/view-objects/landscape/vr-landscape-object-3d';
 
 interface Args {
   readonly id: string;
@@ -172,7 +174,7 @@ export default class VrRendering extends Component<Args> {
     this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
     // Load and scale landscape
-    this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
+    this.landscapeObject3D = new VrLandscapeObject3D(this.args.landscapeData.structureLandscapeData);
     const scale = this.landscapeScalar;
     this.landscapeObject3D.scale.set(scale, scale, scale);
 
@@ -605,7 +607,7 @@ export default class VrRendering extends Component<Args> {
       // Converting plain JSON layout data due to worker limitations
       const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
 
-      const applicationObject3D = new ApplicationObject3D(applicationModel, boxLayoutMap,
+      const applicationObject3D = new VrApplicationObject3D(applicationModel, boxLayoutMap,
         dynamicLandscapeData);
 
       // Add new meshes to application
