@@ -100,8 +100,7 @@ export default class HintMenu extends BaseMenu {
   closeMenu() {
     // Since hint menus are not part of a menu group, they have to
     // be removed manually when they are closed.
-    this.onClose();
-    this.deleteFromParent();
-    this.disposeRecursively();
+    this.onCloseMenu();
+    this.parent?.remove(this);
   }
 }

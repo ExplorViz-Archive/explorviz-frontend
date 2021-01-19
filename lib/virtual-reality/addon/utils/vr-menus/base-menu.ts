@@ -43,6 +43,7 @@ export default abstract class BaseMenu extends THREE.Group {
     const background = new THREE.Mesh();
     background.geometry = this.makeBackgroundGeometry();
     background.material = this.makeBackgroundMaterial(color);
+    this.add(background);
   }
 
   makeBackgroundGeometry(): THREE.Geometry {
