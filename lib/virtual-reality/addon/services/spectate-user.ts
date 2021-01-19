@@ -1,7 +1,7 @@
 import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
-import Sender from 'virtual-reality/utils/vr-multi-user/sender';
+import VrMessageSender from 'virtual-reality/utils/vr-message/sender';
 import LocalVrUser from './local-vr-user';
 import WebSocketService from './web-socket';
 
@@ -16,7 +16,7 @@ export default class SpectateUser extends Service {
 
   startPosition: THREE.Vector3 = new THREE.Vector3(); // Position before this user starts spectating
 
-  sender = new Sender(this.webSocket);
+  sender = new VrMessageSender(this.webSocket);
 
   get isActive() { return this.spectatedUser !== null; }
 
