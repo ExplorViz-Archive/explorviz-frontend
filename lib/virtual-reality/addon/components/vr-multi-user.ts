@@ -28,6 +28,19 @@ import { perform } from 'ember-concurrency-ts';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/utils/vr-message/receiver';
+import { SelfConnectedMessage } from 'virtual-reality/utils/vr-message/receivable/self_connected';
+import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
+import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
+import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
+import { UserControllerMessage } from 'virtual-reality/utils/vr-message/sendable/user_controllers';
+import { UserDisconnectedMessage, USER_DISCONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
+import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receivable/landscape';
+import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_opened';
+import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/app_closed';
+import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
+import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
+import { HighlightingUpdateMessage, HIGHLIGHTING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
+import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/spectating_update';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -83,8 +96,8 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
     this.messageBox = new MessageBoxMenu(this.camera);
 
-    this.sender = new Sender(this.webSocket);
-    this.receiver = new Receiver(this.webSocket, this);
+    this.sender = new VrMessageSender(this.webSocket);
+    this.receiver = new VrMessageReceiver(this.webSocket, this);
     this.webSocket.socketCloseCallback = this.onDisconnect.bind(this);
 
     this.localUser.state = 'offline';
@@ -262,15 +275,17 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    *
    * @param {JSON} data Message containing data on other users.
    */
-  onSelfConnected(
-    self: {id: string, name: string, color: number[]}, 
-    users: {id:string, name: string, color: number[], 
-    controllers: {controller1: string, controller2: string}}[]
-  ): void {
-    // Create User model for all users and add them to the users map
+  onSelfConnected({self, users}: SelfConnectedMessage): void {
+    // Create User model for all users and add them to the users map by
+    // simulating the event of a user connecting.
     for (let i = 0; i < users.length; i++) {
       const userData = users[i];
-      this.onUserConnected(userData.id, userData.name, userData.color, false);
+      this.onUserConnected({
+        event: USER_CONNECTED_EVENT,
+        id: userData.id, 
+        name: userData.name,
+        color: userData.color
+      }, false);
     }
     this.localUser.state = 'online';
     this.localUser.userID = self.id;
@@ -303,14 +318,15 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   onUserConnected(
-    id: string,
-    name: string,
-    color: number[],
+    {id, name, color}: UserConnectedMessage,
     showConnectMessage = true
   ): void {
     // If a user triggers multiple connects, simulate a disconnect first
     if (this.idToRemoteUser.has(id)) {
-      this.onUserDisconnect(id);
+      this.onUserDisconnect({
+        event: USER_DISCONNECTED_EVENT,
+        id
+      });
     }
 
     const user = new RemoteVrUser();
@@ -346,13 +362,10 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    *
    * @param {JSON} data - Data needed to update positions.
    */
-  onUserPositions(
-    userID: string, 
-    camera: { position: number[], quaternion: number[] },
-    controller1: { position: number[], quaternion: number[] },
-    controller2: { position: number[], quaternion: number[] }
-): void {
-
+  onUserPositions({
+    userID, 
+    originalMessage: {camera, controller1, controller2}
+  }: ForwardedMessage<UserPositionsMessage>): void {
     const remoteUser = this.idToRemoteUser.get(userID);
     if (remoteUser) {
       if (controller1) { remoteUser.updateController1(controller1); }
@@ -366,11 +379,10 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    *
    * @param {JSON} data - Contains id and controller information.
    */
-  onUserControllers(
-    userID: string,
-    connect: { controller1: string, controller2: string },
-    disconnect: { controller1: string, controller2: string }
-  ): void {
+  onUserControllers({
+    userID, 
+    originalMessage: {connect, disconnect}
+  }: ForwardedMessage<UserControllerMessage>): void {
 
     // Load newly connected controller(s)
     if (connect) {
@@ -393,8 +405,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    *
    * @param {JSON} data - Contains the id of the user that disconnected.
    */
-  onUserDisconnect(id: string) {
-
+  onUserDisconnect({id}: UserDisconnectedMessage) {
     // Do not spectate a disconnected user
     if (this.spectateUser.spectatedUser?.ID === id) {
       this.spectateUser.deactivate();
@@ -417,30 +428,13 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  onInitialLandscape(
-      openApps: {
-          id: string, 
-          position: number[], 
-          quaternion: number[], 
-          openComponents: string[], 
-          highlightedComponents: {
-              userID: string, 
-              appID: string, 
-              entityType: string, 
-              entityID: string, 
-              isHighlighted: boolean}[]
-          }[],
-      landscape: {
-          position: number[], 
-          quaternion: number[]
-      }
-  ): void {
+  onInitialLandscape({openApps, landscape}: InitialLandscapeMessage): void {
 
     this.removeAllApplications();
 
     const { structureLandscapeData } = this.args.landscapeData;
 
-    openApps.forEach((app: any) => {
+    openApps.forEach((app) => {
       const application = getApplicationInLandscapeById(structureLandscapeData, app.id);
       if (application) {
         perform(this.addApplicationTask, application, new THREE.Vector3(),
@@ -466,9 +460,20 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
               Highlighting.updateHighlighting(applicationObject3D, drawableComm);
             }
 
-            app.highlightedComponents.forEach((highlightingUpdate: any) => {
-              this.onHighlightingUpdate(highlightingUpdate.userID, highlightingUpdate.isHighlighted, highlightingUpdate.appID, 
-                highlightingUpdate.entityType, highlightingUpdate.entityID);
+            // Simulate a highlighting update for every initial highlighting
+            // component.
+            app.highlightedComponents.forEach((highlightingUpdate) => {
+              this.onHighlightingUpdate({
+                event: FORWARDED_EVENT,
+                userID: highlightingUpdate.userID,
+                originalMessage: {
+                  event: HIGHLIGHTING_UPDATE_EVENT,
+                  isHighlighted: highlightingUpdate.isHighlighted,
+                  appID: highlightingUpdate.appID,
+                  entityType: highlightingUpdate.entityType,
+                  entityID: highlightingUpdate.entityID
+                }
+              });
             });
           });
       }
@@ -478,11 +483,9 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     this.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
   }
 
-  onAppOpened(
-      id: string, 
-      position: number[], 
-      quaternion: number[]
-  ): void {
+  onAppOpened({
+    originalMessage: {id, position, quaternion}
+  }: ForwardedMessage<AppOpenedMessage>): void {
     const { structureLandscapeData } = this.args.landscapeData;
     const application = getApplicationInLandscapeById(structureLandscapeData, id);
 
@@ -494,7 +497,9 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  onAppClosed(id: string): void {
+  onAppClosed({
+    originalMessage: {id}
+  }: ForwardedMessage<AppClosedMessage>): void {
     const application = this.applicationGroup.getApplication(id);
 
     if (application !== undefined) {
@@ -502,11 +507,9 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  onObjectMoved(
-      objectId: string,
-      position: number[],
-      quaternion: number[]
-  ): void {
+  onObjectMoved({
+    originalMessage: {objectId, position, quaternion}
+  }: ForwardedMessage<ObjectMovedMessage>): void {
     // The moved object can be any of the intersectable objects.
     for (let object of this.interaction.raycastObjects) {
       if (isGrabbableObject(object) && object.getGrabId() == objectId) {
@@ -517,11 +520,9 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  onComponentUpdate(
-      isFoundation: boolean,
-      appID: string,
-      componentID: string
-  ): void {
+  onComponentUpdate({
+    originalMessage: {isFoundation, appID, componentID}
+  }: ForwardedMessage<ComponentUpdateMessage>): void {
     const applicationObject3D = this.applicationGroup.getApplication(appID);
     if (!applicationObject3D) return;
 
@@ -534,13 +535,10 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  onHighlightingUpdate(
-    userID: string,
-    isHighlighted: boolean,
-    appID: string,
-    entityType: string,
-    entityID: string
-  ): void {
+  onHighlightingUpdate({
+    userID,
+    originalMessage: {isHighlighted, appID, entityType, entityID}
+  }: ForwardedMessage<HighlightingUpdateMessage>): void {
     const applicationObject3D = this.applicationGroup.getApplication(appID);
 
     if (!applicationObject3D) return;
@@ -590,7 +588,10 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   * @param {number} userID - The user's id.
   * @param {boolean} isSpectating - True, if the user is now spectating, else false.
   */
-  onSpectatingUpdate(userID: string, isSpectating: boolean): void {
+  onSpectatingUpdate({
+    userID,
+    originalMessage: {isSpectating}
+  }: ForwardedMessage<SpectatingUpdateMessage>): void {
     const remoteUser = this.idToRemoteUser.get(userID);
 
     if (!remoteUser) return;
