@@ -12,7 +12,9 @@ export interface GrabbableObject extends THREE.Object3D {
 }
 
 export function isGrabbableObject(object: any): object is GrabbableObject {
-    return 'getGrabId' in object;
+    return object !== null 
+        && typeof object === 'object'
+        && typeof object.getGrabId === 'function';
 }
 
 export default class GrabMenu extends PseudoMenu {
