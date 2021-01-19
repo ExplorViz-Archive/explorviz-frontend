@@ -20,6 +20,10 @@ export default class TextItem extends Item {
     this.alignment = alignment;
   }
 
+  setText(text: string) {
+    this.text = text;
+  }
+
   getBoundingBox() {
     return {
       minX: this.getMinX(),

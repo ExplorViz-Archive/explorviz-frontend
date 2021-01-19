@@ -1,16 +1,45 @@
-import THREE from "three";
+import THREE, { Scene, Texture } from "three";
+import CloseIcon from "../view-objects/vr/close-icon";
 import VRControllerBindings from "../vr-controller/vr-controller-bindings";
 import VRController from "../vr-rendering/VRController";
 import BaseMenu from "./base-menu";
+import { GrabbableObject } from "./pseudo-menu/grab-menu";
+
+export interface DetachableMenu extends BaseMenu {
+    getDetachId(): string;
+}
+
+export function isDetachableMenu(menu: BaseMenu): menu is DetachableMenu {
+    return 'getDetachId' in menu;
+}
+
+export type MenuDistachedEvent = {type: string, menuContainer: GrabbableMenuContainer};
+
+export class GrabbableMenuContainer extends THREE.Group implements GrabbableObject {
+    grabId: string;
+    menu: DetachableMenu;
+
+    constructor(menu: DetachableMenu, grabId: string) {
+        super();
+        this.menu = menu;
+        this.grabId = grabId;
+    }
+    getGrabId(): string {
+        return this.grabId;
+    }
+
+}
 
 export default class MenuGroup extends THREE.Group {
     menus: BaseMenu[];
     controllerBindings: VRControllerBindings[];
+    closeButtonTexture: Texture
 
-    constructor() {
+    constructor(closeButtonTexture: Texture) {
         super();
         this.menus = [];
         this.controllerBindings = [];
+        this.closeButtonTexture = closeButtonTexture;
     }
 
     /**
@@ -71,10 +100,10 @@ export default class MenuGroup extends THREE.Group {
      * If a previously open menu was hidden by {@link MenuGroup.openMenu},
      * it is shown again by adding the mesh back to this group.
      */
-    closeMenu() {
+    closeMenu(detach: boolean = false) {
         let closedMenu = this.menus.pop();
         this.controllerBindings.pop();
-        if (closedMenu) {
+        if (closedMenu && !detach) {
             closedMenu.onCloseMenu();
             this.remove(closedMenu);
         }
@@ -87,5 +116,21 @@ export default class MenuGroup extends THREE.Group {
 
         // Hide or show the controllers ray.
         this.toggleControllerRay();
+    }
+
+    detachMenu() {
+        let menu = this.currentMenu;
+        if (menu && isDetachableMenu(menu)) {
+
+            //add close icon
+            const closeIcon = new CloseIcon(this.closeButtonTexture);
+            closeIcon.addToObject(menu);
+            
+            this.closeMenu(true);
+
+            // send detached menu
+            let menuContainer = new GrabbableMenuContainer(menu, menu.getDetachId());
+            this.dispatchEvent({type: 'detachMenu', menuContainer: menuContainer});
+        }
     }
 }

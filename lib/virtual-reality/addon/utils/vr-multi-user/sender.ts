@@ -189,4 +189,18 @@ export default class Sender {
 
     this.webSocket.send(appObj);
   }
+
+  sendMenuDetached(detachId: string, position: THREE.Vector3, quaternion: THREE.Quaternion) {
+    const nonce = this.nextNonce();
+    const obj = {
+      event: 'menu_detached',
+      nonce: nonce,
+      detachId: detachId,
+      position: position.toArray(),
+      quaternion: quaternion.toArray(), 
+    };
+
+    this.webSocket.send(obj);
+    return nonce;
+  }
 }

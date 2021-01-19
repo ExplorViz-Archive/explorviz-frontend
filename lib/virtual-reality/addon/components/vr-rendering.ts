@@ -40,7 +40,6 @@ import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
-import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
@@ -58,6 +57,7 @@ import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-co
 import VRControllerThumbpadBinding, { VRControllerThumbpadDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import SettingsMenu from 'virtual-reality/utils/vr-menus/settings-menu';
 import ResetMenu from 'virtual-reality/utils/vr-menus/reset-menu';
+import { hasContent } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 
 interface Args {
   readonly id: string;
@@ -303,7 +303,7 @@ export default class VrRendering extends Component<Args> {
     id: number,
     color: THREE.Color
   }): VRController {
-    const menuGroup = new MenuGroup();
+    const menuGroup = new MenuGroup(this.closeButtonTexture);
     const controller = new VRController({
       gamepadIndex: id,
       scene: this.scene,
@@ -621,7 +621,7 @@ export default class VrRendering extends Component<Args> {
       // Add labels and close icon to application
       this.addLabels(applicationObject3D);
       const closeIcon = new CloseIcon(this.closeButtonTexture);
-      closeIcon.addToApplication(applicationObject3D);
+      closeIcon.addToObject(applicationObject3D);
 
       // Scale application to a reasonable size to work with it
       const scalar = this.applicationScalar;
@@ -758,9 +758,8 @@ export default class VrRendering extends Component<Args> {
             case VRControllerThumbpadDirection.DOWN:
               if (controller.intersectedObject) {
                 const { object } = controller.intersectedObject;
-                const content = composeContent(object);
-                if (content) {
-                  this.openInfoMenu(controller, content);
+                if (hasContent(object)) {
+                  this.openInfoMenu(controller, object);
                 }
               }
               break;
@@ -905,8 +904,8 @@ export default class VrRendering extends Component<Args> {
     }));
   }
 
-  openInfoMenu(controller: VRController, content: DetailedInfo) {
-    controller.menuGroup.openMenu(new DetailInfoMenu(content));
+  openInfoMenu(controller: VRController, object: THREE.Object3D) {
+    controller.menuGroup.openMenu(new DetailInfoMenu(object));
   }
 
   // #endregion MENUS
@@ -932,7 +931,11 @@ export default class VrRendering extends Component<Args> {
     } else if (object.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
     } else if (object.parent instanceof BaseMenu && uv) {
-      object.parent.triggerDown(uv);
+      if (object instanceof CloseIcon) {
+        this.scene.remove(object.parent);
+      } else if (uv) {
+        object.parent.triggerDown(uv);
+      }
     }
   }
 

@@ -271,6 +271,12 @@ export default abstract class BaseMenu extends THREE.Group {
     }
   }
 
+  detachMenu() {
+    if (this.parent instanceof MenuGroup) {
+      this.parent.detachMenu();
+    }
+  }
+
   /**
    * Callback that is invoked by the menu group when this menu is opened.
    */

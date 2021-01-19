@@ -100,3 +100,15 @@ export default function composeContent(object: THREE.Object3D) {
 
   return content;
 }
+
+function getContentClasses() {
+  return [NodeMesh, ApplicationMesh, ComponentMesh, ClazzMesh, ClazzCommunicationMesh]
+}
+
+export function hasContent(object: THREE.Object3D) {
+  let b = false;
+  getContentClasses().forEach((contentClass) => {
+    if (object instanceof contentClass) b = true;
+  })
+  return b;
+}

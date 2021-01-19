@@ -28,6 +28,7 @@ import { perform } from 'ember-concurrency-ts';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
 import Receiver, { MessageListener } from 'virtual-reality/utils/receiver';
+import { MenuDistachedEvent } from 'virtual-reality/utils/vr-menus/menu-group';
 
 export default class VrMultiUser extends VrRendering implements MessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -61,6 +62,9 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
 
   messageBox!: MessageBoxMenu;
 
+  detachedMenus!: THREE.Group;
+
+
   getRemoteUsers() {
     return this.idToRemoteUser;
   }
@@ -73,7 +77,9 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
     super(owner, args);
 
     this.remoteUserGroup = new THREE.Group();
+    this.detachedMenus = new THREE.Group();
     this.hardwareModels = new HardwareModels();
+
   }
 
   initRendering() {
@@ -95,16 +101,34 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
   initControllers() {
     super.initControllers();
 
+    let listener = (event: MenuDistachedEvent) => {
+      let menuContainer = event.menuContainer;
+      this.detachedMenus.add(menuContainer);
+      this.scene.add(menuContainer);
+      const position = new THREE.Vector3;
+      const quaternion = new THREE.Quaternion;
+      menuContainer.menu.getWorldPosition(position);
+      menuContainer.menu.getWorldQuaternion(quaternion);
+      const nonce = this.sender.sendMenuDetached(menuContainer.menu.getDetachId(), position, quaternion);
+      this.receiver.awaitResponse(nonce, (response: { objectId: string }) => {
+        menuContainer.grabId = response.objectId;
+      });
+    };
+
     if (this.localUser.controller1) {
       this.localUser.controller1.eventCallbacks.connected = this.onControllerConnected.bind(this);
       this.localUser.controller1.eventCallbacks.disconnected = this
         .onControllerDisconnected.bind(this);
+      this.localUser.controller1.menuGroup.addEventListener('menu_distached', listener);
+      this.localUser.controller1.intersectableObjects.push(this.detachedMenus);
     }
 
     if (this.localUser.controller2) {
       this.localUser.controller2.eventCallbacks.connected = this.onControllerConnected.bind(this);
       this.localUser.controller2.eventCallbacks.disconnected = this
         .onControllerDisconnected.bind(this);
+      this.localUser.controller2.menuGroup.addEventListener('menu_distached', listener);
+      this.localUser.controller2.intersectableObjects.push(this.detachedMenus);
     }
   }
 
@@ -192,7 +216,7 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
       this.sender.sendControllerUpdate({}, disconnect);
     }
   }
-  
+
   grabIntersectedObject(controller: VRController) {
     if (!controller.intersectedObject || !controller.ray) return;
 
@@ -263,9 +287,11 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
    * @param {JSON} data Message containing data on other users.
    */
   onSelfConnected(
-    self: {id: string, name: string, color: number[]}, 
-    users: {id:string, name: string, color: number[], 
-    controllers: {controller1: string, controller2: string}}[]
+    self: { id: string, name: string, color: number[] },
+    users: {
+      id: string, name: string, color: number[],
+      controllers: { controller1: string, controller2: string }
+    }[]
   ): void {
     // Create User model for all users and add them to the users map
     for (let i = 0; i < users.length; i++) {
@@ -347,11 +373,11 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
    * @param {JSON} data - Data needed to update positions.
    */
   onUserPositions(
-    userID: string, 
+    userID: string,
     camera: { position: number[], quaternion: number[] },
     controller1: { position: number[], quaternion: number[] },
     controller2: { position: number[], quaternion: number[] }
-): void {
+  ): void {
 
     const remoteUser = this.idToRemoteUser.get(userID);
     if (remoteUser) {
@@ -418,22 +444,23 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
   }
 
   onInitialLandscape(
-      openApps: {
-          id: string, 
-          position: number[], 
-          quaternion: number[], 
-          openComponents: string[], 
-          highlightedComponents: {
-              userID: string, 
-              appID: string, 
-              entityType: string, 
-              entityID: string, 
-              isHighlighted: boolean}[]
-          }[],
-      landscape: {
-          position: number[], 
-          quaternion: number[]
-      }
+    openApps: {
+      id: string,
+      position: number[],
+      quaternion: number[],
+      openComponents: string[],
+      highlightedComponents: {
+        userID: string,
+        appID: string,
+        entityType: string,
+        entityID: string,
+        isHighlighted: boolean
+      }[]
+    }[],
+    landscape: {
+      position: number[],
+      quaternion: number[]
+    }
   ): void {
 
     this.removeAllApplications();
@@ -467,7 +494,7 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
             }
 
             app.highlightedComponents.forEach((highlightingUpdate: any) => {
-              this.onHighlightingUpdate(highlightingUpdate.userID, highlightingUpdate.isHighlighted, highlightingUpdate.appID, 
+              this.onHighlightingUpdate(highlightingUpdate.userID, highlightingUpdate.isHighlighted, highlightingUpdate.appID,
                 highlightingUpdate.entityType, highlightingUpdate.entityID);
             });
           });
@@ -479,9 +506,9 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
   }
 
   onAppOpened(
-      id: string, 
-      position: number[], 
-      quaternion: number[]
+    id: string,
+    position: number[],
+    quaternion: number[]
   ): void {
     const { structureLandscapeData } = this.args.landscapeData;
     const application = getApplicationInLandscapeById(structureLandscapeData, id);
@@ -503,9 +530,9 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
   }
 
   onObjectMoved(
-      objectId: string,
-      position: number[],
-      quaternion: number[]
+    objectId: string,
+    position: number[],
+    quaternion: number[]
   ): void {
     // The moved object can be any of the intersectable objects.
     for (let object of this.interaction.raycastObjects) {
@@ -518,9 +545,9 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
   }
 
   onComponentUpdate(
-      isFoundation: boolean,
-      appID: string,
-      componentID: string
+    isFoundation: boolean,
+    appID: string,
+    componentID: string
   ): void {
     const applicationObject3D = this.applicationGroup.getApplication(appID);
     if (!applicationObject3D) return;
@@ -616,8 +643,8 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
 
   sendPoses() {
     const poses = Helper.getPoses(
-      this.localUser.camera, 
-      this.localUser.controller1, 
+      this.localUser.camera,
+      this.localUser.controller1,
       this.localUser.controller2
     );
     this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
@@ -767,4 +794,5 @@ export default class VrMultiUser extends VrRendering implements MessageListener 
     this.localUser.disconnect();
     this.spectateUser.reset();
   }
+
 }
