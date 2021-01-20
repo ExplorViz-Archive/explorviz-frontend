@@ -12,6 +12,7 @@
 
 # dependencies
 /node_modules
+/lib/virtual-reality/node_modules
 /bower_components
 
 # misc

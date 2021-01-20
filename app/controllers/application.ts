@@ -41,7 +41,7 @@ export default class ApplicationController extends Controller {
   }
 
   async loadCurrentUserPreferences() {
-    const userId = this.session.get('session.content.authenticated.rawUserData.data.id');
+    const userId = this.session.session.content.authenticated.rawUserData.data.id;
     if (!isEmpty(userId)) {
       await this.store.query('userpreference', { userId }).catch(() => {
         this.session.invalidate({ message: 'User preferences could not be loaded' });

@@ -1,6 +1,8 @@
 import THREE from 'three';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
+import { tracked } from '@glimmer/tracking';
 import FoundationMesh from './foundation-mesh';
 import ClazzMesh from './clazz-mesh';
 import ComponentMesh from './component-mesh';
@@ -19,6 +21,8 @@ export default class ApplicationObject3D extends THREE.Object3D {
    */
   dataModel: Application;
 
+  boxLayoutMap: Map<string, BoxLayout>;
+
   traces: Trace[];
 
   /**
@@ -36,11 +40,24 @@ export default class ApplicationObject3D extends THREE.Object3D {
    */
   componentMeshes: Set<ComponentMesh> = new Set();
 
-  constructor(application: Application, traces: Trace[]) {
+  @tracked
+  highlightedEntity: BaseMesh | Trace | null = null;
+
+  constructor(application: Application, boxLayoutMap: Map<string, BoxLayout>, traces: Trace[]) {
     super();
 
     this.dataModel = application;
+    this.boxLayoutMap = boxLayoutMap;
     this.traces = traces;
+  }
+
+  get layout() {
+    const layout = this.getBoxLayout(this.dataModel.pid);
+    if (layout) {
+      return layout;
+    }
+
+    return new BoxLayout();
   }
 
   /**
@@ -81,6 +98,10 @@ export default class ApplicationObject3D extends THREE.Object3D {
     }
 
     return this;
+  }
+
+  getBoxLayout(id: string) {
+    return this.boxLayoutMap.get(id);
   }
 
   /**
@@ -136,6 +157,13 @@ export default class ApplicationObject3D extends THREE.Object3D {
     });
 
     return openComponentIds;
+  }
+
+  setHighlightingColor(color: THREE.Color) {
+    this.getAllMeshes().forEach((mesh) => {
+      mesh.highlightingColor = color;
+      mesh.updateColor();
+    });
   }
 
   /**

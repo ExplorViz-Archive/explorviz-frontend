@@ -5,11 +5,11 @@ import THREE from 'three';
 type CallbackFunctions = {
   mouseEnter?(): void,
   mouseOut?(): void,
-  mouseMove?(mesh?: THREE.Mesh): void,
-  mouseStop?(mesh?: THREE.Mesh, mousePosition?: Position2D): void,
+  mouseMove?(intersection: THREE.Intersection|null): void,
+  mouseStop?(intersection: THREE.Intersection|null, mousePosition?: Position2D): void,
   mouseWheel?(delta: number): void,
-  singleClick?(mesh?: THREE.Mesh): void,
-  doubleClick?(mesh?: THREE.Mesh): void,
+  singleClick?(intersection: THREE.Intersection|null): void,
+  doubleClick?(intersection: THREE.Intersection|null): void,
   panning?(delta: {x: number, y: number}, button: 1|2|3): void
 };
 
@@ -40,24 +40,29 @@ export default class Interaction {
   renderer: THREE.WebGLRenderer;
 
   // Contains all Objects3D which shall be raycasted
-  raycastObject3D: THREE.Object3D;
+  raycastObjects: THREE.Object3D[];
 
   // Used to determine if and which object was hit
   raycaster: Raycaster;
 
-  // Needed for events like 'double tap'
+  // Needed for events like 'singleTap' and 'doubleTap'
   hammerHandler: HammerInteraction;
 
   // Contains functions which should be called in case of an event
   eventCallbackFunctions: CallbackFunctions;
 
+  // Function to filter raycast results as desired
+  raycastFilter: ((intersection: THREE.Intersection) => boolean) | undefined;
+
   constructor(canvas: HTMLCanvasElement, camera: THREE.Camera, renderer: THREE.WebGLRenderer,
-    application: THREE.Object3D, eventCallbackFunctions: CallbackFunctions) {
+    raycastObjects: THREE.Object3D[], eventCallbackFunctions: CallbackFunctions,
+    raycastFilter?: (intersection: THREE.Intersection) => boolean) {
     this.canvas = canvas;
     this.camera = camera;
     this.renderer = renderer;
-    this.raycastObject3D = application;
+    this.raycastObjects = raycastObjects;
     this.eventCallbackFunctions = { ...eventCallbackFunctions };
+    this.raycastFilter = raycastFilter;
 
     this.raycaster = new Raycaster();
 
@@ -138,11 +143,7 @@ export default class Interaction {
 
     const intersectedViewObj = this.raycast(mouse);
 
-    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
-      this.eventCallbackFunctions.mouseMove(intersectedViewObj.object);
-    } else {
-      this.eventCallbackFunctions.mouseMove();
-    }
+    this.eventCallbackFunctions.mouseMove(intersectedViewObj);
   }
 
   onMouseStop(evt: CustomEvent<MouseStopEvent>) {
@@ -153,11 +154,7 @@ export default class Interaction {
 
     const intersectedViewObj = this.raycast(mouse);
 
-    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
-      this.eventCallbackFunctions.mouseStop(intersectedViewObj.object, mouse);
-    } else {
-      this.eventCallbackFunctions.mouseStop();
-    }
+    this.eventCallbackFunctions.mouseStop(intersectedViewObj, mouse);
   }
 
   onMouseWheelStart(evt: WheelEvent) {
@@ -174,11 +171,7 @@ export default class Interaction {
 
     const intersectedViewObj = this.raycast(mouse);
 
-    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
-      this.eventCallbackFunctions.singleClick(intersectedViewObj.object);
-    } else {
-      this.eventCallbackFunctions.singleClick();
-    }
+    this.eventCallbackFunctions.singleClick(intersectedViewObj);
   }
 
   onDoubleClick(mouse: Position2D) {
@@ -186,11 +179,7 @@ export default class Interaction {
 
     const intersectedViewObj = this.raycast(mouse);
 
-    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
-      this.eventCallbackFunctions.doubleClick(intersectedViewObj.object);
-    } else {
-      this.eventCallbackFunctions.doubleClick();
-    }
+    this.eventCallbackFunctions.doubleClick(intersectedViewObj);
   }
 
   onPanning(delta: {x: number, y: number}, event: any) {
@@ -206,16 +195,14 @@ export default class Interaction {
 
     const y = -(mouseOnCanvas.y / this.renderer.domElement.clientHeight) * 2 + 1;
 
-    const origin = { x, y };
-
-    return origin;
+    return { x, y };
   }
 
   raycast(mouseOnCanvas: Position2D) {
     const origin = this.calculatePositionInScene(mouseOnCanvas);
 
     const intersectedViewObj = this.raycaster.raycasting(origin, this.camera,
-      this.raycastObject3D.children);
+      this.raycastObjects, this.raycastFilter);
 
     return intersectedViewObj;
   }

@@ -88,6 +88,10 @@ export default class LandscapeObject3D extends THREE.Object3D {
     removeChildren(this);
   }
 
+  isEmpty() {
+    return this.modelIdToMesh.size === 0;
+  }
+
   /**
    * Computes a minimum bounding rectangle for the layouted landscape
    */

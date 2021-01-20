@@ -2,54 +2,43 @@ import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/applicati
 import applyCommunicationLayout from 'explorviz-frontend/utils/application-rendering/communication-layouter';
 import Configuration from 'explorviz-frontend/services/configuration';
 import CurrentUser from 'explorviz-frontend/services/current-user';
-import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
 
 export default class CommunicationRendering {
-  // Functions as parent object for all application objects
-  applicationObject3D: ApplicationObject3D;
-
   // Service to access color preferences
   configuration: Configuration;
 
   // Used to access communication drawing preferences
   currentUser: CurrentUser;
 
-  // Maps model ids to layouting information
-  boxLayoutMap: Map<string, BoxLayout>;
-
-  constructor(applicationObject3D: ApplicationObject3D, configuration: Configuration,
-    currentUser: CurrentUser, boxLayoutMap: Map<string, BoxLayout>) {
-    this.applicationObject3D = applicationObject3D;
+  constructor(configuration: Configuration, currentUser: CurrentUser) {
     this.configuration = configuration;
     this.currentUser = currentUser;
-    this.boxLayoutMap = boxLayoutMap;
   }
 
   /**
    * Computes communication and communication arrows and adds them to the
    * applicationObject3D
    *
-   * @param boxLayoutMap Contains box layout informationen which
-   *                     is needed for the communication layouting
+   * @param applicationObject3D Contains all application meshes.
+   *                            Computed communication is added to to object.
    */
-  addCommunication(drawableClassCommunications: DrawableClassCommunication[]) {
-    const application = this.applicationObject3D.dataModel;
-    const applicationLayout = this.boxLayoutMap.get(application.pid);
+  addCommunication(applicationObject3D: ApplicationObject3D,
+    drawableClassCommunications: DrawableClassCommunication[]) {
+    const application = applicationObject3D.dataModel;
+    const applicationLayout = applicationObject3D.boxLayoutMap.get(application.pid);
 
-    if (applicationLayout === undefined) {
-      return;
-    }
+    if (!applicationLayout) { return; }
 
     const viewCenterPoint = applicationLayout.center;
 
     // Remove old communication
-    this.applicationObject3D.removeAllCommunication();
+    applicationObject3D.removeAllCommunication();
 
     // Compute communication Layout
-    const commLayoutMap = applyCommunicationLayout(this.applicationObject3D,
-      this.boxLayoutMap, drawableClassCommunications);
+    const commLayoutMap = applyCommunicationLayout(applicationObject3D,
+      applicationObject3D.boxLayoutMap, drawableClassCommunications);
 
     // Retrieve color preferences
     const {
@@ -79,7 +68,7 @@ export default class CommunicationRendering {
 
       pipe.render(viewCenterPoint, curveHeight);
 
-      this.applicationObject3D.add(pipe);
+      applicationObject3D.add(pipe);
 
       // Add arrow indicators for communication
       const ARROW_OFFSET = 0.8;

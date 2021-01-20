@@ -33,4 +33,20 @@ export default class BoxLayout {
 
     return centerPoint;
   }
+
+  /**
+   * Scales layout positions and extensions just like a object in three.js is scaled.
+   *
+   * @param scalar The scalar which is multiplied with the current
+   *               positions / extensions of the layout.
+   */
+  scale(scalar: number) {
+    this.width *= scalar;
+    this.height *= scalar;
+    this.depth *= scalar;
+
+    this.positionX *= scalar;
+    this.positionY *= scalar;
+    this.positionZ *= scalar;
+  }
 }

@@ -3,16 +3,16 @@ import AppCommunicationMesh from 'explorviz-frontend/view-objects/3d/landscape/a
 import { ApplicationCommunication } from './application-communication-computer';
 
 // Simple 2-dimensional point
-type point = { x: number, y: number };
+type Point = { x: number, y: number };
 
 // Blueprint for a drawable application communication
-type tile = {
-  startPoint: point, endPoint: point, positionZ: number, requestsCache: number,
+type Tile = {
+  startPoint: Point, endPoint: Point, positionZ: number, requestsCache: number,
   lineThickness: number, pipeColor: THREE.Color
 };
 
 // Simplified Tile
-type tileWay = { startPoint: point, endPoint: point };
+type TileWay = { startPoint: Point, endPoint: Point };
 
 /**
  * Checks wheter two given 2-d-points are equal based on their x- and
@@ -21,7 +21,7 @@ type tileWay = { startPoint: point, endPoint: point };
  * @param p1 First point
  * @param p2 Second point
  */
-function checkEqualityOfPoints(p1: point, p2: point) {
+function checkEqualityOfPoints(p1: Point, p2: Point) {
   const x = Math.abs(p1.x - p2.x) <= 0.01;
   const y = Math.abs(p1.y - p2.y) <= 0.01;
 
@@ -35,7 +35,7 @@ function checkEqualityOfPoints(p1: point, p2: point) {
  * @param this First Tile for comparison check
  * @param tile Second Tile for comparison check
  */
-function isSameTile(this: tileWay, tile: any) {
+function isSameTile(this: TileWay, tile: any) {
   return checkEqualityOfPoints(this.endPoint, tile.endPoint)
     && checkEqualityOfPoints(this.startPoint, tile.startPoint);
 }
@@ -49,9 +49,9 @@ function isSameTile(this: tileWay, tile: any) {
  * @param color Desired color for the tiles
  */
 export function computeCommunicationTiles(appCommunications: ApplicationCommunication[],
-  modelIdToPoints: Map<string, point[]>, color: THREE.Color) {
-  const tiles: tile[] = [];
-  let tile: tile;
+  modelIdToPoints: Map<string, Point[]>, color: THREE.Color, zOffset = 0.025) {
+  const tiles: Tile[] = [];
+  let tile: Tile;
 
   appCommunications.forEach((applicationCommunication) => {
     const points = modelIdToPoints.get(applicationCommunication.id);
@@ -77,7 +77,7 @@ export function computeCommunicationTiles(appCommunications: ApplicationCommunic
           tile = {
             startPoint: lastPoint,
             endPoint: thisPoint,
-            positionZ: 0.025, // Tiles should be in front of nodes
+            positionZ: zOffset, // Tiles should be in front of nodes
             requestsCache: 0,
             lineThickness: 1, // Determined later on
             pipeColor: color,
@@ -184,8 +184,8 @@ function getCategories(requestMap: Map<number, number>, isLinear: boolean) {
  * @param parent Object to which communication lines are added
  * @param centerPoint Offset of landscape objects: Used to align communication
  */
-export function addCommunicationLineDrawing(tiles: tile[], parent: THREE.Object3D,
-  centerPoint: THREE.Vector2) {
+export function addCommunicationLineDrawing(tiles: Tile[], parent: THREE.Object3D,
+  centerPoint: THREE.Vector2, minSize = 0.04, scalar = 0.28) {
   const requestsToCategory = new Map();
 
   // Initialize Category mapping with default value 0
@@ -201,7 +201,7 @@ export function addCommunicationLineDrawing(tiles: tile[], parent: THREE.Object3
     const tile = tiles[i];
     const category = categoryMapping.get(tile.requestsCache);
     if (category) {
-      tile.lineThickness = 0.28 * category + 0.04;
+      tile.lineThickness = scalar * category + minSize;
       const line = new AppCommunicationMesh(tile);
       line.addOffset(centerPoint);
       parent.add(line);

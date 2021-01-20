@@ -1,5 +1,3 @@
-/* jshint node:true */
-/* global require, module */
 const sass = require('sass');
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
@@ -13,6 +11,7 @@ module.exports = (defaults) => {
     // Default implementation for ember-cli-sass
     sassOptions: {
       implementation: sass,
+      includePaths: ['lib/virtual-reality/addon/styles'],
     },
 
     svgJar: {
@@ -29,12 +28,6 @@ module.exports = (defaults) => {
     fingerprint: {
       exclude: ['images'],
     },
-
-    nodeModulesToVendor: [
-      // add node_modules that you need in vendor modules
-      // See: https://www.npmjs.com/package/ember-cli-node-modules-to-vendor
-      'node_modules/three/build',
-    ],
 
     'ember-bootstrap': {
       bootstrapVersion: 4,
@@ -73,6 +66,7 @@ module.exports = (defaults) => {
   app.import('node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css');
   app.import('node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js');
 
+  app.import('node_modules/webxr-polyfill/build/webxr-polyfill.min.js');
   app.import('node_modules/elkjs/lib/elk-api.js');
 
   return app.toTree();

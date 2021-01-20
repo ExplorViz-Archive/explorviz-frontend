@@ -13,7 +13,6 @@ import * as CommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import HoverEffectHandler from 'explorviz-frontend/utils/hover-effect-handler';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
@@ -37,6 +36,7 @@ interface Args {
   showApplication(application: Application): void;
   openDataSelection(): void;
   toggleVisualizationUpdating(): void;
+  switchToVR(): void;
 }
 
 interface SimplePlaneLayout {
@@ -52,17 +52,17 @@ type PopupData = {
   entity: Node | Application,
 };
 
-type Point = {
+export type Point = {
   x: number,
   y: number
 };
 
-interface Layout1Return {
+export interface Layout1Return {
   graph: ElkNode,
   modelIdToPoints: Map<string, Point[]>,
 }
 
-interface Layout3Return {
+export interface Layout3Return {
   modelIdToLayout: Map<string, SimplePlaneLayout>,
   modelIdToPoints: Map<string, Point[]>,
 }
@@ -122,7 +122,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   readonly imageLoader: ImageLoader = new ImageLoader();
 
-  readonly hoverHandler: HoverEffectHandler = new HoverEffectHandler();
+  hoveredObject: BaseMesh|null = null;
 
   get rightClickMenuItems() {
     const pauseItemtitle = this.args.visualizationPaused ? 'Resume Visualization' : 'Pause Visualization';
@@ -131,6 +131,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       { title: 'Reset View', action: this.resetView },
       { title: pauseItemtitle, action: this.args.toggleVisualizationUpdating },
       { title: 'Open Sidebar', action: this.args.openDataSelection },
+      { title: 'Enter VR', action: this.args.switchToVR },
     ];
   }
 
@@ -267,7 +268,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer,
-      this.landscapeObject3D, {
+      [this.landscapeObject3D], {
         doubleClick: this.handleDoubleClick,
         mouseMove: this.handleMouseMove,
         mouseWheel: this.handleMouseWheel,
@@ -556,7 +557,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #region MOUSE EVENT HANDLER
 
-  handleDoubleClick(mesh?: THREE.Mesh) {
+  handleDoubleClick(intersection: THREE.Intersection | null) {
+    if (!intersection) return;
+    const mesh = intersection.object;
+
     // Handle application
     if (mesh instanceof ApplicationMesh) {
       this.openApplicationIfExistend(mesh);
@@ -595,15 +599,22 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
-  handleMouseMove(mesh: THREE.Mesh | undefined) {
+  handleMouseMove(intersection: THREE.Intersection | null) {
+    if (!intersection) return;
+    const mesh = intersection.object;
+
     const enableHoverEffects = true;
     // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
     // Update hover effect
-    if (mesh === undefined) {
-      this.hoverHandler.resetHoverEffect();
+    if (mesh === undefined && this.hoveredObject) {
+      this.hoveredObject.resetHoverEffect();
+      this.hoveredObject = null;
     } else if (mesh instanceof PlaneMesh && enableHoverEffects) {
-      this.hoverHandler.applyHoverEffect(mesh);
+      if (this.hoveredObject) { this.hoveredObject.resetHoverEffect(); }
+
+      this.hoveredObject = mesh;
+      mesh.applyHoverEffect();
     }
 
     // Do not show popups while mouse is moving
@@ -618,8 +629,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   handleMouseEnter() {
   } */
 
-  handleMouseStop(mesh: THREE.Mesh | undefined, mouseOnCanvas: Position2D) {
-    if (mesh === undefined) { return; }
+  handleMouseStop(intersection: THREE.Intersection | null, mouseOnCanvas: Position2D) {
+    if (!intersection) return;
+    const mesh = intersection.object;
 
     if (mesh instanceof NodeMesh || mesh instanceof ApplicationMesh) {
       this.popupData = {

@@ -9,6 +9,8 @@
 @import "_visualization_navbar";
 @import "_token_selection";
 @import '_right_click_menu';
+// located in lib/virtual-reality/addon/styles
+@import "_virtual_reality";
 
 @import "ember-bootstrap/bootstrap";
 @import 'ember-power-select/themes/bootstrap';
