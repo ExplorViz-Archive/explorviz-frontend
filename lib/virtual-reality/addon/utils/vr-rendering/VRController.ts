@@ -370,7 +370,7 @@ export default class VRController extends BaseMesh {
   }
 
   updateIntersectedObject() {
-    if (!this.ray) return;
+    if (!this.ray || !this.ray.visible) return;
 
     const intersections = this.computeIntersections();
 

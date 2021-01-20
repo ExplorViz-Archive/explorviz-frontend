@@ -2,6 +2,18 @@ import WebSocketService from 'virtual-reality/services/web-socket';
 import THREE from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import { EntityType } from './util/entity_type';
+import { AppClosedMessage } from './sendable/app_closed';
+import { AppOpenedMessage } from './sendable/app_opened';
+import { ComponentUpdateMessage } from './sendable/component_update';
+import { HighlightingUpdateMessage } from './sendable/highlighting_update';
+import { ObjectMovedMessage } from './sendable/object_moved';
+import { ObjectReleasedMessage } from './sendable/object_released';
+import { MenuDetachedMessage } from './sendable/request/menu_detached';
+import { ObjectGrabbedMessage } from './sendable/request/object_grabbed';
+import { SpectatingUpdateMessage } from './sendable/spectating_update';
+import { UserControllerMessage } from './sendable/user_controllers';
+import { UserPositionsMessage } from './sendable/user_positions';
+
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
 export default class VrMessageSender {
@@ -27,7 +39,7 @@ export default class VrMessageSender {
    * controllers.
    */
   sendPoseUpdate(camera: Pose, controller1: Pose, controller2: Pose) {
-    this.webSocket.send({
+    this.webSocket.send<UserPositionsMessage>({
       event: 'user_positions',
       controller1: {
         position: controller1.position.toArray(),
@@ -41,7 +53,6 @@ export default class VrMessageSender {
         position: camera.position.toArray(),
         quaternion: camera.quaternion.toArray(),
       },
-      time: Date.now(),
     });
   }
 
@@ -53,7 +64,7 @@ export default class VrMessageSender {
    */
   sendObjectGrabbed(objectId: string): number {
     const nonce = this.nextNonce();
-    this.webSocket.send({
+    this.webSocket.send<ObjectGrabbedMessage>({
       event: 'object_grabbed',
       nonce, objectId
     });
@@ -68,7 +79,7 @@ export default class VrMessageSender {
    * @param quaternion The new rotation of the grabbed object in world coordinates.
    */
   sendObjectMoved(objectId: string, position: THREE.Vector3, quaternion: THREE.Quaternion) {
-    this.webSocket.send({
+    this.webSocket.send<ObjectMovedMessage>({
       event: 'object_moved', 
       objectId, 
       position: position.toArray(), 
@@ -83,7 +94,7 @@ export default class VrMessageSender {
    * @param objectId The id of the object to request to grab.
    */
   sendObjectReleased(objectId: string) {
-    this.webSocket.send({
+    this.webSocket.send<ObjectReleasedMessage>({
       event: 'object_released', 
       objectId
     });
@@ -95,11 +106,10 @@ export default class VrMessageSender {
    * @param {string} appID ID of the closed application
    */
   sendAppClosed(appID: string) {
-    const appObj = {
+    this.webSocket.send<AppClosedMessage>({
       event: 'app_closed',
       id: appID,
-    };
-    this.webSocket.send(appObj);
+    });
   }
 
   /**
@@ -111,14 +121,13 @@ export default class VrMessageSender {
    */
   sendComponentUpdate(appID: string, componentID: string, isOpened: boolean,
     isFoundation: boolean) {
-    const appObj = {
+    this.webSocket.send<ComponentUpdateMessage>({
       event: 'component_update',
       appID,
       componentID,
       isOpened,
       isFoundation,
-    };
-    this.webSocket.send(appObj);
+    });
   }
 
   /**
@@ -132,41 +141,36 @@ export default class VrMessageSender {
    */
   sendHighlightingUpdate(appID: string, entityType: string,
     entityID: string, isHighlighted: boolean) {
-    const hightlightObj = {
+    this.webSocket.send<HighlightingUpdateMessage>({
       event: 'hightlighting_update',
       appID,
       entityType,
       entityID,
       isHighlighted,
-    };
-    this.webSocket.send(hightlightObj);
+    });
   }
 
   /**
    * Informs backend that this user entered or left spectating mode and
    * additionally adds who is spectating who.
    */
-  sendSpectatingUpdate(userID: string, isSpectating: boolean, spectatedUser: string|null) {
-    const spectateObj = {
+  sendSpectatingUpdate(isSpectating: boolean, spectatedUser: string|null) {
+    this.webSocket.send<SpectatingUpdateMessage>({
       event: 'spectating_update',
-      userID,
       isSpectating,
       spectatedUser,
-    };
-    this.webSocket.send(spectateObj);
+    });
   }
 
   /**
    * Informs the backend if a controller was connected/disconnected.
    */
   sendControllerUpdate(connect: any, disconnect: any) {
-    const controllerObj = {
+    this.webSocket.send<UserControllerMessage>({
       event: 'user_controllers',
       connect,
       disconnect,
-    };
-
-    this.webSocket.send(controllerObj);
+    });
   }
 
   /**
@@ -181,28 +185,24 @@ export default class VrMessageSender {
     const quaternion = new THREE.Quaternion();
     application.getWorldQuaternion(quaternion);
 
-    const appObj = {
+    this.webSocket.send<AppOpenedMessage>({
       event: 'app_opened',
       id: application.dataModel.pid,
       position: position.toArray(),
       quaternion: quaternion.toArray(),
-    };
-
-    this.webSocket.send(appObj);
+    });
   }
 
   sendMenuDetached(detachId: string, entityType: EntityType, position: THREE.Vector3, quaternion: THREE.Quaternion) {
     const nonce = this.nextNonce();
-    const obj = {
+    this.webSocket.send<MenuDetachedMessage>({
       event: 'menu_detached',
       nonce: nonce,
       detachId: detachId,
       entityType: entityType,
       position: position.toArray(),
       quaternion: quaternion.toArray(), 
-    };
-
-    this.webSocket.send(obj);
+    });
     return nonce;
   }
 }
