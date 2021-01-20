@@ -60,6 +60,7 @@ import ResetMenu from 'virtual-reality/utils/vr-menus/reset-menu';
 import { hasContent } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import VrLandscapeObject3D from 'virtual-reality/utils/view-objects/landscape/vr-landscape-object-3d';
+import MenuQueue from 'virtual-reality/utils/menu-queue';
 
 interface Args {
   readonly id: string;
@@ -108,7 +109,8 @@ export default class VrRendering extends Component<Args> {
 
   camera!: THREE.PerspectiveCamera;
 
-  hintMenuGroup!: MenuGroup;
+  messageMenuQueue!: MenuQueue;
+  hintMenuQueue!: MenuQueue;
 
   renderer!: THREE.WebGLRenderer;
 
@@ -193,7 +195,7 @@ export default class VrRendering extends Component<Args> {
     this.initLights();
     this.initInteraction();
     this.initControllers();
-    this.initHintMenuGroup();
+    this.initCameraMenuQueues();
   }
 
   /**
@@ -329,11 +331,24 @@ export default class VrRendering extends Component<Args> {
   }
 
   /**
-   * Adds a menu group for {@link HintMenu}s to the {@link camera}.
+   * Add a menu queues for menus that are attached to the {@link camera}.
    */
-  initHintMenuGroup() {
-    this.hintMenuGroup = new MenuGroup();
-    this.camera.add(this.hintMenuGroup);
+  initCameraMenuQueues() {
+    // Menu group for hints.
+    this.hintMenuQueue = new MenuQueue();
+    this.hintMenuQueue.position.x = 0.035;
+    this.hintMenuQueue.position.y = -0.1;
+    this.hintMenuQueue.position.z = -0.3;
+    this.hintMenuQueue.rotation.x = -0.18;
+    this.camera.add(this.hintMenuQueue);
+
+    // Menu group for message boxes.
+    this.messageMenuQueue = new MenuQueue();
+    this.messageMenuQueue.position.x = 0.035;
+    this.messageMenuQueue.position.y = 0.1;
+    this.messageMenuQueue.position.z = -0.3;
+    this.messageMenuQueue.rotation.x = 0.45;
+    this.camera.add(this.messageMenuQueue);
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -420,12 +435,16 @@ export default class VrRendering extends Component<Args> {
   render() {
     if (this.isDestroyed) { return; }
 
+    // Update delta time service.
     this.time.update();
     const delta = this.time.getDeltaTime();
 
+    // Update controlelrs and menus.
     this.localUser.updateControllers(delta);
-    this.hintMenuGroup.updateMenu(delta);
+    this.hintMenuQueue.updateMenu(delta);
+    this.messageMenuQueue.updateMenu(delta);
 
+    // Render scene.
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -878,7 +897,7 @@ export default class VrRendering extends Component<Args> {
   // #region MENUS
 
   showHint(title: string, text: string|null = null) {
-    this.hintMenuGroup.openMenu(new HintMenu(title, text));
+    this.hintMenuQueue.enqueueMenu(new HintMenu(title, text));
   }
 
   openMainMenu(controller: VRController) {

@@ -1,105 +1,32 @@
-import { Object3D } from 'three';
+import THREE from 'three';
 import BaseMenu from './base-menu';
 import TextItem from './items/text-item';
 
-type Message = {title: string, text?: string, color: string};
+const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.25, [
+  new THREE.KeyframeTrack('.position[y]', [0.0, 0.25], [0.2, 0.0])
+]);
+
+const CLOSE_ANIMATION_CLIP = new THREE.AnimationClip('close-animation', 0.25, [
+  new THREE.KeyframeTrack('.position[y]', [0.0, 0.25], [0.0, 0.2])
+]);
 
 export default class MessageBoxMenu extends BaseMenu {
-  messageQueue: {message: Message, time: number}[];
+  private time: number;
+  private enableTimer: boolean;
 
-  timeBetweenMessages: number;
-
-  parent: THREE.Object3D;
-
-  constructor(parent: Object3D) {
+  constructor({title, text, color, time}: {
+    title: string, text?: string, color: string, time: number
+  }) {
     super({ width: 256, height: 64 }, '#000000');
-
-    this.messageQueue = [];
-    this.timeBetweenMessages = 800;
-    this.parent = parent;
-    this.visible = false;
-  }
-
-  makeBackgroundMaterial(color: THREE.Color) {
-    const material = super.makeBackgroundMaterial(color);
-    material.opacity = 0.7;
-    return material;
-  }
-
-  positionMessageBox() {
-    this.position.x = 0.035;
-    this.position.y = 0.3;
-    this.position.z = -0.3;
-    this.rotation.x = 0.45;
-
-    this.parent.add(this);
-  }
-
-  /**
-     * Add text to messageQueue which should be displayed on top edge of hmd.
-     *
-     * @param {Message} message Title and text which should be displayed.
-     * @param {Number} time The number of milliseconds the message is displayed.
-     */
-  enqueueMessage(message: Message, time: number = 3000) {
-    this.messageQueue.push({ message, time });
-    if (this.messageQueue.length === 1) {
-      this.showMessage();
-    }
-  }
-
-  /**
-       * Displays text messages on the top edge of the hmd for 3 seconds
-       */
-  showMessage() {
-    if (this.messageQueue.length <= 0) { return; }
-
-    const { message, time } = this.messageQueue[0];
-
-    this.setText(message.title, message.text, message.color);
-    this.visible = true;
-
-    this.positionMessageBox();
-    let yOffset = 0;
-    const self = this;
-
-    function downwardAnimation() {
-      yOffset -= 0.015;
-      if (yOffset > -0.195) {
-        self.position.y -= 0.015;
-      } else {
-        return;
-      }
-      requestAnimationFrame(downwardAnimation);
-    }
-
-    function upwardAnimation() {
-      yOffset += 0.015;
-      if (yOffset < 0.195) {
-        self.position.y += 0.015;
-      } else {
-        return;
-      }
-      requestAnimationFrame(upwardAnimation);
-    }
-
-    // Animate
-    downwardAnimation();
-    yOffset = 0;
-    setTimeout(upwardAnimation, 0.8 * time);
-    setTimeout(this.closeAfterTime.bind(this), time);
-  }
-
-  setText(title: string, text: string|undefined, color: string) {
-    const textColor = color || 'lightgreen';
-
-    this.items.clear();
-
-    const titleItem = new TextItem(title, 'title', textColor, { x: 128, y: 10 }, 18, 'center');
+    this.time = time;
+    this.enableTimer = false;
+    
+    // Draw text.
+    const titleItem = new TextItem(title, 'title', color, { x: 128, y: 10 }, 18, 'center');
     this.items.push(titleItem);
 
     if (text) {
-      const textItem = new TextItem(text, 'text', textColor, { x: 128, y: 40 }, 14, 'center');
+      const textItem = new TextItem(text, 'text', color, { x: 128, y: 40 }, 14, 'center');
       this.items.push(textItem);
     } else {
       titleItem.position.y = 21;
@@ -109,14 +36,45 @@ export default class MessageBoxMenu extends BaseMenu {
     this.update();
   }
 
-  closeAfterTime() {
-    this.visible = false;
+  makeBackgroundMaterial(color: THREE.Color) {
+    const material = super.makeBackgroundMaterial(color);
+    material.opacity = 0.7;
+    return material;
+  }
 
-    setTimeout(() => {
-      if (this.messageQueue.length > 0) {
-        this.messageQueue.shift();
-        this.showMessage();
-      }
-    }, this.timeBetweenMessages);
+  onOpenMenu() {
+    super.onOpenMenu();
+    this.playOpenAnimation();
+  }
+
+  onUpdateMenu(delta: number) {
+    super.onUpdateMenu(delta);
+
+    if (this.enableTimer) {
+      // Remove menu automatically after `time` seconds.
+      this.time -= delta;
+      if (this.time <= 0.0) this.playCloseAnimation();
+    }
+  }
+
+  async playOpenAnimation() {
+    const action = this.animationMixer.clipAction(OPEN_ANIMATION_CLIP);
+    action.setLoop(THREE.LoopOnce, 0);
+    action.play();
+
+    // Start message timer when the open animation finished.
+    await this.waitForAnimation(action);
+    this.enableTimer = true;
+  }
+
+  async playCloseAnimation() {
+    const action = this.animationMixer.clipAction(CLOSE_ANIMATION_CLIP);
+    action.setLoop(THREE.LoopOnce, 0);
+    action.clampWhenFinished = true;
+    action.play();
+
+    // Close menu when animation finished.
+    await this.waitForAnimation(action);
+    this.closeMenu();
   }
 }

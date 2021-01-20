@@ -76,8 +76,6 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   // Contains clonable objects of HMD, camera and controllers for other users
   hardwareModels: HardwareModels;
 
-  messageBox!: MessageBoxMenu;
-
   detachedMenus!: THREE.Group;
 
   getRemoteUsers() {
@@ -101,8 +99,6 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     super.initRendering();
 
     this.scene.add(this.remoteUserGroup);
-
-    this.messageBox = new MessageBoxMenu(this.camera);
 
     this.sender = new VrMessageSender(this.webSocket);
     this.receiver = new VrMessageReceiver(this.webSocket, this);
@@ -382,11 +378,12 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     user.add(nameTag);
 
     if (showConnectMessage) {
-      this.messageBox.enqueueMessage({
+      this.messageMenuQueue.enqueueMenu(new MessageBoxMenu({
         title: 'User connected',
         text: user.userName,
         color: `#${user.color.getHexString()}`,
-      }, 3000);
+        time: 3.0,
+      }));
     }
   }
 
@@ -453,11 +450,12 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       this.idToRemoteUser.delete(id);
 
       // Show disconnect notification
-      this.messageBox.enqueueMessage({
+      this.messageMenuQueue.enqueueMenu(new MessageBoxMenu({
         title: 'User disconnected',
         text: user.userName,
         color: `#${user.color.getHexString()}`,
-      }, 3000);
+        time: 3.0,
+      }));
     }
   }
 
@@ -636,10 +634,20 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       if (this.spectateUser.spectatedUser && this.spectateUser.spectatedUser.ID === userID) {
         this.spectateUser.deactivate();
       }
-      this.messageBox.enqueueMessage({ title: remoteUser.userName, text: ' is now spectating', color: remoteUserHexColor }, 2000);
+      this.messageMenuQueue.enqueueMenu(new MessageBoxMenu({
+        title: remoteUser.userName, 
+        text: ' is now spectating', 
+        color: remoteUserHexColor,
+        time: 3.0
+      }));
     } else {
       remoteUser.setVisible(true);
-      this.messageBox.enqueueMessage({ title: remoteUser.userName, text: ' stopped spectating', color: remoteUserHexColor }, 2000);
+      this.messageMenuQueue.enqueueMenu(new MessageBoxMenu({
+        title: remoteUser.userName,
+        text: ' stopped spectating',
+        color: remoteUserHexColor,
+        time: 3.0
+      }));
     }
   }
 

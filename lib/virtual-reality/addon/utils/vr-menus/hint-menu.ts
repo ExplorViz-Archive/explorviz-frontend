@@ -7,7 +7,7 @@ const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.75, [
 ]);
 
 const PULS_ANIMATION_CLIP = new THREE.AnimationClip('puls-animation', 0.25, [
-  new THREE.KeyframeTrack('.position[z]', [0, 0.25], [-0.3, -0.315])
+  new THREE.KeyframeTrack('.position[z]', [0, 0.25], [-0.0, -0.015])
 ]);
 
 const CLOSE_ANIMATION_CLIP = new THREE.AnimationClip('close-animation', 0.75, [
@@ -26,11 +26,6 @@ export default class HintMenu extends BaseMenu {
       const contentItem = new TextItem(text, 'text2', '#ffff00', { x: 256, y: 75 }, 28, 'center');
       this.items.push(contentItem);
     }
-
-    this.position.x = 0.035;
-    this.position.y = -0.1;
-    this.position.z = -0.3;
-    this.rotateX(-0.18);
 
     this.update();
   }
