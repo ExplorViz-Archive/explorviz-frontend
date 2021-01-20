@@ -20,7 +20,6 @@ Router.map(function () {
   this.route('login');
   this.route('callback');
   this.route('visualization');
-  this.route('discovery');
 
   this.route('configuration', function () {
 

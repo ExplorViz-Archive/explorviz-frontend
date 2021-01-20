@@ -16,7 +16,7 @@ export default class PageSetup extends Service {
   * @property navbarRoutes
   * @type Array
   */
-  navbarRoutes: string[] = ['visualization', 'discovery'];
+  navbarRoutes: string[] = ['visualization'];
 }
 
 declare module '@ember/service' {
