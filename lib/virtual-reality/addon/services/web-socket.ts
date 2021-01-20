@@ -23,7 +23,7 @@ export default class WebSocketService extends Service {
 
   socketCloseCallback: ((event: any) => void) | null = null;
 
-  eventCallback: ((event: any, data: any) => void) | null = null;
+  messageCallback: ((message: any) => void) | null = null;
 
   initSocket() {
     const socket = this.websockets.socketFor(this.getSocketUrl());

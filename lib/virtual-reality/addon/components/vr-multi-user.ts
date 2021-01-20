@@ -80,7 +80,6 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
   detachedMenus!: THREE.Group;
 
-
   getRemoteUsers() {
     return this.idToRemoteUser;
   }
@@ -129,8 +128,12 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       menuContainer.menu.getWorldPosition(position);
       menuContainer.menu.getWorldQuaternion(quaternion);
       const nonce = this.sender.sendMenuDetached(menuContainer.menu.getDetachId(), position, quaternion);
-      this.receiver.awaitResponse(isMenuDetachedResponse, nonce, (response: MenuDetachedResponse) => {
-        menuContainer.grabId = response.objectId;
+      this.receiver.awaitResponse({
+        nonce,
+        responseType: isMenuDetachedResponse, 
+        onResponse: (response: MenuDetachedResponse) => {
+          menuContainer.grabId = response.objectId;
+        }
       });
     };
 
@@ -459,7 +462,6 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   onInitialLandscape({openApps, landscape}: InitialLandscapeMessage): void {
-
     this.removeAllApplications();
 
     const { structureLandscapeData } = this.args.landscapeData;

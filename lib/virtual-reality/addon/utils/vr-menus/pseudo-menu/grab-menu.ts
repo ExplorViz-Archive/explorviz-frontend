@@ -5,7 +5,7 @@ import VRControllerThumbpadBinding from 'virtual-reality/utils/vr-controller/vr-
 import VrMessageSender from 'virtual-reality/utils/vr-message/sender';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import PseudoMenu from '../pseudo-menu';
-import { isObjectGrabbedResponse, ObjectGrabbedResponse } from 'virtual-reality/utils/vr-message/receivable/response/grab';
+import { isObjectGrabbedResponse, ObjectGrabbedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-grabbed';
 
 export interface GrabbableObject extends THREE.Object3D {
     getGrabId(): string;
@@ -18,12 +18,11 @@ export function isGrabbableObject(object: any): object is GrabbableObject {
 }
 
 export default class GrabMenu extends PseudoMenu {
-    sender: VrMessageSender;
-    receiver: VrMessageReceiver;
-    grabbedObject: GrabbableObject;
-    grabbedObjectParent: THREE.Object3D|null;
-    grabbedSuccessfully: boolean;
-    originalIntersectableObjects: THREE.Object3D[]|null;
+    private sender: VrMessageSender;
+    private receiver: VrMessageReceiver;
+    private grabbedObject: GrabbableObject;
+    private grabbedObjectParent: THREE.Object3D|null;
+    private grabbedSuccessfully: boolean;
 
     constructor(grabbedObject: GrabbableObject, sender: VrMessageSender, receiver: VrMessageReceiver) {
         super();
@@ -32,7 +31,6 @@ export default class GrabMenu extends PseudoMenu {
         this.grabbedObject = grabbedObject;
         this.grabbedObjectParent = null;
         this.grabbedSuccessfully = false;
-        this.originalIntersectableObjects = null;
     }
 
     /**
@@ -85,19 +83,28 @@ export default class GrabMenu extends PseudoMenu {
         // Send object grab message.
         const objectId = this.grabbedObject.getGrabId();
         const nonce = this.sender.sendObjectGrabbed(objectId);
+        console.log("sent object grabbed request with nonce", nonce);
 
         // Wait for response.
-        this.receiver.awaitResponse(isObjectGrabbedResponse, nonce, (response: ObjectGrabbedResponse) => {
-            // If we receive the answer too late, we ignore it.
-            if (this.isMenuOpen) return;
-            this.grabbedSuccessfully = response.success;
-
-            // If we are allowed to grab the object, move it into the
-            // controller's grip space.
-            if (this.grabbedSuccessfully) {
+        this.receiver.awaitResponse({
+            nonce,
+            responseType: isObjectGrabbedResponse,
+            onResponse: (response: ObjectGrabbedResponse) => {
+                // If we receive the answer too late, we ignore it.
+                if (!this.isMenuOpen) return;
+                this.grabbedSuccessfully = response.success;
+    
+                // If we are allowed to grab the object, move it into the
+                // controller's grip space.
+                if (this.grabbedSuccessfully) {
+                    this.addToGripSpace();
+                } else {
+                    this.closeMenu();
+                }
+            },
+            onOffline: () => {
+                this.grabbedSuccessfully = true;
                 this.addToGripSpace();
-            } else {
-                this.closeMenu();
             }
         });
     }
@@ -150,6 +157,7 @@ export default class GrabMenu extends PseudoMenu {
     }
 
     makeMenuButtonBinding() {
+        // The menu button cannot be used to close the menu.
         return undefined;
     }
 }

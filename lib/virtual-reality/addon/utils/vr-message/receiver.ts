@@ -41,12 +41,14 @@ export interface VrMessageListener {
 }
 
 export default class VrMessageReceiver extends EventDispatcher {
+    private webSocket: WebSocketService;
     private messageListener: VrMessageListener;
 
     constructor(webSocket: WebSocketService, messageListener: VrMessageListener) {
         super();
         this.messageListener = messageListener;
-        webSocket.eventCallback = this.onMessage.bind(this);
+        this.webSocket = webSocket;
+        this.webSocket.messageCallback = this.onMessage.bind(this);
     }
 
     private onMessage(msg: any) {
@@ -85,15 +87,43 @@ export default class VrMessageReceiver extends EventDispatcher {
      * 
      * When the response is received, the listener is removed.
      * 
+     * If the user is offline, no listener will be created.
+     * 
      * @param nonce Locally unique identifier of the request whose response to wait for.
-     * @param callback The callback to invoke when the response is received.
+     * @param responseType A type guard that tests whether the received response has the correct type.
+     * @param onResponse The callback to invoke when the response is received.
+     * @param onOffline The callback to invoke before staring to listen for responses when the client is connected.
+     * @param onOffline The callback to invoke instead of listening for responses when the client is not connected.
      */
-    awaitResponse<T>(isValidResponse: (msg: any) => msg is T, nonce: number, callback: ResponseHandler<T>) {
+    awaitResponse<T>({
+        nonce, 
+        responseType: isValidResponse,
+        onResponse,
+        onOnline,
+        onOffline
+    }: {
+        nonce: number,
+        responseType: (msg: any) => msg is T,
+        onResponse: ResponseHandler<T>,
+        onOnline?: () => void,
+        onOffline?: () => void,
+    }) {
+        // Don't wait for response unless there is a open websocket connection.
+        if (!this.webSocket.isWebSocketOpen) {
+            if (onOffline) onOffline();
+            return;
+        }
+
+        // If a websocket connection is open, notify callee that the listener is added.
+        if (onOnline) onOnline();
+
+        // Listen for responses.
         const listener = (evt : ResponseEvent<any>) => {
+            // Test whether the response belongs to the request with the given nonce.
             if (nonce === evt.nonce) {
                 if (isValidResponse(evt.response)) {
                     this.removeEventListener('response', listener);
-                    callback(evt.response);
+                    onResponse(evt.response);
                 } else {
                     console.error('Received invalid response', evt.response);
                 }

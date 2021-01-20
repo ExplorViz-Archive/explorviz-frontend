@@ -1,5 +1,4 @@
 import THREE from "three";
-import CloseIcon from "../view-objects/vr/close-icon";
 import VRControllerBindings from "../vr-controller/vr-controller-bindings";
 import VRController from "../vr-rendering/VRController";
 import BaseMenu from "./base-menu";
