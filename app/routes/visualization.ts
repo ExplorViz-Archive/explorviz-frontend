@@ -21,7 +21,7 @@ export default class VisualizationRoute extends BaseRoute {
     if (this.landscapeToken.token === null) {
       this.transitionTo('landscapes');
     }
-    super.beforeModel();
+    await super.beforeModel();
   }
 
   model() {
