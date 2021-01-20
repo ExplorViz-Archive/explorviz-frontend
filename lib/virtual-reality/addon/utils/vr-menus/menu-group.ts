@@ -6,6 +6,8 @@ import VRController from "../vr-rendering/VRController";
 import BaseMenu from "./base-menu";
 import { GrabbableObject } from "./pseudo-menu/grab-menu";
 
+export const MENU_DETACH_EVENT_TYPE = 'detach-menu';
+
 export interface DetachableMenu extends BaseMenu {
     getDetachId(): string;
     getEntityType(): EntityType;
@@ -15,21 +17,26 @@ export function isDetachableMenu(menu: BaseMenu): menu is DetachableMenu {
     return 'getDetachId' in menu;
 }
 
-export type MenuDistachedEvent = {type: string, menuContainer: GrabbableMenuContainer};
+export type MenuDetachedEvent = {
+    type: typeof MENU_DETACH_EVENT_TYPE,
+    menu: DetachableMenu
+};
 
 export class GrabbableMenuContainer extends THREE.Group implements GrabbableObject {
-    grabId: string;
+    grabId: string|null;
     menu: DetachableMenu;
 
-    constructor(menu: DetachableMenu, grabId: string) {
+    constructor(menu: DetachableMenu, grabId: string|null) {
         super();
         this.menu = menu;
         this.grabId = grabId;
-    }
-    getGrabId(): string {
-        return this.grabId;
+      
+        this.add(menu);
     }
 
+    getGrabId(): string|null {
+        return this.grabId;
+    }
 }
 
 export default class MenuGroup extends THREE.Group {
@@ -124,12 +131,13 @@ export default class MenuGroup extends THREE.Group {
     detachMenu() {
         const menu = this.currentMenu;
         if (menu && isDetachableMenu(menu)) {
-            
             this.closeMenu(true);
 
             // send detached menu
-            let menuContainer = new GrabbableMenuContainer(menu, menu.getDetachId());
-            this.dispatchEvent({type: 'detachMenu', menuContainer: menuContainer});
+            this.dispatchEvent({
+                type: MENU_DETACH_EVENT_TYPE, 
+                menu
+            });
         }
     }
 }

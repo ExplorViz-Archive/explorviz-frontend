@@ -8,7 +8,7 @@ import PseudoMenu from '../pseudo-menu';
 import { isObjectGrabbedResponse, ObjectGrabbedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-grabbed';
 
 export interface GrabbableObject extends THREE.Object3D {
-    getGrabId(): string;
+    getGrabId(): string|null;
 }
 
 export function isGrabbableObject(object: any): object is GrabbableObject {
@@ -37,6 +37,8 @@ export default class GrabMenu extends PseudoMenu {
      * Moves the grabbed object into the controller's grip space. 
      */
     private addToGripSpace() {
+        this.grabbedSuccessfully = true;
+
         // Store original and parent of grabbed object.
         this.grabbedObjectParent = this.grabbedObject.parent;
 
@@ -80,8 +82,15 @@ export default class GrabMenu extends PseudoMenu {
     onOpenMenu() {
         super.onOpenMenu();
 
-        // Send object grab message.
+        // The backend does not have to be notified when objects without an ID
+        // are grabbed.
         const objectId = this.grabbedObject.getGrabId();
+        if (!objectId) {
+            this.addToGripSpace();
+            return;
+        }
+
+        // Send object grab message.
         const nonce = this.sender.sendObjectGrabbed(objectId);
 
         // Wait for response.
@@ -91,29 +100,26 @@ export default class GrabMenu extends PseudoMenu {
             onResponse: (response: ObjectGrabbedResponse) => {
                 // If we receive the answer too late, we ignore it.
                 if (!this.isMenuOpen) return;
-                this.grabbedSuccessfully = response.isSuccess;
-    
+
                 // If we are allowed to grab the object, move it into the
                 // controller's grip space.
-                if (this.grabbedSuccessfully) {
+                if (response.isSuccess) {
                     this.addToGripSpace();
                 } else {
                     this.closeMenu();
                 }
             },
-            onOffline: () => {
-                this.grabbedSuccessfully = true;
-                this.addToGripSpace();
-            }
+            onOffline: () => this.addToGripSpace()
         });
     }
 
     onUpdateMenu(delta: number) {
         super.onUpdateMenu(delta);
 
-        // Send new position every frame if we are allowed to grab the object.
-        if (this.grabbedSuccessfully) {
-            const objectId = this.grabbedObject.getGrabId();
+        // Send new position every frame if we are allowed to grab the object
+        // and the object has a grab identifier.
+        const objectId = this.grabbedObject.getGrabId();
+        if (this.grabbedSuccessfully && objectId) {
             const position = new THREE.Vector3();
             const quaternion = new THREE.Quaternion();
             this.grabbedObject.getWorldPosition(position);
@@ -125,11 +131,11 @@ export default class GrabMenu extends PseudoMenu {
     onCloseMenu() {
         super.onCloseMenu();
 
-        // Always send object released message to ensure that the backend knows
-        // that we don't want to grab the object anymore even if we did not yet
-        // receive the response.
+        // Always send object released message (except when the object does not
+        // have an ID) to ensure that the backend knows that we don't want to
+        // grab the object anymore even if we did not yet receive the response.
         const objectId = this.grabbedObject.getGrabId();
-        this.sender.sendObjectReleased(objectId);
+        if (objectId) this.sender.sendObjectReleased(objectId);
         
         // If we received the response and were allowed to grab the object,
         // we have to detach the object from the controller.

@@ -27,7 +27,7 @@ import { Application } from 'explorviz-frontend/utils/landscape-schemes/structur
 import { perform } from 'ember-concurrency-ts';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
-import { GrabbableMenuContainer, MenuDistachedEvent } from 'virtual-reality/utils/vr-menus/menu-group';
+import { DetachableMenu, GrabbableMenuContainer, MenuDetachedEvent, MENU_DETACH_EVENT_TYPE } from 'virtual-reality/utils/vr-menus/menu-group';
 
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/utils/vr-message/receiver';
 import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
@@ -95,13 +95,13 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     this.remoteUserGroup = new THREE.Group();
     this.detachedMenus = new THREE.Group();
     this.hardwareModels = new HardwareModels();
-
   }
 
   initRendering() {
     super.initRendering();
 
     this.scene.add(this.remoteUserGroup);
+    this.scene.add(this.detachedMenus);
 
     this.sender = new VrMessageSender(this.webSocket);
     this.receiver = new VrMessageReceiver(this.webSocket, this);
@@ -115,23 +115,29 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   initControllers() {
     super.initControllers();
 
-    let listener = (event: MenuDistachedEvent) => {
-      let menuContainer = event.menuContainer;
-      //add close icon
-      const closeIcon = new CloseIcon(this.closeButtonTexture);
-      closeIcon.addToObject(menuContainer.menu);
-      this.detachedMenus.add(menuContainer);
-      this.scene.add(menuContainer);
-      const position = new THREE.Vector3;
-      const quaternion = new THREE.Quaternion;
-      menuContainer.menu.getWorldPosition(position);
-      menuContainer.menu.getWorldQuaternion(quaternion);
-      const nonce = this.sender.sendMenuDetached(menuContainer.menu.getDetachId(), menuContainer.menu.getEntityType(),position, quaternion);
+    let listener = ({menu}: MenuDetachedEvent) => {
+      const position = new THREE.Vector3();
+      const quaternion = new THREE.Quaternion();
+      menu.getWorldPosition(position);
+      menu.getWorldQuaternion(quaternion);
+
+      // Notify backend about detached menu.
+      const nonce = this.sender.sendMenuDetached(
+        menu.getDetachId(), 
+        menu.getEntityType(),
+        position,
+        quaternion
+      );
+
+      // Wait for backend to assign an id to the detached menu.
       this.receiver.awaitResponse({
         nonce,
         responseType: isMenuDetachedResponse, 
         onResponse: (response: MenuDetachedResponse) => {
-          menuContainer.grabId = response.objectId;
+          this.addDetachedMenu(menu, response.objectId, position.toArray(), quaternion.toArray());
+        },
+        onOffline: () => {
+          this.addDetachedMenu(menu, null, position.toArray(), quaternion.toArray());
         }
       });
     };
@@ -140,7 +146,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       this.localUser.controller1.eventCallbacks.connected = this.onControllerConnected.bind(this);
       this.localUser.controller1.eventCallbacks.disconnected = this
         .onControllerDisconnected.bind(this);
-      this.localUser.controller1.menuGroup.addEventListener('menu_distached', listener);
+      this.localUser.controller1.menuGroup.addEventListener(MENU_DETACH_EVENT_TYPE, listener);
       this.localUser.controller1.intersectableObjects.push(this.detachedMenus);
     }
 
@@ -148,7 +154,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       this.localUser.controller2.eventCallbacks.connected = this.onControllerConnected.bind(this);
       this.localUser.controller2.eventCallbacks.disconnected = this
         .onControllerDisconnected.bind(this);
-      this.localUser.controller2.menuGroup.addEventListener('menu_distached', listener);
+      this.localUser.controller2.menuGroup.addEventListener(MENU_DETACH_EVENT_TYPE, listener);
       this.localUser.controller2.intersectableObjects.push(this.detachedMenus);
     }
   }
@@ -657,17 +663,20 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   onMenuDetached({ objectId, entityType, detachId, position, quaternion }: MenuDetachedForwardMessage) {
     let object = this.findMeshByModelId(entityType, detachId);
     if (isEntityMesh(object)) {
-      let menu = new DetailInfoMenu(object);
-      menu.position.fromArray(position);
-      menu.quaternion.fromArray(quaternion);
-
-      let closeIcon = new CloseIcon(this.closeButtonTexture);
-      closeIcon.addToObject(menu);
-
-      let menuContainer = new GrabbableMenuContainer(menu, objectId);
-      this.detachedMenus.add(menuContainer);
-      this.scene.add(menu);
+      const menu = new DetailInfoMenu(object);
+      this.addDetachedMenu(menu, objectId, position, quaternion);
     }
+  }
+
+  addDetachedMenu(menu: DetachableMenu, grabId: string|null, position: number[], quaternion: number[]): GrabbableMenuContainer {
+    const menuContainer = new GrabbableMenuContainer(menu, grabId);
+    menuContainer.position.fromArray(position);
+    menuContainer.quaternion.fromArray(quaternion);
+    this.detachedMenus.add(menuContainer);
+
+    // Make detached menu closable.
+    let closeIcon = new CloseIcon(this.closeButtonTexture);
+    closeIcon.addToObject(menuContainer);
   }
 
   // #endregion REMOTE EVENT HANDLER

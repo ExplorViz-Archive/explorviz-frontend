@@ -651,14 +651,16 @@ export default class VrRendering extends Component<Args> {
 
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
-      // Add labels and close icon to application
+      // Add labels to application
       this.addLabels(applicationObject3D);
-      const closeIcon = new CloseIcon(this.closeButtonTexture);
-      closeIcon.addToObject(applicationObject3D);
 
       // Scale application to a reasonable size to work with it
       const scalar = this.applicationScalar;
       applicationObject3D.scale.set(scalar, scalar, scalar);
+
+      // Add close icon to application.
+      const closeIcon = new CloseIcon(this.closeButtonTexture);
+      closeIcon.addToObject(applicationObject3D);
 
       this.positionApplication(applicationObject3D, origin);
 
