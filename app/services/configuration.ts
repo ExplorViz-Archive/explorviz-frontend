@@ -37,10 +37,6 @@ export type ExtensionDescription = {
   paneName: string
 };
 
-export type DiscoverySettings = {
-  showHiddenEntities?: boolean
-};
-
 /**
  * The Configuration Service handles color settings for the
  * visualization and configuration extensions
@@ -67,7 +63,6 @@ export default class Configuration extends Service {
   @tracked
   landscapeColors: LandscapeColors;
 
-
   /**
   * Colors for application visualization
   *
@@ -76,9 +71,6 @@ export default class Configuration extends Service {
   */
   @tracked
   applicationColors: ApplicationColors;
-
-  discoverySettings: DiscoverySettings = {};
-
 
   /**
    * Sets default colors
