@@ -19,6 +19,10 @@ export default class ApplicationGroup extends THREE.Group {
     }
   }
 
+  getOpenedApps() {
+    return this.openedApps.values();
+  }
+
   getApplication(id: string) {
     return this.openedApps.get(id);
   }

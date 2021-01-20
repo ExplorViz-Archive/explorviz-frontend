@@ -1,6 +1,6 @@
-import { Object3D } from 'three';
 import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
-import composeContent from '../vr-helpers/detail-info-composer';
+import composeContent, { EntityMesh, getIdOfEntity, getTypeOfEntity } from '../vr-helpers/detail-info-composer';
+import { EntityType } from '../vr-message/util/entity_type';
 import BaseMenu from './base-menu';
 import RectangleItem from './items/rectangle-item';
 import TextItem from './items/text-item';
@@ -10,9 +10,9 @@ export default class DetailInfoMenu extends BaseMenu implements DetachableMenu {
 
   entryItems: Map <string, TextItem>; 
 
-  object: Object3D;
+  object: EntityMesh;
 
-  constructor(object: Object3D) {
+  constructor(object: EntityMesh) {
     super({ width: 768, height: 512 });
     this.entryItems = new Map<string, TextItem>();
     this.object = object;
@@ -48,6 +48,9 @@ export default class DetailInfoMenu extends BaseMenu implements DetachableMenu {
       this.closeMenu();
     }
   }
+  getEntityType(): EntityType {
+    return getTypeOfEntity(this.object);
+  }
 
   onUpdateMenu() {
     let content = composeContent(this.object)
@@ -62,7 +65,7 @@ export default class DetailInfoMenu extends BaseMenu implements DetachableMenu {
   }
 
   getDetachId(): string {
-    throw new Error('Method not implemented.');
+    return getIdOfEntity(this.object);
   }
 
   makeTriggerButtonBinding() {

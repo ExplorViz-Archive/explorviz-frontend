@@ -4,8 +4,9 @@ import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/compon
 import THREE from 'three';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
-import { Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { isApplication, isNode, Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { getAncestorPackages, getClassesInPackage } from 'explorviz-frontend/utils/package-helpers';
+import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from '../vr-message/util/entity_type';
 
 export type DetailedInfo = {
   title: string,
@@ -101,14 +102,34 @@ export default function composeContent(object: THREE.Object3D) {
   return content;
 }
 
-function getContentClasses() {
-  return [NodeMesh, ApplicationMesh, ComponentMesh, ClazzMesh, ClazzCommunicationMesh]
+export type EntityMesh = NodeMesh | ApplicationMesh | ComponentMesh | ClazzMesh | ClazzCommunicationMesh;
+
+export function isEntityMesh(object: any): object is EntityMesh {
+  return object instanceof NodeMesh || object instanceof ApplicationMesh || object instanceof ComponentMesh || object instanceof ClazzMesh || 
+    object instanceof ClazzCommunicationMesh; 
 }
 
-export function hasContent(object: THREE.Object3D) {
-  let b = false;
-  getContentClasses().forEach((contentClass) => {
-    if (object instanceof contentClass) b = true;
-  })
-  return b;
+export function getIdOfEntity(entity: EntityMesh): string {
+  const model = entity.dataModel;
+  if (isNode(model)) {
+    return model.ipAddress;
+  } else if (isApplication(model)) {
+    return model.pid;
+  } else {
+    return model.id;
+  }
+}
+
+export function getTypeOfEntity(entity: EntityMesh): EntityType {
+  if (entity instanceof NodeMesh) {
+    return NODE_ENTITY_TYPE;
+  } else if (entity instanceof ApplicationMesh) {
+    return APPLICATION_ENTITY_TYPE;
+  } else if (entity instanceof ComponentMesh) {
+    return COMPONENT_ENTITY_TYPE;
+  } else if (entity instanceof ClazzMesh) {
+    return CLASS_ENTITY_TYPE;
+  } else {
+    return CLASS_COMMUNICATION_ENTITY_TYPE;
+  }
 }

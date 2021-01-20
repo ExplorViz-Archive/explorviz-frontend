@@ -57,9 +57,10 @@ import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-co
 import VRControllerThumbpadBinding, { VRControllerThumbpadDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import SettingsMenu from 'virtual-reality/utils/vr-menus/settings-menu';
 import ResetMenu from 'virtual-reality/utils/vr-menus/reset-menu';
-import { hasContent } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
+import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import VrLandscapeObject3D from 'virtual-reality/utils/view-objects/landscape/vr-landscape-object-3d';
+import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 
 interface Args {
   readonly id: string;
@@ -771,9 +772,9 @@ export default class VrRendering extends Component<Args> {
             case VRControllerThumbpadDirection.DOWN:
               if (controller.intersectedObject) {
                 const { object } = controller.intersectedObject;
-                if (hasContent(object)) {
+                if (isEntityMesh(object)) {
                   this.openInfoMenu(controller, object);
-                }
+              }
               }
               break;
             case VRControllerThumbpadDirection.RIGHT:
@@ -912,7 +913,7 @@ export default class VrRendering extends Component<Args> {
     }));
   }
 
-  openInfoMenu(controller: VRController, object: THREE.Object3D) {
+  openInfoMenu(controller: VRController, object: EntityMesh) {
     controller.menuGroup.openMenu(new DetailInfoMenu(object));
   }
 
@@ -1096,6 +1097,22 @@ export default class VrRendering extends Component<Args> {
     this.applicationGroup.clear();
     this.localUser.reset();
   }
+
+  findMeshByModelId(entityType: EntityType, id: string) {
+    if (entityType === NODE_ENTITY_TYPE || entityType === APPLICATION_ENTITY_TYPE) {
+      return this.landscapeObject3D.getMeshbyModelId(id);
+    } else {if (entityType === COMPONENT_ENTITY_TYPE || entityType === CLASS_ENTITY_TYPE) {
+      Array.from(this.applicationGroup.getOpenedApps()).forEach((application: ApplicationObject3D) => {
+        return application.getBoxMeshbyModelId(id);
+      });
+    } else if (entityType === CLASS_COMMUNICATION_ENTITY_TYPE) {
+      Array.from(this.applicationGroup.getOpenedApps()).forEach((application: ApplicationObject3D) => {
+        return application.getCommMeshByModelId(id);
+      });
+    }
+    return null;
+  }
+}
 
   // #endregion UTILS
 }

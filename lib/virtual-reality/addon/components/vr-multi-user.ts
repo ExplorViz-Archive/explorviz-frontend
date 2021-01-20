@@ -27,7 +27,7 @@ import { Application } from 'explorviz-frontend/utils/landscape-schemes/structur
 import { perform } from 'ember-concurrency-ts';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
-import { MenuDistachedEvent } from 'virtual-reality/utils/vr-menus/menu-group';
+import { GrabbableMenuContainer, MenuDistachedEvent } from 'virtual-reality/utils/vr-menus/menu-group';
 
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/utils/vr-message/receiver';
 import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
@@ -45,6 +45,9 @@ import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_
 import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
 import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
+import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/receivable/menu-detached-forward';
+import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
+import { isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -128,7 +131,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       const quaternion = new THREE.Quaternion;
       menuContainer.menu.getWorldPosition(position);
       menuContainer.menu.getWorldQuaternion(quaternion);
-      const nonce = this.sender.sendMenuDetached(menuContainer.menu.getDetachId(), position, quaternion);
+      const nonce = this.sender.sendMenuDetached(menuContainer.menu.getDetachId(), menuContainer.menu.getEntityType(),position, quaternion);
       this.receiver.awaitResponse(isMenuDetachedResponse, nonce, (response: MenuDetachedResponse) => {
         menuContainer.grabId = response.objectId;
       });
@@ -305,14 +308,14 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    *
    * @param {JSON} data Message containing data on other users.
    */
-  onSelfConnected({self, users}: SelfConnectedMessage): void {
+  onSelfConnected({ self, users }: SelfConnectedMessage): void {
     // Create User model for all users and add them to the users map by
     // simulating the event of a user connecting.
     for (let i = 0; i < users.length; i++) {
       const userData = users[i];
       this.onUserConnected({
         event: USER_CONNECTED_EVENT,
-        id: userData.id, 
+        id: userData.id,
         name: userData.name,
         color: userData.color
       }, false);
@@ -348,7 +351,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   onUserConnected(
-    {id, name, color}: UserConnectedMessage,
+    { id, name, color }: UserConnectedMessage,
     showConnectMessage = true
   ): void {
     // If a user triggers multiple connects, simulate a disconnect first
@@ -393,8 +396,8 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    * @param {JSON} data - Data needed to update positions.
    */
   onUserPositions({
-    userID, 
-    originalMessage: {camera, controller1, controller2}
+    userID,
+    originalMessage: { camera, controller1, controller2 }
   }: ForwardedMessage<UserPositionsMessage>): void {
     const remoteUser = this.idToRemoteUser.get(userID);
     if (remoteUser) {
@@ -410,8 +413,8 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    * @param {JSON} data - Contains id and controller information.
    */
   onUserControllers({
-    userID, 
-    originalMessage: {connect, disconnect}
+    userID,
+    originalMessage: { connect, disconnect }
   }: ForwardedMessage<UserControllerMessage>): void {
 
     // Load newly connected controller(s)
@@ -435,7 +438,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    *
    * @param {JSON} data - Contains the id of the user that disconnected.
    */
-  onUserDisconnect({id}: UserDisconnectedMessage) {
+  onUserDisconnect({ id }: UserDisconnectedMessage) {
     // Do not spectate a disconnected user
     if (this.spectateUser.spectatedUser?.ID === id) {
       this.spectateUser.deactivate();
@@ -458,7 +461,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  onInitialLandscape({openApps, landscape}: InitialLandscapeMessage): void {
+  onInitialLandscape({ openApps, landscape }: InitialLandscapeMessage): void {
 
     this.removeAllApplications();
 
@@ -514,7 +517,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   onAppOpened({
-    originalMessage: {id, position, quaternion}
+    originalMessage: { id, position, quaternion }
   }: ForwardedMessage<AppOpenedMessage>): void {
     const { structureLandscapeData } = this.args.landscapeData;
     const application = getApplicationInLandscapeById(structureLandscapeData, id);
@@ -528,7 +531,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   onAppClosed({
-    originalMessage: {id}
+    originalMessage: { id }
   }: ForwardedMessage<AppClosedMessage>): void {
     const application = this.applicationGroup.getApplication(id);
 
@@ -538,7 +541,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   onObjectMoved({
-    originalMessage: {objectId, position, quaternion}
+    originalMessage: { objectId, position, quaternion }
   }: ForwardedMessage<ObjectMovedMessage>): void {
     // The moved object can be any of the intersectable objects.
     for (let object of this.interaction.raycastObjects) {
@@ -551,7 +554,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   onComponentUpdate({
-    originalMessage: {isFoundation, appID, componentID}
+    originalMessage: { isFoundation, appID, componentID }
   }: ForwardedMessage<ComponentUpdateMessage>): void {
     const applicationObject3D = this.applicationGroup.getApplication(appID);
     if (!applicationObject3D) return;
@@ -567,7 +570,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
   onHighlightingUpdate({
     userID,
-    originalMessage: {isHighlighted, appID, entityType, entityID}
+    originalMessage: { isHighlighted, appID, entityType, entityID }
   }: ForwardedMessage<HighlightingUpdateMessage>): void {
     const applicationObject3D = this.applicationGroup.getApplication(appID);
 
@@ -620,7 +623,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   */
   onSpectatingUpdate({
     userID,
-    originalMessage: {isSpectating}
+    originalMessage: { isSpectating }
   }: ForwardedMessage<SpectatingUpdateMessage>): void {
     const remoteUser = this.idToRemoteUser.get(userID);
 
@@ -638,6 +641,22 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     } else {
       remoteUser.setVisible(true);
       this.messageBox.enqueueMessage({ title: remoteUser.userName, text: ' stopped spectating', color: remoteUserHexColor }, 2000);
+    }
+  }
+
+  onMenuDetached({ objectId, entityType, detachId, position, quaternion }: MenuDetachedForwardMessage) {
+    let object = this.findMeshByModelId(entityType, detachId);
+    if (isEntityMesh(object)) {
+      let menu = new DetailInfoMenu(object);
+      menu.position.fromArray(position);
+      menu.quaternion.fromArray(quaternion);
+
+      let closeIcon = new CloseIcon(this.closeButtonTexture);
+      closeIcon.addToObject(menu);
+
+      let menuContainer = new GrabbableMenuContainer(menu, objectId);
+      this.detachedMenus.add(menuContainer);
+      this.scene.add(menu);
     }
   }
 

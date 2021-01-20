@@ -2,6 +2,7 @@ import { EventDispatcher } from "three";
 import WebSocketService from "virtual-reality/services/web-socket";
 import { ForwardedMessage, isForwardedMessage, isForwardedMessageOf } from "./receivable/forwarded";
 import { InitialLandscapeMessage, isInitialLandscapeMessage } from "./receivable/landscape";
+import { isMenuDetachedForwardMessage, MenuDetachedForwardMessage } from "./receivable/menu-detached-forward";
 import { isResponseMessage, ResponseMessage } from "./receivable/response";
 import { isSelfConnectedMessage, SelfConnectedMessage } from "./receivable/self_connected";
 import { isUserConnectedMessage, UserConnectedMessage, } from "./receivable/user_connected";
@@ -28,6 +29,7 @@ export interface VrMessageListener {
     onUserConnected(msg: UserConnectedMessage): void;
     onUserDisconnect(msg: UserDisconnectedMessage): void;
     onInitialLandscape(msg: InitialLandscapeMessage): void;
+    onMenuDetached(msg: MenuDetachedForwardMessage): void;
 
     // Forwarded messages.
     onUserPositions(msg: ForwardedMessage<UserPositionsMessage>): void;
@@ -56,6 +58,7 @@ export default class VrMessageReceiver extends EventDispatcher {
         if (isUserConnectedMessage(msg)) return this.messageListener.onUserConnected(msg);
         if (isUserDisconnectedMessage(msg)) return this.messageListener.onUserDisconnect(msg);
         if (isInitialLandscapeMessage(msg)) return this.messageListener.onInitialLandscape(msg);
+        if (isMenuDetachedForwardMessage(msg)) return this.messageListener.onMenuDetached(msg);
         console.error('Received invalid message', msg);
     }
 

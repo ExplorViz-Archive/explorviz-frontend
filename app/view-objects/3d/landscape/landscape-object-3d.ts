@@ -37,8 +37,8 @@ export default class LandscapeObject3D extends THREE.Object3D {
       this.modelIdToMesh.set(object.dataModel.ipAddress, object);
     } else if (object instanceof ApplicationMesh) {
       this.modelIdToMesh.set(object.dataModel.pid, object);
-    }
-
+    }  
+    
     return this;
   }
 

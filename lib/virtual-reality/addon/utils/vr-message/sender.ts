@@ -1,6 +1,7 @@
 import WebSocketService from 'virtual-reality/services/web-socket';
 import THREE from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import { EntityType } from './util/entity_type';
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
 export default class VrMessageSender {
@@ -190,12 +191,13 @@ export default class VrMessageSender {
     this.webSocket.send(appObj);
   }
 
-  sendMenuDetached(detachId: string, position: THREE.Vector3, quaternion: THREE.Quaternion) {
+  sendMenuDetached(detachId: string, entityType: EntityType, position: THREE.Vector3, quaternion: THREE.Quaternion) {
     const nonce = this.nextNonce();
     const obj = {
       event: 'menu_detached',
       nonce: nonce,
       detachId: detachId,
+      entityType: entityType,
       position: position.toArray(),
       quaternion: quaternion.toArray(), 
     };

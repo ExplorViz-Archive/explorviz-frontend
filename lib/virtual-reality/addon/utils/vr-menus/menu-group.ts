@@ -1,12 +1,13 @@
 import THREE from "three";
-import CloseIcon from "../view-objects/vr/close-icon";
 import VRControllerBindings from "../vr-controller/vr-controller-bindings";
+import { EntityType } from "../vr-message/util/entity_type";
 import VRController from "../vr-rendering/VRController";
 import BaseMenu from "./base-menu";
 import { GrabbableObject } from "./pseudo-menu/grab-menu";
 
 export interface DetachableMenu extends BaseMenu {
     getDetachId(): string;
+    getEntityType(): EntityType;
 }
 
 export function isDetachableMenu(menu: BaseMenu): menu is DetachableMenu {
