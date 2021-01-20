@@ -10,7 +10,6 @@ export function isResponseMessage(msg: any): msg is ResponseMessage<any> {
     return msg !== null
         && typeof msg === 'object'
         && msg.event === RESPONSE_EVENT
-        && typeof msg.responseEvent === 'string'
         && typeof msg.nonce === 'number';
 }
 

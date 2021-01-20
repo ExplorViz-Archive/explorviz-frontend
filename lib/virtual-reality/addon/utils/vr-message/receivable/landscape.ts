@@ -62,6 +62,6 @@ export function isInitialLandscapeMessage(msg: any): msg is InitialLandscapeMess
         && typeof msg === 'object'
         && msg.event === INITIAL_LANDSCAPE_EVENT
         && Array.isArray(msg.openApps)
-        && msg.openApps.evey(isApp)
+        && msg.openApps.every(isApp)
         && isLandscape(msg.landscape);
 } 

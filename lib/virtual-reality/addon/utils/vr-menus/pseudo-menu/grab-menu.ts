@@ -83,7 +83,6 @@ export default class GrabMenu extends PseudoMenu {
         // Send object grab message.
         const objectId = this.grabbedObject.getGrabId();
         const nonce = this.sender.sendObjectGrabbed(objectId);
-        console.log("sent object grabbed request with nonce", nonce);
 
         // Wait for response.
         this.receiver.awaitResponse({
@@ -92,7 +91,7 @@ export default class GrabMenu extends PseudoMenu {
             onResponse: (response: ObjectGrabbedResponse) => {
                 // If we receive the answer too late, we ignore it.
                 if (!this.isMenuOpen) return;
-                this.grabbedSuccessfully = response.success;
+                this.grabbedSuccessfully = response.isSuccess;
     
                 // If we are allowed to grab the object, move it into the
                 // controller's grip space.

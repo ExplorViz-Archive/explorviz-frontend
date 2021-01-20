@@ -109,7 +109,7 @@ export default class VrMessageReceiver extends EventDispatcher {
         onOffline?: () => void,
     }) {
         // Don't wait for response unless there is a open websocket connection.
-        if (!this.webSocket.isWebSocketOpen) {
+        if (!this.webSocket.isWebSocketOpen()) {
             if (onOffline) onOffline();
             return;
         }
