@@ -5,24 +5,8 @@ import { setupRenderingTest } from 'ember-qunit';
 //import hbs from 'htmlbars-inline-precompile';
 import Service from '@ember/service';
 
-/* eslint-disable */
-const sessionStub = Service.extend({
-  session: {
-    content: {
-      authenticated: {
-        username: 'testUsernameExplorViz'
-      }
-    }
-  }
-});
-/* eslint-enable */
-
 module('Integration | Component | page-setup/navbar', function(hooks) {
   setupRenderingTest(hooks);
-
-  hooks.beforeEach(function() {
-    this.owner.register('service:session', sessionStub);
-  });
 
   // TODO Seems to fail due to route-action-helper
   // https://github.com/DockYard/ember-route-action-helper/issues/42

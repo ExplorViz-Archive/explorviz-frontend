@@ -27,7 +27,6 @@ import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/found
 import * as EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
-import CurrentUser from 'explorviz-frontend/services/current-user';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
 import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
@@ -74,9 +73,6 @@ export default class VrRendering extends Component<Args> {
 
   @service('configuration')
   configuration!: Configuration;
-
-  @service('current-user')
-  currentUser!: CurrentUser;
 
   @service('local-vr-user')
   localUser!: LocalVrUser;
@@ -183,7 +179,7 @@ export default class VrRendering extends Component<Args> {
     this.controllerInfoMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
     this.localUser.controllerInfoMenus = this.controllerInfoMenus;
 
-    this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
+    this.appCommRendering = new AppCommunicationRendering(this.configuration);
 
     // Load image for delete button
     this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');

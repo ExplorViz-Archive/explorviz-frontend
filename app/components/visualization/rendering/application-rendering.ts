@@ -7,7 +7,6 @@ import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import DS from 'ember-data';
 import Configuration from 'explorviz-frontend/services/configuration';
-import CurrentUser from 'explorviz-frontend/services/current-user';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
@@ -80,9 +79,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @service('configuration')
   configuration!: Configuration;
 
-  @service('current-user')
-  currentUser!: CurrentUser;
-
   @service()
   worker!: any;
 
@@ -148,7 +144,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.applicationObject3D = new ApplicationObject3D(application!,
       new Map(), dynamicLandscapeData);
 
-    this.communicationRendering = new CommunicationRendering(this.configuration, this.currentUser);
+    this.communicationRendering = new CommunicationRendering(this.configuration);
 
     this.hoveredObject = null;
   }

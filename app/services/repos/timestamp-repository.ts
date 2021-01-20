@@ -25,7 +25,7 @@ export default class TimestampRepository extends Service.extend(Evented) {
    * @method triggerTimelineUpdate
    */
   triggerTimelineUpdate() {
-    this.trigger('updated', this.get('latestTimestamp'));
+    this.trigger('updated', this.latestTimestamp);
   }
 }
 

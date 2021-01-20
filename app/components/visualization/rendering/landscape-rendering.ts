@@ -5,7 +5,6 @@ import debugLogger from 'ember-debug-logger';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import THREE from 'three';
 import Configuration from 'explorviz-frontend/services/configuration';
-import CurrentUser from 'explorviz-frontend/services/current-user';
 
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
@@ -81,9 +80,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @service('configuration')
   configuration!: Configuration;
-
-  @service('current-user')
-  currentUser!: CurrentUser;
 
   @service()
   worker!: any;

@@ -1,4 +1,4 @@
-import { action, get } from '@ember/object';
+import { action } from '@ember/object';
 import Component from '@glimmer/component';
 import debugLogger from 'ember-debug-logger';
 import Timestamp from 'explorviz-frontend/models/timestamp';
@@ -445,8 +445,8 @@ export default class PlotlyTimeline extends Component<IArgs> {
     const { defaultMarkerColor, defaultMarkerSize } = this;
 
     selTimestamps.forEach((t) => {
-      this.markerState[get(t, 'id')].color = defaultMarkerColor;
-      this.markerState[get(t, 'id')].size = defaultMarkerSize;
+      this.markerState[t.get('id')].color = defaultMarkerColor;
+      this.markerState[t.get('id')].size = defaultMarkerSize;
     });
 
     this.selectedTimestamps = [];
