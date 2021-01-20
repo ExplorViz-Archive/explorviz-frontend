@@ -1,4 +1,5 @@
 import THREE from "three";
+import FloorMesh from "../view-objects/vr/floor-mesh";
 import VRControllerBindings from "../vr-controller/vr-controller-bindings";
 import VRController from "../vr-rendering/VRController";
 import BaseMenu from "./base-menu";
@@ -52,11 +53,14 @@ export default class MenuGroup extends THREE.Group {
      * group visible or invisible based on the currently open menu.
      */
     toggleControllerRay() {
-        let controller = VRController.findController(this);
+        const controller = VRController.findController(this);
         if (controller) {
             let visible = !this.currentMenu || this.currentMenu.enableControllerRay;
             if (controller.ray) controller.ray.visible = visible;
-            if (controller.teleportArea) controller.teleportArea.visible = visible;
+            if (controller.teleportArea) {
+                const intersectsFloor = controller.intersectedObject?.object instanceof FloorMesh;
+                controller.teleportArea.visible = visible && intersectsFloor;
+            }
         }
     }
 
@@ -98,7 +102,7 @@ export default class MenuGroup extends THREE.Group {
      * it is shown again by adding the mesh back to this group.
      */
     closeMenu(detach: boolean = false) {
-        let closedMenu = this.menus.pop();
+        const closedMenu = this.menus.pop();
         this.controllerBindings.pop();
         if (closedMenu && !detach) {
             closedMenu.onCloseMenu();
@@ -116,7 +120,7 @@ export default class MenuGroup extends THREE.Group {
     }
 
     detachMenu() {
-        let menu = this.currentMenu;
+        const menu = this.currentMenu;
         if (menu && isDetachableMenu(menu)) {
             
             this.closeMenu(true);
