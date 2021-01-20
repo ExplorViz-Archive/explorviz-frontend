@@ -66,21 +66,21 @@ export default class WebSocketService extends Service {
 
   private messageHandler(event: any) {
     const message = JSON.parse(event.data);
-    if (this.eventCallback) {
-      this.eventCallback(message.event, message);
+    if (this.messageCallback) {
+      this.messageCallback(message);
     }
   }
 
-  // Used to send messages to the backend
-  send(obj: any) {
-    if (this.isWebSocketOpen()) { this.socket.send(JSON.stringify(obj)); }
-  }
-
-  sendDisconnectRequest() {
-    const disconnectMessage = [{
-      event: 'receive_disconnect_request',
-    }];
-    this.send(disconnectMessage);
+  /**
+   * Sends a message to the backend.
+   * 
+   * The type parameter `T` is used to validate the type of the sent message
+   * at compile time.
+   * 
+   * @param msg The message to send.
+   */
+  send<T>(msg: T) {
+    if (this.isWebSocketOpen()) { this.socket.send(JSON.stringify(msg)); }
   }
 
   isWebSocketOpen() {
