@@ -1,4 +1,6 @@
 import Component from '@glimmer/component';
+import { inject as service } from '@ember/service';
+import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
 
 interface CursorArgs {
   cursorData: {
@@ -10,6 +12,9 @@ interface CursorArgs {
 
 export default class Cursor extends Component<CursorArgs> {
 
+  @service('collaborative-settings-service')
+  settings!: CollaborativeSettingsService;
+
   get left() {
     return `${this.args.cursorData.x}px`;
   }
@@ -19,6 +24,7 @@ export default class Cursor extends Component<CursorArgs> {
   }
 
   get color() {
-    return this.args.cursorData.color || 'grey';
+    return this.settings.color
+    // return this.args.cursorData.color || 'grey';
   }
 }

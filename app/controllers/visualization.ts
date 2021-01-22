@@ -60,9 +60,6 @@ export default class VisualizationController extends Controller {
   @tracked
   visualizationPaused = false;
 
-  @tracked
-  collaborativeModeActive = false;
-
   debug = debugLogger();
 
   get showLandscapeView() {
@@ -221,18 +218,6 @@ export default class VisualizationController extends Controller {
   @action
   toggleTimeline() {
     this.showTimeline = !this.showTimeline;
-  }
-
-  @action
-  toggleCollaborativeMode() {
-    if (this.collaborativeModeActive) {
-      this.collaborativeModeActive = false;
-      AlertifyHandler.showAlertifyMessage('Collaborative Mode paused!');
-    } else {
-      this.collaborativeModeActive = true;
-      this.collaborativeService.openSocket();
-      AlertifyHandler.showAlertifyMessage('Collaborative Mode active!');
-    }
   }
 
   @action

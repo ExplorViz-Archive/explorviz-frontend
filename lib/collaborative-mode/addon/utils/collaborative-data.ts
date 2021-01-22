@@ -4,8 +4,9 @@ export interface Perspective {
 }
 
 export interface CursorPosition {
-  x: number,
-  y: number,
+  // point?: {x: number, y: number, z: number},
+  point?: number[],
+  id?: String
 }
 
 export interface Click {

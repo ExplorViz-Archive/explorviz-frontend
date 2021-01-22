@@ -1,0 +1,158 @@
+<div class="sidebar-component-close">
+  <button 
+    type="button" 
+    class="sidebar-component-close-button" 
+    title="Close Collaborative Settings"
+    {{on "click" this.close}}
+  >
+    {{svg-jar "x" class="octicon"}}
+  </button>
+</div>
+<div id="collaborativeSettings">
+  <div id="collaborativeSettingsTitle" class="sidebar-component-title">
+    <h5>Collaborative Settings</h5>
+  </div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th class="col-xs-2">Attribute</th>
+        <th class="col-xs-10">Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <b>Enabled?</b>
+          <HelpTooltip
+            @title={{this.tooltipTexts.isHidden}}
+          />
+        </td>
+        <td>
+          <div style="float: left;">
+            <XToggle
+              @theme="skewed"
+              @onLabel="Yes"
+              @offLabel="No"
+              @value={{this.settings.enabled}}
+              @onToggle={{this.toggleEnabled}}
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <b>Follow camera?</b>
+          <HelpTooltip
+            @title={{this.tooltipTexts.isHidden}}
+          />
+        </td>
+        <td>
+          <div style="float: left;">
+            <XToggle
+              @theme="skewed"
+              @onLabel="Yes"
+              @offLabel="No"
+              @value={{this.settings.perspective}}
+              @onToggle={{this.togglePerspective}}
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <b>Mouse move?</b>
+          <HelpTooltip
+            @title={{this.tooltipTexts.isHidden}}
+          />
+        </td>
+        <td>
+          <div style="float: left;">
+            <XToggle
+              @theme="skewed"
+              @onLabel="Yes"
+              @offLabel="No"
+              @value={{this.settings.mouseMove}}
+              @onToggle={{this.toggleMouseMove}}
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <b>Mouse stop?</b>
+          <HelpTooltip
+            @title={{this.tooltipTexts.isHidden}}
+          />
+        </td>
+        <td>
+          <div style="float: left;">
+            <XToggle
+              @theme="skewed"
+              @onLabel="Yes"
+              @offLabel="No"
+              @value={{this.settings.mouseStop}}
+              @onToggle={{this.toggleMouseStop}}
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <b>Mouse hover?</b>
+          <HelpTooltip
+            @title={{this.tooltipTexts.isHidden}}
+          />
+        </td>
+        <td>
+          <div style="float: left;">
+            <XToggle
+              @theme="skewed"
+              @onLabel="Yes"
+              @offLabel="No"
+              @value={{this.settings.mouseHover}}
+              @onToggle={{this.toggleMouseHover}}
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <b>Single click?</b>
+          <HelpTooltip
+            @title={{this.tooltipTexts.isHidden}}
+          />
+        </td>
+        <td>
+          <div style="float: left;">
+            <XToggle
+              @theme="skewed"
+              @onLabel="Yes"
+              @offLabel="No"
+              @value={{this.settings.singleClick}}
+              @onToggle={{this.toggleSingleClick}}
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <b>Double click?</b>
+          <HelpTooltip
+            @title={{this.tooltipTexts.isHidden}}
+          />
+        </td>
+        <td>
+          <div style="float: left;">
+            <XToggle
+              @theme="skewed"
+              @onLabel="Yes"
+              @offLabel="No"
+              @value={{this.settings.doubleClick}}
+              @onToggle={{this.toggleDoubleClick}}
+            />
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

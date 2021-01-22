@@ -2,9 +2,8 @@ import CollaborativeService from 'collaborative-mode/services/collaborative-serv
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import Raycaster from 'explorviz-frontend/utils/raycaster';
 import THREE from 'three';
-import { CursorPosition } from './collaborative-mode/collaborative-data';
 
-type CallbackFunctions = {
+export type CallbackFunctions = {
   mouseEnter?(): void,
   mouseOut?(): void,
   mouseMove?(mesh?: THREE.Mesh): void,
@@ -12,7 +11,7 @@ type CallbackFunctions = {
   mouseWheel?(delta: number): void,
   singleClick?(mesh?: THREE.Mesh): void,
   doubleClick?(mesh?: THREE.Mesh): void,
-  panning?(delta: { x: number, y: number }, button: 1 | 2 | 3): void
+  panning?(delta: { x: number, y: number }, button: 1 | 2 | 3): void;
 };
 
 type MouseStopEvent = {
@@ -146,37 +145,10 @@ export default class Interaction {
 
     if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
       this.eventCallbackFunctions.mouseMove(intersectedViewObj.object);
+      this.collaborativeService.sendMouseMove(intersectedViewObj.point, this.raycastObject3D.quaternion, intersectedViewObj.object);
     } else {
       this.eventCallbackFunctions.mouseMove();
     }
-    const payload = this.getPointerPosition(mouse);
-    this.collaborativeService.sendMouseMove(payload);
-  }
-
-  onMouseMove2(cursorPosition: CursorPosition) {
-    if (!this.eventCallbackFunctions.mouseMove) { return; }
-
-    const mouse = this.calculateMousePosition(cursorPosition);
-    const intersectedViewObj = this.raycast(mouse);
-
-    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
-      this.eventCallbackFunctions.mouseMove(intersectedViewObj.object);
-    } else {
-      this.eventCallbackFunctions.mouseMove();
-    }
-  }
-
-  calculateMousePosition(cursorPosition: CursorPosition) {
-    var mouse = new THREE.Vector3(); // create once and reuse
-    mouse.set(cursorPosition.x, cursorPosition.y, 0);
-    mouse.project(this.camera);
-    mouse.x = Math.round((0.5 + mouse.x / 2) * (this.renderer.domElement.width / window.devicePixelRatio));
-    mouse.y = Math.round((0.5 - mouse.y / 2) * (this.renderer.domElement.height / window.devicePixelRatio));
-    // console.log("Vec2: " + mouse.x + "==" +  mouse.y)
-
-    const pointerX = mouse.x - 5;
-    const pointerY = mouse.y - 5;
-    return {x: pointerX, y: pointerY, color: 'grey'};
   }
 
   onMouseStop(evt: CustomEvent<MouseStopEvent>) {
@@ -189,41 +161,10 @@ export default class Interaction {
 
     if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
       this.eventCallbackFunctions.mouseStop(intersectedViewObj.object, mouse);
+      this.collaborativeService.sendMouseStop(intersectedViewObj.point, this.raycastObject3D.quaternion, intersectedViewObj.object);
     } else {
       this.eventCallbackFunctions.mouseStop();
     }
-    const payload = this.getPointerPosition(mouse);
-    this.collaborativeService.sendMouseStop(payload);
-  }
-
-  onMouseStop2(cursorPosition: CursorPosition) {
-    if (!this.eventCallbackFunctions.mouseStop) { return; }
-    const mouse = this.calculateMousePosition(cursorPosition);
-    const intersectedViewObj = this.raycast(mouse);
-
-    if (intersectedViewObj && intersectedViewObj.object instanceof THREE.Mesh) {
-      this.eventCallbackFunctions.mouseStop(intersectedViewObj.object, mouse);
-    } else {
-      this.eventCallbackFunctions.mouseStop();
-    }
-  }
-
-
-  getPointerPosition(mouse: Position2D) {
-    const pointerPosition = this.calculatePositionInScene(mouse)
-
-    var vec = new THREE.Vector3(); // create once and reuse
-    var pos = new THREE.Vector3(); // create once and reuse
-    vec.set(pointerPosition.x, pointerPosition.y, 0);
-    // vec.set(mouse.x, mouse.y, 0);
-    vec.unproject(this.camera);
-
-    vec.sub(this.camera.position).normalize();
-    var distance = - this.camera.position.z / vec.z;
-
-    pos.copy(this.camera.position).add(vec.multiplyScalar(distance))
-
-    return {x: pos.x, y: pos.y};
   }
 
   onMouseWheelStart(evt: WheelEvent) {

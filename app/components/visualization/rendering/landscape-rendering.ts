@@ -9,7 +9,7 @@ import CurrentUser from 'explorviz-frontend/services/current-user';
 import CollaborativeService from 'collaborative-mode/services/collaborative-service';
 import { Perspective, CursorPosition, instanceOfIdentifiableMesh, Click } from 'collaborative-mode/utils/collaborative-data';
 
-import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
+import { Position2D } from 'explorviz-frontend/utils/interaction';
 import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
 import * as CommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
@@ -30,16 +30,16 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
+import CollaborativeInteraction from 'collaborative-mode/utils/collaborative-interaction';
+import CollaborativeSettingsService from 'collaborative-mode/services/collaborative-settings-service';
 
 interface Args {
   readonly id: string;
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
   readonly visualizationPaused: boolean;
-  readonly collaborativeModeActive: boolean;
   showApplication(application: Application): void;
   toggleVisualizationUpdating(): void;
-  toggleCollaborativeMode(): void;
 }
 
 interface SimplePlaneLayout {
@@ -88,6 +88,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @service('collaborative-service')
   collaborativeService!: CollaborativeService;
 
+  @service('collaborative-settings-service')
+  collaborativeSettingsService!: CollaborativeSettingsService;
+
   @service('current-user')
   currentUser!: CurrentUser;
 
@@ -114,7 +117,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   threePerformance: THREEPerformance | undefined;
 
   // Used to register (mouse) events
-  interaction!: Interaction;
+  interaction!: CollaborativeInteraction;
 
   // Maps models to a computed layout
   modelIdToPlaneLayout: Map<string, PlaneLayout> | null = null;
@@ -134,8 +137,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @tracked
   popupData: PopupData | null = null;
 
-  @tracked
-  cursorPosition: CursorPosition | null = null;
+  spheres: Array<THREE.Mesh> = [];
+
+  spheresIndex = 0;
 
   get font() {
     return this.args.font;
@@ -181,7 +185,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.resize(outerDiv);
 
     await perform(this.loadNewLandscape);
-
+    this.initSpheres();
     this.initDone = true;
   }
 
@@ -264,7 +268,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.handleMouseStop = this.handleMouseStop.bind(this);
     this.handlePanning = this.handlePanning.bind(this);
 
-    this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer,
+    this.interaction = new CollaborativeInteraction(this.canvas, this.camera, this.webglrenderer,
       this.landscapeObject3D, this.collaborativeService, {
       doubleClick: this.handleDoubleClick,
       mouseMove: this.handleMouseMove,
@@ -273,26 +277,41 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       /* mouseEnter: this.handleMouseEnter, */
       mouseStop: this.handleMouseStop,
       panning: this.handlePanning,
-    });
+    },
+    {
+      repositionSphere: this.repositionSphere
+    },
+    this.collaborativeSettingsService
+    );
+  }
+
+  initSpheres() {
+    const sphereGeometry = new THREE.SphereBufferGeometry( 0.1, 32, 32 );
+		const sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
+
+		for ( let i = 0; i < 30; i ++ ) {
+			const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+					this.scene.add( sphere );
+					this.spheres.push( sphere );
+		}
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
   // #region COLLABORATIVE
   @action
-  receivePerspective(cameraa: Perspective) {
-    this.camera.position.set(cameraa.position.x, cameraa.position.y, cameraa.position.z);
+  receivePerspective(perspective: Perspective) {
+    this.camera.position.set(perspective.position.x, perspective.position.y, perspective.position.z);
   }
 
   @action
   receiveMouseMove(mouse: CursorPosition) {
-    this.interaction.onMouseMove2(mouse);
-    this.cursorPosition = this.interaction.calculateMousePosition(mouse);
+    this.interaction.receiveMouseMove(mouse);
   }
 
   @action
   receiveMouseStop(mouse: CursorPosition) {
-    this.interaction.onMouseStop2(mouse);
+    this.interaction.receiveMouseStop(mouse);
   }
 
   @action
@@ -332,9 +351,26 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.webglrenderer.render(this.scene, this.camera);
 
+    this.scaleSpheres();
+
     if (this.threePerformance) {
       this.threePerformance.stats.end();
     }
+  }
+
+  scaleSpheres() {
+		for ( let i = 0; i < this.spheres.length; i ++ ) {
+			const sphere = this.spheres[ i ];
+			sphere.scale.multiplyScalar( 0.98 );
+			sphere.scale.clampScalar( 0.01, 1 );
+    }
+  }
+
+  @action
+  repositionSphere(vec: THREE.Vector3) {
+	  this.spheres[ this.spheresIndex ].position.copy( vec );
+	  this.spheres[ this.spheresIndex ].scale.set( 1, 1, 1 );
+	  this.spheresIndex = ( this.spheresIndex + 1 ) % this.spheres.length;
   }
 
   // #endregion RENDERING LOOP

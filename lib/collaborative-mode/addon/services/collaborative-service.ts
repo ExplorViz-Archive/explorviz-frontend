@@ -2,6 +2,10 @@ import Service, { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
 import { Perspective, IdentifiableMesh, CursorPosition } from 'collaborative-mode/utils/collaborative-data';
 import THREE from 'three';
+import CollaborativeSettingsService from './collaborative-settings-service';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
+import adjustForObjectRotation from 'collaborative-mode/utils/collaborative-util';
+import collaborativeMode from 'lib/collaborative-mode';
 
 export default class CollaborativeService extends Service.extend(Evented
   // anything which *must* be merged to prototype here
@@ -9,49 +13,44 @@ export default class CollaborativeService extends Service.extend(Evented
   // @ts-expect-error
   @service('websockets') socketService!: any;
 
-  pollingTimer: NodeJS.Timeout | null = null;
-  writingTimer: NodeJS.Timeout | null = null;
+  @service('collaborative-settings-service') settings!: CollaborativeSettingsService;
+
   socketRef = null;
 
-  disableControlTimer: NodeJS.Timeout | null = null;
-  disableControl: boolean = false;
+  randomValue = Math.floor(Math.random() * Math.floor(100));
 
   async openSocket() {
-    const randomValue = Math.floor(Math.random() * Math.floor(100));
-    const socket = this.socketService.socketFor('ws://localhost:8080/v2/collaborative/fib/someone' + randomValue);
+    const socket = this.socketService.socketFor('ws://localhost:8080/v2/collaborative/fib/someone' + this.randomValue);
     socket.on('open', this.myOpenHandler, this);
-    socket.on('message', this.myMessageHandler, this);
     socket.on('close', this.myCloseHandler, this);
+    socket.on('message', this.myMessageHandler, this);
 
     this.set('socketRef', socket);
   }
 
-  myOpenHandler(event: any) {
-    console.log(`On open event has been called: ${event}`);
+  async closeSocket() {
+    this.socketService.closeSocketFor('ws://localhost:8080/v2/collaborative/fib/someone' + this.randomValue);
   }
 
-  myMessageHandler(event: any) {
-    // console.log(`Message: ${event.data}`);
-    const result = JSON.parse(event.data);
-    
-    this.trigger(result.action, result.payload);
-
-      // this.disableControl = true
-      // if (this.disableControlTimer) {
-      //   clearTimeout(this.disableControlTimer)
-      // }
-      // this.disableControlTimer = setTimeout(() => {
-      //   this.disableControl = false
-      //   console.log(`Timer expired`);
-      // }, 1000);
-
-      // result.rotation = new THREE.Euler(result.rotation._x, result.rotation._y, result.rotation._z)
-      // this.lastPerspective = result
-      // this.trigger('newPerspective', result);
+  myOpenHandler(event: any) {
+    AlertifyHandler.showAlertifyMessage('Collaborative Mode active!');
   }
 
   myCloseHandler(event: any) {
-    console.log(`On close event has been called: ${event}`);
+    AlertifyHandler.showAlertifyMessage('Collaborative Mode stopped!');
+  }
+
+  myMessageHandler(event: any) {
+    if (event.data.startsWith("User")) {
+      AlertifyHandler.showAlertifyMessage(event.data);
+      return
+    }
+    const result = JSON.parse(event.data);
+
+    const handlerEnabled = this.settings.get(result.action)
+    if ( handlerEnabled == null || handlerEnabled == true) {
+      this.trigger(result.action, result.payload);
+    }
   }
 
   sendDoubleClick(mesh: THREE.Mesh) {
@@ -61,7 +60,7 @@ export default class CollaborativeService extends Service.extend(Evented
   sendSingleClick(mesh: THREE.Mesh) {
     this.sendClick('singleClick', mesh);
   }
-
+  
   sendClick(action: String, mesh: THREE.Mesh) {
     if (this.instanceOfIdentifiableMesh(mesh)) {
       this.send(action, { id: mesh.colabId });
@@ -76,12 +75,23 @@ export default class CollaborativeService extends Service.extend(Evented
     this.send('perspective', payload);
   }
 
-  sendMouseMove(mouse: CursorPosition) {
-    this.send('mouseMove', mouse);
+  sendMouseMove(point: THREE.Vector3, quaternion: THREE.Quaternion, mesh?: THREE.Mesh) {
+    this.sendMouse('mouseMove', point, quaternion, mesh);
   }
 
-  sendMouseStop(mouse: CursorPosition) {
-    this.send('mouseStop', mouse);
+  sendMouseStop(point: THREE.Vector3, quaternion: THREE.Quaternion, mesh?: THREE.Mesh) {
+    this.sendMouse('mouseStop', point, quaternion, mesh);
+  }
+
+  sendMouse(action: String, point: THREE.Vector3, quaternion: THREE.Quaternion, mesh?: THREE.Mesh) {
+    const vectorWithoutObjectRotation = adjustForObjectRotation(point.toArray(), quaternion.clone().conjugate());
+    const payload: CursorPosition = {
+      point: vectorWithoutObjectRotation.toArray()
+    }
+    if (mesh && this.instanceOfIdentifiableMesh(mesh)) {
+      payload.id = mesh.colabId;
+    }
+    this.send(action,  payload);
   }
   
   sendMouseWheel(delta: number) {
@@ -101,10 +111,6 @@ export default class CollaborativeService extends Service.extend(Evented
   instanceOfIdentifiableMesh(object: any): object is IdentifiableMesh {
     return 'colabId' in object;
   }
-  // normal class body definition here
-
-
-  // normal class body definition here
 }
 
 // DO NOT DELETE: this is how TypeScript knows how to look up your services.

@@ -18,18 +18,16 @@
         @toggleVisualizationUpdating={{@toggleVisualizationUpdating}}
         @visualizationPaused={{@visualizationPaused}}
       />
-      <Visualization::PageSetup::Navbar::ToggleCollaborative
-        @toggleCollaborativeMode={{@toggleCollaborativeMode}}
-        @collaborativeModeActive={{@collaborativeModeActive}}
-      />
       <Visualization::PageSetup::Navbar::ColorPickerOpener
         @addComponent={{@addComponent}}
       />
       <Visualization::PageSetup::Navbar::ShareLandscapeOpener
         @addComponent={{@addComponent}}
       />
+      <CollaborativeSettingsOpener
+        @addComponent={{@addComponent}}
+      />
     </Visualization::PageSetup::VisualizationNavbar>
-
     <div
       id="rendering"
       {{did-insert this.outerDivInserted}}
@@ -47,9 +45,6 @@
       {{!-- popup(s) --}}
       <Visualization::Rendering::Popups::PopupCoordinator
         @popupData={{this.popupData}}
-      />
-      <Cursor
-        @cursorData={{this.cursorPosition}}
       />
     </div>
   </div>
@@ -71,6 +66,13 @@
             {{/if}}
             {{#if (eq componentName "share-landscape")}}
               <Visualization::PageSetup::Sidebar::ShareLandscape
+                @isLandscapeView={{true}}
+                @removeComponent={{@removeComponent}}
+                @updateView={{this.updateColors}}
+              />
+            {{/if}}
+            {{#if (eq componentName "collaborative-settings")}}
+              <CollaborativeSettings 
                 @isLandscapeView={{true}}
                 @removeComponent={{@removeComponent}}
                 @updateView={{this.updateColors}}
