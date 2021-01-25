@@ -4,6 +4,12 @@
   this.receiveNewLandscapeData
 }}
 
+{{add-listener
+  this.timestampRepo
+  "updated"
+  this.updateTimestampList
+}}
+
 <div id="vizspace">
   {{#if this.showVR}}
     <VrMultiUser
@@ -102,7 +108,7 @@
     </BsButton>
     <div id="timeline" class="timeline {{unless this.showTimeline "timelinehide"}}">
       <Visualization::PageSetup::Timeline::PlotlyTimeline
-        @timestamps={{this.timestampRepo.timelineTimestamps}}
+        @timestamps={{this.timelineTimestamps}}
         @clicked={{this.timelineClicked}}
         @setChildReference={{this.getTimelineReference}}
       />

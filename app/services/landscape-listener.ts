@@ -1,8 +1,6 @@
 import Service, { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
-import DS from 'ember-data';
-import { set } from '@ember/object';
 import {
   preProcessAndEnhanceStructureLandscape, StructureLandscapeData,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
@@ -15,8 +13,6 @@ import LandscapeTokenService from './landscape-token';
 const { landscapeService, traceService } = ENV.backendAddresses;
 
 export default class LandscapeListener extends Service.extend(Evented) {
-  @service('store') store!: DS.Store;
-
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
   @service('auth') auth!: Auth;
@@ -137,12 +133,9 @@ export default class LandscapeListener extends Service.extend(Evented) {
       /* eslint-enable */
     }
 
-    const timestampRecord = this.store.createRecord('timestamp', { id: uuidv4(), timestamp, totalRequests });
-    set(this.timestampRepo, 'latestTimestamp', timestampRecord);
+    const timestampRecord = { id: uuidv4(), timestamp, totalRequests };
 
-    // this syntax will notify the template engine to redraw all components
-    // with a binding to this attribute
-    set(this.timestampRepo, 'timelineTimestamps', [...this.timestampRepo.timelineTimestamps, timestampRecord]);
+    this.timestampRepo.addTimestamp(this.tokenService.token!.value, timestampRecord);
 
     this.timestampRepo.triggerTimelineUpdate();
   }

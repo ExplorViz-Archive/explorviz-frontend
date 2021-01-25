@@ -17,7 +17,6 @@ import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import MessageBoxMenu from 'virtual-reality/utils/vr-menus/message-box-menu';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import DS from 'ember-data';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';

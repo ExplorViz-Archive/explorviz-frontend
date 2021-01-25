@@ -5,7 +5,6 @@ import THREE from 'three';
 import { inject as service } from '@ember/service';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
-import DS from 'ember-data';
 import Configuration from 'explorviz-frontend/services/configuration';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
@@ -72,9 +71,6 @@ type LayoutData = {
 
 export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #region CLASS FIELDS AND GETTERS
-
-  @service('store')
-  store!: DS.Store;
 
   @service('configuration')
   configuration!: Configuration;
