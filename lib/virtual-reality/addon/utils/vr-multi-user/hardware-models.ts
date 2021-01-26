@@ -19,11 +19,4 @@ export default class HardwareModels extends Object {
       this.hmd = object;
     });
   }
-
-  static positionController(controller: THREE.Object3D) {
-    controller.rotateX(0.71);
-    controller.position.x -= 0.0071;
-    controller.position.y += 0.035;
-    controller.position.z -= 0.035;
-  }
 }
