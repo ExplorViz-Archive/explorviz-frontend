@@ -20,7 +20,7 @@ export default class MessageBoxMenu extends BaseMenu {
     super({ width: 256, height: 64 }, '#000000');
     this.time = time;
     this.enableTimer = false;
-    
+
     // Draw text.
     const titleItem = new TextItem(title, 'title', color, { x: 128, y: 10 }, 18, 'center');
     this.items.push(titleItem);
@@ -72,6 +72,10 @@ export default class MessageBoxMenu extends BaseMenu {
     action.setLoop(THREE.LoopOnce, 0);
     action.clampWhenFinished = true;
     action.play();
+
+    // Stop timer while the close animation is playing such that the close
+    // animation is not triggered multiple times.
+    this.enableTimer = false;
 
     // Close menu when animation finished.
     await this.waitForAnimation(action);
