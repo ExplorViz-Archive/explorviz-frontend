@@ -79,8 +79,6 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   // Contains clonable objects of HMD, camera and controllers for other users
   hardwareModels: HardwareModels;
 
-  detachedMenus!: THREE.Group;
-
   getRemoteUsers() {
     return this.idToRemoteUser;
   }
@@ -93,15 +91,11 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     super(owner, args);
 
     this.remoteUserGroup = new THREE.Group();
-    this.detachedMenus = new THREE.Group();
     this.hardwareModels = new HardwareModels();
   }
 
   initRendering() {
     super.initRendering();
-
-    this.scene.add(this.remoteUserGroup);
-    this.scene.add(this.detachedMenus);
 
     this.sender = new VrMessageSender(this.webSocket);
     this.receiver = new VrMessageReceiver(this.webSocket, this);
@@ -112,10 +106,15 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     $.getJSON('config/config_multiuser.json').then(bind(this.webSocket, this.webSocket.applyConfiguration));
   }
 
+  initScene() {
+    super.initScene();
+    this.scene.add(this.remoteUserGroup);
+  }
+
   initControllers() {
     super.initControllers();
 
-    let listener = ({menu}: MenuDetachedEvent) => {
+    let menuDetachListener = ({menu}: MenuDetachedEvent) => {
       const position = new THREE.Vector3();
       const quaternion = new THREE.Quaternion();
       menu.getWorldPosition(position);
@@ -146,16 +145,14 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       this.localUser.controller1.eventCallbacks.connected = this.onControllerConnected.bind(this);
       this.localUser.controller1.eventCallbacks.disconnected = this
         .onControllerDisconnected.bind(this);
-      this.localUser.controller1.menuGroup.addEventListener(MENU_DETACH_EVENT_TYPE, listener);
-      this.localUser.controller1.intersectableObjects.push(this.detachedMenus);
+      this.localUser.controller1.menuGroup.addEventListener(MENU_DETACH_EVENT_TYPE, menuDetachListener);
     }
 
     if (this.localUser.controller2) {
       this.localUser.controller2.eventCallbacks.connected = this.onControllerConnected.bind(this);
       this.localUser.controller2.eventCallbacks.disconnected = this
         .onControllerDisconnected.bind(this);
-      this.localUser.controller2.menuGroup.addEventListener(MENU_DETACH_EVENT_TYPE, listener);
-      this.localUser.controller2.intersectableObjects.push(this.detachedMenus);
+      this.localUser.controller2.menuGroup.addEventListener(MENU_DETACH_EVENT_TYPE, menuDetachListener);
     }
   }
 
@@ -247,9 +244,14 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   grabIntersectedObject(controller: VRController) {
     if (!controller.intersectedObject || !controller.ray) return;
 
-    const { object: { parent: object } } = controller.intersectedObject;
-    if (object && isGrabbableObject(object)) {
-      controller.menuGroup.openMenu(new GrabMenu(object, this.sender, this.receiver));
+    let object: THREE.Object3D|null = controller.intersectedObject.object;
+    while (object) {
+      if (isGrabbableObject(object)) {
+        controller.menuGroup.openMenu(new GrabMenu(object, this.sender, this.receiver));
+        break;
+      } else {
+        object = object.parent;
+      }
     }
   }
 

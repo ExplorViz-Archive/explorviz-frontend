@@ -131,6 +131,8 @@ export default class VrRendering extends Component<Args> {
 
   floor!: FloorMesh;
 
+  detachedMenus!: THREE.Group;
+
   closeButtonTexture: THREE.Texture;
 
   get font() {
@@ -170,6 +172,7 @@ export default class VrRendering extends Component<Args> {
 
     this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
+    this.detachedMenus = new THREE.Group();
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
 
@@ -214,6 +217,7 @@ export default class VrRendering extends Component<Args> {
     this.scene.add(floorMesh);
     this.scene.add(this.applicationGroup);
     this.scene.add(this.localUser.userGroup);
+    this.scene.add(this.detachedMenus);
 
     this.debug('Scene created');
   }
@@ -274,8 +278,14 @@ export default class VrRendering extends Component<Args> {
     this.handleMouseWheel = this.handleMouseWheel.bind(this);
     this.handlePanning = this.handlePanning.bind(this);
 
+    const intersectableObjects = [
+      this.landscapeObject3D, 
+      this.applicationGroup, 
+      this.floor,
+      this.detachedMenus
+    ];
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      [this.landscapeObject3D, this.applicationGroup, this.floor], {
+      intersectableObjects, {
         singleClick: this.handleSingleClick,
         doubleClick: this.handleDoubleClick,
         mouseWheel: this.handleMouseWheel,
@@ -293,7 +303,6 @@ export default class VrRendering extends Component<Args> {
   }
 
   initControllers() {
-
     this.localUser.controller1 = this.initController({
       id: 0,
       color: new THREE.Color('red'),
