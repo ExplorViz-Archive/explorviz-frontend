@@ -11,9 +11,8 @@ export default class UserManagementEditRoute extends Route.extend(AuthenticatedR
   @service('store')
   store!: DS.Store;
 
-
   // eslint-disable-next-line @typescript-eslint/camelcase
-  model(this: UserManagementEditRoute, { user_id }: { user_id: string }) {
+  model({ user_id }: { user_id: string }) {
     return this.get('store').findRecord('user', user_id, { reload: true }).then(
       (user: User) => ({ user }),
       () => {
@@ -24,7 +23,7 @@ export default class UserManagementEditRoute extends Route.extend(AuthenticatedR
   }
 
   @action
-  goBack(this: UserManagementEditRoute) {
+  goBack() {
     this.transitionTo('configuration.usermanagement');
   }
 }

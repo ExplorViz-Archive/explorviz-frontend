@@ -1,5 +1,5 @@
-import AuthenticatedRouteMixin from
-  'ember-simple-auth/mixins/authenticated-route-mixin';
+import UnauthenticatedRouteMixin from
+  'ember-simple-auth/mixins/unauthenticated-route-mixin';
 import VisualizationController from 'explorviz-frontend/controllers/visualization';
 import THREE from 'three';
 import debugLogger from 'ember-debug-logger';
@@ -11,7 +11,7 @@ import Route from '@ember/routing/route';
 * @class Visualization-Route
 * @extends Ember.Route
 */
-export default class VisualizationRoute extends Route.extend(AuthenticatedRouteMixin) {
+export default class VisualizationRoute extends Route.extend(UnauthenticatedRouteMixin) {
   debug = debugLogger();
 
   model() {
@@ -35,9 +35,9 @@ export default class VisualizationRoute extends Route.extend(AuthenticatedRouteM
   }
 
   // @Override
-  setupController(controller: VisualizationController, model: any) {
+  setupController(controller: VisualizationController, model: any, transition: any) {
     // Call _super for default behavior
-    super.setupController(controller, model);
+    super.setupController(controller, model, transition);
 
     controller.initRendering();
   }
@@ -47,7 +47,6 @@ export default class VisualizationRoute extends Route.extend(AuthenticatedRouteM
   resetController(controller: VisualizationController, isExiting: boolean, transition: any) {
     if (isExiting && transition.targetName !== 'error') {
       controller.send('resetView');
-      controller.landscapeRepo.set('latestApplication', null);
     }
   }
 }

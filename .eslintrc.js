@@ -3,7 +3,8 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 2017,
-    sourceType: 'module'
+    sourceType: 'module',
+    project: './tsconfig.json'
   },
   plugins: [
     'ember',
@@ -23,8 +24,11 @@ module.exports = {
     'no-plusplus': 'off',
     'import/no-cycle': 'off',
     'prefer-rest-params': 'off',
+    'ember/no-mixins': 'off',
+    'ember/require-computed-property-dependencies': 'off',
     "@typescript-eslint/type-annotation-spacing": ["error"],
-    "no-param-reassign": ["error", { "props": false }]
+    "no-param-reassign": ["error", { "props": false }],
+    'func-names': ["error", "always", { "generators": "never" }]
   },
   overrides: [
     // node files

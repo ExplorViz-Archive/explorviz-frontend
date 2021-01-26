@@ -1,49 +1,42 @@
-{{#if @isReplay}}
-  {{add-listener
-    this.landscapeRepo
-    "updatedReplayLandscape"
-    this.onLandscapeUpdated
-  }}
-{{else}}
-  {{add-listener
-    this.landscapeRepo
-    "updatedLatestLandscape"
-    this.onLandscapeUpdated
-  }}
-{{/if}}
+<div
+  style="display:none"
+  {{did-update this.onLandscapeUpdated @landscapeData}}
+>
+</div>
 
 <div class="row" style="height:100%">
   <div
     class="d-flex {{if @showDataSelection "col-8" "col-12"}}"
     style="flex-direction: column; height: 100%"
   >
-    {{#unless @isReplay}}
-      <Visualization::PageSetup::VisualizationNavbar>
-        <Visualization::PageSetup::Navbar::ResetVisualization
-          @resetView={{this.resetView}}
-        />
-        <Visualization::PageSetup::Navbar::PauseReload />
-        <Visualization::PageSetup::Navbar::ColorPickerOpener 
-          @addComponent={{@addComponent}}
-        />
-        <Visualization::PageSetup::Navbar::TraceOverview
-          @addComponent={{@addComponent}}
-        />
-        <Visualization::PageSetup::Navbar::SqlOpener
-          @addComponent={{@addComponent}}
-        />
-        <Visualization::PageSetup::Navbar::ApplicationOpener
-          @openAllComponents={{this.openAllComponents}}
-        />
-        <Visualization::PageSetup::Navbar::ApplicationSearch
-          @application={{@application}}
-          @unhighlightAll={{this.unhighlightAll}}
-          @openParents={{this.openParents}}
-          @closeComponent={{this.closeComponent}}
-          @highlightModel={{this.highlightModel}}
-        />
-      </Visualization::PageSetup::VisualizationNavbar>
-    {{/unless}}
+    <Visualization::PageSetup::VisualizationNavbar>
+      <Visualization::PageSetup::Navbar::ResetVisualization
+        @resetView={{this.resetView}}
+      />
+      <Visualization::PageSetup::Navbar::PauseReload
+        @toggleVisualizationUpdating={{@toggleVisualizationUpdating}}
+        @visualizationPaused={{@visualizationPaused}}
+      />
+      <Visualization::PageSetup::Navbar::ColorPickerOpener
+        @addComponent={{@addComponent}}
+      />
+      <Visualization::PageSetup::Navbar::TraceOverview
+        @addComponent={{@addComponent}}
+        @toggleVisualizationUpdating={{@toggleVisualizationUpdating}}
+        @visualizationPaused={{@visualizationPaused}}
+        @dynamicData={{@landscapeData.dynamicLandscapeData}}
+      />
+      <Visualization::PageSetup::Navbar::ApplicationOpener
+        @openAllComponents={{this.openAllComponents}}
+      />
+      <Visualization::PageSetup::Navbar::ApplicationSearch
+        @application={{@landscapeData.application}}
+        @unhighlightAll={{this.unhighlightAll}}
+        @openParents={{this.openParents}}
+        @closeComponent={{this.closeComponent}}
+        @highlightModel={{this.highlightModel}}
+      />
+    </Visualization::PageSetup::VisualizationNavbar>
 
     <div
       id="rendering"
@@ -65,38 +58,34 @@
       />
     </div>
   </div>
-  {{#unless @isReplay}}
-    <div class={{if @showDataSelection "col-4" "hide"}} id="dataselection">
-      <Visualization::PageSetup::Sidebar::DataSelection
-        @closeDataSelection={{@closeDataSelection}}
-      >
-        {{#each @components as |componentName|}}
-          <div class="card mb-3">
-            <div class="card-body d-flex flex-column">
-              {{#if (eq componentName "trace-selection")}}
-                <Visualization::PageSetup::sidebar::TraceSelection
-                  @highlightTrace={{this.highlightTrace}}
-                  @moveCameraTo={{this.moveCameraTo}}
-                  @removeComponent={{@removeComponent}}
-                  @highlighter={{this.highlighter}}
-                />
-              {{/if}}
-              {{#if (eq componentName "sql-viewer")}}
-                <Visualization::PageSetup::Sidebar::SqlViewer
-                  @removeComponent={{@removeComponent}}
-                />
-              {{/if}}
-              {{#if (eq componentName "color-picker")}}
-                <Visualization::PageSetup::Sidebar::ColorPicker
-                  @isLandscapeView={{false}}
-                  @removeComponent={{@removeComponent}}
-                  @updateView={{this.updateColors}}
-                />
-              {{/if}}
-            </div>
+  <div class={{if @showDataSelection "col-4" "hide"}} id="dataselection">
+    <Visualization::PageSetup::Sidebar::DataSelection
+      @closeDataSelection={{@closeDataSelection}}
+    >
+      {{#each @components as |componentName|}}
+        <div class="card mb-3">
+          <div class="card-body d-flex flex-column">
+            {{#if (eq componentName "trace-selection")}}
+              <Visualization::PageSetup::Sidebar::TraceSelectionAndReplayer
+                @highlightTrace={{this.highlightTrace}}
+                @moveCameraTo={{this.moveCameraTo}}
+                @removeComponent={{@removeComponent}}
+                @removeHighlighting={{this.removeHighlighting}}
+                @dynamicData={{@landscapeData.dynamicLandscapeData}}
+                @structureData={{@landscapeData.structureLandscapeData}}
+                @application={{@landscapeData.application}}
+              />
+            {{/if}}
+            {{#if (eq componentName "color-picker")}}
+              <Visualization::PageSetup::Sidebar::ColorPicker
+                @isLandscapeView={{false}}
+                @removeComponent={{@removeComponent}}
+                @updateView={{this.updateColors}}
+              />
+            {{/if}}
           </div>
-        {{/each}}
-      </Visualization::PageSetup::Sidebar::DataSelection>
-    </div>
-  {{/unless}}
+        </div>
+      {{/each}}
+    </Visualization::PageSetup::Sidebar::DataSelection>
+  </div>
 </div>

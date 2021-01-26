@@ -96,7 +96,6 @@ export default class PlotlyTimeline extends Component<IArgs> {
   }
   // END Ember Div Events
 
-
   @action
   didRender(plotlyDiv: any) {
     // register this component at its parent if set via template
@@ -215,7 +214,7 @@ export default class PlotlyTimeline extends Component<IArgs> {
 
     const data = this.getUpdatedPlotlyDataObject(timestamps, this.markerState);
 
-    const latestTimestamp: any = timestamps.lastObject;
+    const latestTimestamp = timestamps[timestamps.length - 1];
     const latestTimestampValue = new Date(latestTimestamp.get('timestamp'));
 
     const windowInterval = PlotlyTimeline.getSlidingWindowInterval(latestTimestampValue,
@@ -234,7 +233,6 @@ export default class PlotlyTimeline extends Component<IArgs> {
 
     this.initDone = true;
   }
-
 
   extendPlotlyTimelineChart(timestamps: Timestamp[]) {
     if (timestamps.length === 0) {
@@ -404,7 +402,6 @@ export default class PlotlyTimeline extends Component<IArgs> {
       }
       timestampIds.push(timestampId);
     });
-
 
     this.markerState = markerStates;
 

@@ -2,9 +2,10 @@ import THREE from 'three';
 import LabelMesh from '../label-mesh';
 
 export default class ClazzLabelMesh extends LabelMesh {
-  constructor(font: THREE.Font, labelText: string, textColor = new THREE.Color('black')) {
+  constructor(font: THREE.Font, labelText: string, textColor = new THREE.Color('black'), size: number) {
     super(font, labelText, textColor);
-    this.computeLabel(labelText);
+
+    this.computeLabel(labelText, size);
   }
 
   /**
@@ -12,10 +13,9 @@ export default class ClazzLabelMesh extends LabelMesh {
    * and add it to this mesh.
    *
    * @param labelText Desired text for the clazz label
+   * @param size Desired font size for the clazz label
    */
-  private computeLabel(labelText: string) {
-    // Adjust desired text size with possible scaling
-    const TEXT_SIZE = 0.5;
+  computeLabel(labelText: string, size: number) {
     // Text should look like it is written on the parent's box (no height required)
     const TEXT_HEIGHT = 0.0;
 
@@ -27,7 +27,7 @@ export default class ClazzLabelMesh extends LabelMesh {
 
     this.geometry = new THREE.TextGeometry(displayedLabel, {
       font: this.font,
-      size: TEXT_SIZE,
+      size,
       height: TEXT_HEIGHT,
       curveSegments: 1,
     });

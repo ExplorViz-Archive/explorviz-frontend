@@ -2,7 +2,7 @@ import { action, set } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
-import { task } from 'ember-concurrency-decorators';
+import { dropTask, task } from 'ember-concurrency-decorators';
 import DS from 'ember-data';
 import Setting from 'explorviz-frontend/models/setting';
 import User from 'explorviz-frontend/models/user';
@@ -10,6 +10,7 @@ import UserSettings from 'explorviz-frontend/services/user-settings';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import RSVP, { all } from 'rsvp';
 import Userpreference from 'explorviz-frontend/models/userpreference';
+import { perform } from 'ember-concurrency-ts';
 
 interface ISettings {
   [origin: string]: {
@@ -50,9 +51,8 @@ export default class UserManagementUserSettings extends Component<IArgs> {
   @tracked
   useDefaultSettings: {[origin: string]: boolean} = {};
 
-  @task
-  // eslint-disable-next-line
-  initSettings = task(function* (this: UserManagementUserSettings) {
+  @task*
+  initSettings() {
     if (this.args.user === null) {
       return;
     }
@@ -105,11 +105,10 @@ export default class UserManagementUserSettings extends Component<IArgs> {
     });
 
     this.settings = settingsByOrigin;
-  });
+  }
 
-  @task({ drop: true })
-  // eslint-disable-next-line
-  saveSettings = task(function* (this: UserManagementUserSettings) {
+  @dropTask*
+  saveSettings() {
     if (this.args.user === null) {
       return;
     }
@@ -154,12 +153,12 @@ export default class UserManagementUserSettings extends Component<IArgs> {
       const { title, detail } = reason.errors[0];
       AlertifyHandler.showAlertifyError(`<b>${title}:</b> ${detail}`);
     });
-  });
+  }
 
   constructor(owner: any, args: IArgs) {
     super(owner, args);
 
-    this.initSettings.perform();
+    perform(this.initSettings);
   }
 
   @action
