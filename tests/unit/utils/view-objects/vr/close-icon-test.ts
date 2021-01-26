@@ -5,7 +5,7 @@ import { Texture } from 'three';
 module('Unit | Utility | view-objects/vr/close-icon', function(/* hooks */) {
 
   test('it exists', function(assert) {
-    let result = new CloseIcon(new Texture());
+    let result = new CloseIcon(() => {}, new Texture());
     assert.ok(result);
   });
 });
