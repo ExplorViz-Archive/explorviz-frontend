@@ -21,7 +21,7 @@ import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/applicati
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import NameTagMesh from 'virtual-reality/utils/view-objects/vr/name-tag-mesh';
 import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
-import GrabMenu, { isGrabbableObject } from 'virtual-reality/utils/vr-menus/pseudo-menu/grab-menu';
+import GrabMenu, { isGrabbableObject, findGrabbableObject } from 'virtual-reality/utils/vr-menus/pseudo-menu/grab-menu';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { perform } from 'ember-concurrency-ts';
@@ -553,12 +553,14 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }: ForwardedMessage<ObjectMovedMessage>): void {
     // The moved object can be any of the intersectable objects.
     for (let object of this.interaction.raycastObjects) {
-      if (isGrabbableObject(object) && object.getGrabId() == objectId) {
-        object.position.fromArray(position);
-        object.quaternion.fromArray(quaternion);
-        break;
+      let child = findGrabbableObject(object, objectId);
+      if (child) {
+        child.position.fromArray(position);
+        child.quaternion.fromArray(quaternion);
+        return;
       }
     }
+    console.error('Could not find moved object', objectId);
   }
 
   onComponentUpdate({
