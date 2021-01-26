@@ -1,7 +1,6 @@
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import applyCommunicationLayout from 'explorviz-frontend/utils/application-rendering/communication-layouter';
 import Configuration from 'explorviz-frontend/services/configuration';
-import CurrentUser from 'explorviz-frontend/services/current-user';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
 
@@ -9,12 +8,8 @@ export default class CommunicationRendering {
   // Service to access color preferences
   configuration: Configuration;
 
-  // Used to access communication drawing preferences
-  currentUser: CurrentUser;
-
-  constructor(configuration: Configuration, currentUser: CurrentUser) {
+  constructor(configuration: Configuration) {
     this.configuration = configuration;
-    this.currentUser = currentUser;
   }
 
   /**

@@ -5,9 +5,7 @@ import THREE from 'three';
 import { inject as service } from '@ember/service';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
-import DS from 'ember-data';
 import Configuration from 'explorviz-frontend/services/configuration';
-import CurrentUser from 'explorviz-frontend/services/current-user';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
@@ -44,11 +42,15 @@ import {
 } from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 
 interface Args {
-  readonly id: string;
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
   readonly visualizationPaused: boolean;
+  readonly components: string[];
+  readonly showDataSelection: boolean;
   addComponent(componentPath: string): void; // is passed down to the viz navbar
+  removeComponent(component: string): void;
+  openDataSelection(): void;
+  closeDataSelection(): void;
   toggleVisualizationUpdating(): void;
 }
 
@@ -70,14 +72,8 @@ type LayoutData = {
 export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #region CLASS FIELDS AND GETTERS
 
-  @service('store')
-  store!: DS.Store;
-
   @service('configuration')
   configuration!: Configuration;
-
-  @service('current-user')
-  currentUser!: CurrentUser;
 
   @service()
   worker!: any;
@@ -99,6 +95,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   animationFrameId = 0;
 
   // Used to register (mouse) events
+  @tracked
   interaction!: Interaction;
 
   hoveredObject: BaseMesh|null;
@@ -109,6 +106,17 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   readonly applicationObject3D: ApplicationObject3D;
 
   readonly communicationRendering: CommunicationRendering;
+
+  get rightClickMenuItems() {
+    const pauseButtonTitle = this.args.visualizationPaused ? 'Resume Visualization' : 'Pause Visualization';
+
+    return [
+      { title: 'Reset View', action: this.resetView },
+      { title: 'Open All Components', action: this.openAllComponents },
+      { title: pauseButtonTitle, action: this.args.toggleVisualizationUpdating },
+      { title: 'Open Sidebar', action: this.args.openDataSelection },
+    ];
+  }
 
   @tracked
   popupData: PopupData | null = null;
@@ -132,7 +140,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.applicationObject3D = new ApplicationObject3D(application!,
       new Map(), dynamicLandscapeData);
 
-    this.communicationRendering = new CommunicationRendering(this.configuration, this.currentUser);
+    this.communicationRendering = new CommunicationRendering(this.configuration);
 
     this.hoveredObject = null;
   }
@@ -177,8 +185,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    /* const showFpsCounter =
-      this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'showFpsCounter');
+    /*
+    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting',
+      'showFpsCounter');
 
     if (showFpsCounter) {
       this.threePerformance = new THREEPerformance();

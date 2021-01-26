@@ -1,0 +1,43 @@
+<table
+  id="token-selection-table"
+  class="table table-striped"
+>
+  <thead>
+    <tr>
+      <th scope="col" {{on "click" (fn this.sortBy "value")}}>ID</th>
+      <th scope="col"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#if @currentToken}}
+      <tr
+        style="background-color: #aecce1"
+        {{on "click" (fn @selectToken @currentToken)}}
+      >
+        <th scope="row" class="text-center">{{@currentToken.value}}</th>
+        <th scope="row" class="text-center"></th>
+      </tr>
+      <tr
+        style="height: 10px"
+      >
+      </tr>
+    {{/if}}
+    {{#each
+      (sort-by (concat this.sortProperty ":" this.sortOrder) "value" @tokens)
+    as |token|
+    }}
+      <tr>
+        <th scope="row" class="text-center" {{on "click" (fn @selectToken token)}}>{{token.value}}</th>
+        <th
+          scope="row"
+          class="text-center"
+          {{on "click" (fn @deleteToken token.value)}}
+        >
+          Delete
+        </th>
+      </tr>
+    {{else}}
+      There are no tokens linked to your account at the moment.
+    {{/each}}
+  </tbody>
+</table>

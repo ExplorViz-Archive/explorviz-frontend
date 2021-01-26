@@ -11,7 +11,3 @@ module.exports = {
   "ssl-key": ".ssl/server.key",
   "ssl-cert": ".ssl/server.crt"
 }
-
-const { setEdition } = require('@ember/edition-utils');
-
-setEdition('octane');

@@ -2,7 +2,7 @@ import Service, { inject as service } from '@ember/service';
 
 import THREE from 'three';
 import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VRController';
-import DS from 'ember-data';
+import ConnectionMenu from 'virtual-reality/utils/vr-menus/connection-menu';
 import WebSocket from './web-socket';
 import SpectateUser from './spectate-user';
 import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
@@ -15,9 +15,6 @@ export default class LocalVrUser extends Service {
 
   @service('spectate-user')
   spectateUser!: SpectateUser;
-
-  @service()
-  store!: DS.Store;
 
   userID!: string;
 

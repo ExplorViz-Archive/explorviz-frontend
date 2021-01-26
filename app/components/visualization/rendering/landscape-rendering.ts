@@ -5,7 +5,6 @@ import debugLogger from 'ember-debug-logger';
 import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import THREE from 'three';
 import Configuration from 'explorviz-frontend/services/configuration';
-import CurrentUser from 'explorviz-frontend/services/current-user';
 
 import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
@@ -22,11 +21,11 @@ import { tracked } from '@glimmer/tracking';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import Labeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
+import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 
 interface Args {
   readonly id: string;
@@ -34,7 +33,9 @@ interface Args {
   readonly font: THREE.Font;
   readonly visualizationPaused: boolean;
   showApplication(application: Application): void;
+  openDataSelection(): void;
   toggleVisualizationUpdating(): void;
+  switchToVR(): void;
 }
 
 interface SimplePlaneLayout {
@@ -80,9 +81,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @service('configuration')
   configuration!: Configuration;
 
-  @service('current-user')
-  currentUser!: CurrentUser;
-
   @service()
   worker!: any;
 
@@ -106,6 +104,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   threePerformance: THREEPerformance|undefined;
 
   // Used to register (mouse) events
+  @tracked
   interaction!: Interaction;
 
   // Maps models to a computed layout
@@ -120,6 +119,17 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   readonly imageLoader: ImageLoader = new ImageLoader();
 
   hoveredObject: BaseMesh|null = null;
+
+  get rightClickMenuItems() {
+    const pauseItemtitle = this.args.visualizationPaused ? 'Resume Visualization' : 'Pause Visualization';
+
+    return [
+      { title: 'Reset View', action: this.resetView },
+      { title: pauseItemtitle, action: this.args.toggleVisualizationUpdating },
+      { title: 'Open Sidebar', action: this.args.openDataSelection },
+      { title: 'Enter VR', action: this.args.switchToVR },
+    ];
+  }
 
   readonly elk: ELK;
 
@@ -184,8 +194,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    /* const showFpsCounter = this.currentUser
-      .getPreferenceOrDefaultValue('flagsetting', 'showFpsCounter');
+    /*
+    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting',
+      'showFpsCounter');
 
     if (showFpsCounter) {
       this.threePerformance = new THREEPerformance();
