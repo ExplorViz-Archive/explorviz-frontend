@@ -1,4 +1,5 @@
 import { Color, isColor } from "../util/color";
+import { Controllers, isControllers } from "../util/controllers";
 
 export const SELF_CONNECTED_EVENT = 'self_connected';
 
@@ -7,7 +8,7 @@ export type SelfConnectedMessage = {
     self: { id: string, name: string, color: Color },
     users: {
         id: string, name: string, color: Color,
-        controllers: { controller1: string, controller2: string }
+        controllers: Controllers
     }[]
 };
 
@@ -25,7 +26,5 @@ export function isSelfConnectedMessage(msg: any): msg is SelfConnectedMessage {
             && typeof user.id === 'string'
             && typeof user.name === 'string'
             && isColor(user.color)
-            && typeof user.controllers === 'object'
-            && typeof user.controller1 === 'string'
-            && typeof user.controller2 === 'string');
+            && isControllers(user.controllers));
 }
