@@ -26,13 +26,33 @@ export default class CloseIcon extends BaseMesh {
     // Undo scaling of the object.
     this.scale.set(1.0 / object.scale.x, 1.0 / object.scale.y, 1.0 / object.scale.z);
 
-    const bboxApp3D = new THREE.Box3().setFromObject(object);
-    this.position.x = (bboxApp3D.max.x + this.radius) * this.scale.x;
-    this.position.z = (bboxApp3D.max.z + this.radius) * this.scale.z;
+    // Reset rotation of the object temporarily such that the axis are aligned
+    // the world axis.
+    const originalRotation = object.rotation.clone();
+    object.rotation.set(0, 0, 0);
+    object.updateMatrixWorld();
 
-    // Rotate such that the cross faces forwards.
-    this.geometry.rotateX(90 * THREE.MathUtils.DEG2RAD);
-    this.geometry.rotateY(90 * THREE.MathUtils.DEG2RAD);
+    // Get size of the object.
+    const boundingBox = new THREE.Box3().setFromObject(object);
+    const width = boundingBox.max.x - boundingBox.min.x;
+    const height = boundingBox.max.y - boundingBox.min.y;
+    const depth = boundingBox.max.z - boundingBox.min.z;
+
+    // Restore rotation.
+    object.rotation.copy(originalRotation);
+
+    // Position the close button in the top-right corner.
+    this.position.x = (width / 2 + this.radius) * this.scale.x;
+    if (height > depth) {
+      this.position.y = (height / 2 + this.radius) * this.scale.y;
+    } else {
+      this.position.z = (depth / 2 + this.radius) * this.scale.z;
+
+      // Rotate such that the cross faces forwards.
+      this.geometry.rotateX(90 * THREE.MathUtils.DEG2RAD);
+      this.geometry.rotateY(90 * THREE.MathUtils.DEG2RAD);
+    }
+    
     object.add(this);
   }
 }
