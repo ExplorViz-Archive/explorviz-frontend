@@ -4,8 +4,12 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 export default class CloseIcon extends BaseMesh {
   radius: number;
 
-  constructor(texture: THREE.Texture, radius = 0.075, segments = 32) {
+  onClose: () => void;
+
+  constructor(onClose: () => void, texture: THREE.Texture, radius = 0.075, segments = 32) {
     super(new THREE.Color());
+
+    this.onClose = onClose;
 
     this.radius = radius;
 
@@ -54,5 +58,9 @@ export default class CloseIcon extends BaseMesh {
     }
     
     object.add(this);
+  }
+
+  close() {
+    this.onClose();
   }
 }
