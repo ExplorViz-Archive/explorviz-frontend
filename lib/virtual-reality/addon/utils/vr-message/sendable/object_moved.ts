@@ -14,7 +14,7 @@ export function isObjectMovedMessage(msg: any): msg is ObjectMovedMessage {
     return msg !== null
         && typeof msg === 'object'
         && msg.event === OBJECT_MOVED_EVENT
-        && msg.objectId === 'string'
+        && typeof msg.objectId === 'string'
         && isPosition(msg.position)
         && isQuaternion(msg.quaternion);
 }
