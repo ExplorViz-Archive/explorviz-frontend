@@ -17,6 +17,15 @@ export function isGrabbableObject(object: any): object is GrabbableObject {
         && typeof object.getGrabId === 'function';
 }
 
+export function findGrabbableObject(object: THREE.Object3D, objectId: string): GrabbableObject|null {
+    if (isGrabbableObject(object) && object.getGrabId() === objectId) return object;
+    for (let child of object.children) {
+        let result = findGrabbableObject(child, objectId);
+        if (result) return result;
+    }
+    return null;
+}
+
 export default class GrabMenu extends PseudoMenu {
     private sender: VrMessageSender;
     private receiver: VrMessageReceiver;
