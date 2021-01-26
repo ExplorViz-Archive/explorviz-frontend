@@ -1,11 +1,15 @@
 import MessageBoxMenu from 'explorviz-frontend/utils/vr-menus/message-box-menu';
 import { module, test } from 'qunit';
-import { Object3D } from 'three';
 
 module('Unit | Utility | message-box-menu', function(/* hooks */) {
 
   test('it exists', function(assert) {
-    let result = new MessageBoxMenu(new Object3D());
+    let result = new MessageBoxMenu({
+      title: 'Test', 
+      text: 'Hello, world!',
+      color: 'blue',
+      time: 1.0
+    });
     assert.ok(result);
   });
 });
