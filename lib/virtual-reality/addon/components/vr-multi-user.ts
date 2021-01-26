@@ -668,7 +668,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  addDetachedMenu(menu: DetachableMenu, grabId: string|null, position: number[], quaternion: number[]): GrabbableMenuContainer {
+  addDetachedMenu(menu: DetachableMenu, grabId: string|null, position: number[], quaternion: number[]) {
     const menuContainer = new GrabbableMenuContainer(menu, grabId);
     menuContainer.position.fromArray(position);
     menuContainer.quaternion.fromArray(quaternion);
