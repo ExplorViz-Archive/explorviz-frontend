@@ -539,9 +539,9 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   onAppClosed({
-    originalMessage: { id }
+    originalMessage: { appID }
   }: ForwardedMessage<AppClosedMessage>): void {
-    const application = this.applicationGroup.getApplication(id);
+    const application = this.applicationGroup.getApplication(appID);
 
     if (application !== undefined) {
       super.removeApplication(application);
