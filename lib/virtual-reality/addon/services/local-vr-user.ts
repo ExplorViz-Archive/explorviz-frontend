@@ -15,9 +15,6 @@ export default class LocalVrUser extends Service {
   @service('spectate-user')
   spectateUser!: SpectateUser;
 
-  @service()
-  store!: DS.Store;
-
   userID!: string;
 
   userName?: string;
@@ -35,8 +32,6 @@ export default class LocalVrUser extends Service {
   userGroup!: THREE.Group;
 
   connectionStatus: ConnectionStatus = 'offline';
-
-  isLefty = false;
 
   get camera() {
     if (this.renderer.xr.isPresenting) {
