@@ -21,5 +21,5 @@ export function isMenuDetachedForwardMessage(msg: any): msg is MenuDetachedForwa
         && isEntityType(msg.entityType)
         && typeof msg.detachId === 'string'
         && isPosition(msg.position)
-        && isQuaternion(msg.position);
+        && isQuaternion(msg.quaternion);
 }

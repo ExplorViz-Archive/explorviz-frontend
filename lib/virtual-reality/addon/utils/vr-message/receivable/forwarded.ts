@@ -13,7 +13,7 @@ export function isForwardedMessage(msg: any): msg is ForwardedMessage<any> {
         && typeof msg.userID === 'string';
 }
 
-export function isForwardedMessageOf<T>(msg: any, isT: (x: any) => x is T): msg is ForwardedMessage<any> {
+export function isForwardedMessageOf<T>(msg: any, isT: (x: any) => x is T): msg is ForwardedMessage<T> {
     return isForwardedMessage(msg)
         && isT(msg.originalMessage);
 }
