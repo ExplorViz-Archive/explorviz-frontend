@@ -37,11 +37,9 @@ export default class MultiUserMenu extends BaseMenu {
     this.state = this.localUser.state;
     this.initMenu();
     this.getRemoteUsers = getRemoteUsers;
-
   }
 
   initMenu() {
-
     if(this.state == 'offline') {
         this.initOfflineMenu('Connect');
     } else if (this.state == 'connecting') {
@@ -96,11 +94,10 @@ export default class MultiUserMenu extends BaseMenu {
 
   }
 
-
   onUpdateMenu(delta: number) {
     const state = this.localUser.state;
     const idToRemoteVrUsers = this.getRemoteUsers();
-    const users = Array.from(idToRemoteVrUsers.values()); 
+    const users = Array.from(idToRemoteVrUsers.values());
 
     if (this.state != state || !this.arrayEquals(users, this.users)) {
       this.state = state;
@@ -110,7 +107,7 @@ export default class MultiUserMenu extends BaseMenu {
       this.thumbpadTargets.clear();
       this.initMenu();
     }
-    
+
     super.onUpdateMenu(delta);
   }
 
@@ -146,7 +143,6 @@ export default class MultiUserMenu extends BaseMenu {
     return new VRControllerButtonBinding('Disconnect', {
       onButtonDown: () => {
         if (this.state == 'online') {
-
           this.toggleConnection();
           this.disconnectButton?.enableHoverEffectByButton();
           this.update()

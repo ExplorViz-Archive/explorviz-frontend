@@ -47,7 +47,6 @@ export default class SpectateUser extends Service {
     }
 
     remoteUser.setHmdVisible(false);
-
     this.sender.sendSpectatingUpdate(this.isActive, remoteUser.ID);
   }
 
@@ -55,6 +54,8 @@ export default class SpectateUser extends Service {
    * Deactives spectator mode for our user
    */
   deactivate() {
+    if (!this.spectatedUser) return;
+
     if (this.localUser.controller1) {
       this.localUser.controller1.setToDefaultAppearance();
     }
@@ -62,15 +63,8 @@ export default class SpectateUser extends Service {
       this.localUser.controller2.setToDefaultAppearance();
     }
 
-
     this.localUser.userGroup.position.copy(this.startPosition);
-
-    if (!this.spectatedUser || !this.spectatedUser.camera) {
-      return;
-    }
-
     this.spectatedUser.setHmdVisible(true);
-
     this.spectatedUser = null;
 
     this.sender.sendSpectatingUpdate(this.isActive, null);
