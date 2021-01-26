@@ -108,7 +108,7 @@ export default class VrMessageSender {
   sendAppClosed(appID: string) {
     this.webSocket.send<AppClosedMessage>({
       event: 'app_closed',
-      id: appID,
+      appID,
     });
   }
 
