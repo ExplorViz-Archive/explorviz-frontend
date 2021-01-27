@@ -16,7 +16,7 @@ module('Integration | Component | visualization/page-setup/navbar/color-picker-o
     if(textContent === null) {
       assert.ok(null, 'textContent is null');
     } else {
-      assert.equal(textContent.trim(), '');
+      assert.equal(textContent.trim(), 'Color Picker');
     }
   });
 });

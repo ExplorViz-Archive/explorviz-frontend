@@ -7,7 +7,7 @@ module.exports = {
   */
   "disableAnalytics": true,
   // Use SSL for development server by default
-  "ssl": true,
-  "ssl-key": ".ssl/server.key",
-  "ssl-cert": ".ssl/server.crt"
+  //"ssl": true,
+  //"ssl-key": ".ssl/server.key",
+  //"ssl-cert": ".ssl/server.crt"
 }

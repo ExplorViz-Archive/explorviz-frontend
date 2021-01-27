@@ -7,6 +7,6 @@ module('Acceptance | index', function(hooks) {
 
   test('visiting /index', async function(assert) {
     await visit('/index');
-    assert.equal(currentURL(), '/visualization', "Index route replaces current URL with visualization route.");
+    assert.equal(currentURL(), '/login', "Index route replaces current URL with login route.");
   });
 });

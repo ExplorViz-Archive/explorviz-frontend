@@ -7,6 +7,6 @@ module('Acceptance | badroute', function(hooks) {
 
   test('visiting /badroute', async function(assert) {
     await visit('/badroute');
-    assert.equal(currentURL(), '/visualization', "Every non valid route is redirected to visualization.");
+    assert.equal(currentURL(), '/login', "Every non valid route is redirected to login.");
   });
 });
