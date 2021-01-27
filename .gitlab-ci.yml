@@ -8,7 +8,8 @@ before_script:
   - npm install  
   - npm install -g ember-cli
   # install chrome for testing
-  - echo http://dl-3.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories  && \ apk add chromium
+  - echo http://dl-3.alpinelinux.org/alpine/edge/main >> \
+    /etc/apk/repositories && apk add --no-cache chromium
 
 test:
   stage: test
