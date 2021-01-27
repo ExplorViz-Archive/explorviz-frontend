@@ -1,5 +1,6 @@
 import { Position, isPosition } from "../util/position";
 import { isQuaternion, Quaternion } from "../util/quaternion";
+import { isScale, Scale } from "../util/Scale";
 
 export const OBJECT_MOVED_EVENT = 'object_moved';
 
@@ -7,7 +8,8 @@ export type ObjectMovedMessage = {
     event: typeof OBJECT_MOVED_EVENT,
     objectId: string,
     position: Position,
-    quaternion: Quaternion
+    quaternion: Quaternion,
+    scale: Scale,
 };
 
 export function isObjectMovedMessage(msg: any): msg is ObjectMovedMessage {
@@ -16,5 +18,6 @@ export function isObjectMovedMessage(msg: any): msg is ObjectMovedMessage {
         && msg.event === OBJECT_MOVED_EVENT
         && typeof msg.objectId === 'string'
         && isPosition(msg.position)
-        && isQuaternion(msg.quaternion);
+        && isQuaternion(msg.quaternion)
+        && isScale(msg.scale);
 }

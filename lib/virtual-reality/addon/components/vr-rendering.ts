@@ -633,8 +633,7 @@ export default class VrRendering extends Component<Args> {
   // @ts-ignore
   @enqueueTask*
   // eslint-disable-next-line
-  addApplicationTask(applicationModel: Application, origin: THREE.Vector3,
-    callback?: (applicationObject3D: ApplicationObject3D) => void) {
+  addApplicationTask(applicationModel: Application, callback?: (applicationObject3D: ApplicationObject3D) => void) {
     try {
       if (this.applicationGroup.hasApplication(applicationModel.pid)) {
         return;
@@ -676,8 +675,6 @@ export default class VrRendering extends Component<Args> {
       });
       closeIcon.addToObject(applicationObject3D);
 
-      this.positionApplication(applicationObject3D, origin);
-
       this.applicationGroup.addApplication(applicationObject3D);
       this.localUser.controller1?.intersectableObjects.push(applicationObject3D);
       this.localUser.controller2?.intersectableObjects.push(applicationObject3D);
@@ -709,27 +706,12 @@ export default class VrRendering extends Component<Args> {
       communicationInApplication);
   }
 
-  addApplication(applicationModel: Application, origin: THREE.Vector3) {
+  addApplication(applicationModel: Application, callback: (application: ApplicationObject3D) => void) {
     if (applicationModel.packages.length === 0) {
       this.showHint('No data available');
     } else if (!this.applicationGroup.hasApplication(applicationModel.pid)) {
-      perform(this.addApplicationTask, applicationModel, origin);
+      perform(this.addApplicationTask, applicationModel, callback);
     }
-  }
-
-  /**
-   * Sets a (newly opened) application to its default position.
-   *
-   * @param applicationObject3D Application which shall be positioned
-   * @param origin Point of reference (position of application in landscape object)
-   */
-  positionApplication(applicationObject3D: ApplicationObject3D, origin: THREE.Vector3) {
-    // Rotate app so that it is aligned with landscape
-    applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
-    applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
-    applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
-
-    applicationObject3D.position.copy(origin);
   }
 
   /**
@@ -968,7 +950,15 @@ export default class VrRendering extends Component<Args> {
     }
 
     if (object instanceof ApplicationMesh) {
-      this.addApplication(object.dataModel, point);
+      this.addApplication(object.dataModel, (applicationObject3D : ApplicationObject3D) => {
+        // Rotate app so that it is aligned with landscape
+        applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
+        applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
+        applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
+
+        // Position app above clicked point.
+        applicationObject3D.position.copy(point);
+      });
     } else if (object instanceof CloseIcon) {
       if (!object.close()) {
         this.showHint('Object could not be closed');
@@ -1021,21 +1011,6 @@ export default class VrRendering extends Component<Args> {
         Highlighting.highlight(object, application, drawableComm);
       }
     }
-  }
-
-  setAppPose(id: string, position: THREE.Vector3, quaternion: THREE.Quaternion, world = false) {
-    const application = this.applicationGroup.getApplication(id);
-
-    if (!application) {
-      return;
-    }
-
-    if (world) {
-      application.worldToLocal(position);
-    }
-
-    application.position.copy(position);
-    application.quaternion.copy(quaternion);
   }
 
   // eslint-disable-next-line

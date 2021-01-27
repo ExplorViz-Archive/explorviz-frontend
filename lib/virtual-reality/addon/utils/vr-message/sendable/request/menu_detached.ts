@@ -2,6 +2,7 @@ import { EntityType, isEntityType } from "../../util/entity_type";
 import { isNonce, Nonce } from "../../util/nonce";
 import { isPosition, Position } from "../../util/position";
 import { isQuaternion, Quaternion } from "../../util/quaternion";
+import { isScale, Scale } from "../../util/Scale";
 
 export const MENU_DETACHED_EVENT = 'menu_detached';
 
@@ -12,6 +13,7 @@ export type MenuDetachedMessage = {
     entityType: EntityType,
     position: Position,
     quaternion: Quaternion,
+    scale: Scale,
 };
 
 export function isMenuDetachedMessage(msg: any): msg is MenuDetachedMessage {
@@ -22,5 +24,6 @@ export function isMenuDetachedMessage(msg: any): msg is MenuDetachedMessage {
         && isEntityType(msg.entityType)
         && typeof msg.detachId === 'string'
         && isPosition(msg.position)
-        && isQuaternion(msg.quaternion);
+        && isQuaternion(msg.quaternion)
+        && isScale(msg.scale);
 }

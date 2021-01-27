@@ -1,6 +1,7 @@
 import { EntityType, isEntityType } from "../util/entity_type";
 import { isPosition, Position } from "../util/position";
 import { isQuaternion, Quaternion } from "../util/quaternion";
+import { isScale, Scale } from "../util/Scale";
 
 export const INITIAL_LANDSCAPE_EVENT = 'landscape';
 
@@ -17,20 +18,23 @@ type DetachedMenu = {
     entityId: string,
     entityType: EntityType,
     position: Position,
-    quaternion: Quaternion
+    quaternion: Quaternion,
+    scale: Scale
 }
 
 type App = {
     id: string,
     position: Position,
     quaternion: Quaternion,
+    scale: Scale,
     openComponents: string[],
     highlightedComponents: HighlightedComponent[]
 };
 
 type Landscape = {
     position: Position,
-    quaternion: Quaternion
+    quaternion: Quaternion,
+    scale: Scale
 };
 
 export type InitialLandscapeMessage = {
@@ -58,6 +62,7 @@ function isDetachedMenu(menu: any): menu is DetachedMenu {
         && typeof menu.entityId === 'string'
         && isPosition(menu.position)
         && isQuaternion(menu.quaternion)
+        && isScale(menu.scale);
 }
 
 function isApp(app: any): app is App {
@@ -66,6 +71,7 @@ function isApp(app: any): app is App {
         && typeof app.id === 'string'
         && isPosition(app.position)
         && isQuaternion(app.quaternion)
+        && isScale(app.scale)
         && Array.isArray(app.highlightedComponents)
         && app.highlightedComponents.every(isHighlightedComponent)
 }
@@ -74,7 +80,8 @@ function isLandscape(landscape: any): landscape is Landscape {
     return landscape !== null 
         && typeof landscape === 'object'
         && isPosition(landscape.position)
-        && isQuaternion(landscape.quaternion);
+        && isQuaternion(landscape.quaternion)
+        && isScale(landscape.scale);
 }
 
 export function isInitialLandscapeMessage(msg: any): msg is InitialLandscapeMessage {

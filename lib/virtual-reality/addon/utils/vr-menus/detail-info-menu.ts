@@ -2,9 +2,9 @@ import VRControllerButtonBinding from '../vr-controller/vr-controller-button-bin
 import composeContent, { EntityMesh, getIdOfEntity, getTypeOfEntity } from '../vr-helpers/detail-info-composer';
 import { EntityType } from '../vr-message/util/entity_type';
 import BaseMenu from './base-menu';
+import { DetachableMenu } from './detachable-menu';
 import RectangleItem from './items/rectangle-item';
 import TextItem from './items/text-item';
-import { DetachableMenu } from './menu-group';
 
 export default class DetailInfoMenu extends BaseMenu implements DetachableMenu {
 

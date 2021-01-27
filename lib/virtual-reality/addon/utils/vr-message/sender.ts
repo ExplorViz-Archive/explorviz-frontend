@@ -1,7 +1,6 @@
 import WebSocketService from 'virtual-reality/services/web-socket';
 import THREE from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import { EntityType } from './util/entity_type';
 import { AppClosedMessage } from './sendable/request/app_closed';
 import { AppOpenedMessage } from './sendable/app_opened';
 import { ComponentUpdateMessage } from './sendable/component_update';
@@ -15,6 +14,7 @@ import { UserControllerMessage } from './sendable/user_controllers';
 import { UserPositionsMessage } from './sendable/user_positions';
 import { DetachedMenuClosedMessage } from './sendable/request/detached_menu_closed';
 import { Nonce } from './util/nonce';
+import { DetachableMenu } from '../vr-menus/menu-group';
 
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
@@ -80,12 +80,13 @@ export default class VrMessageSender {
    * @param position The new position of the grabbed object in world coordinates.
    * @param quaternion The new rotation of the grabbed object in world coordinates.
    */
-  sendObjectMoved(objectId: string, position: THREE.Vector3, quaternion: THREE.Quaternion) {
+  sendObjectMoved(objectId: string, position: THREE.Vector3, quaternion: THREE.Quaternion, scale: THREE.Vector3) {
     this.webSocket.send<ObjectMovedMessage>({
       event: 'object_moved', 
       objectId, 
       position: position.toArray(), 
-      quaternion: quaternion.toArray()
+      quaternion: quaternion.toArray(),
+      scale: scale.toArray()
     });
   }
 
@@ -210,18 +211,26 @@ export default class VrMessageSender {
       id: application.dataModel.pid,
       position: position.toArray(),
       quaternion: quaternion.toArray(),
+      scale: application.scale.toArray(),
     });
   }
 
-  sendMenuDetached(detachId: string, entityType: EntityType, position: THREE.Vector3, quaternion: THREE.Quaternion): Nonce {
+  sendMenuDetached(menu: DetachableMenu): Nonce {
+    const position = new THREE.Vector3();
+    menu.getWorldPosition(position);
+
+    const quaternion = new THREE.Quaternion();
+    menu.getWorldQuaternion(quaternion);
+
     const nonce = this.nextNonce();
     this.webSocket.send<MenuDetachedMessage>({
       event: 'menu_detached',
       nonce: nonce,
-      detachId: detachId,
-      entityType: entityType,
-      position: position.toArray(),
-      quaternion: quaternion.toArray(), 
+      detachId: menu.getDetachId(),
+      entityType: menu.getEntityType(),
+      position: menu.position.toArray(),
+      quaternion: menu.quaternion.toArray(),
+      scale: menu.scale.toArray(),
     });
     return nonce;
   }

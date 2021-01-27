@@ -1,43 +1,16 @@
 import THREE from "three";
 import FloorMesh from "../view-objects/vr/floor-mesh";
 import VRControllerBindings from "../vr-controller/vr-controller-bindings";
-import { EntityType } from "../vr-message/util/entity_type";
 import VRController from "../vr-rendering/VRController";
 import BaseMenu from "./base-menu";
-import { GrabbableObject } from "./pseudo-menu/grab-menu";
+import { DetachableMenu, isDetachableMenu } from "./detachable-menu";
 
 export const MENU_DETACH_EVENT_TYPE = 'detach-menu';
-
-export interface DetachableMenu extends BaseMenu {
-    getDetachId(): string;
-    getEntityType(): EntityType;
-}
-
-export function isDetachableMenu(menu: BaseMenu): menu is DetachableMenu {
-    return 'getDetachId' in menu;
-}
 
 export type MenuDetachedEvent = {
     type: typeof MENU_DETACH_EVENT_TYPE,
     menu: DetachableMenu
 };
-
-export class GrabbableMenuContainer extends THREE.Group implements GrabbableObject {
-    grabId: string|null;
-    menu: DetachableMenu;
-
-    constructor(menu: DetachableMenu, grabId: string|null) {
-        super();
-        this.menu = menu;
-        this.grabId = grabId;
-      
-        this.add(menu);
-    }
-
-    getGrabId(): string|null {
-        return this.grabId;
-    }
-}
 
 export default class MenuGroup extends THREE.Group {
     menus: BaseMenu[];

@@ -130,10 +130,14 @@ export default class GrabMenu extends PseudoMenu {
         const objectId = this.grabbedObject.getGrabId();
         if (this.grabbedSuccessfully && objectId) {
             const position = new THREE.Vector3();
-            const quaternion = new THREE.Quaternion();
             this.grabbedObject.getWorldPosition(position);
+
+            const quaternion = new THREE.Quaternion();
             this.grabbedObject.getWorldQuaternion(quaternion);
-            this.sender.sendObjectMoved(objectId, position, quaternion);
+
+            const scale = this.grabbedObject.scale;
+
+            this.sender.sendObjectMoved(objectId, position, quaternion, scale);
         }
     }
 

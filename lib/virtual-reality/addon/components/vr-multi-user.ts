@@ -27,7 +27,7 @@ import { Application } from 'explorviz-frontend/utils/landscape-schemes/structur
 import { perform } from 'ember-concurrency-ts';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
-import { DetachableMenu, GrabbableMenuContainer, MenuDetachedEvent, MENU_DETACH_EVENT_TYPE } from 'virtual-reality/utils/vr-menus/menu-group';
+import { MenuDetachedEvent, MENU_DETACH_EVENT_TYPE } from 'virtual-reality/utils/vr-menus/menu-group';
 
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/utils/vr-message/receiver';
 import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
@@ -50,6 +50,8 @@ import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
 import { isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/detached_menu_closed';
 import { isObjectClosedResponse, ObjectClosedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-closed';
+import { DetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
+import { GrabbableMenuContainer } from 'virtual-reality/utils/vr-menus/grabbable-menu-container';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -117,28 +119,18 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     super.initControllers();
 
     let menuDetachListener = ({menu}: MenuDetachedEvent) => {
-      const position = new THREE.Vector3();
-      const quaternion = new THREE.Quaternion();
-      menu.getWorldPosition(position);
-      menu.getWorldQuaternion(quaternion);
-
       // Notify backend about detached menu.
-      const nonce = this.sender.sendMenuDetached(
-        menu.getDetachId(), 
-        menu.getEntityType(),
-        position,
-        quaternion
-      );
+      const nonce = this.sender.sendMenuDetached(menu);
 
       // Wait for backend to assign an id to the detached menu.
       this.receiver.awaitResponse({
         nonce,
         responseType: isMenuDetachedResponse, 
         onResponse: (response: MenuDetachedResponse) => {
-          this.addDetachedMenu(menu, response.objectId, position.toArray(), quaternion.toArray());
+          this.addDetachedMenu(menu, response.objectId);
         },
         onOffline: () => {
-          this.addDetachedMenu(menu, null, position.toArray(), quaternion.toArray());
+          this.addDetachedMenu(menu, null);
         }
       });
     };
@@ -481,10 +473,11 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     openApps.forEach((app) => {
       const application = getApplicationInLandscapeById(structureLandscapeData, app.id);
       if (application) {
-        perform(this.addApplicationTask, application, new THREE.Vector3(),
+        perform(this.addApplicationTask, application,
           (applicationObject3D: ApplicationObject3D) => {
             applicationObject3D.position.fromArray(app.position);
             applicationObject3D.quaternion.fromArray(app.quaternion);
+            applicationObject3D.scale.fromArray(app.scale);
 
             EntityManipulation.restoreComponentState(applicationObject3D,
               new Set(app.openComponents));
@@ -520,28 +513,33 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
     this.landscapeObject3D.position.fromArray(landscape.position);
     this.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
+    this.landscapeObject3D.scale.fromArray(landscape.scale);
 
     // initialize detached menus
     detachedMenus.forEach((detachedMenu) => {
       let object = this.findMeshByModelId(detachedMenu.entityType, detachedMenu.entityId);
       if (isEntityMesh(object)) {
         const menu = new DetailInfoMenu(object);
-        this.addDetachedMenu(menu, detachedMenu.objectId, detachedMenu.position, detachedMenu.quaternion);
+        menu.position.fromArray(detachedMenu.position);
+        menu.quaternion.fromArray(detachedMenu.quaternion);
+        menu.scale.fromArray(detachedMenu.scale);
+        this.addDetachedMenu(menu, detachedMenu.objectId);
       }
     })
   }
 
   onAppOpened({
-    originalMessage: { id, position, quaternion }
+    originalMessage: { id, position, quaternion, scale }
   }: ForwardedMessage<AppOpenedMessage>): void {
     const { structureLandscapeData } = this.args.landscapeData;
     const application = getApplicationInLandscapeById(structureLandscapeData, id);
 
     if (application) {
-      super.addApplication(application, new THREE.Vector3().fromArray(position));
-
-      this.setAppPose(id, new THREE.Vector3().fromArray(position),
-        new THREE.Quaternion().fromArray(quaternion));
+      super.addApplication(application, (applicationObject3D: ApplicationObject3D) => {
+        applicationObject3D.position.fromArray(position);
+        applicationObject3D.quaternion.fromArray(quaternion);
+        applicationObject3D.scale.fromArray(scale);
+      });
     }
   }
 
@@ -567,7 +565,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   onObjectMoved({
-    originalMessage: { objectId, position, quaternion }
+    originalMessage: { objectId, position, quaternion, scale }
   }: ForwardedMessage<ObjectMovedMessage>): void {
     // The moved object can be any of the intersectable objects.
     for (let object of this.interaction.raycastObjects) {
@@ -575,6 +573,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       if (child) {
         child.position.fromArray(position);
         child.quaternion.fromArray(quaternion);
+        child.scale.fromArray(scale);
         return;
       }
     }
@@ -682,18 +681,20 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  onMenuDetached({ objectId, entityType, detachId, position, quaternion }: MenuDetachedForwardMessage) {
+  onMenuDetached({ objectId, entityType, detachId, position, quaternion, scale }: MenuDetachedForwardMessage) {
     let object = this.findMeshByModelId(entityType, detachId);
     if (isEntityMesh(object)) {
       const menu = new DetailInfoMenu(object);
-      this.addDetachedMenu(menu, objectId, position, quaternion);
+      menu.position.fromArray(position);
+      menu.quaternion.fromArray(quaternion);
+      menu.scale.fromArray(scale);
+      this.addDetachedMenu(menu, objectId);
     }
   }
 
-  addDetachedMenu(menu: DetachableMenu, grabId: string|null, position: number[], quaternion: number[]) {
+  addDetachedMenu(menu: DetachableMenu, grabId: string|null) {
+    // Put menu container at same position as menu.
     const menuContainer = new GrabbableMenuContainer(menu, grabId);
-    menuContainer.position.fromArray(position);
-    menuContainer.quaternion.fromArray(quaternion);
     this.detachedMenus.add(menuContainer);
 
     // Make detached menu closable.
@@ -784,19 +785,17 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    * Uses the addApplication Task of vr-rendering to add an application to the scene.
    * Additionally, a callback function is given to send an update to the backend.
    */
-  addApplication(applicationModel: Application, origin: THREE.Vector3) {
+  addApplication(applicationModel: Application, callback: (application: ApplicationObject3D) => void) {
     if (applicationModel.packages.length === 0) {
       this.showHint('No data available');
       return;
     }
 
     if (!this.applicationGroup.hasApplication(applicationModel.pid)) {
-      perform(super.addApplicationTask, applicationModel, origin,
-        ((applicationObject3D: ApplicationObject3D) => {
-          if (this.localUser.isOnline) {
-            this.sender.sendAppOpened(applicationObject3D);
-          }
-        }));
+      perform(super.addApplicationTask, applicationModel, (applicationObject3D: ApplicationObject3D) => {
+        callback(applicationObject3D);
+        this.sender.sendAppOpened(applicationObject3D);
+      });
     } else {
       this.showHint('Application already opened');
     }

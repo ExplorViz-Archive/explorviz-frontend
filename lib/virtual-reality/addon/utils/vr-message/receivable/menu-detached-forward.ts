@@ -1,6 +1,7 @@
 import { EntityType, isEntityType } from "../util/entity_type";
-import { isPosition } from "../util/position";
-import { isQuaternion } from "../util/quaternion";
+import { isPosition, Position } from "../util/position";
+import { isQuaternion, Quaternion } from "../util/quaternion";
+import { isScale, Scale } from "../util/Scale";
 
 export const MENU_DETACHED_FORWARD_EVENT = 'menu_detached';
 
@@ -9,8 +10,9 @@ export type MenuDetachedForwardMessage = {
     objectId: string,
     entityType: EntityType
     detachId: string,
-    position: number[],
-    quaternion:number[]
+    position: Position,
+    quaternion: Quaternion,
+    scale: Scale
 };
 
 export function isMenuDetachedForwardMessage(msg: any): msg is MenuDetachedForwardMessage {
@@ -21,5 +23,6 @@ export function isMenuDetachedForwardMessage(msg: any): msg is MenuDetachedForwa
         && isEntityType(msg.entityType)
         && typeof msg.detachId === 'string'
         && isPosition(msg.position)
-        && isQuaternion(msg.quaternion);
+        && isQuaternion(msg.quaternion)
+        && isScale(msg.scale);
 }
