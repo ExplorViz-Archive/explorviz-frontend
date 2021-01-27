@@ -2,7 +2,7 @@ import WebSocketService from 'virtual-reality/services/web-socket';
 import THREE from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import { EntityType } from './util/entity_type';
-import { AppClosedMessage } from './sendable/app_closed';
+import { AppClosedMessage } from './sendable/request/app_closed';
 import { AppOpenedMessage } from './sendable/app_opened';
 import { ComponentUpdateMessage } from './sendable/component_update';
 import { HighlightingUpdateMessage } from './sendable/highlighting_update';
@@ -13,13 +13,14 @@ import { ObjectGrabbedMessage } from './sendable/request/object_grabbed';
 import { SpectatingUpdateMessage } from './sendable/spectating_update';
 import { UserControllerMessage } from './sendable/user_controllers';
 import { UserPositionsMessage } from './sendable/user_positions';
-import { DetachedMenuClosedMessage } from './sendable/detached_menu_closed';
+import { DetachedMenuClosedMessage } from './sendable/request/detached_menu_closed';
+import { Nonce } from './util/nonce';
 
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
 export default class VrMessageSender {
   webSocket: WebSocketService;
-  lastNonce: number;
+  lastNonce: Nonce;
 
   constructor(webSocket: WebSocketService) {
     this.webSocket = webSocket;
@@ -63,7 +64,7 @@ export default class VrMessageSender {
    * @param objectId The id of the object to request to grab.
    * @return A locally unique identifier that is used by the backend to respond to this request. 
    */
-  sendObjectGrabbed(objectId: string): number {
+  sendObjectGrabbed(objectId: string): Nonce {
     const nonce = this.nextNonce();
     this.webSocket.send<ObjectGrabbedMessage>({
       event: 'object_grabbed',
@@ -107,10 +108,13 @@ export default class VrMessageSender {
    * @param {string} appID ID of the closed application
    */
   sendAppClosed(appID: string) {
+    const nonce = this.nextNonce();
     this.webSocket.send<AppClosedMessage>({
       event: 'app_closed',
+      nonce,
       appID,
     });
+    return nonce;
   }
 
   /**
@@ -118,11 +122,14 @@ export default class VrMessageSender {
    * 
    * @param objectId The ID (grabId) of the closed menu
    */
-  sendDetachedMenuClosed(menuId: string) {
+  sendDetachedMenuClosed(menuId: string): Nonce {
+    const nonce = this.nextNonce();
     this.webSocket.send<DetachedMenuClosedMessage>({
       event: 'detached_menu_closed',
+      nonce,
       menuId,
-    })
+    });
+    return nonce;
   }
 
   /**
@@ -206,7 +213,7 @@ export default class VrMessageSender {
     });
   }
 
-  sendMenuDetached(detachId: string, entityType: EntityType, position: THREE.Vector3, quaternion: THREE.Quaternion) {
+  sendMenuDetached(detachId: string, entityType: EntityType, position: THREE.Vector3, quaternion: THREE.Quaternion): Nonce {
     const nonce = this.nextNonce();
     this.webSocket.send<MenuDetachedMessage>({
       event: 'menu_detached',

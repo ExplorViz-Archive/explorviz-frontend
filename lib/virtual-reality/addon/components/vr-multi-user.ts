@@ -34,7 +34,7 @@ import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/util
 import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
 import { UserControllerMessage } from 'virtual-reality/utils/vr-message/sendable/user_controllers';
 import { UserDisconnectedMessage, USER_DISCONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
-import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/app_closed';
+import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
 import { HighlightingUpdateMessage, HIGHLIGHTING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
 import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/spectating_update';
 import { isMenuDetachedResponse, MenuDetachedResponse } from 'virtual-reality/utils/vr-message/receivable/response/menu-detached';
@@ -48,7 +48,8 @@ import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/receivable/menu-detached-forward';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
 import { isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
-import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/detached_menu_closed';
+import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/detached_menu_closed';
+import { isObjectClosedResponse, ObjectClosedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-closed';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -696,13 +697,37 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     this.detachedMenus.add(menuContainer);
 
     // Make detached menu closable.
-    let onClose = () => {
-      this.detachedMenus.remove(menuContainer);
-      let menuId = menuContainer.getGrabId();
-      if (menuId) this.sender.sendDetachedMenuClosed(menuId);
-    };
-    let closeIcon = new CloseIcon(onClose, this.closeButtonTexture);
+    let closeIcon = new CloseIcon({
+      texture: this.closeButtonTexture,
+      onClose: () => this.removeDetachedMenu(menuContainer)
+    });
     closeIcon.addToObject(menuContainer);
+  }
+
+  removeDetachedMenu(menuContainer: GrabbableMenuContainer) {
+    // Remove the menu locally when it does not have an id (e.g., when we are 
+    // offline).
+    let menuId = menuContainer.getGrabId();
+    if (!menuId) {
+      this.detachedMenus.remove(menuContainer);
+      return;
+    }
+    
+    const nonce = this.sender.sendDetachedMenuClosed(menuId);
+    this.receiver.awaitResponse({
+      nonce,
+      responseType: isObjectClosedResponse,
+      onResponse: (response: ObjectClosedResponse) => {
+        if (response.isSuccess) {
+          this.detachedMenus.remove(menuContainer);
+        } else {
+          this.showHint('Could not close detached menu');
+        }
+      },
+      onOffline: () => {
+        this.detachedMenus.remove(menuContainer);
+      }
+    });
   }
 
   // #endregion REMOTE EVENT HANDLER
@@ -807,16 +832,22 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   removeApplication(application: ApplicationObject3D) {
-    if (this.applicationGroup.isApplicationGrabbed(application.dataModel.pid)) {
-      this.showHint('Application is grabbed');
-      return;
-    }
+    const nonce = this.sender.sendAppClosed(application.dataModel.pid);
 
-    super.removeApplication(application);
-
-    if (this.localUser.isOnline) {
-      this.sender.sendAppClosed(application.dataModel.pid);
-    }
+    this.receiver.awaitResponse({
+      nonce,
+      responseType: isObjectClosedResponse,
+      onResponse: (response: ObjectClosedResponse) => {
+        if (response.isSuccess) {
+          super.removeApplication(application);
+        } else {
+          this.showHint('Could not close application');
+        }
+      },
+      onOffline: () => {
+        super.removeApplication(application);
+      }
+    });
   }
 
   removeAllApplications() {

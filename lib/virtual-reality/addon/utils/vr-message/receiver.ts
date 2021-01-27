@@ -7,15 +7,16 @@ import { isResponseMessage, ResponseMessage } from "./receivable/response";
 import { isSelfConnectedMessage, SelfConnectedMessage } from "./receivable/self_connected";
 import { isUserConnectedMessage, UserConnectedMessage, } from "./receivable/user_connected";
 import { isUserDisconnectedMessage, UserDisconnectedMessage } from "./receivable/user_disconnect";
-import { AppClosedMessage, isAppClosedMessage } from "./sendable/app_closed";
+import { AppClosedMessage, isAppClosedMessage } from "./sendable/request/app_closed";
 import { AppOpenedMessage, isAppOpenedMessage } from "./sendable/app_opened";
 import { ComponentUpdateMessage, isComponentUpdateMessage } from "./sendable/component_update";
-import { DetachedMenuClosedMessage, isDetachedMenuClosedMessage } from "./sendable/detached_menu_closed";
+import { DetachedMenuClosedMessage, isDetachedMenuClosedMessage } from "./sendable/request/detached_menu_closed";
 import { HighlightingUpdateMessage, isHighlightingUpdateMessage } from "./sendable/highlighting_update";
 import { isObjectMovedMessage, ObjectMovedMessage } from "./sendable/object_moved";
 import { isSpectatingUpdateMessage, SpectatingUpdateMessage } from "./sendable/spectating_update";
 import { isUserControllerMessage, UserControllerMessage } from "./sendable/user_controllers";
 import { isUserPositionsMessage, UserPositionsMessage } from "./sendable/user_positions";
+import { Nonce } from "./util/nonce";
 
 const RESPONSE_EVENT = 'response';
 type ResponseEvent<T> = {
@@ -109,7 +110,7 @@ export default class VrMessageReceiver extends EventDispatcher {
         onOnline,
         onOffline
     }: {
-        nonce: number,
+        nonce: Nonce,
         responseType: (msg: any) => msg is T,
         onResponse: ResponseHandler<T>,
         onOnline?: () => void,

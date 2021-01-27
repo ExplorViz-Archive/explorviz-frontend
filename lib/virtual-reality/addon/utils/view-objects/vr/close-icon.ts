@@ -1,20 +1,24 @@
 import THREE, { Object3D } from 'three';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 
 export default class CloseIcon extends BaseMesh {
   radius: number;
 
   onClose: () => void;
 
-  constructor(onClose: () => void, texture: THREE.Texture, radius = 0.075, segments = 32) {
+  constructor({onClose, texture, radius = 0.075, segments = 32}: {
+    onClose: () => void, 
+    texture: THREE.Texture, 
+    radius?: number, 
+    segments?: number
+  }) {
     super(new THREE.Color());
 
     this.onClose = onClose;
 
     this.radius = radius;
-
     this.geometry = new THREE.SphereGeometry(radius, segments, segments);
-
     this.material = new THREE.MeshPhongMaterial({
       map: texture,
     });
@@ -61,6 +65,14 @@ export default class CloseIcon extends BaseMesh {
   }
 
   close() {
-    this.onClose();
+    // An object cannot be closed when it is grabbed by the local user.
+    // The `onClose` callback still has to ask the backend whether the
+    // object can be clsoed.
+    const controller = VRController.findController(this);
+    if (!controller) {
+      this.onClose();
+      return true;
+    }
+    return false;
   }
 }

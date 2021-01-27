@@ -668,10 +668,12 @@ export default class VrRendering extends Component<Args> {
       applicationObject3D.scale.set(scalar, scalar, scalar);
 
       // Add close icon to application.
-      let onClose = () => {
-        this.removeApplication(applicationObject3D);
-      };
-      const closeIcon = new CloseIcon(onClose, this.closeButtonTexture);
+      const closeIcon = new CloseIcon({
+        texture: this.closeButtonTexture,
+        onClose: () => {
+          this.removeApplication(applicationObject3D);
+        }
+      });
       closeIcon.addToObject(applicationObject3D);
 
       this.positionApplication(applicationObject3D, origin);
@@ -968,8 +970,9 @@ export default class VrRendering extends Component<Args> {
     if (object instanceof ApplicationMesh) {
       this.addApplication(object.dataModel, point);
     } else if (object instanceof CloseIcon) {
-      object.close();
-    // Handle application hits
+      if (!object.close()) {
+        this.showHint('Object could not be closed');
+      }
     } else if (object.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
     } else if (object.parent instanceof BaseMenu && uv) {
