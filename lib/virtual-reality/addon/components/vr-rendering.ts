@@ -670,7 +670,7 @@ export default class VrRendering extends Component<Args> {
       // Add close icon to application.
       let onClose = () => {
         this.removeApplication(applicationObject3D);
-      }
+      };
       const closeIcon = new CloseIcon(onClose, this.closeButtonTexture);
       closeIcon.addToObject(applicationObject3D);
 

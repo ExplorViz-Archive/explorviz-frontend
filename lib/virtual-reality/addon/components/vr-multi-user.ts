@@ -563,7 +563,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     originalMessage: { menuId }
   }: ForwardedMessage<DetachedMenuClosedMessage>): void {
     for (let menu of this.detachedMenus.children) {
-      if (isGrabbableObject(menu) && menu.getGrabId() == menuId) {
+      if (isGrabbableObject(menu) && menu.getGrabId() === menuId) {
         this.detachedMenus.remove(menu);
         break;
       }
@@ -703,7 +703,9 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     // Make detached menu closable.
     let onClose = () => {
       this.detachedMenus.remove(menuContainer);
-    }
+      let menuId = menuContainer.getGrabId();
+      if (menuId) this.sender.sendDetachedMenuClosed(menuId);
+    };
     let closeIcon = new CloseIcon(onClose, this.closeButtonTexture);
     closeIcon.addToObject(menuContainer);
   }
