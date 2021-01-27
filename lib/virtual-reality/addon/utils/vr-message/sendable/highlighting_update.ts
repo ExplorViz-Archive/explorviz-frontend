@@ -1,4 +1,4 @@
-export const HIGHLIGHTING_UPDATE_EVENT = 'hightlighting_update';
+export const HIGHLIGHTING_UPDATE_EVENT = 'highlighting_update';
 
 export type HighlightingUpdateMessage = {
     event: typeof HIGHLIGHTING_UPDATE_EVENT,

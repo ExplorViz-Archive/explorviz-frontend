@@ -155,7 +155,7 @@ export default class VrMessageSender {
   sendHighlightingUpdate(appID: string, entityType: string,
     entityID: string, isHighlighted: boolean) {
     this.webSocket.send<HighlightingUpdateMessage>({
-      event: 'hightlighting_update',
+      event: 'highlighting_update',
       appID,
       entityType,
       entityID,
