@@ -13,6 +13,7 @@ import { ObjectGrabbedMessage } from './sendable/request/object_grabbed';
 import { SpectatingUpdateMessage } from './sendable/spectating_update';
 import { UserControllerMessage } from './sendable/user_controllers';
 import { UserPositionsMessage } from './sendable/user_positions';
+import { DetachedMenuClosedMessage } from './sendable/detached_menu_closed';
 
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
@@ -110,6 +111,18 @@ export default class VrMessageSender {
       event: 'app_closed',
       appID,
     });
+  }
+
+  /**
+   * Informs the backend that an detached menu was closed by this user.
+   * 
+   * @param objectId The ID (grabId) of the closed menu
+   */
+  sendDetachedMenuClosed(menuId: string) {
+    this.webSocket.send<DetachedMenuClosedMessage>({
+      event: 'detached_menu_closed',
+      menuId,
+    })
   }
 
   /**

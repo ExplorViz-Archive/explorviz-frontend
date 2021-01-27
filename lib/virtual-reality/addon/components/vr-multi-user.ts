@@ -48,6 +48,7 @@ import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/receivable/menu-detached-forward';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
 import { isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
+import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/detached_menu_closed';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -545,6 +546,17 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
     if (application !== undefined) {
       super.removeApplication(application);
+    }
+  }
+
+  onDetachedMenuClosed({
+    originalMessage: { menuId }
+  }: ForwardedMessage<DetachedMenuClosedMessage>): void {
+    for (let menu of this.detachedMenus.children) {
+      if (isGrabbableObject(menu) && menu.getGrabId() == menuId) {
+        this.detachedMenus.remove(menu);
+        break;
+      }
     }
   }
 

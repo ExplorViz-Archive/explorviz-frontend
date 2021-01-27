@@ -10,6 +10,7 @@ import { isUserDisconnectedMessage, UserDisconnectedMessage } from "./receivable
 import { AppClosedMessage, isAppClosedMessage } from "./sendable/app_closed";
 import { AppOpenedMessage, isAppOpenedMessage } from "./sendable/app_opened";
 import { ComponentUpdateMessage, isComponentUpdateMessage } from "./sendable/component_update";
+import { DetachedMenuClosedMessage, isDetachedMenuClosedMessage } from "./sendable/detached_menu_closed";
 import { HighlightingUpdateMessage, isHighlightingUpdateMessage } from "./sendable/highlighting_update";
 import { isObjectMovedMessage, ObjectMovedMessage } from "./sendable/object_moved";
 import { isSpectatingUpdateMessage, SpectatingUpdateMessage } from "./sendable/spectating_update";
@@ -36,6 +37,8 @@ export interface VrMessageListener {
     onUserControllers(msg: ForwardedMessage<UserControllerMessage>): void;
     onAppOpened(msg: ForwardedMessage<AppOpenedMessage>): void;
     onAppClosed(msg: ForwardedMessage<AppClosedMessage>): void;
+    onDetachedMenuClosed(msg: ForwardedMessage<DetachedMenuClosedMessage>): void;
+
     onObjectMoved(msg: ForwardedMessage<ObjectMovedMessage>): void;
     onComponentUpdate(msg: ForwardedMessage<ComponentUpdateMessage>): void;
     onHighlightingUpdate(msg: ForwardedMessage<HighlightingUpdateMessage>): void;
@@ -69,6 +72,7 @@ export default class VrMessageReceiver extends EventDispatcher {
         if (isForwardedMessageOf(msg, isUserControllerMessage)) return this.messageListener.onUserControllers(msg);
         if (isForwardedMessageOf(msg, isAppOpenedMessage)) return this.messageListener.onAppOpened(msg);
         if (isForwardedMessageOf(msg, isAppClosedMessage)) return this.messageListener.onAppClosed(msg);
+        if (isForwardedMessageOf(msg, isDetachedMenuClosedMessage)) return this.messageListener.onDetachedMenuClosed(msg);
         if (isForwardedMessageOf(msg, isObjectMovedMessage)) return this.messageListener.onObjectMoved(msg);
         if (isForwardedMessageOf(msg, isComponentUpdateMessage)) return this.messageListener.onComponentUpdate(msg);
         if (isForwardedMessageOf(msg, isHighlightingUpdateMessage)) return this.messageListener.onHighlightingUpdate(msg);
