@@ -1,4 +1,4 @@
-image: node:13.14.0-alpine
+image: node:lts-alpine3.12
 
 cache:
   paths:
@@ -8,16 +8,7 @@ before_script:
   - npm install  
   - npm install -g ember-cli
   # install chrome for testing
-  - apk update && apk add --no-cache nmap && \
-    echo @edge http://nl.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories && \
-    echo @edge http://nl.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
-    apk update && \
-    apk add --no-cache \
-      chromium \
-      harfbuzz \
-      "freetype>2.8" \
-      ttf-freefont \
-      nss
+  - echo http://dl-3.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories  && \ apk add chromium
 
 test:
   stage: test
