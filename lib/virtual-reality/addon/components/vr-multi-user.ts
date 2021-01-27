@@ -482,13 +482,8 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       if (application) {
         perform(this.addApplicationTask, application, new THREE.Vector3(),
           (applicationObject3D: ApplicationObject3D) => {
-            const position = new THREE.Vector3().fromArray(app.position);
-            const quaternion = new THREE.Quaternion().fromArray(app.quaternion);
-
-            applicationObject3D.worldToLocal(position);
-
-            applicationObject3D.position.copy(position);
-            applicationObject3D.quaternion.copy(quaternion);
+            applicationObject3D.position.fromArray(app.position);
+            applicationObject3D.quaternion.fromArray(app.quaternion);
 
             EntityManipulation.restoreComponentState(applicationObject3D,
               new Set(app.openComponents));

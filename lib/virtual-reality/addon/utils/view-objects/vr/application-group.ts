@@ -5,8 +5,6 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 export default class ApplicationGroup extends THREE.Group {
   openedApps: Map<string, ApplicationObject3D>;
 
-  grabbedApplications: Set<string> = new Set();
-
   constructor() {
     super();
     this.openedApps = new Map();
@@ -33,57 +31,25 @@ export default class ApplicationGroup extends THREE.Group {
 
   removeApplicationById(id: string) {
     const application = this.openedApps.get(id);
-    if (application) {
-      this.openedApps.delete(id);
-      this.grabbedApplications.delete(id);
-      if (application.parent) {
-        application.parent.remove(application);
+    if (application) this.removeApplication(application);
+  }
+
+  removeApplication(application: ApplicationObject3D) {
+    this.openedApps.delete(application.dataModel.pid);
+    if (application.parent) {
+      application.parent.remove(application);
+    }
+    application.children.forEach((child) => {
+      if (child instanceof BaseMesh) {
+        child.disposeRecursively();
       }
-    }
-  }
-
-  attachApplicationTo(id: string, object: THREE.Object3D) {
-    this.grabbedApplications.add(id);
-
-    const application = this.getApplication(id);
-    if (application) {
-      this.remove(application);
-      object.add(application);
-    }
-  }
-
-  isApplicationGrabbed(id: string) {
-    return this.grabbedApplications.has(id);
-  }
-
-  releaseApplication(id: string) {
-    const application = this.getApplication(id);
-    this.grabbedApplications.delete(id);
-    if (application) {
-      if (application.parent) {
-        application.parent.remove(application);
-      }
-      this.add(application);
-    }
-  }
-
-  releaseAllApplications() {
-    this.grabbedApplications.forEach((id) => this.releaseApplication(id));
+    });
   }
 
   /**
    * Removes all applications.
    */
   clear() {
-    this.releaseAllApplications();
-    Array.from(this.openedApps.values()).forEach((application) => {
-      this.remove(application);
-      this.openedApps.delete(application.dataModel.pid);
-      application.children.forEach((child) => {
-        if (child instanceof BaseMesh) {
-          child.disposeRecursively();
-        }
-      });
-    });
+    Array.from(this.openedApps.values()).forEach((application) => this.removeApplication(application));
   }
 }
