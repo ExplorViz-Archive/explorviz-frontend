@@ -1,12 +1,23 @@
-image: node:latest
+image: node:13.14.0-alpine
 
 cache:
   paths:
     - node_modules/
   
 before_script:
-  - npm install
+  - npm install  
   - npm install -g ember-cli
+  # install chrome for testing
+  - apk update && apk add --no-cache nmap && \
+    echo @edge http://nl.alpinelinux.org/alpine/edge/community >> /etc/apk/repositories && \
+    echo @edge http://nl.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
+    apk update && \
+    apk add --no-cache \
+      chromium \
+      harfbuzz \
+      "freetype>2.8" \
+      ttf-freefont \
+      nss
 
 test:
   stage: test
