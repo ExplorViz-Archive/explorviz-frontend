@@ -1130,17 +1130,16 @@ export default class VrRendering extends Component<Args> {
   findMeshByModelId(entityType: EntityType, id: string) {
     if (entityType === NODE_ENTITY_TYPE || entityType === APPLICATION_ENTITY_TYPE) {
       return this.landscapeObject3D.getMeshbyModelId(id);
-    } else {if (entityType === COMPONENT_ENTITY_TYPE || entityType === CLASS_ENTITY_TYPE) {
-      Array.from(this.applicationGroup.getOpenedApps()).forEach((application: ApplicationObject3D) => {
+    } else if (entityType === COMPONENT_ENTITY_TYPE || entityType === CLASS_ENTITY_TYPE) {
+      for (let application of Array.from(this.applicationGroup.getOpenedApps())) {
         return application.getBoxMeshbyModelId(id);
-      });
+      }
     } else if (entityType === CLASS_COMMUNICATION_ENTITY_TYPE) {
-      Array.from(this.applicationGroup.getOpenedApps()).forEach((application: ApplicationObject3D) => {
+      for (let application of Array.from(this.applicationGroup.getOpenedApps())) {
         return application.getCommMeshByModelId(id);
-      });
+      }
     }
     return null;
-  }
 }
 
   // #endregion UTILS
