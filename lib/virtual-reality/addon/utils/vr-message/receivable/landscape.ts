@@ -1,3 +1,4 @@
+import { EntityType, isEntityType } from "../util/entity_type";
 import { isPosition, Position } from "../util/position";
 import { isQuaternion, Quaternion } from "../util/quaternion";
 
@@ -10,6 +11,14 @@ type HighlightedComponent = {
     entityID: string,
     isHighlighted: boolean
 };
+
+type DetachedMenu = {
+    objectId: string,
+    entityId: string,
+    entityType: EntityType,
+    position: Position,
+    quaternion: Quaternion
+}
 
 type App = {
     id: string,
@@ -28,6 +37,7 @@ export type InitialLandscapeMessage = {
     event: typeof INITIAL_LANDSCAPE_EVENT,
     openApps: App[],
     landscape: Landscape
+    detachedMenus: DetachedMenu[]
 };
 
 function isHighlightedComponent(comp: any): comp is HighlightedComponent {
@@ -38,6 +48,16 @@ function isHighlightedComponent(comp: any): comp is HighlightedComponent {
         && typeof comp.entityType === 'string'
         && typeof comp.entityID === 'string'
         && typeof comp.isHighlighted === 'boolean';
+}
+
+function isDetachedMenu(menu: any): menu is DetachedMenu {
+    return menu != null
+        && typeof menu === 'object'
+        && typeof menu.objectId === 'string'
+        && isEntityType(menu.entityType)
+        && typeof menu.entityId === 'string'
+        && isPosition(menu.position)
+        && isQuaternion(menu.quaternion)
 }
 
 function isApp(app: any): app is App {
@@ -63,5 +83,7 @@ export function isInitialLandscapeMessage(msg: any): msg is InitialLandscapeMess
         && msg.event === INITIAL_LANDSCAPE_EVENT
         && Array.isArray(msg.openApps)
         && msg.openApps.every(isApp)
+        && Array.isArray(msg.detachedMenus)
+        && msg.detachedMenus.every(isDetachedMenu)
         && isLandscape(msg.landscape);
 } 

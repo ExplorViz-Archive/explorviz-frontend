@@ -471,8 +471,9 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  onInitialLandscape({ openApps, landscape }: InitialLandscapeMessage): void {
+  onInitialLandscape({ detachedMenus, openApps, landscape }: InitialLandscapeMessage): void {
     this.removeAllApplications();
+    this.detachedMenus.remove(...this.detachedMenus.children);
 
     const { structureLandscapeData } = this.args.landscapeData;
 
@@ -523,6 +524,15 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
     this.landscapeObject3D.position.fromArray(landscape.position);
     this.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
+
+    // initialize detached menus
+    detachedMenus.forEach((detachedMenu) => {
+      let object = this.findMeshByModelId(detachedMenu.entityType, detachedMenu.entityId);
+      if (isEntityMesh(object)) {
+        const menu = new DetailInfoMenu(object);
+        this.addDetachedMenu(menu, detachedMenu.objectId, detachedMenu.position, detachedMenu.quaternion);
+      }
+    })
   }
 
   onAppOpened({
