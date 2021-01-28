@@ -92,15 +92,5 @@ module.exports = function (environment) {
     ENV.APP.rootElement = '#ember-testing';
   }
 
-  // User specific environment, e.g. for usage in a virtual machine
-
-  if (environment === 'akr') {
-    ENV.APP.API_ROOT = 'http://192.168.91.128:8080';
-  }
-
-  if (environment === 'node2') {
-    ENV.APP.API_ROOT = 'http://192.168.48.32:8090';
-  }
-
   return ENV;
 };
