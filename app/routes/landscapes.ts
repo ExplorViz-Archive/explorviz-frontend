@@ -16,11 +16,13 @@ export default class Landscapes extends BaseRoute {
   }
 
   model() {
-    const uId = this.auth.user?.sub;
+    let uId = this.auth.user?.sub;
 
     if (!uId) {
       return Promise.reject(new Error('User profile not set'));
     }
+
+    uId = encodeURI(uId);
 
     return new Promise<any>((resolve, reject) => {
       fetch(`${userService}/user/${uId}/token`, {
