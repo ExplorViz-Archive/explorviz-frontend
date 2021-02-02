@@ -1,6 +1,6 @@
 import THREE from 'three';
-import BaseMenu from './base-menu';
-import TextItem from './items/text-item';
+import UiMenu from '../ui-menu';
+import TextItem from '../items/text-item';
 
 const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.75, [
   new THREE.KeyframeTrack('.scale[x]', [0.0, 0.75], [0.0, 1.0])
@@ -14,7 +14,7 @@ const CLOSE_ANIMATION_CLIP = new THREE.AnimationClip('close-animation', 0.75, [
   new THREE.KeyframeTrack('.scale[x]', [0, 0.75], [1.0, 0.0])
 ]);
 
-export default class HintMenu extends BaseMenu {
+export default class HintMenu extends UiMenu {
   constructor(title: string, text: string|null = null) {
     super({ width: 512, height: 128 }, '#002e4f');
 
@@ -27,7 +27,7 @@ export default class HintMenu extends BaseMenu {
       this.items.push(contentItem);
     }
 
-    this.update();
+    this.redrawMenu();
   }
 
   makeBackgroundMaterial(color: THREE.Color) {

@@ -1,12 +1,12 @@
-import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
-import composeContent, { EntityMesh, getIdOfEntity, getTypeOfEntity } from '../vr-helpers/detail-info-composer';
-import { EntityType } from '../vr-message/util/entity_type';
-import BaseMenu from './base-menu';
-import { DetachableMenu } from './detachable-menu';
-import RectangleItem from './items/rectangle-item';
-import TextItem from './items/text-item';
+import VRControllerButtonBinding from '../../vr-controller/vr-controller-button-binding';
+import composeContent, { EntityMesh, getIdOfEntity, getTypeOfEntity } from '../../vr-helpers/detail-info-composer';
+import { EntityType } from '../../vr-message/util/entity_type';
+import { DetachableMenu } from '../detachable-menu';
+import RectangleItem from '../items/rectangle-item';
+import TextItem from '../items/text-item';
+import UiMenu from '../ui-menu';
 
-export default class DetailInfoMenu extends BaseMenu implements DetachableMenu {
+export default class DetailInfoMenu extends UiMenu implements DetachableMenu {
 
   entryItems: Map <string, TextItem>; 
 
@@ -41,7 +41,7 @@ export default class DetailInfoMenu extends BaseMenu implements DetachableMenu {
 
 
       });
-      this.update();
+      this.redrawMenu();
 
     } else {
 
@@ -52,13 +52,15 @@ export default class DetailInfoMenu extends BaseMenu implements DetachableMenu {
     return getTypeOfEntity(this.object);
   }
 
-  onUpdateMenu() {
+  onUpdateMenu(delta: number) {
+    super.onUpdateMenu(delta);
+    
     let content = composeContent(this.object)
     if (content) {
       content.entries.forEach(({key, value}) => {
         this.entryItems.get(key)?.setText(value);
       });
-      this.update();
+      this.redrawMenu();
     } else {
       this.closeMenu();
     }

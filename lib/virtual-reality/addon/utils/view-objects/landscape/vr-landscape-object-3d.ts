@@ -1,6 +1,6 @@
 import { StructureLandscapeData } from "explorviz-frontend/utils/landscape-schemes/structure-data";
 import LandscapeObject3D from "explorviz-frontend/view-objects/3d/landscape/landscape-object-3d";
-import { GrabbableObject } from "../../vr-menus/pseudo-menu/grab-menu";
+import { GrabbableObject } from "../../vr-menus/ui-less-menu/grab-menu";
 
 /**
  * For the VR extension, we need a custom view object for landscapes to

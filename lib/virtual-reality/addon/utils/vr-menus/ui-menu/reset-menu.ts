@@ -1,9 +1,9 @@
-import TextItem from './items/text-item';
-import BaseMenu from './base-menu';
-import TextbuttonItem from './items/textbutton-item';
+import TextItem from '../items/text-item';
+import UiMenu from '../ui-menu';
+import TextbuttonItem from '../items/textbutton-item';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 
-export default class ResetMenu extends BaseMenu {
+export default class ResetMenu extends UiMenu {
 
   constructor(resetAll: () => void, localUser: LocalVrUser) {
     super();
@@ -44,6 +44,6 @@ export default class ResetMenu extends BaseMenu {
 
     }
 
-    this.update();
+    this.redrawMenu();
   }
 }

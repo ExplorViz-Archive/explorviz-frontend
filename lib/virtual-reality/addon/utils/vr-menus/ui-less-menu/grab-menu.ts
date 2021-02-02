@@ -4,9 +4,10 @@ import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-co
 import VRControllerThumbpadBinding from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import VrMessageSender from 'virtual-reality/utils/vr-message/sender';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
-import PseudoMenu from '../pseudo-menu';
 import { isObjectGrabbedResponse, ObjectGrabbedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-grabbed';
 import DeltaTime from 'virtual-reality/services/delta-time';
+import ScaleMenu from './scale-menu';
+import BaseMenu from '../base-menu';
 
 export interface GrabbableObject extends THREE.Object3D {
     getGrabId(): string | null;
@@ -27,7 +28,7 @@ export function findGrabbableObject(object: THREE.Object3D, objectId: string): G
     return null;
 }
 
-export default class GrabMenu extends PseudoMenu {
+export default class GrabMenu extends BaseMenu {
     private sender: VrMessageSender;
     private receiver: VrMessageReceiver;
     private grabbedObject: GrabbableObject;
@@ -93,7 +94,7 @@ export default class GrabMenu extends PseudoMenu {
 
     onOpenMenu() {
         super.onOpenMenu();
-
+        
         // The backend does not have to be notified when objects without an ID
         // are grabbed.
         const objectId = this.grabbedObject.getGrabId();
@@ -123,6 +124,16 @@ export default class GrabMenu extends PseudoMenu {
             },
             onOffline: () => this.addToGripSpace()
         });
+    }
+
+    onPauseMenu() {
+        // Release the grabbed object then another menu is opened (e.g., the
+        // scale menu).
+    }
+
+    onResumeMenu() {
+        // Grab the temporarily released object again, then the other menu
+        // (usually the scale menu) is closed again.
     }
 
     onUpdateMenu(delta: number) {
