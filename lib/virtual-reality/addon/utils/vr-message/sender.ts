@@ -14,8 +14,7 @@ import { UserControllerMessage } from './sendable/user_controllers';
 import { UserPositionsMessage } from './sendable/user_positions';
 import { DetachedMenuClosedMessage } from './sendable/request/detached_menu_closed';
 import { Nonce } from './util/nonce';
-import { DetachableMenu } from '../vr-menus/menu-group';
-
+import { DetachableMenu } from '../vr-menus/detachable-menu';
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
 export default class VrMessageSender {
