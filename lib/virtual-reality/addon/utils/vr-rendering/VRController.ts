@@ -83,6 +83,8 @@ export default class VRController extends BaseMesh {
 
   teleportArea: TeleportMesh|null = null;
 
+  enableTeleport: boolean = true;
+
   connected = false;
 
 
@@ -406,7 +408,7 @@ export default class VRController extends BaseMesh {
       }
 
       if (object instanceof FloorMesh) {
-        if (this.teleportArea) {
+        if (this.teleportArea && this.enableTeleport) {
           // Show teleport area above intersected point on floor. However, if
           // the controller's ray is invisible, don't show the teleport area
           // either.

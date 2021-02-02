@@ -258,6 +258,9 @@ export default abstract class BaseMenu extends THREE.Group {
     return false;
   }
 
+  get enableTeleport(): boolean {
+    return this.enableControllerRay;
+  }
   /**
    * Finds the menu item at given uv position.
    *

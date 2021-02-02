@@ -62,6 +62,7 @@ import VrApplicationObject3D from 'virtual-reality/utils/view-objects/applicatio
 import VrLandscapeObject3D from 'virtual-reality/utils/view-objects/landscape/vr-landscape-object-3d';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import MenuQueue from 'virtual-reality/utils/menu-queue';
+import PingMenu from 'virtual-reality/utils/vr-menus/pseudo-menu/ping-menu';
 
 interface Args {
   readonly id: string;
@@ -776,7 +777,8 @@ export default class VrRendering extends Component<Args> {
       thumbpad: new VRControllerThumbpadBinding({ 
         labelUp: 'Teleport / Highlight', 
         labelDown: 'Show Details', 
-        labelRight: 'Zoom'
+        labelRight: 'Zoom',
+        labelLeft: 'Ping'
       }, {
         onThumbpadDown: (controller, axes) => {
           const direction = VRControllerThumbpadBinding.getDirection(axes);
@@ -795,7 +797,10 @@ export default class VrRendering extends Component<Args> {
               }
               break;
             case VRControllerThumbpadDirection.RIGHT:
-              this.openZoomMenu(controller)
+              this.openZoomMenu(controller);
+              break;
+            case VRControllerThumbpadDirection.LEFT:
+              this.openPingMenu(controller);
               break;
           }
         }
@@ -915,6 +920,11 @@ export default class VrRendering extends Component<Args> {
 
   openZoomMenu(controller: VRController) {
     controller.menuGroup.openMenu(new ZoomMenu(this.renderer, this.scene, this.camera));
+  }
+
+  openPingMenu(controller: VRController) {
+    const user = this.localUser;
+    controller.menuGroup.openMenu(new PingMenu(user, this.scene));
   }
 
   openCameraMenu(controller: VRController) {

@@ -37,11 +37,13 @@ export default class MenuGroup extends THREE.Group {
     toggleControllerRay() {
         const controller = VRController.findController(this);
         if (controller) {
-            let visible = !this.currentMenu || this.currentMenu.enableControllerRay;
-            if (controller.ray) controller.ray.visible = visible;
+            let rayVisibleInMenu = !this.currentMenu || this.currentMenu.enableControllerRay;
+            let enableTeleportInMenu = !this.currentMenu || this.currentMenu.enableTeleport;
+            if (controller.ray) controller.ray.visible = rayVisibleInMenu;
             if (controller.teleportArea) {
                 const intersectsFloor = controller.intersectedObject?.object instanceof FloorMesh;
-                controller.teleportArea.visible = visible && intersectsFloor;
+                controller.enableTeleport = enableTeleportInMenu;
+                controller.teleportArea.visible = enableTeleportInMenu && intersectsFloor;
             }
         }
     }
