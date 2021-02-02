@@ -241,7 +241,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     let object: THREE.Object3D|null = controller.intersectedObject.object;
     while (object) {
       if (isGrabbableObject(object)) {
-        controller.menuGroup.openMenu(new GrabMenu(object, this.sender, this.receiver));
+        controller.menuGroup.openMenu(new GrabMenu(object, this.sender, this.receiver, this.time));
         break;
       } else {
         object = object.parent;

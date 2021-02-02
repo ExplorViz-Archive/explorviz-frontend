@@ -6,18 +6,19 @@ import VrMessageSender from 'virtual-reality/utils/vr-message/sender';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import PseudoMenu from '../pseudo-menu';
 import { isObjectGrabbedResponse, ObjectGrabbedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-grabbed';
+import DeltaTime from 'virtual-reality/services/delta-time';
 
 export interface GrabbableObject extends THREE.Object3D {
-    getGrabId(): string|null;
+    getGrabId(): string | null;
 }
 
 export function isGrabbableObject(object: any): object is GrabbableObject {
-    return object !== null 
+    return object !== null
         && typeof object === 'object'
         && typeof object.getGrabId === 'function';
 }
 
-export function findGrabbableObject(object: THREE.Object3D, objectId: string): GrabbableObject|null {
+export function findGrabbableObject(object: THREE.Object3D, objectId: string): GrabbableObject | null {
     if (isGrabbableObject(object) && object.getGrabId() === objectId) return object;
     for (let child of object.children) {
         let result = findGrabbableObject(child, objectId);
@@ -30,16 +31,18 @@ export default class GrabMenu extends PseudoMenu {
     private sender: VrMessageSender;
     private receiver: VrMessageReceiver;
     private grabbedObject: GrabbableObject;
-    private grabbedObjectParent: THREE.Object3D|null;
+    private grabbedObjectParent: THREE.Object3D | null;
     private grabbedSuccessfully: boolean;
+    private time: DeltaTime;
 
-    constructor(grabbedObject: GrabbableObject, sender: VrMessageSender, receiver: VrMessageReceiver) {
+    constructor(grabbedObject: GrabbableObject, sender: VrMessageSender, receiver: VrMessageReceiver, time: DeltaTime) {
         super();
         this.sender = sender;
         this.receiver = receiver;
         this.grabbedObject = grabbedObject;
         this.grabbedObjectParent = null;
         this.grabbedSuccessfully = false;
+        this.time = time;
     }
 
     /**
@@ -56,12 +59,12 @@ export default class GrabMenu extends PseudoMenu {
             // Get inverse of controller transformation.
             const matrix = new THREE.Matrix4();
             matrix.getInverse(controller.gripSpace.matrixWorld);
-        
+
             // Set transforamtion relative to controller transformation.
             this.grabbedObject.matrix.premultiply(matrix);
             this.grabbedObject.matrix.decompose(
-                this.grabbedObject.position, 
-                this.grabbedObject.quaternion, 
+                this.grabbedObject.position,
+                this.grabbedObject.quaternion,
                 this.grabbedObject.scale
             );
             controller.gripSpace.add(this.grabbedObject);
@@ -79,11 +82,11 @@ export default class GrabMenu extends PseudoMenu {
             this.grabbedObject.matrix.premultiply(controller.gripSpace.matrixWorld);
             this.grabbedObject.matrix.decompose(
                 this.grabbedObject.position,
-                this.grabbedObject.quaternion, 
+                this.grabbedObject.quaternion,
                 this.grabbedObject.scale
             );
         }
-        
+
         // Restore original parent.
         this.grabbedObjectParent?.add(this.grabbedObject);
     }
@@ -149,7 +152,7 @@ export default class GrabMenu extends PseudoMenu {
         // grab the object anymore even if we did not yet receive the response.
         const objectId = this.grabbedObject.getGrabId();
         if (objectId) this.sender.sendObjectReleased(objectId);
-        
+
         // If we received the response and were allowed to grab the object,
         // we have to detach the object from the controller.
         if (this.grabbedSuccessfully) {
@@ -161,12 +164,47 @@ export default class GrabMenu extends PseudoMenu {
         return new VRControllerThumbpadBinding({
             labelUp: 'Move Away',
             labelDown: 'Move Closer'
-          }, {
-            onThumbpadTouch: (_controller: VRController, _axes: number[]) => {
-                // TODO move object closer / further away
+        }, {
+            onThumbpadTouch: (controller: VRController, axes: number[]) => {
+                const grabbedObject = this.grabbedObject;
+
+                controller.updateIntersectedObject();
+
+                const { intersectedObject } = controller;
+
+                if (!intersectedObject) return;
+
+                // Position where ray hits the application
+                const intersectionPosWorld = intersectedObject.point;
+                const intersectionPosLocal = intersectionPosWorld.clone();
+                grabbedObject.worldToLocal(intersectionPosLocal);
+
+                const controllerPosition = new THREE.Vector3();
+                controller.raySpace.getWorldPosition(controllerPosition);
+                const controllerPositionLocal = controllerPosition.clone();
+                grabbedObject.worldToLocal(controllerPositionLocal);
+
+                const direction = new THREE.Vector3();
+                direction.subVectors(intersectionPosLocal, controllerPositionLocal);
+
+                const worldDirection = new THREE.Vector3().subVectors(controllerPosition, intersectionPosWorld);
+
+                const yAxis = axes[1];
+
+                // Stop application from moving too close to controller
+                if ((worldDirection.length() > 0.5 && Math.abs(yAxis) > 0.1)
+                    || (worldDirection.length() <= 0.5 && yAxis > 0.1)) {
+                    // Adapt distance for moving according to trigger value
+                    direction.normalize();
+                    const length = yAxis * this.time.getDeltaTime();
+
+                    grabbedObject.translateOnAxis(direction, length);
+                    grabbedObject.updateMatrix();
+                }
             }
         });
     }
+    
 
     makeGripButtonBinding() {
         return new VRControllerButtonBinding('Release Object', {
