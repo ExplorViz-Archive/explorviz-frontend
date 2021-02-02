@@ -204,7 +204,10 @@ export default class GrabMenu extends PseudoMenu {
             }
         });
     }
-    
+
+    get enableControllerRay(): boolean {
+        return true;
+    }
 
     makeGripButtonBinding() {
         return new VRControllerButtonBinding('Release Object', {
