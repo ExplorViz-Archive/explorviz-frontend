@@ -1,30 +1,28 @@
+import Service, { inject as service } from '@ember/service';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import THREE from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import { AppClosedMessage } from './sendable/request/app_closed';
-import { AppOpenedMessage } from './sendable/app_opened';
-import { ComponentUpdateMessage } from './sendable/component_update';
-import { HighlightingUpdateMessage } from './sendable/highlighting_update';
-import { ObjectMovedMessage } from './sendable/object_moved';
-import { ObjectReleasedMessage } from './sendable/object_released';
-import { MenuDetachedMessage } from './sendable/request/menu_detached';
-import { ObjectGrabbedMessage } from './sendable/request/object_grabbed';
-import { SpectatingUpdateMessage } from './sendable/spectating_update';
-import { UserControllerMessage } from './sendable/user_controllers';
-import { UserPositionsMessage } from './sendable/user_positions';
-import { DetachedMenuClosedMessage } from './sendable/request/detached_menu_closed';
-import { Nonce } from './util/nonce';
-import { DetachableMenu } from '../vr-menus/detachable-menu';
+import { AppClosedMessage } from '../utils/vr-message/sendable/request/app_closed';
+import { AppOpenedMessage } from '../utils/vr-message/sendable/app_opened';
+import { ComponentUpdateMessage } from '../utils/vr-message/sendable/component_update';
+import { HighlightingUpdateMessage } from '../utils/vr-message/sendable/highlighting_update';
+import { ObjectMovedMessage } from '../utils/vr-message/sendable/object_moved';
+import { ObjectReleasedMessage } from '../utils/vr-message/sendable/object_released';
+import { MenuDetachedMessage } from '../utils/vr-message/sendable/request/menu_detached';
+import { ObjectGrabbedMessage } from '../utils/vr-message/sendable/request/object_grabbed';
+import { SpectatingUpdateMessage } from '../utils/vr-message/sendable/spectating_update';
+import { UserControllerMessage } from '../utils/vr-message/sendable/user_controllers';
+import { UserPositionsMessage } from '../utils/vr-message/sendable/user_positions';
+import { DetachedMenuClosedMessage } from '../utils/vr-message/sendable/request/detached_menu_closed';
+import { Nonce } from '../utils/vr-message/util/nonce';
+import { DetachableMenu } from '../utils/vr-menus/detachable-menu';
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
-export default class VrMessageSender {
-  webSocket: WebSocketService;
-  lastNonce: Nonce;
+export default class VrMessageSender extends Service {
+  @service('web-socket')
+  webSocket!: WebSocketService;
 
-  constructor(webSocket: WebSocketService) {
-    this.webSocket = webSocket;
-    this.lastNonce = 0;
-  }
+  private lastNonce: Nonce = 0;
 
   /**
    * Gets the next request identifier.
@@ -232,5 +230,11 @@ export default class VrMessageSender {
       scale: menu.scale.toArray(),
     });
     return nonce;
+  }
+}
+
+declare module '@ember/service' {
+  interface Registry {
+    'vr-message-sender': VrMessageSender;
   }
 }

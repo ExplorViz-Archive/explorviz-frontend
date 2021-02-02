@@ -83,14 +83,51 @@ export default class MenuGroup extends THREE.Group {
      * If a previously open menu was hidden by {@link MenuGroup.openMenu},
      * it is shown again by adding the mesh back to this group.
      */
-    closeMenu(detach: boolean = false) {
-        const closedMenu = this.menus.pop();
-        this.controllerBindings.pop();
-        if (closedMenu && !detach) {
-            closedMenu.onCloseMenu();
-            this.remove(closedMenu);
-        }
+    closeMenu() {
+        this.removeMenu((m) => m.onCloseMenu());
+        this.resumeMenu();
+    }
 
+    /**
+     * Detaches the currently active menu if it is an instance of `DetachableMenu`.
+     */
+    detachMenu() {
+        const detachedMenu = this.currentMenu;
+        if (detachedMenu && isDetachableMenu(detachedMenu)) {
+            this.removeMenu((m) => m.onDetachMenu());
+            this.resumeMenu();
+
+            // send detached menu
+            this.dispatchEvent({
+                type: MENU_DETACH_EVENT_TYPE, 
+                menu: detachedMenu
+            });
+        }
+    }
+
+    /**
+     * Removes the currently active menu.
+     * 
+     * @param callback Determines whethe the `onClose` or `onDetach` callback
+     * is invoked.
+     */
+    private removeMenu(callback: (removedMenu: BaseMenu) => void): BaseMenu|undefined {
+        const removedMenu = this.menus.pop();
+        this.controllerBindings.pop();
+        if (removedMenu) {
+            callback(removedMenu);
+            this.remove(removedMenu);
+        }
+        return removedMenu;
+    }
+
+    /**
+     * Resumes the previously active menu.
+     * 
+     * This method must be called after the current menu has been removed 
+     * (see `removeMenu`).
+     */
+    private resumeMenu() {
         // Show previously hidden menu if any.
         if (this.currentMenu) {
             this.add(this.currentMenu);
@@ -99,18 +136,5 @@ export default class MenuGroup extends THREE.Group {
 
         // Hide or show the controllers ray.
         this.toggleControllerRay();
-    }
-
-    detachMenu() {
-        const menu = this.currentMenu;
-        if (menu && isDetachableMenu(menu)) {
-            this.closeMenu(true);
-
-            // send detached menu
-            this.dispatchEvent({
-                type: MENU_DETACH_EVENT_TYPE, 
-                menu
-            });
-        }
     }
 }

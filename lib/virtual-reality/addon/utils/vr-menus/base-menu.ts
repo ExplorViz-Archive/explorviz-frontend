@@ -4,13 +4,77 @@ import VRControllerThumbpadBinding from '../vr-controller/vr-controller-thumbpad
 import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
 import MenuGroup from './menu-group';
 
+export enum MenuState {
+  /**
+   * The initial state of the menu before it has been opened y a menu group.
+   */
+  INIT,
+
+  /**
+   * The state of the menu when it is the currently open menu of a menu group.
+   */
+  OPEN,
+  
+  /**
+   * The state of the menu when it has been closed.
+   */
+  CLOSED,
+  
+  /**
+   * The state of the menu when it is still opened by a menu group but another
+   * menu is currently active.
+   */
+  PAUSED,
+  
+  /**
+   * The state of the menu when it has been detached from the menu group and
+   * is placed in the world.
+   */
+  DETACHED
+}
+
+/**
+ * Base class for all menus that defines life cycle methods and callbacks for
+ * the menu.
+ * 
+ * There are menus with a user interface and menus without a user interface.
+ * For example when an object is grabbed an invisible menu is opened that
+ * takes control over the button bindings of the controller that grabbed the
+ * object.
+ */
 export default abstract class BaseMenu extends THREE.Group {
-  isMenuOpen: boolean;
+  menuState: MenuState;
 
   constructor() {
     super();
-    this.isMenuOpen = false;
+    this.menuState = MenuState.INIT;
   }
+
+  /**
+   * Whether this menu is the currently open menu of a menu group. 
+   */
+  get isMenuOpen(): boolean { return this.menuState === MenuState.OPEN; }
+
+  /**
+   * Whether this menu has been closed.
+   * 
+   * Note that this is not the inverse of `isMenuOpen`.
+   */
+  get isMenuClosed(): boolean { return this.menuState === MenuState.CLOSED; }
+
+  /**
+   * Whether this menu has been paused.
+   * 
+   * A paused menu still belongs to a menu group but there is another menu
+   * that is currently active. A paused menu will not receive regular updates.
+   */
+  get isMenuPaused(): boolean { return this.menuState === MenuState.PAUSED; }
+
+  /**
+   * Whether this menu has been detached from its menu group and has been
+   * placed in the world.
+   */
+  get isMenuDetached(): boolean { return this.menuState === MenuState.DETACHED; }
 
   /**
    * Called when the other controller's ray intersects this menu.
@@ -129,7 +193,7 @@ export default abstract class BaseMenu extends THREE.Group {
    * Callback that is invoked by the menu group when this menu is opened.
    */
   onOpenMenu() {
-    this.isMenuOpen = true;
+    this.menuState = MenuState.OPEN;
   }
 
   /**
@@ -143,18 +207,30 @@ export default abstract class BaseMenu extends THREE.Group {
    * Callback that is invoked by the menu group when this menu is hidden because
    * another menu is openend instead.
    */
-  onPauseMenu() {}
+  onPauseMenu() {
+    this.menuState = MenuState.PAUSED;
+  }
 
   /**
    * Callback that is invoked by the menu group when this menu is shown again
    * after it was hidden becaus ethe other menu was closed.
    */
-  onResumeMenu() {}
+  onResumeMenu() {
+    this.menuState = MenuState.OPEN;
+  }
+
+  /**
+   * Callback that is invoked by the menu group when this menu is detached
+   * and added to the world instead.
+   */
+  onDetachMenu() {
+    this.menuState = MenuState.DETACHED;
+  }
 
   /**
    * Callback that is invoked by the menu group when this menu is closed.
    */
   onCloseMenu() {
-    this.isMenuOpen = false;
+    this.menuState = MenuState.CLOSED;
   }
 }
