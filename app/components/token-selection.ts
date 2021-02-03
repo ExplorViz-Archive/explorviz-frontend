@@ -2,6 +2,7 @@ import Component from '@glimmer/component';
 import { tracked } from '@glimmer/tracking';
 import { LandscapeToken } from 'explorviz-frontend/services/landscape-token';
 import { action } from '@ember/object';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
 interface Args {
   tokens: LandscapeToken[];
@@ -28,5 +29,11 @@ export default class TokenSelection extends Component<Args> {
       this.sortOrder = 'asc';
       this.sortProperty = property;
     }
+  }
+
+  @action
+  // eslint-disable-next-line class-methods-use-this
+  onTokenCopied() {
+    AlertifyHandler.showAlertifySuccess('Token copied to clipboard');
   }
 }

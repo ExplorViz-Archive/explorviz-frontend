@@ -6,6 +6,7 @@
     <tr>
       <th scope="col" {{on "click" (fn this.sortBy "value")}}>ID</th>
       <th scope="col"></th>
+      <th scope="col"></th>
     </tr>
   </thead>
   <tbody>
@@ -15,6 +16,7 @@
         {{on "click" (fn @selectToken @currentToken)}}
       >
         <th scope="row" class="text-center">{{@currentToken.value}}</th>
+        <th scope="row" class="text-center"></th>
         <th scope="row" class="text-center"></th>
       </tr>
       <tr
@@ -28,12 +30,23 @@
     }}
       <tr>
         <th scope="row" class="text-center" {{on "click" (fn @selectToken token)}}>{{token.value}}</th>
-        <th
-          scope="row"
-          class="text-center"
-          {{on "click" (fn @deleteToken token.value)}}
-        >
-          Delete
+        <th scope="row">
+          <CopyButton
+            class="button-svg-with-hover"
+            @clipboardText={{token.value}}
+            @success={{this.onTokenCopied}}
+          >
+            {{svg-jar "clippy" class="octicon align-middle"}}
+          </CopyButton>
+        </th>
+        <th scope="row">
+          <button
+            class="button-svg-with-hover"
+            type="button"
+            {{on "click" (fn @deleteToken token.value)}}
+          >
+            {{svg-jar "trashcan" class="octicon align-middle"}}
+          </button>
         </th>
       </tr>
     {{else}}
