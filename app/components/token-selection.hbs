@@ -37,6 +37,9 @@
             @success={{this.onTokenCopied}}
           >
             {{svg-jar "clippy" class="octicon align-middle"}}
+            <BsTooltip @placement="bottom" @triggerEvents="hover">
+              Copy token to clipboard
+            </BsTooltip>
           </CopyButton>
         </th>
         <th scope="row">
@@ -46,6 +49,9 @@
             {{on "click" (fn @deleteToken token.value)}}
           >
             {{svg-jar "trashcan" class="octicon align-middle"}}
+            <BsTooltip @placement="bottom" @triggerEvents="hover">
+              Delete token permanently
+            </BsTooltip>
           </button>
         </th>
       </tr>
