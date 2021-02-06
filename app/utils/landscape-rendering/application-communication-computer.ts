@@ -21,7 +21,7 @@ function computeApplicationCommunicationRecursively(span: Span,
 
     if (parentSpanApplication !== childSpanApplication) {
       const applicationCommunication: ApplicationCommunication = {
-        id: `${parentSpanApplication.pid}_${childSpanApplication.pid}`,
+        id: `${parentSpanApplication.instanceId}_${childSpanApplication.instanceId}`,
         sourceApplication: parentSpanApplication,
         targetApplication: childSpanApplication,
       };

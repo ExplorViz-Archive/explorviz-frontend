@@ -107,8 +107,8 @@ export default class VisualizationController extends Controller {
     if (this.landscapeData !== null) {
       application = this.landscapeData.application;
       if (application !== undefined) {
-        const newApplication = VisualizationController.getApplicationFromLandscapeByPid(
-          application.pid, structureData,
+        const newApplication = VisualizationController.getApplicationFromLandscapeByInstanceId(
+          application.instanceId, structureData,
         );
 
         if (newApplication) {
@@ -123,12 +123,12 @@ export default class VisualizationController extends Controller {
     };
   }
 
-  private static getApplicationFromLandscapeByPid(pid: string,
+  private static getApplicationFromLandscapeByInstanceId(instanceId: string,
     structureData: StructureLandscapeData) {
     let foundApplication: Application|undefined;
     structureData.nodes.forEach((node) => {
       node.applications.forEach((application) => {
-        if (application.pid === pid) {
+        if (application.instanceId === instanceId) {
           foundApplication = application;
         }
       });
