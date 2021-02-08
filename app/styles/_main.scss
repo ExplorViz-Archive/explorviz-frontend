@@ -149,6 +149,10 @@ svg.octicon {
   cursor: pointer;
 }
 
+.all-unset {
+  all: unset;
+}
+
 @mixin centerSpinners() {
   @for $i from 1 through 5 {
     .spinner-center-#{$i} {
