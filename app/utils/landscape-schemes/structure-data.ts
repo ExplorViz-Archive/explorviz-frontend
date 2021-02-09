@@ -64,7 +64,7 @@ export function isMethod(x: any): x is Method {
 }
 
 export function preProcessAndEnhanceStructureLandscape(
-  landscapeStructure: RawStructureLandscapeData,
+  landscapeStructure: StructureLandscapeData,
 ) {
   function createPackageIds(component: Package, parentId: string) {
     component.id = `${parentId}.${component.name}`;
