@@ -36,7 +36,7 @@ export default class LandscapeObject3D extends THREE.Object3D {
     if (object instanceof NodeMesh) {
       this.modelIdToMesh.set(object.dataModel.ipAddress, object);
     } else if (object instanceof ApplicationMesh) {
-      this.modelIdToMesh.set(object.dataModel.pid, object);
+      this.modelIdToMesh.set(object.dataModel.instanceId, object);
     }
 
     return this;
@@ -45,7 +45,7 @@ export default class LandscapeObject3D extends THREE.Object3D {
   /**
    * Returns Sytem, NodeGroup, Node or Application mesh matching given id
    *
-   * @param id The ipAddress of a Node or the pid of an Application
+   * @param id The ipAddress of a Node or the instanceId of an Application
    */
   getMeshbyModelId(id: string) {
     return this.modelIdToMesh.get(id);

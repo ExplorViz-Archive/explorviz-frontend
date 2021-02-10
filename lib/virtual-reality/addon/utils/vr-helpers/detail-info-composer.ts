@@ -36,7 +36,7 @@ function composeApplicationContent(applicationMesh: ApplicationMesh) {
 
   const content: DetailedInfo = { title: application.name, entries: [] };
 
-  content.entries.push({ key: 'PID: ', value: application.pid });
+  content.entries.push({ key: 'Instance ID: ', value: application.instanceId });
   content.entries.push({ key: 'Language: ', value: application.language });
 
   return content;

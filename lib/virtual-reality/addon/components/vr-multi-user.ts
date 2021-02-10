@@ -219,7 +219,7 @@ export default class VrMultiUser extends VrRendering {
     if (object.parent) {
 
       if (object.parent instanceof ApplicationObject3D && controller.ray) {
-        if (this.applicationGroup.isApplicationGrabbed(object.parent.dataModel.pid)) {
+        if (this.applicationGroup.isApplicationGrabbed(object.parent.dataModel.instanceId)) {
           this.showHint('Application already grabbed');
           return;
         } else {
@@ -264,7 +264,7 @@ export default class VrMultiUser extends VrRendering {
     super.translateApplication(application, direction, length);
 
     if (application instanceof ApplicationObject3D && this.localUser.isOnline) {
-      this.sender.sendAppTranslationUpdate(application.dataModel.pid, direction, length);
+      this.sender.sendAppTranslationUpdate(application.dataModel.instanceId, direction, length);
     }
   }
 
@@ -303,7 +303,7 @@ export default class VrMultiUser extends VrRendering {
         this.onLandscapePosition(data);
         break;
       case 'app_translated':
-        this.onAppTranslation(data.appId, data.direction, data.length);
+        this.onAppTranslation(data.instanceId, data.direction, data.length);
         break;
       case 'app_opened':
         this.onAppOpened(data.id, data.position, data.quaternion);
@@ -318,7 +318,7 @@ export default class VrMultiUser extends VrRendering {
         this.onAppReleased(data.id, data.position, data.quaternion);
         break;
       case 'component_update':
-        this.onComponentUpdate(data.isFoundation, data.appID, data.componentID);
+        this.onComponentUpdate(data.isFoundation, data.instanceId, data.componentID);
         break;
       case 'hightlighting_update':
         this.onHighlightingUpdate(data);
@@ -579,7 +579,7 @@ export default class VrMultiUser extends VrRendering {
             this.addLabels(applicationObject3D);
 
             const drawableComm = this.drawableClassCommunications
-              .get(applicationObject3D.dataModel.pid);
+              .get(applicationObject3D.dataModel.instanceId);
 
             if (drawableComm) {
               this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
@@ -632,8 +632,8 @@ export default class VrMultiUser extends VrRendering {
     }
   }
 
-  onComponentUpdate(isFoundation: boolean, appID: string, componentID: string) {
-    const applicationObject3D = this.applicationGroup.getApplication(appID);
+  onComponentUpdate(isFoundation: boolean, instanceId: string, componentID: string) {
+    const applicationObject3D = this.applicationGroup.getApplication(instanceId);
     if (!applicationObject3D) return;
 
     const componentMesh = applicationObject3D.getBoxMeshbyModelId(componentID);
@@ -647,13 +647,13 @@ export default class VrMultiUser extends VrRendering {
 
   onAppGrabbed(update: {
     userID: string,
-    appID: string,
+    instanceId: string,
     appPosition: number[],
     appQuaternion: number[],
     isGrabbedByController1: boolean,
     controllerPosition: number[],
     controllerQuaternion: number[] }) {
-    super.setAppPose(update.appID, new THREE.Vector3().fromArray(update.appPosition),
+    super.setAppPose(update.instanceId, new THREE.Vector3().fromArray(update.appPosition),
       new THREE.Quaternion().fromArray(update.appQuaternion), true);
 
     const remoteUser = this.idToRemoteUser.get(update.userID);
@@ -673,7 +673,7 @@ export default class VrMultiUser extends VrRendering {
       ray = remoteUser.controller2.ray;
     }
 
-    const application = this.applicationGroup.getApplication(update.appID);
+    const application = this.applicationGroup.getApplication(update.instanceId);
 
     if (controller && ray && application) {
       const controllerMatrix = new THREE.Matrix4();
@@ -686,7 +686,7 @@ export default class VrMultiUser extends VrRendering {
       // Split up matrix into position, quaternion and scale
       application.matrix.decompose(application.position, application.quaternion, application.scale);
 
-      this.applicationGroup.attachApplicationTo(update.appID, controller);
+      this.applicationGroup.attachApplicationTo(update.instanceId, controller);
     }
   }
 
@@ -708,9 +708,9 @@ export default class VrMultiUser extends VrRendering {
   }
 
   onHighlightingUpdate(update: {
-    userID: string, isHighlighted: boolean, appID: string, entityType: string, entityID: string,
+    userID: string, isHighlighted: boolean, instanceId: string, entityType: string, entityID: string,
   }) {
-    const applicationObject3D = this.applicationGroup.getApplication(update.appID);
+    const applicationObject3D = this.applicationGroup.getApplication(update.instanceId);
 
     if (!applicationObject3D) return;
 
@@ -727,7 +727,7 @@ export default class VrMultiUser extends VrRendering {
     applicationObject3D.setHighlightingColor(user.color);
 
     const drawableComm = this.drawableClassCommunications
-      .get(applicationObject3D.dataModel.pid);
+      .get(applicationObject3D.dataModel.instanceId);
 
     // Apply highlighting
     if (update.entityType === 'ComponentMesh' || update.entityType === 'ClazzMesh') {
@@ -856,7 +856,7 @@ export default class VrMultiUser extends VrRendering {
       return;
     }
 
-    if (!this.applicationGroup.hasApplication(applicationModel.pid)) {
+    if (!this.applicationGroup.hasApplication(applicationModel.instanceId)) {
       perform(super.addApplicationTask, applicationModel, origin,
         ((applicationObject3D: ApplicationObject3D) => {
           if (this.localUser.isOnline) {
@@ -877,7 +877,7 @@ export default class VrMultiUser extends VrRendering {
 
     if (this.localUser.isOnline) {
       if (object instanceof ComponentMesh || object instanceof ClazzMesh) {
-        this.sender.sendHighlightingUpdate(application.dataModel.pid, object.constructor.name,
+        this.sender.sendHighlightingUpdate(application.dataModel.instanceId, object.constructor.name,
           object.dataModel.id, object.highlighted);
       } else if (object instanceof ClazzCommunicationMesh) {
         const { sourceClass, targetClass } = object.dataModel;
@@ -891,14 +891,14 @@ export default class VrMultiUser extends VrRendering {
           combinedId = `${targetClass.id}###${sourceClass.id}`;
         }
 
-        this.sender.sendHighlightingUpdate(application.dataModel.pid, object.constructor.name,
+        this.sender.sendHighlightingUpdate(application.dataModel.instanceId, object.constructor.name,
           combinedId, object.highlighted);
       }
     }
   }
 
   removeApplication(application: ApplicationObject3D) {
-    if (this.applicationGroup.isApplicationGrabbed(application.dataModel.pid)) {
+    if (this.applicationGroup.isApplicationGrabbed(application.dataModel.instanceId)) {
       this.showHint('Application is grabbed');
       return;
     }
@@ -906,7 +906,7 @@ export default class VrMultiUser extends VrRendering {
     super.removeApplication(application);
 
     if (this.localUser.isOnline) {
-      this.sender.sendAppClosed(application.dataModel.pid);
+      this.sender.sendAppClosed(application.dataModel.instanceId);
     }
   }
 
@@ -927,7 +927,7 @@ export default class VrMultiUser extends VrRendering {
     super.toggleComponentAndUpdate(componentMesh, applicationObject3D);
 
     if (this.localUser.isOnline) {
-      this.sender.sendComponentUpdate(applicationObject3D.dataModel.pid, componentMesh.dataModel.id,
+      this.sender.sendComponentUpdate(applicationObject3D.dataModel.instanceId, componentMesh.dataModel.id,
         componentMesh.opened, false);
     }
   }
@@ -936,7 +936,7 @@ export default class VrMultiUser extends VrRendering {
     super.closeAllComponentsAndUpdate(applicationObject3D);
 
     if (this.localUser.isOnline) {
-      this.sender.sendComponentUpdate(applicationObject3D.dataModel.pid, '', false, true);
+      this.sender.sendComponentUpdate(applicationObject3D.dataModel.instanceId, '', false, true);
     }
   }
 

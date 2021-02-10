@@ -123,7 +123,7 @@ function layout3(landscape, modelIdToPoints, graph, applicationCommunications) {
                 y: sourcePort.y
               };
 
-              let sourceGraph = modelIdToGraph.get(edge.sourceNode.pid);
+              let sourceGraph = modelIdToGraph.get(edge.sourceNode.instanceId);
 
               if (!sourceGraph) return;
             }
@@ -200,7 +200,7 @@ function layout3(landscape, modelIdToPoints, graph, applicationCommunications) {
   } // END addBendPoints
 
   function updateNodeValues(entity) {
-    let entityIdentifier = entity.pid ? entity.pid : entity.ipAddress;
+    let entityIdentifier = entity.instanceId ? entity.instanceId : entity.ipAddress;
     let entityGraph = modelIdToGraph.get(entityIdentifier);
     if (entityGraph && entityGraph.x && entityGraph.y && entityGraph.width && entityGraph.height) {
       let layout = {
@@ -214,7 +214,7 @@ function layout3(landscape, modelIdToPoints, graph, applicationCommunications) {
   }
 
   function convertToExplorVizCoords(entity) {
-    let entityIdentifier = entity.pid ? entity.pid : entity.ipAddress;
+    let entityIdentifier = entity.instanceId ? entity.instanceId : entity.ipAddress;
     let layout = modelIdToLayout.get(entityIdentifier);
     if (layout) {
       layout.positionX /= CONVERT_TO_KIELER_FACTOR;
@@ -225,7 +225,7 @@ function layout3(landscape, modelIdToPoints, graph, applicationCommunications) {
   }
 
   function setAbsolutePositionForNode(application, node) {
-    let childLayout = modelIdToLayout.get(application.pid);
+    let childLayout = modelIdToLayout.get(application.instanceId);
     let parentLayout = modelIdToLayout.get(node.ipAddress);
     let parentGraph = modelIdToGraph.get(node.ipAddress);
 

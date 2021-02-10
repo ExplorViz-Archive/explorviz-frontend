@@ -52,7 +52,7 @@ export default class ApplicationObject3D extends THREE.Object3D {
   }
 
   get layout() {
-    const layout = this.getBoxLayout(this.dataModel.pid);
+    const layout = this.getBoxLayout(this.dataModel.instanceId);
     if (layout) {
       return layout;
     }
@@ -84,7 +84,7 @@ export default class ApplicationObject3D extends THREE.Object3D {
 
     // Ensure fast access to application meshes by additionally storing them in maps
     if (object instanceof FoundationMesh) {
-      this.modelIdToMesh.set(object.dataModel.pid, object);
+      this.modelIdToMesh.set(object.dataModel.instanceId, object);
     // Store communication separately to allow efficient iteration over meshes
     } else if (object instanceof ComponentMesh || object instanceof ClazzMesh) {
       this.modelIdToMesh.set(object.dataModel.id, object);

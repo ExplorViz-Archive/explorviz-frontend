@@ -565,7 +565,7 @@ export default class VrRendering extends Component<Args> {
 
         // Draw boxes for applications
         applications.forEach((application: Application) => {
-          this.renderApplication(application, modelIdToPlaneLayout.get(application.pid),
+          this.renderApplication(application, modelIdToPlaneLayout.get(application.instanceId),
             centerPoint);
         });
       });
@@ -668,7 +668,7 @@ export default class VrRendering extends Component<Args> {
   addApplicationTask(applicationModel: Application, origin: THREE.Vector3, 
     callback?: (applicationObject3D: ApplicationObject3D) => void) {
     try {
-      if (this.applicationGroup.hasApplication(applicationModel.pid)) {
+      if (this.applicationGroup.hasApplication(applicationModel.instanceId)) {
         return;
       }
 
@@ -688,7 +688,7 @@ export default class VrRendering extends Component<Args> {
 
       this.updateDrawableClassCommunications(applicationObject3D);
 
-      const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.pid)!;
+      const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId)!;
 
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
@@ -714,7 +714,7 @@ export default class VrRendering extends Component<Args> {
   }
 
   updateDrawableClassCommunications(applicationObject3D: ApplicationObject3D) {
-    if (this.drawableClassCommunications.has(applicationObject3D.dataModel.pid)) {
+    if (this.drawableClassCommunications.has(applicationObject3D.dataModel.instanceId)) {
       return;
     }
 
@@ -730,14 +730,14 @@ export default class VrRendering extends Component<Args> {
       (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
     );
 
-    this.drawableClassCommunications.set(applicationObject3D.dataModel.pid,
+    this.drawableClassCommunications.set(applicationObject3D.dataModel.instanceId,
       communicationInApplication);
   }
 
   addApplication(applicationModel: Application, origin: THREE.Vector3) {
     if (applicationModel.packages.length === 0) {
       this.showHint('No data available');
-    } else if (!this.applicationGroup.hasApplication(applicationModel.pid)) {
+    } else if (!this.applicationGroup.hasApplication(applicationModel.instanceId)) {
       perform(this.addApplicationTask, applicationModel, origin);
     }
   }
@@ -1054,7 +1054,7 @@ export default class VrRendering extends Component<Args> {
     EntityManipulation.toggleComponentMeshState(componentMesh, applicationObject3D);
     this.addLabels(applicationObject3D);
 
-    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.pid);
+    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId);
 
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
@@ -1065,7 +1065,7 @@ export default class VrRendering extends Component<Args> {
   closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
     EntityManipulation.closeAllComponents(applicationObject3D);
 
-    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.pid);
+    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId);
 
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
@@ -1086,7 +1086,7 @@ export default class VrRendering extends Component<Args> {
   highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
     if (object instanceof ComponentMesh || object instanceof ClazzMesh
       || object instanceof ClazzCommunicationMesh) {
-      const drawableComm = this.drawableClassCommunications.get(application.dataModel.pid);
+      const drawableComm = this.drawableClassCommunications.get(application.dataModel.instanceId);
 
       if (drawableComm) {
         Highlighting.highlight(object, application, drawableComm);
@@ -1175,7 +1175,7 @@ export default class VrRendering extends Component<Args> {
   }
 
   removeApplication(application: ApplicationObject3D) {
-    this.applicationGroup.removeApplicationById(application.dataModel.pid);
+    this.applicationGroup.removeApplicationById(application.dataModel.instanceId);
 
     const { controller1, controller2 } = this.localUser;
     if (controller1) {
