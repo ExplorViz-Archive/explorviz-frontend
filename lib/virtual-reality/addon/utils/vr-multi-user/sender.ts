@@ -51,10 +51,10 @@ export default class Sender {
   /**
  * Send update of direction and length which encode the translation of the application object.
  */
-  sendAppTranslationUpdate(appId: string, direction: V3, length: number) {
+  sendAppTranslationUpdate(instanceId: string, direction: V3, length: number) {
     const applicationObj = {
       event: 'app_translated',
-      appId,
+      instanceId,
       direction: direction.toArray(),
       length,
     };
@@ -94,12 +94,12 @@ export default class Sender {
   /**
  * Inform the backend that an application was closed
  * by this user
- * @param {string} appID ID of the closed application
+ * @param {string} instanceId ID of the closed application
  */
-  sendAppClosed(appID: string) {
+  sendAppClosed(instanceId: string) {
     const appObj = {
       event: 'app_closed',
-      id: appID,
+      id: instanceId,
     };
     this.webSocket.enqueueIfOpen(appObj);
   }
@@ -114,7 +114,7 @@ export default class Sender {
     const worldQuat = new Quaternion();
     const appObj = {
       event: 'app_grabbed',
-      appID: application.dataModel.pid,
+      instanceId: application.dataModel.instanceId,
       appPosition: application.getWorldPosition(worldPos).toArray(),
       appQuaternion: application.getWorldQuaternion(worldQuat).toArray(),
       isGrabbedByController1: controller.gamepadIndex === 0,
@@ -135,7 +135,7 @@ export default class Sender {
 
     const appObj = {
       event: 'app_released',
-      id: application.dataModel.pid,
+      id: application.dataModel.instanceId,
       position: application.getWorldPosition(worldPos).toArray(),
       quaternion: application.getWorldQuaternion(worldQuat).toArray(),
     };
@@ -144,15 +144,15 @@ export default class Sender {
 
   /**
  * Informs the backend that a component was opened or closed by this user
- * @param {string} appID ID of the app which is a parent to the component
+ * @param {string} instanceId ID of the app which is a parent to the component
  * @param {string} componentID ID of the component which was opened or closed
  * @param {boolean} isOpened Tells whether the component is now open or closed (current state)
  */
-  sendComponentUpdate(appID: string, componentID: string, isOpened: boolean,
+  sendComponentUpdate(instanceId: string, componentID: string, isOpened: boolean,
     isFoundation: boolean) {
     const appObj = {
       event: 'component_update',
-      appID,
+      instanceId,
       componentID,
       isOpened,
       isFoundation,
@@ -163,16 +163,16 @@ export default class Sender {
   /**
  * Informs the backend that an entity (clazz or component) was highlighted
  * or unhighlighted
- * @param {string} appID ID of the parent application of the entity
+ * @param {string} instanceId ID of the parent application of the entity
  * @param {string} entityType Tells whether a clazz/component or communication was updated
  * @param {string} entityID ID of the highlighted/unhighlighted component/clazz
  * @param {boolean} isHighlighted Tells whether the entity has been highlighted or not
  */
-  sendHighlightingUpdate(appID: string, entityType: string,
+  sendHighlightingUpdate(instanceId: string, entityType: string,
     entityID: string, isHighlighted: boolean) {
     const hightlightObj = {
       event: 'hightlighting_update',
-      appID,
+      instanceId,
       entityType,
       entityID,
       isHighlighted,
@@ -221,7 +221,7 @@ export default class Sender {
 
     const appObj = {
       event: 'app_opened',
-      id: application.dataModel.pid,
+      id: application.dataModel.instanceId,
       position: position.toArray(),
       quaternion: quaternion.toArray(),
     };

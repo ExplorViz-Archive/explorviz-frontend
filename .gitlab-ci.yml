@@ -1,14 +1,11 @@
-image: node:lts-alpine3.12
+image: explorviz/build-images:frontend
 
 cache:
   paths:
     - node_modules/
   
 before_script:
-  - npm install  
-  - npm install -g ember-cli
-  # install chrome for testing
-  - apk add --no-cache chromium --repository=http://dl-3.alpinelinux.org/alpine/edge/main
+  - npm install
 
 test:
   stage: test

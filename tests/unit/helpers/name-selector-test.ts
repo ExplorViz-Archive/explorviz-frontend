@@ -6,6 +6,6 @@ module('Unit | Helper | name selector');
 
 
 test('name is present', function (assert) {
-  let result = nameSelector([123456, "pName"]);
+  let result = nameSelector(["123456", "pName"]);
   assert.equal(result, "pName");
 });

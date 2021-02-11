@@ -461,7 +461,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
         // Draw boxes for applications
         applications.forEach((application) => {
-          this.renderApplication(application, modelIdToPlaneLayout.get(application.pid),
+          this.renderApplication(application, modelIdToPlaneLayout.get(application.instanceId),
             centerPoint);
         });
       });

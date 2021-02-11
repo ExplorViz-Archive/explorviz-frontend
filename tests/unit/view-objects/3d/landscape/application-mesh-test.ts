@@ -51,7 +51,7 @@ const node: Node = {
 const application: Application = {
   name: 'SampleApplication',
   language: 'java',
-  pid: '1000',
+  instanceId: '1000',
   parent: node,
   packages: [],
 }
