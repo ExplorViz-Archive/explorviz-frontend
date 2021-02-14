@@ -51,6 +51,9 @@ export default class VisualizationController extends Controller {
   components: string[] = [];
 
   @tracked
+  showAR: boolean = false;
+
+  @tracked
   showVR: boolean = false;
 
   @tracked
@@ -140,6 +143,7 @@ export default class VisualizationController extends Controller {
   @action
   openLandscapeView() {
     this.closeDataSelection();
+    this.showAR = false;
     this.showVR = false;
     if (this.landscapeData !== null) {
       this.landscapeData = {
@@ -157,6 +161,15 @@ export default class VisualizationController extends Controller {
         ...this.landscapeData,
         application: app,
       };
+    }
+  }
+
+  @action
+  switchToAR() {
+    if (!this.showVR) {
+      this.pauseVisualizationUpdating();
+      this.closeDataSelection();
+      this.showAR = true;
     }
   }
 

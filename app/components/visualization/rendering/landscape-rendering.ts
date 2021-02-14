@@ -35,6 +35,7 @@ interface Args {
   showApplication(application: Application): void;
   openDataSelection(): void;
   toggleVisualizationUpdating(): void;
+  switchToAR(): void,
   switchToVR(): void;
 }
 
@@ -127,6 +128,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       { title: 'Reset View', action: this.resetView },
       { title: pauseItemtitle, action: this.args.toggleVisualizationUpdating },
       { title: 'Open Sidebar', action: this.args.openDataSelection },
+      { title: 'Enter AR', action: this.args.switchToAR },
       { title: 'Enter VR', action: this.args.switchToVR },
     ];
   }
