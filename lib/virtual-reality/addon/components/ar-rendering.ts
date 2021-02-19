@@ -15,7 +15,6 @@ import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-
 import * as LandscapeCommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
-import FloorMesh from 'virtual-reality/utils/view-objects/vr/floor-mesh';
 import WebXRPolyfill from 'webxr-polyfill';
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
@@ -116,8 +115,6 @@ export default class ArRendering extends Component<Args> {
   // Scalar with which the application is scaled (evenly in all dimensions)
   applicationScalar: number;
 
-  floor!: FloorMesh;
-
   closeButtonTexture: THREE.Texture;
 
   mainMenu: BaseMenu|undefined;
@@ -211,13 +208,8 @@ export default class ArRendering extends Component<Args> {
   initScene() {
     this.scene = new THREE.Scene();
     this.scene.background = this.configuration.landscapeColors.background;
+
     this.scene.add(this.landscapeObject3D);
-
-    const floorSize = 10;
-    const floorMesh = new FloorMesh(floorSize, floorSize);
-    this.floor = floorMesh;
-
-    this.scene.add(floorMesh);
     this.scene.add(this.applicationGroup);
     this.scene.add(this.localUser.userGroup);
 
@@ -281,7 +273,7 @@ export default class ArRendering extends Component<Args> {
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      [this.landscapeObject3D, this.applicationGroup, this.floor,
+      [this.landscapeObject3D, this.applicationGroup, new THREE.Object3D(),
         this.controllerMainMenus, this.controllerInfoMenus], {
         singleClick: this.handleSingleClick,
         doubleClick: this.handleDoubleClick,
@@ -300,8 +292,8 @@ export default class ArRendering extends Component<Args> {
   }
 
   initControllers() {
-    const intersectableObjects = [this.landscapeObject3D, this.applicationGroup, this.floor,
-      this.controllerMainMenus, this.controllerInfoMenus];
+    const intersectableObjects = [this.landscapeObject3D, this.applicationGroup,
+      new THREE.Object3D(), this.controllerMainMenus, this.controllerInfoMenus];
 
     // Init secondary/utility controller
     const raySpace1 = this.renderer.xr.getController(0);
@@ -1074,10 +1066,8 @@ export default class ArRendering extends Component<Args> {
   }
 
   handleSecondaryInputOn(intersection: THREE.Intersection) {
-    const { object, point } = intersection;
-    if (object instanceof FloorMesh) {
-      this.localUser.teleportToPosition(point);
-    } else if (object.parent instanceof ApplicationObject3D) {
+    const { object } = intersection;
+    if (object.parent instanceof ApplicationObject3D) {
       this.highlightAppEntity(object, object.parent);
     }
   }
@@ -1122,6 +1112,7 @@ export default class ArRendering extends Component<Args> {
   }
 
   centerLandscape() {
+    /*
     const { floor } = this;
     const landscape = this.landscapeObject3D;
     const offset = this.landscapeOffset;
@@ -1154,6 +1145,7 @@ export default class ArRendering extends Component<Args> {
     }
 
     landscape.position.y += offset.y;
+    */
   }
 
   rotateLandscape(deltaX: number) {
