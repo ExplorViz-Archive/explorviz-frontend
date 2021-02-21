@@ -50,6 +50,7 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
+import arRendering from 'explorviz-frontend/components/ar-rendering';
 
 interface Args {
   readonly id: string;
@@ -65,6 +66,8 @@ type LayoutData = {
   positionY: number,
   positionZ: number
 };
+
+declare const THREEx: any;
 
 export default class ArRendering extends Component<Args> {
   // #region CLASS FIELDS AND GETTERS
@@ -89,11 +92,13 @@ export default class ArRendering extends Component<Args> {
   // Used to register (mouse) events
   interaction!: Interaction;
 
+  outerDiv!: HTMLElement;
+
   canvas!: HTMLCanvasElement;
 
   scene!: THREE.Scene;
 
-  camera!: THREE.PerspectiveCamera;
+  camera!: THREE.Camera;
 
   renderer!: THREE.WebGLRenderer;
 
@@ -101,10 +106,6 @@ export default class ArRendering extends Component<Args> {
 
   // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
-
-  controllerMainMenus: THREE.Group;
-
-  controllerInfoMenus: THREE.Group;
 
   // Depth of boxes for landscape entities
   landscapeDepth: number;
@@ -143,9 +144,15 @@ export default class ArRendering extends Component<Args> {
 
   drawableClassCommunications: Map<string, DrawableClassCommunication[]> = new Map();
 
-  // #endregion CLASS FIELDS AND GETTERS
+  onRenderFcts: (() => void)[] = [];
 
-  // #region COMPONENT AND SCENE INITIALIZATION
+  lastTimeMsec: null|number = null;
+
+  arToolkitSource: any;
+
+  arToolkitContext: any;
+
+  // #endregion CLASS FIELDS AND GETTERS
 
   constructor(owner: any, args: Args) {
     super(owner, args);
@@ -157,23 +164,11 @@ export default class ArRendering extends Component<Args> {
 
     this.landscapeDepth = 0.7;
 
-    this.landscapeScalar = 0.1;
+    this.landscapeScalar = 0.5;
     this.applicationScalar = 0.01;
 
     this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
-
-    this.controllerMainMenus = new THREE.Group();
-    this.controllerMainMenus.position.y += 0.15;
-    this.controllerMainMenus.position.z -= 0.15;
-    this.controllerMainMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
-    this.localUser.controllerMainMenus = this.controllerMainMenus;
-
-    this.controllerInfoMenus = new THREE.Group();
-    this.controllerInfoMenus.position.y += 0.15;
-    this.controllerInfoMenus.position.z -= 0.15;
-    this.controllerInfoMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
-    this.localUser.controllerInfoMenus = this.controllerInfoMenus;
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration);
 
@@ -189,6 +184,8 @@ export default class ArRendering extends Component<Args> {
     this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
   }
 
+  // #region COMPONENT AND SCENE INITIALIZATION
+
   /**
      * Calls all three related init functions and adds the three
      * performance panel if it is activated in user settings
@@ -198,8 +195,9 @@ export default class ArRendering extends Component<Args> {
     this.initCamera();
     this.initRenderer();
     this.initLights();
-    this.initInteraction();
-    this.initControllers();
+    // this.initInteraction();
+    // this.initControllers();
+    this.initArJs();
   }
 
   /**
@@ -207,23 +205,18 @@ export default class ArRendering extends Component<Args> {
      */
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = this.configuration.landscapeColors.background;
 
     this.scene.add(this.landscapeObject3D);
     this.scene.add(this.applicationGroup);
-    this.scene.add(this.localUser.userGroup);
-
-    this.debug('Scene created');
   }
 
   /**
      * Creates a PerspectiveCamera according to canvas size and sets its initial position
      */
   initCamera() {
-    const { width, height } = this.canvas;
-    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    this.camera.position.set(0, 1, 2);
-    this.localUser.addCamera(this.camera);
+    this.camera = new THREE.PerspectiveCamera();
+    this.scene.add(this.camera);
+
     this.debug('Camera added');
   }
 
@@ -231,20 +224,19 @@ export default class ArRendering extends Component<Args> {
      * Initiates a WebGLRenderer
      */
   initRenderer() {
-    const { width, height } = this.canvas;
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
-      canvas: this.canvas,
+      alpha: true,
     });
-    this.localUser.renderer = this.renderer;
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(width, height);
-    this.renderer.xr.enabled = true;
 
-    const polyfill = new WebXRPolyfill();
-    if (polyfill) {
-      this.debug('Polyfill enabled');
-    }
+    this.renderer.domElement.style.position = 'absolute';
+    this.renderer.domElement.style.top = '0px';
+    this.renderer.domElement.style.left = '0px';
+    this.renderer.setClearColor(new THREE.Color('lightgrey'), 0);
+    this.renderer.setSize(640, 480);
+
+    document.body.appendChild(this.renderer.domElement);
+
     this.debug('Renderer set up');
   }
 
@@ -273,8 +265,7 @@ export default class ArRendering extends Component<Args> {
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      [this.landscapeObject3D, this.applicationGroup, new THREE.Object3D(),
-        this.controllerMainMenus, this.controllerInfoMenus], {
+      [this.landscapeObject3D, this.applicationGroup, new THREE.Object3D()], {
         singleClick: this.handleSingleClick,
         doubleClick: this.handleDoubleClick,
         mouseWheel: this.handleMouseWheel,
@@ -291,50 +282,76 @@ export default class ArRendering extends Component<Args> {
     return !(intersection.object instanceof LabelMesh || intersection.object instanceof LogoMesh);
   }
 
-  initControllers() {
-    const intersectableObjects = [this.landscapeObject3D, this.applicationGroup,
-      new THREE.Object3D(), this.controllerMainMenus, this.controllerInfoMenus];
+  initArJs() {
+    this.arToolkitSource = new THREEx.ArToolkitSource({
+      // to read from the webcam
+      sourceType: 'webcam',
 
-    // Init secondary/utility controller
-    const raySpace1 = this.renderer.xr.getController(0);
-    const gripSpace1 = this.renderer.xr.getControllerGrip(0);
+      // // to read from an image
+      // sourceType : 'image',
+      // sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',
 
-    const callbacks1 = {
-      thumbpadTouch: this.onThumbpadTouch.bind(this),
-      triggerDown: this.onInteractionTriggerDown.bind(this),
-      triggerPress: ArRendering.onInteractionTriggerPress.bind(this),
-      menuDown: this.onInteractionMenuDown.bind(this),
-      gripDown: this.onInteractionGripDown.bind(this),
-      gripUp: this.onInteractionGripUp.bind(this),
-    };
-    const controller1 = new VRController(0, controlMode.INTERACTION, gripSpace1,
-      raySpace1, callbacks1, this.scene);
-    controller1.setToDefaultAppearance();
-    controller1.raySpace.add(this.controllerInfoMenus);
-    controller1.intersectableObjects = intersectableObjects;
+      // to read from a video
+      // sourceType : 'video',
+      // sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',
+    });
 
-    this.localUser.controller1 = controller1;
-    this.localUser.userGroup.add(controller1);
+    this.arToolkitSource.init(() => {
+      this.resizeAR();
+    });
 
-    // Init secondary controller
-    const raySpace2 = this.renderer.xr.getController(1);
-    const gripSpace2 = this.renderer.xr.getControllerGrip(1);
+    // create atToolkitContext
+    const arToolkitContext = new THREEx.ArToolkitContext({
+      cameraParametersUrl: 'ar_data/camera_para.dat',
+      detectionMode: 'mono',
+    });
 
-    const callbacks2 = {
-      triggerDown: this.onUtilityTrigger.bind(this),
-      menuDown: this.onUtilityMenuDown.bind(this),
-      gripDown: this.onUtilityGripDown.bind(this),
-      gripUp: this.onUtilityGripUp.bind(this),
-    };
+    this.arToolkitContext = arToolkitContext;
 
-    const controller2 = new VRController(1, controlMode.UTILITY, gripSpace2,
-      raySpace2, callbacks2, this.scene);
-    controller2.setToDefaultAppearance();
-    controller2.raySpace.add(this.controllerMainMenus);
-    controller2.intersectableObjects = intersectableObjects;
+    // initialize it
+    arToolkitContext.init(() => {
+      // copy projection matrix to camera
+      this.camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+    });
 
-    this.localUser.controller2 = controller2;
-    this.localUser.userGroup.add(controller2);
+    const self = this;
+    // update artoolkit on every frame
+    this.onRenderFcts.push(() => {
+      if (self.arToolkitSource.ready === false) return;
+
+      arToolkitContext.update(self.arToolkitSource.domElement);
+
+      // update scene.visible if the marker is seen
+      self.scene.visible = self.camera.visible;
+    });
+
+    /// /////////////////////////////////////////////////////////////////////////////
+    //          Create a ArMarkerControls
+    /// /////////////////////////////////////////////////////////////////////////////
+
+    // init controls for camera
+    const markerControls = new THREEx.ArMarkerControls(arToolkitContext, this.camera, {
+      type: 'pattern',
+      patternUrl: 'ar_data/patt.hiro',
+      // patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji',
+      // as we controls the camera, set changeMatrixMode: 'cameraTransformMatrix'
+      changeMatrixMode: 'cameraTransformMatrix',
+    });
+    // as we do changeMatrixMode: 'cameraTransformMatrix', start with invisible scene
+    this.scene.visible = false;
+
+    // render the scene
+    this.onRenderFcts.push(() => {
+      this.renderer.render(this.scene, this.camera);
+    });
+
+    requestAnimationFrame(function animate() {
+      requestAnimationFrame(animate);
+
+      self.onRenderFcts.forEach((onRenderFct) => {
+        onRenderFct();
+      });
+    });
   }
 
   // eslint-disable-next-line
@@ -343,7 +360,8 @@ export default class ArRendering extends Component<Args> {
 
     const { object } = controller.intersectedObject;
 
-    if ((object.parent instanceof ApplicationObject3D || object.parent instanceof LandscapeObject3D) && controller.ray) {
+    if ((object.parent instanceof ApplicationObject3D
+      || object.parent instanceof LandscapeObject3D) && controller.ray) {
       controller.grabObject(object.parent);
     }
     // @ts-ignore
@@ -406,6 +424,8 @@ export default class ArRendering extends Component<Args> {
   async outerDivInserted(outerDiv: HTMLElement) {
     this.debug('Outer Div inserted');
 
+    this.outerDiv = outerDiv;
+
     this.initRendering();
 
     this.renderer.setAnimationLoop(this.render.bind(this));
@@ -428,8 +448,16 @@ export default class ArRendering extends Component<Args> {
 
     // Update renderer and camera according to new canvas size
     this.renderer.setSize(width, height);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+
+    this.resizeAR();
+  }
+
+  resizeAR() {
+    this.arToolkitSource.onResizeElement();
+    this.arToolkitSource.copyElementSizeTo(this.renderer.domElement);
+    if (this.arToolkitContext.arController !== null) {
+      this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
+    }
   }
 
   @action
@@ -480,6 +508,15 @@ export default class ArRendering extends Component<Args> {
     if (this.mainMenu instanceof ZoomMenu) {
       this.mainMenu.renderLens();
     }
+
+    const nowMsec = new Date().getMilliseconds();
+    this.lastTimeMsec	= this.lastTimeMsec || -1000 / 60;
+    const deltaMsec	= Math.min(200, nowMsec - this.lastTimeMsec);
+    this.lastTimeMsec	= nowMsec;
+    // call each update function
+    this.onRenderFcts.forEach((onRenderFct) => {
+      onRenderFct(deltaMsec / 1000, nowMsec / 1000);
+    });
   }
 
   @task*
@@ -544,7 +581,7 @@ export default class ArRendering extends Component<Args> {
       const centerPoint = landscapeRect.center;
 
       // Update camera zoom accordingly
-      updateCameraZoom(landscapeRect, this.camera, this.renderer);
+      // updateCameraZoom(landscapeRect, this.camera, this.renderer);
 
       // Render all landscape entities
       const { nodes } = structureLandscapeData;
@@ -571,7 +608,7 @@ export default class ArRendering extends Component<Args> {
       LandscapeCommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
         centerPoint, 0.004, 0.028);
 
-      this.centerLandscape();
+      // this.centerLandscape();
 
       this.debug('Landscape loaded');
     } catch (e) {
