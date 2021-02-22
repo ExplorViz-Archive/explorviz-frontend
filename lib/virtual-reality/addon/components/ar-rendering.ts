@@ -160,7 +160,7 @@ export default class ArRendering extends Component<Args> {
     this.landscapeScalar = 0.5;
     this.applicationScalar = 0.01;
 
-    this.landscapeLabeler.labelOffset = 0.05;
+    this.landscapeLabeler.labelOffset = 0.1;
 
     this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
@@ -398,6 +398,7 @@ export default class ArRendering extends Component<Args> {
   resizeAR() {
     this.arToolkitSource.onResizeElement();
     this.arToolkitSource.copyElementSizeTo(this.renderer.domElement);
+
     if (this.arToolkitContext.arController !== null) {
       this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
     }
@@ -1009,6 +1010,17 @@ export default class ArRendering extends Component<Args> {
     this.landscapeObject3D.resetMeshReferences();
   }
 
+  cleanUpAr(){
+    const canvas = document.getElementsByTagName("canvas")[0];
+    const video = document.getElementsByTagName("video")[0];
+
+    // Remove elements which were added by ar.js
+    if (canvas && video){
+      document.body.removeChild(canvas);
+      document.body.removeChild(video);
+    }
+  }
+
   resetAll() {
     this.applicationGroup.clear();
     this.resetLandscapePosition();
@@ -1017,6 +1029,7 @@ export default class ArRendering extends Component<Args> {
 
   willDestroy() {
     this.cleanUpLandscape();
+    this.cleanUpAr();
     this.applicationGroup.clear();
     this.localUser.reset();
   }
