@@ -31,6 +31,10 @@ html, body {
   margin: 0px;
 }
 
+.foreground {
+  z-index: 750;
+}
+
 .hide {
   display: none !important;
 }
