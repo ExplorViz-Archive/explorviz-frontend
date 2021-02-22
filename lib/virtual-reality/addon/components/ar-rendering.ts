@@ -3,6 +3,7 @@ import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import debugLogger from 'ember-debug-logger';
 import THREE from 'three';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import Configuration from 'explorviz-frontend/services/configuration';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
@@ -11,11 +12,9 @@ import Interaction from 'explorviz-frontend/utils/interaction';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
 import { enqueueTask, restartableTask, task } from 'ember-concurrency-decorators';
-import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
 import * as LandscapeCommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
-import WebXRPolyfill from 'webxr-polyfill';
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
@@ -31,15 +30,10 @@ import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
-import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VRController';
-import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
 import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
-import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
-import AdvancedMenu from 'virtual-reality/utils/vr-menus/advanced-menu';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
-import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
@@ -50,7 +44,6 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
-import arRendering from 'explorviz-frontend/components/ar-rendering';
 
 interface Args {
   readonly id: string;
@@ -330,7 +323,7 @@ export default class ArRendering extends Component<Args> {
     /// /////////////////////////////////////////////////////////////////////////////
 
     // init controls for camera
-    const markerControls = new THREEx.ArMarkerControls(arToolkitContext, this.camera, {
+    new THREEx.ArMarkerControls(arToolkitContext, this.camera, {
       type: 'pattern',
       patternUrl: 'ar_data/patt.hiro',
       // patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji',
@@ -353,58 +346,6 @@ export default class ArRendering extends Component<Args> {
       });
     });
   }
-
-  // eslint-disable-next-line
-  onInteractionGripDown(controller: VRController) {
-    if (!controller.intersectedObject) return;
-
-    const { object } = controller.intersectedObject;
-
-    if ((object.parent instanceof ApplicationObject3D
-      || object.parent instanceof LandscapeObject3D) && controller.ray) {
-      controller.grabObject(object.parent);
-    }
-    // @ts-ignore
-    console.log(controller.grabbedObject);
-  }
-
-  onInteractionMenuDown(controller: VRController) {
-    if (!controller.intersectedObject) {
-      this.closeInfoMenu();
-      return;
-    }
-
-    const { object } = controller.intersectedObject;
-
-    const content = composeContent(object);
-    if (content) {
-      this.openInfoMenu(content);
-    } else {
-      this.closeInfoMenu();
-    }
-  }
-
-  onInteractionGripUp(controller: VRController) {
-    const object = controller.grabbedObject;
-    controller.releaseObject();
-
-    if (object instanceof ApplicationObject3D) {
-      this.applicationGroup.add(object);
-    }
-  }
-
-  // eslint-disable-next-line
-  onUtilityGripDown(/* controller: VRController */) {
-    this.openZoomMenu();
-  }
-
-  // eslint-disable-next-line
-  onUtilityGripUp(/* controller: VRController */) {
-    if (this.mainMenu instanceof ZoomMenu) {
-      this.closeControllerMenu();
-    }
-  }
-
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
   // #region ACTIONS
@@ -509,13 +450,9 @@ export default class ArRendering extends Component<Args> {
       this.mainMenu.renderLens();
     }
 
-    const nowMsec = new Date().getMilliseconds();
-    this.lastTimeMsec	= this.lastTimeMsec || -1000 / 60;
-    const deltaMsec	= Math.min(200, nowMsec - this.lastTimeMsec);
-    this.lastTimeMsec	= nowMsec;
     // call each update function
     this.onRenderFcts.forEach((onRenderFct) => {
-      onRenderFct(deltaMsec / 1000, nowMsec / 1000);
+      onRenderFct();
     });
   }
 
@@ -765,8 +702,13 @@ export default class ArRendering extends Component<Args> {
 
   addApplication(applicationModel: Application, origin: THREE.Vector3) {
     if (applicationModel.packages.length === 0) {
-      this.showHint('No data available');
-    } else if (!this.applicationGroup.hasApplication(applicationModel.instanceId)) {
+      const message = `Sorry, there is no information for application <b>
+        ${applicationModel.name}</b> available.`;
+
+      AlertifyHandler.showAlertifyMessage(message);
+    } else {
+      // data available => open application-rendering
+      AlertifyHandler.closeAlertifyMessages();
       perform(this.addApplicationTask, applicationModel, origin);
     }
   }
@@ -815,85 +757,6 @@ export default class ArRendering extends Component<Args> {
   }
 
   // #endregion APPLICATION RENDERING
-
-  // #region CONTROLLER HANDLERS
-
-  onInteractionTriggerDown(controller: VRController) {
-    if (!controller.intersectedObject) return;
-
-    this.handlePrimaryInputOn(controller.intersectedObject);
-  }
-
-  static onInteractionTriggerPress(controller: VRController, value: number) {
-    if (!controller.intersectedObject) return;
-
-    const { object, uv } = controller.intersectedObject;
-
-    if (object instanceof BaseMenu && uv) {
-      object.triggerPress(uv, value);
-    }
-  }
-
-  onUtilityTrigger(controller: VRController) {
-    if (!controller.intersectedObject) return;
-
-    this.handleSecondaryInputOn(controller.intersectedObject);
-  }
-
-  /**
-   * This method handles inputs of the touchpad or analog stick respectively.
-   * This input is used to move a grabbed application towards or away from the controller.
-   */
-  onThumbpadTouch(controller: VRController, axes: number[]) {
-    const { grabbedObject } = controller;
-
-    if (!grabbedObject) return;
-
-    controller.updateIntersectedObject();
-
-    const { intersectedObject } = controller;
-
-    if (!intersectedObject) return;
-
-    // Position where ray hits the application
-    const intersectionPosWorld = intersectedObject.point;
-    const intersectionPosLocal = intersectionPosWorld.clone();
-    grabbedObject.worldToLocal(intersectionPosLocal);
-
-    const controllerPosition = new THREE.Vector3();
-    controller.raySpace.getWorldPosition(controllerPosition);
-    const controllerPositionLocal = controllerPosition.clone();
-    grabbedObject.worldToLocal(controllerPositionLocal);
-
-    const direction = new THREE.Vector3();
-    direction.subVectors(intersectionPosLocal, controllerPositionLocal);
-
-    const worldDirection = new THREE.Vector3().subVectors(controllerPosition, intersectionPosWorld);
-
-    const yAxis = axes[1];
-
-    // Stop application from moving too close to controller
-    if ((worldDirection.length() > 0.5 && Math.abs(yAxis) > 0.1)
-        || (worldDirection.length() <= 0.5 && yAxis > 0.1)) {
-      // Adapt distance for moving according to trigger value
-      direction.normalize();
-      const length = yAxis * this.time.getDeltaTime();
-
-      this.translateApplication(grabbedObject, direction, length);
-    }
-
-    if (controller.ray) { controller.ray.scale.z = intersectedObject.distance; }
-  }
-
-  onUtilityMenuDown() {
-    if (this.mainMenu) {
-      this.mainMenu.back();
-    } else {
-      this.openMainMenu();
-    }
-  }
-
-  // #endregion CONTROLLER HANDLERS
 
   // #region MOUSE & KEYBOARD EVENT HANDLER
 
@@ -972,84 +835,6 @@ export default class ArRendering extends Component<Args> {
     }
   }
   // #endregion MOUSE & KEYBOARD EVENT HANDLER
-
-  // #region MENUS
-
-  showHint(title: string, text: string|null = null) {
-    if (this.hintMenu) {
-      this.hintMenu.back();
-      this.hintMenu = undefined;
-    }
-    const hintMenu = new HintMenu(this.camera, title, text);
-    this.hintMenu = hintMenu;
-    hintMenu.startAnimation();
-  }
-
-  openMainMenu() {
-    this.closeControllerMenu();
-
-    if (!this.localUser.controller1) return;
-
-    this.mainMenu = new MainMenu({
-      closeMenu: this.closeControllerMenu.bind(this),
-      openCameraMenu: this.openCameraMenu.bind(this),
-      openAdvancedMenu: this.openAdvancedMenu.bind(this),
-    });
-
-    this.controllerMainMenus.add(this.mainMenu);
-  }
-
-  openZoomMenu() {
-    this.closeControllerMenu();
-
-    this.mainMenu = new ZoomMenu(this.closeControllerMenu.bind(this), this.renderer, this.scene, this.camera);
-    this.controllerMainMenus.add(this.mainMenu);
-  }
-
-  openCameraMenu() {
-    this.closeControllerMenu();
-
-    const user = this.localUser;
-
-    this.mainMenu = new CameraMenu(this.openMainMenu.bind(this), user.getCameraDelta.bind(user),
-      user.changeCameraHeight.bind(user));
-    this.controllerMainMenus.add(this.mainMenu);
-  }
-
-  openAdvancedMenu() {
-    this.closeControllerMenu();
-
-    const user = this.localUser;
-
-    this.mainMenu = new AdvancedMenu(this.openMainMenu.bind(this),
-      user.toggleLeftyMode.bind(user), user.isLefty, this.resetAll.bind(this));
-    this.controllerMainMenus.add(this.mainMenu);
-  }
-
-  closeControllerMenu() {
-    if (this.mainMenu) {
-      this.controllerMainMenus.remove(this.mainMenu);
-      this.mainMenu.disposeRecursively();
-    }
-    this.mainMenu = undefined;
-  }
-
-  openInfoMenu(content: DetailedInfo) {
-    this.closeInfoMenu();
-
-    this.infoMenu = new DetailInfoMenu(this.closeInfoMenu.bind(this), content);
-
-    this.controllerInfoMenus.add(this.infoMenu);
-  }
-
-  closeInfoMenu() {
-    if (this.infoMenu) {
-      this.controllerInfoMenus.remove(this.infoMenu);
-    }
-    this.infoMenu = undefined;
-  }
-
-  // #endregion MENUS
 
   // #region UTILS
 
