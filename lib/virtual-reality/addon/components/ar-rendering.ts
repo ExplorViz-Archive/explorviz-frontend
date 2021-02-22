@@ -1014,8 +1014,19 @@ export default class ArRendering extends Component<Args> {
     const canvas = document.getElementsByTagName("canvas")[0];
     const video = document.getElementsByTagName("video")[0];
 
-    // Remove elements which were added by ar.js
     if (canvas && video){
+      const stream = video.srcObject;
+
+      // Stop stream of webcam
+      if (stream instanceof MediaStream){
+        const tracks = stream.getTracks();
+
+        tracks.forEach((track) => {
+          track.stop();
+        });
+      }
+      
+      // Remove elements which were added by AR.js
       document.body.removeChild(canvas);
       document.body.removeChild(video);
     }
