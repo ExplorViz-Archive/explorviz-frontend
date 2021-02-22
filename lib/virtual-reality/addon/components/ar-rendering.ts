@@ -1011,13 +1011,21 @@ export default class ArRendering extends Component<Args> {
   }
 
   cleanUpAr(){
-    const canvas = document.getElementsByTagName("canvas")[0];
-    const video = document.getElementsByTagName("video")[0];
+    // Remove added canvas
+    const canvas = document.body.querySelectorAll(':scope > canvas')[0];
 
-    if (canvas && video){
+    if (canvas){
+      document.body.removeChild(canvas);
+    }
+
+    // Remove video and stop corresponding stream
+    const video = document.getElementById('arjs-video');
+
+    if (video instanceof HTMLVideoElement){
+      document.body.removeChild(video);
+
       const stream = video.srcObject;
 
-      // Stop stream of webcam
       if (stream instanceof MediaStream){
         const tracks = stream.getTracks();
 
@@ -1025,10 +1033,6 @@ export default class ArRendering extends Component<Args> {
           track.stop();
         });
       }
-      
-      // Remove elements which were added by AR.js
-      document.body.removeChild(canvas);
-      document.body.removeChild(video);
     }
   }
 
