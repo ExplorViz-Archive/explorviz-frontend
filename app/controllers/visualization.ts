@@ -291,6 +291,8 @@ export default class VisualizationController extends Controller {
     this.landscapeData = null;
     this.selectedTimestampRecords = [];
     this.visualizationPaused = false;
+    this.showAR = false;
+    this.showVR = false;
     this.landscapeListener.initLandscapePolling();
     this.updateTimestampList();
   }
