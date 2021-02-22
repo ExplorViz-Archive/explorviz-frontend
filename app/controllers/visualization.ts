@@ -76,7 +76,7 @@ export default class VisualizationController extends Controller {
       || this.landscapeData === null;
   }
 
-  get isLandscapeExistendAndEmpty() {
+  get isLandscapeExistentAndEmpty() {
     return this.landscapeData !== null
       && this.landscapeData.structureLandscapeData.nodes.length === 0;
   }
