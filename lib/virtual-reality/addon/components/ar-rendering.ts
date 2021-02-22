@@ -160,6 +160,8 @@ export default class ArRendering extends Component<Args> {
     this.landscapeScalar = 0.5;
     this.applicationScalar = 0.01;
 
+    this.landscapeLabeler.labelOffset = 0.05;
+
     this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
 
@@ -618,7 +620,7 @@ export default class ArRendering extends Component<Args> {
     // Create and add label + icon
     this.landscapeLabeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
       this.configuration.landscapeColors.applicationText);
-    LandscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);
+    this.landscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
     this.landscapeObject3D.add(applicationMesh);

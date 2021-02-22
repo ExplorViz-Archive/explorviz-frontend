@@ -652,7 +652,7 @@ export default class VrRendering extends Component<Args> {
     // Create and add label + icon
     this.landscapeLabeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
       this.configuration.landscapeColors.applicationText);
-    LandscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);
+    this.landscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
     this.landscapeObject3D.add(applicationMesh);
