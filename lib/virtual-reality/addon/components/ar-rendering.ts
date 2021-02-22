@@ -293,8 +293,9 @@ export default class ArRendering extends Component<Args> {
 
     this.arToolkitSource.init(() => {
       setTimeout(() => {
+          console.log('Resize AR');
           this.resizeAR();
-      },10);
+      }, 100);
 })
     // create atToolkitContext
     const arToolkitContext = new THREEx.ArToolkitContext({
