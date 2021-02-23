@@ -190,9 +190,8 @@ export default class ArRendering extends Component<Args> {
     this.initCamera();
     this.initRenderer();
     this.initLights();
-    // this.initInteraction();
-    // this.initControllers();
     this.initArJs();
+    this.initInteraction();
   }
 
   /**
@@ -232,6 +231,8 @@ export default class ArRendering extends Component<Args> {
 
     document.body.appendChild(this.renderer.domElement);
 
+    this.canvas = this.renderer.domElement;
+
     this.debug('Renderer set up');
   }
 
@@ -260,7 +261,7 @@ export default class ArRendering extends Component<Args> {
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      [this.landscapeObject3D, this.applicationGroup, new THREE.Object3D()], {
+      [this.landscapeObject3D, this.applicationGroup], {
         singleClick: this.handleSingleClick,
         doubleClick: this.handleDoubleClick,
         mouseWheel: this.handleMouseWheel,
@@ -304,20 +305,27 @@ export default class ArRendering extends Component<Args> {
       if (this.arToolkitSource.ready === false) return;
 
       arToolkitContext.update(this.arToolkitSource.domElement);
-
-      // Update scene.visible if the marker is seen
-      this.scene.visible = this.camera.visible;
     });
+
+    const landscapeMarker0 = new THREE.Group();
+    landscapeMarker0.add(this.landscapeObject3D);
+    this.scene.add(landscapeMarker0);
 
     // Init controls for camera
-    new THREEx.ArMarkerControls(arToolkitContext, this.camera, {
+    new THREEx.ArMarkerControls(arToolkitContext, landscapeMarker0, {
       type: 'pattern',
       patternUrl: 'ar_data/patt.hiro',
-      changeMatrixMode: 'cameraTransformMatrix',
     });
 
-    // As we do changeMatrixMode: 'cameraTransformMatrix', start with invisible scene
-    this.scene.visible = false;
+    const applicationMarker0 = new THREE.Group();
+    applicationMarker0.add(this.applicationGroup);
+    this.scene.add(applicationMarker0);
+
+    // Init controls for camera
+    new THREEx.ArMarkerControls(arToolkitContext, applicationMarker0, {
+      type: 'pattern',
+      patternUrl: 'ar_data/pattern-letterA.patt',
+    });
 
     // Render the scene
     this.onRenderFcts.push(() => {
@@ -337,17 +345,6 @@ export default class ArRendering extends Component<Args> {
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
   // #region ACTIONS
-
-  @action
-  canvasInserted(canvas: HTMLCanvasElement) {
-    this.debug('Canvas inserted');
-
-    this.canvas = canvas;
-
-    canvas.oncontextmenu = (e) => {
-      e.preventDefault();
-    };
-  }
 
   @action
   async outerDivInserted(outerDiv: HTMLElement) {
@@ -387,20 +384,6 @@ export default class ArRendering extends Component<Args> {
 
     if (this.arToolkitContext.arController !== null) {
       this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
-    }
-  }
-
-  @action
-  onVrSessionStarted(/* session: XRSession */) {
-    this.debug('WebXRSession started');
-  }
-
-  @action
-  onVrSessionEnded() {
-    this.debug('WebXRSession ended');
-    const outerDiv = this.canvas?.parentElement;
-    if (outerDiv) {
-      this.resize(outerDiv);
     }
   }
 
