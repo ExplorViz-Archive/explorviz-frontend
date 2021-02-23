@@ -15,7 +15,7 @@ export default class Landscapes extends BaseRoute {
     return this.refresh();
   }
 
-  model() {
+  async model() {
     let uId = this.auth.user?.sub;
 
     if (!uId) {
@@ -51,5 +51,11 @@ export default class Landscapes extends BaseRoute {
       // selected token does not exist anymore
       this.tokenService.removeToken();
     }
+  }
+
+  @action
+  // eslint-disable-next-line class-methods-use-this
+  loading(/* transition, originRoute */) {
+    return true;
   }
 }
