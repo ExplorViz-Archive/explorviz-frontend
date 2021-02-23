@@ -33,11 +33,8 @@ import * as Highlighting from 'explorviz-frontend/utils/application-rendering/hi
 import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
-import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
-import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
-import ZoomMenu from 'virtual-reality/utils/vr-menus/zoom-menu';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
@@ -111,12 +108,6 @@ export default class ArRendering extends Component<Args> {
 
   closeButtonTexture: THREE.Texture;
 
-  mainMenu: BaseMenu|undefined;
-
-  infoMenu: DetailInfoMenu|undefined;
-
-  hintMenu: HintMenu|undefined;
-
   landscapeOffset = new THREE.Vector3();
 
   get font() {
@@ -144,6 +135,10 @@ export default class ArRendering extends Component<Args> {
   arToolkitSource: any;
 
   arToolkitContext: any;
+
+  landscapeMarkerRoots: THREE.Group[] = [];
+
+  applicationMarkersRoots: THREE.Group[] = [];
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -418,11 +413,7 @@ export default class ArRendering extends Component<Args> {
 
     this.renderer.render(this.scene, this.camera);
 
-    if (this.mainMenu instanceof ZoomMenu) {
-      this.mainMenu.renderLens();
-    }
-
-    // call each update function
+    // Call each update function
     this.onRenderFcts.forEach((onRenderFct) => {
       onRenderFct();
     });
@@ -639,11 +630,9 @@ export default class ArRendering extends Component<Args> {
       const scalar = this.applicationScalar;
       applicationObject3D.scale.set(scalar, scalar, scalar);
 
-      this.positionApplication(applicationObject3D, origin);
+      applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
 
       this.applicationGroup.addApplication(applicationObject3D);
-      this.localUser.controller1?.intersectableObjects.push(applicationObject3D);
-      this.localUser.controller2?.intersectableObjects.push(applicationObject3D);
 
       if (callback) callback(applicationObject3D);
     } catch (e: any) {
@@ -683,21 +672,6 @@ export default class ArRendering extends Component<Args> {
       AlertifyHandler.closeAlertifyMessages();
       perform(this.addApplicationTask, applicationModel, origin);
     }
-  }
-
-  /**
-   * Sets a (newly opened) application to its default position.
-   *
-   * @param applicationObject3D Application which shall be positioned
-   * @param origin Point of reference (position of application in landscape object)
-   */
-  positionApplication(applicationObject3D: ApplicationObject3D, origin: THREE.Vector3) {
-    // Rotate app so that it is aligned with landscape
-    applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
-    applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
-    applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
-
-    applicationObject3D.position.copy(origin);
   }
 
   /**
@@ -905,43 +879,6 @@ export default class ArRendering extends Component<Args> {
     this.landscapeObject3D.position.add(delta);
   }
 
-  centerLandscape() {
-    /*
-    const { floor } = this;
-    const landscape = this.landscapeObject3D;
-    const offset = this.landscapeOffset;
-
-    // Compute bounding box of the floor
-    const bboxFloor = new THREE.Box3().setFromObject(floor);
-
-    // Calculate center of the floor
-    const centerFloor = new THREE.Vector3();
-    bboxFloor.getCenter(centerFloor);
-
-    const bboxLandscape = new THREE.Box3().setFromObject(landscape);
-
-    // Calculate center of the landscape
-    const centerLandscape = new THREE.Vector3();
-    bboxLandscape.getCenter(centerLandscape);
-
-    // Set new position of landscape
-    landscape.position.x += centerFloor.x - centerLandscape.x + offset.x;
-    landscape.position.z += centerFloor.z - centerLandscape.z + offset.z;
-
-    // Check distance between floor and landscape
-    if (bboxLandscape.min.y > bboxFloor.max.y) {
-      landscape.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
-    }
-
-    // Check if landscape is underneath the floor
-    if (bboxLandscape.min.y < bboxFloor.min.y) {
-      landscape.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
-    }
-
-    landscape.position.y += offset.y;
-    */
-  }
-
   rotateLandscape(deltaX: number) {
     this.landscapeObject3D.rotation.x -= deltaX;
     this.updateLandscapeRotation(this.landscapeObject3D.quaternion.clone());
@@ -949,7 +886,6 @@ export default class ArRendering extends Component<Args> {
 
   updateLandscapeRotation(quaternion: THREE.Quaternion) {
     this.landscapeObject3D.quaternion.copy(quaternion);
-    this.centerLandscape();
   }
 
   resetLandscapePosition() {
@@ -957,7 +893,6 @@ export default class ArRendering extends Component<Args> {
     this.landscapeObject3D.rotation.y = (0);
     this.landscapeObject3D.rotation.z = (0);
     this.landscapeOffset.set(0, 0, 0);
-    this.centerLandscape();
   }
 
   removeApplication(application: ApplicationObject3D) {
