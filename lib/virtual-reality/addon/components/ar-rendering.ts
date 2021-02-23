@@ -279,25 +279,14 @@ export default class ArRendering extends Component<Args> {
 
   initArJs() {
     this.arToolkitSource = new THREEx.ArToolkitSource({
-      // to read from the webcam
       sourceType: 'webcam',
-
-      // // to read from an image
-      // sourceType : 'image',
-      // sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',
-
-      // to read from a video
-      // sourceType : 'video',
-      // sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',
     });
 
     this.arToolkitSource.init(() => {
       setTimeout(() => {
-          console.log('Resize AR');
           this.resizeAR();
       }, 100);
-})
-    // create atToolkitContext
+    })
     const arToolkitContext = new THREEx.ArToolkitContext({
       cameraParametersUrl: 'ar_data/camera_para.dat',
       detectionMode: 'mono',
@@ -305,42 +294,37 @@ export default class ArRendering extends Component<Args> {
 
     this.arToolkitContext = arToolkitContext;
 
-    // initialize it
     arToolkitContext.init(() => {
-      // copy projection matrix to camera
+      // Copy projection matrix to camera
       this.camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
     });
 
-    const self = this;
-    // update artoolkit on every frame
+    // Update artoolkit on every frame
     this.onRenderFcts.push(() => {
-      if (self.arToolkitSource.ready === false) return;
+      if (this.arToolkitSource.ready === false) return;
 
-      arToolkitContext.update(self.arToolkitSource.domElement);
+      arToolkitContext.update(this.arToolkitSource.domElement);
 
-      // update scene.visible if the marker is seen
-      self.scene.visible = self.camera.visible;
+      // Update scene.visible if the marker is seen
+      this.scene.visible = this.camera.visible;
     });
 
-    /// /////////////////////////////////////////////////////////////////////////////
-    //          Create a ArMarkerControls
-    /// /////////////////////////////////////////////////////////////////////////////
-
-    // init controls for camera
+    // Init controls for camera
     new THREEx.ArMarkerControls(arToolkitContext, this.camera, {
       type: 'pattern',
       patternUrl: 'ar_data/patt.hiro',
-      // patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji',
-      // as we controls the camera, set changeMatrixMode: 'cameraTransformMatrix'
       changeMatrixMode: 'cameraTransformMatrix',
     });
-    // as we do changeMatrixMode: 'cameraTransformMatrix', start with invisible scene
+
+    // As we do changeMatrixMode: 'cameraTransformMatrix', start with invisible scene
     this.scene.visible = false;
 
-    // render the scene
+    // Render the scene
     this.onRenderFcts.push(() => {
       this.renderer.render(this.scene, this.camera);
     });
+
+    const self = this;
 
     requestAnimationFrame(function animate() {
       requestAnimationFrame(animate);
