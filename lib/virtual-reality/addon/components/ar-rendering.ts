@@ -88,7 +88,7 @@ export default class ArRendering extends Component<Args> {
 
   scene!: THREE.Scene;
 
-  camera!: THREE.Camera;
+  camera!: THREE.PerspectiveCamera;
 
   renderer!: THREE.WebGLRenderer;
 
@@ -155,8 +155,6 @@ export default class ArRendering extends Component<Args> {
     this.landscapeScalar = 0.5;
     this.applicationScalar = 0.01;
 
-    this.landscapeLabeler.labelOffset = 0.1;
-
     this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
 
@@ -203,7 +201,7 @@ export default class ArRendering extends Component<Args> {
      * Creates a PerspectiveCamera according to canvas size and sets its initial position
      */
   initCamera() {
-    this.camera = new THREE.PerspectiveCamera();
+    this.camera = new THREE.PerspectiveCamera(75, 640 / 480, 0.01, 2000);
     this.scene.add(this.camera);
 
     this.debug('Camera added');
@@ -280,9 +278,9 @@ export default class ArRendering extends Component<Args> {
 
     this.arToolkitSource.init(() => {
       setTimeout(() => {
-          this.resizeAR();
+        this.resizeAR();
       }, 100);
-    })
+    });
     const arToolkitContext = new THREEx.ArToolkitContext({
       cameraParametersUrl: 'ar_data/camera_para.dat',
       detectionMode: 'mono',
@@ -307,6 +305,7 @@ export default class ArRendering extends Component<Args> {
     this.scene.add(landscapeMarker0);
 
     // Init controls for camera
+    // eslint-disable-next-line
     new THREEx.ArMarkerControls(arToolkitContext, landscapeMarker0, {
       type: 'pattern',
       patternUrl: 'ar_data/patt.hiro',
@@ -317,6 +316,7 @@ export default class ArRendering extends Component<Args> {
     this.scene.add(applicationMarker0);
 
     // Init controls for camera
+    // eslint-disable-next-line
     new THREEx.ArMarkerControls(arToolkitContext, applicationMarker0, {
       type: 'pattern',
       patternUrl: 'ar_data/pattern-letterA.patt',
@@ -369,6 +369,9 @@ export default class ArRendering extends Component<Args> {
 
     // Update renderer and camera according to new canvas size
     this.renderer.setSize(width, height);
+
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
 
     this.resizeAR();
   }
@@ -594,10 +597,13 @@ export default class ArRendering extends Component<Args> {
   // @ts-ignore
   @enqueueTask*
   // eslint-disable-next-line
-  addApplicationTask(applicationModel: Application, origin: THREE.Vector3, 
+  addApplicationTask(applicationModel: Application, 
     callback?: (applicationObject3D: ApplicationObject3D) => void) {
     try {
       if (this.applicationGroup.hasApplication(applicationModel.instanceId)) {
+        const message = `Application '${applicationModel.name}' already opened.`;
+
+        AlertifyHandler.showAlertifyWarning(message);
         return;
       }
 
@@ -617,7 +623,8 @@ export default class ArRendering extends Component<Args> {
 
       this.updateDrawableClassCommunications(applicationObject3D);
 
-      const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId)!;
+      const drawableComm = this.drawableClassCommunications
+        .get(applicationObject3D.dataModel.instanceId)!;
 
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
@@ -633,6 +640,10 @@ export default class ArRendering extends Component<Args> {
       applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
 
       this.applicationGroup.addApplication(applicationObject3D);
+
+      const message = `Application '${applicationModel.name}' successfully opened.`;
+
+      AlertifyHandler.showAlertifySuccess(message);
 
       if (callback) callback(applicationObject3D);
     } catch (e: any) {
@@ -661,7 +672,7 @@ export default class ArRendering extends Component<Args> {
       communicationInApplication);
   }
 
-  addApplication(applicationModel: Application, origin: THREE.Vector3) {
+  addApplication(applicationModel: Application) {
     if (applicationModel.packages.length === 0) {
       const message = `Sorry, there is no information for application <b>
         ${applicationModel.name}</b> available.`;
@@ -670,7 +681,7 @@ export default class ArRendering extends Component<Args> {
     } else {
       // data available => open application-rendering
       AlertifyHandler.closeAlertifyMessages();
-      perform(this.addApplicationTask, applicationModel, origin);
+      perform(this.addApplicationTask, applicationModel);
     }
   }
 
@@ -801,7 +812,7 @@ export default class ArRendering extends Component<Args> {
     }
 
     if (object instanceof ApplicationMesh) {
-      this.addApplication(object.dataModel, intersection.point);
+      this.addApplication(object.dataModel);
     // Handle application hits
     } else if (object.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
@@ -814,7 +825,8 @@ export default class ArRendering extends Component<Args> {
     EntityManipulation.toggleComponentMeshState(componentMesh, applicationObject3D);
     this.addLabels(applicationObject3D);
 
-    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId);
+    const drawableComm = this.drawableClassCommunications
+      .get(applicationObject3D.dataModel.instanceId);
 
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
@@ -825,7 +837,8 @@ export default class ArRendering extends Component<Args> {
   closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
     EntityManipulation.closeAllComponents(applicationObject3D);
 
-    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId);
+    const drawableComm = this.drawableClassCommunications
+      .get(applicationObject3D.dataModel.instanceId);
 
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
@@ -914,23 +927,23 @@ export default class ArRendering extends Component<Args> {
     this.landscapeObject3D.resetMeshReferences();
   }
 
-  cleanUpAr(){
+  static cleanUpAr() {
     // Remove added canvas
     const canvas = document.body.querySelectorAll(':scope > canvas')[0];
 
-    if (canvas){
+    if (canvas) {
       document.body.removeChild(canvas);
     }
 
     // Remove video and stop corresponding stream
     const video = document.getElementById('arjs-video');
 
-    if (video instanceof HTMLVideoElement){
+    if (video instanceof HTMLVideoElement) {
       document.body.removeChild(video);
 
       const stream = video.srcObject;
 
-      if (stream instanceof MediaStream){
+      if (stream instanceof MediaStream) {
         const tracks = stream.getTracks();
 
         tracks.forEach((track) => {
@@ -948,7 +961,7 @@ export default class ArRendering extends Component<Args> {
 
   willDestroy() {
     this.cleanUpLandscape();
-    this.cleanUpAr();
+    ArRendering.cleanUpAr();
     this.applicationGroup.clear();
     this.localUser.reset();
   }
