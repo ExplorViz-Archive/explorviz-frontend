@@ -136,9 +136,9 @@ export default class ArRendering extends Component<Args> {
 
   arToolkitContext: any;
 
-  landscapeMarkerRoots: THREE.Group[] = [];
+  landscapeMarkers: THREE.Group[] = [];
 
-  applicationMarkersRoots: THREE.Group[] = [];
+  applicationMarkers: THREE.Group[] = [];
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -201,7 +201,7 @@ export default class ArRendering extends Component<Args> {
      * Creates a PerspectiveCamera according to canvas size and sets its initial position
      */
   initCamera() {
-    this.camera = new THREE.PerspectiveCamera(75, 640 / 480, 0.01, 2000);
+    this.camera = new THREE.PerspectiveCamera(42, 640 / 480, 0.01, 2000);
     this.scene.add(this.camera);
 
     this.debug('Camera added');
@@ -290,7 +290,7 @@ export default class ArRendering extends Component<Args> {
 
     arToolkitContext.init(() => {
       // Copy projection matrix to camera
-      this.camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+      // this.camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
     });
 
     // Update artoolkit on every frame
@@ -312,14 +312,27 @@ export default class ArRendering extends Component<Args> {
     });
 
     const applicationMarker0 = new THREE.Group();
-    applicationMarker0.add(this.applicationGroup);
+    // applicationMarker0.add(this.applicationGroup);
     this.scene.add(applicationMarker0);
+    this.applicationMarkers.push(applicationMarker0);
 
     // Init controls for camera
     // eslint-disable-next-line
     new THREEx.ArMarkerControls(arToolkitContext, applicationMarker0, {
       type: 'pattern',
       patternUrl: 'ar_data/pattern-letterA.patt',
+    });
+
+    const applicationMarker1 = new THREE.Group();
+    // applicationMarker1.add(this.applicationGroup);
+    this.scene.add(applicationMarker1);
+    this.applicationMarkers.push(applicationMarker1);
+
+    // Init controls for camera
+    // eslint-disable-next-line
+    new THREEx.ArMarkerControls(arToolkitContext, applicationMarker1, {
+      type: 'pattern',
+      patternUrl: 'ar_data/pattern-letterB.patt',
     });
 
     // Render the scene
@@ -369,8 +382,6 @@ export default class ArRendering extends Component<Args> {
 
     // Update renderer and camera according to new canvas size
     this.renderer.setSize(width, height);
-
-    this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
     this.resizeAR();
@@ -600,11 +611,23 @@ export default class ArRendering extends Component<Args> {
   addApplicationTask(applicationModel: Application, 
     callback?: (applicationObject3D: ApplicationObject3D) => void) {
     try {
+      /*
       if (this.applicationGroup.hasApplication(applicationModel.instanceId)) {
         const message = `Application '${applicationModel.name}' already opened.`;
 
         AlertifyHandler.showAlertifyWarning(message);
         return;
+      }
+      */
+      for (let i = 0; i < this.applicationMarkers.length; i++) {
+        if (this.applicationMarkers[i].children.length === 0) {
+          break;
+        } else if (i === (this.applicationMarkers.length - 1)) {
+          const message = 'All markers are occupied.';
+
+          AlertifyHandler.showAlertifyWarning(message);
+          return;
+        }
       }
 
       const { dynamicLandscapeData } = this.args.landscapeData;
@@ -641,9 +664,18 @@ export default class ArRendering extends Component<Args> {
 
       this.applicationGroup.addApplication(applicationObject3D);
 
-      const message = `Application '${applicationModel.name}' successfully opened.`;
+      for (let i = 0; i < this.applicationMarkers.length; i++) {
+        if (this.applicationMarkers[i].children.length === 0) {
+          this.applicationMarkers[i].add(applicationObject3D);
 
-      AlertifyHandler.showAlertifySuccess(message);
+          const message = `Application '${applicationModel.name}' successfully opened <br>
+            on marker #${i}.`;
+
+          AlertifyHandler.showAlertifySuccess(message);
+
+          break;
+        }
+      }
 
       if (callback) callback(applicationObject3D);
     } catch (e: any) {
