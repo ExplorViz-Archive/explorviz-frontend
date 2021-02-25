@@ -9,7 +9,7 @@ export default class Raycaster extends THREE.Raycaster {
    * @param possibleObjects Objects to check for raycasting
    */
   raycasting(
-    coords: {x: number, y: number},
+    coords: { x: number, y: number },
     camera: THREE.Camera,
     possibleObjects: THREE.Object3D[],
     raycastFilter: ((object: THREE.Intersection) => boolean) | undefined,
@@ -19,7 +19,17 @@ export default class Raycaster extends THREE.Raycaster {
     // Calculate objects intersecting the picking ray
     const intersections = this.intersectObjects(possibleObjects, true);
 
-    let visibleObjects = intersections.filter(((intersection) => intersection.object.visible));
+    let visibleObjects = intersections.filter(((intersection) => {
+      let { visible } = intersection.object;
+
+      // Also traverse ancestors as given object could be invisible if a ancestor's
+      // visible property is set to false
+      intersection.object.traverseAncestors((ancestor) => {
+        if (!ancestor.visible) visible = false;
+      });
+
+      return visible;
+    }));
 
     if (raycastFilter) {
       visibleObjects = visibleObjects.filter(raycastFilter);
