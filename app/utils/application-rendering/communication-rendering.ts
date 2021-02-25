@@ -22,7 +22,7 @@ export default class CommunicationRendering {
   addCommunication(applicationObject3D: ApplicationObject3D,
     drawableClassCommunications: DrawableClassCommunication[]) {
     const application = applicationObject3D.dataModel;
-    const applicationLayout = applicationObject3D.boxLayoutMap.get(application.pid);
+    const applicationLayout = applicationObject3D.boxLayoutMap.get(application.instanceId);
 
     if (!applicationLayout) { return; }
 
