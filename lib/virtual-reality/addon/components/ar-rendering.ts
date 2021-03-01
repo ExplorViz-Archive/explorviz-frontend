@@ -181,6 +181,7 @@ export default class ArRendering extends Component<Args> {
   initRendering() {
     this.initScene();
     this.initCamera();
+    this.initCameraCrosshair();
     this.initRenderer();
     this.initLights();
     this.initArJs();
@@ -205,6 +206,16 @@ export default class ArRendering extends Component<Args> {
     this.scene.add(this.camera);
 
     this.debug('Camera added');
+  }
+
+  initCameraCrosshair() {
+    const geometry = new THREE.RingGeometry(0.0001, 0.0003, 30);
+    const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const crosshairMesh = new THREE.Mesh(geometry, material);
+
+    this.camera.add(crosshairMesh);
+    // Position just in front of camera
+    crosshairMesh.position.z = -0.1;
   }
 
   /**
