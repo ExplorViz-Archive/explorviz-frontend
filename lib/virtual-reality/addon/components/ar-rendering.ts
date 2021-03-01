@@ -254,7 +254,7 @@ export default class ArRendering extends Component<Args> {
     this.handlePanning = this.handlePanning.bind(this);
 
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      [this.landscapeObject3D, this.applicationGroup], {
+      this.getIntersectableObjects(), {
         singleClick: this.handleSingleClick,
         doubleClick: this.handleDoubleClick,
         mouseWheel: this.handleMouseWheel,
@@ -265,6 +265,16 @@ export default class ArRendering extends Component<Args> {
     window.onkeydown = (event: any) => {
       this.handleKeyboard(event);
     };
+  }
+
+  getIntersectableObjects() {
+    const intersectableObjects: THREE.Object3D[] = [this.landscapeObject3D];
+
+    this.applicationMarkers.forEach((appMarker) => {
+      intersectableObjects.push(appMarker);
+    });
+
+    return intersectableObjects;
   }
 
   static raycastFilter(intersection: THREE.Intersection) {
@@ -311,28 +321,20 @@ export default class ArRendering extends Component<Args> {
       patternUrl: 'ar_data/patt.hiro',
     });
 
-    const applicationMarker0 = new THREE.Group();
-    // applicationMarker0.add(this.applicationGroup);
-    this.scene.add(applicationMarker0);
-    this.applicationMarkers.push(applicationMarker0);
+    const applicationMarkerNames = ['pattern-letterA', 'pattern-letterB'];
 
-    // Init controls for camera
-    // eslint-disable-next-line
-    new THREEx.ArMarkerControls(arToolkitContext, applicationMarker0, {
-      type: 'pattern',
-      patternUrl: 'ar_data/pattern-letterA.patt',
-    });
+    applicationMarkerNames.forEach((markerName) => {
+      const applicationMarker = new THREE.Group();
+      // applicationMarker0.add(this.applicationGroup);
+      this.scene.add(applicationMarker);
+      this.applicationMarkers.push(applicationMarker);
 
-    const applicationMarker1 = new THREE.Group();
-    // applicationMarker1.add(this.applicationGroup);
-    this.scene.add(applicationMarker1);
-    this.applicationMarkers.push(applicationMarker1);
-
-    // Init controls for camera
-    // eslint-disable-next-line
-    new THREEx.ArMarkerControls(arToolkitContext, applicationMarker1, {
-      type: 'pattern',
-      patternUrl: 'ar_data/pattern-letterB.patt',
+      // Init controls for camera
+      // eslint-disable-next-line
+      new THREEx.ArMarkerControls(arToolkitContext, applicationMarker, {
+        type: 'pattern',
+        patternUrl: `ar_data/${markerName}.patt`,
+      });
     });
 
     // Render the scene
