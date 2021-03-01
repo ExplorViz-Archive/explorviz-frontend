@@ -50,6 +50,6 @@
     "app/**/*",
     "tests/**/*",
     "types/**/*",
-    "lib/collaborative-mode"
-  ]
+    "lib/collaborative-mode/**/*"
+  ],
 }

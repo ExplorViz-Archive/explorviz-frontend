@@ -1,10 +1,5 @@
 <div style="display:none" {{did-update this.onUpdated @landscapeData}}></div>
 
-{{ add-listener this.collaborativeService "doubleClick" this.receiveDoubleClick }}
-{{ add-listener this.collaborativeService "mouseMove" this.receiveMouseMove }}
-{{ add-listener this.collaborativeService "mouseStop" this.receiveMouseStop }}
-{{ add-listener this.collaborativeService "perspective" this.receivePerspective }}
-
 <div class="row" style="height:100%">
   <div
     class="d-flex {{if @showDataSelection "col-8" "col-12"}}"
@@ -34,6 +29,26 @@
       {{did-resize this.resize debounce=100}}
     >
       <canvas
+        {{interaction-modifier 
+          raycastObject3D=this.landscapeObject3D 
+          camera=this.camera 
+          doubleClick=this.handleDoubleClick
+          mouseMove=this.handleMouseMove
+          mouseWheel=this.handleMouseWheel
+          mouseOut=this.handleMouseOut
+          mouseStop=this.handleMouseStop
+          panning=this.handlePanning
+        }}
+        {{collaborative-modifier
+          raycastObject3D=this.landscapeObject3D 
+          camera=this.camera 
+          onDoubleClick=this.handleDoubleClick
+          mouseMove=this.handleMouseMove
+          mouseStop=this.handleMouseStop
+          mouseOut=this.handleMouseOut
+          setPerspective=this.setPerspective
+          repositionSphere=this.repositionSphere
+        }}
         class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
         {{did-insert this.canvasInserted}}
       >

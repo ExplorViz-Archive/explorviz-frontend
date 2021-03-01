@@ -1,10 +1,11 @@
+{{ add-listener this.collaborativeService "user_list" this.receiveUserList }}
+{{ add-listener this.collaborativeService "user_joined" this.receiveUserJoined }}
+{{ add-listener this.collaborativeService "presentation_mode_activated" this.onPresentationModeActivated }}
+{{ add-listener this.collaborativeService "presentation_mode_deactivated" this.onPresentationModeDeactivated }}
+{{ add-listener this.collaborativeService "user_in_control" this.onUserInControl }}
 <div class="sidebar-component-close">
-  <button 
-    type="button" 
-    class="sidebar-component-close-button" 
-    title="Close Collaborative Settings"
-    {{on "click" this.close}}
-  >
+  <button type="button" class="sidebar-component-close-button" title="Close Collaborative Settings" {{on "click"
+    this.close}}>
     {{svg-jar "x" class="octicon"}}
   </button>
 </div>
@@ -21,138 +22,62 @@
     </thead>
     <tbody>
       <tr>
+        <td>Session ID</td>
         <td>
-          <b>Enabled?</b>
-          <HelpTooltip
-            @title={{this.tooltipTexts.isHidden}}
-          />
-        </td>
-        <td>
-          <div style="float: left;">
-            <XToggle
-              @theme="skewed"
-              @onLabel="Yes"
-              @offLabel="No"
-              @value={{this.settings.enabled}}
-              @onToggle={{this.toggleEnabled}}
-            />
-          </div>
+          <Input @value={{this.settings.sessionId}} />
+          {{#if this.settings.enabled}}
+          <button type="button" {{on "click" (fn this.leaveSession)}}>Leave</button>
+          {{else}}
+          <button type="button" {{on "click" (fn this.joinSession)}}
+            disabled={{this.settings.isSessionIdEmpty}}>Join</button>
+          <button type="button" {{on "click" (fn this.createSession)}}>Create new session</button>
+          {{/if}}
         </td>
       </tr>
+      {{#if this.settings.enabled }}
+      <tr>
+        <td>Users: </td>
+        <td>
+          <table>
+            <tbody>
+              {{#each this.settings.users as |user|}}
+              <tr>
+                <td>{{user}}</td>
+                <td>
+                  {{#if (and this.settings.admin (not-eq this.settings.userInControl user))}}
+                  <div class="nav-link-with-cursor" title="Give Control" {{on "click" (fn this.giveControl user)}}>
+                    {{svg-jar "device-camera-video" class="octicon align-middle"}}</div>
+                  {{/if}}
+                </td>
+                <td>
+                  {{#if (not-eq this.settings.username user)}}
+                  <div class="nav-link-with-cursor" title="Jump to perspective" {{on "click" (fn this.jumpToPerspective
+                    user)}}>{{svg-jar "eye" class="octicon align-middle"}}</div>
+                  {{/if}}
+                </td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      {{#each this.toggles as |setting|}}
+      {{#if setting.visible }}
       <tr>
         <td>
-          <b>Follow camera?</b>
-          <HelpTooltip
-            @title={{this.tooltipTexts.isHidden}}
-          />
+          <b>{{setting.name}}</b>
+          <HelpTooltip @title={{setting.tooltip}} />
         </td>
         <td>
           <div style="float: left;">
-            <XToggle
-              @theme="skewed"
-              @onLabel="Yes"
-              @offLabel="No"
-              @value={{this.settings.perspective}}
-              @onToggle={{this.togglePerspective}}
-            />
+            <XToggle @theme="skewed" @onLabel="Yes" @offLabel="No" @value={{setting.value}}
+              @onToggle={{setting.onToggle}} />
           </div>
         </td>
       </tr>
-      <tr>
-        <td>
-          <b>Mouse move?</b>
-          <HelpTooltip
-            @title={{this.tooltipTexts.isHidden}}
-          />
-        </td>
-        <td>
-          <div style="float: left;">
-            <XToggle
-              @theme="skewed"
-              @onLabel="Yes"
-              @offLabel="No"
-              @value={{this.settings.mouseMove}}
-              @onToggle={{this.toggleMouseMove}}
-            />
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <b>Mouse stop?</b>
-          <HelpTooltip
-            @title={{this.tooltipTexts.isHidden}}
-          />
-        </td>
-        <td>
-          <div style="float: left;">
-            <XToggle
-              @theme="skewed"
-              @onLabel="Yes"
-              @offLabel="No"
-              @value={{this.settings.mouseStop}}
-              @onToggle={{this.toggleMouseStop}}
-            />
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <b>Mouse hover?</b>
-          <HelpTooltip
-            @title={{this.tooltipTexts.isHidden}}
-          />
-        </td>
-        <td>
-          <div style="float: left;">
-            <XToggle
-              @theme="skewed"
-              @onLabel="Yes"
-              @offLabel="No"
-              @value={{this.settings.mouseHover}}
-              @onToggle={{this.toggleMouseHover}}
-            />
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <b>Single click?</b>
-          <HelpTooltip
-            @title={{this.tooltipTexts.isHidden}}
-          />
-        </td>
-        <td>
-          <div style="float: left;">
-            <XToggle
-              @theme="skewed"
-              @onLabel="Yes"
-              @offLabel="No"
-              @value={{this.settings.singleClick}}
-              @onToggle={{this.toggleSingleClick}}
-            />
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <b>Double click?</b>
-          <HelpTooltip
-            @title={{this.tooltipTexts.isHidden}}
-          />
-        </td>
-        <td>
-          <div style="float: left;">
-            <XToggle
-              @theme="skewed"
-              @onLabel="Yes"
-              @offLabel="No"
-              @value={{this.settings.doubleClick}}
-              @onToggle={{this.toggleDoubleClick}}
-            />
-          </div>
-        </td>
-      </tr>
+      {{/if}}
+      {{/each}}
+      {{/if}}
     </tbody>
   </table>
 </div>

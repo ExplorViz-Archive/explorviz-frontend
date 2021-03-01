@@ -1,7 +1,7 @@
 import Object from '@ember/object';
 import Evented from '@ember/object/evented';
+import InteractionModifierModifier from 'explorviz-frontend/modifiers/interaction-modifier';
 import Hammer from 'hammerjs';
-import Interaction from './interaction';
 
 /* eslint-disable no-bitwise */
 export default class HammerInteraction extends Object.extend(Evented) {
@@ -124,7 +124,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
       mouseDeltaX = mousePosition.x;
       mouseDeltaY = mousePosition.y;
@@ -144,7 +144,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
       delta.x = mousePosition.x - mouseDeltaX;
       delta.y = mousePosition.y - mouseDeltaY;
@@ -169,7 +169,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
       self.trigger('panningEnd', mousePosition);
     });
@@ -186,7 +186,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
       self.trigger('doubletap', mousePosition);
     });
@@ -203,7 +203,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
       self.trigger('singletap', mousePosition);
     });

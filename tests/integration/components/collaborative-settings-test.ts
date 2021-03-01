@@ -12,15 +12,6 @@ module('Integration | Component | collaborative-settings', function(hooks) {
 
     await render(hbs`{{collaborative-settings}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
-
-    // Template block usage:
-    await render(hbs`
-      {{#collaborative-settings}}
-        template block text
-      {{/collaborative-settings}}
-    `);
-
-    assert.equal(this.element.textContent.trim(), 'template block text');
+    assert.equal(this.element.querySelector('.sidebar-component-close')?.className, 'sidebar-component-close');
   });
 });

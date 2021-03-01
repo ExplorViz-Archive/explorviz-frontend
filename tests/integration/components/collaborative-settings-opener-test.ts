@@ -1,26 +1,32 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
-import { render } from '@ember/test-helpers';
+import { click, render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 
-module('Integration | Component | collaborative-settings-opener', function(hooks) {
+module('Integration | Component | collaborative-settings-opener', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', async function(assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
+  test('it renders', async function (assert) {
+    await render(hbs`{{collaborative-settings-opener addComponent=externalAction}}`);
 
-    await render(hbs`{{collaborative-settings-opener}}`);
+    assert.equal(this.element.querySelector('li')?.className, 'nav-item');
 
-    assert.equal(this.element.textContent.trim(), '');
+    let firstSVGElement = this.element?.querySelector('svg');
 
-    // Template block usage:
-    await render(hbs`
-      {{#collaborative-settings-opener}}
-        template block text
-      {{/collaborative-settings-opener}}
-    `);
+    if (firstSVGElement === null) {
+      assert.ok(null, 'no <svg> tag found');
+    } else {
+      assert.equal(firstSVGElement.getAttribute('class'), 'octicon align-middle');
+    }
 
-    assert.equal(this.element.textContent.trim(), 'template block text');
+  });
+
+  test('the button works', async function (assert) {
+    await render(hbs`{{collaborative-settings-opener addComponent=externalAction}}`);
+    this.set('externalAction', function (args: string) {
+      assert.equal(args, 'collaborative-settings');
+    })
+
+    await click('.nav-link-with-cursor');
   });
 });

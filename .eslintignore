@@ -6,3 +6,4 @@ dist/
 public/assets/web-workers/*
 
 tests/
+lib/collaborative-mode/app/*

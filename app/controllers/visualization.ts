@@ -16,6 +16,7 @@ import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/la
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import debugLogger from 'ember-debug-logger';
+import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
@@ -127,6 +128,18 @@ export default class VisualizationController extends Controller {
 
   @action
   openLandscapeView() {
+    this.closeDataSelection();
+    if (this.landscapeData !== null) {
+      this.landscapeData = {
+        ...this.landscapeData,
+        application: undefined,
+      };
+    }
+    this.collaborativeService.send(CollaborativeEvents.OpenLandscapeView, {})
+  }
+
+  @action
+  receiveOpenLandscapeView() {
     this.closeDataSelection();
     if (this.landscapeData !== null) {
       this.landscapeData = {

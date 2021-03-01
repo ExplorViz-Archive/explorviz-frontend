@@ -6,10 +6,7 @@ import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import THREE from 'three';
 import Configuration from 'explorviz-frontend/services/configuration';
 import CurrentUser from 'explorviz-frontend/services/current-user';
-import CollaborativeService from 'collaborative-mode/services/collaborative-service';
-import { Perspective, CursorPosition, instanceOfIdentifiableMesh, Click } from 'collaborative-mode/utils/collaborative-data';
 
-import { Position2D } from 'explorviz-frontend/utils/interaction';
 import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
 import * as CommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
@@ -30,8 +27,7 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
-import CollaborativeInteraction from 'collaborative-mode/utils/collaborative-interaction';
-import CollaborativeSettingsService from 'collaborative-mode/services/collaborative-settings-service';
+import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 
 interface Args {
   readonly id: string;
@@ -85,12 +81,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @service('configuration')
   configuration!: Configuration;
 
-  @service('collaborative-service')
-  collaborativeService!: CollaborativeService;
-
-  @service('collaborative-settings-service')
-  collaborativeSettingsService!: CollaborativeSettingsService;
-
   @service('current-user')
   currentUser!: CurrentUser;
 
@@ -101,7 +91,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   webglrenderer!: THREE.WebGLRenderer;
 
+  @tracked
   camera!: THREE.PerspectiveCamera;
+
+  @tracked
+  cameraPosition!: { x: number, y: number, z: number };
 
   canvas!: HTMLCanvasElement;
 
@@ -115,9 +109,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // Used to display performance and memory usage information
   threePerformance: THREEPerformance | undefined;
-
-  // Used to register (mouse) events
-  interaction!: CollaborativeInteraction;
 
   // Maps models to a computed layout
   modelIdToPlaneLayout: Map<string, PlaneLayout> | null = null;
@@ -137,7 +128,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @tracked
   popupData: PopupData | null = null;
 
-  spheres: Array<THREE.Mesh> = [];
+  spheres: Map<string, Array<THREE.Mesh>> = new Map();
+
+  sphereColors: Array<number> = [ 0xff0000, 0x00ff00, 0x0000ff ];
 
   spheresIndex = 0;
 
@@ -179,13 +172,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Outer Div inserted');
 
     this.initThreeJs();
-    this.initInteraction();
     this.render();
 
     this.resize(outerDiv);
 
     await perform(this.loadNewLandscape);
-    this.initSpheres();
     this.initDone = true;
   }
 
@@ -254,81 +245,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Lights added');
   }
 
-  /**
-   * Binds this context to all event handling functions and
-   * passes them to a newly created Interaction object
-   */
-  initInteraction() {
-    // this.handleSingleClick = this.handleSingleClick.bind(this);
-    this.handleDoubleClick = this.handleDoubleClick.bind(this);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleMouseWheel = this.handleMouseWheel.bind(this);
-    this.handleMouseOut = this.handleMouseOut.bind(this);
-    // this.handleMouseEnter = this.handleMouseEnter.bind(this);
-    this.handleMouseStop = this.handleMouseStop.bind(this);
-    this.handlePanning = this.handlePanning.bind(this);
-
-    this.interaction = new CollaborativeInteraction(this.canvas, this.camera, this.webglrenderer,
-      this.landscapeObject3D, this.collaborativeService, {
-      doubleClick: this.handleDoubleClick,
-      mouseMove: this.handleMouseMove,
-      mouseWheel: this.handleMouseWheel,
-      mouseOut: this.handleMouseOut,
-      /* mouseEnter: this.handleMouseEnter, */
-      mouseStop: this.handleMouseStop,
-      panning: this.handlePanning,
-    },
-    {
-      repositionSphere: this.repositionSphere
-    },
-    this.collaborativeSettingsService
-    );
-  }
-
-  initSpheres() {
-    const sphereGeometry = new THREE.SphereBufferGeometry( 0.1, 32, 32 );
-		const sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-
-		for ( let i = 0; i < 30; i ++ ) {
-			const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
-					this.scene.add( sphere );
-					this.spheres.push( sphere );
-		}
-  }
-
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
   // #region COLLABORATIVE
-  @action
-  receivePerspective(perspective: Perspective) {
-    this.camera.position.set(perspective.position.x, perspective.position.y, perspective.position.z);
-  }
 
   @action
-  receiveMouseMove(mouse: CursorPosition) {
-    this.interaction.receiveMouseMove(mouse);
-  }
-
-  @action
-  receiveMouseStop(mouse: CursorPosition) {
-    this.interaction.receiveMouseStop(mouse);
-  }
-
-  @action
-  receiveDoubleClick(click: Click) {
-    var applicationMesh = this.getApplicationMeshByColabId(click.id)
-    if (applicationMesh instanceof THREE.Mesh) {
-      this.handleDoubleClick(applicationMesh);
-    }
-  }
-
-  getApplicationMeshByColabId(colabId: String) {
-    return this.landscapeObject3D.children.find(obj => {
-      if (instanceOfIdentifiableMesh(obj)) {
-        return obj.colabId === colabId;
-      }
-      return false;
-    })
+  setPerspective(position: { x: number, y: number, z: number }, _rotation: { x: number, y: number, z: number }) {
+    this.camera.position.set(position.x, position.y, position.z);
   }
 
   // #endregion COLLABORATIVE
@@ -359,18 +282,40 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   scaleSpheres() {
-		for ( let i = 0; i < this.spheres.length; i ++ ) {
-			const sphere = this.spheres[ i ];
-			sphere.scale.multiplyScalar( 0.98 );
-			sphere.scale.clampScalar( 0.01, 1 );
+    for (let spheres of this.spheres.values()) {
+      for (let i = 0; i < spheres.length; i++) {
+        const sphere = spheres[i];
+        sphere.scale.multiplyScalar(0.98);
+        sphere.scale.clampScalar(0.01, 1);
+      }
     }
   }
 
   @action
-  repositionSphere(vec: THREE.Vector3) {
-	  this.spheres[ this.spheresIndex ].position.copy( vec );
-	  this.spheres[ this.spheresIndex ].scale.set( 1, 1, 1 );
-	  this.spheresIndex = ( this.spheresIndex + 1 ) % this.spheres.length;
+  repositionSphere(vec: THREE.Vector3, user: string) {
+    let spheres = this.spheres.get(user);
+    if (!spheres) {
+      spheres = this.createSpheres();
+      this.spheres.set(user, spheres);
+    }
+
+    // TODO independent sphereIndex for each user?
+    spheres[this.spheresIndex].position.copy(vec);
+    spheres[this.spheresIndex].scale.set(1, 1, 1);
+    this.spheresIndex = (this.spheresIndex + 1) % spheres.length;
+  }
+
+  createSpheres(): Array<THREE.Mesh> {
+    let spheres = [];
+    const sphereGeometry = new THREE.SphereBufferGeometry(0.08, 32, 32);
+    const sphereMaterial = new THREE.MeshBasicMaterial({ color: this.sphereColors.pop() });
+
+    for (let i = 0; i < 30; i++) {
+      const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      this.scene.add(sphere);
+      spheres.push(sphere);
+    }
+    return spheres;
   }
 
   // #endregion RENDERING LOOP
@@ -405,7 +350,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.landscapeObject3D.removeAllChildren();
     this.labeler.clearCache();
 
-    this.interaction.removeHandlers();
   }
 
   // #endregion COMPONENT AND SCENE CLEAN-UP
@@ -460,8 +404,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #region SCENE POPULATION
 
-  @task*
-  loadNewLandscape() {
+  @task *
+    loadNewLandscape() {
     this.landscapeObject3D.dataModel = this.args.landscapeData.structureLandscapeData;
     yield perform(this.populateScene);
   }
@@ -471,8 +415,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  *
  * @method populateScene
  */
-  @restartableTask*
-  populateScene() {
+  @restartableTask *
+    populateScene() {
     this.debug('populate landscape-rendering');
 
     const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
@@ -626,7 +570,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #region MOUSE EVENT HANDLER
 
+  @action
   handleDoubleClick(mesh?: THREE.Mesh) {
+    console.log("I am here too");
     // Handle application
     if (mesh instanceof ApplicationMesh) {
       this.openApplicationIfExistend(mesh);
@@ -634,6 +580,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
+  @action
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     const LEFT_MOUSE_BUTTON = 1;
 
@@ -651,6 +598,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
+  @action
   handleMouseWheel(delta: number) {
     // Hide (old) tooltip
     this.popupData = null;
@@ -665,6 +613,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
+  @action
   handleMouseMove(mesh: THREE.Mesh | undefined) {
     const enableHoverEffects = true;
     // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
@@ -680,6 +629,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.popupData = null;
   }
 
+  @action
   handleMouseOut() {
     this.popupData = null;
   }
@@ -688,6 +638,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   handleMouseEnter() {
   } */
 
+  @action
   handleMouseStop(mesh: THREE.Mesh | undefined, mouseOnCanvas: Position2D) {
     if (mesh === undefined) { return; }
 
@@ -709,6 +660,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    *
    * @param applicationMesh Mesh of application which shall be opened
    */
+  @action
   openApplicationIfExistend(applicationMesh: ApplicationMesh) {
     const application = applicationMesh.dataModel;
     // No data => show message

@@ -3,6 +3,11 @@
   "newLandscapeData"
   this.receiveNewLandscapeData
 }}
+{{add-listener
+  this.collaborativeService
+  "open_landscape_view"
+  this.receiveOpenLandscapeView
+}}
 
 <div class="row" style="max-height:100%">
   <div class="col-12" id="vizspace">

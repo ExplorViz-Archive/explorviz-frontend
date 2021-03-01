@@ -4,7 +4,6 @@ import debugLogger from 'ember-debug-logger';
 import THREE from 'three';
 import { inject as service } from '@ember/service';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import DS from 'ember-data';
 import Configuration from 'explorviz-frontend/services/configuration';
 import CurrentUser from 'explorviz-frontend/services/current-user';
@@ -32,10 +31,8 @@ import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 import { perform } from 'ember-concurrency-ts';
-import { Click, Perspective, instanceOfIdentifiableMesh, CursorPosition } from 'collaborative-mode/utils/collaborative-data';
-import CollaborativeService from 'collaborative-mode/services/collaborative-service';
-import CollaborativeInteraction from 'collaborative-mode/utils/collaborative-interaction';
-import CollaborativeSettingsService from 'collaborative-mode/services/collaborative-settings-service';
+import { Perspective, CursorPosition } from 'collaborative-mode/utils/collaborative-data';
+import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 
 interface Args {
   readonly id: string;
@@ -71,9 +68,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @service('configuration')
   configuration!: Configuration;
 
-  @service('collaborative-service') collaborativeService!: CollaborativeService;
-  @service('collaborative-settings-service') collaborativeSettingsService!: CollaborativeSettingsService;
-
   @service('current-user')
   currentUser!: CurrentUser;
 
@@ -86,6 +80,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   scene!: THREE.Scene;
 
+  @tracked
   camera!: THREE.PerspectiveCamera;
 
   renderer!: THREE.WebGLRenderer;
@@ -95,9 +90,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // Incremented every time a frame is rendered
   animationFrameId = 0;
-
-  // Used to register (mouse) events
-  interaction!: CollaborativeInteraction;
 
   readonly boxLayoutMap: Map<string, BoxLayout>;
 
@@ -122,7 +114,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @tracked
   cursorPosition: CursorPosition | null = null;
 
-  spheres: Array<THREE.Mesh> = [];
+  spheres: Map<string, Array<THREE.Mesh>> = new Map();
+
+  sphereColors: Array<number> = [ 0xff0000, 0x00ff00, 0x0000ff ];
 
   spheresIndex = 0;
 
@@ -175,7 +169,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Outer Div inserted');
 
     this.initThreeJs();
-    this.initInteraction();
     this.render();
 
     this.resize(outerDiv);
@@ -186,8 +179,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.entityManipulation.applyDefaultApplicationLayout();
     this.communicationRendering.addCommunication(this.drawableClassCommunications);
     this.applicationObject3D.resetRotation();
-
-    this.initSpheres()
   }
 
   /**
@@ -256,53 +247,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Lights added');
   }
 
-  /**
-   * Binds this context to all event handling functions and
-   * passes them to a newly created Interaction object
-   */
-  initInteraction() {
-    this.handleSingleClick = this.handleSingleClick.bind(this);
-    this.handleDoubleClick = this.handleDoubleClick.bind(this);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleMouseWheel = this.handleMouseWheel.bind(this);
-    this.handleMouseOut = this.handleMouseOut.bind(this);
-    // this.handleMouseEnter = this.handleMouseEnter.bind(this);
-    this.handleMouseStop = this.handleMouseStop.bind(this);
-    this.handlePanning = this.handlePanning.bind(this);
-
-    this.interaction = new CollaborativeInteraction(this.canvas, this.camera, this.renderer,
-      this.applicationObject3D, this.collaborativeService, {
-        singleClick: this.handleSingleClick,
-        doubleClick: this.handleDoubleClick,
-        mouseMove: this.handleMouseMove,
-        mouseWheel: this.handleMouseWheel,
-        mouseOut: this.handleMouseOut,
-        // mouseEnter: this.handleMouseEnter,
-        mouseStop: this.handleMouseStop,
-        panning: this.handlePanning,
-      },
-      {
-        repositionSphere: this.repositionSphere
-      },
-      this.collaborativeSettingsService
-      );
-  }
-
-  initSpheres() {
-    const sphereGeometry = new THREE.SphereBufferGeometry( 0.3, 32, 32 );
-		const sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000 } );
-
-		for ( let i = 0; i < 30; i ++ ) {
-			const sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
-					this.scene.add( sphere );
-					this.spheres.push( sphere );
-		}
-  }
-
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
   // #region MOUSE EVENT HANDLER
 
+  @action
   handleSingleClick(mesh: THREE.Mesh | undefined) {
     // User clicked on blank spot on the canvas
     if (mesh === undefined) {
@@ -313,6 +262,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
+  @action
   handleDoubleClick(mesh: THREE.Mesh | undefined) {
     // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
@@ -325,6 +275,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
+  @action
   handleMouseMove(mesh: THREE.Mesh | undefined) {
     const enableHoverEffects = true;
     // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
@@ -340,6 +291,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.popupData = null;
   }
 
+  @action
   handleMouseWheel(delta: number) {
     // Do not show popups while zooming
     this.popupData = null;
@@ -348,6 +300,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.camera.position.z += delta * 3.5;
   }
 
+  @action
   handleMouseOut() {
     this.popupData = null;
   }
@@ -355,6 +308,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   /*   handleMouseEnter() {
   } */
 
+  @action
   handleMouseStop(mesh: THREE.Mesh | undefined, mouseOnCanvas: Position2D) {
     // Show information as popup is mouse stopped on top of a mesh
     if ((mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
@@ -367,6 +321,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
   }
 
+  @action
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     const LEFT_MOUSE_BUTTON = 1;
     const RIGHT_MOUSE_BUTTON = 3;
@@ -479,46 +434,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #endregion SCENE POPULATION
 
   // #region COLLABORATIVE
-
   @action
-  receivePerspective(perspective: Perspective) {
-    this.camera.position.set(perspective.position.x, perspective.position.y, perspective.position.z);
-    this.applicationObject3D.rotation.set(perspective.rotation.x, perspective.rotation.y, perspective.rotation.z);
-  }
-
-  @action
-  receiveMouseMove(mouse: CursorPosition) {
-    this.interaction.receiveMouseMove(mouse);
-  }
-
-  @action
-  receiveMouseStop(mouse: CursorPosition) {
-    this.interaction.receiveMouseStop(mouse);
-  }
-
-  @action
-  receiveSingleClick(click: Click) {
-    var applicationMesh = this.getApplicationMeshByColabId(click.id)
-    if (applicationMesh instanceof THREE.Mesh) {
-      this.handleSingleClick(applicationMesh);
-    }
-  }
-
-  @action
-  receiveDoubleClick(click: Click) {
-    var applicationMesh = this.getApplicationMeshByColabId(click.id)
-    if (applicationMesh instanceof THREE.Mesh) {
-      this.handleDoubleClick(applicationMesh);
-    }
-  }
-
-  getApplicationMeshByColabId(colabId: String) {
-    return this.applicationObject3D.children.find(obj => {
-      if (instanceOfIdentifiableMesh(obj)) {
-        return obj.colabId === colabId;
-      }
-      return false;
-    })
+  setPerspective(position: { x: number, y: number, z: number }, rotation: { x: number, y: number, z: number }) {
+    this.camera.position.set(position.x, position.y, position.z);
+    this.applicationObject3D.rotation.set(rotation.x, rotation.y, rotation.z);
   }
   // #endregion COLLABORATIVE
 
@@ -547,18 +466,40 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   scaleSpheres() {
-		for ( let i = 0; i < this.spheres.length; i ++ ) {
-			const sphere = this.spheres[ i ];
-			sphere.scale.multiplyScalar( 0.98 );
-			sphere.scale.clampScalar( 0.01, 1 );
+    for (let spheres of this.spheres.values()) {
+      for (let i = 0; i < spheres.length; i++) {
+        const sphere = spheres[i];
+        sphere.scale.multiplyScalar(0.98);
+        sphere.scale.clampScalar(0.01, 1);
+      }
     }
   }
 
   @action
-  repositionSphere(vec: THREE.Vector3) {
-	  this.spheres[ this.spheresIndex ].position.copy( vec );
-	  this.spheres[ this.spheresIndex ].scale.set( 1, 1, 1 );
-	  this.spheresIndex = ( this.spheresIndex + 1 ) % this.spheres.length;
+  repositionSphere(vec: THREE.Vector3, user: string) {
+    let spheres = this.spheres.get(user);
+    if (!spheres) {
+      spheres = this.createSpheres();
+      this.spheres.set(user, spheres);
+    }
+
+    // TODO independent sphereIndex for each user?
+    spheres[this.spheresIndex].position.copy(vec);
+    spheres[this.spheresIndex].scale.set(1, 1, 1);
+    this.spheresIndex = (this.spheresIndex + 1) % spheres.length;
+  }
+
+  createSpheres(): Array<THREE.Mesh> {
+    let spheres = [];
+    const sphereGeometry = new THREE.SphereBufferGeometry(0.08, 32, 32);
+    const sphereMaterial = new THREE.MeshBasicMaterial({ color: this.sphereColors.pop() });
+
+    for (let i = 0; i < 30; i++) {
+      const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      this.scene.add(sphere);
+      spheres.push(sphere);
+    }
+    return spheres;
   }
 
   // #endregion RENDERING LOOP
@@ -738,7 +679,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.scene.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
-    this.interaction.removeHandlers();
 
     if (this.threePerformance) {
       this.threePerformance.removePerformanceMeasurement();
