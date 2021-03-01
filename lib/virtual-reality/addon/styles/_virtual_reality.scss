@@ -1,3 +1,9 @@
+.ar-button-svg {
+  width: 5vw;
+  height: 5vw;
+  padding: 1px;
+}
+
 #VrButton {
   cursor: pointer;
   left: calc(50% - 50px);
@@ -19,4 +25,10 @@
 
 #VrButton:hover {
   opacity: 1;
+}
+
+#ar-interaction-container {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
 }
