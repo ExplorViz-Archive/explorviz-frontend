@@ -1,11 +1,35 @@
+:root {
+  --ar-button-padding: 2vmin;
+  --ar-button-size: 5vmin;
+}
+
+.ar-right-button-container{
+  position: fixed;
+  bottom: var(--ar-button-padding);
+  right: var(--ar-button-padding);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-areas: 
+            ". h"
+            "s p";
+  grid-gap: var(--ar-button-padding);
+  padding: var(--ar-button-padding);
+}
+
 .ar-button-svg {
-  width: 5vw;
-  height: 5vw;
+  width: var(--ar-button-size);
+  height: var(--ar-button-size);
   padding: 1px;
 }
 
-#ar-interaction-container {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
+#ar-primary-interaction-container {
+  grid-area: p;
+}
+
+#ar-secondary-interaction-container {
+  grid-area: s;
+}
+
+#ar-heat-toggle-container {
+  grid-area: h;
 }

@@ -433,6 +433,22 @@ export default class ArRendering extends Component<Args> {
     }
   }
 
+  @action
+  handleSecondaryCrosshairInteraction() {
+    const intersection = this.interaction.raycastCanvasCenter();
+
+    if (intersection) {
+      this.handleSecondaryInputOn(intersection);
+    }
+  }
+
+  @action
+  handleHeatmapInteraction() {
+    const intersection = this.interaction.raycastCanvasCenter();
+
+    this.debug(`Clicked heatmap button on object ${intersection}`);
+  }
+
   // #endregion ACTIONS
 
   // #region RENDERING AND SCENE POPULATION

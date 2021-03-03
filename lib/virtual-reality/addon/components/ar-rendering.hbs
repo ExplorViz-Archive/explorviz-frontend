@@ -9,14 +9,38 @@
     <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
   {{/if}}
 
-  <div id="ar-interaction-container" class="foreground">
-    <BsButton
-      @type="primary"
-      class="half-transparent"
-      {{ on "click" this.handlePrimaryCrosshairInteraction }}
-    >
-      {{svg-jar "unfold" class="octicon align-middle ar-button-svg"}}
-    </BsButton>
+  <div class="ar-right-button-container foreground">
+
+    <div id="ar-heat-toggle-container">
+      <BsButton
+        @type="primary"
+        class="half-transparent"
+        {{ on "click" this.handleHeatmapInteraction }}
+      >
+        {{svg-jar "flame" class="octicon align-middle ar-button-svg"}}
+      </BsButton>
+    </div>
+
+    <div id="ar-secondary-interaction-container">
+      <BsButton
+        @type="primary"
+        class="half-transparent"
+        {{ on "click" this.handleSecondaryCrosshairInteraction }}
+      >
+        {{svg-jar "info" class="octicon align-middle ar-button-svg"}}
+      </BsButton>
+    </div>
+
+    <div id="ar-primary-interaction-container">
+      <BsButton
+        @type="primary"
+        class="half-transparent"
+        {{ on "click" this.handlePrimaryCrosshairInteraction }}
+      >
+        {{svg-jar "unfold" class="octicon align-middle ar-button-svg"}}
+      </BsButton>
+    </div>
+
   </div>
 
 </div>
