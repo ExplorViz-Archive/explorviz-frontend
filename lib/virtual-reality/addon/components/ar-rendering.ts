@@ -15,6 +15,9 @@ import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-fron
 import { enqueueTask, restartableTask, task } from 'ember-concurrency-decorators';
 import * as LandscapeCommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
+import {
+  Class, Package, Application, Node,
+} from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
@@ -39,7 +42,7 @@ import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
-import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 
@@ -58,10 +61,12 @@ type LayoutData = {
   positionZ: number
 };
 
+type DataModel = Node | Application |Package | Class | DrawableClassCommunication;
+
 type PopupData = {
   mouseX: number,
   mouseY: number,
-  entity: Package | Class | DrawableClassCommunication
+  entity: DataModel
 };
 
 declare const THREEx: any;
@@ -877,38 +882,10 @@ export default class ArRendering extends Component<Args> {
   }
 
   handleKeyboard(event: any) {
-    const mvDst = 0.05;
     // Handle keys
     switch (event.key) {
-      case 'q':
-        this.rotateLandscape(-mvDst);
-        break;
-      case 'e':
-        this.rotateLandscape(mvDst);
-        break;
-      case 'w':
-        this.moveLandscape(0, mvDst, 0);
-        break;
-      case 's':
-        this.moveLandscape(0, -mvDst, 0);
-        break;
-      case 'a':
-        this.moveLandscape(-mvDst, 0, 0);
-        break;
-      case 'd':
-        this.moveLandscape(mvDst, 0, 0);
-        break;
-      case '1':
-        this.moveLandscape(0, 0, -mvDst);
-        break;
-      case '2':
-        this.moveLandscape(0, 0, mvDst);
-        break;
       case 'c':
         this.localUser.connect();
-        break;
-      case 'r':
-        this.resetLandscapePosition();
         break;
       case 'l':
         perform(this.loadNewLandscape);
@@ -992,49 +969,6 @@ export default class ArRendering extends Component<Args> {
     }
   }
 
-  setAppPose(id: string, position: THREE.Vector3, quaternion: THREE.Quaternion, world = false) {
-    const application = this.applicationGroup.getApplication(id);
-
-    if (!application) {
-      return;
-    }
-
-    if (world) {
-      application.worldToLocal(position);
-    }
-
-    application.position.copy(position);
-    application.quaternion.copy(quaternion);
-  }
-
-  // eslint-disable-next-line
-  translateApplication(application: THREE.Object3D, direction: THREE.Vector3, length: number){
-    application.translateOnAxis(direction, length);
-    application.updateMatrix();
-  }
-
-  moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
-    const delta = new THREE.Vector3(deltaX, deltaY, deltaZ);
-    this.landscapeOffset.add(delta);
-    this.landscapeObject3D.position.add(delta);
-  }
-
-  rotateLandscape(deltaX: number) {
-    this.landscapeObject3D.rotation.x -= deltaX;
-    this.updateLandscapeRotation(this.landscapeObject3D.quaternion.clone());
-  }
-
-  updateLandscapeRotation(quaternion: THREE.Quaternion) {
-    this.landscapeObject3D.quaternion.copy(quaternion);
-  }
-
-  resetLandscapePosition() {
-    this.landscapeObject3D.rotation.x = (-90 * THREE.MathUtils.DEG2RAD);
-    this.landscapeObject3D.rotation.y = (0);
-    this.landscapeObject3D.rotation.z = (0);
-    this.landscapeOffset.set(0, 0, 0);
-  }
-
   removeApplication(application: ApplicationObject3D) {
     this.applicationGroup.removeApplicationById(application.dataModel.instanceId);
 
@@ -1082,8 +1016,9 @@ export default class ArRendering extends Component<Args> {
 
   resetAll() {
     this.applicationGroup.clear();
-    this.resetLandscapePosition();
     this.localUser.resetPosition();
+
+    // ToDo: Reset scale of landscape and applications
   }
 
   willDestroy() {
