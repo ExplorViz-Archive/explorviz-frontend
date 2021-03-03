@@ -13,6 +13,7 @@
     <BsButton
       @type="primary"
       class="half-transparent"
+      {{ on "click" this.handlePrimaryCrosshairInteraction }}
     >
       {{svg-jar "unfold" class="octicon align-middle ar-button-svg"}}
     </BsButton>

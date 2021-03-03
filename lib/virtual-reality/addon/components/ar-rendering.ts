@@ -424,6 +424,15 @@ export default class ArRendering extends Component<Args> {
     this.debug('clean and populate landscape-rendering');
   }
 
+  @action
+  handlePrimaryCrosshairInteraction() {
+    const intersection = this.interaction.raycastCanvasCenter();
+
+    if (intersection) {
+      this.handlePrimaryInputOn(intersection);
+    }
+  }
+
   // #endregion ACTIONS
 
   // #region RENDERING AND SCENE POPULATION
@@ -836,6 +845,7 @@ export default class ArRendering extends Component<Args> {
         break;
     }
   }
+
   // #endregion MOUSE & KEYBOARD EVENT HANDLER
 
   // #region UTILS
