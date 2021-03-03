@@ -10,7 +10,7 @@ type CallbackFunctions = {
   mouseWheel?(delta: number): void,
   singleClick?(intersection: THREE.Intersection|null): void,
   doubleClick?(intersection: THREE.Intersection|null): void,
-  panning?(delta: {x: number, y: number}, button: 1|2|3): void
+  panning?(delta: { x: number, y: number }, button: 1|2|3): void
 };
 
 type MouseStopEvent = {
@@ -182,7 +182,7 @@ export default class Interaction {
     this.eventCallbackFunctions.doubleClick(intersectedViewObj);
   }
 
-  onPanning(delta: {x: number, y: number}, event: any) {
+  onPanning(delta: { x: number, y: number }, event: any) {
     if (!this.eventCallbackFunctions.panning) { return; }
 
     this.eventCallbackFunctions.panning(delta, event.button);
@@ -198,13 +198,26 @@ export default class Interaction {
     return { x, y };
   }
 
+  /**
+   * Raycasts and returns objects on the canvas
+   *
+   * @param position Normalized coordinates between -1 and 1
+   */
+  raycastCanvas(position: { x: number, y: number }) {
+    const intersectedObject = this.raycaster.raycasting(position, this.camera,
+      this.raycastObjects, this.raycastFilter);
+
+    return intersectedObject;
+  }
+
+  raycastCanvasCenter() {
+    return this.raycastCanvas({ x: 0, y: 0 });
+  }
+
   raycast(mouseOnCanvas: Position2D) {
     const origin = this.calculatePositionInScene(mouseOnCanvas);
 
-    const intersectedViewObj = this.raycaster.raycasting(origin, this.camera,
-      this.raycastObjects, this.raycastFilter);
-
-    return intersectedViewObj;
+    return this.raycastCanvas(origin);
   }
 
   createMouseStopEvent() {
