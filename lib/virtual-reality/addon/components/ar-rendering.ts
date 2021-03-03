@@ -3,6 +3,7 @@ import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import debugLogger from 'ember-debug-logger';
 import THREE from 'three';
+import { tracked } from '@glimmer/tracking';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import Configuration from 'explorviz-frontend/services/configuration';
@@ -55,6 +56,12 @@ type LayoutData = {
   positionX: number,
   positionY: number,
   positionZ: number
+};
+
+type PopupData = {
+  mouseX: number,
+  mouseY: number,
+  entity: Package | Class | DrawableClassCommunication
 };
 
 declare const THREEx: any;
@@ -139,6 +146,9 @@ export default class ArRendering extends Component<Args> {
   landscapeMarkers: THREE.Group[] = [];
 
   applicationMarkers: THREE.Group[] = [];
+
+  @tracked
+  popupData: PopupData | null = null;
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -477,7 +487,22 @@ export default class ArRendering extends Component<Args> {
   handleInfoInteraction() {
     const intersection = this.interaction.raycastCanvasCenter();
 
-    this.debug(`Clicked info button on object ${intersection}`);
+    if (!intersection) {
+      this.popupData = null;
+    } else {
+      const mesh = intersection.object;
+
+      // Show information as popup is mouse stopped on top of a mesh
+      if ((mesh instanceof NodeMesh || mesh instanceof ApplicationMesh
+        || mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
+        || mesh instanceof ClazzCommunicationMesh)) {
+        this.popupData = {
+          mouseX: this.canvas.width / 2,
+          mouseY: this.canvas.height / 2,
+          entity: mesh.dataModel,
+        };
+      }
+    }
   }
 
   // #endregion ACTIONS

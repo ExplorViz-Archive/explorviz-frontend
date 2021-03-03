@@ -324,7 +324,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
 
     // Hide popups when mouse moves
-    this.popupData = null;
+    // this.popupData = null;
   }
 
   handleMouseWheel(delta: number) {

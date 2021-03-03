@@ -9,6 +9,11 @@
     <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
   {{/if}}
 
+  {{!-- popup(s) --}}
+  <Visualization::Rendering::Popups::PopupCoordinator
+    @popupData={{this.popupData}}
+  />
+
   <div class="ar-left-button-container foreground">
 
     <div id="ar-plus-interaction-container">
