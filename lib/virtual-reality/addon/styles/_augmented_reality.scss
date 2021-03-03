@@ -33,3 +33,28 @@
 #ar-heat-toggle-container {
   grid-area: h;
 }
+
+.ar-left-button-container{
+  position: fixed;
+  bottom: var(--ar-button-padding);
+  left: var(--ar-button-padding);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-areas: 
+            "plus ."
+            "minus info";
+  grid-gap: var(--ar-button-padding);
+  padding: var(--ar-button-padding);
+}
+
+#ar-plus-interaction-container {
+  grid-area: plus;
+}
+
+#ar-minus-interaction-container {
+  grid-area: minus;
+}
+
+#ar-info-interaction-container {
+  grid-area: info;
+}

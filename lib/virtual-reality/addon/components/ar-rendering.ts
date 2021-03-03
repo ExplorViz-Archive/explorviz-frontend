@@ -449,6 +449,37 @@ export default class ArRendering extends Component<Args> {
     this.debug(`Clicked heatmap button on object ${intersection}`);
   }
 
+  @action
+  handlePlusInteraction() {
+    const intersection = this.interaction.raycastCanvasCenter();
+
+    if (intersection && intersection.object) {
+      const { parent } = intersection.object;
+      if (parent instanceof LandscapeObject3D || parent instanceof ApplicationObject3D) {
+        parent.scale.set(parent.scale.x * 1.1, parent.scale.y * 1.1, parent.scale.z * 1.1);
+      }
+    }
+  }
+
+  @action
+  handleMinusInteraction() {
+    const intersection = this.interaction.raycastCanvasCenter();
+
+    if (intersection && intersection.object) {
+      const { parent } = intersection.object;
+      if (parent instanceof LandscapeObject3D || parent instanceof ApplicationObject3D) {
+        parent.scale.set(parent.scale.x * 0.9, parent.scale.y * 0.9, parent.scale.z * 0.9);
+      }
+    }
+  }
+
+  @action
+  handleInfoInteraction() {
+    const intersection = this.interaction.raycastCanvasCenter();
+
+    this.debug(`Clicked info button on object ${intersection}`);
+  }
+
   // #endregion ACTIONS
 
   // #region RENDERING AND SCENE POPULATION

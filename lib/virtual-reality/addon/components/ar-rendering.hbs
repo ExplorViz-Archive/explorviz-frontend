@@ -9,6 +9,40 @@
     <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
   {{/if}}
 
+  <div class="ar-left-button-container foreground">
+
+    <div id="ar-plus-interaction-container">
+      <BsButton
+        @type="primary"
+        class="half-transparent"
+        {{ on "click" this.handlePlusInteraction }}
+      >
+        {{svg-jar "plus" class="octicon align-middle ar-button-svg"}}
+      </BsButton>
+    </div>
+
+    <div id="ar-minus-interaction-container">
+      <BsButton
+        @type="primary"
+        class="half-transparent"
+        {{ on "click" this.handleMinusInteraction }}
+      >
+        {{svg-jar "dash" class="octicon align-middle ar-button-svg"}}
+      </BsButton>
+    </div>
+
+    <div id="ar-info-interaction-container">
+      <BsButton
+        @type="primary"
+        class="half-transparent"
+        {{ on "click" this.handleInfoInteraction }}
+      >
+        {{svg-jar "info" class="octicon align-middle ar-button-svg"}}
+      </BsButton>
+    </div>
+
+  </div>
+
   <div class="ar-right-button-container foreground">
 
     <div id="ar-heat-toggle-container">
@@ -27,7 +61,7 @@
         class="half-transparent"
         {{ on "click" this.handleSecondaryCrosshairInteraction }}
       >
-        {{svg-jar "info" class="octicon align-middle ar-button-svg"}}
+        {{svg-jar "pin" class="octicon align-middle ar-button-svg"}}
       </BsButton>
     </div>
 
