@@ -33,6 +33,7 @@ export default class Auth extends Service {
           },
           autoParseHash: true,
         },
+        container: 'auth0-login-container',
         theme: {
           logo: config.auth0.logoUrl,
         },
@@ -55,6 +56,12 @@ export default class Auth extends Service {
    * Send a user over to the hosted auth0 login page
    */
   login() {
+    // Since testem seems to enter routes but not render their templates,
+    // the login container does not necessarily exist, which results in an error
+    if (!document.getElementById('auth0-login-container')) {
+      return;
+    }
+
     this.lock.show();
   }
 
