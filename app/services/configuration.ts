@@ -1,6 +1,7 @@
-import Service from '@ember/service';
+import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import { tracked } from '@glimmer/tracking';
+import UserSettings from './user-settings';
 
 export type LandscapeColors = {
   system: THREE.Color,
@@ -29,14 +30,6 @@ export type ApplicationColors = {
   background: THREE.Color
 };
 
-export type ExtensionDescription = {
-  id: string,
-  title: string,
-  link: string,
-  nestedRoute: string,
-  paneName: string
-};
-
 /**
  * The Configuration Service handles color settings for the
  * visualization and configuration extensions
@@ -44,15 +37,8 @@ export type ExtensionDescription = {
  * @extends Ember.Service
  */
 export default class Configuration extends Service {
-  /**
-  * Array for component-based settings dialogs. Any extension may push an object
-  * with the name of it's settings-component and it's title in this array. See
-  * the extension "colorpicker"" for exemplary usage.
-  *
-  * @property configurationExtensions
-  * @type Array
-  */
-  configurationExtensions: ExtensionDescription[] = [];
+  @service('user-settings')
+  userSettings!: UserSettings;
 
   /**
   * Colors for landscape visualization
@@ -78,31 +64,36 @@ export default class Configuration extends Service {
   constructor() {
     super(...arguments);
 
+    const {
+      application: applicationSettings,
+      landscape: landscapeSettings,
+    } = this.userSettings.settings.visualization.colors;
+
     this.landscapeColors = {
-      system: new THREE.Color('#c7c7c7'), // grey
-      nodegroup: new THREE.Color('#169e2b'), // dark green
-      node: new THREE.Color('#00bb41'), // green
-      application: new THREE.Color('#3e14a0'), // purple-blue
-      communication: new THREE.Color('#f49100'), // orange
-      systemText: new THREE.Color('#000000'), // black
-      nodeText: new THREE.Color('#ffffff'), // white
-      applicationText: new THREE.Color('#ffffff'), // white
-      collapseSymbol: new THREE.Color('#000000'), // black
-      background: new THREE.Color('#ffffff'), // white
+      system: new THREE.Color(landscapeSettings.system),
+      nodegroup: new THREE.Color(landscapeSettings.nodegroup),
+      node: new THREE.Color(landscapeSettings.node),
+      application: new THREE.Color(landscapeSettings.application),
+      communication: new THREE.Color(landscapeSettings.communication),
+      systemText: new THREE.Color(landscapeSettings.systemText),
+      nodeText: new THREE.Color(landscapeSettings.nodeText),
+      applicationText: new THREE.Color(landscapeSettings.applicationText),
+      collapseSymbol: new THREE.Color(landscapeSettings.collapseSymbol),
+      background: new THREE.Color(landscapeSettings.background),
     };
 
     this.applicationColors = {
-      foundation: new THREE.Color('#c7c7c7'), // grey
-      componentOdd: new THREE.Color('#169e2b'), // dark green
-      componentEven: new THREE.Color('#00bb41'), // light green
-      clazz: new THREE.Color('#3e14a0'), // purple-blue
-      highlightedEntity: new THREE.Color('#ff0000'), // red
-      componentText: new THREE.Color('#ffffff'), // white
-      clazzText: new THREE.Color('#ffffff'), // white
-      foundationText: new THREE.Color('#000000'), // black
-      communication: new THREE.Color('#f49100'), // orange
-      communicationArrow: new THREE.Color('#000000'), // black
-      background: new THREE.Color('#ffffff'), // white
+      foundation: new THREE.Color(applicationSettings.foundation),
+      componentOdd: new THREE.Color(applicationSettings.componentOdd),
+      componentEven: new THREE.Color(applicationSettings.componentEven),
+      clazz: new THREE.Color(applicationSettings.clazz),
+      highlightedEntity: new THREE.Color(applicationSettings.highlightedEntity),
+      componentText: new THREE.Color(applicationSettings.componentText),
+      clazzText: new THREE.Color(applicationSettings.clazzText),
+      foundationText: new THREE.Color(applicationSettings.foundationText),
+      communication: new THREE.Color(applicationSettings.communication),
+      communicationArrow: new THREE.Color(applicationSettings.communicationArrow),
+      background: new THREE.Color(applicationSettings.background),
     };
   }
 }
