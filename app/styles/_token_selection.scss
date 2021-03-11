@@ -23,3 +23,11 @@
 .button-svg-with-hover:hover {
   color: #fdfdfd;
 }
+
+#landscapes-error-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
