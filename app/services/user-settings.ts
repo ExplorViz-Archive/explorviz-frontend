@@ -24,12 +24,9 @@ export interface ApplicationColorsHexString {
 }
 
 export interface LandscapeColorsHexString {
-  system: string;
-  nodegroup: string;
   node: string;
   application: string;
   communication: string;
-  systemText: string;
   nodeText: string;
   applicationText: string;
   collapseSymbol: string;
@@ -51,12 +48,9 @@ const defaultApplicationColors: ApplicationColorsHexString = {
 };
 
 const defaultLandscapeColors: LandscapeColorsHexString = {
-  system: '#c7c7c7', // grey
-  nodegroup: '#169e2b', // dark green
   node: '#00bb41', // green
   application: '#3e14a0', // purple-blue
   communication: '#f49100', // orange
-  systemText: '#000000', // black
   nodeText: '#ffffff', // white
   applicationText: '#ffffff', // white
   collapseSymbol: '#000000', // black
@@ -78,12 +72,9 @@ const visuallyImpairedApplicationColors = {
 };
 
 const visuallyImpairedLandscapeColors = {
-  system: '#c7c7c7', // grey
-  nodegroup: '#015a6e', // dark green
   node: '#0096be', // green
   application: '#5f5f5f', // purple-blue
   communication: '#f49100', // orange
-  systemText: '#000000', // black
   nodeText: '#ffffff', // white
   applicationText: '#ffffff', // white
   collapseSymbol: '#000000', // black

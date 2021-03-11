@@ -4,12 +4,9 @@ import { tracked } from '@glimmer/tracking';
 import UserSettings from './user-settings';
 
 export type LandscapeColors = {
-  system: THREE.Color,
-  nodegroup: THREE.Color,
   node: THREE.Color,
   application: THREE.Color,
   communication: THREE.Color,
-  systemText: THREE.Color,
   nodeText: THREE.Color,
   applicationText: THREE.Color,
   collapseSymbol: THREE.Color,
@@ -70,12 +67,9 @@ export default class Configuration extends Service {
     } = this.userSettings.settings.visualization.colors;
 
     this.landscapeColors = {
-      system: new THREE.Color(landscapeSettings.system),
-      nodegroup: new THREE.Color(landscapeSettings.nodegroup),
       node: new THREE.Color(landscapeSettings.node),
       application: new THREE.Color(landscapeSettings.application),
       communication: new THREE.Color(landscapeSettings.communication),
-      systemText: new THREE.Color(landscapeSettings.systemText),
       nodeText: new THREE.Color(landscapeSettings.nodeText),
       applicationText: new THREE.Color(landscapeSettings.applicationText),
       collapseSymbol: new THREE.Color(landscapeSettings.collapseSymbol),
