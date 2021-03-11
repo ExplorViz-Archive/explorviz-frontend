@@ -1,9 +1,9 @@
-import UnauthenticatedRouteMixin from
-  'ember-simple-auth/mixins/unauthenticated-route-mixin';
 import VisualizationController from 'explorviz-frontend/controllers/visualization';
 import THREE from 'three';
 import debugLogger from 'ember-debug-logger';
-import Route from '@ember/routing/route';
+import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
+import { inject as service } from '@ember/service';
+import BaseRoute from './base-route';
 
 /**
 * TODO
@@ -11,8 +11,18 @@ import Route from '@ember/routing/route';
 * @class Visualization-Route
 * @extends Ember.Route
 */
-export default class VisualizationRoute extends Route.extend(UnauthenticatedRouteMixin) {
+export default class VisualizationRoute extends BaseRoute {
+  @service('landscape-token')
+  landscapeToken!: LandscapeTokenService;
+
   debug = debugLogger();
+
+  async beforeModel() {
+    if (this.landscapeToken.token === null) {
+      this.transitionTo('landscapes');
+    }
+    await super.beforeModel();
+  }
 
   model() {
     return new Promise((resolve, reject) => {
@@ -45,8 +55,8 @@ export default class VisualizationRoute extends Route.extend(UnauthenticatedRout
   // @Override Ember-Hook
   /* eslint-disable-next-line class-methods-use-this */
   resetController(controller: VisualizationController, isExiting: boolean, transition: any) {
-    if (isExiting && transition.targetName !== 'error') {
-      controller.send('resetView');
+    if (isExiting && transition && transition.targetName !== 'error') {
+      controller.send('resetLandscapeListenerPolling');
     }
   }
 }

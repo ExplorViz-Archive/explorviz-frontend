@@ -53,7 +53,7 @@ function getTestNode() {
 
   const testApplication: Application = {
     name: 'application',
-    pid: 'applicationId',
+    instanceId: 'applicationId',
     language: 'testLanguage',
     parent: testNode, 
     packages: [],

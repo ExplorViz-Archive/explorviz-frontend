@@ -11,6 +11,12 @@ export function getAllApplicationsInLandscape(landscapeStructure: StructureLands
   return landscapeStructure.nodes.map((node) => node.applications).flat();
 }
 
+export function getApplicationInLandscapeById(landscapeStructure: StructureLandscapeData,
+  id: string): Application|undefined {
+  return getAllApplicationsInLandscape(landscapeStructure)
+    .filter(({ instanceId }) => instanceId === id)[0];
+}
+
 export function getApplicationFromClass(structureData: StructureLandscapeData, clazz: Class) {
   let matchingApplication: Application|undefined;
 

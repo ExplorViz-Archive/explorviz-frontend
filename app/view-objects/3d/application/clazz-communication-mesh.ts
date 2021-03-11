@@ -76,7 +76,7 @@ export default class ClazzCommunicationMesh extends BaseMesh implements Identifi
     const edgeGeometry = new THREE.CylinderGeometry(lineThickness, lineThickness,
       direction.length(), 20, 1);
     this.geometry = edgeGeometry;
-    this.applyMatrix(orientation);
+    this.applyMatrix4(orientation);
 
     // Set position to center of pipe
     this.position.copy(end.add(start).divideScalar(2));

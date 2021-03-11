@@ -1,9 +1,13 @@
-import Service, { inject as service } from '@ember/service';
+import Service from '@ember/service';
 
 import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
-import Timestamp from 'explorviz-frontend/models/timestamp';
-import DS from 'ember-data';
+
+export interface Timestamp {
+  id: string,
+  timestamp: number,
+  totalRequests: number,
+}
 
 /**
 * Handles all landscape-related timestamps within the application, especially for the timelines
@@ -14,18 +18,36 @@ import DS from 'ember-data';
 export default class TimestampRepository extends Service.extend(Evented) {
   debug = debugLogger();
 
-  @service('store') store !: DS.Store;
+  private timelineTimestamps: Map<string, Timestamp[]> = new Map();
 
-  latestTimestamp: Timestamp|null = null;
+  getTimestamps(landscapeToken: string) {
+    return this.timelineTimestamps.get(landscapeToken);
+  }
 
-  timelineTimestamps: Timestamp[] = [];
+  getLatestTimestamp(landscapeToken: string) {
+    const timestamps = this.getTimestamps(landscapeToken);
+    if (timestamps) {
+      return timestamps[timestamps.length - 1];
+    }
+
+    return undefined;
+  }
+
+  addTimestamp(landscapeToken: string, timestamp: Timestamp) {
+    const timestamps = this.timelineTimestamps.get(landscapeToken);
+    if (timestamps) {
+      this.timelineTimestamps.set(landscapeToken, [...timestamps, timestamp]);
+    } else {
+      this.timelineTimestamps.set(landscapeToken, [timestamp]);
+    }
+  }
 
   /**
    * Triggers the 'updated' event in the timeline for updating the chart
    * @method triggerTimelineUpdate
    */
   triggerTimelineUpdate() {
-    this.trigger('updated', this.get('latestTimestamp'));
+    this.trigger('updated');
   }
 }
 

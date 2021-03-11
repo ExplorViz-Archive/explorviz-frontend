@@ -17,22 +17,22 @@ export default class Labeler {
  * @param color Desired color of the text
  */
   addNodeTextLabel(nodeMesh: NodeMesh, text: string, font: THREE.Font,
-    color: THREE.Color) {
-    const labelMesh = Labeler.getLabel(this.nodeLabelCache, font, text, 0.22, color);
+    color: THREE.Color, fontSize = 0.22, yOffset = 0.2) {
+    const labelMesh = Labeler.getLabel(this.nodeLabelCache, font, text, fontSize, color);
 
     nodeMesh.geometry.computeBoundingBox();
-    const bboxParent = nodeMesh.geometry.boundingBox;
+    const bboxParent = nodeMesh.geometry.boundingBox!;
 
     labelMesh.geometry.computeBoundingBox();
-    const labelBoundingBox = labelMesh.geometry.boundingBox;
+    const labelBoundingBox = labelMesh.geometry.boundingBox!;
 
     const labelMeshLength = Math.abs(labelBoundingBox.max.x)
     - Math.abs(labelBoundingBox.min.x);
 
     // Add label centered at top of node mesh label
     labelMesh.position.x = -(labelMeshLength / 2.0);
-    labelMesh.position.y = bboxParent.min.y + 0.2;
-    labelMesh.position.z = nodeMesh.position.z + 0.01;
+    labelMesh.position.y = bboxParent.min.y + yOffset;
+    labelMesh.position.z = bboxParent.max.z + 0.001;
 
     nodeMesh.add(labelMesh);
   }
@@ -46,23 +46,21 @@ export default class Labeler {
  * @param color Desired color of the text
  */
   addApplicationTextLabel(applicationMesh: ApplicationMesh, text: string,
-    font: THREE.Font, color: THREE.Color) {
-    const labelMesh = Labeler.getLabel(this.appLabelCache, font, text, 0.25, color);
+    font: THREE.Font, color: THREE.Color, fontSize = 0.25, xOffset = 0.1) {
+    const labelMesh = Labeler.getLabel(this.appLabelCache, font, text, fontSize, color);
 
     applicationMesh.geometry.computeBoundingBox();
-    const bboxParent = applicationMesh.geometry.boundingBox;
+    const bboxParent = applicationMesh.geometry.boundingBox!;
 
     labelMesh.geometry.computeBoundingBox();
-    const labelBoundingBox = labelMesh.geometry.boundingBox;
+    const labelBoundingBox = labelMesh.geometry.boundingBox!;
 
     const labelHeight = Math.abs(labelBoundingBox.max.y) - Math.abs(labelBoundingBox.min.y);
 
-    const PADDING_LEFT = 0.1;
-
     // Position label at left side of parent mesh: Leave space for app logo
-    labelMesh.position.x = bboxParent.min.x + PADDING_LEFT;
+    labelMesh.position.x = bboxParent.min.x + xOffset;
     labelMesh.position.y = -(labelHeight / 2.0);
-    labelMesh.position.z = applicationMesh.position.z + 0.001;
+    labelMesh.position.z = bboxParent.max.z + 0.001;
 
     applicationMesh.add(labelMesh);
   }
@@ -89,29 +87,26 @@ export default class Labeler {
  * @param applicationMesh Mesh of application which shall be labeled
  * @param imageLoader Creates or returns cached image
  */
-  static addApplicationLogo(applicationMesh: ApplicationMesh, imageLoader: any) {
+  static addApplicationLogo(applicationMesh: ApplicationMesh, imageLoader: any,
+    width = 0.4, height = 0.4) {
     const application = applicationMesh.dataModel;
 
     applicationMesh.geometry.computeBoundingBox();
 
-    const logoSize = {
-      width: 0.4,
-      height: 0.4,
-    };
-
-    const appBBox = applicationMesh.geometry.boundingBox;
+    const appBBox = applicationMesh.geometry.boundingBox!;
 
     const logoPos = new THREE.Vector3();
 
-    const RIGHT_PADDING = logoSize.width * 0.7;
+    const RIGHT_PADDING = width * 0.7;
 
     // Position at the very right of application mesh
     logoPos.x = appBBox.max.x - RIGHT_PADDING;
+    logoPos.z = appBBox.max.z + 0.001;
 
     const texturePartialPath = application.language.toLowerCase();
 
     // Create and add image to application mesh
-    imageLoader.createPicture(logoPos, logoSize.width, logoSize.height,
+    imageLoader.createPicture(logoPos, width, height,
       texturePartialPath, applicationMesh);
   }
 

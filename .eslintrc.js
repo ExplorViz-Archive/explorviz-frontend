@@ -17,6 +17,9 @@ module.exports = {
   env: {
     browser: true
   },
+  globals: {
+    'auth0': false
+  },
   rules: {
     'linebreak-style': 'off',
     'import/no-unresolved': 'off',
@@ -27,7 +30,8 @@ module.exports = {
     'ember/no-mixins': 'off',
     'ember/require-computed-property-dependencies': 'off',
     "@typescript-eslint/type-annotation-spacing": ["error"],
-    "no-param-reassign": ["error", { "props": false }]
+    "no-param-reassign": ["error", { "props": false }],
+    'func-names': ["error", "always", { "generators": "never" }]
   },
   overrides: [
     // node files

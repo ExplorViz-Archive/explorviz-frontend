@@ -5,9 +5,9 @@ module.exports = {
 
     Setting `disableAnalytics` to true will prevent any data from being sent.
   */
-  "disableAnalytics": true
+  "disableAnalytics": true,
+  // Use SSL for development server by default
+  //"ssl": true,
+  //"ssl-key": ".ssl/server.key",
+  //"ssl-cert": ".ssl/server.crt"
 }
-
-const { setEdition } = require('@ember/edition-utils');
-
-setEdition('octane');

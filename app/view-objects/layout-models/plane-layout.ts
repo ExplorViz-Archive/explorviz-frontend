@@ -17,4 +17,18 @@ export default class PlaneLayout {
     this.positionX = position.x;
     this.positionY = position.y;
   }
+
+  /**
+   * Scales layout positions and extensions just like a object in three.js is scaled.
+   *
+   * @param scalar The scalar which is multiplied with the current
+   *               positions / extensions of the layout.
+   */
+  scale(scalar: number) {
+    this.height *= scalar;
+    this.width *= scalar;
+
+    this.positionX *= scalar;
+    this.positionY *= scalar;
+  }
 }

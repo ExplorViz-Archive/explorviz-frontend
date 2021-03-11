@@ -10,15 +10,26 @@ export default class NodeMesh extends PlaneMesh implements IdentifiableMesh {
   material: THREE.MeshBasicMaterial;
 
   colabId: String;
+  
+  depth: number;
+
+  defaultZ: number;
 
   constructor(layout: PlaneLayout, nodeModel: Node,
-    defaultColor: THREE.Color, highlightingColor = new THREE.Color('red')) {
+    defaultColor: THREE.Color, highlightingColor = new THREE.Color('red'), depth = 0, zPos = 0.02) {
     super(defaultColor, highlightingColor, layout);
 
     this.dataModel = nodeModel;
+    this.depth = depth;
+    this.defaultZ = zPos;
+
     this.material = new THREE.MeshBasicMaterial({ color: defaultColor });
-    this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
     this.colabId = this.dataModel.ipAddress;
+    if (depth <= 0) {
+      this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
+    } else {
+      this.geometry = new THREE.BoxGeometry(layout.width, layout.height, depth);
+    }
   }
 
   /**
@@ -41,6 +52,6 @@ export default class NodeMesh extends PlaneMesh implements IdentifiableMesh {
     const centerX = this.layout.positionX + this.layout.width / 2 - centerPoint.x;
     const centerY = this.layout.positionY - this.layout.height / 2 - centerPoint.y;
 
-    this.position.set(centerX, centerY, 0.02);
+    this.position.set(centerX, centerY, this.defaultZ);
   }
 }

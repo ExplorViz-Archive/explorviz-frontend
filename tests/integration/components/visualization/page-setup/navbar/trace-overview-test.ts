@@ -17,7 +17,7 @@ module('Integration | Component | trace-overview', function (hooks) {
     if(textContent === null) {
       assert.ok(null, 'no text content');
     } else {
-      assert.equal(textContent.trim(), '');
+      assert.equal(textContent.trim(), 'Trace Overview');
     }
   });
 });

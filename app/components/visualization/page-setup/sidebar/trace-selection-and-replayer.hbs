@@ -1,16 +1,8 @@
-<div class="sidebar-component-close">
-  <button
-    type="button"
-    class="sidebar-component-close-button"
-    title="Close Trace Selection"
-    {{on "click" this.close}}
-  >
-    {{svg-jar "x" class="octicon"}}
-  </button>
-</div>
-
-<div class="sidebar-component-title">
-  <h5>Trace Selection</h5>
+<div
+  class="sidebar-component-close"
+  {{on "click" this.close}}
+>
+  {{svg-jar "x" class="octicon"}}
 </div>
 
 <Visualization::PageSetup::Sidebar::TraceSelection

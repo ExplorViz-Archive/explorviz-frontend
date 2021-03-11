@@ -96,7 +96,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
 
     const singleTap = new Hammer.Tap({
       event: 'singletap',
-      interval: 250,
+      interval: 150,
     });
 
     const doubleTap = new Hammer.Tap({
@@ -192,20 +192,20 @@ export default class HammerInteraction extends Object.extend(Evented) {
     });
 
     /**
-     * Triggers a single tap event for the left mouse button
+     * Triggers a single tap event for the left and right mouse button
      */
     hammer.on('singletap', (evt) => {
-      if (evt.button !== 1) {
-        return;
-      }
-
       if (evt.srcEvent.target !== canvas) {
         return;
       }
 
       const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
-      self.trigger('singletap', mousePosition);
+      if (evt.button === 1) {
+        self.trigger('lefttap', mousePosition, canvas);
+      } else if (evt.button === 3) {
+        self.trigger('righttap', mousePosition, evt.srcEvent);
+      }
     });
   }
 }

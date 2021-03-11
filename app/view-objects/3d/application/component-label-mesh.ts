@@ -4,11 +4,17 @@ import ComponentMesh from './component-mesh';
 import FoundationMesh from './foundation-mesh';
 
 export default class ComponentLabelMesh extends LabelMesh {
+  minHeight: number;
+
+  minLength: number;
+
   constructor(componentMesh: ComponentMesh | FoundationMesh,
-    font: THREE.Font, textColor = new THREE.Color('black')) {
+    font: THREE.Font, textColor = new THREE.Color('black'), minHeight = 1.5, minLength = 4) {
     const labelText = componentMesh.dataModel.name;
     super(font, labelText, textColor);
-    this.computeLabel(componentMesh, labelText);
+
+    this.minHeight = minHeight;
+    this.minLength = minLength;
   }
 
   /**
@@ -17,27 +23,24 @@ export default class ComponentLabelMesh extends LabelMesh {
    * @param componentMesh The component or foundation mesh to add a label to
    * @param labelText The desired text for the label
    */
-  private computeLabel(componentMesh: ComponentMesh | FoundationMesh, labelText: string) {
+  computeLabel(componentMesh: ComponentMesh | FoundationMesh, labelText = this.labelText,
+    scalar = 1) {
     /**
      * Updates bounding box of geometry and returns respective dimensions
      */
     function computeBoxSize(geometry: THREE.Geometry | THREE.BufferGeometry) {
       geometry.computeBoundingBox();
       const boxDimensions = new THREE.Vector3();
-      geometry.boundingBox.getSize(boxDimensions);
+      geometry.boundingBox?.getSize(boxDimensions);
       return { x: boxDimensions.x, y: boxDimensions.y, z: boxDimensions.z };
     }
-
-
-    const MIN_HEIGHT = 1.5;
-    const MIN_LENGTH = 4;
 
     const parentScale = componentMesh.scale;
 
     const parentAspectRatio = parentScale.x / parentScale.z;
 
     // Adjust desired text size with possible scaling
-    const textSize = (2.0 / parentScale.x) * parentAspectRatio;
+    const textSize = (2.0 / parentScale.x) * parentAspectRatio * scalar;
     // Text should look like it is written on the parent's box (no height required)
     const textHeight = 0.0;
 
@@ -72,14 +75,14 @@ export default class ComponentLabelMesh extends LabelMesh {
     const absoluteTextHeight = textSize * parentScale.x * scaleFactor;
 
     // Shorten label string if scaling obliterated label
-    if (absoluteTextHeight < MIN_HEIGHT && labelText.length > MIN_LENGTH && !labelText.includes('...')) {
+    if (absoluteTextHeight < this.minHeight && labelText.length > this.minLength && !labelText.includes('...')) {
       // Dispose objects because new text object needs to be computed
       this.geometry.dispose();
       this.material.dispose();
       this.scale.set(1, 1, 1);
 
       // Calculate theoretical label length based on height mismatch
-      const desiredLength = (absoluteTextHeight / MIN_HEIGHT) * Math.floor(labelText.length);
+      const desiredLength = (absoluteTextHeight / this.minHeight) * Math.floor(labelText.length);
       const shortenedLabel = `${labelText.substring(0, desiredLength - 1)}...`;
 
       // Recursive call to reuse existing code
