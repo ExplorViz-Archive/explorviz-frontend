@@ -13,8 +13,8 @@ export default class LoginRoute extends Route {
   @service
   auth!: Auth;
 
-  async beforeModel() {
-    await this.auth.checkLogin()
+  afterModel() {
+    this.auth.checkLogin()
       .then(() => this.transitionTo(config.auth0.routeAfterLogin))
       .catch(() => this.auth.login());
   }
