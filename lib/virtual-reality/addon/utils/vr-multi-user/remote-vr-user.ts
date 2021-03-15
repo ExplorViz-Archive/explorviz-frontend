@@ -230,7 +230,6 @@ export default class RemoteVrUser extends THREE.Object3D {
         this.controller1.intersection = null;
       }
       this.updatePing1();
-
     }
   }
 

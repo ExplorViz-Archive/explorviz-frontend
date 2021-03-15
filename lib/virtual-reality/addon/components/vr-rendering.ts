@@ -62,7 +62,6 @@ import VrApplicationObject3D from 'virtual-reality/utils/view-objects/applicatio
 import VrLandscapeObject3D from 'virtual-reality/utils/view-objects/landscape/vr-landscape-object-3d';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import MenuQueue from 'virtual-reality/utils/menu-queue';
-import PingMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/ping-menu';
 
 interface Args {
   readonly id: string;
@@ -305,27 +304,27 @@ export default class VrRendering extends Component<Args> {
 
   initControllers() {
     this.localUser.controller1 = this.initController({
-      id: 0,
+      gamepadIndex: 0,
       color: new THREE.Color('red'),
     });
 
     this.localUser.controller2 = this.initController({
-      id: 1,
+      gamepadIndex: 1,
       color: new THREE.Color('blue'),
     });
   }
 
-  initController({id, color}: {
-    id: number,
+  initController({gamepadIndex, color}: {
+    gamepadIndex: number,
     color: THREE.Color
   }): VRController {
     const menuGroup = new MenuGroup();
     const controller = new VRController({
-      gamepadIndex: id,
+      gamepadIndex,
       scene: this.scene,
       bindings: new VRControllerBindingsList(this.makeControllerBindings(), menuGroup.controllerBindings),
-      gripSpace: this.renderer.xr.getControllerGrip(id),
-      raySpace: this.renderer.xr.getController(id),
+      gripSpace: this.renderer.xr.getControllerGrip(gamepadIndex),
+      raySpace: this.renderer.xr.getController(gamepadIndex),
       color, menuGroup
     });
     controller.setToDefaultAppearance();
@@ -927,9 +926,8 @@ export default class VrRendering extends Component<Args> {
     controller.menuGroup.openMenu(new ZoomMenu(this.renderer, this.scene, this.camera));
   }
 
-  openPingMenu(controller: VRController) {
-    const user = this.localUser;
-    controller.menuGroup.openMenu(new PingMenu(user, this.scene));
+  openPingMenu(_controller: VRController) {
+    // Ping menu cannot be opened in single user mode.
   }
 
   openCameraMenu(controller: VRController) {

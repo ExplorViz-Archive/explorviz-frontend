@@ -54,6 +54,7 @@ import { DetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
 import { GrabbableMenuContainer } from 'virtual-reality/utils/vr-menus/grabbable-menu-container';
 import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
+import PingMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/ping-menu';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -199,6 +200,10 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     controller.menuGroup.openMenu(menu);
   }
 
+  openPingMenu(controller: VRController) {
+    const user = this.localUser;
+    controller.menuGroup.openMenu(new PingMenu(user, this.scene, this.sender));
+  }
 
   // #endregion MENUS
 
@@ -418,18 +423,18 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   
   onPingUpdate({
     userID,
-    originalMessage: {controllerId, isPinging} 
+    originalMessage: {controllerId, isPinging}
   }: ForwardedMessage<PingUpdateMessage>): void {
     const remoteUser = this.idToRemoteUser.get(userID);
     if (remoteUser) {
-      if (controllerId == 0) {
+      if (controllerId === 0) {
         if (isPinging) {
           remoteUser.startPing1();
         } else {
           remoteUser.stopPing1();
         }
       }
-      if (controllerId == 1) {
+      if (controllerId === 1) {
         if (isPinging) {
           remoteUser.startPing2();
         } else {
@@ -787,7 +792,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       controller2.updateIntersectedObject();
       let point = controller2.intersectedObject?.point;
       if (point) {
-        intersection1 = point;
+        intersection2 = point;
       }
     }
 

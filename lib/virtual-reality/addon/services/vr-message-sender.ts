@@ -217,7 +217,7 @@ export default class VrMessageSender extends Service {
 
   sendPingUpdate(controllerId: number, isPinging: boolean) {
     this.webSocket.send<PingUpdateMessage>({
-      event: 'ping-update',
+      event: 'ping_update',
       controllerId,
       isPinging
     });
