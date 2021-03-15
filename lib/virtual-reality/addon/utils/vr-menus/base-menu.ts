@@ -177,12 +177,26 @@ export default abstract class BaseMenu extends THREE.Group {
     return false;
   }
 
+  /**
+   * Closes this menu.
+   */
   closeMenu() {
+    this.closeMenusWhile((other) => this === other);
+  }
+
+  /**
+   * Closes menus of this menu's group until the current menu does not match
+   * the given predicate.
+   */
+  closeMenusWhile(predicate: (menu : BaseMenu) => boolean) {
     if (this.parent instanceof MenuGroup) {
-      this.parent.closeMenu();
+      this.parent.closeMenusWhile(predicate);
     }
   }
 
+  /**
+   * Detaches this menu.
+   */
   detachMenu() {
     if (this.parent instanceof MenuGroup) {
       this.parent.detachMenu();

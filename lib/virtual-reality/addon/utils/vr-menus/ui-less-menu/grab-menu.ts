@@ -5,6 +5,7 @@ import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import BaseMenu from '../base-menu';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
+import ScaleMenu, { SharedScaleMenuState } from './scale-menu';
 
 export interface GrabbableObject extends THREE.Object3D {
     getGrabId(): string | null;
@@ -29,6 +30,7 @@ export function findGrabbableObject(root: THREE.Object3D, objectId: string): Gra
 export default class GrabMenu extends BaseMenu {
     private grabbedObject: GrabbableObject;
     private grabbedObjectParent: THREE.Object3D | null;
+    private allowedToGrab: boolean;
     private grabbedObjectService: GrabbedObjectService;
     private deltaTimeService: DeltaTime;
 
@@ -36,6 +38,7 @@ export default class GrabMenu extends BaseMenu {
         super();
         this.grabbedObject = grabbedObject;
         this.grabbedObjectParent = null;
+        this.allowedToGrab = false;
         this.grabbedObjectService = grabbedObjectService;
         this.deltaTimeService = deltaTimeService;
     }
@@ -94,19 +97,39 @@ export default class GrabMenu extends BaseMenu {
         super.onOpenMenu();
 
         // Grab the object only when we are allowed to grab it.
-        const allowedToGrab = await this.grabbedObjectService.grabObject(this.grabbedObject);
-        if (allowedToGrab) {
-            this.addToGripSpace();
+        this.allowedToGrab = await this.grabbedObjectService.grabObject(this.grabbedObject);
+        if (this.allowedToGrab) {
+            // If the object is grabbed by another menu already, open the scale 
+            // menu instead.
+            const controller = VRController.findController(this);
+            const otherController = VRController.findController(this.grabbedObject);
+            const otherMenu = otherController?.menuGroup.currentMenu;
+            if (controller && otherController && otherMenu instanceof GrabMenu) {
+                const sharedState = new SharedScaleMenuState(this.grabbedObject);
+                controller.menuGroup.openMenu(new ScaleMenu(sharedState));
+                otherController.menuGroup.openMenu(new ScaleMenu(sharedState));
+            } else {
+                this.addToGripSpace();
+            }
         } else {
             this.closeMenu();
         }
     }
 
     onPauseMenu() {
-        // Release the grabbed object when another menu is opened (e.g., the
-        // scale menu).
         super.onPauseMenu();
         this.removeFromGripSpace();
+    }
+
+    onResumeMenu() {
+        super.onResumeMenu();
+        if (this.allowedToGrab) this.addToGripSpace();
+    }
+
+    onCloseMenu() {
+        super.onCloseMenu();
+        this.removeFromGripSpace();
+        this.grabbedObjectService.releaseObject(this.grabbedObject);
     }
 
     makeThumbpadBinding() {

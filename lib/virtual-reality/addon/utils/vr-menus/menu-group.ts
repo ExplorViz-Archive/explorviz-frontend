@@ -89,6 +89,18 @@ export default class MenuGroup extends THREE.Group {
     }
 
     /**
+     * Closes menus until the current menu does not match the given predicate.
+     * 
+     * Only the final menu (i.e., the first menu that is not closed) is resumed.
+     */
+    closeMenusWhile(predicate: (menu : BaseMenu) => boolean) {
+        while (this.currentMenu && predicate(this.currentMenu)) {
+            this.removeMenu((m) => m.onCloseMenu());
+        }
+        this.resumeMenu();
+    }
+
+    /**
      * Detaches the currently active menu if it is an instance of `DetachableMenu`.
      */
     detachMenu() {

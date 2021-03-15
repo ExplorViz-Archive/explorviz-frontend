@@ -66,13 +66,13 @@ export default class GrabbedObjectService extends Service {
    * When the object has not been grabbed before, the backend is asked whether
    * the object can be grabbed. 
    * 
-   * @param object The grabbed grabbed.
+   * @param object The grabbed object.
    * @returns A promise that resolves to the answer of the backend to the last 
    * request to grab the object (i.e., `true` when the object can be grabbed
    * and `false` otherwise).
    */
   async grabObject(object: GrabbableObject): Promise<boolean> {
-    const count = this.grabCounters.get(object) || 0;
+    const count = this.getGrabCount(object);
     this.grabCounters.set(object, count + 1);
     
     // If the object has not been grabbed before, ask the server whether we
@@ -84,6 +84,17 @@ export default class GrabbedObjectService extends Service {
     const result = await request;
     if (result && this.grabCounters.has(object)) this.grabbedObjects.add(object);
     return result;
+  }
+
+  /**
+   * Gets the number of controllers that are currentlay grabbing the given
+   * object.
+   * 
+   * @param object The object to get the counter for.
+   * @returns The number of controllers that are grabbing the object.
+   */
+  getGrabCount(object: GrabbableObject): number {
+    return this.grabCounters.get(object) || 0;
   }
 
   /**
