@@ -1,12 +1,12 @@
-import TextItem from './items/text-item';
-import BaseMenu from './base-menu';
-import TextbuttonItem from './items/textbutton-item';
-import ArrowbuttonItem from './items/arrowbutton-item';
-import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
-import VRControllerThumbpadBinding from '../vr-controller/vr-controller-thumbpad-binding';
-import VRController from '../vr-rendering/VRController';
+import TextItem from '../items/text-item';
+import TextbuttonItem from '../items/textbutton-item';
+import ArrowbuttonItem from '../items/arrowbutton-item';
+import VRControllerButtonBinding from '../../vr-controller/vr-controller-button-binding';
+import VRControllerThumbpadBinding from '../../vr-controller/vr-controller-thumbpad-binding';
+import VRController from '../../vr-rendering/VRController';
+import UiMenu from '../ui-menu';
 
-export default class CameraMenu extends BaseMenu {
+export default class CameraMenu extends UiMenu {
 
   getCameraDelta: () => THREE.Vector3;
   changeCameraHeight: (deltaY: number) => void;
@@ -40,7 +40,7 @@ export default class CameraMenu extends BaseMenu {
       y: 182,
     }, 50, 60, '#ffc338', '#00e5ff', 'down');
 
-    this.heightDownButton.onTriggerPressed = (value) => {this.heightDown(value); this.update()};
+    this.heightDownButton.onTriggerPressed = (value) => {this.heightDown(value); this.redrawMenu()};
 
 
     this.heightUpButton = new ArrowbuttonItem('height_up', {
@@ -48,10 +48,10 @@ export default class CameraMenu extends BaseMenu {
       y: 182,
     }, 50, 60, '#ffc338', '#00e5ff', 'up');
 
-    this.heightUpButton.onTriggerPressed = (value) => {this.heightUp(value); this.update()};
+    this.heightUpButton.onTriggerPressed = (value) => {this.heightUp(value); this.redrawMenu()};
 
     this.items.push(this.heightDownButton, this.heightUpButton);
-    this.update();
+    this.redrawMenu();
   }
 
   resetCamera() {
@@ -73,8 +73,8 @@ export default class CameraMenu extends BaseMenu {
 
   makeGripButtonBinding() {
     return new VRControllerButtonBinding('Reset', {
-      onButtonDown: () => { this.resetCamera(); this.resetButton.enableHoverEffectByButton(); this.update() },
-      onButtonUp: () => { this.resetButton.resetHoverEffectByButton(); this.update() }
+      onButtonDown: () => { this.resetCamera(); this.resetButton.enableHoverEffectByButton(); this.redrawMenu() },
+      onButtonUp: () => { this.resetButton.resetHoverEffectByButton(); this.redrawMenu() }
     });
   }
 
@@ -89,19 +89,19 @@ export default class CameraMenu extends BaseMenu {
       this.heightDownButton.enableHoverEffectByButton();
     }
     this.deltaItem.text = this.getCameraDelta().y.toFixed(2);
-    this.update();
+    this.redrawMenu();
   }
 
   onUpdateMenu(delta: number) {
     this.deltaItem.text = this.getCameraDelta().y.toFixed(2);
-    this.update();
+    this.redrawMenu();
     super.onUpdateMenu(delta);
   }
 
   makeThumbpadBinding() {
     return new VRControllerThumbpadBinding({ labelUp: 'Up', labelDown: 'Down' }, {
       onThumbpadPress: this.onThumbpadPress.bind(this),
-      onThumbpadUp: () => { this.heightDownButton.resetHoverEffectByButton(); this.heightUpButton.resetHoverEffectByButton(); this.update();}
+      onThumbpadUp: () => { this.heightDownButton.resetHoverEffectByButton(); this.heightUpButton.resetHoverEffectByButton(); this.redrawMenu();}
     })
   }
 }

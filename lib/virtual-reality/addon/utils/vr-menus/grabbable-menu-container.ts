@@ -1,6 +1,6 @@
 import THREE from "three";
+import { GrabbableObject } from "./ui-less-menu/grab-menu";
 import { DetachableMenu } from "./detachable-menu";
-import { GrabbableObject } from "./pseudo-menu/grab-menu";
 
 export class GrabbableMenuContainer extends THREE.Group implements GrabbableObject {
     grabId: string|null;

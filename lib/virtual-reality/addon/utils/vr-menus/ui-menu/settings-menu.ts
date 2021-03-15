@@ -1,10 +1,10 @@
-import TextItem from './items/text-item';
-import BaseMenu from './base-menu';
-import TextbuttonItem from './items/textbutton-item';
-import VRControllerLabelGroup from '../vr-controller/vr-controller-label-group';
-import CheckboxItem from './items/checkbox-item';
+import TextItem from '../items/text-item';
+import UiMenu from '../ui-menu';
+import TextbuttonItem from '../items/textbutton-item';
+import VRControllerLabelGroup from '../../vr-controller/vr-controller-label-group';
+import CheckboxItem from '../items/checkbox-item';
 
-export default class SettingsMenu extends BaseMenu {
+export default class SettingsMenu extends UiMenu {
 
   constructor({openCameraMenu, labelGroups}: {
     openCameraMenu: () => void, 
@@ -41,10 +41,10 @@ export default class SettingsMenu extends BaseMenu {
       for (let labelGroup of labelGroups) {
         if(labelGroup) labelGroup.visible = visible;
       }
-      this.update();
+      this.redrawMenu();
     };
 
-    this.update();
+    this.redrawMenu();
   }
 
 }

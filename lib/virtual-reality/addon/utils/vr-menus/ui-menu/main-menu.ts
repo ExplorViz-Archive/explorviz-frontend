@@ -1,6 +1,6 @@
-import TextItem from './items/text-item';
-import BaseMenu from './base-menu';
-import TextbuttonItem from './items/textbutton-item';
+import TextItem from '../items/text-item';
+import UiMenu from '../ui-menu';
+import TextbuttonItem from '../items/textbutton-item';
 
 export type MainMenuEvents = {
   openMultiUserMenu?: () => void,
@@ -8,7 +8,7 @@ export type MainMenuEvents = {
   openResetMenu: () => void
 };
 
-export default class MainMenu extends BaseMenu {
+export default class MainMenu extends UiMenu {
   constructor(callbacks: MainMenuEvents) {
     super();
 
@@ -42,6 +42,6 @@ export default class MainMenu extends BaseMenu {
     resetButton.onTriggerDown = callbacks.openResetMenu;
     this.thumbpadTargets.push(resetButton);
 
-    this.update();
+    this.redrawMenu();
   }
 }

@@ -1,12 +1,12 @@
-import BaseMenu from './base-menu';
-import TextbuttonItem from './items/textbutton-item';
-import TextItem from './items/text-item';
-import RemoteVrUser from '../vr-multi-user/remote-vr-user';
+import TextbuttonItem from '../items/textbutton-item';
+import TextItem from '../items/text-item';
+import RemoteVrUser from '../../vr-multi-user/remote-vr-user';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import SpectateUser from 'virtual-reality/services/spectate-user';
-import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
+import VRControllerButtonBinding from '../../vr-controller/vr-controller-button-binding';
+import UiMenu from '../ui-menu';
 
-export default class MultiUserMenu extends BaseMenu {
+export default class MultiUserMenu extends UiMenu {
 
     toggleConnection: (() => void)
 
@@ -47,7 +47,7 @@ export default class MultiUserMenu extends BaseMenu {
     } else if (this.state == 'online') {
         this.initOnlineMenu();
     }
-    this.update();
+    this.redrawMenu();
   }
 
   initOfflineMenu(buttonState: string) {
@@ -126,7 +126,7 @@ export default class MultiUserMenu extends BaseMenu {
       }
       this.spectateUser.deactivate();
     }
-    this.update();
+    this.redrawMenu();
   }
 
   spectate(remoteUser: RemoteVrUser) {
@@ -136,7 +136,7 @@ export default class MultiUserMenu extends BaseMenu {
     if (remoteUserButton) {
         remoteUserButton.text += ' (spectated)';
     }
-    this.update();
+    this.redrawMenu();
   }
 
   makeGripButtonBinding() {
@@ -145,13 +145,13 @@ export default class MultiUserMenu extends BaseMenu {
         if (this.state == 'online') {
           this.toggleConnection();
           this.disconnectButton?.enableHoverEffectByButton();
-          this.update()
+          this.redrawMenu()
         }
       },
       onButtonUp: () => {
         if (this.state == 'online') {
           this.disconnectButton?.resetHoverEffectByButton();
-          this.update()
+          this.redrawMenu()
         }
       }
     });
