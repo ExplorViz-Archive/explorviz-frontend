@@ -1,11 +1,13 @@
-import THREE from 'three';
+import THREE, { AnimationMixer, Mesh } from 'three';
 import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
 import NameTagMesh from '../view-objects/vr/name-tag-mesh';
+import { getPingMesh, PING_ANIMATION_CLIP } from '../vr-menus/pseudo-menu/ping-menu';
 
 type Controller = {
   assetUrl: string,
   position: THREE.Vector3,
   quaternion: THREE.Quaternion,
+  intersection: THREE.Vector3 | null,
   model: THREE.Object3D,
   ray: THREE.Object3D,
 };
@@ -27,11 +29,20 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   controller2: Controller | undefined;
 
+  ping1: Mesh | undefined;
+
+  ping2: Mesh | undefined;
+
+  actionPing1: THREE.AnimationAction | undefined;
+
+  actionPing2: THREE.AnimationAction | undefined;
+
   camera: Camera | undefined;
 
   color!: THREE.Color; // [r,g,b], r,g,b = 0,...,255
 
   nameTag: NameTagMesh|undefined;
+
 
   initCamera(obj: THREE.Object3D) {
     this.camera = {
@@ -61,6 +72,7 @@ export default class RemoteVrUser extends THREE.Object3D {
       assetUrl: assetUrl,
       position: new THREE.Vector3(),
       quaternion: new THREE.Quaternion(),
+      intersection: null,
       model: controllerModel,
       ray,
     };
@@ -92,6 +104,7 @@ export default class RemoteVrUser extends THREE.Object3D {
       this.remove(this.controller1.model);
       this.controller1 = undefined;
     }
+    this.stopPing1();
   }
 
   removeController2() {
@@ -99,6 +112,7 @@ export default class RemoteVrUser extends THREE.Object3D {
       this.remove(this.controller2.model);
       this.controller2 = undefined;
     }
+    this.stopPing2();
   }
 
   removeCamera() {
@@ -123,6 +137,66 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.removeNameTag();
   }
 
+  startPing1() {
+    this.ping1 = getPingMesh(this.color);
+    let mixer = new AnimationMixer(this.ping1);
+    this.actionPing1 = mixer.clipAction(PING_ANIMATION_CLIP);
+    this.add(this.ping1);
+  }
+
+  updatePing1() {
+    if (this.controller1 && this.ping1 && this.actionPing1) {
+      let position = this.controller1.intersection;
+      if (position) {
+          this.ping1.position.set(position.x, position.y, position.z);
+          this.ping1.visible = true;
+          this.actionPing1.play();
+      } else {
+        this.ping1.visible = false;
+        this.actionPing2?.stop();
+      }
+    }
+  }
+
+  stopPing1() {
+    if (this.ping1) {
+      this.remove(this.ping1);
+      this.ping1 = undefined;
+      this.actionPing1?.stop();
+      this.actionPing1 = undefined;
+    }
+  }
+
+  startPing2() {
+    this.ping2 = getPingMesh(this.color);
+    let mixer = new AnimationMixer(this.ping2);
+    this.actionPing2 = mixer.clipAction(PING_ANIMATION_CLIP);
+    this.add(this.ping2);
+  }
+
+  updatePing2() {
+    if (this.controller2 && this.ping2 && this.actionPing2) {
+      let position = this.controller2.intersection;
+      if (position) {
+          this.ping2.position.set(position.x, position.y, position.z);
+          this.ping2.visible = true;
+          this.actionPing2.play();
+      } else {
+        this.ping2.visible = false;
+        this.actionPing2?.stop();
+      }
+    }
+  }
+
+  stopPing2() {
+    if (this.ping2) {
+      this.remove(this.ping2);
+      this.ping2 = undefined;
+      this.actionPing2?.stop();
+      this.actionPing2 = undefined;
+    }
+  }
+
   /**
    * Updates the camera model's position and rotation.
    *
@@ -144,12 +218,19 @@ export default class RemoteVrUser extends THREE.Object3D {
    *
    * @param Object containing the new controller1 position and quaterion.
    */
-  updateController1(controller: {position: number[], quaternion: number[]}) {
+  updateController1(controller: {position: number[], quaternion: number[], intersection: number[] | null}) {
     if (this.controller1) {
       this.controller1.position.fromArray(controller.position);
       this.controller1.quaternion.fromArray(controller.quaternion);
       this.controller1.model.position.copy(this.controller1.position);
       this.controller1.model.quaternion.copy(this.controller1.quaternion);
+      if (controller.intersection) { 
+        this.controller1.intersection = new THREE.Vector3().fromArray(controller.intersection);
+      } else {
+        this.controller1.intersection = null;
+      }
+      this.updatePing1();
+
     }
   }
 
@@ -158,12 +239,18 @@ export default class RemoteVrUser extends THREE.Object3D {
    *
    * @param Object containing the new controller2 position and quaterion.
    */
-  updateController2(controller: {position: number[], quaternion: number[]}) {
+  updateController2(controller: {position: number[], quaternion: number[], intersection: number[] | null}) {
     if (this.controller2) {
       this.controller2.position.fromArray(controller.position);
       this.controller2.quaternion.fromArray(controller.quaternion);
       this.controller2.model.position.copy(this.controller2.position);
       this.controller2.model.quaternion.copy(this.controller2.quaternion);
+      if (controller.intersection) { 
+        this.controller2.intersection = new THREE.Vector3().fromArray(controller.intersection);
+      } else {
+        this.controller2.intersection = null;
+      }
+      this.updatePing2();
     }
   }
 

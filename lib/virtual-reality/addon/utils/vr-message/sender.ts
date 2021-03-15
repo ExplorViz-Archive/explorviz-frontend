@@ -1,5 +1,5 @@
 import WebSocketService from 'virtual-reality/services/web-socket';
-import THREE from 'three';
+import THREE, { Vector3 } from 'three';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import { AppClosedMessage } from './sendable/request/app_closed';
 import { AppOpenedMessage } from './sendable/app_opened';
@@ -14,7 +14,8 @@ import { UserControllerMessage } from './sendable/user_controllers';
 import { UserPositionsMessage } from './sendable/user_positions';
 import { DetachedMenuClosedMessage } from './sendable/request/detached_menu_closed';
 import { Nonce } from './util/nonce';
-import { DetachableMenu } from '../vr-menus/menu-group';
+import { DetachableMenu } from '../vr-menus/detachable-menu';
+import { PingUpdateMessage } from './sendable/ping-update';
 
 
 type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
@@ -40,21 +41,23 @@ export default class VrMessageSender {
    * Sends position and rotation information of the local user's camera and
    * controllers.
    */
-  sendPoseUpdate(camera: Pose, controller1: Pose, controller2: Pose) {
+  sendPoseUpdate(camera: Pose, controller1: Pose, controller2: Pose, intersection1: Vector3, intersection2: Vector3) {
     this.webSocket.send<UserPositionsMessage>({
       event: 'user_positions',
       controller1: {
         position: controller1.position.toArray(),
         quaternion: controller1.quaternion.toArray(),
+        intersection: intersection1.toArray()
       },
       controller2: {
         position: controller2.position.toArray(),
         quaternion: controller2.quaternion.toArray(),
+        intersection: intersection2.toArray()
       },
       camera: {
         position: camera.position.toArray(),
         quaternion: camera.quaternion.toArray(),
-      },
+      }
     });
   }
 
@@ -212,6 +215,14 @@ export default class VrMessageSender {
       position: position.toArray(),
       quaternion: quaternion.toArray(),
       scale: application.scale.toArray(),
+    });
+  }
+
+  sendPingUpdate(controllerId: number, isPinging: boolean) {
+    this.webSocket.send<PingUpdateMessage>({
+      event: 'ping-update',
+      controllerId,
+      isPinging
     });
   }
 

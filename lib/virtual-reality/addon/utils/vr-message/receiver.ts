@@ -17,6 +17,7 @@ import { isSpectatingUpdateMessage, SpectatingUpdateMessage } from "./sendable/s
 import { isUserControllerMessage, UserControllerMessage } from "./sendable/user_controllers";
 import { isUserPositionsMessage, UserPositionsMessage } from "./sendable/user_positions";
 import { Nonce } from "./util/nonce";
+import { isPingUpdateMessage, PingUpdateMessage } from "./sendable/ping-update";
 
 const RESPONSE_EVENT = 'response';
 type ResponseEvent<T> = {
@@ -39,6 +40,7 @@ export interface VrMessageListener {
     onAppOpened(msg: ForwardedMessage<AppOpenedMessage>): void;
     onAppClosed(msg: ForwardedMessage<AppClosedMessage>): void;
     onDetachedMenuClosed(msg: ForwardedMessage<DetachedMenuClosedMessage>): void;
+    onPingUpdate(msg:ForwardedMessage<PingUpdateMessage>):void;
 
     onObjectMoved(msg: ForwardedMessage<ObjectMovedMessage>): void;
     onComponentUpdate(msg: ForwardedMessage<ComponentUpdateMessage>): void;
@@ -78,6 +80,7 @@ export default class VrMessageReceiver extends EventDispatcher {
         if (isForwardedMessageOf(msg, isComponentUpdateMessage)) return this.messageListener.onComponentUpdate(msg);
         if (isForwardedMessageOf(msg, isHighlightingUpdateMessage)) return this.messageListener.onHighlightingUpdate(msg);
         if (isForwardedMessageOf(msg, isSpectatingUpdateMessage)) return this.messageListener.onSpectatingUpdate(msg);
+        if (isForwardedMessageOf(msg, isPingUpdateMessage)) return this.messageListener.onPingUpdate(msg);
         console.error('Received invalid forwarded message', msg);
     }
 

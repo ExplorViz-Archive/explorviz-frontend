@@ -2,14 +2,27 @@
 import THREE, { AnimationMixer, Color, Mesh, Scene } from "three";
 import LocalVrUser from "virtual-reality/services/local-vr-user";
 import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
+import VrMessageSender from "virtual-reality/utils/vr-message/sender";
 import VRController from "virtual-reality/utils/vr-rendering/VRController";
 import PseudoMenu from "../pseudo-menu";
 
-const PING_ANIMATION_CLIP = new THREE.AnimationClip('ping-animation', 0.8, [
-    new THREE.NumberKeyframeTrack('.scale[x]', [0.0, 0.8], [1.0, 2.6]),
-    new THREE.NumberKeyframeTrack('.scale[y]', [0.0, 0.8], [1.0, 2.6]),
-    new THREE.NumberKeyframeTrack('.scale[z]', [0.0, 0.8], [1.0, 2.6])
+export const PING_ANIMATION_CLIP = new THREE.AnimationClip('ping-animation', 0.5, [
+    new THREE.NumberKeyframeTrack('.scale[x]', [0.0, 0.5], [1.0, 2.6]),
+    new THREE.NumberKeyframeTrack('.scale[y]', [0.0, 0.5], [1.0, 2.6]),
+    new THREE.NumberKeyframeTrack('.scale[z]', [0.0, 0.5], [1.0, 2.6])
   ]);
+
+const PING_RADIUS = 0.02;
+
+const PING_SEGMENTS = 32
+
+export function getPingMesh(color: Color): Mesh {
+        const geometry = new THREE.SphereGeometry(PING_RADIUS, PING_SEGMENTS, PING_SEGMENTS);
+        const material = new THREE.MeshBasicMaterial({color});
+        let mesh = new THREE.Mesh(geometry, material);
+        mesh.visible = false;
+        return mesh;
+}
 
 export default class PingMenu extends PseudoMenu {
 
@@ -19,20 +32,16 @@ export default class PingMenu extends PseudoMenu {
 
     action: THREE.AnimationAction;
 
-    static readonly radius = 0.02;
+    sender: VrMessageSender;
 
-    static readonly segments = 32;
-
-    constructor(localUser: LocalVrUser, scene: Scene) {
+    constructor(localUser: LocalVrUser, scene: Scene, sender: VrMessageSender) {
         super();
 
         this.scene = scene;
+        this.sender = sender;
         let color = new Color('red');
         if (localUser.color) color = localUser.color;
-        const geometry = new THREE.SphereGeometry(PingMenu.radius, PingMenu.segments, PingMenu.segments);
-        const material = new THREE.MeshBasicMaterial({color});
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh.visible = false;
+        this.mesh = getPingMesh(color);
         this.scene.add(this.mesh);
 
         this.animationMixer = new AnimationMixer(this.mesh);
@@ -74,11 +83,15 @@ export default class PingMenu extends PseudoMenu {
 
     makeTriggerButtonBinding() {
         return new VRControllerButtonBinding('Ping', {
+            onButtonDown: (controller: VRController) => {
+                this.sender.sendPingUpdate(controller.gamepadIndex, true)
+            },
             onButtonPress: (controller: VRController) => {
                 this.updatePing(controller);
             },
-            onButtonUp: () => {
+            onButtonUp: (controller: VRController) => {
                 this.stopPing();
+                this.sender.sendPingUpdate(controller.gamepadIndex, false);
             }
         })
     }

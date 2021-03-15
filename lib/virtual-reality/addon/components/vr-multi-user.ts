@@ -6,7 +6,7 @@ import DeltaTime from 'virtual-reality/services/delta-time';
 import debugLogger from 'ember-debug-logger';
 import $ from 'jquery';
 import { bind } from '@ember/runloop';
-import THREE from 'three';
+import THREE, { ReinhardToneMapping, Vector3 } from 'three';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
 import VrRendering from 'virtual-reality/components/vr-rendering';
@@ -52,6 +52,7 @@ import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/send
 import { isObjectClosedResponse, ObjectClosedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-closed';
 import { DetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
 import { GrabbableMenuContainer } from 'virtual-reality/utils/vr-menus/grabbable-menu-container';
+import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -409,6 +410,31 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
+  
+  onPingUpdate({
+    userID,
+    originalMessage: {controllerId, isPinging} 
+  }: ForwardedMessage<PingUpdateMessage>): void {
+    const remoteUser = this.idToRemoteUser.get(userID);
+    if (remoteUser) {
+      if (controllerId == 0) {
+        if (isPinging) {
+          remoteUser.startPing1();
+        } else {
+          remoteUser.stopPing1();
+        }
+      }
+      if (controllerId == 1) {
+        if (isPinging) {
+          remoteUser.startPing2();
+        } else {
+          remoteUser.stopPing2();
+        }
+      }
+    }
+
+  }
+
   /**
    * Handles the (dis-)connect of the specified user's controller(s).
    *
@@ -741,8 +767,28 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       this.localUser.controller1,
       this.localUser.controller2
     );
-    this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
+    let controller1 = this.localUser.controller1;
+    let intersection1 = new Vector3();
+    if (controller1) {
+      controller1.updateIntersectedObject();
+      let point = controller1.intersectedObject?.point;
+      if (point) {
+        intersection1 = point;
+      }
+    }
+    let controller2 = this.localUser.controller2;
+    let intersection2 = new Vector3();
+    if (controller2) {
+      controller2.updateIntersectedObject();
+      let point = controller2.intersectedObject?.point;
+      if (point) {
+        intersection1 = point;
+      }
+    }
+
+    this.sender.sendPoseUpdate(poses.camera, poses.controller1 , poses.controller2, intersection1, intersection2);
   }
+
 
   sendInitialControllerConnectState() {
     if (this.localUser.isOnline) {
