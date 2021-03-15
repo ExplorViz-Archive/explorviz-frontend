@@ -3,7 +3,7 @@ import THREE, { AnimationMixer, Color, Mesh, Scene } from "three";
 import LocalVrUser from "virtual-reality/services/local-vr-user";
 import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
 import VRController from "virtual-reality/utils/vr-rendering/VRController";
-import PseudoMenu from "../pseudo-menu";
+import AnimatedMenu from "../animated-menu";
 
 const PING_ANIMATION_CLIP = new THREE.AnimationClip('ping-animation', 0.8, [
     new THREE.NumberKeyframeTrack('.scale[x]', [0.0, 0.8], [1.0, 2.6]),
@@ -11,7 +11,7 @@ const PING_ANIMATION_CLIP = new THREE.AnimationClip('ping-animation', 0.8, [
     new THREE.NumberKeyframeTrack('.scale[z]', [0.0, 0.8], [1.0, 2.6])
   ]);
 
-export default class PingMenu extends PseudoMenu {
+export default class PingMenu extends AnimatedMenu {
 
     mesh: Mesh;
 
@@ -37,7 +37,6 @@ export default class PingMenu extends PseudoMenu {
 
         this.animationMixer = new AnimationMixer(this.mesh);
         this.action = this.animationMixer.clipAction(PING_ANIMATION_CLIP);
-
     }
 
     updatePing(controller: VRController) {

@@ -62,7 +62,7 @@ import VrApplicationObject3D from 'virtual-reality/utils/view-objects/applicatio
 import VrLandscapeObject3D from 'virtual-reality/utils/view-objects/landscape/vr-landscape-object-3d';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import MenuQueue from 'virtual-reality/utils/menu-queue';
-import PingMenu from 'virtual-reality/utils/vr-menus/pseudo-menu/ping-menu';
+import PingMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/ping-menu';
 
 interface Args {
   readonly id: string;
