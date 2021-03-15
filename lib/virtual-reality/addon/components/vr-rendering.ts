@@ -895,8 +895,13 @@ export default class VrRendering extends Component<Args> {
 
   // #region MENUS
 
-  showHint(title: string, text: string|null = null) {
-    this.hintMenuQueue.enqueueMenu(new HintMenu(title, text));
+  showHint(title: string, text: string|undefined = undefined) {
+    // Show the hint only if there is no hint with the text in the queue
+    // already. This prevents the same hint to be shown multiple times when
+    // the user repeats the action that causes the hint.
+    if (!this.hintMenuQueue.hasEnquedOrCurrentMenu((menu) => menu instanceof HintMenu && menu.titleItem.text === title && menu.textItem?.text === text)) {
+      this.hintMenuQueue.enqueueMenu(new HintMenu(title, text));
+    }
   }
 
   openMainMenu(controller: VRController) {
