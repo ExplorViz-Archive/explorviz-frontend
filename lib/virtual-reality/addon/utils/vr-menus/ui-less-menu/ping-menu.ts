@@ -1,8 +1,8 @@
 
 import THREE, { AnimationMixer, Color, Mesh, Scene } from "three";
 import LocalVrUser from "virtual-reality/services/local-vr-user";
+import VrMessageSender from "virtual-reality/services/vr-message-sender";
 import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
-import VrMessageSender from "virtual-reality/utils/vr-message/sender";
 import VRController from "virtual-reality/utils/vr-rendering/VRController";
 import AnimatedMenu from "../animated-menu";
 
@@ -12,7 +12,6 @@ export const PING_ANIMATION_CLIP = new THREE.AnimationClip('ping-animation', 0.5
     new THREE.NumberKeyframeTrack('.scale[z]', [0.0, 0.5], [1.0, 2.6])
   ]);
 
-<<<<<<< HEAD:lib/virtual-reality/addon/utils/vr-menus/pseudo-menu/ping-menu.ts
 const PING_RADIUS = 0.02;
 
 const PING_SEGMENTS = 32
@@ -25,10 +24,7 @@ export function getPingMesh(color: Color): Mesh {
         return mesh;
 }
 
-export default class PingMenu extends PseudoMenu {
-=======
 export default class PingMenu extends AnimatedMenu {
->>>>>>> 2c0ba9dfff2780fa583dbc7aa3280b049c24f19b:lib/virtual-reality/addon/utils/vr-menus/ui-less-menu/ping-menu.ts
 
     mesh: Mesh;
 

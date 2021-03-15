@@ -1,7 +1,7 @@
 import THREE, { AnimationMixer, Mesh } from 'three';
 import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
 import NameTagMesh from '../view-objects/vr/name-tag-mesh';
-import { getPingMesh, PING_ANIMATION_CLIP } from '../vr-menus/pseudo-menu/ping-menu';
+import { getPingMesh, PING_ANIMATION_CLIP } from '../vr-menus/ui-less-menu/ping-menu';
 
 type Controller = {
   assetUrl: string,

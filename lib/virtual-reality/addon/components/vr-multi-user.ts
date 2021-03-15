@@ -6,7 +6,7 @@ import DeltaTime from 'virtual-reality/services/delta-time';
 import debugLogger from 'ember-debug-logger';
 import $ from 'jquery';
 import { bind } from '@ember/runloop';
-import THREE, { ReinhardToneMapping, Vector3 } from 'three';
+import THREE, { Vector3 } from 'three';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
 import VrRendering from 'virtual-reality/components/vr-rendering';
