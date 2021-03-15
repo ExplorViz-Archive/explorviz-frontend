@@ -10,26 +10,26 @@ import THREE from 'three';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
 import VrRendering from 'virtual-reality/components/vr-rendering';
-import VrMessageSender from 'virtual-reality/utils/vr-message/sender';
+import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
-import MessageBoxMenu from 'virtual-reality/utils/vr-menus/message-box-menu';
+import MessageBoxMenu from 'virtual-reality/utils/vr-menus/ui-menu/message-box-menu';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import NameTagMesh from 'virtual-reality/utils/view-objects/vr/name-tag-mesh';
-import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
-import GrabMenu, { isGrabbableObject, findGrabbableObject } from 'virtual-reality/utils/vr-menus/pseudo-menu/grab-menu';
+import MainMenu from 'virtual-reality/utils/vr-menus/ui-menu/main-menu';
+import GrabMenu, { isGrabbableObject, findGrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { perform } from 'ember-concurrency-ts';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
-import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
+import MultiUserMenu from 'virtual-reality/utils/vr-menus/ui-menu/multi-user-menu';
 import { MenuDetachedEvent, MENU_DETACH_EVENT_TYPE } from 'virtual-reality/utils/vr-menus/menu-group';
 
-import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/utils/vr-message/receiver';
+import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
 import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
 import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
 import { UserControllerMessage } from 'virtual-reality/utils/vr-message/sendable/user_controllers';
@@ -46,12 +46,13 @@ import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/ob
 import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/receivable/menu-detached-forward';
-import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
+import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
 import { isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/detached_menu_closed';
 import { isObjectClosedResponse, ObjectClosedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-closed';
 import { DetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
 import { GrabbableMenuContainer } from 'virtual-reality/utils/vr-menus/grabbable-menu-container';
+import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -70,11 +71,14 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   @service('spectate-user')
   spectateUser!: SpectateUser;
 
-  // Used to format and send messages to the backend
+  @service('vr-message-sender')
   sender!: VrMessageSender;
 
-  // Used to subscribe to response for requested.
+  @service('vr-message-receiver')
   receiver!: VrMessageReceiver;
+  
+  @service('grabbed-object')
+  grabbedObjectService!: GrabbedObjectService;
 
   remoteUserGroup: THREE.Group;
 
@@ -100,13 +104,13 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
   initRendering() {
     super.initRendering();
+    this.initWebSocket();
+  }
 
-    this.sender = new VrMessageSender(this.webSocket);
-    this.receiver = new VrMessageReceiver(this.webSocket, this);
+  initWebSocket() {
     this.webSocket.socketCloseCallback = this.onDisconnect.bind(this);
-
+    this.receiver.addMessageListener(this);
     this.localUser.state = 'offline';
-
     $.getJSON('config/config_multiuser.json').then(bind(this.webSocket, this.webSocket.applyConfiguration));
   }
 
@@ -164,6 +168,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     if (this.spectateUser.isActive) {
       this.spectateUser.update();
     }
+    this.grabbedObjectService.sendObjectPositions();
 
     this.updateUserNameTags();
     this.sendPoses();
@@ -241,7 +246,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     let object: THREE.Object3D|null = controller.intersectedObject.object;
     while (object) {
       if (isGrabbableObject(object)) {
-        controller.menuGroup.openMenu(new GrabMenu(object, this.sender, this.receiver, this.time));
+        controller.menuGroup.openMenu(new GrabMenu(object, this.grabbedObjectService, this.time));
         break;
       } else {
         object = object.parent;
@@ -891,6 +896,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     super.willDestroy();
     this.localUser.disconnect();
     this.spectateUser.reset();
+    this.receiver.removeMessageListener(this);
   }
 
 }

@@ -1,5 +1,5 @@
 import { module, test } from 'qunit';
-import SettingsMenu from 'virtual-reality/utils/vr-menus/settings-menu';
+import SettingsMenu from 'virtual-reality/utils/vr-menus/ui-menu/settings-menu';
 
 module('Unit | Utility | vr-menus/settings-menu', function(/* hooks */) {
 

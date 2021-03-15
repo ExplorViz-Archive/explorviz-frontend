@@ -34,16 +34,16 @@ import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
-import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
+import MainMenu from 'virtual-reality/utils/vr-menus/ui-menu/main-menu';
 import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
-import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
+import CameraMenu from 'virtual-reality/utils/vr-menus/ui-menu/camera-menu';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
-import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
+import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
 import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
-import ZoomMenu from 'virtual-reality/utils/vr-menus/zoom-menu';
+import ZoomMenu from 'virtual-reality/utils/vr-menus/ui-menu/zoom-menu';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
@@ -55,8 +55,8 @@ import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-con
 import VRControllerBindings from 'virtual-reality/utils/vr-controller/vr-controller-bindings';
 import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding, { VRControllerThumbpadDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
-import SettingsMenu from 'virtual-reality/utils/vr-menus/settings-menu';
-import ResetMenu from 'virtual-reality/utils/vr-menus/reset-menu';
+import SettingsMenu from 'virtual-reality/utils/vr-menus/ui-menu/settings-menu';
+import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
 import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import VrLandscapeObject3D from 'virtual-reality/utils/view-objects/landscape/vr-landscape-object-3d';
@@ -900,8 +900,13 @@ export default class VrRendering extends Component<Args> {
 
   // #region MENUS
 
-  showHint(title: string, text: string|null = null) {
-    this.hintMenuQueue.enqueueMenu(new HintMenu(title, text));
+  showHint(title: string, text: string|undefined = undefined) {
+    // Show the hint only if there is no hint with the text in the queue
+    // already. This prevents the same hint to be shown multiple times when
+    // the user repeats the action that causes the hint.
+    if (!this.hintMenuQueue.hasEnquedOrCurrentMenu((menu) => menu instanceof HintMenu && menu.titleItem.text === title && menu.textItem?.text === text)) {
+      this.hintMenuQueue.enqueueMenu(new HintMenu(title, text));
+    }
   }
 
   openMainMenu(controller: VRController) {

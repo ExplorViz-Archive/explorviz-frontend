@@ -1,7 +1,7 @@
-import BaseMenu from './base-menu';
+import redrawMenu from '../ui-menu';
 import THREE from 'three';
 
-export default class ZoomMenu extends BaseMenu {
+export default class ZoomMenu extends redrawMenu {
 
   target!: THREE.WebGLRenderTarget;
 
@@ -37,7 +37,7 @@ export default class ZoomMenu extends BaseMenu {
     this.lensCamera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     this.add(this.lensCamera);
 
-    this.update();
+    this.redrawMenu();
   }
 
   makeBackgroundGeometry() {
@@ -80,7 +80,7 @@ export default class ZoomMenu extends BaseMenu {
       this.renderer.xr.enabled = oldXREnabled;
   }
 
-  updateMenu(delta: number) {
+  onUpdateMenu(delta: number) {
     this.renderLens();
     super.onUpdateMenu(delta);
   }

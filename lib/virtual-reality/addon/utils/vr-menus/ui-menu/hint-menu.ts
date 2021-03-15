@@ -1,6 +1,6 @@
 import THREE from 'three';
-import BaseMenu from './base-menu';
-import TextItem from './items/text-item';
+import UiMenu from '../ui-menu';
+import TextItem from '../items/text-item';
 
 const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.75, [
   new THREE.KeyframeTrack('.scale[x]', [0.0, 0.75], [0.0, 1.0])
@@ -14,20 +14,23 @@ const CLOSE_ANIMATION_CLIP = new THREE.AnimationClip('close-animation', 0.75, [
   new THREE.KeyframeTrack('.scale[x]', [0, 0.75], [1.0, 0.0])
 ]);
 
-export default class HintMenu extends BaseMenu {
-  constructor(title: string, text: string|null = null) {
+export default class HintMenu extends UiMenu {
+  titleItem: TextItem;
+  textItem: TextItem|undefined;
+
+  constructor(title: string, text: string|undefined = undefined) {
     super({ width: 512, height: 128 }, '#002e4f');
 
-    const titleItem = new TextItem(title, 'text', '#ffffff', { x: 256, y: 50 }, 28, 'center');
-    this.items.push(titleItem);
+    this.titleItem = new TextItem(title, 'text', '#ffffff', { x: 256, y: 50 }, 28, 'center');
+    this.items.push(this.titleItem);
 
     if (text) {
-      titleItem.position.y = 25;
-      const contentItem = new TextItem(text, 'text2', '#ffff00', { x: 256, y: 75 }, 28, 'center');
-      this.items.push(contentItem);
+      this.titleItem.position.y = 25;
+      this.textItem = new TextItem(text, 'text2', '#ffff00', { x: 256, y: 75 }, 28, 'center');
+      this.items.push(this.textItem);
     }
 
-    this.update();
+    this.redrawMenu();
   }
 
   makeBackgroundMaterial(color: THREE.Color) {
