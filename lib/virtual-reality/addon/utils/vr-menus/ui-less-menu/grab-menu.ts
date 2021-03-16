@@ -66,6 +66,7 @@ export default class GrabMenu extends BaseMenu {
                 this.grabbedObject.scale
             );
             controller.gripSpace.add(this.grabbedObject);
+            controller.intersectableObjects.push(this.grabbedObject);
         }
     }
 
@@ -86,6 +87,7 @@ export default class GrabMenu extends BaseMenu {
                 this.grabbedObject.quaternion,
                 this.grabbedObject.scale
             );
+            controller.intersectableObjects.splice(controller.intersectableObjects.indexOf(this.grabbedObject),1);
         }
 
         // Restore original parent.

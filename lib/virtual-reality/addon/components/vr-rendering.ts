@@ -676,8 +676,6 @@ export default class VrRendering extends Component<Args> {
       closeIcon.addToObject(applicationObject3D);
 
       this.applicationGroup.addApplication(applicationObject3D);
-      this.localUser.controller1?.intersectableObjects.push(applicationObject3D);
-      this.localUser.controller2?.intersectableObjects.push(applicationObject3D);
 
       if (callback) callback(applicationObject3D);
     } catch (e: any) {
@@ -1089,16 +1087,6 @@ export default class VrRendering extends Component<Args> {
 
   removeApplication(application: ApplicationObject3D) {
     this.applicationGroup.removeApplicationById(application.dataModel.pid);
-
-    const { controller1, controller2 } = this.localUser;
-    if (controller1) {
-      controller1.intersectableObjects = controller1.intersectableObjects
-        .filter((object) => object !== application);
-    }
-    if (controller2) {
-      controller2.intersectableObjects = controller2.intersectableObjects
-        .filter((object) => object !== application);
-    }
   }
 
   cleanUpLandscape() {
