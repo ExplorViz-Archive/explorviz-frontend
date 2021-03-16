@@ -344,8 +344,8 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     this.localUser.userID = self.id;
     const color = new THREE.Color().fromArray(self.color);
     this.localUser.color = color;
-    if (this.localUser.controller1) this.localUser.controller1.color = color;
-    if (this.localUser.controller2) this.localUser.controller2.color = color;
+    if (this.localUser.controller1) this.localUser.controller1.updateControllerColor(color);
+    if (this.localUser.controller2) this.localUser.controller2.updateControllerColor(color);
     this.localUser.userName = self.name;
 
     this.sendInitialControllerConnectState();

@@ -177,7 +177,7 @@ export default class VRController extends BaseMesh {
   setToDefaultAppearance() {
     if (!this.connected) return;
     displayAsSolidObject(this);
-    this.addRay(this.color);
+    this.initRay();
     this.initTeleportArea();
   }
 
@@ -200,12 +200,21 @@ export default class VRController extends BaseMesh {
   }
 
   /**
+   * Updates the color of the controller's ray and teleport area.
+   */
+  updateControllerColor(color: THREE.Color) {
+    this.color = color;
+    this.removeRay();
+    this.removeTeleportArea();
+    this.initRay();
+    this.initTeleportArea();
+  }
+
+  /**
    * Adds a line to the controller which is a visual representation of the hit
    * objects for raycasting.
-   *
-   * @param color Color of the ray
    */
-  addRay(color: THREE.Color) {
+   initRay() {
     if (this.ray) return;
 
     const geometry = new THREE.BufferGeometry().setFromPoints(
@@ -213,7 +222,7 @@ export default class VRController extends BaseMesh {
     );
 
     const material = new THREE.LineBasicMaterial({
-      color,
+      color: this.color,
     });
 
     const line = new THREE.Line(geometry, material);
