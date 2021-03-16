@@ -32,7 +32,7 @@ import { MenuDetachedEvent, MENU_DETACH_EVENT_TYPE } from 'virtual-reality/utils
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
 import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
 import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
-import { UserControllerMessage } from 'virtual-reality/utils/vr-message/sendable/user_controllers';
+import { UserControllerMessage, USER_CONTROLLER_EVENT } from 'virtual-reality/utils/vr-message/sendable/user_controllers';
 import { UserDisconnectedMessage, USER_DISCONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
 import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
 import { HighlightingUpdateMessage, HIGHLIGHTING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
@@ -330,6 +330,15 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
         name: userData.name,
         color: userData.color
       }, false);
+      this.onUserControllers({
+        event: FORWARDED_EVENT,
+        userID: userData.id, 
+        originalMessage: {
+          event: USER_CONTROLLER_EVENT,
+          connect : userData.controllers, 
+          disconnect: null
+        }
+      });
     }
     this.localUser.state = 'online';
     this.localUser.userID = self.id;

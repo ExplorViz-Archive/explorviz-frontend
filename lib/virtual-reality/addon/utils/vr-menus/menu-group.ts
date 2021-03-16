@@ -108,7 +108,7 @@ export default class MenuGroup extends THREE.Group {
     detachMenu() {
         const detachedMenu = this.currentMenu;
         if (detachedMenu && isDetachableMenu(detachedMenu)) {
-            this.removeMenu((m) => m.onDetachMenu());
+            this.popMenu((m) => m.onDetachMenu());
             this.resumeMenu();
 
             // send detached menu
@@ -126,13 +126,26 @@ export default class MenuGroup extends THREE.Group {
      * is invoked.
      */
     private removeMenu(callback: (removedMenu: BaseMenu) => void): BaseMenu|undefined {
-        const removedMenu = this.menus.pop();
-        this.controllerBindings.pop();
-        if (removedMenu) {
-            callback(removedMenu);
-            this.remove(removedMenu);
+        const menu = this.popMenu(callback);
+        if (menu) {
+            this.remove(menu);
         }
-        return removedMenu;
+        return menu;
+    }
+
+    /**
+     * Pop active menu.
+     * 
+     * @param callback Determines whethe the `onClose` or `onDetach` callback
+     * is invoked.
+     */
+    private popMenu(callback: (menu: BaseMenu) => void): BaseMenu|undefined {
+        const menu = this.menus.pop();
+        this.controllerBindings.pop();
+        if (menu) {
+            callback(menu);
+        }
+        return menu;
     }
 
     /**
