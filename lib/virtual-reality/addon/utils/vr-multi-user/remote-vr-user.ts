@@ -3,6 +3,7 @@ import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
 import NameTagMesh from '../view-objects/vr/name-tag-mesh';
 import PingMesh from '../view-objects/vr/ping-mesh';
+import WaypointIndicator from '../view-objects/vr/waypoint-indicator';
 
 type Controller = {
   assetUrl: string,
@@ -32,7 +33,11 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   pingMesh1: PingMesh;
 
+  pingWaypoint1: WaypointIndicator;
+
   pingMesh2: PingMesh;
+
+  pingWaypoint2: WaypointIndicator;
 
   camera: Camera | undefined;
 
@@ -63,6 +68,10 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.pingMesh2 = new PingMesh({animationMixer: this.animationMixer, color: this.color});
     this.add(this.pingMesh1);
     this.add(this.pingMesh2);
+    this.pingWaypoint1 = new WaypointIndicator({target: this.pingMesh1, color: this.color});
+    this.pingWaypoint2 = new WaypointIndicator({target: this.pingMesh2, color: this.color});
+    this.localUser.defaultCamera.add(this.pingWaypoint1);
+    this.localUser.defaultCamera.add(this.pingWaypoint2);
   }
 
   initCamera(obj: THREE.Object3D) {
@@ -151,11 +160,19 @@ export default class RemoteVrUser extends THREE.Object3D {
     }
   }
 
+  removePingObjects() {
+    this.remove(this.pingMesh1);
+    this.remove(this.pingMesh2);
+    this.remove(this.pingWaypoint1);
+    this.remove(this.pingWaypoint2);
+  }
+
   removeAllObjects3D() {
     this.removeController1();
     this.removeController2();
     this.removeCamera();
     this.removeNameTag();
+    this.removePingObjects();
   }
 
   startPing1() {

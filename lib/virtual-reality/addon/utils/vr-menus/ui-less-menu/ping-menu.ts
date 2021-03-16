@@ -1,4 +1,3 @@
-
 import THREE from "three";
 import VrMessageSender from "virtual-reality/services/vr-message-sender";
 import PingMesh from "virtual-reality/utils/view-objects/vr/ping-mesh";
