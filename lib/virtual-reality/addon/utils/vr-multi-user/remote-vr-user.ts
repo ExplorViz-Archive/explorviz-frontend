@@ -1,4 +1,4 @@
-import THREE, { AnimationMixer, Mesh } from 'three';
+import THREE from 'three';
 import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
 import NameTagMesh from '../view-objects/vr/name-tag-mesh';
 import { getPingMesh, PING_ANIMATION_CLIP } from '../vr-menus/ui-less-menu/ping-menu';
@@ -29,9 +29,9 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   controller2: Controller | undefined;
 
-  ping1: Mesh | undefined;
+  ping1: THREE.Mesh | undefined;
 
-  ping2: Mesh | undefined;
+  ping2: THREE.Mesh | undefined;
 
   actionPing1: THREE.AnimationAction | undefined;
 
@@ -43,6 +43,12 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   nameTag: NameTagMesh|undefined;
 
+  animationMixer: THREE.AnimationMixer;
+
+  constructor() {
+    super();
+    this.animationMixer = new THREE.AnimationMixer(this);
+  }
 
   initCamera(obj: THREE.Object3D) {
     this.camera = {
@@ -139,8 +145,7 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   startPing1() {
     this.ping1 = getPingMesh(this.color);
-    let mixer = new AnimationMixer(this.ping1);
-    this.actionPing1 = mixer.clipAction(PING_ANIMATION_CLIP);
+    this.actionPing1 = this.animationMixer.clipAction(PING_ANIMATION_CLIP, this.ping1);
     this.add(this.ping1);
   }
 
@@ -169,8 +174,7 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   startPing2() {
     this.ping2 = getPingMesh(this.color);
-    let mixer = new AnimationMixer(this.ping2);
-    this.actionPing2 = mixer.clipAction(PING_ANIMATION_CLIP);
+    this.actionPing2 = this.animationMixer.clipAction(PING_ANIMATION_CLIP, this.ping2);
     this.add(this.ping2);
   }
 
@@ -195,6 +199,15 @@ export default class RemoteVrUser extends THREE.Object3D {
       this.actionPing2?.stop();
       this.actionPing2 = undefined;
     }
+  }
+
+  /**
+   * Updates the the animations.
+   * 
+   * @param delta The time since the last update.
+   */
+  update(delta: number) {
+    this.animationMixer.update(delta);
   }
 
   /**

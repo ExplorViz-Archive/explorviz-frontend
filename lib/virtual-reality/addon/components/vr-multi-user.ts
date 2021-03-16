@@ -172,7 +172,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
     this.grabbedObjectService.sendObjectPositions();
 
-    this.updateUserNameTags();
+    this.updateRemoteUsers();
     this.sendPoses();
   }
 
@@ -824,11 +824,16 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   /**
-   * Set user name tag to be directly above their head
-   * and set rotation such that it looks toward our camera.
+   * Updates animations of the remote user and sets user name tag to be 
+   * directly above their head and set rotation such that it looks toward 
+   * our camera.
    */
-  updateUserNameTags() {
+  updateRemoteUsers() {
     this.idToRemoteUser.forEach((user) => {
+      // Update animations.
+      user.update(this.time.getDeltaTime());
+      
+      // Update name tag.
       const dummyPlane = user.getObjectByName('dummyNameTag');
       if (user.state === 'online' && user.nameTag && user.camera && dummyPlane && this.localUser.camera) {
         user.nameTag.position.setFromMatrixPosition(dummyPlane.matrixWorld);
