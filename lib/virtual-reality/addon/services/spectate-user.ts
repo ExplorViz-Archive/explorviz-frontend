@@ -48,7 +48,7 @@ export default class SpectateUser extends Service {
     }
 
     remoteUser.setHmdVisible(false);
-    this.sender.sendSpectatingUpdate(this.isActive, remoteUser.ID);
+    this.sender.sendSpectatingUpdate(this.isActive, remoteUser.userId);
   }
 
   /**

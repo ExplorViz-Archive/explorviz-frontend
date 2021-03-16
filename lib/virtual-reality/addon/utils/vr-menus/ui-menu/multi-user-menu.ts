@@ -80,11 +80,11 @@ export default class MultiUserMenu extends UiMenu {
     this.users.forEach((user) => {
         if (user.state === 'online' && user.userName) {
           let text = user.userName;
-          if (this.spectateUser.spectatedUser?.ID == user.ID) {
+          if (this.spectateUser.spectatedUser?.userId == user.userId) {
             text += ' (spectated)';
           }
-          const remoteUserButton = new TextbuttonItem(user.ID, text, { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
-          this.remoteUserButtons.set(user.ID, remoteUserButton)
+          const remoteUserButton = new TextbuttonItem(user.userId, text, { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+          this.remoteUserButtons.set(user.userId, remoteUserButton)
           this.items.push(remoteUserButton);
           this.thumbpadTargets.push(remoteUserButton);
           remoteUserButton.onTriggerDown = () => this.spectate(user);
@@ -117,7 +117,7 @@ export default class MultiUserMenu extends UiMenu {
 
   deactivateSpectate() {
     if (this.spectateUser.isActive) {
-      const id = this.spectateUser.spectatedUser?.ID
+      const id = this.spectateUser.spectatedUser?.userId
       if (id) {
         const remoteUserButton = this.remoteUserButtons.get(id);
         if (remoteUserButton) {
@@ -132,7 +132,7 @@ export default class MultiUserMenu extends UiMenu {
   spectate(remoteUser: RemoteVrUser) {
     this.deactivateSpectate();
     this.spectateUser.activate(remoteUser);
-    const remoteUserButton = this.remoteUserButtons.get(remoteUser.ID);
+    const remoteUserButton = this.remoteUserButtons.get(remoteUser.userId);
     if (remoteUserButton) {
         remoteUserButton.text += ' (spectated)';
     }

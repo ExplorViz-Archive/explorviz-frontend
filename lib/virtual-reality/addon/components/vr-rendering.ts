@@ -303,21 +303,11 @@ export default class VrRendering extends Component<Args> {
   }
 
   initControllers() {
-    this.localUser.controller1 = this.initController({
-      gamepadIndex: 0,
-      color: new THREE.Color('red'),
-    });
-
-    this.localUser.controller2 = this.initController({
-      gamepadIndex: 1,
-      color: new THREE.Color('blue'),
-    });
+    this.localUser.controller1 = this.initController({gamepadIndex: 0});
+    this.localUser.controller2 = this.initController({gamepadIndex: 1});
   }
 
-  initController({gamepadIndex, color}: {
-    gamepadIndex: number,
-    color: THREE.Color
-  }): VRController {
+  initController({gamepadIndex}: {gamepadIndex: number}): VRController {
     const menuGroup = new MenuGroup();
     const controller = new VRController({
       gamepadIndex,
@@ -325,7 +315,8 @@ export default class VrRendering extends Component<Args> {
       bindings: new VRControllerBindingsList(this.makeControllerBindings(), menuGroup.controllerBindings),
       gripSpace: this.renderer.xr.getControllerGrip(gamepadIndex),
       raySpace: this.renderer.xr.getController(gamepadIndex),
-      color, menuGroup
+      color: new THREE.Color('red'), 
+      menuGroup
     });
     controller.setToDefaultAppearance();
     controller.intersectableObjects = this.interaction.raycastObjects;
