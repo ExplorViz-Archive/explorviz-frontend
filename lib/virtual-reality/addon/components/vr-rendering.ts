@@ -304,7 +304,7 @@ export default class VrRendering extends Component<Args> {
 
   initControllers() {
     this.localUser.controller1 = this.initController({gamepadIndex: 0});
-    this.localUser.controller2 = this.initController({gamepadIndex: 1);
+    this.localUser.controller2 = this.initController({gamepadIndex: 1});
   }
 
   initController({gamepadIndex}: {gamepadIndex: number}): VRController {
