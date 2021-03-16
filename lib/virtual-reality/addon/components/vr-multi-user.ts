@@ -201,8 +201,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   openPingMenu(controller: VRController) {
-    const user = this.localUser;
-    controller.menuGroup.openMenu(new PingMenu(user, this.scene, this.sender));
+    controller.menuGroup.openMenu(new PingMenu(this.scene, this.sender));
   }
 
   // #endregion MENUS
@@ -374,12 +373,13 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       });
     }
 
-    const user = new RemoteVrUser();
-    user.userName = name;
-    user.ID = id;
-    user.color = new THREE.Color().fromArray(color);
-    user.state = 'online';
-
+    const user = new RemoteVrUser({
+      userName: name,
+      userId: id,
+      color: new THREE.Color().fromArray(color),
+      state: 'online',
+      localUser: this.localUser
+    });
     this.idToRemoteUser.set(id, user);
 
     if (this.hardwareModels.hmd) { user.initCamera(this.hardwareModels.hmd); }
@@ -420,7 +420,6 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  
   onPingUpdate({
     userID,
     originalMessage: {controllerId, isPinging}
@@ -478,7 +477,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    */
   onUserDisconnect({ id }: UserDisconnectedMessage) {
     // Do not spectate a disconnected user
-    if (this.spectateUser.spectatedUser?.ID === id) {
+    if (this.spectateUser.spectatedUser?.userId === id) {
       this.spectateUser.deactivate();
     }
 
@@ -697,7 +696,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     const remoteUserHexColor = `#${remoteUser.color.getHexString()}`;
     if (isSpectating) {
       remoteUser.setVisible(false);
-      if (this.spectateUser.spectatedUser && this.spectateUser.spectatedUser.ID === userID) {
+      if (this.spectateUser.spectatedUser && this.spectateUser.spectatedUser.userId === userID) {
         this.spectateUser.deactivate();
       }
       this.messageMenuQueue.enqueueMenu(new MessageBoxMenu({
@@ -832,13 +831,6 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     this.idToRemoteUser.forEach((user) => {
       // Update animations.
       user.update(this.time.getDeltaTime());
-      
-      // Update name tag.
-      const dummyPlane = user.getObjectByName('dummyNameTag');
-      if (user.state === 'online' && user.nameTag && user.camera && dummyPlane && this.localUser.camera) {
-        user.nameTag.position.setFromMatrixPosition(dummyPlane.matrixWorld);
-        user.nameTag.lookAt(this.localUser.camera.getWorldPosition(new THREE.Vector3()));
-      }
     });
   }
 

@@ -1,7 +1,8 @@
 import THREE from 'three';
+import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
 import NameTagMesh from '../view-objects/vr/name-tag-mesh';
-import { getPingMesh, PING_ANIMATION_CLIP } from '../vr-menus/ui-less-menu/ping-menu';
+import PingMesh from '../view-objects/vr/ping-mesh';
 
 type Controller = {
   assetUrl: string,
@@ -19,35 +20,49 @@ type Camera = {
 };
 
 export default class RemoteVrUser extends THREE.Object3D {
-  userName!: string;
+  userName: string;
 
-  ID: string = 'unknown';
+  userId: string;
 
-  state!: string;
+  state: string;
 
   controller1: Controller | undefined;
 
   controller2: Controller | undefined;
 
-  ping1: THREE.Mesh | undefined;
+  pingMesh1: PingMesh;
 
-  ping2: THREE.Mesh | undefined;
-
-  actionPing1: THREE.AnimationAction | undefined;
-
-  actionPing2: THREE.AnimationAction | undefined;
+  pingMesh2: PingMesh;
 
   camera: Camera | undefined;
 
-  color!: THREE.Color; // [r,g,b], r,g,b = 0,...,255
+  color: THREE.Color; // [r,g,b], r,g,b = 0,...,255
 
   nameTag: NameTagMesh|undefined;
 
+  localUser: LocalVrUser;
+
   animationMixer: THREE.AnimationMixer;
 
-  constructor() {
+  constructor({userName, userId, color, state, localUser}: {
+    userName: string,
+    userId: string,
+    color: THREE.Color,
+    state: string,
+    localUser : LocalVrUser
+  }) {
     super();
+    this.userName = userName;
+    this.userId = userId;
+    this.color = color;
+    this.state = state;
+    this.localUser = localUser;
     this.animationMixer = new THREE.AnimationMixer(this);
+    
+    this.pingMesh1 = new PingMesh({animationMixer: this.animationMixer, color: this.color});
+    this.pingMesh2 = new PingMesh({animationMixer: this.animationMixer, color: this.color});
+    this.add(this.pingMesh1);
+    this.add(this.pingMesh2);
   }
 
   initCamera(obj: THREE.Object3D) {
@@ -144,70 +159,48 @@ export default class RemoteVrUser extends THREE.Object3D {
   }
 
   startPing1() {
-    this.ping1 = getPingMesh(this.color);
-    this.actionPing1 = this.animationMixer.clipAction(PING_ANIMATION_CLIP, this.ping1);
-    this.add(this.ping1);
+    this.pingMesh1.startPinging();
   }
 
   updatePing1() {
-    if (this.controller1 && this.ping1 && this.actionPing1) {
-      let position = this.controller1.intersection;
-      if (position) {
-          this.ping1.position.set(position.x, position.y, position.z);
-          this.ping1.visible = true;
-          this.actionPing1.play();
-      } else {
-        this.ping1.visible = false;
-        this.actionPing2?.stop();
-      }
+    if (this.controller1) {
+      this.pingMesh1.updateIntersection(this.controller1.intersection);
     }
   }
 
   stopPing1() {
-    if (this.ping1) {
-      this.remove(this.ping1);
-      this.ping1 = undefined;
-      this.actionPing1?.stop();
-      this.actionPing1 = undefined;
-    }
+    this.pingMesh1.stopPinging();
   }
 
   startPing2() {
-    this.ping2 = getPingMesh(this.color);
-    this.actionPing2 = this.animationMixer.clipAction(PING_ANIMATION_CLIP, this.ping2);
-    this.add(this.ping2);
+    this.pingMesh2.startPinging();
   }
 
   updatePing2() {
-    if (this.controller2 && this.ping2 && this.actionPing2) {
-      let position = this.controller2.intersection;
-      if (position) {
-          this.ping2.position.set(position.x, position.y, position.z);
-          this.ping2.visible = true;
-          this.actionPing2.play();
-      } else {
-        this.ping2.visible = false;
-        this.actionPing2?.stop();
-      }
+    if (this.controller2) {
+      this.pingMesh2.updateIntersection(this.controller2.intersection);
     }
   }
 
   stopPing2() {
-    if (this.ping2) {
-      this.remove(this.ping2);
-      this.ping2 = undefined;
-      this.actionPing2?.stop();
-      this.actionPing2 = undefined;
-    }
+    this.pingMesh2.stopPinging();
   }
 
   /**
-   * Updates the the animations.
+   * Updates the the animations and sets the position and rotation of the
+   * name tag.
    * 
    * @param delta The time since the last update.
    */
   update(delta: number) {
     this.animationMixer.update(delta);
+    
+    // Update name tag.
+    const dummyPlane = this.getObjectByName('dummyNameTag');
+    if (this.state === 'online' && this.nameTag && this.camera && dummyPlane && this.localUser.camera) {
+      this.nameTag.position.setFromMatrixPosition(dummyPlane.matrixWorld);
+      this.nameTag.lookAt(this.localUser.camera.getWorldPosition(new THREE.Vector3()));
+    }
   }
 
   /**
