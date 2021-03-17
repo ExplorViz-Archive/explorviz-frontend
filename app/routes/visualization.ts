@@ -54,8 +54,8 @@ export default class VisualizationRoute extends BaseRoute {
 
   // @Override Ember-Hook
   /* eslint-disable-next-line class-methods-use-this */
-  resetController(controller: VisualizationController, isExiting: boolean, transition: any) {
-    if (isExiting && transition && transition.targetName !== 'error') {
+  resetController(controller: VisualizationController, isExiting: boolean /* , transition: any */) {
+    if (isExiting) {
       controller.send('resetLandscapeListenerPolling');
     }
   }
