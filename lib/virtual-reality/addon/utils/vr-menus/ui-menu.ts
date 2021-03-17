@@ -39,6 +39,10 @@ export default abstract class UiMenu extends AnimatedMenu {
   
       this.initBackground(new THREE.Color(color));
       this.initCanvas();
+      
+      // Move the mesh slightly in front of the background.
+      this.canvasMesh.position.z = 0.00001;
+      this.add(this.canvasMesh);
     }
 
     /**
@@ -67,13 +71,12 @@ export default abstract class UiMenu extends AnimatedMenu {
      * @param color The color the background should have.
      */
     makeBackgroundMaterial(color: THREE.Color): THREE.Material {
-      const material = new THREE.MeshBasicMaterial({
+      return new THREE.MeshBasicMaterial({
         color: color,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.8,
       });
-      material.transparent = true;
-      material.opacity = 0.8;
-      return material;
     }
   
     /**
@@ -90,9 +93,8 @@ export default abstract class UiMenu extends AnimatedMenu {
       const geometry = this.makeBackgroundGeometry();
       const material = new THREE.MeshBasicMaterial({
         map: new THREE.CanvasTexture(this.canvas),
-        depthTest: false
+        transparent: true,
       });
-      material.transparent = true;
       this.canvasMesh = new THREE.Mesh(geometry, material);
   
       this.add(this.canvasMesh);
