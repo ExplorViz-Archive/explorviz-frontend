@@ -55,6 +55,7 @@ import { GrabbableMenuContainer } from 'virtual-reality/utils/vr-menus/grabbable
 import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import PingMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/ping-menu';
+import { TaskInstance } from 'ember-concurrency';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -511,16 +512,17 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  onInitialLandscape({ detachedMenus, openApps, landscape }: InitialLandscapeMessage): void {
+  async onInitialLandscape({ detachedMenus, openApps, landscape }: InitialLandscapeMessage): Promise<void> {
     this.removeAllApplications();
     this.detachedMenus.remove(...this.detachedMenus.children);
 
     const { structureLandscapeData } = this.args.landscapeData;
 
+    const tasks: TaskInstance<any>[] = [];
     openApps.forEach((app) => {
       const application = getApplicationInLandscapeById(structureLandscapeData, app.id);
       if (application) {
-        perform(this.addApplicationTask, application,
+        const task = perform(this.addApplicationTask, application,
           (applicationObject3D: ApplicationObject3D) => {
             applicationObject3D.position.fromArray(app.position);
             applicationObject3D.quaternion.fromArray(app.quaternion);
@@ -555,12 +557,17 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
               });
             });
           });
+        tasks.push(task);
       }
     });
 
     this.landscapeObject3D.position.fromArray(landscape.position);
     this.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
     this.landscapeObject3D.scale.fromArray(landscape.scale);
+
+    // Wait for applications to be opened before opening the menus. Otherwise
+    // the entities do not exist.
+    await Promise.all(tasks);
 
     // initialize detached menus
     detachedMenus.forEach((detachedMenu) => {
