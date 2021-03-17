@@ -90,10 +90,6 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   // Contains clonable objects of HMD, camera and controllers for other users
   hardwareModels: HardwareModels;
 
-  getRemoteUsers() {
-    return this.idToRemoteUser;
-  }
-
   // #endregion CLASS FIELDS AND GETTERS
 
   // #region INIT
@@ -111,7 +107,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   initWebSocket() {
-    this.webSocket.socketCloseCallback = this.onDisconnect.bind(this);
+    this.webSocket.socketCloseCallback = () => this.onDisconnect();
     this.receiver.addMessageListener(this);
     this.localUser.state = 'offline';
     $.getJSON('config/config_multiuser.json').then(bind(this.webSocket, this.webSocket.applyConfiguration));
@@ -143,16 +139,14 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     };
 
     if (this.localUser.controller1) {
-      this.localUser.controller1.eventCallbacks.connected = this.onControllerConnected.bind(this);
-      this.localUser.controller1.eventCallbacks.disconnected = this
-        .onControllerDisconnected.bind(this);
+      this.localUser.controller1.eventCallbacks.connected = (controller) => this.onControllerConnected(controller);
+      this.localUser.controller1.eventCallbacks.disconnected = (controller) => this.onControllerDisconnected(controller);
       this.localUser.controller1.menuGroup.addEventListener(MENU_DETACH_EVENT_TYPE, menuDetachListener);
     }
 
     if (this.localUser.controller2) {
-      this.localUser.controller2.eventCallbacks.connected = this.onControllerConnected.bind(this);
-      this.localUser.controller2.eventCallbacks.disconnected = this
-        .onControllerDisconnected.bind(this);
+      this.localUser.controller2.eventCallbacks.connected = (controller) => this.onControllerConnected(controller);
+      this.localUser.controller2.eventCallbacks.disconnected = (controller) => this.onControllerDisconnected(controller);
       this.localUser.controller2.menuGroup.addEventListener(MENU_DETACH_EVENT_TYPE, menuDetachListener);
     }
   }
@@ -183,20 +177,20 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     if (!this.localUser.controller1) return;
 
     controller.menuGroup.openMenu(new MainMenu({
-      openSettingsMenu: this.openSettingsMenu.bind(this, controller),
-      openMultiUserMenu: this.openMultiUserMenu.bind(this, controller),
-      openResetMenu: this.openResetMenu.bind(this, controller)
+      openSettingsMenu: () => this.openSettingsMenu(controller),
+      openMultiUserMenu: () => this.openMultiUserMenu(controller),
+      openResetMenu: () => this.openResetMenu(controller)
     }));
   }
 
   openMultiUserMenu(controller: VRController) {
-    const menu = new MultiUserMenu(
-      this.localUser.toggleConnection.bind(this.localUser),
-      this.localUser,
-      this.spectateUserService,
-      this.idToRemoteUser,
-      this.getRemoteUsers.bind(this)
-    );
+    const menu = new MultiUserMenu({
+      toggleConnection: () => this.localUser.toggleConnection(),
+      localUser: this.localUser,
+      spectateUserService: this.spectateUserService,
+      idToRemoteVrUsers: this.idToRemoteUser,
+      getRemoteUsers: () => this.idToRemoteUser
+    });
 
     controller.menuGroup.openMenu(menu);
   }

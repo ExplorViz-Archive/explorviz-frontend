@@ -179,7 +179,7 @@ export default class GrabMenu extends BaseMenu {
 
     makeGripButtonBinding() {
         return new VRControllerButtonBinding('Release Object', {
-            onButtonUp: this.closeMenu.bind(this)
+            onButtonUp: () => this.closeMenu()
         });
     }
 

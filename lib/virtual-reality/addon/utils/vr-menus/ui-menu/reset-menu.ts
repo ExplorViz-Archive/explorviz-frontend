@@ -5,7 +5,10 @@ import LocalVrUser from 'virtual-reality/services/local-vr-user';
 
 export default class ResetMenu extends UiMenu {
 
-  constructor(resetAll: () => void, localUser: LocalVrUser) {
+  constructor({resetAll, localUser}: {
+    resetAll: () => void, 
+    localUser: LocalVrUser
+  }) {
     super();
 
     const textItem = new TextItem('Reset', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
@@ -31,7 +34,7 @@ export default class ResetMenu extends UiMenu {
         this.closeMenu()
       };
 
-      noButton.onTriggerDown = this.closeMenu.bind(this);
+      noButton.onTriggerDown = () => this.closeMenu();
 
       this.items.push(yesButton, noButton);
       this.thumbpadTargets.push(noButton, yesButton);

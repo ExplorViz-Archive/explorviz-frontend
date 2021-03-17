@@ -2,7 +2,7 @@ import TextbuttonItem from '../items/textbutton-item';
 import TextItem from '../items/text-item';
 import RemoteVrUser from '../../vr-multi-user/remote-vr-user';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
-import SpectateUser from 'virtual-reality/services/spectate-user';
+import SpectateUserService from 'virtual-reality/services/spectate-user';
 import VRControllerButtonBinding from '../../vr-controller/vr-controller-button-binding';
 import UiMenu from '../ui-menu';
 
@@ -14,7 +14,7 @@ export default class MultiUserMenu extends UiMenu {
 
     localUser: LocalVrUser;
 
-    spectateUser: SpectateUser;
+    spectateUserService: SpectateUserService;
 
     remoteUserButtons: Map<string, TextbuttonItem> = new Map<string, TextbuttonItem>();
 
@@ -27,10 +27,16 @@ export default class MultiUserMenu extends UiMenu {
     getRemoteUsers: (() => Map<string, RemoteVrUser>);
 
 
-  constructor(toggleConnection: (() => void), localUser: LocalVrUser, spectateUser: SpectateUser, idToRemoteVrUsers : Map<string, RemoteVrUser>, getRemoteUsers: (() => Map<string, RemoteVrUser>)) {
+  constructor({toggleConnection, localUser, spectateUserService, idToRemoteVrUsers, getRemoteUsers}: {
+    toggleConnection: () => void, 
+    localUser: LocalVrUser, 
+    spectateUserService: SpectateUserService, 
+    idToRemoteVrUsers: Map<string, RemoteVrUser>, 
+    getRemoteUsers: () => Map<string, RemoteVrUser>
+  }) {
     super();
     this.localUser = localUser;
-    this.spectateUser = spectateUser;
+    this.spectateUserService = spectateUserService;
     this.idToRemoteVrUsers = idToRemoteVrUsers;
     this.users = Array.from(this.idToRemoteVrUsers.values());
     this.toggleConnection = toggleConnection;
@@ -74,13 +80,13 @@ export default class MultiUserMenu extends UiMenu {
     const localUserButton = new TextbuttonItem('local-user', this.localUser.userName + ' (you)', { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
           this.items.push(localUserButton);
           this.thumbpadTargets.push(localUserButton);
-          localUserButton.onTriggerDown = this.deactivateSpectate.bind(this);
+          localUserButton.onTriggerDown = () => this.deactivateSpectate();
           yPos += yOffset;
 
     this.users.forEach((user) => {
         if (user.state === 'online' && user.userName) {
           let text = user.userName;
-          if (this.spectateUser.spectatedUser?.userId == user.userId) {
+          if (this.spectateUserService.spectatedUser?.userId == user.userId) {
             text += ' (spectated)';
           }
           const remoteUserButton = new TextbuttonItem(user.userId, text, { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
@@ -116,22 +122,22 @@ export default class MultiUserMenu extends UiMenu {
   }
 
   deactivateSpectate() {
-    if (this.spectateUser.isActive) {
-      const id = this.spectateUser.spectatedUser?.userId
+    if (this.spectateUserService.isActive) {
+      const id = this.spectateUserService.spectatedUser?.userId
       if (id) {
         const remoteUserButton = this.remoteUserButtons.get(id);
         if (remoteUserButton) {
             remoteUserButton.text = this.idToRemoteVrUsers.get(id)?.userName || 'unknown';
         }
       }
-      this.spectateUser.deactivate();
+      this.spectateUserService.deactivate();
     }
     this.redrawMenu();
   }
 
   spectate(remoteUser: RemoteVrUser) {
     this.deactivateSpectate();
-    this.spectateUser.activate(remoteUser);
+    this.spectateUserService.activate(remoteUser);
     const remoteUserButton = this.remoteUserButtons.get(remoteUser.userId);
     if (remoteUserButton) {
         remoteUserButton.text += ' (spectated)';
@@ -159,6 +165,6 @@ export default class MultiUserMenu extends UiMenu {
 
   onCloseMenu() {
     super.onCloseMenu();
-    this.spectateUser.deactivate();
+    this.spectateUserService.deactivate();
   }
 }

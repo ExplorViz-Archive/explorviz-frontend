@@ -144,7 +144,7 @@ export default abstract class BaseMenu extends THREE.Group {
    */
   makeMenuButtonBinding(): VRControllerButtonBinding<undefined>|undefined {
     return new VRControllerButtonBinding('Back', {
-      onButtonDown: this.closeMenu.bind(this)
+      onButtonDown: () => this.closeMenu()
     });
   }
 

@@ -23,21 +23,20 @@ export default class VrButton extends Component<VrButtonArgs> {
    * 'buttonText' and 'vrSupported' accordingly.
    */
   @action
-  updateVrStatus() {
+  async updateVrStatus() {
     if ('xr' in navigator) {
       // @ts-ignore
-      navigator.xr.isSessionSupported('immersive-vr').then((supported: boolean) => {
-        if (supported) {
-          this.buttonText = 'Enter VR';
-          this.vrSupported = true;
-        } else if (window.isSecureContext === false) {
-          this.buttonText = 'WEBXR NEEDS HTTPS';
-          this.vrSupported = false;
-        } else {
-          this.buttonText = 'WEBXR NOT AVAILABLE';
-          this.vrSupported = false;
-        }
-      });
+      const supported = await navigator.xr.isSessionSupported('immersive-vr');
+      if (supported) {
+        this.buttonText = 'Enter VR';
+        this.vrSupported = true;
+      } else if (window.isSecureContext === false) {
+        this.buttonText = 'WEBXR NEEDS HTTPS';
+        this.vrSupported = false;
+      } else {
+        this.buttonText = 'WEBXR NOT AVAILABLE';
+        this.vrSupported = false;
+      }
     } else {
       this.buttonText = 'WEBXR NOT SUPPORTED';
       this.vrSupported = false;
@@ -87,7 +86,8 @@ export default class VrButton extends Component<VrButtonArgs> {
     if (!this.currentSession) {
       const sessionInit = { optionalFeatures: ['local-floor'] };
       // @ts-ignore
-      navigator.xr.requestSession('immersive-vr', sessionInit).then(this.onSessionStarted.bind(this));
+      const session = await navigator.xr.requestSession('immersive-vr', sessionInit);
+      this.onSessionStarted(session);
     } else {
       await this.currentSession.end();
       this.onSessionEnded();

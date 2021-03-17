@@ -15,7 +15,10 @@ export default class CameraMenu extends UiMenu {
   heightUpButton: ArrowbuttonItem;
   heightDownButton: ArrowbuttonItem;
 
-  constructor(getCameraDelta: () => THREE.Vector3, changeCameraHeight: (deltaY: number) => void) {
+  constructor({getCameraDelta, changeCameraHeight}: {
+    getCameraDelta: () => THREE.Vector3, 
+    changeCameraHeight: (deltaY: number) => void
+  }) {
     super();
     this.getCameraDelta = getCameraDelta;
     this.changeCameraHeight = changeCameraHeight;
@@ -31,7 +34,7 @@ export default class CameraMenu extends UiMenu {
       y: 13,
     }, 65, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');
 
-    this.resetButton.onTriggerDown = this.resetCamera.bind(this);
+    this.resetButton.onTriggerDown = () => this.resetCamera();
 
     this.items.push(this.resetButton);
 
@@ -100,8 +103,12 @@ export default class CameraMenu extends UiMenu {
 
   makeThumbpadBinding() {
     return new VRControllerThumbpadBinding({ labelUp: 'Up', labelDown: 'Down' }, {
-      onThumbpadPress: this.onThumbpadPress.bind(this),
-      onThumbpadUp: () => { this.heightDownButton.resetHoverEffectByButton(); this.heightUpButton.resetHoverEffectByButton(); this.redrawMenu();}
+      onThumbpadPress: (controller, axes) => this.onThumbpadPress(controller, axes),
+      onThumbpadUp: () => { 
+        this.heightDownButton.resetHoverEffectByButton(); 
+        this.heightUpButton.resetHoverEffectByButton(); 
+        this.redrawMenu();
+      }
     })
   }
 }

@@ -51,7 +51,7 @@ export default class VrMessageReceiver extends Service {
 
     init() {
         super.init();
-        this.webSocket.messageCallback = this.onMessage.bind(this);
+        this.webSocket.messageCallback = (msg) => this.onMessage(msg);
     }
 
     /**
