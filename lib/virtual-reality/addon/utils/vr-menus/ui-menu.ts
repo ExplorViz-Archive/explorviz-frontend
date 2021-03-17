@@ -11,7 +11,7 @@ import Item from "./items/item";
  * controller that holds the menu or using the ray and trigger or the
  * other controller.
  */
-export default class UiMenu extends AnimatedMenu {
+export default abstract class UiMenu extends AnimatedMenu {
     canvas!: HTMLCanvasElement;
   
     canvasMesh!: THREE.Mesh<THREE.Geometry | THREE.BufferGeometry, THREE.MeshBasicMaterial>;
@@ -90,13 +90,11 @@ export default class UiMenu extends AnimatedMenu {
       const geometry = this.makeBackgroundGeometry();
       const material = new THREE.MeshBasicMaterial({
         map: new THREE.CanvasTexture(this.canvas),
-        depthTest: true
+        depthTest: false
       });
       material.transparent = true;
       this.canvasMesh = new THREE.Mesh(geometry, material);
   
-      // Move the mesh slightly in front of the background.
-      this.canvasMesh.position.z = 0.001;
       this.add(this.canvasMesh);
     }
 
