@@ -236,8 +236,8 @@ export default class VrMessageSender extends Service {
       nonce: nonce,
       detachId: menu.getDetachId(),
       entityType: menu.getEntityType(),
-      position: menu.position.toArray(),
-      quaternion: menu.quaternion.toArray(),
+      position: position.toArray(),
+      quaternion: quaternion.toArray(),
       scale: menu.scale.toArray(),
     });
     return nonce;
