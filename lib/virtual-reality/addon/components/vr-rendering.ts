@@ -457,7 +457,7 @@ export default class VrRendering extends Component<Args> {
   // @ts-ignore
   @restartableTask*
   // eslint-disable-next-line
-  populateLandscape() {
+  populateLandscape(): any {
     this.debug('populate landscape-rendering');
 
     const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
