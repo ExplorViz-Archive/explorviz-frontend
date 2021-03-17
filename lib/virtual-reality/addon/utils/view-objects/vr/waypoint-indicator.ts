@@ -35,7 +35,14 @@ export default class WaypointIndicator extends THREE.Sprite {
     }) {
         super();
         this.target = target;
-        this.initSpriteTexture(color);
+        const texture = this.initSpriteTexture(color);
+
+        // Render the arrow always on top of everything else.
+        this.renderOrder = 100;
+        this.material = new THREE.SpriteMaterial({
+            map: texture,
+            depthTest: false
+        });
 
         // Scale and position the indicator such that it is in front of the
         // camera. 
@@ -59,7 +66,7 @@ export default class WaypointIndicator extends THREE.Sprite {
      * 
      * The sprite's texture shows a right pointing triangle in the given color. 
      */
-    private initSpriteTexture(color: THREE.Color) {
+    private initSpriteTexture(color: THREE.Color): THREE.Texture {
         const canvas = document.createElement('canvas');
         canvas.width = WIDTH;
         canvas.height = HEIGHT;
@@ -76,9 +83,7 @@ export default class WaypointIndicator extends THREE.Sprite {
             ctx.fill();
         }
 
-        this.material = new THREE.SpriteMaterial({
-            map: new THREE.CanvasTexture(canvas)
-        });
+        return new THREE.CanvasTexture(canvas);
     }
 
     /**
