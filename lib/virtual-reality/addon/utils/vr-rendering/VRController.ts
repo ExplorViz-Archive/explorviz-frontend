@@ -79,14 +79,13 @@ export default class VRController extends BaseMesh {
 
   scene: THREE.Scene;
 
-  intersectableObjects: THREE.Object3D[] = [];
+  readonly intersectableObjects: THREE.Object3D[];
 
   teleportArea: TeleportMesh|null = null;
 
   enableTeleport: boolean = true;
 
   connected = false;
-
 
   get gamepadId() {
     return this.gamepad ? this.gamepad.id : 'unknown';
@@ -112,7 +111,8 @@ export default class VRController extends BaseMesh {
     raySpace,
     menuGroup,
     bindings,
-    scene
+    scene,
+    intersectableObjects,
   } : {
     gamepadIndex: number,
     color: THREE.Color,
@@ -120,7 +120,8 @@ export default class VRController extends BaseMesh {
     raySpace: THREE.Group,
     menuGroup: MenuGroup,
     bindings: VRControllerBindingsList,
-    scene: THREE.Scene
+    scene: THREE.Scene,
+    intersectableObjects: THREE.Object3D[]
   }) {
     super();
     // Init properties
@@ -133,6 +134,7 @@ export default class VRController extends BaseMesh {
     this.raycaster = new Raycaster();
     this.scene = scene;
     this.eventCallbacks = bindings.makeCallbacks();
+    this.intersectableObjects = intersectableObjects;
 
     // Init controller model
     const controllerModelFactory = XRControllerModelFactory.INSTANCE;
@@ -432,10 +434,6 @@ export default class VRController extends BaseMesh {
     // Store intersected object and scale ray accordingly
     this.intersectedObject = nearestIntersection;
     this.ray.scale.z = nearestIntersection.distance;
-  }
-
-  filterIntersectableObjects(filterFn: (obj: Object3D) => boolean) {
-    this.intersectableObjects = this.intersectableObjects.filter(filterFn);
   }
 
   /**

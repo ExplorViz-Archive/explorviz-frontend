@@ -316,10 +316,10 @@ export default class VrRendering extends Component<Args> {
       gripSpace: this.renderer.xr.getControllerGrip(gamepadIndex),
       raySpace: this.renderer.xr.getController(gamepadIndex),
       color: new THREE.Color('red'), 
-      menuGroup
+      menuGroup,
+      intersectableObjects: this.interaction.raycastObjects
     });
     controller.setToDefaultAppearance();
-    controller.intersectableObjects = this.interaction.raycastObjects;
     controller.intersectableObjects.push(menuGroup);
 
     // Position menus above controller at an angle.

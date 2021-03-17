@@ -920,15 +920,6 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
   removeAllApplications() {
     this.applicationGroup.clear();
-
-    const filterAppsFn = (object: THREE.Object3D) => !(object instanceof ApplicationObject3D);
-
-    if (this.localUser.controller1) {
-      this.localUser.controller1.filterIntersectableObjects(filterAppsFn);
-    }
-    if (this.localUser.controller2) {
-      this.localUser.controller2.filterIntersectableObjects(filterAppsFn);
-    }
   }
 
   toggleComponentAndUpdate(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
