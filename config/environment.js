@@ -29,6 +29,9 @@ module.exports = function (environment) {
       callbackUrl: AUTH_CONFIG.callbackUrl,
       logoutReturnUrl: AUTH_CONFIG.logoutReturnUrl,
       routeAfterLogin: AUTH_CONFIG.routeAfterLogin,
+      disableAuth0: AUTH_CONFIG.disableAuth0,
+      accessToken: AUTH_CONFIG.accessToken,
+      profile: AUTH_CONFIG.profile,
     },
     backendAddresses: {
       landscapeService: BACKEND_CONFIG.landscapeService,
@@ -72,6 +75,10 @@ module.exports = function (environment) {
 
     console.log('');
     console.log(`EXPL-INFO: Production mode: Using ${API_ROOT} as API_ROOT`.blue);
+
+    if (ENV.auth0.disableAuth0) {
+      console.log('EXPL-WARNING: This is prodution mode. Auth0 should not be disabled'.yellow);
+    }
 
     if (API_ROOT === 'change-API_ROOT') {
       console.log(`EXPL-WARNING: This is prodution mode. You must override the 'API_ROOT' variable with its current value: ${API_ROOT}`.yellow);
