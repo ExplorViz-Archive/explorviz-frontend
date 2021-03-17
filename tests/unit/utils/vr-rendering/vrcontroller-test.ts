@@ -16,6 +16,7 @@ module('Unit | Utility | vr-rendering/VRController', function() {
       menuGroup: new MenuGroup(),
       bindings: new VRControllerBindingsList(new VRControllerBindings({}), []),
       scene: new THREE.Scene(),
+      intersectableObjects: []
     });
     assert.ok(result);
   });
