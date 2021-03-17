@@ -3,7 +3,7 @@ import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 import WebSocketService from './web-socket';
-import SpectateUser from './spectate-user';
+import SpectateUserService from './spectate-user';
 
 export type ConnectionStatus = 'offline'|'connecting'|'online';
 
@@ -12,7 +12,7 @@ export default class LocalVrUser extends Service {
   webSocket!: WebSocketService;
 
   @service('spectate-user')
-  spectateUser!: SpectateUser;
+  spectateUserService!: SpectateUserService;
 
   userID!: string;
 
@@ -43,7 +43,7 @@ export default class LocalVrUser extends Service {
 
   get isConnecting() { return this.state === 'connecting'; }
 
-  get isSpectating() { return this.spectateUser.isActive; }
+  get isSpectating() { return this.spectateUserService.isActive; }
 
   get position() { return this.userGroup.position; }
 

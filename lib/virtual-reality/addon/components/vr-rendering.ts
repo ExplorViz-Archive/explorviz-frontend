@@ -41,7 +41,7 @@ import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
 import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
-import DeltaTime from 'virtual-reality/services/delta-time';
+import DeltaTimeService from 'virtual-reality/services/delta-time';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 import ZoomMenu from 'virtual-reality/utils/vr-menus/ui-menu/zoom-menu';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
@@ -91,7 +91,7 @@ export default class VrRendering extends Component<Args> {
   localUser!: LocalVrUser;
 
   @service('delta-time')
-  time!: DeltaTime;
+  deltaTimeService!: DeltaTimeService;
 
   @service()
   worker!: any;
@@ -437,8 +437,8 @@ export default class VrRendering extends Component<Args> {
     if (this.isDestroyed) { return; }
 
     // Update delta time service.
-    this.time.update();
-    const delta = this.time.getDeltaTime();
+    this.deltaTimeService.update();
+    const delta = this.deltaTimeService.getDeltaTime();
 
     // Update controlelrs and menus.
     this.localUser.updateControllers(delta);

@@ -1,8 +1,8 @@
 import { inject as service } from '@ember/service';
 import WebSocketService from 'virtual-reality/services/web-socket';
-import SpectateUser from 'virtual-reality/services/spectate-user';
+import SpectateUserService from 'virtual-reality/services/spectate-user';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
-import DeltaTime from 'virtual-reality/services/delta-time';
+import DeltaTimeService from 'virtual-reality/services/delta-time';
 import debugLogger from 'ember-debug-logger';
 import $ from 'jquery';
 import { bind } from '@ember/runloop';
@@ -69,10 +69,10 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   localUser!: LocalVrUser;
 
   @service('delta-time')
-  time!: DeltaTime;
+  deltaTimeService!: DeltaTimeService;
 
   @service('spectate-user')
-  spectateUser!: SpectateUser;
+  spectateUserService!: SpectateUserService;
 
   @service('vr-message-sender')
   sender!: VrMessageSender;
@@ -168,8 +168,8 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
     if (!this.localUser.isOnline && !this.localUser.isConnecting) return;
 
-    if (this.spectateUser.isActive) {
-      this.spectateUser.update();
+    if (this.spectateUserService.isActive) {
+      this.spectateUserService.update();
     }
     this.grabbedObjectService.sendObjectPositions();
 
@@ -193,7 +193,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     const menu = new MultiUserMenu(
       this.localUser.toggleConnection.bind(this.localUser),
       this.localUser,
-      this.spectateUser,
+      this.spectateUserService,
       this.idToRemoteUser,
       this.getRemoteUsers.bind(this)
     );
@@ -211,7 +211,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
   async onControllerConnected(controller: VRController /* , event: THREE.Event */) {
     // Set visibilty and rays accordingly
-    if (this.spectateUser.isActive) controller.setToSpectatingAppearance();
+    if (this.spectateUserService.isActive) controller.setToSpectatingAppearance();
     else controller.setToDefaultAppearance();
 
     // Prepare update message for other users
@@ -231,7 +231,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
   onControllerDisconnected(controller: VRController) {
     // Avoid that user could get stuck in spectate view
-    this.spectateUser.deactivate();
+    this.spectateUserService.deactivate();
 
     let disconnect: { controller1?: string, controller2?: string };
 
@@ -252,7 +252,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     let object: THREE.Object3D|null = controller.intersectedObject.object;
     while (object) {
       if (isGrabbableObject(object)) {
-        controller.menuGroup.openMenu(new GrabMenu(object, this.grabbedObjectService, this.time));
+        controller.menuGroup.openMenu(new GrabMenu(object, this.grabbedObjectService, this.deltaTimeService));
         break;
       } else {
         object = object.parent;
@@ -261,7 +261,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   handlePrimaryInputOn(intersection: THREE.Intersection) {
-    if (this.spectateUser.spectatedUser) {
+    if (this.spectateUserService.spectatedUser) {
       const { object, uv } = intersection;
       if (object instanceof MultiUserMenu && uv) {
         object.triggerDown(uv);
@@ -273,7 +273,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   handleSecondaryInputOn(intersection: THREE.Intersection) {
-    if (this.spectateUser.spectatedUser) {
+    if (this.spectateUserService.spectatedUser) {
       return;
     }
 
@@ -490,8 +490,8 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    */
   onUserDisconnect({ id }: UserDisconnectedMessage) {
     // Do not spectate a disconnected user
-    if (this.spectateUser.spectatedUser?.userId === id) {
-      this.spectateUser.deactivate();
+    if (this.spectateUserService.spectatedUser?.userId === id) {
+      this.spectateUserService.deactivate();
     }
 
     const user = this.idToRemoteUser.get(id);
@@ -715,8 +715,8 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     const remoteUserHexColor = `#${remoteUser.color.getHexString()}`;
     if (isSpectating) {
       remoteUser.setVisible(false);
-      if (this.spectateUser.spectatedUser && this.spectateUser.spectatedUser.userId === userID) {
-        this.spectateUser.deactivate();
+      if (this.spectateUserService.spectatedUser && this.spectateUserService.spectatedUser.userId === userID) {
+        this.spectateUserService.deactivate();
       }
       this.messageMenuQueue.enqueueMenu(new MessageBoxMenu({
         title: remoteUser.userName, 
@@ -852,7 +852,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   updateRemoteUsers() {
     this.idToRemoteUser.forEach((user) => {
       // Update animations.
-      user.update(this.time.getDeltaTime());
+      user.update(this.deltaTimeService.getDeltaTime());
     });
   }
 
@@ -956,8 +956,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   willDestroy() {
     super.willDestroy();
     this.localUser.disconnect();
-    this.spectateUser.reset();
+    this.spectateUserService.reset();
     this.receiver.removeMessageListener(this);
   }
-
 }

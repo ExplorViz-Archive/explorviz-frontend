@@ -2,7 +2,7 @@ import THREE from 'three';
 import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
-import DeltaTime from 'virtual-reality/services/delta-time';
+import DeltaTimeService from 'virtual-reality/services/delta-time';
 import BaseMenu from '../base-menu';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import ScaleMenu, { SharedScaleMenuState } from './scale-menu';
@@ -32,9 +32,9 @@ export default class GrabMenu extends BaseMenu {
     private grabbedObjectParent: THREE.Object3D | null;
     private allowedToGrab: boolean;
     private grabbedObjectService: GrabbedObjectService;
-    private deltaTimeService: DeltaTime;
+    private deltaTimeService: DeltaTimeService;
 
-    constructor(grabbedObject: GrabbableObject, grabbedObjectService: GrabbedObjectService, deltaTimeService: DeltaTime) {
+    constructor(grabbedObject: GrabbableObject, grabbedObjectService: GrabbedObjectService, deltaTimeService: DeltaTimeService) {
         super();
         this.grabbedObject = grabbedObject;
         this.grabbedObjectParent = null;

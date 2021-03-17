@@ -1,6 +1,6 @@
 import Service from '@ember/service';
 
-export default class DeltaTime extends Service {
+export default class DeltaTimeService extends Service {
   private deltaTime: number = 0; // Time between last two frames in seconds
 
   private lastFrameTime: number = 0; // Time in seconds of last frame
@@ -31,6 +31,6 @@ export default class DeltaTime extends Service {
 
 declare module '@ember/service' {
   interface Registry {
-    'delta-time': DeltaTime;
+    'delta-time': DeltaTimeService;
   }
 }

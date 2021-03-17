@@ -5,7 +5,7 @@ import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import LocalVrUser from './local-vr-user';
 import WebSocketService from './web-socket';
 
-export default class SpectateUser extends Service {
+export default class SpectateUserService extends Service {
   @service('web-socket')
   webSocket!: WebSocketService;
 
@@ -78,6 +78,6 @@ export default class SpectateUser extends Service {
 
 declare module '@ember/service' {
   interface Registry {
-    'spectate-user': SpectateUser;
+    'spectate-user': SpectateUserService;
   }
 }
