@@ -79,7 +79,7 @@ export default class VRController extends BaseMesh {
 
   scene: THREE.Scene;
 
-  readonly intersectableObjects: THREE.Object3D[];
+  readonly intersectableObjects: THREE.Object3D[] = [];
 
   teleportArea: TeleportMesh|null = null;
 
