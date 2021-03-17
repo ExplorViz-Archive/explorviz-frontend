@@ -42,7 +42,7 @@ export default class CloseIcon extends BaseMesh {
     const originalRotation = object.rotation.clone();
     const originalScale = object.scale.clone();
     object.rotation.set(0, 0, 0);
-    object.scale.set(1, 1, 1);
+    if (!compensateScale) object.scale.set(1, 1, 1);
     object.updateMatrixWorld();
 
     // Get size of the object.
