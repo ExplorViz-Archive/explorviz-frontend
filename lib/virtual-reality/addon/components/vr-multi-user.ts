@@ -757,10 +757,9 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     let closeIcon = new CloseIcon({
       texture: this.closeButtonTexture,
       onClose: () => this.removeDetachedMenu(menuContainer),
-      radius: 0.04,
-      compensateParentScale: false
+      radius: 0.04
     });
-    closeIcon.addToObject(menuContainer);
+    closeIcon.addToObject(menuContainer, {compensateScale: false});
   }
 
   removeDetachedMenu(menuContainer: GrabbableMenuContainer) {
