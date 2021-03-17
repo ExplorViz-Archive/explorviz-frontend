@@ -745,10 +745,13 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     this.detachedMenus.add(menuContainer);
 
     // Make detached menu closable.
+    // Since the menu has been scaled already and is not scaled when it has its
+    // normal size, the close icon does not have to correct for the menu's scale.
     let closeIcon = new CloseIcon({
       texture: this.closeButtonTexture,
       onClose: () => this.removeDetachedMenu(menuContainer),
-      radius: 0.04
+      radius: 0.04,
+      compensateParentScale: false
     });
     closeIcon.addToObject(menuContainer);
   }

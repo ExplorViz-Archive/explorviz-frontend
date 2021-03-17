@@ -3,15 +3,18 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import VRController from 'virtual-reality/utils/vr-rendering/VRController';
 
 export default class CloseIcon extends BaseMesh {
-  radius: number;
+  private radius: number;
 
-  onClose: () => void;
+  private onClose: () => void;
 
-  constructor({onClose, texture, radius = 0.075, segments = 32}: {
+  private compensateParentScale: boolean;
+
+  constructor({onClose, texture, radius = 0.075, segments = 32, compensateParentScale = true}: {
     onClose: () => void, 
     texture: THREE.Texture, 
     radius?: number, 
-    segments?: number
+    segments?: number,
+    compensateParentScale?: boolean
   }) {
     super(new THREE.Color());
 
@@ -22,6 +25,7 @@ export default class CloseIcon extends BaseMesh {
     this.material = new THREE.MeshPhongMaterial({
       map: texture,
     });
+    this.compensateParentScale = compensateParentScale;
   }
 
   /**
@@ -32,7 +36,9 @@ export default class CloseIcon extends BaseMesh {
    */
   addToObject(object: Object3D) {
     // Undo scaling of the object.
-    this.scale.set(1.0 / object.scale.x, 1.0 / object.scale.y, 1.0 / object.scale.z);
+    if (this.compensateParentScale) {
+      this.scale.set(1.0 / object.scale.x, 1.0 / object.scale.y, 1.0 / object.scale.z);
+    }
 
     // Reset rotation of the object temporarily such that the axis are aligned
     // the world axis.
