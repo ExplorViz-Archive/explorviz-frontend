@@ -10,7 +10,7 @@ export default class MenuQueue extends MenuGroup {
     private nextMenuDelay: number;
     private nextMenuTime: number;
 
-    constructor(nextMenuDelay = 0.75) {
+    constructor({nextMenuDelay = 0.75}: {nextMenuDelay?: number} = {}) {
         super();
         this.menuQueue = [];
         this.nextMenuDelay = nextMenuDelay;

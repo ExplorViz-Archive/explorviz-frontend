@@ -13,7 +13,7 @@ type AnimationFinishedEvent =  {
 /**
  * Base class for all menus that can be animated.
  */
-export default class AnimatedMenu extends BaseMenu {
+export default abstract class AnimatedMenu extends BaseMenu {
     animationMixer: THREE.AnimationMixer;
 
     constructor() {

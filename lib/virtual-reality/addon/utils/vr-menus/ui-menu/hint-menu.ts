@@ -1,6 +1,6 @@
 import THREE from 'three';
-import UiMenu from '../ui-menu';
 import TextItem from '../items/text-item';
+import HudMenu from '../hud-menu';
 
 const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.75, [
   new THREE.KeyframeTrack('.scale[x]', [0.0, 0.75], [0.0, 1.0])
@@ -14,7 +14,7 @@ const CLOSE_ANIMATION_CLIP = new THREE.AnimationClip('close-animation', 0.75, [
   new THREE.KeyframeTrack('.scale[x]', [0, 0.75], [1.0, 0.0])
 ]);
 
-export default class HintMenu extends UiMenu {
+export default class HintMenu extends HudMenu {
   titleItem: TextItem;
   textItem: TextItem|undefined;
 
