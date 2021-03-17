@@ -79,7 +79,7 @@ export default class VRController extends BaseMesh {
 
   scene: THREE.Scene;
 
-  intersectableObjects: THREE.Object3D[] = [];
+  readonly intersectableObjects: THREE.Object3D[] = [];
 
   teleportArea: TeleportMesh|null = null;
 
@@ -432,10 +432,6 @@ export default class VRController extends BaseMesh {
     // Store intersected object and scale ray accordingly
     this.intersectedObject = nearestIntersection;
     this.ray.scale.z = nearestIntersection.distance;
-  }
-
-  filterIntersectableObjects(filterFn: (obj: Object3D) => boolean) {
-    this.intersectableObjects = this.intersectableObjects.filter(filterFn);
   }
 
   /**
