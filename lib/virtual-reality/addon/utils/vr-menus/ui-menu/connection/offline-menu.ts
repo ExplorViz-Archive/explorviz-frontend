@@ -16,14 +16,14 @@ export default class OfflineMenu extends ConnectionBaseMenu {
         const title = new TextItem('You are offline', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
         this.items.push(title);
     
-        const joinButton = new TextbuttonItem('connect', "Join Room", { x: 100, y: 166 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+        const joinButton = new TextbuttonItem('connect', "Join Room", { x: 100, y: 156 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
         this.items.push(joinButton);
         this.thumbpadTargets.push(joinButton);
         joinButton.onTriggerDown = () => {
-          this.localUser.connect(ROOM_ID);
+          this.menuGroup?.replaceMenu(this.menuFactory.buildJoinMenu());
         };
     
-        const newButton = new TextbuttonItem('connect', "New Room", { x: 100, y: 206 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+        const newButton = new TextbuttonItem('connect', "New Room", { x: 100, y: 216 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
         this.items.push(newButton);
         this.thumbpadTargets.push(newButton);
         newButton.onTriggerDown = () => {

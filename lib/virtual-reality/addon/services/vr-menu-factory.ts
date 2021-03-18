@@ -1,4 +1,5 @@
 import Service, { inject as service } from '@ember/service';
+import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 import SettingsMenu from 'explorviz-frontend/utils/vr-menus/advanced-menu';
 import MainMenu from 'explorviz-frontend/utils/vr-menus/main-menu';
 import LocalVrUser from "virtual-reality/services/local-vr-user";
@@ -12,6 +13,9 @@ import OnlineMenu from "../utils/vr-menus/ui-menu/connection/online-menu";
 export default class VrMenuFactoryService extends Service {
     @service('local-vr-user')
     private localUser!: LocalVrUser;
+
+    @service('ajax')
+    ajax!: AjaxServiceClass;
 
     buildMainMenu(): MainMenu {
         return new MainMenu({menuFactory: this});
@@ -60,6 +64,7 @@ export default class VrMenuFactoryService extends Service {
         return new JoinMenu({
             localUser: this.localUser,
             menuFactory: this,
+            ajax: this.ajax
         });
     }
 }

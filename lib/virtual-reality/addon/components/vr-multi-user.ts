@@ -4,8 +4,6 @@ import SpectateUserService from 'virtual-reality/services/spectate-user';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
 import debugLogger from 'ember-debug-logger';
-import $ from 'jquery';
-import { bind } from '@ember/runloop';
 import THREE, { Vector3 } from 'three';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
@@ -54,6 +52,7 @@ import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/pin
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import PingMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/ping-menu';
 import VrMenuFactoryService from 'virtual-reality/services/vr-menu-factory';
+import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -62,6 +61,9 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
   @service('web-socket')
   webSocket!: WebSocketService;
+
+  @service('ajax') 
+  ajax!: AjaxServiceClass;
 
   @service('local-vr-user')
   localUser!: LocalVrUser;
@@ -107,11 +109,13 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     this.initWebSocket();
   }
 
-  initWebSocket() {
+  async initWebSocket() {
     this.webSocket.socketCloseCallback = () => this.onDisconnect();
     this.receiver.addMessageListener(this);
     this.localUser.state = 'offline';
-    $.getJSON('config/config_multiuser.json').then(bind(this.webSocket, this.webSocket.applyConfiguration));
+    
+    const config = await this.ajax.request('config/config_multiuser.json');
+    this.webSocket.applyConfiguration(config);
   }
 
   initScene() {
