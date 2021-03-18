@@ -8,8 +8,6 @@ import ConnectionBaseMenu from "./base";
 
 export default class OnlineMenu extends ConnectionBaseMenu {
 
-    disconnectButton: TextbuttonItem | undefined
-
     idToRemoteVrUser: Map<string, RemoteVrUser>;
 
     remoteUserButtons: Map<string, TextbuttonItem> = new Map<string, TextbuttonItem>();
@@ -32,9 +30,9 @@ export default class OnlineMenu extends ConnectionBaseMenu {
         const title = new TextItem('Users (' + (users.length + 1) + ')', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
         this.items.push(title);
 
-        this.disconnectButton = new TextbuttonItem('disconnect', 'Disconnect', { x: 370, y: 13, }, 115, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');
-        this.items.push(this.disconnectButton);
-        this.disconnectButton.onTriggerDown = () => this.localUser.disconnect();
+        const disconnectButton = new TextbuttonItem('disconnect', 'Disconnect', { x: 370, y: 13, }, 115, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');
+        this.items.push(disconnectButton);
+        disconnectButton.onTriggerDown = () => this.localUser.disconnect();
 
         const yOffset = 60;
         let yPos = 50 + yOffset;
