@@ -20,7 +20,7 @@ export default class Auth extends Service {
   init() {
     super.init();
 
-    if (config.auth0.disableAuth0) { // no-auth
+    if (config.environment === 'noauth') { // no-auth
       this.set('user', config.auth0.profile);
       this.set('accessToken', config.auth0.accessToken);
       return;

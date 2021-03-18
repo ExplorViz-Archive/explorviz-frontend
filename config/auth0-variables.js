@@ -6,8 +6,7 @@ module.exports = {
   logoutReturnUrl: 'http://localhost:4200/',
   routeAfterLogin: 'landscapes',
 
-  disableAuth0: false,
-  // iff disbableAuth0, this token and profile will be applied
+  // iff started with environment "noauth", this token and profile will be applied
   accessToken: 'SPECIAL_TOKEN',
   profile: {
     name: 'John Doe',

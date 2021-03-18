@@ -20,7 +20,6 @@ declare const config: {
     callbackUrl: string,
     logoutReturnUrl: string,
     routeAfterLogin: string,
-    disableAuth0: boolean,
     accessToken: string,
     profile: Auth0UserProfile,
   },
