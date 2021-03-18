@@ -3,15 +3,15 @@ import THREE, {
 } from 'three';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
-import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
-import XRControllerModel from '../lib/controller/XRControllerModel';
-import FloorMesh from '../view-objects/vr/floor-mesh';
-import TeleportMesh from '../view-objects/vr/teleport-mesh';
-import BaseMenu from '../vr-menus/base-menu';
-import { displayAsWireframe, displayAsSolidObject } from '../vr-helpers/multi-user-helper';
-import VRControllerLabelGroup from '../vr-controller/vr-controller-label-group';
-import VRControllerBindingsList from '../vr-controller/vr-controller-bindings-list';
-import MenuGroup from '../vr-menus/menu-group';
+import XRControllerModelFactory from './lib/controller/XRControllerModelFactory';
+import XRControllerModel from './lib/controller/XRControllerModel';
+import FloorMesh from './view-objects/vr/floor-mesh';
+import TeleportMesh from './view-objects/vr/teleport-mesh';
+import BaseMenu from './vr-menus/base-menu';
+import { displayAsWireframe, displayAsSolidObject } from './vr-helpers/multi-user-helper';
+import VRControllerLabelGroup from './vr-controller/vr-controller-label-group';
+import VRControllerBindingsList from './vr-controller/vr-controller-bindings-list';
+import MenuGroup from './vr-menus/menu-group';
 
 export type VRControllerCallbackFunctions = {
   connected? (controller: VRController, event: THREE.Event): void,

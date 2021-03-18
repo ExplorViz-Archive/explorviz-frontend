@@ -3,7 +3,7 @@ import TextbuttonItem from '../items/textbutton-item';
 import ArrowbuttonItem from '../items/arrowbutton-item';
 import VRControllerButtonBinding from '../../vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding from '../../vr-controller/vr-controller-thumbpad-binding';
-import VRController from '../../vr-rendering/VRController';
+import VRController from '../../vr-controller';
 import UiMenu from '../ui-menu';
 
 export default class CameraMenu extends UiMenu {

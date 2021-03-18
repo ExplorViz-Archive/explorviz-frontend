@@ -1,5 +1,5 @@
 import THREE from "three";
-import VRController from "../vr-rendering/VRController";
+import VRController from "../vr-controller";
 
 export enum VRControllerLabelOffsetDirection {
     LEFT = -1,

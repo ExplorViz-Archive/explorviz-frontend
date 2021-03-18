@@ -1,5 +1,5 @@
-import BaseMenu from "./vr-menus/base-menu";
-import MenuGroup from "./vr-menus/menu-group";
+import BaseMenu from "./base-menu";
+import MenuGroup from "./menu-group";
 
 /**
  * A menu group that maintains a queue of menus and displays the next menu

@@ -1,5 +1,5 @@
 import THREE from "three";
-import VRController from "../vr-rendering/VRController";
+import VRController from "../vr-controller";
 import VRControllerBindings from "./vr-controller-bindings";
 import VRControllerBindingsList from "./vr-controller-bindings-list";
 import { getVRControllerLabelPositions } from "./vr-controller-label-positions";

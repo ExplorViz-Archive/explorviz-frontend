@@ -22,9 +22,8 @@ import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh
 import NameTagMesh from 'virtual-reality/utils/view-objects/vr/name-tag-mesh';
 import MainMenu from 'virtual-reality/utils/vr-menus/ui-menu/main-menu';
 import GrabMenu, { isGrabbableObject, findGrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
-import VRController from 'virtual-reality/utils/vr-rendering/VRController';
+import VRController from 'virtual-reality/utils/vr-controller';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import { perform } from 'ember-concurrency-ts';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import MultiUserMenu from 'virtual-reality/utils/vr-menus/ui-menu/multi-user-menu';
 import { MenuDetachedEvent, MENU_DETACH_EVENT_TYPE } from 'virtual-reality/utils/vr-menus/menu-group';
@@ -55,7 +54,6 @@ import { GrabbableMenuContainer } from 'virtual-reality/utils/vr-menus/grabbable
 import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import PingMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/ping-menu';
-import { TaskInstance } from 'ember-concurrency';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -203,7 +201,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
   // #region INPUT EVENTS
 
-  async onControllerConnected(controller: VRController /* , event: THREE.Event */) {
+  async onControllerConnected(controller: VRController) {
     // Set visibilty and rays accordingly
     if (this.spectateUserService.isActive) controller.setToSpectatingAppearance();
     else controller.setToDefaultAppearance();
@@ -512,46 +510,44 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
     const { structureLandscapeData } = this.args.landscapeData;
 
-    const tasks: TaskInstance<any>[] = [];
+    const tasks: Promise<void>[] = [];
     openApps.forEach((app) => {
       const application = getApplicationInLandscapeById(structureLandscapeData, app.id);
       if (application) {
-        const task = perform(this.addApplicationTask, application,
-          (applicationObject3D: ApplicationObject3D) => {
-            applicationObject3D.position.fromArray(app.position);
-            applicationObject3D.quaternion.fromArray(app.quaternion);
-            applicationObject3D.scale.fromArray(app.scale);
+        tasks.push(this.vrApplicationRenderer.addApplication(application).then((applicationObject3D: ApplicationObject3D) => {
+          applicationObject3D.position.fromArray(app.position);
+          applicationObject3D.quaternion.fromArray(app.quaternion);
+          applicationObject3D.scale.fromArray(app.scale);
 
-            EntityManipulation.restoreComponentState(applicationObject3D,
-              new Set(app.openComponents));
+          EntityManipulation.restoreComponentState(applicationObject3D,
+            new Set(app.openComponents));
 
-            this.addLabels(applicationObject3D);
+          this.vrApplicationRenderer.addLabels(applicationObject3D);
 
-            const drawableComm = this.drawableClassCommunications
-              .get(applicationObject3D.dataModel.pid);
+          const drawableComm = this.vrApplicationRenderer.drawableClassCommunications
+            .get(applicationObject3D.dataModel.pid);
 
-            if (drawableComm) {
-              this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-              Highlighting.updateHighlighting(applicationObject3D, drawableComm);
-            }
+          if (drawableComm) {
+            this.vrApplicationRenderer.appCommRendering.addCommunication(applicationObject3D, drawableComm);
+            Highlighting.updateHighlighting(applicationObject3D, drawableComm);
+          }
 
-            // Simulate a highlighting update for every initial highlighting
-            // component.
-            app.highlightedComponents.forEach((highlightingUpdate) => {
-              this.onHighlightingUpdate({
-                event: FORWARDED_EVENT,
-                userID: highlightingUpdate.userID,
-                originalMessage: {
-                  event: HIGHLIGHTING_UPDATE_EVENT,
-                  isHighlighted: highlightingUpdate.isHighlighted,
-                  appID: highlightingUpdate.appID,
-                  entityType: highlightingUpdate.entityType,
-                  entityID: highlightingUpdate.entityID
-                }
-              });
+          // Simulate a highlighting update for every initial highlighting
+          // component.
+          app.highlightedComponents.forEach((highlightingUpdate) => {
+            this.onHighlightingUpdate({
+              event: FORWARDED_EVENT,
+              userID: highlightingUpdate.userID,
+              originalMessage: {
+                event: HIGHLIGHTING_UPDATE_EVENT,
+                isHighlighted: highlightingUpdate.isHighlighted,
+                appID: highlightingUpdate.appID,
+                entityType: highlightingUpdate.entityType,
+                entityID: highlightingUpdate.entityID
+              }
             });
           });
-        tasks.push(task);
+        }));
       }
     });
 
@@ -576,18 +572,19 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     })
   }
 
-  onAppOpened({
+  async onAppOpened({
     originalMessage: { id, position, quaternion, scale }
-  }: ForwardedMessage<AppOpenedMessage>): void {
+  }: ForwardedMessage<AppOpenedMessage>): Promise<void> {
     const { structureLandscapeData } = this.args.landscapeData;
     const application = getApplicationInLandscapeById(structureLandscapeData, id);
 
     if (application) {
-      super.addApplication(application, (applicationObject3D: ApplicationObject3D) => {
+      const applicationObject3D = await super.addApplication(application);
+      if (applicationObject3D) {
         applicationObject3D.position.fromArray(position);
         applicationObject3D.quaternion.fromArray(quaternion);
         applicationObject3D.scale.fromArray(scale);
-      });
+      }
     }
   }
 
@@ -663,7 +660,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     // Highlight entities in the respective user color
     applicationObject3D.setHighlightingColor(user.color);
 
-    const drawableComm = this.drawableClassCommunications
+    const drawableComm = this.vrApplicationRenderer.drawableClassCommunications
       .get(applicationObject3D.dataModel.pid);
 
     // Apply highlighting
@@ -854,20 +851,10 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
    * Uses the addApplication Task of vr-rendering to add an application to the scene.
    * Additionally, a callback function is given to send an update to the backend.
    */
-  addApplication(applicationModel: Application, callback: (application: ApplicationObject3D) => void) {
-    if (applicationModel.packages.length === 0) {
-      this.showHint('No data available');
-      return;
-    }
-
-    if (!this.applicationGroup.hasApplication(applicationModel.pid)) {
-      perform(super.addApplicationTask, applicationModel, (applicationObject3D: ApplicationObject3D) => {
-        callback(applicationObject3D);
-        this.sender.sendAppOpened(applicationObject3D);
-      });
-    } else {
-      this.showHint('Application already opened');
-    }
+  async addApplication(applicationModel: Application): Promise<ApplicationObject3D|null> {
+    var applicationObject3D = await super.addApplication(applicationModel);
+    if (applicationObject3D) this.sender.sendAppOpened(applicationObject3D);
+    return applicationObject3D;
   }
 
   highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {

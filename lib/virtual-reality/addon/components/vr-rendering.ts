@@ -1,82 +1,58 @@
-import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
+import Component from '@glimmer/component';
+import { task } from 'ember-concurrency-decorators';
+import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
-import THREE from 'three';
-import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
+import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import Configuration from 'explorviz-frontend/services/configuration';
-import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
-import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
+import CurrentUser from 'explorviz-frontend/services/current-user';
+import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
+import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
+import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
+import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import Interaction from 'explorviz-frontend/utils/interaction';
-import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
-import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
-import { enqueueTask, restartableTask, task } from 'ember-concurrency-decorators';
-import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
-import * as LandscapeCommunicationRendering from
-  'explorviz-frontend/utils/landscape-rendering/communication-rendering';
-import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
-import FloorMesh from 'virtual-reality/utils/view-objects/vr/floor-mesh';
-import WebXRPolyfill from 'webxr-polyfill';
-import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
-import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
+import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
-import * as EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
-import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
-import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
-import CurrentUser from 'explorviz-frontend/services/current-user';
-import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
+import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
+import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
+import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
+import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
+import THREE from 'three';
+import DeltaTimeService from 'virtual-reality/services/delta-time';
 import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
-import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
-import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
-import VRController from 'virtual-reality/utils/vr-rendering/VRController';
-import MainMenu from 'virtual-reality/utils/vr-menus/ui-menu/main-menu';
-import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
-import CameraMenu from 'virtual-reality/utils/vr-menus/ui-menu/camera-menu';
-import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
-import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
-import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
-import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
-import DeltaTimeService from 'virtual-reality/services/delta-time';
-import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
-import ZoomMenu from 'virtual-reality/utils/vr-menus/ui-menu/zoom-menu';
-import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
-import { perform } from 'ember-concurrency-ts';
-import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
-import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
-import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
-import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
-import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-controller-bindings-list';
+import FloorMesh from 'virtual-reality/utils/view-objects/vr/floor-mesh';
+import VRController from 'virtual-reality/utils/vr-controller';
 import VRControllerBindings from 'virtual-reality/utils/vr-controller/vr-controller-bindings';
+import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-controller-bindings-list';
 import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding, { VRControllerThumbpadDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
-import SettingsMenu from 'virtual-reality/utils/vr-menus/ui-menu/settings-menu';
-import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
 import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
-import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
-import VrLandscapeObject3D from 'virtual-reality/utils/view-objects/landscape/vr-landscape-object-3d';
+import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
+import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
+import MenuQueue from 'virtual-reality/utils/vr-menus/menu-queue';
+import CameraMenu from 'virtual-reality/utils/vr-menus/ui-menu/camera-menu';
+import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
+import MainMenu from 'virtual-reality/utils/vr-menus/ui-menu/main-menu';
+import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
+import SettingsMenu from 'virtual-reality/utils/vr-menus/ui-menu/settings-menu';
+import ZoomMenu from 'virtual-reality/utils/vr-menus/ui-menu/zoom-menu';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
-import MenuQueue from 'virtual-reality/utils/menu-queue';
+import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
+import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
+import WebXRPolyfill from 'webxr-polyfill';
 
 interface Args {
   readonly id: string;
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
 }
-
-type LayoutData = {
-  height: number,
-  width: number,
-  depth: number,
-  positionX: number,
-  positionY: number,
-  positionZ: number
-};
 
 export default class VrRendering extends Component<Args> {
   // #region CLASS FIELDS AND GETTERS
@@ -96,9 +72,6 @@ export default class VrRendering extends Component<Args> {
   @service()
   worker!: any;
 
-  // Maps models to a computed layout
-  modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
-
   debug = debugLogger('VrRendering');
 
   // Used to register (mouse) events
@@ -117,41 +90,15 @@ export default class VrRendering extends Component<Args> {
 
   raycaster: THREE.Raycaster;
 
-  // Group which contains all currently opened application objects
-  applicationGroup: ApplicationGroup;
-
-  // Depth of boxes for landscape entities
-  landscapeDepth: number;
-
-  // Scalar with which the landscape is scaled (evenly in all dimensions)
-  landscapeScalar: number;
-
-  // Scalar with which the application is scaled (evenly in all dimensions)
-  applicationScalar: number;
-
   floor!: FloorMesh;
 
   detachedMenus!: THREE.Group;
 
   closeButtonTexture: THREE.Texture;
 
-  get font() {
-    return this.args.font;
-  }
+  readonly vrLandscapeRenderer: VrLandscapeRenderer;
 
-  readonly elk: ELK;
-
-  readonly imageLoader: ImageLoader = new ImageLoader();
-
-  readonly appCommRendering: AppCommunicationRendering;
-
-  // Provides functions to label landscape meshes
-  readonly landscapeLabeler = new LandscapeLabeler();
-
-  // Extended Object3D which manages landscape meshes
-  readonly landscapeObject3D!: LandscapeObject3D;
-
-  drawableClassCommunications: Map<string, DrawableClassCommunication[]> = new Map();
+  readonly vrApplicationRenderer: VrApplicationRenderer;
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -161,37 +108,41 @@ export default class VrRendering extends Component<Args> {
     super(owner, args);
     this.debug('Constructor called');
 
-    this.elk = new ElkConstructor({
-      workerUrl: './assets/web-workers/elk-worker.min.js',
-    });
-
-    this.landscapeDepth = 0.7;
-
-    this.landscapeScalar = 0.1;
-    this.applicationScalar = 0.01;
-
     this.raycaster = new THREE.Raycaster();
-    this.applicationGroup = new ApplicationGroup();
     this.detachedMenus = new THREE.Group();
-
-    this.appCommRendering = new AppCommunicationRendering(this.configuration, this.currentUser);
 
     // Load image for delete button
     this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
-    // Load and scale landscape
-    this.landscapeObject3D = new VrLandscapeObject3D(this.args.landscapeData.structureLandscapeData);
-    const scale = this.landscapeScalar;
-    this.landscapeObject3D.scale.set(scale, scale, scale);
+    this.vrLandscapeRenderer = new VrLandscapeRenderer({
+      configuration: this.configuration,
+      floor: this.floor,
+      font: this.args.font,
+      landscapeData: this.args.landscapeData,
+      worker: this.worker
+    });
+    this.vrApplicationRenderer = new VrApplicationRenderer({
+      appCommRendering: new AppCommunicationRendering(this.configuration, this.currentUser),
+      closeButtonTexture: this.closeButtonTexture,
+      configuration: this.configuration,
+      font: this.args.font,
+      landscapeData: this.args.landscapeData,
+      onRemoveApplication: (application) => this.removeApplication(application),
+      worker: this.worker,
+    });
+  }
 
-    // Rotate landscape such that it lays flat on the floor
-    this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
+  get landscapeObject3D(): LandscapeObject3D {
+    return this.vrLandscapeRenderer.landscapeObject3D;
+  }
+
+  get applicationGroup(): ApplicationGroup {
+    return this.vrApplicationRenderer.applicationGroup;
   }
 
   /**
-     * Calls all three related init functions and adds the three
-     * performance panel if it is activated in user settings
-     */
+    * Calls all init functions.
+    */
   initRendering() {
     this.initScene();
     this.initCamera();
@@ -406,24 +357,9 @@ export default class VrRendering extends Component<Args> {
     }
   }
 
-  /**
-   * Inherit this function to update the scene with a new renderingModel. It
-   * automatically removes every mesh from the scene and finally calls
-   * the (overridden) "populateLandscape" function. Add your custom code
-   * as shown in landscape-rendering.
-   *
-   * @method cleanAndUpdateScene
-   */
-  @action
-  async cleanAndUpdateScene() {
-    await perform(this.populateLandscape);
-
-    this.debug('clean and populate landscape-rendering');
-  }
-
   // #endregion ACTIONS
 
-  // #region RENDERING AND SCENE POPULATION
+  // #region RENDERING
 
   /**
    * Main rendering function
@@ -446,284 +382,23 @@ export default class VrRendering extends Component<Args> {
 
   @task*
   loadNewLandscape() {
-    yield perform(this.populateLandscape);
+    yield perform(this.vrLandscapeRenderer.populateLandscape);
   }
 
-  /**
- * Computes new meshes for the landscape and adds them to the scene
- *
- * @method populateLandscape
- */
-  // @ts-ignore
-  @restartableTask*
-  // eslint-disable-next-line
-  populateLandscape(): any {
-    this.debug('populate landscape-rendering');
-
-    const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
-
-    this.landscapeObject3D.dataModel = structureLandscapeData;
-
-    // Run Klay layouting in 3 steps within workers
-    try {
-      const applicationCommunications = computeApplicationCommunication(structureLandscapeData,
-        dynamicLandscapeData);
-
-      // Do layout pre-processing (1st step)
-      const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
-        structureLandscapeData,
-        applicationCommunications,
-      });
-
-      // Run actual klay function (2nd step)
-      const newGraph: ElkNode = yield this.elk.layout(graph);
-
-      // Post-process layout graph (3rd step)
-      const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
-        graph: newGraph,
-        modelIdToPoints,
-        structureLandscapeData,
-        applicationCommunications,
-      });
-
-      // Clean old landscape
-      this.cleanUpLandscape();
-
-      const {
-        modelIdToLayout,
-        modelIdToPoints: modelIdToPointsComplete,
-      }: Layout3Return = layoutedLandscape;
-
-      const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
-
-      this.modelIdToPlaneLayout = modelIdToPlaneLayout;
-
-      // Convert the simple to a PlaneLayout map
-      LandscapeRendering.convertToPlaneLayoutMap(modelIdToLayout, modelIdToPlaneLayout);
-
-      // Compute center of landscape
-      const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
-      const centerPoint = landscapeRect.center;
-
-      // Update camera zoom accordingly
-      updateCameraZoom(landscapeRect, this.camera, this.renderer);
-
-      // Render all landscape entities
-      const { nodes } = structureLandscapeData;
-
-      // Draw boxes for nodes
-      nodes.forEach((node: Node) => {
-        this.renderNode(node, modelIdToPlaneLayout.get(node.ipAddress), centerPoint);
-
-        const { applications } = node;
-
-        // Draw boxes for applications
-        applications.forEach((application: Application) => {
-          this.renderApplication(application, modelIdToPlaneLayout.get(application.pid),
-            centerPoint);
-        });
-      });
-
-      // Render application communication
-      const color = this.configuration.landscapeColors.communication;
-      const tiles = LandscapeCommunicationRendering
-        .computeCommunicationTiles(applicationCommunications, modelIdToPointsComplete,
-          color, this.landscapeDepth / 2 + 0.25);
-
-      LandscapeCommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
-        centerPoint, 0.004, 0.028);
-
-      this.centerLandscape();
-
-      this.debug('Landscape loaded');
-    } catch (e) {
-      this.debug(e);
-    }
-  }
-
-  // #endregion RENDERING AND SCENE POPULATION
-
-  // #region LANDSCAPE RENDERING
-
-  /**
- * Creates & positions a node mesh with corresponding labels.
- * Then adds it to the landscapeObject3D.
- *
- * @param node Data model for the node mesh
- * @param layout Layout data to position the mesh correctly
- * @param centerPoint Offset of landscape object
- */
-  renderNode(node: Node, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
-
-    // Create node mesh
-    const nodeMesh = new NodeMesh(
-      layout,
-      node,
-      this.configuration.landscapeColors.node,
-      this.configuration.applicationColors.highlightedEntity,
-      this.landscapeDepth,
-      0.2,
-    );
-
-    // Create and add label + icon
-    nodeMesh.setToDefaultPosition(centerPoint);
-
-    // Label with own ip-address by default
-    const labelText = nodeMesh.getDisplayName();
-
-    this.landscapeLabeler.addNodeTextLabel(nodeMesh, labelText, this.font,
-      this.configuration.landscapeColors.nodeText);
-
-    // Add to scene
-    this.landscapeObject3D.add(nodeMesh);
-  }
-
-  /**
- * Creates & positions an application mesh with corresponding labels.
- * Then adds it to the landscapeObject3D.
- *
- * @param application Data model for the application mesh
- * @param layout Layout data to position the mesh correctly
- * @param centerPoint Offset of landscape object
- */
-  renderApplication(application: Application, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
-
-    // Create application mesh
-    const applicationMesh = new ApplicationMesh(
-      layout,
-      application,
-      this.configuration.landscapeColors.application,
-      this.configuration.applicationColors.highlightedEntity,
-      this.landscapeDepth,
-      0.3,
-    );
-    applicationMesh.setToDefaultPosition(centerPoint);
-
-    // Create and add label + icon
-    this.landscapeLabeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
-      this.configuration.landscapeColors.applicationText);
-    LandscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);
-
-    // Add to scene
-    this.landscapeObject3D.add(applicationMesh);
-  }
-
-  // #endregion LANDSCAPE RENDERING
+  // #endregion RENDERING
 
   // #region APLICATION RENDERING
 
-  // @ts-ignore
-  @enqueueTask*
-  // eslint-disable-next-line
-  addApplicationTask(applicationModel: Application, callback?: (applicationObject3D: ApplicationObject3D) => void) {
-    try {
-      if (this.applicationGroup.hasApplication(applicationModel.pid)) {
-        return;
-      }
-
-      const { dynamicLandscapeData } = this.args.landscapeData;
-
-      const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', applicationModel);
-
-      // Converting plain JSON layout data due to worker limitations
-      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
-
-      const applicationObject3D = new VrApplicationObject3D(applicationModel, boxLayoutMap,
-        dynamicLandscapeData);
-
-      // Add new meshes to application
-      EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
-        this.configuration.applicationColors);
-
-      this.updateDrawableClassCommunications(applicationObject3D);
-
-      const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.pid)!;
-
-      this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-
-      // Add labels to application
-      this.addLabels(applicationObject3D);
-
-      // Scale application to a reasonable size to work with it
-      const scalar = this.applicationScalar;
-      applicationObject3D.scale.set(scalar, scalar, scalar);
-
-      // Add close icon to application.
-      const closeIcon = new CloseIcon({
-        texture: this.closeButtonTexture,
-        onClose: () => {
-          this.removeApplication(applicationObject3D);
-        }
-      });
-      closeIcon.addToObject(applicationObject3D);
-
-      this.applicationGroup.addApplication(applicationObject3D);
-
-      if (callback) callback(applicationObject3D);
-    } catch (e: any) {
-      this.debug(e);
-    }
-  }
-
-  updateDrawableClassCommunications(applicationObject3D: ApplicationObject3D) {
-    if (this.drawableClassCommunications.has(applicationObject3D.dataModel.pid)) {
-      return;
-    }
-
-    const { structureLandscapeData } = this.args.landscapeData;
-    const drawableClassCommunications = computeDrawableClassCommunication(
-      structureLandscapeData,
-      applicationObject3D.traces,
-    );
-
-    const allClasses = new Set(getAllClassesInApplication(applicationObject3D.dataModel));
-
-    const communicationInApplication = drawableClassCommunications.filter(
-      (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
-    );
-
-    this.drawableClassCommunications.set(applicationObject3D.dataModel.pid,
-      communicationInApplication);
-  }
-
-  addApplication(applicationModel: Application, callback: (application: ApplicationObject3D) => void) {
+  addApplication(applicationModel: Application): Promise<ApplicationObject3D|null> {
     if (applicationModel.packages.length === 0) {
       this.showHint('No data available');
-    } else if (!this.applicationGroup.hasApplication(applicationModel.pid)) {
-      perform(this.addApplicationTask, applicationModel, callback);
+      return Promise.resolve(null);
     }
-  }
-
-  /**
-   * Adds labels to all box meshes of a given application
-   */
-  addLabels(applicationObject3D: ApplicationObject3D) {
-    if (!this.font) { return; }
-
-    const clazzTextColor = this.configuration.applicationColors.clazzText;
-    const componentTextColor = this.configuration.applicationColors.componentText;
-    const foundationTextColor = this.configuration.applicationColors.foundationText;
-
-    applicationObject3D.getBoxMeshes().forEach((mesh) => {
-    /* Labeling is time-consuming. Thus, label only visible meshes incrementally
-       as opposed to labeling all meshes up front (as done in application-rendering) */
-      if (!mesh.visible) return;
-
-      if (mesh instanceof ClazzMesh) {
-        ApplicationLabeler
-          .addClazzTextLabel(mesh, this.font, clazzTextColor);
-      } else if (mesh instanceof ComponentMesh) {
-        ApplicationLabeler
-          .addBoxTextLabel(mesh, this.font, componentTextColor);
-      } else if (mesh instanceof FoundationMesh) {
-        ApplicationLabeler
-          .addBoxTextLabel(mesh, this.font, foundationTextColor);
-      }
-    });
+    if (this.applicationGroup.hasApplication(applicationModel.pid)) {
+      this.showHint('Application already opened');
+      return Promise.resolve(null);
+    }
+    return this.vrApplicationRenderer.addApplication(applicationModel);
   }
 
   // #endregion APPLICATION RENDERING
@@ -950,7 +625,7 @@ export default class VrRendering extends Component<Args> {
     }
 
     if (object instanceof ApplicationMesh) {
-      this.addApplication(object.dataModel, (applicationObject3D : ApplicationObject3D) => {
+      this.addApplication(object.dataModel).then((applicationObject3D : ApplicationObject3D) => {
         // Rotate app so that it is aligned with landscape
         applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
         applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
@@ -972,12 +647,12 @@ export default class VrRendering extends Component<Args> {
 
   toggleComponentAndUpdate(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
     EntityManipulation.toggleComponentMeshState(componentMesh, applicationObject3D);
-    this.addLabels(applicationObject3D);
+    this.vrApplicationRenderer.addLabels(applicationObject3D);
 
-    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.pid);
+    const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(applicationObject3D.dataModel.pid);
 
     if (drawableComm) {
-      this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
+      this.vrApplicationRenderer.appCommRendering.addCommunication(applicationObject3D, drawableComm);
       Highlighting.updateHighlighting(applicationObject3D, drawableComm);
     }
   }
@@ -985,10 +660,10 @@ export default class VrRendering extends Component<Args> {
   closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
     EntityManipulation.closeAllComponents(applicationObject3D);
 
-    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.pid);
+    const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(applicationObject3D.dataModel.pid);
 
     if (drawableComm) {
-      this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
+      this.vrApplicationRenderer.appCommRendering.addCommunication(applicationObject3D, drawableComm);
       Highlighting.updateHighlighting(applicationObject3D, drawableComm);
     }
   }
@@ -1005,7 +680,7 @@ export default class VrRendering extends Component<Args> {
   highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
     if (object instanceof ComponentMesh || object instanceof ClazzMesh
       || object instanceof ClazzCommunicationMesh) {
-      const drawableComm = this.drawableClassCommunications.get(application.dataModel.pid);
+      const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(application.dataModel.pid);
 
       if (drawableComm) {
         Highlighting.highlight(object, application, drawableComm);
@@ -1024,39 +699,6 @@ export default class VrRendering extends Component<Args> {
     this.landscapeObject3D.position.add(delta);
   }
 
-  centerLandscape() {
-    const { floor } = this;
-    const landscape = this.landscapeObject3D;
-
-    // Compute bounding box of the floor
-    const bboxFloor = new THREE.Box3().setFromObject(floor);
-
-    // Calculate center of the floor
-    const centerFloor = new THREE.Vector3();
-    bboxFloor.getCenter(centerFloor);
-
-    const bboxLandscape = new THREE.Box3().setFromObject(landscape);
-
-    // Calculate center of the landscape
-    const centerLandscape = new THREE.Vector3();
-    bboxLandscape.getCenter(centerLandscape);
-
-    // Set new position of landscape
-    landscape.position.x += centerFloor.x - centerLandscape.x;
-    landscape.position.z += centerFloor.z - centerLandscape.z;
-
-    // Check distance between floor and landscape
-    if (bboxLandscape.min.y > bboxFloor.max.y) {
-      landscape.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
-    }
-
-    // Check if landscape is underneath the floor
-    if (bboxLandscape.min.y < bboxFloor.min.y) {
-      landscape.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
-    }
-
-  }
-
   rotateLandscape(deltaX: number) {
     this.landscapeObject3D.rotation.x -= deltaX;
     this.updateLandscapeRotation(this.landscapeObject3D.quaternion.clone());
@@ -1064,23 +706,18 @@ export default class VrRendering extends Component<Args> {
 
   updateLandscapeRotation(quaternion: THREE.Quaternion) {
     this.landscapeObject3D.quaternion.copy(quaternion);
-    this.centerLandscape();
+    this.vrLandscapeRenderer.centerLandscape();
   }
 
   resetLandscapePosition() {
     this.landscapeObject3D.rotation.x = -90 * THREE.MathUtils.DEG2RAD;
     this.landscapeObject3D.rotation.y = 0;
     this.landscapeObject3D.rotation.z = 0;
-    this.centerLandscape();
+    this.vrLandscapeRenderer.centerLandscape();
   }
 
   removeApplication(application: ApplicationObject3D) {
     this.applicationGroup.removeApplicationById(application.dataModel.pid);
-  }
-
-  cleanUpLandscape() {
-    this.landscapeObject3D.removeAllChildren();
-    this.landscapeObject3D.resetMeshReferences();
   }
 
   resetAll() {
@@ -1090,7 +727,7 @@ export default class VrRendering extends Component<Args> {
   }
 
   willDestroy() {
-    this.cleanUpLandscape();
+    this.vrLandscapeRenderer.cleanUpLandscape();
     this.applicationGroup.clear();
     this.localUser.reset();
   }

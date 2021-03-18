@@ -3,9 +3,9 @@ import THREE from 'three';
 import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-controller-bindings-list';
 import VRControllerBindings from 'virtual-reality/utils/vr-controller/vr-controller-bindings';
 import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
-import VRController from 'virtual-reality/utils/vr-rendering/VRController';
+import VRController from 'virtual-reality/utils/vr-controller';
 
-module('Unit | Utility | vr-rendering/VRController', function() {
+module('Unit | Utility | vr-controller', function() {
 
   test('it exists', function( assert ) {
     let result = new VRController({

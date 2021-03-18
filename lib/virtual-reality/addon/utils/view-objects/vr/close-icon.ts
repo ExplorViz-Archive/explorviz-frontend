@@ -1,6 +1,6 @@
 import THREE, { Object3D } from 'three';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import VRController from 'virtual-reality/utils/vr-rendering/VRController';
+import VRController from 'virtual-reality/utils/vr-controller';
 
 export default class CloseIcon extends BaseMesh {
   private radius: number;
