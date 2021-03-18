@@ -63,13 +63,8 @@ export default class MenuGroup extends THREE.Group {
             this.remove(this.currentMenu);
         }
 
-        this.menus.push(menu);
-        this.controllerBindings.push(menu.makeControllerBindings());
-        this.add(menu);
+        this.addMenu(menu);
         menu.onOpenMenu();
-
-        // Hide or show the controllers ray.
-        this.toggleControllerRay();
     }
 
     /**
@@ -103,6 +98,16 @@ export default class MenuGroup extends THREE.Group {
     }
 
     /**
+     * Closes the currently open menu and opens the given menu without
+     * resuming the previously open menu.
+     */
+    replaceMenu(nextMenu: BaseMenu) {
+        this.removeMenu((m) => m.onCloseMenu());
+        this.addMenu(nextMenu);
+        nextMenu.onOpenMenu();
+    }
+
+    /**
      * Detaches the currently active menu if it is an instance of `DetachableMenu`.
      */
     detachMenu() {
@@ -117,6 +122,21 @@ export default class MenuGroup extends THREE.Group {
                 menu: detachedMenu
             });
         }
+    }
+
+    /**
+     * Adds the given menu to the menu group, making it the currently active
+     * menu.
+     * 
+     * @param menu  The menu to add.
+     */
+    private addMenu(menu: BaseMenu) {
+        this.menus.push(menu);
+        this.controllerBindings.push(menu.makeControllerBindings());
+        this.add(menu);
+        
+        // Hide or show the controllers ray.
+        this.toggleControllerRay();
     }
 
     /**

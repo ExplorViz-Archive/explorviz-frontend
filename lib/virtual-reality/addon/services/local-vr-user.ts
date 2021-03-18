@@ -125,9 +125,11 @@ export default class LocalVrUser extends Service {
     this.userGroup.children.forEach((child) => { this.userGroup.remove(child); });
   }
 
-  connect() {
-    this.state = 'connecting';
-    this.webSocket.initSocket();
+  connect(roomId: string) {
+    if (!this.isConnecting) {
+      this.state = 'connecting';
+      this.webSocket.initSocket(roomId);
+    }
   }
 
   /**
@@ -138,16 +140,6 @@ export default class LocalVrUser extends Service {
 
     // Close socket
     this.webSocket.closeSocket();
-  }
-
-  toggleConnection() {
-    if (this.isConnecting) { return; }
-
-    if (this.isOnline) {
-      this.disconnect();
-    } else {
-      this.connect();
-    }
   }
 }
 

@@ -39,7 +39,6 @@ import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 import MenuQueue from 'virtual-reality/utils/vr-menus/menu-queue';
 import CameraMenu from 'virtual-reality/utils/vr-menus/ui-menu/camera-menu';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
-import MainMenu from 'virtual-reality/utils/vr-menus/ui-menu/main-menu';
 import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
 import SettingsMenu from 'virtual-reality/utils/vr-menus/ui-menu/settings-menu';
 import ZoomMenu from 'virtual-reality/utils/vr-menus/ui-menu/zoom-menu';
@@ -541,9 +540,6 @@ export default class VrRendering extends Component<Args> {
       case '2':
         this.moveLandscape(0, 0, mvDst);
         break;
-      case 'c':
-        this.localUser.connect();
-        break;
       case 'r':
         this.resetLandscapePosition();
         break;
@@ -567,13 +563,7 @@ export default class VrRendering extends Component<Args> {
     }
   }
 
-  openMainMenu(controller: VRController) {
-    if (!this.localUser.controller1) return;
-
-    controller.menuGroup.openMenu(new MainMenu({
-      openSettingsMenu: () => this.openSettingsMenu(controller),
-      openResetMenu: () => this.openResetMenu(controller)
-    }));
+  openMainMenu(_controller: VRController) {
   }
 
   openResetMenu(controller: VRController) {

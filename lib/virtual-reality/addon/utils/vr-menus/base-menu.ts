@@ -180,6 +180,12 @@ export default abstract class BaseMenu extends THREE.Group {
   get enableTeleport(): boolean {
     return this.enableControllerRay;
   }
+
+  get menuGroup(): MenuGroup|null {
+    if (this.parent instanceof MenuGroup) return this.parent;
+    return null;
+  }
+
   /**
    * Closes this menu.
    */
@@ -192,18 +198,14 @@ export default abstract class BaseMenu extends THREE.Group {
    * the given predicate.
    */
   closeMenusWhile(predicate: (menu : BaseMenu) => boolean) {
-    if (this.parent instanceof MenuGroup) {
-      this.parent.closeMenusWhile(predicate);
-    }
+    this.menuGroup?.closeMenusWhile(predicate);
   }
 
   /**
    * Detaches this menu.
    */
   detachMenu() {
-    if (this.parent instanceof MenuGroup) {
-      this.parent.detachMenu();
-    }
+    this.menuGroup?.detachMenu();
   }
 
   /**

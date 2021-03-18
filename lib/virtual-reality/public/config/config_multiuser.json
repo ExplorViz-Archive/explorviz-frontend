@@ -2,5 +2,5 @@
   "host": "192.168.48.209",
   "port": 443,
   "secure": true,
-  "path": "/v2/vr"
+  "path": "/v2/vr/{room-id}"
 }

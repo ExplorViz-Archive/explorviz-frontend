@@ -17,16 +17,17 @@ export default class WebSocketService extends Service {
 
   path: string | null = '';
 
-  getSocketUrl() {
-    return `${this.secure ? "wss" : "ws"}://${this.host}:${this.port}/${this.path}`;
+  getSocketUrl(roomId: string) {
+    const path = this.path?.replace('{room-id}', roomId);
+    return `${this.secure ? "wss" : "ws"}://${this.host}:${this.port}/${path}`;
   }
 
   socketCloseCallback: ((event: any) => void) | null = null;
 
   messageCallback: ((message: any) => void) | null = null;
 
-  initSocket() {
-    const socket = this.websockets.socketFor(this.getSocketUrl());
+  initSocket(roomId: string) {
+    const socket = this.websockets.socketFor(this.getSocketUrl(roomId));
     socket.on('message', this.messageHandler, this);
     socket.on('close', this.closeHandler, this);
     this.socket = socket;
@@ -44,7 +45,7 @@ export default class WebSocketService extends Service {
   }
 
   closeSocket() {
-    this.websockets.closeSocketFor(this.getSocketUrl());
+    this.websockets.closeSocketFor(this.socket.socket.url);
   }
 
   private closeHandler(event: any) {

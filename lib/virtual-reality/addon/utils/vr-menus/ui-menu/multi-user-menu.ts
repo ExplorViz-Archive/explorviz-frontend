@@ -8,8 +8,6 @@ import UiMenu from '../ui-menu';
 
 export default class MultiUserMenu extends UiMenu {
 
-    toggleConnection: (() => void)
-
     users: RemoteVrUser[];
 
     localUser: LocalVrUser;
@@ -27,8 +25,7 @@ export default class MultiUserMenu extends UiMenu {
     getRemoteUsers: (() => Map<string, RemoteVrUser>);
 
 
-  constructor({toggleConnection, localUser, spectateUserService, idToRemoteVrUsers, getRemoteUsers}: {
-    toggleConnection: () => void, 
+  constructor({localUser, spectateUserService, idToRemoteVrUsers, getRemoteUsers}: {
     localUser: LocalVrUser, 
     spectateUserService: SpectateUserService, 
     idToRemoteVrUsers: Map<string, RemoteVrUser>, 
@@ -39,7 +36,6 @@ export default class MultiUserMenu extends UiMenu {
     this.spectateUserService = spectateUserService;
     this.idToRemoteVrUsers = idToRemoteVrUsers;
     this.users = Array.from(this.idToRemoteVrUsers.values());
-    this.toggleConnection = toggleConnection;
     this.state = this.localUser.state;
     this.initMenu();
     this.getRemoteUsers = getRemoteUsers;
@@ -63,7 +59,10 @@ export default class MultiUserMenu extends UiMenu {
     const connectButton = new TextbuttonItem('connect', buttonState, { x: 100, y: 186 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
     this.items.push(connectButton);
     this.thumbpadTargets.push(connectButton);
-    connectButton.onTriggerDown = this.toggleConnection;
+    connectButton.onTriggerDown = () => {
+      // @ts-ignore
+      this.localUser.connect(window.roomId);
+    };
   }
 
   initOnlineMenu() {
@@ -72,7 +71,7 @@ export default class MultiUserMenu extends UiMenu {
 
     this.disconnectButton = new TextbuttonItem('disconnect', 'Disconnect', {x: 370,y: 13,}, 115, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');
     this.items.push(this.disconnectButton);
-    this.disconnectButton.onTriggerDown = this.toggleConnection;
+    this.disconnectButton.onTriggerDown = () => this.localUser.disconnect();
 
     const yOffset = 60;
     let yPos = 50 + yOffset;
@@ -149,7 +148,7 @@ export default class MultiUserMenu extends UiMenu {
     return new VRControllerButtonBinding('Disconnect', {
       onButtonDown: () => {
         if (this.state == 'online') {
-          this.toggleConnection();
+          this.localUser.disconnect();
           this.disconnectButton?.enableHoverEffectByButton();
           this.redrawMenu()
         }

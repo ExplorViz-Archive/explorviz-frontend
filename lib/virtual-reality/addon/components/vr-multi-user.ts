@@ -20,7 +20,6 @@ import * as Highlighting from 'explorviz-frontend/utils/application-rendering/hi
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import NameTagMesh from 'virtual-reality/utils/view-objects/vr/name-tag-mesh';
-import MainMenu from 'virtual-reality/utils/vr-menus/ui-menu/main-menu';
 import GrabMenu, { isGrabbableObject, findGrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
 import VRController from 'virtual-reality/utils/vr-controller';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
@@ -54,6 +53,7 @@ import { GrabbableMenuContainer } from 'virtual-reality/utils/vr-menus/grabbable
 import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import PingMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/ping-menu';
+import VrMenuFactoryService from 'virtual-reality/services/vr-menu-factory';
 
 export default class VrMultiUser extends VrRendering implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
@@ -80,6 +80,9 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   
   @service('grabbed-object')
   grabbedObjectService!: GrabbedObjectService;
+
+  @service('vr-menu-factory')
+  menuFactory!: VrMenuFactoryService;
 
   remoteUserGroup: THREE.Group;
 
@@ -172,18 +175,11 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   // #region MENUS
 
   openMainMenu(controller: VRController) {
-    if (!this.localUser.controller1) return;
-
-    controller.menuGroup.openMenu(new MainMenu({
-      openSettingsMenu: () => this.openSettingsMenu(controller),
-      openMultiUserMenu: () => this.openMultiUserMenu(controller),
-      openResetMenu: () => this.openResetMenu(controller)
-    }));
+    controller.menuGroup.openMenu(this.menuFactory.buildMainMenu());
   }
 
   openMultiUserMenu(controller: VRController) {
     const menu = new MultiUserMenu({
-      toggleConnection: () => this.localUser.toggleConnection(),
       localUser: this.localUser,
       spectateUserService: this.spectateUserService,
       idToRemoteVrUsers: this.idToRemoteUser,
