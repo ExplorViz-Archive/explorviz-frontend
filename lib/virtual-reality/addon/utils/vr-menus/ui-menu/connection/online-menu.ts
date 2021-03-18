@@ -27,7 +27,7 @@ export default class OnlineMenu extends ConnectionBaseMenu {
     initMenu() {
 
         const users = Array.from(this.idToRemoteVrUser.values());
-        const title = new TextItem('Users (' + (users.length + 1) + ')', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
+        const title = new TextItem(`Room ${this.localUser.currentRoomId}`, 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
         this.items.push(title);
 
         const disconnectButton = new TextbuttonItem('disconnect', 'Disconnect', { x: 370, y: 13, }, 115, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');

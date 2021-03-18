@@ -32,6 +32,8 @@ export default class LocalVrUser extends Service {
 
   connectionStatus: ConnectionStatus = 'offline';
 
+  currentRoomId: string|null = null;
+
   get camera() {
     if (this.renderer.xr.isPresenting) {
       return this.renderer.xr.getCamera(this.defaultCamera);
@@ -128,7 +130,8 @@ export default class LocalVrUser extends Service {
   connect(roomId: string) {
     if (!this.isConnecting) {
       this.state = 'connecting';
-      this.webSocket.initSocket(roomId);
+      this.currentRoomId = roomId;
+      this.webSocket.initSocket(this.currentRoomId);
     }
   }
 
@@ -139,7 +142,10 @@ export default class LocalVrUser extends Service {
     this.state = 'offline';
 
     // Close socket
-    this.webSocket.closeSocket();
+    if (this.currentRoomId) {
+      this.webSocket.closeSocket(this.currentRoomId);
+      this.currentRoomId = null;
+    }
   }
 }
 

@@ -44,8 +44,8 @@ export default class WebSocketService extends Service {
     this.path = config.path.replace(/^\/|\/$/g, "");
   }
 
-  closeSocket() {
-    this.websockets.closeSocketFor(this.socket.socket.url);
+  closeSocket(roomId: string) {
+    this.websockets.closeSocketFor(this.getSocketUrl(roomId));
   }
 
   private closeHandler(event: any) {
