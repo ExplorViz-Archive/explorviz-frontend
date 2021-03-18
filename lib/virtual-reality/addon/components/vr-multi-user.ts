@@ -102,6 +102,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
     this.remoteUserGroup = new THREE.Group();
     this.hardwareModels = new HardwareModels();
+    this.menuFactory.idToRemoteVrUser = this.idToRemoteUser;
   }
 
   initRendering() {

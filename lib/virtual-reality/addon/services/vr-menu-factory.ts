@@ -6,6 +6,7 @@ import LocalVrUser from "virtual-reality/services/local-vr-user";
 import ConnectionBaseMenu from 'virtual-reality/utils/vr-menus/ui-menu/connection/base';
 import JoinMenu from "virtual-reality/utils/vr-menus/ui-menu/connection/join-menu";
 import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
+import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import ConnectingMenu from "../utils/vr-menus/ui-menu/connection/connecting-menu";
 import OfflineMenu from "../utils/vr-menus/ui-menu/connection/offline-menu";
 import OnlineMenu from "../utils/vr-menus/ui-menu/connection/online-menu";
@@ -16,9 +17,11 @@ export default class VrMenuFactoryService extends Service {
 
     @service('ajax')
     ajax!: AjaxServiceClass;
+    
+    idToRemoteVrUser: Map<string, RemoteVrUser> = new Map<string, RemoteVrUser>();
 
     buildMainMenu(): MainMenu {
-        return new MainMenu({menuFactory: this});
+        return new MainMenu({ menuFactory: this });
     }
 
     buildSettingsMenu(): SettingsMenu {
@@ -57,7 +60,7 @@ export default class VrMenuFactoryService extends Service {
         return new OnlineMenu({
             localUser: this.localUser,
             menuFactory: this,
-        });
+        }, this.idToRemoteVrUser);
     }
 
     buildJoinMenu(): JoinMenu {
@@ -70,7 +73,7 @@ export default class VrMenuFactoryService extends Service {
 }
 
 declare module '@ember/service' {
-  interface Registry {
-    'vr-menu-factory': VrMenuFactoryService;
-  }
+    interface Registry {
+        'vr-menu-factory': VrMenuFactoryService;
+    }
 }
