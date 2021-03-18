@@ -150,8 +150,9 @@ export default class JoinMenu extends ConnectionBaseMenu {
         // Refesh room list after timeout.
         if (this.refreshTimeout > 0) {
             this.refreshTimeout -= delta;
-            if (this.refreshTimeout < 0) {
-                this.loadRoomList();
+            if (this.refreshTimeout <= 0) {
+                this.refreshTimeout = 0;
+                this.loadAndDrawRoomList();
             }
         }
     }

@@ -12,11 +12,11 @@ export default class OnlineMenu extends ConnectionBaseMenu {
 
     remoteUserButtons: Map<string, TextbuttonItem> = new Map<string, TextbuttonItem>();
 
-    constructor(args: {
+    constructor({idToRemoteVrUser, ...args}: {
         localUser: LocalVrUser,
-        menuFactory: VrMenuFactoryService
-    }, idToRemoteVrUser: Map<string, RemoteVrUser>
-    ) {
+        menuFactory: VrMenuFactoryService,
+        idToRemoteVrUser: Map<string, RemoteVrUser>
+    }) {
         super(args);
 
         this.idToRemoteVrUser = idToRemoteVrUser;

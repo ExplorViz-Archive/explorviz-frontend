@@ -46,6 +46,7 @@ export default class VrMenuFactoryService extends Service {
         return new OfflineMenu({
             localUser: this.localUser,
             menuFactory: this,
+            ajax: this.ajax,
         });
     }
 
@@ -60,7 +61,8 @@ export default class VrMenuFactoryService extends Service {
         return new OnlineMenu({
             localUser: this.localUser,
             menuFactory: this,
-        }, this.idToRemoteVrUser);
+            idToRemoteVrUser: this.idToRemoteVrUser
+        });
     }
 
     buildJoinMenu(): JoinMenu {
