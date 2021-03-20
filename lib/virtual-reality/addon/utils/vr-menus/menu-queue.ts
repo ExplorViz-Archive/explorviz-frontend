@@ -1,6 +1,10 @@
 import BaseMenu from "./base-menu";
 import MenuGroup from "./menu-group";
 
+export type MenuQueueArgs = {
+    nextMenuDelay?: number
+};
+
 /**
  * A menu group that maintains a queue of menus and displays the next menu
  * in the queue automatically once the previous menu is closed.
@@ -10,7 +14,7 @@ export default class MenuQueue extends MenuGroup {
     private nextMenuDelay: number;
     private nextMenuTime: number;
 
-    constructor({nextMenuDelay = 0.75}: {nextMenuDelay?: number} = {}) {
+    constructor({nextMenuDelay = 0.75}: MenuQueueArgs = {}) {
         super();
         this.menuQueue = [];
         this.nextMenuDelay = nextMenuDelay;
@@ -18,21 +22,21 @@ export default class MenuQueue extends MenuGroup {
     }
 
     /**
-     * Tests whether a menu has been enqueued that matches the given predicate. 
+     * Tests whether a menu has been enqueued that matches the given predicate.
      */
     hasEnquedOrCurrentMenu(predicate: (menu: BaseMenu) => boolean) {
         return this.currentMenu && predicate(this.currentMenu) || this.hasEnquedMenu(predicate);
     }
 
     /**
-     * Tests whether a menu has been enqueued that matches the given predicate. 
+     * Tests whether a menu has been enqueued that matches the given predicate.
      */
     hasEnquedMenu(predicate: (menu: BaseMenu) => boolean) {
         return this.menuQueue.any(predicate);
     }
 
     /**
-     * Adds a menu to the queue. 
+     * Adds a menu to the queue.
      */
     enqueueMenu(menu: BaseMenu) {
         this.menuQueue.push(menu);

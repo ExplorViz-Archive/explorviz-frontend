@@ -1,16 +1,17 @@
 import TextItem from '../items/text-item';
-import UiMenu from '../ui-menu';
+import UiMenu, { UiMenuArgs } from '../ui-menu';
 import TextbuttonItem from '../items/textbutton-item';
 import VRControllerLabelGroup from '../../vr-controller/vr-controller-label-group';
 import CheckboxItem from '../items/checkbox-item';
 
+export type SettingsMenuArgs = UiMenuArgs & {
+  labelGroups: (VRControllerLabelGroup|undefined)[]
+};
+
 export default class SettingsMenu extends UiMenu {
 
-  constructor({openCameraMenu, labelGroups}: {
-    openCameraMenu: () => void, 
-    labelGroups: (VRControllerLabelGroup|undefined)[]
-  }) {
-    super();
+  constructor({labelGroups, ...args}: SettingsMenuArgs) {
+    super(args);
 
     const textItem = new TextItem('Settings', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(textItem);
@@ -22,7 +23,7 @@ export default class SettingsMenu extends UiMenu {
 
     this.items.push(cameraButton);
     this.thumbpadTargets.push(cameraButton);
-    cameraButton.onTriggerDown = openCameraMenu;
+    cameraButton.onTriggerDown = () => this.menuGroup?.openMenu(this.menuFactory.buildCameraMenu());
 
     const labelsText = new TextItem('Show Labels', 'labels_text', '#ffffff', { x: 100, y: 200 }, 28, 'left');
     this.items.push(labelsText);

@@ -1,31 +1,27 @@
-import TextItem from "explorviz-frontend/utils/vr-menus/items/text-item";
-import TextbuttonItem from "explorviz-frontend/utils/vr-menus/items/textbutton-item";
-import LocalVrUser from "virtual-reality/services/local-vr-user";
-import VrMenuFactoryService from "virtual-reality/services/vr-menu-factory";
+import TextItem from "../../items/text-item";
+import TextbuttonItem from "../../items/textbutton-item";
 import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
 import RemoteVrUser from "virtual-reality/utils/vr-multi-user/remote-vr-user";
-import ConnectionBaseMenu from "./base";
+import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
+
+type OnlineMenuArgs = ConnectionBaseMenuArgs & {
+  idToRemoteVrUser: Map<string, RemoteVrUser>
+};
 
 export default class OnlineMenu extends ConnectionBaseMenu {
+    private idToRemoteVrUser: Map<string, RemoteVrUser>;
+    private remoteUserButtons: Map<string, TextbuttonItem>;
 
-    idToRemoteVrUser: Map<string, RemoteVrUser>;
-
-    remoteUserButtons: Map<string, TextbuttonItem> = new Map<string, TextbuttonItem>();
-
-    constructor({idToRemoteVrUser, ...args}: {
-        localUser: LocalVrUser,
-        menuFactory: VrMenuFactoryService,
-        idToRemoteVrUser: Map<string, RemoteVrUser>
-    }) {
+    constructor({idToRemoteVrUser, ...args}: OnlineMenuArgs) {
         super(args);
 
         this.idToRemoteVrUser = idToRemoteVrUser;
+        this.remoteUserButtons = new Map<string, TextbuttonItem>();
 
         this.initMenu();
     }
 
-    initMenu() {
-
+    private initMenu() {
         const users = Array.from(this.idToRemoteVrUser.values());
         const title = new TextItem(`Room ${this.localUser.currentRoomId}`, 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
         this.items.push(title);
@@ -73,11 +69,11 @@ export default class OnlineMenu extends ConnectionBaseMenu {
 
     }
 
-    arrayEquals(a: string[], b: string[]) {
+    private arrayEquals(a: string[], b: string[]) {
         return a.length === b.length && a.every((val, index) => val === b[index]);
     }
 
-    deactivateSpectate() {
+    private deactivateSpectate() {
         if (this.localUser.spectateUserService.isActive) {
             const id = this.localUser.spectateUserService.spectatedUser?.userId
             if (id) {
@@ -91,7 +87,7 @@ export default class OnlineMenu extends ConnectionBaseMenu {
         this.redrawMenu();
     }
 
-    spectate(remoteUser: RemoteVrUser) {
+    private spectate(remoteUser: RemoteVrUser) {
         this.deactivateSpectate();
         this.localUser.spectateUserService.activate(remoteUser);
         const remoteUserButton = this.remoteUserButtons.get(remoteUser.userId);
@@ -100,7 +96,6 @@ export default class OnlineMenu extends ConnectionBaseMenu {
         }
         this.redrawMenu();
     }
-
 
     makeGripButtonBinding() {
         return new VRControllerButtonBinding('Disconnect', {

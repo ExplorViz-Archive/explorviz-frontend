@@ -1,7 +1,7 @@
+import BaseMenu, { BaseMenuArgs } from "../base-menu";
+import GrabMenu, { GrabbableObject } from "./grab-menu";
 import THREE from "three";
 import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
-import BaseMenu from "../base-menu";
-import GrabMenu, { GrabbableObject } from "./grab-menu";
 
 export class SharedScaleMenuState {
     readonly grabbedObject: GrabbableObject;
@@ -66,7 +66,7 @@ export class SharedScaleMenuState {
     }
 
     /**
-     * Resets the current positions such that new positions can be collected 
+     * Resets the current positions such that new positions can be collected
      * in the next tick.
      */
     clear() {
@@ -74,11 +74,15 @@ export class SharedScaleMenuState {
     }
 }
 
+export type ScaleMenuArgs = BaseMenuArgs & {
+    sharedState: SharedScaleMenuState,
+}
+
 export default class ScaleMenu extends BaseMenu {
     protected sharedState: SharedScaleMenuState;
 
-    constructor(sharedState: SharedScaleMenuState) {
-        super();
+    constructor({ sharedState, ...args }: ScaleMenuArgs) {
+        super(args);
         this.sharedState = sharedState;
     }
 
@@ -112,7 +116,7 @@ export default class ScaleMenu extends BaseMenu {
             this.closeMenu();
             return;
         }
-        
+
         // Write current position into the shared state.
         let position = new THREE.Vector3();
         this.getWorldPosition(position);

@@ -1,12 +1,12 @@
 import THREE from "three";
-import BaseMenu from "./base-menu";
+import BaseMenu, { BaseMenuArgs } from "./base-menu";
 
 /**
  * An event that is fired by THREE.js's animation system when an animation
  * is done.
  */
 type AnimationFinishedEvent =  {
-  type: 'finished', 
+  type: 'finished',
   action: THREE.AnimationAction
 };
 
@@ -16,8 +16,8 @@ type AnimationFinishedEvent =  {
 export default abstract class AnimatedMenu extends BaseMenu {
     animationMixer: THREE.AnimationMixer;
 
-    constructor() {
-        super();
+    constructor(args: BaseMenuArgs) {
+        super(args);
         this.animationMixer = new THREE.AnimationMixer(this);
     }
 

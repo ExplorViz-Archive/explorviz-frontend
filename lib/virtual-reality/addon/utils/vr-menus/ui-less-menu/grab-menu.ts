@@ -3,9 +3,8 @@ import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-co
 import VRControllerThumbpadBinding from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import VRController from 'virtual-reality/utils/vr-controller';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
-import BaseMenu from '../base-menu';
+import BaseMenu, { BaseMenuArgs } from '../base-menu';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
-import ScaleMenu, { SharedScaleMenuState } from './scale-menu';
 
 export interface GrabbableObject extends THREE.Object3D {
     getGrabId(): string | null;
@@ -27,6 +26,12 @@ export function findGrabbableObject(root: THREE.Object3D, objectId: string): Gra
     return null;
 }
 
+export type GrabMenuArgs = BaseMenuArgs & {
+    deltaTimeService: DeltaTimeService
+    grabbedObject: GrabbableObject;
+    grabbedObjectService: GrabbedObjectService;
+};
+
 export default class GrabMenu extends BaseMenu {
     private grabbedObject: GrabbableObject;
     private grabbedObjectParent: THREE.Object3D | null;
@@ -34,8 +39,11 @@ export default class GrabMenu extends BaseMenu {
     private grabbedObjectService: GrabbedObjectService;
     private deltaTimeService: DeltaTimeService;
 
-    constructor(grabbedObject: GrabbableObject, grabbedObjectService: GrabbedObjectService, deltaTimeService: DeltaTimeService) {
-        super();
+    constructor({
+      grabbedObject, grabbedObjectService, deltaTimeService,
+      ...args
+    }: GrabMenuArgs) {
+        super(args);
         this.grabbedObject = grabbedObject;
         this.grabbedObjectParent = null;
         this.allowedToGrab = false;
@@ -44,7 +52,7 @@ export default class GrabMenu extends BaseMenu {
     }
 
     /**
-     * Moves the grabbed object into the controller's grip space. 
+     * Moves the grabbed object into the controller's grip space.
      */
     private addToGripSpace() {
         // Don't grab the object when the menu has been closed or paused
@@ -101,15 +109,15 @@ export default class GrabMenu extends BaseMenu {
         // Grab the object only when we are allowed to grab it.
         this.allowedToGrab = await this.grabbedObjectService.grabObject(this.grabbedObject);
         if (this.allowedToGrab) {
-            // If the object is grabbed by another menu already, open the scale 
+            // If the object is grabbed by another menu already, open the scale
             // menu instead.
             const controller = VRController.findController(this);
             const otherController = VRController.findController(this.grabbedObject);
             const otherMenu = otherController?.menuGroup.currentMenu;
             if (controller && otherController && otherMenu instanceof GrabMenu) {
-                const sharedState = new SharedScaleMenuState(this.grabbedObject);
-                controller.menuGroup.openMenu(new ScaleMenu(sharedState));
-                otherController.menuGroup.openMenu(new ScaleMenu(sharedState));
+                const {scaleMenu1, scaleMenu2} = this.menuFactory.buildScaleMenus(this.grabbedObject);
+                controller.menuGroup.openMenu(scaleMenu1);
+                otherController.menuGroup.openMenu(scaleMenu2);
             } else {
                 this.addToGripSpace();
             }

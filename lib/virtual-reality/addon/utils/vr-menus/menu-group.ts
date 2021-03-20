@@ -13,8 +13,8 @@ export type MenuDetachedEvent = {
 };
 
 export default class MenuGroup extends THREE.Group {
-    menus: BaseMenu[];
-    controllerBindings: VRControllerBindings[];
+    private menus: BaseMenu[];
+    readonly controllerBindings: VRControllerBindings[];
 
     constructor() {
         super();
@@ -87,7 +87,7 @@ export default class MenuGroup extends THREE.Group {
 
     /**
      * Closes menus until the current menu does not match the given predicate.
-     * 
+     *
      * Only the final menu (i.e., the first menu that is not closed) is resumed.
      */
     closeMenusWhile(predicate: (menu : BaseMenu) => boolean) {
@@ -118,7 +118,7 @@ export default class MenuGroup extends THREE.Group {
 
             // send detached menu
             this.dispatchEvent({
-                type: MENU_DETACH_EVENT_TYPE, 
+                type: MENU_DETACH_EVENT_TYPE,
                 menu: detachedMenu
             });
         }
@@ -127,21 +127,21 @@ export default class MenuGroup extends THREE.Group {
     /**
      * Adds the given menu to the menu group, making it the currently active
      * menu.
-     * 
+     *
      * @param menu  The menu to add.
      */
     private addMenu(menu: BaseMenu) {
         this.menus.push(menu);
         this.controllerBindings.push(menu.makeControllerBindings());
         this.add(menu);
-        
+
         // Hide or show the controllers ray.
         this.toggleControllerRay();
     }
 
     /**
      * Removes the currently active menu.
-     * 
+     *
      * @param callback Determines whethe the `onClose` or `onDetach` callback
      * is invoked.
      */
@@ -155,7 +155,7 @@ export default class MenuGroup extends THREE.Group {
 
     /**
      * Pop active menu.
-     * 
+     *
      * @param callback Determines whethe the `onClose` or `onDetach` callback
      * is invoked.
      */
@@ -170,8 +170,8 @@ export default class MenuGroup extends THREE.Group {
 
     /**
      * Resumes the previously active menu.
-     * 
-     * This method must be called after the current menu has been removed 
+     *
+     * This method must be called after the current menu has been removed
      * (see `removeMenu`).
      */
     private resumeMenu() {

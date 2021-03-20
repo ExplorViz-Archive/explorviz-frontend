@@ -1,5 +1,6 @@
 import THREE from 'three';
 import HudMenu from '../hud-menu';
+import { UiMenuArgs } from '../ui-menu';
 import TextItem from '../items/text-item';
 
 const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.25, [
@@ -10,14 +11,24 @@ const CLOSE_ANIMATION_CLIP = new THREE.AnimationClip('close-animation', 0.25, [
   new THREE.KeyframeTrack('.position[y]', [0.0, 0.25], [0.0, 0.2])
 ]);
 
+export type MessageBoxMenuArgs = UiMenuArgs & {
+  title: string,
+  text?: string,
+  color: string,
+  time: number
+};
+
 export default class MessageBoxMenu extends HudMenu {
   private time: number;
   private enableTimer: boolean;
 
-  constructor({title, text, color, time}: {
-    title: string, text?: string, color: string, time: number
-  }) {
-    super({ width: 256, height: 64 }, '#000000');
+  constructor({
+    title, text, color, time,
+    resolution = { width: 256, height: 64 },
+    backgroundColor = '#000000',
+    ...args
+  }: MessageBoxMenuArgs) {
+    super({resolution, backgroundColor, ...args});
     this.time = time;
     this.enableTimer = false;
 

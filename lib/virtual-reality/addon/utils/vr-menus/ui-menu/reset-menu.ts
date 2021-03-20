@@ -1,21 +1,32 @@
 import TextItem from '../items/text-item';
-import UiMenu from '../ui-menu';
+import UiMenu, { UiMenuArgs } from '../ui-menu';
 import TextbuttonItem from '../items/textbutton-item';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
+import THREE from 'three';
+import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
+import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
+
+export type ResetMenuArgs = UiMenuArgs & {
+  localUser: LocalVrUser,
+  vrApplicationRenderer: VrApplicationRenderer,
+  vrLandscapeRenderer: VrLandscapeRenderer,
+};
 
 export default class ResetMenu extends UiMenu {
+  private localUser: LocalVrUser;
+  private vrApplicationRenderer: VrApplicationRenderer;
+  private vrLandscapeRenderer: VrLandscapeRenderer;
 
-  constructor({resetAll, localUser}: {
-    resetAll: () => void, 
-    localUser: LocalVrUser
-  }) {
-    super();
+  constructor({localUser, vrApplicationRenderer, vrLandscapeRenderer, ...args}: ResetMenuArgs) {
+    super(args);
+    this.localUser = localUser;
+    this.vrApplicationRenderer = vrApplicationRenderer;
+    this.vrLandscapeRenderer = vrLandscapeRenderer;
 
     const textItem = new TextItem('Reset', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(textItem);
 
     if (localUser.state != 'online') {
-
       const question = new TextItem('Reset state and position?', 'question', '#ffffff', { x: 100, y: 148 }, 28, 'left');
       this.items.push(question);
 
@@ -23,30 +34,49 @@ export default class ResetMenu extends UiMenu {
         x: 100 - 20,
         y: 266,
       }, 158, 50, 28, '#555555', '#ffc338', '#929292');
+      noButton.onTriggerDown = () => this.closeMenu();
+      this.items.push(noButton);
+      this.thumbpadTargets.push(noButton);
 
       const yesButton = new TextbuttonItem('yes', 'Yes', {
         x: 258 + 20,
         y: 266,
       }, 158, 50, 28, '#555555', '#ffc338', '#929292');
-
       yesButton.onTriggerDown = () => {
-        resetAll();
+        this.resetAll();
         this.closeMenu()
       };
+      this.items.push(yesButton);
+      this.thumbpadTargets.push(yesButton);
 
-      noButton.onTriggerDown = () => this.closeMenu();
-
-      this.items.push(yesButton, noButton);
-      this.thumbpadTargets.push(noButton, yesButton);
       this.thumbpadAxis = 0;
 
     } else {
-
       const message = new TextItem('Not allowed when online.', 'message', '#ffffff', { x: 100, y: 148 }, 28, 'left');
       this.items.push(message);
-
     }
 
     this.redrawMenu();
+  }
+
+  private resetAll() {
+    this.resetLocalUser();
+    this.resetApplications();
+    this.resetLandscape();
+  }
+
+  private resetLocalUser() {
+    this.localUser.resetPosition();
+  }
+
+  private resetApplications() {
+    this.vrApplicationRenderer.applicationGroup.clear();
+  }
+
+  private resetLandscape() {
+    this.vrLandscapeRenderer.landscapeObject3D.rotation.x = -90 * THREE.MathUtils.DEG2RAD;
+    this.vrLandscapeRenderer.landscapeObject3D.rotation.y = 0;
+    this.vrLandscapeRenderer.landscapeObject3D.rotation.z = 0;
+    this.vrLandscapeRenderer.centerLandscape();
   }
 }

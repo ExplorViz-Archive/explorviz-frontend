@@ -2,8 +2,14 @@ import THREE from "three";
 import VRControllerButtonBinding from "../vr-controller/vr-controller-button-binding";
 import VRControllerThumbpadBinding, { thumbpadDirectionToVector2 } from "../vr-controller/vr-controller-thumbpad-binding";
 import AnimatedMenu from "./animated-menu";
+import { BaseMenuArgs } from "./base-menu";
 import InteractiveItem from "./items/interactive-item";
 import Item from "./items/item";
+
+export type UiMenuArgs = BaseMenuArgs & {
+  resolution?: { width: number, height: number },
+  backgroundColor?: string
+};
 
 /**
  * Base class for all menus that have a canvas with UI elements. The user can
@@ -13,33 +19,37 @@ import Item from "./items/item";
  */
 export default abstract class UiMenu extends AnimatedMenu {
     canvas!: HTMLCanvasElement;
-  
+
     canvasMesh!: THREE.Mesh<THREE.Geometry | THREE.BufferGeometry, THREE.MeshBasicMaterial>;
-  
+
     resolution: { width: number, height: number };
-  
+
     items: Item[];
-  
+
     lastHoveredItem: InteractiveItem|undefined;
-  
+
     thumbpadTargets: InteractiveItem[];
-  
+
     activeTarget: InteractiveItem|undefined;
-  
+
     thumbpadAxis: number;
 
-    constructor(resolution: { width: number, height: number } = { width: 512, height: 512 }, color = '#444444') {
-      super();
-  
+    constructor({
+      resolution = { width: 512, height: 512 },
+      backgroundColor = '#444444',
+      ...args
+    }: UiMenuArgs) {
+      super(args);
+
       this.resolution = resolution;
       this.items = [];
       this.thumbpadTargets = [];
       this.activeTarget = undefined;
       this.thumbpadAxis = 1;
-  
-      this.initBackground(new THREE.Color(color));
+
+      this.initBackground(new THREE.Color(backgroundColor));
       this.initCanvas();
-      
+
       // Move the mesh slightly in front of the background.
       this.canvasMesh.position.z = 0.00001;
       this.add(this.canvasMesh);
@@ -54,7 +64,7 @@ export default abstract class UiMenu extends AnimatedMenu {
       background.material = this.makeBackgroundMaterial(color);
       this.add(background);
     }
-  
+
     /**
      * Creates the geometry of the background mesh.
      */
@@ -64,10 +74,10 @@ export default abstract class UiMenu extends AnimatedMenu {
         (this.resolution.height / 512) * 0.3,
       );
     }
-  
+
     /**
      * Creates the material of the background mesh.
-     * 
+     *
      * @param color The color the background should have.
      */
     makeBackgroundMaterial(color: THREE.Color): THREE.Material {
@@ -78,7 +88,7 @@ export default abstract class UiMenu extends AnimatedMenu {
         opacity: 0.8,
       });
     }
-  
+
     /**
      * Creates ta canvas element to draw to and a mesh that displays the canvas.
      */
@@ -86,7 +96,7 @@ export default abstract class UiMenu extends AnimatedMenu {
       this.canvas = document.createElement('canvas');
       this.canvas.width = this.resolution.width;
       this.canvas.height = this.resolution.height;
-  
+
       // Create a mesh that displays the canvas as a texture. This is needed
       // such that the back face of the background can be visible while the
       // user interface's background is not.
@@ -96,7 +106,7 @@ export default abstract class UiMenu extends AnimatedMenu {
         transparent: true,
       });
       this.canvasMesh = new THREE.Mesh(geometry, material);
-  
+
       this.add(this.canvasMesh);
     }
 
@@ -107,17 +117,17 @@ export default abstract class UiMenu extends AnimatedMenu {
       const { canvas } = this;
       const ctx = canvas.getContext('2d')!;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
+
       for (let i = 0; i < this.items.length; i++) {
         const item = this.items[i];
         item.drawToCanvas(ctx);
       }
-  
+
       if (this.canvasMesh.material.map) {
         this.canvasMesh.material.map.needsUpdate = true;
       }
     }
-    
+
 
   /**
    * Finds the menu item at given uv position.
@@ -153,7 +163,7 @@ export default abstract class UiMenu extends AnimatedMenu {
 
   /**
    * Gets the menu iitem with the given id.
-   * 
+   *
    * @param id The id of the item to find.
    * @returns The item or `undefined`if there is no such item.
    */
@@ -165,7 +175,7 @@ export default abstract class UiMenu extends AnimatedMenu {
    * Tests whether a menu item is hovered when the menu is hovered by the ray
    * of the other controller.
    *
-   * @param uv The coordinates of the point that is hovered 
+   * @param uv The coordinates of the point that is hovered
    */
   hover(uv: THREE.Vector2) {
     super.hover(uv);
@@ -224,9 +234,9 @@ export default abstract class UiMenu extends AnimatedMenu {
   makeThumbpadBinding() {
     if (this.thumbpadTargets.length == 0) return undefined;
     return new VRControllerThumbpadBinding(
-      this.thumbpadAxis === 0 
-        ? {labelLeft: 'Previous', labelRight: 'Next'} 
-        : {labelUp: 'Previous', labelDown: 'Next'}, 
+      this.thumbpadAxis === 0
+        ? {labelLeft: 'Previous', labelRight: 'Next'}
+        : {labelUp: 'Previous', labelDown: 'Next'},
       {
         onThumbpadDown: (_controller, axes) => {
           // No item can be selected with the touchpad, if an item is selected
@@ -238,11 +248,11 @@ export default abstract class UiMenu extends AnimatedMenu {
           const offset = vector.toArray()[this.thumbpadAxis];
           if (offset !== 0) {
             // Get index of currently selected item or if no item is selected,
-            // get `0` if the user wants to select the previous (i.e., if 
-            // `offset = -1`) or `-1` if the user want to select the next item 
+            // get `0` if the user wants to select the previous (i.e., if
+            // `offset = -1`) or `-1` if the user want to select the next item
             // (i.e., if `offset = 1`).
             let index = this.activeTarget
-              ? this.thumbpadTargets.indexOf(this.activeTarget) 
+              ? this.thumbpadTargets.indexOf(this.activeTarget)
               : -(offset + 1) / 2;
 
             // Wrap index at start and end of list.
@@ -254,7 +264,7 @@ export default abstract class UiMenu extends AnimatedMenu {
       }
     );
   }
-  
+
   /**
    * The trigger can be used as a select button when this menu has items
    * that can be selected by the thumbpad.
@@ -269,10 +279,18 @@ export default abstract class UiMenu extends AnimatedMenu {
   }
 
   /**
+   * Whether the other controller can be used to interact with this menu while
+   * the user is in spectator mode.
+   */
+  get enableTriggerInSpectorMode(): boolean {
+    return false;
+  }
+
+  /**
    * Called once when the other controller's trigger is pressed down while
    * hovering this menu. This method is not called again before the trigger
    * is released.
-   * 
+   *
    * @param uv The coordinate of the menu that is hovered.
    */
   triggerDown(uv: THREE.Vector2) {
@@ -286,7 +304,7 @@ export default abstract class UiMenu extends AnimatedMenu {
   /**
    * Called when the other controller's trigger is pressed while hovering this
    * menu.
-   * 
+   *
    * @param uv The coordinate of the menu that is hovered.
    * @param value The intensity of the trigger press.
    */

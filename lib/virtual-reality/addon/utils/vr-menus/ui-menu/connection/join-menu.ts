@@ -1,10 +1,8 @@
 import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 import config from 'explorviz-frontend/config/environment';
-import TextItem from "explorviz-frontend/utils/vr-menus/items/text-item";
-import TextbuttonItem from "explorviz-frontend/utils/vr-menus/items/textbutton-item";
-import LocalVrUser from "virtual-reality/services/local-vr-user";
-import VrMenuFactoryService from "virtual-reality/services/vr-menu-factory";
-import ConnectionBaseMenu from "./base";
+import TextItem from "../../items/text-item";
+import TextbuttonItem from "../../items/textbutton-item";
+import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 
 /**
  * Time in seconds before the new room list should be fetched.
@@ -22,15 +20,15 @@ function isRoomId(roomId: any): roomId is RoomId {
     return typeof roomId === 'string';
 }
 
+export type JoinMenuArgs = ConnectionBaseMenuArgs & {
+  ajax: AjaxServiceClass
+};
+
 export default class JoinMenu extends ConnectionBaseMenu {
     private ajax: AjaxServiceClass;
     private refreshTimeout: number;
 
-    constructor({ajax, ...args}: {
-        localUser: LocalVrUser,
-        menuFactory: VrMenuFactoryService,
-        ajax: AjaxServiceClass
-    }) {
+    constructor({ajax, ...args}: JoinMenuArgs) {
         super(args);
         this.ajax = ajax;
         this.refreshTimeout = 0;
@@ -46,7 +44,7 @@ export default class JoinMenu extends ConnectionBaseMenu {
                 return {id: roomId, name: `Room ${roomId}`};
             });
         }
-        throw 'invalid data'; 
+        throw 'invalid data';
     }
 
     private drawLoadingScreen() {
@@ -54,11 +52,11 @@ export default class JoinMenu extends ConnectionBaseMenu {
 
         // Draw loading screen.
         const title = new TextItem(
-            'Loading Rooms...', 
-            'title', 
+            'Loading Rooms...',
+            'title',
             '#ffffff',
-            { x: 256, y: 20 }, 
-            50, 
+            { x: 256, y: 20 },
+            50,
             'center'
         );
         this.items.push(title);
@@ -70,28 +68,28 @@ export default class JoinMenu extends ConnectionBaseMenu {
         this.items.clear();
 
         const title = new TextItem(
-            `Join Room (${rooms.length})`, 
-            'title', 
+            `Join Room (${rooms.length})`,
+            'title',
             '#ffffff',
-            { x: 256, y: 20 }, 
-            50, 
+            { x: 256, y: 20 },
+            50,
             'center'
         );
         this.items.push(title);
-        
+
         // Draw one button for each room.
         const yOffset = 60;
         let yPos = 50 + yOffset;
         for (let room of rooms) {
             const roomButton = new TextbuttonItem(
-                `room-${room.id}`, 
-                room.name, 
-                { x: 100, y: yPos }, 
-                316, 
-                50, 
-                28, 
-                '#555555', 
-                '#ffc338', 
+                `room-${room.id}`,
+                room.name,
+                { x: 100, y: yPos },
+                316,
+                50,
+                28,
+                '#555555',
+                '#ffc338',
                 '#929292'
             );
             this.items.push(roomButton);
@@ -109,15 +107,15 @@ export default class JoinMenu extends ConnectionBaseMenu {
 
         // Draw loading screen.
         const title = new TextItem(
-            `Error: ${msg}`, 
-            'title', 
+            `Error: ${msg}`,
+            'title',
             '#ffffff',
-            { x: 256, y: 20 }, 
-            50, 
+            { x: 256, y: 20 },
+            50,
             'center'
         );
         this.items.push(title);
-    
+
         const retryButton = new TextbuttonItem('connect', "Retry", { x: 100, y: 186 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
         this.items.push(retryButton);
         this.thumbpadTargets.push(retryButton);

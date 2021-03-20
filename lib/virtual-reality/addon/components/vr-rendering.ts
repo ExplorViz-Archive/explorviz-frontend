@@ -13,7 +13,6 @@ import * as EntityManipulation from 'explorviz-frontend/utils/application-render
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import Interaction from 'explorviz-frontend/utils/interaction';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import HintMenu from 'explorviz-frontend/utils/vr-menus/hint-menu';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
@@ -37,11 +36,6 @@ import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detai
 import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 import MenuQueue from 'virtual-reality/utils/vr-menus/menu-queue';
-import CameraMenu from 'virtual-reality/utils/vr-menus/ui-menu/camera-menu';
-import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
-import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
-import SettingsMenu from 'virtual-reality/utils/vr-menus/ui-menu/settings-menu';
-import ZoomMenu from 'virtual-reality/utils/vr-menus/ui-menu/zoom-menu';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
@@ -78,14 +72,8 @@ export default class VrRendering extends Component<Args> {
 
   canvas!: HTMLCanvasElement;
 
-  scene!: THREE.Scene;
-
-  camera!: THREE.PerspectiveCamera;
-
   messageMenuQueue!: MenuQueue;
   hintMenuQueue!: MenuQueue;
-
-  renderer!: THREE.WebGLRenderer;
 
   raycaster: THREE.Raycaster;
 
@@ -139,6 +127,18 @@ export default class VrRendering extends Component<Args> {
     return this.vrApplicationRenderer.applicationGroup;
   }
 
+  get renderer(): THREE.WebGLRenderer {
+    return this.localUser.renderer;
+  }
+
+  get scene(): THREE.Scene {
+    return this.localUser.scene;
+  }
+
+  get camera(): THREE.PerspectiveCamera {
+    return this.localUser.defaultCamera;
+  }
+
   /**
     * Calls all init functions.
     */
@@ -156,7 +156,7 @@ export default class VrRendering extends Component<Args> {
      * Creates a scene, its background and adds a landscapeObject3D to it
      */
   initScene() {
-    this.scene = new THREE.Scene();
+    this.localUser.scene = new THREE.Scene();
     this.scene.background = this.configuration.landscapeColors.background;
     this.scene.add(this.landscapeObject3D);
 
@@ -177,9 +177,9 @@ export default class VrRendering extends Component<Args> {
      */
   initCamera() {
     const { width, height } = this.canvas;
-    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    this.camera.position.set(0, 1, 2);
-    this.localUser.addCamera(this.camera);
+    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    camera.position.set(0, 1, 2);
+    this.localUser.addCamera(camera);
     this.debug('Camera added');
   }
 
@@ -188,11 +188,10 @@ export default class VrRendering extends Component<Args> {
      */
   initRenderer() {
     const { width, height } = this.canvas;
-    this.renderer = new THREE.WebGLRenderer({
+    this.localUser.renderer = new THREE.WebGLRenderer({
       antialias: true,
       canvas: this.canvas,
     });
-    this.localUser.renderer = this.renderer;
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
     this.renderer.xr.enabled = true;
@@ -224,8 +223,8 @@ export default class VrRendering extends Component<Args> {
    */
   initInteraction() {
     const intersectableObjects = [
-      this.landscapeObject3D, 
-      this.applicationGroup, 
+      this.landscapeObject3D,
+      this.applicationGroup,
       this.floor,
       this.detachedMenus
     ];
@@ -260,7 +259,7 @@ export default class VrRendering extends Component<Args> {
       bindings: new VRControllerBindingsList(this.makeControllerBindings(), menuGroup.controllerBindings),
       gripSpace: this.renderer.xr.getControllerGrip(gamepadIndex),
       raySpace: this.renderer.xr.getController(gamepadIndex),
-      color: new THREE.Color('red'), 
+      color: new THREE.Color('red'),
       menuGroup,
       intersectableObjects: this.interaction.raycastObjects
     });
@@ -431,9 +430,9 @@ export default class VrRendering extends Component<Args> {
         onButtonDown: (controller) => this.grabIntersectedObject(controller)
       }),
 
-      thumbpad: new VRControllerThumbpadBinding({ 
-        labelUp: 'Teleport / Highlight', 
-        labelDown: 'Show Details', 
+      thumbpad: new VRControllerThumbpadBinding({
+        labelUp: 'Teleport / Highlight',
+        labelDown: 'Show Details',
         labelRight: 'Zoom',
         labelLeft: 'Ping'
       }, {
@@ -450,7 +449,7 @@ export default class VrRendering extends Component<Args> {
                 const { object } = controller.intersectedObject;
                 if (isEntityMesh(object)) {
                   this.openInfoMenu(controller, object);
-              }
+                }
               }
               break;
             case VRControllerThumbpadDirection.RIGHT:
@@ -540,9 +539,6 @@ export default class VrRendering extends Component<Args> {
       case '2':
         this.moveLandscape(0, 0, mvDst);
         break;
-      case 'r':
-        this.resetLandscapePosition();
-        break;
       case 'l':
         perform(this.loadNewLandscape);
         break;
@@ -554,50 +550,15 @@ export default class VrRendering extends Component<Args> {
 
   // #region MENUS
 
-  showHint(title: string, text: string|undefined = undefined) {
-    // Show the hint only if there is no hint with the text in the queue
-    // already. This prevents the same hint to be shown multiple times when
-    // the user repeats the action that causes the hint.
-    if (!this.hintMenuQueue.hasEnquedOrCurrentMenu((menu) => menu instanceof HintMenu && menu.titleItem.text === title && menu.textItem?.text === text)) {
-      this.hintMenuQueue.enqueueMenu(new HintMenu(title, text));
-    }
-  }
+  showHint(_title: string, _text: string|undefined = undefined) { }
 
-  openMainMenu(_controller: VRController) {
-  }
+  openMainMenu(_controller: VRController) { }
 
-  openResetMenu(controller: VRController) {
-    controller.menuGroup.openMenu(new ResetMenu({
-      localUser: this.localUser,
-      resetAll: () => this.resetAll()
-    }));
-  }
+  openZoomMenu(_controller: VRController) { }
 
-  openZoomMenu(controller: VRController) {
-    controller.menuGroup.openMenu(new ZoomMenu(this.renderer, this.scene, this.camera));
-  }
+  openPingMenu(_controller: VRController) { }
 
-  openPingMenu(_controller: VRController) {
-    // Ping menu cannot be opened in single user mode.
-  }
-
-  openCameraMenu(controller: VRController) {
-    controller.menuGroup.openMenu(new CameraMenu({
-      getCameraDelta: () => this.localUser.getCameraDelta(), 
-      changeCameraHeight: (deltaY) => this.localUser.changeCameraHeight(deltaY)
-    }));
-  }
-
-  openSettingsMenu(controller: VRController) {
-    controller.menuGroup.openMenu(new SettingsMenu({
-      openCameraMenu: () => this.openCameraMenu(controller),
-      labelGroups: [this.localUser.controller1?.labelGroup, this.localUser.controller2?.labelGroup]
-    }));
-  }
-
-  openInfoMenu(controller: VRController, object: EntityMesh) {
-    controller.menuGroup.openMenu(new DetailInfoMenu(object));
-  }
+  openInfoMenu(_controller: VRController, _object: EntityMesh) { }
 
   // #endregion MENUS
 

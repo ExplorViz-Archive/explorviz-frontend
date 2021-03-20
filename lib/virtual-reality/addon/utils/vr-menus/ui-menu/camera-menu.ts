@@ -4,75 +4,81 @@ import ArrowbuttonItem from '../items/arrowbutton-item';
 import VRControllerButtonBinding from '../../vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding from '../../vr-controller/vr-controller-thumbpad-binding';
 import VRController from '../../vr-controller';
-import UiMenu from '../ui-menu';
+import UiMenu, { UiMenuArgs } from '../ui-menu';
+
+/**
+ * The maximum change of the camera's height per frame when the trigger is fully pressed.
+ */
+const MAX_TRANSLATE_SPEED = 0.02;
+
+export type CameraMenuArgs = UiMenuArgs & {
+  cameraObject3D: THREE.Object3D
+};
 
 export default class CameraMenu extends UiMenu {
+  private cameraObject3D: THREE.Object3D;
+  private resetButton: TextbuttonItem;
+  private heightTextItem: TextItem;
+  private heightUpButton: ArrowbuttonItem;
+  private heightDownButton: ArrowbuttonItem;
 
-  getCameraDelta: () => THREE.Vector3;
-  changeCameraHeight: (deltaY: number) => void;
-  resetButton: TextbuttonItem;
-  deltaItem: TextItem;
-  heightUpButton: ArrowbuttonItem;
-  heightDownButton: ArrowbuttonItem;
-
-  constructor({getCameraDelta, changeCameraHeight}: {
-    getCameraDelta: () => THREE.Vector3, 
-    changeCameraHeight: (deltaY: number) => void
-  }) {
-    super();
-    this.getCameraDelta = getCameraDelta;
-    this.changeCameraHeight = changeCameraHeight;
+  constructor({cameraObject3D, ...args}: CameraMenuArgs) {
+    super(args);
+    this.cameraObject3D = cameraObject3D;
 
     const title = new TextItem('Camera', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
 
-    this.deltaItem = new TextItem(getCameraDelta().y.toFixed(2), 'camera_height', '#ffffff', { x: 256, y: 202 }, 28, 'center');
-    this.items.push(this.deltaItem);
+    this.heightTextItem = new TextItem(this.cameraHeight.toFixed(2), 'camera_height', '#ffffff', { x: 256, y: 202 }, 28, 'center');
+    this.items.push(this.heightTextItem);
 
     this.resetButton = new TextbuttonItem('reset', 'Reset', {
       x: 420,
       y: 13,
     }, 65, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');
-
     this.resetButton.onTriggerDown = () => this.resetCamera();
-
     this.items.push(this.resetButton);
 
     this.heightDownButton = new ArrowbuttonItem('height_down', {
       x: 100,
       y: 182,
     }, 50, 60, '#ffc338', '#00e5ff', 'down');
-
     this.heightDownButton.onTriggerPressed = (value) => {this.heightDown(value); this.redrawMenu()};
-
+    this.items.push(this.heightDownButton);
 
     this.heightUpButton = new ArrowbuttonItem('height_up', {
       x: 366,
       y: 182,
     }, 50, 60, '#ffc338', '#00e5ff', 'up');
-
     this.heightUpButton.onTriggerPressed = (value) => {this.heightUp(value); this.redrawMenu()};
+    this.items.push(this.heightUpButton);
 
-    this.items.push(this.heightDownButton, this.heightUpButton);
     this.redrawMenu();
   }
 
-  resetCamera() {
-    const delta = this.getCameraDelta().y;
-    this.changeCameraHeight(-delta);
-    this.deltaItem.text = this.getCameraDelta().y.toFixed(2);
+  private get cameraHeight(): number {
+    return this.cameraObject3D.position.y;
   }
 
-  heightDown(value: number) {
-      this.changeCameraHeight(-0.02 * value);
-      this.deltaItem.text = this.getCameraDelta().y.toFixed(2);
+  private set cameraHeight(cameraHeight: number) {
+    this.cameraObject3D.position.y = cameraHeight;
   }
 
-  heightUp(value: number) {
-    this.changeCameraHeight(0.02 * value);
-    this.deltaItem.text = this.getCameraDelta().y.toFixed(2);
+  private translateCamera(deltaHeight: number) {
+    this.cameraHeight = this.cameraHeight + deltaHeight;
   }
 
+  private resetCamera() {
+    this.cameraHeight = 0;
+  }
+
+  private heightDown(value: number) {
+      this.translateCamera(-value * MAX_TRANSLATE_SPEED);
+  }
+
+  private heightUp(value: number) {
+    this.translateCamera(value * MAX_TRANSLATE_SPEED);
+  }
 
   makeGripButtonBinding() {
     return new VRControllerButtonBinding('Reset', {
@@ -91,24 +97,26 @@ export default class CameraMenu extends UiMenu {
       this.heightDown(-axes[1]);
       this.heightDownButton.enableHoverEffectByButton();
     }
-    this.deltaItem.text = this.getCameraDelta().y.toFixed(2);
-    this.redrawMenu();
   }
 
   onUpdateMenu(delta: number) {
-    this.deltaItem.text = this.getCameraDelta().y.toFixed(2);
-    this.redrawMenu();
+    const text = this.cameraHeight.toFixed(2);
+    if (text !== this.heightTextItem.text) {
+      this.heightTextItem.text = text;
+      this.redrawMenu();
+    }
+
     super.onUpdateMenu(delta);
   }
 
   makeThumbpadBinding() {
     return new VRControllerThumbpadBinding({ labelUp: 'Up', labelDown: 'Down' }, {
       onThumbpadPress: (controller, axes) => this.onThumbpadPress(controller, axes),
-      onThumbpadUp: () => { 
-        this.heightDownButton.resetHoverEffectByButton(); 
-        this.heightUpButton.resetHoverEffectByButton(); 
+      onThumbpadUp: () => {
+        this.heightDownButton.resetHoverEffectByButton();
+        this.heightUpButton.resetHoverEffectByButton();
         this.redrawMenu();
       }
-    })
+    });
   }
 }

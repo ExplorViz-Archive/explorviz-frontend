@@ -1,6 +1,7 @@
 import THREE from 'three';
 import TextItem from '../items/text-item';
 import HudMenu from '../hud-menu';
+import { UiMenuArgs } from '../ui-menu';
 
 const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.75, [
   new THREE.KeyframeTrack('.scale[x]', [0.0, 0.75], [0.0, 1.0])
@@ -14,12 +15,22 @@ const CLOSE_ANIMATION_CLIP = new THREE.AnimationClip('close-animation', 0.75, [
   new THREE.KeyframeTrack('.scale[x]', [0, 0.75], [1.0, 0.0])
 ]);
 
-export default class HintMenu extends HudMenu {
-  titleItem: TextItem;
-  textItem: TextItem|undefined;
+export type HintMenuArgs = UiMenuArgs & {
+  title: string,
+  text?: string
+};
 
-  constructor(title: string, text: string|undefined = undefined) {
-    super({ width: 512, height: 128 }, '#002e4f');
+export default class HintMenu extends HudMenu {
+  readonly titleItem: TextItem;
+  readonly textItem: TextItem|undefined;
+
+  constructor({
+    title, text,
+    resolution = { width: 512, height: 128 },
+    backgroundColor = '#002e4f',
+    ...args
+  }: HintMenuArgs) {
+    super({resolution, backgroundColor, ...args});
 
     this.titleItem = new TextItem(title, 'text', '#ffffff', { x: 256, y: 50 }, 28, 'center');
     this.items.push(this.titleItem);
@@ -53,7 +64,7 @@ export default class HintMenu extends HudMenu {
     pulsAction.setLoop(THREE.LoopPingPong, 4);
     pulsAction.play();
     await this.waitForAnimation(pulsAction);
-    
+
     // Play close animation.
     const closeAction = this.animationMixer.clipAction(CLOSE_ANIMATION_CLIP);
     closeAction.setLoop(THREE.LoopOnce, 0);

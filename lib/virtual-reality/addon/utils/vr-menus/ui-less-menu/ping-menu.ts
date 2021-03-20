@@ -4,16 +4,20 @@ import PingMesh from "virtual-reality/utils/view-objects/vr/ping-mesh";
 import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
 import VRController from "virtual-reality/utils/vr-controller";
 import AnimatedMenu from "../animated-menu";
+import { BaseMenuArgs } from "../base-menu";
+
+export type PingMenuArgs = BaseMenuArgs & {
+    scene: THREE.Scene,
+    sender: VrMessageSender,
+};
 
 export default class PingMenu extends AnimatedMenu {
-    mesh: PingMesh|undefined;
+    private mesh: PingMesh|undefined;
+    private scene: THREE.Scene;
+    private sender: VrMessageSender;
 
-    scene: THREE.Scene;
-
-    sender: VrMessageSender;
-
-    constructor(scene: THREE.Scene, sender: VrMessageSender) {
-        super();
+    constructor({scene, sender, ...args}: PingMenuArgs) {
+        super(args);
 
         this.scene = scene;
         this.sender = sender;
@@ -36,7 +40,7 @@ export default class PingMenu extends AnimatedMenu {
         const controller = VRController.findController(this);
         if (controller) {
             this.mesh = new PingMesh({
-                animationMixer: this.animationMixer, 
+                animationMixer: this.animationMixer,
                 color: controller.color
             });
             this.scene.add(this.mesh);

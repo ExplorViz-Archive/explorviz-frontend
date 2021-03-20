@@ -2,6 +2,7 @@ import THREE from 'three';
 import VRControllerBindings from '../vr-controller/vr-controller-bindings';
 import VRControllerThumbpadBinding from '../vr-controller/vr-controller-thumbpad-binding';
 import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
+import VrMenuFactoryService from '../../services/vr-menu-factory';
 import MenuGroup from './menu-group';
 
 export enum MenuState {
@@ -14,18 +15,18 @@ export enum MenuState {
    * The state of the menu when it is the currently open menu of a menu group.
    */
   OPEN,
-  
+
   /**
    * The state of the menu when it has been closed.
    */
   CLOSED,
-  
+
   /**
    * The state of the menu when it is still opened by a menu group but another
    * menu is currently active.
    */
   PAUSED,
-  
+
   /**
    * The state of the menu when it has been detached from the menu group and
    * is placed in the world.
@@ -33,38 +34,44 @@ export enum MenuState {
   DETACHED
 }
 
+export type BaseMenuArgs = {
+  menuFactory: VrMenuFactoryService
+};
+
 /**
  * Base class for all menus that defines life cycle methods and callbacks for
  * the menu.
- * 
+ *
  * There are menus with a user interface and menus without a user interface.
  * For example when an object is grabbed an invisible menu is opened that
  * takes control over the button bindings of the controller that grabbed the
  * object.
  */
 export default abstract class BaseMenu extends THREE.Group {
-  menuState: MenuState;
+  private menuState: MenuState;
+  readonly menuFactory: VrMenuFactoryService;
 
-  constructor() {
+  constructor({menuFactory}: BaseMenuArgs) {
     super();
+    this.menuFactory = menuFactory;
     this.menuState = MenuState.INIT;
   }
 
   /**
-   * Whether this menu is the currently open menu of a menu group. 
+   * Whether this menu is the currently open menu of a menu group.
    */
   get isMenuOpen(): boolean { return this.menuState === MenuState.OPEN; }
 
   /**
    * Whether this menu has been closed.
-   * 
+   *
    * Note that this is not the inverse of `isMenuOpen`.
    */
   get isMenuClosed(): boolean { return this.menuState === MenuState.CLOSED; }
 
   /**
    * Whether this menu has been paused.
-   * 
+   *
    * A paused menu still belongs to a menu group but there is another menu
    * that is currently active. A paused menu will not receive regular updates.
    */
@@ -85,7 +92,7 @@ export default abstract class BaseMenu extends THREE.Group {
    * Called once when the other controller's trigger is pressed down while
    * hovering this menu. This method is not called again before the trigger
    * is released.
-   * 
+   *
    * @param uv The coordinate of the menu that is hovered.
    */
   triggerDown(_uv: THREE.Vector2) {}
@@ -93,7 +100,7 @@ export default abstract class BaseMenu extends THREE.Group {
   /**
    * Called when the other controller's trigger is pressed while hovering this
    * menu.
-   * 
+   *
    * @param uv The coordinate of the menu that is hovered.
    * @param value The intensity of the trigger press.
    */
@@ -138,7 +145,7 @@ export default abstract class BaseMenu extends THREE.Group {
   /**
    * Creates the binding for the menu button to use for the controller that
    * holds this menu.
-   * 
+   *
    * By default the menu button closes the menu. Overwrite this method to
    * return `undefined` to disable this behavior.
    */
@@ -151,7 +158,7 @@ export default abstract class BaseMenu extends THREE.Group {
   /**
    * Creates the controller bindings to use for the controller that has opened
    * this menu instead of the default bindings whenever this menu is open.
-   * 
+   *
    * The controller bindings are created when the menu is opened. They do not
    * refresh automatically.
    */
@@ -217,7 +224,7 @@ export default abstract class BaseMenu extends THREE.Group {
 
   /**
    * Callback that is invoked by the menu group once per frame.
-   * 
+   *
    * @param delta The time in seconds since the last frame.
    */
   onUpdateMenu(_delta: number) {}

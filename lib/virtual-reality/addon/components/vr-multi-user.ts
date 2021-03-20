@@ -4,6 +4,7 @@ import SpectateUserService from 'virtual-reality/services/spectate-user';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
 import debugLogger from 'ember-debug-logger';
+import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import THREE, { Vector3 } from 'three';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
@@ -11,20 +12,18 @@ import VrRendering from 'virtual-reality/components/vr-rendering';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
-import MessageBoxMenu from 'virtual-reality/utils/vr-menus/ui-menu/message-box-menu';
+import UiMenu from 'virtual-reality/utils/vr-menus/ui-menu';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import NameTagMesh from 'virtual-reality/utils/view-objects/vr/name-tag-mesh';
-import GrabMenu, { isGrabbableObject, findGrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
+import { isGrabbableObject, findGrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
 import VRController from 'virtual-reality/utils/vr-controller';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
-import MultiUserMenu from 'virtual-reality/utils/vr-menus/ui-menu/multi-user-menu';
 import { MenuDetachedEvent, MENU_DETACH_EVENT_TYPE } from 'virtual-reality/utils/vr-menus/menu-group';
-
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
 import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
 import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
@@ -42,15 +41,13 @@ import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/ob
 import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/receivable/menu-detached-forward';
-import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
-import { isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
+import HintMenu from 'virtual-reality/utils/vr-menus/ui-menu/hint-menu';
 import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/detached_menu_closed';
 import { isObjectClosedResponse, ObjectClosedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-closed';
 import { DetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
 import { GrabbableMenuContainer } from 'virtual-reality/utils/vr-menus/grabbable-menu-container';
 import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
-import PingMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/ping-menu';
 import VrMenuFactoryService from 'virtual-reality/services/vr-menu-factory';
 import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 
@@ -62,7 +59,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   @service('web-socket')
   webSocket!: WebSocketService;
 
-  @service('ajax') 
+  @service('ajax')
   ajax!: AjaxServiceClass;
 
   @service('local-vr-user')
@@ -79,7 +76,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
   @service('vr-message-receiver')
   receiver!: VrMessageReceiver;
-  
+
   @service('grabbed-object')
   grabbedObjectService!: GrabbedObjectService;
 
@@ -102,7 +99,11 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
     this.remoteUserGroup = new THREE.Group();
     this.hardwareModels = new HardwareModels();
-    this.menuFactory.idToRemoteVrUser = this.idToRemoteUser;
+    this.menuFactory.injectValues({
+      idToRemoteVrUser: this.idToRemoteUser,
+      vrApplicationRenderer: this.vrApplicationRenderer,
+      vrLandscapeRenderer: this.vrLandscapeRenderer
+    });
   }
 
   initRendering() {
@@ -114,7 +115,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     this.webSocket.socketCloseCallback = () => this.onDisconnect();
     this.receiver.addMessageListener(this);
     this.localUser.state = 'offline';
-    
+
     const config = await this.ajax.request('config/config_multiuser.json');
     this.webSocket.applyConfiguration(config);
   }
@@ -134,7 +135,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       // Wait for backend to assign an id to the detached menu.
       this.receiver.awaitResponse({
         nonce,
-        responseType: isMenuDetachedResponse, 
+        responseType: isMenuDetachedResponse,
         onResponse: (response: MenuDetachedResponse) => {
           this.addDetachedMenu(menu, response.objectId);
         },
@@ -179,23 +180,29 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
 
   // #region MENUS
 
+  showHint(title: string, text: string|undefined = undefined) {
+    // Show the hint only if there is no hint with the text in the queue
+    // already. This prevents the same hint to be shown multiple times when
+    // the user repeats the action that causes the hint.
+    if (!this.hintMenuQueue.hasEnquedOrCurrentMenu((menu) => menu instanceof HintMenu && menu.titleItem.text === title && menu.textItem?.text === text)) {
+      this.hintMenuQueue.enqueueMenu(this.menuFactory.buildHintMenu(title, text));
+    }
+  }
+
   openMainMenu(controller: VRController) {
     controller.menuGroup.openMenu(this.menuFactory.buildMainMenu());
   }
 
-  openMultiUserMenu(controller: VRController) {
-    const menu = new MultiUserMenu({
-      localUser: this.localUser,
-      spectateUserService: this.spectateUserService,
-      idToRemoteVrUsers: this.idToRemoteUser,
-      getRemoteUsers: () => this.idToRemoteUser
-    });
-
-    controller.menuGroup.openMenu(menu);
+  openZoomMenu(controller: VRController) {
+    controller.menuGroup.openMenu(this.menuFactory.buildZoomMenu());
   }
 
   openPingMenu(controller: VRController) {
-    controller.menuGroup.openMenu(new PingMenu(this.scene, this.sender));
+    controller.menuGroup.openMenu(this.menuFactory.buildPingMenu());
+  }
+
+  openInfoMenu(controller: VRController, object: EntityMesh) {
+    controller.menuGroup.openMenu(this.menuFactory.buildInfoMenu(object));
   }
 
   // #endregion MENUS
@@ -245,7 +252,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     let object: THREE.Object3D|null = controller.intersectedObject.object;
     while (object) {
       if (isGrabbableObject(object)) {
-        controller.menuGroup.openMenu(new GrabMenu(object, this.grabbedObjectService, this.deltaTimeService));
+        controller.menuGroup.openMenu(this.menuFactory.buildGrabMenu(object));
         break;
       } else {
         object = object.parent;
@@ -256,7 +263,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   handlePrimaryInputOn(intersection: THREE.Intersection) {
     if (this.spectateUserService.spectatedUser) {
       const { object, uv } = intersection;
-      if (object instanceof MultiUserMenu && uv) {
+      if (object instanceof UiMenu && object.enableTriggerInSpectorMode && uv) {
         object.triggerDown(uv);
       }
       return;
@@ -326,10 +333,10 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       }, false);
       this.onUserControllers({
         event: FORWARDED_EVENT,
-        userID: userData.id, 
+        userID: userData.id,
         originalMessage: {
           event: USER_CONTROLLER_EVENT,
-          connect : userData.controllers, 
+          connect : userData.controllers,
           disconnect: null
         }
       });
@@ -400,7 +407,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     user.add(nameTag);
 
     if (showConnectMessage) {
-      this.messageMenuQueue.enqueueMenu(new MessageBoxMenu({
+      this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
         title: 'User connected',
         text: user.userName,
         color: `#${user.color.getHexString()}`,
@@ -496,7 +503,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       this.idToRemoteUser.delete(id);
 
       // Show disconnect notification
-      this.messageMenuQueue.enqueueMenu(new MessageBoxMenu({
+      this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
         title: 'User disconnected',
         text: user.userName,
         color: `#${user.color.getHexString()}`,
@@ -564,7 +571,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     detachedMenus.forEach((detachedMenu) => {
       let object = this.findMeshByModelId(detachedMenu.entityType, detachedMenu.entityId);
       if (isEntityMesh(object)) {
-        const menu = new DetailInfoMenu(object);
+        const menu = this.menuFactory.buildInfoMenu(object);
         menu.position.fromArray(detachedMenu.position);
         menu.quaternion.fromArray(detachedMenu.quaternion);
         menu.scale.fromArray(detachedMenu.scale);
@@ -710,15 +717,15 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
       if (this.spectateUserService.spectatedUser && this.spectateUserService.spectatedUser.userId === userID) {
         this.spectateUserService.deactivate();
       }
-      this.messageMenuQueue.enqueueMenu(new MessageBoxMenu({
-        title: remoteUser.userName, 
-        text: ' is now spectating', 
+      this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
+        title: remoteUser.userName,
+        text: ' is now spectating',
         color: remoteUserHexColor,
         time: 3.0
       }));
     } else {
       remoteUser.setVisible(true);
-      this.messageMenuQueue.enqueueMenu(new MessageBoxMenu({
+      this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
         title: remoteUser.userName,
         text: ' stopped spectating',
         color: remoteUserHexColor,
@@ -730,7 +737,7 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   onMenuDetached({ objectId, entityType, detachId, position, quaternion, scale }: MenuDetachedForwardMessage) {
     let object = this.findMeshByModelId(entityType, detachId);
     if (isEntityMesh(object)) {
-      const menu = new DetailInfoMenu(object);
+      const menu = this.menuFactory.buildInfoMenu(object);
       menu.position.fromArray(position);
       menu.quaternion.fromArray(quaternion);
       menu.scale.fromArray(scale);
@@ -755,14 +762,14 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   removeDetachedMenu(menuContainer: GrabbableMenuContainer) {
-    // Remove the menu locally when it does not have an id (e.g., when we are 
+    // Remove the menu locally when it does not have an id (e.g., when we are
     // offline).
     let menuId = menuContainer.getGrabId();
     if (!menuId) {
       this.detachedMenus.remove(menuContainer);
       return;
     }
-    
+
     const nonce = this.sender.sendDetachedMenuClosed(menuId);
     this.receiver.awaitResponse({
       nonce,
@@ -837,8 +844,8 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   }
 
   /**
-   * Updates animations of the remote user and sets user name tag to be 
-   * directly above their head and set rotation such that it looks toward 
+   * Updates animations of the remote user and sets user name tag to be
+   * directly above their head and set rotation such that it looks toward
    * our camera.
    */
   updateRemoteUsers() {

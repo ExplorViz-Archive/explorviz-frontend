@@ -1,13 +1,10 @@
 import TextItem from '../items/text-item';
-import UiMenu from '../ui-menu';
+import UiMenu, { UiMenuArgs } from '../ui-menu';
 import TextbuttonItem from '../items/textbutton-item';
-import VrMenuFactoryService from 'virtual-reality/services/vr-menu-factory';
 
 export default class MainMenu extends UiMenu {
-  constructor({menuFactory}: {
-    menuFactory: VrMenuFactoryService
-  }) {
-    super();
+  constructor(args: UiMenuArgs) {
+    super(args);
 
     const title = new TextItem('Main Menu', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
@@ -19,7 +16,7 @@ export default class MainMenu extends UiMenu {
 
     this.items.push(connectionButton);
     connectionButton.onTriggerDown = () => {
-      this.menuGroup?.openMenu(menuFactory.buildConnectionMenu());
+      this.menuGroup?.openMenu(this.menuFactory.buildConnectionMenu());
     };
     this.thumbpadTargets.push(connectionButton);
 
@@ -30,7 +27,7 @@ export default class MainMenu extends UiMenu {
 
     this.items.push(settingsButton);
     settingsButton.onTriggerDown = () => {
-      this.menuGroup?.openMenu(menuFactory.buildSettingsMenu());
+      this.menuGroup?.openMenu(this.menuFactory.buildSettingsMenu());
     };
     this.thumbpadTargets.push(settingsButton);
 
@@ -41,7 +38,7 @@ export default class MainMenu extends UiMenu {
 
     this.items.push(resetButton);
     resetButton.onTriggerDown = () => {
-      this.menuGroup?.openMenu(menuFactory.buildResetMenu());
+      this.menuGroup?.openMenu(this.menuFactory.buildResetMenu());
     };
     this.thumbpadTargets.push(resetButton);
 

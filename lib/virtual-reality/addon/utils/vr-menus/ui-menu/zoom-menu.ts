@@ -1,7 +1,15 @@
-import redrawMenu from '../ui-menu';
+import UiMenu, { UiMenuArgs } from '../ui-menu';
 import THREE from 'three';
 
-export default class ZoomMenu extends redrawMenu {
+const CIRCLE_SEGMENTS = 48;
+
+export type ZoomMenuArgs = UiMenuArgs & {
+  renderer: THREE.WebGLRenderer,
+  scene: THREE.Scene,
+  headsetCamera: THREE.PerspectiveCamera
+};
+
+export default class ZoomMenu extends UiMenu {
 
   target!: THREE.WebGLRenderTarget;
 
@@ -13,11 +21,8 @@ export default class ZoomMenu extends redrawMenu {
 
   headsetCamera!: THREE.PerspectiveCamera;
 
-  static readonly segments = 48;
-
-  constructor(renderer: THREE.WebGLRenderer, scene: THREE.Scene, headsetCamera: THREE.PerspectiveCamera) {
-    super();
-
+  constructor({renderer, scene, headsetCamera, ...args}: ZoomMenuArgs) {
+    super(args);
     this.renderer = renderer;
     this.scene = scene;
     this.headsetCamera = headsetCamera;
@@ -26,7 +31,7 @@ export default class ZoomMenu extends redrawMenu {
 
     this.target = new THREE.WebGLRenderTarget(this.resolution.width, this.resolution.height);
 
-    const geometry = new THREE.CircleBufferGeometry(radius, ZoomMenu.segments);
+    const geometry = new THREE.CircleBufferGeometry(radius, CIRCLE_SEGMENTS);
     const material = new THREE.MeshBasicMaterial({map: this.target.texture});
     const lens = new THREE.Mesh(geometry, material);
     lens.position.z = 0.001;
@@ -42,11 +47,16 @@ export default class ZoomMenu extends redrawMenu {
 
   makeBackgroundGeometry() {
     const radius = this.resolution.width/512 * 0.16;
-    const geometry = new THREE.CircleGeometry(radius, ZoomMenu.segments);
+    const geometry = new THREE.CircleGeometry(radius, CIRCLE_SEGMENTS);
     return geometry;
   }
 
-  renderLens() {
+  onUpdateMenu(delta: number) {
+    this.renderLens();
+    super.onUpdateMenu(delta);
+  }
+
+  private renderLens() {
       const oldTarget = this.renderer.getRenderTarget();
       const oldXREnabled = this.renderer.xr.enabled;
       this.renderer.setRenderTarget(this.target);
@@ -78,10 +88,5 @@ export default class ZoomMenu extends redrawMenu {
 
       this.renderer.setRenderTarget(oldTarget);
       this.renderer.xr.enabled = oldXREnabled;
-  }
-
-  onUpdateMenu(delta: number) {
-    this.renderLens();
-    super.onUpdateMenu(delta);
   }
 }

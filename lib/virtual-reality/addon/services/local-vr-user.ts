@@ -22,7 +22,9 @@ export default class LocalVrUser extends Service {
 
   renderer!: THREE.WebGLRenderer;
 
-  defaultCamera!: THREE.Camera;
+  scene!: THREE.Scene;
+
+  defaultCamera!: THREE.PerspectiveCamera;
 
   controller1: VRController|undefined;
 
@@ -63,7 +65,7 @@ export default class LocalVrUser extends Service {
     this.userGroup = new THREE.Group();
   }
 
-  addCamera(camera: THREE.Camera) {
+  addCamera(camera: THREE.PerspectiveCamera) {
     this.defaultCamera = camera;
     this.userGroup.add(camera);
   }
@@ -71,14 +73,6 @@ export default class LocalVrUser extends Service {
   updateControllers(delta: number) {
     if (this.controller1) { this.controller1.update(delta); }
     if (this.controller2) { this.controller2.update(delta); }
-  }
-
-  getCameraDelta() {
-    return this.userGroup.position;
-  }
-
-  changeCameraHeight(deltaY: number) {
-    this.userGroup.position.add(new THREE.Vector3(0, deltaY, 0));
   }
 
   /*
