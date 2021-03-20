@@ -2,6 +2,8 @@
 import Service from '@ember/service';
 
 export type LandscapeToken = {
+  alias: string,
+  created: number,
   ownerId: string,
   value: string,
 };
@@ -44,9 +46,13 @@ export default class LandscapeTokenService extends Service {
 
   private isValidToken(token: unknown): token is LandscapeToken {
     return (this.isObject(token)
-      && Object.keys(token).length === 2
+      && Object.keys(token).length === 4
+      && {}.hasOwnProperty.call(token, 'alias')
+      && {}.hasOwnProperty.call(token, 'created')
       && {}.hasOwnProperty.call(token, 'ownerId')
       && {}.hasOwnProperty.call(token, 'value')
+      && typeof (<LandscapeToken>token).alias === 'string'
+      && typeof (<LandscapeToken>token).created === 'number'
       && typeof (<LandscapeToken>token).ownerId === 'string'
       && typeof (<LandscapeToken>token).value === 'string');
   }
