@@ -173,8 +173,8 @@ export default class VrRendering extends Component<Args> {
   }
 
   /**
-     * Creates a PerspectiveCamera according to canvas size and sets its initial position
-     */
+   * Creates a PerspectiveCamera according to canvas size and sets its initial position
+   */
   initCamera() {
     const { width, height } = this.canvas;
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
@@ -184,8 +184,8 @@ export default class VrRendering extends Component<Args> {
   }
 
   /**
-     * Initiates a WebGLRenderer
-     */
+   * Initiates a WebGLRenderer
+   */
   initRenderer() {
     const { width, height } = this.canvas;
     this.localUser.renderer = new THREE.WebGLRenderer({
@@ -204,8 +204,8 @@ export default class VrRendering extends Component<Args> {
   }
 
   /**
-     * Creates a SpotLight and an AmbientLight and adds it to the scene
-     */
+   * Creates a SpotLight and an AmbientLight and adds it to the scene
+   */
   initLights() {
     const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
     spotLight.position.set(100, 100, 100);
@@ -325,11 +325,11 @@ export default class VrRendering extends Component<Args> {
   }
 
   /**
-     * Call this whenever the canvas is resized. Updated properties of camera
-     * and renderer.
-     *
-     * @param outerDiv HTML element containing the canvas
-     */
+   * Call this whenever the canvas is resized. Updated properties of camera
+   * and renderer.
+   *
+   * @param outerDiv HTML element containing the canvas
+   */
   @action
   resize(outerDiv: HTMLElement) {
     const width = Number(outerDiv.clientWidth);
@@ -512,33 +512,7 @@ export default class VrRendering extends Component<Args> {
   }
 
   handleKeyboard(event: any) {
-    const mvDst = 0.05;
-    // Handle keys
     switch (event.key) {
-      case 'q':
-        this.rotateLandscape(-mvDst);
-        break;
-      case 'e':
-        this.rotateLandscape(mvDst);
-        break;
-      case 'w':
-        this.moveLandscape(0, mvDst, 0);
-        break;
-      case 's':
-        this.moveLandscape(0, -mvDst, 0);
-        break;
-      case 'a':
-        this.moveLandscape(-mvDst, 0, 0);
-        break;
-      case 'd':
-        this.moveLandscape(mvDst, 0, 0);
-        break;
-      case '1':
-        this.moveLandscape(0, 0, -mvDst);
-        break;
-      case '2':
-        this.moveLandscape(0, 0, mvDst);
-        break;
       case 'l':
         perform(this.loadNewLandscape);
         break;
@@ -546,6 +520,7 @@ export default class VrRendering extends Component<Args> {
         break;
     }
   }
+
   // #endregion MOUSE & KEYBOARD EVENT HANDLER
 
   // #region MENUS
@@ -639,42 +614,8 @@ export default class VrRendering extends Component<Args> {
     }
   }
 
-  // eslint-disable-next-line
-  translateApplication(application: THREE.Object3D, direction: THREE.Vector3, length: number){
-    application.translateOnAxis(direction, length);
-    application.updateMatrix();
-  }
-
-  moveLandscape(deltaX: number, deltaY: number, deltaZ: number) {
-    const delta = new THREE.Vector3(deltaX, deltaY, deltaZ);
-    this.landscapeObject3D.position.add(delta);
-  }
-
-  rotateLandscape(deltaX: number) {
-    this.landscapeObject3D.rotation.x -= deltaX;
-    this.updateLandscapeRotation(this.landscapeObject3D.quaternion.clone());
-  }
-
-  updateLandscapeRotation(quaternion: THREE.Quaternion) {
-    this.landscapeObject3D.quaternion.copy(quaternion);
-    this.vrLandscapeRenderer.centerLandscape();
-  }
-
-  resetLandscapePosition() {
-    this.landscapeObject3D.rotation.x = -90 * THREE.MathUtils.DEG2RAD;
-    this.landscapeObject3D.rotation.y = 0;
-    this.landscapeObject3D.rotation.z = 0;
-    this.vrLandscapeRenderer.centerLandscape();
-  }
-
   removeApplication(application: ApplicationObject3D) {
     this.applicationGroup.removeApplicationById(application.dataModel.pid);
-  }
-
-  resetAll() {
-    this.applicationGroup.clear();
-    this.resetLandscapePosition();
-    this.localUser.resetPosition();
   }
 
   willDestroy() {

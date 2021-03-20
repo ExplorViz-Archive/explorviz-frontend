@@ -833,16 +833,6 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
     }
   }
 
-  resetAll() {
-    // Do not allow to reset everything for collaborative work
-    if (this.localUser.isOnline) {
-      this.showHint('Reset all is disabled in online mode');
-      return;
-    }
-
-    super.resetAll();
-  }
-
   /**
    * Updates animations of the remote user and sets user name tag to be
    * directly above their head and set rotation such that it looks toward
