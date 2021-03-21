@@ -153,8 +153,8 @@ export default class VrRendering extends Component<Args> {
   }
 
   /**
-     * Creates a scene, its background and adds a landscapeObject3D to it
-     */
+   * Creates a scene, its background and adds a landscapeObject3D to it
+   */
   initScene() {
     this.localUser.scene = new THREE.Scene();
     this.scene.background = this.configuration.landscapeColors.background;

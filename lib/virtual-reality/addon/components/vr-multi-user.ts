@@ -341,14 +341,11 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
         }
       });
     }
-    this.localUser.state = 'online';
-    this.localUser.userID = self.id;
-    const color = new THREE.Color().fromArray(self.color);
-    this.localUser.color = color;
-    if (this.localUser.controller1) this.localUser.controller1.updateControllerColor(color);
-    if (this.localUser.controller2) this.localUser.controller2.updateControllerColor(color);
-    this.localUser.userName = self.name;
-
+    this.localUser.connected({
+      id: self.id,
+      name: self.name,
+      color: new THREE.Color().fromArray(self.color)
+    });
     this.sendInitialControllerConnectState();
   }
 
@@ -934,7 +931,6 @@ export default class VrMultiUser extends VrRendering implements VrMessageListene
   */
   willDestroy() {
     super.willDestroy();
-    this.localUser.disconnect();
     this.spectateUserService.reset();
     this.receiver.removeMessageListener(this);
   }

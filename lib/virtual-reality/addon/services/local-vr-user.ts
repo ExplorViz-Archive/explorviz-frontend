@@ -100,9 +100,8 @@ export default class LocalVrUser extends Service {
   }
 
   reset() {
+    this.disconnect();
     this.userID = 'unknown';
-    this.state = 'offline';
-    this.color = undefined;
     this.color = undefined;
 
     // remove controller rays and models
@@ -127,6 +126,20 @@ export default class LocalVrUser extends Service {
       this.currentRoomId = roomId;
       this.webSocket.initSocket(this.currentRoomId);
     }
+  }
+
+  connected({id, name, color}: {
+    id: string,
+    name: string,
+    color: THREE.Color;
+  }) {
+    this.state = 'online';
+    this.userID = id;
+    this.userName = name;
+
+    this.color = color;
+    if (this.controller1) this.controller1.updateControllerColor(color);
+    if (this.controller2) this.controller2.updateControllerColor(color);
   }
 
   /**
