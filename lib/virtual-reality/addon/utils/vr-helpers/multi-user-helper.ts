@@ -20,8 +20,8 @@ export function getObjectPose(object: Object3D) {
   return { position, quaternion };
 }
 
-export function getPoses(camera: Camera, controller1: VRController|undefined,
-  controller2: VRController|undefined) {
+export function getPoses(camera: Camera, controller1: VRController | undefined,
+  controller2: VRController | undefined) {
   const cameraPose = getCameraPose(camera);
 
   let controller1Pose = { position: new Vector3(), quaternion: new Quaternion() };

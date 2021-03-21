@@ -10,7 +10,7 @@ import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_
 
 export type DetailedInfo = {
   title: string,
-  entries: {key: string, value: string}[],
+  entries: { key: string, value: string }[],
 };
 
 // #region HELPER
@@ -83,14 +83,14 @@ function composeDrawableClazzCommunicationContent(communicationMesh: ClazzCommun
 // #endregion APPLICATION CONTENT COMPOSER
 
 export default function composeContent(object: THREE.Object3D) {
-  let content: DetailedInfo|null = null;
+  let content: DetailedInfo | null = null;
 
   // Landscape Content
   if (object instanceof NodeMesh) {
     content = composeNodeContent(object);
   } else if (object instanceof ApplicationMesh) {
     content = composeApplicationContent(object);
-  // Application Content
+    // Application Content
   } else if (object instanceof ComponentMesh) {
     content = composeComponentContent(object);
   } else if (object instanceof ClazzMesh) {

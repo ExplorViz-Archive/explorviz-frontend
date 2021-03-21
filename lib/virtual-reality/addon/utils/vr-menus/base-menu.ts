@@ -51,7 +51,7 @@ export default abstract class BaseMenu extends THREE.Group {
   private menuState: MenuState;
   readonly menuFactory: VrMenuFactoryService;
 
-  constructor({menuFactory}: BaseMenuArgs) {
+  constructor({ menuFactory }: BaseMenuArgs) {
     super();
     this.menuFactory = menuFactory;
     this.menuState = MenuState.INIT;
@@ -86,7 +86,7 @@ export default abstract class BaseMenu extends THREE.Group {
   /**
    * Called when the other controller's ray intersects this menu.
    */
-  hover(_uv: THREE.Vector2) {}
+  hover(_uv: THREE.Vector2) { }
 
   /**
    * Called once when the other controller's trigger is pressed down while
@@ -95,7 +95,7 @@ export default abstract class BaseMenu extends THREE.Group {
    *
    * @param uv The coordinate of the menu that is hovered.
    */
-  triggerDown(_uv: THREE.Vector2) {}
+  triggerDown(_uv: THREE.Vector2) { }
 
   /**
    * Called when the other controller's trigger is pressed while hovering this
@@ -104,25 +104,25 @@ export default abstract class BaseMenu extends THREE.Group {
    * @param uv The coordinate of the menu that is hovered.
    * @param value The intensity of the trigger press.
    */
-  triggerPress(_uv: THREE.Vector2, _value: number) {}
+  triggerPress(_uv: THREE.Vector2, _value: number) { }
 
   /**
    * Called when this menu is hovered to apply visual feedback for the hover
    * effect.
    */
-  applyHoverEffect() {}
+  applyHoverEffect() { }
 
   /**
    * Called when this menu is not hovered anymore to reset the visual feedback
    * for the hover effect.
    */
-  resetHoverEffect() {}
+  resetHoverEffect() { }
 
   /**
    * Creates the bindings for the thumbpad of the controller that holds this
    * menu.
    */
-  makeThumbpadBinding(): VRControllerThumbpadBinding|undefined {
+  makeThumbpadBinding(): VRControllerThumbpadBinding | undefined {
     return undefined;
   }
 
@@ -130,7 +130,7 @@ export default abstract class BaseMenu extends THREE.Group {
    * Creates the binding for the trigger button of the controller that holds
    * this menu.
    */
-  makeTriggerButtonBinding(): VRControllerButtonBinding<number>|undefined {
+  makeTriggerButtonBinding(): VRControllerButtonBinding<number> | undefined {
     return undefined;
   }
 
@@ -138,7 +138,7 @@ export default abstract class BaseMenu extends THREE.Group {
    * Creates the binding for the controller's grip button to use for the
    * controller that holds this menu.
    */
-  makeGripButtonBinding(): VRControllerButtonBinding<undefined>|undefined {
+  makeGripButtonBinding(): VRControllerButtonBinding<undefined> | undefined {
     return undefined;
   }
 
@@ -149,7 +149,7 @@ export default abstract class BaseMenu extends THREE.Group {
    * By default the menu button closes the menu. Overwrite this method to
    * return `undefined` to disable this behavior.
    */
-  makeMenuButtonBinding(): VRControllerButtonBinding<undefined>|undefined {
+  makeMenuButtonBinding(): VRControllerButtonBinding<undefined> | undefined {
     return new VRControllerButtonBinding('Back', {
       onButtonDown: () => this.closeMenu()
     });
@@ -188,7 +188,7 @@ export default abstract class BaseMenu extends THREE.Group {
     return this.enableControllerRay;
   }
 
-  get menuGroup(): MenuGroup|null {
+  get menuGroup(): MenuGroup | null {
     if (this.parent instanceof MenuGroup) return this.parent;
     return null;
   }
@@ -204,7 +204,7 @@ export default abstract class BaseMenu extends THREE.Group {
    * Closes menus of this menu's group until the current menu does not match
    * the given predicate.
    */
-  closeMenusWhile(predicate: (menu : BaseMenu) => boolean) {
+  closeMenusWhile(predicate: (menu: BaseMenu) => boolean) {
     this.menuGroup?.closeMenusWhile(predicate);
   }
 
@@ -227,7 +227,7 @@ export default abstract class BaseMenu extends THREE.Group {
    *
    * @param delta The time in seconds since the last frame.
    */
-  onUpdateMenu(_delta: number) {}
+  onUpdateMenu(_delta: number) { }
 
   /**
    * Callback that is invoked by the menu group when this menu is hidden because

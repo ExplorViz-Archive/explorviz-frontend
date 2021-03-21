@@ -17,7 +17,7 @@ export default class ResetMenu extends UiMenu {
   private vrApplicationRenderer: VrApplicationRenderer;
   private vrLandscapeRenderer: VrLandscapeRenderer;
 
-  constructor({localUser, vrApplicationRenderer, vrLandscapeRenderer, ...args}: ResetMenuArgs) {
+  constructor({ localUser, vrApplicationRenderer, vrLandscapeRenderer, ...args }: ResetMenuArgs) {
     super(args);
     this.localUser = localUser;
     this.vrApplicationRenderer = vrApplicationRenderer;

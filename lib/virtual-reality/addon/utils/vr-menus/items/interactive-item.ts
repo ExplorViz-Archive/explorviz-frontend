@@ -4,13 +4,13 @@ export default abstract class InteractiveItem extends Item {
   hoveredByButton = false;
   hoveredByRay = false;
 
-  get isHovered() { return this.hoveredByButton || this.hoveredByRay;}
+  get isHovered() { return this.hoveredByButton || this.hoveredByRay; }
 
-  onHover: (() => void)|undefined = undefined;
+  onHover: (() => void) | undefined = undefined;
 
-  onTriggerDown: (() => void)|undefined = undefined;
+  onTriggerDown: (() => void) | undefined = undefined;
 
-  onTriggerPressed: ((value: number) => void)|undefined = undefined;
+  onTriggerPressed: ((value: number) => void) | undefined = undefined;
 
   enableHoverEffect() {
     this.hoveredByRay = true;

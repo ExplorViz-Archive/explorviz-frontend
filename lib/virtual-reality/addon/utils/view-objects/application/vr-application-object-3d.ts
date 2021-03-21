@@ -11,11 +11,11 @@ import { GrabbableObject } from "../../vr-menus/ui-less-menu/grab-menu";
  * the ID to send to the backend to identify the grabbed object.
  */
 export default class VrApplicationObject3D extends ApplicationObject3D implements GrabbableObject {
-    constructor(application: Application, boxLayoutMap: Map<string, BoxLayout>, traces: Trace[]) {
-        super(application, boxLayoutMap, traces);
-    }
+  constructor(application: Application, boxLayoutMap: Map<string, BoxLayout>, traces: Trace[]) {
+    super(application, boxLayoutMap, traces);
+  }
 
-    getGrabId(): string {
-        return this.dataModel.pid;
-    }
+  getGrabId(): string {
+    return this.dataModel.pid;
+  }
 }

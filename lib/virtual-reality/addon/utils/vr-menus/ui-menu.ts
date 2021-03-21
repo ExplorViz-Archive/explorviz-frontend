@@ -18,115 +18,115 @@ export type UiMenuArgs = BaseMenuArgs & {
  * other controller.
  */
 export default abstract class UiMenu extends AnimatedMenu {
-    canvas!: HTMLCanvasElement;
+  canvas!: HTMLCanvasElement;
 
-    canvasMesh!: THREE.Mesh<THREE.Geometry | THREE.BufferGeometry, THREE.MeshBasicMaterial>;
+  canvasMesh!: THREE.Mesh<THREE.Geometry | THREE.BufferGeometry, THREE.MeshBasicMaterial>;
 
-    resolution: { width: number, height: number };
+  resolution: { width: number, height: number };
 
-    items: Item[];
+  items: Item[];
 
-    lastHoveredItem: InteractiveItem|undefined;
+  lastHoveredItem: InteractiveItem | undefined;
 
-    thumbpadTargets: InteractiveItem[];
+  thumbpadTargets: InteractiveItem[];
 
-    activeTarget: InteractiveItem|undefined;
+  activeTarget: InteractiveItem | undefined;
 
-    thumbpadAxis: number;
+  thumbpadAxis: number;
 
-    constructor({
-      resolution = { width: 512, height: 512 },
-      backgroundColor = '#444444',
-      ...args
-    }: UiMenuArgs) {
-      super(args);
+  constructor({
+    resolution = { width: 512, height: 512 },
+    backgroundColor = '#444444',
+    ...args
+  }: UiMenuArgs) {
+    super(args);
 
-      this.resolution = resolution;
-      this.items = [];
-      this.thumbpadTargets = [];
-      this.activeTarget = undefined;
-      this.thumbpadAxis = 1;
+    this.resolution = resolution;
+    this.items = [];
+    this.thumbpadTargets = [];
+    this.activeTarget = undefined;
+    this.thumbpadAxis = 1;
 
-      this.initBackground(new THREE.Color(backgroundColor));
-      this.initCanvas();
+    this.initBackground(new THREE.Color(backgroundColor));
+    this.initCanvas();
 
-      // Move the mesh slightly in front of the background.
-      this.canvasMesh.position.z = 0.00001;
-      this.add(this.canvasMesh);
+    // Move the mesh slightly in front of the background.
+    this.canvasMesh.position.z = 0.00001;
+    this.add(this.canvasMesh);
+  }
+
+  /**
+   * Creates the mesh that is used as the background of the menu.
+   */
+  initBackground(color: THREE.Color) {
+    const background = new THREE.Mesh();
+    background.geometry = this.makeBackgroundGeometry();
+    background.material = this.makeBackgroundMaterial(color);
+    this.add(background);
+  }
+
+  /**
+   * Creates the geometry of the background mesh.
+   */
+  makeBackgroundGeometry(): THREE.Geometry {
+    return new THREE.PlaneGeometry(
+      (this.resolution.width / 512) * 0.3,
+      (this.resolution.height / 512) * 0.3,
+    );
+  }
+
+  /**
+   * Creates the material of the background mesh.
+   *
+   * @param color The color the background should have.
+   */
+  makeBackgroundMaterial(color: THREE.Color): THREE.Material {
+    return new THREE.MeshBasicMaterial({
+      color: color,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.8,
+    });
+  }
+
+  /**
+   * Creates ta canvas element to draw to and a mesh that displays the canvas.
+   */
+  initCanvas() {
+    this.canvas = document.createElement('canvas');
+    this.canvas.width = this.resolution.width;
+    this.canvas.height = this.resolution.height;
+
+    // Create a mesh that displays the canvas as a texture. This is needed
+    // such that the back face of the background can be visible while the
+    // user interface's background is not.
+    const geometry = this.makeBackgroundGeometry();
+    const material = new THREE.MeshBasicMaterial({
+      map: new THREE.CanvasTexture(this.canvas),
+      transparent: true,
+    });
+    this.canvasMesh = new THREE.Mesh(geometry, material);
+
+    this.add(this.canvasMesh);
+  }
+
+  /**
+   * Redraws the `items` onto the canwas.
+   */
+  redrawMenu() {
+    const { canvas } = this;
+    const ctx = canvas.getContext('2d')!;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < this.items.length; i++) {
+      const item = this.items[i];
+      item.drawToCanvas(ctx);
     }
 
-    /**
-     * Creates the mesh that is used as the background of the menu.
-     */
-    initBackground(color: THREE.Color) {
-      const background = new THREE.Mesh();
-      background.geometry = this.makeBackgroundGeometry();
-      background.material = this.makeBackgroundMaterial(color);
-      this.add(background);
+    if (this.canvasMesh.material.map) {
+      this.canvasMesh.material.map.needsUpdate = true;
     }
-
-    /**
-     * Creates the geometry of the background mesh.
-     */
-    makeBackgroundGeometry(): THREE.Geometry {
-      return new THREE.PlaneGeometry(
-        (this.resolution.width / 512) * 0.3,
-        (this.resolution.height / 512) * 0.3,
-      );
-    }
-
-    /**
-     * Creates the material of the background mesh.
-     *
-     * @param color The color the background should have.
-     */
-    makeBackgroundMaterial(color: THREE.Color): THREE.Material {
-      return new THREE.MeshBasicMaterial({
-        color: color,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.8,
-      });
-    }
-
-    /**
-     * Creates ta canvas element to draw to and a mesh that displays the canvas.
-     */
-    initCanvas() {
-      this.canvas = document.createElement('canvas');
-      this.canvas.width = this.resolution.width;
-      this.canvas.height = this.resolution.height;
-
-      // Create a mesh that displays the canvas as a texture. This is needed
-      // such that the back face of the background can be visible while the
-      // user interface's background is not.
-      const geometry = this.makeBackgroundGeometry();
-      const material = new THREE.MeshBasicMaterial({
-        map: new THREE.CanvasTexture(this.canvas),
-        transparent: true,
-      });
-      this.canvasMesh = new THREE.Mesh(geometry, material);
-
-      this.add(this.canvasMesh);
-    }
-
-    /**
-     * Redraws the `items` onto the canwas.
-     */
-    redrawMenu() {
-      const { canvas } = this;
-      const ctx = canvas.getContext('2d')!;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      for (let i = 0; i < this.items.length; i++) {
-        const item = this.items[i];
-        item.drawToCanvas(ctx);
-      }
-
-      if (this.canvasMesh.material.map) {
-        this.canvasMesh.material.map.needsUpdate = true;
-      }
-    }
+  }
 
 
   /**
@@ -167,7 +167,7 @@ export default abstract class UiMenu extends AnimatedMenu {
    * @param id The id of the item to find.
    * @returns The item or `undefined`if there is no such item.
    */
-  getItemById(id: string): Item|undefined {
+  getItemById(id: string): Item | undefined {
     return this.items.find((item) => item.id === id);
   }
 
@@ -201,7 +201,7 @@ export default abstract class UiMenu extends AnimatedMenu {
    *
    * @param item The hovered item or `undefined` when no item is hovered anymore.
    */
-  hoverItem(item: InteractiveItem|undefined) {
+  hoverItem(item: InteractiveItem | undefined) {
     // If an item is hovered, reset the item selected with the touchpad.
     // If no item is hovered, but an item has been selected, don't reset the
     // selection.
@@ -235,8 +235,8 @@ export default abstract class UiMenu extends AnimatedMenu {
     if (this.thumbpadTargets.length == 0) return undefined;
     return new VRControllerThumbpadBinding(
       this.thumbpadAxis === 0
-        ? {labelLeft: 'Previous', labelRight: 'Next'}
-        : {labelUp: 'Previous', labelDown: 'Next'},
+        ? { labelLeft: 'Previous', labelRight: 'Next' }
+        : { labelUp: 'Previous', labelDown: 'Next' },
       {
         onThumbpadDown: (_controller, axes) => {
           // No item can be selected with the touchpad, if an item is selected
@@ -272,9 +272,9 @@ export default abstract class UiMenu extends AnimatedMenu {
   makeTriggerButtonBinding() {
     if (this.thumbpadTargets.length == 0) return undefined;
     return new VRControllerButtonBinding('Select', {
-        onButtonDown: () => {
-          if (this.activeTarget) this.activeTarget.onTriggerDown?.call(this.activeTarget);
-        }
+      onButtonDown: () => {
+        if (this.activeTarget) this.activeTarget.onTriggerDown?.call(this.activeTarget);
+      }
     });
   }
 
@@ -294,7 +294,7 @@ export default abstract class UiMenu extends AnimatedMenu {
    * @param uv The coordinate of the menu that is hovered.
    */
   triggerDown(uv: THREE.Vector2) {
-    const item = this.getItem(uv) as InteractiveItem|undefined;
+    const item = this.getItem(uv) as InteractiveItem | undefined;
 
     if (item && item.onTriggerDown) {
       item.onTriggerDown();
@@ -310,7 +310,7 @@ export default abstract class UiMenu extends AnimatedMenu {
    */
   triggerPress(uv: THREE.Vector2, value: number) {
     super.triggerPress(uv, value);
-    const item = this.getItem(uv) as InteractiveItem|undefined;
+    const item = this.getItem(uv) as InteractiveItem | undefined;
 
     if (item && item.onTriggerPressed) {
       item.onTriggerPressed(value);

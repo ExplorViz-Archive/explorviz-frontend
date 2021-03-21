@@ -2,7 +2,7 @@ import THREE from 'three';
 import { OBJLoader } from '../lib/loader/OBJLoader';
 
 export default class HardwareModels extends Object {
-  hmd: THREE.Group|undefined;
+  hmd: THREE.Group | undefined;
 
   constructor() {
     super();

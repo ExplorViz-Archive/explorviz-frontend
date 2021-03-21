@@ -1,7 +1,7 @@
 import ArrowbuttonItem from './arrowbutton-item';
 import InteractiveItem from './interactive-item';
 
-export type CurvedArrowDirection = 'left'|'right';
+export type CurvedArrowDirection = 'left' | 'right';
 
 export default class CurvedArrowbuttonItem extends InteractiveItem {
   size: number;

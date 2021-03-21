@@ -22,7 +22,7 @@ export type HintMenuArgs = UiMenuArgs & {
 
 export default class HintMenu extends HudMenu {
   readonly titleItem: TextItem;
-  readonly textItem: TextItem|undefined;
+  readonly textItem: TextItem | undefined;
 
   constructor({
     title, text,
@@ -30,7 +30,7 @@ export default class HintMenu extends HudMenu {
     backgroundColor = '#002e4f',
     ...args
   }: HintMenuArgs) {
-    super({resolution, backgroundColor, ...args});
+    super({ resolution, backgroundColor, ...args });
 
     this.titleItem = new TextItem(title, 'text', '#ffffff', { x: 256, y: 50 }, 28, 'center');
     this.items.push(this.titleItem);

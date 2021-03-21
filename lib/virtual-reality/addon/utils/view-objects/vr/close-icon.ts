@@ -7,7 +7,7 @@ export default class CloseIcon extends BaseMesh {
 
   private onClose: () => void;
 
-  constructor({onClose, texture, radius = 0.075, segments = 32}: {
+  constructor({ onClose, texture, radius = 0.075, segments = 32 }: {
     onClose: () => void,
     texture: THREE.Texture,
     radius?: number,
@@ -31,7 +31,7 @@ export default class CloseIcon extends BaseMesh {
    *
    * @param Object3D Object to which the icon shall be added
    */
-  addToObject(object: Object3D, {compensateScale = true}: {
+  addToObject(object: Object3D, { compensateScale = true }: {
     compensateScale?: boolean
   } = {}) {
     // Undo scaling of the object.

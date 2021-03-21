@@ -52,10 +52,10 @@ export default class GrabbedObjectService extends Service {
     // Wait for response.
     return new Promise((resolve) => {
       this.receiver.awaitResponse({
-          nonce,
-          responseType: isObjectGrabbedResponse,
-          onResponse: (response: ObjectGrabbedResponse) => resolve(response.isSuccess),
-          onOffline: () => resolve(true)
+        nonce,
+        responseType: isObjectGrabbedResponse,
+        onResponse: (response: ObjectGrabbedResponse) => resolve(response.isSuccess),
+        onOffline: () => resolve(true)
       });
     });
   }
@@ -129,15 +129,15 @@ export default class GrabbedObjectService extends Service {
     for (var object of this.grabbedObjects.values()) {
       const objectId = object.getGrabId();
       if (objectId) {
-          const position = new THREE.Vector3();
-          object.getWorldPosition(position);
+        const position = new THREE.Vector3();
+        object.getWorldPosition(position);
 
-          const quaternion = new THREE.Quaternion();
-          object.getWorldQuaternion(quaternion);
+        const quaternion = new THREE.Quaternion();
+        object.getWorldQuaternion(quaternion);
 
-          const scale = object.scale;
+        const scale = object.scale;
 
-          this.sender.sendObjectMoved(objectId, position, quaternion, scale);
+        this.sender.sendObjectMoved(objectId, position, quaternion, scale);
       }
     }
   }

@@ -5,12 +5,12 @@ import TextbuttonItem from '../items/textbutton-item';
 import UiMenu, { UiMenuArgs } from '../ui-menu';
 
 export type SettingsMenuArgs = UiMenuArgs & {
-  labelGroups: (VRControllerLabelGroup|undefined)[]
+  labelGroups: (VRControllerLabelGroup | undefined)[]
 };
 
 export default class SettingsMenu extends UiMenu {
 
-  constructor({labelGroups, ...args}: SettingsMenuArgs) {
+  constructor({ labelGroups, ...args }: SettingsMenuArgs) {
     super(args);
 
     const textItem = new TextItem('Settings', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
@@ -40,7 +40,7 @@ export default class SettingsMenu extends UiMenu {
       VRControllerLabelGroup.visibilitySetting = visible;
       labelsCheckbox.isChecked = visible;
       for (let labelGroup of labelGroups) {
-        if(labelGroup) labelGroup.visible = visible;
+        if (labelGroup) labelGroup.visible = visible;
       }
       this.redrawMenu();
     };

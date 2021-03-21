@@ -12,12 +12,12 @@ import BaseMenu from './vr-menus/base-menu';
 import MenuGroup from './vr-menus/menu-group';
 
 export type VRControllerCallbackFunctions = {
-  connected? (controller: VRController, event: THREE.Event): void,
-  disconnected? (controller: VRController): void,
+  connected?(controller: VRController, event: THREE.Event): void,
+  disconnected?(controller: VRController): void,
 
-  thumbpadTouch? (controller: VRController, axes: number[]): void,
+  thumbpadTouch?(controller: VRController, axes: number[]): void,
   thumbpadDown?(controller: VRController, axes: number[]): void,
-  thumbpadPress? (controller: VRController, axes: number[]): void,
+  thumbpadPress?(controller: VRController, axes: number[]): void,
   thumbpadUp?(controller: VRController, axes: number[]): void,
 
   triggerDown?(controller: VRController): void,
@@ -30,7 +30,7 @@ export type VRControllerCallbackFunctions = {
 
   menuUp?(controller: VRController): void,
   menuPress?(controller: VRController): void,
-  menuDown? (controller: VRController): void,
+  menuDown?(controller: VRController): void,
 }
 
 
@@ -41,7 +41,7 @@ export type VRControllerCallbackFunctions = {
 export default class VRController extends BaseMesh {
   gamepadIndex: number;
 
-  gamepad: Gamepad|null = null;
+  gamepad: Gamepad | null = null;
 
   color: THREE.Color;
 
@@ -67,11 +67,11 @@ export default class VRController extends BaseMesh {
 
   menuGroup: MenuGroup;
 
-  ray: THREE.Line|null = null;
+  ray: THREE.Line | null = null;
 
   controllerModel: XRControllerModel;
 
-  intersectedObject: THREE.Intersection|null = null;
+  intersectedObject: THREE.Intersection | null = null;
 
   raycaster: THREE.Raycaster;
 
@@ -79,7 +79,7 @@ export default class VRController extends BaseMesh {
 
   readonly intersectableObjects: THREE.Object3D[] = [];
 
-  teleportArea: TeleportMesh|null = null;
+  teleportArea: TeleportMesh | null = null;
 
   enableTeleport: boolean = true;
 
@@ -111,7 +111,7 @@ export default class VRController extends BaseMesh {
     bindings,
     scene,
     intersectableObjects,
-  } : {
+  }: {
     gamepadIndex: number,
     color: THREE.Color,
     gripSpace: THREE.Group,
@@ -214,7 +214,7 @@ export default class VRController extends BaseMesh {
    * Adds a line to the controller which is a visual representation of the hit
    * objects for raycasting.
    */
-   initRay() {
+  initRay() {
     if (this.ray) return;
 
     const geometry = new THREE.BufferGeometry().setFromPoints(
@@ -237,7 +237,7 @@ export default class VRController extends BaseMesh {
    */
   initTeleportArea() {
     if (!this.teleportArea) {
-    // Create teleport area
+      // Create teleport area
       this.teleportArea = new TeleportMesh(this.color);
 
       // Add teleport area to parent (usually the scene object)
@@ -410,23 +410,23 @@ export default class VRController extends BaseMesh {
 
     // Handle hover effect and teleport area
 
-      if (object.parent instanceof BaseMenu && uv) {
-        object.parent.hover(uv);
-      } else if (object instanceof BaseMesh) {
-        object.applyHoverEffect();
-      }
+    if (object.parent instanceof BaseMenu && uv) {
+      object.parent.hover(uv);
+    } else if (object instanceof BaseMesh) {
+      object.applyHoverEffect();
+    }
 
-      if (object instanceof FloorMesh) {
-        if (this.teleportArea && this.enableTeleport) {
-          // Show teleport area above intersected point on floor. However, if
-          // the controller's ray is invisible, don't show the teleport area
-          // either.
-          this.teleportArea.showAbovePosition(nearestIntersection.point);
-          this.teleportArea.visible = this.ray.visible;
-        }
-      } else if (object instanceof BaseMesh) {
-        object.applyHoverEffect();
+    if (object instanceof FloorMesh) {
+      if (this.teleportArea && this.enableTeleport) {
+        // Show teleport area above intersected point on floor. However, if
+        // the controller's ray is invisible, don't show the teleport area
+        // either.
+        this.teleportArea.showAbovePosition(nearestIntersection.point);
+        this.teleportArea.visible = this.ray.visible;
       }
+    } else if (object instanceof BaseMesh) {
+      object.applyHoverEffect();
+    }
 
 
     // Store intersected object and scale ray accordingly

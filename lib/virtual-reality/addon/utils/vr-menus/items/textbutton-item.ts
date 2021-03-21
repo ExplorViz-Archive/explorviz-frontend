@@ -71,8 +71,7 @@ export default class TextbuttonItem extends InteractiveItem {
    * @param font The font to measure the size in.
    * @return {{width: Number, height: Number, sublineHeight: Number}} The sizes of the text.
    */
-  private static getTextSize(text: string, font: string):
-  { width: number, height: number, sublineHeight: number } {
+  private static getTextSize(text: string, font: string): { width: number, height: number, sublineHeight: number } {
     // re-use canvas object for better performance
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d')!;

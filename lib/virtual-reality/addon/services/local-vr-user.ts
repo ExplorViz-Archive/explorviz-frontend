@@ -4,7 +4,7 @@ import VRController from 'virtual-reality/utils/vr-controller';
 import SpectateUserService from './spectate-user';
 import WebSocketService from './web-socket';
 
-export type ConnectionStatus = 'offline'|'connecting'|'online';
+export type ConnectionStatus = 'offline' | 'connecting' | 'online';
 
 export default class LocalVrUser extends Service {
   @service('web-socket')
@@ -17,7 +17,7 @@ export default class LocalVrUser extends Service {
 
   userName?: string;
 
-  color: THREE.Color|undefined;
+  color: THREE.Color | undefined;
 
   renderer!: THREE.WebGLRenderer;
 
@@ -25,15 +25,15 @@ export default class LocalVrUser extends Service {
 
   defaultCamera!: THREE.PerspectiveCamera;
 
-  controller1: VRController|undefined;
+  controller1: VRController | undefined;
 
-  controller2: VRController|undefined;
+  controller2: VRController | undefined;
 
   userGroup!: THREE.Group;
 
   connectionStatus: ConnectionStatus = 'offline';
 
-  currentRoomId: string|null = null;
+  currentRoomId: string | null = null;
 
   get camera() {
     if (this.renderer.xr.isPresenting) {
@@ -121,7 +121,7 @@ export default class LocalVrUser extends Service {
     }
   }
 
-  connected({id, name, color}: {
+  connected({ id, name, color }: {
     id: string,
     name: string,
     color: THREE.Color;

@@ -12,14 +12,14 @@ export type DetailInfoMenuArgs = UiMenuArgs & {
 
 export default class DetailInfoMenu extends UiMenu implements DetachableMenu {
   private object: EntityMesh;
-  private entryItems: Map <string, TextItem>;
+  private entryItems: Map<string, TextItem>;
 
   constructor({
     object,
     resolution = { width: 768, height: 512 },
     ...args
   }: DetailInfoMenuArgs) {
-    super({resolution, ...args});
+    super({ resolution, ...args });
     this.object = object;
     this.entryItems = new Map<string, TextItem>();
   }
@@ -67,7 +67,7 @@ export default class DetailInfoMenu extends UiMenu implements DetachableMenu {
 
     let content = composeContent(this.object)
     if (content) {
-      content.entries.forEach(({key, value}) => {
+      content.entries.forEach(({ key, value }) => {
         this.entryItems.get(key)?.setText(value);
       });
       this.redrawMenu();

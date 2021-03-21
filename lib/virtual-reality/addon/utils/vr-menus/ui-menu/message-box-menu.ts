@@ -28,7 +28,7 @@ export default class MessageBoxMenu extends HudMenu {
     backgroundColor = '#000000',
     ...args
   }: MessageBoxMenuArgs) {
-    super({resolution, backgroundColor, ...args});
+    super({ resolution, backgroundColor, ...args });
     this.time = time;
     this.enableTimer = false;
 

@@ -18,7 +18,7 @@ import { UserControllerMessage } from '../utils/vr-message/sendable/user_control
 import { UserPositionsMessage } from '../utils/vr-message/sendable/user_positions';
 import { Nonce } from '../utils/vr-message/util/nonce';
 
-type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
+type Pose = { position: THREE.Vector3, quaternion: THREE.Quaternion };
 export default class VrMessageSender extends Service {
   @service('web-socket')
   webSocket!: WebSocketService;
@@ -175,7 +175,7 @@ export default class VrMessageSender extends Service {
    * Informs backend that this user entered or left spectating mode and
    * additionally adds who is spectating who.
    */
-  sendSpectatingUpdate(isSpectating: boolean, spectatedUser: string|null) {
+  sendSpectatingUpdate(isSpectating: boolean, spectatedUser: string | null) {
     this.webSocket.send<SpectatingUpdateMessage>({
       event: 'spectating_update',
       isSpectating,

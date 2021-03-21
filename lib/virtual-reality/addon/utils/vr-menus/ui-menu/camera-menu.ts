@@ -22,7 +22,7 @@ export default class CameraMenu extends UiMenu {
   private heightUpButton: ArrowbuttonItem;
   private heightDownButton: ArrowbuttonItem;
 
-  constructor({cameraObject3D, ...args}: CameraMenuArgs) {
+  constructor({ cameraObject3D, ...args }: CameraMenuArgs) {
     super(args);
     this.cameraObject3D = cameraObject3D;
 
@@ -43,14 +43,14 @@ export default class CameraMenu extends UiMenu {
       x: 100,
       y: 182,
     }, 50, 60, '#ffc338', '#00e5ff', 'down');
-    this.heightDownButton.onTriggerPressed = (value) => {this.heightDown(value); this.redrawMenu()};
+    this.heightDownButton.onTriggerPressed = (value) => { this.heightDown(value); this.redrawMenu() };
     this.items.push(this.heightDownButton);
 
     this.heightUpButton = new ArrowbuttonItem('height_up', {
       x: 366,
       y: 182,
     }, 50, 60, '#ffc338', '#00e5ff', 'up');
-    this.heightUpButton.onTriggerPressed = (value) => {this.heightUp(value); this.redrawMenu()};
+    this.heightUpButton.onTriggerPressed = (value) => { this.heightUp(value); this.redrawMenu() };
     this.items.push(this.heightUpButton);
 
     this.redrawMenu();
@@ -73,7 +73,7 @@ export default class CameraMenu extends UiMenu {
   }
 
   private heightDown(value: number) {
-      this.translateCamera(-value * MAX_TRANSLATE_SPEED);
+    this.translateCamera(-value * MAX_TRANSLATE_SPEED);
   }
 
   private heightUp(value: number) {

@@ -9,11 +9,11 @@ import { GrabbableObject } from "../../vr-menus/ui-less-menu/grab-menu";
  * the ID to send to the backend to identify the grabbed object.
  */
 export default class VrLandscapeObject3D extends LandscapeObject3D implements GrabbableObject {
-    constructor(landscape: StructureLandscapeData) {
-        super(landscape);
-    }
+  constructor(landscape: StructureLandscapeData) {
+    super(landscape);
+  }
 
-    getGrabId(): string {
-        return this.dataModel.landscapeToken;
-    }
+  getGrabId(): string {
+    return this.dataModel.landscapeToken;
+  }
 }

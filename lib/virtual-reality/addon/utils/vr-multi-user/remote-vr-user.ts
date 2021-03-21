@@ -43,18 +43,18 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   color: THREE.Color; // [r,g,b], r,g,b = 0,...,255
 
-  nameTag: NameTagMesh|undefined;
+  nameTag: NameTagMesh | undefined;
 
   localUser: LocalVrUser;
 
   animationMixer: THREE.AnimationMixer;
 
-  constructor({userName, userId, color, state, localUser}: {
+  constructor({ userName, userId, color, state, localUser }: {
     userName: string,
     userId: string,
     color: THREE.Color,
     state: string,
-    localUser : LocalVrUser
+    localUser: LocalVrUser
   }) {
     super();
     this.userName = userName;
@@ -64,12 +64,12 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.localUser = localUser;
     this.animationMixer = new THREE.AnimationMixer(this);
 
-    this.pingMesh1 = new PingMesh({animationMixer: this.animationMixer, color: this.color});
-    this.pingMesh2 = new PingMesh({animationMixer: this.animationMixer, color: this.color});
+    this.pingMesh1 = new PingMesh({ animationMixer: this.animationMixer, color: this.color });
+    this.pingMesh2 = new PingMesh({ animationMixer: this.animationMixer, color: this.color });
     this.add(this.pingMesh1);
     this.add(this.pingMesh2);
-    this.pingWaypoint1 = new WaypointIndicator({target: this.pingMesh1, color: this.color});
-    this.pingWaypoint2 = new WaypointIndicator({target: this.pingMesh2, color: this.color});
+    this.pingWaypoint1 = new WaypointIndicator({ target: this.pingMesh1, color: this.color });
+    this.pingWaypoint2 = new WaypointIndicator({ target: this.pingMesh2, color: this.color });
     this.localUser.defaultCamera.add(this.pingWaypoint1);
     this.localUser.defaultCamera.add(this.pingWaypoint2);
   }
@@ -225,7 +225,7 @@ export default class RemoteVrUser extends THREE.Object3D {
    *
    * @param Object containing the new camera position and quaterion.
    */
-  updateCamera(camera: {position: number[], quaternion: number[]}) {
+  updateCamera(camera: { position: number[], quaternion: number[] }) {
     if (this.camera) {
       camera.position[1] -= 0.01;
 
@@ -241,7 +241,7 @@ export default class RemoteVrUser extends THREE.Object3D {
    *
    * @param Object containing the new controller1 position and quaterion.
    */
-  updateController1(controller: {position: number[], quaternion: number[], intersection: number[] | null}) {
+  updateController1(controller: { position: number[], quaternion: number[], intersection: number[] | null }) {
     if (this.controller1) {
       this.controller1.position.fromArray(controller.position);
       this.controller1.quaternion.fromArray(controller.quaternion);
@@ -261,7 +261,7 @@ export default class RemoteVrUser extends THREE.Object3D {
    *
    * @param Object containing the new controller2 position and quaterion.
    */
-  updateController2(controller: {position: number[], quaternion: number[], intersection: number[] | null}) {
+  updateController2(controller: { position: number[], quaternion: number[], intersection: number[] | null }) {
     if (this.controller2) {
       this.controller2.position.fromArray(controller.position);
       this.controller2.quaternion.fromArray(controller.quaternion);

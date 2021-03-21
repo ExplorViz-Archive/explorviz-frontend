@@ -1,6 +1,6 @@
 import Item from './item';
 
-type Alignment = 'left'|'center'|'right';
+type Alignment = 'left' | 'center' | 'right';
 
 export default class TextItem extends Item {
   text: string;
@@ -86,8 +86,7 @@ export default class TextItem extends Item {
    * @param font The font to measure the size in.
    * @return {{width: Number, height: Number, sublineHeight: Number}} The sizes of the text.
    */
-  private static getTextSize(text: string, font: string):
-  { width: number, height: number, sublineHeight: number } {
+  private static getTextSize(text: string, font: string): { width: number, height: number, sublineHeight: number } {
     // re-use canvas object for better performance
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d')!;
