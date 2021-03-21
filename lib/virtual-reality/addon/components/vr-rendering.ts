@@ -540,16 +540,6 @@ export default class VrRendering extends Component<Args> {
   // #region UTILS
 
   handlePrimaryInputOn({ object, uv, point }: THREE.Intersection) {
-    const handleApplicationObject = (appObject: THREE.Object3D) => {
-      if (!(appObject.parent instanceof ApplicationObject3D)) return;
-
-      if (appObject instanceof ComponentMesh) {
-        this.toggleComponentAndUpdate(appObject, appObject.parent);
-      } else if (appObject instanceof FoundationMesh) {
-        this.closeAllComponentsAndUpdate(appObject.parent);
-      }
-    }
-
     if (object instanceof ApplicationMesh) {
       this.addApplication(object.dataModel).then((applicationObject3D : ApplicationObject3D) => {
         // Rotate app so that it is aligned with landscape
@@ -565,7 +555,12 @@ export default class VrRendering extends Component<Args> {
         this.showHint('Object could not be closed');
       }
     } else if (object.parent instanceof ApplicationObject3D) {
-      handleApplicationObject(object);
+      const application = object.parent;
+      if (object instanceof ComponentMesh) {
+        this.toggleComponentAndUpdate(object, application);
+      } else if (object instanceof FoundationMesh) {
+        this.closeAllComponentsAndUpdate(application);
+      }
     } else if (object.parent instanceof BaseMenu && uv) {
         object.parent.triggerDown(uv);
     }
