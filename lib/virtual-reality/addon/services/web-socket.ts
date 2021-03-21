@@ -5,7 +5,7 @@ export default class WebSocketService extends Service {
   @service()
   websockets !: any;
 
-  debug = debugLogger('VrMultiUser');
+  debug = debugLogger('WebSocketService');
 
   private socket: any; // WebSocket to send/receive messages to/from backend
 
@@ -38,7 +38,7 @@ export default class WebSocketService extends Service {
     this.port = config.port;
     this.secure = config.secure;
 
-    // Remove leading and tailing slashes such that the URL returned by 
+    // Remove leading and tailing slashes such that the URL returned by
     // `getSocketUrl` does not contain two leading slashes or any trailing
     // slash.
     this.path = config.path.replace(/^\/|\/$/g, "");
@@ -74,10 +74,10 @@ export default class WebSocketService extends Service {
 
   /**
    * Sends a message to the backend.
-   * 
+   *
    * The type parameter `T` is used to validate the type of the sent message
    * at compile time.
-   * 
+   *
    * @param msg The message to send.
    */
   send<T>(msg: T) {

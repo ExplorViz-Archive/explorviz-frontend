@@ -126,7 +126,7 @@ export default class VrApplicationRenderer {
             this.applicationGroup.addApplication(applicationObject3D);
 
             if (callback) callback(applicationObject3D);
-        } catch (e: any) {
+        } catch (e) {
             this.debug(e);
         }
   }

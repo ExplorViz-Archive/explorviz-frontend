@@ -43,25 +43,19 @@ export default class LocalVrUser extends Service {
     return this.defaultCamera;
   }
 
-  get isOnline() { return this.state === 'online'; }
+  get isOnline() { return this.connectionStatus === 'online'; }
 
-  get isConnecting() { return this.state === 'connecting'; }
+  get isConnecting() { return this.connectionStatus === 'connecting'; }
 
   get isSpectating() { return this.spectateUserService.isActive; }
 
   get position() { return this.userGroup.position; }
 
-  get state() { return this.connectionStatus; }
-
-  set state(state: ConnectionStatus) {
-    this.connectionStatus = state;
-  }
-
   init() {
     super.init();
 
     this.userID = 'unknown';
-    this.state = 'offline';
+    this.connectionStatus = 'offline';
     this.userGroup = new THREE.Group();
   }
 
@@ -122,7 +116,7 @@ export default class LocalVrUser extends Service {
 
   connect(roomId: string) {
     if (!this.isConnecting) {
-      this.state = 'connecting';
+      this.connectionStatus = 'connecting';
       this.currentRoomId = roomId;
       this.webSocket.initSocket(this.currentRoomId);
     }
@@ -133,7 +127,7 @@ export default class LocalVrUser extends Service {
     name: string,
     color: THREE.Color;
   }) {
-    this.state = 'online';
+    this.connectionStatus = 'online';
     this.userID = id;
     this.userName = name;
 
@@ -146,7 +140,7 @@ export default class LocalVrUser extends Service {
    * Switch to offline mode, close socket connection
    */
   disconnect() {
-    this.state = 'offline';
+    this.connectionStatus = 'offline';
 
     // Close socket
     if (this.currentRoomId) {

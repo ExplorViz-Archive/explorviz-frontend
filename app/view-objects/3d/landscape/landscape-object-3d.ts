@@ -37,8 +37,8 @@ export default class LandscapeObject3D extends THREE.Object3D {
       this.modelIdToMesh.set(object.dataModel.ipAddress, object);
     } else if (object instanceof ApplicationMesh) {
       this.modelIdToMesh.set(object.dataModel.pid, object);
-    }  
-    
+    }
+
     return this;
   }
 
@@ -62,7 +62,7 @@ export default class LandscapeObject3D extends THREE.Object3D {
    * Removes all child meshes and disposes their geometries and materials
    */
   removeAllChildren() {
-    function removeChildren(entity: THREE.Object3D | THREE.Mesh) {
+    const removeChildren = (entity: THREE.Object3D | THREE.Mesh) => {
       for (let i = entity.children.length - 1; i >= 0; i--) {
         const child = entity.children[i];
 

@@ -26,7 +26,7 @@ export default class ResetMenu extends UiMenu {
     const textItem = new TextItem('Reset', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(textItem);
 
-    if (localUser.state != 'online') {
+    if (localUser.connectionStatus != 'online') {
       const question = new TextItem('Reset state and position?', 'question', '#ffffff', { x: 100, y: 148 }, 28, 'left');
       this.items.push(question);
 

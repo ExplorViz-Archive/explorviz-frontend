@@ -63,7 +63,7 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.state = state;
     this.localUser = localUser;
     this.animationMixer = new THREE.AnimationMixer(this);
-    
+
     this.pingMesh1 = new PingMesh({animationMixer: this.animationMixer, color: this.color});
     this.pingMesh2 = new PingMesh({animationMixer: this.animationMixer, color: this.color});
     this.add(this.pingMesh1);
@@ -134,7 +134,7 @@ export default class RemoteVrUser extends THREE.Object3D {
       this.remove(this.controller1.model);
       this.controller1 = undefined;
     }
-    this.stopPing1();
+    this.togglePing1(false);
   }
 
   removeController2() {
@@ -142,7 +142,7 @@ export default class RemoteVrUser extends THREE.Object3D {
       this.remove(this.controller2.model);
       this.controller2 = undefined;
     }
-    this.stopPing2();
+    this.togglePing2(false);
   }
 
   removeCamera() {
@@ -175,8 +175,12 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.removePingObjects();
   }
 
-  startPing1() {
-    this.pingMesh1.startPinging();
+  togglePing1(isPinging: boolean) {
+    if (isPinging) {
+      this.pingMesh1.startPinging();
+    } else {
+      this.pingMesh1.stopPinging();
+    }
   }
 
   updatePing1() {
@@ -185,12 +189,12 @@ export default class RemoteVrUser extends THREE.Object3D {
     }
   }
 
-  stopPing1() {
-    this.pingMesh1.stopPinging();
-  }
-
-  startPing2() {
-    this.pingMesh2.startPinging();
+  togglePing2(isPinging: boolean) {
+    if (isPinging) {
+      this.pingMesh2.startPinging();
+    } else {
+      this.pingMesh2.stopPinging();
+    }
   }
 
   updatePing2() {
@@ -199,19 +203,15 @@ export default class RemoteVrUser extends THREE.Object3D {
     }
   }
 
-  stopPing2() {
-    this.pingMesh2.stopPinging();
-  }
-
   /**
    * Updates the the animations and sets the position and rotation of the
    * name tag.
-   * 
+   *
    * @param delta The time since the last update.
    */
   update(delta: number) {
     this.animationMixer.update(delta);
-    
+
     // Update name tag.
     const dummyPlane = this.getObjectByName('dummyNameTag');
     if (this.state === 'online' && this.nameTag && this.camera && dummyPlane && this.localUser.camera) {
@@ -247,7 +247,7 @@ export default class RemoteVrUser extends THREE.Object3D {
       this.controller1.quaternion.fromArray(controller.quaternion);
       this.controller1.model.position.copy(this.controller1.position);
       this.controller1.model.quaternion.copy(this.controller1.quaternion);
-      if (controller.intersection) { 
+      if (controller.intersection) {
         this.controller1.intersection = new THREE.Vector3().fromArray(controller.intersection);
       } else {
         this.controller1.intersection = null;
@@ -267,7 +267,7 @@ export default class RemoteVrUser extends THREE.Object3D {
       this.controller2.quaternion.fromArray(controller.quaternion);
       this.controller2.model.position.copy(this.controller2.position);
       this.controller2.model.quaternion.copy(this.controller2.quaternion);
-      if (controller.intersection) { 
+      if (controller.intersection) {
         this.controller2.intersection = new THREE.Vector3().fromArray(controller.intersection);
       } else {
         this.controller2.intersection = null;

@@ -21,6 +21,14 @@ export default class OnlineMenu extends ConnectionBaseMenu {
         this.initMenu();
     }
 
+    /**
+     * It is possible to interact with this menu while spectating another user
+     * such that spectator mode can be disabled.
+     */
+    get enableTriggerInSpectorMode() {
+      return true;
+    }
+
     private initMenu() {
         const users = Array.from(this.idToRemoteVrUser.values());
         const title = new TextItem(`Room ${this.localUser.currentRoomId}`, 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
