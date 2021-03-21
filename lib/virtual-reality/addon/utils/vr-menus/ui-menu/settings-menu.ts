@@ -1,8 +1,8 @@
-import TextItem from '../items/text-item';
-import UiMenu, { UiMenuArgs } from '../ui-menu';
-import TextbuttonItem from '../items/textbutton-item';
 import VRControllerLabelGroup from '../../vr-controller/vr-controller-label-group';
 import CheckboxItem from '../items/checkbox-item';
+import TextItem from '../items/text-item';
+import TextbuttonItem from '../items/textbutton-item';
+import UiMenu, { UiMenuArgs } from '../ui-menu';
 
 export type SettingsMenuArgs = UiMenuArgs & {
   labelGroups: (VRControllerLabelGroup|undefined)[]

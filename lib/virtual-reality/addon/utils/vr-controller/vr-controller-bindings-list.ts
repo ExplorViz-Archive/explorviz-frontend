@@ -1,5 +1,5 @@
-import VRControllerBindings from './vr-controller-bindings';
 import { VRControllerCallbackFunctions } from '../vr-controller';
+import VRControllerBindings from './vr-controller-bindings';
 
 export default class VRControllerBindingsList {
     defaultBindings: VRControllerBindings;

@@ -1,8 +1,8 @@
 import THREE from 'three';
-import VRControllerBindings from '../vr-controller/vr-controller-bindings';
-import VRControllerThumbpadBinding from '../vr-controller/vr-controller-thumbpad-binding';
-import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
 import VrMenuFactoryService from '../../services/vr-menu-factory';
+import VRControllerBindings from '../vr-controller/vr-controller-bindings';
+import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
+import VRControllerThumbpadBinding from '../vr-controller/vr-controller-thumbpad-binding';
 import MenuGroup from './menu-group';
 
 export enum MenuState {

@@ -1,8 +1,8 @@
 import THREE from "three";
 import VrMessageSender from "virtual-reality/services/vr-message-sender";
 import PingMesh from "virtual-reality/utils/view-objects/vr/ping-mesh";
-import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
 import VRController from "virtual-reality/utils/vr-controller";
+import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
 import AnimatedMenu from "../animated-menu";
 import { BaseMenuArgs } from "../base-menu";
 

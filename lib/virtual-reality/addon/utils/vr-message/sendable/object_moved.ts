@@ -1,4 +1,4 @@
-import { Position, isPosition } from "../util/position";
+import { isPosition, Position } from "../util/position";
 import { isQuaternion, Quaternion } from "../util/quaternion";
 import { isScale, Scale } from "../util/Scale";
 

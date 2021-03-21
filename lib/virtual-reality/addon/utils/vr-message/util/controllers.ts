@@ -1,5 +1,3 @@
-
-
 export type Controllers = { controller1: string|null, controller2: string|null } | null;
 
 export function isControllers(controllers: any): controllers is Controllers {

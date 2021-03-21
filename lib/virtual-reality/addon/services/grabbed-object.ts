@@ -1,9 +1,9 @@
 import Service, { inject as service } from '@ember/service';
-import { GrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
-import VrMessageSender from 'virtual-reality/services/vr-message-sender';
-import VrMessageReceiver from './vr-message-receiver';
-import { isObjectGrabbedResponse, ObjectGrabbedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-grabbed';
 import THREE from 'three';
+import VrMessageSender from 'virtual-reality/services/vr-message-sender';
+import { GrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
+import { isObjectGrabbedResponse, ObjectGrabbedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-grabbed';
+import VrMessageReceiver from './vr-message-receiver';
 
 export default class GrabbedObjectService extends Service {
   @service('vr-message-sender')
@@ -14,7 +14,7 @@ export default class GrabbedObjectService extends Service {
 
   /**
    * Counts how often an object has been requested to be grabbed.
-   * 
+   *
    * This counter is incremented when an object is grabbed and decremented
    * when the object is released.
    */
@@ -33,11 +33,11 @@ export default class GrabbedObjectService extends Service {
 
   /**
    * Asks the backend whether the given object can be grabbed
-   * 
+   *
    * In offline mode, the promise always completes with `true`.
-   * 
+   *
    * @param object The grabbed grabbed.
-   * @returns A promise that resolves to the answer of the backend (i.e., `true` 
+   * @returns A promise that resolves to the answer of the backend (i.e., `true`
    * when the object can be grabbed and `false` otherwise).
    */
   private sendGrabRequest(object: GrabbableObject): Promise<boolean> {
@@ -62,19 +62,19 @@ export default class GrabbedObjectService extends Service {
 
   /**
    * Registers that the given object has been grabbed.
-   * 
+   *
    * When the object has not been grabbed before, the backend is asked whether
-   * the object can be grabbed. 
-   * 
+   * the object can be grabbed.
+   *
    * @param object The grabbed object.
-   * @returns A promise that resolves to the answer of the backend to the last 
+   * @returns A promise that resolves to the answer of the backend to the last
    * request to grab the object (i.e., `true` when the object can be grabbed
    * and `false` otherwise).
    */
   async grabObject(object: GrabbableObject): Promise<boolean> {
     const count = this.getGrabCount(object);
     this.grabCounters.set(object, count + 1);
-    
+
     // If the object has not been grabbed before, ask the server whether we
     // are allowed to grab the object.
     const request = this.grabRequests.get(object) || this.sendGrabRequest(object);
@@ -89,7 +89,7 @@ export default class GrabbedObjectService extends Service {
   /**
    * Gets the number of controllers that are currentlay grabbing the given
    * object.
-   * 
+   *
    * @param object The object to get the counter for.
    * @returns The number of controllers that are grabbing the object.
    */
@@ -99,10 +99,10 @@ export default class GrabbedObjectService extends Service {
 
   /**
    * Registers that the given object has been released.
-   * 
+   *
    * If the object is not grabbed by any controller anymore, the backend is
    * notified that the object has been released.
-   * 
+   *
    * @param object The releasaed object.
    */
   releaseObject(object: GrabbableObject) {
@@ -110,7 +110,7 @@ export default class GrabbedObjectService extends Service {
     if (count) {
       this.grabCounters.set(object, count - 1);
 
-      // If the object is not grabbed anymore by any controller, notify the 
+      // If the object is not grabbed anymore by any controller, notify the
       // backend that the object has been released.
       if (count === 1) {
         const objectId = object.getGrabId();

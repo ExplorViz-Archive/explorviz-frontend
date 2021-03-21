@@ -1,9 +1,8 @@
 import Service, { inject as service } from '@ember/service';
-
 import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-controller';
-import WebSocketService from './web-socket';
 import SpectateUserService from './spectate-user';
+import WebSocketService from './web-socket';
 
 export type ConnectionStatus = 'offline'|'connecting'|'online';
 

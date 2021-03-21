@@ -45,7 +45,7 @@ export default class WaypointIndicator extends THREE.Sprite {
         });
 
         // Scale and position the indicator such that it is in front of the
-        // camera. 
+        // camera.
         this.position.x = 0.1;
         this.position.z = -0.3;
         this.scale.set(SIZE, SIZE, 1.0);
@@ -63,8 +63,8 @@ export default class WaypointIndicator extends THREE.Sprite {
 
     /**
      * Draws the arrow texture.
-     * 
-     * The sprite's texture shows a right pointing triangle in the given color. 
+     *
+     * The sprite's texture shows a right pointing triangle in the given color.
      */
     private initSpriteTexture(color: THREE.Color): THREE.Texture {
         const canvas = document.createElement('canvas');
@@ -89,7 +89,7 @@ export default class WaypointIndicator extends THREE.Sprite {
     /**
      * Updates the position of the arrow such that it points to the target
      * object from the current view of the given camera.
-     * 
+     *
      * @param camera The camera whose perspective to use.
      */
      private updateArrowPosition(camera: THREE.Camera) {

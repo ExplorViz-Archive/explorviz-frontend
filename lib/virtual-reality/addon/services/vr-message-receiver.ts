@@ -1,23 +1,23 @@
 import Service, { inject as service } from '@ember/service';
 import WebSocketService from "virtual-reality/services/web-socket";
+import { isPingUpdateMessage, PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
 import { ForwardedMessage, isForwardedMessage, isForwardedMessageOf } from "../utils/vr-message/receivable/forwarded";
 import { InitialLandscapeMessage, isInitialLandscapeMessage } from "../utils/vr-message/receivable/landscape";
 import { isMenuDetachedForwardMessage, MenuDetachedForwardMessage } from "../utils/vr-message/receivable/menu-detached-forward";
 import { isResponseMessage, ResponseMessage } from "../utils/vr-message/receivable/response";
 import { isSelfConnectedMessage, SelfConnectedMessage } from "../utils/vr-message/receivable/self_connected";
-import { isUserConnectedMessage, UserConnectedMessage, } from "../utils/vr-message/receivable/user_connected";
+import { isUserConnectedMessage, UserConnectedMessage } from "../utils/vr-message/receivable/user_connected";
 import { isUserDisconnectedMessage, UserDisconnectedMessage } from "../utils/vr-message/receivable/user_disconnect";
-import { AppClosedMessage, isAppClosedMessage } from "../utils/vr-message/sendable/request/app_closed";
 import { AppOpenedMessage, isAppOpenedMessage } from "../utils/vr-message/sendable/app_opened";
 import { ComponentUpdateMessage, isComponentUpdateMessage } from "../utils/vr-message/sendable/component_update";
-import { DetachedMenuClosedMessage, isDetachedMenuClosedMessage } from "../utils/vr-message/sendable/request/detached_menu_closed";
 import { HighlightingUpdateMessage, isHighlightingUpdateMessage } from "../utils/vr-message/sendable/highlighting_update";
 import { isObjectMovedMessage, ObjectMovedMessage } from "../utils/vr-message/sendable/object_moved";
+import { AppClosedMessage, isAppClosedMessage } from "../utils/vr-message/sendable/request/app_closed";
+import { DetachedMenuClosedMessage, isDetachedMenuClosedMessage } from "../utils/vr-message/sendable/request/detached_menu_closed";
 import { isSpectatingUpdateMessage, SpectatingUpdateMessage } from "../utils/vr-message/sendable/spectating_update";
 import { isUserControllerMessage, UserControllerMessage } from "../utils/vr-message/sendable/user_controllers";
 import { isUserPositionsMessage, UserPositionsMessage } from "../utils/vr-message/sendable/user_positions";
 import { Nonce } from "../utils/vr-message/util/nonce";
-import { isPingUpdateMessage, PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
 
 type ResponseHandler<T> = (msg: T) => void;
 
@@ -57,7 +57,7 @@ export default class VrMessageReceiver extends Service {
     /**
      * Registers a new listener whose message handler methods should be invoked
      * whenever a message is received.
-     * 
+     *
      * @param messageListener The new message listener.
      */
     addMessageListener(messageListener: VrMessageListener) {
@@ -67,7 +67,7 @@ export default class VrMessageReceiver extends Service {
     /**
      * Removes a listener from the list of messages that are notified when
      * messages are received from the backend.
-     * 
+     *
      * @param messageListener The listener to remove.
      */
     removeMessageListener(messageListener: VrMessageListener) {
@@ -108,11 +108,11 @@ export default class VrMessageReceiver extends Service {
     /**
      * Adds an event listener that is invoked when a response with the given
      * identifier is received.
-     * 
+     *
      * When the response is received, the listener is removed.
-     * 
+     *
      * If the user is offline, no listener will be created.
-     * 
+     *
      * @param nonce Locally unique identifier of the request whose response to wait for.
      * @param responseType A type guard that tests whether the received response has the correct type.
      * @param onResponse The callback to invoke when the response is received.
@@ -120,7 +120,7 @@ export default class VrMessageReceiver extends Service {
      * @param onOffline The callback to invoke instead of listening for responses when the client is not connected.
      */
     awaitResponse<T>({
-        nonce, 
+        nonce,
         responseType: isValidResponse,
         onResponse,
         onOnline,

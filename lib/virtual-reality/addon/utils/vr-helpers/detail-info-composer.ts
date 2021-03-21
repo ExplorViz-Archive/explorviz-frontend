@@ -1,11 +1,11 @@
+import { isApplication, isNode, Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { getAncestorPackages, getClassesInPackage } from 'explorviz-frontend/utils/package-helpers';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
-import THREE from 'three';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
-import { isApplication, isNode, Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import { getAncestorPackages, getClassesInPackage } from 'explorviz-frontend/utils/package-helpers';
+import THREE from 'three';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from '../vr-message/util/entity_type';
 
 export type DetailedInfo = {
@@ -105,8 +105,8 @@ export default function composeContent(object: THREE.Object3D) {
 export type EntityMesh = NodeMesh | ApplicationMesh | ComponentMesh | ClazzMesh | ClazzCommunicationMesh;
 
 export function isEntityMesh(object: any): object is EntityMesh {
-  return object instanceof NodeMesh || object instanceof ApplicationMesh || object instanceof ComponentMesh || object instanceof ClazzMesh || 
-    object instanceof ClazzCommunicationMesh; 
+  return object instanceof NodeMesh || object instanceof ApplicationMesh || object instanceof ComponentMesh || object instanceof ClazzMesh ||
+    object instanceof ClazzCommunicationMesh;
 }
 
 export function getIdOfEntity(entity: EntityMesh): string {

@@ -41,7 +41,7 @@ export function getVRControllerLabelPositions(controller: VRController|null): VR
     // Instead, this code relies on naming conventions. The name of a mesh is
     // usually `<rootNodeName>_<visualResponse>_<value|min|max>` where
     // `<rootNodeName>` is the name of the component with dashes replaced
-    // by underscores. Accessing the 3D object this way is equivalent to 
+    // by underscores. Accessing the 3D object this way is equivalent to
     // accessing the `valueNode`, `minNode` or `maxNode`, respectively, of
     // `motionController.components[componentName].visualResponses[visualResponse]`.
     const meshPosition = (componentName: string, visualResponseName: string, nodeName: string): THREE.Vector3|undefined => {
@@ -88,12 +88,12 @@ export function getVRControllerLabelPositions(controller: VRController|null): VR
     };
 
     // Gets the position of the value node of the first existing component
-    // with one of the given names of the motion controller. 
+    // with one of the given names of the motion controller.
     const buttonPosition = (...componentNames: string[]): VRControllerLabelPosition|undefined => {
         for (let componentName of componentNames) {
             const position = meshPosition(componentName, 'pressed', 'value');
             if (!position) continue;
-            
+
             return {
                 buttonPosition: position,
                 offsetDirection: VRControllerLabelOffsetDirection.RIGHT

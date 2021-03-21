@@ -1,10 +1,10 @@
 import THREE from 'three';
+import DeltaTimeService from 'virtual-reality/services/delta-time';
+import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
+import VRController from 'virtual-reality/utils/vr-controller';
 import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
-import VRController from 'virtual-reality/utils/vr-controller';
-import DeltaTimeService from 'virtual-reality/services/delta-time';
 import BaseMenu, { BaseMenuArgs } from '../base-menu';
-import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 
 export interface GrabbableObject extends THREE.Object3D {
     getGrabId(): string | null;

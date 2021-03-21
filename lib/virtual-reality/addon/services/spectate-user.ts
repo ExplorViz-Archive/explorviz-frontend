@@ -1,7 +1,7 @@
 import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
-import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
+import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import LocalVrUser from './local-vr-user';
 
 export default class SpectateUserService extends Service {

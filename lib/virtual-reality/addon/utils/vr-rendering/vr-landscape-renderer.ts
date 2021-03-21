@@ -8,12 +8,12 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 import * as LandscapeCommunicationRendering from 'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import FloorMesh from 'explorviz-frontend/utils/view-objects/vr/floor-mesh';
+import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
-import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
-import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import THREE from 'three';
 import VrLandscapeObject3D from '../view-objects/landscape/vr-landscape-object-3d';
 
@@ -64,7 +64,7 @@ export default class VrLandscapeRenderer {
         // Load and scale landscape.
         this.landscapeObject3D = new VrLandscapeObject3D(this.landscapeData.structureLandscapeData);
         this.landscapeObject3D.scale.set(LANDSCAPE_SCALAR, LANDSCAPE_SCALAR, LANDSCAPE_SCALAR);
-        
+
         // Rotate landscape such that it lays flat on the floor
         this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
     }

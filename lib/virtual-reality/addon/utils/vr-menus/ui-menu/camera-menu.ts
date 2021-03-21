@@ -1,9 +1,9 @@
-import TextItem from '../items/text-item';
-import TextbuttonItem from '../items/textbutton-item';
-import ArrowbuttonItem from '../items/arrowbutton-item';
+import VRController from '../../vr-controller';
 import VRControllerButtonBinding from '../../vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding from '../../vr-controller/vr-controller-thumbpad-binding';
-import VRController from '../../vr-controller';
+import ArrowbuttonItem from '../items/arrowbutton-item';
+import TextItem from '../items/text-item';
+import TextbuttonItem from '../items/textbutton-item';
 import UiMenu, { UiMenuArgs } from '../ui-menu';
 
 /**

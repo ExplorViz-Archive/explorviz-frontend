@@ -1,16 +1,14 @@
-import THREE, {
-  Object3D, Raycaster,
-} from 'three';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
-import XRControllerModelFactory from './lib/controller/XRControllerModelFactory';
+import THREE, { Object3D, Raycaster } from 'three';
 import XRControllerModel from './lib/controller/XRControllerModel';
+import XRControllerModelFactory from './lib/controller/XRControllerModelFactory';
 import FloorMesh from './view-objects/vr/floor-mesh';
 import TeleportMesh from './view-objects/vr/teleport-mesh';
-import BaseMenu from './vr-menus/base-menu';
-import { displayAsWireframe, displayAsSolidObject } from './vr-helpers/multi-user-helper';
-import VRControllerLabelGroup from './vr-controller/vr-controller-label-group';
 import VRControllerBindingsList from './vr-controller/vr-controller-bindings-list';
+import VRControllerLabelGroup from './vr-controller/vr-controller-label-group';
+import { displayAsSolidObject, displayAsWireframe } from './vr-helpers/multi-user-helper';
+import BaseMenu from './vr-menus/base-menu';
 import MenuGroup from './vr-menus/menu-group';
 
 export type VRControllerCallbackFunctions = {
@@ -429,7 +427,7 @@ export default class VRController extends BaseMesh {
       } else if (object instanceof BaseMesh) {
         object.applyHoverEffect();
       }
-    
+
 
     // Store intersected object and scale ray accordingly
     this.intersectedObject = nearestIntersection;

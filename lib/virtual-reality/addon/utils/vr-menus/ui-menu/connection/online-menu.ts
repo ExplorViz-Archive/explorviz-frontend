@@ -1,7 +1,7 @@
-import TextItem from "../../items/text-item";
-import TextbuttonItem from "../../items/textbutton-item";
 import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
 import RemoteVrUser from "virtual-reality/utils/vr-multi-user/remote-vr-user";
+import TextItem from "../../items/text-item";
+import TextbuttonItem from "../../items/textbutton-item";
 import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 
 type OnlineMenuArgs = ConnectionBaseMenuArgs & {

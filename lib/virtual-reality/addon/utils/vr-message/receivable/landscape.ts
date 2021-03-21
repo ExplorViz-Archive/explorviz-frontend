@@ -45,7 +45,7 @@ export type InitialLandscapeMessage = {
 };
 
 function isHighlightedComponent(comp: any): comp is HighlightedComponent {
-    return comp !== null 
+    return comp !== null
         && typeof comp === 'object'
         && typeof comp.userID === 'string'
         && typeof comp.appID === 'string'
@@ -66,7 +66,7 @@ function isDetachedMenu(menu: any): menu is DetachedMenu {
 }
 
 function isApp(app: any): app is App {
-    return app !== null 
+    return app !== null
         && typeof app === 'object'
         && typeof app.id === 'string'
         && isPosition(app.position)
@@ -77,7 +77,7 @@ function isApp(app: any): app is App {
 }
 
 function isLandscape(landscape: any): landscape is Landscape {
-    return landscape !== null 
+    return landscape !== null
         && typeof landscape === 'object'
         && isPosition(landscape.position)
         && isQuaternion(landscape.quaternion)
@@ -85,7 +85,7 @@ function isLandscape(landscape: any): landscape is Landscape {
 }
 
 export function isInitialLandscapeMessage(msg: any): msg is InitialLandscapeMessage {
-    return msg !== null 
+    return msg !== null
         && typeof msg === 'object'
         && msg.event === INITIAL_LANDSCAPE_EVENT
         && Array.isArray(msg.openApps)
@@ -93,4 +93,4 @@ export function isInitialLandscapeMessage(msg: any): msg is InitialLandscapeMess
         && Array.isArray(msg.detachedMenus)
         && msg.detachedMenus.every(isDetachedMenu)
         && isLandscape(msg.landscape);
-} 
+}

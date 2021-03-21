@@ -1,7 +1,7 @@
 import THREE from 'three';
 import HudMenu from '../hud-menu';
-import { UiMenuArgs } from '../ui-menu';
 import TextItem from '../items/text-item';
+import { UiMenuArgs } from '../ui-menu';
 
 const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.25, [
   new THREE.KeyframeTrack('.position[y]', [0.0, 0.25], [0.2, 0.0])

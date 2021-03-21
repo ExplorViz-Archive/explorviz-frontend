@@ -1,7 +1,5 @@
 import VRController from 'explorviz-frontend/utils/vr-controller';
-import {
-  Camera, Object3D, Mesh, MeshStandardMaterial, Quaternion, Vector3,
-} from 'three';
+import { Camera, Mesh, MeshStandardMaterial, Object3D, Quaternion, Vector3 } from 'three';
 import RemoteVrUser from '../vr-multi-user/remote-vr-user';
 
 export function getCameraPose(camera: Camera) {

@@ -1,6 +1,6 @@
 import THREE from 'three';
-import TextItem from '../items/text-item';
 import HudMenu from '../hud-menu';
+import TextItem from '../items/text-item';
 import { UiMenuArgs } from '../ui-menu';
 
 const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.75, [

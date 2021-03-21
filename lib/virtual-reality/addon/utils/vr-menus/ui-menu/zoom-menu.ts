@@ -1,5 +1,5 @@
-import UiMenu, { UiMenuArgs } from '../ui-menu';
 import THREE from 'three';
+import UiMenu, { UiMenuArgs } from '../ui-menu';
 
 const CIRCLE_SEGMENTS = 48;
 

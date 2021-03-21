@@ -1,6 +1,6 @@
 import TextItem from '../items/text-item';
-import UiMenu, { UiMenuArgs } from '../ui-menu';
 import TextbuttonItem from '../items/textbutton-item';
+import UiMenu, { UiMenuArgs } from '../ui-menu';
 
 export default class MainMenu extends UiMenu {
   constructor(args: UiMenuArgs) {

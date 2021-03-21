@@ -1,7 +1,7 @@
 import VRController from "explorviz-frontend/utils/vr-controller";
+import THREE from "three";
 import VRControllerLabelGroup from "./vr-controller-label-group";
 import VRControllerLabelMesh from "./vr-controller-label-mesh";
-import THREE from "three";
 import { VRControllerThumbpadLabelPositions } from "./vr-controller-label-positions";
 
 type VRControllerThumbpadLabels = {
@@ -22,8 +22,8 @@ export enum VRControllerThumbpadDirection { NONE, UP, RIGHT, DOWN, LEFT };
 
 /**
  * Converts the given direction of the thumbpad into a 2D vector in a
- * coordinate system whose origin is in the top-left corner. 
- * 
+ * coordinate system whose origin is in the top-left corner.
+ *
  * @param direction The direction to convert.
  */
 export function thumbpadDirectionToVector2(direction: VRControllerThumbpadDirection) {

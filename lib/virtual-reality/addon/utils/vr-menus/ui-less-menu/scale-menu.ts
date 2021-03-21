@@ -1,7 +1,7 @@
-import BaseMenu, { BaseMenuArgs } from "../base-menu";
-import GrabMenu, { GrabbableObject } from "./grab-menu";
 import THREE from "three";
 import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
+import BaseMenu, { BaseMenuArgs } from "../base-menu";
+import GrabMenu, { GrabbableObject } from "./grab-menu";
 
 export class SharedScaleMenuState {
     readonly grabbedObject: GrabbableObject;

@@ -1,6 +1,5 @@
-
-import { Position, isPosition } from "../util/position";
-import { Quaternion, isQuaternion } from "../util/quaternion";
+import { isPosition, Position } from "../util/position";
+import { isQuaternion, Quaternion } from "../util/quaternion";
 
 export const USER_POSITIONS_EVENT = 'user_positions';
 
@@ -15,14 +14,14 @@ export type UserPositionsMessage = {
 };
 
 function isPose(pose: any): pose is Pose {
-    return pose !== null 
+    return pose !== null
       && typeof pose === 'object'
       && isPosition(pose.position)
       && isQuaternion(pose.quaternion);
 }
 
 function isControllerPose(pose: any): pose is ControllerPose {
-    return pose !== null 
+    return pose !== null
       && typeof pose === 'object'
       && isPosition(pose.position)
       && isQuaternion(pose.quaternion)

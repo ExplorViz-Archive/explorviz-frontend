@@ -1,7 +1,7 @@
 import THREE from "three";
 import FloorMesh from "../view-objects/vr/floor-mesh";
-import VRControllerBindings from "../vr-controller/vr-controller-bindings";
 import VRController from "../vr-controller";
+import VRControllerBindings from "../vr-controller/vr-controller-bindings";
 import BaseMenu from "./base-menu";
 import { DetachableMenu, isDetachableMenu } from "./detachable-menu";
 

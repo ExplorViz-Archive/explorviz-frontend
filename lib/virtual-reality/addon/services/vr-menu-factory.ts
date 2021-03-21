@@ -1,29 +1,29 @@
 import Service, { inject as service } from '@ember/service';
 import { AjaxServiceClass } from 'ember-ajax/services/ajax';
-import DeltaTimeService from 'virtual-reality/services/delta-time';
-import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import SettingsMenu from 'explorviz-frontend/utils/vr-menus/advanced-menu';
 import MainMenu from 'explorviz-frontend/utils/vr-menus/main-menu';
+import DeltaTimeService from 'virtual-reality/services/delta-time';
+import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import LocalVrUser from "virtual-reality/services/local-vr-user";
-import CameraMenu from 'virtual-reality/utils/vr-menus/ui-menu/camera-menu';
-import ConnectionBaseMenu from 'virtual-reality/utils/vr-menus/ui-menu/connection/base';
-import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
+import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import { EntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import GrabMenu, { GrabbableObject } from "virtual-reality/utils/vr-menus/ui-less-menu/grab-menu";
-import ScaleMenu, { SharedScaleMenuState } from "virtual-reality/utils/vr-menus/ui-less-menu/scale-menu";
-import HintMenu from "virtual-reality/utils/vr-menus/ui-menu/hint-menu";
-import JoinMenu from "virtual-reality/utils/vr-menus/ui-menu/connection/join-menu";
-import MessageBoxMenu from "virtual-reality/utils/vr-menus/ui-menu/message-box-menu";
 import PingMenu from "virtual-reality/utils/vr-menus/ui-less-menu/ping-menu";
+import ScaleMenu, { SharedScaleMenuState } from "virtual-reality/utils/vr-menus/ui-less-menu/scale-menu";
+import CameraMenu from 'virtual-reality/utils/vr-menus/ui-menu/camera-menu';
+import ConnectionBaseMenu from 'virtual-reality/utils/vr-menus/ui-menu/connection/base';
+import JoinMenu from "virtual-reality/utils/vr-menus/ui-menu/connection/join-menu";
+import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
+import HintMenu from "virtual-reality/utils/vr-menus/ui-menu/hint-menu";
+import MessageBoxMenu from "virtual-reality/utils/vr-menus/ui-menu/message-box-menu";
 import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
+import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
+import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import ConnectingMenu from "../utils/vr-menus/ui-menu/connection/connecting-menu";
 import OfflineMenu from "../utils/vr-menus/ui-menu/connection/offline-menu";
 import OnlineMenu from "../utils/vr-menus/ui-menu/connection/online-menu";
 import ZoomMenu from "../utils/vr-menus/ui-menu/zoom-menu";
-import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
-import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
-import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 
 type InjectedValues = {
   idToRemoteVrUser: Map<string, RemoteVrUser>,

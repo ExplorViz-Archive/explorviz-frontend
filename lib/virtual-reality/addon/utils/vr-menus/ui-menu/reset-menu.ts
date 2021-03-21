@@ -1,10 +1,10 @@
-import TextItem from '../items/text-item';
-import UiMenu, { UiMenuArgs } from '../ui-menu';
-import TextbuttonItem from '../items/textbutton-item';
-import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import THREE from 'three';
-import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
+import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
+import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
+import TextItem from '../items/text-item';
+import TextbuttonItem from '../items/textbutton-item';
+import UiMenu, { UiMenuArgs } from '../ui-menu';
 
 export type ResetMenuArgs = UiMenuArgs & {
   localUser: LocalVrUser,
