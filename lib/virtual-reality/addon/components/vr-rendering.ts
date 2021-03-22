@@ -136,16 +136,16 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private floor!: FloorMesh;
 
-  private vrLandscapeRenderer: VrLandscapeRenderer;
+  private vrLandscapeRenderer!: VrLandscapeRenderer;
 
-  private vrApplicationRenderer: VrApplicationRenderer;
+  private vrApplicationRenderer!: VrApplicationRenderer;
 
-  private remoteUserGroup: THREE.Group;
+  private remoteUserGroup: THREE.Group = new THREE.Group();;
 
   private idToRemoteUser: Map<string, RemoteVrUser> = new Map();
 
   // Contains clonable objects of HMD, camera and controllers for other users
-  private hardwareModels: HardwareModels;
+  private hardwareModels: HardwareModels = new HardwareModels();
 
   // #endregion CLASS FIELDS
 
@@ -175,45 +175,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   // #region INITIALIZATION
 
-  constructor(owner: any, args: Args) {
-    super(owner, args);
-    this.debug('Constructor called');
-
-    // Load image for delete button
-    const closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
-
-    this.vrLandscapeRenderer = new VrLandscapeRenderer({
-      configuration: this.configuration,
-      floor: this.floor, // TODO floor is not initialized yet.
-      font: this.args.font,
-      landscapeData: this.args.landscapeData,
-      worker: this.worker
-    });
-    this.vrApplicationRenderer = new VrApplicationRenderer({
-      appCommRendering: new AppCommunicationRendering(this.configuration, this.currentUser),
-      closeButtonTexture,
-      configuration: this.configuration,
-      font: this.args.font,
-      landscapeData: this.args.landscapeData,
-      onRemoveApplication: (application) => this.removeApplication(application),
-      worker: this.worker,
-    });
-
-    this.remoteUserGroup = new THREE.Group();
-    this.hardwareModels = new HardwareModels();
-
-    this.menuFactory.injectValues({
-      idToRemoteVrUser: this.idToRemoteUser,
-      vrApplicationRenderer: this.vrApplicationRenderer,
-      vrLandscapeRenderer: this.vrLandscapeRenderer
-    });
-    this.detachedMenuGroups = new DetachedMenuGroupContainer({
-      closeButtonTexture,
-      receiver: this.receiver,
-      sender: this.sender,
-    });
-  }
-
   /**
    * Calls all init functions.
    */
@@ -221,6 +182,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.initScene();
     this.initCamera();
     this.initRenderer();
+    this.initObjectRendering();
     this.initInteraction();
     this.initControllers();
     this.initWebSocket();
@@ -307,6 +269,41 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     if (polyfill) {
       this.debug('Polyfill enabled');
     }
+  }
+
+  private initObjectRendering() {
+    // Load image for delete button
+    const closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
+
+    // Initialize landscape and application rendering.
+    this.vrLandscapeRenderer = new VrLandscapeRenderer({
+      configuration: this.configuration,
+      floor: this.floor,
+      font: this.args.font,
+      landscapeData: this.args.landscapeData,
+      worker: this.worker
+    });
+    this.vrApplicationRenderer = new VrApplicationRenderer({
+      appCommRendering: new AppCommunicationRendering(this.configuration, this.currentUser),
+      closeButtonTexture,
+      configuration: this.configuration,
+      font: this.args.font,
+      landscapeData: this.args.landscapeData,
+      onRemoveApplication: (application) => this.removeApplication(application),
+      worker: this.worker,
+    });
+
+    // Initialize menu rendering.
+    this.menuFactory.injectValues({
+      idToRemoteVrUser: this.idToRemoteUser,
+      vrApplicationRenderer: this.vrApplicationRenderer,
+      vrLandscapeRenderer: this.vrLandscapeRenderer
+    });
+    this.detachedMenuGroups = new DetachedMenuGroupContainer({
+      closeButtonTexture,
+      receiver: this.receiver,
+      sender: this.sender,
+    });
   }
 
   /**
@@ -422,7 +419,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.debug('Outer Div inserted');
 
     // Initialize the component.
-    this.initRendering(); // TODO can this be done in the constructor already?
+    this.initRendering();
     this.resize(outerDiv);
 
     // Start main loop.
