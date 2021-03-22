@@ -1,6 +1,6 @@
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
-import THREE, { Object3D, Raycaster } from 'three';
+import THREE from 'three';
 import XRControllerModel from './lib/controller/XRControllerModel';
 import XRControllerModelFactory from './lib/controller/XRControllerModelFactory';
 import FloorMesh from './view-objects/vr/floor-mesh';
@@ -93,7 +93,7 @@ export default class VRController extends BaseMesh {
  * Finds the controller whose buttons the labels in this group point to or
  * returns `null` if the group does not have a parent controller.
  */
-  static findController(object: Object3D): VRController | null {
+  static findController(object: THREE.Object3D): VRController | null {
     let current = object.parent;
     while (current) {
       if (current instanceof VRController) return current;
@@ -129,7 +129,7 @@ export default class VRController extends BaseMesh {
     this.raySpace = raySpace;
     this.labelGroup = new VRControllerLabelGroup(bindings);
     this.menuGroup = menuGroup;
-    this.raycaster = new Raycaster();
+    this.raycaster = new THREE.Raycaster();
     this.scene = scene;
     this.eventCallbacks = bindings.makeCallbacks();
     this.intersectableObjects = intersectableObjects;

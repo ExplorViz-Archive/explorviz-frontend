@@ -1,6 +1,6 @@
 import Service, { inject as service } from '@ember/service';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import THREE, { Vector3 } from 'three';
+import THREE from 'three';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
 import { DetachableMenu } from '../utils/vr-menus/detachable-menu';
@@ -18,7 +18,11 @@ import { UserControllerMessage } from '../utils/vr-message/sendable/user_control
 import { UserPositionsMessage } from '../utils/vr-message/sendable/user_positions';
 import { Nonce } from '../utils/vr-message/util/nonce';
 
-type Pose = { position: THREE.Vector3, quaternion: THREE.Quaternion };
+type Pose = {
+  position: THREE.Vector3,
+  quaternion: THREE.Quaternion
+};
+
 export default class VrMessageSender extends Service {
   @service('web-socket')
   webSocket!: WebSocketService;
@@ -38,7 +42,7 @@ export default class VrMessageSender extends Service {
    * Sends position and rotation information of the local user's camera and
    * controllers.
    */
-  sendPoseUpdate(camera: Pose, controller1: Pose, controller2: Pose, intersection1: Vector3, intersection2: Vector3) {
+  sendPoseUpdate(camera: Pose, controller1: Pose, controller2: Pose, intersection1: THREE.Vector3, intersection2: THREE.Vector3) {
     this.webSocket.send<UserPositionsMessage>({
       event: 'user_positions',
       controller1: {

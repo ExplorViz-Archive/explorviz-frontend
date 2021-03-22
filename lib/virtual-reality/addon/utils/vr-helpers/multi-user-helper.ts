@@ -1,35 +1,35 @@
-import VRController from 'explorviz-frontend/utils/vr-controller';
-import { Camera, Mesh, MeshStandardMaterial, Object3D, Quaternion, Vector3 } from 'three';
+import THREE from 'three';
+import VRController from '../vr-controller';
 import RemoteVrUser from '../vr-multi-user/remote-vr-user';
 
-export function getCameraPose(camera: Camera) {
-  const position = new Vector3();
+export function getCameraPose(camera: THREE.Camera) {
+  const position = new THREE.Vector3();
   camera.getWorldPosition(position);
 
   return { position, quaternion: camera.quaternion };
 }
 
-export function getObjectPose(object: Object3D) {
-  const position = new Vector3();
+export function getObjectPose(object: THREE.Object3D) {
+  const position = new THREE.Vector3();
   object.getWorldPosition(position);
 
   // Use world quaternions because controller can also be rotated via controllerGroup
-  const quaternion = new Quaternion();
+  const quaternion = new THREE.Quaternion();
   object.getWorldQuaternion(quaternion);
 
   return { position, quaternion };
 }
 
-export function getPoses(camera: Camera, controller1: VRController | undefined,
+export function getPoses(camera: THREE.Camera, controller1: VRController | undefined,
   controller2: VRController | undefined) {
   const cameraPose = getCameraPose(camera);
 
-  let controller1Pose = { position: new Vector3(), quaternion: new Quaternion() };
+  let controller1Pose = { position: new THREE.Vector3(), quaternion: new THREE.Quaternion() };
   if (controller1) {
     controller1Pose = getObjectPose(controller1.raySpace);
   }
 
-  let controller2Pose = { position: new Vector3(), quaternion: new Quaternion() };
+  let controller2Pose = { position: new THREE.Vector3(), quaternion: new THREE.Quaternion() };
   if (controller2) {
     controller2Pose = getObjectPose(controller2.raySpace);
   }
@@ -61,7 +61,7 @@ export function getTextSize(text: string, font: string) {
 export function addDummyNamePlane(user: RemoteVrUser) {
   if (user.camera && user.camera.model) {
     // Use dummy object to let username always face camera with lookAt() function
-    const dummy = new Object3D();
+    const dummy = new THREE.Object3D();
     dummy.name = 'dummyNameTag';
 
     dummy.position.copy(user.camera.model.position);
@@ -75,8 +75,8 @@ export function addDummyNamePlane(user: RemoteVrUser) {
  * Sets MeshStandardMaterial of given object to have the given opacity.
  * Displays object using wireframes (instead of polygons):
  */
-export function displayAsWireframe(object: Object3D, frameLineWidth = 0.5, opacity = 0.1) {
-  if (object instanceof Mesh && object.material instanceof MeshStandardMaterial) {
+export function displayAsWireframe(object: THREE.Object3D, frameLineWidth = 0.5, opacity = 0.1) {
+  if (object instanceof THREE.Mesh && object.material instanceof THREE.MeshStandardMaterial) {
     object.material.wireframe = true;
     object.material.wireframeLinewidth = frameLineWidth;
 
@@ -95,8 +95,8 @@ export function displayAsWireframe(object: Object3D, frameLineWidth = 0.5, opaci
  * Sets MeshStandardMaterial of given object to have the given opacity.
  * Displays object using polygons (instead of wireframe):
  */
-export function displayAsSolidObject(object: Object3D, opacity = 1) {
-  if (object instanceof Mesh && object.material instanceof MeshStandardMaterial) {
+export function displayAsSolidObject(object: THREE.Object3D, opacity = 1) {
+  if (object instanceof THREE.Mesh && object.material instanceof THREE.MeshStandardMaterial) {
     object.material.wireframe = false;
 
     object.material.transparent = opacity !== 1;

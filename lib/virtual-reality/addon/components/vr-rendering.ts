@@ -24,7 +24,7 @@ import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
-import THREE, { Vector3 } from 'three';
+import THREE from 'three';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import SpectateUserService from 'virtual-reality/services/spectate-user';
@@ -904,22 +904,18 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       this.localUser.controller2
     );
     let controller1 = this.localUser.controller1;
-    let intersection1 = new Vector3();
+    let intersection1 = new THREE.Vector3();
     if (controller1) {
       controller1.updateIntersectedObject();
       let point = controller1.intersectedObject?.point;
-      if (point) {
-        intersection1 = point;
-      }
+      if (point) intersection1 = point;
     }
     let controller2 = this.localUser.controller2;
-    let intersection2 = new Vector3();
+    let intersection2 = new THREE.Vector3();
     if (controller2) {
       controller2.updateIntersectedObject();
       let point = controller2.intersectedObject?.point;
-      if (point) {
-        intersection2 = point;
-      }
+      if (point) intersection2 = point;
     }
 
     this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2, intersection1, intersection2);

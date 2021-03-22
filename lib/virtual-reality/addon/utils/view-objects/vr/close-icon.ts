@@ -1,5 +1,5 @@
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import THREE, { Object3D } from 'three';
+import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-controller';
 
 export default class CloseIcon extends BaseMesh {
@@ -31,7 +31,7 @@ export default class CloseIcon extends BaseMesh {
    *
    * @param Object3D Object to which the icon shall be added
    */
-  addToObject(object: Object3D, { compensateScale = true }: {
+  addToObject(object: THREE.Object3D, { compensateScale = true }: {
     compensateScale?: boolean
   } = {}) {
     // Undo scaling of the object.
