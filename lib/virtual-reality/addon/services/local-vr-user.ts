@@ -140,12 +140,8 @@ export default class LocalVrUser extends Service {
    */
   disconnect() {
     this.connectionStatus = 'offline';
-
-    // Close socket
-    if (this.currentRoomId) {
-      this.webSocket.closeSocket(this.currentRoomId);
-      this.currentRoomId = null;
-    }
+    this.currentRoomId = null;
+    this.webSocket.closeSocket();
   }
 }
 

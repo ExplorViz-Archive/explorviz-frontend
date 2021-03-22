@@ -1,7 +1,6 @@
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
-import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 import { task } from 'ember-concurrency-decorators';
 import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
@@ -105,9 +104,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   @service('web-socket')
   private webSocket!: WebSocketService;
-
-  @service('ajax')
-  private ajax!: AjaxServiceClass;
 
   @service('vr-message-sender')
   private sender!: VrMessageSender;
@@ -393,10 +389,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // TODO why does the state have to be set manually?
     this.localUser.connectionStatus = 'offline';
-
-    // TODO move loading of configuration file to web socket service.
-    const config = await this.ajax.request('config/config_multiuser.json');
-    this.webSocket.applyConfiguration(config);
   }
 
   // #endregion INITIALIZATION

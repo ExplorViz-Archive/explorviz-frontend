@@ -1,51 +1,65 @@
 import Service, { inject as service } from '@ember/service';
 import debugLogger from 'ember-debug-logger';
+import { AjaxServiceClass } from 'ember-ajax/services/ajax';
+
+type WebSocketConfiguration = {
+  host: string,
+  port: number,
+  secure: boolean,
+  path: string,
+};
+
+function isWebSocketConfiguration(config: any): config is WebSocketConfiguration {
+  return config !== null
+      && typeof config === 'object'
+      && typeof config.host === 'string'
+      && typeof config.port === 'number'
+      && typeof config.secure === 'boolean'
+      && typeof config.path === 'string'
+}
 
 export default class WebSocketService extends Service {
   @service()
-  websockets !: any;
+  private websockets !: any;
 
-  debug = debugLogger('WebSocketService');
+  @service('ajax')
+  private ajax!: AjaxServiceClass;
 
-  private socket: any; // WebSocket to send/receive messages to/from backend
+  private debug = debugLogger('WebSocketService');
 
-  host: string | null = '';
-
-  port: string | null = '';
-
-  secure: boolean | null = false;
-
-  path: string | null = '';
-
-  getSocketUrl(roomId: string) {
-    const path = this.path?.replace('{room-id}', roomId);
-    return `${this.secure ? "wss" : "ws"}://${this.host}:${this.port}/${path}`;
-  }
+  private config: Promise<WebSocketConfiguration> | null = null;
+  private currentSocket: any = null; // WebSocket to send/receive messages to/from backend
+  private currentSocketUrl: string | null = null;
 
   socketCloseCallback: ((event: any) => void) | null = null;
-
   messageCallback: ((message: any) => void) | null = null;
 
-  initSocket(roomId: string) {
-    const socket = this.websockets.socketFor(this.getSocketUrl(roomId));
-    socket.on('message', this.messageHandler, this);
-    socket.on('close', this.closeHandler, this);
-    this.socket = socket;
+  private async loadConfiguration(file: string): Promise<WebSocketConfiguration> {
+    const config = await this.ajax.request(file);
+    if (isWebSocketConfiguration(config)) return config;
+    throw `invalid web socket configuration ${file}`;
   }
 
-  applyConfiguration(config: { host: string, port: string, secure: boolean, path: string }) {
-    this.host = config.host;
-    this.port = config.port;
-    this.secure = config.secure;
-
-    // Remove leading and tailing slashes such that the URL returned by
-    // `getSocketUrl` does not contain two leading slashes or any trailing
-    // slash.
-    this.path = config.path.replace(/^\/|\/$/g, "");
+  private getSocketUrl(config: WebSocketConfiguration, roomId: string) {
+    // Insert room id into the configured path and make sure that there are
+    // no leading or trailing slashes.
+    const path = config.path.replace('{room-id}', encodeURIComponent(roomId)).replace(/^\/|\/$/g, "");
+    return `${config.secure ? "wss" : "ws"}://${config.host}:${config.port}/${path}`;
   }
 
-  closeSocket(roomId: string) {
-    this.websockets.closeSocketFor(this.getSocketUrl(roomId));
+  async initSocket(roomId: string) {
+    // Load configuration file at most once.
+    this.config = this.config || this.loadConfiguration('config/config_multiuser.json');
+    const config = await this.config;
+
+    this.currentSocketUrl = this.getSocketUrl(config, roomId);
+    this.currentSocket = this.websockets.socketFor(this.currentSocketUrl);
+    this.currentSocket.on('message', this.messageHandler, this);
+    this.currentSocket.on('close', this.closeHandler, this);
+  }
+
+  closeSocket() {
+    this.websockets.closeSocketFor(this.currentSocketUrl);
   }
 
   private closeHandler(event: any) {
@@ -60,9 +74,10 @@ export default class WebSocketService extends Service {
     }
 
     // Remove internal event listeners.
-    this.socket.off('message', this.messageHandler);
-    this.socket.off('close', this.closeHandler);
-    this.socket = null;
+    this.currentSocket.off('message', this.messageHandler);
+    this.currentSocket.off('close', this.closeHandler);
+    this.currentSocket = null;
+    this.currentSocketUrl = null;
   }
 
   private messageHandler(event: any) {
@@ -81,19 +96,16 @@ export default class WebSocketService extends Service {
    * @param msg The message to send.
    */
   send<T>(msg: T) {
-    if (this.isWebSocketOpen()) { this.socket.send(JSON.stringify(msg)); }
+    if (this.isWebSocketOpen()) this.currentSocket.send(JSON.stringify(msg));
   }
 
   isWebSocketOpen() {
-    return this.socket && this.socket.readyState() === 1;
+    return this.currentSocket && this.currentSocket.readyState() === 1;
   }
 
   reset() {
-    this.socket = null;
-    this.host = null;
-    this.port = null;
-    this.secure = null;
-    this.path = null;
+    this.currentSocket = null;
+    this.currentSocketUrl = null;
   }
 }
 
