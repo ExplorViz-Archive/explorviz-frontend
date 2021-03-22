@@ -554,22 +554,24 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     return this.vrApplicationRenderer.addApplication(applicationModel);
   }
 
-  private removeApplication(application: ApplicationObject3D) {
-    // Ask backend to close the application.
-    const nonce = this.sender.sendAppClosed(application.dataModel.pid);
+  private removeApplication(application: ApplicationObject3D): Promise<boolean> {
+    return new Promise((resolve) => {
+      // Ask backend to close the application.
+      const nonce = this.sender.sendAppClosed(application.dataModel.pid);
 
-    // Remove the application only when the backend allowed the application to be closed.
-    this.receiver.awaitResponse({
-      nonce,
-      responseType: isObjectClosedResponse,
-      onResponse: (response: ObjectClosedResponse) => {
-        if (!response.isSuccess) {
-          this.showHint('Could not close application');
-          return;
+      // Remove the application only when the backend allowed the application to be closed.
+      this.receiver.awaitResponse({
+        nonce,
+        responseType: isObjectClosedResponse,
+        onResponse: (response: ObjectClosedResponse) => {
+          if (response.isSuccess) this.forceRemoveApplication(application);
+          resolve(response.isSuccess);
+        },
+        onOffline: () => {
+          this.forceRemoveApplication(application)
+          resolve(true);
         }
-        this.forceRemoveApplication(application);
-      },
-      onOffline: () => this.forceRemoveApplication(application)
+      });
     });
   }
 
@@ -866,9 +868,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         applicationObject3D.position.copy(point);
       });
     } else if (object instanceof CloseIcon) {
-      if (!object.close()) {
-        this.showHint('Object could not be closed');
-      }
+      object.close().then((closedSuccessfully: boolean) => {
+        if (!closedSuccessfully) this.showHint('Object could not be closed');
+      });
     } else if (object.parent instanceof ApplicationObject3D) {
       const application = object.parent;
       if (object instanceof ComponentMesh) {

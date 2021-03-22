@@ -5,7 +5,7 @@ import VRController from 'virtual-reality/utils/vr-controller';
 export default class CloseIcon extends BaseMesh {
   private radius: number;
 
-  private onClose: () => boolean | Promise<boolean>;
+  private onClose: () => Promise<boolean>;
 
   constructor({ onClose, texture, radius = 0.075, segments = 32 }: {
     onClose: () => Promise<boolean>,
@@ -70,15 +70,14 @@ export default class CloseIcon extends BaseMesh {
     object.add(this);
   }
 
-  close() {
+  close(): Promise<boolean> {
     // An object cannot be closed when it is grabbed by the local user.
     // The `onClose` callback still has to ask the backend whether the
     // object can be clsoed.
     const controller = VRController.findController(this);
     if (!controller) {
-      this.onClose();
-      return true;
+      return this.onClose();
     }
-    return false;
+    return Promise.resolve(false);
   }
 }

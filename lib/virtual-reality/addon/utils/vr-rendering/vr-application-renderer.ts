@@ -31,7 +31,7 @@ type LayoutData = {
   positionZ: number
 };
 
-type RemoveApplicationCallback = (application: ApplicationObject3D) => void;
+type RemoveApplicationCallback = (application: ApplicationObject3D) => Promise<boolean>;
 
 export default class VrApplicationRenderer {
   debug = debugLogger('VrApplicationRender');

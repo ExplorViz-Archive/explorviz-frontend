@@ -107,10 +107,8 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
         nonce,
         responseType: isObjectClosedResponse,
         onResponse: (response: ObjectClosedResponse) => {
-          if (response.isSuccess) {
-            this.forceRemoveDetachedMenu(detachedMenuGroup);
-            resolve(true);
-          }
+          if (response.isSuccess) this.forceRemoveDetachedMenu(detachedMenuGroup);
+          resolve(response.isSuccess);
         },
         onOffline: () => {
           this.forceRemoveDetachedMenu(detachedMenuGroup);
