@@ -27,23 +27,15 @@ export default class VrLandscapeRenderer {
   private debug = debugLogger('VrLandscapeRenderer');
 
   private configuration: Configuration;
-
   private floor: FloorMesh;
-
   private font: THREE.Font;
-
   private landscapeData: LandscapeData;
-
   private elk: ELK;
-
   private worker: any;
-
-  readonly imageLoader: ImageLoader = new ImageLoader();
+  private imageLoader: ImageLoader = new ImageLoader();
+  private landscapeLabeler = new LandscapeLabeler();
 
   readonly landscapeObject3D: LandscapeObject3D;
-
-  // Provides functions to label landscape meshes
-  readonly landscapeLabeler = new LandscapeLabeler();
 
   constructor({ configuration, floor, font, landscapeData, worker }: {
     configuration: Configuration,
