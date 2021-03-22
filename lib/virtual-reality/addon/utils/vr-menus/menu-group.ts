@@ -3,23 +3,23 @@ import FloorMesh from "../view-objects/vr/floor-mesh";
 import VRController from "../vr-controller";
 import VRControllerBindings from "../vr-controller/vr-controller-bindings";
 import BaseMenu from "./base-menu";
-import { DetachableMenu, isDetachableMenu } from "./detachable-menu";
+import { isDetachableMenu } from "./detachable-menu";
+import DetachedMenuGroupContainer from "./detached-menu-group-container";
 
-export const MENU_DETACH_EVENT_TYPE = 'detach-menu';
-
-export type MenuDetachedEvent = {
-  type: typeof MENU_DETACH_EVENT_TYPE,
-  menu: DetachableMenu
+export type MenuGroupArgs = {
+  detachedMenuGroups: DetachedMenuGroupContainer
 };
 
 export default class MenuGroup extends THREE.Group {
   private menus: BaseMenu[];
+  private detachedMenuGroups: DetachedMenuGroupContainer;
   readonly controllerBindings: VRControllerBindings[];
 
-  constructor() {
+  constructor({ detachedMenuGroups }: MenuGroupArgs) {
     super();
     this.menus = [];
     this.controllerBindings = [];
+    this.detachedMenuGroups = detachedMenuGroups;
   }
 
   /**
@@ -116,11 +116,8 @@ export default class MenuGroup extends THREE.Group {
       this.popMenu((m) => m.onDetachMenu());
       this.resumeMenu();
 
-      // send detached menu
-      this.dispatchEvent({
-        type: MENU_DETACH_EVENT_TYPE,
-        menu: detachedMenu
-      });
+      // Attach menu to group for detached menus.
+      this.detachedMenuGroups.addDetachedMenu(detachedMenu);
     }
   }
 
@@ -130,7 +127,7 @@ export default class MenuGroup extends THREE.Group {
    *
    * @param menu  The menu to add.
    */
-  private addMenu(menu: BaseMenu) {
+  protected addMenu(menu: BaseMenu) {
     this.menus.push(menu);
     this.controllerBindings.push(menu.makeControllerBindings());
     this.add(menu);

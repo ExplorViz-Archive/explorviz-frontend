@@ -1,7 +1,7 @@
 import BaseMenu from "./base-menu";
-import MenuGroup from "./menu-group";
+import MenuGroup, { MenuGroupArgs } from "./menu-group";
 
-export type MenuQueueArgs = {
+export type MenuQueueArgs = MenuGroupArgs & {
   nextMenuDelay?: number
 };
 
@@ -14,8 +14,8 @@ export default class MenuQueue extends MenuGroup {
   private nextMenuDelay: number;
   private nextMenuTime: number;
 
-  constructor({ nextMenuDelay = 0.75 }: MenuQueueArgs = {}) {
-    super();
+  constructor({ nextMenuDelay = 0.75, ...args }: MenuQueueArgs) {
+    super(args);
     this.menuQueue = [];
     this.nextMenuDelay = nextMenuDelay;
     this.nextMenuTime = 0.0;

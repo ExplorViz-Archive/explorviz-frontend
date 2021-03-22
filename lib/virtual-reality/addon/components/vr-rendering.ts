@@ -44,9 +44,8 @@ import VRControllerThumbpadBinding, { VRControllerThumbpadDirection } from 'virt
 import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
 import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
-import { DetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
-import { GrabbableMenuContainer } from 'virtual-reality/utils/vr-menus/grabbable-menu-container';
-import MenuGroup, { MenuDetachedEvent, MENU_DETACH_EVENT_TYPE } from 'virtual-reality/utils/vr-menus/menu-group';
+import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
+import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 import MenuQueue from 'virtual-reality/utils/vr-menus/menu-queue';
 import { findGrabbableObject, isGrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
 import UiMenu from 'virtual-reality/utils/vr-menus/ui-menu';
@@ -54,7 +53,6 @@ import HintMenu from 'virtual-reality/utils/vr-menus/ui-menu/hint-menu';
 import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
 import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receivable/landscape';
 import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/receivable/menu-detached-forward';
-import { isMenuDetachedResponse, MenuDetachedResponse } from 'virtual-reality/utils/vr-message/receivable/response/menu-detached';
 import { isObjectClosedResponse, ObjectClosedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-closed';
 import { SelfConnectedMessage } from 'virtual-reality/utils/vr-message/receivable/self_connected';
 import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
@@ -138,11 +136,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private hintMenuQueue!: MenuQueue;
 
+  private detachedMenuGroups!: DetachedMenuGroupContainer;
+
   private floor!: FloorMesh;
-
-  private detachedMenus!: THREE.Group;
-
-  private closeButtonTexture: THREE.Texture;
 
   private vrLandscapeRenderer: VrLandscapeRenderer;
 
@@ -187,21 +183,19 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     super(owner, args);
     this.debug('Constructor called');
 
-    this.detachedMenus = new THREE.Group();
-
     // Load image for delete button
-    this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
+    const closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
     this.vrLandscapeRenderer = new VrLandscapeRenderer({
       configuration: this.configuration,
-      floor: this.floor,
+      floor: this.floor, // TODO floor is not initialized yet.
       font: this.args.font,
       landscapeData: this.args.landscapeData,
       worker: this.worker
     });
     this.vrApplicationRenderer = new VrApplicationRenderer({
       appCommRendering: new AppCommunicationRendering(this.configuration, this.currentUser),
-      closeButtonTexture: this.closeButtonTexture,
+      closeButtonTexture,
       configuration: this.configuration,
       font: this.args.font,
       landscapeData: this.args.landscapeData,
@@ -211,10 +205,16 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     this.remoteUserGroup = new THREE.Group();
     this.hardwareModels = new HardwareModels();
+
     this.menuFactory.injectValues({
       idToRemoteVrUser: this.idToRemoteUser,
       vrApplicationRenderer: this.vrApplicationRenderer,
       vrLandscapeRenderer: this.vrLandscapeRenderer
+    });
+    this.detachedMenuGroups = new DetachedMenuGroupContainer({
+      closeButtonTexture,
+      receiver: this.receiver,
+      sender: this.sender,
     });
   }
 
@@ -256,7 +256,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Add object meshes and groups.
     this.scene.add(this.landscapeObject3D);
     this.scene.add(this.applicationGroup);
-    this.scene.add(this.detachedMenus);
+    this.scene.add(this.detachedMenuGroups);
 
     // Add user meshes and groups.
     this.scene.add(this.localUser.userGroup);
@@ -276,7 +276,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.localUser.addCamera(camera);
 
     // Menu group for hints.
-    this.hintMenuQueue = new MenuQueue();
+    this.hintMenuQueue = new MenuQueue({ detachedMenuGroups: this.detachedMenuGroups });
     this.hintMenuQueue.position.x = 0.035;
     this.hintMenuQueue.position.y = -0.1;
     this.hintMenuQueue.position.z = -0.3;
@@ -284,7 +284,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     camera.add(this.hintMenuQueue);
 
     // Menu group for message boxes.
-    this.messageMenuQueue = new MenuQueue();
+    this.messageMenuQueue = new MenuQueue({ detachedMenuGroups: this.detachedMenuGroups });
     this.messageMenuQueue.position.x = 0.035;
     this.messageMenuQueue.position.y = 0.1;
     this.messageMenuQueue.position.z = -0.3;
@@ -324,7 +324,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       this.landscapeObject3D,
       this.applicationGroup,
       this.floor,
-      this.detachedMenus
+      this.detachedMenuGroups
     ];
     const raycastFilter = (intersection: THREE.Intersection) => {
       return !(intersection.object instanceof LabelMesh ||
@@ -354,22 +354,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private initController({ gamepadIndex }: { gamepadIndex: number }): VRController {
     // Initialize the controller's menu group.
-    const menuGroup = new MenuGroup();
-    menuGroup.addEventListener(MENU_DETACH_EVENT_TYPE, ({ menu }: MenuDetachedEvent) => {
-      // Notify backend about detached menu.
-      const nonce = this.sender.sendMenuDetached(menu);
-
-      // Wait for backend to assign an id to the detached menu.
-      this.receiver.awaitResponse({
-        nonce,
-        responseType: isMenuDetachedResponse,
-        onResponse: (response: MenuDetachedResponse) => {
-          this.addDetachedMenu(menu, response.objectId);
-        },
-        onOffline: () => {
-          this.addDetachedMenu(menu, null);
-        }
-      });
+    const menuGroup = new MenuGroup({
+      detachedMenuGroups: this.detachedMenuGroups
     });
 
     // Initialize controller.
@@ -696,48 +682,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private openInfoMenu(controller: VRController, object: EntityMesh) {
     controller.menuGroup.openMenu(this.menuFactory.buildInfoMenu(object));
-  }
-
-  private addDetachedMenu(menu: DetachableMenu, grabId: string | null) {
-    // Put menu container at same position as menu.
-    const menuContainer = new GrabbableMenuContainer(menu, grabId);
-    this.detachedMenus.add(menuContainer);
-
-    // Make detached menu closable.
-    // Since the menu has been scaled already and is not scaled when it has its
-    // normal size, the close icon does not have to correct for the menu's scale.
-    let closeIcon = new CloseIcon({
-      texture: this.closeButtonTexture,
-      onClose: () => this.removeDetachedMenu(menuContainer),
-      radius: 0.04
-    });
-    closeIcon.addToObject(menuContainer, { compensateScale: false });
-  }
-
-  private removeDetachedMenu(menuContainer: GrabbableMenuContainer) {
-    // Remove the menu locally when it does not have an id (e.g., when we are
-    // offline).
-    let menuId = menuContainer.getGrabId();
-    if (!menuId) {
-      this.detachedMenus.remove(menuContainer);
-      return;
-    }
-
-    const nonce = this.sender.sendDetachedMenuClosed(menuId);
-    this.receiver.awaitResponse({
-      nonce,
-      responseType: isObjectClosedResponse,
-      onResponse: (response: ObjectClosedResponse) => {
-        if (response.isSuccess) {
-          this.detachedMenus.remove(menuContainer);
-        } else {
-          this.showHint('Could not close detached menu');
-        }
-      },
-      onOffline: () => {
-        this.detachedMenus.remove(menuContainer);
-      }
-    });
   }
 
   // #endregion MENUS
@@ -1192,7 +1136,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   async onInitialLandscape({ detachedMenus, openApps, landscape }: InitialLandscapeMessage): Promise<void> {
     this.forceRemoveAllApplications();
-    this.detachedMenus.remove(...this.detachedMenus.children);
+    this.detachedMenuGroups.forceRemoveAllDetachedMenus();
 
     const { structureLandscapeData } = this.args.landscapeData;
 
@@ -1253,7 +1197,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         menu.position.fromArray(detachedMenu.position);
         menu.quaternion.fromArray(detachedMenu.quaternion);
         menu.scale.fromArray(detachedMenu.scale);
-        this.addDetachedMenu(menu, detachedMenu.objectId);
+        this.detachedMenuGroups.addDetachedMenuWithId(menu, detachedMenu.objectId);
       }
     })
   }
@@ -1404,19 +1348,14 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       menu.position.fromArray(position);
       menu.quaternion.fromArray(quaternion);
       menu.scale.fromArray(scale);
-      this.addDetachedMenu(menu, objectId);
+      this.detachedMenuGroups.addDetachedMenuWithId(menu, objectId);
     }
   }
 
   onDetachedMenuClosed({
     originalMessage: { menuId }
   }: ForwardedMessage<DetachedMenuClosedMessage>): void {
-    for (let menu of this.detachedMenus.children) {
-      if (isGrabbableObject(menu) && menu.getGrabId() === menuId) {
-        this.detachedMenus.remove(menu);
-        break;
-      }
-    }
+    this.detachedMenuGroups.forceRemoveDetachedMenuWithId(menuId);
   }
 
   // #endregion HANDLING MESSAGES

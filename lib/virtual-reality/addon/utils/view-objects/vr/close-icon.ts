@@ -5,10 +5,10 @@ import VRController from 'virtual-reality/utils/vr-controller';
 export default class CloseIcon extends BaseMesh {
   private radius: number;
 
-  private onClose: () => void;
+  private onClose: () => boolean | Promise<boolean>;
 
   constructor({ onClose, texture, radius = 0.075, segments = 32 }: {
-    onClose: () => void,
+    onClose: () => Promise<boolean>,
     texture: THREE.Texture,
     radius?: number,
     segments?: number,
