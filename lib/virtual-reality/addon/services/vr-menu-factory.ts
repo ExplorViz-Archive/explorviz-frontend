@@ -1,7 +1,5 @@
 import Service, { inject as service } from '@ember/service';
 import { AjaxServiceClass } from 'ember-ajax/services/ajax';
-import SettingsMenu from 'explorviz-frontend/utils/vr-menus/advanced-menu';
-import MainMenu from 'explorviz-frontend/utils/vr-menus/main-menu';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import LocalVrUser from "virtual-reality/services/local-vr-user";
@@ -15,18 +13,19 @@ import ConnectionBaseMenu from 'virtual-reality/utils/vr-menus/ui-menu/connectio
 import JoinMenu from "virtual-reality/utils/vr-menus/ui-menu/connection/join-menu";
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
 import HintMenu from "virtual-reality/utils/vr-menus/ui-menu/hud/hint-menu";
-import MessageBoxMenu from "virtual-reality/utils/vr-menus/ui-menu/message-box-menu";
+import MessageBoxMenu from "virtual-reality/utils/vr-menus/ui-menu/hud/message-box-menu";
 import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
-import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import ConnectingMenu from "../utils/vr-menus/ui-menu/connection/connecting-menu";
 import OfflineMenu from "../utils/vr-menus/ui-menu/connection/offline-menu";
 import OnlineMenu from "../utils/vr-menus/ui-menu/connection/online-menu";
 import ZoomMenu from "../utils/vr-menus/ui-menu/zoom-menu";
+import RemoteVrUserService from "./remote-vr-users";
+import SettingsMenu from "../utils/vr-menus/ui-menu/settings-menu";
+import MainMenu from "../utils/vr-menus/ui-menu/main-menu";
 
 type InjectedValues = {
-  idToRemoteVrUser: Map<string, RemoteVrUser>,
   vrApplicationRenderer: VrApplicationRenderer,
   vrLandscapeRenderer: VrLandscapeRenderer,
 };
@@ -34,6 +33,9 @@ type InjectedValues = {
 export default class VrMenuFactoryService extends Service {
   @service('local-vr-user')
   private localUser!: LocalVrUser;
+
+  @service('remote-vr-users')
+  private remoteUsers!: RemoteVrUserService;
 
   @service('ajax')
   private ajax!: AjaxServiceClass;
@@ -47,16 +49,13 @@ export default class VrMenuFactoryService extends Service {
   @service('grabbed-object')
   private grabbedObjectService!: GrabbedObjectService;
 
-  private idToRemoteVrUser!: Map<string, RemoteVrUser>;
   private vrApplicationRenderer!: VrApplicationRenderer;
   private vrLandscapeRenderer!: VrLandscapeRenderer;
 
   injectValues({
-    idToRemoteVrUser,
     vrApplicationRenderer,
     vrLandscapeRenderer
   }: InjectedValues) {
-    this.idToRemoteVrUser = idToRemoteVrUser;
     this.vrApplicationRenderer = vrApplicationRenderer;
     this.vrLandscapeRenderer = vrLandscapeRenderer;
   }
@@ -114,7 +113,7 @@ export default class VrMenuFactoryService extends Service {
   buildOnlineMenu(): OnlineMenu {
     return new OnlineMenu({
       localUser: this.localUser,
-      idToRemoteVrUser: this.idToRemoteVrUser,
+      remoteUsers: this.remoteUsers,
       menuFactory: this,
     });
   }

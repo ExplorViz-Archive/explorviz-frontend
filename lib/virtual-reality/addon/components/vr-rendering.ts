@@ -8,6 +8,7 @@ import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import Configuration from 'explorviz-frontend/services/configuration';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
+import RemoteVrUserService from 'explorviz-frontend/services/remote-vr-users';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
@@ -34,7 +35,6 @@ import WebSocketService from 'virtual-reality/services/web-socket';
 import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import FloorMesh from 'virtual-reality/utils/view-objects/vr/floor-mesh';
-import NameTagMesh from 'virtual-reality/utils/view-objects/vr/name-tag-mesh';
 import VRController from 'virtual-reality/utils/vr-controller';
 import VRControllerBindings from 'virtual-reality/utils/vr-controller/vr-controller-bindings';
 import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-controller-bindings-list';
@@ -55,7 +55,7 @@ import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/rec
 import { isObjectClosedResponse, ObjectClosedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-closed';
 import { SelfConnectedMessage } from 'virtual-reality/utils/vr-message/receivable/self_connected';
 import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
-import { UserDisconnectedMessage, USER_DISCONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
+import { UserDisconnectedMessage } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
 import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_opened';
 import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
 import { HighlightingUpdateMessage, HIGHLIGHTING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
@@ -67,7 +67,6 @@ import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendab
 import { UserControllerMessage, USER_CONTROLLER_EVENT } from 'virtual-reality/utils/vr-message/sendable/user_controllers';
 import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
-import HardwareModels from 'virtual-reality/utils/vr-multi-user/hardware-models';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
@@ -117,6 +116,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('vr-menu-factory')
   private menuFactory!: VrMenuFactoryService;
 
+  @service('remote-vr-users')
+  private remoteUsers!: RemoteVrUserService;
+
   // #endregion SERVICES
 
   // #region CLASS FIELDS
@@ -139,13 +141,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private vrLandscapeRenderer!: VrLandscapeRenderer;
 
   private vrApplicationRenderer!: VrApplicationRenderer;
-
-  private remoteUserGroup: THREE.Group = new THREE.Group();;
-
-  private idToRemoteUser: Map<string, RemoteVrUser> = new Map();
-
-  // Contains clonable objects of HMD, camera and controllers for other users
-  private hardwareModels: HardwareModels = new HardwareModels();
 
   // #endregion CLASS FIELDS
 
@@ -218,7 +213,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Add user meshes and groups.
     this.scene.add(this.localUser.userGroup);
-    this.scene.add(this.remoteUserGroup);
+    this.scene.add(this.remoteUsers.remoteUserGroup);
   }
 
   /**
@@ -295,7 +290,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Initialize menu rendering.
     this.menuFactory.injectValues({
-      idToRemoteVrUser: this.idToRemoteUser,
       vrApplicationRenderer: this.vrApplicationRenderer,
       vrLandscapeRenderer: this.vrLandscapeRenderer
     });
@@ -491,22 +485,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Update services.
     this.spectateUserService.update();
     this.grabbedObjectService.sendObjectPositions();
-    this.updateRemoteUsers(); // TODO remote user service.
+    this.remoteUsers.updateRemoteUsers(delta);
 
     // Send updates to backend.
     this.sendPoses(); // TODO move to update function of local user?
-  }
-
-  /**
-   * Updates animations of the remote user and sets user name tag to be
-   * directly above their head and set rotation such that it looks toward
-   * our camera.
-   */
-  private updateRemoteUsers() {
-    this.idToRemoteUser.forEach((user) => {
-      // Update animations.
-      user.update(this.deltaTimeService.getDeltaTime());
-    });
   }
 
   /**
@@ -947,10 +929,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     }
 
     // Remove remote users.
-    this.idToRemoteUser.forEach((user) => {
-      user.removeAllObjects3D();
-    });
-    this.idToRemoteUser.clear();
+    this.remoteUsers.removeAllRemoteUsers();
 
     // Reset highlighting colors.
     this.applicationGroup.children.forEach((child) => {
@@ -998,39 +977,20 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     { id, name, color }: UserConnectedMessage,
     showConnectMessage = true
   ): void {
-    // If a user triggers multiple connects, simulate a disconnect first
-    if (this.idToRemoteUser.has(id)) {
-      this.onUserDisconnect({
-        event: USER_DISCONNECTED_EVENT,
-        id
-      });
-    }
-
-    const user = new RemoteVrUser({
+    const remoteUser = new RemoteVrUser({
       userName: name,
       userId: id,
       color: new THREE.Color().fromArray(color),
       state: 'online',
       localUser: this.localUser
     });
-    this.idToRemoteUser.set(id, user);
-
-    if (this.hardwareModels.hmd) { user.initCamera(this.hardwareModels.hmd); }
-
-    // Add 3d-models for new user
-    this.remoteUserGroup.add(user);
-
-    // Add name tag
-    Helper.addDummyNamePlane(user);
-    const nameTag = new NameTagMesh(user.userName, user.color);
-    user.nameTag = nameTag;
-    user.add(nameTag);
+    this.remoteUsers.addRemoteUser(remoteUser);
 
     if (showConnectMessage) {
       this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
         title: 'User connected',
-        text: user.userName,
-        color: `#${user.color.getHexString()}`,
+        text: remoteUser.userName,
+        color: `#${remoteUser.color.getHexString()}`,
         time: 3.0,
       }));
     }
@@ -1043,12 +1003,12 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     userID,
     originalMessage: { camera, controller1, controller2 }
   }: ForwardedMessage<UserPositionsMessage>): void {
-    const remoteUser = this.idToRemoteUser.get(userID);
-    if (remoteUser) {
-      if (controller1) { remoteUser.updateController1(controller1); }
-      if (controller2) { remoteUser.updateController2(controller2); }
-      if (camera) { remoteUser.updateCamera(camera); }
-    }
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userID);
+    if (!remoteUser) return;
+
+    if (controller1) remoteUser.updateController1(controller1);
+    if (controller2) remoteUser.updateController2(controller2);
+    if (camera) remoteUser.updateCamera(camera);
   }
 
   /**
@@ -1058,13 +1018,13 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     userID,
     originalMessage: { controllerId, isPinging }
   }: ForwardedMessage<PingUpdateMessage>): void {
-    const remoteUser = this.idToRemoteUser.get(userID);
-    if (remoteUser) {
-      if (controllerId === 0) {
-        remoteUser.togglePing1(isPinging);
-      } else if (controllerId === 1) {
-        remoteUser.togglePing2(isPinging);
-      }
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userID);
+    if (!remoteUser) return;
+
+    if (controllerId === 0) {
+      remoteUser.togglePing1(isPinging);
+    } else if (controllerId === 1) {
+      remoteUser.togglePing2(isPinging);
     }
   }
 
@@ -1077,7 +1037,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     userID,
     originalMessage: { connect, disconnect }
   }: ForwardedMessage<UserControllerMessage>): void {
-    const remoteUser = this.idToRemoteUser.get(userID);
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userID);
     if (!remoteUser) return;
 
     // Load models of newly connected controller(s).
@@ -1099,24 +1059,13 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    * @param {JSON} data - Contains the id of the user that disconnected.
    */
   onUserDisconnect({ id }: UserDisconnectedMessage) {
-    // Do not spectate a disconnected user
-    if (this.spectateUserService.spectatedUser?.userId === id) {
-      this.spectateUserService.deactivate();
-    }
-
-    const user = this.idToRemoteUser.get(id);
-
-    if (user) {
-      // Remove user's 3d-objects
-      user.removeAllObjects3D();
-      this.remoteUserGroup.remove(user);
-      this.idToRemoteUser.delete(id);
-
-      // Show disconnect notification
+    // Remove user and show disconnect notification.
+    const removedUser = this.remoteUsers.removeRemoteUserById(id);
+    if (removedUser) {
       this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
         title: 'User disconnected',
-        text: user.userName,
-        color: `#${user.color.getHexString()}`,
+        text: removedUser.userName,
+        color: `#${removedUser.color.getHexString()}`,
         time: 3.0,
       }));
     }
@@ -1257,9 +1206,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       return;
     }
 
-    const user = this.idToRemoteUser.get(userID);
-
-    if (!user || !user.color) return;
+    const user = this.remoteUsers.lookupRemoteUserById(userID);
+    if (!user) return;
 
     // Highlight entities in the respective user color
     applicationObject3D.setHighlightingColor(user.color);
@@ -1301,17 +1249,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     userID,
     originalMessage: { isSpectating }
   }: ForwardedMessage<SpectatingUpdateMessage>): void {
-    const remoteUser = this.idToRemoteUser.get(userID);
+    const remoteUser = this.remoteUsers.setRemoteUserSpectatingById(userID, isSpectating);
     if (!remoteUser) return;
-
-    remoteUser.state = isSpectating ? 'spectating' : 'online';
 
     const remoteUserHexColor = `#${remoteUser.color.getHexString()}`;
     if (isSpectating) {
-      remoteUser.setVisible(false);
-      if (this.spectateUserService.spectatedUser && this.spectateUserService.spectatedUser.userId === userID) {
-        this.spectateUserService.deactivate();
-      }
       this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
         title: remoteUser.userName,
         text: ' is now spectating',
@@ -1319,7 +1261,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         time: 3.0
       }));
     } else {
-      remoteUser.setVisible(true);
       this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
         title: remoteUser.userName,
         text: ' stopped spectating',

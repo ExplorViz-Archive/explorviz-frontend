@@ -3,19 +3,20 @@ import RemoteVrUser from "virtual-reality/utils/vr-multi-user/remote-vr-user";
 import TextItem from "../../items/text-item";
 import TextbuttonItem from "../../items/textbutton-item";
 import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
+import RemoteVrUserService from "../../../../services/remote-vr-users";
 
 type OnlineMenuArgs = ConnectionBaseMenuArgs & {
-  idToRemoteVrUser: Map<string, RemoteVrUser>
+  remoteUsers: RemoteVrUserService
 };
 
 export default class OnlineMenu extends ConnectionBaseMenu {
-  private idToRemoteVrUser: Map<string, RemoteVrUser>;
+  private remoteUsers: RemoteVrUserService;
   private remoteUserButtons: Map<string, TextbuttonItem>;
 
-  constructor({ idToRemoteVrUser, ...args }: OnlineMenuArgs) {
+  constructor({ remoteUsers, ...args }: OnlineMenuArgs) {
     super(args);
 
-    this.idToRemoteVrUser = idToRemoteVrUser;
+    this.remoteUsers = remoteUsers;
     this.remoteUserButtons = new Map<string, TextbuttonItem>();
 
     this.initMenu();
@@ -30,7 +31,7 @@ export default class OnlineMenu extends ConnectionBaseMenu {
   }
 
   private initMenu() {
-    const users = Array.from(this.idToRemoteVrUser.values());
+    const users = Array.from(this.remoteUsers.getAllRemoteUsers());
     const title = new TextItem(`Room ${this.localUser.currentRoomId}`, 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
 
@@ -69,7 +70,7 @@ export default class OnlineMenu extends ConnectionBaseMenu {
   onUpdateMenu(delta: number) {
     super.onUpdateMenu(delta);
 
-    if (!this.arrayEquals(Array.from(this.idToRemoteVrUser.keys()), Array.from(this.remoteUserButtons.keys()))) {
+    if (!this.arrayEquals(Array.from(this.remoteUsers.getAllRemoteUserIds()), Array.from(this.remoteUserButtons.keys()))) {
       this.items.clear();
       this.thumbpadTargets.clear();
       this.initMenu();
@@ -87,7 +88,7 @@ export default class OnlineMenu extends ConnectionBaseMenu {
       if (id) {
         const remoteUserButton = this.remoteUserButtons.get(id);
         if (remoteUserButton) {
-          remoteUserButton.text = this.idToRemoteVrUser.get(id)?.userName || 'unknown';
+          remoteUserButton.text = this.remoteUsers.lookupRemoteUserById(id)?.userName || 'unknown';
         }
       }
       this.localUser.spectateUserService.deactivate();
