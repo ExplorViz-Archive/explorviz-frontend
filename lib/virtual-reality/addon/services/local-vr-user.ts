@@ -64,8 +64,8 @@ export default class LocalVrUser extends Service {
   }
 
   updateControllers(delta: number) {
-    if (this.controller1) { this.controller1.update(delta); }
-    if (this.controller2) { this.controller2.update(delta); }
+    if (this.controller1) this.controller1.update(delta);
+    if (this.controller2) this.controller2.update(delta);
   }
 
   /*
@@ -105,12 +105,12 @@ export default class LocalVrUser extends Service {
     this.controller2?.gripSpace?.children.forEach((child) => {
       this.controller2?.gripSpace?.remove(child);
     });
-    this.controller1?.children.forEach((child) => { this.controller1?.remove(child); });
-    this.controller2?.children.forEach((child) => { this.controller2?.remove(child); });
+    this.controller1?.children.forEach((child) => this.controller1?.remove(child));
+    this.controller2?.children.forEach((child) => this.controller2?.remove(child));
 
     this.controller1 = undefined;
     this.controller2 = undefined;
-    this.userGroup.children.forEach((child) => { this.userGroup.remove(child); });
+    this.userGroup.children.forEach((child) => this.userGroup.remove(child));
   }
 
   connect(roomId: string) {
