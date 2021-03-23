@@ -468,24 +468,25 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    * Main loop that is called once per frame.
    */
   private tick() {
-    this.update();
+    if (this.isDestroyed) { return; }
+
+    // Compute time since last tick.
+    this.deltaTimeService.update();
+    const delta = this.deltaTimeService.getDeltaTime();
+
+    this.update(delta);
     this.render();
   }
 
   /**
    * Updates menus, services and all objects in the scene.
    */
-  private update() {
-    if (this.isDestroyed) { return; }
-
-    // Compute time since last frame.
-    this.deltaTimeService.update();
-    const delta = this.deltaTimeService.getDeltaTime();
-
+  private update(delta: number) {
     // Update controllers and menus.
     this.localUser.updateControllers(delta);
     this.hintMenuQueue.updateMenu(delta);
     this.messageMenuQueue.updateMenu(delta);
+    this.detachedMenuGroups.updateDetachedMenus(delta);
 
     // Update services.
     this.spectateUserService.update();

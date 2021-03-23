@@ -22,6 +22,7 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
   private sender: VrMessageSender;
   private receiver: VrMessageReceiver;
 
+  private detachedMenuGroups: Set<DetachedMenuGroup>;
   private detachedMenuGroupsById: Map<string, DetachedMenuGroup>;
 
   constructor({closeButtonTexture, sender, receiver}: DetachedMenuGroupContainerArgs) {
@@ -30,6 +31,7 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
     this.sender = sender;
     this.receiver = receiver;
 
+    this.detachedMenuGroups = new Set();
     this.detachedMenuGroupsById = new Map();
   }
 
@@ -56,30 +58,40 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
   }
 
   /**
+   * Updates all detached menus.
+   */
+  updateDetachedMenus(delta: number) {
+    for (let detachedMenuGroup of this.detachedMenuGroups) {
+      detachedMenuGroup.updateMenu(delta);
+    }
+  }
+
+  /**
    * Adds a group for a detached menu to this container at the position and
    * with the same rotation and scale as the given menu.
    */
   addDetachedMenuWithId(menu: DetachableMenu, menuId: string | null) {
     // Put menu container at same position as menu.
-    const group = new DetachedMenuGroup({
+    const detachedMenuGroup = new DetachedMenuGroup({
       menu, menuId, detachedMenuGroups: this
     });
-    if (menuId) this.detachedMenuGroupsById.set(menuId, group);
-    this.add(group);
+    this.detachedMenuGroups.add(detachedMenuGroup);
+    if (menuId) this.detachedMenuGroupsById.set(menuId, detachedMenuGroup);
+    this.add(detachedMenuGroup);
 
     // Make detached menu closable.
     // Since the menu has been scaled already and is not scaled when it has its
     // normal size, the close icon does not have to correct for the menu's scale.
     const closeIcon = new CloseIcon({
       texture: this.closeButtonTexture,
-      onClose: () => this.removeDetachedMenu(group),
+      onClose: () => this.removeDetachedMenu(detachedMenuGroup),
       radius: 0.04
     });
-    closeIcon.addToObject(group);
+    closeIcon.addToObject(detachedMenuGroup);
 
     // Apply same position, rotation and scale as detached menu.
-    menu.getWorldPosition(group.position);
-    menu.getWorldQuaternion(group.quaternion);
+    menu.getWorldPosition(detachedMenuGroup.position);
+    menu.getWorldQuaternion(detachedMenuGroup.quaternion);
     this.scale.copy(menu.scale);
 
     // Reset position, rotation and scale of detached menu.
@@ -130,7 +142,11 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
    * Removes the given menu without asking the backend.
    */
   forceRemoveDetachedMenu(detachedMenuGroup: DetachedMenuGroup) {
+    // Remove the 3D object of the menu.
     this.remove(detachedMenuGroup);
+
+    // Stop updating the menu.
+    this.detachedMenuGroups.delete(detachedMenuGroup);
 
     // Remove association with the menu's id.
     const menuId = detachedMenuGroup.getGrabId();
@@ -139,6 +155,7 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
 
   forceRemoveAllDetachedMenus() {
     this.remove(...this.children);
+    this.detachedMenuGroups.clear();
     this.detachedMenuGroupsById.clear();
   }
 }
