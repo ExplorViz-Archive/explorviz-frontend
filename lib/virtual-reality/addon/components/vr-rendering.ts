@@ -48,7 +48,7 @@ import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 import MenuQueue from 'virtual-reality/utils/vr-menus/menu-queue';
 import { findGrabbableObject, isGrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
 import UiMenu from 'virtual-reality/utils/vr-menus/ui-menu';
-import HintMenu from 'virtual-reality/utils/vr-menus/ui-menu/hint-menu';
+import HintMenu from 'virtual-reality/utils/vr-menus/ui-menu/hud/hint-menu';
 import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
 import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receivable/landscape';
 import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/receivable/menu-detached-forward';

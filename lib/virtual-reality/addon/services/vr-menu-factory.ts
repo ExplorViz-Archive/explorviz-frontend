@@ -14,7 +14,7 @@ import CameraMenu from 'virtual-reality/utils/vr-menus/ui-menu/camera-menu';
 import ConnectionBaseMenu from 'virtual-reality/utils/vr-menus/ui-menu/connection/base';
 import JoinMenu from "virtual-reality/utils/vr-menus/ui-menu/connection/join-menu";
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
-import HintMenu from "virtual-reality/utils/vr-menus/ui-menu/hint-menu";
+import HintMenu from "virtual-reality/utils/vr-menus/ui-menu/hud/hint-menu";
 import MessageBoxMenu from "virtual-reality/utils/vr-menus/ui-menu/message-box-menu";
 import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
