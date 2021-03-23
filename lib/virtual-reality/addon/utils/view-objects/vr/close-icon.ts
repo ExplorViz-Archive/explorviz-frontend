@@ -31,18 +31,13 @@ export default class CloseIcon extends BaseMesh {
    *
    * @param Object3D Object to which the icon shall be added
    */
-  addToObject(object: THREE.Object3D, { compensateScale = true }: {
-    compensateScale?: boolean
-  } = {}) {
+  addToObject(object: THREE.Object3D) {
     // Undo scaling of the object.
-    if (compensateScale) this.scale.set(1.0 / object.scale.x, 1.0 / object.scale.y, 1.0 / object.scale.z);
+    this.scale.set(1.0 / object.scale.x, 1.0 / object.scale.y, 1.0 / object.scale.z);
 
-    // Reset rotation and scale of the object temporarily such that the axis
-    // are aligned the world axis.
+    // Reset rotation of the object temporarily such that the axis are aligned the world axis.
     const originalRotation = object.rotation.clone();
-    const originalScale = object.scale.clone();
     object.rotation.set(0, 0, 0);
-    if (!compensateScale) object.scale.set(1, 1, 1);
     object.updateMatrixWorld();
 
     // Get size of the object.
@@ -53,7 +48,6 @@ export default class CloseIcon extends BaseMesh {
 
     // Restore rotation.
     object.rotation.copy(originalRotation);
-    object.scale.copy(originalScale);
 
     // Position the close button in the top-right corner.
     this.position.x = (width / 2 + this.radius) * this.scale.x;

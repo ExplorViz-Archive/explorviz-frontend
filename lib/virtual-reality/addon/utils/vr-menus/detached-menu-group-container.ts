@@ -71,6 +71,14 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
    * with the same rotation and scale as the given menu.
    */
   addDetachedMenuWithId(menu: DetachableMenu, menuId: string | null) {
+    // Remember the position, rotation and scale of the detached menu.
+    const position = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
+    menu.getWorldPosition(position);
+    menu.getWorldQuaternion(quaternion);
+    scale.copy(menu.scale);
+
     // Put menu container at same position as menu.
     const detachedMenuGroup = new DetachedMenuGroup({
       menu, menuId, detachedMenuGroups: this
@@ -90,9 +98,9 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
     closeIcon.addToObject(detachedMenuGroup);
 
     // Apply same position, rotation and scale as detached menu.
-    menu.getWorldPosition(detachedMenuGroup.position);
-    menu.getWorldQuaternion(detachedMenuGroup.quaternion);
-    this.scale.copy(menu.scale);
+    detachedMenuGroup.position.copy(position);
+    detachedMenuGroup.quaternion.copy(quaternion);
+    detachedMenuGroup.scale.copy(scale);
 
     // Reset position, rotation and scale of detached menu.
     menu.position.set(0, 0, 0);
