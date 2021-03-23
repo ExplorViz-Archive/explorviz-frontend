@@ -9,13 +9,13 @@ import * as LandscapeCommunicationRendering from 'explorviz-frontend/utils/lands
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
-import FloorMesh from 'explorviz-frontend/utils/view-objects/vr/floor-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import THREE from 'three';
 import VrLandscapeObject3D from '../view-objects/landscape/vr-landscape-object-3d';
+import FloorMesh from '../view-objects/vr/floor-mesh';
 
 // Scalar with which the landscape is scaled (evenly in all dimensions)
 const LANDSCAPE_SCALAR = 0.1;

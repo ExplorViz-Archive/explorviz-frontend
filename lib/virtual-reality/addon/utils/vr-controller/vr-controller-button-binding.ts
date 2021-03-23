@@ -1,4 +1,4 @@
-import VRController from "explorviz-frontend/utils/vr-controller";
+import VRController from "../vr-controller";
 import VRControllerLabelGroup from "./vr-controller-label-group";
 import VRControllerLabelMesh from "./vr-controller-label-mesh";
 import { VRControllerLabelPosition } from "./vr-controller-label-positions";
