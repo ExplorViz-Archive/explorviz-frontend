@@ -42,6 +42,17 @@ export default class MainMenu extends UiMenu {
     };
     this.thumbpadTargets.push(resetButton);
 
+    const timeButton = new TextbuttonItem('time', 'Time', {
+      x: 100,
+      y: 260,
+    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+
+    this.items.push(timeButton);
+    timeButton.onTriggerDown = () => {
+      this.menuGroup?.openMenu(this.menuFactory.buildTimeMenu());
+    };
+    this.thumbpadTargets.push(resetButton);
+
     this.redrawMenu();
   }
 }

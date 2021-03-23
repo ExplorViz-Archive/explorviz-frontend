@@ -5,6 +5,7 @@ import { task } from 'ember-concurrency-decorators';
 import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
+import Timestamp from 'explorviz-frontend/models/timestamp';
 import Configuration from 'explorviz-frontend/services/configuration';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
@@ -70,6 +71,7 @@ import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
+import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import WebXRPolyfill from 'webxr-polyfill';
 
 const FLOOR_SIZE = 10;
@@ -77,6 +79,9 @@ const FLOOR_SIZE = 10;
 interface Args {
   readonly id: string;
   readonly landscapeData: LandscapeData;
+  updateTimestamp(timestamps: Timestamp[]): void; 
+  timestamp: number;
+  interval: number;
   readonly font: THREE.Font;
 }
 
@@ -141,6 +146,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private vrLandscapeRenderer!: VrLandscapeRenderer;
 
   private vrApplicationRenderer!: VrApplicationRenderer;
+
+  private vrTimestampService!: VrTimestampService;
 
   // #endregion CLASS FIELDS
 
@@ -287,10 +294,14 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     });
     this.scene.add(this.applicationGroup);
 
+    // Initialize timestamp service
+    this.vrTimestampService = new VrTimestampService(this.args.timestamp, this.args.timestamp);
+
     // Initialize menu rendering.
     this.menuFactory.injectValues({
       vrApplicationRenderer: this.vrApplicationRenderer,
-      vrLandscapeRenderer: this.vrLandscapeRenderer
+      vrLandscapeRenderer: this.vrLandscapeRenderer,
+      vrTimestampService: this.vrTimestampService
     });
     this.detachedMenuGroups = new DetachedMenuGroupContainer({
       closeButtonTexture,
@@ -298,6 +309,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       sender: this.sender,
     });
     this.scene.add(this.detachedMenuGroups);
+
   }
 
   /**

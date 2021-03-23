@@ -24,10 +24,13 @@ import ZoomMenu from "../utils/vr-menus/ui-menu/zoom-menu";
 import RemoteVrUserService from "./remote-vr-users";
 import SettingsMenu from "../utils/vr-menus/ui-menu/settings-menu";
 import MainMenu from "../utils/vr-menus/ui-menu/main-menu";
+import TimeMenu from 'virtual-reality/utils/vr-menus/ui-menu/time-menu';
+import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 
 type InjectedValues = {
   vrApplicationRenderer: VrApplicationRenderer,
   vrLandscapeRenderer: VrLandscapeRenderer,
+  vrTimestampService: VrTimestampService;
 };
 
 export default class VrMenuFactoryService extends Service {
@@ -51,11 +54,14 @@ export default class VrMenuFactoryService extends Service {
 
   private vrApplicationRenderer!: VrApplicationRenderer;
   private vrLandscapeRenderer!: VrLandscapeRenderer;
+  private vrTimestampService!: VrTimestampService;
 
   injectValues({
     vrApplicationRenderer,
-    vrLandscapeRenderer
+    vrLandscapeRenderer,
+    vrTimestampService
   }: InjectedValues) {
+    this.vrTimestampService = vrTimestampService;
     this.vrApplicationRenderer = vrApplicationRenderer;
     this.vrLandscapeRenderer = vrLandscapeRenderer;
   }
@@ -122,6 +128,13 @@ export default class VrMenuFactoryService extends Service {
     return new JoinMenu({
       localUser: this.localUser,
       ajax: this.ajax,
+      menuFactory: this,
+    });
+  }
+
+  buildTimeMenu(): TimeMenu {
+    return new TimeMenu({
+      vrTimestampService: this.vrTimestampService,
       menuFactory: this,
     });
   }

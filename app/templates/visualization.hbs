@@ -10,6 +10,9 @@
       <VrRendering
         @id="landscape1"
         @landscapeData={{this.landscapeData}}
+        @updateTimestamp={{this.timelineClicked}}
+        @timestamp={{this.timestampRepo.latestTimestamp}}
+        @interval={{this.timelineInterval}}
         @font={{@model}}
       />
       <div style="position: absolute!important; top: 35px;">
