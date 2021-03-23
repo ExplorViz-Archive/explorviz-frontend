@@ -6,7 +6,7 @@ const CIRCLE_SEGMENTS = 48;
 export type ZoomMenuArgs = UiMenuArgs & {
   renderer: THREE.WebGLRenderer,
   scene: THREE.Scene,
-  headsetCamera: THREE.PerspectiveCamera
+  headsetCamera: THREE.Camera
 };
 
 export default class ZoomMenu extends UiMenu {
@@ -19,7 +19,7 @@ export default class ZoomMenu extends UiMenu {
 
   scene!: THREE.Scene;
 
-  headsetCamera!: THREE.PerspectiveCamera;
+  headsetCamera!: THREE.Camera;
 
   constructor({ renderer, scene, headsetCamera, ...args }: ZoomMenuArgs) {
     super(args);
