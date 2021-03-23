@@ -206,11 +206,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
 
-    // Add object meshes and groups.
-    this.scene.add(this.landscapeObject3D);
-    this.scene.add(this.applicationGroup);
-    this.scene.add(this.detachedMenuGroups);
-
     // Add user meshes and groups.
     this.scene.add(this.localUser.userGroup);
     this.scene.add(this.remoteUsers.remoteUserGroup);
@@ -270,7 +265,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Load image for delete button
     const closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
-    // Initialize landscape and application rendering.
+    // Initialize landscape rendering.
     this.vrLandscapeRenderer = new VrLandscapeRenderer({
       configuration: this.configuration,
       floor: this.floor,
@@ -278,6 +273,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       landscapeData: this.args.landscapeData,
       worker: this.worker
     });
+    this.scene.add(this.landscapeObject3D);
+
+    // Initialize application rendering.
     this.vrApplicationRenderer = new VrApplicationRenderer({
       appCommRendering: new AppCommunicationRendering(this.configuration, this.currentUser),
       closeButtonTexture,
@@ -287,6 +285,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       onRemoveApplication: (application) => this.removeApplication(application),
       worker: this.worker,
     });
+    this.scene.add(this.applicationGroup);
 
     // Initialize menu rendering.
     this.menuFactory.injectValues({
@@ -298,6 +297,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       receiver: this.receiver,
       sender: this.sender,
     });
+    this.scene.add(this.detachedMenuGroups);
   }
 
   /**
