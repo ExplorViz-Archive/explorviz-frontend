@@ -5,16 +5,17 @@ import { task } from 'ember-concurrency-decorators';
 import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
-import Timestamp from 'explorviz-frontend/models/timestamp';
 import Configuration from 'explorviz-frontend/services/configuration';
 import CurrentUser from 'explorviz-frontend/services/current-user';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
+import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import RemoteVrUserService from 'explorviz-frontend/services/remote-vr-users';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import Interaction from 'explorviz-frontend/utils/interaction';
-import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
@@ -80,8 +81,8 @@ const FLOOR_SIZE = 10;
 
 interface Args {
   readonly id: string;
-  readonly landscapeData: LandscapeData;
-  updateTimestamp(timestamps: Timestamp[]): void; 
+  landscapeData: LandscapeData;
+  loadLandscapeByTimestamp(timestamps: number): [StructureLandscapeData, DynamicLandscapeData]; 
   timestamp: number;
   interval: number;
   readonly font: THREE.Font;
@@ -89,6 +90,9 @@ interface Args {
 
 export default class VrRendering extends Component<Args> implements VrMessageListener {
   // #region SERVICES
+
+  @service('reload-handler')
+  reloadHandler!: ReloadHandler;
 
   @service('configuration')
   private configuration!: Configuration;
@@ -312,9 +316,12 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       localUser: this.localUser,
       sender: this.sender,
       updateModel: (timestamp: number) => {
-        var timestampObj = new Timestamp();
-        timestampObj.set('timestamp', timestamp);
-        this.args.updateTimestamp([timestampObj]);
+        try {
+          const [structureData, dynamicData] = this.args.loadLandscapeByTimestamp(timestamp);
+          this.updateLandscape(structureData, dynamicData);
+        } catch (e) {
+          this.debug('Landscape couldn\'t be requested!', e);
+        }
       },
       vrLandscapeRenderer: this.vrLandscapeRenderer,
       vrApplicationRenderer: this.vrApplicationRenderer,
@@ -335,7 +342,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       vrTimestampService: this.vrTimestampService,
       detachedMenuGroups: this.detachedMenuGroups
     });
-    
+
   }
 
   /**
@@ -1365,6 +1372,42 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       default:
         return null;
     }
+  }
+
+  updateLandscape(structureData: StructureLandscapeData,
+    dynamicData: DynamicLandscapeData) {
+    let application;
+    if (this.args.landscapeData !== null) {
+      application = this.args.landscapeData.application;
+      if (application !== undefined) {
+        const newApplication = VrRendering.getApplicationFromLandscapeByPid(
+          application.pid, structureData,
+        );
+
+        if (newApplication) {
+          application = newApplication;
+        }
+      }
+    }
+    this.args.landscapeData = {
+      structureLandscapeData: structureData,
+      dynamicLandscapeData: dynamicData,
+      application,
+    };
+  }
+
+  private static getApplicationFromLandscapeByPid(pid: string,
+    structureData: StructureLandscapeData) {
+    let foundApplication: Application|undefined;
+    structureData.nodes.forEach((node) => {
+      node.applications.forEach((application) => {
+        if (application.pid === pid) {
+          foundApplication = application;
+        }
+      });
+    });
+
+    return foundApplication;
   }
 
   // #endregion UTILS
