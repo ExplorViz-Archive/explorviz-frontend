@@ -11,6 +11,11 @@ import { displayAsSolidObject, displayAsWireframe } from './vr-helpers/multi-use
 import BaseMenu from './vr-menus/base-menu';
 import MenuGroup from './vr-menus/menu-group';
 
+/**
+ * Length of the controller's ray when there is no intersection point.
+ */
+export const DEFAULT_RAY_LENGTH = 1000;
+
 export type VRControllerCallbackFunctions = {
   connected?(controller: VRController, event: THREE.Event): void,
   disconnected?(controller: VRController): void,
@@ -32,7 +37,6 @@ export type VRControllerCallbackFunctions = {
   menuPress?(controller: VRController): void,
   menuDown?(controller: VRController): void,
 }
-
 
 /**
  * A wrapper around the gamepad object which handles inputs to
@@ -393,7 +397,7 @@ export default class VRController extends BaseMesh {
         this.teleportArea.visible = false;
       }
       this.resetHoverEffect();
-      this.ray.scale.z = 5;
+      this.ray.scale.z = DEFAULT_RAY_LENGTH;
       return;
     }
 

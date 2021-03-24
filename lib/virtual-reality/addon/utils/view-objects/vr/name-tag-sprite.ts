@@ -31,7 +31,7 @@ export default class NameTagSprite extends THREE.Sprite {
     ctx.font = '30px arial';
     ctx.fillStyle = `#${color.getHexString()}`; // Username is colored in corresponding color
     ctx.textAlign = 'center';
-    ctx.fillText(username, width / 2, height - PADDING / 2 - textSize.sublineHeight);
+    ctx.fillText(username, width / 2, height - PADDING / 2);
 
     // Set drawn texture as background.
     const texture = new THREE.Texture(this.canvas);

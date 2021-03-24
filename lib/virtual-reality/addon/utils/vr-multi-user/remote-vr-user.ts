@@ -4,6 +4,7 @@ import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory
 import NameTagSprite from '../view-objects/vr/name-tag-sprite';
 import PingMesh from '../view-objects/vr/ping-mesh';
 import WaypointIndicator from '../view-objects/vr/waypoint-indicator';
+import { DEFAULT_RAY_LENGTH } from '../vr-controller';
 
 type Controller = {
   assetUrl: string,
@@ -121,8 +122,6 @@ export default class RemoteVrUser extends THREE.Object3D {
     });
 
     const line = new THREE.Line(geometry, material);
-    line.scale.z = 5;
-
     line.position.y -= 0.005;
     line.position.z -= 0.02;
     controller.add(line);
@@ -214,6 +213,17 @@ export default class RemoteVrUser extends THREE.Object3D {
    */
   update(delta: number) {
     this.animationMixer.update(delta);
+
+    // Update length of rays such that they extend to the intersection point.
+    if (this.controller1) this.updateRay(this.controller1);
+    if (this.controller2) this.updateRay(this.controller2);
+  }
+
+  private updateRay(controller: Controller) {
+    const distance = controller.intersection
+      ? controller.intersection.clone().sub(controller.ray.position).length()
+      : DEFAULT_RAY_LENGTH;
+    controller.ray.scale.z = distance;
   }
 
   /**
