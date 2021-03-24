@@ -11,5 +11,5 @@ export function isPingUpdateMessage(msg: any): msg is PingUpdateMessage {
     && typeof msg === 'object'
     && msg.event === PING_UPDATE_EVENT
     && typeof msg.controllerId === 'number'
-    && typeof msg.isPinging === 'boolean'
+    && typeof msg.isPinging === 'boolean';
 }

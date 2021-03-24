@@ -61,10 +61,11 @@ import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_
 import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
 import { HighlightingUpdateMessage, HIGHLIGHTING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
 import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
-import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
+import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
 import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
 import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/detached_menu_closed';
 import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/spectating_update';
+import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
 import { UserControllerMessage, USER_CONTROLLER_EVENT } from 'virtual-reality/utils/vr-message/sendable/user_controllers';
 import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
@@ -1038,6 +1039,12 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       remoteUser.togglePing2(isPinging);
     }
   }
+
+  onTimestampUpdate({
+    originalMessage: { timestamp }
+  }: ForwardedMessage<TimestampUpdateMessage>): void {
+    // TODO change timestamp
+  };
 
   /**
    * Handles the (dis-)connect of the specified user's controller(s).
