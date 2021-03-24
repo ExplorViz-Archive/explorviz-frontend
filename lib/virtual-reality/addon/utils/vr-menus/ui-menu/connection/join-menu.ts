@@ -107,7 +107,7 @@ export default class JoinMenu extends ConnectionBaseMenu {
 
     // Draw loading screen.
     const title = new TextItem(
-      `Error: ${msg}`,
+      `Error`,
       'title',
       '#ffffff',
       { x: 256, y: 20 },
@@ -115,6 +115,16 @@ export default class JoinMenu extends ConnectionBaseMenu {
       'center'
     );
     this.items.push(title);
+
+    const text = new TextItem(
+      msg,
+      'title',
+      '#ffffff',
+      { x: 256, y: 100 },
+      20,
+      'center'
+    );
+    this.items.push(text);
 
     const retryButton = new TextbuttonItem('connect', "Retry", { x: 100, y: 186 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
     this.items.push(retryButton);
