@@ -2,7 +2,8 @@ import Service, { inject as service } from '@ember/service';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import THREE from 'three';
 import WebSocketService from 'virtual-reality/services/web-socket';
-import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
+import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
+import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
 import { DetachableMenu } from '../utils/vr-menus/detachable-menu';
 import { AppOpenedMessage } from '../utils/vr-message/sendable/app_opened';
 import { ComponentUpdateMessage } from '../utils/vr-message/sendable/component_update';
@@ -224,6 +225,12 @@ export default class VrMessageSender extends Service {
       event: 'ping_update',
       controllerId,
       isPinging
+    });
+  }
+
+  sendTimestampUpdate(timestamp: number) {
+    this.webSocket.send<TimestampUpdateMessage>({
+      event: 'timestamp_update', timestamp
     });
   }
 

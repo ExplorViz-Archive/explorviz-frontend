@@ -32,6 +32,8 @@ type App = {
 };
 
 type Landscape = {
+  landscapeToken: String,
+  timestamp: number,
   position: Position,
   quaternion: Quaternion,
   scale: Scale
@@ -79,6 +81,8 @@ function isApp(app: any): app is App {
 function isLandscape(landscape: any): landscape is Landscape {
   return landscape !== null
     && typeof landscape === 'object'
+    && typeof landscape.landscapeToken === 'string'
+    && typeof landscape.timestamp === 'number'
     && isPosition(landscape.position)
     && isQuaternion(landscape.quaternion)
     && isScale(landscape.scale);

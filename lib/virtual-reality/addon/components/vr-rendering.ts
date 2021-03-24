@@ -32,6 +32,7 @@ import SpectateUserService from 'virtual-reality/services/spectate-user';
 import VrMenuFactoryService from 'virtual-reality/services/vr-menu-factory';
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
+import VrRoomService from 'virtual-reality/services/vr-room';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
@@ -61,10 +62,11 @@ import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_
 import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
 import { HighlightingUpdateMessage, HIGHLIGHTING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
 import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
-import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping-update';
+import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
 import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
 import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/detached_menu_closed';
 import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/spectating_update';
+import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
 import { UserControllerMessage, USER_CONTROLLER_EVENT } from 'virtual-reality/utils/vr-message/sendable/user_controllers';
 import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
@@ -123,6 +125,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   @service('remote-vr-users')
   private remoteUsers!: RemoteVrUserService;
+
+  @service
+  private vrRoomService!: VrRoomService;
 
   // #endregion SERVICES
 
@@ -184,7 +189,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.initScene();
     this.initCamera();
     this.initRenderer();
-    this.initObjectRendering();
+    this.initServices();
     this.initInteraction();
     this.initControllers();
     this.initWebSocket();
@@ -229,21 +234,17 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     camera.position.set(0, 1, 2);
     this.localUser.addCamera(camera);
-
+    
     // Menu group for hints.
     this.hintMenuQueue = new MenuQueue({ detachedMenuGroups: this.detachedMenuGroups });
-    this.hintMenuQueue.position.x = 0.035;
-    this.hintMenuQueue.position.y = -0.1;
     this.hintMenuQueue.position.z = -0.3;
-    this.hintMenuQueue.rotation.x = -0.18;
     camera.add(this.hintMenuQueue);
 
     // Menu group for message boxes.
     this.messageMenuQueue = new MenuQueue({ detachedMenuGroups: this.detachedMenuGroups });
-    this.messageMenuQueue.position.x = 0.035;
+    this.messageMenuQueue.rotation.x = 0.45;
     this.messageMenuQueue.position.y = 0.1;
     this.messageMenuQueue.position.z = -0.3;
-    this.messageMenuQueue.rotation.x = 0.45;
     camera.add(this.messageMenuQueue);
   }
 
@@ -268,7 +269,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     }
   }
 
-  private initObjectRendering() {
+  private initServices() {
     // Load image for delete button
     const closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
@@ -300,11 +301,16 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       interval: this.args.interval
     });
 
+    this.vrRoomService.injectValues({
+      vrLandscapeRenderer: this.vrLandscapeRenderer,
+      vrTimestampService: this.vrTimestampService,
+    });
+
     // Initialize menu rendering.
     this.menuFactory.injectValues({
       vrApplicationRenderer: this.vrApplicationRenderer,
       vrLandscapeRenderer: this.vrLandscapeRenderer,
-      vrTimestampService: this.vrTimestampService
+      vrTimestampService: this.vrTimestampService,
     });
     this.detachedMenuGroups = new DetachedMenuGroupContainer({
       closeButtonTexture,
@@ -334,11 +340,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     };
     this.interaction = new Interaction(
       this.canvas, this.camera, this.renderer, intersectableObjects, {
-      singleClick: (intersection) => this.handleSingleClick(intersection),
-      doubleClick: (intersection) => this.handleDoubleClick(intersection),
-      mouseWheel: (delta) => this.handleMouseWheel(delta),
-      panning: (delta, button) => this.handlePanning(delta, button),
-    }, raycastFilter
+        singleClick: (intersection) => this.handleSingleClick(intersection),
+        doubleClick: (intersection) => this.handleDoubleClick(intersection),
+        mouseWheel: (delta) => this.handleMouseWheel(delta),
+        panning: (delta, button) => this.handlePanning(delta, button),
+      }, raycastFilter
     );
 
     // Add key listener for room positioning
@@ -485,6 +491,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     this.update(delta);
     this.render();
+
+    // Send position update to backend. This must happen after the scene has
+    // been rendered such that the camera position is not corrupted.
+    this.sendPoses();
   }
 
   /**
@@ -501,9 +511,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.spectateUserService.update();
     this.grabbedObjectService.sendObjectPositions();
     this.remoteUsers.updateRemoteUsers(delta);
-
-    // Send updates to backend.
-    this.sendPoses(); // TODO move to update function of local user?
   }
 
   /**
@@ -845,7 +852,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Test which kind of object the user interacted with.
     if (object instanceof ApplicationMesh) {
-      this.addApplication(object.dataModel).then((applicationObject3D: ApplicationObject3D) => {
+      this.addApplication(object.dataModel).then((applicationObject3D: ApplicationObject3D | null) => {
+        if (!applicationObject3D) return;
+
         // Rotate app so that it is aligned with landscape
         applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
         applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
@@ -1043,6 +1052,12 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     }
   }
 
+  onTimestampUpdate({
+    originalMessage: { timestamp }
+  }: ForwardedMessage<TimestampUpdateMessage>): void {
+    this.vrTimestampService.updateTimestamp(timestamp);
+  }
+
   /**
    * Handles the (dis-)connect of the specified user's controller(s).
    *
@@ -1096,7 +1111,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     openApps.forEach((app) => {
       const application = getApplicationInLandscapeById(structureLandscapeData, app.id);
       if (application) {
-        tasks.push(this.vrApplicationRenderer.addApplication(application).then((applicationObject3D: ApplicationObject3D) => {
+        tasks.push(this.vrApplicationRenderer.addApplication(application).then((applicationObject3D: ApplicationObject3D | null) => {
+          if (!applicationObject3D) return;
+
           applicationObject3D.position.fromArray(app.position);
           applicationObject3D.quaternion.fromArray(app.quaternion);
           applicationObject3D.scale.fromArray(app.scale);
