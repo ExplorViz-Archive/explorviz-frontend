@@ -126,7 +126,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('remote-vr-users')
   private remoteUsers!: RemoteVrUserService;
 
-  @service
+  @service('vr-room-service')
   private vrRoomService!: VrRoomService;
 
   // #endregion SERVICES
