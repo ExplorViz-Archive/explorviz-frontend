@@ -1,5 +1,6 @@
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 import { restartableTask } from 'ember-concurrency-decorators';
+import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
@@ -7,7 +8,8 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 import * as LandscapeCommunicationRendering from 'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
-import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import { Application, Node, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
@@ -29,7 +31,8 @@ export default class VrLandscapeRenderer {
   private configuration: Configuration;
   private floor: FloorMesh;
   private font: THREE.Font;
-  private landscapeData: LandscapeData;
+  private structureLandscapeData: StructureLandscapeData;
+  private dynamicLandscapeData: DynamicLandscapeData;
   private elk: ELK;
   private worker: any;
   private imageLoader: ImageLoader = new ImageLoader();
@@ -47,16 +50,24 @@ export default class VrLandscapeRenderer {
     this.configuration = configuration;
     this.floor = floor;
     this.font = font;
-    this.landscapeData = landscapeData;
+    this.structureLandscapeData = landscapeData.structureLandscapeData;
+    this.dynamicLandscapeData = landscapeData.dynamicLandscapeData;
     this.elk = new ElkConstructor({
       workerUrl: './assets/web-workers/elk-worker.min.js',
     });
     this.worker = worker;
 
     // Load and scale landscape.
-    this.landscapeObject3D = new VrLandscapeObject3D(this.landscapeData.structureLandscapeData);
+    this.landscapeObject3D = new VrLandscapeObject3D(this.structureLandscapeData);
     this.resetScale();
     this.resetRotation();
+  }
+
+  async updateLandscapeData(structureLandscapeData: StructureLandscapeData, dynamicLandscapeData: DynamicLandscapeData): Promise<void> {
+    this.structureLandscapeData = structureLandscapeData;
+    this.dynamicLandscapeData = dynamicLandscapeData;
+
+    await perform(this.populateLandscape);
   }
 
   // #region LANDSCAPE POSITIONING
@@ -122,23 +133,19 @@ export default class VrLandscapeRenderer {
    *
    * @method populateLandscape
    */
-  @restartableTask *
-    // eslint-disable-next-line
-    populateLandscape(): any {
+  @restartableTask 
+  *populateLandscape(): any {
     this.debug('populate landscape-rendering');
 
-    const { structureLandscapeData, dynamicLandscapeData } = this.landscapeData;
-
-    this.landscapeObject3D.dataModel = structureLandscapeData;
+    this.landscapeObject3D.dataModel = this.structureLandscapeData;
 
     // Run Klay layouting in 3 steps within workers
     try {
-      const applicationCommunications = computeApplicationCommunication(structureLandscapeData,
-        dynamicLandscapeData);
+      const applicationCommunications = computeApplicationCommunication(this.structureLandscapeData, this.dynamicLandscapeData);
 
       // Do layout pre-processing (1st step)
       const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
-        structureLandscapeData,
+        structureLandscapeData: this.structureLandscapeData,
         applicationCommunications,
       });
 
@@ -149,7 +156,7 @@ export default class VrLandscapeRenderer {
       const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
-        structureLandscapeData,
+        structureLandscapeData: this.structureLandscapeData,
         applicationCommunications,
       });
 
@@ -171,7 +178,7 @@ export default class VrLandscapeRenderer {
       const centerPoint = landscapeRect.center;
 
       // Render all landscape entities
-      const { nodes } = structureLandscapeData;
+      const { nodes } = this.structureLandscapeData;
 
       // Draw boxes for nodes
       nodes.forEach((node: Node) => {

@@ -1,11 +1,25 @@
+import debugLogger from "ember-debug-logger";
+import ReloadHandler from "explorviz-frontend/services/reload-handler";
 import LocalVrUser from "virtual-reality/services/local-vr-user";
 import VrMessageSender from "virtual-reality/services/vr-message-sender";
 import DetachedMenuGroupContainer from "./vr-menus/detached-menu-group-container";
 import VrApplicationRenderer from "./vr-rendering/vr-application-renderer";
 import VrLandscapeRenderer from "./vr-rendering/vr-landscape-renderer";
 
+type VrtTimestampServiceArgs = {
+    timestamp: number, 
+    interval: number, 
+    localUser: LocalVrUser, 
+    sender: VrMessageSender, 
+    reloadHandler: ReloadHandler,
+    vrLandscapeRenderer: VrLandscapeRenderer,
+    vrApplicationRenderer: VrApplicationRenderer,
+    detachedMenuGroups: DetachedMenuGroupContainer
+};
 
 export default class VrTimestampService {
+
+    private debug = debugLogger('VrTimestampService');
 
     localUser: LocalVrUser;
 
@@ -15,7 +29,7 @@ export default class VrTimestampService {
 
     interval: number;
 
-    updateModel: (timestamp: number) => void;
+    reloadHandler: ReloadHandler;
 
     vrLandscapeRenderer: VrLandscapeRenderer;
 
@@ -23,15 +37,12 @@ export default class VrTimestampService {
 
     detachedMenuGroups: DetachedMenuGroupContainer
 
-    constructor({ timestamp, interval, localUser, sender, updateModel, vrLandscapeRenderer, vrApplicationRenderer, detachedMenuGroups }:
-        { timestamp: number, interval: number, localUser: LocalVrUser, sender: VrMessageSender, 
-            updateModel(timestamp: number): void, vrLandscapeRenderer: VrLandscapeRenderer,
-            vrApplicationRenderer: VrApplicationRenderer, detachedMenuGroups: DetachedMenuGroupContainer}) {
+    constructor({ timestamp, interval, localUser, sender, reloadHandler, vrLandscapeRenderer, vrApplicationRenderer, detachedMenuGroups }: VrtTimestampServiceArgs) {
         this.timestamp = timestamp;
         this.interval = interval;
         this.localUser = localUser;
         this.sender = sender;
-        this.updateModel = updateModel;
+        this.reloadHandler = reloadHandler;
         this.vrLandscapeRenderer = vrLandscapeRenderer;
         this.vrApplicationRenderer = vrApplicationRenderer;
         this.detachedMenuGroups = detachedMenuGroups;
@@ -45,29 +56,33 @@ export default class VrTimestampService {
         return Promise.resolve();
     }
 
-    updateTimestamp(timestamp: number) {
+    updateTimestamp(timestamp: number): Promise<void> {
         console.log('update timestamp', timestamp);
 
         if (this.localUser.isOnline) {
             this.sender.sendTimestampUpdate(timestamp)
         }
-        this.updateTimestampLocally(timestamp);
+        return this.updateTimestampLocally(timestamp);
     }
 
-    updateTimestampLocally(timestamp: number) {
-        // reset 
-        this.detachedMenuGroups.forceRemoveAllDetachedMenus();
-        this.vrApplicationRenderer.applicationGroup.clear();
-        this.vrLandscapeRenderer.cleanUpLandscape();
+    async updateTimestampLocally(timestamp: number): Promise<void> {
+        try {
+            // reset 
+            this.detachedMenuGroups.forceRemoveAllDetachedMenus();
+            this.vrApplicationRenderer.applicationGroup.clear();
+            this.vrLandscapeRenderer.cleanUpLandscape();
 
-        // update model
-        this.updateModel(timestamp);
-        this.timestamp = timestamp;
-
-        // render landscape
-        this.vrLandscapeRenderer.populateLandscape();
+            // update model
+            this.timestamp = timestamp;
+            const [structureData, dynamicData] = await this.reloadHandler.loadLandscapeByTimestamp(timestamp);
+            
+            await Promise.all([
+                this.vrLandscapeRenderer.updateLandscapeData(structureData, dynamicData),
+                this.vrApplicationRenderer.updateLandscapeData(structureData, dynamicData)
+            ]);
+        } catch (e) {
+            this.debug('Landscape couldn\'t be requested!', e);
+        }
     }
-
-
 }
 

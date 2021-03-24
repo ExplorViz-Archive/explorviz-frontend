@@ -9,7 +9,8 @@ import AppCommunicationRendering from 'explorviz-frontend/utils/application-rend
 import * as EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
 import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
-import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
@@ -40,7 +41,8 @@ export default class VrApplicationRenderer {
   private closeButtonTexture: THREE.Texture;
   private configuration: Configuration;
   private font: THREE.Font;
-  private landscapeData: LandscapeData;
+  private structureLandscapeData: StructureLandscapeData;
+  private dynamicLandscapeData: DynamicLandscapeData;
   private onRemoveApplication: RemoveApplicationCallback;
   private worker: any;
 
@@ -60,7 +62,7 @@ export default class VrApplicationRenderer {
     closeButtonTexture: THREE.Texture,
     configuration: Configuration,
     font: THREE.Font,
-    landscapeData: LandscapeData,
+    landscapeData: LandscapeData;
     onRemoveApplication: RemoveApplicationCallback,
     worker: any
   }) {
@@ -68,12 +70,18 @@ export default class VrApplicationRenderer {
     this.closeButtonTexture = closeButtonTexture;
     this.configuration = configuration;
     this.font = font;
-    this.landscapeData = landscapeData;
+    this.structureLandscapeData = landscapeData.structureLandscapeData;
+    this.dynamicLandscapeData = landscapeData.dynamicLandscapeData;
     this.onRemoveApplication = onRemoveApplication;
     this.worker = worker;
 
     this.applicationGroup = new ApplicationGroup();
     this.drawableClassCommunications = new Map();
+  }
+  
+  async updateLandscapeData(structureLandscapeData: StructureLandscapeData, dynamicLandscapeData: DynamicLandscapeData): Promise<void> {
+    this.structureLandscapeData = structureLandscapeData;
+    this.dynamicLandscapeData = dynamicLandscapeData;
   }
 
   addApplication(applicationModel: Application): Promise<ApplicationObject3D> {
@@ -89,15 +97,13 @@ export default class VrApplicationRenderer {
         return;
       }
 
-      const { dynamicLandscapeData } = this.landscapeData;
-
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', applicationModel);
 
       // Converting plain JSON layout data due to worker limitations
       const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
 
       const applicationObject3D = new VrApplicationObject3D(applicationModel, boxLayoutMap,
-        dynamicLandscapeData);
+        this.dynamicLandscapeData);
 
       // Add new meshes to application
       EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
@@ -136,9 +142,8 @@ export default class VrApplicationRenderer {
       return;
     }
 
-    const { structureLandscapeData } = this.landscapeData;
     const drawableClassCommunications = computeDrawableClassCommunication(
-      structureLandscapeData,
+      this.structureLandscapeData,
       applicationObject3D.traces,
     );
 

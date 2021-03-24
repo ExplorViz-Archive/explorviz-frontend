@@ -14,8 +14,7 @@ import AppCommunicationRendering from 'explorviz-frontend/utils/application-rend
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import Interaction from 'explorviz-frontend/utils/interaction';
-import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
-import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
@@ -82,7 +81,6 @@ const FLOOR_SIZE = 10;
 interface Args {
   readonly id: string;
   landscapeData: LandscapeData;
-  loadLandscapeByTimestamp(timestamps: number): [StructureLandscapeData, DynamicLandscapeData]; 
   timestamp: number;
   interval: number;
   readonly font: THREE.Font;
@@ -315,14 +313,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       interval: this.args.interval,
       localUser: this.localUser,
       sender: this.sender,
-      updateModel: (timestamp: number) => {
-        try {
-          const [structureData, dynamicData] = this.args.loadLandscapeByTimestamp(timestamp);
-          this.updateLandscape(structureData, dynamicData);
-        } catch (e) {
-          this.debug('Landscape couldn\'t be requested!', e);
-        }
-      },
+      reloadHandler: this.reloadHandler,
       vrLandscapeRenderer: this.vrLandscapeRenderer,
       vrApplicationRenderer: this.vrApplicationRenderer,
       detachedMenuGroups: this.detachedMenuGroups
@@ -1372,42 +1363,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       default:
         return null;
     }
-  }
-
-  updateLandscape(structureData: StructureLandscapeData,
-    dynamicData: DynamicLandscapeData) {
-    let application;
-    if (this.args.landscapeData !== null) {
-      application = this.args.landscapeData.application;
-      if (application !== undefined) {
-        const newApplication = VrRendering.getApplicationFromLandscapeByPid(
-          application.pid, structureData,
-        );
-
-        if (newApplication) {
-          application = newApplication;
-        }
-      }
-    }
-    this.args.landscapeData = {
-      structureLandscapeData: structureData,
-      dynamicLandscapeData: dynamicData,
-      application,
-    };
-  }
-
-  private static getApplicationFromLandscapeByPid(pid: string,
-    structureData: StructureLandscapeData) {
-    let foundApplication: Application|undefined;
-    structureData.nodes.forEach((node) => {
-      node.applications.forEach((application) => {
-        if (application.pid === pid) {
-          foundApplication = application;
-        }
-      });
-    });
-
-    return foundApplication;
   }
 
   // #endregion UTILS
