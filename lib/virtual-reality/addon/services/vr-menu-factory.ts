@@ -49,7 +49,7 @@ export default class VrMenuFactoryService extends Service {
   @service('grabbed-object')
   private grabbedObjectService!: GrabbedObjectService;
 
-  @service('vr-room-service')
+  @service('vr-room')
   private vrRoomService!: VrRoomService;
 
   private vrApplicationRenderer!: VrApplicationRenderer;
