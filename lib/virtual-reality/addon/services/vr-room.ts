@@ -82,6 +82,6 @@ export default class VrRoomService extends Service {
 
 declare module '@ember/service' {
   interface Registry {
-    'vr-room-service': VrRoomService;
+    'vr-room': VrRoomService;
   }
 }

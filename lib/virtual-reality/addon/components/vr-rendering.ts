@@ -118,7 +118,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private receiver!: VrMessageReceiver;
 
   @service('grabbed-object')
-  grabbedObjectService!: GrabbedObjectService;
+  private grabbedObjectService!: GrabbedObjectService;
 
   @service('vr-menu-factory')
   private menuFactory!: VrMenuFactoryService;
@@ -126,7 +126,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('remote-vr-users')
   private remoteUsers!: RemoteVrUserService;
 
-  @service('vr-room-service')
+  @service('vr-room')
   private vrRoomService!: VrRoomService;
 
   // #endregion SERVICES
@@ -270,6 +270,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   private initServices() {
+    this.debug('Initializing services...');
+
     // Load image for delete button
     const closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
