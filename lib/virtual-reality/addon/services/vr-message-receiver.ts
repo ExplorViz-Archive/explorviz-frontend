@@ -36,7 +36,7 @@ export interface VrMessageListener {
   onAppClosed(msg: ForwardedMessage<AppClosedMessage>): void;
   onDetachedMenuClosed(msg: ForwardedMessage<DetachedMenuClosedMessage>): void;
   onPingUpdate(msg: ForwardedMessage<PingUpdateMessage>): void;
-  onTimstampUpdate(msg: ForwardedMessage<TimestampUpdateMessage>): void;
+  onTimestampUpdate(msg: ForwardedMessage<TimestampUpdateMessage>): void;
   onObjectMoved(msg: ForwardedMessage<ObjectMovedMessage>): void;
   onComponentUpdate(msg: ForwardedMessage<ComponentUpdateMessage>): void;
   onHighlightingUpdate(msg: ForwardedMessage<HighlightingUpdateMessage>): void;
@@ -98,7 +98,7 @@ export default class VrMessageReceiver extends Service {
     if (isForwardedMessageOf(msg, isHighlightingUpdateMessage)) return this.messageListeners.forEach((l) => l.onHighlightingUpdate(msg));
     if (isForwardedMessageOf(msg, isSpectatingUpdateMessage)) return this.messageListeners.forEach((l) => l.onSpectatingUpdate(msg));
     if (isForwardedMessageOf(msg, isPingUpdateMessage)) return this.messageListeners.forEach((l) => l.onPingUpdate(msg));
-    if (isForwardedMessageOf(msg, isTimestampUpdateMessage)) return this.messageListeners.forEach((l) => l.onTimstampUpdate(msg));
+    if (isForwardedMessageOf(msg, isTimestampUpdateMessage)) return this.messageListeners.forEach((l) => l.onTimestampUpdate(msg));
     console.error('Received invalid forwarded message', msg);
   }
 

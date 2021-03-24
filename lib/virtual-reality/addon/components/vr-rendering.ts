@@ -1041,10 +1041,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   onTimestampUpdate({
-    originalMessage: { timestamp }
+    originalMessage: { timestamp: _timestamp }
   }: ForwardedMessage<TimestampUpdateMessage>): void {
     // TODO change timestamp
-  };
+  }
 
   /**
    * Handles the (dis-)connect of the specified user's controller(s).
