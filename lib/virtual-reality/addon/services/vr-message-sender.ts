@@ -43,18 +43,18 @@ export default class VrMessageSender extends Service {
    * Sends position and rotation information of the local user's camera and
    * controllers.
    */
-  sendPoseUpdate(camera: Pose, controller1: Pose, controller2: Pose, intersection1: THREE.Vector3, intersection2: THREE.Vector3) {
+  sendPoseUpdate(camera: Pose, controller1: Pose, controller2: Pose, intersection1: THREE.Vector3 | null, intersection2: THREE.Vector3 | null) {
     this.webSocket.send<UserPositionsMessage>({
       event: 'user_positions',
       controller1: {
         position: controller1.position.toArray(),
         quaternion: controller1.quaternion.toArray(),
-        intersection: intersection1.toArray()
+        intersection: intersection1?.toArray() || null
       },
       controller2: {
         position: controller2.position.toArray(),
         quaternion: controller2.quaternion.toArray(),
-        intersection: intersection2.toArray()
+        intersection: intersection2?.toArray() || null
       },
       camera: {
         position: camera.position.toArray(),

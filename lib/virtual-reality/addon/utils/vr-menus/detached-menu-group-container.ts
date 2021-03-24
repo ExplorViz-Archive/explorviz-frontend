@@ -79,7 +79,12 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
     menu.getWorldQuaternion(quaternion);
     scale.copy(menu.scale);
 
-    // Put menu container at same position as menu.
+    // Reset position, rotation and scale of detached menu.
+    menu.position.set(0, 0, 0);
+    menu.rotation.set(0, 0, 0);
+    menu.scale.set(1, 1, 1);
+
+    // Create menu group for the detached menu.
     const detachedMenuGroup = new DetachedMenuGroup({
       menu, menuId, detachedMenuGroups: this
     });
@@ -101,11 +106,6 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
     detachedMenuGroup.position.copy(position);
     detachedMenuGroup.quaternion.copy(quaternion);
     detachedMenuGroup.scale.copy(scale);
-
-    // Reset position, rotation and scale of detached menu.
-    menu.position.set(0, 0, 0);
-    menu.rotation.set(0, 0, 0);
-    menu.scale.set(1, 1, 1);
   }
 
   /**
@@ -150,6 +150,9 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
    * Removes the given menu without asking the backend.
    */
   forceRemoveDetachedMenu(detachedMenuGroup: DetachedMenuGroup) {
+    // Notify the detached menu that it has been closed.
+    detachedMenuGroup.closeAllMenus();
+
     // Remove the 3D object of the menu.
     this.remove(detachedMenuGroup);
 
@@ -162,6 +165,11 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
   }
 
   forceRemoveAllDetachedMenus() {
+    // Notify all detached menus that they have been closed.
+    for (let detachedMenuGroup of this.detachedMenuGroups) {
+      detachedMenuGroup.closeAllMenus();
+    }
+
     this.remove(...this.children);
     this.detachedMenuGroups.clear();
     this.detachedMenuGroupsById.clear();

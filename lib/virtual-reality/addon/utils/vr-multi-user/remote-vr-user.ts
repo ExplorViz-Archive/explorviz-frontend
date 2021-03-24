@@ -221,7 +221,7 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   private updateRay(controller: Controller) {
     const distance = controller.intersection
-      ? controller.intersection.clone().sub(controller.ray.position).length()
+      ? controller.ray.getWorldPosition(new THREE.Vector3()).sub(controller.intersection).length()
       : DEFAULT_RAY_LENGTH;
     controller.ray.scale.z = distance;
   }

@@ -86,6 +86,13 @@ export default class MenuGroup extends THREE.Group {
   }
 
   /**
+   * Closes all menus.
+   */
+  closeAllMenus() {
+    this.closeMenusWhile(() => true);
+  }
+
+  /**
    * Closes menus until the current menu does not match the given predicate.
    *
    * Only the final menu (i.e., the first menu that is not closed) is resumed.

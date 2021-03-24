@@ -18,7 +18,11 @@ export default class DetachedMenuGroup extends MenuGroup implements GrabbableObj
   constructor({ menu, menuId, ...args }: DetachedMenuGroupArgs) {
     super(args);
     this.menuId = menuId;
+
+    // Add menu to menu group and notify it that it has been opened when it was
+    // not open previously.
     this.addMenu(menu);
+    if (!menu.isMenuOpen) menu.onOpenMenu();
   }
 
   getGrabId(): string | null {

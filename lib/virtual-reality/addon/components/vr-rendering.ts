@@ -917,18 +917,16 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       this.localUser.controller2
     );
     let controller1 = this.localUser.controller1;
-    let intersection1 = new THREE.Vector3();
+    let intersection1 = null;
     if (controller1) {
       controller1.updateIntersectedObject();
-      let point = controller1.intersectedObject?.point;
-      if (point) intersection1 = point;
+      intersection1 = controller1.intersectedObject?.point || null;
     }
     let controller2 = this.localUser.controller2;
-    let intersection2 = new THREE.Vector3();
+    let intersection2 = null;
     if (controller2) {
       controller2.updateIntersectedObject();
-      let point = controller2.intersectedObject?.point;
-      if (point) intersection2 = point;
+      intersection2 = controller2.intersectedObject?.point || null;
     }
 
     this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2, intersection1, intersection2);
