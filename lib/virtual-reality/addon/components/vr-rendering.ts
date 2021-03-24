@@ -296,7 +296,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.scene.add(this.applicationGroup);
 
     // Initialize timestamp service.
-    this.vrTimestampService = new VrTimestampService(this.args.timestamp, this.args.timestamp);
+    this.vrTimestampService = new VrTimestampService({ 
+      timestamp: this.args.timestamp, 
+      interval: this.args.interval
+    });
 
     // Initialiye room service.
     this.vrRoomService.injectValues({

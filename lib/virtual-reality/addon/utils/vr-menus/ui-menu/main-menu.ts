@@ -51,7 +51,7 @@ export default class MainMenu extends UiMenu {
     timeButton.onTriggerDown = () => {
       this.menuGroup?.openMenu(this.menuFactory.buildTimeMenu());
     };
-    this.thumbpadTargets.push(resetButton);
+    this.thumbpadTargets.push(timeButton);
 
     this.redrawMenu();
   }
