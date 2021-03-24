@@ -62,6 +62,10 @@ export default class TimeMenu extends UiMenu {
       x: 100,
       y: 320,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+    this.selectButton.onTriggerDown = (() => {
+      this.vrTimestampService.updateTimestamp(this.date.getTime());
+      this.closeMenu();
+    }) 
     this.items.push(this.selectButton);
 
     this.redrawMenu();
@@ -76,6 +80,8 @@ export default class TimeMenu extends UiMenu {
       this.redrawMenu();
     }
   }
+
+  
 
   setDateBack() {
     this.date.setTime(this.date.getTime() - this.vrTimestampService.interval * this.msPerSeconds);

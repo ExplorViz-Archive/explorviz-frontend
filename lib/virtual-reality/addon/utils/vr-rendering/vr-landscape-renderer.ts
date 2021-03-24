@@ -64,6 +64,15 @@ export default class VrLandscapeRenderer {
   // #region LANDSCAPE POSITIONING
 
   centerLandscape() {
+
+    // Reset scale
+    this.landscapeObject3D.scale.fromArray([1,1,1]);
+
+    // Reset landscape rotation
+    this.landscapeObject3D.rotation.x = -90 * THREE.MathUtils.DEG2RAD;
+    this.landscapeObject3D.rotation.y = 0;
+    this.landscapeObject3D.rotation.z = 0;
+
     const landscape = this.landscapeObject3D;
 
     // Compute bounding box of the floor

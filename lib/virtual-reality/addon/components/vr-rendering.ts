@@ -295,12 +295,32 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     });
     this.scene.add(this.applicationGroup);
 
+    // Initialize menu group.
+    this.detachedMenuGroups = new DetachedMenuGroupContainer({
+      closeButtonTexture,
+      receiver: this.receiver,
+      sender: this.sender,
+    });
+    this.scene.add(this.detachedMenuGroups);
+
     // Initialize timestamp service
     this.vrTimestampService = new VrTimestampService({ 
       timestamp: this.args.timestamp, 
-      interval: this.args.interval
+      interval: this.args.interval,
+      localUser: this.localUser,
+      sender: this.sender,
+      updateModel: (timestamp: number) => {
+        var timestampObj = new Timestamp();
+        timestampObj.set('timestamp', timestamp);
+        this.args.updateTimestamp([timestampObj]);
+      },
+      vrLandscapeRenderer: this.vrLandscapeRenderer,
+      vrApplicationRenderer: this.vrApplicationRenderer,
+      detachedMenuGroups: this.detachedMenuGroups
     });
+    
 
+    // Initialize room service.
     this.vrRoomService.injectValues({
       vrLandscapeRenderer: this.vrLandscapeRenderer,
       vrTimestampService: this.vrTimestampService,
@@ -311,13 +331,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       vrApplicationRenderer: this.vrApplicationRenderer,
       vrLandscapeRenderer: this.vrLandscapeRenderer,
       vrTimestampService: this.vrTimestampService,
+      detachedMenuGroups: this.detachedMenuGroups
     });
-    this.detachedMenuGroups = new DetachedMenuGroupContainer({
-      closeButtonTexture,
-      receiver: this.receiver,
-      sender: this.sender,
-    });
-    this.scene.add(this.detachedMenuGroups);
+  
 
   }
 
@@ -1055,7 +1071,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   onTimestampUpdate({
     originalMessage: { timestamp }
   }: ForwardedMessage<TimestampUpdateMessage>): void {
-    this.vrTimestampService.updateTimestamp(timestamp);
+    this.vrTimestampService.updateTimestampLocally(timestamp);
   }
 
   /**

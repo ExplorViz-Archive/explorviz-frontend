@@ -1,7 +1,7 @@
-import THREE from 'three';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
+import DetachedMenuGroupContainer from '../detached-menu-group-container';
 import TextItem from '../items/text-item';
 import TextbuttonItem from '../items/textbutton-item';
 import UiMenu, { UiMenuArgs } from '../ui-menu';
@@ -10,18 +10,21 @@ export type ResetMenuArgs = UiMenuArgs & {
   localUser: LocalVrUser,
   vrApplicationRenderer: VrApplicationRenderer,
   vrLandscapeRenderer: VrLandscapeRenderer,
+  detachedMenuGroups: DetachedMenuGroupContainer
 };
 
 export default class ResetMenu extends UiMenu {
   private localUser: LocalVrUser;
   private vrApplicationRenderer: VrApplicationRenderer;
   private vrLandscapeRenderer: VrLandscapeRenderer;
+  private detachedMenuGroups: DetachedMenuGroupContainer;
 
-  constructor({ localUser, vrApplicationRenderer, vrLandscapeRenderer, ...args }: ResetMenuArgs) {
+  constructor({ localUser, vrApplicationRenderer, vrLandscapeRenderer, detachedMenuGroups, ...args }: ResetMenuArgs) {
     super(args);
     this.localUser = localUser;
     this.vrApplicationRenderer = vrApplicationRenderer;
     this.vrLandscapeRenderer = vrLandscapeRenderer;
+    this.detachedMenuGroups = detachedMenuGroups;
 
     const textItem = new TextItem('Reset', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(textItem);
@@ -62,6 +65,7 @@ export default class ResetMenu extends UiMenu {
   private resetAll() {
     this.resetLocalUser();
     this.resetApplications();
+    this.resetDetachedMenus();
     this.resetLandscape();
   }
 
@@ -69,14 +73,15 @@ export default class ResetMenu extends UiMenu {
     this.localUser.resetPosition();
   }
 
+  private resetDetachedMenus() {
+    this.detachedMenuGroups.forceRemoveAllDetachedMenus();
+  }
+
   private resetApplications() {
     this.vrApplicationRenderer.applicationGroup.clear();
   }
 
   private resetLandscape() {
-    this.vrLandscapeRenderer.landscapeObject3D.rotation.x = -90 * THREE.MathUtils.DEG2RAD;
-    this.vrLandscapeRenderer.landscapeObject3D.rotation.y = 0;
-    this.vrLandscapeRenderer.landscapeObject3D.rotation.z = 0;
     this.vrLandscapeRenderer.centerLandscape();
   }
 }

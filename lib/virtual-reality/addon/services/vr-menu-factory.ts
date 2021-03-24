@@ -26,11 +26,13 @@ import MainMenu from "../utils/vr-menus/ui-menu/main-menu";
 import TimeMenu from 'virtual-reality/utils/vr-menus/ui-menu/time-menu';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import VrRoomService from './vr-room';
+import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
 
 type InjectedValues = {
   vrApplicationRenderer: VrApplicationRenderer,
   vrLandscapeRenderer: VrLandscapeRenderer,
   vrTimestampService: VrTimestampService,
+  detachedMenuGroups: DetachedMenuGroupContainer
 };
 
 export default class VrMenuFactoryService extends Service {
@@ -55,15 +57,18 @@ export default class VrMenuFactoryService extends Service {
   private vrApplicationRenderer!: VrApplicationRenderer;
   private vrLandscapeRenderer!: VrLandscapeRenderer;
   private vrTimestampService!: VrTimestampService;
+  private detachedMenuGroups!: DetachedMenuGroupContainer;
 
   injectValues({
     vrApplicationRenderer,
     vrLandscapeRenderer,
-    vrTimestampService
+    vrTimestampService,
+    detachedMenuGroups
   }: InjectedValues) {
     this.vrTimestampService = vrTimestampService;
     this.vrApplicationRenderer = vrApplicationRenderer;
     this.vrLandscapeRenderer = vrLandscapeRenderer;
+    this.detachedMenuGroups = detachedMenuGroups;
   }
 
   buildMainMenu(): MainMenu {
@@ -206,6 +211,7 @@ export default class VrMenuFactoryService extends Service {
       vrApplicationRenderer: this.vrApplicationRenderer,
       vrLandscapeRenderer: this.vrLandscapeRenderer,
       menuFactory: this,
+      detachedMenuGroups: this.detachedMenuGroups
     });
   }
 
