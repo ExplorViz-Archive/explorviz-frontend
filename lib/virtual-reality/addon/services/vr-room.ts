@@ -63,7 +63,10 @@ export default class VrRoomService extends Service {
 
   createRoom(): Promise<string> {
     const url = `${config.APP.API_ROOT}/v2/vr/room`;
-    return this.ajax.post(url, {data: this.buildInitialRoomPayload()});
+    return this.ajax.post(url, {
+      contentType: "application/json",
+      data: JSON.stringify(this.buildInitialRoomPayload())
+    });
   }
 
   private buildInitialRoomPayload(): InitialRoomPayload {
