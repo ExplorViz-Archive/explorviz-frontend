@@ -10,4 +10,15 @@ export default class VrTimestampService {
         this.interval = interval;
     }
 
+    updateLandscapeToken(landscapeToken: string, timestamp: number) {
+        // TODO implement me
+        console.log('update landscape', landscapeToken, timestamp);
+        this.timestamp = timestamp;
+    }
+
+    updateTimestamp(timestamp: number) {
+        // TODO implement me
+        console.log('update timestamp', timestamp);
+        this.timestamp = timestamp;
+    }
 }

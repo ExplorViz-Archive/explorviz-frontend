@@ -1,19 +1,18 @@
-import { AjaxServiceClass } from "ember-ajax/services/ajax";
-import config from "explorviz-frontend/config/environment";
+import VrRoomService from "virtual-reality/services/vr-room";
 import TextItem from "../../items/text-item";
 import TextbuttonItem from "../../items/textbutton-item";
 import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 
 export type OfflineMenuArgs = ConnectionBaseMenuArgs & {
-  ajax: AjaxServiceClass
+  vrRoomService: VrRoomService
 };
 
 export default class OfflineMenu extends ConnectionBaseMenu {
-  private ajax: AjaxServiceClass;
+  private vrRoomService: VrRoomService;
 
-  constructor({ ajax, ...args }: OfflineMenuArgs) {
+  constructor({ vrRoomService, ...args }: OfflineMenuArgs) {
     super(args);
-    this.ajax = ajax;
+    this.vrRoomService = vrRoomService;
 
     const title = new TextItem('You are offline', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
     this.items.push(title);
@@ -33,9 +32,7 @@ export default class OfflineMenu extends ConnectionBaseMenu {
     this.redrawMenu();
   }
 
-  async createAndJoinNewRoom() {
-    const url = `${config.APP.API_ROOT}/v2/vr/room`;
-    const roomId = await this.ajax.post(url);
-    this.localUser.connect(roomId);
+  createAndJoinNewRoom() {
+    this.localUser.connect(this.vrRoomService.createRoom());
   }
 }

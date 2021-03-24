@@ -32,6 +32,7 @@ import SpectateUserService from 'virtual-reality/services/spectate-user';
 import VrMenuFactoryService from 'virtual-reality/services/vr-menu-factory';
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
+import VrRoomService from 'virtual-reality/services/vr-room';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
@@ -125,6 +126,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('remote-vr-users')
   private remoteUsers!: RemoteVrUserService;
 
+  @service
+  private vrRoomService!: VrRoomService;
+
   // #endregion SERVICES
 
   // #region CLASS FIELDS
@@ -185,7 +189,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.initScene();
     this.initCamera();
     this.initRenderer();
-    this.initObjectRendering();
+    this.initServices();
     this.initInteraction();
     this.initControllers();
     this.initWebSocket();
@@ -265,7 +269,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     }
   }
 
-  private initObjectRendering() {
+  private initServices() {
     // Load image for delete button
     const closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
@@ -294,11 +298,16 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Initialize timestamp service
     this.vrTimestampService = new VrTimestampService(this.args.timestamp, this.args.timestamp);
 
+    this.vrRoomService.injectValues({
+      vrLandscapeRenderer: this.vrLandscapeRenderer,
+      vrTimestampService: this.vrTimestampService,
+    });
+
     // Initialize menu rendering.
     this.menuFactory.injectValues({
       vrApplicationRenderer: this.vrApplicationRenderer,
       vrLandscapeRenderer: this.vrLandscapeRenderer,
-      vrTimestampService: this.vrTimestampService
+      vrTimestampService: this.vrTimestampService,
     });
     this.detachedMenuGroups = new DetachedMenuGroupContainer({
       closeButtonTexture,
@@ -1041,9 +1050,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   onTimestampUpdate({
-    originalMessage: { timestamp: _timestamp }
+    originalMessage: { timestamp }
   }: ForwardedMessage<TimestampUpdateMessage>): void {
-    // TODO change timestamp
+    this.vrTimestampService.updateTimestamp(timestamp);
   }
 
   /**

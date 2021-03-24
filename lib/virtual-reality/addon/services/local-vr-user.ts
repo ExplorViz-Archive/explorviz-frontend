@@ -113,10 +113,10 @@ export default class LocalVrUser extends Service {
     this.userGroup.children.forEach((child) => this.userGroup.remove(child));
   }
 
-  connect(roomId: string) {
+  async connect(roomId: Promise<string>) {
     if (!this.isConnecting) {
       this.connectionStatus = 'connecting';
-      this.currentRoomId = roomId;
+      this.currentRoomId = await roomId;
       this.webSocket.initSocket(this.currentRoomId);
     }
   }

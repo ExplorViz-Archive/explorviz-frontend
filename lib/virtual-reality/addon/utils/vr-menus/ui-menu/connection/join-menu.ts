@@ -1,5 +1,6 @@
 import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 import config from 'explorviz-frontend/config/environment';
+import VrRoomService, { RoomListRecord } from 'virtual-reality/services/vr-room';
 import TextItem from "../../items/text-item";
 import TextbuttonItem from "../../items/textbutton-item";
 import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
@@ -9,42 +10,22 @@ import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
  */
 const REFRESH_TIMEOUT = 3.0;
 
-type RoomId = string;
 
-type Room = {
-  id: RoomId,
-  name: string
-};
-
-function isRoomId(roomId: any): roomId is RoomId {
-  return typeof roomId === 'string';
-}
 
 export type JoinMenuArgs = ConnectionBaseMenuArgs & {
-  ajax: AjaxServiceClass
+  vrRoomService: VrRoomService
 };
 
 export default class JoinMenu extends ConnectionBaseMenu {
-  private ajax: AjaxServiceClass;
+  private vrRoomService: VrRoomService;
   private refreshTimeout: number;
 
-  constructor({ ajax, ...args }: JoinMenuArgs) {
+  constructor({ vrRoomService, ...args }: JoinMenuArgs) {
     super(args);
-    this.ajax = ajax;
+    this.vrRoomService = vrRoomService;
     this.refreshTimeout = 0;
 
     this.drawLoadingScreen();
-  }
-
-  private async loadRoomList(): Promise<Room[]> {
-    const url = `${config.APP.API_ROOT}/v2/vr/rooms`;
-    const roomIds = await this.ajax.request(url);
-    if (Array.isArray(roomIds) && roomIds.every(isRoomId)) {
-      return roomIds.map((roomId) => {
-        return { id: roomId, name: `Room ${roomId}` };
-      });
-    }
-    throw 'invalid data';
   }
 
   private drawLoadingScreen() {
@@ -64,7 +45,7 @@ export default class JoinMenu extends ConnectionBaseMenu {
     this.redrawMenu();
   }
 
-  private async drawRoomList(rooms: Room[]) {
+  private async drawRoomList(rooms: RoomListRecord[]) {
     this.items.clear();
 
     const title = new TextItem(
@@ -95,7 +76,7 @@ export default class JoinMenu extends ConnectionBaseMenu {
       this.items.push(roomButton);
       this.thumbpadTargets.push(roomButton);
       roomButton.onTriggerDown = () => {
-        this.localUser.connect(room.id);
+        this.localUser.connect(Promise.resolve(room.id));
       }
       yPos += yOffset;
     }
@@ -139,7 +120,7 @@ export default class JoinMenu extends ConnectionBaseMenu {
 
   private async loadAndDrawRoomList() {
     try {
-      const rooms = await this.loadRoomList();
+      const rooms = await this.vrRoomService.listRooms();
       this.drawRoomList(rooms);
       this.refreshTimeout = REFRESH_TIMEOUT;
     } catch (e) {

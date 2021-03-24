@@ -1,5 +1,4 @@
 import Service, { inject as service } from '@ember/service';
-import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import LocalVrUser from "virtual-reality/services/local-vr-user";
@@ -26,11 +25,12 @@ import SettingsMenu from "../utils/vr-menus/ui-menu/settings-menu";
 import MainMenu from "../utils/vr-menus/ui-menu/main-menu";
 import TimeMenu from 'virtual-reality/utils/vr-menus/ui-menu/time-menu';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
+import VrRoomService from './vr-room';
 
 type InjectedValues = {
   vrApplicationRenderer: VrApplicationRenderer,
   vrLandscapeRenderer: VrLandscapeRenderer,
-  vrTimestampService: VrTimestampService;
+  vrTimestampService: VrTimestampService,
 };
 
 export default class VrMenuFactoryService extends Service {
@@ -40,9 +40,6 @@ export default class VrMenuFactoryService extends Service {
   @service('remote-vr-users')
   private remoteUsers!: RemoteVrUserService;
 
-  @service('ajax')
-  private ajax!: AjaxServiceClass;
-
   @service('vr-message-sender')
   private sender!: VrMessageSender;
 
@@ -51,6 +48,9 @@ export default class VrMenuFactoryService extends Service {
 
   @service('grabbed-object')
   private grabbedObjectService!: GrabbedObjectService;
+
+  @service
+  private vrRoomService!: VrRoomService;
 
   private vrApplicationRenderer!: VrApplicationRenderer;
   private vrLandscapeRenderer!: VrLandscapeRenderer;
@@ -104,7 +104,7 @@ export default class VrMenuFactoryService extends Service {
   buildOfflineMenu(): OfflineMenu {
     return new OfflineMenu({
       localUser: this.localUser,
-      ajax: this.ajax,
+      vrRoomService: this.vrRoomService,
       menuFactory: this,
     });
   }
@@ -127,7 +127,7 @@ export default class VrMenuFactoryService extends Service {
   buildJoinMenu(): JoinMenu {
     return new JoinMenu({
       localUser: this.localUser,
-      ajax: this.ajax,
+      vrRoomService: this.vrRoomService,
       menuFactory: this,
     });
   }
