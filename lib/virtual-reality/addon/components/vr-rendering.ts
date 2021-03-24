@@ -295,9 +295,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     });
     this.scene.add(this.applicationGroup);
 
-    // Initialize timestamp service
+    // Initialize timestamp service.
     this.vrTimestampService = new VrTimestampService(this.args.timestamp, this.args.timestamp);
 
+    // Initialiye room service.
     this.vrRoomService.injectValues({
       vrLandscapeRenderer: this.vrLandscapeRenderer,
       vrTimestampService: this.vrTimestampService,
@@ -315,7 +316,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       sender: this.sender,
     });
     this.scene.add(this.detachedMenuGroups);
-
   }
 
   /**
