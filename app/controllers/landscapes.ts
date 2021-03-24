@@ -59,6 +59,7 @@ export default class Landscapes extends Controller {
       fetch(`${userService}/user/${uId}/token`, {
         headers: {
           Authorization: `Bearer ${this.auth.accessToken}`,
+          "Content-Type": "application/json"
         },
         method: 'POST',
       })

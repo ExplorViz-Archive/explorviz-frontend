@@ -10,7 +10,7 @@ export default class ClazzCommunicationMesh extends BaseMesh implements Identifi
 
   layout: CommunicationLayout;
 
-  colabId: String;
+  colabId: string;
 
   constructor(layout: CommunicationLayout, dataModel: DrawableClassCommunication,
     defaultColor: THREE.Color, highlightingColor: THREE.Color) {

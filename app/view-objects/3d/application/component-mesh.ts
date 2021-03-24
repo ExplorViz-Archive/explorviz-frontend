@@ -14,7 +14,7 @@ export default class ComponentMesh extends BoxMesh implements IdentifiableMesh {
 
   opened: boolean = false;
 
-  colabId: String;
+  colabId: string;
 
   // Set by labeler
   labelMesh: ComponentLabelMesh | null = null;

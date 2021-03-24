@@ -4,6 +4,8 @@ import { Perspective, IdentifiableMesh, CursorPosition, CollaborativeEvents } fr
 import THREE from 'three';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import adjustForObjectRotation from 'collaborative-mode/utils/collaborative-util';
+import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
+import { tracked } from '@glimmer/tracking';
 
 export default class CollaborativeService extends Service.extend(Evented
   // anything which *must* be merged to prototype here
@@ -12,34 +14,44 @@ export default class CollaborativeService extends Service.extend(Evented
   @service('websockets')
   socketService!: any;
 
-  socketRef = null;
+  socketRef: any = null;
 
-  socketUrl: String = "";
+  socketUrl: string = "";
 
   username: string = "";
 
-  async openSocket(sessionId: String, username: String) {
+  @service('collaborative-settings-service')
+  settings!: CollaborativeSettingsService;
+
+  openSocket(username: String) {
     this.username = username.toString();
-    this.socketUrl = `ws://localhost:8080/v2/collaborative/${sessionId}/${username}`;
+    this.socketUrl = `ws://localhost:8080/v2/collaborative/${username}`;
     const socket = this.socketService.socketFor(this.socketUrl);
     socket.on('open', this.myOpenHandler, this);
     socket.on('close', this.myCloseHandler, this);
     socket.on('message', this.myMessageHandler, this);
 
-    this.set('socketRef', socket);
+    this.socketRef = socket;
   }
 
-  async closeSocket() {
-    this.socketService.closeSocketFor(this.socketUrl);
+  reconnect() {
+    this.socketRef?.reconnect();
+    AlertifyHandler.showAlertifyMessage('Trying to reconnected...');
   }
 
-  // @ts-expect-error
-  myOpenHandler(event: any) {
+  closeSocket() {
+    this.socketRef?.close();
+    // this.socketService.closeSocketFor(this.socketUrl);
+  }
+
+  myOpenHandler() {
+    this.settings.connected = true;
     AlertifyHandler.showAlertifyMessage('Collaborative Mode active!');
   }
 
-  // @ts-expect-error
-  myCloseHandler(event: any) {
+  myCloseHandler() {
+    this.settings.connected = false;
+    this.settings.meeting = undefined;
     AlertifyHandler.showAlertifyMessage('Collaborative Mode stopped!');
   }
 
@@ -47,7 +59,7 @@ export default class CollaborativeService extends Service.extend(Evented
     console.log("Message: " + event.data)
     const result = JSON.parse(event.data);
     
-    this.trigger(result.action, result.payload, result.from);
+    this.trigger(result.event, result.data);
   }
 
   sendDoubleClick(mesh: THREE.Mesh) {
@@ -58,14 +70,14 @@ export default class CollaborativeService extends Service.extend(Evented
     this.sendClick(CollaborativeEvents.SingleClick, mesh);
   }
 
-  sendClick(action: String, mesh: THREE.Mesh) {
+  sendClick(action: string, mesh: THREE.Mesh) {
     if (this.instanceOfIdentifiableMesh(mesh)) {
       this.send(action, { id: mesh.colabId });
     }
   }
 
-  sendPerspective(payload: Perspective, to?: string) {
-    this.send(CollaborativeEvents.Perspective, payload, to);
+  sendPerspective(data: Perspective) {
+    this.send(CollaborativeEvents.Perspective, data);
   }
 
   sendMouseMove(point: THREE.Vector3, quaternion: THREE.Quaternion, mesh?: THREE.Mesh) {
@@ -80,7 +92,7 @@ export default class CollaborativeService extends Service.extend(Evented
     this.sendMouse(CollaborativeEvents.MouseStop, point, quaternion, mesh);
   }
 
-  sendMouse(action: String, point: THREE.Vector3, quaternion: THREE.Quaternion, mesh?: THREE.Mesh) {
+  sendMouse(event: string, point: THREE.Vector3, quaternion: THREE.Quaternion, mesh?: THREE.Mesh) {
     const vectorWithoutObjectRotation = adjustForObjectRotation(point.toArray(), quaternion.clone().conjugate());
     const payload: CursorPosition = {
       point: vectorWithoutObjectRotation.toArray()
@@ -88,22 +100,20 @@ export default class CollaborativeService extends Service.extend(Evented
     if (mesh && this.instanceOfIdentifiableMesh(mesh)) {
       payload.id = mesh.colabId;
     }
-    this.send(action, payload);
+    this.send(event, payload);
   }
 
-  send(action: String, payload: any, to?: string) {
+  send(event: string, data: any = {}) {
+    // console.log("event" + event)
     const content = JSON.stringify(
       {
-        action: action,
-        to: to,
-        from: this.username,
-        payload: payload
+        event: event,
+        data: data
       }
     )
-  // @ts-expect-error
     this.socketRef?.send(content);
   }
-
+  
   instanceOfIdentifiableMesh(object: any): object is IdentifiableMesh {
     return 'colabId' in object;
   }

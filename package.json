@@ -137,8 +137,8 @@
   },
   "ember-addon": {
     "paths": [
-      "lib/collaborative-mode",
-      "lib/virtual-reality"
+      "lib/virtual-reality",
+      "lib/collaborative-mode"
     ]
   }
 }

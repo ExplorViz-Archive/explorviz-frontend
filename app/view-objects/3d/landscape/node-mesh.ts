@@ -9,7 +9,7 @@ export default class NodeMesh extends PlaneMesh implements IdentifiableMesh {
 
   material: THREE.MeshBasicMaterial;
 
-  colabId: String;
+  colabId: string;
   
   depth: number;
 

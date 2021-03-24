@@ -42,6 +42,7 @@ import {
   restoreComponentState,
   toggleComponentMeshState,
 } from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
+import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -88,18 +89,21 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   scene!: THREE.Scene;
 
   @tracked
+  hammerInteraction: HammerInteraction;
+
+  @tracked
   camera!: THREE.PerspectiveCamera;
 
   renderer!: THREE.WebGLRenderer;
 
   // Used to display performance and memory usage information
-  threePerformance: THREEPerformance|undefined;
+  threePerformance: THREEPerformance | undefined;
 
   // Incremented every time a frame is rendered
   animationFrameId = 0;
 
   // Used to register (mouse) events
-  hoveredObject: BaseMesh|null;
+  hoveredObject: BaseMesh | null;
 
   drawableClassCommunications: DrawableClassCommunication[] = [];
 
@@ -127,7 +131,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   spheres: Map<string, Array<THREE.Mesh>> = new Map();
 
-  sphereColors: Array<number> = [ 0xff0000, 0x00ff00, 0x0000ff ];
+  sphereColors: Array<number> = [0xff0000, 0x00ff00, 0x0000ff];
 
   spheresIndex = 0;
 
@@ -144,6 +148,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Constructor called');
 
     this.render = this.render.bind(this);
+    this.hammerInteraction = HammerInteraction.create();
 
     const { application, dynamicLandscapeData } = this.args.landscapeData;
 
@@ -160,6 +165,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Canvas inserted');
 
     this.canvas = canvas;
+    this.hammerInteraction.setupHammer(canvas)
 
     canvas.oncontextmenu = (e) => {
       e.preventDefault();
@@ -258,7 +264,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   handleSingleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
     const mesh = intersection.object;
+    this.singleClickOnMesh(mesh);
+  }
 
+  @action
+  singleClickOnMesh(mesh: THREE.Object3D) {
     // User clicked on blank spot on the canvas
     if (mesh === undefined) {
       removeHighlighting(this.applicationObject3D);
@@ -266,20 +276,25 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       || mesh instanceof ClazzCommunicationMesh) {
       highlight(mesh, this.applicationObject3D, this.drawableClassCommunications);
     }
+
   }
-  // TODO maba
+
   @action
   handleDoubleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
     const mesh = intersection.object;
+    this.doubleClickOnMesh(mesh);
+  }
 
+  @action
+  doubleClickOnMesh(mesh: THREE.Object3D) {
     // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
       toggleComponentMeshState(mesh, this.applicationObject3D);
       this.communicationRendering.addCommunication(this.applicationObject3D,
         this.drawableClassCommunications);
       updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
-    // Close all components since foundation shall never be closed itself
+      // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
       closeAllComponents(this.applicationObject3D);
       // Re-compute communication and highlighting
@@ -288,12 +303,16 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
     }
   }
-  // TODO maba
+
   @action
   handleMouseMove(intersection: THREE.Intersection | null) {
     if (!intersection) return;
     const mesh = intersection.object;
+    this.mouseMoveOnMesh(mesh);
+  }
 
+  @action
+  mouseMoveOnMesh(mesh: THREE.Object3D) {
     const enableHoverEffects = true;
     // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
@@ -328,12 +347,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   /*   handleMouseEnter() {
   } */
-  // TODO maba
   @action
   handleMouseStop(intersection: THREE.Intersection | null, mouseOnCanvas: Position2D) {
     if (!intersection) return;
     const mesh = intersection.object;
+    this.mouseStopOnMesh(mesh, mouseOnCanvas);
+  }
 
+  @action
+  mouseStopOnMesh(mesh: THREE.Object3D, mouseOnCanvas: Position2D) {
     // Show information as popup is mouse stopped on top of a mesh
     if ((mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
       || mesh instanceof ClazzCommunicationMesh)) {
@@ -343,6 +365,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         entity: mesh.dataModel,
       };
     }
+
   }
 
   @action
@@ -372,15 +395,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region SCENE POPULATION
 
-  @task*
-  loadNewApplication() {
+  @task *
+    loadNewApplication() {
     this.applicationObject3D.dataModel = this.args.landscapeData.application!;
     this.applicationObject3D.traces = this.args.landscapeData.dynamicLandscapeData;
     yield perform(this.populateScene);
   }
 
-  @restartableTask*
-  populateScene() {
+  @restartableTask *
+    populateScene() {
     try {
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter',
         this.applicationObject3D.dataModel);
@@ -454,9 +477,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region COLLABORATIVE
   @action
-  setPerspective(position: { x: number, y: number, z: number }, rotation: { x: number, y: number, z: number }) {
-    this.camera.position.set(position.x, position.y, position.z);
-    this.applicationObject3D.rotation.set(rotation.x, rotation.y, rotation.z);
+  setPerspective(position: number[], rotation: number[]) {
+    this.camera.position.fromArray(position);
+    this.applicationObject3D.rotation.fromArray(rotation);
   }
   // #endregion COLLABORATIVE
 
@@ -495,10 +518,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  repositionSphere(vec: THREE.Vector3, user: string) {
+  repositionSphere(vec: THREE.Vector3, user: string, color: string) {
     let spheres = this.spheres.get(user);
     if (!spheres) {
-      spheres = this.createSpheres();
+      spheres = this.createSpheres(color);
       this.spheres.set(user, spheres);
     }
 
@@ -508,10 +531,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.spheresIndex = (this.spheresIndex + 1) % spheres.length;
   }
 
-  createSpheres(): Array<THREE.Mesh> {
+  createSpheres(color: string): Array<THREE.Mesh> {
     let spheres = [];
-    const sphereGeometry = new THREE.SphereBufferGeometry(0.08, 32, 32);
-    const sphereMaterial = new THREE.MeshBasicMaterial({ color: this.sphereColors.pop() });
+    const sphereGeometry = new THREE.SphereBufferGeometry(0.4, 32, 32);
+    const sphereMaterial = new THREE.MeshBasicMaterial({ color: color });
 
     for (let i = 0; i < 30; i++) {
       const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
@@ -532,8 +555,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    * @param entity Component or Clazz of which the mesh parents shall be opened
    */
   @action
-  openParents(entity: Package|Class) {
-    function getAllAncestorComponents(entity: Package|Class): Package[] {
+  openParents(entity: Package | Class) {
+    function getAllAncestorComponents(entity: Package | Class): Package[] {
       if (isClass(entity)) {
         return getAllAncestorComponents(entity.parent);
       }
@@ -597,7 +620,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    * @param entity Component or clazz which shall be highlighted
    */
   @action
-  highlightModel(entity: Package|Class) {
+  highlightModel(entity: Package | Class) {
     highlightModel(entity, this.applicationObject3D, this.drawableClassCommunications);
   }
 
@@ -615,7 +638,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    * @param model Clazz or clazz communication which shall be in focus of the camera
    */
   @action
-  moveCameraTo(emberModel: Class|Span) {
+  moveCameraTo(emberModel: Class | Span) {
     const applicationCenter = this.applicationObject3D.layout.center;
 
     moveCameraTo(emberModel, applicationCenter, this.camera, this.applicationObject3D);
@@ -680,7 +703,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.scene.traverse((object3D) => {
       if (object3D instanceof BaseMesh) {
         object3D.updateColor();
-      // Special case because communication arrow is no base mesh
+        // Special case because communication arrow is no base mesh
       } else if (object3D instanceof CommunicationArrowMesh) {
         object3D.updateColor(this.configuration.applicationColors.communicationArrow);
       }

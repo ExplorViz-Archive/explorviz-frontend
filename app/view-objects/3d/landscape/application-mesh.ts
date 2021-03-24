@@ -9,7 +9,7 @@ export default class ApplicationMesh extends PlaneMesh implements IdentifiableMe
 
   material: THREE.MeshBasicMaterial;
 
-  colabId: String;
+  colabId: string;
 
   depth: number;
 

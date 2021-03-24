@@ -13,22 +13,24 @@ export enum CollaborativeEvents {
 }
 
 export interface Perspective {
-  position: {x: number, y: number, z: number},
-  rotation: {x: number, y: number, z: number},
+  user?: string;
+  position: number[],
+  rotation: number[],
   requested: boolean
 }
 
 export interface CursorPosition {
-  // point?: {x: number, y: number, z: number},
-  point?: number[],
-  id?: String
+  user?: string,
+  point: number[],
+  id?: string
 }
 
 export interface Click {
-  id: String
+  user: string,
+  id: string
 }
 export interface IdentifiableMesh {
-   colabId: String
+  colabId: string
 }
 
 export interface SessionData {
@@ -47,4 +49,19 @@ export interface PresentationModeDeactivated {
 
 export function instanceOfIdentifiableMesh(object: any): object is IdentifiableMesh {
   return 'colabId' in object;
+}
+
+export interface Meeting {
+  id: string,
+  users: User[],
+  presentationMode: boolean,
+  adminId: string,
+  presenterId: string
+}
+
+export interface User {
+  name: string,
+  color: string,
+  admin: boolean,
+  presenter: boolean
 }

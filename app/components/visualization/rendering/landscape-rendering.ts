@@ -26,6 +26,7 @@ import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
+import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 
 interface Args {
   readonly id: string;
@@ -87,6 +88,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   scene!: THREE.Scene;
 
   webglrenderer!: THREE.WebGLRenderer;
+  
+  @tracked
+  hammerInteraction: HammerInteraction;
 
   @tracked
   camera!: THREE.PerspectiveCamera;
@@ -156,6 +160,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Constructor called');
 
     this.render = this.render.bind(this);
+    this.hammerInteraction = HammerInteraction.create();
 
     this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
 
@@ -169,6 +174,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Canvas inserted');
 
     this.canvas = canvas;
+    this.hammerInteraction.setupHammer(canvas)
 
     canvas.oncontextmenu = (e) => {
       e.preventDefault();
@@ -258,8 +264,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   // #region COLLABORATIVE
 
   @action
-  setPerspective(position: { x: number, y: number, z: number }, _rotation: { x: number, y: number, z: number }) {
-    this.camera.position.set(position.x, position.y, position.z);
+  setPerspective(position: number[], _rotation: number[]) {
+    this.camera.position.fromArray(position);
   }
 
   // #endregion COLLABORATIVE
@@ -300,10 +306,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  repositionSphere(vec: THREE.Vector3, user: string) {
+  repositionSphere(vec: THREE.Vector3, user: string, color: string) {
     let spheres = this.spheres.get(user);
     if (!spheres) {
-      spheres = this.createSpheres();
+      spheres = this.createSpheres(color);
       this.spheres.set(user, spheres);
     }
 
@@ -313,10 +319,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.spheresIndex = (this.spheresIndex + 1) % spheres.length;
   }
 
-  createSpheres(): Array<THREE.Mesh> {
+  createSpheres(color: string): Array<THREE.Mesh> {
     let spheres = [];
     const sphereGeometry = new THREE.SphereBufferGeometry(0.08, 32, 32);
-    const sphereMaterial = new THREE.MeshBasicMaterial({ color: this.sphereColors.pop() });
+    const sphereMaterial = new THREE.MeshBasicMaterial({ color: color });
 
     for (let i = 0; i < 30; i++) {
       const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
@@ -583,6 +589,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (!intersection) return;
     const mesh = intersection.object;
 
+    this.doubleClickOnMesh(mesh);
+  }
+
+  @action
+  doubleClickOnMesh(mesh: THREE.Object3D) {
     // Handle application
     if (mesh instanceof ApplicationMesh) {
       this.openApplicationIfExistend(mesh);
@@ -628,7 +639,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   handleMouseMove(intersection: THREE.Intersection | null) {
     if (!intersection) return;
     const mesh = intersection.object;
+    this.mouseMoveOnMesh(mesh);
+  }
 
+  @action
+  mouseMoveOnMesh(mesh: THREE.Object3D) {
     const enableHoverEffects = true;
     // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
@@ -662,6 +677,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (!intersection) return;
     const mesh = intersection.object;
 
+    this.mouseStopOnMesh(mesh, mouseOnCanvas);
+  }
+
+  @action
+  mouseStopOnMesh(mesh: THREE.Object3D, mouseOnCanvas: Position2D) {
     if (mesh instanceof NodeMesh || mesh instanceof ApplicationMesh) {
       this.popupData = {
         mouseX: mouseOnCanvas.x,

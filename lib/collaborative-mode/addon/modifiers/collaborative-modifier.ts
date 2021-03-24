@@ -8,6 +8,7 @@ import { Click, CollaborativeEvents, CursorPosition, instanceOfIdentifiableMesh,
 import THREE, { Vector3 } from 'three';
 import adjustForObjectRotation from 'explorviz-frontend/utils/collaborative-util';
 import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
+import EventSettingsService from 'collaborative-mode/services/event-settings-service';
 
 
 interface IModifierArgs {
@@ -15,13 +16,13 @@ interface IModifierArgs {
     named: {
         camera: THREE.Camera,
         raycastObject3D: THREE.Object3D,
-        mouseMove?(mesh?: THREE.Mesh): void,
-        mouseStop?(mesh?: THREE.Mesh, mousePosition?: Position2D): void,
+        mouseMove?(mesh?: THREE.Object3D): void,
+        mouseStop?(mesh?: THREE.Object3D, mousePosition?: Position2D): void,
         mouseOut?(): void,
-        onSingleClick?(mesh?: THREE.Mesh): void,
-        onDoubleClick?(mesh?: THREE.Mesh): void,
-        setPerspective?(position: { x: number, y: number, z: number }, rotation: { x: number, y: number, z: number }): void,
-        repositionSphere?(vector: Vector3, user: string): void,
+        onSingleClick?(mesh?: THREE.Object3D): void,
+        onDoubleClick?(mesh?: THREE.Object3D): void,
+        setPerspective?(position: number[], rotation: number[]): void,
+        repositionSphere?(vector: Vector3, user: string, color: string): void,
     }
 }
 
@@ -53,6 +54,10 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
     @service('collaborative-service')
     collaborativeService!: CollaborativeService;
 
+    @service('event-settings-service')
+    eventSettings!: EventSettingsService;
+
+
     get canvas(): HTMLCanvasElement {
         assert(
             `Element must be 'HTMLCanvasElement' but was ${typeof this.element}`,
@@ -60,6 +65,7 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
         );
         return this.element;
     }
+
     get raycastObject3D(): THREE.Object3D {
         return this.args.named.raycastObject3D
     }
@@ -69,82 +75,86 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
     }
 
     @action
-    receiveSingleClick(click: Click, user: string) {
-        if (!this.args.named.onSingleClick || !this.settings.followSingleClick || this.settings.userInControl != user) { return; }
+    receiveSingleClick(click: Click) {
+        if (!this.args.named.onSingleClick || this.settings.userInControl != click.user) { return; }
+        if (!this.settings.watching && !this.eventSettings.singleClick) {return}
 
         var applicationMesh = this.getApplicationMeshByColabId(click.id)
-        if (applicationMesh instanceof THREE.Mesh) {
-            this.args.named.onSingleClick(applicationMesh);
-        }
+        this.args.named.onSingleClick(applicationMesh);
     }
 
     @action
-    receiveDoubleClick(click: Click, user: string) {
-        if (!this.args.named.onDoubleClick || !this.settings.followDoubleClick || this.settings.userInControl != user) { return; }
+    receiveDoubleClick(click: Click) {
+        if (!this.args.named.onDoubleClick || this.settings.userInControl != click.user) { return; }
+        if (!this.settings.watching && !this.eventSettings.doubleClick ) { return; }
 
         var applicationMesh = this.getApplicationMeshByColabId(click.id)
-        if (applicationMesh instanceof THREE.Mesh) {
-            this.args.named.onDoubleClick(applicationMesh);
-        }
+        this.args.named.onDoubleClick(applicationMesh);
     }
 
     @action
-    receiveMouseMove(mouse: CursorPosition, user: string) {
-        if (!this.args.named.mouseMove || !this.settings.followMouseMove || !mouse.point || !mouse.id) { return; }
+    receiveMouseMove(mouse: CursorPosition) {
+        if (!this.args.named.mouseMove || !mouse.id) { return; }
+        if (!this.settings.watching && !this.eventSettings.mouseMove ) { return; }
 
+        const user = mouse.user
         const vec = adjustForObjectRotation(mouse.point, this.raycastObject3D.quaternion);
-
         if (this.args.named.repositionSphere) {
-            this.args.named.repositionSphere(vec, user);
+            var userObj = this.settings.meeting?.users.find(obj => {
+                return obj.name == mouse.user
+            })
+
+            this.args.named.repositionSphere(vec, user!, userObj!.color);
         }
 
-        if (this.settings.userInControl != user) { return; }
+        if (this.settings.userInControl != mouse.user) { return; }
         var intersectedViewObj = this.getApplicationMeshByColabId(mouse.id);
 
-        if (intersectedViewObj instanceof THREE.Mesh && this.settings.followMouseHover) {
+        if (this.eventSettings.mouseHover) {
             this.args.named.mouseMove(intersectedViewObj);
-        } else {
-            this.args.named.mouseMove();
         }
     }
 
     @action
-    receiveMouseStop(mouse: CursorPosition, user: string) {
-        if (!this.args.named.mouseStop || !this.settings.followMouseStop || !mouse.point || !mouse.id) { return; }
-        if (this.settings.userInControl != user) { return; }
+    receiveMouseStop(mouse: CursorPosition) {
+        if (!this.args.named.mouseStop || !mouse.id) { return; }
+        if (!this.settings.watching && !this.eventSettings.mouseStop ) { return; }
+        if (this.settings.userInControl != mouse.user) { return; }
+
         const vec = adjustForObjectRotation(mouse.point, this.raycastObject3D.quaternion);
 
         var intersectedViewObj = this.getApplicationMeshByColabId(mouse.id);
 
-        if (intersectedViewObj instanceof THREE.Mesh && this.settings.followMouseHover) {
+        if (this.eventSettings.mouseHover) {
             const mousePosition = this.calculateMousePosition(vec);
             this.args.named.mouseStop(intersectedViewObj, mousePosition);
-        } else {
-            this.args.named.mouseStop();
         }
     }
 
     @action
     receiveMouseOut() {
-        if (this.args.named.mouseOut && this.settings.followMouseStop) {
-            this.args.named.mouseOut();
-        }
+        if (!this.args.named.mouseOut) { return }
+        if (!this.settings.watching && !this.eventSettings.mouseOut) { return }
+
+        this.args.named.mouseOut();
     }
 
     @action
-    receivePerspective(perspective: Perspective, user: string) {
-        if (this.args.named.setPerspective && (this.settings.followPerspective || perspective.requested || this.settings.userInControl != user)) {
-            this.args.named.setPerspective(perspective.position, perspective.rotation);
-        }
+    receivePerspective(perspective: Perspective) {
+        if (!this.args.named.setPerspective) {return}
+        if (!this.settings.watching && !this.eventSettings.mouseOut) {return } 
+        if (this.settings.userInControl != perspective.user) { return; }
+
+        this.args.named.setPerspective(perspective.position, perspective.rotation);
     }
 
     @action
-    sendPerspective(_data: any, from: string) {
+    sendPerspective(_data: any) {
         this.collaborativeService.sendPerspective({
-            position: { x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z },
-            rotation: { x: this.raycastObject3D.rotation?.x, y: this.raycastObject3D.rotation?.y, z: this.raycastObject3D.rotation?.z },
+            position: this.camera.position.toArray(),
+            rotation: this.raycastObject3D.rotation?.toArray(),
             requested: true
-        }, from);
+        });
     }
 
     calculateMousePosition(mouse: Vector3) {

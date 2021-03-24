@@ -15,7 +15,7 @@ export default class ClazzMesh extends BoxMesh implements IdentifiableMesh {
 
   dataModel: Class;
 
-  colabId: String;
+  colabId: string;
 
   constructor(layout: BoxLayout, clazz: Class, defaultColor: THREE.Color,
     highlightingColor: THREE.Color) {

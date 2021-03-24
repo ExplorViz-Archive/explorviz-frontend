@@ -10,13 +10,34 @@
       {{did-resize this.resize debounce=100}}
     >
       <canvas
+        {{interaction-modifier 
+          raycastObject=this.landscapeObject3D 
+          camera=this.camera 
+          hammerModifier=this.hammerInteraction
+          doubleClick=this.handleDoubleClick
+          mouseMove=this.handleMouseMove
+          mouseWheel=this.handleMouseWheel
+          mouseOut=this.handleMouseOut
+          mouseStop=this.handleMouseStop
+          panning=this.handlePanning
+        }}
+        {{collaborative-modifier
+          raycastObject3D=this.landscapeObject3D 
+          camera=this.camera 
+          onDoubleClick=this.doubleClickOnMesh
+          mouseMove=this.mouseMoveOnMesh
+          mouseStop=this.mouseStopOnMesh
+          mouseOut=this.handleMouseOut
+          setPerspective=this.setPerspective
+          repositionSphere=this.repositionSphere
+        }}
         class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
         {{did-insert this.canvasInserted}}
       >
-        {{#if this.interaction}}
+        {{#if this.hammerInteraction}}
           <RightClickMenuHammer
             @items={{this.rightClickMenuItems}}
-            @hammer={{this.interaction.hammerHandler}}
+            @hammer={{this.hammerInteraction}}
           />
         {{/if}}
       </canvas>
@@ -45,6 +66,9 @@
               <Visualization::PageSetup::Navbar::ColorPickerOpener
                 @addComponent={{@addComponent}}
               />
+              <CollaborativeSettingsOpener
+                @addComponent={{@addComponent}}
+              />
             </ul>
           </div>
           {{#each @components as |componentName|}}
@@ -58,6 +82,13 @@
                     @updateView={{this.updateColors}}
                   />
                 {{/if}}
+            {{#if (eq componentName "collaborative-settings")}}
+              <CollaborativeSettings 
+                @isLandscapeView={{true}}
+                @removeComponent={{@removeComponent}}
+                @updateView={{this.updateColors}}
+              />
+            {{/if}}
               </div>
             </div>
           {{/each}}
