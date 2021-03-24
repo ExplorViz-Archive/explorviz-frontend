@@ -55,24 +55,23 @@ export default class VrLandscapeRenderer {
 
     // Load and scale landscape.
     this.landscapeObject3D = new VrLandscapeObject3D(this.landscapeData.structureLandscapeData);
-    this.landscapeObject3D.scale.set(LANDSCAPE_SCALAR, LANDSCAPE_SCALAR, LANDSCAPE_SCALAR);
-
-    // Rotate landscape such that it lays flat on the floor
-    this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
+    this.resetScale();
+    this.resetRotation();
   }
 
   // #region LANDSCAPE POSITIONING
 
-  centerLandscape() {
+  private resetScale() {
+    this.landscapeObject3D.scale.set(LANDSCAPE_SCALAR, LANDSCAPE_SCALAR, LANDSCAPE_SCALAR);
+  }
 
-    // Reset scale
-    this.landscapeObject3D.scale.fromArray([1,1,1]);
-
-    // Reset landscape rotation
+  private resetRotation() {
     this.landscapeObject3D.rotation.x = -90 * THREE.MathUtils.DEG2RAD;
     this.landscapeObject3D.rotation.y = 0;
     this.landscapeObject3D.rotation.z = 0;
+  }
 
+  private resetPosition() {
     const landscape = this.landscapeObject3D;
 
     // Compute bounding box of the floor
@@ -101,6 +100,12 @@ export default class VrLandscapeRenderer {
     if (bboxLandscape.min.y < bboxFloor.min.y) {
       landscape.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
     }
+  }
+
+  centerLandscape() {
+    this.resetScale();
+    this.resetRotation();
+    this.resetPosition();
   }
 
   // #endregion LANDSCAPE POSITIONING
