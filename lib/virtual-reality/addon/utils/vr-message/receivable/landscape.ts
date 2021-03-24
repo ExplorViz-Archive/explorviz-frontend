@@ -32,7 +32,7 @@ type App = {
 };
 
 type Landscape = {
-  landscapeToken: String,
+  landscapeToken: string,
   timestamp: number,
   position: Position,
   quaternion: Quaternion,

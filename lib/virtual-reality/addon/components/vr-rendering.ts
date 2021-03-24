@@ -118,7 +118,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private receiver!: VrMessageReceiver;
 
   @service('grabbed-object')
-  grabbedObjectService!: GrabbedObjectService;
+  private grabbedObjectService!: GrabbedObjectService;
 
   @service('vr-menu-factory')
   private menuFactory!: VrMenuFactoryService;
@@ -126,7 +126,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('remote-vr-users')
   private remoteUsers!: RemoteVrUserService;
 
-  @service
+  @service('vr-room')
   private vrRoomService!: VrRoomService;
 
   // #endregion SERVICES
@@ -270,6 +270,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   private initServices() {
+    this.debug('Initializing services...');
+
     // Load image for delete button
     const closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
 
@@ -303,7 +305,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     });
     this.scene.add(this.detachedMenuGroups);
 
-    // Initialize timestamp service
+    // Initialize timestamp service.
     this.vrTimestampService = new VrTimestampService({ 
       timestamp: this.args.timestamp, 
       interval: this.args.interval,
@@ -320,7 +322,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     });
     
 
-    // Initialize room service.
+    // Initialiye room service.
     this.vrRoomService.injectValues({
       vrLandscapeRenderer: this.vrLandscapeRenderer,
       vrTimestampService: this.vrTimestampService,
@@ -333,8 +335,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       vrTimestampService: this.vrTimestampService,
       detachedMenuGroups: this.detachedMenuGroups
     });
-  
-
+    
   }
 
   /**
@@ -1166,6 +1167,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       }
     });
 
+    tasks.push(this.vrTimestampService.updateLandscapeToken(landscape.landscapeToken, landscape.timestamp));
     this.landscapeObject3D.position.fromArray(landscape.position);
     this.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
     this.landscapeObject3D.scale.fromArray(landscape.scale);

@@ -1,5 +1,3 @@
-import { AjaxServiceClass } from 'ember-ajax/services/ajax';
-import config from 'explorviz-frontend/config/environment';
 import VrRoomService, { RoomListRecord } from 'virtual-reality/services/vr-room';
 import TextItem from "../../items/text-item";
 import TextbuttonItem from "../../items/textbutton-item";
@@ -9,8 +7,6 @@ import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
  * Time in seconds before the new room list should be fetched.
  */
 const REFRESH_TIMEOUT = 3.0;
-
-
 
 export type JoinMenuArgs = ConnectionBaseMenuArgs & {
   vrRoomService: VrRoomService
