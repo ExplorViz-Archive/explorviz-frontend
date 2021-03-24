@@ -1152,7 +1152,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       }
     });
 
-    this.vrTimestampService.updateLandscapeToken(landscape.landscapeToken, landscape.timestamp);
+    tasks.push(this.vrTimestampService.updateLandscapeToken(landscape.landscapeToken, landscape.timestamp));
     this.landscapeObject3D.position.fromArray(landscape.position);
     this.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
     this.landscapeObject3D.scale.fromArray(landscape.scale);
