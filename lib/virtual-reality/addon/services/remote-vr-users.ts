@@ -1,8 +1,6 @@
 import Service, { inject as service } from '@ember/service';
 import THREE from "three";
-import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
 import { OBJLoader } from "../utils/lib/loader/OBJLoader";
-import NameTagMesh from "../utils/view-objects/vr/name-tag-mesh";
 import RemoteVrUser from "../utils/vr-multi-user/remote-vr-user";
 import SpectateUserService from "./spectate-user";
 
@@ -41,12 +39,6 @@ export default class RemoteVrUserService extends Service {
     this.idToRemoteUser.set(remoteUser.userId, remoteUser);
     this.headsetModel.then((hmd) => remoteUser.initCamera(hmd));
     this.remoteUserGroup.add(remoteUser);
-
-    // Add name tag
-    Helper.addDummyNamePlane(remoteUser);
-    const nameTag = new NameTagMesh(remoteUser.userName, remoteUser.color);
-    remoteUser.nameTag = nameTag;
-    remoteUser.add(nameTag);
   }
 
   getAllRemoteUserIds() {

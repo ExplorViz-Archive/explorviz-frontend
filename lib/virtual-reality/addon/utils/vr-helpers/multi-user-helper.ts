@@ -1,6 +1,5 @@
 import THREE from 'three';
 import VRController from '../vr-controller';
-import RemoteVrUser from '../vr-multi-user/remote-vr-user';
 
 export function getCameraPose(camera: THREE.Camera) {
   const position = new THREE.Vector3();
@@ -56,19 +55,6 @@ export function getTextSize(text: string, font: string) {
   const height = context.measureText('W').width;
   const sublineHeight = context.measureText('H').width;
   return { width, height, sublineHeight };
-}
-
-export function addDummyNamePlane(user: RemoteVrUser) {
-  if (user.camera && user.camera.model) {
-    // Use dummy object to let username always face camera with lookAt() function
-    const dummy = new THREE.Object3D();
-    dummy.name = 'dummyNameTag';
-
-    dummy.position.copy(user.camera.model.position);
-    dummy.position.y += 0.3; // Display username above hmd
-
-    user.camera.model.add(dummy);
-  }
 }
 
 /**

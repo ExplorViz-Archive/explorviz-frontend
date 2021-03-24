@@ -1,7 +1,7 @@
 import THREE from 'three';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
-import NameTagMesh from '../view-objects/vr/name-tag-mesh';
+import NameTagSprite from '../view-objects/vr/name-tag-sprite';
 import PingMesh from '../view-objects/vr/ping-mesh';
 import WaypointIndicator from '../view-objects/vr/waypoint-indicator';
 
@@ -43,7 +43,7 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   color: THREE.Color; // [r,g,b], r,g,b = 0,...,255
 
-  nameTag: NameTagMesh | undefined;
+  nameTag: NameTagSprite | undefined;
 
   localUser: LocalVrUser;
 
@@ -82,6 +82,7 @@ export default class RemoteVrUser extends THREE.Object3D {
     };
 
     this.add(this.camera.model);
+    this.addNameTag();
   }
 
   async initController1(assetUrl: string) {
@@ -145,22 +146,25 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.togglePing2(false);
   }
 
-  removeCamera() {
+  private removeCamera() {
     if (this.camera && this.camera.model) {
       this.remove(this.camera.model);
       this.camera = undefined;
     }
   }
 
-  removeNameTag() {
-    if (this.nameTag) {
-      this.remove(this.nameTag);
-      this.nameTag.disposeRecursively();
-      this.nameTag = undefined;
-    }
+  private addNameTag() {
+    this.nameTag = new NameTagSprite(this.userName, this.color);
+    this.nameTag.position.y += 0.3;
+    this.camera?.model.add(this.nameTag);
   }
 
-  removePingObjects() {
+  private removeNameTag() {
+    this.nameTag?.parent?.remove(this.nameTag);
+    this.nameTag = undefined;
+  }
+
+  private removePingObjects() {
     this.remove(this.pingMesh1);
     this.remove(this.pingMesh2);
     this.pingWaypoint1.parent?.remove(this.pingWaypoint1);
@@ -204,20 +208,12 @@ export default class RemoteVrUser extends THREE.Object3D {
   }
 
   /**
-   * Updates the the animations and sets the position and rotation of the
-   * name tag.
+   * Updates the the remote user once per frame.
    *
    * @param delta The time since the last update.
    */
   update(delta: number) {
     this.animationMixer.update(delta);
-
-    // Update name tag.
-    const dummyPlane = this.getObjectByName('dummyNameTag');
-    if (this.state === 'online' && this.nameTag && this.camera && dummyPlane && this.localUser.camera) {
-      this.nameTag.position.setFromMatrixPosition(dummyPlane.matrixWorld);
-      this.nameTag.lookAt(this.localUser.camera.getWorldPosition(new THREE.Vector3()));
-    }
   }
 
   /**
