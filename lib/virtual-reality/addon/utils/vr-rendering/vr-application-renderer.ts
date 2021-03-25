@@ -181,26 +181,4 @@ export default class VrApplicationRenderer {
       }
     });
   }
-
-  updateDrawableCommunications(applicationObject3D: ApplicationObject3D) {
-    if (this.drawableClassCommunications.has(applicationObject3D.dataModel.instanceId)) {
-      return;
-    }
-
-    const drawableClassCommunications = computeDrawableClassCommunication(
-      this.structureLandscapeData,
-      applicationObject3D.traces,
-    );
-
-    const allClasses = new Set(getAllClassesInApplication(applicationObject3D.dataModel));
-
-    const communicationInApplication = drawableClassCommunications.filter(
-      (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
-    );
-
-    this.drawableClassCommunications.set(
-      applicationObject3D.dataModel.instanceId, 
-      communicationInApplication
-    );
-  }
 }

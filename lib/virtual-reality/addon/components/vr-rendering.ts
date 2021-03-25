@@ -9,7 +9,7 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import RemoteVrUserService from 'explorviz-frontend/services/remote-vr-users';
-import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
+import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
@@ -618,7 +618,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   private updateDrawableCommunications(applicationObject3D: ApplicationObject3D) {
-    this.vrApplicationRenderer.updateDrawableCommunications(applicationObject3D);
+    const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId);
+    if (drawableComm) {
+      this.vrApplicationRenderer.appCommRendering.addCommunication(applicationObject3D, drawableComm);
+      Highlighting.updateHighlighting(applicationObject3D, drawableComm);
+    }
   }
 
   // #endregion COMPONENT AND COMMUNICATION RENDERING

@@ -43,7 +43,7 @@ export default class VrTimestampService {
         this.timestampInterval = timestampInterval;
     }
 
-    updateLandscapeToken(landscapeToken: string, timestamp: number): Promise<void> {
+    updateLandscapeToken(_landscapeToken: string, timestamp: number): Promise<void> {
         // TODO implement me
         this.timestamp = timestamp;
         return Promise.resolve();
