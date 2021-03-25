@@ -20,9 +20,20 @@ export default class MainMenu extends UiMenu {
     };
     this.thumbpadTargets.push(connectionButton);
 
-    const settingsButton = new TextbuttonItem('settings', 'Settings', {
+    const timeButton = new TextbuttonItem('time', 'Time', {
       x: 100,
       y: 140,
+    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+
+    this.items.push(timeButton);
+    timeButton.onTriggerDown = () => {
+      this.menuGroup?.openMenu(this.menuFactory.buildTimeMenu());
+    };
+    this.thumbpadTargets.push(timeButton);
+
+    const settingsButton = new TextbuttonItem('settings', 'Settings', {
+      x: 100,
+      y: 200,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
     this.items.push(settingsButton);
@@ -33,7 +44,7 @@ export default class MainMenu extends UiMenu {
 
     const resetButton = new TextbuttonItem('reset', 'Reset', {
       x: 100,
-      y: 200,
+      y: 260,
     }, 316, 50, 28, '#555555', '#ffc338', '#929292');
 
     this.items.push(resetButton);
@@ -41,17 +52,6 @@ export default class MainMenu extends UiMenu {
       this.menuGroup?.openMenu(this.menuFactory.buildResetMenu());
     };
     this.thumbpadTargets.push(resetButton);
-
-    const timeButton = new TextbuttonItem('time', 'Time', {
-      x: 100,
-      y: 260,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
-
-    this.items.push(timeButton);
-    timeButton.onTriggerDown = () => {
-      this.menuGroup?.openMenu(this.menuFactory.buildTimeMenu());
-    };
-    this.thumbpadTargets.push(timeButton);
 
     this.redrawMenu();
   }
