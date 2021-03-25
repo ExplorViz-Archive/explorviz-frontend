@@ -319,7 +319,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       detachedMenuGroups: this.detachedMenuGroups
     });
     
-
     // Initialiye room service.
     this.vrRoomService.injectValues({
       detachedMenuGroups: this.detachedMenuGroups,
@@ -335,7 +334,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       vrTimestampService: this.vrTimestampService,
       detachedMenuGroups: this.detachedMenuGroups
     });
-
   }
 
   /**
