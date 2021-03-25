@@ -1,6 +1,6 @@
 import Service, { inject as service } from '@ember/service';
-import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 import ENV from 'explorviz-frontend/config/environment';
+import Auth from 'explorviz-frontend/services/auth';
 import THREE from 'three';
 import { DetachableMenu, isDetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
 import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
@@ -30,8 +30,8 @@ type InjectedValues = {
 };
 
 export default class VrRoomService extends Service {
-  @service('ajax')
-  private ajax!: AjaxServiceClass;
+  @service('auth')
+  auth!: Auth;
 
   private detachedMenuGroups!: DetachedMenuGroupContainer;
   private vrApplicationRenderer!: VrApplicationRenderer;
@@ -52,7 +52,11 @@ export default class VrRoomService extends Service {
 
   async listRooms(): Promise<RoomListRecord[]> {
     const url = `${vrService}/v2/vr/rooms`;
-    const roomIds = await this.ajax.request(url);
+    const roomIds = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${this.auth.accessToken}`,
+      }
+    });
     if (Array.isArray(roomIds) && roomIds.every(isRoomId)) {
       return roomIds.map((roomId) => {
         return { id: roomId, name: `Room ${roomId}` };
@@ -61,12 +65,17 @@ export default class VrRoomService extends Service {
     throw 'invalid data';
   }
 
-  createRoom(): Promise<string> {
+  async createRoom(): Promise<string> {
     const url = `${vrService}/v2/vr/room`;
-    return this.ajax.post(url, {
-      contentType: "application/json",
-      data: JSON.stringify(this.buildInitialRoomPayload())
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.auth.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(this.buildInitialRoomPayload())
     });
+    return await response.json() as string;
   }
 
   private buildInitialRoomPayload(): InitialRoomPayload {
