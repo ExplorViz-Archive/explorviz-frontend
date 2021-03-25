@@ -163,8 +163,8 @@ export default class RemoteVrUser extends THREE.Object3D {
   removePingObjects() {
     this.remove(this.pingMesh1);
     this.remove(this.pingMesh2);
-    this.remove(this.pingWaypoint1);
-    this.remove(this.pingWaypoint2);
+    this.pingWaypoint1.parent?.remove(this.pingWaypoint1);
+    this.pingWaypoint2.parent?.remove(this.pingWaypoint2);
   }
 
   removeAllObjects3D() {

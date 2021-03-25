@@ -229,21 +229,17 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     camera.position.set(0, 1, 2);
     this.localUser.addCamera(camera);
-
+    
     // Menu group for hints.
     this.hintMenuQueue = new MenuQueue({ detachedMenuGroups: this.detachedMenuGroups });
-    this.hintMenuQueue.position.x = 0.035;
-    this.hintMenuQueue.position.y = -0.1;
     this.hintMenuQueue.position.z = -0.3;
-    this.hintMenuQueue.rotation.x = -0.18;
     camera.add(this.hintMenuQueue);
 
     // Menu group for message boxes.
     this.messageMenuQueue = new MenuQueue({ detachedMenuGroups: this.detachedMenuGroups });
-    this.messageMenuQueue.position.x = 0.035;
+    this.messageMenuQueue.rotation.x = 0.45;
     this.messageMenuQueue.position.y = 0.1;
     this.messageMenuQueue.position.z = -0.3;
-    this.messageMenuQueue.rotation.x = 0.45;
     camera.add(this.messageMenuQueue);
   }
 
@@ -331,11 +327,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     };
     this.interaction = new Interaction(
       this.canvas, this.camera, this.renderer, intersectableObjects, {
-      singleClick: (intersection) => this.handleSingleClick(intersection),
-      doubleClick: (intersection) => this.handleDoubleClick(intersection),
-      mouseWheel: (delta) => this.handleMouseWheel(delta),
-      panning: (delta, button) => this.handlePanning(delta, button),
-    }, raycastFilter
+        singleClick: (intersection) => this.handleSingleClick(intersection),
+        doubleClick: (intersection) => this.handleDoubleClick(intersection),
+        mouseWheel: (delta) => this.handleMouseWheel(delta),
+        panning: (delta, button) => this.handlePanning(delta, button),
+      }, raycastFilter
     );
 
     // Add key listener for room positioning
@@ -482,6 +478,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     this.update(delta);
     this.render();
+
+    // Send position update to backend. This must happen after the scene has
+    // been rendered such that the camera position is not corrupted.
+    this.sendPoses();
   }
 
   /**
@@ -498,9 +498,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.spectateUserService.update();
     this.grabbedObjectService.sendObjectPositions();
     this.remoteUsers.updateRemoteUsers(delta);
-
-    // Send updates to backend.
-    this.sendPoses(); // TODO move to update function of local user?
   }
 
   /**
@@ -842,7 +839,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Test which kind of object the user interacted with.
     if (object instanceof ApplicationMesh) {
-      this.addApplication(object.dataModel).then((applicationObject3D: ApplicationObject3D) => {
+      this.addApplication(object.dataModel).then((applicationObject3D: ApplicationObject3D | null) => {
+        if (!applicationObject3D) return;
+
         // Rotate app so that it is aligned with landscape
         applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
         applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
@@ -1093,7 +1092,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     openApps.forEach((app) => {
       const application = getApplicationInLandscapeById(structureLandscapeData, app.id);
       if (application) {
-        tasks.push(this.vrApplicationRenderer.addApplication(application).then((applicationObject3D: ApplicationObject3D) => {
+        tasks.push(this.vrApplicationRenderer.addApplication(application).then((applicationObject3D: ApplicationObject3D | null) => {
+          if (!applicationObject3D) return;
+
           applicationObject3D.position.fromArray(app.position);
           applicationObject3D.quaternion.fromArray(app.quaternion);
           applicationObject3D.scale.fromArray(app.scale);
