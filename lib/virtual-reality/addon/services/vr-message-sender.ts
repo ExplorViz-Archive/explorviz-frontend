@@ -145,8 +145,7 @@ export default class VrMessageSender extends Service {
    * @param {string} componentID ID of the component which was opened or closed
    * @param {boolean} isOpened Tells whether the component is now open or closed (current state)
    */
-  sendComponentUpdate(appID: string, componentID: string, isOpened: boolean,
-    isFoundation: boolean) {
+  sendComponentUpdate(appID: string, componentID: string, isOpened: boolean, isFoundation: boolean) {
     this.webSocket.send<ComponentUpdateMessage>({
       event: 'component_update',
       appID,
@@ -205,17 +204,11 @@ export default class VrMessageSender extends Service {
    * @param ApplicationObject3D Opened application
    */
   sendAppOpened(application: ApplicationObject3D) {
-    const position = new THREE.Vector3();
-    application.getWorldPosition(position);
-
-    const quaternion = new THREE.Quaternion();
-    application.getWorldQuaternion(quaternion);
-
     this.webSocket.send<AppOpenedMessage>({
       event: 'app_opened',
       id: application.dataModel.pid,
-      position: position.toArray(),
-      quaternion: quaternion.toArray(),
+      position: application.getWorldPosition(new THREE.Vector3()).toArray(),
+      quaternion: application.getWorldQuaternion(new THREE.Quaternion()).toArray(),
       scale: application.scale.toArray(),
     });
   }

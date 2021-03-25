@@ -36,6 +36,13 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
   }
 
   /**
+   * Gets the menu groups of all detached menus.
+   */
+  getDetachedMenus(): DetachedMenuGroup[] {
+    return Array.from(this.detachedMenuGroups);
+  }
+
+  /**
    * Asks the backend for an id for the given menu and adds a detached menu
    * group for the menu. In offline mode, the menu is not assigned an id
    * but still detached.

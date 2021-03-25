@@ -2,9 +2,10 @@ import Service, { inject as service } from '@ember/service';
 import { AjaxServiceClass } from 'ember-ajax/services/ajax';
 import config from 'explorviz-frontend/config/environment';
 import THREE from 'three';
-import { Position } from 'virtual-reality/utils/vr-message/util/position';
-import { Quaternion } from 'virtual-reality/utils/vr-message/util/quaternion';
-import { Scale } from 'virtual-reality/utils/vr-message/util/Scale';
+import { DetachableMenu, isDetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
+import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
+import { InitialRoomApp, InitialRoomDetachedMenu, InitialRoomLandscape, InitialRoomPayload } from 'virtual-reality/utils/vr-payload/initial-room';
+import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 
@@ -19,17 +20,9 @@ function isRoomId(roomId: any): roomId is RoomId {
   return typeof roomId === 'string';
 }
 
-type InitialRoomPayload = {
-  landscape: {
-    landscapeToken: string,
-    timestamp: number,
-    position: Position,
-    quaternion: Quaternion,
-    scale: Scale
-  }
-}
-
 type InjectedValues = {
+  detachedMenuGroups: DetachedMenuGroupContainer,
+  vrApplicationRenderer: VrApplicationRenderer,
   vrLandscapeRenderer: VrLandscapeRenderer,
   vrTimestampService: VrTimestampService
 };
@@ -38,14 +31,19 @@ export default class VrRoomService extends Service {
   @service('ajax')
   private ajax!: AjaxServiceClass;
 
+  private detachedMenuGroups!: DetachedMenuGroupContainer;
+  private vrApplicationRenderer!: VrApplicationRenderer;
   private vrLandscapeRenderer!: VrLandscapeRenderer;
-
   private vrTimestampService!: VrTimestampService;
 
   injectValues({
+    detachedMenuGroups,
+    vrApplicationRenderer,
     vrLandscapeRenderer,
     vrTimestampService,
   }: InjectedValues) {
+    this.detachedMenuGroups = detachedMenuGroups;
+    this.vrApplicationRenderer = vrApplicationRenderer;
     this.vrLandscapeRenderer = vrLandscapeRenderer;
     this.vrTimestampService = vrTimestampService;
   }
@@ -70,16 +68,50 @@ export default class VrRoomService extends Service {
   }
 
   private buildInitialRoomPayload(): InitialRoomPayload {
+    return {
+      landscape: this.buildInitialRoomLandscape(),
+      openApps: this.buildInitialOpenApps(),
+      detachedMenus: this.buildInitialDetachedMenus(),
+    }
+  }
+
+  private buildInitialRoomLandscape(): InitialRoomLandscape {
     const landscapeObject3D = this.vrLandscapeRenderer.landscapeObject3D;
     return {
-      landscape: {
-        landscapeToken: landscapeObject3D.dataModel.landscapeToken,
-        timestamp: this.vrTimestampService.timestamp,
-        position: landscapeObject3D.getWorldPosition(new THREE.Vector3()).toArray(),
-        quaternion: landscapeObject3D.getWorldQuaternion(new THREE.Quaternion()).toArray(),
-        scale: landscapeObject3D.scale.toArray()
-      }
-    }
+      landscapeToken: landscapeObject3D.dataModel.landscapeToken,
+      timestamp: this.vrTimestampService.timestamp,
+      position: landscapeObject3D.getWorldPosition(new THREE.Vector3()).toArray(),
+      quaternion: landscapeObject3D.getWorldQuaternion(new THREE.Quaternion()).toArray(),
+      scale: landscapeObject3D.scale.toArray()
+    };
+  }
+
+  private buildInitialOpenApps(): InitialRoomApp[] {
+    const applicationGroup = this.vrApplicationRenderer.applicationGroup;
+    return Array.from(applicationGroup.openedApps.values()).map((application) => {
+      return {
+        id: application.dataModel.pid,
+        position: application.getWorldPosition(new THREE.Vector3()).toArray(),
+        quaternion: application.getWorldQuaternion(new THREE.Quaternion()).toArray(),
+        scale: application.scale.toArray(),
+        openComponents: Array.from(application.openComponentIds),
+      };
+    });
+  }
+
+  private buildInitialDetachedMenus(): InitialRoomDetachedMenu[] {
+    return this.detachedMenuGroups.getDetachedMenus()
+      .filter((detachedMenuGroup) => isDetachableMenu(detachedMenuGroup.currentMenu))
+      .map((detachedMenuGroup) => {
+        const detachedMenu = detachedMenuGroup.currentMenu as DetachableMenu;
+        return {
+          entityId: detachedMenu.getDetachId(),
+          entityType: detachedMenu.getEntityType(),
+          position: detachedMenuGroup.getWorldPosition(new THREE.Vector3()).toArray(),
+          quaternion: detachedMenuGroup.getWorldQuaternion(new THREE.Quaternion()).toArray(),
+          scale: detachedMenuGroup.scale.toArray()
+        };
+      });
   }
 }
 

@@ -322,6 +322,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Initialiye room service.
     this.vrRoomService.injectValues({
+      detachedMenuGroups: this.detachedMenuGroups,
+      vrApplicationRenderer: this.vrApplicationRenderer,
       vrLandscapeRenderer: this.vrLandscapeRenderer,
       vrTimestampService: this.vrTimestampService,
     });
