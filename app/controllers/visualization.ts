@@ -42,8 +42,10 @@ export default class VisualizationController extends Controller {
 
   plotlyTimelineRef!: PlotlyTimeline;
 
+  @tracked
   selectedTimestampRecords: Timestamp[] = [];
 
+  @tracked
   timelineInterval: number = 10;
 
   @tracked

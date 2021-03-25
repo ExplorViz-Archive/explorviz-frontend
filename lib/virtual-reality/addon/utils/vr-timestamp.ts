@@ -1,4 +1,6 @@
 import debugLogger from "ember-debug-logger";
+import Auth from "explorviz-frontend/services/auth";
+import LandscapeTokenService from "explorviz-frontend/services/landscape-token";
 import ReloadHandler from "explorviz-frontend/services/reload-handler";
 import LocalVrUser from "virtual-reality/services/local-vr-user";
 import VrMessageSender from "virtual-reality/services/vr-message-sender";
@@ -10,8 +12,10 @@ type VrtTimestampServiceArgs = {
     timestamp: number, 
     timestampInterval: number, 
     localUser: LocalVrUser, 
+    auth: Auth,
     sender: VrMessageSender, 
     reloadHandler: ReloadHandler,
+    landscapeTokenService: LandscapeTokenService,
     vrLandscapeRenderer: VrLandscapeRenderer,
     vrApplicationRenderer: VrApplicationRenderer,
     detachedMenuGroups: DetachedMenuGroupContainer
@@ -23,18 +27,33 @@ export default class VrTimestampService {
 
     private localUser: LocalVrUser;
     private sender: VrMessageSender;
+    private auth: Auth;
     private reloadHandler: ReloadHandler;
+    private landscapeTokenService: LandscapeTokenService;
     private vrLandscapeRenderer: VrLandscapeRenderer;
     private vrApplicationRenderer: VrApplicationRenderer;
-    private detachedMenuGroups: DetachedMenuGroupContainer
+    private detachedMenuGroups: DetachedMenuGroupContainer;
     
     timestamp: number;
     timestampInterval: number;
 
-    constructor({ timestamp, timestampInterval, localUser, sender, reloadHandler, vrLandscapeRenderer, vrApplicationRenderer, detachedMenuGroups }: VrtTimestampServiceArgs) {
+    constructor({
+        timestamp, 
+        timestampInterval, 
+        localUser, 
+        sender, 
+        auth,
+        reloadHandler, 
+        landscapeTokenService, 
+        vrLandscapeRenderer, 
+        vrApplicationRenderer, 
+        detachedMenuGroups
+    }: VrtTimestampServiceArgs) {
         this.localUser = localUser;
         this.sender = sender;
+        this.auth = auth;
         this.reloadHandler = reloadHandler;
+        this.landscapeTokenService = landscapeTokenService;
         this.vrLandscapeRenderer = vrLandscapeRenderer;
         this.vrApplicationRenderer = vrApplicationRenderer;
         this.detachedMenuGroups = detachedMenuGroups;
@@ -43,10 +62,26 @@ export default class VrTimestampService {
         this.timestampInterval = timestampInterval;
     }
 
-    updateLandscapeToken(_landscapeToken: string, timestamp: number): Promise<void> {
-        // TODO implement me
-        this.timestamp = timestamp;
-        return Promise.resolve();
+    async updateLandscapeToken(landscapeToken: string, timestamp: number): Promise<void> {
+        // While changing the timestamp, we overwrite the landscape token temporarily sucht
+        // that the given landscape is loaded instead.
+        let originalToken = this.landscapeTokenService.token;
+        this.landscapeTokenService.setToken({
+            alias: 'Temporary VR Token',
+            created: new Date().getTime(),
+            ownerId: this.auth.user?.sub || '',
+            value: landscapeToken,
+        });
+
+        await this.updateTimestampLocally(timestamp);
+
+        // Reset to original landscape token. When there was no token before the landscape was
+        // changed, just remove the temporary token.
+        if (originalToken) {
+            this.landscapeTokenService.setToken(originalToken);
+        } else {
+            this.landscapeTokenService.removeToken();
+        }
     }
 
     updateTimestamp(timestamp: number): Promise<void> {

@@ -5,7 +5,9 @@ import { task } from 'ember-concurrency-decorators';
 import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
+import Auth from 'explorviz-frontend/services/auth';
 import Configuration from 'explorviz-frontend/services/configuration';
+import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import RemoteVrUserService from 'explorviz-frontend/services/remote-vr-users';
@@ -15,7 +17,6 @@ import * as EntityManipulation from 'explorviz-frontend/utils/application-render
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import Interaction from 'explorviz-frontend/utils/interaction';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
@@ -89,8 +90,14 @@ interface Args {
 export default class VrRendering extends Component<Args> implements VrMessageListener {
   // #region SERVICES
 
+  @service('auth')
+  auth!: Auth;
+
   @service('reload-handler')
   reloadHandler!: ReloadHandler;
+
+  @service('landscape-token')
+  landscapeTokenService!: LandscapeTokenService;
   
   @service('repos/timestamp-repository')
   timestampRepo!: TimestampRepository;
@@ -315,7 +322,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         timestampInterval: this.args.timestampInterval,
       localUser: this.localUser,
       sender: this.sender,
+      auth: this.auth,
       reloadHandler: this.reloadHandler,
+      landscapeTokenService: this.landscapeTokenService,
       vrLandscapeRenderer: this.vrLandscapeRenderer,
       vrApplicationRenderer: this.vrApplicationRenderer,
       detachedMenuGroups: this.detachedMenuGroups
@@ -1120,11 +1129,16 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.forceRemoveAllApplications();
     this.detachedMenuGroups.forceRemoveAllDetachedMenus();
 
-    const { structureLandscapeData } = this.args.landscapeData;
+    // Initialize landscape.
+    await this.vrTimestampService.updateLandscapeToken(landscape.landscapeToken, landscape.timestamp);
+    this.landscapeObject3D.position.fromArray(landscape.position);
+    this.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
+    this.landscapeObject3D.scale.fromArray(landscape.scale);
 
+    // Initialize applications.
     const tasks: Promise<void>[] = [];
     openApps.forEach((app) => {
-      const application = getApplicationInLandscapeById(structureLandscapeData, app.id);
+      const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(app.id);
       if (application) {
         tasks.push(this.vrApplicationRenderer.addApplication(application).then((applicationObject3D: ApplicationObject3D | null) => {
           if (!applicationObject3D) return;
@@ -1165,16 +1179,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       }
     });
 
-    tasks.push(this.vrTimestampService.updateLandscapeToken(landscape.landscapeToken, landscape.timestamp));
-    this.landscapeObject3D.position.fromArray(landscape.position);
-    this.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
-    this.landscapeObject3D.scale.fromArray(landscape.scale);
-
     // Wait for applications to be opened before opening the menus. Otherwise
     // the entities do not exist.
     await Promise.all(tasks);
 
-    // initialize detached menus
+    // Initialize detached menus.
     detachedMenus.forEach((detachedMenu) => {
       let object = this.findMeshByModelId(detachedMenu.entityType, detachedMenu.entityId);
       if (isEntityMesh(object)) {
@@ -1190,8 +1199,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   async onAppOpened({
     originalMessage: { id, position, quaternion, scale }
   }: ForwardedMessage<AppOpenedMessage>): Promise<void> {
-    const { structureLandscapeData } = this.args.landscapeData;
-    const application = getApplicationInLandscapeById(structureLandscapeData, id);
+    const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(id);
 
     if (application) {
       const applicationObject3D = await this.addApplicationLocally(application);

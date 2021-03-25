@@ -52,11 +52,12 @@ export default class VrRoomService extends Service {
 
   async listRooms(): Promise<RoomListRecord[]> {
     const url = `${vrService}/v2/vr/rooms`;
-    const roomIds = await fetch(url, {
+    const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${this.auth.accessToken}`,
       }
     });
+    const roomIds = await response.json();
     if (Array.isArray(roomIds) && roomIds.every(isRoomId)) {
       return roomIds.map((roomId) => {
         return { id: roomId, name: `Room ${roomId}` };

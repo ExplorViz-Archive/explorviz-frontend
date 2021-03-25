@@ -11,6 +11,7 @@ import * as ApplicationLabeler from 'explorviz-frontend/utils/application-render
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { getApplicationInLandscapeById } from 'explorviz-frontend/utils/landscape-structure-helpers';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
@@ -82,6 +83,10 @@ export default class VrApplicationRenderer {
   async updateLandscapeData(structureLandscapeData: StructureLandscapeData, dynamicLandscapeData: DynamicLandscapeData): Promise<void> {
     this.structureLandscapeData = structureLandscapeData;
     this.dynamicLandscapeData = dynamicLandscapeData;
+  }
+
+  getApplicationInCurrentLandscapeById(id: string) {
+    return getApplicationInLandscapeById(this.structureLandscapeData, id);
   }
 
   addApplication(applicationModel: Application): Promise<ApplicationObject3D> {
