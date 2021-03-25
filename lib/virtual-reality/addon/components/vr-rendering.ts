@@ -9,6 +9,7 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import RemoteVrUserService from 'explorviz-frontend/services/remote-vr-users';
+import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
@@ -79,9 +80,9 @@ const FLOOR_SIZE = 10;
 
 interface Args {
   readonly id: string;
-  landscapeData: LandscapeData;
-  timestamp: number;
-  interval: number;
+  readonly landscapeData: LandscapeData;
+  readonly selectedTimestampRecords: Timestamp[];
+  readonly timestampInterval: number;
   readonly font: THREE.Font;
 }
 
@@ -90,6 +91,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   @service('reload-handler')
   reloadHandler!: ReloadHandler;
+  
+  @service('repos/timestamp-repository')
+  timestampRepo!: TimestampRepository;
 
   @service('configuration')
   private configuration!: Configuration;
@@ -305,8 +309,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Initialize timestamp service.
     this.vrTimestampService = new VrTimestampService({ 
-      timestamp: this.args.timestamp, 
-      interval: this.args.interval,
+      timestamp: this.args.selectedTimestampRecords[0]?.timestamp || 
+        this.timestampRepo.getLatestTimestamp(this.args.landscapeData.structureLandscapeData.landscapeToken)?.timestamp ||
+        new Date().getTime(),
+        timestampInterval: this.args.timestampInterval,
       localUser: this.localUser,
       sender: this.sender,
       reloadHandler: this.reloadHandler,

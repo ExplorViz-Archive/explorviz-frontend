@@ -1,6 +1,6 @@
 {
   "host": "192.168.48.209",
-  "port": 443,
+  "port": 4443,
   "secure": true,
   "path": "/v2/vr/{room-id}"
 }

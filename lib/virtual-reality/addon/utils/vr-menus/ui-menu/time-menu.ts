@@ -81,14 +81,12 @@ export default class TimeMenu extends UiMenu {
     }
   }
 
-  
-
   setDateBack() {
-    this.date.setTime(this.date.getTime() - this.vrTimestampService.interval * this.msPerSeconds);
+    this.date.setTime(this.date.getTime() - this.vrTimestampService.timestampInterval * this.msPerSeconds);
   }
 
   setDateForth() {
-  this.date.setTime(this.date.getTime() + this.vrTimestampService.interval * this.msPerSeconds);
+  this.date.setTime(this.date.getTime() + this.vrTimestampService.timestampInterval * this.msPerSeconds);
   }
 
   makeThumbpadBinding() {

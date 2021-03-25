@@ -8,7 +8,7 @@ import VrLandscapeRenderer from "./vr-rendering/vr-landscape-renderer";
 
 type VrtTimestampServiceArgs = {
     timestamp: number, 
-    interval: number, 
+    timestampInterval: number, 
     localUser: LocalVrUser, 
     sender: VrMessageSender, 
     reloadHandler: ReloadHandler,
@@ -21,44 +21,35 @@ export default class VrTimestampService {
 
     private debug = debugLogger('VrTimestampService');
 
-    localUser: LocalVrUser;
-
-    sender: VrMessageSender
-
+    private localUser: LocalVrUser;
+    private sender: VrMessageSender;
+    private reloadHandler: ReloadHandler;
+    private vrLandscapeRenderer: VrLandscapeRenderer;
+    private vrApplicationRenderer: VrApplicationRenderer;
+    private detachedMenuGroups: DetachedMenuGroupContainer
+    
     timestamp: number;
+    timestampInterval: number;
 
-    interval: number;
-
-    reloadHandler: ReloadHandler;
-
-    vrLandscapeRenderer: VrLandscapeRenderer;
-
-    vrApplicationRenderer: VrApplicationRenderer;
-
-    detachedMenuGroups: DetachedMenuGroupContainer
-
-    constructor({ timestamp, interval, localUser, sender, reloadHandler, vrLandscapeRenderer, vrApplicationRenderer, detachedMenuGroups }: VrtTimestampServiceArgs) {
-        this.timestamp = timestamp;
-        this.interval = interval;
+    constructor({ timestamp, timestampInterval, localUser, sender, reloadHandler, vrLandscapeRenderer, vrApplicationRenderer, detachedMenuGroups }: VrtTimestampServiceArgs) {
         this.localUser = localUser;
         this.sender = sender;
         this.reloadHandler = reloadHandler;
         this.vrLandscapeRenderer = vrLandscapeRenderer;
         this.vrApplicationRenderer = vrApplicationRenderer;
         this.detachedMenuGroups = detachedMenuGroups;
-
+        
+        this.timestamp = timestamp;
+        this.timestampInterval = timestampInterval;
     }
 
     updateLandscapeToken(landscapeToken: string, timestamp: number): Promise<void> {
         // TODO implement me
-        console.log('update landscape', landscapeToken, timestamp);
         this.timestamp = timestamp;
         return Promise.resolve();
     }
 
     updateTimestamp(timestamp: number): Promise<void> {
-        console.log('update timestamp', timestamp);
-
         if (this.localUser.isOnline) {
             this.sender.sendTimestampUpdate(timestamp)
         }

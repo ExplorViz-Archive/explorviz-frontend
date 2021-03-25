@@ -59,7 +59,7 @@ export default class WebSocketService extends Service {
   }
 
   closeSocket() {
-    this.websockets.closeSocketFor(this.currentSocketUrl);
+    if (this.currentSocketUrl) this.websockets.closeSocketFor(this.currentSocketUrl);
   }
 
   private closeHandler(event: any) {

@@ -5,5 +5,5 @@ module.exports = {
   traceService: 'http://localhost:8083',
   // userService: 'http://localhost:32682',
   userService: 'http://localhost:8084',
-  vrService: "http://localhost:4444"
+  vrService: "http://localhost:4443"
 };
