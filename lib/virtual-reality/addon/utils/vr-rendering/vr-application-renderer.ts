@@ -93,7 +93,7 @@ export default class VrApplicationRenderer {
   @enqueueTask
   private *addApplicationTask(applicationModel: Application, callback?: (applicationObject3D: ApplicationObject3D) => void) {
     try {
-      if (this.applicationGroup.hasApplication(applicationModel.pid)) {
+      if (this.applicationGroup.hasApplication(applicationModel.instanceId)) {
         return;
       }
 
@@ -111,7 +111,7 @@ export default class VrApplicationRenderer {
 
       this.updateDrawableClassCommunications(applicationObject3D);
 
-      const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.pid)!;
+      const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId)!;
 
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
@@ -138,7 +138,7 @@ export default class VrApplicationRenderer {
   }
 
   private updateDrawableClassCommunications(applicationObject3D: ApplicationObject3D) {
-    if (this.drawableClassCommunications.has(applicationObject3D.dataModel.pid)) {
+    if (this.drawableClassCommunications.has(applicationObject3D.dataModel.instanceId)) {
       return;
     }
 
@@ -153,7 +153,7 @@ export default class VrApplicationRenderer {
       (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
     );
 
-    this.drawableClassCommunications.set(applicationObject3D.dataModel.pid,
+    this.drawableClassCommunications.set(applicationObject3D.dataModel.instanceId,
       communicationInApplication);
   }
 
@@ -180,5 +180,27 @@ export default class VrApplicationRenderer {
         ApplicationLabeler.addBoxTextLabel(mesh, this.font, foundationTextColor);
       }
     });
+  }
+
+  updateDrawableCommunications(applicationObject3D: ApplicationObject3D) {
+    if (this.drawableClassCommunications.has(applicationObject3D.dataModel.instanceId)) {
+      return;
+    }
+
+    const drawableClassCommunications = computeDrawableClassCommunication(
+      this.structureLandscapeData,
+      applicationObject3D.traces,
+    );
+
+    const allClasses = new Set(getAllClassesInApplication(applicationObject3D.dataModel));
+
+    const communicationInApplication = drawableClassCommunications.filter(
+      (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
+    );
+
+    this.drawableClassCommunications.set(
+      applicationObject3D.dataModel.instanceId, 
+      communicationInApplication
+    );
   }
 }

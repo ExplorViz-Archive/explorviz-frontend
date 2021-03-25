@@ -119,7 +119,7 @@ export default class Interaction {
     }
 
     if (this.eventCallbackFunctions.singleClick) {
-      this.hammerHandler.on('singletap', this.onSingleClick);
+      this.hammerHandler.on('lefttap', this.onSingleClick);
     }
   }
 

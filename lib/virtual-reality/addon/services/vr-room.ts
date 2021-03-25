@@ -1,6 +1,6 @@
 import Service, { inject as service } from '@ember/service';
 import { AjaxServiceClass } from 'ember-ajax/services/ajax';
-import config from 'explorviz-frontend/config/environment';
+import ENV from 'explorviz-frontend/config/environment';
 import THREE from 'three';
 import { DetachableMenu, isDetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
 import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
@@ -8,6 +8,8 @@ import { InitialRoomApp, InitialRoomDetachedMenu, InitialRoomLandscape, InitialR
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
+
+const { vrService } = ENV.backendAddresses;
 
 type RoomId = string;
 
@@ -49,7 +51,7 @@ export default class VrRoomService extends Service {
   }
 
   async listRooms(): Promise<RoomListRecord[]> {
-    const url = `${config.APP.API_ROOT}/v2/vr/rooms`;
+    const url = `${vrService}/v2/vr/rooms`;
     const roomIds = await this.ajax.request(url);
     if (Array.isArray(roomIds) && roomIds.every(isRoomId)) {
       return roomIds.map((roomId) => {
@@ -60,7 +62,7 @@ export default class VrRoomService extends Service {
   }
 
   createRoom(): Promise<string> {
-    const url = `${config.APP.API_ROOT}/v2/vr/room`;
+    const url = `${vrService}/v2/vr/room`;
     return this.ajax.post(url, {
       contentType: "application/json",
       data: JSON.stringify(this.buildInitialRoomPayload())
@@ -90,7 +92,7 @@ export default class VrRoomService extends Service {
     const applicationGroup = this.vrApplicationRenderer.applicationGroup;
     return Array.from(applicationGroup.openedApps.values()).map((application) => {
       return {
-        id: application.dataModel.pid,
+        id: application.dataModel.instanceId,
         position: application.getWorldPosition(new THREE.Vector3()).toArray(),
         quaternion: application.getWorldQuaternion(new THREE.Quaternion()).toArray(),
         scale: application.scale.toArray(),

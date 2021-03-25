@@ -6,15 +6,15 @@ import {
 } from '@ember/object';
 import { inject as service } from '@ember/service';
 import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-setup/timeline/plotly-timeline';
-import Timestamp from 'explorviz-frontend/models/timestamp';
 import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
-import TimestampRepository from 'explorviz-frontend/services/repos/timestamp-repository';
+import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
 import { tracked } from '@glimmer/tracking';
 import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import debugLogger from 'ember-debug-logger';
+import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
@@ -35,6 +35,8 @@ export default class VisualizationController extends Controller {
   @service('landscape-listener') landscapeListener!: LandscapeListener;
 
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
+
+  @service('landscape-token') landscapeTokenService!: LandscapeTokenService;
 
   @service('reload-handler') reloadHandler!: ReloadHandler;
 
@@ -62,6 +64,9 @@ export default class VisualizationController extends Controller {
   @tracked
   visualizationPaused = false;
 
+  @tracked
+  timelineTimestamps: Timestamp[] = [];
+
   debug = debugLogger();
 
   get showLandscapeView() {
@@ -85,6 +90,12 @@ export default class VisualizationController extends Controller {
   }
 
   @action
+  updateTimestampList() {
+    const currentToken = this.landscapeTokenService.token!.value;
+    this.timelineTimestamps = this.timestampRepo.getTimestamps(currentToken) ?? [];
+  }
+
+  @action
   receiveNewLandscapeData(structureData: StructureLandscapeData,
     dynamicData: DynamicLandscapeData) {
     if (!this.visualizationPaused) {
@@ -98,8 +109,8 @@ export default class VisualizationController extends Controller {
     if (this.landscapeData !== null) {
       application = this.landscapeData.application;
       if (application !== undefined) {
-        const newApplication = VisualizationController.getApplicationFromLandscapeByPid(
-          application.pid, structureData,
+        const newApplication = VisualizationController.getApplicationFromLandscapeByInstanceId(
+          application.instanceId, structureData,
         );
 
         if (newApplication) {
@@ -114,12 +125,12 @@ export default class VisualizationController extends Controller {
     };
   }
 
-  private static getApplicationFromLandscapeByPid(pid: string,
+  private static getApplicationFromLandscapeByInstanceId(instanceId: string,
     structureData: StructureLandscapeData) {
     let foundApplication: Application|undefined;
     structureData.nodes.forEach((node) => {
       node.applications.forEach((application) => {
-        if (application.pid === pid) {
+        if (application.instanceId === instanceId) {
           foundApplication = application;
         }
       });
@@ -166,9 +177,21 @@ export default class VisualizationController extends Controller {
   }
 
   @action
+  resetLandscapeListenerPolling() {
+    if (this.landscapeListener.timer !== null) {
+      clearTimeout(this.landscapeListener.timer);
+    }
+  }
+
+  @action
   closeDataSelection() {
     this.showDataSelection = false;
     this.components = [];
+  }
+
+  @action
+  openDataSelection() {
+    this.showDataSelection = true;
   }
 
   @action
@@ -181,7 +204,6 @@ export default class VisualizationController extends Controller {
     }
 
     this.components = [component, ...this.components];
-    this.showDataSelection = true;
   }
 
   @action
@@ -195,11 +217,6 @@ export default class VisualizationController extends Controller {
       components.splice(index, 1);
       this.components = components;
     }
-
-    // Close sidebar if it would be empty otherwise
-    if (this.components.length === 0) {
-      this.showDataSelection = false;
-    }
   }
 
   @action
@@ -211,7 +228,7 @@ export default class VisualizationController extends Controller {
     this.pauseVisualizationUpdating();
     try {
       const [structureData, dynamicData] = await
-      this.reloadHandler.loadLandscapeByTimestamp(timestampRecordArray[0].get('timestamp'));
+      this.reloadHandler.loadLandscapeByTimestamp(timestampRecordArray[0].timestamp);
 
       this.updateLandscape(structureData, dynamicData);
       set(this, 'selectedTimestampRecords', timestampRecordArray);
@@ -260,13 +277,15 @@ export default class VisualizationController extends Controller {
   }
 
   initRendering() {
+    this.landscapeData = null;
+    this.selectedTimestampRecords = [];
+    this.visualizationPaused = false;
     this.landscapeListener.initLandscapePolling();
+    this.updateTimestampList();
   }
 
   willDestroy() {
-    if (this.landscapeListener.timer !== null) {
-      clearTimeout(this.landscapeListener.timer);
-    }
+    this.resetLandscapeListenerPolling();
   }
 }
 

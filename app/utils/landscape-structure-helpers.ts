@@ -14,7 +14,7 @@ export function getAllApplicationsInLandscape(landscapeStructure: StructureLands
 export function getApplicationInLandscapeById(landscapeStructure: StructureLandscapeData,
   id: string): Application|undefined {
   return getAllApplicationsInLandscape(landscapeStructure)
-    .filter(({ pid }) => pid === id)[0];
+    .filter(({ instanceId }) => instanceId === id)[0];
 }
 
 export function getApplicationFromClass(structureData: StructureLandscapeData, clazz: Class) {

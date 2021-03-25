@@ -177,18 +177,15 @@ export default class VrLandscapeRenderer {
       const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
       const centerPoint = landscapeRect.center;
 
-      // Render all landscape entities
-      const { nodes } = this.structureLandscapeData;
-
       // Draw boxes for nodes
-      nodes.forEach((node: Node) => {
+      this.structureLandscapeData.nodes.forEach((node: Node) => {
         this.renderNode(node, modelIdToPlaneLayout.get(node.ipAddress), centerPoint);
 
         const { applications } = node;
 
         // Draw boxes for applications
         applications.forEach((application: Application) => {
-          this.renderApplication(application, modelIdToPlaneLayout.get(application.pid),
+          this.renderApplication(application, modelIdToPlaneLayout.get(application.instanceId),
             centerPoint);
         });
       });

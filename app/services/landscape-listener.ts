@@ -1,24 +1,23 @@
 import Service, { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
-import DS from 'ember-data';
-import { set } from '@ember/object';
-import { AjaxServiceClass } from 'ember-ajax/services/ajax';
-import config from 'explorviz-frontend/config/environment';
 import {
   preProcessAndEnhanceStructureLandscape, StructureLandscapeData,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import ENV from 'explorviz-frontend/config/environment';
 import TimestampRepository from './repos/timestamp-repository';
+import Auth from './auth';
+import LandscapeTokenService from './landscape-token';
+
+const { landscapeService, traceService } = ENV.backendAddresses;
 
 export default class LandscapeListener extends Service.extend(Evented) {
-  @service('session') session!: any;
-
-  @service('store') store!: DS.Store;
-
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
-  @service('ajax') ajax!: AjaxServiceClass;
+  @service('auth') auth!: Auth;
+
+  @service('landscape-token') tokenService!: LandscapeTokenService;
 
   latestStructureData: StructureLandscapeData|null = null;
 
@@ -67,16 +66,46 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
   requestStructureData(/* fromTimestamp: number, toTimestamp: number */) {
     return new Promise<StructureLandscapeData>((resolve, reject) => {
-      this.ajax.request(`${config.APP.API_ROOT}/v2/landscapes/fibonacci-sample-landscape/structure`)
-        .then((data: StructureLandscapeData) => resolve(data))
+      if (this.tokenService.token === null) {
+        reject(new Error('No landscape token selected'));
+        return;
+      }
+      fetch(`${landscapeService}/v2/landscapes/${this.tokenService.token.value}/structure`, {
+        headers: {
+          Authorization: `Bearer ${this.auth.accessToken}`,
+        },
+      })
+        .then(async (response: Response) => {
+          if (response.ok) {
+            const structureData = await response.json() as StructureLandscapeData;
+            resolve(structureData);
+          } else {
+            reject();
+          }
+        })
         .catch((e) => reject(e));
     });
   }
 
   requestDynamicData(fromTimestamp: number, toTimestamp: number) {
     return new Promise<DynamicLandscapeData>((resolve, reject) => {
-      this.ajax.request(`${config.APP.API_ROOT}/v2/landscapes/fibonacci-sample-landscape/dynamic?from=${fromTimestamp}&to=${toTimestamp}`)
-        .then((data: any) => resolve(data))
+      if (this.tokenService.token === null) {
+        reject(new Error('No landscape token selected'));
+        return;
+      }
+      fetch(`${traceService}/v2/landscapes/${this.tokenService.token.value}/dynamic?from=${fromTimestamp}&to=${toTimestamp}`, {
+        headers: {
+          Authorization: `Bearer ${this.auth.accessToken}`,
+        },
+      })
+        .then(async (response: Response) => {
+          if (response.ok) {
+            const dynamicData = await response.json() as DynamicLandscapeData;
+            resolve(dynamicData);
+          } else {
+            reject();
+          }
+        })
         .catch((e) => reject(e));
     });
   }
@@ -104,12 +133,9 @@ export default class LandscapeListener extends Service.extend(Evented) {
       /* eslint-enable */
     }
 
-    const timestampRecord = this.store.createRecord('timestamp', { id: uuidv4(), timestamp, totalRequests });
-    set(this.timestampRepo, 'latestTimestamp', timestampRecord);
+    const timestampRecord = { id: uuidv4(), timestamp, totalRequests };
 
-    // this syntax will notify the template engine to redraw all components
-    // with a binding to this attribute
-    set(this.timestampRepo, 'timelineTimestamps', [...this.timestampRepo.timelineTimestamps, timestampRecord]);
+    this.timestampRepo.addTimestamp(this.tokenService.token!.value, timestampRecord);
 
     this.timestampRepo.triggerTimelineUpdate();
   }

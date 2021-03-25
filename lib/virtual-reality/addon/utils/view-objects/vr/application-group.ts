@@ -11,9 +11,9 @@ export default class ApplicationGroup extends THREE.Group {
   }
 
   addApplication(application: ApplicationObject3D) {
-    if (!this.hasApplication(application.dataModel.pid)) {
+    if (!this.hasApplication(application.dataModel.instanceId)) {
       this.add(application);
-      this.openedApps.set(application.dataModel.pid, application);
+      this.openedApps.set(application.dataModel.instanceId, application);
     }
   }
 
@@ -35,10 +35,8 @@ export default class ApplicationGroup extends THREE.Group {
   }
 
   removeApplication(application: ApplicationObject3D) {
-    this.openedApps.delete(application.dataModel.pid);
-    if (application.parent) {
-      application.parent.remove(application);
-    }
+    this.openedApps.delete(application.dataModel.instanceId);
+    application.parent?.remove(application);
     application.children.forEach((child) => {
       if (child instanceof BaseMesh) {
         child.disposeRecursively();

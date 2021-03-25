@@ -6,7 +6,6 @@ import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import Configuration from 'explorviz-frontend/services/configuration';
-import CurrentUser from 'explorviz-frontend/services/current-user';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import RemoteVrUserService from 'explorviz-frontend/services/remote-vr-users';
@@ -94,9 +93,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   @service('configuration')
   private configuration!: Configuration;
-
-  @service('current-user')
-  private currentUser!: CurrentUser;
 
   @service('local-vr-user')
   private localUser!: LocalVrUser;
@@ -289,7 +285,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Initialize application rendering.
     this.vrApplicationRenderer = new VrApplicationRenderer({
-      appCommRendering: new AppCommunicationRendering(this.configuration, this.currentUser),
+      appCommRendering: new AppCommunicationRendering(this.configuration),
       closeButtonTexture,
       configuration: this.configuration,
       font: this.args.font,
@@ -555,7 +551,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       this.showHint('No data available');
       return Promise.resolve(null);
     }
-    if (this.applicationGroup.hasApplication(applicationModel.pid)) {
+    if (this.applicationGroup.hasApplication(applicationModel.instanceId)) {
       this.showHint('Application already opened');
       return Promise.resolve(null);
     }
@@ -566,7 +562,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private removeApplication(application: ApplicationObject3D): Promise<boolean> {
     return new Promise((resolve) => {
       // Ask backend to close the application.
-      const nonce = this.sender.sendAppClosed(application.dataModel.pid);
+      const nonce = this.sender.sendAppClosed(application.dataModel.instanceId);
 
       // Remove the application only when the backend allowed the application to be closed.
       this.receiver.awaitResponse({
@@ -585,7 +581,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   private forceRemoveApplication(application: ApplicationObject3D) {
-    this.applicationGroup.removeApplicationById(application.dataModel.pid);
+    this.applicationGroup.removeApplicationById(application.dataModel.instanceId);
   }
 
   private forceRemoveAllApplications() {
@@ -602,7 +598,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.updateDrawableCommunications(applicationObject3D);
 
     if (!onlyLocally && this.localUser.isOnline) {
-      this.sender.sendComponentUpdate(applicationObject3D.dataModel.pid, componentMesh.dataModel.id, componentMesh.opened, false);
+      this.sender.sendComponentUpdate(applicationObject3D.dataModel.instanceId, componentMesh.dataModel.id, componentMesh.opened, false);
     }
   }
 
@@ -611,16 +607,12 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.updateDrawableCommunications(applicationObject3D);
 
     if (!onlyLocally && this.localUser.isOnline) {
-      this.sender.sendComponentUpdate(applicationObject3D.dataModel.pid, '', false, true);
+      this.sender.sendComponentUpdate(applicationObject3D.dataModel.instanceId, '', false, true);
     }
   }
 
   private updateDrawableCommunications(applicationObject3D: ApplicationObject3D) {
-    const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(applicationObject3D.dataModel.pid);
-    if (drawableComm) {
-      this.vrApplicationRenderer.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-      Highlighting.updateHighlighting(applicationObject3D, drawableComm);
-    }
+    this.vrApplicationRenderer.updateDrawableCommunications(applicationObject3D);
   }
 
   // #endregion COMPONENT AND COMMUNICATION RENDERING
@@ -638,7 +630,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       application.setHighlightingColor(this.localUser.color);
     }
 
-    const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(application.dataModel.pid);
+    const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(application.dataModel.instanceId);
     if (this.isHightlightableAppEntity(object) && drawableComm) {
       Highlighting.highlight(object, application, drawableComm);
     }
@@ -646,7 +638,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Send highlighting update.
     if (this.localUser.isOnline) {
       if (object instanceof ComponentMesh || object instanceof ClazzMesh) {
-        this.sender.sendHighlightingUpdate(application.dataModel.pid, object.constructor.name,
+        this.sender.sendHighlightingUpdate(application.dataModel.instanceId, object.constructor.name,
           object.dataModel.id, object.highlighted);
       } else if (object instanceof ClazzCommunicationMesh) {
         const { sourceClass, targetClass } = object.dataModel;
@@ -660,7 +652,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
           combinedId = `${targetClass.id}###${sourceClass.id}`;
         }
 
-        this.sender.sendHighlightingUpdate(application.dataModel.pid, object.constructor.name,
+        this.sender.sendHighlightingUpdate(application.dataModel.instanceId, object.constructor.name,
           combinedId, object.highlighted);
       }
     }
@@ -1137,7 +1129,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
           this.vrApplicationRenderer.addLabels(applicationObject3D);
 
           const drawableComm = this.vrApplicationRenderer.drawableClassCommunications
-            .get(applicationObject3D.dataModel.pid);
+            .get(applicationObject3D.dataModel.instanceId);
 
           if (drawableComm) {
             this.vrApplicationRenderer.appCommRendering.addCommunication(applicationObject3D, drawableComm);
@@ -1259,7 +1251,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     applicationObject3D.setHighlightingColor(user.color);
 
     const drawableComm = this.vrApplicationRenderer.drawableClassCommunications
-      .get(applicationObject3D.dataModel.pid);
+      .get(applicationObject3D.dataModel.instanceId);
 
     // Apply highlighting
     if (entityType === 'ComponentMesh' || entityType === 'ClazzMesh') {

@@ -17,6 +17,9 @@ module.exports = {
   env: {
     browser: true
   },
+  globals: {
+    'auth0': false
+  },
   rules: {
     'linebreak-style': 'off',
     'import/no-unresolved': 'off',
