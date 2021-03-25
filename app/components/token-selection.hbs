@@ -9,6 +9,7 @@
       <th scope="col" {{on "click" (fn this.sortBy "created")}}>Created</th>
       <th scope="col"></th>
       <th scope="col"></th>
+      <th scope="col"></th>
     </tr>
   </thead>
   <tbody>
@@ -36,6 +37,7 @@
         <th scope="row" {{on "click" (fn @selectToken token)}}>{{token.alias}}</th>
         <th scope="row" {{on "click" (fn @selectToken token)}}>{{token.value}}</th>
         <th scope="row" {{on "click" (fn @selectToken token)}}>{{timestamp-to-date token.created "localString"}}</th>
+        {{#if (eq token.ownerId this.auth.user.sub)}}
         <th scope="row">
           <CopyButton
             class="button-svg-with-hover"
@@ -60,6 +62,17 @@
             </BsTooltip>
           </button>
         </th>
+        <th scope="row">
+          <ShareLandscape 
+            @token={{token}}
+          />
+        </th>
+        {{else}}
+        
+        <th scope="row" />
+        <th scope="row" />
+        <th scope="row" />
+        {{/if}}
       </tr>
     {{else}}
       There are no tokens linked to your account at the moment.

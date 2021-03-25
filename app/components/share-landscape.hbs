@@ -1,0 +1,36 @@
+<div id="colorPresets" class="dropdown">
+    <button class="button-svg-with-hover" type="button">
+        {{svg-jar "lock" class="octicon align-middle"}}
+        <BsTooltip @placement="bottom" @triggerEvents="hover">
+            Manage access to token
+        </BsTooltip>
+        <BsPopover @title="Manage Access">
+            <table class="table table-striped" style="width: 100%">
+                <tbody>
+                    {{#each @token.sharedUsersIds as |userWithAccess|}}
+                    <tr class="d-flex">
+                        <td class="col-10">{{userWithAccess}}</td>
+                        <td class="col-2"><button class="button-svg-with-hover" type="button" {{on "click" (fn
+                                this.revokeAccess userWithAccess)}}>
+                                {{svg-jar "dash" class="octicon align-middle"}}
+                                <BsTooltip @placement="bottom" @triggerEvents="hover">
+                                    Revoke access
+                                </BsTooltip>
+                            </button></td>
+                    </tr>
+                    {{/each}}
+                    <tr class="d-flex">
+                        <td class="col-10"><Input @value={{this.username}} placeholder="github|12345"/></td>
+                        <td class="col-2"><button class="button-svg-with-hover" type="button" {{on "click" (fn
+                                this.grantAccess)}}>
+                                {{svg-jar "plus" class="octicon align-middle"}}
+                                <BsTooltip @placement="bottom" @triggerEvents="hover">
+                                    Grant access
+                                </BsTooltip>
+                            </button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </BsPopover>
+    </button>
+</div>
