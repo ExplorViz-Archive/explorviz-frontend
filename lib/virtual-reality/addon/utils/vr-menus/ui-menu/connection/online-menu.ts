@@ -1,5 +1,4 @@
 import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
-import RemoteVrUser from "virtual-reality/utils/vr-multi-user/remote-vr-user";
 import TextItem from "../../items/text-item";
 import TextbuttonItem from "../../items/textbutton-item";
 import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
@@ -45,20 +44,15 @@ export default class OnlineMenu extends ConnectionBaseMenu {
     const localUserButton = new TextbuttonItem('local-user', this.localUser.userName + ' (you)', { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
     this.items.push(localUserButton);
     this.thumbpadTargets.push(localUserButton);
-    localUserButton.onTriggerDown = () => this.deactivateSpectate();
     yPos += yOffset;
 
     users.forEach((user) => {
       if (user.state === 'online' && user.userName) {
-        let text = user.userName;
-        if (this.localUser.spectateUserService.spectatedUser?.userId == user.userId) {
-          text += ' (spectated)';
-        }
-        const remoteUserButton = new TextbuttonItem(user.userId, text, { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+        const remoteUserButton = new TextbuttonItem(user.userId, user.userName, { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
         this.remoteUserButtons.set(user.userId, remoteUserButton)
         this.items.push(remoteUserButton);
         this.thumbpadTargets.push(remoteUserButton);
-        remoteUserButton.onTriggerDown = () => this.spectate(user);
+        remoteUserButton.onTriggerDown = () => this.menuGroup?.openMenu(this.menuFactory.buildSpectateMenu(user));
         yPos += yOffset;
       }
     });
@@ -80,30 +74,6 @@ export default class OnlineMenu extends ConnectionBaseMenu {
 
   private arrayEquals(a: string[], b: string[]) {
     return a.length === b.length && a.every((val, index) => val === b[index]);
-  }
-
-  private deactivateSpectate() {
-    if (this.localUser.spectateUserService.isActive) {
-      const id = this.localUser.spectateUserService.spectatedUser?.userId
-      if (id) {
-        const remoteUserButton = this.remoteUserButtons.get(id);
-        if (remoteUserButton) {
-          remoteUserButton.text = this.remoteUsers.lookupRemoteUserById(id)?.userName || 'unknown';
-        }
-      }
-      this.localUser.spectateUserService.deactivate();
-    }
-    this.redrawMenu();
-  }
-
-  private spectate(remoteUser: RemoteVrUser) {
-    this.deactivateSpectate();
-    this.localUser.spectateUserService.activate(remoteUser);
-    const remoteUserButton = this.remoteUserButtons.get(remoteUser.userId);
-    if (remoteUserButton) {
-      remoteUserButton.text += ' (spectated)';
-    }
-    this.redrawMenu();
   }
 
   makeGripButtonBinding() {
