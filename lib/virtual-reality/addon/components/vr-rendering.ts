@@ -729,7 +729,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   private openMainMenu(controller: VRController) {
-    controller.menuGroup.openMenu(this.menuFactory.buildMainMenu());
+    controller.menuGroup.openMenu(this.menuFactory.buildToolMenu());
   }
 
   private openZoomMenu(controller: VRController) {

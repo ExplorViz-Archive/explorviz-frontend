@@ -30,6 +30,7 @@ import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-
 import SpectateMenu from 'virtual-reality/utils/vr-menus/ui-menu/connection/spectate-menu';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import DisableInputMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/disable-input-menu';
+import ToolMenu from 'virtual-reality/utils/vr-menus/ui-menu/tool-menu';
 
 type InjectedValues = {
   vrApplicationRenderer: VrApplicationRenderer,
@@ -77,6 +78,10 @@ export default class VrMenuFactoryService extends Service {
 
   buildMainMenu(): MainMenu {
     return new MainMenu({ menuFactory: this });
+  }
+
+  buildToolMenu(): ToolMenu {
+    return new ToolMenu({ menuFactory: this });
   }
 
   // #region SETTINGS MENUS
