@@ -47,14 +47,12 @@ export default class OnlineMenu extends ConnectionBaseMenu {
     yPos += yOffset;
 
     users.forEach((user) => {
-      if (user.state === 'online' && user.userName) {
         const remoteUserButton = new TextbuttonItem(user.userId, user.userName, { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
         this.remoteUserButtons.set(user.userId, remoteUserButton)
         this.items.push(remoteUserButton);
         this.thumbpadTargets.push(remoteUserButton);
         remoteUserButton.onTriggerDown = () => this.menuGroup?.openMenu(this.menuFactory.buildSpectateMenu(user));
         yPos += yOffset;
-      }
     });
     this.items.push(title);
 
