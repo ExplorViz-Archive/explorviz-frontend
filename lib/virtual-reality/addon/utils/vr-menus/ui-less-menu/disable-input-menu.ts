@@ -4,11 +4,11 @@ import BaseMenu, { BaseMenuArgs } from "../base-menu";
 
 export default class DisableInputMenu extends BaseMenu {
   
-  constructor({...args}: BaseMenuArgs) {
+  constructor(args: BaseMenuArgs) {
     super(args);
   }
 
   makeMenuButtonBinding(): VRControllerButtonBinding<undefined> | undefined {
     return undefined;
-    };
+  };
 }

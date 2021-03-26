@@ -230,7 +230,7 @@ export default class VrMenuFactoryService extends Service {
   buildDisableInputMenu(): DisableInputMenu {
     return new DisableInputMenu({
       menuFactory: this
-    })
+    });
   }
 
   // #endregion OTHER MENUS
