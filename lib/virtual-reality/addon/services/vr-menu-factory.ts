@@ -27,6 +27,9 @@ import TimeMenu from 'virtual-reality/utils/vr-menus/ui-menu/time-menu';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import VrRoomService from './vr-room';
 import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
+import SpectateMenu from 'virtual-reality/utils/vr-menus/ui-menu/connection/spectate-menu';
+import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
+import DisableInputMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/disable-input-menu';
 
 type InjectedValues = {
   vrApplicationRenderer: VrApplicationRenderer,
@@ -36,6 +39,7 @@ type InjectedValues = {
 };
 
 export default class VrMenuFactoryService extends Service {
+
   @service('local-vr-user')
   private localUser!: LocalVrUser;
 
@@ -144,6 +148,14 @@ export default class VrMenuFactoryService extends Service {
     });
   }
 
+  buildSpectateMenu(remoteUser: RemoteVrUser): SpectateMenu {
+    return new SpectateMenu({
+      menuFactory: this,
+      localUser: this.localUser,
+      remoteUser
+    });
+  }
+
   // #endregion CONNECTION MENUS
 
   // #region TOOL MENUS
@@ -212,6 +224,12 @@ export default class VrMenuFactoryService extends Service {
       vrLandscapeRenderer: this.vrLandscapeRenderer,
       menuFactory: this,
       detachedMenuGroups: this.detachedMenuGroups
+    });
+  }
+
+  buildDisableInputMenu(): DisableInputMenu {
+    return new DisableInputMenu({
+      menuFactory: this
     });
   }
 
