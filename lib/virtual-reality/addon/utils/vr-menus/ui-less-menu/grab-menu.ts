@@ -213,4 +213,5 @@ export default class GrabMenu extends BaseMenu {
       this.grabbedObject.parent?.worldToLocal(position);
       this.grabbedObject.position.copy(position);
     }
+  }
 }
