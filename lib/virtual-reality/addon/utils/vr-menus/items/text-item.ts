@@ -1,4 +1,5 @@
 import Item from './item';
+import * as Helper from '../../vr-helpers/multi-user-helper';
 
 type Alignment = 'left' | 'center' | 'right';
 
@@ -34,7 +35,7 @@ export default class TextItem extends Item {
   }
 
   private getMinX() {
-    const size = TextItem.getTextSize(this.text, `${this.fontSize}px arial`);
+    const size = Helper.getTextSize(this.text, `${this.fontSize}px arial`);
 
     let itemX = this.position.x;
 
@@ -48,7 +49,7 @@ export default class TextItem extends Item {
   }
 
   private getMaxX() {
-    const size = TextItem.getTextSize(this.text, `${this.fontSize}px arial`);
+    const size = Helper.getTextSize(this.text, `${this.fontSize}px arial`);
 
     return this.getMinX() + size.width;
   }
@@ -58,13 +59,14 @@ export default class TextItem extends Item {
   }
 
   private getMaxY() {
-    const size = TextItem.getTextSize(this.text, `${this.fontSize}px arial`);
+    const size = Helper.getTextSize(this.text, `${this.fontSize}px arial`);
 
     return this.position.y + size.height;
   }
 
   drawToCanvas(ctx: CanvasRenderingContext2D): void {
     // Draw Text
+    ctx.save();
     ctx.font = `${this.fontSize}px arial`;
     ctx.fillStyle = this.color;
     ctx.textAlign = this.alignment;
@@ -72,28 +74,8 @@ export default class TextItem extends Item {
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-    const textSize = TextItem.getTextSize(this.text, ctx.font);
+    const textSize = Helper.getTextSize(this.text, ctx.font);
     ctx.fillText(this.text, this.position.x, this.position.y + textSize.sublineHeight);
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-  }
-
-  /**
-   * Returns measurements in pixels for a given text
-   *
-   * @param text The text to measure the width, height and subline height of.
-   * @param font The font to measure the size in.
-   * @return {{width: Number, height: Number, sublineHeight: Number}} The sizes of the text.
-   */
-  private static getTextSize(text: string, font: string): { width: number, height: number, sublineHeight: number } {
-    // re-use canvas object for better performance
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d')!;
-    context.font = font;
-    const { width } = context.measureText(text);
-    const height = context.measureText('W').width;
-    const sublineHeight = context.measureText('H').width;
-    return { width, height, sublineHeight };
+    ctx.restore();
   }
 }
