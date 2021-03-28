@@ -1,10 +1,11 @@
-export default abstract class Item {
-  id: string;
+export type ItemArgs = {
+  position: { x: number, y: number }
+};
 
+export default abstract class Item {
   position: { x: number, y: number };
 
-  constructor(id: string, position: { x: number, y: number }) {
-    this.id = id;
+  constructor({position}: ItemArgs) {
     this.position = position;
   }
 

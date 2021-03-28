@@ -1,62 +1,49 @@
 import BaseMesh from "explorviz-frontend/view-objects/3d/base-mesh";
 import THREE from "three";
-import * as Helper from '../vr-helpers/multi-user-helper';
+import TextTexture from '../vr-helpers/text-texture';
 import { VRControllerLabelPosition } from "./vr-controller-label-positions";
 
-export default class VRControllerLabelMesh extends BaseMesh {
-  canvas: HTMLCanvasElement;
+const SIZE_PER_PIXEL = 0.15 / 500;
 
+export default class VRControllerLabelMesh extends BaseMesh {
   constructor(label: string, labelPosition: VRControllerLabelPosition) {
     super();
 
-    // Set width and height based on text size.
-    const font = '30px arial';
-    const textSize = Helper.getTextSize(label, font);
-    const padding = 10;
-    const width = textSize.width + padding;
-    const height = textSize.height + padding;
+    // Write label text into a texture.
+    const texture = new TextTexture({
+      text: label,
+      textColor: new THREE.Color(0xffffff),
+      fontSize: 30,
+      fontFamily: 'arial',
+      padding: 20,
+    });
 
-    const worldWidth = width / 512 * 0.15;
-    const worldHeight = height / 512 * 0.15;
+    // Set size of label based on text size.
+    const worldWidth = texture.image.width * SIZE_PER_PIXEL;
+    const worldHeight = texture.image.height * SIZE_PER_PIXEL;
     this.geometry = new THREE.PlaneGeometry(worldWidth, worldHeight);
 
     // Fill background with default menu background color.
     this.material = new THREE.MeshBasicMaterial({
       color: new THREE.Color(0x444444),
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.8
     });
 
-    // Use canvas to display text.
-    this.canvas = document.createElement('canvas');
-    this.canvas.width = width;
-    this.canvas.height = height;
-
-    const ctx = this.canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Write white text into canvas.
-    ctx.font = font;
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.fillText(label, width / 2, height - padding);
-
-    // Create a new mesh whose texture is the canvas such that the text
+    // Create a new mesh whose texture is the texture such that the text
     // is not visible from the back.
-    const geometry = this.geometry.clone();
-    const material = new THREE.MeshBasicMaterial({
-      map: new THREE.CanvasTexture(this.canvas),
-      depthTest: true
+    const canvasGeometry = this.geometry.clone();
+    const canvasMaterial = new THREE.MeshBasicMaterial({
+      map: texture,
+      depthTest: true,
+      transparent: true,
     });
-    material.transparent = true;
-    const canvasMesh = new THREE.Mesh(geometry, material);
+    const canvasMesh = new THREE.Mesh(canvasGeometry, canvasMaterial);
 
     // Move the canvas slightly in front of the background.
-    canvasMesh.position.z = 0.001;
+    canvasMesh.position.z = 0.00001;
     this.add(canvasMesh);
-
-    // Make label slightly transparent.
-    this.material.transparent = true;
-    this.material.opacity = 0.8;
 
     // Move label to the left or right of the controller.
     // There is a 5cm padding between the label and the controller.

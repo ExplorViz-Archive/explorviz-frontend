@@ -1,56 +1,80 @@
-import InteractiveItem from './interactive-item';
-import * as Helper from '../../vr-helpers/multi-user-helper';
+import InteractiveItem, { InteractiveItemArgs } from './interactive-item';
+
+export const DEFAULT_BUTTON_COLOR = '#555555';
+export const DEFAULT_BUTTON_TEXT_COLOR = '#ffc338';
+export const DEFAULT_BUTTON_HOVER_COLOR = '#929292';
+
+export type TextbuttonItemArgs = InteractiveItemArgs & {
+  text: string,
+  fontSize: number,
+  width: number,
+  height: number,
+  buttonColor?: string,
+  textColor?: string,
+  hoverColor?: string,
+};
 
 export default class TextbuttonItem extends InteractiveItem {
   text: string;
+  fontSize: number;
 
   width: number;
-
   height: number;
 
-  textSize: number;
-
-  buttonColor: string;
-
   textColor: string;
-
+  buttonColor: string;
   hoverColor: string;
 
-  constructor(id: string, text: string, position: { x: number, y: number },
-    width: number, height: number, textSize: number,
-    buttonColor: string, textColor: string, hoverColor: string) {
-    super(id, position);
+  constructor({
+    text, fontSize,
+    width, height,
+    buttonColor = DEFAULT_BUTTON_COLOR,
+    textColor = DEFAULT_BUTTON_TEXT_COLOR,
+    hoverColor = DEFAULT_BUTTON_HOVER_COLOR,
+    ...args
+  }: TextbuttonItemArgs) {
+    super(args);
 
     this.text = text;
     this.width = width;
     this.height = height;
-    this.textSize = textSize;
+    this.fontSize = fontSize;
     this.buttonColor = buttonColor;
     this.textColor = textColor;
     this.hoverColor = hoverColor;
   }
 
+  get font() {
+    return `${this.fontSize}px arial`;
+  }
+
   drawToCanvas(ctx: CanvasRenderingContext2D): void {
-    // draw button background
+    ctx.save();
+
+    // Draw button background.
     ctx.fillStyle = this.isHovered ? this.hoverColor : this.buttonColor;
     ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
 
-    // draw button text
-    ctx.save();
+    // Draw button text.
     ctx.fillStyle = this.textColor;
-    ctx.font = `${this.textSize}px arial`;
+    ctx.font = this.font;
     ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
     ctx.shadowBlur = 4;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-    const textSize = Helper.getTextSize(this.text, ctx.font);
-    ctx.fillText(this.text, this.position.x + (this.width / 2),
-      this.position.y + ((this.height + textSize.sublineHeight) / 2));
+
+    ctx.fillText(
+      this.text,
+      this.position.x + this.width / 2,
+      this.position.y + this.height / 2
+    );
     ctx.restore();
   }
 
-  getBoundingBox(): { minX: number; maxX: number; minY: number; maxY: number; } {
+  getBoundingBox() {
     return {
       minX: this.position.x,
       maxX: this.position.x + this.width,

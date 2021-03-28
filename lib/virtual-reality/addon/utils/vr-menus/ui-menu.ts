@@ -6,6 +6,10 @@ import { BaseMenuArgs } from "./base-menu";
 import InteractiveItem from "./items/interactive-item";
 import Item from "./items/item";
 
+export const DEFAULT_MENU_RESOLUTION = 512;
+
+export const SIZE_RESOLUTION_FACTOR = 0.3 / DEFAULT_MENU_RESOLUTION;
+
 export type UiMenuArgs = BaseMenuArgs & {
   resolution?: { width: number, height: number },
   backgroundColor?: string
@@ -35,7 +39,7 @@ export default abstract class UiMenu extends AnimatedMenu {
   thumbpadAxis: number;
 
   constructor({
-    resolution = { width: 512, height: 512 },
+    resolution = { width: DEFAULT_MENU_RESOLUTION, height: DEFAULT_MENU_RESOLUTION },
     backgroundColor = '#444444',
     ...args
   }: UiMenuArgs) {
@@ -70,8 +74,8 @@ export default abstract class UiMenu extends AnimatedMenu {
    */
   makeBackgroundGeometry(): THREE.Geometry {
     return new THREE.PlaneGeometry(
-      (this.resolution.width / 512) * 0.3,
-      (this.resolution.height / 512) * 0.3,
+      this.resolution.width * SIZE_RESOLUTION_FACTOR,
+      this.resolution.height * SIZE_RESOLUTION_FACTOR,
     );
   }
 
@@ -159,16 +163,6 @@ export default abstract class UiMenu extends AnimatedMenu {
       }
     }
     return undefined;
-  }
-
-  /**
-   * Gets the menu iitem with the given id.
-   *
-   * @param id The id of the item to find.
-   * @returns The item or `undefined`if there is no such item.
-   */
-  getItemById(id: string): Item | undefined {
-    return this.items.find((item) => item.id === id);
   }
 
   /**

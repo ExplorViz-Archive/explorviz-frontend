@@ -36,25 +36,20 @@ export function getPoses(camera: THREE.Camera, controller1: VRController | undef
   return { camera: cameraPose, controller1: controller1Pose, controller2: controller2Pose };
 }
 
-/**
- * Returns measurements in pixels for a given text
- *
- * @param {string} text The text to measure the width, height and subline height of.
- * @param {string} font The font to measure the size in.
- * @return {{width: Number, height: Number, sublineHeight: Number}} The sizes of the text.
- */
-export function getTextSize(text: string, font: string) {
+export function measureText(text: string, {font, alignment, baseline}: {
+  font: string,
+  alignment: CanvasTextAlign,
+  baseline: CanvasTextBaseline
+}): TextMetrics {
   // re-use canvas object for better performance
   const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw `failed to measure text: ${text}`;
 
-  if (!context) return { width: 200, height: 50, sublineHeight: 10 };
-
-  context.font = font;
-  const { width } = context.measureText(text);
-  const height = context.measureText('W').width;
-  const sublineHeight = context.measureText('H').width;
-  return { width, height, sublineHeight };
+  ctx.font = font;
+  ctx.textAlign = alignment;
+  ctx.textBaseline = baseline;
+  return ctx.measureText(text);
 }
 
 /**

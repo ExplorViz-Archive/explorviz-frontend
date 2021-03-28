@@ -1,81 +1,75 @@
-import Item from './item';
-import * as Helper from '../../vr-helpers/multi-user-helper';
+import Item, { ItemArgs } from './item';
 
-type Alignment = 'left' | 'center' | 'right';
+/**
+ * A canvas 2D rendering context that is used to measure the bounding box of
+ * the text.
+ */
+const measurementContext = document.createElement('canvas').getContext('2d');
+
+export type TextItemArgs = ItemArgs & {
+  text: string,
+  color: string,
+  fontSize: number,
+  alignment?: CanvasTextAlign,
+  baseline?: CanvasTextBaseline,
+};
 
 export default class TextItem extends Item {
   text: string;
-
   color: string;
-
   fontSize: number;
+  alignment: CanvasTextAlign;
+  baseline: CanvasTextBaseline;
 
-  alignment: Alignment;
-
-  constructor(text: string, id: string, color: string, position: { x: number, y: number },
-    fontSize: number, alignment: Alignment = 'left') {
-    super(id, position);
+  constructor({text, color, fontSize, alignment = 'left', baseline = 'alphabetic', ...args}: TextItemArgs) {
+    super(args);
     this.text = text;
     this.color = color;
     this.fontSize = fontSize;
     this.alignment = alignment;
+    this.baseline = baseline;
+  }
+
+  get font() {
+    return `${this.fontSize}px arial`;
   }
 
   setText(text: string) {
     this.text = text;
   }
 
+  measureText() {
+    if (!measurementContext) throw `failed to measure text: ${this.text}`;
+
+    measurementContext.font = this.font;
+    measurementContext.textAlign = this.alignment;
+    measurementContext.textBaseline = this.baseline;
+    return measurementContext.measureText(this.text);
+  }
+
   getBoundingBox() {
+    const size = this.measureText();
     return {
-      minX: this.getMinX(),
-      maxX: this.getMaxX(),
-      minY: this.getMinY(),
-      maxY: this.getMaxY(),
+      minX: this.position.x + size.actualBoundingBoxLeft,
+      maxX: this.position.x + size.actualBoundingBoxRight,
+      minY: this.position.y + size.actualBoundingBoxAscent,
+      maxY: this.position.y + size.actualBoundingBoxDescent
     };
   }
 
-  private getMinX() {
-    const size = Helper.getTextSize(this.text, `${this.fontSize}px arial`);
-
-    let itemX = this.position.x;
-
-    if (this.alignment === 'center') {
-      itemX -= size.width / 2;
-    } else if (this.alignment === 'right') {
-      itemX -= size.width;
-    }
-
-    return itemX;
-  }
-
-  private getMaxX() {
-    const size = Helper.getTextSize(this.text, `${this.fontSize}px arial`);
-
-    return this.getMinX() + size.width;
-  }
-
-  private getMinY() {
-    return this.position.y;
-  }
-
-  private getMaxY() {
-    const size = Helper.getTextSize(this.text, `${this.fontSize}px arial`);
-
-    return this.position.y + size.height;
-  }
-
   drawToCanvas(ctx: CanvasRenderingContext2D): void {
-    // Draw Text
     ctx.save();
-    ctx.font = `${this.fontSize}px arial`;
+    ctx.font = this.font;
     ctx.fillStyle = this.color;
     ctx.textAlign = this.alignment;
+    ctx.textBaseline = this.baseline;
+
     ctx.shadowBlur = 4;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-    const textSize = Helper.getTextSize(this.text, ctx.font);
-    ctx.fillText(this.text, this.position.x, this.position.y + textSize.sublineHeight);
+
+    ctx.fillText(this.text, this.position.x, this.position.y);
     ctx.restore();
   }
 }

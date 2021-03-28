@@ -1,35 +1,27 @@
-import TextItem from "../../items/text-item";
 import TextbuttonItem from "../../items/textbutton-item";
 import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
+import TitleItem from "../../items/title-item";
 
 export default class ConnectingMenu extends ConnectionBaseMenu {
   constructor(args: ConnectionBaseMenuArgs) {
     super(args);
 
-    const title = new TextItem(
-      'Connecting...',
-      'title',
-      '#ffffff',
-      { x: 256, y: 20 },
-      50,
-      'center'
-    );
+    const title = new TitleItem({
+      text: 'Connecting...',
+      position: { x: 256, y: 20 }
+    });
     this.items.push(title);
 
-    const cancelButton = new TextbuttonItem(
-      'connect',
-      "Cancel",
-      { x: 100, y: 186 },
-      316,
-      50,
-      28,
-      '#555555',
-      '#ffc338',
-      '#929292'
-    );
+    const cancelButton = new TextbuttonItem({
+      text: 'Cancel',
+      position: { x: 100, y: 186 },
+      width: 316,
+      height: 50,
+      fontSize: 28,
+      onTriggerDown: () => this.localUser.disconnect()
+    });
     this.items.push(cancelButton);
     this.thumbpadTargets.push(cancelButton);
-    cancelButton.onTriggerDown = () => this.localUser.disconnect();
 
     this.redrawMenu();
   }

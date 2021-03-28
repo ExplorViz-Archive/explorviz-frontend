@@ -1,7 +1,7 @@
 import VrRoomService from "virtual-reality/services/vr-room";
-import TextItem from "../../items/text-item";
 import TextbuttonItem from "../../items/textbutton-item";
 import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
+import TitleItem from "../../items/title-item";
 
 export type OfflineMenuArgs = ConnectionBaseMenuArgs & {
   vrRoomService: VrRoomService
@@ -14,25 +14,38 @@ export default class OfflineMenu extends ConnectionBaseMenu {
     super(args);
     this.vrRoomService = vrRoomService;
 
-    const title = new TextItem('You are offline', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
+    const title = new TitleItem({
+      text: 'You are offline',
+      position: { x: 256, y: 20 },
+    });
     this.items.push(title);
 
-    const joinButton = new TextbuttonItem('connect', "Join Room", { x: 100, y: 156 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+    const joinButton = new TextbuttonItem({
+      text: "Join Room",
+      position: { x: 100, y: 156 },
+      width: 316,
+      height: 50,
+      fontSize: 28,
+      onTriggerDown: () => this.menuGroup?.replaceMenu(this.menuFactory.buildJoinMenu())
+    });
     this.items.push(joinButton);
     this.thumbpadTargets.push(joinButton);
-    joinButton.onTriggerDown = () => {
-      this.menuGroup?.replaceMenu(this.menuFactory.buildJoinMenu());
-    };
 
-    const newButton = new TextbuttonItem('connect', "New Room", { x: 100, y: 216 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+    const newButton = new TextbuttonItem({
+      text: "New Room",
+      position: { x: 100, y: 216 },
+      width: 316,
+      height: 50,
+      fontSize: 28,
+      onTriggerDown: () => this.createAndJoinNewRoom()
+    });
     this.items.push(newButton);
     this.thumbpadTargets.push(newButton);
-    newButton.onTriggerDown = () => this.createAndJoinNewRoom();
 
     this.redrawMenu();
   }
 
-  createAndJoinNewRoom() {
+  private createAndJoinNewRoom() {
     this.localUser.connect(this.vrRoomService.createRoom());
   }
 }

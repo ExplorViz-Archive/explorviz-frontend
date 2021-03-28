@@ -1,14 +1,18 @@
-import Item from './item';
+import Item, { ItemArgs } from './item';
+
+export type RectangleItemArgs = ItemArgs & {
+  width: number,
+  height: number,
+  color: string,
+};
 
 export default class RectangleItem extends Item {
   width: number;
-
   height: number;
-
   color: string;
 
-  constructor(id: string, position: { x: number, y: number }, width: number, height: number, color = '#ffffff') {
-    super(id, position);
+  constructor({width, height, color, ...args}: RectangleItemArgs) {
+    super(args);
 
     this.width = width;
     this.height = height;
@@ -16,11 +20,13 @@ export default class RectangleItem extends Item {
   }
 
   drawToCanvas(ctx: CanvasRenderingContext2D) {
+    ctx.save();
     ctx.fillStyle = this.color;
     ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+    ctx.restore();
   }
 
-  getBoundingBox(): { minX: number; maxX: number; minY: number; maxY: number; } {
+  getBoundingBox() {
     return {
       minX: this.position.x,
       maxX: this.position.x + this.width,

@@ -1,5 +1,5 @@
 import THREE from 'three';
-import UiMenu, { UiMenuArgs } from '../ui-menu';
+import UiMenu, { UiMenuArgs, SIZE_RESOLUTION_FACTOR } from '../ui-menu';
 
 const CIRCLE_SEGMENTS = 48;
 
@@ -27,10 +27,9 @@ export default class ZoomMenu extends UiMenu {
     this.scene = scene;
     this.headsetCamera = headsetCamera;
 
-    const radius = this.resolution.width / 512 * 0.15;
-
     this.target = new THREE.WebGLRenderTarget(this.resolution.width, this.resolution.height);
 
+    const radius = this.resolution.width * SIZE_RESOLUTION_FACTOR / 2;
     const geometry = new THREE.CircleBufferGeometry(radius, CIRCLE_SEGMENTS);
     const material = new THREE.MeshBasicMaterial({ map: this.target.texture });
     const lens = new THREE.Mesh(geometry, material);
@@ -46,7 +45,7 @@ export default class ZoomMenu extends UiMenu {
   }
 
   makeBackgroundGeometry() {
-    const radius = this.resolution.width / 512 * 0.16;
+    const radius = this.resolution.width * SIZE_RESOLUTION_FACTOR / 1.875;
     const geometry = new THREE.CircleGeometry(radius, CIRCLE_SEGMENTS);
     return geometry;
   }
