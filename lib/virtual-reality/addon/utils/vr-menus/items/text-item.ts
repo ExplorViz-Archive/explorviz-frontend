@@ -38,15 +38,6 @@ export default class TextItem extends Item {
     this.text = text;
   }
 
-  measureText() {
-    if (!measurementContext) throw `failed to measure text: ${this.text}`;
-
-    measurementContext.font = this.font;
-    measurementContext.textAlign = this.alignment;
-    measurementContext.textBaseline = this.baseline;
-    return measurementContext.measureText(this.text);
-  }
-
   getBoundingBox() {
     const size = this.measureText();
     return {
@@ -55,6 +46,15 @@ export default class TextItem extends Item {
       minY: this.position.y + size.actualBoundingBoxAscent,
       maxY: this.position.y + size.actualBoundingBoxDescent
     };
+  }
+
+  private measureText() {
+    if (!measurementContext) throw `failed to measure text: ${this.text}`;
+
+    measurementContext.font = this.font;
+    measurementContext.textAlign = this.alignment;
+    measurementContext.textBaseline = this.baseline;
+    return measurementContext.measureText(this.text);
   }
 
   drawToCanvas(ctx: CanvasRenderingContext2D): void {
