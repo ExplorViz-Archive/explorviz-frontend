@@ -11,7 +11,7 @@ import {
 } from 'three';
 
 import debugLogger from 'ember-debug-logger';
-import { GLTFLoader } from '../loader/GLTFLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 import {
   Constants as MotionControllerConstants,

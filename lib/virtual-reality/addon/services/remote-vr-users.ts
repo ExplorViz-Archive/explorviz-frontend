@@ -1,6 +1,6 @@
 import Service, { inject as service } from '@ember/service';
 import THREE from "three";
-import { OBJLoader } from "../utils/lib/loader/OBJLoader";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import RemoteVrUser from "../utils/vr-multi-user/remote-vr-user";
 import SpectateUserService from "./spectate-user";
 
