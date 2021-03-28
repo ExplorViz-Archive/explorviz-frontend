@@ -230,7 +230,7 @@ export default class VRController extends BaseMesh {
     });
 
     const line = new THREE.Line(geometry, material);
-    line.scale.z = 5;
+    line.scale.z = DEFAULT_RAY_LENGTH;
 
     this.ray = line;
     this.raySpace.add(this.ray);
