@@ -56,7 +56,7 @@ export default class VisualizationRoute extends BaseRoute {
   /* eslint-disable-next-line class-methods-use-this */
   resetController(controller: VisualizationController, isExiting: boolean /* , transition: any */) {
     if (isExiting) {
-      controller.send('resetLandscapeListenerPolling');
+      controller.send('resetLandscapeLoaderPolling');
     }
   }
 }

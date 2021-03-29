@@ -1,12 +1,12 @@
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 
-module('Unit | Service | landscape-listener', function(hooks) {
+module('Unit | Service | landscape-loader', function(hooks) {
   setupTest(hooks);
 
   // Replace this with your real tests.
   test('it exists', function(assert) {
-    let service = this.owner.lookup('service:landscape-listener');
+    let service = this.owner.lookup('service:landscape-loader');
     assert.ok(service);
   });
 });

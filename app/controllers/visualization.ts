@@ -6,7 +6,7 @@ import {
 } from '@ember/object';
 import { inject as service } from '@ember/service';
 import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-setup/timeline/plotly-timeline';
-import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
+import LandscapeLoader from 'explorviz-frontend/services/landscape-loader';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
 import { tracked } from '@glimmer/tracking';
@@ -32,7 +32,7 @@ export interface LandscapeData {
  * @submodule visualization
  */
 export default class VisualizationController extends Controller {
-  @service('landscape-listener') landscapeListener!: LandscapeListener;
+  @service('landscape-loader') landscapeLoader!: LandscapeLoader;
 
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
@@ -175,9 +175,9 @@ export default class VisualizationController extends Controller {
   }
 
   @action
-  resetLandscapeListenerPolling() {
-    if (this.landscapeListener.timer !== null) {
-      clearTimeout(this.landscapeListener.timer);
+  resetLandscapeLoaderPolling() {
+    if (this.landscapeLoader.timer !== null) {
+      clearTimeout(this.landscapeLoader.timer);
     }
   }
 
@@ -278,12 +278,12 @@ export default class VisualizationController extends Controller {
     this.landscapeData = null;
     this.selectedTimestampRecords = [];
     this.visualizationPaused = false;
-    this.landscapeListener.initLandscapePolling();
+    this.landscapeLoader.initLandscapePolling();
     this.updateTimestampList();
   }
 
   willDestroy() {
-    this.resetLandscapeListenerPolling();
+    this.resetLandscapeLoaderPolling();
   }
 }
 

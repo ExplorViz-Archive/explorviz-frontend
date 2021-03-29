@@ -1,7 +1,7 @@
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
-import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
+import LandscapeLoader from 'explorviz-frontend/services/landscape-loader';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 
@@ -13,7 +13,7 @@ interface Args {
 }
 
 export default class TraceOverview extends Component<Args> {
-  @service('landscape-listener') landscapeListener!: LandscapeListener;
+  @service('landscape-loader') landscapeLoader!: LandscapeLoader;
 
   @action
   showTraces() {

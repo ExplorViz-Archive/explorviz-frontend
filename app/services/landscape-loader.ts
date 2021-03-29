@@ -12,7 +12,7 @@ import LandscapeTokenService from './landscape-token';
 
 const { landscapeService, traceService } = ENV.backendAddresses;
 
-export default class LandscapeListener extends Service.extend(Evented) {
+export default class LandscapeLoader extends Service.extend(Evented) {
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
   @service('auth') auth!: Auth;
@@ -45,7 +45,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
         this.set('latestDynamicData', dynamicData);
 
         this.updateTimestampRepoAndTimeline(endTime,
-          LandscapeListener.computeTotalRequests(this.latestDynamicData!));
+          LandscapeLoader.computeTotalRequests(this.latestDynamicData!));
 
         this.trigger('newLandscapeData', this.latestStructureData, this.latestDynamicData);
       } catch (e) {
@@ -143,6 +143,6 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
 declare module '@ember/service' {
   interface Registry {
-    'landscape-listener': LandscapeListener;
+    'landscape-loader': LandscapeLoader;
   }
 }
