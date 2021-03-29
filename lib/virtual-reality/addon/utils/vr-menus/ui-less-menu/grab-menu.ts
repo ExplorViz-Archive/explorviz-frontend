@@ -10,6 +10,20 @@ export interface GrabbableObject extends THREE.Object3D {
   getGrabId(): string | null;
 }
 
+export class GrabbableObjectWrapper extends THREE.Group implements GrabbableObject {
+  private grabId: string | null;
+
+  constructor(object: THREE.Object3D, grabId: string | null = null) {
+    super();
+    this.grabId = grabId;
+    this.add(object);
+  }
+
+  getGrabId() {
+    return this.grabId;
+  }
+}
+
 export function isGrabbableObject(object: any): object is GrabbableObject {
   return object !== null
     && typeof object === 'object'

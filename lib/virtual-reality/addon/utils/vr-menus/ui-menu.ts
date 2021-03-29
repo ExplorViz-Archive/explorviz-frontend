@@ -140,7 +140,7 @@ export default abstract class UiMenu extends AnimatedMenu {
    *
    * @returns Item at given position if there is one, else undefined.
    */
-  getItem(position: THREE.Vector2, onlyInteractiveItems = true) {
+  getItem(position: THREE.Vector2, onlyInteractiveItems = true): InteractiveItem | undefined {
     const items = onlyInteractiveItems
       ? this.items.filter((item) => item instanceof InteractiveItem)
       : this.items;
@@ -159,7 +159,7 @@ export default abstract class UiMenu extends AnimatedMenu {
       } = item.getBoundingBox();
 
       if (x >= minX && y >= minY && x <= maxX && y <= maxY) {
-        return item;
+        return item as InteractiveItem;
       }
     }
     return undefined;
@@ -174,7 +174,7 @@ export default abstract class UiMenu extends AnimatedMenu {
   hover(uv: THREE.Vector2) {
     super.hover(uv);
     const item = this.getItem(uv);
-    if (!item || item instanceof InteractiveItem) this.hoverItem(item);
+    this.hoverItem(item);
   }
 
   /**
@@ -288,8 +288,7 @@ export default abstract class UiMenu extends AnimatedMenu {
    * @param uv The coordinate of the menu that is hovered.
    */
   triggerDown(uv: THREE.Vector2) {
-    const item = this.getItem(uv) as InteractiveItem | undefined;
-
+    const item = this.getItem(uv);
     if (item && item.onTriggerDown) {
       item.onTriggerDown();
     }
@@ -304,8 +303,8 @@ export default abstract class UiMenu extends AnimatedMenu {
    */
   triggerPress(uv: THREE.Vector2, value: number) {
     super.triggerPress(uv, value);
-    const item = this.getItem(uv) as InteractiveItem | undefined;
-
+    
+    const item = this.getItem(uv);
     if (item && item.onTriggerPressed) {
       item.onTriggerPressed(value);
     }
