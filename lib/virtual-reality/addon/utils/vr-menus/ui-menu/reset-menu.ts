@@ -55,7 +55,7 @@ export default class ResetMenu extends UiMenu {
 
       const yesButton = new TextbuttonItem({
         text: 'Yes',
-        position: { x: 100 - 20, y: 266, },
+        position: { x: 258 + 20, y: 266, },
         width: 158,
         height: 50,
         fontSize: 28,

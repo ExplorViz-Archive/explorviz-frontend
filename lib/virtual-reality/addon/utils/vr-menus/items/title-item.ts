@@ -4,7 +4,7 @@ import { ItemArgs } from "./item";
 export const TITLE_FONT_SIZE = 50;
 export const TITLE_TEXT_COLOR = '#ffffff';
 export const TITLE_TEXT_ALIGNMENT = 'center';
-export const TITLE_TEXT_BASELINE = 'alphabetic';
+export const TITLE_TEXT_BASELINE = 'top';
 
 export type TitleItemArgs = ItemArgs & {
   text: string

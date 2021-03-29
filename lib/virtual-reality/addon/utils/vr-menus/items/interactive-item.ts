@@ -16,6 +16,9 @@ export default abstract class InteractiveItem extends Item {
 
   constructor({onHover, onTriggerDown, onTriggerPressed, ...args}: InteractiveItemArgs) {
     super(args);
+    this.onHover = onHover;
+    this.onTriggerDown = onTriggerDown;
+    this.onTriggerPressed = onTriggerPressed;
   }
 
   get isHovered() { return this.hoveredByButton || this.hoveredByRay; }

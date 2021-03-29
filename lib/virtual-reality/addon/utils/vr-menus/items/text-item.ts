@@ -21,7 +21,7 @@ export default class TextItem extends Item {
   alignment: CanvasTextAlign;
   baseline: CanvasTextBaseline;
 
-  constructor({text, color, fontSize, alignment = 'left', baseline = 'alphabetic', ...args}: TextItemArgs) {
+  constructor({text, color, fontSize, alignment = 'left', baseline = 'top', ...args}: TextItemArgs) {
     super(args);
     this.text = text;
     this.color = color;
