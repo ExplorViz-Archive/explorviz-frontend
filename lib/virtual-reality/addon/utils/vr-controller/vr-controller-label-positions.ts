@@ -30,9 +30,12 @@ export function getVRControllerLabelPositions(controller: VRController | null): 
   const motionController = controller?.controllerModel.motionController;
   if (!controller || !motionController) return null;
 
+  // Since the layout description is not exposed by the TypeScript interface,
+  // we have to remove the type first.
+  const controllerNodeName = (motionController as any).layoutDescription.rootNodeName;
+
   // Make sure that the controller model has been loaded and its position is
   // up to date.
-  const controllerNodeName = motionController.layoutDescription.rootNodeName;
   if (!controller.controllerModel.getObjectByName(controllerNodeName)) return null;
   controller.controllerModel.updateMatrixWorld(true);
 

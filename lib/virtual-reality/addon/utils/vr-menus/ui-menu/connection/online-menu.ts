@@ -1,8 +1,8 @@
 import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
-import TextItem from "../../items/text-item";
 import TextbuttonItem from "../../items/textbutton-item";
 import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 import RemoteVrUserService from "../../../../services/remote-vr-users";
+import TitleItem from "../../items/title-item";
 
 type OnlineMenuArgs = ConnectionBaseMenuArgs & {
   remoteUsers: RemoteVrUserService
@@ -31,27 +31,51 @@ export default class OnlineMenu extends ConnectionBaseMenu {
 
   private initMenu() {
     const users = Array.from(this.remoteUsers.getAllRemoteUsers());
-    const title = new TextItem(`Room ${this.localUser.currentRoomId}`, 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
+    const title = new TitleItem({
+      text: `Room ${this.localUser.currentRoomId}`,
+      position: { x: 256, y: 20 },
+    });
     this.items.push(title);
 
-    const disconnectButton = new TextbuttonItem('disconnect', 'Disconnect', { x: 370, y: 13, }, 115, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');
+    const disconnectButton = new TextbuttonItem({
+      text: 'Disconnect',
+      position: { x: 370, y: 13, },
+      width: 115,
+      height: 40,
+      fontSize: 22,
+      buttonColor: '#aaaaaa',
+      textColor: '#ffffff',
+      hoverColor: '#dc3b00',
+      onTriggerDown: () => this.localUser.disconnect()
+    });
     this.items.push(disconnectButton);
-    disconnectButton.onTriggerDown = () => this.localUser.disconnect();
 
     const yOffset = 60;
     let yPos = 50 + yOffset;
 
-    const localUserButton = new TextbuttonItem('local-user', this.localUser.userName + ' (you)', { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+    const localUserButton = new TextbuttonItem({
+      text: this.localUser.userName + ' (you)',
+      position: { x: 100, y: yPos },
+      width: 316,
+      height: 50,
+      fontSize: 28,
+    });
     this.items.push(localUserButton);
     this.thumbpadTargets.push(localUserButton);
     yPos += yOffset;
 
     users.forEach((user) => {
-        const remoteUserButton = new TextbuttonItem(user.userId, user.userName, { x: 100, y: yPos }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+        const remoteUserButton = new TextbuttonItem({
+          text: user.userName,
+          position: { x: 100, y: yPos },
+          width: 316,
+          height: 50,
+          fontSize: 28,
+          onTriggerDown: () => this.menuGroup?.openMenu(this.menuFactory.buildSpectateMenu(user))
+        });
         this.remoteUserButtons.set(user.userId, remoteUserButton)
         this.items.push(remoteUserButton);
         this.thumbpadTargets.push(remoteUserButton);
-        remoteUserButton.onTriggerDown = () => this.menuGroup?.openMenu(this.menuFactory.buildSpectateMenu(user));
         yPos += yOffset;
     });
     this.items.push(title);

@@ -33,11 +33,21 @@ export default class MessageBoxMenu extends HudMenu {
     this.enableTimer = false;
 
     // Draw text.
-    const titleItem = new TextItem(title, 'title', color, { x: 128, y: 10 }, 18, 'center');
+    const titleItem = new TextItem({
+      text: title, color,
+      fontSize: 18,
+      alignment: 'center',
+      position: { x: 128, y: 10 },
+    });
     this.items.push(titleItem);
 
     if (text) {
-      const textItem = new TextItem(text, 'text', color, { x: 128, y: 40 }, 14, 'center');
+      const textItem = new TextItem({
+        text, color,
+        fontSize: 14,
+        alignment: 'center',
+        position: { x: 128, y: 40 },
+      });
       this.items.push(textItem);
     } else {
       titleItem.position.y = 21;

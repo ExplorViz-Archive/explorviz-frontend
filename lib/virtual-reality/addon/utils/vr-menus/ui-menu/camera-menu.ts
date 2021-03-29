@@ -5,6 +5,7 @@ import ArrowbuttonItem from '../items/arrowbutton-item';
 import TextItem from '../items/text-item';
 import TextbuttonItem from '../items/textbutton-item';
 import UiMenu, { UiMenuArgs } from '../ui-menu';
+import TitleItem from "../items/title-item";
 
 /**
  * The maximum change of the camera's height per frame when the trigger is fully pressed.
@@ -26,31 +27,50 @@ export default class CameraMenu extends UiMenu {
     super(args);
     this.cameraObject3D = cameraObject3D;
 
-    const title = new TextItem('Camera', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
+    const title = new TitleItem({
+      text: 'Camera',
+      position: { x: 256, y: 20 }
+    });
     this.items.push(title);
 
-    this.heightTextItem = new TextItem(this.cameraHeight.toFixed(2), 'camera_height', '#ffffff', { x: 256, y: 202 }, 28, 'center');
+    this.heightTextItem = new TextItem({
+      text: this.cameraHeight.toFixed(2),
+      color: '#ffffff',
+      fontSize: 28,
+      alignment: 'center',
+      position: { x: 256, y: 202 },
+    });
     this.items.push(this.heightTextItem);
 
-    this.resetButton = new TextbuttonItem('reset', 'Reset', {
-      x: 420,
-      y: 13,
-    }, 65, 40, 22, '#aaaaaa', '#ffffff', '#dc3b00');
-    this.resetButton.onTriggerDown = () => this.resetCamera();
+    this.resetButton = new TextbuttonItem({
+      text: 'Reset',
+      position: { x: 420, y: 13, },
+      width: 65,
+      height: 40,
+      fontSize: 22,
+      buttonColor: '#aaaaaa',
+      textColor: '#ffffff',
+      hoverColor: '#dc3b00',
+      onTriggerDown: () => this.resetCamera()
+    });
     this.items.push(this.resetButton);
 
-    this.heightDownButton = new ArrowbuttonItem('height_down', {
-      x: 100,
-      y: 182,
-    }, 50, 60, '#ffc338', '#00e5ff', 'down');
-    this.heightDownButton.onTriggerPressed = (value) => { this.heightDown(value); this.redrawMenu() };
+    this.heightDownButton = new ArrowbuttonItem({
+      direction: 'down',
+      position: { x: 100, y: 182 },
+      width: 50,
+      height: 60,
+      onTriggerPressed: (value) => this.heightDown(value)
+    });
     this.items.push(this.heightDownButton);
 
-    this.heightUpButton = new ArrowbuttonItem('height_up', {
-      x: 366,
-      y: 182,
-    }, 50, 60, '#ffc338', '#00e5ff', 'up');
-    this.heightUpButton.onTriggerPressed = (value) => { this.heightUp(value); this.redrawMenu() };
+    this.heightUpButton = new ArrowbuttonItem({
+      direction: 'up',
+      position: { x: 366, y: 182 },
+      width: 50,
+      height: 60,
+      onTriggerPressed: (value) => this.heightUp(value)
+    });
     this.items.push(this.heightUpButton);
 
     this.redrawMenu();
@@ -66,10 +86,12 @@ export default class CameraMenu extends UiMenu {
 
   private translateCamera(deltaHeight: number) {
     this.cameraHeight = this.cameraHeight + deltaHeight;
+    this.redrawMenu();
   }
 
   private resetCamera() {
     this.cameraHeight = 0;
+    this.redrawMenu();
   }
 
   private heightDown(value: number) {
@@ -82,7 +104,7 @@ export default class CameraMenu extends UiMenu {
 
   makeGripButtonBinding() {
     return new VRControllerButtonBinding('Reset', {
-      onButtonDown: () => { this.resetCamera(); this.resetButton.enableHoverEffectByButton(); this.redrawMenu() },
+      onButtonDown: () => { this.resetButton.enableHoverEffectByButton(); this.resetCamera(); },
       onButtonUp: () => { this.resetButton.resetHoverEffectByButton(); this.redrawMenu() }
     });
   }
@@ -91,11 +113,11 @@ export default class CameraMenu extends UiMenu {
     this.heightDownButton.resetHoverEffectByButton();
     this.heightUpButton.resetHoverEffectByButton();
     if (axes[1] > 0) {
-      this.heightUp(axes[1]);
       this.heightUpButton.enableHoverEffectByButton();
+      this.heightUp(axes[1]);
     } else {
-      this.heightDown(-axes[1]);
       this.heightDownButton.enableHoverEffectByButton();
+      this.heightDown(-axes[1]);
     }
   }
 

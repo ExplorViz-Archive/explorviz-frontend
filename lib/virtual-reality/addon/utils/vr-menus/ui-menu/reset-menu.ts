@@ -5,6 +5,7 @@ import DetachedMenuGroupContainer from '../detached-menu-group-container';
 import TextItem from '../items/text-item';
 import TextbuttonItem from '../items/textbutton-item';
 import UiMenu, { UiMenuArgs } from '../ui-menu';
+import TitleItem from "../items/title-item";
 
 export type ResetMenuArgs = UiMenuArgs & {
   localUser: LocalVrUser,
@@ -26,36 +27,52 @@ export default class ResetMenu extends UiMenu {
     this.vrLandscapeRenderer = vrLandscapeRenderer;
     this.detachedMenuGroups = detachedMenuGroups;
 
-    const textItem = new TextItem('Reset', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
+    const textItem = new TitleItem({
+      text: 'Reset',
+      position: { x: 256, y: 20 },
+    });
     this.items.push(textItem);
 
     if (localUser.connectionStatus != 'online') {
-      const question = new TextItem('Reset state and position?', 'question', '#ffffff', { x: 100, y: 148 }, 28, 'left');
+      const question = new TextItem({
+        text: 'Reset state and position?',
+        color: '#ffffff',
+        fontSize: 28,
+        position: { x: 100, y: 148 },
+      });
       this.items.push(question);
 
-      const noButton = new TextbuttonItem('no', 'No', {
-        x: 100 - 20,
-        y: 266,
-      }, 158, 50, 28, '#555555', '#ffc338', '#929292');
-      noButton.onTriggerDown = () => this.closeMenu();
+      const noButton = new TextbuttonItem({
+        text: 'No',
+        position: { x: 100 - 20, y: 266, },
+        width: 158,
+        height: 50,
+        fontSize: 28,
+        onTriggerDown: () => this.closeMenu()
+      });
       this.items.push(noButton);
       this.thumbpadTargets.push(noButton);
 
-      const yesButton = new TextbuttonItem('yes', 'Yes', {
-        x: 258 + 20,
-        y: 266,
-      }, 158, 50, 28, '#555555', '#ffc338', '#929292');
-      yesButton.onTriggerDown = () => {
-        this.resetAll();
-        this.closeMenu()
-      };
+      const yesButton = new TextbuttonItem({
+        text: 'Yes',
+        position: { x: 100 - 20, y: 266, },
+        width: 158,
+        height: 50,
+        fontSize: 28,
+        onTriggerDown: () => this.resetAll()
+      });
       this.items.push(yesButton);
       this.thumbpadTargets.push(yesButton);
 
       this.thumbpadAxis = 0;
 
     } else {
-      const message = new TextItem('Not allowed when online.', 'message', '#ffffff', { x: 100, y: 148 }, 28, 'left');
+      const message = new TextItem({
+        text: 'Not allowed when online.',
+        color: '#ffffff',
+        fontSize:  28,
+        position: { x: 100, y: 148 },
+      });
       this.items.push(message);
     }
 
@@ -67,6 +84,7 @@ export default class ResetMenu extends UiMenu {
     this.resetApplications();
     this.resetDetachedMenus();
     this.resetLandscape();
+    this.closeMenu();
   }
 
   private resetLocalUser() {

@@ -63,7 +63,7 @@ export default class GrabMenu extends BaseMenu {
       const matrix = new THREE.Matrix4();
       matrix.getInverse(controller.gripSpace.matrixWorld);
 
-      // Store original and parent of grabbed object.
+      // Store original parent of grabbed object.
       this.grabbedObjectParent = this.grabbedObject.parent;
 
       // Set transforamtion relative to controller transformation.
@@ -175,7 +175,7 @@ export default class GrabMenu extends BaseMenu {
           const length = yAxis * this.deltaTimeService.getDeltaTime();
 
           this.grabbedObject.translateOnAxis(direction, length);
-          this.grabbedObject.updateMatrix();
+          this.collideWithFloor();
         }
       }
     });
@@ -194,5 +194,24 @@ export default class GrabMenu extends BaseMenu {
   makeMenuButtonBinding() {
     // The menu button cannot be used to close the menu.
     return undefined;
+  }
+
+  onUpdateMenu(delta: number) {
+    super.onUpdateMenu(delta);
+    this.collideWithFloor();
+  }
+
+  /**
+   * Prevent the object from being moved beneath the floor.
+   */
+  private collideWithFloor() {
+    this.grabbedObject.updateMatrixWorld();
+    const bbox = new THREE.Box3().setFromObject(this.grabbedObject);
+    if (bbox.min.y < 0) {
+      const position = this.grabbedObject.getWorldPosition(new THREE.Vector3());
+      position.y -= bbox.min.y;
+      this.grabbedObject.parent?.worldToLocal(position);
+      this.grabbedObject.position.copy(position);
+    }
   }
 }

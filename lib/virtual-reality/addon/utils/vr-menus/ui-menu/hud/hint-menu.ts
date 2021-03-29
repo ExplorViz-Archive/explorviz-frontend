@@ -1,7 +1,7 @@
 import THREE from 'three';
 import HudMenu from '../../hud-menu';
 import TextItem from '../../items/text-item';
-import { UiMenuArgs } from '../../ui-menu';
+import { UiMenuArgs, DEFAULT_MENU_RESOLUTION } from '../../ui-menu';
 
 const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.75, [
   new THREE.KeyframeTrack('.scale[x]', [0.0, 0.75], [0.0, 1.0])
@@ -26,18 +26,30 @@ export default class HintMenu extends HudMenu {
 
   constructor({
     title, text,
-    resolution = { width: 512, height: 128 },
+    resolution = { width: DEFAULT_MENU_RESOLUTION, height: DEFAULT_MENU_RESOLUTION / 4 },
     backgroundColor = '#002e4f',
     ...args
   }: HintMenuArgs) {
     super({ resolution, backgroundColor, ...args });
 
-    this.titleItem = new TextItem(title, 'text', '#ffffff', { x: 256, y: 50 }, 28, 'center');
+    this.titleItem = new TextItem({
+      text: title,
+      color: '#ffffff',
+      fontSize: 28,
+      alignment: 'center',
+      position: { x: 256, y: 50 },
+    });
     this.items.push(this.titleItem);
 
     if (text) {
       this.titleItem.position.y = 25;
-      this.textItem = new TextItem(text, 'text2', '#ffff00', { x: 256, y: 75 }, 28, 'center');
+      this.textItem = new TextItem({
+        text,
+        color: '#ffff00',
+        fontSize: 28,
+        alignment: 'center',
+        position: { x: 256, y: 75 }
+      });
       this.items.push(this.textItem);
     }
 

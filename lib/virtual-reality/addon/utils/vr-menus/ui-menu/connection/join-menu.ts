@@ -2,6 +2,7 @@ import VrRoomService, { RoomListRecord } from 'virtual-reality/services/vr-room'
 import TextItem from "../../items/text-item";
 import TextbuttonItem from "../../items/textbutton-item";
 import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
+import TitleItem from "../../items/title-item";
 
 /**
  * Time in seconds before the new room list should be fetched.
@@ -28,14 +29,10 @@ export default class JoinMenu extends ConnectionBaseMenu {
     this.items.clear();
 
     // Draw loading screen.
-    const title = new TextItem(
-      'Loading Rooms...',
-      'title',
-      '#ffffff',
-      { x: 256, y: 20 },
-      50,
-      'center'
-    );
+    const title = new TitleItem({
+      text: 'Loading Rooms...',
+      position: { x: 256, y: 20 },
+    });
     this.items.push(title);
 
     this.redrawMenu();
@@ -44,36 +41,26 @@ export default class JoinMenu extends ConnectionBaseMenu {
   private async drawRoomList(rooms: RoomListRecord[]) {
     this.items.clear();
 
-    const title = new TextItem(
-      `Join Room (${rooms.length})`,
-      'title',
-      '#ffffff',
-      { x: 256, y: 20 },
-      50,
-      'center'
-    );
+    const title = new TitleItem({
+      text: `Join Room (${rooms.length})`,
+      position: { x: 256, y: 20 },
+    });
     this.items.push(title);
 
     // Draw one button for each room.
     const yOffset = 60;
     let yPos = 50 + yOffset;
     for (let room of rooms) {
-      const roomButton = new TextbuttonItem(
-        `room-${room.id}`,
-        room.name,
-        { x: 100, y: yPos },
-        316,
-        50,
-        28,
-        '#555555',
-        '#ffc338',
-        '#929292'
-      );
+      const roomButton = new TextbuttonItem({
+        text: room.name,
+        position: { x: 100, y: yPos },
+        width: 316,
+        height: 50,
+        fontSize: 28,
+        onTriggerDown: () => this.localUser.connect(Promise.resolve(room.id))
+      });
       this.items.push(roomButton);
       this.thumbpadTargets.push(roomButton);
-      roomButton.onTriggerDown = () => {
-        this.localUser.connect(Promise.resolve(room.id));
-      }
       yPos += yOffset;
     }
     this.redrawMenu();
@@ -83,33 +70,34 @@ export default class JoinMenu extends ConnectionBaseMenu {
     this.items.clear();
 
     // Draw loading screen.
-    const title = new TextItem(
-      `Error`,
-      'title',
-      '#ffffff',
-      { x: 256, y: 20 },
-      50,
-      'center'
-    );
+    const title = new TitleItem({
+      text: 'Error',
+      position: { x: 256, y: 20 },
+    });
     this.items.push(title);
 
-    const text = new TextItem(
-      msg,
-      'title',
-      '#ffffff',
-      { x: 256, y: 100 },
-      20,
-      'center'
-    );
+    const text = new TextItem({
+      text: msg,
+      color: '#ffffff',
+      fontSize: 20,
+      alignment: 'center',
+      position: { x: 256, y: 100 },
+    });
     this.items.push(text);
 
-    const retryButton = new TextbuttonItem('connect', "Retry", { x: 100, y: 186 }, 316, 50, 28, '#555555', '#ffc338', '#929292');
+    const retryButton = new TextbuttonItem({
+      text: 'Retry',
+      position: { x: 100, y: 186 },
+      width: 316,
+      height: 50,
+      fontSize: 28,
+      onTriggerDown: () => {
+        this.drawLoadingScreen();
+        this.loadAndDrawRoomList();
+      }
+    });
     this.items.push(retryButton);
     this.thumbpadTargets.push(retryButton);
-    retryButton.onTriggerDown = () => {
-      this.drawLoadingScreen();
-      this.loadAndDrawRoomList();
-    };
 
     this.redrawMenu();
   }

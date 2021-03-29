@@ -424,9 +424,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     this.webSocket.socketCloseCallback = () => this.onSelfDisconnected();
     this.receiver.addMessageListener(this);
-
-    // TODO why does the state have to be set manually?
-    this.localUser.connectionStatus = 'offline';
   }
 
   // #endregion INITIALIZATION

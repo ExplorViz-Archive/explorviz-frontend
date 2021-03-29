@@ -1,8 +1,8 @@
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import THREE from 'three';
-import XRControllerModel from './lib/controller/XRControllerModel';
-import XRControllerModelFactory from './lib/controller/XRControllerModelFactory';
+import VrControllerModel from './vr-controller/vr-controller-model';
+import VrControllerModelFactory from './vr-controller/vr-controller-model-factory';
 import FloorMesh from './view-objects/vr/floor-mesh';
 import TeleportMesh from './view-objects/vr/teleport-mesh';
 import VRControllerBindingsList from './vr-controller/vr-controller-bindings-list';
@@ -73,7 +73,7 @@ export default class VRController extends BaseMesh {
 
   ray: THREE.Line | null = null;
 
-  controllerModel: XRControllerModel;
+  controllerModel: VrControllerModel;
 
   intersectedObject: THREE.Intersection | null = null;
 
@@ -139,7 +139,7 @@ export default class VRController extends BaseMesh {
     this.intersectableObjects = intersectableObjects;
 
     // Init controller model
-    const controllerModelFactory = XRControllerModelFactory.INSTANCE;
+    const controllerModelFactory = VrControllerModelFactory.INSTANCE;
     this.controllerModel = controllerModelFactory.createControllerModel(this.gripSpace);
     this.gripSpace.add(this.controllerModel);
 
@@ -230,7 +230,7 @@ export default class VRController extends BaseMesh {
     });
 
     const line = new THREE.Line(geometry, material);
-    line.scale.z = 5;
+    line.scale.z = DEFAULT_RAY_LENGTH;
 
     this.ray = line;
     this.raySpace.add(this.ray);

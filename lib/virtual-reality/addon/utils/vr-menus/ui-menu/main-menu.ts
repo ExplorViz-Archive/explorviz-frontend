@@ -1,56 +1,59 @@
-import TextItem from '../items/text-item';
 import TextbuttonItem from '../items/textbutton-item';
 import UiMenu, { UiMenuArgs } from '../ui-menu';
+import TitleItem from "../items/title-item";
 
 export default class MainMenu extends UiMenu {
   constructor(args: UiMenuArgs) {
     super(args);
 
-    const title = new TextItem('Main Menu', 'title', '#ffffff', { x: 256, y: 20 }, 50, 'center');
+    const title = new TitleItem({
+      text: 'Main Menu',
+      position: { x: 256, y: 20 },
+    });
     this.items.push(title);
 
-    const connectionButton = new TextbuttonItem('connect', 'Connection', {
-      x: 100,
-      y: 80,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
-
+    const connectionButton = new TextbuttonItem({
+      text: 'Connection',
+      position: { x: 100, y: 80 },
+      width: 316,
+      height: 50,
+      fontSize: 28,
+      onTriggerDown: () => this.menuGroup?.openMenu(this.menuFactory.buildConnectionMenu())
+    });
     this.items.push(connectionButton);
-    connectionButton.onTriggerDown = () => {
-      this.menuGroup?.openMenu(this.menuFactory.buildConnectionMenu());
-    };
     this.thumbpadTargets.push(connectionButton);
 
-    const timeButton = new TextbuttonItem('time', 'Time', {
-      x: 100,
-      y: 140,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
-
+    const timeButton = new TextbuttonItem({
+      text: 'Time',
+      position: { x: 100, y: 140, },
+      width: 316,
+      height: 50,
+      fontSize: 28,
+      onTriggerDown: () => this.menuGroup?.openMenu(this.menuFactory.buildTimeMenu())
+    });
     this.items.push(timeButton);
-    timeButton.onTriggerDown = () => {
-      this.menuGroup?.openMenu(this.menuFactory.buildTimeMenu());
-    };
     this.thumbpadTargets.push(timeButton);
 
-    const settingsButton = new TextbuttonItem('settings', 'Settings', {
-      x: 100,
-      y: 200,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
-
+    const settingsButton = new TextbuttonItem({
+      text: 'Settings',
+      position: { x: 100, y: 200, },
+      width: 316,
+      height: 50,
+      fontSize: 28,
+      onTriggerDown: () => this.menuGroup?.openMenu(this.menuFactory.buildSettingsMenu())
+    });
     this.items.push(settingsButton);
-    settingsButton.onTriggerDown = () => {
-      this.menuGroup?.openMenu(this.menuFactory.buildSettingsMenu());
-    };
     this.thumbpadTargets.push(settingsButton);
 
-    const resetButton = new TextbuttonItem('reset', 'Reset', {
-      x: 100,
-      y: 260,
-    }, 316, 50, 28, '#555555', '#ffc338', '#929292');
-
+    const resetButton = new TextbuttonItem({
+      text: 'Reset',
+      position: { x: 100, y: 260, },
+      width: 316,
+      height: 50,
+      fontSize: 28,
+      onTriggerDown: () => this.menuGroup?.openMenu(this.menuFactory.buildResetMenu())
+    });
     this.items.push(resetButton);
-    resetButton.onTriggerDown = () => {
-      this.menuGroup?.openMenu(this.menuFactory.buildResetMenu());
-    };
     this.thumbpadTargets.push(resetButton);
 
     this.redrawMenu();

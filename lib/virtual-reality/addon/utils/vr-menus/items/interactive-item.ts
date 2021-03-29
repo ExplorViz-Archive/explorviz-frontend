@@ -1,16 +1,24 @@
-import Item from './item';
+import Item, { ItemArgs } from './item';
+
+export type InteractiveItemArgs = ItemArgs & {
+  onHover?: () => void,
+  onTriggerDown?: () => void,
+  onTriggerPressed?: (value: number) => void,
+};
 
 export default abstract class InteractiveItem extends Item {
-  hoveredByButton = false;
-  hoveredByRay = false;
+  private hoveredByButton = false;
+  private hoveredByRay = false;
+
+  readonly onHover: (() => void) | undefined = undefined;
+  readonly onTriggerDown: (() => void) | undefined = undefined;
+  readonly onTriggerPressed: ((value: number) => void) | undefined = undefined;
+
+  constructor({onHover, onTriggerDown, onTriggerPressed, ...args}: InteractiveItemArgs) {
+    super(args);
+  }
 
   get isHovered() { return this.hoveredByButton || this.hoveredByRay; }
-
-  onHover: (() => void) | undefined = undefined;
-
-  onTriggerDown: (() => void) | undefined = undefined;
-
-  onTriggerPressed: ((value: number) => void) | undefined = undefined;
 
   enableHoverEffect() {
     this.hoveredByRay = true;

@@ -1,6 +1,8 @@
 import Service, { inject as service } from '@ember/service';
 import THREE from "three";
-import { OBJLoader } from "../utils/lib/loader/OBJLoader";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
+import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
+import { TGALoader } from "three/examples/jsm/loaders/TGALoader";
 import RemoteVrUser from "../utils/vr-multi-user/remote-vr-user";
 import SpectateUserService from "./spectate-user";
 
@@ -16,18 +18,31 @@ export default class RemoteVrUserService extends Service {
     super.init();
 
     // Load headset model.
-    this.headsetModel = new Promise((resolve) => {
-      const objLoader = new OBJLoader(THREE.DefaultLoadingManager);
-      objLoader.load('/generic_hmd/generic_hmd.obj', (headsetModel: THREE.Group) => {
-        // Load headset texture.
-        const textureLoader = new THREE.TextureLoader();
-        textureLoader.setPath('/generic_hmd/');
-        const headsetMesh = headsetModel.children[0] as THREE.Mesh;
-        const headsetMaterial = headsetMesh.material as THREE.MeshBasicMaterial;
-        headsetMaterial.map = textureLoader.load('generic_hmd.tga');
+    this.headsetModel =  this.loadObjWithMtl({
+      path: '/generic_hmd/',
+      objFile: 'generic_hmd.obj',
+      mtlFile: 'generic_hmd.mtl'
+    });
+  }
 
-        headsetModel.name = 'hmdTexture';
-        resolve(headsetModel);
+  private loadObjWithMtl({path, objFile, mtlFile}: {
+    path: string,
+    objFile: string,
+    mtlFile: string
+  }): Promise<THREE.Group> {
+    return new Promise((resolve) => {
+      const loadingManager = new THREE.LoadingManager();
+      loadingManager.addHandler(/\.tga$/i, new TGALoader());
+
+      const mtlLoader = new MTLLoader(loadingManager);
+      mtlLoader.setPath(path);
+      mtlLoader.load(mtlFile, (materials) => {
+        materials.preload();
+
+        const objLoader = new OBJLoader(loadingManager);
+        objLoader.setPath(path);
+        objLoader.setMaterials(materials);
+        objLoader.load(objFile, resolve);
       });
     });
   }
