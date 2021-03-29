@@ -27,6 +27,7 @@ import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/applic
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import SpectateUserService from 'virtual-reality/services/spectate-user';
@@ -49,7 +50,7 @@ import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
 import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 import MenuQueue from 'virtual-reality/utils/vr-menus/menu-queue';
-import { findGrabbableObject, isGrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
+import { findGrabbableObject, GrabbableObjectWrapper, isGrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
 import UiMenu from 'virtual-reality/utils/vr-menus/ui-menu';
 import HintMenu from 'virtual-reality/utils/vr-menus/ui-menu/hud/hint-menu';
 import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
@@ -496,6 +497,46 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     if (outerDiv) {
       this.resize(outerDiv);
     }
+  }
+
+  @action
+  async onDropFiles(files: File[]) {
+    const filesByName = new Map<string, File>();
+    for (const file of files) filesByName.set(file.name, file);
+
+    // Create a loading manager that converts file names to object URLs.
+    const loadingManager = new THREE.LoadingManager();
+    const objectURLs: string[] = [];
+    loadingManager.setURLModifier((url) => {
+      const file = filesByName.get(url);
+      if (file) {
+        const objectUrl = URL.createObjectURL(file);
+        objectURLs.push(objectUrl);
+        return objectUrl;
+      }
+      return url;
+    });
+
+    const tasks: Promise<any>[] = [];
+
+    // Load all glTF models.
+    for (let file of files) {
+      if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
+        tasks.push(new Promise((resolve) => {
+          const gltfLoader = new GLTFLoader(loadingManager);
+          gltfLoader.load(file.name, (gltf) => {
+            const object = new GrabbableObjectWrapper(gltf.scene);
+            this.interaction.raycastObjects.push(object),
+            this.scene.add(object);
+            resolve(null);
+          });
+        }));
+      }
+    }
+
+    // Revoke the object URLs when all loading tasks are done.
+    await Promise.all(tasks);
+    objectURLs.forEach((url) => URL.revokeObjectURL(url));
   }
 
   // #endregion ACTIONS
