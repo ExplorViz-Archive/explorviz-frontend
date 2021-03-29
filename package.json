@@ -102,6 +102,7 @@
   "dependencies": {
     "@glimmer/component": "^1.0.2",
     "@glimmer/tracking": "^1.0.2",
+    "@webxr-input-profiles/motion-controllers": "^1.0.0",
     "auth0-js": "^9.14.0",
     "auth0-lock": "^11.27.1",
     "bootstrap-colorpicker": "3.2.0",

@@ -1,6 +1,6 @@
 import THREE from 'three';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
-import XRControllerModelFactory from '../lib/controller/XRControllerModelFactory';
+import VrControllerModelFactory from '../vr-controller/vr-controller-model-factory';
 import NameTagSprite from '../view-objects/vr/name-tag-sprite';
 import PingMesh from '../view-objects/vr/ping-mesh';
 import WaypointIndicator from '../view-objects/vr/waypoint-indicator';
@@ -97,7 +97,7 @@ export default class RemoteVrUser extends THREE.Object3D {
   }
 
   async initController(assetUrl: string): Promise<Controller> {
-    const controllerModel = await XRControllerModelFactory.INSTANCE.loadAssetScene(assetUrl);
+    const controllerModel = await VrControllerModelFactory.INSTANCE.loadAssetScene(assetUrl);
     const ray = RemoteVrUser.addRayToControllerModel(controllerModel, this.color);
 
     let controller = {

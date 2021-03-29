@@ -12,12 +12,28 @@ import {
 import {
   Constants as MotionControllerConstants,
   MotionController,
-} from './motion-controllers.module';
+  VisualResponse,
+  Component,
+} from '@webxr-input-profiles/motion-controllers';
 
-export default class XRControllerModel extends Object3D {
+export type VisualResponseNodes = {
+  visualResponse: VisualResponse,
+  valueNode: THREE.Object3D,
+  minNode?: THREE.Object3D,
+  maxNode?: THREE.Object3D,
+};
+
+export type TouchPointNode = {
+  component: Component,
+  touchPointNode: THREE.Object3D,
+};
+
+export default class VrControllerModel extends Object3D {
   private _motionController!: MotionController|null;
   private _motionControllerPromise!: Promise<MotionController>;
   private _onMotionControllerConnect: ((motionController: MotionController) => void)|null;
+  private touchPointNodes: TouchPointNode[];
+  private visualResponseNodes: VisualResponseNodes[];
 
   envMap: any;
 
@@ -28,12 +44,14 @@ export default class XRControllerModel extends Object3D {
     this._motionControllerPromise = new Promise((resolve) => {
       this._onMotionControllerConnect = resolve;
     });
+    this.touchPointNodes = [];
+    this.visualResponseNodes = [];
     this.envMap = null;
   }
 
   /**
    * Gets profile information for the connected motion controller.
-   * 
+   *
    * This property is `null` unless the 3D model of the controller has been
    * loaded.
    */
@@ -43,7 +61,7 @@ export default class XRControllerModel extends Object3D {
 
   /**
    * Promise for {@link motionController}.
-   * 
+   *
    * The promise completes once the controller's 3D model has been loaded.
    * When the controller reconnects, a new promise is created.
    */
@@ -87,6 +105,14 @@ export default class XRControllerModel extends Object3D {
     return this;
   }
 
+  addTouchPointNode(node: TouchPointNode) {
+    this.touchPointNodes.push(node);
+  }
+
+  addVisualResponseNodes(nodes: VisualResponseNodes) {
+    this.visualResponseNodes.push(nodes);
+  }
+
   /**
   * Polls data from the XRInputSource and updates the model's components to match
   * the real world data
@@ -99,39 +125,28 @@ export default class XRControllerModel extends Object3D {
     // Cause the MotionController to poll the Gamepad for data
     this.motionController.updateFromGamepad();
 
-    // Update the 3D model to reflect the button, thumbstick, and touchpad state
-    Object.values(this.motionController.components).forEach((component) => {
-      // Update node data based on the visual responses' current states
-      // @ts-ignore
-      Object.values(component.visualResponses).forEach((visualResponse) => {
-        const {
-          // @ts-ignore
-          valueNode, minNode, maxNode, value, valueNodeProperty,
-        } = visualResponse;
+    // Update the 3D model to reflect the button, thumbstick, and touchpad state.
+    this.visualResponseNodes.forEach(({
+      visualResponse: { value, valueNodeProperty },
+      minNode, maxNode, valueNode
+    }: VisualResponseNodes) => {
+      // Calculate the new properties based on the weight supplied
+      if (valueNodeProperty === MotionControllerConstants.VisualResponseProperty.VISIBILITY && typeof value === 'boolean') {
+        valueNode.visible = value;
+      } else if (valueNodeProperty === MotionControllerConstants.VisualResponseProperty.TRANSFORM && typeof value === 'number' && minNode && maxNode) {
+        Quaternion.slerp(
+          minNode.quaternion,
+          maxNode.quaternion,
+          valueNode.quaternion,
+          value,
+        );
 
-        // Skip if the visual response node is not found. No error is needed,
-        // because it will have been reported at load time.
-        if (!valueNode) return;
-
-        // Calculate the new properties based on the weight supplied
-        if (valueNodeProperty === MotionControllerConstants.VisualResponseProperty.VISIBILITY) {
-          valueNode.visible = value;
-        } else if
-        (valueNodeProperty === MotionControllerConstants.VisualResponseProperty.TRANSFORM) {
-          Quaternion.slerp(
-            minNode.quaternion,
-            maxNode.quaternion,
-            valueNode.quaternion,
-            value,
-          );
-
-          valueNode.position.lerpVectors(
-            minNode.position,
-            maxNode.position,
-            value,
-          );
-        }
-      });
+        valueNode.position.lerpVectors(
+          minNode.position,
+          maxNode.position,
+          value,
+        );
+      }
     });
   }
 }
