@@ -1,6 +1,8 @@
 import THREE from 'three';
-import BaseMenu, { BaseMenuArgs } from '../base-menu';
-import * as Helper from '../../vr-helpers/multi-user-helper';
+import { BaseMenuArgs } from '../base-menu';
+import TextTexture from 'virtual-reality/utils/vr-helpers/text-texture';
+import { SIZE_RESOLUTION_FACTOR } from '../ui-menu';
+import InteractiveMenu from '../interactive-menu';
 
 type OpticonIconName = string;
 
@@ -21,14 +23,16 @@ const BACKGROUND_COLOR = new THREE.Color(0x444444);
 
 const LABEL_PADDING = 80;
 const LABEL_OFFSET = 0.025;
-const LABEL_FONT = '80px arial';
+const LABEL_FONT_SIZE = 80;
+const LABEL_FONT_FAMILY = 'arial';
 
 const TOOL_CIRCLE_RADIUS = 0.07;
 const TOOL_CIRCLE_SEGMENTS = 32;
 const TOOL_X_OFFSET = 0.02;
 
-export default class ToolMenu extends BaseMenu {
+export default class ToolMenu extends InteractiveMenu {
   private tools: Tool[];
+  private defaultToolIndex: number = 0;
   private selectedToolIndex: number = -1;
 
   constructor(args: BaseMenuArgs) {
@@ -38,20 +42,29 @@ export default class ToolMenu extends BaseMenu {
     this.addTool({
       label: 'Zoom',
       icon: 'search',
-      action: () => this.menuGroup?.openMenu(this.menuFactory.buildZoomMenu())
+      action: () => this.menuGroup?.replaceMenu(this.menuFactory.buildZoomMenu())
+    });
+    this.addDefaultTool({
+      label: 'Options',
+      icon: 'gear',
+      action: () => this.menuGroup?.replaceMenu(this.menuFactory.buildMainMenu())
     });
     this.addTool({
       label: 'Ping',
       icon: 'north-star',
-      action: () => this.menuGroup?.openMenu(this.menuFactory.buildPingMenu())
-    });
-    this.addTool({
-      label: 'Options',
-      icon: 'gear',
-      action: () => this.menuGroup?.openMenu(this.menuFactory.buildMainMenu())
+      action: () => this.menuGroup?.replaceMenu(this.menuFactory.buildPingMenu())
     });
 
-    this.selectTool(0);
+    this.selectTool(this.defaultToolIndex);
+  }
+
+  private get selectedTool(): Tool {
+    return this.tools[this.selectedToolIndex];
+  }
+
+  private addDefaultTool(args: ToolArgs) {
+    this.addTool(args);
+    this.defaultToolIndex = this.tools.length - 1;
   }
 
   private addTool({label, icon, action}: ToolArgs) {
@@ -72,7 +85,7 @@ export default class ToolMenu extends BaseMenu {
       object: group,
       action, 
       toggleSelect: (isSelected) => {
-        backgroundMesh.material.opacity = isSelected ? 1.0 : 0.5;
+        backgroundMesh.material.opacity = isSelected ? 0.8 : 0.5;
         // labelMesh.visible = isSelected;
       } 
     });
@@ -90,52 +103,66 @@ export default class ToolMenu extends BaseMenu {
   }
 
   private buildLabelMesh(label: string) {
-    // Choose texture size depending on text size.
-    const textSize = Helper.getTextSize(label, LABEL_FONT);
-    const width = textSize.width + LABEL_PADDING;
-    const height = textSize.height + LABEL_PADDING;
-
-    // Create canvas to draw texture.
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-
-    // Fill background.
-    ctx.fillStyle = `#${BACKGROUND_COLOR.getHexString()}`;
-    ctx.fillRect(0, 0, width, height);
-
-    // Draw text.
-    ctx.font = LABEL_FONT;
-    ctx.fillStyle = `#${FOREGROUND_COLOR.getHexString()}`;
-    ctx.textAlign = 'center';
-    ctx.fillText(label, width / 2, height - LABEL_PADDING / 2);
-
-    // Set drawn texture as background.
-    const texture = new THREE.Texture(canvas);
-    texture.needsUpdate = true;
+    const texture = new TextTexture({
+      text: label,
+      textColor: FOREGROUND_COLOR,
+      fontSize: LABEL_FONT_SIZE,
+      fontFamily: LABEL_FONT_FAMILY,
+      padding: LABEL_PADDING,
+      backgroundColor: BACKGROUND_COLOR
+    });
     const material = new THREE.MeshBasicMaterial({
       map: texture,
       transparent: true,
       opacity: 0.8,
     });
 
-    const worldWidth = width / 512 * 0.15;
-    const worldHeight = height / 512 * 0.15;
+    const worldWidth = texture.image.width * SIZE_RESOLUTION_FACTOR / 2;
+    const worldHeight = texture.image.height * SIZE_RESOLUTION_FACTOR / 2;
     const geometry = new THREE.PlaneGeometry(worldWidth, worldHeight);
     return new THREE.Mesh(geometry, material);
   }
 
   private selectTool(index: number) {
-    // Unselect previous tool.
+    // Unselect previous tool unless this is the initially selected tool.
     if (this.selectedToolIndex >= 0) {
-      this.tools[this.selectedToolIndex].toggleSelect(false);
+      this.selectedTool.toggleSelect(false);
     }
     
     // Select new current tool.
     this.selectedToolIndex = index % this.tools.length;
-    this.tools[this.selectedToolIndex].toggleSelect(true);
+    this.selectedTool.toggleSelect(true);
+
+    // Move the selected tool to the center.
+    this.position.x = -this.selectedTool.object.position.x;
+  }
+
+  triggerDown(intersection: THREE.Intersection) {
+    super.triggerDown(intersection);
+
+    // Find click tool.
+    const tool = this.findToolByObject(intersection.object);
+    if (tool) {
+      const index = this.tools.indexOf(tool);
+      if (index == this.selectedToolIndex) {
+        this.selectedTool.action();
+      } else {
+        this.selectTool(index);
+      }
+    }
+  }
+
+  /**
+   * Finds the tool that contains the given object.
+   */
+  private findToolByObject(object: THREE.Object3D): Tool | null {
+    for (let tool of this.tools) {
+      let current: THREE.Object3D | null = object;
+      while (current) {
+        if (current === tool.object) return tool;
+        current = current.parent;
+      }
+    }
+    return null;
   }
 }

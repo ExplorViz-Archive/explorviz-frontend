@@ -46,12 +46,11 @@ import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-co
 import VRControllerThumbpadBinding, { VRControllerThumbpadDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
-import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
+import InteractiveMenu from 'virtual-reality/utils/vr-menus/interactive-menu';
 import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 import MenuQueue from 'virtual-reality/utils/vr-menus/menu-queue';
 import { findGrabbableObject, GrabbableObjectWrapper, isGrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
-import UiMenu from 'virtual-reality/utils/vr-menus/ui-menu';
 import HintMenu from 'virtual-reality/utils/vr-menus/ui-menu/hud/hint-menu';
 import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
 import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receivable/landscape';
@@ -73,6 +72,7 @@ import { UserControllerMessage, USER_CONTROLLER_EVENT } from 'virtual-reality/ut
 import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
+import VrInputManager, { VrInputHandler } from 'virtual-reality/utils/vr-multi-user/vr-input-manager';
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
@@ -164,6 +164,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private vrTimestampService!: VrTimestampService;
 
+  private primaryInputManager = new VrInputManager();
+
+  private secondaryInputManager = new VrInputManager();
+
   // #endregion CLASS FIELDS
 
   // #region GETTERS
@@ -201,6 +205,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.initRenderer();
     this.initServices();
     this.initInteraction();
+    this.initPrimaryInput();
+    this.initSecondaryInput();
     this.initControllers();
     this.initWebSocket();
   }
@@ -378,6 +384,55 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     window.onkeydown = (event: any) => {
       this.handleKeyboard(event);
     };
+  }
+
+  private initPrimaryInput() {
+    this.primaryInputManager.addInputHandler<ApplicationMesh>({
+      canHandle: (object): object is ApplicationMesh => object instanceof ApplicationMesh,
+      triggerDown: (application, {point}) => this.addApplication(application.dataModel).then((applicationObject3D) => {
+        if (!applicationObject3D) return;
+
+        // Rotate app so that it is aligned with landscape
+        applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
+        applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
+        applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
+
+        // Position app above clicked point.
+        applicationObject3D.position.copy(point);
+      })
+    });
+    this.primaryInputManager.addInputHandler<ComponentMesh>({
+      canHandle: (object): object is ComponentMesh => object instanceof ComponentMesh && object.parent instanceof ApplicationObject3D,
+      triggerDown: (component) => this.toggleComponentAndUpdate(component, component.parent as ApplicationObject3D)
+    });
+    this.primaryInputManager.addInputHandler<FoundationMesh>({
+      canHandle: (object): object is FoundationMesh => object instanceof FoundationMesh && object.parent instanceof ApplicationObject3D,
+      triggerDown: (foundation) => this.closeAllComponentsAndUpdate(foundation.parent as ApplicationObject3D)
+    });
+    this.primaryInputManager.addInputHandler<CloseIcon>({
+      canHandle: (object): object is CloseIcon => object instanceof CloseIcon,
+      triggerDown: (closeIcon) => closeIcon.close().then((closedSuccessfully: boolean) => {
+        if (!closedSuccessfully) this.showHint('Object could not be closed');
+      })
+    });
+    const menuInputHandler: VrInputHandler<InteractiveMenu> = {
+      canHandle: (object): object is InteractiveMenu => object instanceof InteractiveMenu,
+      triggerDown: (menu, intersection) => menu.triggerDown(intersection),
+      triggerPress: (menu, intersection, value) => menu.triggerPress(intersection, value),
+      triggerUp: (menu, intersection) => menu.triggerUp(intersection)
+    };
+    this.primaryInputManager.addInputHandler(menuInputHandler);
+  }
+
+  private initSecondaryInput() {
+    this.secondaryInputManager.addInputHandler<FloorMesh>({
+      canHandle: (object): object is FloorMesh => object instanceof FloorMesh,
+      triggerDown: (_floor, {point}) => this.localUser.teleportToPosition(point)
+    });
+    this.secondaryInputManager.addInputHandler<ApplicationObject3D>({
+      canHandle: (object): object is ApplicationObject3D => object instanceof ApplicationObject3D,
+      triggerDown: (application, {object}) => this.highlightAppEntity(object, application)
+    });
   }
 
   private initControllers() {
@@ -790,17 +845,15 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       triggerButton: new VRControllerButtonBinding('Open / Close', {
         onButtonDown: (controller: VRController) => {
           if (!controller.intersectedObject) return;
-
-          this.handlePrimaryInputOn(controller.intersectedObject);
+          this.primaryInputManager.handleTriggerDown(controller.intersectedObject);
         },
         onButtonPress: (controller: VRController, value: number) => {
           if (!controller.intersectedObject) return;
-
-          const { object, uv } = controller.intersectedObject;
-
-          if (object.parent instanceof BaseMenu && uv) {
-            object.parent.triggerPress(uv, value);
-          }
+          this.primaryInputManager.handleTriggerPress(controller.intersectedObject, value);
+        },
+        onButtonUp: (controller: VRController) => {
+          if (!controller.intersectedObject) return;
+          this.primaryInputManager.handleTriggerUp(controller.intersectedObject);
         }
       }),
 
@@ -823,7 +876,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
           switch (direction) {
             case VRControllerThumbpadDirection.UP:
               if (controller.intersectedObject) {
-                this.handleSecondaryInputOn(controller.intersectedObject)
+                this.secondaryInputManager.handleTriggerDown(controller.intersectedObject);
               }
               break;
             case VRControllerThumbpadDirection.DOWN:
@@ -863,14 +916,12 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private handleDoubleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
-
-    this.handlePrimaryInputOn(intersection);
+    this.primaryInputManager.handleTriggerDown(intersection);
   }
 
   private handleSingleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
-
-    this.handleSecondaryInputOn(intersection);
+    this.secondaryInputManager.handleTriggerDown(intersection);
   }
 
   private handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
@@ -901,57 +952,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         break;
       default:
         break;
-    }
-  }
-
-  private handlePrimaryInputOn({ object, uv, point }: THREE.Intersection) {
-    // The user can only interact with menus
-    if (this.spectateUserService.spectatedUser) {
-      // TODO doesn't this have to be object.parent?
-      if (object instanceof UiMenu && object.enableTriggerInSpectorMode && uv) {
-        object.triggerDown(uv);
-      }
-      return;
-    }
-
-    // Test which kind of object the user interacted with.
-    if (object instanceof ApplicationMesh) {
-      this.addApplication(object.dataModel).then((applicationObject3D: ApplicationObject3D | null) => {
-        if (!applicationObject3D) return;
-
-        // Rotate app so that it is aligned with landscape
-        applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
-        applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
-        applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
-
-        // Position app above clicked point.
-        applicationObject3D.position.copy(point);
-      });
-    } else if (object instanceof CloseIcon) {
-      object.close().then((closedSuccessfully: boolean) => {
-        if (!closedSuccessfully) this.showHint('Object could not be closed');
-      });
-    } else if (object.parent instanceof ApplicationObject3D) {
-      const application = object.parent;
-      if (object instanceof ComponentMesh) {
-        this.toggleComponentAndUpdate(object, application);
-      } else if (object instanceof FoundationMesh) {
-        this.closeAllComponentsAndUpdate(application);
-      }
-    } else if (object.parent instanceof BaseMenu && uv) {
-      object.parent.triggerDown(uv);
-    }
-  }
-
-  private handleSecondaryInputOn({ object, point }: THREE.Intersection) {
-    // The user cannot interact with the environment while spectating another user.
-    if (this.spectateUserService.spectatedUser) return;
-
-    // Test which kind of object the user interacted with.
-    if (object instanceof FloorMesh) {
-      this.localUser.teleportToPosition(point);
-    } else if (object.parent instanceof ApplicationObject3D) {
-      this.highlightAppEntity(object, object.parent);
     }
   }
 

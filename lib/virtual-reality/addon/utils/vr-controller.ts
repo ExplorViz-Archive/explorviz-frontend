@@ -8,8 +8,8 @@ import TeleportMesh from './view-objects/vr/teleport-mesh';
 import VRControllerBindingsList from './vr-controller/vr-controller-bindings-list';
 import VRControllerLabelGroup from './vr-controller/vr-controller-label-group';
 import { displayAsSolidObject, displayAsWireframe } from './vr-helpers/multi-user-helper';
-import BaseMenu from './vr-menus/base-menu';
 import MenuGroup from './vr-menus/menu-group';
+import InteractiveMenu from './vr-menus/interactive-menu';
 
 /**
  * Length of the controller's ray when there is no intersection point.
@@ -401,7 +401,7 @@ export default class VRController extends BaseMesh {
       return;
     }
 
-    const { object, uv } = nearestIntersection;
+    const { object } = nearestIntersection;
 
     if (this.intersectedObject && object !== this.intersectedObject.object) {
       if (this.intersectedObject.object instanceof FloorMesh) {
@@ -414,9 +414,9 @@ export default class VRController extends BaseMesh {
 
     // Handle hover effect and teleport area
 
-    if (object.parent instanceof BaseMenu && uv) {
-      object.parent.hover(uv);
-    } else if (object instanceof BaseMesh) {
+    if (object.parent instanceof InteractiveMenu) {
+      object.parent.hover(nearestIntersection);
+    } else if (object instanceof InteractiveMenu) {
       object.applyHoverEffect();
     }
 
@@ -428,7 +428,7 @@ export default class VRController extends BaseMesh {
         this.teleportArea.showAbovePosition(nearestIntersection.point);
         this.teleportArea.visible = this.ray.visible;
       }
-    } else if (object instanceof BaseMesh) {
+    } else if (object instanceof InteractiveMenu) {
       object.applyHoverEffect();
     }
 

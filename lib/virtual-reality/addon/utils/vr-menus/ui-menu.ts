@@ -1,8 +1,8 @@
 import THREE from "three";
 import VRControllerButtonBinding from "../vr-controller/vr-controller-button-binding";
 import VRControllerThumbpadBinding, { thumbpadDirectionToVector2 } from "../vr-controller/vr-controller-thumbpad-binding";
-import AnimatedMenu from "./animated-menu";
 import { BaseMenuArgs } from "./base-menu";
+import InteractiveMenu from "./interactive-menu";
 import InteractiveItem from "./items/interactive-item";
 import Item from "./items/item";
 
@@ -21,7 +21,7 @@ export type UiMenuArgs = BaseMenuArgs & {
  * controller that holds the menu or using the ray and trigger or the
  * other controller.
  */
-export default abstract class UiMenu extends AnimatedMenu {
+export default abstract class UiMenu extends InteractiveMenu {
   canvas!: HTMLCanvasElement;
 
   canvasMesh!: THREE.Mesh<THREE.Geometry | THREE.BufferGeometry, THREE.MeshBasicMaterial>;
@@ -171,9 +171,11 @@ export default abstract class UiMenu extends AnimatedMenu {
    *
    * @param uv The coordinates of the point that is hovered
    */
-  hover(uv: THREE.Vector2) {
-    super.hover(uv);
-    const item = this.getItem(uv);
+  hover(intersection: THREE.Intersection) {
+    super.hover(intersection);
+
+    if (!intersection.uv) return;
+    const item = this.getItem(intersection.uv);
     this.hoverItem(item);
   }
 
@@ -284,11 +286,12 @@ export default abstract class UiMenu extends AnimatedMenu {
    * Called once when the other controller's trigger is pressed down while
    * hovering this menu. This method is not called again before the trigger
    * is released.
-   *
-   * @param uv The coordinate of the menu that is hovered.
    */
-  triggerDown(uv: THREE.Vector2) {
-    const item = this.getItem(uv);
+   triggerDown(intersection: THREE.Intersection,) {
+    super.triggerDown(intersection);
+
+    if (!intersection.uv) return;
+    const item = this.getItem(intersection.uv);
     if (item && item.onTriggerDown) {
       item.onTriggerDown();
     }
@@ -301,10 +304,11 @@ export default abstract class UiMenu extends AnimatedMenu {
    * @param uv The coordinate of the menu that is hovered.
    * @param value The intensity of the trigger press.
    */
-  triggerPress(uv: THREE.Vector2, value: number) {
-    super.triggerPress(uv, value);
-    
-    const item = this.getItem(uv);
+  triggerPress(intersection: THREE.Intersection, value: number) {
+    super.triggerPress(intersection, value);
+
+    if (!intersection.uv) return;
+    const item = this.getItem(intersection.uv);
     if (item && item.onTriggerPressed) {
       item.onTriggerPressed(value);
     }

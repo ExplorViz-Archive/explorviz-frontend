@@ -84,41 +84,6 @@ export default abstract class BaseMenu extends THREE.Group {
   get isMenuDetached(): boolean { return this.menuState === MenuState.DETACHED; }
 
   /**
-   * Called when the other controller's ray intersects this menu.
-   */
-  hover(_uv: THREE.Vector2) { }
-
-  /**
-   * Called once when the other controller's trigger is pressed down while
-   * hovering this menu. This method is not called again before the trigger
-   * is released.
-   *
-   * @param uv The coordinate of the menu that is hovered.
-   */
-  triggerDown(_uv: THREE.Vector2) { }
-
-  /**
-   * Called when the other controller's trigger is pressed while hovering this
-   * menu.
-   *
-   * @param uv The coordinate of the menu that is hovered.
-   * @param value The intensity of the trigger press.
-   */
-  triggerPress(_uv: THREE.Vector2, _value: number) { }
-
-  /**
-   * Called when this menu is hovered to apply visual feedback for the hover
-   * effect.
-   */
-  applyHoverEffect() { }
-
-  /**
-   * Called when this menu is not hovered anymore to reset the visual feedback
-   * for the hover effect.
-   */
-  resetHoverEffect() { }
-
-  /**
    * Creates the bindings for the thumbpad of the controller that holds this
    * menu.
    */
