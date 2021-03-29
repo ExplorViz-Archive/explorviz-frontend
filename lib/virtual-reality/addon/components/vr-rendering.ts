@@ -99,7 +99,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   @service('landscape-token')
   landscapeTokenService!: LandscapeTokenService;
-  
+
   @service('repos/timestamp-repository')
   timestampRepo!: TimestampRepository;
 
@@ -244,7 +244,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
     camera.position.set(0, 1, 2);
     this.localUser.addCamera(camera);
-    
+
     // Menu group for hints.
     this.hintMenuQueue = new MenuQueue({ detachedMenuGroups: this.detachedMenuGroups });
     this.hintMenuQueue.position.z = -0.3;
@@ -316,11 +316,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.scene.add(this.detachedMenuGroups);
 
     // Initialize timestamp service.
-    this.vrTimestampService = new VrTimestampService({ 
-      timestamp: this.args.selectedTimestampRecords[0]?.timestamp || 
+    this.vrTimestampService = new VrTimestampService({
+      timestamp: this.args.selectedTimestampRecords[0]?.timestamp ||
         this.timestampRepo.getLatestTimestamp(this.args.landscapeData.structureLandscapeData.landscapeToken)?.timestamp ||
         new Date().getTime(),
-        timestampInterval: this.args.timestampInterval,
+      timestampInterval: this.args.timestampInterval,
       localUser: this.localUser,
       sender: this.sender,
       auth: this.auth,
@@ -330,7 +330,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       vrApplicationRenderer: this.vrApplicationRenderer,
       detachedMenuGroups: this.detachedMenuGroups
     });
-    
+
     // Initialiye room service.
     this.vrRoomService.injectValues({
       detachedMenuGroups: this.detachedMenuGroups,
@@ -367,11 +367,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     };
     this.interaction = new Interaction(
       this.canvas, this.camera, this.renderer, intersectableObjects, {
-        singleClick: (intersection) => this.handleSingleClick(intersection),
-        doubleClick: (intersection) => this.handleDoubleClick(intersection),
-        mouseWheel: (delta) => this.handleMouseWheel(delta),
-        panning: (delta, button) => this.handlePanning(delta, button),
-      }, raycastFilter
+      singleClick: (intersection) => this.handleSingleClick(intersection),
+      doubleClick: (intersection) => this.handleDoubleClick(intersection),
+      mouseWheel: (delta) => this.handleMouseWheel(delta),
+      panning: (delta, button) => this.handlePanning(delta, button),
+    }, raycastFilter
     );
 
     // Add key listener for room positioning
@@ -527,7 +527,29 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
           gltfLoader.load(file.name, (gltf) => {
             const object = new GrabbableObjectWrapper(gltf.scene);
             this.interaction.raycastObjects.push(object),
-            this.scene.add(object);
+              this.scene.add(object);
+            resolve(null);
+          });
+        }));
+      }
+
+      if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) {
+        tasks.push(new Promise((resolve) => {
+          // Create the panoramic sphere geometery
+          const panoSphereGeo = new THREE.SphereGeometry(10, 256, 256);
+          // Create the panoramic sphere material
+          const panoSphereMat = new THREE.MeshStandardMaterial({
+            side: THREE.BackSide,
+            displacementScale: - 4.0
+          });
+          // Create the panoramic sphere mesh
+          var sphere = new THREE.Mesh(panoSphereGeo, panoSphereMat);
+          const loader = new THREE.TextureLoader(loadingManager);
+          loader.load(file.name, (texture) => {
+            texture.minFilter = THREE.NearestFilter;
+            texture.generateMipmaps = false;
+            sphere.material.map = texture;
+            this.scene.add(sphere);
             resolve(null);
           });
         }));
