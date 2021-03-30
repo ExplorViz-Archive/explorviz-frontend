@@ -9,8 +9,7 @@ import { tracked } from '@glimmer/tracking';
 
 interface ShareLandscapeArgs {
   token: LandscapeToken;
-  grantAccess(tokenId: string, userId: string): void;
-  revokeAccess(tokenId: string, userId: string): void;
+  reload(): void;
 }
 
 const { userService } = ENV.backendAddresses;
@@ -41,6 +40,17 @@ export default class ShareLandscape extends Component<ShareLandscapeArgs> {
       const token = await this.sendModifyAccess(this.args.token.value, userId, 'revoke');
       this.args.token.sharedUsersIds.removeObject(userId);
       AlertifyHandler.showAlertifySuccess(`Access of ${userId} revoked for token ${this.args.token.value}`);
+    } catch (e) {
+      AlertifyHandler.showAlertifySuccess(e.message);
+    }
+  }
+
+  @action
+  async cloneToken(userId: string) {
+    try {
+      await this.sendModifyAccess(this.args.token.value, userId, 'clone');
+      this.args.reload()
+      AlertifyHandler.showAlertifySuccess(`Cloned token ${this.args.token.value}`);
     } catch (e) {
       AlertifyHandler.showAlertifySuccess(e.message);
     }

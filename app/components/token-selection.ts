@@ -10,6 +10,7 @@ interface Args {
   tokens: LandscapeToken[];
   selectToken(token: LandscapeToken): void;
   deleteToken(tokenId: string): Promise<undefined>;
+  reload(): void;
 }
 
 export default class TokenSelection extends Component<Args> {
