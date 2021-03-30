@@ -6,6 +6,7 @@ import {
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import ENV from 'explorviz-frontend/config/environment';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import TimestampRepository from './repos/timestamp-repository';
 import Auth from './auth';
 import LandscapeTokenService from './landscape-token';
@@ -34,22 +35,30 @@ export default class LandscapeLoader extends Service.extend(Evented) {
     }
 
     this.timer = setIntervalImmediately(async () => {
-      try {
-        // request landscape data that is 60 seconds old
-        // that way we can be sure, all traces are available
-        const endTime = Date.now() - (60 * 1000);
-        const [structureData, dynamicData] = await this.requestData(endTime, intervalInSeconds);
+      // request landscape data that is 60 seconds old
+      // that way we can be sure, all traces are available
+      const endTime = Date.now() - (60 * 1000);
+      const [structureData, dynamicData] = await this.requestData(endTime, intervalInSeconds);
 
-        this.set('latestStructureData', preProcessAndEnhanceStructureLandscape(structureData));
+      if (structureData.status === 'fulfilled') {
+        this.set('latestStructureData', preProcessAndEnhanceStructureLandscape(structureData.value));
+      } else {
+        this.set('latestStructureData', null);
+      }
 
-        this.set('latestDynamicData', dynamicData);
+      if (dynamicData.status === 'fulfilled') {
+        this.set('latestDynamicData', dynamicData.value);
+      } else {
+        this.set('latestDynamicData', null);
+      }
 
-        this.updateTimestampRepoAndTimeline(endTime,
-          LandscapeLoader.computeTotalRequests(this.latestDynamicData!));
+      this.updateTimestampRepoAndTimeline(endTime,
+        LandscapeLoader.computeTotalRequests(this.latestDynamicData));
 
+      if (this.latestStructureData !== null) {
         this.trigger('newLandscapeData', this.latestStructureData, this.latestDynamicData);
-      } catch (e) {
-        // landscape data could not be requested, try again?
+      } else {
+        AlertifyHandler.showAlertifyError('Could not retrieve landscape data. Backend offline?');
       }
     }, intervalInSeconds * 1000);
   }
@@ -60,7 +69,7 @@ export default class LandscapeLoader extends Service.extend(Evented) {
     const structureDataPromise = this.requestStructureData(/* startTime, endTime */);
     const dynamicDataPromise = this.requestDynamicData(startTime, endTime);
 
-    const landscapeData = Promise.all([structureDataPromise, dynamicDataPromise]);
+    const landscapeData = Promise.allSettled([structureDataPromise, dynamicDataPromise]);
     return landscapeData;
   }
 
@@ -110,7 +119,10 @@ export default class LandscapeLoader extends Service.extend(Evented) {
     });
   }
 
-  static computeTotalRequests(dynamicData: DynamicLandscapeData) {
+  static computeTotalRequests(dynamicData: DynamicLandscapeData|null) {
+    if (dynamicData === null) {
+      return 0;
+    }
     // cant't run reduce on empty array
     if (dynamicData.length === 0) {
       return 0;

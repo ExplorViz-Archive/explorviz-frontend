@@ -22,12 +22,16 @@ export default class ReloadHandler extends Service.extend(Evented) {
     self.debug('Start import landscape-request');
 
     try {
-      const [structureData, dynamicData] = await this.landscapeLoader.requestData(timestamp,
+      const [structureDataRes, dynamicDataRes] = await this.landscapeLoader.requestData(timestamp,
         interval);
 
-      const enhancedStructure = preProcessAndEnhanceStructureLandscape(structureData);
+      const structureData = structureDataRes.status === 'fulfilled'
+        ? preProcessAndEnhanceStructureLandscape(structureDataRes.value) : null;
 
-      return [enhancedStructure, dynamicData] as [StructureLandscapeData, DynamicLandscapeData];
+      const dynamicData = dynamicDataRes.status === 'fulfilled' ? dynamicDataRes.value : null;
+
+      return [structureData, dynamicData] as
+        [StructureLandscapeData|null, DynamicLandscapeData|null];
     } catch (e) {
       throw Error(e);
     }

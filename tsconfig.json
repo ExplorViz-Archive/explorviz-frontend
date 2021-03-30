@@ -21,6 +21,9 @@
     "baseUrl": ".",
     "module": "es6",
     "skipLibCheck": true,
+    "lib": [
+      "ES2020.Promise",
+    ],
     "paths": {
       "explorviz-frontend/tests/*": [
         "tests/*"

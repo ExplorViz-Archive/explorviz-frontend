@@ -407,8 +407,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Run Klay layouting in 3 steps within workers
     try {
-      const applicationCommunications = computeApplicationCommunication(structureLandscapeData,
-        dynamicLandscapeData);
+      const applicationCommunications = dynamicLandscapeData
+        ? computeApplicationCommunication(structureLandscapeData, dynamicLandscapeData) : [];
 
       // Do layout pre-processing (1st step)
       const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
@@ -420,7 +420,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       const newGraph: ElkNode = yield this.elk.layout(graph);
 
       // Post-process layout graph (3rd step)
-      const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
+      const layoutedLandscape: Layout3Return = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
         structureLandscapeData,
@@ -434,7 +434,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       const {
         modelIdToLayout,
         modelIdToPoints: modelIdToPointsComplete,
-      }: Layout3Return = layoutedLandscape;
+      } = layoutedLandscape;
 
       const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
 

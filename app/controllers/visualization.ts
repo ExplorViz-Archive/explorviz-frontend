@@ -18,7 +18,7 @@ import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
-  dynamicLandscapeData: DynamicLandscapeData;
+  dynamicLandscapeData: DynamicLandscapeData|null;
   application?: Application;
 }
 
@@ -95,14 +95,17 @@ export default class VisualizationController extends Controller {
 
   @action
   receiveNewLandscapeData(structureData: StructureLandscapeData,
-    dynamicData: DynamicLandscapeData) {
+    dynamicData: DynamicLandscapeData|null) {
     if (!this.visualizationPaused) {
+      if (dynamicData === null) {
+        AlertifyHandler.showAlertifyWarning('Could not retrieve dynamic data from backend');
+      }
       this.updateLandscape(structureData, dynamicData);
     }
   }
 
   updateLandscape(structureData: StructureLandscapeData,
-    dynamicData: DynamicLandscapeData) {
+    dynamicData: DynamicLandscapeData|null) {
     let application;
     if (this.landscapeData !== null) {
       application = this.landscapeData.application;
@@ -224,17 +227,21 @@ export default class VisualizationController extends Controller {
       return;
     }
     this.pauseVisualizationUpdating();
-    try {
-      const [structureData, dynamicData] = await
-      this.reloadHandler.loadLandscapeByTimestamp(timestampRecordArray[0].timestamp);
 
-      this.updateLandscape(structureData, dynamicData);
-      set(this, 'selectedTimestampRecords', timestampRecordArray);
-    } catch (e) {
-      this.debug('Landscape couldn\'t be requested!', e);
-      AlertifyHandler.showAlertifyMessage('Landscape couldn\'t be requested!');
+    const [structureData, dynamicData] = await
+    this.reloadHandler.loadLandscapeByTimestamp(timestampRecordArray[0].timestamp);
+
+    if (structureData == null) {
+      AlertifyHandler.showAlertifyMessage('Structural landscape data could not be loaded!');
       this.resumeVisualizationUpdating();
+      return;
     }
+
+    timestampRecordArray[0].totalRequests = LandscapeLoader.computeTotalRequests(dynamicData);
+    set(this, 'selectedTimestampRecords', timestampRecordArray);
+    this.updateTimestampList();
+
+    this.updateLandscape(structureData, dynamicData);
   }
 
   @action

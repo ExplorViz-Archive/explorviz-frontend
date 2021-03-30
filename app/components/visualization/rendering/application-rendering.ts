@@ -138,7 +138,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const { application, dynamicLandscapeData } = this.args.landscapeData;
 
     this.applicationObject3D = new ApplicationObject3D(application!,
-      new Map(), dynamicLandscapeData);
+      new Map(), dynamicLandscapeData ?? []);
 
     this.communicationRendering = new CommunicationRendering(this.configuration);
 
@@ -386,7 +386,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @task*
   loadNewApplication() {
     this.applicationObject3D.dataModel = this.args.landscapeData.application!;
-    this.applicationObject3D.traces = this.args.landscapeData.dynamicLandscapeData;
+    this.applicationObject3D.traces = this.args.landscapeData.dynamicLandscapeData ?? [];
     yield perform(this.populateScene);
   }
 
