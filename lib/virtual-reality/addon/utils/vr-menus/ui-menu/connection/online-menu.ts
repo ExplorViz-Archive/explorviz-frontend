@@ -65,7 +65,6 @@ export default class OnlineMenu extends ConnectionBaseMenu {
     yPos += yOffset;
 
     users.forEach((user) => {
-      if (user.state === 'online' && user.userName) {
         const remoteUserButton = new TextbuttonItem({
           text: user.userName,
           position: { x: 100, y: yPos },
@@ -78,7 +77,6 @@ export default class OnlineMenu extends ConnectionBaseMenu {
         this.items.push(remoteUserButton);
         this.thumbpadTargets.push(remoteUserButton);
         yPos += yOffset;
-      }
     });
     this.items.push(title);
 
