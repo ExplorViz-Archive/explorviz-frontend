@@ -3,6 +3,8 @@ import { BaseMenuArgs } from '../base-menu';
 import TextTexture from 'virtual-reality/utils/vr-helpers/text-texture';
 import { SIZE_RESOLUTION_FACTOR } from '../ui-menu';
 import InteractiveMenu from '../interactive-menu';
+import VRControllerThumbpadBinding from "../../vr-controller/vr-controller-thumbpad-binding";
+import VRControllerButtonBinding from "../../vr-controller/vr-controller-button-binding";
 
 type OpticonIconName = string;
 
@@ -31,6 +33,8 @@ const TOOL_CIRCLE_SEGMENTS = 32;
 const TOOL_X_OFFSET = 0.02;
 
 const SELECT_ANIMATION_DURATION = 0.2;
+
+const THUMBPAD_THRESHOLD = 0.5;
 
 export default class ToolMenu extends InteractiveMenu {
   private tools: Tool[];
@@ -134,13 +138,16 @@ export default class ToolMenu extends InteractiveMenu {
     // While an animation is playing, no other tool can be selected.
     if (this.currentAnimation) return;
 
+    // A tool can only be selected if the index is in range.
+    if (index < 0 || index >= this.tools.length) return;
+
     // Unselect previous tool unless this is the initially selected tool.
     if (this.selectedToolIndex >= 0) {
       this.selectedTool.toggleSelect(false);
     }
 
     // Select new current tool.
-    this.selectedToolIndex = (index + this.tools.length) % this.tools.length;
+    this.selectedToolIndex = index;
     this.selectedTool.toggleSelect(true);
 
     // Animate the selected tool to the center if animations are enabled.
@@ -171,6 +178,14 @@ export default class ToolMenu extends InteractiveMenu {
     this.position.x = targetPositionX;
   }
 
+  private selectPreviousTool() {
+    this.selectTool(this.selectedToolIndex - 1);
+  }
+
+  private selectNextTool() {
+    this.selectTool(this.selectedToolIndex + 1);
+  }
+
   triggerDown(intersection: THREE.Intersection) {
     super.triggerDown(intersection);
 
@@ -184,6 +199,21 @@ export default class ToolMenu extends InteractiveMenu {
         this.selectTool(index);
       }
     }
+  }
+
+  makeThumbpadBinding() {
+    return new VRControllerThumbpadBinding({ labelUp: 'Previous', labelDown: 'Next' }, {
+      onThumbpadTouch: (_controller, axes) => {
+        if (axes[0] <= -THUMBPAD_THRESHOLD) this.selectPreviousTool();
+        if (axes[0] >= THUMBPAD_THRESHOLD) this.selectNextTool();
+      }
+    });
+  }
+
+  makeTriggerBinding() {
+    return new VRControllerButtonBinding('Select', {
+      onButtonDown: (_controller) => this.selectedTool.action()
+    });
   }
 
   /**
