@@ -7,7 +7,7 @@ import InteractiveMenu from '../interactive-menu';
 type OpticonIconName = string;
 
 type ToolArgs = {
-  label: string, 
+  label: string,
   icon: OpticonIconName,
   action: () => void
 };
@@ -30,14 +30,18 @@ const TOOL_CIRCLE_RADIUS = 0.07;
 const TOOL_CIRCLE_SEGMENTS = 32;
 const TOOL_X_OFFSET = 0.02;
 
+const SELECT_ANIMATION_DURATION = 0.2;
+
 export default class ToolMenu extends InteractiveMenu {
   private tools: Tool[];
   private defaultToolIndex: number = 0;
   private selectedToolIndex: number = -1;
+  private currentAnimation: THREE.AnimationAction | null;
 
   constructor(args: BaseMenuArgs) {
     super(args);
     this.tools = [];
+    this.currentAnimation = null;
 
     this.addTool({
       label: 'Zoom',
@@ -55,7 +59,7 @@ export default class ToolMenu extends InteractiveMenu {
       action: () => this.menuGroup?.replaceMenu(this.menuFactory.buildPingMenu())
     });
 
-    this.selectTool(this.defaultToolIndex);
+    this.selectTool(this.defaultToolIndex, {enableAnimation: false});
   }
 
   private get selectedTool(): Tool {
@@ -78,16 +82,17 @@ export default class ToolMenu extends InteractiveMenu {
     const labelMesh = this.buildLabelMesh(label);
     if (labelMesh) {
       labelMesh.position.y = -(LABEL_OFFSET + TOOL_CIRCLE_RADIUS);
+      labelMesh.visible = false;
       group.add(labelMesh);
     }
 
     this.tools.push({
       object: group,
-      action, 
+      action,
       toggleSelect: (isSelected) => {
         backgroundMesh.material.opacity = isSelected ? 0.8 : 0.5;
-        // labelMesh.visible = isSelected;
-      } 
+        labelMesh.visible = isSelected;
+      }
     });
   }
 
@@ -123,24 +128,53 @@ export default class ToolMenu extends InteractiveMenu {
     return new THREE.Mesh(geometry, material);
   }
 
-  private selectTool(index: number) {
+  private async selectTool(index: number, {enableAnimation = true}: {
+    enableAnimation?: boolean
+  } = {}) {
+    // While an animation is playing, no other tool can be selected.
+    if (this.currentAnimation) return;
+
     // Unselect previous tool unless this is the initially selected tool.
     if (this.selectedToolIndex >= 0) {
       this.selectedTool.toggleSelect(false);
     }
-    
+
     // Select new current tool.
-    this.selectedToolIndex = index % this.tools.length;
+    this.selectedToolIndex = (index + this.tools.length) % this.tools.length;
     this.selectedTool.toggleSelect(true);
 
-    // Move the selected tool to the center.
-    this.position.x = -this.selectedTool.object.position.x;
+    // Animate the selected tool to the center if animations are enabled.
+    const targetPositionX = -this.selectedTool.object.position.x;
+    if (enableAnimation) {
+      this.currentAnimation = this.animationMixer.clipAction(new THREE.AnimationClip(
+        'select-animation',
+        SELECT_ANIMATION_DURATION, [
+          new THREE.KeyframeTrack(
+            '.position[x]',
+            [0.0, SELECT_ANIMATION_DURATION],
+            [this.position.x, targetPositionX]
+          )
+        ]));
+      this.currentAnimation.setLoop(THREE.LoopOnce, 0);
+      this.currentAnimation.clampWhenFinished = true;
+      this.currentAnimation.play();
+
+      // Wait for animation to finish. Since the animation is clamped, it has
+      // to be stopped explicitly. Clamping the animation avoids it to snap back
+      // to the original value before it is set to the target value below.
+      await this.waitForAnimation(this.currentAnimation);
+      this.currentAnimation.stop();
+      this.currentAnimation = null;
+    }
+
+    // Apply target value when animations are not enabled or when the animation is done.
+    this.position.x = targetPositionX;
   }
 
   triggerDown(intersection: THREE.Intersection) {
     super.triggerDown(intersection);
 
-    // Find click tool.
+    // Select clicked tool or run its action if it is selected already.
     const tool = this.findToolByObject(intersection.object);
     if (tool) {
       const index = this.tools.indexOf(tool);
