@@ -631,7 +631,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
-  // TODO maba
   @action
   handleMouseMove(intersection: THREE.Intersection | null) {
     if (!intersection) return;
@@ -668,7 +667,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   handleMouseEnter() {
   } */
 
-  // TODO maba
   @action
   handleMouseStop(intersection: THREE.Intersection | null, mouseOnCanvas: Position2D) {
     if (!intersection) return;

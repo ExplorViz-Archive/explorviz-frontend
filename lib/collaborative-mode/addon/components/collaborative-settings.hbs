@@ -20,19 +20,21 @@
     </thead>
     <tbody>
       {{#each this.settings.meetings as |meeting|}}
+      {{#if (eq this.landscapeTokenService.token.value meeting.landscapeToken)}}
       <tr>
-        <td>{{meeting}}</td>
+        <td>{{meeting.id}} {{meeting.landscapeToken}}</td>
         <td>
-          <button type="button" {{on "click" (fn this.joinSession meeting)}}>join</button>
+          <button type="button" {{on "click" (fn this.joinSession meeting.id)}}>join</button>
         </td>
       </tr>
+      {{/if}}
       {{/each}}
-      <tr>
+      {{!-- <tr>
         <td><Input @value={{this.meetingId}} /></td>
         <td>
           <button type="button" {{on "click" (fn this.joinSession this.meetingId)}}>join</button>
         </td>
-      </tr>
+      </tr> --}}
       <tr>
         <td>new session</td>
         <td>
@@ -75,11 +77,11 @@
         <td><div style="background-color: {{user.color}}; width: 10px; height: 10px;"></div></td>
         <td>
           {{#if (and this.settings.amIAdmin (not-eq this.settings.meeting.presenterId user.name))}}
-          <div class="nav-link-with-cursor" title="Give Control" {{on "click" (fn this.giveControl user)}}>
+          <div class="nav-link-with-cursor" title="Give Control" {{on "click" (fn this.giveControl user.name)}}>
             {{svg-jar "device-camera-video" class="octicon align-middle"}}</div>
           {{/if}}
           {{#if (not-eq user.name this.setting.username)}}
-          <div class="nav-link-with-cursor" title="Jump to perspective" {{on "click" (fn this.jumpToPerspective user)}}>
+          <div class="nav-link-with-cursor" title="Jump to perspective" {{on "click" (fn this.jumpToPerspective user.name)}}>
             {{svg-jar "eye" class="octicon align-middle"}}</div>
           {{/if}}
         </td>

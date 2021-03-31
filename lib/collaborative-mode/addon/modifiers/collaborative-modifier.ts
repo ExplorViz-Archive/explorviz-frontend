@@ -35,7 +35,6 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
         this.collaborativeService.on(CollaborativeEvents.MouseStop, this.receiveMouseStop);
         this.collaborativeService.on(CollaborativeEvents.MouseOut, this.receiveMouseOut);
         this.collaborativeService.on(CollaborativeEvents.Perspective, this.receivePerspective);
-        this.collaborativeService.on(CollaborativeEvents.GetPerspective, this.sendPerspective);
     }
 
     willDestroy() {
@@ -45,7 +44,6 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
         this.collaborativeService.off(CollaborativeEvents.MouseStop, this.receiveMouseStop);
         this.collaborativeService.off(CollaborativeEvents.MouseOut, this.receiveMouseOut);
         this.collaborativeService.off(CollaborativeEvents.Perspective, this.receivePerspective);
-        this.collaborativeService.off(CollaborativeEvents.GetPerspective, this.sendPerspective);
     }
 
     @service('collaborative-settings-service')
@@ -142,19 +140,10 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
     @action
     receivePerspective(perspective: Perspective) {
         if (!this.args.named.setPerspective) {return}
-        if (!this.settings.watching && !this.eventSettings.mouseOut) {return } 
+        if (!this.settings.watching && !this.eventSettings.perspective) {return } 
         if (this.settings.userInControl != perspective.user) { return; }
 
         this.args.named.setPerspective(perspective.position, perspective.rotation);
-    }
-
-    @action
-    sendPerspective(_data: any) {
-        this.collaborativeService.sendPerspective({
-            position: this.camera.position.toArray(),
-            rotation: this.raycastObject3D.rotation?.toArray(),
-            requested: true
-        });
     }
 
     calculateMousePosition(mouse: Vector3) {

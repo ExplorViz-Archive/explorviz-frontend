@@ -5,10 +5,8 @@ export enum CollaborativeEvents {
   Perspective = 'perspective',
   SingleClick = 'single_click',
   DoubleClick = 'double_click',
-  GetPerspective = 'get_perspective',
-  PresentationModeActivated = 'presentation_mode_activated',
-  PresentationModeDeactivated = 'presentation_mode_deactivated',
-  UserInControl = 'user_in_control',
+  RequestLastPosition = 'request_last_position',
+  TransferControl = 'transfer_control',
   OpenLandscapeView = 'open_landscape_view'
 }
 
@@ -33,9 +31,6 @@ export interface IdentifiableMesh {
   colabId: string
 }
 
-export interface SessionData {
-  users: String[]
-}
 export interface UserJoinedMessage {
   user: string
 }
@@ -53,10 +48,12 @@ export function instanceOfIdentifiableMesh(object: any): object is IdentifiableM
 
 export interface Meeting {
   id: string,
+  landscapeToken: string,
   users: User[],
   presentationMode: boolean,
   adminId: string,
-  presenterId: string
+  presenterId: string,
+  applicationId: string
 }
 
 export interface User {

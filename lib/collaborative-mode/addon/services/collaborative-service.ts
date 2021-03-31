@@ -5,7 +5,7 @@ import THREE from 'three';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import adjustForObjectRotation from 'collaborative-mode/utils/collaborative-util';
 import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
-import { tracked } from '@glimmer/tracking';
+import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 
 export default class CollaborativeService extends Service.extend(Evented
   // anything which *must* be merged to prototype here
@@ -13,6 +13,9 @@ export default class CollaborativeService extends Service.extend(Evented
   // @ts-expect-error
   @service('websockets')
   socketService!: any;
+
+  @service('landscape-token')
+  landscapeTokenService!: LandscapeTokenService;
 
   socketRef: any = null;
 
@@ -25,40 +28,41 @@ export default class CollaborativeService extends Service.extend(Evented
 
   openSocket(username: String) {
     this.username = username.toString();
-    this.socketUrl = `ws://localhost:8080/v2/collaborative/${username}`;
-    const socket = this.socketService.socketFor(this.socketUrl);
-    socket.on('open', this.myOpenHandler, this);
-    socket.on('close', this.myCloseHandler, this);
-    socket.on('message', this.myMessageHandler, this);
-
-    this.socketRef = socket;
+    if (this.socketRef) {
+      this.reconnect();
+    } else {
+      this.socketUrl = `ws://localhost:8080/v2/collaborative/${username}`;
+      const socket = this.socketService.socketFor(this.socketUrl);
+      socket.on('open', this.myOpenHandler, this);
+      socket.on('close', this.myCloseHandler, this);
+      socket.on('message', this.myMessageHandler, this);
+      this.socketRef = socket;
+    }
   }
 
   reconnect() {
+    AlertifyHandler.showAlertifyMessage('Trying to reconnect...');
     this.socketRef?.reconnect();
-    AlertifyHandler.showAlertifyMessage('Trying to reconnected...');
   }
 
   closeSocket() {
     this.socketRef?.close();
-    // this.socketService.closeSocketFor(this.socketUrl);
   }
 
   myOpenHandler() {
     this.settings.connected = true;
-    AlertifyHandler.showAlertifyMessage('Collaborative Mode active!');
   }
 
   myCloseHandler() {
     this.settings.connected = false;
     this.settings.meeting = undefined;
-    AlertifyHandler.showAlertifyMessage('Collaborative Mode stopped!');
+    this.settings.meetingId = ""
+    this.settings.meetings.clear()
   }
 
   myMessageHandler(event: any) {
-    console.log("Message: " + event.data)
     const result = JSON.parse(event.data);
-    
+
     this.trigger(result.event, result.data);
   }
 
@@ -104,7 +108,6 @@ export default class CollaborativeService extends Service.extend(Evented
   }
 
   send(event: string, data: any = {}) {
-    // console.log("event" + event)
     const content = JSON.stringify(
       {
         event: event,
@@ -113,11 +116,10 @@ export default class CollaborativeService extends Service.extend(Evented
     )
     this.socketRef?.send(content);
   }
-  
+
   instanceOfIdentifiableMesh(object: any): object is IdentifiableMesh {
     return 'colabId' in object;
   }
-
 }
 
 // DO NOT DELETE: this is how TypeScript knows how to look up your services.

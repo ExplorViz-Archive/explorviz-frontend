@@ -4,7 +4,7 @@ import { inject as service } from '@ember/service';
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 import CollaborativeService from 'collaborative-mode/services/collaborative-service';
-import { CollaborativeEvents, Meeting } from 'collaborative-mode/utils/collaborative-data';
+import { Meeting } from 'collaborative-mode/utils/collaborative-data';
 
 export default class CollaborativeSettingsService extends Service.extend({
   // anything which *must* be merged to prototype here

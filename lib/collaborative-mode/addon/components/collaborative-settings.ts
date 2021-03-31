@@ -3,9 +3,10 @@ import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
 import CollaborativeService from 'explorviz-frontend/services/collaborative-service';
-import { CollaborativeEvents, PresentationModeActivated, SessionData, UserJoinedMessage } from 'collaborative-mode/utils/collaborative-data';
+import { CollaborativeEvents, UserJoinedMessage } from 'collaborative-mode/utils/collaborative-data';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import { tracked } from '@glimmer/tracking';
+import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 
 interface CollaborativeSettingsArgs {
   isLandscapeView: Boolean
@@ -20,6 +21,9 @@ export default class CollaborativeSettings extends Component<CollaborativeSettin
 
   @service('collaborative-service')
   collaborativeService!: CollaborativeService;
+
+  @service('landscape-token')
+  landscapeTokenService!: LandscapeTokenService;
 
   @tracked
   additionalSettingsVisible: boolean = false;
@@ -51,31 +55,30 @@ export default class CollaborativeSettings extends Component<CollaborativeSettin
 
   @action
   leaveMeeting() {
-    console.log("Leave meeting")
-    this.collaborativeService.send("leave_meeting", {meeting: this.settings.meeting?.id});
+    this.collaborativeService.send("leave_meeting", { meeting: this.settings.meeting?.id });
     this.settings.meeting = undefined;
     this.settings.meetingId = "";
   }
 
   @action
   joinSession(meetingId: string) {
-    this.collaborativeService.send("join_meeting", {meeting: meetingId});
+    this.collaborativeService.send("join_meeting", { meeting: meetingId });
   }
 
   @action
   createSession() {
-    this.collaborativeService.send("create_meeting");
+    const currentToken = this.landscapeTokenService.token!.value;
+    this.collaborativeService.send("create_meeting", {landscapeToken: currentToken });
   }
-
 
   @action
   jumpToPerspective(user: string) {
-    this.collaborativeService.send(CollaborativeEvents.GetPerspective, {target: user});
+    this.collaborativeService.send(CollaborativeEvents.RequestLastPosition, { target: user });
   }
 
   @action
   giveControl(user: string) {
-    this.collaborativeService.send(CollaborativeEvents.UserInControl, { user: user });
+    this.collaborativeService.send(CollaborativeEvents.TransferControl, { target: user });
   }
 
   @action
