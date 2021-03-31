@@ -11,8 +11,28 @@
   <BsButton
     @type="primary"
     class="align-self-center pt-2 px-3"
-    @onClick={{this.createToken}}
+    @onClick={{this.openTokenCreationModal}}
   >
     {{svg-jar "plus" class="octicon"}}
   </BsButton>
 </div>
+
+<BsModalSimple
+  @open={{this.tokenCreationModalIsOpen}}
+  @title="Create Landscape Token"
+  @closeTitle="Cancel"
+  @submitTitle="Create"
+>
+  <BsForm
+    @model={{this}}
+    @onSubmit={{this.createToken}}
+    @submitOnError={{true}} as |Form|
+  >
+    <Form.element
+      @controlType="text"
+      @label="Alias (may be left empty)"
+      @property="tokenAlias"
+      @autofocus={{true}}
+    />
+  </BsForm>
+</BsModalSimple>

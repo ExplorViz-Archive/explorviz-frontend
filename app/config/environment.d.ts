@@ -1,3 +1,5 @@
+import { Auth0UserProfile } from 'auth0-js';
+
 /**
  * Type declarations for
  *    import config from './config/environment'
@@ -17,7 +19,9 @@ declare const config: {
     logoUrl: string,
     callbackUrl: string,
     logoutReturnUrl: string,
-    routeAfterLogin: string
+    routeAfterLogin: string,
+    accessToken: string,
+    profile: Auth0UserProfile,
   },
   backendAddresses: {
     landscapeService: string,

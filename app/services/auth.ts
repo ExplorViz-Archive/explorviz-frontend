@@ -11,7 +11,7 @@ export default class Auth extends Service {
   router!: any;
 
   // is initialized in the init()
-  private lock!: Auth0LockStatic;
+  private lock: Auth0LockStatic|null = null;
 
   user: Auth0UserProfile|undefined = undefined;
 
@@ -19,6 +19,12 @@ export default class Auth extends Service {
 
   init() {
     super.init();
+
+    if (config.environment === 'noauth') { // no-auth
+      this.set('user', config.auth0.profile);
+      this.set('accessToken', config.auth0.accessToken);
+      return;
+    }
 
     this.lock = new Auth0Lock(
       config.auth0.clientId,
@@ -62,7 +68,11 @@ export default class Auth extends Service {
       return;
     }
 
-    this.lock.show();
+    if (this.lock) {
+      this.lock.show();
+    } else { // no-auth
+      this.router.transitionTo(config.auth0.routeAfterLogin);
+    }
   }
 
   /**
@@ -71,15 +81,20 @@ export default class Auth extends Service {
   setUser(token: string) {
     // once we have a token, we are able to go get the users information
     return new Promise<Auth0UserProfile>((resolve, reject) => {
-      this.lock.getUserInfo(token, (_err: Auth0Error, profile: Auth0UserProfile) => {
-        if (_err) {
-          reject(_err);
-        } else {
-          this.debug('User set', profile);
-          this.set('user', profile);
-          resolve(profile);
-        }
-      });
+      if (this.lock) {
+        this.lock.getUserInfo(token, (_err: Auth0Error, profile: Auth0UserProfile) => {
+          if (_err) {
+            reject(_err);
+          } else {
+            this.debug('User set', profile);
+            this.set('user', profile);
+            resolve(profile);
+          }
+        });
+      } else { // no-auth
+        this.set('user', config.auth0.profile);
+        resolve(config.auth0.profile);
+      }
     });
   }
 
@@ -89,17 +104,24 @@ export default class Auth extends Service {
   checkLogin() {
     // check to see if a user is authenticated, we'll get a token back
     return new Promise((resolve, reject) => {
-      this.lock.checkSession({}, async (err, authResult) => {
-        if (err || authResult === undefined) {
-          this.set('user', undefined);
-          this.set('accessToken', undefined);
-          reject(err);
-        } else {
-          this.set('accessToken', authResult.accessToken);
-          await this.setUser(authResult.accessToken);
-          resolve(authResult);
-        }
-      });
+      if (this.lock) {
+        this.lock.checkSession({}, async (err, authResult) => {
+          this.debug(authResult);
+          if (err || authResult === undefined) {
+            this.set('user', undefined);
+            this.set('accessToken', undefined);
+            reject(err);
+          } else {
+            this.set('accessToken', authResult.accessToken);
+            await this.setUser(authResult.accessToken);
+            resolve(authResult);
+          }
+        });
+      } else { // no-auth
+        this.set('user', config.auth0.profile);
+        this.set('accessToken', config.auth0.accessToken);
+        resolve({});
+      }
     });
   }
 
@@ -109,10 +131,14 @@ export default class Auth extends Service {
   logout() {
     this.set('user', undefined);
     this.set('accessToken', undefined);
-    this.lock.logout({
-      clientID: config.auth0.clientId,
-      returnTo: config.auth0.logoutReturnUrl,
-    });
+    if (this.lock) {
+      this.lock?.logout({
+        clientID: config.auth0.clientId,
+        returnTo: config.auth0.logoutReturnUrl,
+      });
+    } else { // no-auth
+      this.router.transitionTo('/');
+    }
   }
 }
 
