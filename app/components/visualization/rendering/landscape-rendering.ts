@@ -95,9 +95,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @tracked
   camera!: THREE.PerspectiveCamera;
 
-  @tracked
-  cameraPosition!: { x: number, y: number, z: number };
-
   canvas!: HTMLCanvasElement;
 
   debug = debugLogger('LandscapeRendering');

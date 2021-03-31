@@ -23,7 +23,8 @@ interface InteractionModifierArgs {
     mousePositionX: number,
     camera: THREE.Camera,
     raycastObject: THREE.Object3D,
-    raycastFilter?: (intersection: THREE.Intersection) => boolean
+    raycastFilter?: (intersection: THREE.Intersection) => boolean,
+    hammerInteraction: HammerInteraction,
     mouseEnter?(): void,
     mouseOut?(): void,
     mouseMove?(intersection: THREE.Intersection | null): void,
@@ -43,9 +44,6 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   // Function to filter raycast results as desired
   raycastFilter: ((intersection: THREE.Intersection) => boolean) | undefined;
 
-  // Needed for events like 'singleTap' and 'doubleTap'
-  hammerHandler: HammerInteraction;
-
   @service('collaborative-service')
   collaborativeService!: CollaborativeService;
 
@@ -54,7 +52,6 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
 
 
   didInstall() {
-    this.hammerHandler.setupHammer(this.canvas);
     // mouseout handler for disabling notifications
     if (this.args.named.mouseOut) { this.canvas.addEventListener('mouseout', this.onMouseOut, false); }
 
@@ -71,26 +68,25 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
       this.createMouseStopEvent();
       this.canvas.addEventListener('mousestop', this.onMouseStop, false);
     }
-    this.element.addEventListener('mousemove', this.onMouseMove);
     if (this.args.named.doubleClick) {
-      this.hammerHandler.on('doubletap', this.onDoubleClick);
+      this.hammerInteraction.on('doubletap', this.onDoubleClick);
     }
 
     if (this.args.named.panning) {
-      this.hammerHandler.on('panning', this.onPanning);
+      this.hammerInteraction.on('panning', this.onPanning);
     }
 
     if (this.args.named.singleClick) {
-      this.hammerHandler.on('lefttap', this.onSingleClick);
+      this.hammerInteraction.on('lefttap', this.onSingleClick);
     }
   }
 
   willDestroy() {
-    if (this.args.named.doubleClick) { this.hammerHandler.hammerManager.off('doubletap'); }
+    if (this.args.named.doubleClick) { this.hammerInteraction.hammerManager.off('doubletap'); }
 
-    if (this.args.named.panning) { this.hammerHandler.hammerManager.off('panning'); }
+    if (this.args.named.panning) { this.hammerInteraction.hammerManager.off('panning'); }
 
-    if (this.args.named.singleClick) { this.hammerHandler.hammerManager.off('singletap'); }
+    if (this.args.named.singleClick) { this.hammerInteraction.hammerManager.off('singletap'); }
 
     if (this.args.named.mouseOut) { this.canvas.removeEventListener('mouseout', this.onMouseOut); }
 
@@ -119,9 +115,12 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
     return this.args.named.camera;
   }
 
+  get hammerInteraction(): HammerInteraction {
+    return this.args.named.hammerInteraction;
+  }
+
   constructor(owner: any, args: InteractionModifierArgs) {
     super(owner, args);
-    this.hammerHandler = HammerInteraction.create();
     this.raycaster = new Raycaster();
   }
 
