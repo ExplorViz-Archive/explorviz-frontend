@@ -7,7 +7,12 @@ export enum CollaborativeEvents {
   DoubleClick = 'double_click',
   RequestLastPosition = 'request_last_position',
   TransferControl = 'transfer_control',
-  OpenLandscapeView = 'open_landscape_view'
+  OpenLandscapeView = 'open_landscape_view',
+  CreateMeeting = "create_meeting",
+  JoinMeeting = "join_meeting",
+  LeaveMeeting = "leave_meeting",
+  ApplicationOpened = "application_opened",
+  TogglePresentationMode = "toggle_presentation_mode"
 }
 
 export interface Perspective {

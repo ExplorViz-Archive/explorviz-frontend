@@ -1,6 +1,6 @@
 import Service, { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
-import { Perspective, IdentifiableMesh, CursorPosition, CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
+import { Perspective, instanceOfIdentifiableMesh, CursorPosition, CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
 import THREE from 'three';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import adjustForObjectRotation from 'collaborative-mode/utils/collaborative-util';
@@ -21,13 +21,10 @@ export default class CollaborativeService extends Service.extend(Evented
 
   socketUrl: string = "";
 
-  username: string = "";
-
   @service('collaborative-settings-service')
   settings!: CollaborativeSettingsService;
 
-  openSocket(username: String) {
-    this.username = username.toString();
+  openSocket(username: string) {
     if (this.socketRef) {
       this.reconnect();
     } else {
@@ -75,7 +72,7 @@ export default class CollaborativeService extends Service.extend(Evented
   }
 
   sendClick(action: string, mesh: THREE.Mesh) {
-    if (this.instanceOfIdentifiableMesh(mesh)) {
+    if (instanceOfIdentifiableMesh(mesh)) {
       this.send(action, { id: mesh.colabId });
     }
   }
@@ -101,7 +98,7 @@ export default class CollaborativeService extends Service.extend(Evented
     const payload: CursorPosition = {
       point: vectorWithoutObjectRotation.toArray()
     }
-    if (mesh && this.instanceOfIdentifiableMesh(mesh)) {
+    if (mesh && instanceOfIdentifiableMesh(mesh)) {
       payload.id = mesh.colabId;
     }
     this.send(event, payload);
@@ -117,9 +114,6 @@ export default class CollaborativeService extends Service.extend(Evented
     this.socketRef?.send(content);
   }
 
-  instanceOfIdentifiableMesh(object: any): object is IdentifiableMesh {
-    return 'colabId' in object;
-  }
 }
 
 // DO NOT DELETE: this is how TypeScript knows how to look up your services.

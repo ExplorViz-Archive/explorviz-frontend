@@ -55,20 +55,20 @@ export default class CollaborativeSettings extends Component<CollaborativeSettin
 
   @action
   leaveMeeting() {
-    this.collaborativeService.send("leave_meeting", { meeting: this.settings.meeting?.id });
+    this.collaborativeService.send(CollaborativeEvents.LeaveMeeting, { meeting: this.settings.meeting?.id });
     this.settings.meeting = undefined;
     this.settings.meetingId = "";
   }
 
   @action
   joinSession(meetingId: string) {
-    this.collaborativeService.send("join_meeting", { meeting: meetingId });
+    this.collaborativeService.send(CollaborativeEvents.JoinMeeting, { meeting: meetingId });
   }
 
   @action
-  createSession() {
+  createMeeting() {
     const currentToken = this.landscapeTokenService.token!.value;
-    this.collaborativeService.send("create_meeting", {landscapeToken: currentToken });
+    this.collaborativeService.send(CollaborativeEvents.CreateMeeting, { landscapeToken: currentToken });
   }
 
   @action

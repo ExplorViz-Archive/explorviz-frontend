@@ -3,8 +3,10 @@ import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import config from 'explorviz-frontend/config/environment';
 import CollaborativeService from 'collaborative-mode/services/collaborative-service';
 import { Meeting } from 'collaborative-mode/utils/collaborative-data';
+import Auth from 'explorviz-frontend/services/auth';
 
 export default class CollaborativeSettingsService extends Service.extend({
   // anything which *must* be merged to prototype here
@@ -12,6 +14,9 @@ export default class CollaborativeSettingsService extends Service.extend({
 
   @service('collaborative-service')
   collaborativeService!: CollaborativeService;
+
+  @service('auth')
+  auth!: Auth;
 
   constructor() {
     super(...arguments);
@@ -28,8 +33,14 @@ export default class CollaborativeSettingsService extends Service.extend({
   @tracked
   connected: boolean = false;
 
-  @tracked
-  username: string = "User" + Math.floor(Math.random() * Math.floor(100));
+  randomUsername = "User" + Math.floor(Math.random() * Math.floor(100));
+
+  get username(): string {
+    if (config.environment === 'noauth') { // no-auth
+      return this.randomUsername;
+    }
+    return this.auth.user!.name
+  }
 
   get presentationMode(): boolean {
     if (this.meeting) {

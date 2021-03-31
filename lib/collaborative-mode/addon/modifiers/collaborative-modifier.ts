@@ -140,8 +140,8 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
     @action
     receivePerspective(perspective: Perspective) {
         if (!this.args.named.setPerspective) {return}
-        if (!this.settings.watching && !this.eventSettings.perspective) {return } 
-        if (this.settings.userInControl != perspective.user) { return; }
+        if (!perspective.requested && !this.settings.watching && !this.eventSettings.perspective) {return } 
+        if (!perspective.requested && this.settings.userInControl != perspective.user) { return; }
 
         this.args.named.setPerspective(perspective.position, perspective.rotation);
     }
