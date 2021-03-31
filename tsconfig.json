@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "experimentalDecorators": true,
-    "target": "es2019",
+    "target": "es2020",
     "allowJs": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
@@ -22,7 +22,7 @@
     "module": "es6",
     "skipLibCheck": true,
     "lib": [
-      "ES2020.Promise",
+      "ES2020",
     ],
     "paths": {
       "explorviz-frontend/tests/*": [
