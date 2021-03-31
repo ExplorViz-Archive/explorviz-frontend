@@ -6,6 +6,8 @@ import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import adjustForObjectRotation from 'collaborative-mode/utils/collaborative-util';
 import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
+import ENV from 'explorviz-frontend/config/environment';
+const { collaborativeService } = ENV.backendAddresses;
 
 export default class CollaborativeService extends Service.extend(Evented
   // anything which *must* be merged to prototype here
@@ -28,7 +30,7 @@ export default class CollaborativeService extends Service.extend(Evented
     if (this.socketRef) {
       this.reconnect();
     } else {
-      this.socketUrl = `ws://localhost:8080/v2/collaborative/${username}`;
+      this.socketUrl = `${collaborativeService}/v2/collaborative/${username}`;
       const socket = this.socketService.socketFor(this.socketUrl);
       socket.on('open', this.myOpenHandler, this);
       socket.on('close', this.myCloseHandler, this);

@@ -36,6 +36,7 @@ module.exports = function (environment) {
       landscapeService: BACKEND_CONFIG.landscapeService,
       traceService: BACKEND_CONFIG.traceService,
       userService: BACKEND_CONFIG.userService,
+      collaborativeService: BACKEND_CONFIG.collaborativeService,
     },
 
     APP: {
