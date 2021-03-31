@@ -77,6 +77,7 @@ import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-applica
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import WebXRPolyfill from 'webxr-polyfill';
+import ToolMenu from "../utils/vr-menus/ui-menu/tool-menu";
 
 const FLOOR_SIZE = 10;
 
@@ -153,6 +154,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private messageMenuQueue!: MenuQueue;
 
   private hintMenuQueue!: MenuQueue;
+
+  private debugMenuGroup!: MenuGroup;
 
   private detachedMenuGroups!: DetachedMenuGroupContainer;
 
@@ -262,6 +265,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.messageMenuQueue.position.y = 0.1;
     this.messageMenuQueue.position.z = -0.3;
     camera.add(this.messageMenuQueue);
+
+    // Menu group for previewing menus during development.
+    this.debugMenuGroup = new MenuGroup({ detachedMenuGroups: this.detachedMenuGroups });
+    this.debugMenuGroup.position.z = -0.35;
+    camera.add(this.debugMenuGroup);
   }
 
   /**
@@ -365,7 +373,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       this.landscapeObject3D,
       this.applicationGroup,
       this.floor,
-      this.detachedMenuGroups
+      this.detachedMenuGroups,
+      this.debugMenuGroup,
     ];
     const raycastFilter = (intersection: THREE.Intersection) => {
       return !(intersection.object instanceof LabelMesh ||
@@ -646,6 +655,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.localUser.updateControllers(delta);
     this.hintMenuQueue.updateMenu(delta);
     this.messageMenuQueue.updateMenu(delta);
+    this.debugMenuGroup.updateMenu(delta);
     this.detachedMenuGroups.updateDetachedMenus(delta);
 
     // Update services.
@@ -977,6 +987,15 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private handleKeyboard(event: any) {
     switch (event.key) {
       case 'l': perform(this.loadNewLandscape); break;
+
+      case 'Escape':
+        // Close current debug menu or open tool menu if no menu is debugged.
+        if (this.debugMenuGroup.currentMenu) {
+          this.debugMenuGroup.closeMenu();
+        } else {
+          this.debugMenuGroup.openMenu(this.menuFactory.buildToolMenu());
+        }
+        break;
       default:
         break;
     }
