@@ -12,15 +12,7 @@ module('Integration | Component | admin-settings', function(hooks) {
 
     await render(hbs`{{admin-settings}}`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    assert.notEqual(this.element.textContent?.trim(), '');
 
-    // Template block usage:
-    await render(hbs`
-      {{#admin-settings}}
-        template block text
-      {{/admin-settings}}
-    `);
-
-    assert.equal(this.element.textContent.trim(), 'template block text');
   });
 });

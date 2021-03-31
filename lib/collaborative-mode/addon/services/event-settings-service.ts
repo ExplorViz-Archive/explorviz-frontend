@@ -1,6 +1,4 @@
 import Service from '@ember/service';
-import { inject as service } from '@ember/service';
-import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
 import { tracked } from '@glimmer/tracking';
 
 export default class EventSettingsService extends Service.extend({

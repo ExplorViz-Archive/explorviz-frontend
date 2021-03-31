@@ -11,13 +11,9 @@ module('Integration | Component | collaborative-settings-opener', function (hook
 
     assert.equal(this.element.querySelector('li')?.className, 'nav-item');
 
-    let firstSVGElement = this.element?.querySelector('svg');
+    let buttonText = this.element?.querySelector('.nav-link-with-cursor');
 
-    if (firstSVGElement === null) {
-      assert.ok(null, 'no <svg> tag found');
-    } else {
-      assert.equal(firstSVGElement.getAttribute('class'), 'octicon align-middle');
-    }
+    assert.equal(buttonText?.textContent, 'Collaborative Mode');
 
   });
 

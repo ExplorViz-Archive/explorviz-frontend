@@ -4,7 +4,6 @@ import debugLogger from 'ember-debug-logger';
 import THREE from 'three';
 import { inject as service } from '@ember/service';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import DS from 'ember-data';
 import Configuration from 'explorviz-frontend/services/configuration';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
@@ -27,7 +26,6 @@ import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { Span, Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 import { perform } from 'ember-concurrency-ts';
-import { Perspective, CursorPosition } from 'collaborative-mode/utils/collaborative-data';
 import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 import {
   highlight, highlightModel, highlightTrace, removeHighlighting, updateHighlighting,
@@ -48,7 +46,6 @@ interface Args {
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
   readonly visualizationPaused: boolean;
-  Perspective: Perspective; // TODO maba
   readonly components: string[];
   readonly showDataSelection: boolean;
   addComponent(componentPath: string): void; // is passed down to the viz navbar
@@ -126,12 +123,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @tracked
   popupData: PopupData | null = null;
 
-  @tracked
-  cursorPosition: CursorPosition | null = null;
-
+  // these spheres represent the cursor of the other users and are only visible in collaborative mode
   spheres: Map<string, Array<THREE.Mesh>> = new Map();
-
-  sphereColors: Array<number> = [0xff0000, 0x00ff00, 0x0000ff];
 
   spheresIndex = 0;
 
@@ -259,7 +252,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
   // #region MOUSE EVENT HANDLER
-  // TODO maba
   @action
   handleSingleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;

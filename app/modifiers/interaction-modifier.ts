@@ -187,7 +187,7 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
 
   @action
   onSingleClick(mouse: Position2D) {
-    if (!this.args.named.singleClick || !this.collaborativeSettings.isInteractionAllowed) { return; }
+    if (!this.args.named.singleClick || !this.collaborativeSettings.isInteractionAllowed || !this.collaborativeSettings.canIOpen) { return; }
 
     const intersectedViewObj = this.raycast(mouse);
     this.args.named.singleClick(intersectedViewObj);

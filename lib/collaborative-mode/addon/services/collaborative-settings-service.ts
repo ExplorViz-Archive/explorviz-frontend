@@ -71,7 +71,7 @@ export default class CollaborativeSettingsService extends Service.extend({
   }
 
   get watching(): boolean {
-    return this.presentationMode && this.meeting?.presenterId == this.username 
+    return this.presentationMode && this.meeting?.presenterId != this.username 
   }
 
   get followSingleClick(): boolean {
