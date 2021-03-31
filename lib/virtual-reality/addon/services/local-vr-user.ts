@@ -85,6 +85,26 @@ export default class LocalVrUser extends Service {
     this.userGroup.position.z += position.z - cameraWorldPos.z;
   }
 
+  /**
+   * Moves the user group in the given direction relative to the default camera.
+   */
+  moveInCameraDirection(direction: THREE.Vector3, {
+    enableX = true, enableY = true, enableZ = true
+  }: {enableX?: boolean, enableY?: boolean, enableZ?: boolean}) {
+    // Convert direction from the camera's object space to world coordinates.
+    const distance = direction.length();
+    direction = direction.clone().normalize().transformDirection(this.defaultCamera.matrix);
+
+    // Remove disabled components.
+    if (!enableX) direction.x = 0;
+    if (!enableY) direction.y = 0;
+    if (!enableZ) direction.z = 0;
+
+    // Convert the direction back to object space before applying the translation.
+    direction.normalize().transformDirection(this.userGroup.matrix.getInverse(new THREE.Matrix4()));
+    this.userGroup.translateOnAxis(direction, distance);
+  }
+
   /*
    * This method is used to adapt the users view to the initial position
    */

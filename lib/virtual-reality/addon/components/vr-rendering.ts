@@ -604,7 +604,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
             texture.minFilter = THREE.NearestFilter;
             texture.generateMipmaps = false;
             sphere.material.map = texture;
-            this.scene.add(sphere);
+            this.localUser.userGroup.add(sphere);
             resolve(null);
           });
         }));
@@ -948,30 +948,35 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     const LEFT_MOUSE_BUTTON = 1;
+    const RIGHT_MOUSE_BUTTON = 3;
 
-    if (button === LEFT_MOUSE_BUTTON) {
-      // Move landscape further if camera is far away
-      const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 4.0);
+    const x = delta.x / this.canvas.width;
+    const y = delta.y / this.canvas.height;
 
-      // Adapt panning speed
-      const xOffset = (delta.x / 100) * -ZOOM_CORRECTION;
-      const yOffset = (delta.y / 100) * ZOOM_CORRECTION;
-
-      // Adapt camera position (apply panning)
-      this.camera.position.x += xOffset;
-      this.camera.position.y += yOffset;
+    switch (button) {
+      case LEFT_MOUSE_BUTTON:
+        // Move user.
+        const moveSpeed = 3.0;
+        this.localUser.moveInCameraDirection(new THREE.Vector3(-x * moveSpeed, 0, -y * moveSpeed), {enableY: false});
+        break;
+      case RIGHT_MOUSE_BUTTON:
+        // Rotate camera to look around.
+        const xAxis = new THREE.Vector3(1, 0, 0);
+        const yAxis = new THREE.Vector3(0, 1, 0);
+        const rotationSpeed = Math.PI;
+        this.camera.rotateOnAxis(xAxis, y * rotationSpeed);
+        this.camera.rotateOnWorldAxis(yAxis, x * rotationSpeed);
+        break;
     }
   }
 
   private handleMouseWheel(delta: number) {
-    this.camera.position.z += delta * 0.2;
+    this.camera.translateZ(delta * 0.2);
   }
 
   private handleKeyboard(event: any) {
     switch (event.key) {
-      case 'l':
-        perform(this.loadNewLandscape);
-        break;
+      case 'l': perform(this.loadNewLandscape); break;
       default:
         break;
     }
