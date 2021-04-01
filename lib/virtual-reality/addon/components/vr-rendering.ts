@@ -77,7 +77,6 @@ import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-applica
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import WebXRPolyfill from 'webxr-polyfill';
-import ToolMenu from "../utils/vr-menus/ui-menu/tool-menu";
 
 const FLOOR_SIZE = 10;
 

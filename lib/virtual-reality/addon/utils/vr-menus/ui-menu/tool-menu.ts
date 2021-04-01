@@ -6,11 +6,9 @@ import InteractiveMenu from '../interactive-menu';
 import VRControllerThumbpadBinding from "../../vr-controller/vr-controller-thumbpad-binding";
 import VRControllerButtonBinding from "../../vr-controller/vr-controller-button-binding";
 
-type OpticonIconName = string;
-
 type ToolArgs = {
   label: string,
-  icon: OpticonIconName,
+  icon: string,
   action: () => void
 };
 
@@ -20,8 +18,13 @@ type Tool = {
   toggleSelect: (isSelected: boolean) => void
 };
 
-const FOREGROUND_COLOR = new THREE.Color(0xFFFFFF);
+const FOREGROUND_COLOR = new THREE.Color(0xFFC338);
 const BACKGROUND_COLOR = new THREE.Color(0x444444);
+const ICON_COLOR = new THREE.Color(0xFFFFFF);
+const SELECTED_ICON_COLOR = FOREGROUND_COLOR;
+
+const OPACITY = 0.5;
+const SELECTED_OPACITY = 0.8;
 
 const LABEL_PADDING = 80;
 const LABEL_OFFSET = 0.025;
@@ -31,6 +34,8 @@ const LABEL_FONT_FAMILY = 'arial';
 const TOOL_CIRCLE_RADIUS = 0.07;
 const TOOL_CIRCLE_SEGMENTS = 32;
 const TOOL_X_OFFSET = 0.02;
+
+const TOOL_ICON_RADIUS = 0.05;
 
 const SELECT_ANIMATION_DURATION = 0.2;
 
@@ -63,7 +68,7 @@ export default class ToolMenu extends InteractiveMenu {
       action: () => this.menuGroup?.replaceMenu(this.menuFactory.buildPingMenu())
     });
 
-    this.selectTool(this.defaultToolIndex, {enableAnimation: false});
+    this.selectTool(this.defaultToolIndex, { enableAnimation: false });
   }
 
   private get selectedTool(): Tool {
@@ -75,13 +80,16 @@ export default class ToolMenu extends InteractiveMenu {
     this.defaultToolIndex = this.tools.length - 1;
   }
 
-  private addTool({label, icon, action}: ToolArgs) {
+  private addTool({ label, icon, action }: ToolArgs) {
     const group = new THREE.Group();
     this.add(group);
     group.position.x = this.tools.length * (TOOL_X_OFFSET + 2 * TOOL_CIRCLE_RADIUS);
 
     const backgroundMesh = this.buildBackgroundMesh();
     group.add(backgroundMesh);
+
+    const iconMesh = this.buildIconMesh(icon);
+    group.add(iconMesh);
 
     const labelMesh = this.buildLabelMesh(label);
     if (labelMesh) {
@@ -94,7 +102,9 @@ export default class ToolMenu extends InteractiveMenu {
       object: group,
       action,
       toggleSelect: (isSelected) => {
-        backgroundMesh.material.opacity = isSelected ? 0.8 : 0.5;
+        backgroundMesh.material.opacity = isSelected ? SELECTED_OPACITY : OPACITY;
+        iconMesh.material.opacity = isSelected ? SELECTED_OPACITY : OPACITY;
+        iconMesh.material.color = isSelected ? SELECTED_ICON_COLOR : ICON_COLOR;
         labelMesh.visible = isSelected;
       }
     });
@@ -105,7 +115,19 @@ export default class ToolMenu extends InteractiveMenu {
     const material = new THREE.MeshBasicMaterial({
       color: BACKGROUND_COLOR,
       side: THREE.DoubleSide,
-      opacity: 0.5,
+      opacity: OPACITY,
+      transparent: true
+    });
+    return new THREE.Mesh(geometry, material);
+  }
+
+  private buildIconMesh(icon: string) {
+    const texture = new THREE.TextureLoader().load(`images/menu-icons/${icon}-128.png`);
+    const geometry = new THREE.CircleGeometry(TOOL_ICON_RADIUS, TOOL_CIRCLE_SEGMENTS);
+    const material = new THREE.MeshBasicMaterial({
+      map: texture,
+      color: ICON_COLOR,
+      opacity: OPACITY,
       transparent: true
     });
     return new THREE.Mesh(geometry, material);
@@ -123,7 +145,7 @@ export default class ToolMenu extends InteractiveMenu {
     const material = new THREE.MeshBasicMaterial({
       map: texture,
       transparent: true,
-      opacity: 0.8,
+      opacity: SELECTED_OPACITY,
     });
 
     const worldWidth = texture.image.width * SIZE_RESOLUTION_FACTOR / 2;
@@ -132,7 +154,7 @@ export default class ToolMenu extends InteractiveMenu {
     return new THREE.Mesh(geometry, material);
   }
 
-  private async selectTool(index: number, {enableAnimation = true}: {
+  private async selectTool(index: number, { enableAnimation = true }: {
     enableAnimation?: boolean
   } = {}) {
     // While an animation is playing, no other tool can be selected.
@@ -156,12 +178,12 @@ export default class ToolMenu extends InteractiveMenu {
       this.currentAnimation = this.animationMixer.clipAction(new THREE.AnimationClip(
         'select-animation',
         SELECT_ANIMATION_DURATION, [
-          new THREE.KeyframeTrack(
-            '.position[x]',
-            [0.0, SELECT_ANIMATION_DURATION],
-            [this.position.x, targetPositionX]
-          )
-        ]));
+        new THREE.KeyframeTrack(
+          '.position[x]',
+          [0.0, SELECT_ANIMATION_DURATION],
+          [this.position.x, targetPositionX]
+        )
+      ]));
       this.currentAnimation.setLoop(THREE.LoopOnce, 0);
       this.currentAnimation.clampWhenFinished = true;
       this.currentAnimation.play();
