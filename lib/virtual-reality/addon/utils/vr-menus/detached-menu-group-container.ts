@@ -8,7 +8,7 @@ import { DetachableMenu } from './detachable-menu';
 import DetachedMenuGroup from './detached-menu-group';
 
 export type DetachedMenuGroupContainerArgs = {
-  closeButtonTextures: CloseIconTextures,
+  closeIconTextures: CloseIconTextures,
   sender: VrMessageSender,
   receiver: VrMessageReceiver
 };
@@ -18,16 +18,16 @@ export type DetachedMenuGroupContainerArgs = {
  * detached menu and its sub-menus.
  */
 export default class DetachedMenuGroupContainer extends THREE.Group {
-  private closeButtonTextures: CloseIconTextures;
+  private closeIconTextures: CloseIconTextures;
   private sender: VrMessageSender;
   private receiver: VrMessageReceiver;
 
   private detachedMenuGroups: Set<DetachedMenuGroup>;
   private detachedMenuGroupsById: Map<string, DetachedMenuGroup>;
 
-  constructor({closeButtonTextures, sender, receiver}: DetachedMenuGroupContainerArgs) {
+  constructor({closeIconTextures, sender, receiver}: DetachedMenuGroupContainerArgs) {
     super();
-    this.closeButtonTextures = closeButtonTextures;
+    this.closeIconTextures = closeIconTextures;
     this.sender = sender;
     this.receiver = receiver;
 
@@ -103,7 +103,7 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
     // Since the menu has been scaled already and is not scaled when it has its
     // normal size, the close icon does not have to correct for the menu's scale.
     const closeIcon = new CloseIcon({
-      textures: this.closeButtonTextures,
+      textures: this.closeIconTextures,
       onClose: () => this.removeDetachedMenu(detachedMenuGroup),
       radius: 0.04
     });

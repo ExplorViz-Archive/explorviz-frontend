@@ -39,9 +39,9 @@ export default class VrApplicationRenderer {
   debug = debugLogger('VrApplicationRender');
 
   readonly appCommRendering: AppCommunicationRendering;
-  private closeButtonTextures: CloseIconTextures;
+  private closeIconTextures: CloseIconTextures;
   private configuration: Configuration;
-  private font: THREE.Font;
+  private font: THREE.Font | undefined;
   private structureLandscapeData: StructureLandscapeData;
   private dynamicLandscapeData: DynamicLandscapeData;
   private onRemoveApplication: RemoveApplicationCallback;
@@ -52,7 +52,7 @@ export default class VrApplicationRenderer {
 
   constructor({
     appCommRendering,
-    closeButtonTextures,
+    closeIconTextures,
     configuration,
     font,
     landscapeData,
@@ -60,15 +60,15 @@ export default class VrApplicationRenderer {
     worker
   }: {
     appCommRendering: AppCommunicationRendering,
-    closeButtonTextures: CloseIconTextures,
+    closeIconTextures: CloseIconTextures,
     configuration: Configuration,
-    font: THREE.Font,
+    font: THREE.Font | undefined,
     landscapeData: LandscapeData;
     onRemoveApplication: RemoveApplicationCallback,
     worker: any
   }) {
     this.appCommRendering = appCommRendering;
-    this.closeButtonTextures = closeButtonTextures;
+    this.closeIconTextures = closeIconTextures;
     this.configuration = configuration;
     this.font = font;
     this.structureLandscapeData = landscapeData.structureLandscapeData;
@@ -129,7 +129,7 @@ export default class VrApplicationRenderer {
 
       // Add close icon to application.
       const closeIcon = new CloseIcon({
-        textures: this.closeButtonTextures,
+        textures: this.closeIconTextures,
         onClose: () => this.onRemoveApplication(applicationObject3D)
       });
       closeIcon.addToObject(applicationObject3D);
@@ -172,9 +172,9 @@ export default class VrApplicationRenderer {
     const componentTextColor = this.configuration.applicationColors.componentText;
     const foundationTextColor = this.configuration.applicationColors.foundationText;
 
-    applicationObject3D.getBoxMeshes().forEach((mesh) => {
-      /* Labeling is time-consuming. Thus, label only visible meshes incrementally
-         as opposed to labeling all meshes up front (as done in application-rendering) */
+    for (const mesh of applicationObject3D.getBoxMeshes()) {
+      // Labeling is time-consuming. Thus, label only visible meshes incrementally
+      // as opposed to labeling all meshes up front (as done in application-rendering).
       if (!mesh.visible) return;
 
       if (mesh instanceof ClazzMesh) {
@@ -184,6 +184,6 @@ export default class VrApplicationRenderer {
       } else if (mesh instanceof FoundationMesh) {
         ApplicationLabeler.addBoxTextLabel(mesh, this.font, foundationTextColor);
       }
-    });
+    }
   }
 }

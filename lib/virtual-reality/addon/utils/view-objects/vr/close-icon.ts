@@ -8,13 +8,6 @@ export type CloseIconTextures = {
 };
 
 export default class CloseIcon extends BaseMesh {
-  static loadTextures(loader: THREE.TextureLoader): CloseIconTextures {
-    return {
-      defaultTexture: loader.load('images/x_white_transp.png'),
-      hoverTexture: loader.load('images/x_white.png')
-    };
-  }
-
   private radius: number;
 
   private onClose: () => Promise<boolean>;

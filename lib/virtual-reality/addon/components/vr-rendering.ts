@@ -79,6 +79,7 @@ import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import WebXRPolyfill from 'webxr-polyfill';
 import VrSceneService from "../services/vr-scene";
+import VrAssetRepository from "../services/vr-asset-repo";
 
 interface Args {
   readonly id: string;
@@ -101,6 +102,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
   @service('repos/timestamp-repository') private timestampRepo!: TimestampRepository;
   @service('spectate-user') private spectateUserService!: SpectateUserService;
+  @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
   @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
   @service('vr-message-receiver') private receiver!: VrMessageReceiver;
   @service('vr-message-sender') private sender!: VrMessageSender;
@@ -218,15 +220,14 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private initServices() {
     this.debug('Initializing services...');
 
-    // Load image for delete button
-    const textureLoader = new THREE.TextureLoader();
-    const closeButtonTextures = CloseIcon.loadTextures(textureLoader);
+    // Use given font for landscape and application rendering.
+    this.assetRepo.font = this.args.font;
 
     // Initialize landscape rendering.
     this.vrLandscapeRenderer = new VrLandscapeRenderer({
       configuration: this.configuration,
       floor: this.sceneService.floor,
-      font: this.args.font,
+      font: this.assetRepo.font,
       landscapeData: this.args.landscapeData,
       worker: this.worker
     });
@@ -235,9 +236,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Initialize application rendering.
     this.vrApplicationRenderer = new VrApplicationRenderer({
       appCommRendering: new AppCommunicationRendering(this.configuration),
-      closeButtonTextures,
+      closeIconTextures: this.assetRepo.closeIconTextures,
       configuration: this.configuration,
-      font: this.args.font,
+      font: this.assetRepo.font,
       landscapeData: this.args.landscapeData,
       onRemoveApplication: (application) => this.removeApplication(application),
       worker: this.worker,
@@ -246,7 +247,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Initialize menu group.
     this.detachedMenuGroups = new DetachedMenuGroupContainer({
-      closeButtonTextures,
+      closeIconTextures: this.assetRepo.closeIconTextures,
       receiver: this.receiver,
       sender: this.sender,
     });

@@ -30,7 +30,7 @@ export default class VrLandscapeRenderer {
 
   private configuration: Configuration;
   private floor: FloorMesh;
-  private font: THREE.Font;
+  private font: THREE.Font | undefined;
   private structureLandscapeData: StructureLandscapeData;
   private dynamicLandscapeData: DynamicLandscapeData;
   private elk: ELK;
@@ -43,7 +43,7 @@ export default class VrLandscapeRenderer {
   constructor({ configuration, floor, font, landscapeData, worker }: {
     configuration: Configuration,
     floor: FloorMesh,
-    font: THREE.Font,
+    font: THREE.Font | undefined,
     landscapeData: LandscapeData,
     worker: any
   }) {
@@ -133,7 +133,7 @@ export default class VrLandscapeRenderer {
    *
    * @method populateLandscape
    */
-  @restartableTask 
+  @restartableTask
   *populateLandscape(): any {
     this.debug('populate landscape-rendering');
 
@@ -239,8 +239,9 @@ export default class VrLandscapeRenderer {
     // Label with own ip-address by default
     const labelText = nodeMesh.getDisplayName();
 
-    this.landscapeLabeler.addNodeTextLabel(nodeMesh, labelText, this.font,
-      this.configuration.landscapeColors.nodeText);
+    if (this.font) {
+      this.landscapeLabeler.addNodeTextLabel(nodeMesh, labelText, this.font, this.configuration.landscapeColors.nodeText);
+    }
 
     // Add to scene
     this.landscapeObject3D.add(nodeMesh);
@@ -270,8 +271,12 @@ export default class VrLandscapeRenderer {
     applicationMesh.setToDefaultPosition(centerPoint);
 
     // Create and add label + icon
-    this.landscapeLabeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
-      this.configuration.landscapeColors.applicationText);
+    if (this.font) {
+      this.landscapeLabeler.addApplicationTextLabel(
+        applicationMesh, application.name, this.font,
+        this.configuration.landscapeColors.applicationText
+      );
+    }
     LandscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
