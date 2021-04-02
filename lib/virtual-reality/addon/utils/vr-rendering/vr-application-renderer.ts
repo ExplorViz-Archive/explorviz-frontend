@@ -175,7 +175,7 @@ export default class VrApplicationRenderer {
     for (const mesh of applicationObject3D.getBoxMeshes()) {
       // Labeling is time-consuming. Thus, label only visible meshes incrementally
       // as opposed to labeling all meshes up front (as done in application-rendering).
-      if (!mesh.visible) return;
+      if (!mesh.visible) continue;
 
       if (mesh instanceof ClazzMesh) {
         ApplicationLabeler.addClazzTextLabel(mesh, this.font, clazzTextColor);
