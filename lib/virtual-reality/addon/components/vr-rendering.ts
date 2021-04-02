@@ -384,14 +384,15 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       singleClick: (intersection) => this.handleSingleClick(intersection),
       doubleClick: (intersection) => this.handleDoubleClick(intersection),
       mouseWheel: (delta) => this.handleMouseWheel(delta),
+      mouseMove: (intersection) => this.handleMouseMove(intersection),
       panning: (delta, button) => this.handlePanning(delta, button),
     }, raycastFilter
     );
 
-    // Add key listener for room positioning
-    window.onkeydown = (event: any) => {
+    // Add additional event listeners.
+    window.addEventListener('keydown', (event: KeyboardEvent) => {
       this.handleKeyboard(event);
-    };
+    });
   }
 
   private initPrimaryInput() {
@@ -427,7 +428,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       canHandle: (object): object is InteractiveMenu => object instanceof InteractiveMenu,
       triggerDown: (menu, intersection) => menu.triggerDown(intersection),
       triggerPress: (menu, intersection, value) => menu.triggerPress(intersection, value),
-      triggerUp: (menu, intersection) => menu.triggerUp(intersection)
+      triggerUp: (menu, intersection) => menu.triggerUp(intersection),
+      hover: (menu, intersection) => menu.hover(intersection),
+      resetHover: (menu) => menu.resetHoverEffect()
     };
     this.primaryInputManager.addInputHandler(menuInputHandler);
   }
@@ -983,7 +986,15 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.camera.translateZ(delta * 0.2);
   }
 
-  private handleKeyboard(event: any) {
+  private handleMouseMove(intersection: THREE.Intersection | null) {
+    if (intersection) {
+      this.primaryInputManager.handleHover(intersection);
+    } else {
+      this.primaryInputManager.resetHover();
+    }
+  }
+
+  private handleKeyboard(event: KeyboardEvent) {
     switch (event.key) {
       case 'l': perform(this.loadNewLandscape); break;
 

@@ -3,13 +3,22 @@ export type VrInputHandler<T extends THREE.Object3D> = {
   triggerDown?(object: T, intersection: THREE.Intersection): void,
   triggerPress?(object: T, intersection: THREE.Intersection, value: number): void,
   triggerUp?(object: T, intersection: THREE.Intersection): void,
+  hover?(object: T, intersection: THREE.Intersection): void,
+  resetHover?(object: T): void,
+};
+
+type LastHover<T extends THREE.Object3D> = {
+  handler: VrInputHandler<T>,
+  object: T
 };
 
 export default class VrInputManager {
   private inputHandlers: VrInputHandler<any>[];
+  private lastHover: LastHover<any> | null;
 
   constructor() {
     this.inputHandlers = [];
+    this.lastHover = null;
   }
 
   addInputHandler<T extends THREE.Object3D>(handler: VrInputHandler<T>) {
@@ -29,6 +38,22 @@ export default class VrInputManager {
   handleTriggerUp(intersection: THREE.Intersection) {
     const result = this.findInputHandler(intersection);
     if (result && result.handler.triggerUp) result.handler.triggerUp(result.object, intersection);
+  }
+
+  handleHover(intersection: THREE.Intersection) {
+    const result = this.findInputHandler(intersection);
+    if (this.lastHover?.object !== result?.object) this.resetHover();
+    if (result && result.handler.hover) {
+      this.lastHover = result;
+      result.handler.hover(result.object, intersection);
+    }
+  }
+
+  resetHover() {
+    if (this.lastHover && this.lastHover.handler.resetHover) {
+      this.lastHover.handler.resetHover(this.lastHover.object);
+    }
+    this.lastHover = null;
   }
 
   private findInputHandler(intersection: THREE.Intersection): {
