@@ -3,36 +3,28 @@ import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-controller';
 import SpectateUserService from './spectate-user';
 import WebSocketService from './web-socket';
+import VrSceneService from "./vr-scene";
 
 export type ConnectionStatus = 'offline' | 'connecting' | 'online';
 
 export default class LocalVrUser extends Service {
-  @service('web-socket')
-  webSocket!: WebSocketService;
-
-  @service('spectate-user')
-  spectateUserService!: SpectateUserService;
+  @service('spectate-user') private spectateUserService!: SpectateUserService;
+  @service('vr-scene') private sceneService!: VrSceneService;
+  @service('web-socket') private webSocket!: WebSocketService;
 
   userID!: string;
-
   userName?: string;
-
   color: THREE.Color | undefined;
 
   renderer!: THREE.WebGLRenderer;
 
-  scene!: THREE.Scene;
-
+  private userGroup!: THREE.Group;
   defaultCamera!: THREE.PerspectiveCamera;
-
   controller1: VRController | undefined;
-
   controller2: VRController | undefined;
-
-  userGroup!: THREE.Group;
+  panoramaSphere: THREE.Object3D | undefined;
 
   connectionStatus: ConnectionStatus = 'offline';
-
   currentRoomId: string | null = null;
 
   get camera() {
@@ -55,12 +47,35 @@ export default class LocalVrUser extends Service {
 
     this.userID = 'unknown';
     this.connectionStatus = 'offline';
+
     this.userGroup = new THREE.Group();
+    this.sceneService.scene.add(this.userGroup);
+
+    // Initialize camera. The default aspect ratio is not known at this point
+    // and must be updated when the canvas is inserted.
+    this.defaultCamera = new THREE.PerspectiveCamera(75, 1.0, 0.1, 1000);
+    this.defaultCamera.position.set(0, 1, 2);
+    this.userGroup.add(this.defaultCamera);
   }
 
-  addCamera(camera: THREE.PerspectiveCamera) {
-    this.defaultCamera = camera;
-    this.userGroup.add(camera);
+  setController1(controller1: VRController) {
+    this.controller1 = controller1;
+    this.userGroup.add(controller1);
+  }
+
+  setController2(controller2: VRController) {
+    this.controller2 = controller2;
+    this.userGroup.add(controller2);
+  }
+
+  setPanoramaShere(panoramaSphere: THREE.Object3D) {
+    this.removePanoramaShere();
+    this.panoramaSphere = panoramaSphere;
+    this.userGroup.add(panoramaSphere);
+  }
+
+  private removePanoramaShere() {
+    if (this.panoramaSphere) this.userGroup.remove(this.panoramaSphere);
   }
 
   updateControllers(delta: number) {
@@ -72,7 +87,9 @@ export default class LocalVrUser extends Service {
    *  This method is used to adapt the users view to
    *  the new position
    */
-  teleportToPosition(position: THREE.Vector3, adaptCameraHeight = false) {
+  teleportToPosition(position: THREE.Vector3, {adaptCameraHeight = false}: {
+    adaptCameraHeight?: boolean
+  } = {}) {
     if (!this.camera) return;
 
     const cameraWorldPos = new THREE.Vector3();
@@ -125,20 +142,22 @@ export default class LocalVrUser extends Service {
     this.userID = 'unknown';
     this.color = undefined;
 
-    // remove controller rays and models
-    // since raySpace and gripSpace will else persist
-    this.controller1?.raySpace?.children.forEach((child) => {
-      this.controller1?.raySpace?.remove(child);
-    });
-    this.controller2?.gripSpace?.children.forEach((child) => {
-      this.controller2?.gripSpace?.remove(child);
-    });
-    this.controller1?.children.forEach((child) => this.controller1?.remove(child));
-    this.controller2?.children.forEach((child) => this.controller2?.remove(child));
-
+    this.resetController(this.controller1);
     this.controller1 = undefined;
+
+    this.resetController(this.controller2);
     this.controller2 = undefined;
-    this.userGroup.children.forEach((child) => this.userGroup.remove(child));
+  }
+
+  private resetController(controller: VRController | undefined) {
+    if (!controller) return;
+
+    this.userGroup.remove(controller);
+    controller.children.forEach((child) => controller.remove(child));
+    controller.gripSpace?.children.forEach((child) => {
+      controller.gripSpace?.remove(child);
+    });
+    controller.removeTeleportArea();
   }
 
   async connect(roomId: Promise<string>) {

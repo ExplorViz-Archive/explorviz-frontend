@@ -5,10 +5,11 @@ import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
 import { TGALoader } from "three/examples/jsm/loaders/TGALoader";
 import RemoteVrUser from "../utils/vr-multi-user/remote-vr-user";
 import SpectateUserService from "./spectate-user";
+import VrSceneService from "./vr-scene";
 
 export default class RemoteVrUserService extends Service {
-  @service('spectate-user')
-  private spectateUserService!: SpectateUserService;
+  @service('spectate-user') private spectateUserService!: SpectateUserService;
+  @service('vr-scene') private sceneService!: VrSceneService;
 
   private headsetModel!: Promise<THREE.Group>;
   private idToRemoteUser: Map<string, RemoteVrUser> = new Map();
@@ -16,9 +17,10 @@ export default class RemoteVrUserService extends Service {
 
   init() {
     super.init();
+    this.sceneService.scene.add(this.remoteUserGroup);
 
     // Load headset model.
-    this.headsetModel =  this.loadObjWithMtl({
+    this.headsetModel = this.loadObjWithMtl({
       path: '/generic_hmd/',
       objFile: 'generic_hmd.obj',
       mtlFile: 'generic_hmd.mtl'

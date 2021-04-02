@@ -7,31 +7,25 @@ import TextbuttonItem from "../items/textbutton-item";
 import UiMenu, { UiMenuArgs } from "../ui-menu";
 import TitleItem from "../items/title-item";
 
+const MS_PER_SECOND = 1000
+
 export type TimeMenuArgs = UiMenuArgs & {
-  vrTimestampService: VrTimestampService
+  timestampService: VrTimestampService
 };
 
 export default class TimeMenu extends UiMenu {
+  private date: Date;
+  private selectButton: TextbuttonItem;
+  private timeBackButton: ArrowbuttonItem;
+  private timeForthButton: ArrowbuttonItem;
+  private timestampService: VrTimestampService;
+  private timestampTextItem: TextItem;
 
-  readonly msPerSeconds: number = 1000;
-
-  vrTimestampService: VrTimestampService;
-
-  date: Date;
-
-  timestampTextItem: TextItem;
-
-  timeForthButton: ArrowbuttonItem;
-
-  timeBackButton: ArrowbuttonItem;
-
-  selectButton: TextbuttonItem;
-
-  constructor({ vrTimestampService, ...args }: TimeMenuArgs) {
+  constructor({ timestampService, ...args }: TimeMenuArgs) {
     super(args);
 
-    this.vrTimestampService = vrTimestampService;
-    this.date = new Date(vrTimestampService.timestamp);
+    this.timestampService = timestampService;
+    this.date = new Date(timestampService.timestamp);
 
     const title = new TitleItem({
       text: 'Time',
@@ -79,7 +73,7 @@ export default class TimeMenu extends UiMenu {
       height: 50,
       fontSize: 28,
       onTriggerDown: () => {
-        this.vrTimestampService.updateTimestamp(this.date.getTime());
+        this.timestampService.updateTimestamp(this.date.getTime());
         this.closeMenu();
       }
     });
@@ -98,11 +92,11 @@ export default class TimeMenu extends UiMenu {
   }
 
   setDateBack() {
-    this.date.setTime(this.date.getTime() - this.vrTimestampService.timestampInterval * this.msPerSeconds);
+    this.date.setTime(this.date.getTime() - this.timestampService.timestampInterval * MS_PER_SECOND);
   }
 
   setDateForth() {
-  this.date.setTime(this.date.getTime() + this.vrTimestampService.timestampInterval * this.msPerSeconds);
+    this.date.setTime(this.date.getTime() + this.timestampService.timestampInterval * MS_PER_SECOND);
   }
 
   makeThumbpadBinding() {

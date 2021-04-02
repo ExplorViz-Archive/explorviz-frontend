@@ -78,8 +78,7 @@ import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-applica
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import WebXRPolyfill from 'webxr-polyfill';
-
-const FLOOR_SIZE = 10;
+import VrSceneService from "../services/vr-scene";
 
 interface Args {
   readonly id: string;
@@ -92,87 +91,41 @@ interface Args {
 export default class VrRendering extends Component<Args> implements VrMessageListener {
   // #region SERVICES
 
-  @service('auth')
-  auth!: Auth;
-
-  @service('reload-handler')
-  reloadHandler!: ReloadHandler;
-
-  @service('landscape-token')
-  landscapeTokenService!: LandscapeTokenService;
-
-  @service('repos/timestamp-repository')
-  timestampRepo!: TimestampRepository;
-
-  @service('configuration')
-  private configuration!: Configuration;
-
-  @service('local-vr-user')
-  private localUser!: LocalVrUser;
-
-  @service('spectate-user')
-  private spectateUserService!: SpectateUserService;
-
-  @service('delta-time')
-  private deltaTimeService!: DeltaTimeService;
-
-  @service()
-  private worker!: any;
-
-  @service('web-socket')
-  private webSocket!: WebSocketService;
-
-  @service('vr-message-sender')
-  private sender!: VrMessageSender;
-
-  @service('vr-message-receiver')
-  private receiver!: VrMessageReceiver;
-
-  @service('grabbed-object')
-  private grabbedObjectService!: GrabbedObjectService;
-
-  @service('vr-menu-factory')
-  private menuFactory!: VrMenuFactoryService;
-
-  @service('remote-vr-users')
-  private remoteUsers!: RemoteVrUserService;
-
-  @service('vr-room')
-  private vrRoomService!: VrRoomService;
+  @service('auth') private auth!: Auth;
+  @service('configuration') private configuration!: Configuration;
+  @service('delta-time') private deltaTimeService!: DeltaTimeService;
+  @service('grabbed-object') private grabbedObjectService!: GrabbedObjectService;
+  @service('landscape-token') private landscapeTokenService!: LandscapeTokenService;
+  @service('local-vr-user') private localUser!: LocalVrUser;
+  @service('reload-handler') private reloadHandler!: ReloadHandler;
+  @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
+  @service('repos/timestamp-repository') private timestampRepo!: TimestampRepository;
+  @service('spectate-user') private spectateUserService!: SpectateUserService;
+  @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
+  @service('vr-message-receiver') private receiver!: VrMessageReceiver;
+  @service('vr-message-sender') private sender!: VrMessageSender;
+  @service('vr-room') private vrRoomService!: VrRoomService;
+  @service('vr-scene') private sceneService!: VrSceneService;
+  @service('web-socket') private webSocket!: WebSocketService;
+  @service() private worker!: any;
 
   // #endregion SERVICES
 
   // #region CLASS FIELDS
 
-  private debug = debugLogger('VrRendering');
-
-  private vrSessionActive: boolean = false;
-
-  // Used to register (mouse) events
-  private interaction!: Interaction;
-
   private canvas!: HTMLCanvasElement;
-
-  private messageMenuQueue!: MenuQueue;
-
-  private hintMenuQueue!: MenuQueue;
-
+  private debug = debugLogger('VrRendering');
   private debugMenuGroup!: MenuGroup;
-
   private detachedMenuGroups!: DetachedMenuGroupContainer;
-
-  private floor!: FloorMesh;
-
-  private vrLandscapeRenderer!: VrLandscapeRenderer;
-
-  private vrApplicationRenderer!: VrApplicationRenderer;
-
-  private vrTimestampService!: VrTimestampService;
-
+  private hintMenuQueue!: MenuQueue;
+  private interaction!: Interaction;
+  private messageMenuQueue!: MenuQueue;
   private primaryInputManager = new VrInputManager();
-
   private secondaryInputManager = new VrInputManager();
-
+  private vrApplicationRenderer!: VrApplicationRenderer;
+  private vrLandscapeRenderer!: VrLandscapeRenderer;
+  private vrSessionActive: boolean = false;
+  private timestampService!: VrTimestampService;
   private willDestroyController: AbortController = new AbortController();
 
   // #endregion CLASS FIELDS
@@ -192,7 +145,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   get scene(): THREE.Scene {
-    return this.localUser.scene;
+    return this.sceneService.scene;
   }
 
   get camera(): THREE.PerspectiveCamera {
@@ -207,8 +160,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    * Calls all init functions.
    */
   private initRendering() {
-    this.initScene();
-    this.initCamera();
+    this.initHUD();
     this.initRenderer();
     this.initServices();
     this.initInteraction();
@@ -219,61 +171,27 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   /**
-   * Creates a scene, adds the floor and other initial meshes and groups to it.
+   * Creates the menu groups that are attached to the user's camera.
    */
-  private initScene() {
-    this.debug('Initializing scene...');
-
-    this.localUser.scene = new THREE.Scene();
-    this.scene.background = this.configuration.landscapeColors.background;
-
-    // Initilize floor.
-    const floorMesh = new FloorMesh(FLOOR_SIZE, FLOOR_SIZE);
-    this.floor = floorMesh;
-    this.scene.add(floorMesh);
-
-    // Initialize lights.
-    const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
-    spotLight.position.set(100, 100, 100);
-    spotLight.castShadow = false;
-    this.scene.add(spotLight);
-
-    const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
-    this.scene.add(light);
-
-    // Add user meshes and groups.
-    this.scene.add(this.localUser.userGroup);
-    this.scene.add(this.remoteUsers.remoteUserGroup);
-  }
-
-  /**
-   * Creates a PerspectiveCamera according to canvas size and sets its initial position
-   */
-  private initCamera() {
-    this.debug('Initializing camera...');
-
-    // Create camera.
-    const { width, height } = this.canvas;
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-    camera.position.set(0, 1, 2);
-    this.localUser.addCamera(camera);
+  private initHUD() {
+    this.debug('Initializing head-up display menus...');
 
     // Menu group for hints.
     this.hintMenuQueue = new MenuQueue({ detachedMenuGroups: this.detachedMenuGroups });
     this.hintMenuQueue.position.z = -0.3;
-    camera.add(this.hintMenuQueue);
+    this.localUser.defaultCamera.add(this.hintMenuQueue);
 
     // Menu group for message boxes.
     this.messageMenuQueue = new MenuQueue({ detachedMenuGroups: this.detachedMenuGroups });
     this.messageMenuQueue.rotation.x = 0.45;
     this.messageMenuQueue.position.y = 0.1;
     this.messageMenuQueue.position.z = -0.3;
-    camera.add(this.messageMenuQueue);
+    this.localUser.defaultCamera.add(this.messageMenuQueue);
 
     // Menu group for previewing menus during development.
     this.debugMenuGroup = new MenuGroup({ detachedMenuGroups: this.detachedMenuGroups });
     this.debugMenuGroup.position.z = -0.35;
-    camera.add(this.debugMenuGroup);
+    this.localUser.defaultCamera.add(this.debugMenuGroup);
   }
 
   /**
@@ -307,7 +225,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Initialize landscape rendering.
     this.vrLandscapeRenderer = new VrLandscapeRenderer({
       configuration: this.configuration,
-      floor: this.floor,
+      floor: this.sceneService.floor,
       font: this.args.font,
       landscapeData: this.args.landscapeData,
       worker: this.worker
@@ -335,7 +253,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.scene.add(this.detachedMenuGroups);
 
     // Initialize timestamp service.
-    this.vrTimestampService = new VrTimestampService({
+    this.timestampService = new VrTimestampService({
       timestamp: this.args.selectedTimestampRecords[0]?.timestamp ||
         this.timestampRepo.getLatestTimestamp(this.args.landscapeData.structureLandscapeData.landscapeToken)?.timestamp ||
         new Date().getTime(),
@@ -355,14 +273,14 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       detachedMenuGroups: this.detachedMenuGroups,
       vrApplicationRenderer: this.vrApplicationRenderer,
       vrLandscapeRenderer: this.vrLandscapeRenderer,
-      vrTimestampService: this.vrTimestampService,
+      timestampService: this.timestampService,
     });
 
     // Initialize menu rendering.
     this.menuFactory.injectValues({
       vrApplicationRenderer: this.vrApplicationRenderer,
       vrLandscapeRenderer: this.vrLandscapeRenderer,
-      vrTimestampService: this.vrTimestampService,
+      timestampService: this.timestampService,
       detachedMenuGroups: this.detachedMenuGroups
     });
   }
@@ -377,7 +295,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const intersectableObjects = [
       this.landscapeObject3D,
       this.applicationGroup,
-      this.floor,
+      this.sceneService.floor,
       this.detachedMenuGroups,
       this.debugMenuGroup,
     ];
@@ -493,8 +411,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private initControllers() {
     this.debug('Initializing controllers...');
 
-    this.localUser.controller1 = this.initController({ gamepadIndex: 0 });
-    this.localUser.controller2 = this.initController({ gamepadIndex: 1 });
+    this.localUser.setController1(this.initController({ gamepadIndex: 0 }));
+    this.localUser.setController2(this.initController({ gamepadIndex: 1 }));
   }
 
   private initController({ gamepadIndex }: { gamepadIndex: number }): VRController {
@@ -529,7 +447,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     menuGroup.position.z -= 0.15;
     menuGroup.rotateX(340 * THREE.MathUtils.DEG2RAD);
 
-    this.localUser.userGroup.add(controller);
     return controller;
   }
 
@@ -653,24 +570,25 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
           });
         }));
       }
+    }
 
+    // If a single image file has been dropped, use it as a panorama.
+    if (files.length === 1) {
+      const file = files[0];
       if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) {
         tasks.push(new Promise((resolve) => {
-          // Create the panoramic sphere geometery
-          const panoSphereGeo = new THREE.SphereGeometry(10, 256, 256);
-          // Create the panoramic sphere material
-          const panoSphereMat = new THREE.MeshStandardMaterial({
-            side: THREE.BackSide,
-            displacementScale: - 4.0
-          });
-          // Create the panoramic sphere mesh
-          var sphere = new THREE.Mesh(panoSphereGeo, panoSphereMat);
           const loader = new THREE.TextureLoader(loadingManager);
           loader.load(file.name, (texture) => {
             texture.minFilter = THREE.NearestFilter;
             texture.generateMipmaps = false;
-            sphere.material.map = texture;
-            this.localUser.userGroup.add(sphere);
+
+            const geometry = new THREE.SphereGeometry(10, 256, 256);
+            const material = new THREE.MeshStandardMaterial({
+              map: texture,
+              side: THREE.BackSide,
+              displacementScale: - 4.0
+            });
+            this.localUser.setPanoramaShere(new THREE.Mesh(geometry, material));
             resolve(null);
           });
         }));
@@ -1242,7 +1160,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   onTimestampUpdate({
     originalMessage: { timestamp }
   }: ForwardedMessage<TimestampUpdateMessage>): void {
-    this.vrTimestampService.updateTimestampLocally(timestamp);
+    this.timestampService.updateTimestampLocally(timestamp);
   }
 
   /**
@@ -1293,7 +1211,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.detachedMenuGroups.forceRemoveAllDetachedMenus();
 
     // Initialize landscape.
-    await this.vrTimestampService.updateLandscapeToken(landscape.landscapeToken, landscape.timestamp);
+    await this.timestampService.updateLandscapeToken(landscape.landscapeToken, landscape.timestamp);
     this.landscapeObject3D.position.fromArray(landscape.position);
     this.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
     this.landscapeObject3D.scale.fromArray(landscape.scale);

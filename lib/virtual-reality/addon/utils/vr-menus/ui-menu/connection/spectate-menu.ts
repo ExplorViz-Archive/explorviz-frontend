@@ -1,14 +1,16 @@
 import THREE from "three";
 import LocalVrUser from "virtual-reality/services/local-vr-user";
+import SpectateUserService from "virtual-reality/services/spectate-user";
 import VRController from "virtual-reality/utils/vr-controller";
 import RemoteVrUser from "virtual-reality/utils/vr-multi-user/remote-vr-user";
 import TextItem from "../../items/text-item";
 import DisableInputMenu from "../../ui-less-menu/disable-input-menu";
-import UiMenu, { UiMenuArgs, DEFAULT_MENU_RESOLUTION, SIZE_RESOLUTION_FACTOR } from "../../ui-menu";
+import UiMenu, { DEFAULT_MENU_RESOLUTION, SIZE_RESOLUTION_FACTOR, UiMenuArgs } from "../../ui-menu";
 
 export type SpectateMenuArgs = UiMenuArgs & {
+  localUser: LocalVrUser,
   remoteUser: RemoteVrUser,
-  localUser: LocalVrUser
+  spectateUserService: SpectateUserService
 };
 
 const HEIGHT = 60;
@@ -17,11 +19,12 @@ export default class SpectateMenu extends UiMenu {
 
   private localUser: LocalVrUser;
   private remoteUser: RemoteVrUser
+  private spectateUserService: SpectateUserService;
 
   private disableInputMenu: DisableInputMenu;
 
   constructor({
-    remoteUser, localUser,
+    localUser, spectateUserService, remoteUser,
     resolution = {
       width: DEFAULT_MENU_RESOLUTION,
       height: HEIGHT
@@ -30,6 +33,7 @@ export default class SpectateMenu extends UiMenu {
     super({resolution, ...args});
 
     this.localUser = localUser;
+    this.spectateUserService = spectateUserService;
     this.remoteUser = remoteUser;
 
     this.disableInputMenu = this.menuFactory.buildDisableInputMenu();
@@ -52,7 +56,7 @@ export default class SpectateMenu extends UiMenu {
     otherController?.menuGroup?.openMenu(this.disableInputMenu);
 
     // Activate spectating.
-    this.localUser.spectateUserService.activate(this.remoteUser);
+    this.spectateUserService.activate(this.remoteUser);
 
     // Show spectating user.
     const text = new TextItem({
@@ -69,7 +73,7 @@ export default class SpectateMenu extends UiMenu {
 
   onCloseMenu() {
     super.onCloseMenu();
-    this.localUser.spectateUserService.deactivate();
+    this.spectateUserService.deactivate();
     this.disableInputMenu?.closeMenu();
   }
 }

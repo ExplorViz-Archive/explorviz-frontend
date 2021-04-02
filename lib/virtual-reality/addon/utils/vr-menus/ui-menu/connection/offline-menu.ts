@@ -4,15 +4,15 @@ import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 import TitleItem from "../../items/title-item";
 
 export type OfflineMenuArgs = ConnectionBaseMenuArgs & {
-  vrRoomService: VrRoomService
+  roomService: VrRoomService
 };
 
 export default class OfflineMenu extends ConnectionBaseMenu {
-  private vrRoomService: VrRoomService;
+  private roomService: VrRoomService;
 
-  constructor({ vrRoomService, ...args }: OfflineMenuArgs) {
+  constructor({ roomService, ...args }: OfflineMenuArgs) {
     super(args);
-    this.vrRoomService = vrRoomService;
+    this.roomService = roomService;
 
     const title = new TitleItem({
       text: 'You are offline',
@@ -46,6 +46,6 @@ export default class OfflineMenu extends ConnectionBaseMenu {
   }
 
   private createAndJoinNewRoom() {
-    this.localUser.connect(this.vrRoomService.createRoom());
+    this.localUser.connect(this.roomService.createRoom());
   }
 }

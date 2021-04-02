@@ -26,7 +26,7 @@ type InjectedValues = {
   detachedMenuGroups: DetachedMenuGroupContainer,
   vrApplicationRenderer: VrApplicationRenderer,
   vrLandscapeRenderer: VrLandscapeRenderer,
-  vrTimestampService: VrTimestampService
+  timestampService: VrTimestampService
 };
 
 export default class VrRoomService extends Service {
@@ -36,18 +36,18 @@ export default class VrRoomService extends Service {
   private detachedMenuGroups!: DetachedMenuGroupContainer;
   private vrApplicationRenderer!: VrApplicationRenderer;
   private vrLandscapeRenderer!: VrLandscapeRenderer;
-  private vrTimestampService!: VrTimestampService;
+  private timestampService!: VrTimestampService;
 
   injectValues({
     detachedMenuGroups,
     vrApplicationRenderer,
     vrLandscapeRenderer,
-    vrTimestampService,
+    timestampService,
   }: InjectedValues) {
     this.detachedMenuGroups = detachedMenuGroups;
     this.vrApplicationRenderer = vrApplicationRenderer;
     this.vrLandscapeRenderer = vrLandscapeRenderer;
-    this.vrTimestampService = vrTimestampService;
+    this.timestampService = timestampService;
   }
 
   async listRooms(): Promise<RoomListRecord[]> {
@@ -91,7 +91,7 @@ export default class VrRoomService extends Service {
     const landscapeObject3D = this.vrLandscapeRenderer.landscapeObject3D;
     return {
       landscapeToken: landscapeObject3D.dataModel.landscapeToken,
-      timestamp: this.vrTimestampService.timestamp,
+      timestamp: this.timestampService.timestamp,
       position: landscapeObject3D.getWorldPosition(new THREE.Vector3()).toArray(),
       quaternion: landscapeObject3D.getWorldQuaternion(new THREE.Quaternion()).toArray(),
       scale: landscapeObject3D.scale.toArray()

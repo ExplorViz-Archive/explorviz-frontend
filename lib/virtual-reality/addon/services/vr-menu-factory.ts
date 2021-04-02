@@ -31,46 +31,38 @@ import SpectateMenu from 'virtual-reality/utils/vr-menus/ui-menu/connection/spec
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import DisableInputMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/disable-input-menu';
 import ToolMenu from 'virtual-reality/utils/vr-menus/ui-menu/tool-menu';
+import VrSceneService from "./vr-scene";
+import SpectateUserService from "./spectate-user";
 
 type InjectedValues = {
   vrApplicationRenderer: VrApplicationRenderer,
   vrLandscapeRenderer: VrLandscapeRenderer,
-  vrTimestampService: VrTimestampService,
+  timestampService: VrTimestampService,
   detachedMenuGroups: DetachedMenuGroupContainer
 };
 
 export default class VrMenuFactoryService extends Service {
-
-  @service('local-vr-user')
-  private localUser!: LocalVrUser;
-
-  @service('remote-vr-users')
-  private remoteUsers!: RemoteVrUserService;
-
-  @service('vr-message-sender')
-  private sender!: VrMessageSender;
-
-  @service('delta-time')
-  private deltaTimeService!: DeltaTimeService;
-
-  @service('grabbed-object')
-  private grabbedObjectService!: GrabbedObjectService;
-
-  @service('vr-room')
-  private vrRoomService!: VrRoomService;
+  @service('delta-time') private deltaTimeService!: DeltaTimeService;
+  @service('grabbed-object') private grabbedObjectService!: GrabbedObjectService;
+  @service('local-vr-user') private localUser!: LocalVrUser;
+  @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
+  @service('spectate-user') private spectateUserService!: SpectateUserService;
+  @service('vr-message-sender') private sender!: VrMessageSender;
+  @service('vr-room') private roomService!: VrRoomService;
+  @service('vr-scene') private sceneService!: VrSceneService;
 
   private vrApplicationRenderer!: VrApplicationRenderer;
   private vrLandscapeRenderer!: VrLandscapeRenderer;
-  private vrTimestampService!: VrTimestampService;
+  private timestampService!: VrTimestampService;
   private detachedMenuGroups!: DetachedMenuGroupContainer;
 
   injectValues({
     vrApplicationRenderer,
     vrLandscapeRenderer,
-    vrTimestampService,
+    timestampService,
     detachedMenuGroups
   }: InjectedValues) {
-    this.vrTimestampService = vrTimestampService;
+    this.timestampService = timestampService;
     this.vrApplicationRenderer = vrApplicationRenderer;
     this.vrLandscapeRenderer = vrLandscapeRenderer;
     this.detachedMenuGroups = detachedMenuGroups;
@@ -118,7 +110,7 @@ export default class VrMenuFactoryService extends Service {
   buildOfflineMenu(): OfflineMenu {
     return new OfflineMenu({
       localUser: this.localUser,
-      vrRoomService: this.vrRoomService,
+      roomService: this.roomService,
       menuFactory: this,
     });
   }
@@ -134,6 +126,7 @@ export default class VrMenuFactoryService extends Service {
     return new OnlineMenu({
       localUser: this.localUser,
       remoteUsers: this.remoteUsers,
+      spectateUserService: this.spectateUserService,
       menuFactory: this,
     });
   }
@@ -141,14 +134,14 @@ export default class VrMenuFactoryService extends Service {
   buildJoinMenu(): JoinMenu {
     return new JoinMenu({
       localUser: this.localUser,
-      vrRoomService: this.vrRoomService,
+      roomService: this.roomService,
       menuFactory: this,
     });
   }
 
   buildTimeMenu(): TimeMenu {
     return new TimeMenu({
-      vrTimestampService: this.vrTimestampService,
+      timestampService: this.timestampService,
       menuFactory: this,
     });
   }
@@ -157,6 +150,7 @@ export default class VrMenuFactoryService extends Service {
     return new SpectateMenu({
       menuFactory: this,
       localUser: this.localUser,
+      spectateUserService: this.spectateUserService,
       remoteUser
     });
   }
@@ -168,7 +162,7 @@ export default class VrMenuFactoryService extends Service {
   buildZoomMenu(): ZoomMenu {
     return new ZoomMenu({
       renderer: this.localUser.renderer,
-      scene: this.localUser.scene,
+      scene: this.sceneService.scene,
       headsetCamera: this.localUser.defaultCamera,
       menuFactory: this,
     });
@@ -176,7 +170,7 @@ export default class VrMenuFactoryService extends Service {
 
   buildPingMenu(): PingMenu {
     return new PingMenu({
-      scene: this.localUser.scene,
+      scene: this.sceneService.scene,
       sender: this.sender,
       menuFactory: this
     });

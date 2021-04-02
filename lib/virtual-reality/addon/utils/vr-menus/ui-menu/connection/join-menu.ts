@@ -10,16 +10,16 @@ import TitleItem from "../../items/title-item";
 const REFRESH_TIMEOUT = 3.0;
 
 export type JoinMenuArgs = ConnectionBaseMenuArgs & {
-  vrRoomService: VrRoomService
+  roomService: VrRoomService
 };
 
 export default class JoinMenu extends ConnectionBaseMenu {
-  private vrRoomService: VrRoomService;
+  private roomService: VrRoomService;
   private refreshTimeout: number;
 
-  constructor({ vrRoomService, ...args }: JoinMenuArgs) {
+  constructor({ roomService, ...args }: JoinMenuArgs) {
     super(args);
-    this.vrRoomService = vrRoomService;
+    this.roomService = roomService;
     this.refreshTimeout = 0;
 
     this.drawLoadingScreen();
@@ -104,7 +104,7 @@ export default class JoinMenu extends ConnectionBaseMenu {
 
   private async loadAndDrawRoomList() {
     try {
-      const rooms = await this.vrRoomService.listRooms();
+      const rooms = await this.roomService.listRooms();
       this.drawRoomList(rooms);
       this.refreshTimeout = REFRESH_TIMEOUT;
     } catch (e) {
