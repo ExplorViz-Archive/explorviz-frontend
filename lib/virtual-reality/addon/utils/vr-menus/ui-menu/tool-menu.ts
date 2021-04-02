@@ -15,13 +15,15 @@ type ToolArgs = {
 type Tool = {
   object: THREE.Object3D,
   action: () => void,
-  toggleSelect: (isSelected: boolean) => void
+  toggleSelect: (isSelected: boolean) => void,
+  toggleHover: (isHovered: boolean) => void
 };
 
-const FOREGROUND_COLOR = new THREE.Color(0xFFC338);
+const FOREGROUND_COLOR = new THREE.Color(0xFFFFFF);
+const SELECTED_FOREGROUND_COLOR = new THREE.Color(0xFFC338);
 const BACKGROUND_COLOR = new THREE.Color(0x444444);
-const ICON_COLOR = new THREE.Color(0xFFFFFF);
-const SELECTED_ICON_COLOR = FOREGROUND_COLOR;
+const ICON_COLOR = FOREGROUND_COLOR;
+const SELECTED_ICON_COLOR = SELECTED_FOREGROUND_COLOR;
 
 const OPACITY = 0.5;
 const SELECTED_OPACITY = 0.8;
@@ -32,10 +34,13 @@ const LABEL_FONT_SIZE = 80;
 const LABEL_FONT_FAMILY = 'arial';
 
 const TOOL_CIRCLE_RADIUS = 0.07;
-const TOOL_CIRCLE_SEGMENTS = 32;
+const TOOL_CIRCLE_SEGMENTS = 48;
 const TOOL_X_OFFSET = 0.02;
 
 const TOOL_ICON_RADIUS = 0.05;
+
+const TOOL_SCALE = 1.0;
+const TOOL_HOVERED_SCALE = 1.1;
 
 const SELECT_ANIMATION_DURATION = 0.2;
 
@@ -43,14 +48,16 @@ const THUMBPAD_THRESHOLD = 0.5;
 
 export default class ToolMenu extends InteractiveMenu {
   private tools: Tool[];
+  private currentSelectAnimation: THREE.AnimationAction | null;
+
   private defaultToolIndex: number = 0;
-  private selectedToolIndex: number = -1;
-  private currentAnimation: THREE.AnimationAction | null;
+  private selectedTool: Tool | null = null;
+  private hoveredTool: Tool | null = null;
 
   constructor(args: BaseMenuArgs) {
     super(args);
     this.tools = [];
-    this.currentAnimation = null;
+    this.currentSelectAnimation = null;
 
     this.addTool({
       label: 'Zoom',
@@ -71,9 +78,7 @@ export default class ToolMenu extends InteractiveMenu {
     this.selectTool(this.defaultToolIndex, { enableAnimation: false });
   }
 
-  private get selectedTool(): Tool {
-    return this.tools[this.selectedToolIndex];
-  }
+  // #region TOOL CONSTRUCTION
 
   private addDefaultTool(args: ToolArgs) {
     this.addTool(args);
@@ -89,25 +94,34 @@ export default class ToolMenu extends InteractiveMenu {
     group.add(backgroundMesh);
 
     const iconMesh = this.buildIconMesh(icon);
+    iconMesh.position.z = 0.00001;
     group.add(iconMesh);
 
-    const labelMesh = this.buildLabelMesh(label);
-    if (labelMesh) {
-      labelMesh.position.y = -(LABEL_OFFSET + TOOL_CIRCLE_RADIUS);
-      labelMesh.visible = false;
-      group.add(labelMesh);
-    }
+    const labelMeshes = this.buildLabelMeshes(label);
+    labelMeshes.foreground.position.z = 0.00001;
 
-    this.tools.push({
+    const labelGroup = new THREE.Group();
+    labelGroup.add(...Object.values(labelMeshes));
+    labelGroup.position.y = -(LABEL_OFFSET + TOOL_CIRCLE_RADIUS);
+    labelGroup.visible = false;
+    group.add(labelGroup);
+
+    const tool = {
       object: group,
       action,
-      toggleSelect: (isSelected) => {
+      toggleHover: (isHovered: boolean) => {
+        group.scale.setScalar(isHovered ? TOOL_HOVERED_SCALE : TOOL_SCALE);
+        labelGroup.visible = isHovered || this.selectedTool === tool;
+      },
+      toggleSelect: (isSelected: boolean) => {
         backgroundMesh.material.opacity = isSelected ? SELECTED_OPACITY : OPACITY;
         iconMesh.material.opacity = isSelected ? SELECTED_OPACITY : OPACITY;
         iconMesh.material.color = isSelected ? SELECTED_ICON_COLOR : ICON_COLOR;
-        labelMesh.visible = isSelected;
-      }
-    });
+        labelMeshes.foreground.material.color = isSelected ? SELECTED_FOREGROUND_COLOR : FOREGROUND_COLOR;
+        labelGroup.visible = isSelected;
+      },
+    };
+    this.tools.push(tool);
   }
 
   private buildBackgroundMesh() {
@@ -133,49 +147,80 @@ export default class ToolMenu extends InteractiveMenu {
     return new THREE.Mesh(geometry, material);
   }
 
-  private buildLabelMesh(label: string) {
+  private buildLabelMeshes(label: string) {
     const texture = new TextTexture({
       text: label,
-      textColor: FOREGROUND_COLOR,
+      textColor: new THREE.Color(0xFFFFFF),
       fontSize: LABEL_FONT_SIZE,
       fontFamily: LABEL_FONT_FAMILY,
-      padding: LABEL_PADDING,
-      backgroundColor: BACKGROUND_COLOR
-    });
-    const material = new THREE.MeshBasicMaterial({
-      map: texture,
-      transparent: true,
-      opacity: SELECTED_OPACITY,
+      padding: LABEL_PADDING
     });
 
     const worldWidth = texture.image.width * SIZE_RESOLUTION_FACTOR / 2;
     const worldHeight = texture.image.height * SIZE_RESOLUTION_FACTOR / 2;
     const geometry = new THREE.PlaneGeometry(worldWidth, worldHeight);
-    return new THREE.Mesh(geometry, material);
+
+    const foregroundMaterial = new THREE.MeshBasicMaterial({
+      map: texture,
+      color: FOREGROUND_COLOR,
+      transparent: true,
+      opacity: SELECTED_OPACITY,
+    });
+    const backgroundMaterial = new THREE.MeshBasicMaterial({
+      color: BACKGROUND_COLOR,
+      transparent: true,
+      opacity: SELECTED_OPACITY,
+    });
+    return {
+      foreground: new THREE.Mesh(geometry, foregroundMaterial),
+      background: new THREE.Mesh(geometry, backgroundMaterial),
+    };
+  }
+
+  // #endregion TOOL CONSTRUCTION
+
+  // #region TOOL HIGHLIGHTING
+
+  private hoverTool(index: number) {
+    this.resetHoveredTool();
+    this.hoveredTool = this.tools[index];
+    this.hoveredTool.toggleHover(true);
+  }
+
+  private resetHoveredTool() {
+    this.hoveredTool?.toggleHover(false);
+    this.hoveredTool = null;
+  }
+
+  // #endregion TOOL HIGHLIGHTING
+
+  // #region TOOL SELECTION
+
+  private get selectedToolIndex() {
+    if (this.selectedTool) return this.tools.indexOf(this.selectedTool);
+    return this.defaultToolIndex;
   }
 
   private async selectTool(index: number, { enableAnimation = true }: {
     enableAnimation?: boolean
   } = {}) {
     // While an animation is playing, no other tool can be selected.
-    if (this.currentAnimation) return;
+    if (this.currentSelectAnimation) return;
 
     // A tool can only be selected if the index is in range.
     if (index < 0 || index >= this.tools.length) return;
 
     // Unselect previous tool unless this is the initially selected tool.
-    if (this.selectedToolIndex >= 0) {
-      this.selectedTool.toggleSelect(false);
-    }
+    this.selectedTool?.toggleSelect(false);
 
     // Select new current tool.
-    this.selectedToolIndex = index;
+    this.selectedTool = this.tools[index];
     this.selectedTool.toggleSelect(true);
 
     // Animate the selected tool to the center if animations are enabled.
     const targetPositionX = -this.selectedTool.object.position.x;
     if (enableAnimation) {
-      this.currentAnimation = this.animationMixer.clipAction(new THREE.AnimationClip(
+      this.currentSelectAnimation = this.animationMixer.clipAction(new THREE.AnimationClip(
         'select-animation',
         SELECT_ANIMATION_DURATION, [
         new THREE.KeyframeTrack(
@@ -184,16 +229,16 @@ export default class ToolMenu extends InteractiveMenu {
           [this.position.x, targetPositionX]
         )
       ]));
-      this.currentAnimation.setLoop(THREE.LoopOnce, 0);
-      this.currentAnimation.clampWhenFinished = true;
-      this.currentAnimation.play();
+      this.currentSelectAnimation.setLoop(THREE.LoopOnce, 0);
+      this.currentSelectAnimation.clampWhenFinished = true;
+      this.currentSelectAnimation.play();
 
       // Wait for animation to finish. Since the animation is clamped, it has
       // to be stopped explicitly. Clamping the animation avoids it to snap back
       // to the original value before it is set to the target value below.
-      await this.waitForAnimation(this.currentAnimation);
-      this.currentAnimation.stop();
-      this.currentAnimation = null;
+      await this.waitForAnimation(this.currentSelectAnimation);
+      this.currentSelectAnimation.stop();
+      this.currentSelectAnimation = null;
     }
 
     // Apply target value when animations are not enabled or when the animation is done.
@@ -208,6 +253,26 @@ export default class ToolMenu extends InteractiveMenu {
     this.selectTool(this.selectedToolIndex + 1);
   }
 
+  // #region TOOL SELECTION
+
+  // #region OTHER CONTROLLER INPUT
+
+  hover(intersection: THREE.Intersection) {
+    super.hover(intersection);
+
+    // Select clicked tool or run its action if it is selected already.
+    const tool = this.findToolByObject(intersection.object);
+    if (tool) {
+      const index = this.tools.indexOf(tool);
+      this.hoverTool(index);
+    }
+  }
+
+  resetHoverEffect() {
+    super.resetHoverEffect();
+    this.resetHoveredTool();
+  }
+
   triggerDown(intersection: THREE.Intersection) {
     super.triggerDown(intersection);
 
@@ -215,13 +280,17 @@ export default class ToolMenu extends InteractiveMenu {
     const tool = this.findToolByObject(intersection.object);
     if (tool) {
       const index = this.tools.indexOf(tool);
-      if (index == this.selectedToolIndex) {
-        this.selectedTool.action();
+      if (index === this.selectedToolIndex) {
+        this.selectedTool?.action();
       } else {
         this.selectTool(index);
       }
     }
   }
+
+  // #endregion OTHER CONTROLLER INPUT
+
+  // #region CONTROLLER INPUT
 
   makeThumbpadBinding() {
     return new VRControllerThumbpadBinding({ labelUp: 'Previous', labelDown: 'Next' }, {
@@ -234,9 +303,11 @@ export default class ToolMenu extends InteractiveMenu {
 
   makeTriggerBinding() {
     return new VRControllerButtonBinding('Select', {
-      onButtonDown: (_controller) => this.selectedTool.action()
+      onButtonDown: (_controller) => this.selectedTool?.action()
     });
   }
+
+  // #endregion CONTROLLER INPUT
 
   /**
    * Finds the tool that contains the given object.
