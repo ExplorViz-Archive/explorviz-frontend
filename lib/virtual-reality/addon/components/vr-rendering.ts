@@ -1,8 +1,6 @@
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
-import { task } from 'ember-concurrency-decorators';
-import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import Auth from 'explorviz-frontend/services/auth';
@@ -75,11 +73,11 @@ import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import VrInputManager from 'virtual-reality/utils/vr-multi-user/vr-input-manager';
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
-import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import WebXRPolyfill from 'webxr-polyfill';
 import VrSceneService from "../services/vr-scene";
 import VrAssetRepository from "../services/vr-asset-repo";
+import VrLandscapeRenderer from "../services/vr-landscape-renderer";
 
 interface Args {
   readonly id: string;
@@ -103,6 +101,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('repos/timestamp-repository') private timestampRepo!: TimestampRepository;
   @service('spectate-user') private spectateUserService!: SpectateUserService;
   @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
+  @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
   @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
   @service('vr-message-receiver') private receiver!: VrMessageReceiver;
   @service('vr-message-sender') private sender!: VrMessageSender;
@@ -125,7 +124,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private primaryInputManager = new VrInputManager();
   private secondaryInputManager = new VrInputManager();
   private vrApplicationRenderer!: VrApplicationRenderer;
-  private vrLandscapeRenderer!: VrLandscapeRenderer;
   private vrSessionActive: boolean = false;
   private timestampService!: VrTimestampService;
   private willDestroyController: AbortController = new AbortController();
@@ -223,15 +221,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Use given font for landscape and application rendering.
     this.assetRepo.font = this.args.font;
 
-    // Initialize landscape rendering.
-    this.vrLandscapeRenderer = new VrLandscapeRenderer({
-      configuration: this.configuration,
-      floor: this.sceneService.floor,
-      font: this.assetRepo.font,
-      landscapeData: this.args.landscapeData,
-      worker: this.worker
-    });
-    this.scene.add(this.landscapeObject3D);
+    // Load landscape.
+    this.vrLandscapeRenderer.updateLandscapeData(
+      this.args.landscapeData.structureLandscapeData,
+      this.args.landscapeData.dynamicLandscapeData
+    );
 
     // Initialize application rendering.
     this.vrApplicationRenderer = new VrApplicationRenderer({
@@ -280,7 +274,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Initialize menu rendering.
     this.menuFactory.injectValues({
       vrApplicationRenderer: this.vrApplicationRenderer,
-      vrLandscapeRenderer: this.vrLandscapeRenderer,
       timestampService: this.timestampService,
       detachedMenuGroups: this.detachedMenuGroups
     });
@@ -500,9 +493,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Start main loop.
     this.renderer.setAnimationLoop(() => this.tick());
-
-    // Load landscape.
-    await perform(this.loadNewLandscape);
   }
 
   /**
@@ -649,12 +639,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   // #endregion MAIN LOOP
 
-  // #region LANDSCAPE AND APPLICATION RENDERING
-
-  @task
-  private *loadNewLandscape() {
-    yield perform(this.vrLandscapeRenderer.populateLandscape);
-  }
+  // #region APPLICATION RENDERING
 
   private async addApplication(applicationModel: Application): Promise<ApplicationObject3D | null> {
     const application = await this.addApplicationLocally(applicationModel);
@@ -704,7 +689,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.applicationGroup.clear();
   }
 
-  // #endregion LANDSCAPE AND APPLICATION RENDERING
+  // #endregion APPLICATION RENDERING
 
   // #region COMPONENT AND COMMUNICATION RENDERING
 
@@ -980,10 +965,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private handleKeyboard(event: KeyboardEvent) {
     switch (event.key) {
-      case 'l':
-        perform(this.loadNewLandscape);
-        break;
-
       case 'Escape':
         if (!this.vrSessionActive) {
           // Close current debug menu or open tool menu if no menu is debugged.

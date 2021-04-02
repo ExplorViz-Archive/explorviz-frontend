@@ -6,14 +6,14 @@ import LocalVrUser from "virtual-reality/services/local-vr-user";
 import VrMessageSender from "virtual-reality/services/vr-message-sender";
 import DetachedMenuGroupContainer from "./vr-menus/detached-menu-group-container";
 import VrApplicationRenderer from "./vr-rendering/vr-application-renderer";
-import VrLandscapeRenderer from "./vr-rendering/vr-landscape-renderer";
+import VrLandscapeRenderer from "../services/vr-landscape-renderer";
 
 type VrtTimestampServiceArgs = {
-    timestamp: number, 
-    timestampInterval: number, 
-    localUser: LocalVrUser, 
+    timestamp: number,
+    timestampInterval: number,
+    localUser: LocalVrUser,
     auth: Auth,
-    sender: VrMessageSender, 
+    sender: VrMessageSender,
     reloadHandler: ReloadHandler,
     landscapeTokenService: LandscapeTokenService,
     vrLandscapeRenderer: VrLandscapeRenderer,
@@ -33,20 +33,20 @@ export default class VrTimestampService {
     private vrLandscapeRenderer: VrLandscapeRenderer;
     private vrApplicationRenderer: VrApplicationRenderer;
     private detachedMenuGroups: DetachedMenuGroupContainer;
-    
+
     timestamp: number;
     timestampInterval: number;
 
     constructor({
-        timestamp, 
-        timestampInterval, 
-        localUser, 
-        sender, 
+        timestamp,
+        timestampInterval,
+        localUser,
+        sender,
         auth,
-        reloadHandler, 
-        landscapeTokenService, 
-        vrLandscapeRenderer, 
-        vrApplicationRenderer, 
+        reloadHandler,
+        landscapeTokenService,
+        vrLandscapeRenderer,
+        vrApplicationRenderer,
         detachedMenuGroups
     }: VrtTimestampServiceArgs) {
         this.localUser = localUser;
@@ -57,7 +57,7 @@ export default class VrTimestampService {
         this.vrLandscapeRenderer = vrLandscapeRenderer;
         this.vrApplicationRenderer = vrApplicationRenderer;
         this.detachedMenuGroups = detachedMenuGroups;
-        
+
         this.timestamp = timestamp;
         this.timestampInterval = timestampInterval;
     }
@@ -93,15 +93,14 @@ export default class VrTimestampService {
 
     async updateTimestampLocally(timestamp: number): Promise<void> {
         try {
-            // reset 
-            this.detachedMenuGroups.forceRemoveAllDetachedMenus();
-            this.vrApplicationRenderer.applicationGroup.clear();
-            this.vrLandscapeRenderer.cleanUpLandscape();
-
-            // update model
+            // Update model.
             this.timestamp = timestamp;
             const [structureData, dynamicData] = await this.reloadHandler.loadLandscapeByTimestamp(timestamp);
-            
+
+            // Reset.
+            this.detachedMenuGroups.forceRemoveAllDetachedMenus();
+            this.vrApplicationRenderer.applicationGroup.clear();
+
             await Promise.all([
                 this.vrLandscapeRenderer.updateLandscapeData(structureData, dynamicData),
                 this.vrApplicationRenderer.updateLandscapeData(structureData, dynamicData)
@@ -111,4 +110,3 @@ export default class VrTimestampService {
         }
     }
 }
-

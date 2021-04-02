@@ -6,8 +6,8 @@ import { DetachableMenu, isDetachableMenu } from 'virtual-reality/utils/vr-menus
 import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
 import { InitialRoomApp, InitialRoomDetachedMenu, InitialRoomLandscape, InitialRoomPayload } from 'virtual-reality/utils/vr-payload/initial-room';
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
-import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
+import VrLandscapeRenderer from "./vr-landscape-renderer";
 
 const { vrService } = ENV.backendAddresses;
 

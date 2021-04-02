@@ -15,7 +15,6 @@ import HintMenu from "virtual-reality/utils/vr-menus/ui-menu/hud/hint-menu";
 import MessageBoxMenu from "virtual-reality/utils/vr-menus/ui-menu/hud/message-box-menu";
 import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
-import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import ConnectingMenu from "../utils/vr-menus/ui-menu/connection/connecting-menu";
 import OfflineMenu from "../utils/vr-menus/ui-menu/connection/offline-menu";
 import OnlineMenu from "../utils/vr-menus/ui-menu/connection/online-menu";
@@ -33,10 +32,10 @@ import DisableInputMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/disabl
 import ToolMenu from 'virtual-reality/utils/vr-menus/ui-menu/tool-menu';
 import VrSceneService from "./vr-scene";
 import SpectateUserService from "./spectate-user";
+import VrLandscapeRenderer from "./vr-landscape-renderer";
 
 type InjectedValues = {
   vrApplicationRenderer: VrApplicationRenderer,
-  vrLandscapeRenderer: VrLandscapeRenderer,
   timestampService: VrTimestampService,
   detachedMenuGroups: DetachedMenuGroupContainer
 };
@@ -47,24 +46,22 @@ export default class VrMenuFactoryService extends Service {
   @service('local-vr-user') private localUser!: LocalVrUser;
   @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
   @service('spectate-user') private spectateUserService!: SpectateUserService;
+  @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
   @service('vr-message-sender') private sender!: VrMessageSender;
   @service('vr-room') private roomService!: VrRoomService;
   @service('vr-scene') private sceneService!: VrSceneService;
 
   private vrApplicationRenderer!: VrApplicationRenderer;
-  private vrLandscapeRenderer!: VrLandscapeRenderer;
   private timestampService!: VrTimestampService;
   private detachedMenuGroups!: DetachedMenuGroupContainer;
 
   injectValues({
     vrApplicationRenderer,
-    vrLandscapeRenderer,
     timestampService,
     detachedMenuGroups
   }: InjectedValues) {
     this.timestampService = timestampService;
     this.vrApplicationRenderer = vrApplicationRenderer;
-    this.vrLandscapeRenderer = vrLandscapeRenderer;
     this.detachedMenuGroups = detachedMenuGroups;
   }
 
