@@ -85,6 +85,14 @@ export default class LocalVrUser extends Service {
     this.userGroup.position.z += position.z - cameraWorldPos.z;
   }
 
+  get cameraHeight(): number {
+    return this.userGroup.position.y;
+  }
+
+  set cameraHeight(cameraHeight: number) {
+    this.userGroup.position.y = cameraHeight;
+  }
+
   /**
    * Moves the user group in the given direction relative to the default camera.
    */

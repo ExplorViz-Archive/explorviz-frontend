@@ -98,7 +98,7 @@ export default class VrMenuFactoryService extends Service {
 
   buildCameraMenu(): CameraMenu {
     return new CameraMenu({
-      cameraObject3D: this.localUser.userGroup,
+      localUser: this.localUser,
       menuFactory: this,
     });
   }

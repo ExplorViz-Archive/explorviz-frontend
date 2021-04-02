@@ -173,6 +173,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private secondaryInputManager = new VrInputManager();
 
+  private willDestroyController: AbortController = new AbortController();
+
   // #endregion CLASS FIELDS
 
   // #region GETTERS
@@ -390,12 +392,15 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       mouseWheel: (delta) => this.handleMouseWheel(delta),
       mouseMove: (intersection) => this.handleMouseMove(intersection),
       panning: (delta, button) => this.handlePanning(delta, button),
-    }, raycastFilter
-    );
+    }, raycastFilter);
 
-    // Add additional event listeners.
-    window.addEventListener('keydown', (event: KeyboardEvent) => {
-      this.handleKeyboard(event);
+    // Add additional event listeners. Since TypeScript does not yet support
+    // the signal option  of `addEventListener`, we have to listen for the
+    // will destroy signal manually.
+    const keydownListener = (event: KeyboardEvent) => this.handleKeyboard(event);
+    window.addEventListener('keydown', keydownListener);
+    this.willDestroyController.signal.addEventListener('abort', () => {
+      window.removeEventListener('keydown', keydownListener);
     });
   }
 
@@ -540,11 +545,17 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   // #region DESTRUCTION
 
   willDestroy() {
+    // Reset rendering.
     this.applicationGroup.clear();
+    this.vrLandscapeRenderer.cleanUpLandscape();
+
+    // Reset services.
     this.localUser.reset();
     this.spectateUserService.reset();
-    this.vrLandscapeRenderer.cleanUpLandscape();
+
+    // Remove event listers.
     this.receiver.removeMessageListener(this);
+    this.willDestroyController.abort();
   }
 
   // #endregion DESTRUCTION
@@ -994,7 +1005,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private handleDoubleClick(intersection: THREE.Intersection | null) {
     if (this.vrSessionActive || !intersection) return;
-    if (!intersection) return;
     this.primaryInputManager.handleTriggerDown(intersection);
   }
 
@@ -1031,7 +1041,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private handleMouseWheel(delta: number) {
     if (this.vrSessionActive) return;
-    this.camera.translateZ(delta * 0.2);
+    this.localUser.cameraHeight += delta * 0.2;
   }
 
   private handleMouseMove(intersection: THREE.Intersection | null) {
@@ -1051,7 +1061,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   private handleKeyboard(event: KeyboardEvent) {
     switch (event.key) {
-      case 'l': perform(this.loadNewLandscape); break;
+      case 'l':
+        perform(this.loadNewLandscape);
+        break;
 
       case 'Escape':
         if (!this.vrSessionActive) {

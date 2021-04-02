@@ -1,11 +1,12 @@
+import LocalVrUser from "virtual-reality/services/local-vr-user";
 import VRController from '../../vr-controller';
 import VRControllerButtonBinding from '../../vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding from '../../vr-controller/vr-controller-thumbpad-binding';
 import ArrowbuttonItem from '../items/arrowbutton-item';
 import TextItem from '../items/text-item';
 import TextbuttonItem from '../items/textbutton-item';
-import UiMenu, { UiMenuArgs } from '../ui-menu';
 import TitleItem from "../items/title-item";
+import UiMenu, { UiMenuArgs } from '../ui-menu';
 
 /**
  * The maximum change of the camera's height per frame when the trigger is fully pressed.
@@ -13,19 +14,19 @@ import TitleItem from "../items/title-item";
 const MAX_TRANSLATE_SPEED = 0.02;
 
 export type CameraMenuArgs = UiMenuArgs & {
-  cameraObject3D: THREE.Object3D
+  localUser: LocalVrUser
 };
 
 export default class CameraMenu extends UiMenu {
-  private cameraObject3D: THREE.Object3D;
+  private localUser: LocalVrUser;
   private resetButton: TextbuttonItem;
   private heightTextItem: TextItem;
   private heightUpButton: ArrowbuttonItem;
   private heightDownButton: ArrowbuttonItem;
 
-  constructor({ cameraObject3D, ...args }: CameraMenuArgs) {
+  constructor({ localUser, ...args }: CameraMenuArgs) {
     super(args);
-    this.cameraObject3D = cameraObject3D;
+    this.localUser = localUser;
 
     const title = new TitleItem({
       text: 'Camera',
@@ -34,7 +35,7 @@ export default class CameraMenu extends UiMenu {
     this.items.push(title);
 
     this.heightTextItem = new TextItem({
-      text: this.cameraHeight.toFixed(2),
+      text: this.localUser.cameraHeight.toFixed(2),
       color: '#ffffff',
       fontSize: 28,
       alignment: 'center',
@@ -76,21 +77,13 @@ export default class CameraMenu extends UiMenu {
     this.redrawMenu();
   }
 
-  private get cameraHeight(): number {
-    return this.cameraObject3D.position.y;
-  }
-
-  private set cameraHeight(cameraHeight: number) {
-    this.cameraObject3D.position.y = cameraHeight;
-  }
-
   private translateCamera(deltaHeight: number) {
-    this.cameraHeight = this.cameraHeight + deltaHeight;
+    this.localUser.cameraHeight = this.localUser.cameraHeight + deltaHeight;
     this.redrawMenu();
   }
 
   private resetCamera() {
-    this.cameraHeight = 0;
+    this.localUser.cameraHeight = 0;
     this.redrawMenu();
   }
 
@@ -122,7 +115,7 @@ export default class CameraMenu extends UiMenu {
   }
 
   onUpdateMenu(delta: number) {
-    const text = this.cameraHeight.toFixed(2);
+    const text = this.localUser.cameraHeight.toFixed(2);
     if (text !== this.heightTextItem.text) {
       this.heightTextItem.text = text;
       this.redrawMenu();
