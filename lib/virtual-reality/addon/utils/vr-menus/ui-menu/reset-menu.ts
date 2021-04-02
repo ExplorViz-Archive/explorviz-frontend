@@ -1,7 +1,7 @@
+import DetachedMenuGroupsService from "virtual-reality/services/detached-menu-groups";
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
 import VrLandscapeRenderer from "../../../services/vr-landscape-renderer";
-import DetachedMenuGroupContainer from '../detached-menu-group-container';
 import TextItem from '../items/text-item';
 import TextbuttonItem from '../items/textbutton-item';
 import TitleItem from "../items/title-item";
@@ -11,14 +11,14 @@ export type ResetMenuArgs = UiMenuArgs & {
   localUser: LocalVrUser,
   vrApplicationRenderer: VrApplicationRenderer,
   vrLandscapeRenderer: VrLandscapeRenderer,
-  detachedMenuGroups: DetachedMenuGroupContainer
+  detachedMenuGroups: DetachedMenuGroupsService
 };
 
 export default class ResetMenu extends UiMenu {
   private localUser: LocalVrUser;
   private vrApplicationRenderer: VrApplicationRenderer;
   private vrLandscapeRenderer: VrLandscapeRenderer;
-  private detachedMenuGroups: DetachedMenuGroupContainer;
+  private detachedMenuGroups: DetachedMenuGroupsService;
 
   constructor({ localUser, vrApplicationRenderer, vrLandscapeRenderer, detachedMenuGroups, ...args }: ResetMenuArgs) {
     super(args);
@@ -92,7 +92,7 @@ export default class ResetMenu extends UiMenu {
   }
 
   private resetDetachedMenus() {
-    this.detachedMenuGroups.forceRemoveAllDetachedMenus();
+    this.detachedMenuGroups.removeAllDetachedMenusLocally();
   }
 
   private resetApplications() {

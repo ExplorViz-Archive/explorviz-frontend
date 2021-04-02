@@ -2,9 +2,9 @@ import Service, { inject as service } from '@ember/service';
 import ENV from 'explorviz-frontend/config/environment';
 import Auth from 'explorviz-frontend/services/auth';
 import THREE from 'three';
+import DetachedMenuGroupsService from 'virtual-reality/services/detached-menu-groups';
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
 import { DetachableMenu, isDetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
-import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
 import { InitialRoomApp, InitialRoomDetachedMenu, InitialRoomLandscape, InitialRoomPayload } from 'virtual-reality/utils/vr-payload/initial-room';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import VrLandscapeRenderer from "./vr-landscape-renderer";
@@ -23,30 +23,20 @@ function isRoomId(roomId: any): roomId is RoomId {
 }
 
 type InjectedValues = {
-  detachedMenuGroups: DetachedMenuGroupContainer,
-  vrApplicationRenderer: VrApplicationRenderer,
-  vrLandscapeRenderer: VrLandscapeRenderer,
   timestampService: VrTimestampService
 };
 
 export default class VrRoomService extends Service {
-  @service('auth')
-  auth!: Auth;
+  @service('auth') private auth!: Auth;
+  @service('detached-menu-groups') private detachedMenuGroups!: DetachedMenuGroupsService;
+  @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
+  @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
 
-  private detachedMenuGroups!: DetachedMenuGroupContainer;
-  private vrApplicationRenderer!: VrApplicationRenderer;
-  private vrLandscapeRenderer!: VrLandscapeRenderer;
   private timestampService!: VrTimestampService;
 
   injectValues({
-    detachedMenuGroups,
-    vrApplicationRenderer,
-    vrLandscapeRenderer,
     timestampService,
   }: InjectedValues) {
-    this.detachedMenuGroups = detachedMenuGroups;
-    this.vrApplicationRenderer = vrApplicationRenderer;
-    this.vrLandscapeRenderer = vrLandscapeRenderer;
     this.timestampService = timestampService;
   }
 

@@ -27,6 +27,7 @@ import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
+import DetachedMenuGroupsService from 'virtual-reality/services/detached-menu-groups';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import SpectateUserService from 'virtual-reality/services/spectate-user';
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
@@ -48,7 +49,6 @@ import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-co
 import VRControllerThumbpadBinding, { VRControllerThumbpadDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
-import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
 import InteractiveMenu from 'virtual-reality/utils/vr-menus/interactive-menu';
 import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 import MenuQueue from 'virtual-reality/utils/vr-menus/menu-queue';
@@ -57,7 +57,6 @@ import HintMenu from 'virtual-reality/utils/vr-menus/ui-menu/hud/hint-menu';
 import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
 import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receivable/landscape';
 import { MenuDetachedForwardMessage } from 'virtual-reality/utils/vr-message/receivable/menu-detached-forward';
-import { isObjectClosedResponse, ObjectClosedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-closed';
 import { SelfConnectedMessage } from 'virtual-reality/utils/vr-message/receivable/self_connected';
 import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
 import { UserDisconnectedMessage } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
@@ -92,6 +91,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('auth') private auth!: Auth;
   @service('configuration') private configuration!: Configuration;
   @service('delta-time') private deltaTimeService!: DeltaTimeService;
+  @service('detached-menu-groups') private detachedMenuGroups!: DetachedMenuGroupsService;
   @service('grabbed-object') private grabbedObjectService!: GrabbedObjectService;
   @service('landscape-token') private landscapeTokenService!: LandscapeTokenService;
   @service('local-vr-user') private localUser!: LocalVrUser;
@@ -116,7 +116,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private canvas!: HTMLCanvasElement;
   private debug = debugLogger('VrRendering');
   private debugMenuGroup!: MenuGroup;
-  private detachedMenuGroups!: DetachedMenuGroupContainer;
   private hintMenuQueue!: MenuQueue;
   private interaction!: Interaction;
   private messageMenuQueue!: MenuQueue;
@@ -226,19 +225,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     );
 
     // Initialize application rendering.
-    this.vrApplicationRenderer.onRemoveApplication = (application) => this.removeApplication(application);
     this.vrApplicationRenderer.updateLandscapeData(
       this.args.landscapeData.structureLandscapeData,
       this.args.landscapeData.dynamicLandscapeData
     );
-
-    // Initialize menu group.
-    this.detachedMenuGroups = new DetachedMenuGroupContainer({
-      closeIconTextures: this.assetRepo.closeIconTextures,
-      receiver: this.receiver,
-      sender: this.sender,
-    });
-    this.scene.add(this.detachedMenuGroups);
 
     // Initialize timestamp service.
     this.timestampService = new VrTimestampService({
@@ -258,17 +248,12 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Initialiye room service.
     this.vrRoomService.injectValues({
-      detachedMenuGroups: this.detachedMenuGroups,
-      vrApplicationRenderer: this.vrApplicationRenderer,
-      vrLandscapeRenderer: this.vrLandscapeRenderer,
       timestampService: this.timestampService,
     });
 
     // Initialize menu rendering.
     this.menuFactory.injectValues({
-      vrApplicationRenderer: this.vrApplicationRenderer,
-      timestampService: this.timestampService,
-      detachedMenuGroups: this.detachedMenuGroups
+      timestampService: this.timestampService
     });
   }
 
@@ -283,7 +268,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       this.landscapeObject3D,
       this.applicationGroup,
       this.sceneService.floor,
-      this.detachedMenuGroups,
+      this.detachedMenuGroups.container,
       this.debugMenuGroup,
     ];
     const raycastFilter = (intersection: THREE.Intersection) => {
@@ -320,7 +305,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // When an application on the landscape is clicked, open the application.
     this.primaryInputManager.addInputHandler<ApplicationMesh>({
       targetType: ApplicationMesh,
-      triggerDown: (event) => this.addApplication(event.target.dataModel).then((applicationObject3D) => {
+      triggerDown: (event) => this.addApplicationOrShowHint(event.target.dataModel).then((applicationObject3D) => {
         if (!applicationObject3D) return;
 
         // Rotate app so that it is aligned with landscape
@@ -450,8 +435,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   willDestroy() {
     // Reset rendering.
-    this.applicationGroup.clear();
+    this.vrApplicationRenderer.removeAllApplicationsLocally();
     this.vrLandscapeRenderer.cleanUpLandscape();
+    this.detachedMenuGroups.removeAllDetachedMenusLocally();
 
     // Reset services.
     this.localUser.reset();
@@ -634,52 +620,18 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   // #region APPLICATION RENDERING
 
-  private async addApplication(applicationModel: Application): Promise<ApplicationObject3D | null> {
-    const application = await this.addApplicationLocally(applicationModel);
-    if (application) this.sender.sendAppOpened(application);
-    return application;
-  }
-
-  private addApplicationLocally(applicationModel: Application): Promise<ApplicationObject3D | null> {
+  private async addApplicationOrShowHint(applicationModel: Application): Promise<ApplicationObject3D | null> {
     if (applicationModel.packages.length === 0) {
       this.showHint('No data available');
       return Promise.resolve(null);
     }
+
     if (this.applicationGroup.hasApplication(applicationModel.instanceId)) {
       this.showHint('Application already opened');
       return Promise.resolve(null);
     }
 
     return this.vrApplicationRenderer.addApplication(applicationModel);
-  }
-
-  private removeApplication(application: ApplicationObject3D): Promise<boolean> {
-    return new Promise((resolve) => {
-      // Ask backend to close the application.
-      const nonce = this.sender.sendAppClosed(application.dataModel.instanceId);
-
-      // Remove the application only when the backend allowed the application to be closed.
-      this.receiver.awaitResponse({
-        nonce,
-        responseType: isObjectClosedResponse,
-        onResponse: (response: ObjectClosedResponse) => {
-          if (response.isSuccess) this.forceRemoveApplication(application);
-          resolve(response.isSuccess);
-        },
-        onOffline: () => {
-          this.forceRemoveApplication(application)
-          resolve(true);
-        }
-      });
-    });
-  }
-
-  private forceRemoveApplication(application: ApplicationObject3D) {
-    this.applicationGroup.removeApplicationById(application.dataModel.instanceId);
-  }
-
-  private forceRemoveAllApplications() {
-    this.applicationGroup.clear();
   }
 
   // #endregion APPLICATION RENDERING
@@ -882,7 +834,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
           }
         }
       })
-
     })
   }
 
@@ -1182,8 +1133,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   async onInitialLandscape({ detachedMenus, openApps, landscape }: InitialLandscapeMessage): Promise<void> {
-    this.forceRemoveAllApplications();
-    this.detachedMenuGroups.forceRemoveAllDetachedMenus();
+    this.vrApplicationRenderer.removeAllApplicationsLocally();
+    this.detachedMenuGroups.removeAllDetachedMenusLocally();
 
     // Initialize landscape.
     await this.timestampService.updateLandscapeToken(landscape.landscapeToken, landscape.timestamp);
@@ -1196,7 +1147,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     openApps.forEach((app) => {
       const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(app.id);
       if (application) {
-        tasks.push(this.vrApplicationRenderer.addApplication(application).then((applicationObject3D: ApplicationObject3D | null) => {
+        tasks.push(this.vrApplicationRenderer.addApplicationLocally(application).then((applicationObject3D: ApplicationObject3D | null) => {
           if (!applicationObject3D) return;
 
           applicationObject3D.position.fromArray(app.position);
@@ -1247,7 +1198,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         menu.position.fromArray(detachedMenu.position);
         menu.quaternion.fromArray(detachedMenu.quaternion);
         menu.scale.fromArray(detachedMenu.scale);
-        this.detachedMenuGroups.addDetachedMenuWithId(menu, detachedMenu.objectId);
+        this.detachedMenuGroups.addDetachedMenuLocally(menu, detachedMenu.objectId);
       }
     })
   }
@@ -1258,7 +1209,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(id);
 
     if (application) {
-      const applicationObject3D = await this.addApplicationLocally(application);
+      const applicationObject3D = await this.vrApplicationRenderer.addApplicationLocally(application);
       if (applicationObject3D) {
         applicationObject3D.position.fromArray(position);
         applicationObject3D.quaternion.fromArray(quaternion);
@@ -1271,7 +1222,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     originalMessage: { appID }
   }: ForwardedMessage<AppClosedMessage>): void {
     const application = this.applicationGroup.getApplication(appID);
-    if (application) this.forceRemoveApplication(application);
+    if (application) this.vrApplicationRenderer.removeApplicationLocally(application);
   }
 
   onObjectMoved({
@@ -1389,14 +1340,14 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       menu.position.fromArray(position);
       menu.quaternion.fromArray(quaternion);
       menu.scale.fromArray(scale);
-      this.detachedMenuGroups.addDetachedMenuWithId(menu, objectId);
+      this.detachedMenuGroups.addDetachedMenuLocally(menu, objectId);
     }
   }
 
   onDetachedMenuClosed({
     originalMessage: { menuId }
   }: ForwardedMessage<DetachedMenuClosedMessage>): void {
-    this.detachedMenuGroups.forceRemoveDetachedMenuWithId(menuId);
+    this.detachedMenuGroups.removeDetachedMenuLocallyById(menuId);
   }
 
   // #endregion HANDLING MESSAGES

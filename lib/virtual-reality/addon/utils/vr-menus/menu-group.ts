@@ -4,15 +4,15 @@ import VRController from "../vr-controller";
 import VRControllerBindings from "../vr-controller/vr-controller-bindings";
 import BaseMenu from "./base-menu";
 import { isDetachableMenu } from "./detachable-menu";
-import DetachedMenuGroupContainer from "./detached-menu-group-container";
+import DetachedMenuGroupsService from "../../services/detached-menu-groups";
 
 export type MenuGroupArgs = {
-  detachedMenuGroups: DetachedMenuGroupContainer
+  detachedMenuGroups: DetachedMenuGroupsService
 };
 
 export default class MenuGroup extends THREE.Group {
   private menus: BaseMenu[];
-  private detachedMenuGroups: DetachedMenuGroupContainer;
+  private detachedMenuGroups: DetachedMenuGroupsService;
   readonly controllerBindings: VRControllerBindings[];
 
   constructor({ detachedMenuGroups }: MenuGroupArgs) {

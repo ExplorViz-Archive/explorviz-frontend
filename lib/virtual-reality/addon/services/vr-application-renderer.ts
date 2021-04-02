@@ -21,6 +21,9 @@ import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import VrAssetRepository from "./vr-asset-repo";
 import VrSceneService from "./vr-scene";
+import VrMessageSender from "./vr-message-sender";
+import VrMessageReceiver from "./vr-message-receiver";
+import { isObjectClosedResponse, ObjectClosedResponse } from "../utils/vr-message/receivable/response/object-closed";
 
 // Scalar with which the application is scaled (evenly in all dimensions)
 const APPLICATION_SCALAR = 0.01;
@@ -34,13 +37,13 @@ type LayoutData = {
   positionZ: number
 };
 
-type RemoveApplicationCallback = (application: ApplicationObject3D) => Promise<boolean>;
-
 export default class VrApplicationRenderer extends Service {
   debug = debugLogger('VrApplicationRender');
 
   @service('configuration') private configuration!: Configuration;
   @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
+  @service('vr-message-receiver') private receiver!: VrMessageReceiver;
+  @service('vr-message-sender') private sender!: VrMessageSender;
   @service('vr-scene') private sceneService!: VrSceneService;
   @service() private worker!: any;
 
@@ -50,8 +53,6 @@ export default class VrApplicationRenderer extends Service {
   readonly applicationGroup: ApplicationGroup;
   readonly appCommRendering: AppCommunicationRendering;
   readonly drawableClassCommunications: Map<string, DrawableClassCommunication[]>;
-
-  onRemoveApplication?: RemoveApplicationCallback;
 
   constructor(properties?: object) {
     super(properties);
@@ -72,10 +73,45 @@ export default class VrApplicationRenderer extends Service {
     return getApplicationInLandscapeById(this.structureLandscapeData, id);
   }
 
-  addApplication(applicationModel: Application): Promise<ApplicationObject3D> {
+  async addApplication(applicationModel: Application): Promise<ApplicationObject3D> {
+    const application = await this.addApplicationLocally(applicationModel);
+    if (application) this.sender.sendAppOpened(application);
+    return application;
+  }
+
+  addApplicationLocally(applicationModel: Application): Promise<ApplicationObject3D> {
     return new Promise((resolve) => {
       perform(this.addApplicationTask, applicationModel, resolve);
     });
+  }
+
+  removeApplication(application: ApplicationObject3D): Promise<boolean> {
+    return new Promise((resolve) => {
+      // Ask backend to close the application.
+      const nonce = this.sender.sendAppClosed(application.dataModel.instanceId);
+
+      // Remove the application only when the backend allowed the application to be closed.
+      this.receiver.awaitResponse({
+        nonce,
+        responseType: isObjectClosedResponse,
+        onResponse: (response: ObjectClosedResponse) => {
+          if (response.isSuccess) this.removeApplicationLocally(application);
+          resolve(response.isSuccess);
+        },
+        onOffline: () => {
+          this.removeApplicationLocally(application)
+          resolve(true);
+        }
+      });
+    });
+  }
+
+  removeApplicationLocally(application: ApplicationObject3D) {
+    this.applicationGroup.removeApplicationById(application.dataModel.instanceId);
+  }
+
+  removeAllApplicationsLocally() {
+    this.applicationGroup.clear();
   }
 
   @enqueueTask
@@ -113,10 +149,7 @@ export default class VrApplicationRenderer extends Service {
       // Add close icon to application.
       const closeIcon = new CloseIcon({
         textures: this.assetRepo.closeIconTextures,
-        onClose: () => {
-          if (!this.onRemoveApplication) return Promise.resolve(true);
-          return this.onRemoveApplication(applicationObject3D)
-        }
+        onClose: () => this.removeApplication(applicationObject3D)
       });
       closeIcon.addToObject(applicationObject3D);
 

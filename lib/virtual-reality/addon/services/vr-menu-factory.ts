@@ -5,7 +5,6 @@ import LocalVrUser from "virtual-reality/services/local-vr-user";
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import { EntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
-import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
 import DisableInputMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/disable-input-menu';
 import GrabMenu, { GrabbableObject } from "virtual-reality/utils/vr-menus/ui-less-menu/grab-menu";
 import PingMenu from "virtual-reality/utils/vr-menus/ui-less-menu/ping-menu";
@@ -33,15 +32,15 @@ import SpectateUserService from "./spectate-user";
 import VrLandscapeRenderer from "./vr-landscape-renderer";
 import VrRoomService from './vr-room';
 import VrSceneService from "./vr-scene";
+import DetachedMenuGroupsService from "./detached-menu-groups";
 
 type InjectedValues = {
-  vrApplicationRenderer: VrApplicationRenderer,
-  timestampService: VrTimestampService,
-  detachedMenuGroups: DetachedMenuGroupContainer
+  timestampService: VrTimestampService
 };
 
 export default class VrMenuFactoryService extends Service {
   @service('delta-time') private deltaTimeService!: DeltaTimeService;
+  @service('detached-menu-groups') private detachedMenuGroups!: DetachedMenuGroupsService;
   @service('grabbed-object') private grabbedObjectService!: GrabbedObjectService;
   @service('local-vr-user') private localUser!: LocalVrUser;
   @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
@@ -53,14 +52,11 @@ export default class VrMenuFactoryService extends Service {
   @service('vr-scene') private sceneService!: VrSceneService;
 
   private timestampService!: VrTimestampService;
-  private detachedMenuGroups!: DetachedMenuGroupContainer;
 
   injectValues({
-    timestampService,
-    detachedMenuGroups
+    timestampService
   }: InjectedValues) {
     this.timestampService = timestampService;
-    this.detachedMenuGroups = detachedMenuGroups;
   }
 
   buildMainMenu(): MainMenu {

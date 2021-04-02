@@ -2,9 +2,9 @@ import debugLogger from "ember-debug-logger";
 import Auth from "explorviz-frontend/services/auth";
 import LandscapeTokenService from "explorviz-frontend/services/landscape-token";
 import ReloadHandler from "explorviz-frontend/services/reload-handler";
+import DetachedMenuGroupService from "virtual-reality/services/detached-menu-groups";
 import LocalVrUser from "virtual-reality/services/local-vr-user";
 import VrMessageSender from "virtual-reality/services/vr-message-sender";
-import DetachedMenuGroupContainer from "./vr-menus/detached-menu-group-container";
 import VrApplicationRenderer from "../services/vr-application-renderer";
 import VrLandscapeRenderer from "../services/vr-landscape-renderer";
 
@@ -18,7 +18,7 @@ type VrtTimestampServiceArgs = {
     landscapeTokenService: LandscapeTokenService,
     vrLandscapeRenderer: VrLandscapeRenderer,
     vrApplicationRenderer: VrApplicationRenderer,
-    detachedMenuGroups: DetachedMenuGroupContainer
+    detachedMenuGroups: DetachedMenuGroupService
 };
 
 export default class VrTimestampService {
@@ -32,7 +32,7 @@ export default class VrTimestampService {
     private landscapeTokenService: LandscapeTokenService;
     private vrLandscapeRenderer: VrLandscapeRenderer;
     private vrApplicationRenderer: VrApplicationRenderer;
-    private detachedMenuGroups: DetachedMenuGroupContainer;
+    private detachedMenuGroups: DetachedMenuGroupService;
 
     timestamp: number;
     timestampInterval: number;
@@ -98,8 +98,8 @@ export default class VrTimestampService {
             const [structureData, dynamicData] = await this.reloadHandler.loadLandscapeByTimestamp(timestamp);
 
             // Reset.
-            this.detachedMenuGroups.forceRemoveAllDetachedMenus();
-            this.vrApplicationRenderer.applicationGroup.clear();
+            this.detachedMenuGroups.removeAllDetachedMenusLocally();
+            this.vrApplicationRenderer.removeAllApplicationsLocally();
 
             await Promise.all([
                 this.vrLandscapeRenderer.updateLandscapeData(structureData, dynamicData),

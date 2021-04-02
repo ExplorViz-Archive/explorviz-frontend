@@ -1,38 +1,34 @@
-import THREE from 'three';
-import VrMessageReceiver from 'virtual-reality/services/vr-message-receiver';
-import VrMessageSender from 'virtual-reality/services/vr-message-sender';
-import CloseIcon, { CloseIconTextures } from 'virtual-reality/utils/view-objects/vr/close-icon';
-import { isMenuDetachedResponse, MenuDetachedResponse } from 'virtual-reality/utils/vr-message/receivable/response/menu-detached';
-import { isObjectClosedResponse, ObjectClosedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-closed';
-import { DetachableMenu } from './detachable-menu';
-import DetachedMenuGroup from './detached-menu-group';
+import Service, { inject as service } from '@ember/service';
+import DetachedMenuGroup from "../utils/vr-menus/detached-menu-group";
+import CloseIcon from "../utils/view-objects/vr/close-icon";
+import VrSceneService from "./vr-scene";
+import { isObjectClosedResponse, ObjectClosedResponse } from "../utils/vr-message/receivable/response/object-closed";
+import THREE from "three";
+import { MenuDetachedResponse, isMenuDetachedResponse } from "../utils/vr-message/receivable/response/menu-detached";
+import { DetachableMenu } from "../utils/vr-menus/detachable-menu";
+import VrAssetRepository from "./vr-asset-repo";
+import VrMessageSender from "./vr-message-sender";
+import VrMessageReceiver from "./vr-message-receiver";
 
-export type DetachedMenuGroupContainerArgs = {
-  closeIconTextures: CloseIconTextures,
-  sender: VrMessageSender,
-  receiver: VrMessageReceiver
-};
-
-/**
- * A group of detached menu groups. Each detached menu group contains a single
- * detached menu and its sub-menus.
- */
-export default class DetachedMenuGroupContainer extends THREE.Group {
-  private closeIconTextures: CloseIconTextures;
-  private sender: VrMessageSender;
-  private receiver: VrMessageReceiver;
+export default class DetachedMenuGroupsService extends Service {
+  @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
+  @service('vr-message-sender') private sender!: VrMessageSender;
+  @service('vr-message-receiver') private receiver!: VrMessageReceiver;
+  @service('vr-scene') private sceneService!: VrSceneService;
 
   private detachedMenuGroups: Set<DetachedMenuGroup>;
   private detachedMenuGroupsById: Map<string, DetachedMenuGroup>;
 
-  constructor({closeIconTextures, sender, receiver}: DetachedMenuGroupContainerArgs) {
-    super();
-    this.closeIconTextures = closeIconTextures;
-    this.sender = sender;
-    this.receiver = receiver;
+  readonly container: THREE.Group;
+
+  constructor(properties?: object) {
+    super(properties);
 
     this.detachedMenuGroups = new Set();
     this.detachedMenuGroupsById = new Map();
+
+    this.container = new THREE.Group();
+    this.sceneService.scene.add(this.container);
   }
 
   /**
@@ -56,10 +52,10 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
       nonce,
       responseType: isMenuDetachedResponse,
       onResponse: (response: MenuDetachedResponse) => {
-        this.addDetachedMenuWithId(menu, response.objectId);
+        this.addDetachedMenuLocally(menu, response.objectId);
       },
       onOffline: () => {
-        this.addDetachedMenuWithId(menu, null);
+        this.addDetachedMenuLocally(menu, null);
       }
     });
   }
@@ -77,7 +73,7 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
    * Adds a group for a detached menu to this container at the position and
    * with the same rotation and scale as the given menu.
    */
-  addDetachedMenuWithId(menu: DetachableMenu, menuId: string | null) {
+  addDetachedMenuLocally(menu: DetachableMenu, menuId: string | null) {
     // Remember the position, rotation and scale of the detached menu.
     const position = new THREE.Vector3();
     const quaternion = new THREE.Quaternion();
@@ -97,13 +93,13 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
     });
     this.detachedMenuGroups.add(detachedMenuGroup);
     if (menuId) this.detachedMenuGroupsById.set(menuId, detachedMenuGroup);
-    this.add(detachedMenuGroup);
+    this.container.add(detachedMenuGroup);
 
     // Make detached menu closable.
     // Since the menu has been scaled already and is not scaled when it has its
     // normal size, the close icon does not have to correct for the menu's scale.
     const closeIcon = new CloseIcon({
-      textures: this.closeIconTextures,
+      textures: this.assetRepo.closeIconTextures,
       onClose: () => this.removeDetachedMenu(detachedMenuGroup),
       radius: 0.04
     });
@@ -124,7 +120,7 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
     // offline).
     const menuId = detachedMenuGroup.getGrabId();
     if (!menuId) {
-      this.forceRemoveDetachedMenu(detachedMenuGroup);
+      this.removeDetachedMenuLocally(detachedMenuGroup);
       return Promise.resolve(true);
     }
 
@@ -134,11 +130,11 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
         nonce,
         responseType: isObjectClosedResponse,
         onResponse: (response: ObjectClosedResponse) => {
-          if (response.isSuccess) this.forceRemoveDetachedMenu(detachedMenuGroup);
+          if (response.isSuccess) this.removeDetachedMenuLocally(detachedMenuGroup);
           resolve(response.isSuccess);
         },
         onOffline: () => {
-          this.forceRemoveDetachedMenu(detachedMenuGroup);
+          this.removeDetachedMenuLocally(detachedMenuGroup);
           resolve(true);
         }
       });
@@ -148,20 +144,20 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
   /**
    * Removes the detached menu with the given id.
    */
-  forceRemoveDetachedMenuWithId(menuId: string) {
+  removeDetachedMenuLocallyById(menuId: string) {
     const detachedMenuGroup = this.detachedMenuGroupsById.get(menuId);
-    if (detachedMenuGroup) this.forceRemoveDetachedMenu(detachedMenuGroup);
+    if (detachedMenuGroup) this.removeDetachedMenuLocally(detachedMenuGroup);
   }
 
   /**
    * Removes the given menu without asking the backend.
    */
-  forceRemoveDetachedMenu(detachedMenuGroup: DetachedMenuGroup) {
+  removeDetachedMenuLocally(detachedMenuGroup: DetachedMenuGroup) {
     // Notify the detached menu that it has been closed.
     detachedMenuGroup.closeAllMenus();
 
     // Remove the 3D object of the menu.
-    this.remove(detachedMenuGroup);
+    this.container.remove(detachedMenuGroup);
 
     // Stop updating the menu.
     this.detachedMenuGroups.delete(detachedMenuGroup);
@@ -171,14 +167,20 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
     if (menuId) this.detachedMenuGroupsById.delete(menuId);
   }
 
-  forceRemoveAllDetachedMenus() {
+  removeAllDetachedMenusLocally() {
     // Notify all detached menus that they have been closed.
     for (let detachedMenuGroup of this.detachedMenuGroups) {
       detachedMenuGroup.closeAllMenus();
     }
 
-    this.remove(...this.children);
+    this.container.remove(...this.detachedMenuGroups);
     this.detachedMenuGroups.clear();
     this.detachedMenuGroupsById.clear();
+  }
+}
+
+declare module '@ember/service' {
+  interface Registry {
+    'detached-menu-groups': DetachedMenuGroupsService;
   }
 }
