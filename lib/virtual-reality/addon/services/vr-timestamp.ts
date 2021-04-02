@@ -1,3 +1,4 @@
+import Service, { inject as service } from '@ember/service';
 import debugLogger from "ember-debug-logger";
 import Auth from "explorviz-frontend/services/auth";
 import LandscapeTokenService from "explorviz-frontend/services/landscape-token";
@@ -5,59 +6,33 @@ import ReloadHandler from "explorviz-frontend/services/reload-handler";
 import DetachedMenuGroupService from "virtual-reality/services/detached-menu-groups";
 import LocalVrUser from "virtual-reality/services/local-vr-user";
 import VrMessageSender from "virtual-reality/services/vr-message-sender";
-import VrApplicationRenderer from "../services/vr-application-renderer";
-import VrLandscapeRenderer from "../services/vr-landscape-renderer";
+import VrApplicationRenderer from "./vr-application-renderer";
+import VrLandscapeRenderer from "./vr-landscape-renderer";
 
-type VrtTimestampServiceArgs = {
+type InjectedValues = {
     timestamp: number,
     timestampInterval: number,
-    localUser: LocalVrUser,
-    auth: Auth,
-    sender: VrMessageSender,
-    reloadHandler: ReloadHandler,
-    landscapeTokenService: LandscapeTokenService,
-    vrLandscapeRenderer: VrLandscapeRenderer,
-    vrApplicationRenderer: VrApplicationRenderer,
-    detachedMenuGroups: DetachedMenuGroupService
 };
 
-export default class VrTimestampService {
-
+export default class VrTimestampService extends Service {
     private debug = debugLogger('VrTimestampService');
 
-    private localUser: LocalVrUser;
-    private sender: VrMessageSender;
-    private auth: Auth;
-    private reloadHandler: ReloadHandler;
-    private landscapeTokenService: LandscapeTokenService;
-    private vrLandscapeRenderer: VrLandscapeRenderer;
-    private vrApplicationRenderer: VrApplicationRenderer;
-    private detachedMenuGroups: DetachedMenuGroupService;
+    @service('auth') private auth!: Auth;
+    @service('detached-menu-groups') private detachedMenuGroups!: DetachedMenuGroupService;
+    @service('landscape-token') private landscapeTokenService!: LandscapeTokenService;
+    @service('local-vr-user') private localUser!: LocalVrUser;
+    @service('reload-handler') private reloadHandler!: ReloadHandler;
+    @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
+    @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
+    @service('vr-message-sender') private sender!: VrMessageSender;
 
-    timestamp: number;
-    timestampInterval: number;
+    timestamp!: number;
+    timestampInterval!: number;
 
-    constructor({
+    injectValues({
         timestamp,
         timestampInterval,
-        localUser,
-        sender,
-        auth,
-        reloadHandler,
-        landscapeTokenService,
-        vrLandscapeRenderer,
-        vrApplicationRenderer,
-        detachedMenuGroups
-    }: VrtTimestampServiceArgs) {
-        this.localUser = localUser;
-        this.sender = sender;
-        this.auth = auth;
-        this.reloadHandler = reloadHandler;
-        this.landscapeTokenService = landscapeTokenService;
-        this.vrLandscapeRenderer = vrLandscapeRenderer;
-        this.vrApplicationRenderer = vrApplicationRenderer;
-        this.detachedMenuGroups = detachedMenuGroups;
-
+    }: InjectedValues) {
         this.timestamp = timestamp;
         this.timestampInterval = timestampInterval;
     }
@@ -97,16 +72,20 @@ export default class VrTimestampService {
             this.timestamp = timestamp;
             const [structureData, dynamicData] = await this.reloadHandler.loadLandscapeByTimestamp(timestamp);
 
-            // Reset.
-            this.detachedMenuGroups.removeAllDetachedMenusLocally();
-            this.vrApplicationRenderer.removeAllApplicationsLocally();
-
             await Promise.all([
                 this.vrLandscapeRenderer.updateLandscapeData(structureData, dynamicData),
-                this.vrApplicationRenderer.updateLandscapeData(structureData, dynamicData)
+                this.vrApplicationRenderer.updateLandscapeData(structureData, dynamicData),
+                this.detachedMenuGroups.updateLandscapeData(structureData, dynamicData)
             ]);
         } catch (e) {
             this.debug('Landscape couldn\'t be requested!', e);
         }
     }
+}
+
+
+declare module '@ember/service' {
+  interface Registry {
+    'vr-timestamp': VrTimestampService;
+  }
 }

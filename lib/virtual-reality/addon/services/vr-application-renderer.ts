@@ -67,6 +67,8 @@ export default class VrApplicationRenderer extends Service {
   async updateLandscapeData(structureLandscapeData: StructureLandscapeData, dynamicLandscapeData: DynamicLandscapeData): Promise<void> {
     this.structureLandscapeData = structureLandscapeData;
     this.dynamicLandscapeData = dynamicLandscapeData;
+
+    this.removeAllApplicationsLocally();
   }
 
   getApplicationInCurrentLandscapeById(id: string) {

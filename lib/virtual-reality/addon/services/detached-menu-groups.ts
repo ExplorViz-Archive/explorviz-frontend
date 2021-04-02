@@ -9,6 +9,8 @@ import { DetachableMenu } from "../utils/vr-menus/detachable-menu";
 import VrAssetRepository from "./vr-asset-repo";
 import VrMessageSender from "./vr-message-sender";
 import VrMessageReceiver from "./vr-message-receiver";
+import { StructureLandscapeData } from "../../../../app/utils/landscape-schemes/structure-data";
+import { DynamicLandscapeData } from "../../../../app/utils/landscape-schemes/dynamic-data";
 
 export default class DetachedMenuGroupsService extends Service {
   @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
@@ -29,6 +31,10 @@ export default class DetachedMenuGroupsService extends Service {
 
     this.container = new THREE.Group();
     this.sceneService.scene.add(this.container);
+  }
+
+  updateLandscapeData(_structureData: StructureLandscapeData, _dynamicData: DynamicLandscapeData): any {
+    this.removeAllDetachedMenusLocally()
   }
 
   /**

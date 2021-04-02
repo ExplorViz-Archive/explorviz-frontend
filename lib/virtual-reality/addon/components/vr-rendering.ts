@@ -3,11 +3,8 @@ import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
 import debugLogger from 'ember-debug-logger';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
-import Auth from 'explorviz-frontend/services/auth';
 import Configuration from 'explorviz-frontend/services/configuration';
-import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
-import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import RemoteVrUserService from 'explorviz-frontend/services/remote-vr-users';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
@@ -36,8 +33,8 @@ import VrLandscapeRenderer from "virtual-reality/services/vr-landscape-renderer"
 import VrMenuFactoryService from 'virtual-reality/services/vr-menu-factory';
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
-import VrRoomService from 'virtual-reality/services/vr-room';
 import VrSceneService from "virtual-reality/services/vr-scene";
+import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
@@ -74,7 +71,6 @@ import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import VrInputManager from 'virtual-reality/utils/vr-multi-user/vr-input-manager';
-import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import WebXRPolyfill from 'webxr-polyfill';
 
 interface Args {
@@ -88,14 +84,11 @@ interface Args {
 export default class VrRendering extends Component<Args> implements VrMessageListener {
   // #region SERVICES
 
-  @service('auth') private auth!: Auth;
   @service('configuration') private configuration!: Configuration;
   @service('delta-time') private deltaTimeService!: DeltaTimeService;
   @service('detached-menu-groups') private detachedMenuGroups!: DetachedMenuGroupsService;
   @service('grabbed-object') private grabbedObjectService!: GrabbedObjectService;
-  @service('landscape-token') private landscapeTokenService!: LandscapeTokenService;
   @service('local-vr-user') private localUser!: LocalVrUser;
-  @service('reload-handler') private reloadHandler!: ReloadHandler;
   @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
   @service('repos/timestamp-repository') private timestampRepo!: TimestampRepository;
   @service('spectate-user') private spectateUserService!: SpectateUserService;
@@ -105,8 +98,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
   @service('vr-message-receiver') private receiver!: VrMessageReceiver;
   @service('vr-message-sender') private sender!: VrMessageSender;
-  @service('vr-room') private vrRoomService!: VrRoomService;
   @service('vr-scene') private sceneService!: VrSceneService;
+  @service('vr-timestamp') private timestampService!: VrTimestampService;
   @service('web-socket') private webSocket!: WebSocketService;
 
   // #endregion SERVICES
@@ -122,7 +115,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private primaryInputManager = new VrInputManager();
   private secondaryInputManager = new VrInputManager();
   private vrSessionActive: boolean = false;
-  private timestampService!: VrTimestampService;
   private willDestroyController: AbortController = new AbortController();
 
   // #endregion CLASS FIELDS
@@ -231,29 +223,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     );
 
     // Initialize timestamp service.
-    this.timestampService = new VrTimestampService({
+    this.timestampService.injectValues({
       timestamp: this.args.selectedTimestampRecords[0]?.timestamp ||
         this.timestampRepo.getLatestTimestamp(this.args.landscapeData.structureLandscapeData.landscapeToken)?.timestamp ||
         new Date().getTime(),
       timestampInterval: this.args.timestampInterval,
-      localUser: this.localUser,
-      sender: this.sender,
-      auth: this.auth,
-      reloadHandler: this.reloadHandler,
-      landscapeTokenService: this.landscapeTokenService,
-      vrLandscapeRenderer: this.vrLandscapeRenderer,
-      vrApplicationRenderer: this.vrApplicationRenderer,
-      detachedMenuGroups: this.detachedMenuGroups
-    });
-
-    // Initialiye room service.
-    this.vrRoomService.injectValues({
-      timestampService: this.timestampService,
-    });
-
-    // Initialize menu rendering.
-    this.menuFactory.injectValues({
-      timestampService: this.timestampService
     });
   }
 

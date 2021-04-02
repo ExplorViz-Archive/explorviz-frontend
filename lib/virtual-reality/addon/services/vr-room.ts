@@ -4,9 +4,9 @@ import Auth from 'explorviz-frontend/services/auth';
 import THREE from 'three';
 import DetachedMenuGroupsService from 'virtual-reality/services/detached-menu-groups';
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
+import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import { DetachableMenu, isDetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
 import { InitialRoomApp, InitialRoomDetachedMenu, InitialRoomLandscape, InitialRoomPayload } from 'virtual-reality/utils/vr-payload/initial-room';
-import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import VrLandscapeRenderer from "./vr-landscape-renderer";
 
 const { vrService } = ENV.backendAddresses;
@@ -22,23 +22,12 @@ function isRoomId(roomId: any): roomId is RoomId {
   return typeof roomId === 'string';
 }
 
-type InjectedValues = {
-  timestampService: VrTimestampService
-};
-
 export default class VrRoomService extends Service {
   @service('auth') private auth!: Auth;
   @service('detached-menu-groups') private detachedMenuGroups!: DetachedMenuGroupsService;
   @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
-
-  private timestampService!: VrTimestampService;
-
-  injectValues({
-    timestampService,
-  }: InjectedValues) {
-    this.timestampService = timestampService;
-  }
+  @service('vr-timestamp') private timestampService!: VrTimestampService;
 
   async listRooms(): Promise<RoomListRecord[]> {
     const url = `${vrService}/v2/vr/rooms`;

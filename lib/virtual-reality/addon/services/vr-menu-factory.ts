@@ -4,6 +4,7 @@ import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import LocalVrUser from "virtual-reality/services/local-vr-user";
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
+import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import { EntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import DisableInputMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/disable-input-menu';
 import GrabMenu, { GrabbableObject } from "virtual-reality/utils/vr-menus/ui-less-menu/grab-menu";
@@ -20,23 +21,18 @@ import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
 import TimeMenu from 'virtual-reality/utils/vr-menus/ui-menu/time-menu';
 import ToolMenu from 'virtual-reality/utils/vr-menus/ui-menu/tool-menu';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
-import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import ConnectingMenu from "../utils/vr-menus/ui-menu/connection/connecting-menu";
 import OfflineMenu from "../utils/vr-menus/ui-menu/connection/offline-menu";
 import OnlineMenu from "../utils/vr-menus/ui-menu/connection/online-menu";
 import MainMenu from "../utils/vr-menus/ui-menu/main-menu";
 import SettingsMenu from "../utils/vr-menus/ui-menu/settings-menu";
 import ZoomMenu from "../utils/vr-menus/ui-menu/zoom-menu";
+import DetachedMenuGroupsService from "./detached-menu-groups";
 import RemoteVrUserService from "./remote-vr-users";
 import SpectateUserService from "./spectate-user";
 import VrLandscapeRenderer from "./vr-landscape-renderer";
 import VrRoomService from './vr-room';
 import VrSceneService from "./vr-scene";
-import DetachedMenuGroupsService from "./detached-menu-groups";
-
-type InjectedValues = {
-  timestampService: VrTimestampService
-};
 
 export default class VrMenuFactoryService extends Service {
   @service('delta-time') private deltaTimeService!: DeltaTimeService;
@@ -50,14 +46,7 @@ export default class VrMenuFactoryService extends Service {
   @service('vr-message-sender') private sender!: VrMessageSender;
   @service('vr-room') private roomService!: VrRoomService;
   @service('vr-scene') private sceneService!: VrSceneService;
-
-  private timestampService!: VrTimestampService;
-
-  injectValues({
-    timestampService
-  }: InjectedValues) {
-    this.timestampService = timestampService;
-  }
+  @service('vr-timestamp') private timestampService!: VrTimestampService;
 
   buildMainMenu(): MainMenu {
     return new MainMenu({ menuFactory: this });
