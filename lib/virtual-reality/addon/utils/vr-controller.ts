@@ -1,15 +1,12 @@
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import THREE from 'three';
 import VrControllerModel from './vr-controller/vr-controller-model';
 import VrControllerModelFactory from './vr-controller/vr-controller-model-factory';
-import FloorMesh from './view-objects/vr/floor-mesh';
 import TeleportMesh from './view-objects/vr/teleport-mesh';
 import VRControllerBindingsList from './vr-controller/vr-controller-bindings-list';
 import VRControllerLabelGroup from './vr-controller/vr-controller-label-group';
 import { displayAsSolidObject, displayAsWireframe } from './vr-helpers/multi-user-helper';
 import MenuGroup from './vr-menus/menu-group';
-import InteractiveMenu from './vr-menus/interactive-menu';
 
 /**
  * Length of the controller's ray when there is no intersection point.
@@ -36,6 +33,8 @@ export type VRControllerCallbackFunctions = {
   menuUp?(controller: VRController): void,
   menuPress?(controller: VRController): void,
   menuDown?(controller: VRController): void,
+
+  updateIntersectedObject?(controller: VRController): void,
 }
 
 /**
@@ -282,7 +281,7 @@ export default class VRController extends BaseMesh {
    * Whenever a button change or press event is registered, the according
    * callback functions (provided via the constructor) are called.
    */
-  updateGamepad() {
+  private updateGamepad() {
     const { gamepad } = this;
     const callbacks = this.eventCallbacks;
 
@@ -362,8 +361,8 @@ export default class VRController extends BaseMesh {
     }
   }
 
-  computeIntersections() {
-    if (this.intersectableObjects.length === 0) return [];
+  private computeNearestIntersection(): THREE.Intersection | null {
+    if (this.intersectableObjects.length === 0) return null;
 
     const { raySpace } = this;
     const tempMatrix = new THREE.Matrix4();
@@ -374,82 +373,24 @@ export default class VRController extends BaseMesh {
 
     const intersections = this.raycaster.intersectObjects(this.intersectableObjects, true);
 
-    for (let i = 0; i < intersections.length; i++) {
-      const { object } = intersections[i];
-      if (!(object instanceof LabelMesh) && object.visible) {
-        return [intersections[i]];
-      }
+    for (const intersection of intersections) {
+      if (intersection.object.visible) return intersection;
     }
 
-    return [];
+    return null;
   }
 
   updateIntersectedObject() {
     if (!this.ray || !this.ray.visible) return;
 
-    const intersections = this.computeIntersections();
+    // Find and store intersected object and scale ray accordingly.
+    const nearestIntersection = this.computeNearestIntersection();
+    this.intersectedObject = nearestIntersection || null;
+    this.ray.scale.z = nearestIntersection?.distance || DEFAULT_RAY_LENGTH;
 
-    const [nearestIntersection] = intersections;
-
-    if (!nearestIntersection) {
-      this.intersectedObject = null;
-      if (this.teleportArea) {
-        this.teleportArea.visible = false;
-      }
-      this.resetHoverEffect();
-      this.ray.scale.z = DEFAULT_RAY_LENGTH;
-      return;
-    }
-
-    const { object } = nearestIntersection;
-
-    if (this.intersectedObject && object !== this.intersectedObject.object) {
-      if (this.intersectedObject.object instanceof FloorMesh) {
-        if (this.teleportArea) {
-          this.teleportArea.visible = false;
-        }
-      }
-      this.resetHoverEffect();
-    }
-
-    // Handle hover effect and teleport area
-
-    if (object.parent instanceof InteractiveMenu) {
-      object.parent.hover(nearestIntersection);
-    } else if (object instanceof InteractiveMenu) {
-      object.applyHoverEffect();
-    }
-
-    if (object instanceof FloorMesh) {
-      if (this.teleportArea && this.enableTeleport) {
-        // Show teleport area above intersected point on floor. However, if
-        // the controller's ray is invisible, don't show the teleport area
-        // either.
-        this.teleportArea.showAbovePosition(nearestIntersection.point);
-        this.teleportArea.visible = this.ray.visible;
-      }
-    } else if (object instanceof InteractiveMenu) {
-      object.applyHoverEffect();
-    }
-
-
-    // Store intersected object and scale ray accordingly
-    this.intersectedObject = nearestIntersection;
-    this.ray.scale.z = nearestIntersection.distance;
-  }
-
-  /**
-   * Resets the hover effect of the object which was previously hovered upon by the controller.
-   *
-   * @param controller Controller of which the hover effect shall be reseted.
-   */
-  resetHoverEffect() {
-    if (!this.intersectedObject || !this.intersectedObject.object) return;
-
-    const { object } = this.intersectedObject;
-
-    if (object instanceof BaseMesh) {
-      object.resetHoverEffect();
+    // Invoke event handler for hover effect.
+    if (this.eventCallbacks.updateIntersectedObject) {
+      this.eventCallbacks.updateIntersectedObject(this);
     }
   }
 }

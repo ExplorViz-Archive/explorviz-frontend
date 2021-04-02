@@ -1,14 +1,14 @@
 import THREE from 'three';
 import VrMessageReceiver from 'virtual-reality/services/vr-message-receiver';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
-import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
+import CloseIcon, { CloseIconTextures } from 'virtual-reality/utils/view-objects/vr/close-icon';
 import { isMenuDetachedResponse, MenuDetachedResponse } from 'virtual-reality/utils/vr-message/receivable/response/menu-detached';
 import { isObjectClosedResponse, ObjectClosedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-closed';
 import { DetachableMenu } from './detachable-menu';
 import DetachedMenuGroup from './detached-menu-group';
 
 export type DetachedMenuGroupContainerArgs = {
-  closeButtonTexture: THREE.Texture,
+  closeButtonTextures: CloseIconTextures,
   sender: VrMessageSender,
   receiver: VrMessageReceiver
 };
@@ -18,16 +18,16 @@ export type DetachedMenuGroupContainerArgs = {
  * detached menu and its sub-menus.
  */
 export default class DetachedMenuGroupContainer extends THREE.Group {
-  private closeButtonTexture: THREE.Texture;
+  private closeButtonTextures: CloseIconTextures;
   private sender: VrMessageSender;
   private receiver: VrMessageReceiver;
 
   private detachedMenuGroups: Set<DetachedMenuGroup>;
   private detachedMenuGroupsById: Map<string, DetachedMenuGroup>;
 
-  constructor({closeButtonTexture, sender, receiver}: DetachedMenuGroupContainerArgs) {
+  constructor({closeButtonTextures, sender, receiver}: DetachedMenuGroupContainerArgs) {
     super();
-    this.closeButtonTexture = closeButtonTexture;
+    this.closeButtonTextures = closeButtonTextures;
     this.sender = sender;
     this.receiver = receiver;
 
@@ -103,7 +103,7 @@ export default class DetachedMenuGroupContainer extends THREE.Group {
     // Since the menu has been scaled already and is not scaled when it has its
     // normal size, the close icon does not have to correct for the menu's scale.
     const closeIcon = new CloseIcon({
-      texture: this.closeButtonTexture,
+      textures: this.closeButtonTextures,
       onClose: () => this.removeDetachedMenu(detachedMenuGroup),
       radius: 0.04
     });

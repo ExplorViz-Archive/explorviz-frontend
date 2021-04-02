@@ -23,6 +23,7 @@ import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
@@ -72,7 +73,7 @@ import { UserControllerMessage, USER_CONTROLLER_EVENT } from 'virtual-reality/ut
 import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
-import VrInputManager, { VrInputHandler } from 'virtual-reality/utils/vr-multi-user/vr-input-manager';
+import VrInputManager from 'virtual-reality/utils/vr-multi-user/vr-input-manager';
 import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
 import VrLandscapeRenderer from 'virtual-reality/utils/vr-rendering/vr-landscape-renderer';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
@@ -144,6 +145,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   // #region CLASS FIELDS
 
   private debug = debugLogger('VrRendering');
+
+  private vrSessionActive: boolean = false;
 
   // Used to register (mouse) events
   private interaction!: Interaction;
@@ -296,7 +299,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.debug('Initializing services...');
 
     // Load image for delete button
-    const closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
+    const textureLoader = new THREE.TextureLoader();
+    const closeButtonTextures = CloseIcon.loadTextures(textureLoader);
 
     // Initialize landscape rendering.
     this.vrLandscapeRenderer = new VrLandscapeRenderer({
@@ -311,7 +315,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Initialize application rendering.
     this.vrApplicationRenderer = new VrApplicationRenderer({
       appCommRendering: new AppCommunicationRendering(this.configuration),
-      closeButtonTexture,
+      closeButtonTextures,
       configuration: this.configuration,
       font: this.args.font,
       landscapeData: this.args.landscapeData,
@@ -322,7 +326,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Initialize menu group.
     this.detachedMenuGroups = new DetachedMenuGroupContainer({
-      closeButtonTexture,
+      closeButtonTextures,
       receiver: this.receiver,
       sender: this.sender,
     });
@@ -396,9 +400,17 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   private initPrimaryInput() {
+    // When any base mash is hovered, highlight it.
+    this.primaryInputManager.addInputHandler({
+      targetType: BaseMesh,
+      hover: (event) => event.target.applyHoverEffect(),
+      resetHover: (event) => event.target.resetHoverEffect(),
+    });
+
+    // When an application on the landscape is clicked, open the application.
     this.primaryInputManager.addInputHandler<ApplicationMesh>({
-      canHandle: (object): object is ApplicationMesh => object instanceof ApplicationMesh,
-      triggerDown: (application, {point}) => this.addApplication(application.dataModel).then((applicationObject3D) => {
+      targetType: ApplicationMesh,
+      triggerDown: (event) => this.addApplication(event.target.dataModel).then((applicationObject3D) => {
         if (!applicationObject3D) return;
 
         // Rotate app so that it is aligned with landscape
@@ -407,42 +419,69 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
 
         // Position app above clicked point.
-        applicationObject3D.position.copy(point);
+        applicationObject3D.position.copy(event.intersection.point);
       })
     });
-    this.primaryInputManager.addInputHandler<ComponentMesh>({
-      canHandle: (object): object is ComponentMesh => object instanceof ComponentMesh && object.parent instanceof ApplicationObject3D,
-      triggerDown: (component) => this.toggleComponentAndUpdate(component, component.parent as ApplicationObject3D)
+
+    // When a component of an application is clicked, open it.
+    this.primaryInputManager.addInputHandler({
+      targetType: ComponentMesh,
+      triggerDown: (event) => {
+        if (event.target.parent instanceof ApplicationObject3D) {
+          this.toggleComponentAndUpdate(event.target, event.target.parent);
+        }
+      }
     });
-    this.primaryInputManager.addInputHandler<FoundationMesh>({
-      canHandle: (object): object is FoundationMesh => object instanceof FoundationMesh && object.parent instanceof ApplicationObject3D,
-      triggerDown: (foundation) => this.closeAllComponentsAndUpdate(foundation.parent as ApplicationObject3D)
+
+    // When the foundation of an application is clicked, close all components.
+    this.primaryInputManager.addInputHandler({
+      targetType: FoundationMesh,
+      triggerDown: (event) => {
+        if (event.target.parent instanceof ApplicationObject3D) {
+          this.closeAllComponentsAndUpdate(event.target.parent);
+        }
+      }
     });
-    this.primaryInputManager.addInputHandler<CloseIcon>({
-      canHandle: (object): object is CloseIcon => object instanceof CloseIcon,
-      triggerDown: (closeIcon) => closeIcon.close().then((closedSuccessfully: boolean) => {
+
+    // When a close icon is clicked, close the corresponding object.
+    this.primaryInputManager.addInputHandler({
+      targetType: CloseIcon,
+      triggerDown: (event) => event.target.close().then((closedSuccessfully: boolean) => {
         if (!closedSuccessfully) this.showHint('Object could not be closed');
       })
     });
-    const menuInputHandler: VrInputHandler<InteractiveMenu> = {
-      canHandle: (object): object is InteractiveMenu => object instanceof InteractiveMenu,
-      triggerDown: (menu, intersection) => menu.triggerDown(intersection),
-      triggerPress: (menu, intersection, value) => menu.triggerPress(intersection, value),
-      triggerUp: (menu, intersection) => menu.triggerUp(intersection),
-      hover: (menu, intersection) => menu.hover(intersection),
-      resetHover: (menu) => menu.resetHoverEffect()
-    };
-    this.primaryInputManager.addInputHandler(menuInputHandler);
+
+    // Initialize menu interaction with other controller.
+    this.primaryInputManager.addInputHandler({
+      targetType: InteractiveMenu,
+      triggerDown: (event) => event.target.triggerDown(event.intersection),
+      triggerPress: (event) => event.target.triggerPress(event.intersection, event.value),
+      triggerUp: (event) => event.target.triggerUp(event.intersection),
+      hover: (event) => event.target.hover(event.intersection),
+      resetHover: (event) => event.target.resetHoverEffect()
+    });
   }
 
   private initSecondaryInput() {
-    this.secondaryInputManager.addInputHandler<FloorMesh>({
-      canHandle: (object): object is FloorMesh => object instanceof FloorMesh,
-      triggerDown: (_floor, {point}) => this.localUser.teleportToPosition(point)
+    this.secondaryInputManager.addInputHandler({
+      targetType: FloorMesh,
+      triggerDown: (event) => this.localUser.teleportToPosition(event.intersection.point),
+      hover: (event) => {
+        if (event.controller?.teleportArea && event.controller?.ray) {
+          event.controller.teleportArea.showAbovePosition(event.intersection.point);
+          event.controller.teleportArea.visible = event.controller.ray.visible && event.controller.enableTeleport;
+        }
+      },
+      resetHover: (event) => {
+        if (event.controller?.teleportArea) {
+          event.controller.teleportArea.visible = false;
+        }
+      },
     });
-    this.secondaryInputManager.addInputHandler<ApplicationObject3D>({
-      canHandle: (object): object is ApplicationObject3D => object instanceof ApplicationObject3D,
-      triggerDown: (application, {object}) => this.highlightAppEntity(object, application)
+
+    this.secondaryInputManager.addInputHandler({
+      targetType: ApplicationObject3D,
+      triggerDown: (event) => this.highlightAppEntity(event.intersection.object, event.target)
     });
   }
 
@@ -476,6 +515,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Add connection event listeners.
     controller.eventCallbacks.connected = (controller) => this.onControllerConnected(controller);
     controller.eventCallbacks.disconnected = (controller) => this.onControllerDisconnected(controller);
+
+    // Add hover event listeners.
+    controller.eventCallbacks.updateIntersectedObject = (controller) => this.handleHover(controller.intersectedObject, controller);
 
     // Position menus above controller at an angle.
     menuGroup.position.y += 0.15;
@@ -554,11 +596,13 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @action
   onVrSessionStarted(/* session: XRSession */) {
     this.debug('WebXRSession started');
+    this.vrSessionActive = true;
   }
 
   @action
   onVrSessionEnded() {
     this.debug('WebXRSession ended');
+    this.vrSessionActive = false;
     const outerDiv = this.canvas?.parentElement;
     if (outerDiv) {
       this.resize(outerDiv);
@@ -879,15 +923,15 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       triggerButton: new VRControllerButtonBinding('Open / Close', {
         onButtonDown: (controller: VRController) => {
           if (!controller.intersectedObject) return;
-          this.primaryInputManager.handleTriggerDown(controller.intersectedObject);
+          this.primaryInputManager.handleTriggerDown(controller.intersectedObject, controller);
         },
         onButtonPress: (controller: VRController, value: number) => {
           if (!controller.intersectedObject) return;
-          this.primaryInputManager.handleTriggerPress(controller.intersectedObject, value);
+          this.primaryInputManager.handleTriggerPress(controller.intersectedObject, value, controller);
         },
         onButtonUp: (controller: VRController) => {
           if (!controller.intersectedObject) return;
-          this.primaryInputManager.handleTriggerUp(controller.intersectedObject);
+          this.primaryInputManager.handleTriggerUp(controller.intersectedObject, controller);
         }
       }),
 
@@ -949,16 +993,19 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   private handleDoubleClick(intersection: THREE.Intersection | null) {
+    if (this.vrSessionActive || !intersection) return;
     if (!intersection) return;
     this.primaryInputManager.handleTriggerDown(intersection);
   }
 
   private handleSingleClick(intersection: THREE.Intersection | null) {
-    if (!intersection) return;
+    if (this.vrSessionActive || !intersection) return;
     this.secondaryInputManager.handleTriggerDown(intersection);
   }
 
   private handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
+    if (this.vrSessionActive) return;
+
     const LEFT_MOUSE_BUTTON = 1;
     const RIGHT_MOUSE_BUTTON = 3;
 
@@ -983,14 +1030,22 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   private handleMouseWheel(delta: number) {
+    if (this.vrSessionActive) return;
     this.camera.translateZ(delta * 0.2);
   }
 
   private handleMouseMove(intersection: THREE.Intersection | null) {
+    if (this.vrSessionActive) return;
+    this.handleHover(intersection, null);
+  }
+
+  private handleHover(intersection: THREE.Intersection | null, controller: VRController | null) {
     if (intersection) {
-      this.primaryInputManager.handleHover(intersection);
+      this.primaryInputManager.handleHover(intersection, controller);
+      this.secondaryInputManager.handleHover(intersection, controller);
     } else {
-      this.primaryInputManager.resetHover();
+      this.primaryInputManager.resetHover(controller);
+      this.secondaryInputManager.resetHover(controller);
     }
   }
 
@@ -999,11 +1054,13 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       case 'l': perform(this.loadNewLandscape); break;
 
       case 'Escape':
-        // Close current debug menu or open tool menu if no menu is debugged.
-        if (this.debugMenuGroup.currentMenu) {
-          this.debugMenuGroup.closeMenu();
-        } else {
-          this.debugMenuGroup.openMenu(this.menuFactory.buildToolMenu());
+        if (!this.vrSessionActive) {
+          // Close current debug menu or open tool menu if no menu is debugged.
+          if (this.debugMenuGroup.currentMenu) {
+            this.debugMenuGroup.closeMenu();
+          } else {
+            this.debugMenuGroup.openMenu(this.menuFactory.buildToolMenu());
+          }
         }
         break;
       default:

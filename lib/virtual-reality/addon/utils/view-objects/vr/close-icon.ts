@@ -2,14 +2,27 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-controller';
 
+export type CloseIconTextures = {
+  defaultTexture: THREE.Texture,
+  hoverTexture: THREE.Texture,
+};
+
 export default class CloseIcon extends BaseMesh {
+  static loadTextures(loader: THREE.TextureLoader): CloseIconTextures {
+    return {
+      defaultTexture: loader.load('images/x_white_transp.png'),
+      hoverTexture: loader.load('images/x_white.png')
+    };
+  }
+
   private radius: number;
 
   private onClose: () => Promise<boolean>;
+  private textures: CloseIconTextures;
 
-  constructor({ onClose, texture, radius = 0.075, segments = 32 }: {
+  constructor({ onClose, textures, radius = 0.075, segments = 32 }: {
     onClose: () => Promise<boolean>,
-    texture: THREE.Texture,
+    textures: CloseIconTextures,
     radius?: number,
     segments?: number,
     compensateParentScale?: boolean
@@ -17,11 +30,12 @@ export default class CloseIcon extends BaseMesh {
     super(new THREE.Color());
 
     this.onClose = onClose;
+    this.textures = textures;
 
     this.radius = radius;
     this.geometry = new THREE.SphereGeometry(radius, segments, segments);
     this.material = new THREE.MeshPhongMaterial({
-      map: texture,
+      map: textures.defaultTexture,
     });
   }
 
@@ -62,6 +76,16 @@ export default class CloseIcon extends BaseMesh {
     }
 
     object.add(this);
+  }
+
+  applyHoverEffect() {
+    super.applyHoverEffect();
+    this.material.map = this.textures.hoverTexture;
+  }
+
+  resetHoverEffect() {
+    super.resetHoverEffect();
+    this.material.map = this.textures.defaultTexture;
   }
 
   close(): Promise<boolean> {

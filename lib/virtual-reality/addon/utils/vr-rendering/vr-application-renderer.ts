@@ -19,7 +19,7 @@ import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/found
 import THREE from 'three';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
-import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
+import CloseIcon, { CloseIconTextures } from 'virtual-reality/utils/view-objects/vr/close-icon';
 
 // Scalar with which the application is scaled (evenly in all dimensions)
 const APPLICATION_SCALAR = 0.01;
@@ -39,7 +39,7 @@ export default class VrApplicationRenderer {
   debug = debugLogger('VrApplicationRender');
 
   readonly appCommRendering: AppCommunicationRendering;
-  private closeButtonTexture: THREE.Texture;
+  private closeButtonTextures: CloseIconTextures;
   private configuration: Configuration;
   private font: THREE.Font;
   private structureLandscapeData: StructureLandscapeData;
@@ -52,7 +52,7 @@ export default class VrApplicationRenderer {
 
   constructor({
     appCommRendering,
-    closeButtonTexture,
+    closeButtonTextures,
     configuration,
     font,
     landscapeData,
@@ -60,7 +60,7 @@ export default class VrApplicationRenderer {
     worker
   }: {
     appCommRendering: AppCommunicationRendering,
-    closeButtonTexture: THREE.Texture,
+    closeButtonTextures: CloseIconTextures,
     configuration: Configuration,
     font: THREE.Font,
     landscapeData: LandscapeData;
@@ -68,7 +68,7 @@ export default class VrApplicationRenderer {
     worker: any
   }) {
     this.appCommRendering = appCommRendering;
-    this.closeButtonTexture = closeButtonTexture;
+    this.closeButtonTextures = closeButtonTextures;
     this.configuration = configuration;
     this.font = font;
     this.structureLandscapeData = landscapeData.structureLandscapeData;
@@ -79,7 +79,7 @@ export default class VrApplicationRenderer {
     this.applicationGroup = new ApplicationGroup();
     this.drawableClassCommunications = new Map();
   }
-  
+
   async updateLandscapeData(structureLandscapeData: StructureLandscapeData, dynamicLandscapeData: DynamicLandscapeData): Promise<void> {
     this.structureLandscapeData = structureLandscapeData;
     this.dynamicLandscapeData = dynamicLandscapeData;
@@ -129,7 +129,7 @@ export default class VrApplicationRenderer {
 
       // Add close icon to application.
       const closeIcon = new CloseIcon({
-        texture: this.closeButtonTexture,
+        textures: this.closeButtonTextures,
         onClose: () => this.onRemoveApplication(applicationObject3D)
       });
       closeIcon.addToObject(applicationObject3D);
