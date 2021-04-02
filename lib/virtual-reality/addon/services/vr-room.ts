@@ -2,10 +2,10 @@ import Service, { inject as service } from '@ember/service';
 import ENV from 'explorviz-frontend/config/environment';
 import Auth from 'explorviz-frontend/services/auth';
 import THREE from 'three';
+import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
 import { DetachableMenu, isDetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
 import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
 import { InitialRoomApp, InitialRoomDetachedMenu, InitialRoomLandscape, InitialRoomPayload } from 'virtual-reality/utils/vr-payload/initial-room';
-import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import VrLandscapeRenderer from "./vr-landscape-renderer";
 

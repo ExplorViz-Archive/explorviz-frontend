@@ -5,7 +5,7 @@ import ReloadHandler from "explorviz-frontend/services/reload-handler";
 import LocalVrUser from "virtual-reality/services/local-vr-user";
 import VrMessageSender from "virtual-reality/services/vr-message-sender";
 import DetachedMenuGroupContainer from "./vr-menus/detached-menu-group-container";
-import VrApplicationRenderer from "./vr-rendering/vr-application-renderer";
+import VrApplicationRenderer from "../services/vr-application-renderer";
 import VrLandscapeRenderer from "../services/vr-landscape-renderer";
 
 type VrtTimestampServiceArgs = {

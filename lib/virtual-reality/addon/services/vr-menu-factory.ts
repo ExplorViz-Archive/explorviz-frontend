@@ -2,37 +2,37 @@ import Service, { inject as service } from '@ember/service';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import LocalVrUser from "virtual-reality/services/local-vr-user";
+import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import { EntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
+import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
+import DisableInputMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/disable-input-menu';
 import GrabMenu, { GrabbableObject } from "virtual-reality/utils/vr-menus/ui-less-menu/grab-menu";
 import PingMenu from "virtual-reality/utils/vr-menus/ui-less-menu/ping-menu";
 import ScaleMenu, { SharedScaleMenuState } from "virtual-reality/utils/vr-menus/ui-less-menu/scale-menu";
 import CameraMenu from 'virtual-reality/utils/vr-menus/ui-menu/camera-menu';
 import ConnectionBaseMenu from 'virtual-reality/utils/vr-menus/ui-menu/connection/base';
 import JoinMenu from "virtual-reality/utils/vr-menus/ui-menu/connection/join-menu";
+import SpectateMenu from 'virtual-reality/utils/vr-menus/ui-menu/connection/spectate-menu';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/ui-menu/detail-info-menu';
 import HintMenu from "virtual-reality/utils/vr-menus/ui-menu/hud/hint-menu";
 import MessageBoxMenu from "virtual-reality/utils/vr-menus/ui-menu/hud/message-box-menu";
 import ResetMenu from 'virtual-reality/utils/vr-menus/ui-menu/reset-menu';
-import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
+import TimeMenu from 'virtual-reality/utils/vr-menus/ui-menu/time-menu';
+import ToolMenu from 'virtual-reality/utils/vr-menus/ui-menu/tool-menu';
+import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
+import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import ConnectingMenu from "../utils/vr-menus/ui-menu/connection/connecting-menu";
 import OfflineMenu from "../utils/vr-menus/ui-menu/connection/offline-menu";
 import OnlineMenu from "../utils/vr-menus/ui-menu/connection/online-menu";
+import MainMenu from "../utils/vr-menus/ui-menu/main-menu";
+import SettingsMenu from "../utils/vr-menus/ui-menu/settings-menu";
 import ZoomMenu from "../utils/vr-menus/ui-menu/zoom-menu";
 import RemoteVrUserService from "./remote-vr-users";
-import SettingsMenu from "../utils/vr-menus/ui-menu/settings-menu";
-import MainMenu from "../utils/vr-menus/ui-menu/main-menu";
-import TimeMenu from 'virtual-reality/utils/vr-menus/ui-menu/time-menu';
-import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
-import VrRoomService from './vr-room';
-import DetachedMenuGroupContainer from 'virtual-reality/utils/vr-menus/detached-menu-group-container';
-import SpectateMenu from 'virtual-reality/utils/vr-menus/ui-menu/connection/spectate-menu';
-import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
-import DisableInputMenu from 'virtual-reality/utils/vr-menus/ui-less-menu/disable-input-menu';
-import ToolMenu from 'virtual-reality/utils/vr-menus/ui-menu/tool-menu';
-import VrSceneService from "./vr-scene";
 import SpectateUserService from "./spectate-user";
 import VrLandscapeRenderer from "./vr-landscape-renderer";
+import VrRoomService from './vr-room';
+import VrSceneService from "./vr-scene";
 
 type InjectedValues = {
   vrApplicationRenderer: VrApplicationRenderer,
@@ -46,22 +46,20 @@ export default class VrMenuFactoryService extends Service {
   @service('local-vr-user') private localUser!: LocalVrUser;
   @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
   @service('spectate-user') private spectateUserService!: SpectateUserService;
+  @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
   @service('vr-message-sender') private sender!: VrMessageSender;
   @service('vr-room') private roomService!: VrRoomService;
   @service('vr-scene') private sceneService!: VrSceneService;
 
-  private vrApplicationRenderer!: VrApplicationRenderer;
   private timestampService!: VrTimestampService;
   private detachedMenuGroups!: DetachedMenuGroupContainer;
 
   injectValues({
-    vrApplicationRenderer,
     timestampService,
     detachedMenuGroups
   }: InjectedValues) {
     this.timestampService = timestampService;
-    this.vrApplicationRenderer = vrApplicationRenderer;
     this.detachedMenuGroups = detachedMenuGroups;
   }
 

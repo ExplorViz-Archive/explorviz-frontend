@@ -10,7 +10,6 @@ import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import RemoteVrUserService from 'explorviz-frontend/services/remote-vr-users';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
-import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import Interaction from 'explorviz-frontend/utils/interaction';
@@ -20,8 +19,8 @@ import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/applicati
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
-import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
@@ -30,10 +29,14 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import SpectateUserService from 'virtual-reality/services/spectate-user';
+import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
+import VrAssetRepository from "virtual-reality/services/vr-asset-repo";
+import VrLandscapeRenderer from "virtual-reality/services/vr-landscape-renderer";
 import VrMenuFactoryService from 'virtual-reality/services/vr-menu-factory';
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import VrRoomService from 'virtual-reality/services/vr-room';
+import VrSceneService from "virtual-reality/services/vr-scene";
 import WebSocketService from 'virtual-reality/services/web-socket';
 import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
@@ -72,12 +75,8 @@ import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import VrInputManager from 'virtual-reality/utils/vr-multi-user/vr-input-manager';
-import VrApplicationRenderer from 'virtual-reality/utils/vr-rendering/vr-application-renderer';
 import VrTimestampService from 'virtual-reality/utils/vr-timestamp';
 import WebXRPolyfill from 'webxr-polyfill';
-import VrSceneService from "../services/vr-scene";
-import VrAssetRepository from "../services/vr-asset-repo";
-import VrLandscapeRenderer from "../services/vr-landscape-renderer";
 
 interface Args {
   readonly id: string;
@@ -100,6 +99,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
   @service('repos/timestamp-repository') private timestampRepo!: TimestampRepository;
   @service('spectate-user') private spectateUserService!: SpectateUserService;
+  @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
   @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
   @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
@@ -108,7 +108,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('vr-room') private vrRoomService!: VrRoomService;
   @service('vr-scene') private sceneService!: VrSceneService;
   @service('web-socket') private webSocket!: WebSocketService;
-  @service() private worker!: any;
 
   // #endregion SERVICES
 
@@ -123,7 +122,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private messageMenuQueue!: MenuQueue;
   private primaryInputManager = new VrInputManager();
   private secondaryInputManager = new VrInputManager();
-  private vrApplicationRenderer!: VrApplicationRenderer;
   private vrSessionActive: boolean = false;
   private timestampService!: VrTimestampService;
   private willDestroyController: AbortController = new AbortController();
@@ -228,16 +226,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     );
 
     // Initialize application rendering.
-    this.vrApplicationRenderer = new VrApplicationRenderer({
-      appCommRendering: new AppCommunicationRendering(this.configuration),
-      closeIconTextures: this.assetRepo.closeIconTextures,
-      configuration: this.configuration,
-      font: this.assetRepo.font,
-      landscapeData: this.args.landscapeData,
-      onRemoveApplication: (application) => this.removeApplication(application),
-      worker: this.worker,
-    });
-    this.scene.add(this.applicationGroup);
+    this.vrApplicationRenderer.onRemoveApplication = (application) => this.removeApplication(application);
+    this.vrApplicationRenderer.updateLandscapeData(
+      this.args.landscapeData.structureLandscapeData,
+      this.args.landscapeData.dynamicLandscapeData
+    );
 
     // Initialize menu group.
     this.detachedMenuGroups = new DetachedMenuGroupContainer({
@@ -930,7 +923,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       case LEFT_MOUSE_BUTTON:
         // Move user.
         const moveSpeed = 3.0;
-        this.localUser.moveInCameraDirection(new THREE.Vector3(-x * moveSpeed, 0, -y * moveSpeed), {enableY: false});
+        this.localUser.moveInCameraDirection(new THREE.Vector3(-x * moveSpeed, 0, -y * moveSpeed), { enableY: false });
         break;
       case RIGHT_MOUSE_BUTTON:
         // Rotate camera to look around.
