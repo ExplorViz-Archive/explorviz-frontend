@@ -51,6 +51,18 @@ export default class LandscapeObject3D extends THREE.Object3D {
     return this.modelIdToMesh.get(id);
   }
 
+  getAllMeshes() {
+    return Array.from(this.modelIdToMesh.values());
+  }
+
+  setOpacity(opacity: number) {
+    this.getAllMeshes().forEach((mesh) => {
+      if (mesh instanceof THREE.Mesh && mesh.material instanceof THREE.Material) {
+        mesh.material.opacity = opacity;
+      }
+    });
+  }
+
   /**
    * Resets all maps and sets governing meshes
    */
