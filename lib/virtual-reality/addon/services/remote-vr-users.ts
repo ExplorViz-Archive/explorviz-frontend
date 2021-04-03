@@ -54,7 +54,7 @@ export default class RemoteVrUserService extends Service {
     if (this.idToRemoteUser.has(remoteUser.userId)) this.removeRemoteUser(remoteUser);
 
     this.idToRemoteUser.set(remoteUser.userId, remoteUser);
-    this.headsetModel.then((hmd) => remoteUser.initCamera(hmd));
+    this.headsetModel.then((hmd) => remoteUser.initCamera(hmd.clone(true)));
     this.remoteUserGroup.add(remoteUser);
   }
 
