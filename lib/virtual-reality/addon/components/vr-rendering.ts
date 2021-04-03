@@ -12,8 +12,6 @@ import * as Highlighting from 'explorviz-frontend/utils/application-rendering/hi
 import Interaction from 'explorviz-frontend/utils/interaction';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
-import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
@@ -26,7 +24,7 @@ import DeltaTimeService from 'virtual-reality/services/delta-time';
 import DetachedMenuGroupsService from 'virtual-reality/services/detached-menu-groups';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import SpectateUserService from 'virtual-reality/services/spectate-user';
-import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
+import VrApplicationRenderer, { AddApplicationArgs } from 'virtual-reality/services/vr-application-renderer';
 import VrAssetRepository from "virtual-reality/services/vr-asset-repo";
 import VrLandscapeRenderer from "virtual-reality/services/vr-landscape-renderer";
 import VrMenuFactoryService from 'virtual-reality/services/vr-menu-factory';
@@ -57,7 +55,7 @@ import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/util
 import { UserDisconnectedMessage } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
 import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_opened';
 import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
-import { HighlightingUpdateMessage, HIGHLIGHTING_UPDATE_EVENT } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
+import { HighlightingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
 import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
 import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
 import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
@@ -70,6 +68,7 @@ import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import VrInputManager from 'virtual-reality/utils/vr-multi-user/vr-input-manager';
 import WebXRPolyfill from 'webxr-polyfill';
+import VrHighlightingService from "../services/vr-highlighting";
 
 interface Args {
   readonly id: string;
@@ -94,6 +93,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('spectate-user') private spectateUserService!: SpectateUserService;
   @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
   @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
+  @service('vr-highlighting') private highlightingService!: VrHighlightingService;
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
   @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
   @service('vr-message-receiver') private receiver!: VrMessageReceiver;
@@ -255,16 +255,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // When an application on the landscape is clicked, open the application.
     this.primaryInputManager.addInputHandler<ApplicationMesh>({
       targetType: ApplicationMesh,
-      triggerDown: (event) => this.addApplicationOrShowHint(event.target.dataModel).then((applicationObject3D) => {
-        if (!applicationObject3D) return;
-
-        // Rotate app so that it is aligned with landscape
-        applicationObject3D.setRotationFromQuaternion(this.vrLandscapeRenderer.landscapeObject3D.quaternion);
-        applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
-        applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
-
-        // Position app above clicked point.
-        applicationObject3D.position.copy(event.intersection.point);
+      triggerDown: (event) => this.addApplicationOrShowHint(event.target.dataModel, {
+        position: event.intersection.point,
+        quaternion: new THREE.Quaternion().setFromEuler(new THREE.Euler(90 * THREE.MathUtils.DEG2RAD, 90 * THREE.MathUtils.DEG2RAD, 0))
+          .premultiply(this.vrLandscapeRenderer.landscapeObject3D.quaternion)
       })
     });
 
@@ -326,7 +320,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     this.secondaryInputManager.addInputHandler({
       targetType: ApplicationObject3D,
-      triggerDown: (event) => this.highlightAppEntity(event.intersection.object, event.target)
+      triggerDown: (event) => this.highlightingService.highlightComponent(event.target, event.intersection.object)
     });
   }
 
@@ -566,7 +560,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   // #region APPLICATION RENDERING
 
-  private async addApplicationOrShowHint(applicationModel: Application): Promise<ApplicationObject3D | null> {
+  private async addApplicationOrShowHint(applicationModel: Application, args: AddApplicationArgs): Promise<ApplicationObject3D | null> {
     if (applicationModel.packages.length === 0) {
       this.showHint('No data available');
       return Promise.resolve(null);
@@ -577,7 +571,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       return Promise.resolve(null);
     }
 
-    return this.vrApplicationRenderer.addApplication(applicationModel);
+    return this.vrApplicationRenderer.addApplication(applicationModel, args);
   }
 
   // #endregion APPLICATION RENDERING
@@ -612,49 +606,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   // #endregion COMPONENT AND COMMUNICATION RENDERING
-
-  // #region HIGHLIGHTING
-
-  private isHightlightableAppEntity(object: THREE.Object3D): object is ComponentMesh | ClazzMesh | ClazzCommunicationMesh {
-    return object instanceof ComponentMesh ||
-      object instanceof ClazzMesh ||
-      object instanceof ClazzCommunicationMesh;
-  }
-
-  private highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
-    if (this.localUser.color) {
-      application.setHighlightingColor(this.localUser.color);
-    }
-
-    const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(application.dataModel.instanceId);
-    if (this.isHightlightableAppEntity(object) && drawableComm) {
-      Highlighting.highlight(object, application, drawableComm);
-    }
-
-    // Send highlighting update.
-    if (this.localUser.isOnline) {
-      if (object instanceof ComponentMesh || object instanceof ClazzMesh) {
-        this.sender.sendHighlightingUpdate(application.dataModel.instanceId, object.constructor.name,
-          object.dataModel.id, object.highlighted);
-      } else if (object instanceof ClazzCommunicationMesh) {
-        const { sourceClass, targetClass } = object.dataModel;
-
-        // this is necessary, since drawable class communications are created on
-        // client side, thus their ids do not match, since they are uuids
-        let combinedId: string;
-        if (sourceClass.id < targetClass.id) {
-          combinedId = `${sourceClass.id}###${targetClass.id}`;
-        } else {
-          combinedId = `${targetClass.id}###${sourceClass.id}`;
-        }
-
-        this.sender.sendHighlightingUpdate(application.dataModel.instanceId, object.constructor.name,
-          combinedId, object.highlighted);
-      }
-    }
-  }
-
-  // #endregion HIGHLIGHTING
 
   // #region MENUS
 
@@ -946,7 +897,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.localUser.connected({
       id: self.id,
       name: self.name,
-      color: new THREE.Color().fromArray(self.color)
+      color: new THREE.Color(...self.color)
     });
     this.sendInitialControllerConnectState();
   }
@@ -958,7 +909,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const remoteUser = new RemoteVrUser({
       userName: name,
       userId: id,
-      color: new THREE.Color().fromArray(color),
+      color: new THREE.Color(...color),
       state: 'online',
       localUser: this.localUser
     });
@@ -1066,45 +1017,22 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.vrLandscapeRenderer.landscapeObject3D.scale.fromArray(landscape.scale);
 
     // Initialize applications.
-    const tasks: Promise<void>[] = [];
+    const tasks: Promise<any>[] = [];
     openApps.forEach((app) => {
       const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(app.id);
       if (application) {
-        tasks.push(this.vrApplicationRenderer.addApplicationLocally(application).then((applicationObject3D: ApplicationObject3D | null) => {
-          if (!applicationObject3D) return;
-
-          applicationObject3D.position.fromArray(app.position);
-          applicationObject3D.quaternion.fromArray(app.quaternion);
-          applicationObject3D.scale.fromArray(app.scale);
-
-          EntityManipulation.restoreComponentState(applicationObject3D,
-            new Set(app.openComponents));
-
-          this.vrApplicationRenderer.addLabels(applicationObject3D);
-
-          const drawableComm = this.vrApplicationRenderer.drawableClassCommunications
-            .get(applicationObject3D.dataModel.instanceId);
-
-          if (drawableComm) {
-            this.vrApplicationRenderer.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-            Highlighting.updateHighlighting(applicationObject3D, drawableComm);
-          }
-
-          // Simulate a highlighting update for every initial highlighting
-          // component.
-          app.highlightedComponents.forEach((highlightingUpdate) => {
-            this.onHighlightingUpdate({
-              event: FORWARDED_EVENT,
-              userID: highlightingUpdate.userID,
-              originalMessage: {
-                event: HIGHLIGHTING_UPDATE_EVENT,
-                isHighlighted: highlightingUpdate.isHighlighted,
-                appID: highlightingUpdate.appID,
-                entityType: highlightingUpdate.entityType,
-                entityID: highlightingUpdate.entityID
-              }
-            });
-          });
+        tasks.push(this.vrApplicationRenderer.addApplicationLocally(application, {
+          position: new THREE.Vector3(...app.position),
+          quaternion: new THREE.Quaternion(...app.quaternion),
+          scale: new THREE.Vector3(...app.scale),
+          openComponents: new Set(app.openComponents),
+          highlightedComponents: app.highlightedComponents.map((highlightedComponent) => {
+            return {
+              entityType: highlightedComponent.entityType,
+              entityID: highlightedComponent.entityID,
+              color: this.remoteUsers.lookupRemoteUserById(highlightedComponent.userID)?.color,
+            };
+          }),
         }));
       }
     });
@@ -1126,18 +1054,16 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     })
   }
 
-  async onAppOpened({
+  onAppOpened({
     originalMessage: { id, position, quaternion, scale }
-  }: ForwardedMessage<AppOpenedMessage>): Promise<void> {
+  }: ForwardedMessage<AppOpenedMessage>): void {
     const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(id);
-
     if (application) {
-      const applicationObject3D = await this.vrApplicationRenderer.addApplicationLocally(application);
-      if (applicationObject3D) {
-        applicationObject3D.position.fromArray(position);
-        applicationObject3D.quaternion.fromArray(quaternion);
-        applicationObject3D.scale.fromArray(scale);
-      }
+      this.vrApplicationRenderer.addApplicationLocally(application, {
+        position: new THREE.Vector3(...position),
+        quaternion: new THREE.Quaternion(...quaternion),
+        scale: new THREE.Vector3(...scale),
+      });
     }
   }
 
@@ -1183,44 +1109,19 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     userID,
     originalMessage: { isHighlighted, appID, entityType, entityID }
   }: ForwardedMessage<HighlightingUpdateMessage>): void {
-    const applicationObject3D = this.vrApplicationRenderer.getApplicationById(appID);
-
-    if (!applicationObject3D) return;
-
-    if (!isHighlighted) {
-      Highlighting.removeHighlighting(applicationObject3D);
-      return;
-    }
+    const application = this.vrApplicationRenderer.getApplicationById(appID);
+    if (!application) return;
 
     const user = this.remoteUsers.lookupRemoteUserById(userID);
     if (!user) return;
 
-    // Highlight entities in the respective user color
-    applicationObject3D.setHighlightingColor(user.color);
-
-    const drawableComm = this.vrApplicationRenderer.drawableClassCommunications
-      .get(applicationObject3D.dataModel.instanceId);
-
-    // Apply highlighting
-    if (entityType === 'ComponentMesh' || entityType === 'ClazzMesh') {
-      const boxMesh = applicationObject3D.getBoxMeshbyModelId(entityID);
-      if (boxMesh instanceof ComponentMesh || boxMesh instanceof ClazzMesh) {
-        if (drawableComm) {
-          Highlighting.highlight(boxMesh, applicationObject3D, drawableComm);
-        }
-      }
-    } else {
-      // The target and source class id of communication
-      const classIds = new Set<string>(entityID.split('###'));
-
-      applicationObject3D.getCommMeshes().forEach((commMesh) => {
-        if (classIds.has(commMesh.dataModel.sourceClass.id)
-          && classIds.has(commMesh.dataModel.targetClass.id)) {
-          if (drawableComm) {
-            Highlighting.highlight(commMesh, applicationObject3D, drawableComm);
-          }
-        }
+    if (isHighlighted) {
+      this.highlightingService.hightlightComponentLocallyByTypeAndId(application, {
+        entityType, entityID,
+        color: user.color
       });
+    } else {
+      this.highlightingService.removeHighlightingLocally(application);
     }
   }
 

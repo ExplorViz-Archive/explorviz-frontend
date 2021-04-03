@@ -6,7 +6,9 @@ import ApplicationRendering from 'explorviz-frontend/components/visualization/re
 import Configuration from 'explorviz-frontend/services/configuration';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
+import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import * as EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
+import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
@@ -17,6 +19,7 @@ import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import BaseMesh from "explorviz-frontend/view-objects/3d/base-mesh";
+import THREE from "three";
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import { isObjectClosedResponse, ObjectClosedResponse } from "../utils/vr-message/receivable/response/object-closed";
@@ -24,7 +27,7 @@ import VrAssetRepository from "./vr-asset-repo";
 import VrMessageReceiver from "./vr-message-receiver";
 import VrMessageSender from "./vr-message-sender";
 import VrSceneService from "./vr-scene";
-import THREE from "three";
+import VrHighlightingService, { HightlightComponentArgs } from "./vr-highlighting";
 
 // Scalar with which the application is scaled (evenly in all dimensions)
 const APPLICATION_SCALAR = 0.01;
@@ -38,11 +41,20 @@ type LayoutData = {
   positionZ: number
 };
 
+export type AddApplicationArgs = {
+  position?: THREE.Vector3,
+  quaternion?: THREE.Quaternion,
+  scale?: THREE.Vector3,
+  openComponents?: Set<string>,
+  highlightedComponents?: HightlightComponentArgs[]
+};
+
 export default class VrApplicationRenderer extends Service {
   debug = debugLogger('VrApplicationRender');
 
   @service('configuration') private configuration!: Configuration;
   @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
+  @service('vr-highlighting') private highlightingService!: VrHighlightingService;
   @service('vr-message-receiver') private receiver!: VrMessageReceiver;
   @service('vr-message-sender') private sender!: VrMessageSender;
   @service('vr-scene') private sceneService!: VrSceneService;
@@ -91,16 +103,44 @@ export default class VrApplicationRenderer extends Service {
     return this.openApplications.has(id);
   }
 
-  async addApplication(applicationModel: Application): Promise<ApplicationObject3D> {
-    const application = await this.addApplicationLocally(applicationModel);
-    if (application) this.sender.sendAppOpened(application);
+  async addApplication(applicationModel: Application, args: AddApplicationArgs = {}): Promise<ApplicationObject3D> {
+    const application = await this.addApplicationLocally(applicationModel, args);
+    this.sender.sendAppOpened(application);
     return application;
   }
 
-  addApplicationLocally(applicationModel: Application): Promise<ApplicationObject3D> {
+  addApplicationLocally(applicationModel: Application, args: AddApplicationArgs = {}): Promise<ApplicationObject3D> {
     return new Promise((resolve) => {
-      perform(this.addApplicationTask, applicationModel, resolve);
+      perform(this.addApplicationTask, applicationModel, (application) => {
+        this.initializeApplication(application, args);
+        resolve(application);
+      });
     });
+  }
+
+  private initializeApplication(application: ApplicationObject3D, args: AddApplicationArgs) {
+    // Set initial position, rotation and scale.
+    if (args.position) application.position.copy(args.position);
+    if (args.quaternion) application.quaternion.copy(args.quaternion);
+    if (args.scale) application.scale.copy(args.scale);
+
+    // Expand initially open components.
+    if (args.openComponents) {
+      EntityManipulation.restoreComponentState(application, args.openComponents);
+      this.addLabels(application);
+    }
+
+    // Draw communication lines.
+    const drawableComm = this.drawableClassCommunications.get(application.dataModel.instanceId);
+    if (drawableComm) {
+      this.appCommRendering.addCommunication(application, drawableComm);
+      Highlighting.updateHighlighting(application, drawableComm);
+    }
+
+    // Hightlight components.
+    for (const hightlightedComponent of args.highlightedComponents || []) {
+      this.highlightingService.hightlightComponentLocallyByTypeAndId(application, hightlightedComponent);
+    }
   }
 
   removeApplication(application: ApplicationObject3D): Promise<boolean> {
@@ -160,15 +200,13 @@ export default class VrApplicationRenderer extends Service {
       this.updateDrawableClassCommunications(applicationObject3D);
 
       const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId)!;
-
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
       // Add labels to application
       this.addLabels(applicationObject3D);
 
-      // Scale application to a reasonable size to work with it
-      const scalar = APPLICATION_SCALAR;
-      applicationObject3D.scale.set(scalar, scalar, scalar);
+      // Scale application to a reasonable size to work with it.
+      applicationObject3D.scale.setScalar(APPLICATION_SCALAR);
 
       // Add close icon to application.
       const closeIcon = new CloseIcon({
