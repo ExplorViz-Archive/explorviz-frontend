@@ -78,8 +78,7 @@ export default class VrRoomService extends Service {
   }
 
   private buildInitialOpenApps(): InitialRoomApp[] {
-    const applicationGroup = this.vrApplicationRenderer.applicationGroup;
-    return Array.from(applicationGroup.openedApps.values()).map((application) => {
+    return this.vrApplicationRenderer.getOpenApplications().map((application) => {
       return {
         id: application.dataModel.instanceId,
         position: application.getWorldPosition(new THREE.Vector3()).toArray(),

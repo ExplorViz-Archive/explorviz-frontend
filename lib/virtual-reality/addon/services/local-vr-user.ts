@@ -83,6 +83,12 @@ export default class LocalVrUser extends Service {
     if (this.controller2) this.controller2.update(delta);
   }
 
+  updateCameraAspectRatio(width: number, height: number) {
+    this.renderer.setSize(width, height);
+    this.defaultCamera.aspect = width / height;
+    this.defaultCamera.updateProjectionMatrix();
+  }
+
   /*
    *  This method is used to adapt the users view to
    *  the new position
@@ -128,6 +134,16 @@ export default class LocalVrUser extends Service {
     // Convert the direction back to object space before applying the translation.
     direction.normalize().transformDirection(this.userGroup.matrix.getInverse(new THREE.Matrix4()));
     this.userGroup.translateOnAxis(direction, distance);
+  }
+
+  /**
+   * Rotates the camera around the local x and world y axis.
+   */
+  rotateCamera(x: number, y: number) {
+    const xAxis = new THREE.Vector3(1, 0, 0);
+    const yAxis = new THREE.Vector3(0, 1, 0);
+    this.camera.rotateOnAxis(xAxis, y);
+    this.camera.rotateOnWorldAxis(yAxis, x);
   }
 
   /*

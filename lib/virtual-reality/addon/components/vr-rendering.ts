@@ -19,7 +19,6 @@ import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/found
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
-import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -36,7 +35,6 @@ import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import VrSceneService from "virtual-reality/services/vr-scene";
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import WebSocketService from 'virtual-reality/services/web-socket';
-import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import FloorMesh from 'virtual-reality/utils/view-objects/vr/floor-mesh';
 import VRController from 'virtual-reality/utils/vr-controller';
@@ -119,30 +117,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
   // #endregion CLASS FIELDS
 
-  // #region GETTERS
-
-  get landscapeObject3D(): LandscapeObject3D {
-    return this.vrLandscapeRenderer.landscapeObject3D;
-  }
-
-  get applicationGroup(): ApplicationGroup {
-    return this.vrApplicationRenderer.applicationGroup;
-  }
-
-  get renderer(): THREE.WebGLRenderer {
-    return this.localUser.renderer;
-  }
-
-  get scene(): THREE.Scene {
-    return this.sceneService.scene;
-  }
-
-  get camera(): THREE.PerspectiveCamera {
-    return this.localUser.defaultCamera;
-  }
-
-  // #endregion GETTERS
-
   // #region INITIALIZATION
 
   /**
@@ -194,9 +168,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       antialias: true,
       canvas: this.canvas,
     });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(width, height);
-    this.renderer.xr.enabled = true;
+    this.localUser.renderer.setPixelRatio(window.devicePixelRatio);
+    this.localUser.renderer.setSize(width, height);
+    this.localUser.renderer.xr.enabled = true;
 
     const polyfill = new WebXRPolyfill();
     if (polyfill) {
@@ -239,8 +213,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.debug('Initializing interaction...');
 
     const intersectableObjects = [
-      this.landscapeObject3D,
-      this.applicationGroup,
+      this.vrLandscapeRenderer.landscapeObject3D,
+      this.vrApplicationRenderer.applicationGroup,
       this.sceneService.floor,
       this.detachedMenuGroups.container,
       this.debugMenuGroup,
@@ -250,7 +224,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         intersection.object instanceof LogoMesh);
     };
     this.interaction = new Interaction(
-      this.canvas, this.camera, this.renderer, intersectableObjects, {
+      this.canvas, this.localUser.defaultCamera, this.localUser.renderer, intersectableObjects, {
       singleClick: (intersection) => this.handleSingleClick(intersection),
       doubleClick: (intersection) => this.handleDoubleClick(intersection),
       mouseWheel: (delta) => this.handleMouseWheel(delta),
@@ -283,7 +257,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         if (!applicationObject3D) return;
 
         // Rotate app so that it is aligned with landscape
-        applicationObject3D.setRotationFromQuaternion(this.landscapeObject3D.quaternion);
+        applicationObject3D.setRotationFromQuaternion(this.vrLandscapeRenderer.landscapeObject3D.quaternion);
         applicationObject3D.rotateX(90 * THREE.MathUtils.DEG2RAD);
         applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
 
@@ -370,10 +344,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Initialize controller.
     const controller = new VRController({
       gamepadIndex,
-      scene: this.scene,
+      scene: this.sceneService.scene,
       bindings: new VRControllerBindingsList(this.makeControllerBindings(), menuGroup.controllerBindings),
-      gripSpace: this.renderer.xr.getControllerGrip(gamepadIndex),
-      raySpace: this.renderer.xr.getController(gamepadIndex),
+      gripSpace: this.localUser.renderer.xr.getControllerGrip(gamepadIndex),
+      raySpace: this.localUser.renderer.xr.getController(gamepadIndex),
       color: new THREE.Color('red'),
       menuGroup,
       intersectableObjects: this.interaction.raycastObjects
@@ -445,7 +419,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.resize(outerDiv);
 
     // Start main loop.
-    this.renderer.setAnimationLoop(() => this.tick());
+    this.localUser.renderer.setAnimationLoop(() => this.tick());
   }
 
   /**
@@ -458,11 +432,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   resize(outerDiv: HTMLElement) {
     const width = outerDiv.clientWidth;
     const height = outerDiv.clientHeight;
-
-    // Update renderer and camera according to new canvas size
-    this.renderer.setSize(width, height);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    this.localUser.updateCameraAspectRatio(width, height);
   }
 
   @action
@@ -508,8 +478,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
           const gltfLoader = new GLTFLoader(loadingManager);
           gltfLoader.load(file.name, (gltf) => {
             const object = new GrabbableObjectWrapper(gltf.scene);
-            this.interaction.raycastObjects.push(object),
-              this.scene.add(object);
+            this.interaction.raycastObjects.push(object);
+            this.sceneService.scene.add(object);
             resolve(null);
           });
         }));
@@ -587,7 +557,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    * Renders the scene.
    */
   private render() {
-    this.renderer.render(this.scene, this.camera);
+    this.localUser.renderer.render(this.sceneService.scene, this.localUser.defaultCamera);
   }
 
   // #endregion MAIN LOOP
@@ -600,7 +570,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       return Promise.resolve(null);
     }
 
-    if (this.applicationGroup.hasApplication(applicationModel.instanceId)) {
+    if (this.vrApplicationRenderer.isApplicationOpen(applicationModel.instanceId)) {
       this.showHint('Application already opened');
       return Promise.resolve(null);
     }
@@ -852,11 +822,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         break;
       case RIGHT_MOUSE_BUTTON:
         // Rotate camera to look around.
-        const xAxis = new THREE.Vector3(1, 0, 0);
-        const yAxis = new THREE.Vector3(0, 1, 0);
         const rotationSpeed = Math.PI;
-        this.camera.rotateOnAxis(xAxis, y * rotationSpeed);
-        this.camera.rotateOnWorldAxis(yAxis, x * rotationSpeed);
+        this.localUser.rotateCamera(y * rotationSpeed, x * rotationSpeed);
         break;
     }
   }
@@ -961,11 +928,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.remoteUsers.removeAllRemoteUsers();
 
     // Reset highlighting colors.
-    this.applicationGroup.children.forEach((child) => {
-      if (child instanceof ApplicationObject3D) {
-        child.setHighlightingColor(this.configuration.applicationColors.highlightedEntity);
-      }
-    });
+    for (let application of this.vrApplicationRenderer.getOpenApplications()) {
+      application.setHighlightingColor(this.configuration.applicationColors.highlightedEntity);
+    }
 
     this.localUser.disconnect();
   }
@@ -1112,9 +1077,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
     // Initialize landscape.
     await this.timestampService.updateLandscapeToken(landscape.landscapeToken, landscape.timestamp);
-    this.landscapeObject3D.position.fromArray(landscape.position);
-    this.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
-    this.landscapeObject3D.scale.fromArray(landscape.scale);
+    this.vrLandscapeRenderer.landscapeObject3D.position.fromArray(landscape.position);
+    this.vrLandscapeRenderer.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
+    this.vrLandscapeRenderer.landscapeObject3D.scale.fromArray(landscape.scale);
 
     // Initialize applications.
     const tasks: Promise<void>[] = [];
@@ -1195,7 +1160,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   onAppClosed({
     originalMessage: { appID }
   }: ForwardedMessage<AppClosedMessage>): void {
-    const application = this.applicationGroup.getApplication(appID);
+    const application = this.vrApplicationRenderer.getApplicationById(appID);
     if (application) this.vrApplicationRenderer.removeApplicationLocally(application);
   }
 
@@ -1218,7 +1183,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   onComponentUpdate({
     originalMessage: { isFoundation, appID, componentID }
   }: ForwardedMessage<ComponentUpdateMessage>): void {
-    const applicationObject3D = this.applicationGroup.getApplication(appID);
+    const applicationObject3D = this.vrApplicationRenderer.getApplicationById(appID);
     if (!applicationObject3D) return;
 
     const componentMesh = applicationObject3D.getBoxMeshbyModelId(componentID);
@@ -1234,7 +1199,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     userID,
     originalMessage: { isHighlighted, appID, entityType, entityID }
   }: ForwardedMessage<HighlightingUpdateMessage>): void {
-    const applicationObject3D = this.applicationGroup.getApplication(appID);
+    const applicationObject3D = this.vrApplicationRenderer.getApplicationById(appID);
 
     if (!applicationObject3D) return;
 
@@ -1332,18 +1297,18 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     switch (entityType) {
       case NODE_ENTITY_TYPE:
       case APPLICATION_ENTITY_TYPE:
-        return this.landscapeObject3D.getMeshbyModelId(id);
+        return this.vrLandscapeRenderer.landscapeObject3D.getMeshbyModelId(id);
 
       case COMPONENT_ENTITY_TYPE:
       case CLASS_ENTITY_TYPE:
-        for (let application of Array.from(this.applicationGroup.getOpenedApps())) {
+        for (let application of this.vrApplicationRenderer.getOpenApplications()) {
           const mesh = application.getBoxMeshbyModelId(id);
           if (mesh) return mesh;
         }
         return null;
 
       case CLASS_COMMUNICATION_ENTITY_TYPE:
-        for (let application of Array.from(this.applicationGroup.getOpenedApps())) {
+        for (let application of this.vrApplicationRenderer.getOpenApplications()) {
           const mesh = application.getCommMeshByModelId(id);
           if (mesh) return mesh;
         }

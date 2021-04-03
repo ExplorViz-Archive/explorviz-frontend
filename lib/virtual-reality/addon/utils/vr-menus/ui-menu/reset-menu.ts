@@ -96,7 +96,7 @@ export default class ResetMenu extends UiMenu {
   }
 
   private resetApplications() {
-    this.vrApplicationRenderer.applicationGroup.clear();
+    this.vrApplicationRenderer.removeAllApplicationsLocally();
   }
 
   private resetLandscape() {

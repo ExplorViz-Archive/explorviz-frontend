@@ -16,14 +16,15 @@ import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
+import BaseMesh from "explorviz-frontend/view-objects/3d/base-mesh";
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
-import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
-import VrAssetRepository from "./vr-asset-repo";
-import VrSceneService from "./vr-scene";
-import VrMessageSender from "./vr-message-sender";
-import VrMessageReceiver from "./vr-message-receiver";
 import { isObjectClosedResponse, ObjectClosedResponse } from "../utils/vr-message/receivable/response/object-closed";
+import VrAssetRepository from "./vr-asset-repo";
+import VrMessageReceiver from "./vr-message-receiver";
+import VrMessageSender from "./vr-message-sender";
+import VrSceneService from "./vr-scene";
+import THREE from "three";
 
 // Scalar with which the application is scaled (evenly in all dimensions)
 const APPLICATION_SCALAR = 0.01;
@@ -50,14 +51,17 @@ export default class VrApplicationRenderer extends Service {
   private structureLandscapeData!: StructureLandscapeData;
   private dynamicLandscapeData!: DynamicLandscapeData;
 
-  readonly applicationGroup: ApplicationGroup;
+  private openApplications: Map<string, ApplicationObject3D>;
+
+  readonly applicationGroup: THREE.Group;
   readonly appCommRendering: AppCommunicationRendering;
   readonly drawableClassCommunications: Map<string, DrawableClassCommunication[]>;
 
   constructor(properties?: object) {
     super(properties);
+    this.openApplications = new Map();
 
-    this.applicationGroup = new ApplicationGroup();
+    this.applicationGroup = new THREE.Group();
     this.sceneService.scene.add(this.applicationGroup);
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration);
@@ -71,8 +75,20 @@ export default class VrApplicationRenderer extends Service {
     this.removeAllApplicationsLocally();
   }
 
-  getApplicationInCurrentLandscapeById(id: string) {
+  getApplicationInCurrentLandscapeById(id: string): Application | undefined {
     return getApplicationInLandscapeById(this.structureLandscapeData, id);
+  }
+
+  getApplicationById(id: string): ApplicationObject3D | undefined {
+    return this.openApplications.get(id);
+  }
+
+  getOpenApplications(): ApplicationObject3D[] {
+    return Array.from(this.openApplications.values());
+  }
+
+  isApplicationOpen(id: string): boolean {
+    return this.openApplications.has(id);
   }
 
   async addApplication(applicationModel: Application): Promise<ApplicationObject3D> {
@@ -109,19 +125,25 @@ export default class VrApplicationRenderer extends Service {
   }
 
   removeApplicationLocally(application: ApplicationObject3D) {
-    this.applicationGroup.removeApplicationById(application.dataModel.instanceId);
+    this.openApplications.delete(application.dataModel.instanceId);
+    application.parent?.remove(application);
+    application.children.forEach((child) => {
+      if (child instanceof BaseMesh) {
+        child.disposeRecursively();
+      }
+    });
   }
 
   removeAllApplicationsLocally() {
-    this.applicationGroup.clear();
+    for (const application of this.openApplications.values()) {
+      this.removeApplicationLocally(application)
+    }
   }
 
   @enqueueTask
   private *addApplicationTask(applicationModel: Application, callback?: (applicationObject3D: ApplicationObject3D) => void) {
     try {
-      if (this.applicationGroup.hasApplication(applicationModel.instanceId)) {
-        return;
-      }
+      if (this.isApplicationOpen(applicationModel.instanceId)) return;
 
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', applicationModel);
 
@@ -155,7 +177,8 @@ export default class VrApplicationRenderer extends Service {
       });
       closeIcon.addToObject(applicationObject3D);
 
-      this.applicationGroup.addApplication(applicationObject3D);
+      this.applicationGroup.add(applicationObject3D);
+      this.openApplications.set(applicationModel.instanceId, applicationObject3D);
 
       if (callback) callback(applicationObject3D);
     } catch (e) {
