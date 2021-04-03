@@ -33,7 +33,7 @@ export default class SpectateUserService extends Service {
   activate(remoteUser: RemoteVrUser | null) {
     if (!remoteUser) return;
 
-    this.startPosition.copy(this.localUser.position);
+    this.startPosition.copy(this.localUser.getCameraWorldPosition());
     this.spectatedUser = remoteUser;
 
     if (this.localUser.controller1) {

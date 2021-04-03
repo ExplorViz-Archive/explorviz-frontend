@@ -88,7 +88,7 @@ export default class ResetMenu extends UiMenu {
   }
 
   private resetLocalUser() {
-    this.localUser.resetPosition();
+    this.localUser.resetPositionAndRotation();
   }
 
   private resetDetachedMenus() {

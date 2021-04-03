@@ -14,8 +14,8 @@ export default class NameTagSprite extends THREE.Sprite {
       fontSize: 30,
       fontFamily: 'arial',
       padding: 20,
-      backgroundColor: new THREE.Color(200, 200, 216),
-      backgroundOpacity: 0.5,
+      backgroundColor: new THREE.Color(0x444444),
+      backgroundOpacity: 0.8,
     });
 
     // Set drawn texture as background.

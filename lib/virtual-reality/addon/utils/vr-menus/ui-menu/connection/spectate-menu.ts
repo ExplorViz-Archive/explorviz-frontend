@@ -52,21 +52,31 @@ export default class SpectateMenu extends UiMenu {
     super.onOpenMenu();
 
     // Disable input for the other controller.
-    const otherController = VRController.findController(this) === this.localUser.controller1 ? this.localUser.controller2 : this.localUser.controller1;
+    const controller = VRController.findController(this);
+    const otherController = controller === this.localUser.controller1 ? this.localUser.controller2 : this.localUser.controller1;
     otherController?.menuGroup?.openMenu(this.disableInputMenu);
 
     // Activate spectating.
     this.spectateUserService.activate(this.remoteUser);
 
     // Show spectating user.
-    const text = new TextItem({
-      text: 'Spectating ' + this.remoteUser.userName,
+    const textItem = new TextItem({
+      text: 'Spectating ',
       color: '#ffffff',
       fontSize: 28,
-      alignment: 'center',
+      alignment: 'right',
       position: { x: 256, y: 20 },
     });
-    this.items.push(text);
+    this.items.push(textItem);
+
+    const userNameItem = new TextItem({
+      text: this.remoteUser.userName,
+      color: `#${this.remoteUser.color.getHexString()}`,
+      fontSize: 28,
+      alignment: 'left',
+      position: { x: 256, y: 20 },
+    });
+    this.items.push(userNameItem);
 
     this.redrawMenu();
   }

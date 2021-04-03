@@ -40,8 +40,6 @@ export default class LocalVrUser extends Service {
 
   get isSpectating() { return this.spectateUserService.isActive; }
 
-  get position() { return this.userGroup.position; }
-
   init() {
     super.init();
 
@@ -98,14 +96,16 @@ export default class LocalVrUser extends Service {
   } = {}) {
     if (!this.camera) return;
 
-    const cameraWorldPos = new THREE.Vector3();
-    this.camera.getWorldPosition(cameraWorldPos);
-
+    const cameraWorldPos = this.getCameraWorldPosition();
     this.userGroup.position.x += position.x - cameraWorldPos.x;
     if (adaptCameraHeight) {
       this.userGroup.position.y += position.y - cameraWorldPos.y;
     }
     this.userGroup.position.z += position.z - cameraWorldPos.z;
+  }
+
+  getCameraWorldPosition() {
+    return this.camera.getWorldPosition(new THREE.Vector3());
   }
 
   get cameraHeight(): number {
@@ -142,18 +142,20 @@ export default class LocalVrUser extends Service {
   rotateCamera(x: number, y: number) {
     const xAxis = new THREE.Vector3(1, 0, 0);
     const yAxis = new THREE.Vector3(0, 1, 0);
-    this.camera.rotateOnAxis(xAxis, y);
-    this.camera.rotateOnWorldAxis(yAxis, x);
+    this.camera.rotateOnAxis(xAxis, x);
+    this.camera.rotateOnWorldAxis(yAxis, y);
   }
 
   /*
    * This method is used to adapt the users view to the initial position
    */
-  resetPosition() {
+  resetPositionAndRotation() {
     this.userGroup.position.set(0, 0, 0);
+    this.defaultCamera.rotation.set(0, 0, 0);
   }
 
   reset() {
+    this.resetPositionAndRotation();
     this.disconnect();
     this.userID = 'unknown';
     this.color = undefined;
