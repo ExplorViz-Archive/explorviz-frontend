@@ -46,9 +46,6 @@ export default class VisualizationController extends Controller {
   selectedTimestampRecords: Timestamp[] = [];
 
   @tracked
-  timelineInterval: number = 10;
-
-  @tracked
   showDataSelection = false;
 
   @tracked

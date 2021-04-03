@@ -7,8 +7,6 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
 import RemoteVrUserService from 'explorviz-frontend/services/remote-vr-users';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
-import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
-import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import Interaction from 'explorviz-frontend/utils/interaction';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
@@ -74,7 +72,6 @@ interface Args {
   readonly id: string;
   readonly landscapeData: LandscapeData;
   readonly selectedTimestampRecords: Timestamp[];
-  readonly timestampInterval: number;
   readonly font: THREE.Font;
 }
 
@@ -186,25 +183,17 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Use given font for landscape and application rendering.
     this.assetRepo.font = this.args.font;
 
-    // Load landscape.
-    this.vrLandscapeRenderer.updateLandscapeData(
+    // Initialize timestamp and landscape data. If no timestamp is selected,
+    // the latest timestamp is used. When there is no timestamp, we fall back
+    // to the current time.
+    const timestamp = this.args.selectedTimestampRecords[0]?.timestamp ||
+      this.timestampRepo.getLatestTimestamp(this.args.landscapeData.structureLandscapeData.landscapeToken)?.timestamp ||
+      new Date().getTime();
+    this.timestampService.setTimestampLocally(
+      timestamp,
       this.args.landscapeData.structureLandscapeData,
       this.args.landscapeData.dynamicLandscapeData
     );
-
-    // Initialize application rendering.
-    this.vrApplicationRenderer.updateLandscapeData(
-      this.args.landscapeData.structureLandscapeData,
-      this.args.landscapeData.dynamicLandscapeData
-    );
-
-    // Initialize timestamp service.
-    this.timestampService.injectValues({
-      timestamp: this.args.selectedTimestampRecords[0]?.timestamp ||
-        this.timestampRepo.getLatestTimestamp(this.args.landscapeData.structureLandscapeData.landscapeToken)?.timestamp ||
-        new Date().getTime(),
-      timestampInterval: this.args.timestampInterval,
-    });
   }
 
   /**
@@ -267,7 +256,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       targetType: ComponentMesh,
       triggerDown: (event) => {
         if (event.target.parent instanceof ApplicationObject3D) {
-          this.toggleComponentAndUpdate(event.target, event.target.parent);
+          this.vrApplicationRenderer.toggleComponent(event.target, event.target.parent);
         }
       }
     });
@@ -277,7 +266,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       targetType: FoundationMesh,
       triggerDown: (event) => {
         if (event.target.parent instanceof ApplicationObject3D) {
-          this.closeAllComponentsAndUpdate(event.target.parent);
+          this.vrApplicationRenderer.closeAllComponents(event.target.parent);
         }
       }
     });
@@ -575,37 +564,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   // #endregion APPLICATION RENDERING
-
-  // #region COMPONENT AND COMMUNICATION RENDERING
-
-  private toggleComponentAndUpdate(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D, { onlyLocally = false }: { onlyLocally?: boolean } = {}) {
-    EntityManipulation.toggleComponentMeshState(componentMesh, applicationObject3D);
-    this.vrApplicationRenderer.addLabels(applicationObject3D);
-    this.updateDrawableCommunications(applicationObject3D);
-
-    if (!onlyLocally && this.localUser.isOnline) {
-      this.sender.sendComponentUpdate(applicationObject3D.dataModel.instanceId, componentMesh.dataModel.id, componentMesh.opened, false);
-    }
-  }
-
-  private closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D, { onlyLocally = false }: { onlyLocally?: boolean } = {}) {
-    EntityManipulation.closeAllComponents(applicationObject3D);
-    this.updateDrawableCommunications(applicationObject3D);
-
-    if (!onlyLocally && this.localUser.isOnline) {
-      this.sender.sendComponentUpdate(applicationObject3D.dataModel.instanceId, '', false, true);
-    }
-  }
-
-  private updateDrawableCommunications(applicationObject3D: ApplicationObject3D) {
-    const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId);
-    if (drawableComm) {
-      this.vrApplicationRenderer.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-      Highlighting.updateHighlighting(applicationObject3D, drawableComm);
-    }
-  }
-
-  // #endregion COMPONENT AND COMMUNICATION RENDERING
 
   // #region MENUS
 
@@ -1099,9 +1057,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const componentMesh = applicationObject3D.getBoxMeshbyModelId(componentID);
 
     if (isFoundation) {
-      EntityManipulation.closeAllComponents(applicationObject3D);
+      this.vrApplicationRenderer.closeAllComponentsLocally(applicationObject3D);
     } else if (componentMesh instanceof ComponentMesh) {
-      this.toggleComponentAndUpdate(componentMesh, applicationObject3D, { onlyLocally: true });
+      this.vrApplicationRenderer.toggleComponentLocally(componentMesh, applicationObject3D);
     }
   }
 

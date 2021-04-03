@@ -180,6 +180,27 @@ export default class VrApplicationRenderer extends Service {
     }
   }
 
+  toggleComponent(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
+    this.toggleComponentLocally(componentMesh, applicationObject3D);
+    this.sender.sendComponentUpdate(applicationObject3D.dataModel.instanceId, componentMesh.dataModel.id, componentMesh.opened, false);
+  }
+
+  toggleComponentLocally(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
+    EntityManipulation.toggleComponentMeshState(componentMesh, applicationObject3D);
+    this.addLabels(applicationObject3D);
+    this.highlightingService.updateHighlightingLocally(applicationObject3D);
+  }
+
+  closeAllComponents(applicationObject3D: ApplicationObject3D) {
+    this.closeAllComponentsLocally(applicationObject3D);
+    this.sender.sendComponentUpdate(applicationObject3D.dataModel.instanceId, '', false, true);
+  }
+
+  closeAllComponentsLocally(applicationObject3D: ApplicationObject3D) {
+    EntityManipulation.closeAllComponents(applicationObject3D);
+    this.highlightingService.updateHighlightingLocally(applicationObject3D);
+  }
+
   @enqueueTask
   private *addApplicationTask(applicationModel: Application, callback?: (applicationObject3D: ApplicationObject3D) => void) {
     try {
@@ -197,7 +218,7 @@ export default class VrApplicationRenderer extends Service {
       EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
         this.configuration.applicationColors);
 
-      this.updateDrawableClassCommunications(applicationObject3D);
+      this.findDrawableClassCommunications(applicationObject3D);
 
       const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId)!;
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
@@ -224,7 +245,7 @@ export default class VrApplicationRenderer extends Service {
     }
   }
 
-  private updateDrawableClassCommunications(applicationObject3D: ApplicationObject3D) {
+  private findDrawableClassCommunications(applicationObject3D: ApplicationObject3D) {
     if (this.drawableClassCommunications.has(applicationObject3D.dataModel.instanceId)) {
       return;
     }
@@ -235,19 +256,16 @@ export default class VrApplicationRenderer extends Service {
     );
 
     const allClasses = new Set(getAllClassesInApplication(applicationObject3D.dataModel));
-
     const communicationInApplication = drawableClassCommunications.filter(
       (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
     );
-
-    this.drawableClassCommunications.set(applicationObject3D.dataModel.instanceId,
-      communicationInApplication);
+    this.drawableClassCommunications.set(applicationObject3D.dataModel.instanceId, communicationInApplication);
   }
 
   /**
    * Adds labels to all box meshes of a given application
    */
-  addLabels(applicationObject3D: ApplicationObject3D) {
+  private addLabels(applicationObject3D: ApplicationObject3D) {
     if (!this.assetRepo.font) { return; }
 
     const clazzTextColor = this.configuration.applicationColors.clazzText;

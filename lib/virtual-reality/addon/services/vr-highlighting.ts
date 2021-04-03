@@ -51,6 +51,14 @@ export default class VrHighlightingService extends Service {
     for (const mesh of meshes) this.hightlightMesh(application, mesh, color);
   }
 
+  updateHighlightingLocally(application: ApplicationObject3D) {
+    const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(application.dataModel.instanceId);
+    if (drawableComm) {
+      this.vrApplicationRenderer.appCommRendering.addCommunication(application, drawableComm);
+      Highlighting.updateHighlighting(application, drawableComm);
+    }
+  }
+
   private hightlightMesh(
     application: ApplicationObject3D,
     mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMesh,
