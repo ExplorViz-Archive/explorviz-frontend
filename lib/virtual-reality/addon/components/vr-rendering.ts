@@ -41,7 +41,7 @@ import VRController from 'virtual-reality/utils/vr-controller';
 import VRControllerBindings from 'virtual-reality/utils/vr-controller/vr-controller-bindings';
 import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-controller-bindings-list';
 import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
-import VRControllerThumbpadBinding, { VRControllerThumbpadDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
+import VRControllerThumbpadBinding, { VRControllerThumbpadVerticalDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
 import InteractiveMenu from 'virtual-reality/utils/vr-menus/interactive-menu';
@@ -78,6 +78,8 @@ interface Args {
   readonly timestampInterval: number;
   readonly font: THREE.Font;
 }
+
+const THUMBPAD_THRESHOLD = 0.5;
 
 export default class VrRendering extends Component<Args> implements VrMessageListener {
   // #region SERVICES
@@ -665,16 +667,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     }
   }
 
-  private openMainMenu(controller: VRController) {
+  private openToolMenu(controller: VRController) {
     controller.menuGroup.openMenu(this.menuFactory.buildToolMenu());
-  }
-
-  private openZoomMenu(controller: VRController) {
-    controller.menuGroup.openMenu(this.menuFactory.buildZoomMenu());
-  }
-
-  private openPingMenu(controller: VRController) {
-    controller.menuGroup.openMenu(this.menuFactory.buildPingMenu());
   }
 
   private openInfoMenu(controller: VRController, object: EntityMesh) {
@@ -706,18 +700,17 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   private onControllerDisconnected(controller: VRController) {
-    // Avoid that user could get stuck in spectate view
-    this.spectateUserService.deactivate();
+    // Close all open menus of the disconnected controller.
+    controller.menuGroup.closeAllMenus();
 
-    let disconnect: { controller1?: string, controller2?: string };
-
-    if (controller === this.localUser.controller1) {
-      disconnect = { controller1: controller.gamepadId };
-    } else {
-      disconnect = { controller2: controller.gamepadId };
-    }
-
+    // Inform other users that the controller disconnected.
     if (this.localUser.isOnline) {
+      let disconnect: { controller1?: string, controller2?: string };
+      if (controller === this.localUser.controller1) {
+        disconnect = { controller1: controller.gamepadId };
+      } else {
+        disconnect = { controller2: controller.gamepadId };
+      }
       this.sender.sendControllerUpdate({}, disconnect);
     }
   }
@@ -739,8 +732,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         }
       }),
 
-      menuButton: new VRControllerButtonBinding('Options', {
-        onButtonDown: (controller) => this.openMainMenu(controller)
+      menuButton: new VRControllerButtonBinding('Menu', {
+        onButtonDown: (controller) => this.openToolMenu(controller)
       }),
 
       gripButton: new VRControllerButtonBinding('Grab Object', {
@@ -749,31 +742,22 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
 
       thumbpad: new VRControllerThumbpadBinding({
         labelUp: 'Teleport / Highlight',
-        labelDown: 'Show Details',
-        labelRight: 'Zoom',
-        labelLeft: 'Ping'
+        labelDown: 'Show Details'
       }, {
         onThumbpadDown: (controller, axes) => {
-          const direction = VRControllerThumbpadBinding.getDirection(axes);
-          switch (direction) {
-            case VRControllerThumbpadDirection.UP:
+          switch (VRControllerThumbpadBinding.getVerticalDirection(axes, {threshold: THUMBPAD_THRESHOLD})) {
+            case VRControllerThumbpadVerticalDirection.UP:
               if (controller.intersectedObject) {
                 this.secondaryInputManager.handleTriggerDown(controller.intersectedObject);
               }
               break;
-            case VRControllerThumbpadDirection.DOWN:
+            case VRControllerThumbpadVerticalDirection.DOWN:
               if (controller.intersectedObject) {
                 const { object } = controller.intersectedObject;
                 if (isEntityMesh(object)) {
                   this.openInfoMenu(controller, object);
                 }
               }
-              break;
-            case VRControllerThumbpadDirection.RIGHT:
-              this.openZoomMenu(controller);
-              break;
-            case VRControllerThumbpadDirection.LEFT:
-              this.openPingMenu(controller);
               break;
           }
         }

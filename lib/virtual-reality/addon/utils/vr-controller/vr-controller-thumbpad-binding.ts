@@ -18,6 +18,8 @@ type VRControllerThumbpadCallbacks = {
   onThumbpadUp?(controller: VRController, axes: number[]): void;
 };
 
+export enum VRControllerThumbpadVerticalDirection { NONE, UP, DOWN };
+export enum VRControllerThumbpadHorizontalDirection { NONE, RIGHT, LEFT };
 export enum VRControllerThumbpadDirection { NONE, UP, RIGHT, DOWN, LEFT };
 
 /**
@@ -45,6 +47,26 @@ export default class VRControllerThumbpadBinding {
     if (angle < 135) return VRControllerThumbpadDirection.DOWN;
     if (angle < 225) return VRControllerThumbpadDirection.RIGHT;
     return VRControllerThumbpadDirection.UP;
+  }
+
+  static getVerticalDirection(axes: number[], {threshold = 0}: {
+    threshold?: number
+  } = {}): VRControllerThumbpadVerticalDirection {
+    // Negative values SHOULD correspond to "forward" and positive values to "backward".
+    // See also <https://w3c.github.io/gamepad/#dom-gamepad-axes>.
+    if (axes[0] <= -threshold) return VRControllerThumbpadVerticalDirection.UP;
+    if (axes[0] >= threshold) return VRControllerThumbpadVerticalDirection.DOWN;
+    return VRControllerThumbpadVerticalDirection.NONE;
+  }
+
+  static getHorizontalDirection(axes: number[], {threshold = 0}: {
+    threshold?: number
+  } = {}): VRControllerThumbpadHorizontalDirection {
+    // Negative values SHOULD correspond to "left" and positive values to "right".
+    // See also <https://w3c.github.io/gamepad/#dom-gamepad-axes>.
+    if (axes[1] <= -threshold) return VRControllerThumbpadHorizontalDirection.LEFT;
+    if (axes[1] >= threshold) return VRControllerThumbpadHorizontalDirection.RIGHT;
+    return VRControllerThumbpadHorizontalDirection.NONE;
   }
 
   labels: VRControllerThumbpadLabels;
