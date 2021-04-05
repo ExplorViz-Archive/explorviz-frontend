@@ -111,14 +111,14 @@ export default class VrMessageSender extends Service {
   /**
    * Informs the backend that an application was closed by this user.
    *
-   * @param {string} appID ID of the closed application
+   * @param {string} appId ID of the closed application
    */
-  sendAppClosed(appID: string) {
+  sendAppClosed(appId: string) {
     const nonce = this.nextNonce();
     this.webSocket.send<AppClosedMessage>({
       event: 'app_closed',
       nonce,
-      appID,
+      appId,
     });
     return nonce;
   }
@@ -141,15 +141,15 @@ export default class VrMessageSender extends Service {
   /**
    * Informs the backend that a component was opened or closed by this user.
    *
-   * @param {string} appID ID of the app which is a parent to the component
-   * @param {string} componentID ID of the component which was opened or closed
+   * @param {string} appId ID of the app which is a parent to the component
+   * @param {string} componentId ID of the component which was opened or closed
    * @param {boolean} isOpened Tells whether the component is now open or closed (current state)
    */
-  sendComponentUpdate(appID: string, componentID: string, isOpened: boolean, isFoundation: boolean) {
+  sendComponentUpdate(appId: string, componentId: string, isOpened: boolean, isFoundation: boolean) {
     this.webSocket.send<ComponentUpdateMessage>({
       event: 'component_update',
-      appID,
-      componentID,
+      appId,
+      componentId,
       isOpened,
       isFoundation,
     });
@@ -159,18 +159,18 @@ export default class VrMessageSender extends Service {
    * Informs the backend that an entity (clazz or component) was highlighted
    * or unhighlighted.
    *
-   * @param {string} appID ID of the parent application of the entity
+   * @param {string} appId ID of the parent application of the entity
    * @param {string} entityType Tells whether a clazz/component or communication was updated
-   * @param {string} entityID ID of the highlighted/unhighlighted component/clazz
+   * @param {string} entityId ID of the highlighted/unhighlighted component/clazz
    * @param {boolean} isHighlighted Tells whether the entity has been highlighted or not
    */
-  sendHighlightingUpdate(appID: string, entityType: string,
-    entityID: string, isHighlighted: boolean) {
+  sendHighlightingUpdate(appId: string, entityType: string,
+    entityId: string, isHighlighted: boolean) {
     this.webSocket.send<HighlightingUpdateMessage>({
       event: 'highlighting_update',
-      appID,
+      appId,
       entityType,
-      entityID,
+      entityId,
       isHighlighted,
     });
   }

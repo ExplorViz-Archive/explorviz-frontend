@@ -11,7 +11,7 @@ import VrMessageSender from "./vr-message-sender";
 
 export type HightlightComponentArgs = {
   entityType: string,
-  entityID: string,
+  entityId: string,
   color?: THREE.Color
 };
 
@@ -45,9 +45,9 @@ export default class VrHighlightingService extends Service {
   }
 
   hightlightComponentLocallyByTypeAndId(application: ApplicationObject3D, {
-    entityType, entityID, color
+    entityType, entityId, color
   }: HightlightComponentArgs) {
-    const meshes = this.findMeshesByTypeAndId(application, entityType, entityID);
+    const meshes = this.findMeshesByTypeAndId(application, entityType, entityId);
     for (const mesh of meshes) this.hightlightMesh(application, mesh, color);
   }
 
@@ -89,17 +89,17 @@ export default class VrHighlightingService extends Service {
   private *findMeshesByTypeAndId(
     application: ApplicationObject3D,
     entityType: string,
-    entityID: string
+    entityId: string
   ): Generator<HighlightableMesh> {
     if (entityType === 'ComponentMesh' || entityType === 'ClazzMesh') {
-      const mesh = application.getBoxMeshbyModelId(entityID);
+      const mesh = application.getBoxMeshbyModelId(entityId);
       if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
         yield mesh;
       }
     }
 
     if (entityType === 'ClazzCommunicationMesh') {
-      const classIds = new Set(entityID.split('###'));
+      const classIds = new Set(entityId.split('###'));
       for (let mesh of application.getCommMeshes()) {
         if (classIds.has(mesh.dataModel.sourceClass.id)
           && classIds.has(mesh.dataModel.targetClass.id)) {

@@ -4,8 +4,8 @@ export type ComponentUpdateMessage = {
   event: typeof COMPONENT_UPDATE_EVENT,
   isFoundation: boolean,
   isOpened: boolean,
-  appID: string,
-  componentID: string
+  appId: string,
+  componentId: string
 };
 
 export function isComponentUpdateMessage(msg: any): msg is ComponentUpdateMessage {
@@ -14,6 +14,6 @@ export function isComponentUpdateMessage(msg: any): msg is ComponentUpdateMessag
     && msg.event === COMPONENT_UPDATE_EVENT
     && typeof msg.isFoundation === 'boolean'
     && typeof msg.isOpened === 'boolean'
-    && typeof msg.appID === 'string'
-    && typeof msg.componentID === 'string';
+    && typeof msg.appId === 'string'
+    && typeof msg.componentId === 'string';
 }

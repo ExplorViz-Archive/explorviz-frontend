@@ -6,10 +6,10 @@ import { isScale, Scale } from "../util/Scale";
 export const INITIAL_LANDSCAPE_EVENT = 'landscape';
 
 type HighlightedComponent = {
-  userID: string,
-  appID: string,
+  userId: string,
+  appId: string,
   entityType: string,
-  entityID: string,
+  entityId: string,
   isHighlighted: boolean
 };
 
@@ -49,10 +49,10 @@ export type InitialLandscapeMessage = {
 function isHighlightedComponent(comp: any): comp is HighlightedComponent {
   return comp !== null
     && typeof comp === 'object'
-    && typeof comp.userID === 'string'
-    && typeof comp.appID === 'string'
+    && typeof comp.userId === 'string'
+    && typeof comp.appId === 'string'
     && typeof comp.entityType === 'string'
-    && typeof comp.entityID === 'string'
+    && typeof comp.entityId === 'string'
     && typeof comp.isHighlighted === 'boolean';
 }
 

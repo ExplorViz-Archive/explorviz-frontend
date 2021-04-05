@@ -5,7 +5,7 @@ export const APP_CLOSED_EVENT = 'app_closed';
 export type AppClosedMessage = {
   event: typeof APP_CLOSED_EVENT,
   nonce: Nonce,
-  appID: string
+  appId: string
 };
 
 export function isAppClosedMessage(msg: any): msg is AppClosedMessage {
@@ -13,5 +13,5 @@ export function isAppClosedMessage(msg: any): msg is AppClosedMessage {
     && typeof msg === 'object'
     && msg.event === APP_CLOSED_EVENT
     && isNonce(msg.nonce)
-    && typeof msg.appID === 'string';
+    && typeof msg.appId === 'string';
 }

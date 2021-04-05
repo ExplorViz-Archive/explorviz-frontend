@@ -14,7 +14,7 @@ export default class LocalVrUser extends Service {
   @service('vr-scene') private sceneService!: VrSceneService;
   @service('web-socket') private webSocket!: WebSocketService;
 
-  userID!: string;
+  userId!: string;
   userName?: string;
   color: THREE.Color | undefined;
 
@@ -45,7 +45,7 @@ export default class LocalVrUser extends Service {
   init() {
     super.init();
 
-    this.userID = 'unknown';
+    this.userId = 'unknown';
     this.connectionStatus = 'offline';
 
     this.userGroup = new THREE.Group();
@@ -159,7 +159,7 @@ export default class LocalVrUser extends Service {
   reset() {
     this.resetPositionAndRotation();
     this.disconnect();
-    this.userID = 'unknown';
+    this.userId = 'unknown';
     this.color = undefined;
 
     this.resetController(this.controller1);
@@ -207,7 +207,7 @@ export default class LocalVrUser extends Service {
     color: THREE.Color;
   }) {
     this.connectionStatus = 'online';
-    this.userID = id;
+    this.userId = id;
     this.userName = name;
 
     this.color = color;

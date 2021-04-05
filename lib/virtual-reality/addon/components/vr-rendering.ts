@@ -844,7 +844,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       }, false);
       this.onUserControllers({
         event: FORWARDED_EVENT,
-        userID: userData.id,
+        userId: userData.id,
         originalMessage: {
           event: USER_CONTROLLER_EVENT,
           connect: userData.controllers,
@@ -887,10 +887,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    * Updates the specified user's camera and controller positions.
    */
   onUserPositions({
-    userID,
+    userId,
     originalMessage: { camera, controller1, controller2 }
   }: ForwardedMessage<UserPositionsMessage>): void {
-    const remoteUser = this.remoteUsers.lookupRemoteUserById(userID);
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
     if (!remoteUser) return;
 
     if (controller1) remoteUser.updateController1(controller1);
@@ -902,10 +902,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    * Updates whether the given user is pinging with the specified controller or not.
    */
   onPingUpdate({
-    userID,
+    userId,
     originalMessage: { controllerId, isPinging }
   }: ForwardedMessage<PingUpdateMessage>): void {
-    const remoteUser = this.remoteUsers.lookupRemoteUserById(userID);
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
     if (!remoteUser) return;
 
     if (controllerId === 0) {
@@ -927,10 +927,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    * @param {JSON} data - Contains id and controller information.
    */
   onUserControllers({
-    userID,
+    userId,
     originalMessage: { connect, disconnect }
   }: ForwardedMessage<UserControllerMessage>): void {
-    const remoteUser = this.remoteUsers.lookupRemoteUserById(userID);
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
     if (!remoteUser) return;
 
     // Load models of newly connected controller(s).
@@ -987,8 +987,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
           highlightedComponents: app.highlightedComponents.map((highlightedComponent) => {
             return {
               entityType: highlightedComponent.entityType,
-              entityID: highlightedComponent.entityID,
-              color: this.remoteUsers.lookupRemoteUserById(highlightedComponent.userID)?.color,
+              entityId: highlightedComponent.entityId,
+              color: this.remoteUsers.lookupRemoteUserById(highlightedComponent.userId)?.color,
             };
           }),
         }));
@@ -1026,9 +1026,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   onAppClosed({
-    originalMessage: { appID }
+    originalMessage: { appId }
   }: ForwardedMessage<AppClosedMessage>): void {
-    const application = this.vrApplicationRenderer.getApplicationById(appID);
+    const application = this.vrApplicationRenderer.getApplicationById(appId);
     if (application) this.vrApplicationRenderer.removeApplicationLocally(application);
   }
 
@@ -1049,12 +1049,12 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   onComponentUpdate({
-    originalMessage: { isFoundation, appID, componentID }
+    originalMessage: { isFoundation, appId, componentId }
   }: ForwardedMessage<ComponentUpdateMessage>): void {
-    const applicationObject3D = this.vrApplicationRenderer.getApplicationById(appID);
+    const applicationObject3D = this.vrApplicationRenderer.getApplicationById(appId);
     if (!applicationObject3D) return;
 
-    const componentMesh = applicationObject3D.getBoxMeshbyModelId(componentID);
+    const componentMesh = applicationObject3D.getBoxMeshbyModelId(componentId);
 
     if (isFoundation) {
       this.vrApplicationRenderer.closeAllComponentsLocally(applicationObject3D);
@@ -1064,18 +1064,18 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   onHighlightingUpdate({
-    userID,
-    originalMessage: { isHighlighted, appID, entityType, entityID }
+    userId,
+    originalMessage: { isHighlighted, appId, entityType, entityId }
   }: ForwardedMessage<HighlightingUpdateMessage>): void {
-    const application = this.vrApplicationRenderer.getApplicationById(appID);
+    const application = this.vrApplicationRenderer.getApplicationById(appId);
     if (!application) return;
 
-    const user = this.remoteUsers.lookupRemoteUserById(userID);
+    const user = this.remoteUsers.lookupRemoteUserById(userId);
     if (!user) return;
 
     if (isHighlighted) {
       this.highlightingService.hightlightComponentLocallyByTypeAndId(application, {
-        entityType, entityID,
+        entityType, entityId,
         color: user.color
       });
     } else {
@@ -1087,14 +1087,14 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   * Updates the state of given user to spectating or connected.
   * Hides them if spectating.
   *
-  * @param {string} userID - The user's id.
+  * @param {string} userId - The user's id.
   * @param {boolean} isSpectating - True, if the user is now spectating, else false.
   */
   onSpectatingUpdate({
-    userID,
+    userId,
     originalMessage: { isSpectating }
   }: ForwardedMessage<SpectatingUpdateMessage>): void {
-    const remoteUser = this.remoteUsers.setRemoteUserSpectatingById(userID, isSpectating);
+    const remoteUser = this.remoteUsers.setRemoteUserSpectatingById(userId, isSpectating);
     if (!remoteUser) return;
 
     const remoteUserHexColor = `#${remoteUser.color.getHexString()}`;

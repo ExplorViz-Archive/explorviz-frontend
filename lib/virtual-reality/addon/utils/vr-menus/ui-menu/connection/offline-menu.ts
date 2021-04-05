@@ -1,18 +1,10 @@
-import VrRoomService from "virtual-reality/services/vr-room";
 import TextbuttonItem from "../../items/textbutton-item";
 import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 import TitleItem from "../../items/title-item";
 
-export type OfflineMenuArgs = ConnectionBaseMenuArgs & {
-  roomService: VrRoomService
-};
-
 export default class OfflineMenu extends ConnectionBaseMenu {
-  private roomService: VrRoomService;
-
-  constructor({ roomService, ...args }: OfflineMenuArgs) {
+  constructor(args: ConnectionBaseMenuArgs) {
     super(args);
-    this.roomService = roomService;
 
     const title = new TitleItem({
       text: 'You are offline',
