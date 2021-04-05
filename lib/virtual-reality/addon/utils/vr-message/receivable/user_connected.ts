@@ -1,4 +1,6 @@
 import { Color, isColor } from "../util/color";
+import { Position, isPosition } from "../util/position";
+import { Quaternion, isQuaternion } from "../util/quaternion";
 
 export const USER_CONNECTED_EVENT = 'user_connected';
 
@@ -6,7 +8,9 @@ export type UserConnectedMessage = {
   event: typeof USER_CONNECTED_EVENT,
   id: string,
   name: string,
-  color: Color
+  color: Color,
+  position: Position,
+  quaternion: Quaternion,
 };
 
 export function isUserConnectedMessage(msg: any): msg is UserConnectedMessage {
@@ -15,5 +19,7 @@ export function isUserConnectedMessage(msg: any): msg is UserConnectedMessage {
     && msg.event === USER_CONNECTED_EVENT
     && typeof msg.id === 'string'
     && typeof msg.name === 'string'
-    && isColor(msg.color);
+    && isColor(msg.color)
+    && isPosition(msg.position)
+    && isQuaternion(msg.quaternion);
 }

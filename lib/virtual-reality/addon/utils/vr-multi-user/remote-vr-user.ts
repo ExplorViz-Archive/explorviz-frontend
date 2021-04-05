@@ -5,50 +5,35 @@ import NameTagSprite from '../view-objects/vr/name-tag-sprite';
 import PingMesh from '../view-objects/vr/ping-mesh';
 import WaypointIndicator from '../view-objects/vr/waypoint-indicator';
 import { DEFAULT_RAY_LENGTH } from '../vr-controller';
+import { ControllerId, CONTROLLER_1_ID, CONTROLLER_2_ID } from "../vr-message/util/controller_id";
+import RayMesh from "../view-objects/vr/ray-mesh";
+import { Pose, ControllerPose } from "../vr-message/sendable/user_positions";
 
 type Controller = {
   assetUrl: string,
-  position: THREE.Vector3,
-  quaternion: THREE.Quaternion,
   intersection: THREE.Vector3 | null,
   model: THREE.Object3D,
-  ray: THREE.Object3D,
+  ray: RayMesh,
+  pingMesh: PingMesh,
+  waypointIndicator: WaypointIndicator,
 };
 
 type Camera = {
-  position: THREE.Vector3,
-  quaternion: THREE.Quaternion,
   model: THREE.Object3D,
 };
 
 export default class RemoteVrUser extends THREE.Object3D {
   userName: string;
-
   userId: string;
-
+  color: THREE.Color;
   state: string;
 
-  controller1: Controller | undefined;
+  camera: Camera | null;
+  controllers: (Controller | null)[];
+  nameTag: NameTagSprite | null;
 
-  controller2: Controller | undefined;
-
-  pingMesh1: PingMesh;
-
-  pingWaypoint1: WaypointIndicator;
-
-  pingMesh2: PingMesh;
-
-  pingWaypoint2: WaypointIndicator;
-
-  camera: Camera | undefined;
-
-  color: THREE.Color; // [r,g,b], r,g,b = 0,...,255
-
-  nameTag: NameTagSprite | undefined;
-
-  localUser: LocalVrUser;
-
-  animationMixer: THREE.AnimationMixer;
+  private animationMixer: THREE.AnimationMixer;
+  private localUser: LocalVrUser;
 
   constructor({ userName, userId, color, state, localUser }: {
     userName: string,
@@ -62,93 +47,66 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.userId = userId;
     this.color = color;
     this.state = state;
-    this.localUser = localUser;
-    this.animationMixer = new THREE.AnimationMixer(this);
 
-    this.pingMesh1 = new PingMesh({ animationMixer: this.animationMixer, color: this.color });
-    this.pingMesh2 = new PingMesh({ animationMixer: this.animationMixer, color: this.color });
-    this.add(this.pingMesh1);
-    this.add(this.pingMesh2);
-    this.pingWaypoint1 = new WaypointIndicator({ target: this.pingMesh1, color: this.color });
-    this.pingWaypoint2 = new WaypointIndicator({ target: this.pingMesh2, color: this.color });
-    this.localUser.defaultCamera.add(this.pingWaypoint1);
-    this.localUser.defaultCamera.add(this.pingWaypoint2);
+    this.camera = null;
+    this.controllers = [null, null];
+    this.nameTag = null;
+
+    this.animationMixer = new THREE.AnimationMixer(this);
+    this.localUser = localUser;
   }
 
-  initCamera(obj: THREE.Object3D) {
-    this.camera = {
-      position: new THREE.Vector3(),
-      quaternion: new THREE.Quaternion(),
-      model: obj,
-    };
+  initCamera(obj: THREE.Object3D, initialPose: Pose) {
+    this.camera = { model: obj };
 
     this.add(this.camera.model);
+    this.updateCamera(initialPose);
     this.addNameTag();
   }
 
-  async initController1(assetUrl: string) {
-    this.removeController1();
-    this.controller1 = await this.initController(assetUrl);
-  }
+  async initController(controllerId: ControllerId, assetUrl: string, initialPose: ControllerPose): Promise<void> {
+    this.removeController(controllerId);
 
-  async initController2(assetUrl: string) {
-    this.removeController2();
-    this.controller2 = await this.initController(assetUrl);
-  }
+    // Load controller model.
+    const model = await VrControllerModelFactory.INSTANCE.loadAssetScene(assetUrl);
+    this.add(model);
 
-  async initController(assetUrl: string): Promise<Controller> {
-    const controllerModel = await VrControllerModelFactory.INSTANCE.loadAssetScene(assetUrl);
-    const ray = RemoteVrUser.addRayToControllerModel(controllerModel, this.color);
+    // Initialize ray.
+    const ray = new RayMesh(this.color);
+    model.add(ray);
+
+    // Initialize pinging.
+    const pingMesh = new PingMesh({ animationMixer: this.animationMixer, color: this.color });
+    const waypointIndicator =  new WaypointIndicator({ target: pingMesh, color: this.color });
+    this.add(pingMesh);
+    this.localUser.defaultCamera.add(waypointIndicator);
 
     let controller = {
       assetUrl: assetUrl,
       position: new THREE.Vector3(),
       quaternion: new THREE.Quaternion(),
       intersection: null,
-      model: controllerModel,
-      ray,
+      model, ray, pingMesh, waypointIndicator
     };
+    this.controllers[controllerId] = controller;
     this.add(controller.model);
-    return controller;
+
+    this.updateController(controllerId, initialPose);
   }
 
-  static addRayToControllerModel(controller: THREE.Object3D, color: THREE.Color) {
-    const geometry = new THREE.BufferGeometry().setFromPoints(
-      [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)],
-    );
-
-    const material = new THREE.LineBasicMaterial({
-      color,
-    });
-
-    const line = new THREE.Line(geometry, material);
-    line.position.y -= 0.005;
-    line.position.z -= 0.02;
-    controller.add(line);
-
-    return line;
-  }
-
-  removeController1() {
-    if (this.controller1 && this.controller1.model) {
-      this.remove(this.controller1.model);
-      this.controller1 = undefined;
-    }
-    this.togglePing1(false);
-  }
-
-  removeController2() {
-    if (this.controller2 && this.controller2.model) {
-      this.remove(this.controller2.model);
-      this.controller2 = undefined;
-    }
-    this.togglePing2(false);
+  removeController(controllerId: ControllerId) {
+    const controller = this.controllers[controllerId];
+    if (!controller) return;
+    this.remove(controller.model);
+    this.remove(controller.pingMesh);
+    this.localUser.defaultCamera.remove(controller.waypointIndicator);
+    this.controllers[controllerId] = null;
   }
 
   private removeCamera() {
     if (this.camera && this.camera.model) {
       this.remove(this.camera.model);
-      this.camera = undefined;
+      this.camera = null;
     }
   }
 
@@ -160,49 +118,24 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   private removeNameTag() {
     this.nameTag?.parent?.remove(this.nameTag);
-    this.nameTag = undefined;
-  }
-
-  private removePingObjects() {
-    this.remove(this.pingMesh1);
-    this.remove(this.pingMesh2);
-    this.pingWaypoint1.parent?.remove(this.pingWaypoint1);
-    this.pingWaypoint2.parent?.remove(this.pingWaypoint2);
+    this.nameTag = null;
   }
 
   removeAllObjects3D() {
-    this.removeController1();
-    this.removeController2();
+    this.removeController(CONTROLLER_1_ID);
+    this.removeController(CONTROLLER_2_ID);
     this.removeCamera();
     this.removeNameTag();
-    this.removePingObjects();
   }
 
-  togglePing1(isPinging: boolean) {
+  togglePing(controllerId: ControllerId, isPinging: boolean) {
+    const controller = this.controllers[controllerId];
+    if (!controller) return;
+
     if (isPinging) {
-      this.pingMesh1.startPinging();
+      controller.pingMesh.startPinging();
     } else {
-      this.pingMesh1.stopPinging();
-    }
-  }
-
-  updatePing1() {
-    if (this.controller1) {
-      this.pingMesh1.updateIntersection(this.controller1.intersection);
-    }
-  }
-
-  togglePing2(isPinging: boolean) {
-    if (isPinging) {
-      this.pingMesh2.startPinging();
-    } else {
-      this.pingMesh2.stopPinging();
-    }
-  }
-
-  updatePing2() {
-    if (this.controller2) {
-      this.pingMesh2.updateIntersection(this.controller2.intersection);
+      controller.pingMesh.stopPinging();
     }
   }
 
@@ -215,15 +148,14 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.animationMixer.update(delta);
 
     // Update length of rays such that they extend to the intersection point.
-    if (this.controller1) this.updateRay(this.controller1);
-    if (this.controller2) this.updateRay(this.controller2);
-  }
-
-  private updateRay(controller: Controller) {
-    const distance = controller.intersection
-      ? controller.ray.getWorldPosition(new THREE.Vector3()).sub(controller.intersection).length()
-      : DEFAULT_RAY_LENGTH;
-    controller.ray.scale.z = distance;
+    for (const controller of this.controllers) {
+      if (controller) {
+        const distance = controller.intersection
+          ? controller.ray.getWorldPosition(new THREE.Vector3()).sub(controller.intersection).length()
+          : DEFAULT_RAY_LENGTH;
+        controller.ray.scale.z = distance;
+      }
+    }
   }
 
   /**
@@ -231,14 +163,12 @@ export default class RemoteVrUser extends THREE.Object3D {
    *
    * @param Object containing the new camera position and quaterion.
    */
-  updateCamera(camera: { position: number[], quaternion: number[] }) {
+  updateCamera(pose: Pose) {
     if (this.camera) {
-      camera.position[1] -= 0.01;
+      pose.position[1] -= 0.01;
 
-      this.camera.position.fromArray(camera.position);
-      this.camera.quaternion.fromArray(camera.quaternion);
-      this.camera.model.position.copy(this.camera.position);
-      this.camera.model.quaternion.copy(this.camera.quaternion);
+      this.camera.model.position.fromArray(pose.position);
+      this.camera.model.quaternion.fromArray(pose.quaternion);
     }
   }
 
@@ -247,38 +177,15 @@ export default class RemoteVrUser extends THREE.Object3D {
    *
    * @param Object containing the new controller1 position and quaterion.
    */
-  updateController1(controller: { position: number[], quaternion: number[], intersection: number[] | null }) {
-    if (this.controller1) {
-      this.controller1.position.fromArray(controller.position);
-      this.controller1.quaternion.fromArray(controller.quaternion);
-      this.controller1.model.position.copy(this.controller1.position);
-      this.controller1.model.quaternion.copy(this.controller1.quaternion);
-      if (controller.intersection) {
-        this.controller1.intersection = new THREE.Vector3().fromArray(controller.intersection);
-      } else {
-        this.controller1.intersection = null;
-      }
-      this.updatePing1();
-    }
-  }
+  updateController(controllerId: ControllerId, { position, quaternion, intersection }: ControllerPose) {
+    const controller = this.controllers[controllerId];
+    if (!controller) return;
 
-  /**
-   * Updates the controller2 model's position and rotation.
-   *
-   * @param Object containing the new controller2 position and quaterion.
-   */
-  updateController2(controller: { position: number[], quaternion: number[], intersection: number[] | null }) {
-    if (this.controller2) {
-      this.controller2.position.fromArray(controller.position);
-      this.controller2.quaternion.fromArray(controller.quaternion);
-      this.controller2.model.position.copy(this.controller2.position);
-      this.controller2.model.quaternion.copy(this.controller2.quaternion);
-      if (controller.intersection) {
-        this.controller2.intersection = new THREE.Vector3().fromArray(controller.intersection);
-      } else {
-        this.controller2.intersection = null;
-      }
-      this.updatePing2();
+    if (controller) {
+      controller.model.position.fromArray(position);
+      controller.model.quaternion.fromArray(quaternion);
+      controller.intersection = intersection && new THREE.Vector3().fromArray(intersection);
+      controller.pingMesh.updateIntersection(controller.intersection);
     }
   }
 
@@ -289,11 +196,8 @@ export default class RemoteVrUser extends THREE.Object3D {
    *                         Shows them if true.
    */
   setVisible(visible: boolean) {
-    if (this.controller1) {
-      this.controller1.model.visible = visible;
-    }
-    if (this.controller2) {
-      this.controller2.model.visible = visible;
+    for (const controller of this.controllers) {
+      if (controller) controller.model.visible = visible;
     }
     this.setHmdVisible(visible);
   }

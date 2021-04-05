@@ -39,7 +39,7 @@ import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-con
 import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding, { VRControllerThumbpadVerticalDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
-import * as Helper from 'virtual-reality/utils/vr-helpers/multi-user-helper';
+import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
 import InteractiveMenu from 'virtual-reality/utils/vr-menus/interactive-menu';
 import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 import MenuQueue from 'virtual-reality/utils/vr-menus/menu-queue';
@@ -60,13 +60,15 @@ import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/requ
 import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/detached_menu_closed';
 import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/spectating_update';
 import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
-import { UserControllerMessage, USER_CONTROLLER_EVENT } from 'virtual-reality/utils/vr-message/sendable/user_controllers';
 import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import VrInputManager from 'virtual-reality/utils/vr-multi-user/vr-input-manager';
 import WebXRPolyfill from 'webxr-polyfill';
 import VrHighlightingService from "../services/vr-highlighting";
+import { UserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
+import { UserControllerConnectMessage, USER_CONTROLLER_CONNECT_EVENT } from "../utils/vr-message/sendable/user_controller_connect";
+import { CONTROLLER_1_ID, CONTROLLER_2_ID, ControllerId } from "../utils/vr-message/util/controller_id";
 
 interface Args {
   readonly id: string;
@@ -316,11 +318,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private initControllers() {
     this.debug('Initializing controllers...');
 
-    this.localUser.setController1(this.initController({ gamepadIndex: 0 }));
-    this.localUser.setController2(this.initController({ gamepadIndex: 1 }));
+    this.localUser.setController1(this.initController({ gamepadIndex: CONTROLLER_1_ID }));
+    this.localUser.setController2(this.initController({ gamepadIndex: CONTROLLER_2_ID }));
   }
 
-  private initController({ gamepadIndex }: { gamepadIndex: number }): VRController {
+  private initController({ gamepadIndex }: { gamepadIndex: ControllerId }): VRController {
     // Initialize the controller's menu group.
     const menuGroup = new MenuGroup({
       detachedMenuGroups: this.detachedMenuGroups
@@ -593,19 +595,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     if (this.spectateUserService.isActive) controller.setToSpectatingAppearance();
     else controller.setToDefaultAppearance();
 
-    // Prepare update message for other users
-    let connect: { controller1?: string, controller2?: string };
-    const motionController = await controller.controllerModel.motionControllerPromise;
-    if (controller === this.localUser.controller1) {
-      connect = { controller1: motionController.assetUrl };
-    } else {
-      connect = { controller2: motionController.assetUrl };
-    }
-    const disconnect = {};
-
-    if (this.localUser.isOnline) {
-      this.sender.sendControllerUpdate(connect, disconnect);
-    }
+    this.sender.sendControllerConnect(controller);
   }
 
   private onControllerDisconnected(controller: VRController) {
@@ -613,15 +603,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     controller.menuGroup.closeAllMenus();
 
     // Inform other users that the controller disconnected.
-    if (this.localUser.isOnline) {
-      let disconnect: { controller1?: string, controller2?: string };
-      if (controller === this.localUser.controller1) {
-        disconnect = { controller1: controller.gamepadId };
-      } else {
-        disconnect = { controller2: controller.gamepadId };
-      }
-      this.sender.sendControllerUpdate({}, disconnect);
-    }
+    this.sender.sendControllerDisconnect(controller);
   }
 
   private makeControllerBindings(): VRControllerBindings {
@@ -654,7 +636,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         labelDown: 'Show Details'
       }, {
         onThumbpadDown: (controller, axes) => {
-          switch (VRControllerThumbpadBinding.getVerticalDirection(axes, {threshold: THUMBPAD_THRESHOLD})) {
+          switch (VRControllerThumbpadBinding.getVerticalDirection(axes, { threshold: THUMBPAD_THRESHOLD })) {
             case VRControllerThumbpadVerticalDirection.UP:
               if (controller.intersectedObject) {
                 this.secondaryInputManager.handleTriggerDown(controller.intersectedObject);
@@ -763,38 +745,17 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   // #region SENDING MESSAGES
 
   private sendPoses() {
-    const poses = Helper.getPoses(
+    const poses = VrPoses.getPoses(
       this.localUser.camera,
       this.localUser.controller1,
       this.localUser.controller2
     );
-    let controller1 = this.localUser.controller1;
-    let intersection1 = null;
-    if (controller1) {
-      controller1.updateIntersectedObject();
-      intersection1 = controller1.intersectedObject?.point || null;
-    }
-    let controller2 = this.localUser.controller2;
-    let intersection2 = null;
-    if (controller2) {
-      controller2.updateIntersectedObject();
-      intersection2 = controller2.intersectedObject?.point || null;
-    }
-
-    this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2, intersection1, intersection2);
+    this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
   }
 
   private sendInitialControllerConnectState() {
-    if (this.localUser.isOnline) {
-      const connect: { controller1?: string, controller2?: string } = {};
-      if (this.localUser.controller1?.connected) {
-        connect.controller1 = this.localUser.controller1.controllerModel.motionController?.assetUrl;
-      }
-      if (this.localUser.controller2?.connected) {
-        connect.controller2 = this.localUser.controller2.controllerModel.motionController?.assetUrl;
-      }
-      this.sender.sendControllerUpdate(connect, {});
-    }
+    this.sender.sendControllerConnect(this.localUser.controller1);
+    this.sender.sendControllerConnect(this.localUser.controller2);
   }
 
   // #endregion SENDING MESSAGES
@@ -802,7 +763,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   // #region HANDLING MESSAGES
 
   private onSelfDisconnected(event?: any) {
-    if (this.localUser.connectionStatus === 'connecting') {
+    if (this.localUser.isConnecting) {
       this.showHint('VR service not responding');
     } else if (event) {
       switch (event.code) {
@@ -840,28 +801,35 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         event: USER_CONNECTED_EVENT,
         id: userData.id,
         name: userData.name,
-        color: userData.color
+        color: userData.color,
+        position: userData.position,
+        quaternion: userData.quaternion
       }, false);
-      this.onUserControllers({
-        event: FORWARDED_EVENT,
-        userId: userData.id,
-        originalMessage: {
-          event: USER_CONTROLLER_EVENT,
-          connect: userData.controllers,
-          disconnect: null
-        }
-      });
+      for (let controller of userData.controllers) {
+        this.onUserControllerConnect({
+          event: FORWARDED_EVENT,
+          userId: userData.id,
+          originalMessage: {
+            event: USER_CONTROLLER_CONNECT_EVENT,
+            controller
+          }
+        });
+      }
     }
+
+    // Initialize local user.
     this.localUser.connected({
       id: self.id,
       name: self.name,
       color: new THREE.Color(...self.color)
     });
+
+    // Send controllers.
     this.sendInitialControllerConnectState();
   }
 
   onUserConnected(
-    { id, name, color }: UserConnectedMessage,
+    { id, name, color, position, quaternion }: UserConnectedMessage,
     showConnectMessage = true
   ): void {
     const remoteUser = new RemoteVrUser({
@@ -871,7 +839,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       state: 'online',
       localUser: this.localUser
     });
-    this.remoteUsers.addRemoteUser(remoteUser);
+    this.remoteUsers.addRemoteUser(remoteUser, { position, quaternion });
 
     if (showConnectMessage) {
       this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
@@ -893,8 +861,8 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
     if (!remoteUser) return;
 
-    if (controller1) remoteUser.updateController1(controller1);
-    if (controller2) remoteUser.updateController2(controller2);
+    if (controller1) remoteUser.updateController(CONTROLLER_1_ID, controller1);
+    if (controller2) remoteUser.updateController(CONTROLLER_2_ID, controller2);
     if (camera) remoteUser.updateCamera(camera);
   }
 
@@ -908,11 +876,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
     if (!remoteUser) return;
 
-    if (controllerId === 0) {
-      remoteUser.togglePing1(isPinging);
-    } else if (controllerId === 1) {
-      remoteUser.togglePing2(isPinging);
-    }
+    remoteUser.togglePing(controllerId, isPinging);
   }
 
   onTimestampUpdate({
@@ -921,29 +885,24 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.timestampService.updateTimestampLocally(timestamp);
   }
 
-  /**
-   * Handles the (dis-)connect of the specified user's controller(s).
-   *
-   * @param {JSON} data - Contains id and controller information.
-   */
-  onUserControllers({
+  onUserControllerConnect({
     userId,
-    originalMessage: { connect, disconnect }
-  }: ForwardedMessage<UserControllerMessage>): void {
+    originalMessage: { controller: { controllerId, assetUrl, position, quaternion, intersection } }
+  }: ForwardedMessage<UserControllerConnectMessage>): void {
     const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
     if (!remoteUser) return;
 
-    // Load models of newly connected controller(s).
-    if (connect) {
-      if (connect.controller1) remoteUser.initController1(connect.controller1);
-      if (connect.controller2) remoteUser.initController2(connect.controller2);
-    }
+    remoteUser.initController(controllerId, assetUrl, { position, quaternion, intersection });
+  }
 
-    // Remove controller model(s) due to controller disconnect.
-    if (disconnect) {
-      if (disconnect.controller1) remoteUser.removeController1();
-      if (disconnect.controller2) remoteUser.removeController2();
-    }
+  onUserControllerDisconnect({
+    userId,
+    originalMessage: { controllerId, }
+  }: ForwardedMessage<UserControllerDisconnectMessage>): void {
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
+    if (!remoteUser) return;
+
+    remoteUser.removeController(controllerId);
   }
 
   /**

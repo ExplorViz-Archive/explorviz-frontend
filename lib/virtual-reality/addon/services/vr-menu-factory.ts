@@ -90,7 +90,6 @@ export default class VrMenuFactoryService extends Service {
   buildOfflineMenu(): OfflineMenu {
     return new OfflineMenu({
       localUser: this.localUser,
-      roomService: this.roomService,
       menuFactory: this,
     });
   }

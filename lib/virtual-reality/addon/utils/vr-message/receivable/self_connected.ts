@@ -1,30 +1,45 @@
 import { Color, isColor } from "../util/color";
-import { Controllers, isControllers } from "../util/controllers";
+import { Controller, isController } from "../util/controller";
+import { Position, isPosition } from "../util/position";
+import { Quaternion, isQuaternion } from "../util/quaternion";
 
 export const SELF_CONNECTED_EVENT = 'self_connected';
 
+type InitialUser = { id: string, name: string, color: Color };
+
+type InitialRemoteUser = InitialUser & {
+  position: Position,
+  quaternion: Quaternion,
+  controllers: Controller[]
+};
+
 export type SelfConnectedMessage = {
   event: typeof SELF_CONNECTED_EVENT,
-  self: { id: string, name: string, color: Color },
-  users: {
-    id: string, name: string, color: Color,
-    controllers: Controllers
-  }[]
+  self: InitialUser,
+  users: InitialRemoteUser[]
 };
+
+function isInitialUser(user: any): user is InitialUser {
+  return user !== null
+    && typeof user === 'object'
+    && typeof user.id === 'string'
+    && typeof user.name === 'string'
+    && isColor(user.color);
+}
+
+function isInitialRemoteUser(remoteUser: any): remoteUser is InitialRemoteUser {
+  return isInitialUser(remoteUser) as boolean
+    && isPosition(remoteUser.position)
+    && isQuaternion(remoteUser.quaternion)
+    && Array.isArray(remoteUser.controllers)
+    && remoteUser.controllers.every(isController);
+}
 
 export function isSelfConnectedMessage(msg: any): msg is SelfConnectedMessage {
   return msg !== null
     && typeof msg === 'object'
     && msg.event === SELF_CONNECTED_EVENT
-    && typeof msg.self === 'object'
-    && typeof msg.self.id === 'string'
-    && typeof msg.self.name === 'string'
-    && isColor(msg.self.color)
+    && isInitialUser(msg.self)
     && Array.isArray(msg.users)
-    && msg.users.every((user: any) =>
-      typeof user === 'object'
-      && typeof user.id === 'string'
-      && typeof user.name === 'string'
-      && isColor(user.color)
-      && isControllers(user.controllers));
+    && msg.users.every(isInitialRemoteUser);
 }

@@ -16,9 +16,10 @@ import { isObjectMovedMessage, ObjectMovedMessage } from "../utils/vr-message/se
 import { AppClosedMessage, isAppClosedMessage } from "../utils/vr-message/sendable/request/app_closed";
 import { DetachedMenuClosedMessage, isDetachedMenuClosedMessage } from "../utils/vr-message/sendable/request/detached_menu_closed";
 import { isSpectatingUpdateMessage, SpectatingUpdateMessage } from "../utils/vr-message/sendable/spectating_update";
-import { isUserControllerMessage, UserControllerMessage } from "../utils/vr-message/sendable/user_controllers";
 import { isUserPositionsMessage, UserPositionsMessage } from "../utils/vr-message/sendable/user_positions";
 import { Nonce } from "../utils/vr-message/util/nonce";
+import { UserControllerConnectMessage, isUserControllerConnectMessage } from "../utils/vr-message/sendable/user_controller_connect";
+import { UserControllerDisconnectMessage, isUserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
 
 type ResponseHandler<T> = (msg: T) => void;
 
@@ -31,7 +32,8 @@ export interface VrMessageListener {
 
   // Forwarded messages.
   onUserPositions(msg: ForwardedMessage<UserPositionsMessage>): void;
-  onUserControllers(msg: ForwardedMessage<UserControllerMessage>): void;
+  onUserControllerConnect(msg: ForwardedMessage<UserControllerConnectMessage>): void;
+  onUserControllerDisconnect(msg: ForwardedMessage<UserControllerDisconnectMessage>): void;
   onAppOpened(msg: ForwardedMessage<AppOpenedMessage>): void;
   onAppClosed(msg: ForwardedMessage<AppClosedMessage>): void;
   onDetachedMenuClosed(msg: ForwardedMessage<DetachedMenuClosedMessage>): void;
@@ -89,7 +91,8 @@ export default class VrMessageReceiver extends Service {
 
   private onForwardedMessage(msg: ForwardedMessage<any>) {
     if (isForwardedMessageOf(msg, isUserPositionsMessage)) return this.messageListeners.forEach((l) => l.onUserPositions(msg));
-    if (isForwardedMessageOf(msg, isUserControllerMessage)) return this.messageListeners.forEach((l) => l.onUserControllers(msg));
+    if (isForwardedMessageOf(msg, isUserControllerConnectMessage)) return this.messageListeners.forEach((l) => l.onUserControllerConnect(msg));
+    if (isForwardedMessageOf(msg, isUserControllerDisconnectMessage)) return this.messageListeners.forEach((l) => l.onUserControllerDisconnect(msg));
     if (isForwardedMessageOf(msg, isAppOpenedMessage)) return this.messageListeners.forEach((l) => l.onAppOpened(msg));
     if (isForwardedMessageOf(msg, isAppClosedMessage)) return this.messageListeners.forEach((l) => l.onAppClosed(msg));
     if (isForwardedMessageOf(msg, isDetachedMenuClosedMessage)) return this.messageListeners.forEach((l) => l.onDetachedMenuClosed(msg));

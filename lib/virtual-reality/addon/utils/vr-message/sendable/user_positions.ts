@@ -3,14 +3,14 @@ import { isQuaternion, Quaternion } from "../util/quaternion";
 
 export const USER_POSITIONS_EVENT = 'user_positions';
 
-type Pose = { position: Position, quaternion: Quaternion };
-type ControllerPose = { position: Position, quaternion: Quaternion, intersection: Position | null }
+export type Pose = { position: Position, quaternion: Quaternion };
+export type ControllerPose = Pose & { intersection: Position | null }
 
 export type UserPositionsMessage = {
   event: typeof USER_POSITIONS_EVENT,
   camera: Pose,
-  controller1: ControllerPose,
-  controller2: ControllerPose,
+  controller1: ControllerPose | undefined,
+  controller2: ControllerPose | undefined,
 };
 
 function isPose(pose: any): pose is Pose {
@@ -33,6 +33,6 @@ export function isUserPositionsMessage(msg: any): msg is UserPositionsMessage {
     && typeof msg === 'object'
     && msg.event === USER_POSITIONS_EVENT
     && isPose(msg.camera)
-    && isControllerPose(msg.controller1)
-    && isControllerPose(msg.controller2)
+    && (!msg.controller1 || isControllerPose(msg.controller1))
+    && (!msg.controller2 || isControllerPose(msg.controller2))
 }

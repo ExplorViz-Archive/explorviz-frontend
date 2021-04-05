@@ -7,6 +7,7 @@ import VRControllerBindingsList from './vr-controller/vr-controller-bindings-lis
 import VRControllerLabelGroup from './vr-controller/vr-controller-label-group';
 import { displayAsSolidObject, displayAsWireframe } from './vr-helpers/multi-user-helper';
 import MenuGroup from './vr-menus/menu-group';
+import { ControllerId } from "./vr-message/util/controller_id";
 
 /**
  * Length of the controller's ray when there is no intersection point.
@@ -42,7 +43,7 @@ export type VRControllerCallbackFunctions = {
  * a VR controller and provides update and callback functionalities.
  */
 export default class VRController extends BaseMesh {
-  gamepadIndex: number;
+  gamepadIndex: ControllerId;
 
   gamepad: Gamepad | null = null;
 
@@ -115,7 +116,7 @@ export default class VRController extends BaseMesh {
     scene,
     intersectableObjects,
   }: {
-    gamepadIndex: number,
+    gamepadIndex: ControllerId,
     color: THREE.Color,
     gripSpace: THREE.Group,
     raySpace: THREE.Group,

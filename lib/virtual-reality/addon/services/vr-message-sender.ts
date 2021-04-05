@@ -15,14 +15,13 @@ import { DetachedMenuClosedMessage } from '../utils/vr-message/sendable/request/
 import { MenuDetachedMessage } from '../utils/vr-message/sendable/request/menu_detached';
 import { ObjectGrabbedMessage } from '../utils/vr-message/sendable/request/object_grabbed';
 import { SpectatingUpdateMessage } from '../utils/vr-message/sendable/spectating_update';
-import { UserControllerMessage } from '../utils/vr-message/sendable/user_controllers';
-import { UserPositionsMessage } from '../utils/vr-message/sendable/user_positions';
+import { UserPositionsMessage, ControllerPose, Pose } from '../utils/vr-message/sendable/user_positions';
 import { Nonce } from '../utils/vr-message/util/nonce';
-
-type Pose = {
-  position: THREE.Vector3,
-  quaternion: THREE.Quaternion
-};
+import { ControllerId } from "../utils/vr-message/util/controller_id";
+import { UserControllerConnectMessage } from "../utils/vr-message/sendable/user_controller_connect";
+import VRController from "../utils/vr-controller";
+import { UserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
+import { getControllerPose } from "../utils/vr-helpers/vr-poses";
 
 export default class VrMessageSender extends Service {
   @service('web-socket')
@@ -43,23 +42,10 @@ export default class VrMessageSender extends Service {
    * Sends position and rotation information of the local user's camera and
    * controllers.
    */
-  sendPoseUpdate(camera: Pose, controller1: Pose, controller2: Pose, intersection1: THREE.Vector3 | null, intersection2: THREE.Vector3 | null) {
+  sendPoseUpdate(camera: Pose, controller1: ControllerPose | undefined, controller2: ControllerPose | undefined) {
     this.webSocket.send<UserPositionsMessage>({
       event: 'user_positions',
-      controller1: {
-        position: controller1.position.toArray(),
-        quaternion: controller1.quaternion.toArray(),
-        intersection: intersection1?.toArray() || null
-      },
-      controller2: {
-        position: controller2.position.toArray(),
-        quaternion: controller2.quaternion.toArray(),
-        intersection: intersection2?.toArray() || null
-      },
-      camera: {
-        position: camera.position.toArray(),
-        quaternion: camera.quaternion.toArray(),
-      }
+      controller1, controller2, camera
     });
   }
 
@@ -190,11 +176,27 @@ export default class VrMessageSender extends Service {
   /**
    * Informs the backend if a controller was connected/disconnected.
    */
-  sendControllerUpdate(connect: any, disconnect: any) {
-    this.webSocket.send<UserControllerMessage>({
-      event: 'user_controllers',
-      connect,
-      disconnect,
+  async sendControllerConnect(controller: VRController | undefined) {
+    if (!controller?.connected) return;
+
+    const motionController = await controller.controllerModel.motionControllerPromise;
+    this.webSocket.send<UserControllerConnectMessage>({
+      event: 'user_controller_connect',
+      controller: {
+        assetUrl: motionController.assetUrl,
+        controllerId: controller.gamepadIndex,
+        ...getControllerPose(controller)
+      },
+    });
+  }
+
+  /**
+   * Informs the backend if a controller was connected/disconnected.
+   */
+  sendControllerDisconnect(controller: VRController) {
+    this.webSocket.send<UserControllerDisconnectMessage>({
+      event: 'user_controller_disconnect',
+      controllerId: controller.gamepadIndex,
     });
   }
 
@@ -213,7 +215,7 @@ export default class VrMessageSender extends Service {
     });
   }
 
-  sendPingUpdate(controllerId: number, isPinging: boolean) {
+  sendPingUpdate(controllerId: ControllerId, isPinging: boolean) {
     this.webSocket.send<PingUpdateMessage>({
       event: 'ping_update',
       controllerId,

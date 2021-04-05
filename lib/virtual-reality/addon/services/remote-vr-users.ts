@@ -6,6 +6,7 @@ import { TGALoader } from "three/examples/jsm/loaders/TGALoader";
 import RemoteVrUser from "../utils/vr-multi-user/remote-vr-user";
 import SpectateUserService from "./spectate-user";
 import VrSceneService from "./vr-scene";
+import { Pose } from "../utils/vr-message/sendable/user_positions";
 
 export default class RemoteVrUserService extends Service {
   @service('spectate-user') private spectateUserService!: SpectateUserService;
@@ -49,12 +50,12 @@ export default class RemoteVrUserService extends Service {
     });
   }
 
-  addRemoteUser(remoteUser: RemoteVrUser) {
+  addRemoteUser(remoteUser: RemoteVrUser, initialPose: Pose) {
     // Make sure that the user does not already exist.
     if (this.idToRemoteUser.has(remoteUser.userId)) this.removeRemoteUser(remoteUser);
 
     this.idToRemoteUser.set(remoteUser.userId, remoteUser);
-    this.headsetModel.then((hmd) => remoteUser.initCamera(hmd.clone(true)));
+    this.headsetModel.then((hmd) => remoteUser.initCamera(hmd.clone(true), initialPose));
     this.remoteUserGroup.add(remoteUser);
   }
 

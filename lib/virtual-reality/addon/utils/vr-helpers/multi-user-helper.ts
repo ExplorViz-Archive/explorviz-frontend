@@ -1,40 +1,4 @@
 import THREE from 'three';
-import VRController from '../vr-controller';
-
-export function getCameraPose(camera: THREE.Camera) {
-  const position = new THREE.Vector3();
-  camera.getWorldPosition(position);
-
-  return { position, quaternion: camera.quaternion };
-}
-
-export function getObjectPose(object: THREE.Object3D) {
-  const position = new THREE.Vector3();
-  object.getWorldPosition(position);
-
-  // Use world quaternions because controller can also be rotated via controllerGroup
-  const quaternion = new THREE.Quaternion();
-  object.getWorldQuaternion(quaternion);
-
-  return { position, quaternion };
-}
-
-export function getPoses(camera: THREE.Camera, controller1: VRController | undefined,
-  controller2: VRController | undefined) {
-  const cameraPose = getCameraPose(camera);
-
-  let controller1Pose = { position: new THREE.Vector3(), quaternion: new THREE.Quaternion() };
-  if (controller1) {
-    controller1Pose = getObjectPose(controller1.raySpace);
-  }
-
-  let controller2Pose = { position: new THREE.Vector3(), quaternion: new THREE.Quaternion() };
-  if (controller2) {
-    controller2Pose = getObjectPose(controller2.raySpace);
-  }
-
-  return { camera: cameraPose, controller1: controller1Pose, controller2: controller2Pose };
-}
 
 export function measureText(text: string, {font, alignment, baseline}: {
   font: string,

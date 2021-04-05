@@ -22,7 +22,7 @@ export default class SpectateUserService extends Service {
   */
   update() {
     if (this.spectatedUser && this.spectatedUser.camera) {
-      this.localUser.teleportToPosition(this.spectatedUser.camera.position, {adaptCameraHeight: true});
+      this.localUser.teleportToPosition(this.spectatedUser.camera.model.position, { adaptCameraHeight: true });
     }
   }
 
@@ -60,7 +60,7 @@ export default class SpectateUserService extends Service {
       this.localUser.controller2.setToDefaultAppearance();
     }
 
-    this.localUser.teleportToPosition(this.startPosition, {adaptCameraHeight: true});
+    this.localUser.teleportToPosition(this.startPosition, { adaptCameraHeight: true });
     this.spectatedUser.setHmdVisible(true);
     this.spectatedUser = null;
 

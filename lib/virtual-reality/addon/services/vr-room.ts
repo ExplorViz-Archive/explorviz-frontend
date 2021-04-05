@@ -12,12 +12,15 @@ import { isRoomCreatedResponse, RoomCreatedResponse } from "../utils/vr-payload/
 import { isRoomListRecord, RoomListRecord } from "../utils/vr-payload/receivable/room-list";
 import { JoinLobbyPayload } from "../utils/vr-payload/sendable/join-lobby";
 import VrLandscapeRenderer from "./vr-landscape-renderer";
+import * as VrPose from "../utils/vr-helpers/vr-poses";
+import LocalVrUser from "./local-vr-user";
 
 const { vrService } = ENV.backendAddresses;
 
 export default class VrRoomService extends Service {
   @service('auth') private auth!: Auth;
   @service('detached-menu-groups') private detachedMenuGroups!: DetachedMenuGroupsService;
+  @service('local-vr-user') localUser!: LocalVrUser;
   @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
   @service('vr-timestamp') private timestampService!: VrTimestampService;
@@ -115,7 +118,8 @@ export default class VrRoomService extends Service {
   private buildJoinLobbyPayload(): JoinLobbyPayload | null {
     if (!this.auth.user) return null;
     return {
-      userName: this.auth.user.nickname
+      userName: this.auth.user.nickname,
+      ...VrPose.getCameraPose(this.localUser.camera)
     };
   }
 }
