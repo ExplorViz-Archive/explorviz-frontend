@@ -1,7 +1,7 @@
-import { EntityType } from "../vr-message/util/entity_type";
-import { Position } from "../vr-message/util/position";
-import { Quaternion } from "../vr-message/util/quaternion";
-import { Scale } from "../vr-message/util/Scale";
+import { EntityType } from "../../vr-message/util/entity_type";
+import { Position } from "../../vr-message/util/position";
+import { Quaternion } from "../../vr-message/util/quaternion";
+import { Scale } from "../../vr-message/util/Scale";
 
 export type InitialRoomDetachedMenu = {
   entityId: string,
@@ -9,7 +9,7 @@ export type InitialRoomDetachedMenu = {
   position: Position,
   quaternion: Quaternion,
   scale: Scale
-}
+};
 
 export type InitialRoomApp = {
   id: string,

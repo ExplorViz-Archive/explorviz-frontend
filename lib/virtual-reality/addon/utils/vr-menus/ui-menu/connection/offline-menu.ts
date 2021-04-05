@@ -46,6 +46,6 @@ export default class OfflineMenu extends ConnectionBaseMenu {
   }
 
   private createAndJoinNewRoom() {
-    this.localUser.connect(this.roomService.createRoom());
+    this.localUser.hostRoom();
   }
 }

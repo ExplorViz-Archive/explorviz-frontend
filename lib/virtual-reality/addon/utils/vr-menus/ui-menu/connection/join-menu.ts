@@ -1,8 +1,9 @@
-import VrRoomService, { RoomListRecord } from 'virtual-reality/services/vr-room';
+import VrRoomService from 'virtual-reality/services/vr-room';
 import TextItem from "../../items/text-item";
 import TextbuttonItem from "../../items/textbutton-item";
 import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 import TitleItem from "../../items/title-item";
+import { RoomListRecord } from "../../../vr-payload/receivable/room-list";
 
 /**
  * Time in seconds before the new room list should be fetched.
@@ -52,12 +53,12 @@ export default class JoinMenu extends ConnectionBaseMenu {
     let yPos = 50 + yOffset;
     for (let room of rooms) {
       const roomButton = new TextbuttonItem({
-        text: room.name,
+        text: room.roomName,
         position: { x: 100, y: yPos },
         width: 316,
         height: 50,
         fontSize: 28,
-        onTriggerDown: () => this.localUser.connect(Promise.resolve(room.id))
+        onTriggerDown: () => this.localUser.joinRoom(room.roomId)
       });
       this.items.push(roomButton);
       this.thumbpadTargets.push(roomButton);

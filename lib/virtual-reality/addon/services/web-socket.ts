@@ -16,14 +16,13 @@ export default class WebSocketService extends Service {
   socketCloseCallback: ((event: any) => void) | null = null;
   messageCallback: ((message: any) => void) | null = null;
 
-  private getSocketUrl(roomId: string) {
+  private getSocketUrl(ticketId: string) {
     const vrServiceSocket = vrService.replace(/^http(s?):\/\//i, 'ws$1://');
-    return `${vrServiceSocket}/v2/vr/${roomId}`;
+    return `${vrServiceSocket}/v2/vr/${ticketId}`;
   }
 
-  async initSocket(roomId: string) {
-    // TODO set Authorization header
-    this.currentSocketUrl = this.getSocketUrl(roomId);
+  async initSocket(ticketId: string) {
+    this.currentSocketUrl = this.getSocketUrl(ticketId);
     this.currentSocket = this.websockets.socketFor(this.currentSocketUrl);
     this.currentSocket.on('message', this.messageHandler, this);
     this.currentSocket.on('close', this.closeHandler, this);

@@ -6,21 +6,14 @@ import DetachedMenuGroupsService from 'virtual-reality/services/detached-menu-gr
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import { DetachableMenu, isDetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
-import { InitialRoomApp, InitialRoomDetachedMenu, InitialRoomLandscape, InitialRoomPayload } from 'virtual-reality/utils/vr-payload/initial-room';
+import { InitialRoomApp, InitialRoomDetachedMenu, InitialRoomLandscape, InitialRoomPayload } from 'virtual-reality/utils/vr-payload/sendable/initial-room';
+import { isLobbyJoinedResponse, LobbyJoinedResponse } from "../utils/vr-payload/receivable/lobby-joined";
+import { isRoomCreatedResponse, RoomCreatedResponse } from "../utils/vr-payload/receivable/room-created";
+import { isRoomListRecord, RoomListRecord } from "../utils/vr-payload/receivable/room-list";
+import { JoinLobbyPayload } from "../utils/vr-payload/sendable/join-lobby";
 import VrLandscapeRenderer from "./vr-landscape-renderer";
 
 const { vrService } = ENV.backendAddresses;
-
-type RoomId = string;
-
-export type RoomListRecord = {
-  id: RoomId,
-  name: string
-};
-
-function isRoomId(roomId: any): roomId is RoomId {
-  return typeof roomId === 'string';
-}
 
 export default class VrRoomService extends Service {
   @service('auth') private auth!: Auth;
@@ -36,16 +29,14 @@ export default class VrRoomService extends Service {
         Authorization: `Bearer ${this.auth.accessToken}`,
       }
     });
-    const roomIds = await response.json();
-    if (Array.isArray(roomIds) && roomIds.every(isRoomId)) {
-      return roomIds.map((roomId) => {
-        return { id: roomId, name: `Room ${roomId}` };
-      });
+    const records = await response.json();
+    if (Array.isArray(records) && records.every(isRoomListRecord)) {
+      return records;
     }
     throw 'invalid data';
   }
 
-  async createRoom(): Promise<string> {
+  async createRoom(): Promise<RoomCreatedResponse> {
     const url = `${vrService}/v2/vr/room`;
     const response = await fetch(url, {
       method: 'POST',
@@ -55,7 +46,9 @@ export default class VrRoomService extends Service {
       },
       body: JSON.stringify(this.buildInitialRoomPayload())
     });
-    return await response.json() as string;
+    const json = await response.json();
+    if (isRoomCreatedResponse(json)) return json;
+    throw 'invalid data';
   }
 
   private buildInitialRoomPayload(): InitialRoomPayload {
@@ -102,6 +95,28 @@ export default class VrRoomService extends Service {
           scale: detachedMenuGroup.scale.toArray()
         };
       });
+  }
+
+  async joinLobby(roomId: string): Promise<LobbyJoinedResponse> {
+    const url = `${vrService}/v2/vr/room/${roomId}/lobby`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.auth.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(this.buildJoinLobbyPayload())
+    });
+    const json = await response.json();
+    if (isLobbyJoinedResponse(json)) return json;
+    throw 'invalid data';
+  }
+
+  private buildJoinLobbyPayload(): JoinLobbyPayload | null {
+    if (!this.auth.user) return null;
+    return {
+      userName: this.auth.user.nickname
+    };
   }
 }
 

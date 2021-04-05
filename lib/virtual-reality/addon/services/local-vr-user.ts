@@ -4,11 +4,13 @@ import VRController from 'virtual-reality/utils/vr-controller';
 import SpectateUserService from './spectate-user';
 import WebSocketService from './web-socket';
 import VrSceneService from "./vr-scene";
+import VrRoomService from "./vr-room";
 
 export type ConnectionStatus = 'offline' | 'connecting' | 'online';
 
 export default class LocalVrUser extends Service {
   @service('spectate-user') private spectateUserService!: SpectateUserService;
+  @service('vr-room') private roomService!: VrRoomService;
   @service('vr-scene') private sceneService!: VrSceneService;
   @service('web-socket') private webSocket!: WebSocketService;
 
@@ -178,12 +180,25 @@ export default class LocalVrUser extends Service {
     controller.removeTeleportArea();
   }
 
-  async connect(roomId: Promise<string>) {
+  async hostRoom() {
     if (!this.isConnecting) {
       this.connectionStatus = 'connecting';
-      this.currentRoomId = await roomId;
-      this.webSocket.initSocket(this.currentRoomId);
+      var response = await this.roomService.createRoom();
+      this._joinRoom(response.roomId);
     }
+  }
+
+  joinRoom(roomId: string) {
+    if (!this.isConnecting) {
+      this.connectionStatus = 'connecting';
+      this._joinRoom(roomId);
+    }
+  }
+
+  private async _joinRoom(roomId: string) {
+    this.currentRoomId = roomId;
+    const response = await this.roomService.joinLobby(this.currentRoomId);
+    this.webSocket.initSocket(response.ticketId);
   }
 
   connected({ id, name, color }: {
