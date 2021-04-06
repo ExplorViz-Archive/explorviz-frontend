@@ -61,7 +61,6 @@ import { DetachedMenuClosedMessage } from 'virtual-reality/utils/vr-message/send
 import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/spectating_update';
 import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
 import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
-import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import VrInputManager from 'virtual-reality/utils/vr-multi-user/vr-input-manager';
 import WebXRPolyfill from 'webxr-polyfill';
@@ -69,6 +68,7 @@ import VrHighlightingService from "../services/vr-highlighting";
 import { UserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
 import { UserControllerConnectMessage, USER_CONTROLLER_CONNECT_EVENT } from "../utils/vr-message/sendable/user_controller_connect";
 import { CONTROLLER_1_ID, CONTROLLER_2_ID, ControllerId } from "../utils/vr-message/util/controller_id";
+import VrRoomService from 'virtual-reality/services/vr-room';
 
 interface Args {
   readonly id: string;
@@ -97,6 +97,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
   @service('vr-message-receiver') private receiver!: VrMessageReceiver;
   @service('vr-message-sender') private sender!: VrMessageSender;
+  @service('vr-room') private roomService!: VrRoomService;
   @service('vr-scene') private sceneService!: VrSceneService;
   @service('vr-timestamp') private timestampService!: VrTimestampService;
   @service('web-socket') private webSocket!: WebSocketService;
@@ -923,52 +924,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     }
   }
 
-  async onInitialLandscape({ detachedMenus, openApps, landscape }: InitialLandscapeMessage): Promise<void> {
-    this.vrApplicationRenderer.removeAllApplicationsLocally();
-    this.detachedMenuGroups.removeAllDetachedMenusLocally();
-
-    // Initialize landscape.
+  async onInitialLandscape({ landscape, openApps, detachedMenus }: InitialLandscapeMessage): Promise<void> {
     await this.timestampService.updateLandscapeToken(landscape.landscapeToken, landscape.timestamp);
-    this.vrLandscapeRenderer.landscapeObject3D.position.fromArray(landscape.position);
-    this.vrLandscapeRenderer.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
-    this.vrLandscapeRenderer.landscapeObject3D.scale.fromArray(landscape.scale);
-
-    // Initialize applications.
-    const tasks: Promise<any>[] = [];
-    openApps.forEach((app) => {
-      const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(app.id);
-      if (application) {
-        tasks.push(this.vrApplicationRenderer.addApplicationLocally(application, {
-          position: new THREE.Vector3(...app.position),
-          quaternion: new THREE.Quaternion(...app.quaternion),
-          scale: new THREE.Vector3(...app.scale),
-          openComponents: new Set(app.openComponents),
-          highlightedComponents: app.highlightedComponents.map((highlightedComponent) => {
-            return {
-              entityType: highlightedComponent.entityType,
-              entityId: highlightedComponent.entityId,
-              color: this.remoteUsers.lookupRemoteUserById(highlightedComponent.userId)?.color,
-            };
-          }),
-        }));
-      }
-    });
-
-    // Wait for applications to be opened before opening the menus. Otherwise
-    // the entities do not exist.
-    await Promise.all(tasks);
-
-    // Initialize detached menus.
-    detachedMenus.forEach((detachedMenu) => {
-      let object = this.findMeshByModelId(detachedMenu.entityType, detachedMenu.entityId);
-      if (isEntityMesh(object)) {
-        const menu = this.menuFactory.buildInfoMenu(object);
-        menu.position.fromArray(detachedMenu.position);
-        menu.quaternion.fromArray(detachedMenu.quaternion);
-        menu.scale.fromArray(detachedMenu.scale);
-        this.detachedMenuGroups.addDetachedMenuLocally(menu, detachedMenu.objectId);
-      }
-    })
+    this.roomService.restoreRoomLayout({ landscape, openApps, detachedMenus });
   }
 
   onAppOpened({
@@ -1075,7 +1033,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   onMenuDetached({ objectId, entityType, detachId, position, quaternion, scale }: MenuDetachedForwardMessage) {
-    let object = this.findMeshByModelId(entityType, detachId);
+    let object = this.sceneService.findMeshByModelId(entityType, detachId);
     if (isEntityMesh(object)) {
       const menu = this.menuFactory.buildInfoMenu(object);
       menu.position.fromArray(position);
@@ -1092,34 +1050,4 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   // #endregion HANDLING MESSAGES
-
-  // #region UTILS
-
-  findMeshByModelId(entityType: EntityType, id: string) {
-    switch (entityType) {
-      case NODE_ENTITY_TYPE:
-      case APPLICATION_ENTITY_TYPE:
-        return this.vrLandscapeRenderer.landscapeObject3D.getMeshbyModelId(id);
-
-      case COMPONENT_ENTITY_TYPE:
-      case CLASS_ENTITY_TYPE:
-        for (let application of this.vrApplicationRenderer.getOpenApplications()) {
-          const mesh = application.getBoxMeshbyModelId(id);
-          if (mesh) return mesh;
-        }
-        return null;
-
-      case CLASS_COMMUNICATION_ENTITY_TYPE:
-        for (let application of this.vrApplicationRenderer.getOpenApplications()) {
-          const mesh = application.getCommMeshByModelId(id);
-          if (mesh) return mesh;
-        }
-        return null;
-
-      default:
-        return null;
-    }
-  }
-
-  // #endregion UTILS
 }

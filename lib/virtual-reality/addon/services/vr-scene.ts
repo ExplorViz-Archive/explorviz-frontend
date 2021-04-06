@@ -1,12 +1,17 @@
 import Service, { inject as service } from '@ember/service';
 import Configuration from 'explorviz-frontend/services/configuration';
+import VrApplicationRenderer from 'explorviz-frontend/services/vr-application-renderer';
+import VrLandscapeRenderer from 'explorviz-frontend/services/vr-landscape-renderer';
 import THREE from "three";
+import { EntityType, NODE_ENTITY_TYPE, APPLICATION_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, CLASS_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import FloorMesh from "../utils/view-objects/vr/floor-mesh";
 
 const FLOOR_SIZE = 1000;
 
 export default class VrSceneService extends Service {
   @service('configuration') private configuration!: Configuration;
+  @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
+  @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
 
   readonly scene: THREE.Scene;
   readonly floor: FloorMesh;
@@ -35,6 +40,32 @@ export default class VrSceneService extends Service {
     const skyLight = new THREE.SpotLight(0xffffff, 0.5, 1000, Math.PI, 0, 0);
     skyLight.castShadow = false;
     this.scene.add(skyLight);
+  }
+
+  findMeshByModelId(entityType: EntityType, id: string) {
+    switch (entityType) {
+      case NODE_ENTITY_TYPE:
+      case APPLICATION_ENTITY_TYPE:
+        return this.vrLandscapeRenderer.landscapeObject3D.getMeshbyModelId(id);
+
+      case COMPONENT_ENTITY_TYPE:
+      case CLASS_ENTITY_TYPE:
+        for (let application of this.vrApplicationRenderer.getOpenApplications()) {
+          const mesh = application.getBoxMeshbyModelId(id);
+          if (mesh) return mesh;
+        }
+        return null;
+
+      case CLASS_COMMUNICATION_ENTITY_TYPE:
+        for (let application of this.vrApplicationRenderer.getOpenApplications()) {
+          const mesh = application.getCommMeshByModelId(id);
+          if (mesh) return mesh;
+        }
+        return null;
+
+      default:
+        return null;
+    }
   }
 }
 

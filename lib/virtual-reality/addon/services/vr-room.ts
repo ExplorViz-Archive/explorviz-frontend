@@ -14,6 +14,11 @@ import { JoinLobbyPayload } from "../utils/vr-payload/sendable/join-lobby";
 import VrLandscapeRenderer from "./vr-landscape-renderer";
 import * as VrPose from "../utils/vr-helpers/vr-poses";
 import LocalVrUser from "./local-vr-user";
+import { SerializedVrRoom } from 'virtual-reality/utils/vr-multi-user/serialized-vr-room';
+import { isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
+import RemoteVrUserService from './remote-vr-users';
+import VrMenuFactoryService from 'explorviz-frontend/services/vr-menu-factory';
+import VrSceneService from './vr-scene';
 
 const { vrService } = ENV.backendAddresses;
 
@@ -24,6 +29,9 @@ export default class VrRoomService extends Service {
   @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
   @service('vr-timestamp') private timestampService!: VrTimestampService;
+  @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
+  @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
+  @service('vr-scene') private sceneService!: VrSceneService;
 
   async listRooms(): Promise<RoomListRecord[]> {
     const url = `${vrService}/v2/vr/rooms`;
@@ -54,12 +62,73 @@ export default class VrRoomService extends Service {
     throw 'invalid data';
   }
 
+  saveCurrentRoomLayout(): SerializedVrRoom {
+    const { landscape, openApps, detachedMenus } = this.buildInitialRoomPayload();
+    return {
+      landscape,
+      openApps: openApps.map((app) => {
+        return {highlightedComponents: [], ...app};
+      }),
+      detachedMenus: detachedMenus.map((menu) => {
+        return {objectId: null, ...menu};
+      })
+    };
+  }
+
+  async restoreRoomLayout({ detachedMenus, openApps, landscape }: SerializedVrRoom) {
+    this.vrApplicationRenderer.removeAllApplicationsLocally();
+    this.detachedMenuGroups.removeAllDetachedMenusLocally();
+
+    // Initialize landscape.
+    this.vrLandscapeRenderer.landscapeObject3D.position.fromArray(landscape.position);
+    this.vrLandscapeRenderer.landscapeObject3D.quaternion.fromArray(landscape.quaternion);
+    this.vrLandscapeRenderer.landscapeObject3D.scale.fromArray(landscape.scale);
+
+    // Initialize applications.
+    const tasks: Promise<any>[] = [];
+    openApps.forEach((app) => {
+      const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(app.id);
+      if (application) {
+        tasks.push(this.vrApplicationRenderer.addApplicationLocally(application, {
+          position: new THREE.Vector3(...app.position),
+          quaternion: new THREE.Quaternion(...app.quaternion),
+          scale: new THREE.Vector3(...app.scale),
+          openComponents: new Set(app.openComponents),
+          highlightedComponents: app.highlightedComponents.map((highlightedComponent) => {
+            return {
+              entityType: highlightedComponent.entityType,
+              entityId: highlightedComponent.entityId,
+              color: this.remoteUsers.lookupRemoteUserById(highlightedComponent.userId)?.color,
+            };
+          }),
+        }));
+      }
+    });
+
+    // Wait for applications to be opened before opening the menus. Otherwise
+    // the entities do not exist.
+    await Promise.all(tasks);
+
+    // Initialize detached menus.
+    detachedMenus.forEach((detachedMenu) => {
+      let object = this.sceneService.findMeshByModelId(detachedMenu.entityType, detachedMenu.entityId);
+      console.log('creating menu for', detachedMenu.entityType, detachedMenu.entityId, object);
+      if (isEntityMesh(object)) {
+        const menu = this.menuFactory.buildInfoMenu(object);
+        menu.position.fromArray(detachedMenu.position);
+        menu.quaternion.fromArray(detachedMenu.quaternion);
+        menu.scale.fromArray(detachedMenu.scale);
+        this.detachedMenuGroups.addDetachedMenuLocally(menu, detachedMenu.objectId);
+      }
+    });
+  }
+
   private buildInitialRoomPayload(): InitialRoomPayload {
     return {
       landscape: this.buildInitialRoomLandscape(),
       openApps: this.buildInitialOpenApps(),
       detachedMenus: this.buildInitialDetachedMenus(),
-    }
+    };
   }
 
   private buildInitialRoomLandscape(): InitialRoomLandscape {
@@ -118,7 +187,7 @@ export default class VrRoomService extends Service {
   private buildJoinLobbyPayload(): JoinLobbyPayload | null {
     if (!this.auth.user) return null;
     return {
-      userName: this.auth.user.nickname,
+      userName: window.localStorage.nickname || this.auth.user.nickname,
       ...VrPose.getCameraPose(this.localUser.camera)
     };
   }
