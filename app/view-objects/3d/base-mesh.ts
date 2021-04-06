@@ -7,13 +7,16 @@ export default abstract class BaseMesh extends THREE.Mesh {
 
   defaultColor: THREE.Color;
 
+  defaultOpacity: number;
+
   highlightingColor: THREE.Color;
 
   isHovered = false;
 
-  constructor(defaultColor: THREE.Color = new THREE.Color(), highlightingColor = new THREE.Color('red')) {
+  constructor(defaultColor: THREE.Color = new THREE.Color(), highlightingColor = new THREE.Color('red'), defaultOpacity = 1) {
     super();
     this.defaultColor = defaultColor;
+    this.defaultOpacity = defaultOpacity;
     this.highlightingColor = highlightingColor;
   }
 
@@ -30,7 +33,7 @@ export default abstract class BaseMesh extends THREE.Mesh {
     if (this.material instanceof THREE.MeshLambertMaterial
       || this.material instanceof THREE.MeshBasicMaterial) {
       this.material.color = this.defaultColor;
-      this.turnOpaque();
+      this.changeOpacity(this.defaultOpacity);
     }
   }
 
