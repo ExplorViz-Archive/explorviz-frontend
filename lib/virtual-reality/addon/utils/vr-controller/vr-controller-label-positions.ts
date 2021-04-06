@@ -70,7 +70,7 @@ export function getVRControllerLabelPositions(controller: VRController | null): 
         return {
           positionUp: {
             buttonPosition: up,
-            offsetDirection: VRControllerLabelOffsetDirection.RIGHT
+            offsetDirection: VRControllerLabelOffsetDirection.LEFT
           },
           positionRight: {
             buttonPosition: right,

@@ -30,6 +30,10 @@ export default class MenuGroup extends THREE.Group {
     return this.menus[this.menus.length - 1];
   }
 
+  get hasPreviousMenu(): boolean {
+    return this.menus.length > 1;
+  }
+
   /**
    * Makes the ray and teleport area of the parent controller of this menu
    * group visible or invisible based on the currently open menu.

@@ -123,16 +123,16 @@ export default class TimeMenu extends UiMenu {
     });
   }
 
-  makeTriggerButtonBinding() {
+  makeGripButtonBinding() {
     return new VRControllerButtonBinding('Select', {
-      onButtonDown: (() => {
+      onButtonDown: () => {
         this.selectButton.enableHoverEffectByButton();
         this.redrawMenu();
-      }),
-      onButtonUp: (() => {
-        this.selectButton.resetHoverEffectByButton();
-        this.redrawMenu();
-      })
+      },
+      onButtonUp: () => {
+        this.timestampService.updateTimestamp(this.date.getTime());
+        this.closeMenu();
+      }
     });
   }
 }

@@ -3,7 +3,7 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import THREE from "three";
 import FloorMesh from "../utils/view-objects/vr/floor-mesh";
 
-const FLOOR_SIZE = 10;
+const FLOOR_SIZE = 1000;
 
 export default class VrSceneService extends Service {
   @service('configuration') private configuration!: Configuration;
@@ -30,6 +30,11 @@ export default class VrSceneService extends Service {
 
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
+
+    // Add a light that illuminates the sky box if the user dragged in a backgound image.
+    const skyLight = new THREE.SpotLight(0xffffff, 0.5, 1000, Math.PI, 0, 0);
+    skyLight.castShadow = false;
+    this.scene.add(skyLight);
   }
 }
 

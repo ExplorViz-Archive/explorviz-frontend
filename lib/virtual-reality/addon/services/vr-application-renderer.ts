@@ -75,7 +75,7 @@ export default class VrApplicationRenderer extends Service {
 
     this.applicationGroup = new THREE.Group();
     this.sceneService.scene.add(this.applicationGroup);
-
+    
     this.appCommRendering = new AppCommunicationRendering(this.configuration);
     this.drawableClassCommunications = new Map();
   }
@@ -85,6 +85,7 @@ export default class VrApplicationRenderer extends Service {
     this.dynamicLandscapeData = dynamicLandscapeData;
 
     this.removeAllApplicationsLocally();
+    this.drawableClassCommunications.clear();
   }
 
   getApplicationInCurrentLandscapeById(id: string): Application | undefined {
@@ -218,7 +219,7 @@ export default class VrApplicationRenderer extends Service {
       EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
         this.configuration.applicationColors);
 
-      this.findDrawableClassCommunications(applicationObject3D);
+      this.createDrawableClassCommunications(applicationObject3D);
 
       const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId)!;
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
@@ -245,7 +246,7 @@ export default class VrApplicationRenderer extends Service {
     }
   }
 
-  private findDrawableClassCommunications(applicationObject3D: ApplicationObject3D) {
+  private createDrawableClassCommunications(applicationObject3D: ApplicationObject3D) {
     if (this.drawableClassCommunications.has(applicationObject3D.dataModel.instanceId)) {
       return;
     }

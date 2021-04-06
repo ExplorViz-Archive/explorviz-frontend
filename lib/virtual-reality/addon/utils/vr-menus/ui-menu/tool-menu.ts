@@ -303,7 +303,7 @@ export default class ToolMenu extends InteractiveMenu {
     });
   }
 
-  makeTriggerBinding() {
+  makeTriggerButtonBinding() {
     return new VRControllerButtonBinding('Select', {
       onButtonDown: (_controller) => this.selectedTool?.action()
     });

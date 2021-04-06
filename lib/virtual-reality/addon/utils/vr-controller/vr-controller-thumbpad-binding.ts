@@ -49,24 +49,25 @@ export default class VRControllerThumbpadBinding {
     return VRControllerThumbpadDirection.UP;
   }
 
-  static getVerticalDirection(axes: number[], {threshold = 0}: {
-    threshold?: number
-  } = {}): VRControllerThumbpadVerticalDirection {
-    // Negative values SHOULD correspond to "forward" and positive values to "backward".
-    // See also <https://w3c.github.io/gamepad/#dom-gamepad-axes>.
-    if (axes[0] <= -threshold) return VRControllerThumbpadVerticalDirection.UP;
-    if (axes[0] >= threshold) return VRControllerThumbpadVerticalDirection.DOWN;
-    return VRControllerThumbpadVerticalDirection.NONE;
-  }
-
   static getHorizontalDirection(axes: number[], {threshold = 0}: {
     threshold?: number
   } = {}): VRControllerThumbpadHorizontalDirection {
     // Negative values SHOULD correspond to "left" and positive values to "right".
     // See also <https://w3c.github.io/gamepad/#dom-gamepad-axes>.
-    if (axes[1] <= -threshold) return VRControllerThumbpadHorizontalDirection.LEFT;
-    if (axes[1] >= threshold) return VRControllerThumbpadHorizontalDirection.RIGHT;
+    if (axes[0] <= -threshold) return VRControllerThumbpadHorizontalDirection.LEFT;
+    if (axes[0] >= threshold) return VRControllerThumbpadHorizontalDirection.RIGHT;
     return VRControllerThumbpadHorizontalDirection.NONE;
+  }
+
+  static getVerticalDirection(axes: number[], {threshold = 0}: {
+    threshold?: number
+  } = {}): VRControllerThumbpadVerticalDirection {
+    // Negative values SHOULD correspond to "forward" and positive values to "backward".
+    // See also <https://w3c.github.io/gamepad/#dom-gamepad-axes>.
+    // However, the axes are inverted in the HTC Vive, thus we swap up and down.
+    if (axes[1] <= -threshold) return VRControllerThumbpadVerticalDirection.DOWN;
+    if (axes[1] >= threshold) return VRControllerThumbpadVerticalDirection.UP;
+    return VRControllerThumbpadVerticalDirection.NONE;
   }
 
   labels: VRControllerThumbpadLabels;

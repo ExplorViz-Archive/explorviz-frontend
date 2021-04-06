@@ -14,6 +14,7 @@ export default class OnlineMenu extends ConnectionBaseMenu {
   private remoteUsers: RemoteVrUserService;
   private remoteUserButtons: Map<string, TextbuttonItem>;
   private spectateUserService: SpectateUserService;
+  private disconnectButton?: TextbuttonItem;
 
   constructor({ remoteUsers, spectateUserService, ...args }: OnlineMenuArgs) {
     super(args);
@@ -41,7 +42,7 @@ export default class OnlineMenu extends ConnectionBaseMenu {
     });
     this.items.push(title);
 
-    const disconnectButton = new TextbuttonItem({
+    this.disconnectButton = new TextbuttonItem({
       text: 'Disconnect',
       position: { x: 370, y: 13, },
       width: 115,
@@ -52,7 +53,7 @@ export default class OnlineMenu extends ConnectionBaseMenu {
       hoverColor: '#dc3b00',
       onTriggerDown: () => this.localUser.disconnect()
     });
-    this.items.push(disconnectButton);
+    this.items.push(this.disconnectButton);
 
     const yOffset = 60;
     let yPos = 50 + yOffset;
@@ -105,6 +106,10 @@ export default class OnlineMenu extends ConnectionBaseMenu {
   makeGripButtonBinding() {
     return new VRControllerButtonBinding('Disconnect', {
       onButtonDown: () => {
+        this.disconnectButton?.enableHoverEffectByButton();
+        this.redrawMenu();
+      },
+      onButtonUp: () => {
         this.localUser.disconnect();
         this.menuGroup?.replaceMenu(this.menuFactory.buildConnectionMenu());
       }
