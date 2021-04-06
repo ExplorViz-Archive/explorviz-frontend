@@ -15,17 +15,16 @@ interface ShareLandscapeArgs {
 const { userService } = ENV.backendAddresses;
 
 export default class ShareLandscape extends Component<ShareLandscapeArgs> {
-
   @service('auth')
   auth!: Auth;
 
   @tracked
-  username: string = "";
+  username: string = '';
 
   @action
   async grantAccess() {
     try {
-      const token = await this.sendModifyAccess(this.args.token.value, this.username, 'grant');
+      await this.sendModifyAccess(this.args.token.value, this.username, 'grant');
       this.args.token.sharedUsersIds.addObject(this.username);
 
       AlertifyHandler.showAlertifySuccess(`Access of ${this.username} granted for token ${this.args.token.value}`);
@@ -33,11 +32,11 @@ export default class ShareLandscape extends Component<ShareLandscapeArgs> {
       AlertifyHandler.showAlertifySuccess(e.message);
     }
   }
- 
+
   @action
   async revokeAccess(userId: string) {
     try {
-      const token = await this.sendModifyAccess(this.args.token.value, userId, 'revoke');
+      await this.sendModifyAccess(this.args.token.value, userId, 'revoke');
       this.args.token.sharedUsersIds.removeObject(userId);
       AlertifyHandler.showAlertifySuccess(`Access of ${userId} revoked for token ${this.args.token.value}`);
     } catch (e) {
@@ -49,7 +48,7 @@ export default class ShareLandscape extends Component<ShareLandscapeArgs> {
   async cloneToken(userId: string) {
     try {
       await this.sendModifyAccess(this.args.token.value, userId, 'clone');
-      this.args.reload()
+      this.args.reload();
       AlertifyHandler.showAlertifySuccess(`Cloned token ${this.args.token.value}`);
     } catch (e) {
       AlertifyHandler.showAlertifySuccess(e.message);
@@ -58,7 +57,9 @@ export default class ShareLandscape extends Component<ShareLandscapeArgs> {
 
   sendModifyAccess(tokenId: string, userId: string, method: string) {
     return new Promise<undefined>((resolve, reject) => {
-      fetch(`${userService}/token/${tokenId}/${userId}?method=${method}`, {
+      const encodedUserId = encodeURI(userId);
+
+      fetch(`${userService}/token/${tokenId}/${encodedUserId}?method=${method}`, {
         headers: {
           Authorization: `Bearer ${this.auth.accessToken}`,
         },
@@ -76,6 +77,4 @@ export default class ShareLandscape extends Component<ShareLandscapeArgs> {
         .catch((e) => reject(e));
     });
   }
-
 }
-
