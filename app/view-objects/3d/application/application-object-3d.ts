@@ -8,6 +8,7 @@ import ClazzMesh from './clazz-mesh';
 import ComponentMesh from './component-mesh';
 import ClazzCommunicationMesh from './clazz-communication-mesh';
 import BaseMesh from '../base-mesh';
+import BoxMesh from './box-mesh';
 
 /**
  * This extended Object3D adds additional functionality to
@@ -157,6 +158,48 @@ export default class ApplicationObject3D extends THREE.Object3D {
     });
 
     return openComponentIds;
+  }
+
+  /**
+   * Sets the visiblity of all component meshes with the current application
+   * @param opaccity Determines how opaque / visible component meshes should be
+   */
+  setBoxMeshOpacity(opacity = 1) {
+    this.getBoxMeshes().forEach((mesh) => {
+      if (mesh instanceof BoxMesh) {
+        if (opacity === 1) {
+          mesh.turnOpaque();
+          mesh.defaultOpacity = 1;
+        } else {
+          mesh.turnTransparent(opacity);
+          mesh.defaultOpacity = opacity;
+        }
+      }
+    });
+  }
+
+  turnOpaque(setAsDefault = true) {
+    if (setAsDefault) {
+      this.setBoxMeshOpacity(1);
+    } else {
+      this.getBoxMeshes().forEach((mesh) => {
+        if (mesh instanceof BoxMesh) {
+          mesh.turnOpaque();
+        }
+      });
+    }
+  }
+
+  setToDefaultOpacity() {
+    this.getBoxMeshes().forEach((mesh) => {
+      if (mesh instanceof BoxMesh) {
+        if (mesh.defaultOpacity === 1) {
+          mesh.turnOpaque();
+        } else {
+          mesh.turnTransparent(mesh.defaultOpacity);
+        }
+      }
+    });
   }
 
   setHighlightingColor(color: THREE.Color) {
