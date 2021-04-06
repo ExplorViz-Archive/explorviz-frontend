@@ -331,10 +331,7 @@ export default class ArRendering extends Component<Args> {
 
     this.arToolkitContext = arToolkitContext;
 
-    arToolkitContext.init(() => {
-      // Copy projection matrix to camera
-      // this.camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
-    });
+    arToolkitContext.init();
 
     // Update artoolkit on every frame
     this.onRenderFcts.push(() => {
@@ -373,16 +370,6 @@ export default class ArRendering extends Component<Args> {
     // Render the scene
     this.onRenderFcts.push(() => {
       this.renderer.render(this.scene, this.camera);
-    });
-
-    const self = this;
-
-    requestAnimationFrame(function animate() {
-      requestAnimationFrame(animate);
-
-      self.onRenderFcts.forEach((onRenderFct) => {
-        onRenderFct();
-      });
     });
   }
   // #endregion COMPONENT AND SCENE INITIALIZATION
