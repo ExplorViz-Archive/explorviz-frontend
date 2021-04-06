@@ -152,6 +152,10 @@ export default class ArRendering extends Component<Args> {
 
   applicationMarkers: THREE.Group[] = [];
 
+  landscapeOpacity: number;
+
+  applicationOpacity: number;
+
   @tracked
   popupData: PopupData | null = null;
 
@@ -169,6 +173,9 @@ export default class ArRendering extends Component<Args> {
 
     this.landscapeScalar = 0.5;
     this.applicationScalar = 0.01;
+
+    this.landscapeOpacity = 0.9;
+    this.applicationOpacity = 0.7;
 
     this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
@@ -567,7 +574,7 @@ export default class ArRendering extends Component<Args> {
       const newGraph: ElkNode = yield this.elk.layout(graph);
 
       // Post-process layout graph (3rd step)
-      const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
+      const layoutedLandscape: Layout3Return = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
         structureLandscapeData,
@@ -620,6 +627,8 @@ export default class ArRendering extends Component<Args> {
 
       LandscapeCommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
         centerPoint, 0.004, 0.028);
+
+      this.landscapeObject3D.setOpacity(this.landscapeOpacity);
 
       // this.centerLandscape();
 
@@ -760,6 +769,8 @@ export default class ArRendering extends Component<Args> {
       applicationObject3D.scale.set(scalar, scalar, scalar);
 
       applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
+
+      applicationObject3D.setBoxMeshOpacity(this.applicationOpacity);
 
       this.applicationGroup.addApplication(applicationObject3D);
 

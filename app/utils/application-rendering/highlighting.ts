@@ -19,6 +19,7 @@ import { getClassesInPackage } from '../package-helpers';
  */
 export function removeHighlighting(applicationObject3D: ApplicationObject3D) {
   const meshes = applicationObject3D.getAllMeshes();
+
   meshes.forEach((mesh) => {
     mesh.unhighlight();
   });
@@ -77,6 +78,9 @@ export function highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMe
 
   // Reset highlighting
   removeHighlighting(applicationObject3D);
+
+  applicationObject3D.turnOpaque(false);
+
   const model = mesh.dataModel;
 
   // Highlight the entity itself
