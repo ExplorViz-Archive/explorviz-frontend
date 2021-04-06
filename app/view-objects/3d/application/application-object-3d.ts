@@ -178,6 +178,11 @@ export default class ApplicationObject3D extends THREE.Object3D {
     });
   }
 
+  /**
+   * Sets the opacity of all box meshes within the application object to 1.
+   *
+   * @param setAsDefault Determines whether default opacity value should be set
+   */
   turnOpaque(setAsDefault = true) {
     if (setAsDefault) {
       this.setBoxMeshOpacity(1);
@@ -190,6 +195,10 @@ export default class ApplicationObject3D extends THREE.Object3D {
     }
   }
 
+  /**
+   * Sets the opacity of all box meshes within the application object to the
+   * default opacity value (which is 1 if not set otherwise).
+   */
   setToDefaultOpacity() {
     this.getBoxMeshes().forEach((mesh) => {
       if (mesh instanceof BoxMesh) {
@@ -202,11 +211,30 @@ export default class ApplicationObject3D extends THREE.Object3D {
     });
   }
 
+  /**
+   * Sets the highlighting color for all meshes within the application object.
+   *
+   * @param color Color for highlighting of objects within the application.
+   */
   setHighlightingColor(color: THREE.Color) {
     this.getAllMeshes().forEach((mesh) => {
       mesh.highlightingColor = color;
       mesh.updateColor();
     });
+  }
+
+  /**
+   * Scales the application object such that its largest side matches the given value.
+   *
+   * @param max Desired length for the longest side of the application object
+   */
+  setLargestSide(max: number) {
+    if (max <= 0) return;
+
+    const appDimensions = new THREE.Box3().setFromObject(this);
+    const scalar = max / Math.max(...appDimensions.getSize(new THREE.Vector3()).toArray());
+
+    this.scale.multiplyScalar(scalar);
   }
 
   /**

@@ -112,12 +112,6 @@ export default class ArRendering extends Component<Args> {
   // Depth of boxes for landscape entities
   landscapeDepth: number;
 
-  // Scalar with which the landscape is scaled (evenly in all dimensions)
-  landscapeScalar: number;
-
-  // Scalar with which the application is scaled (evenly in all dimensions)
-  applicationScalar: number;
-
   closeButtonTexture: THREE.Texture;
 
   landscapeOffset = new THREE.Vector3();
@@ -171,9 +165,6 @@ export default class ArRendering extends Component<Args> {
 
     this.landscapeDepth = 0.7;
 
-    this.landscapeScalar = 0.5;
-    this.applicationScalar = 0.01;
-
     this.landscapeOpacity = 0.9;
     this.applicationOpacity = 0.7;
 
@@ -187,8 +178,6 @@ export default class ArRendering extends Component<Args> {
 
     // Load and scale landscape
     this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
-    const scale = this.landscapeScalar;
-    this.landscapeObject3D.scale.set(scale, scale, scale);
 
     // Rotate landscape such that it lays flat on the floor
     this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
@@ -587,9 +576,6 @@ export default class ArRendering extends Component<Args> {
       const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
       const centerPoint = landscapeRect.center;
 
-      // Update camera zoom accordingly
-      // updateCameraZoom(landscapeRect, this.camera, this.renderer);
-
       // Render all landscape entities
       const { nodes } = structureLandscapeData;
 
@@ -617,7 +603,7 @@ export default class ArRendering extends Component<Args> {
 
       this.landscapeObject3D.setOpacity(this.landscapeOpacity);
 
-      // this.centerLandscape();
+      this.landscapeObject3D.setLargestSide(2);
 
       this.debug('Landscape loaded');
     } catch (e) {
@@ -751,9 +737,8 @@ export default class ArRendering extends Component<Args> {
       const closeIcon = new CloseIcon(this.closeButtonTexture);
       closeIcon.addToApplication(applicationObject3D);
 
-      // Scale application to a reasonable size to work with it
-      const scalar = this.applicationScalar;
-      applicationObject3D.scale.set(scalar, scalar, scalar);
+      // Scale application such that it approximately fits to the printed marker
+      applicationObject3D.setLargestSide(1.5);
 
       applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
 
