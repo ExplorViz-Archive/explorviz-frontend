@@ -4,6 +4,15 @@
   {{did-resize this.resize debounce=100}}
 >
   <canvas
+    {{interaction-modifier 
+      raycastObject=this.landscapeObject3D 
+      camera=this.camera 
+      singleClick=this.handleSingleClick
+      doubleClick=this.handleDoubleClick
+      mouseWheel=this.handleMouseWheel
+      panning=this.handlePanning
+      raycastFilter=VrRendering.raycastFilter
+    }}
     class="main-content-majority"
     {{did-insert this.canvasInserted}}
   >
