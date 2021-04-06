@@ -322,7 +322,7 @@ export default class ArRendering extends Component<Args> {
     this.arToolkitSource.init(() => {
       setTimeout(() => {
         this.resizeAR();
-      }, 100);
+      }, 250);
     });
     const arToolkitContext = new THREEx.ArToolkitContext({
       cameraParametersUrl: 'ar_data/camera_para.dat',
