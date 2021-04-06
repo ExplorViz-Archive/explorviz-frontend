@@ -477,19 +477,23 @@ export default class ArRendering extends Component<Args> {
 
     if (!intersection) {
       this.popupData = null;
-    } else {
-      const mesh = intersection.object;
+      return;
+    }
 
-      // Show information as popup is mouse stopped on top of a mesh
-      if ((mesh instanceof NodeMesh || mesh instanceof ApplicationMesh
-        || mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
-        || mesh instanceof ClazzCommunicationMesh)) {
-        this.popupData = {
-          mouseX: this.canvas.width / 2,
-          mouseY: this.canvas.height / 2,
-          entity: mesh.dataModel,
-        };
-      }
+    const mesh = intersection.object;
+
+    // Show information as popup is mouse stopped on top of a mesh
+    if ((mesh instanceof NodeMesh || mesh instanceof ApplicationMesh
+      || mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
+      || mesh instanceof ClazzCommunicationMesh)
+      && mesh.dataModel !== this.popupData?.entity) {
+      this.popupData = {
+        mouseX: this.canvas.width / 2,
+        mouseY: this.canvas.height / 2,
+        entity: mesh.dataModel,
+      };
+    } else {
+      this.popupData = null;
     }
   }
 
