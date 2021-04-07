@@ -79,6 +79,16 @@ export default class MenuGroup extends THREE.Group {
   }
 
   /**
+   * Updates the controller bindings of the currently open menu.
+   */
+  updateControllerBindings() {
+    if (this.currentMenu) {
+      const index = this.controllerBindings.length - 1;
+      this.controllerBindings[index] = this.currentMenu.makeControllerBindings();
+    }
+  }
+
+  /**
    * Closes the currently open menu if any.
    *
    * If a previously open menu was hidden by {@link MenuGroup.openMenu},

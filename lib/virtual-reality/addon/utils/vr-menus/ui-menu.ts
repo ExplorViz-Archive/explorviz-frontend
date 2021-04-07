@@ -130,6 +130,12 @@ export default abstract class UiMenu extends InteractiveMenu {
     if (this.canvasMesh.material.map) {
       this.canvasMesh.material.map.needsUpdate = true;
     }
+
+    // When the menu's content has changed, we also update the controller bindings.
+    // For example, when thumbpad targets are added after the menu is open and
+    // there were no targets before, we have to update the controller bindings
+    // such that the controller can be used for navigation and the labels appear.
+    this.menuGroup?.updateControllerBindings();
   }
 
 
@@ -228,7 +234,7 @@ export default abstract class UiMenu extends InteractiveMenu {
    * The thumbpad can be used to select menu items.
    */
   makeThumbpadBinding() {
-    if (this.thumbpadTargets.length == 0) return undefined;
+    if (this.thumbpadTargets.length === 0) return undefined;
     return new VRControllerThumbpadBinding(
       this.thumbpadAxis === 0
         ? { labelLeft: 'Previous', labelRight: 'Next' }
