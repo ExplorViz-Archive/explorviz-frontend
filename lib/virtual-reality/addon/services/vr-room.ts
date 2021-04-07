@@ -150,7 +150,7 @@ export default class VrRoomService extends Service {
   private buildJoinLobbyPayload(): JoinLobbyPayload | null {
     if (!this.auth.user) return null;
     return {
-      userName: window.localStorage.nickname || this.auth.user.nickname,
+      userName: this.auth.user.nickname,
       ...VrPose.getCameraPose(this.localUser.camera)
     };
   }
