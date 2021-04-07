@@ -1,10 +1,10 @@
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import THREE from 'three';
-import VrControllerModel from './vr-controller/vr-controller-model';
-import VrControllerModelFactory from './vr-controller/vr-controller-model-factory';
 import TeleportMesh from './view-objects/vr/teleport-mesh';
 import VRControllerBindingsList from './vr-controller/vr-controller-bindings-list';
 import VRControllerLabelGroup from './vr-controller/vr-controller-label-group';
+import VrControllerModel from './vr-controller/vr-controller-model';
+import VrControllerModelFactory from './vr-controller/vr-controller-model-factory';
 import { displayAsSolidObject, displayAsWireframe } from './vr-helpers/wireframe';
 import MenuGroup from './vr-menus/menu-group';
 import { ControllerId } from "./vr-message/util/controller_id";

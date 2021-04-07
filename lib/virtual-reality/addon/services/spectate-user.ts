@@ -5,15 +5,12 @@ import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import LocalVrUser from './local-vr-user';
 
 export default class SpectateUserService extends Service {
-  @service('local-vr-user')
-  localUser!: LocalVrUser;
-
-  @service('vr-message-sender')
-  sender!: VrMessageSender;
+  @service('local-vr-user') private localUser!: LocalVrUser;
+  @service('vr-message-sender') private sender!: VrMessageSender;
 
   spectatedUser: RemoteVrUser | null = null; // Tells which userId (if any) is being spectated
 
-  startPosition: THREE.Vector3 = new THREE.Vector3(); // Position before this user starts spectating
+  private startPosition: THREE.Vector3 = new THREE.Vector3(); // Position before this user starts spectating
 
   get isActive() { return this.spectatedUser !== null; }
 

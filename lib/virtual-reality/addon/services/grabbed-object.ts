@@ -6,8 +6,8 @@ import { isObjectGrabbedResponse, ObjectGrabbedResponse } from 'virtual-reality/
 import VrMessageReceiver from './vr-message-receiver';
 
 export default class GrabbedObjectService extends Service {
-  @service('vr-message-sender') private sender!: VrMessageSender;
   @service('vr-message-receiver') private receiver!: VrMessageReceiver;
+  @service('vr-message-sender') private sender!: VrMessageSender;
 
   /**
    * Counts how often an object has been requested to be grabbed.

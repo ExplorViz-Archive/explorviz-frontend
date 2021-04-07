@@ -1,10 +1,10 @@
 import THREE from "three";
+import DetachedMenuGroupsService from "../../services/detached-menu-groups";
 import FloorMesh from "../view-objects/vr/floor-mesh";
 import VRController from "../vr-controller";
 import VRControllerBindings from "../vr-controller/vr-controller-bindings";
 import BaseMenu from "./base-menu";
 import { isDetachableMenu } from "./detachable-menu";
-import DetachedMenuGroupsService from "../../services/detached-menu-groups";
 
 export type MenuGroupArgs = {
   detachedMenuGroups: DetachedMenuGroupsService

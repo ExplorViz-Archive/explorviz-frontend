@@ -70,7 +70,7 @@ export default class ResetMenu extends UiMenu {
       const message = new TextItem({
         text: 'Not allowed when online.',
         color: '#ffffff',
-        fontSize:  28,
+        fontSize: 28,
         position: { x: 100, y: 148 },
       });
       this.items.push(message);

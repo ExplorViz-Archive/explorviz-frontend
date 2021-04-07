@@ -1,5 +1,5 @@
 import THREE from 'three';
-import UiMenu, { UiMenuArgs, SIZE_RESOLUTION_FACTOR } from '../ui-menu';
+import UiMenu, { SIZE_RESOLUTION_FACTOR, UiMenuArgs } from '../ui-menu';
 
 const CIRCLE_SEGMENTS = 48;
 

@@ -1,15 +1,15 @@
 import Service, { inject as service } from '@ember/service';
+import VrMenuFactoryService from 'explorviz-frontend/services/vr-menu-factory';
 import THREE from 'three';
 import DetachedMenuGroupsService from 'virtual-reality/services/detached-menu-groups';
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
-import { DetachableMenu, isDetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
-import VrLandscapeRenderer from "./vr-landscape-renderer";
-import LocalVrUser from "./local-vr-user";
-import { SerializedVrRoom, SerializedDetachedMenu, SerialzedApp, SerializedLandscape } from 'virtual-reality/utils/vr-multi-user/serialized-vr-room';
 import { isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
+import { DetachableMenu, isDetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
+import { SerializedDetachedMenu, SerializedLandscape, SerializedVrRoom, SerialzedApp } from 'virtual-reality/utils/vr-multi-user/serialized-vr-room';
+import LocalVrUser from "./local-vr-user";
 import RemoteVrUserService from './remote-vr-users';
-import VrMenuFactoryService from 'explorviz-frontend/services/vr-menu-factory';
+import VrLandscapeRenderer from "./vr-landscape-renderer";
 import VrSceneService from './vr-scene';
 
 type RestoreOptions = {
@@ -19,12 +19,12 @@ type RestoreOptions = {
 export default class VrRoomSerializer extends Service {
   @service('detached-menu-groups') private detachedMenuGroups!: DetachedMenuGroupsService;
   @service('local-vr-user') localUser!: LocalVrUser;
+  @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
   @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
-  @service('vr-timestamp') private timestampService!: VrTimestampService;
-  @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
   @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
   @service('vr-scene') private sceneService!: VrSceneService;
+  @service('vr-timestamp') private timestampService!: VrTimestampService;
 
   /**
    * Runs the given action and tries to restore the previous state of the room

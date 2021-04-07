@@ -1,13 +1,13 @@
 import THREE from 'three';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
-import VrControllerModelFactory from '../vr-controller/vr-controller-model-factory';
 import NameTagSprite from '../view-objects/vr/name-tag-sprite';
 import PingMesh from '../view-objects/vr/ping-mesh';
+import RayMesh from "../view-objects/vr/ray-mesh";
 import WaypointIndicator from '../view-objects/vr/waypoint-indicator';
 import { DEFAULT_RAY_LENGTH } from '../vr-controller';
+import VrControllerModelFactory from '../vr-controller/vr-controller-model-factory';
+import { ControllerPose, Pose } from "../vr-message/sendable/user_positions";
 import { ControllerId, CONTROLLER_1_ID, CONTROLLER_2_ID } from "../vr-message/util/controller_id";
-import RayMesh from "../view-objects/vr/ray-mesh";
-import { Pose, ControllerPose } from "../vr-message/sendable/user_positions";
 
 type Controller = {
   assetUrl: string,
@@ -77,7 +77,7 @@ export default class RemoteVrUser extends THREE.Object3D {
 
     // Initialize pinging.
     const pingMesh = new PingMesh({ animationMixer: this.animationMixer, color: this.color });
-    const waypointIndicator =  new WaypointIndicator({ target: pingMesh, color: this.color });
+    const waypointIndicator = new WaypointIndicator({ target: pingMesh, color: this.color });
     this.add(pingMesh);
     this.localUser.defaultCamera.add(waypointIndicator);
 

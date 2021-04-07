@@ -49,7 +49,7 @@ export default class VRControllerThumbpadBinding {
     return VRControllerThumbpadDirection.UP;
   }
 
-  static getHorizontalDirection(axes: number[], {threshold = 0}: {
+  static getHorizontalDirection(axes: number[], { threshold = 0 }: {
     threshold?: number
   } = {}): VRControllerThumbpadHorizontalDirection {
     // Negative values SHOULD correspond to "left" and positive values to "right".
@@ -59,7 +59,7 @@ export default class VRControllerThumbpadBinding {
     return VRControllerThumbpadHorizontalDirection.NONE;
   }
 
-  static getVerticalDirection(axes: number[], {threshold = 0}: {
+  static getVerticalDirection(axes: number[], { threshold = 0 }: {
     threshold?: number
   } = {}): VRControllerThumbpadVerticalDirection {
     // Negative values SHOULD correspond to "forward" and positive values to "backward".

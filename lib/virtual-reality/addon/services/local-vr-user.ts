@@ -2,9 +2,9 @@ import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-controller';
 import SpectateUserService from './spectate-user';
-import WebSocketService from './web-socket';
-import VrSceneService from "./vr-scene";
 import VrRoomService from "./vr-room";
+import VrSceneService from "./vr-scene";
+import WebSocketService from './web-socket';
 
 export type ConnectionStatus = 'offline' | 'connecting' | 'online';
 
@@ -93,7 +93,7 @@ export default class LocalVrUser extends Service {
    *  This method is used to adapt the users view to
    *  the new position
    */
-  teleportToPosition(position: THREE.Vector3, {adaptCameraHeight = false}: {
+  teleportToPosition(position: THREE.Vector3, { adaptCameraHeight = false }: {
     adaptCameraHeight?: boolean
   } = {}) {
     if (!this.camera) return;
@@ -123,7 +123,7 @@ export default class LocalVrUser extends Service {
    */
   moveInCameraDirection(direction: THREE.Vector3, {
     enableX = true, enableY = true, enableZ = true
-  }: {enableX?: boolean, enableY?: boolean, enableZ?: boolean}) {
+  }: { enableX?: boolean, enableY?: boolean, enableZ?: boolean }) {
     // Convert direction from the camera's object space to world coordinates.
     const distance = direction.length();
     direction = direction.clone().normalize().transformDirection(this.defaultCamera.matrix);

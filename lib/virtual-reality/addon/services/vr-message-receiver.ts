@@ -16,10 +16,10 @@ import { isObjectMovedMessage, ObjectMovedMessage } from "../utils/vr-message/se
 import { AppClosedMessage, isAppClosedMessage } from "../utils/vr-message/sendable/request/app_closed";
 import { DetachedMenuClosedMessage, isDetachedMenuClosedMessage } from "../utils/vr-message/sendable/request/detached_menu_closed";
 import { isSpectatingUpdateMessage, SpectatingUpdateMessage } from "../utils/vr-message/sendable/spectating_update";
+import { isUserControllerConnectMessage, UserControllerConnectMessage } from "../utils/vr-message/sendable/user_controller_connect";
+import { isUserControllerDisconnectMessage, UserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
 import { isUserPositionsMessage, UserPositionsMessage } from "../utils/vr-message/sendable/user_positions";
 import { Nonce } from "../utils/vr-message/util/nonce";
-import { UserControllerConnectMessage, isUserControllerConnectMessage } from "../utils/vr-message/sendable/user_controller_connect";
-import { UserControllerDisconnectMessage, isUserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
 
 type ResponseHandler<T> = (msg: T) => void;
 
@@ -46,8 +46,7 @@ export interface VrMessageListener {
 }
 
 export default class VrMessageReceiver extends Service {
-  @service('web-socket')
-  webSocket!: WebSocketService;
+  @service('web-socket') private webSocket!: WebSocketService;
 
   private messageListeners: VrMessageListener[] = [];
   private responseHandlers = new Map<Nonce, ResponseHandler<any>>();

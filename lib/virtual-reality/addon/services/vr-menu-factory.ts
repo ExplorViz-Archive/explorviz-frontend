@@ -32,8 +32,8 @@ import RemoteVrUserService from "./remote-vr-users";
 import SpectateUserService from "./spectate-user";
 import VrLandscapeRenderer from "./vr-landscape-renderer";
 import VrRoomService from './vr-room';
-import VrSceneService from "./vr-scene";
 import VrRoomSerializer from "./vr-room-serializer";
+import VrSceneService from "./vr-scene";
 
 export default class VrMenuFactoryService extends Service {
   @service('delta-time') private deltaTimeService!: DeltaTimeService;
@@ -45,8 +45,8 @@ export default class VrMenuFactoryService extends Service {
   @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
   @service('vr-message-sender') private sender!: VrMessageSender;
-  @service('vr-room') private roomService!: VrRoomService;
   @service('vr-room-serializer') private roomSerializer!: VrRoomSerializer;
+  @service('vr-room') private roomService!: VrRoomService;
   @service('vr-scene') private sceneService!: VrSceneService;
   @service('vr-timestamp') private timestampService!: VrTimestampService;
 

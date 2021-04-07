@@ -1,12 +1,12 @@
 import Service, { inject as service } from '@ember/service';
 import THREE from "three";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
+import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
 import { TGALoader } from "three/examples/jsm/loaders/TGALoader";
+import { Pose } from "../utils/vr-message/sendable/user_positions";
 import RemoteVrUser from "../utils/vr-multi-user/remote-vr-user";
 import SpectateUserService from "./spectate-user";
 import VrSceneService from "./vr-scene";
-import { Pose } from "../utils/vr-message/sendable/user_positions";
 
 export default class RemoteVrUserService extends Service {
   @service('spectate-user') private spectateUserService!: SpectateUserService;
@@ -28,7 +28,7 @@ export default class RemoteVrUserService extends Service {
     });
   }
 
-  private loadObjWithMtl({path, objFile, mtlFile}: {
+  private loadObjWithMtl({ path, objFile, mtlFile }: {
     path: string,
     objFile: string,
     mtlFile: string
@@ -82,7 +82,7 @@ export default class RemoteVrUserService extends Service {
     remoteUser.setVisible(!isSpectating);
 
     // If we spectated the remote user before, stop spectating.
-    if (isSpectating && this.spectateUserService.spectatedUser ?.userId === remoteUser.userId) {
+    if (isSpectating && this.spectateUserService.spectatedUser?.userId === remoteUser.userId) {
       this.spectateUserService.deactivate();
     }
   }
@@ -95,7 +95,7 @@ export default class RemoteVrUserService extends Service {
 
   private removeRemoteUser(remoteUser: RemoteVrUser) {
     // Stop spectating removed user.
-    if (this.spectateUserService.spectatedUser ?.userId === remoteUser.userId) {
+    if (this.spectateUserService.spectatedUser?.userId === remoteUser.userId) {
       this.spectateUserService.deactivate();
     }
 

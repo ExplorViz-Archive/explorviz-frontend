@@ -1,6 +1,6 @@
 import TextbuttonItem from "../../items/textbutton-item";
-import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 import TitleItem from "../../items/title-item";
+import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 
 export default class OfflineMenu extends ConnectionBaseMenu {
   constructor(args: ConnectionBaseMenuArgs) {

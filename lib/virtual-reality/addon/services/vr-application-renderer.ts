@@ -24,10 +24,10 @@ import VrApplicationObject3D from 'virtual-reality/utils/view-objects/applicatio
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import { isObjectClosedResponse, ObjectClosedResponse } from "../utils/vr-message/receivable/response/object-closed";
 import VrAssetRepository from "./vr-asset-repo";
+import VrHighlightingService, { HightlightComponentArgs } from "./vr-highlighting";
 import VrMessageReceiver from "./vr-message-receiver";
 import VrMessageSender from "./vr-message-sender";
 import VrSceneService from "./vr-scene";
-import VrHighlightingService, { HightlightComponentArgs } from "./vr-highlighting";
 
 // Scalar with which the application is scaled (evenly in all dimensions)
 const APPLICATION_SCALAR = 0.01;
@@ -75,7 +75,7 @@ export default class VrApplicationRenderer extends Service {
 
     this.applicationGroup = new THREE.Group();
     this.sceneService.scene.add(this.applicationGroup);
-    
+
     this.appCommRendering = new AppCommunicationRendering(this.configuration);
     this.drawableClassCommunications = new Map();
   }

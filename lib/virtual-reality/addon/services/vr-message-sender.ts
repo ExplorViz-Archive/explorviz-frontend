@@ -4,6 +4,8 @@ import THREE from 'three';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
 import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
+import VRController from "../utils/vr-controller";
+import { getControllerPose } from "../utils/vr-helpers/vr-poses";
 import { DetachableMenu } from '../utils/vr-menus/detachable-menu';
 import { AppOpenedMessage } from '../utils/vr-message/sendable/app_opened';
 import { ComponentUpdateMessage } from '../utils/vr-message/sendable/component_update';
@@ -15,17 +17,14 @@ import { DetachedMenuClosedMessage } from '../utils/vr-message/sendable/request/
 import { MenuDetachedMessage } from '../utils/vr-message/sendable/request/menu_detached';
 import { ObjectGrabbedMessage } from '../utils/vr-message/sendable/request/object_grabbed';
 import { SpectatingUpdateMessage } from '../utils/vr-message/sendable/spectating_update';
-import { UserPositionsMessage, ControllerPose, Pose } from '../utils/vr-message/sendable/user_positions';
-import { Nonce } from '../utils/vr-message/util/nonce';
-import { ControllerId } from "../utils/vr-message/util/controller_id";
 import { UserControllerConnectMessage } from "../utils/vr-message/sendable/user_controller_connect";
-import VRController from "../utils/vr-controller";
 import { UserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
-import { getControllerPose } from "../utils/vr-helpers/vr-poses";
+import { ControllerPose, Pose, UserPositionsMessage } from '../utils/vr-message/sendable/user_positions';
+import { ControllerId } from "../utils/vr-message/util/controller_id";
+import { Nonce } from '../utils/vr-message/util/nonce';
 
 export default class VrMessageSender extends Service {
-  @service('web-socket')
-  webSocket!: WebSocketService;
+  @service('web-socket') private webSocket!: WebSocketService;
 
   private lastNonce: Nonce = 0;
 

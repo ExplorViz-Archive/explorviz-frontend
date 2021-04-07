@@ -1,12 +1,12 @@
 import VrTimestampService from "virtual-reality/services/vr-timestamp";
 import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
 import VRControllerThumbpadBinding, { VRControllerThumbpadHorizontalDirection } from "virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding";
+import VrRoomSerializer from "../../../services/vr-room-serializer";
 import ArrowbuttonItem from "../items/arrowbutton-item";
 import TextItem from "../items/text-item";
 import TextbuttonItem from "../items/textbutton-item";
 import TitleItem from "../items/title-item";
 import UiMenu, { UiMenuArgs } from "../ui-menu";
-import VrRoomSerializer from "../../../services/vr-room-serializer";
 
 const MS_PER_SECOND = 1000;
 const TIMESTAMP_INTERVAL = 10 * MS_PER_SECOND;

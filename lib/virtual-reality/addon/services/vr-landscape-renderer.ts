@@ -16,9 +16,9 @@ import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/land
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import THREE from 'three';
-import VrSceneService from "./vr-scene";
-import VrAssetRepository from "./vr-asset-repo";
 import VrLandscapeObject3D from "../utils/view-objects/landscape/vr-landscape-object-3d";
+import VrAssetRepository from "./vr-asset-repo";
+import VrSceneService from "./vr-scene";
 
 // Scalar with which the landscape is scaled (evenly in all dimensions)
 const LANDSCAPE_SCALAR = 0.1;
@@ -26,12 +26,12 @@ const LANDSCAPE_SCALAR = 0.1;
 // Depth of boxes for landscape entities
 const LANDSCAPE_DEPTH = 0.7;
 
-export default class VrLandscapeRenderer extends Service  {
+export default class VrLandscapeRenderer extends Service {
   private debug = debugLogger('VrLandscapeRenderer');
 
   @service('configuration') private configuration!: Configuration;
-  @service('vr-scene') private sceneService!: VrSceneService;
   @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
+  @service('vr-scene') private sceneService!: VrSceneService;
   @service() private worker!: any;
 
   private elk: ELK;
@@ -49,7 +49,7 @@ export default class VrLandscapeRenderer extends Service  {
 
     // Create landscape object. The actual landscape data is not available
     // until the VR rendering component is created.
-    this.landscapeObject3D = new VrLandscapeObject3D({landscapeToken: '', nodes: []});
+    this.landscapeObject3D = new VrLandscapeObject3D({ landscapeToken: '', nodes: [] });
     this.sceneService.scene.add(this.landscapeObject3D);
   }
 

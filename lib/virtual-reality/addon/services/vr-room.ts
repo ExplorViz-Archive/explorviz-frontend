@@ -1,23 +1,23 @@
 import Service, { inject as service } from '@ember/service';
 import ENV from 'explorviz-frontend/config/environment';
 import Auth from 'explorviz-frontend/services/auth';
+import VrMenuFactoryService from 'explorviz-frontend/services/vr-menu-factory';
 import THREE from 'three';
 import DetachedMenuGroupsService from 'virtual-reality/services/detached-menu-groups';
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
+import { isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
+import { SerializedVrRoom } from 'virtual-reality/utils/vr-multi-user/serialized-vr-room';
 import { InitialRoomPayload } from 'virtual-reality/utils/vr-payload/sendable/initial-room';
+import * as VrPose from "../utils/vr-helpers/vr-poses";
 import { isLobbyJoinedResponse, LobbyJoinedResponse } from "../utils/vr-payload/receivable/lobby-joined";
 import { isRoomCreatedResponse, RoomCreatedResponse } from "../utils/vr-payload/receivable/room-created";
 import { isRoomListRecord, RoomListRecord } from "../utils/vr-payload/receivable/room-list";
 import { JoinLobbyPayload } from "../utils/vr-payload/sendable/join-lobby";
-import VrLandscapeRenderer from "./vr-landscape-renderer";
-import * as VrPose from "../utils/vr-helpers/vr-poses";
 import LocalVrUser from "./local-vr-user";
-import { SerializedVrRoom } from 'virtual-reality/utils/vr-multi-user/serialized-vr-room';
-import { isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import RemoteVrUserService from './remote-vr-users';
-import VrMenuFactoryService from 'explorviz-frontend/services/vr-menu-factory';
-import VrSceneService from './vr-scene';
+import VrLandscapeRenderer from "./vr-landscape-renderer";
 import VrRoomSerializer from "./vr-room-serializer";
+import VrSceneService from './vr-scene';
 
 const { vrService } = ENV.backendAddresses;
 
@@ -25,12 +25,12 @@ export default class VrRoomService extends Service {
   @service('auth') private auth!: Auth;
   @service('detached-menu-groups') private detachedMenuGroups!: DetachedMenuGroupsService;
   @service('local-vr-user') localUser!: LocalVrUser;
+  @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
   @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
-  @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
   @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
-  @service('vr-scene') private sceneService!: VrSceneService;
   @service('vr-room-serializer') private roomSerializer!: VrRoomSerializer;
+  @service('vr-scene') private sceneService!: VrSceneService;
 
   async listRooms(): Promise<RoomListRecord[]> {
     const url = `${vrService}/v2/vr/rooms`;
@@ -66,10 +66,10 @@ export default class VrRoomService extends Service {
     return {
       landscape,
       openApps: openApps.map((app) => {
-        return {highlightedComponents: [], ...app};
+        return { highlightedComponents: [], ...app };
       }),
       detachedMenus: detachedMenus.map((menu) => {
-        return {objectId: null, ...menu};
+        return { objectId: null, ...menu };
       })
     };
   }

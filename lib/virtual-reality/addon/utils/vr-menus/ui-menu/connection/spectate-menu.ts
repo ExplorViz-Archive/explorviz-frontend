@@ -30,7 +30,7 @@ export default class SpectateMenu extends UiMenu {
       height: HEIGHT
     }, ...args
   }: SpectateMenuArgs) {
-    super({resolution, ...args});
+    super({ resolution, ...args });
 
     this.localUser = localUser;
     this.spectateUserService = spectateUserService;

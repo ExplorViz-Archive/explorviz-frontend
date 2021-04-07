@@ -2,17 +2,12 @@
  * Adapted from: https://github.com/mrdoob/three.js/blob/master/examples/jsm/webxr/XRControllerModelFactory.js
  */
 
-import THREE from 'three';
-
+import { Constants as MotionControllerConstants, fetchProfile, MotionController, VisualResponse } from '@webxr-input-profiles/motion-controllers';
 import debugLogger from 'ember-debug-logger';
-import { GLTFLoader, GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
-import {
-  Constants as MotionControllerConstants,
-  fetchProfile,
-  MotionController,
-  VisualResponse,
-} from '@webxr-input-profiles/motion-controllers';
+import THREE from 'three';
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import VrControllerModel from './vr-controller-model';
+
 
 const DEFAULT_PROFILES_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles';
 const DEFAULT_PROFILE = 'generic-trigger';
@@ -56,7 +51,7 @@ export default class VrControllerModelFactory {
           const material = new THREE.MeshBasicMaterial({ color: 0x0000FF });
           const sphere = new THREE.Mesh(sphereGeometry, material);
           touchPointNode.add(sphere);
-          controllerModel.addTouchPointNode({component, touchPointNode});
+          controllerModel.addTouchPointNode({ component, touchPointNode });
         } else {
           debug(`Could not find touch dot, ${component.touchPointNodeName}, in touchpad component ${component.id}`);
         }
@@ -91,15 +86,15 @@ export default class VrControllerModelFactory {
             return;
           }
 
-          controllerModel.addVisualResponseNodes({visualResponse, valueNode, minNode, maxNode});
+          controllerModel.addVisualResponseNodes({ visualResponse, valueNode, minNode, maxNode });
         } else {
-          controllerModel.addVisualResponseNodes({visualResponse, valueNode});
+          controllerModel.addVisualResponseNodes({ visualResponse, valueNode });
         }
       });
     });
   }
 
-  static addAssetSceneToControllerModel(controllerModel: VrControllerModel, scene: THREE.Group|null) {
+  static addAssetSceneToControllerModel(controllerModel: VrControllerModel, scene: THREE.Group | null) {
     if (!controllerModel.motionController || !scene) return;
 
     // Find the nodes needed for animation and cache them on the motionController.
@@ -121,7 +116,7 @@ export default class VrControllerModelFactory {
 
   createControllerModel(controller: THREE.Group) {
     const controllerModel = new VrControllerModel();
-    let lastAssetScene: THREE.Group|null = null;
+    let lastAssetScene: THREE.Group | null = null;
 
     controller.addEventListener('connected', async (event) => {
       try {
@@ -132,7 +127,7 @@ export default class VrControllerModelFactory {
         // The bug has already been fixed (see https://github.com/immersive-web/webxr-input-profiles/blob/main/packages/motion-controllers/src/profiles.d.ts)
         // but no new version has been released.
         // TODO update dependency once a new version is released and remove the type assertions below.
-        let {profile, assetPath} = await (fetchProfile(xrInputSource, this.path, DEFAULT_PROFILE) as unknown as Promise<{ profile: object; assetPath?: string }>);
+        let { profile, assetPath } = await (fetchProfile(xrInputSource, this.path, DEFAULT_PROFILE) as unknown as Promise<{ profile: object; assetPath?: string }>);
         if (!assetPath) return;
 
         controllerModel.onMotionControllerConnect(new MotionController(
@@ -166,8 +161,8 @@ export default class VrControllerModelFactory {
         this.gltfLoader.load(assetUrl, (asset: GLTF) => {
           resolve(asset.scene);
         },
-        undefined,
-        () => reject(`Failed to load asset from ${assetUrl}`));
+          undefined,
+          () => reject(`Failed to load asset from ${assetUrl}`));
       });
     }
     let cachedAsset = await this.assetSceneCache[assetUrl];

@@ -1,10 +1,10 @@
 import THREE from 'three';
-import { BaseMenuArgs } from '../base-menu';
 import TextTexture from 'virtual-reality/utils/vr-helpers/text-texture';
-import { SIZE_RESOLUTION_FACTOR } from '../ui-menu';
-import InteractiveMenu from '../interactive-menu';
-import VRControllerThumbpadBinding, { VRControllerThumbpadHorizontalDirection } from "../../vr-controller/vr-controller-thumbpad-binding";
 import VRControllerButtonBinding from "../../vr-controller/vr-controller-button-binding";
+import VRControllerThumbpadBinding, { VRControllerThumbpadHorizontalDirection } from "../../vr-controller/vr-controller-thumbpad-binding";
+import { BaseMenuArgs } from '../base-menu';
+import InteractiveMenu from '../interactive-menu';
+import { SIZE_RESOLUTION_FACTOR } from '../ui-menu';
 
 type ToolArgs = {
   label: string,
@@ -295,7 +295,7 @@ export default class ToolMenu extends InteractiveMenu {
   makeThumbpadBinding() {
     return new VRControllerThumbpadBinding({ labelLeft: 'Previous', labelRight: 'Next' }, {
       onThumbpadTouch: (_controller, axes) => {
-        switch (VRControllerThumbpadBinding.getHorizontalDirection(axes, {threshold: THUMBPAD_THRESHOLD})) {
+        switch (VRControllerThumbpadBinding.getHorizontalDirection(axes, { threshold: THUMBPAD_THRESHOLD })) {
           case VRControllerThumbpadHorizontalDirection.LEFT: this.selectPreviousTool(); break;
           case VRControllerThumbpadHorizontalDirection.RIGHT: this.selectNextTool(); break;
         }

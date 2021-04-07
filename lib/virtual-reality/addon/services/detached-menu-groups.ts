@@ -1,21 +1,21 @@
 import Service, { inject as service } from '@ember/service';
-import DetachedMenuGroup from "../utils/vr-menus/detached-menu-group";
-import CloseIcon from "../utils/view-objects/vr/close-icon";
-import VrSceneService from "./vr-scene";
-import { isObjectClosedResponse, ObjectClosedResponse } from "../utils/vr-message/receivable/response/object-closed";
 import THREE from "three";
-import { MenuDetachedResponse, isMenuDetachedResponse } from "../utils/vr-message/receivable/response/menu-detached";
-import { DetachableMenu } from "../utils/vr-menus/detachable-menu";
-import VrAssetRepository from "./vr-asset-repo";
-import VrMessageSender from "./vr-message-sender";
-import VrMessageReceiver from "./vr-message-receiver";
-import { StructureLandscapeData } from "../../../../app/utils/landscape-schemes/structure-data";
 import { DynamicLandscapeData } from "../../../../app/utils/landscape-schemes/dynamic-data";
+import { StructureLandscapeData } from "../../../../app/utils/landscape-schemes/structure-data";
+import CloseIcon from "../utils/view-objects/vr/close-icon";
+import { DetachableMenu } from "../utils/vr-menus/detachable-menu";
+import DetachedMenuGroup from "../utils/vr-menus/detached-menu-group";
+import { isMenuDetachedResponse, MenuDetachedResponse } from "../utils/vr-message/receivable/response/menu-detached";
+import { isObjectClosedResponse, ObjectClosedResponse } from "../utils/vr-message/receivable/response/object-closed";
+import VrAssetRepository from "./vr-asset-repo";
+import VrMessageReceiver from "./vr-message-receiver";
+import VrMessageSender from "./vr-message-sender";
+import VrSceneService from "./vr-scene";
 
 export default class DetachedMenuGroupsService extends Service {
   @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
-  @service('vr-message-sender') private sender!: VrMessageSender;
   @service('vr-message-receiver') private receiver!: VrMessageReceiver;
+  @service('vr-message-sender') private sender!: VrMessageSender;
   @service('vr-scene') private sceneService!: VrSceneService;
 
   private detachedMenuGroups: Set<DetachedMenuGroup>;

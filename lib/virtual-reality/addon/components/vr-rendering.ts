@@ -38,6 +38,7 @@ import VRControllerBindings from 'virtual-reality/utils/vr-controller/vr-control
 import VRControllerBindingsList from 'virtual-reality/utils/vr-controller/vr-controller-bindings-list';
 import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding, { VRControllerThumbpadVerticalDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
+import VrInputManager from 'virtual-reality/utils/vr-controller/vr-input-manager';
 import { EntityMesh, isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
 import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
 import InteractiveMenu from 'virtual-reality/utils/vr-menus/interactive-menu';
@@ -62,13 +63,12 @@ import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendab
 import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
 import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
-import VrInputManager from 'virtual-reality/utils/vr-controller/vr-input-manager';
 import WebXRPolyfill from 'webxr-polyfill';
 import VrHighlightingService from "../services/vr-highlighting";
-import { UserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
-import { UserControllerConnectMessage, USER_CONTROLLER_CONNECT_EVENT } from "../utils/vr-message/sendable/user_controller_connect";
-import { CONTROLLER_1_ID, CONTROLLER_2_ID, ControllerId } from "../utils/vr-message/util/controller_id";
 import VrRoomSerializer from "../services/vr-room-serializer";
+import { UserControllerConnectMessage, USER_CONTROLLER_CONNECT_EVENT } from "../utils/vr-message/sendable/user_controller_connect";
+import { UserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
+import { ControllerId, CONTROLLER_1_ID, CONTROLLER_2_ID } from "../utils/vr-message/util/controller_id";
 
 interface Args {
   readonly id: string;

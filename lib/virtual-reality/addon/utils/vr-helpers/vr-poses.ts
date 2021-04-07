@@ -1,6 +1,6 @@
 import THREE from 'three';
 import VRController from '../vr-controller';
-import { Pose, ControllerPose } from "../vr-message/sendable/user_positions";
+import { ControllerPose, Pose } from "../vr-message/sendable/user_positions";
 
 export function getCameraPose(camera: THREE.Camera): Pose {
   return {

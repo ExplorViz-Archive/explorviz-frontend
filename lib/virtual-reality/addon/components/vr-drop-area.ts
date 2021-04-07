@@ -30,7 +30,7 @@ export default class VrDropArea extends Component<VrDropAreaArgs> {
         files.push(event.dataTransfer.files[i]);
       }
     }
-    
+
     if (files.length > 0) this.args.onDropFiles(files);
   }
 

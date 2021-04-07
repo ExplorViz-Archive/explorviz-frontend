@@ -287,7 +287,7 @@ export default abstract class UiMenu extends InteractiveMenu {
    * hovering this menu. This method is not called again before the trigger
    * is released.
    */
-   triggerDown(intersection: THREE.Intersection,) {
+  triggerDown(intersection: THREE.Intersection, ) {
     super.triggerDown(intersection);
 
     if (!intersection.uv) return;

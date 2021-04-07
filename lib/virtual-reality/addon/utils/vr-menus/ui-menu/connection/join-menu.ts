@@ -1,9 +1,9 @@
 import VrRoomService from 'virtual-reality/services/vr-room';
+import { RoomListRecord } from "../../../vr-payload/receivable/room-list";
 import TextItem from "../../items/text-item";
 import TextbuttonItem from "../../items/textbutton-item";
-import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 import TitleItem from "../../items/title-item";
-import { RoomListRecord } from "../../../vr-payload/receivable/room-list";
+import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 
 /**
  * Time in seconds before the new room list should be fetched.

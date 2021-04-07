@@ -3,15 +3,15 @@ import Configuration from 'explorviz-frontend/services/configuration';
 import VrApplicationRenderer from 'explorviz-frontend/services/vr-application-renderer';
 import VrLandscapeRenderer from 'explorviz-frontend/services/vr-landscape-renderer';
 import THREE from "three";
-import { EntityType, NODE_ENTITY_TYPE, APPLICATION_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, CLASS_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
+import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from 'virtual-reality/utils/vr-message/util/entity_type';
 import FloorMesh from "../utils/view-objects/vr/floor-mesh";
 
 const FLOOR_SIZE = 1000;
 
 export default class VrSceneService extends Service {
   @service('configuration') private configuration!: Configuration;
-  @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
   @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
+  @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
 
   readonly scene: THREE.Scene;
   readonly floor: FloorMesh;

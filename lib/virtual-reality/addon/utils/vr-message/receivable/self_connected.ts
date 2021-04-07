@@ -1,7 +1,7 @@
 import { Color, isColor } from "../util/color";
 import { Controller, isController } from "../util/controller";
-import { Position, isPosition } from "../util/position";
-import { Quaternion, isQuaternion } from "../util/quaternion";
+import { isPosition, Position } from "../util/position";
+import { isQuaternion, Quaternion } from "../util/quaternion";
 
 export const SELF_CONNECTED_EVENT = 'self_connected';
 

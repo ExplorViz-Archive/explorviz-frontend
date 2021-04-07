@@ -2,19 +2,9 @@
  * Adapted from: https://github.com/mrdoob/three.js/blob/master/examples/jsm/webxr/XRControllerModelFactory.js
  */
 
-import {
-  Object3D,
-  Quaternion,
-  Material,
-  Mesh,
-} from 'three';
+import { Component, Constants as MotionControllerConstants, MotionController, VisualResponse } from '@webxr-input-profiles/motion-controllers';
+import { Material, Mesh, Object3D, Quaternion } from 'three';
 
-import {
-  Constants as MotionControllerConstants,
-  MotionController,
-  VisualResponse,
-  Component,
-} from '@webxr-input-profiles/motion-controllers';
 
 export type VisualResponseNodes = {
   visualResponse: VisualResponse,
@@ -29,9 +19,9 @@ export type TouchPointNode = {
 };
 
 export default class VrControllerModel extends Object3D {
-  private _motionController!: MotionController|null;
+  private _motionController!: MotionController | null;
   private _motionControllerPromise!: Promise<MotionController>;
-  private _onMotionControllerConnect: ((motionController: MotionController) => void)|null;
+  private _onMotionControllerConnect: ((motionController: MotionController) => void) | null;
   private touchPointNodes: TouchPointNode[];
   private visualResponseNodes: VisualResponseNodes[];
 
@@ -55,7 +45,7 @@ export default class VrControllerModel extends Object3D {
    * This property is `null` unless the 3D model of the controller has been
    * loaded.
    */
-  get motionController(): MotionController|null {
+  get motionController(): MotionController | null {
     return this._motionController;
   }
 
@@ -117,7 +107,7 @@ export default class VrControllerModel extends Object3D {
   * Polls data from the XRInputSource and updates the model's components to match
   * the real world data
   */
-  updateMatrixWorld(force: Boolean|undefined) {
+  updateMatrixWorld(force: Boolean | undefined) {
     super.updateMatrixWorld.call(this, force);
 
     if (!this.motionController) return;

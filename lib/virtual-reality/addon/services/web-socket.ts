@@ -1,6 +1,6 @@
 import Service, { inject as service } from '@ember/service';
-import ENV from 'explorviz-frontend/config/environment';
 import debugLogger from 'ember-debug-logger';
+import ENV from 'explorviz-frontend/config/environment';
 
 const { vrService } = ENV.backendAddresses;
 
