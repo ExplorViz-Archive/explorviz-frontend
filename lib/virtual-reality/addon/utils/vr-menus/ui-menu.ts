@@ -146,16 +146,14 @@ export default abstract class UiMenu extends InteractiveMenu {
    *
    * @returns Item at given position if there is one, else undefined.
    */
-  getItem(position: THREE.Vector2, onlyInteractiveItems = true): InteractiveItem | undefined {
-    const items = onlyInteractiveItems
-      ? this.items.filter((item) => item instanceof InteractiveItem)
-      : this.items;
+  getInteractiveItem(position: THREE.Vector2): InteractiveItem | undefined {
+    const items = this.items.filter((item) => item instanceof InteractiveItem);
 
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       // calculate pixel position
       const x = this.resolution.width * position.x;
-      const y = this.resolution.height - (this.resolution.height * position.y);
+      const y = this.resolution.height * (1.0 - position.y);
 
       const {
         minX,
@@ -181,7 +179,7 @@ export default abstract class UiMenu extends InteractiveMenu {
     super.hover(intersection);
 
     if (!intersection.uv) return;
-    const item = this.getItem(intersection.uv);
+    const item = this.getInteractiveItem(intersection.uv);
     this.hoverItem(item);
   }
 
@@ -297,7 +295,7 @@ export default abstract class UiMenu extends InteractiveMenu {
     super.triggerDown(intersection);
 
     if (!intersection.uv) return;
-    const item = this.getItem(intersection.uv);
+    const item = this.getInteractiveItem(intersection.uv);
     if (item && item.onTriggerDown) {
       item.onTriggerDown();
     }
@@ -314,7 +312,7 @@ export default abstract class UiMenu extends InteractiveMenu {
     super.triggerPress(intersection, value);
 
     if (!intersection.uv) return;
-    const item = this.getItem(intersection.uv);
+    const item = this.getInteractiveItem(intersection.uv);
     if (item && item.onTriggerPressed) {
       item.onTriggerPressed(value);
     }
