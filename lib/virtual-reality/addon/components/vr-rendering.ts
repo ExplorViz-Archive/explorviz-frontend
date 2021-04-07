@@ -62,13 +62,13 @@ import { SpectatingUpdateMessage } from 'virtual-reality/utils/vr-message/sendab
 import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
 import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
-import VrInputManager from 'virtual-reality/utils/vr-multi-user/vr-input-manager';
+import VrInputManager from 'virtual-reality/utils/vr-controller/vr-input-manager';
 import WebXRPolyfill from 'webxr-polyfill';
 import VrHighlightingService from "../services/vr-highlighting";
 import { UserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
 import { UserControllerConnectMessage, USER_CONTROLLER_CONNECT_EVENT } from "../utils/vr-message/sendable/user_controller_connect";
 import { CONTROLLER_1_ID, CONTROLLER_2_ID, ControllerId } from "../utils/vr-message/util/controller_id";
-import VrRoomService from 'virtual-reality/services/vr-room';
+import VrRoomSerializer from "../services/vr-room-serializer";
 
 interface Args {
   readonly id: string;
@@ -97,7 +97,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
   @service('vr-message-receiver') private receiver!: VrMessageReceiver;
   @service('vr-message-sender') private sender!: VrMessageSender;
-  @service('vr-room') private roomService!: VrRoomService;
+  @service('vr-room-serializer') private roomSerializer!: VrRoomSerializer;
   @service('vr-scene') private sceneService!: VrSceneService;
   @service('vr-timestamp') private timestampService!: VrTimestampService;
   @service('web-socket') private webSocket!: WebSocketService;
@@ -883,7 +883,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   onTimestampUpdate({
     originalMessage: { timestamp }
   }: ForwardedMessage<TimestampUpdateMessage>): void {
-    this.timestampService.updateTimestampLocally(timestamp);
+    this.roomSerializer.preserveRoom(() => this.timestampService.updateTimestampLocally(timestamp), {
+      restoreLandscapeData: false
+    });
   }
 
   onUserControllerConnect({
@@ -925,8 +927,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   async onInitialLandscape({ landscape, openApps, detachedMenus }: InitialLandscapeMessage): Promise<void> {
-    await this.timestampService.updateLandscapeToken(landscape.landscapeToken, landscape.timestamp);
-    this.roomService.restoreRoomLayout({ landscape, openApps, detachedMenus });
+    this.roomSerializer.restoreRoom({ landscape, openApps, detachedMenus });
   }
 
   onAppOpened({

@@ -3,7 +3,6 @@ import debugLogger from "ember-debug-logger";
 import Auth from "explorviz-frontend/services/auth";
 import LandscapeTokenService from "explorviz-frontend/services/landscape-token";
 import ReloadHandler from "explorviz-frontend/services/reload-handler";
-import VrRoomService from 'explorviz-frontend/services/vr-room';
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { StructureLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import DetachedMenuGroupService from "virtual-reality/services/detached-menu-groups";
@@ -23,11 +22,10 @@ export default class VrTimestampService extends Service {
   @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
   @service('vr-message-sender') private sender!: VrMessageSender;
-  @service('vr-room') private roomService!: VrRoomService;
 
   timestamp!: number;
 
-  async updateLandscapeToken(landscapeToken: string, timestamp: number): Promise<void> {
+  async updateLandscapeTokenLocally(landscapeToken: string, timestamp: number): Promise<void> {
     // While changing the timestamp, we overwrite the landscape token temporarily sucht
     // that the given landscape is loaded instead.
     let originalToken = this.landscapeTokenService.token;
@@ -60,7 +58,7 @@ export default class VrTimestampService extends Service {
     try {
       // Load new landscape data.
       const [structureData, dynamicData] = await this.reloadHandler.loadLandscapeByTimestamp(timestamp);
-      await this.setTimestampAndRestoreLocally(timestamp, structureData, dynamicData);
+      await this.setTimestampLocally(timestamp, structureData, dynamicData);
     } catch (e) {
       this.debug('Landscape couldn\'t be requested!', e);
     }
@@ -78,21 +76,6 @@ export default class VrTimestampService extends Service {
       this.vrApplicationRenderer.updateLandscapeData(structureLandscapeData, dynamicLandscapeData),
       this.detachedMenuGroups.updateLandscapeData(structureLandscapeData, dynamicLandscapeData)
     ]);
-  }
-
-  private async setTimestampAndRestoreLocally(
-    timestamp: number,
-    structureLandscapeData: StructureLandscapeData,
-    dynamicLandscapeData: DynamicLandscapeData
-  ): Promise<void> {
-    // Save currently open apps and menus and their positions.
-    const roomLayout = this.roomService.saveCurrentRoomLayout();
-    roomLayout.landscape.timestamp = timestamp;
-
-    await this.setTimestampLocally(timestamp, structureLandscapeData, dynamicLandscapeData);
-
-    // Try to restore the state of the room.
-    this.roomService.restoreRoomLayout(roomLayout);
   }
 }
 

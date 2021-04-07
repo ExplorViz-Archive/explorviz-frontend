@@ -4,9 +4,7 @@ import Auth from 'explorviz-frontend/services/auth';
 import THREE from 'three';
 import DetachedMenuGroupsService from 'virtual-reality/services/detached-menu-groups';
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
-import VrTimestampService from 'virtual-reality/services/vr-timestamp';
-import { DetachableMenu, isDetachableMenu } from 'virtual-reality/utils/vr-menus/detachable-menu';
-import { InitialRoomApp, InitialRoomDetachedMenu, InitialRoomLandscape, InitialRoomPayload } from 'virtual-reality/utils/vr-payload/sendable/initial-room';
+import { InitialRoomPayload } from 'virtual-reality/utils/vr-payload/sendable/initial-room';
 import { isLobbyJoinedResponse, LobbyJoinedResponse } from "../utils/vr-payload/receivable/lobby-joined";
 import { isRoomCreatedResponse, RoomCreatedResponse } from "../utils/vr-payload/receivable/room-created";
 import { isRoomListRecord, RoomListRecord } from "../utils/vr-payload/receivable/room-list";
@@ -19,6 +17,7 @@ import { isEntityMesh } from 'virtual-reality/utils/vr-helpers/detail-info-compo
 import RemoteVrUserService from './remote-vr-users';
 import VrMenuFactoryService from 'explorviz-frontend/services/vr-menu-factory';
 import VrSceneService from './vr-scene';
+import VrRoomSerializer from "./vr-room-serializer";
 
 const { vrService } = ENV.backendAddresses;
 
@@ -28,10 +27,10 @@ export default class VrRoomService extends Service {
   @service('local-vr-user') localUser!: LocalVrUser;
   @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
-  @service('vr-timestamp') private timestampService!: VrTimestampService;
   @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
   @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
   @service('vr-scene') private sceneService!: VrSceneService;
+  @service('vr-room-serializer') private roomSerializer!: VrRoomSerializer;
 
   async listRooms(): Promise<RoomListRecord[]> {
     const url = `${vrService}/v2/vr/rooms`;
@@ -124,49 +123,13 @@ export default class VrRoomService extends Service {
   }
 
   private buildInitialRoomPayload(): InitialRoomPayload {
+    // Serialize room and remove unsupported properties.
+    const room = this.roomSerializer.serializeRoom();
     return {
-      landscape: this.buildInitialRoomLandscape(),
-      openApps: this.buildInitialOpenApps(),
-      detachedMenus: this.buildInitialDetachedMenus(),
-    };
-  }
-
-  private buildInitialRoomLandscape(): InitialRoomLandscape {
-    const landscapeObject3D = this.vrLandscapeRenderer.landscapeObject3D;
-    return {
-      landscapeToken: landscapeObject3D.dataModel.landscapeToken,
-      timestamp: this.timestampService.timestamp,
-      position: landscapeObject3D.getWorldPosition(new THREE.Vector3()).toArray(),
-      quaternion: landscapeObject3D.getWorldQuaternion(new THREE.Quaternion()).toArray(),
-      scale: landscapeObject3D.scale.toArray()
-    };
-  }
-
-  private buildInitialOpenApps(): InitialRoomApp[] {
-    return this.vrApplicationRenderer.getOpenApplications().map((application) => {
-      return {
-        id: application.dataModel.instanceId,
-        position: application.getWorldPosition(new THREE.Vector3()).toArray(),
-        quaternion: application.getWorldQuaternion(new THREE.Quaternion()).toArray(),
-        scale: application.scale.toArray(),
-        openComponents: Array.from(application.openComponentIds),
-      };
-    });
-  }
-
-  private buildInitialDetachedMenus(): InitialRoomDetachedMenu[] {
-    return this.detachedMenuGroups.getDetachedMenus()
-      .filter((detachedMenuGroup) => isDetachableMenu(detachedMenuGroup.currentMenu))
-      .map((detachedMenuGroup) => {
-        const detachedMenu = detachedMenuGroup.currentMenu as DetachableMenu;
-        return {
-          entityId: detachedMenu.getDetachId(),
-          entityType: detachedMenu.getEntityType(),
-          position: detachedMenuGroup.getWorldPosition(new THREE.Vector3()).toArray(),
-          quaternion: detachedMenuGroup.getWorldQuaternion(new THREE.Quaternion()).toArray(),
-          scale: detachedMenuGroup.scale.toArray()
-        };
-      });
+      landscape: room.landscape,
+      openApps: room.openApps.map(({ highlightedComponents, ...app }) => app),
+      detachedMenus: room.detachedMenus.map(({ objectId, ...menu }) => menu),
+    }
   }
 
   async joinLobby(roomId: string): Promise<LobbyJoinedResponse> {

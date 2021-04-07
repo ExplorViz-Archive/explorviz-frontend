@@ -33,6 +33,7 @@ import SpectateUserService from "./spectate-user";
 import VrLandscapeRenderer from "./vr-landscape-renderer";
 import VrRoomService from './vr-room';
 import VrSceneService from "./vr-scene";
+import VrRoomSerializer from "./vr-room-serializer";
 
 export default class VrMenuFactoryService extends Service {
   @service('delta-time') private deltaTimeService!: DeltaTimeService;
@@ -45,6 +46,7 @@ export default class VrMenuFactoryService extends Service {
   @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
   @service('vr-message-sender') private sender!: VrMessageSender;
   @service('vr-room') private roomService!: VrRoomService;
+  @service('vr-room-serializer') private roomSerializer!: VrRoomSerializer;
   @service('vr-scene') private sceneService!: VrSceneService;
   @service('vr-timestamp') private timestampService!: VrTimestampService;
 
@@ -120,6 +122,7 @@ export default class VrMenuFactoryService extends Service {
 
   buildTimeMenu(): TimeMenu {
     return new TimeMenu({
+      roomSerializer: this.roomSerializer,
       timestampService: this.timestampService,
       menuFactory: this,
     });

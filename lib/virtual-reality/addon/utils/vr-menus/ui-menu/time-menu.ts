@@ -6,25 +6,29 @@ import TextItem from "../items/text-item";
 import TextbuttonItem from "../items/textbutton-item";
 import TitleItem from "../items/title-item";
 import UiMenu, { UiMenuArgs } from "../ui-menu";
+import VrRoomSerializer from "../../../services/vr-room-serializer";
 
 const MS_PER_SECOND = 1000;
 const TIMESTAMP_INTERVAL = 10 * MS_PER_SECOND;
 
 export type TimeMenuArgs = UiMenuArgs & {
-  timestampService: VrTimestampService
+  roomSerializer: VrRoomSerializer,
+  timestampService: VrTimestampService,
 };
 
 export default class TimeMenu extends UiMenu {
   private date: Date;
   private selectButton: TextbuttonItem;
+  private roomSerializer: VrRoomSerializer;
   private timeBackButton: ArrowbuttonItem;
   private timeForthButton: ArrowbuttonItem;
   private timestampService: VrTimestampService;
   private timestampTextItem: TextItem;
 
-  constructor({ timestampService, ...args }: TimeMenuArgs) {
+  constructor({ roomSerializer, timestampService, ...args }: TimeMenuArgs) {
     super(args);
 
+    this.roomSerializer = roomSerializer;
     this.timestampService = timestampService;
     this.date = new Date(timestampService.timestamp);
 
@@ -74,7 +78,7 @@ export default class TimeMenu extends UiMenu {
       height: 50,
       fontSize: 28,
       onTriggerDown: () => {
-        this.timestampService.updateTimestamp(this.date.getTime());
+        this.applySelectedTimestamp()
         this.closeMenu();
       }
     });
@@ -98,6 +102,12 @@ export default class TimeMenu extends UiMenu {
 
   setDateForthBy(timeInMilliseconds: number) {
     this.date.setTime(this.date.getTime() + timeInMilliseconds);
+  }
+
+  private applySelectedTimestamp() {
+    this.roomSerializer.preserveRoom(() => this.timestampService.updateTimestamp(this.date.getTime()), {
+      restoreLandscapeData: false
+    });
   }
 
   makeThumbpadBinding() {
@@ -130,7 +140,7 @@ export default class TimeMenu extends UiMenu {
         this.redrawMenu();
       },
       onButtonUp: () => {
-        this.timestampService.updateTimestamp(this.date.getTime());
+        this.applySelectedTimestamp();
         this.closeMenu();
       }
     });

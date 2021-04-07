@@ -1,21 +1,5 @@
 import THREE from 'three';
 
-export function measureText(text: string, {font, alignment, baseline}: {
-  font: string,
-  alignment: CanvasTextAlign,
-  baseline: CanvasTextBaseline
-}): TextMetrics {
-  // re-use canvas object for better performance
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw `failed to measure text: ${text}`;
-
-  ctx.font = font;
-  ctx.textAlign = alignment;
-  ctx.textBaseline = baseline;
-  return ctx.measureText(text);
-}
-
 /**
  * Sets MeshStandardMaterial of given object to have the given opacity.
  * Displays object using wireframes (instead of polygons):

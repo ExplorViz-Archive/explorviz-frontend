@@ -5,7 +5,7 @@ import VrControllerModelFactory from './vr-controller/vr-controller-model-factor
 import TeleportMesh from './view-objects/vr/teleport-mesh';
 import VRControllerBindingsList from './vr-controller/vr-controller-bindings-list';
 import VRControllerLabelGroup from './vr-controller/vr-controller-label-group';
-import { displayAsSolidObject, displayAsWireframe } from './vr-helpers/multi-user-helper';
+import { displayAsSolidObject, displayAsWireframe } from './vr-helpers/wireframe';
 import MenuGroup from './vr-menus/menu-group';
 import { ControllerId } from "./vr-message/util/controller_id";
 
