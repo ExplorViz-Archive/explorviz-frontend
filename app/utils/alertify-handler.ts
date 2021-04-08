@@ -1,6 +1,6 @@
 import $ from 'jquery';
-
-declare const alertify: any;
+// @ts-ignore until types for AlertifyJS are added
+import alertify from 'alertifyjs';
 
 /**
 * @class AlertifyHandler
