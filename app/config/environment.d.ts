@@ -27,6 +27,7 @@ declare const config: {
     landscapeService: string,
     traceService: string,
     userService: string,
+    collaborativeService: string,
     vrService: string,
   },
   APP: any;

@@ -1,21 +1,20 @@
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
 import debugLogger from 'ember-debug-logger';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import Configuration from 'explorviz-frontend/services/configuration';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
 import RemoteVrUserService from 'explorviz-frontend/services/remote-vr-users';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
-import Interaction from 'explorviz-frontend/utils/interaction';
+import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
-import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
@@ -110,12 +109,14 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   private debug = debugLogger('VrRendering');
   private debugMenuGroup!: MenuGroup;
   private hintMenuQueue!: MenuQueue;
-  private interaction!: Interaction;
   private messageMenuQueue!: MenuQueue;
   private primaryInputManager = new VrInputManager();
   private secondaryInputManager = new VrInputManager();
   private vrSessionActive: boolean = false;
   private willDestroyController: AbortController = new AbortController();
+
+  @tracked
+  hammerInteraction: HammerInteraction = HammerInteraction.create();
 
   // #endregion CLASS FIELDS
 
@@ -205,26 +206,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    */
   private initInteraction() {
     this.debug('Initializing interaction...');
-
-    const intersectableObjects = [
-      this.vrLandscapeRenderer.landscapeObject3D,
-      this.vrApplicationRenderer.applicationGroup,
-      this.sceneService.floor,
-      this.detachedMenuGroups.container,
-      this.debugMenuGroup,
-    ];
-    const raycastFilter = (intersection: THREE.Intersection) => {
-      return !(intersection.object instanceof LabelMesh ||
-        intersection.object instanceof LogoMesh);
-    };
-    this.interaction = new Interaction(
-      this.canvas, this.localUser.defaultCamera, this.localUser.renderer, intersectableObjects, {
-      singleClick: (intersection) => this.handleSingleClick(intersection),
-      doubleClick: (intersection) => this.handleDoubleClick(intersection),
-      mouseWheel: (delta) => this.handleMouseWheel(delta),
-      mouseMove: (intersection) => this.handleMouseMove(intersection),
-      panning: (delta, button) => this.handlePanning(delta, button),
-    }, raycastFilter);
+    this.hammerInteraction.setupHammer(this.canvas);
 
     // Add additional event listeners. Since TypeScript does not yet support
     // the signal option  of `addEventListener`, we have to listen for the
@@ -337,11 +319,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       gripSpace: this.localUser.renderer.xr.getControllerGrip(gamepadIndex),
       raySpace: this.localUser.renderer.xr.getController(gamepadIndex),
       color: new THREE.Color('red'),
-      menuGroup,
-      intersectableObjects: this.interaction.raycastObjects
+      menuGroup
     });
     controller.setToDefaultAppearance();
-    controller.intersectableObjects.push(menuGroup);
 
     // Add connection event listeners.
     controller.eventCallbacks.connected = (controller) => this.onControllerConnected(controller);
@@ -391,6 +371,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @action
   canvasInserted(canvas: HTMLCanvasElement) {
     this.debug('Canvas inserted');
+    console.log('canvas inserted');
 
     this.canvas = canvas;
     canvas.oncontextmenu = (e) => {
@@ -466,7 +447,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
           const gltfLoader = new GLTFLoader(loadingManager);
           gltfLoader.load(file.name, (gltf) => {
             const object = new GrabbableObjectWrapper(gltf.scene);
-            this.interaction.raycastObjects.push(object);
             this.sceneService.scene.add(object);
             resolve(null);
           });
@@ -671,17 +651,20 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     }
   }
 
-  private handleDoubleClick(intersection: THREE.Intersection | null) {
+  @action
+  handleDoubleClick(intersection: THREE.Intersection | null) {
     if (this.vrSessionActive || !intersection) return;
     this.primaryInputManager.handleTriggerDown(intersection);
   }
 
-  private handleSingleClick(intersection: THREE.Intersection | null) {
+  @action
+  handleSingleClick(intersection: THREE.Intersection | null) {
     if (this.vrSessionActive || !intersection) return;
     this.secondaryInputManager.handleTriggerDown(intersection);
   }
 
-  private handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
+  @action
+  handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     if (this.vrSessionActive) return;
 
     const LEFT_MOUSE_BUTTON = 1;
@@ -704,12 +687,14 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     }
   }
 
-  private handleMouseWheel(delta: number) {
+  @action
+  handleMouseWheel(delta: number) {
     if (this.vrSessionActive) return;
     this.localUser.cameraHeight += delta * 0.2;
   }
 
-  private handleMouseMove(intersection: THREE.Intersection | null) {
+  @action
+  handleMouseMove(intersection: THREE.Intersection | null) {
     if (this.vrSessionActive) return;
     this.handleHover(intersection, null);
   }
@@ -953,17 +938,16 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   onObjectMoved({
     originalMessage: { objectId, position, quaternion, scale }
   }: ForwardedMessage<ObjectMovedMessage>): void {
-    // The moved object can be any of the intersectable objects.
-    for (let object of this.interaction.raycastObjects) {
-      let child = findGrabbableObject(object, objectId);
-      if (child) {
-        child.position.fromArray(position);
-        child.quaternion.fromArray(quaternion);
-        child.scale.fromArray(scale);
-        return;
-      }
+    // Find moved object in the scene.
+    const movedObject = findGrabbableObject(this.sceneService.scene, objectId);
+    if (!movedObject) {
+      console.error('Could not find moved object', objectId);
+      return;
     }
-    console.error('Could not find moved object', objectId);
+
+    movedObject.position.fromArray(position);
+    movedObject.quaternion.fromArray(quaternion);
+    movedObject.scale.fromArray(scale);
   }
 
   onComponentUpdate({

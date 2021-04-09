@@ -34,6 +34,7 @@ export default class VrTimestampService extends Service {
       created: new Date().getTime(),
       ownerId: this.auth.user?.sub || '',
       value: landscapeToken,
+      sharedUsersIds: []
     });
 
     await this.updateTimestampLocally(timestamp);

@@ -81,8 +81,6 @@ export default class VRController extends BaseMesh {
 
   scene: THREE.Scene;
 
-  readonly intersectableObjects: THREE.Object3D[] = [];
-
   teleportArea: TeleportMesh | null = null;
 
   enableTeleport: boolean = true;
@@ -114,7 +112,6 @@ export default class VRController extends BaseMesh {
     menuGroup,
     bindings,
     scene,
-    intersectableObjects,
   }: {
     gamepadIndex: ControllerId,
     color: THREE.Color,
@@ -123,7 +120,6 @@ export default class VRController extends BaseMesh {
     menuGroup: MenuGroup,
     bindings: VRControllerBindingsList,
     scene: THREE.Scene,
-    intersectableObjects: THREE.Object3D[]
   }) {
     super();
     // Init properties
@@ -136,7 +132,6 @@ export default class VRController extends BaseMesh {
     this.raycaster = new THREE.Raycaster();
     this.scene = scene;
     this.eventCallbacks = bindings.makeCallbacks();
-    this.intersectableObjects = intersectableObjects;
 
     // Init controller model
     const controllerModelFactory = VrControllerModelFactory.INSTANCE;
@@ -363,8 +358,6 @@ export default class VRController extends BaseMesh {
   }
 
   private computeNearestIntersection(): THREE.Intersection | null {
-    if (this.intersectableObjects.length === 0) return null;
-
     const { raySpace } = this;
     const tempMatrix = new THREE.Matrix4();
     tempMatrix.identity().extractRotation(raySpace.matrixWorld);
@@ -372,7 +365,7 @@ export default class VRController extends BaseMesh {
     this.raycaster.ray.origin.setFromMatrixPosition(raySpace.matrixWorld);
     this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-    const intersections = this.raycaster.intersectObjects(this.intersectableObjects, true);
+    const intersections = this.raycaster.intersectObject(this.scene, true);
 
     for (const intersection of intersections) {
       if (intersection.object.visible) return intersection;

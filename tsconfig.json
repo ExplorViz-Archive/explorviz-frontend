@@ -27,10 +27,23 @@
       ],
       "explorviz-frontend/*": [
         "app/*",
+        "lib/collaborative-mode/app/*",
         "lib/virtual-reality/app/*"
       ],
       "*": [
         "types/*"
+      ],
+      "collaborative-mode": [
+        "lib/collaborative-mode/addon"
+      ],
+      "collaborative-mode/*": [
+        "lib/collaborative-mode/addon/*"
+      ],
+      "collaborative-mode/test-support": [
+        "lib/collaborative-mode/addon-test-support"
+      ],
+      "collaborative-mode/test-support/*": [
+        "lib/collaborative-mode/addon-test-support/*"
       ],
       "virtual-reality": [
         "lib/virtual-reality/addon"
@@ -50,6 +63,7 @@
     "app/**/*",
     "tests/**/*",
     "types/**/*",
+    "lib/collaborative-mode/**/*",
     "lib/virtual-reality/**/*",
   ],
   "exclude": [

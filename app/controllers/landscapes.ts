@@ -98,6 +98,11 @@ export default class Landscapes extends Controller {
     });
   }
 
+  @action
+  reload() {
+    this.send('refreshRoute');
+  }
+
   sendTokenDeleteRequest(tokenId: string) {
     return new Promise<undefined>((resolve, reject) => {
       fetch(`${userService}/token/${tokenId}`, {

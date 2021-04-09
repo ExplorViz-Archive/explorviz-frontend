@@ -1,4 +1,4 @@
-<VrDropArea @onDropFiles={{this.onDropFiles}} style="">
+<VrDropArea @onDropFiles={{this.onDropFiles}}>
   <div
     id="rendering"
     {{did-insert this.outerDivInserted}}
@@ -7,6 +7,16 @@
     <canvas
       class="main-content-majority"
       {{did-insert this.canvasInserted}}
+      {{interaction-modifier
+        raycastObject=this.sceneService.scene
+        camera=this.localUser.defaultCamera
+        singleClick=this.handleSingleClick
+        doubleClick=this.handleDoubleClick
+        mouseWheel=this.handleMouseWheel
+        mouseMove=this.handleMouseMove
+        panning=this.handlePanning
+        hammerInteraction=this.hammerInteraction
+      }}
     >
     </canvas>
     {{#if this.loadNewLandscape.isRunning}}
@@ -14,7 +24,6 @@
     {{else if this.addApplication.isRunning}}
       <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
     {{/if}}
-
   </div>
   <VrButton
     @renderer={{this.localUser.renderer}}
