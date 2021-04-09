@@ -1,6 +1,6 @@
+import { GrabbableObject } from "virtual-reality/utils/view-objects/interfaces/grabbable-object";
 import { DetachableMenu } from "./detachable-menu";
 import MenuGroup, { MenuGroupArgs } from './menu-group';
-import { GrabbableObject } from "./ui-less-menu/grab-menu";
 
 export type DetachedMenuGroupArgs = MenuGroupArgs & {
   menu: DetachableMenu,
@@ -23,6 +23,10 @@ export default class DetachedMenuGroup extends MenuGroup implements GrabbableObj
     // not open previously.
     this.addMenu(menu);
     if (!menu.isMenuOpen) menu.onOpenMenu();
+  }
+
+  canBeIntersected(_intersection: THREE.Intersection) {
+    return true;
   }
 
   getGrabId(): string | null {

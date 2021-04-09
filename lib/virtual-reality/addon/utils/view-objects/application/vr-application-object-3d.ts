@@ -2,7 +2,7 @@ import { Trace } from "explorviz-frontend/utils/landscape-schemes/dynamic-data";
 import { Application } from "explorviz-frontend/utils/landscape-schemes/structure-data";
 import ApplicationObject3D from "explorviz-frontend/view-objects/3d/application/application-object-3d";
 import BoxLayout from "explorviz-frontend/view-objects/layout-models/box-layout";
-import { GrabbableObject } from "../../vr-menus/ui-less-menu/grab-menu";
+import { GrabbableObject } from "../interfaces/grabbable-object";
 
 /**
  * For the VR extension, we need a custom view object for applications to
@@ -13,6 +13,10 @@ import { GrabbableObject } from "../../vr-menus/ui-less-menu/grab-menu";
 export default class VrApplicationObject3D extends ApplicationObject3D implements GrabbableObject {
   constructor(application: Application, boxLayoutMap: Map<string, BoxLayout>, traces: Trace[]) {
     super(application, boxLayoutMap, traces);
+  }
+
+  canBeIntersected(_intersection: THREE.Intersection) {
+    return true;
   }
 
   getGrabId(): string {

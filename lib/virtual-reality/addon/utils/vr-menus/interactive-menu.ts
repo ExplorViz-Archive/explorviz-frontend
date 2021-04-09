@@ -1,6 +1,15 @@
+import { IntersectableObject } from 'virtual-reality/utils/view-objects/interfaces/intersectable-object';
 import AnimatedMenu from "./animated-menu";
 
-export default class InteractiveMenu extends AnimatedMenu {
+export default class InteractiveMenu extends AnimatedMenu implements IntersectableObject {
+
+  /**
+   * Interactive menus can be intersected by a controller's ray by default.
+   */
+  canBeIntersected(_intersection: THREE.Intersection) {
+    return true;
+  }
+
   /**
    * Called when the other controller's ray intersects this menu.
    */

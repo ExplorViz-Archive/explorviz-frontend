@@ -1,5 +1,6 @@
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import THREE from 'three';
+import { canIntersectAllParentObjects } from './view-objects/interfaces/intersectable-object';
 import TeleportMesh from './view-objects/vr/teleport-mesh';
 import VRControllerBindingsList from './vr-controller/vr-controller-bindings-list';
 import VRControllerLabelGroup from './vr-controller/vr-controller-label-group';
@@ -136,7 +137,7 @@ export default class VRController extends BaseMesh {
     // Init controller model
     const controllerModelFactory = VrControllerModelFactory.INSTANCE;
     this.controllerModel = controllerModelFactory.createControllerModel(this.gripSpace);
-    this.gripSpace.add(this.controllerModel);
+    this.raySpace.add(this.controllerModel);
 
     // Init children
     this.initChildren();
@@ -368,7 +369,9 @@ export default class VRController extends BaseMesh {
     const intersections = this.raycaster.intersectObject(this.scene, true);
 
     for (const intersection of intersections) {
-      if (intersection.object.visible) return intersection;
+      if (canIntersectAllParentObjects(intersection, { onlyVisible: true })) {
+        return intersection;
+      }
     }
 
     return null;

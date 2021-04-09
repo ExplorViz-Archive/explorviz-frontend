@@ -1,7 +1,7 @@
 import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
-import { GrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
+import { GrabbableObject } from 'virtual-reality/utils/view-objects/interfaces/grabbable-object';
 import { isObjectGrabbedResponse, ObjectGrabbedResponse } from 'virtual-reality/utils/vr-message/receivable/response/object-grabbed';
 import VrMessageReceiver from './vr-message-receiver';
 

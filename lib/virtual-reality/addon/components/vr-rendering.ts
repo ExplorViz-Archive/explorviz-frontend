@@ -30,6 +30,7 @@ import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import VrSceneService from "virtual-reality/services/vr-scene";
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import WebSocketService from 'virtual-reality/services/web-socket';
+import { findGrabbableObject, GrabbableObjectWrapper, isGrabbableObject } from "virtual-reality/utils/view-objects/interfaces/grabbable-object";
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import FloorMesh from 'virtual-reality/utils/view-objects/vr/floor-mesh';
 import VRController from 'virtual-reality/utils/vr-controller';
@@ -43,7 +44,6 @@ import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
 import InteractiveMenu from 'virtual-reality/utils/vr-menus/interactive-menu';
 import MenuGroup from 'virtual-reality/utils/vr-menus/menu-group';
 import MenuQueue from 'virtual-reality/utils/vr-menus/menu-queue';
-import { findGrabbableObject, GrabbableObjectWrapper, isGrabbableObject } from 'virtual-reality/utils/vr-menus/ui-less-menu/grab-menu';
 import HintMenu from 'virtual-reality/utils/vr-menus/ui-menu/hud/hint-menu';
 import { ForwardedMessage, FORWARDED_EVENT } from 'virtual-reality/utils/vr-message/receivable/forwarded';
 import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receivable/landscape';
@@ -371,7 +371,6 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   @action
   canvasInserted(canvas: HTMLCanvasElement) {
     this.debug('Canvas inserted');
-    console.log('canvas inserted');
 
     this.canvas = canvas;
     canvas.oncontextmenu = (e) => {

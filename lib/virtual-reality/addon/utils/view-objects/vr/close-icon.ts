@@ -1,13 +1,14 @@
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-controller';
+import { IntersectableObject } from "../interfaces/intersectable-object";
 
 export type CloseIconTextures = {
   defaultTexture: THREE.Texture,
   hoverTexture: THREE.Texture,
 };
 
-export default class CloseIcon extends BaseMesh {
+export default class CloseIcon extends BaseMesh implements IntersectableObject {
   private radius: number;
 
   private onClose: () => Promise<boolean>;
@@ -30,6 +31,10 @@ export default class CloseIcon extends BaseMesh {
     this.material = new THREE.MeshPhongMaterial({
       map: textures.defaultTexture,
     });
+  }
+
+  canBeIntersected(_intersection: THREE.Intersection) {
+    return true;
   }
 
   /**

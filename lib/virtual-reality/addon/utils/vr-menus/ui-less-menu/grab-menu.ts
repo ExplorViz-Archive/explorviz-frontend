@@ -1,44 +1,11 @@
 import THREE from 'three';
 import DeltaTimeService from 'virtual-reality/services/delta-time';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
+import { GrabbableObject } from 'virtual-reality/utils/view-objects/interfaces/grabbable-object';
 import VRController from 'virtual-reality/utils/vr-controller';
 import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
 import BaseMenu, { BaseMenuArgs } from '../base-menu';
-
-export interface GrabbableObject extends THREE.Object3D {
-  getGrabId(): string | null;
-}
-
-export class GrabbableObjectWrapper extends THREE.Group implements GrabbableObject {
-  private grabId: string | null;
-
-  constructor(object: THREE.Object3D, grabId: string | null = null) {
-    super();
-    this.grabId = grabId;
-    this.add(object);
-  }
-
-  getGrabId() {
-    return this.grabId;
-  }
-}
-
-export function isGrabbableObject(object: any): object is GrabbableObject {
-  return object !== null
-    && typeof object === 'object'
-    && typeof object.getGrabId === 'function';
-}
-
-export function findGrabbableObject(root: THREE.Object3D, objectId: string): GrabbableObject | null {
-  let objects = [root];
-  while (objects.length > 0) {
-    let object = objects.shift();
-    if (isGrabbableObject(object) && object.getGrabId() === objectId) return object;
-    if (object) objects.push(...object.children);
-  }
-  return null;
-}
 
 export type GrabMenuArgs = BaseMenuArgs & {
   deltaTimeService: DeltaTimeService

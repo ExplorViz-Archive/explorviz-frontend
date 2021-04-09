@@ -102,7 +102,6 @@ export default class VrRoomSerializer extends Service {
     // Initialize detached menus.
     detachedMenus.forEach((detachedMenu) => {
       let object = this.sceneService.findMeshByModelId(detachedMenu.entityType, detachedMenu.entityId);
-      console.log('creating menu for', detachedMenu.entityType, detachedMenu.entityId, object);
       if (isEntityMesh(object)) {
         const menu = this.menuFactory.buildInfoMenu(object);
         menu.position.fromArray(detachedMenu.position);
