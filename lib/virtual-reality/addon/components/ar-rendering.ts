@@ -236,17 +236,8 @@ export default class ArRendering extends Component<Args> {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
+      canvas: this.canvas,
     });
-
-    this.renderer.domElement.style.position = 'absolute';
-    this.renderer.domElement.style.top = '0px';
-    this.renderer.domElement.style.left = '0px';
-    this.renderer.setClearColor(new THREE.Color('lightgrey'), 0);
-    this.renderer.setSize(640, 480);
-
-    document.body.appendChild(this.renderer.domElement);
-
-    this.canvas = this.renderer.domElement;
 
     this.debug('Renderer set up');
   }
@@ -380,6 +371,18 @@ export default class ArRendering extends Component<Args> {
     await perform(this.loadNewLandscape);
   }
 
+  @action
+  canvasInserted(canvas: HTMLCanvasElement) {
+    this.debug('Canvas inserted');
+
+    this.canvas = canvas;
+    // this.hammerInteraction.setupHammer(canvas);
+
+    canvas.oncontextmenu = (e) => {
+      e.preventDefault();
+    };
+  }
+
   /**
      * Call this whenever the canvas is resized. Updated properties of camera
      * and renderer.
@@ -400,11 +403,7 @@ export default class ArRendering extends Component<Args> {
 
   resizeAR() {
     this.arToolkitSource.onResizeElement();
-    this.arToolkitSource.copyElementSizeTo(this.renderer.domElement);
-
-    if (this.arToolkitContext.arController !== null) {
-      this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
-    }
+    this.arToolkitSource.copyElementSizeTo(this.canvas);
   }
 
   /**
@@ -976,13 +975,6 @@ export default class ArRendering extends Component<Args> {
   }
 
   static cleanUpAr() {
-    // Remove added canvas
-    const canvas = document.body.querySelectorAll(':scope > canvas')[0];
-
-    if (canvas) {
-      document.body.removeChild(canvas);
-    }
-
     // Remove video and stop corresponding stream
     const video = document.getElementById('arjs-video');
 
