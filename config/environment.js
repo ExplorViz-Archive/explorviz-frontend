@@ -29,11 +29,14 @@ module.exports = function (environment) {
       callbackUrl: AUTH_CONFIG.callbackUrl,
       logoutReturnUrl: AUTH_CONFIG.logoutReturnUrl,
       routeAfterLogin: AUTH_CONFIG.routeAfterLogin,
+      accessToken: AUTH_CONFIG.accessToken,
+      profile: AUTH_CONFIG.profile,
     },
     backendAddresses: {
       landscapeService: BACKEND_CONFIG.landscapeService,
       traceService: BACKEND_CONFIG.traceService,
       userService: BACKEND_CONFIG.userService,
+      collaborativeService: BACKEND_CONFIG.collaborativeService,
     },
 
     APP: {
@@ -44,7 +47,7 @@ module.exports = function (environment) {
 
   let API_ROOT;
 
-  if (environment === 'development') {
+  if (environment === 'development' || environment === 'noauth') {
     API_ROOT = 'http://localhost:8080';
 
     if (process.env.API_ROOT) {

@@ -7,7 +7,6 @@ import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import Configuration from 'explorviz-frontend/services/configuration';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
-import Interaction from 'explorviz-frontend/utils/interaction';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
 import { enqueueTask, restartableTask, task } from 'ember-concurrency-decorators';
@@ -86,9 +85,6 @@ export default class VrRendering extends Component<Args> {
   modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
 
   debug = debugLogger('VrRendering');
-
-  // Used to register (mouse) events
-  interaction!: Interaction;
 
   canvas!: HTMLCanvasElement;
 
@@ -275,19 +271,6 @@ export default class VrRendering extends Component<Args> {
    * passes them to a newly created Interaction object
    */
   initInteraction() {
-    this.handleSingleClick = this.handleSingleClick.bind(this);
-    this.handleDoubleClick = this.handleDoubleClick.bind(this);
-    this.handleMouseWheel = this.handleMouseWheel.bind(this);
-    this.handlePanning = this.handlePanning.bind(this);
-
-    this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      [this.landscapeObject3D, this.applicationGroup, this.floor,
-        this.controllerMainMenus, this.controllerInfoMenus], {
-        singleClick: this.handleSingleClick,
-        doubleClick: this.handleDoubleClick,
-        mouseWheel: this.handleMouseWheel,
-        panning: this.handlePanning,
-      }, VrRendering.raycastFilter);
 
     // Add key listener for room positioning
     window.onkeydown = (event: any) => {
@@ -868,18 +851,21 @@ export default class VrRendering extends Component<Args> {
 
   // #region MOUSE & KEYBOARD EVENT HANDLER
 
+  @action
   handleDoubleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
 
     this.handlePrimaryInputOn(intersection);
   }
 
+  @action
   handleSingleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
 
     this.handleSecondaryInputOn(intersection);
   }
 
+  @action
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     const LEFT_MOUSE_BUTTON = 1;
 
@@ -897,6 +883,7 @@ export default class VrRendering extends Component<Args> {
     }
   }
 
+  @action
   handleMouseWheel(delta: number) {
     this.camera.position.z += delta * 0.2;
   }

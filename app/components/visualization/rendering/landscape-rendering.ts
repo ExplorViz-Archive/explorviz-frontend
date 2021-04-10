@@ -6,7 +6,6 @@ import THREEPerformance from 'explorviz-frontend/utils/threejs-performance';
 import THREE from 'three';
 import Configuration from 'explorviz-frontend/services/configuration';
 
-import Interaction, { Position2D } from 'explorviz-frontend/utils/interaction';
 import updateCameraZoom from 'explorviz-frontend/utils/landscape-rendering/zoom-calculator';
 import * as CommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
@@ -26,6 +25,8 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
+import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
+import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 
 interface Args {
   readonly id: string;
@@ -88,7 +89,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   scene!: THREE.Scene;
 
   webglrenderer!: THREE.WebGLRenderer;
+  
+  @tracked
+  hammerInteraction: HammerInteraction;
 
+  @tracked
   camera!: THREE.PerspectiveCamera;
 
   canvas!: HTMLCanvasElement;
@@ -102,14 +107,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   initDone: boolean;
 
   // Used to display performance and memory usage information
-  threePerformance: THREEPerformance|undefined;
-
-  // Used to register (mouse) events
-  @tracked
-  interaction!: Interaction;
+  threePerformance: THREEPerformance | undefined;
 
   // Maps models to a computed layout
-  modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
+  modelIdToPlaneLayout: Map<string, PlaneLayout> | null = null;
 
   // Extended Object3D which manages landscape meshes
   readonly landscapeObject3D: LandscapeObject3D;
@@ -138,6 +139,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   @tracked
   popupData: PopupData | null = null;
 
+  spheres: Map<string, Array<THREE.Mesh>> = new Map();
+
+  spheresIndex = 0;
+
   get font() {
     return this.args.font;
   }
@@ -152,6 +157,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Constructor called');
 
     this.render = this.render.bind(this);
+    this.hammerInteraction = HammerInteraction.create();
 
     this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
 
@@ -165,6 +171,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Canvas inserted');
 
     this.canvas = canvas;
+    this.hammerInteraction.setupHammer(canvas)
 
     canvas.oncontextmenu = (e) => {
       e.preventDefault();
@@ -176,13 +183,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Outer Div inserted');
 
     this.initThreeJs();
-    this.initInteraction();
     this.render();
 
     this.resize(outerDiv);
 
     await perform(this.loadNewLandscape);
-
     this.initDone = true;
   }
 
@@ -251,33 +256,16 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Lights added');
   }
 
-  /**
-   * Binds this context to all event handling functions and
-   * passes them to a newly created Interaction object
-   */
-  initInteraction() {
-    // this.handleSingleClick = this.handleSingleClick.bind(this);
-    this.handleDoubleClick = this.handleDoubleClick.bind(this);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleMouseWheel = this.handleMouseWheel.bind(this);
-    this.handleMouseOut = this.handleMouseOut.bind(this);
-    // this.handleMouseEnter = this.handleMouseEnter.bind(this);
-    this.handleMouseStop = this.handleMouseStop.bind(this);
-    this.handlePanning = this.handlePanning.bind(this);
+  // #endregion COMPONENT AND SCENE INITIALIZATION
 
-    this.interaction = new Interaction(this.canvas, this.camera, this.webglrenderer,
-      [this.landscapeObject3D], {
-        doubleClick: this.handleDoubleClick,
-        mouseMove: this.handleMouseMove,
-        mouseWheel: this.handleMouseWheel,
-        mouseOut: this.handleMouseOut,
-        /* mouseEnter: this.handleMouseEnter, */
-        mouseStop: this.handleMouseStop,
-        panning: this.handlePanning,
-      });
+  // #region COLLABORATIVE
+
+  @action
+  setPerspective(position: number[], _rotation: number[]) {
+    this.camera.position.fromArray(position);
   }
 
-  // #endregion COMPONENT AND SCENE INITIALIZATION
+  // #endregion COLLABORATIVE
 
   // #region RENDERING LOOP
 
@@ -297,9 +285,48 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     this.webglrenderer.render(this.scene, this.camera);
 
+    this.scaleSpheres();
+
     if (this.threePerformance) {
       this.threePerformance.stats.end();
     }
+  }
+
+  scaleSpheres() {
+    for (let spheres of this.spheres.values()) {
+      for (let i = 0; i < spheres.length; i++) {
+        const sphere = spheres[i];
+        sphere.scale.multiplyScalar(0.98);
+        sphere.scale.clampScalar(0.01, 1);
+      }
+    }
+  }
+
+  @action
+  repositionSphere(vec: THREE.Vector3, user: string, color: string) {
+    let spheres = this.spheres.get(user);
+    if (!spheres) {
+      spheres = this.createSpheres(color);
+      this.spheres.set(user, spheres);
+    }
+
+    // TODO independent sphereIndex for each user?
+    spheres[this.spheresIndex].position.copy(vec);
+    spheres[this.spheresIndex].scale.set(1, 1, 1);
+    this.spheresIndex = (this.spheresIndex + 1) % spheres.length;
+  }
+
+  createSpheres(color: string): Array<THREE.Mesh> {
+    let spheres = [];
+    const sphereGeometry = new THREE.SphereBufferGeometry(0.08, 32, 32);
+    const sphereMaterial = new THREE.MeshBasicMaterial({ color: color });
+
+    for (let i = 0; i < 30; i++) {
+      const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+      this.scene.add(sphere);
+      spheres.push(sphere);
+    }
+    return spheres;
   }
 
   // #endregion RENDERING LOOP
@@ -334,7 +361,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.landscapeObject3D.removeAllChildren();
     this.labeler.clearCache();
 
-    this.interaction.removeHandlers();
   }
 
   // #endregion COMPONENT AND SCENE CLEAN-UP
@@ -389,8 +415,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #region SCENE POPULATION
 
-  @task*
-  loadNewLandscape() {
+  @task *
+    loadNewLandscape() {
     this.landscapeObject3D.dataModel = this.args.landscapeData.structureLandscapeData;
     yield perform(this.populateScene);
   }
@@ -400,8 +426,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  *
  * @method populateScene
  */
-  @restartableTask*
-  populateScene() {
+  @restartableTask *
+    populateScene() {
     this.debug('populate landscape-rendering');
 
     const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
@@ -555,10 +581,16 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #region MOUSE EVENT HANDLER
 
+  @action
   handleDoubleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
     const mesh = intersection.object;
 
+    this.doubleClickOnMesh(mesh);
+  }
+
+  @action
+  doubleClickOnMesh(mesh: THREE.Object3D) {
     // Handle application
     if (mesh instanceof ApplicationMesh) {
       this.openApplicationIfExistend(mesh);
@@ -566,6 +598,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
+  @action
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     const LEFT_MOUSE_BUTTON = 1;
 
@@ -583,6 +616,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
+  @action
   handleMouseWheel(delta: number) {
     // Hide (old) tooltip
     this.popupData = null;
@@ -597,10 +631,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
+  @action
   handleMouseMove(intersection: THREE.Intersection | null) {
     if (!intersection) return;
     const mesh = intersection.object;
+    this.mouseMoveOnMesh(mesh);
+  }
 
+  @action
+  mouseMoveOnMesh(mesh: THREE.Object3D) {
     const enableHoverEffects = true;
     // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
 
@@ -619,6 +658,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.popupData = null;
   }
 
+  @action
   handleMouseOut() {
     this.popupData = null;
   }
@@ -627,10 +667,16 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   handleMouseEnter() {
   } */
 
+  @action
   handleMouseStop(intersection: THREE.Intersection | null, mouseOnCanvas: Position2D) {
     if (!intersection) return;
     const mesh = intersection.object;
 
+    this.mouseStopOnMesh(mesh, mouseOnCanvas);
+  }
+
+  @action
+  mouseStopOnMesh(mesh: THREE.Object3D, mouseOnCanvas: Position2D) {
     if (mesh instanceof NodeMesh || mesh instanceof ApplicationMesh) {
       this.popupData = {
         mouseX: mouseOnCanvas.x,
@@ -649,6 +695,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    *
    * @param applicationMesh Mesh of application which shall be opened
    */
+  @action
   openApplicationIfExistend(applicationMesh: ApplicationMesh) {
     const application = applicationMesh.dataModel;
     // No data => show message
