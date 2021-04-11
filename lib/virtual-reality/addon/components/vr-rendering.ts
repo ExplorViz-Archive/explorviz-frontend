@@ -35,8 +35,6 @@ import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VR
 import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
 import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
-import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
-import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import AdvancedMenu from 'virtual-reality/utils/vr-menus/advanced-menu';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
 import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
