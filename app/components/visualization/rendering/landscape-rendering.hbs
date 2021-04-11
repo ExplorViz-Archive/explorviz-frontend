@@ -11,8 +11,8 @@
     >
       <canvas
         {{interaction-modifier 
-          raycastObject=this.landscapeObject3D 
-          camera=this.camera 
+          raycastObjects=this.landscapeObject3D
+          camera=this.camera
           hammerInteraction=this.hammerInteraction
           doubleClick=this.handleDoubleClick
           mouseMove=this.handleMouseMove
@@ -22,8 +22,8 @@
           panning=this.handlePanning
         }}
         {{collaborative-modifier
-          raycastObject3D=this.landscapeObject3D 
-          camera=this.camera 
+          raycastObject3D=this.landscapeObject3D
+          camera=this.camera
           onDoubleClick=this.doubleClickOnMesh
           mouseMove=this.mouseMoveOnMesh
           mouseStop=this.mouseStopOnMesh

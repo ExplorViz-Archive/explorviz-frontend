@@ -2,7 +2,7 @@ import Modifier from 'ember-modifier';
 import { action } from '@ember/object';
 import { assert } from '@ember/debug';
 import Raycaster from 'explorviz-frontend/utils/raycaster';
-import { Mesh } from 'three';
+import THREE, { Object3D, Mesh } from 'three';
 import { inject as service } from '@ember/service';
 import CollaborativeService from 'explorviz-frontend/services/collaborative-service';
 import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
@@ -22,7 +22,7 @@ interface InteractionModifierArgs {
   named: {
     mousePositionX: number,
     camera: THREE.Camera,
-    raycastObject: THREE.Object3D,
+    raycastObjects: Object3D | Object3D[],
     raycastFilter?: (intersection: THREE.Intersection) => boolean,
     hammerInteraction: HammerInteraction,
     mouseEnter?(): void,
@@ -37,7 +37,6 @@ interface InteractionModifierArgs {
 }
 
 export default class InteractionModifierModifier extends Modifier<InteractionModifierArgs> {
-
   // Used to determine if and which object was hit
   raycaster: Raycaster;
 
@@ -49,7 +48,6 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
 
   @service('collaborative-settings-service')
   collaborativeSettings!: CollaborativeSettingsService;
-
 
   didInstall() {
     // mouseout handler for disabling notifications
@@ -102,13 +100,13 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   get canvas(): HTMLCanvasElement {
     assert(
       `Element must be 'HTMLCanvasElement' but was ${typeof this.element}`,
-      this.element instanceof HTMLCanvasElement
+      this.element instanceof HTMLCanvasElement,
     );
     return this.element;
   }
 
-  get raycastObject(): THREE.Object3D {
-    return this.args.named.raycastObject
+  get raycastObjects(): Object3D | Object3D[] {
+    return this.args.named.raycastObjects;
   }
 
   get camera(): THREE.Camera {
@@ -153,8 +151,10 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
 
     this.args.named.mouseMove(intersectedViewObj);
 
-    if (intersectedViewObj && intersectedViewObj.object instanceof Mesh && this.collaborativeSettings.meeting) {
-      this.collaborativeService.sendMouseMove(intersectedViewObj.point, this.raycastObject.quaternion, intersectedViewObj.object);
+    if (this.raycastObjects instanceof Object3D && intersectedViewObj
+    && intersectedViewObj.object instanceof Mesh && this.collaborativeSettings.meeting) {
+      this.collaborativeService.sendMouseMove(intersectedViewObj.point,
+        this.raycastObjects.quaternion, intersectedViewObj.object);
     }
   }
 
@@ -163,13 +163,16 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
     if (!this.args.named.mouseStop || !this.collaborativeSettings.isInteractionAllowed) { return; }
 
     // Extract mouse position
-    const mouse: Position2D = InteractionModifierModifier.getMousePos(this.canvas, evt.detail.srcEvent);
+    const mouse: Position2D = InteractionModifierModifier
+      .getMousePos(this.canvas, evt.detail.srcEvent);
 
     const intersectedViewObj = this.raycast(mouse);
     this.args.named.mouseStop(intersectedViewObj, mouse);
 
-    if (intersectedViewObj && intersectedViewObj.object instanceof Mesh && this.collaborativeSettings.meeting) {
-      this.collaborativeService.sendMouseStop(intersectedViewObj.point, this.raycastObject.quaternion, intersectedViewObj.object);
+    if (this.raycastObjects instanceof Object3D && intersectedViewObj
+      && intersectedViewObj.object instanceof Mesh && this.collaborativeSettings.meeting) {
+      this.collaborativeService.sendMouseStop(intersectedViewObj.point,
+        this.raycastObjects.quaternion, intersectedViewObj.object);
     }
   }
 
@@ -182,29 +185,32 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
 
     this.args.named.mouseWheel(delta);
     this.sendPerspective();
-
   }
 
   @action
   onSingleClick(mouse: Position2D) {
-    if (!this.args.named.singleClick || !this.collaborativeSettings.isInteractionAllowed || !this.collaborativeSettings.canIOpen) { return; }
+    if (!this.args.named.singleClick || !this.collaborativeSettings.isInteractionAllowed
+      || !this.collaborativeSettings.canIOpen) { return; }
 
     const intersectedViewObj = this.raycast(mouse);
     this.args.named.singleClick(intersectedViewObj);
 
-    if (intersectedViewObj && intersectedViewObj.object instanceof Mesh && this.collaborativeSettings.meeting) {
+    if (intersectedViewObj && intersectedViewObj.object instanceof Mesh
+      && this.collaborativeSettings.meeting) {
       this.collaborativeService.sendSingleClick(intersectedViewObj.object);
     }
   }
 
   @action
   onDoubleClick(mouse: Position2D) {
-    if (!this.args.named.doubleClick || !this.collaborativeSettings.isInteractionAllowed || !this.collaborativeSettings.canIOpen) { return; }
+    if (!this.args.named.doubleClick || !this.collaborativeSettings.isInteractionAllowed
+      || !this.collaborativeSettings.canIOpen) { return; }
 
     const intersectedViewObj = this.raycast(mouse);
     this.args.named.doubleClick(intersectedViewObj);
 
-    if (intersectedViewObj && intersectedViewObj.object instanceof Mesh && this.collaborativeSettings.meeting) {
+    if (intersectedViewObj && intersectedViewObj.object instanceof Mesh
+      && this.collaborativeSettings.meeting) {
       this.collaborativeService.sendDoubleClick(intersectedViewObj.object);
     }
   }
@@ -218,11 +224,11 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   }
 
   sendPerspective() {
-    if (this.collaborativeSettings.meeting) {
+    if (this.collaborativeSettings.meeting && this.raycastObjects instanceof Object3D) {
       this.collaborativeService.sendPerspective({
         position: this.camera.position.toArray(),
-        rotation: this.raycastObject.rotation?.toArray().slice(0, 3),
-        requested: false
+        rotation: this.raycastObjects.rotation?.toArray().slice(0, 3),
+        requested: false,
       });
     }
   }
@@ -230,8 +236,11 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   raycast(mouseOnCanvas: Position2D) {
     const origin = this.calculatePositionInScene(mouseOnCanvas);
 
+    const possibleObjects = this.raycastObjects instanceof Object3D
+      ? [this.raycastObjects] : this.raycastObjects;
+
     const intersectedViewObj = this.raycaster.raycasting(origin, this.args.named.camera,
-      [this.raycastObject], this.raycastFilter);
+      possibleObjects, this.raycastFilter);
 
     return intersectedViewObj;
   }

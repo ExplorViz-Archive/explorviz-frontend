@@ -50,6 +50,7 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
+import { tracked } from '@glimmer/tracking';
 
 interface Args {
   readonly id: string;
@@ -90,6 +91,7 @@ export default class VrRendering extends Component<Args> {
 
   scene!: THREE.Scene;
 
+  @tracked
   camera!: THREE.PerspectiveCamera;
 
   renderer!: THREE.WebGLRenderer;
@@ -142,6 +144,9 @@ export default class VrRendering extends Component<Args> {
 
   drawableClassCommunications: Map<string, DrawableClassCommunication[]> = new Map();
 
+  @tracked
+  raycastObjects: THREE.Object3D[];
+
   // #endregion CLASS FIELDS AND GETTERS
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -186,6 +191,8 @@ export default class VrRendering extends Component<Args> {
 
     // Rotate landscape such that it lays flat on the floor
     this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
+
+    this.raycastObjects = [this.landscapeObject3D, this.applicationGroup];
   }
 
   /**
@@ -271,7 +278,6 @@ export default class VrRendering extends Component<Args> {
    * passes them to a newly created Interaction object
    */
   initInteraction() {
-
     // Add key listener for room positioning
     window.onkeydown = (event: any) => {
       this.handleKeyboard(event);
@@ -799,7 +805,7 @@ export default class VrRendering extends Component<Args> {
    * This input is used to move a grabbed application towards or away from the controller.
    */
   onThumbpadTouch(controller: VRController, axes: number[]) {
-    const grabbedObject = controller.grabbedObject;
+    const { grabbedObject } = controller;
 
     if (!grabbedObject) return;
 
