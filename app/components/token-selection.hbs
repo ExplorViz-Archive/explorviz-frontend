@@ -9,6 +9,7 @@
       <th scope="col" {{on "click" (fn this.sortBy "created")}}>Created</th>
       <th scope="col"></th>
       <th scope="col"></th>
+      <th scope="col"></th>
     </tr>
   </thead>
   <tbody>
@@ -20,6 +21,7 @@
         <th scope="row">{{@currentToken.alias}}</th>
         <th scope="row">{{@currentToken.value}}</th>
         <th scope="row">{{timestamp-to-date @currentToken.created "localString"}}</th>
+        <th scope="row"></th>
         <th scope="row"></th>
         <th scope="row"></th>
       </tr>
@@ -49,6 +51,7 @@
           </CopyButton>
         </th>
         <th scope="row">
+        {{#if (eq token.ownerId this.auth.user.sub)}}
           <button
             class="button-svg-with-hover"
             type="button"
@@ -59,6 +62,13 @@
               Delete token permanently
             </BsTooltip>
           </button>
+        {{/if}}
+        </th>
+        <th scope="row">
+          <ShareLandscape 
+            @token={{token}}
+            @reload={{@reload}}
+          />
         </th>
       </tr>
     {{else}}

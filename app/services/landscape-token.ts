@@ -6,6 +6,7 @@ export type LandscapeToken = {
   created: number,
   ownerId: string,
   value: string,
+  sharedUsersIds: string[]
 };
 
 export default class LandscapeTokenService extends Service {

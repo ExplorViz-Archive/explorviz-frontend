@@ -1,0 +1,17 @@
+{
+  "name": "collaborative-mode",
+  "keywords": [
+    "ember-addon"
+  ],
+  "devDependencies": {
+    "typescript": "3.7.4"
+  },
+  "dependencies": {
+    "babel-plugin-htmlbars-inline-precompile": "^4.2.0",
+    "ember-cli-babel": "*",
+    "ember-cli-typescript": "*",
+    "ember-cli-htmlbars": "*",
+    "@glimmer/component": "^1.0.0"
+    
+  }
+}

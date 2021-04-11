@@ -20,9 +20,13 @@ module.exports = (defaults) => {
         'node_modules/octicons/build/svg',
       ],
     },
+    babel: {
+      sourceMaps: 'inline'
+    },
 
     'ember-cli-babel': {
       includePolyfill: true,
+      sourceMaps: 'inline'
     },
 
     fingerprint: {
