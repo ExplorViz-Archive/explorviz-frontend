@@ -45,6 +45,7 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
+import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 
 interface Args {
   readonly id: string;
@@ -100,6 +101,7 @@ export default class ArRendering extends Component<Args> {
 
   scene!: THREE.Scene;
 
+  @tracked
   camera!: THREE.PerspectiveCamera;
 
   renderer!: THREE.WebGLRenderer;
@@ -130,6 +132,7 @@ export default class ArRendering extends Component<Args> {
   readonly landscapeLabeler = new LandscapeLabeler();
 
   // Extended Object3D which manages landscape meshes
+  @tracked
   readonly landscapeObject3D!: LandscapeObject3D;
 
   drawableClassCommunications: Map<string, DrawableClassCommunication[]> = new Map();
@@ -152,6 +155,9 @@ export default class ArRendering extends Component<Args> {
 
   @tracked
   popupData: PopupData | null = null;
+
+  @tracked
+  hammerInteraction: HammerInteraction;
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -181,6 +187,8 @@ export default class ArRendering extends Component<Args> {
 
     // Rotate landscape such that it lays flat on the floor
     this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
+
+    this.hammerInteraction = HammerInteraction.create();
   }
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -261,18 +269,8 @@ export default class ArRendering extends Component<Args> {
    * passes them to a newly created Interaction object
    */
   initInteraction() {
-    this.handleSingleClick = this.handleSingleClick.bind(this);
-    this.handleDoubleClick = this.handleDoubleClick.bind(this);
-    this.handleMouseWheel = this.handleMouseWheel.bind(this);
-    this.handlePanning = this.handlePanning.bind(this);
-
     this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      this.getIntersectableObjects(), {
-        singleClick: this.handleSingleClick,
-        doubleClick: this.handleDoubleClick,
-        mouseWheel: this.handleMouseWheel,
-        panning: this.handlePanning,
-      }, ArRendering.raycastFilter);
+      this.getIntersectableObjects(), {}, ArRendering.raycastFilter);
 
     // Add key listener for room positioning
     window.onkeydown = (event: any) => {
@@ -302,7 +300,7 @@ export default class ArRendering extends Component<Args> {
     this.arToolkitSource.init(() => {
       setTimeout(() => {
         this.resizeAR();
-      }, 250);
+      }, 1000);
     });
     const arToolkitContext = new THREEx.ArToolkitContext({
       cameraParametersUrl: 'ar_data/camera_para.dat',
@@ -376,7 +374,7 @@ export default class ArRendering extends Component<Args> {
     this.debug('Canvas inserted');
 
     this.canvas = canvas;
-    // this.hammerInteraction.setupHammer(canvas);
+    this.hammerInteraction.setupHammer(canvas);
 
     canvas.oncontextmenu = (e) => {
       e.preventDefault();
@@ -834,18 +832,21 @@ export default class ArRendering extends Component<Args> {
 
   // #region MOUSE & KEYBOARD EVENT HANDLER
 
+  @action
   handleDoubleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
 
     this.handlePrimaryInputOn(intersection);
   }
 
+  @action
   handleSingleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
 
     this.handleSecondaryInputOn(intersection);
   }
 
+  @action
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     const LEFT_MOUSE_BUTTON = 1;
 
@@ -863,6 +864,7 @@ export default class ArRendering extends Component<Args> {
     }
   }
 
+  @action
   handleMouseWheel(delta: number) {
     this.camera.position.z += delta * 0.2;
   }

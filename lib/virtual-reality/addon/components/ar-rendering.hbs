@@ -15,8 +15,24 @@
   />
 
   <canvas
+    class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
     {{did-insert this.canvasInserted}}
+    {{interaction-modifier 
+      raycastObject=this.landscapeObject3D
+      camera=this.camera 
+      hammerInteraction=this.hammerInteraction
+      doubleClick=this.handleDoubleClick
+      singleClick=this.handleSingleClick
+      mouseWheel=this.handleMouseWheel
+      panning=this.handlePanning
+    }}
   >
+    {{#if this.hammerInteraction}}
+      <RightClickMenuHammer
+        @items={{this.rightClickMenuItems}}
+        @hammer={{this.hammerInteraction}}
+      />
+    {{/if}}
   </canvas>
 
   <div class="ar-left-button-container foreground">
