@@ -7,6 +7,8 @@ import { inject as service } from '@ember/service';
 import CollaborativeService from 'explorviz-frontend/services/collaborative-service';
 import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
+import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
+import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 
 export type Position2D = {
   x: number,
@@ -23,7 +25,7 @@ interface InteractionModifierArgs {
     mousePositionX: number,
     camera: THREE.Camera,
     raycastObjects: Object3D | Object3D[],
-    raycastFilter?: (intersection: THREE.Intersection) => boolean,
+    raycastFilter?: ((intersection: THREE.Intersection) => boolean) | null,
     hammerInteraction: HammerInteraction,
     mouseEnter?(): void,
     mouseOut?(): void,
@@ -39,9 +41,6 @@ interface InteractionModifierArgs {
 export default class InteractionModifierModifier extends Modifier<InteractionModifierArgs> {
   // Used to determine if and which object was hit
   raycaster: Raycaster;
-
-  // Function to filter raycast results as desired
-  raycastFilter: ((intersection: THREE.Intersection) => boolean) | undefined;
 
   @service('collaborative-service')
   collaborativeService!: CollaborativeService;
@@ -107,6 +106,20 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
 
   get raycastObjects(): Object3D | Object3D[] {
     return this.args.named.raycastObjects;
+  }
+
+  get raycastFilter(): ((intersection: THREE.Intersection) => boolean) | undefined {
+    const filter = this.args.named.raycastFilter;
+
+    // Use default filter if no one is passed
+    if (filter === undefined) {
+      return (intersection: THREE.Intersection) => !(intersection.object instanceof LabelMesh
+        || intersection.object instanceof LogoMesh);
+    // Use no filter if null is passed explicitly
+    } if (filter === null) {
+      return undefined;
+    }
+    return filter;
   }
 
   get camera(): THREE.Camera {

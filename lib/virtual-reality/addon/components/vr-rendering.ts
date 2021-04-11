@@ -96,8 +96,6 @@ export default class VrRendering extends Component<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
-  raycaster: THREE.Raycaster;
-
   // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
 
@@ -164,7 +162,6 @@ export default class VrRendering extends Component<Args> {
     this.landscapeScalar = 0.1;
     this.applicationScalar = 0.01;
 
-    this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
 
     this.controllerMainMenus = new THREE.Group();
@@ -282,10 +279,6 @@ export default class VrRendering extends Component<Args> {
     window.onkeydown = (event: any) => {
       this.handleKeyboard(event);
     };
-  }
-
-  static raycastFilter(intersection: THREE.Intersection) {
-    return !(intersection.object instanceof LabelMesh || intersection.object instanceof LogoMesh);
   }
 
   initControllers() {
