@@ -6,7 +6,7 @@ cache:
   
 before_script:
   - npm install
-  - npm install ember-template-lint
+  - npm install -g ember-template lint
 
 test:
   stage: test
