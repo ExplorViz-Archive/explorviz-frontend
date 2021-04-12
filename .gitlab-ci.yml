@@ -6,12 +6,15 @@ cache:
   
 before_script:
   - npm install
+  - npm install ember-template lint
 
 test:
   stage: test
   tags:
     - exec-docker
-  script: ember test --launch chromium
+  script:
+    - ember test --launch chromium
+    - ember-template-lint .
 
 # - stage: deploy
 #    if: (type = push) AND ((branch = dev-1) OR (branch = master))
