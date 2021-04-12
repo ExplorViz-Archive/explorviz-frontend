@@ -14,7 +14,6 @@ interface Args {
 }
 
 export default class TokenSelection extends Component<Args> {
-
   @service('auth')
   auth!: Auth;
 

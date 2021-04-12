@@ -1,16 +1,13 @@
 import Service from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 
-export default class EventSettingsService extends Service.extend({
-  // anything which *must* be merged to prototype here
-}) {
-
+export default class EventSettingsService extends Service {
   @tracked
   mouseMove: boolean = true;
 
   @tracked
   mouseStop: boolean = true;
-  
+
   @tracked
   mouseOut: boolean = true;
 
