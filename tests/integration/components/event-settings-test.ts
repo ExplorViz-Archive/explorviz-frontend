@@ -10,7 +10,7 @@ module('Integration | Component | event-settings', function(hooks) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{event-settings}}`);
+    await render(hbs`<EventSettings />`);
 
     assert.equal(this.element.textContent?.trim(), 'Additional Settings');
 
