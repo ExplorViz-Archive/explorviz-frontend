@@ -1,3 +1,9 @@
+{{#if this.showSettings}}
+  <div class="settings-container">
+    <ArSettingsPane/>
+  </div>
+{{/if}}
+
 <div
   id="rendering"
   {{did-insert this.outerDivInserted}}
@@ -8,6 +14,17 @@
   {{else if this.addApplication.isRunning}}
     <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
   {{/if}}
+
+  <div class="ar-right-relative foreground mt-6">
+    <BsButton
+      @onClick={{this.toggleSettingsPane}}
+      @type="secondary"
+      @outline={{true}}
+      @title="Settings"
+    >
+      {{svg-jar "settings" class="octicon align-middle"}}
+    </BsButton>
+  </div>
 
   {{!-- popup(s) --}}
   <Visualization::Rendering::Popups::PopupCoordinator

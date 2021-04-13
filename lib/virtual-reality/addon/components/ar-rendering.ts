@@ -159,6 +159,9 @@ export default class ArRendering extends Component<Args> {
   @tracked
   hammerInteraction: HammerInteraction;
 
+  @tracked
+  showSettings = false;
+
   // #endregion CLASS FIELDS AND GETTERS
 
   constructor(owner: any, args: Args) {
@@ -492,6 +495,11 @@ export default class ArRendering extends Component<Args> {
     } else {
       this.popupData = null;
     }
+  }
+
+  @action
+  toggleSettingsPane() {
+    this.showSettings = !this.showSettings;
   }
 
   // #endregion ACTIONS

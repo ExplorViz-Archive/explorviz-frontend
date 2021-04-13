@@ -3,6 +3,22 @@
   --ar-button-size: 5vmin;
 }
 
+.settings-container {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.settings-pane {
+  margin: 10vh 20vw;
+}
+
+.white {
+  background-color: white;
+}
+
 .ar-right-button-container{
   position: fixed;
   bottom: var(--ar-button-padding);
@@ -20,6 +36,11 @@
   width: var(--ar-button-size);
   height: var(--ar-button-size);
   padding: 1px;
+}
+
+.ar-right-relative {
+  position: relative;
+  left: calc(100vw - 60px);
 }
 
 #ar-primary-interaction-container {
