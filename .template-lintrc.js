@@ -1,8 +1,9 @@
 module.exports = {
-  extends: 'octane',
+  extends: 'recommended',
 
   rules: {
-    'attribute-indentation': true,
+    // disabled for now, since this rule has issues with multi-line modifiers
+    'attribute-indentation': false,
     'block-indentation': true,
     'inline-link-to': true,
     'linebreak-style': false,
@@ -18,7 +19,7 @@ module.exports = {
     'no-element-event-actions': true,
     'no-extra-mut-helper-argument': true,
     'no-html-comments': true,
-    'no-implicit-this': true,
+    'no-implicit-this': { allow: ['VrRendering.raycastFilter'] },
     'no-index-component-invocation': true,
     'no-inline-styles': false,
     'no-input-block': true,
@@ -29,7 +30,7 @@ module.exports = {
     'no-invalid-role': true,
     'no-log': true,
     'no-negated-condition': true,
-    'no-nested-interactive': true,
+    'no-nested-interactive': false,
     'no-obsolete-elements': true,
     'no-outlet-outside-routes': true,
     'no-partial': true,

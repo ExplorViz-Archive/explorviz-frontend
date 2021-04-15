@@ -2,50 +2,50 @@ import { Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import { sortTracesByDuration, sortTracesById, sortSpanArrayByTime } from 'explorviz-frontend/utils/trace-helpers';
 import { module, test } from 'qunit';
 
-module('Unit | Utility | trace-helpers', function() {
-  test('sortTracesByDuration', function(assert) {
+module('Unit | Utility | trace-helpers', function () {
+  test('sortTracesByDuration', function (assert) {
     const testTraces = getTestTraces();
     sortTracesByDuration(testTraces);
     assert.ok(testTraces[0].traceId === 'trace2'
       && testTraces[1].traceId === 'trace3'
-      && testTraces[2].traceId === 'trace1', "Traces must be sorted in ascending order and original array mutated");
+      && testTraces[2].traceId === 'trace1', 'Traces must be sorted in ascending order and original array mutated');
 
     const testTraces2 = getTestTraces();
     sortTracesByDuration(testTraces2, false);
     assert.ok(testTraces2[0].traceId === 'trace1'
       && testTraces2[1].traceId === 'trace3'
-      && testTraces2[2].traceId === 'trace2', "Traces must be sorted in descending order and original array mutated");
+      && testTraces2[2].traceId === 'trace2', 'Traces must be sorted in descending order and original array mutated');
 
     const testTraces3 = getTestTraces();
     const sortedArray = sortTracesByDuration(testTraces3, true, true);
     assert.ok(sortedArray[0].traceId === 'trace2'
       && sortedArray[1].traceId === 'trace3'
       && sortedArray[2].traceId === 'trace1'
-      && sortedArray !== testTraces3, "Traces must be sorted in ascending order and original array unmutated");
+      && sortedArray !== testTraces3, 'Traces must be sorted in ascending order and original array unmutated');
   });
 
-  test('sortTracesById', function(assert) {
+  test('sortTracesById', function (assert) {
     const testTraces = getTestTraces();
     sortTracesById(testTraces);
     assert.ok(testTraces[0].traceId === 'trace1'
       && testTraces[1].traceId === 'trace2'
-      && testTraces[2].traceId === 'trace3', "Traces must be sorted in ascending order and original array mutated");
+      && testTraces[2].traceId === 'trace3', 'Traces must be sorted in ascending order and original array mutated');
 
     const testTraces2 = getTestTraces();
     sortTracesById(testTraces2, false);
     assert.ok(testTraces2[0].traceId === 'trace3'
       && testTraces2[1].traceId === 'trace2'
-      && testTraces2[2].traceId === 'trace1', "Traces must be sorted in descending order and original array mutated");
+      && testTraces2[2].traceId === 'trace1', 'Traces must be sorted in descending order and original array mutated');
 
     const testTraces3 = getTestTraces();
     const sortedArray = sortTracesById(testTraces3, true, true);
     assert.ok(sortedArray[0].traceId === 'trace1'
       && sortedArray[1].traceId === 'trace2'
       && sortedArray[2].traceId === 'trace3'
-      && sortedArray !== testTraces3, "Traces must be sorted in ascending order and original array unmutated");
+      && sortedArray !== testTraces3, 'Traces must be sorted in ascending order and original array unmutated');
   });
 
-  test('sortSpanArrayByTime', function(assert) {
+  test('sortSpanArrayByTime', function (assert) {
     const testSpanList = getTestSpanList();
     sortSpanArrayByTime(testSpanList);
     // test spans are defined in a way that the time sorted array matches the
@@ -53,7 +53,7 @@ module('Unit | Utility | trace-helpers', function() {
     assert.ok(testSpanList[0].spanId === 'span1'
       && testSpanList[1].spanId === 'span2'
       && testSpanList[2].spanId === 'span3'
-      && testSpanList[3].spanId === 'span4', "Spans must be sorted in ascending order and original array mutated");
+      && testSpanList[3].spanId === 'span4', 'Spans must be sorted in ascending order and original array mutated');
 
     const testSpanList2 = getTestSpanList();
     const sortedArray = sortSpanArrayByTime(testSpanList2, true);
@@ -61,7 +61,7 @@ module('Unit | Utility | trace-helpers', function() {
       && testSpanList[1].spanId === 'span2'
       && testSpanList[2].spanId === 'span3'
       && testSpanList[3].spanId === 'span4'
-      && sortedArray !== testSpanList2, "Spans must be sorted in ascending order and original array unmutated");
+      && sortedArray !== testSpanList2, 'Spans must be sorted in ascending order and original array unmutated');
   });
 });
 
@@ -71,11 +71,11 @@ function getTestTraces(): Trace[] {
     traceId: 'trace2',
     startTime: {
       seconds: 26,
-      nanoAdjust: 850000000
+      nanoAdjust: 850000000,
     },
     endTime: {
       seconds: 26,
-      nanoAdjust: 890000000
+      nanoAdjust: 890000000,
     },
     duration: 40,
     overallRequestCount: 1,
@@ -87,24 +87,24 @@ function getTestTraces(): Trace[] {
       traceId: 'trace2',
       startTime: {
         seconds: 26,
-        nanoAdjust: 850000000
+        nanoAdjust: 850000000,
       },
       endTime: {
         seconds: 26,
-        nanoAdjust: 890000000
+        nanoAdjust: 890000000,
       },
-      hashCode: 'trace2_hashCode'
-    }]
+      hashCode: 'trace2_hashCode',
+    }],
   }, {
     landscapeToken: '',
     traceId: 'trace3',
     startTime: {
       seconds: 15,
-      nanoAdjust: 500000000
+      nanoAdjust: 500000000,
     },
     endTime: {
       seconds: 15,
-      nanoAdjust: 570000000
+      nanoAdjust: 570000000,
     },
     duration: 70,
     overallRequestCount: 1,
@@ -116,24 +116,24 @@ function getTestTraces(): Trace[] {
       traceId: 'trace3',
       startTime: {
         seconds: 15,
-        nanoAdjust: 500000000
+        nanoAdjust: 500000000,
       },
       endTime: {
         seconds: 17,
-        nanoAdjust: 570000000
+        nanoAdjust: 570000000,
       },
-      hashCode: 'trace3_hashCode'
-    }]
+      hashCode: 'trace3_hashCode',
+    }],
   }, {
     landscapeToken: '',
     traceId: 'trace1',
     startTime: {
       seconds: 10,
-      nanoAdjust: 100000000
+      nanoAdjust: 100000000,
     },
     endTime: {
       seconds: 11,
-      nanoAdjust: 110000000
+      nanoAdjust: 110000000,
     },
     duration: 1010,
     overallRequestCount: 1,
@@ -145,14 +145,14 @@ function getTestTraces(): Trace[] {
       traceId: 'trace1',
       startTime: {
         seconds: 10,
-        nanoAdjust: 100000000
+        nanoAdjust: 100000000,
       },
       endTime: {
         seconds: 11,
-        nanoAdjust: 110000000
+        nanoAdjust: 110000000,
       },
-      hashCode: 'trace1_hashCode'
-    }]
+      hashCode: 'trace1_hashCode',
+    }],
   }];
 }
 
@@ -164,13 +164,13 @@ function getTestSpanList() {
     traceId: 'trace1',
     startTime: {
       seconds: 10,
-      nanoAdjust: 100000000
+      nanoAdjust: 100000000,
     },
     endTime: {
       seconds: 11,
-      nanoAdjust: 110000000
+      nanoAdjust: 110000000,
     },
-    hashCode: 'method1HashCode'
+    hashCode: 'method1HashCode',
   }, {
     landscapeToken: '',
     spanId: 'span4',
@@ -178,13 +178,13 @@ function getTestSpanList() {
     traceId: 'trace1',
     startTime: {
       seconds: 10,
-      nanoAdjust: 130000000
+      nanoAdjust: 130000000,
     },
     endTime: {
       seconds: 11,
-      nanoAdjust: 110000000
+      nanoAdjust: 110000000,
     },
-    hashCode: 'method3HashCode'
+    hashCode: 'method3HashCode',
   }, {
     landscapeToken: '',
     spanId: 'span2',
@@ -192,13 +192,13 @@ function getTestSpanList() {
     traceId: 'trace1',
     startTime: {
       seconds: 10,
-      nanoAdjust: 110000000
+      nanoAdjust: 110000000,
     },
     endTime: {
       seconds: 10,
-      nanoAdjust: 120000000
+      nanoAdjust: 120000000,
     },
-    hashCode: 'method2HashCode'
+    hashCode: 'method2HashCode',
   }, {
     landscapeToken: '',
     spanId: 'span3',
@@ -206,12 +206,12 @@ function getTestSpanList() {
     traceId: 'trace1',
     startTime: {
       seconds: 10,
-      nanoAdjust: 120000000
+      nanoAdjust: 120000000,
     },
     endTime: {
       seconds: 11,
-      nanoAdjust: 110000000
+      nanoAdjust: 110000000,
     },
-    hashCode: 'method2HashCode'
-  }]
+    hashCode: 'method2HashCode',
+  }];
 }

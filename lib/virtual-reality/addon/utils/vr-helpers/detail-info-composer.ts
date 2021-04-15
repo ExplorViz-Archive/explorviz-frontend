@@ -7,7 +7,7 @@ import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import { Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { getAncestorPackages, getClassesInPackage } from 'explorviz-frontend/utils/package-helpers';
 
-export type DetailedInfo= {
+export type DetailedInfo = {
   title: string,
   entries: {key: string, value: string}[],
 };

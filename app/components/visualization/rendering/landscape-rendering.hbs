@@ -10,9 +10,10 @@
       {{did-resize this.resize debounce=100}}
     >
       <canvas
-        {{interaction-modifier 
-          raycastObject=this.landscapeObject3D 
-          camera=this.camera 
+        class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
+        {{interaction-modifier
+          raycastObject=this.landscapeObject3D
+          camera=this.camera
           hammerInteraction=this.hammerInteraction
           doubleClick=this.handleDoubleClick
           mouseMove=this.handleMouseMove
@@ -22,8 +23,8 @@
           panning=this.handlePanning
         }}
         {{collaborative-modifier
-          raycastObject3D=this.landscapeObject3D 
-          camera=this.camera 
+          raycastObject3D=this.landscapeObject3D
+          camera=this.camera
           onDoubleClick=this.doubleClickOnMesh
           mouseMove=this.mouseMoveOnMesh
           mouseStop=this.mouseStopOnMesh
@@ -31,7 +32,6 @@
           setPerspective=this.setPerspective
           repositionSphere=this.repositionSphere
         }}
-        class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
         {{did-insert this.canvasInserted}}
       >
         {{#if this.hammerInteraction}}
@@ -82,13 +82,13 @@
                     @updateView={{this.updateColors}}
                   />
                 {{/if}}
-            {{#if (eq componentName "collaborative-settings")}}
-              <CollaborativeSettings 
-                @isLandscapeView={{true}}
-                @removeComponent={{@removeComponent}}
-                @updateView={{this.updateColors}}
-              />
-            {{/if}}
+                {{#if (eq componentName "collaborative-settings")}}
+                  <CollaborativeSettings 
+                    @isLandscapeView={{true}}
+                    @removeComponent={{@removeComponent}}
+                    @updateView={{this.updateColors}}
+                  />
+                {{/if}}
               </div>
             </div>
           {{/each}}

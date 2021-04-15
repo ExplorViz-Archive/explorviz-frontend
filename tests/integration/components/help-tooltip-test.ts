@@ -1,16 +1,15 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
-//import hbs from 'htmlbars-inline-precompile';
+// import hbs from 'htmlbars-inline-precompile';
 
-
-module('Integration | Component | help tooltip', function(hooks) {
+module('Integration | Component | help tooltip', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', function(assert) {
+  test('it renders', function (assert) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.on('myAction', function(val) { ... });
 
-    /*this.render(hbs`{{help-tooltip}}`);
+    /* this.render(hbs`{{help-tooltip}}`);
 
     assert.equal(this.$().text().trim(), '');
 
@@ -21,7 +20,7 @@ module('Integration | Component | help tooltip', function(hooks) {
       {{/help-tooltip}}
     `);
 
-    assert.equal(this.$().text().trim(), 'template block text');*/
+    assert.equal(this.$().text().trim(), 'template block text'); */
     assert.equal(true, true, 'TODO');
   });
 });

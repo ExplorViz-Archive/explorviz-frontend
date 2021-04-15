@@ -51,18 +51,18 @@
           </CopyButton>
         </th>
         <th scope="row">
-        {{#if (eq token.ownerId this.auth.user.sub)}}
-          <button
-            class="button-svg-with-hover"
-            type="button"
-            {{on "click" (fn @deleteToken token.value)}}
-          >
-            {{svg-jar "trashcan" class="octicon align-middle"}}
-            <BsTooltip @placement="bottom" @triggerEvents="hover">
-              Delete token permanently
-            </BsTooltip>
-          </button>
-        {{/if}}
+          {{#if (eq token.ownerId this.auth.user.sub)}}
+            <button
+              class="button-svg-with-hover"
+              type="button"
+              {{on "click" (fn @deleteToken token.value)}}
+            >
+              {{svg-jar "trashcan" class="octicon align-middle"}}
+              <BsTooltip @placement="bottom" @triggerEvents="hover">
+                Delete token permanently
+              </BsTooltip>
+            </button>
+          {{/if}}
         </th>
         <th scope="row">
           <ShareLandscape 
