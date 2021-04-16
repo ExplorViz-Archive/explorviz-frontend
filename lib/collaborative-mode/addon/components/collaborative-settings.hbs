@@ -2,7 +2,7 @@
   {{svg-jar "x" class="octicon"}}
 </div>
 <div id="collaborativeSettings">
-  {{#if (or this.settings.connected (not this.settings.meeting))}}
+  {{#if (and this.settings.connected (not this.settings.meeting))}}
   <table class="table table-striped">
     <thead>
       <tr>
