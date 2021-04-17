@@ -21,12 +21,12 @@ module.exports = (defaults) => {
       ],
     },
     babel: {
-      sourceMaps: 'inline'
+      sourceMaps: 'inline',
     },
 
     'ember-cli-babel': {
       includePolyfill: true,
-      sourceMaps: 'inline'
+      sourceMaps: 'inline',
     },
 
     fingerprint: {
@@ -44,7 +44,7 @@ module.exports = (defaults) => {
         node: {
           global: true,
         },
-      }
+      },
     },
   });
 

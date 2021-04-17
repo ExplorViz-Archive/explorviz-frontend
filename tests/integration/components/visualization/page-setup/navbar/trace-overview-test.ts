@@ -12,9 +12,9 @@ module('Integration | Component | trace-overview', function (hooks) {
 
     await render(hbs`<Visualization::PageSetup::Navbar::TraceOverview />`);
 
-    let textContent = this.element.textContent;
+    const { textContent } = this.element;
 
-    if(textContent === null) {
+    if (textContent === null) {
       assert.ok(null, 'no text content');
     } else {
       assert.equal(textContent.trim(), 'Trace Overview');

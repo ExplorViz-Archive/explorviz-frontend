@@ -55,7 +55,7 @@ export default class CollaborativeSettingsService extends Service {
   }
 
   get isInteractionAllowed(): boolean {
-    return !this.meeting || !this.presentationMode || this.userInControl == this.username;
+    return !this.meeting || !this.presentationMode || this.userInControl === this.username;
   }
 
   get canIOpen(): boolean {
@@ -75,7 +75,7 @@ export default class CollaborativeSettingsService extends Service {
   }
 
   get watching(): boolean {
-    return this.presentationMode && this.meeting?.presenterId != this.username;
+    return this.presentationMode && this.meeting?.presenterId !== this.username;
   }
 
   @action

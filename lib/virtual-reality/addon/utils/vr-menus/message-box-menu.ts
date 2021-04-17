@@ -82,6 +82,7 @@ export default class MessageBoxMenu extends BaseMenu {
     downwardAnimation();
     yOffset = 0;
     setTimeout(upwardAnimation, 0.8 * time);
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     setTimeout(this.closeAfterTime.bind(this), time);
   }
 

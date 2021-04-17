@@ -20,7 +20,7 @@ export default class WebSocket extends Service {
   path: string|null = '';
 
   getSocketUrl() {
-    return `${this.secure ? "wss" : "ws"}://${this.host}:${this.port}/${this.path}`;
+    return `${this.secure ? 'wss' : 'ws'}://${this.host}:${this.port}/${this.path}`;
   }
 
   socketCloseCallback: ((event: any) => void)| null = null;

@@ -11,10 +11,9 @@ module('Integration | Component | collaborative-settings-opener', function (hook
 
     assert.equal(this.element.querySelector('li')?.className, 'nav-item');
 
-    let buttonText = this.element?.querySelector('.nav-link-with-cursor');
+    const buttonText = this.element?.querySelector('.nav-link-with-cursor');
 
-    assert.equal(buttonText?.textContent, 'Collaborative Mode');
-
+    assert.equal(buttonText?.textContent?.trim(), 'Collaborative Mode');
   });
 
   test('the button works', async function (assert) {

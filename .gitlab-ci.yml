@@ -8,13 +8,24 @@ before_script:
   - npm install
   - npm install -g ember-template-lint
 
+stages:
+  - code-analysis
+  - build
+  - test
+
+linting:
+  stage: code-analysis
+  tags:
+    - exec-docker
+  script:
+    - npm run lint
+
 test:
   stage: test
   tags:
     - exec-docker
   script:
     - ember test --launch chromium
-    - ember-template-lint .
 
 # - stage: deploy
 #    if: (type = push) AND ((branch = dev-1) OR (branch = master))
