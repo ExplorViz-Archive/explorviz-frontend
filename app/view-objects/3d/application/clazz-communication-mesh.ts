@@ -1,9 +1,9 @@
 import THREE from 'three';
 import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
+import { IdentifiableMesh } from 'collaborative-mode/utils/collaborative-data';
 import CommunicationLayout from '../../layout-models/communication-layout';
 import BaseMesh from '../base-mesh';
 import CommunicationArrowMesh from './communication-arrow-mesh';
-import { IdentifiableMesh } from 'collaborative-mode/utils/collaborative-data';
 
 export default class ClazzCommunicationMesh extends BaseMesh implements IdentifiableMesh {
   dataModel: DrawableClassCommunication;

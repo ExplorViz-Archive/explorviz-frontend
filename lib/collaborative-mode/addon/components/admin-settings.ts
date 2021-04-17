@@ -8,7 +8,6 @@ import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data
 interface AdminSettingsArgs {}
 
 export default class AdminSettings extends Component<AdminSettingsArgs> {
-
   @service('collaborative-settings-service')
   collaborativeSettings!: CollaborativeSettingsService;
 
@@ -18,9 +17,11 @@ export default class AdminSettings extends Component<AdminSettingsArgs> {
   get settings() {
     return [
       {
-        name: 'Presentation Mode?', tooltip: 'When selected, only one user is allowed to interact',
-        value: this.collaborativeSettings.meeting?.presentationMode, onToggle: this.togglePresentationMode
-      }
+        name: 'Presentation Mode?',
+        tooltip: 'When selected, only one user is allowed to interact',
+        value: this.collaborativeSettings.meeting?.presentationMode,
+        onToggle: this.togglePresentationMode,
+      },
     ];
   }
 

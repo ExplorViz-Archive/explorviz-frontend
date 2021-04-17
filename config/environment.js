@@ -6,7 +6,7 @@ var colors = require('colors'); // eslint-disable-line
 const AUTH_CONFIG = require('./auth0-variables');
 const BACKEND_CONFIG = require('./backend-addresses');
 
-module.exports = function (environment) {
+module.exports = function initEnvironment(environment) {
   const ENV = {
     modulePrefix: 'explorviz-frontend',
     environment,

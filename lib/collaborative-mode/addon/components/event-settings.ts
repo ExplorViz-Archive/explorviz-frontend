@@ -8,44 +8,55 @@ import EventSettingsService from 'explorviz-frontend/services/event-settings-ser
 interface EventSettingsArgs { }
 
 export default class EventSettings extends Component<EventSettingsArgs> {
+  @tracked
+  collapsed: boolean = true;
 
-    @tracked
-    collapsed: boolean = true;
+  @service('collaborative-settings-service')
+  collaborativeSettings!: CollaborativeSettingsService;
 
-    @service('collaborative-settings-service')
-    collaborativeSettings!: CollaborativeSettingsService;
+  @service('event-settings-service')
+  eventSettings!: EventSettingsService;
 
-    @service('event-settings-service')
-    eventSettings!: EventSettingsService;
-
-    get settings() {
-        return [
-            {
-                name: 'Follow Camera?', tooltip: 'Follow camera movement',
-                value: this.eventSettings.perspective, onToggle: this.togglePerspective
-            },
-            {
-                name: 'Mouse move?', tooltip: 'Show mouse movement of others',
-                value: this.eventSettings.mouseMove, onToggle: this.toggleMouseMove
-            },
-            {
-                name: 'Mouse stop?', tooltip: 'Show tooltips.',
-                value: this.eventSettings.mouseStop, onToggle: this.toggleMouseStop
-            },
-            {
-                name: 'Mouse hover?', tooltip: 'Show highlighted objects',
-                value: this.eventSettings.mouseHover, onToggle: this.toggleMouseHover
-            },
-            {
-                name: 'Single Click?', tooltip: 'Follow single clicks',
-                value: this.eventSettings.singleClick, onToggle: this.toggleSingleClick
-            },
-            {
-                name: 'Double Click?', tooltip: 'Follow Double clicks',
-                value: this.eventSettings.doubleClick, onToggle: this.toggleDoubleClick
-            },
-        ];
-    }
+  get settings() {
+    return [
+      {
+        name: 'Follow Camera?',
+        tooltip: 'Follow camera movement',
+        value: this.eventSettings.perspective,
+        onToggle: this.togglePerspective,
+      },
+      {
+        name: 'Mouse move?',
+        tooltip: 'Show mouse movement of others',
+        value: this.eventSettings.mouseMove,
+        onToggle: this.toggleMouseMove,
+      },
+      {
+        name: 'Mouse stop?',
+        tooltip: 'Show tooltips.',
+        value: this.eventSettings.mouseStop,
+        onToggle: this.toggleMouseStop,
+      },
+      {
+        name: 'Mouse hover?',
+        tooltip: 'Show highlighted objects',
+        value: this.eventSettings.mouseHover,
+        onToggle: this.toggleMouseHover,
+      },
+      {
+        name: 'Single Click?',
+        tooltip: 'Follow single clicks',
+        value: this.eventSettings.singleClick,
+        onToggle: this.toggleSingleClick,
+      },
+      {
+        name: 'Double Click?',
+        tooltip: 'Follow Double clicks',
+        value: this.eventSettings.doubleClick,
+        onToggle: this.toggleDoubleClick,
+      },
+    ];
+  }
 
   @action
   toggleCollapsed() {
@@ -81,5 +92,4 @@ export default class EventSettings extends Component<EventSettingsArgs> {
   toggleDoubleClick() {
     this.eventSettings.doubleClick = !this.eventSettings.doubleClick;
   }
-
 }
