@@ -1,8 +1,8 @@
 import THREE from 'three';
 import { Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { IdentifiableMesh } from 'collaborative-mode/utils/collaborative-data';
 import PlaneMesh from './plane-mesh';
 import PlaneLayout from '../../layout-models/plane-layout';
-import { IdentifiableMesh } from 'collaborative-mode/utils/collaborative-data';
 
 export default class NodeMesh extends PlaneMesh implements IdentifiableMesh {
   dataModel: Node;
@@ -10,7 +10,7 @@ export default class NodeMesh extends PlaneMesh implements IdentifiableMesh {
   material: THREE.MeshBasicMaterial;
 
   colabId: string;
-  
+
   depth: number;
 
   defaultZ: number;

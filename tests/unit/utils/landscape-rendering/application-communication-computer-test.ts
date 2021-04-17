@@ -1,7 +1,8 @@
-/* import landscapeRenderingApplicationCommunicationComputer from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer'; */
-import { module, /* test */ } from 'qunit';
+/* import landscapeRenderingApplicationCommunicationComputer
+  from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer'; */
+import { module /* test */ } from 'qunit';
 
-module('Unit | Utility | landscape-rendering/application-communication-computer', function(/* hooks */) {
+module('Unit | Utility | landscape-rendering/application-communication-computer', function (/* hooks */) {
 
   // Replace this with your real tests.
 /*   test('it works', function(assert) {

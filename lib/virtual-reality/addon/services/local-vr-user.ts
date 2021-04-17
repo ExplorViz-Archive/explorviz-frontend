@@ -2,9 +2,9 @@ import Service, { inject as service } from '@ember/service';
 
 import THREE from 'three';
 import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VRController';
+import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
 import WebSocket from './web-socket';
 import SpectateUser from './spectate-user';
-import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
 
 export type ConnectionStatus = 'offline'|'connecting'|'online';
 

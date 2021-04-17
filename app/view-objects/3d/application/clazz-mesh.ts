@@ -26,6 +26,6 @@ export default class ClazzMesh extends BoxMesh implements IdentifiableMesh {
     this.geometry = geometry;
     this.material = material;
     this.dataModel = clazz;
-    this.colabId = clazz.id
+    this.colabId = clazz.id;
   }
 }
