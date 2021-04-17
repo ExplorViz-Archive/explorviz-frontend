@@ -25,7 +25,6 @@ export default class MainMenu extends BaseMenu {
     this.items.push(cameraButton);
     cameraButton.onTriggerDown = callbacks.openCameraMenu;
 
-
     const advancedButton = new TextbuttonItem('advanced', 'Advanced Options', {
       x: 100,
       y: 140,

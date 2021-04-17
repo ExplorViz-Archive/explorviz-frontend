@@ -4,9 +4,9 @@
   {{did-resize this.resize debounce=100}}
 >
   <canvas
-    {{interaction-modifier 
-      raycastObject=this.landscapeObject3D 
-      camera=this.camera 
+    {{interaction-modifier
+      raycastObject=this.landscapeObject3D
+      camera=this.camera
       singleClick=this.handleSingleClick
       doubleClick=this.handleDoubleClick
       mouseWheel=this.handleMouseWheel
@@ -22,7 +22,6 @@
   {{else if this.addApplication.isRunning}}
     <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
   {{/if}}
-
 </div>
 <VrButton
   @renderer={{this.renderer}}

@@ -4,12 +4,11 @@ import { inject as service } from '@ember/service';
 import CollaborativeService from 'explorviz-frontend/services/collaborative-service';
 import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
 
-interface CollaborativeSettingsOpenerArgs {
+interface Args {
   addComponent(componentPath: string): void
 }
 
-export default class CollaborativeSettingsOpener extends Component<CollaborativeSettingsOpenerArgs> {
-
+export default class CollaborativeSettingsOpener extends Component<Args> {
   @service('collaborative-service')
   collaborativeService!: CollaborativeService;
 

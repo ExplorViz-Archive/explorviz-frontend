@@ -143,16 +143,21 @@ interface XRWebGLLayerOptions {
   framebufferScaleFactor?: number;
 }
 
-declare let XRWebGLLayer: {
-  prototype: XRWebGLLayer;
-  new(session: XRSession, context: WebGLRenderingContext | undefined,
-    options?: XRWebGLLayerOptions): XRWebGLLayer;
-};
-interface XRWebGLLayer {
-  framebuffer: WebGLFramebuffer;
-  framebufferWidth: number;
-  framebufferHeight: number;
-  getViewport: Function;
+declare class XRWebGLLayer {
+  static getNativeFramebufferScaleFactor(session: XRSession): number;
+  constructor(session: XRSession, context: WebGLRenderingContext | WebGL2RenderingContext,
+    layerInit?: XRWebGLLayerInit);
+  readonly antialias: boolean;
+
+  readonly framebuffer: WebGLFramebuffer;
+
+  readonly framebufferWidth: number;
+
+  readonly framebufferHeight: number;
+
+  readonly ignoreDepthValues: boolean;
+
+  getViewport: (view: XRView) => XRViewport;
 }
 
 interface XRView {
@@ -185,7 +190,8 @@ declare class XRRay {
 
 declare enum XRHitTestTrackableType {
   'point',
-  'plane'
+  'plane',
+  'mesh',
 }
 
 interface XRHitResult {

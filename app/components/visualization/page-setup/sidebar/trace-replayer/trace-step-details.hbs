@@ -12,10 +12,7 @@
           {{#if @sourceClass}}
             {{@sourceClass.name}}
             <BsButton
-              @onClick={{fn
-                @moveCameraTo
-                @sourceClass
-              }}
+              @onClick={{fn @moveCameraTo @sourceClass}}
               @type="button"
               class="th-btn"
             >
@@ -30,10 +27,7 @@
           {{#if @targetClass}}
             {{@targetClass.name}}
             <BsButton
-              @onClick={{fn
-                @moveCameraTo
-                @targetClass
-              }}
+              @onClick={{fn @moveCameraTo @targetClass}}
               @type="button"
               class="th-btn"
             >
@@ -66,10 +60,7 @@
           </BsButton>
         </th>
         <td class="col-9 container-word-wrap">
-          {{format-number
-            this.spanDuration
-            this.timeUnit
-          }}
+          {{format-number this.spanDuration this.timeUnit}}
         </td>
       </tr>
     </tbody>

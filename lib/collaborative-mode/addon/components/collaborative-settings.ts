@@ -1,11 +1,10 @@
 import Component from '@glimmer/component';
+import { tracked } from '@glimmer/tracking';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
 import CollaborativeService from 'explorviz-frontend/services/collaborative-service';
-import { CollaborativeEvents, UserJoinedMessage } from 'collaborative-mode/utils/collaborative-data';
-import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import { tracked } from '@glimmer/tracking';
+import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 
 interface CollaborativeSettingsArgs {
@@ -15,7 +14,6 @@ interface CollaborativeSettingsArgs {
 }
 
 export default class CollaborativeSettings extends Component<CollaborativeSettingsArgs> {
-
   @service('collaborative-settings-service')
   settings!: CollaborativeSettingsService;
 
@@ -29,7 +27,7 @@ export default class CollaborativeSettings extends Component<CollaborativeSettin
   additionalSettingsVisible: boolean = false;
 
   @tracked
-  meetingId: string = ""
+  meetingId: string = '';
 
   @action
   toggleAdditionalSettingsVisible() {
@@ -44,7 +42,6 @@ export default class CollaborativeSettings extends Component<CollaborativeSettin
   @action
   closeSocket() {
     this.settings.meeting = undefined;
-    this.settings.meetingId = "";
     this.collaborativeService.closeSocket();
   }
 
@@ -55,9 +52,10 @@ export default class CollaborativeSettings extends Component<CollaborativeSettin
 
   @action
   leaveMeeting() {
-    this.collaborativeService.send(CollaborativeEvents.LeaveMeeting, { meeting: this.settings.meeting?.id });
+    this.collaborativeService.send(CollaborativeEvents.LeaveMeeting, {
+      meeting: this.settings.meeting?.id,
+    });
     this.settings.meeting = undefined;
-    this.settings.meetingId = "";
   }
 
   @action
@@ -68,7 +66,9 @@ export default class CollaborativeSettings extends Component<CollaborativeSettin
   @action
   createMeeting() {
     const currentToken = this.landscapeTokenService.token!.value;
-    this.collaborativeService.send(CollaborativeEvents.CreateMeeting, { landscapeToken: currentToken });
+    this.collaborativeService.send(CollaborativeEvents.CreateMeeting, {
+      landscapeToken: currentToken,
+    });
   }
 
   @action
@@ -79,10 +79,5 @@ export default class CollaborativeSettings extends Component<CollaborativeSettin
   @action
   giveControl(user: string) {
     this.collaborativeService.send(CollaborativeEvents.TransferControl, { target: user });
-  }
-
-  @action
-  receiveUserJoined(data: UserJoinedMessage) {
-    AlertifyHandler.showAlertifyMessage(data.user + " joined!");
   }
 }

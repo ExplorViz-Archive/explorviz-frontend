@@ -16,10 +16,7 @@
     @onClick={{@selectNextTraceStep}}
     @type="secondary"
     @outline={{true}}
-    @disabled={{gte
-      @currentTraceStepIndex
-      (dec @traceStepCount)
-    }}
+    @disabled={{gte @currentTraceStepIndex (dec @traceStepCount)}}
   >
     {{svg-jar "chevron-right" class="octicon align-middle"}}
   </BsButton>
