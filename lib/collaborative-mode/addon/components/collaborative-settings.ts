@@ -5,7 +5,6 @@ import { inject as service } from '@ember/service';
 import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
 import CollaborativeService from 'explorviz-frontend/services/collaborative-service';
 import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
-import { tracked } from '@glimmer/tracking';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 
 interface CollaborativeSettingsArgs {
