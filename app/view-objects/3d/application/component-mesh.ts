@@ -28,6 +28,6 @@ export default class ComponentMesh extends BoxMesh implements IdentifiableMesh {
     this.geometry = geometry;
     this.material = material;
     this.dataModel = component;
-    this.colabId = component.id
+    this.colabId = component.id;
   }
 }

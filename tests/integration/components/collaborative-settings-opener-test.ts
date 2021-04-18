@@ -7,22 +7,26 @@ module('Integration | Component | collaborative-settings-opener', function (hook
   setupRenderingTest(hooks);
 
   test('it renders', async function (assert) {
-    await render(hbs`{{collaborative-settings-opener addComponent=externalAction}}`);
+    await render(hbs`<CollaborativeSettingsOpener @addComponent={{this.externalAction}}/>`);
 
     assert.equal(this.element.querySelector('li')?.className, 'nav-item');
 
-    let buttonText = this.element?.querySelector('.nav-link-with-cursor');
+    const buttonText = this.element?.querySelector('.nav-link-with-cursor');
 
-    assert.equal(buttonText?.textContent, 'Collaborative Mode');
-
+    assert.equal(buttonText?.textContent?.trim(), 'Collaborative Mode');
   });
 
   test('the button works', async function (assert) {
-    await render(hbs`{{collaborative-settings-opener addComponent=externalAction}}`);
+    let providedArgument;
+
     this.set('externalAction', function (args: string) {
-      assert.equal(args, 'collaborative-settings');
-    })
+      providedArgument = args;
+    });
+
+    await render(hbs`<CollaborativeSettingsOpener @addComponent={{this.externalAction}}/>`);
 
     await click('.nav-link-with-cursor');
+
+    assert.equal(providedArgument, 'collaborative-settings');
   });
 });

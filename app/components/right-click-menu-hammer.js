@@ -30,9 +30,9 @@ export default class RightClickMenuHammer extends RightClickMenu {
   @action
   closeContextMenu(e) {
     // path property expected by addon's implementation
-    // if (e) {
-    //   e.path = e.path || (e.composedPath && e.composedPath());
-    // }
+    if (e && !e.path) {
+      e.path = e.composedPath && e.composedPath();
+    }
     super.closeContextMenu(e);
   }
 }

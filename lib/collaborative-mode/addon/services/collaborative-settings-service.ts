@@ -1,17 +1,14 @@
 import { A } from '@ember/array';
 import { action } from '@ember/object';
-import { inject as service } from '@ember/service';
-import Service from '@ember/service';
+import Service, { inject as service } from '@ember/service';
+
 import { tracked } from '@glimmer/tracking';
 import config from 'explorviz-frontend/config/environment';
 import CollaborativeService from 'collaborative-mode/services/collaborative-service';
 import { Meeting } from 'collaborative-mode/utils/collaborative-data';
 import Auth from 'explorviz-frontend/services/auth';
 
-export default class CollaborativeSettingsService extends Service.extend({
-  // anything which *must* be merged to prototype here
-}) {
-
+export default class CollaborativeSettingsService extends Service {
   @service('collaborative-service')
   collaborativeService!: CollaborativeService;
 
@@ -20,9 +17,9 @@ export default class CollaborativeSettingsService extends Service.extend({
 
   constructor() {
     super(...arguments);
-    this.collaborativeService.on("meeting_created", this.onMeetingCreated);
-    this.collaborativeService.on("meeting_updated", this.onMeetingUpdated);
-    this.collaborativeService.on("meeting_list", this.onMeetingList);
+    this.collaborativeService.on('meeting_created', this.onMeetingCreated);
+    this.collaborativeService.on('meeting_updated', this.onMeetingUpdated);
+    this.collaborativeService.on('meeting_list', this.onMeetingList);
   }
 
   meetings: String[] = A([]);
@@ -33,13 +30,13 @@ export default class CollaborativeSettingsService extends Service.extend({
   @tracked
   connected: boolean = false;
 
-  randomUsername = "User" + Math.floor(Math.random() * Math.floor(100));
+  randomUsername = `User${Math.floor(Math.random() * Math.floor(100))}`;
 
   get username(): string {
     if (config.environment === 'noauth') { // no-auth
       return this.randomUsername;
     }
-    return this.auth.user!.name
+    return this.auth.user?.name || '';
   }
 
   get presentationMode(): boolean {
@@ -50,27 +47,23 @@ export default class CollaborativeSettingsService extends Service.extend({
   }
 
   get amIAdmin(): boolean {
-    return this.meeting?.adminId == this.username;
+    return this.meeting?.adminId === this.username;
   }
 
   get userInControl() {
-    return this.meeting?.presenterId
-  }
-
-  get isSessionIdEmpty() {
-    return !this.meetingId
+    return this.meeting?.presenterId;
   }
 
   get isInteractionAllowed(): boolean {
-    return !this.meeting || !this.presentationMode || this.userInControl == this.username;
+    return !this.meeting || !this.presentationMode || this.userInControl === this.username;
   }
 
   get canIOpen(): boolean {
-    return !this.meeting || this.amIInControl
+    return !this.meeting || this.amIInControl;
   }
 
   get amIInControl(): boolean {
-    return this.username == this.userInControl;
+    return this.username === this.userInControl;
   }
 
   get amIPresenter(): boolean {
@@ -82,31 +75,7 @@ export default class CollaborativeSettingsService extends Service.extend({
   }
 
   get watching(): boolean {
-    return this.presentationMode && this.meeting?.presenterId != this.username 
-  }
-
-  get followSingleClick(): boolean {
-    return this.singleClick || this.amIViewer;
-  }
-
-  get followDoubleClick(): boolean {
-    return this.doubleClick || this.amIViewer;
-  }
-
-  get followMouseMove(): boolean {
-    return this.mouseMove || this.amIViewer;
-  }
-
-  get followMouseStop(): boolean {
-    return this.mouseStop || this.amIViewer;
-  }
-
-  get followMouseHover(): boolean {
-    return this.mouseHover || this.amIViewer;
-  }
-
-  get followPerspective(): boolean {
-    return this.perspective || this.amIViewer;
+    return this.presentationMode && this.meeting?.presenterId !== this.username;
   }
 
   @action

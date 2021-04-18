@@ -331,11 +331,10 @@ export default class VrRendering extends Component<Args> {
 
     const { object } = controller.intersectedObject;
 
-    if ((object.parent instanceof ApplicationObject3D || object.parent instanceof LandscapeObject3D) && controller.ray) {
+    if ((object.parent instanceof ApplicationObject3D || object.parent instanceof LandscapeObject3D)
+      && controller.ray) {
       controller.grabObject(object.parent);
     }
-    // @ts-ignore
-    console.log(controller.grabbedObject);
   }
 
   onInteractionMenuDown(controller: VRController) {
@@ -505,7 +504,7 @@ export default class VrRendering extends Component<Args> {
       const newGraph: ElkNode = yield this.elk.layout(graph);
 
       // Post-process layout graph (3rd step)
-      const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
+      const layoutedLandscape: Layout3Return = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
         structureLandscapeData,
@@ -668,7 +667,8 @@ export default class VrRendering extends Component<Args> {
 
       this.updateDrawableClassCommunications(applicationObject3D);
 
-      const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId)!;
+      const drawableComm = this.drawableClassCommunications
+        .get(applicationObject3D.dataModel.instanceId)!;
 
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
@@ -957,7 +957,8 @@ export default class VrRendering extends Component<Args> {
   openZoomMenu() {
     this.closeControllerMenu();
 
-    this.mainMenu = new ZoomMenu(this.closeControllerMenu.bind(this), this.renderer, this.scene, this.camera);
+    this.mainMenu = new ZoomMenu(this.closeControllerMenu.bind(this), this.renderer,
+      this.scene, this.camera);
     this.controllerMainMenus.add(this.mainMenu);
   }
 
@@ -1038,7 +1039,8 @@ export default class VrRendering extends Component<Args> {
     EntityManipulation.toggleComponentMeshState(componentMesh, applicationObject3D);
     this.addLabels(applicationObject3D);
 
-    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId);
+    const drawableComm = this.drawableClassCommunications
+      .get(applicationObject3D.dataModel.instanceId);
 
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
@@ -1049,7 +1051,8 @@ export default class VrRendering extends Component<Args> {
   closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
     EntityManipulation.closeAllComponents(applicationObject3D);
 
-    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId);
+    const drawableComm = this.drawableClassCommunications
+      .get(applicationObject3D.dataModel.instanceId);
 
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);

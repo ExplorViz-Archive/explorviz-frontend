@@ -21,12 +21,12 @@ module.exports = (defaults) => {
       ],
     },
     babel: {
-      sourceMaps: 'inline'
+      sourceMaps: 'inline',
     },
 
     'ember-cli-babel': {
       includePolyfill: true,
-      sourceMaps: 'inline'
+      sourceMaps: 'inline',
     },
 
     fingerprint: {
@@ -44,7 +44,7 @@ module.exports = (defaults) => {
         node: {
           global: true,
         },
-      }
+      },
     },
   });
 
@@ -56,9 +56,8 @@ module.exports = (defaults) => {
   app.import('vendor/threex/threex.rendererstats.min.js');
   app.import('vendor/threex/threex.dynamictexture.min.js');
 
-  app.import('vendor/alertifyjs/alertify.min.js');
-  app.import('vendor/alertifyjs/css/alertify.min.css');
-  app.import('vendor/alertifyjs/css/themes/default.min.css');
+  app.import('node_modules/alertifyjs/build/css/alertify.min.css');
+  app.import('node_modules/alertifyjs/build/css/themes/default.min.css');
 
   app.import('vendor/cytoscape/cytoscape.min.js');
 

@@ -1,5 +1,5 @@
-import config from './config/environment';
 import EmberRouter from '@ember/routing/router';
+import config from './config/environment';
 
 /**
 * Ember router for mapping "route" and respective "template".
@@ -15,8 +15,9 @@ const Router = EmberRouter.extend({
   configurationRouteExtensions: null,
 });
 
+// eslint-disable-next-line func-names, array-callback-return
 Router.map(function () {
-  this.route('badroute', { path: "/*path" });
+  this.route('badroute', { path: '/*path' });
   this.route('login');
   this.route('callback');
   this.route('visualization');
