@@ -323,6 +323,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     });
     controller.setToDefaultAppearance();
 
+    // Set camera of the controller's raycaster view-dependent objects such as
+    // sprites can be intersected.
+    controller.raycaster.camera = this.localUser.defaultCamera;
+
     // Add connection event listeners.
     controller.eventCallbacks.connected = (controller) => this.onControllerConnected(controller);
     controller.eventCallbacks.disconnected = (controller) => this.onControllerDisconnected(controller);
