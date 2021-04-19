@@ -1,20 +1,17 @@
 <div
-  class="drop-area"
+  id="VrDropArea"
   {{ on "drop" this.onDrop }}
   {{ on "dragover" this.onDragover }}
   {{ on "dragleave" this.onDragleave }}
-  style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex;"
 >
-  <!-- Conent. -->
+  <!-- Content -->
   {{yield}}
 
+  <!-- Overlay -->
   {{#if isDraggedOver}}
-  <!-- Background. -->
-  <div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: #555555; opacity: 0.8; pointer-events: none;">
-    <!-- Border. -->
-    <div style="position: absolute; top: 10%; right: 10%; bottom: 10%; left: 10%; border-radius: 10%; border: 10px dashed #929292; display: flex; justify-content: center; align-items: center;">
-      <!-- Text. -->
-      <div style="font-size: 3vw; text-align: center;color: #929292; font-weight: bold; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);">
+  <div class="vr-drop-area-background">
+    <div class="vr-drop-area-border">
+      <div class="vr-drop-area-text">
         Drop texture file to set background.
       </div>
     </div>

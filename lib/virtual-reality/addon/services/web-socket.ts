@@ -6,14 +6,16 @@ const { vrService } = ENV.backendAddresses;
 
 export default class WebSocketService extends Service {
   @service()
-  private websockets !: any;
+  private websockets!: any;
 
   private debug = debugLogger('WebSocketService');
 
   private currentSocket: any = null; // WebSocket to send/receive messages to/from backend
+
   private currentSocketUrl: string | null = null;
 
   socketCloseCallback: ((event: any) => void) | null = null;
+
   messageCallback: ((message: any) => void) | null = null;
 
   private getSocketUrl(ticketId: string) {
@@ -35,7 +37,9 @@ export default class WebSocketService extends Service {
   private closeHandler(event: any) {
     // Log that connection has been closed.
     if (event && event.code && event.target.url) {
-      this.debug(`Connection to Backend-Extension ( ${event.target.url} ) closed, WebSocket close code ${event.code}.`);
+      this.debug(
+        `Connection to Backend-Extension ( ${event.target.url} ) closed, WebSocket close code ${event.code}.`,
+      );
     }
 
     // Invoke external event listener for close event.

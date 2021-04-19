@@ -5,28 +5,36 @@ import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import LocalVrUser from './local-vr-user';
 
 export default class SpectateUserService extends Service {
-  @service('local-vr-user') private localUser!: LocalVrUser;
-  @service('vr-message-sender') private sender!: VrMessageSender;
+  @service('local-vr-user')
+  private localUser!: LocalVrUser;
 
-  spectatedUser: RemoteVrUser | null = null; // Tells which userId (if any) is being spectated
+  @service('vr-message-sender')
+  private sender!: VrMessageSender;
 
-  private startPosition: THREE.Vector3 = new THREE.Vector3(); // Position before this user starts spectating
+  spectatedUser: RemoteVrUser | null = null;
 
-  get isActive() { return this.spectatedUser !== null; }
+  private startPosition: THREE.Vector3 = new THREE.Vector3();
+
+  get isActive() {
+    return this.spectatedUser !== null;
+  }
 
   /**
-  * Used in spectating mode to set user's camera position to the spectated user's position
-  */
+   * Used in spectating mode to set user's camera position to the spectated user's position
+   */
   update() {
     if (this.spectatedUser && this.spectatedUser.camera) {
-      this.localUser.teleportToPosition(this.spectatedUser.camera.model.position, { adaptCameraHeight: true });
+      this.localUser.teleportToPosition(
+        this.spectatedUser.camera.model.position,
+        { adaptCameraHeight: true },
+      );
     }
   }
 
   /**
- * Switches our user into spectator mode
- * @param {number} userId The id of the user to be spectated
- */
+   * Switches our user into spectator mode
+   * @param {number} userId The id of the user to be spectated
+   */
   activate(remoteUser: RemoteVrUser | null) {
     if (!remoteUser) return;
 
@@ -57,7 +65,9 @@ export default class SpectateUserService extends Service {
       this.localUser.controller2.setToDefaultAppearance();
     }
 
-    this.localUser.teleportToPosition(this.startPosition, { adaptCameraHeight: true });
+    this.localUser.teleportToPosition(this.startPosition, {
+      adaptCameraHeight: true,
+    });
     this.spectatedUser.setHmdVisible(true);
     this.spectatedUser = null;
 

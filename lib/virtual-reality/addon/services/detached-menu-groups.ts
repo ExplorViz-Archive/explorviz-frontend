@@ -1,24 +1,32 @@
 import Service, { inject as service } from '@ember/service';
-import THREE from "three";
-import { DynamicLandscapeData } from "../../../../app/utils/landscape-schemes/dynamic-data";
-import { StructureLandscapeData } from "../../../../app/utils/landscape-schemes/structure-data";
-import CloseIcon from "../utils/view-objects/vr/close-icon";
-import { DetachableMenu } from "../utils/vr-menus/detachable-menu";
-import DetachedMenuGroup from "../utils/vr-menus/detached-menu-group";
-import { isMenuDetachedResponse, MenuDetachedResponse } from "../utils/vr-message/receivable/response/menu-detached";
-import { isObjectClosedResponse, ObjectClosedResponse } from "../utils/vr-message/receivable/response/object-closed";
-import VrAssetRepository from "./vr-asset-repo";
-import VrMessageReceiver from "./vr-message-receiver";
-import VrMessageSender from "./vr-message-sender";
-import VrSceneService from "./vr-scene";
+import THREE from 'three';
+import { DynamicLandscapeData } from '../../../../app/utils/landscape-schemes/dynamic-data';
+import { StructureLandscapeData } from '../../../../app/utils/landscape-schemes/structure-data';
+import CloseIcon from '../utils/view-objects/vr/close-icon';
+import { DetachableMenu } from '../utils/vr-menus/detachable-menu';
+import DetachedMenuGroup from '../utils/vr-menus/detached-menu-group';
+import { isMenuDetachedResponse, MenuDetachedResponse } from '../utils/vr-message/receivable/response/menu-detached';
+import { isObjectClosedResponse, ObjectClosedResponse } from '../utils/vr-message/receivable/response/object-closed';
+import VrAssetRepository from './vr-asset-repo';
+import VrMessageReceiver from './vr-message-receiver';
+import VrMessageSender from './vr-message-sender';
+import VrSceneService from './vr-scene';
 
 export default class DetachedMenuGroupsService extends Service {
-  @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
-  @service('vr-message-receiver') private receiver!: VrMessageReceiver;
-  @service('vr-message-sender') private sender!: VrMessageSender;
-  @service('vr-scene') private sceneService!: VrSceneService;
+  @service('vr-asset-repo')
+  private assetRepo!: VrAssetRepository;
+
+  @service('vr-message-receiver')
+  private receiver!: VrMessageReceiver;
+
+  @service('vr-message-sender')
+  private sender!: VrMessageSender;
+
+  @service('vr-scene')
+  private sceneService!: VrSceneService;
 
   private detachedMenuGroups: Set<DetachedMenuGroup>;
+
   private detachedMenuGroupsById: Map<string, DetachedMenuGroup>;
 
   readonly container: THREE.Group;
@@ -33,8 +41,15 @@ export default class DetachedMenuGroupsService extends Service {
     this.sceneService.scene.add(this.container);
   }
 
-  updateLandscapeData(_structureData: StructureLandscapeData, _dynamicData: DynamicLandscapeData): any {
-    this.removeAllDetachedMenusLocally()
+  /**
+   * Callback that is invoked by the timestamp service when a new landscape or timestamp is
+   * selected.
+   */
+  updateLandscapeData(
+    _structureData: StructureLandscapeData,
+    _dynamicData: DynamicLandscapeData,
+  ) {
+    this.removeAllDetachedMenusLocally();
   }
 
   /**
@@ -62,7 +77,7 @@ export default class DetachedMenuGroupsService extends Service {
       },
       onOffline: () => {
         this.addDetachedMenuLocally(menu, null);
-      }
+      },
     });
   }
 
@@ -70,7 +85,7 @@ export default class DetachedMenuGroupsService extends Service {
    * Updates all detached menus.
    */
   updateDetachedMenus(delta: number) {
-    for (let detachedMenuGroup of this.detachedMenuGroups) {
+    for (const detachedMenuGroup of this.detachedMenuGroups) {
       detachedMenuGroup.updateMenu(delta);
     }
   }
@@ -95,7 +110,9 @@ export default class DetachedMenuGroupsService extends Service {
 
     // Create menu group for the detached menu.
     const detachedMenuGroup = new DetachedMenuGroup({
-      menu, menuId, detachedMenuGroups: this
+      menu,
+      menuId,
+      detachedMenuGroups: this,
     });
     this.detachedMenuGroups.add(detachedMenuGroup);
     if (menuId) this.detachedMenuGroupsById.set(menuId, detachedMenuGroup);
@@ -107,7 +124,7 @@ export default class DetachedMenuGroupsService extends Service {
     const closeIcon = new CloseIcon({
       textures: this.assetRepo.closeIconTextures,
       onClose: () => this.removeDetachedMenu(detachedMenuGroup),
-      radius: 0.04
+      radius: 0.04,
     });
     closeIcon.addToObject(detachedMenuGroup);
 
@@ -142,7 +159,7 @@ export default class DetachedMenuGroupsService extends Service {
         onOffline: () => {
           this.removeDetachedMenuLocally(detachedMenuGroup);
           resolve(true);
-        }
+        },
       });
     });
   }
@@ -175,7 +192,7 @@ export default class DetachedMenuGroupsService extends Service {
 
   removeAllDetachedMenusLocally() {
     // Notify all detached menus that they have been closed.
-    for (let detachedMenuGroup of this.detachedMenuGroups) {
+    for (const detachedMenuGroup of this.detachedMenuGroups) {
       detachedMenuGroup.closeAllMenus();
     }
 

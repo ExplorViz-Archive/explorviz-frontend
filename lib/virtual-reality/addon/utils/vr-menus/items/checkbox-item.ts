@@ -17,22 +17,29 @@ export type CheckboxItemArgs = InteractiveItemArgs & {
 
 export default class CheckboxItem extends InteractiveItem {
   width: number;
+
   height: number;
+
   boxColor: string;
+
   checkmarkColor: string;
+
   hoverColor: string;
+
   lineWidth: number;
+
   isChecked: boolean;
 
   constructor({
-    width, height,
+    width,
+    height,
     boxColor = DEFAULT_CHECKBOX_COLOR,
     checkmarkColor = DEFAULT_CHECKMARK_COLOR,
     hoverColor = DEFAULT_CHECKBOX_HOVER_COLOR,
     lineWidth = 5,
     isChecked = false,
     ...args
-  } : CheckboxItemArgs) {
+  }: CheckboxItemArgs) {
     super(args);
 
     this.width = width;
@@ -48,7 +55,11 @@ export default class CheckboxItem extends InteractiveItem {
     ctx.save();
 
     // Draw box.
-    const { width, height, position: { x, y } } = this;
+    const {
+      width,
+      height,
+      position: { x, y },
+    } = this;
     ctx.lineWidth = this.lineWidth;
     ctx.strokeStyle = this.isHovered ? this.hoverColor : this.boxColor;
     ctx.strokeRect(x, y, width, height);
@@ -57,8 +68,8 @@ export default class CheckboxItem extends InteractiveItem {
     if (this.isChecked) {
       ctx.strokeStyle = this.checkmarkColor;
       ctx.beginPath();
-      ctx.moveTo(x + 10, y + (height / 2));
-      ctx.lineTo(x + (width / 2), y + height - 10);
+      ctx.moveTo(x + 10, y + height / 2);
+      ctx.lineTo(x + width / 2, y + height - 10);
       ctx.lineTo(x + width - 10, y + 10);
       ctx.stroke();
     }

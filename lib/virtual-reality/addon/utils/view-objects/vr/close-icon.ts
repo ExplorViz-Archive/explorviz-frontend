@@ -1,25 +1,31 @@
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-controller';
-import { IntersectableObject } from "../interfaces/intersectable-object";
+import { IntersectableObject } from '../interfaces/intersectable-object';
 
 export type CloseIconTextures = {
-  defaultTexture: THREE.Texture,
-  hoverTexture: THREE.Texture,
+  defaultTexture: THREE.Texture;
+  hoverTexture: THREE.Texture;
 };
 
 export default class CloseIcon extends BaseMesh implements IntersectableObject {
   private radius: number;
 
   private onClose: () => Promise<boolean>;
+
   private textures: CloseIconTextures;
 
-  constructor({ onClose, textures, radius = 0.075, segments = 32 }: {
-    onClose: () => Promise<boolean>,
-    textures: CloseIconTextures,
-    radius?: number,
-    segments?: number,
-    compensateParentScale?: boolean
+  constructor({
+    onClose,
+    textures,
+    radius = 0.075,
+    segments = 32,
+  }: {
+    onClose: () => Promise<boolean>;
+    textures: CloseIconTextures;
+    radius?: number;
+    segments?: number;
+    compensateParentScale?: boolean;
   }) {
     super(new THREE.Color());
 
@@ -45,7 +51,11 @@ export default class CloseIcon extends BaseMesh implements IntersectableObject {
    */
   addToObject(object: THREE.Object3D) {
     // Undo scaling of the object.
-    this.scale.set(1.0 / object.scale.x, 1.0 / object.scale.y, 1.0 / object.scale.z);
+    this.scale.set(
+      1.0 / object.scale.x,
+      1.0 / object.scale.y,
+      1.0 / object.scale.z,
+    );
 
     // Reset rotation of the object temporarily such that the axis are aligned the world axis.
     const originalRotation = object.rotation.clone();

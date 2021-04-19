@@ -1,18 +1,18 @@
-import THREE from "three";
-import VRControllerButtonBinding from "../vr-controller/vr-controller-button-binding";
-import VRControllerThumbpadBinding, { thumbpadDirectionToVector2 } from "../vr-controller/vr-controller-thumbpad-binding";
-import { BaseMenuArgs } from "./base-menu";
-import InteractiveMenu from "./interactive-menu";
-import InteractiveItem from "./items/interactive-item";
-import Item from "./items/item";
+import THREE from 'three';
+import VRControllerButtonBinding from '../vr-controller/vr-controller-button-binding';
+import VRControllerThumbpadBinding, { thumbpadDirectionToVector2 } from '../vr-controller/vr-controller-thumbpad-binding';
+import { BaseMenuArgs } from './base-menu';
+import InteractiveMenu from './interactive-menu';
+import InteractiveItem from './items/interactive-item';
+import Item from './items/item';
 
 export const DEFAULT_MENU_RESOLUTION = 512;
 
 export const SIZE_RESOLUTION_FACTOR = 0.3 / DEFAULT_MENU_RESOLUTION;
 
 export type UiMenuArgs = BaseMenuArgs & {
-  resolution?: { width: number, height: number },
-  backgroundColor?: string
+  resolution?: { width: number; height: number };
+  backgroundColor?: string;
 };
 
 /**
@@ -24,9 +24,12 @@ export type UiMenuArgs = BaseMenuArgs & {
 export default abstract class UiMenu extends InteractiveMenu {
   canvas!: HTMLCanvasElement;
 
-  canvasMesh!: THREE.Mesh<THREE.Geometry | THREE.BufferGeometry, THREE.MeshBasicMaterial>;
+  canvasMesh!: THREE.Mesh<
+  THREE.Geometry | THREE.BufferGeometry,
+  THREE.MeshBasicMaterial
+  >;
 
-  resolution: { width: number, height: number };
+  resolution: { width: number; height: number };
 
   items: Item[];
 
@@ -39,7 +42,10 @@ export default abstract class UiMenu extends InteractiveMenu {
   thumbpadAxis: number;
 
   constructor({
-    resolution = { width: DEFAULT_MENU_RESOLUTION, height: DEFAULT_MENU_RESOLUTION },
+    resolution = {
+      width: DEFAULT_MENU_RESOLUTION,
+      height: DEFAULT_MENU_RESOLUTION,
+    },
     backgroundColor = '#444444',
     ...args
   }: UiMenuArgs) {
@@ -86,7 +92,7 @@ export default abstract class UiMenu extends InteractiveMenu {
    */
   makeBackgroundMaterial(color: THREE.Color): THREE.Material {
     return new THREE.MeshBasicMaterial({
-      color: color,
+      color,
       side: THREE.DoubleSide,
       transparent: true,
       opacity: 0.8,
@@ -138,7 +144,6 @@ export default abstract class UiMenu extends InteractiveMenu {
     this.menuGroup?.updateControllerBindings();
   }
 
-
   /**
    * Finds the menu item at given uv position.
    *
@@ -156,10 +161,7 @@ export default abstract class UiMenu extends InteractiveMenu {
       const y = this.resolution.height * (1.0 - position.y);
 
       const {
-        minX,
-        minY,
-        maxX,
-        maxY,
+        minX, minY, maxX, maxY,
       } = item.getBoundingBox();
 
       if (x >= minX && y >= minY && x <= maxX && y <= maxY) {
@@ -178,9 +180,11 @@ export default abstract class UiMenu extends InteractiveMenu {
   hover(intersection: THREE.Intersection) {
     super.hover(intersection);
 
+    // Hover item at the intersected coordinates. If no item is hovered, but an item has been
+    // selected with the touchpad, do not reset the hover effect.
     if (!intersection.uv) return;
     const item = this.getInteractiveItem(intersection.uv);
-    this.hoverItem(item);
+    this.hoverItem(item || this.activeTarget);
   }
 
   /**
@@ -203,13 +207,7 @@ export default abstract class UiMenu extends InteractiveMenu {
    */
   hoverItem(item: InteractiveItem | undefined) {
     // If an item is hovered, reset the item selected with the touchpad.
-    // If no item is hovered, but an item has been selected, don't reset the
-    // selection.
-    if (item) {
-      this.activeTarget = undefined;
-    } else {
-      item = this.activeTarget;
-    }
+    if (item) this.activeTarget = undefined;
 
     // Update hover effect if hovered item changed.
     if (item !== this.lastHoveredItem) {
@@ -257,11 +255,11 @@ export default abstract class UiMenu extends InteractiveMenu {
 
             // Wrap index at start and end of list.
             const len = this.thumbpadTargets.length;
-            index = ((index + offset) % len + len) % len;
+            index = (((index + offset) % len) + len) % len;
             this.activateItem(this.thumbpadTargets[index]);
           }
-        }
-      }
+        },
+      },
     );
   }
 
@@ -270,11 +268,11 @@ export default abstract class UiMenu extends InteractiveMenu {
    * that can be selected by the thumbpad.
    */
   makeTriggerButtonBinding() {
-    if (this.thumbpadTargets.length == 0) return undefined;
+    if (this.thumbpadTargets.length === 0) return undefined;
     return new VRControllerButtonBinding('Select', {
       onButtonDown: () => {
         if (this.activeTarget) this.activeTarget.onTriggerDown?.call(this.activeTarget);
-      }
+      },
     });
   }
 
@@ -291,7 +289,7 @@ export default abstract class UiMenu extends InteractiveMenu {
    * hovering this menu. This method is not called again before the trigger
    * is released.
    */
-  triggerDown(intersection: THREE.Intersection, ) {
+  triggerDown(intersection: THREE.Intersection) {
     super.triggerDown(intersection);
 
     if (!intersection.uv) return;

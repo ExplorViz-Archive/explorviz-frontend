@@ -1,12 +1,13 @@
-import LocalVrUser, { ConnectionStatus } from "virtual-reality/services/local-vr-user";
-import UiMenu, { UiMenuArgs } from "../../ui-menu";
+import LocalVrUser, { ConnectionStatus } from 'virtual-reality/services/local-vr-user';
+import UiMenu, { UiMenuArgs } from '../../ui-menu';
 
 export type ConnectionBaseMenuArgs = UiMenuArgs & {
-  localUser: LocalVrUser,
+  localUser: LocalVrUser;
 };
 
 export default abstract class ConnectionBaseMenu extends UiMenu {
   private initialConnectionStatus: ConnectionStatus;
+
   readonly localUser: LocalVrUser;
 
   constructor({ localUser, ...args }: ConnectionBaseMenuArgs) {

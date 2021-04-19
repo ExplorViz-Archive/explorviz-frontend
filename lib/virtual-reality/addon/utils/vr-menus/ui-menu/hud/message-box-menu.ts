@@ -4,26 +4,30 @@ import TextItem from '../../items/text-item';
 import { UiMenuArgs } from '../../ui-menu';
 
 const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.25, [
-  new THREE.KeyframeTrack('.position[y]', [0.0, 0.25], [0.2, 0.0])
+  new THREE.KeyframeTrack('.position[y]', [0.0, 0.25], [0.2, 0.0]),
 ]);
 
 const CLOSE_ANIMATION_CLIP = new THREE.AnimationClip('close-animation', 0.25, [
-  new THREE.KeyframeTrack('.position[y]', [0.0, 0.25], [0.0, 0.2])
+  new THREE.KeyframeTrack('.position[y]', [0.0, 0.25], [0.0, 0.2]),
 ]);
 
 export type MessageBoxMenuArgs = UiMenuArgs & {
-  title: string,
-  text?: string,
-  color: string,
-  time: number
+  title: string;
+  text?: string;
+  color: string;
+  time: number;
 };
 
 export default class MessageBoxMenu extends HudMenu {
   private time: number;
+
   private enableTimer: boolean;
 
   constructor({
-    title, text, color, time,
+    title,
+    text,
+    color,
+    time,
     resolution = { width: 256, height: 64 },
     backgroundColor = '#000000',
     ...args
@@ -34,7 +38,8 @@ export default class MessageBoxMenu extends HudMenu {
 
     // Draw text.
     const titleItem = new TextItem({
-      text: title, color,
+      text: title,
+      color,
       fontSize: 18,
       alignment: 'center',
       position: { x: 128, y: 10 },
@@ -43,7 +48,8 @@ export default class MessageBoxMenu extends HudMenu {
 
     if (text) {
       const textItem = new TextItem({
-        text, color,
+        text,
+        color,
         fontSize: 14,
         alignment: 'center',
         position: { x: 128, y: 40 },

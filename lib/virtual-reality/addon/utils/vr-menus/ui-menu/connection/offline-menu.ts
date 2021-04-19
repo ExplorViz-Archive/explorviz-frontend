@@ -1,6 +1,6 @@
-import TextbuttonItem from "../../items/textbutton-item";
-import TitleItem from "../../items/title-item";
-import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
+import TextbuttonItem from '../../items/textbutton-item';
+import TitleItem from '../../items/title-item';
+import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from './base';
 
 export default class OfflineMenu extends ConnectionBaseMenu {
   constructor(args: ConnectionBaseMenuArgs) {
@@ -13,23 +13,23 @@ export default class OfflineMenu extends ConnectionBaseMenu {
     this.items.push(title);
 
     const joinButton = new TextbuttonItem({
-      text: "Join Room",
+      text: 'Join Room',
       position: { x: 100, y: 156 },
       width: 316,
       height: 50,
       fontSize: 28,
-      onTriggerDown: () => this.menuGroup?.replaceMenu(this.menuFactory.buildJoinMenu())
+      onTriggerDown: () => this.menuGroup?.replaceMenu(this.menuFactory.buildJoinMenu()),
     });
     this.items.push(joinButton);
     this.thumbpadTargets.push(joinButton);
 
     const newButton = new TextbuttonItem({
-      text: "New Room",
+      text: 'New Room',
       position: { x: 100, y: 216 },
       width: 316,
       height: 50,
       fontSize: 28,
-      onTriggerDown: () => this.createAndJoinNewRoom()
+      onTriggerDown: () => this.createAndJoinNewRoom(),
     });
     this.items.push(newButton);
     this.thumbpadTargets.push(newButton);

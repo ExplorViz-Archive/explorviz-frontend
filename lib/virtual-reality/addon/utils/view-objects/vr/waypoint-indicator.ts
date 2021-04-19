@@ -1,4 +1,4 @@
-import THREE from "three";
+import THREE from 'three';
 
 /**
  * The width of the texture in pixel.
@@ -29,9 +29,12 @@ const HIDE_THREASHOLD = 0.5;
 export default class WaypointIndicator extends THREE.Sprite {
   target: THREE.Object3D;
 
-  constructor({ color, target }: {
-    color: THREE.Color,
-    target: THREE.Object3D
+  constructor({
+    color,
+    target,
+  }: {
+    color: THREE.Color;
+    target: THREE.Object3D;
   }) {
     super();
     this.target = target;
@@ -41,7 +44,7 @@ export default class WaypointIndicator extends THREE.Sprite {
     this.renderOrder = 100;
     this.material = new THREE.SpriteMaterial({
       map: texture,
-      depthTest: false
+      depthTest: false,
     });
 
     // Scale and position the indicator such that it is in front of the
@@ -94,7 +97,8 @@ export default class WaypointIndicator extends THREE.Sprite {
    */
   private updateArrowPosition(camera: THREE.Camera) {
     // When the targe is not visible, the waypoint indicator is not visible either.
-    // The visible flag cannot be used to hide the object because this would disable onBeforeRendered callbacks.
+    // The visible flag cannot be used to hide the object because this would disable
+    // `onBeforeRendered` callbacks.
     if (!this.target.visible) {
       this.material.opacity = 0.0;
       return;

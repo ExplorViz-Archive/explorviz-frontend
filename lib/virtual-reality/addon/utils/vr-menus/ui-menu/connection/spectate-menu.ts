@@ -1,34 +1,38 @@
-import THREE from "three";
-import LocalVrUser from "virtual-reality/services/local-vr-user";
-import SpectateUserService from "virtual-reality/services/spectate-user";
-import VRController from "virtual-reality/utils/vr-controller";
-import RemoteVrUser from "virtual-reality/utils/vr-multi-user/remote-vr-user";
-import TextItem from "../../items/text-item";
-import DisableInputMenu from "../../ui-less-menu/disable-input-menu";
-import UiMenu, { DEFAULT_MENU_RESOLUTION, SIZE_RESOLUTION_FACTOR, UiMenuArgs } from "../../ui-menu";
+import THREE from 'three';
+import LocalVrUser from 'virtual-reality/services/local-vr-user';
+import SpectateUserService from 'virtual-reality/services/spectate-user';
+import VRController from 'virtual-reality/utils/vr-controller';
+import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
+import TextItem from '../../items/text-item';
+import DisableInputMenu from '../../ui-less-menu/disable-input-menu';
+import UiMenu, { DEFAULT_MENU_RESOLUTION, SIZE_RESOLUTION_FACTOR, UiMenuArgs } from '../../ui-menu';
 
 export type SpectateMenuArgs = UiMenuArgs & {
-  localUser: LocalVrUser,
-  remoteUser: RemoteVrUser,
-  spectateUserService: SpectateUserService
+  localUser: LocalVrUser;
+  remoteUser: RemoteVrUser;
+  spectateUserService: SpectateUserService;
 };
 
 const HEIGHT = 60;
 
 export default class SpectateMenu extends UiMenu {
-
   private localUser: LocalVrUser;
-  private remoteUser: RemoteVrUser
+
+  private remoteUser: RemoteVrUser;
+
   private spectateUserService: SpectateUserService;
 
   private disableInputMenu: DisableInputMenu;
 
   constructor({
-    localUser, spectateUserService, remoteUser,
+    localUser,
+    spectateUserService,
+    remoteUser,
     resolution = {
       width: DEFAULT_MENU_RESOLUTION,
-      height: HEIGHT
-    }, ...args
+      height: HEIGHT,
+    },
+    ...args
   }: SpectateMenuArgs) {
     super({ resolution, ...args });
 
@@ -44,7 +48,11 @@ export default class SpectateMenu extends UiMenu {
    */
   makeBackgroundGeometry(): THREE.Geometry {
     const geometry = super.makeBackgroundGeometry();
-    geometry.translate(0, (HEIGHT - DEFAULT_MENU_RESOLUTION) / 2 * SIZE_RESOLUTION_FACTOR, 0);
+    geometry.translate(
+      0,
+      ((HEIGHT - DEFAULT_MENU_RESOLUTION) / 2) * SIZE_RESOLUTION_FACTOR,
+      0,
+    );
     return geometry;
   }
 
@@ -53,7 +61,9 @@ export default class SpectateMenu extends UiMenu {
 
     // Disable input for the other controller.
     const controller = VRController.findController(this);
-    const otherController = controller === this.localUser.controller1 ? this.localUser.controller2 : this.localUser.controller1;
+    const otherController = controller === this.localUser.controller1
+      ? this.localUser.controller2
+      : this.localUser.controller1;
     otherController?.menuGroup?.openMenu(this.disableInputMenu);
 
     // Activate spectating.

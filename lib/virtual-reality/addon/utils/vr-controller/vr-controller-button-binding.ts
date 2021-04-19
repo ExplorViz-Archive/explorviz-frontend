@@ -1,7 +1,7 @@
-import VRController from "../vr-controller";
-import VRControllerLabelGroup from "./vr-controller-label-group";
-import VRControllerLabelMesh from "./vr-controller-label-mesh";
-import { VRControllerLabelPosition } from "./vr-controller-label-positions";
+import VRController from '../vr-controller';
+import VRControllerLabelGroup from './vr-controller-label-group';
+import VRControllerLabelMesh from './vr-controller-label-mesh';
+import { VRControllerLabelPosition } from './vr-controller-label-positions';
 
 type VRControllerButtonCallbacks<V> = {
   onButtonDown?(controller: VRController): void;
@@ -11,6 +11,7 @@ type VRControllerButtonCallbacks<V> = {
 
 export default class VRControllerButtonBinding<V> {
   label: string;
+
   callbacks: VRControllerButtonCallbacks<V>;
 
   constructor(label: string, callbacks: VRControllerButtonCallbacks<V>) {
@@ -18,7 +19,10 @@ export default class VRControllerButtonBinding<V> {
     this.callbacks = callbacks;
   }
 
-  addLabel(group: VRControllerLabelGroup, position: VRControllerLabelPosition): void {
+  addLabel(
+    group: VRControllerLabelGroup,
+    position: VRControllerLabelPosition,
+  ): void {
     group.add(new VRControllerLabelMesh(this.label, position));
   }
 }

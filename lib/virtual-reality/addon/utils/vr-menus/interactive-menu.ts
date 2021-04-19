@@ -1,8 +1,9 @@
 import { IntersectableObject } from 'virtual-reality/utils/view-objects/interfaces/intersectable-object';
-import AnimatedMenu from "./animated-menu";
+import AnimatedMenu from './animated-menu';
 
-export default class InteractiveMenu extends AnimatedMenu implements IntersectableObject {
-
+export default class InteractiveMenu
+  extends AnimatedMenu
+  implements IntersectableObject {
   /**
    * Interactive menus can be intersected by a controller's ray by default.
    */
@@ -13,7 +14,7 @@ export default class InteractiveMenu extends AnimatedMenu implements Intersectab
   /**
    * Called when the other controller's ray intersects this menu.
    */
-  hover(_intersection: THREE.Intersection) { }
+  hover(_intersection: THREE.Intersection) {}
 
   /**
    * Called once when the other controller's trigger is pressed down while
@@ -22,7 +23,7 @@ export default class InteractiveMenu extends AnimatedMenu implements Intersectab
    *
    * @param intersection The intersected point of the menu that is hovered.
    */
-  triggerDown(_intersection: THREE.Intersection) { }
+  triggerDown(_intersection: THREE.Intersection) {}
 
   /**
    * Called when the other controller's trigger is pressed while hovering this
@@ -31,7 +32,7 @@ export default class InteractiveMenu extends AnimatedMenu implements Intersectab
    * @param intersection The intersected point of the menu that is hovered.
    * @param value The intensity of the trigger press.
    */
-  triggerPress(_intersection: THREE.Intersection, _value: number) { }
+  triggerPress(_intersection: THREE.Intersection, _value: number) {}
 
   /**
    * Called once when the other controller's trigger is released while
@@ -39,17 +40,17 @@ export default class InteractiveMenu extends AnimatedMenu implements Intersectab
    *
    * @param intersection The intersected point of the menu that is hovered.
    */
-  triggerUp(_intersection: THREE.Intersection) { }
+  triggerUp(_intersection: THREE.Intersection) {}
 
   /**
    * Called when this menu is hovered to apply visual feedback for the hover
    * effect.
    */
-  applyHoverEffect() { }
+  applyHoverEffect() {}
 
   /**
    * Called when this menu is not hovered anymore to reset the visual feedback
    * for the hover effect.
    */
-  resetHoverEffect() { }
+  resetHoverEffect() {}
 }

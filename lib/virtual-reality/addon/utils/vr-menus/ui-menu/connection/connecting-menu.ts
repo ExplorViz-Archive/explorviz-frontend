@@ -1,6 +1,6 @@
-import TextbuttonItem from "../../items/textbutton-item";
-import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
-import TitleItem from "../../items/title-item";
+import TextbuttonItem from '../../items/textbutton-item';
+import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from './base';
+import TitleItem from '../../items/title-item';
 
 export default class ConnectingMenu extends ConnectionBaseMenu {
   constructor(args: ConnectionBaseMenuArgs) {
@@ -8,7 +8,7 @@ export default class ConnectingMenu extends ConnectionBaseMenu {
 
     const title = new TitleItem({
       text: 'Connecting...',
-      position: { x: 256, y: 20 }
+      position: { x: 256, y: 20 },
     });
     this.items.push(title);
 
@@ -18,7 +18,7 @@ export default class ConnectingMenu extends ConnectionBaseMenu {
       width: 316,
       height: 50,
       fontSize: 28,
-      onTriggerDown: () => this.localUser.disconnect()
+      onTriggerDown: () => this.localUser.disconnect(),
     });
     this.items.push(cancelButton);
     this.thumbpadTargets.push(cancelButton);

@@ -6,11 +6,18 @@ import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/compon
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import THREE from 'three';
-import { APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE } from '../vr-message/util/entity_type';
+import {
+  APPLICATION_ENTITY_TYPE,
+  CLASS_COMMUNICATION_ENTITY_TYPE,
+  CLASS_ENTITY_TYPE,
+  COMPONENT_ENTITY_TYPE,
+  EntityType,
+  NODE_ENTITY_TYPE,
+} from '../vr-message/util/entity_type';
 
 export type DetailedInfo = {
-  title: string,
-  entries: { key: string, value: string }[],
+  title: string;
+  entries: { key: string; value: string }[];
 };
 
 // #region HELPER
@@ -27,7 +34,10 @@ function countComponentElements(component: Package) {
 // #region LANDSCAPE CONTENT COMPOSER
 
 function composeNodeContent(nodeMesh: NodeMesh) {
-  const content: DetailedInfo = { title: nodeMesh.getDisplayName(), entries: [] };
+  const content: DetailedInfo = {
+    title: nodeMesh.getDisplayName(),
+    entries: [],
+  };
 
   return content;
 }
@@ -53,8 +63,14 @@ function composeComponentContent(componentMesh: ComponentMesh) {
 
   const content: DetailedInfo = { title: component.name, entries: [] };
 
-  content.entries.push({ key: 'Contained Packages: ', value: packageCount.toString() });
-  content.entries.push({ key: 'Contained Classes: ', value: classCount.toString() });
+  content.entries.push({
+    key: 'Contained Packages: ',
+    value: packageCount.toString(),
+  });
+  content.entries.push({
+    key: 'Contained Classes: ',
+    value: classCount.toString(),
+  });
 
   return content;
 }
@@ -67,15 +83,22 @@ function composeClazzContent(clazzMesh: ClazzMesh) {
   return content;
 }
 
-function composeDrawableClazzCommunicationContent(communicationMesh: ClazzCommunicationMesh) {
+function composeDrawableClazzCommunicationContent(
+  communicationMesh: ClazzCommunicationMesh,
+) {
   const communication = communicationMesh.dataModel;
 
   const commDirection = communication.bidirectional ? ' <-> ' : ' -> ';
-  const title = communication.sourceClass.name + commDirection + communication.targetClass.name;
+  const title = communication.sourceClass.name
+    + commDirection
+    + communication.targetClass.name;
 
   const content: DetailedInfo = { title, entries: [] };
 
-  content.entries.push({ key: 'Requests: ', value: communication.totalRequests.toString() });
+  content.entries.push({
+    key: 'Requests: ',
+    value: communication.totalRequests.toString(),
+  });
 
   return content;
 }
@@ -102,34 +125,46 @@ export default function composeContent(object: THREE.Object3D) {
   return content;
 }
 
-export type EntityMesh = NodeMesh | ApplicationMesh | ComponentMesh | ClazzMesh | ClazzCommunicationMesh;
+export type EntityMesh =
+  | NodeMesh
+  | ApplicationMesh
+  | ComponentMesh
+  | ClazzMesh
+  | ClazzCommunicationMesh;
 
 export function isEntityMesh(object: any): object is EntityMesh {
-  return object instanceof NodeMesh || object instanceof ApplicationMesh || object instanceof ComponentMesh || object instanceof ClazzMesh ||
-    object instanceof ClazzCommunicationMesh;
+  return (
+    object instanceof NodeMesh
+    || object instanceof ApplicationMesh
+    || object instanceof ComponentMesh
+    || object instanceof ClazzMesh
+    || object instanceof ClazzCommunicationMesh
+  );
 }
 
 export function getIdOfEntity(entity: EntityMesh): string {
   const model = entity.dataModel;
   if (isNode(model)) {
     return model.ipAddress;
-  } else if (isApplication(model)) {
-    return model.instanceId;
-  } else {
-    return model.id;
   }
+  if (isApplication(model)) {
+    return model.instanceId;
+  }
+  return model.id;
 }
 
 export function getTypeOfEntity(entity: EntityMesh): EntityType {
   if (entity instanceof NodeMesh) {
     return NODE_ENTITY_TYPE;
-  } else if (entity instanceof ApplicationMesh) {
-    return APPLICATION_ENTITY_TYPE;
-  } else if (entity instanceof ComponentMesh) {
-    return COMPONENT_ENTITY_TYPE;
-  } else if (entity instanceof ClazzMesh) {
-    return CLASS_ENTITY_TYPE;
-  } else {
-    return CLASS_COMMUNICATION_ENTITY_TYPE;
   }
+  if (entity instanceof ApplicationMesh) {
+    return APPLICATION_ENTITY_TYPE;
+  }
+  if (entity instanceof ComponentMesh) {
+    return COMPONENT_ENTITY_TYPE;
+  }
+  if (entity instanceof ClazzMesh) {
+    return CLASS_ENTITY_TYPE;
+  }
+  return CLASS_COMMUNICATION_ENTITY_TYPE;
 }

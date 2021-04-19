@@ -7,21 +7,32 @@ import Item, { ItemArgs } from './item';
 const measurementContext = document.createElement('canvas').getContext('2d');
 
 export type TextItemArgs = ItemArgs & {
-  text: string,
-  color: string,
-  fontSize: number,
-  alignment?: CanvasTextAlign,
-  baseline?: CanvasTextBaseline,
+  text: string;
+  color: string;
+  fontSize: number;
+  alignment?: CanvasTextAlign;
+  baseline?: CanvasTextBaseline;
 };
 
 export default class TextItem extends Item {
   text: string;
+
   color: string;
+
   fontSize: number;
+
   alignment: CanvasTextAlign;
+
   baseline: CanvasTextBaseline;
 
-  constructor({text, color, fontSize, alignment = 'left', baseline = 'top', ...args}: TextItemArgs) {
+  constructor({
+    text,
+    color,
+    fontSize,
+    alignment = 'left',
+    baseline = 'top',
+    ...args
+  }: TextItemArgs) {
     super(args);
     this.text = text;
     this.color = color;
@@ -44,12 +55,12 @@ export default class TextItem extends Item {
       minX: this.position.x + size.actualBoundingBoxLeft,
       maxX: this.position.x + size.actualBoundingBoxRight,
       minY: this.position.y + size.actualBoundingBoxAscent,
-      maxY: this.position.y + size.actualBoundingBoxDescent
+      maxY: this.position.y + size.actualBoundingBoxDescent,
     };
   }
 
   private measureText() {
-    if (!measurementContext) throw `failed to measure text: ${this.text}`;
+    if (!measurementContext) throw new Error(`failed to measure text: ${this.text}`);
 
     measurementContext.font = this.font;
     measurementContext.textAlign = this.alignment;

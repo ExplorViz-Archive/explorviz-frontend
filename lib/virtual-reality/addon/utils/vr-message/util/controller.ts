@@ -1,20 +1,22 @@
-import { isPosition, Position } from "../util/position";
-import { isQuaternion, Quaternion } from "../util/quaternion";
-import { ControllerId } from "./controller_id";
+import { isPosition, Position } from './position';
+import { isQuaternion, Quaternion } from './quaternion';
+import { ControllerId } from './controller_id';
 
 export type Controller = {
-  controllerId: ControllerId,
-  assetUrl: string,
-  position: Position,
-  quaternion: Quaternion,
-  intersection: Position | null
+  controllerId: ControllerId;
+  assetUrl: string;
+  position: Position;
+  quaternion: Quaternion;
+  intersection: Position | null;
 };
 
 export function isController(controller: any): controller is Controller {
-  return controller !== null
+  return (
+    controller !== null
     && typeof controller === 'object'
     && typeof controller.assetUrl === 'string'
     && isPosition(controller.position)
     && isQuaternion(controller.quaternion)
-    && (!controller.intersection || isPosition(controller.intersection));
+    && (!controller.intersection || isPosition(controller.intersection))
+  );
 }

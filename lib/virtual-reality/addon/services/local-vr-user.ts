@@ -2,31 +2,45 @@ import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-controller';
 import SpectateUserService from './spectate-user';
-import VrRoomService from "./vr-room";
-import VrSceneService from "./vr-scene";
+import VrRoomService from './vr-room';
+import VrSceneService from './vr-scene';
 import WebSocketService from './web-socket';
 
 export type ConnectionStatus = 'offline' | 'connecting' | 'online';
 
 export default class LocalVrUser extends Service {
-  @service('spectate-user') private spectateUserService!: SpectateUserService;
-  @service('vr-room') private roomService!: VrRoomService;
-  @service('vr-scene') private sceneService!: VrSceneService;
-  @service('web-socket') private webSocket!: WebSocketService;
+  @service('spectate-user')
+  private spectateUserService!: SpectateUserService;
+
+  @service('vr-room')
+  private roomService!: VrRoomService;
+
+  @service('vr-scene')
+  private sceneService!: VrSceneService;
+
+  @service('web-socket')
+  private webSocket!: WebSocketService;
 
   userId!: string;
+
   userName?: string;
+
   color: THREE.Color | undefined;
 
   renderer!: THREE.WebGLRenderer;
 
   private userGroup!: THREE.Group;
+
   defaultCamera!: THREE.PerspectiveCamera;
+
   controller1: VRController | undefined;
+
   controller2: VRController | undefined;
+
   panoramaSphere: THREE.Object3D | undefined;
 
   connectionStatus: ConnectionStatus = 'offline';
+
   currentRoomId: string | null = null;
 
   get camera() {
@@ -36,11 +50,17 @@ export default class LocalVrUser extends Service {
     return this.defaultCamera;
   }
 
-  get isOnline() { return this.connectionStatus === 'online'; }
+  get isOnline() {
+    return this.connectionStatus === 'online';
+  }
 
-  get isConnecting() { return this.connectionStatus === 'connecting'; }
+  get isConnecting() {
+    return this.connectionStatus === 'connecting';
+  }
 
-  get isSpectating() { return this.spectateUserService.isActive; }
+  get isSpectating() {
+    return this.spectateUserService.isActive;
+  }
 
   init() {
     super.init();
@@ -93,9 +113,14 @@ export default class LocalVrUser extends Service {
    *  This method is used to adapt the users view to
    *  the new position
    */
-  teleportToPosition(position: THREE.Vector3, { adaptCameraHeight = false }: {
-    adaptCameraHeight?: boolean
-  } = {}) {
+  teleportToPosition(
+    position: THREE.Vector3,
+    {
+      adaptCameraHeight = false,
+    }: {
+      adaptCameraHeight?: boolean;
+    } = {},
+  ) {
     if (!this.camera) return;
 
     const cameraWorldPos = this.getCameraWorldPosition();
@@ -121,21 +146,33 @@ export default class LocalVrUser extends Service {
   /**
    * Moves the user group in the given direction relative to the default camera.
    */
-  moveInCameraDirection(direction: THREE.Vector3, {
-    enableX = true, enableY = true, enableZ = true
-  }: { enableX?: boolean, enableY?: boolean, enableZ?: boolean }) {
+  moveInCameraDirection(
+    direction: THREE.Vector3,
+    {
+      enableX = true,
+      enableY = true,
+      enableZ = true,
+    }: { enableX?: boolean; enableY?: boolean; enableZ?: boolean },
+  ) {
     // Convert direction from the camera's object space to world coordinates.
     const distance = direction.length();
-    direction = direction.clone().normalize().transformDirection(this.defaultCamera.matrix);
+    const worldDirection = direction
+      .clone()
+      .normalize()
+      .transformDirection(this.defaultCamera.matrix);
 
     // Remove disabled components.
-    if (!enableX) direction.x = 0;
-    if (!enableY) direction.y = 0;
-    if (!enableZ) direction.z = 0;
+    if (!enableX) worldDirection.x = 0;
+    if (!enableY) worldDirection.y = 0;
+    if (!enableZ) worldDirection.z = 0;
 
     // Convert the direction back to object space before applying the translation.
-    direction.normalize().transformDirection(this.userGroup.matrix.getInverse(new THREE.Matrix4()));
-    this.userGroup.translateOnAxis(direction, distance);
+    const localDirection = worldDirection
+      .normalize()
+      .transformDirection(
+        this.userGroup.matrix.getInverse(new THREE.Matrix4()),
+      );
+    this.userGroup.translateOnAxis(localDirection, distance);
   }
 
   /**
@@ -183,27 +220,29 @@ export default class LocalVrUser extends Service {
   async hostRoom() {
     if (!this.isConnecting) {
       this.connectionStatus = 'connecting';
-      var response = await this.roomService.createRoom();
-      this._joinRoom(response.roomId);
+      const response = await this.roomService.createRoom();
+      this.joinRoom(response.roomId, { checkConnectionStatus: false });
     }
   }
 
-  joinRoom(roomId: string) {
-    if (!this.isConnecting) {
+  async joinRoom(roomId: string, {
+    checkConnectionStatus = true,
+  }: { checkConnectionStatus?: boolean } = {}) {
+    if (!checkConnectionStatus || !this.isConnecting) {
       this.connectionStatus = 'connecting';
-      this._joinRoom(roomId);
+      this.currentRoomId = roomId;
+      const response = await this.roomService.joinLobby(this.currentRoomId);
+      this.webSocket.initSocket(response.ticketId);
     }
   }
 
-  private async _joinRoom(roomId: string) {
-    this.currentRoomId = roomId;
-    const response = await this.roomService.joinLobby(this.currentRoomId);
-    this.webSocket.initSocket(response.ticketId);
-  }
-
-  connected({ id, name, color }: {
-    id: string,
-    name: string,
+  connected({
+    id,
+    name,
+    color,
+  }: {
+    id: string;
+    name: string;
     color: THREE.Color;
   }) {
     this.connectionStatus = 'online';

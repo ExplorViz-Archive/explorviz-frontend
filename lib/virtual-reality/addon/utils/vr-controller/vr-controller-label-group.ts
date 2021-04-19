@@ -1,19 +1,25 @@
-import THREE from "three";
-import VRController from "../vr-controller";
-import VRControllerBindings from "./vr-controller-bindings";
-import VRControllerBindingsList from "./vr-controller-bindings-list";
-import { getVRControllerLabelPositions } from "./vr-controller-label-positions";
+import THREE from 'three';
+import VRController from '../vr-controller';
+import VRControllerBindings from './vr-controller-bindings';
+import VRControllerBindingsList from './vr-controller-bindings-list';
+import { getVRControllerLabelPositions } from './vr-controller-label-positions';
 
 export default class VRControllerLabelGroup extends THREE.Group {
   static get visibilitySetting(): boolean {
-    return window.localStorage.getItem('explorviz.vr.labels.visible') !== 'false';
+    return (
+      window.localStorage.getItem('explorviz.vr.labels.visible') !== 'false'
+    );
   }
 
   static set visibilitySetting(visible: boolean) {
-    window.localStorage.setItem('explorviz.vr.labels.visible', visible.toString());
+    window.localStorage.setItem(
+      'explorviz.vr.labels.visible',
+      visible.toString(),
+    );
   }
 
   controllerBindings: VRControllerBindingsList;
+
   lastControllerBindings: VRControllerBindings | null;
 
   constructor(controllerBindings: VRControllerBindingsList) {
@@ -22,7 +28,6 @@ export default class VRControllerLabelGroup extends THREE.Group {
     this.lastControllerBindings = null;
     this.visible = VRControllerLabelGroup.visibilitySetting;
   }
-
 
   updateLabels() {
     // Test whether the controller bindings or motion controller changed

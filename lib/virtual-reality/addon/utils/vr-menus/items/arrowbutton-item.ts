@@ -6,22 +6,28 @@ const DEFAULT_ARROW_BUTTON_HOVER_COLOR = '#00e5ff';
 export type ArrowDirection = 'left' | 'right' | 'up' | 'down';
 
 export type ArrowbuttonItemArgs = InteractiveItemArgs & {
-  width: number,
-  height: number,
-  direction: ArrowDirection,
-  buttonColor?: string,
-  hoverColor?: string,
+  width: number;
+  height: number;
+  direction: ArrowDirection;
+  buttonColor?: string;
+  hoverColor?: string;
 };
 
 export default class ArrowbuttonItem extends InteractiveItem {
   width: number;
+
   height: number;
+
   buttonColor: string;
+
   hoverColor: string;
+
   direction: ArrowDirection;
 
   constructor({
-    width, height, direction,
+    width,
+    height,
+    direction,
     buttonColor = DEFAULT_ARROW_BUTTON_COLOR,
     hoverColor = DEFAULT_ARROW_BUTTON_HOVER_COLOR,
     ...args
@@ -38,7 +44,13 @@ export default class ArrowbuttonItem extends InteractiveItem {
   drawToCanvas(ctx: CanvasRenderingContext2D) {
     ctx.save();
     ctx.fillStyle = this.isHovered ? this.hoverColor : this.buttonColor;
-    ArrowbuttonItem.drawArrowhead(ctx, this.position, this.width, this.height, this.direction);
+    ArrowbuttonItem.drawArrowhead(
+      ctx,
+      this.position,
+      this.width,
+      this.height,
+      this.direction,
+    );
     ctx.restore();
   }
 
@@ -65,8 +77,13 @@ export default class ArrowbuttonItem extends InteractiveItem {
    * @param height - The height  of the arrow.
    * @param direction - The direction of the arrow.
    */
-  static drawArrowhead(ctx: CanvasRenderingContext2D, from: { x: number, y: number },
-    width: number, height: number, direction: ArrowDirection) {
+  static drawArrowhead(
+    ctx: CanvasRenderingContext2D,
+    from: { x: number; y: number },
+    width: number,
+    height: number,
+    direction: ArrowDirection,
+  ) {
     // eslint-disable-next-line default-case
     switch (direction) {
       case 'up':

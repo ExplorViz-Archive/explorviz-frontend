@@ -2,27 +2,34 @@
  * Adapted from: https://github.com/mrdoob/three.js/blob/master/examples/jsm/webxr/XRControllerModelFactory.js
  */
 
-import { Component, Constants as MotionControllerConstants, MotionController, VisualResponse } from '@webxr-input-profiles/motion-controllers';
-import { Material, Mesh, Object3D, Quaternion } from 'three';
-
+import {
+  Component, Constants as MotionControllerConstants, MotionController, VisualResponse,
+} from '@webxr-input-profiles/motion-controllers';
+import {
+  Material, Mesh, Object3D, Quaternion,
+} from 'three';
 
 export type VisualResponseNodes = {
-  visualResponse: VisualResponse,
-  valueNode: THREE.Object3D,
-  minNode?: THREE.Object3D,
-  maxNode?: THREE.Object3D,
+  visualResponse: VisualResponse;
+  valueNode: THREE.Object3D;
+  minNode?: THREE.Object3D;
+  maxNode?: THREE.Object3D;
 };
 
 export type TouchPointNode = {
-  component: Component,
-  touchPointNode: THREE.Object3D,
+  component: Component;
+  touchPointNode: THREE.Object3D;
 };
 
 export default class VrControllerModel extends Object3D {
   private _motionController!: MotionController | null;
+
   private _motionControllerPromise!: Promise<MotionController>;
+
   private _onMotionControllerConnect: ((motionController: MotionController) => void) | null;
+
   private touchPointNodes: TouchPointNode[];
+
   private visualResponseNodes: VisualResponseNodes[];
 
   envMap: any;
@@ -104,9 +111,9 @@ export default class VrControllerModel extends Object3D {
   }
 
   /**
-  * Polls data from the XRInputSource and updates the model's components to match
-  * the real world data
-  */
+   * Polls data from the XRInputSource and updates the model's components to match
+   * the real world data
+   */
   updateMatrixWorld(force: Boolean | undefined) {
     super.updateMatrixWorld.call(this, force);
 
@@ -116,27 +123,38 @@ export default class VrControllerModel extends Object3D {
     this.motionController.updateFromGamepad();
 
     // Update the 3D model to reflect the button, thumbstick, and touchpad state.
-    this.visualResponseNodes.forEach(({
-      visualResponse: { value, valueNodeProperty },
-      minNode, maxNode, valueNode
-    }: VisualResponseNodes) => {
-      // Calculate the new properties based on the weight supplied
-      if (valueNodeProperty === MotionControllerConstants.VisualResponseProperty.VISIBILITY && typeof value === 'boolean') {
-        valueNode.visible = value;
-      } else if (valueNodeProperty === MotionControllerConstants.VisualResponseProperty.TRANSFORM && typeof value === 'number' && minNode && maxNode) {
-        Quaternion.slerp(
-          minNode.quaternion,
-          maxNode.quaternion,
-          valueNode.quaternion,
-          value,
-        );
+    this.visualResponseNodes.forEach(
+      ({
+        visualResponse: { value, valueNodeProperty },
+        minNode,
+        maxNode,
+        valueNode,
+      }: VisualResponseNodes) => {
+        // Calculate the new properties based on the weight supplied
+        switch (valueNodeProperty) {
+          case MotionControllerConstants.VisualResponseProperty.VISIBILITY:
+            if (typeof value === 'boolean') valueNode.visible = value;
+            break;
+          case MotionControllerConstants.VisualResponseProperty.TRANSFORM:
+            if (typeof value === 'number' && minNode && maxNode) {
+              Quaternion.slerp(
+                minNode.quaternion,
+                maxNode.quaternion,
+                valueNode.quaternion,
+                value,
+              );
 
-        valueNode.position.lerpVectors(
-          minNode.position,
-          maxNode.position,
-          value,
-        );
-      }
-    });
+              valueNode.position.lerpVectors(
+                minNode.position,
+                maxNode.position,
+                value,
+              );
+            }
+            break;
+          default:
+            break;
+        }
+      },
+    );
   }
 }

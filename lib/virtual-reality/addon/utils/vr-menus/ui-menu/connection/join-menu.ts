@@ -1,9 +1,9 @@
 import VrRoomService from 'virtual-reality/services/vr-room';
-import { RoomListRecord } from "../../../vr-payload/receivable/room-list";
-import TextItem from "../../items/text-item";
-import TextbuttonItem from "../../items/textbutton-item";
-import TitleItem from "../../items/title-item";
-import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
+import { RoomListRecord } from '../../../vr-payload/receivable/room-list';
+import TextItem from '../../items/text-item';
+import TextbuttonItem from '../../items/textbutton-item';
+import TitleItem from '../../items/title-item';
+import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from './base';
 
 /**
  * Time in seconds before the new room list should be fetched.
@@ -11,11 +11,12 @@ import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
 const REFRESH_TIMEOUT = 3.0;
 
 export type JoinMenuArgs = ConnectionBaseMenuArgs & {
-  roomService: VrRoomService
+  roomService: VrRoomService;
 };
 
 export default class JoinMenu extends ConnectionBaseMenu {
   private roomService: VrRoomService;
+
   private refreshTimeout: number;
 
   constructor({ roomService, ...args }: JoinMenuArgs) {
@@ -51,14 +52,14 @@ export default class JoinMenu extends ConnectionBaseMenu {
     // Draw one button for each room.
     const yOffset = 60;
     let yPos = 50 + yOffset;
-    for (let room of rooms) {
+    for (const room of rooms) {
       const roomButton = new TextbuttonItem({
         text: room.roomName,
         position: { x: 100, y: yPos },
         width: 316,
         height: 50,
         fontSize: 28,
-        onTriggerDown: () => this.localUser.joinRoom(room.roomId)
+        onTriggerDown: () => this.localUser.joinRoom(room.roomId),
       });
       this.items.push(roomButton);
       this.thumbpadTargets.push(roomButton);
@@ -95,7 +96,7 @@ export default class JoinMenu extends ConnectionBaseMenu {
       onTriggerDown: () => {
         this.drawLoadingScreen();
         this.loadAndDrawRoomList();
-      }
+      },
     });
     this.items.push(retryButton);
     this.thumbpadTargets.push(retryButton);

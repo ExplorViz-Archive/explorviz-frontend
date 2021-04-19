@@ -8,20 +8,26 @@ import VRControllerThumbpadBinding from 'virtual-reality/utils/vr-controller/vr-
 import BaseMenu, { BaseMenuArgs } from '../base-menu';
 
 export type GrabMenuArgs = BaseMenuArgs & {
-  deltaTimeService: DeltaTimeService
+  deltaTimeService: DeltaTimeService;
   grabbedObject: GrabbableObject;
   grabbedObjectService: GrabbedObjectService;
 };
 
 export default class GrabMenu extends BaseMenu {
   private grabbedObject: GrabbableObject;
+
   private grabbedObjectParent: THREE.Object3D | null;
+
   private allowedToGrab: boolean;
+
   private grabbedObjectService: GrabbedObjectService;
+
   private deltaTimeService: DeltaTimeService;
 
   constructor({
-    grabbedObject, grabbedObjectService, deltaTimeService,
+    grabbedObject,
+    grabbedObjectService,
+    deltaTimeService,
     ...args
   }: GrabMenuArgs) {
     super(args);
@@ -52,7 +58,7 @@ export default class GrabMenu extends BaseMenu {
       this.grabbedObject.matrix.decompose(
         this.grabbedObject.position,
         this.grabbedObject.quaternion,
-        this.grabbedObject.scale
+        this.grabbedObject.scale,
       );
       controller.gripSpace.add(this.grabbedObject);
     }
@@ -73,7 +79,7 @@ export default class GrabMenu extends BaseMenu {
       this.grabbedObject.matrix.decompose(
         this.grabbedObject.position,
         this.grabbedObject.quaternion,
-        this.grabbedObject.scale
+        this.grabbedObject.scale,
       );
     }
 
@@ -86,7 +92,9 @@ export default class GrabMenu extends BaseMenu {
     super.onOpenMenu();
 
     // Grab the object only when we are allowed to grab it.
-    this.allowedToGrab = await this.grabbedObjectService.grabObject(this.grabbedObject);
+    this.allowedToGrab = await this.grabbedObjectService.grabObject(
+      this.grabbedObject,
+    );
     if (this.allowedToGrab) {
       // If the object is grabbed by another menu already, open the scale
       // menu instead.
@@ -94,7 +102,9 @@ export default class GrabMenu extends BaseMenu {
       const otherController = VRController.findController(this.grabbedObject);
       const otherMenu = otherController?.menuGroup.currentMenu;
       if (controller && otherController && otherMenu instanceof GrabMenu) {
-        const { scaleMenu1, scaleMenu2 } = this.menuFactory.buildScaleMenus(this.grabbedObject);
+        const { scaleMenu1, scaleMenu2 } = this.menuFactory.buildScaleMenus(
+          this.grabbedObject,
+        );
         controller.menuGroup.openMenu(scaleMenu1);
         otherController.menuGroup.openMenu(scaleMenu2);
       } else {
@@ -122,42 +132,50 @@ export default class GrabMenu extends BaseMenu {
   }
 
   makeThumbpadBinding() {
-    return new VRControllerThumbpadBinding({
-      labelUp: 'Move Away',
-      labelDown: 'Move Closer'
-    }, {
-      onThumbpadTouch: (controller: VRController, axes: number[]) => {
-        controller.updateIntersectedObject();
-        if (!controller.intersectedObject) return;
+    return new VRControllerThumbpadBinding(
+      {
+        labelUp: 'Move Away',
+        labelDown: 'Move Closer',
+      },
+      {
+        onThumbpadTouch: (controller: VRController, axes: number[]) => {
+          controller.updateIntersectedObject();
+          if (!controller.intersectedObject) return;
 
-        // Position where ray hits the application
-        const intersectionPosWorld = controller.intersectedObject.point;
-        const intersectionPosLocal = intersectionPosWorld.clone();
-        this.grabbedObject.worldToLocal(intersectionPosLocal);
+          // Position where ray hits the application
+          const intersectionPosWorld = controller.intersectedObject.point;
+          const intersectionPosLocal = intersectionPosWorld.clone();
+          this.grabbedObject.worldToLocal(intersectionPosLocal);
 
-        const controllerPosition = new THREE.Vector3();
-        controller.raySpace.getWorldPosition(controllerPosition);
-        const controllerPositionLocal = controllerPosition.clone();
-        this.grabbedObject.worldToLocal(controllerPositionLocal);
+          const controllerPosition = new THREE.Vector3();
+          controller.raySpace.getWorldPosition(controllerPosition);
+          const controllerPositionLocal = controllerPosition.clone();
+          this.grabbedObject.worldToLocal(controllerPositionLocal);
 
-        const direction = new THREE.Vector3();
-        direction.subVectors(intersectionPosLocal, controllerPositionLocal);
+          const direction = new THREE.Vector3();
+          direction.subVectors(intersectionPosLocal, controllerPositionLocal);
 
-        const worldDirection = new THREE.Vector3().subVectors(controllerPosition, intersectionPosWorld);
+          const worldDirection = new THREE.Vector3().subVectors(
+            controllerPosition,
+            intersectionPosWorld,
+          );
 
-        // Stop object from moving too close to controller.
-        const yAxis = axes[1];
-        if ((worldDirection.length() > 0.5 && Math.abs(yAxis) > 0.1)
-          || (worldDirection.length() <= 0.5 && yAxis > 0.1)) {
-          // Adapt distance for moving according to trigger value.
-          direction.normalize();
-          const length = yAxis * this.deltaTimeService.getDeltaTime();
+          // Stop object from moving too close to controller.
+          const yAxis = axes[1];
+          if (
+            (worldDirection.length() > 0.5 && Math.abs(yAxis) > 0.1)
+            || (worldDirection.length() <= 0.5 && yAxis > 0.1)
+          ) {
+            // Adapt distance for moving according to trigger value.
+            direction.normalize();
+            const length = yAxis * this.deltaTimeService.getDeltaTime();
 
-          this.grabbedObject.translateOnAxis(direction, length);
-          this.collideWithFloor();
-        }
-      }
-    });
+            this.grabbedObject.translateOnAxis(direction, length);
+            this.collideWithFloor();
+          }
+        },
+      },
+    );
   }
 
   get enableControllerRay(): boolean {
@@ -166,7 +184,7 @@ export default class GrabMenu extends BaseMenu {
 
   makeGripButtonBinding() {
     return new VRControllerButtonBinding('Release Object', {
-      onButtonUp: () => this.closeMenu()
+      onButtonUp: () => this.closeMenu(),
     });
   }
 

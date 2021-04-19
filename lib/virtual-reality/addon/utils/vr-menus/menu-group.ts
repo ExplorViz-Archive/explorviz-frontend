@@ -1,18 +1,20 @@
-import THREE from "three";
-import DetachedMenuGroupsService from "../../services/detached-menu-groups";
-import FloorMesh from "../view-objects/vr/floor-mesh";
-import VRController from "../vr-controller";
-import VRControllerBindings from "../vr-controller/vr-controller-bindings";
-import BaseMenu from "./base-menu";
-import { isDetachableMenu } from "./detachable-menu";
+import THREE from 'three';
+import DetachedMenuGroupsService from '../../services/detached-menu-groups';
+import FloorMesh from '../view-objects/vr/floor-mesh';
+import VRController from '../vr-controller';
+import VRControllerBindings from '../vr-controller/vr-controller-bindings';
+import BaseMenu from './base-menu';
+import { isDetachableMenu } from './detachable-menu';
 
 export type MenuGroupArgs = {
-  detachedMenuGroups: DetachedMenuGroupsService
+  detachedMenuGroups: DetachedMenuGroupsService;
 };
 
 export default class MenuGroup extends THREE.Group {
   private menus: BaseMenu[];
+
   private detachedMenuGroups: DetachedMenuGroupsService;
+
   readonly controllerBindings: VRControllerBindings[];
 
   constructor({ detachedMenuGroups }: MenuGroupArgs) {
@@ -41,8 +43,8 @@ export default class MenuGroup extends THREE.Group {
   toggleControllerRay() {
     const controller = VRController.findController(this);
     if (controller) {
-      let rayVisibleInMenu = !this.currentMenu || this.currentMenu.enableControllerRay;
-      let enableTeleportInMenu = !this.currentMenu || this.currentMenu.enableTeleport;
+      const rayVisibleInMenu = !this.currentMenu || this.currentMenu.enableControllerRay;
+      const enableTeleportInMenu = !this.currentMenu || this.currentMenu.enableTeleport;
       if (controller.ray) controller.ray.visible = rayVisibleInMenu;
       if (controller.teleportArea) {
         const intersectsFloor = controller.intersectedObject?.object instanceof FloorMesh;
@@ -84,7 +86,9 @@ export default class MenuGroup extends THREE.Group {
   updateControllerBindings() {
     if (this.currentMenu) {
       const index = this.controllerBindings.length - 1;
-      this.controllerBindings[index] = this.currentMenu.makeControllerBindings();
+      this.controllerBindings[
+        index
+      ] = this.currentMenu.makeControllerBindings();
     }
   }
 
@@ -163,7 +167,9 @@ export default class MenuGroup extends THREE.Group {
    * @param callback Determines whethe the `onClose` or `onDetach` callback
    * is invoked.
    */
-  private removeMenu(callback: (removedMenu: BaseMenu) => void): BaseMenu | undefined {
+  private removeMenu(
+    callback: (removedMenu: BaseMenu) => void,
+  ): BaseMenu | undefined {
     const menu = this.popMenu(callback);
     if (menu) {
       this.remove(menu);

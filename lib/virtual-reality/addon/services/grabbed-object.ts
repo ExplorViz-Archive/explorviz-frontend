@@ -6,8 +6,11 @@ import { isObjectGrabbedResponse, ObjectGrabbedResponse } from 'virtual-reality/
 import VrMessageReceiver from './vr-message-receiver';
 
 export default class GrabbedObjectService extends Service {
-  @service('vr-message-receiver') private receiver!: VrMessageReceiver;
-  @service('vr-message-sender') private sender!: VrMessageSender;
+  @service('vr-message-receiver')
+  private receiver!: VrMessageReceiver;
+
+  @service('vr-message-sender')
+  private sender!: VrMessageSender;
 
   /**
    * Counts how often an object has been requested to be grabbed.
@@ -52,7 +55,7 @@ export default class GrabbedObjectService extends Service {
         nonce,
         responseType: isObjectGrabbedResponse,
         onResponse: (response: ObjectGrabbedResponse) => resolve(response.isSuccess),
-        onOffline: () => resolve(true)
+        onOffline: () => resolve(true),
       });
     });
   }
@@ -123,7 +126,7 @@ export default class GrabbedObjectService extends Service {
    * Sends the positions of all grabbed objects to the backend.
    */
   sendObjectPositions() {
-    for (var object of this.grabbedObjects.values()) {
+    for (const object of this.grabbedObjects.values()) {
       const objectId = object.getGrabId();
       if (objectId) {
         const position = new THREE.Vector3();
@@ -132,7 +135,7 @@ export default class GrabbedObjectService extends Service {
         const quaternion = new THREE.Quaternion();
         object.getWorldQuaternion(quaternion);
 
-        const scale = object.scale;
+        const { scale } = object;
 
         this.sender.sendObjectMoved(objectId, position, quaternion, scale);
       }

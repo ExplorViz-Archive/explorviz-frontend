@@ -86,7 +86,10 @@ export default class VrButton extends Component<VrButtonArgs> {
     if (!this.currentSession) {
       const sessionInit = { optionalFeatures: ['local-floor'] };
       // @ts-ignore
-      const session = await navigator.xr.requestSession('immersive-vr', sessionInit);
+      const session = await navigator.xr.requestSession(
+        'immersive-vr',
+        sessionInit,
+      );
       this.onSessionStarted(session);
     } else {
       await this.currentSession.end();

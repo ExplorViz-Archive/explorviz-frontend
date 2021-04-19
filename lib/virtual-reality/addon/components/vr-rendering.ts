@@ -22,15 +22,15 @@ import DetachedMenuGroupsService from 'virtual-reality/services/detached-menu-gr
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import SpectateUserService from 'virtual-reality/services/spectate-user';
 import VrApplicationRenderer, { AddApplicationArgs } from 'virtual-reality/services/vr-application-renderer';
-import VrAssetRepository from "virtual-reality/services/vr-asset-repo";
-import VrLandscapeRenderer from "virtual-reality/services/vr-landscape-renderer";
+import VrAssetRepository from 'virtual-reality/services/vr-asset-repo';
+import VrLandscapeRenderer from 'virtual-reality/services/vr-landscape-renderer';
 import VrMenuFactoryService from 'virtual-reality/services/vr-menu-factory';
 import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
-import VrSceneService from "virtual-reality/services/vr-scene";
+import VrSceneService from 'virtual-reality/services/vr-scene';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import WebSocketService from 'virtual-reality/services/web-socket';
-import { findGrabbableObject, GrabbableObjectWrapper, isGrabbableObject } from "virtual-reality/utils/view-objects/interfaces/grabbable-object";
+import { findGrabbableObject, GrabbableObjectWrapper, isGrabbableObject } from 'virtual-reality/utils/view-objects/interfaces/grabbable-object';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import FloorMesh from 'virtual-reality/utils/view-objects/vr/floor-mesh';
 import VRController from 'virtual-reality/utils/vr-controller';
@@ -63,11 +63,11 @@ import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendabl
 import { UserPositionsMessage } from 'virtual-reality/utils/vr-message/sendable/user_positions';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import WebXRPolyfill from 'webxr-polyfill';
-import VrHighlightingService from "../services/vr-highlighting";
-import VrRoomSerializer from "../services/vr-room-serializer";
-import { UserControllerConnectMessage, USER_CONTROLLER_CONNECT_EVENT } from "../utils/vr-message/sendable/user_controller_connect";
-import { UserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
-import { ControllerId, CONTROLLER_1_ID, CONTROLLER_2_ID } from "../utils/vr-message/util/controller_id";
+import VrHighlightingService from '../services/vr-highlighting';
+import VrRoomSerializer from '../services/vr-room-serializer';
+import { UserControllerConnectMessage, USER_CONTROLLER_CONNECT_EVENT } from '../utils/vr-message/sendable/user_controller_connect';
+import { UserControllerDisconnectMessage } from '../utils/vr-message/sendable/user_controller_disconnect';
+import { ControllerId, CONTROLLER_1_ID, CONTROLLER_2_ID } from '../utils/vr-message/util/controller_id';
 
 interface Args {
   readonly id: string;
@@ -77,42 +77,91 @@ interface Args {
 }
 
 const THUMBPAD_THRESHOLD = 0.5;
+const MOUSE_MOVE_SPEED = 3.0;
+const MOUSE_ROTATION_SPEED = Math.PI;
 
-export default class VrRendering extends Component<Args> implements VrMessageListener {
+export default class VrRendering
+  extends Component<Args>
+  implements VrMessageListener {
   // #region SERVICES
 
-  @service('configuration') private configuration!: Configuration;
-  @service('delta-time') private deltaTimeService!: DeltaTimeService;
-  @service('detached-menu-groups') private detachedMenuGroups!: DetachedMenuGroupsService;
-  @service('grabbed-object') private grabbedObjectService!: GrabbedObjectService;
-  @service('local-vr-user') private localUser!: LocalVrUser;
-  @service('remote-vr-users') private remoteUsers!: RemoteVrUserService;
-  @service('repos/timestamp-repository') private timestampRepo!: TimestampRepository;
-  @service('spectate-user') private spectateUserService!: SpectateUserService;
-  @service('vr-application-renderer') private vrApplicationRenderer!: VrApplicationRenderer;
-  @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
-  @service('vr-highlighting') private highlightingService!: VrHighlightingService;
-  @service('vr-landscape-renderer') private vrLandscapeRenderer!: VrLandscapeRenderer;
-  @service('vr-menu-factory') private menuFactory!: VrMenuFactoryService;
-  @service('vr-message-receiver') private receiver!: VrMessageReceiver;
-  @service('vr-message-sender') private sender!: VrMessageSender;
-  @service('vr-room-serializer') private roomSerializer!: VrRoomSerializer;
-  @service('vr-scene') private sceneService!: VrSceneService;
-  @service('vr-timestamp') private timestampService!: VrTimestampService;
-  @service('web-socket') private webSocket!: WebSocketService;
+  @service('configuration')
+  private configuration!: Configuration;
+
+  @service('delta-time')
+  private deltaTimeService!: DeltaTimeService;
+
+  @service('detached-menu-groups')
+  private detachedMenuGroups!: DetachedMenuGroupsService;
+
+  @service('grabbed-object')
+  private grabbedObjectService!: GrabbedObjectService;
+
+  @service('local-vr-user')
+  private localUser!: LocalVrUser;
+
+  @service('remote-vr-users')
+  private remoteUsers!: RemoteVrUserService;
+
+  @service('repos/timestamp-repository')
+  private timestampRepo!: TimestampRepository;
+
+  @service('spectate-user')
+  private spectateUserService!: SpectateUserService;
+
+  @service('vr-application-renderer')
+  private vrApplicationRenderer!: VrApplicationRenderer;
+
+  @service('vr-asset-repo')
+  private assetRepo!: VrAssetRepository;
+
+  @service('vr-highlighting')
+  private highlightingService!: VrHighlightingService;
+
+  @service('vr-landscape-renderer')
+  private vrLandscapeRenderer!: VrLandscapeRenderer;
+
+  @service('vr-menu-factory')
+  private menuFactory!: VrMenuFactoryService;
+
+  @service('vr-message-receiver')
+  private receiver!: VrMessageReceiver;
+
+  @service('vr-message-sender')
+  private sender!: VrMessageSender;
+
+  @service('vr-room-serializer')
+  private roomSerializer!: VrRoomSerializer;
+
+  @service('vr-scene')
+  private sceneService!: VrSceneService;
+
+  @service('vr-timestamp')
+  private timestampService!: VrTimestampService;
+
+  @service('web-socket')
+  private webSocket!: WebSocketService;
 
   // #endregion SERVICES
 
   // #region CLASS FIELDS
 
   private canvas!: HTMLCanvasElement;
+
   private debug = debugLogger('VrRendering');
+
   private debugMenuGroup!: MenuGroup;
+
   private hintMenuQueue!: MenuQueue;
+
   private messageMenuQueue!: MenuQueue;
+
   private primaryInputManager = new VrInputManager();
+
   private secondaryInputManager = new VrInputManager();
+
   private vrSessionActive: boolean = false;
+
   private willDestroyController: AbortController = new AbortController();
 
   @tracked
@@ -143,19 +192,25 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.debug('Initializing head-up display menus...');
 
     // Menu group for hints.
-    this.hintMenuQueue = new MenuQueue({ detachedMenuGroups: this.detachedMenuGroups });
+    this.hintMenuQueue = new MenuQueue({
+      detachedMenuGroups: this.detachedMenuGroups,
+    });
     this.hintMenuQueue.position.z = -0.3;
     this.localUser.defaultCamera.add(this.hintMenuQueue);
 
     // Menu group for message boxes.
-    this.messageMenuQueue = new MenuQueue({ detachedMenuGroups: this.detachedMenuGroups });
+    this.messageMenuQueue = new MenuQueue({
+      detachedMenuGroups: this.detachedMenuGroups,
+    });
     this.messageMenuQueue.rotation.x = 0.45;
     this.messageMenuQueue.position.y = 0.1;
     this.messageMenuQueue.position.z = -0.3;
     this.localUser.defaultCamera.add(this.messageMenuQueue);
 
     // Menu group for previewing menus during development.
-    this.debugMenuGroup = new MenuGroup({ detachedMenuGroups: this.detachedMenuGroups });
+    this.debugMenuGroup = new MenuGroup({
+      detachedMenuGroups: this.detachedMenuGroups,
+    });
     this.debugMenuGroup.position.z = -0.35;
     this.localUser.defaultCamera.add(this.debugMenuGroup);
   }
@@ -190,13 +245,14 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Initialize timestamp and landscape data. If no timestamp is selected,
     // the latest timestamp is used. When there is no timestamp, we fall back
     // to the current time.
-    const timestamp = this.args.selectedTimestampRecords[0]?.timestamp ||
-      this.timestampRepo.getLatestTimestamp(this.args.landscapeData.structureLandscapeData.landscapeToken)?.timestamp ||
-      new Date().getTime();
+    const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
+    const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
+      || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
+      || new Date().getTime();
     this.timestampService.setTimestampLocally(
       timestamp,
       this.args.landscapeData.structureLandscapeData,
-      this.args.landscapeData.dynamicLandscapeData
+      this.args.landscapeData.dynamicLandscapeData,
     );
   }
 
@@ -231,9 +287,16 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       targetType: ApplicationMesh,
       triggerDown: (event) => this.addApplicationOrShowHint(event.target.dataModel, {
         position: event.intersection.point,
-        quaternion: new THREE.Quaternion().setFromEuler(new THREE.Euler(90 * THREE.MathUtils.DEG2RAD, 90 * THREE.MathUtils.DEG2RAD, 0))
-          .premultiply(this.vrLandscapeRenderer.landscapeObject3D.quaternion)
-      })
+        quaternion: new THREE.Quaternion()
+          .setFromEuler(
+            new THREE.Euler(
+              90 * THREE.MathUtils.DEG2RAD,
+              90 * THREE.MathUtils.DEG2RAD,
+              0,
+            ),
+          )
+          .premultiply(this.vrLandscapeRenderer.landscapeObject3D.quaternion),
+      }),
     });
 
     // When a component of an application is clicked, open it.
@@ -241,9 +304,12 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       targetType: ComponentMesh,
       triggerDown: (event) => {
         if (event.target.parent instanceof ApplicationObject3D) {
-          this.vrApplicationRenderer.toggleComponent(event.target, event.target.parent);
+          this.vrApplicationRenderer.toggleComponent(
+            event.target,
+            event.target.parent,
+          );
         }
-      }
+      },
     });
 
     // When the foundation of an application is clicked, close all components.
@@ -253,7 +319,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
         if (event.target.parent instanceof ApplicationObject3D) {
           this.vrApplicationRenderer.closeAllComponents(event.target.parent);
         }
-      }
+      },
     });
 
     // When a close icon is clicked, close the corresponding object.
@@ -261,7 +327,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       targetType: CloseIcon,
       triggerDown: (event) => event.target.close().then((closedSuccessfully: boolean) => {
         if (!closedSuccessfully) this.showHint('Object could not be closed');
-      })
+      }),
     });
 
     // Initialize menu interaction with other controller.
@@ -271,7 +337,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       triggerPress: (event) => event.target.triggerPress(event.intersection, event.value),
       triggerUp: (event) => event.target.triggerUp(event.intersection),
       hover: (event) => event.target.hover(event.intersection),
-      resetHover: (event) => event.target.resetHoverEffect()
+      resetHover: (event) => event.target.resetHoverEffect(),
     });
   }
 
@@ -279,47 +345,61 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.secondaryInputManager.addInputHandler({
       targetType: FloorMesh,
       triggerDown: (event) => this.localUser.teleportToPosition(event.intersection.point),
-      hover: (event) => {
-        if (event.controller?.teleportArea && event.controller?.ray) {
-          event.controller.teleportArea.showAbovePosition(event.intersection.point);
-          event.controller.teleportArea.visible = event.controller.ray.visible && event.controller.enableTeleport;
+      hover: ({ controller, intersection }) => {
+        if (controller?.teleportArea && controller?.ray) {
+          controller.teleportArea.showAbovePosition(intersection.point);
+          controller.teleportArea.visible = controller.ray.visible && controller.enableTeleport;
         }
       },
-      resetHover: (event) => {
-        if (event.controller?.teleportArea) {
-          event.controller.teleportArea.visible = false;
+      resetHover: ({ controller }) => {
+        if (controller?.teleportArea) {
+          controller.teleportArea.visible = false;
         }
       },
     });
 
     this.secondaryInputManager.addInputHandler({
       targetType: ApplicationObject3D,
-      triggerDown: (event) => this.highlightingService.highlightComponent(event.target, event.intersection.object)
+      triggerDown: (event) => this.highlightingService.highlightComponent(
+        event.target,
+        event.intersection.object,
+      ),
     });
   }
 
   private initControllers() {
     this.debug('Initializing controllers...');
 
-    this.localUser.setController1(this.initController({ gamepadIndex: CONTROLLER_1_ID }));
-    this.localUser.setController2(this.initController({ gamepadIndex: CONTROLLER_2_ID }));
+    this.localUser.setController1(
+      this.initController({ gamepadIndex: CONTROLLER_1_ID }),
+    );
+    this.localUser.setController2(
+      this.initController({ gamepadIndex: CONTROLLER_2_ID }),
+    );
   }
 
-  private initController({ gamepadIndex }: { gamepadIndex: ControllerId }): VRController {
+  private initController({
+    gamepadIndex,
+  }: {
+    gamepadIndex: ControllerId;
+  }): VRController {
     // Initialize the controller's menu group.
     const menuGroup = new MenuGroup({
-      detachedMenuGroups: this.detachedMenuGroups
+      detachedMenuGroups: this.detachedMenuGroups,
     });
 
     // Initialize controller.
     const controller = new VRController({
       gamepadIndex,
       scene: this.sceneService.scene,
-      bindings: new VRControllerBindingsList(this.makeControllerBindings(), menuGroup.controllerBindings),
+      bindings: new VRControllerBindingsList(
+        this.makeControllerBindings(),
+        menuGroup.controllerBindings,
+      ),
       gripSpace: this.localUser.renderer.xr.getControllerGrip(gamepadIndex),
       raySpace: this.localUser.renderer.xr.getController(gamepadIndex),
       color: new THREE.Color('red'),
-      menuGroup
+      menuGroup,
     });
     controller.setToDefaultAppearance();
 
@@ -328,11 +408,13 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     controller.raycaster.camera = this.localUser.defaultCamera;
 
     // Add connection event listeners.
-    controller.eventCallbacks.connected = (controller) => this.onControllerConnected(controller);
-    controller.eventCallbacks.disconnected = (controller) => this.onControllerDisconnected(controller);
+    controller.eventCallbacks.connected = () => this.onControllerConnected(controller);
+    controller.eventCallbacks.disconnected = () => this.onControllerDisconnected(controller);
 
     // Add hover event listeners.
-    controller.eventCallbacks.updateIntersectedObject = (controller) => this.handleHover(controller.intersectedObject, controller);
+    controller.eventCallbacks.updateIntersectedObject = () => {
+      this.handleHover(controller.intersectedObject, controller);
+    };
 
     // Position menus above controller at an angle.
     menuGroup.position.y += 0.15;
@@ -444,16 +526,18 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const tasks: Promise<any>[] = [];
 
     // Load all glTF models.
-    for (let file of files) {
+    for (const file of files) {
       if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
-        tasks.push(new Promise((resolve) => {
-          const gltfLoader = new GLTFLoader(loadingManager);
-          gltfLoader.load(file.name, (gltf) => {
-            const object = new GrabbableObjectWrapper(gltf.scene);
-            this.sceneService.scene.add(object);
-            resolve(null);
-          });
-        }));
+        tasks.push(
+          new Promise((resolve) => {
+            const gltfLoader = new GLTFLoader(loadingManager);
+            gltfLoader.load(file.name, (gltf) => {
+              const object = new GrabbableObjectWrapper(gltf.scene);
+              this.sceneService.scene.add(object);
+              resolve(null);
+            });
+          }),
+        );
       }
     }
 
@@ -461,22 +545,26 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     if (files.length === 1) {
       const file = files[0];
       if (file.name.endsWith('.jpg') || file.name.endsWith('.png')) {
-        tasks.push(new Promise((resolve) => {
-          const loader = new THREE.TextureLoader(loadingManager);
-          loader.load(file.name, (texture) => {
-            texture.minFilter = THREE.NearestFilter;
-            texture.generateMipmaps = false;
+        tasks.push(
+          new Promise((resolve) => {
+            const loader = new THREE.TextureLoader(loadingManager);
+            loader.load(file.name, (texture) => {
+              texture.minFilter = THREE.NearestFilter;
+              texture.generateMipmaps = false;
 
-            const geometry = new THREE.SphereGeometry(10, 256, 256);
-            const material = new THREE.MeshStandardMaterial({
-              map: texture,
-              side: THREE.BackSide,
-              displacementScale: - 4.0
+              const geometry = new THREE.SphereGeometry(10, 256, 256);
+              const material = new THREE.MeshStandardMaterial({
+                map: texture,
+                side: THREE.BackSide,
+                displacementScale: -4.0,
+              });
+              this.localUser.setPanoramaShere(
+                new THREE.Mesh(geometry, material),
+              );
+              resolve(null);
             });
-            this.localUser.setPanoramaShere(new THREE.Mesh(geometry, material));
-            resolve(null);
-          });
-        }));
+          }),
+        );
       }
     }
 
@@ -493,7 +581,9 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    * Main loop that is called once per frame.
    */
   private tick() {
-    if (this.isDestroyed) { return; }
+    if (this.isDestroyed) {
+      return;
+    }
 
     // Compute time since last tick.
     this.deltaTimeService.update();
@@ -528,20 +618,28 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    * Renders the scene.
    */
   private render() {
-    this.localUser.renderer.render(this.sceneService.scene, this.localUser.defaultCamera);
+    this.localUser.renderer.render(
+      this.sceneService.scene,
+      this.localUser.defaultCamera,
+    );
   }
 
   // #endregion MAIN LOOP
 
   // #region APPLICATION RENDERING
 
-  private async addApplicationOrShowHint(applicationModel: Application, args: AddApplicationArgs): Promise<ApplicationObject3D | null> {
+  private async addApplicationOrShowHint(
+    applicationModel: Application,
+    args: AddApplicationArgs,
+  ): Promise<ApplicationObject3D | null> {
     if (applicationModel.packages.length === 0) {
       this.showHint('No data available');
       return Promise.resolve(null);
     }
 
-    if (this.vrApplicationRenderer.isApplicationOpen(applicationModel.instanceId)) {
+    if (
+      this.vrApplicationRenderer.isApplicationOpen(applicationModel.instanceId)
+    ) {
       this.showHint('Application already opened');
       return Promise.resolve(null);
     }
@@ -557,8 +655,16 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Show the hint only if there is no hint with the text in the queue
     // already. This prevents the same hint to be shown multiple times when
     // the user repeats the action that causes the hint.
-    if (!this.hintMenuQueue.hasEnquedOrCurrentMenu((menu) => menu instanceof HintMenu && menu.titleItem.text === title && menu.textItem?.text === text)) {
-      this.hintMenuQueue.enqueueMenu(this.menuFactory.buildHintMenu(title, text));
+    if (
+      !this.hintMenuQueue.hasEnquedOrCurrentMenu(
+        (menu) => menu instanceof HintMenu
+          && menu.titleItem.text === title
+          && menu.textItem?.text === text,
+      )
+    ) {
+      this.hintMenuQueue.enqueueMenu(
+        this.menuFactory.buildHintMenu(title, text),
+      );
     }
   }
 
@@ -595,61 +701,81 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
       triggerButton: new VRControllerButtonBinding('Open / Close', {
         onButtonDown: (controller: VRController) => {
           if (!controller.intersectedObject) return;
-          this.primaryInputManager.handleTriggerDown(controller.intersectedObject, controller);
+          this.primaryInputManager.handleTriggerDown(
+            controller.intersectedObject,
+            controller,
+          );
         },
         onButtonPress: (controller: VRController, value: number) => {
           if (!controller.intersectedObject) return;
-          this.primaryInputManager.handleTriggerPress(controller.intersectedObject, value, controller);
+          this.primaryInputManager.handleTriggerPress(
+            controller.intersectedObject,
+            value,
+            controller,
+          );
         },
         onButtonUp: (controller: VRController) => {
           if (!controller.intersectedObject) return;
-          this.primaryInputManager.handleTriggerUp(controller.intersectedObject, controller);
-        }
+          this.primaryInputManager.handleTriggerUp(
+            controller.intersectedObject,
+            controller,
+          );
+        },
       }),
 
       menuButton: new VRControllerButtonBinding('Menu', {
-        onButtonDown: (controller) => this.openToolMenu(controller)
+        onButtonDown: (controller) => this.openToolMenu(controller),
       }),
 
       gripButton: new VRControllerButtonBinding('Grab Object', {
-        onButtonDown: (controller) => this.grabIntersectedObject(controller)
+        onButtonDown: (controller) => this.grabIntersectedObject(controller),
       }),
 
-      thumbpad: new VRControllerThumbpadBinding({
-        labelUp: 'Teleport / Highlight',
-        labelDown: 'Show Details'
-      }, {
-        onThumbpadDown: (controller, axes) => {
-          switch (VRControllerThumbpadBinding.getVerticalDirection(axes, { threshold: THUMBPAD_THRESHOLD })) {
-            case VRControllerThumbpadVerticalDirection.UP:
-              if (controller.intersectedObject) {
-                this.secondaryInputManager.handleTriggerDown(controller.intersectedObject);
-              }
-              break;
-            case VRControllerThumbpadVerticalDirection.DOWN:
-              if (controller.intersectedObject) {
-                const { object } = controller.intersectedObject;
-                if (isEntityMesh(object)) {
-                  this.openInfoMenu(controller, object);
+      thumbpad: new VRControllerThumbpadBinding(
+        {
+          labelUp: 'Teleport / Highlight',
+          labelDown: 'Show Details',
+        },
+        {
+          onThumbpadDown: (controller, axes) => {
+            const direction = VRControllerThumbpadBinding.getVerticalDirection(axes, {
+              threshold: THUMBPAD_THRESHOLD,
+            });
+            switch (direction) {
+              case VRControllerThumbpadVerticalDirection.UP:
+                if (controller.intersectedObject) {
+                  this.secondaryInputManager.handleTriggerDown(
+                    controller.intersectedObject,
+                  );
                 }
-              }
-              break;
-          }
-        }
-      })
-    })
+                break;
+              case VRControllerThumbpadVerticalDirection.DOWN:
+                if (controller.intersectedObject) {
+                  const { object } = controller.intersectedObject;
+                  if (isEntityMesh(object)) {
+                    this.openInfoMenu(controller, object);
+                  }
+                }
+                break;
+              default:
+                break;
+            }
+          },
+        },
+      ),
+    });
   }
 
   private grabIntersectedObject(controller: VRController) {
     if (!controller.intersectedObject || !controller.ray) return;
 
-    let object: THREE.Object3D | null = controller.intersectedObject.object;
-    while (object) {
-      if (isGrabbableObject(object)) {
-        controller.menuGroup.openMenu(this.menuFactory.buildGrabMenu(object));
+    let current: THREE.Object3D | null = controller.intersectedObject.object;
+    while (current) {
+      if (isGrabbableObject(current)) {
+        controller.menuGroup.openMenu(this.menuFactory.buildGrabMenu(current));
         break;
       } else {
-        object = object.parent;
+        current = current.parent;
       }
     }
   }
@@ -667,7 +793,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   @action
-  handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
+  handlePanning(delta: { x: number; y: number }, button: 1 | 2 | 3) {
     if (this.vrSessionActive) return;
 
     const LEFT_MOUSE_BUTTON = 1;
@@ -679,13 +805,16 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     switch (button) {
       case LEFT_MOUSE_BUTTON:
         // Move user.
-        const moveSpeed = 3.0;
-        this.localUser.moveInCameraDirection(new THREE.Vector3(-x * moveSpeed, 0, -y * moveSpeed), { enableY: false });
+        this.localUser.moveInCameraDirection(
+          new THREE.Vector3(-x * MOUSE_MOVE_SPEED, 0, -y * MOUSE_MOVE_SPEED),
+          { enableY: false },
+        );
         break;
       case RIGHT_MOUSE_BUTTON:
         // Rotate camera to look around.
-        const rotationSpeed = Math.PI;
-        this.localUser.rotateCamera(y * rotationSpeed, x * rotationSpeed);
+        this.localUser.rotateCamera(y * MOUSE_ROTATION_SPEED, x * MOUSE_ROTATION_SPEED);
+        break;
+      default:
         break;
     }
   }
@@ -702,7 +831,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.handleHover(intersection, null);
   }
 
-  private handleHover(intersection: THREE.Intersection | null, controller: VRController | null) {
+  private handleHover(
+    intersection: THREE.Intersection | null,
+    controller: VRController | null,
+  ) {
     if (intersection) {
       this.primaryInputManager.handleHover(intersection, controller);
       this.secondaryInputManager.handleHover(intersection, controller);
@@ -737,9 +869,13 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     const poses = VrPoses.getPoses(
       this.localUser.camera,
       this.localUser.controller1,
-      this.localUser.controller2
+      this.localUser.controller2,
     );
-    this.sender.sendPoseUpdate(poses.camera, poses.controller1, poses.controller2);
+    this.sender.sendPoseUpdate(
+      poses.camera,
+      poses.controller1,
+      poses.controller2,
+    );
   }
 
   private sendInitialControllerConnectState() {
@@ -771,8 +907,10 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.remoteUsers.removeAllRemoteUsers();
 
     // Reset highlighting colors.
-    for (let application of this.vrApplicationRenderer.getOpenApplications()) {
-      application.setHighlightingColor(this.configuration.applicationColors.highlightedEntity);
+    for (const application of this.vrApplicationRenderer.getOpenApplications()) {
+      application.setHighlightingColor(
+        this.configuration.applicationColors.highlightedEntity,
+      );
     }
 
     this.localUser.disconnect();
@@ -786,22 +924,25 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // simulating the event of a user connecting.
     for (let i = 0; i < users.length; i++) {
       const userData = users[i];
-      this.onUserConnected({
-        event: USER_CONNECTED_EVENT,
-        id: userData.id,
-        name: userData.name,
-        color: userData.color,
-        position: userData.position,
-        quaternion: userData.quaternion
-      }, false);
-      for (let controller of userData.controllers) {
+      this.onUserConnected(
+        {
+          event: USER_CONNECTED_EVENT,
+          id: userData.id,
+          name: userData.name,
+          color: userData.color,
+          position: userData.position,
+          quaternion: userData.quaternion,
+        },
+        false,
+      );
+      for (const controller of userData.controllers) {
         this.onUserControllerConnect({
           event: FORWARDED_EVENT,
           userId: userData.id,
           originalMessage: {
             event: USER_CONTROLLER_CONNECT_EVENT,
-            controller
-          }
+            controller,
+          },
         });
       }
     }
@@ -810,7 +951,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     this.localUser.connected({
       id: self.id,
       name: self.name,
-      color: new THREE.Color(...self.color)
+      color: new THREE.Color(...self.color),
     });
 
     // Send controllers.
@@ -818,25 +959,29 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   onUserConnected(
-    { id, name, color, position, quaternion }: UserConnectedMessage,
-    showConnectMessage = true
+    {
+      id, name, color, position, quaternion,
+    }: UserConnectedMessage,
+    showConnectMessage = true,
   ): void {
     const remoteUser = new RemoteVrUser({
       userName: name,
       userId: id,
       color: new THREE.Color(...color),
       state: 'online',
-      localUser: this.localUser
+      localUser: this.localUser,
     });
     this.remoteUsers.addRemoteUser(remoteUser, { position, quaternion });
 
     if (showConnectMessage) {
-      this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
-        title: 'User connected',
-        text: remoteUser.userName,
-        color: `#${remoteUser.color.getHexString()}`,
-        time: 3.0,
-      }));
+      this.messageMenuQueue.enqueueMenu(
+        this.menuFactory.buildMessageBoxMenu({
+          title: 'User connected',
+          text: remoteUser.userName,
+          color: `#${remoteUser.color.getHexString()}`,
+          time: 3.0,
+        }),
+      );
     }
   }
 
@@ -845,7 +990,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    */
   onUserPositions({
     userId,
-    originalMessage: { camera, controller1, controller2 }
+    originalMessage: { camera, controller1, controller2 },
   }: ForwardedMessage<UserPositionsMessage>): void {
     const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
     if (!remoteUser) return;
@@ -860,7 +1005,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
    */
   onPingUpdate({
     userId,
-    originalMessage: { controllerId, isPinging }
+    originalMessage: { controllerId, isPinging },
   }: ForwardedMessage<PingUpdateMessage>): void {
     const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
     if (!remoteUser) return;
@@ -869,26 +1014,41 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   onTimestampUpdate({
-    originalMessage: { timestamp }
+    originalMessage: { timestamp },
   }: ForwardedMessage<TimestampUpdateMessage>): void {
-    this.roomSerializer.preserveRoom(() => this.timestampService.updateTimestampLocally(timestamp), {
-      restoreLandscapeData: false
-    });
+    this.roomSerializer.preserveRoom(
+      () => this.timestampService.updateTimestampLocally(timestamp),
+      {
+        restoreLandscapeData: false,
+      },
+    );
   }
 
   onUserControllerConnect({
     userId,
-    originalMessage: { controller: { controllerId, assetUrl, position, quaternion, intersection } }
+    originalMessage: {
+      controller: {
+        controllerId,
+        assetUrl,
+        position,
+        quaternion,
+        intersection,
+      },
+    },
   }: ForwardedMessage<UserControllerConnectMessage>): void {
     const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
     if (!remoteUser) return;
 
-    remoteUser.initController(controllerId, assetUrl, { position, quaternion, intersection });
+    remoteUser.initController(controllerId, assetUrl, {
+      position,
+      quaternion,
+      intersection,
+    });
   }
 
   onUserControllerDisconnect({
     userId,
-    originalMessage: { controllerId, }
+    originalMessage: { controllerId },
   }: ForwardedMessage<UserControllerDisconnectMessage>): void {
     const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
     if (!remoteUser) return;
@@ -905,23 +1065,33 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     // Remove user and show disconnect notification.
     const removedUser = this.remoteUsers.removeRemoteUserById(id);
     if (removedUser) {
-      this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
-        title: 'User disconnected',
-        text: removedUser.userName,
-        color: `#${removedUser.color.getHexString()}`,
-        time: 3.0,
-      }));
+      this.messageMenuQueue.enqueueMenu(
+        this.menuFactory.buildMessageBoxMenu({
+          title: 'User disconnected',
+          text: removedUser.userName,
+          color: `#${removedUser.color.getHexString()}`,
+          time: 3.0,
+        }),
+      );
     }
   }
 
-  async onInitialLandscape({ landscape, openApps, detachedMenus }: InitialLandscapeMessage): Promise<void> {
+  async onInitialLandscape({
+    landscape,
+    openApps,
+    detachedMenus,
+  }: InitialLandscapeMessage): Promise<void> {
     this.roomSerializer.restoreRoom({ landscape, openApps, detachedMenus });
   }
 
   onAppOpened({
-    originalMessage: { id, position, quaternion, scale }
+    originalMessage: {
+      id, position, quaternion, scale,
+    },
   }: ForwardedMessage<AppOpenedMessage>): void {
-    const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(id);
+    const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(
+      id,
+    );
     if (application) {
       this.vrApplicationRenderer.addApplicationLocally(application, {
         position: new THREE.Vector3(...position),
@@ -932,19 +1102,21 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   onAppClosed({
-    originalMessage: { appId }
+    originalMessage: { appId },
   }: ForwardedMessage<AppClosedMessage>): void {
     const application = this.vrApplicationRenderer.getApplicationById(appId);
     if (application) this.vrApplicationRenderer.removeApplicationLocally(application);
   }
 
   onObjectMoved({
-    originalMessage: { objectId, position, quaternion, scale }
+    originalMessage: {
+      objectId, position, quaternion, scale,
+    },
   }: ForwardedMessage<ObjectMovedMessage>): void {
     // Find moved object in the scene.
     const movedObject = findGrabbableObject(this.sceneService.scene, objectId);
     if (!movedObject) {
-      console.error('Could not find moved object', objectId);
+      this.debug('Could not find moved object', objectId);
       return;
     }
 
@@ -954,9 +1126,11 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   onComponentUpdate({
-    originalMessage: { isFoundation, appId, componentId }
+    originalMessage: { isFoundation, appId, componentId },
   }: ForwardedMessage<ComponentUpdateMessage>): void {
-    const applicationObject3D = this.vrApplicationRenderer.getApplicationById(appId);
+    const applicationObject3D = this.vrApplicationRenderer.getApplicationById(
+      appId,
+    );
     if (!applicationObject3D) return;
 
     const componentMesh = applicationObject3D.getBoxMeshbyModelId(componentId);
@@ -964,13 +1138,18 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     if (isFoundation) {
       this.vrApplicationRenderer.closeAllComponentsLocally(applicationObject3D);
     } else if (componentMesh instanceof ComponentMesh) {
-      this.vrApplicationRenderer.toggleComponentLocally(componentMesh, applicationObject3D);
+      this.vrApplicationRenderer.toggleComponentLocally(
+        componentMesh,
+        applicationObject3D,
+      );
     }
   }
 
   onHighlightingUpdate({
     userId,
-    originalMessage: { isHighlighted, appId, entityType, entityId }
+    originalMessage: {
+      isHighlighted, appId, entityType, entityId,
+    },
   }: ForwardedMessage<HighlightingUpdateMessage>): void {
     const application = this.vrApplicationRenderer.getApplicationById(appId);
     if (!application) return;
@@ -979,49 +1158,67 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
     if (!user) return;
 
     if (isHighlighted) {
-      this.highlightingService.hightlightComponentLocallyByTypeAndId(application, {
-        entityType, entityId,
-        color: user.color
-      });
+      this.highlightingService.hightlightComponentLocallyByTypeAndId(
+        application,
+        {
+          entityType,
+          entityId,
+          color: user.color,
+        },
+      );
     } else {
       this.highlightingService.removeHighlightingLocally(application);
     }
   }
 
   /**
-  * Updates the state of given user to spectating or connected.
-  * Hides them if spectating.
-  *
-  * @param {string} userId - The user's id.
-  * @param {boolean} isSpectating - True, if the user is now spectating, else false.
-  */
+   * Updates the state of given user to spectating or connected.
+   * Hides them if spectating.
+   *
+   * @param {string} userId - The user's id.
+   * @param {boolean} isSpectating - True, if the user is now spectating, else false.
+   */
   onSpectatingUpdate({
     userId,
-    originalMessage: { isSpectating }
+    originalMessage: { isSpectating },
   }: ForwardedMessage<SpectatingUpdateMessage>): void {
-    const remoteUser = this.remoteUsers.setRemoteUserSpectatingById(userId, isSpectating);
+    const remoteUser = this.remoteUsers.setRemoteUserSpectatingById(
+      userId,
+      isSpectating,
+    );
     if (!remoteUser) return;
 
     const remoteUserHexColor = `#${remoteUser.color.getHexString()}`;
     if (isSpectating) {
-      this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
-        title: remoteUser.userName,
-        text: ' is now spectating',
-        color: remoteUserHexColor,
-        time: 3.0
-      }));
+      this.messageMenuQueue.enqueueMenu(
+        this.menuFactory.buildMessageBoxMenu({
+          title: remoteUser.userName,
+          text: ' is now spectating',
+          color: remoteUserHexColor,
+          time: 3.0,
+        }),
+      );
     } else {
-      this.messageMenuQueue.enqueueMenu(this.menuFactory.buildMessageBoxMenu({
-        title: remoteUser.userName,
-        text: ' stopped spectating',
-        color: remoteUserHexColor,
-        time: 3.0
-      }));
+      this.messageMenuQueue.enqueueMenu(
+        this.menuFactory.buildMessageBoxMenu({
+          title: remoteUser.userName,
+          text: ' stopped spectating',
+          color: remoteUserHexColor,
+          time: 3.0,
+        }),
+      );
     }
   }
 
-  onMenuDetached({ objectId, entityType, detachId, position, quaternion, scale }: MenuDetachedForwardMessage) {
-    let object = this.sceneService.findMeshByModelId(entityType, detachId);
+  onMenuDetached({
+    objectId,
+    entityType,
+    detachId,
+    position,
+    quaternion,
+    scale,
+  }: MenuDetachedForwardMessage) {
+    const object = this.sceneService.findMeshByModelId(entityType, detachId);
     if (isEntityMesh(object)) {
       const menu = this.menuFactory.buildInfoMenu(object);
       menu.position.fromArray(position);
@@ -1032,7 +1229,7 @@ export default class VrRendering extends Component<Args> implements VrMessageLis
   }
 
   onDetachedMenuClosed({
-    originalMessage: { menuId }
+    originalMessage: { menuId },
   }: ForwardedMessage<DetachedMenuClosedMessage>): void {
     this.detachedMenuGroups.removeDetachedMenuLocallyById(menuId);
   }

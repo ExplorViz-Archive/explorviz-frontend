@@ -16,9 +16,9 @@ import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/land
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import THREE from 'three';
-import VrLandscapeObject3D from "../utils/view-objects/landscape/vr-landscape-object-3d";
-import VrAssetRepository from "./vr-asset-repo";
-import VrSceneService from "./vr-scene";
+import VrLandscapeObject3D from '../utils/view-objects/landscape/vr-landscape-object-3d';
+import VrAssetRepository from './vr-asset-repo';
+import VrSceneService from './vr-scene';
 
 // Scalar with which the landscape is scaled (evenly in all dimensions)
 const LANDSCAPE_SCALAR = 0.1;
@@ -29,13 +29,22 @@ const LANDSCAPE_DEPTH = 0.7;
 export default class VrLandscapeRenderer extends Service {
   private debug = debugLogger('VrLandscapeRenderer');
 
-  @service('configuration') private configuration!: Configuration;
-  @service('vr-asset-repo') private assetRepo!: VrAssetRepository;
-  @service('vr-scene') private sceneService!: VrSceneService;
-  @service() private worker!: any;
+  @service('configuration')
+  private configuration!: Configuration;
+
+  @service('vr-asset-repo')
+  private assetRepo!: VrAssetRepository;
+
+  @service('vr-scene')
+  private sceneService!: VrSceneService;
+
+  @service()
+  private worker!: any;
 
   private elk: ELK;
+
   private imageLoader: ImageLoader = new ImageLoader();
+
   private landscapeLabeler = new LandscapeLabeler();
 
   readonly landscapeObject3D: LandscapeObject3D;
@@ -49,18 +58,32 @@ export default class VrLandscapeRenderer extends Service {
 
     // Create landscape object. The actual landscape data is not available
     // until the VR rendering component is created.
-    this.landscapeObject3D = new VrLandscapeObject3D({ landscapeToken: '', nodes: [] });
+    this.landscapeObject3D = new VrLandscapeObject3D({
+      landscapeToken: '',
+      nodes: [],
+    });
     this.sceneService.scene.add(this.landscapeObject3D);
   }
 
-  async updateLandscapeData(structureLandscapeData: StructureLandscapeData, dynamicLandscapeData: DynamicLandscapeData): Promise<void> {
-    await perform(this.populateLandscape, structureLandscapeData, dynamicLandscapeData);
+  async updateLandscapeData(
+    structureLandscapeData: StructureLandscapeData,
+    dynamicLandscapeData: DynamicLandscapeData,
+  ): Promise<void> {
+    await perform(
+      this.populateLandscape,
+      structureLandscapeData,
+      dynamicLandscapeData,
+    );
   }
 
   // #region LANDSCAPE POSITIONING
 
   private resetScale() {
-    this.landscapeObject3D.scale.set(LANDSCAPE_SCALAR, LANDSCAPE_SCALAR, LANDSCAPE_SCALAR);
+    this.landscapeObject3D.scale.set(
+      LANDSCAPE_SCALAR,
+      LANDSCAPE_SCALAR,
+      LANDSCAPE_SCALAR,
+    );
   }
 
   private resetRotation() {
@@ -77,7 +100,9 @@ export default class VrLandscapeRenderer extends Service {
     const centerFloor = new THREE.Vector3();
     bboxFloor.getCenter(centerFloor);
 
-    const bboxLandscape = new THREE.Box3().setFromObject(this.landscapeObject3D);
+    const bboxLandscape = new THREE.Box3().setFromObject(
+      this.landscapeObject3D,
+    );
 
     // Calculate center of the landscape.
     const centerLandscape = new THREE.Vector3();
@@ -89,12 +114,14 @@ export default class VrLandscapeRenderer extends Service {
 
     // Check distance between floor and landscape
     if (bboxLandscape.min.y > bboxFloor.max.y) {
-      this.landscapeObject3D.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
+      this.landscapeObject3D.position.y
+        += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
     }
 
     // Check if landscape is underneath the floor
     if (bboxLandscape.min.y < bboxFloor.min.y) {
-      this.landscapeObject3D.position.y += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
+      this.landscapeObject3D.position.y
+        += bboxFloor.max.y - bboxLandscape.min.y + 0.001;
     }
   }
 
@@ -119,7 +146,10 @@ export default class VrLandscapeRenderer extends Service {
    * @method populateLandscape
    */
   @restartableTask
-  private *populateLandscape(structureLandscapeData: StructureLandscapeData, dynamicLandscapeData: DynamicLandscapeData): any {
+  private* populateLandscape(
+    structureLandscapeData: StructureLandscapeData,
+    dynamicLandscapeData: DynamicLandscapeData,
+  ): any {
     this.debug('populate landscape-rendering');
 
     // Update landscape model.
@@ -127,10 +157,16 @@ export default class VrLandscapeRenderer extends Service {
 
     // Run Klay layouting in 3 steps within workers
     try {
-      const applicationCommunications = computeApplicationCommunication(structureLandscapeData, dynamicLandscapeData);
+      const applicationCommunications = computeApplicationCommunication(
+        structureLandscapeData,
+        dynamicLandscapeData,
+      );
 
       // Do layout pre-processing (1st step)
-      const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
+      const {
+        graph,
+        modelIdToPoints,
+      }: Layout1Return = yield this.worker.postMessage('layout1', {
         structureLandscapeData,
         applicationCommunications,
       });
@@ -157,33 +193,53 @@ export default class VrLandscapeRenderer extends Service {
       const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
 
       // Convert the simple to a PlaneLayout map
-      LandscapeRendering.convertToPlaneLayoutMap(modelIdToLayout, modelIdToPlaneLayout);
+      LandscapeRendering.convertToPlaneLayoutMap(
+        modelIdToLayout,
+        modelIdToPlaneLayout,
+      );
 
       // Compute center of landscape
-      const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
+      const landscapeRect = this.landscapeObject3D.getMinMaxRect(
+        modelIdToPlaneLayout,
+      );
       const centerPoint = landscapeRect.center;
 
       // Draw boxes for nodes
       structureLandscapeData.nodes.forEach((node: Node) => {
-        this.renderNode(node, modelIdToPlaneLayout.get(node.ipAddress), centerPoint);
+        this.renderNode(
+          node,
+          modelIdToPlaneLayout.get(node.ipAddress),
+          centerPoint,
+        );
 
         const { applications } = node;
 
         // Draw boxes for applications
         applications.forEach((application: Application) => {
-          this.renderApplication(application, modelIdToPlaneLayout.get(application.instanceId),
-            centerPoint);
+          this.renderApplication(
+            application,
+            modelIdToPlaneLayout.get(application.instanceId),
+            centerPoint,
+          );
         });
       });
 
       // Render application communication
       const color = this.configuration.landscapeColors.communication;
-      const tiles = LandscapeCommunicationRendering
-        .computeCommunicationTiles(applicationCommunications, modelIdToPointsComplete,
-          color, LANDSCAPE_DEPTH / 2 + 0.25);
+      const tiles = LandscapeCommunicationRendering.computeCommunicationTiles(
+        applicationCommunications,
+        modelIdToPointsComplete,
+        color,
+        LANDSCAPE_DEPTH / 2 + 0.25,
+      );
 
-      LandscapeCommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
-        centerPoint, 0.004, 0.028);
+      LandscapeCommunicationRendering.addCommunicationLineDrawing(
+        tiles,
+        this.landscapeObject3D,
+        centerPoint,
+        0.004,
+        0.028,
+      );
 
       // Reset position of landscape.
       this.resetScale();
@@ -208,9 +264,14 @@ export default class VrLandscapeRenderer extends Service {
    * @param layout Layout data to position the mesh correctly
    * @param centerPoint Offset of landscape object
    */
-  private renderNode(node: Node, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
+  private renderNode(
+    node: Node,
+    layout: PlaneLayout | undefined,
+    centerPoint: THREE.Vector2,
+  ) {
+    if (!layout) {
+      return;
+    }
 
     // Create node mesh
     const nodeMesh = new NodeMesh(
@@ -229,7 +290,12 @@ export default class VrLandscapeRenderer extends Service {
     const labelText = nodeMesh.getDisplayName();
 
     if (this.assetRepo.font) {
-      this.landscapeLabeler.addNodeTextLabel(nodeMesh, labelText, this.assetRepo.font, this.configuration.landscapeColors.nodeText);
+      this.landscapeLabeler.addNodeTextLabel(
+        nodeMesh,
+        labelText,
+        this.assetRepo.font,
+        this.configuration.landscapeColors.nodeText,
+      );
     }
 
     // Add to scene
@@ -244,9 +310,14 @@ export default class VrLandscapeRenderer extends Service {
    * @param layout Layout data to position the mesh correctly
    * @param centerPoint Offset of landscape object
    */
-  private renderApplication(application: Application, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
+  private renderApplication(
+    application: Application,
+    layout: PlaneLayout | undefined,
+    centerPoint: THREE.Vector2,
+  ) {
+    if (!layout) {
+      return;
+    }
 
     // Create application mesh
     const applicationMesh = new ApplicationMesh(
@@ -262,8 +333,10 @@ export default class VrLandscapeRenderer extends Service {
     // Create and add label + icon
     if (this.assetRepo.font) {
       this.landscapeLabeler.addApplicationTextLabel(
-        applicationMesh, application.name, this.assetRepo.font,
-        this.configuration.landscapeColors.applicationText
+        applicationMesh,
+        application.name,
+        this.assetRepo.font,
+        this.configuration.landscapeColors.applicationText,
       );
     }
     LandscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);

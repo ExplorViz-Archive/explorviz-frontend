@@ -5,29 +5,35 @@ export const DEFAULT_BUTTON_TEXT_COLOR = '#ffc338';
 export const DEFAULT_BUTTON_HOVER_COLOR = '#929292';
 
 export type TextbuttonItemArgs = InteractiveItemArgs & {
-  text: string,
-  fontSize: number,
-  width: number,
-  height: number,
-  buttonColor?: string,
-  textColor?: string,
-  hoverColor?: string,
+  text: string;
+  fontSize: number;
+  width: number;
+  height: number;
+  buttonColor?: string;
+  textColor?: string;
+  hoverColor?: string;
 };
 
 export default class TextbuttonItem extends InteractiveItem {
   text: string;
+
   fontSize: number;
 
   width: number;
+
   height: number;
 
   textColor: string;
+
   buttonColor: string;
+
   hoverColor: string;
 
   constructor({
-    text, fontSize,
-    width, height,
+    text,
+    fontSize,
+    width,
+    height,
     buttonColor = DEFAULT_BUTTON_COLOR,
     textColor = DEFAULT_BUTTON_TEXT_COLOR,
     hoverColor = DEFAULT_BUTTON_HOVER_COLOR,
@@ -69,7 +75,7 @@ export default class TextbuttonItem extends InteractiveItem {
     ctx.fillText(
       this.text,
       this.position.x + this.width / 2,
-      this.position.y + this.height / 2
+      this.position.y + this.height / 2,
     );
     ctx.restore();
   }

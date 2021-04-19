@@ -18,15 +18,15 @@ export default class VrDropArea extends Component<VrDropAreaArgs> {
     const files = [];
     if (event.dataTransfer?.items) {
       // Use DataTransferItemList interface to access the files.
-      for (var i = 0; i < event.dataTransfer.items.length; i++) {
+      for (let i = 0; i < event.dataTransfer.items.length; i++) {
         if (event.dataTransfer.items[i].kind === 'file') {
-          var file = event.dataTransfer.items[i].getAsFile();
+          const file = event.dataTransfer.items[i].getAsFile();
           if (file) files.push(file);
         }
       }
     } else if (event.dataTransfer?.files) {
       // Use DataTransfer interface to access the files.
-      for (var i = 0; i < event.dataTransfer.files.length; i++) {
+      for (let i = 0; i < event.dataTransfer.files.length; i++) {
         files.push(event.dataTransfer.files[i]);
       }
     }
@@ -41,7 +41,7 @@ export default class VrDropArea extends Component<VrDropAreaArgs> {
   }
 
   @action
-  onDragleave(_event: DragEvent) {
+  onDragleave() {
     this.isDraggedOver = false;
   }
 }

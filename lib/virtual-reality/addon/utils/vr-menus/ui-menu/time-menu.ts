@@ -1,28 +1,34 @@
-import VrTimestampService from "virtual-reality/services/vr-timestamp";
-import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
-import VRControllerThumbpadBinding, { VRControllerThumbpadHorizontalDirection } from "virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding";
-import VrRoomSerializer from "../../../services/vr-room-serializer";
-import ArrowbuttonItem from "../items/arrowbutton-item";
-import TextItem from "../items/text-item";
-import TextbuttonItem from "../items/textbutton-item";
-import TitleItem from "../items/title-item";
-import UiMenu, { UiMenuArgs } from "../ui-menu";
+import VrTimestampService from 'virtual-reality/services/vr-timestamp';
+import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
+import VRControllerThumbpadBinding, { VRControllerThumbpadHorizontalDirection } from 'virtual-reality/utils/vr-controller/vr-controller-thumbpad-binding';
+import VrRoomSerializer from '../../../services/vr-room-serializer';
+import ArrowbuttonItem from '../items/arrowbutton-item';
+import TextItem from '../items/text-item';
+import TextbuttonItem from '../items/textbutton-item';
+import TitleItem from '../items/title-item';
+import UiMenu, { UiMenuArgs } from '../ui-menu';
 
 const MS_PER_SECOND = 1000;
 const TIMESTAMP_INTERVAL = 10 * MS_PER_SECOND;
 
 export type TimeMenuArgs = UiMenuArgs & {
-  roomSerializer: VrRoomSerializer,
-  timestampService: VrTimestampService,
+  roomSerializer: VrRoomSerializer;
+  timestampService: VrTimestampService;
 };
 
 export default class TimeMenu extends UiMenu {
   private date: Date;
+
   private selectButton: TextbuttonItem;
+
   private roomSerializer: VrRoomSerializer;
+
   private timeBackButton: ArrowbuttonItem;
+
   private timeForthButton: ArrowbuttonItem;
+
   private timestampService: VrTimestampService;
+
   private timestampTextItem: TextItem;
 
   constructor({ roomSerializer, timestampService, ...args }: TimeMenuArgs) {
@@ -55,7 +61,7 @@ export default class TimeMenu extends UiMenu {
       onTriggerPressed: (value) => {
         this.setDateBackBy(value * TIMESTAMP_INTERVAL);
         this.redrawMenu();
-      }
+      },
     });
     this.items.push(this.timeBackButton);
 
@@ -67,20 +73,20 @@ export default class TimeMenu extends UiMenu {
       onTriggerPressed: (value) => {
         this.setDateForthBy(value * TIMESTAMP_INTERVAL);
         this.redrawMenu();
-      }
+      },
     });
     this.items.push(this.timeForthButton);
 
     this.selectButton = new TextbuttonItem({
       text: 'Select',
-      position: { x: 100, y: 320, },
+      position: { x: 100, y: 320 },
       width: 316,
       height: 50,
       fontSize: 28,
       onTriggerDown: () => {
-        this.applySelectedTimestamp()
+        this.applySelectedTimestamp();
         this.closeMenu();
-      }
+      },
     });
     this.items.push(this.selectButton);
 
@@ -90,7 +96,7 @@ export default class TimeMenu extends UiMenu {
   onUpdateMenu(delta: number) {
     super.onUpdateMenu(delta);
     const nextDate = this.date.toLocaleString();
-    if (nextDate != this.timestampTextItem.text) {
+    if (nextDate !== this.timestampTextItem.text) {
       this.timestampTextItem.text = nextDate;
       this.redrawMenu();
     }
@@ -105,32 +111,40 @@ export default class TimeMenu extends UiMenu {
   }
 
   private applySelectedTimestamp() {
-    this.roomSerializer.preserveRoom(() => this.timestampService.updateTimestamp(this.date.getTime()), {
-      restoreLandscapeData: false
-    });
+    this.roomSerializer.preserveRoom(
+      () => this.timestampService.updateTimestamp(this.date.getTime()),
+      {
+        restoreLandscapeData: false,
+      },
+    );
   }
 
   makeThumbpadBinding() {
-    return new VRControllerThumbpadBinding({ labelLeft: 'Earlier', labelRight: 'Later' }, {
-      onThumbpadDown: ((_, axes) => {
-        switch (VRControllerThumbpadBinding.getHorizontalDirection(axes)) {
-          case VRControllerThumbpadHorizontalDirection.LEFT:
-            this.setDateBackBy(TIMESTAMP_INTERVAL);
-            this.timeBackButton.enableHoverEffectByButton();
-            break;
-          case VRControllerThumbpadHorizontalDirection.RIGHT:
-            this.setDateForthBy(TIMESTAMP_INTERVAL);
-            this.timeForthButton.enableHoverEffectByButton();
-            break;
-        }
-        this.redrawMenu();
-      }),
-      onThumbpadUp: (() => {
-        this.timeForthButton.resetHoverEffectByButton();
-        this.timeBackButton.resetHoverEffectByButton();
-        this.redrawMenu();
-      })
-    });
+    return new VRControllerThumbpadBinding(
+      { labelLeft: 'Earlier', labelRight: 'Later' },
+      {
+        onThumbpadDown: (_, axes) => {
+          switch (VRControllerThumbpadBinding.getHorizontalDirection(axes)) {
+            case VRControllerThumbpadHorizontalDirection.LEFT:
+              this.setDateBackBy(TIMESTAMP_INTERVAL);
+              this.timeBackButton.enableHoverEffectByButton();
+              break;
+            case VRControllerThumbpadHorizontalDirection.RIGHT:
+              this.setDateForthBy(TIMESTAMP_INTERVAL);
+              this.timeForthButton.enableHoverEffectByButton();
+              break;
+            default:
+              break;
+          }
+          this.redrawMenu();
+        },
+        onThumbpadUp: () => {
+          this.timeForthButton.resetHoverEffectByButton();
+          this.timeBackButton.resetHoverEffectByButton();
+          this.redrawMenu();
+        },
+      },
+    );
   }
 
   makeGripButtonBinding() {
@@ -142,7 +156,7 @@ export default class TimeMenu extends UiMenu {
       onButtonUp: () => {
         this.applySelectedTimestamp();
         this.closeMenu();
-      }
+      },
     });
   }
 }

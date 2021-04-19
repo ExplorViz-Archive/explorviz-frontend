@@ -1,10 +1,10 @@
-import { GrabbableObject } from "virtual-reality/utils/view-objects/interfaces/grabbable-object";
-import { DetachableMenu } from "./detachable-menu";
+import { GrabbableObject } from 'virtual-reality/utils/view-objects/interfaces/grabbable-object';
+import { DetachableMenu } from './detachable-menu';
 import MenuGroup, { MenuGroupArgs } from './menu-group';
 
 export type DetachedMenuGroupArgs = MenuGroupArgs & {
-  menu: DetachableMenu,
-  menuId: string | null
+  menu: DetachableMenu;
+  menuId: string | null;
 };
 
 /**
@@ -12,7 +12,9 @@ export type DetachedMenuGroupArgs = MenuGroupArgs & {
  *
  * Since this is a menu group, the detached menu can still open sub menus.
  */
-export default class DetachedMenuGroup extends MenuGroup implements GrabbableObject {
+export default class DetachedMenuGroup
+  extends MenuGroup
+  implements GrabbableObject {
   private menuId: string | null;
 
   constructor({ menu, menuId, ...args }: DetachedMenuGroupArgs) {

@@ -1,9 +1,13 @@
 export type LobbyJoinedResponse = {
-  ticketId: string,
+  ticketId: string;
 };
 
-export function isLobbyJoinedResponse(response: any): response is LobbyJoinedResponse {
-  return response !== null
+export function isLobbyJoinedResponse(
+  response: any,
+): response is LobbyJoinedResponse {
+  return (
+    response !== null
     && typeof response === 'object'
-    && typeof response.ticketId === 'string';
+    && typeof response.ticketId === 'string'
+  );
 }

@@ -1,26 +1,26 @@
 import THREE from 'three';
 import TextTexture from 'virtual-reality/utils/vr-helpers/text-texture';
-import VRControllerButtonBinding from "../../vr-controller/vr-controller-button-binding";
-import VRControllerThumbpadBinding, { VRControllerThumbpadHorizontalDirection } from "../../vr-controller/vr-controller-thumbpad-binding";
+import VRControllerButtonBinding from '../../vr-controller/vr-controller-button-binding';
+import VRControllerThumbpadBinding, { VRControllerThumbpadHorizontalDirection } from '../../vr-controller/vr-controller-thumbpad-binding';
 import { BaseMenuArgs } from '../base-menu';
 import InteractiveMenu from '../interactive-menu';
 import { SIZE_RESOLUTION_FACTOR } from '../ui-menu';
 
 type ToolArgs = {
-  label: string,
-  icon: string,
-  action: () => void
+  label: string;
+  icon: string;
+  action: () => void;
 };
 
 type Tool = {
-  object: THREE.Object3D,
-  action: () => void,
-  toggleSelect: (isSelected: boolean) => void,
-  toggleHover: (isHovered: boolean) => void
+  object: THREE.Object3D;
+  action: () => void;
+  toggleSelect: (isSelected: boolean) => void;
+  toggleHover: (isHovered: boolean) => void;
 };
 
-const FOREGROUND_COLOR = new THREE.Color(0xFFFFFF);
-const SELECTED_FOREGROUND_COLOR = new THREE.Color(0xFFC338);
+const FOREGROUND_COLOR = new THREE.Color(0xffffff);
+const SELECTED_FOREGROUND_COLOR = new THREE.Color(0xffc338);
 const BACKGROUND_COLOR = new THREE.Color(0x444444);
 const ICON_COLOR = FOREGROUND_COLOR;
 const SELECTED_ICON_COLOR = SELECTED_FOREGROUND_COLOR;
@@ -48,10 +48,13 @@ const THUMBPAD_THRESHOLD = 0.5;
 
 export default class ToolMenu extends InteractiveMenu {
   private tools: Tool[];
+
   private currentSelectAnimation: THREE.AnimationAction | null;
 
   private defaultToolIndex: number = 0;
+
   private selectedTool: Tool | null = null;
+
   private hoveredTool: Tool | null = null;
 
   constructor(args: BaseMenuArgs) {
@@ -62,17 +65,17 @@ export default class ToolMenu extends InteractiveMenu {
     this.addTool({
       label: 'Zoom',
       icon: 'search',
-      action: () => this.menuGroup?.replaceMenu(this.menuFactory.buildZoomMenu())
+      action: () => this.menuGroup?.replaceMenu(this.menuFactory.buildZoomMenu()),
     });
     this.addDefaultTool({
       label: 'Options',
       icon: 'gear',
-      action: () => this.menuGroup?.replaceMenu(this.menuFactory.buildMainMenu())
+      action: () => this.menuGroup?.replaceMenu(this.menuFactory.buildMainMenu()),
     });
     this.addTool({
       label: 'Ping',
       icon: 'north-star',
-      action: () => this.menuGroup?.replaceMenu(this.menuFactory.buildPingMenu())
+      action: () => this.menuGroup?.replaceMenu(this.menuFactory.buildPingMenu()),
     });
 
     this.selectTool(this.defaultToolIndex, { enableAnimation: false });
@@ -114,10 +117,14 @@ export default class ToolMenu extends InteractiveMenu {
         labelGroup.visible = isHovered || this.selectedTool === tool;
       },
       toggleSelect: (isSelected: boolean) => {
-        backgroundMesh.material.opacity = isSelected ? SELECTED_OPACITY : OPACITY;
+        backgroundMesh.material.opacity = isSelected
+          ? SELECTED_OPACITY
+          : OPACITY;
         iconMesh.material.opacity = isSelected ? SELECTED_OPACITY : OPACITY;
         iconMesh.material.color = isSelected ? SELECTED_ICON_COLOR : ICON_COLOR;
-        labelMeshes.foreground.material.color = isSelected ? SELECTED_FOREGROUND_COLOR : FOREGROUND_COLOR;
+        labelMeshes.foreground.material.color = isSelected
+          ? SELECTED_FOREGROUND_COLOR
+          : FOREGROUND_COLOR;
         labelGroup.visible = isSelected;
       },
     };
@@ -125,24 +132,32 @@ export default class ToolMenu extends InteractiveMenu {
   }
 
   private buildBackgroundMesh() {
-    const geometry = new THREE.CircleGeometry(TOOL_CIRCLE_RADIUS, TOOL_CIRCLE_SEGMENTS);
+    const geometry = new THREE.CircleGeometry(
+      TOOL_CIRCLE_RADIUS,
+      TOOL_CIRCLE_SEGMENTS,
+    );
     const material = new THREE.MeshBasicMaterial({
       color: BACKGROUND_COLOR,
       side: THREE.DoubleSide,
       opacity: OPACITY,
-      transparent: true
+      transparent: true,
     });
     return new THREE.Mesh(geometry, material);
   }
 
   private buildIconMesh(icon: string) {
-    const texture = new THREE.TextureLoader().load(`images/menu-icons/${icon}-128.png`);
-    const geometry = new THREE.CircleGeometry(TOOL_ICON_RADIUS, TOOL_CIRCLE_SEGMENTS);
+    const texture = new THREE.TextureLoader().load(
+      `images/menu-icons/${icon}-128.png`,
+    );
+    const geometry = new THREE.CircleGeometry(
+      TOOL_ICON_RADIUS,
+      TOOL_CIRCLE_SEGMENTS,
+    );
     const material = new THREE.MeshBasicMaterial({
       map: texture,
       color: ICON_COLOR,
       opacity: OPACITY,
-      transparent: true
+      transparent: true,
     });
     return new THREE.Mesh(geometry, material);
   }
@@ -150,14 +165,15 @@ export default class ToolMenu extends InteractiveMenu {
   private buildLabelMeshes(label: string) {
     const texture = new TextTexture({
       text: label,
-      textColor: new THREE.Color(0xFFFFFF),
+      textColor: new THREE.Color(0xffffff),
       fontSize: LABEL_FONT_SIZE,
       fontFamily: LABEL_FONT_FAMILY,
-      padding: LABEL_PADDING
+      padding: LABEL_PADDING,
     });
 
-    const worldWidth = texture.image.width * SIZE_RESOLUTION_FACTOR / 2;
-    const worldHeight = texture.image.height * SIZE_RESOLUTION_FACTOR / 2;
+    const worldSizeFactor = SIZE_RESOLUTION_FACTOR / 2;
+    const worldWidth = texture.image.width * worldSizeFactor;
+    const worldHeight = texture.image.height * worldSizeFactor;
     const geometry = new THREE.PlaneGeometry(worldWidth, worldHeight);
 
     const foregroundMaterial = new THREE.MeshBasicMaterial({
@@ -201,9 +217,14 @@ export default class ToolMenu extends InteractiveMenu {
     return this.defaultToolIndex;
   }
 
-  private async selectTool(index: number, { enableAnimation = true }: {
-    enableAnimation?: boolean
-  } = {}) {
+  private async selectTool(
+    index: number,
+    {
+      enableAnimation = true,
+    }: {
+      enableAnimation?: boolean;
+    } = {},
+  ) {
     // While an animation is playing, no other tool can be selected.
     if (this.currentSelectAnimation) return;
 
@@ -220,15 +241,15 @@ export default class ToolMenu extends InteractiveMenu {
     // Animate the selected tool to the center if animations are enabled.
     const targetPositionX = -this.selectedTool.object.position.x;
     if (enableAnimation) {
-      this.currentSelectAnimation = this.animationMixer.clipAction(new THREE.AnimationClip(
-        'select-animation',
-        SELECT_ANIMATION_DURATION, [
-        new THREE.KeyframeTrack(
-          '.position[x]',
-          [0.0, SELECT_ANIMATION_DURATION],
-          [this.position.x, targetPositionX]
-        )
-      ]));
+      this.currentSelectAnimation = this.animationMixer.clipAction(
+        new THREE.AnimationClip('select-animation', SELECT_ANIMATION_DURATION, [
+          new THREE.KeyframeTrack(
+            '.position[x]',
+            [0.0, SELECT_ANIMATION_DURATION],
+            [this.position.x, targetPositionX],
+          ),
+        ]),
+      );
       this.currentSelectAnimation.setLoop(THREE.LoopOnce, 0);
       this.currentSelectAnimation.clampWhenFinished = true;
       this.currentSelectAnimation.play();
@@ -293,19 +314,32 @@ export default class ToolMenu extends InteractiveMenu {
   // #region CONTROLLER INPUT
 
   makeThumbpadBinding() {
-    return new VRControllerThumbpadBinding({ labelLeft: 'Previous', labelRight: 'Next' }, {
-      onThumbpadTouch: (_controller, axes) => {
-        switch (VRControllerThumbpadBinding.getHorizontalDirection(axes, { threshold: THUMBPAD_THRESHOLD })) {
-          case VRControllerThumbpadHorizontalDirection.LEFT: this.selectPreviousTool(); break;
-          case VRControllerThumbpadHorizontalDirection.RIGHT: this.selectNextTool(); break;
-        }
-      }
-    });
+    return new VRControllerThumbpadBinding(
+      { labelLeft: 'Previous', labelRight: 'Next' },
+      {
+        onThumbpadTouch: (_controller, axes) => {
+          switch (
+            VRControllerThumbpadBinding.getHorizontalDirection(axes, {
+              threshold: THUMBPAD_THRESHOLD,
+            })
+          ) {
+            case VRControllerThumbpadHorizontalDirection.LEFT:
+              this.selectPreviousTool();
+              break;
+            case VRControllerThumbpadHorizontalDirection.RIGHT:
+              this.selectNextTool();
+              break;
+            default:
+              break;
+          }
+        },
+      },
+    );
   }
 
   makeTriggerButtonBinding() {
     return new VRControllerButtonBinding('Select', {
-      onButtonDown: (_controller) => this.selectedTool?.action()
+      onButtonDown: (_controller) => this.selectedTool?.action(),
     });
   }
 
@@ -315,7 +349,7 @@ export default class ToolMenu extends InteractiveMenu {
    * Finds the tool that contains the given object.
    */
   private findToolByObject(object: THREE.Object3D): Tool | null {
-    for (let tool of this.tools) {
+    for (const tool of this.tools) {
       let current: THREE.Object3D | null = object;
       while (current) {
         if (current === tool.object) return tool;

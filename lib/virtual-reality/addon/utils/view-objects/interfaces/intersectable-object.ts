@@ -1,4 +1,4 @@
-import THREE from "three";
+import THREE from 'three';
 
 /**
  * Interface for all objects that can be intersected by a controller's ray.
@@ -7,10 +7,14 @@ export interface IntersectableObject extends THREE.Object3D {
   canBeIntersected(intersection: THREE.Intersection): boolean;
 }
 
-export function isIntersectableObject(object: any): object is IntersectableObject {
-  return object !== null
+export function isIntersectableObject(
+  object: any,
+): object is IntersectableObject {
+  return (
+    object !== null
     && typeof object === 'object'
-    && typeof object.canBeIntersected === 'function';
+    && typeof object.canBeIntersected === 'function'
+  );
 }
 
 /**
@@ -21,9 +25,14 @@ export function isIntersectableObject(object: any): object is IntersectableObjec
  * rejects the intersection. If the `onlyVisisble` flag is set to `true`, all
  * parent objects must be visible.
  */
-export function canIntersectAllParentObjects(intersection: THREE.Intersection, { onlyVisible }: {
-  onlyVisible: boolean
-}) {
+export function canIntersectAllParentObjects(
+  intersection: THREE.Intersection,
+  {
+    onlyVisible,
+  }: {
+    onlyVisible: boolean;
+  },
+) {
   let result = false;
   let current: THREE.Object3D | null = intersection.object;
   while (current) {

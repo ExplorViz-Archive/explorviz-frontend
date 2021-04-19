@@ -1,19 +1,21 @@
-import THREE from "three";
-import VrMessageSender from "virtual-reality/services/vr-message-sender";
-import PingMesh from "virtual-reality/utils/view-objects/vr/ping-mesh";
-import VRController from "virtual-reality/utils/vr-controller";
-import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
-import AnimatedMenu from "../animated-menu";
-import { BaseMenuArgs } from "../base-menu";
+import THREE from 'three';
+import VrMessageSender from 'virtual-reality/services/vr-message-sender';
+import PingMesh from 'virtual-reality/utils/view-objects/vr/ping-mesh';
+import VRController from 'virtual-reality/utils/vr-controller';
+import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
+import AnimatedMenu from '../animated-menu';
+import { BaseMenuArgs } from '../base-menu';
 
 export type PingMenuArgs = BaseMenuArgs & {
-  scene: THREE.Scene,
-  sender: VrMessageSender,
+  scene: THREE.Scene;
+  sender: VrMessageSender;
 };
 
 export default class PingMenu extends AnimatedMenu {
   private mesh: PingMesh | undefined;
+
   private scene: THREE.Scene;
+
   private sender: VrMessageSender;
 
   constructor({ scene, sender, ...args }: PingMenuArgs) {
@@ -41,7 +43,7 @@ export default class PingMenu extends AnimatedMenu {
     if (controller) {
       this.mesh = new PingMesh({
         animationMixer: this.animationMixer,
-        color: controller.color
+        color: controller.color,
       });
       this.scene.add(this.mesh);
     }
@@ -55,7 +57,7 @@ export default class PingMenu extends AnimatedMenu {
     return new VRControllerButtonBinding('Ping', {
       onButtonDown: (controller: VRController) => {
         this.mesh?.startPinging();
-        this.sender.sendPingUpdate(controller.gamepadIndex, true)
+        this.sender.sendPingUpdate(controller.gamepadIndex, true);
       },
       onButtonPress: (controller: VRController) => {
         this.updatePing(controller);
@@ -63,7 +65,7 @@ export default class PingMenu extends AnimatedMenu {
       onButtonUp: (controller: VRController) => {
         this.mesh?.stopPinging();
         this.sender.sendPingUpdate(controller.gamepadIndex, false);
-      }
-    })
+      },
+    });
   }
 }

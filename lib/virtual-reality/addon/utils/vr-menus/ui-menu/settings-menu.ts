@@ -2,15 +2,14 @@ import VRControllerLabelGroup from '../../vr-controller/vr-controller-label-grou
 import CheckboxItem from '../items/checkbox-item';
 import TextItem from '../items/text-item';
 import TextbuttonItem from '../items/textbutton-item';
-import TitleItem from "../items/title-item";
+import TitleItem from '../items/title-item';
 import UiMenu, { UiMenuArgs } from '../ui-menu';
 
 export type SettingsMenuArgs = UiMenuArgs & {
-  labelGroups: (VRControllerLabelGroup | undefined)[]
+  labelGroups: (VRControllerLabelGroup | undefined)[];
 };
 
 export default class SettingsMenu extends UiMenu {
-
   constructor({ labelGroups, ...args }: SettingsMenuArgs) {
     super(args);
 
@@ -26,7 +25,7 @@ export default class SettingsMenu extends UiMenu {
       width: 316,
       height: 50,
       fontSize: 28,
-      onTriggerDown: () => this.menuGroup?.openMenu(this.menuFactory.buildCameraMenu())
+      onTriggerDown: () => this.menuGroup?.openMenu(this.menuFactory.buildCameraMenu()),
     });
     this.items.push(cameraButton);
     this.thumbpadTargets.push(cameraButton);
@@ -40,7 +39,7 @@ export default class SettingsMenu extends UiMenu {
     this.items.push(labelsText);
 
     const labelsCheckbox = new CheckboxItem({
-      position: { x: 366, y: 180, },
+      position: { x: 366, y: 180 },
       width: 50,
       height: 50,
       isChecked: VRControllerLabelGroup.visibilitySetting,
@@ -49,16 +48,15 @@ export default class SettingsMenu extends UiMenu {
         const visible = !VRControllerLabelGroup.visibilitySetting;
         VRControllerLabelGroup.visibilitySetting = visible;
         labelsCheckbox.isChecked = visible;
-        for (let labelGroup of labelGroups) {
+        for (const labelGroup of labelGroups) {
           if (labelGroup) labelGroup.visible = visible;
         }
         this.redrawMenu();
-      }
+      },
     });
     this.items.push(labelsCheckbox);
     this.thumbpadTargets.push(labelsCheckbox);
 
     this.redrawMenu();
   }
-
 }

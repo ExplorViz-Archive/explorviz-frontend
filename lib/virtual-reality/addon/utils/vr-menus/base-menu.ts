@@ -31,11 +31,11 @@ export enum MenuState {
    * The state of the menu when it has been detached from the menu group and
    * is placed in the world.
    */
-  DETACHED
+  DETACHED,
 }
 
 export type BaseMenuArgs = {
-  menuFactory: VrMenuFactoryService
+  menuFactory: VrMenuFactoryService;
 };
 
 /**
@@ -49,6 +49,7 @@ export type BaseMenuArgs = {
  */
 export default abstract class BaseMenu extends THREE.Group {
   private menuState: MenuState;
+
   readonly menuFactory: VrMenuFactoryService;
 
   constructor({ menuFactory }: BaseMenuArgs) {
@@ -60,14 +61,18 @@ export default abstract class BaseMenu extends THREE.Group {
   /**
    * Whether this menu is the currently open menu of a menu group.
    */
-  get isMenuOpen(): boolean { return this.menuState === MenuState.OPEN; }
+  get isMenuOpen(): boolean {
+    return this.menuState === MenuState.OPEN;
+  }
 
   /**
    * Whether this menu has been closed.
    *
    * Note that this is not the inverse of `isMenuOpen`.
    */
-  get isMenuClosed(): boolean { return this.menuState === MenuState.CLOSED; }
+  get isMenuClosed(): boolean {
+    return this.menuState === MenuState.CLOSED;
+  }
 
   /**
    * Whether this menu has been paused.
@@ -75,13 +80,17 @@ export default abstract class BaseMenu extends THREE.Group {
    * A paused menu still belongs to a menu group but there is another menu
    * that is currently active. A paused menu will not receive regular updates.
    */
-  get isMenuPaused(): boolean { return this.menuState === MenuState.PAUSED; }
+  get isMenuPaused(): boolean {
+    return this.menuState === MenuState.PAUSED;
+  }
 
   /**
    * Whether this menu has been detached from its menu group and has been
    * placed in the world.
    */
-  get isMenuDetached(): boolean { return this.menuState === MenuState.DETACHED; }
+  get isMenuDetached(): boolean {
+    return this.menuState === MenuState.DETACHED;
+  }
 
   /**
    * Creates the bindings for the thumbpad of the controller that holds this
@@ -117,7 +126,7 @@ export default abstract class BaseMenu extends THREE.Group {
   makeMenuButtonBinding(): VRControllerButtonBinding<undefined> | undefined {
     const label = this.menuGroup?.hasPreviousMenu ? 'Back' : 'Close';
     return new VRControllerButtonBinding(label, {
-      onButtonDown: () => this.closeMenu()
+      onButtonDown: () => this.closeMenu(),
     });
   }
 
@@ -133,7 +142,7 @@ export default abstract class BaseMenu extends THREE.Group {
       thumbpad: this.makeThumbpadBinding(),
       triggerButton: this.makeTriggerButtonBinding(),
       gripButton: this.makeGripButtonBinding(),
-      menuButton: this.makeMenuButtonBinding()
+      menuButton: this.makeMenuButtonBinding(),
     });
   }
 
@@ -193,7 +202,7 @@ export default abstract class BaseMenu extends THREE.Group {
    *
    * @param delta The time in seconds since the last frame.
    */
-  onUpdateMenu(_delta: number) { }
+  onUpdateMenu(_delta: number) {}
 
   /**
    * Callback that is invoked by the menu group when this menu is hidden because

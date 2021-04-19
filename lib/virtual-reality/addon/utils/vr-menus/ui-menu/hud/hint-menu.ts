@@ -4,29 +4,34 @@ import TextItem from '../../items/text-item';
 import { DEFAULT_MENU_RESOLUTION, UiMenuArgs } from '../../ui-menu';
 
 const OPEN_ANIMATION_CLIP = new THREE.AnimationClip('open-animation', 0.75, [
-  new THREE.KeyframeTrack('.scale[x]', [0.0, 0.75], [0.0, 1.0])
+  new THREE.KeyframeTrack('.scale[x]', [0.0, 0.75], [0.0, 1.0]),
 ]);
 
 const PULS_ANIMATION_CLIP = new THREE.AnimationClip('puls-animation', 0.25, [
-  new THREE.KeyframeTrack('.position[z]', [0, 0.25], [-0.0, -0.015])
+  new THREE.KeyframeTrack('.position[z]', [0, 0.25], [-0.0, -0.015]),
 ]);
 
 const CLOSE_ANIMATION_CLIP = new THREE.AnimationClip('close-animation', 0.75, [
-  new THREE.KeyframeTrack('.scale[x]', [0, 0.75], [1.0, 0.0])
+  new THREE.KeyframeTrack('.scale[x]', [0, 0.75], [1.0, 0.0]),
 ]);
 
 export type HintMenuArgs = UiMenuArgs & {
-  title: string,
-  text?: string
+  title: string;
+  text?: string;
 };
 
 export default class HintMenu extends HudMenu {
   readonly titleItem: TextItem;
+
   readonly textItem: TextItem | undefined;
 
   constructor({
-    title, text,
-    resolution = { width: DEFAULT_MENU_RESOLUTION, height: DEFAULT_MENU_RESOLUTION / 4 },
+    title,
+    text,
+    resolution = {
+      width: DEFAULT_MENU_RESOLUTION,
+      height: DEFAULT_MENU_RESOLUTION / 4,
+    },
     backgroundColor = '#002e4f',
     ...args
   }: HintMenuArgs) {
@@ -48,7 +53,7 @@ export default class HintMenu extends HudMenu {
         color: '#ffff00',
         fontSize: 28,
         alignment: 'center',
-        position: { x: 256, y: 75 }
+        position: { x: 256, y: 75 },
       });
       this.items.push(this.textItem);
     }

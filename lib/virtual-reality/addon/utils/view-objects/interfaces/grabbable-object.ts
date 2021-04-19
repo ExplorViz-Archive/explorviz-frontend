@@ -1,11 +1,13 @@
-import THREE from "three";
+import THREE from 'three';
 import { IntersectableObject } from './intersectable-object';
 
 export interface GrabbableObject extends IntersectableObject {
   getGrabId(): string | null;
 }
 
-export class GrabbableObjectWrapper extends THREE.Group implements GrabbableObject {
+export class GrabbableObjectWrapper
+  extends THREE.Group
+  implements GrabbableObject {
   private grabId: string | null;
 
   constructor(object: THREE.Object3D, grabId: string | null = null) {
@@ -24,15 +26,20 @@ export class GrabbableObjectWrapper extends THREE.Group implements GrabbableObje
 }
 
 export function isGrabbableObject(object: any): object is GrabbableObject {
-  return object !== null
+  return (
+    object !== null
     && typeof object === 'object'
-    && typeof object.getGrabId === 'function';
+    && typeof object.getGrabId === 'function'
+  );
 }
 
-export function findGrabbableObject(root: THREE.Object3D, objectId: string): GrabbableObject | null {
-  let objects = [root];
+export function findGrabbableObject(
+  root: THREE.Object3D,
+  objectId: string,
+): GrabbableObject | null {
+  const objects = [root];
   while (objects.length > 0) {
-    let object = objects.shift();
+    const object = objects.shift();
     if (isGrabbableObject(object) && object.getGrabId() === objectId) return object;
     if (object) objects.push(...object.children);
   }

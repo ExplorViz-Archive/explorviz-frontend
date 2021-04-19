@@ -1,19 +1,22 @@
-import SpectateUserService from "virtual-reality/services/spectate-user";
-import VRControllerButtonBinding from "virtual-reality/utils/vr-controller/vr-controller-button-binding";
-import RemoteVrUserService from "../../../../services/remote-vr-users";
-import TextbuttonItem from "../../items/textbutton-item";
-import TitleItem from "../../items/title-item";
-import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from "./base";
+import SpectateUserService from 'virtual-reality/services/spectate-user';
+import VRControllerButtonBinding from 'virtual-reality/utils/vr-controller/vr-controller-button-binding';
+import RemoteVrUserService from '../../../../services/remote-vr-users';
+import TextbuttonItem from '../../items/textbutton-item';
+import TitleItem from '../../items/title-item';
+import ConnectionBaseMenu, { ConnectionBaseMenuArgs } from './base';
 
 type OnlineMenuArgs = ConnectionBaseMenuArgs & {
-  remoteUsers: RemoteVrUserService,
-  spectateUserService: SpectateUserService
+  remoteUsers: RemoteVrUserService;
+  spectateUserService: SpectateUserService;
 };
 
 export default class OnlineMenu extends ConnectionBaseMenu {
   private remoteUsers: RemoteVrUserService;
+
   private remoteUserButtons: Map<string, TextbuttonItem>;
+
   private spectateUserService: SpectateUserService;
+
   private disconnectButton?: TextbuttonItem;
 
   constructor({ remoteUsers, spectateUserService, ...args }: OnlineMenuArgs) {
@@ -44,14 +47,14 @@ export default class OnlineMenu extends ConnectionBaseMenu {
 
     this.disconnectButton = new TextbuttonItem({
       text: 'Disconnect',
-      position: { x: 370, y: 13, },
+      position: { x: 370, y: 13 },
       width: 115,
       height: 40,
       fontSize: 22,
       buttonColor: '#aaaaaa',
       textColor: '#ffffff',
       hoverColor: '#dc3b00',
-      onTriggerDown: () => this.localUser.disconnect()
+      onTriggerDown: () => this.localUser.disconnect(),
     });
     this.items.push(this.disconnectButton);
 
@@ -59,7 +62,7 @@ export default class OnlineMenu extends ConnectionBaseMenu {
     let yPos = 50 + yOffset;
 
     const localUserButton = new TextbuttonItem({
-      text: this.localUser.userName + ' (you)',
+      text: `${this.localUser.userName} (you)`,
       position: { x: 100, y: yPos },
       width: 316,
       height: 50,
@@ -76,9 +79,9 @@ export default class OnlineMenu extends ConnectionBaseMenu {
         width: 316,
         height: 50,
         fontSize: 28,
-        onTriggerDown: () => this.menuGroup?.openMenu(this.menuFactory.buildSpectateMenu(user))
+        onTriggerDown: () => this.menuGroup?.openMenu(this.menuFactory.buildSpectateMenu(user)),
       });
-      this.remoteUserButtons.set(user.userId, remoteUserButton)
+      this.remoteUserButtons.set(user.userId, remoteUserButton);
       this.items.push(remoteUserButton);
       this.thumbpadTargets.push(remoteUserButton);
       yPos += yOffset;
@@ -91,12 +94,16 @@ export default class OnlineMenu extends ConnectionBaseMenu {
   onUpdateMenu(delta: number) {
     super.onUpdateMenu(delta);
 
-    if (!this.arrayEquals(Array.from(this.remoteUsers.getAllRemoteUserIds()), Array.from(this.remoteUserButtons.keys()))) {
+    if (
+      !this.arrayEquals(
+        Array.from(this.remoteUsers.getAllRemoteUserIds()),
+        Array.from(this.remoteUserButtons.keys()),
+      )
+    ) {
       this.items.clear();
       this.thumbpadTargets.clear();
       this.initMenu();
     }
-
   }
 
   private arrayEquals(a: string[], b: string[]) {
@@ -112,7 +119,7 @@ export default class OnlineMenu extends ConnectionBaseMenu {
       onButtonUp: () => {
         this.localUser.disconnect();
         this.menuGroup?.replaceMenu(this.menuFactory.buildConnectionMenu());
-      }
+      },
     });
   }
 

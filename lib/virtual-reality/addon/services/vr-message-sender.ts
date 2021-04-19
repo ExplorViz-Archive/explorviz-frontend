@@ -4,8 +4,8 @@ import THREE from 'three';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
 import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
-import VRController from "../utils/vr-controller";
-import { getControllerPose } from "../utils/vr-helpers/vr-poses";
+import VRController from '../utils/vr-controller';
+import { getControllerPose } from '../utils/vr-helpers/vr-poses';
 import { DetachableMenu } from '../utils/vr-menus/detachable-menu';
 import { AppOpenedMessage } from '../utils/vr-message/sendable/app_opened';
 import { ComponentUpdateMessage } from '../utils/vr-message/sendable/component_update';
@@ -17,14 +17,15 @@ import { DetachedMenuClosedMessage } from '../utils/vr-message/sendable/request/
 import { MenuDetachedMessage } from '../utils/vr-message/sendable/request/menu_detached';
 import { ObjectGrabbedMessage } from '../utils/vr-message/sendable/request/object_grabbed';
 import { SpectatingUpdateMessage } from '../utils/vr-message/sendable/spectating_update';
-import { UserControllerConnectMessage } from "../utils/vr-message/sendable/user_controller_connect";
-import { UserControllerDisconnectMessage } from "../utils/vr-message/sendable/user_controller_disconnect";
+import { UserControllerConnectMessage } from '../utils/vr-message/sendable/user_controller_connect';
+import { UserControllerDisconnectMessage } from '../utils/vr-message/sendable/user_controller_disconnect';
 import { ControllerPose, Pose, UserPositionsMessage } from '../utils/vr-message/sendable/user_positions';
-import { ControllerId } from "../utils/vr-message/util/controller_id";
+import { ControllerId } from '../utils/vr-message/util/controller_id';
 import { Nonce } from '../utils/vr-message/util/nonce';
 
 export default class VrMessageSender extends Service {
-  @service('web-socket') private webSocket!: WebSocketService;
+  @service('web-socket')
+  private webSocket!: WebSocketService;
 
   private lastNonce: Nonce = 0;
 
@@ -41,10 +42,16 @@ export default class VrMessageSender extends Service {
    * Sends position and rotation information of the local user's camera and
    * controllers.
    */
-  sendPoseUpdate(camera: Pose, controller1: ControllerPose | undefined, controller2: ControllerPose | undefined) {
+  sendPoseUpdate(
+    camera: Pose,
+    controller1: ControllerPose | undefined,
+    controller2: ControllerPose | undefined,
+  ) {
     this.webSocket.send<UserPositionsMessage>({
       event: 'user_positions',
-      controller1, controller2, camera
+      controller1,
+      controller2,
+      camera,
     });
   }
 
@@ -58,7 +65,8 @@ export default class VrMessageSender extends Service {
     const nonce = this.nextNonce();
     this.webSocket.send<ObjectGrabbedMessage>({
       event: 'object_grabbed',
-      nonce, objectId
+      nonce,
+      objectId,
     });
     return nonce;
   }
@@ -70,13 +78,18 @@ export default class VrMessageSender extends Service {
    * @param position The new position of the grabbed object in world coordinates.
    * @param quaternion The new rotation of the grabbed object in world coordinates.
    */
-  sendObjectMoved(objectId: string, position: THREE.Vector3, quaternion: THREE.Quaternion, scale: THREE.Vector3) {
+  sendObjectMoved(
+    objectId: string,
+    position: THREE.Vector3,
+    quaternion: THREE.Quaternion,
+    scale: THREE.Vector3,
+  ) {
     this.webSocket.send<ObjectMovedMessage>({
       event: 'object_moved',
       objectId,
       position: position.toArray(),
       quaternion: quaternion.toArray(),
-      scale: scale.toArray()
+      scale: scale.toArray(),
     });
   }
 
@@ -89,7 +102,7 @@ export default class VrMessageSender extends Service {
   sendObjectReleased(objectId: string) {
     this.webSocket.send<ObjectReleasedMessage>({
       event: 'object_released',
-      objectId
+      objectId,
     });
   }
 
@@ -130,7 +143,12 @@ export default class VrMessageSender extends Service {
    * @param {string} componentId ID of the component which was opened or closed
    * @param {boolean} isOpened Tells whether the component is now open or closed (current state)
    */
-  sendComponentUpdate(appId: string, componentId: string, isOpened: boolean, isFoundation: boolean) {
+  sendComponentUpdate(
+    appId: string,
+    componentId: string,
+    isOpened: boolean,
+    isFoundation: boolean,
+  ) {
     this.webSocket.send<ComponentUpdateMessage>({
       event: 'component_update',
       appId,
@@ -149,8 +167,12 @@ export default class VrMessageSender extends Service {
    * @param {string} entityId ID of the highlighted/unhighlighted component/clazz
    * @param {boolean} isHighlighted Tells whether the entity has been highlighted or not
    */
-  sendHighlightingUpdate(appId: string, entityType: string,
-    entityId: string, isHighlighted: boolean) {
+  sendHighlightingUpdate(
+    appId: string,
+    entityType: string,
+    entityId: string,
+    isHighlighted: boolean,
+  ) {
     this.webSocket.send<HighlightingUpdateMessage>({
       event: 'highlighting_update',
       appId,
@@ -178,13 +200,14 @@ export default class VrMessageSender extends Service {
   async sendControllerConnect(controller: VRController | undefined) {
     if (!controller?.connected) return;
 
-    const motionController = await controller.controllerModel.motionControllerPromise;
+    const motionController = await controller.controllerModel
+      .motionControllerPromise;
     this.webSocket.send<UserControllerConnectMessage>({
       event: 'user_controller_connect',
       controller: {
         assetUrl: motionController.assetUrl,
         controllerId: controller.gamepadIndex,
-        ...getControllerPose(controller)
+        ...getControllerPose(controller),
       },
     });
   }
@@ -209,7 +232,9 @@ export default class VrMessageSender extends Service {
       event: 'app_opened',
       id: application.dataModel.instanceId,
       position: application.getWorldPosition(new THREE.Vector3()).toArray(),
-      quaternion: application.getWorldQuaternion(new THREE.Quaternion()).toArray(),
+      quaternion: application
+        .getWorldQuaternion(new THREE.Quaternion())
+        .toArray(),
       scale: application.scale.toArray(),
     });
   }
@@ -218,13 +243,14 @@ export default class VrMessageSender extends Service {
     this.webSocket.send<PingUpdateMessage>({
       event: 'ping_update',
       controllerId,
-      isPinging
+      isPinging,
     });
   }
 
   sendTimestampUpdate(timestamp: number) {
     this.webSocket.send<TimestampUpdateMessage>({
-      event: 'timestamp_update', timestamp
+      event: 'timestamp_update',
+      timestamp,
     });
   }
 
@@ -238,7 +264,7 @@ export default class VrMessageSender extends Service {
     const nonce = this.nextNonce();
     this.webSocket.send<MenuDetachedMessage>({
       event: 'menu_detached',
-      nonce: nonce,
+      nonce,
       detachId: menu.getDetachId(),
       entityType: menu.getEntityType(),
       position: position.toArray(),

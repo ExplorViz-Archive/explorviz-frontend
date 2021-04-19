@@ -1,13 +1,13 @@
-import THREE from "three";
-import BaseMenu, { BaseMenuArgs } from "./base-menu";
+import THREE from 'three';
+import BaseMenu, { BaseMenuArgs } from './base-menu';
 
 /**
  * An event that is fired by THREE.js's animation system when an animation
  * is done.
  */
 type AnimationFinishedEvent = {
-  type: 'finished',
-  action: THREE.AnimationAction
+  type: 'finished';
+  action: THREE.AnimationAction;
 };
 
 /**

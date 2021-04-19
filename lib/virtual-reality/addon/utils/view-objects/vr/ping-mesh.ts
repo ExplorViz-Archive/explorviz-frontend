@@ -1,10 +1,14 @@
-import THREE from "three";
+import THREE from 'three';
 
-export const PING_ANIMATION_CLIP = new THREE.AnimationClip('ping-animation', 0.5, [
-  new THREE.NumberKeyframeTrack('.scale[x]', [0.0, 0.5], [1.0, 2.6]),
-  new THREE.NumberKeyframeTrack('.scale[y]', [0.0, 0.5], [1.0, 2.6]),
-  new THREE.NumberKeyframeTrack('.scale[z]', [0.0, 0.5], [1.0, 2.6])
-]);
+export const PING_ANIMATION_CLIP = new THREE.AnimationClip(
+  'ping-animation',
+  0.5,
+  [
+    new THREE.NumberKeyframeTrack('.scale[x]', [0.0, 0.5], [1.0, 2.6]),
+    new THREE.NumberKeyframeTrack('.scale[y]', [0.0, 0.5], [1.0, 2.6]),
+    new THREE.NumberKeyframeTrack('.scale[z]', [0.0, 0.5], [1.0, 2.6]),
+  ],
+);
 
 const PING_RADIUS = 0.02;
 
@@ -12,15 +16,23 @@ const PING_SEGMENTS = 32;
 
 export default class PingMesh extends THREE.Mesh {
   private action: THREE.AnimationAction;
+
   private isPinging: boolean;
 
-  constructor({ animationMixer, color }: {
-    animationMixer: THREE.AnimationMixer,
-    color: THREE.Color
+  constructor({
+    animationMixer,
+    color,
+  }: {
+    animationMixer: THREE.AnimationMixer;
+    color: THREE.Color;
   }) {
     super();
 
-    this.geometry = new THREE.SphereGeometry(PING_RADIUS, PING_SEGMENTS, PING_SEGMENTS);
+    this.geometry = new THREE.SphereGeometry(
+      PING_RADIUS,
+      PING_SEGMENTS,
+      PING_SEGMENTS,
+    );
     this.material = new THREE.MeshBasicMaterial({ color });
     this.visible = false;
     this.isPinging = false;

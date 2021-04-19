@@ -1,7 +1,7 @@
-import BaseMesh from "explorviz-frontend/view-objects/3d/base-mesh";
-import THREE from "three";
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import THREE from 'three';
 import TextTexture from '../vr-helpers/text-texture';
-import { VRControllerLabelPosition } from "./vr-controller-label-positions";
+import { VRControllerLabelPosition } from './vr-controller-label-positions';
 
 const SIZE_PER_PIXEL = 0.15 / 500;
 
@@ -28,7 +28,7 @@ export default class VRControllerLabelMesh extends BaseMesh {
       color: new THREE.Color(0x444444),
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.8
+      opacity: 0.8,
     });
 
     // Create a new mesh whose texture is the texture such that the text
@@ -47,7 +47,7 @@ export default class VRControllerLabelMesh extends BaseMesh {
 
     // Move label to the left or right of the controller.
     // There is a 5cm padding between the label and the controller.
-    const labelOffset = labelPosition.offsetDirection * worldWidth / 2;
+    const labelOffset = (labelPosition.offsetDirection * worldWidth) / 2;
     const labelPadding = labelPosition.offsetDirection * 0.05;
     this.position.copy(labelPosition.buttonPosition);
     this.translateX(labelOffset + labelPadding);

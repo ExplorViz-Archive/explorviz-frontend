@@ -1,32 +1,33 @@
-import VRController from "../vr-controller";
+import VRController from '../vr-controller';
 
 export type VrInputEvent<T> = {
-  target: T,
-  controller: VRController | null,
-  intersection: THREE.Intersection,
+  target: T;
+  controller: VRController | null;
+  intersection: THREE.Intersection;
 };
 
 export type VrTriggerPressEvent<T> = VrInputEvent<T> & {
-  value: number
+  value: number;
 };
 
 export type VrInputHandler<T extends THREE.Object3D> = {
-  targetType: Function & { prototype: T },
-  triggerDown?(event: VrInputEvent<T>): void,
-  triggerPress?(event: VrTriggerPressEvent<T>): void,
-  triggerUp?(event: VrInputEvent<T>): void,
-  hover?(event: VrInputEvent<T>): void,
-  resetHover?(event: VrInputEvent<T>): void,
+  targetType: Function & { prototype: T };
+  triggerDown?(event: VrInputEvent<T>): void;
+  triggerPress?(event: VrTriggerPressEvent<T>): void;
+  triggerUp?(event: VrInputEvent<T>): void;
+  hover?(event: VrInputEvent<T>): void;
+  resetHover?(event: VrInputEvent<T>): void;
 };
 
 type LastHover<T extends THREE.Object3D> = {
-  handler: VrInputHandler<T>,
-  target: T,
-  intersection: THREE.Intersection
+  handler: VrInputHandler<T>;
+  target: T;
+  intersection: THREE.Intersection;
 };
 
 export default class VrInputManager {
   private inputHandlers: VrInputHandler<any>[];
+
   private lastHovers: Map<VRController | null, LastHover<any>[]>;
 
   constructor() {
@@ -38,31 +39,60 @@ export default class VrInputManager {
     this.inputHandlers.push(handler);
   }
 
-  handleTriggerDown(intersection: THREE.Intersection, controller: VRController | null = null) {
-    for (const [handler, target] of this.findInputHandlers(intersection).entries()) {
+  handleTriggerDown(
+    intersection: THREE.Intersection,
+    controller: VRController | null = null,
+  ) {
+    for (const [handler, target] of this.findInputHandlers(
+      intersection,
+    ).entries()) {
       if (handler.triggerDown) handler.triggerDown({ target, intersection, controller });
     }
   }
 
-  handleTriggerPress(intersection: THREE.Intersection, value: number, controller: VRController | null = null) {
-    for (const [handler, target] of this.findInputHandlers(intersection).entries()) {
-      if (handler.triggerPress) handler.triggerPress({ target, intersection, value, controller });
+  handleTriggerPress(
+    intersection: THREE.Intersection,
+    value: number,
+    controller: VRController | null = null,
+  ) {
+    for (const [handler, target] of this.findInputHandlers(
+      intersection,
+    ).entries()) {
+      if (handler.triggerPress) {
+        handler.triggerPress({
+          target,
+          intersection,
+          value,
+          controller,
+        });
+      }
     }
   }
 
-  handleTriggerUp(intersection: THREE.Intersection, controller: VRController | null = null) {
-    for (const [handler, target] of this.findInputHandlers(intersection).entries()) {
+  handleTriggerUp(
+    intersection: THREE.Intersection,
+    controller: VRController | null = null,
+  ) {
+    for (const [handler, target] of this.findInputHandlers(
+      intersection,
+    ).entries()) {
       if (handler.triggerUp) handler.triggerUp({ target, intersection, controller });
     }
   }
 
-  handleHover(intersection: THREE.Intersection, controller: VRController | null = null) {
+  handleHover(
+    intersection: THREE.Intersection,
+    controller: VRController | null = null,
+  ) {
     const targetsByHandler = this.findInputHandlers(intersection);
 
     // Reset hover effect when target changed.
     const lastHovers = this.lastHovers.get(controller) || [];
     for (const lastHover of lastHovers) {
-      if (lastHover.handler.resetHover && lastHover.target !== targetsByHandler.get(lastHover.handler)) {
+      if (
+        lastHover.handler.resetHover
+        && lastHover.target !== targetsByHandler.get(lastHover.handler)
+      ) {
         lastHover.handler.resetHover({
           controller,
           intersection: lastHover.intersection,
@@ -101,7 +131,9 @@ export default class VrInputManager {
    * Returns for every handler the corresponding target object, i.e., the first
    * ancestor of the intersected object that has the handler's target type.
    */
-  private findInputHandlers(intersection: THREE.Intersection): Map<VrInputHandler<THREE.Object3D>, THREE.Object3D> {
+  private findInputHandlers(
+    intersection: THREE.Intersection,
+  ): Map<VrInputHandler<THREE.Object3D>, THREE.Object3D> {
     const result = new Map();
     for (const handler of this.inputHandlers) {
       let target: THREE.Object3D | null = intersection.object;

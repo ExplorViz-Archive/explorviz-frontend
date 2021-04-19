@@ -1,26 +1,35 @@
-import DetachedMenuGroupsService from "virtual-reality/services/detached-menu-groups";
+import DetachedMenuGroupsService from 'virtual-reality/services/detached-menu-groups';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
-import VrLandscapeRenderer from "../../../services/vr-landscape-renderer";
+import VrLandscapeRenderer from '../../../services/vr-landscape-renderer';
 import TextItem from '../items/text-item';
 import TextbuttonItem from '../items/textbutton-item';
-import TitleItem from "../items/title-item";
+import TitleItem from '../items/title-item';
 import UiMenu, { UiMenuArgs } from '../ui-menu';
 
 export type ResetMenuArgs = UiMenuArgs & {
-  localUser: LocalVrUser,
-  vrApplicationRenderer: VrApplicationRenderer,
-  vrLandscapeRenderer: VrLandscapeRenderer,
-  detachedMenuGroups: DetachedMenuGroupsService
+  localUser: LocalVrUser;
+  vrApplicationRenderer: VrApplicationRenderer;
+  vrLandscapeRenderer: VrLandscapeRenderer;
+  detachedMenuGroups: DetachedMenuGroupsService;
 };
 
 export default class ResetMenu extends UiMenu {
   private localUser: LocalVrUser;
+
   private vrApplicationRenderer: VrApplicationRenderer;
+
   private vrLandscapeRenderer: VrLandscapeRenderer;
+
   private detachedMenuGroups: DetachedMenuGroupsService;
 
-  constructor({ localUser, vrApplicationRenderer, vrLandscapeRenderer, detachedMenuGroups, ...args }: ResetMenuArgs) {
+  constructor({
+    localUser,
+    vrApplicationRenderer,
+    vrLandscapeRenderer,
+    detachedMenuGroups,
+    ...args
+  }: ResetMenuArgs) {
     super(args);
     this.localUser = localUser;
     this.vrApplicationRenderer = vrApplicationRenderer;
@@ -33,7 +42,7 @@ export default class ResetMenu extends UiMenu {
     });
     this.items.push(textItem);
 
-    if (localUser.connectionStatus != 'online') {
+    if (localUser.connectionStatus !== 'online') {
       const question = new TextItem({
         text: 'Reset state and position?',
         color: '#ffffff',
@@ -44,28 +53,27 @@ export default class ResetMenu extends UiMenu {
 
       const noButton = new TextbuttonItem({
         text: 'No',
-        position: { x: 100 - 20, y: 266, },
+        position: { x: 100 - 20, y: 266 },
         width: 158,
         height: 50,
         fontSize: 28,
-        onTriggerDown: () => this.closeMenu()
+        onTriggerDown: () => this.closeMenu(),
       });
       this.items.push(noButton);
       this.thumbpadTargets.push(noButton);
 
       const yesButton = new TextbuttonItem({
         text: 'Yes',
-        position: { x: 258 + 20, y: 266, },
+        position: { x: 258 + 20, y: 266 },
         width: 158,
         height: 50,
         fontSize: 28,
-        onTriggerDown: () => this.resetAll()
+        onTriggerDown: () => this.resetAll(),
       });
       this.items.push(yesButton);
       this.thumbpadTargets.push(yesButton);
 
       this.thumbpadAxis = 0;
-
     } else {
       const message = new TextItem({
         text: 'Not allowed when online.',

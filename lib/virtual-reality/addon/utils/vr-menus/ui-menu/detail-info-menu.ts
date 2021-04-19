@@ -7,16 +7,20 @@ import TextItem from '../items/text-item';
 import UiMenu, { DEFAULT_MENU_RESOLUTION, UiMenuArgs } from '../ui-menu';
 
 export type DetailInfoMenuArgs = UiMenuArgs & {
-  object: EntityMesh
+  object: EntityMesh;
 };
 
 export default class DetailInfoMenu extends UiMenu implements DetachableMenu {
   private object: EntityMesh;
+
   private entryItems: Map<string, TextItem>;
 
   constructor({
     object,
-    resolution = { width: 1.5 * DEFAULT_MENU_RESOLUTION, height: DEFAULT_MENU_RESOLUTION },
+    resolution = {
+      width: 1.5 * DEFAULT_MENU_RESOLUTION,
+      height: DEFAULT_MENU_RESOLUTION,
+    },
     ...args
   }: DetailInfoMenuArgs) {
     super({ resolution, ...args });
@@ -35,7 +39,7 @@ export default class DetailInfoMenu extends UiMenu implements DetachableMenu {
   onOpenMenu() {
     super.onOpenMenu();
 
-    let content = composeContent(this.object);
+    const content = composeContent(this.object);
     if (!content) {
       this.closeMenu();
       return;
@@ -45,7 +49,7 @@ export default class DetailInfoMenu extends UiMenu implements DetachableMenu {
       position: { x: 0, y: 0 },
       width: this.resolution.width,
       height: 66,
-      color: '#777777'
+      color: '#777777',
     });
     this.items.push(titleBackground);
 
@@ -87,7 +91,7 @@ export default class DetailInfoMenu extends UiMenu implements DetachableMenu {
   onUpdateMenu(delta: number) {
     super.onUpdateMenu(delta);
 
-    let content = composeContent(this.object)
+    const content = composeContent(this.object);
     if (content) {
       content.entries.forEach(({ key, value }) => {
         this.entryItems.get(key)?.setText(value);
@@ -102,7 +106,7 @@ export default class DetailInfoMenu extends UiMenu implements DetachableMenu {
     return new VRControllerButtonBinding('Detach', {
       onButtonDown: () => {
         this.detachMenu();
-      }
-    })
+      },
+    });
   }
 }

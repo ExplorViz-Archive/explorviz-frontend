@@ -1,11 +1,11 @@
-import LocalVrUser from "virtual-reality/services/local-vr-user";
+import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import VRController from '../../vr-controller';
 import VRControllerButtonBinding from '../../vr-controller/vr-controller-button-binding';
 import VRControllerThumbpadBinding from '../../vr-controller/vr-controller-thumbpad-binding';
 import ArrowbuttonItem from '../items/arrowbutton-item';
 import TextItem from '../items/text-item';
 import TextbuttonItem from '../items/textbutton-item';
-import TitleItem from "../items/title-item";
+import TitleItem from '../items/title-item';
 import UiMenu, { UiMenuArgs } from '../ui-menu';
 
 /**
@@ -14,14 +14,18 @@ import UiMenu, { UiMenuArgs } from '../ui-menu';
 const MAX_TRANSLATE_SPEED = 0.02;
 
 export type CameraMenuArgs = UiMenuArgs & {
-  localUser: LocalVrUser
+  localUser: LocalVrUser;
 };
 
 export default class CameraMenu extends UiMenu {
   private localUser: LocalVrUser;
+
   private resetButton: TextbuttonItem;
+
   private heightTextItem: TextItem;
+
   private heightUpButton: ArrowbuttonItem;
+
   private heightDownButton: ArrowbuttonItem;
 
   constructor({ localUser, ...args }: CameraMenuArgs) {
@@ -30,7 +34,7 @@ export default class CameraMenu extends UiMenu {
 
     const title = new TitleItem({
       text: 'Camera',
-      position: { x: 256, y: 20 }
+      position: { x: 256, y: 20 },
     });
     this.items.push(title);
 
@@ -45,14 +49,14 @@ export default class CameraMenu extends UiMenu {
 
     this.resetButton = new TextbuttonItem({
       text: 'Reset',
-      position: { x: 420, y: 13, },
+      position: { x: 420, y: 13 },
       width: 65,
       height: 40,
       fontSize: 22,
       buttonColor: '#aaaaaa',
       textColor: '#ffffff',
       hoverColor: '#dc3b00',
-      onTriggerDown: () => this.resetCamera()
+      onTriggerDown: () => this.resetCamera(),
     });
     this.items.push(this.resetButton);
 
@@ -61,7 +65,7 @@ export default class CameraMenu extends UiMenu {
       position: { x: 100, y: 182 },
       width: 50,
       height: 60,
-      onTriggerPressed: (value) => this.heightDown(value)
+      onTriggerPressed: (value) => this.heightDown(value),
     });
     this.items.push(this.heightDownButton);
 
@@ -70,7 +74,7 @@ export default class CameraMenu extends UiMenu {
       position: { x: 366, y: 182 },
       width: 50,
       height: 60,
-      onTriggerPressed: (value) => this.heightUp(value)
+      onTriggerPressed: (value) => this.heightUp(value),
     });
     this.items.push(this.heightUpButton);
 
@@ -78,7 +82,7 @@ export default class CameraMenu extends UiMenu {
   }
 
   private translateCamera(deltaHeight: number) {
-    this.localUser.cameraHeight = this.localUser.cameraHeight + deltaHeight;
+    this.localUser.cameraHeight += deltaHeight;
     this.redrawMenu();
   }
 
@@ -97,8 +101,14 @@ export default class CameraMenu extends UiMenu {
 
   makeGripButtonBinding() {
     return new VRControllerButtonBinding('Reset', {
-      onButtonDown: () => { this.resetButton.enableHoverEffectByButton(); this.resetCamera(); },
-      onButtonUp: () => { this.resetButton.resetHoverEffectByButton(); this.redrawMenu() }
+      onButtonDown: () => {
+        this.resetButton.enableHoverEffectByButton();
+        this.resetCamera();
+      },
+      onButtonUp: () => {
+        this.resetButton.resetHoverEffectByButton();
+        this.redrawMenu();
+      },
     });
   }
 
@@ -125,13 +135,16 @@ export default class CameraMenu extends UiMenu {
   }
 
   makeThumbpadBinding() {
-    return new VRControllerThumbpadBinding({ labelUp: 'Up', labelDown: 'Down' }, {
-      onThumbpadPress: (controller, axes) => this.onThumbpadPress(controller, axes),
-      onThumbpadUp: () => {
-        this.heightDownButton.resetHoverEffectByButton();
-        this.heightUpButton.resetHoverEffectByButton();
-        this.redrawMenu();
-      }
-    });
+    return new VRControllerThumbpadBinding(
+      { labelUp: 'Up', labelDown: 'Down' },
+      {
+        onThumbpadPress: (controller, axes) => this.onThumbpadPress(controller, axes),
+        onThumbpadUp: () => {
+          this.heightDownButton.resetHoverEffectByButton();
+          this.heightUpButton.resetHoverEffectByButton();
+          this.redrawMenu();
+        },
+      },
+    );
   }
 }

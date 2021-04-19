@@ -3,9 +3,13 @@ import VRControllerBindings from './vr-controller-bindings';
 
 export default class VRControllerBindingsList {
   defaultBindings: VRControllerBindings;
+
   controllerBindings: VRControllerBindings[];
 
-  constructor(defaultBindings: VRControllerBindings, controllerBindings: VRControllerBindings[]) {
+  constructor(
+    defaultBindings: VRControllerBindings,
+    controllerBindings: VRControllerBindings[],
+  ) {
     this.defaultBindings = defaultBindings;
     this.controllerBindings = controllerBindings;
   }
@@ -17,22 +21,74 @@ export default class VRControllerBindingsList {
 
   makeCallbacks(): VRControllerCallbackFunctions {
     return {
-      thumbpadTouch: (controller, axes) => this.currentBindings.thumbpad?.callbacks.onThumbpadTouch?.call(null, controller, axes),
-      thumbpadDown: (controller, axes) => this.currentBindings.thumbpad?.callbacks.onThumbpadDown?.call(null, controller, axes),
-      thumbpadPress: (controller, axes) => this.currentBindings.thumbpad?.callbacks.onThumbpadPress?.call(null, controller, axes),
-      thumbpadUp: (controller, axes) => this.currentBindings.thumbpad?.callbacks.onThumbpadUp?.call(null, controller, axes),
+      thumbpadTouch: (controller, axes) => {
+        if (this.currentBindings.thumbpad?.callbacks.onThumbpadTouch) {
+          this.currentBindings.thumbpad.callbacks.onThumbpadTouch(controller, axes);
+        }
+      },
+      thumbpadDown: (controller, axes) => {
+        if (this.currentBindings.thumbpad?.callbacks.onThumbpadDown) {
+          this.currentBindings.thumbpad.callbacks.onThumbpadDown(controller, axes);
+        }
+      },
+      thumbpadPress: (controller, axes) => {
+        if (this.currentBindings.thumbpad?.callbacks.onThumbpadPress) {
+          this.currentBindings.thumbpad.callbacks.onThumbpadPress(controller, axes);
+        }
+      },
+      thumbpadUp: (controller, axes) => {
+        if (this.currentBindings.thumbpad?.callbacks.onThumbpadUp) {
+          this.currentBindings.thumbpad.callbacks.onThumbpadUp(controller, axes);
+        }
+      },
 
-      triggerDown: (controller) => this.currentBindings.triggerButton?.callbacks.onButtonDown?.call(null, controller),
-      triggerPress: (controller, value) => this.currentBindings.triggerButton?.callbacks.onButtonPress?.call(null, controller, value),
-      triggerUp: (controller) => this.currentBindings.triggerButton?.callbacks.onButtonUp?.call(null, controller),
+      triggerDown: (controller) => {
+        if (this.currentBindings.triggerButton?.callbacks.onButtonDown) {
+          this.currentBindings.triggerButton.callbacks.onButtonDown(controller);
+        }
+      },
+      triggerPress: (controller, value) => {
+        if (this.currentBindings.triggerButton?.callbacks.onButtonPress) {
+          this.currentBindings.triggerButton.callbacks.onButtonPress(controller, value);
+        }
+      },
+      triggerUp: (controller) => {
+        if (this.currentBindings.triggerButton?.callbacks.onButtonUp) {
+          this.currentBindings.triggerButton.callbacks.onButtonUp(controller);
+        }
+      },
 
-      gripDown: (controller) => this.currentBindings.gripButton?.callbacks.onButtonDown?.call(null, controller),
-      gripPress: (controller) => this.currentBindings.gripButton?.callbacks.onButtonPress?.call(null, controller),
-      gripUp: (controller) => this.currentBindings.gripButton?.callbacks.onButtonUp?.call(null, controller),
+      gripDown: (controller) => {
+        if (this.currentBindings.gripButton?.callbacks.onButtonDown) {
+          this.currentBindings.gripButton.callbacks.onButtonDown(controller);
+        }
+      },
+      gripPress: (controller) => {
+        if (this.currentBindings.gripButton?.callbacks.onButtonPress) {
+          this.currentBindings.gripButton.callbacks.onButtonPress(controller, undefined);
+        }
+      },
+      gripUp: (controller) => {
+        if (this.currentBindings.gripButton?.callbacks.onButtonUp) {
+          this.currentBindings.gripButton.callbacks.onButtonUp(controller);
+        }
+      },
 
-      menuUp: (controller) => this.currentBindings.menuButton?.callbacks.onButtonDown?.call(null, controller),
-      menuPress: (controller) => this.currentBindings.menuButton?.callbacks.onButtonPress?.call(null, controller),
-      menuDown: (controller) => this.currentBindings.menuButton?.callbacks.onButtonUp?.call(null, controller),
+      menuUp: (controller) => {
+        if (this.currentBindings.menuButton?.callbacks.onButtonDown) {
+          this.currentBindings.menuButton.callbacks.onButtonDown(controller);
+        }
+      },
+      menuPress: (controller) => {
+        if (this.currentBindings.menuButton?.callbacks.onButtonPress) {
+          this.currentBindings.menuButton.callbacks.onButtonPress(controller, undefined);
+        }
+      },
+      menuDown: (controller) => {
+        if (this.currentBindings.menuButton?.callbacks.onButtonUp) {
+          this.currentBindings.menuButton.callbacks.onButtonUp(controller);
+        }
+      },
     };
   }
 }

@@ -1,19 +1,24 @@
 import Service, { inject as service } from '@ember/service';
-import THREE from "three";
-import { MTLLoader } from "three/examples/jsm/loaders/MTLLoader";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
-import { TGALoader } from "three/examples/jsm/loaders/TGALoader";
-import { Pose } from "../utils/vr-message/sendable/user_positions";
-import RemoteVrUser from "../utils/vr-multi-user/remote-vr-user";
-import SpectateUserService from "./spectate-user";
-import VrSceneService from "./vr-scene";
+import THREE from 'three';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { TGALoader } from 'three/examples/jsm/loaders/TGALoader';
+import { Pose } from '../utils/vr-message/sendable/user_positions';
+import RemoteVrUser from '../utils/vr-multi-user/remote-vr-user';
+import SpectateUserService from './spectate-user';
+import VrSceneService from './vr-scene';
 
 export default class RemoteVrUserService extends Service {
-  @service('spectate-user') private spectateUserService!: SpectateUserService;
-  @service('vr-scene') private sceneService!: VrSceneService;
+  @service('spectate-user')
+  private spectateUserService!: SpectateUserService;
+
+  @service('vr-scene')
+  private sceneService!: VrSceneService;
 
   private headsetModel!: Promise<THREE.Group>;
+
   private idToRemoteUser: Map<string, RemoteVrUser> = new Map();
+
   readonly remoteUserGroup: THREE.Group = new THREE.Group();
 
   init() {
@@ -24,14 +29,18 @@ export default class RemoteVrUserService extends Service {
     this.headsetModel = this.loadObjWithMtl({
       path: '/generic_hmd/',
       objFile: 'generic_hmd.obj',
-      mtlFile: 'generic_hmd.mtl'
+      mtlFile: 'generic_hmd.mtl',
     });
   }
 
-  private loadObjWithMtl({ path, objFile, mtlFile }: {
-    path: string,
-    objFile: string,
-    mtlFile: string
+  private loadObjWithMtl({
+    path,
+    objFile,
+    mtlFile,
+  }: {
+    path: string;
+    objFile: string;
+    mtlFile: string;
   }): Promise<THREE.Group> {
     return new Promise((resolve) => {
       const loadingManager = new THREE.LoadingManager();
@@ -71,7 +80,10 @@ export default class RemoteVrUserService extends Service {
     return this.idToRemoteUser.get(userId);
   }
 
-  setRemoteUserSpectatingById(userId: string, isSpectating: boolean): RemoteVrUser | undefined {
+  setRemoteUserSpectatingById(
+    userId: string,
+    isSpectating: boolean,
+  ): RemoteVrUser | undefined {
     const remoteUser = this.idToRemoteUser.get(userId);
     if (remoteUser) this.setRemoteUserSpectating(remoteUser, isSpectating);
     return remoteUser;
@@ -82,7 +94,10 @@ export default class RemoteVrUserService extends Service {
     remoteUser.setVisible(!isSpectating);
 
     // If we spectated the remote user before, stop spectating.
-    if (isSpectating && this.spectateUserService.spectatedUser?.userId === remoteUser.userId) {
+    if (
+      isSpectating
+      && this.spectateUserService.spectatedUser?.userId === remoteUser.userId
+    ) {
       this.spectateUserService.deactivate();
     }
   }

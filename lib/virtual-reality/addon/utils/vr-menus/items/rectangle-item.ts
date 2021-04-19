@@ -1,17 +1,21 @@
 import Item, { ItemArgs } from './item';
 
 export type RectangleItemArgs = ItemArgs & {
-  width: number,
-  height: number,
-  color: string,
+  width: number;
+  height: number;
+  color: string;
 };
 
 export default class RectangleItem extends Item {
   width: number;
+
   height: number;
+
   color: string;
 
-  constructor({width, height, color, ...args}: RectangleItemArgs) {
+  constructor({
+    width, height, color, ...args
+  }: RectangleItemArgs) {
     super(args);
 
     this.width = width;

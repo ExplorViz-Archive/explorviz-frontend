@@ -8,7 +8,7 @@ import VrControllerModel from './vr-controller/vr-controller-model';
 import VrControllerModelFactory from './vr-controller/vr-controller-model-factory';
 import { displayAsSolidObject, displayAsWireframe } from './vr-helpers/wireframe';
 import MenuGroup from './vr-menus/menu-group';
-import { ControllerId } from "./vr-message/util/controller_id";
+import { ControllerId } from './vr-message/util/controller_id';
 
 /**
  * Length of the controller's ray when there is no intersection point.
@@ -16,28 +16,28 @@ import { ControllerId } from "./vr-message/util/controller_id";
 export const DEFAULT_RAY_LENGTH = 1000;
 
 export type VRControllerCallbackFunctions = {
-  connected?(controller: VRController, event: THREE.Event): void,
-  disconnected?(controller: VRController): void,
+  connected?(controller: VRController, event: THREE.Event): void;
+  disconnected?(controller: VRController): void;
 
-  thumbpadTouch?(controller: VRController, axes: number[]): void,
-  thumbpadDown?(controller: VRController, axes: number[]): void,
-  thumbpadPress?(controller: VRController, axes: number[]): void,
-  thumbpadUp?(controller: VRController, axes: number[]): void,
+  thumbpadTouch?(controller: VRController, axes: number[]): void;
+  thumbpadDown?(controller: VRController, axes: number[]): void;
+  thumbpadPress?(controller: VRController, axes: number[]): void;
+  thumbpadUp?(controller: VRController, axes: number[]): void;
 
-  triggerDown?(controller: VRController): void,
-  triggerPress?(controller: VRController, value: number): void,
-  triggerUp?(controller: VRController): void,
+  triggerDown?(controller: VRController): void;
+  triggerPress?(controller: VRController, value: number): void;
+  triggerUp?(controller: VRController): void;
 
-  gripDown?(controller: VRController): void,
-  gripPress?(controller: VRController): void,
-  gripUp?(controller: VRController): void,
+  gripDown?(controller: VRController): void;
+  gripPress?(controller: VRController): void;
+  gripUp?(controller: VRController): void;
 
-  menuUp?(controller: VRController): void,
-  menuPress?(controller: VRController): void,
-  menuDown?(controller: VRController): void,
+  menuUp?(controller: VRController): void;
+  menuPress?(controller: VRController): void;
+  menuDown?(controller: VRController): void;
 
-  updateIntersectedObject?(controller: VRController): void,
-}
+  updateIntersectedObject?(controller: VRController): void;
+};
 
 /**
  * A wrapper around the gamepad object which handles inputs to
@@ -93,9 +93,9 @@ export default class VRController extends BaseMesh {
   }
 
   /**
- * Finds the controller whose buttons the labels in this group point to or
- * returns `null` if the group does not have a parent controller.
- */
+   * Finds the controller whose buttons the labels in this group point to or
+   * returns `null` if the group does not have a parent controller.
+   */
   static findController(object: THREE.Object3D): VRController | null {
     let current = object.parent;
     while (current) {
@@ -114,13 +114,13 @@ export default class VRController extends BaseMesh {
     bindings,
     scene,
   }: {
-    gamepadIndex: ControllerId,
-    color: THREE.Color,
-    gripSpace: THREE.Group,
-    raySpace: THREE.Group,
-    menuGroup: MenuGroup,
-    bindings: VRControllerBindingsList,
-    scene: THREE.Scene,
+    gamepadIndex: ControllerId;
+    color: THREE.Color;
+    gripSpace: THREE.Group;
+    raySpace: THREE.Group;
+    menuGroup: MenuGroup;
+    bindings: VRControllerBindingsList;
+    scene: THREE.Scene;
   }) {
     super();
     // Init properties
@@ -136,7 +136,9 @@ export default class VRController extends BaseMesh {
 
     // Init controller model
     const controllerModelFactory = VrControllerModelFactory.INSTANCE;
-    this.controllerModel = controllerModelFactory.createControllerModel(this.gripSpace);
+    this.controllerModel = controllerModelFactory.createControllerModel(
+      this.gripSpace,
+    );
     this.raySpace.add(this.controllerModel);
 
     // Init children
@@ -217,9 +219,10 @@ export default class VRController extends BaseMesh {
   initRay() {
     if (this.ray) return;
 
-    const geometry = new THREE.BufferGeometry().setFromPoints(
-      [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -1)],
-    );
+    const geometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, 0, -1),
+    ]);
 
     const material = new THREE.LineBasicMaterial({
       color: this.color,
@@ -297,7 +300,10 @@ export default class VRController extends BaseMesh {
       this.timestamp = timestamp;
 
       // Handle change in joystick / thumbpad position
-      if (this.axes[0] !== gamepad.axes[0] || this.axes[1] !== gamepad.axes[1]) {
+      if (
+        this.axes[0] !== gamepad.axes[0]
+        || this.axes[1] !== gamepad.axes[1]
+      ) {
         [this.axes[0], this.axes[1]] = gamepad.axes;
         if (callbacks.thumbpadTouch) {
           callbacks.thumbpadTouch(this, this.axes);

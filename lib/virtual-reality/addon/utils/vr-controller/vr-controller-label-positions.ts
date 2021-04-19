@@ -1,15 +1,15 @@
-import THREE from "three";
-import VRController from "../vr-controller";
+import THREE from 'three';
+import VRController from '../vr-controller';
 
 export enum VRControllerLabelOffsetDirection {
   LEFT = -1,
-  RIGHT = 1
+  RIGHT = 1,
 }
 
 export type VRControllerLabelPosition = {
-  buttonPosition: THREE.Vector3
-  offsetDirection: VRControllerLabelOffsetDirection
-}
+  buttonPosition: THREE.Vector3;
+  offsetDirection: VRControllerLabelOffsetDirection;
+};
 
 export type VRControllerThumbpadLabelPositions = {
   positionUp?: VRControllerLabelPosition;
@@ -19,20 +19,23 @@ export type VRControllerThumbpadLabelPositions = {
 };
 
 export type VRControllerLabelPositions = {
-  thumbpad: VRControllerThumbpadLabelPositions,
-  triggerButton?: VRControllerLabelPosition,
-  gripButton?: VRControllerLabelPosition,
-  menuButton?: VRControllerLabelPosition,
+  thumbpad: VRControllerThumbpadLabelPositions;
+  triggerButton?: VRControllerLabelPosition;
+  gripButton?: VRControllerLabelPosition;
+  menuButton?: VRControllerLabelPosition;
 };
 
-export function getVRControllerLabelPositions(controller: VRController | null): VRControllerLabelPositions | null {
+export function getVRControllerLabelPositions(
+  controller: VRController | null,
+): VRControllerLabelPositions | null {
   // Wait until the input profile of the controller model is fully loaded.
   const motionController = controller?.controllerModel.motionController;
   if (!controller || !motionController) return null;
 
   // Since the layout description is not exposed by the TypeScript interface,
   // we have to remove the type first.
-  const controllerNodeName = (motionController as any).layoutDescription.rootNodeName;
+  const controllerNodeName = (motionController as any).layoutDescription
+    .rootNodeName;
 
   // Make sure that the controller model has been loaded and its position is
   // up to date.
@@ -47,7 +50,11 @@ export function getVRControllerLabelPositions(controller: VRController | null): 
   // by underscores. Accessing the 3D object this way is equivalent to
   // accessing the `valueNode`, `minNode` or `maxNode`, respectively, of
   // `motionController.components[componentName].visualResponses[visualResponse]`.
-  const meshPosition = (componentName: string, visualResponseName: string, nodeName: string): THREE.Vector3 | undefined => {
+  const meshPosition = (
+    componentName: string,
+    visualResponseName: string,
+    nodeName: string,
+  ): THREE.Vector3 | undefined => {
     const rootNodeName = componentName.replace(/-/g, '_');
     const meshName = `${rootNodeName}_${visualResponseName}_${nodeName}`;
     const mesh = controller.controllerModel.getObjectByName(meshName);
@@ -60,8 +67,10 @@ export function getVRControllerLabelPositions(controller: VRController | null): 
   };
 
   // Gets the positions of the outermost points of the thumbpad
-  const thumbpadPosition = (...componentNames: string[]): VRControllerThumbpadLabelPositions => {
-    for (let componentName of componentNames) {
+  const thumbpadPosition = (
+    ...componentNames: string[]
+  ): VRControllerThumbpadLabelPositions => {
+    for (const componentName of componentNames) {
       const up = meshPosition(componentName, 'yaxis_touched', 'min');
       const right = meshPosition(componentName, 'xaxis_touched', 'max');
       const down = meshPosition(componentName, 'yaxis_touched', 'max');
@@ -70,19 +79,19 @@ export function getVRControllerLabelPositions(controller: VRController | null): 
         return {
           positionUp: {
             buttonPosition: up,
-            offsetDirection: VRControllerLabelOffsetDirection.LEFT
+            offsetDirection: VRControllerLabelOffsetDirection.LEFT,
           },
           positionRight: {
             buttonPosition: right,
-            offsetDirection: VRControllerLabelOffsetDirection.RIGHT
+            offsetDirection: VRControllerLabelOffsetDirection.RIGHT,
           },
           positionDown: {
             buttonPosition: down,
-            offsetDirection: VRControllerLabelOffsetDirection.LEFT
+            offsetDirection: VRControllerLabelOffsetDirection.LEFT,
           },
           positionLeft: {
             buttonPosition: left,
-            offsetDirection: VRControllerLabelOffsetDirection.LEFT
+            offsetDirection: VRControllerLabelOffsetDirection.LEFT,
           },
         };
       }
@@ -92,15 +101,17 @@ export function getVRControllerLabelPositions(controller: VRController | null): 
 
   // Gets the position of the value node of the first existing component
   // with one of the given names of the motion controller.
-  const buttonPosition = (...componentNames: string[]): VRControllerLabelPosition | undefined => {
-    for (let componentName of componentNames) {
+  const buttonPosition = (
+    ...componentNames: string[]
+  ): VRControllerLabelPosition | undefined => {
+    for (const componentName of componentNames) {
       const position = meshPosition(componentName, 'pressed', 'value');
-      if (!position) continue;
-
-      return {
-        buttonPosition: position,
-        offsetDirection: VRControllerLabelOffsetDirection.RIGHT
-      };
+      if (position) {
+        return {
+          buttonPosition: position,
+          offsetDirection: VRControllerLabelOffsetDirection.RIGHT,
+        };
+      }
     }
     return undefined;
   };
@@ -109,6 +120,6 @@ export function getVRControllerLabelPositions(controller: VRController | null): 
     thumbpad: thumbpadPosition('xr-standard-touchpad'),
     triggerButton: buttonPosition('xr-standard-trigger'),
     gripButton: buttonPosition('xr-standard-squeeze'),
-    menuButton: buttonPosition('menu', 'x-button', 'a-button')
+    menuButton: buttonPosition('menu', 'x-button', 'a-button'),
   };
 }

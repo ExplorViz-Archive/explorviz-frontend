@@ -1,8 +1,8 @@
-import BaseMenu from "./base-menu";
-import MenuGroup, { MenuGroupArgs } from "./menu-group";
+import BaseMenu from './base-menu';
+import MenuGroup, { MenuGroupArgs } from './menu-group';
 
 export type MenuQueueArgs = MenuGroupArgs & {
-  nextMenuDelay?: number
+  nextMenuDelay?: number;
 };
 
 /**
@@ -11,7 +11,9 @@ export type MenuQueueArgs = MenuGroupArgs & {
  */
 export default class MenuQueue extends MenuGroup {
   private menuQueue: BaseMenu[];
+
   private nextMenuDelay: number;
+
   private nextMenuTime: number;
 
   constructor({ nextMenuDelay = 0.75, ...args }: MenuQueueArgs) {
@@ -25,7 +27,8 @@ export default class MenuQueue extends MenuGroup {
    * Tests whether a menu has been enqueued that matches the given predicate.
    */
   hasEnquedOrCurrentMenu(predicate: (menu: BaseMenu) => boolean) {
-    return this.currentMenu && predicate(this.currentMenu) || this.hasEnquedMenu(predicate);
+    if (this.currentMenu && predicate(this.currentMenu)) return true;
+    return this.hasEnquedMenu(predicate);
   }
 
   /**
@@ -49,7 +52,7 @@ export default class MenuQueue extends MenuGroup {
         this.nextMenuTime -= delta;
       } else {
         // Open the menu after the count down if there is a next menu.
-        var nextMenu = this.menuQueue.shift();
+        const nextMenu = this.menuQueue.shift();
         if (nextMenu) {
           this.openMenu(nextMenu);
 

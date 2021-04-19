@@ -1,13 +1,13 @@
 import THREE from 'three';
 
 export type TextTextureArgs = {
-  text: string,
-  textColor: THREE.Color,
-  fontSize: number,
-  fontFamily: string,
-  padding: number,
-  backgroundColor?: THREE.Color,
-  backgroundOpacity?: number
+  text: string;
+  textColor: THREE.Color;
+  fontSize: number;
+  fontFamily: string;
+  padding: number;
+  backgroundColor?: THREE.Color;
+  backgroundOpacity?: number;
 };
 
 export default class TextTexture extends THREE.CanvasTexture {
@@ -17,8 +17,13 @@ export default class TextTexture extends THREE.CanvasTexture {
   }
 
   static createCanvas({
-    text, textColor, fontSize, fontFamily, padding,
-    backgroundColor, backgroundOpacity = 1
+    text,
+    textColor,
+    fontSize,
+    fontFamily,
+    padding,
+    backgroundColor,
+    backgroundOpacity = 1,
   }: TextTextureArgs): HTMLCanvasElement {
     // Create canvas to draw texture.
     const canvas = document.createElement('canvas');
@@ -29,8 +34,12 @@ export default class TextTexture extends THREE.CanvasTexture {
       // Resize canvas to fit the text and padding.
       ctx.font = `${fontSize}px ${fontFamily}`;
       const metrics = ctx.measureText(text);
-      canvas.width = Math.abs(metrics.actualBoundingBoxLeft) + Math.abs(metrics.actualBoundingBoxRight) + padding;
-      canvas.height = Math.abs(metrics.actualBoundingBoxAscent) + Math.abs(metrics.actualBoundingBoxDescent) + padding;
+      canvas.width = Math.abs(metrics.actualBoundingBoxLeft)
+        + Math.abs(metrics.actualBoundingBoxRight)
+        + padding;
+      canvas.height = Math.abs(metrics.actualBoundingBoxAscent)
+        + Math.abs(metrics.actualBoundingBoxDescent)
+        + padding;
 
       // Fill background.
       if (backgroundColor) {
@@ -41,7 +50,7 @@ export default class TextTexture extends THREE.CanvasTexture {
         ctx.restore();
       }
 
-      // Due to the resize, the context gets reset. Thus, the text properties of the context must be reinitialized.
+      // Due to the resize, the context gets reset. Thus, we have to set the font again.
       ctx.font = `${fontSize}px ${fontFamily}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';

@@ -4,8 +4,15 @@ import THREE from 'three';
  * Sets MeshStandardMaterial of given object to have the given opacity.
  * Displays object using wireframes (instead of polygons):
  */
-export function displayAsWireframe(object: THREE.Object3D, frameLineWidth = 0.5, opacity = 0.1) {
-  if (object instanceof THREE.Mesh && object.material instanceof THREE.MeshStandardMaterial) {
+export function displayAsWireframe(
+  object: THREE.Object3D,
+  frameLineWidth = 0.5,
+  opacity = 0.1,
+) {
+  if (
+    object instanceof THREE.Mesh
+    && object.material instanceof THREE.MeshStandardMaterial
+  ) {
     object.material.wireframe = true;
     object.material.wireframeLinewidth = frameLineWidth;
 
@@ -25,7 +32,10 @@ export function displayAsWireframe(object: THREE.Object3D, frameLineWidth = 0.5,
  * Displays object using polygons (instead of wireframe):
  */
 export function displayAsSolidObject(object: THREE.Object3D, opacity = 1) {
-  if (object instanceof THREE.Mesh && object.material instanceof THREE.MeshStandardMaterial) {
+  if (
+    object instanceof THREE.Mesh
+    && object.material instanceof THREE.MeshStandardMaterial
+  ) {
     object.material.wireframe = false;
 
     object.material.transparent = opacity !== 1;
