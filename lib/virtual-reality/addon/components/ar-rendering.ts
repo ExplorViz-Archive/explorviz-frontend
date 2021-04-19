@@ -46,6 +46,8 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
+import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -505,6 +507,18 @@ export default class ArRendering extends Component<Args> {
   @action
   toggleSettingsPane() {
     this.args.openDataSelection();
+  }
+
+  @action
+  updateColors() {
+    this.scene.traverse((object3D) => {
+      if (object3D instanceof BaseMesh) {
+        object3D.updateColor();
+        // Special case because communication arrow is no base mesh
+      } else if (object3D instanceof CommunicationArrowMesh) {
+        object3D.updateColor(this.configuration.applicationColors.communicationArrow);
+      }
+    });
   }
 
   // #endregion ACTIONS

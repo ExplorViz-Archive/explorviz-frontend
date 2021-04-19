@@ -152,13 +152,13 @@
                 {{#if (eq componentName "color-picker")}}
                   <h5 class="text-center">Landscape Colors</h5>
                   <Visualization::PageSetup::Sidebar::ColorPicker
-                    @isLandscapeView={{false}}
+                    @isLandscapeView={{true}}
                     @removeComponent={{@removeComponent}}
                     @updateView={{this.updateColors}}
                   />
                   <h5 class="text-center">Application Colors</h5>
                   <Visualization::PageSetup::Sidebar::ColorPicker
-                    @isLandscapeView={{true}}
+                    @isLandscapeView={{false}}
                     @removeComponent={{@removeComponent}}
                     @updateView={{this.updateColors}}
                   />
