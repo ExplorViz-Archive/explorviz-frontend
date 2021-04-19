@@ -48,9 +48,14 @@ import { getAllClassesInApplication } from 'explorviz-frontend/utils/application
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 
 interface Args {
-  readonly id: string;
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
+  readonly components: string[];
+  readonly showDataSelection: boolean;
+  addComponent(componentPath: string): void; // is passed down to the viz navbar
+  removeComponent(component: string): void;
+  openDataSelection(): void;
+  closeDataSelection(): void;
 }
 
 type LayoutData = {
@@ -499,7 +504,7 @@ export default class ArRendering extends Component<Args> {
 
   @action
   toggleSettingsPane() {
-    this.showSettings = !this.showSettings;
+    this.args.openDataSelection();
   }
 
   // #endregion ACTIONS

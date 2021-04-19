@@ -1,123 +1,173 @@
-{{#if this.showSettings}}
-  <div class="settings-container">
-    <ArSettingsPane/>
-  </div>
-{{/if}}
-
-<div
-  id="rendering"
-  {{did-insert this.outerDivInserted}}
-  {{did-resize this.resize debounce=100}}
->
-  {{#if this.loadNewLandscape.isRunning}}
-    <Visualization::Rendering::LoadingIndicator @text="Loading New Landscape" />
-  {{else if this.addApplication.isRunning}}
-    <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
-  {{/if}}
-
-  <div class="ar-right-relative foreground mt-6">
-    <BsButton
-      @onClick={{this.toggleSettingsPane}}
-      @type="secondary"
-      @outline={{true}}
-      @title="Settings"
-    >
-      {{svg-jar "settings" class="octicon align-middle"}}
-    </BsButton>
-  </div>
-
-  {{!-- popup(s) --}}
-  <Visualization::Rendering::Popups::PopupCoordinator
-    @popupData={{this.popupData}}
-  />
-
-  <canvas
-    class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
-    {{did-insert this.canvasInserted}}
-    {{interaction-modifier 
-      raycastObject=this.landscapeObject3D
-      camera=this.camera 
-      hammerInteraction=this.hammerInteraction
-      doubleClick=this.handleDoubleClick
-      singleClick=this.handleSingleClick
-      mouseWheel=this.handleMouseWheel
-      panning=this.handlePanning
-    }}
+<div class="row" style="height:100%">
+  <div
+    class="d-flex col-12"
+    style="flex-direction: column; height: 100%"
   >
-    {{#if this.hammerInteraction}}
-      <RightClickMenuHammer
-        @items={{this.rightClickMenuItems}}
-        @hammer={{this.hammerInteraction}}
+    {{!-- <Visualization::PageSetup::VisualizationNavbar>
+      <Visualization::PageSetup::Navbar::ApplicationSearch
+        @application={{@landscapeData.application}}
+        @unhighlightAll={{this.unhighlightAll}}
+        @openParents={{this.openParents}}
+        @closeComponent={{this.closeComponent}}
+        @highlightModel={{this.highlightModel}}
       />
-    {{/if}}
-  </canvas>
+    </Visualization::PageSetup::VisualizationNavbar> --}}
 
-  <div class="ar-left-button-container foreground">
+    <div
+      id="rendering"
+      {{did-insert this.outerDivInserted}}
+      {{did-resize this.resize debounce=100}}
+    >
+      {{#if this.loadNewLandscape.isRunning}}
+        <Visualization::Rendering::LoadingIndicator @text="Loading New Landscape" />
+      {{else if this.addApplication.isRunning}}
+        <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
+      {{/if}}
 
-    <div id="ar-plus-interaction-container">
-      <BsButton
-        @type="primary"
-        class="half-transparent"
-        {{ on "click" this.handlePlusInteraction }}
+      {{#unless @showDataSelection}}
+        <div class="ar-right-relative foreground mt-6">
+          <BsButton
+            @onClick={{this.toggleSettingsPane}}
+            @type="secondary"
+            @outline={{true}}
+            @title="Settings"
+          >
+            {{svg-jar "settings" class="octicon align-middle"}}
+          </BsButton>
+        </div>
+      {{/unless}}
+
+      {{!-- popup(s) --}}
+      <Visualization::Rendering::Popups::PopupCoordinator
+        @popupData={{this.popupData}}
+      />
+
+      <canvas
+        class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
+        {{did-insert this.canvasInserted}}
+        {{interaction-modifier 
+          raycastObject=this.landscapeObject3D
+          camera=this.camera 
+          hammerInteraction=this.hammerInteraction
+          doubleClick=this.handleDoubleClick
+          singleClick=this.handleSingleClick
+          mouseWheel=this.handleMouseWheel
+          panning=this.handlePanning
+        }}
       >
-        {{svg-jar "plus" class="octicon align-middle ar-button-svg"}}
-      </BsButton>
-    </div>
+        {{#if this.hammerInteraction}}
+          <RightClickMenuHammer
+            @items={{this.rightClickMenuItems}}
+            @hammer={{this.hammerInteraction}}
+          />
+        {{/if}}
+      </canvas>
 
-    <div id="ar-minus-interaction-container">
-      <BsButton
-        @type="primary"
-        class="half-transparent"
-        {{ on "click" this.handleMinusInteraction }}
-      >
-        {{svg-jar "dash" class="octicon align-middle ar-button-svg"}}
-      </BsButton>
-    </div>
+      <div class="ar-left-button-container foreground">
 
-    <div id="ar-info-interaction-container">
-      <BsButton
-        @type="primary"
-        class="half-transparent"
-        {{ on "click" this.handleInfoInteraction }}
-      >
-        {{svg-jar "info" class="octicon align-middle ar-button-svg"}}
-      </BsButton>
-    </div>
+        <div id="ar-plus-interaction-container">
+          <BsButton
+            @type="primary"
+            class="half-transparent"
+            {{ on "click" this.handlePlusInteraction }}
+          >
+            {{svg-jar "plus" class="octicon align-middle ar-button-svg"}}
+          </BsButton>
+        </div>
 
+        <div id="ar-minus-interaction-container">
+          <BsButton
+            @type="primary"
+            class="half-transparent"
+            {{ on "click" this.handleMinusInteraction }}
+          >
+            {{svg-jar "dash" class="octicon align-middle ar-button-svg"}}
+          </BsButton>
+        </div>
+
+        <div id="ar-info-interaction-container">
+          <BsButton
+            @type="primary"
+            class="half-transparent"
+            {{ on "click" this.handleInfoInteraction }}
+          >
+            {{svg-jar "info" class="octicon align-middle ar-button-svg"}}
+          </BsButton>
+        </div>
+
+      </div>
+
+      <div class="ar-right-button-container foreground">
+
+        <div id="ar-heat-toggle-container">
+          <BsButton
+            @type="primary"
+            class="half-transparent"
+            {{ on "click" this.handleHeatmapInteraction }}
+          >
+            {{svg-jar "flame" class="octicon align-middle ar-button-svg"}}
+          </BsButton>
+        </div>
+
+        <div id="ar-secondary-interaction-container">
+          <BsButton
+            @type="primary"
+            class="half-transparent"
+            {{ on "click" this.handleSecondaryCrosshairInteraction }}
+          >
+            {{svg-jar "pin" class="octicon align-middle ar-button-svg"}}
+          </BsButton>
+        </div>
+
+        <div id="ar-primary-interaction-container">
+          <BsButton
+            @type="primary"
+            class="half-transparent"
+            {{ on "click" this.handlePrimaryCrosshairInteraction }}
+          >
+            {{svg-jar "unfold" class="octicon align-middle ar-button-svg"}}
+          </BsButton>
+        </div>
+
+      </div>
+
+    </div>
   </div>
-
-  <div class="ar-right-button-container foreground">
-
-    <div id="ar-heat-toggle-container">
-      <BsButton
-        @type="primary"
-        class="half-transparent"
-        {{ on "click" this.handleHeatmapInteraction }}
-      >
-        {{svg-jar "flame" class="octicon align-middle ar-button-svg"}}
-      </BsButton>
+  {{#if @showDataSelection}}
+    <div class="position-absolute right col-4 foreground" id="dataselection">
+      <div class="mt-6 d-flex flex-row w-100">
+        <Visualization::PageSetup::Sidebar::DataSelection
+          @closeDataSelection={{@closeDataSelection}}
+        >
+          <div class="explorviz-visualization-navbar">
+            <ul class="nav justify-content-center">
+              <Visualization::PageSetup::Navbar::ColorPickerOpener
+                @addComponent={{@addComponent}}
+              />
+            </ul>
+          </div>
+          {{#each @components as |componentName|}}
+            <div class="card mt-3 border-radius-0">
+              <div class="card-body d-flex flex-column">
+                {{#if (eq componentName "color-picker")}}
+                  <h5 class="text-center">Landscape Colors</h5>
+                  <Visualization::PageSetup::Sidebar::ColorPicker
+                    @isLandscapeView={{false}}
+                    @removeComponent={{@removeComponent}}
+                    @updateView={{this.updateColors}}
+                  />
+                  <h5 class="text-center">Application Colors</h5>
+                  <Visualization::PageSetup::Sidebar::ColorPicker
+                    @isLandscapeView={{true}}
+                    @removeComponent={{@removeComponent}}
+                    @updateView={{this.updateColors}}
+                  />
+                {{/if}}
+              </div>
+            </div>
+          {{/each}}
+        </Visualization::PageSetup::Sidebar::DataSelection>
+      </div>
     </div>
-
-    <div id="ar-secondary-interaction-container">
-      <BsButton
-        @type="primary"
-        class="half-transparent"
-        {{ on "click" this.handleSecondaryCrosshairInteraction }}
-      >
-        {{svg-jar "pin" class="octicon align-middle ar-button-svg"}}
-      </BsButton>
-    </div>
-
-    <div id="ar-primary-interaction-container">
-      <BsButton
-        @type="primary"
-        class="half-transparent"
-        {{ on "click" this.handlePrimaryCrosshairInteraction }}
-      >
-        {{svg-jar "unfold" class="octicon align-middle ar-button-svg"}}
-      </BsButton>
-    </div>
-
-  </div>
-
+  {{/if}}
 </div>

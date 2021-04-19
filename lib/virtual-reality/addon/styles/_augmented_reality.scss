@@ -43,6 +43,10 @@
   left: calc(100vw - 60px);
 }
 
+.right{
+  right: 0!important;
+}
+
 #ar-primary-interaction-container {
   grid-area: p;
 }
