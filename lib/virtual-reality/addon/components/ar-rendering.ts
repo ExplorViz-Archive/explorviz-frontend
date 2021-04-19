@@ -199,6 +199,8 @@ export default class ArRendering extends Component<Args> {
     this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
 
     this.hammerInteraction = HammerInteraction.create();
+
+    AlertifyHandler.setAlertifyPosition('bottom-center');
   }
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -1034,6 +1036,7 @@ export default class ArRendering extends Component<Args> {
     ArRendering.cleanUpAr();
     this.applicationGroup.clear();
     this.localUser.reset();
+    AlertifyHandler.setAlertifyPosition('bottom-right');
   }
 
   // #endregion UTILS
