@@ -5,6 +5,6 @@ module.exports = {
   traceService: 'http://localhost:8083',
   // userService: 'http://localhost:32682',
   userService: 'http://localhost:8084',
-  collaborativeService: 'ws://localhost:8080',
+  collaborativeService: 'ws://localhost:8085',
   vrService: "http://localhost:4443"
 };

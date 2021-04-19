@@ -1,17 +1,20 @@
 import Service, { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
-import { Perspective, instanceOfIdentifiableMesh, CursorPosition, CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
+import {
+  Perspective,
+  instanceOfIdentifiableMesh,
+  CursorPosition, CollaborativeEvents,
+} from 'collaborative-mode/utils/collaborative-data';
 import THREE from 'three';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import adjustForObjectRotation from 'collaborative-mode/utils/collaborative-util';
 import CollaborativeSettingsService from 'explorviz-frontend/services/collaborative-settings-service';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 import ENV from 'explorviz-frontend/config/environment';
+
 const { collaborativeService } = ENV.backendAddresses;
 
-export default class CollaborativeService extends Service.extend(Evented
-  // anything which *must* be merged to prototype here
-) {
+export default class CollaborativeService extends Service.extend(Evented) {
   // @ts-expect-error
   @service('websockets')
   socketService!: any;
@@ -21,7 +24,7 @@ export default class CollaborativeService extends Service.extend(Evented
 
   socketRef: any = null;
 
-  socketUrl: string = "";
+  socketUrl: string = '';
 
   @service('collaborative-settings-service')
   settings!: CollaborativeSettingsService;
@@ -55,8 +58,7 @@ export default class CollaborativeService extends Service.extend(Evented
   myCloseHandler() {
     this.settings.connected = false;
     this.settings.meeting = undefined;
-    this.settings.meetingId = ""
-    this.settings.meetings.clear()
+    this.settings.meetings.clear();
   }
 
   myMessageHandler(event: any) {
@@ -96,10 +98,11 @@ export default class CollaborativeService extends Service.extend(Evented
   }
 
   sendMouse(event: string, point: THREE.Vector3, quaternion: THREE.Quaternion, mesh?: THREE.Mesh) {
-    const vectorWithoutObjectRotation = adjustForObjectRotation(point.toArray(), quaternion.clone().conjugate());
+    const vectorWithoutObjectRotation = adjustForObjectRotation(point.toArray(),
+      quaternion.clone().conjugate());
     const payload: CursorPosition = {
-      point: vectorWithoutObjectRotation.toArray()
-    }
+      point: vectorWithoutObjectRotation.toArray(),
+    };
     if (mesh && instanceOfIdentifiableMesh(mesh)) {
       payload.id = mesh.colabId;
     }
@@ -109,13 +112,22 @@ export default class CollaborativeService extends Service.extend(Evented
   send(event: string, data: any = {}) {
     const content = JSON.stringify(
       {
-        event: event,
-        data: data
-      }
-    )
+        event,
+        data,
+      },
+    );
     this.socketRef?.send(content);
   }
 
+  willDestroy() {
+    const socket = this.socketRef;
+    if (socket) {
+      socket.off('open', this.myOpenHandler);
+      socket.off('close', this.myCloseHandler);
+      socket.off('message', this.myMessageHandler);
+    }
+    this.socketRef = null;
+  }
 }
 
 // DO NOT DELETE: this is how TypeScript knows how to look up your services.

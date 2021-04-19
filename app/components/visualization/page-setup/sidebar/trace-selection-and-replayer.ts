@@ -45,6 +45,7 @@ export default class TraceSelectionAndReplayer extends Component<Args> {
   }
 
   willDestroy() {
+    super.willDestroy();
     if (this.selectedTrace) {
       this.args.removeHighlighting();
     }
