@@ -6,7 +6,8 @@ import CheckboxItem from './items/checkbox-item';
 export default class AdvancedMenu extends BaseMenu {
   isLefty: boolean;
 
-  constructor(openMainMenu: () => void, toggleLeftyMode: () => void, userIsLefty: boolean, resetAll: () => void) {
+  constructor(openMainMenu: () => void, toggleLeftyMode: () => void, userIsLefty: boolean,
+    resetAll: () => void) {
     super();
 
     this.isLefty = userIsLefty;

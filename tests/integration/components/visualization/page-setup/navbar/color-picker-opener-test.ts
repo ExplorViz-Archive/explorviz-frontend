@@ -3,7 +3,7 @@ import { setupRenderingTest } from 'ember-qunit';
 import { render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 
-module('Integration | Component | visualization/page-setup/navbar/color-picker-opener', function(hooks) {
+module('Integration | Component | visualization/page-setup/navbar/color-picker-opener', function (hooks) {
   setupRenderingTest(hooks);
 
   test('it renders', async function (assert) {
@@ -11,9 +11,9 @@ module('Integration | Component | visualization/page-setup/navbar/color-picker-o
 
     await render(hbs`<Visualization::PageSetup::Navbar::ColorPickerOpener />`);
 
-    let textContent = this.element.textContent;
+    const { textContent } = this.element;
 
-    if(textContent === null) {
+    if (textContent === null) {
       assert.ok(null, 'textContent is null');
     } else {
       assert.equal(textContent.trim(), 'Color Picker');

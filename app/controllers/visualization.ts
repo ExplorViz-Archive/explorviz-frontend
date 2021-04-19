@@ -146,8 +146,8 @@ export default class VisualizationController extends Controller {
 
   @action
   openLandscapeView() {
-    this.receiveOpenLandscapeView()
-    this.collaborativeService.send(CollaborativeEvents.OpenLandscapeView, { } )
+    this.receiveOpenLandscapeView();
+    this.collaborativeService.send(CollaborativeEvents.OpenLandscapeView, { });
   }
 
   @action
@@ -171,7 +171,7 @@ export default class VisualizationController extends Controller {
         ...this.landscapeData,
         application: app,
       };
-      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.instanceId } )
+      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.instanceId });
     }
   }
 
@@ -304,6 +304,7 @@ export default class VisualizationController extends Controller {
     this.visualizationPaused = false;
     this.showAR = false;
     this.showVR = false;
+    this.closeDataSelection();
     this.landscapeListener.initLandscapePolling();
     this.updateTimestampList();
   }

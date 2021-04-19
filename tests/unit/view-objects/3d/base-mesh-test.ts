@@ -3,11 +3,10 @@ import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
 import THREE from 'three';
 
-module('Unit | View Object | 3d/base-mesh', function(hooks) {
-
+module('Unit | View Object | 3d/base-mesh', function (hooks) {
   setupTest(hooks);
 
-  test('Default highlighting color is assigned', function(assert) {
+  test('Default highlighting color is assigned', function (assert) {
     const defaultColor = new THREE.Color('green');
 
     const applicationMesh = new BaseMeshMock(defaultColor);
@@ -18,7 +17,7 @@ module('Unit | View Object | 3d/base-mesh', function(hooks) {
     assert.equal(highlightingColor, redColor);
   });
 
-  test('Highlighting property is set correctly when highlighting', function(assert) {
+  test('Highlighting property is set correctly when highlighting', function (assert) {
     const defaultColor = new THREE.Color('green');
 
     const baseMesh = new BaseMeshMock(defaultColor);
@@ -28,7 +27,7 @@ module('Unit | View Object | 3d/base-mesh', function(hooks) {
     assert.equal(baseMesh.highlighted, true);
   });
 
-  test('Highlighting property is set correctly when un-highlighting', function(assert) {
+  test('Highlighting property is set correctly when un-highlighting', function (assert) {
     const defaultColor = new THREE.Color('green');
 
     const baseMesh = new BaseMeshMock(defaultColor);

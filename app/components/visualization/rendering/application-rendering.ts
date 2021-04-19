@@ -123,7 +123,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @tracked
   popupData: PopupData | null = null;
 
-  // these spheres represent the cursor of the other users and are only visible in collaborative mode
+  // these spheres represent the cursor of the other users
+  // and are only visible in collaborative mode
   spheres: Map<string, Array<THREE.Mesh>> = new Map();
 
   spheresIndex = 0;
@@ -158,7 +159,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.debug('Canvas inserted');
 
     this.canvas = canvas;
-    this.hammerInteraction.setupHammer(canvas)
+    this.hammerInteraction.setupHammer(canvas);
 
     canvas.oncontextmenu = (e) => {
       e.preventDefault();
@@ -268,7 +269,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       || mesh instanceof ClazzCommunicationMesh) {
       highlight(mesh, this.applicationObject3D, this.drawableClassCommunications);
     }
-
   }
 
   @action
@@ -357,7 +357,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         entity: mesh.dataModel,
       };
     }
-
   }
 
   @action
@@ -387,15 +386,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region SCENE POPULATION
 
-  @task *
-    loadNewApplication() {
+  @task*
+  loadNewApplication() {
     this.applicationObject3D.dataModel = this.args.landscapeData.application!;
     this.applicationObject3D.traces = this.args.landscapeData.dynamicLandscapeData;
     yield perform(this.populateScene);
   }
 
-  @restartableTask *
-    populateScene() {
+  @restartableTask*
+  populateScene() {
     try {
       const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter',
         this.applicationObject3D.dataModel);
@@ -500,13 +499,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   scaleSpheres() {
-    for (let spheres of this.spheres.values()) {
-      for (let i = 0; i < spheres.length; i++) {
-        const sphere = spheres[i];
+    this.spheres.forEach((sphereArray) => {
+      for (let i = 0; i < sphereArray.length; i++) {
+        const sphere = sphereArray[i];
         sphere.scale.multiplyScalar(0.98);
         sphere.scale.clampScalar(0.01, 1);
       }
-    }
+    });
   }
 
   @action
@@ -524,9 +523,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   createSpheres(color: string): Array<THREE.Mesh> {
-    let spheres = [];
+    const spheres = [];
     const sphereGeometry = new THREE.SphereBufferGeometry(0.4, 32, 32);
-    const sphereMaterial = new THREE.MeshBasicMaterial({ color: color });
+    const sphereMaterial = new THREE.MeshBasicMaterial({ color });
 
     for (let i = 0; i < 30; i++) {
       const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
@@ -548,6 +547,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   @action
   openParents(entity: Package | Class) {
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     function getAllAncestorComponents(entity: Package | Class): Package[] {
       if (isClass(entity)) {
         return getAllAncestorComponents(entity.parent);
@@ -707,6 +707,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #region COMPONENT AND SCENE CLEAN-UP
 
   willDestroy() {
+    super.willDestroy();
     cancelAnimationFrame(this.animationFrameId);
     this.cleanUpApplication();
     this.scene.dispose();

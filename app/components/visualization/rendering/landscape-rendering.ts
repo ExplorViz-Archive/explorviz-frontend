@@ -89,7 +89,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   scene!: THREE.Scene;
 
   webglrenderer!: THREE.WebGLRenderer;
-  
+
   @tracked
   hammerInteraction: HammerInteraction;
 
@@ -171,7 +171,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.debug('Canvas inserted');
 
     this.canvas = canvas;
-    this.hammerInteraction.setupHammer(canvas)
+    this.hammerInteraction.setupHammer(canvas);
 
     canvas.oncontextmenu = (e) => {
       e.preventDefault();
@@ -261,7 +261,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   // #region COLLABORATIVE
 
   @action
-  setPerspective(position: number[], _rotation: number[]) {
+  setPerspective(position: number[] /* , rotation: number[] */) {
     this.camera.position.fromArray(position);
   }
 
@@ -293,13 +293,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   scaleSpheres() {
-    for (let spheres of this.spheres.values()) {
-      for (let i = 0; i < spheres.length; i++) {
-        const sphere = spheres[i];
+    this.spheres.forEach((sphereArray) => {
+      for (let i = 0; i < sphereArray.length; i++) {
+        const sphere = sphereArray[i];
         sphere.scale.multiplyScalar(0.98);
         sphere.scale.clampScalar(0.01, 1);
       }
-    }
+    });
   }
 
   @action
@@ -317,9 +317,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   createSpheres(color: string): Array<THREE.Mesh> {
-    let spheres = [];
+    const spheres = [];
     const sphereGeometry = new THREE.SphereBufferGeometry(0.08, 32, 32);
-    const sphereMaterial = new THREE.MeshBasicMaterial({ color: color });
+    const sphereMaterial = new THREE.MeshBasicMaterial({ color });
 
     for (let i = 0; i < 30; i++) {
       const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
@@ -340,6 +340,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  * @method willDestroy
  */
   willDestroy() {
+    super.willDestroy();
     cancelAnimationFrame(this.animationFrameId);
 
     // Clean up WebGL rendering context by forcing context loss
@@ -360,7 +361,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     // Clean up all remaining meshes
     this.landscapeObject3D.removeAllChildren();
     this.labeler.clearCache();
-
   }
 
   // #endregion COMPONENT AND SCENE CLEAN-UP
@@ -415,8 +415,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   // #region SCENE POPULATION
 
-  @task *
-    loadNewLandscape() {
+  @task*
+  loadNewLandscape() {
     this.landscapeObject3D.dataModel = this.args.landscapeData.structureLandscapeData;
     yield perform(this.populateScene);
   }
@@ -426,8 +426,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
  *
  * @method populateScene
  */
-  @restartableTask *
-    populateScene() {
+  @restartableTask*
+  populateScene() {
     this.debug('populate landscape-rendering');
 
     const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
@@ -448,7 +448,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       const newGraph: ElkNode = yield this.elk.layout(graph);
 
       // Post-process layout graph (3rd step)
-      const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
+      const layoutedLandscape: Layout3Return = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
         structureLandscapeData,
