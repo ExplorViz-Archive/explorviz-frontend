@@ -16,7 +16,7 @@ module('Integration | Component | visualization/page-setup/navbar/ar-settings-op
     if (textContent === null) {
       assert.ok(null, 'textContent is null');
     } else {
-      assert.equal(textContent.trim(), '');
+      assert.equal(textContent.trim(), 'Settings');
     }
   });
 });

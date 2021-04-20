@@ -48,6 +48,7 @@ import { getAllClassesInApplication } from 'explorviz-frontend/utils/application
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
+import ArSettings from 'virtual-reality/services/ar-settings';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -90,6 +91,9 @@ export default class ArRendering extends Component<Args> {
 
   @service('delta-time')
   time!: DeltaTime;
+
+  @service('ar-settings')
+  arSettings!: ArSettings;
 
   @service()
   worker!: any;
@@ -156,10 +160,6 @@ export default class ArRendering extends Component<Args> {
 
   applicationMarkers: THREE.Group[] = [];
 
-  landscapeOpacity: number;
-
-  applicationOpacity: number;
-
   @tracked
   popupData: PopupData | null = null;
 
@@ -181,11 +181,9 @@ export default class ArRendering extends Component<Args> {
 
     this.landscapeDepth = 0.7;
 
-    this.landscapeOpacity = 0.9;
-    this.applicationOpacity = 0.7;
-
     this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
+    this.arSettings.applicationGroup = this.applicationGroup;
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration);
 
@@ -194,6 +192,7 @@ export default class ArRendering extends Component<Args> {
 
     // Load and scale landscape
     this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
+    this.arSettings.landscapeObject = this.landscapeObject3D;
 
     // Rotate landscape such that it lays flat on the floor
     this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
@@ -631,7 +630,7 @@ export default class ArRendering extends Component<Args> {
       LandscapeCommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
         centerPoint, 0.004, 0.028);
 
-      this.landscapeObject3D.setOpacity(this.landscapeOpacity);
+      this.landscapeObject3D.setOpacity(this.arSettings.landscapeOpacity);
 
       this.landscapeObject3D.setLargestSide(2);
 
@@ -772,7 +771,7 @@ export default class ArRendering extends Component<Args> {
 
       applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
 
-      applicationObject3D.setBoxMeshOpacity(this.applicationOpacity);
+      applicationObject3D.setBoxMeshOpacity(this.arSettings.applicationOpacity);
 
       this.applicationGroup.addApplication(applicationObject3D);
 

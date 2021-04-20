@@ -23,6 +23,10 @@ export default class ApplicationGroup extends THREE.Group {
     return this.openedApps.get(id);
   }
 
+  getAllApplications() {
+    return Array.from(this.openedApps.values());
+  }
+
   hasApplication(id: string) {
     return this.openedApps.has(id);
   }
