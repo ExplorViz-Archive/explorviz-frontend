@@ -83,7 +83,7 @@ export default class LandscapeObject3D extends THREE.Object3D {
           entity.remove(child);
         }
       }
-    }
+    };
 
     removeChildren(this);
   }

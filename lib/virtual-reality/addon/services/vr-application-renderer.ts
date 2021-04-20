@@ -178,12 +178,12 @@ export default class VrApplicationRenderer extends Service {
     }
 
     // Hightlight components.
-    for (const hightlightedComponent of args.highlightedComponents || []) {
+    args.highlightedComponents?.forEach((highlightedComponent) => {
       this.highlightingService.hightlightComponentLocallyByTypeAndId(
         application,
-        hightlightedComponent,
+        highlightedComponent,
       );
-    }
+    });
   }
 
   removeApplication(application: ApplicationObject3D): Promise<boolean> {
@@ -218,9 +218,7 @@ export default class VrApplicationRenderer extends Service {
   }
 
   removeAllApplicationsLocally() {
-    for (const application of this.openApplications.values()) {
-      this.removeApplicationLocally(application);
-    }
+    this.openApplications.forEach((app) => this.removeApplicationLocally(app));
   }
 
   toggleComponent(
@@ -357,15 +355,14 @@ export default class VrApplicationRenderer extends Service {
    * Adds labels to all box meshes of a given application
    */
   private addLabels(applicationObject3D: ApplicationObject3D) {
-    if (!this.assetRepo.font) return;
-
     const clazzTextColor = this.configuration.applicationColors.clazzText;
     const componentTextColor = this.configuration.applicationColors
       .componentText;
     const foundationTextColor = this.configuration.applicationColors
       .foundationText;
 
-    for (const mesh of applicationObject3D.getBoxMeshes()) {
+    applicationObject3D.getBoxMeshes().forEach((mesh) => {
+      if (!this.assetRepo.font) return;
       // Labeling is time-consuming. Thus, label only visible meshes incrementally
       // as opposed to labeling all meshes up front (as done in application-rendering).
       if (mesh.visible) {
@@ -389,7 +386,7 @@ export default class VrApplicationRenderer extends Service {
           );
         }
       }
-    }
+    });
   }
 }
 

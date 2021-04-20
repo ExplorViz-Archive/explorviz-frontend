@@ -4,17 +4,17 @@
   {{ on "dragover" this.onDragover }}
   {{ on "dragleave" this.onDragleave }}
 >
-  <!-- Content -->
+  {{!-- Content --}}
   {{yield}}
 
-  <!-- Overlay -->
-  {{#if isDraggedOver}}
-  <div class="vr-drop-area-background">
-    <div class="vr-drop-area-border">
-      <div class="vr-drop-area-text">
-        Drop texture file to set background.
+  {{!-- Overlay --}}
+  {{#if this.isDraggedOver}}
+    <div class="vr-drop-area-background">
+      <div class="vr-drop-area-border">
+        <div class="vr-drop-area-text">
+          Drop texture file to set background.
+        </div>
       </div>
     </div>
-  </div>
   {{/if}}
 </div>

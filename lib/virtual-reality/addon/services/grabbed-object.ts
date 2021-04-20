@@ -126,7 +126,7 @@ export default class GrabbedObjectService extends Service {
    * Sends the positions of all grabbed objects to the backend.
    */
   sendObjectPositions() {
-    for (const object of this.grabbedObjects.values()) {
+    this.grabbedObjects.forEach((object) => {
       const objectId = object.getGrabId();
       if (objectId) {
         const position = new THREE.Vector3();
@@ -139,7 +139,7 @@ export default class GrabbedObjectService extends Service {
 
         this.sender.sendObjectMoved(objectId, position, quaternion, scale);
       }
-    }
+    });
   }
 }
 

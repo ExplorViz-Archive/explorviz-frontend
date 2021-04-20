@@ -102,10 +102,7 @@ export default class VrTimestampService extends Service {
         structureLandscapeData,
         dynamicLandscapeData,
       ),
-      this.detachedMenuGroups.updateLandscapeData(
-        structureLandscapeData,
-        dynamicLandscapeData,
-      ),
+      this.detachedMenuGroups.updateLandscapeData(),
     ]);
   }
 }

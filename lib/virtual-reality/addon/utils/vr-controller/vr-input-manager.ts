@@ -39,25 +39,15 @@ export default class VrInputManager {
     this.inputHandlers.push(handler);
   }
 
-  handleTriggerDown(
-    intersection: THREE.Intersection,
-    controller: VRController | null = null,
-  ) {
-    for (const [handler, target] of this.findInputHandlers(
-      intersection,
-    ).entries()) {
+  handleTriggerDown(intersection: THREE.Intersection, controller: VRController | null = null) {
+    this.findInputHandlers(intersection).forEach((target, handler) => {
       if (handler.triggerDown) handler.triggerDown({ target, intersection, controller });
-    }
+    });
   }
 
-  handleTriggerPress(
-    intersection: THREE.Intersection,
-    value: number,
-    controller: VRController | null = null,
-  ) {
-    for (const [handler, target] of this.findInputHandlers(
-      intersection,
-    ).entries()) {
+  handleTriggerPress(intersection: THREE.Intersection, value: number,
+    controller: VRController | null = null) {
+    this.findInputHandlers(intersection).forEach((target, handler) => {
       if (handler.triggerPress) {
         handler.triggerPress({
           target,
@@ -66,29 +56,20 @@ export default class VrInputManager {
           controller,
         });
       }
-    }
+    });
   }
 
-  handleTriggerUp(
-    intersection: THREE.Intersection,
-    controller: VRController | null = null,
-  ) {
-    for (const [handler, target] of this.findInputHandlers(
-      intersection,
-    ).entries()) {
+  handleTriggerUp(intersection: THREE.Intersection, controller: VRController | null = null) {
+    this.findInputHandlers(intersection).forEach((target, handler) => {
       if (handler.triggerUp) handler.triggerUp({ target, intersection, controller });
-    }
+    });
   }
 
-  handleHover(
-    intersection: THREE.Intersection,
-    controller: VRController | null = null,
-  ) {
+  handleHover(intersection: THREE.Intersection, controller: VRController | null = null) {
     const targetsByHandler = this.findInputHandlers(intersection);
 
     // Reset hover effect when target changed.
-    const lastHovers = this.lastHovers.get(controller) || [];
-    for (const lastHover of lastHovers) {
+    this.lastHovers.get(controller)?.forEach((lastHover) => {
       if (
         lastHover.handler.resetHover
         && lastHover.target !== targetsByHandler.get(lastHover.handler)
@@ -99,21 +80,21 @@ export default class VrInputManager {
           target: lastHover.target,
         });
       }
-    }
+    });
 
     // Enable hover effect.
-    const hovers = [];
-    for (const [handler, target] of targetsByHandler.entries()) {
+    const hovers: LastHover<any>[] = [];
+    targetsByHandler.forEach((target, handler) => {
       if (handler.hover) {
         handler.hover({ target, intersection, controller });
         hovers.push({ handler, target, intersection });
       }
-    }
+    });
     this.lastHovers.set(controller, hovers);
   }
 
   resetHover(controller: VRController | null = null) {
-    for (const lastHover of this.lastHovers.get(controller) || []) {
+    this.lastHovers.get(controller)?.forEach((lastHover) => {
       if (lastHover.handler.resetHover) {
         lastHover.handler.resetHover({
           controller,
@@ -121,7 +102,7 @@ export default class VrInputManager {
           target: lastHover.target,
         });
       }
-    }
+    });
     this.lastHovers.delete(controller);
   }
 
@@ -131,17 +112,16 @@ export default class VrInputManager {
    * Returns for every handler the corresponding target object, i.e., the first
    * ancestor of the intersected object that has the handler's target type.
    */
-  private findInputHandlers(
-    intersection: THREE.Intersection,
-  ): Map<VrInputHandler<THREE.Object3D>, THREE.Object3D> {
+  private findInputHandlers(intersection: THREE.Intersection):
+  Map<VrInputHandler<THREE.Object3D>, THREE.Object3D> {
     const result = new Map();
-    for (const handler of this.inputHandlers) {
+    this.inputHandlers.forEach((handler) => {
       let target: THREE.Object3D | null = intersection.object;
       while (target && !(target instanceof handler.targetType)) {
         target = target.parent;
       }
       if (target) result.set(handler, target);
-    }
+    });
     return result;
   }
 }

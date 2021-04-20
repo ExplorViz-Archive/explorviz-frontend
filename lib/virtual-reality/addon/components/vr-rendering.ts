@@ -508,7 +508,7 @@ export default class VrRendering
   @action
   async onDropFiles(files: File[]) {
     const filesByName = new Map<string, File>();
-    for (const file of files) filesByName.set(file.name, file);
+    files.forEach((file) => filesByName.set(file.name, file));
 
     // Create a loading manager that converts file names to object URLs.
     const loadingManager = new THREE.LoadingManager();
@@ -526,7 +526,7 @@ export default class VrRendering
     const tasks: Promise<any>[] = [];
 
     // Load all glTF models.
-    for (const file of files) {
+    files.forEach((file) => {
       if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
         tasks.push(
           new Promise((resolve) => {
@@ -539,7 +539,7 @@ export default class VrRendering
           }),
         );
       }
-    }
+    });
 
     // If a single image file has been dropped, use it as a panorama.
     if (files.length === 1) {
@@ -907,11 +907,11 @@ export default class VrRendering
     this.remoteUsers.removeAllRemoteUsers();
 
     // Reset highlighting colors.
-    for (const application of this.vrApplicationRenderer.getOpenApplications()) {
+    this.vrApplicationRenderer.getOpenApplications().forEach((application) => {
       application.setHighlightingColor(
         this.configuration.applicationColors.highlightedEntity,
       );
-    }
+    });
 
     this.localUser.disconnect();
   }
@@ -935,7 +935,7 @@ export default class VrRendering
         },
         false,
       );
-      for (const controller of userData.controllers) {
+      userData.controllers.forEach((controller) => {
         this.onUserControllerConnect({
           event: FORWARDED_EVENT,
           userId: userData.id,
@@ -944,7 +944,7 @@ export default class VrRendering
             controller,
           },
         });
-      }
+      });
     }
 
     // Initialize local user.

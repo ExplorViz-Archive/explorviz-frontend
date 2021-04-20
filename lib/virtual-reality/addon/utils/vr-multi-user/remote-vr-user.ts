@@ -175,7 +175,7 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.animationMixer.update(delta);
 
     // Update length of rays such that they extend to the intersection point.
-    for (const controller of this.controllers) {
+    this.controllers.forEach((controller) => {
       if (controller) {
         const distance = controller.intersection
           ? controller.ray
@@ -185,7 +185,7 @@ export default class RemoteVrUser extends THREE.Object3D {
           : DEFAULT_RAY_LENGTH;
         controller.ray.scale.z = distance;
       }
-    }
+    });
   }
 
   /**
@@ -229,9 +229,9 @@ export default class RemoteVrUser extends THREE.Object3D {
    *                         Shows them if true.
    */
   setVisible(visible: boolean) {
-    for (const controller of this.controllers) {
+    this.controllers.forEach((controller) => {
       if (controller) controller.model.visible = visible;
-    }
+    });
     this.setHmdVisible(visible);
   }
 

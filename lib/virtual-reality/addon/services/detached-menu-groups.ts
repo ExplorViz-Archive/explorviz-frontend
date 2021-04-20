@@ -1,7 +1,5 @@
 import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
-import { DynamicLandscapeData } from '../../../../app/utils/landscape-schemes/dynamic-data';
-import { StructureLandscapeData } from '../../../../app/utils/landscape-schemes/structure-data';
 import CloseIcon from '../utils/view-objects/vr/close-icon';
 import { DetachableMenu } from '../utils/vr-menus/detachable-menu';
 import DetachedMenuGroup from '../utils/vr-menus/detached-menu-group';
@@ -45,10 +43,7 @@ export default class DetachedMenuGroupsService extends Service {
    * Callback that is invoked by the timestamp service when a new landscape or timestamp is
    * selected.
    */
-  updateLandscapeData(
-    _structureData: StructureLandscapeData,
-    _dynamicData: DynamicLandscapeData,
-  ) {
+  updateLandscapeData() {
     this.removeAllDetachedMenusLocally();
   }
 
@@ -85,9 +80,7 @@ export default class DetachedMenuGroupsService extends Service {
    * Updates all detached menus.
    */
   updateDetachedMenus(delta: number) {
-    for (const detachedMenuGroup of this.detachedMenuGroups) {
-      detachedMenuGroup.updateMenu(delta);
-    }
+    this.detachedMenuGroups.forEach((menuGroup) => menuGroup.updateMenu(delta));
   }
 
   /**
@@ -192,9 +185,7 @@ export default class DetachedMenuGroupsService extends Service {
 
   removeAllDetachedMenusLocally() {
     // Notify all detached menus that they have been closed.
-    for (const detachedMenuGroup of this.detachedMenuGroups) {
-      detachedMenuGroup.closeAllMenus();
-    }
+    this.detachedMenuGroups.forEach((menuGroup) => menuGroup.closeAllMenus());
 
     this.container.remove(...this.detachedMenuGroups);
     this.detachedMenuGroups.clear();

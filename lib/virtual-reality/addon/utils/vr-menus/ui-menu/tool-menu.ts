@@ -339,7 +339,7 @@ export default class ToolMenu extends InteractiveMenu {
 
   makeTriggerButtonBinding() {
     return new VRControllerButtonBinding('Select', {
-      onButtonDown: (_controller) => this.selectedTool?.action(),
+      onButtonDown: () => this.selectedTool?.action(),
     });
   }
 
@@ -349,7 +349,8 @@ export default class ToolMenu extends InteractiveMenu {
    * Finds the tool that contains the given object.
    */
   private findToolByObject(object: THREE.Object3D): Tool | null {
-    for (const tool of this.tools) {
+    for (let i = 0; i < this.tools.length; i++) {
+      const tool = this.tools[i];
       let current: THREE.Object3D | null = object;
       while (current) {
         if (current === tool.object) return tool;

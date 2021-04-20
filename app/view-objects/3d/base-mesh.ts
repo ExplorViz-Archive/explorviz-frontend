@@ -3,8 +3,10 @@ import calculateColorBrightness from
   'explorviz-frontend/utils/helpers/threejs-helpers';
 
 export default abstract class BaseMesh<
-  TGeometry extends THREE.Geometry | THREE.BufferGeometry = THREE.Geometry | THREE.BufferGeometry,
-  TMaterial extends THREE.MeshBasicMaterial | THREE.MeshLambertMaterial = THREE.MeshBasicMaterial | THREE.MeshLambertMaterial
+  TGeometry extends THREE.Geometry | THREE.BufferGeometry =
+  THREE.Geometry | THREE.BufferGeometry,
+  TMaterial extends THREE.MeshBasicMaterial | THREE.MeshLambertMaterial =
+  THREE.MeshBasicMaterial | THREE.MeshLambertMaterial,
 > extends THREE.Mesh<TGeometry, TMaterial> {
   highlighted: boolean = false;
 

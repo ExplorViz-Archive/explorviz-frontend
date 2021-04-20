@@ -37,7 +37,7 @@ module.exports = function initEnvironment(environment) {
       traceService: BACKEND_CONFIG.traceService,
       userService: BACKEND_CONFIG.userService,
       collaborativeService: BACKEND_CONFIG.collaborativeService,
-      vrService: BACKEND_CONFIG.vrService
+      vrService: BACKEND_CONFIG.vrService,
     },
 
     APP: {

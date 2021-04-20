@@ -70,7 +70,8 @@ export function getVRControllerLabelPositions(
   const thumbpadPosition = (
     ...componentNames: string[]
   ): VRControllerThumbpadLabelPositions => {
-    for (const componentName of componentNames) {
+    for (let i = 0; i < componentNames.length; i++) {
+      const componentName = componentNames[i];
       const up = meshPosition(componentName, 'yaxis_touched', 'min');
       const right = meshPosition(componentName, 'xaxis_touched', 'max');
       const down = meshPosition(componentName, 'yaxis_touched', 'max');
@@ -104,7 +105,8 @@ export function getVRControllerLabelPositions(
   const buttonPosition = (
     ...componentNames: string[]
   ): VRControllerLabelPosition | undefined => {
-    for (const componentName of componentNames) {
+    for (let i = 0; i < componentNames.length; i++) {
+      const componentName = componentNames[i];
       const position = meshPosition(componentName, 'pressed', 'value');
       if (position) {
         return {

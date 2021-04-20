@@ -60,7 +60,7 @@ export default class VrRoomService extends Service {
     if (Array.isArray(records) && records.every(isRoomListRecord)) {
       return records;
     }
-    throw 'invalid data';
+    throw new Error('invalid data');
   }
 
   async createRoom(): Promise<RoomCreatedResponse> {
@@ -75,7 +75,7 @@ export default class VrRoomService extends Service {
     });
     const json = await response.json();
     if (isRoomCreatedResponse(json)) return json;
-    throw 'invalid data';
+    throw new Error('invalid data');
   }
 
   saveCurrentRoomLayout(): SerializedVrRoom {
@@ -180,7 +180,7 @@ export default class VrRoomService extends Service {
     });
     const json = await response.json();
     if (isLobbyJoinedResponse(json)) return json;
-    throw 'invalid data';
+    throw new Error('invalid data');
   }
 
   private buildJoinLobbyPayload(): JoinLobbyPayload | null {

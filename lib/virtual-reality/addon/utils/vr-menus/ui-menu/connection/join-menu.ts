@@ -52,7 +52,7 @@ export default class JoinMenu extends ConnectionBaseMenu {
     // Draw one button for each room.
     const yOffset = 60;
     let yPos = 50 + yOffset;
-    for (const room of rooms) {
+    rooms.forEach((room) => {
       const roomButton = new TextbuttonItem({
         text: room.roomName,
         position: { x: 100, y: yPos },
@@ -64,7 +64,7 @@ export default class JoinMenu extends ConnectionBaseMenu {
       this.items.push(roomButton);
       this.thumbpadTargets.push(roomButton);
       yPos += yOffset;
-    }
+    });
     this.redrawMenu();
   }
 

@@ -1,7 +1,4 @@
-import { Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
-import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import { GrabbableObject } from '../interfaces/grabbable-object';
 
 /**
@@ -10,17 +7,8 @@ import { GrabbableObject } from '../interfaces/grabbable-object';
  * application as grabbable by a controller and provides a method to get
  * the ID to send to the backend to identify the grabbed object.
  */
-export default class VrApplicationObject3D
-  extends ApplicationObject3D
-  implements GrabbableObject {
-  constructor(
-    application: Application,
-    boxLayoutMap: Map<string, BoxLayout>,
-    traces: Trace[],
-  ) {
-    super(application, boxLayoutMap, traces);
-  }
-
+export default class VrApplicationObject3D extends ApplicationObject3D implements GrabbableObject {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canBeIntersected(_intersection: THREE.Intersection) {
     return true;
   }

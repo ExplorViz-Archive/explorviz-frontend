@@ -374,7 +374,8 @@ export default class VRController extends BaseMesh {
 
     const intersections = this.raycaster.intersectObject(this.scene, true);
 
-    for (const intersection of intersections) {
+    for (let i = 0; i < intersections.length; i++) {
+      const intersection = intersections[i];
       if (canIntersectAllParentObjects(intersection, { onlyVisible: true })) {
         return intersection;
       }

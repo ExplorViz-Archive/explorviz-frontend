@@ -48,9 +48,9 @@ export default class SettingsMenu extends UiMenu {
         const visible = !VRControllerLabelGroup.visibilitySetting;
         VRControllerLabelGroup.visibilitySetting = visible;
         labelsCheckbox.isChecked = visible;
-        for (const labelGroup of labelGroups) {
+        labelGroups.forEach((labelGroup) => {
           if (labelGroup) labelGroup.visible = visible;
-        }
+        });
         this.redrawMenu();
       },
     });

@@ -5,9 +5,7 @@ export interface GrabbableObject extends IntersectableObject {
   getGrabId(): string | null;
 }
 
-export class GrabbableObjectWrapper
-  extends THREE.Group
-  implements GrabbableObject {
+export class GrabbableObjectWrapper extends THREE.Group implements GrabbableObject {
   private grabId: string | null;
 
   constructor(object: THREE.Object3D, grabId: string | null = null) {
@@ -16,6 +14,7 @@ export class GrabbableObjectWrapper
     this.add(object);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canBeIntersected(_intersection: THREE.Intersection) {
     return true;
   }

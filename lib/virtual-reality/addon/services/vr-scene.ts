@@ -4,7 +4,8 @@ import VrApplicationRenderer from 'explorviz-frontend/services/vr-application-re
 import VrLandscapeRenderer from 'explorviz-frontend/services/vr-landscape-renderer';
 import THREE from 'three';
 import {
-  APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE, COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE,
+  APPLICATION_ENTITY_TYPE, CLASS_COMMUNICATION_ENTITY_TYPE, CLASS_ENTITY_TYPE,
+  COMPONENT_ENTITY_TYPE, EntityType, NODE_ENTITY_TYPE,
 } from 'virtual-reality/utils/vr-message/util/entity_type';
 import FloorMesh from '../utils/view-objects/vr/floor-mesh';
 
@@ -58,22 +59,35 @@ export default class VrSceneService extends Service {
 
       case COMPONENT_ENTITY_TYPE:
       case CLASS_ENTITY_TYPE:
-        for (const application of this.vrApplicationRenderer.getOpenApplications()) {
-          const mesh = application.getBoxMeshbyModelId(id);
-          if (mesh) return mesh;
-        }
-        return null;
+        return this.getBoxMeshByModelId(id);
 
       case CLASS_COMMUNICATION_ENTITY_TYPE:
-        for (const application of this.vrApplicationRenderer.getOpenApplications()) {
-          const mesh = application.getCommMeshByModelId(id);
-          if (mesh) return mesh;
-        }
-        return null;
+        return this.getCommunicationMeshById(id);
 
       default:
         return null;
     }
+  }
+
+  private getCommunicationMeshById(id: string) {
+    const openApplications = this.vrApplicationRenderer.getOpenApplications();
+    for (let i = 0; i < openApplications.length; i++) {
+      const application = openApplications[i];
+      const mesh = application.getCommMeshByModelId(id);
+      if (mesh) return mesh;
+    }
+    return null;
+  }
+
+  private getBoxMeshByModelId(id: string) {
+    const openApplications = this.vrApplicationRenderer.getOpenApplications();
+
+    for (let i = 0; i < openApplications.length; i++) {
+      const application = openApplications[i];
+      const mesh = application.getBoxMeshbyModelId(id);
+      if (mesh) return mesh;
+    }
+    return null;
   }
 }
 

@@ -1,14 +1,8 @@
 import THREE from 'three';
 import { IntersectableObject } from '../interfaces/intersectable-object';
 
-export default class FloorMesh
-  extends THREE.Mesh
-  implements IntersectableObject {
-  constructor(
-    width: number,
-    length: number,
-    path = 'images/materials/floor.jpg',
-  ) {
+export default class FloorMesh extends THREE.Mesh implements IntersectableObject {
+  constructor(width: number, length: number, path = 'images/materials/floor.jpg') {
     super();
 
     /**
@@ -33,6 +27,7 @@ export default class FloorMesh
     this.receiveShadow = true;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   canBeIntersected(_intersection: THREE.Intersection) {
     return true;
   }

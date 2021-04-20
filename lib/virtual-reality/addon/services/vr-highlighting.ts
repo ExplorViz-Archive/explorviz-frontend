@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import Service, { inject as service } from '@ember/service';
 import Configuration from 'explorviz-frontend/services/configuration';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';

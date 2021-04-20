@@ -202,6 +202,7 @@ export default abstract class BaseMenu extends THREE.Group {
    *
    * @param delta The time in seconds since the last frame.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onUpdateMenu(_delta: number) {}
 
   /**

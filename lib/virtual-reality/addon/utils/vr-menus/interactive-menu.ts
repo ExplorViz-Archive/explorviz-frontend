@@ -1,9 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { IntersectableObject } from 'virtual-reality/utils/view-objects/interfaces/intersectable-object';
 import AnimatedMenu from './animated-menu';
 
-export default class InteractiveMenu
-  extends AnimatedMenu
-  implements IntersectableObject {
+export default abstract class InteractiveMenu extends AnimatedMenu implements IntersectableObject {
   /**
    * Interactive menus can be intersected by a controller's ray by default.
    */
@@ -21,7 +20,7 @@ export default class InteractiveMenu
    * hovering this menu. This method is not called again before the trigger
    * is released.
    *
-   * @param intersection The intersected point of the menu that is hovered.
+   * @param _intersection The intersected point of the menu that is hovered.
    */
   triggerDown(_intersection: THREE.Intersection) {}
 
@@ -29,8 +28,8 @@ export default class InteractiveMenu
    * Called when the other controller's trigger is pressed while hovering this
    * menu.
    *
-   * @param intersection The intersected point of the menu that is hovered.
-   * @param value The intensity of the trigger press.
+   * @param _intersection The intersected point of the menu that is hovered.
+   * @param _value The intensity of the trigger press.
    */
   triggerPress(_intersection: THREE.Intersection, _value: number) {}
 
@@ -38,7 +37,7 @@ export default class InteractiveMenu
    * Called once when the other controller's trigger is released while
    * hovering this menu.
    *
-   * @param intersection The intersected point of the menu that is hovered.
+   * @param _intersection The intersected point of the menu that is hovered.
    */
   triggerUp(_intersection: THREE.Intersection) {}
 
