@@ -11,6 +11,11 @@
   height: 100%;
 }
 
+.center-horizontal {
+  display: flex;
+  justify-content: center;
+}
+
 .settings-pane {
   margin: 10vh 20vw;
 }
