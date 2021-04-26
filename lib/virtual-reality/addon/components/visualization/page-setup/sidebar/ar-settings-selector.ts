@@ -13,10 +13,36 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
   arSettings!: ArSettings;
 
   @tracked
-  buttonSize = 5;
+  buttonSize: number;
 
   @tracked
-  buttonPadding = 2;
+  buttonPadding: number;
+
+  constructor(owner: any, args: ArSettingsSelectorArgs) {
+    super(owner, args);
+
+    this.buttonSize = ArSettingsSelector.getCssVminSize('--ar-button-size');
+    this.buttonPadding = ArSettingsSelector.getCssVminSize('--ar-button-padding');
+
+    /*
+    if (root) {
+      const buttonSizeString = getComputedStyle(root).getPropertyValue('--ar-button-size');
+      const currentButtonSize = Number.parseFloat(
+        buttonSizeString.substring(0, buttonSizeString.length - 4),
+      );
+      this.buttonSize = currentButtonSize;
+
+      const buttonPaddingString = getComputedStyle(root).getPropertyValue('--ar-button-padding');
+      const currentButtonPadding = Number.parseFloat(
+        buttonPaddingString.substring(0, buttonPaddingString.length - 4),
+      );
+      this.buttonPadding = currentButtonPadding;
+    } else {
+      this.buttonSize = 5;
+      this.buttonPadding = 2;
+    }
+    */
+  }
 
   @action
   close() {
@@ -54,5 +80,14 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
     if (root) {
       (<HTMLElement>root).style.setProperty(variable, value);
     }
+  }
+
+  static getCssVminSize(variable: string) {
+    const root = document.querySelector(':root')!;
+
+    const cssString = getComputedStyle(root).getPropertyValue(variable);
+    const cssValue = Number.parseFloat(cssString.replace('vmin', ''));
+
+    return cssValue;
   }
 }
