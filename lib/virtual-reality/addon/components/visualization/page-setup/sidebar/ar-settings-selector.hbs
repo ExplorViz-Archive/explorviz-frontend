@@ -5,7 +5,7 @@
   {{svg-jar "x" class="octicon"}}
 </div>
 
-<label for="customRange1" class="form-label">Landscape Opacity</label>
+<label for="landscapeOpacityRange" class="form-label">Landscape Opacity</label>
 <Input 
     id="landscapeOpacityRange"
     @type="range" 
@@ -15,7 +15,7 @@
 />
 <div class="center-horizontal">{{this.arSettings.landscapeOpacity}}</div>
 
-<label for="customRange1" class="form-label">Application Opacity</label>
+<label for="applicationOpacityRange" class="form-label">Application Opacity</label>
 <Input 
     id="applicationOpacityRange"
     @type="range"
@@ -24,3 +24,21 @@
     {{on "input" this.updateApplicationOpacity}}
 />
 <div class="center-horizontal">{{this.arSettings.applicationOpacity}}</div>
+
+<label for="buttonSizeRange" class="form-label">Button Size</label>
+<Input 
+    id="buttonSizeRange"
+    @type="range"
+    @value={{this.buttonSize}}
+    class="form-range" min="1.0" max="16.0" step="1.5"
+    {{on "input" this.updateButtonSize}}
+/>
+
+<label for="buttonSpacingRange" class="form-label">Button Spacing</label>
+<Input 
+    id="buttonSpacingRange"
+    @type="range"
+    @value={{this.buttonPadding}}
+    class="form-range" min="0.0" max="10.0" step="1"
+    {{on "input" this.updateButtonSpacing}}
+/>
