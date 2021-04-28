@@ -11,13 +11,18 @@ export default class BaseRoute extends Route {
   async beforeModel() {
     // this is where we check if a user is authenticated
     // if not authenticated, kick them to the home page
-    await this.auth.checkLogin().catch((e: Auth0Error) => {
-      if (e.description) {
-        AlertifyHandler.showAlertifyWarning(e.description);
-      }
-      if (e.statusCode !== 429) {
-        this.auth.logout();
-      }
+    return new Promise<void>((resolve, reject) => {
+      this.auth.checkLogin().then(() => {
+        resolve();
+      }).catch((e: Auth0Error) => {
+        if (e.description) {
+          AlertifyHandler.showAlertifyWarning(e.description);
+        }
+        if (e.statusCode !== 429) {
+          this.auth.logout();
+        }
+        reject();
+      });
     });
   }
 }
