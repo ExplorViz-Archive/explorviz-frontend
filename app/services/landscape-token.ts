@@ -5,15 +5,15 @@ export type LandscapeToken = {
   alias: string,
   created: number,
   ownerId: string,
+  sharedUsersIds: string[],
   value: string,
-  sharedUsersIds: string[]
 };
 
 export default class LandscapeTokenService extends Service {
   token: LandscapeToken|null = null;
 
-  init() {
-    super.init();
+  constructor() {
+    super(...arguments);
 
     this.restoreToken();
   }
@@ -47,15 +47,22 @@ export default class LandscapeTokenService extends Service {
 
   private isValidToken(token: unknown): token is LandscapeToken {
     return (this.isObject(token)
-      && Object.keys(token).length === 4
+      && Object.keys(token).length === 5
       && {}.hasOwnProperty.call(token, 'alias')
       && {}.hasOwnProperty.call(token, 'created')
       && {}.hasOwnProperty.call(token, 'ownerId')
+      && {}.hasOwnProperty.call(token, 'sharedUsersIds')
       && {}.hasOwnProperty.call(token, 'value')
       && typeof (<LandscapeToken>token).alias === 'string'
       && typeof (<LandscapeToken>token).created === 'number'
       && typeof (<LandscapeToken>token).ownerId === 'string'
+      && this.isStringArray((<LandscapeToken>token).sharedUsersIds)
       && typeof (<LandscapeToken>token).value === 'string');
+  }
+
+  private isStringArray(possibleArray: unknown) {
+    return Array.isArray(possibleArray)
+      && possibleArray.every((item) => typeof item === 'string');
   }
 
   private isObject(variable: unknown): variable is object {
