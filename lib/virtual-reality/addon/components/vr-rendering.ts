@@ -35,8 +35,6 @@ import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VR
 import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
 import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
-import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
-import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import AdvancedMenu from 'virtual-reality/utils/vr-menus/advanced-menu';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
 import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
@@ -50,6 +48,7 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
+import { tracked } from '@glimmer/tracking';
 
 interface Args {
   readonly id: string;
@@ -90,11 +89,10 @@ export default class VrRendering extends Component<Args> {
 
   scene!: THREE.Scene;
 
+  @tracked
   camera!: THREE.PerspectiveCamera;
 
   renderer!: THREE.WebGLRenderer;
-
-  raycaster: THREE.Raycaster;
 
   // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
@@ -142,6 +140,9 @@ export default class VrRendering extends Component<Args> {
 
   drawableClassCommunications: Map<string, DrawableClassCommunication[]> = new Map();
 
+  @tracked
+  raycastObjects: THREE.Object3D[];
+
   // #endregion CLASS FIELDS AND GETTERS
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -159,7 +160,6 @@ export default class VrRendering extends Component<Args> {
     this.landscapeScalar = 0.1;
     this.applicationScalar = 0.01;
 
-    this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
 
     this.controllerMainMenus = new THREE.Group();
@@ -186,6 +186,8 @@ export default class VrRendering extends Component<Args> {
 
     // Rotate landscape such that it lays flat on the floor
     this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
+
+    this.raycastObjects = [this.landscapeObject3D, this.applicationGroup];
   }
 
   /**
@@ -275,10 +277,6 @@ export default class VrRendering extends Component<Args> {
     window.onkeydown = (event: any) => {
       this.handleKeyboard(event);
     };
-  }
-
-  static raycastFilter(intersection: THREE.Intersection) {
-    return !(intersection.object instanceof LabelMesh || intersection.object instanceof LogoMesh);
   }
 
   initControllers() {
