@@ -7,6 +7,7 @@ import {
 import { inject as service } from '@ember/service';
 import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-setup/timeline/plotly-timeline';
 import LandscapeLoader from 'explorviz-frontend/services/landscape-loader';
+import CollaborativeService from 'collaborative-mode/services/collaborative-service';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
 import { tracked } from '@glimmer/tracking';
@@ -14,6 +15,7 @@ import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/la
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import debugLogger from 'ember-debug-logger';
+import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 
 export interface LandscapeData {
@@ -33,6 +35,8 @@ export interface LandscapeData {
  */
 export default class VisualizationController extends Controller {
   @service('landscape-loader') landscapeLoader!: LandscapeLoader;
+
+  @service('collaborative-service') collaborativeService!: CollaborativeService;
 
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
@@ -142,6 +146,12 @@ export default class VisualizationController extends Controller {
 
   @action
   openLandscapeView() {
+    this.receiveOpenLandscapeView();
+    this.collaborativeService.send(CollaborativeEvents.OpenLandscapeView, { });
+  }
+
+  @action
+  receiveOpenLandscapeView() {
     this.closeDataSelection();
     this.showVR = false;
     if (this.landscapeData !== null) {
@@ -160,6 +170,7 @@ export default class VisualizationController extends Controller {
         ...this.landscapeData,
         application: app,
       };
+      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.instanceId });
     }
   }
 
@@ -286,6 +297,7 @@ export default class VisualizationController extends Controller {
     this.selectedTimestampRecords = [];
     this.visualizationPaused = false;
     this.landscapeLoader.initLandscapePolling();
+    this.closeDataSelection();
     this.updateTimestampList();
   }
 

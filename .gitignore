@@ -12,7 +12,6 @@
 
 # dependencies
 /node_modules
-/lib/virtual-reality/node_modules
 /bower_components
 
 # self signed ssl certificates

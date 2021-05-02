@@ -2,28 +2,28 @@ import { getClassMethodHashCodes, getClassAncestorPackages } from 'explorviz-fro
 import { Class, Method, Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { module, test } from 'qunit';
 
-module('Unit | Utility | class-helpers', function() {
-  test('getClassMethodHashCodes with 1 method', function(assert) {
+module('Unit | Utility | class-helpers', function () {
+  test('getClassMethodHashCodes with 1 method', function (assert) {
     const testClass = getTestPackageWithOneClassAndOneMethod().classes[0];
-    let hashCodeArray = getClassMethodHashCodes(testClass);
+    const hashCodeArray = getClassMethodHashCodes(testClass);
     assert.ok(hashCodeArray.length === 1 && hashCodeArray[0] === 'testHash');
   });
 
-  test('getClassMethodHashCodes with empty method array', function(assert) {
+  test('getClassMethodHashCodes with empty method array', function (assert) {
     const testClass = getTestPackageWithOneClassNoMethods().classes[0];
-    let hashCodeArray = getClassMethodHashCodes(testClass);
+    const hashCodeArray = getClassMethodHashCodes(testClass);
     assert.ok(hashCodeArray.length === 0);
   });
 
-  test('getClassAncestorPackages with one parent package', function(assert) {
+  test('getClassAncestorPackages with one parent package', function (assert) {
     const testClass = getTestPackageWithNoParentAndOneClass().classes[0];
-    let ancestors = getClassAncestorPackages(testClass);
+    const ancestors = getClassAncestorPackages(testClass);
     assert.ok(ancestors.length === 1);
   });
 
-  test('getClassAncestorPackages with two ancestor packages', function(assert) {
+  test('getClassAncestorPackages with two ancestor packages', function (assert) {
     const testClass = getTestPackageWithOneParentAndOneClass().subPackages[0].classes[0];
-    let ancestors = getClassAncestorPackages(testClass);
+    const ancestors = getClassAncestorPackages(testClass);
     assert.ok(ancestors.length === 2 && ancestors[0] !== ancestors[1]);
   });
 });
@@ -33,21 +33,21 @@ function getTestPackageWithOneClassAndOneMethod() {
     id: 'package',
     name: 'package',
     subPackages: [],
-    classes: []
-  }
-  
+    classes: [],
+  };
+
   const testClass: Class = {
     id: 'class',
     name: 'class',
     methods: [],
     parent: testPackage,
-  }
-  
+  };
+
   const testMethod: Method = {
     name: 'testMethod',
     hashCode: 'testHash',
-  }
-  
+  };
+
   testClass.methods.push(testMethod);
   testPackage.classes.push(testClass);
 
@@ -59,16 +59,16 @@ function getTestPackageWithOneClassNoMethods() {
     id: 'package',
     name: 'package',
     subPackages: [],
-    classes: []
-  }
-  
+    classes: [],
+  };
+
   const testClass: Class = {
     id: 'class',
     name: 'class',
     methods: [],
     parent: testPackage,
-  }
-  
+  };
+
   testPackage.classes.push(testClass);
 
   return testPackage;
@@ -79,15 +79,15 @@ function getTestPackageWithNoParentAndOneClass() {
     id: 'package',
     name: 'package',
     subPackages: [],
-    classes: []
-  }
-  
+    classes: [],
+  };
+
   const testClass: Class = {
     id: 'class',
     name: 'class',
     methods: [],
     parent: testPackage,
-  }
+  };
 
   testPackage.classes.push(testClass);
 
@@ -99,30 +99,27 @@ function getTestPackageWithOneParentAndOneClass() {
     id: 'package',
     name: 'package',
     subPackages: [],
-    classes: []
-  }
+    classes: [],
+  };
 
   const testSubPackage: Package = {
     id: 'subPackage',
     name: 'subPackage',
     subPackages: [],
-    classes: []
-  }
+    classes: [],
+  };
 
   testPackage.subPackages.push(testSubPackage);
   testSubPackage.parent = testPackage;
-  
+
   const testClass: Class = {
     id: 'class',
     name: 'class',
     methods: [],
     parent: testSubPackage,
-  }
+  };
 
   testSubPackage.classes.push(testClass);
 
-
   return testPackage;
 }
-
-

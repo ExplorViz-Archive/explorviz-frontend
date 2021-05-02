@@ -1,10 +1,11 @@
+import { IdentifiableMesh } from 'collaborative-mode/utils/collaborative-data';
 import { Class } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import THREE from 'three';
 import BoxMesh from './box-mesh';
 import ClazzLabelMesh from './clazz-label-mesh';
 
-export default class ClazzMesh extends BoxMesh {
+export default class ClazzMesh extends BoxMesh implements IdentifiableMesh {
   geometry: THREE.BoxGeometry;
 
   material: THREE.MeshLambertMaterial;
@@ -13,6 +14,8 @@ export default class ClazzMesh extends BoxMesh {
   labelMesh: ClazzLabelMesh | null = null;
 
   dataModel: Class;
+
+  colabId: string;
 
   constructor(layout: BoxLayout, clazz: Class, defaultColor: THREE.Color,
     highlightingColor: THREE.Color) {
@@ -23,5 +26,6 @@ export default class ClazzMesh extends BoxMesh {
     this.geometry = geometry;
     this.material = material;
     this.dataModel = clazz;
+    this.colabId = clazz.id;
   }
 }

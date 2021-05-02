@@ -1,6 +1,9 @@
 import $ from 'jquery';
+// @ts-ignore until types for AlertifyJS are available
+import alertify from 'alertifyjs';
 
-declare const alertify: any;
+type AlertifyPosition = 'top-left' | 'top-center' | 'top-right' |
+'bottom-left' | 'bottom-center' | 'bottom-right';
 
 /**
 * @class AlertifyHandler
@@ -74,7 +77,14 @@ export default class AlertifyHandler {
 
     this.alertActive = false;
   }
-}
 
-// Alert messages appear in the bottom right corner
-alertify.set('notifier', 'position', 'bottom-right');
+  /**
+   * Set the position for notifications which are handled by AlertifyJS.
+   * 'bottom-right' is set by default.
+   *
+   * @param position Defines the position on the screen where notifications are displayed
+   */
+  static setAlertifyPosition(position: AlertifyPosition) {
+    alertify.set('notifier', 'position', position);
+  }
+}

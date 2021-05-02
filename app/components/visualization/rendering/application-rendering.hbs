@@ -9,16 +9,6 @@
     class="d-flex {{if @showDataSelection "col-8" "col-12"}}"
     style="flex-direction: column; height: 100%"
   >
-    {{!-- <Visualization::PageSetup::VisualizationNavbar>
-      <Visualization::PageSetup::Navbar::ApplicationSearch
-        @application={{@landscapeData.application}}
-        @unhighlightAll={{this.unhighlightAll}}
-        @openParents={{this.openParents}}
-        @closeComponent={{this.closeComponent}}
-        @highlightModel={{this.highlightModel}}
-      />
-    </Visualization::PageSetup::VisualizationNavbar> --}}
-
     <div
       id="rendering"
       {{did-insert this.outerDivInserted}}
@@ -26,12 +16,35 @@
     >
       <canvas
         class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
+        {{interaction-modifier
+          raycastObjects=this.applicationObject3D
+          camera=this.camera
+          hammerInteraction=this.hammerInteraction
+          doubleClick=this.handleDoubleClick
+          singleClick=this.handleSingleClick
+          mouseMove=this.handleMouseMove
+          mouseWheel=this.handleMouseWheel
+          mouseOut=this.handleMouseOut
+          mouseStop=this.handleMouseStop
+          panning=this.handlePanning
+        }}
+        {{collaborative-modifier
+          raycastObject3D=this.applicationObject3D
+          camera=this.camera
+          onSingleClick=this.singleClickOnMesh
+          onDoubleClick=this.doubleClickOnMesh
+          mouseMove=this.mouseMoveOnMesh
+          mouseStop=this.mouseStopOnMesh
+          mouseOut=this.handleMouseOut
+          setPerspective=this.setPerspective
+          repositionSphere=this.repositionSphere
+        }}
         {{did-insert this.canvasInserted}}
       >
-        {{#if this.interaction}}
+        {{#if this.hammerInteraction}}
           <RightClickMenuHammer
             @items={{this.rightClickMenuItems}}
-            @hammer={{this.interaction.hammerHandler}}
+            @hammer={{this.hammerInteraction}}
           />
         {{/if}}
       </canvas>
@@ -66,6 +79,9 @@
                 @visualizationPaused={{@visualizationPaused}}
                 @dynamicData={{@landscapeData.dynamicLandscapeData}}
               />
+              <CollaborativeSettingsOpener
+                @addComponent={{@addComponent}}
+              />
             </ul>
           </div>
           {{#each @components as |componentName|}}
@@ -87,6 +103,14 @@
                   <h5 class="text-center">Color Picker</h5>
                   <Visualization::PageSetup::Sidebar::ColorPicker
                     @isLandscapeView={{false}}
+                    @removeComponent={{@removeComponent}}
+                    @updateView={{this.updateColors}}
+                  />
+                {{/if}}
+                {{#if (eq componentName "collaborative-settings")}}
+                  <h5 class="text-center">Collaborative Settings</h5>
+                  <CollaborativeSettings
+                    @isLandscapeView={{true}}
                     @removeComponent={{@removeComponent}}
                     @updateView={{this.updateColors}}
                   />

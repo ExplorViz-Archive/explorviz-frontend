@@ -1,16 +1,9 @@
-app/router.js
-app/app.ts
-vendor/
-dist/
+dist/**
+vendor/**
+
+lib/virtual-reality/addon/utils/lib/loader
 
 public/assets/web-workers/*
 
-lib/virtual-reality/addon/utils/lib/**/*
-
-# in-repo addons somehow get these addon/addon and app/app project structure
-# when merged with the main project. This throws errors on .js files
-# with eslint, so we ignore them.
-lib/virtual-reality/addon/addon/utils/lib/**/*
-lib/virtual-reality/app/app/**/*
-
-tests/
+testem.js
+yuidoc-packages.js

@@ -57,7 +57,6 @@ export default class VrMultiUser extends VrRendering {
 
   messageBox!: MessageBoxMenu;
 
-
   // #endregion CLASS FIELDS AND GETTERS
 
   // #region INIT
@@ -140,15 +139,14 @@ export default class VrMultiUser extends VrRendering {
       closeMenu: super.closeControllerMenu.bind(this),
       openCameraMenu: super.openCameraMenu.bind(this),
       openAdvancedMenu: super.openAdvancedMenu.bind(this),
-      openMultiUserMenu: this.openMultiUserMenu.bind(this)
+      openMultiUserMenu: this.openMultiUserMenu.bind(this),
     });
 
     this.controllerMainMenus.add(this.mainMenu);
   }
 
-
   openMultiUserMenu() {
-    this.closeControllerMenu()
+    this.closeControllerMenu();
 
     const menu = new MultiUserMenu(
       this.openMainMenu.bind(this),
@@ -167,7 +165,6 @@ export default class VrMultiUser extends VrRendering {
       this.mainMenu.updateUserList(this.idToRemoteUser);
     }
   }
-
 
   // #endregion MENUS
 
@@ -217,14 +214,12 @@ export default class VrMultiUser extends VrRendering {
     const { object } = controller.intersectedObject;
 
     if (object.parent) {
-
       if (object.parent instanceof ApplicationObject3D && controller.ray) {
         if (this.applicationGroup.isApplicationGrabbed(object.parent.dataModel.instanceId)) {
           this.showHint('Application already grabbed');
           return;
-        } else {
-          this.sender.sendAppGrabbed(object.parent, controller);
         }
+        this.sender.sendAppGrabbed(object.parent, controller);
       }
 
       controller.grabObject(object.parent);
@@ -708,7 +703,8 @@ export default class VrMultiUser extends VrRendering {
   }
 
   onHighlightingUpdate(update: {
-    userID: string, isHighlighted: boolean, instanceId: string, entityType: string, entityID: string,
+    userID: string, isHighlighted: boolean, instanceId: string,
+    entityType: string, entityID: string,
   }) {
     const applicationObject3D = this.applicationGroup.getApplication(update.instanceId);
 
@@ -792,11 +788,11 @@ export default class VrMultiUser extends VrRendering {
   }
 
   sendLandscapePosition() {
-    const controllers = [ this.localUser.controller1, this.localUser.controller2 ];
+    const controllers = [this.localUser.controller1, this.localUser.controller2];
 
-    controllers.forEach(controller => {
+    controllers.forEach((controller) => {
       if (controller) {
-        const grabbedObject = controller.grabbedObject;
+        const { grabbedObject } = controller;
         if (grabbedObject instanceof LandscapeObject3D) {
           const position = new THREE.Vector3();
           this.landscapeObject3D.updateMatrixWorld();
@@ -805,7 +801,7 @@ export default class VrMultiUser extends VrRendering {
           this.landscapeObject3D.getWorldQuaternion(quaternion);
           this.sender.sendLandscapeUpdate(position, quaternion, this.landscapeOffset);
         }
-      } 
+      }
     });
   }
 
@@ -877,8 +873,8 @@ export default class VrMultiUser extends VrRendering {
 
     if (this.localUser.isOnline) {
       if (object instanceof ComponentMesh || object instanceof ClazzMesh) {
-        this.sender.sendHighlightingUpdate(application.dataModel.instanceId, object.constructor.name,
-          object.dataModel.id, object.highlighted);
+        this.sender.sendHighlightingUpdate(application.dataModel.instanceId,
+          object.constructor.name, object.dataModel.id, object.highlighted);
       } else if (object instanceof ClazzCommunicationMesh) {
         const { sourceClass, targetClass } = object.dataModel;
 
@@ -891,8 +887,8 @@ export default class VrMultiUser extends VrRendering {
           combinedId = `${targetClass.id}###${sourceClass.id}`;
         }
 
-        this.sender.sendHighlightingUpdate(application.dataModel.instanceId, object.constructor.name,
-          combinedId, object.highlighted);
+        this.sender.sendHighlightingUpdate(application.dataModel.instanceId,
+          object.constructor.name, combinedId, object.highlighted);
       }
     }
   }
@@ -927,8 +923,8 @@ export default class VrMultiUser extends VrRendering {
     super.toggleComponentAndUpdate(componentMesh, applicationObject3D);
 
     if (this.localUser.isOnline) {
-      this.sender.sendComponentUpdate(applicationObject3D.dataModel.instanceId, componentMesh.dataModel.id,
-        componentMesh.opened, false);
+      this.sender.sendComponentUpdate(applicationObject3D.dataModel.instanceId,
+        componentMesh.dataModel.id, componentMesh.opened, false);
     }
   }
 

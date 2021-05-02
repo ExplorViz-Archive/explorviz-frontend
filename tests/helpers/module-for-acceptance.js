@@ -1,9 +1,10 @@
+/* eslint-disable consistent-return */
 import { module } from 'qunit';
 import { Promise } from 'rsvp';
-import startApp from '../helpers/start-app';
-import destroyApp from '../helpers/destroy-app';
+import startApp from './start-app';
+import destroyApp from './destroy-app';
 
-export default function(name, options = {}) {
+export default function (name, options = {}) {
   module(name, {
     beforeEach() {
       this.application = startApp();
@@ -13,9 +14,10 @@ export default function(name, options = {}) {
       }
     },
 
-    afterEach() {
-      let afterEach = options.afterEach && options.afterEach.apply(this, arguments);
-      return Promise.resolve(afterEach).then(() => destroyApp(this.application));
-    }
+    async afterEach() {
+      const afterEach = options.afterEach && options.afterEach.apply(this, arguments);
+      await Promise.resolve(afterEach);
+      return destroyApp(this.application);
+    },
   });
 }

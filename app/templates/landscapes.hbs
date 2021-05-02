@@ -6,6 +6,7 @@
       @tokens={{@model}}
       @currentToken={{this.tokenService.token}}
       @deleteToken={{this.deleteToken}}
+      @reload={{this.reload}}
     />
   </div>
   <BsButton
@@ -19,6 +20,7 @@
 
 <BsModalSimple
   @open={{this.tokenCreationModalIsOpen}}
+  @onHidden={{this.closeTokenCreationModal}}
   @title="Create Landscape Token"
   @closeTitle="Cancel"
   @submitTitle="Create"
