@@ -21,7 +21,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
   latestStructureData: StructureLandscapeData|null = null;
 
-  latestDynamicData: DynamicLandscapeData|null = null;
+  latestDynamicData: DynamicLandscapeData = [];
 
   debug = debugLogger();
 
@@ -38,16 +38,27 @@ export default class LandscapeListener extends Service.extend(Evented) {
         // request landscape data that is 60 seconds old
         // that way we can be sure, all traces are available
         const endTime = Date.now() - (60 * 1000);
-        const [structureData, dynamicData] = await this.requestData(endTime, intervalInSeconds);
+        const [strucDataProm, dynamicDataProm] = await this.requestData(endTime, intervalInSeconds);
 
-        this.set('latestStructureData', preProcessAndEnhanceStructureLandscape(structureData));
+        let structureData = null;
+        if (strucDataProm.status === 'fulfilled') {
+          structureData = strucDataProm.value;
 
-        this.set('latestDynamicData', dynamicData);
+          this.set('latestStructureData', preProcessAndEnhanceStructureLandscape(structureData));
+        }
+
+        if (dynamicDataProm.status === 'fulfilled') {
+          this.set('latestDynamicData', dynamicDataProm.value);
+        } else {
+          this.set('latestDynamicData', []);
+        }
 
         this.updateTimestampRepoAndTimeline(endTime,
           LandscapeListener.computeTotalRequests(this.latestDynamicData!));
 
-        this.trigger('newLandscapeData', this.latestStructureData, this.latestDynamicData);
+        if (structureData || this.latestDynamicData.length > 0) {
+          this.trigger('newLandscapeData', this.latestStructureData, this.latestDynamicData);
+        }
       } catch (e) {
         // landscape data could not be requested, try again?
       }
@@ -60,7 +71,8 @@ export default class LandscapeListener extends Service.extend(Evented) {
     const structureDataPromise = this.requestStructureData(/* startTime, endTime */);
     const dynamicDataPromise = this.requestDynamicData(startTime, endTime);
 
-    const landscapeData = Promise.all([structureDataPromise, dynamicDataPromise]);
+    const landscapeData = Promise.allSettled([structureDataPromise, dynamicDataPromise]);
+
     return landscapeData;
   }
 
