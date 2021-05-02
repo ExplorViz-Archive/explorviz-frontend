@@ -105,11 +105,18 @@ export default class HammerInteraction extends Object.extend(Evented) {
       interval: 250,
     });
 
+    const press = new Hammer.Press({
+      event: 'press',
+      pointers: 1,
+      threshold: 25,
+      time: 500,
+    });
+
     const pan = new Hammer.Pan({
       event: 'pan',
     });
 
-    hammer.add([doubleTap, singleTap, pan]);
+    hammer.add([doubleTap, singleTap, press, pan]);
 
     doubleTap.recognizeWith(singleTap);
     singleTap.requireFailure(doubleTap);
@@ -206,6 +213,19 @@ export default class HammerInteraction extends Object.extend(Evented) {
       } else if (evt.button === 3) {
         self.trigger('righttap', mousePosition, evt.srcEvent);
       }
+    });
+
+    /**
+     * Triggers a press event which (could e.g. be used as an alternative to 'righttap')
+     */
+    hammer.on('press', (evt) => {
+      if (evt.srcEvent.target !== canvas) {
+        return;
+      }
+
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
+
+      self.trigger('press', mousePosition, evt.srcEvent);
     });
   }
 }
