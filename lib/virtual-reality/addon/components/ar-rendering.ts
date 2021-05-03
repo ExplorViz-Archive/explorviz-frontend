@@ -12,7 +12,7 @@ import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import Interaction from 'explorviz-frontend/utils/interaction';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
-import { enqueueTask, restartableTask, task } from 'ember-concurrency-decorators';
+import { restartableTask, task } from 'ember-concurrency-decorators';
 import * as LandscapeCommunicationRendering from
   'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import {
@@ -45,13 +45,19 @@ import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 import ArSettings from 'virtual-reality/services/ar-settings';
-import VrApplicationRenderer, { AddApplicationArgs } from 'virtual-reality/services/vr-application-renderer';
+import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
+import VrMessageReceiver from 'virtual-reality/services/vr-message-receiver';
+import VrAssetRepository from 'virtual-reality/services/vr-asset-repo';
+import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
+import VrTimestampService from 'virtual-reality/services/vr-timestamp';
+import VrHighlightingService from 'virtual-reality/services/vr-highlighting';
 
 interface Args {
   readonly landscapeData: LandscapeData;
   readonly font: THREE.Font;
   readonly components: string[];
   readonly showDataSelection: boolean;
+  readonly selectedTimestampRecords: Timestamp[];
   addComponent(componentPath: string): void; // is passed down to the viz navbar
   removeComponent(component: string): void;
   openDataSelection(): void;
@@ -80,11 +86,26 @@ export default class ArRendering extends Component<Args> {
   @service('delta-time')
   time!: DeltaTime;
 
+  @service('vr-highlighting')
+  private highlightingService!: VrHighlightingService;
+
   @service('ar-settings')
   arSettings!: ArSettings;
 
+  @service('repos/timestamp-repository')
+  private timestampRepo!: TimestampRepository;
+
+  @service('vr-timestamp')
+  private timestampService!: VrTimestampService;
+
+  @service('vr-message-receiver')
+  private receiver!: VrMessageReceiver;
+
   @service('vr-application-renderer')
   private vrApplicationRenderer!: VrApplicationRenderer;
+
+  @service('vr-asset-repo')
+  private assetRepo!: VrAssetRepository;
 
   @service()
   worker!: any;
@@ -148,6 +169,8 @@ export default class ArRendering extends Component<Args> {
 
   applicationMarkers: THREE.Group[] = [];
 
+  private willDestroyController: AbortController = new AbortController();
+
   @tracked
   popupData: PopupData | null = null;
 
@@ -195,6 +218,7 @@ export default class ArRendering extends Component<Args> {
      * performance panel if it is activated in user settings
      */
   initRendering() {
+    this.initServices();
     this.initScene();
     this.initCamera();
     this.initCameraCrosshair();
@@ -244,6 +268,26 @@ export default class ArRendering extends Component<Args> {
     });
 
     this.debug('Renderer set up');
+  }
+
+  private initServices() {
+    this.debug('Initializing services...');
+
+    // Use given font for landscape and application rendering.
+    this.assetRepo.font = this.args.font;
+
+    // Initialize timestamp and landscape data. If no timestamp is selected,
+    // the latest timestamp is used. When there is no timestamp, we fall back
+    // to the current time.
+    const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
+    const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
+      || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
+      || new Date().getTime();
+    this.timestampService.setTimestampLocally(
+      timestamp,
+      this.args.landscapeData.structureLandscapeData,
+      this.args.landscapeData.dynamicLandscapeData,
+    );
   }
 
   /**
@@ -730,8 +774,6 @@ export default class ArRendering extends Component<Args> {
 
       applicationObject3D.setBoxMeshOpacity(this.arSettings.applicationOpacity);
 
-      this.addLabels(applicationObject3D);
-
       for (let i = 0; i < this.applicationMarkers.length; i++) {
         if (this.applicationMarkers[i].children.length === 0) {
           this.applicationMarkers[i].add(applicationObject3D);
@@ -745,55 +787,6 @@ export default class ArRendering extends Component<Args> {
         }
       }
     }
-  }
-
-  updateDrawableClassCommunications(applicationObject3D: ApplicationObject3D) {
-    if (this.drawableClassCommunications.has(applicationObject3D.dataModel.instanceId)) {
-      return;
-    }
-
-    const { structureLandscapeData } = this.args.landscapeData;
-    const drawableClassCommunications = computeDrawableClassCommunication(
-      structureLandscapeData,
-      applicationObject3D.traces,
-    );
-
-    const allClasses = new Set(getAllClassesInApplication(applicationObject3D.dataModel));
-
-    const communicationInApplication = drawableClassCommunications.filter(
-      (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
-    );
-
-    this.drawableClassCommunications.set(applicationObject3D.dataModel.instanceId,
-      communicationInApplication);
-  }
-
-  /**
-   * Adds labels to all box meshes of a given application
-   */
-  addLabels(applicationObject3D: ApplicationObject3D) {
-    if (!this.font) { return; }
-
-    const clazzTextColor = this.configuration.applicationColors.clazzText;
-    const componentTextColor = this.configuration.applicationColors.componentText;
-    const foundationTextColor = this.configuration.applicationColors.foundationText;
-
-    applicationObject3D.getBoxMeshes().forEach((mesh) => {
-    /* Labeling is time-consuming. Thus, label only visible meshes incrementally
-       as opposed to labeling all meshes up front (as done in application-rendering) */
-      if (!mesh.visible) return;
-
-      if (mesh instanceof ClazzMesh) {
-        ApplicationLabeler
-          .addClazzTextLabel(mesh, this.font, clazzTextColor);
-      } else if (mesh instanceof ComponentMesh) {
-        ApplicationLabeler
-          .addBoxTextLabel(mesh, this.font, componentTextColor);
-      } else if (mesh instanceof FoundationMesh) {
-        ApplicationLabeler
-          .addBoxTextLabel(mesh, this.font, foundationTextColor);
-      }
-    });
   }
 
   // #endregion APPLICATION RENDERING
@@ -863,11 +856,16 @@ export default class ArRendering extends Component<Args> {
       if (!(appObject.parent instanceof ApplicationObject3D)) return;
 
       if (appObject instanceof ComponentMesh) {
-        self.toggleComponentAndUpdate(appObject, appObject.parent);
+        self.vrApplicationRenderer.toggleComponent(
+          appObject,
+          appObject.parent,
+        );
       } else if (appObject instanceof CloseIcon) {
-        // self.removeApplication(appObject.parent);
+        appObject.close().then((closedSuccessfully: boolean) => {
+          if (!closedSuccessfully) AlertifyHandler.showAlertifyError('Application could not be closed');
+        });
       } else if (appObject instanceof FoundationMesh) {
-        self.closeAllComponentsAndUpdate(appObject.parent);
+        self.vrApplicationRenderer.closeAllComponents(appObject.parent);
       }
     }
 
@@ -879,47 +877,13 @@ export default class ArRendering extends Component<Args> {
     }
   }
 
-  toggleComponentAndUpdate(componentMesh: ComponentMesh, applicationObject3D: ApplicationObject3D) {
-    EntityManipulation.toggleComponentMeshState(componentMesh, applicationObject3D);
-    this.addLabels(applicationObject3D);
-
-    const drawableComm = this.drawableClassCommunications
-      .get(applicationObject3D.dataModel.instanceId);
-
-    if (drawableComm) {
-      this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-      Highlighting.updateHighlighting(applicationObject3D, drawableComm);
-    }
-  }
-
-  closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
-    EntityManipulation.closeAllComponents(applicationObject3D);
-
-    const drawableComm = this.drawableClassCommunications
-      .get(applicationObject3D.dataModel.instanceId);
-
-    if (drawableComm) {
-      this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-      Highlighting.updateHighlighting(applicationObject3D, drawableComm);
-    }
-  }
-
   handleSecondaryInputOn(intersection: THREE.Intersection) {
     const { object } = intersection;
     if (object.parent instanceof ApplicationObject3D) {
-      this.highlightAppEntity(object, object.parent);
-    }
-  }
-
-  // eslint-disable-next-line
-  highlightAppEntity(object: THREE.Object3D, application: ApplicationObject3D) {
-    if (object instanceof ComponentMesh || object instanceof ClazzMesh
-      || object instanceof ClazzCommunicationMesh) {
-      const drawableComm = this.drawableClassCommunications.get(application.dataModel.instanceId);
-
-      if (drawableComm) {
-        Highlighting.highlight(object, application, drawableComm);
-      }
+      this.highlightingService.highlightComponent(
+        object.parent,
+        object,
+      );
     }
   }
 
@@ -948,9 +912,19 @@ export default class ArRendering extends Component<Args> {
   }
 
   willDestroy() {
+  // Reset rendering.
+    this.vrApplicationRenderer.removeAllApplicationsLocally();
+    // this.vrLandscapeRenderer.cleanUpLandscape();
+
+    // Reset services.
+    this.localUser.reset();
+
+    // Remove event listers.
+    // this.receiver.removeMessageListener(this);
+    this.willDestroyController.abort();
+
     this.cleanUpLandscape();
     ArRendering.cleanUpAr();
-    this.localUser.reset();
     AlertifyHandler.setAlertifyPosition('bottom-right');
   }
 
