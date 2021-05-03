@@ -1,19 +1,20 @@
+export type ItemArgs = {
+  position: { x: number; y: number };
+};
+
 export default abstract class Item {
-  id: string;
+  position: { x: number; y: number };
 
-  position: { x: number, y: number };
-
-  constructor(id: string, position: { x: number, y: number }) {
-    this.id = id;
+  constructor({ position }: ItemArgs) {
     this.position = position;
   }
 
   abstract drawToCanvas(ctx: CanvasRenderingContext2D): void;
 
   abstract getBoundingBox(): {
-    minX: number,
-    maxX: number,
-    minY: number,
-    maxY: number,
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
   };
 }

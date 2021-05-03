@@ -46,6 +46,7 @@ export default class VisualizationController extends Controller {
 
   plotlyTimelineRef!: PlotlyTimeline;
 
+  @tracked
   selectedTimestampRecords: Timestamp[] = [];
 
   @tracked

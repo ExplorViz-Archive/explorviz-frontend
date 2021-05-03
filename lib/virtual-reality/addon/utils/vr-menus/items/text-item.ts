@@ -1,6 +1,18 @@
-import Item from './item';
+import Item, { ItemArgs } from './item';
 
-type Alignment = 'left'|'center'|'right';
+/**
+ * A canvas 2D rendering context that is used to measure the bounding box of
+ * the text.
+ */
+const measurementContext = document.createElement('canvas').getContext('2d');
+
+export type TextItemArgs = ItemArgs & {
+  text: string;
+  color: string;
+  fontSize: number;
+  alignment?: CanvasTextAlign;
+  baseline?: CanvasTextBaseline;
+};
 
 export default class TextItem extends Item {
   text: string;
@@ -9,88 +21,66 @@ export default class TextItem extends Item {
 
   fontSize: number;
 
-  alignment: Alignment;
+  alignment: CanvasTextAlign;
 
-  constructor(text: string, id: string, color: string, position: { x: number, y: number },
-    fontSize: number, alignment: Alignment = 'left') {
-    super(id, position);
+  baseline: CanvasTextBaseline;
+
+  constructor({
+    text,
+    color,
+    fontSize,
+    alignment = 'left',
+    baseline = 'top',
+    ...args
+  }: TextItemArgs) {
+    super(args);
     this.text = text;
     this.color = color;
     this.fontSize = fontSize;
     this.alignment = alignment;
+    this.baseline = baseline;
+  }
+
+  get font() {
+    return `${this.fontSize}px arial`;
+  }
+
+  setText(text: string) {
+    this.text = text;
   }
 
   getBoundingBox() {
+    const size = this.measureText();
     return {
-      minX: this.getMinX(),
-      maxX: this.getMaxX(),
-      minY: this.getMinY(),
-      maxY: this.getMaxY(),
+      minX: this.position.x + size.actualBoundingBoxLeft,
+      maxX: this.position.x + size.actualBoundingBoxRight,
+      minY: this.position.y + size.actualBoundingBoxAscent,
+      maxY: this.position.y + size.actualBoundingBoxDescent,
     };
   }
 
-  private getMinX() {
-    const size = TextItem.getTextSize(this.text, `${this.fontSize}px arial`);
+  private measureText() {
+    if (!measurementContext) throw new Error(`failed to measure text: ${this.text}`);
 
-    let itemX = this.position.x;
-
-    if (this.alignment === 'center') {
-      itemX -= size.width / 2;
-    } else if (this.alignment === 'right') {
-      itemX -= size.width;
-    }
-
-    return itemX;
-  }
-
-  private getMaxX() {
-    const size = TextItem.getTextSize(this.text, `${this.fontSize}px arial`);
-
-    return this.getMinX() + size.width;
-  }
-
-  private getMinY() {
-    return this.position.y;
-  }
-
-  private getMaxY() {
-    const size = TextItem.getTextSize(this.text, `${this.fontSize}px arial`);
-
-    return this.position.y + size.height;
+    measurementContext.font = this.font;
+    measurementContext.textAlign = this.alignment;
+    measurementContext.textBaseline = this.baseline;
+    return measurementContext.measureText(this.text);
   }
 
   drawToCanvas(ctx: CanvasRenderingContext2D): void {
-    // Draw Text
-    ctx.font = `${this.fontSize}px arial`;
+    ctx.save();
+    ctx.font = this.font;
     ctx.fillStyle = this.color;
     ctx.textAlign = this.alignment;
+    ctx.textBaseline = this.baseline;
+
     ctx.shadowBlur = 4;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
     ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-    const textSize = TextItem.getTextSize(this.text, ctx.font);
-    ctx.fillText(this.text, this.position.x, this.position.y + textSize.sublineHeight);
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-  }
 
-  /**
-   * Returns measurements in pixels for a given text
-   *
-   * @param text The text to measure the width, height and subline height of.
-   * @param font The font to measure the size in.
-   * @return {{width: Number, height: Number, sublineHeight: Number}} The sizes of the text.
-   */
-  private static getTextSize(text: string, font: string):
-  { width: number, height: number, sublineHeight: number } {
-    // re-use canvas object for better performance
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d')!;
-    context.font = font;
-    const { width } = context.measureText(text);
-    const height = context.measureText('W').width;
-    const sublineHeight = context.measureText('H').width;
-    return { width, height, sublineHeight };
+    ctx.fillText(this.text, this.position.x, this.position.y);
+    ctx.restore();
   }
 }

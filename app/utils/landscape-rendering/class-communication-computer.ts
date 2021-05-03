@@ -40,7 +40,8 @@ export default function computeDrawableClassCommunication(
   landscapeStructureData: StructureLandscapeData,
   landscapeDynamicData: DynamicLandscapeData,
 ) {
-  if (landscapeDynamicData.length === 0) {
+  if (!landscapeDynamicData || landscapeDynamicData.length === 0) {
+    console.log('No dynamic data found for application');
     return [];
   }
   const hashCodeToClassMap = getHashCodeToClassMap(landscapeStructureData);

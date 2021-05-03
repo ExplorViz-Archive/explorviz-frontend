@@ -21,20 +21,16 @@ import {
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
-import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
-import * as EntityRendering from 'explorviz-frontend/utils/application-rendering/entity-rendering';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
-import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
-import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import DeltaTime from 'virtual-reality/services/delta-time';
@@ -49,6 +45,7 @@ import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 import ArSettings from 'virtual-reality/services/ar-settings';
+import VrApplicationRenderer, { AddApplicationArgs } from 'virtual-reality/services/vr-application-renderer';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -60,15 +57,6 @@ interface Args {
   openDataSelection(): void;
   closeDataSelection(): void;
 }
-
-type LayoutData = {
-  height: number,
-  width: number,
-  depth: number,
-  positionX: number,
-  positionY: number,
-  positionZ: number
-};
 
 type DataModel = Node | Application |Package | Class | DrawableClassCommunication;
 
@@ -95,6 +83,9 @@ export default class ArRendering extends Component<Args> {
   @service('ar-settings')
   arSettings!: ArSettings;
 
+  @service('vr-application-renderer')
+  private vrApplicationRenderer!: VrApplicationRenderer;
+
   @service()
   worker!: any;
 
@@ -118,9 +109,6 @@ export default class ArRendering extends Component<Args> {
   renderer!: THREE.WebGLRenderer;
 
   raycaster: THREE.Raycaster;
-
-  // Group which contains all currently opened application objects
-  applicationGroup: ApplicationGroup;
 
   // Depth of boxes for landscape entities
   landscapeDepth: number;
@@ -182,8 +170,6 @@ export default class ArRendering extends Component<Args> {
     this.landscapeDepth = 0.7;
 
     this.raycaster = new THREE.Raycaster();
-    this.applicationGroup = new ApplicationGroup();
-    this.arSettings.applicationGroup = this.applicationGroup;
 
     this.appCommRendering = new AppCommunicationRendering(this.configuration);
 
@@ -225,7 +211,6 @@ export default class ArRendering extends Component<Args> {
     this.scene = new THREE.Scene();
 
     this.scene.add(this.landscapeObject3D);
-    this.scene.add(this.applicationGroup);
   }
 
   /**
@@ -344,7 +329,6 @@ export default class ArRendering extends Component<Args> {
 
     applicationMarkerNames.forEach((markerName) => {
       const applicationMarker = new THREE.Group();
-      // applicationMarker0.add(this.applicationGroup);
       this.scene.add(applicationMarker);
       this.applicationMarkers.push(applicationMarker);
 
@@ -534,8 +518,6 @@ export default class ArRendering extends Component<Args> {
 
     this.time.update();
 
-    this.localUser.updateControllers();
-
     this.renderer.render(this.scene, this.camera);
 
     // Call each update function
@@ -714,57 +696,32 @@ export default class ArRendering extends Component<Args> {
   // #endregion LANDSCAPE RENDERING
 
   // #region APLICATION RENDERING
+  async addApplication(applicationModel: Application) {
+    if (applicationModel.packages.length === 0) {
+      const message = `Sorry, there is no information for application <b>
+        ${applicationModel.name}</b> available.`;
 
-  // @ts-ignore
-  @enqueueTask*
-  // eslint-disable-next-line
-  addApplicationTask(applicationModel: Application, 
-    callback?: (applicationObject3D: ApplicationObject3D) => void) {
-    try {
-      /*
-      if (this.applicationGroup.hasApplication(applicationModel.instanceId)) {
-        const message = `Application '${applicationModel.name}' already opened.`;
+      AlertifyHandler.showAlertifyMessage(message);
+    } else {
+      // data available => open application-rendering
+      AlertifyHandler.closeAlertifyMessages();
 
-        AlertifyHandler.showAlertifyWarning(message);
-        return;
-      }
-      */
       for (let i = 0; i < this.applicationMarkers.length; i++) {
         if (this.applicationMarkers[i].children.length === 0) {
           break;
         } else if (i === (this.applicationMarkers.length - 1)) {
-          const message = 'All markers are occupied.';
-
-          AlertifyHandler.showAlertifyWarning(message);
+          AlertifyHandler.showAlertifyWarning('All markers are occupied.');
           return;
         }
       }
 
-      const { dynamicLandscapeData } = this.args.landscapeData;
+      const applicationObject3D = await this.vrApplicationRenderer
+        .addApplication(applicationModel, {});
 
-      const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', applicationModel);
-
-      // Converting plain JSON layout data due to worker limitations
-      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
-
-      const applicationObject3D = new ApplicationObject3D(applicationModel, boxLayoutMap,
-        dynamicLandscapeData);
-
-      // Add new meshes to application
-      EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
-        this.configuration.applicationColors);
-
-      this.updateDrawableClassCommunications(applicationObject3D);
-
-      const drawableComm = this.drawableClassCommunications
-        .get(applicationObject3D.dataModel.instanceId)!;
-
-      this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-
-      // Add labels and close icon to application
-      this.addLabels(applicationObject3D);
-      const closeIcon = new CloseIcon(this.closeButtonTexture);
-      closeIcon.addToApplication(applicationObject3D);
+      if (!applicationObject3D) {
+        AlertifyHandler.showAlertifyError('Could not open application.');
+        return;
+      }
 
       // Scale application such that it approximately fits to the printed marker
       applicationObject3D.setLargestSide(1.5);
@@ -773,7 +730,7 @@ export default class ArRendering extends Component<Args> {
 
       applicationObject3D.setBoxMeshOpacity(this.arSettings.applicationOpacity);
 
-      this.applicationGroup.addApplication(applicationObject3D);
+      this.addLabels(applicationObject3D);
 
       for (let i = 0; i < this.applicationMarkers.length; i++) {
         if (this.applicationMarkers[i].children.length === 0) {
@@ -787,10 +744,6 @@ export default class ArRendering extends Component<Args> {
           break;
         }
       }
-
-      if (callback) callback(applicationObject3D);
-    } catch (e: any) {
-      this.debug(e);
     }
   }
 
@@ -813,19 +766,6 @@ export default class ArRendering extends Component<Args> {
 
     this.drawableClassCommunications.set(applicationObject3D.dataModel.instanceId,
       communicationInApplication);
-  }
-
-  addApplication(applicationModel: Application) {
-    if (applicationModel.packages.length === 0) {
-      const message = `Sorry, there is no information for application <b>
-        ${applicationModel.name}</b> available.`;
-
-      AlertifyHandler.showAlertifyMessage(message);
-    } else {
-      // data available => open application-rendering
-      AlertifyHandler.closeAlertifyMessages();
-      perform(this.addApplicationTask, applicationModel);
-    }
   }
 
   /**
@@ -901,7 +841,7 @@ export default class ArRendering extends Component<Args> {
     // Handle keys
     switch (event.key) {
       case 'c':
-        this.localUser.connect();
+        // this.localUser.connect();
         break;
       case 'l':
         perform(this.loadNewLandscape);
@@ -917,7 +857,7 @@ export default class ArRendering extends Component<Args> {
 
   handlePrimaryInputOn(intersection: THREE.Intersection) {
     const self = this;
-    const { object, uv } = intersection;
+    const { object } = intersection;
 
     function handleApplicationObject(appObject: THREE.Object3D) {
       if (!(appObject.parent instanceof ApplicationObject3D)) return;
@@ -925,7 +865,7 @@ export default class ArRendering extends Component<Args> {
       if (appObject instanceof ComponentMesh) {
         self.toggleComponentAndUpdate(appObject, appObject.parent);
       } else if (appObject instanceof CloseIcon) {
-        self.removeApplication(appObject.parent);
+        // self.removeApplication(appObject.parent);
       } else if (appObject instanceof FoundationMesh) {
         self.closeAllComponentsAndUpdate(appObject.parent);
       }
@@ -936,8 +876,6 @@ export default class ArRendering extends Component<Args> {
     // Handle application hits
     } else if (object.parent instanceof ApplicationObject3D) {
       handleApplicationObject(object);
-    } else if (object instanceof BaseMenu && uv) {
-      object.triggerDown(uv);
     }
   }
 
@@ -985,20 +923,6 @@ export default class ArRendering extends Component<Args> {
     }
   }
 
-  removeApplication(application: ApplicationObject3D) {
-    this.applicationGroup.removeApplicationById(application.dataModel.instanceId);
-
-    const { controller1, controller2 } = this.localUser;
-    if (controller1) {
-      controller1.intersectableObjects = controller1.intersectableObjects
-        .filter((object) => object !== application);
-    }
-    if (controller2) {
-      controller2.intersectableObjects = controller2.intersectableObjects
-        .filter((object) => object !== application);
-    }
-  }
-
   cleanUpLandscape() {
     this.landscapeObject3D.removeAllChildren();
     this.landscapeObject3D.resetMeshReferences();
@@ -1023,17 +947,9 @@ export default class ArRendering extends Component<Args> {
     }
   }
 
-  resetAll() {
-    this.applicationGroup.clear();
-    this.localUser.resetPosition();
-
-    // ToDo: Reset scale of landscape and applications
-  }
-
   willDestroy() {
     this.cleanUpLandscape();
     ArRendering.cleanUpAr();
-    this.applicationGroup.clear();
     this.localUser.reset();
     AlertifyHandler.setAlertifyPosition('bottom-right');
   }
