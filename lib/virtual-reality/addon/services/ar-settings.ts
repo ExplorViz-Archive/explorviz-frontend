@@ -1,17 +1,18 @@
-import Service from '@ember/service';
+import Service, { inject as service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import VrApplicationRenderer from 'explorviz-frontend/services/vr-application-renderer';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
-import ApplicationGroup from 'virtual-reality/utils/view-objects/vr/application-group';
 
 export default class ArSettings extends Service.extend({
   // anything which *must* be merged to prototype here
 }) {
+  @service('vr-application-renderer')
+  private vrApplicationRenderer!: VrApplicationRenderer;
+
   landscapeObject: LandscapeObject3D | undefined;
 
   @tracked
   landscapeOpacity: number;
-
-  applicationGroup: ApplicationGroup | undefined;
 
   @tracked
   applicationOpacity: number;
@@ -40,11 +41,9 @@ export default class ArSettings extends Service.extend({
   }
 
   updateApplicationOpacity() {
-    if (this.applicationGroup) {
-      this.applicationGroup.getAllApplications().forEach((applicationObject3D) => {
-        applicationObject3D.setBoxMeshOpacity(this.applicationOpacity);
-      });
-    }
+    this.vrApplicationRenderer.getOpenApplications().forEach((applicationObject3D) => {
+      applicationObject3D.setBoxMeshOpacity(this.applicationOpacity);
+    });
   }
 }
 

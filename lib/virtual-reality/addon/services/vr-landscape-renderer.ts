@@ -339,7 +339,7 @@ export default class VrLandscapeRenderer extends Service {
         this.configuration.landscapeColors.applicationText,
       );
     }
-    LandscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);
+    this.landscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
     this.landscapeObject3D.add(applicationMesh);

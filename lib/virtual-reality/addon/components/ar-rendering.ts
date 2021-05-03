@@ -20,17 +20,14 @@ import {
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
-import * as ApplicationLabeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
-import * as EntityManipulation from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
-import * as Highlighting from 'explorviz-frontend/utils/application-rendering/highlighting';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import DeltaTime from 'virtual-reality/services/delta-time';
@@ -39,14 +36,13 @@ import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
 import { perform } from 'ember-concurrency-ts';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 
-import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
-import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
+import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 import ArSettings from 'virtual-reality/services/ar-settings';
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
-import VrMessageReceiver from 'virtual-reality/services/vr-message-receiver';
+// import VrMessageReceiver from 'virtual-reality/services/vr-message-receiver';
 import VrAssetRepository from 'virtual-reality/services/vr-asset-repo';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
@@ -98,8 +94,8 @@ export default class ArRendering extends Component<Args> {
   @service('vr-timestamp')
   private timestampService!: VrTimestampService;
 
-  @service('vr-message-receiver')
-  private receiver!: VrMessageReceiver;
+  // @service('vr-message-receiver')
+  // private receiver!: VrMessageReceiver;
 
   @service('vr-application-renderer')
   private vrApplicationRenderer!: VrApplicationRenderer;
@@ -823,11 +819,6 @@ export default class ArRendering extends Component<Args> {
       this.camera.position.x += xOffset;
       this.camera.position.y += yOffset;
     }
-  }
-
-  @action
-  handleMouseWheel(delta: number) {
-    this.camera.position.z += delta * 0.2;
   }
 
   handleKeyboard(event: any) {
