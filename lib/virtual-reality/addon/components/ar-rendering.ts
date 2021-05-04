@@ -434,9 +434,9 @@ export default class ArRendering extends Component<Args> {
 
     this.arToolkitSource.onResizeElement();
 
-    this.arToolkitSource.copySizeTo(this.renderer.domElement);
+    this.arToolkitSource.copyElementSizeTo(this.renderer.domElement);
     if (this.arToolkitContext.arController !== null) {
-      this.arToolkitSource.copySizeTo(this.arToolkitContext.arController.canvas);
+      this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
     }
 
     const video = document.getElementById('arjs-video');
@@ -488,10 +488,13 @@ export default class ArRendering extends Component<Args> {
   }
 
   @action
-  handleHeatmapInteraction() {
-    const intersection = this.interaction.raycastCanvasCenter();
+  handleZoomActivation() {
+    this.debug('Actiavte zoom');
+  }
 
-    this.debug(`Clicked heatmap button on object ${intersection}`);
+  @action
+  handleZoomDeactivation() {
+    this.debug('Deactivate zoom');
   }
 
   @action

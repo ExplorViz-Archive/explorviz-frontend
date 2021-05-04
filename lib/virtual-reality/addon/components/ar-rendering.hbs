@@ -98,13 +98,17 @@
 
       <div class="ar-right-button-container foreground">
 
-        <div id="ar-heat-toggle-container">
+        <div id="ar-zoom-container">
           <BsButton
             @type="primary"
             class="half-transparent"
-            {{ on "click" this.handleHeatmapInteraction }}
+            {{ on "touchstart" this.handleZoomActivation }}
+            {{ on "touchend" this.handleZoomDeactivation }}
+            {{ on "touchcancel" this.handleZoomDeactivation }}
+            {{ on "click" this.handleZoomActivation}}
+            {{ on "mouseout" this.handleZoomDeactivation}}
           >
-            {{svg-jar "flame" class="octicon align-middle ar-button-svg"}}
+            {{svg-jar "eye" class="octicon align-middle ar-button-svg"}}
           </BsButton>
         </div>
 
