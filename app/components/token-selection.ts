@@ -4,7 +4,6 @@ import { inject as service } from '@ember/service';
 import { LandscapeToken } from 'explorviz-frontend/services/landscape-token';
 import { action } from '@ember/object';
 import Auth from 'explorviz-frontend/services/auth';
-import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
 interface Args {
   tokens: LandscapeToken[];
@@ -35,11 +34,5 @@ export default class TokenSelection extends Component<Args> {
       this.sortOrder = 'asc';
       this.sortProperty = property;
     }
-  }
-
-  @action
-  // eslint-disable-next-line class-methods-use-this
-  onTokenCopied() {
-    AlertifyHandler.showAlertifySuccess('Token copied to clipboard');
   }
 }
