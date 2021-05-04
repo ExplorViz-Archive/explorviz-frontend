@@ -491,8 +491,8 @@ export default class VrRendering extends Component<Args> {
 
     // Run Klay layouting in 3 steps within workers
     try {
-      const applicationCommunications = computeApplicationCommunication(structureLandscapeData,
-        dynamicLandscapeData);
+      const applicationCommunications = dynamicLandscapeData
+        ? computeApplicationCommunication(structureLandscapeData, dynamicLandscapeData) : [];
 
       // Do layout pre-processing (1st step)
       const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
@@ -659,7 +659,7 @@ export default class VrRendering extends Component<Args> {
       const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
 
       const applicationObject3D = new ApplicationObject3D(applicationModel, boxLayoutMap,
-        dynamicLandscapeData);
+        dynamicLandscapeData ?? []);
 
       // Add new meshes to application
       EntityRendering.addFoundationAndChildrenToApplication(applicationObject3D,
