@@ -37,11 +37,11 @@
           {{#if @token.secret}}
             <tr>
               <td>Secret</td>
-              <td>{{@token.value}}</td>
+              <td>{{@token.secret}}</td>
               <td>
                 <CopyButton
                   class="button-svg-with-hover"
-                  @clipboardText={{@token.value}}
+                  @clipboardText={{@token.secret}}
                   @success={{this.onTokenSecretCopied}}
                 >
                   {{svg-jar "clippy-16" class="octicon align-middle"}}
