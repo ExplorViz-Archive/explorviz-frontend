@@ -16,12 +16,12 @@ export default class AdditionalTokenInfo extends Component<Args> {
   @action
   // eslint-disable-next-line class-methods-use-this
   onTokenIdCopied() {
-    AlertifyHandler.showAlertifySuccess('Token id copied to clipboards');
+    AlertifyHandler.showAlertifySuccess('Token id copied to clipboard');
   }
 
   @action
   // eslint-disable-next-line class-methods-use-this
   onTokenSecretCopied() {
-    AlertifyHandler.showAlertifySuccess('Token secret copied to clipboards');
+    AlertifyHandler.showAlertifySuccess('Token secret copied to clipboard');
   }
 }
