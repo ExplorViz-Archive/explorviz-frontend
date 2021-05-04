@@ -339,11 +339,6 @@ export default class ArRendering extends Component<Args> {
       }, 1000);
     });
 
-    window.addEventListener('orientationchange', () => {
-      // ToDO: Fix zoom problem
-      this.resize(this.outerDiv);
-    }, false);
-
     const arToolkitContext = new THREEx.ArToolkitContext({
       cameraParametersUrl: 'ar_data/camera_para.dat',
       detectionMode: 'mono',
