@@ -335,9 +335,15 @@ export default class ArRendering extends Component<Args> {
 
     this.arToolkitSource.init(() => {
       setTimeout(() => {
-        this.resizeAR();
+        this.resize(this.outerDiv);
       }, 1000);
     });
+
+    window.addEventListener('orientationchange', () => {
+      // ToDO: Fix zoom problem
+      this.resize(this.outerDiv);
+    }, false);
+
     const arToolkitContext = new THREEx.ArToolkitContext({
       cameraParametersUrl: 'ar_data/camera_para.dat',
       detectionMode: 'mono',
@@ -431,12 +437,26 @@ export default class ArRendering extends Component<Args> {
     this.renderer.setSize(width, height);
     this.camera.updateProjectionMatrix();
 
-    this.resizeAR();
-  }
-
-  resizeAR() {
     this.arToolkitSource.onResizeElement();
-    this.arToolkitSource.copyElementSizeTo(this.canvas);
+
+    this.arToolkitSource.copySizeTo(this.renderer.domElement);
+    if (this.arToolkitContext.arController !== null) {
+      this.arToolkitSource.copySizeTo(this.arToolkitContext.arController.canvas);
+    }
+
+    const video = document.getElementById('arjs-video');
+
+    if (video instanceof HTMLVideoElement) {
+      // Set video to cover screen
+      video.style.width = '100%';
+      video.style.height = '100%';
+      video.style.objectFit = 'cover';
+      video.style.marginLeft = '0';
+      video.style.marginTop = '0';
+
+      // Center canvas
+      this.canvas.style.marginLeft = `${(width - parseInt(this.canvas.style.width, 10)) / 2}px`;
+    }
   }
 
   /**
