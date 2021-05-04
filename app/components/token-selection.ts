@@ -3,8 +3,8 @@ import { tracked } from '@glimmer/tracking';
 import { inject as service } from '@ember/service';
 import { LandscapeToken } from 'explorviz-frontend/services/landscape-token';
 import { action } from '@ember/object';
-import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import Auth from 'explorviz-frontend/services/auth';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
 interface Args {
   tokens: LandscapeToken[];
