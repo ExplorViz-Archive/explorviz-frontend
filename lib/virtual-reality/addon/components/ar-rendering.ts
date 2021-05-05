@@ -47,6 +47,7 @@ import VrAssetRepository from 'virtual-reality/services/vr-asset-repo';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import VrHighlightingService from 'virtual-reality/services/vr-highlighting';
+import ArZoomHandler from 'virtual-reality/utils/ar-helpers/ar-zoom-handler';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -123,8 +124,6 @@ export default class ArRendering extends Component<Args> {
   @tracked
   camera!: THREE.PerspectiveCamera;
 
-  zoomCamera!: THREE.PerspectiveCamera;
-
   renderer!: THREE.WebGLRenderer;
 
   raycaster: THREE.Raycaster;
@@ -143,6 +142,8 @@ export default class ArRendering extends Component<Args> {
   readonly elk: ELK;
 
   readonly imageLoader: ImageLoader = new ImageLoader();
+
+  arZoomHandler: ArZoomHandler | undefined;
 
   readonly appCommRendering: AppCommunicationRendering;
 
@@ -169,8 +170,6 @@ export default class ArRendering extends Component<Args> {
 
   private willDestroyController: AbortController = new AbortController();
 
-  zoomIndicatorMesh: THREE.Mesh | undefined | null;
-
   @tracked
   popupData: PopupData | null = null;
 
@@ -179,8 +178,6 @@ export default class ArRendering extends Component<Args> {
 
   @tracked
   showSettings = false;
-
-  zoomEnabled = false;
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -244,8 +241,9 @@ export default class ArRendering extends Component<Args> {
      */
   initCamera() {
     this.camera = new THREE.PerspectiveCamera(42, 640 / 480, 0.01, 2000);
-    this.zoomCamera = this.camera.clone();
     this.scene.add(this.camera);
+
+    this.arZoomHandler = new ArZoomHandler(this.camera, this.outerDiv);
 
     this.debug('Camera added');
   }
@@ -258,37 +256,6 @@ export default class ArRendering extends Component<Args> {
     this.camera.add(crosshairMesh);
     // Position just in front of camera
     crosshairMesh.position.z = -0.1;
-  }
-
-  addZoomIndicator() {
-    if (this.zoomIndicatorMesh) return;
-
-    const geometry = new THREE.PlaneGeometry(this.outerDiv.clientWidth / 40000,
-      this.outerDiv.clientHeight / 30000, 30, 30);
-    const material = new THREE.MeshBasicMaterial({ color: 0xcad3eb });
-    material.transparent = true;
-    material.opacity = 0.15;
-    const zoomBorderMesh = new THREE.Mesh(geometry, material);
-    this.zoomIndicatorMesh = zoomBorderMesh;
-
-    this.camera.add(zoomBorderMesh);
-    // Position just in front of camera
-    zoomBorderMesh.position.z = -0.2;
-  }
-
-  removeZoomIndicator() {
-    if (this.zoomIndicatorMesh) {
-      this.camera.remove(this.zoomIndicatorMesh);
-
-      if (this.zoomIndicatorMesh.material instanceof THREE.Material) {
-        this.zoomIndicatorMesh.material.dispose();
-      }
-      if (this.zoomIndicatorMesh.geometry instanceof THREE.Geometry) {
-        this.zoomIndicatorMesh.geometry.dispose();
-      }
-
-      this.zoomIndicatorMesh = null;
-    }
   }
 
   /**
@@ -527,14 +494,12 @@ export default class ArRendering extends Component<Args> {
 
   @action
   handleZoomActivation() {
-    this.addZoomIndicator();
-    this.zoomEnabled = true;
+    this.arZoomHandler?.enableZoom();
   }
 
   @action
   handleZoomDeactivation() {
-    this.removeZoomIndicator();
-    this.zoomEnabled = false;
+    this.arZoomHandler?.disableZoom();
   }
 
   @action
@@ -625,38 +590,7 @@ export default class ArRendering extends Component<Args> {
       onRenderFct();
     });
 
-    if (this.zoomEnabled) {
-      this.renderZoom();
-    }
-  }
-
-  renderZoom() {
-    this.renderer.setScissorTest(true);
-    const fullSize = this.renderer.getSize(new THREE.Vector2());
-
-    const sizeX = fullSize.x / 3; // size of magnifier
-    const sizeY = fullSize.y / 3;
-    const x = this.outerDiv.clientWidth / 2 - sizeX / 2;
-    const y = this.outerDiv.clientHeight / 2 - sizeY / 2;
-
-    const times = 3; // scale of magnifier
-
-    const offsetX = (this.outerDiv.clientWidth / 3) + sizeX / 3;
-    const offsetY = (this.outerDiv.clientHeight / 3) + sizeY / 3;
-
-    this.zoomCamera.setViewOffset(
-      this.outerDiv.clientWidth,
-      this.outerDiv.clientHeight,
-      offsetX,
-      offsetY,
-      (this.outerDiv.clientWidth / 3) / times,
-      (this.outerDiv.clientHeight / 3) / times,
-    );
-
-    this.renderer.setViewport(x, y, sizeX, sizeY);
-    this.renderer.setScissor(x, y, sizeX, sizeY);
-    this.renderer.render(this.scene, this.zoomCamera);
-    this.renderer.setScissorTest(false);
+    this.arZoomHandler?.renderZoomCamera(this.renderer, this.scene);
   }
 
   @task*
@@ -894,24 +828,6 @@ export default class ArRendering extends Component<Args> {
     if (!intersection) return;
 
     this.handleSecondaryInputOn(intersection);
-  }
-
-  @action
-  handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
-    const LEFT_MOUSE_BUTTON = 1;
-
-    if (button === LEFT_MOUSE_BUTTON) {
-      // Move landscape further if camera is far away
-      const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 4.0);
-
-      // Adapt panning speed
-      const xOffset = (delta.x / 100) * -ZOOM_CORRECTION;
-      const yOffset = (delta.y / 100) * ZOOM_CORRECTION;
-
-      // Adapt camera position (apply panning)
-      this.camera.position.x += xOffset;
-      this.camera.position.y += yOffset;
-    }
   }
 
   handleKeyboard(event: any) {
