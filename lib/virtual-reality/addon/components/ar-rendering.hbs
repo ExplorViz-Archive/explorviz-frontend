@@ -45,9 +45,9 @@
       <canvas
         class="main-content-majority position-absolute {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
         {{did-insert this.canvasInserted}}
-        {{interaction-modifier 
+        {{interaction-modifier
           raycastObject=this.landscapeObject3D
-          camera=this.camera 
+          camera=this.camera
           hammerInteraction=this.hammerInteraction
           doubleClick=this.handleDoubleClick
           singleClick=this.handleSingleClick
@@ -84,20 +84,6 @@
           </BsButton>
         </div>
 
-        <div id="ar-info-interaction-container">
-          <BsButton
-            @type="primary"
-            class="half-transparent"
-            {{ on "click" this.handleInfoInteraction }}
-          >
-            {{svg-jar "info" class="octicon align-middle ar-button-svg"}}
-          </BsButton>
-        </div>
-
-      </div>
-
-      <div class="ar-right-button-container foreground">
-
         <div id="ar-zoom-container">
           <BsButton
             @type="primary"
@@ -111,6 +97,11 @@
             {{svg-jar "eye" class="octicon align-middle ar-button-svg"}}
           </BsButton>
         </div>
+
+
+      </div>
+
+      <div class="ar-right-button-container foreground">
 
         <div id="ar-secondary-interaction-container">
           <BsButton
@@ -129,6 +120,17 @@
             {{ on "click" this.handlePrimaryCrosshairInteraction }}
           >
             {{svg-jar "unfold" class="octicon align-middle ar-button-svg"}}
+          </BsButton>
+        </div>
+
+        
+        <div id="ar-info-interaction-container">
+          <BsButton
+            @type="primary"
+            class="half-transparent"
+            {{ on "click" this.handleInfoInteraction }}
+          >
+            {{svg-jar "info" class="octicon align-middle ar-button-svg"}}
           </BsButton>
         </div>
 

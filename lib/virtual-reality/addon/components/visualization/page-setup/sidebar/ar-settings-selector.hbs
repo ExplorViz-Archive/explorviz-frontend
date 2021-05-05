@@ -6,9 +6,9 @@
 </div>
 
 <label for="landscapeOpacityRange" class="form-label">Landscape Opacity</label>
-<Input 
+<Input
     id="landscapeOpacityRange"
-    @type="range" 
+    @type="range"
     @value={{this.arSettings.landscapeOpacity}}
     class="form-range" min="0.1" max="1.0" step="0.1"
     {{on "input" this.updateLandscapeOpacity}}
@@ -16,7 +16,7 @@
 <div class="center-horizontal">{{this.arSettings.landscapeOpacity}}</div>
 
 <label for="applicationOpacityRange" class="form-label">Application Opacity</label>
-<Input 
+<Input
     id="applicationOpacityRange"
     @type="range"
     @value={{this.arSettings.applicationOpacity}}
@@ -26,7 +26,7 @@
 <div class="center-horizontal">{{this.arSettings.applicationOpacity}}</div>
 
 <label for="buttonSizeRange" class="form-label">Button Size</label>
-<Input 
+<Input
     id="buttonSizeRange"
     @type="range"
     @value={{this.buttonSize}}
@@ -35,7 +35,7 @@
 />
 
 <label for="buttonSpacingRange" class="form-label">Button Spacing</label>
-<Input 
+<Input
     id="buttonSpacingRange"
     @type="range"
     @value={{this.buttonPadding}}

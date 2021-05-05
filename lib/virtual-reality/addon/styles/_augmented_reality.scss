@@ -31,8 +31,8 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-areas: 
-            ". h"
-            "s p";
+            ". p"
+            "i s";
   grid-gap: var(--ar-button-padding);
   padding: var(--ar-button-padding);
 }
@@ -60,8 +60,8 @@
   grid-area: s;
 }
 
-#ar-zoom-container {
-  grid-area: h;
+#ar-info-interaction-container {
+  grid-area: i;
 }
 
 .ar-left-button-container{
@@ -71,20 +71,20 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-areas: 
-            "plus ."
-            "minus info";
+            "p ."
+            "m z";
   grid-gap: var(--ar-button-padding);
   padding: var(--ar-button-padding);
 }
 
 #ar-plus-interaction-container {
-  grid-area: plus;
+  grid-area: p;
 }
 
 #ar-minus-interaction-container {
-  grid-area: minus;
+  grid-area: m;
 }
 
-#ar-info-interaction-container {
-  grid-area: info;
+#ar-zoom-container {
+  grid-area: z;
 }
