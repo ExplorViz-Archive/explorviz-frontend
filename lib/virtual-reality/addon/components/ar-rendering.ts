@@ -7,14 +7,9 @@ import { tracked } from '@glimmer/tracking';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import Configuration from 'explorviz-frontend/services/configuration';
-import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import Interaction from 'explorviz-frontend/utils/interaction';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
-import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
-import { restartableTask, task } from 'ember-concurrency-decorators';
-import * as LandscapeCommunicationRendering from
-  'explorviz-frontend/utils/landscape-rendering/communication-rendering';
 import {
   Class, Package, Application, Node,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
@@ -24,17 +19,13 @@ import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
-import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
 import LocalVrUser from 'explorviz-frontend/services/local-vr-user';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import DeltaTime from 'virtual-reality/services/delta-time';
-import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
-import { perform } from 'ember-concurrency-ts';
-import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 
 import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
@@ -42,12 +33,14 @@ import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 import ArSettings from 'virtual-reality/services/ar-settings';
 import VrApplicationRenderer from 'virtual-reality/services/vr-application-renderer';
-// import VrMessageReceiver from 'virtual-reality/services/vr-message-receiver';
 import VrAssetRepository from 'virtual-reality/services/vr-asset-repo';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
 import VrTimestampService from 'virtual-reality/services/vr-timestamp';
 import VrHighlightingService from 'virtual-reality/services/vr-highlighting';
 import ArZoomHandler from 'virtual-reality/utils/ar-helpers/ar-zoom-handler';
+import RemoteVrUserService from 'virtual-reality/services/remote-vr-users';
+import VrSceneService from 'virtual-reality/services/vr-scene';
+import VrLandscapeRenderer from 'virtual-reality/services/vr-landscape-renderer';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -81,7 +74,7 @@ export default class ArRendering extends Component<Args> {
   localUser!: LocalVrUser;
 
   @service('delta-time')
-  time!: DeltaTime;
+  deltaTimeService!: DeltaTime;
 
   @service('vr-highlighting')
   private highlightingService!: VrHighlightingService;
@@ -89,8 +82,17 @@ export default class ArRendering extends Component<Args> {
   @service('ar-settings')
   arSettings!: ArSettings;
 
+  @service('remote-vr-users')
+  private remoteUsers!: RemoteVrUserService;
+
   @service('repos/timestamp-repository')
   private timestampRepo!: TimestampRepository;
+
+  @service('vr-landscape-renderer')
+  private vrLandscapeRenderer!: VrLandscapeRenderer;
+
+  @service('vr-scene')
+  private sceneService!: VrSceneService;
 
   @service('vr-timestamp')
   private timestampService!: VrTimestampService;
@@ -104,12 +106,6 @@ export default class ArRendering extends Component<Args> {
   @service('vr-asset-repo')
   private assetRepo!: VrAssetRepository;
 
-  @service()
-  worker!: any;
-
-  // Maps models to a computed layout
-  modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
-
   debug = debugLogger('ArRendering');
 
   // Used to register (mouse) events
@@ -119,33 +115,12 @@ export default class ArRendering extends Component<Args> {
 
   canvas!: HTMLCanvasElement;
 
-  scene!: THREE.Scene;
-
   @tracked
   camera!: THREE.PerspectiveCamera;
-
-  renderer!: THREE.WebGLRenderer;
-
-  raycaster: THREE.Raycaster;
-
-  // Depth of boxes for landscape entities
-  landscapeDepth: number;
-
-  closeButtonTexture: THREE.Texture;
-
-  landscapeOffset = new THREE.Vector3();
-
-  get font() {
-    return this.args.font;
-  }
-
-  readonly elk: ELK;
 
   readonly imageLoader: ImageLoader = new ImageLoader();
 
   arZoomHandler: ArZoomHandler | undefined;
-
-  readonly appCommRendering: AppCommunicationRendering;
 
   // Provides functions to label landscape meshes
   readonly landscapeLabeler = new LandscapeLabeler();
@@ -154,11 +129,7 @@ export default class ArRendering extends Component<Args> {
   @tracked
   readonly landscapeObject3D!: LandscapeObject3D;
 
-  drawableClassCommunications: Map<string, DrawableClassCommunication[]> = new Map();
-
   onRenderFcts: (() => void)[] = [];
-
-  lastTimeMsec: null|number = null;
 
   arToolkitSource: any;
 
@@ -185,25 +156,8 @@ export default class ArRendering extends Component<Args> {
     super(owner, args);
     this.debug('Constructor called');
 
-    this.elk = new ElkConstructor({
-      workerUrl: './assets/web-workers/elk-worker.min.js',
-    });
-
-    this.landscapeDepth = 0.7;
-
-    this.raycaster = new THREE.Raycaster();
-
-    this.appCommRendering = new AppCommunicationRendering(this.configuration);
-
-    // Load image for delete button
-    this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
-
-    // Load and scale landscape
-    this.landscapeObject3D = new LandscapeObject3D(this.args.landscapeData.structureLandscapeData);
-    this.arSettings.landscapeObject = this.landscapeObject3D;
-
-    // Rotate landscape such that it lays flat on the floor
-    this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
+    this.landscapeObject3D = this.vrLandscapeRenderer.landscapeObject3D;
+    this.vrLandscapeRenderer.setLargestSide(2);
 
     this.hammerInteraction = HammerInteraction.create();
 
@@ -216,59 +170,14 @@ export default class ArRendering extends Component<Args> {
      * Calls all three related init functions and adds the three
      * performance panel if it is activated in user settings
      */
-  initRendering() {
+  private initRendering() {
     this.initServices();
-    this.initScene();
+    this.initRenderer();
     this.initCamera();
     this.initCameraCrosshair();
-    this.initRenderer();
-    this.initLights();
     this.initArJs();
     this.initInteraction();
-  }
-
-  /**
-     * Creates a scene, its background and adds a landscapeObject3D to it
-     */
-  initScene() {
-    this.scene = new THREE.Scene();
-
-    this.scene.add(this.landscapeObject3D);
-  }
-
-  /**
-     * Creates a PerspectiveCamera according to canvas size and sets its initial position
-     */
-  initCamera() {
-    this.camera = new THREE.PerspectiveCamera(42, 640 / 480, 0.01, 2000);
-    this.scene.add(this.camera);
-
-    this.arZoomHandler = new ArZoomHandler(this.camera, this.outerDiv);
-
-    this.debug('Camera added');
-  }
-
-  initCameraCrosshair() {
-    const geometry = new THREE.RingGeometry(0.0001, 0.0003, 30);
-    const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-    const crosshairMesh = new THREE.Mesh(geometry, material);
-
-    this.camera.add(crosshairMesh);
-    // Position just in front of camera
-    crosshairMesh.position.z = -0.1;
-  }
-
-  /**
-     * Initiates a WebGLRenderer
-     */
-  initRenderer() {
-    this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      canvas: this.canvas,
-    });
-
-    this.debug('Renderer set up');
+    this.configureScene();
   }
 
   private initServices() {
@@ -292,25 +201,52 @@ export default class ArRendering extends Component<Args> {
   }
 
   /**
-     * Creates a SpotLight and an AmbientLight and adds it to the scene
+     * Creates a PerspectiveCamera according to canvas size and sets its initial position
      */
-  initLights() {
-    const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
-    spotLight.position.set(100, 100, 100);
-    spotLight.castShadow = false;
-    this.scene.add(spotLight);
+  private initCamera() {
+    // Set camera properties
+    this.localUser.defaultCamera.fov = 42;
+    this.localUser.updateCameraAspectRatio(640, 480);
+    this.localUser.defaultCamera.near = 0.01;
+    this.localUser.defaultCamera.far = 2000;
+    this.localUser.defaultCamera.position.set(0, 0, 0);
 
-    const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
-    this.scene.add(light);
-    this.debug('Lights added');
+    this.arZoomHandler = new ArZoomHandler(this.localUser.defaultCamera, this.outerDiv);
+  }
+
+  private initCameraCrosshair() {
+    const geometry = new THREE.RingGeometry(0.0001, 0.0003, 30);
+    const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const crosshairMesh = new THREE.Mesh(geometry, material);
+
+    this.localUser.defaultCamera.add(crosshairMesh);
+    // Position just in front of camera
+    crosshairMesh.position.z = -0.1;
+  }
+
+  /**
+  * Initiates a WebGLRenderer
+  */
+  private initRenderer() {
+    this.debug('Initializing renderer...');
+
+    const { width, height } = this.canvas;
+    this.localUser.renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: true,
+      canvas: this.canvas,
+    });
+    this.localUser.renderer.setPixelRatio(window.devicePixelRatio);
+    this.localUser.renderer.setSize(width, height);
   }
 
   /**
    * Binds this context to all event handling functions and
    * passes them to a newly created Interaction object
    */
-  initInteraction() {
-    this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
+  private initInteraction() {
+    this.interaction = new Interaction(this.canvas, this.localUser.defaultCamera,
+      this.localUser.renderer,
       this.getIntersectableObjects(), {}, ArRendering.raycastFilter);
 
     // Add key listener for room positioning
@@ -319,7 +255,12 @@ export default class ArRendering extends Component<Args> {
     };
   }
 
-  getIntersectableObjects() {
+  private configureScene() {
+    this.sceneService.setSceneTransparent();
+    this.sceneService.removeSkylight();
+  }
+
+  private getIntersectableObjects() {
     const intersectableObjects: THREE.Object3D[] = [this.landscapeObject3D];
 
     this.applicationMarkers.forEach((appMarker) => {
@@ -333,7 +274,7 @@ export default class ArRendering extends Component<Args> {
     return !(intersection.object instanceof LabelMesh || intersection.object instanceof LogoMesh);
   }
 
-  initArJs() {
+  private initArJs() {
     this.arToolkitSource = new THREEx.ArToolkitSource({
       sourceType: 'webcam',
     });
@@ -362,20 +303,20 @@ export default class ArRendering extends Component<Args> {
 
     const landscapeMarker0 = new THREE.Group();
     landscapeMarker0.add(this.landscapeObject3D);
-    this.scene.add(landscapeMarker0);
+    this.sceneService.scene.add(landscapeMarker0);
 
     // Init controls for camera
     // eslint-disable-next-line
     new THREEx.ArMarkerControls(arToolkitContext, landscapeMarker0, {
       type: 'pattern',
-      patternUrl: 'ar_data/patt.hiro',
+      patternUrl: 'ar_data/L.patt',
     });
 
-    const applicationMarkerNames = ['pattern-letterA', 'pattern-letterB'];
+    const applicationMarkerNames = ['pattern-rectangular_1', 'pattern-rectangular_2', 'pattern-rectangular_3', 'pattern-rectangular_4', 'pattern-rectangular_5'];
 
     applicationMarkerNames.forEach((markerName) => {
       const applicationMarker = new THREE.Group();
-      this.scene.add(applicationMarker);
+      this.sceneService.scene.add(applicationMarker);
       this.applicationMarkers.push(applicationMarker);
 
       // Init controls for camera
@@ -384,11 +325,6 @@ export default class ArRendering extends Component<Args> {
         type: 'pattern',
         patternUrl: `ar_data/${markerName}.patt`,
       });
-    });
-
-    // Render the scene
-    this.onRenderFcts.push(() => {
-      this.renderer.render(this.scene, this.camera);
     });
   }
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -403,11 +339,12 @@ export default class ArRendering extends Component<Args> {
 
     this.initRendering();
 
-    this.renderer.setAnimationLoop(this.render.bind(this));
-
     this.resize(outerDiv);
 
-    await perform(this.loadNewLandscape);
+    // Start main loop.
+    this.localUser.renderer.setAnimationLoop(() => this.tick());
+
+    // await perform(this.loadNewLandscape);
   }
 
   @action
@@ -433,13 +370,15 @@ export default class ArRendering extends Component<Args> {
     const width = Number(outerDiv.clientWidth);
     const height = Number(outerDiv.clientHeight);
 
+    this.localUser.updateCameraAspectRatio(width, height);
+
     // Update renderer and camera according to new canvas size
-    this.renderer.setSize(width, height);
-    this.camera.updateProjectionMatrix();
+    this.localUser.renderer.setSize(width, height);
+    this.localUser.defaultCamera.updateProjectionMatrix();
 
     this.arToolkitSource.onResizeElement();
 
-    this.arToolkitSource.copyElementSizeTo(this.renderer.domElement);
+    this.arToolkitSource.copyElementSizeTo(this.localUser.renderer.domElement);
     if (this.arToolkitContext.arController !== null) {
       this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
     }
@@ -457,21 +396,6 @@ export default class ArRendering extends Component<Args> {
       // Center canvas
       this.canvas.style.marginLeft = `${(width - parseInt(this.canvas.style.width, 10)) / 2}px`;
     }
-  }
-
-  /**
-   * Inherit this function to update the scene with a new renderingModel. It
-   * automatically removes every mesh from the scene and finally calls
-   * the (overridden) "populateLandscape" function. Add your custom code
-   * as shown in landscape-rendering.
-   *
-   * @method cleanAndUpdateScene
-   */
-  @action
-  async cleanAndUpdateScene() {
-    await perform(this.populateLandscape);
-
-    this.debug('clean and populate landscape-rendering');
   }
 
   @action
@@ -559,7 +483,7 @@ export default class ArRendering extends Component<Args> {
 
   @action
   updateColors() {
-    this.scene.traverse((object3D) => {
+    this.sceneService.scene.traverse((object3D) => {
       if (object3D instanceof BaseMesh) {
         object3D.updateColor();
         // Special case because communication arrow is no base mesh
@@ -571,198 +495,86 @@ export default class ArRendering extends Component<Args> {
 
   // #endregion ACTIONS
 
+  // #region MOUSE & KEYBOARD EVENT HANDLER
+
+  @action
+  handleDoubleClick(intersection: THREE.Intersection | null) {
+    if (!intersection) return;
+
+    this.handlePrimaryInputOn(intersection);
+  }
+
+  @action
+  handleSingleClick(intersection: THREE.Intersection | null) {
+    if (!intersection) return;
+
+    this.handleSecondaryInputOn(intersection);
+  }
+
+  handleKeyboard(event: any) {
+    // Handle keys
+    switch (event.key) {
+      case 'c':
+        // this.localUser.connect();
+        break;
+      case 'm':
+        this.localUser.defaultCamera.fov += 1;
+        this.localUser.defaultCamera.updateProjectionMatrix();
+        break;
+      case 'n':
+        this.localUser.defaultCamera.fov -= 1;
+        this.localUser.defaultCamera.updateProjectionMatrix();
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  // #endregion MOUSE & KEYBOARD EVENT HANDLER
+
   // #region RENDERING AND SCENE POPULATION
 
   /**
-   * Main rendering function
+   * Main loop that is called once per frame.
    */
-  render() {
-    if (this.isDestroyed) { return; }
+  private tick() {
+    if (this.isDestroyed) {
+      return;
+    }
 
-    this.time.update();
+    // Compute time since last tick.
+    this.deltaTimeService.update();
+    const delta = this.deltaTimeService.getDeltaTime();
 
-    this.renderer.setViewport(0, 0, this.outerDiv.clientWidth, this.outerDiv.clientHeight);
+    this.remoteUsers.updateRemoteUsers(delta);
+    this.render();
+  }
 
-    this.renderer.render(this.scene, this.camera);
+  /**
+     * Renders the scene.
+     */
+  private render() {
+    this.localUser.renderer
+      .setViewport(0, 0, this.outerDiv.clientWidth, this.outerDiv.clientHeight);
+
+    this.localUser.renderer.render(
+      this.sceneService.scene,
+      this.localUser.defaultCamera,
+    );
 
     // Call each update function
     this.onRenderFcts.forEach((onRenderFct) => {
       onRenderFct();
     });
 
-    this.arZoomHandler?.renderZoomCamera(this.renderer, this.scene);
-  }
-
-  @task*
-  loadNewLandscape() {
-    yield perform(this.populateLandscape);
-  }
-
-  /**
- * Computes new meshes for the landscape and adds them to the scene
- *
- * @method populateLandscape
- */
-  // @ts-ignore
-  @restartableTask*
-  // eslint-disable-next-line
-  populateLandscape() {
-    this.debug('populate landscape-rendering');
-
-    const { structureLandscapeData, dynamicLandscapeData } = this.args.landscapeData;
-
-    this.landscapeObject3D.dataModel = structureLandscapeData;
-
-    // Run Klay layouting in 3 steps within workers
-    try {
-      const applicationCommunications = computeApplicationCommunication(structureLandscapeData,
-        dynamicLandscapeData);
-
-      // Do layout pre-processing (1st step)
-      const { graph, modelIdToPoints }: Layout1Return = yield this.worker.postMessage('layout1', {
-        structureLandscapeData,
-        applicationCommunications,
-      });
-
-      // Run actual klay function (2nd step)
-      const newGraph: ElkNode = yield this.elk.layout(graph);
-
-      // Post-process layout graph (3rd step)
-      const layoutedLandscape: Layout3Return = yield this.worker.postMessage('layout3', {
-        graph: newGraph,
-        modelIdToPoints,
-        structureLandscapeData,
-        applicationCommunications,
-      });
-
-      // Clean old landscape
-      this.cleanUpLandscape();
-
-      const {
-        modelIdToLayout,
-        modelIdToPoints: modelIdToPointsComplete,
-      }: Layout3Return = layoutedLandscape;
-
-      const modelIdToPlaneLayout = new Map<string, PlaneLayout>();
-
-      this.modelIdToPlaneLayout = modelIdToPlaneLayout;
-
-      // Convert the simple to a PlaneLayout map
-      LandscapeRendering.convertToPlaneLayoutMap(modelIdToLayout, modelIdToPlaneLayout);
-
-      // Compute center of landscape
-      const landscapeRect = this.landscapeObject3D.getMinMaxRect(modelIdToPlaneLayout);
-      const centerPoint = landscapeRect.center;
-
-      // Render all landscape entities
-      const { nodes } = structureLandscapeData;
-
-      // Draw boxes for nodes
-      nodes.forEach((node: Node) => {
-        this.renderNode(node, modelIdToPlaneLayout.get(node.ipAddress), centerPoint);
-
-        const { applications } = node;
-
-        // Draw boxes for applications
-        applications.forEach((application: Application) => {
-          this.renderApplication(application, modelIdToPlaneLayout.get(application.instanceId),
-            centerPoint);
-        });
-      });
-
-      // Render application communication
-      const color = this.configuration.landscapeColors.communication;
-      const tiles = LandscapeCommunicationRendering
-        .computeCommunicationTiles(applicationCommunications, modelIdToPointsComplete,
-          color, this.landscapeDepth / 2 + 0.25);
-
-      LandscapeCommunicationRendering.addCommunicationLineDrawing(tiles, this.landscapeObject3D,
-        centerPoint, 0.004, 0.028);
-
-      this.landscapeObject3D.setOpacity(this.arSettings.landscapeOpacity);
-
-      this.landscapeObject3D.setLargestSide(2);
-
-      this.debug('Landscape loaded');
-    } catch (e) {
-      this.debug(e);
-    }
+    this.arZoomHandler?.renderZoomCamera(this.localUser.renderer, this.sceneService.scene);
   }
 
   // #endregion RENDERING AND SCENE POPULATION
 
-  // #region LANDSCAPE RENDERING
-
-  /**
- * Creates & positions a node mesh with corresponding labels.
- * Then adds it to the landscapeObject3D.
- *
- * @param node Data model for the node mesh
- * @param layout Layout data to position the mesh correctly
- * @param centerPoint Offset of landscape object
- */
-  renderNode(node: Node, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
-
-    // Create node mesh
-    const nodeMesh = new NodeMesh(
-      layout,
-      node,
-      this.configuration.landscapeColors.node,
-      this.configuration.applicationColors.highlightedEntity,
-      this.landscapeDepth,
-      0.2,
-    );
-
-    // Create and add label + icon
-    nodeMesh.setToDefaultPosition(centerPoint);
-
-    // Label with own ip-address by default
-    const labelText = nodeMesh.getDisplayName();
-
-    this.landscapeLabeler.addNodeTextLabel(nodeMesh, labelText, this.font,
-      this.configuration.landscapeColors.nodeText);
-
-    // Add to scene
-    this.landscapeObject3D.add(nodeMesh);
-  }
-
-  /**
- * Creates & positions an application mesh with corresponding labels.
- * Then adds it to the landscapeObject3D.
- *
- * @param application Data model for the application mesh
- * @param layout Layout data to position the mesh correctly
- * @param centerPoint Offset of landscape object
- */
-  renderApplication(application: Application, layout: PlaneLayout | undefined,
-    centerPoint: THREE.Vector2) {
-    if (!layout) { return; }
-
-    // Create application mesh
-    const applicationMesh = new ApplicationMesh(
-      layout,
-      application,
-      this.configuration.landscapeColors.application,
-      this.configuration.applicationColors.highlightedEntity,
-      this.landscapeDepth,
-      0.3,
-    );
-    applicationMesh.setToDefaultPosition(centerPoint);
-
-    // Create and add label + icon
-    this.landscapeLabeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
-      this.configuration.landscapeColors.applicationText);
-    this.landscapeLabeler.addApplicationLogo(applicationMesh, this.imageLoader);
-
-    // Add to scene
-    this.landscapeObject3D.add(applicationMesh);
-  }
-
-  // #endregion LANDSCAPE RENDERING
-
   // #region APLICATION RENDERING
+
   async addApplication(applicationModel: Application) {
     if (applicationModel.packages.length === 0) {
       const message = `Sorry, there is no information for application <b>
@@ -814,41 +626,9 @@ export default class ArRendering extends Component<Args> {
 
   // #endregion APPLICATION RENDERING
 
-  // #region MOUSE & KEYBOARD EVENT HANDLER
-
-  @action
-  handleDoubleClick(intersection: THREE.Intersection | null) {
-    if (!intersection) return;
-
-    this.handlePrimaryInputOn(intersection);
-  }
-
-  @action
-  handleSingleClick(intersection: THREE.Intersection | null) {
-    if (!intersection) return;
-
-    this.handleSecondaryInputOn(intersection);
-  }
-
-  handleKeyboard(event: any) {
-    // Handle keys
-    switch (event.key) {
-      case 'c':
-        // this.localUser.connect();
-        break;
-      case 'l':
-        perform(this.loadNewLandscape);
-        break;
-      default:
-        break;
-    }
-  }
-
-  // #endregion MOUSE & KEYBOARD EVENT HANDLER
-
   // #region UTILS
 
-  handlePrimaryInputOn(intersection: THREE.Intersection) {
+  private handlePrimaryInputOn(intersection: THREE.Intersection) {
     const self = this;
     const { object } = intersection;
 
@@ -877,7 +657,7 @@ export default class ArRendering extends Component<Args> {
     }
   }
 
-  handleSecondaryInputOn(intersection: THREE.Intersection) {
+  private handleSecondaryInputOn(intersection: THREE.Intersection) {
     const { object } = intersection;
     if (object.parent instanceof ApplicationObject3D) {
       this.highlightingService.highlightComponent(
@@ -887,7 +667,7 @@ export default class ArRendering extends Component<Args> {
     }
   }
 
-  cleanUpLandscape() {
+  private cleanUpLandscape() {
     this.landscapeObject3D.removeAllChildren();
     this.landscapeObject3D.resetMeshReferences();
   }

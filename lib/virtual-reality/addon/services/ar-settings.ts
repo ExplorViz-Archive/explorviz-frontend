@@ -1,7 +1,7 @@
 import Service, { inject as service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 import VrApplicationRenderer from 'explorviz-frontend/services/vr-application-renderer';
-import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
+import VrLandscapeRenderer from 'explorviz-frontend/services/vr-landscape-renderer';
 
 export default class ArSettings extends Service.extend({
   // anything which *must* be merged to prototype here
@@ -9,7 +9,8 @@ export default class ArSettings extends Service.extend({
   @service('vr-application-renderer')
   private vrApplicationRenderer!: VrApplicationRenderer;
 
-  landscapeObject: LandscapeObject3D | undefined;
+  @service('vr-landscape-renderer')
+  private vrLandscapeRenderer!: VrLandscapeRenderer;
 
   @tracked
   landscapeOpacity: number;
@@ -30,9 +31,7 @@ export default class ArSettings extends Service.extend({
   }
 
   updateLandscapeOpacity() {
-    if (this.landscapeObject) {
-      this.landscapeObject.setOpacity(this.landscapeOpacity);
-    }
+    this.vrLandscapeRenderer.landscapeObject3D.setOpacity(this.landscapeOpacity);
   }
 
   setApplicationOpacity(opacity: number) {

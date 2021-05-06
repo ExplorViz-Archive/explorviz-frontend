@@ -47,6 +47,9 @@ export default class VrLandscapeRenderer extends Service {
 
   private landscapeLabeler = new LandscapeLabeler();
 
+  // Initialize landscape such that largest side meets this value
+  private largestSide: number | undefined;
+
   readonly landscapeObject3D: LandscapeObject3D;
 
   constructor(properties?: object) {
@@ -126,9 +129,18 @@ export default class VrLandscapeRenderer extends Service {
   }
 
   centerLandscape() {
-    this.resetScale();
+    if (this.largestSide) {
+      this.landscapeObject3D.setLargestSide(this.largestSide);
+    } else {
+      this.resetScale();
+    }
     this.resetRotation();
     this.resetPosition();
+  }
+
+  setLargestSide(largestSide: number) {
+    this.largestSide = largestSide;
+    this.landscapeObject3D.setLargestSide(largestSide);
   }
 
   // #endregion LANDSCAPE POSITIONING

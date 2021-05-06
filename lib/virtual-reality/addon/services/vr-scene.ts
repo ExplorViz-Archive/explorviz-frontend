@@ -25,6 +25,8 @@ export default class VrSceneService extends Service {
 
   readonly floor: FloorMesh;
 
+  skyLight: THREE.SpotLight;
+
   constructor(properties?: object) {
     super(properties);
 
@@ -46,9 +48,22 @@ export default class VrSceneService extends Service {
     this.scene.add(light);
 
     // Add a light that illuminates the sky box if the user dragged in a backgound image.
-    const skyLight = new THREE.SpotLight(0xffffff, 0.5, 1000, Math.PI, 0, 0);
-    skyLight.castShadow = false;
-    this.scene.add(skyLight);
+    this.skyLight = new THREE.SpotLight(0xffffff, 0.5, 1000, Math.PI, 0, 0);
+    this.skyLight.castShadow = false;
+    this.scene.add(this.skyLight);
+  }
+
+  removeSkylight() {
+    this.scene.remove(this.skyLight);
+  }
+
+  /**
+   * Removes the floor and sets a transparent background.
+   * Landscape and application models are unaffected.
+   */
+  setSceneTransparent() {
+    this.scene.remove(this.floor);
+    this.scene.background = null;
   }
 
   findMeshByModelId(entityType: EntityType, id: string) {
