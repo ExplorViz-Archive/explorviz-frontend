@@ -41,6 +41,21 @@ import ArZoomHandler from 'virtual-reality/utils/ar-helpers/ar-zoom-handler';
 import RemoteVrUserService from 'virtual-reality/services/remote-vr-users';
 import VrSceneService from 'virtual-reality/services/vr-scene';
 import VrLandscapeRenderer from 'virtual-reality/services/vr-landscape-renderer';
+import VrMessageReceiver, { VrMessageListener } from 'virtual-reality/services/vr-message-receiver';
+import { SelfConnectedMessage } from 'virtual-reality/utils/vr-message/receivable/self_connected';
+import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
+import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
+import { ForwardedMessage } from 'virtual-reality/utils/vr-message/receivable/forwarded';
+import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
+import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
+import { UserDisconnectedMessage } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
+import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receivable/landscape';
+import { AppOpenedMessage } from 'virtual-reality/utils/vr-message/sendable/app_opened';
+import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/request/app_closed';
+import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
+import { HighlightingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
+import WebSocketService from 'virtual-reality/services/web-socket';
+import VrRoomSerializer from '../services/vr-room-serializer';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -64,7 +79,7 @@ type PopupData = {
 
 declare const THREEx: any;
 
-export default class ArRendering extends Component<Args> {
+export default class ArRendering extends Component<Args> implements VrMessageListener {
   // #region CLASS FIELDS AND GETTERS
 
   @service('configuration')
@@ -91,6 +106,9 @@ export default class ArRendering extends Component<Args> {
   @service('vr-landscape-renderer')
   private vrLandscapeRenderer!: VrLandscapeRenderer;
 
+  @service('vr-message-receiver')
+  private receiver!: VrMessageReceiver;
+
   @service('vr-scene')
   private sceneService!: VrSceneService;
 
@@ -105,6 +123,12 @@ export default class ArRendering extends Component<Args> {
 
   @service('vr-asset-repo')
   private assetRepo!: VrAssetRepository;
+
+  @service('vr-room-serializer')
+  private roomSerializer!: VrRoomSerializer;
+
+  @service('web-socket')
+  private webSocket!: WebSocketService;
 
   debug = debugLogger('ArRendering');
 
@@ -178,6 +202,7 @@ export default class ArRendering extends Component<Args> {
     this.initArJs();
     this.initInteraction();
     this.configureScene();
+    this.initWebSocket();
   }
 
   private initServices() {
@@ -258,6 +283,13 @@ export default class ArRendering extends Component<Args> {
   private configureScene() {
     this.sceneService.setSceneTransparent();
     this.sceneService.removeSkylight();
+  }
+
+  private async initWebSocket() {
+    this.debug('Initializing websocket...');
+
+    this.webSocket.socketCloseCallback = () => this.onSelfDisconnected();
+    this.receiver.addMessageListener(this);
   }
 
   private getIntersectableObjects() {
@@ -709,4 +741,218 @@ export default class ArRendering extends Component<Args> {
   }
 
   // #endregion UTILS
+
+  // #region HANDLING MESSAGES
+
+  onSelfDisconnected(event?: any) {
+    if (this.localUser.isConnecting) {
+      AlertifyHandler.showAlertifyMessage('VR service not responding');
+    } else if (event) {
+      switch (event.code) {
+        case 1000: // Normal Closure
+          AlertifyHandler.showAlertifyMessage('Successfully disconnected');
+          break;
+        case 1006: // Abnormal closure
+          AlertifyHandler.showAlertifyMessage('VR service closed abnormally');
+          break;
+        default:
+          AlertifyHandler.showAlertifyMessage('Unexpected disconnect');
+      }
+    }
+
+    // Remove remote users.
+    this.remoteUsers.removeAllRemoteUsers();
+
+    // Reset highlighting colors.
+    this.vrApplicationRenderer.getOpenApplications().forEach((application) => {
+      application.setHighlightingColor(
+        this.configuration.applicationColors.highlightedEntity,
+      );
+    });
+
+    this.localUser.disconnect();
+  }
+
+  /**
+   * After succesfully connecting to the backend, create and spawn other users.
+   */
+  onSelfConnected({ self, users }: SelfConnectedMessage): void {
+    // Create User model for all users and add them to the users map by
+    // simulating the event of a user connecting.
+    for (let i = 0; i < users.length; i++) {
+      const userData = users[i];
+      this.onUserConnected(
+        {
+          event: USER_CONNECTED_EVENT,
+          id: userData.id,
+          name: userData.name,
+          color: userData.color,
+          position: userData.position,
+          quaternion: userData.quaternion,
+        },
+        false,
+      );
+    }
+
+    // Initialize local user.
+    this.localUser.connected({
+      id: self.id,
+      name: self.name,
+      color: new THREE.Color(...self.color),
+    });
+  }
+
+  onUserConnected(
+    {
+      id, name, color, position, quaternion,
+    }: UserConnectedMessage,
+    showConnectMessage = true,
+  ): void {
+    const remoteUser = new RemoteVrUser({
+      userName: name,
+      userId: id,
+      color: new THREE.Color(...color),
+      state: 'online',
+      localUser: this.localUser,
+    });
+    this.remoteUsers.addRemoteUser(remoteUser, { position, quaternion });
+
+    if (showConnectMessage) {
+      AlertifyHandler.showAlertifySuccess(`User ${remoteUser.userName} connected.`);
+    }
+  }
+
+  /**
+   * Updates the specified user's camera and controller positions.
+   */
+  onUserPositions() {}
+
+  /**
+   * Updates whether the given user is pinging with the specified controller or not.
+   */
+  onPingUpdate({
+    userId,
+    originalMessage: { controllerId, isPinging },
+  }: ForwardedMessage<PingUpdateMessage>): void {
+    const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
+    if (!remoteUser) return;
+
+    remoteUser.togglePing(controllerId, isPinging);
+  }
+
+  onTimestampUpdate({
+    originalMessage: { timestamp },
+  }: ForwardedMessage<TimestampUpdateMessage>): void {
+    this.roomSerializer.preserveRoom(
+      () => this.timestampService.updateTimestampLocally(timestamp),
+      {
+        restoreLandscapeData: false,
+      },
+    );
+  }
+
+  onUserControllerConnect() {}
+
+  onUserControllerDisconnect() {}
+
+  /**
+   * Removes the user that disconnected and informs our user about it.
+   *
+   * @param {JSON} data - Contains the id of the user that disconnected.
+   */
+  onUserDisconnect({ id }: UserDisconnectedMessage) {
+    // Remove user and show disconnect notification.
+    const removedUser = this.remoteUsers.removeRemoteUserById(id);
+    if (removedUser) {
+      AlertifyHandler.showAlertifyError(`User ${removedUser.userName} disconnedted.`);
+    }
+  }
+
+  async onInitialLandscape({
+    landscape,
+    openApps,
+    detachedMenus,
+  }: InitialLandscapeMessage): Promise<void> {
+    this.roomSerializer.restoreRoom({ landscape, openApps, detachedMenus });
+  }
+
+  onAppOpened({
+    originalMessage: {
+      id, position, quaternion, scale,
+    },
+  }: ForwardedMessage<AppOpenedMessage>): void {
+    const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(
+      id,
+    );
+    if (application) {
+      this.vrApplicationRenderer.addApplicationLocally(application, {
+        position: new THREE.Vector3(...position),
+        quaternion: new THREE.Quaternion(...quaternion),
+        scale: new THREE.Vector3(...scale),
+      });
+    }
+  }
+
+  onAppClosed({
+    originalMessage: { appId },
+  }: ForwardedMessage<AppClosedMessage>): void {
+    const application = this.vrApplicationRenderer.getApplicationById(appId);
+    if (application) this.vrApplicationRenderer.removeApplicationLocally(application);
+  }
+
+  onObjectMoved() {}
+
+  onComponentUpdate({
+    originalMessage: { isFoundation, appId, componentId },
+  }: ForwardedMessage<ComponentUpdateMessage>): void {
+    const applicationObject3D = this.vrApplicationRenderer.getApplicationById(
+      appId,
+    );
+    if (!applicationObject3D) return;
+
+    const componentMesh = applicationObject3D.getBoxMeshbyModelId(componentId);
+
+    if (isFoundation) {
+      this.vrApplicationRenderer.closeAllComponentsLocally(applicationObject3D);
+    } else if (componentMesh instanceof ComponentMesh) {
+      this.vrApplicationRenderer.toggleComponentLocally(
+        componentMesh,
+        applicationObject3D,
+      );
+    }
+  }
+
+  onHighlightingUpdate({
+    userId,
+    originalMessage: {
+      isHighlighted, appId, entityType, entityId,
+    },
+  }: ForwardedMessage<HighlightingUpdateMessage>): void {
+    const application = this.vrApplicationRenderer.getApplicationById(appId);
+    if (!application) return;
+
+    const user = this.remoteUsers.lookupRemoteUserById(userId);
+    if (!user) return;
+
+    if (isHighlighted) {
+      this.highlightingService.hightlightComponentLocallyByTypeAndId(
+        application,
+        {
+          entityType,
+          entityId,
+          color: user.color,
+        },
+      );
+    } else {
+      this.highlightingService.removeHighlightingLocally(application);
+    }
+  }
+
+  onSpectatingUpdate() {}
+
+  onMenuDetached() { }
+
+  onDetachedMenuClosed() { }
+
+  // #endregion HANDLING MESSAGES
 }
