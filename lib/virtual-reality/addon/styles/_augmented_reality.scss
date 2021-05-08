@@ -3,6 +3,10 @@
   --ar-button-size: 5vmin;
 }
 
+.bold {
+  font-weight: bold;
+}
+
 .settings-container {
   position: absolute;
   display: flex;
@@ -22,6 +26,12 @@
 
 .white {
   background-color: white;
+}
+
+.flex-space-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .ar-right-button-container{

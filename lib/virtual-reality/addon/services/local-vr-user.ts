@@ -1,6 +1,7 @@
 import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-controller';
+import { tracked } from '@glimmer/tracking';
 import SpectateUserService from './spectate-user';
 import VrRoomService from './vr-room';
 import VrSceneService from './vr-scene';
@@ -39,8 +40,10 @@ export default class LocalVrUser extends Service {
 
   panoramaSphere: THREE.Object3D | undefined;
 
+  @tracked
   connectionStatus: ConnectionStatus = 'offline';
 
+  @tracked
   currentRoomId: string | null = null;
 
   get camera() {

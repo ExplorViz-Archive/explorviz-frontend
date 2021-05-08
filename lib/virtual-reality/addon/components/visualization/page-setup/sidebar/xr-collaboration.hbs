@@ -4,3 +4,79 @@
 >
   {{svg-jar "x" class="octicon"}}
 </div>
+
+<div>
+  <label class="bold">Status: </label>
+
+  <label>{{this.localUser.connectionStatus}}</label>
+</div>
+
+{{#if (eq this.localUser.connectionStatus "online")}}
+  <div>
+    <label class="bold">Current Room: </label>
+
+    <label>{{this.localUser.currentRoomId}}</label>
+  </div>
+
+  <label class="bold">Users</label>
+
+  <ul>
+    <li>
+      {{this.localUser.userName}}
+    </li>
+  </ul>
+
+{{/if}}
+
+{{#if (eq this.localUser.connectionStatus "offline")}}
+  <div class="flex-space-between">
+    <label class="bold">Rooms</label>
+
+    <BsButton
+      title="Reload Rooms"
+      {{on "click" this.loadRooms}}
+      @type="secondary"
+      @outline={{true}}
+    >
+      {{svg-jar "sync" class="octicon"}}
+    </BsButton>
+  </div>
+
+  <ul>
+    {{#each this.rooms as |room|}}
+      <div class="flex-space-between">
+        <li>
+          {{room.roomName}}
+        </li>
+        <BsButton
+          title="Join Room"
+          {{on "click" (fn this.joinRoom room)}}
+          @type="success"
+          @outline={{true}}
+        >
+          Join
+        </BsButton>
+      </div>
+    {{/each}}
+  </ul>
+
+  <BsButton
+    title="Host Room"
+    {{on "click" this.hostRoom}}
+    @type="secondary"
+    @outline={{true}}
+  >
+    Host Room
+  </BsButton>
+{{/if}}
+
+{{#if (eq this.localUser.connectionStatus "online")}}
+  <BsButton
+  title="Disconnect from Room"
+  {{on "click" this.leaveSession}}
+  @type="danger"
+  @outline={{true}}
+  >
+    Disconnect
+  </BsButton>
+{{/if}}
