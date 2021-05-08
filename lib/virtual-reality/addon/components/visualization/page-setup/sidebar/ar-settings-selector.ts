@@ -23,25 +23,6 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
 
     this.buttonSize = ArSettingsSelector.getCssVminSize('--ar-button-size');
     this.buttonPadding = ArSettingsSelector.getCssVminSize('--ar-button-padding');
-
-    /*
-    if (root) {
-      const buttonSizeString = getComputedStyle(root).getPropertyValue('--ar-button-size');
-      const currentButtonSize = Number.parseFloat(
-        buttonSizeString.substring(0, buttonSizeString.length - 4),
-      );
-      this.buttonSize = currentButtonSize;
-
-      const buttonPaddingString = getComputedStyle(root).getPropertyValue('--ar-button-padding');
-      const currentButtonPadding = Number.parseFloat(
-        buttonPaddingString.substring(0, buttonPaddingString.length - 4),
-      );
-      this.buttonPadding = currentButtonPadding;
-    } else {
-      this.buttonSize = 5;
-      this.buttonPadding = 2;
-    }
-    */
   }
 
   @action

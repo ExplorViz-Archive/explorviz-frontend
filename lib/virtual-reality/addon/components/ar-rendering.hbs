@@ -148,6 +148,9 @@
               <Visualization::PageSetup::Navbar::ColorPickerOpener
                 @addComponent={{@addComponent}}
               />
+              <Visualization::PageSetup::Navbar::XrCollaborationOpener
+                @addComponent={{@addComponent}}
+              />
               <Visualization::PageSetup::Navbar::ArSettingsOpener
                 @addComponent={{@addComponent}}
               />
@@ -168,6 +171,12 @@
                     @isLandscapeView={{false}}
                     @removeComponent={{@removeComponent}}
                     @updateView={{this.updateColors}}
+                  />
+                {{/if}}
+                {{#if (eq componentName "xr-collaboration")}}
+                  <h5 class="text-center">Collaboration</h5>
+                  <Visualization::PageSetup::Sidebar::XrCollaboration
+                    @removeComponent={{@removeComponent}}
                   />
                 {{/if}}
                 {{#if (eq componentName "ar-settings-selector")}}
