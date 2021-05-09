@@ -6,5 +6,5 @@ module.exports = {
   // userService: 'http://localhost:32682',
   userService: 'http://localhost:8084',
   collaborativeService: 'ws://localhost:8085',
-  vrService: 'http://localhost:4443',
+  vrService: 'http://localhost:4444',
 };
