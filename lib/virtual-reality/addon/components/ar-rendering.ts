@@ -353,10 +353,10 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     // eslint-disable-next-line
     new THREEx.ArMarkerControls(arToolkitContext, landscapeMarker0, {
       type: 'pattern',
-      patternUrl: 'ar_data/L.patt',
+      patternUrl: 'ar_data/pattern-angular_L_thick.patt',
     });
 
-    const applicationMarkerNames = ['pattern-rectangular_1', 'pattern-rectangular_2', 'pattern-rectangular_3', 'pattern-rectangular_4', 'pattern-rectangular_5'];
+    const applicationMarkerNames = ['pattern-angular_1', 'pattern-angular_2', 'pattern-angular_3', 'pattern-angular_4', 'pattern-angular_5'];
 
     applicationMarkerNames.forEach((markerName) => {
       const applicationMarker = new THREE.Group();
