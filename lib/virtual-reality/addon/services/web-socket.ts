@@ -56,6 +56,7 @@ export default class WebSocketService extends Service {
 
   private messageHandler(event: any) {
     const message = JSON.parse(event.data);
+    // console.log('Message: ', message);
     if (this.messageCallback) {
       this.messageCallback(message);
     }

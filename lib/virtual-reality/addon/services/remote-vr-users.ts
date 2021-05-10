@@ -21,6 +21,8 @@ export default class RemoteVrUserService extends Service {
 
   readonly remoteUserGroup: THREE.Group = new THREE.Group();
 
+  displayHmd = true;
+
   init() {
     super.init();
     this.sceneService.scene.add(this.remoteUserGroup);
@@ -64,7 +66,9 @@ export default class RemoteVrUserService extends Service {
     if (this.idToRemoteUser.has(remoteUser.userId)) this.removeRemoteUser(remoteUser);
 
     this.idToRemoteUser.set(remoteUser.userId, remoteUser);
-    this.headsetModel.then((hmd) => remoteUser.initCamera(hmd.clone(true), initialPose));
+    if (this.displayHmd) {
+      this.headsetModel.then((hmd) => remoteUser.initCamera(hmd.clone(true), initialPose));
+    }
     this.remoteUserGroup.add(remoteUser);
   }
 

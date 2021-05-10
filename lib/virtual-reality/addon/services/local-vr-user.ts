@@ -24,6 +24,7 @@ export default class LocalVrUser extends Service {
 
   userId!: string;
 
+  @tracked
   userName?: string;
 
   color: THREE.Color | undefined;

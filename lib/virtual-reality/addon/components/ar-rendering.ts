@@ -55,7 +55,11 @@ import { AppClosedMessage } from 'virtual-reality/utils/vr-message/sendable/requ
 import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/component_update';
 import { HighlightingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
 import WebSocketService from 'virtual-reality/services/web-socket';
+import VrMessageSender from 'virtual-reality/services/vr-message-sender';
+import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
+import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import VrRoomSerializer from '../services/vr-room-serializer';
+import VrLandscapeObject3D from '../utils/view-objects/landscape/vr-landscape-object-3d';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -96,6 +100,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @service('ar-settings')
   arSettings!: ArSettings;
+
+  @service('vr-message-sender')
+  private sender!: VrMessageSender;
+
+  @service('grabbed-object')
+  private grabbedObjectService!: GrabbedObjectService;
 
   @service('remote-vr-users')
   private remoteUsers!: RemoteVrUserService;
@@ -223,6 +233,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       this.args.landscapeData.structureLandscapeData,
       this.args.landscapeData.dynamicLandscapeData,
     );
+
+    this.remoteUsers.displayHmd = false;
   }
 
   /**
@@ -459,13 +471,13 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   @action
-  handlePlusInteraction() {
+  async handlePlusInteraction() {
     const intersection = this.interaction.raycastCanvasCenter();
 
     if (intersection && intersection.object) {
       const { parent } = intersection.object;
-      if (parent instanceof LandscapeObject3D || parent instanceof ApplicationObject3D) {
-        parent.scale.set(parent.scale.x * 1.1, parent.scale.y * 1.1, parent.scale.z * 1.1);
+      if (parent instanceof VrLandscapeObject3D || parent instanceof VrApplicationObject3D) {
+        this.scaleObject(parent, parent.scale.multiplyScalar(1.1));
       }
     }
   }
@@ -476,8 +488,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     if (intersection && intersection.object) {
       const { parent } = intersection.object;
-      if (parent instanceof LandscapeObject3D || parent instanceof ApplicationObject3D) {
-        parent.scale.set(parent.scale.x * 0.9, parent.scale.y * 0.9, parent.scale.z * 0.9);
+      if (parent instanceof VrLandscapeObject3D || parent instanceof VrApplicationObject3D) {
+        this.scaleObject(parent, parent.scale.multiplyScalar(0.9));
       }
     }
   }
@@ -612,7 +624,10 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       const message = `Sorry, there is no information for application <b>
         ${applicationModel.name}</b> available.`;
 
-      AlertifyHandler.showAlertifyMessage(message);
+      AlertifyHandler.showAlertifyWarning(message);
+    } else if (this.vrApplicationRenderer.isApplicationOpen(applicationModel.instanceId)) {
+      // ToDo: Add info about occupied marker
+      AlertifyHandler.showAlertifyWarning('Application already opened.');
     } else {
       // data available => open application-rendering
       AlertifyHandler.closeAlertifyMessages();
@@ -629,29 +644,33 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       const applicationObject3D = await this.vrApplicationRenderer
         .addApplication(applicationModel, {});
 
-      if (!applicationObject3D) {
-        AlertifyHandler.showAlertifyError('Could not open application.');
-        return;
-      }
+      this.addApplicationToMarker(applicationModel, applicationObject3D);
+    }
+  }
 
-      // Scale application such that it approximately fits to the printed marker
-      applicationObject3D.setLargestSide(1.5);
+  addApplicationToMarker(applicationModel: Application, applicationObject3D: ApplicationObject3D) {
+    if (!applicationObject3D) {
+      AlertifyHandler.showAlertifyError('Could not open application.');
+      return;
+    }
 
-      applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
+    // Scale application such that it approximately fits to the printed marker
+    applicationObject3D.setLargestSide(1.5);
 
-      applicationObject3D.setBoxMeshOpacity(this.arSettings.applicationOpacity);
+    applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
 
-      for (let i = 0; i < this.applicationMarkers.length; i++) {
-        if (this.applicationMarkers[i].children.length === 0) {
-          this.applicationMarkers[i].add(applicationObject3D);
+    applicationObject3D.setBoxMeshOpacity(this.arSettings.applicationOpacity);
 
-          const message = `Application '${applicationModel.name}' successfully opened <br>
-            on marker #${i}.`;
+    for (let i = 0; i < this.applicationMarkers.length; i++) {
+      if (this.applicationMarkers[i].children.length === 0) {
+        this.applicationMarkers[i].add(applicationObject3D);
 
-          AlertifyHandler.showAlertifySuccess(message);
+        const message = `Application '${applicationModel.name}' successfully opened <br>
+          on marker #${i}.`;
 
-          break;
-        }
+        AlertifyHandler.showAlertifySuccess(message);
+
+        break;
       }
     }
   }
@@ -720,6 +739,22 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
           track.stop();
         });
       }
+    }
+  }
+
+  async scaleObject(object: VrLandscapeObject3D | VrApplicationObject3D, scale: THREE.Vector3) {
+    const allowedToGrab = await this.grabbedObjectService.grabObject(
+      object,
+    );
+
+    if (allowedToGrab) {
+      object.scale.copy(scale);
+      this.sender.sendObjectMoved(object.getGrabId(),
+        object.position, object.quaternion, object.scale);
+
+      this.grabbedObjectService.releaseObject(object);
+    } else {
+      AlertifyHandler.showAlertifyWarning('App is being scaled by another user!');
     }
   }
 
@@ -876,20 +911,23 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.roomSerializer.restoreRoom({ landscape, openApps, detachedMenus });
   }
 
-  onAppOpened({
+  async onAppOpened({
     originalMessage: {
       id, position, quaternion, scale,
     },
-  }: ForwardedMessage<AppOpenedMessage>): void {
+  }: ForwardedMessage<AppOpenedMessage>): Promise<void> {
     const application = this.vrApplicationRenderer.getApplicationInCurrentLandscapeById(
       id,
     );
     if (application) {
+      const applicationObject3D = await
       this.vrApplicationRenderer.addApplicationLocally(application, {
         position: new THREE.Vector3(...position),
         quaternion: new THREE.Quaternion(...quaternion),
         scale: new THREE.Vector3(...scale),
       });
+
+      this.addApplicationToMarker(application, applicationObject3D);
     }
   }
 
