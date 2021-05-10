@@ -321,6 +321,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   private initArJs() {
     this.arToolkitSource = new THREEx.ArToolkitSource({
       sourceType: 'webcam',
+      // resolution displayed for the source
+      displayWidth: this.outerDiv.clientWidth,
+      displayHeight: this.outerDiv.clientHeight,
     });
 
     this.arToolkitSource.init(() => {
@@ -411,21 +414,19 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
      */
   @action
   resize(outerDiv: HTMLElement) {
-    const width = Number(outerDiv.clientWidth);
-    const height = Number(outerDiv.clientHeight);
-
-    this.localUser.updateCameraAspectRatio(width, height);
-
-    // Update renderer and camera according to new canvas size
-    this.localUser.renderer.setSize(width, height);
-    this.localUser.defaultCamera.updateProjectionMatrix();
-
     this.arToolkitSource.onResizeElement();
 
+    /*
     this.arToolkitSource.copyElementSizeTo(this.localUser.renderer.domElement);
     if (this.arToolkitContext.arController !== null) {
       this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
     }
+    */
+
+    const width = Number(outerDiv.clientWidth);
+    const height = Number(outerDiv.clientHeight);
+
+    this.localUser.updateCameraAspectRatio(width, height);
 
     const video = document.getElementById('arjs-video');
 
@@ -439,6 +440,16 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
       // Center canvas
       this.canvas.style.marginLeft = `${(width - parseInt(this.canvas.style.width, 10)) / 2}px`;
+
+      /*
+      const sourceWidth = video.videoWidth;
+      const sourceHeight = video.videoHeight;
+
+      console.log('Test: ', sourceWidth, sourceHeight);
+      console.log('sourceAspect', sourceWidth / sourceHeight, sourceWidth, sourceHeight);
+      // compute screenAspect
+      console.log('screenAspect', width / height, width, height);
+      */
     }
   }
 
