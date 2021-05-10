@@ -9,16 +9,16 @@
       <th scope="col"></th>
       <th scope="col"></th>
       <th scope="col"></th>
+      <th scope="col"></th>
     </tr>
   </thead>
   <tbody>
     {{#if @currentToken}}
       <tr
-        style="background-color: #aecce1"
-        {{on "click" (fn @selectToken @currentToken)}}
-      >
+        style="background-color: #aecce1">
         <th scope="row">{{@currentToken.alias}}</th>
         <th scope="row">{{timestamp-to-date @currentToken.created "localString"}}</th>
+        <th scope="row"></th>
         <th scope="row"></th>
         <th scope="row"></th>
         <th scope="row"></th>
@@ -33,8 +33,20 @@
     as |token|
     }}
       <tr>
-        <th scope="row" {{on "click" (fn @selectToken token)}}>{{token.alias}}</th>
-        <th scope="row" {{on "click" (fn @selectToken token)}}>{{timestamp-to-date token.created "localString"}}</th>
+        <th scope="row">{{token.alias}}</th>
+        <th scope="row">{{timestamp-to-date token.created "localString"}}</th>
+        <th scope="row">
+          <button
+            class="button-svg-with-hover"
+            type="button"
+            {{on "click" (fn @selectToken token)}}
+          >
+            {{svg-jar "search-16" class="octicon align-middle"}}
+            <BsTooltip @placement="bottom" @triggerEvents="hover">
+              Open visualization
+            </BsTooltip>
+          </button>
+        </th>
         <th scope="row">
           <AdditionalTokenInfo @token={{token}}/>
         </th>
