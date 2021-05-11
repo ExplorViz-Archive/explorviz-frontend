@@ -4,7 +4,7 @@
     <BsTooltip @placement="bottom" @triggerEvents="hover">
       Show additional info
     </BsTooltip>
-    <BsPopover @title="Additional Data">
+    <BsPopover @title="Additional Info">
       <table class="table table-striped" style="width: 100%">
         <tbody>
           <tr>
@@ -37,7 +37,7 @@
           {{#if @token.secret}}
             <tr>
               <td>Secret</td>
-              <td>{{@token.secret}}</td>
+              <td style="word-break: break-all">{{@token.secret}}</td>
               <td>
                 <CopyButton
                   class="button-svg-with-hover"
