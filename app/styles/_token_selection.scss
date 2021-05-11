@@ -31,3 +31,20 @@
   justify-content: center;
   align-items: center;
 }
+
+.token-selection-icons {
+  list-style-type: none;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 0;
+  margin-left: auto;
+  padding-left: 0;
+
+  > li {
+    margin-right: 1rem;
+  }
+  > li:last-child {
+    margin-right: 0;
+  }
+}
