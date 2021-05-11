@@ -42,3 +42,13 @@ h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 #ember-right-click-menu-wormhole > ul {
   z-index: 100000;
 }
+
+.auth0-lock.auth0-lock .auth0-lock-cred-pane-internal-wrapper {
+  height: auto!important;
+}
+
+.auth0-lock.auth0-lock.auth0-lock-opened-in-frame {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
