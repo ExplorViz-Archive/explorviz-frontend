@@ -24,23 +24,15 @@
         <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
       {{/if}}
 
-      {{#unless @showDataSelection}}
-        <div class="ar-right-relative foreground mt-6">
-          <BsButton
-            @onClick={{this.toggleSettingsPane}}
-            @type="secondary"
-            @outline={{true}}
-            @title="Settings"
-          >
-            {{svg-jar "settings" class="octicon align-middle"}}
-          </BsButton>
-        </div>
-      {{/unless}}
+
 
       {{!-- popup(s) --}}
-      <Visualization::Rendering::Popups::PopupCoordinator
+      <PopupWrapper
         @popupData={{this.popupData}}
-      />
+        @keepPopupOpen={{this.keepPopupOpen}}
+        @closePopup={{this.closePopup}}
+      >
+      </PopupWrapper>
 
       <canvas
         class="main-content-majority position-absolute {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
@@ -94,7 +86,7 @@
             {{ on "click" this.handleZoomActivation}}
             {{ on "mouseout" this.handleZoomDeactivation}}
           >
-            {{svg-jar "eye" class="octicon align-middle ar-button-svg"}}
+            {{svg-jar "search" class="octicon align-middle ar-button-svg"}}
           </BsButton>
         </div>
 

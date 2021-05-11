@@ -196,6 +196,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.hammerInteraction = HammerInteraction.create();
 
     AlertifyHandler.setAlertifyPosition('bottom-center');
+    document.addEventListener('contextmenu', (event) => event.preventDefault());
   }
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -521,11 +522,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       || mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
       || mesh instanceof ClazzCommunicationMesh)
       && mesh.dataModel !== this.popupData?.entity) {
-      this.popupData = {
+      const popupData = {
         mouseX: this.canvas.width / 2,
         mouseY: this.canvas.height / 2,
         entity: mesh.dataModel,
       };
+      this.popupData = popupData;
     } else {
       this.popupData = null;
     }
@@ -767,6 +769,18 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     } else {
       AlertifyHandler.showAlertifyWarning('App is being scaled by another user!');
     }
+  }
+
+  @action
+  keepPopupOpen() {
+    // this.popupIsPinned = true;
+  }
+
+  @action
+  closePopup() {
+    // this.popupIsPinned = false;
+    // this.pinnedPopupData = this.popupData;
+    this.popupData = null;
   }
 
   willDestroy() {
