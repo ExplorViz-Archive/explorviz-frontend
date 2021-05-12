@@ -88,6 +88,22 @@
             <div class="jumbotron">
               <h2>No Landscape found!</h2>
               <p>A new landscape will be fetched every 10 seconds.</p>
+              <BsButton
+                @onClick={{this.switchToAR}}
+                @type="secondary"
+                @outline={{true}}
+                title="Enter AR"
+              >
+                Enter AR
+              </BsButton>
+              <BsButton
+                @onClick={{this.switchToVR}}
+                @type="secondary"
+                @outline={{true}}
+                title="Enter VR"
+              >
+                Enter VR
+              </BsButton>
             </div>
             <div class="spinner-center-3" role="status"></div>
           </div>
