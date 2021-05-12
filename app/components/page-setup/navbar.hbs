@@ -11,7 +11,7 @@
   {{#if this.tokenService.token}}
     <div id="navbar-token-item" class="pointer-events-all">
       <LinkTo @route="landscapes" class="d-flex-center">
-        {{svg-jar "key" class="octicon"}}
+        {{svg-jar "key-16" class="octicon"}}
         <span>
           {{!-- {{#if this.tokenService.token.alias}}
             {{truncate this.tokenService.token.alias 20 true}}
@@ -47,7 +47,7 @@
       data-toggle="dropdown"
       type="button"
     >
-      {{svg-jar "person" class="octicon"}}<span>{{this.auth.user.nickname}} ({{this.auth.user.sub}})</span><span class="caret ml-1"></span>
+      {{svg-jar "person-16" class="octicon"}}<span>{{this.auth.user.nickname}} ({{this.auth.user.sub}})</span><span class="caret ml-1"></span>
     </button>
   </div>
 </div>
