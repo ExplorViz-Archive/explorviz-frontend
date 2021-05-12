@@ -245,15 +245,19 @@ export default class VrRendering
     // Initialize timestamp and landscape data. If no timestamp is selected,
     // the latest timestamp is used. When there is no timestamp, we fall back
     // to the current time.
-    const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
-    const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
-      || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
-      || new Date().getTime();
-    this.timestampService.setTimestampLocally(
-      timestamp,
-      this.args.landscapeData.structureLandscapeData,
-      this.args.landscapeData.dynamicLandscapeData,
-    );
+    if (this.args.landscapeData) {
+      const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
+      const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
+        || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
+        || new Date().getTime();
+      this.timestampService.setTimestampLocally(
+        timestamp,
+        this.args.landscapeData.structureLandscapeData,
+        this.args.landscapeData.dynamicLandscapeData,
+      );
+    } else {
+      this.debug('No landscape data found.');
+    }
   }
 
   /**

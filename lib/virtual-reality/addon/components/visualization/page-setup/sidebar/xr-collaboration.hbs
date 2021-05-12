@@ -60,14 +60,18 @@
     {{/each}}
   </ul>
 
-  <BsButton
-    title="Host Room"
-    {{on "click" this.hostRoom}}
-    @type="secondary"
-    @outline={{true}}
-  >
-    Host Room
-  </BsButton>
+  {{#if this.timestampService.timestamp}}
+    <BsButton
+      title="Host Room"
+      {{on "click" this.hostRoom}}
+      @type="secondary"
+      @outline={{true}}
+    >
+      Host Room
+    </BsButton>
+  {{else}}
+    <label class="bold">No landscape data available. Cannot host room. </label>
+  {{/if}}
 {{/if}}
 
 {{#if (eq this.localUser.connectionStatus "online")}}

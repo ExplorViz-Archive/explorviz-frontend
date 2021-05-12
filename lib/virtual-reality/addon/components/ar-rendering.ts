@@ -221,21 +221,24 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     // Use given font for landscape and application rendering.
     this.assetRepo.font = this.args.font;
+    this.remoteUsers.displayHmd = false;
 
     // Initialize timestamp and landscape data. If no timestamp is selected,
     // the latest timestamp is used. When there is no timestamp, we fall back
     // to the current time.
-    const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
-    const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
-      || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
-      || new Date().getTime();
-    this.timestampService.setTimestampLocally(
-      timestamp,
-      this.args.landscapeData.structureLandscapeData,
-      this.args.landscapeData.dynamicLandscapeData,
-    );
-
-    this.remoteUsers.displayHmd = false;
+    if (this.args.landscapeData) {
+      const { landscapeToken } = this.args.landscapeData.structureLandscapeData;
+      const timestamp = this.args.selectedTimestampRecords[0]?.timestamp
+        || this.timestampRepo.getLatestTimestamp(landscapeToken)?.timestamp
+        || new Date().getTime();
+      this.timestampService.setTimestampLocally(
+        timestamp,
+        this.args.landscapeData.structureLandscapeData,
+        this.args.landscapeData.dynamicLandscapeData,
+      );
+    } else {
+      AlertifyHandler.showAlertifyWarning('No landscape found!');
+    }
   }
 
   /**

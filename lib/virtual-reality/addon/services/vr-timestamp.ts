@@ -1,4 +1,5 @@
 import Service, { inject as service } from '@ember/service';
+import { tracked } from '@glimmer/tracking';
 import debugLogger from 'ember-debug-logger';
 import Auth from 'explorviz-frontend/services/auth';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
@@ -38,6 +39,7 @@ export default class VrTimestampService extends Service {
   @service('vr-message-sender')
   private sender!: VrMessageSender;
 
+  @tracked
   timestamp!: number;
 
   async updateLandscapeTokenLocally(
