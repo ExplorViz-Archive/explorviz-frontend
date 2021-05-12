@@ -20,7 +20,7 @@
     <VrMultiUser
       @id="landscape1"
       @landscapeData={{this.landscapeData}}
-      @font={{@model}}
+      @font={{this.font}}
     />
     <div class="position-absolute mt-6 ml-3">
       <BsButton
@@ -45,7 +45,7 @@
       {{else if this.allLandscapeDataExistsAndNotEmpty}}
         <Visualization::Rendering::LandscapeRendering
           @landscapeData={{this.landscapeData}}
-          @font={{@model}}
+          @font={{this.font}}
           @components={{this.components}}
           @removeComponent={{this.removeComponent}}
           @closeDataSelection={{this.closeDataSelection}}
@@ -70,7 +70,7 @@
       <Visualization::Rendering::ApplicationRendering
         @landscapeData={{this.landscapeData}}
         @addComponent={{this.addComponent}}
-        @font={{@model}}
+        @font={{this.font}}
         @components={{this.components}}
         @removeComponent={{this.removeComponent}}
         @openDataSelection={{this.openDataSelection}}
