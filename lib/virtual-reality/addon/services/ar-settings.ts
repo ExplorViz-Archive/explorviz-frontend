@@ -18,6 +18,8 @@ export default class ArSettings extends Service.extend({
   @tracked
   applicationOpacity: number;
 
+  sidebarWidthInPercent: number | undefined;
+
   constructor() {
     super(...arguments);
 

@@ -133,6 +133,7 @@
   {{#if @showDataSelection}}
     <div class="position-absolute right col-4" id="dataselection">
       <div class="mt-6 d-flex flex-row w-100">
+        <SidebarResizer/>
         <Visualization::PageSetup::Sidebar::DataSelection
           @closeDataSelection={{@closeDataSelection}}
         >
