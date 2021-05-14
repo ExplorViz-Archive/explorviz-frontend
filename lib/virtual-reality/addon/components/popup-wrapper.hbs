@@ -3,7 +3,8 @@
     <div class="d-flex">
       <BsButton class="ar-popup-close"
         @type ="primary"
-        @onClick={{this.closePopup}}
+        {{on "click" this.closePopup}}
+        {{on "touchstart" this.closePopup}}
       >
         X
       </BsButton>
