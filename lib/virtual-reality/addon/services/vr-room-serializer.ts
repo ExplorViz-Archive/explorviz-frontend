@@ -85,7 +85,7 @@ export default class VrRoomSerializer extends Service {
     }
 
     // Restore landscape, apps and meus.
-    this.restoreRoomWithoutTimestamp(room);
+    await this.restoreRoomWithoutTimestamp(room);
   }
 
   private async restoreRoomWithoutTimestamp({
@@ -152,29 +152,31 @@ export default class VrRoomSerializer extends Service {
     });
   }
 
+  // ToDo: Add both global and local positions
   private serializeLandscape(): SerializedLandscape {
     const { landscapeObject3D } = this.vrLandscapeRenderer;
     return {
       landscapeToken: landscapeObject3D.dataModel.landscapeToken,
       timestamp: this.timestampService.timestamp,
       position: landscapeObject3D
-        .getWorldPosition(new THREE.Vector3())
+        .position
         .toArray(),
       quaternion: landscapeObject3D
-        .getWorldQuaternion(new THREE.Quaternion())
+        .quaternion
         .toArray(),
       scale: landscapeObject3D.scale.toArray(),
     };
   }
 
+  // ToDo: Add both global and local positions
   private serializeOpenApplications(): SerialzedApp[] {
     return this.vrApplicationRenderer
       .getOpenApplications()
       .map((application) => ({
         id: application.dataModel.instanceId,
-        position: application.getWorldPosition(new THREE.Vector3()).toArray(),
+        position: application.position.toArray(),
         quaternion: application
-          .getWorldQuaternion(new THREE.Quaternion())
+          .quaternion
           .toArray(),
         scale: application.scale.toArray(),
         openComponents: Array.from(application.openComponentIds),

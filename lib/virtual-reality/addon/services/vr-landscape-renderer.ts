@@ -48,7 +48,7 @@ export default class VrLandscapeRenderer extends Service {
   private landscapeLabeler = new LandscapeLabeler();
 
   // Initialize landscape such that largest side meets this value
-  private largestSide: number | undefined;
+  largestSide: number | undefined;
 
   readonly landscapeObject3D: LandscapeObject3D;
 
@@ -358,6 +358,11 @@ export default class VrLandscapeRenderer extends Service {
   }
 
   // #endregion LANDSCAPE RENDERING
+
+  resetService() {
+    this.cleanUpLandscape();
+    this.largestSide = undefined;
+  }
 }
 
 declare module '@ember/service' {

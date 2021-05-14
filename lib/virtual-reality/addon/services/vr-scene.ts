@@ -50,6 +50,10 @@ export default class VrSceneService extends Service {
     // Add a light that illuminates the sky box if the user dragged in a backgound image.
     this.skyLight = new THREE.SpotLight(0xffffff, 0.5, 1000, Math.PI, 0, 0);
     this.skyLight.castShadow = false;
+    this.addSkylight();
+  }
+
+  addSkylight() {
     this.scene.add(this.skyLight);
   }
 

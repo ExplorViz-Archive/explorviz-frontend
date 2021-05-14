@@ -13,7 +13,6 @@ import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/applic
 import {
   Class, Package, Application, Node,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
@@ -26,7 +25,7 @@ import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
-
+import { findGrabbableObject } from 'virtual-reality/utils/view-objects/interfaces/grabbable-object';
 import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
@@ -58,6 +57,7 @@ import WebSocketService from 'virtual-reality/services/web-socket';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
+import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
 import VrRoomSerializer from '../services/vr-room-serializer';
 import VrLandscapeObject3D from '../utils/view-objects/landscape/vr-landscape-object-3d';
 
@@ -159,17 +159,13 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   // Provides functions to label landscape meshes
   readonly landscapeLabeler = new LandscapeLabeler();
 
-  // Extended Object3D which manages landscape meshes
-  @tracked
-  readonly landscapeObject3D!: LandscapeObject3D;
-
   onRenderFcts: (() => void)[] = [];
 
   arToolkitSource: any;
 
   arToolkitContext: any;
 
-  landscapeMarkers: THREE.Group[] = [];
+  landscapeMarker = new THREE.Group();
 
   applicationMarkers: THREE.Group[] = [];
 
@@ -190,8 +186,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     super(owner, args);
     this.debug('Constructor called');
 
-    this.landscapeObject3D = this.vrLandscapeRenderer.landscapeObject3D;
     this.vrLandscapeRenderer.setLargestSide(2);
+    // this.vrLandscapeRenderer.centerLandscape();
 
     this.hammerInteraction = HammerInteraction.create();
 
@@ -309,7 +305,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   private getIntersectableObjects() {
-    const intersectableObjects: THREE.Object3D[] = [this.landscapeObject3D];
+    const intersectableObjects: THREE.Object3D[] = [this.vrLandscapeRenderer.landscapeObject3D];
 
     this.applicationMarkers.forEach((appMarker) => {
       intersectableObjects.push(appMarker);
@@ -352,13 +348,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       arToolkitContext.update(this.arToolkitSource.domElement);
     });
 
-    const landscapeMarker0 = new THREE.Group();
-    landscapeMarker0.add(this.landscapeObject3D);
-    this.sceneService.scene.add(landscapeMarker0);
+    this.landscapeMarker.add(this.vrLandscapeRenderer.landscapeObject3D);
+    this.sceneService.scene.add(this.landscapeMarker);
 
     // Init controls for camera
     // eslint-disable-next-line
-    new THREEx.ArMarkerControls(arToolkitContext, landscapeMarker0, {
+    new THREEx.ArMarkerControls(arToolkitContext, this.landscapeMarker, {
       type: 'pattern',
       patternUrl: 'ar_data/pattern-angular_L_thick.patt',
     });
@@ -420,13 +415,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   resize(outerDiv: HTMLElement) {
     this.arToolkitSource.onResizeElement();
 
-    /*
-    this.arToolkitSource.copyElementSizeTo(this.localUser.renderer.domElement);
-    if (this.arToolkitContext.arController !== null) {
-      this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
-    }
-    */
-
     const width = Number(outerDiv.clientWidth);
     const height = Number(outerDiv.clientHeight);
 
@@ -444,16 +432,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
       // Center canvas
       this.canvas.style.marginLeft = `${(width - parseInt(this.canvas.style.width, 10)) / 2}px`;
-
-      /*
-      const sourceWidth = video.videoWidth;
-      const sourceHeight = video.videoHeight;
-
-      console.log('Test: ', sourceWidth, sourceHeight);
-      console.log('sourceAspect', sourceWidth / sourceHeight, sourceWidth, sourceHeight);
-      // compute screenAspect
-      console.log('screenAspect', width / height, width, height);
-      */
     }
   }
 
@@ -574,9 +552,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   handleKeyboard(event: any) {
     // Handle keys
     switch (event.key) {
-      case 'c':
-        // this.localUser.connect();
-        break;
       case 'm':
         this.localUser.defaultCamera.fov += 1;
         this.localUser.defaultCamera.updateProjectionMatrix();
@@ -660,33 +635,41 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       const applicationObject3D = await this.vrApplicationRenderer
         .addApplication(applicationModel, {});
 
-      this.addApplicationToMarker(applicationModel, applicationObject3D);
+      this.addLocalApplicationToMarker(applicationObject3D);
     }
   }
 
-  addApplicationToMarker(applicationModel: Application, applicationObject3D: ApplicationObject3D) {
-    if (!applicationObject3D) {
-      AlertifyHandler.showAlertifyError('Could not open application.');
-      return;
-    }
-
-    // Scale application such that it approximately fits to the printed marker
+  addLocalApplicationToMarker(applicationObject3D: ApplicationObject3D) {
+    // Set default scale such that application approximately fits on the printed marker
     applicationObject3D.setLargestSide(1.5);
 
-    applicationObject3D.rotateY(90 * THREE.MathUtils.DEG2RAD);
+    this.addApplicationToMarker(applicationObject3D);
+  }
 
-    applicationObject3D.setBoxMeshOpacity(this.arSettings.applicationOpacity);
+  addApplicationToMarker(applicationObject3D: ApplicationObject3D) {
+    applicationObject3D.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0),
+      90 * THREE.MathUtils.DEG2RAD);
+
+    if (!applicationObject3D.highlightedEntity) {
+      applicationObject3D.setBoxMeshOpacity(this.arSettings.applicationOpacity);
+    }
+
+    const applicationModel = applicationObject3D.dataModel;
 
     for (let i = 0; i < this.applicationMarkers.length; i++) {
       if (this.applicationMarkers[i].children.length === 0) {
         this.applicationMarkers[i].add(applicationObject3D);
 
         const message = `Application '${applicationModel.name}' successfully opened <br>
-          on marker #${i}.`;
+          on marker #${i + 1}.`;
 
         AlertifyHandler.showAlertifySuccess(message);
 
         break;
+      } else {
+        const message = `Application '${applicationModel.name}' is already open`;
+
+        AlertifyHandler.showAlertifyWarning(message);
       }
     }
   }
@@ -732,11 +715,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         object,
       );
     }
-  }
-
-  private cleanUpLandscape() {
-    this.landscapeObject3D.removeAllChildren();
-    this.landscapeObject3D.resetMeshReferences();
   }
 
   static cleanUpAr() {
@@ -787,18 +765,17 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   willDestroy() {
-  // Reset rendering.
-    this.vrApplicationRenderer.removeAllApplicationsLocally();
-    // this.vrLandscapeRenderer.cleanUpLandscape();
-
     // Reset services.
     this.localUser.reset();
+    this.vrLandscapeRenderer.resetService();
+    this.vrApplicationRenderer.removeAllApplicationsLocally();
+    this.sceneService.addSkylight();
 
     // Remove event listers.
-    // this.receiver.removeMessageListener(this);
+    this.receiver.removeMessageListener(this);
     this.willDestroyController.abort();
 
-    this.cleanUpLandscape();
+    // Reset AR and position of alerts
     ArRendering.cleanUpAr();
     AlertifyHandler.setAlertifyPosition('bottom-right');
   }
@@ -936,7 +913,13 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     openApps,
     detachedMenus,
   }: InitialLandscapeMessage): Promise<void> {
-    this.roomSerializer.restoreRoom({ landscape, openApps, detachedMenus });
+    await this.roomSerializer.restoreRoom({ landscape, openApps, detachedMenus });
+
+    this.landscapeMarker.add(this.vrLandscapeRenderer.landscapeObject3D);
+
+    this.vrApplicationRenderer.getOpenApplications().forEach((applicationObject3D) => {
+      this.addApplicationToMarker(applicationObject3D);
+    });
   }
 
   async onAppOpened({
@@ -955,7 +938,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         scale: new THREE.Vector3(...scale),
       });
 
-      this.addApplicationToMarker(application, applicationObject3D);
+      this.addApplicationToMarker(applicationObject3D);
     }
   }
 
@@ -966,7 +949,22 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     if (application) this.vrApplicationRenderer.removeApplicationLocally(application);
   }
 
-  onObjectMoved() {}
+  onObjectMoved({
+    originalMessage: {
+      objectId, position, quaternion, scale,
+    },
+  }: ForwardedMessage<ObjectMovedMessage>): void {
+    // Find moved object in the scene.
+    const movedObject = findGrabbableObject(this.sceneService.scene, objectId);
+    if (!movedObject) {
+      this.debug('Could not find moved object', objectId);
+      return;
+    }
+
+    movedObject.position.fromArray(position);
+    movedObject.quaternion.fromArray(quaternion);
+    movedObject.scale.fromArray(scale);
+  }
 
   onComponentUpdate({
     originalMessage: { isFoundation, appId, componentId },
