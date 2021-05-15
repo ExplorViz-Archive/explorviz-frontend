@@ -4,12 +4,15 @@ import { Application, Class, Package } from 'explorviz-frontend/utils/landscape-
 
 interface PopupWrapperArgs {
   popupData: {
-    mouseX: number,
-    mouseY: number,
+    id: number,
+    isPinned: boolean,
+    posX: number,
+    posY: number,
     entity: Node | Application | Package | Class
   };
-  keepPopupOpen(): void
-  closePopup(): void
+  keepPopupOpen(id: number): void
+  setPopupPosition(id: number, posX: number, posY: number): void
+  closePopup(id: number): void
 }
 
 export default class PopupWrapper extends Component<PopupWrapperArgs> {
@@ -27,22 +30,25 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
 
   @action
   keepPopupOpen() {
-    this.args.keepPopupOpen();
-    this.isPinned = true;
+    if (!this.args.popupData.isPinned) {
+      this.args.keepPopupOpen(this.args.popupData.id);
+    }
   }
 
   @action
   closePopup() {
-    this.isPinned = false;
-    if (this.divElement) {
-      this.divElement.style.top = '0px';
-      this.divElement.style.left = '0px';
-    }
-    this.args.closePopup();
+    this.args.closePopup(this.args.popupData.id);
   }
 
   setupPosition(popoverDiv: HTMLElement) {
     const { popupData } = this.args;
+
+    // Set to previously stored position
+    if (popupData.isPinned) {
+      popoverDiv.style.left = `${popupData.posX}px`;
+      popoverDiv.style.top = `${popupData.posY}px`;
+      return;
+    }
 
     // Sorrounding div for position calculations
     const containerDiv = popoverDiv.parentElement as HTMLElement;
@@ -66,7 +72,7 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
     // position under mouse cursor
     if (popupTopPosition < 0) {
       const approximateMouseHeight = 35;
-      popupTopPosition = popupData.mouseY + approximateMouseHeight;
+      popupTopPosition = popupData.posY + approximateMouseHeight;
     }
 
     // Prevent popup positioning right(outside) of rendering canvas =>
@@ -91,6 +97,8 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
   dragElement(elmnt: HTMLElement) {
     let xOffset = 0; let yOffset = 0; let inputX = 0; let inputY = 0;
 
+    const self = this;
+
     function moveElement(clientX: number, clientY: number) {
       // Calculate cursor position
       xOffset = inputX - clientX;
@@ -112,6 +120,8 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
       if (minY >= 0 && maxY <= window.innerHeight) {
         elmnt.style.top = `${minY}px`;
       }
+
+      self.args.setPopupPosition(self.args.popupData.id, minX, minY);
     }
 
     function closeDragElement() {
@@ -128,25 +138,7 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
       event.preventDefault();
 
       // Calculate cursor position
-      xOffset = inputX - e.clientX;
-      yOffset = inputY - e.clientY;
-      inputX = e.clientX;
-      inputY = e.clientY;
-
-      // Calculate popup position
-      const minX = elmnt.offsetLeft - xOffset;
-      const maxX = minX + elmnt.clientWidth;
-      const minY = elmnt.offsetTop - yOffset;
-      const maxY = minY + elmnt.clientHeight;
-
-      // set the element's new position:
-      if (minX >= 0 && maxX <= window.innerWidth) {
-        elmnt.style.left = `${minX}px`;
-      }
-
-      if (minY >= 0 && maxY <= window.innerHeight) {
-        elmnt.style.top = `${minY}px`;
-      }
+      moveElement(e.clientX, e.clientY);
     }
 
     function elementTouchDrag(e: TouchEvent) {

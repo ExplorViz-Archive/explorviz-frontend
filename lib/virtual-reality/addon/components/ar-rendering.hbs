@@ -28,12 +28,17 @@
       {{/unless}}
 
       {{!-- popup(s) --}}
-      <PopupWrapper
-        @popupData={{this.popupData}}
-        @keepPopupOpen={{this.keepPopupOpen}}
-        @closePopup={{this.closePopup}}
-      >
-      </PopupWrapper>
+
+
+      {{#each this.popupDataMap as |popupData|}}
+        <PopupWrapper
+          @popupData={{popupData.[1]}}
+          @keepPopupOpen={{this.keepPopupOpen}}
+          @setPopupPosition={{this.setPopupPosition}}
+          @closePopup={{this.closePopup}}
+        >
+        </PopupWrapper>
+      {{/each}}
 
       <canvas
         class="main-content-majority position-absolute {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"

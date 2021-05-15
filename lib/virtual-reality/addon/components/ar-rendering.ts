@@ -76,8 +76,10 @@ interface Args {
 type DataModel = Node | Application |Package | Class | DrawableClassCommunication;
 
 type PopupData = {
-  mouseX: number,
-  mouseY: number,
+  id: number,
+  posX: number,
+  posY: number,
+  isPinned: boolean,
   entity: DataModel
 };
 
@@ -172,7 +174,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   private willDestroyController: AbortController = new AbortController();
 
   @tracked
-  popupData: PopupData | null = null;
+  popupDataMap: Map<number, PopupData> = new Map();
 
   @tracked
   hammerInteraction: HammerInteraction;
@@ -492,7 +494,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     const intersection = this.interaction.raycastCanvasCenter();
 
     if (!intersection) {
-      this.popupData = null;
+      this.removeUnpinnedPopups();
       return;
     }
 
@@ -501,16 +503,24 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     // Show information as popup is mouse stopped on top of a mesh
     if ((mesh instanceof NodeMesh || mesh instanceof ApplicationMesh
       || mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
-      || mesh instanceof ClazzCommunicationMesh)
-      && mesh.dataModel !== this.popupData?.entity) {
-      const popupData = {
-        mouseX: this.canvas.width / 2,
-        mouseY: this.canvas.height / 2,
-        entity: mesh.dataModel,
-      };
-      this.popupData = popupData;
-    } else {
-      this.popupData = null;
+      || mesh instanceof ClazzCommunicationMesh)) {
+      // Remove popup if it is already opened at default position
+      if (this.popupDataMap.has(mesh.id) && !this.popupDataMap.get(mesh.id)?.isPinned) {
+        this.removeUnpinnedPopups();
+      } else {
+        this.removeUnpinnedPopups();
+
+        const popupData = {
+          id: mesh.id,
+          isPinned: false,
+          posX: this.canvas.width / 2,
+          posY: this.canvas.height / 2,
+          entity: mesh.dataModel,
+        };
+
+        this.popupDataMap.set(mesh.id, popupData);
+        this.popupDataMap = new Map(this.popupDataMap);
+      }
     }
   }
 
@@ -752,16 +762,37 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     }
   }
 
-  @action
-  keepPopupOpen() {
-    // this.popupIsPinned = true;
+  removeUnpinnedPopups() {
+    this.popupDataMap.forEach((value, key) => {
+      if (!value.isPinned) {
+        this.popupDataMap.delete(key);
+      }
+    });
+
+    this.popupDataMap = new Map(this.popupDataMap);
   }
 
   @action
-  closePopup() {
-    // this.popupIsPinned = false;
-    // this.pinnedPopupData = this.popupData;
-    this.popupData = null;
+  keepPopupOpen(id: number) {
+    const popupData = this.popupDataMap.get(id);
+    if (popupData) {
+      popupData.isPinned = true;
+    }
+  }
+
+  @action
+  setPopupPosition(id: number, posX: number, posY: number) {
+    const popupData = this.popupDataMap.get(id);
+    if (popupData) {
+      popupData.posX = posX;
+      popupData.posY = posY;
+    }
+  }
+
+  @action
+  closePopup(id: number) {
+    this.popupDataMap.delete(id);
+    this.popupDataMap = new Map(this.popupDataMap);
   }
 
   willDestroy() {
