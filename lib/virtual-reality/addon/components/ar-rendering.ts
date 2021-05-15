@@ -260,7 +260,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     this.localUser.defaultCamera.add(crosshairMesh);
     // Position just in front of camera
-    crosshairMesh.position.z = -0.1;
+    crosshairMesh.position.z = -0.05;
   }
 
   /**

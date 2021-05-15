@@ -1,5 +1,5 @@
 {{#if @popupData}}
-  <div {{did-insert this.setupDragElement}} {{on "click" this.keepPopupOpen}} id="popupWrapper" class="foreground" style="position: absolute; cursor: move">
+  <div {{did-insert this.setupDragElement}} {{on "click" this.keepPopupOpen}} {{on "touchstart" this.keepPopupOpen}} id="popupWrapper" class="foreground" style="position: absolute; cursor: move">
     <div class="d-flex">
       <BsButton class="ar-popup-close"
         @type ="primary"
