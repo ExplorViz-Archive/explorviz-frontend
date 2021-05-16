@@ -24,7 +24,7 @@ export default class NodeMesh extends PlaneMesh implements IdentifiableMesh {
     this.defaultZ = zPos;
 
     this.material = new THREE.MeshBasicMaterial({ color: defaultColor });
-    this.colabId = this.dataModel.ipAddress;
+    this.colabId = this.dataModel.id;
     if (depth <= 0) {
       this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
     } else {

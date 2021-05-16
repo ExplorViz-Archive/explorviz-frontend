@@ -118,7 +118,6 @@ export function preProcessAndEnhanceStructureLandscape(
 
   enhancedlandscapeStructure.nodes.forEach((node) => {
     node.applications.forEach((app) => {
-      app.instanceId = `${app.instanceId}`;
       app.packages.forEach((component) => {
         // create package ids in Java notation, e.g., 'net.explorviz.test'
         // and add parent relations for quicker access
