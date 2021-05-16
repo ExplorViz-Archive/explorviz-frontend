@@ -70,12 +70,12 @@ export function preProcessAndEnhanceStructureLandscape(
 ) {
   function createNodeId(node: Node) {
     const { hostName, ipAddress } = node;
-    node.id = `${hostName}.${ipAddress}`;
+    node.id = `${hostName}#${ipAddress}`;
   }
 
   function createApplicationId(app: Application) {
     const { hostName, ipAddress } = app.parent;
-    app.id = `${hostName}.${ipAddress}.${app.instanceId}`;
+    app.id = `${hostName}#${ipAddress}#${app.instanceId}`;
   }
 
   function createPackageIds(component: Package, parentId: string) {
@@ -157,7 +157,7 @@ interface RawPackage {
 interface RawApplication {
   name: string;
   language: string;
-  instanceId: number;
+  instanceId: string;
   packages: RawPackage[];
 }
 
