@@ -167,8 +167,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   @tracked
   showSettings = false;
 
-  renderer!: THREE.WebGLRenderer;
-
   // #endregion CLASS FIELDS AND GETTERS
 
   constructor(owner: any, args: Args) {
@@ -259,14 +257,14 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   * Initiates a WebGLRenderer
   */
   private initRenderer() {
-    this.renderer = new THREE.WebGLRenderer({
+    this.localUser.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
       canvas: this.canvas,
     });
 
-    this.renderer.setClearColor(new THREE.Color('lightgrey'), 0);
-    this.renderer.setSize(this.outerDiv.clientWidth, this.outerDiv.clientHeight);
+    this.localUser.renderer.setClearColor(new THREE.Color('lightgrey'), 0);
+    this.localUser.renderer.setSize(this.outerDiv.clientWidth, this.outerDiv.clientHeight);
   }
 
   /**
@@ -412,11 +410,11 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
      */
   @action
   resize(outerDiv: HTMLElement) {
-    this.renderer.setSize(outerDiv.clientWidth, outerDiv.clientHeight);
+    this.localUser.renderer.setSize(outerDiv.clientWidth, outerDiv.clientHeight);
     if (!this.arToolkitContext) return;
 
     this.arToolkitSource.onResizeElement();
-    this.arToolkitSource.copyElementSizeTo(this.renderer.domElement);
+    this.arToolkitSource.copyElementSizeTo(this.localUser.renderer.domElement);
 
     if (this.arToolkitContext.arController !== null) {
       this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
@@ -581,9 +579,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   // #region RENDERING
 
   render() {
-    this.renderer.render(this.sceneService.scene, this.localUser.defaultCamera);
+    this.localUser.renderer.render(this.sceneService.scene, this.localUser.defaultCamera);
 
-    this.arZoomHandler?.renderZoomCamera(this.renderer, this.sceneService.scene);
+    this.arZoomHandler?.renderZoomCamera(this.localUser.renderer, this.sceneService.scene);
   }
 
   animate() {

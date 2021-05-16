@@ -2,7 +2,7 @@ import Service, { inject as service } from '@ember/service';
 import debugLogger from 'ember-debug-logger';
 import ENV from 'explorviz-frontend/config/environment';
 
-const { vrService } = ENV.backendAddresses;
+const { vrService, vrSocketPath } = ENV.backendAddresses;
 
 export default class WebSocketService extends Service {
   @service()
@@ -20,7 +20,7 @@ export default class WebSocketService extends Service {
 
   private getSocketUrl(ticketId: string) {
     const vrServiceSocket = vrService.replace(/^http(s?):\/\//i, 'ws$1://');
-    return `${vrServiceSocket}/v2/vr/${ticketId}`;
+    return vrServiceSocket + vrSocketPath + ticketId;
   }
 
   async initSocket(ticketId: string) {

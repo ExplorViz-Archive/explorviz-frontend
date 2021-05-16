@@ -29,6 +29,7 @@ declare const config: {
     userService: string,
     collaborativeService: string,
     vrService: string,
+    vrSocketPath: string,
   },
   APP: any;
 };

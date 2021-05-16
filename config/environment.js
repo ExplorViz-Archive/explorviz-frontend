@@ -38,6 +38,7 @@ module.exports = function initEnvironment(environment) {
       userService: BACKEND_CONFIG.userService,
       collaborativeService: BACKEND_CONFIG.collaborativeService,
       vrService: BACKEND_CONFIG.vrService,
+      vrSocketPath: BACKEND_CONFIG.vrSocketPath,
     },
 
     APP: {
