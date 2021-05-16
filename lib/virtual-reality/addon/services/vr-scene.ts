@@ -21,7 +21,7 @@ export default class VrSceneService extends Service {
   @service('vr-landscape-renderer')
   private vrLandscapeRenderer!: VrLandscapeRenderer;
 
-  readonly scene: THREE.Scene;
+  scene: THREE.Scene;
 
   readonly floor: FloorMesh;
 

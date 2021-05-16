@@ -33,6 +33,7 @@ export default class LocalVrUser extends Service {
 
   private userGroup!: THREE.Group;
 
+  @tracked
   defaultCamera!: THREE.PerspectiveCamera;
 
   controller1: VRController | undefined;

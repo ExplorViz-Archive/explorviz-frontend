@@ -5,7 +5,6 @@ import debugLogger from 'ember-debug-logger';
 import THREE from 'three';
 import { tracked } from '@glimmer/tracking';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
-import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import Configuration from 'explorviz-frontend/services/configuration';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import Interaction from 'explorviz-frontend/utils/interaction';
@@ -13,7 +12,6 @@ import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/applic
 import {
   Class, Package, Application, Node,
 } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import LandscapeLabeler from 'explorviz-frontend/utils/landscape-rendering/labeler';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
@@ -127,9 +125,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   @service('vr-timestamp')
   private timestampService!: VrTimestampService;
 
-  // @service('vr-message-receiver')
-  // private receiver!: VrMessageReceiver;
-
   @service('vr-application-renderer')
   private vrApplicationRenderer!: VrApplicationRenderer;
 
@@ -151,17 +146,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   canvas!: HTMLCanvasElement;
 
-  @tracked
-  camera!: THREE.PerspectiveCamera;
-
-  readonly imageLoader: ImageLoader = new ImageLoader();
-
   arZoomHandler: ArZoomHandler | undefined;
-
-  // Provides functions to label landscape meshes
-  readonly landscapeLabeler = new LandscapeLabeler();
-
-  onRenderFcts: (() => void)[] = [];
 
   arToolkitSource: any;
 
@@ -181,6 +166,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @tracked
   showSettings = false;
+
+  renderer!: THREE.WebGLRenderer;
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -205,6 +192,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
      */
   private initRendering() {
     this.initServices();
+
     this.initRenderer();
     this.initCamera();
     this.initCameraCrosshair();
@@ -212,6 +200,13 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.initInteraction();
     this.configureScene();
     this.initWebSocket();
+  }
+
+  updateArToolkit() {
+    // update artoolkit on every frame
+    if (this.arToolkitSource.ready !== false) {
+      this.arToolkitContext.update(this.arToolkitSource.domElement);
+    }
   }
 
   private initServices() {
@@ -244,11 +239,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
      */
   private initCamera() {
     // Set camera properties
-    this.localUser.defaultCamera.fov = 42;
-    this.localUser.updateCameraAspectRatio(640, 480);
-    this.localUser.defaultCamera.near = 0.01;
-    this.localUser.defaultCamera.far = 2000;
-    this.localUser.defaultCamera.position.set(0, 0, 0);
+    this.localUser.defaultCamera = new THREE.PerspectiveCamera();
+    this.sceneService.scene.add(this.localUser.defaultCamera);
 
     this.arZoomHandler = new ArZoomHandler(this.localUser.defaultCamera, this.outerDiv);
   }
@@ -260,23 +252,21 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     this.localUser.defaultCamera.add(crosshairMesh);
     // Position just in front of camera
-    crosshairMesh.position.z = -0.05;
+    crosshairMesh.position.z = -0.1;
   }
 
   /**
   * Initiates a WebGLRenderer
   */
   private initRenderer() {
-    this.debug('Initializing renderer...');
-
-    const { width, height } = this.canvas;
-    this.localUser.renderer = new THREE.WebGLRenderer({
-      alpha: true,
+    this.renderer = new THREE.WebGLRenderer({
       antialias: true,
+      alpha: true,
       canvas: this.canvas,
     });
-    this.localUser.renderer.setPixelRatio(window.devicePixelRatio);
-    this.localUser.renderer.setSize(width, height);
+
+    this.renderer.setClearColor(new THREE.Color('lightgrey'), 0);
+    this.renderer.setSize(this.outerDiv.clientWidth, this.outerDiv.clientHeight);
   }
 
   /**
@@ -323,9 +313,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   private initArJs() {
     this.arToolkitSource = new THREEx.ArToolkitSource({
       sourceType: 'webcam',
-      // resolution displayed for the source
-      displayWidth: this.outerDiv.clientWidth,
-      displayHeight: this.outerDiv.clientHeight,
     });
 
     this.arToolkitSource.init(() => {
@@ -334,20 +321,26 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       }, 1000);
     });
 
-    const arToolkitContext = new THREEx.ArToolkitContext({
+    // handle resize event
+    window.addEventListener('resize', () => {
+      this.resize(this.outerDiv);
+    });
+
+    /// /////////////////////////////////////////////////////////
+    // setup arToolkitContext
+    /// /////////////////////////////////////////////////////////
+
+    // create atToolkitContext
+    this.arToolkitContext = new THREEx.ArToolkitContext({
       cameraParametersUrl: 'ar_data/camera_para.dat',
       detectionMode: 'mono',
     });
 
-    this.arToolkitContext = arToolkitContext;
-
-    arToolkitContext.init();
-
-    // Update artoolkit on every frame
-    this.onRenderFcts.push(() => {
-      if (this.arToolkitSource.ready === false) return;
-
-      arToolkitContext.update(this.arToolkitSource.domElement);
+    // copy projection matrix to camera when initialization complete
+    this.arToolkitContext.init(() => {
+      this.localUser.defaultCamera.projectionMatrix.copy(
+        this.arToolkitContext.getProjectionMatrix(),
+      );
     });
 
     this.landscapeMarker.add(this.vrLandscapeRenderer.landscapeObject3D);
@@ -355,7 +348,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     // Init controls for camera
     // eslint-disable-next-line
-    new THREEx.ArMarkerControls(arToolkitContext, this.landscapeMarker, {
+    new THREEx.ArMarkerControls(this.arToolkitContext, this.landscapeMarker, {
       type: 'pattern',
       patternUrl: 'ar_data/pattern-angular_L_thick.patt',
     });
@@ -369,7 +362,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
       // Init controls for camera
       // eslint-disable-next-line
-      new THREEx.ArMarkerControls(arToolkitContext, applicationMarker, {
+      new THREEx.ArMarkerControls(this.arToolkitContext, applicationMarker, {
         type: 'pattern',
         patternUrl: `ar_data/${markerName}.patt`,
       });
@@ -389,10 +382,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     this.resize(outerDiv);
 
-    // Start main loop.
-    this.localUser.renderer.setAnimationLoop(() => this.tick());
-
-    // await perform(this.loadNewLandscape);
+    // Initiate rendering
+    this.animate = this.animate.bind(this);
+    this.animate();
   }
 
   @action
@@ -415,25 +407,14 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
      */
   @action
   resize(outerDiv: HTMLElement) {
+    this.renderer.setSize(outerDiv.clientWidth, outerDiv.clientHeight);
+    if (!this.arToolkitContext) return;
+
     this.arToolkitSource.onResizeElement();
+    this.arToolkitSource.copyElementSizeTo(this.renderer.domElement);
 
-    const width = Number(outerDiv.clientWidth);
-    const height = Number(outerDiv.clientHeight);
-
-    this.localUser.updateCameraAspectRatio(width, height);
-
-    const video = document.getElementById('arjs-video');
-
-    if (video instanceof HTMLVideoElement) {
-      // Set video to cover screen
-      video.style.width = '100%';
-      video.style.height = '100%';
-      video.style.objectFit = 'cover';
-      video.style.marginLeft = '0';
-      video.style.marginTop = '0';
-
-      // Center canvas
-      this.canvas.style.marginLeft = `${(width - parseInt(this.canvas.style.width, 10)) / 2}px`;
+    if (this.arToolkitContext.arController !== null) {
+      this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
     }
   }
 
@@ -578,45 +559,31 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   // #endregion MOUSE & KEYBOARD EVENT HANDLER
 
-  // #region RENDERING AND SCENE POPULATION
+  // #region RENDERING
 
-  /**
-   * Main loop that is called once per frame.
-   */
-  private tick() {
+  render() {
+    this.renderer.render(this.sceneService.scene, this.localUser.defaultCamera);
+
+    this.arZoomHandler?.renderZoomCamera(this.renderer, this.sceneService.scene);
+  }
+
+  animate() {
     if (this.isDestroyed) {
       return;
     }
 
-    // Compute time since last tick.
-    this.deltaTimeService.update();
-    const delta = this.deltaTimeService.getDeltaTime();
+    requestAnimationFrame(this.animate);
 
-    this.remoteUsers.updateRemoteUsers(delta);
+    // Update time dependent services
+    this.deltaTimeService.update();
+    this.remoteUsers.updateRemoteUsers(this.deltaTimeService.getDeltaTime());
+
+    this.updateArToolkit();
+
     this.render();
   }
 
-  /**
-     * Renders the scene.
-     */
-  private render() {
-    this.localUser.renderer
-      .setViewport(0, 0, this.outerDiv.clientWidth, this.outerDiv.clientHeight);
-
-    this.localUser.renderer.render(
-      this.sceneService.scene,
-      this.localUser.defaultCamera,
-    );
-
-    // Call each update function
-    this.onRenderFcts.forEach((onRenderFct) => {
-      onRenderFct();
-    });
-
-    this.arZoomHandler?.renderZoomCamera(this.localUser.renderer, this.sceneService.scene);
-  }
-
-  // #endregion RENDERING AND SCENE POPULATION
+  // #endregion RENDERING
 
   // #region APLICATION RENDERING
 

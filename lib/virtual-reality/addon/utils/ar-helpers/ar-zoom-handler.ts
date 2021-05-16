@@ -20,6 +20,7 @@ export default class ArZoomHandler {
 
   enableZoom() {
     this.zoomEnabled = true;
+    this.zoomCamera = this.mainCamera.clone();
     this.addZoomIndicator();
   }
 
@@ -39,7 +40,7 @@ export default class ArZoomHandler {
     const x = this.outerDiv.clientWidth / 2 - sizeX / 2;
     const y = this.outerDiv.clientHeight / 2 - sizeY / 2;
 
-    const times = 3; // scale of magnifier
+    const zoomScale = 3;
 
     const offsetX = (this.outerDiv.clientWidth / 3) + sizeX / 3;
     const offsetY = (this.outerDiv.clientHeight / 3) + sizeY / 3;
@@ -49,14 +50,17 @@ export default class ArZoomHandler {
       this.outerDiv.clientHeight,
       offsetX,
       offsetY,
-      (this.outerDiv.clientWidth / 3) / times,
-      (this.outerDiv.clientHeight / 3) / times,
+      (this.outerDiv.clientWidth / 3) / zoomScale,
+      (this.outerDiv.clientHeight / 3) / zoomScale,
     );
 
     renderer.setViewport(x, y, sizeX, sizeY);
     renderer.setScissor(x, y, sizeX, sizeY);
     renderer.render(scene, this.zoomCamera);
+
+    // Prepare renderer to render full scene again
     renderer.setScissorTest(false);
+    renderer.setViewport(0, 0, this.outerDiv.clientWidth, this.outerDiv.clientHeight);
   }
 
   addZoomIndicator() {
