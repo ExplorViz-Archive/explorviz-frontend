@@ -341,6 +341,11 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       this.localUser.defaultCamera.projectionMatrix.copy(
         this.arToolkitContext.getProjectionMatrix(),
       );
+
+      // Adapt aspect and fov to other parameters
+      this.localUser.defaultCamera.aspect = 1.33;
+      this.localUser.defaultCamera.fov = 44;
+      this.localUser.defaultCamera.updateProjectionMatrix();
     });
 
     this.landscapeMarker.add(this.vrLandscapeRenderer.landscapeObject3D);
@@ -543,14 +548,28 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   handleKeyboard(event: any) {
     // Handle keys
     switch (event.key) {
+      /*
       case 'm':
-        this.localUser.defaultCamera.fov += 1;
+        this.localUser.defaultCamera.aspect += 0.05;
         this.localUser.defaultCamera.updateProjectionMatrix();
+        console.log('Aspect: ', this.localUser.defaultCamera.aspect);
         break;
       case 'n':
-        this.localUser.defaultCamera.fov -= 1;
+        this.localUser.defaultCamera.aspect -= 0.05;
         this.localUser.defaultCamera.updateProjectionMatrix();
+        console.log('Aspect: ', this.localUser.defaultCamera.aspect);
         break;
+      case 'k':
+        this.localUser.defaultCamera.fov += 0.05;
+        this.localUser.defaultCamera.updateProjectionMatrix();
+        console.log('Fov: ', this.localUser.defaultCamera.fov);
+        break;
+      case 'j':
+        this.localUser.defaultCamera.fov -= 0.05;
+        this.localUser.defaultCamera.updateProjectionMatrix();
+        console.log('Fov: ', this.localUser.defaultCamera.fov);
+        break;
+      */
 
       default:
         break;
