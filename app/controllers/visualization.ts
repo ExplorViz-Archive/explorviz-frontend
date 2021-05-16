@@ -169,7 +169,7 @@ export default class VisualizationController extends Controller {
         ...this.landscapeData,
         application: app,
       };
-      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.instanceId });
+      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.id });
     }
   }
 

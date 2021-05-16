@@ -32,9 +32,6 @@ export interface Click {
   user: string;
   id: string;
 }
-export interface IdentifiableMesh {
-  colabId: string;
-}
 
 export interface UserJoinedMessage {
   user: string;
@@ -45,10 +42,6 @@ export interface PresentationModeActivated {
 }
 
 export interface PresentationModeDeactivated {
-}
-
-export function instanceOfIdentifiableMesh(object: any): object is IdentifiableMesh {
-  return 'colabId' in object;
 }
 
 export interface Meeting {
