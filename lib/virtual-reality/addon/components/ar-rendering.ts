@@ -56,6 +56,7 @@ import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
+import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
 import VrRoomSerializer from '../services/vr-room-serializer';
 import VrLandscapeObject3D from '../utils/view-objects/landscape/vr-landscape-object-3d';
 
@@ -578,6 +579,19 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   // #region RENDERING
 
+  /**
+   * Sends a message if a given interval (in seconds) has passed to keep websocket alive
+   */
+  private sendKeepAliveMessage(interval = 1) {
+    if (this.deltaTimeService.getCurrentDeltaTime() > interval) {
+      this.deltaTimeService.update();
+
+      // Send camera pose as dummy message
+      const cameraPose = VrPoses.getCameraPose(this.localUser.defaultCamera);
+      this.sender.sendPoseUpdate(cameraPose);
+    }
+  }
+
   render() {
     this.localUser.renderer.render(this.sceneService.scene, this.localUser.defaultCamera);
 
@@ -590,9 +604,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     }
 
     requestAnimationFrame(this.animate);
-
     // Update time dependent services
-    this.deltaTimeService.update();
+
+    if (this.webSocket.isWebSocketOpen()) {
+      this.sendKeepAliveMessage();
+    }
+
     this.remoteUsers.updateRemoteUsers(this.deltaTimeService.getDeltaTime());
 
     this.updateArToolkit();

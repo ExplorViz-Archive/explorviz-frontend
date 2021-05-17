@@ -44,8 +44,8 @@ export default class VrMessageSender extends Service {
    */
   sendPoseUpdate(
     camera: Pose,
-    controller1: ControllerPose | undefined,
-    controller2: ControllerPose | undefined,
+    controller1?: ControllerPose | undefined,
+    controller2?: ControllerPose | undefined,
   ) {
     this.webSocket.send<UserPositionsMessage>({
       event: 'user_positions',

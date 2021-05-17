@@ -22,6 +22,13 @@ export default class DeltaTimeService extends Service {
   }
 
   /**
+   * Returns time between now and last frame
+   */
+  getCurrentDeltaTime() {
+    return (Date.now() / 1000.0) - this.lastFrameTime;
+  }
+
+  /**
    * Returns time in seconds between the last two frames
    */
   getDeltaTime() {

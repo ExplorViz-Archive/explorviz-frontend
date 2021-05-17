@@ -22,7 +22,7 @@
 
   <ul>
     {{#each this.users as |user|}}
-      <li style={{user.style}}>
+      <li style={{html-safe user.style}}>
         {{user.name}}
       </li>
     {{/each}}
