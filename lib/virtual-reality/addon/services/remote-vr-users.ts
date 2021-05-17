@@ -66,6 +66,7 @@ export default class RemoteVrUserService extends Service {
     if (this.idToRemoteUser.has(remoteUser.userId)) this.removeRemoteUser(remoteUser);
 
     this.idToRemoteUser.set(remoteUser.userId, remoteUser);
+    this.notifyPropertyChange('idToRemoteUser');
     if (this.displayHmd) {
       this.headsetModel.then((hmd) => remoteUser.initCamera(hmd.clone(true), initialPose));
     }
@@ -109,6 +110,7 @@ export default class RemoteVrUserService extends Service {
   removeRemoteUserById(userId: string): RemoteVrUser | undefined {
     const remoteUser = this.idToRemoteUser.get(userId);
     if (remoteUser) this.removeRemoteUser(remoteUser);
+    this.notifyPropertyChange('idToRemoteUser');
     return remoteUser;
   }
 
@@ -122,6 +124,7 @@ export default class RemoteVrUserService extends Service {
     remoteUser.removeAllObjects3D();
     this.remoteUserGroup.remove(remoteUser);
     this.idToRemoteUser.delete(remoteUser.userId);
+    this.notifyPropertyChange('idToRemoteUser');
   }
 
   removeAllRemoteUsers() {
@@ -129,10 +132,12 @@ export default class RemoteVrUserService extends Service {
       user.removeAllObjects3D();
     });
     this.idToRemoteUser.clear();
+    this.notifyPropertyChange('idToRemoteUser');
   }
 
   updateRemoteUsers(delta: number) {
     this.idToRemoteUser.forEach((remoteUser) => remoteUser.update(delta));
+    this.notifyPropertyChange('idToRemoteUser');
   }
 }
 

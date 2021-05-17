@@ -21,9 +21,11 @@
   <label class="bold">Users</label>
 
   <ul>
-    <li>
-      {{this.localUser.userName}}
-    </li>
+    {{#each this.users as |user|}}
+      <li style={{user.style}}>
+        {{user.name}}
+      </li>
+    {{/each}}
   </ul>
 
 {{/if}}
