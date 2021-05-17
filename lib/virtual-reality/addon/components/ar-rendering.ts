@@ -818,14 +818,14 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   onSelfDisconnected(event?: any) {
     if (this.localUser.isConnecting) {
-      AlertifyHandler.showAlertifyMessage('VR service not responding');
+      AlertifyHandler.showAlertifyMessage('AR backend service not responding');
     } else if (event) {
       switch (event.code) {
         case 1000: // Normal Closure
           AlertifyHandler.showAlertifyMessage('Successfully disconnected');
           break;
         case 1006: // Abnormal closure
-          AlertifyHandler.showAlertifyMessage('VR service closed abnormally');
+          AlertifyHandler.showAlertifyMessage('AR backend service closed abnormally');
           break;
         default:
           AlertifyHandler.showAlertifyMessage('Unexpected disconnect');

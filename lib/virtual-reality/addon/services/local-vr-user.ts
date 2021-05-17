@@ -2,6 +2,7 @@ import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
 import VRController from 'virtual-reality/utils/vr-controller';
 import { tracked } from '@glimmer/tracking';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import SpectateUserService from './spectate-user';
 import VrRoomService from './vr-room';
 import VrSceneService from './vr-scene';
@@ -225,8 +226,13 @@ export default class LocalVrUser extends Service {
   async hostRoom() {
     if (!this.isConnecting) {
       this.connectionStatus = 'connecting';
-      const response = await this.roomService.createRoom();
-      this.joinRoom(response.roomId, { checkConnectionStatus: false });
+      try {
+        const response = await this.roomService.createRoom();
+        this.joinRoom(response.roomId, { checkConnectionStatus: false });
+      } catch (e: any) {
+        this.connectionStatus = 'offline';
+        AlertifyHandler.showAlertifyError('Cannot reach VR-Service.');
+      }
     }
   }
 
@@ -236,8 +242,14 @@ export default class LocalVrUser extends Service {
     if (!checkConnectionStatus || !this.isConnecting) {
       this.connectionStatus = 'connecting';
       this.currentRoomId = roomId;
-      const response = await this.roomService.joinLobby(this.currentRoomId);
-      this.webSocket.initSocket(response.ticketId);
+      try {
+        const response = await this.roomService.joinLobby(this.currentRoomId);
+        this.webSocket.initSocket(response.ticketId);
+      } catch (e: any) {
+        this.connectionStatus = 'offline';
+        this.currentRoomId = null;
+        AlertifyHandler.showAlertifyError('Cannot reach VR-Service.');
+      }
     }
   }
 
