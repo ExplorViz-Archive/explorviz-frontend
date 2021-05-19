@@ -169,7 +169,7 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
 
       if (parentComponent === null) {
         // common ancestor must be the foundation
-        parentMesh = applicationObject3D.getBoxMeshbyModelId(application.instanceId);
+        parentMesh = applicationObject3D.getBoxMeshbyModelId(application.id);
       } else {
         parentMesh = applicationObject3D.getBoxMeshbyModelId(parentComponent.id);
       }
@@ -271,7 +271,7 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
   function layoutDrawableCommunication(commu: DrawableClassCommunication, app: Application) {
     const externalPortsExtension = new THREE.Vector3(3.0, 3.5, 3.0);
 
-    const foundationLayout = boxLayoutMap.get(app.instanceId);
+    const foundationLayout = boxLayoutMap.get(app.id);
 
     if (!foundationLayout) { return; }
 

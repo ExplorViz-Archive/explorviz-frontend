@@ -47,12 +47,14 @@ function getTestClass() {
 
 function getTestNode() {
   const testNode: Node = {
+    id: 'testNode.testIp',
     ipAddress: 'testIp',
     hostName: 'testNode',
     applications: [],
   };
 
   const testApplication: Application = {
+    id: 'testNode.testIp.applicationId',
     name: 'application',
     instanceId: 'applicationId',
     language: 'testLanguage',

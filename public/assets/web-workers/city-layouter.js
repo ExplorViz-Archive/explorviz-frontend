@@ -49,7 +49,7 @@ function applyBoxLayout(application) {
 
   let layoutMap = new Map();
 
-  layoutMap.set(application.instanceId, {
+  layoutMap.set(application.id, {
     height: 1,
     width: 1,
     depth: 1,
@@ -101,7 +101,7 @@ function applyBoxLayout(application) {
   function setAbsoluteLayoutPositionOfApplication(application) {
     const { packages } = application;
 
-    let componentLayout = layoutMap.get(application.instanceId);
+    let componentLayout = layoutMap.get(application.id);
 
     packages.forEach((childComponent) => {
       let childCompLayout = layoutMap.get(childComponent.id);
@@ -321,7 +321,7 @@ function applyBoxLayout(application) {
       initNodes(child);
     });
 
-    let componentData = layoutMap.get(application.instanceId);
+    let componentData = layoutMap.get(application.id);
     componentData.height = getHeightOfApplication(application);
     componentData.width = -1.0;
     componentData.depth = -1.0;
@@ -416,7 +416,7 @@ function applyBoxLayout(application) {
 
     const segment = layoutGeneric(tempList);
 
-    let componentData = layoutMap.get(application.instanceId);
+    let componentData = layoutMap.get(application.id);
     componentData.width = segment.width;
     componentData.depth = segment.height;
   }
