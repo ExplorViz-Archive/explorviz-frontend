@@ -62,7 +62,7 @@ export function addComponentAndChildrenToScene(component: Package, applicationOb
 ApplicationObject3D, applicationColors: ApplicationColors, componentLevel = 1) {
   const application = applicationObject3D.dataModel;
   const componentLayout = applicationObject3D.getBoxLayout(component.id);
-  const applicationLayout = applicationObject3D.getBoxLayout(application.instanceId);
+  const applicationLayout = applicationObject3D.getBoxLayout(application.id);
 
   if (componentLayout === undefined || applicationLayout === undefined) { return; }
 

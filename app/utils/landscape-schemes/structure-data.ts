@@ -21,6 +21,7 @@ export interface Package {
 }
 
 export interface Application {
+  id: string,
   name: string;
   language: string;
   instanceId: string;
@@ -29,6 +30,7 @@ export interface Application {
 }
 
 export interface Node {
+  id: string
   ipAddress: string;
   hostName: string;
   applications: Application[];
@@ -66,6 +68,16 @@ export function isMethod(x: any): x is Method {
 export function preProcessAndEnhanceStructureLandscape(
   landscapeStructure: StructureLandscapeData,
 ) {
+  function createNodeId(node: Node) {
+    const { hostName, ipAddress } = node;
+    node.id = `${hostName}#${ipAddress}`;
+  }
+
+  function createApplicationId(app: Application) {
+    const { hostName, ipAddress } = app.parent;
+    app.id = `${hostName}#${ipAddress}#${app.instanceId}`;
+  }
+
   function createPackageIds(component: Package, parentId: string) {
     component.id = `${parentId}.${component.name}`;
     component.subPackages.forEach((subComponent) => {
@@ -106,7 +118,6 @@ export function preProcessAndEnhanceStructureLandscape(
 
   enhancedlandscapeStructure.nodes.forEach((node) => {
     node.applications.forEach((app) => {
-      app.instanceId = `${app.instanceId}`;
       app.packages.forEach((component) => {
         // create package ids in Java notation, e.g., 'net.explorviz.test'
         // and add parent relations for quicker access
@@ -119,7 +130,9 @@ export function preProcessAndEnhanceStructureLandscape(
       });
       createClassIds(app.packages);
       addParentToApplication(app, node);
+      createApplicationId(app);
     });
+    createNodeId(node);
   });
 
   return enhancedlandscapeStructure;
@@ -144,7 +157,7 @@ interface RawPackage {
 interface RawApplication {
   name: string;
   language: string;
-  instanceId: number;
+  instanceId: string;
   packages: RawPackage[];
 }
 

@@ -69,14 +69,8 @@ function getTestTraces(): Trace[] {
   return [{
     landscapeToken: '',
     traceId: 'trace2',
-    startTime: {
-      seconds: 26,
-      nanoAdjust: 850000000,
-    },
-    endTime: {
-      seconds: 26,
-      nanoAdjust: 890000000,
-    },
+    startTime: 26850000000,
+    endTime: 26890000000,
     duration: 40,
     overallRequestCount: 1,
     traceCount: 1,
@@ -85,27 +79,15 @@ function getTestTraces(): Trace[] {
       spanId: 'trace2_span1',
       parentSpanId: '',
       traceId: 'trace2',
-      startTime: {
-        seconds: 26,
-        nanoAdjust: 850000000,
-      },
-      endTime: {
-        seconds: 26,
-        nanoAdjust: 890000000,
-      },
+      startTime: 26850000000,
+      endTime: 26890000000,
       hashCode: 'trace2_hashCode',
     }],
   }, {
     landscapeToken: '',
     traceId: 'trace3',
-    startTime: {
-      seconds: 15,
-      nanoAdjust: 500000000,
-    },
-    endTime: {
-      seconds: 15,
-      nanoAdjust: 570000000,
-    },
+    startTime: 15500000000,
+    endTime: 15570000000,
     duration: 70,
     overallRequestCount: 1,
     traceCount: 1,
@@ -114,27 +96,15 @@ function getTestTraces(): Trace[] {
       spanId: 'trace3_span1',
       parentSpanId: '',
       traceId: 'trace3',
-      startTime: {
-        seconds: 15,
-        nanoAdjust: 500000000,
-      },
-      endTime: {
-        seconds: 17,
-        nanoAdjust: 570000000,
-      },
+      startTime: 15500000000,
+      endTime: 15570000000,
       hashCode: 'trace3_hashCode',
     }],
   }, {
     landscapeToken: '',
     traceId: 'trace1',
-    startTime: {
-      seconds: 10,
-      nanoAdjust: 100000000,
-    },
-    endTime: {
-      seconds: 11,
-      nanoAdjust: 110000000,
-    },
+    startTime: 10100000000,
+    endTime: 11110000000,
     duration: 1010,
     overallRequestCount: 1,
     traceCount: 1,
@@ -143,14 +113,8 @@ function getTestTraces(): Trace[] {
       spanId: 'trace1_span1',
       parentSpanId: '',
       traceId: 'trace1',
-      startTime: {
-        seconds: 10,
-        nanoAdjust: 100000000,
-      },
-      endTime: {
-        seconds: 11,
-        nanoAdjust: 110000000,
-      },
+      startTime: 10100000000,
+      endTime: 11110000000,
       hashCode: 'trace1_hashCode',
     }],
   }];
@@ -162,56 +126,32 @@ function getTestSpanList() {
     spanId: 'span1',
     parentSpanId: '',
     traceId: 'trace1',
-    startTime: {
-      seconds: 10,
-      nanoAdjust: 100000000,
-    },
-    endTime: {
-      seconds: 11,
-      nanoAdjust: 110000000,
-    },
+    startTime: 10100000000,
+    endTime: 11110000000,
     hashCode: 'method1HashCode',
   }, {
     landscapeToken: '',
     spanId: 'span4',
     parentSpanId: 'span3',
     traceId: 'trace1',
-    startTime: {
-      seconds: 10,
-      nanoAdjust: 130000000,
-    },
-    endTime: {
-      seconds: 11,
-      nanoAdjust: 110000000,
-    },
+    startTime: 10130000000,
+    endTime: 11110000000,
     hashCode: 'method3HashCode',
   }, {
     landscapeToken: '',
     spanId: 'span2',
     parentSpanId: 'span1',
     traceId: 'trace1',
-    startTime: {
-      seconds: 10,
-      nanoAdjust: 110000000,
-    },
-    endTime: {
-      seconds: 10,
-      nanoAdjust: 120000000,
-    },
+    startTime: 10110000000,
+    endTime: 10120000000,
     hashCode: 'method2HashCode',
   }, {
     landscapeToken: '',
     spanId: 'span3',
     parentSpanId: 'span1',
     traceId: 'trace1',
-    startTime: {
-      seconds: 10,
-      nanoAdjust: 120000000,
-    },
-    endTime: {
-      seconds: 11,
-      nanoAdjust: 110000000,
-    },
+    startTime: 10120000000,
+    endTime: 11110000000,
     hashCode: 'method2HashCode',
   }];
 }

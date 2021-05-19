@@ -1,11 +1,10 @@
-import { IdentifiableMesh } from 'collaborative-mode/utils/collaborative-data';
 import { Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import THREE from 'three';
 import BoxMesh from './box-mesh';
 import ComponentLabelMesh from './component-label-mesh';
 
-export default class ComponentMesh extends BoxMesh implements IdentifiableMesh {
+export default class ComponentMesh extends BoxMesh {
   geometry: THREE.BoxGeometry;
 
   material: THREE.MeshLambertMaterial;
@@ -13,8 +12,6 @@ export default class ComponentMesh extends BoxMesh implements IdentifiableMesh {
   dataModel: Package;
 
   opened: boolean = false;
-
-  colabId: string;
 
   // Set by labeler
   labelMesh: ComponentLabelMesh | null = null;
@@ -28,6 +25,5 @@ export default class ComponentMesh extends BoxMesh implements IdentifiableMesh {
     this.geometry = geometry;
     this.material = material;
     this.dataModel = component;
-    this.colabId = component.id;
   }
 }

@@ -1,15 +1,12 @@
 import THREE from 'three';
 import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
-import { IdentifiableMesh } from 'collaborative-mode/utils/collaborative-data';
 import PlaneMesh from './plane-mesh';
 import PlaneLayout from '../../layout-models/plane-layout';
 
-export default class ApplicationMesh extends PlaneMesh implements IdentifiableMesh {
+export default class ApplicationMesh extends PlaneMesh {
   dataModel: Application;
 
   material: THREE.MeshBasicMaterial;
-
-  colabId: string;
 
   depth: number;
 
@@ -25,7 +22,6 @@ export default class ApplicationMesh extends PlaneMesh implements IdentifiableMe
     this.defaultZ = zPos;
 
     this.material = new THREE.MeshBasicMaterial({ color: defaultColor });
-    this.colabId = applicationModel.instanceId;
     if (depth <= 0) {
       this.geometry = new THREE.PlaneGeometry(layout.width, layout.height);
     } else {

@@ -11,7 +11,7 @@
   {{#if this.tokenService.token}}
     <div class="navbar-token-link pointer-events-all d-none d-md-block">
       <LinkTo @route="landscapes" class="d-flex-center">
-        {{svg-jar "key" class="octicon"}}
+        {{svg-jar "key-16" class="octicon"}}
         <span>{{this.tokenService.token.alias}}</span>
       </LinkTo>
     </div>
@@ -32,11 +32,11 @@
         {{#if this.tokenService.token}}
           <ddm.item>
             <ddm.link-to
-              class="truncate-text d-md-none"
+              class="truncate-text d-flex-center d-md-none"
               @route="landscapes"
               {{on "click" dd.closeDropdown}}
             >
-              {{svg-jar "key" class="octicon"}}
+              {{svg-jar "key-16" class="octicon"}}
               <span>{{this.tokenService.token.alias}}</span>
             </ddm.link-to>
           </ddm.item>

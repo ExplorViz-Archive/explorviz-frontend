@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import Controller from '@ember/controller';
 import {
   action,
@@ -47,6 +46,9 @@ export default class VisualizationController extends Controller {
   plotlyTimelineRef!: PlotlyTimeline;
 
   selectedTimestampRecords: Timestamp[] = [];
+
+  @tracked
+  font!: THREE.Font; // set by the route
 
   @tracked
   showDataSelection = false;
@@ -111,8 +113,8 @@ export default class VisualizationController extends Controller {
     if (this.landscapeData !== null) {
       application = this.landscapeData.application;
       if (application !== undefined) {
-        const newApplication = VisualizationController.getApplicationFromLandscapeByInstanceId(
-          application.instanceId, structureData,
+        const newApplication = VisualizationController.getApplicationFromLandscapeById(
+          application.id, structureData,
         );
 
         if (newApplication) {
@@ -127,12 +129,12 @@ export default class VisualizationController extends Controller {
     };
   }
 
-  private static getApplicationFromLandscapeByInstanceId(instanceId: string,
+  private static getApplicationFromLandscapeById(id: string,
     structureData: StructureLandscapeData) {
     let foundApplication: Application|undefined;
     structureData.nodes.forEach((node) => {
       node.applications.forEach((application) => {
-        if (application.instanceId === instanceId) {
+        if (application.id === id) {
           foundApplication = application;
         }
       });
@@ -167,7 +169,7 @@ export default class VisualizationController extends Controller {
         ...this.landscapeData,
         application: app,
       };
-      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.instanceId });
+      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.id });
     }
   }
 
