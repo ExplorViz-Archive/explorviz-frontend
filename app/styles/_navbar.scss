@@ -2,6 +2,14 @@
   all: unset;
 }
 
+.navbar-token-link {
+  float: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .truncate-text {
   display: inline-block;
   vertical-align: top;
@@ -14,16 +22,19 @@
 #navbar-user-options {
   position: static;
   align-items: center;
+  height: 100%;
+  float: right;
 }
 
 #navbar-user-options > .dropdown {
   position: static;
+  display: flex;
+  align-items: center;
 }
 
 #navbar-user-options > .dropdown > .dropdown-menu {
   font-size: 14px;
   width: 200px;
-  right: 0;
 
   &.dropdown-item:nth-child(0):hover {
     background-color: #fff;
