@@ -1,6 +1,6 @@
 <div id="colorPresets" class="dropdown">
   <button class="button-svg-with-hover" type="button">
-    {{svg-jar "lock" class="octicon align-middle"}}
+    {{svg-jar "share-android-16" class="octicon align-middle"}}
     <BsTooltip @placement="bottom" @triggerEvents="hover">
       Manage access to token
     </BsTooltip>
@@ -17,7 +17,7 @@
                     type="button"
                     {{on "click" (fn this.revokeAccess userWithAccess)}}
                   >
-                    {{svg-jar "dash" class="octicon align-middle"}}
+                    {{svg-jar "dash-16" class="octicon align-middle"}}
                     <BsTooltip @placement="bottom" @triggerEvents="hover">
                       Revoke access
                     </BsTooltip>
@@ -36,7 +36,7 @@
                   type="button"
                   {{on "click" this.grantAccess}}
                 >
-                  {{svg-jar "plus" class="octicon align-middle"}}
+                  {{svg-jar "plus-16" class="octicon align-middle"}}
                   <BsTooltip @placement="bottom" @triggerEvents="hover">
                     Grant access
                   </BsTooltip>
@@ -52,7 +52,7 @@
                   type="button"
                   {{on "click" (fn this.revokeAccess this.auth.user.sub)}}
                 >
-                  {{svg-jar "trashcan" class="octicon align-middle"}}
+                  {{svg-jar "trash-16" class="octicon align-middle"}}
                   <BsTooltip @placement="bottom" @triggerEvents="hover">
                     Revoke own access
                   </BsTooltip>
@@ -67,7 +67,7 @@
                   type="button"
                   {{on "click" (fn this.cloneToken this.auth.user.sub)}}
                 >
-                  {{svg-jar "clippy" class="octicon align-middle"}}
+                  {{svg-jar "clippy-16" class="octicon align-middle"}}
                   <BsTooltip @placement="bottom" @triggerEvents="hover">
                     Clone token to gain write access
                   </BsTooltip>

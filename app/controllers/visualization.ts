@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import Controller from '@ember/controller';
 import {
   action,
@@ -48,6 +47,9 @@ export default class VisualizationController extends Controller {
 
   @tracked
   selectedTimestampRecords: Timestamp[] = [];
+
+  @tracked
+  font!: THREE.Font; // set by the route
 
   @tracked
   showDataSelection = false;
