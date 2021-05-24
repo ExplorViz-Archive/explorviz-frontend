@@ -85,15 +85,11 @@ export default class ColorPicker extends Component<Args> {
     if (this.args.isLandscapeView) {
       const { landscapeColors } = this.configuration;
 
-      landscapeColors.system.set('#c7c7c7'); // grey
-      landscapeColors.nodegroup.set('#169e2b'); // dark green
       landscapeColors.node.set('#00bb41'); // green
       landscapeColors.application.set('#3e14a0'); // purple-blue
       landscapeColors.communication.set('#f49100'); // orange
-      landscapeColors.systemText.set('#000000'); // black
       landscapeColors.nodeText.set('#ffffff'); // white
       landscapeColors.applicationText.set('#ffffff'); // white
-      landscapeColors.collapseSymbol.set('#000000'); // black
       landscapeColors.background.set('#ffffff'); // white
     } else {
       const { applicationColors } = this.configuration;
@@ -121,15 +117,11 @@ export default class ColorPicker extends Component<Args> {
     if (this.args.isLandscapeView) {
       const { landscapeColors } = this.configuration;
 
-      landscapeColors.system.set('#c7c7c7'); // grey
-      landscapeColors.nodegroup.set('#015a6e'); // dark green
       landscapeColors.node.set('#0096be'); // green
       landscapeColors.application.set('#5f5f5f'); // purple-blue
       landscapeColors.communication.set('#f49100'); // orange
-      landscapeColors.systemText.set('#000000'); // black
       landscapeColors.nodeText.set('#ffffff'); // white
       landscapeColors.applicationText.set('#ffffff'); // white
-      landscapeColors.collapseSymbol.set('#000000'); // black
       landscapeColors.background.set('#ffffff'); // white
     } else {
       const { applicationColors } = this.configuration;

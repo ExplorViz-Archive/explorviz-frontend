@@ -3,15 +3,11 @@ import THREE from 'three';
 import { tracked } from '@glimmer/tracking';
 
 export type LandscapeColors = {
-  system: THREE.Color,
-  nodegroup: THREE.Color,
   node: THREE.Color,
   application: THREE.Color,
   communication: THREE.Color,
-  systemText: THREE.Color,
   nodeText: THREE.Color,
   applicationText: THREE.Color,
-  collapseSymbol: THREE.Color,
   background: THREE.Color
 };
 
@@ -79,15 +75,11 @@ export default class Configuration extends Service {
     super(...arguments);
 
     this.landscapeColors = {
-      system: new THREE.Color('#c7c7c7'), // grey
-      nodegroup: new THREE.Color('#169e2b'), // dark green
       node: new THREE.Color('#00bb41'), // green
       application: new THREE.Color('#3e14a0'), // purple-blue
       communication: new THREE.Color('#f49100'), // orange
-      systemText: new THREE.Color('#000000'), // black
       nodeText: new THREE.Color('#ffffff'), // white
       applicationText: new THREE.Color('#ffffff'), // white
-      collapseSymbol: new THREE.Color('#000000'), // black
       background: new THREE.Color('#ffffff'), // white
     };
 
