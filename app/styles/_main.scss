@@ -50,6 +50,11 @@ html, body {
   flex-grow: 1;
 }
 
+// Disable double tap to zoom for mobile devices
+* {
+touch-action: manipulation;
+}
+
 //Additional classes
 
 .container-word-wrap {
