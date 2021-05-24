@@ -383,16 +383,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   private initArJs() {
-    this.arToolkitSource = new THREEx.ArToolkitSource({
-      sourceType: 'webcam',
-    });
-
-    this.arToolkitSource.init(() => {
-      setTimeout(() => {
-        this.resize(this.outerDiv);
-      }, 1000);
-    });
-
     // handle resize event
     window.addEventListener('resize', () => {
       this.resize(this.outerDiv);
@@ -413,12 +403,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       this.localUser.defaultCamera.projectionMatrix.copy(
         this.arToolkitContext.getProjectionMatrix(),
       );
-
-      // Adapt aspect and fov to other parameters
-      this.localUser.defaultCamera.aspect = 1.33;
-      this.localUser.defaultCamera.fov = 44;
-      this.localUser.defaultCamera.updateProjectionMatrix();
     });
+
+    this.initArJsCamera();
 
     this.landscapeMarker.add(this.vrLandscapeRenderer.landscapeObject3D);
     this.sceneService.scene.add(this.landscapeMarker);
@@ -444,6 +431,27 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         patternUrl: `ar_data/${markerName}.patt`,
       });
     });
+  }
+
+  initArJsCamera(width = 640, height = 480) {
+    ArRendering.cleanUpAr();
+
+    this.arToolkitSource = new THREEx.ArToolkitSource({
+      sourceType: 'webcam',
+      sourceWidth: width,
+      sourceHeight: height,
+    });
+
+    this.arToolkitSource.init(() => {
+      setTimeout(() => {
+        this.resize(this.outerDiv);
+      }, 1000);
+    });
+
+    // Adapt aspect and fov to other parameters
+    this.localUser.defaultCamera.aspect = width / height;
+    this.localUser.defaultCamera.fov = 44;
+    this.localUser.defaultCamera.updateProjectionMatrix();
   }
   // #endregion COMPONENT AND SCENE INITIALIZATION
 
@@ -619,6 +627,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   handleKeyboard(event: any) {
     // Handle keys
     switch (event.key) {
+      case 'c':
+        this.initArJsCamera(1920, 1080);
+        break;
       /*
       case 'm':
         this.localUser.defaultCamera.aspect += 0.05;
@@ -641,7 +652,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         console.log('Fov: ', this.localUser.defaultCamera.fov);
         break;
       */
-
       default:
         break;
     }
