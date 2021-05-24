@@ -2,7 +2,7 @@ import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import debugLogger from 'ember-debug-logger';
-import THREE from 'three';
+import THREE, { MathUtils } from 'three';
 import { tracked } from '@glimmer/tracking';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import Configuration from 'explorviz-frontend/services/configuration';
@@ -57,6 +57,7 @@ import VrApplicationObject3D from 'virtual-reality/utils/view-objects/applicatio
 import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
 import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
+import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import VrRoomSerializer from '../services/vr-room-serializer';
 import VrLandscapeObject3D from '../utils/view-objects/landscape/vr-landscape-object-3d';
 
@@ -159,6 +160,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   private willDestroyController: AbortController = new AbortController();
 
+  pinchedObj: THREE.Object3D | ApplicationObject3D | null = null;
+
+  rotatedObj: THREE.Object3D | null | undefined;
+
+  pannedObject: THREE.Object3D | null | undefined;
+
   @tracked
   popupDataMap: Map<number, PopupData> = new Map();
 
@@ -195,6 +202,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.initRenderer();
     this.initCamera();
     this.initCameraCrosshair();
+    this.initHammerJS();
     this.initArJs();
     this.initInteraction();
     this.configureScene();
@@ -252,6 +260,64 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.localUser.defaultCamera.add(crosshairMesh);
     // Position just in front of camera
     crosshairMesh.position.z = -0.1;
+  }
+
+  private initHammerJS() {
+    this.hammerInteraction.setupHammer(this.canvas);
+
+    this.hammerInteraction.on('pinchstart', () => {
+      const intersection = this.interaction.raycastCanvasCenter();
+      const pinchObject = intersection?.object?.parent;
+
+      if (pinchObject instanceof LandscapeObject3D || pinchObject instanceof ApplicationObject3D) {
+        this.pinchedObj = pinchObject;
+      }
+    });
+
+    this.hammerInteraction.on('pinch', (deltaScaleInPercent: number) => {
+      if (!this.pinchedObj) return;
+
+      const newScale = this.pinchedObj.scale.x + this.pinchedObj.scale.x * deltaScaleInPercent;
+      this.pinchedObj.scale.set(newScale, newScale, newScale);
+    });
+
+    this.hammerInteraction.on('pinchend', () => {
+      this.pinchedObj = null;
+    });
+
+    this.hammerInteraction.on('rotatestart', () => {
+      const intersection = this.interaction.raycastCanvasCenter();
+      this.rotatedObj = intersection?.object?.parent;
+    });
+
+    this.hammerInteraction.on('rotate', (deltaRotation: number) => {
+      if (this.rotatedObj instanceof LandscapeObject3D) {
+        this.rotatedObj.rotation.z += deltaRotation * MathUtils.DEG2RAD;
+      } else if (this.rotatedObj instanceof ApplicationObject3D) {
+        this.rotatedObj.rotation.y += deltaRotation * MathUtils.DEG2RAD;
+      }
+    });
+
+    this.hammerInteraction.on('rotateend', () => {
+      this.rotatedObj = null;
+    });
+
+    this.hammerInteraction.on('panstart', () => {
+      const intersection = this.interaction.raycastCanvasCenter();
+      this.pannedObject = intersection?.object?.parent;
+    });
+
+    this.hammerInteraction.on('panning', (delta: {x: number, y: number}) => {
+      if (this.pannedObject instanceof LandscapeObject3D) {
+        this.pannedObject.position.x += delta.x * 0.0045;
+        this.pannedObject.position.z += delta.y * 0.0045;
+      }
+
+      if (this.pannedObject instanceof ApplicationObject3D) {
+        this.pannedObject.position.x += delta.x * 0.0045;
+        this.pannedObject.position.z += delta.y * 0.0045;
+      }
+    });
   }
 
   /**
@@ -396,7 +462,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.debug('Canvas inserted');
 
     this.canvas = canvas;
-    this.hammerInteraction.setupHammer(canvas);
 
     canvas.oncontextmenu = (e) => {
       e.preventDefault();
@@ -936,7 +1001,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     // Remove user and show disconnect notification.
     const removedUser = this.remoteUsers.removeRemoteUserById(id);
     if (removedUser) {
-      AlertifyHandler.showAlertifyError(`User ${removedUser.userName} disconnedted.`);
+      AlertifyHandler.showAlertifyError(`User ${removedUser.userName} disconnected.`);
     }
   }
 
