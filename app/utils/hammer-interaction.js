@@ -18,6 +18,10 @@ export default class HammerInteraction extends Object.extend(Evented) {
     let mouseDeltaX = 0;
     let mouseDeltaY = 0;
 
+    // Used to calculate delta scale and delta zoom for events
+    let lastPinchScale = 1;
+    let lastRotation = 0;
+
     // Fire Panning-Event with right click as well
     function registerRightClickWithPan() {
       const POINTER_INPUT_MAP = {
@@ -146,6 +150,8 @@ export default class HammerInteraction extends Object.extend(Evented) {
 
       mouseDeltaX = mousePosition.x;
       mouseDeltaY = mousePosition.y;
+
+      self.trigger('panstart', evt);
     });
 
     /**
@@ -244,14 +250,18 @@ export default class HammerInteraction extends Object.extend(Evented) {
     */
 
     hammer.on('pinchstart', (evt) => {
+      lastPinchScale = evt.scale;
       self.trigger('pinchstart', evt);
     });
 
     hammer.on('pinchmove', (evt) => {
-      self.trigger('pinch', evt);
+      const deltaScaleInPercent = (evt.scale - lastPinchScale) / lastPinchScale;
+      lastPinchScale = evt.scale;
+      self.trigger('pinch', deltaScaleInPercent, evt);
     });
 
     hammer.on('pinchend', (evt) => {
+      lastPinchScale = 1;
       self.trigger('pinchend', evt);
     });
 
@@ -260,14 +270,20 @@ export default class HammerInteraction extends Object.extend(Evented) {
     */
 
     hammer.on('rotatestart', (evt) => {
+      lastRotation = evt.rotation;
       self.trigger('rotatestart', evt);
     });
 
     hammer.on('rotate', (evt) => {
-      self.trigger('rotate', evt);
+      // Difference in rotation between rotate events (in degrees)
+      const deltaRotation = lastRotation - evt.rotation;
+      lastRotation = evt.rotation;
+
+      self.trigger('rotate', deltaRotation, evt);
     });
 
     hammer.on('rotateend', (evt) => {
+      lastRotation = 0;
       self.trigger('rotateend', evt);
     });
   }
