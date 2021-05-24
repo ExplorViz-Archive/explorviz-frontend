@@ -193,8 +193,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
      * performance panel if it is activated in user settings
      */
   private initRendering() {
-    this.initServices();
-
     this.initRenderer();
     this.initCamera();
     this.initCameraCrosshair();
@@ -202,6 +200,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.initArJs();
     this.initInteraction();
     this.configureScene();
+    this.initServices();
     this.initWebSocket();
   }
 
@@ -383,6 +382,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   private initArJs() {
+    this.initArJsCamera();
+
     // handle resize event
     window.addEventListener('resize', () => {
       this.resize(this.outerDiv);
@@ -403,9 +404,10 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       this.localUser.defaultCamera.projectionMatrix.copy(
         this.arToolkitContext.getProjectionMatrix(),
       );
+      this.localUser.defaultCamera.aspect = 1.33;
+      this.localUser.defaultCamera.fov = 44;
+      this.localUser.defaultCamera.updateProjectionMatrix();
     });
-
-    this.initArJsCamera();
 
     this.landscapeMarker.add(this.vrLandscapeRenderer.landscapeObject3D);
     this.sceneService.scene.add(this.landscapeMarker);

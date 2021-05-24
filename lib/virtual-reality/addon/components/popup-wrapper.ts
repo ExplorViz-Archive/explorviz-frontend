@@ -62,7 +62,7 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
       return;
     }
 
-    const popupTopOffset = popoverHeight + 10;
+    const popupTopOffset = popoverHeight + 40;
     const popupLeftOffset = popoverWidth / 2;
 
     let popupTopPosition = containerDiv.clientHeight / 2 - popupTopOffset;
