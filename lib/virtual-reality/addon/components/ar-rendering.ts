@@ -259,7 +259,19 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   private initHammerJS() {
-    this.hammerInteraction.setupHammer(this.canvas);
+    this.hammerInteraction.setupHammer(this.canvas, 500);
+
+    this.hammerInteraction.on('lefttap', () => {
+      this.handleSecondaryCrosshairInteraction();
+    });
+
+    this.hammerInteraction.on('doubletap', () => {
+      this.handlePrimaryCrosshairInteraction();
+    });
+
+    this.hammerInteraction.on('press', () => {
+      this.handleInfoInteraction();
+    });
 
     this.hammerInteraction.on('pinchstart', () => {
       const intersection = this.interaction.raycastCanvasCenter();

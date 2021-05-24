@@ -12,7 +12,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
    *
    * @param {*} canvas Events are registered on the canvas
    */
-  setupHammer(canvas) {
+  setupHammer(canvas, dbTapInterval = 250) {
     const self = this;
 
     let mouseDeltaX = 0;
@@ -106,7 +106,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
     const doubleTap = new Hammer.Tap({
       event: 'doubletap',
       taps: 2,
-      interval: 250,
+      interval: dbTapInterval,
     });
 
     const press = new Hammer.Press({
@@ -202,11 +202,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
      * Triggers a doubletap event for the right mouse button
      */
     hammer.on('doubletap', (evt) => {
-      if (evt.button !== 1) {
-        return;
-      }
-
-      if (evt.srcEvent.target !== canvas) {
+      if (evt.button !== 1 || evt.srcEvent.target !== canvas) {
         return;
       }
 
