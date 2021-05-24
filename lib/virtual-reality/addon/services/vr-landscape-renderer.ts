@@ -129,13 +129,14 @@ export default class VrLandscapeRenderer extends Service {
   }
 
   centerLandscape() {
+    this.resetRotation();
+
     if (this.largestSide) {
       this.landscapeObject3D.setLargestSide(this.largestSide);
     } else {
       this.resetScale();
+      this.resetPosition();
     }
-    this.resetRotation();
-    this.resetPosition();
   }
 
   setLargestSide(largestSide: number) {

@@ -23,7 +23,6 @@ import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
 import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import DeltaTime from 'virtual-reality/services/delta-time';
 import { LandscapeData } from 'explorviz-frontend/controllers/visualization';
-import { findGrabbableObject } from 'virtual-reality/utils/view-objects/interfaces/grabbable-object';
 import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
@@ -54,7 +53,6 @@ import { HighlightingUpdateMessage } from 'virtual-reality/utils/vr-message/send
 import WebSocketService from 'virtual-reality/services/web-socket';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
-import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
 import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import VrRoomSerializer from '../services/vr-room-serializer';
@@ -178,7 +176,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.debug('Constructor called');
 
     this.vrLandscapeRenderer.setLargestSide(2);
-    // this.vrLandscapeRenderer.centerLandscape();
 
     this.hammerInteraction = HammerInteraction.create();
 
@@ -193,14 +190,14 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
      * performance panel if it is activated in user settings
      */
   private initRendering() {
+    this.initServices();
     this.initRenderer();
     this.initCamera();
+    this.configureScene();
+    this.initArJs();
     this.initCameraCrosshair();
     this.initHammerJS();
-    this.initArJs();
     this.initInteraction();
-    this.configureScene();
-    this.initServices();
     this.initWebSocket();
   }
 
@@ -1049,22 +1046,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     if (application) this.vrApplicationRenderer.removeApplicationLocally(application);
   }
 
-  onObjectMoved({
-    originalMessage: {
-      objectId, position, quaternion, scale,
-    },
-  }: ForwardedMessage<ObjectMovedMessage>): void {
-    // Find moved object in the scene.
-    const movedObject = findGrabbableObject(this.sceneService.scene, objectId);
-    if (!movedObject) {
-      this.debug('Could not find moved object', objectId);
-      return;
-    }
-
-    movedObject.position.fromArray(position);
-    movedObject.quaternion.fromArray(quaternion);
-    movedObject.scale.fromArray(scale);
-  }
+  onObjectMoved(): void { }
 
   onComponentUpdate({
     originalMessage: { isFoundation, appId, componentId },
