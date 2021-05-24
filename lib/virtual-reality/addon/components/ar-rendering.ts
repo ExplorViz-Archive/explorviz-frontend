@@ -54,7 +54,6 @@ import { HighlightingUpdateMessage } from 'virtual-reality/utils/vr-message/send
 import WebSocketService from 'virtual-reality/services/web-socket';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
-import GrabbedObjectService from 'virtual-reality/services/grabbed-object';
 import { ObjectMovedMessage } from 'virtual-reality/utils/vr-message/sendable/object_moved';
 import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
@@ -105,9 +104,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @service('vr-message-sender')
   private sender!: VrMessageSender;
-
-  @service('grabbed-object')
-  private grabbedObjectService!: GrabbedObjectService;
 
   @service('remote-vr-users')
   private remoteUsers!: RemoteVrUserService;
@@ -277,8 +273,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.hammerInteraction.on('pinch', (deltaScaleInPercent: number) => {
       if (!this.pinchedObj) return;
 
-      const newScale = this.pinchedObj.scale.x + this.pinchedObj.scale.x * deltaScaleInPercent;
-      this.pinchedObj.scale.set(newScale, newScale, newScale);
+      this.pinchedObj.scale.copy(this.pinchedObj.scale.multiplyScalar(1 + deltaScaleInPercent));
     });
 
     this.hammerInteraction.on('pinchend', () => {
@@ -522,7 +517,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     if (intersection && intersection.object) {
       const { parent } = intersection.object;
       if (parent instanceof VrLandscapeObject3D || parent instanceof VrApplicationObject3D) {
-        this.scaleObject(parent, parent.scale.multiplyScalar(1.1));
+        parent.scale.copy(parent.scale.multiplyScalar(1.1));
       }
     }
   }
@@ -534,7 +529,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     if (intersection && intersection.object) {
       const { parent } = intersection.object;
       if (parent instanceof VrLandscapeObject3D || parent instanceof VrApplicationObject3D) {
-        this.scaleObject(parent, parent.scale.multiplyScalar(0.9));
+        parent.scale.copy(parent.scale.multiplyScalar(0.9));
       }
     }
   }
@@ -809,22 +804,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
           track.stop();
         });
       }
-    }
-  }
-
-  async scaleObject(object: VrLandscapeObject3D | VrApplicationObject3D, scale: THREE.Vector3) {
-    const allowedToGrab = await this.grabbedObjectService.grabObject(
-      object,
-    );
-
-    if (allowedToGrab) {
-      object.scale.copy(scale);
-      this.sender.sendObjectMoved(object.getGrabId(),
-        object.position, object.quaternion, object.scale);
-
-      this.grabbedObjectService.releaseObject(object);
-    } else {
-      AlertifyHandler.showAlertifyWarning('App is being scaled by another user!');
     }
   }
 
