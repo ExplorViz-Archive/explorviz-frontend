@@ -5,12 +5,17 @@ import { assert } from '@ember/debug';
 import CollaborativeSettingsService from 'collaborative-mode/services/collaborative-settings-service';
 import CollaborativeService from 'collaborative-mode/services/collaborative-service';
 import {
-  Click, CollaborativeEvents, CursorPosition, instanceOfIdentifiableMesh, Perspective,
+  Click, CollaborativeEvents, CursorPosition, Perspective,
 } from 'collaborative-mode/utils/collaborative-data';
 import THREE, { Vector3 } from 'three';
 import adjustForObjectRotation from 'explorviz-frontend/utils/collaborative-util';
 import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 import EventSettingsService from 'collaborative-mode/services/event-settings-service';
+import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
+import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
+import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
+import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
+import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 
 interface IModifierArgs {
   positional: [],
@@ -76,7 +81,7 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
     if (!this.args.named.onSingleClick || this.settings.userInControl !== click.user) { return; }
     if (!this.settings.watching && !this.eventSettings.singleClick) { return; }
 
-    const applicationMesh = this.getApplicationMeshByColabId(click.id);
+    const applicationMesh = this.getApplicationMeshById(click.id);
     this.args.named.onSingleClick(applicationMesh);
   }
 
@@ -85,7 +90,7 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
     if (!this.args.named.onDoubleClick || this.settings.userInControl !== click.user) { return; }
     if (!this.settings.watching && !this.eventSettings.doubleClick) { return; }
 
-    const applicationMesh = this.getApplicationMeshByColabId(click.id);
+    const applicationMesh = this.getApplicationMeshById(click.id);
     this.args.named.onDoubleClick(applicationMesh);
   }
 
@@ -103,7 +108,7 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
     }
 
     if (this.settings.userInControl !== mouse.user) { return; }
-    const intersectedViewObj = this.getApplicationMeshByColabId(mouse.id);
+    const intersectedViewObj = this.getApplicationMeshById(mouse.id);
 
     if (this.eventSettings.mouseHover) {
       this.args.named.mouseMove(intersectedViewObj);
@@ -118,7 +123,7 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
 
     const vec = adjustForObjectRotation(mouse.point, this.raycastObject3D.quaternion);
 
-    const intersectedViewObj = this.getApplicationMeshByColabId(mouse.id);
+    const intersectedViewObj = this.getApplicationMeshById(mouse.id);
 
     if (this.eventSettings.mouseHover) {
       const mousePosition = this.calculateMousePosition(vec);
@@ -157,10 +162,14 @@ export default class CollaborativeModifierModifier extends Modifier<IModifierArg
     return { x: pointerX, y: pointerY };
   }
 
-  getApplicationMeshByColabId(colabId: String) {
+  getApplicationMeshById(id: string) {
     return this.raycastObject3D.children.find((obj) => {
-      if (instanceOfIdentifiableMesh(obj)) {
-        return obj.colabId === colabId;
+      if (obj instanceof ClazzCommunicationMesh
+        || obj instanceof ClazzMesh
+        || obj instanceof ComponentMesh
+        || obj instanceof ApplicationMesh
+        || obj instanceof NodeMesh) {
+        return obj.dataModel.id === id;
       }
       return false;
     });

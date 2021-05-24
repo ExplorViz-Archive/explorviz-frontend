@@ -220,7 +220,7 @@ export default class VrLandscapeRenderer extends Service {
       structureLandscapeData.nodes.forEach((node: Node) => {
         this.renderNode(
           node,
-          modelIdToPlaneLayout.get(node.ipAddress),
+          modelIdToPlaneLayout.get(node.id),
           centerPoint,
         );
 
@@ -230,7 +230,7 @@ export default class VrLandscapeRenderer extends Service {
         applications.forEach((application: Application) => {
           this.renderApplication(
             application,
-            modelIdToPlaneLayout.get(application.instanceId),
+            modelIdToPlaneLayout.get(application.id),
             centerPoint,
           );
         });

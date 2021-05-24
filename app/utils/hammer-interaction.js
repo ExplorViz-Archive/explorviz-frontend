@@ -112,15 +112,26 @@ export default class HammerInteraction extends Object.extend(Evented) {
       time: 500,
     });
 
+    const pinch = new Hammer.Pinch({
+      event: 'pinch',
+      pointers: 2,
+    });
+
+    const rotate = new Hammer.Rotate({
+      event: 'rotate',
+      pointers: 2,
+    });
+
     const pan = new Hammer.Pan({
       event: 'pan',
     });
 
-    hammer.add([doubleTap, singleTap, press, pan]);
+    hammer.add([doubleTap, singleTap, press, pinch, rotate, pan]);
 
     doubleTap.recognizeWith(singleTap);
     singleTap.requireFailure(doubleTap);
     doubleTap.dropRequireFailure(singleTap);
+    pinch.recognizeWith(rotate);
 
     hammer.on('panstart', (evt) => {
       if (evt.button !== 1 && evt.button !== 3) {
@@ -226,6 +237,38 @@ export default class HammerInteraction extends Object.extend(Evented) {
       const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
       self.trigger('press', mousePosition, evt.srcEvent);
+    });
+
+    /*
+    * Expose pinch events
+    */
+
+    hammer.on('pinchstart', (evt) => {
+      self.trigger('pinchstart', evt);
+    });
+
+    hammer.on('pinchmove', (evt) => {
+      self.trigger('pinch', evt);
+    });
+
+    hammer.on('pinchend', (evt) => {
+      self.trigger('pinchend', evt);
+    });
+
+    /*
+    * Expose rotation events
+    */
+
+    hammer.on('rotatestart', (evt) => {
+      self.trigger('rotatestart', evt);
+    });
+
+    hammer.on('rotate', (evt) => {
+      self.trigger('rotate', evt);
+    });
+
+    hammer.on('rotateend', (evt) => {
+      self.trigger('rotateend', evt);
     });
   }
 }

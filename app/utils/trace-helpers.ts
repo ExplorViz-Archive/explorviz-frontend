@@ -1,34 +1,6 @@
 import {
-  isSpan, Span, Trace,
+  Span, Trace,
 } from './landscape-schemes/dynamic-data';
-
-/**
- * Returns the span's start time in nanoseconds
- */
-export function calculateStartTime(span: Span): number;
-/**
- * Returns the trace's start time in nanoseconds
- */
-export function calculateStartTime(trace: Trace): number;
-export function calculateStartTime(traceOrSpan: Trace|Span) {
-  const { startTime } = traceOrSpan;
-
-  return startTime.seconds * 1000000000.0 + startTime.nanoAdjust;
-}
-
-/**
- * Returns the span's end time in nanoseconds
- */
-export function calculateEndTime(span: Span): number;
-/**
- * Returns the trace's end time in nanoseconds
- */
-export function calculateEndTime(trace: Trace): number;
-export function calculateEndTime(traceOrSpan: Trace|Span) {
-  const { endTime } = traceOrSpan;
-
-  return endTime.seconds * 1000000000.0 + endTime.nanoAdjust;
-}
 
 /**
  * Returns the span's total duration in nanoseconds
@@ -39,10 +11,7 @@ export function calculateDuration(span: Span): number;
  */
 export function calculateDuration(trace: Trace): number;
 export function calculateDuration(traceOrSpan: Trace|Span) {
-  if (isSpan(traceOrSpan)) {
-    return calculateEndTime(traceOrSpan) - calculateStartTime(traceOrSpan);
-  }
-  return calculateEndTime(traceOrSpan) - calculateStartTime(traceOrSpan);
+  return traceOrSpan.endTime - traceOrSpan.startTime;
 }
 
 /**
@@ -104,7 +73,7 @@ export function getTraceRequestCount(trace: Trace) {
 }
 
 /**
- * Sorts the given span array by heir startTime and returns it
+ * Sorts the given span array by their startTime and returns it
  *
  * @param spanArary The array that is to be sorted
  * @param copy If set to true, a sorted copy of the array is returned,
@@ -115,18 +84,7 @@ export function sortSpanArrayByTime(spanArary: Span[], copy = false) {
   if (copy) {
     sortedArray = [...sortedArray];
   }
-  return sortedArray.sort((span1, span2) => {
-    if (span1.startTime.seconds < span2.startTime.seconds
-      || (span1.startTime.seconds === span2.startTime.seconds
-        && span1.startTime.nanoAdjust < span2.startTime.nanoAdjust)) {
-      return -1;
-    }
-    if (span1.startTime.seconds === span2.startTime.seconds
-      && span1.startTime.nanoAdjust === span2.startTime.nanoAdjust) {
-      return 0;
-    }
-    return 1;
-  });
+  return sortedArray.sort((span1, span2) => span1.startTime - span2.startTime);
 }
 
 /**

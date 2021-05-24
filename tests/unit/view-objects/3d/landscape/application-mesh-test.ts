@@ -42,12 +42,14 @@ module('Unit | View Object | 3d/landscape/application-mesh', function (hooks) {
 });
 
 const node: Node = {
+  id: 'foo.100.100.100.100',
   ipAddress: '100.100.100.100',
   hostName: 'foo',
   applications: [],
 };
 
 const application: Application = {
+  id: 'foo.100.100.100.100.1000',
   name: 'SampleApplication',
   language: 'java',
   instanceId: '1000',
