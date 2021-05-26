@@ -460,9 +460,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     );
 
     const allClasses = new Set(getAllClassesInApplication(application!));
+    const allClassIds = new Set([...allClasses].map((clazz) => clazz.id));
 
     const communicationInApplication = drawableClassCommunications.filter(
-      (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
+      (comm) => allClassIds.has(comm.sourceClass.id) || allClassIds.has(comm.targetClass.id),
     );
 
     this.drawableClassCommunications = communicationInApplication;
