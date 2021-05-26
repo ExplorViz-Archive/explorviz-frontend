@@ -118,19 +118,18 @@ export function preProcessAndEnhanceStructureLandscape(
 
   enhancedlandscapeStructure.nodes.forEach((node) => {
     node.applications.forEach((app) => {
+      addParentToApplication(app, node);
+      createApplicationId(app);
       app.packages.forEach((component) => {
         // create package ids in Java notation, e.g., 'net.explorviz.test'
         // and add parent relations for quicker access
-        component.id = component.name;
         component.subPackages.forEach((subComponent) => {
-          createPackageIds(subComponent, component.id);
+          createPackageIds(component, app.id);
           addParentToPackage(subComponent, component);
         });
         addParentToClazzes(component);
       });
       createClassIds(app.packages);
-      addParentToApplication(app, node);
-      createApplicationId(app);
     });
     createNodeId(node);
   });
