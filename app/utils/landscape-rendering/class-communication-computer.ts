@@ -93,7 +93,7 @@ export default function computeDrawableClassCommunication(
     } else {
       const drawableClassCommunication = sourceTargetClassIdToDrawable.get(targetSourceClassId);
 
-      if (drawableClassCommunication !== undefined) {
+      if (drawableClassCommunication) {
         drawableClassCommunication.bidirectional = true;
         drawableClassCommunication.totalRequests += totalRequests;
       } else {

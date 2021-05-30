@@ -97,15 +97,15 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
   } // END calculatePipeSizeFromQuantiles
 
   /**
-   * Returns the first parent component which is open or - if it does not exist -
-   * the root component (which has no parent itself)
+   * Returns the first parent component which is open
+   * or - if it does not exist - the deepest closed component
    *
    * @param component Component for which an open parent shall be returned
    */
-  function findFirstParentOpenComponent(component: Package): Package|null {
+  function findFirstOpenOrLastClosedAncestorComponent(component: Package): Package {
     const parentComponent = component.parent;
 
-    if (!parentComponent) return null;
+    if (!parentComponent) return component;
 
     // Check open status in corresponding component mesh
     const parentMesh = applicationObject3D.getBoxMeshbyModelId(parentComponent.id);
@@ -114,7 +114,7 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
     }
 
     // Recursive call
-    return findFirstParentOpenComponent(parentComponent);
+    return findFirstOpenOrLastClosedAncestorComponent(parentComponent);
   }
 
   function getParentComponentOfDrawableCommunication(communication: DrawableClassCommunication) {
@@ -182,57 +182,44 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
         const sourceClazz = classCommunication.sourceClass;
         const targetClazz = classCommunication.targetClass;
 
-        if (sourceClazz && targetClazz) {
-          const sourceParent = sourceClazz.parent;
-          const sourceParentMesh = applicationObject3D.getBoxMeshbyModelId(sourceParent.id);
+        const sourceParent = sourceClazz.parent;
+        const sourceParentMesh = applicationObject3D.getBoxMeshbyModelId(sourceParent.id);
 
-          // Determine where the communication should begin
-          // (clazz or component - based upon their visiblity)
-          if (sourceParentMesh instanceof ComponentMesh && sourceParentMesh.opened) {
-            sourceEntity = classCommunication.sourceClass;
-          } else {
-            sourceEntity = findFirstParentOpenComponent(sourceParent);
+        // Determine where the communication should begin
+        // (clazz or component - based upon their visiblity)
+        if (sourceParentMesh instanceof ComponentMesh && sourceParentMesh.opened) {
+          sourceEntity = classCommunication.sourceClass;
+        } else {
+          sourceEntity = findFirstOpenOrLastClosedAncestorComponent(sourceParent);
+        }
+
+        const targetParent = targetClazz.parent;
+        const targetParentMesh = applicationObject3D.getBoxMeshbyModelId(targetParent.id);
+
+        // Determine where the communication should end
+        // (clazz or component - based upon their visiblity)
+        if (targetParentMesh instanceof ComponentMesh && targetParentMesh.opened) {
+          targetEntity = classCommunication.targetClass;
+        } else {
+          targetEntity = findFirstOpenOrLastClosedAncestorComponent(targetParent);
+        }
+
+        if (sourceEntity !== targetEntity) {
+          const commLayout = new CommunicationLayout(classCommunication);
+          layoutMap.set(classCommunication.id, commLayout);
+
+          const sourceLayout = boxLayoutMap.get(sourceEntity.id);
+          if (sourceLayout) {
+            commLayout.startX = sourceLayout.positionX + sourceLayout.width / 2.0;
+            commLayout.startY = sourceLayout.positionY;
+            commLayout.startZ = sourceLayout.positionZ + sourceLayout.depth / 2.0;
           }
 
-          const targetParent = targetClazz.parent;
-          const targetParentMesh = applicationObject3D.getBoxMeshbyModelId(targetParent.id);
-
-          // Determine where the communication should end
-          // (clazz or component - based upon their visiblity)
-          if (targetParentMesh instanceof ComponentMesh && targetParentMesh.opened) {
-            targetEntity = classCommunication.targetClass;
-          } else {
-            targetEntity = findFirstParentOpenComponent(targetParent);
-          }
-
-          if (sourceEntity || targetEntity) {
-            const commLayout = new CommunicationLayout(classCommunication);
-            layoutMap.set(classCommunication.id, commLayout);
-
-            if (sourceEntity) {
-              const sourceLayout = boxLayoutMap.get(sourceEntity.id);
-              if (sourceLayout) {
-                commLayout.startX = sourceLayout.positionX + sourceLayout.width / 2.0;
-                commLayout.startY = sourceLayout.positionY;
-                commLayout.startZ = sourceLayout.positionZ + sourceLayout.depth / 2.0;
-              } else {
-                commLayout.startX = 0;
-                commLayout.startY = 0;
-                commLayout.startZ = 0;
-              }
-            }
-            if (targetEntity) {
-              const targetLayout = boxLayoutMap.get(targetEntity.id);
-              if (targetLayout) {
-                commLayout.endX = targetLayout.positionX + targetLayout.width / 2.0;
-                commLayout.endY = targetLayout.positionY + 0.05;
-                commLayout.endZ = targetLayout.positionZ + targetLayout.depth / 2.0;
-              } else {
-                commLayout.endX = 0;
-                commLayout.endY = 0;
-                commLayout.endZ = 0;
-              }
-            }
+          const targetLayout = boxLayoutMap.get(targetEntity.id);
+          if (targetLayout) {
+            commLayout.endX = targetLayout.positionX + targetLayout.width / 2.0;
+            commLayout.endY = targetLayout.positionY + 0.05;
+            commLayout.endZ = targetLayout.positionZ + targetLayout.depth / 2.0;
           }
         }
       }
