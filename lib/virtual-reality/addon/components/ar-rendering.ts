@@ -758,10 +758,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         AlertifyHandler.showAlertifySuccess(message);
 
         break;
-      } else {
-        const message = `Application '${applicationModel.name}' is already open`;
-
-        AlertifyHandler.showAlertifyWarning(message);
       }
     }
   }

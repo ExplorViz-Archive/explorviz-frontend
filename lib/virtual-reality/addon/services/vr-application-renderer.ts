@@ -215,10 +215,14 @@ export default class VrApplicationRenderer extends Service {
         child.disposeRecursively();
       }
     });
+
+    this.drawableClassCommunications.delete(application.dataModel.instanceId);
   }
 
   removeAllApplicationsLocally() {
     this.openApplications.forEach((app) => this.removeApplicationLocally(app));
+
+    this.drawableClassCommunications.clear();
   }
 
   toggleComponent(
