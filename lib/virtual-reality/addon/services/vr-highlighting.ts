@@ -45,7 +45,7 @@ export default class VrHighlightingService extends Service {
     if (isHightlightableMesh(object)) {
       this.hightlightMesh(application, object, this.localUser.color);
 
-      const appId = application.dataModel.instanceId;
+      const appId = application.dataModel.id;
       const entityType = this.getEntityType(object);
       const entityId = this.getEntityId(object);
       this.sender.sendHighlightingUpdate(
@@ -75,7 +75,7 @@ export default class VrHighlightingService extends Service {
 
   updateHighlightingLocally(application: ApplicationObject3D) {
     const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(
-      application.dataModel.instanceId,
+      application.dataModel.id,
     );
     if (drawableComm) {
       this.vrApplicationRenderer.appCommRendering.addCommunication(
@@ -92,7 +92,7 @@ export default class VrHighlightingService extends Service {
     color?: THREE.Color,
   ) {
     const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(
-      application.dataModel.instanceId,
+      application.dataModel.id,
     );
     if (drawableComm) {
       application.setHighlightingColor(

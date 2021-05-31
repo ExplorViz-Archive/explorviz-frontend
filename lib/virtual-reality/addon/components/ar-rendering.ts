@@ -708,7 +708,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         ${applicationModel.name}</b> available.`;
 
       AlertifyHandler.showAlertifyWarning(message);
-    } else if (this.vrApplicationRenderer.isApplicationOpen(applicationModel.instanceId)) {
+    } else if (this.vrApplicationRenderer.isApplicationOpen(applicationModel.id)) {
       // ToDo: Add info about occupied marker
       AlertifyHandler.showAlertifyWarning('Application already opened.');
     } else {

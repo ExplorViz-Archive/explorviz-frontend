@@ -170,7 +170,7 @@ export default class VrApplicationRenderer extends Service {
 
     // Draw communication lines.
     const drawableComm = this.drawableClassCommunications.get(
-      application.dataModel.instanceId,
+      application.dataModel.id,
     );
     if (drawableComm) {
       this.appCommRendering.addCommunication(application, drawableComm);
@@ -189,7 +189,7 @@ export default class VrApplicationRenderer extends Service {
   removeApplication(application: ApplicationObject3D): Promise<boolean> {
     return new Promise((resolve) => {
       // Ask backend to close the application.
-      const nonce = this.sender.sendAppClosed(application.dataModel.instanceId);
+      const nonce = this.sender.sendAppClosed(application.dataModel.id);
 
       // Remove the application only when the backend allowed the application to be closed.
       this.receiver.awaitResponse({
@@ -208,7 +208,7 @@ export default class VrApplicationRenderer extends Service {
   }
 
   removeApplicationLocally(application: ApplicationObject3D) {
-    this.openApplications.delete(application.dataModel.instanceId);
+    this.openApplications.delete(application.dataModel.id);
     application.parent?.remove(application);
     application.children.forEach((child) => {
       if (child instanceof BaseMesh) {
@@ -216,7 +216,7 @@ export default class VrApplicationRenderer extends Service {
       }
     });
 
-    this.drawableClassCommunications.delete(application.dataModel.instanceId);
+    this.drawableClassCommunications.delete(application.dataModel.id);
   }
 
   removeAllApplicationsLocally() {
@@ -231,7 +231,7 @@ export default class VrApplicationRenderer extends Service {
   ) {
     this.toggleComponentLocally(componentMesh, applicationObject3D);
     this.sender.sendComponentUpdate(
-      applicationObject3D.dataModel.instanceId,
+      applicationObject3D.dataModel.id,
       componentMesh.dataModel.id,
       componentMesh.opened,
       false,
@@ -253,7 +253,7 @@ export default class VrApplicationRenderer extends Service {
   closeAllComponents(applicationObject3D: ApplicationObject3D) {
     this.closeAllComponentsLocally(applicationObject3D);
     this.sender.sendComponentUpdate(
-      applicationObject3D.dataModel.instanceId,
+      applicationObject3D.dataModel.id,
       '',
       false,
       true,
@@ -271,7 +271,7 @@ export default class VrApplicationRenderer extends Service {
     callback?: (applicationObject3D: ApplicationObject3D) => void,
   ) {
     try {
-      if (this.isApplicationOpen(applicationModel.instanceId)) return;
+      if (this.isApplicationOpen(applicationModel.id)) return;
 
       const workerPayload = {
         structure: applicationModel,
@@ -303,7 +303,7 @@ export default class VrApplicationRenderer extends Service {
       this.createDrawableClassCommunications(applicationObject3D);
 
       const drawableComm = this.drawableClassCommunications.get(
-        applicationObject3D.dataModel.instanceId,
+        applicationObject3D.dataModel.id,
       )!;
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
@@ -322,7 +322,7 @@ export default class VrApplicationRenderer extends Service {
 
       this.applicationGroup.add(applicationObject3D);
       this.openApplications.set(
-        applicationModel.instanceId,
+        applicationModel.id,
         applicationObject3D,
       );
 
@@ -337,7 +337,7 @@ export default class VrApplicationRenderer extends Service {
   ) {
     if (
       this.drawableClassCommunications.has(
-        applicationObject3D.dataModel.instanceId,
+        applicationObject3D.dataModel.id,
       )
     ) {
       return;
@@ -355,7 +355,7 @@ export default class VrApplicationRenderer extends Service {
       (comm) => allClasses.has(comm.sourceClass) || allClasses.has(comm.targetClass),
     );
     this.drawableClassCommunications.set(
-      applicationObject3D.dataModel.instanceId,
+      applicationObject3D.dataModel.id,
       communicationInApplication,
     );
   }

@@ -642,7 +642,7 @@ export default class VrRendering
     }
 
     if (
-      this.vrApplicationRenderer.isApplicationOpen(applicationModel.instanceId)
+      this.vrApplicationRenderer.isApplicationOpen(applicationModel.id)
     ) {
       this.showHint('Application already opened');
       return Promise.resolve(null);

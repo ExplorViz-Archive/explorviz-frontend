@@ -148,7 +148,7 @@ export function getIdOfEntity(entity: EntityMesh): string {
     return model.ipAddress;
   }
   if (isApplication(model)) {
-    return model.instanceId;
+    return model.id;
   }
   return model.id;
 }
