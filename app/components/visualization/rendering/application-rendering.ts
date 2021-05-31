@@ -396,8 +396,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @restartableTask*
   populateScene() {
     try {
-      const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter',
-        this.applicationObject3D.dataModel);
+      const workerPayload = {
+        structure: this.applicationObject3D.dataModel,
+        dynamic: this.applicationObject3D.traces,
+      };
+
+      const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', workerPayload);
 
       // Remember state of components
       const { openComponentIds } = this.applicationObject3D;
