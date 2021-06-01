@@ -176,8 +176,8 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
 
       if ((parentMesh instanceof ComponentMesh && parentMesh.opened)
       || parentMesh instanceof FoundationMesh) {
-        let sourceEntity: any = null;
-        let targetEntity: any = null;
+        let sourceEntity: Class|Package|null = null;
+        let targetEntity: Class|Package|null = null;
 
         const sourceClazz = classCommunication.sourceClass;
         const targetClazz = classCommunication.targetClass;
@@ -204,23 +204,21 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
           targetEntity = findFirstOpenOrLastClosedAncestorComponent(targetParent);
         }
 
-        if (sourceEntity !== targetEntity) {
-          const commLayout = new CommunicationLayout(classCommunication);
-          layoutMap.set(classCommunication.id, commLayout);
+        const commLayout = new CommunicationLayout(classCommunication);
+        layoutMap.set(classCommunication.id, commLayout);
 
-          const sourceLayout = boxLayoutMap.get(sourceEntity.id);
-          if (sourceLayout) {
-            commLayout.startX = sourceLayout.positionX + sourceLayout.width / 2.0;
-            commLayout.startY = sourceLayout.positionY;
-            commLayout.startZ = sourceLayout.positionZ + sourceLayout.depth / 2.0;
-          }
+        const sourceLayout = boxLayoutMap.get(sourceEntity.id);
+        if (sourceLayout) {
+          commLayout.startX = sourceLayout.positionX + sourceLayout.width / 2.0;
+          commLayout.startY = sourceLayout.positionY;
+          commLayout.startZ = sourceLayout.positionZ + sourceLayout.depth / 2.0;
+        }
 
-          const targetLayout = boxLayoutMap.get(targetEntity.id);
-          if (targetLayout) {
-            commLayout.endX = targetLayout.positionX + targetLayout.width / 2.0;
-            commLayout.endY = targetLayout.positionY + 0.05;
-            commLayout.endZ = targetLayout.positionZ + targetLayout.depth / 2.0;
-          }
+        const targetLayout = boxLayoutMap.get(targetEntity.id);
+        if (targetLayout) {
+          commLayout.endX = targetLayout.positionX + targetLayout.width / 2.0;
+          commLayout.endY = targetLayout.positionY + 0.05;
+          commLayout.endZ = targetLayout.positionZ + targetLayout.depth / 2.0;
         }
       }
     }
