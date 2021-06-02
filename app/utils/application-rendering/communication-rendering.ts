@@ -2,6 +2,8 @@ import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/applicati
 import applyCommunicationLayout from 'explorviz-frontend/utils/application-rendering/communication-layouter';
 import Configuration from 'explorviz-frontend/services/configuration';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import CommunicationLayout from 'explorviz-frontend/view-objects/layout-models/communication-layout';
+import { Vector3 } from 'three';
 import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
 
 export default class CommunicationRendering {
@@ -10,6 +12,31 @@ export default class CommunicationRendering {
 
   constructor(configuration: Configuration) {
     this.configuration = configuration;
+  }
+
+  private computeCurveHeight(commLayout: CommunicationLayout) {
+    let baseCurveHeight = 20;
+
+    if (this.configuration.commCurveHeightDependsOnDistance) {
+      const classDistance = Math.hypot(
+        commLayout.endX - commLayout.startX, commLayout.endZ - commLayout.startZ,
+      );
+      baseCurveHeight = classDistance * 0.5;
+    }
+
+    return baseCurveHeight * this.configuration.commCurveHeightMultiplier;
+  }
+
+  // Add arrow indicators for drawable class communication
+  private addArrows(pipe: ClazzCommunicationMesh, curveHeight: number, viewCenterPoint: Vector3) {
+    const arrowOffset = 0.8;
+    const arrowHeight = curveHeight / 2 + arrowOffset;
+    const arrowThickness = this.configuration.commArrowThickness;
+    const arrowColorHex = this.configuration.applicationColors.communicationArrow.getHex();
+
+    if (typeof arrowThickness === 'number' && arrowThickness > 0.0) {
+      pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColorHex);
+    }
   }
 
   /**
@@ -39,14 +66,7 @@ export default class CommunicationRendering {
     const {
       communication: communicationColor,
       highlightedEntity: highlightedEntityColor,
-      communicationArrow: arrowColor,
     } = this.configuration.applicationColors;
-
-    // Retrieve curve preferences
-    const maybeCurveHeight = 20;
-    // this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCurvyCommHeight');
-    const curveHeight = typeof maybeCurveHeight === 'number' ? maybeCurveHeight : 0.0;
-    const isCurved = curveHeight !== 0.0;
 
     // Render all drawable communications
     drawableClassCommunications.forEach((drawableClazzComm) => {
@@ -61,20 +81,13 @@ export default class CommunicationRendering {
       const pipe = new ClazzCommunicationMesh(commLayout, drawableClazzComm,
         communicationColor, highlightedEntityColor);
 
+      const curveHeight = this.computeCurveHeight(commLayout);
+
       pipe.render(viewCenterPoint, curveHeight);
 
       applicationObject3D.add(pipe);
 
-      // Add arrow indicators for communication
-      const ARROW_OFFSET = 0.8;
-      const arrowHeight = isCurved ? curveHeight / 2 + ARROW_OFFSET : ARROW_OFFSET;
-      const arrowThickness = 0.5;
-      // this.currentUser.getPreferenceOrDefaultValue('rangesetting', 'appVizCommArrowSize');
-      const arrowColorHex = arrowColor.getHex();
-
-      if (typeof arrowThickness === 'number' && arrowThickness > 0.0) {
-        pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColorHex);
-      }
+      this.addArrows(pipe, curveHeight, viewCenterPoint);
     });
   }
 }

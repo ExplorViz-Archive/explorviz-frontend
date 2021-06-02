@@ -72,6 +72,16 @@ export default class Configuration extends Service {
   @tracked
   applicationColors: ApplicationColors;
 
+  // #region APPLICATION LAYOUT
+
+  commCurveHeightDependsOnDistance = true;
+
+  commCurveHeightMultiplier = 1;
+
+  commArrowThickness = 0.5;
+
+  // #endregion APPLICATION LAYOUT
+
   /**
    * Sets default colors
    */
