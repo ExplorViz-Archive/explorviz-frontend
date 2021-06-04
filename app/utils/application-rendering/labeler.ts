@@ -69,7 +69,7 @@ export function addBoxTextLabel(boxMesh: ComponentMesh|FoundationMesh, font: THR
  * @param size Size of text
  */
 export function addClazzTextLabel(clazzMesh: ClazzMesh, font: THREE.Font,
-  color: THREE.Color, size = 0.5, replace = false) {
+  color: THREE.Color, size = 0.75, replace = false) {
   if (clazzMesh.labelMesh && !replace) return;
 
   const text = clazzMesh.dataModel.name;
