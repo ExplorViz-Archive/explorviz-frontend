@@ -74,9 +74,7 @@ export default class Configuration extends Service {
 
   // #region APPLICATION LAYOUT
 
-  commCurveHeightDependsOnDistance = true;
-
-  commCurveHeightMultiplier = 1;
+  commCurveHeight = 20;
 
   commArrowThickness = 0.5;
 
