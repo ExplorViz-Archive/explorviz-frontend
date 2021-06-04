@@ -164,8 +164,8 @@ function applyBoxLayout(application, allLandscapeTraces) {
 
   function calcClazzHeight(application, allLandscapeTraces) {
 
-    const CLAZZ_SIZE_DEFAULT = 0.05;
-    const CLAZZ_SIZE_EACH_STEP = 1.1;
+    const CLAZZ_SIZE_DEFAULT = 1.5;
+    const CLAZZ_SIZE_EACH_STEP = 1.5;
 
     const clazzes = [];
     application.packages.forEach((component) => {
@@ -208,7 +208,6 @@ function applyBoxLayout(application, allLandscapeTraces) {
 
     clazzes.forEach((clazz) => {
       let clazzData = layoutMap.get(clazz.id);
-      //clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT) * 2.0;
       clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT);
     });
   }
