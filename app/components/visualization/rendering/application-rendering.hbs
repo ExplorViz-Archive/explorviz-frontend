@@ -14,6 +14,17 @@
       {{did-insert this.outerDivInserted}}
       {{did-resize this.resize debounce=100}}
     >
+      {{#if this.heatmapConf.heatmapActive}}
+        <div style="position: absolute; right: 0">
+          <HeatmapLegend />
+          <MetricSelector
+            @metrics={{this.heatmapConf.metrics}}
+            @selectMetric={{this.updateMetric}}
+            @selectedMetric={{this.heatmapConf.selectedMetric}}
+          />
+        </div>
+      {{/if}}
+
       <canvas
         class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
         {{interaction-modifier

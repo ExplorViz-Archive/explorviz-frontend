@@ -1,0 +1,12 @@
+<PowerSelect
+  @options={{@metrics}}
+  @triggerClass="metric-selector"
+  @selected={{@selectedMetric}}
+  @onchange={{@selectMetric}}
+  @placeholder="Select metric..."
+  @searchEnabled={{false}}
+  @matchTriggerWidth={{false}} as |metric|
+>
+  {{capitalize metric.name}}
+  {{!-- <HelpTooltipRight @title={{metric.description}}/> --}}
+</PowerSelect>

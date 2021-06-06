@@ -88,6 +88,7 @@
     "popper.js": "^1.16.0",
     "qunit": "2.14.0",
     "typescript": "4.0.3",
+    "stats.js": "^0.17.0",
     "yuidoc-bootstrap-theme": "^1.0.6",
     "yuidocjs": "^0.10.2"
   },
@@ -131,6 +132,7 @@
     "plotly.js-dist": "^1.57.1",
     "rsvp": "^4.8.5",
     "sass": "^1.24.2",
+    "simpleheat": "^0.4.0",
     "stats.js": "^0.17.0",
     "three": "^0.119.1",
     "threejs-meshline": "^2.0.12",
@@ -138,6 +140,7 @@
   },
   "ember-addon": {
     "paths": [
+      "lib/heatmap",
       "lib/virtual-reality",
       "lib/collaborative-mode"
     ]

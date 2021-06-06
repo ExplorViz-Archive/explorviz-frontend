@@ -1,0 +1,17 @@
+#heatmap-legend-container {
+  width: 150px;
+  border: 1px solid lightgray;
+  border-radius: 0.2rem;
+  background-color: white;
+  user-select: none;
+}
+
+#heatmap-legend {
+  width: 33.3333333333%;
+  height: 250px;
+}
+
+#heatmap-legend-label {
+  width: 66.666666666%;
+  height: 250px;
+}

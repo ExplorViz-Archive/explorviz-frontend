@@ -121,8 +121,12 @@ export function addFoundationAndChildrenToApplication(applicationObject3D: Appli
     highlightedEntity: highlightedEntityColor,
   } = applicationColors;
 
+  const segmentScalar = 0.45;
+  const widthSegments = Math.floor(applicationLayout.width * segmentScalar);
+  const depthSegments = Math.floor(applicationLayout.depth * segmentScalar);
+
   const mesh = new FoundationMesh(applicationLayout,
-    application, foundationColor, highlightedEntityColor);
+    application, foundationColor, highlightedEntityColor, widthSegments, depthSegments);
 
   addMeshToApplication(mesh, applicationObject3D);
 

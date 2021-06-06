@@ -42,6 +42,18 @@
       "collaborative-mode/test-support/*": [
         "lib/collaborative-mode/addon-test-support/*"
       ],
+      "heatmap": [
+        "lib/heatmap/addon"
+      ],
+      "heatmap/*": [
+        "lib/heatmap/addon/*"
+      ],
+      "heatmap/test-support": [
+        "lib/heatmap/addon-test-support"
+      ],
+      "heatmap/test-support/*": [
+        "lib/heatmap/addon-test-support/*"
+      ],
       "virtual-reality": [
         "lib/virtual-reality/addon"
       ],
@@ -69,6 +81,7 @@
     "tests",
     "types",
     "lib/collaborative-mode",
-    "lib/virtual-reality"
+    "lib/virtual-reality",
+    "lib/heatmap"
   ]
 }
