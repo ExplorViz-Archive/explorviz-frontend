@@ -45,6 +45,7 @@ import {
   toggleComponentMeshState,
 } from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
+import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPos, removeHeatmapHelperLines } from 'heatmap/utils/heatmap-helper';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -157,7 +158,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const { application, dynamicLandscapeData } = this.args.landscapeData;
 
     this.applicationObject3D = new ApplicationObject3D(application!,
-      new Map(), dynamicLandscapeData);
+      new Map(), { instanceCountMap: new Map() }, dynamicLandscapeData);
 
     this.communicationRendering = new CommunicationRendering(this.configuration);
 
@@ -281,8 +282,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       highlight(mesh, this.applicationObject3D, this.drawableClassCommunications);
     }
     if (this.heatmapConf.heatmapActive) {
-      this.setAppComponentVisibility(0.1);
-      this.setAppCommunicationVisibility(0.1);
+      this.applicationObject3D.setOpacity(0.1);
     }
   }
 
@@ -310,8 +310,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
     }
     if (this.heatmapConf.heatmapActive) {
-      this.setAppComponentVisibility(0.1);
-      this.setAppCommunicationVisibility(0.1);
+      this.applicationObject3D.setOpacity(0.1);
     }
   }
 
@@ -423,14 +422,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         dynamic: this.applicationObject3D.traces,
       };
 
-      const layoutedApplication: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', workerPayload);
+      const applicationData: {layoutMap: Map<string, LayoutData>, metricsMap: Map<string, any>} = yield this.worker.postMessage('city-layouter', workerPayload);
 
       // Remember state of components
       const { openComponentIds } = this.applicationObject3D;
 
       // Converting plain JSON layout data due to worker limitations
-      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutedApplication);
+      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(applicationData.layoutMap);
       this.applicationObject3D.boxLayoutMap = boxLayoutMap;
+      this.applicationObject3D.metrics.instanceCountMap = applicationData.metricsMap;
 
       // Clean up old application
       this.cleanUpApplication();
@@ -503,11 +503,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.applicationObject3D.rotation.fromArray(rotation);
   }
   // #endregion COLLABORATIVE
+
   // #region HEATMAP
 
   applyHeatmap() {
-    this.setAppComponentVisibility(0.1);
-    this.setAppCommunicationVisibility(0.1);
+    this.applicationObject3D.setOpacity(0.1);
 
     const foundationMesh = this.applicationObject3D
       .getBoxMeshbyModelId(this.args.landscapeData.application!.id);
@@ -520,13 +520,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     let simpleHeatMap: any;
     let canvas: any;
 
-    this.clazzMetrics = new Map();
-
-    this.applicationObject3D.getBoxMeshes().forEach((boxMesh) => {
-      if (boxMesh instanceof ClazzMesh) {
-        this.clazzMetrics.set(boxMesh.dataModel.id, Math.random() * 10);
-      }
-    });
+    this.clazzMetrics = this.applicationObject3D.metrics.instanceCountMap;
 
     const heatmap = this.clazzMetrics;
 
@@ -552,7 +546,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     foundationMesh.getWorldPosition(foundationWorldPosition);
 
-    this.removeHeatmapHelperLines();
+    removeHeatmapHelperLines(this.applicationObject3D);
 
     const boxMeshes = this.applicationObject3D.getBoxMeshes();
 
@@ -575,77 +569,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     } else {
       simpleHeatMap.draw(0.0);
 
-      ApplicationRendering.applySimpleHeatOnFoundation(foundationMesh, canvas);
+      applySimpleHeatOnFoundation(foundationMesh, canvas);
     }
-  }
-
-  /**
-   * Sets the visiblity of all component meshes with the current application
-   * @param opaccity Determines how opaque/visible component meshes should be
-   */
-  setAppComponentVisibility(opacity = 1) {
-    const allMeshes = this.applicationObject3D.getAllMeshes();
-
-    allMeshes.forEach((mesh) => {
-      if (mesh instanceof ComponentMesh) {
-        if (opacity === 1) {
-          mesh.turnOpaque();
-        } else {
-          mesh.turnTransparent(opacity);
-        }
-      }
-    });
-  }
-
-  /**
-   * Sets the visiblity of all communication meshes with the current application
-   * @param opaccity Determines how opaque/visible component meshes should be
-   */
-  setAppCommunicationVisibility(opacity = 1) {
-    const commMeshes = this.applicationObject3D.getCommMeshes();
-
-    commMeshes.forEach((mesh) => {
-      if (mesh instanceof ClazzCommunicationMesh) {
-        if (opacity === 1) {
-          mesh.turnOpaque();
-        } else {
-          mesh.turnTransparent(opacity);
-        }
-      }
-    });
-  }
-
-  /**
-   * Adds a line to visualize the vertical line from a clazz to the foundation mesh
-   */
-  addHeatmapHelperLine(clazzPos: THREE.Vector3, worldIntersectionPoint: THREE.Vector3) {
-    const material1 = new THREE.LineBasicMaterial({ color: 0x808080 });
-    const points = [];
-
-    points.push(this.applicationObject3D.worldToLocal(clazzPos));
-    points.push(worldIntersectionPoint);
-    const geometry1 = new THREE.BufferGeometry().setFromPoints(points);
-    const line = new THREE.Line(geometry1, material1);
-    line.name = 'helperline';
-
-    this.applicationObject3D.add(line);
-  }
-
-  /**
-   * Removes the vertical lines which visualize position of a clazz on the foundation mesh
-   */
-  removeHeatmapHelperLines() {
-    const applicationChildren: THREE.Object3D[] = [];
-
-    // Remove helper lines if existend
-    this.applicationObject3D.traverse(((child) => {
-      if (child.name === 'helperline') {
-        applicationChildren.push(child);
-      }
-    }));
-    applicationChildren.forEach(((child) => {
-      this.applicationObject3D.remove(child);
-    }));
   }
 
   heatmapClazzUpdate(clazz: Class, foundationMesh: FoundationMesh, simpleHeatMap: any,
@@ -664,7 +589,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     const clazzPos = clazzMesh.position.clone();
     const heatmap = this.clazzMetrics;
-    const viewPos = this.computeHeatMapViewPos(foundationMesh);
+    const viewPos = computeHeatMapViewPos(foundationMesh, this.camera);
 
     clazzPos.y -= clazzMesh.height / 2;
 
@@ -682,7 +607,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.applicationObject3D.worldToLocal(worldIntersectionPoint);
 
     if (this.heatmapConf.useHelperLines) {
-      this.addHeatmapHelperLine(clazzPos, worldIntersectionPoint);
+      addHeatmapHelperLine(this.applicationObject3D, clazzPos, worldIntersectionPoint);
     }
 
     // Compute color only for the first intersection point for consistency if one was found.
@@ -713,36 +638,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         }
       }
     }
-  }
-
-  static applySimpleHeatOnFoundation(foundationMesh: FoundationMesh, canvas: HTMLCanvasElement) {
-    const color = 'rgb(255, 255, 255)';
-
-    // @ts-ignore
-    foundationMesh.material = [];
-
-    const sideMaterial = new THREE.MeshLambertMaterial({ color: new THREE.Color(color) });
-    // @ts-ignore
-    for (let i = 1; i <= 6; i++) foundationMesh.material.push(sideMaterial.clone());
-
-    // Edit upper side of foundation
-    // @ts-ignore
-    const heatmapMaterial = foundationMesh.material[2] as THREE.MeshLambertMaterial;
-
-    heatmapMaterial.emissiveMap = new THREE.CanvasTexture(canvas);
-    heatmapMaterial.emissive = new THREE.Color('rgb(125, 125, 125)');
-    heatmapMaterial.emissiveIntensity = 1;
-    heatmapMaterial.needsUpdate = true;
-  }
-
-  computeHeatMapViewPos(foundationMesh: FoundationMesh) {
-    // Create viewpoint from which the faces of the foundation are computed for each clazz.
-    const viewPos = foundationMesh.position.clone();
-    viewPos.y = Math.max(this.camera.position.z * 0.8, 100);
-
-    foundationMesh.localToWorld(viewPos);
-
-    return viewPos;
   }
 
   // #endregion HEATMAP
@@ -879,8 +774,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
 
     if (this.heatmapConf.heatmapActive) {
-      this.setAppComponentVisibility(0.1);
-      this.setAppCommunicationVisibility(0.1);
+      this.applicationObject3D.setOpacity(0.1);
     }
   }
 
@@ -1012,9 +906,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   removeHeatmap() {
-    this.setAppComponentVisibility(1);
-    this.setAppCommunicationVisibility(1);
-    this.removeHeatmapHelperLines();
+    this.applicationObject3D.setOpacity(1);
+    removeHeatmapHelperLines(this.applicationObject3D);
 
     const foundationMesh = this.applicationObject3D
       .getBoxMeshbyModelId(this.args.landscapeData.application!.id);

@@ -291,6 +291,7 @@ export default class VrApplicationRenderer extends Service {
       const applicationObject3D = new VrApplicationObject3D(
         applicationModel,
         boxLayoutMap,
+        { instanceCountMap: new Map() },
         this.dynamicLandscapeData,
       );
 

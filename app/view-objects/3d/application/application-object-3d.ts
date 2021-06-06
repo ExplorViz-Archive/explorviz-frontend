@@ -24,6 +24,8 @@ export default class ApplicationObject3D extends THREE.Object3D {
 
   boxLayoutMap: Map<string, BoxLayout>;
 
+  metrics: {instanceCountMap: Map<string, any>};
+
   traces: Trace[];
 
   /**
@@ -44,11 +46,13 @@ export default class ApplicationObject3D extends THREE.Object3D {
   @tracked
   highlightedEntity: BaseMesh | Trace | null = null;
 
-  constructor(application: Application, boxLayoutMap: Map<string, BoxLayout>, traces: Trace[]) {
+  constructor(application: Application, boxLayoutMap: Map<string, BoxLayout>,
+    metrics: {instanceCountMap: Map<string, any>}, traces: Trace[]) {
     super();
 
     this.dataModel = application;
     this.boxLayoutMap = boxLayoutMap;
+    this.metrics = metrics;
     this.traces = traces;
   }
 
@@ -176,6 +180,29 @@ export default class ApplicationObject3D extends THREE.Object3D {
         }
       }
     });
+  }
+
+  /**
+   * Sets the visiblity of all communication meshes with the current application
+   * @param opaccity Determines how opaque/visible component meshes should be
+   */
+  setCommunicationOpacity(opacity = 1) {
+    const commMeshes = this.getCommMeshes();
+
+    commMeshes.forEach((mesh) => {
+      if (mesh instanceof ClazzCommunicationMesh) {
+        if (opacity === 1) {
+          mesh.turnOpaque();
+        } else {
+          mesh.turnTransparent(opacity);
+        }
+      }
+    });
+  }
+
+  setOpacity(opacity = 1) {
+    this.setBoxMeshOpacity(opacity);
+    this.setCommunicationOpacity(opacity);
   }
 
   /**

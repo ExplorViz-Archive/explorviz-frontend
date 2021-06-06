@@ -3,8 +3,8 @@ self.addEventListener('message', function(e) {
   const structureData = e.data.structure;
   const dynamicData = e.data.dynamic;
   
-  let application = applyBoxLayout(structureData, dynamicData);
-  postMessage(application);
+  const cityLayout = applyBoxLayout(structureData, dynamicData);
+  postMessage(cityLayout);
 }, false);
   
 // Ping the Ember service to say that everything is ok.
@@ -48,7 +48,8 @@ function applyBoxLayout(application, allLandscapeTraces) {
   const INSET_SPACE = 4.0;
   const OPENED_COMPONENT_HEIGHT = 1.5;
 
-  let layoutMap = new Map();
+  const layoutMap = new Map();
+  const instanceCountMap = new Map();
 
   layoutMap.set(application.id, {
     height: 1,
@@ -68,6 +69,7 @@ function applyBoxLayout(application, allLandscapeTraces) {
       positionY: 0,
       positionZ: 0
     });
+    instanceCountMap.set(clazz.id, 0);
   });
 
   getAllComponentsInApplication(application).forEach((component) => {
@@ -95,7 +97,7 @@ function applyBoxLayout(application, allLandscapeTraces) {
     box.depth *= 0.5;
   });
 
-  return layoutMap;
+  return {layoutMap, metricsMap: instanceCountMap};
 
   // Helper functions
 
@@ -207,9 +209,10 @@ function applyBoxLayout(application, allLandscapeTraces) {
     const categories = getCategories(instanceCountList, false);
 
     clazzes.forEach((clazz) => {
-      let clazzData = layoutMap.get(clazz.id);
-      //clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT) * 2.0;
-      clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT);
+      const clazzLayout = layoutMap.get(clazz.id);
+
+      clazzLayout.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT);
+      instanceCountMap.set(clazz.id, clazz.instanceCount);
     });
   }
 
