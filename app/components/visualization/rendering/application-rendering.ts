@@ -571,6 +571,24 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
       applySimpleHeatOnFoundation(foundationMesh, canvas);
     }
+
+    this.heatmapConf.currentApplication = this.applicationObject3D;
+  }
+
+  removeHeatmap() {
+    this.applicationObject3D.setOpacity(1);
+    removeHeatmapHelperLines(this.applicationObject3D);
+
+    const foundationMesh = this.applicationObject3D
+      .getBoxMeshbyModelId(this.args.landscapeData.application!.id);
+
+    if (foundationMesh && foundationMesh instanceof FoundationMesh) {
+      foundationMesh.setDefaultMaterial();
+    }
+
+    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
+
+    this.heatmapConf.currentApplication = null;
   }
 
   heatmapClazzUpdate(clazz: Class, foundationMesh: FoundationMesh, simpleHeatMap: any,
@@ -903,20 +921,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     } else {
       this.removeHeatmap();
     }
-  }
-
-  removeHeatmap() {
-    this.applicationObject3D.setOpacity(1);
-    removeHeatmapHelperLines(this.applicationObject3D);
-
-    const foundationMesh = this.applicationObject3D
-      .getBoxMeshbyModelId(this.args.landscapeData.application!.id);
-
-    if (foundationMesh && foundationMesh instanceof FoundationMesh) {
-      foundationMesh.setDefaultMaterial();
-    }
-
-    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
   }
 
   // #endregion ACTIONS

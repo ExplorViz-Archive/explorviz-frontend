@@ -278,14 +278,14 @@ export default class VrApplicationRenderer extends Service {
         dynamic: this.dynamicLandscapeData,
       };
 
-      const layoutedApplication: Map<
-      string,
-      LayoutData
-      > = yield this.worker.postMessage('city-layouter', workerPayload);
+      const applicationData: {
+        layoutMap: Map<string, LayoutData>,
+        metricsMap: Map<string, any>
+      } = yield this.worker.postMessage('city-layouter', workerPayload);
 
       // Converting plain JSON layout data due to worker limitations
       const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(
-        layoutedApplication,
+        applicationData.layoutMap,
       );
 
       const applicationObject3D = new VrApplicationObject3D(

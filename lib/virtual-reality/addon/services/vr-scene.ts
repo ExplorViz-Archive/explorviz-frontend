@@ -25,6 +25,8 @@ export default class VrSceneService extends Service {
 
   readonly floor: FloorMesh;
 
+  spotLight: THREE.SpotLight;
+
   skyLight: THREE.SpotLight;
 
   constructor(properties?: object) {
@@ -39,18 +41,26 @@ export default class VrSceneService extends Service {
     this.scene.add(this.floor);
 
     // Initialize lights.
-    const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
-    spotLight.position.set(100, 100, 100);
-    spotLight.castShadow = false;
-    this.scene.add(spotLight);
-
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
+
+    this.spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
+    this.spotLight.position.set(100, 100, 100);
+    this.spotLight.castShadow = false;
+    this.addSpotlight();
 
     // Add a light that illuminates the sky box if the user dragged in a backgound image.
     this.skyLight = new THREE.SpotLight(0xffffff, 0.5, 1000, Math.PI, 0, 0);
     this.skyLight.castShadow = false;
     this.addSkylight();
+  }
+
+  addSpotlight() {
+    this.scene.add(this.spotLight);
+  }
+
+  removeSpotlight() {
+    this.scene.remove(this.spotLight);
   }
 
   addSkylight() {
@@ -59,6 +69,20 @@ export default class VrSceneService extends Service {
 
   removeSkylight() {
     this.scene.remove(this.skyLight);
+  }
+
+  /**
+   * Handles the visibility of all lights other than the ambient light.
+   * This includes spotlights which might cause reflections.
+   */
+  setAuxiliaryLightVisibility(visible: boolean) {
+    if (visible) {
+      this.addSkylight();
+      this.addSpotlight();
+    } else {
+      this.removeSkylight();
+      this.removeSpotlight();
+    }
   }
 
   /**

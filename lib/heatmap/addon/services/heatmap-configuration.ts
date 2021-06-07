@@ -2,6 +2,7 @@ import Service from '@ember/service';
 import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
 import { tracked } from '@glimmer/tracking';
+import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import { getDefaultGradient as getSimpleDefaultGradient } from '../utils/simple-heatmap';
 import { getDefaultGradient as getArrayDefaultGradient } from '../utils/array-heatmap';
 import { revertKey } from '../utils/heatmap-generator';
@@ -17,6 +18,8 @@ type HeatmapMode = 'aggregatedHeatmap'|'windowedHeatmap';
 export default class HeatmapConfiguration extends Service.extend(Evented) {
   @tracked
   heatmapActive = false;
+
+  currentApplication: ApplicationObject3D | undefined | null;
 
   // Switch for the legend
   legendActive = true;

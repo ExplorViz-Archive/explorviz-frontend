@@ -52,11 +52,15 @@ import { ComponentUpdateMessage } from 'virtual-reality/utils/vr-message/sendabl
 import { HighlightingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/highlighting_update';
 import WebSocketService from 'virtual-reality/services/web-socket';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
-import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
+import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
+import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPos, removeHeatmapHelperLines } from 'heatmap/utils/heatmap-helper';
+import { invokeRecoloring, setColorValues } from 'heatmap/utils/array-heatmap';
+import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
+import { computeHeatmapMinMax } from 'heatmap/utils/heatmap-generator';
+import { updateHighlighting } from 'explorviz-frontend/utils/application-rendering/highlighting';
 import VrRoomSerializer from '../services/vr-room-serializer';
-import VrLandscapeObject3D from '../utils/view-objects/landscape/vr-landscape-object-3d';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -93,6 +97,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @service('delta-time')
   deltaTimeService!: DeltaTime;
+
+  @service('heatmap-configuration')
+  heatmapConf!: HeatmapConfiguration;
 
   @service('vr-highlighting')
   private highlightingService!: VrHighlightingService;
@@ -530,26 +537,20 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   @action
-  async handlePlusInteraction() {
-    const intersection = this.interaction.raycastCanvasCenter();
-
-    if (intersection && intersection.object) {
-      const { parent } = intersection.object;
-      if (parent instanceof VrLandscapeObject3D || parent instanceof VrApplicationObject3D) {
-        parent.scale.copy(parent.scale.multiplyScalar(1.1));
-      }
-    }
+  async handlePinActivation() {
+    // console.log('Laser activated');
   }
 
   @action
-  handleMinusInteraction() {
+  async handleHeatmapToggle() {
+    const currentHeatmapAppId = this.heatmapConf.currentApplication?.id;
+    this.removeHeatmap();
+
     const intersection = this.interaction.raycastCanvasCenter();
 
-    if (intersection && intersection.object) {
-      const { parent } = intersection.object;
-      if (parent instanceof VrLandscapeObject3D || parent instanceof VrApplicationObject3D) {
-        parent.scale.copy(parent.scale.multiplyScalar(0.9));
-      }
+    if (intersection && intersection.object.parent instanceof ApplicationObject3D
+      && currentHeatmapAppId !== intersection.object.parent.id) {
+      this.applyHeatmap(intersection.object.parent);
     }
   }
 
@@ -764,6 +765,173 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   // #endregion APPLICATION RENDERING
 
+  // #region HEATMAP
+
+  applyHeatmap(applicationObject3D: ApplicationObject3D) {
+    // Avoid unwanted reflections in heatmap mode
+    this.sceneService.setAuxiliaryLightVisibility(false);
+
+    applicationObject3D.setOpacity(0.1);
+
+    const foundationMesh = applicationObject3D
+      .getBoxMeshbyModelId(applicationObject3D.dataModel.id);
+
+    if (!(foundationMesh instanceof FoundationMesh)) {
+      return;
+    }
+
+    let colorMap: number[];
+    let simpleHeatMap: any;
+    let canvas: any;
+
+    const heatmap = applicationObject3D.metrics.instanceCountMap;
+
+    const minmax = computeHeatmapMinMax(heatmap);
+    this.heatmapConf.largestValue = minmax.max;
+
+    if (!this.heatmapConf.useSimpleHeat) {
+      const { depthSegments, widthSegments } = foundationMesh.geometry.parameters;
+      // Compute face numbers of top side of the cube
+      const size = widthSegments * depthSegments * 2;
+      // Prepare color map with same size as the surface of the foundation topside
+      colorMap = new Array(size).fill(0);
+    } else {
+      canvas = document.createElement('canvas');
+      canvas.width = foundationMesh.width;
+      canvas.height = foundationMesh.depth;
+      simpleHeatMap = simpleHeatmap(this.heatmapConf.largestValue, canvas,
+        this.heatmapConf.getSimpleHeatGradient(),
+        this.heatmapConf.heatmapRadius, this.heatmapConf.blurRadius);
+    }
+
+    const foundationWorldPosition = new THREE.Vector3();
+
+    foundationMesh.getWorldPosition(foundationWorldPosition);
+
+    removeHeatmapHelperLines(applicationObject3D);
+
+    const boxMeshes = applicationObject3D.getBoxMeshes();
+
+    boxMeshes.forEach((boxMesh) => {
+      if (boxMesh instanceof ClazzMesh) {
+        this.heatmapClazzUpdate(applicationObject3D, boxMesh.dataModel, foundationMesh,
+          simpleHeatMap, colorMap, heatmap);
+      }
+    });
+
+    if (!this.heatmapConf.useSimpleHeat) {
+      const color = 'rgb(255, 255, 255)';
+      foundationMesh.material = new THREE.MeshLambertMaterial({
+        color: new THREE.Color(color),
+        vertexColors: true,
+      });
+
+      invokeRecoloring(colorMap!, foundationMesh, minmax.max,
+        this.heatmapConf.getArrayHeatGradient());
+    } else {
+      simpleHeatMap.draw(0.0);
+
+      applySimpleHeatOnFoundation(foundationMesh, canvas);
+    }
+
+    this.heatmapConf.heatmapActive = true;
+    this.heatmapConf.currentApplication = applicationObject3D;
+  }
+
+  removeHeatmap() {
+    const applicationObject3D = this.heatmapConf.currentApplication;
+    if (!applicationObject3D) return;
+
+    this.sceneService.addSkylight();
+    applicationObject3D.setOpacity(1);
+    removeHeatmapHelperLines(applicationObject3D);
+
+    const foundationMesh = applicationObject3D
+      .getBoxMeshbyModelId(applicationObject3D.dataModel.id);
+
+    if (foundationMesh && foundationMesh instanceof FoundationMesh) {
+      foundationMesh.setDefaultMaterial();
+    }
+
+    const comms = this.vrApplicationRenderer.drawableClassCommunications
+      .get(applicationObject3D.dataModel.id);
+    if (comms) {
+      updateHighlighting(applicationObject3D, comms);
+    }
+
+    this.heatmapConf.heatmapActive = false;
+    this.heatmapConf.currentApplication = null;
+  }
+
+  heatmapClazzUpdate(applicationObject3D: ApplicationObject3D,
+    clazz: Class, foundationMesh: FoundationMesh, simpleHeatMap: any,
+    colorMap: number[], heatmap: Map<string, any>) {
+    // Calculate center point of the clazz floor. This is used for computing the corresponding
+    // face on the foundation box.
+    const clazzMesh = applicationObject3D.getBoxMeshbyModelId(clazz.id) as
+          ClazzMesh | undefined;
+
+    if (!clazzMesh) {
+      return;
+    }
+
+    const raycaster = new THREE.Raycaster();
+    const { selectedMode } = this.heatmapConf;
+
+    const clazzPos = clazzMesh.position.clone();
+    const viewPos = computeHeatMapViewPos(foundationMesh, this.localUser.defaultCamera);
+
+    clazzPos.y -= clazzMesh.height / 2;
+
+    applicationObject3D.localToWorld(clazzPos);
+
+    // The vector from the viewPos to the clazz floor center point
+    const rayVector = clazzPos.clone().sub(viewPos);
+
+    // Following the ray vector from the floor center get the intersection with the foundation.
+    raycaster.set(clazzPos, rayVector.normalize());
+
+    const firstIntersection = raycaster.intersectObject(foundationMesh, false)[0];
+
+    const worldIntersectionPoint = firstIntersection.point.clone();
+    applicationObject3D.worldToLocal(worldIntersectionPoint);
+
+    if (this.heatmapConf.useHelperLines) {
+      addHeatmapHelperLine(applicationObject3D, clazzPos, worldIntersectionPoint);
+    }
+
+    // Compute color only for the first intersection point for consistency if one was found.
+    if (firstIntersection) {
+      if (!this.heatmapConf.useSimpleHeat && firstIntersection.faceIndex) {
+        // The number of faces at front and back of the foundation mesh,
+        // i.e. the starting index for the faces on top.
+        const depthOffset = foundationMesh.geometry.parameters.depthSegments * 4;
+        if (selectedMode === 'aggregatedHeatmap') {
+          setColorValues(firstIntersection.faceIndex - depthOffset,
+            heatmap.get(clazz.id) - (this.heatmapConf.largestValue / 2),
+            colorMap,
+            foundationMesh);
+        } else {
+          setColorValues(firstIntersection.faceIndex - depthOffset,
+            heatmap.get(clazz.id),
+            colorMap,
+            foundationMesh);
+        }
+      } else if (this.heatmapConf.useSimpleHeat && firstIntersection.uv) {
+        const xPos = firstIntersection.uv.x * foundationMesh.width;
+        const zPos = (1 - firstIntersection.uv.y) * foundationMesh.depth;
+        if (selectedMode === 'aggregatedHeatmap') {
+          simpleHeatMap.add([xPos, zPos, heatmap.get(clazz.id)]);
+        } else {
+          simpleHeatMap.add([xPos, zPos,
+            heatmap.get(clazz.id) + (this.heatmapConf.largestValue / 2)]);
+        }
+      }
+    }
+  }
+
+  // #endregion HEATMAP
+
   // #region UTILS
 
   private handlePrimaryInputOn(intersection: THREE.Intersection) {
@@ -785,6 +953,10 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       } else if (appObject instanceof FoundationMesh) {
         self.vrApplicationRenderer.closeAllComponents(appObject.parent);
       }
+
+      if (self.heatmapConf.heatmapActive) {
+        appObject.parent.setOpacity(0.1);
+      }
     }
 
     if (object instanceof ApplicationMesh) {
@@ -802,6 +974,10 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         object.parent,
         object,
       );
+
+      if (this.heatmapConf.heatmapActive) {
+        object.parent.setOpacity(0.1);
+      }
     }
   }
 
