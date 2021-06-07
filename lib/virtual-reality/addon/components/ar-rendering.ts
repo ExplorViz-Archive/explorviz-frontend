@@ -54,7 +54,7 @@ import WebSocketService from 'virtual-reality/services/web-socket';
 import VrMessageSender from 'virtual-reality/services/vr-message-sender';
 import * as VrPoses from 'virtual-reality/utils/vr-helpers/vr-poses';
 import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
-import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
+import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configuration';
 import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPos, removeHeatmapHelperLines } from 'heatmap/utils/heatmap-helper';
 import { invokeRecoloring, setColorValues } from 'heatmap/utils/array-heatmap';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
@@ -506,6 +506,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     if (this.arToolkitContext.arController !== null) {
       this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
     }
+  }
+
+  @action
+  updateMetric(metric: Metric) {
+    this.heatmapConf.set('selectedMetric', metric);
+    this.heatmapConf.triggerMetricUpdate();
   }
 
   @action

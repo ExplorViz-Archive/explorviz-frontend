@@ -3,7 +3,7 @@ import { Metric } from 'heatmap/services/heatmap-configuration';
 
 interface Args {
   metrics: Metric[];
-  updateMetric(metric: Metric): void;
+  selectMetric(metric: Metric): void;
   selectedMetric: Metric|null;
 }
 

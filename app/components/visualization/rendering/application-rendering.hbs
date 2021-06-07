@@ -15,14 +15,11 @@
       {{did-resize this.resize debounce=100}}
     >
       {{#if this.heatmapConf.heatmapActive}}
-        <div style="position: absolute; right: 0">
-          <HeatmapLegend />
-          <MetricSelector
-            @metrics={{this.heatmapConf.metrics}}
-            @selectMetric={{this.updateMetric}}
-            @selectedMetric={{this.heatmapConf.selectedMetric}}
-          />
-        </div>
+        <HeatmapInfo 
+          @metrics={{this.heatmapConf.metrics}}
+          @updateMetric={{this.updateMetric}}
+          @selectedMetric={{this.heatmapConf.selectedMetric}}
+        />
       {{/if}}
 
       <canvas

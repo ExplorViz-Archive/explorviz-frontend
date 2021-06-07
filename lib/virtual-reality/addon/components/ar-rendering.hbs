@@ -8,6 +8,14 @@
       {{did-insert this.outerDivInserted}}
       {{did-resize this.resize debounce=100}}
     >
+      {{#if this.heatmapConf.heatmapActive}}
+        <HeatmapInfo 
+          @metrics={{this.heatmapConf.metrics}}
+          @updateMetric={{this.updateMetric}}
+          @selectedMetric={{this.heatmapConf.selectedMetric}}
+        />
+      {{/if}}
+
       {{#if this.loadNewLandscape.isRunning}}
         <Visualization::Rendering::LoadingIndicator @text="Loading New Landscape" />
       {{else if this.addApplication.isRunning}}
