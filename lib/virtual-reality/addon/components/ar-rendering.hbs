@@ -200,3 +200,9 @@
     </div>
   {{/if}}
 </div>
+
+{{add-listener
+  this.heatmapConfiguration
+  "updatedClazzMetrics"
+  this.applyHeatmap
+}}

@@ -5,13 +5,16 @@ import { tracked } from '@glimmer/tracking';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import { getDefaultGradient as getSimpleDefaultGradient } from '../utils/simple-heatmap';
 import { getDefaultGradient as getArrayDefaultGradient } from '../utils/array-heatmap';
-import { revertKey } from '../utils/heatmap-generator';
+import revertKey from '../utils/heatmap-generator';
 
-export interface Metric {
+export type Metric = {
   name: string;
-  typeName: string;
   description: string;
-}
+  mode: HeatmapMode,
+  min: number,
+  max: number,
+  values: Map<string, number>
+};
 
 type HeatmapMode = 'aggregatedHeatmap'|'windowedHeatmap';
 
@@ -24,16 +27,17 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
   // Switch for the legend
   legendActive = true;
 
-  latestClazzMetrics = null;
+  @tracked
+  latestClazzMetrics: Metric[]|null = null;
 
   largestValue = 0;
 
   metrics: Metric[] = [];
 
   @tracked
-  selectedMetric: null|Metric = null;
+  selectedMetric: Metric|null = null;
 
-  applicationID: null|string = null;
+  applicationID: string|null = null;
 
   // Switches and models used by config
   selectedMode: HeatmapMode = 'aggregatedHeatmap';
@@ -67,7 +71,7 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
   triggerMetricUpdate() {
     if (this.applicationID) {
       if (this.latestClazzMetrics !== null) {
-        this.trigger('newSelectedMetric', this.latestClazzMetrics);
+        this.trigger('newSelectedMetric', this.selectedMetric);
       }
     }
   }
@@ -111,7 +115,8 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
     this.set('latestClazzMetrics', null);
     this.set('selectedMetric', null);
     this.set('applicationID', null);
-    // this.set("metrics", null);
+    this.set('currentApplication', null);
+    this.set('heatmapActive', false);
     this.set('largestValue', 0);
   }
 }

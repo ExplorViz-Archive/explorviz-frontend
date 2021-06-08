@@ -19,7 +19,6 @@ import { restartableTask, task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configuration';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
-import { computeHeatmapMinMax } from 'heatmap/utils/heatmap-generator';
 import { setColorValues, invokeRecoloring } from 'heatmap/utils/array-heatmap';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 import {
@@ -46,6 +45,7 @@ import {
 } from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPos, removeHeatmapHelperLines } from 'heatmap/utils/heatmap-helper';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -138,8 +138,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   spheresIndex = 0;
 
-  clazzMetrics: any;
-
   get font() {
     return this.args.font;
   }
@@ -158,7 +156,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const { application, dynamicLandscapeData } = this.args.landscapeData;
 
     this.applicationObject3D = new ApplicationObject3D(application!,
-      new Map(), { instanceCountMap: new Map() }, dynamicLandscapeData);
+      new Map(), dynamicLandscapeData);
 
     this.communicationRendering = new CommunicationRendering(this.configuration);
 
@@ -424,15 +422,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         dynamic: this.applicationObject3D.traces,
       };
 
-      const applicationData: {layoutMap: Map<string, LayoutData>, metricsMap: Map<string, any>} = yield this.worker.postMessage('city-layouter', workerPayload);
+      const layoutMap: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', workerPayload);
 
       // Remember state of components
       const { openComponentIds } = this.applicationObject3D;
 
       // Converting plain JSON layout data due to worker limitations
-      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(applicationData.layoutMap);
+      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutMap);
       this.applicationObject3D.boxLayoutMap = boxLayoutMap;
-      this.applicationObject3D.metrics.instanceCountMap = applicationData.metricsMap;
 
       // Clean up old application
       this.cleanUpApplication();
@@ -451,7 +448,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.scene.add(this.applicationObject3D);
 
       if (this.heatmapConf.heatmapActive) {
-        this.applyHeatmap();
+        perform(this.calculateHeatmapTask, this.applicationObject3D, () => {
+          this.applyHeatmap();
+          this.heatmapConf.triggerLatestHeatmapUpdate();
+        });
       }
     } catch (e) {
       // console.log(e);
@@ -508,7 +508,54 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   // #region HEATMAP
 
+  @restartableTask*
+  calculateHeatmapTask(
+    applicationObject3D: ApplicationObject3D,
+    callback?: () => void,
+  ) {
+    try {
+      const workerPayload = {
+        structure: applicationObject3D.dataModel,
+        dynamic: applicationObject3D.traces,
+      };
+
+      const metrics: Metric[] = yield this.worker.postMessage('metrics-worker', workerPayload);
+
+      this.heatmapConf.applicationID = applicationObject3D.dataModel.id;
+      this.heatmapConf.latestClazzMetrics = metrics;
+
+      const { selectedMetric } = this.heatmapConf;
+
+      // Update currently viewed metric
+      if (selectedMetric) {
+        const updatedMetric = this.heatmapConf.latestClazzMetrics.find(
+          (latestMetric) => latestMetric.name === selectedMetric.name,
+        );
+
+        if (updatedMetric) {
+          this.heatmapConf.selectedMetric = updatedMetric;
+        }
+      }
+
+      if (callback) callback();
+    } catch (e) {
+      this.debug(e);
+    }
+  }
+
   applyHeatmap() {
+    if (!this.heatmapConf.latestClazzMetrics || !this.heatmapConf.latestClazzMetrics.firstObject) {
+      AlertifyHandler.showAlertifyError('No metrics available.');
+      return;
+    }
+
+    // Selected first metric if none is selected yet
+    if (!this.heatmapConf.selectedMetric) {
+      this.heatmapConf.selectedMetric = this.heatmapConf.latestClazzMetrics.firstObject;
+    }
+
+    const { selectedMetric } = this.heatmapConf;
+
     this.applicationObject3D.setComponentMeshOpacity(0.1);
     this.applicationObject3D.setCommunicationOpacity(0.1);
 
@@ -523,13 +570,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     let simpleHeatMap: any;
     let canvas: any;
 
-    this.clazzMetrics = this.applicationObject3D.metrics.instanceCountMap;
-
-    const heatmap = this.clazzMetrics;
-
-    const minmax = computeHeatmapMinMax(heatmap);
-    this.heatmapConf.largestValue = minmax.max;
-
     if (!this.heatmapConf.useSimpleHeat) {
       const { depthSegments, widthSegments } = foundationMesh.geometry.parameters;
       // Compute face numbers of top side of the cube
@@ -540,7 +580,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       canvas = document.createElement('canvas');
       canvas.width = foundationMesh.width;
       canvas.height = foundationMesh.depth;
-      simpleHeatMap = simpleHeatmap(this.heatmapConf.largestValue, canvas,
+      simpleHeatMap = simpleHeatmap(selectedMetric.max, canvas,
         this.heatmapConf.getSimpleHeatGradient(),
         this.heatmapConf.heatmapRadius, this.heatmapConf.blurRadius);
     }
@@ -567,7 +607,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         vertexColors: true,
       });
 
-      invokeRecoloring(colorMap!, foundationMesh, minmax.max,
+      invokeRecoloring(colorMap!, foundationMesh, selectedMetric.max,
         this.heatmapConf.getArrayHeatGradient());
     } else {
       simpleHeatMap.draw(0.0);
@@ -576,6 +616,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
 
     this.heatmapConf.currentApplication = this.applicationObject3D;
+    this.heatmapConf.applicationID = this.applicationObject3D.dataModel.id;
+    this.heatmapConf.heatmapActive = true;
   }
 
   removeHeatmap() {
@@ -592,6 +634,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
 
     this.heatmapConf.currentApplication = null;
+    this.heatmapConf.heatmapActive = false;
   }
 
   heatmapClazzUpdate(clazz: Class, foundationMesh: FoundationMesh, simpleHeatMap: any,
@@ -601,15 +644,19 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id) as
         ClazzMesh | undefined;
 
-    if (!clazzMesh) {
+    if (!clazzMesh || !this.heatmapConf.selectedMetric) {
       return;
     }
+
+    const heatmapValues = this.heatmapConf.selectedMetric.values;
+    const heatmapValue = heatmapValues.get(clazz.id);
+
+    if (!heatmapValue) return;
 
     const raycaster = new THREE.Raycaster();
     const { selectedMode } = this.heatmapConf;
 
     const clazzPos = clazzMesh.position.clone();
-    const heatmap = this.clazzMetrics;
     const viewPos = computeHeatMapViewPos(foundationMesh, this.camera);
 
     clazzPos.y -= clazzMesh.height / 2;
@@ -639,12 +686,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         const depthOffset = foundationMesh.geometry.parameters.depthSegments * 4;
         if (selectedMode === 'aggregatedHeatmap') {
           setColorValues(firstIntersection.faceIndex - depthOffset,
-            heatmap.get(clazz.id) - (this.heatmapConf.largestValue / 2),
+            heatmapValue - (this.heatmapConf.largestValue / 2),
             colorMap,
             foundationMesh);
         } else {
           setColorValues(firstIntersection.faceIndex - depthOffset,
-            heatmap.get(clazz.id),
+            heatmapValue,
             colorMap,
             foundationMesh);
         }
@@ -652,10 +699,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         const xPos = firstIntersection.uv.x * foundationMesh.width;
         const zPos = (1 - firstIntersection.uv.y) * foundationMesh.depth;
         if (selectedMode === 'aggregatedHeatmap') {
-          simpleHeatMap.add([xPos, zPos, heatmap.get(clazz.id)]);
+          simpleHeatMap.add([xPos, zPos, heatmapValues.get(clazz.id)]);
         } else {
           simpleHeatMap.add([xPos, zPos,
-            heatmap.get(clazz.id) + (this.heatmapConf.largestValue / 2)]);
+            heatmapValue + (this.heatmapConf.largestValue / 2)]);
         }
       }
     }
@@ -859,17 +906,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   /**
-   * Performs a run to re-populate the scene
-   */
-  @action
-  onHeatmapUpdated(clazzMetrics: Map<string, number>) {
-    this.clazzMetrics = clazzMetrics;
-    if (this.heatmapConf.heatmapActive) {
-      this.applyHeatmap();
-    }
-  }
-
-  /**
    * Highlights a trace or specified trace step.
    * Opens all component meshes to make whole trace visible.
    *
@@ -903,21 +939,26 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   updateMetric(metric: Metric) {
-    this.heatmapConf.set('selectedMetric', metric);
+    this.heatmapConf.selectedMetric = metric;
     this.heatmapConf.triggerMetricUpdate();
+
+    if (this.heatmapConf.heatmapActive) {
+      this.applyHeatmap();
+    }
   }
 
   @action
   toggleHeatmap() {
-    this.heatmapConf.heatmapActive = !this.heatmapConf.heatmapActive;
-
     // Avoid unwanted reflections in heatmap mode
-    this.setSpotLightVisibilityInScene(!this.heatmapConf.heatmapActive);
+    this.setSpotLightVisibilityInScene(this.heatmapConf.heatmapActive);
 
     if (this.heatmapConf.heatmapActive) {
-      this.applyHeatmap();
-    } else {
       this.removeHeatmap();
+    } else {
+      // TODO: Check whether new calculation of heatmap is necessary
+      perform(this.calculateHeatmapTask, this.applicationObject3D, () => {
+        this.applyHeatmap();
+      });
     }
   }
 
@@ -932,6 +973,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.scene.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
+
+    this.heatmapConf.cleanup();
 
     if (this.threePerformance) {
       this.threePerformance.removePerformanceMeasurement();

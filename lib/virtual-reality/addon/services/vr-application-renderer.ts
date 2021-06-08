@@ -1,5 +1,5 @@
 import Service, { inject as service } from '@ember/service';
-import { enqueueTask } from 'ember-concurrency-decorators';
+import { enqueueTask, restartableTask } from 'ember-concurrency-decorators';
 import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
@@ -19,7 +19,7 @@ import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
-import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
+import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configuration';
 import THREE from 'three';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
@@ -294,6 +294,42 @@ export default class VrApplicationRenderer extends Service {
     }
   }
 
+  @restartableTask*
+  calculateHeatmapTask(
+    applicationObject3D: ApplicationObject3D,
+    callback?: () => void,
+  ) {
+    try {
+      const workerPayload = {
+        structure: applicationObject3D.dataModel,
+        dynamic: applicationObject3D.traces,
+      };
+
+      const metrics: Metric[] = yield this.worker.postMessage('metrics-worker', workerPayload);
+
+      this.heatmapConf.currentApplication = applicationObject3D;
+      this.heatmapConf.applicationID = applicationObject3D.dataModel.id;
+      this.heatmapConf.latestClazzMetrics = metrics;
+
+      const { selectedMetric } = this.heatmapConf;
+
+      // Update currently viewed metric
+      if (selectedMetric) {
+        const updatedMetric = this.heatmapConf.latestClazzMetrics.find(
+          (latestMetric) => latestMetric.name === selectedMetric.name,
+        );
+
+        if (updatedMetric) {
+          this.heatmapConf.selectedMetric = updatedMetric;
+        }
+      }
+
+      if (callback) callback();
+    } catch (e) {
+      this.debug(e);
+    }
+  }
+
   @enqueueTask
   private* addApplicationTask(
     applicationModel: Application,
@@ -307,20 +343,14 @@ export default class VrApplicationRenderer extends Service {
         dynamic: this.dynamicLandscapeData,
       };
 
-      const applicationData: {
-        layoutMap: Map<string, LayoutData>,
-        metricsMap: Map<string, any>
-      } = yield this.worker.postMessage('city-layouter', workerPayload);
+      const layoutMap: Map<string, LayoutData> = yield this.worker.postMessage('city-layouter', workerPayload);
 
       // Converting plain JSON layout data due to worker limitations
-      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(
-        applicationData.layoutMap,
-      );
+      const boxLayoutMap = ApplicationRendering.convertToBoxLayoutMap(layoutMap);
 
       const applicationObject3D = new VrApplicationObject3D(
         applicationModel,
         boxLayoutMap,
-        { instanceCountMap: new Map() },
         this.dynamicLandscapeData,
       );
 
@@ -355,6 +385,12 @@ export default class VrApplicationRenderer extends Service {
         applicationModel.id,
         applicationObject3D,
       );
+
+      if (this.heatmapConf.heatmapActive) {
+        perform(this.calculateHeatmapTask, applicationObject3D, () => {
+          this.heatmapConf.triggerLatestHeatmapUpdate();
+        });
+      }
 
       if (callback) callback(applicationObject3D);
     } catch (e) {

@@ -9,7 +9,6 @@ interface Args {
     aggregatedHeatmap: string,
     windowedHeatmap: string
   },
-  mode: 'aggregatedHeatmap'|'windowedHeatmap'
 }
 
 export default class HeatmapLegend extends Component<Args> {
@@ -30,7 +29,7 @@ export default class HeatmapLegend extends Component<Args> {
   }
 
   get header() {
-    const { mode } = this.args;
+    const { mode } = this.heatmapConfiguration.selectedMetric!;
     if (mode === 'aggregatedHeatmap') {
       return 'Aggregated Heatmap';
     }
@@ -41,7 +40,7 @@ export default class HeatmapLegend extends Component<Args> {
   }
 
   get subHeader() {
-    const { mode } = this.args;
+    const { mode } = this.heatmapConfiguration.selectedMetric!;
     if (mode === 'aggregatedHeatmap') {
       return 'Aggregated score:';
     }
@@ -102,7 +101,8 @@ export default class HeatmapLegend extends Component<Args> {
     let maxLabel = 'max';
 
     if (this.heatmapConfiguration.showLegendValues) {
-      const largestValue = Math.ceil(this.heatmapConfiguration.largestValue);
+      const largestValue = Math.ceil(this.heatmapConfiguration.selectedMetric!.max);
+
       if (this.heatmapConfiguration.selectedMode === 'aggregatedHeatmap') {
         minLabel = '0';
         midLabel = `${largestValue / 2}`;

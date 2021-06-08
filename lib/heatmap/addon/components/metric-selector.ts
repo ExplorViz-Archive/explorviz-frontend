@@ -1,11 +1,12 @@
 import Component from '@glimmer/component';
-import { Metric } from 'heatmap/services/heatmap-configuration';
+import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configuration';
+import { inject as service } from '@ember/service';
 
 interface Args {
-  metrics: Metric[];
   selectMetric(metric: Metric): void;
-  selectedMetric: Metric|null;
 }
 
 export default class MetricSelector extends Component<Args> {
+  @service('heatmap-configuration')
+  heatmapConfiguration!: HeatmapConfiguration;
 }

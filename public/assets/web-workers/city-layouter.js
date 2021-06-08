@@ -97,7 +97,7 @@ function applyBoxLayout(application, allLandscapeTraces) {
     box.depth *= 0.5;
   });
 
-  return {layoutMap, metricsMap: instanceCountMap};
+  return layoutMap;
 
   // Helper functions
 

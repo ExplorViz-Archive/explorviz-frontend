@@ -58,8 +58,8 @@ import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configura
 import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPos, removeHeatmapHelperLines } from 'heatmap/utils/heatmap-helper';
 import { invokeRecoloring, setColorValues } from 'heatmap/utils/array-heatmap';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
-import { computeHeatmapMinMax } from 'heatmap/utils/heatmap-generator';
 import { updateHighlighting } from 'explorviz-frontend/utils/application-rendering/highlighting';
+import { perform } from 'ember-concurrency-ts';
 import VrRoomSerializer from '../services/vr-room-serializer';
 
 interface Args {
@@ -139,6 +139,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @service('web-socket')
   private webSocket!: WebSocketService;
+
+  @service()
+  worker!: any;
 
   debug = debugLogger('ArRendering');
 
@@ -512,6 +515,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   updateMetric(metric: Metric) {
     this.heatmapConf.set('selectedMetric', metric);
     this.heatmapConf.triggerMetricUpdate();
+
+    this.applyHeatmap();
   }
 
   @action
@@ -564,7 +569,10 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     if (intersection && intersection.object.parent instanceof ApplicationObject3D
       && currentHeatmapAppId !== intersection.object.parent.id) {
-      this.applyHeatmap(intersection.object.parent);
+      const applicationObject3D = intersection.object.parent;
+      perform(this.vrApplicationRenderer.calculateHeatmapTask, applicationObject3D, () => {
+        this.applyHeatmap();
+      });
     }
   }
 
@@ -781,7 +789,23 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   // #region HEATMAP
 
-  applyHeatmap(applicationObject3D: ApplicationObject3D) {
+  @action
+  applyHeatmap() {
+    const applicationObject3D = this.heatmapConf.currentApplication;
+
+    if (!this.heatmapConf.latestClazzMetrics || !this.heatmapConf.latestClazzMetrics.firstObject
+      || !applicationObject3D) {
+      AlertifyHandler.showAlertifyError('No metrics available.');
+      return;
+    }
+
+    // Selected first metric if none is selected yet
+    if (!this.heatmapConf.selectedMetric) {
+      this.heatmapConf.selectedMetric = this.heatmapConf.latestClazzMetrics.firstObject;
+    }
+
+    const { selectedMetric } = this.heatmapConf;
+
     // Avoid unwanted reflections in heatmap mode
     this.sceneService.setAuxiliaryLightVisibility(false);
 
@@ -798,11 +822,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     let simpleHeatMap: any;
     let canvas: any;
 
-    const heatmap = applicationObject3D.metrics.instanceCountMap;
-
-    const minmax = computeHeatmapMinMax(heatmap);
-    this.heatmapConf.largestValue = minmax.max;
-
     if (!this.heatmapConf.useSimpleHeat) {
       const { depthSegments, widthSegments } = foundationMesh.geometry.parameters;
       // Compute face numbers of top side of the cube
@@ -813,7 +832,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       canvas = document.createElement('canvas');
       canvas.width = foundationMesh.width;
       canvas.height = foundationMesh.depth;
-      simpleHeatMap = simpleHeatmap(this.heatmapConf.largestValue, canvas,
+      simpleHeatMap = simpleHeatmap(selectedMetric.max, canvas,
         this.heatmapConf.getSimpleHeatGradient(),
         this.heatmapConf.heatmapRadius, this.heatmapConf.blurRadius);
     }
@@ -829,7 +848,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     boxMeshes.forEach((boxMesh) => {
       if (boxMesh instanceof ClazzMesh) {
         this.heatmapClazzUpdate(applicationObject3D, boxMesh.dataModel, foundationMesh,
-          simpleHeatMap, colorMap, heatmap);
+          simpleHeatMap, colorMap);
       }
     });
 
@@ -840,7 +859,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         vertexColors: true,
       });
 
-      invokeRecoloring(colorMap!, foundationMesh, minmax.max,
+      invokeRecoloring(colorMap!, foundationMesh, selectedMetric.max,
         this.heatmapConf.getArrayHeatGradient());
     } else {
       simpleHeatMap.draw(0.0);
@@ -879,15 +898,20 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   heatmapClazzUpdate(applicationObject3D: ApplicationObject3D,
     clazz: Class, foundationMesh: FoundationMesh, simpleHeatMap: any,
-    colorMap: number[], heatmap: Map<string, any>) {
+    colorMap: number[]) {
     // Calculate center point of the clazz floor. This is used for computing the corresponding
     // face on the foundation box.
     const clazzMesh = applicationObject3D.getBoxMeshbyModelId(clazz.id) as
           ClazzMesh | undefined;
 
-    if (!clazzMesh) {
+    if (!clazzMesh || !this.heatmapConf.selectedMetric) {
       return;
     }
+
+    const heatmapValues = this.heatmapConf.selectedMetric.values;
+    const heatmapValue = heatmapValues.get(clazz.id);
+
+    if (!heatmapValue) return;
 
     const raycaster = new THREE.Raycaster();
     const { selectedMode } = this.heatmapConf;
@@ -922,12 +946,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         const depthOffset = foundationMesh.geometry.parameters.depthSegments * 4;
         if (selectedMode === 'aggregatedHeatmap') {
           setColorValues(firstIntersection.faceIndex - depthOffset,
-            heatmap.get(clazz.id) - (this.heatmapConf.largestValue / 2),
+            heatmapValue - (this.heatmapConf.largestValue / 2),
             colorMap,
             foundationMesh);
         } else {
           setColorValues(firstIntersection.faceIndex - depthOffset,
-            heatmap.get(clazz.id),
+            heatmapValue,
             colorMap,
             foundationMesh);
         }
@@ -935,10 +959,10 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         const xPos = firstIntersection.uv.x * foundationMesh.width;
         const zPos = (1 - firstIntersection.uv.y) * foundationMesh.depth;
         if (selectedMode === 'aggregatedHeatmap') {
-          simpleHeatMap.add([xPos, zPos, heatmap.get(clazz.id)]);
+          simpleHeatMap.add([xPos, zPos, heatmapValues.get(clazz.id)]);
         } else {
           simpleHeatMap.add([xPos, zPos,
-            heatmap.get(clazz.id) + (this.heatmapConf.largestValue / 2)]);
+            heatmapValue + (this.heatmapConf.largestValue / 2)]);
         }
       }
     }

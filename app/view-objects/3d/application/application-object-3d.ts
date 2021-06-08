@@ -24,8 +24,6 @@ export default class ApplicationObject3D extends THREE.Object3D {
 
   boxLayoutMap: Map<string, BoxLayout>;
 
-  metrics: {instanceCountMap: Map<string, any>};
-
   traces: Trace[];
 
   /**
@@ -46,13 +44,11 @@ export default class ApplicationObject3D extends THREE.Object3D {
   @tracked
   highlightedEntity: BaseMesh | Trace | null = null;
 
-  constructor(application: Application, boxLayoutMap: Map<string, BoxLayout>,
-    metrics: {instanceCountMap: Map<string, any>}, traces: Trace[]) {
+  constructor(application: Application, boxLayoutMap: Map<string, BoxLayout>, traces: Trace[]) {
     super();
 
     this.dataModel = application;
     this.boxLayoutMap = boxLayoutMap;
-    this.metrics = metrics;
     this.traces = traces;
   }
 
