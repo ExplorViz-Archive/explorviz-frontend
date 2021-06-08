@@ -19,6 +19,7 @@ import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
 import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/foundation-mesh';
 import BaseMesh from 'explorviz-frontend/view-objects/3d/base-mesh';
+import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 import THREE from 'three';
 import VrApplicationObject3D from 'virtual-reality/utils/view-objects/application/vr-application-object-3d';
 import CloseIcon from 'virtual-reality/utils/view-objects/vr/close-icon';
@@ -54,6 +55,9 @@ export default class VrApplicationRenderer extends Service {
 
   @service('configuration')
   private configuration!: Configuration;
+
+  @service('heatmap-configuration')
+  heatmapConf!: HeatmapConfiguration;
 
   @service('vr-asset-repo')
   private assetRepo!: VrAssetRepository;
@@ -263,6 +267,31 @@ export default class VrApplicationRenderer extends Service {
   closeAllComponentsLocally(applicationObject3D: ApplicationObject3D) {
     EntityManipulation.closeAllComponents(applicationObject3D);
     this.highlightingService.updateHighlightingLocally(applicationObject3D);
+  }
+
+  openAllComponents(applicationObject3D: ApplicationObject3D) {
+    this.openAllComponentsLocally(applicationObject3D);
+    this.sender.sendComponentUpdate(
+      applicationObject3D.dataModel.id,
+      '',
+      true,
+      true,
+    );
+  }
+
+  openAllComponentsLocally(applicationObject3D: ApplicationObject3D) {
+    EntityManipulation.openAllComponents(applicationObject3D);
+    this.addLabels(applicationObject3D);
+
+    const drawableComm = this.drawableClassCommunications.get(
+      applicationObject3D.dataModel.id,
+    )!;
+    this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
+    this.highlightingService.updateHighlightingLocally(applicationObject3D);
+
+    if (this.heatmapConf.heatmapActive) {
+      applicationObject3D.setOpacity(0.1);
+    }
   }
 
   @enqueueTask

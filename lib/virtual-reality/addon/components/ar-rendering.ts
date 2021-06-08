@@ -543,8 +543,16 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   @action
-  async handlePinActivation() {
-    // console.log('Laser activated');
+  async handleOpenAllComponents() {
+    const intersection = this.interaction.raycastCanvasCenter();
+
+    if (!(intersection?.object.parent instanceof ApplicationObject3D)) {
+      return;
+    }
+
+    const applicationObject3D = intersection.object.parent;
+
+    this.vrApplicationRenderer.openAllComponents(applicationObject3D);
   }
 
   @action
@@ -1227,7 +1235,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   onObjectMoved(): void { }
 
   onComponentUpdate({
-    originalMessage: { isFoundation, appId, componentId },
+    originalMessage: {
+      isFoundation, appId, isOpened, componentId,
+    },
   }: ForwardedMessage<ComponentUpdateMessage>): void {
     const applicationObject3D = this.vrApplicationRenderer.getApplicationById(
       appId,
@@ -1237,7 +1247,11 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     const componentMesh = applicationObject3D.getBoxMeshbyModelId(componentId);
 
     if (isFoundation) {
-      this.vrApplicationRenderer.closeAllComponentsLocally(applicationObject3D);
+      if (isOpened) {
+        this.vrApplicationRenderer.openAllComponentsLocally(applicationObject3D);
+      } else {
+        this.vrApplicationRenderer.closeAllComponentsLocally(applicationObject3D);
+      }
     } else if (componentMesh instanceof ComponentMesh) {
       this.vrApplicationRenderer.toggleComponentLocally(
         componentMesh,

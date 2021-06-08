@@ -183,6 +183,24 @@ export default class ApplicationObject3D extends THREE.Object3D {
   }
 
   /**
+   * Sets the visiblity of all component meshes with the current application
+   * @param opaccity Determines how opaque / visible component meshes should be
+   */
+  setComponentMeshOpacity(opacity = 1) {
+    this.getBoxMeshes().forEach((mesh) => {
+      if (mesh instanceof ComponentMesh) {
+        if (opacity === 1) {
+          mesh.turnOpaque();
+          mesh.defaultOpacity = 1;
+        } else {
+          mesh.turnTransparent(opacity);
+          mesh.defaultOpacity = opacity;
+        }
+      }
+    });
+  }
+
+  /**
    * Sets the visiblity of all communication meshes with the current application
    * @param opaccity Determines how opaque/visible component meshes should be
    */

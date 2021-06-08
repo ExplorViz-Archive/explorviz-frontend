@@ -40,7 +40,7 @@ import {
   closeComponentMesh,
   moveCameraTo,
   openComponentMesh,
-  openComponentsRecursively,
+  openAllComponents,
   restoreComponentState,
   toggleComponentMeshState,
 } from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
@@ -282,7 +282,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       highlight(mesh, this.applicationObject3D, this.drawableClassCommunications);
     }
     if (this.heatmapConf.heatmapActive) {
-      this.applicationObject3D.setOpacity(0.1);
+      this.applicationObject3D.setComponentMeshOpacity(0.1);
+      this.applicationObject3D.setCommunicationOpacity(0.1);
     }
   }
 
@@ -310,7 +311,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
     }
     if (this.heatmapConf.heatmapActive) {
-      this.applicationObject3D.setOpacity(0.1);
+      this.applicationObject3D.setComponentMeshOpacity(0.1);
+      this.applicationObject3D.setCommunicationOpacity(0.1);
     }
   }
 
@@ -507,7 +509,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #region HEATMAP
 
   applyHeatmap() {
-    this.applicationObject3D.setOpacity(0.1);
+    this.applicationObject3D.setComponentMeshOpacity(0.1);
+    this.applicationObject3D.setCommunicationOpacity(0.1);
 
     const foundationMesh = this.applicationObject3D
       .getBoxMeshbyModelId(this.args.landscapeData.application!.id);
@@ -779,20 +782,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   @action
   openAllComponents() {
-    this.applicationObject3D.dataModel.packages.forEach((child) => {
-      const mesh = this.applicationObject3D.getBoxMeshbyModelId(child.id);
-      if (mesh !== undefined && mesh instanceof ComponentMesh) {
-        openComponentMesh(mesh, this.applicationObject3D);
-      }
-      openComponentsRecursively(child, this.applicationObject3D);
-    });
+    openAllComponents(this.applicationObject3D);
 
     this.communicationRendering.addCommunication(this.applicationObject3D,
       this.drawableClassCommunications);
     updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
 
     if (this.heatmapConf.heatmapActive) {
-      this.applicationObject3D.setOpacity(0.1);
+      this.applicationObject3D.setComponentMeshOpacity(0.1);
+      this.applicationObject3D.setCommunicationOpacity(0.1);
     }
   }
 
