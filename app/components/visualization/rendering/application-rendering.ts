@@ -417,6 +417,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       EntityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D,
         this.configuration.applicationColors);
 
+      // Add globe for communication that comes from the outside
+      EntityRendering.addGlobeToApplication(this.applicationObject3D);
+
       // Restore old state of components
       restoreComponentState(this.applicationObject3D, openComponentIds);
       this.updateDrawableClassCommunications();
