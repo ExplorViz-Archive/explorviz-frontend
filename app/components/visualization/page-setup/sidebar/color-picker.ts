@@ -17,6 +17,8 @@ export default class ColorPicker extends Component<Args> {
   applyColorScheme(scheme: string) {
     if (scheme === 'default') {
       this.applyDefaultColors();
+    } else if (scheme === 'classic') {
+      this.applyClassicColors();
     } else if (scheme === 'impaired') {
       this.applyVisuallyImpairedColors();
     }
@@ -78,10 +80,47 @@ export default class ColorPicker extends Component<Args> {
   }
 
   /**
-   * Sets color values to default.
+   * Sets color values to default mode.
    * Triggers update of color configuration and colors of current view.
    */
   applyDefaultColors() {
+    if (this.args.isLandscapeView) {
+      const { landscapeColors } = this.configuration;
+
+      landscapeColors.system.set('#c7c7c7'); // grey
+      landscapeColors.nodegroup.set('#169e2b'); // dark green
+      landscapeColors.node.set('#00bb41'); // green
+      landscapeColors.application.set('#3e14a0'); // purple-blue
+      landscapeColors.communication.set('#c4c4c4'); // light grey
+      landscapeColors.systemText.set('#000000'); // black
+      landscapeColors.nodeText.set('#ffffff'); // white
+      landscapeColors.applicationText.set('#ffffff'); // white
+      landscapeColors.collapseSymbol.set('#000000'); // black
+      landscapeColors.background.set('#ffffff'); // white
+    } else {
+      const { applicationColors } = this.configuration;
+      applicationColors.foundation.set('#d2d2d2'); // grey
+      applicationColors.componentOdd.set('#8bd6bb'); // lime green
+      // applicationColors.componentEven.set('#d8e0cc'); // pastel green
+      applicationColors.componentEven.set('#8bccd6'); // desaturated cyan
+      applicationColors.clazz.set('#8ba6d6'); // light pastel green
+      applicationColors.highlightedEntity.set('#ff6666'); // pastel red
+      applicationColors.componentText.set('#ffffff'); // white
+      applicationColors.clazzText.set('#ffffff'); // white
+      applicationColors.foundationText.set('#000000'); // black
+      applicationColors.communication.set('#d6bb8b'); // dark grey
+      applicationColors.communicationArrow.set('#000000'); // black
+      applicationColors.background.set('#ffffff'); // white
+    }
+
+    this.updateView();
+  }
+
+  /**
+   * Sets color values to classic mode.
+   * Triggers update of color configuration and colors of current view.
+   */
+  applyClassicColors() {
     if (this.args.isLandscapeView) {
       const { landscapeColors } = this.configuration;
 

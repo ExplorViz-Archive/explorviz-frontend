@@ -100,15 +100,15 @@ export default class Configuration extends Service {
     };
 
     this.applicationColors = {
-      foundation: new THREE.Color('#c7c7c7'), // grey
-      componentOdd: new THREE.Color('#169e2b'), // dark green
-      componentEven: new THREE.Color('#00bb41'), // light green
-      clazz: new THREE.Color('#3e14a0'), // purple-blue
-      highlightedEntity: new THREE.Color('#ff0000'), // red
+      foundation: new THREE.Color('#d2d2d2'), // grey
+      componentOdd: new THREE.Color('#8bd6bb'), // dark green
+      componentEven: new THREE.Color('#8bccd6'), // light green
+      clazz: new THREE.Color('#968bd6'), // purple-blue
+      highlightedEntity: new THREE.Color('#ff6666'), // red
       componentText: new THREE.Color('#ffffff'), // white
       clazzText: new THREE.Color('#ffffff'), // white
       foundationText: new THREE.Color('#000000'), // black
-      communication: new THREE.Color('#f49100'), // orange
+      communication: new THREE.Color('#d6bb8b'), // orange
       communicationArrow: new THREE.Color('#000000'), // black
       background: new THREE.Color('#ffffff'), // white
     };
