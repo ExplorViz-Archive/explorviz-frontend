@@ -10,7 +10,7 @@ interface Args {
   selectedTrace: Trace;
   structureData: StructureLandscapeData;
   highlightTrace(trace: Trace, traceStep: string): void;
-  moveCameraTo(emberModel: Class|Span): void;
+  moveCameraTo(emberModel: Class | Span): void;
 }
 
 export default class TraceReplayerMain extends Component<Args> {
@@ -18,7 +18,7 @@ export default class TraceReplayerMain extends Component<Args> {
   isReplayAnimated: boolean = true;
 
   @tracked
-  currentTraceStep: Span|null = null;
+  currentTraceStep: Span | null = null;
 
   @tracked
   traceSteps: Span[] = [];

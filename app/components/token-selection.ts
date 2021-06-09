@@ -20,7 +20,7 @@ export default class TokenSelection extends Component<Args> {
   sortProperty: keyof LandscapeToken = 'value';
 
   @tracked
-  sortOrder: 'asc'|'desc' = 'asc';
+  sortOrder: 'asc' | 'desc' = 'asc';
 
   @action
   sortBy(property: keyof LandscapeToken) {

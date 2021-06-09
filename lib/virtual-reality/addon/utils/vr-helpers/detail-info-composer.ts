@@ -9,7 +9,7 @@ import { getAncestorPackages, getClassesInPackage } from 'explorviz-frontend/uti
 
 export type DetailedInfo = {
   title: string,
-  entries: {key: string, value: string}[],
+  entries: { key: string, value: string }[],
 };
 
 // #region HELPER
@@ -82,7 +82,7 @@ function composeDrawableClazzCommunicationContent(communicationMesh: ClazzCommun
 // #endregion APPLICATION CONTENT COMPOSER
 
 export default function composeContent(object: THREE.Object3D) {
-  let content: DetailedInfo|null = null;
+  let content: DetailedInfo | null = null;
 
   // Landscape Content
   if (object instanceof NodeMesh) {

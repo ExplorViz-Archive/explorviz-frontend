@@ -5,7 +5,7 @@ import {
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import VRController from '../vr-rendering/VRController';
 
-type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
+type Pose = { position: THREE.Vector3, quaternion: THREE.Quaternion };
 export default class Sender {
   webSocket: WebSocket;
 
@@ -184,7 +184,7 @@ export default class Sender {
  * Informs backend that this user entered or left spectating mode
  * and additionally adds who is spectating who
  */
-  sendSpectatingUpdate(userID: string, isSpectating: boolean, spectatedUser: string|null) {
+  sendSpectatingUpdate(userID: string, isSpectating: boolean, spectatedUser: string | null) {
     const spectateObj = {
       event: 'spectating_update',
       userID,

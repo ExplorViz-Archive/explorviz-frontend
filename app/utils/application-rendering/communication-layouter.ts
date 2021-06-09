@@ -87,7 +87,7 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
     const sourceClassComponents: Package[] = [];
     const { sourceClass } = communication;
     if (sourceClass !== null) {
-      let parentComponent: Package|undefined = sourceClass.parent;
+      let parentComponent: Package | undefined = sourceClass.parent;
       while (parentComponent !== undefined) {
         sourceClassComponents.unshift(parentComponent);
         parentComponent = parentComponent.parent;
@@ -98,7 +98,7 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
     const targetClassComponents: Package[] = [];
     const { targetClass } = communication;
     if (targetClass !== null) {
-      let parentComponent: Package|undefined = targetClass.parent;
+      let parentComponent: Package | undefined = targetClass.parent;
       while (parentComponent !== undefined) {
         targetClassComponents.unshift(parentComponent);
         parentComponent = parentComponent.parent;
@@ -106,7 +106,7 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
     }
 
     // Find the most inner common component
-    let commonComponent: Package|null = null;
+    let commonComponent: Package | null = null;
     for (let i = 0; i < sourceClassComponents.length && i < targetClassComponents.length; i++) {
       if (sourceClassComponents[i] === targetClassComponents[i]) {
         commonComponent = sourceClassComponents[i];
@@ -141,8 +141,8 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
 
       if ((parentMesh instanceof ComponentMesh && parentMesh.opened)
       || parentMesh instanceof FoundationMesh) {
-        let sourceEntity: Class|Package|null = null;
-        let targetEntity: Class|Package|null = null;
+        let sourceEntity: Class | Package | null = null;
+        let targetEntity: Class | Package | null = null;
 
         const sourceClazz = classCommunication.sourceClass;
         const targetClazz = classCommunication.targetClass;

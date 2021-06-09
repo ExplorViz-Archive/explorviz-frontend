@@ -12,7 +12,7 @@ import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/found
  *
  * @param boxMesh Mesh which is labeled
  */
-export function positionBoxLabel(boxMesh: ComponentMesh|FoundationMesh) {
+export function positionBoxLabel(boxMesh: ComponentMesh | FoundationMesh) {
   const label = boxMesh.labelMesh;
 
   if (!label) { return; }
@@ -48,7 +48,7 @@ export function positionBoxLabel(boxMesh: ComponentMesh|FoundationMesh) {
  * @param minLength Minimal length (#letters) of text. More important than minHeight
  * @param scalar Allows to scale text size additionally
  */
-export function addBoxTextLabel(boxMesh: ComponentMesh|FoundationMesh, font: THREE.Font,
+export function addBoxTextLabel(boxMesh: ComponentMesh | FoundationMesh, font: THREE.Font,
   color: THREE.Color, minHeight = 1.5, minLength = 4, scalar = 1, replace = false) {
   if (boxMesh.labelMesh && !replace) return;
   const labelMesh = new ComponentLabelMesh(boxMesh, font, color, minHeight, minLength);

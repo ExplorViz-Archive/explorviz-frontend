@@ -12,13 +12,13 @@ export function getAllApplicationsInLandscape(landscapeStructure: StructureLands
 }
 
 export function getApplicationInLandscapeById(landscapeStructure: StructureLandscapeData,
-  id: string): Application|undefined {
+  id: string): Application | undefined {
   return getAllApplicationsInLandscape(landscapeStructure)
     .filter((app) => app.id === id)[0];
 }
 
 export function getApplicationFromClass(structureData: StructureLandscapeData, clazz: Class) {
-  let matchingApplication: Application|undefined;
+  let matchingApplication: Application | undefined;
 
   structureData.nodes.forEach((node) => {
     const possibleMatch = node.applications
@@ -43,7 +43,7 @@ export function getHashCodeToApplicationMap(landscapeStructure: StructureLandsca
   return hashCodeToApplicationMap;
 }
 
-export function getHashCodeToClassMap(structureData: StructureLandscapeData|Application) {
+export function getHashCodeToClassMap(structureData: StructureLandscapeData | Application) {
   const hashCodeToClassMap = new Map<string, Class>();
 
   let classList: Class[];
@@ -73,7 +73,7 @@ export function createTraceIdToSpanTrees(traces: Trace[]) {
   return traceIdToSpanTree;
 }
 
-export function getSpanIdToClassMap(structureData: Application|StructureLandscapeData,
+export function getSpanIdToClassMap(structureData: Application | StructureLandscapeData,
   trace: Trace) {
   const hashCodeToClassMap = getHashCodeToClassMap(structureData);
 
@@ -92,7 +92,7 @@ export function getSpanIdToClassMap(structureData: Application|StructureLandscap
   return spanIdToClassMap;
 }
 
-export function spanIdToClass(structureData: Application|StructureLandscapeData,
+export function spanIdToClass(structureData: Application | StructureLandscapeData,
   trace: Trace, spanId: string) {
   const spanIdToClassMap = getSpanIdToClassMap(structureData, trace);
   return spanIdToClassMap.get(spanId);

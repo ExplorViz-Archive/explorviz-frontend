@@ -81,7 +81,7 @@ export default class VrRendering extends Component<Args> {
   worker!: any;
 
   // Maps models to a computed layout
-  modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
+  modelIdToPlaneLayout: Map<string, PlaneLayout> | null = null;
 
   debug = debugLogger('VrRendering');
 
@@ -114,11 +114,11 @@ export default class VrRendering extends Component<Args> {
 
   closeButtonTexture: THREE.Texture;
 
-  mainMenu: BaseMenu|undefined;
+  mainMenu: BaseMenu | undefined;
 
-  infoMenu: DetailInfoMenu|undefined;
+  infoMenu: DetailInfoMenu | undefined;
 
-  hintMenu: HintMenu|undefined;
+  hintMenu: HintMenu | undefined;
 
   landscapeOffset = new THREE.Vector3();
 
@@ -930,7 +930,7 @@ export default class VrRendering extends Component<Args> {
 
   // #region MENUS
 
-  showHint(title: string, text: string|null = null) {
+  showHint(title: string, text: string | null = null) {
     if (this.hintMenu) {
       this.hintMenu.back();
       this.hintMenu = undefined;

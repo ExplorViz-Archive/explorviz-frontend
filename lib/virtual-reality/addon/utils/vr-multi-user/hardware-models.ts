@@ -2,13 +2,13 @@ import THREE from 'three';
 import { OBJLoader } from '../lib/loader/OBJLoader';
 
 export default class HardwareModels extends Object {
-  hmd: THREE.Group|undefined;
+  hmd: THREE.Group | undefined;
 
-  private leftOculusController: THREE.Group|undefined;
+  private leftOculusController: THREE.Group | undefined;
 
-  private rightOculusController: THREE.Group|undefined;
+  private rightOculusController: THREE.Group | undefined;
 
-  private viveController: THREE.Group|undefined;
+  private viveController: THREE.Group | undefined;
 
   constructor() {
     super();

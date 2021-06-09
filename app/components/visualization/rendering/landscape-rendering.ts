@@ -119,7 +119,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   readonly imageLoader: ImageLoader = new ImageLoader();
 
-  hoveredObject: BaseMesh|null = null;
+  hoveredObject: BaseMesh | null = null;
 
   get rightClickMenuItems() {
     const pauseItemtitle = this.args.visualizationPaused ? 'Resume Visualization' : 'Pause Visualization';
