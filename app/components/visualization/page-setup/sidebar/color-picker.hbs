@@ -19,17 +19,24 @@
     <div class="dropdown-menu">
       <div
         class="dropdown-item pointer-cursor"
-        name="defaultScheme"
-        {{on "click" (fn this.applyColorScheme "default")}}
+        name="classicScheme"
+        {{on "click" (fn this.applyColorScheme "classic")}}
       >
-        Default Color Scheme
+        Classic
       </div>
       <div
         class="dropdown-item pointer-cursor"
-        name="impairedScheme"
-        {{on "click" (fn this.applyColorScheme "impaired")}}
+        name="modernSchema"
+        {{on "click" (fn this.applyColorScheme "modern")}}
       >
-        Vision Impairment Color Scheme
+        Modern
+      </div>
+      <div
+        class="dropdown-item pointer-cursor"
+        name="darkScheme"
+        {{on "click" (fn this.applyColorScheme "dark")}}
+      >
+        Dark
       </div>
     </div>
   </div>

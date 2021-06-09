@@ -15,10 +15,12 @@ export default class ColorPicker extends Component<Args> {
 
   @action
   applyColorScheme(scheme: string) {
-    if (scheme === 'default') {
-      this.applyDefaultColors();
-    } else if (scheme === 'impaired') {
-      this.applyVisuallyImpairedColors();
+    if (scheme === 'classic') {
+      this.applyClassicColors();
+    } else if (scheme === 'modern') {
+      this.applyModernColors();
+    } else if (scheme === 'dark') {
+      this.applyDarkColors();
     }
   }
 
@@ -78,10 +80,10 @@ export default class ColorPicker extends Component<Args> {
   }
 
   /**
-   * Sets color values to default.
+   * Sets color values to classic colors.
    * Triggers update of color configuration and colors of current view.
    */
-  applyDefaultColors() {
+  applyClassicColors() {
     if (this.args.isLandscapeView) {
       const { landscapeColors } = this.configuration;
 
@@ -110,15 +112,15 @@ export default class ColorPicker extends Component<Args> {
   }
 
   /**
-   * Updates color values such that they better suit visually impaired users.
+   * Sets color values to default colors.
    * Triggers update of color configuration and colors of current view.
    */
-  applyVisuallyImpairedColors() {
+  applyModernColors() {
     if (this.args.isLandscapeView) {
       const { landscapeColors } = this.configuration;
 
-      landscapeColors.node.set('#0096be'); // green
-      landscapeColors.application.set('#5f5f5f'); // purple-blue
+      landscapeColors.node.set('#0096be'); // light blue
+      landscapeColors.application.set('#5f5f5f'); // dark grey
       landscapeColors.communication.set('#f49100'); // orange
       landscapeColors.nodeText.set('#ffffff'); // white
       landscapeColors.applicationText.set('#ffffff'); // white
@@ -135,6 +137,38 @@ export default class ColorPicker extends Component<Args> {
       applicationColors.clazzText.set('#ffffff'); // white
       applicationColors.foundationText.set('#000000'); // black
       applicationColors.communication.set('#f49100'); // orange
+      applicationColors.communicationArrow.set('#000000'); // black
+      applicationColors.background.set('#ffffff'); // white
+    }
+
+    this.updateView();
+  }
+
+  /**
+   * Sets color values to dark values.
+   * Triggers update of color configuration and colors of current view.
+   */
+  applyDarkColors() {
+    if (this.args.isLandscapeView) {
+      const { landscapeColors } = this.configuration;
+
+      landscapeColors.node.set('#2f3d3b'); // light black
+      landscapeColors.application.set('#5B7B88'); // dark grey
+      landscapeColors.communication.set('#E3E3E3'); // light grey
+      landscapeColors.nodeText.set('#ffffff'); // white
+      landscapeColors.applicationText.set('#ffffff'); // white
+      landscapeColors.background.set('#ffffff'); // white
+    } else {
+      const { applicationColors } = this.configuration;
+      applicationColors.foundation.set('#c7c7c7'); // grey
+      applicationColors.componentOdd.set('#2f3d3b'); // dark grey
+      applicationColors.componentEven.set('#5B7B88'); // grey
+      applicationColors.clazz.set('#a72b15'); // dark red
+      applicationColors.highlightedEntity.set('#ff0000'); // red
+      applicationColors.componentText.set('#ffffff'); // white
+      applicationColors.clazzText.set('#ffffff'); // white
+      applicationColors.foundationText.set('#000000'); // black
+      applicationColors.communication.set('#E3E3E3'); // light grey
       applicationColors.communicationArrow.set('#000000'); // black
       applicationColors.background.set('#ffffff'); // white
     }
