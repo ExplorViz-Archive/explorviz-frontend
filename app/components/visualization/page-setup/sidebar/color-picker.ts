@@ -21,6 +21,8 @@ export default class ColorPicker extends Component<Args> {
       this.applyClassicColors();
     } else if (scheme === 'impaired') {
       this.applyVisuallyImpairedColors();
+    } else if (scheme === 'dark') {
+      this.applyDarkColors();
     }
   }
 
@@ -184,6 +186,40 @@ export default class ColorPicker extends Component<Args> {
       applicationColors.communication.set('#f49100'); // orange
       applicationColors.communicationArrow.set('#000000'); // black
       applicationColors.background.set('#ffffff'); // white
+    }
+
+    this.updateView();
+  }
+
+  /**
+   * Sets color values to dark values.
+   * Triggers update of color configuration and colors of current view.
+   */
+  applyDarkColors() {
+    if (this.args.isLandscapeView) {
+      const { landscapeColors } = this.configuration;
+
+      landscapeColors.system.set('#c7c7c7'); // grey
+      landscapeColors.nodegroup.set('#000000'); // black
+      landscapeColors.node.set('#2f3d3b'); // light black
+      landscapeColors.application.set('#5B7B88'); // dark grey
+      landscapeColors.communication.set('#e3e3e3'); // light grey
+      landscapeColors.nodeText.set('#ffffff'); // white
+      landscapeColors.applicationText.set('#ffffff'); // white
+      landscapeColors.background.set('#acacac'); // stone grey
+    } else {
+      const { applicationColors } = this.configuration;
+      applicationColors.foundation.set('#c7c7c7'); // grey
+      applicationColors.componentOdd.set('#2f3d3b'); // dark grey
+      applicationColors.componentEven.set('#5B7B88'); // grey
+      applicationColors.clazz.set('#4073b6'); // blue
+      applicationColors.highlightedEntity.set('#ff0000'); // red
+      applicationColors.componentText.set('#ffffff'); // white
+      applicationColors.clazzText.set('#ffffff'); // white
+      applicationColors.foundationText.set('#000000'); // black
+      applicationColors.communication.set('#e3e3e3'); // light grey
+      applicationColors.communicationArrow.set('#000000'); // black
+      applicationColors.background.set('#acacac'); // stone grey
     }
 
     this.updateView();
