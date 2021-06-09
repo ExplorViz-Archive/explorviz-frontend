@@ -13,6 +13,8 @@ export default class ComponentLabelMesh extends LabelMesh {
     const labelText = componentMesh.dataModel.name;
     super(font, labelText, textColor);
 
+    this.receiveShadow = true;
+
     this.minHeight = minHeight;
     this.minLength = minLength;
   }
