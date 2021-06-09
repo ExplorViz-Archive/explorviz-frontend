@@ -646,6 +646,20 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.handleSecondaryInputOn(intersection);
   }
 
+  @action
+  handleMouseWheel(delta: number) {
+    const intersection = this.interaction.raycastCanvasCenter();
+
+    if (intersection && (
+      intersection.object.parent instanceof ApplicationObject3D
+      || intersection.object.parent instanceof LandscapeObject3D)) {
+      const object = intersection.object.parent;
+
+      // Scale hit object with respect to scroll direction and scroll distance
+      object.scale.copy(object.scale.multiplyScalar(1 - (delta / 25)));
+    }
+  }
+
   handleKeyboard(event: any) {
     // Handle keys
     switch (event.key) {

@@ -57,6 +57,7 @@
           hammerInteraction=this.hammerInteraction
           doubleClick=this.handleDoubleClick
           singleClick=this.handleSingleClick
+          mouseWheel=this.handleMouseWheel
           panning=this.handlePanning
         }}
       >
@@ -130,13 +131,13 @@
           </BsButton>
         </div>
 
-        <div id="ar-pin-interaction-container">
+        <div id="ar-openall-interaction-container">
           <BsButton
             @type="primary"
             class="half-transparent"
             {{ on "click" this.handleOpenAllComponents }}
           >
-            {{svg-jar "book-16" class="octicon align-middle ar-button-svg"}}
+            {{svg-jar "fold-up-16" class="octicon align-middle ar-button-svg"}}
           </BsButton>
         </div>
 
