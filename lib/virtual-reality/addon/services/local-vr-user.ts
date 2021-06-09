@@ -1,5 +1,7 @@
 import Service, { inject as service } from '@ember/service';
 import THREE from 'three';
+import Configuration from 'explorviz-frontend/services/configuration';
+import { computed } from '@ember/object';
 import VRController from 'virtual-reality/utils/vr-controller';
 import { tracked } from '@glimmer/tracking';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
@@ -11,6 +13,9 @@ import WebSocketService from './web-socket';
 export type ConnectionStatus = 'offline' | 'connecting' | 'online';
 
 export default class LocalVrUser extends Service {
+  @service('configuration')
+  configuration!: Configuration;
+
   @service('spectate-user')
   private spectateUserService!: SpectateUserService;
 
@@ -28,6 +33,7 @@ export default class LocalVrUser extends Service {
   @tracked
   userName?: string;
 
+  @tracked
   color: THREE.Color | undefined;
 
   renderer!: THREE.WebGLRenderer;
@@ -48,6 +54,18 @@ export default class LocalVrUser extends Service {
 
   @tracked
   currentRoomId: string | null = null;
+
+  @computed('color', 'connectionStatus')
+  get highlightingColorStyle() {
+    let hexColor = '';
+    if (this.isOnline && this.color) {
+      hexColor = this.color.getHexString();
+    } else {
+      hexColor = this.configuration.applicationColors.highlightedEntity.getHexString();
+    }
+
+    return `color:#${hexColor}`;
+  }
 
   get camera() {
     if (this.renderer.xr.isPresenting) {

@@ -112,6 +112,7 @@
         <div id="ar-secondary-interaction-container">
           <BsButton
             @type="primary"
+            style={{html-safe this.localUser.highlightingColorStyle}}
             class="half-transparent"
             {{ on "click" this.handleSecondaryCrosshairInteraction }}
           >
