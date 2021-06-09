@@ -68,6 +68,103 @@ self.addEventListener('message', function(e) {
       };
     }
 
+    function calculateIncomingRequestCountMetric(application, allLandscapeTraces) {
+      // Initialize matric components
+      let min = 0;
+      let max = 0;
+      const values = new Map();
+  
+      getAllClazzesInApplication(application).forEach((clazz) => {
+        values.set(clazz.id, 0);
+      });
+
+      const clazzes = [];
+      application.packages.forEach((component) => {
+        getClazzList(component, clazzes);
+      });
+  
+      const hashCodeToClassMap = getHashCodeToClassMap(clazzes);
+  
+      const allMethodHashCodes = getAllSpanHashCodesFromTraces(allLandscapeTraces);
+  
+      for (let methodHashCode of allMethodHashCodes) {
+        const classMatchingTraceHashCode = hashCodeToClassMap.get(methodHashCode);
+  
+        if(classMatchingTraceHashCode === undefined) {
+          continue;
+        }
+  
+        const methodMatchingSpanHash = classMatchingTraceHashCode.methods.find((method) => method.hashCode === methodHashCode);
+  
+        if(methodMatchingSpanHash === undefined) {
+          continue;
+        }
+
+        const newRequestCount = values.get(classMatchingTraceHashCode.id) + 1;
+
+        values.set(classMatchingTraceHashCode.id, newRequestCount);
+        max = Math.max(max, newRequestCount);
+      }
+
+      return {
+        name: 'Incoming Requests',
+        mode: 'aggregatedHeatmap',
+        description: 'Number of incoming requests of a class in given timeframe',
+        min, 
+        max, 
+        values
+      };
+    }
+
+    function calculateOutgoingRequestCountMetric(application, allLandscapeTraces) {
+      // Initialize matric components
+      let min = 0;
+      let max = 0;
+      const values = new Map();
+  
+      getAllClazzesInApplication(application).forEach((clazz) => {
+        values.set(clazz.id, 0);
+      });
+
+      const clazzes = [];
+      application.packages.forEach((component) => {
+        getClazzList(component, clazzes);
+      });
+
+      const hashCodeToClassMap = getHashCodeToClassMap(clazzes);
+
+      const traceIdToSpanTreeMap = getTraceIdToSpanTreeMap(allLandscapeTraces);
+
+      traceIdToSpanTreeMap.forEach((spanTree) => {
+        const { root, tree } = spanTree;
+
+        calculateRequestsRecursively(root, tree);
+      });
+
+      function calculateRequestsRecursively(span, tree) {
+        const childSpans = tree.get(span.spanId);
+        const parentClass = hashCodeToClassMap.get(span.hashCode);
+
+        if (parentClass) {
+          const newRequestCount = values.get(parentClass.id) + childSpans.length;
+
+          values.set(parentClass.id, newRequestCount);
+          max = Math.max(max, newRequestCount);
+        }
+
+        childSpans.forEach((childSpan) => calculateRequestsRecursively(childSpan, tree));
+      }
+
+      return {
+        name: 'Outgoing Requests',
+        mode: 'aggregatedHeatmap',
+        description: 'Number of outgoing requests of a class in given timeframe',
+        min, 
+        max, 
+        values
+      };
+    }
+
     function calculateDummyMetric(application) {
       // Initialize matric components
       let min = Number.MAX_VALUE;
@@ -103,6 +200,13 @@ self.addEventListener('message', function(e) {
 
     const instanceCountMetric = calcInstanceCountMetric(application, allLandscapeTraces);
     metrics.push(instanceCountMetric);
+
+    
+    const incomingRequestCountMetric = calculateIncomingRequestCountMetric(application, allLandscapeTraces);
+    metrics.push(incomingRequestCountMetric);
+
+    const outgoingRequestCountMetric = calculateOutgoingRequestCountMetric(application, allLandscapeTraces);
+    metrics.push(outgoingRequestCountMetric);
 
     return metrics;
   
@@ -170,6 +274,61 @@ self.addEventListener('message', function(e) {
         });
       });
       return hashCodes;
-    }  
+    }
+
+    function sortSpanArrayByTime(spanArary, copy = false) {
+      let sortedArray = spanArary;
+      if (copy) {
+        sortedArray = [...sortedArray];
+      }
+      return sortedArray.sort((span1, span2) => span1.startTime - span2.startTime);
+    }
+    
+    /**
+     * Returns a SpanTree, which contains the first span and a map,
+     * which maps all spans' ids to their corresponding child spans
+     */
+    function getTraceIdToSpanTree(trace) {
+      let firstSpan = trace.spanList[0];
+    
+      // Put spans into map for more efficient lookup when sorting
+      const spanIdToSpanMap = new Map();
+      trace.spanList.forEach((span) => {
+        if (span.parentSpanId === '') {
+          firstSpan = span;
+        } else {
+          spanIdToSpanMap.set(span.spanId, span);
+        }
+      });
+    
+      const parentSpanIdToChildSpansMap = new Map();
+    
+      trace.spanList.forEach((span) => {
+        parentSpanIdToChildSpansMap.set(span.spanId, []);
+      });
+    
+      trace.spanList.forEach((span) => {
+        parentSpanIdToChildSpansMap.get(span.parentSpanId)?.push(span);
+      });
+    
+      parentSpanIdToChildSpansMap.forEach((spanArary) => sortSpanArrayByTime(spanArary));
+    
+      const tree = {
+        root: firstSpan,
+        tree: parentSpanIdToChildSpansMap,
+      };
+    
+      return tree;
+    }
+    
+    function getTraceIdToSpanTreeMap(traces) {
+      const traceIdToSpanTree = new Map();
+    
+      traces.forEach((trace) => {
+        traceIdToSpanTree.set(trace.traceId, getTraceIdToSpanTree(trace));
+      });
+    
+      return traceIdToSpanTree;
+    }
   }
   
