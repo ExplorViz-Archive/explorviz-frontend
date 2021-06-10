@@ -2,9 +2,8 @@ import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/applicati
 import applyCommunicationLayout from 'explorviz-frontend/utils/application-rendering/communication-layouter';
 import Configuration from 'explorviz-frontend/services/configuration';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
-import { Vector3 } from 'three';
 import CommunicationLayout from 'explorviz-frontend/view-objects/layout-models/communication-layout';
-import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
+import { Vector3 } from 'three';
 import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
 
 export default class CommunicationRendering {
@@ -15,19 +14,17 @@ export default class CommunicationRendering {
     this.configuration = configuration;
   }
 
-  computeCommunicationLine(drawableClazzComm: DrawableClassCommunication,
-    commLayout: CommunicationLayout, applicationLayout: BoxLayout) {
-    // Add communication to application
-    const pipe = new ClazzCommunicationMesh(
-      commLayout,
-      drawableClazzComm,
-      this.configuration.applicationColors.communication,
-      this.configuration.applicationColors.highlightedEntity,
-    );
+  private computeCurveHeight(commLayout: CommunicationLayout) {
+    let baseCurveHeight = 20;
 
-    pipe.render(applicationLayout.center, this.configuration.commCurveHeight);
+    if (this.configuration.commCurveHeightDependsOnDistance) {
+      const classDistance = Math.hypot(
+        commLayout.endX - commLayout.startX, commLayout.endZ - commLayout.startZ,
+      );
+      baseCurveHeight = classDistance * 0.5;
+    }
 
-    return pipe;
+    return baseCurveHeight * this.configuration.commCurveHeightMultiplier;
   }
 
   // Add arrow indicators for drawable class communication
@@ -56,10 +53,20 @@ export default class CommunicationRendering {
 
     if (!applicationLayout) { return; }
 
+    const viewCenterPoint = applicationLayout.center;
+
+    // Remove old communication
     applicationObject3D.removeAllCommunication();
 
+    // Compute communication Layout
     const commLayoutMap = applyCommunicationLayout(applicationObject3D,
       applicationObject3D.boxLayoutMap, drawableClassCommunications);
+
+    // Retrieve color preferences
+    const {
+      communication: communicationColor,
+      highlightedEntity: highlightedEntityColor,
+    } = this.configuration.applicationColors;
 
     // Render all drawable communications
     drawableClassCommunications.forEach((drawableClazzComm) => {
@@ -70,11 +77,17 @@ export default class CommunicationRendering {
         return;
       }
 
-      const pipe = this.computeCommunicationLine(drawableClazzComm, commLayout, applicationLayout);
+      // Add communication to application
+      const pipe = new ClazzCommunicationMesh(commLayout, drawableClazzComm,
+        communicationColor, highlightedEntityColor);
+
+      const curveHeight = this.computeCurveHeight(commLayout);
+
+      pipe.render(viewCenterPoint, curveHeight);
 
       applicationObject3D.add(pipe);
 
-      this.addArrows(pipe, this.configuration.commCurveHeight, applicationLayout.center);
+      this.addArrows(pipe, curveHeight, viewCenterPoint);
     });
   }
 }
