@@ -13,6 +13,7 @@ export default class ComponentLabelMesh extends LabelMesh {
     const labelText = componentMesh.dataModel.name;
     super(font, labelText, textColor);
 
+    this.renderOrder = 1;
     this.receiveShadow = true;
 
     this.minHeight = minHeight;
@@ -53,7 +54,10 @@ export default class ComponentLabelMesh extends LabelMesh {
       curveSegments: 1,
     });
 
-    this.material = new THREE.MeshBasicMaterial({ color: this.defaultColor });
+    this.material = new THREE.MeshBasicMaterial({
+      color: this.defaultColor,
+      depthTest: false,
+    });
 
     const textDimensions = computeBoxSize(this.geometry);
     const textWidth = textDimensions.x;
