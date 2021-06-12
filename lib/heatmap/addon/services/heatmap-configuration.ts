@@ -1,8 +1,9 @@
-import Service from '@ember/service';
+import Service, { inject as service } from '@ember/service';
 import Evented from '@ember/object/evented';
 import debugLogger from 'ember-debug-logger';
 import { tracked } from '@glimmer/tracking';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
+import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
 import { getDefaultGradient as getSimpleDefaultGradient } from '../utils/simple-heatmap';
 import { getDefaultGradient as getArrayDefaultGradient } from '../utils/array-heatmap';
 import revertKey from '../utils/heatmap-generator';
@@ -19,6 +20,9 @@ export type Metric = {
 type HeatmapMode = 'aggregatedHeatmap' | 'windowedHeatmap';
 
 export default class HeatmapConfiguration extends Service.extend(Evented) {
+  @service('landscape-listener')
+  landscapeListener!: LandscapeListener;
+
   @tracked
   heatmapActive = false;
 
@@ -59,6 +63,14 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
   arrayHeatGradient = getArrayDefaultGradient();
 
   debug = debugLogger();
+
+  constructor() {
+    super(...arguments);
+
+    this.landscapeListener.on('newLandscapeData', () => {
+      this.latestClazzMetrics = null;
+    });
+  }
 
   triggerLatestHeatmapUpdate() {
     if (this.applicationID) {
