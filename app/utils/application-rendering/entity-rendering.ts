@@ -142,17 +142,18 @@ export function addFoundationAndChildrenToApplication(applicationObject3D: Appli
  */
 export function addGlobeToApplication(applicationObject3D: ApplicationObject3D) {
   const geometry = new THREE.SphereGeometry(2.5, 15, 15);
-  const texture = new THREE.TextureLoader().load('images/earth-map.jpg');
-  const material = new THREE.MeshPhongMaterial({ map: texture });
-  // material.map = THREE.TextureLoader.loadTexture('images/earthmap1k.jpg');
-  const mesh = new THREE.Mesh(geometry, material);
-  const applicationCenter = applicationObject3D.layout.center;
+  const texture = new THREE.TextureLoader().load('images/earth-map.jpg', (loadedTexture) => {
+    const material = new THREE.MeshPhongMaterial({ map: loadedTexture });
+    const mesh = new THREE.Mesh(geometry, material);
+    const applicationCenter = applicationObject3D.layout.center;
 
-  const centerPoint = new THREE.Vector3(-5, 0, -5);
+    const centerPoint = new THREE.Vector3(-5, 0, -5);
 
-  centerPoint.sub(applicationCenter);
+    centerPoint.sub(applicationCenter);
 
-  mesh.position.copy(centerPoint);
+    mesh.position.copy(centerPoint);
+    mesh.rotateY(-2.45);
 
-  applicationObject3D.add(mesh);
+    applicationObject3D.add(mesh);
+  });
 }
