@@ -321,15 +321,17 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     });
 
     this.hammerInteraction.on('panning', (delta: { x: number, y: number }) => {
-      if (this.pannedObject instanceof LandscapeObject3D) {
-        this.pannedObject.position.x += delta.x * 0.0045;
-        this.pannedObject.position.z += delta.y * 0.0045;
+      if (!(this.pannedObject instanceof LandscapeObject3D)
+      && !(this.pannedObject instanceof ApplicationObject3D)) {
+        return;
       }
 
-      if (this.pannedObject instanceof ApplicationObject3D) {
-        this.pannedObject.position.x += delta.x * 0.0045;
-        this.pannedObject.position.z += delta.y * 0.0045;
-      }
+      const deltaVector = new THREE.Vector3(delta.x, 0, delta.y);
+      deltaVector.multiplyScalar(0.0025);
+
+      deltaVector.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.pannedObject.parent!.rotation.z);
+
+      this.pannedObject.position.add(deltaVector);
     });
   }
 
