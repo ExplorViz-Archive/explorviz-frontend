@@ -1,0 +1,41 @@
+<div id="colorPresets" class="dropdown">
+  <button
+      class="btn btn-outline-dark dropdown-toggle"
+      type="button"
+      data-toggle="dropdown"
+      aria-haspopup="true"
+      aria-expanded="false"
+  >
+    Presets
+  </button>
+  <div class="dropdown-menu">
+    <div
+    class="dropdown-item pointer-cursor"
+    name="defaultScheme"
+    {{on "click" (fn this.applyColorScheme "default")}}
+    >
+      Default
+    </div>
+    <div
+    class="dropdown-item pointer-cursor"
+    name="impairedScheme"
+    {{on "click" (fn this.applyColorScheme "impaired")}}
+    >
+      Vision Impairment
+    </div>
+    <div
+    class="dropdown-item pointer-cursor"
+    name="classicScheme"
+    {{on "click" (fn this.applyColorScheme "classic")}}
+    >
+      Classic (Initial)
+    </div>
+    <div
+    class="dropdown-item pointer-cursor"
+    name="darkScheme"
+    {{on "click" (fn this.applyColorScheme "dark")}}
+    >
+      Dark
+    </div>
+  </div>
+</div>
