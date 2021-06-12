@@ -17,7 +17,7 @@ self.addEventListener('message', function(e) {
   function calculateMetrics(application, allLandscapeTraces) {  
 
     function calcInstanceCountMetric(application, allLandscapeTraces) {
-      // Initialize matric components
+      // Initialize metric properties
       let min = 0;
       let max = 0;
       const values = new Map();
@@ -61,7 +61,7 @@ self.addEventListener('message', function(e) {
       return {
         name: 'Instance Count',
         mode: 'aggregatedHeatmap',
-        description: 'Number of newly created instances in given timeframe',
+        description: 'Number of newly created instances (objects)',
         min, 
         max, 
         values
@@ -69,7 +69,7 @@ self.addEventListener('message', function(e) {
     }
 
     function calculateIncomingRequestCountMetric(application, allLandscapeTraces) {
-      // Initialize matric components
+      // Initialize metric properties
       let min = 0;
       let max = 0;
       const values = new Map();
@@ -109,7 +109,7 @@ self.addEventListener('message', function(e) {
       return {
         name: 'Incoming Requests',
         mode: 'aggregatedHeatmap',
-        description: 'Number of incoming requests of a class in given timeframe',
+        description: 'Number of incoming requests of a class',
         min, 
         max, 
         values
@@ -117,7 +117,7 @@ self.addEventListener('message', function(e) {
     }
 
     function calculateOutgoingRequestCountMetric(application, allLandscapeTraces) {
-      // Initialize matric components
+      // Initialize metric properties
       let min = 0;
       let max = 0;
       const values = new Map();
@@ -158,15 +158,41 @@ self.addEventListener('message', function(e) {
       return {
         name: 'Outgoing Requests',
         mode: 'aggregatedHeatmap',
-        description: 'Number of outgoing requests of a class in given timeframe',
+        description: 'Number of outgoing requests of a class',
         min, 
         max, 
         values
       };
     }
 
+    function calculateOverallRequestCountMetric(incomingRequestCountMetric, outgoingRequestCountMetric) {
+      // Initialize metric properties
+      const min = incomingRequestCountMetric.min + outgoingRequestCountMetric.min;
+      const max = incomingRequestCountMetric.max + outgoingRequestCountMetric.max;
+      
+      const values = new Map();
+
+      incomingRequestCountMetric.values.forEach( (incomingRequests, classId) => {
+        let outgoingRequests = outgoingRequestCountMetric.values.get(classId);
+
+        values.set(classId, incomingRequests + outgoingRequests);
+      })
+
+      return {
+        name: 'Overall Requests',
+        mode: 'aggregatedHeatmap',
+        description: 'Number of in- and outgoing requests of a class',
+        min, 
+        max, 
+        values
+      };
+    }
+
+    /**
+     * Can be used for test purposes, as every new calculation of this metric generates different results
+     */
     function calculateDummyMetric(application) {
-      // Initialize matric components
+      // Initialize metric properties
       let min = Number.MAX_VALUE;
       let max = 0;
       const values = new Map();
@@ -195,8 +221,9 @@ self.addEventListener('message', function(e) {
 
     let metrics = [];
 
-    const dummyMetric = calculateDummyMetric(application);
-    metrics.push(dummyMetric);
+    // The following metric might be useful for testing purposes
+    // const dummyMetric = calculateDummyMetric(application);
+    // metrics.push(dummyMetric);
 
     const instanceCountMetric = calcInstanceCountMetric(application, allLandscapeTraces);
     metrics.push(instanceCountMetric);
@@ -207,6 +234,9 @@ self.addEventListener('message', function(e) {
 
     const outgoingRequestCountMetric = calculateOutgoingRequestCountMetric(application, allLandscapeTraces);
     metrics.push(outgoingRequestCountMetric);
+
+    const overallRequestCountMetric = calculateOverallRequestCountMetric(incomingRequestCountMetric, outgoingRequestCountMetric);
+    metrics.push(overallRequestCountMetric);
 
     return metrics;
   
