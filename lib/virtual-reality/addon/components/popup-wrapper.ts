@@ -99,6 +99,14 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
 
     const self = this;
 
+    function xPositionInsideWindow(minX: number, maxX: number) {
+      return minX >= 0 && maxX <= window.innerWidth;
+    }
+
+    function yPositionInsideWindow(minY: number, maxY: number) {
+      return minY >= 0 && maxY <= window.innerHeight;
+    }
+
     function moveElement(clientX: number, clientY: number) {
       // Calculate cursor position
       xOffset = inputX - clientX;
@@ -106,22 +114,27 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
       inputX = clientX;
       inputY = clientY;
 
-      // Calculate popup position
-      const minX = elmnt.offsetLeft - xOffset;
-      const maxX = minX + elmnt.clientWidth;
-      const minY = elmnt.offsetTop - yOffset;
-      const maxY = minY + elmnt.clientHeight;
+      // Calculation of old and new coordinates
+      const oldMinX = elmnt.offsetLeft;
+      const oldMaxX = oldMinX + elmnt.clientWidth;
+      const oldMinY = elmnt.offsetTop;
+      const oldMaxY = oldMinY + elmnt.clientHeight;
+
+      const newMinX = oldMinX - xOffset;
+      const newMaxX = newMinX + elmnt.clientWidth;
+      const newMinY = oldMinY - yOffset;
+      const newMaxY = newMinY + elmnt.clientHeight;
 
       // Set the element's new position:
-      if (minX >= 0 && maxX <= window.innerWidth) {
-        elmnt.style.left = `${minX}px`;
+      if (!xPositionInsideWindow(oldMinX, oldMaxX) || xPositionInsideWindow(newMinX, newMaxX)) {
+        elmnt.style.left = `${newMinX}px`;
       }
 
-      if (minY >= 0 && maxY <= window.innerHeight) {
-        elmnt.style.top = `${minY}px`;
+      if (!yPositionInsideWindow(oldMinY, oldMaxY) || yPositionInsideWindow(newMinY, newMaxY)) {
+        elmnt.style.top = `${newMinY}px`;
       }
 
-      self.args.setPopupPosition(self.args.popupData.id, minX, minY);
+      self.args.setPopupPosition(self.args.popupData.id, newMinX, newMinY);
     }
 
     function closeDragElement() {
