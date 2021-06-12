@@ -67,7 +67,7 @@ export default class VisualizationController extends Controller {
   showTimeline: boolean = true;
 
   @tracked
-  landscapeData: LandscapeData|null = null;
+  landscapeData: LandscapeData | null = null;
 
   @tracked
   visualizationPaused = false;
@@ -135,7 +135,7 @@ export default class VisualizationController extends Controller {
 
   private static getApplicationFromLandscapeById(id: string,
     structureData: StructureLandscapeData) {
-    let foundApplication: Application|undefined;
+    let foundApplication: Application | undefined;
     structureData.nodes.forEach((node) => {
       node.applications.forEach((application) => {
         if (application.id === id) {

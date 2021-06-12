@@ -28,17 +28,6 @@ export default class HeatmapLegend extends Component<Args> {
     };
   }
 
-  get header() {
-    const { mode } = this.heatmapConfiguration.selectedMetric!;
-    if (mode === 'aggregatedHeatmap') {
-      return 'Aggregated Heatmap';
-    }
-    if (mode === 'windowedHeatmap') {
-      return 'Windowed Heatmap';
-    }
-    return 'Header';
-  }
-
   get subHeader() {
     const { mode } = this.heatmapConfiguration.selectedMetric!;
     if (mode === 'aggregatedHeatmap') {

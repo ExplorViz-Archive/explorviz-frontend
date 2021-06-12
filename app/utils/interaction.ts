@@ -5,12 +5,12 @@ import THREE from 'three';
 type CallbackFunctions = {
   mouseEnter?(): void,
   mouseOut?(): void,
-  mouseMove?(intersection: THREE.Intersection|null): void,
-  mouseStop?(intersection: THREE.Intersection|null, mousePosition?: Position2D): void,
+  mouseMove?(intersection: THREE.Intersection | null): void,
+  mouseStop?(intersection: THREE.Intersection | null, mousePosition?: Position2D): void,
   mouseWheel?(delta: number): void,
-  singleClick?(intersection: THREE.Intersection|null): void,
-  doubleClick?(intersection: THREE.Intersection|null): void,
-  panning?(delta: { x: number, y: number }, button: 1|2|3): void
+  singleClick?(intersection: THREE.Intersection | null): void,
+  doubleClick?(intersection: THREE.Intersection | null): void,
+  panning?(delta: { x: number, y: number }, button: 1 | 2 | 3): void
 };
 
 type MouseStopEvent = {

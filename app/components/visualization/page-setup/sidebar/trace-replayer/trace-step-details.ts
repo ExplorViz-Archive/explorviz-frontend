@@ -14,7 +14,7 @@ interface Args {
   readonly targetApplicationName: string;
   readonly spanStartTime: number;
   readonly spanEndTime: number;
-  moveCameraTo(emberModel: Class|Span): void;
+  moveCameraTo(emberModel: Class | Span): void;
 }
 
 export default class TraceStepDetails extends Component<Args> {

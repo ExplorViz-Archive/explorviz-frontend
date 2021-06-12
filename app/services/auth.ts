@@ -11,11 +11,11 @@ export default class Auth extends Service {
   router!: any;
 
   // is initialized in the init()
-  private lock: Auth0LockStatic|null = null;
+  private lock: Auth0LockStatic | null = null;
 
-  user: Auth0UserProfile|undefined = undefined;
+  user: Auth0UserProfile | undefined = undefined;
 
-  accessToken: string|undefined = undefined;
+  accessToken: string | undefined = undefined;
 
   constructor() {
     super(...arguments);

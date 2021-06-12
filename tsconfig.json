@@ -25,6 +25,7 @@
       "explorviz-frontend/*": [
         "app/*",
         "lib/collaborative-mode/app/*",
+        "lib/heatmap/app/*",
         "lib/virtual-reality/app/*"
       ],
       "explorviz-frontend/tests/*": [

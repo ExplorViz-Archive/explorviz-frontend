@@ -74,7 +74,7 @@ interface Args {
   closeDataSelection(): void;
 }
 
-type DataModel = Node | Application |Package | Class | DrawableClassCommunication;
+type DataModel = Node | Application | Package | Class | DrawableClassCommunication;
 
 type PopupData = {
   id: number,
@@ -320,7 +320,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       this.pannedObject = intersection?.object?.parent;
     });
 
-    this.hammerInteraction.on('panning', (delta: {x: number, y: number}) => {
+    this.hammerInteraction.on('panning', (delta: { x: number, y: number }) => {
       if (this.pannedObject instanceof LandscapeObject3D) {
         this.pannedObject.position.x += delta.x * 0.0045;
         this.pannedObject.position.z += delta.y * 0.0045;

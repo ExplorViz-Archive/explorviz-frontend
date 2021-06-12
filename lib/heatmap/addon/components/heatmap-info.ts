@@ -5,7 +5,7 @@ import { Metric } from 'heatmap/services/heatmap-configuration';
 interface HeatmapInfoArgs {
   metrics: Metric[];
   updateMetric(metric: Metric): void;
-  selectedMetric: Metric|null;
+  selectedMetric: Metric | null;
 }
 
 export default class HeatmapInfo extends Component<HeatmapInfoArgs> {

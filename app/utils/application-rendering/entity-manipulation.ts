@@ -236,7 +236,7 @@ export function applyCameraPosition(centerPoint: THREE.Vector3, camera: THREE.Pe
    * @param camera Camera which shall be moved
    * @param applicationObject3D Object which contains all application meshes
    */
-export function moveCameraTo(model: Class|Span, applicationCenter: THREE.Vector3,
+export function moveCameraTo(model: Class | Span, applicationCenter: THREE.Vector3,
   camera: PerspectiveCamera, applicationObject3D: ApplicationObject3D) {
   if (isSpan(model)) {
     const traceOfSpan = applicationObject3D.traces.find(

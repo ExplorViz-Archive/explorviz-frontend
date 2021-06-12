@@ -16,7 +16,7 @@ export type Metric = {
   values: Map<string, number>
 };
 
-type HeatmapMode = 'aggregatedHeatmap'|'windowedHeatmap';
+type HeatmapMode = 'aggregatedHeatmap' | 'windowedHeatmap';
 
 export default class HeatmapConfiguration extends Service.extend(Evented) {
   @tracked
@@ -28,16 +28,16 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
   legendActive = true;
 
   @tracked
-  latestClazzMetrics: Metric[]|null = null;
+  latestClazzMetrics: Metric[] | null = null;
 
   largestValue = 0;
 
   metrics: Metric[] = [];
 
   @tracked
-  selectedMetric: Metric|null = null;
+  selectedMetric: Metric | null = null;
 
-  applicationID: string|null = null;
+  applicationID: string | null = null;
 
   // Switches and models used by config
   selectedMode: HeatmapMode = 'aggregatedHeatmap';

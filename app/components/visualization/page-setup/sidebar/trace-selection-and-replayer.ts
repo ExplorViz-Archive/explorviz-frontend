@@ -6,7 +6,7 @@ import { Application, Class, StructureLandscapeData } from 'explorviz-frontend/u
 import { getHashCodeToClassMap } from 'explorviz-frontend/utils/landscape-structure-helpers';
 
 interface Args {
-  moveCameraTo(emberModel: Class|Span): void;
+  moveCameraTo(emberModel: Class | Span): void;
   highlightTrace(trace: Trace, traceStep: string): void;
   removeHighlighting(): void;
   removeComponent(componentPath: string): void;
@@ -17,7 +17,7 @@ interface Args {
 
 export default class TraceSelectionAndReplayer extends Component<Args> {
   @tracked
-  selectedTrace: Trace|null = null;
+  selectedTrace: Trace | null = null;
 
   get applicationTraces() {
     const hashCodeToClassMap = getHashCodeToClassMap(this.args.application);
