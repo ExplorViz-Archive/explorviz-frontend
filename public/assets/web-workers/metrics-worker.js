@@ -167,16 +167,23 @@ self.addEventListener('message', function(e) {
 
     function calculateOverallRequestCountMetric(incomingRequestCountMetric, outgoingRequestCountMetric) {
       // Initialize metric properties
-      const min = incomingRequestCountMetric.min + outgoingRequestCountMetric.min;
-      const max = incomingRequestCountMetric.max + outgoingRequestCountMetric.max;
+      let min = Number.MAX_SAFE_INTEGER;
+      let max = 0;
       
       const values = new Map();
 
       incomingRequestCountMetric.values.forEach( (incomingRequests, classId) => {
-        let outgoingRequests = outgoingRequestCountMetric.values.get(classId);
+        const outgoingRequests = outgoingRequestCountMetric.values.get(classId);
+        const overallRequests = incomingRequests + outgoingRequests;
 
+        min = Math.min(min, overallRequests);
+        max = Math.max(max, overallRequests);
         values.set(classId, incomingRequests + outgoingRequests);
       })
+
+      if (min > max) {
+        min = max = 0;
+      }
 
       return {
         name: 'Overall Requests',
