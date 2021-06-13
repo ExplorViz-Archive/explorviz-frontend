@@ -64,14 +64,6 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
 
   debug = debugLogger();
 
-  constructor() {
-    super(...arguments);
-
-    this.landscapeListener.on('newLandscapeData', () => {
-      this.latestClazzMetrics = null;
-    });
-  }
-
   triggerLatestHeatmapUpdate() {
     if (this.applicationID) {
       if (this.latestClazzMetrics !== null) {

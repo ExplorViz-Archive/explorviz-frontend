@@ -56,9 +56,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
         this.updateTimestampRepoAndTimeline(endTime,
           LandscapeListener.computeTotalRequests(this.latestDynamicData!));
 
-        if (structureData || this.latestDynamicData.length > 0) {
-          this.trigger('newLandscapeData', this.latestStructureData, this.latestDynamicData);
-        }
+        this.trigger('newLandscapeData', this.latestStructureData, this.latestDynamicData);
       } catch (e) {
         // landscape data could not be requested, try again?
       }

@@ -825,7 +825,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     // Avoid unwanted reflections in heatmap mode
     this.sceneService.setAuxiliaryLightVisibility(false);
 
-    applicationObject3D.setOpacity(0.1);
+    applicationObject3D.setComponentMeshOpacity(0.1);
+    applicationObject3D.setCommunicationOpacity(0.1);
 
     const foundationMesh = applicationObject3D
       .getBoxMeshbyModelId(applicationObject3D.dataModel.id);
@@ -1009,7 +1010,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       }
 
       if (self.heatmapConf.heatmapActive) {
-        appObject.parent.setOpacity(0.1);
+        appObject.parent.setComponentMeshOpacity(0.1);
+        appObject.parent.setCommunicationOpacity(0.1);
       }
     }
 
@@ -1030,7 +1032,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       );
 
       if (this.heatmapConf.heatmapActive) {
-        object.parent.setOpacity(0.1);
+        object.parent.setComponentMeshOpacity(0.1);
+        object.parent.setCommunicationOpacity(0.1);
       }
     }
   }

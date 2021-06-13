@@ -290,7 +290,8 @@ export default class VrApplicationRenderer extends Service {
     this.highlightingService.updateHighlightingLocally(applicationObject3D);
 
     if (this.heatmapConf.heatmapActive) {
-      applicationObject3D.setOpacity(0.1);
+      applicationObject3D.setComponentMeshOpacity(0.1);
+      applicationObject3D.setCommunicationOpacity(0.1);
     }
   }
 
