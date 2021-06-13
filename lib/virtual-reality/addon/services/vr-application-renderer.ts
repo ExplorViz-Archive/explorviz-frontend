@@ -361,6 +361,9 @@ export default class VrApplicationRenderer extends Service {
         this.configuration.applicationColors,
       );
 
+      // Add globe for communication that comes from the outside
+      EntityRendering.addGlobeToApplication(applicationObject3D);
+
       this.createDrawableClassCommunications(applicationObject3D);
 
       const drawableComm = this.drawableClassCommunications.get(

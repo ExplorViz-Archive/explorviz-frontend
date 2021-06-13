@@ -44,9 +44,13 @@ export default class VrSceneService extends Service {
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
 
-    this.spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
-    this.spotLight.position.set(100, 100, 100);
-    this.spotLight.castShadow = false;
+    this.spotLight = new THREE.SpotLight(0xffffff, 0.5, 2000);
+    this.spotLight.position.set(-200, 100, 100);
+    this.spotLight.castShadow = true;
+    this.spotLight.angle = 0.3;
+    this.spotLight.penumbra = 0.2;
+    this.spotLight.decay = 2;
+
     this.addSpotlight();
 
     // Add a light that illuminates the sky box if the user dragged in a backgound image.

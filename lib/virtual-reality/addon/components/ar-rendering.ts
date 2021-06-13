@@ -1003,6 +1003,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         );
       } else if (appObject instanceof CloseIcon) {
         appObject.close().then((closedSuccessfully: boolean) => {
+          if (appObject.parent === self.heatmapConf.currentApplication) {
+            self.removeHeatmap();
+          }
           if (!closedSuccessfully) AlertifyHandler.showAlertifyError('Application could not be closed');
         });
       } else if (appObject instanceof FoundationMesh) {
