@@ -93,6 +93,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
+  animationMixers!: Array<THREE.AnimationMixer>;
+
+  globeMesh!: THREE.Mesh;
+
+  clock!: THREE.Clock;
+
   // Used to display performance and memory usage information
   threePerformance: THREEPerformance | undefined;
 
@@ -235,6 +241,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
+
+    this.animationMixers = new Array<THREE.AnimationMixer>();
+
+    this.clock = new THREE.Clock();
     this.debug('Renderer set up');
   }
 
@@ -426,8 +436,25 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       EntityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D,
         this.configuration.applicationColors);
 
-      // Add globe for communication that comes from the outside
-      EntityRendering.addGlobeToApplication(this.applicationObject3D);
+      if (!this.globeMesh) {
+        // Add globe for communication that comes from the outside
+        this.globeMesh = EntityRendering.addGlobeToApplication(this.applicationObject3D);
+
+        const period = 1000;
+        const times = [0, period];
+        const values = [0, 360];
+
+        const trackName = '.rotation[y]';
+        const track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+        const clip = new THREE.AnimationClip('default', period, [track]);
+
+        const animationMixer = new THREE.AnimationMixer(this.globeMesh);
+
+        const clipAction = animationMixer.clipAction(clip);
+        clipAction.play();
+        this.animationMixers.push(animationMixer);
+      }
 
       // Restore old state of components
       restoreComponentState(this.applicationObject3D, openComponentIds);
@@ -504,6 +531,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (this.threePerformance) {
       this.threePerformance.threexStats.update(this.renderer);
       this.threePerformance.stats.begin();
+    }
+
+    if (this.animationMixers) {
+      this.animationMixers.forEach((mixer) => mixer.update(this.clock.getDelta()));
     }
 
     this.renderer.render(this.scene, this.camera);
