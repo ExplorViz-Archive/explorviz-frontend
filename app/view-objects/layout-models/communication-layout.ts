@@ -4,17 +4,17 @@ import { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-r
 export default class CommunicationLayout {
   model: DrawableClassCommunication;
 
-  startX: number = 0;
+  startX: number = -5;
 
   startY: number = 0;
 
-  startZ: number = 0;
+  startZ: number = -5;
 
-  endX: number = 0;
+  endX: number = -5;
 
   endY: number = 0;
 
-  endZ: number = 0;
+  endZ: number = -5;
 
   lineThickness: number = 1;
 

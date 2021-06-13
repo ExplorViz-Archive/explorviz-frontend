@@ -136,3 +136,27 @@ export function addFoundationAndChildrenToApplication(applicationObject3D: Appli
     addComponentAndChildrenToScene(child, applicationObject3D, applicationColors);
   });
 }
+
+/**
+ * Creates a GlobeMesh and adds it to the given application object.
+ * Communication that come from the outside
+ *
+ * @param applicationObject3D Object which shall contain all application meshes
+ * @param applicationColors Object which defines the colors for different application entities
+ */
+export function addGlobeToApplication(applicationObject3D: ApplicationObject3D) {
+  const geometry = new THREE.SphereGeometry(2.5, 15, 15);
+  const texture = new THREE.TextureLoader().load('images/earth-map.jpg');
+  const material = new THREE.MeshPhongMaterial({ map: texture });
+  // material.map = THREE.TextureLoader.loadTexture('images/earthmap1k.jpg');
+  const mesh = new THREE.Mesh(geometry, material);
+  const applicationCenter = applicationObject3D.layout.center;
+
+  const centerPoint = new THREE.Vector3(-5, 0, -5);
+
+  centerPoint.sub(applicationCenter);
+
+  mesh.position.copy(centerPoint);
+
+  applicationObject3D.add(mesh);
+}

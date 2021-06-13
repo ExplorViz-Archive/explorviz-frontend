@@ -21,7 +21,7 @@ export default class LandscapeListener extends Service.extend(Evented) {
 
   latestStructureData: StructureLandscapeData | null = null;
 
-  latestDynamicData: DynamicLandscapeData = [];
+  latestDynamicData: DynamicLandscapeData | null = null;
 
   debug = debugLogger();
 

@@ -52,7 +52,8 @@ export default abstract class BaseMesh<
     if (this.isHovered) return;
 
     // Calculate and apply brighter color to material ('hover effect')
-    this.material.color = calculateColorBrightness(this.material.color, colorShift);
+    const material = this.material as THREE.MeshBasicMaterial | THREE.MeshLambertMaterial;
+    material.color = calculateColorBrightness(material.color, colorShift);
     this.isHovered = true;
   }
 
@@ -60,10 +61,11 @@ export default abstract class BaseMesh<
    * Restores original color of mesh which had a hover effect
    */
   resetHoverEffect(): void {
+    const material = this.material as THREE.MeshBasicMaterial | THREE.MeshLambertMaterial;
     const { highlighted, defaultColor, highlightingColor } = this;
 
     // Restore normal color (depends on highlighting status)
-    this.material.color = highlighted ? highlightingColor : defaultColor;
+    material.color = highlighted ? highlightingColor : defaultColor;
     this.isHovered = false;
   }
 

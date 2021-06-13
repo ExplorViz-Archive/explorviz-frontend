@@ -6,40 +6,9 @@
 </div>
 
 <div id="colorHeader">
-  <div id="colorPresets" class="dropdown">
-    <button
-      class="btn btn-outline-dark dropdown-toggle"
-      type="button"
-      data-toggle="dropdown"
-      aria-haspopup="true"
-      aria-expanded="false"
-    >
-      Presets
-    </button>
-    <div class="dropdown-menu">
-      <div
-        class="dropdown-item pointer-cursor"
-        name="classicScheme"
-        {{on "click" (fn this.applyColorScheme "classic")}}
-      >
-        Classic
-      </div>
-      <div
-        class="dropdown-item pointer-cursor"
-        name="modernSchema"
-        {{on "click" (fn this.applyColorScheme "modern")}}
-      >
-        Modern
-      </div>
-      <div
-        class="dropdown-item pointer-cursor"
-        name="darkScheme"
-        {{on "click" (fn this.applyColorScheme "dark")}}
-      >
-        Dark
-      </div>
-    </div>
-  </div>
+  <Visualization::PageSetup::Sidebar::ColorSchemeSelector
+    @updateView={{@updateView}}
+  />
 </div>
 
 <div class="mt-3">

@@ -66,8 +66,8 @@ export default class ApplicationObject3D extends THREE.Object3D {
    * (x = 0.65, y = 0.80)
    */
   resetRotation() {
-    const ROTATION_X = 0.65;
-    const ROTATION_Y = 0.80;
+    const ROTATION_X = 0.75;
+    const ROTATION_Y = 1.20;
 
     this.rotation.x = ROTATION_X;
     this.rotation.y = ROTATION_Y;

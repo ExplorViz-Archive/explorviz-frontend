@@ -240,6 +240,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       antialias: true,
       canvas: this.canvas,
     });
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
     this.debug('Renderer set up');
@@ -249,9 +251,16 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    * Creates a SpotLight and an AmbientLight and adds it to the scene
    */
   initLights() {
-    const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
-    spotLight.position.set(100, 100, 100);
-    spotLight.castShadow = false;
+    // const spotLight = new THREE.SpotLight(0xffffff, 0.5, 1000, 1.56, 0, 0);
+    const spotLight = new THREE.SpotLight(0xffffff, 0.5, 2000);
+    spotLight.position.set(-200, 100, 100);
+    spotLight.castShadow = true;
+
+    spotLight.angle = 0.3;
+    spotLight.penumbra = 0.2;
+    spotLight.decay = 2;
+    // spotLight.distance = 50;
+
     this.scene.add(spotLight);
 
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
@@ -437,6 +446,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       // Add new meshes to application
       EntityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D,
         this.configuration.applicationColors);
+
+      // Add globe for communication that comes from the outside
+      EntityRendering.addGlobeToApplication(this.applicationObject3D);
 
       // Restore old state of components
       restoreComponentState(this.applicationObject3D, openComponentIds);

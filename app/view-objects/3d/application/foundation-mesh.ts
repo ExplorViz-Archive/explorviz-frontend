@@ -16,11 +16,11 @@ export default class FoundationMesh extends BoxMesh {
     widthSegments: number = 1, depthSegments: number = 1) {
     super(layout, defaultColor, highlightingColor);
 
-    this.setDefaultMaterial();
+    this.receiveShadow = true;
 
     const geometry = new THREE.BoxGeometry(1, 1, 1, widthSegments, 1, depthSegments);
     this.geometry = geometry;
-
+    this.setDefaultMaterial();
     this.dataModel = foundation;
   }
 
