@@ -14,13 +14,6 @@ export default class ColorPicker extends Component<Args> {
   configuration!: Configuration;
 
   @action
-  applyColorScheme(scheme: string) {
-    this.configuration.applyColorSchemeByName(scheme);
-
-    this.args.updateView();
-  }
-
-  @action
   close() {
     this.args.removeComponent('color-picker');
   }
