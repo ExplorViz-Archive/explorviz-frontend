@@ -46,6 +46,27 @@
   height: 100%;
 }
 
+.arPresetSelectionContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 250px));
+  grid-gap: 20px;
+}
+
+.arSettingsPropertyContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 180px));
+}
+
+.arSettingsSliderContainer {
+  display: flex;
+  margin-top: 5px;
+  margin-bottom: 20px;
+}
+
+.arSliderLabel {
+  margin-left: 1rem;
+}
+
 .center-horizontal {
   display: flex;
   justify-content: center;
@@ -120,6 +141,10 @@
 
 #ar-info-interaction-container {
   grid-area: i;
+}
+
+#ar-settings {
+  padding-bottom: 25px;
 }
 
 #ar-heatmap-interaction-container {
