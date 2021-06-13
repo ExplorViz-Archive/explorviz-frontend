@@ -3,6 +3,8 @@ import { action } from '@ember/object';
 import ArSettings from 'virtual-reality/services/ar-settings';
 import { inject as service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
+import Configuration from 'explorviz-frontend/services/configuration';
+import VrApplicationRenderer from 'explorviz-frontend/services/vr-application-renderer';
 
 interface ArSettingsSelectorArgs {
   removeComponent(componentPath: string): void
@@ -11,6 +13,12 @@ interface ArSettingsSelectorArgs {
 export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs> {
   @service('ar-settings')
   arSettings!: ArSettings;
+
+  @service('configuration')
+  configuration!: Configuration;
+
+  @service('vr-application-renderer')
+  vrApplicationRenderer!: VrApplicationRenderer;
 
   @tracked
   buttonSize: number;
@@ -28,6 +36,19 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
   @action
   close() {
     this.args.removeComponent('ar-settings-selector');
+  }
+
+  @action
+  updateCommunication() {
+    this.vrApplicationRenderer.updateCommunication();
+  }
+
+  @action
+  toggleApplicationDependsOnDistance() {
+    const oldValue = this.configuration.commCurveHeightDependsOnDistance;
+    this.configuration.commCurveHeightDependsOnDistance = !oldValue;
+
+    this.vrApplicationRenderer.updateCommunication();
   }
 
   @action

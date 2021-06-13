@@ -295,6 +295,16 @@ export default class VrApplicationRenderer extends Service {
     }
   }
 
+  updateCommunication() {
+    this.getOpenApplications().forEach((application) => {
+      const drawableComm = this.drawableClassCommunications.get(
+        application.dataModel.id,
+      )!;
+
+      this.appCommRendering.addCommunication(application, drawableComm);
+    });
+  }
+
   @restartableTask*
   calculateHeatmapTask(
     applicationObject3D: ApplicationObject3D,

@@ -6,6 +6,36 @@
 </div>
 
 <hr>
+<div style="display: flex; justify-content:flex-start;">
+  <Visualization::PageSetup::Sidebar::ColorSchemeSelector
+    @updateView={{@updateView}}
+  />
+</div>
+
+<hr>
+<hr>
+<label for="communicationHeightRange" class="form-label">Communication Height</label>
+<Input
+    id="communicationHeightRange"
+    @type="range"
+    @value={{this.configuration.commCurveHeightMultiplier}}
+    class="form-range" min="0.0" max="3.0" step="0.2"
+    {{on "input" this.updateCommunication}}
+/>
+<div class="center-horizontal">{{this.configuration.commCurveHeightMultiplier}}</div>
+
+<div style="display: flex; justify-content:space-between;">
+  <label for="communicationDistanceCheckbox" class="form-label">Depends on Distance</label>
+  <Input
+      id="communicationDistanceCheckbox"
+      @type="checkbox"
+      @checked={{this.configuration.commCurveHeightDependsOnDistance}}
+      {{on "input" this.toggleApplicationDependsOnDistance}}
+  />
+</div>
+
+
+<hr>
 <label for="landscapeOpacityRange" class="form-label">Landscape Opacity</label>
 <Input
     id="landscapeOpacityRange"
