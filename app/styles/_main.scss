@@ -2,6 +2,7 @@ html, body {
   overflow: hidden;
   position: relative;
   height: 100vh;
+  touch-action: none;
 }
 
 #main-container {
@@ -52,7 +53,7 @@ html, body {
 
 // Disable double tap to zoom for mobile devices
 * {
-touch-action: manipulation;
+touch-action: pan-y;
 }
 
 //Additional classes
