@@ -5,7 +5,7 @@ export default class ArZoomHandler {
 
   private zoomCamera: THREE.PerspectiveCamera;
 
-  private zoomEnabled: boolean;
+  zoomEnabled: boolean;
 
   private zoomIndicatorMesh: THREE.Mesh | undefined;
 

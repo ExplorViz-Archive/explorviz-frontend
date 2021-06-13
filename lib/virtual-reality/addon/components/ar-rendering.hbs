@@ -95,11 +95,7 @@
           <BsButton
             @type="primary"
             class="half-transparent"
-            {{ on "touchstart" this.handleZoomActivation }}
-            {{ on "touchend" this.handleZoomDeactivation }}
-            {{ on "touchcancel" this.handleZoomDeactivation }}
-            {{ on "click" this.handleZoomActivation}}
-            {{ on "mouseout" this.handleZoomDeactivation}}
+            {{ on "click" this.handleZoomToggle}}
           >
             {{svg-jar "search-16" class="octicon align-middle ar-button-svg"}}
           </BsButton>

@@ -552,13 +552,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   @action
-  handleZoomActivation() {
-    this.arZoomHandler?.enableZoom();
-  }
-
-  @action
-  handleZoomDeactivation() {
-    this.arZoomHandler?.disableZoom();
+  handleZoomToggle() {
+    if (this.arZoomHandler?.zoomEnabled) {
+      this.arZoomHandler?.disableZoom();
+    } else {
+      this.arZoomHandler?.enableZoom();
+    }
   }
 
   @action
