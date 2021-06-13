@@ -170,6 +170,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   pannedObject: THREE.Object3D | null | undefined;
 
+  rendererResolutionMultiplier = 1;
+
   @tracked
   popupDataMap: Map<number, PopupData> = new Map();
 
@@ -444,6 +446,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     });
   }
 
+  @action
   initArJsCamera(width = 640, height = 480) {
     ArRendering.cleanUpAr();
 
@@ -502,7 +505,10 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
      */
   @action
   resize(outerDiv: HTMLElement) {
-    this.localUser.renderer.setSize(outerDiv.clientWidth, outerDiv.clientHeight);
+    this.localUser.renderer.setSize(
+      outerDiv.clientWidth * this.rendererResolutionMultiplier,
+      outerDiv.clientHeight * this.rendererResolutionMultiplier,
+    );
     if (!this.arToolkitContext) return;
 
     this.arToolkitSource.onResizeElement();
@@ -511,6 +517,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     if (this.arToolkitContext.arController !== null) {
       this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
     }
+  }
+
+  @action
+  updateRendererResolution(resolutionMultiplier: number) {
+    this.rendererResolutionMultiplier = resolutionMultiplier;
+    this.resize(this.outerDiv);
   }
 
   @action

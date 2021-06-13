@@ -176,6 +176,8 @@
                   <Visualization::PageSetup::Sidebar::ArSettingsSelector
                     @removeComponent={{@removeComponent}}
                     @updateView={{this.updateColors}}
+                    @updateCameraResolution={{this.initArJsCamera}}
+                    @updateRendererResolution={{this.updateRendererResolution}}
                   />
                 {{/if}}
               </div>

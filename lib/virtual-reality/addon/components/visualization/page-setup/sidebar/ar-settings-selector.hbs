@@ -13,6 +13,53 @@
 </div>
 
 <hr>
+<div id="cameraPresets" class="dropdown">
+  <button
+      class="btn btn-outline-dark dropdown-toggle"
+      type="button"
+      data-toggle="dropdown"
+      aria-haspopup="true"
+      aria-expanded="false"
+  >
+    Camera Resolution
+  </button>
+
+  <div class="dropdown-menu">
+    {{#each this.cameraPresets as |cameraPreset|}}
+      <div
+      class="dropdown-item pointer-cursor"
+      {{on "click" (fn this.updateCameraResoltion cameraPreset.width cameraPreset.height)}}
+      >
+        {{cameraPreset.name}}
+      </div>
+    {{/each}}
+  </div>
+</div>
+
+<hr>
+<div id="rendererPresets" class="dropdown">
+  <button
+      class="btn btn-outline-dark dropdown-toggle"
+      type="button"
+      data-toggle="dropdown"
+      aria-haspopup="true"
+      aria-expanded="false"
+  >
+    Rendering Resolution
+  </button>
+
+  <div class="dropdown-menu">
+    {{#each this.renderResolutions as |renderResolution|}}
+      <div
+      class="dropdown-item pointer-cursor"
+      {{on "click" (fn this.updateRendererResoltion renderResolution.multiplier)}}
+      >
+        {{renderResolution.name}}
+      </div>
+    {{/each}}
+  </div>
+</div>
+
 <hr>
 <label for="communicationHeightRange" class="form-label">Communication Height</label>
 <Input

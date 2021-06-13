@@ -8,6 +8,8 @@ import VrApplicationRenderer from 'explorviz-frontend/services/vr-application-re
 
 interface ArSettingsSelectorArgs {
   removeComponent(componentPath: string): void
+  updateCameraResolution(width: number, height: number): void
+  updateRendererResolution(multiplier: number): void
 }
 
 export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs> {
@@ -26,6 +28,18 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
   @tracked
   buttonPadding: number;
 
+  cameraPresets = [
+    { name: '480p', width: 640, height: 480 },
+    { name: '960p', width: 1280, height: 960 },
+    { name: '1440p', width: 1920, height: 1440 },
+  ];
+
+  renderResolutions = [
+    { name: 'low', multiplier: 0.5 },
+    { name: 'default', multiplier: 1 },
+    { name: 'high', multiplier: 2 },
+  ];
+
   constructor(owner: any, args: ArSettingsSelectorArgs) {
     super(owner, args);
 
@@ -41,6 +55,16 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
   @action
   updateCommunication() {
     this.vrApplicationRenderer.updateCommunication();
+  }
+
+  @action
+  updateCameraResoltion(width: number, height: number) {
+    this.args.updateCameraResolution(width, height);
+  }
+
+  @action
+  updateRendererResoltion(multiplier: number) {
+    this.args.updateRendererResolution(multiplier);
   }
 
   @action
