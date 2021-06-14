@@ -1,22 +1,32 @@
 import Component from '@glimmer/component';
-import Clazz from 'explorviz-frontend/models/clazz';
+import { Class } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
+import { inject as service } from '@ember/service';
+import { computed } from '@ember/object';
 
 interface Args {
-  clazz: Clazz
+  clazz: Class
 }
 
 export default class ClazzPopup extends Component<Args> {
+  @service('heatmap-configuration')
+  heatmapConf!: HeatmapConfiguration;
+
   get name() {
-    return this.args.clazz.get('name');
+    return this.args.clazz.name;
   }
 
-  get activeInstances() {
-    return this.args.clazz.get('instanceCount');
-  }
+  @computed('heatmapConf.latestClazzMetrics')
+  get metrics() {
+    const metrics = this.heatmapConf.latestClazzMetrics;
+    const classMetrics: { name: string, value: number | undefined }[] = [];
 
-  get calledOps() {
-    const clazzCommunications = this.args.clazz.get('clazzCommunications');
-    const operationCount = clazzCommunications.get('length');
-    return operationCount;
+    if (metrics) {
+      metrics.forEach((metric) => {
+        classMetrics.push({ name: metric.name, value: metric.values.get(this.args.clazz.id) });
+      });
+    }
+
+    return classMetrics;
   }
 }

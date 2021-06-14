@@ -1,8 +1,9 @@
 // Wait for the initial message event.
 self.addEventListener('message', function(e) {
-  let data = e.data;
+  const structureData = e.data.structure;
+  const dynamicData = e.data.dynamic;
   
-  let application = applyBoxLayout(data);
+  let application = applyBoxLayout(structureData, dynamicData);
   postMessage(application);
 }, false);
   
@@ -12,20 +13,20 @@ postMessage(true);
 
 /******* Define Layouter *******/
 
-function applyBoxLayout(application) {
+function applyBoxLayout(application, allLandscapeTraces) {
 
   function getAllClazzesInApplication(application) {
     let allComponents = getAllComponentsInApplication(application);
 
     let allClazzes = [];
     allComponents.forEach(component => {
-      allClazzes.push(...component.clazzes);
+      allClazzes.push(...component.classes);
     });
     return allClazzes;
   }
 
   function getAllComponentsInApplication(application) {
-    let children = application.components;
+    let children = application.packages;
 
     let components = [];
 
@@ -37,7 +38,7 @@ function applyBoxLayout(application) {
 
   function getAllComponents(component) {
     let components = [];
-    component.children.forEach((component) => {
+    component.subPackages.forEach((component) => {
       components.push(...getAllComponents(component), component);
     });
 
@@ -80,7 +81,7 @@ function applyBoxLayout(application) {
     });
   });
 
-  calcClazzHeight(application);
+  calcClazzHeight(application, allLandscapeTraces);
   initApplication(application);
 
   doApplicationLayout(application);
@@ -99,11 +100,11 @@ function applyBoxLayout(application) {
   // Helper functions
 
   function setAbsoluteLayoutPositionOfApplication(application) {
-    const { components } = application;
+    const { packages } = application;
 
     let componentLayout = layoutMap.get(application.id);
 
-    components.forEach((childComponent) => {
+    packages.forEach((childComponent) => {
       let childCompLayout = layoutMap.get(childComponent.id);
 
       childCompLayout.positionX += componentLayout.positionX;
@@ -115,8 +116,8 @@ function applyBoxLayout(application) {
   }
 
   function setAbsoluteLayoutPosition(component) {
-    const childComponents = component.children;
-    const clazzes = component.clazzes;
+    const childComponents = component.subPackages;
+    const clazzes = component.classes;
 
     let componentLayout = layoutMap.get(component.id);
 
@@ -140,28 +141,75 @@ function applyBoxLayout(application) {
     });
   }
 
+  function getHashCodeToClassMap(clazzes) {
+    const hashCodeToClassMap = new Map();    
+  
+    clazzes.forEach((clazz) => {
+      clazz.methods.forEach(({ hashCode }) => hashCodeToClassMap.set(hashCode, clazz));
+    });
+  
+    return hashCodeToClassMap;
+  }
 
-  function calcClazzHeight(application) {
+  function getAllSpanHashCodesFromTraces(traceArray) {
+    const hashCodes = [];
+    
+    traceArray.forEach((trace) => {
+      trace.spanList.forEach((span) => {
+        hashCodes.push(span.hashCode);
+      });
+    });
+    return hashCodes;
+  }
+
+  function calcClazzHeight(application, allLandscapeTraces) {
 
     const CLAZZ_SIZE_DEFAULT = 0.05;
     const CLAZZ_SIZE_EACH_STEP = 1.1;
 
     const clazzes = [];
-    application.components.forEach((component) => {
+    application.packages.forEach((component) => {
       getClazzList(component, clazzes);
     });
+
+    const hashCodeToClassMap = getHashCodeToClassMap(clazzes);
+
+    const allMethodHashCodes = getAllSpanHashCodesFromTraces(allLandscapeTraces);
+
+    for (let methodHashCode of allMethodHashCodes) {
+      const classMatchingTraceHashCode = hashCodeToClassMap.get(methodHashCode);
+
+      if(classMatchingTraceHashCode === undefined) {
+        continue;
+      }
+
+      const methodMatchingSpanHash = classMatchingTraceHashCode.methods.find((method) => method.hashCode === methodHashCode);
+
+      if(methodMatchingSpanHash === undefined) {
+        continue;
+      }
+
+      // OpenCensus denotes constructor calls with <init>
+      // Therefore, we count the <init>s for all given classes
+      if (methodMatchingSpanHash.name === '<init>') {
+        classMatchingTraceHashCode.instanceCount++;
+      }
+
+    }
 
     const instanceCountList = [];
 
     clazzes.forEach((clazz) => {
-      instanceCountList.push(clazz.instanceCount);
+      const instanceCount = clazz.instanceCount ? clazz.instanceCount : 0;
+      instanceCountList.push(instanceCount);
     });
 
     const categories = getCategories(instanceCountList, false);
 
     clazzes.forEach((clazz) => {
       let clazzData = layoutMap.get(clazz.id);
-      clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT) * 2.0;
+      //clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT) * 2.0;
+      clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT);
     });
   }
 
@@ -298,22 +346,23 @@ function applyBoxLayout(application) {
 
 
   function getClazzList(component, clazzesArray) {
-    const children = component.children;
-    const clazzes = component.clazzes;
+    const children = component.subPackages;
+    const clazzes = component.classes;
 
     children.forEach((child) => {
       getClazzList(child, clazzesArray);
     });
 
     clazzes.forEach((clazz) => {
+      clazz.instanceCount = 0;
       clazzesArray.push(clazz);
     });
   }
 
   function initApplication(application) {
-    const { components } = application;
+    const { packages } = application;
 
-    components.forEach((child) => {
+    packages.forEach((child) => {
       initNodes(child);
     });
 
@@ -325,8 +374,8 @@ function applyBoxLayout(application) {
 
 
   function initNodes(component) {
-    const children = component.children;
-    const clazzes = component.clazzes;
+    const children = component.subPackages;
+    const clazzes = component.classes;
 
     const clazzWidth = 2.0;
 
@@ -352,8 +401,8 @@ function applyBoxLayout(application) {
 
     let childrenHeight = floorHeight;
 
-    const children = component.children;
-    const clazzes = component.clazzes;
+    const children = component.subPackages;
+    const clazzes = component.classes;
 
     clazzes.forEach((clazz) => {
       let clazzData = layoutMap.get(clazz.id);
@@ -379,9 +428,9 @@ function applyBoxLayout(application) {
 
     let childrenHeight = floorHeight;
 
-    const { components } = application;
+    const { packages } = application;
 
-    components.forEach((child) => {
+    packages.forEach((child) => {
       let childData = layoutMap.get(child.id);
       if (childData.height > childrenHeight) {
         childrenHeight = childData.height;
@@ -392,9 +441,9 @@ function applyBoxLayout(application) {
   }
 
   function doApplicationLayout(application) {
-    const { components } = application;
+    const { packages } = application;
 
-    components.forEach((child) => {
+    packages.forEach((child) => {
       doLayout(child);
     });
 
@@ -404,9 +453,9 @@ function applyBoxLayout(application) {
   function layoutChildrenOfApplication(application) {
     let tempList = [];
 
-    const { components } = application;
+    const { packages } = application;
 
-    components.forEach((child) => {
+    packages.forEach((child) => {
       tempList.push(child);
     });
 
@@ -418,7 +467,7 @@ function applyBoxLayout(application) {
   }
 
   function doLayout(component) {
-    const children = component.children;
+    const children = component.subPackages;
 
     children.forEach((child) => {
       doLayout(child);
@@ -431,8 +480,8 @@ function applyBoxLayout(application) {
   function layoutChildren(component) {
     let tempList = [];
 
-    const children = component.children;
-    const clazzes = component.clazzes;
+    const children = component.subPackages;
+    const clazzes = component.classes;
 
     clazzes.forEach((clazz) => {
       tempList.push(clazz);

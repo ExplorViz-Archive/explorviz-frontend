@@ -1,10 +1,14 @@
 import THREE from 'three';
-import Application from 'explorviz-frontend/models/application';
+import { Application } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { Trace } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
+import { tracked } from '@glimmer/tracking';
 import FoundationMesh from './foundation-mesh';
 import ClazzMesh from './clazz-mesh';
 import ComponentMesh from './component-mesh';
 import ClazzCommunicationMesh from './clazz-communication-mesh';
 import BaseMesh from '../base-mesh';
+import BoxMesh from './box-mesh';
 
 /**
  * This extended Object3D adds additional functionality to
@@ -17,6 +21,10 @@ export default class ApplicationObject3D extends THREE.Object3D {
    * The data model that this application object should visualize
    */
   dataModel: Application;
+
+  boxLayoutMap: Map<string, BoxLayout>;
+
+  traces: Trace[];
 
   /**
    * Map to store all box shaped meshes (i.e., Clazz, Component, Foundation)
@@ -33,10 +41,24 @@ export default class ApplicationObject3D extends THREE.Object3D {
    */
   componentMeshes: Set<ComponentMesh> = new Set();
 
-  constructor(application: Application) {
+  @tracked
+  highlightedEntity: BaseMesh | Trace | null = null;
+
+  constructor(application: Application, boxLayoutMap: Map<string, BoxLayout>, traces: Trace[]) {
     super();
 
     this.dataModel = application;
+    this.boxLayoutMap = boxLayoutMap;
+    this.traces = traces;
+  }
+
+  get layout() {
+    const layout = this.getBoxLayout(this.dataModel.id);
+    if (layout) {
+      return layout;
+    }
+
+    return new BoxLayout();
   }
 
   /**
@@ -44,8 +66,8 @@ export default class ApplicationObject3D extends THREE.Object3D {
    * (x = 0.65, y = 0.80)
    */
   resetRotation() {
-    const ROTATION_X = 0.65;
-    const ROTATION_Y = 0.80;
+    const ROTATION_X = 0.75;
+    const ROTATION_Y = 1.20;
 
     this.rotation.x = ROTATION_X;
     this.rotation.y = ROTATION_Y;
@@ -62,10 +84,11 @@ export default class ApplicationObject3D extends THREE.Object3D {
     super.add(object);
 
     // Ensure fast access to application meshes by additionally storing them in maps
-    if (object instanceof FoundationMesh || object instanceof ComponentMesh
-        || object instanceof ClazzMesh) {
+    if (object instanceof FoundationMesh) {
       this.modelIdToMesh.set(object.dataModel.id, object);
     // Store communication separately to allow efficient iteration over meshes
+    } else if (object instanceof ComponentMesh || object instanceof ClazzMesh) {
+      this.modelIdToMesh.set(object.dataModel.id, object);
     } else if (object instanceof ClazzCommunicationMesh) {
       this.commIdToMesh.set(object.dataModel.id, object);
     }
@@ -76,6 +99,10 @@ export default class ApplicationObject3D extends THREE.Object3D {
     }
 
     return this;
+  }
+
+  getBoxLayout(id: string) {
+    return this.boxLayoutMap.get(id);
   }
 
   /**
@@ -131,6 +158,110 @@ export default class ApplicationObject3D extends THREE.Object3D {
     });
 
     return openComponentIds;
+  }
+
+  /**
+   * Sets the visiblity of all component meshes with the current application
+   * @param opaccity Determines how opaque / visible component meshes should be
+   */
+  setBoxMeshOpacity(opacity = 1) {
+    this.getBoxMeshes().forEach((mesh) => {
+      if (mesh instanceof BoxMesh) {
+        if (opacity === 1) {
+          mesh.turnOpaque();
+          mesh.defaultOpacity = 1;
+        } else {
+          mesh.turnTransparent(opacity);
+          mesh.defaultOpacity = opacity;
+        }
+      }
+    });
+  }
+
+  /**
+   * Sets the visiblity of all component meshes with the current application
+   * @param opaccity Determines how opaque / visible component meshes should be
+   */
+  setComponentMeshOpacity(opacity = 1) {
+    this.getBoxMeshes().forEach((mesh) => {
+      if (mesh instanceof ComponentMesh) {
+        if (opacity === 1) {
+          mesh.turnOpaque();
+          mesh.defaultOpacity = 1;
+        } else {
+          mesh.turnTransparent(opacity);
+          mesh.defaultOpacity = opacity;
+        }
+      }
+    });
+  }
+
+  /**
+   * Sets the visiblity of all communication meshes with the current application
+   * @param opaccity Determines how opaque/visible component meshes should be
+   */
+  setCommunicationOpacity(opacity = 1) {
+    const commMeshes = this.getCommMeshes();
+
+    commMeshes.forEach((mesh) => {
+      if (mesh instanceof ClazzCommunicationMesh) {
+        if (opacity === 1) {
+          mesh.turnOpaque();
+        } else {
+          mesh.turnTransparent(opacity);
+        }
+      }
+    });
+  }
+
+  setOpacity(opacity = 1) {
+    this.setBoxMeshOpacity(opacity);
+    this.setCommunicationOpacity(opacity);
+  }
+
+  /**
+   * Sets the opacity of all box meshes within the application object to 1.
+   *
+   * @param setAsDefault Determines whether default opacity value should be set
+   */
+  turnOpaque(setAsDefault = true) {
+    if (setAsDefault) {
+      this.setBoxMeshOpacity(1);
+    } else {
+      this.getBoxMeshes().forEach((mesh) => {
+        if (mesh instanceof BoxMesh) {
+          mesh.turnOpaque();
+        }
+      });
+    }
+  }
+
+  /**
+   * Sets the opacity of all box meshes within the application object to the
+   * default opacity value (which is 1 if not set otherwise).
+   */
+  setToDefaultOpacity() {
+    this.getBoxMeshes().forEach((mesh) => {
+      if (mesh instanceof BoxMesh) {
+        if (mesh.defaultOpacity === 1) {
+          mesh.turnOpaque();
+        } else {
+          mesh.turnTransparent(mesh.defaultOpacity);
+        }
+      }
+    });
+  }
+
+  /**
+   * Sets the highlighting color for all meshes within the application object.
+   *
+   * @param color Color for highlighting of objects within the application.
+   */
+  setHighlightingColor(color: THREE.Color) {
+    this.getAllMeshes().forEach((mesh) => {
+      mesh.highlightingColor = color;
+      mesh.updateColor();
+    });
   }
 
   /**

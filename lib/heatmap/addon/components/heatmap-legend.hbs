@@ -1,7 +1,7 @@
 <div id="heatmap-legend-container" class="d-flex flex-column p-2">
   <div id="legend-header">
-    <span id="legend-header-content">{{this.header}}</span> 
-    {{#if (eq @mode "aggregatedHeatmap")}}
+    <span id="legend-header-content">Heatmap</span>
+    {{#if (eq this.heatmapConfiguration.selectedMode "aggregatedHeatmap")}}
       <HelpTooltip @title={{this.descriptions.aggregatedHeatmap}} />
     {{else}}
       <HelpTooltip @title={{this.descriptions.windowedHeatmap}} />
@@ -31,7 +31,13 @@
 </div>
 
 {{add-listener
-  this.heatmapRepo
+  this.heatmapConfiguration
   "updatedClazzMetrics"
+  this.updateLabel
+}}
+
+{{add-listener
+  this.heatmapConfiguration
+  "newSelectedMetric"
   this.updateLabel
 }}

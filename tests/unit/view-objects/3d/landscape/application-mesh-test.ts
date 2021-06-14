@@ -1,18 +1,14 @@
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import { module, test } from 'qunit';
 import { setupTest } from 'ember-qunit';
-import { run } from '@ember/runloop';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import THREE from 'three';
+import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
-module('Unit | View Object | 3d/landscape/application-mesh', function(hooks) {
-
+module('Unit | View Object | 3d/landscape/application-mesh', function (hooks) {
   setupTest(hooks);
 
-  test('Default highlighting color is assigned', function(assert) {
-    const application = run(() =>
-      this.owner.lookup('service:store').createRecord('application')
-    );
+  test('Default highlighting color is assigned', function (assert) {
     const planeLayout = new PlaneLayout();
     const defaultColor = new THREE.Color('green');
 
@@ -24,10 +20,7 @@ module('Unit | View Object | 3d/landscape/application-mesh', function(hooks) {
     assert.equal(highlightingColor, redColor);
   });
 
-  test('Datamodel is assigned to mesh', function(assert) {
-    const application = run(() =>
-      this.owner.lookup('service:store').createRecord('application')
-    );
+  test('Datamodel is assigned to mesh', function (assert) {
     const planeLayout = new PlaneLayout();
     const defaultColor = new THREE.Color('green');
 
@@ -36,10 +29,7 @@ module('Unit | View Object | 3d/landscape/application-mesh', function(hooks) {
     assert.equal(application, applicationMesh.dataModel);
   });
 
-  test('Passed default color is correctly applied to material', function(assert) {
-    const application = run(() =>
-      this.owner.lookup('service:store').createRecord('application')
-    );
+  test('Passed default color is correctly applied to material', function (assert) {
     const planeLayout = new PlaneLayout();
     const defaultColor = new THREE.Color('#ff00ff');
 
@@ -50,3 +40,21 @@ module('Unit | View Object | 3d/landscape/application-mesh', function(hooks) {
     assert.equal(applicationMaterialColor, defaultColor.getHexString());
   });
 });
+
+const node: Node = {
+  id: 'foo.100.100.100.100',
+  ipAddress: '100.100.100.100',
+  hostName: 'foo',
+  applications: [],
+};
+
+const application: Application = {
+  id: 'foo.100.100.100.100.1000',
+  name: 'SampleApplication',
+  language: 'java',
+  instanceId: '1000',
+  parent: node,
+  packages: [],
+};
+
+node.applications.push(application);

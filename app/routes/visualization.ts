@@ -1,9 +1,11 @@
-import AuthenticatedRouteMixin from
-  'ember-simple-auth/mixins/authenticated-route-mixin';
 import VisualizationController from 'explorviz-frontend/controllers/visualization';
 import THREE from 'three';
 import debugLogger from 'ember-debug-logger';
-import Route from '@ember/routing/route';
+import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
+import { inject as service } from '@ember/service';
+import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
+import { action } from '@ember/object';
+import BaseRoute from './base-route';
 
 /**
 * TODO
@@ -11,10 +13,28 @@ import Route from '@ember/routing/route';
 * @class Visualization-Route
 * @extends Ember.Route
 */
-export default class VisualizationRoute extends Route.extend(AuthenticatedRouteMixin) {
+export default class VisualizationRoute extends BaseRoute {
+  @service('landscape-token')
+  landscapeToken!: LandscapeTokenService;
+
   debug = debugLogger();
 
-  model() {
+  async beforeModel() {
+    if (this.landscapeToken.token === null) {
+      this.transitionTo('landscapes');
+      return Promise.resolve();
+    }
+    // load font for labels
+    const controller = this.controllerFor('visualization') as VisualizationController;
+    if (!controller.font) {
+      const font = await this.loadFont();
+      controller.set('font', font);
+    }
+    // handle auth0 authorization
+    return super.beforeModel();
+  }
+
+  private async loadFont(): Promise<THREE.Font> {
     return new Promise((resolve, reject) => {
       new THREE.FontLoader().load(
         // resource URL
@@ -34,20 +54,28 @@ export default class VisualizationRoute extends Route.extend(AuthenticatedRouteM
     });
   }
 
+  @action
+  error(error: any) {
+    if (error instanceof ProgressEvent) {
+      AlertifyHandler.showAlertifyError('Failed to load font for labels.');
+      return true;
+    }
+    return super.error(error);
+  }
+
   // @Override
-  setupController(controller: VisualizationController, model: any) {
+  setupController(controller: VisualizationController, model: any, transition: any) {
     // Call _super for default behavior
-    super.setupController(controller, model);
+    super.setupController(controller, model, transition);
 
     controller.initRendering();
   }
 
   // @Override Ember-Hook
   /* eslint-disable-next-line class-methods-use-this */
-  resetController(controller: VisualizationController, isExiting: boolean, transition: any) {
-    if (isExiting && transition.targetName !== 'error') {
-      controller.send('resetView');
-      controller.landscapeRepo.set('latestApplication', null);
+  resetController(controller: VisualizationController, isExiting: boolean /* , transition: any */) {
+    if (isExiting) {
+      controller.send('resetLandscapeListenerPolling');
     }
   }
 }

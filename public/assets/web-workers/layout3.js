@@ -1,14 +1,14 @@
 // Wait for the initial message event.
 self.addEventListener('message', function(e) {
-  let { reducedLandscape, openEntitiesIds, modelIdToPoints, graph } = e.data;
+  let { structureLandscapeData, modelIdToPoints, graph, applicationCommunications } = e.data;
 
-  let landscape = layout3(reducedLandscape, openEntitiesIds, modelIdToPoints, graph);
+  let landscape = layout3(structureLandscapeData, modelIdToPoints, graph, applicationCommunications);
   postMessage(landscape);
 }, false);
 
 const CONVERT_TO_KIELER_FACTOR = 180.0;
 
-function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
+function layout3(landscape, modelIdToPoints, graph, applicationCommunications) {
 
   let modelIdToGraph = new Map();
   let modeldToKielerEdgeReference = new Map();
@@ -19,7 +19,7 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
   createModelIdToGraphMap(graph);
   createModelIdToEdgeMap();
 
-  updateGraphWithResults(landscape); 
+  updateGraphWithResults(landscape, applicationCommunications); 
 
   return { modelIdToLayout, modelIdToPoints, modeldToKielerEdgeReference, modelIdToGraph, graph };
 
@@ -42,106 +42,46 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
   }
 
 
-  function updateGraphWithResults(landscape) {
+  function updateGraphWithResults(landscape, applicationCommunications) {
 
-    const systems = landscape.systems;
+    const { nodes } = landscape;
 
-    systems?.forEach((system) => {
+    nodes?.forEach((node) => {
 
-      updateNodeValues(system);
+      updateNodeValues(node);
 
-      const nodegroups = system.nodeGroups;
+      const applications = node.applications;
 
-      nodegroups?.forEach((nodegroup) => {
+      applications.forEach((application) => {
 
-        if (isVisible(nodegroup)) {
-
-          const nodes = nodegroup.nodes;
-
-          if (nodes.length > 1) {
-            updateNodeValues(nodegroup);
-          }
-
-          setAbsolutePositionForNode(nodegroup, system);
-
-          nodes?.forEach((node) => {
-
-            if (isVisible(node)) {
-
-              updateNodeValues(node);
-
-              if (nodes.length > 1) {
-                setAbsolutePositionForNode(node, nodegroup);
-              } else if (nodes.length === 1) {
-                setAbsolutePositionForNode(node, system);
-              }
-
-              const applications = node.applications;
-
-              applications.forEach((application) => {
-
-                updateNodeValues(application);
-                setAbsolutePositionForNode(application, node);
-
-              });
-
-            }
-
-          });
-
-        }
+        updateNodeValues(application);
+        setAbsolutePositionForNode(application, node);
 
       });
 
     });
 
-    addBendPointsInAbsoluteCoordinates(landscape);
+    addBendPointsInAbsoluteCoordinates(applicationCommunications);
 
-    systems?.forEach((system) => {
+    nodes?.forEach((node) => {
 
-      const nodegroups = system.nodeGroups;
+      const applications = node.applications;
 
-      nodegroups?.forEach((nodegroup) => {
+      applications?.forEach((application) => {
 
-        if (isVisible(nodegroup)) {
-
-          const nodes = nodegroup.nodes;
-
-          nodes?.forEach((node) => {
-
-            if (isVisible(node)) {
-
-              const applications = node.applications;
-
-              applications?.forEach((application) => {
-
-                convertToExplorVizCoords(application);
-
-              });
-
-              convertToExplorVizCoords(node);
-
-            }
-
-          });
-
-          if (nodes.length > 1) {
-            convertToExplorVizCoords(nodegroup);
-          }
-
-        }
+        convertToExplorVizCoords(application);
 
       });
 
-      convertToExplorVizCoords(system);
+      convertToExplorVizCoords(node);
 
     });
 
   } // END updateGraphWithResults
 
-  function addBendPointsInAbsoluteCoordinates(landscape) {
+  function addBendPointsInAbsoluteCoordinates(applicationCommunications) {
 
-    const totalApplicationCommunications = landscape.applicationCommunications;
+    const totalApplicationCommunications = applicationCommunications;
     // Points for drawing which represent an edge
     const edgeIdToPoints = new Map();
 
@@ -159,8 +99,7 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
           }
 
           let sourceApplication = applicationcommunication.sourceApplication;
-          let targetApplication = applicationcommunication.targetApplication;
-          let parentNode = getRightParent(sourceApplication, targetApplication);
+          let parentNode = sourceApplication.parent;
 
           if (parentNode) {
 
@@ -227,17 +166,10 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
               let insetLeft = 0.0;
               let insetTop = 0.0;
 
-              // why is parentNode.constructor.modelName undefined?
-              // "alternative": parentNode.content._internalModel.modelName
-              if (isReducedSystem(parentNode)) {
-                pOffsetX = insetLeft;
-                pOffsetY = insetTop * -1;
-              } else {
-                let layout = modelIdToLayout.get(parentNode.id);
-                if (layout){
-                  pOffsetX = layout?.positionX + insetLeft;
-                  pOffsetY = layout?.positionY - insetTop;
-                }
+              let layout = modelIdToLayout.get(parentNode.id);
+              if (layout){
+                pOffsetX = layout?.positionX + insetLeft;
+                pOffsetY = layout?.positionY - insetTop;
               }
             }
 
@@ -251,7 +183,7 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
               resultPoint.x = (point.x + pOffsetX) / CONVERT_TO_KIELER_FACTOR;
               resultPoint.y = (point.y * -1 + pOffsetY) / CONVERT_TO_KIELER_FACTOR; // KIELER has inverted Y coords
               let points = modelIdToPoints.get(applicationcommunication.id);
-              if (points){
+              if (points) {
                 points.push(resultPoint);
                 modelIdToPoints.set(applicationcommunication.id, points);
               }
@@ -268,21 +200,22 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
   } // END addBendPoints
 
   function updateNodeValues(entity) {
-    let entityGraph = modelIdToGraph.get(entity.id);
+    let entityIdentifier = entity.id;
+    let entityGraph = modelIdToGraph.get(entityIdentifier);
     if (entityGraph && entityGraph.x && entityGraph.y && entityGraph.width && entityGraph.height) {
       let layout = {
         positionX: entityGraph.x,
         positionY: entityGraph.y * -1,
         width: entityGraph.width,
         height: entityGraph.height,
-        opened: openEntitiesIds.has(entity.id)
       }
-      modelIdToLayout.set(entity.id, layout);
+      modelIdToLayout.set(entityIdentifier, layout);
     }
   }
 
   function convertToExplorVizCoords(entity) {
-    let layout = modelIdToLayout.get(entity.id);
+    let entityIdentifier = entity.id;
+    let layout = modelIdToLayout.get(entityIdentifier);
     if (layout) {
       layout.positionX /= CONVERT_TO_KIELER_FACTOR;
       layout.positionY /= CONVERT_TO_KIELER_FACTOR;
@@ -291,44 +224,15 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
     }
   }
 
-  function setAbsolutePositionForNode(child, parent) {
-    let childLayout = modelIdToLayout.get(child.id);
-    let parentLayout = modelIdToLayout.get(parent.id);
-    let parentGraph = modelIdToGraph.get(parent.id);
+  function setAbsolutePositionForNode(application, node) {
+    let childLayout = modelIdToLayout.get(application.id);
+    let parentLayout = modelIdToLayout.get(node.id);
+    let parentGraph = modelIdToGraph.get(node.id);
 
     if (childLayout && parentLayout) {
       childLayout.positionX += parentLayout.positionX;
       childLayout.positionY += parentLayout.positionY;
     }
-  }
-
-  function getRightParent(sourceApplication, targetApplication) {
-    let sourceNode = sourceApplication.parent;
-
-    let result = sourceNode;
-
-    if (!isVisible(sourceNode)) {
-      let sourceNodeGroup = sourceNode.parent;
-      let sourceSystem = sourceNodeGroup.parent;
-
-      let targetNode = targetApplication.parent;
-      let targetNodeGroup = targetNode.parent;
-      let targetSystem = targetNodeGroup.parent;
-
-      if (!isOpen(sourceSystem)) {
-        if (sourceSystem !== targetSystem) {
-          result = sourceSystem;
-        } else {
-          result = null; // means don't draw
-        }
-      } else {
-        let maybeApp = seekRepresentativeApplication(sourceApplication);
-        if (maybeApp) {
-          result = maybeApp.parent;
-        }
-      }
-    }
-    return result;
   }
 
   function isDescendant(child, parent) {
@@ -345,81 +249,5 @@ function layout3(landscape, openEntitiesIds, modelIdToPoints, graph) {
     }
 
     return false;
-  }
-
-  /**
-   * Searches for an application with the same name as the 
-   * given application within the same nodegroup. This can be
-   * be done because a nodegroup only contains nodes which run
-   * the same applications.
-   * @param application 
-   */
-  function seekRepresentativeApplication(application) {
-    let parentNode = application.parent;
-    let parentNodeGroup = parentNode.parent;
-
-    let nodes = parentNodeGroup.nodes;
-
-    let returnValue = null;
-
-    nodes?.forEach((node) => {
-      if (isVisible(node)) {
-
-        const applications = node.applications;
-
-        applications?.forEach((representiveApplication) => {
-
-          if (representiveApplication.name === application.name) {
-            returnValue = representiveApplication;
-          }
-        });
-      }
-    });
-
-    return returnValue;
-  }
-
-  function isOpen(entity) {    
-    if (isReducedNodeGroup(entity)) {
-      return entity.nodes.length < 2 || openEntitiesIds.has(entity.id);
-    } else {
-      return openEntitiesIds.has(entity.id);
-    }
-  }
-
-  function isVisible(entity) {
-    if (isReducedNodeGroup(entity)) {
-      let system = entity.parent;
-      return isOpen(system);
-    } else if (isReducedNode(entity)) {
-      let nodeGroup = entity.parent;
-      if (isOpen(nodeGroup)) {
-        return isVisible(nodeGroup);
-      } else {
-        let nodes = nodeGroup.nodes;
-        return nodes[0]?.id === entity.id && isVisible(nodeGroup);
-      }
-    } else if (isReducedApplication(entity)) {
-      let node = entity.parent;
-      return isVisible(node);
-    } else {
-      return false;
-    }
-  }
-
-  function isReducedSystem(arg) {
-    return arg.nodeGroups !== undefined;
-  }
-
-  function isReducedNodeGroup(arg) {
-    return arg.nodes !== undefined;
-  }
-
-  function isReducedNode(arg) {
-    return arg.applications !== undefined;
-  }
-
-  function isReducedApplication(arg) {
-    return arg.type !== undefined && arg.type === 'application';
   }
 }

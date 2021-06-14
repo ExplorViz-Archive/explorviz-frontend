@@ -1,12 +1,12 @@
 const sass = require('sass');
 const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
-module.exports = function (defaults) {
+module.exports = (defaults) => {
   const app = new EmberApp(defaults, {
     // Default implementation for ember-cli-sass
     sassOptions: {
       implementation: sass,
-      includePaths: ['lib/heatmap/addon/styles'],
+      includePaths: ['lib/virtual-reality/addon/styles', 'lib/heatmap/addon/styles'],
     },
 
     svgJar: {
@@ -15,39 +15,44 @@ module.exports = function (defaults) {
         'node_modules/@primer/octicons/build/svg',
       ],
     },
+    babel: {
+      sourceMaps: 'inline',
+    },
 
     'ember-cli-babel': {
       includePolyfill: true,
+      sourceMaps: 'inline',
     },
 
     fingerprint: {
       exclude: ['images'],
     },
 
-    nodeModulesToVendor: [
-      // add node_modules that you need in vendor modules
-      // See: https://www.npmjs.com/package/ember-cli-node-modules-to-vendor
-      'node_modules/three/build',
-    ],
-
     'ember-bootstrap': {
       bootstrapVersion: 4,
       importBootstrapFont: false,
       importBootstrapCSS: false,
     },
+
+    autoImport: {
+      webpack: {
+        node: {
+          global: true,
+        },
+      },
+    },
   });
 
   // export for threex.dynamictexture
-  app.import('vendor/three.min.js', {
+  app.import('node_modules/three/build/three.min.js', {
     prepend: true,
   });
 
   app.import('vendor/threex/threex.rendererstats.min.js');
   app.import('vendor/threex/threex.dynamictexture.min.js');
 
-  app.import('vendor/alertifyjs/alertify.min.js');
-  app.import('vendor/alertifyjs/css/alertify.min.css');
-  app.import('vendor/alertifyjs/css/themes/default.min.css');
+  app.import('node_modules/alertifyjs/build/css/alertify.min.css');
+  app.import('node_modules/alertifyjs/build/css/themes/default.min.css');
 
   app.import('vendor/cytoscape/cytoscape.min.js');
 
@@ -55,9 +60,11 @@ module.exports = function (defaults) {
 
   app.import('node_modules/bootstrap/dist/js/bootstrap.min.js');
 
+  app.import('node_modules/auth0-js/build/auth0.js');
   app.import('node_modules/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css');
   app.import('node_modules/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.min.js');
 
+  app.import('node_modules/webxr-polyfill/build/webxr-polyfill.min.js');
   app.import('node_modules/elkjs/lib/elk-api.js');
 
   return app.toTree();

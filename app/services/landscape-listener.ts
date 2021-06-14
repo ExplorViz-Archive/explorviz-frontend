@@ -1,152 +1,143 @@
 import Service, { inject as service } from '@ember/service';
-import config from 'explorviz-frontend/config/environment';
 import Evented from '@ember/object/evented';
-import addDrawableCommunication from 'explorviz-frontend/utils/model-update';
 import debugLogger from 'ember-debug-logger';
-import DS from 'ember-data';
-import { set } from '@ember/object';
-import Landscape from 'explorviz-frontend/models/landscape';
-import Timestamp from 'explorviz-frontend/models/timestamp';
-import LandscapeRepository from './repos/landscape-repository';
+import {
+  preProcessAndEnhanceStructureLandscape, StructureLandscapeData,
+} from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
+import ENV from 'explorviz-frontend/config/environment';
 import TimestampRepository from './repos/timestamp-repository';
+import Auth from './auth';
+import LandscapeTokenService from './landscape-token';
 
-declare const EventSourcePolyfill: any;
+const { landscapeService, traceService } = ENV.backendAddresses;
 
 export default class LandscapeListener extends Service.extend(Evented) {
-  // https://github.com/segmentio/sse/blob/master/index.js
-
-  content: any = null;
-
-  @service('session') session!: any;
-
-  @service('store') store!: DS.Store;
-
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
-  @service('repos/landscape-repository') landscapeRepo!: LandscapeRepository;
+  @service('auth') auth!: Auth;
 
-  latestJsonLandscape = null;
+  @service('landscape-token') tokenService!: LandscapeTokenService;
 
-  es: any = null;
+  latestStructureData: StructureLandscapeData | null = null;
 
-  pauseVisualizationReload = false;
+  latestDynamicData: DynamicLandscapeData | null = null;
 
   debug = debugLogger();
 
-  initSSE() {
-    set(this, 'content', []);
+  timer: NodeJS.Timeout | null = null;
 
-    const url = config.APP.API_ROOT;
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    const { access_token } = this.session.data.authenticated;
-
-    // Close former event source. Multiple (>= 6) instances cause the ember store to no longer work
-    let { es } = this;
-    if (es) {
-      es.close();
+  async initLandscapePolling(intervalInSeconds: number = 10) {
+    function setIntervalImmediately(func: () => void, interval: number) {
+      func();
+      return setInterval(func, interval);
     }
 
-    // ATTENTION: This is a polyfill (see vendor folder)
-    // Replace if original EventSource API allows HTTP-Headers
-    set(this, 'es', new EventSourcePolyfill(`${url}/v1/landscapes/broadcast/`, {
-      headers: {
-        // eslint-disable-next-line @typescript-eslint/camelcase
-        Authorization: `Bearer ${access_token}`,
-      },
-    }));
+    this.timer = setIntervalImmediately(async () => {
+      try {
+        // request landscape data that is 60 seconds old
+        // that way we can be sure, all traces are available
+        const endTime = Date.now() - (60 * 1000);
+        const [structureData, dynamicData] = await this.requestData(endTime, intervalInSeconds);
 
-    es = this.es;
+        this.set('latestStructureData', preProcessAndEnhanceStructureLandscape(structureData));
 
-    set(es, 'onmessage', (event: any) => {
-      const jsonLandscape = JSON.parse(event.data);
+        this.set('latestDynamicData', dynamicData);
 
-      if (jsonLandscape && Object.prototype.hasOwnProperty.call(jsonLandscape, 'data')) {
-        // Pause active -> no landscape visualization update
-        // Do avoid update of store to prevent inconsistencies
-        // between visualization and e.g. trace data
-        if (!this.pauseVisualizationReload) {
-          this.store.unloadAll('tracestep');
-          this.store.unloadAll('trace');
-          this.store.unloadAll('clazzcommunication');
-          this.store.unloadAll('event');
+        this.updateTimestampRepoAndTimeline(endTime,
+          LandscapeListener.computeTotalRequests(this.latestDynamicData!));
 
-          // ATTENTION: Mind the push operation, push != pushPayload in terms of
-          // serializer usage
-          // https://github.com/emberjs/data/issues/3455
-
-          set(this, 'latestJsonLandscape', jsonLandscape);
-          const landscapeRecord = this.store.push(jsonLandscape) as Landscape;
-
-          addDrawableCommunication(this.store);
-
-          set(this.landscapeRepo, 'latestLandscape', landscapeRecord);
-          this.landscapeRepo.triggerLatestLandscapeUpdate();
-
-          const timestampRecord = landscapeRecord.timestamp;
-
-          timestampRecord.then((record) => {
-            this.updateTimestampRepoAndTimeline(record);
-          });
-        } else {
-          // visualization is paused
-          this.debug('Visualization update paused');
-
-          // hacky way to obtain the timestamp record, without deserializing
-          // the complete landscape record and poluting the store
-          const timestampId = jsonLandscape.data.relationships.timestamp.data.id;
-
-          const includedArray = jsonLandscape.included;
-
-          let timestampValue;
-          let totalRequests;
-
-          // eslint-disable-next-line no-restricted-syntax
-          for (const elem of includedArray) {
-            /* eslint-disable-next-line eqeqeq */
-            if (elem.id == timestampId) {
-              timestampValue = elem.attributes.timestamp;
-              totalRequests = elem.attributes.totalRequests;
-              break;
-            }
-          }
-
-          const timestampRecord = this.store.createRecord('timestamp', {
-            id: timestampId,
-            timestamp: timestampValue,
-            totalRequests,
-          });
-          this.updateTimestampRepoAndTimeline(timestampRecord);
-        }
+        this.trigger('newLandscapeData', this.latestStructureData, this.latestDynamicData);
+      } catch (e) {
+        // landscape data could not be requested, try again?
       }
+    }, intervalInSeconds * 1000);
+  }
+
+  async requestData(endTime: number, intervalInSeconds: number) {
+    const startTime = endTime - (intervalInSeconds * 1000);
+
+    const structureDataPromise = this.requestStructureData(/* startTime, endTime */);
+    const dynamicDataPromise = this.requestDynamicData(startTime, endTime);
+
+    const landscapeData = Promise.all([structureDataPromise, dynamicDataPromise]);
+    return landscapeData;
+  }
+
+  requestStructureData(/* fromTimestamp: number, toTimestamp: number */) {
+    return new Promise<StructureLandscapeData>((resolve, reject) => {
+      if (this.tokenService.token === null) {
+        reject(new Error('No landscape token selected'));
+        return;
+      }
+      fetch(`${landscapeService}/v2/landscapes/${this.tokenService.token.value}/structure`, {
+        headers: {
+          Authorization: `Bearer ${this.auth.accessToken}`,
+        },
+      })
+        .then(async (response: Response) => {
+          if (response.ok) {
+            const structureData = await response.json() as StructureLandscapeData;
+            resolve(structureData);
+          } else {
+            reject();
+          }
+        })
+        .catch((e) => reject(e));
     });
   }
 
-  updateTimestampRepoAndTimeline(this: LandscapeListener, timestamp: Timestamp) {
-    set(this.timestampRepo, 'latestTimestamp', timestamp);
+  requestDynamicData(fromTimestamp: number, toTimestamp: number) {
+    return new Promise<DynamicLandscapeData>((resolve, reject) => {
+      if (this.tokenService.token === null) {
+        reject(new Error('No landscape token selected'));
+        return;
+      }
+      fetch(`${traceService}/v2/landscapes/${this.tokenService.token.value}/dynamic?from=${fromTimestamp}&to=${toTimestamp}`, {
+        headers: {
+          Authorization: `Bearer ${this.auth.accessToken}`,
+        },
+      })
+        .then(async (response: Response) => {
+          if (response.ok) {
+            const dynamicData = await response.json() as DynamicLandscapeData;
+            resolve(dynamicData);
+          } else {
+            reject();
+          }
+        })
+        .catch((e) => reject(e));
+    });
+  }
 
-    // this syntax will notify the template engine to redraw all components
-    // with a binding to this attribute
-    set(this.timestampRepo, 'timelineTimestamps', [...this.timestampRepo.timelineTimestamps, timestamp]);
+  static computeTotalRequests(dynamicData: DynamicLandscapeData) {
+    // cant't run reduce on empty array
+    if (dynamicData.length === 0) {
+      return 0;
+    }
+    const reducer = (accumulator: number, currentValue: number) => accumulator + currentValue;
+    return dynamicData.map((trace) => trace.spanList.length).reduce(reducer);
+  }
+
+  updateTimestampRepoAndTimeline(timestamp: number, totalRequests: number) {
+    /**
+     * Generates a unique string ID
+     */
+    //  See: https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+    function uuidv4() {
+      /* eslint-disable */
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+      /* eslint-enable */
+    }
+
+    const timestampRecord = { id: uuidv4(), timestamp, totalRequests };
+
+    this.timestampRepo.addTimestamp(this.tokenService.token!.value, timestampRecord);
 
     this.timestampRepo.triggerTimelineUpdate();
-  }
-
-  toggleVisualizationReload() {
-    // TODO: need to notify the timeline
-    if (this.pauseVisualizationReload) {
-      this.startVisualizationReload();
-    } else {
-      this.stopVisualizationReload();
-    }
-  }
-
-  startVisualizationReload() {
-    set(this, 'pauseVisualizationReload', false);
-    this.trigger('visualizationResumed');
-  }
-
-  stopVisualizationReload() {
-    set(this, 'pauseVisualizationReload', true);
   }
 }
 

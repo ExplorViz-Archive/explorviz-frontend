@@ -2,19 +2,24 @@ module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 2017,
-    sourceType: 'module'
+    ecmaVersion: 2019,
+    sourceType: 'module',
+    project: './tsconfig.json',
   },
   plugins: [
-    'ember',
-    '@typescript-eslint'
+    // 'ember',
+    '@typescript-eslint',
   ],
   extends: [
     'airbnb-typescript/base',
-    'plugin:ember/recommended',
+    // 'plugin:ember/recommended',
   ],
   env: {
-    browser: true
+    browser: true,
+    node: true,
+  },
+  globals: {
+    auth0: false,
   },
   rules: {
     'linebreak-style': 'off',
@@ -23,8 +28,11 @@ module.exports = {
     'no-plusplus': 'off',
     'import/no-cycle': 'off',
     'prefer-rest-params': 'off',
-    "@typescript-eslint/type-annotation-spacing": ["error"],
-    "no-param-reassign": ["error", { "props": false }]
+    'ember/no-mixins': 'off',
+    'ember/require-computed-property-dependencies': 'off',
+    '@typescript-eslint/type-annotation-spacing': ['error'],
+    'no-param-reassign': ['error', { props: false }],
+    'func-names': ['error', 'always', { generators: 'never' }],
   },
   overrides: [
     // node files
@@ -33,16 +41,16 @@ module.exports = {
         'ember-cli-build.js',
         'testem.js',
         'config/**/*.js',
-        'lib/*/index.js'
+        'lib/*/index.js',
       ],
       parserOptions: {
         sourceType: 'script',
-        ecmaVersion: 2015
+        ecmaVersion: 2015,
       },
       env: {
         browser: false,
-        node: true
-      }
-    }
-  ]
+        node: true,
+      },
+    },
+  ],
 };

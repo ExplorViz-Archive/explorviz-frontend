@@ -1,7 +1,7 @@
 <PowerSelect
-  @options={{@metrics}}
+  @options={{this.heatmapConfiguration.latestClazzMetrics}}
   @triggerClass="metric-selector"
-  @selected={{@selectedMetric}}
+  @selected={{this.heatmapConfiguration.selectedMetric}}
   @onchange={{@selectMetric}}
   @placeholder="Select metric..."
   @searchEnabled={{false}}

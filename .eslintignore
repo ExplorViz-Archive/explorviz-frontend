@@ -1,8 +1,9 @@
-app/router.js
-app/app.ts
-vendor/
-dist/
+dist/**
+vendor/**
+
+lib/virtual-reality/addon/utils/lib/loader
 
 public/assets/web-workers/*
 
-tests/
+testem.js
+yuidoc-packages.js

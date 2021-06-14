@@ -1,38 +1,12 @@
-<div class="sidebar-component-close">
-  <button
-    type="button"
-    class="sidebar-component-close-button"
-    title="Close Trace Selection"
-    {{on "click" this.close}}
-  >
-    {{svg-jar "x-16" class="octicon"}}
-  </button>
-</div>
-
-<div class="sidebar-component-title">
-  <h5>Trace Selection</h5>
-</div>
-
 <div class="mt-2 mb-1 d-flex justify-content-end">
   <div>
     <Input
       id="filterInput"
-      @value={{this.filterInput}}
-      @placeholder="Filter traces"
       class="form-control input-lg"
-      @autofocus="autofocus"
-      @focus-out={{this.filter}}
-      @enter={{this.filter}}
+      placeholder="Filter traces"
+      autofocus="autofocus"
+      {{on "input" this.filter}}
     />
-  </div>
-  <div>
-    <BsButton
-      @onClick={{this.filter}}
-      @type="button"
-      class="btn btn-light"
-    >
-      {{svg-jar "search-16" class="octicon align-middle"}}
-    </BsButton>
   </div>
 </div>
 
@@ -41,9 +15,9 @@
     <thead>
       <tr style="cursor: pointer">
         <th {{on "click" (fn this.sortByProperty "traceId")}} scope="col">Trace ID</th>
-        <th {{on "click" (fn this.sortByProperty "sourceClazz.name")}} scope="col">Soure Clazz</th>
-        <th {{on "click" (fn this.sortByProperty "targetClazz.name")}} scope="col">Target Clazz</th>
-        <th {{on "click" (fn this.sortByProperty "totalTraceDuration")}} scope="col">
+        <th {{on "click" (fn this.sortByProperty "firstClassName")}} scope="col">First Clazz</th>
+        <th {{on "click" (fn this.sortByProperty "lastClassName")}} scope="col">Last Clazz</th>
+        <th {{on "click" (fn this.sortByProperty "traceDuration")}} scope="col">
           Duration in
           <BsButton
             @onClick={{this.toggleTraceTimeUnit}}
@@ -56,129 +30,24 @@
       </tr>
     </thead>
     <tbody>
-      {{#each this.traces as |trace|}}
+      {{#each this.traces as |trace index|}}
         <tr
           style="cursor: pointer"
-          bgcolor={{if this.selectedTrace "#cc8a8a"}}
-          {{on "click" (fn this.clickedTrace trace)}}
+          bgcolor={{if @selectedTrace "#cc8a8a"}}
+          {{on "click" (fn @selectTrace trace)}}
         >
           <th title={{trace.traceId}}>{{truncate trace.traceId 8 true}}</th>
-          <td title={{trace.sourceClazz.name}}>{{truncate trace.sourceClazz.name 12 true}}</td>
-          <td title={{trace.targetClazz.name}}>{{truncate trace.targetClazz.name 14 true}}</td>
-          <td>{{format-number trace.totalTraceDuration this.traceTimeUnit}}</td>
+          {{#let (get-value-of-map this.firstClasses trace.traceId) as |firstClass|}}
+            <td title={{firstClass.name}}>{{truncate firstClass.name 12 true}}</td>
+          {{/let}}
+          {{#let (get-value-of-map this.lastClasses trace.traceId) as |lastClass|}}
+            <td title={{lastClass.name}}>{{truncate lastClass.name 14 true}}</td>
+          {{/let}}
+          {{#let (get this.traceDurations index) as |duration|}}
+            <td>{{format-number duration this.traceTimeUnit}}</td>
+          {{/let}}
         </tr>
       {{/each}}
     </tbody>
   </table>
 </div>
-
-{{#if this.selectedTrace}}
-  <hr>
-
-  <h5 align="center">
-    Trace Replayer
-    <BsButton
-      @onClick={{this.toggleAnimation}}
-      @title={{if this.isReplayAnimated "Pause animation" "Resume animation"}}
-      @type="button"
-      class="th-btn {{if this.isReplayAnimated "navbar-highlight red-hover"}}"
-    >
-      {{svg-jar "device-camera-video-16" class="octicon align-middle"}}
-    </BsButton>
-  </h5>
-
-  <div class="mt-3 d-flex justify-content-between align-items-center">
-    <BsButton
-      @onClick={{this.selectPreviousTraceStep}}
-      @type="secondary"
-      @outline={{true}}
-      @title="One step back"
-      @disabled={{lte this.currentTraceStep.tracePosition 1}}
-    >
-      {{svg-jar "chevron-left-16" class="octicon align-middle"}}
-    </BsButton>
-    <div>
-      Step <strong>{{this.currentTraceStep.tracePosition}}</strong> of {{this.selectedTrace.length}}
-    </div>
-    <BsButton
-      @onClick={{this.selectNextTraceStep}}
-      @type="secondary"
-      @outline={{true}}
-      @title="One step forth"
-      @disabled={{gte
-        this.currentTraceStep.tracePosition
-        this.selectedTrace.length
-      }}
-    >
-      {{svg-jar "chevron-right-16" class="octicon align-middle"}}
-    </BsButton>
-  </div>
-
-  <hr>
-
-  <h5 align="center">Trace Step Details</h5>
-  <div class="mt-3 d-flex justify-content-between">
-    <table class="table table-striped">
-      <tbody>
-        <tr class="d-flex">
-          <th class="col-3">Soure Clazz</th>
-          <td class="col-9 container-word-wrap">
-            {{this.currentTraceStep.clazzCommunication.sourceClazz.name}}
-            <BsButton
-              @onClick={{fn
-                @moveCameraTo
-                this.currentTraceStep.clazzCommunication.sourceClazz
-              }}
-              @type="button"
-              class="th-btn"
-            >
-              {{svg-jar "eye-16" class="octicon align-middle"}}
-            </BsButton>
-          </td>
-        </tr>
-        <tr class="d-flex">
-          <th class="col-3">Target Clazz</th>
-          <td class="col-9 container-word-wrap">
-            {{this.currentTraceStep.clazzCommunication.targetClazz.name}}
-            <BsButton
-              @onClick={{fn
-                @moveCameraTo
-                this.currentTraceStep.clazzCommunication.targetClazz
-              }}
-              @type="button"
-              class="th-btn"
-            >
-              {{svg-jar "eye-16" class="octicon align-middle"}}
-            </BsButton>
-          </td>
-        </tr>
-        <tr class="d-flex">
-          <th class="col-3">Operation Name</th>
-          <td class="col-9 container-word-wrap">{{this.currentTraceStep.clazzCommunication.operationName}}</td>
-        </tr>
-        <tr class="d-flex">
-          <th class="col-3">Requests</th>
-          <td class="col-9 container-word-wrap">{{this.currentTraceStep.requests}}</td>
-        </tr>
-        <tr class="d-flex">
-          <th class="col-3" title="Average Response Time">
-            Avg. Resp. Time in
-            <BsButton
-              @onClick={{this.toggleTraceStepTimeUnit}}
-              class="th-btn"
-              outline={{true}}
-            >
-              {{this.traceStepTimeUnit}}
-            </BsButton>
-          </th>
-          <td class="col-9 container-word-wrap">
-            {{format-number
-              this.currentTraceStep.averageResponseTime
-              this.traceStepTimeUnit
-            }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-{{/if}}

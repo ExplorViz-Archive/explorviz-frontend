@@ -3,25 +3,16 @@ html, body {
   height: 100vh;
 }
 
-.main-content {
-  overflow: hidden;
-  @extend .ml-3;
-  @extend .mr-3;
-  @extend .mt-5;
-  @extend .mb-3;
-  @extend .flex-grow-1;
+#main-container {
+  height: 100%;
   @extend .d-flex;
   @extend .flex-column;
-}
-
-.main-content > .row {
-  @extend .flex-grow-1;
 }
 
 #vizspace {
   @extend .d-flex;
   @extend .flex-column;
-  max-height: 100%;
+  height: 100%;
 }
 
 #rendering {
@@ -64,6 +55,10 @@ html, body {
   position: relative;
 }
 
+.flex-1 {
+  flex: 1;
+}
+
 .explorVizModal {
   background-color: #8e8e8e;
   position: absolute;
@@ -76,6 +71,14 @@ html, body {
   cursor: wait;
   box-shadow: 5px 10px #888888;
   border-radius: 10px;
+}
+
+.mt-6 {
+  margin-top: 4rem !important;
+}
+
+.border-radius-0 {
+  border-radius: 0 !important;
 }
 
 .inline {
@@ -123,8 +126,8 @@ svg.octicon {
 }
 
 .d-flex-center {
-  align-items: center;
-  display: flex;
+  align-items: center!important;
+  display: flex!important;
 }
 
 .d-contents {
@@ -144,6 +147,10 @@ svg.octicon {
 
 .pointer-cursor {
   cursor: pointer;
+}
+
+.all-unset {
+  all: unset;
 }
 
 @mixin centerSpinners() {

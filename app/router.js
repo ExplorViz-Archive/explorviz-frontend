@@ -1,5 +1,5 @@
-import config from './config/environment';
 import EmberRouter from '@ember/routing/router';
+import config from './config/environment';
 
 /**
 * Ember router for mapping "route" and respective "template".
@@ -15,36 +15,13 @@ const Router = EmberRouter.extend({
   configurationRouteExtensions: null,
 });
 
+// eslint-disable-next-line func-names, array-callback-return
 Router.map(function () {
-
-  this.route('badroute', { path: "/*path" });
+  this.route('badroute', { path: '/*path' });
   this.route('login');
+  this.route('callback');
   this.route('visualization');
-  this.route('discovery');
-  this.route('replay');
-
-  this.route('configuration', function () {
-
-    this.route('usermanagement', function () {
-      this.route('users');
-      this.route('edit', { path: '/edit/:user_id' });
-      this.route('new');
-    });
-
-    this.route('settings');
-
-    this.route('heatmapsettings');
-
-    // add nested configuration routes which are added by extensions
-    const configurationRouteContext = this;
-
-    Router.configurationRouteExtensions.forEach(function (extensionRoute) {
-      if (extensionRoute !== 'undefined') {
-        configurationRouteContext.route(extensionRoute);
-      }
-    });
-
-  });
+  this.route('landscapes');
 });
 
 export default Router;

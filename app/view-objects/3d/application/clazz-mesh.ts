@@ -1,5 +1,6 @@
+import { Class } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import THREE from 'three';
-import Clazz from 'explorviz-frontend/models/clazz';
 import BoxMesh from './box-mesh';
 import ClazzLabelMesh from './clazz-label-mesh';
 
@@ -11,13 +12,11 @@ export default class ClazzMesh extends BoxMesh {
   // Set by labeler
   labelMesh: ClazzLabelMesh | null = null;
 
-  dataModel: Clazz;
+  dataModel: Class;
 
-
-  constructor(layoutPos: THREE.Vector3, layoutHeight: number,
-    layoutWidth: number, layoutDepth: number, clazz: Clazz, defaultColor: THREE.Color,
+  constructor(layout: BoxLayout, clazz: Class, defaultColor: THREE.Color,
     highlightingColor: THREE.Color) {
-    super(layoutPos, layoutHeight, layoutWidth, layoutDepth, defaultColor, highlightingColor);
+    super(layout, defaultColor, highlightingColor);
 
     const material = new THREE.MeshLambertMaterial({ color: defaultColor });
     const geometry = new THREE.BoxGeometry(1, 1, 1);

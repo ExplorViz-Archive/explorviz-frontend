@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import { inject as service } from '@ember/service';
-import HeatmapRepository from 'heatmap/services/repos/heatmap-repository';
+import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
 
@@ -12,8 +12,8 @@ interface HeatmapMode {
 }
 
 export default class HeatmapSettings extends Component<Args> {
-  @service('repos/heatmap-repository')
-  heatmapRepo!: HeatmapRepository;
+  @service('heatmap-configuration')
+  heatmapConf!: HeatmapConfiguration;
 
   heatmapModes: HeatmapMode[] = [
     { name: 'Aggregated Heatmap', id: 'aggregatedHeatmap' },
@@ -45,33 +45,33 @@ export default class HeatmapSettings extends Component<Args> {
 
   constructor(owner: any, args: Args) {
     super(owner, args);
-    this.selectedMode = this.heatmapRepo.selectedMode === 'aggregatedHeatmap' ? this.heatmapModes[0] : this.heatmapModes[1];
+    this.selectedMode = this.heatmapConf.selectedMode === 'aggregatedHeatmap' ? this.heatmapModes[0] : this.heatmapModes[1];
   }
 
   @action
   setHeatmapMode(mapMode: HeatmapMode) {
     this.selectedMode = mapMode;
-    this.heatmapRepo.set('selectedMode', mapMode.id);
+    this.heatmapConf.set('selectedMode', mapMode.id);
   }
 
   @action
   toggleSimpleHeat() {
-    this.heatmapRepo.toggleProperty('useSimpleHeat');
+    this.heatmapConf.toggleProperty('useSimpleHeat');
   }
 
   @action
   onHeatmapRadiusChange(heatmapRadiusNew: number) {
-    this.heatmapRepo.set('heatmapRadius', heatmapRadiusNew);
+    this.heatmapConf.set('heatmapRadius', heatmapRadiusNew);
   }
 
   @action
   onBlurRadiusChange(blurRadiusNew: number) {
-    this.heatmapRepo.set('blurRadius', blurRadiusNew);
+    this.heatmapConf.set('blurRadius', blurRadiusNew);
   }
 
   @action
   toggleLegendValues() {
-    this.heatmapRepo.toggleProperty('showLegendValues');
+    this.heatmapConf.toggleProperty('showLegendValues');
   }
 
   @action
@@ -86,16 +86,16 @@ export default class HeatmapSettings extends Component<Args> {
 
   @action
   resetSimpleHeatGradient() {
-    this.heatmapRepo.resetSimpleHeatGradient();
+    this.heatmapConf.resetSimpleHeatGradient();
   }
 
   @action
   resetArrayHeatGradient() {
-    this.heatmapRepo.resetArrayHeatGradient();
+    this.heatmapConf.resetArrayHeatGradient();
   }
 
   @action
   toggleHelperLines() {
-    this.heatmapRepo.toggleProperty('useHelperLines');
+    this.heatmapConf.toggleProperty('useHelperLines');
   }
 }

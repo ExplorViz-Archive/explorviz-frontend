@@ -1,7 +1,7 @@
 import Object from '@ember/object';
 import Evented from '@ember/object/evented';
+import InteractionModifierModifier from 'explorviz-frontend/modifiers/interaction-modifier';
 import Hammer from 'hammerjs';
-import Interaction from './interaction';
 
 /* eslint-disable no-bitwise */
 export default class HammerInteraction extends Object.extend(Evented) {
@@ -96,7 +96,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
 
     const singleTap = new Hammer.Tap({
       event: 'singletap',
-      interval: 250,
+      interval: 150,
     });
 
     const doubleTap = new Hammer.Tap({
@@ -124,7 +124,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
       mouseDeltaX = mousePosition.x;
       mouseDeltaY = mousePosition.y;
@@ -144,7 +144,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
       delta.x = mousePosition.x - mouseDeltaX;
       delta.y = mousePosition.y - mouseDeltaY;
@@ -169,7 +169,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
       self.trigger('panningEnd', mousePosition);
     });
@@ -186,26 +186,26 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
-      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
       self.trigger('doubletap', mousePosition);
     });
 
     /**
-     * Triggers a single tap event for the left mouse button
+     * Triggers a single tap event for the left and right mouse button
      */
     hammer.on('singletap', (evt) => {
-      if (evt.button !== 1) {
-        return;
-      }
-
       if (evt.srcEvent.target !== canvas) {
         return;
       }
 
-      const mousePosition = Interaction.getMousePos(canvas, evt.srcEvent);
+      const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
-      self.trigger('singletap', mousePosition);
+      if (evt.button === 1) {
+        self.trigger('lefttap', mousePosition, canvas);
+      } else if (evt.button === 3) {
+        self.trigger('righttap', mousePosition, evt.srcEvent);
+      }
     });
   }
 }

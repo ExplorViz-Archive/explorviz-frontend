@@ -1,6 +1,6 @@
 import Component from '@glimmer/component';
 import debugLogger from 'ember-debug-logger';
-import HeatmapRepository from 'heatmap/services/repos/heatmap-repository';
+import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 import { inject as service } from '@ember/service';
 import { action } from '@ember/object';
 
@@ -9,14 +9,13 @@ interface Args {
     aggregatedHeatmap: string,
     windowedHeatmap: string
   },
-  mode: 'aggregatedHeatmap'|'windowedHeatmap'
 }
 
 export default class HeatmapLegend extends Component<Args> {
   debug = debugLogger();
 
-  @service('repos/heatmap-repository')
-  heatmapRepo!: HeatmapRepository;
+  @service('heatmap-configuration')
+  heatmapConfiguration!: HeatmapConfiguration;
 
   canvas!: HTMLCanvasElement;
 
@@ -29,19 +28,8 @@ export default class HeatmapLegend extends Component<Args> {
     };
   }
 
-  get header() {
-    const { mode } = this.args;
-    if (mode === 'aggregatedHeatmap') {
-      return 'Aggregated Heatmap';
-    }
-    if (mode === 'windowedHeatmap') {
-      return 'Windowed Heatmap';
-    }
-    return 'Header';
-  }
-
   get subHeader() {
-    const { mode } = this.args;
+    const { mode } = this.heatmapConfiguration.selectedMetric!;
     if (mode === 'aggregatedHeatmap') {
       return 'Aggregated score:';
     }
@@ -64,13 +52,13 @@ export default class HeatmapLegend extends Component<Args> {
     const ctx = this.canvas.getContext('2d')!;
     const grad = ctx.createLinearGradient(0, this.canvas.height, 0, 0);
 
-    if (this.heatmapRepo.useSimpleHeat) {
-      const heatmapGradient = this.heatmapRepo.getSimpleHeatGradient();
+    if (this.heatmapConfiguration.useSimpleHeat) {
+      const heatmapGradient = this.heatmapConfiguration.getSimpleHeatGradient();
       Object.keys(heatmapGradient).forEach((key) => {
         grad.addColorStop(Number(key), heatmapGradient[key]);
       });
     } else {
-      const heatmapGradient = this.heatmapRepo.getArrayHeatGradient();
+      const heatmapGradient = this.heatmapConfiguration.getArrayHeatGradient();
       Object.keys(heatmapGradient).forEach((key) => {
         grad.addColorStop(Number(key) + 0.50, heatmapGradient[key]);
       });
@@ -101,18 +89,19 @@ export default class HeatmapLegend extends Component<Args> {
     let midLabel = 'mid';
     let maxLabel = 'max';
 
-    if (this.heatmapRepo.showLegendValues) {
-      const largestValue = Math.round(this.heatmapRepo.largestValue) + 2;
-      if (this.heatmapRepo.selectedMode === 'aggregatedHeatmap') {
+    if (this.heatmapConfiguration.showLegendValues) {
+      const largestValue = Math.ceil(this.heatmapConfiguration.selectedMetric!.max);
+
+      if (this.heatmapConfiguration.selectedMode === 'aggregatedHeatmap') {
         minLabel = '0';
-        midLabel = `${largestValue / 4}`;
-        maxLabel = `${largestValue / 2}`;
+        midLabel = `${largestValue / 2}`;
+        maxLabel = `${largestValue}`;
       } else {
         minLabel = `${-largestValue / 2}`;
         midLabel = '0';
         maxLabel = `${largestValue / 2}`;
       }
-    } else if (this.heatmapRepo.selectedMode === 'aggregatedHeatmap') {
+    } else if (this.heatmapConfiguration.selectedMode === 'aggregatedHeatmap') {
       minLabel = '0';
     } else {
       midLabel = '0';

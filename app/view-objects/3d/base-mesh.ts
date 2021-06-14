@@ -1,17 +1,27 @@
 import THREE from 'three';
+import calculateColorBrightness from
+  'explorviz-frontend/utils/helpers/threejs-helpers';
 
-
-export default abstract class BaseMesh extends THREE.Mesh {
+export default abstract class BaseMesh<
+  TGeometry extends THREE.Geometry | THREE.BufferGeometry =
+  THREE.Geometry | THREE.BufferGeometry,
+  TMaterial extends THREE.MeshBasicMaterial | THREE.MeshLambertMaterial =
+  THREE.MeshBasicMaterial | THREE.MeshLambertMaterial,
+> extends THREE.Mesh<TGeometry, TMaterial> {
   highlighted: boolean = false;
 
   defaultColor: THREE.Color;
 
+  defaultOpacity: number;
+
   highlightingColor: THREE.Color;
 
+  isHovered = false;
 
-  constructor(defaultColor: THREE.Color, highlightingColor = new THREE.Color('red')) {
+  constructor(defaultColor: THREE.Color = new THREE.Color(), highlightingColor = new THREE.Color('red'), defaultOpacity = 1) {
     super();
     this.defaultColor = defaultColor;
+    this.defaultOpacity = defaultOpacity;
     this.highlightingColor = highlightingColor;
   }
 
@@ -28,8 +38,35 @@ export default abstract class BaseMesh extends THREE.Mesh {
     if (this.material instanceof THREE.MeshLambertMaterial
       || this.material instanceof THREE.MeshBasicMaterial) {
       this.material.color = this.defaultColor;
-      this.turnOpaque();
+      this.changeOpacity(this.defaultOpacity);
     }
+  }
+
+  /**
+   * Alters the color of a given mesh such that it is clear which mesh
+   * the mouse points at
+   *
+   * @param colorShift Specifies color shift: <1 is darker and >1 is lighter
+   */
+  applyHoverEffect(colorShift = 1.1): void {
+    if (this.isHovered) return;
+
+    // Calculate and apply brighter color to material ('hover effect')
+    const material = this.material as THREE.MeshBasicMaterial | THREE.MeshLambertMaterial;
+    material.color = calculateColorBrightness(material.color, colorShift);
+    this.isHovered = true;
+  }
+
+  /**
+   * Restores original color of mesh which had a hover effect
+   */
+  resetHoverEffect(): void {
+    const material = this.material as THREE.MeshBasicMaterial | THREE.MeshLambertMaterial;
+    const { highlighted, defaultColor, highlightingColor } = this;
+
+    // Restore normal color (depends on highlighting status)
+    material.color = highlighted ? highlightingColor : defaultColor;
+    this.isHovered = false;
   }
 
   updateColor() {

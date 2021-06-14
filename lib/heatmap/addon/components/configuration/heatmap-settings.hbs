@@ -39,14 +39,14 @@
           @theme="skewed"
           @onLabel="simple"
           @offLabel="array"
-          @value={{this.heatmapRepo.useSimpleHeat}}
+          @value={{this.heatmapConf.useSimpleHeat}}
           @onToggle={{this.toggleSimpleHeat}}
         />
       </div>
     </div>
   </div>
 
-  {{#if this.heatmapRepo.useSimpleHeat}}
+  {{#if this.heatmapConf.useSimpleHeat}}
     <div class="pl-3">
       <div class="d-flex justify-content-between">
         <div>
@@ -61,7 +61,7 @@
             class="d-contents"
             @controlType="number"
             @step="1"
-            @value={{this.heatmapRepo.heatmapRadius}}
+            @value={{this.heatmapConf.heatmapRadius}}
             @onChange={{this.onHeatmapRadiusChange}}
           />
         </BsForm>
@@ -82,7 +82,7 @@
             class="d-contents"
             @controlType="number"
             @step="1"
-            @value={{this.heatmapRepo.blurRadius}}
+            @value={{this.heatmapConf.blurRadius}}
             @onChange={{this.onBlurRadiusChange}}
           />
         </BsForm>
@@ -103,7 +103,7 @@
         @theme="skewed"
         @onLabel="Yes"
         @offLabel="No"
-        @value={{this.heatmapRepo.useHelperLines}}
+        @value={{this.heatmapConf.useHelperLines}}
         @onToggle={{this.toggleHelperLines}}
       />
     </div>
@@ -122,7 +122,7 @@
         @theme="skewed"
         @onLabel="Yes"
         @offLabel="No"
-        @value={{this.heatmapRepo.showLegendValues}}
+        @value={{this.heatmapConf.showLegendValues}}
         @onToggle={{this.toggleLegendValues}}
       />
     </div>
@@ -147,16 +147,17 @@
   </div>
   {{#if this.showSimpleHeatSettings}}
     <div class="row mb-1 pr-3">
-      {{#each-in this.heatmapRepo.simpleHeatGradient as |key|}}
+      {{#each-in this.heatmapConf.simpleHeatGradient as |key|}}
         <div class="col-md-4 col-lg-2 col-xl-2 mt-3">
           <div>
             Stop value: {{revert-key key "_" "."}}
           </div>
           <div id={{concat "sh-gradient-" key}} class="input-group">
             <Input
-              type="text"
+              id="simpleHeatGradientInput"
+              @type="text"
               class="form-control input-lg"
-              @value={{get this.heatmapRepo.simpleHeatGradient key}}
+              @value={{get this.heatmapConf.simpleHeatGradient key}}
             />
           </div>
         </div>
@@ -193,16 +194,17 @@
   </div>
   {{#if this.showArrayHeatSettings}}
     <div class="row">
-      {{#each-in this.heatmapRepo.arrayHeatGradient as |key val|}}
+      {{#each-in this.heatmapConf.arrayHeatGradient as |key|}}
         <div class="col-md-4 col-lg-2 col-xl-2 mt-3">
           <div>
             Stop value: {{revert-key key "_" "."}}
           </div>
           <div id={{concat "ah-gradient-" key}} class="input-group">
             <Input
+              id="arrayHeatGradientInput"
               class="form-control input-lg"
-              type="text"
-              @value={{get this.heatmapRepo.arrayHeatGradient key}}
+              @type="text"
+              @value={{get this.heatmapConf.arrayHeatGradient key}}
             />
           </div>
         </div>

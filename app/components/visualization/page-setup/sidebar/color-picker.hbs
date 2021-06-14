@@ -1,38 +1,31 @@
-<div class="sidebar-component-close">
-  <button 
-    type="button" 
-    class="sidebar-component-close-button" 
-    title="Close Color Configuration"
-    {{on "click" this.close}}
-  >
-    {{svg-jar "x" class="octicon"}}
-  </button>
+<div
+  class="sidebar-component-close"
+  {{on "click" this.close}}
+>
+  {{svg-jar "x-16" class="octicon"}}
 </div>
+
 <div id="colorHeader">
-  <div id="colorTitle" class="sidebar-component-title">
-    <h5>Colors</h5>
-  </div>
   <div id="colorPresets" class="dropdown">
-    <button 
-      class="btn btn-info dropdown-toggle" 
-      type="button" 
-      id="dropdownMenuButton" 
+    <button
+      class="btn btn-outline-dark dropdown-toggle"
+      type="button"
       data-toggle="dropdown"
-      aria-haspopup="true" 
+      aria-haspopup="true"
       aria-expanded="false"
     >
       Presets
     </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-      <div 
-        class="dropdown-item" 
-        name="defaultScheme" 
+    <div class="dropdown-menu">
+      <div
+        class="dropdown-item pointer-cursor"
+        name="defaultScheme"
         {{on "click" (fn this.applyColorScheme "default")}}
       >
         Default Color Scheme
       </div>
-      <div 
-        class="dropdown-item" 
+      <div
+        class="dropdown-item pointer-cursor"
         name="impairedScheme"
         {{on "click" (fn this.applyColorScheme "impaired")}}
       >
@@ -42,35 +35,34 @@
   </div>
 </div>
 
-
-<div>
+<div class="mt-3">
   {{#if @isLandscapeView}}
 
     {{#each (entries this.configuration.landscapeColors) as |entry|}}
-      <div 
-        id={{concat "cp-landscape-" (get entry 0)}} 
-        class="input-group" 
+      <div
+        id={{concat "cp-landscape-" (get entry 0)}}
+        class="input-group justify-content-between"
         {{did-insert (fn this.setupLandscapeColorpicker (get entry 0))}}
       >
-        <span class="input-group-append color-picker-input">
+        <span class="colorpicker-label">{{format-color-property (get entry 0)}}</span>
+        <span class="input-group-append colorpicker-input">
           <span class="input-group-text colorpicker-input-addon"><i></i></span>
         </span>
-        <span class="color-picker-label">{{format-color-property (get entry 0)}}</span>
       </div>
     {{/each}}
 
   {{else}}
 
     {{#each (entries this.configuration.applicationColors) as |entry|}}
-      <div 
-        id={{concat "cp-application-" (get entry 0)}} 
-        class="input-group" 
+      <div
+        id={{concat "cp-application-" (get entry 0)}}
+        class="input-group justify-content-between"
         {{did-insert (fn this.setupApplicationColorPicker (get entry 0))}}
       >
-        <span class="input-group-append color-picker-input">
+        <span class="colorpicker-label">{{format-color-property (get entry 0)}}</span>
+        <span class="input-group-append colorpicker-input">
           <span class="input-group-text colorpicker-input-addon"><i></i></span>
         </span>
-        <span class="color-picker-label">{{format-color-property (get entry 0)}}</span>
       </div>
     {{/each}}
   {{/if}}

@@ -1,17 +1,36 @@
-@import "ember-bootstrap/bootstrap";
 @import "_main";
-@import "_discovery";
 @import "_sidebar";
-@import "_usermanagement";
-@import "_navbar";
-@import "_loginform";
 @import "_timeline";
 @import "_alertify";
 @import "_pagenavigation";
+@import "_navbar";
 @import "_visualization_navbar";
+@import "_token_selection";
+@import "_login";
+@import '_right_click_menu';
+// located in lib/virtual-reality/addon/styles
+@import "_virtual_reality";
 
 // located in lib/heatmap/addon/styles
 @import "_heatmap";
-
+@import "ember-bootstrap/bootstrap";
 @import 'ember-power-select/themes/bootstrap';
 @import "ember-power-select";
+@import 'ember-right-click-menu';
+
+
+.disable-select {
+  user-select: none; /* supported by Chrome and Opera */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-weight: 400;
+}
+
+#ember-right-click-menu-wormhole > ul {
+  z-index: 100000;
+}
