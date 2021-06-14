@@ -53,6 +53,12 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
   }
 
   @action
+  updateCommunicationWidth(event: any) {
+    this.configuration.commWidthMultiplier = Number.parseFloat(event.target.value);
+    this.vrApplicationRenderer.updateCommunication();
+  }
+
+  @action
   updateCommunicationHeight(event: any) {
     this.configuration.commCurveHeightMultiplier = Number.parseFloat(event.target.value);
     this.vrApplicationRenderer.updateCommunication();

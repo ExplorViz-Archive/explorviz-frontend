@@ -46,10 +46,20 @@
   height: 100%;
 }
 
-.arPresetSelectionContainer {
+.arSettingsGridContainer {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 250px));
-  grid-gap: 20px;
+}
+
+.arSettingsGridItem {
+  padding: 3vh;
+  border-top: dotted lightgray
+}
+
+.arPresetGridItem {
+  display: flex;
+  justify-content: center;
+  align-content: center;
 }
 
 .arSettingsPropertyContainer {

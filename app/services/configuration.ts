@@ -81,6 +81,9 @@ export default class Configuration extends Service {
   @tracked
   commCurveHeightMultiplier = 1;
 
+  @tracked
+  commWidthMultiplier = 1;
+
   commArrowThickness = 0.5;
 
   // #endregion APPLICATION LAYOUT
