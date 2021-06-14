@@ -11,8 +11,12 @@ export default class ArZoomHandler {
 
   private outerDiv: HTMLElement;
 
-  constructor(camera: THREE.PerspectiveCamera, outerDiv: HTMLElement) {
+  private renderer: THREE.WebGLRenderer;
+
+  constructor(camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer,
+    outerDiv: HTMLElement) {
     this.mainCamera = camera;
+    this.renderer = renderer;
     this.zoomCamera = camera.clone();
     this.outerDiv = outerDiv;
     this.zoomEnabled = false;
@@ -46,16 +50,17 @@ export default class ArZoomHandler {
     const offsetY = (this.outerDiv.clientHeight / 3) + sizeY / 3;
 
     this.zoomCamera.setViewOffset(
-      this.outerDiv.clientWidth,
-      this.outerDiv.clientHeight,
+      fullSize.x,
+      fullSize.y,
       offsetX,
       offsetY,
-      (this.outerDiv.clientWidth / 3) / zoomScale,
-      (this.outerDiv.clientHeight / 3) / zoomScale,
+      (fullSize.x / 3) / zoomScale,
+      (fullSize.y / 3) / zoomScale,
     );
 
     renderer.setViewport(x, y, sizeX, sizeY);
     renderer.setScissor(x, y, sizeX, sizeY);
+
     renderer.render(scene, this.zoomCamera);
 
     // Prepare renderer to render full scene again
@@ -66,8 +71,13 @@ export default class ArZoomHandler {
   addZoomIndicator() {
     if (this.zoomIndicatorMesh) return;
 
-    const geometry = new THREE.PlaneGeometry(this.outerDiv.clientWidth / 50000,
-      this.outerDiv.clientHeight / 30000, 30, 30);
+    const fullSize = this.renderer.getSize(new THREE.Vector2());
+
+    const sizeX = fullSize.x / 3; // size of magnifier
+    const sizeY = fullSize.y / 3;
+
+    const geometry = new THREE.PlaneGeometry(sizeX / 15000,
+      sizeY / 15000, 30, 30);
     const material = new THREE.MeshBasicMaterial({ color: 0xcad3eb });
     material.transparent = true;
     material.opacity = 0.15;
@@ -77,7 +87,7 @@ export default class ArZoomHandler {
     this.mainCamera.add(zoomBorderMesh);
 
     // Position just in front of camera
-    zoomBorderMesh.position.z = -0.2;
+    zoomBorderMesh.position.z = -0.1;
   }
 
   removeZoomIndicator() {

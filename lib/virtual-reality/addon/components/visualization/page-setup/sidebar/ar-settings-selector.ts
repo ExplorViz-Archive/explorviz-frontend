@@ -53,7 +53,8 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
   }
 
   @action
-  updateCommunication() {
+  updateCommunicationHeight(event: any) {
+    this.configuration.commCurveHeightMultiplier = Number.parseFloat(event.target.value);
     this.vrApplicationRenderer.updateCommunication();
   }
 

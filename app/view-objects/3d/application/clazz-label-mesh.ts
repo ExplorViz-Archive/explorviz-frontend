@@ -8,6 +8,10 @@ export default class ClazzLabelMesh extends LabelMesh {
     this.renderOrder = 1;
 
     this.computeLabel(labelText, size);
+
+    // Set label slightly transparent to avoid errors
+    // due to different render order (of transparent objects)
+    this.turnTransparent(0.99);
   }
 
   /**

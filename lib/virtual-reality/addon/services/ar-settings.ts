@@ -28,7 +28,7 @@ export default class ArSettings extends Service.extend({
     super(...arguments);
 
     this.landscapeOpacity = 0.9;
-    this.applicationOpacity = 1.0;
+    this.applicationOpacity = 0.9;
   }
 
   setLandscapeOpacity(opacity: number) {
@@ -49,8 +49,7 @@ export default class ArSettings extends Service.extend({
 
   updateApplicationOpacity() {
     this.vrApplicationRenderer.getOpenApplications().forEach((applicationObject3D) => {
-      applicationObject3D.setComponentMeshOpacity(this.applicationOpacity);
-      applicationObject3D.setCommunicationOpacity(this.applicationOpacity);
+      applicationObject3D.setOpacity(this.applicationOpacity);
     });
   }
 }
