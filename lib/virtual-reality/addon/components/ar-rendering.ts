@@ -253,8 +253,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.localUser.defaultCamera = new THREE.PerspectiveCamera();
     this.sceneService.scene.add(this.localUser.defaultCamera);
 
-    this.arZoomHandler = new ArZoomHandler(this.localUser.defaultCamera,
-      this.localUser.renderer, this.outerDiv);
+    this.arZoomHandler = new ArZoomHandler(this.localUser.defaultCamera, this.outerDiv,
+      this.arSettings);
   }
 
   private initCameraCrosshair() {
@@ -727,7 +727,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   render() {
     this.localUser.renderer.render(this.sceneService.scene, this.localUser.defaultCamera);
 
-    this.arZoomHandler?.renderZoomCamera(this.localUser.renderer, this.sceneService.scene);
+    this.arZoomHandler?.renderZoomCamera(this.localUser.renderer, this.sceneService.scene,
+      this.resize);
   }
 
   animate() {

@@ -53,6 +53,11 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
   }
 
   @action
+  updateZoomLevel(event: any) {
+    this.arSettings.zoomLevel = Number.parseFloat(event.target.value);
+  }
+
+  @action
   updateCommunicationWidth(event: any) {
     this.configuration.commWidthMultiplier = Number.parseFloat(event.target.value);
     this.vrApplicationRenderer.updateCommunication();

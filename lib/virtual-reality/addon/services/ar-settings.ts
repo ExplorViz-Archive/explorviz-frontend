@@ -24,6 +24,9 @@ export default class ArSettings extends Service.extend({
 
   sidebarWidthInPercent: number | undefined;
 
+  @tracked
+  zoomLevel = 3;
+
   constructor() {
     super(...arguments);
 
