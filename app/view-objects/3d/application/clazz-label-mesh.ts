@@ -5,6 +5,8 @@ export default class ClazzLabelMesh extends LabelMesh {
   constructor(font: THREE.Font, labelText: string, textColor = new THREE.Color('black'), size: number) {
     super(font, labelText, textColor);
 
+    this.renderOrder = 1;
+
     this.computeLabel(labelText, size);
   }
 
@@ -32,6 +34,9 @@ export default class ClazzLabelMesh extends LabelMesh {
       curveSegments: 1,
     });
 
-    this.material = new THREE.MeshBasicMaterial({ color: this.defaultColor });
+    this.material = new THREE.MeshBasicMaterial({
+      color: this.defaultColor,
+      depthTest: false,
+    });
   }
 }

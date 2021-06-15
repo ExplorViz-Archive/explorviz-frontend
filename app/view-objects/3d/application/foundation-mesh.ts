@@ -18,6 +18,8 @@ export default class FoundationMesh extends BoxMesh {
 
     this.setDefaultMaterial();
 
+    this.receiveShadow = true;
+
     const geometry = new THREE.BoxGeometry(1, 1, 1, widthSegments, 1, depthSegments);
     this.geometry = geometry;
 

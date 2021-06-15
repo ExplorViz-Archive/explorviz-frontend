@@ -9,7 +9,7 @@ import { getAncestorPackages, getClassesInPackage } from 'explorviz-frontend/uti
 
 export type DetailedInfo = {
   title: string,
-  entries: {key: string, value: string}[],
+  entries: { key: string, value: string }[],
 };
 
 // #region HELPER

@@ -144,19 +144,21 @@ export function addFoundationAndChildrenToApplication(applicationObject3D: Appli
  * @param applicationObject3D Object which shall contain all application meshes
  * @param applicationColors Object which defines the colors for different application entities
  */
-export function addGlobeToApplication(applicationObject3D: ApplicationObject3D) {
+export function addGlobeToApplication(appObject3D: ApplicationObject3D): THREE.Mesh {
   const geometry = new THREE.SphereGeometry(2.5, 15, 15);
   const texture = new THREE.TextureLoader().load('images/earth-map.jpg');
   const material = new THREE.MeshPhongMaterial({ map: texture });
-  // material.map = THREE.TextureLoader.loadTexture('images/earthmap1k.jpg');
   const mesh = new THREE.Mesh(geometry, material);
-  const applicationCenter = applicationObject3D.layout.center;
+  const applicationCenter = appObject3D.layout.center;
 
   const centerPoint = new THREE.Vector3(-5, 0, -5);
 
   centerPoint.sub(applicationCenter);
 
   mesh.position.copy(centerPoint);
+  // mesh.rotateY(-2.45);
 
-  applicationObject3D.add(mesh);
+  appObject3D.add(mesh);
+
+  return mesh;
 }

@@ -2,10 +2,10 @@ import { Object3D } from 'three';
 import BaseMenu from './base-menu';
 import TextItem from './items/text-item';
 
-type Message = {title: string, text?: string, color: string};
+type Message = { title: string, text?: string, color: string };
 
 export default class MessageBoxMenu extends BaseMenu {
-  messageQueue: {message: Message, time: number}[];
+  messageQueue: { message: Message, time: number }[];
 
   timeBetweenMessages: number;
 

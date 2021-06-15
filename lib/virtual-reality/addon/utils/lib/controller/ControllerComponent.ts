@@ -15,7 +15,7 @@ export type ComponentProperty = {
 export default class ControllerComponent {
   values: ComponentProperty;
 
-  gamepadIndices: {button: number, xAxis: number, yAxis: number};
+  gamepadIndices: { button: number, xAxis: number, yAxis: number };
 
   id: string;
 

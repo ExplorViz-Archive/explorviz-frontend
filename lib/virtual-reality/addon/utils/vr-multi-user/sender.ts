@@ -5,7 +5,7 @@ import {
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import VRController from '../vr-rendering/VRController';
 
-type Pose = {position: THREE.Vector3, quaternion: THREE.Quaternion};
+type Pose = { position: THREE.Vector3, quaternion: THREE.Quaternion };
 export default class Sender {
   webSocket: WebSocket;
 
