@@ -100,6 +100,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   animationFrameId = 0;
 
   // Used to register (mouse) events
+  @tracked
   hoveredObject: BaseMesh | null;
 
   drawableClassCommunications: DrawableClassCommunication[] = [];
@@ -255,17 +256,19 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   // #region MOUSE EVENT HANDLER
   @action
   handleSingleClick(intersection: THREE.Intersection | null) {
-    if (!intersection) return;
+    // User clicked on blank spot on the canvas
+    if (!intersection) {
+      this.popupData = null;
+      this.removeHighlighting();
+      return;
+    }
     const mesh = intersection.object;
     this.singleClickOnMesh(mesh);
   }
 
   @action
   singleClickOnMesh(mesh: THREE.Object3D) {
-    // User clicked on blank spot on the canvas
-    if (mesh === undefined) {
-      removeHighlighting(this.applicationObject3D);
-    } else if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
+    if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
       highlight(mesh, this.applicationObject3D, this.drawableClassCommunications);
     }
@@ -298,7 +301,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   handleMouseMove(intersection: THREE.Intersection | null) {
-    if (!intersection) return;
+    if (!intersection) {
+      if (this.hoveredObject) {
+        this.hoveredObject.resetHoverEffect();
+        this.hoveredObject = null;
+      }
+      this.popupData = null;
+      return;
+    }
     const mesh = intersection.object;
     this.mouseMoveOnMesh(mesh);
   }
@@ -337,11 +347,30 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.popupData = null;
   }
 
+  @action
+  handlePress(intersection: THREE.Intersection | null, mouseOnCanvas: Position2D) {
+    if (!intersection) {
+      this.popupData = null;
+      // open right click menu
+      return;
+    }
+
+    const mesh = intersection.object;
+    this.mouseStopOnMesh(mesh, mouseOnCanvas);
+  }
+
   /*   handleMouseEnter() {
   } */
   @action
   handleMouseStop(intersection: THREE.Intersection | null, mouseOnCanvas: Position2D) {
-    if (!intersection) return;
+    if (!intersection) {
+      if (this.hoveredObject) {
+        this.hoveredObject.resetHoverEffect();
+        this.hoveredObject = null;
+      }
+      this.popupData = null;
+      return;
+    }
     const mesh = intersection.object;
     this.mouseStopOnMesh(mesh, mouseOnCanvas);
   }
@@ -361,6 +390,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
+    this.popupData = null;
+
     const LEFT_MOUSE_BUTTON = 1;
     const RIGHT_MOUSE_BUTTON = 3;
 
@@ -380,6 +411,21 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.camera.position.x += xOffset;
       this.camera.position.y += yOffset;
     }
+  }
+
+  @action
+  handlePinch(delta: number) {
+    this.popupData = null;
+
+    const ZOOM_CORRECTION = Math.abs(this.camera.position.z);
+    // Change zoom depending on mouse wheel direction
+    this.camera.position.z -= delta * ZOOM_CORRECTION;
+  }
+
+  @action
+  handleRotate(delta: number, event: any) {
+    // Rotate object
+    this.applicationObject3D.rotation.y += THREE.MathUtils.degToRad(delta);
   }
 
   // #endregion MOUSE EVENT HANDLER

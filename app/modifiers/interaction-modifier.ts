@@ -20,10 +20,10 @@ type MouseStopEvent = {
 };
 
 interface InteractionModifierArgs {
-  positional: [],
+  positional: [];
   named: {
     mousePositionX: number,
-    camera: THREE.Camera,
+    camera: THREE.Camera;
     raycastObjects: Object3D | Object3D[],
     raycastFilter?: ((intersection: THREE.Intersection) => boolean) | null,
     hammerInteraction: HammerInteraction,
@@ -34,9 +34,10 @@ interface InteractionModifierArgs {
     mouseWheel?(delta: number): void,
     singleClick?(intersection: THREE.Intersection | null): void,
     doubleClick?(intersection: THREE.Intersection | null): void,
-    panning?(delta: { x: number, y: number }, button: 1 | 2 | 3): void;
-    rotate?(deltaRotation: number, event: any): void;
-    pinch?(deltaScaleInPercent: number, event: any): void;
+    panning?(delta: { x: number, y: number }, button: 1 | 2 | 3): void,
+    rotate?(deltaRotation: number, event: any): void,
+    pinch?(deltaScaleInPercent: number, event: any): void,
+    press?(intersection: THREE.Intersection | null, mousePosition: Position2D): void,
   }
 }
 
@@ -50,6 +51,15 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   @service('collaborative-settings-service')
   collaborativeSettings!: CollaborativeSettingsService;
 
+  // We use this variable to count how many steps the mouse was moved
+  // before an occurence of a single click.
+  // On mobile devices, tapping will result in a mousemove + mousestop event.
+  // Since we use the mousestop event in our rendering components to
+  // trigger the display of the popups, on mobile, any tap would trigger
+  // the display those popups. So we count actual movings of the mouse
+  // to know if it was actually being moved or if there was just a click.
+  mouseMoveSteps = 0;
+
   didInstall() {
     // mouseout handler for disabling notifications
     if (this.args.named.mouseOut) { this.canvas.addEventListener('mouseout', this.onMouseOut, false); }
@@ -62,6 +72,8 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
 
     // mouse move handler
     if (this.args.named.mouseMove) { this.canvas.addEventListener('mousemove', this.onMouseMove, false); }
+
+    this.canvas.addEventListener('click', this.onRegularClickEvent, false);
 
     if (this.args.named.mouseStop) {
       this.createMouseStopEvent();
@@ -86,6 +98,10 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
     if (this.args.named.singleClick) {
       this.hammerInteraction.on('lefttap', this.onSingleClick);
     }
+
+    if (this.args.named.press) {
+      this.hammerInteraction.on('press', this.onPress);
+    }
   }
 
   willDestroy() {
@@ -95,9 +111,11 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
 
     if (this.args.named.singleClick) { this.hammerInteraction.hammerManager.off('singletap'); }
 
-    if (this.args.named.singleClick) { this.hammerInteraction.hammerManager.off('pinch'); }
+    if (this.args.named.pinch) { this.hammerInteraction.hammerManager.off('pinch'); }
 
-    if (this.args.named.singleClick) { this.hammerInteraction.hammerManager.off('rotate'); }
+    if (this.args.named.rotate) { this.hammerInteraction.hammerManager.off('rotate'); }
+
+    if (this.args.named.press) { this.hammerInteraction.hammerManager.off('press'); }
 
     if (this.args.named.mouseOut) { this.canvas.removeEventListener('mouseout', this.onMouseOut); }
 
@@ -108,6 +126,8 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
     if (this.args.named.mouseMove) { this.canvas.removeEventListener('mousemove', this.onMouseMove); }
 
     if (this.args.named.mouseStop) { this.canvas.removeEventListener('mousestop', this.onMouseStop); }
+
+    this.canvas.removeEventListener('click', this.onRegularClickEvent);
   }
 
   get canvas(): HTMLCanvasElement {
@@ -171,6 +191,12 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   onMouseMove(evt: MouseEvent) {
     if (!this.args.named.mouseMove || !this.collaborativeSettings.isInteractionAllowed) { return; }
 
+    this.mouseMoveSteps++;
+
+    if (this.mouseMoveSteps < 2) {
+      return;
+    }
+
     // Extract mouse position
     const mouse: Position2D = InteractionModifierModifier.getMousePos(this.canvas, evt);
 
@@ -188,6 +214,13 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   @action
   onMouseStop(evt: CustomEvent<MouseStopEvent>) {
     if (!this.args.named.mouseStop || !this.collaborativeSettings.isInteractionAllowed) { return; }
+
+    if (this.mouseMoveSteps < 2) {
+      this.mouseMoveSteps = 0;
+      return;
+    }
+
+    this.mouseMoveSteps = 0;
 
     // Extract mouse position
     const mouse: Position2D = InteractionModifierModifier
@@ -240,6 +273,25 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
       && this.collaborativeSettings.meeting) {
       this.collaborativeService.sendDoubleClick(intersectedViewObj.object);
     }
+  }
+
+  @action
+  onRegularClickEvent() {
+    this.mouseMoveSteps = 0;
+  }
+
+  @action
+  onPress(mouse: Position2D) {
+    if (!this.args.named.press || !this.collaborativeSettings.isInteractionAllowed) { return; }
+
+    const intersectedViewObj = this.raycast(mouse);
+    this.args.named.press(intersectedViewObj, mouse);
+
+    // Send press event here?
+    /*     if (intersectedViewObj && intersectedViewObj.object instanceof Mesh
+      && this.collaborativeSettings.meeting) {
+      this.collaborativeService.sendSingleClick(intersectedViewObj.object);
+    } */
   }
 
   @action

@@ -15,7 +15,7 @@
       {{did-resize this.resize debounce=100}}
     >
       <canvas
-        class="main-content-majority {{if this.hoverHandler.hoveredEntityObj "pointer-cursor"}}"
+        class="main-content-majority {{if this.hoveredObject "pointer-cursor"}}"
         {{interaction-modifier
           raycastObjects=this.applicationObject3D
           camera=this.camera
@@ -27,6 +27,9 @@
           mouseOut=this.handleMouseOut
           mouseStop=this.handleMouseStop
           panning=this.handlePanning
+          rotate=this.handleRotate
+          pinch=this.handlePinch
+          press=this.handlePress
         }}
         {{collaborative-modifier
           raycastObject3D=this.applicationObject3D

@@ -119,7 +119,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   readonly imageLoader: ImageLoader = new ImageLoader();
 
-  hoveredObject: BaseMesh|null = null;
+  @tracked
+  hoveredObject: BaseMesh | null = null;
 
   get rightClickMenuItems() {
     const pauseItemtitle = this.args.visualizationPaused ? 'Resume Visualization' : 'Pause Visualization';
@@ -578,6 +579,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   // #endregion SCENE MANIPULATION
 
   // #region MOUSE EVENT HANDLER
+  @action
+  handleSingleClick(intersection: THREE.Intersection | null) {
+    // User clicked on blank spot on the canvas
+    if (!intersection) {
+      this.popupData = null;
+    }
+  }
 
   @action
   handleDoubleClick(intersection: THREE.Intersection | null) {
@@ -598,6 +606,8 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
+    this.popupData = null;
+
     const LEFT_MOUSE_BUTTON = 1;
 
     if (button === LEFT_MOUSE_BUTTON) {
@@ -612,6 +622,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
       this.camera.position.x += xOffset;
       this.camera.position.y += yOffset;
     }
+  }
+
+  @action
+  handlePinch(delta: number) {
+    this.popupData = null;
+
+    this.handleMouseWheel(-delta * 2);
   }
 
   @action
@@ -631,7 +648,14 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   handleMouseMove(intersection: THREE.Intersection | null) {
-    if (!intersection) return;
+    if (!intersection) {
+      if (this.hoveredObject) {
+        this.hoveredObject.resetHoverEffect();
+        this.hoveredObject = null;
+      }
+      this.popupData = null;
+      return;
+    }
     const mesh = intersection.object;
     this.mouseMoveOnMesh(mesh);
   }
@@ -666,8 +690,27 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   } */
 
   @action
+  handlePress(intersection: THREE.Intersection | null, mouseOnCanvas: Position2D) {
+    if (!intersection) {
+      this.popupData = null;
+      // open right click menu
+      return;
+    }
+
+    const mesh = intersection.object;
+    this.mouseStopOnMesh(mesh, mouseOnCanvas);
+  }
+
+  @action
   handleMouseStop(intersection: THREE.Intersection | null, mouseOnCanvas: Position2D) {
-    if (!intersection) return;
+    if (!intersection) {
+      if (this.hoveredObject) {
+        this.hoveredObject.resetHoverEffect();
+        this.hoveredObject = null;
+      }
+      this.popupData = null;
+      return;
+    }
     const mesh = intersection.object;
 
     this.mouseStopOnMesh(mesh, mouseOnCanvas);
