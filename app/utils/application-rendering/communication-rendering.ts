@@ -10,8 +10,11 @@ export default class CommunicationRendering {
   // Service to access color preferences
   configuration: Configuration;
 
+  transparent: boolean;
+
   constructor(configuration: Configuration) {
     this.configuration = configuration;
+    this.transparent = false;
   }
 
   private computeCurveHeight(commLayout: CommunicationLayout) {
@@ -88,6 +91,10 @@ export default class CommunicationRendering {
       applicationObject3D.add(pipe);
 
       this.addArrows(pipe, curveHeight, viewCenterPoint);
+
+      if (this.transparent) {
+        pipe.turnTransparent(0.0);
+      }
     });
   }
 }

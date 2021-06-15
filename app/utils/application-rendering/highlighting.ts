@@ -68,7 +68,12 @@ export function turnComponentAndAncestorsTransparent(component: Package,
  */
 export function highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMesh,
   applicationObject3D: ApplicationObject3D, communication: DrawableClassCommunication[],
-  toggleHighlighting = true) {
+  toggleHighlighting = true, ignoreCommuLines = false) {
+  if (ignoreCommuLines && mesh instanceof ClazzCommunicationMesh) {
+    // do nothing
+    return;
+  }
+
   // Reset highlighting if highlighted mesh is clicked
   if (mesh.highlighted && toggleHighlighting) {
     removeHighlighting(applicationObject3D);
