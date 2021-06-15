@@ -223,6 +223,8 @@ export default class HammerInteraction extends Object.extend(Evented) {
         return;
       }
 
+      console.log('asd');
+
       const mousePosition = InteractionModifierModifier.getMousePos(canvas, evt.srcEvent);
 
       if (evt.button === 1) {
@@ -250,17 +252,20 @@ export default class HammerInteraction extends Object.extend(Evented) {
     */
 
     hammer.on('pinchstart', (evt) => {
+      console.log('pinchstart');
       lastPinchScale = evt.scale;
       self.trigger('pinchstart', evt);
     });
 
     hammer.on('pinchmove', (evt) => {
+      console.log('pinchmove');
       const deltaScaleInPercent = (evt.scale - lastPinchScale) / lastPinchScale;
       lastPinchScale = evt.scale;
       self.trigger('pinch', deltaScaleInPercent, evt);
     });
 
     hammer.on('pinchend', (evt) => {
+      console.log('pinchend');
       lastPinchScale = 1;
       self.trigger('pinchend', evt);
     });
@@ -270,19 +275,24 @@ export default class HammerInteraction extends Object.extend(Evented) {
     */
 
     hammer.on('rotatestart', (evt) => {
+      console.log('rotatestart');
       lastRotation = evt.rotation;
       self.trigger('rotatestart', evt);
     });
 
     hammer.on('rotate', (evt) => {
+      console.log('rotate');
       // Difference in rotation between rotate events (in degrees)
       const deltaRotation = lastRotation - evt.rotation;
       lastRotation = evt.rotation;
+
+      console.log(deltaRotation);
 
       self.trigger('rotate', deltaRotation, evt);
     });
 
     hammer.on('rotateend', (evt) => {
+      console.log('rotateend');
       lastRotation = 0;
       self.trigger('rotateend', evt);
     });

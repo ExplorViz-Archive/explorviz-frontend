@@ -35,6 +35,8 @@ interface InteractionModifierArgs {
     singleClick?(intersection: THREE.Intersection | null): void,
     doubleClick?(intersection: THREE.Intersection | null): void,
     panning?(delta: { x: number, y: number }, button: 1 | 2 | 3): void;
+    rotate?(deltaRotation: number, event: any): void;
+    pinch?(deltaScaleInPercent: number, event: any): void;
   }
 }
 
@@ -73,6 +75,14 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
       this.hammerInteraction.on('panning', this.onPanning);
     }
 
+    if (this.args.named.pinch) {
+      this.hammerInteraction.on('pinch', this.onPinch);
+    }
+
+    if (this.args.named.rotate) {
+      this.hammerInteraction.on('rotate', this.onRotate);
+    }
+
     if (this.args.named.singleClick) {
       this.hammerInteraction.on('lefttap', this.onSingleClick);
     }
@@ -84,6 +94,10 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
     if (this.args.named.panning) { this.hammerInteraction.hammerManager.off('panning'); }
 
     if (this.args.named.singleClick) { this.hammerInteraction.hammerManager.off('singletap'); }
+
+    if (this.args.named.singleClick) { this.hammerInteraction.hammerManager.off('pinch'); }
+
+    if (this.args.named.singleClick) { this.hammerInteraction.hammerManager.off('rotate'); }
 
     if (this.args.named.mouseOut) { this.canvas.removeEventListener('mouseout', this.onMouseOut); }
 
@@ -233,6 +247,22 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
     if (!this.args.named.panning || !this.collaborativeSettings.isInteractionAllowed) { return; }
 
     this.args.named.panning(delta, event.button);
+    this.sendPerspective();
+  }
+
+  @action
+  onRotate(deltaRotation: number, event: any) {
+    if (!this.args.named.rotate || !this.collaborativeSettings.isInteractionAllowed) { return; }
+
+    this.args.named.rotate(deltaRotation, event);
+    this.sendPerspective();
+  }
+
+  @action
+  onPinch(deltaScaleInPercent: number, event: any) {
+    if (!this.args.named.pinch || !this.collaborativeSettings.isInteractionAllowed) { return; }
+
+    this.args.named.pinch(deltaScaleInPercent, event);
     this.sendPerspective();
   }
 
