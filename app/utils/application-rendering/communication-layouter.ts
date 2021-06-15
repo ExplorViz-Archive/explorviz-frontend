@@ -36,62 +36,27 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
       return requestsList;
     }
 
-    /**
-     * Generates four default categories (0, min, average, max)
-     * for rendering (thickness of communication lines)
-     *
-     * @param requestsList A list with all existing request sizes
-     */
-    function calculateCategories(requestsList: number[]) {
-      const MIN = Math.min(...requestsList);
-      const AVERAGE = requestsList.length > 0
-        ? requestsList.reduce((a, b) => a + b) / requestsList.length : Infinity;
-      const MAX = Math.max(...requestsList);
-      const categories = [0, MIN, AVERAGE, MAX];
-
-      return categories;
-    }
-
-    /**
-     * Retrieves a matching category for a specific clazzCommunication
-     *
-     * @param numOfRequests Number to compare with given categories
-     * @param categories Contains numbers which act as thresholds for category assignment
-     */
-    function getMatchingCategory(numOfRequests: number, categories: number[]) {
-      // default category = lowest category
-      let calculatedCategory = 0;
-
-      for (let i = 0; i < categories.length; i++) {
-        if (numOfRequests >= categories[i]) {
-          calculatedCategory = i;
-        } else {
-          break;
-        }
-      }
-
-      return calculatedCategory;
-    }
-
     // Constant factors for rendering communication lines (pipes)
-    const PIPE_SIZE_EACH_STEP = 0.15;
-    // Minimum pipe size which is applied for request category 0
-    const PIPE_SIZE_DEFAULT = 0.1;
+    const LINE_THICKNESS_FACTOR = 0.5;
 
     const requestsList = gatherRequestsIntoList();
-    const categories = calculateCategories(requestsList);
+
+    const minRequests = Math.min(...requestsList);
+    const maximumRequests = Math.max(...requestsList);
 
     drawableClassCommunications.forEach((clazzCommunication) => {
       const maybeCommunicationLayout = layoutMap.get(clazzCommunication.id);
 
       if (maybeCommunicationLayout) {
-        // Contains a number from 0 to 3 (category) depending on the number of requests
-        const calculatedCategory = getMatchingCategory(clazzCommunication.totalRequests,
-          categories);
+        // normalize request count to [0, 1] interval
+        let range = maximumRequests - minRequests;
+        let normalizedRequests = (clazzCommunication.totalRequests - minRequests) / range;
+        // normalize request count to [0.2, 1] interval
+        range = 1 - 0.2;
+        normalizedRequests = normalizedRequests * range + 0.2;
 
         // Apply line thickness depending on calculated request category
-        maybeCommunicationLayout.lineThickness = (calculatedCategory * PIPE_SIZE_EACH_STEP)
-               + PIPE_SIZE_DEFAULT;
+        maybeCommunicationLayout.lineThickness = (normalizedRequests * LINE_THICKNESS_FACTOR);
       }
     });
   } // END calculatePipeSizeFromQuantiles
@@ -122,7 +87,7 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
     const sourceClassComponents: Package[] = [];
     const { sourceClass } = communication;
     if (sourceClass !== null) {
-      let parentComponent: Package|undefined = sourceClass.parent;
+      let parentComponent: Package | undefined = sourceClass.parent;
       while (parentComponent !== undefined) {
         sourceClassComponents.unshift(parentComponent);
         parentComponent = parentComponent.parent;
@@ -133,7 +98,7 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
     const targetClassComponents: Package[] = [];
     const { targetClass } = communication;
     if (targetClass !== null) {
-      let parentComponent: Package|undefined = targetClass.parent;
+      let parentComponent: Package | undefined = targetClass.parent;
       while (parentComponent !== undefined) {
         targetClassComponents.unshift(parentComponent);
         parentComponent = parentComponent.parent;
@@ -141,7 +106,7 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
     }
 
     // Find the most inner common component
-    let commonComponent: Package|null = null;
+    let commonComponent: Package | null = null;
     for (let i = 0; i < sourceClassComponents.length && i < targetClassComponents.length; i++) {
       if (sourceClassComponents[i] === targetClassComponents[i]) {
         commonComponent = sourceClassComponents[i];
@@ -176,8 +141,8 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
 
       if ((parentMesh instanceof ComponentMesh && parentMesh.opened)
       || parentMesh instanceof FoundationMesh) {
-        let sourceEntity: any = null;
-        let targetEntity: any = null;
+        let sourceEntity: Class | Package | null = null;
+        let targetEntity: Class | Package | null = null;
 
         const sourceClazz = classCommunication.sourceClass;
         const targetClazz = classCommunication.targetClass;
@@ -204,23 +169,21 @@ export default function applyCommunicationLayout(applicationObject3D: Applicatio
           targetEntity = findFirstOpenOrLastClosedAncestorComponent(targetParent);
         }
 
-        if (sourceEntity !== targetEntity) {
-          const commLayout = new CommunicationLayout(classCommunication);
-          layoutMap.set(classCommunication.id, commLayout);
+        const commLayout = new CommunicationLayout(classCommunication);
+        layoutMap.set(classCommunication.id, commLayout);
 
-          const sourceLayout = boxLayoutMap.get(sourceEntity.id);
-          if (sourceLayout) {
-            commLayout.startX = sourceLayout.positionX + sourceLayout.width / 2.0;
-            commLayout.startY = sourceLayout.positionY;
-            commLayout.startZ = sourceLayout.positionZ + sourceLayout.depth / 2.0;
-          }
+        const sourceLayout = boxLayoutMap.get(sourceEntity.id);
+        if (sourceLayout) {
+          commLayout.startX = sourceLayout.positionX + sourceLayout.width / 2.0;
+          commLayout.startY = sourceLayout.positionY;
+          commLayout.startZ = sourceLayout.positionZ + sourceLayout.depth / 2.0;
+        }
 
-          const targetLayout = boxLayoutMap.get(targetEntity.id);
-          if (targetLayout) {
-            commLayout.endX = targetLayout.positionX + targetLayout.width / 2.0;
-            commLayout.endY = targetLayout.positionY + 0.05;
-            commLayout.endZ = targetLayout.positionZ + targetLayout.depth / 2.0;
-          }
+        const targetLayout = boxLayoutMap.get(targetEntity.id);
+        if (targetLayout) {
+          commLayout.endX = targetLayout.positionX + targetLayout.width / 2.0;
+          commLayout.endY = targetLayout.positionY + 0.05;
+          commLayout.endZ = targetLayout.positionZ + targetLayout.depth / 2.0;
         }
       }
     }

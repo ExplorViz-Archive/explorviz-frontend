@@ -178,7 +178,7 @@ export default class VrMultiUser extends VrRendering {
     this.localUser.setControlsAccordingToHand();
 
     // Prepare update message for other users
-    let connect: {controller1?: string, controller2?: string};
+    let connect: { controller1?: string, controller2?: string };
     if (controller === this.localUser.controller1) {
       connect = { controller1: controller.gamepadId };
     } else {
@@ -195,7 +195,7 @@ export default class VrMultiUser extends VrRendering {
     // Avoid that user could get stuck in spectate view
     this.spectateUser.deactivate();
 
-    let disconnect: {controller1?: string, controller2?: string};
+    let disconnect: { controller1?: string, controller2?: string };
 
     if (controller === this.localUser.controller1) {
       disconnect = { controller1: controller.gamepadId };
@@ -657,8 +657,8 @@ export default class VrMultiUser extends VrRendering {
       return;
     }
 
-    let controller: THREE.Object3D|null = null;
-    let ray: THREE.Object3D|null = null;
+    let controller: THREE.Object3D | null = null;
+    let ray: THREE.Object3D | null = null;
 
     if (update.isGrabbedByController1 && remoteUser.controller1) {
       controller = remoteUser.controller1.model;
@@ -807,7 +807,7 @@ export default class VrMultiUser extends VrRendering {
 
   sendInitialControllerConnectState() {
     if (this.localUser.isOnline) {
-      const connect: {controller1?: string, controller2?: string} = {};
+      const connect: { controller1?: string, controller2?: string } = {};
       if (this.localUser.controller1?.connected) {
         connect.controller1 = this.localUser.controller1.gamepadId;
       }

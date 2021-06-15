@@ -14,17 +14,17 @@ import { Constants } from './motion-controllers.module';
  * interpolating between the range of motion nodes.
  */
 export default class VisualResponse {
-  value: number|boolean|undefined;
+  value: number | boolean | undefined;
 
-  minNode: Object3D|undefined;
+  minNode: Object3D | undefined;
 
-  minNodeName: string|undefined;
+  minNodeName: string | undefined;
 
-  maxNode: Object|undefined;
+  maxNode: Object | undefined;
 
-  valueNode: Object3D|undefined;
+  valueNode: Object3D | undefined;
 
-  maxNodeName: string|undefined;
+  maxNodeName: string | undefined;
 
   valueNodeName: string;
 
@@ -97,7 +97,12 @@ export default class VisualResponse {
    */
   updateFromComponent({
     xAxis, yAxis, button, state,
-  }: {xAxis: number|undefined, yAxis: number|undefined, button: number|undefined, state: string}) {
+  }: {
+    xAxis: number | undefined,
+    yAxis: number | undefined,
+    button: number | undefined,
+    state: string
+  }) {
     const { normalizedXAxis, normalizedYAxis } = VisualResponse.normalizeAxes(xAxis, yAxis);
     switch (this.componentProperty) {
       case Constants.ComponentProperty.X_AXIS:

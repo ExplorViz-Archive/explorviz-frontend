@@ -20,6 +20,8 @@ export default class ComponentMesh extends BoxMesh {
     highlightingColor: THREE.Color) {
     super(layout, defaultColor, highlightingColor);
 
+    this.receiveShadow = true;
+
     const material = new THREE.MeshLambertMaterial({ color: defaultColor });
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     this.geometry = geometry;

@@ -45,7 +45,7 @@ export const controlMode = Object.freeze({
 export default class VRController extends BaseMesh {
   gamepadIndex: number;
 
-  gamepad: Gamepad|null = null;
+  gamepad: Gamepad | null = null;
 
   control: string;
 
@@ -67,13 +67,13 @@ export default class VRController extends BaseMesh {
 
   raySpace: THREE.Group;
 
-  ray: THREE.Line|null = null;
+  ray: THREE.Line | null = null;
 
   controllerModel: XRControllerModel;
 
-  motionController: MotionController|null;
+  motionController: MotionController | null;
 
-  intersectedObject: THREE.Intersection|null = null;
+  intersectedObject: THREE.Intersection | null = null;
 
   raycaster: THREE.Raycaster;
 
@@ -81,11 +81,11 @@ export default class VRController extends BaseMesh {
 
   intersectableObjects: THREE.Object3D[] = [];
 
-  grabbedObject: THREE.Object3D|null = null;
+  grabbedObject: THREE.Object3D | null = null;
 
-  grabbedObjectParent: THREE.Object3D|null = null;
+  grabbedObjectParent: THREE.Object3D | null = null;
 
-  teleportArea: TeleportMesh|null = null;
+  teleportArea: TeleportMesh | null = null;
 
   connected = false;
 

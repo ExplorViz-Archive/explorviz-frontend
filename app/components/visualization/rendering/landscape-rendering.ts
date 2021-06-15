@@ -119,7 +119,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   readonly imageLoader: ImageLoader = new ImageLoader();
 
-  hoveredObject: BaseMesh|null = null;
+  hoveredObject: BaseMesh | null = null;
 
   get rightClickMenuItems() {
     const pauseItemtitle = this.args.visualizationPaused ? 'Resume Visualization' : 'Pause Visualization';
@@ -248,9 +248,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    * Creates a DirectionalLight and adds it to the scene
    */
   initLights() {
-    const dirLight = new THREE.DirectionalLight();
-    dirLight.position.set(30, 10, 20);
-    this.scene.add(dirLight);
     this.debug('Lights added');
   }
 

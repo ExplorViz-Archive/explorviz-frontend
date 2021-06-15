@@ -13,7 +13,7 @@ export default class HintMenu extends BaseMenu {
   counter: number;
 
   constructor(parent: THREE.Object3D, title: string,
-    text: string|null = null, blinks = 2) {
+    text: string | null = null, blinks = 2) {
     super({ width: 512, height: 128 }, '#002e4f');
 
     this.blinks = blinks;

@@ -10,7 +10,7 @@ export function calculateDuration(span: Span): number;
  * Returns the trace's total duration in nanoseconds
  */
 export function calculateDuration(trace: Trace): number;
-export function calculateDuration(traceOrSpan: Trace|Span) {
+export function calculateDuration(traceOrSpan: Trace | Span) {
   return traceOrSpan.endTime - traceOrSpan.startTime;
 }
 

@@ -7,7 +7,7 @@ type Controller = {
   quaternion: THREE.Quaternion,
   model: THREE.Object3D,
   ray: THREE.Object3D,
-} |undefined;
+} | undefined;
 
 type Camera = {
   position: THREE.Vector3,
@@ -30,7 +30,7 @@ export default class RemoteVrUser extends THREE.Object3D {
 
   color!: THREE.Color; // [r,g,b], r,g,b = 0,...,255
 
-  nameTag: NameTagMesh|undefined;
+  nameTag: NameTagMesh | undefined;
 
   initCamera(obj: THREE.Object3D) {
     this.camera = {
@@ -42,7 +42,7 @@ export default class RemoteVrUser extends THREE.Object3D {
     this.add(this.camera.model);
   }
 
-  initController1(name: string, controllerModel: THREE.Object3D|undefined) {
+  initController1(name: string, controllerModel: THREE.Object3D | undefined) {
     if (!controllerModel) return;
 
     this.removeController1();
@@ -138,7 +138,7 @@ export default class RemoteVrUser extends THREE.Object3D {
    *
    * @param Object containing the new camera position and quaterion.
    */
-  updateCamera(camera: {position: number[], quaternion: number[]}) {
+  updateCamera(camera: { position: number[], quaternion: number[] }) {
     if (this.camera) {
       camera.position[1] -= 0.01;
 
@@ -154,7 +154,7 @@ export default class RemoteVrUser extends THREE.Object3D {
    *
    * @param Object containing the new controller1 position and quaterion.
    */
-  updateController1(controller: {position: number[], quaternion: number[]}) {
+  updateController1(controller: { position: number[], quaternion: number[] }) {
     if (this.controller1) {
       this.controller1.position.fromArray(controller.position);
       this.controller1.quaternion.fromArray(controller.quaternion);
@@ -168,7 +168,7 @@ export default class RemoteVrUser extends THREE.Object3D {
    *
    * @param Object containing the new controller2 position and quaterion.
    */
-  updateController2(controller: {position: number[], quaternion: number[]}) {
+  updateController2(controller: { position: number[], quaternion: number[] }) {
     if (this.controller2) {
       this.controller2.position.fromArray(controller.position);
       this.controller2.quaternion.fromArray(controller.quaternion);

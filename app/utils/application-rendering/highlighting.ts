@@ -161,7 +161,7 @@ export function highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMe
  * @param entity Component or clazz of which the corresponding mesh shall be highlighted
  * @param applicationObject3D Application mesh which contains the entity
  */
-export function highlightModel(entity: Package|Class, applicationObject3D: ApplicationObject3D,
+export function highlightModel(entity: Package | Class, applicationObject3D: ApplicationObject3D,
   communication: DrawableClassCommunication[]) {
   const mesh = applicationObject3D.getBoxMeshbyModelId(entity.id);
   if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh) {
@@ -191,7 +191,7 @@ export function highlightTrace(trace: Trace, traceStep: string,
 
   const involvedClazzes = new Set<Class>();
 
-  let highlightedSpan: Span|undefined;
+  let highlightedSpan: Span | undefined;
 
   const hashCodeToClassMap = getHashCodeToClassMap(landscapeStructureData);
 
@@ -207,7 +207,7 @@ export function highlightTrace(trace: Trace, traceStep: string,
   }
 
   // get both classes involved in the procedure call of the highlighted span
-  let highlightedSpanParentClass: Class|undefined;
+  let highlightedSpanParentClass: Class | undefined;
   const highlightedSpanClass = hashCodeToClassMap.get(highlightedSpan.hashCode);
   trace.spanList.forEach((span) => {
     if (highlightedSpan === undefined) {

@@ -12,7 +12,7 @@ export default abstract class BaseMenu extends BaseMesh {
 
   color: string;
 
-  lastHoveredItem: InteractiveItem|undefined;
+  lastHoveredItem: InteractiveItem | undefined;
 
   get opacity() {
     const material = this.material as THREE.Material;
@@ -76,7 +76,7 @@ export default abstract class BaseMenu extends BaseMesh {
   }
 
   hover(uv: THREE.Vector2) {
-    const item = this.getItem(uv) as InteractiveItem|undefined;
+    const item = this.getItem(uv) as InteractiveItem | undefined;
 
     if (this.lastHoveredItem && !item) {
       this.lastHoveredItem.resetHoverEffect();
@@ -106,7 +106,7 @@ export default abstract class BaseMenu extends BaseMesh {
   }
 
   triggerDown(uv: THREE.Vector2) {
-    const item = this.getItem(uv) as InteractiveItem|undefined;
+    const item = this.getItem(uv) as InteractiveItem | undefined;
 
     if (item && item.onTriggerDown) {
       item.onTriggerDown();
@@ -114,7 +114,7 @@ export default abstract class BaseMenu extends BaseMesh {
   }
 
   triggerPress(uv: THREE.Vector2, value: number) {
-    const item = this.getItem(uv) as InteractiveItem|undefined;
+    const item = this.getItem(uv) as InteractiveItem | undefined;
 
     if (item && item.onTriggerPressed) {
       item.onTriggerPressed(value);

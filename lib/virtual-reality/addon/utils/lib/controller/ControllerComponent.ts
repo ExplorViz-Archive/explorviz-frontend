@@ -6,16 +6,16 @@ import VisualResponse from './VisualResponse';
 import { Constants } from './motion-controllers.module';
 
 export type ComponentProperty = {
-  button: number|undefined,
-  xAxis: number|undefined,
-  yAxis: number|undefined,
+  button: number | undefined,
+  xAxis: number | undefined,
+  yAxis: number | undefined,
   state: string;
 };
 
 export default class ControllerComponent {
   values: ComponentProperty;
 
-  gamepadIndices: {button: number, xAxis: number, yAxis: number};
+  gamepadIndices: { button: number, xAxis: number, yAxis: number };
 
   id: string;
 
@@ -72,7 +72,7 @@ export default class ControllerComponent {
    * @description Poll for updated data based on current gamepad state
    * @param {Object} gamepad - The gamepad object from which the component data should be polled
    */
-  updateFromGamepad(gamepad: Gamepad|undefined) {
+  updateFromGamepad(gamepad: Gamepad | undefined) {
     if (!gamepad) return;
 
     // Set the state to default before processing other data sources
