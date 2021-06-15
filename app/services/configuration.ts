@@ -131,20 +131,20 @@ export default class Configuration extends Service {
 
   applyColorSchemeByName(colorScheme: string | null) {
     switch (colorScheme) {
-      case 'default':
-        this.applyDefaultColors();
-        break;
       case 'classic':
         this.applyClassicColors();
         break;
-      case 'impaired':
-        this.applyVisuallyImpairedColors();
+      case 'pastel':
+        this.applyPastelColors();
+        break;
+      case 'blue':
+        this.applyBlueColors();
         break;
       case 'dark':
         this.applyDarkColors();
         break;
       default:
-        this.applyDefaultColors(false);
+        this.applyClassicColors(false);
     }
   }
 
@@ -160,7 +160,7 @@ export default class Configuration extends Service {
      * Sets color values to default mode.
      * Triggers update of color configuration and colors of current view.
      */
-  applyDefaultColors(persist = true) {
+  applyPastelColors(persist = true) {
     const { landscapeColors } = this;
 
     landscapeColors.system.set('#c7c7c7'); // grey
@@ -192,7 +192,7 @@ export default class Configuration extends Service {
     this.updateView();
 
     if (persist) {
-      localStorage.setItem('colorScheme', 'default');
+      localStorage.setItem('colorScheme', 'pastel');
     }
   }
 
@@ -239,7 +239,7 @@ export default class Configuration extends Service {
      * Updates color values such that they better suit visually impaired users.
      * Triggers update of color configuration and colors of current view.
      */
-  applyVisuallyImpairedColors(persist = true) {
+  applyBlueColors(persist = true) {
     const { landscapeColors } = this;
 
     landscapeColors.system.set('#c7c7c7'); // grey
@@ -270,7 +270,7 @@ export default class Configuration extends Service {
     this.updateView();
 
     if (persist) {
-      localStorage.setItem('colorScheme', 'impaired');
+      localStorage.setItem('colorScheme', 'blue');
     }
   }
 

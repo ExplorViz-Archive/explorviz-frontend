@@ -12,9 +12,9 @@ export default class ColorSchemeSelector extends Component<ColorSchemeSelectorAr
   configuration!: Configuration;
 
   colorSchemes = [
-    { name: 'Default', identifier: 'default' },
-    { name: 'Vision Impairment', identifier: 'impaired' },
     { name: 'Classic (Initial)', identifier: 'classic' },
+    { name: 'Pastel', identifier: 'pastel' },
+    { name: 'Blue', identifier: 'blue' },
     { name: 'Dark', identifier: 'dark' },
   ];
 
