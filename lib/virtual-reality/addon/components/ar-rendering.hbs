@@ -142,11 +142,12 @@
     </div>
   </div>
   {{#if @showDataSelection}}
-    <div class="position-absolute right col-8" style="max-width: 750px;" id="dataselection">
+    <div class="position-absolute right col-8" id="dataselection">
       <div class="mt-6 d-flex flex-row w-100">
         <SidebarResizer/>
         <Visualization::PageSetup::Sidebar::DataSelection
           @closeDataSelection={{@closeDataSelection}}
+          @disableBackToLandscape={{true}}
         >
           <div class="explorviz-visualization-navbar">
             <ul class="nav justify-content-center">

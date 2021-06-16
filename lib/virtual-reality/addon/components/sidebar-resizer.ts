@@ -28,7 +28,7 @@ export default class SidebarResizer extends Component<SidebarResizerArgs> {
     function setSidebarWidth(widthInPercent: number) {
       const sidebar = document.getElementById('dataselection');
 
-      if (sidebar && widthInPercent > 20 && widthInPercent < 90) {
+      if (sidebar && widthInPercent > 20) {
         sidebar.style.maxWidth = `${widthInPercent}%`;
         self.settings.sidebarWidthInPercent = widthInPercent;
       }
