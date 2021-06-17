@@ -1,6 +1,8 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
+import { inject as service } from '@ember/service';
 import { Application, Class, Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import ArSettings from 'virtual-reality/services/ar-settings';
 
 interface PopupWrapperArgs {
   popupData: {
@@ -16,6 +18,9 @@ interface PopupWrapperArgs {
 }
 
 export default class PopupWrapper extends Component<PopupWrapperArgs> {
+  @service('ar-settings')
+  arSettings!: ArSettings;
+
   isPinned = false;
 
   divElement: HTMLElement | undefined;
@@ -26,6 +31,10 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
     this.dragElement(element);
 
     this.setupPosition(element);
+
+    if (this.arSettings.stackPopups) {
+      this.args.keepPopupOpen(this.args.popupData.id);
+    }
   }
 
   @action
@@ -92,6 +101,8 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
     /* eslint-disable no-param-reassign */
     popoverDiv.style.top = `${popupTopPosition}px`;
     popoverDiv.style.left = `${popupLeftPosition}px`;
+
+    this.args.setPopupPosition(this.args.popupData.id, popupLeftPosition, popupTopPosition);
   }
 
   dragElement(elmnt: HTMLElement) {

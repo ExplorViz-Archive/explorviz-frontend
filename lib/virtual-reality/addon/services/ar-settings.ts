@@ -27,6 +27,9 @@ export default class ArSettings extends Service.extend({
   @tracked
   zoomLevel = 3;
 
+  @tracked
+  stackPopups = false;
+
   constructor() {
     super(...arguments);
 

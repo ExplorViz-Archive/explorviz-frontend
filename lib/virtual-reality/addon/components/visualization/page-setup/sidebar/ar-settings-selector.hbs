@@ -130,20 +130,6 @@
           <div class="arSliderLabel">{{this.arSettings.applicationOpacity}}</div>
         </div>
       </div>
-
-      <div class="arSettingsPropertyContainer">
-        <label for="zoomLevelRange" class="form-label">Zoom Level</label>
-        <div class="arSettingsSliderContainer">
-          <Input
-              id="zoomLevelRange"
-              @type="range"
-              @value={{this.arSettings.zoomLevel}}
-              class="form-range" min="1.25" max="5.0" step="0.25"
-              {{on "input" this.updateZoomLevel}}
-          />
-          <div class="arSliderLabel">{{this.arSettings.zoomLevel}}</div>
-        </div>
-      </div>
     </div>
 
     <div id="buttonSettingsContainer" class="arSettingsGridItem">
@@ -172,6 +158,33 @@
               {{on "input" this.updateButtonSpacing}}
           />
           <div class="arSliderLabel">{{this.buttonPadding}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="miscSettingsContainer" class="arSettingsGridItem">
+      <div class="arSettingsPropertyContainer">
+        <label for="zoomLevelRange" class="form-label">Zoom Level</label>
+        <div class="arSettingsSliderContainer">
+          <Input
+              id="zoomLevelRange"
+              @type="range"
+              @value={{this.arSettings.zoomLevel}}
+              class="form-range" min="1.25" max="5.0" step="0.25"
+              {{on "input" this.updateZoomLevel}}
+          />
+          <div class="arSliderLabel">{{this.arSettings.zoomLevel}}</div>
+        </div>
+      </div>
+
+      <div class="arSettingsPropertyContainer">
+        <label for="stackPopupsCheckBox" class="form-label">Stack Popups</label>
+        <div class="arSettingsSliderContainer">
+          <Input
+              id="stackPopupsCheckBox"
+              @type="checkbox"
+              @checked={{this.arSettings.stackPopups}}
+          />
         </div>
       </div>
     </div>

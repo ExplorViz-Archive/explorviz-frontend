@@ -605,8 +605,14 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     if ((mesh instanceof NodeMesh || mesh instanceof ApplicationMesh
       || mesh instanceof ClazzMesh || mesh instanceof ComponentMesh
       || mesh instanceof ClazzCommunicationMesh)) {
+      // Remove old popup to move it up front (stacking popups)
+      if (this.arSettings.stackPopups) {
+        this.popupDataMap.delete(mesh.id);
+      }
+
       // Remove popup if it is already opened at default position
-      if (this.popupDataMap.has(mesh.id) && !this.popupDataMap.get(mesh.id)?.isPinned) {
+      if (this.popupDataMap.has(mesh.id) && !this.popupDataMap.get(mesh.id)?.isPinned
+      && !this.arSettings.stackPopups) {
         this.removeUnpinnedPopups();
       } else {
         this.removeUnpinnedPopups();
