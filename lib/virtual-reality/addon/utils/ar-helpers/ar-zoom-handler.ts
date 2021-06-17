@@ -1,6 +1,7 @@
 import THREE from 'three';
 import ArSettings from 'virtual-reality/services/ar-settings';
 import { inject as service } from '@ember/service';
+import { tracked } from '@glimmer/tracking';
 
 export default class ArZoomHandler {
   @service('ar-settings')
@@ -10,6 +11,7 @@ export default class ArZoomHandler {
 
   private zoomCamera: THREE.PerspectiveCamera;
 
+  @tracked
   zoomEnabled: boolean;
 
   private outerDiv: HTMLElement;

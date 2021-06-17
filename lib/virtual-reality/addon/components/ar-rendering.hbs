@@ -25,6 +25,7 @@
       {{#unless @showDataSelection}}
         <div class="ar-right-relative foreground mt-6">
           <BsButton
+            id="arSettingsOpener"
             @onClick={{this.toggleSettingsPane}}
             @type="secondary"
             @outline={{true}}
@@ -82,23 +83,43 @@
         </div>
 
         <div id="ar-heatmap-interaction-container">
-          <BsButton
-            @type="primary"
-            class="half-transparent"
-            {{ on "click" this.handleHeatmapToggle }}
-          >
-            {{svg-jar "flame-16" class="octicon align-middle ar-button-svg"}}
-          </BsButton>
+          {{#if this.heatmapConf.heatmapActive}}
+            <BsButton
+              @type="success"
+              class="half-transparent"
+              {{ on "click" this.handleHeatmapToggle }}
+            >
+              {{svg-jar "flame-16" class="octicon align-middle ar-button-svg"}}
+            </BsButton>
+          {{else}}
+            <BsButton
+              @type="primary"
+              class="half-transparent"
+              {{ on "click" this.handleHeatmapToggle }}
+            >
+              {{svg-jar "flame-16" class="octicon align-middle ar-button-svg"}}
+            </BsButton>
+          {{/if}}
         </div>
 
         <div id="ar-zoom-container">
-          <BsButton
-            @type="primary"
-            class="half-transparent"
-            {{ on "click" this.handleZoomToggle}}
-          >
-            {{svg-jar "search-16" class="octicon align-middle ar-button-svg"}}
-          </BsButton>
+          {{#if this.arZoomHandler.zoomEnabled}}
+            <BsButton
+              @type="success"
+              class="half-transparent"
+              {{ on "click" this.handleZoomToggle}}
+            >
+              {{svg-jar "search-16" class="octicon align-middle ar-button-svg"}}
+            </BsButton>
+          {{else}}
+            <BsButton
+              @type="primary"
+              class="half-transparent"
+              {{ on "click" this.handleZoomToggle}}
+            >
+              {{svg-jar "search-16" class="octicon align-middle ar-button-svg"}}
+            </BsButton>
+          {{/if}}
         </div>
 
 

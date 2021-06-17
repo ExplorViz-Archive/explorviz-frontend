@@ -152,6 +152,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   canvas!: HTMLCanvasElement;
 
+  @tracked
   arZoomHandler: ArZoomHandler | undefined;
 
   arToolkitSource: any;
@@ -911,7 +912,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     const applicationObject3D = this.heatmapConf.currentApplication;
     if (!applicationObject3D) return;
 
-    this.sceneService.addSkylight();
     applicationObject3D.setOpacity(1);
     removeHeatmapHelperLines(applicationObject3D);
 
