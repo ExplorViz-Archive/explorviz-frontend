@@ -1,31 +1,40 @@
 <div id="heatmap-legend-container" class="d-flex flex-column p-2">
   <div id="legend-header">
-    <span id="legend-header-content">Heatmap</span>
-    {{#if (eq this.heatmapConfiguration.selectedMode "aggregatedHeatmap")}}
-      <HelpTooltip @title={{this.descriptions.aggregatedHeatmap}} />
-    {{else}}
-      <HelpTooltip @title={{this.descriptions.windowedHeatmap}} />
-    {{/if}}
-  </div>
-  <div id="legend-subheader" class="mt-1" style="font-size: 0.75rem">
-    {{this.subHeader}}
-  </div>
-  <div class="d-flex flex-row mt-2">
-    <div id="heatmap-legend" {{did-insert this.didInsertLegend}}>
-      <canvas
-        id="legend-canvas"
-        height="100%"
-        {{did-insert this.didInsertCanvas}}
-      >
-      </canvas>
+    <div>
+      <span id="legend-header-content">Heatmap</span>
+      {{#if (eq this.heatmapConfiguration.selectedMode "aggregatedHeatmap")}}
+        <HelpTooltip @title={{this.descriptions.aggregatedHeatmap}} />
+      {{else}}
+        <HelpTooltip @title={{this.descriptions.windowedHeatmap}} />
+      {{/if}}
     </div>
-    <div id="heatmap-legend-label" {{did-insert this.didInsertLegendlabel}}>
-      <canvas
-        id="legend-canvas-label"
-        height="100%"
-        {{did-insert this.didInsertCanvaslabel}}
-      >
-      </canvas>
+    <div>
+      <input id="collapsible" class="heatmap-legend-toggle" type="checkbox" checked>
+      <label for="collapsible" class="collapse-toggle-label" data-toggle="collapse" href="#heatmapCollapseContainer" aria-expanded="false" aria-controls="heatmapCollapseContainer"></label>
+    </div>
+  </div>
+
+  <div id="heatmapCollapseContainer" class="collapse show">
+    <div id="legend-subheader" class="mt-1" style="font-size: 0.75rem">
+      {{this.subHeader}}
+    </div>
+    <div class="d-flex flex-row mt-2">
+      <div id="heatmap-legend" {{did-insert this.didInsertLegend}}>
+        <canvas
+          id="legend-canvas"
+          height="100%"
+          {{did-insert this.didInsertCanvas}}
+        >
+        </canvas>
+      </div>
+      <div id="heatmap-legend-label" {{did-insert this.didInsertLegendlabel}}>
+        <canvas
+          id="legend-canvas-label"
+          height="100%"
+          {{did-insert this.didInsertCanvaslabel}}
+        >
+        </canvas>
+      </div>
     </div>
   </div>
 </div>
