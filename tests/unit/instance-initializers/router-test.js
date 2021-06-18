@@ -1,5 +1,4 @@
 import Application from '@ember/application';
-
 import { initialize } from 'explorviz-frontend/instance-initializers/router';
 import { module, test } from 'qunit';
 import destroyApp from '../../helpers/destroy-app';

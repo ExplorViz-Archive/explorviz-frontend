@@ -131,20 +131,20 @@ export default class Configuration extends Service {
 
   applyColorSchemeByName(colorScheme: string | null) {
     switch (colorScheme) {
+      case 'pastel':
+        this.applyDefaultColors();
+        break;
       case 'classic':
         this.applyClassicColors();
         break;
-      case 'pastel':
-        this.applyPastelColors();
-        break;
       case 'blue':
-        this.applyBlueColors();
+        this.applyVisuallyImpairedColors();
         break;
       case 'dark':
         this.applyDarkColors();
         break;
       default:
-        this.applyClassicColors(false);
+        this.applyDefaultColors(false);
     }
   }
 
@@ -160,14 +160,14 @@ export default class Configuration extends Service {
      * Sets color values to default mode.
      * Triggers update of color configuration and colors of current view.
      */
-  applyPastelColors(persist = true) {
+  applyDefaultColors(persist = true) {
     const { landscapeColors } = this;
 
-    landscapeColors.system.set('#c7c7c7'); // grey
+    landscapeColors.system.set('#d2d2d2'); // grey
     landscapeColors.nodegroup.set('#169e2b'); // dark green
-    landscapeColors.node.set('#00bb41'); // green
-    landscapeColors.application.set('#3e14a0'); // purple-blue
-    landscapeColors.communication.set('#c4c4c4'); // light grey
+    landscapeColors.node.set('#6bc484'); // green
+    landscapeColors.application.set('#0096be'); // purple-blue
+    landscapeColors.communication.set('#d6d48b'); // light grey
     landscapeColors.systemText.set('#000000'); // black
     landscapeColors.nodeText.set('#ffffff'); // white
     landscapeColors.applicationText.set('#ffffff'); // white
@@ -177,22 +177,21 @@ export default class Configuration extends Service {
     const { applicationColors } = this;
 
     applicationColors.foundation.set('#d2d2d2'); // grey
-    applicationColors.componentOdd.set('#8bd6bb'); // lime green
-    // applicationColors.componentEven.set('#d8e0cc'); // pastel green
-    applicationColors.componentEven.set('#8bccd6'); // desaturated cyan
-    applicationColors.clazz.set('#8ba6d6'); // light pastel green
-    applicationColors.highlightedEntity.set('#ff6666'); // pastel red
+    applicationColors.componentOdd.set('#65c97e'); // lime green
+    applicationColors.componentEven.set('#3c8db0'); // desaturated cyan
+    applicationColors.clazz.set('#a7cffb'); // light pastel blue
+    applicationColors.highlightedEntity.set('#ff5151'); // pastel red
     applicationColors.componentText.set('#ffffff'); // white
     applicationColors.clazzText.set('#ffffff'); // white
     applicationColors.foundationText.set('#000000'); // black
-    applicationColors.communication.set('#d6bb8b'); // dark grey
+    applicationColors.communication.set('#d6d48b'); // dark grey
     applicationColors.communicationArrow.set('#000000'); // black
     applicationColors.background.set('#ffffff'); // white
 
     this.updateView();
 
     if (persist) {
-      localStorage.setItem('colorScheme', 'pastel');
+      localStorage.setItem('colorScheme', 'default');
     }
   }
 
@@ -239,7 +238,7 @@ export default class Configuration extends Service {
      * Updates color values such that they better suit visually impaired users.
      * Triggers update of color configuration and colors of current view.
      */
-  applyBlueColors(persist = true) {
+  applyVisuallyImpairedColors(persist = true) {
     const { landscapeColors } = this;
 
     landscapeColors.system.set('#c7c7c7'); // grey
@@ -258,7 +257,7 @@ export default class Configuration extends Service {
     applicationColors.foundation.set('#c7c7c7'); // grey
     applicationColors.componentOdd.set('#015a6e'); // blue
     applicationColors.componentEven.set('#0096be'); // light blue
-    applicationColors.clazz.set('#5f5f5f'); // dark grey
+    applicationColors.clazz.set('#f7f7f7'); // white
     applicationColors.highlightedEntity.set('#ff0000'); // red
     applicationColors.componentText.set('#ffffff'); // white
     applicationColors.clazzText.set('#ffffff'); // white
@@ -270,7 +269,7 @@ export default class Configuration extends Service {
     this.updateView();
 
     if (persist) {
-      localStorage.setItem('colorScheme', 'blue');
+      localStorage.setItem('colorScheme', 'impaired');
     }
   }
 

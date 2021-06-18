@@ -14,19 +14,25 @@ export default class HeatmapInfo extends Component<HeatmapInfoArgs> {
   @action
   setupDragElement(element: HTMLElement) {
     this.divElement = element;
-    this.dragElement(element);
+    this.dragElement();
 
-    this.setupPosition(element);
+    this.setupPosition();
   }
 
-  setupPosition(heatmapInfoDiv: HTMLElement) {
-    const containerDiv = heatmapInfoDiv.parentElement as HTMLElement;
+  setupPosition() {
+    if (!this.divElement) return;
 
-    heatmapInfoDiv.style.top = '100px';
-    heatmapInfoDiv.style.left = `${containerDiv.clientWidth - heatmapInfoDiv.clientWidth - 15}px`;
+    const containerDiv = this.divElement.parentElement as HTMLElement;
+
+    this.divElement.style.top = '100px';
+    this.divElement.style.left = `${containerDiv.clientWidth - this.divElement.clientWidth - 15}px`;
   }
 
-  dragElement(elmnt: HTMLElement) {
+  dragElement() {
+    if (!this.divElement) return;
+
+    const elmnt = this.divElement;
+
     let xOffset = 0; let yOffset = 0; let inputX = 0; let inputY = 0;
 
     function xPositionInsideWindow(minX: number, maxX: number) {

@@ -1,7 +1,7 @@
 import GlimmerComponent from '@glimmer/component';
 import { action } from '@ember/object';
 import debugLogger from 'ember-debug-logger';
-import THREE, { Vector3 } from 'three';
+import THREE from 'three';
 import { inject as service } from '@ember/service';
 import * as Labeler from 'explorviz-frontend/utils/application-rendering/labeler';
 import Configuration from 'explorviz-frontend/services/configuration';
@@ -18,8 +18,6 @@ import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout'
 import { restartableTask, task } from 'ember-concurrency-decorators';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import HeatmapConfiguration, { Metric } from 'heatmap/services/heatmap-configuration';
-import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
-import { setColorValues, invokeRecoloring } from 'heatmap/utils/array-heatmap';
 import CommunicationArrowMesh from 'explorviz-frontend/view-objects/3d/application/communication-arrow-mesh';
 import {
   Class, isClass, Package,
@@ -46,6 +44,8 @@ import {
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 import applySimpleHeatOnFoundation, { addHeatmapHelperLine, computeHeatMapViewPos, removeHeatmapHelperLines } from 'heatmap/utils/heatmap-helper';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
+import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
+import { invokeRecoloring, setColorValues } from 'heatmap/utils/array-heatmap';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -101,6 +101,12 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   renderer!: THREE.WebGLRenderer;
 
+  animationMixers!: Array<THREE.AnimationMixer>;
+
+  globeMesh!: THREE.Mesh;
+
+  clock!: THREE.Clock;
+
   // Used to display performance and memory usage information
   threePerformance: THREEPerformance | undefined;
 
@@ -123,6 +129,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     return [
       { title: 'Reset View', action: this.resetView },
       { title: 'Open All Components', action: this.openAllComponents },
+      { title: 'Toggle Communication', action: this.toggleCommunicationLines },
       { title: 'Toggle Heatmap', action: this.toggleHeatmap },
       { title: pauseButtonTitle, action: this.args.toggleVisualizationUpdating },
       { title: 'Open Sidebar', action: this.args.openDataSelection },
@@ -244,6 +251,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(width, height);
+
+    this.animationMixers = new Array<THREE.AnimationMixer>();
+
+    this.clock = new THREE.Clock();
     this.debug('Renderer set up');
   }
 
@@ -286,7 +297,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       removeHighlighting(this.applicationObject3D);
     } else if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
-      highlight(mesh, this.applicationObject3D, this.drawableClassCommunications);
+      highlight(mesh, this.applicationObject3D,
+        this.drawableClassCommunications, true,
+        this.communicationRendering.transparent);
     }
     if (this.heatmapConf.heatmapActive) {
       this.applicationObject3D.setComponentMeshOpacity(0.1);
@@ -330,23 +343,20 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.mouseMoveOnMesh(mesh);
   }
 
-  updateHoverEffect(mesh: THREE.Object3D | undefined) {
+  @action
+  mouseMoveOnMesh(mesh: THREE.Object3D) {
+    const enableHoverEffects = true;
+    // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
+
+    // Update hover effect
     if (mesh === undefined && this.hoveredObject) {
       this.hoveredObject.resetHoverEffect();
       this.hoveredObject = null;
-    } else if (mesh instanceof BaseMesh) {
+    } else if (mesh instanceof BaseMesh && enableHoverEffects && !this.heatmapConf.heatmapActive) {
       if (this.hoveredObject) { this.hoveredObject.resetHoverEffect(); }
 
       this.hoveredObject = mesh;
       mesh.applyHoverEffect();
-    }
-  }
-
-  @action
-  mouseMoveOnMesh(mesh: THREE.Object3D) {
-    // Update hover effect
-    if (!this.heatmapConf.heatmapActive) {
-      this.updateHoverEffect(mesh);
     }
 
     // Hide popups when mouse moves
@@ -447,8 +457,25 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       EntityRendering.addFoundationAndChildrenToApplication(this.applicationObject3D,
         this.configuration.applicationColors);
 
-      // Add globe for communication that comes from the outside
-      EntityRendering.addGlobeToApplication(this.applicationObject3D);
+      if (!this.globeMesh) {
+        // Add globe for communication that comes from the outside
+        this.globeMesh = EntityRendering.addGlobeToApplication(this.applicationObject3D);
+
+        const period = 1000;
+        const times = [0, period];
+        const values = [0, 360];
+
+        const trackName = '.rotation[y]';
+        const track = new THREE.NumberKeyframeTrack(trackName, times, values);
+
+        const clip = new THREE.AnimationClip('default', period, [track]);
+
+        const animationMixer = new THREE.AnimationMixer(this.globeMesh);
+
+        const clipAction = animationMixer.clipAction(clip);
+        clipAction.play();
+        this.animationMixers.push(animationMixer);
+      }
 
       // Restore old state of components
       restoreComponentState(this.applicationObject3D, openComponentIds);
@@ -569,7 +596,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const { selectedMetric } = this.heatmapConf;
 
     this.applicationObject3D.setComponentMeshOpacity(0.1);
-    this.applicationObject3D.setCommunicationOpacity(0.1);
+    if (this.communicationRendering.transparent) {
+      this.applicationObject3D.setCommunicationOpacity(0.0);
+    } else {
+      this.applicationObject3D.setCommunicationOpacity(0.1);
+    }
 
     const foundationMesh = this.applicationObject3D
       .getBoxMeshbyModelId(this.args.landscapeData.application!.id);
@@ -597,7 +628,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         this.heatmapConf.heatmapRadius, this.heatmapConf.blurRadius);
     }
 
-    const foundationWorldPosition = new Vector3();
+    const foundationWorldPosition = new THREE.Vector3();
 
     foundationMesh.getWorldPosition(foundationWorldPosition);
 
@@ -654,7 +685,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Calculate center point of the clazz floor. This is used for computing the corresponding
     // face on the foundation box.
     const clazzMesh = this.applicationObject3D.getBoxMeshbyModelId(clazz.id) as
-        ClazzMesh | undefined;
+          ClazzMesh | undefined;
 
     if (!clazzMesh || !this.heatmapConf.selectedMetric) {
       return;
@@ -736,6 +767,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (this.threePerformance) {
       this.threePerformance.threexStats.update(this.renderer);
       this.threePerformance.stats.begin();
+    }
+
+    if (this.animationMixers) {
+      this.animationMixers.forEach((mixer) => mixer.update(this.clock.getDelta()));
     }
 
     this.renderer.render(this.scene, this.camera);
@@ -851,6 +886,26 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.applicationObject3D.setComponentMeshOpacity(0.1);
       this.applicationObject3D.setCommunicationOpacity(0.1);
     }
+  }
+
+  /**
+   * Toggles the visualization of communication lines.
+   */
+  @action
+  toggleCommunicationLines() {
+    this.communicationRendering.transparent = !this.communicationRendering.transparent;
+    this.drawableClassCommunications.forEach((commu) => {
+      const commMesh = this.applicationObject3D.getCommMeshByModelId(commu.id);
+      if (commMesh) {
+        if (this.communicationRendering.transparent) {
+          commMesh.turnTransparent(0.0);
+        } else if (this.heatmapConf.heatmapActive) {
+          commMesh.turnTransparent(0.1);
+        } else {
+          commMesh.turnOpaque();
+        }
+      }
+    });
   }
 
   /**

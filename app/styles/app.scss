@@ -12,10 +12,9 @@
 @import "_augmented_reality";
 @import "_virtual_reality";
 
-@import "ember-bootstrap/bootstrap";
 // located in lib/heatmap/addon/styles
 @import "_heatmap";
-
+@import "ember-bootstrap/bootstrap";
 @import 'ember-power-select/themes/bootstrap';
 @import "ember-power-select";
 @import 'ember-right-click-menu';
