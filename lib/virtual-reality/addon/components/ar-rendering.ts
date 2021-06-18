@@ -42,7 +42,6 @@ import { SelfConnectedMessage } from 'virtual-reality/utils/vr-message/receivabl
 import { UserConnectedMessage, USER_CONNECTED_EVENT } from 'virtual-reality/utils/vr-message/receivable/user_connected';
 import RemoteVrUser from 'virtual-reality/utils/vr-multi-user/remote-vr-user';
 import { ForwardedMessage } from 'virtual-reality/utils/vr-message/receivable/forwarded';
-import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
 import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
 import { UserDisconnectedMessage } from 'virtual-reality/utils/vr-message/receivable/user_disconnect';
 import { InitialLandscapeMessage } from 'virtual-reality/utils/vr-message/receivable/landscape';
@@ -60,6 +59,7 @@ import { invokeRecoloring, setColorValues } from 'heatmap/utils/array-heatmap';
 import { simpleHeatmap } from 'heatmap/utils/simple-heatmap';
 import { updateHighlighting } from 'explorviz-frontend/utils/application-rendering/highlighting';
 import { perform } from 'ember-concurrency-ts';
+import { MousePingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
 import VrRoomSerializer from '../services/vr-room-serializer';
 
 interface Args {
@@ -181,6 +181,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @tracked
   showSettings = false;
+
+  localPing: { obj: THREE.Object3D, time: number } | undefined | null;
 
   // #endregion CLASS FIELDS AND GETTERS
 
@@ -576,6 +578,86 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   @action
+  async handlePing() {
+    const intersection = this.interaction.raycastCanvasCenter();
+
+    if (!(intersection?.object.parent instanceof ApplicationObject3D)
+    && !(intersection?.object.parent instanceof LandscapeObject3D)) {
+      return;
+    }
+
+    if (!this.localUser.isOnline) {
+      AlertifyHandler.showAlertifyWarning('Offline. <br> Join session with users to ping.');
+      return;
+    } if (Array.from(this.remoteUsers.getAllRemoteUsers()).length === 0) {
+      AlertifyHandler.showAlertifyWarning('You are alone in this room. <br> Wait for other users.');
+      return;
+    }
+
+    const parentObj = intersection.object.parent;
+    const pingPosition = parentObj.worldToLocal(intersection.point);
+
+    if (parentObj instanceof ApplicationObject3D) {
+      pingPosition.y += 1;
+    } else {
+      pingPosition.z += 0.1;
+    }
+
+    const color = this.localUser.color ? this.localUser.color
+      : this.configuration.applicationColors.highlightedEntity;
+
+    this.addPing(parentObj, pingPosition, color);
+
+    if (this.localUser.isOnline) {
+      if (parentObj instanceof ApplicationObject3D) {
+        this.sender.sendMousePingUpdate(parentObj.dataModel.id, true, pingPosition);
+      } else {
+        this.sender.sendMousePingUpdate('landscape', false, pingPosition);
+      }
+    }
+  }
+
+  addPing(parentObj: THREE.Object3D, position: THREE.Vector3, color: THREE.Color) {
+    if (this.localPing) {
+      this.removeLocalPing();
+    }
+
+    let size = 2;
+
+    if (parentObj instanceof LandscapeObject3D) {
+      size = 0.2;
+    }
+
+    const geometry = new THREE.SphereGeometry(size, 32, 32);
+    const material = new THREE.MeshBasicMaterial({ color });
+    const sphere = new THREE.Mesh(geometry, material);
+
+    sphere.position.copy(position);
+
+    parentObj.add(sphere);
+
+    this.localPing = { obj: sphere, time: Date.now() };
+  }
+
+  removeLocalPing() {
+    if (this.localPing) {
+      this.localPing.obj.parent?.remove(this.localPing.obj);
+      this.localPing = null;
+    }
+  }
+
+  updatePings() {
+    const now = Date.now();
+    if (this.localPing && now - this.localPing.time > 2000) {
+      this.removeLocalPing();
+    }
+
+    Array.from(this.remoteUsers.getAllRemoteUsers()).forEach((user) => {
+      user.updateMousePing();
+    });
+  }
+
+  @action
   async handleHeatmapToggle() {
     const currentHeatmapAppId = this.heatmapConf.currentApplication?.id;
     this.removeHeatmap();
@@ -736,6 +818,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     this.arZoomHandler?.renderZoomCamera(this.localUser.renderer, this.sceneService.scene,
       this.resize);
+
+    this.updatePings();
   }
 
   animate() {
@@ -1218,14 +1302,23 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   /**
    * Updates whether the given user is pinging with the specified controller or not.
    */
-  onPingUpdate({
+  onPingUpdate() {}
+
+  onMousePingUpdate({
     userId,
-    originalMessage: { controllerId, isPinging },
-  }: ForwardedMessage<PingUpdateMessage>): void {
+    originalMessage: { modelId, isApplication, position },
+  }: ForwardedMessage<MousePingUpdateMessage>): void {
     const remoteUser = this.remoteUsers.lookupRemoteUserById(userId);
     if (!remoteUser) return;
 
-    remoteUser.togglePing(controllerId, isPinging);
+    const applicationObj = this.vrApplicationRenderer.getApplicationById(modelId);
+
+    if (applicationObj && isApplication) {
+      remoteUser.addMousePing(applicationObj, new THREE.Vector3().fromArray(position));
+    } else {
+      remoteUser.addMousePing(this.vrLandscapeRenderer.landscapeObject3D,
+        new THREE.Vector3().fromArray(position));
+    }
   }
 
   onTimestampUpdate({

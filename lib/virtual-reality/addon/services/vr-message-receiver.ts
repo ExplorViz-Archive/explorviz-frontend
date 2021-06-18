@@ -1,6 +1,7 @@
 import Service, { inject as service } from '@ember/service';
 import debugLogger from 'ember-debug-logger';
 import WebSocketService from 'virtual-reality/services/web-socket';
+import { isMousePingUpdateMessage, MousePingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
 import { isPingUpdateMessage, PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
 import { isTimestampUpdateMessage, TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
 import { ForwardedMessage, isForwardedMessage, isForwardedMessageOf } from '../utils/vr-message/receivable/forwarded';
@@ -43,6 +44,7 @@ export interface VrMessageListener {
   onAppClosed(msg: ForwardedMessage<AppClosedMessage>): void;
   onDetachedMenuClosed(msg: ForwardedMessage<DetachedMenuClosedMessage>): void;
   onPingUpdate(msg: ForwardedMessage<PingUpdateMessage>): void;
+  onMousePingUpdate(msg: ForwardedMessage<MousePingUpdateMessage>): void;
   onTimestampUpdate(msg: ForwardedMessage<TimestampUpdateMessage>): void;
   onObjectMoved(msg: ForwardedMessage<ObjectMovedMessage>): void;
   onComponentUpdate(msg: ForwardedMessage<ComponentUpdateMessage>): void;
@@ -161,6 +163,10 @@ export default class VrMessageReceiver extends Service {
     }
     if (isForwardedMessageOf(msg, isPingUpdateMessage)) {
       this.messageListeners.forEach((l) => l.onPingUpdate(msg));
+      return;
+    }
+    if (isForwardedMessageOf(msg, isMousePingUpdateMessage)) {
+      this.messageListeners.forEach((l) => l.onMousePingUpdate(msg));
       return;
     }
     if (isForwardedMessageOf(msg, isTimestampUpdateMessage)) {

@@ -2,6 +2,7 @@ import Service, { inject as service } from '@ember/service';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import THREE from 'three';
 import WebSocketService from 'virtual-reality/services/web-socket';
+import { MousePingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/mouse-ping-update';
 import { PingUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/ping_update';
 import { TimestampUpdateMessage } from 'virtual-reality/utils/vr-message/sendable/timetsamp_update';
 import VRController from '../utils/vr-controller';
@@ -244,6 +245,19 @@ export default class VrMessageSender extends Service {
       event: 'ping_update',
       controllerId,
       isPinging,
+    });
+  }
+
+  sendMousePingUpdate(
+    modelId: string,
+    isApplication: boolean,
+    position: THREE.Vector3,
+  ) {
+    this.webSocket.send<MousePingUpdateMessage>({
+      event: 'mouse_ping_update',
+      modelId,
+      isApplication,
+      position: position.toArray(),
     });
   }
 

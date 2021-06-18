@@ -1017,6 +1017,8 @@ export default class VrRendering
     remoteUser.togglePing(controllerId, isPinging);
   }
 
+  onMousePingUpdate() {}
+
   onTimestampUpdate({
     originalMessage: { timestamp },
   }: ForwardedMessage<TimestampUpdateMessage>): void {

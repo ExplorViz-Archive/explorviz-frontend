@@ -1,3 +1,4 @@
+import LandscapeObject3D from 'explorviz-frontend/view-objects/3d/landscape/landscape-object-3d';
 import THREE from 'three';
 import LocalVrUser from 'virtual-reality/services/local-vr-user';
 import NameTagSprite from '../view-objects/vr/name-tag-sprite';
@@ -36,6 +37,8 @@ export default class RemoteVrUser extends THREE.Object3D {
   controllers: (Controller | null)[];
 
   nameTag: NameTagSprite | null;
+
+  mousePing: { obj: THREE.Object3D, time: number } | undefined | null;
 
   private animationMixer: THREE.AnimationMixer;
 
@@ -186,6 +189,43 @@ export default class RemoteVrUser extends THREE.Object3D {
         controller.ray.scale.z = distance;
       }
     });
+  }
+
+  addMousePing(parentObj: THREE.Object3D, position: THREE.Vector3) {
+    if (this.mousePing) {
+      this.removeMousePing();
+    }
+
+    // Default for applications
+    let size = 2;
+
+    if (parentObj instanceof LandscapeObject3D) {
+      size = 0.2;
+    }
+
+    const geometry = new THREE.SphereGeometry(size, 32, 32);
+    const material = new THREE.MeshBasicMaterial({ color: this.color });
+    const sphere = new THREE.Mesh(geometry, material);
+
+    sphere.position.copy(position);
+
+    parentObj.add(sphere);
+
+    this.mousePing = { obj: sphere, time: Date.now() };
+  }
+
+  removeMousePing() {
+    if (this.mousePing) {
+      this.mousePing.obj.parent?.remove(this.mousePing.obj);
+      this.mousePing = null;
+    }
+  }
+
+  updateMousePing() {
+    const now = Date.now();
+    if (this.mousePing && now - this.mousePing.time > 2000) {
+      this.removeMousePing();
+    }
   }
 
   /**
