@@ -1009,7 +1009,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     const applicationObject3D = this.heatmapConf.currentApplication;
     if (!applicationObject3D) return;
 
-    applicationObject3D.setOpacity(1);
     removeHeatmapHelperLines(applicationObject3D);
 
     const foundationMesh = applicationObject3D
@@ -1027,6 +1026,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     this.heatmapConf.heatmapActive = false;
     this.heatmapConf.currentApplication = null;
+
+    applicationObject3D.setOpacity(this.arSettings.applicationOpacity);
   }
 
   heatmapClazzUpdate(applicationObject3D: ApplicationObject3D,

@@ -115,7 +115,6 @@ export default class HeatmapInfo extends Component<HeatmapInfoArgs> {
 
     function dragTouchDown(e: TouchEvent) {
       const event = e || window.event;
-      event.preventDefault();
 
       if (event.targetTouches.length > 0) {
         inputX = event.targetTouches[0].clientX;

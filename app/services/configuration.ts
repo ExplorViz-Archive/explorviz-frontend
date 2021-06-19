@@ -132,7 +132,7 @@ export default class Configuration extends Service {
   applyColorSchemeByName(colorScheme: string | null) {
     switch (colorScheme) {
       case 'pastel':
-        this.applyDefaultColors();
+        this.applyPastelColors();
         break;
       case 'classic':
         this.applyClassicColors();
@@ -144,7 +144,7 @@ export default class Configuration extends Service {
         this.applyDarkColors();
         break;
       default:
-        this.applyDefaultColors(false);
+        this.applyClassicColors(false);
     }
   }
 
@@ -160,7 +160,7 @@ export default class Configuration extends Service {
      * Sets color values to default mode.
      * Triggers update of color configuration and colors of current view.
      */
-  applyDefaultColors(persist = true) {
+  applyPastelColors(persist = true) {
     const { landscapeColors } = this;
 
     landscapeColors.system.set('#d2d2d2'); // grey
@@ -191,7 +191,7 @@ export default class Configuration extends Service {
     this.updateView();
 
     if (persist) {
-      localStorage.setItem('colorScheme', 'default');
+      localStorage.setItem('colorScheme', 'pastel');
     }
   }
 
@@ -269,7 +269,7 @@ export default class Configuration extends Service {
     this.updateView();
 
     if (persist) {
-      localStorage.setItem('colorScheme', 'impaired');
+      localStorage.setItem('colorScheme', 'blue');
     }
   }
 
