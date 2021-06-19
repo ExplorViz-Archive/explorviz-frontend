@@ -138,15 +138,11 @@
           </BsButton>
         </div>
 
-        <div id="ar-primary-interaction-container">
-          <BsButton
-            @type="primary"
-            class="half-transparent"
-            {{ on "click" this.handlePrimaryCrosshairInteraction }}
-          >
-            {{svg-jar "unfold-16" class="octicon align-middle ar-button-svg"}}
-          </BsButton>
-        </div>
+
+        <Visualization::PageSetup::ArButtons::PrimaryInteractionButton
+          @handlePrimaryCrosshairInteraction={{this.handlePrimaryCrosshairInteraction}}
+          @openAllComponents={{this.handleOpenAllComponents}}
+        />
 
         <div id="ar-ping-interaction-container">
           <BsButton
