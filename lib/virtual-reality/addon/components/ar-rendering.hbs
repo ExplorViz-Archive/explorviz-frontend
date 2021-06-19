@@ -29,7 +29,7 @@
             @onClick={{this.toggleSettingsPane}}
             @type="secondary"
             @outline={{true}}
-            @title="Settings"
+            title="Settings"
           >
             {{svg-jar "gear-16" class="octicon align-middle"}}
           </BsButton>
@@ -72,87 +72,36 @@
 
       <div class="ar-left-button-container foreground">
 
-        <div id="ar-info-interaction-container">
-          <BsButton
-            @type="primary"
-            class="half-transparent"
-            {{ on "click" this.handleInfoInteraction }}
-          >
-            {{svg-jar "info-16" class="octicon align-middle ar-button-svg"}}
-          </BsButton>
-        </div>
+        <Visualization::PageSetup::ArButtons::PopupButton
+          @handleInfoInteraction={{this.handleInfoInteraction}}
+          @removeAllPopups={{this.removeAllPopups}}
+        />
 
-        <div id="ar-heatmap-interaction-container">
-          {{#if this.heatmapConf.heatmapActive}}
-            <BsButton
-              @type="success"
-              class="half-transparent"
-              {{ on "click" this.handleHeatmapToggle }}
-            >
-              {{svg-jar "flame-16" class="octicon align-middle ar-button-svg"}}
-            </BsButton>
-          {{else}}
-            <BsButton
-              @type="primary"
-              class="half-transparent"
-              {{ on "click" this.handleHeatmapToggle }}
-            >
-              {{svg-jar "flame-16" class="octicon align-middle ar-button-svg"}}
-            </BsButton>
-          {{/if}}
-        </div>
+        <Visualization::PageSetup::ArButtons::HeatmapButton
+          @toggleHeatmap={{this.handleHeatmapToggle}}
+        />
 
-        <div id="ar-zoom-container">
-          {{#if this.arZoomHandler.zoomEnabled}}
-            <BsButton
-              @type="success"
-              class="half-transparent"
-              {{ on "click" this.handleZoomToggle}}
-            >
-              {{svg-jar "search-16" class="octicon align-middle ar-button-svg"}}
-            </BsButton>
-          {{else}}
-            <BsButton
-              @type="primary"
-              class="half-transparent"
-              {{ on "click" this.handleZoomToggle}}
-            >
-              {{svg-jar "search-16" class="octicon align-middle ar-button-svg"}}
-            </BsButton>
-          {{/if}}
-        </div>
-
+        <Visualization::PageSetup::ArButtons::ZoomButton
+          @arZoomHandler={{this.arZoomHandler}}
+          @handleZoomToggle={{this.handleZoomToggle}}
+        />
 
       </div>
 
       <div class="ar-right-button-container foreground">
-
-        <div id="ar-secondary-interaction-container">
-          <BsButton
-            @type="primary"
-            style={{html-safe this.localUser.highlightingColorStyle}}
-            class="half-transparent"
-            {{ on "click" this.handleSecondaryCrosshairInteraction }}
-          >
-            {{svg-jar "paintbrush-16" class="octicon align-middle ar-button-svg"}}
-          </BsButton>
-        </div>
-
 
         <Visualization::PageSetup::ArButtons::PrimaryInteractionButton
           @handlePrimaryCrosshairInteraction={{this.handlePrimaryCrosshairInteraction}}
           @openAllComponents={{this.handleOpenAllComponents}}
         />
 
-        <div id="ar-ping-interaction-container">
-          <BsButton
-            @type="primary"
-            class="half-transparent"
-            {{ on "click" this.handlePing }}
-          >
-            {{svg-jar "north-star-16" class="octicon align-middle ar-button-svg"}}
-          </BsButton>
-        </div>
+        <Visualization::PageSetup::ArButtons::SecondaryInteractionButton
+          @handleSecondaryCrosshairInteraction={{this.handleSecondaryCrosshairInteraction}}
+        />
+
+        <Visualization::PageSetup::ArButtons::PingButton
+          @handlePing={{this.handlePing}}
+        />
 
       </div>
 

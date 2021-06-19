@@ -176,6 +176,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   @tracked
   popupDataMap: Map<number, PopupData> = new Map();
 
+  lastPopupClear = 0;
+
   @tracked
   hammerInteraction: HammerInteraction;
 
@@ -579,18 +581,18 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @action
   async handlePing() {
-    const intersection = this.interaction.raycastCanvasCenter();
-
-    if (!(intersection?.object.parent instanceof ApplicationObject3D)
-    && !(intersection?.object.parent instanceof LandscapeObject3D)) {
-      return;
-    }
-
     if (!this.localUser.isOnline) {
       AlertifyHandler.showAlertifyWarning('Offline. <br> Join session with users to ping.');
       return;
     } if (Array.from(this.remoteUsers.getAllRemoteUsers()).length === 0) {
       AlertifyHandler.showAlertifyWarning('You are alone in this room. <br> Wait for other users.');
+      return;
+    }
+
+    const intersection = this.interaction.raycastCanvasCenter();
+
+    if (!(intersection?.object.parent instanceof ApplicationObject3D)
+    && !(intersection?.object.parent instanceof LandscapeObject3D)) {
       return;
     }
 
@@ -670,11 +672,16 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       perform(this.vrApplicationRenderer.calculateHeatmapTask, applicationObject3D, () => {
         this.applyHeatmap();
       });
+    } else if (intersection && intersection.object.parent instanceof LandscapeObject3D) {
+      AlertifyHandler.showAlertifyWarning('Heat Map only available for applications.');
     }
   }
 
   @action
   handleInfoInteraction() {
+    // Do not add popup if user long pressed popup button to remove all popups
+    if (Date.now() - this.lastPopupClear < 10) return;
+
     const intersection = this.interaction.raycastCanvasCenter();
 
     if (!intersection) {
@@ -729,6 +736,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
         object3D.updateColor(this.configuration.applicationColors.communicationArrow);
       }
     });
+  }
+
+  @action
+  removeAllPopups() {
+    this.lastPopupClear = Date.now();
+    this.popupDataMap = new Map();
   }
 
   // #endregion ACTIONS

@@ -1,12 +1,12 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
 
-interface PrimaryInteractionButtonArgs {
-  handlePrimaryCrosshairInteraction(): void
-  openAllComponents(): void
+interface PopupButtonArgs {
+  handleInfoInteraction(): void
+  removeAllPopups(): void
 }
 
-export default class PrimaryInteractionButton extends Component<PrimaryInteractionButtonArgs> {
+export default class PopupButton extends Component<PopupButtonArgs> {
   @action
   addLongPressListener(button: HTMLButtonElement) {
     const self = this;
@@ -17,7 +17,7 @@ export default class PrimaryInteractionButton extends Component<PrimaryInteracti
       const minLongPressTime = 500;
 
       if (diff > minLongPressTime) {
-        self.args.openAllComponents();
+        self.args.removeAllPopups();
       }
     }
 
