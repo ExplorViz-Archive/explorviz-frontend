@@ -178,6 +178,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   lastPopupClear = 0;
 
+  lastOpenAllComponents = 0;
+
   @tracked
   hammerInteraction: HammerInteraction;
 
@@ -568,6 +570,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   @action
   async handleOpenAllComponents() {
+    this.lastOpenAllComponents = Date.now();
+
     const intersection = this.interaction.raycastCanvasCenter();
 
     if (!(intersection?.object.parent instanceof ApplicationObject3D)) {
@@ -1111,7 +1115,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     const { object } = intersection;
 
     function handleApplicationObject(appObject: THREE.Object3D) {
-      if (!(appObject.parent instanceof ApplicationObject3D)) return;
+      if (!(appObject.parent instanceof ApplicationObject3D)
+      || Date.now() - self.lastOpenAllComponents < 20) return;
 
       if (appObject instanceof ComponentMesh) {
         self.vrApplicationRenderer.toggleComponent(

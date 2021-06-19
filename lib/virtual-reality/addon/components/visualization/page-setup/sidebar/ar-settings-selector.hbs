@@ -62,6 +62,18 @@
 
     <div id="communicationSettingsContainer" class="arSettingsGridItem">
       <div class="arSettingsPropertyContainer">
+        <label for="renderCommunicationCheckbox" class="form-label">Render Communication</label>
+        <div class="arSettingsSliderContainer">
+          <Input
+              id="renderCommunicationCheckbox"
+              @type="checkbox"
+              @checked={{this.configuration.renderCommunication}}
+              {{on "input" this.toggleRenderClassCommunication}}
+          />
+        </div>
+      </div>
+
+      <div class="arSettingsPropertyContainer">
         <label for="communicationWidthRange" class="form-label">Communication Width</label>
         <div class="arSettingsSliderContainer">
           <Input

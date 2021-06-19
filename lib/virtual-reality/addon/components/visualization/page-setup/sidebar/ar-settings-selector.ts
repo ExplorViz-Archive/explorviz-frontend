@@ -88,6 +88,14 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
   }
 
   @action
+  toggleRenderClassCommunication() {
+    const oldValue = this.arSettings.renderCommunication;
+    this.arSettings.renderCommunication = !oldValue;
+
+    this.vrApplicationRenderer.updateCommunication();
+  }
+
+  @action
   updateLandscapeOpacity(event: any) {
     this.arSettings.setLandscapeOpacity(event.target.value);
   }

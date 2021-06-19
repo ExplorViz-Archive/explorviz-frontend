@@ -3,6 +3,7 @@ import { enqueueTask, restartableTask } from 'ember-concurrency-decorators';
 import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import ApplicationRendering from 'explorviz-frontend/components/visualization/rendering/application-rendering';
+import ArSettings from 'explorviz-frontend/services/ar-settings';
 import Configuration from 'explorviz-frontend/services/configuration';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 import AppCommunicationRendering from 'explorviz-frontend/utils/application-rendering/communication-rendering';
@@ -52,6 +53,9 @@ export type AddApplicationArgs = {
 
 export default class VrApplicationRenderer extends Service {
   debug = debugLogger('VrApplicationRender');
+
+  @service('ar-settings')
+  private arSettings!: ArSettings;
 
   @service('configuration')
   private configuration!: Configuration;
@@ -176,7 +180,7 @@ export default class VrApplicationRenderer extends Service {
     const drawableComm = this.drawableClassCommunications.get(
       application.dataModel.id,
     );
-    if (drawableComm) {
+    if (drawableComm && this.arSettings.renderCommunication) {
       this.appCommRendering.addCommunication(application, drawableComm);
       Highlighting.updateHighlighting(application, drawableComm);
     }
@@ -286,7 +290,9 @@ export default class VrApplicationRenderer extends Service {
     const drawableComm = this.drawableClassCommunications.get(
       applicationObject3D.dataModel.id,
     )!;
-    this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
+    if (this.arSettings.renderCommunication) {
+      this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
+    }
     this.highlightingService.updateHighlightingLocally(applicationObject3D);
 
     if (this.heatmapConf.heatmapActive) {
@@ -301,7 +307,11 @@ export default class VrApplicationRenderer extends Service {
         application.dataModel.id,
       )!;
 
-      this.appCommRendering.addCommunication(application, drawableComm);
+      if (this.arSettings.renderCommunication) {
+        this.appCommRendering.addCommunication(application, drawableComm);
+      } else {
+        application.removeAllCommunication();
+      }
     });
   }
 
@@ -379,7 +389,10 @@ export default class VrApplicationRenderer extends Service {
       const drawableComm = this.drawableClassCommunications.get(
         applicationObject3D.dataModel.id,
       )!;
-      this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
+
+      if (this.arSettings.renderCommunication) {
+        this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
+      }
 
       // Add labels to application
       this.addLabels(applicationObject3D);

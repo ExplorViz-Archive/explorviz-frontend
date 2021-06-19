@@ -6,6 +6,7 @@ import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/
 import ClazzCommunicationMesh from 'explorviz-frontend/view-objects/3d/application/clazz-communication-mesh';
 import ClazzMesh from 'explorviz-frontend/view-objects/3d/application/clazz-mesh';
 import ComponentMesh from 'explorviz-frontend/view-objects/3d/application/component-mesh';
+import ArSettings from 'explorviz-frontend/services/ar-settings';
 import VrApplicationRenderer from './vr-application-renderer';
 import LocalVrUser from './local-vr-user';
 import VrMessageSender from './vr-message-sender';
@@ -29,6 +30,9 @@ function isHightlightableMesh(
 }
 
 export default class VrHighlightingService extends Service {
+  @service('ar-settings')
+  private arSettings!: ArSettings;
+
   @service('configuration')
   private configuration!: Configuration;
 
@@ -74,6 +78,8 @@ export default class VrHighlightingService extends Service {
   }
 
   updateHighlightingLocally(application: ApplicationObject3D) {
+    if (!this.arSettings.renderCommunication) return;
+
     const drawableComm = this.vrApplicationRenderer.drawableClassCommunications.get(
       application.dataModel.id,
     );
