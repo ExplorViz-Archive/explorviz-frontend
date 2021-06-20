@@ -96,7 +96,7 @@
   align-items: center;
 }
 
-.ar-right-button-container{
+.ar-right-button-container {
   position: fixed;
   bottom: var(--ar-button-padding);
   right: var(--ar-button-padding);
@@ -120,7 +120,7 @@
   left: calc(100vw - 60px);
 }
 
-.ar-left-button-container{
+.ar-left-button-container {
   position: fixed;
   bottom: var(--ar-button-padding);
   left: var(--ar-button-padding);
@@ -135,6 +135,11 @@
 
 .right{
   right: 0!important;
+}
+
+.room-list-item {
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 #arSettingsOpener {

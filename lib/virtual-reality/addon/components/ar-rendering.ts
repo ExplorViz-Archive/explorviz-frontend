@@ -191,11 +191,10 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   get rightClickMenuItems() {
     return [
-      { title: 'Open Landscape View', action: this.args.openLandscapeView },
-      { title: 'Open Sidebar', action: this.args.openDataSelection },
+      { title: 'Leave AR View', action: this.args.openLandscapeView },
       { title: 'Remove Popups', action: this.removeAllPopups },
       { title: 'Reset View', action: this.resetView },
-      { title: 'Toggle Communication', action: this.toggleCommunication },
+      { title: this.arSettings.renderCommunication ? 'Hide Communication' : 'Add Communication', action: this.toggleCommunication },
       { title: 'Close all Applications', action: this.removeAllApplications },
     ];
   }
