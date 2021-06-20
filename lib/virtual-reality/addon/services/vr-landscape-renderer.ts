@@ -89,7 +89,7 @@ export default class VrLandscapeRenderer extends Service {
     );
   }
 
-  private resetRotation() {
+  resetRotation() {
     this.landscapeObject3D.rotation.x = -90 * THREE.MathUtils.DEG2RAD;
     this.landscapeObject3D.rotation.y = 0;
     this.landscapeObject3D.rotation.z = 0;

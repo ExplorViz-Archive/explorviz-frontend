@@ -68,6 +68,7 @@ interface Args {
   readonly components: string[];
   readonly showDataSelection: boolean;
   readonly selectedTimestampRecords: Timestamp[];
+  openLandscapeView(): void
   addComponent(componentPath: string): void; // is passed down to the viz navbar
   removeComponent(component: string): void;
   openDataSelection(): void;
@@ -188,6 +189,17 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   localPing: { obj: THREE.Object3D, time: number } | undefined | null;
 
+  get rightClickMenuItems() {
+    return [
+      { title: 'Open Landscape View', action: this.args.openLandscapeView },
+      { title: 'Open Sidebar', action: this.args.openDataSelection },
+      { title: 'Remove Popups', action: this.removeAllPopups },
+      { title: 'Reset View', action: this.resetView },
+      { title: 'Toggle Communication', action: this.toggleCommunication },
+      { title: 'Close all Applications', action: this.removeAllApplications },
+    ];
+  }
+
   // #endregion CLASS FIELDS AND GETTERS
 
   constructor(owner: any, args: Args) {
@@ -276,18 +288,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   private initHammerJS() {
     this.hammerInteraction.setupHammer(this.canvas, 500);
-
-    this.hammerInteraction.on('lefttap', () => {
-      this.handleSecondaryCrosshairInteraction();
-    });
-
-    this.hammerInteraction.on('doubletap', () => {
-      this.handlePrimaryCrosshairInteraction();
-    });
-
-    this.hammerInteraction.on('press', () => {
-      this.handleInfoInteraction();
-    });
 
     this.hammerInteraction.on('pinchstart', () => {
       const intersection = this.interaction.raycastCanvasCenter();
@@ -525,6 +525,33 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     if (this.arToolkitContext.arController !== null) {
       this.arToolkitSource.copyElementSizeTo(this.arToolkitContext.arController.canvas);
     }
+  }
+
+  @action
+  resetView() {
+    this.vrLandscapeRenderer.setLargestSide(2);
+    this.vrLandscapeRenderer.landscapeObject3D.position.set(0, 0, 0);
+    this.vrLandscapeRenderer.resetRotation();
+
+    this.vrApplicationRenderer.getOpenApplications().forEach((application) => {
+      application.position.set(0, 0, 0);
+      application.setLargestSide(1.5);
+      application.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0),
+        90 * THREE.MathUtils.DEG2RAD);
+    });
+  }
+
+  @action
+  removeAllApplications() {
+    this.vrApplicationRenderer.removeAllApplications();
+  }
+
+  @action
+  toggleCommunication() {
+    const oldValue = this.arSettings.renderCommunication;
+    this.arSettings.renderCommunication = !oldValue;
+
+    this.vrApplicationRenderer.updateCommunication();
   }
 
   @action

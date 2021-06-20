@@ -194,6 +194,12 @@ export default class VrApplicationRenderer extends Service {
     });
   }
 
+  removeAllApplications() {
+    this.getOpenApplications().forEach((application) => {
+      this.removeApplication(application);
+    });
+  }
+
   removeApplication(application: ApplicationObject3D): Promise<boolean> {
     return new Promise((resolve) => {
       // Ask backend to close the application.

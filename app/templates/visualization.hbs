@@ -22,6 +22,7 @@
       @landscapeData={{this.landscapeData}}
       @selectedTimestampRecords={{this.selectedTimestampRecords}}
       @font={{this.font}}
+      @openLandscapeView={{this.openLandscapeView}}
       @addComponent={{this.addComponent}}
       @components={{this.components}}
       @removeComponent={{this.removeComponent}}
@@ -29,17 +30,6 @@
       @closeDataSelection={{this.closeDataSelection}}
       @showDataSelection={{this.showDataSelection}}
     />
-    <div class="position-absolute mt-6 ml-3">
-      <BsButton
-        id="backToLandscapeButton"
-        @onClick={{this.openLandscapeView}}
-        @type="secondary"
-        @outline={{true}}
-        title="Back to Landscape View"
-      >
-        {{svg-jar "arrow-left-24" class="octicon align-middle"}}
-      </BsButton>
-    </div>
   {{else}}
     {{#if this.showVR}}
       <VrRendering
