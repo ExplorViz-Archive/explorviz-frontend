@@ -1432,7 +1432,10 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     originalMessage: { appId },
   }: ForwardedMessage<AppClosedMessage>): void {
     const application = this.vrApplicationRenderer.getApplicationById(appId);
-    if (application) this.vrApplicationRenderer.removeApplicationLocally(application);
+    if (application) {
+      AlertifyHandler.showAlertifyWarning(`Application '${application.dataModel.name}' closed.`);
+      this.vrApplicationRenderer.removeApplicationLocally(application);
+    }
   }
 
   onObjectMoved(): void { }
