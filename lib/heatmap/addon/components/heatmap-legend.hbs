@@ -4,9 +4,23 @@
       <span id="legend-header-content">Heatmap</span>
       {{#if (eq this.heatmapConfiguration.selectedMode "aggregatedHeatmap")}}
         <HelpTooltip @title={{this.descriptions.aggregatedHeatmap}} />
-      {{else}}
+      {{else if (eq this.heatmapConfiguration.selectedMode "windowedHeatmap")}}
         <HelpTooltip @title={{this.descriptions.windowedHeatmap}} />
+      {{else}}
+        <HelpTooltip @title={{this.descriptions.snapshotHeatmap}} />
       {{/if}}
+    </div>
+    <div>
+      <button
+        class="button-svg-with-hover"
+        type="button"
+        {{on "click" this.switchHeatMapMode}}
+      >
+        {{svg-jar "arrow-switch-16" class="octicon align-middle"}}
+        <BsTooltip @placement="bottom" @triggerEvents="hover">
+          Switch Heat Map Mode.
+        </BsTooltip>
+      </button>
     </div>
     <div>
       <input id="collapsible" class="heatmap-legend-toggle" type="checkbox" checked>

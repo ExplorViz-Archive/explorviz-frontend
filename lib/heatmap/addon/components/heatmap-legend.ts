@@ -7,7 +7,8 @@ import { action } from '@ember/object';
 interface Args {
   descriptions?: {
     aggregatedHeatmap: string,
-    windowedHeatmap: string
+    windowedHeatmap: string,
+    snapshotHeatmap: string
   },
 }
 
@@ -23,18 +24,22 @@ export default class HeatmapLegend extends Component<Args> {
 
   get descriptions() {
     return this.args.descriptions ?? {
-      aggregatedHeatmap: 'Aggregates subsequent heatmaps by adding a part of the previous metric score to the new value.',
-      windowedHeatmap: 'Compares the latest metric score by difference to a previous one. The heatmap to be compared to is defined by the windowsize in the backend.',
+      aggregatedHeatmap: 'Continuously aggregates metric scores by adding a part of the previous metric score to the new (visualized) value.',
+      windowedHeatmap: 'Visualizes the alteration for the selected metric considering the last ten scores.',
+      snapshotHeatmap: 'Visualizes the metric scores of the currently rendered snapshot.',
     };
   }
 
   get subHeader() {
-    const { mode } = this.heatmapConfiguration.selectedMetric!;
+    const mode = this.heatmapConfiguration.selectedMode;
+    if (mode === 'snapshotHeatmap') {
+      return 'Snapshot score:';
+    }
     if (mode === 'aggregatedHeatmap') {
-      return 'Aggregated score:';
+      return 'Cont. score:';
     }
     if (mode === 'windowedHeatmap') {
-      return 'Value difference:';
+      return 'Windowed difference:';
     }
     return 'Subheader';
   }
@@ -113,5 +118,10 @@ export default class HeatmapLegend extends Component<Args> {
     ctx.fillText(maxLabel, canvas.width / 2, canvas.height * 0.05);
     ctx.fillText(midLabel, canvas.width / 2, canvas.height * 0.525);
     ctx.fillText(minLabel, canvas.width / 2, canvas.height * 0.99);
+  }
+
+  @action
+  switchHeatMapMode() {
+    this.heatmapConfiguration.switchMode();
   }
 }

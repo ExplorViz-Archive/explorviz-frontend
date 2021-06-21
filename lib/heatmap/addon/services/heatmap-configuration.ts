@@ -17,7 +17,7 @@ export type Metric = {
   values: Map<string, number>
 };
 
-type HeatmapMode = 'aggregatedHeatmap' | 'windowedHeatmap';
+type HeatmapMode = 'snapshotHeatmap' | 'aggregatedHeatmap' | 'windowedHeatmap';
 
 export default class HeatmapConfiguration extends Service.extend(Evented) {
   @service('landscape-listener')
@@ -44,6 +44,7 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
   applicationID: string | null = null;
 
   // Switches and models used by config
+  @tracked
   selectedMode: HeatmapMode = 'aggregatedHeatmap';
 
   useSimpleHeat = true;
@@ -63,6 +64,31 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
   arrayHeatGradient = getArrayDefaultGradient();
 
   debug = debugLogger();
+
+  switchMode() {
+    switch (this.selectedMode) {
+      case 'snapshotHeatmap':
+        this.selectedMode = 'aggregatedHeatmap';
+        break;
+      case 'aggregatedHeatmap':
+        this.selectedMode = 'windowedHeatmap';
+        break;
+      case 'windowedHeatmap':
+        this.selectedMode = 'snapshotHeatmap';
+        break;
+      default:
+        this.selectedMode = 'snapshotHeatmap';
+        break;
+    }
+  }
+
+  triggerHeatmapMode() {
+    if (this.applicationID) {
+      if (this.latestClazzMetrics !== null) {
+        this.trigger('updatedHeatMapMode', this.selectedMode);
+      }
+    }
+  }
 
   triggerLatestHeatmapUpdate() {
     if (this.applicationID) {
