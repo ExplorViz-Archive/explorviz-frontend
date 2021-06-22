@@ -97,6 +97,7 @@
   "dependencies": {
     "@glimmer/component": "^1.0.2",
     "@glimmer/tracking": "^1.0.2",
+    "@mediapop/ember-viewport": "^0.1.5",
     "@primer/octicons": "^13.0.0",
     "alertifyjs": "^1.13.1",
     "auth0-js": "^9.14.0",

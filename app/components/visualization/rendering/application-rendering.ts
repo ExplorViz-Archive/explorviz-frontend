@@ -423,7 +423,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  handleRotate(delta: number, event: any) {
+  handleRotate(delta: number) {
     // Rotate object
     this.applicationObject3D.rotation.y += THREE.MathUtils.degToRad(delta);
   }

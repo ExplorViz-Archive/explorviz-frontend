@@ -1,12 +1,12 @@
 html, body {
   overflow: hidden;
-  height: 100vh;
 }
 
 #main-container {
-  height: 100%;
-  @extend .d-flex;
-  @extend .flex-column;
+  height: 100vh;
+  // --vh is set by the ember addon ember-viewport
+  height: calc(var(--vh, 1vh) * 100);
+  position: relative;
 }
 
 #vizspace {
