@@ -108,7 +108,7 @@ export default class HeatmapLegend extends Component<Args> {
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.font = '1rem Arial';
+    ctx.font = '1em Arial';
     ctx.textAlign = 'center';
     ctx.fillText(maxLabel, canvas.width / 2, canvas.height * 0.05);
     ctx.fillText(midLabel, canvas.width / 2, canvas.height * 0.525);
