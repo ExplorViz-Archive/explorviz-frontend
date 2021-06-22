@@ -625,10 +625,33 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  handlePinch(delta: number) {
+  handlePinch(delta: number, center: Position2D) {
     this.popupData = null;
 
-    this.handleMouseWheel(-delta * 6.0);
+    const mouseScenePos = this.calculatePositionInScene(center);
+
+    // Zoom into landscape further if camera is far away
+    const ZOOM_CORRECTION = Math.abs(this.camera.position.z);
+
+    const scrollVector = new THREE.Vector3(mouseScenePos.x, mouseScenePos.y, 1);
+    scrollVector.unproject(this.camera);
+    scrollVector.sub(this.camera.position);
+    scrollVector.setLength(delta * ZOOM_CORRECTION);
+
+    const landscapeVisible = this.camera.position.z + scrollVector.z > 0.2;
+
+    // Apply zoom, prevent to zoom behind 2D-Landscape (z-direction)
+    if (landscapeVisible) {
+      this.camera.position.addVectors(this.camera.position, scrollVector);
+    }
+  }
+
+  calculatePositionInScene(mouseOnCanvas: Position2D) {
+    const x = (mouseOnCanvas.x / this.canvas.clientWidth) * 2 - 1;
+
+    const y = -(mouseOnCanvas.y / this.canvas.clientHeight) * 2 + 1;
+
+    return { x, y };
   }
 
   @action

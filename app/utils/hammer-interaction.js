@@ -257,7 +257,7 @@ export default class HammerInteraction extends Object.extend(Evented) {
     hammer.on('pinchmove', (evt) => {
       const deltaScaleInPercent = (evt.scale - lastPinchScale) / lastPinchScale;
       lastPinchScale = evt.scale;
-      self.trigger('pinch', deltaScaleInPercent, evt);
+      self.trigger('pinch', deltaScaleInPercent, evt.center);
     });
 
     hammer.on('pinchend', (evt) => {

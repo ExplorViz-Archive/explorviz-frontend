@@ -311,10 +311,10 @@ export default class InteractionModifierModifier extends Modifier<InteractionMod
   }
 
   @action
-  onPinch(deltaScaleInPercent: number, event: any) {
+  onPinch(deltaScaleInPercent: number, center: Position2D) {
     if (!this.args.named.pinch || !this.collaborativeSettings.isInteractionAllowed) { return; }
 
-    this.args.named.pinch(deltaScaleInPercent, event);
+    this.args.named.pinch(deltaScaleInPercent, center);
     this.sendPerspective();
   }
 
