@@ -78,49 +78,6 @@ export default class HeatmapLegend extends Component<Args> {
   }
 
   @action
-  didInsertLegendlabel(div: HTMLDivElement) {
-    this.labelCanvas.width = div.clientWidth;
-    this.labelCanvas.height = div.clientHeight;
-
-    this.updateLabel();
-  }
-
-  @action
-  updateLabel() {
-    const canvas = this.labelCanvas;
-    const ctx = canvas.getContext('2d')!;
-
-    let minLabel = 'min';
-    let midLabel = 'mid';
-    let maxLabel = 'max';
-
-    if (this.heatmapConfiguration.showLegendValues) {
-      const largestValue = Math.ceil(this.heatmapConfiguration.selectedMetric!.max);
-
-      if (this.heatmapConfiguration.selectedMode === 'aggregatedHeatmap') {
-        minLabel = '0';
-        midLabel = `${largestValue / 2}`;
-        maxLabel = `${largestValue}`;
-      } else {
-        minLabel = `${-largestValue / 2}`;
-        midLabel = '0';
-        maxLabel = `${largestValue / 2}`;
-      }
-    } else if (this.heatmapConfiguration.selectedMode === 'aggregatedHeatmap') {
-      minLabel = '0';
-    } else {
-      midLabel = '0';
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.font = '1rem Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(maxLabel, canvas.width / 2, canvas.height * 0.05);
-    ctx.fillText(midLabel, canvas.width / 2, canvas.height * 0.525);
-    ctx.fillText(minLabel, canvas.width / 2, canvas.height * 0.99);
-  }
-
-  @action
   switchHeatMapMode() {
     this.heatmapConfiguration.switchMode();
   }
