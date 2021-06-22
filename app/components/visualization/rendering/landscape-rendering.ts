@@ -646,14 +646,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     }
   }
 
-  calculatePositionInScene(mouseOnCanvas: Position2D) {
-    const x = (mouseOnCanvas.x / this.canvas.clientWidth) * 2 - 1;
-
-    const y = -(mouseOnCanvas.y / this.canvas.clientHeight) * 2 + 1;
-
-    return { x, y };
-  }
-
   @action
   handleMouseWheel(delta: number) {
     // Hide (old) tooltip
@@ -795,5 +787,13 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
       modelIdToPlaneLayout.set(modelId, planeLayoutObject);
     });
+  }
+
+  calculatePositionInScene(mouseOnCanvas: Position2D) {
+    const x = (mouseOnCanvas.x / this.canvas.clientWidth) * 2 - 1;
+
+    const y = -(mouseOnCanvas.y / this.canvas.clientHeight) * 2 + 1;
+
+    return { x, y };
   }
 }

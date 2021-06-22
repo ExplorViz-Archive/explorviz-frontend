@@ -338,8 +338,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Do not show popups while zooming
     this.popupData = null;
 
+    const ZOOM_CORRECTION = Math.abs(this.camera.position.z) / 6.0;
+
     // Change zoom depending on mouse wheel direction
-    this.camera.position.z += delta * 3.5;
+    this.camera.position.z += delta * ZOOM_CORRECTION;
   }
 
   @action
