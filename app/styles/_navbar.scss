@@ -58,6 +58,13 @@
   transform: rotateX(180deg);
 }
 
+#navbar-logo {
+  float: left;
+  height: 30px;
+  // fixes the logo from becoming blurry on some devices
+  transform: translateZ(0);
+}
+
 .pointer-events-none {
   pointer-events: none;
 }
