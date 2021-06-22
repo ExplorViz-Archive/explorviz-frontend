@@ -628,7 +628,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
   handlePinch(delta: number) {
     this.popupData = null;
 
-    this.handleMouseWheel(-delta * 2);
+    this.handleMouseWheel(-delta * 6.0);
   }
 
   @action
@@ -636,7 +636,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     // Hide (old) tooltip
     this.popupData = null;
 
-    const scrollDelta = delta * 1.5;
+    // Zoom into landscape further if camera is far away
+    const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 6.0);
+
+    const scrollDelta = delta * ZOOM_CORRECTION;
 
     const landscapeVisible = this.camera.position.z + scrollDelta > 0.2;
 
