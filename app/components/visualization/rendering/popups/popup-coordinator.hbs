@@ -1,5 +1,8 @@
 {{#if @popupData}}
-  <div class="popover" {{did-insert this.setPopupPosition}}>
+  <div class="popover"
+    {{did-insert this.setPopupPosition}}
+    {{did-update this.setPopupPosition @popupData}}
+  >
     {{!-- landscape popups --}}
     {{#if (eq this.entityType "node")}}
       <Visualization::Rendering::Popups::LandscapePopups::NodePopup
