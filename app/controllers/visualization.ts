@@ -106,7 +106,7 @@ export default class VisualizationController extends Controller {
   receiveNewLandscapeData(structureData: StructureLandscapeData,
     dynamicData: DynamicLandscapeData) {
     if (!this.visualizationPaused) {
-      this.heatmapConf.latestClazzMetrics = null;
+      this.heatmapConf.latestClazzMetricScores = null;
       this.updateLandscape(structureData, dynamicData);
     }
   }

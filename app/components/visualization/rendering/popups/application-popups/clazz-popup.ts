@@ -16,9 +16,9 @@ export default class ClazzPopup extends Component<Args> {
     return this.args.clazz.name;
   }
 
-  @computed('heatmapConf.latestClazzMetrics')
+  @computed('heatmapConf.latestClazzMetricScores')
   get metrics() {
-    const metrics = this.heatmapConf.latestClazzMetrics;
+    const metrics = this.heatmapConf.latestClazzMetricScores;
     const classMetrics: { name: string, value: number | undefined }[] = [];
 
     if (metrics) {

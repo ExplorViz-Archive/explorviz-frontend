@@ -11,7 +11,6 @@ import revertKey from '../utils/heatmap-generator';
 export type Metric = {
   name: string;
   description: string;
-  mode: HeatmapMode,
   min: number,
   max: number,
   values: Map<string, number>
@@ -32,11 +31,13 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
   legendActive = true;
 
   @tracked
-  latestClazzMetrics: Metric[] | null = null;
+  latestClazzMetricScores: Metric[] | null = null;
 
   largestValue = 0;
 
   metrics: Metric[] = [];
+
+  aggregatedMetricScores: Map<string, Metric> = new Map<string, Metric>();
 
   @tracked
   selectedMetric: Metric | null = null;
@@ -65,6 +66,32 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
 
   debug = debugLogger();
 
+  saveAndCalculateMetricScores(newScores: Metric[]) {
+    // calculate new aggregated metric scores
+    newScores.forEach((newMetricScore) => {
+      const metricName = newMetricScore.name;
+      this.metrics.push(newMetricScore);
+      if (newMetricScore.values) {
+        // update values
+        newMetricScore.values.forEach((value, key) => {
+          const oldMetric = this.aggregatedMetricScores.get(metricName);
+          const oldMetricScores = oldMetric?.values;
+
+          // Init metrics (first run)
+          if (!oldMetric) {
+            this.aggregatedMetricScores.set(metricName, newMetricScore);
+          } else if (oldMetricScores) {
+            // update metric scores (subsequent runs)
+            const oldScore = oldMetricScores.get(key);
+            if (oldScore) {
+              this.aggregatedMetricScores.get(metricName)?.values.set(key, value + 0.5 * oldScore);
+            }
+          }
+        });
+      }
+    });
+  }
+
   switchMode() {
     switch (this.selectedMode) {
       case 'snapshotHeatmap':
@@ -84,7 +111,7 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
 
   triggerHeatmapMode() {
     if (this.applicationID) {
-      if (this.latestClazzMetrics !== null) {
+      if (this.latestClazzMetricScores !== null) {
         this.trigger('updatedHeatMapMode', this.selectedMode);
       }
     }
@@ -92,15 +119,15 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
 
   triggerLatestHeatmapUpdate() {
     if (this.applicationID) {
-      if (this.latestClazzMetrics !== null) {
-        this.trigger('updatedClazzMetrics', this.latestClazzMetrics);
+      if (this.latestClazzMetricScores !== null) {
+        this.trigger('updatedClazzMetrics', this.latestClazzMetricScores);
       }
     }
   }
 
   triggerMetricUpdate() {
     if (this.applicationID) {
-      if (this.latestClazzMetrics !== null) {
+      if (this.latestClazzMetricScores !== null) {
         this.trigger('newSelectedMetric', this.selectedMetric);
       }
     }
@@ -142,7 +169,7 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
    * Reset all class attribute values to null;
    */
   cleanup() {
-    this.set('latestClazzMetrics', null);
+    this.set('latestClazzMetricScores', null);
     this.set('selectedMetric', null);
     this.set('applicationID', null);
     this.set('currentApplication', null);

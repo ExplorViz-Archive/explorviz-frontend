@@ -560,13 +560,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       const metrics: Metric[] = yield this.worker.postMessage('metrics-worker', workerPayload);
 
       this.heatmapConf.applicationID = applicationObject3D.dataModel.id;
-      this.heatmapConf.latestClazzMetrics = metrics;
+      this.heatmapConf.latestClazzMetricScores = metrics;
+      this.heatmapConf.saveAndCalculateMetricScores(metrics);
 
       const { selectedMetric } = this.heatmapConf;
 
       // Update currently viewed metric
       if (selectedMetric) {
-        const updatedMetric = this.heatmapConf.latestClazzMetrics.find(
+        const updatedMetric = this.heatmapConf.latestClazzMetricScores.find(
           (latestMetric) => latestMetric.name === selectedMetric.name,
         );
 
@@ -582,17 +583,19 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   applyHeatmap() {
-    if (!this.heatmapConf.latestClazzMetrics || !this.heatmapConf.latestClazzMetrics.firstObject) {
+    if (!this.heatmapConf.latestClazzMetricScores
+      || !this.heatmapConf.latestClazzMetricScores.firstObject) {
       AlertifyHandler.showAlertifyError('No metrics available.');
       return;
     }
 
     // Selected first metric if none is selected yet
     if (!this.heatmapConf.selectedMetric) {
-      this.heatmapConf.selectedMetric = this.heatmapConf.latestClazzMetrics.firstObject;
+      this.heatmapConf.selectedMetric = this.heatmapConf.latestClazzMetricScores.firstObject;
     }
 
     const { selectedMetric } = this.heatmapConf;
+    console.log('apply heatmap', selectedMetric);
 
     this.applicationObject3D.setComponentMeshOpacity(0.1);
     if (this.communicationRendering.transparent) {
