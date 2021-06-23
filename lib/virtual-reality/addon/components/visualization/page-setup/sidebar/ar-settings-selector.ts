@@ -35,9 +35,9 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
   ];
 
   renderResolutions = [
-    { name: 'low', multiplier: 0.5 },
-    { name: 'default', multiplier: 1 },
-    { name: 'high', multiplier: 2 },
+    { name: 'default', multiplier: 2 },
+    { name: 'low', multiplier: 1 },
+    { name: 'very low', multiplier: 0.5 },
   ];
 
   constructor(owner: any, args: ArSettingsSelectorArgs) {

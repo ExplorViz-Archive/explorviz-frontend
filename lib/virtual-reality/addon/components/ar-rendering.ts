@@ -172,7 +172,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   pannedObject: THREE.Object3D | null | undefined;
 
-  rendererResolutionMultiplier = 1;
+  rendererResolutionMultiplier = 2;
 
   @tracked
   popupDataMap: Map<number, PopupData> = new Map();
