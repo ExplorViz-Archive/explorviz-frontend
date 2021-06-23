@@ -489,7 +489,7 @@ export default class VrRendering extends Component<Args> {
 
     this.landscapeObject3D.dataModel = structureLandscapeData;
 
-    // Run Klay layouting in 3 steps within workers
+    // Run Elk layouting in 3 steps within workers
     try {
       const applicationCommunications = computeApplicationCommunication(structureLandscapeData,
         dynamicLandscapeData);
@@ -500,7 +500,7 @@ export default class VrRendering extends Component<Args> {
         applicationCommunications,
       });
 
-      // Run actual klay function (2nd step)
+      // Run actual elk function (2nd step)
       const newGraph: ElkNode = yield this.elk.layout(graph);
 
       // Post-process layout graph (3rd step)
