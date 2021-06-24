@@ -28,6 +28,8 @@ import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
 
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+
 interface Args {
   readonly id: string;
   readonly landscapeData: LandscapeData;
@@ -199,6 +201,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.initCamera();
     this.initRenderer();
     this.initLights();
+    this.initControls();
 
     /*
     const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting',
@@ -253,6 +256,28 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     dirLight.position.set(30, 10, 20);
     this.scene.add(dirLight);
     this.debug('Lights added');
+  }
+
+  initControls() {
+    const controls = new OrbitControls(this.camera, this.webglrenderer.domElement);
+
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.PAN,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.ROTATE,
+    };
+
+    controls.touches = {
+      ONE: THREE.TOUCH.PAN,
+      TWO: THREE.TOUCH.DOLLY_PAN,
+    };
+
+    controls.enableRotate = false;
+
+    controls.minDistance = 0.5;
+    controls.maxDistance = 50;
+
+    controls.zoomSpeed = 1.2;
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -601,66 +626,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (mesh instanceof ApplicationMesh) {
       this.openApplicationIfExistend(mesh);
       // Handle nodeGroup
-    }
-  }
-
-  @action
-  handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
-    this.popupData = null;
-
-    const LEFT_MOUSE_BUTTON = 1;
-
-    if (button === LEFT_MOUSE_BUTTON) {
-      // Move landscape further if camera is far away
-      const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 4.0);
-
-      // Divide delta by 100 to achieve reasonable panning speeds
-      const xOffset = (delta.x / 100) * -ZOOM_CORRECTION;
-      const yOffset = (delta.y / 100) * ZOOM_CORRECTION;
-
-      // Adapt camera position (apply panning)
-      this.camera.position.x += xOffset;
-      this.camera.position.y += yOffset;
-    }
-  }
-
-  @action
-  handlePinch(delta: number, center: Position2D) {
-    this.popupData = null;
-
-    const mouseScenePos = this.calculatePositionInScene(center);
-
-    // Zoom into landscape further if camera is far away
-    const ZOOM_CORRECTION = Math.abs(this.camera.position.z);
-
-    const scrollVector = new THREE.Vector3(mouseScenePos.x, mouseScenePos.y, 1);
-    scrollVector.unproject(this.camera);
-    scrollVector.sub(this.camera.position);
-    scrollVector.setLength(delta * ZOOM_CORRECTION);
-
-    const landscapeVisible = this.camera.position.z + scrollVector.z > 0.2;
-
-    // Apply zoom, prevent to zoom behind 2D-Landscape (z-direction)
-    if (landscapeVisible) {
-      this.camera.position.addVectors(this.camera.position, scrollVector);
-    }
-  }
-
-  @action
-  handleMouseWheel(delta: number) {
-    // Hide (old) tooltip
-    this.popupData = null;
-
-    // Zoom into landscape further if camera is far away
-    const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 6.0);
-
-    const scrollDelta = delta * ZOOM_CORRECTION;
-
-    const landscapeVisible = this.camera.position.z + scrollDelta > 0.2;
-
-    // Apply zoom, prevent to zoom behind 2D-Landscape (z-direction)
-    if (landscapeVisible) {
-      this.camera.position.z += scrollDelta;
     }
   }
 
