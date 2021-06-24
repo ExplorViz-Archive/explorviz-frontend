@@ -98,6 +98,8 @@
 
 .ar-right-button-container {
   position: fixed;
+  pointer-events: none;
+  z-index: 749;
   bottom: var(--ar-button-padding);
   right: var(--ar-button-padding);
   display: grid;
@@ -109,6 +111,11 @@
   padding: var(--ar-button-padding);
 }
 
+.ar-right-button-container * {
+  pointer-events: all;
+}
+
+
 .ar-button-svg {
   width: var(--ar-button-size);
   height: var(--ar-button-size);
@@ -117,11 +124,14 @@
 
 .ar-right-relative {
   position: relative;
+  height: fit-content;
   left: calc(100vw - 60px);
 }
 
 .ar-left-button-container {
   position: fixed;
+  pointer-events: none;
+  z-index: 749;
   bottom: var(--ar-button-padding);
   left: var(--ar-button-padding);
   display: grid;
@@ -131,6 +141,10 @@
             "h z";
   grid-gap: var(--ar-button-padding);
   padding: var(--ar-button-padding);
+}
+
+.ar-left-button-container * {
+  pointer-events: all;
 }
 
 .right{
@@ -180,4 +194,8 @@
   padding-top: 10px;
   padding-bottom: 10px;
   opacity: 0.7;
+}
+
+#sidebarButtonContainer {
+  height: fit-content;
 }

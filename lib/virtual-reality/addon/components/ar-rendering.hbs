@@ -70,7 +70,7 @@
         {{/if}}
       </canvas>
 
-      <div class="ar-left-button-container foreground">
+      <div class="ar-left-button-container">
 
         <Visualization::PageSetup::ArButtons::PopupButton
           @handleInfoInteraction={{this.handleInfoInteraction}}
@@ -88,7 +88,7 @@
 
       </div>
 
-      <div class="ar-right-button-container foreground">
+      <div class="ar-right-button-container">
 
         <Visualization::PageSetup::ArButtons::PrimaryInteractionButton
           @handlePrimaryCrosshairInteraction={{this.handlePrimaryCrosshairInteraction}}
@@ -114,7 +114,7 @@
         <Visualization::PageSetup::Sidebar::DataSelection
           @closeDataSelection={{@closeDataSelection}}
         >
-          <div class="explorviz-visualization-navbar">
+          <div class="explorviz-visualization-navbar foreground">
             <ul class="nav justify-content-center">
               <Visualization::PageSetup::Navbar::XrCollaborationOpener
                 @addComponent={{@addComponent}}
