@@ -41,6 +41,7 @@ import {
   toggleComponentMeshState,
 } from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -104,6 +105,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   hoveredObject: BaseMesh | null;
 
   drawableClassCommunications: DrawableClassCommunication[] = [];
+
+  orbitControls!: OrbitControls;
 
   // Extended Object3D which manages application meshes
   readonly applicationObject3D: ApplicationObject3D;
@@ -182,7 +185,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     applyDefaultApplicationLayout(this.applicationObject3D);
     this.communicationRendering.addCommunication(this.applicationObject3D,
       this.drawableClassCommunications);
-    this.applicationObject3D.resetRotation();
   }
 
   /**
@@ -194,6 +196,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.initCamera();
     this.initRenderer();
     this.initLights();
+    this.initControls();
 
     /*
     const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting',
@@ -249,6 +252,29 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const light = new THREE.AmbientLight(new THREE.Color(0.65, 0.65, 0.65));
     this.scene.add(light);
     this.debug('Lights added');
+  }
+
+  initControls() {
+    const controls = new OrbitControls(this.camera, this.canvas);
+
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.PAN,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.ROTATE,
+    };
+
+    controls.touches = {
+      ONE: THREE.TOUCH.PAN,
+      TWO: THREE.TOUCH.DOLLY_ROTATE,
+    };
+
+    controls.maxDistance = 250;
+
+    controls.zoomSpeed = 1.2;
+
+    this.orbitControls = controls;
+    this.camera.rotation.setFromVector3(new THREE.Vector3(0, 0, Math.PI / 2));
+    this.orbitControls.update();
   }
 
   // #endregion COMPONENT AND SCENE INITIALIZATION
@@ -334,17 +360,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
-  handleMouseWheel(delta: number) {
-    // Do not show popups while zooming
-    this.popupData = null;
-
-    const ZOOM_CORRECTION = Math.abs(this.camera.position.z) / 6.0;
-
-    // Change zoom depending on mouse wheel direction
-    this.camera.position.z += delta * ZOOM_CORRECTION;
-  }
-
-  @action
   handleMouseOut() {
     this.popupData = null;
   }
@@ -388,46 +403,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         entity: mesh.dataModel,
       };
     }
-  }
-
-  @action
-  handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
-    this.popupData = null;
-
-    const LEFT_MOUSE_BUTTON = 1;
-    const RIGHT_MOUSE_BUTTON = 3;
-
-    if (button === RIGHT_MOUSE_BUTTON) {
-      // Rotate object
-      this.applicationObject3D.rotation.x += delta.y / 100;
-      this.applicationObject3D.rotation.y += delta.x / 100;
-    } else if (button === LEFT_MOUSE_BUTTON) {
-      // Move landscape further if camera is far away
-      const ZOOM_CORRECTION = (Math.abs(this.camera.position.z) / 4.0);
-
-      // Divide delta by 100 to achieve reasonable panning speeds
-      const xOffset = (delta.x / 100) * -ZOOM_CORRECTION;
-      const yOffset = (delta.y / 100) * ZOOM_CORRECTION;
-
-      // Adapt camera position (apply panning)
-      this.camera.position.x += xOffset;
-      this.camera.position.y += yOffset;
-    }
-  }
-
-  @action
-  handlePinch(delta: number) {
-    this.popupData = null;
-
-    const ZOOM_CORRECTION = Math.abs(this.camera.position.z);
-    // Change zoom depending on mouse wheel direction
-    this.camera.position.z -= delta * ZOOM_CORRECTION;
-  }
-
-  @action
-  handleRotate(delta: number) {
-    // Rotate object
-    this.applicationObject3D.rotation.y += THREE.MathUtils.degToRad(delta);
   }
 
   // #endregion MOUSE EVENT HANDLER
@@ -690,7 +665,6 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   @action
   resetView() {
     this.camera.position.set(0, 0, 100);
-    this.applicationObject3D.resetRotation();
   }
 
   /**

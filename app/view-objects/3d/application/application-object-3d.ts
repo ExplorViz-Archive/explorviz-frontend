@@ -61,18 +61,6 @@ export default class ApplicationObject3D extends THREE.Object3D {
   }
 
   /**
-   * Resets this object's rotation to default
-   * (x = 0.65, y = 0.80)
-   */
-  resetRotation() {
-    const ROTATION_X = 0.65;
-    const ROTATION_Y = 0.80;
-
-    this.rotation.x = ROTATION_X;
-    this.rotation.y = ROTATION_Y;
-  }
-
-  /**
    * Adds object as child of this object.
    * Furthermore, application related meshes are stored inside
    * one of the class's maps or set for easier future access.
