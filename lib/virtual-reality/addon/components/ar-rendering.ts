@@ -1074,6 +1074,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     this.heatmapConf.currentApplication = null;
 
     applicationObject3D.setOpacity(this.arSettings.applicationOpacity);
+
+    this.sceneService.addSpotlight();
   }
 
   heatmapClazzUpdate(applicationObject3D: ApplicationObject3D,
