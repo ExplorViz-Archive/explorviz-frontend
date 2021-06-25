@@ -68,12 +68,7 @@ export function turnComponentAndAncestorsTransparent(component: Package,
  */
 export function highlight(mesh: ComponentMesh | ClazzMesh | ClazzCommunicationMesh,
   applicationObject3D: ApplicationObject3D, communication: DrawableClassCommunication[],
-  toggleHighlighting = true, ignoreCommuLines = false) {
-  if (ignoreCommuLines && mesh instanceof ClazzCommunicationMesh) {
-    // do nothing
-    return;
-  }
-
+  toggleHighlighting = true) {
   // Reset highlighting if highlighted mesh is clicked
   if (mesh.highlighted && toggleHighlighting) {
     removeHighlighting(applicationObject3D);
@@ -308,9 +303,7 @@ export function highlightTrace(trace: Trace, traceStep: string,
  */
 export function updateHighlighting(applicationObject3D: ApplicationObject3D,
   communication: DrawableClassCommunication[]) {
-  if (!applicationObject3D.highlightedEntity) {
-    return;
-  }
+  if (!applicationObject3D.highlightedEntity) return;
 
   if (applicationObject3D.highlightedEntity instanceof ClazzCommunicationMesh) {
     const possiblyNewMeshInstance = applicationObject3D

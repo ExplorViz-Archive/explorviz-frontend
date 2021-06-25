@@ -124,13 +124,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   readonly communicationRendering: CommunicationRendering;
 
   get rightClickMenuItems() {
+    const commButtonTitle = this.configuration.isCommRendered ? 'Hide Communication' : 'Add Communication';
+    const heatmapButtonTitle = this.heatmapConf.heatmapActive ? 'Disable Heatmap' : 'Enable Heatmap';
     const pauseButtonTitle = this.args.visualizationPaused ? 'Resume Visualization' : 'Pause Visualization';
 
     return [
       { title: 'Reset View', action: this.resetView },
       { title: 'Open All Components', action: this.openAllComponents },
-      { title: 'Toggle Communication', action: this.toggleCommunicationLines },
-      { title: 'Toggle Heatmap', action: this.toggleHeatmap },
+      { title: commButtonTitle, action: this.toggleCommunicationRendering },
+      { title: heatmapButtonTitle, action: this.toggleHeatmap },
       { title: pauseButtonTitle, action: this.args.toggleVisualizationUpdating },
       { title: 'Open Sidebar', action: this.args.openDataSelection },
     ];
@@ -165,7 +167,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.applicationObject3D = new ApplicationObject3D(application!,
       new Map(), dynamicLandscapeData);
 
-    this.communicationRendering = new CommunicationRendering(this.configuration);
+    this.communicationRendering = new CommunicationRendering(this.configuration, this.heatmapConf);
 
     this.hoveredObject = null;
   }
@@ -297,8 +299,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     } else if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
       highlight(mesh, this.applicationObject3D,
-        this.drawableClassCommunications, true,
-        this.communicationRendering.transparent);
+        this.drawableClassCommunications, true);
     }
     if (this.heatmapConf.heatmapActive) {
       this.applicationObject3D.setComponentMeshOpacity(0.1);
@@ -595,11 +596,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const { selectedMetric } = this.heatmapConf;
 
     this.applicationObject3D.setComponentMeshOpacity(0.1);
-    if (this.communicationRendering.transparent) {
-      this.applicationObject3D.setCommunicationOpacity(0.0);
-    } else {
-      this.applicationObject3D.setCommunicationOpacity(0.1);
-    }
+    this.applicationObject3D.setCommunicationOpacity(0.1);
 
     const foundationMesh = this.applicationObject3D
       .getBoxMeshbyModelId(this.args.landscapeData.application!.id);
@@ -897,20 +894,20 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    * Toggles the visualization of communication lines.
    */
   @action
-  toggleCommunicationLines() {
-    this.communicationRendering.transparent = !this.communicationRendering.transparent;
-    this.drawableClassCommunications.forEach((commu) => {
-      const commMesh = this.applicationObject3D.getCommMeshByModelId(commu.id);
-      if (commMesh) {
-        if (this.communicationRendering.transparent) {
-          commMesh.turnTransparent(0.0);
-        } else if (this.heatmapConf.heatmapActive) {
-          commMesh.turnTransparent(0.1);
-        } else {
-          commMesh.turnOpaque();
-        }
+  toggleCommunicationRendering() {
+    this.configuration.isCommRendered = !this.configuration.isCommRendered;
+
+    if (this.configuration.isCommRendered) {
+      this.communicationRendering.addCommunication(this.applicationObject3D,
+        this.drawableClassCommunications);
+    } else {
+      this.applicationObject3D.removeAllCommunication();
+
+      // Remove highlighting if highlighted communication is no longer visible
+      if (this.applicationObject3D.highlightedEntity instanceof ClazzCommunicationMesh) {
+        removeHighlighting(this.applicationObject3D);
       }
-    });
+    }
   }
 
   /**
@@ -1040,6 +1037,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   willDestroy() {
     super.willDestroy();
+
     cancelAnimationFrame(this.animationFrameId);
     this.cleanUpApplication();
     this.scene.dispose();
@@ -1047,12 +1045,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.renderer.forceContextLoss();
 
     this.heatmapConf.cleanup();
+    this.configuration.isCommRendered = true;
 
     if (this.threePerformance) {
       this.threePerformance.removePerformanceMeasurement();
     }
-
-    this.heatmapConf.heatmapActive = false;
 
     this.debug('Cleaned up application rendering');
   }
