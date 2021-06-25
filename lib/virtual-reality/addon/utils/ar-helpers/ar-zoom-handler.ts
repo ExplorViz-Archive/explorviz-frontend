@@ -59,7 +59,10 @@ export default class ArZoomHandler {
       sizeY / zoomLevel,
     );
 
-    this.zoomCamera.aspect = 2;
+    const canvas = renderer.domElement;
+
+    this.zoomCamera.aspect = canvas.clientWidth / canvas.clientHeight;
+    this.zoomCamera.updateProjectionMatrix();
 
     renderer.setViewport(x, y, sizeX, sizeY);
     renderer.setScissor(x, y, sizeX, sizeY);
