@@ -16,6 +16,7 @@
     >
       {{#if this.heatmapConf.heatmapActive}}
         <HeatmapInfo
+          @triggerHeatmapVisualization={{this.triggerHeatmapVisualization}}
           @updateMetric={{this.updateMetric}}
         />
       {{/if}}

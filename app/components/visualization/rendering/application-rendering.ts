@@ -564,18 +564,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       this.heatmapConf.latestClazzMetricScores = metrics;
       this.heatmapConf.saveAndCalculateMetricScores(metrics);
 
-      const { selectedMetric } = this.heatmapConf;
-
-      // Update currently viewed metric
-      if (selectedMetric) {
-        const updatedMetric = this.heatmapConf.latestClazzMetricScores.find(
-          (latestMetric) => latestMetric.name === selectedMetric.name,
-        );
-
-        if (updatedMetric) {
-          this.heatmapConf.selectedMetric = updatedMetric;
-        }
-      }
+      this.heatmapConf.updateCurrentlyViewedMetric();
 
       if (callback) callback();
     } catch (e) {
@@ -596,7 +585,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
 
     const { selectedMetric } = this.heatmapConf;
-    console.log('apply heatmap', selectedMetric);
+    // console.log('apply heatmap', selectedMetric);
 
     this.applicationObject3D.setComponentMeshOpacity(0.1);
     this.applicationObject3D.setCommunicationOpacity(0.1);
@@ -1010,9 +999,23 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   }
 
   @action
+  triggerHeatmapVisualization() {
+    const metricName = this.heatmapConf.selectedMetric?.name;
+
+    if (metricName) {
+      this.heatmapConf.setSelectedMetricForCurrentMode(metricName);
+    }
+
+    if (this.heatmapConf.heatmapActive) {
+      this.applyHeatmap();
+    }
+  }
+
+  @action
   updateMetric(metric: Metric) {
-    this.heatmapConf.selectedMetric = metric;
-    this.heatmapConf.triggerMetricUpdate();
+    const metricName = metric.name;
+
+    this.heatmapConf.setSelectedMetricForCurrentMode(metricName);
 
     if (this.heatmapConf.heatmapActive) {
       this.applyHeatmap();
