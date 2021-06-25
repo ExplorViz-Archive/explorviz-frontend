@@ -17,6 +17,7 @@ import debugLogger from 'ember-debug-logger';
 import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
+import ElkConstructor from 'elkjs/lib/elk-api';
 
 export interface LandscapeData {
   structureLandscapeData: StructureLandscapeData;
@@ -77,6 +78,11 @@ export default class VisualizationController extends Controller {
 
   @tracked
   timelineTimestamps: Timestamp[] = [];
+
+  @tracked
+  elk = new ElkConstructor({
+    workerUrl: './assets/web-workers/elk-worker.min.js',
+  });
 
   debug = debugLogger();
 
