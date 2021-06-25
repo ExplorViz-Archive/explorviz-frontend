@@ -74,6 +74,9 @@ export default class Configuration extends Service {
 
   // #region APPLICATION LAYOUT
 
+  @tracked
+  isCommRendered = true;
+
   commCurveHeightDependsOnDistance = true;
 
   // Determines height of class communication curves, 0 results in straight lines

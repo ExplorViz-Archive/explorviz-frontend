@@ -13,7 +13,7 @@ export default class ColorSchemeSelector extends Component<ColorSchemeSelectorAr
 
   colorSchemes = [
     { name: 'Default', identifier: 'default' },
-    { name: 'Vision Impairment!', identifier: 'impaired' },
+    { name: 'Vision Impairment', identifier: 'impaired' },
     { name: 'Classic (Initial)', identifier: 'classic' },
     { name: 'Dark', identifier: 'dark' },
   ];
