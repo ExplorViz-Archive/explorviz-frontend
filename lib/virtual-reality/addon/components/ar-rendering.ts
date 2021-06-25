@@ -399,8 +399,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     return !(intersection.object instanceof LabelMesh || intersection.object instanceof LogoMesh);
   }
 
-  private initArJs() {
-    this.initArJsCamera();
+  @action
+  initArJs(width = 640, height = 480) {
+    this.initArJsCamera(width, height);
 
     // handle resize event
     window.addEventListener('resize', () => {
@@ -410,22 +411,6 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     /// /////////////////////////////////////////////////////////
     // setup arToolkitContext
     /// /////////////////////////////////////////////////////////
-
-    // create atToolkitContext
-    this.arToolkitContext = new THREEx.ArToolkitContext({
-      cameraParametersUrl: 'ar_data/camera_para.dat',
-      detectionMode: 'mono',
-    });
-
-    // copy projection matrix to camera when initialization complete
-    this.arToolkitContext.init(() => {
-      this.localUser.defaultCamera.projectionMatrix.copy(
-        this.arToolkitContext.getProjectionMatrix(),
-      );
-      this.localUser.defaultCamera.aspect = 1.33;
-      this.localUser.defaultCamera.fov = 44;
-      this.localUser.defaultCamera.updateProjectionMatrix();
-    });
 
     this.landscapeMarker.add(this.vrLandscapeRenderer.landscapeObject3D);
     this.sceneService.scene.add(this.landscapeMarker);
@@ -439,22 +424,27 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
     const applicationMarkerNames = ['pattern-angular_1', 'pattern-angular_2', 'pattern-angular_3', 'pattern-angular_4', 'pattern-angular_5'];
 
-    applicationMarkerNames.forEach((markerName) => {
-      const applicationMarker = new THREE.Group();
-      this.sceneService.scene.add(applicationMarker);
-      this.applicationMarkers.push(applicationMarker);
+    for (let i = 0; i < applicationMarkerNames.length; i++) {
+      let applicationMarker: THREE.Group;
+
+      if (this.applicationMarkers.length <= i) {
+        applicationMarker = new THREE.Group();
+        this.sceneService.scene.add(applicationMarker);
+        this.applicationMarkers.push(applicationMarker);
+      } else {
+        applicationMarker = this.applicationMarkers[i];
+      }
 
       // Init controls for camera
       // eslint-disable-next-line
       new THREEx.ArMarkerControls(this.arToolkitContext, applicationMarker, {
         type: 'pattern',
-        patternUrl: `ar_data/${markerName}.patt`,
+        patternUrl: `ar_data/${applicationMarkerNames[i]}.patt`,
       });
-    });
+    }
   }
 
-  @action
-  initArJsCamera(width = 640, height = 480) {
+  private initArJsCamera(width = 640, height = 480) {
     ArRendering.cleanUpAr();
 
     this.arToolkitSource = new THREEx.ArToolkitSource({
@@ -469,10 +459,36 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       }, 1000);
     });
 
-    // Adapt aspect and fov to other parameters
-    this.localUser.defaultCamera.aspect = width / height;
-    this.localUser.defaultCamera.fov = 44;
-    this.localUser.defaultCamera.updateProjectionMatrix();
+    let cameraParametersUrl: string;
+    const aspectRatio = width / height;
+    if (aspectRatio > 1.5) {
+      cameraParametersUrl = 'ar_data/camera_para_1280_720.dat';
+    } else {
+      cameraParametersUrl = 'ar_data/camera_para_640_480.dat';
+    }
+
+    // create atToolkitContext
+    this.arToolkitContext = new THREEx.ArToolkitContext({
+      cameraParametersUrl,
+      detectionMode: 'mono',
+    });
+
+    // copy projection matrix to camera when initialization complete
+    this.arToolkitContext.init(() => {
+      this.localUser.defaultCamera.projectionMatrix.copy(
+        this.arToolkitContext.getProjectionMatrix(),
+      );
+      // The properties in the following section need to be set manually since otherwise
+      // text would be flickering
+      this.localUser.defaultCamera.aspect = width / height;
+
+      if (aspectRatio > 1.5) {
+        this.localUser.defaultCamera.fov = 34.25;
+      } else {
+        this.localUser.defaultCamera.fov = 44;
+      }
+      this.localUser.defaultCamera.updateProjectionMatrix();
+    });
   }
   // #endregion COMPONENT AND SCENE INITIALIZATION
 

@@ -29,9 +29,9 @@ export default class ArSettingsSelector extends Component<ArSettingsSelectorArgs
   buttonPadding: number;
 
   cameraPresets = [
-    { name: '480p', width: 640, height: 480 },
-    { name: '960p', width: 1280, height: 960 },
-    { name: '1440p', width: 1920, height: 1440 },
+    { name: '640 x 480', width: 640, height: 480 },
+    { name: '1280 x 720', width: 1280, height: 720 },
+    { name: '1920 x 1080', width: 1920, height: 1080 },
   ];
 
   renderResolutions = [
