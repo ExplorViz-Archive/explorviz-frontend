@@ -1402,6 +1402,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     await this.roomSerializer.restoreRoom({ landscape, openApps, detachedMenus });
 
     this.landscapeMarker.add(this.vrLandscapeRenderer.landscapeObject3D);
+    this.arSettings.updateLandscapeOpacity();
 
     this.vrApplicationRenderer.getOpenApplications().forEach((applicationObject3D) => {
       this.addApplicationToMarker(applicationObject3D);

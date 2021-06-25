@@ -4,6 +4,7 @@ import { restartableTask } from 'ember-concurrency-decorators';
 import { perform } from 'ember-concurrency-ts';
 import debugLogger from 'ember-debug-logger';
 import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
+import ArSettings from 'explorviz-frontend/services/ar-settings';
 import Configuration from 'explorviz-frontend/services/configuration';
 import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-rendering/application-communication-computer';
 import * as LandscapeCommunicationRendering from 'explorviz-frontend/utils/landscape-rendering/communication-rendering';
@@ -28,6 +29,9 @@ const LANDSCAPE_DEPTH = 0.7;
 
 export default class VrLandscapeRenderer extends Service {
   private debug = debugLogger('VrLandscapeRenderer');
+
+  @service('ar-settings')
+  private arSettings!: ArSettings;
 
   @service('configuration')
   private configuration!: Configuration;
@@ -253,6 +257,8 @@ export default class VrLandscapeRenderer extends Service {
         0.004,
         0.028,
       );
+
+      this.landscapeObject3D.setOpacity(this.arSettings.landscapeOpacity);
 
       // Reset position of landscape.
       this.resetScale();
