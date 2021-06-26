@@ -23,18 +23,47 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
 
   isPinned = false;
 
-  divElement: HTMLElement | undefined;
+  divElement!: HTMLElement;
+
+  panDeltaX = 0;
+
+  panDeltaY = 0;
 
   @action
   setupDragElement(element: HTMLElement) {
-    this.divElement = element;
-    this.dragElement(element);
+    this.initializePanListener(element);
 
-    this.setupPosition(element);
+    this.setupInitialPosition(element);
+
+    this.divElement = element;
 
     if (this.arSettings.stackPopups) {
       this.args.keepPopupOpen(this.args.popupData.id);
     }
+  }
+
+  initializePanListener(element: HTMLElement) {
+    const mc = new Hammer(element);
+
+    mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+
+    // Keep track of pan distance since pan start
+    mc.on('panstart', () => {
+      this.keepPopupOpen();
+      this.panDeltaX = 0;
+      this.panDeltaY = 0;
+    });
+
+    mc.on('panleft panright panup pandown', (ev) => {
+      // Calculate positional difference since last pan event
+      const currentDeltaX = this.panDeltaX - ev.deltaX;
+      const currentDeltaY = this.panDeltaY - ev.deltaY;
+
+      this.handlePan(currentDeltaX, currentDeltaY);
+
+      this.panDeltaX = ev.deltaX;
+      this.panDeltaY = ev.deltaY;
+    });
   }
 
   @action
@@ -49,7 +78,7 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
     this.args.closePopup(this.args.popupData.id);
   }
 
-  setupPosition(popoverDiv: HTMLElement) {
+  setupInitialPosition(popoverDiv: HTMLElement) {
     const { popupData } = this.args;
 
     // Set to previously stored position
@@ -105,9 +134,7 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
     this.args.setPopupPosition(this.args.popupData.id, popupLeftPosition, popupTopPosition);
   }
 
-  dragElement(elmnt: HTMLElement) {
-    let xOffset = 0; let yOffset = 0; let inputX = 0; let inputY = 0;
-
+  handlePan(deltaX: number, deltaY: number) {
     const self = this;
 
     function xPositionInsideWindow(minX: number, maxX: number) {
@@ -118,94 +145,30 @@ export default class PopupWrapper extends Component<PopupWrapperArgs> {
       return minY >= 0 && maxY <= window.innerHeight;
     }
 
-    function moveElement(clientX: number, clientY: number) {
-      // Calculate cursor position
-      xOffset = inputX - clientX;
-      yOffset = inputY - clientY;
-      inputX = clientX;
-      inputY = clientY;
-
+    function moveElement(xOffset: number, yOffset: number) {
       // Calculation of old and new coordinates
-      const oldMinX = elmnt.offsetLeft;
-      const oldMaxX = oldMinX + elmnt.clientWidth;
-      const oldMinY = elmnt.offsetTop;
-      const oldMaxY = oldMinY + elmnt.clientHeight;
+      const oldMinX = self.divElement.offsetLeft;
+      const oldMaxX = oldMinX + self.divElement.clientWidth;
+      const oldMinY = self.divElement.offsetTop;
+      const oldMaxY = oldMinY + self.divElement.clientHeight;
 
       const newMinX = oldMinX - xOffset;
-      const newMaxX = newMinX + elmnt.clientWidth;
+      const newMaxX = newMinX + self.divElement.clientWidth;
       const newMinY = oldMinY - yOffset;
-      const newMaxY = newMinY + elmnt.clientHeight;
+      const newMaxY = newMinY + self.divElement.clientHeight;
 
       // Set the element's new position:
       if (!xPositionInsideWindow(oldMinX, oldMaxX) || xPositionInsideWindow(newMinX, newMaxX)) {
-        elmnt.style.left = `${newMinX}px`;
+        self.divElement.style.left = `${newMinX}px`;
       }
 
       if (!yPositionInsideWindow(oldMinY, oldMaxY) || yPositionInsideWindow(newMinY, newMaxY)) {
-        elmnt.style.top = `${newMinY}px`;
+        self.divElement.style.top = `${newMinY}px`;
       }
 
       self.args.setPopupPosition(self.args.popupData.id, newMinX, newMinY);
     }
 
-    function closeDragElement() {
-      // stop moving when mouse button is released:
-      document.onmouseup = null;
-      document.onmousemove = null;
-      document.ontouchcancel = null;
-      document.ontouchend = null;
-      document.ontouchmove = null;
-    }
-
-    function elementMouseDrag(e: MouseEvent) {
-      const event = e || window.event;
-      event.preventDefault();
-
-      // Calculate cursor position
-      moveElement(e.clientX, e.clientY);
-    }
-
-    function elementTouchDrag(e: TouchEvent) {
-      const event = e || window.event;
-      event.preventDefault();
-
-      if (event.targetTouches.length < 1) {
-        closeDragElement();
-      } else {
-        const { clientX } = event.targetTouches[0];
-        const { clientY } = event.targetTouches[0];
-
-        moveElement(clientX, clientY);
-      }
-    }
-
-    function dragMouseDown(e: MouseEvent) {
-      const event = e || window.event;
-      event.preventDefault();
-      // Get the mouse cursor position at startup:
-      inputX = e.clientX;
-      inputY = e.clientY;
-      document.onmouseup = closeDragElement;
-      // Call a function whenever the cursor moves:
-      document.onmousemove = elementMouseDrag;
-    }
-
-    function dragTouchDown(e: TouchEvent) {
-      const event = e || window.event;
-      event.preventDefault();
-
-      if (event.targetTouches.length > 0) {
-        inputX = event.targetTouches[0].clientX;
-        inputY = event.targetTouches[0].clientY;
-
-        document.ontouchcancel = closeDragElement;
-        document.ontouchend = closeDragElement;
-
-        document.ontouchmove = elementTouchDrag;
-      }
-    }
-
-    elmnt.onmousedown = dragMouseDown;
-    elmnt.ontouchstart = dragTouchDown;
+    moveElement(deltaX, deltaY);
   }
 }
