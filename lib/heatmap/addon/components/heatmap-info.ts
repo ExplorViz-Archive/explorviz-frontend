@@ -37,7 +37,8 @@ export default class HeatmapInfo extends Component<HeatmapInfoArgs> {
 
     mc.on('panleft panright panup pandown', (ev) => {
       // Do not interfer with metric selection
-      if (ev.target.className && ev.target.className.includes('ember-power-select')) return;
+      if (ev.target.className === 'string'
+        && ev.target.className.includes('ember-power-select')) return;
 
       // Calculate positional difference since last pan event
       const currentDeltaX = this.panDeltaX - ev.deltaX;
