@@ -37,39 +37,46 @@ export default class ArZoomHandler {
     resize: (outerDiv: HTMLElement) => void) {
     if (!this.zoomEnabled) return;
 
-    renderer.setScissorTest(true);
-    const fullSize = renderer.getSize(new THREE.Vector2());
+    const originalSize = renderer.getSize(new THREE.Vector2());
 
     const { zoomLevel } = this.arSettings;
 
-    const sizeX = fullSize.x / 3; // size of magnifier
-    const sizeY = fullSize.y / 3;
-    const x = fullSize.x / 2 - sizeX / 2;
-    const y = fullSize.y / 2 - sizeY / 2;
+    const zoomSize = {
+      x: originalSize.x / 3,
+      y: originalSize.y / 3,
+    };
 
-    const offsetX = sizeX + sizeX / 2 - (sizeX / zoomLevel) / 2;
-    const offsetY = sizeY + sizeY / 2 - (sizeY / zoomLevel) / 2;
+    const zoomPos = {
+      x: originalSize.x / 2 - zoomSize.x / 2,
+      y: originalSize.y / 2 - zoomSize.y / 2,
+    };
+
+    const zoomOffset = {
+      x: zoomSize.x + zoomSize.x / 2 - (zoomSize.x / zoomLevel) / 2,
+      y: zoomSize.y + zoomSize.y / 2 - (zoomSize.y / zoomLevel) / 2,
+    };
 
     this.zoomCamera.setViewOffset(
-      fullSize.x,
-      fullSize.y,
-      offsetX,
-      offsetY,
-      sizeX / zoomLevel,
-      sizeY / zoomLevel,
+      originalSize.x,
+      originalSize.y,
+      zoomOffset.x,
+      zoomOffset.y,
+      zoomSize.x / zoomLevel,
+      zoomSize.y / zoomLevel,
     );
 
     const canvas = renderer.domElement;
 
+    renderer.setScissorTest(true);
+
     this.zoomCamera.aspect = canvas.clientWidth / canvas.clientHeight;
     this.zoomCamera.updateProjectionMatrix();
 
-    renderer.setViewport(x, y, sizeX, sizeY);
-    renderer.setScissor(x, y, sizeX, sizeY);
+    renderer.setViewport(zoomPos.x, zoomPos.y, zoomSize.x, zoomSize.y);
+    renderer.setScissor(zoomPos.x, zoomPos.y, zoomSize.x, zoomSize.y);
 
     renderer.render(scene, this.zoomCamera);
 
-    // Prepare renderer to render full scene again
     renderer.setScissorTest(false);
 
     renderer.setViewport(0, 0, this.outerDiv.clientWidth, this.outerDiv.clientHeight);
