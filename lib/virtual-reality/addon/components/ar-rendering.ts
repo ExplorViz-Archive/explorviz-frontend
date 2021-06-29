@@ -400,8 +400,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
   }
 
   @action
-  initArJs(width = 640, height = 480) {
-    this.initArJsCamera(width, height);
+  initArJs(width = 640, height = 480, isSpectating = false) {
+    this.initArJsCamera(width, height, isSpectating);
 
     // handle resize event
     window.addEventListener('resize', () => {
@@ -444,14 +444,23 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     }
   }
 
-  private initArJsCamera(width = 640, height = 480) {
+  private initArJsCamera(width = 640, height = 480, isSpectating = false) {
     ArRendering.cleanUpAr();
 
-    this.arToolkitSource = new THREEx.ArToolkitSource({
-      sourceType: 'webcam',
-      sourceWidth: width,
-      sourceHeight: height,
-    });
+    if (isSpectating) {
+      this.arToolkitSource = new THREEx.ArToolkitSource({
+        sourceType: 'image',
+        sourceUrl: 'ar_data/marker_images/default_markers/marker_overview.png',
+        sourceWidth: width,
+        sourceHeight: height,
+      });
+    } else {
+      this.arToolkitSource = new THREEx.ArToolkitSource({
+        sourceType: 'webcam',
+        sourceWidth: width,
+        sourceHeight: height,
+      });
+    }
 
     this.arToolkitSource.init(() => {
       setTimeout(() => {
@@ -826,7 +835,10 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     // Handle keys
     switch (event.key) {
       case 'c':
-        this.initArJsCamera(1920, 1080);
+        this.initArJs(640, 480);
+        break;
+      case 's':
+        this.initArJs(1540, 1080, true);
         break;
       /*
       case 'm':
@@ -1209,12 +1221,12 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
 
   static cleanUpAr() {
     // Remove video and stop corresponding stream
-    const video = document.getElementById('arjs-video');
+    const arJsVideo = document.getElementById('arjs-video');
 
-    if (video instanceof HTMLVideoElement) {
-      document.body.removeChild(video);
+    if (arJsVideo instanceof HTMLVideoElement) {
+      document.body.removeChild(arJsVideo);
 
-      const stream = video.srcObject;
+      const stream = arJsVideo.srcObject;
 
       if (stream instanceof MediaStream) {
         const tracks = stream.getTracks();
@@ -1223,6 +1235,8 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
           track.stop();
         });
       }
+    } else if (arJsVideo instanceof HTMLImageElement) {
+      document.body.removeChild(arJsVideo);
     }
   }
 
