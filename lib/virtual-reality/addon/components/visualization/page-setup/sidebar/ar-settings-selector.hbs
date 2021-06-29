@@ -8,11 +8,16 @@
 
   <div class="arSettingsGridContainer">
     <div class="arSettingsGridItem arPresetGridItem">
+      <form method="get" action="ar_data/marker_images/default_markers/Marker_DINA4.pdf" class="center-horizontal" target="_blank">
+        <button type="submit" class="btn btn-primary autoMargin">Download Markers</button>
+      </form>
+    </div>
+
+    <div class="arSettingsGridItem arPresetGridItem">
       <Visualization::PageSetup::Sidebar::ColorSchemeSelector
         @updateView={{@updateView}}
       />
     </div>
-
 
     <div id="cameraPresets" class="dropdown arSettingsGridItem arPresetGridItem">
       <button
