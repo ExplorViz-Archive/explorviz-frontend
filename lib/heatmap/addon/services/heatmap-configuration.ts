@@ -101,7 +101,7 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
           // console.log(this.differenceMetricScores);
           // console.log('chosenMetric', chosenMetric);
           if (chosenMetric && chosenMetric.lastObject) {
-            // console.log('windowed');
+            // console.log('chose windowed');
             this.selectedMetric = chosenMetric.lastObject;
             // console.log(this.selectedMetric);
           }
@@ -110,7 +110,7 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
       default:
         break;
     }
-
+    // console.log('selected metric', this.selectedMetric);
     this.triggerMetricUpdate();
   }
 
@@ -122,13 +122,13 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
       if (this.selectedMode === 'aggregatedHeatmap') {
         const chosenMetric = this.aggregatedMetricScores.get(this.selectedMetric?.name);
         if (chosenMetric) {
-          console.log('updated aggregated');
           updatedMetric = chosenMetric;
+          // console.log('updated aggregated', updatedMetric);
         }
       } else if (this.selectedMode === 'windowedHeatmap') {
         const chosenMetric = this.differenceMetricScores.get(this.selectedMetric?.name);
         if (chosenMetric && chosenMetric.lastObject) {
-          console.log('updated windowed');
+          // console.log('updated windowed');
           updatedMetric = chosenMetric.lastObject;
         }
       } else if (this.selectedMode === 'snapshotHeatmap') {
@@ -136,7 +136,7 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
           (latestMetric) => latestMetric.name === this.selectedMetric?.name,
         );
         if (updatedMetric) {
-          console.log('updated snapshot');
+          // console.log('updated snapshot');
         }
       }
       if (updatedMetric) {
@@ -146,6 +146,10 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
   }
 
   saveAndCalculateMetricScores(newScores: Metric[]) {
+    function roundToTwoDecimalPlaces(num: number): number {
+      return Math.round((num + Number.EPSILON) * 100) / 100;
+    }
+
     // calculate new aggregated (cont and windowed) metric scores
     newScores.forEach((newMetricScore) => {
       const metricName = newMetricScore.name;
@@ -179,7 +183,7 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
               }
             });
             newMetricValue = value - newMetricValue;
-            newWindowedMetricsMap.set(key, newMetricValue);
+            newWindowedMetricsMap.set(key, roundToTwoDecimalPlaces(newMetricValue));
             // console.log('set new Window', key, newMetricValue);
           } else {
             // console.log('init value');
@@ -193,17 +197,53 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
 
           // Init metrics (first run)
           if (!oldMetricAggregated) {
-            console.log('init agg Metric');
+            // console.log('init agg Metric', newMetricScore.values);
             this.aggregatedMetricScores.set(metricName, newMetricScore);
           } else if (oldMetricScores) {
             // update metric scores (subsequent runs)
             const oldScore = oldMetricScores.get(key);
             if (oldScore) {
-              // console.log('udpate agg Metric', value + 0.5 * oldScore);
-              this.aggregatedMetricScores.get(metricName)?.values.set(key, value + 0.5 * oldScore);
+              // console.log('udpate agg Metric', key, value + 0.5 * oldScore);
+              this.aggregatedMetricScores.get(metricName)?.values.set(key,
+                roundToTwoDecimalPlaces(value + 0.5 * oldScore));
             }
           }
         });
+
+        // Update min max for continuously aggregated metric scores
+
+        let newMinAgg: number = 0;
+        let newMaxAgg: number = 0;
+
+        if (this.aggregatedMetricScores.get(metricName)) {
+          this.aggregatedMetricScores.get(metricName)!.values.forEach((value) => {
+            if (newMinAgg) {
+              newMinAgg = value < newMinAgg ? value : newMinAgg;
+            } else {
+              newMinAgg = value;
+            }
+
+            if (newMaxAgg) {
+              newMaxAgg = value > newMaxAgg ? value : newMaxAgg;
+            } else {
+              newMaxAgg = value;
+            }
+          });
+
+          const newMetricScoreObject = {
+            name: metricName,
+            mode: 'aggregatedHeatmap',
+            description: newMetricScore.description,
+            min: roundToTwoDecimalPlaces(newMinAgg),
+            max: roundToTwoDecimalPlaces(newMaxAgg),
+            values: this.aggregatedMetricScores.get(metricName)!.values,
+          };
+
+          this.aggregatedMetricScores.set(metricName, newMetricScoreObject);
+
+          // this.aggregatedMetricScores.get(metricName)!.max = newMaxAgg;
+          // this.aggregatedMetricScores.get(metricName)!.min = newMinAgg;
+        }
 
         // Finally, set new Metrics for windowed mode
 
@@ -233,17 +273,18 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
             name: metricName,
             mode: 'aggregatedHeatmap',
             description: newMetricScore.description,
-            min: newMin,
-            max: newMax,
+            min: roundToTwoDecimalPlaces(newMin),
+            max: roundToTwoDecimalPlaces(newMax),
             values: newWindowedMetricsMap,
           };
-          console.log('new Metric Score', newMetricScoreObject);
+          // console.log('new Metric Score', newMetricScoreObject);
 
           if (this.differenceMetricScores && this.differenceMetricScores.get(metricName)) {
             this.differenceMetricScores.get(metricName)?.push(newMetricScoreObject);
           } else {
             this.differenceMetricScores.set(metricName, [newMetricScoreObject]);
           }
+          // console.log('new windowed metrics', this.differenceMetricScores);
         }
       }
     });

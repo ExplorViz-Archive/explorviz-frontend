@@ -4,16 +4,27 @@
 <div class="popover-body" style="white-space: nowrap;">
   <table style="width:100%">
     <tbody>
-      {{#each this.metrics as |metric|}}
-        <tr>
-          <td>{{metric.name}}:</td>
-          <td style="text-align:right;padding-left:10px;">
-            {{metric.value}}
-          </td>
-        </tr>
+      {{#if this.heatmapConf.heatmapActive}}
+        {{#each this.allMetrics as |metric|}}
+          {{#if (eq this.heatmapConf.selectedMetric.name metric.metricName)}}
+            <tr>
+              <td style="font-weight:bold;">{{metric.metricName}}:</td>
+              <td style="font-weight:bold;text-align:right;padding-left:10px;">
+                {{metric.snapshotVal}} / {{metric.contAggVal}} / {{metric.winVal}}
+              </td>
+            </tr>
+          {{else}}
+            <tr>
+              <td>{{metric.metricName}}:</td>
+              <td style="text-align:right;padding-left:10px;">
+                {{metric.snapshotVal}} / {{metric.contAggVal}} / {{metric.winVal}}
+              </td>
+            </tr>
+          {{/if}}
+        {{/each}}
       {{else}}
         Activate heatmap to calculate metrics
-      {{/each}}
+      {{/if}}
     </tbody>
   </table>
 </div>
