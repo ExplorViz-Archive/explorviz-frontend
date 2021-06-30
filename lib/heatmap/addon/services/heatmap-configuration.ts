@@ -100,9 +100,9 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
           chosenMetric = this.differenceMetricScores.get(metricName);
           // console.log(this.differenceMetricScores);
           // console.log('chosenMetric', chosenMetric);
-          if (chosenMetric && chosenMetric.lastObject) {
+          if (chosenMetric && chosenMetric[chosenMetric.length - 1]) {
             // console.log('chose windowed');
-            this.selectedMetric = chosenMetric.lastObject;
+            this.selectedMetric = chosenMetric[chosenMetric.length - 1];
             // console.log(this.selectedMetric);
           }
         }
@@ -127,9 +127,9 @@ export default class HeatmapConfiguration extends Service.extend(Evented) {
         }
       } else if (this.selectedMode === 'windowedHeatmap') {
         const chosenMetric = this.differenceMetricScores.get(this.selectedMetric?.name);
-        if (chosenMetric && chosenMetric.lastObject) {
+        if (chosenMetric && chosenMetric[chosenMetric.length - 1]) {
           // console.log('updated windowed');
-          updatedMetric = chosenMetric.lastObject;
+          updatedMetric = chosenMetric[chosenMetric.length - 1];
         }
       } else if (this.selectedMode === 'snapshotHeatmap') {
         updatedMetric = this.latestClazzMetricScores.find(

@@ -29,13 +29,20 @@ export default class ClazzPopup extends Component<Args> {
       metrics.forEach((metric) => {
         const aggMetrics = this.heatmapConf.aggregatedMetricScores.get(metric.name);
 
-        const winMetrics = this.heatmapConf.differenceMetricScores.get(metric.name)?.lastObject;
+        let winValToShow;
+
+        const winMetrics = this.heatmapConf.differenceMetricScores.get(metric.name);
+
+        if (winMetrics) {
+          const newestWinMetricScores = winMetrics[winMetrics?.length - 1];
+          winValToShow = newestWinMetricScores.values.get(this.args.clazz.id);
+        }
 
         const newEntry = {
           metricName: metric.name,
           snapshotVal: metric.values.get(this.args.clazz.id),
           contAggVal: aggMetrics?.values.get(this.args.clazz.id),
-          winVal: winMetrics?.values.get(this.args.clazz.id),
+          winVal: winValToShow,
         };
         allClassMetricScores.push(newEntry);
       });
