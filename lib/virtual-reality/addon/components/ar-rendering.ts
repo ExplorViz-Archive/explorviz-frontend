@@ -419,7 +419,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     // eslint-disable-next-line
     new THREEx.ArMarkerControls(this.arToolkitContext, this.landscapeMarker, {
       type: 'pattern',
-      patternUrl: 'ar_data/pattern-angular_L_thick.patt',
+      patternUrl: 'ar_data/marker_patterns/pattern-angular_L_thick.patt',
     });
 
     const applicationMarkerNames = ['pattern-angular_1', 'pattern-angular_2', 'pattern-angular_3', 'pattern-angular_4', 'pattern-angular_5'];
@@ -439,7 +439,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
       // eslint-disable-next-line
       new THREEx.ArMarkerControls(this.arToolkitContext, applicationMarker, {
         type: 'pattern',
-        patternUrl: `ar_data/${applicationMarkerNames[i]}.patt`,
+        patternUrl: `ar_data/marker_patterns/${applicationMarkerNames[i]}.patt`,
       });
     }
   }
@@ -450,7 +450,7 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     if (isSpectating) {
       this.arToolkitSource = new THREEx.ArToolkitSource({
         sourceType: 'image',
-        sourceUrl: 'ar_data/marker_images/default_markers/marker_overview.png',
+        sourceUrl: 'ar_data/marker_images/marker_overview.png',
         sourceWidth: width,
         sourceHeight: height,
       });
@@ -471,9 +471,9 @@ export default class ArRendering extends Component<Args> implements VrMessageLis
     let cameraParametersUrl: string;
     const aspectRatio = width / height;
     if (aspectRatio > 1.5) {
-      cameraParametersUrl = 'ar_data/camera_para_1280_720.dat';
+      cameraParametersUrl = 'ar_data/camera_configurations/camera_para_1280_720.dat';
     } else {
-      cameraParametersUrl = 'ar_data/camera_para_640_480.dat';
+      cameraParametersUrl = 'ar_data/camera_configurations/camera_para_640_480.dat';
     }
 
     // create atToolkitContext
