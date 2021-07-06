@@ -1,56 +1,50 @@
 <h3 class="popover-header">
-  <div style="font-weight:bold;text-align:center;">{{this.name}}</div>
+  <div class="text-center text-break font-weight-bold pl-1">{{this.name}}</div>
 </h3>
-<div class="popover-body" style="white-space: nowrap;">
-  <table style="width:100%">
-    <thead>
-      <tr>
-        <th>Metric Name</th>
-        <th>Snapshot</th>
-        <th>/</th>
-        <th>Aggregated</th>
-        <th>/</th>
-        <th>Windowed</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{#if this.heatmapConf.heatmapActive}}
+<div class="popover-body">
+  {{#if this.heatmapConf.heatmapActive}}
+    <table class="w-100">
+      <thead>
+        <tr>
+          <th>Metric Name</th>
+          <th class="pl-1 pr-1">Snapshot</th>
+          <th class="pl-1 pr-1">Aggregated</th>
+          <th>Windowed</th>
+        </tr>
+      </thead>
+      <tbody>
         {{#each this.allMetrics as |metric|}}
           {{#if (eq this.heatmapConf.selectedMetric.name metric.metricName)}}
             <tr>
-              <td style="font-weight:bold;color:blue;">{{metric.metricName}}:</td>
-              <td style="font-weight:bold;color:blue;text-align:center;">
+              <td class="font-weight-bold text-primary">{{metric.metricName}}:</td>
+              <td class="text-center font-weight-bold text-primary">
                 {{metric.snapshotVal}}
               </td>
-              <td></td>
-              <td style="font-weight:bold;color:blue;text-align:center;">
+              <td class="text-center font-weight-bold text-primary">
                 {{metric.contAggVal}}
               </td>
-              <td></td>
-              <td style="font-weight:bold;color:blue;text-align:center;">
+              <td class="text-center font-weight-bold text-primary">
                 {{metric.winVal}}
               </td>
             </tr>
           {{else}}
             <tr>
               <td>{{metric.metricName}}:</td>
-              <td style="text-align:center;">
+              <td class="text-center">
                 {{metric.snapshotVal}}
               </td>
-              <td></td>
-              <td style="text-align:center;">
+              <td class="text-center">
                 {{metric.contAggVal}}
               </td>
-              <td></td>
-              <td style="text-align:center;">
+              <td class="text-center">
                 {{metric.winVal}}
               </td>
             </tr>
           {{/if}}
         {{/each}}
-      {{else}}
-        Activate heatmap to calculate metrics
-      {{/if}}
-    </tbody>
-  </table>
+      </tbody>
+    </table>
+  {{else}}
+    Activate heatmap to view metrics
+  {{/if}}
 </div>

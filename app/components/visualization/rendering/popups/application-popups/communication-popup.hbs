@@ -1,5 +1,5 @@
 <h3 class="popover-header">
-  <div style="font-weight:bold;text-align:center;">
+  <div class="text-center text-break font-weight-bold pl-1">
     {{this.sourceClazz}}
     {{#if this.isBidirectional}}
       {{svg-jar "arrow-both-16" class="octicon align-middle"}}
@@ -9,18 +9,18 @@
     {{this.targetClazz}}
   </div>
 </h3>
-<div class="popover-body" style="white-space: nowrap;">
-  <table style="width:100%">
+<div class="popover-body">
+  <table class="w-100">
     <tbody>
       <tr>
-        <td>&nbsp;{{svg-jar "comment-16" class="octicon align-middle"}}&nbsp;Name:</td>
-        <td style="text-align:right;padding-left:10px;">
+        <td class="text-nowrap align-top">{{svg-jar "comment-16" class="octicon align-middle mr-1"}}Name:</td>
+        <td class="text-right text-break pl-1">
           {{this.operationName}}
         </td>
       </tr>
       <tr>
-        <td>&nbsp;{{svg-jar "code-16" class="octicon align-middle"}}&nbsp;Requests:</td>
-        <td style="text-align:right;padding-left:10px;">
+        <td class="text-nowrap align-top">{{svg-jar "code-16" class="octicon align-middle mr-1"}}Requests:</td>
+        <td class="text-right text-break pl-1">
           {{this.requests}}
         </td>
       </tr>
