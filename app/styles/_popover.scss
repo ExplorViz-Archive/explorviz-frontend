@@ -6,7 +6,10 @@
 
 @media (max-width: 575.98px) {
   .popover > .popover-body {
-    display: inline-block;
     overflow-x: auto;
+
+    > table {
+      display: inline-table;
+    }
   }
 }
