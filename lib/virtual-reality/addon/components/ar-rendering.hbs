@@ -40,13 +40,13 @@
 
 
       {{#each this.popupDataMap as |popupData|}}
-        <PopupWrapper
+        <Visualization::Rendering::Popups::PopupWrapper
           @popupData={{popupData.[1]}}
           @keepPopupOpen={{this.keepPopupOpen}}
           @setPopupPosition={{this.setPopupPosition}}
           @closePopup={{this.closePopup}}
         >
-        </PopupWrapper>
+        </Visualization::Rendering::Popups::PopupWrapper>
       {{/each}}
 
       <canvas
@@ -110,7 +110,7 @@
   {{#if @showDataSelection}}
     <div class="position-absolute right col-8" id="dataselection">
       <div class="mt-6 d-flex flex-row w-100">
-        <SidebarResizer/>
+        <Visualization::PageSetup::Sidebar::SidebarResizer/>
         <Visualization::PageSetup::Sidebar::DataSelection
           @closeDataSelection={{@closeDataSelection}}
         >
