@@ -273,7 +273,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     controls.zoomSpeed = 1.2;
 
     this.orbitControls = controls;
-    this.camera.rotation.setFromVector3(new THREE.Vector3(0, 0, Math.PI / 2));
+    this.camera.position.set(-69, 42, 58);
+    this.camera.rotation.setFromVector3(new THREE.Vector3(-0.63, -0.76, -0.47));
     this.orbitControls.update();
   }
 
