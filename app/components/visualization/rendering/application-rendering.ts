@@ -41,6 +41,7 @@ import {
   toggleComponentMeshState,
 } from 'explorviz-frontend/utils/application-rendering/entity-manipulation';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 
 interface Args {
   readonly landscapeData: LandscapeData;
@@ -78,6 +79,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @service()
   worker!: any;
+
+  @service('user-settings')
+  userSettings!: UserSettings;
 
   debug = debugLogger('ApplicationRendering');
 
@@ -200,13 +204,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    /*
-    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting',
-      'showFpsCounter');
+    const { showFpsCounter } = this.userSettings.settings.flags;
 
     if (showFpsCounter) {
       this.threePerformance = new THREEPerformance();
-    } */
+    }
   }
 
   /**
@@ -324,8 +326,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   mouseMoveOnMesh(mesh: THREE.Object3D) {
-    const enableHoverEffects = true;
-    // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
+    const { enableHoverEffects } = this.userSettings.settings.flags;
 
     // Update hover effect
     if (mesh === undefined && this.hoveredObject) {

@@ -74,7 +74,7 @@ export default class Configuration extends Service {
     const {
       application: applicationSettings,
       landscape: landscapeSettings,
-    } = this.userSettings.settings.visualization.colors;
+    } = this.userSettings.settings.colors;
 
     this.landscapeColors = {
       node: new THREE.Color(landscapeSettings.node),

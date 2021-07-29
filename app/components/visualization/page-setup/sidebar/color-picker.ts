@@ -95,14 +95,14 @@ export default class ColorPicker extends Component<Args> {
   }
 
   applyColorsFromUserSettings() {
-    const landscapeColors = this.userSettings.settings.visualization.colors.landscape;
+    const landscapeColors = this.userSettings.settings.colors.landscape;
     Object.entries(landscapeColors).forEach(
       ([key, value]: [keyof LandscapeColorsHexString, string]) => {
         this.configuration.landscapeColors[key].set(value);
       },
     );
 
-    const applicationColors = this.userSettings.settings.visualization.colors.application;
+    const applicationColors = this.userSettings.settings.colors.application;
     Object.entries(applicationColors).forEach(
       ([key, value]: [keyof ApplicationColorsHexString, string]) => {
         this.configuration.applicationColors[key].set(value);

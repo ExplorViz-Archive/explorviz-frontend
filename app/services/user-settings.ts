@@ -1,12 +1,16 @@
 import Service from '@ember/service';
 
 export interface Settings {
-  visualization: {
-    colors: {
-      application: ApplicationColorsHexString;
-      landscape: LandscapeColorsHexString;
-    };
+  colors: {
+    application: ApplicationColorsHexString;
+    landscape: LandscapeColorsHexString;
   };
+  flags: FlagSettings;
+}
+
+export interface FlagSettings {
+  showFpsCounter: boolean;
+  enableHoverEffects: boolean;
 }
 
 export interface ApplicationColorsHexString {
@@ -124,6 +128,11 @@ const darkLandscapeColors = {
   background: '#acacac', // stone grey
 };
 
+const defaultFlags: FlagSettings = {
+  showFpsCounter: false,
+  enableHoverEffects: true,
+};
+
 export default class UserSettings extends Service {
   settings!: Settings;
 
@@ -154,12 +163,11 @@ export default class UserSettings extends Service {
 
   applyDefaultSettings() {
     const settings = {
-      visualization: {
-        colors: {
-          application: { ...defaultApplicationColors },
-          landscape: { ...defaultLandscapeColors },
-        },
+      colors: {
+        application: { ...defaultApplicationColors },
+        landscape: { ...defaultLandscapeColors },
       },
+      flags: { ...defaultFlags },
     };
 
     this.updateSettings(settings);
@@ -170,37 +178,42 @@ export default class UserSettings extends Service {
     this.set('settings', settings);
   }
 
+  updateFlagSetting(attribute: keyof FlagSettings, value: boolean) {
+    this.settings.flags[attribute] = value;
+    this.updateSettings(this.settings);
+  }
+
   updateLandscapeColor(attribute: keyof LandscapeColorsHexString, value: string) {
-    this.settings.visualization.colors.landscape[attribute] = value;
+    this.settings.colors.landscape[attribute] = value;
     this.updateSettings(this.settings);
   }
 
   updateApplicationColor(attribute: keyof ApplicationColorsHexString, value: string) {
-    this.settings.visualization.colors.application[attribute] = value;
+    this.settings.colors.application[attribute] = value;
     this.updateSettings(this.settings);
   }
 
   setDefaultColors() {
-    this.settings.visualization.colors.landscape = { ...defaultLandscapeColors };
-    this.settings.visualization.colors.application = { ...defaultApplicationColors };
+    this.settings.colors.landscape = { ...defaultLandscapeColors };
+    this.settings.colors.application = { ...defaultApplicationColors };
     this.updateSettings(this.settings);
   }
 
   setImpairedColors() {
-    this.settings.visualization.colors.landscape = { ...visuallyImpairedLandscapeColors };
-    this.settings.visualization.colors.application = { ...visuallyImpairedApplicationColors };
+    this.settings.colors.landscape = { ...visuallyImpairedLandscapeColors };
+    this.settings.colors.application = { ...visuallyImpairedApplicationColors };
     this.updateSettings(this.settings);
   }
 
   setClassicColors() {
-    this.settings.visualization.colors.landscape = { ...classicLandscapeColors };
-    this.settings.visualization.colors.application = { ...classicApplicationColors };
+    this.settings.colors.landscape = { ...classicLandscapeColors };
+    this.settings.colors.application = { ...classicApplicationColors };
     this.updateSettings(this.settings);
   }
 
   setDarkColors() {
-    this.settings.visualization.colors.landscape = { ...darkLandscapeColors };
-    this.settings.visualization.colors.application = { ...darkApplicationColors };
+    this.settings.colors.landscape = { ...darkLandscapeColors };
+    this.settings.colors.application = { ...darkApplicationColors };
     this.updateSettings(this.settings);
   }
 

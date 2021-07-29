@@ -27,6 +27,7 @@ import { perform } from 'ember-concurrency-ts';
 import ElkConstructor, { ELK, ElkNode } from 'elkjs/lib/elk-api';
 import { Position2D } from 'explorviz-frontend/modifiers/interaction-modifier';
 import HammerInteraction from 'explorviz-frontend/utils/hammer-interaction';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 
 interface Args {
   readonly id: string;
@@ -84,6 +85,9 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @service()
   worker!: any;
+
+  @service('user-settings')
+  userSettings!: UserSettings;
 
   scene!: THREE.Scene;
 
@@ -199,13 +203,11 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    /*
-    const showFpsCounter = this.currentUser.getPreferenceOrDefaultValue('flagsetting',
-      'showFpsCounter');
+    const { showFpsCounter } = this.userSettings.settings.flags;
 
     if (showFpsCounter) {
       this.threePerformance = new THREEPerformance();
-    } */
+    }
   }
 
   /**
@@ -635,8 +637,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   mouseMoveOnMesh(mesh: THREE.Object3D) {
-    const enableHoverEffects = true;
-    // this.currentUser.getPreferenceOrDefaultValue('flagsetting', 'enableHoverEffects') as boolean;
+    const { enableHoverEffects } = this.userSettings.settings.flags;
 
     // Update hover effect
     if (mesh === undefined && this.hoveredObject) {
