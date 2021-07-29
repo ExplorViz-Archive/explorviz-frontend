@@ -1,6 +1,6 @@
 import Item from './item';
 
-type Alignment = 'left'|'center'|'right';
+type Alignment = 'left' | 'center' | 'right';
 
 export default class TextItem extends Item {
   text: string;

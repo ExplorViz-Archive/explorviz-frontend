@@ -1,8 +1,9 @@
 // Wait for the initial message event.
 self.addEventListener('message', function(e) {
-  let data = e.data;
+  const structureData = e.data.structure;
+  const dynamicData = e.data.dynamic;
   
-  let application = applyBoxLayout(data);
+  let application = applyBoxLayout(structureData, dynamicData);
   postMessage(application);
 }, false);
   
@@ -12,7 +13,7 @@ postMessage(true);
 
 /******* Define Layouter *******/
 
-function applyBoxLayout(application) {
+function applyBoxLayout(application, allLandscapeTraces) {
 
   function getAllClazzesInApplication(application) {
     let allComponents = getAllComponentsInApplication(application);
@@ -49,7 +50,7 @@ function applyBoxLayout(application) {
 
   let layoutMap = new Map();
 
-  layoutMap.set(application.instanceId, {
+  layoutMap.set(application.id, {
     height: 1,
     width: 1,
     depth: 1,
@@ -80,7 +81,7 @@ function applyBoxLayout(application) {
     });
   });
 
-  calcClazzHeight(application);
+  calcClazzHeight(application, allLandscapeTraces);
   initApplication(application);
 
   doApplicationLayout(application);
@@ -101,7 +102,7 @@ function applyBoxLayout(application) {
   function setAbsoluteLayoutPositionOfApplication(application) {
     const { packages } = application;
 
-    let componentLayout = layoutMap.get(application.instanceId);
+    let componentLayout = layoutMap.get(application.id);
 
     packages.forEach((childComponent) => {
       let childCompLayout = layoutMap.get(childComponent.id);
@@ -140,32 +141,74 @@ function applyBoxLayout(application) {
     });
   }
 
+  function getHashCodeToClassMap(clazzes) {
+    const hashCodeToClassMap = new Map();    
+  
+    clazzes.forEach((clazz) => {
+      clazz.methods.forEach(({ hashCode }) => hashCodeToClassMap.set(hashCode, clazz));
+    });
+  
+    return hashCodeToClassMap;
+  }
 
-  function calcClazzHeight(application) {
+  function getAllSpanHashCodesFromTraces(traceArray) {
+    const hashCodes = [];
+    
+    traceArray.forEach((trace) => {
+      trace.spanList.forEach((span) => {
+        hashCodes.push(span.hashCode);
+      });
+    });
+    return hashCodes;
+  }
 
-    const CLAZZ_SIZE_DEFAULT = 0.05;
-    const CLAZZ_SIZE_EACH_STEP = 1.1;
+  function calcClazzHeight(application, allLandscapeTraces) {
+
+    const CLAZZ_SIZE_DEFAULT = 1.5;
+    const CLAZZ_SIZE_EACH_STEP = 1.5;
 
     const clazzes = [];
     application.packages.forEach((component) => {
       getClazzList(component, clazzes);
     });
 
-/*     const instanceCountList = [];
+    const hashCodeToClassMap = getHashCodeToClassMap(clazzes);
+
+    const allMethodHashCodes = getAllSpanHashCodesFromTraces(allLandscapeTraces);
+
+    for (let methodHashCode of allMethodHashCodes) {
+      const classMatchingTraceHashCode = hashCodeToClassMap.get(methodHashCode);
+
+      if(classMatchingTraceHashCode === undefined) {
+        continue;
+      }
+
+      const methodMatchingSpanHash = classMatchingTraceHashCode.methods.find((method) => method.hashCode === methodHashCode);
+
+      if(methodMatchingSpanHash === undefined) {
+        continue;
+      }
+
+      // OpenCensus denotes constructor calls with <init>
+      // Therefore, we count the <init>s for all given classes
+      if (methodMatchingSpanHash.name === '<init>') {
+        classMatchingTraceHashCode.instanceCount++;
+      }
+
+    }
+
+    const instanceCountList = [];
 
     clazzes.forEach((clazz) => {
-      instanceCountList.push(clazz.instanceCount);
-    }); */
-
-    const instanceCount = 0;
-
-    const instanceCountList = new Array(clazzes.length).fill(instanceCount, 0);
+      const instanceCount = clazz.instanceCount ? clazz.instanceCount : 0;
+      instanceCountList.push(instanceCount);
+    });
 
     const categories = getCategories(instanceCountList, false);
 
     clazzes.forEach((clazz) => {
       let clazzData = layoutMap.get(clazz.id);
-      clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[instanceCount] + CLAZZ_SIZE_DEFAULT) * 2.0;
+      clazzData.height = (CLAZZ_SIZE_EACH_STEP * categories[clazz.instanceCount] + CLAZZ_SIZE_DEFAULT);
     });
   }
 
@@ -310,6 +353,7 @@ function applyBoxLayout(application) {
     });
 
     clazzes.forEach((clazz) => {
+      clazz.instanceCount = 0;
       clazzesArray.push(clazz);
     });
   }
@@ -321,7 +365,7 @@ function applyBoxLayout(application) {
       initNodes(child);
     });
 
-    let componentData = layoutMap.get(application.instanceId);
+    let componentData = layoutMap.get(application.id);
     componentData.height = getHeightOfApplication(application);
     componentData.width = -1.0;
     componentData.depth = -1.0;
@@ -416,7 +460,7 @@ function applyBoxLayout(application) {
 
     const segment = layoutGeneric(tempList);
 
-    let componentData = layoutMap.get(application.instanceId);
+    let componentData = layoutMap.get(application.id);
     componentData.width = segment.width;
     componentData.depth = segment.height;
   }

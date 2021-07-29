@@ -1,6 +1,6 @@
 import InteractiveItem from './interactive-item';
 
-export type ArrowDirection = 'left'|'right'|'up'|'down';
+export type ArrowDirection = 'left' | 'right' | 'up' | 'down';
 
 export default class ArrowbuttonItem extends InteractiveItem {
   width: number;

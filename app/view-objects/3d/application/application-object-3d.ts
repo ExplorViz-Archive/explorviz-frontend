@@ -52,7 +52,7 @@ export default class ApplicationObject3D extends THREE.Object3D {
   }
 
   get layout() {
-    const layout = this.getBoxLayout(this.dataModel.instanceId);
+    const layout = this.getBoxLayout(this.dataModel.id);
     if (layout) {
       return layout;
     }
@@ -65,8 +65,8 @@ export default class ApplicationObject3D extends THREE.Object3D {
    * (x = 0.65, y = 0.80)
    */
   resetRotation() {
-    const ROTATION_X = 0.65;
-    const ROTATION_Y = 0.80;
+    const ROTATION_X = 0.75;
+    const ROTATION_Y = 1.20;
 
     this.rotation.x = ROTATION_X;
     this.rotation.y = ROTATION_Y;
@@ -84,7 +84,7 @@ export default class ApplicationObject3D extends THREE.Object3D {
 
     // Ensure fast access to application meshes by additionally storing them in maps
     if (object instanceof FoundationMesh) {
-      this.modelIdToMesh.set(object.dataModel.instanceId, object);
+      this.modelIdToMesh.set(object.dataModel.id, object);
     // Store communication separately to allow efficient iteration over meshes
     } else if (object instanceof ComponentMesh || object instanceof ClazzMesh) {
       this.modelIdToMesh.set(object.dataModel.id, object);

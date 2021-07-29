@@ -6,13 +6,35 @@
       @tokens={{@model}}
       @currentToken={{this.tokenService.token}}
       @deleteToken={{this.deleteToken}}
+      @reload={{this.reload}}
     />
   </div>
   <BsButton
     @type="primary"
     class="align-self-center pt-2 px-3"
-    @onClick={{this.createToken}}
+    @onClick={{this.openTokenCreationModal}}
   >
-    {{svg-jar "plus" class="octicon"}}
+    {{svg-jar "plus-16" class="octicon"}}
   </BsButton>
 </div>
+
+<BsModalSimple
+  @open={{this.tokenCreationModalIsOpen}}
+  @onHidden={{this.closeTokenCreationModal}}
+  @title="Create Landscape Token"
+  @closeTitle="Cancel"
+  @submitTitle="Create"
+>
+  <BsForm
+    @model={{this}}
+    @onSubmit={{this.createToken}}
+    @submitOnError={{true}} as |Form|
+  >
+    <Form.element
+      @controlType="text"
+      @label="Alias (may be left empty)"
+      @property="tokenAlias"
+      @autofocus={{true}}
+    />
+  </BsForm>
+</BsModalSimple>

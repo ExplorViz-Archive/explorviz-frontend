@@ -2,37 +2,13 @@
   class="sidebar-component-close"
   {{on "click" this.close}}
 >
-  {{svg-jar "x" class="octicon"}}
+  {{svg-jar "x-16" class="octicon"}}
 </div>
 
 <div id="colorHeader">
-  <div id="colorPresets" class="dropdown">
-    <button
-      class="btn btn-outline-dark dropdown-toggle"
-      type="button"
-      data-toggle="dropdown"
-      aria-haspopup="true"
-      aria-expanded="false"
-    >
-      Presets
-    </button>
-    <div class="dropdown-menu">
-      <div
-        class="dropdown-item pointer-cursor"
-        name="defaultScheme"
-        {{on "click" (fn this.applyColorScheme "default")}}
-      >
-        Default Color Scheme
-      </div>
-      <div
-        class="dropdown-item pointer-cursor"
-        name="impairedScheme"
-        {{on "click" (fn this.applyColorScheme "impaired")}}
-      >
-        Vision Impairment Color Scheme
-      </div>
-    </div>
-  </div>
+  <Visualization::PageSetup::Sidebar::ColorSchemeSelector
+    @colorSchemes={{this.colorSchemes}}
+  />
 </div>
 
 <div class="mt-3">

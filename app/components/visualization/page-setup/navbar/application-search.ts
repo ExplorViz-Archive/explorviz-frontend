@@ -17,8 +17,8 @@ interface SearchSeperator {
 interface Args {
   application: Application,
   unhighlightAll(): void,
-  highlightModel(entity: Class|Package): void,
-  openParents(entity: Class|Package): void,
+  highlightModel(entity: Class | Package): void,
+  openParents(entity: Class | Package): void,
   closeComponent(component: Package): void
 }
 /* eslint-disable require-yield */
@@ -54,13 +54,13 @@ export default class ApplicationSearch extends GlimmerComponent<Args> {
   }
 
   @restartableTask*
-  searchEntity(term: string): TaskGenerator<(Class|Package|SearchSeperator)[]> {
+  searchEntity(term: string): TaskGenerator<(Class | Package | SearchSeperator)[]> {
     if (isBlank(term)) { return []; }
     return yield perform(this.getPossibleEntityNames, term);
   }
 
   @task*
-  getPossibleEntityNames(name: string): TaskGenerator<(Class|Package|SearchSeperator)[]> {
+  getPossibleEntityNames(name: string): TaskGenerator<(Class | Package | SearchSeperator)[]> {
     const searchString = name.toLowerCase();
 
     const latestApp = this.args.application;

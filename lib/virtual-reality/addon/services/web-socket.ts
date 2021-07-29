@@ -11,21 +11,21 @@ export default class WebSocket extends Service {
 
   private updateQueue: any[] = []; // Messages which are ready to be sent to backend
 
-  host: string|null = '';
+  host: string | null = '';
 
-  port: string|null = '';
+  port: string | null = '';
 
-  secure: boolean|null = false;
+  secure: boolean | null = false;
 
-  path: string|null = '';
+  path: string | null = '';
 
   getSocketUrl() {
-    return `${this.secure ? "wss" : "ws"}://${this.host}:${this.port}/${this.path}`;
+    return `${this.secure ? 'wss' : 'ws'}://${this.host}:${this.port}/${this.path}`;
   }
 
-  socketCloseCallback: ((event: any) => void)| null = null;
+  socketCloseCallback: ((event: any) => void) | null = null;
 
-  eventCallback: ((event: any, data: any) => void)| null = null;
+  eventCallback: ((event: any, data: any) => void) | null = null;
 
   initSocket() {
     const socket = this.websockets.socketFor(this.getSocketUrl());

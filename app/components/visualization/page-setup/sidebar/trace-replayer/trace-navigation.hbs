@@ -6,7 +6,7 @@
     @outline={{true}}
     @disabled={{lte @currentTraceStepIndex 0}}
   >
-    {{svg-jar "chevron-left" class="octicon align-middle"}}
+    {{svg-jar "chevron-left-16" class="octicon align-middle"}}
   </BsButton>
   <div>
     Step <strong>{{inc @currentTraceStepIndex}}</strong> of {{@traceStepCount}}
@@ -16,11 +16,8 @@
     @onClick={{@selectNextTraceStep}}
     @type="secondary"
     @outline={{true}}
-    @disabled={{gte
-      @currentTraceStepIndex
-      (dec @traceStepCount)
-    }}
+    @disabled={{gte @currentTraceStepIndex (dec @traceStepCount)}}
   >
-    {{svg-jar "chevron-right" class="octicon align-middle"}}
+    {{svg-jar "chevron-right-16" class="octicon align-middle"}}
   </BsButton>
 </div>

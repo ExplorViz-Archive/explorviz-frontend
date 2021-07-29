@@ -12,14 +12,11 @@
           {{#if @sourceClass}}
             {{@sourceClass.name}}
             <BsButton
-              @onClick={{fn
-                @moveCameraTo
-                @sourceClass
-              }}
+              @onClick={{fn @moveCameraTo @sourceClass}}
               @type="button"
               class="th-btn"
             >
-              {{svg-jar "eye" class="octicon align-middle"}}
+              {{svg-jar "eye-16" class="octicon align-middle"}}
             </BsButton>
           {{/if}}
         </td>
@@ -30,14 +27,11 @@
           {{#if @targetClass}}
             {{@targetClass.name}}
             <BsButton
-              @onClick={{fn
-                @moveCameraTo
-                @targetClass
-              }}
+              @onClick={{fn @moveCameraTo @targetClass}}
               @type="button"
               class="th-btn"
             >
-              {{svg-jar "eye" class="octicon align-middle"}}
+              {{svg-jar "eye-16" class="octicon align-middle"}}
             </BsButton>
           {{/if}}
         </td>
@@ -66,10 +60,7 @@
           </BsButton>
         </th>
         <td class="col-9 container-word-wrap">
-          {{format-number
-            this.spanDuration
-            this.timeUnit
-          }}
+          {{format-number this.spanDuration this.timeUnit}}
         </td>
       </tr>
     </tbody>

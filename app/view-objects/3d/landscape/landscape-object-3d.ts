@@ -33,10 +33,8 @@ export default class LandscapeObject3D extends THREE.Object3D {
     super.add(object);
 
     // Ensure fast access to landscape meshes by additionally storing them in maps
-    if (object instanceof NodeMesh) {
-      this.modelIdToMesh.set(object.dataModel.ipAddress, object);
-    } else if (object instanceof ApplicationMesh) {
-      this.modelIdToMesh.set(object.dataModel.instanceId, object);
+    if (object instanceof NodeMesh || object instanceof ApplicationMesh) {
+      this.modelIdToMesh.set(object.dataModel.id, object);
     }
 
     return this;
@@ -45,7 +43,7 @@ export default class LandscapeObject3D extends THREE.Object3D {
   /**
    * Returns Sytem, NodeGroup, Node or Application mesh matching given id
    *
-   * @param id The ipAddress of a Node or the instanceId of an Application
+   * @param id The of a Node or an Application
    */
   getMeshbyModelId(id: string) {
     return this.modelIdToMesh.get(id);
@@ -108,7 +106,7 @@ export default class LandscapeObject3D extends THREE.Object3D {
     } else {
       // Check nodes for new min/max position
       nodes.forEach((node: Node) => {
-        const nodeLayout = modelIdToLayout.get(node.ipAddress);
+        const nodeLayout = modelIdToLayout.get(node.id);
         if (nodeLayout) {
           rect.setMinMaxFromLayout(nodeLayout);
         }

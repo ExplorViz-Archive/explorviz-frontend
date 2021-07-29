@@ -4,55 +4,59 @@
 >
   <thead>
     <tr>
-      <th scope="col" {{on "click" (fn this.sortBy "value")}}>ID</th>
-      <th scope="col"></th>
+      <th scope="col" {{on "click" (fn this.sortBy "alias")}}>Alias</th>
+      <th scope="col" {{on "click" (fn this.sortBy "created")}}>Created</th>
       <th scope="col"></th>
     </tr>
   </thead>
   <tbody>
-    {{#if @currentToken}}
-      <tr
-        style="background-color: #aecce1"
-        {{on "click" (fn @selectToken @currentToken)}}
-      >
-        <th scope="row" class="text-center">{{@currentToken.value}}</th>
-        <th scope="row" class="text-center"></th>
-        <th scope="row" class="text-center"></th>
-      </tr>
-      <tr
-        style="height: 10px"
-      >
-      </tr>
-    {{/if}}
     {{#each
       (sort-by (concat this.sortProperty ":" this.sortOrder) "value" @tokens)
     as |token|
     }}
-      <tr>
-        <th scope="row" class="text-center" {{on "click" (fn @selectToken token)}}>{{token.value}}</th>
+      <tr
+        style={{if (eq @currentToken.value token.value) "background-color: #aecce1"}}
+      >
+        <th scope="row">{{token.alias}}</th>
+        <th scope="row">{{timestamp-to-date token.created "localString"}}</th>
         <th scope="row">
-          <CopyButton
-            class="button-svg-with-hover"
-            @clipboardText={{token.value}}
-            @success={{this.onTokenCopied}}
-          >
-            {{svg-jar "clippy" class="octicon align-middle"}}
-            <BsTooltip @placement="bottom" @triggerEvents="hover">
-              Copy token to clipboard
-            </BsTooltip>
-          </CopyButton>
-        </th>
-        <th scope="row">
-          <button
-            class="button-svg-with-hover"
-            type="button"
-            {{on "click" (fn @deleteToken token.value)}}
-          >
-            {{svg-jar "trashcan" class="octicon align-middle"}}
-            <BsTooltip @placement="bottom" @triggerEvents="hover">
-              Delete token permanently
-            </BsTooltip>
-          </button>
+          <ul class="token-selection-icons">
+            <li>
+              <button
+                class="button-svg-with-hover"
+                type="button"
+                {{on "click" (fn @selectToken token)}}
+              >
+                {{svg-jar "search-16" class="octicon align-middle"}}
+                <BsTooltip @placement="bottom" @triggerEvents="hover">
+                  Open visualization
+                </BsTooltip>
+              </button>
+            </li>
+            <li>
+              <AdditionalTokenInfo @token={{token}}/>
+            </li>
+            {{#if (eq token.ownerId this.auth.user.sub)}}
+              <li>
+                <button
+                  class="button-svg-with-hover"
+                  type="button"
+                  {{on "click" (fn @deleteToken token.value)}}
+                >
+                  {{svg-jar "trash-16" class="octicon align-middle"}}
+                  <BsTooltip @placement="bottom" @triggerEvents="hover">
+                    Delete token permanently
+                  </BsTooltip>
+                </button>
+              </li>
+            {{/if}}
+            <li>
+              <ShareLandscape
+                @token={{token}}
+                @reload={{@reload}}
+              />
+            </li>
+          </ul>
         </th>
       </tr>
     {{else}}

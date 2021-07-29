@@ -3,11 +3,10 @@ import { setupTest } from 'ember-qunit';
 import BoxLayout from 'explorviz-frontend/view-objects/layout-models/box-layout';
 import THREE from 'three';
 
-module('Unit | View Object | layout-models/box-layout', function(hooks) {
-
+module('Unit | View Object | layout-models/box-layout', function (hooks) {
   setupTest(hooks);
 
-  test('Position is set correctly through setter', function(assert) {
+  test('Position is set correctly through setter', function (assert) {
     const boxLayout = new BoxLayout();
     boxLayout.position = new THREE.Vector3(10, 20, 30);
 
@@ -17,7 +16,7 @@ module('Unit | View Object | layout-models/box-layout', function(hooks) {
     assert.ok(positionComponentsEqual);
   });
 
-  test('center is calculated correctly', function(assert) {
+  test('center is calculated correctly', function (assert) {
     const boxLayout = new BoxLayout();
     boxLayout.position = new THREE.Vector3(10, 20, 30);
     boxLayout.width = 100;

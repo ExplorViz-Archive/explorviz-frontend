@@ -2,11 +2,11 @@ import Service, { inject as service } from '@ember/service';
 
 import THREE from 'three';
 import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VRController';
+import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
 import WebSocket from './web-socket';
 import SpectateUser from './spectate-user';
-import MultiUserMenu from 'virtual-reality/utils/vr-menus/multi-user-menu';
 
-export type ConnectionStatus = 'offline'|'connecting'|'online';
+export type ConnectionStatus = 'offline' | 'connecting' | 'online';
 
 export default class LocalVrUser extends Service {
   @service('web-socket')
@@ -17,19 +17,19 @@ export default class LocalVrUser extends Service {
 
   userID!: string;
 
-  color: THREE.Color|undefined;
+  color: THREE.Color | undefined;
 
   renderer!: THREE.WebGLRenderer;
 
   defaultCamera!: THREE.Camera;
 
-  controller1: VRController|undefined;
+  controller1: VRController | undefined;
 
-  controller2: VRController|undefined;
+  controller2: VRController | undefined;
 
-  controllerMainMenus: THREE.Group|undefined;
+  controllerMainMenus: THREE.Group | undefined;
 
-  controllerInfoMenus: THREE.Group|undefined;
+  controllerInfoMenus: THREE.Group | undefined;
 
   userGroup!: THREE.Group;
 

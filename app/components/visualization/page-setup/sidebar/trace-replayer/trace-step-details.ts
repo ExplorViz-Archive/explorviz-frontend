@@ -12,9 +12,9 @@ interface Args {
   readonly targetClass: Class;
   readonly sourceApplicationName?: string;
   readonly targetApplicationName: string;
-  readonly spanStartTime: { seconds: number, nanoAdjust: number };
-  readonly spanEndTime: { seconds: number, nanoAdjust: number };
-  moveCameraTo(emberModel: Class|Span): void;
+  readonly spanStartTime: number;
+  readonly spanEndTime: number;
+  moveCameraTo(emberModel: Class | Span): void;
 }
 
 export default class TraceStepDetails extends Component<Args> {
@@ -22,12 +22,8 @@ export default class TraceStepDetails extends Component<Args> {
   timeUnit: TimeUnit = 'ns';
 
   get spanDuration() {
-    const startTimeInNs = this.args.spanStartTime.seconds * 1000000000.0
-      + this.args.spanStartTime.nanoAdjust;
-    const endTimeInNs = this.args.spanEndTime.seconds * 1000000000.0
-      + this.args.spanEndTime.nanoAdjust;
-
-    return endTimeInNs - startTimeInNs;
+    const { spanStartTime, spanEndTime } = this.args;
+    return spanEndTime - spanStartTime;
   }
 
   @action

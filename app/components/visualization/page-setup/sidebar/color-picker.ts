@@ -30,14 +30,12 @@ export default class ColorPicker extends Component<Args> {
   @service('user-settings')
   userSettings!: UserSettings;
 
-  @action
-  applyColorScheme(scheme: string) {
-    if (scheme === 'default') {
-      this.applyDefaultColors();
-    } else if (scheme === 'impaired') {
-      this.applyVisuallyImpairedColors();
-    }
-  }
+  colorSchemes = [
+    { name: 'Default', action: this.applyDefaultColors },
+    { name: 'Vision Impairment', action: this.applyImpairedColors },
+    { name: 'Classic (Initial)', action: this.applyClassicColors },
+    { name: 'Dark', action: this.applyDarkColors },
+  ];
 
   @action
   close() {
@@ -72,7 +70,7 @@ export default class ColorPicker extends Component<Args> {
    * @param configColor Reference to the respective color in the configuration service
    */
   setupColorpicker(element: HTMLElement,
-    colorPickerObject: ColorPickerObjectApplication|ColorPickerObjectLandscape) {
+    colorPickerObject: ColorPickerObjectApplication | ColorPickerObjectLandscape) {
     // eslint-disable-next-line
     $(`#${element.id}`)
     // @ts-ignore
@@ -96,66 +94,62 @@ export default class ColorPicker extends Component<Args> {
       });
   }
 
-  /**
-   * Marks the colors in configuration as updated and triggers a view update.
-   */
-  updateView() {
-    if (this.args.isLandscapeView) {
-      this.configuration.notifyPropertyChange('landscapeColors');
-    } else {
-      this.configuration.notifyPropertyChange('applicationColors');
-    }
+  applyColorsFromUserSettings() {
+    const landscapeColors = this.userSettings.settings.visualization.colors.landscape;
+    Object.entries(landscapeColors).forEach(
+      ([key, value]: [keyof LandscapeColorsHexString, string]) => {
+        this.configuration.landscapeColors[key].set(value);
+      },
+    );
+
+    const applicationColors = this.userSettings.settings.visualization.colors.application;
+    Object.entries(applicationColors).forEach(
+      ([key, value]: [keyof ApplicationColorsHexString, string]) => {
+        this.configuration.applicationColors[key].set(value);
+      },
+    );
 
     this.args.updateView();
-  }
-
-  applyColorsFromUserSettings() {
-    if (this.args.isLandscapeView) {
-      const landscapeColors = this.userSettings.settings.visualization.colors.landscape;
-      Object.entries(landscapeColors).forEach(
-        ([key, value]: [keyof LandscapeColorsHexString, string]) => {
-          this.configuration.landscapeColors[key].set(value);
-        },
-      );
-    } else {
-      const applicationColors = this.userSettings.settings.visualization.colors.application;
-      Object.entries(applicationColors).forEach(
-        ([key, value]: [keyof ApplicationColorsHexString, string]) => {
-          this.configuration.applicationColors[key].set(value);
-        },
-      );
-    }
-    this.updateView();
   }
 
   /**
    * Sets color values to default.
    * Triggers update of color configuration and colors of current view.
    */
+  @action
   applyDefaultColors() {
-    if (this.args.isLandscapeView) {
-      this.userSettings.applyDefaultColorsForLandscape();
-    } else {
-      this.userSettings.applyDefaultColorsForApplication();
-    }
+    this.userSettings.setDefaultColors();
     this.applyColorsFromUserSettings();
+  }
 
-    this.updateView();
+  /**
+   * Applies a dark theme to the visualization.
+   * Triggers update of color configuration and colors of current view.
+   */
+  @action
+  applyDarkColors() {
+    this.userSettings.setDarkColors();
+    this.applyColorsFromUserSettings();
+  }
+
+  /**
+   * Sets colors to the classic colors from the good ol' days.
+   * Triggers update of color configuration and colors of current view.
+   */
+  @action
+  applyClassicColors() {
+    this.userSettings.setClassicColors();
+    this.applyColorsFromUserSettings();
   }
 
   /**
    * Updates color values such that they better suit visually impaired users.
    * Triggers update of color configuration and colors of current view.
    */
-  applyVisuallyImpairedColors() {
-    if (this.args.isLandscapeView) {
-      this.userSettings.applyVisuallyImpairedColorsForLandscape();
-    } else {
-      this.userSettings.applyVisuallyImpairedColorsForApplication();
-    }
+  @action
+  applyImpairedColors() {
+    this.userSettings.setImpairedColors();
     this.applyColorsFromUserSettings();
-
-    this.updateView();
   }
 
   private static isLandscapeObject(object: unknown): object is ColorPickerObjectLandscape {

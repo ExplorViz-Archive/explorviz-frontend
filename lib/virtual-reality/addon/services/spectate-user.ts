@@ -12,7 +12,7 @@ export default class SpectateUser extends Service {
   @service('local-vr-user')
   localUser!: LocalVrUser;
 
-  spectatedUser: RemoteVrUser|null = null; // Tells which userID (if any) is being spectated
+  spectatedUser: RemoteVrUser | null = null; // Tells which userID (if any) is being spectated
 
   startPosition: THREE.Vector3 = new THREE.Vector3(); // Position before this user starts spectating
 
@@ -33,7 +33,7 @@ export default class SpectateUser extends Service {
  * Switches our user into spectator mode
  * @param {number} userID The id of the user to be spectated
  */
-  activate(remoteUser: RemoteVrUser|null) {
+  activate(remoteUser: RemoteVrUser | null) {
     if (!remoteUser) return;
 
     this.startPosition.copy(this.localUser.userGroup.position);
@@ -61,7 +61,6 @@ export default class SpectateUser extends Service {
     if (this.localUser.controller2) {
       this.localUser.controller2.setToDefaultAppearance();
     }
-
 
     this.localUser.userGroup.position.copy(this.startPosition);
 

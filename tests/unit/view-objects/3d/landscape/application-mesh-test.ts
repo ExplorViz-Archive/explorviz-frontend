@@ -5,11 +5,10 @@ import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-lay
 import THREE from 'three';
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 
-module('Unit | View Object | 3d/landscape/application-mesh', function(hooks) {
-
+module('Unit | View Object | 3d/landscape/application-mesh', function (hooks) {
   setupTest(hooks);
 
-  test('Default highlighting color is assigned', function(assert) {
+  test('Default highlighting color is assigned', function (assert) {
     const planeLayout = new PlaneLayout();
     const defaultColor = new THREE.Color('green');
 
@@ -21,7 +20,7 @@ module('Unit | View Object | 3d/landscape/application-mesh', function(hooks) {
     assert.equal(highlightingColor, redColor);
   });
 
-  test('Datamodel is assigned to mesh', function(assert) {
+  test('Datamodel is assigned to mesh', function (assert) {
     const planeLayout = new PlaneLayout();
     const defaultColor = new THREE.Color('green');
 
@@ -30,7 +29,7 @@ module('Unit | View Object | 3d/landscape/application-mesh', function(hooks) {
     assert.equal(application, applicationMesh.dataModel);
   });
 
-  test('Passed default color is correctly applied to material', function(assert) {
+  test('Passed default color is correctly applied to material', function (assert) {
     const planeLayout = new PlaneLayout();
     const defaultColor = new THREE.Color('#ff00ff');
 
@@ -43,17 +42,19 @@ module('Unit | View Object | 3d/landscape/application-mesh', function(hooks) {
 });
 
 const node: Node = {
+  id: 'foo.100.100.100.100',
   ipAddress: '100.100.100.100',
   hostName: 'foo',
   applications: [],
-}
+};
 
 const application: Application = {
+  id: 'foo.100.100.100.100.1000',
   name: 'SampleApplication',
   language: 'java',
   instanceId: '1000',
   parent: node,
   packages: [],
-}
+};
 
 node.applications.push(application);

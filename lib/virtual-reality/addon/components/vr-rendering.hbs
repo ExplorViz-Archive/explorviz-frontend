@@ -5,6 +5,14 @@
 >
   <canvas
     class="main-content-majority"
+    {{interaction-modifier
+      raycastObjects=this.raycastObjects
+      camera=this.camera
+      singleClick=this.handleSingleClick
+      doubleClick=this.handleDoubleClick
+      mouseWheel=this.handleMouseWheel
+      panning=this.handlePanning
+    }}
     {{did-insert this.canvasInserted}}
   >
   </canvas>
@@ -13,7 +21,6 @@
   {{else if this.addApplication.isRunning}}
     <Visualization::Rendering::LoadingIndicator @text="Loading New Application" />
   {{/if}}
-
 </div>
 <VrButton
   @renderer={{this.renderer}}

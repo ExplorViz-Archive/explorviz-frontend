@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import Controller from '@ember/controller';
 import {
   action,
@@ -7,6 +6,7 @@ import {
 import { inject as service } from '@ember/service';
 import PlotlyTimeline from 'explorviz-frontend/components/visualization/page-setup/timeline/plotly-timeline';
 import LandscapeListener from 'explorviz-frontend/services/landscape-listener';
+import CollaborativeService from 'collaborative-mode/services/collaborative-service';
 import ReloadHandler from 'explorviz-frontend/services/reload-handler';
 import TimestampRepository, { Timestamp } from 'explorviz-frontend/services/repos/timestamp-repository';
 import { tracked } from '@glimmer/tracking';
@@ -14,6 +14,7 @@ import { Application, StructureLandscapeData } from 'explorviz-frontend/utils/la
 import { DynamicLandscapeData } from 'explorviz-frontend/utils/landscape-schemes/dynamic-data';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import debugLogger from 'ember-debug-logger';
+import { CollaborativeEvents } from 'collaborative-mode/utils/collaborative-data';
 import LandscapeTokenService from 'explorviz-frontend/services/landscape-token';
 
 export interface LandscapeData {
@@ -34,6 +35,8 @@ export interface LandscapeData {
 export default class VisualizationController extends Controller {
   @service('landscape-listener') landscapeListener!: LandscapeListener;
 
+  @service('collaborative-service') collaborativeService!: CollaborativeService;
+
   @service('repos/timestamp-repository') timestampRepo!: TimestampRepository;
 
   @service('landscape-token') landscapeTokenService!: LandscapeTokenService;
@@ -43,6 +46,9 @@ export default class VisualizationController extends Controller {
   plotlyTimelineRef!: PlotlyTimeline;
 
   selectedTimestampRecords: Timestamp[] = [];
+
+  @tracked
+  font!: THREE.Font; // set by the route
 
   @tracked
   showDataSelection = false;
@@ -57,7 +63,7 @@ export default class VisualizationController extends Controller {
   showTimeline: boolean = true;
 
   @tracked
-  landscapeData: LandscapeData|null = null;
+  landscapeData: LandscapeData | null = null;
 
   @tracked
   visualizationPaused = false;
@@ -107,8 +113,8 @@ export default class VisualizationController extends Controller {
     if (this.landscapeData !== null) {
       application = this.landscapeData.application;
       if (application !== undefined) {
-        const newApplication = VisualizationController.getApplicationFromLandscapeByInstanceId(
-          application.instanceId, structureData,
+        const newApplication = VisualizationController.getApplicationFromLandscapeById(
+          application.id, structureData,
         );
 
         if (newApplication) {
@@ -123,12 +129,12 @@ export default class VisualizationController extends Controller {
     };
   }
 
-  private static getApplicationFromLandscapeByInstanceId(instanceId: string,
+  private static getApplicationFromLandscapeById(id: string,
     structureData: StructureLandscapeData) {
-    let foundApplication: Application|undefined;
+    let foundApplication: Application | undefined;
     structureData.nodes.forEach((node) => {
       node.applications.forEach((application) => {
-        if (application.instanceId === instanceId) {
+        if (application.id === id) {
           foundApplication = application;
         }
       });
@@ -139,6 +145,12 @@ export default class VisualizationController extends Controller {
 
   @action
   openLandscapeView() {
+    this.receiveOpenLandscapeView();
+    this.collaborativeService.send(CollaborativeEvents.OpenLandscapeView, { });
+  }
+
+  @action
+  receiveOpenLandscapeView() {
     this.closeDataSelection();
     this.showVR = false;
     if (this.landscapeData !== null) {
@@ -157,6 +169,7 @@ export default class VisualizationController extends Controller {
         ...this.landscapeData,
         application: app,
       };
+      this.collaborativeService.send(CollaborativeEvents.ApplicationOpened, { id: app.id });
     }
   }
 
@@ -278,6 +291,7 @@ export default class VisualizationController extends Controller {
     this.landscapeData = null;
     this.selectedTimestampRecords = [];
     this.visualizationPaused = false;
+    this.closeDataSelection();
     this.landscapeListener.initLandscapePolling();
     this.updateTimestampList();
   }

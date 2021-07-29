@@ -15,7 +15,7 @@ import {
 } from './motion-controllers.module';
 
 export default class XRControllerModel extends Object3D {
-  motionController: MotionController|null;
+  motionController: MotionController | null;
 
   envMap: any;
 
@@ -46,7 +46,7 @@ export default class XRControllerModel extends Object3D {
   * Polls data from the XRInputSource and updates the model's components to match
   * the real world data
   */
-  updateMatrixWorld(force: Boolean|undefined) {
+  updateMatrixWorld(force: Boolean | undefined) {
     super.updateMatrixWorld.call(this, force);
 
     if (!this.motionController) return;

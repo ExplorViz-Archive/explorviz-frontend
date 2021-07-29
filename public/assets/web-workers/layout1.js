@@ -76,7 +76,7 @@ function layout1(landscape, applicationCommunications) {
       let appSource = applicationcommunication.sourceApplication;
       let appTarget = applicationcommunication.targetApplication;
 
-      if (appSource.instanceId !== appTarget.instanceId) {
+      if (appSource.id !== appTarget.id) {
         const edge = createEdgeBetweenSourceTarget(appSource, appTarget, applicationcommunication.id);
         let edgeReference = modeldToKielerEdgeReference.get(applicationcommunication.id);
         edgeReference.push(edge);
@@ -98,8 +98,8 @@ function layout1(landscape, applicationCommunications) {
     const DEFAULT_WIDTH = 1.5;
     const DEFAULT_HEIGHT = 0.75;
 
-    const nodeKielerGraph = createEmptyGraph(node.ipAddress);
-    modelIdToGraph.set(node.ipAddress, nodeKielerGraph);
+    const nodeKielerGraph = createEmptyGraph(node.id);
+    modelIdToGraph.set(node.id, nodeKielerGraph);
 
     // kieler scaled padding
     const ksp = 2.5 * PADDING * CONVERT_TO_KIELER_FACTOR;
@@ -141,7 +141,7 @@ function layout1(landscape, applicationCommunications) {
       const height = DEFAULT_HEIGHT * CONVERT_TO_KIELER_FACTOR;
 
       const applicationKielerNode = {
-        "id": application.instanceId,
+        "id": application.id,
         "width": width,
         "height": height,
         "children": [],
@@ -149,7 +149,7 @@ function layout1(landscape, applicationCommunications) {
         "ports": []
       };
 
-      modelIdToGraph.set(application.instanceId, applicationKielerNode);
+      modelIdToGraph.set(application.id, applicationKielerNode);
 
       if (nodeKielerGraph.children)
         nodeKielerGraph.children.push(applicationKielerNode);
@@ -169,8 +169,8 @@ function layout1(landscape, applicationCommunications) {
     function createSourcePortIfNotExisting(sourceApplication) {
 
       // Do not create duplicate port
-      let maybePort = modelIdToSourcePort.get(sourceApplication.instanceId);
-      if (maybePort && modelIdToSourcePort.has(sourceApplication.instanceId)){
+      let maybePort = modelIdToSourcePort.get(sourceApplication.id);
+      if (maybePort && modelIdToSourcePort.has(sourceApplication.id)){
         return maybePort;
       } else {
         const DEFAULT_PORT_WIDTH = 0.000001;
@@ -179,7 +179,7 @@ function layout1(landscape, applicationCommunications) {
   
         const CONVERT_TO_KIELER_FACTOR = 180;
 
-        const portId = sourceApplication.instanceId + "_sp1";
+        const portId = sourceApplication.id + "_sp1";
 
         let port = {
           id: portId,
@@ -192,10 +192,10 @@ function layout1(landscape, applicationCommunications) {
           y: 0
         };
 
-        let sourceGraph = modelIdToGraph.get(sourceApplication.instanceId);
+        let sourceGraph = modelIdToGraph.get(sourceApplication.id);
         port.node = sourceGraph;
 
-        modelIdToSourcePort.set(sourceApplication.instanceId, port);
+        modelIdToSourcePort.set(sourceApplication.id, port);
         sourceGraph?.ports?.push(port);
 
         return port;
@@ -206,8 +206,8 @@ function layout1(landscape, applicationCommunications) {
     function createTargetPortIfNotExisting(targetApplication) {
 
       // Do not create duplicate port
-      let maybePort = modelIdToTargetPort.get(targetApplication.instanceId);
-      if (maybePort && modelIdToTargetPort.has(targetApplication.instanceId)){
+      let maybePort = modelIdToTargetPort.get(targetApplication.id);
+      if (maybePort && modelIdToTargetPort.has(targetApplication.id)){
         return maybePort;
       } else {
         const DEFAULT_PORT_WIDTH = 0.000001;
@@ -216,7 +216,7 @@ function layout1(landscape, applicationCommunications) {
   
         const CONVERT_TO_KIELER_FACTOR = 180;
 
-        const portId = targetApplication.instanceId + "_tp1";
+        const portId = targetApplication.id + "_tp1";
 
         let port = {
           id: portId,
@@ -229,10 +229,10 @@ function layout1(landscape, applicationCommunications) {
           y: 0
         };
 
-        let targetGraph = modelIdToGraph.get(targetApplication.instanceId);
+        let targetGraph = modelIdToGraph.get(targetApplication.id);
         port.node = targetGraph;
 
-        modelIdToTargetPort.set(targetApplication.instanceId, port);
+        modelIdToTargetPort.set(targetApplication.id, port);
         targetGraph?.ports?.push(port);
 
         return port;
@@ -245,7 +245,7 @@ function layout1(landscape, applicationCommunications) {
 
   function createEdgeHelper(sourceApplication, port1, targetApplication, port2, commId) {
 
-    const id = sourceApplication.instanceId + "_to_" + targetApplication.instanceId;
+    const id = sourceApplication.id + "_to_" + targetApplication.id;
 
     let edge = lookForExistingEdge(sourceApplication, id);
 
@@ -257,8 +257,8 @@ function layout1(landscape, applicationCommunications) {
 
     setEdgeLayoutProperties(edge);
 
-    edge.source = sourceApplication.instanceId;
-    edge.target = targetApplication.instanceId;
+    edge.source = sourceApplication.id;
+    edge.target = targetApplication.id;
 
     edge.sourcePort = port1.id;
     edge.targetPort = port2.id;
@@ -277,7 +277,7 @@ function layout1(landscape, applicationCommunications) {
 
     edge.communicationId = commId;
 
-    let graph = modelIdToGraph.get(sourceApplication.instanceId);
+    let graph = modelIdToGraph.get(sourceApplication.id);
     graph?.edges?.push(edge);
 
     return edge;
@@ -286,7 +286,7 @@ function layout1(landscape, applicationCommunications) {
     //inner function
     // looks for already existing edges
     function lookForExistingEdge(sourceApplication, id) {
-      let edges = modelIdToGraph.get(sourceApplication.instanceId)?.edges;
+      let edges = modelIdToGraph.get(sourceApplication.id)?.edges;
       if (edges) {
         let length = edges.length;
         for (let i = 0; i < length; i++) {

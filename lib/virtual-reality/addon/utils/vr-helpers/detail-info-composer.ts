@@ -7,9 +7,9 @@ import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
 import { Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { getAncestorPackages, getClassesInPackage } from 'explorviz-frontend/utils/package-helpers';
 
-export type DetailedInfo= {
+export type DetailedInfo = {
   title: string,
-  entries: {key: string, value: string}[],
+  entries: { key: string, value: string }[],
 };
 
 // #region HELPER
@@ -82,7 +82,7 @@ function composeDrawableClazzCommunicationContent(communicationMesh: ClazzCommun
 // #endregion APPLICATION CONTENT COMPOSER
 
 export default function composeContent(object: THREE.Object3D) {
-  let content: DetailedInfo|null = null;
+  let content: DetailedInfo | null = null;
 
   // Landscape Content
   if (object instanceof NodeMesh) {

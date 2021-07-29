@@ -1,27 +1,28 @@
 import { getAllMethodHashCodesInApplication, applicationHasClass } from 'explorviz-frontend/utils/application-helpers';
-import { Application, Class, Node, Package } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
+import {
+  Application, Class, Node, Package,
+} from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import { module, test } from 'qunit';
 
-module('Unit | Utility | application-helpers', function() {
-  test('getAllMethodHashCodesInApplication', function(assert) {
+module('Unit | Utility | application-helpers', function () {
+  test('getAllMethodHashCodesInApplication', function (assert) {
     const testApplication = getTestNode().applications[0];
     const methodHashSet = new Set(getAllMethodHashCodesInApplication(testApplication));
     assert.ok(methodHashSet.size === 4);
   });
 
-  test('applicationHasClass against not included class', function(assert) {
+  test('applicationHasClass against not included class', function (assert) {
     const testApplication = getTestNode().applications[0];
     const hasClass = applicationHasClass(testApplication, getTestClass());
     assert.ok(!hasClass);
   });
 
-  test('applicationHasClass against included class', function(assert) {
+  test('applicationHasClass against included class', function (assert) {
     const testApplication = getTestNode().applications[0];
     const includedClass = testApplication.packages[0].subPackages[0].classes[0];
     const hasClass = applicationHasClass(testApplication, includedClass);
     assert.ok(hasClass);
   });
-
 });
 
 function getTestClass() {
@@ -29,9 +30,9 @@ function getTestClass() {
     id: 'package123',
     name: 'package123',
     subPackages: [],
-    classes: []
+    classes: [],
   };
-  
+
   const testClass: Class = {
     id: 'class123',
     name: 'class123',
@@ -46,16 +47,18 @@ function getTestClass() {
 
 function getTestNode() {
   const testNode: Node = {
+    id: 'testNode.testIp',
     ipAddress: 'testIp',
     hostName: 'testNode',
     applications: [],
   };
 
   const testApplication: Application = {
+    id: 'testNode.testIp.applicationId',
     name: 'application',
     instanceId: 'applicationId',
     language: 'testLanguage',
-    parent: testNode, 
+    parent: testNode,
     packages: [],
   };
 
@@ -71,7 +74,7 @@ function getTestPackage1() {
     id: 'package11',
     name: 'package11',
     subPackages: [],
-    classes: []
+    classes: [],
   };
 
   const subPackage11: Package = {
@@ -100,7 +103,7 @@ function getTestPackage1() {
 
   testPackage11.subPackages.push(subPackage11, subPackage12);
   subPackage11.subPackages.push(subSubPackage);
-  
+
   const testClass11: Class = {
     id: 'class11',
     name: 'class11',
@@ -110,7 +113,7 @@ function getTestPackage1() {
     }],
     parent: testPackage11,
   };
-  
+
   const testClass12: Class = {
     id: 'class12',
     name: 'class12',
@@ -122,7 +125,7 @@ function getTestPackage1() {
   };
 
   testPackage11.classes.push(testClass11, testClass12);
-  
+
   const testClass13: Class = {
     id: 'class13',
     name: 'class13',
@@ -132,9 +135,9 @@ function getTestPackage1() {
     }],
     parent: subPackage11,
   };
-  
+
   subPackage11.classes.push(testClass13);
-  
+
   return testPackage11;
 }
 
@@ -143,7 +146,7 @@ function getTestPackage2() {
     id: 'package21',
     name: 'package21',
     subPackages: [],
-    classes: []
+    classes: [],
   };
 
   const subPackage21: Package = {
@@ -155,7 +158,7 @@ function getTestPackage2() {
   };
 
   testPackage21.subPackages.push(subPackage21);
-  
+
   const testClass21: Class = {
     id: 'class21',
     name: 'class21',
@@ -165,8 +168,8 @@ function getTestPackage2() {
     }],
     parent: subPackage21,
   };
-  
+
   subPackage21.classes.push(testClass21);
-  
+
   return testPackage21;
 }

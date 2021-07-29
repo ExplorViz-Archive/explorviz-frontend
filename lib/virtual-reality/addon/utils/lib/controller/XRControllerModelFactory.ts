@@ -102,7 +102,7 @@ export default class XRControllerModelFactory {
     });
   }
 
-  static addAssetSceneToControllerModel(controllerModel: XRControllerModel, scene: Scene|null) {
+  static addAssetSceneToControllerModel(controllerModel: XRControllerModel, scene: Scene | null) {
     if (!controllerModel.motionController || !scene) return;
 
     // Find the nodes needed for animation and cache them on the motionController.
@@ -124,7 +124,7 @@ export default class XRControllerModelFactory {
 
   createControllerModel(controller: THREE.Group) {
     const controllerModel = new XRControllerModel();
-    let scene: Scene|null = null;
+    let scene: Scene | null = null;
 
     controller.addEventListener('connected', (event) => {
       const xrInputSource = event.data;

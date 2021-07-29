@@ -7,7 +7,6 @@ import ImageLoader from 'explorviz-frontend/utils/three-image-loader';
 import Configuration from 'explorviz-frontend/services/configuration';
 import PlaneLayout from 'explorviz-frontend/view-objects/layout-models/plane-layout';
 import NodeMesh from 'explorviz-frontend/view-objects/3d/landscape/node-mesh';
-import Interaction from 'explorviz-frontend/utils/interaction';
 import ApplicationMesh from 'explorviz-frontend/view-objects/3d/landscape/application-mesh';
 import LandscapeRendering, { Layout1Return, Layout3Return } from 'explorviz-frontend/components/visualization/rendering/landscape-rendering';
 import { enqueueTask, restartableTask, task } from 'ember-concurrency-decorators';
@@ -36,8 +35,6 @@ import VRController, { controlMode } from 'virtual-reality/utils/vr-rendering/VR
 import MainMenu from 'virtual-reality/utils/vr-menus/main-menu';
 import BaseMenu from 'virtual-reality/utils/vr-menus/base-menu';
 import CameraMenu from 'virtual-reality/utils/vr-menus/camera-menu';
-import LabelMesh from 'explorviz-frontend/view-objects/3d/label-mesh';
-import LogoMesh from 'explorviz-frontend/view-objects/3d/logo-mesh';
 import AdvancedMenu from 'virtual-reality/utils/vr-menus/advanced-menu';
 import DetailInfoMenu from 'virtual-reality/utils/vr-menus/detail-info-menu';
 import composeContent, { DetailedInfo } from 'virtual-reality/utils/vr-helpers/detail-info-composer';
@@ -51,6 +48,7 @@ import computeApplicationCommunication from 'explorviz-frontend/utils/landscape-
 import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/structure-data';
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
+import { tracked } from '@glimmer/tracking';
 
 interface Args {
   readonly id: string;
@@ -83,22 +81,18 @@ export default class VrRendering extends Component<Args> {
   worker!: any;
 
   // Maps models to a computed layout
-  modelIdToPlaneLayout: Map<string, PlaneLayout>|null = null;
+  modelIdToPlaneLayout: Map<string, PlaneLayout> | null = null;
 
   debug = debugLogger('VrRendering');
-
-  // Used to register (mouse) events
-  interaction!: Interaction;
 
   canvas!: HTMLCanvasElement;
 
   scene!: THREE.Scene;
 
+  @tracked
   camera!: THREE.PerspectiveCamera;
 
   renderer!: THREE.WebGLRenderer;
-
-  raycaster: THREE.Raycaster;
 
   // Group which contains all currently opened application objects
   applicationGroup: ApplicationGroup;
@@ -120,11 +114,11 @@ export default class VrRendering extends Component<Args> {
 
   closeButtonTexture: THREE.Texture;
 
-  mainMenu: BaseMenu|undefined;
+  mainMenu: BaseMenu | undefined;
 
-  infoMenu: DetailInfoMenu|undefined;
+  infoMenu: DetailInfoMenu | undefined;
 
-  hintMenu: HintMenu|undefined;
+  hintMenu: HintMenu | undefined;
 
   landscapeOffset = new THREE.Vector3();
 
@@ -146,6 +140,9 @@ export default class VrRendering extends Component<Args> {
 
   drawableClassCommunications: Map<string, DrawableClassCommunication[]> = new Map();
 
+  @tracked
+  raycastObjects: THREE.Object3D[];
+
   // #endregion CLASS FIELDS AND GETTERS
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -163,7 +160,6 @@ export default class VrRendering extends Component<Args> {
     this.landscapeScalar = 0.1;
     this.applicationScalar = 0.01;
 
-    this.raycaster = new THREE.Raycaster();
     this.applicationGroup = new ApplicationGroup();
 
     this.controllerMainMenus = new THREE.Group();
@@ -190,6 +186,8 @@ export default class VrRendering extends Component<Args> {
 
     // Rotate landscape such that it lays flat on the floor
     this.landscapeObject3D.rotateX(-90 * THREE.MathUtils.DEG2RAD);
+
+    this.raycastObjects = [this.landscapeObject3D, this.applicationGroup];
   }
 
   /**
@@ -275,28 +273,10 @@ export default class VrRendering extends Component<Args> {
    * passes them to a newly created Interaction object
    */
   initInteraction() {
-    this.handleSingleClick = this.handleSingleClick.bind(this);
-    this.handleDoubleClick = this.handleDoubleClick.bind(this);
-    this.handleMouseWheel = this.handleMouseWheel.bind(this);
-    this.handlePanning = this.handlePanning.bind(this);
-
-    this.interaction = new Interaction(this.canvas, this.camera, this.renderer,
-      [this.landscapeObject3D, this.applicationGroup, this.floor,
-        this.controllerMainMenus, this.controllerInfoMenus], {
-        singleClick: this.handleSingleClick,
-        doubleClick: this.handleDoubleClick,
-        mouseWheel: this.handleMouseWheel,
-        panning: this.handlePanning,
-      }, VrRendering.raycastFilter);
-
     // Add key listener for room positioning
     window.onkeydown = (event: any) => {
       this.handleKeyboard(event);
     };
-  }
-
-  static raycastFilter(intersection: THREE.Intersection) {
-    return !(intersection.object instanceof LabelMesh || intersection.object instanceof LogoMesh);
   }
 
   initControllers() {
@@ -351,11 +331,10 @@ export default class VrRendering extends Component<Args> {
 
     const { object } = controller.intersectedObject;
 
-    if ((object.parent instanceof ApplicationObject3D || object.parent instanceof LandscapeObject3D) && controller.ray) {
+    if ((object.parent instanceof ApplicationObject3D || object.parent instanceof LandscapeObject3D)
+      && controller.ray) {
       controller.grabObject(object.parent);
     }
-    // @ts-ignore
-    console.log(controller.grabbedObject);
   }
 
   onInteractionMenuDown(controller: VRController) {
@@ -525,7 +504,7 @@ export default class VrRendering extends Component<Args> {
       const newGraph: ElkNode = yield this.elk.layout(graph);
 
       // Post-process layout graph (3rd step)
-      const layoutedLandscape: any = yield this.worker.postMessage('layout3', {
+      const layoutedLandscape: Layout3Return = yield this.worker.postMessage('layout3', {
         graph: newGraph,
         modelIdToPoints,
         structureLandscapeData,
@@ -688,7 +667,8 @@ export default class VrRendering extends Component<Args> {
 
       this.updateDrawableClassCommunications(applicationObject3D);
 
-      const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId)!;
+      const drawableComm = this.drawableClassCommunications
+        .get(applicationObject3D.dataModel.instanceId)!;
 
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
 
@@ -816,7 +796,7 @@ export default class VrRendering extends Component<Args> {
    * This input is used to move a grabbed application towards or away from the controller.
    */
   onThumbpadTouch(controller: VRController, axes: number[]) {
-    const grabbedObject = controller.grabbedObject;
+    const { grabbedObject } = controller;
 
     if (!grabbedObject) return;
 
@@ -868,18 +848,21 @@ export default class VrRendering extends Component<Args> {
 
   // #region MOUSE & KEYBOARD EVENT HANDLER
 
+  @action
   handleDoubleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
 
     this.handlePrimaryInputOn(intersection);
   }
 
+  @action
   handleSingleClick(intersection: THREE.Intersection | null) {
     if (!intersection) return;
 
     this.handleSecondaryInputOn(intersection);
   }
 
+  @action
   handlePanning(delta: { x: number, y: number }, button: 1 | 2 | 3) {
     const LEFT_MOUSE_BUTTON = 1;
 
@@ -897,6 +880,7 @@ export default class VrRendering extends Component<Args> {
     }
   }
 
+  @action
   handleMouseWheel(delta: number) {
     this.camera.position.z += delta * 0.2;
   }
@@ -946,7 +930,7 @@ export default class VrRendering extends Component<Args> {
 
   // #region MENUS
 
-  showHint(title: string, text: string|null = null) {
+  showHint(title: string, text: string | null = null) {
     if (this.hintMenu) {
       this.hintMenu.back();
       this.hintMenu = undefined;
@@ -973,7 +957,8 @@ export default class VrRendering extends Component<Args> {
   openZoomMenu() {
     this.closeControllerMenu();
 
-    this.mainMenu = new ZoomMenu(this.closeControllerMenu.bind(this), this.renderer, this.scene, this.camera);
+    this.mainMenu = new ZoomMenu(this.closeControllerMenu.bind(this), this.renderer,
+      this.scene, this.camera);
     this.controllerMainMenus.add(this.mainMenu);
   }
 
@@ -1054,7 +1039,8 @@ export default class VrRendering extends Component<Args> {
     EntityManipulation.toggleComponentMeshState(componentMesh, applicationObject3D);
     this.addLabels(applicationObject3D);
 
-    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId);
+    const drawableComm = this.drawableClassCommunications
+      .get(applicationObject3D.dataModel.instanceId);
 
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
@@ -1065,7 +1051,8 @@ export default class VrRendering extends Component<Args> {
   closeAllComponentsAndUpdate(applicationObject3D: ApplicationObject3D) {
     EntityManipulation.closeAllComponents(applicationObject3D);
 
-    const drawableComm = this.drawableClassCommunications.get(applicationObject3D.dataModel.instanceId);
+    const drawableComm = this.drawableClassCommunications
+      .get(applicationObject3D.dataModel.instanceId);
 
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);

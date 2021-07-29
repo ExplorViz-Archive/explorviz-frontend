@@ -22,15 +22,25 @@
     "module": "es6",
     "skipLibCheck": true,
     "paths": {
+      "explorviz-frontend/*": [
+        "app/*",
+        "lib/collaborative-mode/app/*",
+        "lib/virtual-reality/app/*"
+      ],
       "explorviz-frontend/tests/*": [
         "tests/*"
       ],
-      "explorviz-frontend/*": [
-        "app/*",
-        "lib/virtual-reality/app/*"
+      "collaborative-mode": [
+        "lib/collaborative-mode/addon"
       ],
-      "*": [
-        "types/*"
+      "collaborative-mode/*": [
+        "lib/collaborative-mode/addon/*"
+      ],
+      "collaborative-mode/test-support": [
+        "lib/collaborative-mode/addon-test-support"
+      ],
+      "collaborative-mode/test-support/*": [
+        "lib/collaborative-mode/addon-test-support/*"
       ],
       "virtual-reality": [
         "lib/virtual-reality/addon"
@@ -43,16 +53,22 @@
       ],
       "virtual-reality/test-support/*": [
         "lib/virtual-reality/addon-test-support/*"
+      ],
+      "*": [
+        "types/*"
       ]
     }
   },
   "include": [
-    "app/**/*",
-    "tests/**/*",
-    "types/**/*",
-    "lib/virtual-reality/**/*",
-  ],
-  "exclude": [
-    "lib/virtual-reality/addon/utils/lib/**/*"
+    ".eslintrc.js",
+    "**/.eslintrc.js",
+    ".template-lintrc.js",
+    "ember-cli-build.js",
+    "app",
+    "config",
+    "tests",
+    "types",
+    "lib/collaborative-mode",
+    "lib/virtual-reality"
   ]
 }

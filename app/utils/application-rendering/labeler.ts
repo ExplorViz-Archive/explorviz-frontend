@@ -12,7 +12,7 @@ import FoundationMesh from 'explorviz-frontend/view-objects/3d/application/found
  *
  * @param boxMesh Mesh which is labeled
  */
-export function positionBoxLabel(boxMesh: ComponentMesh|FoundationMesh) {
+export function positionBoxLabel(boxMesh: ComponentMesh | FoundationMesh) {
   const label = boxMesh.labelMesh;
 
   if (!label) { return; }
@@ -48,7 +48,7 @@ export function positionBoxLabel(boxMesh: ComponentMesh|FoundationMesh) {
  * @param minLength Minimal length (#letters) of text. More important than minHeight
  * @param scalar Allows to scale text size additionally
  */
-export function addBoxTextLabel(boxMesh: ComponentMesh|FoundationMesh, font: THREE.Font,
+export function addBoxTextLabel(boxMesh: ComponentMesh | FoundationMesh, font: THREE.Font,
   color: THREE.Color, minHeight = 1.5, minLength = 4, scalar = 1, replace = false) {
   if (boxMesh.labelMesh && !replace) return;
   const labelMesh = new ComponentLabelMesh(boxMesh, font, color, minHeight, minLength);
@@ -69,7 +69,7 @@ export function addBoxTextLabel(boxMesh: ComponentMesh|FoundationMesh, font: THR
  * @param size Size of text
  */
 export function addClazzTextLabel(clazzMesh: ClazzMesh, font: THREE.Font,
-  color: THREE.Color, size = 0.5, replace = false) {
+  color: THREE.Color, size = 0.75, replace = false) {
   if (clazzMesh.labelMesh && !replace) return;
 
   const text = clazzMesh.dataModel.name;

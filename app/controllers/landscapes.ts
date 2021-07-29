@@ -5,6 +5,7 @@ import { inject as service } from '@ember/service';
 import Auth from 'explorviz-frontend/services/auth';
 import AlertifyHandler from 'explorviz-frontend/utils/alertify-handler';
 import ENV from 'explorviz-frontend/config/environment';
+import { tracked } from '@glimmer/tracking';
 
 const { userService } = ENV.backendAddresses;
 
@@ -15,6 +16,24 @@ export default class Landscapes extends Controller {
   @service('auth')
   auth!: Auth;
 
+  @tracked
+  tokenCreationModalIsOpen: boolean = false;
+
+  @tracked
+  tokenAlias: string = '';
+
+  @action
+  openTokenCreationModal() {
+    this.tokenCreationModalIsOpen = true;
+    this.tokenAlias = '';
+  }
+
+  @action
+  closeTokenCreationModal() {
+    this.tokenCreationModalIsOpen = false;
+    this.tokenAlias = '';
+  }
+
   @action
   selectToken(token: LandscapeToken) {
     this.tokenService.setToken(token);
@@ -24,11 +43,12 @@ export default class Landscapes extends Controller {
   @action
   async createToken() {
     try {
-      const token = await this.sendTokenCreateRequest();
+      const token = await this.sendTokenCreateRequest(this.tokenAlias);
+      this.closeTokenCreationModal();
       AlertifyHandler.showAlertifySuccess(`Token created: ${token.value}`);
       this.send('refreshRoute');
     } catch (e) {
-      AlertifyHandler.showAlertifySuccess(e.message);
+      AlertifyHandler.showAlertifyError(e.message);
     }
   }
 
@@ -38,7 +58,7 @@ export default class Landscapes extends Controller {
       await this.sendTokenDeleteRequest(tokenId);
       AlertifyHandler.showAlertifySuccess('Token successfully deleted');
     } catch (e) {
-      AlertifyHandler.showAlertifySuccess(e.message);
+      AlertifyHandler.showAlertifyError(e.message);
     }
     if (this.tokenService.token?.value === tokenId) {
       this.tokenService.removeToken();
@@ -46,7 +66,7 @@ export default class Landscapes extends Controller {
     this.send('refreshRoute');
   }
 
-  sendTokenCreateRequest() {
+  sendTokenCreateRequest(alias = '') {
     let uId = this.auth.user?.sub;
 
     if (!uId) {
@@ -59,8 +79,12 @@ export default class Landscapes extends Controller {
       fetch(`${userService}/user/${uId}/token`, {
         headers: {
           Authorization: `Bearer ${this.auth.accessToken}`,
+          'Content-Type': 'application/json',
         },
         method: 'POST',
+        body: JSON.stringify({
+          alias,
+        }),
       })
         .then(async (response: Response) => {
           if (response.ok) {
@@ -72,6 +96,11 @@ export default class Landscapes extends Controller {
         })
         .catch((e) => reject(e));
     });
+  }
+
+  @action
+  reload() {
+    this.send('refreshRoute');
   }
 
   sendTokenDeleteRequest(tokenId: string) {

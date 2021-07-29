@@ -3,11 +3,6 @@ const EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
 module.exports = (defaults) => {
   const app = new EmberApp(defaults, {
-    octicons: {
-      // load selected icons for popup-handler since it does not (yet) use components / templates
-      icons: ['arrow-right', 'arrow-both', 'code', 'list-ordered', 'clock', 'tools'],
-    },
-
     // Default implementation for ember-cli-sass
     sassOptions: {
       implementation: sass,
@@ -17,12 +12,16 @@ module.exports = (defaults) => {
     svgJar: {
       sourceDirs: [
         'public', // default SVGJar lookup directory
-        'node_modules/octicons/build/svg',
+        'node_modules/@primer/octicons/build/svg',
       ],
+    },
+    babel: {
+      sourceMaps: 'inline',
     },
 
     'ember-cli-babel': {
       includePolyfill: true,
+      sourceMaps: 'inline',
     },
 
     fingerprint: {
@@ -40,7 +39,7 @@ module.exports = (defaults) => {
         node: {
           global: true,
         },
-      }
+      },
     },
   });
 
@@ -52,9 +51,8 @@ module.exports = (defaults) => {
   app.import('vendor/threex/threex.rendererstats.min.js');
   app.import('vendor/threex/threex.dynamictexture.min.js');
 
-  app.import('vendor/alertifyjs/alertify.min.js');
-  app.import('vendor/alertifyjs/css/alertify.min.css');
-  app.import('vendor/alertifyjs/css/themes/default.min.css');
+  app.import('node_modules/alertifyjs/build/css/alertify.min.css');
+  app.import('node_modules/alertifyjs/build/css/themes/default.min.css');
 
   app.import('vendor/cytoscape/cytoscape.min.js');
 

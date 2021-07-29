@@ -9,7 +9,6 @@ export type LandscapeColors = {
   communication: THREE.Color,
   nodeText: THREE.Color,
   applicationText: THREE.Color,
-  collapseSymbol: THREE.Color,
   background: THREE.Color
 };
 
@@ -44,7 +43,7 @@ export default class Configuration extends Service {
   * @type LandscapeColors
   */
   @tracked
-  landscapeColors: LandscapeColors;
+  landscapeColors!: LandscapeColors;
 
   /**
   * Colors for application visualization
@@ -53,7 +52,18 @@ export default class Configuration extends Service {
   * @type ApplicationColors
   */
   @tracked
-  applicationColors: ApplicationColors;
+  applicationColors!: ApplicationColors;
+
+  // #region APPLICATION LAYOUT
+
+  commCurveHeightDependsOnDistance = true;
+
+  // Determines height of class communication curves, 0 results in straight lines
+  commCurveHeightMultiplier = 1;
+
+  commArrowThickness = 0.5;
+
+  // #endregion APPLICATION LAYOUT
 
   /**
    * Sets default colors
@@ -72,7 +82,6 @@ export default class Configuration extends Service {
       communication: new THREE.Color(landscapeSettings.communication),
       nodeText: new THREE.Color(landscapeSettings.nodeText),
       applicationText: new THREE.Color(landscapeSettings.applicationText),
-      collapseSymbol: new THREE.Color(landscapeSettings.collapseSymbol),
       background: new THREE.Color(landscapeSettings.background),
     };
 
