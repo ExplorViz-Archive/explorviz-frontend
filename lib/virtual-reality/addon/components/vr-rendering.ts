@@ -49,6 +49,7 @@ import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/st
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 import { tracked } from '@glimmer/tracking';
+import HeatmapConfiguration from 'heatmap/services/heatmap-configuration';
 
 interface Args {
   readonly id: string;
@@ -70,6 +71,9 @@ export default class VrRendering extends Component<Args> {
 
   @service('configuration')
   configuration!: Configuration;
+
+  @service('configuration')
+  heatmapConf!: HeatmapConfiguration;
 
   @service('local-vr-user')
   localUser!: LocalVrUser;
@@ -174,7 +178,7 @@ export default class VrRendering extends Component<Args> {
     this.controllerInfoMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
     this.localUser.controllerInfoMenus = this.controllerInfoMenus;
 
-    this.appCommRendering = new AppCommunicationRendering(this.configuration);
+    this.appCommRendering = new AppCommunicationRendering(this.configuration, this.heatmapConf);
 
     // Load image for delete button
     this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
