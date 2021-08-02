@@ -1,4 +1,5 @@
 import Service from '@ember/service';
+import { tracked } from '@glimmer/tracking';
 
 export interface Settings {
   colors: {
@@ -157,10 +158,11 @@ const defaultFlags: FlagSettings = {
 };
 
 export default class UserSettings extends Service {
+  @tracked
   settings!: Settings;
 
-  init() {
-    super.init();
+  constructor() {
+    super(...arguments);
     try {
       this.restoreSettings();
     } catch (e) {
@@ -202,7 +204,7 @@ export default class UserSettings extends Service {
   }
 
   updateFlagSetting(attribute: keyof FlagSettings, value: boolean) {
-    this.settings.flags[attribute].value = value;
+    this.settings.flags[attribute] = { ...this.settings.flags[attribute], value };
     this.updateSettings(this.settings);
   }
 

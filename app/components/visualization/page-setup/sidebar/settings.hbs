@@ -1,0 +1,6 @@
+{{#each-in @flagSettings as |name setting|}}
+  <Visualization::PageSetup::Sidebar::Settings::FlagSetting
+    @setting={{setting}}
+    @onChange={{fn this.updateFlagSetting name}}
+  />
+{{/each-in}}
