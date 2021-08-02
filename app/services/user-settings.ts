@@ -8,9 +8,24 @@ export interface Settings {
   flags: FlagSettings;
 }
 
+export interface Setting<T> {
+  displayName: string;
+  description: string;
+  value: T;
+}
+
+export type FlagSetting = Setting<boolean>;
+
+export interface RangeSetting extends Setting<number> {
+  range: {
+    min: number;
+    max: number;
+  };
+}
+
 export interface FlagSettings {
-  showFpsCounter: boolean;
-  enableHoverEffects: boolean;
+  showFpsCounter: FlagSetting;
+  enableHoverEffects: FlagSetting;
 }
 
 export interface ApplicationColorsHexString {
@@ -129,8 +144,16 @@ const darkLandscapeColors = {
 };
 
 const defaultFlags: FlagSettings = {
-  showFpsCounter: false,
-  enableHoverEffects: true,
+  showFpsCounter: {
+    displayName: 'Show FPS Counter',
+    description: '\'Frames Per Second\' metrics in visualizations',
+    value: false,
+  },
+  enableHoverEffects: {
+    displayName: 'Enable Hover Effects',
+    description: 'Hover effect (flashing entities) for mouse cursor',
+    value: true,
+  },
 };
 
 export default class UserSettings extends Service {
@@ -179,7 +202,7 @@ export default class UserSettings extends Service {
   }
 
   updateFlagSetting(attribute: keyof FlagSettings, value: boolean) {
-    this.settings.flags[attribute] = value;
+    this.settings.flags[attribute].value = value;
     this.updateSettings(this.settings);
   }
 

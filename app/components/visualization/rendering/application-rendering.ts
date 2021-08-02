@@ -204,7 +204,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    const { showFpsCounter } = this.userSettings.settings.flags;
+    const { value: showFpsCounter } = this.userSettings.settings.flags.showFpsCounter;
 
     if (showFpsCounter) {
       this.threePerformance = new THREEPerformance();
@@ -326,7 +326,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   mouseMoveOnMesh(mesh: THREE.Object3D) {
-    const { enableHoverEffects } = this.userSettings.settings.flags;
+    const { value: enableHoverEffects } = this.userSettings.settings.flags.enableHoverEffects;
 
     // Update hover effect
     if (mesh === undefined && this.hoveredObject) {
