@@ -49,6 +49,7 @@ import { Application, Node } from 'explorviz-frontend/utils/landscape-schemes/st
 import computeDrawableClassCommunication, { DrawableClassCommunication } from 'explorviz-frontend/utils/landscape-rendering/class-communication-computer';
 import { getAllClassesInApplication } from 'explorviz-frontend/utils/application-helpers';
 import { tracked } from '@glimmer/tracking';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 
 interface Args {
   readonly id: string;
@@ -70,6 +71,9 @@ export default class VrRendering extends Component<Args> {
 
   @service('configuration')
   configuration!: Configuration;
+
+  @service('user-settings')
+  userSettings!: UserSettings;
 
   @service('local-vr-user')
   localUser!: LocalVrUser;
@@ -174,7 +178,7 @@ export default class VrRendering extends Component<Args> {
     this.controllerInfoMenus.rotateX(340 * THREE.MathUtils.DEG2RAD);
     this.localUser.controllerInfoMenus = this.controllerInfoMenus;
 
-    this.appCommRendering = new AppCommunicationRendering(this.configuration);
+    this.appCommRendering = new AppCommunicationRendering(this.configuration, this.userSettings);
 
     // Load image for delete button
     this.closeButtonTexture = new THREE.TextureLoader().load('images/x_white_transp.png');
@@ -1044,7 +1048,9 @@ export default class VrRendering extends Component<Args> {
 
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-      Highlighting.updateHighlighting(applicationObject3D, drawableComm);
+
+      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+      Highlighting.updateHighlighting(applicationObject3D, drawableComm, value);
     }
   }
 
@@ -1056,7 +1062,9 @@ export default class VrRendering extends Component<Args> {
 
     if (drawableComm) {
       this.appCommRendering.addCommunication(applicationObject3D, drawableComm);
-      Highlighting.updateHighlighting(applicationObject3D, drawableComm);
+
+      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+      Highlighting.updateHighlighting(applicationObject3D, drawableComm, value);
     }
   }
 
@@ -1076,7 +1084,8 @@ export default class VrRendering extends Component<Args> {
       const drawableComm = this.drawableClassCommunications.get(application.dataModel.instanceId);
 
       if (drawableComm) {
-        Highlighting.highlight(object, application, drawableComm);
+        const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+        Highlighting.highlight(object, application, drawableComm, value);
       }
     }
   }

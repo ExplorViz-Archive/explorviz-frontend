@@ -3,24 +3,21 @@ import { setupRenderingTest } from 'ember-qunit';
 import { render } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 
-module('Integration | Component | visualization/page-setup/navbar/settings-opener', function(hooks) {
+module('Integration | Component | visualization/page-setup/navbar/settings-opener', function (hooks) {
   setupRenderingTest(hooks);
 
-  test('it renders', async function(assert) {
+  test('it renders', async function (assert) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`{{visualization/page-setup/navbar/settings-opener}}`);
+    await render(hbs`<Visualization::PageSetup::Navbar::SettingsOpener />`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    const { textContent } = this.element;
 
-    // Template block usage:
-    await render(hbs`
-      {{#visualization/page-setup/navbar/settings-opener}}
-        template block text
-      {{/visualization/page-setup/navbar/settings-opener}}
-    `);
-
-    assert.equal(this.element.textContent.trim(), 'template block text');
+    if (textContent === null) {
+      assert.ok(null, 'no text content');
+    } else {
+      assert.equal(textContent.trim(), 'Settings');
+    }
   });
 });
