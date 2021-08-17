@@ -102,17 +102,14 @@
                     @application={{@landscapeData.application}}
                   />
                 {{/if}}
-                {{#if (eq componentName "color-picker")}}
-                  <h5 class="text-center">Color Picker</h5>
-                  <Visualization::PageSetup::Sidebar::ColorPicker
-                    @isLandscapeView={{false}}
-                    @removeComponent={{@removeComponent}}
-                    @updateView={{this.updateColors}}
-                  />
-                {{/if}}
                 {{#if (eq componentName "settings")}}
                   <h5 class="text-center">Settings</h5>
-                  <Visualization::PageSetup::Sidebar::Settings />
+                  <Visualization::PageSetup::Sidebar::Settings
+                    @isLandscapeView={{false}}
+                    @updateHighlighting={{this.updateHighlighting}}
+                    @redrawCommunication={{this.addCommunication}}
+                    @updateColors={{this.updateColors}}
+                  />
                 {{/if}}
                 {{#if (eq componentName "collaborative-settings")}}
                   <h5 class="text-center">Collaborative Settings</h5>

@@ -7,8 +7,7 @@ import isObject from 'explorviz-frontend/utils/object-helpers';
 
 interface Args {
   isLandscapeView: boolean;
-  removeComponent(componentPath: string): void;
-  updateView(): void;
+  updateColors(): void;
 }
 
 interface ColorPickerObjectApplication {
@@ -36,11 +35,6 @@ export default class ColorPicker extends Component<Args> {
     { name: 'Classic (Initial)', action: this.applyClassicColors },
     { name: 'Dark', action: this.applyDarkColors },
   ];
-
-  @action
-  close() {
-    this.args.removeComponent('color-picker');
-  }
 
   @action
   setupLandscapeColorpicker(colorName: keyof LandscapeColors, element: HTMLElement) {
@@ -90,7 +84,7 @@ export default class ColorPicker extends Component<Args> {
           this.userSettings.updateApplicationColor(colorPickerObject.colorName, inputColor);
         }
 
-        this.args.updateView();
+        this.args.updateColors();
       });
   }
 
@@ -109,7 +103,7 @@ export default class ColorPicker extends Component<Args> {
       },
     );
 
-    this.args.updateView();
+    this.args.updateColors();
   }
 
   /**

@@ -189,8 +189,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     // Display application nicely for first rendering
     applyDefaultApplicationLayout(this.applicationObject3D);
-    this.communicationRendering.addCommunication(this.applicationObject3D,
-      this.drawableClassCommunications);
+    this.addCommunication();
     this.applicationObject3D.resetRotation();
   }
 
@@ -305,8 +304,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     // Toggle open state of clicked component
     if (mesh instanceof ComponentMesh) {
       toggleComponentMeshState(mesh, this.applicationObject3D);
-      this.communicationRendering.addCommunication(this.applicationObject3D,
-        this.drawableClassCommunications);
+      this.addCommunication();
       if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
         const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
         updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
@@ -317,8 +315,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     } else if (mesh instanceof FoundationMesh) {
       closeAllComponents(this.applicationObject3D);
       // Re-compute communication and highlighting
-      this.communicationRendering.addCommunication(this.applicationObject3D,
-        this.drawableClassCommunications);
+      this.addCommunication();
       if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
         const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
         updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
@@ -471,8 +468,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       // Restore old state of components
       restoreComponentState(this.applicationObject3D, openComponentIds);
       this.updateDrawableClassCommunications();
-      this.communicationRendering.addCommunication(this.applicationObject3D,
-        this.drawableClassCommunications);
+      this.addCommunication();
       this.addLabels();
 
       this.scene.add(this.applicationObject3D);
@@ -539,6 +535,15 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     const animationId = requestAnimationFrame(this.render);
     this.animationFrameId = animationId;
+
+    const { value: showFpsCounter } = this.userSettings.settings.flags.showFpsCounter;
+
+    if (showFpsCounter && !this.threePerformance) {
+      this.threePerformance = new THREEPerformance();
+    } else if (!showFpsCounter && this.threePerformance) {
+      this.threePerformance.removePerformanceMeasurement();
+      this.threePerformance = undefined;
+    }
 
     if (this.threePerformance) {
       this.threePerformance.threexStats.update(this.renderer);
@@ -626,8 +631,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         openComponentMesh(ancestorMesh, this.applicationObject3D);
       }
     });
-    this.communicationRendering.addCommunication(this.applicationObject3D,
-      this.drawableClassCommunications);
+    this.addCommunication();
 
     if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
       const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
@@ -648,8 +652,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (mesh instanceof ComponentMesh) {
       closeComponentMesh(mesh, this.applicationObject3D);
     }
-    this.communicationRendering.addCommunication(this.applicationObject3D,
-      this.drawableClassCommunications);
+    this.addCommunication();
 
     if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
       const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
@@ -672,8 +675,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       openComponentsRecursively(child, this.applicationObject3D);
     });
 
-    this.communicationRendering.addCommunication(this.applicationObject3D,
-      this.drawableClassCommunications);
+    this.addCommunication();
 
     if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
       const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
@@ -681,6 +683,18 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     } else {
       this.unhighlightAll();
     }
+  }
+
+  @action
+  updateHighlighting() {
+    const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+  }
+
+  @action
+  addCommunication() {
+    this.communicationRendering.addCommunication(this.applicationObject3D,
+      this.drawableClassCommunications);
   }
 
   /**

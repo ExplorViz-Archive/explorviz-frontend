@@ -190,12 +190,12 @@ const defaultRanges: RangeSettings = {
     },
   },
   appVizCurvyCommHeight: {
-    displayName: 'Curviness of the Communication Lines',
-    description: 'If greater 0.0, communication lines are rendered arc-shaped with set height (Straight lines: 0.0)',
+    displayName: 'Curviness factor of the Communication Lines',
+    description: 'If greater 0.0, communication lines are rendered arc-shaped (Straight lines: 0.0)',
     value: 0.0,
     range: {
       min: 0.0,
-      max: 50.0,
+      max: 1.5,
     },
   },
 };
@@ -253,6 +253,12 @@ export default class UserSettings extends Service {
   }
 
   updateRangeSetting(attribute: keyof RangeSettings, value: number) {
+    const { range } = this.settings.ranges[attribute];
+    if (Number.isNaN(value)) {
+      throw new Error('Value is not a number');
+    } else if (value < range.min || value > range.max) {
+      throw new Error(`Value must be between ${range.min} and ${range.max}`);
+    }
     this.settings.ranges[attribute] = { ...this.settings.ranges[attribute], value };
     this.updateSettings(this.settings);
   }
