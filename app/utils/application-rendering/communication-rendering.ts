@@ -3,6 +3,7 @@ import applyCommunicationLayout from 'explorviz-frontend/utils/application-rende
 import Configuration from 'explorviz-frontend/services/configuration';
 import ApplicationObject3D from 'explorviz-frontend/view-objects/3d/application/application-object-3d';
 import CommunicationLayout from 'explorviz-frontend/view-objects/layout-models/communication-layout';
+import UserSettings from 'explorviz-frontend/services/user-settings';
 import { Vector3 } from 'three';
 import { DrawableClassCommunication } from '../landscape-rendering/class-communication-computer';
 
@@ -10,8 +11,11 @@ export default class CommunicationRendering {
   // Service to access color preferences
   configuration: Configuration;
 
-  constructor(configuration: Configuration) {
+  userSettings: UserSettings;
+
+  constructor(configuration: Configuration, userSettings: UserSettings) {
     this.configuration = configuration;
+    this.userSettings = userSettings;
   }
 
   private computeCurveHeight(commLayout: CommunicationLayout) {
@@ -24,17 +28,17 @@ export default class CommunicationRendering {
       baseCurveHeight = classDistance * 0.5;
     }
 
-    return baseCurveHeight * this.configuration.commCurveHeightMultiplier;
+    return baseCurveHeight * this.userSettings.settings.ranges.appVizCurvyCommHeight.value;
   }
 
   // Add arrow indicators for drawable class communication
   private addArrows(pipe: ClazzCommunicationMesh, curveHeight: number, viewCenterPoint: Vector3) {
     const arrowOffset = 0.8;
     const arrowHeight = curveHeight / 2 + arrowOffset;
-    const arrowThickness = this.configuration.commArrowThickness;
+    const arrowThickness = this.userSettings.settings.ranges.appVizCommArrowSize.value;
     const arrowColorHex = this.configuration.applicationColors.communicationArrow.getHex();
 
-    if (typeof arrowThickness === 'number' && arrowThickness > 0.0) {
+    if (arrowThickness > 0.0) {
       pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColorHex);
     }
   }

@@ -202,12 +202,6 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     this.initCamera();
     this.initRenderer();
     this.initLights();
-
-    const { value: showFpsCounter } = this.userSettings.settings.flags.showFpsCounter;
-
-    if (showFpsCounter) {
-      this.threePerformance = new THREEPerformance();
-    }
   }
 
   /**
@@ -274,6 +268,15 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     const animationId = requestAnimationFrame(this.render);
     this.animationFrameId = animationId;
+
+    const { value: showFpsCounter } = this.userSettings.settings.flags.showFpsCounter;
+
+    if (showFpsCounter && !this.threePerformance) {
+      this.threePerformance = new THREEPerformance();
+    } else if (!showFpsCounter && this.threePerformance) {
+      this.threePerformance.removePerformanceMeasurement();
+      this.threePerformance = undefined;
+    }
 
     if (this.threePerformance) {
       this.threePerformance.threexStats.update(this.webglrenderer);

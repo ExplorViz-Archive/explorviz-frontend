@@ -1,0 +1,5 @@
+<div class="mb-3">
+  <HelpTooltip @title={{@setting.description}} />
+  <label for={{@setting.name}}>{{@setting.displayName}}</label>
+  <Input id={{@setting.name}} @value={{@setting.value}} @type="number" class="form-control" {{on "change" @onChange}} />
+</div>

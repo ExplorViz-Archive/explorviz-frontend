@@ -1,6 +1,13 @@
-{{#each-in @flagSettings as |name setting|}}
+{{#each-in this.userSettings.settings.flags as |name setting|}}
   <Visualization::PageSetup::Sidebar::Settings::FlagSetting
     @setting={{setting}}
     @onChange={{fn this.updateFlagSetting name}}
+  />
+{{/each-in}}
+
+{{#each-in this.userSettings.settings.ranges as |name setting|}}
+  <Visualization::PageSetup::Sidebar::Settings::RangeSetting
+    @setting={{setting}}
+    @onChange={{fn this.updateRangeSetting name}}
   />
 {{/each-in}}

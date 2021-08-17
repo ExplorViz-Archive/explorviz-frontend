@@ -7,6 +7,7 @@ export interface Settings {
     landscape: LandscapeColorsHexString;
   };
   flags: FlagSettings;
+  ranges: RangeSettings;
 }
 
 export interface Setting<T> {
@@ -27,6 +28,13 @@ export interface RangeSetting extends Setting<number> {
 export interface FlagSettings {
   showFpsCounter: FlagSetting;
   enableHoverEffects: FlagSetting;
+  keepHighlightingOnOpenOrClose: FlagSetting;
+}
+
+export interface RangeSettings {
+  appVizTransparencyIntensity: RangeSetting;
+  appVizCommArrowSize: RangeSetting;
+  appVizCurvyCommHeight: RangeSetting;
 }
 
 export interface ApplicationColorsHexString {
@@ -155,6 +163,41 @@ const defaultFlags: FlagSettings = {
     description: 'Hover effect (flashing entities) for mouse cursor',
     value: true,
   },
+  keepHighlightingOnOpenOrClose: {
+    displayName: 'Keep Highlighting On Open Or Close',
+    description: 'Toggle if highlighting should be resetted on double click in application visualization',
+    value: true,
+  },
+};
+
+const defaultRanges: RangeSettings = {
+  appVizTransparencyIntensity: {
+    displayName: 'Transparency Intensity in Application Visualization',
+    description: 'Transparency effect intensity (\'Enable Transparent Components\' must be enabled)',
+    value: 0.1,
+    range: {
+      min: 0.1,
+      max: 1.0,
+    },
+  },
+  appVizCommArrowSize: {
+    displayName: 'Arrow Size in Application Visualization',
+    description: 'Arrow Size for selected communications in application visualization',
+    value: 1.0,
+    range: {
+      min: 0.0,
+      max: 5.0,
+    },
+  },
+  appVizCurvyCommHeight: {
+    displayName: 'Curviness of the Communication Lines',
+    description: 'If greater 0.0, communication lines are rendered arc-shaped with set height (Straight lines: 0.0)',
+    value: 0.0,
+    range: {
+      min: 0.0,
+      max: 50.0,
+    },
+  },
 };
 
 export default class UserSettings extends Service {
@@ -193,6 +236,7 @@ export default class UserSettings extends Service {
         landscape: { ...defaultLandscapeColors },
       },
       flags: { ...defaultFlags },
+      ranges: { ...defaultRanges },
     };
 
     this.updateSettings(settings);
@@ -205,6 +249,11 @@ export default class UserSettings extends Service {
 
   updateFlagSetting(attribute: keyof FlagSettings, value: boolean) {
     this.settings.flags[attribute] = { ...this.settings.flags[attribute], value };
+    this.updateSettings(this.settings);
+  }
+
+  updateRangeSetting(attribute: keyof RangeSettings, value: number) {
+    this.settings.ranges[attribute] = { ...this.settings.ranges[attribute], value };
     this.updateSettings(this.settings);
   }
 

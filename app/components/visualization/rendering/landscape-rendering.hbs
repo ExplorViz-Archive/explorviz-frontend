@@ -66,6 +66,9 @@
               <Visualization::PageSetup::Navbar::ColorPickerOpener
                 @addComponent={{@addComponent}}
               />
+              <Visualization::PageSetup::Navbar::SettingsOpener
+                @addComponent={{@addComponent}}
+              />
               <CollaborativeSettingsOpener
                 @addComponent={{@addComponent}}
               />
@@ -82,11 +85,13 @@
                     @updateView={{this.updateColors}}
                   />
                 {{/if}}
+                {{#if (eq componentName "settings")}}
+                  <h5 class="text-center">Settings</h5>
+                  <Visualization::PageSetup::Sidebar::Settings />
+                {{/if}}
                 {{#if (eq componentName "collaborative-settings")}}
                   <CollaborativeSettings
-                    @isLandscapeView={{true}}
                     @removeComponent={{@removeComponent}}
-                    @updateView={{this.updateColors}}
                   />
                 {{/if}}
               </div>

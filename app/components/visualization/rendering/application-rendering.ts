@@ -159,7 +159,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.applicationObject3D = new ApplicationObject3D(application!,
       new Map(), dynamicLandscapeData);
 
-    this.communicationRendering = new CommunicationRendering(this.configuration);
+    this.communicationRendering = new CommunicationRendering(this.configuration, this.userSettings);
 
     this.hoveredObject = null;
   }
@@ -288,7 +288,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       removeHighlighting(this.applicationObject3D);
     } else if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
-      highlight(mesh, this.applicationObject3D, this.drawableClassCommunications);
+      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+      highlight(mesh, this.applicationObject3D, this.drawableClassCommunications, value);
     }
   }
 
@@ -306,14 +307,24 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       toggleComponentMeshState(mesh, this.applicationObject3D);
       this.communicationRendering.addCommunication(this.applicationObject3D,
         this.drawableClassCommunications);
-      updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
+      if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
+        const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+        updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+      } else {
+        this.unhighlightAll();
+      }
       // Close all components since foundation shall never be closed itself
     } else if (mesh instanceof FoundationMesh) {
       closeAllComponents(this.applicationObject3D);
       // Re-compute communication and highlighting
       this.communicationRendering.addCommunication(this.applicationObject3D,
         this.drawableClassCommunications);
-      updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
+      if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
+        const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+        updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+      } else {
+        this.unhighlightAll();
+      }
     }
   }
 
@@ -617,7 +628,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
     this.communicationRendering.addCommunication(this.applicationObject3D,
       this.drawableClassCommunications);
-    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
+
+    if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
+      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+      updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+    } else {
+      this.unhighlightAll();
+    }
   }
 
   /**
@@ -633,7 +650,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
     this.communicationRendering.addCommunication(this.applicationObject3D,
       this.drawableClassCommunications);
-    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
+
+    if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
+      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+      updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+    } else {
+      this.unhighlightAll();
+    }
   }
 
   /**
@@ -651,7 +674,13 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.communicationRendering.addCommunication(this.applicationObject3D,
       this.drawableClassCommunications);
-    updateHighlighting(this.applicationObject3D, this.drawableClassCommunications);
+
+    if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
+      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+      updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
+    } else {
+      this.unhighlightAll();
+    }
   }
 
   /**
@@ -661,7 +690,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   @action
   highlightModel(entity: Package | Class) {
-    highlightModel(entity, this.applicationObject3D, this.drawableClassCommunications);
+    const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+    highlightModel(entity, this.applicationObject3D, this.drawableClassCommunications, value);
   }
 
   /**
@@ -729,8 +759,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   highlightTrace(trace: Trace, traceStep: string) {
     // Open components such that complete trace is visible
     this.openAllComponents();
+    const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
     highlightTrace(trace, traceStep, this.applicationObject3D,
-      this.drawableClassCommunications, this.args.landscapeData.structureLandscapeData);
+      this.drawableClassCommunications, this.args.landscapeData.structureLandscapeData, value);
   }
 
   @action

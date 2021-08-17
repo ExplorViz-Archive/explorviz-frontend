@@ -58,11 +58,6 @@ export default class Configuration extends Service {
 
   commCurveHeightDependsOnDistance = true;
 
-  // Determines height of class communication curves, 0 results in straight lines
-  commCurveHeightMultiplier = 1;
-
-  commArrowThickness = 0.5;
-
   // #endregion APPLICATION LAYOUT
 
   /**
