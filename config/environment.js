@@ -45,41 +45,18 @@ module.exports = function initEnvironment(environment) {
     },
   };
 
-  let API_ROOT;
-
-  if (environment === 'development' || environment === 'noauth') {
-    API_ROOT = 'http://localhost:8080';
-
-    if (process.env.API_ROOT) {
-      API_ROOT = process.env.API_ROOT;
-    }
-
-    ENV.APP.API_ROOT = API_ROOT;
-
-    console.log('');
-    console.log(`EXPL-INFO: Development mode: Using ${API_ROOT} as API_ROOT`.blue);
-  }
-
   if (environment === 'production') {
-    console.log('');
+    console.log('EXPL-WARNING: This is production mode. You may override the following variables via Docker environment variables:'.yellow);
+    console.log('- LANDSCAPE_URL'.yellow);
+    console.log('- TRACE_URL'.yellow);
+    console.log('- USER_URL'.yellow);
+    console.log('- COLLAB_URL'.yellow);
+    console.log('... depending on your deployment, e.g., reverse proxy in use.'.yellow);
 
-    // var rootURL = 'change-rootURL';
-    API_ROOT = 'change-API_ROOT';
-
-    if (process.env.API_ROOT) {
-      console.log('EXPL-INFO: Using environment variable as API_ROOT'.blue);
-      API_ROOT = process.env.API_ROOT;
-    }
-
-    ENV.APP.API_ROOT = API_ROOT;
-
-    console.log('');
-    console.log(`EXPL-INFO: Production mode: Using ${API_ROOT} as API_ROOT`.blue);
-
-    if (API_ROOT === 'change-API_ROOT') {
-      console.log(`EXPL-WARNING: This is prodution mode. You must override the 'API_ROOT' variable with its current value: ${API_ROOT}`.yellow);
-      console.log('EXPL-WARNING: Set the environment variable API_ROOT=XXX'.yellow);
-    }
+    ENV.backendAddresses.landscapeService = 'change-landscape-url';
+    ENV.backendAddresses.traceService = 'change-trace-url';
+    ENV.backendAddresses.userService = 'change-user-url';
+    ENV.backendAddresses.collaborativeService = 'change-collab-url';
   }
 
   if (environment === 'test') {
