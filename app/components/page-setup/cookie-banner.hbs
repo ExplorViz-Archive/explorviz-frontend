@@ -1,0 +1,12 @@
+<!-- Based on : https://github.com/Wruczek/Bootstrap-Cookie-Alert -->
+<div id="cookie-banner-container" class={{this.classList}} role="alert">
+    <b>
+        🍪 ExplorViz uses only <a href="https://gdpr.eu/cookies/">necessary cookies</a> to fully operate the given services. <br>
+        These includes session cookies to keep you logged in and to remember your preferences and cookies for the authorization process with your external account (<a href=https://docs.github.com/en/github/site-policy/github-privacy-statement>GitHub</a>, <a href="https://policies.google.com/technologies/cookies?hl=en-US">Google</a>).<br>
+        No additional personal information is given to third-parties, is received or/and stored.<br>
+        Please read the given sites for further information.<br></b>
+
+    <button type="button" {{action "acceptCookies"}} class="btn btn-primary btn-sm acceptcookies">
+        I understand
+    </button>
+</div>
