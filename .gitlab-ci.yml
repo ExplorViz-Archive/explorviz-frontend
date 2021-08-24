@@ -12,6 +12,7 @@ stages:
   - code-analysis
   - build
   - test
+  - deploy
 
 linting:
   stage: code-analysis
@@ -26,6 +27,50 @@ test:
     - exec-docker
   script:
     - ember test --launch chromium
+
+.deploy-to-dockerhub:
+  stage: deploy
+  tags:
+    - exec-docker
+  variables:
+    DOCKERHUB_TAG: "latest"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"auth\":\"$(echo -n ${DOCKERHUB_USER}:${DOCKERHUB_PASSWORD} | base64)\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context=$CI_PROJECT_DIR --dockerfile=$CI_PROJECT_DIR/Dockerfile --destination=$DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$DOCKERHUB_TAG
+
+deploy-dockerhub-master:
+  extends:
+    - .deploy-to-dockerhub
+  only:
+    - master
+  variables:
+    DOCKERHUB_TAG: "latest"
+
+deploy-dockerhub-dev:
+  extends:
+    - .deploy-to-dockerhub
+  only:
+    - dev
+  variables:
+    DOCKERHUB_TAG: "dev"
+
+retag-dockerhub-image:
+  stage: deploy
+  tags:
+    - exec-docker
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [""]
+  script:
+    - crane auth login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD $CI_REGISTRY
+    - crane cp $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$DOCKERHUB_TAG $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+  
 
 # - stage: deploy
 #    if: (type = push) AND ((branch = dev-1) OR (branch = master))
