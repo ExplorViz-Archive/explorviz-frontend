@@ -47,18 +47,16 @@ test:
 deploy-dockerhub-master:
   extends:
     - .deploy-to-dockerhub
-  only:
-    - master
-  variables:
-    DOCKERHUB_TAG: "latest"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
 
 deploy-dockerhub-dev:
   extends:
     - .deploy-to-dockerhub
-  only:
-    - dev
-  variables:
-    DOCKERHUB_TAG: "dev"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      variables:
+        DOCKERHUB_TAG: "dev"
 
 retag-dockerhub-image:
   stage: deploy
@@ -70,11 +68,3 @@ retag-dockerhub-image:
   script:
     - crane auth login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD $CI_REGISTRY
     - crane cp $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$DOCKERHUB_TAG $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
-  
-
-# - stage: deploy
-#    if: (type = push) AND ((branch = dev-1) OR (branch = master))
-#    skip_cleanup: false
-#    env:
-#      - EMBER_VERSION=release
-#    script: ember build --prod && chmod +x .travis/docker_push.sh && .travis/docker_push.sh
