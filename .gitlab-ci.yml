@@ -54,7 +54,7 @@ deploy-dockerhub-dev:
   extends:
     - .deploy-to-dockerhub
   rules:
-    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "dev"
       variables:
         DOCKERHUB_TAG: "dev"
 
