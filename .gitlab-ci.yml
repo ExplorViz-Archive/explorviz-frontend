@@ -37,7 +37,7 @@ build:
     - ember test --launch chromium
   artifacts:
     paths:
-      - build
+      - dist
 
 .deploy-to-dockerhub:
   stage: deploy
