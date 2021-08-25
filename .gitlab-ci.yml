@@ -28,9 +28,6 @@ test:
   stage: test
   tags:
     - exec-docker
-  before_script:
-    - npm install
-    - npm install -g ember-template-lint  
   script:
     - ember test --launch chromium
 
@@ -38,9 +35,6 @@ build:
   stage: build
   tags:
     - exec-docker
-  before_script:
-    - npm install
-    - npm install -g ember-template-lint
   script:
     - ember test --launch chromium
   artifacts:
