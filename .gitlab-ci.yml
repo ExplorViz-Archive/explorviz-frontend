@@ -27,6 +27,8 @@ test:
   tags:
     - exec-docker
   script:
+    - npm install
+    - npm install -g ember-template-lint
     - ember test --launch chromium
 
 build:
@@ -34,7 +36,9 @@ build:
   tags:
     - exec-docker
   script:
-    - ember test --launch chromium
+    - npm install
+    - npm install -g ember-template-lint
+    - ember build --prod
   artifacts:
     paths:
       - dist
