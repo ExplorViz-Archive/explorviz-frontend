@@ -24,5 +24,4 @@
 /libpeerconnection.log
 npm-debug.log*
 testem.log
-package-lock.json
 jsconfig.json
