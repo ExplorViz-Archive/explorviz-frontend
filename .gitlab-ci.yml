@@ -87,6 +87,5 @@ retag-dockerhub-image:
     name: gcr.io/go-containerregistry/crane:debug
     entrypoint: [""]
   script:
-    - echo $BUILD_VERSION
     - crane auth login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD "index.docker.io"
     - crane cp $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$DOCKERHUB_TAG $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
