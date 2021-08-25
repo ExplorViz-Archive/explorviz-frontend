@@ -27,8 +27,8 @@ test:
   tags:
     - exec-docker
   script:
+    - npm ci --cache .npm --prefer-offline
     - npm install
-    - npm install -g ember-template-lint
     - ember test --launch chromium
 
 build:
@@ -36,8 +36,8 @@ build:
   tags:
     - exec-docker
   script:
+    - npm ci --cache .npm --prefer-offline
     - npm install
-    - npm install -g ember-template-lint
     - ember build --prod
   artifacts:
     paths:
@@ -81,5 +81,5 @@ retag-dockerhub-image:
     name: gcr.io/go-containerregistry/crane:debug
     entrypoint: [""]
   script:
-    - crane auth login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD $CI_REGISTRY
+    - crane auth login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD "index.docker.io"
     - crane cp $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$DOCKERHUB_TAG $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
