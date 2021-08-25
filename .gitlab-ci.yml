@@ -9,7 +9,8 @@ stages:
   - code-analysis
   - test
   - build
-  - deploy
+  - deploy:images
+  - deploy:retagging
 
 linting:
   stage: code-analysis
@@ -44,7 +45,7 @@ build:
       - dist
 
 .deploy-to-dockerhub:
-  stage: deploy
+  stage: deploy:images
   tags:
     - exec-docker
   variables:
@@ -72,14 +73,20 @@ deploy-dockerhub-dev:
     - if: $CI_COMMIT_BRANCH == "dev"
       variables:
         DOCKERHUB_TAG: "dev"
+  script:
+    - echo "DOCKERHUB_TAG=dev" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
 
 retag-dockerhub-image:
-  stage: deploy
+  stage: deploy:retagging
   tags:
     - exec-docker
   image:
     name: gcr.io/go-containerregistry/crane:debug
     entrypoint: [""]
   script:
+    - echo $BUILD_VERSION
     - crane auth login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD "index.docker.io"
     - crane cp $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$DOCKERHUB_TAG $DOCKERHUB_ORGA/$DOCKERHUB_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
