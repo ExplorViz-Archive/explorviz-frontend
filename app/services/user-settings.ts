@@ -422,19 +422,18 @@ export default class UserSettings extends Service {
   }
 
   private restoreSettings() {
-    const userSettingsJSON = localStorage.getItem('userSettings');
+    const userLandscapeSettingsJSON = localStorage.getItem('userLandscapeSettings');
+    const userApplicationSettingsJSON = localStorage.getItem('userApplicationSettings');
 
-    if (userSettingsJSON === null) {
+    if (userLandscapeSettingsJSON === null || userApplicationSettingsJSON === null) {
       throw new Error('There are no settings to restore');
     }
 
-    const parsedSettings = JSON.parse(userSettingsJSON);
+    const parsedLandscapeSettings = JSON.parse(userLandscapeSettingsJSON);
+    const parsedApplicationSettings = JSON.parse(userApplicationSettingsJSON);
 
-    if (this.areValidSettings(parsedSettings)) {
-      this.set('landscapeSettings', parsedSettings);
-    } else {
-      throw new Error('The settings are invalid');
-    }
+    this.set('landscapeSettings', parsedLandscapeSettings);
+    this.set('applicationSettings', parsedApplicationSettings);
   }
 
   applyDefaultSettings() {
@@ -535,12 +534,6 @@ export default class UserSettings extends Service {
     }
 
     this.updateSettings();
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  private areValidSettings(settings: unknown): settings is Settings {
-    // TODO: implement checks for properties to exist and types to be correct
-    return false;
   }
 }
 
