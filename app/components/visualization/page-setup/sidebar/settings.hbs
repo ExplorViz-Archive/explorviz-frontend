@@ -1,6 +1,35 @@
 <div class="mt-3">
-  <h6 class="mb-3"><strong>Flag Settings</strong></h6>
-  <div class="ml-3">
+  {{#if @isLandscapeView}}
+  {{else}}
+    {{#each-in this.applicationSettingsSortedByGroup as |groupId settingIdArray|}}
+      <h6 class="mb-3"><strong>{{groupId}}</strong></h6>
+      {{#each settingIdArray as |settingId|}}
+        {{#let
+          (get this.userSettings.applicationSettings settingId)
+          as |setting|
+        }}
+          {{#if setting.isFlagSetting}}
+            <Visualization::PageSetup::Sidebar::Settings::FlagSetting
+              @setting={{setting}}
+              @onChange={{fn this.updateFlagSetting settingId}}
+            />
+          {{else if setting.isRangeSetting}}
+            <Visualization::PageSetup::Sidebar::Settings::RangeSetting
+              @setting={{setting}}
+              @onChange={{fn this.updateRangeSetting settingId}}
+            />
+          {{else if setting.isColorSetting}}
+            <Visualization::PageSetup::Sidebar::ColorPicker
+              @id={{settingId}}
+              @setting={{setting}}
+              @updateColors={{@updateColors}}
+            />
+          {{/if}}
+        {{/let}}
+      {{/each}}
+    {{/each-in}}
+  {{/if}}
+{{!--   <div class="ml-3">
     {{#each-in this.userSettings.settings.flags as |name setting|}}
       <Visualization::PageSetup::Sidebar::Settings::FlagSetting
         @setting={{setting}}
@@ -29,5 +58,5 @@
       @isLandscapeView={{@isLandscapeView}}
       @updateColors={{@updateColors}}
     />
-  </div>
+  </div> --}}
 </div>

@@ -149,6 +149,10 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     return this.args.font;
   }
 
+  get landSettings() {
+    return this.userSettings.landscapeSettings;
+  }
+
   // #endregion CLASS FIELDS AND GETTERS
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -209,7 +213,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
    */
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = this.configuration.landscapeColors.background;
+    this.scene.background = this.configuration.landscapeColors.backgroundColor;
 
     this.scene.add(this.landscapeObject3D);
 
@@ -269,14 +273,14 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     const animationId = requestAnimationFrame(this.render);
     this.animationFrameId = animationId;
 
-    const { value: showFpsCounter } = this.userSettings.settings.flags.showFpsCounter;
+    /*     const { value: showFpsCounter } = this.userSettings.settings.flags.showFpsCounter;
 
     if (showFpsCounter && !this.threePerformance) {
       this.threePerformance = new THREEPerformance();
     } else if (!showFpsCounter && this.threePerformance) {
       this.threePerformance.removePerformanceMeasurement();
       this.threePerformance = undefined;
-    }
+    } */
 
     if (this.threePerformance) {
       this.threePerformance.threexStats.update(this.webglrenderer);
@@ -496,7 +500,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
       // Render application communication
 
-      const color = this.configuration.landscapeColors.communication;
+      const color = this.configuration.landscapeColors.communicationColor;
 
       const tiles = CommunicationRendering.computeCommunicationTiles(applicationCommunications,
         modelIdToPointsComplete, color);
@@ -523,7 +527,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     if (!layout) { return; }
 
     // Create node mesh
-    const nodeMesh = new NodeMesh(layout, node, this.configuration.landscapeColors.node);
+    const nodeMesh = new NodeMesh(layout, node, this.configuration.landscapeColors.nodeColor);
 
     // Create and add label + icon
     nodeMesh.setToDefaultPosition(centerPoint);
@@ -532,7 +536,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
     const labelText = nodeMesh.getDisplayName();
 
     this.labeler.addNodeTextLabel(nodeMesh, labelText, this.font,
-      this.configuration.landscapeColors.nodeText);
+      this.configuration.landscapeColors.nodeTextColor);
 
     // Add to scene
     this.landscapeObject3D.add(nodeMesh);
@@ -552,12 +556,12 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
     // Create application mesh
     const applicationMesh = new ApplicationMesh(layout, application,
-      this.configuration.landscapeColors.application);
+      this.configuration.landscapeColors.applicationColor);
     applicationMesh.setToDefaultPosition(centerPoint);
 
     // Create and add label + icon
     this.labeler.addApplicationTextLabel(applicationMesh, application.name, this.font,
-      this.configuration.landscapeColors.applicationText);
+      this.configuration.landscapeColors.applicationTextColor);
     Labeler.addApplicationLogo(applicationMesh, this.imageLoader);
 
     // Add to scene
@@ -640,7 +644,7 @@ export default class LandscapeRendering extends GlimmerComponent<Args> {
 
   @action
   mouseMoveOnMesh(mesh: THREE.Object3D) {
-    const { value: enableHoverEffects } = this.userSettings.settings.flags.enableHoverEffects;
+    const { value: enableHoverEffects } = this.landSettings.enableHoverEffects;
 
     // Update hover effect
     if (mesh === undefined && this.hoveredObject) {

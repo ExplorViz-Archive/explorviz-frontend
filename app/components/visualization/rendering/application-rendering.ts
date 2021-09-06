@@ -143,6 +143,10 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     return this.args.font;
   }
 
+  get appSettings() {
+    return this.userSettings.applicationSettings;
+  }
+
   // #endregion CLASS FIELDS AND GETTERS
 
   // #region COMPONENT AND SCENE INITIALIZATION
@@ -203,11 +207,11 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     this.initRenderer();
     this.initLights();
 
-    const { value: showFpsCounter } = this.userSettings.settings.flags.showFpsCounter;
+    /*     const { value: showFpsCounter } = this.userSettings.settings.flags.showFpsCounter;
 
     if (showFpsCounter) {
       this.threePerformance = new THREEPerformance();
-    }
+    } */
   }
 
   /**
@@ -215,7 +219,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = this.configuration.applicationColors.background;
+    this.scene.background = this.configuration.applicationColors.backgroundColor;
     this.debug('Scene created');
   }
 
@@ -287,7 +291,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       removeHighlighting(this.applicationObject3D);
     } else if (mesh instanceof ComponentMesh || mesh instanceof ClazzMesh
       || mesh instanceof ClazzCommunicationMesh) {
-      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+      const { value } = this.appSettings.transparencyIntensity;
       highlight(mesh, this.applicationObject3D, this.drawableClassCommunications, value);
     }
   }
@@ -305,8 +309,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     if (mesh instanceof ComponentMesh) {
       toggleComponentMeshState(mesh, this.applicationObject3D);
       this.addCommunication();
-      if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
-        const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+      if (this.appSettings.keepHighlightingOnOpenOrClose.value) {
+        const { value } = this.appSettings.transparencyIntensity;
         updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
       } else {
         this.unhighlightAll();
@@ -316,8 +320,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
       closeAllComponents(this.applicationObject3D);
       // Re-compute communication and highlighting
       this.addCommunication();
-      if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
-        const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+      if (this.appSettings.keepHighlightingOnOpenOrClose.value) {
+        const { value } = this.appSettings.transparencyIntensity;
         updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
       } else {
         this.unhighlightAll();
@@ -334,7 +338,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   mouseMoveOnMesh(mesh: THREE.Object3D) {
-    const { value: enableHoverEffects } = this.userSettings.settings.flags.enableHoverEffects;
+    const { value: enableHoverEffects } = this.appSettings.enableHoverEffects;
 
     // Update hover effect
     if (mesh === undefined && this.hoveredObject) {
@@ -483,9 +487,9 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   addLabels() {
     if (!this.font) { return; }
 
-    const clazzTextColor = this.configuration.applicationColors.clazzText;
-    const componentTextColor = this.configuration.applicationColors.componentText;
-    const foundationTextColor = this.configuration.applicationColors.foundationText;
+    const {
+      clazzTextColor, componentTextColor, foundationTextColor,
+    } = this.configuration.applicationColors;
 
     // Label all entities (excluding communication)
     this.applicationObject3D.getBoxMeshes().forEach((mesh) => {
@@ -536,14 +540,14 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     const animationId = requestAnimationFrame(this.render);
     this.animationFrameId = animationId;
 
-    const { value: showFpsCounter } = this.userSettings.settings.flags.showFpsCounter;
+    /*     const { value: showFpsCounter } = this.userSettings.settings.flags.showFpsCounter;
 
     if (showFpsCounter && !this.threePerformance) {
       this.threePerformance = new THREEPerformance();
     } else if (!showFpsCounter && this.threePerformance) {
       this.threePerformance.removePerformanceMeasurement();
       this.threePerformance = undefined;
-    }
+    } */
 
     if (this.threePerformance) {
       this.threePerformance.threexStats.update(this.renderer);
@@ -633,8 +637,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     });
     this.addCommunication();
 
-    if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
-      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+    if (this.appSettings.keepHighlightingOnOpenOrClose.value) {
+      const { value } = this.appSettings.transparencyIntensity;
       updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
     } else {
       this.unhighlightAll();
@@ -654,8 +658,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
     }
     this.addCommunication();
 
-    if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
-      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+    if (this.appSettings.keepHighlightingOnOpenOrClose.value) {
+      const { value } = this.appSettings.transparencyIntensity;
       updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
     } else {
       this.unhighlightAll();
@@ -677,8 +681,8 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
     this.addCommunication();
 
-    if (this.userSettings.settings.flags.keepHighlightingOnOpenOrClose.value) {
-      const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+    if (this.appSettings.keepHighlightingOnOpenOrClose.value) {
+      const { value } = this.appSettings.transparencyIntensity;
       updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
     } else {
       this.unhighlightAll();
@@ -687,7 +691,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
 
   @action
   updateHighlighting() {
-    const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+    const { value } = this.appSettings.transparencyIntensity;
     updateHighlighting(this.applicationObject3D, this.drawableClassCommunications, value);
   }
 
@@ -704,7 +708,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
    */
   @action
   highlightModel(entity: Package | Class) {
-    const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+    const { value } = this.appSettings.transparencyIntensity;
     highlightModel(entity, this.applicationObject3D, this.drawableClassCommunications, value);
   }
 
@@ -773,7 +777,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
   highlightTrace(trace: Trace, traceStep: string) {
     // Open components such that complete trace is visible
     this.openAllComponents();
-    const { value } = this.userSettings.settings.ranges.appVizTransparencyIntensity;
+    const { value } = this.appSettings.transparencyIntensity;
     highlightTrace(trace, traceStep, this.applicationObject3D,
       this.drawableClassCommunications, this.args.landscapeData.structureLandscapeData, value);
   }
@@ -790,7 +794,7 @@ export default class ApplicationRendering extends GlimmerComponent<Args> {
         object3D.updateColor();
         // Special case because communication arrow is no base mesh
       } else if (object3D instanceof CommunicationArrowMesh) {
-        object3D.updateColor(this.configuration.applicationColors.communicationArrow);
+        object3D.updateColor(this.configuration.applicationColors.communicationArrowColor);
       }
     });
   }

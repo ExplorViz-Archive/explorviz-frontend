@@ -13,6 +13,10 @@ export default class CommunicationRendering {
 
   userSettings: UserSettings;
 
+  get appSettings() {
+    return this.userSettings.applicationSettings;
+  }
+
   constructor(configuration: Configuration, userSettings: UserSettings) {
     this.configuration = configuration;
     this.userSettings = userSettings;
@@ -28,15 +32,15 @@ export default class CommunicationRendering {
       baseCurveHeight = classDistance * 0.5;
     }
 
-    return baseCurveHeight * this.userSettings.settings.ranges.appVizCurvyCommHeight.value;
+    return baseCurveHeight * this.appSettings.curvyCommHeight.value;
   }
 
   // Add arrow indicators for drawable class communication
   private addArrows(pipe: ClazzCommunicationMesh, curveHeight: number, viewCenterPoint: Vector3) {
     const arrowOffset = 0.8;
     const arrowHeight = curveHeight / 2 + arrowOffset;
-    const arrowThickness = this.userSettings.settings.ranges.appVizCommArrowSize.value;
-    const arrowColorHex = this.configuration.applicationColors.communicationArrow.getHex();
+    const arrowThickness = this.appSettings.commArrowSize.value;
+    const arrowColorHex = this.configuration.applicationColors.communicationArrowColor.getHex();
 
     if (arrowThickness > 0.0) {
       pipe.addArrows(viewCenterPoint, arrowThickness, arrowHeight, arrowColorHex);
@@ -67,10 +71,7 @@ export default class CommunicationRendering {
       applicationObject3D.boxLayoutMap, drawableClassCommunications);
 
     // Retrieve color preferences
-    const {
-      communication: communicationColor,
-      highlightedEntity: highlightedEntityColor,
-    } = this.configuration.applicationColors;
+    const { communicationColor, highlightedEntityColor } = this.configuration.applicationColors;
 
     // Render all drawable communications
     drawableClassCommunications.forEach((drawableClazzComm) => {

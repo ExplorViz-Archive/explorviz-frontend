@@ -4,26 +4,26 @@ import { tracked } from '@glimmer/tracking';
 import UserSettings from './user-settings';
 
 export type LandscapeColors = {
-  node: THREE.Color,
-  application: THREE.Color,
-  communication: THREE.Color,
-  nodeText: THREE.Color,
-  applicationText: THREE.Color,
-  background: THREE.Color
+  nodeColor: THREE.Color,
+  applicationColor: THREE.Color,
+  communicationColor: THREE.Color,
+  nodeTextColor: THREE.Color,
+  applicationTextColor: THREE.Color,
+  backgroundColor: THREE.Color
 };
 
 export type ApplicationColors = {
-  foundation: THREE.Color,
-  componentOdd: THREE.Color,
-  componentEven: THREE.Color,
-  clazz: THREE.Color,
-  highlightedEntity: THREE.Color,
-  componentText: THREE.Color,
-  clazzText: THREE.Color,
-  foundationText: THREE.Color,
-  communication: THREE.Color,
-  communicationArrow: THREE.Color,
-  background: THREE.Color
+  foundationColor: THREE.Color,
+  componentOddColor: THREE.Color,
+  componentEvenColor: THREE.Color,
+  clazzColor: THREE.Color,
+  highlightedEntityColor: THREE.Color,
+  componentTextColor: THREE.Color,
+  clazzTextColor: THREE.Color,
+  foundationTextColor: THREE.Color,
+  communicationColor: THREE.Color,
+  communicationArrowColor: THREE.Color,
+  backgroundColor: THREE.Color
 };
 
 /**
@@ -66,32 +66,31 @@ export default class Configuration extends Service {
   constructor() {
     super(...arguments);
 
-    const {
-      application: applicationSettings,
-      landscape: landscapeSettings,
-    } = this.userSettings.settings.colors;
+    const { landscapeSettings, applicationSettings } = this.userSettings;
 
     this.landscapeColors = {
-      node: new THREE.Color(landscapeSettings.node),
-      application: new THREE.Color(landscapeSettings.application),
-      communication: new THREE.Color(landscapeSettings.communication),
-      nodeText: new THREE.Color(landscapeSettings.nodeText),
-      applicationText: new THREE.Color(landscapeSettings.applicationText),
-      background: new THREE.Color(landscapeSettings.background),
+      nodeColor: new THREE.Color(landscapeSettings.nodeColor.value),
+      applicationColor: new THREE.Color(landscapeSettings.applicationColor.value),
+      communicationColor: new THREE.Color(landscapeSettings.communicationColor.value),
+      nodeTextColor: new THREE.Color(landscapeSettings.nodeTextColor.value),
+      applicationTextColor: new THREE.Color(landscapeSettings.applicationTextColor.value),
+      backgroundColor: new THREE.Color(landscapeSettings.backgroundColor.value),
     };
 
     this.applicationColors = {
-      foundation: new THREE.Color(applicationSettings.foundation),
-      componentOdd: new THREE.Color(applicationSettings.componentOdd),
-      componentEven: new THREE.Color(applicationSettings.componentEven),
-      clazz: new THREE.Color(applicationSettings.clazz),
-      highlightedEntity: new THREE.Color(applicationSettings.highlightedEntity),
-      componentText: new THREE.Color(applicationSettings.componentText),
-      clazzText: new THREE.Color(applicationSettings.clazzText),
-      foundationText: new THREE.Color(applicationSettings.foundationText),
-      communication: new THREE.Color(applicationSettings.communication),
-      communicationArrow: new THREE.Color(applicationSettings.communicationArrow),
-      background: new THREE.Color(applicationSettings.background),
+      foundationColor: new THREE.Color(applicationSettings.foundationColor.value),
+      componentOddColor: new THREE.Color(applicationSettings.componentOddColor.value),
+      componentEvenColor: new THREE.Color(applicationSettings.componentEvenColor.value),
+      clazzColor: new THREE.Color(applicationSettings.clazzColor.value),
+      highlightedEntityColor:
+      new THREE.Color(applicationSettings.highlightedEntityColor.value),
+      componentTextColor: new THREE.Color(applicationSettings.componentTextColor.value),
+      clazzTextColor: new THREE.Color(applicationSettings.clazzTextColor.value),
+      foundationTextColor: new THREE.Color(applicationSettings.foundationTextColor.value),
+      communicationColor: new THREE.Color(applicationSettings.communicationColor.value),
+      communicationArrowColor:
+      new THREE.Color(applicationSettings.communicationArrowColor.value),
+      backgroundColor: new THREE.Color(applicationSettings.backgroundColor.value),
     };
   }
 }
